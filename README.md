@@ -51,6 +51,8 @@ Build the server using `dotnet build`.
 
 ## Licensing
 
+The licensing structure described in this section takes effect beginning with commit [88cbf23ae81c4566069314b99544a99b7e34edb6], dated (`28 July 2026 20:00:00 UTC`).
+
 Night City 2045 is a multi-licensed repository.
 
 Code originating from Space Station 14, RobustToolbox, and other upstream
