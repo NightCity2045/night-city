@@ -1,0 +1,152 @@
+job-name-warden = Смотритель
+job-name-security = Офицер СБ
+job-name-cadet = Кадет СБ
+job-name-hos = Глава Службы Безопасности
+job-name-detective = Детектив
+job-name-brigmedic = Бригмедик
+job-name-borg = Борг
+job-name-senior-researcher = Ведущий Исследователь
+job-name-senior-engineer = Бригадир
+job-name-senior-physician = Медицинский Офицер
+job-name-senior-officer = Ветеран СБ
+job-name-scientist = Учёный
+job-name-research-assistant = Научный Ассистент
+job-name-rd = Мистагог
+job-name-roboticist = Роботехник
+job-name-psychologist = Психолог
+job-name-intern = Интерн
+job-name-doctor = Врач
+job-name-paramedic = Парамедик
+job-name-cmo = Главный Врач
+job-name-chemist = Химик
+job-name-technical-assistant = Технический Ассистент
+job-name-engineer = Инженер
+job-name-atmostech = Атмосферный Техник
+job-name-hop = Глава Персонала
+job-name-captain = Капитан
+job-name-ntrep = Corporate Liaison
+job-name-serviceworker = Сервисный Работник
+job-name-centcomoff = Представитель Центрального Коммандования
+job-name-cburn = Агент РХБЗЗ
+job-name-deathsquad = Агент Эскадрона Смерти
+job-name-reporter = Репортёр
+job-name-musician = Музыкант
+job-name-librarian = Библиотекарь
+# DeltaV - Changed Lawyer to Attorney
+# DeltaV - Changed Lawyer to Attorney
+# job-name-lawyer = Юрист
+job-name-mime = Мим
+job-name-ce = Старший Инженер
+job-name-janitor = Уборщик
+job-name-chaplain = Священник
+job-name-botanist = Ботаник
+job-name-bartender = Бармен
+job-name-passenger = Ассистент
+job-name-nccitizen = Житель
+job-name-salvagespec = Утилизатор
+job-name-station-ai = Станционный ИИ
+job-name-qm = Квартирмейстер
+job-name-cargotech = Грузчик
+job-name-chef = Шеф-повар
+job-name-clown = Клоун
+job-name-ertleader = Лидер ОБР
+job-name-ertchaplain = Священник ОБР
+job-name-ertengineer = Инженер ОБР
+job-name-ertsecurity = Офицер Безопасности ОБР
+job-name-ertmedic = Медик ОБР
+job-name-ertjanitor = Уборщик ОБР
+job-name-boxer = Боксёр
+job-name-zookeeper = Зоотехник
+job-name-visitor = Посетитель
+
+# unused jobs
+# these are required for the agent ID job icon tooltips
+# I am keeping them for roleplaying opportunities
+# unused jobs
+# these are required for the agent ID job icon tooltips
+# I am keeping them for roleplaying opportunities
+job-name-geneticist = Генетик
+job-name-no-id = Нет ID
+job-name-prisoner = Prisoner
+job-name-syndicate = Синдикат
+job-name-unknown = Неизвестно
+job-name-virologist = Вирусолог
+job-name-zombie = Зомби
+
+# Job titles
+# Job titles
+job-title-visitor = Посетитель
+job-title-cluwne = Клувн
+job-title-universal = Универсальный
+
+# Role timers - Make these alphabetical or I cut you
+# Role timers - Make these alphabetical or I cut you
+JobAtmosphericTechnician = Атмосферный Техник
+JobBartender = Бармен
+JobBorg = Борг
+JobBotanist = Ботаник
+JobBoxer = Боксер
+JobCafeOwner = Владелец кафе
+JobCaptain = Капитан
+JobCargoTechnician = Грузчик
+JobCentralCommandOfficial = Представитель Центрального Коммандования
+JobChaplain = Священник
+JobChef = Шеф-повар
+JobChemist = Химик
+JobChiefEngineer = Старший Инженер
+JobChiefMedicalOfficer = Главный Врач
+JobClown = Клоун
+JobDetective = Детектив
+JobBrigmedic = Бригмедик
+JobERTChaplain = Священник ОБР
+JobERTEngineer = Инженер ОБР
+JobERTJanitor = Уборщик ОБР
+JobERTLeader = Лидер ОБР
+JobERTMedical = Медик ОБР
+JobERTSecurity = Офицер Безопасности ОБР
+JobHeadOfPersonnel = Глава Персонала
+JobHeadOfSecurity = Глава Службы Безопасности
+JobJanitor = Уборщик
+JobLawyer = Юрист
+JobLibrarian = Библиотекарь
+JobMedicalDoctor = Врач
+JobMedicalIntern = Интерн
+JobMime = Мим
+JobMusician = Музыкант
+JobParamedic = Парамедик
+JobPassenger = Ассистент
+JobPsychologist = Психолог
+JobQuartermaster = Квартирмейстер
+JobReporter = Репортёр
+JobRestaurantOwner = Владелец ресторана
+JobResearchAssistant = Научный Ассистент
+JobResearchDirector = Мистагог
+JobRoboticist = Роботехник
+JobSalvageSpecialist = Утилизатор
+JobScientist = Учёный
+JobSecurityCadet = Кадет СБ
+JobSecurityOfficer = Офицер СБ
+JobSeniorEngineer = Бригадир
+JobSeniorOfficer = Ветеран СБ
+JobSeniorPhysician = Медицинский Офицер
+JobSeniorResearcher = Ведущий Исследователь
+JobServiceWorker = Сервисный Работник
+JobStationAi = Станционный ИИ
+JobStationEngineer = Инженер
+JobTechnicalAssistant = Технический Ассистент
+JobMilitechChief = Начальник Militech
+JobMilitechOperativeLead = Лидер оперативников Militech
+JobMilitechOperative = Оперативник Militech
+JobMilitechRigger = Риггер Militech
+JobMilitechNetrunner = Нетраннер Militech
+JobMilitechSecuritySpecialist = Специалист безопасности Militech
+JobMilitechCombatMedic = Боевой медик Militech
+JobMilitechTech = Техник Militech
+JobMilitechQuartermaster = Квартирмейстер Militech
+JobBiotechnicaRigger = Риггер Biotechnica
+JobVisitor = Посетитель
+JobWarden = Смотритель
+JobZookeeper = Зоотехник
+
+job-name-militech-rigger = Риггер Militech
+job-name-biotechnica-rigger = Риггер Biotechnica
