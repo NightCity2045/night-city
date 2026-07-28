@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
+using Content.Shared._NC.Identity;
 using Content.Shared.Construction.Prototypes;
 using Content.Shared.Preferences;
 using Robust.Shared.Network;
@@ -20,6 +21,8 @@ namespace Content.Server.Preferences.Managers
         bool TryGetCachedPreferences(NetUserId userId, [NotNullWhen(true)] out PlayerPreferences? playerPreferences);
         PlayerPreferences GetPreferences(NetUserId userId);
         PlayerPreferences? GetPreferencesOrNull(NetUserId? userId);
+        bool TryGetProfileId(NetUserId userId, int slot, out ProfileId profileId);
+        bool TryGetSelectedProfileId(NetUserId userId, out ProfileId profileId);
         IEnumerable<KeyValuePair<NetUserId, HumanoidCharacterProfile>> GetSelectedProfilesForPlayers(List<NetUserId> userIds);
         bool HavePreferencesLoaded(ICommonSession session);
 
