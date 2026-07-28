@@ -7,7 +7,7 @@ namespace Content.Shared._NC.CCVar;
 /// Night City job-system configuration.
 /// </summary>
 [CVarDefs]
-public sealed class NCCVars : CVars
+public sealed partial class NCCVars : CVars
 {
     /// <summary>
     /// Replaces ordinary station job selection with the technical Citizen role.

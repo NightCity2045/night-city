@@ -1386,7 +1386,7 @@ namespace Content.Server.Database.Migrations.Postgres
 
                             t.HasCheckConstraint("CK_nc_character_progression_level", "level >= 1 AND level <= 10");
 
-                            t.HasCheckConstraint("CK_nc_character_progression_spent_skill_points", "spent_skill_points >= 0 AND spent_skill_points <= level * 10");
+                            t.HasCheckConstraint("CK_nc_character_progression_spent_skill_points", "spent_skill_points >= 0");
                         });
                 });
 

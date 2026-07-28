@@ -56,7 +56,8 @@ public abstract partial class ServerDbContext
             table.HasCheckConstraint("CK_nc_character_progression_level", "level >= 1 AND level <= 10");
             table.HasCheckConstraint(
                 "CK_nc_character_progression_spent_skill_points",
-                "spent_skill_points >= 0 AND spent_skill_points <= level * 10");
+                // The upper budget is defined by the RED progression prototype and validated transactionally.
+                "spent_skill_points >= 0");
         });
 
         modelBuilder.Entity<NCCharacterRoundParticipation>()

@@ -1,0 +1,43 @@
+- type: ncOrganization
+  id: NCCityServices
+  organizationId: 6515bc7d-0e0a-4f5c-b126-0b0e7b09f101
+  name: nc-organization-city-services
+  defaultEntryPosition: NCCityWorker
+
+- type: ncDepartment
+  id: NCCityOperations
+  departmentId: 6515bc7d-0e0a-4f5c-b126-0b0e7b09f102
+  organization: NCCityServices
+  name: nc-department-city-operations
+
+- type: ncPosition
+  id: NCCityWorker
+  positionId: 6515bc7d-0e0a-4f5c-b126-0b0e7b09f103
+  organization: NCCityServices
+  department: NCCityOperations
+  name: nc-position-city-worker
+  rankWeight: 10
+  baseSalary: 50
+  payIntervalSeconds: 900
+  access:
+  - Maintenance
+
+- type: ncPosition
+  id: NCCitySupervisor
+  positionId: 6515bc7d-0e0a-4f5c-b126-0b0e7b09f104
+  organization: NCCityServices
+  department: NCCityOperations
+  name: nc-position-city-supervisor
+  rankWeight: 100
+  baseSalary: 100
+  payIntervalSeconds: 900
+  access:
+  - Maintenance
+  isLeadership: true
+  canHire: true
+  canPromote: true
+  canDemote: true
+  canTransfer: true
+  canSuspend: true
+  canDismiss: true
+  maxPromotableRankWeight: 99
