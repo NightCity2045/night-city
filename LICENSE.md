@@ -1,5 +1,3 @@
-# FILE: LICENSE.md
-
 # Night City 2045 Licensing
 
 Night City 2045 is a multi-licensed repository.
