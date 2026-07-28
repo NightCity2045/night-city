@@ -55,6 +55,9 @@ public sealed partial class StationJobsSystem
     {
         DebugTools.Assert(stations.Count > 0);
 
+        if (TryAssignNCCitizenJobs(profiles, stations, out var citizenAssignments))
+            return citizenAssignments;
+
         InitializeRoundStart();
 
         if (profiles.Count == 0)
@@ -264,6 +267,11 @@ public sealed partial class StationJobsSystem
         endFunc:
         return assigned;
     }
+
+    private partial bool TryAssignNCCitizenJobs(
+        IReadOnlyDictionary<NetUserId, HumanoidCharacterProfile> profiles,
+        IReadOnlyList<EntityUid> stations,
+        out Dictionary<NetUserId, (ProtoId<JobPrototype>?, EntityUid)> assigned);
 
     /// <summary>
     /// Attempts to assign overflow jobs to any player in allPlayersToAssign that is not in assignedJobs.

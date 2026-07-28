@@ -11,6 +11,7 @@ using Content.Shared.GameTicking;
 using Content.Shared.Preferences;
 using Content.Shared.Roles;
 using Content.Shared.Roles.Jobs;
+using Content.Shared._NC.CCVar;
 using Robust.Shared.Network;
 using Robust.Shared.Prototypes;
 
@@ -81,6 +82,7 @@ public sealed class JobTest : GameTest
     {
         var pair = Pair;
 
+        pair.Server.CfgMan.SetCVar(NCCVars.SingleCitizenJob, false);
         pair.Server.CfgMan.SetCVar(CCVars.GameMap, _map);
         var ticker = pair.Server.System<GameTicker>();
 
@@ -108,6 +110,7 @@ public sealed class JobTest : GameTest
     {
         var pair = Pair;
 
+        pair.Server.CfgMan.SetCVar(NCCVars.SingleCitizenJob, false);
         pair.Server.CfgMan.SetCVar(CCVars.GameMap, _map);
         var ticker = pair.Server.System<GameTicker>();
         Assert.That(ticker.RunLevel, Is.EqualTo(GameRunLevel.PreRoundLobby));
@@ -141,6 +144,7 @@ public sealed class JobTest : GameTest
     {
         var pair = Pair;
 
+        pair.Server.CfgMan.SetCVar(NCCVars.SingleCitizenJob, false);
         pair.Server.CfgMan.SetCVar(CCVars.GameMap, _map);
         var ticker = pair.Server.System<GameTicker>();
         Assert.That(ticker.RunLevel, Is.EqualTo(GameRunLevel.PreRoundLobby));
@@ -170,6 +174,7 @@ public sealed class JobTest : GameTest
     {
         var pair = Pair;
 
+        pair.Server.CfgMan.SetCVar(NCCVars.SingleCitizenJob, false);
         pair.Server.CfgMan.SetCVar(CCVars.GameMap, _map);
         var ticker = pair.Server.System<GameTicker>();
         Assert.That(ticker.RunLevel, Is.EqualTo(GameRunLevel.PreRoundLobby));

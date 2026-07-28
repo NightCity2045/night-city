@@ -926,6 +926,950 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("job", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCBankAccount", b =>
+                {
+                    b.Property<Guid>("BankAccountId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("bank_account_id");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("account_number");
+
+                    b.Property<byte>("AccountType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("account_type");
+
+                    b.Property<long>("Balance")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("balance");
+
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("closed_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<byte[]>("CredentialHash")
+                        .HasColumnType("BLOB")
+                        .HasColumnName("credential_hash");
+
+                    b.Property<byte[]>("CredentialSalt")
+                        .HasColumnType("BLOB")
+                        .HasColumnName("credential_salt");
+
+                    b.Property<string>("CurrencyPrototypeId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("currency_prototype_id");
+
+                    b.Property<int?>("OwnerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("owner_profile_id");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("version");
+
+                    b.HasKey("BankAccountId")
+                        .HasName("PK_nc_bank_account");
+
+                    b.HasIndex("AccountNumber")
+                        .IsUnique();
+
+                    b.HasIndex("OwnerProfileId");
+
+                    b.ToTable("nc_bank_account", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_nc_bank_account_balance", "balance >= 0");
+
+                            t.HasCheckConstraint("CK_nc_bank_account_personal_owner", "(account_type IN (0, 3) AND owner_profile_id IS NOT NULL) OR (account_type NOT IN (0, 3) AND owner_profile_id IS NULL)");
+
+                            t.HasCheckConstraint("CK_nc_bank_account_version", "version >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCBankTransaction", b =>
+                {
+                    b.Property<Guid>("BankTransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("bank_transaction_id");
+
+                    b.Property<Guid?>("ActorAccountId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("actor_account_id");
+
+                    b.Property<int?>("ActorProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("actor_profile_id");
+
+                    b.Property<long>("Amount")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid?>("CreditAccountId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("credit_account_id");
+
+                    b.Property<long?>("CreditBalanceAfter")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("credit_balance_after");
+
+                    b.Property<string>("CurrencyPrototypeId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("currency_prototype_id");
+
+                    b.Property<Guid?>("DebitAccountId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("debit_account_id");
+
+                    b.Property<long?>("DebitBalanceAfter")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("debit_balance_after");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("request_id");
+
+                    b.Property<int?>("RoundId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("round_id");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("timestamp");
+
+                    b.Property<byte>("TransactionType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("transaction_type");
+
+                    b.HasKey("BankTransactionId")
+                        .HasName("PK_nc_bank_transaction");
+
+                    b.HasIndex("CreditAccountId");
+
+                    b.HasIndex("DebitAccountId");
+
+                    b.HasIndex("RequestId")
+                        .IsUnique();
+
+                    b.ToTable("nc_bank_transaction", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_nc_bank_transaction_accounts", "debit_account_id IS NOT NULL OR credit_account_id IS NOT NULL");
+
+                            t.HasCheckConstraint("CK_nc_bank_transaction_amount", "amount > 0");
+                        });
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCBusiness", b =>
+                {
+                    b.Property<Guid>("BusinessId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("business_id");
+
+                    b.Property<Guid>("BankAccountId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("bank_account_id");
+
+                    b.Property<string>("BusinessType")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("business_type");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
+                    b.Property<Guid?>("PropertyId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("property_id");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("status");
+
+                    b.HasKey("BusinessId")
+                        .HasName("PK_nc_business");
+
+                    b.HasIndex("BankAccountId")
+                        .IsUnique();
+
+                    b.HasIndex("PropertyId");
+
+                    b.ToTable("nc_business", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCBusinessOwnership", b =>
+                {
+                    b.Property<Guid>("BusinessId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("business_id");
+
+                    b.Property<int>("OwnerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("owner_profile_id");
+
+                    b.Property<DateTime>("AcquiredAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("acquired_at");
+
+                    b.Property<byte>("OwnershipType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("ownership_type");
+
+                    b.Property<int>("ShareBasisPoints")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("share_basis_points");
+
+                    b.HasKey("BusinessId", "OwnerProfileId")
+                        .HasName("PK_nc_business_ownership");
+
+                    b.HasIndex("OwnerProfileId");
+
+                    b.ToTable("nc_business_ownership", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_nc_business_ownership_share", "share_basis_points > 0 AND share_basis_points <= 10000");
+                        });
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("department_id");
+
+                    b.Property<byte>("EmploymentState")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("employment_state");
+
+                    b.Property<DateTime>("HiredAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("hired_at");
+
+                    b.Property<int?>("HiredByProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("hired_by_profile_id");
+
+                    b.Property<DateTime?>("LastPromotionAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("last_promotion_at");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("organization_id");
+
+                    b.Property<Guid>("PositionId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("position_id");
+
+                    b.Property<DateTime?>("SuspendedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("suspended_at");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_character_employment");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("PositionId");
+
+                    b.ToTable("nc_character_employment", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterLicense", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("LicensePrototypeId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("license_prototype_id");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("expires_at");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("issued_at");
+
+                    b.Property<Guid?>("IssuedByAdminId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("issued_by_admin_id");
+
+                    b.Property<int?>("IssuedByProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("issued_by_profile_id");
+
+                    b.HasKey("ProfileId", "LicensePrototypeId")
+                        .HasName("PK_nc_character_license");
+
+                    b.ToTable("nc_character_license", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterLifecycle", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<DateTime?>("DeclaredAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("declared_at");
+
+                    b.Property<Guid?>("DeclaredByAccountId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("declared_by_account_id");
+
+                    b.Property<int?>("DeclaredByProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("declared_by_profile_id");
+
+                    b.Property<int?>("DeclaredRoundId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("declared_round_id");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid?>("RequestId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("request_id");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("status");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_character_lifecycle");
+
+                    b.HasIndex("RequestId")
+                        .IsUnique();
+
+                    b.ToTable("nc_character_lifecycle", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterProgression", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<int>("CompletedRounds")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("completed_rounds");
+
+                    b.Property<int?>("LastCountedRoundId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("last_counted_round_id");
+
+                    b.Property<byte>("Level")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("level");
+
+                    b.Property<int>("SpentSkillPoints")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("spent_skill_points");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_character_progression");
+
+                    b.HasIndex("LastCountedRoundId");
+
+                    b.ToTable("nc_character_progression", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_nc_character_progression_completed_rounds", "completed_rounds >= 0");
+
+                            t.HasCheckConstraint("CK_nc_character_progression_level", "level >= 1 AND level <= 10");
+
+                            t.HasCheckConstraint("CK_nc_character_progression_spent_skill_points", "spent_skill_points >= 0 AND spent_skill_points <= level * 10");
+                        });
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterRoundParticipation", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<int>("RoundId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("round_id");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("account_id");
+
+                    b.Property<int>("ActiveSeconds")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("active_seconds");
+
+                    b.Property<bool>("Counted")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("counted");
+
+                    b.Property<DateTime?>("CountedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("counted_at");
+
+                    b.Property<DateTime>("FirstJoinedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("first_joined_at");
+
+                    b.Property<DateTime>("LastSeenAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("last_seen_at");
+
+                    b.HasKey("ProfileId", "RoundId")
+                        .HasName("PK_nc_character_round_participation");
+
+                    b.HasIndex("RoundId");
+
+                    b.HasIndex("AccountId", "RoundId");
+
+                    b.ToTable("nc_character_round_participation", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_nc_character_round_participation_active_seconds", "active_seconds >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterSkill", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("SkillPrototypeId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("skill_prototype_id");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("rank");
+
+                    b.Property<int>("SpentPoints")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("spent_points");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ProfileId", "SkillPrototypeId")
+                        .HasName("PK_nc_character_skill");
+
+                    b.ToTable("nc_character_skill", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_nc_character_skill_rank", "rank >= 0");
+
+                            t.HasCheckConstraint("CK_nc_character_skill_spent_points", "spent_points >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCDeletedCharacterAudit", b =>
+                {
+                    b.Property<long>("DeletedCharacterAuditId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("deleted_character_audit_id");
+
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("account_id");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<int>("DeletedProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("deleted_profile_id");
+
+                    b.Property<string>("DeletionReason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("deletion_reason");
+
+                    b.Property<string>("LastCharacterName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("last_character_name");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("request_id");
+
+                    b.Property<int?>("RoundId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("round_id");
+
+                    b.HasKey("DeletedCharacterAuditId")
+                        .HasName("PK_nc_deleted_character_audit");
+
+                    b.HasIndex("DeletedProfileId");
+
+                    b.HasIndex("RequestId")
+                        .IsUnique();
+
+                    b.ToTable("nc_deleted_character_audit", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCDepartment", b =>
+                {
+                    b.Property<Guid>("DepartmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("department_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("organization_id");
+
+                    b.Property<string>("PrototypeId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("prototype_id");
+
+                    b.HasKey("DepartmentId")
+                        .HasName("PK_nc_department");
+
+                    b.HasIndex("OrganizationId", "PrototypeId")
+                        .IsUnique();
+
+                    b.ToTable("nc_department", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCEmploymentHistory", b =>
+                {
+                    b.Property<long>("EmploymentHistoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("employment_history_id");
+
+                    b.Property<byte>("Action")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("action");
+
+                    b.Property<Guid?>("ActorAdminId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("actor_admin_id");
+
+                    b.Property<int?>("ActorProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("actor_profile_id");
+
+                    b.Property<Guid?>("NewDepartmentId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("new_department_id");
+
+                    b.Property<Guid?>("NewPositionId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("new_position_id");
+
+                    b.Property<Guid?>("OldDepartmentId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("old_department_id");
+
+                    b.Property<Guid?>("OldPositionId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("old_position_id");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("organization_id");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("request_id");
+
+                    b.Property<int?>("RoundId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("round_id");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("timestamp");
+
+                    b.HasKey("EmploymentHistoryId")
+                        .HasName("PK_nc_employment_history");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("ProfileId");
+
+                    b.HasIndex("RequestId")
+                        .IsUnique();
+
+                    b.ToTable("nc_employment_history", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCOrganization", b =>
+                {
+                    b.Property<Guid>("OrganizationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("organization_id");
+
+                    b.Property<Guid?>("BankAccountId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("bank_account_id");
+
+                    b.Property<Guid?>("DefaultEntryPositionId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("default_entry_position_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
+                    b.Property<string>("PrototypeId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("prototype_id");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("status");
+
+                    b.HasKey("OrganizationId")
+                        .HasName("PK_nc_organization");
+
+                    b.HasIndex("BankAccountId");
+
+                    b.HasIndex("DefaultEntryPositionId");
+
+                    b.HasIndex("PrototypeId")
+                        .IsUnique();
+
+                    b.ToTable("nc_organization", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPersistenceAudit", b =>
+                {
+                    b.Property<long>("AuditId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("audit_id");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("action");
+
+                    b.Property<Guid?>("ActorAccountId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("actor_account_id");
+
+                    b.Property<int?>("ActorProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("actor_profile_id");
+
+                    b.Property<string>("NewValue")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("new_value");
+
+                    b.Property<string>("OldValue")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("old_value");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("request_id");
+
+                    b.Property<int?>("RoundId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("round_id");
+
+                    b.Property<int?>("TargetProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("target_profile_id");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("timestamp");
+
+                    b.HasKey("AuditId")
+                        .HasName("PK_nc_persistence_audit");
+
+                    b.HasIndex("RequestId")
+                        .IsUnique();
+
+                    b.HasIndex("TargetProfileId");
+
+                    b.HasIndex("Timestamp");
+
+                    b.ToTable("nc_persistence_audit", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPosition", b =>
+                {
+                    b.Property<Guid>("PositionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("position_id");
+
+                    b.Property<long>("BaseSalary")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("base_salary");
+
+                    b.Property<bool>("CanDemote")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("can_demote");
+
+                    b.Property<bool>("CanDismiss")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("can_dismiss");
+
+                    b.Property<bool>("CanHire")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("can_hire");
+
+                    b.Property<bool>("CanPromote")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("can_promote");
+
+                    b.Property<bool>("CanSuspend")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("can_suspend");
+
+                    b.Property<bool>("CanTransfer")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("can_transfer");
+
+                    b.Property<Guid?>("DepartmentId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("department_id");
+
+                    b.Property<bool>("IsLeadership")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("is_leadership");
+
+                    b.Property<int?>("MaxPromotableRankWeight")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("max_promotable_rank_weight");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("organization_id");
+
+                    b.Property<int>("PayIntervalSeconds")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("pay_interval_seconds");
+
+                    b.Property<Guid?>("PayrollAccountId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("payroll_account_id");
+
+                    b.Property<string>("PrototypeId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("prototype_id");
+
+                    b.Property<int>("RankWeight")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("rank_weight");
+
+                    b.HasKey("PositionId")
+                        .HasName("PK_nc_position");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("PayrollAccountId");
+
+                    b.HasIndex("OrganizationId", "PrototypeId")
+                        .IsUnique();
+
+                    b.ToTable("nc_position", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_nc_position_base_salary", "base_salary >= 0");
+
+                            t.HasCheckConstraint("CK_nc_position_pay_interval", "pay_interval_seconds >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCProperty", b =>
+                {
+                    b.Property<Guid>("PropertyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("property_id");
+
+                    b.Property<Guid?>("MapEntityId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("map_entity_id");
+
+                    b.Property<string>("PropertyType")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("property_type");
+
+                    b.Property<string>("PrototypeId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("prototype_id");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("status");
+
+                    b.HasKey("PropertyId")
+                        .HasName("PK_nc_property");
+
+                    b.HasIndex("MapEntityId")
+                        .IsUnique();
+
+                    b.ToTable("nc_property", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPropertyOwnership", b =>
+                {
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("property_id");
+
+                    b.Property<byte>("OwnerType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("owner_type");
+
+                    b.Property<string>("OwnerId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("owner_id");
+
+                    b.Property<DateTime>("AcquiredAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("acquired_at");
+
+                    b.Property<int>("ShareBasisPoints")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("share_basis_points");
+
+                    b.HasKey("PropertyId", "OwnerType", "OwnerId")
+                        .HasName("PK_nc_property_ownership");
+
+                    b.ToTable("nc_property_ownership", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_nc_property_ownership_share", "share_basis_points > 0 AND share_basis_points <= 10000");
+                        });
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCRoundAccountCredit", b =>
+                {
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("account_id");
+
+                    b.Property<int>("RoundId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("round_id");
+
+                    b.Property<DateTime>("CreditedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("credited_at");
+
+                    b.Property<int>("CreditedProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("credited_profile_id");
+
+                    b.HasKey("AccountId", "RoundId")
+                        .HasName("PK_nc_round_account_credit");
+
+                    b.HasIndex("CreditedProfileId");
+
+                    b.HasIndex("RoundId");
+
+                    b.ToTable("nc_round_account_credit", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.PlayTime", b =>
                 {
                     b.Property<int>("Id")
@@ -1861,6 +2805,233 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasConstraintName("FK_job_profile_profile_id");
 
                     b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCBankAccount", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_nc_bank_account_profile_profile_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCBankTransaction", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCBankAccount", null)
+                        .WithMany()
+                        .HasForeignKey("CreditAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_nc_bank_transaction_nc_bank_account_ncbank_account_bank_account_id");
+
+                    b.HasOne("Content.Server.Database.NCBankAccount", null)
+                        .WithMany()
+                        .HasForeignKey("DebitAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_nc_bank_transaction_nc_bank_account_ncbank_account_bank_account_id1");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCBusiness", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCBankAccount", null)
+                        .WithMany()
+                        .HasForeignKey("BankAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_business_nc_bank_account_ncbank_account_bank_account_id");
+
+                    b.HasOne("Content.Server.Database.NCProperty", null)
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_nc_business_nc_property_ncproperty_property_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCBusinessOwnership", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCBusiness", null)
+                        .WithMany()
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_business_ownership_nc_business_business_id");
+
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_business_ownership_profile_profile_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCDepartment", null)
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_nc_character_employment_nc_department_ncdepartment_department_id");
+
+                    b.HasOne("Content.Server.Database.NCOrganization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_employment_nc_organization_ncorganization_organization_id");
+
+                    b.HasOne("Content.Server.Database.NCPosition", null)
+                        .WithMany()
+                        .HasForeignKey("PositionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_employment_nc_position_ncposition_position_id");
+
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCCharacterEmployment", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_employment_profile_profile_id1");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterLicense", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_license_profile_profile_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterLifecycle", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCCharacterLifecycle", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_lifecycle_profile_profile_id1");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterProgression", b =>
+                {
+                    b.HasOne("Content.Server.Database.Round", null)
+                        .WithMany()
+                        .HasForeignKey("LastCountedRoundId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_nc_character_progression_round_round_id");
+
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCCharacterProgression", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_progression_profile_profile_id1");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterRoundParticipation", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_round_participation_profile_profile_id");
+
+                    b.HasOne("Content.Server.Database.Round", null)
+                        .WithMany()
+                        .HasForeignKey("RoundId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_round_participation_round_round_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterSkill", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_skill_profile_profile_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCDepartment", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCOrganization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_department_nc_organization_ncorganization_organization_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCEmploymentHistory", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCOrganization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_employment_history_nc_organization_ncorganization_organization_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCOrganization", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCBankAccount", null)
+                        .WithMany()
+                        .HasForeignKey("BankAccountId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_nc_organization_nc_bank_account_ncbank_account_bank_account_id");
+
+                    b.HasOne("Content.Server.Database.NCPosition", null)
+                        .WithMany()
+                        .HasForeignKey("DefaultEntryPositionId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_nc_organization_nc_position_ncposition_position_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPosition", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCDepartment", null)
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_nc_position_nc_department_ncdepartment_department_id");
+
+                    b.HasOne("Content.Server.Database.NCOrganization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_position_nc_organization_ncorganization_organization_id");
+
+                    b.HasOne("Content.Server.Database.NCBankAccount", null)
+                        .WithMany()
+                        .HasForeignKey("PayrollAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_nc_position_nc_bank_account_ncbank_account_bank_account_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPropertyOwnership", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCProperty", null)
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_property_ownership_nc_property_property_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCRoundAccountCredit", b =>
+                {
+                    b.HasOne("Content.Server.Database.Round", null)
+                        .WithMany()
+                        .HasForeignKey("RoundId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_round_account_credit_round_round_id");
                 });
 
             modelBuilder.Entity("Content.Server.Database.Player", b =>
