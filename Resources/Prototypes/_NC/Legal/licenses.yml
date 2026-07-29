@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncLicense
+  id: NCDriverLicense
+  name: nc-license-driver
+  description: nc-license-driver-desc
+  validityDays: 365
+
+- type: ncLicense
+  id: NCFirearmsLicense
+  name: nc-license-firearms
+  description: nc-license-firearms-desc
+  issuingOrganization: NCPD
+  validityDays: 180
+
+- type: ncLicense
+  id: NCMedicalPracticeLicense
+  name: nc-license-medical-practice
+  description: nc-license-medical-practice-desc
+  issuingOrganization: TraumaTeam
+  validityDays: 365
+
+- type: ncLicense
+  id: NCCyberwarePracticeLicense
+  name: nc-license-cyberware-practice
+  description: nc-license-cyberware-practice-desc
+  issuingOrganization: Biotechnica
+  validityDays: 365
+
+- type: ncLicense
+  id: NCBusinessLicense
+  name: nc-license-business
+  description: nc-license-business-desc
+  validityDays: 365

@@ -1,0 +1,12 @@
+ent-CitiNetTerminal = Терминал CitiNet
+ent-CitiNetTerminal-desc = Громоздкий настольный терминал с мерцающим ЭЛТ-монитором.
+ent-CitiNetDataChipNCPD = Чип доступа NCPD
+ent-CitiNetDataChipNCPD-desc = Небольшой чип с зашифрованными ключами доступа к базе данных NCPD.
+ent-CitiNetDataChipNCPDForensics = Чип доступа к криминалистике NCPD
+ent-CitiNetDataChipNCPDForensics-desc = Небольшой чип с зашифрованными ключами доступа к криминалистической базе NCPD.
+ent-CitiNetCorporateDropBox = Почтомат "Vendit"
+ent-CitiNetCorporateDropBox-desc = Защищенный корпоративный терминал для получения посылок. Требуется PIN-код.
+ent-CitiNetStreetDeadDrop = Старая мусорка
+ent-CitiNetStreetDeadDrop-desc = Грязный бак, забитый старыми газетами. Кажется, тут что-то припрятано.
+ent-CitiNetDeliveryChip = Навигационный чип 'QuickPath'
+ent-CitiNetDeliveryChip-desc = Одноразовый чип с координатами вашей посылки. Вставьте в КПК для активации GPS-метки.

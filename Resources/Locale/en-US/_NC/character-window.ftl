@@ -1,0 +1,36 @@
+nc-character-window-title = Character
+nc-character-window-name = {$name}
+nc-character-window-summary = Level {$level} · completed rounds {$rounds} · available skill points {$available} · balance {$balance} eb
+nc-character-window-level-progress = Level progress: {$current}/{$required} credited rounds
+nc-character-window-level-max = Maximum level reached
+nc-character-window-assets = Properties: {$properties} · businesses: {$businesses}
+nc-character-window-position = Position: {$position}
+nc-character-window-employment = Organization: {$organization} · department: {$department} · position: {$position}
+nc-character-window-unemployed = Unemployed
+nc-character-window-skill = {$skill}: {$rank}/{$max} (+1 costs {$cost})
+nc-character-window-properties = Property
+nc-character-window-businesses = Businesses
+nc-character-window-licenses = Licenses
+nc-character-window-documents = Documents
+nc-character-window-skills = Skills
+nc-character-window-empty = None
+nc-character-window-property = {$type} · share {$share}% · {$status}
+nc-character-window-business = {$name} ({$type}) · share {$share}% · owners {$coowners} · {$status}
+nc-character-window-legal-record = {$name} · {$status} · expires {$expiry}
+nc-character-window-document = {$name} · № {$serial} · {$status}
+nc-character-window-no-expiry = no expiry
+nc-character-status-active = active
+nc-character-status-inheritance = inheritance pending
+nc-character-status-archived = archived
+nc-character-status-invalid = invalid
+nc-character-status-suspended = suspended
+nc-character-status-closed = closed
+nc-character-status-expired = expired
+nc-character-status-revoked = revoked
+nc-character-skill-confirm-title = Confirm skill purchase
+nc-character-skill-confirm-summary = {$skill}: {$current} → {$target}
+    Cost: {$cost} skill points
+    Remaining after purchase: {$remaining}
+nc-character-skill-confirm = Confirm
+nc-character-skill-cancel = Cancel
+nc-character-command-description = Opens the persistent character window.

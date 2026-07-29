@@ -1,0 +1,56 @@
+
+- type: ncRedSkill
+  id: NCAthletics
+  name: nc-red-skill-athletics-name
+  description: nc-red-skill-athletics-description
+  maxRank: 10
+  costPerRank: 1
+
+- type: ncRedSkill
+  id: NCAwareness
+  name: nc-red-skill-awareness-name
+  description: nc-red-skill-awareness-description
+  maxRank: 10
+  costPerRank: 1
+
+- type: ncRedSkill
+  id: NCConversation
+  name: nc-red-skill-conversation-name
+  description: nc-red-skill-conversation-description
+  maxRank: 10
+  costPerRank: 1
+
+- type: ncRedSkill
+  id: NCEducation
+  name: nc-red-skill-education-name
+  description: nc-red-skill-education-description
+  maxRank: 10
+  costPerRank: 1
+
+- type: ncRedSkill
+  id: NCFirstAid
+  name: nc-red-skill-first-aid-name
+  description: nc-red-skill-first-aid-description
+  maxRank: 10
+  costPerRank: 1
+
+- type: ncRedSkill
+  id: NCHandgun
+  name: nc-red-skill-handgun-name
+  description: nc-red-skill-handgun-description
+  maxRank: 10
+  costPerRank: 1
+
+- type: ncRedSkill
+  id: NCStealth
+  name: nc-red-skill-stealth-name
+  description: nc-red-skill-stealth-description
+  maxRank: 10
+  costPerRank: 1
+
+- type: ncRedSkill
+  id: NCTechnology
+  name: nc-red-skill-technology-name
+  description: nc-red-skill-technology-description
+  maxRank: 10
+  costPerRank: 1

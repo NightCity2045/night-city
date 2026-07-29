@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Content.Server.Database
 {
-    public abstract class ServerDbContext : DbContext
+    public abstract partial class ServerDbContext : DbContext
     {
         protected ServerDbContext(DbContextOptions options) : base(options)
         {
@@ -299,7 +299,10 @@ namespace Content.Server.Database
 
             ModelBan.OnModelCreating(modelBuilder);
             ModelCustomVoteLog.OnModelCreating(modelBuilder);
+            OnModelCreatingNC(modelBuilder);
         }
+
+        partial void OnModelCreatingNC(ModelBuilder modelBuilder);
 
         public virtual IQueryable<AdminLog> SearchLogs(IQueryable<AdminLog> query, string searchText)
         {

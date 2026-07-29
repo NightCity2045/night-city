@@ -1,0 +1,208 @@
+# ============================================================
+#region NIGHT CITY POLICE DEPARTMENT
+# ============================================================
+
+- type: ncOrganization
+  id: NCPD
+  organizationId: a1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a2101
+  name: nc-organization-ncpd
+  defaultEntryPosition: NCPDOfficer
+  payrollStartingBalance: 5000
+  currencyPrototypeId: Eurodollar
+
+# ============================================================
+#region DEPARTMENTS
+# ============================================================
+
+- type: ncDepartment
+  id: NCPDPatrolDivision
+  departmentId: a1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a2102
+  organization: NCPD
+  name: nc-department-ncpd-patrol
+
+
+- type: ncDepartment
+  id: NCPDCommandDivision
+  departmentId: a1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a2103
+  organization: NCPD
+  name: nc-department-ncpd-command
+
+# ------------------------------------------------------------
+# region OFFICER
+# Базовая должность NCPD.
+# ------------------------------------------------------------
+
+- type: ncPosition
+  id: NCPDOfficer
+  positionId: a1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a2201
+  organization: NCPD
+  department: NCPDPatrolDivision
+  name: nc-position-ncpd-officer
+
+  rankWeight: 10
+
+  baseSalary: 75
+  payIntervalSeconds: 900
+
+  access:
+  - NC_General
+  - NCPD_Patrol
+
+
+# ------------------------------------------------------------
+# region SERGEANT
+# Первый руководящий ранг.
+# Самостоятельно менять должности пока не может.
+# ------------------------------------------------------------
+
+- type: ncPosition
+  id: NCPDSergeant
+  positionId: a1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a2202
+  organization: NCPD
+  department: NCPDPatrolDivision
+  name: nc-position-ncpd-sergeant
+
+  rankWeight: 20
+
+  baseSalary: 100
+  payIntervalSeconds: 900
+
+  access:
+  - NC_General
+  - NCPD_Patrol
+  - NCPD_Armory
+
+  isLeadership: true
+
+# ------------------------------------------------------------
+# region LIEUTENANT
+# Может нанимать офицеров и повышать до сержанта.
+# ------------------------------------------------------------
+
+- type: ncPosition
+  id: NCPDLieutenant
+  positionId: a1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a2203
+  organization: NCPD
+  department: NCPDPatrolDivision
+  name: nc-position-ncpd-lieutenant
+
+  rankWeight: 40
+
+  baseSalary: 125
+  payIntervalSeconds: 900
+
+  access:
+  - NC_General
+  - NCPD_Patrol
+  - NCPD_Armory
+  - NCPD_Command
+
+  isLeadership: true
+
+  canHire: true
+  canPromote: true
+  canDemote: true
+  canTransfer: true
+
+  maxPromotableRankWeight: 20
+
+# ------------------------------------------------------------
+# region INSPECTOR
+# Может назначать должности вплоть до лейтенанта.
+# ------------------------------------------------------------
+
+- type: ncPosition
+  id: NCPDInspector
+  positionId: a1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a2204
+  organization: NCPD
+  department: NCPDCommandDivision
+  name: nc-position-ncpd-inspector
+
+  rankWeight: 60
+
+  baseSalary: 150
+  payIntervalSeconds: 900
+
+  access:
+  - NC_General
+  - NCPD_Patrol
+  - NCPD_Armory
+  - NCPD_Detective
+  - NCPD_Command
+
+  isLeadership: true
+
+  canHire: true
+  canPromote: true
+  canDemote: true
+  canTransfer: true
+
+  maxPromotableRankWeight: 40
+
+# ------------------------------------------------------------
+# region COMMANDER
+# Может назначать должности вплоть до инспектора.
+# ------------------------------------------------------------
+
+- type: ncPosition
+  id: NCPDCommander
+  positionId: a1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a2205
+  organization: NCPD
+  department: NCPDCommandDivision
+  name: nc-position-ncpd-commander
+
+  rankWeight: 80
+
+  baseSalary: 180
+  payIntervalSeconds: 900
+
+  access:
+  - NC_General
+  - NCPD_Patrol
+  - NCPD_Armory
+  - NCPD_Detective
+  - NCPD_Command
+
+  isLeadership: true
+
+  canHire: true
+  canPromote: true
+  canDemote: true
+  canTransfer: true
+
+  maxPromotableRankWeight: 60
+
+
+# ------------------------------------------------------------
+# region CHIEF
+# Высшая должность NCPD.
+# Может назначать любую должность, кроме другого Chief.
+# ------------------------------------------------------------
+
+- type: ncPosition
+  id: NCPDChief
+  positionId: a1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a2206
+  organization: NCPD
+  department: NCPDCommandDivision
+  name: nc-position-ncpd-chief
+
+  rankWeight: 100
+
+  baseSalary: 225
+  payIntervalSeconds: 900
+
+  access:
+  - NC_General
+  - NCPD_Patrol
+  - NCPD_Armory
+  - NCPD_Detective
+  - NCPD_Command
+
+  isLeadership: true
+
+  canHire: true
+  canPromote: true
+  canDemote: true
+  canTransfer: true
+
+  maxPromotableRankWeight: 99
