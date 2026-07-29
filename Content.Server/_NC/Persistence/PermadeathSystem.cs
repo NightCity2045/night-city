@@ -1,11 +1,16 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using Content.Server.Database;
 using Content.Server.GameTicking;
 using Content.Server.Preferences.Managers;
 using Content.Server._NC.Identity;
 using Content.Shared._NC.CCVar;
+using Content.Shared._NC.Identity;
 using Content.Shared._NC.Persistence.Components;
 using Content.Shared.GameTicking;
 using Content.Shared.Mobs;
+using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
 using Robust.Shared.Configuration;
 using System.Threading.Tasks;
@@ -15,8 +20,8 @@ using System.Linq;
 namespace Content.Server._NC.Persistence;
 
 /// <summary>
-/// Declares death immediately but performs destructive cleanup only at round end or lobby exit.
-/// Revival in the same round cancels the pending declaration.
+/// Records only explicitly confirmed permanent deaths and delays destructive cleanup until
+/// round end or lobby exit, leaving the ordinary revival window intact.
 /// </summary>
 public sealed partial class PermadeathSystem : EntitySystem
 {
@@ -43,22 +48,53 @@ public sealed partial class PermadeathSystem : EntitySystem
             !_identity.TryGetIdentity(args.Target, out var profileId, out var accountId))
             return;
 
-        if (args.NewMobState == MobState.Dead)
+        // Ordinary death never declares permadeath. A successful revival cancels an explicit
+        // declaration made earlier in the same round.
+        if (args.OldMobState == MobState.Dead &&
+            _pendingByAccount.Remove(accountId.UserId, out var pending))
         {
-            var pending = new PendingDeath(profileId.Value, accountId.UserId, Guid.NewGuid());
-            _pendingByAccount[accountId.UserId] = pending;
-            _ = SetPendingAsync(pending, true);
-        }
-        else if (args.OldMobState == MobState.Dead)
-        {
-            _pendingByAccount.Remove(accountId.UserId);
-            _ = SetPendingAsync(
-                new PendingDeath(profileId.Value, accountId.UserId, Guid.NewGuid()),
-                false);
+            _ = SetPendingAsync(pending with
+            {
+                RequestId = Guid.NewGuid(),
+                ActorAccountId = accountId.UserId,
+                ActorProfileId = profileId.Value,
+                Reason = "mob-revived",
+            }, false);
         }
     }
 
-    private async Task SetPendingAsync(PendingDeath pending, bool value)
+    /// <summary>
+    /// Explicit confirmation entry point for an authorized game process or administrator.
+    /// It rejects living targets and does not delete the profile immediately.
+    /// </summary>
+    public async Task<NCLifecycleResult> ConfirmPermadeathAsync(
+        EntityUid target,
+        Guid actorAccountId,
+        ProfileId? actorProfileId,
+        string reason)
+    {
+        if (!_configuration.GetCVar(NCCVars.PermadeathEnabled))
+            return new NCLifecycleResult(false, "nc-permadeath-error-disabled");
+        if (string.IsNullOrWhiteSpace(reason))
+            return new NCLifecycleResult(false, "nc-permadeath-error-reason-required");
+        if (!_identity.TryGetIdentity(target, out var targetProfileId, out var targetAccountId))
+            return new NCLifecycleResult(false, "nc-permadeath-error-profile-not-found");
+        if (!TryComp<MobStateComponent>(target, out var mobState) ||
+            mobState.CurrentState != MobState.Dead)
+            return new NCLifecycleResult(false, "nc-permadeath-error-target-not-dead");
+
+        var pending = new PendingDeath(
+            targetProfileId.Value,
+            targetAccountId.UserId,
+            actorAccountId,
+            actorProfileId?.Value,
+            reason.Trim(),
+            Guid.NewGuid());
+        _pendingByAccount[targetAccountId.UserId] = pending;
+        return await SetPendingAsync(pending, true);
+    }
+
+    private async Task<NCLifecycleResult> SetPendingAsync(PendingDeath pending, bool value)
     {
         var lifecycleLock = GetLifecycleLock(pending.AccountId);
         await lifecycleLock.WaitAsync();
@@ -68,21 +104,30 @@ public sealed partial class PermadeathSystem : EntitySystem
             if (value &&
                 (!_pendingByAccount.TryGetValue(pending.AccountId, out var current) ||
                  current.RequestId != pending.RequestId))
-                return;
+                return new NCLifecycleResult(false, "nc-permadeath-error-superseded");
             if (!value && _pendingByAccount.ContainsKey(pending.AccountId))
-                return;
+                return new NCLifecycleResult(false, "nc-permadeath-error-superseded");
 
             var result = await _database.SetNCPermadeathPendingAsync(
                 pending.ProfileId,
                 pending.AccountId,
+                pending.ActorAccountId,
+                pending.ActorProfileId,
                 _ticker.RoundId,
                 value,
-                value ? "mob-state-dead" : "mob-revived",
+                pending.Reason,
                 pending.RequestId);
+            if (value && !result.Success &&
+                _pendingByAccount.TryGetValue(pending.AccountId, out var failedCurrent) &&
+                failedCurrent.RequestId == pending.RequestId)
+            {
+                _pendingByAccount.Remove(pending.AccountId);
+            }
             if (result.Success && TryGetMindState(pending.ProfileId, out var state))
                 state.LifecycleStatus = (byte) (value
                     ? NCCharacterLifecycleStatus.PermadeathPending
                     : NCCharacterLifecycleStatus.Alive);
+            return result;
         }
         finally
         {
@@ -111,21 +156,29 @@ public sealed partial class PermadeathSystem : EntitySystem
 
     private async void OnJoinedLobby(PlayerJoinedLobbyEvent args)
     {
-        if (!_configuration.GetCVar(NCCVars.PermadeathEnabled) ||
-            !_pendingByAccount.Remove(args.PlayerSession.UserId.UserId, out var pending))
+        if (!_configuration.GetCVar(NCCVars.PermadeathEnabled))
             return;
 
-        var lifecycleLock = GetLifecycleLock(pending.AccountId);
+        var accountId = args.PlayerSession.UserId.UserId;
+        var hasMemoryEntry = _pendingByAccount.Remove(accountId, out var pending);
+        var lifecycleLock = GetLifecycleLock(accountId);
         await lifecycleLock.WaitAsync();
         try
         {
-            await _database.FinalizeNCPermadeathForAccountAsync(pending.AccountId, _ticker.RoundId);
-            await _preferences.RefreshAfterNCPermadeathAsync(args.PlayerSession, pending.ProfileId);
+            // The database is the source of truth. This also finalizes pending deaths after
+            // a server restart, when the in-memory declaration cache is necessarily empty.
+            var result = await _database.FinalizeNCPermadeathForAccountAsync(accountId, _ticker.RoundId);
+            if (result.Success && result.FinalizedProfiles > 0)
+            {
+                await _preferences.RefreshAfterNCPermadeathAsync(
+                    args.PlayerSession,
+                    hasMemoryEntry ? pending.ProfileId : null);
+            }
         }
         finally
         {
             lifecycleLock.Release();
-            _lifecycleLocks.Remove(pending.AccountId);
+            _lifecycleLocks.Remove(accountId);
         }
     }
 
@@ -154,5 +207,11 @@ public sealed partial class PermadeathSystem : EntitySystem
         return lifecycleLock;
     }
 
-    private readonly record struct PendingDeath(int ProfileId, Guid AccountId, Guid RequestId);
+    private readonly record struct PendingDeath(
+        int ProfileId,
+        Guid AccountId,
+        Guid ActorAccountId,
+        int? ActorProfileId,
+        string Reason,
+        Guid RequestId);
 }

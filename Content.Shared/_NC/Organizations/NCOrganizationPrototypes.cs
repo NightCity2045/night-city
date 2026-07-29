@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using Content.Shared.Access;
 using Robust.Shared.Prototypes;
 
@@ -19,6 +22,15 @@ public sealed partial class NCOrganizationPrototype : IPrototype
 
     [DataField]
     public ProtoId<NCPositionPrototype>? DefaultEntryPosition { get; private set; }
+
+    [DataField]
+    public bool HasPayrollAccount { get; private set; } = true;
+
+    [DataField]
+    public long PayrollStartingBalance { get; private set; }
+
+    [DataField]
+    public string CurrencyPrototypeId { get; private set; } = "Eurodollar";
 }
 
 [Prototype("ncDepartment")]

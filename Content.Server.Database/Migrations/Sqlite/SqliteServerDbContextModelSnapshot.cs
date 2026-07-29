@@ -1164,6 +1164,76 @@ namespace Content.Server.Database.Migrations.Sqlite
                         });
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCCharacterDocument", b =>
+                {
+                    b.Property<Guid>("DocumentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("document_id");
+
+                    b.Property<string>("DocumentPrototypeId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("document_prototype_id");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("expires_at");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("issued_at");
+
+                    b.Property<Guid?>("IssuedByAdminId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("issued_by_admin_id");
+
+                    b.Property<int?>("IssuedByProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("issued_by_profile_id");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("payload");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("serial_number");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("status");
+
+                    b.HasKey("DocumentId")
+                        .HasName("PK_nc_character_document");
+
+                    b.HasIndex("SerialNumber")
+                        .IsUnique();
+
+                    b.HasIndex("ProfileId", "DocumentPrototypeId");
+
+                    b.ToTable("nc_character_document", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
                 {
                     b.Property<int>("ProfileId")
@@ -1206,6 +1276,11 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasColumnType("TEXT")
                         .HasColumnName("updated_at");
 
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("version");
+
                     b.HasKey("ProfileId")
                         .HasName("PK_nc_character_employment");
 
@@ -1215,7 +1290,10 @@ namespace Content.Server.Database.Migrations.Sqlite
 
                     b.HasIndex("PositionId");
 
-                    b.ToTable("nc_character_employment", (string)null);
+                    b.ToTable("nc_character_employment", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_nc_character_employment_version", "version >= 0");
+                        });
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCCharacterLicense", b =>
@@ -1244,6 +1322,20 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Property<int?>("IssuedByProfileId")
                         .HasColumnType("INTEGER")
                         .HasColumnName("issued_by_profile_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("status");
 
                     b.HasKey("ProfileId", "LicensePrototypeId")
                         .HasName("PK_nc_character_license");
@@ -1571,6 +1663,71 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .IsUnique();
 
                     b.ToTable("nc_employment_history", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCInheritanceCase", b =>
+                {
+                    b.Property<Guid>("InheritanceCaseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("inheritance_case_id");
+
+                    b.Property<Guid>("AssetId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("asset_id");
+
+                    b.Property<byte>("AssetType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("asset_type");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("DeceasedProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("deceased_profile_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("resolved_at");
+
+                    b.Property<Guid?>("ResolvedByAccountId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("resolved_by_account_id");
+
+                    b.Property<string>("ResolvedOwnerId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("resolved_owner_id");
+
+                    b.Property<byte?>("ResolvedOwnerType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("resolved_owner_type");
+
+                    b.Property<int>("ShareBasisPoints")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("share_basis_points");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("status");
+
+                    b.HasKey("InheritanceCaseId")
+                        .HasName("PK_nc_inheritance_case");
+
+                    b.HasIndex("AssetType", "AssetId", "Status");
+
+                    b.ToTable("nc_inheritance_case", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_nc_inheritance_case_share", "share_basis_points > 0 AND share_basis_points <= 10000");
+                        });
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCOrganization", b =>
@@ -2862,6 +3019,16 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_nc_business_ownership_profile_profile_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterDocument", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_document_profile_profile_id");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>

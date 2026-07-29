@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using Content.Server.Database;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -45,9 +48,10 @@ public abstract partial class ServerDbBase
         await using var db = await GetDb();
         await using var transaction = await db.DbContext.Database.BeginTransactionAsync();
 
-        if (!await db.DbContext.Profile.AnyAsync(profile =>
+        var profile = await db.DbContext.Profile.SingleOrDefaultAsync(profile =>
                 profile.Id == profileId &&
-                profile.Preference.UserId == accountId))
+                profile.Preference.UserId == accountId);
+        if (profile == null)
         {
             throw new InvalidOperationException(
                 $"Persistent character profile {profileId} is not owned by account {accountId}.");
@@ -79,6 +83,25 @@ public abstract partial class ServerDbBase
                 Status = NCCharacterLifecycleStatus.Alive,
             };
             db.DbContext.NCCharacterLifecycle.Add(lifecycle);
+        }
+
+        var identityDocument = await db.DbContext.NCCharacterDocument
+            .SingleOrDefaultAsync(entry =>
+                entry.ProfileId == profileId &&
+                entry.DocumentPrototypeId == "NCCitizenIdentityDocument");
+        if (identityDocument == null)
+        {
+            identityDocument = new NCCharacterDocument
+            {
+                DocumentId = Guid.NewGuid(),
+                ProfileId = profileId,
+                DocumentPrototypeId = "NCCitizenIdentityDocument",
+                SerialNumber = $"NCID{profileId:D10}",
+                Status = NCLegalRecordStatus.Active,
+                IssuedAt = now,
+                Reason = "identity-created",
+            };
+            db.DbContext.NCCharacterDocument.Add(identityDocument);
         }
 
         var bank = await db.DbContext.NCBankAccount
@@ -117,22 +140,54 @@ public abstract partial class ServerDbBase
         bank = await db.DbContext.NCBankAccount
             .AsNoTracking()
             .SingleAsync(entry => entry.BankAccountId == bank.BankAccountId);
-        var properties = await db.DbContext.NCPropertyOwnership
+        var propertyOwnerships = await db.DbContext.NCPropertyOwnership
             .AsNoTracking()
             .Where(entry =>
                 entry.OwnerType == NCOwnerType.Character &&
                 entry.OwnerId == profileId.ToString())
             .ToListAsync();
-        var businesses = await db.DbContext.NCBusinessOwnership
+        var propertyIds = propertyOwnerships.Select(entry => entry.PropertyId).ToArray();
+        var propertyRows = await db.DbContext.NCProperty
+            .AsNoTracking()
+            .Where(entry => propertyIds.Contains(entry.PropertyId))
+            .ToDictionaryAsync(entry => entry.PropertyId);
+        var properties = propertyOwnerships
+            .Where(entry => propertyRows.ContainsKey(entry.PropertyId))
+            .Select(entry => new NCPropertyHolding(propertyRows[entry.PropertyId], entry))
+            .ToList();
+        var businessOwnerships = await db.DbContext.NCBusinessOwnership
             .AsNoTracking()
             .Where(entry => entry.OwnerProfileId == profileId)
             .ToListAsync();
+        var businessIds = businessOwnerships.Select(entry => entry.BusinessId).ToArray();
+        var businessRows = await db.DbContext.NCBusiness
+            .AsNoTracking()
+            .Where(entry => businessIds.Contains(entry.BusinessId))
+            .ToDictionaryAsync(entry => entry.BusinessId);
+        var coownerCounts = await db.DbContext.NCBusinessOwnership
+            .AsNoTracking()
+            .Where(entry => businessIds.Contains(entry.BusinessId))
+            .GroupBy(entry => entry.BusinessId)
+            .Select(group => new { BusinessId = group.Key, Count = group.Count() })
+            .ToDictionaryAsync(entry => entry.BusinessId, entry => entry.Count);
+        var businesses = businessOwnerships
+            .Where(entry => businessRows.ContainsKey(entry.BusinessId))
+            .Select(entry => new NCBusinessHolding(
+                businessRows[entry.BusinessId],
+                entry,
+                coownerCounts.GetValueOrDefault(entry.BusinessId)))
+            .ToList();
         var licenses = await db.DbContext.NCCharacterLicense
+            .AsNoTracking()
+            .Where(entry => entry.ProfileId == profileId)
+            .ToListAsync();
+        var documents = await db.DbContext.NCCharacterDocument
             .AsNoTracking()
             .Where(entry => entry.ProfileId == profileId)
             .ToListAsync();
 
         return new NCCharacterSnapshot(
+            profile.CharacterName,
             progression,
             skills,
             employment,
@@ -140,6 +195,7 @@ public abstract partial class ServerDbBase
             properties,
             businesses,
             licenses,
+            documents,
             lifecycle);
     }
 }

@@ -1,7 +1,36 @@
 nc-character-window-title = Персонаж
+nc-character-window-name = {$name}
 nc-character-window-summary = Уровень {$level} · завершено раундов {$rounds} · свободно очков навыков {$available} · баланс {$balance} еб
+nc-character-window-level-progress = Прогресс уровня: {$current}/{$required} засчитанных раундов
+nc-character-window-level-max = Достигнут максимальный уровень
 nc-character-window-assets = Недвижимость: {$properties} · бизнесы: {$businesses}
 nc-character-window-position = Должность: {$position}
+nc-character-window-employment = Организация: {$organization} · подразделение: {$department} · должность: {$position}
 nc-character-window-unemployed = Безработный
 nc-character-window-skill = {$skill}: {$rank}/{$max} (+1 стоит {$cost})
+nc-character-window-properties = Имущество
+nc-character-window-businesses = Бизнесы
+nc-character-window-licenses = Лицензии
+nc-character-window-documents = Документы
+nc-character-window-skills = Навыки
+nc-character-window-empty = Нет записей
+nc-character-window-property = {$type} · доля {$share}% · {$status}
+nc-character-window-business = {$name} ({$type}) · доля {$share}% · владельцев {$coowners} · {$status}
+nc-character-window-legal-record = {$name} · {$status} · действует до {$expiry}
+nc-character-window-document = {$name} · № {$serial} · {$status}
+nc-character-window-no-expiry = бессрочно
+nc-character-status-active = действует
+nc-character-status-inheritance = ожидает наследования
+nc-character-status-archived = в архиве
+nc-character-status-invalid = недействительно
+nc-character-status-suspended = приостановлено
+nc-character-status-closed = закрыто
+nc-character-status-expired = срок истёк
+nc-character-status-revoked = отозвано
+nc-character-skill-confirm-title = Подтверждение развития навыка
+nc-character-skill-confirm-summary = {$skill}: {$current} → {$target}
+    Стоимость: {$cost} очков навыков
+    Останется после покупки: {$remaining}
+nc-character-skill-confirm = Подтвердить
+nc-character-skill-cancel = Отмена
 nc-character-command-description = Открывает окно постоянного персонажа.

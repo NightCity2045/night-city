@@ -1,8 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using Robust.Shared.Console;
 
 namespace Content.Client._NC.RED.Progression;
 
-public sealed class NCCharacterCommand : IConsoleCommand
+public sealed partial class NCCharacterCommand : IConsoleCommand
 {
     [Dependency] private IEntitySystemManager _systems = default!;
 

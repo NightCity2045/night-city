@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using Content.Server.Database;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -72,7 +75,8 @@ public abstract partial class ServerDbBase
         int? roundId,
         Guid requestId)
     {
-        if (!ValidOwnership(prototypeId, propertyType, shareBasisPoints))
+        if (!ValidOwnership(prototypeId, propertyType, shareBasisPoints) ||
+            shareBasisPoints != 10_000)
             return new NCOwnershipResult(false, "nc-ownership-error-invalid-data", null);
 
         await using var db = await GetDb();
@@ -117,6 +121,7 @@ public abstract partial class ServerDbBase
         Guid requestId)
     {
         if (!ValidOwnership(name, businessType, shareBasisPoints) ||
+            shareBasisPoints != 10_000 ||
             string.IsNullOrWhiteSpace(currencyPrototypeId))
             return new NCOwnershipResult(false, "nc-ownership-error-invalid-data", null);
 

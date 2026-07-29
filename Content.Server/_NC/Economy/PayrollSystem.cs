@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using Content.Server.Database;
 using Content.Server.GameTicking;
 using Content.Server._NC.Organizations;
@@ -59,7 +62,8 @@ public sealed partial class PayrollSystem : EntitySystem
         NCCharacterEmployment? employment)
     {
         if (employment == null ||
-            employment.EmploymentState != NCEmploymentState.Active ||
+            employment.EmploymentState is not
+                (NCEmploymentState.Active or NCEmploymentState.SuspendedPaid) ||
             !TryGetPosition(employment.PositionId, out var position) ||
             position.BaseSalary <= 0 ||
             position.PayIntervalSeconds <= 0)
@@ -104,9 +108,9 @@ public sealed partial class PayrollSystem : EntitySystem
         NetUserId accountId,
         NCPositionPrototype position)
     {
-        var result = await _database.CreditNCPayrollAsync(
+        var result = await _database.PayNCPositionSalaryAsync(
             profileId,
-            position.BaseSalary,
+            position.PositionId,
             $"position:{position.ID}",
             _ticker.RoundId,
             Guid.NewGuid());

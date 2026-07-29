@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using Content.Shared._NC.Economy;
 using Content.Shared._NC.RED.Progression;
 using Robust.Shared.Prototypes;
@@ -22,6 +25,7 @@ public sealed partial class NCCharacterSystem : EntitySystem
     {
         _window ??= new NCCharacterWindow(_prototypes, AllocateSkill);
         _window.OpenCentered();
+        RaiseNetworkEvent(new NCCharacterStateRequest());
         if (_state != null)
             _window.UpdateState(_state);
     }
@@ -46,7 +50,14 @@ public sealed partial class NCCharacterSystem : EntitySystem
             state.Balance,
             _state.PropertyCount,
             _state.BusinessCount,
+            _state.CharacterName,
+            _state.OrganizationPrototypeId,
+            _state.DepartmentPrototypeId,
             _state.PositionPrototypeId,
+            _state.Properties,
+            _state.Businesses,
+            _state.Licenses,
+            _state.Documents,
             _state.LifecycleStatus,
             state.Error);
         _window?.UpdateState(_state);

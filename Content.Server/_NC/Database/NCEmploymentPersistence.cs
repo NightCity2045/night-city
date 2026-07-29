@@ -1,6 +1,10 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using Content.Server.Database;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Content.Server.Database;
@@ -13,6 +17,9 @@ public partial interface IServerDbManager
         IReadOnlyCollection<NCPositionDefinition> positions);
 
     Task<NCEmploymentResult> ApplyNCEmploymentActionAsync(NCEmploymentMutation mutation);
+    Task<IReadOnlyList<NCEmploymentHistory>> GetNCEmploymentHistoryAsync(
+        int profileId,
+        int limit);
 }
 
 public sealed partial class ServerDbManager
@@ -31,10 +38,31 @@ public sealed partial class ServerDbManager
         DbWriteOpsMetric.Inc();
         return RunDbCommand(() => _db.ApplyNCEmploymentActionAsync(mutation));
     }
+
+    public Task<IReadOnlyList<NCEmploymentHistory>> GetNCEmploymentHistoryAsync(
+        int profileId,
+        int limit)
+    {
+        DbReadOpsMetric.Inc();
+        return RunDbCommand(() => _db.GetNCEmploymentHistoryAsync(profileId, limit));
+    }
 }
 
 public abstract partial class ServerDbBase
 {
+    public async Task<IReadOnlyList<NCEmploymentHistory>> GetNCEmploymentHistoryAsync(
+        int profileId,
+        int limit)
+    {
+        await using var db = await GetDb();
+        return await db.DbContext.NCEmploymentHistory
+            .AsNoTracking()
+            .Where(entry => entry.ProfileId == profileId)
+            .OrderByDescending(entry => entry.Timestamp)
+            .Take(Math.Clamp(limit, 1, 100))
+            .ToListAsync();
+    }
+
     public async Task SyncNCOrganizationsAsync(
         IReadOnlyCollection<NCOrganizationDefinition> organizations,
         IReadOnlyCollection<NCDepartmentDefinition> departments,
@@ -55,6 +83,23 @@ public abstract partial class ServerDbBase
             row.Name = definition.Name;
             row.Status = NCOrganizationStatus.Active;
             row.DefaultEntryPositionId = null;
+
+            if (definition.HasPayrollAccount && row.BankAccountId == null)
+            {
+                var accountId = Guid.NewGuid();
+                db.DbContext.NCBankAccount.Add(new NCBankAccount
+                {
+                    BankAccountId = accountId,
+                    AccountNumber = $"ORG{definition.OrganizationId:N}"[..32],
+                    AccountType = NCBankAccountType.Organization,
+                    CurrencyPrototypeId = definition.CurrencyPrototypeId,
+                    Balance = definition.PayrollStartingBalance,
+                    Status = NCBankAccountStatus.Active,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                });
+                row.BankAccountId = accountId;
+            }
         }
 
         await db.DbContext.SaveChangesAsync();
@@ -85,6 +130,8 @@ public abstract partial class ServerDbBase
             row.RankWeight = definition.RankWeight;
             row.BaseSalary = definition.BaseSalary;
             row.PayIntervalSeconds = definition.PayIntervalSeconds;
+            row.PayrollAccountId = (await db.DbContext.NCOrganization
+                .FindAsync(definition.OrganizationId))?.BankAccountId;
             row.IsLeadership = definition.IsLeadership;
             row.CanHire = definition.CanHire;
             row.CanPromote = definition.CanPromote;
@@ -105,6 +152,45 @@ public abstract partial class ServerDbBase
         }
 
         await db.DbContext.SaveChangesAsync();
+
+        // Missing YAML is never treated as a hard delete: durable history keeps the old rows,
+        // while affected employment is explicitly invalidated so stale access cannot survive.
+        var activeOrganizationIds = organizations.Select(entry => entry.OrganizationId).ToHashSet();
+        var activePositionIds = positions.Select(entry => entry.PositionId).ToHashSet();
+        var archivedOrganizations = await db.DbContext.NCOrganization
+            .Where(entry => !activeOrganizationIds.Contains(entry.OrganizationId))
+            .ToListAsync();
+        foreach (var archived in archivedOrganizations)
+            archived.Status = NCOrganizationStatus.Archived;
+
+        var invalidEmployments = await db.DbContext.NCCharacterEmployment
+            .Where(entry =>
+                entry.EmploymentState != NCEmploymentState.Terminated &&
+                (!activeOrganizationIds.Contains(entry.OrganizationId) ||
+                 !activePositionIds.Contains(entry.PositionId)))
+            .ToListAsync();
+        var invalidatedAt = DateTime.UtcNow;
+        foreach (var employment in invalidEmployments)
+        {
+            employment.EmploymentState = NCEmploymentState.Invalid;
+            employment.UpdatedAt = invalidatedAt;
+            employment.Version++;
+            db.DbContext.NCEmploymentHistory.Add(new NCEmploymentHistory
+            {
+                ProfileId = employment.ProfileId,
+                OrganizationId = employment.OrganizationId,
+                OldDepartmentId = employment.DepartmentId,
+                NewDepartmentId = employment.DepartmentId,
+                OldPositionId = employment.PositionId,
+                NewPositionId = employment.PositionId,
+                Action = NCEmploymentAction.AdministrativeChange,
+                Reason = "prototype-archived",
+                Timestamp = invalidatedAt,
+                RequestId = Guid.NewGuid(),
+            });
+        }
+
+        await db.DbContext.SaveChangesAsync();
         await transaction.CommitAsync();
     }
 
@@ -113,15 +199,33 @@ public abstract partial class ServerDbBase
         await using var db = await GetDb();
         await using var transaction = await db.DbContext.Database.BeginTransactionAsync();
 
+        if (string.IsNullOrWhiteSpace(mutation.Reason) || mutation.Reason.Length > 512)
+            return new NCEmploymentResult(false, "nc-employment-error-invalid-reason", null);
         if (await db.DbContext.NCEmploymentHistory.AnyAsync(entry => entry.RequestId == mutation.RequestId))
             return new NCEmploymentResult(false, "nc-employment-error-duplicate-request", null);
+        if (!await db.DbContext.NCCharacterLifecycle.AnyAsync(entry =>
+                entry.ProfileId == mutation.TargetProfileId &&
+                entry.Status == NCCharacterLifecycleStatus.Alive))
+        {
+            return new NCEmploymentResult(false, "nc-employment-error-target-unavailable", null);
+        }
 
         var current = await db.DbContext.NCCharacterEmployment
             .SingleOrDefaultAsync(entry => entry.ProfileId == mutation.TargetProfileId);
+        var organization = await db.DbContext.NCOrganization.FindAsync(mutation.OrganizationId);
         var targetPosition = mutation.PositionId == null
             ? null
             : await db.DbContext.NCPosition.FindAsync(mutation.PositionId.Value);
+        var currentPosition = current == null
+            ? null
+            : await db.DbContext.NCPosition.FindAsync(current.PositionId);
 
+        if (mutation.ExpectedVersion != null &&
+            (current?.Version ?? 0) != mutation.ExpectedVersion.Value)
+            return new NCEmploymentResult(false, "nc-employment-error-conflict", current);
+
+        if (organization is not { Status: NCOrganizationStatus.Active })
+            return new NCEmploymentResult(false, "nc-employment-error-invalid-organization", null);
         if (mutation.Action is NCEmploymentAction.Hire or NCEmploymentAction.Promote or
             NCEmploymentAction.Demote or NCEmploymentAction.Transfer)
         {
@@ -133,6 +237,45 @@ public abstract partial class ServerDbBase
             return new NCEmploymentResult(false, "nc-employment-error-already-employed", null);
         if (mutation.Action != NCEmploymentAction.Hire && current == null)
             return new NCEmploymentResult(false, "nc-employment-error-not-employed", null);
+        if (mutation.Action != NCEmploymentAction.Hire &&
+            current!.OrganizationId != mutation.OrganizationId)
+        {
+            return new NCEmploymentResult(false, "nc-employment-error-wrong-organization", null);
+        }
+        if (mutation.ActorProfileId == mutation.TargetProfileId)
+            return new NCEmploymentResult(false, "nc-employment-error-self-action", null);
+        if (mutation.ActorProfileId != null &&
+            mutation.Action == NCEmploymentAction.Hire &&
+            targetPosition?.PositionId != organization.DefaultEntryPositionId)
+        {
+            return new NCEmploymentResult(false, "nc-employment-error-entry-position-required", null);
+        }
+        if (mutation.Action == NCEmploymentAction.Promote &&
+            (currentPosition == null || targetPosition!.RankWeight <= currentPosition.RankWeight))
+        {
+            return new NCEmploymentResult(false, "nc-employment-error-not-promotion", null);
+        }
+        if (mutation.Action == NCEmploymentAction.Demote &&
+            (currentPosition == null || targetPosition!.RankWeight >= currentPosition.RankWeight))
+        {
+            return new NCEmploymentResult(false, "nc-employment-error-not-demotion", null);
+        }
+        if (mutation.Action == NCEmploymentAction.Suspend &&
+            current!.EmploymentState != NCEmploymentState.Active)
+        {
+            return new NCEmploymentResult(false, "nc-employment-error-invalid-state", null);
+        }
+        if (mutation.Action == NCEmploymentAction.Reinstate &&
+            current!.EmploymentState is not (NCEmploymentState.SuspendedPaid or
+                NCEmploymentState.SuspendedUnpaid))
+        {
+            return new NCEmploymentResult(false, "nc-employment-error-invalid-state", null);
+        }
+        if (mutation.Action == NCEmploymentAction.Dismiss &&
+            current!.EmploymentState == NCEmploymentState.Terminated)
+        {
+            return new NCEmploymentResult(false, "nc-employment-error-invalid-state", null);
+        }
 
         if (mutation.ActorProfileId != null)
         {
@@ -141,7 +284,7 @@ public abstract partial class ServerDbBase
             var actorPosition = actor == null ? null : await db.DbContext.NCPosition.FindAsync(actor.PositionId);
             if (actor == null || actor.EmploymentState != NCEmploymentState.Active ||
                 actor.OrganizationId != mutation.OrganizationId || actorPosition == null ||
-                !CanPerform(actorPosition, mutation.Action, targetPosition))
+                !CanPerform(actorPosition, mutation.Action, targetPosition ?? currentPosition))
             {
                 return new NCEmploymentResult(false, "nc-employment-error-forbidden", null);
             }
@@ -162,6 +305,11 @@ public abstract partial class ServerDbBase
         switch (mutation.Action)
         {
             case NCEmploymentAction.Hire:
+                current.HiredAt = now;
+                current.HiredByProfileId = mutation.ActorProfileId;
+                current.LastPromotionAt = null;
+                current.SuspendedAt = null;
+                goto case NCEmploymentAction.Transfer;
             case NCEmploymentAction.Promote:
             case NCEmploymentAction.Demote:
             case NCEmploymentAction.Transfer:
@@ -173,7 +321,9 @@ public abstract partial class ServerDbBase
                     current.LastPromotionAt = now;
                 break;
             case NCEmploymentAction.Suspend:
-                current.EmploymentState = NCEmploymentState.SuspendedUnpaid;
+                current.EmploymentState = mutation.PaidSuspension
+                    ? NCEmploymentState.SuspendedPaid
+                    : NCEmploymentState.SuspendedUnpaid;
                 current.SuspendedAt = now;
                 break;
             case NCEmploymentAction.Reinstate:
@@ -186,6 +336,42 @@ public abstract partial class ServerDbBase
         }
 
         current.UpdatedAt = now;
+        current.Version++;
+
+        var employmentDocument = await db.DbContext.NCCharacterDocument
+            .SingleOrDefaultAsync(entry =>
+                entry.ProfileId == mutation.TargetProfileId &&
+                entry.DocumentPrototypeId == "NCEmploymentCertificate");
+        if (mutation.Action == NCEmploymentAction.Dismiss)
+        {
+            if (employmentDocument != null)
+            {
+                employmentDocument.Status = NCLegalRecordStatus.Revoked;
+                employmentDocument.RevokedAt = now;
+                employmentDocument.Reason = mutation.Reason;
+            }
+        }
+        else
+        {
+            employmentDocument ??= new NCCharacterDocument
+            {
+                DocumentId = Guid.NewGuid(),
+                ProfileId = mutation.TargetProfileId,
+                DocumentPrototypeId = "NCEmploymentCertificate",
+                SerialNumber = $"NCEMP{mutation.TargetProfileId:D10}",
+            };
+            if (db.DbContext.Entry(employmentDocument).State ==
+                Microsoft.EntityFrameworkCore.EntityState.Detached)
+                db.DbContext.NCCharacterDocument.Add(employmentDocument);
+            employmentDocument.Status = NCLegalRecordStatus.Active;
+            employmentDocument.IssuedAt = now;
+            employmentDocument.RevokedAt = null;
+            employmentDocument.IssuedByProfileId = mutation.ActorProfileId;
+            employmentDocument.Payload =
+                $"organization={current.OrganizationId:N};position={current.PositionId:N};state={current.EmploymentState}";
+            employmentDocument.Reason = mutation.Reason;
+        }
+
         db.DbContext.NCEmploymentHistory.Add(new NCEmploymentHistory
         {
             ProfileId = mutation.TargetProfileId,
@@ -203,9 +389,16 @@ public abstract partial class ServerDbBase
             RequestId = mutation.RequestId,
         });
 
-        await db.DbContext.SaveChangesAsync();
-        await transaction.CommitAsync();
-        return new NCEmploymentResult(true, null, current);
+        try
+        {
+            await db.DbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return new NCEmploymentResult(true, null, current);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return new NCEmploymentResult(false, "nc-employment-error-conflict", null);
+        }
     }
 
     private static bool CanPerform(

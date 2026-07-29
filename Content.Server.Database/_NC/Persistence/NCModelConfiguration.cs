@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using Microsoft.EntityFrameworkCore;
 
 namespace Content.Server.Database;
@@ -23,6 +26,8 @@ public abstract partial class ServerDbContext
     public DbSet<NCPersistenceAudit> NCPersistenceAudit { get; set; } = null!;
     public DbSet<NCDeletedCharacterAudit> NCDeletedCharacterAudit { get; set; } = null!;
     public DbSet<NCCharacterLicense> NCCharacterLicense { get; set; } = null!;
+    public DbSet<NCCharacterDocument> NCCharacterDocument { get; set; } = null!;
+    public DbSet<NCInheritanceCase> NCInheritanceCase { get; set; } = null!;
 
     /// <summary>
     /// Configures Night City persistence without mixing the domain models into upstream database files.
@@ -190,6 +195,13 @@ public abstract partial class ServerDbContext
             .WithMany()
             .HasForeignKey(entry => entry.PositionId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<NCCharacterEmployment>()
+            .Property(entry => entry.Version)
+            .IsConcurrencyToken();
+
+        modelBuilder.Entity<NCCharacterEmployment>().ToTable(table =>
+            table.HasCheckConstraint("CK_nc_character_employment_version", "version >= 0"));
 
         modelBuilder.Entity<NCEmploymentHistory>()
             .HasIndex(entry => entry.ProfileId);
@@ -359,5 +371,26 @@ public abstract partial class ServerDbContext
             .WithMany()
             .HasForeignKey(entry => entry.ProfileId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<NCCharacterDocument>()
+            .HasIndex(entry => entry.SerialNumber)
+            .IsUnique();
+
+        modelBuilder.Entity<NCCharacterDocument>()
+            .HasIndex(entry => new { entry.ProfileId, entry.DocumentPrototypeId });
+
+        modelBuilder.Entity<NCCharacterDocument>()
+            .HasOne<Profile>()
+            .WithMany()
+            .HasForeignKey(entry => entry.ProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<NCInheritanceCase>()
+            .HasIndex(entry => new { entry.AssetType, entry.AssetId, entry.Status });
+
+        modelBuilder.Entity<NCInheritanceCase>().ToTable(table =>
+            table.HasCheckConstraint(
+                "CK_nc_inheritance_case_share",
+                "share_basis_points > 0 AND share_basis_points <= 10000"));
     }
 }

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using System;
 
 namespace Content.Server.Database;
@@ -6,7 +9,10 @@ public sealed record NCOrganizationDefinition(
     Guid OrganizationId,
     string PrototypeId,
     string Name,
-    Guid? DefaultEntryPositionId);
+    Guid? DefaultEntryPositionId,
+    bool HasPayrollAccount,
+    long PayrollStartingBalance,
+    string CurrencyPrototypeId);
 
 public sealed record NCDepartmentDefinition(
     Guid DepartmentId,
@@ -41,6 +47,8 @@ public sealed record NCEmploymentMutation(
     Guid? PositionId,
     string Reason,
     int? RoundId,
+    bool PaidSuspension,
+    long? ExpectedVersion,
     Guid RequestId);
 
 public sealed record NCEmploymentResult(

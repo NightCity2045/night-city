@@ -1,4 +1,8 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using Content.Shared._NC.Identity;
+using Content.Shared._NC.Persistence;
 
 namespace Content.Shared._NC.Persistence.Components;
 
@@ -14,6 +18,9 @@ public sealed partial class CharacterPersistentStateComponent : Component
 
     [ViewVariables]
     public bool Loaded;
+
+    [ViewVariables]
+    public string CharacterName = string.Empty;
 
     [ViewVariables]
     public int CompletedRounds;
@@ -34,6 +41,12 @@ public sealed partial class CharacterPersistentStateComponent : Component
     public Guid? PositionId;
 
     [ViewVariables]
+    public byte? EmploymentState;
+
+    [ViewVariables]
+    public long EmploymentVersion;
+
+    [ViewVariables]
     public Guid? PersonalBankAccountId;
 
     [ViewVariables]
@@ -44,6 +57,18 @@ public sealed partial class CharacterPersistentStateComponent : Component
 
     [ViewVariables]
     public int BusinessCount;
+
+    [ViewVariables]
+    public List<NCPropertySummary> Properties = [];
+
+    [ViewVariables]
+    public List<NCBusinessSummary> Businesses = [];
+
+    [ViewVariables]
+    public List<NCLegalSummary> Licenses = [];
+
+    [ViewVariables]
+    public List<NCLegalSummary> Documents = [];
 
     [ViewVariables]
     public byte LifecycleStatus;

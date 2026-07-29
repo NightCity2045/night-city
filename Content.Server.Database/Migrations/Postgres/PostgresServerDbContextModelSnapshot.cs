@@ -1218,6 +1218,76 @@ namespace Content.Server.Database.Migrations.Postgres
                         });
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCCharacterDocument", b =>
+                {
+                    b.Property<Guid>("DocumentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("document_id");
+
+                    b.Property<string>("DocumentPrototypeId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("document_prototype_id");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("issued_at");
+
+                    b.Property<Guid?>("IssuedByAdminId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("issued_by_admin_id");
+
+                    b.Property<int?>("IssuedByProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("issued_by_profile_id");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("payload");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("serial_number");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
+
+                    b.HasKey("DocumentId")
+                        .HasName("PK_nc_character_document");
+
+                    b.HasIndex("SerialNumber")
+                        .IsUnique();
+
+                    b.HasIndex("ProfileId", "DocumentPrototypeId");
+
+                    b.ToTable("nc_character_document", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
                 {
                     b.Property<int>("ProfileId")
@@ -1260,6 +1330,11 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
                     b.HasKey("ProfileId")
                         .HasName("PK_nc_character_employment");
 
@@ -1269,7 +1344,10 @@ namespace Content.Server.Database.Migrations.Postgres
 
                     b.HasIndex("PositionId");
 
-                    b.ToTable("nc_character_employment", (string)null);
+                    b.ToTable("nc_character_employment", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_nc_character_employment_version", "version >= 0");
+                        });
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCCharacterLicense", b =>
@@ -1298,6 +1376,20 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.Property<int?>("IssuedByProfileId")
                         .HasColumnType("integer")
                         .HasColumnName("issued_by_profile_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.HasKey("ProfileId", "LicensePrototypeId")
                         .HasName("PK_nc_character_license");
@@ -1629,6 +1721,71 @@ namespace Content.Server.Database.Migrations.Postgres
                         .IsUnique();
 
                     b.ToTable("nc_employment_history", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCInheritanceCase", b =>
+                {
+                    b.Property<Guid>("InheritanceCaseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("inheritance_case_id");
+
+                    b.Property<Guid>("AssetId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("asset_id");
+
+                    b.Property<byte>("AssetType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("asset_type");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("DeceasedProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("deceased_profile_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("resolved_at");
+
+                    b.Property<Guid?>("ResolvedByAccountId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("resolved_by_account_id");
+
+                    b.Property<string>("ResolvedOwnerId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("resolved_owner_id");
+
+                    b.Property<byte?>("ResolvedOwnerType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("resolved_owner_type");
+
+                    b.Property<int>("ShareBasisPoints")
+                        .HasColumnType("integer")
+                        .HasColumnName("share_basis_points");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
+
+                    b.HasKey("InheritanceCaseId")
+                        .HasName("PK_nc_inheritance_case");
+
+                    b.HasIndex("AssetType", "AssetId", "Status");
+
+                    b.ToTable("nc_inheritance_case", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_nc_inheritance_case_share", "share_basis_points > 0 AND share_basis_points <= 10000");
+                        });
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCOrganization", b =>
@@ -2951,6 +3108,16 @@ namespace Content.Server.Database.Migrations.Postgres
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_nc_business_ownership_profile_profile_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterDocument", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_document_profile_profile_id");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>

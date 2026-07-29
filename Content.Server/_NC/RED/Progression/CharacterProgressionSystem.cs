@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using Content.Server.Database;
 using Content.Server.GameTicking;
 using Content.Server._NC.Identity;
@@ -101,6 +104,16 @@ public sealed partial class CharacterProgressionSystem : EntitySystem
             ? null
             : _prototypes.EnumeratePrototypes<NCPositionPrototype>()
                 .FirstOrDefault(position => position.PositionId == state.PositionId)?.ID;
+        var organizationPrototypeId = state.OrganizationId == null
+            ? null
+            : _prototypes.EnumeratePrototypes<NCOrganizationPrototype>()
+                .FirstOrDefault(organization =>
+                    organization.OrganizationId == state.OrganizationId)?.ID;
+        var departmentPrototypeId = state.DepartmentId == null
+            ? null
+            : _prototypes.EnumeratePrototypes<NCDepartmentPrototype>()
+                .FirstOrDefault(department =>
+                    department.DepartmentId == state.DepartmentId)?.ID;
         RaiseNetworkEvent(new NCProgressionStateEvent(
             state.CompletedRounds,
             state.Level,
@@ -110,7 +123,14 @@ public sealed partial class CharacterProgressionSystem : EntitySystem
             state.PersonalBalance,
             state.PropertyCount,
             state.BusinessCount,
+            state.CharacterName,
+            organizationPrototypeId,
+            departmentPrototypeId,
             positionPrototypeId,
+            state.Properties.ToArray(),
+            state.Businesses.ToArray(),
+            state.Licenses.ToArray(),
+            state.Documents.ToArray(),
             state.LifecycleStatus,
             error), session.Channel);
     }

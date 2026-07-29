@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using System.Collections.Generic;
 using System.Linq;
 using Content.Server.Database;
@@ -41,8 +44,13 @@ public sealed class NCPersistenceSchemaTest
             Assert.That(tableNames, Does.Contain("nc_bank_account"));
             Assert.That(tableNames, Does.Contain("nc_bank_transaction"));
             Assert.That(tableNames, Does.Contain("nc_business"));
+            Assert.That(tableNames, Does.Contain("nc_character_document"));
+            Assert.That(tableNames, Does.Contain("nc_inheritance_case"));
             Assert.That(tableNames, Does.Contain("nc_persistence_audit"));
-            Assert.That(tableNames, Has.Count.EqualTo(19));
+            Assert.That(tableNames, Has.Count.EqualTo(21));
+            Assert.That(context.Model.FindEntityType(typeof(NCCharacterEmployment))
+                ?.FindProperty(nameof(NCCharacterEmployment.Version))
+                ?.IsConcurrencyToken, Is.True);
         });
 
         var accountId = Guid.NewGuid();
@@ -118,6 +126,24 @@ public sealed class NCPersistenceSchemaTest
             ProfileId = profile.Id,
             Status = NCCharacterLifecycleStatus.Alive,
         });
+        context.NCCharacterLicense.Add(new NCCharacterLicense
+        {
+            ProfileId = profile.Id,
+            LicensePrototypeId = "NCDriverLicense",
+            Status = NCLegalRecordStatus.Active,
+            IssuedAt = DateTime.UtcNow,
+            Reason = "schema-test",
+        });
+        context.NCCharacterDocument.Add(new NCCharacterDocument
+        {
+            DocumentId = Guid.NewGuid(),
+            ProfileId = profile.Id,
+            DocumentPrototypeId = "NCCitizenIdentityDocument",
+            SerialNumber = $"NCID{profile.Id:D10}",
+            Status = NCLegalRecordStatus.Active,
+            IssuedAt = DateTime.UtcNow,
+            Reason = "schema-test",
+        });
         context.NCPersistenceAudit.Add(new NCPersistenceAudit
         {
             Timestamp = DateTime.UtcNow,
@@ -135,6 +161,8 @@ public sealed class NCPersistenceSchemaTest
         {
             Assert.That(context.NCCharacterProgression.Any(entry => entry.ProfileId == profile.Id), Is.False);
             Assert.That(context.NCCharacterLifecycle.Any(entry => entry.ProfileId == profile.Id), Is.False);
+            Assert.That(context.NCCharacterLicense.Any(entry => entry.ProfileId == profile.Id), Is.False);
+            Assert.That(context.NCCharacterDocument.Any(entry => entry.ProfileId == profile.Id), Is.False);
             Assert.That(context.NCPersistenceAudit.Any(entry => entry.TargetProfileId == profile.Id), Is.True);
         });
     }
@@ -182,6 +210,74 @@ public sealed class NCPersistenceSchemaTest
 
         // Permadeath must explicitly settle and close personal accounts before deleting the profile.
         Assert.ThrowsAsync<DbUpdateException>(async () => await context.SaveChangesAsync());
+    }
+
+    [Test]
+    public async Task ConcurrentEmploymentChangesRejectTheStaleWriter()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+        var options = new DbContextOptionsBuilder<SqliteServerDbContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        await using (var setup = new SqliteServerDbContext(options))
+        {
+            await setup.Database.MigrateAsync();
+            var preference = new Preference
+            {
+                UserId = Guid.NewGuid(),
+                SelectedCharacterSlot = 0,
+                AdminOOCColor = "#ffffff",
+            };
+            var profile = CreateProfile(preference);
+            preference.Profiles.Add(profile);
+            setup.Preference.Add(preference);
+
+            var organizationId = Guid.NewGuid();
+            var positionId = Guid.NewGuid();
+            setup.NCOrganization.Add(new NCOrganization
+            {
+                OrganizationId = organizationId,
+                PrototypeId = "ConcurrencyOrganization",
+                Name = "Concurrency organization",
+                Status = NCOrganizationStatus.Active,
+            });
+            setup.NCPosition.Add(new NCPosition
+            {
+                PositionId = positionId,
+                OrganizationId = organizationId,
+                PrototypeId = "ConcurrencyPosition",
+                Name = "Concurrency position",
+                PayIntervalSeconds = 900,
+            });
+            await setup.SaveChangesAsync();
+            setup.NCCharacterEmployment.Add(new NCCharacterEmployment
+            {
+                ProfileId = profile.Id,
+                OrganizationId = organizationId,
+                PositionId = positionId,
+                EmploymentState = NCEmploymentState.Active,
+                HiredAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Version = 1,
+            });
+            await setup.SaveChangesAsync();
+        }
+
+        await using var first = new SqliteServerDbContext(options);
+        await using var second = new SqliteServerDbContext(options);
+        var firstEntry = await first.NCCharacterEmployment.SingleAsync();
+        var staleEntry = await second.NCCharacterEmployment.SingleAsync();
+
+        firstEntry.Version++;
+        firstEntry.UpdatedAt = DateTime.UtcNow;
+        await first.SaveChangesAsync();
+
+        staleEntry.Version++;
+        staleEntry.UpdatedAt = DateTime.UtcNow;
+        Assert.ThrowsAsync<DbUpdateConcurrencyException>(
+            async () => await second.SaveChangesAsync());
     }
 
     private static NCBankTransaction CreateTransaction(Guid transactionId, Guid requestId, Guid accountId)

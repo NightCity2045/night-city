@@ -7,6 +7,8 @@
   organizationId: a1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a2101
   name: nc-organization-ncpd
   defaultEntryPosition: NCPDOfficer
+  payrollStartingBalance: 5000
+  currencyPrototypeId: Eurodollar
 
 # ============================================================
 #region DEPARTMENTS
@@ -43,8 +45,8 @@
   payIntervalSeconds: 900
 
   access:
-  - Security
-  - Brig
+  - NC_General
+  - NCPD_Patrol
 
 
 # ------------------------------------------------------------
@@ -66,9 +68,9 @@
   payIntervalSeconds: 900
 
   access:
-  - Security
-  - Brig
-  - Armory
+  - NC_General
+  - NCPD_Patrol
+  - NCPD_Armory
 
   isLeadership: true
 
@@ -90,10 +92,10 @@
   payIntervalSeconds: 900
 
   access:
-  - Security
-  - Brig
-  - Armory
-  - Command
+  - NC_General
+  - NCPD_Patrol
+  - NCPD_Armory
+  - NCPD_Command
 
   isLeadership: true
 
@@ -122,11 +124,11 @@
   payIntervalSeconds: 900
 
   access:
-  - Security
-  - Brig
-  - Armory
-  - Detective
-  - Command
+  - NC_General
+  - NCPD_Patrol
+  - NCPD_Armory
+  - NCPD_Detective
+  - NCPD_Command
 
   isLeadership: true
 
@@ -155,11 +157,11 @@
   payIntervalSeconds: 900
 
   access:
-  - Security
-  - Brig
-  - Armory
-  - Detective
-  - Command
+  - NC_General
+  - NCPD_Patrol
+  - NCPD_Armory
+  - NCPD_Detective
+  - NCPD_Command
 
   isLeadership: true
 
@@ -190,11 +192,11 @@
   payIntervalSeconds: 900
 
   access:
-  - Security
-  - Brig
-  - Armory
-  - Detective
-  - Command
+  - NC_General
+  - NCPD_Patrol
+  - NCPD_Armory
+  - NCPD_Detective
+  - NCPD_Command
 
   isLeadership: true
 

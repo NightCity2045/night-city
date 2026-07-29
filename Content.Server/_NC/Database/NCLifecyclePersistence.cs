@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using Content.Server.Database;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -10,7 +13,9 @@ public partial interface IServerDbManager
 {
     Task<NCLifecycleResult> SetNCPermadeathPendingAsync(
         int profileId,
-        Guid accountId,
+        Guid targetAccountId,
+        Guid actorAccountId,
+        int? actorProfileId,
         int roundId,
         bool pending,
         string reason,
@@ -24,7 +29,9 @@ public sealed partial class ServerDbManager
 {
     public Task<NCLifecycleResult> SetNCPermadeathPendingAsync(
         int profileId,
-        Guid accountId,
+        Guid targetAccountId,
+        Guid actorAccountId,
+        int? actorProfileId,
         int roundId,
         bool pending,
         string reason,
@@ -32,7 +39,14 @@ public sealed partial class ServerDbManager
     {
         DbWriteOpsMetric.Inc();
         return RunDbCommand(() => _db.SetNCPermadeathPendingAsync(
-            profileId, accountId, roundId, pending, reason, requestId));
+            profileId,
+            targetAccountId,
+            actorAccountId,
+            actorProfileId,
+            roundId,
+            pending,
+            reason,
+            requestId));
     }
 
     public Task<NCLifecycleResult> FinalizeNCPermadeathForAccountAsync(Guid accountId, int roundId)
@@ -52,7 +66,9 @@ public abstract partial class ServerDbBase
 {
     public async Task<NCLifecycleResult> SetNCPermadeathPendingAsync(
         int profileId,
-        Guid accountId,
+        Guid targetAccountId,
+        Guid actorAccountId,
+        int? actorProfileId,
         int roundId,
         bool pending,
         string reason,
@@ -63,7 +79,7 @@ public abstract partial class ServerDbBase
             .SingleOrDefaultAsync(entry => entry.ProfileId == profileId);
         if (lifecycle == null ||
             !await db.DbContext.Profile.AnyAsync(profile =>
-                profile.Id == profileId && profile.Preference.UserId == accountId))
+                profile.Id == profileId && profile.Preference.UserId == targetAccountId))
             return new NCLifecycleResult(false, "nc-permadeath-error-profile-not-found");
 
         if (!pending)
@@ -81,8 +97,8 @@ public abstract partial class ServerDbBase
             lifecycle.Status = NCCharacterLifecycleStatus.PermadeathPending;
             lifecycle.DeclaredRoundId = roundId;
             lifecycle.DeclaredAt = DateTime.UtcNow;
-            lifecycle.DeclaredByAccountId = accountId;
-            lifecycle.DeclaredByProfileId = profileId;
+            lifecycle.DeclaredByAccountId = actorAccountId;
+            lifecycle.DeclaredByProfileId = actorProfileId;
             lifecycle.Reason = reason;
             lifecycle.RequestId = requestId;
         }
@@ -152,25 +168,85 @@ public abstract partial class ServerDbBase
             var businessOwnerships = await db.DbContext.NCBusinessOwnership
                 .Where(entry => entry.OwnerProfileId == profileId)
                 .ToListAsync();
-            var businessIds = businessOwnerships.Select(entry => entry.BusinessId).ToArray();
-            var businesses = await db.DbContext.NCBusiness
-                .Where(entry => businessIds.Contains(entry.BusinessId))
-                .ToListAsync();
-            foreach (var business in businesses)
-                business.Status = NCBusinessStatus.InheritancePending;
+            foreach (var ownership in businessOwnerships)
+            {
+                var coowners = await db.DbContext.NCBusinessOwnership
+                    .Where(entry =>
+                        entry.BusinessId == ownership.BusinessId &&
+                        entry.OwnerProfileId != profileId)
+                    .OrderBy(entry => entry.OwnerProfileId)
+                    .ToListAsync();
+                var business = await db.DbContext.NCBusiness.FindAsync(ownership.BusinessId);
+                var inheritance = new NCInheritanceCase
+                {
+                    InheritanceCaseId = Guid.NewGuid(),
+                    AssetType = NCInheritanceAssetType.Business,
+                    AssetId = ownership.BusinessId,
+                    DeceasedProfileId = profileId,
+                    ShareBasisPoints = ownership.ShareBasisPoints,
+                    CreatedAt = now,
+                    Reason = lifecycle.Reason ?? "permadeath",
+                };
+
+                if (coowners.Count == 0)
+                {
+                    inheritance.Status = NCInheritanceStatus.Pending;
+                    if (business != null)
+                        business.Status = NCBusinessStatus.InheritancePending;
+                }
+                else
+                {
+                    // Existing owners absorb the deceased share proportionally; rounding remainder
+                    // goes to the final stable owner so the total remains exactly 10000 basis points.
+                    var remainingTotal = coowners.Sum(entry => entry.ShareBasisPoints);
+                    var distributed = 0;
+                    for (var index = 0; index < coowners.Count; index++)
+                    {
+                        var increment = index == coowners.Count - 1
+                            ? ownership.ShareBasisPoints - distributed
+                            : (int) ((long) ownership.ShareBasisPoints *
+                                coowners[index].ShareBasisPoints / remainingTotal);
+                        coowners[index].ShareBasisPoints += increment;
+                        distributed += increment;
+                    }
+
+                    inheritance.Status = NCInheritanceStatus.Resolved;
+                    inheritance.ResolvedAt = now;
+                    inheritance.Reason = "automatic-coowner-redistribution";
+                    if (business != null)
+                        business.Status = NCBusinessStatus.Active;
+                }
+
+                db.DbContext.NCInheritanceCase.Add(inheritance);
+            }
             db.DbContext.NCBusinessOwnership.RemoveRange(businessOwnerships);
 
             var ownerId = profileId.ToString();
             var propertyOwnerships = await db.DbContext.NCPropertyOwnership
                 .Where(entry => entry.OwnerType == NCOwnerType.Character && entry.OwnerId == ownerId)
                 .ToListAsync();
-            var propertyIds = propertyOwnerships.Select(entry => entry.PropertyId).ToArray();
-            var properties = await db.DbContext.NCProperty
-                .Where(entry => propertyIds.Contains(entry.PropertyId))
-                .ToListAsync();
-            foreach (var property in properties)
-                property.Status = NCPropertyStatus.InheritancePending;
-            db.DbContext.NCPropertyOwnership.RemoveRange(propertyOwnerships);
+            foreach (var ownership in propertyOwnerships)
+            {
+                var inheritanceId = Guid.NewGuid();
+                db.DbContext.NCInheritanceCase.Add(new NCInheritanceCase
+                {
+                    InheritanceCaseId = inheritanceId,
+                    AssetType = NCInheritanceAssetType.Property,
+                    AssetId = ownership.PropertyId,
+                    DeceasedProfileId = profileId,
+                    ShareBasisPoints = ownership.ShareBasisPoints,
+                    Status = NCInheritanceStatus.Pending,
+                    CreatedAt = now,
+                    Reason = lifecycle.Reason ?? "permadeath",
+                });
+
+                // Keep the share represented while the legal process is unresolved.
+                ownership.OwnerType = NCOwnerType.System;
+                ownership.OwnerId = $"estate:{inheritanceId:N}";
+                var property = await db.DbContext.NCProperty.FindAsync(ownership.PropertyId);
+                if (property != null)
+                    property.Status = NCPropertyStatus.InheritancePending;
+            }
 
             db.DbContext.NCDeletedCharacterAudit.Add(new NCDeletedCharacterAudit
             {

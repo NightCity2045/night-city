@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -108,6 +111,7 @@ public sealed class NCCharacterEmployment
     public DateTime? LastPromotionAt { get; set; }
     public DateTime? SuspendedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public long Version { get; set; }
 }
 
 /// <summary>

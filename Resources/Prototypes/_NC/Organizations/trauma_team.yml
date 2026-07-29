@@ -1,0 +1,125 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncOrganization
+  id: TraumaTeam
+  organizationId: b1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a3101
+  name: nc-organization-trauma-team
+  defaultEntryPosition: TraumaTeamIntern
+  payrollStartingBalance: 10000
+  currencyPrototypeId: Eurodollar
+
+- type: ncDepartment
+  id: TraumaTeamClinical
+  departmentId: b1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a3102
+  organization: TraumaTeam
+  name: nc-department-trauma-clinical
+
+- type: ncDepartment
+  id: TraumaTeamResponse
+  departmentId: b1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a3103
+  organization: TraumaTeam
+  name: nc-department-trauma-response
+
+- type: ncDepartment
+  id: TraumaTeamCommand
+  departmentId: b1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a3104
+  organization: TraumaTeam
+  name: nc-department-trauma-command
+
+- type: ncPosition
+  id: TraumaTeamIntern
+  positionId: b1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a3201
+  organization: TraumaTeam
+  department: TraumaTeamClinical
+  name: nc-position-trauma-intern
+  rankWeight: 10
+  baseSalary: 170
+  payIntervalSeconds: 900
+  access: [NC_General, Trauma_Medical]
+
+- type: ncPosition
+  id: TraumaTeamCoroner
+  positionId: b1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a3202
+  organization: TraumaTeam
+  department: TraumaTeamClinical
+  name: nc-position-trauma-coroner
+  rankWeight: 30
+  baseSalary: 280
+  payIntervalSeconds: 900
+  access: [NC_General, Trauma_Medical, Trauma_Morgue]
+
+- type: ncPosition
+  id: TraumaTeamDoctor
+  positionId: b1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a3203
+  organization: TraumaTeam
+  department: TraumaTeamClinical
+  name: nc-position-trauma-doctor
+  rankWeight: 30
+  baseSalary: 300
+  payIntervalSeconds: 900
+  access: [NC_General, Trauma_Medical, Trauma_Morgue]
+
+- type: ncPosition
+  id: TraumaTeamPsych
+  positionId: b1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a3204
+  organization: TraumaTeam
+  department: TraumaTeamClinical
+  name: nc-position-trauma-psych
+  rankWeight: 30
+  baseSalary: 320
+  payIntervalSeconds: 900
+  access: [NC_General, Trauma_Medical, Trauma_Morgue]
+
+- type: ncPosition
+  id: TraumaTeamTech
+  positionId: b1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a3205
+  organization: TraumaTeam
+  department: TraumaTeamResponse
+  name: nc-position-trauma-tech
+  rankWeight: 35
+  baseSalary: 250
+  payIntervalSeconds: 900
+  access: [NC_General, Trauma_Medical, Trauma_Morgue, Trauma_Hangar, Trauma_Operative]
+
+- type: ncPosition
+  id: TraumaTeamParamedic
+  positionId: b1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a3206
+  organization: TraumaTeam
+  department: TraumaTeamResponse
+  name: nc-position-trauma-paramedic
+  rankWeight: 40
+  baseSalary: 350
+  payIntervalSeconds: 900
+  access: [NC_General, Trauma_Medical, Trauma_Morgue, Trauma_Hangar, Trauma_Operative]
+
+- type: ncPosition
+  id: TraumaTeamOperative
+  positionId: b1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a3207
+  organization: TraumaTeam
+  department: TraumaTeamResponse
+  name: nc-position-trauma-operative
+  rankWeight: 50
+  baseSalary: 400
+  payIntervalSeconds: 900
+  access: [NC_General, Trauma_Medical, Trauma_Morgue, Trauma_Hangar, Trauma_Operative]
+
+- type: ncPosition
+  id: TraumaTeamChief
+  positionId: b1c6e4f0-8d2b-4f3a-9c7e-1b5d6f8a3208
+  organization: TraumaTeam
+  department: TraumaTeamCommand
+  name: nc-position-trauma-chief
+  rankWeight: 100
+  baseSalary: 650
+  payIntervalSeconds: 900
+  access: [NC_General, Trauma_Medical, Trauma_Morgue, Trauma_Hangar, Trauma_Operative, Trauma_Command]
+  isLeadership: true
+  canHire: true
+  canPromote: true
+  canDemote: true
+  canTransfer: true
+  canSuspend: true
+  canDismiss: true
+  maxPromotableRankWeight: 99

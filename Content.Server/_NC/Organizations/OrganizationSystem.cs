@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using Content.Server.Database;
 using Content.Shared._NC.Organizations;
 using Robust.Shared.Prototypes;
@@ -35,7 +38,10 @@ public sealed partial class OrganizationSystem : EntitySystem
                     p.Name.Id,
                     p.DefaultEntryPosition == null
                         ? null
-                        : _prototypes.Index(p.DefaultEntryPosition.Value).PositionId))
+                        : _prototypes.Index(p.DefaultEntryPosition.Value).PositionId,
+                    p.HasPayrollAccount,
+                    p.PayrollStartingBalance,
+                    p.CurrencyPrototypeId))
                 .ToArray();
             var departments = _prototypes.EnumeratePrototypes<NCDepartmentPrototype>()
                 .Select(p => new NCDepartmentDefinition(
