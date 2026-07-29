@@ -1,5 +1,7 @@
 using System.Numerics;
 using Content.Client.Parallax.Managers;
+using Content.Client.Viewport;
+using Content.Shared._NC.ZLevels.Core.EntitySystems;
 using Content.Shared.CCVar;
 using Content.Shared.Parallax.Biomes;
 using Robust.Client.GameObjects;
@@ -21,6 +23,7 @@ public sealed partial class ParallaxOverlay : Overlay
     [Dependency] private IParallaxManager _manager = default!;
     private readonly SharedMapSystem _mapSystem;
     private readonly ParallaxSystem _parallax;
+    private readonly NCSharedZLevelsSystem _zLevels;
 
     public override OverlaySpace Space => OverlaySpace.WorldSpaceBelowWorld;
 
@@ -30,6 +33,7 @@ public sealed partial class ParallaxOverlay : Overlay
         IoCManager.InjectDependencies(this);
         _mapSystem = _entManager.System<SharedMapSystem>();
         _parallax = _entManager.System<ParallaxSystem>();
+        _zLevels = _entManager.System<NCSharedZLevelsSystem>();
     }
 
     protected override bool BeforeDraw(in OverlayDrawArgs args)
@@ -37,7 +41,11 @@ public sealed partial class ParallaxOverlay : Overlay
         if (args.MapId == MapId.Nullspace || _entManager.HasComponent<BiomeComponent>(_mapSystem.GetMapOrInvalid(args.MapId)))
             return false;
 
-        return true;
+        // A stacked viewport draws parallax only behind its lowest visible level.
+        if (args.Viewport.Eye is ScalingViewport.ZEye zEye)
+            return zEye.LowestDepth == zEye.Depth;
+
+        return !_zLevels.TryMapDown(args.MapUid, out _);
     }
 
     protected override void Draw(in OverlayDrawArgs args)

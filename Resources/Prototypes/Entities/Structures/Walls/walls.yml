@@ -56,6 +56,7 @@
     resistance: 2
   - type: BlockWeather
   - type: SunShadowCast
+  - type: NCZLevelHighGround
 
 - type: entity
   abstract: true
@@ -63,6 +64,7 @@
   id: BaseWall
   components:
   - type: Occluder # Breaks on diagonal walls
+  - type: NCZGridConnector
 
 - type: entity
   abstract: true

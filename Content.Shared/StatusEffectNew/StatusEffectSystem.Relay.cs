@@ -1,3 +1,6 @@
+using System.Linq;
+using Content.Shared._NC.ZLevels.Core.EntitySystems;
+using Content.Shared._NC.ZLevels.Damage;
 using Content.Shared.Body.Events;
 using Content.Shared.Damage.Events;
 using Content.Shared.Damage.Systems;
@@ -19,6 +22,10 @@ public sealed partial class StatusEffectsSystem
 {
     private void InitializeRelay()
     {
+        SubscribeLocalEvent<StatusEffectContainerComponent, NCZFallingDamageCalculateEvent>(RelayStatusEffectEvent);
+        SubscribeLocalEvent<StatusEffectContainerComponent, NCZFellOnMeEvent>(RelayStatusEffectEvent);
+        SubscribeLocalEvent<StatusEffectContainerComponent, NCZLevelHitEvent>(RefRelayStatusEffectEvent);
+
         SubscribeLocalEvent<StatusEffectContainerComponent, LocalPlayerAttachedEvent>(RelayStatusEffectEvent);
         SubscribeLocalEvent<StatusEffectContainerComponent, LocalPlayerDetachedEvent>(RelayStatusEffectEvent);
         SubscribeLocalEvent<StatusEffectContainerComponent, RejuvenateEvent>(RelayStatusEffectEvent);
@@ -61,8 +68,16 @@ public sealed partial class StatusEffectsSystem
     {
         // this copies the by-ref event if it is a struct
         var ev = new StatusEffectRelayedEvent<T>(args);
-        foreach (var activeEffect in statusEffect.Comp.ActiveStatusEffects?.ContainedEntities ?? [])
+        var effects = statusEffect.Comp.ActiveStatusEffects?.ContainedEntities;
+        if (effects is null)
+            return;
+
+        // Effects may remove themselves while handling a relayed Z-level event.
+        foreach (var activeEffect in effects.ToArray())
         {
+            if (!Exists(activeEffect))
+                continue;
+
             RaiseLocalEvent(activeEffect, ref ev);
         }
         // and now we copy it back
@@ -73,8 +88,15 @@ public sealed partial class StatusEffectsSystem
     {
         // this copies the by-ref event if it is a struct
         var ev = new StatusEffectRelayedEvent<T>(args);
-        foreach (var activeEffect in statusEffect.Comp.ActiveStatusEffects?.ContainedEntities ?? [])
+        var effects = statusEffect.Comp.ActiveStatusEffects?.ContainedEntities;
+        if (effects is null)
+            return;
+
+        foreach (var activeEffect in effects.ToArray())
         {
+            if (!Exists(activeEffect))
+                continue;
+
             RaiseLocalEvent(activeEffect, ref ev);
         }
     }

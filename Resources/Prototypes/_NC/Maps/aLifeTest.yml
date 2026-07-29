@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: gameMap
+  id: NCALifeTest
+  mapName: NC ALife Test
+  mapPath: Resources/Maps/_NC/Test/Test0.yml
+  minPlayers: 0
+  stations:
+    Empty:
+      stationProto: StandardNanotrasenStation
+      components:
+      - type: StationNameSetup
+        mapNameTemplate: "NC ALife Test"
+      - type: StationJobs
+        availableJobs:
+          Passenger: [ -1, -1 ]
+      - type: NCStationZLevels
+        mapsAbove:
+        - Resources/Maps/_NC/Test/Test1.yml
+        zLevelsComponentOverrides:
+        - type: NCZLevelRoof
+        - type: Gravity
+          enabled: true
+        - type: NCAutoGridGravity
+

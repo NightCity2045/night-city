@@ -19,9 +19,12 @@ public sealed partial class StencilOverlay
     {
         var worldHandle = args.WorldHandle;
         var mapId = args.MapId;
-        var worldAABB = args.WorldAABB;
+        // Empty edge tiles are now included for Z-level weather, so enlarge the query
+        // to avoid weather flickering at the edge of the viewport.
+        var worldAABB = args.WorldAABB.Enlarged(1f);
         var worldBounds = args.WorldBounds;
         var position = args.Viewport.Eye?.Position.Position ?? Vector2.Zero;
+        var eye = args.Viewport.Eye;
 
         // Cut out the irrelevant bits via stencil
         // This is why we don't just use parallax; we might want specific tiles to get drawn over
@@ -48,10 +51,16 @@ public sealed partial class StencilOverlay
                         if (_weather.CanWeatherAffect((grid.Owner, grid, roofComp), tile))
                             continue;
 
-                        var gridTile = new Box2(tile.GridIndices * grid.Comp.TileSize,
-                            (tile.GridIndices + Vector2i.One) * grid.Comp.TileSize);
-
-                        worldHandle.DrawRect(gridTile, Color.White);
+                        // Offset the stencil with the isometric Z-level wall projection.
+                        if (eye is not null)
+                        {
+                            Angle rotation = eye.Rotation * -1f;
+                            var offset = rotation.ToWorldVec() * -0.5f;
+                            var gridTile = new Box2(
+                                tile.GridIndices * grid.Comp.TileSize + offset,
+                                (tile.GridIndices + Vector2i.One) * grid.Comp.TileSize + offset);
+                            worldHandle.DrawRect(gridTile, Color.White);
+                        }
                     }
                 }
             },

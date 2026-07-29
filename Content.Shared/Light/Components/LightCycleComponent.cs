@@ -16,10 +16,10 @@ public sealed partial class LightCycleComponent : Component
     /// How long an entire cycle lasts
     /// </summary>
     [DataField, AutoNetworkedField]
-    public TimeSpan Duration = TimeSpan.FromMinutes(30);
+    public TimeSpan Duration = TimeSpan.FromMinutes(24);
 
     [DataField, AutoNetworkedField]
-    public TimeSpan Offset;
+    public TimeSpan Offset = TimeSpan.FromMinutes(10);
 
     [DataField, AutoNetworkedField]
     public bool Enabled = true;
@@ -27,14 +27,15 @@ public sealed partial class LightCycleComponent : Component
     /// <summary>
     /// Should the offset be randomised upon MapInit.
     /// </summary>
+    // Z-level maps must start at the same point in the cycle.
     [DataField, AutoNetworkedField]
-    public bool InitialOffset = true;
+    public bool InitialOffset = false;
 
     /// <summary>
     /// Trench of the oscillation.
     /// </summary>
     [DataField, AutoNetworkedField]
-    public float MinLightLevel = 0f;
+    public float MinLightLevel = 0.3f;
 
     /// <summary>
     /// Peak of the oscillation
