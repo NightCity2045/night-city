@@ -1,2 +1,4 @@
 - name: Example-article
   href: example-article.md
+- name: NCMapCoordinates
+  href: nc-map-coordinates.md

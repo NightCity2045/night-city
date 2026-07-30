@@ -3,6 +3,7 @@
  * https://github.com/space-wizards/space-station-14/blob/master/LICENSE.TXT
  */
 
+using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.ZLevels.Core.EntitySystems;
 using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;
@@ -13,7 +14,7 @@ namespace Content.Shared._NC.ZLevels.Core.Components;
 /// Tracker that tracks all maps added to the zLevel network. Usually, entity in Nullspace,
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
-[Access(typeof(NCSharedZLevelsSystem))]
+[Access(typeof(NCSharedZLevelsSystem), typeof(NCMapCoordinatesSystem))]
 public sealed partial class NCZMapNetworkComponent : Component
 {
     [ViewVariables, AutoNetworkedField]

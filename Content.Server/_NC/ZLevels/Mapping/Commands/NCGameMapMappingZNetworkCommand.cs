@@ -98,7 +98,7 @@ public sealed partial class NCGameMapMappingZNetworkCommand : LocalizedEntityCom
 
         //Ok all parsing is done, we start creating maps
 
-        var network = _zLevel.CreateMapNetwork(zNetwork.ZLevelsComponentOverrides);
+        var network = _zLevel.CreateMapNetwork(zNetwork.NetworkId, zNetwork.ZLevelsComponentOverrides);
         _meta.SetEntityName(network, $"Mapping zNetwork: {mapProto.MapName}");
         Dictionary<EntityUid, int> dict = new();
 

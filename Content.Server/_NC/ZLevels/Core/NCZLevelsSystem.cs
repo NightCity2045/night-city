@@ -6,6 +6,7 @@
 using Content.Server._NC.ZLevels.Core.Components;
 using Content.Server.Station.Events;
 using Content.Server.Station.Systems;
+using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.ZLevels.Core.Components;
 using Content.Shared._NC.ZLevels.Core.EntitySystems;
 using JetBrains.Annotations;
@@ -22,6 +23,7 @@ public sealed partial class NCZLevelsSystem : NCSharedZLevelsSystem
     [Dependency] private TransformSystem _transform = default!;
     [Dependency] private MetaDataSystem _meta = default!;
     [Dependency] private StationSystem _station = default!;
+    [Dependency] private NCMapCoordinatesSystem _ncCoordinates = default!;
 
     [Dependency] private EntityQuery<MapGridComponent> _mapGridQuery = default!;
 
@@ -40,7 +42,7 @@ public sealed partial class NCZLevelsSystem : NCSharedZLevelsSystem
             return;
 
         var stationName = MetaData(ent).EntityName;
-        var stationNetwork = CreateMapNetwork(ent.Comp.ZLevelsComponentOverrides);
+        var stationNetwork = CreateMapNetwork(ent.Comp.NetworkId, ent.Comp.ZLevelsComponentOverrides);
 
         ent.Comp.ZNetworkEntity = stationNetwork;
 

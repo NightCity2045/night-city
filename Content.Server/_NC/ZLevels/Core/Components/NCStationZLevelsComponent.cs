@@ -3,6 +3,8 @@
  * https://github.com/space-wizards/space-station-14/blob/master/LICENSE.TXT
  */
 
+using Content.Shared._NC.Coordinates;
+using Content.Shared._NC.Coordinates.Serialization;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 
@@ -15,6 +17,12 @@ namespace Content.Server._NC.ZLevels.Core.Components;
 [RegisterComponent]
 public sealed partial class NCStationZLevelsComponent : Component
 {
+    /// <summary>
+    /// Stable identity used by persistent city coordinates. Never change it after publishing the map.
+    /// </summary>
+    [DataField(required: true, customTypeSerializer: typeof(NCZNetworkIdSerializer))]
+    public NCZNetworkId NetworkId;
+
     [DataField]
     public EntityUid? ZNetworkEntity;
 

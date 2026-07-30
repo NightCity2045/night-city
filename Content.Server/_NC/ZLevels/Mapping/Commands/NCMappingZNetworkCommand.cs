@@ -64,7 +64,7 @@ public sealed partial class NCMappingZNetworkCommand : LocalizedEntityCommands
 
         //Ok all parsing is done, we start creating maps
 
-        var network = _zLevel.CreateMapNetwork(indexedZMap.Components);
+        var network = _zLevel.CreateMapNetwork(indexedZMap.NetworkId, indexedZMap.Components);
         _meta.SetEntityName(network, $"Mapping zNetwork: {indexedZMap.ID}");
         Dictionary<EntityUid, int> dict = new();
 

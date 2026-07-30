@@ -17,6 +17,7 @@
         availableJobs:
           Passenger: [ -1, -1 ]
       - type: NCStationZLevels
+        networkId: f7466602-81be-4ad9-9338-9c181a31e552
         mapsAbove:
         - Resources/Maps/_NC/Test/Test1.yml
         zLevelsComponentOverrides:
@@ -24,4 +25,3 @@
         - type: Gravity
           enabled: true
         - type: NCAutoGridGravity
-

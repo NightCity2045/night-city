@@ -5,6 +5,8 @@
 
 using System.Linq;
 using Content.Server._NC.ZLevels.PVS;
+using Content.Shared._NC.Coordinates;
+using Content.Shared._NC.Coordinates.Components;
 using Content.Shared._NC.ZLevels.Core.Components;
 using JetBrains.Annotations;
 using Robust.Shared.Prototypes;
@@ -19,12 +21,35 @@ public sealed partial class NCZLevelsSystem
     [PublicAPI]
     public Entity<NCZMapNetworkComponent> CreateMapNetwork(ComponentRegistry? components = null)
     {
+        return CreateMapNetwork(NCZNetworkId.NewTransient(), components);
+    }
+
+    /// <summary>
+    /// Creates a new zLevel Map Network entity with an explicit persistent identity.
+    /// </summary>
+    [PublicAPI]
+    public Entity<NCZMapNetworkComponent> CreateMapNetwork(
+        NCZNetworkId networkId,
+        ComponentRegistry? components = null)
+    {
+        if (!networkId.IsValid)
+            throw new ArgumentException("A Z-level network requires a non-empty NCZNetworkId.", nameof(networkId));
+
+        if (_ncCoordinates.ContainsNetwork(networkId))
+            throw new InvalidOperationException($"NCZNetworkId {networkId} is already registered.");
+
         var ent = Spawn();
 
         var zLevel = EnsureComp<NCZMapNetworkComponent>(ent);
         EnsureComp<NCPvsOverrideComponent>(ent);
 
         zLevel.Components = components ?? new ComponentRegistry();
+
+        // Supply the identity before component startup so the shared registry never observes an empty ID.
+        AddComp(ent, new NCZNetworkIdentityComponent
+        {
+            NetworkId = networkId,
+        });
 
         return (ent, zLevel);
     }

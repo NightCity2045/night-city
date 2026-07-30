@@ -18,6 +18,7 @@
         availableJobs:
           Passenger: [ -1, -1 ]
       - type: NCStationZLevels
+        networkId: 4ca02a1c-5e73-48d7-af28-3f6ef5df8271
         mapsBelow:
         - /Maps/Test/empty.yml
         mapsAbove:
@@ -31,6 +32,7 @@
 # Mapping commands can use this prototype to create an isolated two-level network.
 - type: zMap
   id: NCZLevelsEmptyTest
+  networkId: ecfbb91d-b622-4dd1-a21c-a02657ed1881
   maps:
   - /Maps/Test/empty.yml
   - /Maps/Test/empty.yml
