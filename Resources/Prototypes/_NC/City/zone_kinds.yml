@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncZoneKind
+  id: District
+  hierarchyRank: 0
+  contextSlot: District
+  requiresParent: false
+  supportsActivityMode: true
+  editorColor: "#d94b4b"
+  allowedGeometry:
+  - Polygon
+  - Volume
+
+- type: ncZoneKind
+  id: Sector
+  hierarchyRank: 1
+  contextSlot: Sector
+  allowedParents:
+  - District
+  supportsActivityMode: true
+  editorColor: "#dc8b3f"
+  allowedGeometry:
+  - Polygon
+  - Volume
+
+- type: ncZoneKind
+  id: Street
+  hierarchyRank: 2
+  contextSlot: Street
+  allowedParents:
+  - District
+  - Sector
+  editorColor: "#d5c84a"
+  allowedGeometry:
+  - Polygon
+  - TileMask
+  - Volume
+
+- type: ncZoneKind
+  id: Building
+  hierarchyRank: 3
+  contextSlot: Building
+  allowedParents:
+  - District
+  - Sector
+  - Street
+  editorColor: "#4f91d9"
+  allowedGeometry:
+  - Polygon
+  - Volume
+
+- type: ncZoneKind
+  id: Apartment
+  hierarchyRank: 4
+  contextSlot: Apartment
+  allowedParents:
+  - Building
+  editorColor: "#a76bdb"
+  allowedGeometry:
+  - Polygon
+  - TileMask
+  - Volume

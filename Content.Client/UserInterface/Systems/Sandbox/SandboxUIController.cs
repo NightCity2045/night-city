@@ -1,5 +1,8 @@
 using System.Numerics;
 using Content.Client.Administration.Managers;
+// NC start - Route the sandbox hotkey through the Night City mapper hub.
+using Content.Client._NC.Mapping.UI;
+// NC end
 using Content.Client.Gameplay;
 using Content.Client.Sandbox;
 using Content.Client.UserInterface.Controls;
@@ -55,8 +58,11 @@ public sealed partial class SandboxUIController : UIController, IOnStateChanged<
                     return;
                 EntitySpawningController.ToggleWindow();
             }));
+        // NC start - Preserve the upstream key function while replacing its window with the NC mapping hub.
         _input.SetInputCommand(ContentKeyFunctions.OpenSandboxWindow,
-            InputCmdHandler.FromDelegate(_ => ToggleWindow()));
+            InputCmdHandler.FromDelegate(_ =>
+                UIManager.GetUIController<NCMappingHubUIController>().ToggleWindow()));
+        // NC end
         _input.SetInputCommand(ContentKeyFunctions.OpenTileSpawnWindow,
             InputCmdHandler.FromDelegate(_ =>
             {

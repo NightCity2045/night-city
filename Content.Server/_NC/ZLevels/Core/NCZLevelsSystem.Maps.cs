@@ -60,7 +60,10 @@ public sealed partial class NCZLevelsSystem
     [PublicAPI]
     public bool TryAddMapsIntoNetwork(Entity<NCZMapNetworkComponent> network, Dictionary<EntityUid, int> maps)
     {
+        // NC start: validate the complete batch before mutating the network so a rejected load cannot leave
+        // a partially populated Z-level dictionary or sorted lookup cache behind.
         var success = true;
+        var requestedDepths = new HashSet<int>();
         foreach (var (mapUid, depth) in maps)
         {
             if (TryGetMapNetwork(mapUid, out var otherNetwork))
@@ -69,7 +72,7 @@ public sealed partial class NCZLevelsSystem
                 success = false;
             }
 
-            if (network.Comp.ZLevels.ContainsKey(depth))
+            if (network.Comp.ZLevels.ContainsKey(depth) || !requestedDepths.Add(depth))
             {
                 Log.Error($"Failed to add map {mapUid} to ZLevelNetwork {network}: This depth is already occupied.");
                 success = false;
@@ -80,7 +83,14 @@ public sealed partial class NCZLevelsSystem
                 Log.Error($"Failed attempt to add map {mapUid} to ZLevelNetwork {network} at depth {depth}: This map is already in this network.");
                 success = false;
             }
+        }
 
+        if (!success)
+            return false;
+        // NC end
+
+        foreach (var (mapUid, depth) in maps)
+        {
             network.Comp.ZLevels[depth] = mapUid;
             network.Comp.ZLevelByEntity[mapUid] = depth;
 
@@ -153,12 +163,17 @@ public sealed partial class NCZLevelsSystem
         var comp = network.Comp;
         var list = comp.SortedZLevels;
 
-        // Zero handling
-        if (comp.SortedMin == depth && comp.SortedMax == depth)
+        // NC start: default min/max values do not mean that Z=0 is already present. Seed an empty cache from
+        // the first actual map so loading bottom-up, top-down, or without a ground floor is equally valid.
+        if (list.Count == 0)
         {
             list.Add(value);
+            comp.SortedMin = depth;
+            comp.SortedMax = depth;
+            Dirty(network);
             return;
         }
+        // NC end
 
         var min = comp.SortedMin;
         var max = comp.SortedMax;

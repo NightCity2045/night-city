@@ -71,4 +71,100 @@ public sealed class NCZLevelNetworkTest : GameTest
         await server.WaitPost(() => zLevels.DeleteMapNetwork(network));
         await server.WaitRunTicks(1);
     }
+
+    [Test]
+    public async Task CacheSupportsNegativeFirstSparseDepths()
+    {
+        var server = Pair.Server;
+        var mapSystem = server.System<SharedMapSystem>();
+        var zLevels = server.System<NCZLevelsSystem>();
+
+        EntityUid bottom = default;
+        EntityUid ground = default;
+        EntityUid upper = default;
+        Entity<NCZMapNetworkComponent> network = default;
+
+        await server.WaitAssertion(() =>
+        {
+            mapSystem.CreateMap(out var bottomId);
+            mapSystem.CreateMap(out var groundId);
+            mapSystem.CreateMap(out var upperId);
+
+            bottom = mapSystem.GetMap(bottomId);
+            ground = mapSystem.GetMap(groundId);
+            upper = mapSystem.GetMap(upperId);
+            network = zLevels.CreateMapNetwork();
+
+            // This is the order used by znetwork-load when a save contains basement floors.
+            Assert.That(zLevels.TryAddMapsIntoNetwork(network, new Dictionary<EntityUid, int>
+            {
+                [bottom] = -2,
+                [ground] = 0,
+                [upper] = 3,
+            }), Is.True);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(network.Comp.SortedMin, Is.EqualTo(-2));
+                Assert.That(network.Comp.SortedMax, Is.EqualTo(3));
+                Assert.That(network.Comp.SortedZLevels, Has.Count.EqualTo(6));
+                Assert.That(network.Comp.SortedZLevels[0], Is.EqualTo(bottom));
+                Assert.That(network.Comp.SortedZLevels[1], Is.EqualTo(EntityUid.Invalid));
+                Assert.That(network.Comp.SortedZLevels[2], Is.EqualTo(ground));
+                Assert.That(network.Comp.SortedZLevels[3], Is.EqualTo(EntityUid.Invalid));
+                Assert.That(network.Comp.SortedZLevels[4], Is.EqualTo(EntityUid.Invalid));
+                Assert.That(network.Comp.SortedZLevels[5], Is.EqualTo(upper));
+            });
+        });
+
+        await server.WaitPost(() => zLevels.DeleteMapNetwork(network));
+        await server.WaitRunTicks(1);
+    }
+
+    [Test]
+    public async Task RejectedBatchDoesNotPartiallyMutateNetwork()
+    {
+        var server = Pair.Server;
+        var mapSystem = server.System<SharedMapSystem>();
+        var zLevels = server.System<NCZLevelsSystem>();
+
+        EntityUid first = default;
+        EntityUid duplicateDepth = default;
+        Entity<NCZMapNetworkComponent> network = default;
+
+        var failureLevel = Pair.ServerLogHandler.FailureLevel;
+        Pair.ServerLogHandler.FailureLevel = null;
+
+        try
+        {
+            await server.WaitAssertion(() =>
+            {
+                mapSystem.CreateMap(out var firstId);
+                mapSystem.CreateMap(out var duplicateId);
+                first = mapSystem.GetMap(firstId);
+                duplicateDepth = mapSystem.GetMap(duplicateId);
+                network = zLevels.CreateMapNetwork();
+
+                Assert.That(zLevels.TryAddMapsIntoNetwork(network, new Dictionary<EntityUid, int>
+                {
+                    [first] = -1,
+                    [duplicateDepth] = -1,
+                }), Is.False);
+
+                Assert.Multiple(() =>
+                {
+                    Assert.That(network.Comp.ZLevels, Is.Empty);
+                    Assert.That(network.Comp.ZLevelByEntity, Is.Empty);
+                    Assert.That(network.Comp.SortedZLevels, Is.Empty);
+                });
+            });
+        }
+        finally
+        {
+            Pair.ServerLogHandler.FailureLevel = failureLevel;
+        }
+
+        await server.WaitPost(() => zLevels.DeleteMapNetwork(network));
+        await server.WaitRunTicks(1);
+    }
 }

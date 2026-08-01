@@ -5,7 +5,7 @@
 - type: gameMap
   id: NCALifeTest
   mapName: NC ALife Test
-  mapPath: Resources/Maps/_NC/Test/Test0.yml
+  mapPath: Maps/_NC/Test/Test0.yml
   minPlayers: 0
   stations:
     Empty:
@@ -19,7 +19,7 @@
       - type: NCStationZLevels
         networkId: f7466602-81be-4ad9-9338-9c181a31e552
         mapsAbove:
-        - Resources/Maps/_NC/Test/Test1.yml
+        - Maps/_NC/Test/Test1.yml
         zLevelsComponentOverrides:
         - type: NCZLevelRoof
         - type: Gravity
