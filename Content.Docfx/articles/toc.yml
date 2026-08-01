@@ -1,2 +1,6 @@
 - name: Example-article
   href: example-article.md
+- name: NCMapCoordinates
+  href: nc-map-coordinates.md
+- name: Night City zones
+  href: nc-city-zones.md

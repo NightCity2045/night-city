@@ -2,6 +2,7 @@
   id: Space
   name: tiles-space
   friction: 0
+  transparent: true
   isSubfloor: true
   isSpace: true
   sturdy: false

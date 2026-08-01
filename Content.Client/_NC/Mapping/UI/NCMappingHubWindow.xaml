@@ -1,0 +1,152 @@
+<ui:NCMappingHubWindow
+    xmlns="https://spacestation14.io"
+    xmlns:ui="clr-namespace:Content.Client._NC.Mapping.UI"
+    xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+    Title="{Loc nc-mapping-hub-title}"
+    MinSize="720 560"
+    SetSize="860 720">
+    <TabContainer Name="Tabs" Access="Public" VerticalExpand="True" HorizontalExpand="True">
+        <ScrollContainer VerticalExpand="True">
+            <BoxContainer Orientation="Vertical" Margin="10" SeparationOverride="8">
+                <Label Text="{Loc nc-mapping-hub-spawn-description}" />
+                <GridContainer Columns="2">
+                    <Button Name="EntitiesButton" Access="Public" Text="{Loc nc-mapping-hub-entities}" />
+                    <Button Name="TilesButton" Access="Public" Text="{Loc nc-mapping-hub-tiles}" />
+                    <Button Name="DecalsButton" Access="Public" Text="{Loc nc-mapping-hub-decals}" />
+                    <Button Name="SubfloorButton" Access="Public" Text="{Loc nc-mapping-hub-subfloor}" />
+                    <Button Name="MarkersButton" Access="Public" Text="{Loc nc-mapping-hub-markers}" />
+                    <Button Name="BoundsButton" Access="Public" Text="{Loc nc-mapping-hub-bounds}" />
+                    <Button Name="LightButton" Access="Public" Text="{Loc nc-mapping-hub-light}" />
+                    <Button Name="FovButton" Access="Public" Text="{Loc nc-mapping-hub-fov}" />
+                    <Button Name="ShadowsButton" Access="Public" Text="{Loc nc-mapping-hub-shadows}" />
+                    <Button Name="ThermalButton" Access="Public" Text="{Loc nc-mapping-hub-thermal}" />
+                </GridContainer>
+                <Label Text="{Loc nc-mapping-hub-character-description}" />
+                <GridContainer Columns="2">
+                    <Button Name="AghostButton" Access="Public" Text="{Loc nc-mapping-hub-aghost}" />
+                    <Button Name="AccessButton" Access="Public" Text="{Loc nc-mapping-hub-access}" />
+                    <Button Name="RespawnButton" Access="Public" Text="{Loc nc-mapping-hub-respawn}" />
+                    <Button Name="SuicideButton" Access="Public" Text="{Loc nc-mapping-hub-suicide}" />
+                </GridContainer>
+            </BoxContainer>
+        </ScrollContainer>
+
+        <BoxContainer Orientation="Vertical" Margin="10" SeparationOverride="8">
+            <Label Name="NetworkLabel" Access="Public" Text="{Loc nc-mapping-hub-network-none}" />
+            <Label Name="CurrentFloorLabel" Access="Public" Text="{Loc nc-mapping-hub-floor-none}" />
+            <OptionButton Name="FloorSelector" Access="Public" />
+            <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                <Button Name="FloorDownButton" Access="Public" Text="{Loc nc-mapping-hub-floor-down}" HorizontalExpand="True" />
+                <Button Name="GoToFloorButton" Access="Public" Text="{Loc nc-mapping-hub-floor-go}" HorizontalExpand="True" />
+                <Button Name="FloorUpButton" Access="Public" Text="{Loc nc-mapping-hub-floor-up}" HorizontalExpand="True" />
+            </BoxContainer>
+            <Button Name="RefreshFloorsButton" Access="Public" Text="{Loc nc-mapping-hub-refresh}" />
+            <Label Name="FloorStatusLabel" Access="Public" Text="" />
+        </BoxContainer>
+
+        <ScrollContainer VerticalExpand="True">
+            <BoxContainer Orientation="Vertical" Margin="10" SeparationOverride="8">
+                <Label Text="{Loc nc-mapping-hub-zones-description}" />
+                <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                    <Button Name="ToggleZonesButton" Access="Public" Text="{Loc nc-mapping-hub-zones-toggle}" ToggleMode="True" HorizontalExpand="True" />
+                    <Button Name="RefreshZonesButton" Access="Public" Text="{Loc nc-mapping-hub-refresh}" HorizontalExpand="True" />
+                    <controls:ConfirmButton Name="DiscardDraftButton" Access="Public"
+                        Text="{Loc nc-mapping-hub-zone-discard}"
+                        ConfirmationText="{Loc nc-mapping-hub-zone-confirm-discard}"
+                        HorizontalExpand="True" />
+                </BoxContainer>
+                <Label Name="ZoneSetLabel" Access="Public" Text="{Loc nc-mapping-hub-zone-set-none}" />
+                <Label Name="DraftStatusLabel" Access="Public" Text="" />
+                <Label Name="ZoneOperationStatusLabel" Access="Public" Text="" />
+
+                <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                    <Button Name="UndoButton" Access="Public" Text="{Loc nc-mapping-hub-zone-undo}" HorizontalExpand="True" />
+                    <Button Name="RedoButton" Access="Public" Text="{Loc nc-mapping-hub-zone-redo}" HorizontalExpand="True" />
+                    <Button Name="ValidateButton" Access="Public" Text="{Loc nc-mapping-hub-zone-validate}" HorizontalExpand="True" />
+                </BoxContainer>
+
+                <Label Text="{Loc nc-mapping-hub-zone-list}" />
+                <LineEdit Name="ZoneSearchEdit" Access="Public" PlaceHolder="{Loc nc-mapping-hub-zone-search}" />
+                <OptionButton Name="ZoneSelector" Access="Public" />
+                <Label Name="ZoneDetailsLabel" Access="Public" Text="{Loc nc-mapping-hub-zone-none}" />
+
+                <Label Text="{Loc nc-mapping-hub-zone-properties}" />
+                <GridContainer Columns="2">
+                    <Label Text="{Loc nc-mapping-hub-zone-kind}" />
+                    <OptionButton Name="ZoneKindSelector" Access="Public" />
+                    <Label Text="{Loc nc-mapping-hub-zone-name}" />
+                    <LineEdit Name="ZoneNameEdit" Access="Public" PlaceHolder="{Loc nc-mapping-hub-zone-name-placeholder}" />
+                    <Label Text="{Loc nc-mapping-hub-zone-parent}" />
+                    <OptionButton Name="ZoneParentSelector" Access="Public" />
+                    <Label Text="{Loc nc-mapping-hub-zone-priority}" />
+                    <LineEdit Name="ZonePriorityEdit" Access="Public" Text="0" />
+                    <Label Text="{Loc nc-mapping-hub-zone-activity}" />
+                    <OptionButton Name="ZoneActivitySelector" Access="Public" />
+                </GridContainer>
+                <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                    <Button Name="CreateZoneButton" Access="Public" Text="{Loc nc-mapping-hub-zone-create}" HorizontalExpand="True" />
+                    <Button Name="UpdateZoneButton" Access="Public" Text="{Loc nc-mapping-hub-zone-update}" HorizontalExpand="True" />
+                    <controls:ConfirmButton Name="DeleteZoneButton" Access="Public"
+                        Text="{Loc nc-mapping-hub-zone-delete}"
+                        ConfirmationText="{Loc nc-mapping-hub-zone-confirm-delete}"
+                        HorizontalExpand="True" />
+                </BoxContainer>
+
+                <Label Text="{Loc nc-mapping-hub-zone-geometry}" />
+                <OptionButton Name="GeometrySelector" Access="Public" />
+                <GridContainer Columns="4">
+                    <Label Text="Z" />
+                    <LineEdit Name="GeometryZEdit" Access="Public" Text="0" MinWidth="72" />
+                    <Label Text="{Loc nc-mapping-hub-zone-snap}" />
+                    <LineEdit Name="SnapEdit" Access="Public" Text="1" MinWidth="72" />
+                    <Label Text="Min Z" />
+                    <LineEdit Name="MinZEdit" Access="Public" Text="0" MinWidth="72" />
+                    <Label Text="Max Z" />
+                    <LineEdit Name="MaxZEdit" Access="Public" Text="0" MinWidth="72" />
+                    <Label Text="{Loc nc-mapping-hub-zone-min-loaded-z}" />
+                    <OptionButton Name="MinZFloorSelector" Access="Public" />
+                    <Label Text="{Loc nc-mapping-hub-zone-max-loaded-z}" />
+                    <OptionButton Name="MaxZFloorSelector" Access="Public" />
+                </GridContainer>
+                <CheckBox Name="GlobalZCheckBox" Access="Public"
+                    Text="{Loc nc-mapping-hub-zone-global-z}" />
+                <Button Name="ApplyGeometryScopeButton" Access="Public"
+                    Text="{Loc nc-mapping-hub-zone-apply-z-scope}" HorizontalExpand="True" />
+                <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                    <Button Name="DrawPolygonButton" Access="Public" Text="{Loc nc-mapping-hub-zone-draw-shape}" ToggleMode="True" HorizontalExpand="True" />
+                    <Button Name="CreateTileMaskButton" Access="Public" Text="{Loc nc-mapping-hub-zone-create-mask}" HorizontalExpand="True" />
+                    <Button Name="DeleteGeometryButton" Access="Public" Text="{Loc nc-mapping-hub-zone-delete-geometry}" HorizontalExpand="True" />
+                </BoxContainer>
+                <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                    <Button Name="FinishToolButton" Access="Public" Text="{Loc nc-mapping-hub-zone-finish}" HorizontalExpand="True" />
+                    <Button Name="CancelToolButton" Access="Public" Text="{Loc nc-mapping-hub-zone-cancel}" HorizontalExpand="True" />
+                </BoxContainer>
+                <Label Name="ToolStatusLabel" Access="Public" Text="{Loc nc-mapping-hub-zone-tool-none}" />
+
+                <Label Text="{Loc nc-mapping-hub-zone-vertex}" />
+                <OptionButton Name="VertexSelector" Access="Public" />
+                <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                    <Button Name="MoveVertexButton" Access="Public" Text="{Loc nc-mapping-hub-zone-move-vertex}" ToggleMode="True" HorizontalExpand="True" />
+                    <Button Name="InsertVertexButton" Access="Public" Text="{Loc nc-mapping-hub-zone-insert-vertex}" ToggleMode="True" HorizontalExpand="True" />
+                    <Button Name="DeleteVertexButton" Access="Public" Text="{Loc nc-mapping-hub-zone-delete-vertex}" HorizontalExpand="True" />
+                </BoxContainer>
+
+                <Label Text="{Loc nc-mapping-hub-zone-tile-brush}" />
+                <OptionButton Name="BrushSizeSelector" Access="Public" />
+                <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                    <Button Name="PaintTilesButton" Access="Public" Text="{Loc nc-mapping-hub-zone-paint}" ToggleMode="True" HorizontalExpand="True" />
+                    <Button Name="EraseTilesButton" Access="Public" Text="{Loc nc-mapping-hub-zone-erase}" ToggleMode="True" HorizontalExpand="True" />
+                </BoxContainer>
+
+                <Label Text="{Loc nc-mapping-hub-zone-errors}" />
+                <ItemList Name="ValidationList" Access="Public" MinHeight="100" />
+
+                <Label Text="{Loc nc-mapping-hub-zone-export}" />
+                <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                    <LineEdit Name="ExportFileEdit" Access="Public" Text="city-zones.yml" HorizontalExpand="True" />
+                    <Button Name="ExportButton" Access="Public" Text="{Loc nc-mapping-hub-zone-export-button}" />
+                </BoxContainer>
+            </BoxContainer>
+        </ScrollContainer>
+    </TabContainer>
+</ui:NCMappingHubWindow>

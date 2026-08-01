@@ -1,0 +1,80 @@
+﻿- type: entity
+  id: NCActionZLevelUp
+  name: Move up
+  description: Move up one Z-Level
+  components:
+  - type: Action
+    checkCanInteract: false
+    icon:
+      sprite: _NC/Actions/zLevels.rsi
+      state: up
+  - type: InstantAction
+    event: !type:NCZLevelActionUp
+
+- type: entity
+  id: NCActionZLevelDown
+  name: Move down
+  description: Move down one Z-Level
+  components:
+  - type: Action
+    checkCanInteract: false
+    icon:
+      sprite: _NC/Actions/zLevels.rsi
+      state: down
+  - type: InstantAction
+    event: !type:NCZLevelActionDown
+
+- type: entity
+  id: NCActionToggleLookUp
+  name: Look up
+  description: You lift your head and look up at the sky.
+  components:
+  - type: Action
+    checkCanInteract: false
+    icon:
+      sprite: _NC/Actions/zLevels.rsi
+      state: eye
+  - type: InstantAction
+    event: !type:NCToggleZLevelLookUpAction
+
+# CrystallEdge ships the controllable-flight code with these prototype IDs,
+# but not the corresponding action definitions. They use the same vertical
+# controls so the complete copied flight subsystem can be enabled safely.
+- type: entity
+  id: NCActionZFlightUp
+  name: Fly up
+  description: Raise the target flight level by one Z-level.
+  components:
+  - type: Action
+    checkCanInteract: false
+    icon:
+      sprite: _NC/Actions/zLevels.rsi
+      state: up
+  - type: InstantAction
+    event: !type:NCZFlightActionUp
+
+- type: entity
+  id: NCActionZFlightDown
+  name: Fly down
+  description: Lower the target flight level by one Z-level.
+  components:
+  - type: Action
+    checkCanInteract: false
+    icon:
+      sprite: _NC/Actions/zLevels.rsi
+      state: down
+  - type: InstantAction
+    event: !type:NCZFlightActionDown
+
+- type: entity
+  id: NCActionZFlightToggle
+  name: Toggle flight
+  description: Start or stop vertical flight.
+  components:
+  - type: Action
+    checkCanInteract: false
+    icon:
+      sprite: _NC/Actions/zLevels.rsi
+      state: eye
+  - type: InstantAction
+    event: !type:ToggleActionEvent
