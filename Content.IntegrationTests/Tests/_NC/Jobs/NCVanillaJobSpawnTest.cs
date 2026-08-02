@@ -1,12 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Astro
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
 using Content.IntegrationTests.Fixtures;
-using Content.IntegrationTests.Pair;
 using Content.Server.GameTicking;
 using Content.Server.Mind;
-using Content.Shared._NC.CCVar;
-using Content.Shared._NC.Roles;
 using Content.Shared.CCVar;
 using Content.Shared.GameTicking;
 using Content.Shared.Roles.Jobs;
@@ -14,12 +12,12 @@ using Content.Shared.Roles.Jobs;
 namespace Content.IntegrationTests.Tests._NC.Jobs;
 
 [TestFixture]
-public sealed class NCCitizenJobTest : GameTest
+public sealed class NCVanillaJobSpawnTest : GameTest
 {
-    private const string MapId = "NCCitizenJobTestMap";
+    private const string MapId = "NCVanillaJobSpawnTestMap";
 
     [TestPrototypes]
-    private static readonly string CitizenMapPrototype = $"""
+    private static readonly string PassengerMapPrototype = $"""
         - type: gameMap
           id: {MapId}
           mapName: {MapId}
@@ -44,11 +42,16 @@ public sealed class NCCitizenJobTest : GameTest
     };
 
     [Test]
-    public async Task OrdinaryRoundStartAlwaysAssignsCitizen()
+    public async Task OrdinaryRoundStartUsesVanillaOverflowJob()
     {
         var pair = Pair;
-        pair.Server.CfgMan.SetCVar(NCCVars.SingleCitizenJob, true);
         pair.Server.CfgMan.SetCVar(CCVars.GameMap, MapId);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(SharedGameTicker.FallbackOverflowJob.Id, Is.EqualTo("Passenger"));
+            Assert.That(SharedGameTicker.FallbackOverflowJobName, Is.EqualTo("job-name-passenger"));
+        });
 
         var ticker = pair.Server.System<GameTicker>();
         ticker.ToggleReadyAll(true);
@@ -67,7 +70,7 @@ public sealed class NCCitizenJobTest : GameTest
         var mind = mindSystem.GetMind(entity!.Value);
 
         Assert.That(jobSystem.MindTryGetJobId(mind, out var job));
-        Assert.That(job, Is.EqualTo(NCJobIds.Citizen));
+        Assert.That(job, Is.EqualTo(SharedGameTicker.FallbackOverflowJob));
 
         await pair.Server.WaitPost(() => ticker.RestartRound());
     }

@@ -41,8 +41,6 @@ public sealed partial class StationJobsSystem : EntitySystem
 
     private void OnInit(Entity<StationJobsComponent> ent, ref ComponentInit args)
     {
-        ConfigureNCJobs(ent.Comp);
-
         ent.Comp.MidRoundTotalJobs = ent.Comp.SetupAvailableJobs.Values
             .Select(x => Math.Max(x[1], 0))
             .Sum();
@@ -52,8 +50,6 @@ public sealed partial class StationJobsSystem : EntitySystem
             .Select(x => x.Key)
             .ToHashSet();
     }
-
-    private partial void ConfigureNCJobs(StationJobsComponent jobs);
 
     public override void Update(float _)
     {

@@ -4,10 +4,8 @@ using Content.Client.LateJoin;
 using Content.Client.Lobby.UI;
 using Content.Client.Message;
 using Content.Client.Playtime;
-using Content.Client._NC.LateJoin;
 using Content.Client.UserInterface.Systems.Chat;
 using Content.Client.Voting;
-using Content.Shared._NC.CCVar;
 using Content.Shared.CCVar;
 using Robust.Client;
 using Robust.Client.Console;
@@ -116,10 +114,7 @@ namespace Content.Client.Lobby
                 return;
             }
 
-            if (_cfg.GetCVar(NCCVars.SingleCitizenJob))
-                new NCLateJoinGui().OpenCentered();
-            else
-                new LateJoinGui().OpenCentered();
+            new LateJoinGui().OpenCentered();
         }
 
         private void OnReadyToggled(BaseButton.ButtonToggledEventArgs args)
