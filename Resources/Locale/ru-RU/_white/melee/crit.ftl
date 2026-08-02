@@ -1,1 +1,0 @@
-melee-crit-damage = Критическое попадание: {$damage}!

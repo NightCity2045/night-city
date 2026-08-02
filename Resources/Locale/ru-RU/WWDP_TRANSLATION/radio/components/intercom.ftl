@@ -1,1 +1,0 @@
-intercom-menu-title = Интерком

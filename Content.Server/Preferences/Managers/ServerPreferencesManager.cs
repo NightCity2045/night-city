@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Content.Server.Afk;
 using Content.Server.Database;
-using Content.Shared._NC.Identity;
 using Content.Shared.Body;
 using Content.Shared.CCVar;
 using Content.Shared.Construction.Prototypes;
@@ -268,20 +267,10 @@ namespace Content.Server.Preferences.Managers
                 [slot] = profile
             };
 
-            var updatedPreferences =
-                new PlayerPreferences(profiles, slot, curPrefs.AdminOOCColor, curPrefs.ConstructionFavorites);
+            prefsData.Prefs = new PlayerPreferences(profiles, slot, curPrefs.AdminOOCColor, curPrefs.ConstructionFavorites);
 
             if (ShouldStorePrefs(session.Channel.AuthType))
-            {
                 await _db.SaveCharacterSlotAsync(userId, profile, slot);
-
-                // A newly created slot has no cached database ID until the insert completes.
-                if (!prefsData.ProfileIds.ContainsKey(slot))
-                    await RefreshProfileIdCache(userId, prefsData);
-            }
-
-            // Do not expose the newly selected profile to spawning systems before its stable ID is available.
-            prefsData.Prefs = updatedPreferences;
         }
 
         public async Task SetConstructionFavorites(NetUserId userId, List<ProtoId<ConstructionPrototype>> favorites)
@@ -356,8 +345,6 @@ namespace Content.Server.Preferences.Managers
                 {
                     await _db.SaveCharacterSlotAsync(userId, null, slot);
                 }
-
-                prefsData.ProfileIds.Remove(slot);
             }
         }
 
@@ -423,7 +410,6 @@ namespace Content.Server.Preferences.Managers
                 async Task LoadPrefs()
                 {
                     var prefs = await GetOrCreatePreferencesAsync(session.UserId, cancel);
-                    prefsData.ProfileIds = CreateProfileIdMap(prefs);
                     prefsData.Prefs = ConvertPreferences(prefs);
                 }
             }
@@ -555,7 +541,6 @@ namespace Content.Server.Preferences.Managers
         {
             public bool PrefsLoaded;
             public PlayerPreferences? Prefs;
-            public Dictionary<int, ProfileId> ProfileIds = new();
         }
 
         void IPostInjectInit.PostInject()

@@ -1,1 +1,0 @@
-admin-alert-shared-connection = {$player} использует общее интернет соединение с {$otherCount} подключенными игроками: {$otherList}
