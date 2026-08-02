@@ -1,1 +1,0 @@
-game-hud-open-emotions-menu-button-tooltip = Открыть меню эмоций.

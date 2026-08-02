@@ -1,1 +1,0 @@
-melee-backstab-damage = Удар в спину: {$damage}!

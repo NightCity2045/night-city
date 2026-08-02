@@ -1,4 +1,0 @@
-- type: ncRedProgression
-  id: NCDefaultProgression
-  completedRoundThresholds: [0, 2, 4, 8, 16, 24, 36, 52, 72, 100]
-  skillPointsPerLevel: 10

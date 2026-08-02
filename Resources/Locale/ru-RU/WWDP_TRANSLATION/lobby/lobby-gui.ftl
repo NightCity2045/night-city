@@ -1,1 +1,0 @@
-ui-lobby-title = Лобби
