@@ -92,6 +92,12 @@ public sealed partial class ServerPreferencesManager
         return true;
     }
 
+    /// <summary>Refreshes only persistent Night City identity/employment data after an IC personnel action.</summary>
+    public Task RefreshNCEmploymentAsync(NetUserId userId)
+    {
+        return RefreshNCCharacterData(userId);
+    }
+
     /// <summary>
     /// Creates the character's first employment from the selected department.
     /// A previous record, including a terminated one, can only be changed by the personnel workflow.

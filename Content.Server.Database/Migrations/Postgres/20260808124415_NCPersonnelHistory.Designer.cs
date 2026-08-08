@@ -4,8 +4,12 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text.Json;
 using Content.Server.Database;
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using NpgsqlTypes;
@@ -15,9 +19,11 @@ using NpgsqlTypes;
 namespace Content.Server.Database.Migrations.Postgres
 {
     [DbContext(typeof(PostgresServerDbContext))]
-    partial class PostgresServerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260808124415_NCPersonnelHistory")]
+    partial class NCPersonnelHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

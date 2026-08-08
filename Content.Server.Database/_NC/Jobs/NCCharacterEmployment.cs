@@ -5,6 +5,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
 namespace Content.Server.Database;
@@ -17,6 +18,17 @@ public enum NCEmploymentState : byte
     Active,
     Suspended,
     Terminated,
+}
+
+public enum NCEmploymentEventType : byte
+{
+    EntrySelected,
+    Hired,
+    Terminated,
+    AdministrativeChange,
+    Promoted,
+    Demoted,
+    Transferred,
 }
 
 /// <summary>
@@ -37,6 +49,26 @@ public sealed class NCCharacterEmployment
     public DateTime UpdatedAt { get; set; }
 
     public Profile Profile { get; set; } = null!;
+    public List<NCEmploymentEvent> Events { get; set; } = new();
+}
+
+/// <summary>Append-only personnel history. Employment changes are corrected with another event, never erased.</summary>
+[Table("nc_employment_event")]
+public sealed class NCEmploymentEvent
+{
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+    public int ProfileId { get; set; }
+    public NCCharacterEmployment Employment { get; set; } = null!;
+    public NCEmploymentEventType EventType { get; set; }
+    [MaxLength(64)] public string? PreviousJobPrototypeId { get; set; }
+    [MaxLength(64)] public string? NewJobPrototypeId { get; set; }
+    public NCEmploymentState? PreviousState { get; set; }
+    public NCEmploymentState NewState { get; set; }
+    [MaxLength(512)] public string Reason { get; set; } = string.Empty;
+    public int? ActorProfileId { get; set; }
+    [MaxLength(128)] public string ActorName { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
 }
 
 /// <summary>
@@ -51,6 +83,7 @@ public sealed record NCCharacterEmploymentData(
 public abstract partial class ServerDbContext
 {
     public DbSet<NCCharacterEmployment> NCCharacterEmployment => Set<NCCharacterEmployment>();
+    public DbSet<NCEmploymentEvent> NCEmploymentEvents => Set<NCEmploymentEvent>();
 
     partial void ConfigureNCModels(ModelBuilder modelBuilder)
     {
@@ -65,5 +98,13 @@ public abstract partial class ServerDbContext
 
         modelBuilder.Entity<NCCharacterEmployment>()
             .HasIndex(employment => employment.JobPrototypeId);
+
+        modelBuilder.Entity<NCEmploymentEvent>()
+            .HasOne(value => value.Employment)
+            .WithMany(value => value.Events)
+            .HasForeignKey(value => value.ProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NCEmploymentEvent>()
+            .HasIndex(value => new { value.ProfileId, value.CreatedAt });
     }
 }

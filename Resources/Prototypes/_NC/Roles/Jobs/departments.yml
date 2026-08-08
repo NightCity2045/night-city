@@ -10,6 +10,23 @@
   weight: 50
   ncSelectable: true
   ncEntryJob: NCPDCadet
+  ncPersonnelManagers: [ NCPDChief, NCPDCommander, NCPDLieutenant ]
+  ncPositionLimits:
+    NCPDChief: 1
+    NCPDCommander: 2
+    NCPDLieutenant: 4
+    NCPDInspector: 6
+    NCPDSergeant: 8
+    NCPDOfficer: 20
+    NCPDCadet: 20
+  ncPositionRanks:
+    NCPDChief: 100
+    NCPDCommander: 90
+    NCPDLieutenant: 80
+    NCPDInspector: 70
+    NCPDSergeant: 60
+    NCPDOfficer: 50
+    NCPDCadet: 10
   roles: [ NCPDChief, NCPDCommander, NCPDLieutenant, NCPDInspector, NCPDSergeant, NCPDOfficer, NCPDCadet ]
 
 - type: department

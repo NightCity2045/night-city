@@ -73,6 +73,8 @@ public abstract partial class ServerDbBase
             return false;
 
         var now = DateTime.UtcNow;
+        var previousJob = profile.NCEmployment?.JobPrototypeId;
+        var previousState = profile.NCEmployment?.State;
         if (job == null)
         {
             if (profile.NCEmployment == null)
@@ -101,6 +103,29 @@ public abstract partial class ServerDbBase
             employment.JobPrototypeId = job.Value.Id;
             employment.State = NCEmploymentState.Active;
             employment.UpdatedAt = now;
+        }
+
+        if (profile.NCEmployment != null &&
+            (previousJob != profile.NCEmployment.JobPrototypeId || previousState != profile.NCEmployment.State))
+        {
+            profile.NCEmployment.Events.Add(new NCEmploymentEvent
+            {
+                EventType = previousState == null
+                    ? NCEmploymentEventType.EntrySelected
+                    : NCEmploymentEventType.AdministrativeChange,
+                PreviousJobPrototypeId = previousJob,
+                NewJobPrototypeId = profile.NCEmployment.State == NCEmploymentState.Active
+                    ? profile.NCEmployment.JobPrototypeId
+                    : null,
+                PreviousState = previousState,
+                NewState = profile.NCEmployment.State,
+                Reason = previousState == null
+                    ? "Initial department selection"
+                    : "Administrative employment change",
+                ActorProfileId = profile.Id,
+                ActorName = profile.CharacterName,
+                CreatedAt = now,
+            });
         }
 
         await db.DbContext.SaveChangesAsync();

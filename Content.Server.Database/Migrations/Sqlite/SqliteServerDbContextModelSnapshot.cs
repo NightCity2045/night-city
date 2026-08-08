@@ -993,6 +993,67 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("nc_character_employment", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCEmploymentEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_employment_event_id");
+
+                    b.Property<string>("ActorName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("actor_name");
+
+                    b.Property<int?>("ActorProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("actor_profile_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<byte>("EventType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("event_type");
+
+                    b.Property<string>("NewJobPrototypeId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("new_job_prototype_id");
+
+                    b.Property<byte>("NewState")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("new_state");
+
+                    b.Property<string>("PreviousJobPrototypeId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("previous_job_prototype_id");
+
+                    b.Property<byte?>("PreviousState")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("previous_state");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_employment_event");
+
+                    b.HasIndex("ProfileId", "CreatedAt");
+
+                    b.ToTable("nc_employment_event", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCPoliceCase", b =>
                 {
                     b.Property<long>("Id")
@@ -2379,6 +2440,18 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Profile");
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCEmploymentEvent", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCCharacterEmployment", "Employment")
+                        .WithMany("Events")
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_employment_event_nc_character_employment_employment_profile_id");
+
+                    b.Navigation("Employment");
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCPoliceCaseEntry", b =>
                 {
                     b.HasOne("Content.Server.Database.NCPoliceCase", "Case")
@@ -2656,6 +2729,11 @@ namespace Content.Server.Database.Migrations.Sqlite
             modelBuilder.Entity("Content.Server.Database.CustomVoteLog", b =>
                 {
                     b.Navigation("Options");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
+                {
+                    b.Navigation("Events");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCPoliceCase", b =>
