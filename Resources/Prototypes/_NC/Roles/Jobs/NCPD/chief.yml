@@ -11,20 +11,65 @@
   weight: 100
   setPreference: false
   startingGear: NCPDChiefGear
-  icon: JobIconHeadOfSecurity
+  icon: JobIconNCPDChief
   accessGroups: [ NCPDBasic ]
-  access: [ NCPD_Command, NCPD_Armory, NCPD_Detective ]
+  access: [ NCPD_Command, NCPD_Armory, NCPD_Investigations ]
 
 - type: startingGear
   id: NCPDChiefGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitHoS
+    jumpsuit: ClothingUniformNCPDChief
     back: ClothingBackpackSecurity
     shoes: ClothingShoesBootsJack
     head: ClothingHeadHatBeretHoS
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
-    id: HoSPDA
+    id: NCPDChiefPDA
     ears: ClothingHeadsetAltSecurity
     belt: ClothingBeltSecurityFilled
     outerClothing: ClothingOuterCoatHoSTrench
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconNCPDChief
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: ncpd_Nachalnik
+  jobName: job-name-ncpd-chief
+
+- type: entity
+  parent: IDCardStandard
+  id: NCPDChiefIDCard
+  name: ent-ncpd-chief-id-card
+  components:
+  - type: Sprite
+    layers:
+    - state: gold
+    - state: stripe_top
+      color: "#4777C8"
+    - state: stripe_bottom
+      color: "#2F5C9E"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: ncpd_Nachalnik
+  - type: PresetIdCard
+    job: NCPDChief
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: NCPDChiefPDA
+  name: ent-ncpd-chief-pda
+  description: ent-ncpd-pda-desc
+  components:
+  - type: Pda
+    id: NCPDChiefIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-hos
+  - type: PdaBorderColor
+    borderColor: "#4777C8"
+    accentVColor: "#D8A650"
+  - type: Icon
+    state: pda-hos

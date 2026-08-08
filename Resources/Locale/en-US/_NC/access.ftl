@@ -1,7 +1,7 @@
 nc-access-general = Night City general
 nc-access-ncpd-patrol = NCPD patrol
 nc-access-ncpd-armory = NCPD armory
-nc-access-ncpd-detective = NCPD investigations
+nc-access-ncpd-investigations = NCPD investigations
 nc-access-ncpd-command = NCPD command
 nc-access-trauma-medical = Trauma Team medical
 nc-access-trauma-morgue = Trauma Team morgue

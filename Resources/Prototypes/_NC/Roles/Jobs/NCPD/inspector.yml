@@ -7,27 +7,72 @@
   name: job-name-ncpd-inspector
   description: job-description-ncpd-inspector
   playTimeTracker: NCJobNCPDInspector
-  supervisors: nc-job-supervisors-ncpd-command
+  supervisors: nc-job-supervisors-ncpd-lieutenants
   weight: 80
   setPreference: false
   startingGear: NCPDInspectorGear
-  icon: JobIconDetective
+  icon: JobIconNCPDInspector
   accessGroups: [ NCPDBasic ]
-  access: [ NCPD_Detective ]
+  access: [ NCPD_Investigations ]
 
 - type: startingGear
   id: NCPDInspectorGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitDetective
+    jumpsuit: ClothingUniformNCPDPatrol
     back: ClothingBackpackSecurity
     shoes: ClothingShoesColorBlack
     head: ClothingHeadHatFedoraBrown
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesForensic
-    id: DetectivePDA
+    id: NCPDInspectorPDA
     ears: ClothingHeadsetSecurity
     belt: ClothingBeltHolsterFilled
   storage:
     back:
     - ForensicPad
     - ForensicScanner
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconNCPDInspector
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: ncpd_inspector
+  jobName: job-name-ncpd-inspector
+
+- type: entity
+  parent: IDCardStandard
+  id: NCPDInspectorIDCard
+  name: ent-ncpd-inspector-id-card
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#4777C8"
+    - state: stripe_bottom
+      color: "#2F5C9E"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: ncpd_inspector
+  - type: PresetIdCard
+    job: NCPDInspector
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: NCPDInspectorPDA
+  name: ent-ncpd-inspector-pda
+  description: ent-ncpd-pda-desc
+  components:
+  - type: Pda
+    id: NCPDInspectorIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-detective
+  - type: PdaBorderColor
+    borderColor: "#4777C8"
+    accentVColor: "#2F5C9E"
+  - type: Icon
+    state: pda-detective

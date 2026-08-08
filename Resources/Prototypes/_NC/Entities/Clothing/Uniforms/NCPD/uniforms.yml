@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: [ ClothingUniformBase, ClothingUniformFoldableBase, BaseRestrictedContraband ]
+  id: ClothingUniformNCPDPatrol
+  name: ent-clothing-uniform-ncpd-patrol
+  description: ent-clothing-uniform-ncpd-patrol-desc
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Uniforms/Jumpsuits/nspd_normis.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/Uniforms/Jumpsuits/nspd_normis.rsi
+
+- type: entity
+  parent: [ ClothingUniformBase, ClothingUniformFoldableBase, BaseRestrictedContraband ]
+  id: ClothingUniformNCPDCommand
+  name: ent-clothing-uniform-ncpd-command
+  description: ent-clothing-uniform-ncpd-command-desc
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Uniforms/Jumpsuits/nspd_cool.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/Uniforms/Jumpsuits/nspd_cool.rsi
+
+- type: entity
+  parent: [ ClothingUniformBase, ClothingUniformFoldableBase, BaseRestrictedContraband ]
+  id: ClothingUniformNCPDChief
+  name: ent-clothing-uniform-ncpd-chief
+  description: ent-clothing-uniform-ncpd-chief-desc
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Uniforms/Jumpsuits/nspd_cool_white.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/Uniforms/Jumpsuits/nspd_cool_white.rsi

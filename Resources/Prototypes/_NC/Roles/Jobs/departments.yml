@@ -10,7 +10,7 @@
   weight: 50
   ncSelectable: true
   ncEntryJob: NCPDCadet
-  roles: [ NCPDChief, NCPDCommander, NCPDInspector, NCPDLieutenant, NCPDSergeant, NCPDOfficer, NCPDCadet ]
+  roles: [ NCPDChief, NCPDCommander, NCPDLieutenant, NCPDInspector, NCPDSergeant, NCPDOfficer, NCPDCadet ]
 
 - type: department
   id: TraumaTeam

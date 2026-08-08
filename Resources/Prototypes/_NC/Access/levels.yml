@@ -13,8 +13,8 @@
   id: NCPD_Armory
   name: nc-access-ncpd-armory
 - type: accessLevel
-  id: NCPD_Detective
-  name: nc-access-ncpd-detective
+  id: NCPD_Investigations
+  name: nc-access-ncpd-investigations
 - type: accessLevel
   id: NCPD_Command
   name: nc-access-ncpd-command

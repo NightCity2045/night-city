@@ -7,24 +7,69 @@
   name: job-name-ncpd-commander
   description: job-description-ncpd-commander
   playTimeTracker: NCJobNCPDCommander
-  supervisors: nc-job-supervisors-ncpd-command
+  supervisors: nc-job-supervisors-ncpd-chief
   weight: 90
   setPreference: false
   startingGear: NCPDCommanderGear
-  icon: JobIconWarden
+  icon: JobIconNCPDCommander
   accessGroups: [ NCPDBasic ]
-  access: [ NCPD_Command, NCPD_Armory ]
+  access: [ NCPD_Command, NCPD_Armory, NCPD_Investigations ]
 
 - type: startingGear
   id: NCPDCommanderGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitWarden
+    jumpsuit: ClothingUniformNCPDCommand
     back: ClothingBackpackSecurity
     shoes: ClothingShoesBootsJack
     head: ClothingHeadHatWarden
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
-    id: WardenPDA
+    id: NCPDCommanderPDA
     ears: ClothingHeadsetAltSecurity
     belt: ClothingBeltSecurityFilled
     outerClothing: ClothingOuterArmorBasic
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconNCPDCommander
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: ncpd_policer_commander
+  jobName: job-name-ncpd-commander
+
+- type: entity
+  parent: IDCardStandard
+  id: NCPDCommanderIDCard
+  name: ent-ncpd-commander-id-card
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#4777C8"
+    - state: stripe_bottom
+      color: "#2F5C9E"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: ncpd_policer_commander
+  - type: PresetIdCard
+    job: NCPDCommander
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: NCPDCommanderPDA
+  name: ent-ncpd-commander-pda
+  description: ent-ncpd-pda-desc
+  components:
+  - type: Pda
+    id: NCPDCommanderIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-warden
+  - type: PdaBorderColor
+    borderColor: "#4777C8"
+    accentVColor: "#2F5C9E"
+  - type: Icon
+    state: pda-warden

@@ -7,22 +7,66 @@
   name: job-name-ncpd-cadet
   description: job-description-ncpd-cadet
   playTimeTracker: NCJobNCPDCadet
-  supervisors: nc-job-supervisors-ncpd-command
+  supervisors: nc-job-supervisors-ncpd-officers
   weight: 10
   setPreference: false
   startingGear: NCPDCadetGear
-  icon: JobIconSecurityOfficer
+  icon: JobIconNCPDCadet
   accessGroups: [ NCPDBasic ]
 
 - type: startingGear
   id: NCPDCadetGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitSecGrey
+    jumpsuit: ClothingUniformNCPDPatrol
     back: ClothingBackpackSecurity
     shoes: ClothingShoesBootsJack
     eyes: ClothingEyesGlassesSecurity
-    id: SecurityCadetPDA
+    id: NCPDCadetPDA
     ears: ClothingHeadsetSecurity
     belt: ClothingBeltSecurityFilled
     outerClothing: ClothingOuterArmorBasic
     pocket2: BookSecurity
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconNCPDCadet
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: ncpd_policer
+  jobName: job-name-ncpd-cadet
+
+- type: entity
+  parent: IDCardStandard
+  id: NCPDCadetIDCard
+  name: ent-ncpd-cadet-id-card
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#4777C8"
+    - state: stripe_bottom
+      color: "#2F5C9E"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: ncpd_policer
+  - type: PresetIdCard
+    job: NCPDCadet
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: NCPDCadetPDA
+  name: ent-ncpd-cadet-pda
+  description: ent-ncpd-pda-desc
+  components:
+  - type: Pda
+    id: NCPDCadetIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-security
+  - type: PdaBorderColor
+    borderColor: "#4777C8"
+  - type: Icon
+    state: pda-security
