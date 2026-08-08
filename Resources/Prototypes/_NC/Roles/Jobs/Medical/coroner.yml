@@ -9,6 +9,7 @@
   playTimeTracker: NCJobMedicalCoroner
   supervisors: nc-job-supervisors-medical-command
   weight: 90
+  salary: 280
   setPreference: false
   startingGear: NCMedicalCoronerGear
   icon: JobIconMedicalDoctor

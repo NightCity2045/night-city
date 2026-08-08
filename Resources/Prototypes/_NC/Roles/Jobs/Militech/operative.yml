@@ -9,6 +9,7 @@
   playTimeTracker: NCJobMilitechOperative
   supervisors: nc-job-supervisors-militech-command
   weight: 70
+  salary: 300
   setPreference: false
   startingGear: MilitechOperativeGear
   icon: JobIconSecurityOfficer

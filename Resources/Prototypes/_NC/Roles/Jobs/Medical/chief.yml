@@ -9,6 +9,7 @@
   playTimeTracker: NCJobMedicalChief
   supervisors: nc-job-supervisors-city-administration
   weight: 100
+  salary: 650
   setPreference: false
   startingGear: NCMedicalChiefGear
   icon: JobIconChiefMedicalOfficer

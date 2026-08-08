@@ -9,6 +9,7 @@
   playTimeTracker: NCJobBiotechnicaMedTech
   supervisors: nc-job-supervisors-biotechnica-management
   weight: 55
+  salary: 200
   setPreference: false
   startingGear: BiotechnicaMedTechGear
   icon: JobIconMedicalDoctor

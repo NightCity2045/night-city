@@ -9,6 +9,7 @@
   playTimeTracker: NCJobNCPDChief
   supervisors: nc-job-supervisors-city-administration
   weight: 100
+  salary: 450
   setPreference: false
   startingGear: NCPDChiefGear
   icon: JobIconNCPDChief

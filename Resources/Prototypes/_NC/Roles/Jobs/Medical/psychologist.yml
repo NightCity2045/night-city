@@ -9,6 +9,7 @@
   playTimeTracker: NCJobMedicalPsychologist
   supervisors: nc-job-supervisors-medical-command
   weight: 80
+  salary: 320
   setPreference: false
   startingGear: NCMedicalPsychologistGear
   icon: JobIconMedicalDoctor

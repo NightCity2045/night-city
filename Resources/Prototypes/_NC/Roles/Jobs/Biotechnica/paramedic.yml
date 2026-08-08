@@ -9,6 +9,7 @@
   playTimeTracker: NCJobBiotechnicaParamedic
   supervisors: nc-job-supervisors-biotechnica-management
   weight: 60
+  salary: 150
   setPreference: false
   startingGear: BiotechnicaParamedicGear
   icon: JobIconParamedic

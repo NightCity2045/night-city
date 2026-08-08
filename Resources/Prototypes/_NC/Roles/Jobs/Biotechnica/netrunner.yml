@@ -9,6 +9,7 @@
   playTimeTracker: NCJobBiotechnicaNetrunner
   supervisors: nc-job-supervisors-biotechnica-management
   weight: 60
+  salary: 400
   setPreference: false
   startingGear: BiotechnicaNetrunnerGear
   icon: JobIconScientist

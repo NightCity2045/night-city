@@ -9,6 +9,7 @@
   playTimeTracker: NCJobBiotechnicaChief
   supervisors: nc-job-supervisors-biotechnica-management
   weight: 100
+  salary: 600
   setPreference: false
   startingGear: BiotechnicaChiefGear
   icon: JobIconResearchDirector

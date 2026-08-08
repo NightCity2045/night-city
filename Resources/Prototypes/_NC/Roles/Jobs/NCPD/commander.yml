@@ -9,6 +9,7 @@
   playTimeTracker: NCJobNCPDCommander
   supervisors: nc-job-supervisors-ncpd-chief
   weight: 90
+  salary: 300
   setPreference: false
   startingGear: NCPDCommanderGear
   icon: JobIconNCPDCommander

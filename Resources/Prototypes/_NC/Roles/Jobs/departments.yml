@@ -8,6 +8,7 @@
   description: department-desc-ncpd
   color: "#4777C8"
   weight: 50
+  startingBudget: 5000
   ncSelectable: true
   ncEntryJob: NCPDCadet
   ncPersonnelManagers: [ NCPDChief, NCPDCommander, NCPDLieutenant ]
@@ -35,8 +36,16 @@
   description: department-desc-trauma-team
   color: "#4FB9D7"
   weight: 40
+  startingBudget: 10000
   ncSelectable: true
   ncEntryJob: TraumaTeamParamedic
+  ncPersonnelManagers: [ TraumaTeamOperative ]
+  ncPositionLimits:
+    TraumaTeamOperative: 10
+    TraumaTeamParamedic: 20
+  ncPositionRanks:
+    TraumaTeamOperative: 100
+    TraumaTeamParamedic: 50
   roles: [ TraumaTeamParamedic, TraumaTeamOperative ]
 
 - type: department
@@ -45,8 +54,24 @@
   description: department-desc-medical-nc
   color: "#66C58D"
   weight: 35
+  startingBudget: 10000
   ncSelectable: true
   ncEntryJob: TraumaTeamIntern
+  ncPersonnelManagers: [ TraumaTeamChief ]
+  ncPositionLimits:
+    TraumaTeamChief: 1
+    TraumaTeamCoroner: 4
+    TraumaTeamPsych: 4
+    TraumaTeamDoctor: 12
+    TraumaTeamTech: 6
+    TraumaTeamIntern: 12
+  ncPositionRanks:
+    TraumaTeamChief: 100
+    TraumaTeamCoroner: 70
+    TraumaTeamPsych: 60
+    TraumaTeamDoctor: 50
+    TraumaTeamTech: 40
+    TraumaTeamIntern: 10
   roles: [ TraumaTeamChief, TraumaTeamDoctor, TraumaTeamCoroner, TraumaTeamPsych, TraumaTeamIntern, TraumaTeamTech ]
 
 - type: department
@@ -55,8 +80,30 @@
   description: department-desc-biotechnica
   color: "#6DB15C"
   weight: 30
+  startingBudget: 15000
   ncSelectable: true
   ncEntryJob: BiotechnicaOperative
+  ncPersonnelManagers: [ BiotechnicaChief, BiotechnicaOperativeLead ]
+  ncPositionLimits:
+    BiotechnicaChief: 1
+    BiotechnicaOperativeLead: 4
+    BiotechnicaOperative: 12
+    BiotechnicaNetrunner: 6
+    BiotechnicaRigger: 8
+    BiotechnicaMedTech: 8
+    BiotechnicaParamedic: 8
+    BiotechnicaTech: 8
+    BiotechnicaBotanist: 12
+  ncPositionRanks:
+    BiotechnicaChief: 100
+    BiotechnicaOperativeLead: 80
+    BiotechnicaOperative: 60
+    BiotechnicaNetrunner: 55
+    BiotechnicaRigger: 50
+    BiotechnicaMedTech: 50
+    BiotechnicaParamedic: 40
+    BiotechnicaTech: 40
+    BiotechnicaBotanist: 30
   roles: [ BiotechnicaChief, BiotechnicaOperativeLead, BiotechnicaOperative, BiotechnicaRigger, BiotechnicaBotanist, BiotechnicaMedTech, BiotechnicaTech, BiotechnicaNetrunner, BiotechnicaParamedic ]
 
 - type: department
@@ -65,8 +112,30 @@
   description: department-desc-militech
   color: "#8A8C91"
   weight: 30
+  startingBudget: 25000
   ncSelectable: true
   ncEntryJob: MilitechOperative
+  ncPersonnelManagers: [ MilitechChief, MilitechOperativeLead ]
+  ncPositionLimits:
+    MilitechChief: 1
+    MilitechOperativeLead: 4
+    MilitechSecuritySpecialist: 12
+    MilitechOperative: 20
+    MilitechNetrunner: 6
+    MilitechRigger: 8
+    MilitechCombatMedic: 8
+    MilitechTech: 8
+    MilitechQuartermaster: 6
+  ncPositionRanks:
+    MilitechChief: 100
+    MilitechOperativeLead: 80
+    MilitechSecuritySpecialist: 60
+    MilitechOperative: 50
+    MilitechNetrunner: 50
+    MilitechRigger: 40
+    MilitechCombatMedic: 40
+    MilitechTech: 30
+    MilitechQuartermaster: 30
   roles: [ MilitechChief, MilitechOperativeLead, MilitechOperative, MilitechRigger, MilitechNetrunner, MilitechSecuritySpecialist, MilitechCombatMedic, MilitechTech, MilitechQuartermaster ]
 
 - type: department
@@ -75,6 +144,14 @@
   description: department-desc-zhirafa
   color: "#D8A650"
   weight: 10
+  startingBudget: 5000
   ncSelectable: true
   ncEntryJob: ZhirafaJanitor
+  ncPersonnelManagers: [ ZhirafaEngineer ]
+  ncPositionLimits:
+    ZhirafaEngineer: 12
+    ZhirafaJanitor: 12
+  ncPositionRanks:
+    ZhirafaEngineer: 100
+    ZhirafaJanitor: 10
   roles: [ ZhirafaJanitor, ZhirafaEngineer ]

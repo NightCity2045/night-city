@@ -25,6 +25,12 @@ public sealed partial class NCBankConfigurationPrototype : IPrototype
     [DataField]
     public int PinDigits = 4;
 
+    /// <summary>
+    /// Real-time interval between organization payroll runs, in seconds.
+    /// </summary>
+    [DataField]
+    public float PaydayIntervalSeconds = 1800f;
+
     [DataField]
     public ProtoId<StackPrototype> CurrencyStack = "Credit";
 }

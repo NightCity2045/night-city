@@ -9,6 +9,7 @@
   playTimeTracker: NCJobMilitechQuartermaster
   supervisors: nc-job-supervisors-militech-command
   weight: 45
+  salary: 300
   setPreference: false
   startingGear: MilitechQuartermasterGear
   icon: JobIconQuarterMaster

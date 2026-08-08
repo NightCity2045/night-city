@@ -9,6 +9,7 @@
   playTimeTracker: NCJobMilitechCombatMedic
   supervisors: nc-job-supervisors-militech-command
   weight: 60
+  salary: 250
   setPreference: false
   startingGear: MilitechCombatMedicGear
   icon: JobIconParamedic

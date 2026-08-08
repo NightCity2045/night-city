@@ -9,6 +9,7 @@
   playTimeTracker: NCJobNCPDOfficer
   supervisors: nc-job-supervisors-ncpd-sergeants
   weight: 40
+  salary: 120
   setPreference: false
   startingGear: NCPDOfficerGear
   icon: JobIconNCPDOfficer

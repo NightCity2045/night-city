@@ -4,12 +4,9 @@
 
 - type: entity
   parent: BaseComputerAiAccess
-  id: NCComputerNCPDPersonnel
-  name: NCPD personnel console
-  description: A secured terminal for persistent NCPD personnel decisions.
+  id: NCComputerPersonnelBase
+  abstract: true
   components:
-  - type: NCPersonnelConsole
-    department: NCPD
   - type: UserInterface
     interfaces:
       enum.NCPersonnelConsoleUiKey.Key:
@@ -33,6 +30,16 @@
   - type: PointLight
     radius: 1.5
     energy: 4.0
+
+- type: entity
+  parent: NCComputerPersonnelBase
+  id: NCComputerNCPDPersonnel
+  name: NCPD personnel console
+  description: A secured terminal for persistent NCPD personnel decisions.
+  components:
+  - type: NCPersonnelConsole
+    department: NCPD
+  - type: PointLight
     color: "#4777C8"
   - type: Computer
     board: NCNCPDPersonnelComputerCircuitboard
@@ -49,3 +56,133 @@
     state: cpu_command
   - type: ComputerBoard
     prototype: NCComputerNCPDPersonnel
+
+- type: entity
+  parent: NCComputerPersonnelBase
+  id: NCComputerTraumaTeamPersonnel
+  name: Trauma Team personnel console
+  description: A secured terminal for persistent Trauma Team personnel decisions.
+  components:
+  - type: NCPersonnelConsole
+    department: TraumaTeam
+  - type: PointLight
+    color: "#4FB9D7"
+  - type: Computer
+    board: NCTraumaTeamPersonnelComputerCircuitboard
+  - type: AccessReader
+    access: [[Trauma_Command]]
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: NCTraumaTeamPersonnelComputerCircuitboard
+  name: Trauma Team personnel console board
+  description: A computer board for a Trauma Team personnel console.
+  components:
+  - type: Sprite
+    state: cpu_command
+  - type: ComputerBoard
+    prototype: NCComputerTraumaTeamPersonnel
+
+- type: entity
+  parent: NCComputerPersonnelBase
+  id: NCComputerMedicalPersonnel
+  name: Medical personnel console
+  description: A secured terminal for persistent Medical personnel decisions.
+  components:
+  - type: NCPersonnelConsole
+    department: MedicalNC
+  - type: PointLight
+    color: "#66C58D"
+  - type: Computer
+    board: NCMedicalPersonnelComputerCircuitboard
+  - type: AccessReader
+    access: [[Medical_Command]]
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: NCMedicalPersonnelComputerCircuitboard
+  name: Medical personnel console board
+  description: A computer board for a Medical personnel console.
+  components:
+  - type: Sprite
+    state: cpu_command
+  - type: ComputerBoard
+    prototype: NCComputerMedicalPersonnel
+
+- type: entity
+  parent: NCComputerPersonnelBase
+  id: NCComputerBiotechnicaPersonnel
+  name: Biotechnica personnel console
+  description: A secured terminal for persistent Biotechnica personnel decisions.
+  components:
+  - type: NCPersonnelConsole
+    department: Biotechnica
+  - type: PointLight
+    color: "#6DB15C"
+  - type: Computer
+    board: NCBiotechnicaPersonnelComputerCircuitboard
+  - type: AccessReader
+    access: [[Biotech_HeadOfDepartment]]
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: NCBiotechnicaPersonnelComputerCircuitboard
+  name: Biotechnica personnel console board
+  description: A computer board for a Biotechnica personnel console.
+  components:
+  - type: Sprite
+    state: cpu_command
+  - type: ComputerBoard
+    prototype: NCComputerBiotechnicaPersonnel
+
+- type: entity
+  parent: NCComputerPersonnelBase
+  id: NCComputerMilitechPersonnel
+  name: Militech personnel console
+  description: A secured terminal for persistent Militech personnel decisions.
+  components:
+  - type: NCPersonnelConsole
+    department: Militech
+  - type: PointLight
+    color: "#8A8C91"
+  - type: Computer
+    board: NCMilitechPersonnelComputerCircuitboard
+  - type: AccessReader
+    access: [[Militech_Command]]
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: NCMilitechPersonnelComputerCircuitboard
+  name: Militech personnel console board
+  description: A computer board for a Militech personnel console.
+  components:
+  - type: Sprite
+    state: cpu_command
+  - type: ComputerBoard
+    prototype: NCComputerMilitechPersonnel
+
+- type: entity
+  parent: NCComputerPersonnelBase
+  id: NCComputerZhirafaPersonnel
+  name: Zhirafa personnel console
+  description: A secured terminal for persistent Zhirafa personnel decisions.
+  components:
+  - type: NCPersonnelConsole
+    department: Zhirafa
+  - type: PointLight
+    color: "#D8A650"
+  - type: Computer
+    board: NCZhirafaPersonnelComputerCircuitboard
+  - type: AccessReader
+    access: [[Zhirafa_Command]]
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: NCZhirafaPersonnelComputerCircuitboard
+  name: Zhirafa personnel console board
+  description: A computer board for a Zhirafa personnel console.
+  components:
+  - type: Sprite
+    state: cpu_command
+  - type: ComputerBoard
+    prototype: NCComputerZhirafaPersonnel

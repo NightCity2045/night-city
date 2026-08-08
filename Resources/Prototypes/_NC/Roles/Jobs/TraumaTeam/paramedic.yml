@@ -9,6 +9,7 @@
   playTimeTracker: NCJobTraumaTeamParamedic
   supervisors: nc-job-supervisors-trauma-team-command
   weight: 70
+  salary: 350
   setPreference: false
   startingGear: TraumaTeamParamedicGear
   icon: JobIconParamedic

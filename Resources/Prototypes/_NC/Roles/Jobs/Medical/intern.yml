@@ -9,6 +9,7 @@
   playTimeTracker: NCJobMedicalIntern
   supervisors: nc-job-supervisors-medical-command
   weight: 20
+  salary: 170
   setPreference: false
   startingGear: NCMedicalInternGear
   icon: JobIconMedicalIntern

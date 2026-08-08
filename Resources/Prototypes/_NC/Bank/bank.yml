@@ -7,6 +7,7 @@
   startingBalance: 500
   accountPrefix: NC
   pinDigits: 4
+  paydayIntervalSeconds: 1800
   currencyStack: Credit
 
 - type: entity

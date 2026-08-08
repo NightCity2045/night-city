@@ -9,11 +9,12 @@
   playTimeTracker: NCJobTraumaTeamOperative
   supervisors: nc-job-supervisors-trauma-team-command
   weight: 60
+  salary: 400
   setPreference: false
   startingGear: TraumaTeamOperativeGear
   icon: JobIconSecurityOfficer
   accessGroups: [ TraumaBasic ]
-  access: [ Trauma_Operative ]
+  access: [ Trauma_Command, Trauma_Operative ]
 
 - type: startingGear
   id: TraumaTeamOperativeGear

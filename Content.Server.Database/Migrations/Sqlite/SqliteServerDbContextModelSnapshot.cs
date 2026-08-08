@@ -1054,6 +1054,80 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("nc_employment_event", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankAccount", b =>
+                {
+                    b.Property<string>("OrganizationPrototypeId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("organization_prototype_id");
+
+                    b.Property<int>("Balance")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("balance");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("OrganizationPrototypeId")
+                        .HasName("PK_nc_organization_bank_account");
+
+                    b.ToTable("nc_organization_bank_account", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankTransaction", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_organization_bank_transaction_id");
+
+                    b.Property<string>("ActorName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("actor_name");
+
+                    b.Property<int?>("ActorProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("actor_profile_id");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("amount");
+
+                    b.Property<int>("BalanceAfter")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("balance_after");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("OrganizationPrototypeId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("organization_prototype_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.Property<byte>("Type")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_organization_bank_transaction");
+
+                    b.HasIndex("OrganizationPrototypeId", "CreatedAt");
+
+                    b.ToTable("nc_organization_bank_transaction", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCPoliceCase", b =>
                 {
                     b.Property<long>("Id")
@@ -2452,6 +2526,18 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Employment");
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankTransaction", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCOrganizationBankAccount", "Organization")
+                        .WithMany("Transactions")
+                        .HasForeignKey("OrganizationPrototypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_organization_bank_transaction_nc_organization_bank_account_organization_prototype_id1");
+
+                    b.Navigation("Organization");
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCPoliceCaseEntry", b =>
                 {
                     b.HasOne("Content.Server.Database.NCPoliceCase", "Case")
@@ -2734,6 +2820,11 @@ namespace Content.Server.Database.Migrations.Sqlite
             modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
                 {
                     b.Navigation("Events");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankAccount", b =>
+                {
+                    b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCPoliceCase", b =>

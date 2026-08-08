@@ -9,6 +9,7 @@
   playTimeTracker: NCJobNCPDCadet
   supervisors: nc-job-supervisors-ncpd-officers
   weight: 10
+  salary: 80
   setPreference: false
   startingGear: NCPDCadetGear
   icon: JobIconNCPDCadet

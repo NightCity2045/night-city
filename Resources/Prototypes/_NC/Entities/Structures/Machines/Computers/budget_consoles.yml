@@ -1,0 +1,189 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: BaseComputerAiAccess
+  id: NCComputerOrganizationBudgetBase
+  abstract: true
+  components:
+  - type: UserInterface
+    interfaces:
+      enum.NCOrganizationBudgetConsoleUiKey.Key:
+        type: NCOrganizationBudgetConsoleBoundUserInterface
+      enum.WiresUiKey.Key:
+        type: WiresBoundUserInterface
+  - type: ActivatableUI
+    key: enum.NCOrganizationBudgetConsoleUiKey.Key
+    singleUser: true
+  - type: Sprite
+    layers:
+    - map: ["computerLayerBody"]
+      state: computer
+    - map: ["computerLayerKeyboard"]
+      state: generic_keyboard
+    - map: ["computerLayerScreen"]
+      state: command
+    - map: ["computerLayerKeys"]
+      state: security_key
+    - map: ["enum.WiresVisualLayers.MaintenancePanel"]
+      state: generic_panel_open
+  - type: PointLight
+    radius: 1.5
+    energy: 4.0
+
+- type: entity
+  parent: NCComputerOrganizationBudgetBase
+  id: NCComputerNCPDBudget
+  name: NCPD budget console
+  description: A secured terminal for managing the persistent NCPD budget.
+  components:
+  - type: NCOrganizationBudgetConsole
+    department: NCPD
+  - type: PointLight
+    color: "#4777C8"
+  - type: Computer
+    board: NCNCPDBudgetComputerCircuitboard
+  - type: AccessReader
+    access: [[NCPD_Command]]
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: NCNCPDBudgetComputerCircuitboard
+  name: NCPD budget console board
+  description: A computer board for an NCPD budget console.
+  components:
+  - type: Sprite
+    state: cpu_command
+  - type: ComputerBoard
+    prototype: NCComputerNCPDBudget
+
+- type: entity
+  parent: NCComputerOrganizationBudgetBase
+  id: NCComputerTraumaTeamBudget
+  name: Trauma Team budget console
+  description: A secured terminal for managing the persistent Trauma Team budget.
+  components:
+  - type: NCOrganizationBudgetConsole
+    department: TraumaTeam
+  - type: PointLight
+    color: "#4FB9D7"
+  - type: Computer
+    board: NCTraumaTeamBudgetComputerCircuitboard
+  - type: AccessReader
+    access: [[Trauma_Command]]
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: NCTraumaTeamBudgetComputerCircuitboard
+  name: Trauma Team budget console board
+  description: A computer board for a Trauma Team budget console.
+  components:
+  - type: Sprite
+    state: cpu_command
+  - type: ComputerBoard
+    prototype: NCComputerTraumaTeamBudget
+
+- type: entity
+  parent: NCComputerOrganizationBudgetBase
+  id: NCComputerMedicalBudget
+  name: Medical budget console
+  description: A secured terminal for managing the persistent Medical budget.
+  components:
+  - type: NCOrganizationBudgetConsole
+    department: MedicalNC
+  - type: PointLight
+    color: "#66C58D"
+  - type: Computer
+    board: NCMedicalBudgetComputerCircuitboard
+  - type: AccessReader
+    access: [[Medical_Command]]
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: NCMedicalBudgetComputerCircuitboard
+  name: Medical budget console board
+  description: A computer board for a Medical budget console.
+  components:
+  - type: Sprite
+    state: cpu_command
+  - type: ComputerBoard
+    prototype: NCComputerMedicalBudget
+
+- type: entity
+  parent: NCComputerOrganizationBudgetBase
+  id: NCComputerBiotechnicaBudget
+  name: Biotechnica budget console
+  description: A secured terminal for managing the persistent Biotechnica budget.
+  components:
+  - type: NCOrganizationBudgetConsole
+    department: Biotechnica
+  - type: PointLight
+    color: "#6DB15C"
+  - type: Computer
+    board: NCBiotechnicaBudgetComputerCircuitboard
+  - type: AccessReader
+    access: [[Biotech_HeadOfDepartment]]
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: NCBiotechnicaBudgetComputerCircuitboard
+  name: Biotechnica budget console board
+  description: A computer board for a Biotechnica budget console.
+  components:
+  - type: Sprite
+    state: cpu_command
+  - type: ComputerBoard
+    prototype: NCComputerBiotechnicaBudget
+
+- type: entity
+  parent: NCComputerOrganizationBudgetBase
+  id: NCComputerMilitechBudget
+  name: Militech budget console
+  description: A secured terminal for managing the persistent Militech budget.
+  components:
+  - type: NCOrganizationBudgetConsole
+    department: Militech
+  - type: PointLight
+    color: "#8A8C91"
+  - type: Computer
+    board: NCMilitechBudgetComputerCircuitboard
+  - type: AccessReader
+    access: [[Militech_Command]]
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: NCMilitechBudgetComputerCircuitboard
+  name: Militech budget console board
+  description: A computer board for a Militech budget console.
+  components:
+  - type: Sprite
+    state: cpu_command
+  - type: ComputerBoard
+    prototype: NCComputerMilitechBudget
+
+- type: entity
+  parent: NCComputerOrganizationBudgetBase
+  id: NCComputerZhirafaBudget
+  name: Zhirafa budget console
+  description: A secured terminal for managing the persistent Zhirafa budget.
+  components:
+  - type: NCOrganizationBudgetConsole
+    department: Zhirafa
+  - type: PointLight
+    color: "#D8A650"
+  - type: Computer
+    board: NCZhirafaBudgetComputerCircuitboard
+  - type: AccessReader
+    access: [[Zhirafa_Command]]
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: NCZhirafaBudgetComputerCircuitboard
+  name: Zhirafa budget console board
+  description: A computer board for a Zhirafa budget console.
+  components:
+  - type: Sprite
+    state: cpu_command
+  - type: ComputerBoard
+    prototype: NCComputerZhirafaBudget

@@ -9,6 +9,7 @@
   playTimeTracker: NCJobBiotechnicaOperative
   supervisors: nc-job-supervisors-biotechnica-management
   weight: 70
+  salary: 250
   setPreference: false
   startingGear: BiotechnicaOperativeGear
   icon: JobIconSecurityOfficer

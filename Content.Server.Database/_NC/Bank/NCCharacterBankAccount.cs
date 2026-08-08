@@ -34,6 +34,8 @@ public abstract partial class ServerDbContext
 
     private static void ConfigureNCBankModels(ModelBuilder modelBuilder)
     {
+        ConfigureNCOrganizationBankModels(modelBuilder);
+
         modelBuilder.Entity<NCCharacterBankAccount>()
             .HasOne<Profile>()
             .WithOne()

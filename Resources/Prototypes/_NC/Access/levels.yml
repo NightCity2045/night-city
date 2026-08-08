@@ -92,6 +92,13 @@
   id: Militech_General
   name: nc-access-militech-general
 
+- type: accessLevel
+  id: Zhirafa_General
+  name: nc-access-zhirafa-general
+- type: accessLevel
+  id: Zhirafa_Command
+  name: nc-access-zhirafa-command
+
 - type: accessGroup
   id: NCBasic
   tags: [ NCGeneral ]
@@ -115,3 +122,7 @@
 - type: accessGroup
   id: MilitechBasic
   tags: [ NCGeneral, Militech_General, Militech_Staff ]
+
+- type: accessGroup
+  id: ZhirafaBasic
+  tags: [ NCGeneral, Zhirafa_General ]

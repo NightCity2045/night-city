@@ -9,6 +9,7 @@
   playTimeTracker: NCJobMilitechTech
   supervisors: nc-job-supervisors-militech-command
   weight: 50
+  salary: 250
   setPreference: false
   startingGear: MilitechTechGear
   icon: JobIconStationEngineer

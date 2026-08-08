@@ -26,3 +26,5 @@ nc-access-militech-tech = Militech technical
 nc-access-militech-medical = Militech medical
 nc-access-militech-staff = Militech staff
 nc-access-militech-general = Militech general
+nc-access-zhirafa-general = Zhirafa general
+nc-access-zhirafa-command = Zhirafa management

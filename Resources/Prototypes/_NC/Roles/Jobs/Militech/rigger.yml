@@ -9,6 +9,7 @@
   playTimeTracker: NCJobMilitechRigger
   supervisors: nc-job-supervisors-militech-command
   weight: 55
+  salary: 350
   setPreference: false
   startingGear: MilitechRiggerGear
   icon: JobIconStationEngineer

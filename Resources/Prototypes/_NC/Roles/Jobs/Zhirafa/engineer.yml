@@ -9,10 +9,12 @@
   playTimeTracker: NCJobZhirafaEngineer
   supervisors: nc-job-supervisors-zhirafa-management
   weight: 20
+  salary: 180
   setPreference: false
   startingGear: ZhirafaEngineerGear
   icon: JobIconStationEngineer
-  accessGroups: [ NCBasic ]
+  accessGroups: [ ZhirafaBasic ]
+  access: [ Zhirafa_Command ]
 
 - type: startingGear
   id: ZhirafaEngineerGear

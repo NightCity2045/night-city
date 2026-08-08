@@ -9,6 +9,7 @@
   playTimeTracker: NCJobMilitechNetrunner
   supervisors: nc-job-supervisors-militech-command
   weight: 60
+  salary: 450
   setPreference: false
   startingGear: MilitechNetrunnerGear
   icon: JobIconScientist

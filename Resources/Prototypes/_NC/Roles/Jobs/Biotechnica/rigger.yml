@@ -9,6 +9,7 @@
   playTimeTracker: NCJobBiotechnicaRigger
   supervisors: nc-job-supervisors-biotechnica-management
   weight: 55
+  salary: 300
   setPreference: false
   startingGear: BiotechnicaRiggerGear
   icon: JobIconStationEngineer

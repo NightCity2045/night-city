@@ -9,6 +9,7 @@
   playTimeTracker: NCJobBiotechnicaBotanist
   supervisors: nc-job-supervisors-biotechnica-management
   weight: 10
+  salary: 150
   setPreference: false
   startingGear: BiotechnicaBotanistGear
   icon: JobIconBotanist

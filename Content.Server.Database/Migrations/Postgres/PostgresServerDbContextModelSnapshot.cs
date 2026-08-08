@@ -1110,6 +1110,82 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("nc_employment_event", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankAccount", b =>
+                {
+                    b.Property<string>("OrganizationPrototypeId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("organization_prototype_id");
+
+                    b.Property<int>("Balance")
+                        .HasColumnType("integer")
+                        .HasColumnName("balance");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("OrganizationPrototypeId")
+                        .HasName("PK_nc_organization_bank_account");
+
+                    b.ToTable("nc_organization_bank_account", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankTransaction", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("nc_organization_bank_transaction_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ActorName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("actor_name");
+
+                    b.Property<int?>("ActorProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("actor_profile_id");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer")
+                        .HasColumnName("amount");
+
+                    b.Property<int>("BalanceAfter")
+                        .HasColumnType("integer")
+                        .HasColumnName("balance_after");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("OrganizationPrototypeId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("organization_prototype_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("reason");
+
+                    b.Property<byte>("Type")
+                        .HasColumnType("smallint")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_organization_bank_transaction");
+
+                    b.HasIndex("OrganizationPrototypeId", "CreatedAt");
+
+                    b.ToTable("nc_organization_bank_transaction", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCPoliceCase", b =>
                 {
                     b.Property<long>("Id")
@@ -2549,6 +2625,18 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.Navigation("Employment");
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankTransaction", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCOrganizationBankAccount", "Organization")
+                        .WithMany("Transactions")
+                        .HasForeignKey("OrganizationPrototypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_organization_bank_transaction_nc_organization_bank_accou~");
+
+                    b.Navigation("Organization");
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCPoliceCaseEntry", b =>
                 {
                     b.HasOne("Content.Server.Database.NCPoliceCase", "Case")
@@ -2831,6 +2919,11 @@ namespace Content.Server.Database.Migrations.Postgres
             modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
                 {
                     b.Navigation("Events");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankAccount", b =>
+                {
+                    b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCPoliceCase", b =>

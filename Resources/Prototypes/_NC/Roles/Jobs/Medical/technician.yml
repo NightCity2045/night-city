@@ -9,6 +9,7 @@
   playTimeTracker: NCJobMedicalTechnician
   supervisors: nc-job-supervisors-medical-command
   weight: 40
+  salary: 250
   setPreference: false
   startingGear: NCMedicalTechnicianGear
   icon: JobIconMedicalDoctor

@@ -88,6 +88,92 @@ public sealed partial class NCBankSystem : EntitySystem
         return await AdjustBalanceAsync(characterId, -amount);
     }
 
+    /// <summary>
+    /// Creates an organization's persistent account once and preserves its balance across rounds.
+    /// </summary>
+    public async Task<NCOrganizationBankAccountData?> EnsureOrganizationAccountAsync(
+        string organizationPrototypeId,
+        int startingBalance)
+    {
+        await _transactionGate.WaitAsync();
+        try
+        {
+            return await _database.GetOrCreateNCOrganizationBankAccountAsync(
+                organizationPrototypeId,
+                startingBalance);
+        }
+        finally
+        {
+            _transactionGate.Release();
+        }
+    }
+
+    public Task<IReadOnlyList<NCOrganizationBankTransactionData>> GetOrganizationTransactionsAsync(
+        string organizationPrototypeId,
+        int limit)
+    {
+        return _database.GetNCOrganizationBankTransactionsAsync(organizationPrototypeId, limit);
+    }
+
+    /// <summary>
+    /// Applies a manager-authorized cash deposit or withdrawal to an organization budget.
+    /// </summary>
+    public async Task<NCOrganizationBudgetMutationData> TryChangeOrganizationBudgetAsync(
+        string organizationPrototypeId,
+        int startingBalance,
+        int delta,
+        NCCharacterId actorCharacterId,
+        string actorName,
+        string reason)
+    {
+        await _transactionGate.WaitAsync();
+        try
+        {
+            return await _database.TryChangeNCOrganizationBudgetAsync(
+                organizationPrototypeId,
+                startingBalance,
+                delta,
+                actorCharacterId,
+                actorName,
+                reason);
+        }
+        finally
+        {
+            _transactionGate.Release();
+        }
+    }
+
+    /// <summary>
+    /// Pays one employed character from an organization's persistent budget.
+    /// </summary>
+    public async Task<NCSalaryPaymentData> TryPaySalaryAsync(
+        NCCharacterId characterId,
+        string organizationPrototypeId,
+        int startingBalance,
+        int salary,
+        string jobPrototypeId)
+    {
+        await _transactionGate.WaitAsync();
+        try
+        {
+            // Active characters normally receive an account on spawn. Ensuring it here also closes
+            // the short race between spawn persistence and the first payroll run.
+            if (await EnsureAccountAsync(characterId) == null)
+                return new(NCSalaryPaymentResult.CharacterAccountNotFound, 0, null);
+
+            return await _database.TryPayNCSalaryAsync(
+                characterId,
+                organizationPrototypeId,
+                startingBalance,
+                salary,
+                jobPrototypeId);
+        }
+        finally
+        {
+            _transactionGate.Release();
+        }
+    }
+
     private async Task<NCBankAccountData?> EnsureAccountAsync(NCCharacterId characterId)
     {
         var configuration = Configuration;

@@ -9,10 +9,11 @@
   playTimeTracker: NCJobZhirafaJanitor
   supervisors: nc-job-supervisors-zhirafa-management
   weight: 10
+  salary: 80
   setPreference: false
   startingGear: ZhirafaJanitorGear
   icon: JobIconJanitor
-  accessGroups: [ NCBasic ]
+  accessGroups: [ ZhirafaBasic ]
 
 - type: startingGear
   id: ZhirafaJanitorGear

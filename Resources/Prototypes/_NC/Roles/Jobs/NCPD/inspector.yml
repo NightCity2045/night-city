@@ -9,6 +9,7 @@
   playTimeTracker: NCJobNCPDInspector
   supervisors: nc-job-supervisors-ncpd-lieutenants
   weight: 80
+  salary: 200
   setPreference: false
   startingGear: NCPDInspectorGear
   icon: JobIconNCPDInspector

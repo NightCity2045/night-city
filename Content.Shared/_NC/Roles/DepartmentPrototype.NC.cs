@@ -9,6 +9,12 @@ namespace Content.Shared.Roles;
 public sealed partial class DepartmentPrototype
 {
     /// <summary>
+    /// Persistent organization budget used when its account is created for the first time.
+    /// </summary>
+    [DataField("startingBudget")]
+    public int StartingBudget { get; private set; }
+
+    /// <summary>
     /// Whether players may select this department as a character preference.
     /// </summary>
     [DataField("ncSelectable")]
