@@ -5,7 +5,7 @@
 - type: gameMap
   id: NCALifeTest
   mapName: NC ALife Test
-  mapPath: Maps/_NC/Test/Test0.yml
+  mapPath: Maps/_NC/NightCity/NightCity0.yml
   minPlayers: 0
   stations:
     Empty:
@@ -19,7 +19,15 @@
       - type: NCStationZLevels
         networkId: f7466602-81be-4ad9-9338-9c181a31e552
         mapsAbove:
-        - Maps/_NC/Test/Test1.yml
+          - /Maps/_NC/NightCity/NightCity4.yml
+          - /Maps/_NC/NightCity/NightCity3.yml
+          - /Maps/_NC/NightCity/NightCity2.yml
+          - /Maps/_NC/NightCity/NightCity1.yml
+        mapsBelow:
+          - /Maps/_NC/NightCity/NightCity-1.yml
+          - /Maps/_NC/NightCity/NightCity-2.yml
+          - /Maps/_NC/NightCity/NightCity-3.yml
+          - /Maps/_NC/NightCity/NightCity-4.yml
         zLevelsComponentOverrides:
         - type: NCZLevelRoof
         - type: Gravity
