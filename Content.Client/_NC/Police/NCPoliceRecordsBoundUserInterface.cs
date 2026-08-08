@@ -34,6 +34,10 @@ public sealed partial class NCPoliceRecordsBoundUserInterface(EntityUid owner, E
             SendMessage(new NCPoliceCreateWarrantMessage(type, reason, caseId));
         _window.OnResolveWarrant += (warrantId, status, reason) =>
             SendMessage(new NCPoliceResolveWarrantMessage(warrantId, status, reason));
+        _window.OnCreateFine += (article, reason, amount) =>
+            SendMessage(new NCPoliceCreateFineMessage(article, reason, amount));
+        _window.OnFineStatusChanged += (fineId, status, reason) =>
+            SendMessage(new NCPoliceSetFineStatusMessage(fineId, status, reason));
         _window.OpenCentered();
     }
 

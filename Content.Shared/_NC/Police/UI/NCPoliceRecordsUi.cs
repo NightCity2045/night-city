@@ -80,6 +80,11 @@ public sealed record NCPoliceWarrantSummary(
     string? ResolutionReason,
     DateTime? ResolvedAt);
 
+[Serializable, NetSerializable]
+public sealed record NCPoliceFineSummary(long FineId, int TargetCharacterId, string TargetName,
+    string Article, string Reason, int Amount, NCPoliceFineStatus Status, string IssuedByName,
+    DateTime IssuedAt, DateTime DueAt, DateTime? PaidAt);
+
 /// <summary>
 /// Per-user console update. A direct BUI message avoids the vanilla console problem where users share one selection.
 /// </summary>
@@ -91,6 +96,7 @@ public sealed class NCPoliceRecordsUpdateMessage(
     List<NCPoliceCaseSummary> cases,
     NCPoliceCaseSummary? selectedCase,
     List<NCPoliceWarrantSummary> warrants,
+    List<NCPoliceFineSummary> fines,
     bool canEdit) : BoundUserInterfaceMessage
 {
     public readonly List<NCPoliceRecordSummary> SearchResults = searchResults;
@@ -99,6 +105,7 @@ public sealed class NCPoliceRecordsUpdateMessage(
     public readonly List<NCPoliceCaseSummary> Cases = cases;
     public readonly NCPoliceCaseSummary? SelectedCase = selectedCase;
     public readonly List<NCPoliceWarrantSummary> Warrants = warrants;
+    public readonly List<NCPoliceFineSummary> Fines = fines;
     public readonly bool CanEdit = canEdit;
 }
 
@@ -184,5 +191,22 @@ public sealed class NCPoliceResolveWarrantMessage(
 {
     public readonly long WarrantId = warrantId;
     public readonly NCPoliceWarrantStatus Status = status;
+    public readonly string Reason = reason;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCPoliceCreateFineMessage(string article, string reason, int amount) : BoundUserInterfaceMessage
+{
+    public readonly string Article = article;
+    public readonly string Reason = reason;
+    public readonly int Amount = amount;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCPoliceSetFineStatusMessage(long fineId, NCPoliceFineStatus status, string reason)
+    : BoundUserInterfaceMessage
+{
+    public readonly long FineId = fineId;
+    public readonly NCPoliceFineStatus Status = status;
     public readonly string Reason = reason;
 }

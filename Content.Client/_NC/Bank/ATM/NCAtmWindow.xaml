@@ -8,7 +8,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       x:Class="Content.Client._NC.Bank.ATM.NCAtmWindow"
                       Title="{Loc 'nc-atm-window-title'}"
-                      SetSize="380 360">
+                      SetSize="460 560">
     <BoxContainer Margin="10" Orientation="Vertical" SeparationOverride="10">
         <Label Name="StatusLabel" Align="Center" />
 
@@ -39,6 +39,11 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                 <Label Name="DepositLabel" />
             </BoxContainer>
             <Button Name="DepositButton" Text="{Loc 'nc-atm-deposit'}" />
+            <PanelContainer StyleClasses="LowDivider" />
+            <Label Text="{Loc 'nc-atm-fines-title'}" StyleClasses="LabelHeading" />
+            <Label Name="NoFinesLabel" Text="{Loc 'nc-atm-fines-none'}" FontColorOverride="DarkGray" Align="Center" />
+            <ItemList Name="FinesList" MinHeight="120" VerticalExpand="True" />
+            <Button Name="PayFineButton" Text="{Loc 'nc-atm-fine-pay'}" Disabled="True" />
         </BoxContainer>
     </BoxContainer>
 </controls:FancyWindow>

@@ -60,6 +60,8 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
         SubscribeLocalEvent<NCPoliceRecordsConsoleComponent, NCPoliceChangeCaseStatusMessage>(OnChangeCaseStatus);
         SubscribeLocalEvent<NCPoliceRecordsConsoleComponent, NCPoliceCreateWarrantMessage>(OnCreateWarrant);
         SubscribeLocalEvent<NCPoliceRecordsConsoleComponent, NCPoliceResolveWarrantMessage>(OnResolveWarrant);
+        SubscribeLocalEvent<NCPoliceRecordsConsoleComponent, NCPoliceCreateFineMessage>(OnCreateFine);
+        SubscribeLocalEvent<NCPoliceRecordsConsoleComponent, NCPoliceSetFineStatusMessage>(OnSetFineStatus);
         SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawnComplete);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
     }
@@ -313,6 +315,47 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
         }
     }
 
+    private async void OnCreateFine(EntityUid uid, NCPoliceRecordsConsoleComponent component, NCPoliceCreateFineMessage args)
+    {
+        var article = args.Article.Trim();
+        var reason = args.Reason.Trim();
+        if (!TryGetActionContext(uid, args.Actor, out var user, out var view, out var actorId, out var actorName) ||
+            view.Selected is not { } target || args.Amount <= 0 || article.Length is < 1 or > 128 ||
+            reason.Length is < 1 or > 512)
+            return;
+        try
+        {
+            if (await _database.CreateNCPoliceFineAsync(target, article, reason, args.Amount,
+                    DateTime.UtcNow + component.FineDuePeriod, actorId, actorName) == null)
+                return;
+            await RefreshOpenViewsAsync();
+        }
+        catch (Exception exception)
+        {
+            HandleDatabaseError(uid, user, "create fine", exception);
+        }
+    }
+
+    private async void OnSetFineStatus(EntityUid uid, NCPoliceRecordsConsoleComponent component,
+        NCPoliceSetFineStatusMessage args)
+    {
+        var reason = args.Reason.Trim();
+        if (!TryGetActionContext(uid, args.Actor, out var user, out var view, out var actorId, out var actorName) ||
+            !view.FineIds.Contains(args.FineId) || !Enum.IsDefined(args.Status) ||
+            args.Status is NCPoliceFineStatus.Issued or NCPoliceFineStatus.Paid || reason.Length is < 1 or > 512)
+            return;
+        try
+        {
+            if (await _database.SetNCPoliceFineStatusAsync(args.FineId, args.Status, reason, actorId, actorName) == null)
+                return;
+            await RefreshOpenViewsAsync();
+        }
+        catch (Exception exception)
+        {
+            HandleDatabaseError(uid, user, "change fine status", exception);
+        }
+    }
+
     private async void OnPlayerSpawnComplete(PlayerSpawnCompleteEvent args)
     {
         if (!_preferences.TryGetSelectedNCCharacterId(args.Player.UserId, out var characterId))
@@ -428,6 +471,11 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
         foreach (var warrant in warrants)
             view.WarrantIds.Add(warrant.Id);
 
+        var fines = await _database.GetNCPoliceFinesAsync(component.FineListLimit);
+        view.FineIds.Clear();
+        foreach (var fine in fines)
+            view.FineIds.Add(fine.Id);
+
         var summaries = results
             .Select(value => ToSummary(value, _presentThisRound.Contains(value.CharacterId)))
             .OrderByDescending(value => value.PresentThisRound)
@@ -441,6 +489,7 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
             cases.Select(ToCaseSummary).ToList(),
             selectedCase == null ? null : ToCaseSummary(selectedCase),
             warrants.Select(ToWarrantSummary).ToList(),
+            fines.Select(ToFineSummary).ToList(),
             true), user);
     }
 
@@ -565,11 +614,19 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
             value.ResolvedAt);
     }
 
+    private static NCPoliceFineSummary ToFineSummary(NCPoliceFineData value)
+    {
+        return new NCPoliceFineSummary(value.Id, value.TargetCharacterId.Value, value.TargetName,
+            value.Article, value.Reason, value.Amount, value.Status, value.IssuedByName,
+            value.IssuedAt, value.DueAt, value.PaidAt);
+    }
+
     private sealed class ConsoleView
     {
         public readonly List<NCCharacterId> ResultIds = new();
         public readonly HashSet<long> CaseIds = new();
         public readonly HashSet<long> WarrantIds = new();
+        public readonly HashSet<long> FineIds = new();
         public string Query = string.Empty;
         public NCCharacterId? Selected;
         public long? SelectedCaseId;

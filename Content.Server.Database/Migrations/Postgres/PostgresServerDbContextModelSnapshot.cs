@@ -1190,6 +1190,131 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("nc_police_case_subject", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCPoliceFine", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("nc_police_fine_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("Article")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("article");
+
+                    b.Property<DateTime>("DueAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("due_at");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("issued_at");
+
+                    b.Property<string>("IssuedByName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("issued_by_name");
+
+                    b.Property<int?>("IssuedByProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("issued_by_profile_id");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("paid_at");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("reason");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TargetName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("target_name");
+
+                    b.Property<int>("TargetProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("target_profile_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_police_fine");
+
+                    b.HasIndex("TargetProfileId", "Status");
+
+                    b.ToTable("nc_police_fine", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceFineEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("nc_police_fine_event_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ActorName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("actor_name");
+
+                    b.Property<int?>("ActorProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("actor_profile_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<byte>("EventType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("event_type");
+
+                    b.Property<long>("FineId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fine_id");
+
+                    b.Property<byte>("NewStatus")
+                        .HasColumnType("smallint")
+                        .HasColumnName("new_status");
+
+                    b.Property<byte>("PreviousStatus")
+                        .HasColumnType("smallint")
+                        .HasColumnName("previous_status");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("reason");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_police_fine_event");
+
+                    b.HasIndex("FineId", "CreatedAt");
+
+                    b.ToTable("nc_police_fine_event", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCPoliceRecord", b =>
                 {
                     b.Property<int>("ProfileId")
@@ -2373,6 +2498,18 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.Navigation("Case");
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCPoliceFineEvent", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCPoliceFine", "Fine")
+                        .WithMany("Events")
+                        .HasForeignKey("FineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_police_fine_event_nc_police_fine_fine_id");
+
+                    b.Navigation("Fine");
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCPoliceRecord", b =>
                 {
                     b.HasOne("Content.Server.Database.Profile", null)
@@ -2623,6 +2760,11 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.Navigation("Subjects");
 
                     b.Navigation("Warrants");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceFine", b =>
+                {
+                    b.Navigation("Events");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCPoliceRecord", b =>

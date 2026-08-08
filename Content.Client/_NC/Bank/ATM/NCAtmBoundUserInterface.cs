@@ -19,6 +19,7 @@ public sealed class NCAtmBoundUserInterface(EntityUid owner, Enum uiKey) : Bound
         _window.OnDeposit += () => SendMessage(new NCAtmDepositMessage());
         _window.OnLogin += (account, pin) => SendMessage(new NCAtmLoginMessage(account, pin));
         _window.OnLogout += () => SendMessage(new NCAtmLogoutMessage());
+        _window.OnPayFine += fineId => SendMessage(new NCAtmPayFineMessage(fineId));
         _window.OpenCentered();
     }
 

@@ -31,4 +31,10 @@ public sealed partial class NCPoliceRecordsConsoleComponent : Component
 
     [DataField]
     public int WarrantListLimit = 100;
+
+    [DataField]
+    public int FineListLimit = 200;
+
+    [DataField]
+    public TimeSpan FineDuePeriod = TimeSpan.FromDays(7);
 }

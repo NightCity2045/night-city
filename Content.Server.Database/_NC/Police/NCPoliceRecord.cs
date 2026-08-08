@@ -70,6 +70,7 @@ public abstract partial class ServerDbContext
     private static void ConfigureNCPoliceModels(ModelBuilder modelBuilder)
     {
         ConfigureNCPoliceCaseModels(modelBuilder);
+        ConfigureNCPoliceFineModels(modelBuilder);
 
         modelBuilder.Entity<NCPoliceRecord>()
             .HasOne<Profile>()

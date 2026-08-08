@@ -4,7 +4,9 @@
 
 using Content.Server.Popups;
 using System.Threading.Tasks;
+using System.Linq;
 using Content.Server.Preferences.Managers;
+using Content.Server.Database;
 using Content.Server.Stack;
 using Content.Shared._NC.Bank.ATM;
 using Content.Shared._NC.Bank.Components;
@@ -15,6 +17,7 @@ using Content.Shared.UserInterface;
 using Robust.Server.GameObjects;
 using Robust.Shared.Containers;
 using Robust.Shared.Player;
+using Content.Shared.Database._NC.Police;
 
 namespace Content.Server._NC.Bank.ATM;
 
@@ -25,6 +28,7 @@ namespace Content.Server._NC.Bank.ATM;
 public sealed partial class NCAtmSystem : EntitySystem
 {
     [Dependency] private NCBankSystem _bank = default!;
+    [Dependency] private IServerDbManager _database = default!;
     [Dependency] private SharedContainerSystem _containers = default!;
     [Dependency] private ISharedPlayerManager _players = default!;
     [Dependency] private PopupSystem _popup = default!;
@@ -48,6 +52,7 @@ public sealed partial class NCAtmSystem : EntitySystem
         SubscribeLocalEvent<NCAtmComponent, NCAtmLogoutMessage>(OnLogout);
         SubscribeLocalEvent<NCAtmComponent, NCAtmWithdrawMessage>(OnWithdraw);
         SubscribeLocalEvent<NCAtmComponent, NCAtmDepositMessage>(OnDeposit);
+        SubscribeLocalEvent<NCAtmComponent, NCAtmPayFineMessage>(OnPayFine);
     }
 
     private void OnInteractUsing(EntityUid uid, NCAtmComponent component, InteractUsingEvent args)
@@ -239,6 +244,40 @@ public sealed partial class NCAtmSystem : EntitySystem
         }
     }
 
+    private async void OnPayFine(EntityUid uid, NCAtmComponent component, NCAtmPayFineMessage args)
+    {
+        if (args.Actor is not { Valid: true } user ||
+            !_authenticated.TryGetValue((uid, user), out var characterId) || args.FineId <= 0)
+            return;
+
+        var operation = (uid, user);
+        if (!_processing.Add(operation))
+            return;
+
+        try
+        {
+            // Payment and fine status transition are persisted atomically by the database layer.
+            var result = await _database.PayNCPoliceFineAsync(args.FineId, characterId);
+            var locale = result.Result switch
+            {
+                NCPoliceFinePaymentResult.Success => "nc-atm-fine-paid",
+                NCPoliceFinePaymentResult.InsufficientFunds => "nc-atm-insufficient-funds",
+                _ => "nc-atm-fine-payment-failed",
+            };
+            _popup.PopupEntity(Loc.GetString(locale), uid, user);
+        }
+        catch (Exception exception)
+        {
+            Log.Error($"ATM fine payment failed for character {characterId.Value}: {exception}");
+            _popup.PopupEntity(Loc.GetString("nc-atm-transaction-failed"), uid, user);
+        }
+        finally
+        {
+            _processing.Remove(operation);
+            await UpdateUiAsync(uid, component, user);
+        }
+    }
+
     private async Task UpdateUiAsync(EntityUid uid, NCAtmComponent component, EntityUid user)
     {
         if (Deleted(uid) || Deleted(user))
@@ -254,6 +293,7 @@ public sealed partial class NCAtmSystem : EntitySystem
         var accountNumber = string.Empty;
         var balance = 0;
         var loggedIn = false;
+        var fines = new List<NCAtmFineSummary>();
         if (_authenticated.TryGetValue((uid, user), out var authenticatedCharacter))
         {
             var account = await _bank.GetAccountAsync(authenticatedCharacter);
@@ -262,6 +302,11 @@ public sealed partial class NCAtmSystem : EntitySystem
                 loggedIn = true;
                 accountNumber = account.AccountNumber;
                 balance = account.Balance;
+                fines = (await _database.GetNCPoliceFinesAsync(100, authenticatedCharacter))
+                    .Where(value => value.Status is NCPoliceFineStatus.Issued or NCPoliceFineStatus.Overdue)
+                    .Select(value => new NCAtmFineSummary(value.Id, value.Article, value.Reason,
+                        value.Amount, value.Status, value.DueAt))
+                    .ToList();
             }
             else
             {
@@ -284,6 +329,7 @@ public sealed partial class NCAtmSystem : EntitySystem
             loggedIn,
             component.TaxRate,
             depositAmount,
-            ownAccountNumber));
+            ownAccountNumber,
+            fines));
     }
 }

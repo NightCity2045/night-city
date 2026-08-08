@@ -144,6 +144,31 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                                 </BoxContainer>
                             </ScrollContainer>
                         </BoxContainer>
+
+                        <BoxContainer Name="FinesTab" Margin="8" Orientation="Horizontal" SeparationOverride="8">
+                            <BoxContainer Orientation="Vertical" MinWidth="360" MaxWidth="360" SeparationOverride="4">
+                                <Label Text="{Loc 'nc-police-fines-list'}" StyleClasses="LabelHeading" />
+                                <ItemList Name="FineList" VerticalExpand="True" />
+                                <LineEdit Name="NewFineArticle" PlaceHolder="{Loc 'nc-police-fine-article-placeholder'}" />
+                                <LineEdit Name="NewFineAmount" PlaceHolder="{Loc 'nc-police-fine-amount-placeholder'}" />
+                                <TextEdit Name="NewFineReason" MinHeight="70" />
+                                <Button Name="CreateFineButton" Text="{Loc 'nc-police-fine-create'}" />
+                            </BoxContainer>
+                            <PanelContainer StyleClasses="LowDivider" />
+                            <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+                                <BoxContainer Name="FineDetailContainer" Orientation="Vertical" Visible="False" SeparationOverride="6">
+                                    <Label Name="FineTitleLabel" StyleClasses="LabelHeading" />
+                                    <Label Name="FineStatusLabel" />
+                                    <Label Name="FineReasonLabel" />
+                                    <Label Name="FineIssuedLabel" />
+                                    <Label Name="FineDueLabel" />
+                                    <PanelContainer StyleClasses="LowDivider" />
+                                    <OptionButton Name="FineStatusSelector" />
+                                    <TextEdit Name="FineStatusReason" MinHeight="70" />
+                                    <Button Name="ApplyFineStatusButton" Text="{Loc 'nc-police-fine-change-status'}" />
+                                </BoxContainer>
+                            </ScrollContainer>
+                        </BoxContainer>
                     </TabContainer>
                 </BoxContainer>
             </BoxContainer>

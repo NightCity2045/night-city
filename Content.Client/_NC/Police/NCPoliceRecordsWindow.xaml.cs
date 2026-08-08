@@ -20,9 +20,11 @@ public sealed partial class NCPoliceRecordsWindow : FancyWindow
 {
     private readonly IPrototypeManager _prototypes;
     private readonly Dictionary<long, NCPoliceWarrantSummary> _warrants = new();
+    private readonly Dictionary<long, NCPoliceFineSummary> _fines = new();
     private int? _selectedCharacterId;
     private long? _selectedCaseId;
     private long? _selectedWarrantId;
+    private long? _selectedFineId;
 
     public event Action<string>? OnSearch;
     public event Action<int>? OnSelected;
@@ -34,6 +36,8 @@ public sealed partial class NCPoliceRecordsWindow : FancyWindow
     public event Action<long, NCPoliceCaseStatus, string>? OnCaseStatusChanged;
     public event Action<NCPoliceWarrantType, string, long?>? OnCreateWarrant;
     public event Action<long, NCPoliceWarrantStatus, string>? OnResolveWarrant;
+    public event Action<string, string, int>? OnCreateFine;
+    public event Action<long, NCPoliceFineStatus, string>? OnFineStatusChanged;
 
     public NCPoliceRecordsWindow(IPrototypeManager prototypes)
     {
@@ -43,6 +47,7 @@ public sealed partial class NCPoliceRecordsWindow : FancyWindow
         RecordTabs.SetTabTitle(0, Loc.GetString("nc-police-tab-dossier"));
         RecordTabs.SetTabTitle(1, Loc.GetString("nc-police-tab-cases"));
         RecordTabs.SetTabTitle(2, Loc.GetString("nc-police-tab-warrants"));
+        RecordTabs.SetTabTitle(3, Loc.GetString("nc-police-tab-fines"));
 
         foreach (var status in Enum.GetValues<NCPoliceOperationalStatus>())
             StatusSelector.AddItem(StatusName(status), (int) status);
@@ -54,12 +59,16 @@ public sealed partial class NCPoliceRecordsWindow : FancyWindow
             NewWarrantTypeSelector.AddItem(WarrantTypeName(type), (int) type);
         foreach (var status in Enum.GetValues<NCPoliceWarrantStatus>().Where(value => value != NCPoliceWarrantStatus.Active))
             WarrantResolutionStatusSelector.AddItem(WarrantStatusName(status), (int) status);
+        foreach (var status in Enum.GetValues<NCPoliceFineStatus>()
+                     .Where(value => value is NCPoliceFineStatus.Contested or NCPoliceFineStatus.Voided or NCPoliceFineStatus.Overdue))
+            FineStatusSelector.AddItem(FineStatusName(status), (int) status);
 
         WireOptionButton(StatusSelector);
         WireOptionButton(CaseSubjectRoleSelector);
         WireOptionButton(CaseStatusSelector);
         WireOptionButton(NewWarrantTypeSelector);
         WireOptionButton(WarrantResolutionStatusSelector);
+        WireOptionButton(FineStatusSelector);
 
         SearchButton.OnPressed += _ => SubmitSearch();
         SearchEdit.OnTextEntered += _ => SubmitSearch();
@@ -133,6 +142,28 @@ public sealed partial class NCPoliceRecordsWindow : FancyWindow
                     reason);
             }
         };
+        FineList.OnItemSelected += args =>
+        {
+            if (FineList[args.ItemIndex].Metadata is long fineId && _fines.TryGetValue(fineId, out var fine))
+            {
+                _selectedFineId = fineId;
+                UpdateFineDetail(fine);
+            }
+        };
+        CreateFineButton.OnPressed += _ =>
+        {
+            var article = NewFineArticle.Text.Trim();
+            var reason = Rope.Collapse(NewFineReason.TextRope).Trim();
+            if (_selectedCharacterId != null && article.Length > 0 && reason.Length > 0 &&
+                int.TryParse(NewFineAmount.Text, out var amount) && amount > 0)
+                OnCreateFine?.Invoke(article, reason, amount);
+        };
+        ApplyFineStatusButton.OnPressed += _ =>
+        {
+            var reason = Rope.Collapse(FineStatusReason.TextRope).Trim();
+            if (_selectedFineId is { } fineId && reason.Length > 0)
+                OnFineStatusChanged?.Invoke(fineId, (NCPoliceFineStatus) FineStatusSelector.SelectedId, reason);
+        };
     }
 
     public void UpdateData(NCPoliceRecordsUpdateMessage update)
@@ -141,6 +172,7 @@ public sealed partial class NCPoliceRecordsWindow : FancyWindow
         UpdateDossier(update);
         UpdateCases(update);
         UpdateWarrants(update.Warrants);
+        UpdateFines(update.Fines);
     }
 
     private void UpdateResidentList(List<NCPoliceRecordSummary> results)
@@ -257,6 +289,42 @@ public sealed partial class NCPoliceRecordsWindow : FancyWindow
         }
     }
 
+    private void UpdateFines(List<NCPoliceFineSummary> fines)
+    {
+        _fines.Clear();
+        FineList.Clear();
+        foreach (var fine in fines)
+        {
+            _fines[fine.FineId] = fine;
+            FineList.AddItem(Loc.GetString("nc-police-fine-list-line", ("id", fine.FineId),
+                ("name", fine.TargetName), ("amount", fine.Amount), ("status", FineStatusName(fine.Status))),
+                metadata: fine.FineId);
+        }
+        if (_selectedFineId is { } selectedId && _fines.TryGetValue(selectedId, out var selected))
+            UpdateFineDetail(selected);
+        else
+        {
+            _selectedFineId = null;
+            FineDetailContainer.Visible = false;
+        }
+    }
+
+    private void UpdateFineDetail(NCPoliceFineSummary fine)
+    {
+        FineDetailContainer.Visible = true;
+        FineTitleLabel.Text = Loc.GetString("nc-police-fine-title-line", ("id", fine.FineId),
+            ("article", fine.Article), ("name", fine.TargetName), ("amount", fine.Amount));
+        FineStatusLabel.Text = Loc.GetString("nc-police-fine-status-line", ("status", FineStatusName(fine.Status)));
+        FineReasonLabel.Text = Loc.GetString("nc-police-fine-reason-line", ("reason", fine.Reason));
+        FineIssuedLabel.Text = Loc.GetString("nc-police-fine-issued-line", ("actor", fine.IssuedByName),
+            ("time", fine.IssuedAt.ToLocalTime().ToString("g")));
+        FineDueLabel.Text = Loc.GetString("nc-police-fine-due-line", ("time", fine.DueAt.ToLocalTime().ToString("g")));
+        var editable = fine.Status is not (NCPoliceFineStatus.Paid or NCPoliceFineStatus.Voided);
+        FineStatusSelector.Disabled = !editable;
+        FineStatusReason.Editable = editable;
+        ApplyFineStatusButton.Disabled = !editable;
+    }
+
     private static string FormatCaseEntry(NCPoliceCaseEntrySummary entry)
     {
         return entry.EntryType switch
@@ -335,4 +403,6 @@ public sealed partial class NCPoliceRecordsWindow : FancyWindow
         Loc.GetString($"nc-police-warrant-type-{type.ToString().ToLowerInvariant()}");
     private static string WarrantStatusName(NCPoliceWarrantStatus status) =>
         Loc.GetString($"nc-police-warrant-status-{status.ToString().ToLowerInvariant()}");
+    private static string FineStatusName(NCPoliceFineStatus status) =>
+        Loc.GetString($"nc-police-fine-status-{status.ToString().ToLowerInvariant()}");
 }

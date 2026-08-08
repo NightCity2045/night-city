@@ -67,3 +67,29 @@ public enum NCPoliceWarrantStatus : byte
     Revoked,
     Expired,
 }
+
+public enum NCPoliceFineStatus : byte
+{
+    Issued,
+    Paid,
+    Contested,
+    Voided,
+    Overdue,
+}
+
+public enum NCPoliceFineEventType : byte
+{
+    Issued,
+    Paid,
+    StatusChanged,
+}
+
+public enum NCPoliceFinePaymentResult : byte
+{
+    Success,
+    FineNotFound,
+    NotOwner,
+    NotPayable,
+    AccountNotFound,
+    InsufficientFunds,
+}

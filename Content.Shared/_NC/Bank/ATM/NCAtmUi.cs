@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Robust.Shared.Serialization;
+using Content.Shared.Database._NC.Police;
 
 namespace Content.Shared._NC.Bank.ATM;
 
@@ -21,6 +22,7 @@ public sealed class NCAtmBoundUserInterfaceState : BoundUserInterfaceState
     public readonly float TaxRate;
     public readonly int DepositAmount;
     public readonly string OwnAccountNumber;
+    public readonly List<NCAtmFineSummary> Fines;
 
     public NCAtmBoundUserInterfaceState(
         int bankBalance,
@@ -28,7 +30,8 @@ public sealed class NCAtmBoundUserInterfaceState : BoundUserInterfaceState
         bool isLoggedIn,
         float taxRate,
         int depositAmount,
-        string ownAccountNumber)
+        string ownAccountNumber,
+        List<NCAtmFineSummary> fines)
     {
         BankBalance = bankBalance;
         AccountNumber = accountNumber;
@@ -36,6 +39,7 @@ public sealed class NCAtmBoundUserInterfaceState : BoundUserInterfaceState
         TaxRate = taxRate;
         DepositAmount = depositAmount;
         OwnAccountNumber = ownAccountNumber;
+        Fines = fines;
     }
 }
 
@@ -57,3 +61,13 @@ public sealed class NCAtmWithdrawMessage(int amount) : BoundUserInterfaceMessage
 
 [Serializable, NetSerializable]
 public sealed class NCAtmDepositMessage : BoundUserInterfaceMessage;
+
+[Serializable, NetSerializable]
+public sealed record NCAtmFineSummary(long Id, string Article, string Reason, int Amount,
+    NCPoliceFineStatus Status, DateTime DueAt);
+
+[Serializable, NetSerializable]
+public sealed class NCAtmPayFineMessage(long fineId) : BoundUserInterfaceMessage
+{
+    public readonly long FineId = fineId;
+}

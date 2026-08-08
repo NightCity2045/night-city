@@ -17,6 +17,8 @@ public sealed partial class NCAtmWindow : FancyWindow
     public event Action? OnDeposit;
     public event Action<string, string>? OnLogin;
     public event Action? OnLogout;
+    public event Action<long>? OnPayFine;
+    private long? _selectedFineId;
 
     public NCAtmWindow()
     {
@@ -37,6 +39,16 @@ public sealed partial class NCAtmWindow : FancyWindow
             }
         };
         LogoutButton.OnPressed += _ => OnLogout?.Invoke();
+        FinesList.OnItemSelected += args =>
+        {
+            _selectedFineId = FinesList[args.ItemIndex].Metadata is long fineId ? fineId : null;
+            PayFineButton.Disabled = _selectedFineId == null;
+        };
+        PayFineButton.OnPressed += _ =>
+        {
+            if (_selectedFineId is { } fineId)
+                OnPayFine?.Invoke(fineId);
+        };
     }
 
     public void UpdateState(NCAtmBoundUserInterfaceState state)
@@ -53,6 +65,16 @@ public sealed partial class NCAtmWindow : FancyWindow
         WithdrawButton.Disabled = !state.IsLoggedIn;
         WithdrawEdit.Editable = state.IsLoggedIn;
         DepositButton.Disabled = !state.IsLoggedIn || state.DepositAmount <= 0;
+        FinesList.Clear();
+        _selectedFineId = null;
+        PayFineButton.Disabled = true;
+        foreach (var fine in state.Fines)
+        {
+            FinesList.AddItem(Loc.GetString("nc-atm-fine-line",
+                ("id", fine.Id), ("article", fine.Article), ("amount", fine.Amount),
+                ("due", fine.DueAt.ToLocalTime().ToString("g"))), metadata: fine.Id);
+        }
+        NoFinesLabel.Visible = state.Fines.Count == 0;
 
         if (state.IsLoggedIn)
         {
