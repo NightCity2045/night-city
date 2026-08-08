@@ -926,7 +926,41 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("job", (string)null);
                 });
 
-            // NC start - Persistent character employment model.
+            modelBuilder.Entity("Content.Server.Database.NCCharacterBankAccount", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("account_number");
+
+                    b.Property<int>("Balance")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("balance");
+
+                    b.Property<string>("Pin")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("pin");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_character_bank_account");
+
+                    b.HasIndex("AccountNumber")
+                        .IsUnique();
+
+                    b.ToTable("nc_character_bank_account", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
                 {
                     b.Property<int>("ProfileId")
@@ -958,7 +992,6 @@ namespace Content.Server.Database.Migrations.Sqlite
 
                     b.ToTable("nc_character_employment", (string)null);
                 });
-            // NC end
 
             modelBuilder.Entity("Content.Server.Database.PlayTime", b =>
                 {
@@ -1125,11 +1158,9 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasColumnType("jsonb")
                         .HasColumnName("markings");
 
-                    // NC start - Per-character initial department.
                     b.Property<string>("NCDepartmentPreference")
                         .HasColumnType("TEXT")
                         .HasColumnName("ncdepartment_preference");
-                    // NC end
 
                     b.Property<byte[]>("OrganMarkings")
                         .HasColumnType("jsonb")
@@ -1903,7 +1934,16 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Profile");
                 });
 
-            // NC start - Character employment belongs to exactly one profile.
+            modelBuilder.Entity("Content.Server.Database.NCCharacterBankAccount", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCCharacterBankAccount", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_bank_account_profile_profile_id");
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
                 {
                     b.HasOne("Content.Server.Database.Profile", "Profile")
@@ -1946,7 +1986,6 @@ namespace Content.Server.Database.Migrations.Sqlite
 
                     b.Navigation("LastSeenHWId");
                 });
-            // NC end
 
             modelBuilder.Entity("Content.Server.Database.Profile", b =>
                 {
@@ -2175,9 +2214,7 @@ namespace Content.Server.Database.Migrations.Sqlite
 
                     b.Navigation("Loadouts");
 
-                    // NC start - Optional current employment navigation.
                     b.Navigation("NCEmployment");
-                    // NC end
 
                     b.Navigation("Traits");
                 });

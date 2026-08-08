@@ -980,6 +980,44 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("job", (string)null);
                 });
 
+            // NC start - Persistent character bank account model.
+            modelBuilder.Entity("Content.Server.Database.NCCharacterBankAccount", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("account_number");
+
+                    b.Property<int>("Balance")
+                        .HasColumnType("integer")
+                        .HasColumnName("balance");
+
+                    b.Property<string>("Pin")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)")
+                        .HasColumnName("pin");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_character_bank_account");
+
+                    b.HasIndex("AccountNumber")
+                        .IsUnique();
+
+                    b.ToTable("nc_character_bank_account", (string)null);
+                });
+
+            // NC end
+
             // NC start - Persistent character employment model.
             modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
                 {
@@ -1985,6 +2023,19 @@ namespace Content.Server.Database.Migrations.Postgres
 
                     b.Navigation("Profile");
                 });
+
+            // NC start - Bank account belongs to exactly one profile.
+            modelBuilder.Entity("Content.Server.Database.NCCharacterBankAccount", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCCharacterBankAccount", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_bank_account_profile_profile_id");
+                });
+
+            // NC end
 
             // NC start - Character employment belongs to exactly one profile.
             modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
