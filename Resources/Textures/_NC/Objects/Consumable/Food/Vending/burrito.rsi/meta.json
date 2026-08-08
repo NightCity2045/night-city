@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-4.0",
+  "copyright": "Made by Ceterai on GitHub for NightStation.",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "icon"
+    },
+    {
+      "name": "icon_half"
+    },
+    {
+      "name": "icon_sealed"
+    },
+    {
+      "name": "icon_empty"
+    }
+  ]
+}

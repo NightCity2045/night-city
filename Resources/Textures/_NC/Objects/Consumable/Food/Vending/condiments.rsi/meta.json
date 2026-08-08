@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-4.0",
+  "copyright": "Made by Ceterai on GitHub for NightStation.",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "packet-empty"
+    },
+    {
+      "name": "packet-trash"
+    },
+    {
+      "name": "packet-layer"
+    },
+    {
+      "name": "packet-layer-open"
+    },
+    {
+      "name": "packet-trans-1"
+    },
+    {
+      "name": "packet-trans-2"
+    },
+    {
+      "name": "packet-solid-1"
+    },
+    {
+      "name": "packet-solid-2"
+    }
+  ]
+}

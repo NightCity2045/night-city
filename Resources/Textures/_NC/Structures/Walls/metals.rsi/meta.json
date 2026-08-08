@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-4.0",
+  "copyright": "By alze_1",
+  "size": {
+    "x": 32,
+    "y": 64
+  },
+  "states": [
+    {
+      "name": "full"
+    },
+    {
+      "name": "metals0",
+      "directions": 4
+    },
+    {
+      "name": "metals1",
+      "directions": 4
+    },
+    {
+      "name": "metals2",
+      "directions": 4
+    },
+    {
+      "name": "metals3",
+      "directions": 4
+    },
+    {
+      "name": "metals4",
+      "directions": 4
+    },
+    {
+      "name": "metals5",
+      "directions": 4
+    },
+    {
+      "name": "metals6",
+      "directions": 4
+    },
+    {
+      "name": "metals7",
+      "directions": 4
+    }
+  ]
+}

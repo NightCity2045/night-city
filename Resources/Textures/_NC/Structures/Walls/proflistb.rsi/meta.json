@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-4.0",
+  "copyright": "By alze_1",
+  "size": {
+    "x": 32,
+    "y": 64
+  },
+  "states": [
+    {
+      "name": "full"
+    },
+    {
+      "name": "proflistb0",
+      "directions": 4
+    },
+    {
+      "name": "proflistb1",
+      "directions": 4
+    },
+    {
+      "name": "proflistb2",
+      "directions": 4
+    },
+    {
+      "name": "proflistb3",
+      "directions": 4
+    },
+    {
+      "name": "proflistb4",
+      "directions": 4
+    },
+    {
+      "name": "proflistb5",
+      "directions": 4
+    },
+    {
+      "name": "proflistb6",
+      "directions": 4
+    },
+    {
+      "name": "proflistb7",
+      "directions": 4
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-4.0",
+    "copyright": "Producted by fichty for 300 bucks to Night City 2045 project. Steal it and I fist ur ahh",
+
+    "size": {
+        "x": 8,
+        "y": 8
+    },
+    "states": [
+        {
+            "name": "biotech"
+        },
+        {
+            "name": "biotech_agrariy"
+        },
+        {
+            "name": "biotech_medick"
+        },
+        {
+            "name": "biotech_medteh"
+        },
+        {
+            "name": "biotech_netruner"
+        },
+        {
+            "name": "biotech_oficer"
+        },
+        {
+            "name": "biotech_rukuvoditel"
+        },
+        {
+            "name": "biotech_teh"
+        },
+        {
+            "name": "biotech_zaparamedick"
+        },
+        {
+            "name": "civ_citizen"
+        },
+        {
+            "name": "civ_edgeruner"
+        },
+        {
+            "name": "civ_fixer"
+        },
+        {
+            "name": "civ_netruner"
+        },
+        {
+            "name": "civ_ripper"
+        },
+        {
+            "name": "ncpd_inspector"
+        },
+        {
+            "name": "ncpd_Letenant"
+        },
+        {
+            "name": "ncpd_MaxTraher"
+        },
+        {
+            "name": "ncpd_Nachalnik"
+        },
+        {
+            "name": "ncpd_policer"
+        },
+		{
+            "name": "ncpd_policer_serg"
+        },
+        {
+            "name": "ncpd_policer_commander"
+        },
+        {
+            "name": "ncpd_Tac"
+        },
+		{
+            "name": "dozor"
+        },
+		{
+            "name": "dozor_2"
+        },
+		{
+            "name": "dozor_3"
+        },
+		{
+            "name": "trauma-intern"
+        },
+        {
+            "name": "trauma"
+        },
+        {
+            "name": "trauma_coroner"
+        },
+        {
+            "name": "trauma-glava"
+        },
+        {
+            "name": "trauma-paramed"
+        },
+        {
+            "name": "trauma-psihologophobia"
+        },
+        {
+            "name": "trauma-tehnik"
+        },
+        {
+            "name": "traumator"
+        }
+    ]
+}

@@ -1,0 +1,120 @@
+
+- type: entity
+  parent: WallSolid
+  id: NCWalMetals
+  name: ent-NCWalMetals
+  description: ent-NCWalMetals-desc
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Walls/metals.rsi
+  - type: Icon
+    sprite: _NC/Structures/Walls/metals.rsi
+  - type: IconSmooth
+    key: walls
+    base: metals
+
+- type: entity
+  parent: WallSolid
+  id: NCWalMetalsa
+  name: ent-NCWalMetalsa
+  description: ent-NCWalMetalsa-desc
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Walls/metalsa.rsi
+  - type: Icon
+    sprite: _NC/Structures/Walls/metalsa.rsi
+  - type: IconSmooth
+    key: walls
+    base: metalsa
+
+- type: entity
+  parent: WallSolid
+  id: NCWalbeton
+  name: ent-NCWalbeton
+  description: ent-NCWalbeton-desc
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Walls/beton.rsi
+  - type: Icon
+    sprite: _NC/Structures/Walls/beton.rsi
+  - type: IconSmooth
+    key: walls
+    base: beton
+
+- type: entity
+  parent: WallSolid
+  id: NCWalproflista
+  name: профлист
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Walls/proflista.rsi
+  - type: Icon
+    sprite: _NC/Structures/Walls/proflista.rsi
+  - type: IconSmooth
+    key: walls
+    base: proflista
+
+- type: entity
+  parent: WallSolid
+  id: NCWalproflistb
+  name: профлист из стали
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Walls/proflistb.rsi
+  - type: Icon
+    sprite: _NC/Structures/Walls/proflistb.rsi
+  - type: IconSmooth
+    key: walls
+    base: proflistb
+
+- type: entity
+  parent: WallSolid
+  id: NCWalproflist
+  name: профлист зелёный
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Walls/proflist.rsi
+  - type: Icon
+    sprite: _NC/Structures/Walls/proflist.rsi
+  - type: IconSmooth
+    key: walls
+    base: proflist
+
+- type: entity
+  parent: WallSolid
+  id: NCWalproflistd
+  name: профлист красный
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Walls/proflistd.rsi
+  - type: Icon
+    sprite: _NC/Structures/Walls/proflistd.rsi
+  - type: IconSmooth
+    key: walls
+    base: proflistd
+
+- type: entity
+  parent: WallSolid
+  id: NCWalprofliste
+  name: профлист из меди
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Walls/profliste.rsi
+  - type: Icon
+    sprite: _NC/Structures/Walls/profliste.rsi
+  - type: IconSmooth
+    key: walls
+    base: profliste
+
+- type: entity
+  parent: WallSolid
+  id: NCWalproflistg
+  name: профлист синий
+  components:
+  - type: Sprite
+    sprite: _NC/Structures/Walls/proflistg.rsi
+  - type: Icon
+    sprite: _NC/Structures/Walls/proflistg.rsi
+  - type: IconSmooth
+    key: walls
+    base: proflistg
