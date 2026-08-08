@@ -4,6 +4,8 @@
 
 using Content.Server.Database;
 using Content.Shared._NC.Identity;
+using Content.Shared._NC.Preferences;
+using Content.Shared.Preferences;
 using Content.Shared.Roles;
 using Robust.Shared.Network;
 using Robust.Shared.Prototypes;
@@ -14,6 +16,12 @@ namespace Content.Server.Preferences.Managers;
 public sealed partial class ServerPreferencesManager
 {
     private readonly Dictionary<NetUserId, Dictionary<int, NCCharacterRuntimeData>> _ncCharacterData = new();
+
+    private void InitializeNCEmploymentNetworking()
+    {
+        _netManager.RegisterNetMessage<NCEmploymentSnapshotMessage>();
+        _netManager.RegisterNetMessage<NCResignEmploymentMessage>(HandleNCResignEmployment);
+    }
 
     private void CacheNCCharacterData(NetUserId userId, Preference preference)
     {
@@ -35,6 +43,10 @@ public sealed partial class ServerPreferencesManager
         }
 
         _ncCharacterData[userId] = characters;
+
+        // Lobby clients receive changes made by personnel consoles without reconnecting.
+        if (_cachedPlayerPrefs.TryGetValue(userId, out var preferences) && preferences.PrefsLoaded)
+            SendNCEmploymentSnapshot(userId);
     }
 
     private async Task RefreshNCCharacterData(NetUserId userId)
@@ -58,6 +70,10 @@ public sealed partial class ServerPreferencesManager
         }
 
         _ncCharacterData[userId] = characters;
+
+        // Push authoritative changes made after the lobby preferences finished loading.
+        if (_cachedPlayerPrefs.TryGetValue(userId, out var preferences) && preferences.PrefsLoaded)
+            SendNCEmploymentSnapshot(userId);
     }
 
     public bool TryGetSelectedNCCharacterId(NetUserId userId, out NCCharacterId characterId)
@@ -98,19 +114,59 @@ public sealed partial class ServerPreferencesManager
         return RefreshNCCharacterData(userId);
     }
 
+    private void SendNCEmploymentSnapshot(NetUserId userId)
+    {
+        if (!_playerManager.TryGetSessionById(userId, out var session) ||
+            !_ncCharacterData.TryGetValue(userId, out var characters))
+        {
+            return;
+        }
+
+        var message = new NCEmploymentSnapshotMessage();
+        foreach (var (slot, data) in characters)
+        {
+            if (data.HasEmploymentRecord)
+                message.Employment[slot] = data.Job?.Id;
+        }
+
+        _netManager.ServerSendMessage(message, session.Channel);
+    }
+
+    private async void HandleNCResignEmployment(NCResignEmploymentMessage message)
+    {
+        if (!_playerManager.TryGetSessionByChannel(message.MsgChannel, out var session) ||
+            !TryGetSelectedNCData(session.UserId, out var character) ||
+            character.Job == null)
+        {
+            SendNCEmploymentSnapshot(message.MsgChannel.UserId);
+            return;
+        }
+
+        if (await _db.ResignNCCharacterEmploymentAsync(session.UserId, character.CharacterId.Value))
+        {
+            // NC - The old lobby department choice must not silently select or restore the resigned position.
+            await ClearSelectedNCDepartmentPreferenceAsync(session.UserId);
+            await RefreshNCCharacterData(session.UserId);
+        }
+        else
+            SendNCEmploymentSnapshot(session.UserId);
+    }
+
     /// <summary>
-    /// Creates the character's first employment from the selected department.
-    /// A previous record, including a terminated one, can only be changed by the personnel workflow.
+    /// Creates employment from an explicitly selected department.
+    /// Terminated employment can only be restored after the player changes and saves the department choice.
     /// </summary>
     private async Task CreateNCEntryEmploymentIfNeeded(
         NetUserId userId,
         int slot,
-        ProtoId<DepartmentPrototype>? departmentId)
+        ProtoId<DepartmentPrototype>? departmentId,
+        bool allowTerminated = false)
     {
         if (departmentId is not { } selectedDepartment ||
             !_ncCharacterData.TryGetValue(userId, out var characters) ||
             !characters.TryGetValue(slot, out var character) ||
-            character.HasEmploymentRecord ||
+            character.Job != null ||
+            (character.HasEmploymentRecord && !allowTerminated) ||
             !_prototypeManager.TryIndex(selectedDepartment, out var department) ||
             !department.NCSelectable ||
             department.NCEntryJob is not { } entryJob ||
@@ -121,6 +177,42 @@ public sealed partial class ServerPreferencesManager
 
         if (await _db.SetNCCharacterEmploymentAsync(userId, character.CharacterId.Value, entryJob))
             await RefreshNCCharacterData(userId);
+    }
+
+    /// <summary>
+    /// Clears the obsolete lobby preference after a voluntary resignation and synchronizes it to the client.
+    /// </summary>
+    private async Task ClearSelectedNCDepartmentPreferenceAsync(NetUserId userId)
+    {
+        if (!_cachedPlayerPrefs.TryGetValue(userId, out var preferences) ||
+            preferences.Prefs is not { } playerPreferences ||
+            !playerPreferences.Characters.TryGetValue(playerPreferences.SelectedCharacterIndex, out var profile) ||
+            profile.NCDepartmentPreference == null)
+        {
+            return;
+        }
+
+        var clearedProfile = profile.WithNCDepartmentPreference(null);
+        var characters = new Dictionary<int, HumanoidCharacterProfile>(playerPreferences.Characters)
+        {
+            [playerPreferences.SelectedCharacterIndex] = clearedProfile,
+        };
+        preferences.Prefs = new PlayerPreferences(
+            characters,
+            playerPreferences.SelectedCharacterIndex,
+            playerPreferences.AdminOOCColor,
+            playerPreferences.ConstructionFavorites);
+
+        await _db.SaveCharacterSlotAsync(userId, clearedProfile, playerPreferences.SelectedCharacterIndex);
+
+        if (!_playerManager.TryGetSessionById(userId, out var session))
+            return;
+
+        _netManager.ServerSendMessage(new MsgPreferencesAndSettings
+        {
+            Preferences = preferences.Prefs,
+            Settings = new GameSettings { MaxCharacterSlots = MaxCharacterSlots },
+        }, session.Channel);
     }
 
     private bool TryGetSelectedNCData(NetUserId userId, out NCCharacterRuntimeData data)

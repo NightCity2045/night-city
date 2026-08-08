@@ -7,6 +7,7 @@ using Content.Shared.GameTicking;
 using Content.Shared.Preferences;
 using Content.Shared.Preferences.Loadouts;
 using Content.Shared.Roles;
+using Content.Shared.StatusIcon; // NC - Department cards use their own data-driven icons.
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
@@ -123,6 +124,24 @@ public sealed partial class HumanoidProfileEditor
             .ToList();
         ncDepartments.Sort(DepartmentUIComparer.Instance);
 
+        ProtoId<JobPrototype>? employmentJob = null;
+        var hasEmploymentRecord = CharacterSlot is { } employmentSlot &&
+                                  _preferencesManager.TryGetNCEmploymentRecord(employmentSlot, out employmentJob);
+        var hasActiveEmployment = hasEmploymentRecord && employmentJob != null;
+        JobPrototype? activeJob = null;
+        ProtoId<DepartmentPrototype>? activeDepartment = null;
+        if (employmentJob is { } activeJobId && _prototypeManager.TryIndex(activeJobId, out activeJob))
+        {
+            foreach (var department in ncDepartments)
+            {
+                if (!department.Roles.Contains(activeJobId))
+                    continue;
+
+                activeDepartment = department.ID;
+                break;
+            }
+        }
+
         if (ncDepartments.Count > 0)
         {
             PreferenceUnavailableButton.Visible = false;
@@ -151,9 +170,14 @@ public sealed partial class HumanoidProfileEditor
             JobList.AddChild(grid);
 
             var residentJob = _prototypeManager.Index<JobPrototype>(SharedGameTicker.FallbackOverflowJob);
+            // NC - Existing employment controls both the preview and selection; stale entry preferences are ignored.
+            if (hasActiveEmployment)
+                JobOverride = activeJob;
+
             AddDepartmentCard(
                 null,
                 residentJob,
+                "NCDepartmentIconResident",
                 Loc.GetString("job-name-passenger"),
                 Loc.GetString("job-description-passenger"),
                 Color.FromHex("#777781"));
@@ -170,6 +194,7 @@ public sealed partial class HumanoidProfileEditor
                 AddDepartmentCard(
                     department.ID,
                     entryJob,
+                    department.NCIcon,
                     Loc.GetString(department.Name),
                     Loc.GetString(department.Description),
                     department.Color);
@@ -180,27 +205,54 @@ public sealed partial class HumanoidProfileEditor
             void AddDepartmentCard(
                 ProtoId<DepartmentPrototype>? departmentId,
                 JobPrototype previewJob,
+                ProtoId<JobIconPrototype>? departmentIcon,
                 string title,
                 string description,
                 Color accentColor)
             {
-                var selected = Profile?.NCDepartmentPreference == departmentId;
-                var iconPrototype = _prototypeManager.Index(previewJob.Icon);
+                var selected = hasActiveEmployment
+                    ? departmentId == activeDepartment
+                    : Profile?.NCDepartmentPreference == departmentId;
+                var isActiveDepartment = hasActiveEmployment &&
+                                         departmentId == activeDepartment;
+                // NC - Militech and Zhirafa retain the entry-job fallback until dedicated _NC art exists.
+                var iconPrototype = _prototypeManager.Index(departmentIcon ?? previewJob.Icon);
                 var selectButton = new Button
                 {
-                    Text = Loc.GetString(selected
-                        ? "nc-character-department-selected"
-                        : departmentId == null
-                            ? "nc-character-resident-select"
-                            : "nc-character-department-apply"),
-                    Disabled = selected,
+                    Text = Loc.GetString(isActiveDepartment
+                        ? "nc-character-employment-resign"
+                        : selected
+                            ? "nc-character-department-selected"
+                            : departmentId == null
+                                ? "nc-character-resident-select"
+                                : "nc-character-department-apply"),
+                    Disabled = hasActiveEmployment ? !isActiveDepartment : selected,
                     MinWidth = 120,
                     HorizontalAlignment = HAlignment.Right,
                     VerticalAlignment = VAlignment.Center,
                 };
 
+                var confirmingResignation = false;
                 selectButton.OnPressed += _ =>
                 {
+                    if (isActiveDepartment)
+                    {
+                        if (!confirmingResignation)
+                        {
+                            confirmingResignation = true;
+                            selectButton.Text = Loc.GetString("nc-character-employment-resign-confirm");
+                            selectButton.AddStyleClass("negative");
+                            return;
+                        }
+
+                        selectButton.Disabled = true;
+                        _preferencesManager.ResignSelectedNCEmployment();
+                        return;
+                    }
+
+                    if (hasActiveEmployment)
+                        return;
+
                     if (Profile == null)
                         return;
 
@@ -218,7 +270,9 @@ public sealed partial class HumanoidProfileEditor
                     MaxWidth = 350,
                     Margin = new Thickness(0, 8, 0, 0),
                 };
-                descriptionLabel.SetMessage(description);
+                descriptionLabel.SetMessage(isActiveDepartment && activeJob != null
+                    ? $"{description}\n{Loc.GetString("nc-character-employment-current-position", ("job", activeJob.LocalizedName))}"
+                    : description);
 
                 grid.AddChild(new PanelContainer
                 {

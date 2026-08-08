@@ -16,6 +16,7 @@ public partial interface IServerDbManager
 {
     Task<IReadOnlyList<NCCharacterEmploymentData>> GetNCCharacterEmploymentDataAsync(NetUserId userId);
     Task<bool> SetNCCharacterEmploymentAsync(NetUserId userId, int profileId, ProtoId<JobPrototype>? job);
+    Task<bool> ResignNCCharacterEmploymentAsync(NetUserId userId, int profileId);
 }
 
 public sealed partial class ServerDbManager
@@ -33,6 +34,12 @@ public sealed partial class ServerDbManager
     {
         DbWriteOpsMetric.Inc();
         return RunDbCommand(() => _db.SetNCCharacterEmploymentAsync(userId, profileId, job));
+    }
+
+    public Task<bool> ResignNCCharacterEmploymentAsync(NetUserId userId, int profileId)
+    {
+        DbWriteOpsMetric.Inc();
+        return RunDbCommand(() => _db.ResignNCCharacterEmploymentAsync(userId, profileId));
     }
 }
 
@@ -112,6 +119,8 @@ public abstract partial class ServerDbBase
             {
                 EventType = previousState == null
                     ? NCEmploymentEventType.EntrySelected
+                    : previousState == NCEmploymentState.Terminated && profile.NCEmployment.State == NCEmploymentState.Active
+                        ? NCEmploymentEventType.Hired
                     : NCEmploymentEventType.AdministrativeChange,
                 PreviousJobPrototypeId = previousJob,
                 NewJobPrototypeId = profile.NCEmployment.State == NCEmploymentState.Active
@@ -121,12 +130,51 @@ public abstract partial class ServerDbBase
                 NewState = profile.NCEmployment.State,
                 Reason = previousState == null
                     ? "Initial department selection"
+                    : previousState == NCEmploymentState.Terminated && profile.NCEmployment.State == NCEmploymentState.Active
+                        ? "Department selected after previous employment ended"
                     : "Administrative employment change",
                 ActorProfileId = profile.Id,
                 ActorName = profile.CharacterName,
                 CreatedAt = now,
             });
         }
+
+        await db.DbContext.SaveChangesAsync();
+        return true;
+    }
+
+    /// <summary>
+    /// Voluntarily terminates the authenticated user's own selected character employment.
+    /// This path is separate from administrative changes so the personnel history remains truthful.
+    /// </summary>
+    public async Task<bool> ResignNCCharacterEmploymentAsync(NetUserId userId, int profileId)
+    {
+        await using var db = await GetDb();
+        var profile = await db.DbContext.Profile
+            .Include(value => value.Preference)
+            .Include(value => value.NCEmployment)
+            .ThenInclude(value => value!.Events)
+            .SingleOrDefaultAsync(value => value.Id == profileId && value.Preference.UserId == userId.UserId);
+
+        if (profile?.NCEmployment is not { State: NCEmploymentState.Active } employment)
+            return false;
+
+        var now = DateTime.UtcNow;
+        var previousJob = employment.JobPrototypeId;
+        employment.State = NCEmploymentState.Terminated;
+        employment.UpdatedAt = now;
+        employment.Events.Add(new NCEmploymentEvent
+        {
+            EventType = NCEmploymentEventType.Resigned,
+            PreviousJobPrototypeId = previousJob,
+            NewJobPrototypeId = null,
+            PreviousState = NCEmploymentState.Active,
+            NewState = NCEmploymentState.Terminated,
+            Reason = "Voluntary resignation",
+            ActorProfileId = profile.Id,
+            ActorName = profile.CharacterName,
+            CreatedAt = now,
+        });
 
         await db.DbContext.SaveChangesAsync();
         return true;

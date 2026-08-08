@@ -11,6 +11,7 @@
   startingBudget: 5000
   ncSelectable: true
   ncEntryJob: NCPDCadet
+  ncIcon: NCDepartmentIconNCPD
   ncPersonnelManagers: [ NCPDChief, NCPDCommander, NCPDLieutenant ]
   ncPositionLimits:
     NCPDChief: 1
@@ -39,6 +40,7 @@
   startingBudget: 10000
   ncSelectable: true
   ncEntryJob: TraumaTeamParamedic
+  ncIcon: NCDepartmentIconTraumaTeam
   ncPersonnelManagers: [ TraumaTeamOperative ]
   ncPositionLimits:
     TraumaTeamOperative: 10
@@ -56,23 +58,24 @@
   weight: 35
   startingBudget: 10000
   ncSelectable: true
-  ncEntryJob: TraumaTeamIntern
-  ncPersonnelManagers: [ TraumaTeamChief ]
+  ncEntryJob: NCMedicalIntern
+  ncIcon: NCDepartmentIconMedical
+  ncPersonnelManagers: [ NCMedicalChief ]
   ncPositionLimits:
-    TraumaTeamChief: 1
-    TraumaTeamCoroner: 4
-    TraumaTeamPsych: 4
-    TraumaTeamDoctor: 12
-    TraumaTeamTech: 6
-    TraumaTeamIntern: 12
+    NCMedicalChief: 1
+    NCMedicalCoroner: 4
+    NCMedicalPsychologist: 4
+    NCMedicalDoctor: 12
+    NCMedicalTechnician: 6
+    NCMedicalIntern: 12
   ncPositionRanks:
-    TraumaTeamChief: 100
-    TraumaTeamCoroner: 70
-    TraumaTeamPsych: 60
-    TraumaTeamDoctor: 50
-    TraumaTeamTech: 40
-    TraumaTeamIntern: 10
-  roles: [ TraumaTeamChief, TraumaTeamDoctor, TraumaTeamCoroner, TraumaTeamPsych, TraumaTeamIntern, TraumaTeamTech ]
+    NCMedicalChief: 100
+    NCMedicalCoroner: 70
+    NCMedicalPsychologist: 60
+    NCMedicalDoctor: 50
+    NCMedicalTechnician: 40
+    NCMedicalIntern: 10
+  roles: [ NCMedicalChief, NCMedicalDoctor, NCMedicalCoroner, NCMedicalPsychologist, NCMedicalIntern, NCMedicalTechnician ]
 
 - type: department
   id: Biotechnica
@@ -83,6 +86,7 @@
   startingBudget: 15000
   ncSelectable: true
   ncEntryJob: BiotechnicaOperative
+  ncIcon: NCDepartmentIconBiotechnica
   ncPersonnelManagers: [ BiotechnicaChief, BiotechnicaOperativeLead ]
   ncPositionLimits:
     BiotechnicaChief: 1
@@ -155,3 +159,39 @@
     ZhirafaEngineer: 100
     ZhirafaJanitor: 10
   roles: [ ZhirafaJanitor, ZhirafaEngineer ]
+
+# Department selection icons are independent from entry-job icons.
+- type: jobIcon
+  parent: JobIcon
+  id: NCDepartmentIconResident
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: civ_citizen
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCDepartmentIconNCPD
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: ncpd_policer
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCDepartmentIconTraumaTeam
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: trauma-paramed
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCDepartmentIconMedical
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: trauma
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCDepartmentIconBiotechnica
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech

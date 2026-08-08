@@ -59,6 +59,8 @@ namespace Content.Server.Preferences.Managers
             _netManager.RegisterNetMessage<MsgUpdateCharacter>(HandleUpdateCharacterMessage);
             _netManager.RegisterNetMessage<MsgDeleteCharacter>(HandleDeleteCharacterMessage);
             _netManager.RegisterNetMessage<MsgUpdateConstructionFavorites>(HandleUpdateConstructionFavoritesMessage);
+            // NC - Persistent employment is projected separately from editable character preferences.
+            InitializeNCEmploymentNetworking();
             _sawmill = _log.GetSawmill("prefs");
         }
 
@@ -267,6 +269,10 @@ namespace Content.Server.Preferences.Managers
             var curPrefs = prefsData.Prefs!;
             var session = _playerManager.GetSessionById(userId);
 
+            // NC - Only an explicit department change may reactivate terminated employment.
+            var ncDepartmentChanged = curPrefs.Characters.TryGetValue(slot, out var previousProfile) &&
+                                      previousProfile.NCDepartmentPreference != profile.NCDepartmentPreference;
+
             profile.EnsureValid(session, _dependencies);
 
             var profiles = new Dictionary<int, HumanoidCharacterProfile>(curPrefs.Characters)
@@ -281,8 +287,12 @@ namespace Content.Server.Preferences.Managers
                 await _db.SaveCharacterSlotAsync(userId, profile, slot);
                 // NC - New character slots receive their stable Profile.Id only after saving.
                 await RefreshNCCharacterData(userId);
-                // NC - A department choice creates only the character's first employment.
-                await CreateNCEntryEmploymentIfNeeded(userId, slot, profile.NCDepartmentPreference);
+                // NC - A saved new choice may create first employment or rehire a resigned character.
+                await CreateNCEntryEmploymentIfNeeded(
+                    userId,
+                    slot,
+                    profile.NCDepartmentPreference,
+                    ncDepartmentChanged);
             }
         }
 
@@ -456,6 +466,8 @@ namespace Content.Server.Preferences.Managers
                 MaxCharacterSlots = MaxCharacterSlots
             };
             _netManager.ServerSendMessage(msg, session.Channel);
+            // NC - Send authoritative positions after the editable character profiles.
+            SendNCEmploymentSnapshot(session.UserId);
         }
 
         public void OnClientDisconnected(ICommonSession session)

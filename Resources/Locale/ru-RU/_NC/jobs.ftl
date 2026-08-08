@@ -95,3 +95,6 @@ job-name-zhirafa-janitor = Работник санитарной службы Zh
 job-description-zhirafa-janitor = Обслуживает улицы и городские пространства.
 job-name-zhirafa-engineer = Инженер Zhirafa
 job-description-zhirafa-engineer = Обслуживает повреждённую городскую инфраструктуру.
+nc-character-employment-resign = Уволиться
+nc-character-employment-resign-confirm = Подтвердить увольнение
+nc-character-employment-current-position = Текущая должность: {$job}

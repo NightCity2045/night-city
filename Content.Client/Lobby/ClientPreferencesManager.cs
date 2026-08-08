@@ -31,6 +31,8 @@ namespace Content.Client.Lobby
             _netManager.RegisterNetMessage<MsgUpdateCharacter>();
             _netManager.RegisterNetMessage<MsgSelectCharacter>();
             _netManager.RegisterNetMessage<MsgDeleteCharacter>();
+            // NC - Active positions are server-owned and synchronized separately from editable profiles.
+            InitializeNCEmploymentNetworking();
 
             _baseClient.RunLevelChanged += BaseClientOnRunLevelChanged;
         }
@@ -41,6 +43,8 @@ namespace Content.Client.Lobby
             {
                 Settings = default!;
                 Preferences = default!;
+                // NC - Do not show employment from a previous connection while the next snapshot loads.
+                ResetNCEmployment();
             }
         }
 

@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Robust.Shared.Prototypes;
+using Content.Shared.StatusIcon;
 
 namespace Content.Shared.Roles;
 
@@ -25,6 +26,13 @@ public sealed partial class DepartmentPrototype
     /// </summary>
     [DataField("ncEntryJob")]
     public ProtoId<JobPrototype>? NCEntryJob { get; private set; }
+
+    /// <summary>
+    /// Department icon shown by the Night City character editor instead of an entry job icon.
+    /// Departments without one keep the entry-job fallback until dedicated art is available.
+    /// </summary>
+    [DataField("ncIcon")]
+    public ProtoId<JobIconPrototype>? NCIcon { get; private set; }
 
     /// <summary>
     /// Jobs allowed to perform personnel actions for this organization.

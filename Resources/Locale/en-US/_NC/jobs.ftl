@@ -92,3 +92,6 @@ job-name-zhirafa-janitor = Zhirafa Sanitation Worker
 job-description-zhirafa-janitor = Maintains streets and municipal spaces.
 job-name-zhirafa-engineer = Zhirafa Engineer
 job-description-zhirafa-engineer = Maintains damaged urban infrastructure.
+nc-character-employment-resign = Resign
+nc-character-employment-resign-confirm = Confirm resignation
+nc-character-employment-current-position = Current position: {$job}

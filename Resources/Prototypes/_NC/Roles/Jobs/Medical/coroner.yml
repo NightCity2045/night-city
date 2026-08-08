@@ -3,7 +3,7 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 - type: job
-  id: TraumaTeamCoroner
+  id: NCMedicalCoroner
   name: job-name-medical-coroner
   description: job-description-medical-coroner
   playTimeTracker: NCJobMedicalCoroner

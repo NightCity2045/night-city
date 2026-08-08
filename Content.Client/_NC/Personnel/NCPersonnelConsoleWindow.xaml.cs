@@ -167,6 +167,7 @@ public sealed partial class NCPersonnelConsoleWindow : FancyWindow
         {
             "EntrySelected" => Loc.GetString("nc-personnel-reason-entry-selected"),
             "AdministrativeChange" => Loc.GetString("nc-personnel-reason-administrative-change"),
+            "Resigned" => Loc.GetString("nc-personnel-reason-voluntary-resignation"),
             _ => entry.Reason,
         };
     }

@@ -29,6 +29,7 @@ public enum NCEmploymentEventType : byte
     Promoted,
     Demoted,
     Transferred,
+    Resigned,
 }
 
 /// <summary>

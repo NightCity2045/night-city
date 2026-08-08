@@ -1,4 +1,3 @@
-using System.Linq;
 using Content.Client.Humanoid;
 using Content.Shared.Clothing;
 using Content.Shared.Humanoid;
@@ -31,6 +30,7 @@ public sealed partial class CharacterPickerButton : ContainerButton
         ISharedPlayerManager playerMan,
         ButtonGroup group,
         HumanoidCharacterProfile profile,
+        ProtoId<JobPrototype>? ncEmployment,
         bool isSelected)
     {
         RobustXamlLoader.Load(this);
@@ -41,19 +41,16 @@ public sealed partial class CharacterPickerButton : ContainerButton
 
         View.LoadPreview(profile);
 
-        // NC start - Department employment takes precedence over obsolete vanilla job priorities in the picker.
-        if (TryGetNCDisplayJob(prototypeManager, profile, out var ncJob))
+        // NC start - Show the concrete server-owned position, never a stale department preference.
+        if (ncEmployment is { } employmentId && prototypeManager.TryIndex(employmentId, out var ncJob))
         {
-            description = $"{description}\n{ncJob.LocalizedName}";
+            description = TryGetNCDisplayDepartment(prototypeManager, employmentId, out var department)
+                ? $"{description}\n{Loc.GetString(department.Name)} - {ncJob.LocalizedName}"
+                : $"{description}\n{ncJob.LocalizedName}";
         }
         else
         {
-            var highPriorityJob = profile.JobPriorities.SingleOrDefault(p => p.Value == JobPriority.High).Key;
-            if (highPriorityJob != default)
-            {
-                var jobName = prototypeManager.Index(highPriorityJob).LocalizedName;
-                description = $"{description}\n{jobName}";
-            }
+            description = $"{description}\n{Loc.GetString("job-name-passenger")}";
         }
         // NC end
 
@@ -74,5 +71,6 @@ public sealed partial class CharacterPickerButton : ContainerButton
             DeleteButton.Visible = false;
             ConfirmDeleteButton.Visible = true;
         };
+
     }
 }

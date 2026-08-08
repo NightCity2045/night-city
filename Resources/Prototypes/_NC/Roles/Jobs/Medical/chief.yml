@@ -3,7 +3,7 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 - type: job
-  id: TraumaTeamChief
+  id: NCMedicalChief
   name: job-name-medical-chief
   description: job-description-medical-chief
   playTimeTracker: NCJobMedicalChief

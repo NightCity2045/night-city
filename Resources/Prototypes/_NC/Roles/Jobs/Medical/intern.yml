@@ -3,7 +3,7 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 - type: job
-  id: TraumaTeamIntern
+  id: NCMedicalIntern
   name: job-name-medical-intern
   description: job-description-medical-intern
   playTimeTracker: NCJobMedicalIntern
