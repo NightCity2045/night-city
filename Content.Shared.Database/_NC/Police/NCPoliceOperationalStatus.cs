@@ -27,3 +27,43 @@ public enum NCPoliceRecordEventType : byte
     StatusChanged,
     Correction,
 }
+
+public enum NCPoliceCaseStatus : byte
+{
+    Open,
+    UnderInvestigation,
+    Closed,
+    Archived,
+}
+
+public enum NCPoliceCaseSubjectRole : byte
+{
+    PersonOfInterest,
+    Suspect,
+    Victim,
+    Witness,
+    Other,
+}
+
+public enum NCPoliceCaseEntryType : byte
+{
+    Report,
+    StatusChanged,
+    SubjectAdded,
+}
+
+public enum NCPoliceWarrantType : byte
+{
+    Questioning,
+    Search,
+    Detention,
+    Arrest,
+}
+
+public enum NCPoliceWarrantStatus : byte
+{
+    Active,
+    Executed,
+    Revoked,
+    Expired,
+}

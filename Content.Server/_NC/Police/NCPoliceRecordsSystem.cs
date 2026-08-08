@@ -53,6 +53,13 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
         SubscribeLocalEvent<NCPoliceRecordsConsoleComponent, NCPoliceRecordsSearchMessage>(OnSearch);
         SubscribeLocalEvent<NCPoliceRecordsConsoleComponent, NCPoliceRecordsSelectMessage>(OnSelect);
         SubscribeLocalEvent<NCPoliceRecordsConsoleComponent, NCPoliceRecordsChangeStatusMessage>(OnChangeStatus);
+        SubscribeLocalEvent<NCPoliceRecordsConsoleComponent, NCPoliceCreateCaseMessage>(OnCreateCase);
+        SubscribeLocalEvent<NCPoliceRecordsConsoleComponent, NCPoliceSelectCaseMessage>(OnSelectCase);
+        SubscribeLocalEvent<NCPoliceRecordsConsoleComponent, NCPoliceAddCaseSubjectMessage>(OnAddCaseSubject);
+        SubscribeLocalEvent<NCPoliceRecordsConsoleComponent, NCPoliceAddCaseEntryMessage>(OnAddCaseEntry);
+        SubscribeLocalEvent<NCPoliceRecordsConsoleComponent, NCPoliceChangeCaseStatusMessage>(OnChangeCaseStatus);
+        SubscribeLocalEvent<NCPoliceRecordsConsoleComponent, NCPoliceCreateWarrantMessage>(OnCreateWarrant);
+        SubscribeLocalEvent<NCPoliceRecordsConsoleComponent, NCPoliceResolveWarrantMessage>(OnResolveWarrant);
         SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawnComplete);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
     }
@@ -158,6 +165,154 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
         }
     }
 
+    private async void OnCreateCase(EntityUid uid, NCPoliceRecordsConsoleComponent component, NCPoliceCreateCaseMessage args)
+    {
+        if (!TryGetActionContext(uid, args.Actor, out var user, out var view, out var actorId, out var actorName) ||
+            view.Selected is not { } subject || args.Title.Trim().Length is < 1 or > 128 ||
+            args.Summary.Trim().Length is < 1 or > 1024)
+            return;
+
+        try
+        {
+            var policeCase = await _database.CreateNCPoliceCaseAsync(
+                args.Title, args.Summary, subject, actorId, actorName);
+            if (policeCase == null)
+                return;
+
+            view.SelectedCaseId = policeCase.Id;
+            await RefreshOpenViewsAsync();
+        }
+        catch (Exception exception)
+        {
+            HandleDatabaseError(uid, user, "create case", exception);
+        }
+    }
+
+    private async void OnSelectCase(EntityUid uid, NCPoliceRecordsConsoleComponent component, NCPoliceSelectCaseMessage args)
+    {
+        if (args.Actor is not { Valid: true } user || !CanUse(uid, user) ||
+            !_views.TryGetValue((uid, user), out var view) || !view.CaseIds.Contains(args.CaseId))
+            return;
+
+        view.SelectedCaseId = args.CaseId;
+        await SendViewAsync(uid, component, user);
+    }
+
+    private async void OnAddCaseSubject(
+        EntityUid uid,
+        NCPoliceRecordsConsoleComponent component,
+        NCPoliceAddCaseSubjectMessage args)
+    {
+        if (!TryGetActionContext(uid, args.Actor, out var user, out var view, out var actorId, out var actorName) ||
+            view.Selected is not { } subject || view.SelectedCaseId != args.CaseId || !Enum.IsDefined(args.Role))
+            return;
+
+        try
+        {
+            if (await _database.AddNCPoliceCaseSubjectAsync(
+                    args.CaseId, subject, args.Role, actorId, actorName) == null)
+                return;
+            await RefreshOpenViewsAsync();
+        }
+        catch (Exception exception)
+        {
+            HandleDatabaseError(uid, user, "add case subject", exception);
+        }
+    }
+
+    private async void OnAddCaseEntry(
+        EntityUid uid,
+        NCPoliceRecordsConsoleComponent component,
+        NCPoliceAddCaseEntryMessage args)
+    {
+        var text = args.Text.Trim();
+        if (!TryGetActionContext(uid, args.Actor, out var user, out var view, out var actorId, out var actorName) ||
+            view.SelectedCaseId != args.CaseId || text.Length is < 1 or > 1024)
+            return;
+
+        try
+        {
+            if (await _database.AddNCPoliceCaseEntryAsync(args.CaseId, text, actorId, actorName) == null)
+                return;
+            await RefreshOpenViewsAsync();
+        }
+        catch (Exception exception)
+        {
+            HandleDatabaseError(uid, user, "add case report", exception);
+        }
+    }
+
+    private async void OnChangeCaseStatus(
+        EntityUid uid,
+        NCPoliceRecordsConsoleComponent component,
+        NCPoliceChangeCaseStatusMessage args)
+    {
+        var reason = args.Reason.Trim();
+        if (!TryGetActionContext(uid, args.Actor, out var user, out var view, out var actorId, out var actorName) ||
+            view.SelectedCaseId != args.CaseId || !Enum.IsDefined(args.Status) || reason.Length is < 1 or > 1024)
+            return;
+
+        try
+        {
+            if (await _database.SetNCPoliceCaseStatusAsync(
+                    args.CaseId, args.Status, reason, actorId, actorName) == null)
+                return;
+            await RefreshOpenViewsAsync();
+        }
+        catch (Exception exception)
+        {
+            HandleDatabaseError(uid, user, "change case status", exception);
+        }
+    }
+
+    private async void OnCreateWarrant(
+        EntityUid uid,
+        NCPoliceRecordsConsoleComponent component,
+        NCPoliceCreateWarrantMessage args)
+    {
+        var reason = args.Reason.Trim();
+        if (!TryGetActionContext(uid, args.Actor, out var user, out var view, out var actorId, out var actorName) ||
+            view.Selected is not { } target || !Enum.IsDefined(args.Type) || reason.Length is < 1 or > 512 ||
+            args.CaseId is { } caseId && view.SelectedCaseId != caseId)
+            return;
+
+        try
+        {
+            if (await _database.CreateNCPoliceWarrantAsync(
+                    target, args.CaseId, args.Type, reason, actorId, actorName) == null)
+                return;
+            await RefreshOpenViewsAsync();
+        }
+        catch (Exception exception)
+        {
+            HandleDatabaseError(uid, user, "create warrant", exception);
+        }
+    }
+
+    private async void OnResolveWarrant(
+        EntityUid uid,
+        NCPoliceRecordsConsoleComponent component,
+        NCPoliceResolveWarrantMessage args)
+    {
+        var reason = args.Reason.Trim();
+        if (!TryGetActionContext(uid, args.Actor, out var user, out var view, out var actorId, out var actorName) ||
+            !view.WarrantIds.Contains(args.WarrantId) || args.Status == NCPoliceWarrantStatus.Active ||
+            !Enum.IsDefined(args.Status) || reason.Length is < 1 or > 512)
+            return;
+
+        try
+        {
+            if (await _database.ResolveNCPoliceWarrantAsync(
+                    args.WarrantId, args.Status, reason, actorId, actorName) == null)
+                return;
+            await RefreshOpenViewsAsync();
+        }
+        catch (Exception exception)
+        {
+            HandleDatabaseError(uid, user, "resolve warrant", exception);
+        }
+    }
+
     private async void OnPlayerSpawnComplete(PlayerSpawnCompleteEvent args)
     {
         if (!_preferences.TryGetSelectedNCCharacterId(args.Player.UserId, out var characterId))
@@ -208,6 +363,34 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
         return false;
     }
 
+    private bool TryGetActionContext(
+        EntityUid console,
+        EntityUid? actor,
+        out EntityUid user,
+        out ConsoleView view,
+        out NCCharacterId actorCharacterId,
+        out string actorName)
+    {
+        user = actor ?? EntityUid.Invalid;
+        view = null!;
+        actorCharacterId = default;
+        actorName = string.Empty;
+        if (!user.Valid || !CanUse(console, user) || !_views.TryGetValue((console, user), out var foundView) ||
+            !_players.TryGetSessionByEntity(user, out var session) ||
+            !_preferences.TryGetSelectedNCCharacterId(session.UserId, out actorCharacterId))
+            return false;
+
+        view = foundView;
+        actorName = _identity.GetIdentityShortInfo(user, console) ?? MetaData(user).EntityName;
+        return true;
+    }
+
+    private void HandleDatabaseError(EntityUid console, EntityUid user, string operation, Exception exception)
+    {
+        Log.Error($"NCPD records failed to {operation} at {console}: {exception}");
+        _popup.PopupEntity(Loc.GetString("nc-police-records-error"), console, user);
+    }
+
     private async Task SendViewAsync(
         EntityUid uid,
         NCPoliceRecordsConsoleComponent component,
@@ -229,6 +412,22 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
             history = await _database.GetNCPoliceRecordHistoryAsync(selectedId, component.HistoryLimit);
         }
 
+        var cases = await _database.GetNCPoliceCasesAsync(component.CaseListLimit);
+        view.CaseIds.Clear();
+        foreach (var policeCase in cases)
+            view.CaseIds.Add(policeCase.Id);
+
+        NCPoliceCaseData? selectedCase = null;
+        if (view.SelectedCaseId is { } selectedCaseId && view.CaseIds.Contains(selectedCaseId))
+            selectedCase = await _database.GetNCPoliceCaseAsync(selectedCaseId, component.CaseEntryLimit);
+        else
+            view.SelectedCaseId = null;
+
+        var warrants = await _database.GetNCPoliceWarrantsAsync(component.WarrantListLimit);
+        view.WarrantIds.Clear();
+        foreach (var warrant in warrants)
+            view.WarrantIds.Add(warrant.Id);
+
         var summaries = results
             .Select(value => ToSummary(value, _presentThisRound.Contains(value.CharacterId)))
             .OrderByDescending(value => value.PresentThisRound)
@@ -239,6 +438,9 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
             summaries,
             selected == null ? null : ToSummary(selected, _presentThisRound.Contains(selected.CharacterId)),
             history.Select(ToHistory).ToList(),
+            cases.Select(ToCaseSummary).ToList(),
+            selectedCase == null ? null : ToCaseSummary(selectedCase),
+            warrants.Select(ToWarrantSummary).ToList(),
             true), user);
     }
 
@@ -321,10 +523,55 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
             value.CreatedAt);
     }
 
+    private static NCPoliceCaseSummary ToCaseSummary(NCPoliceCaseData value)
+    {
+        return new NCPoliceCaseSummary(
+            value.Id,
+            value.Title,
+            value.Summary,
+            value.Status,
+            value.CreatedByName,
+            value.CreatedAt,
+            value.UpdatedAt,
+            value.Subjects.Select(subject => new NCPoliceCaseSubjectSummary(
+                subject.CharacterId.Value, subject.CharacterName, subject.Role)).ToList(),
+            value.Entries.Select(entry => new NCPoliceCaseEntrySummary(
+                entry.Id,
+                entry.EntryType,
+                entry.Text,
+                entry.PreviousStatus,
+                entry.NewStatus,
+                entry.SubjectCharacterId?.Value,
+                entry.SubjectName,
+                entry.SubjectRole,
+                entry.AuthorName,
+                entry.CreatedAt)).ToList());
+    }
+
+    private static NCPoliceWarrantSummary ToWarrantSummary(NCPoliceWarrantData value)
+    {
+        return new NCPoliceWarrantSummary(
+            value.Id,
+            value.CaseId,
+            value.TargetCharacterId.Value,
+            value.TargetName,
+            value.Type,
+            value.Status,
+            value.Reason,
+            value.IssuedByName,
+            value.IssuedAt,
+            value.ResolvedByName,
+            value.ResolutionReason,
+            value.ResolvedAt);
+    }
+
     private sealed class ConsoleView
     {
         public readonly List<NCCharacterId> ResultIds = new();
+        public readonly HashSet<long> CaseIds = new();
+        public readonly HashSet<long> WarrantIds = new();
         public string Query = string.Empty;
         public NCCharacterId? Selected;
+        public long? SelectedCaseId;
     }
 }

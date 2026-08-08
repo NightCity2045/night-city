@@ -39,3 +39,54 @@ nc-police-status-paroled = Paroled
 nc-police-status-released = Released
 nc-police-status-missing = Missing
 nc-police-status-dangerous = Armed and dangerous
+
+nc-police-tab-dossier = Dossier
+nc-police-tab-cases = Cases
+nc-police-tab-warrants = Warrants
+
+nc-police-cases-list = Police cases
+nc-police-case-title-placeholder = Case title...
+nc-police-case-create = Open case for selected resident
+nc-police-case-select-prompt = Select a case to open its journal.
+nc-police-case-subjects = Linked residents
+nc-police-case-link-resident = Link selected resident
+nc-police-case-reports = Append-only reports
+nc-police-case-add-report = Add report
+nc-police-case-status-reason = IC basis for status change...
+nc-police-case-change-status = Change
+nc-police-case-status-line = Status: {$status}
+nc-police-case-subject-line = {$name} — {$role}
+nc-police-case-entry-line = {$time} | {$author}: {$text}
+nc-police-case-entry-status-changed = Status changed: {$oldStatus} -> {$newStatus}. {$reason}
+nc-police-case-entry-subject-added = Linked resident {$name} as {$role}.
+
+nc-police-case-status-open = Open
+nc-police-case-status-underinvestigation = Under investigation
+nc-police-case-status-closed = Closed
+nc-police-case-status-archived = Archived
+nc-police-case-role-personofinterest = Person of interest
+nc-police-case-role-suspect = Suspect
+nc-police-case-role-victim = Victim
+nc-police-case-role-witness = Witness
+nc-police-case-role-other = Other
+
+nc-police-warrants-list = Warrant registry
+nc-police-warrant-create = Issue warrant for selected resident
+nc-police-warrant-case-link = Linked to case #{$caseId}
+nc-police-warrant-no-case-link = Not linked to a case
+nc-police-warrant-link-selected-case = Link to selected case
+nc-police-warrant-resolve = Resolve warrant
+nc-police-warrant-status-line = Status: {$status}
+nc-police-warrant-reason-line = Basis: {$reason}
+nc-police-warrant-issued-line = Issued by {$actor} at {$time}
+nc-police-warrant-not-resolved = This warrant is still active.
+nc-police-warrant-resolution-line = Resolved by {$actor}: {$reason}
+
+nc-police-warrant-type-questioning = Questioning
+nc-police-warrant-type-search = Search
+nc-police-warrant-type-detention = Detention
+nc-police-warrant-type-arrest = Arrest
+nc-police-warrant-status-active = Active
+nc-police-warrant-status-executed = Executed
+nc-police-warrant-status-revoked = Revoked
+nc-police-warrant-status-expired = Expired

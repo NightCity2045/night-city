@@ -22,4 +22,13 @@ public sealed partial class NCPoliceRecordsConsoleComponent : Component
 
     [DataField]
     public int HistoryLimit = 100;
+
+    [DataField]
+    public int CaseListLimit = 100;
+
+    [DataField]
+    public int CaseEntryLimit = 100;
+
+    [DataField]
+    public int WarrantListLimit = 100;
 }

@@ -34,6 +34,52 @@ public sealed record NCPoliceRecordHistoryEntry(
     string ActorName,
     DateTime CreatedAt);
 
+[Serializable, NetSerializable]
+public sealed record NCPoliceCaseSubjectSummary(
+    int CharacterId,
+    string CharacterName,
+    NCPoliceCaseSubjectRole Role);
+
+[Serializable, NetSerializable]
+public sealed record NCPoliceCaseEntrySummary(
+    long EntryId,
+    NCPoliceCaseEntryType EntryType,
+    string Text,
+    NCPoliceCaseStatus? PreviousStatus,
+    NCPoliceCaseStatus? NewStatus,
+    int? SubjectCharacterId,
+    string? SubjectName,
+    NCPoliceCaseSubjectRole? SubjectRole,
+    string AuthorName,
+    DateTime CreatedAt);
+
+[Serializable, NetSerializable]
+public sealed record NCPoliceCaseSummary(
+    long CaseId,
+    string Title,
+    string Summary,
+    NCPoliceCaseStatus Status,
+    string CreatedByName,
+    DateTime CreatedAt,
+    DateTime UpdatedAt,
+    List<NCPoliceCaseSubjectSummary> Subjects,
+    List<NCPoliceCaseEntrySummary> Entries);
+
+[Serializable, NetSerializable]
+public sealed record NCPoliceWarrantSummary(
+    long WarrantId,
+    long? CaseId,
+    int TargetCharacterId,
+    string TargetName,
+    NCPoliceWarrantType Type,
+    NCPoliceWarrantStatus Status,
+    string Reason,
+    string IssuedByName,
+    DateTime IssuedAt,
+    string? ResolvedByName,
+    string? ResolutionReason,
+    DateTime? ResolvedAt);
+
 /// <summary>
 /// Per-user console update. A direct BUI message avoids the vanilla console problem where users share one selection.
 /// </summary>
@@ -42,11 +88,17 @@ public sealed class NCPoliceRecordsUpdateMessage(
     List<NCPoliceRecordSummary> searchResults,
     NCPoliceRecordSummary? selectedRecord,
     List<NCPoliceRecordHistoryEntry> history,
+    List<NCPoliceCaseSummary> cases,
+    NCPoliceCaseSummary? selectedCase,
+    List<NCPoliceWarrantSummary> warrants,
     bool canEdit) : BoundUserInterfaceMessage
 {
     public readonly List<NCPoliceRecordSummary> SearchResults = searchResults;
     public readonly NCPoliceRecordSummary? SelectedRecord = selectedRecord;
     public readonly List<NCPoliceRecordHistoryEntry> History = history;
+    public readonly List<NCPoliceCaseSummary> Cases = cases;
+    public readonly NCPoliceCaseSummary? SelectedCase = selectedCase;
+    public readonly List<NCPoliceWarrantSummary> Warrants = warrants;
     public readonly bool CanEdit = canEdit;
 }
 
@@ -71,4 +123,66 @@ public sealed class NCPoliceRecordsChangeStatusMessage(
     public readonly int CharacterId = characterId;
     public readonly NCPoliceOperationalStatus Status = status;
     public readonly string? Reason = reason;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCPoliceCreateCaseMessage(string title, string summary) : BoundUserInterfaceMessage
+{
+    public readonly string Title = title;
+    public readonly string Summary = summary;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCPoliceSelectCaseMessage(long caseId) : BoundUserInterfaceMessage
+{
+    public readonly long CaseId = caseId;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCPoliceAddCaseSubjectMessage(
+    long caseId,
+    NCPoliceCaseSubjectRole role) : BoundUserInterfaceMessage
+{
+    public readonly long CaseId = caseId;
+    public readonly NCPoliceCaseSubjectRole Role = role;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCPoliceAddCaseEntryMessage(long caseId, string text) : BoundUserInterfaceMessage
+{
+    public readonly long CaseId = caseId;
+    public readonly string Text = text;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCPoliceChangeCaseStatusMessage(
+    long caseId,
+    NCPoliceCaseStatus status,
+    string reason) : BoundUserInterfaceMessage
+{
+    public readonly long CaseId = caseId;
+    public readonly NCPoliceCaseStatus Status = status;
+    public readonly string Reason = reason;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCPoliceCreateWarrantMessage(
+    NCPoliceWarrantType type,
+    string reason,
+    long? caseId) : BoundUserInterfaceMessage
+{
+    public readonly NCPoliceWarrantType Type = type;
+    public readonly string Reason = reason;
+    public readonly long? CaseId = caseId;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCPoliceResolveWarrantMessage(
+    long warrantId,
+    NCPoliceWarrantStatus status,
+    string reason) : BoundUserInterfaceMessage
+{
+    public readonly long WarrantId = warrantId;
+    public readonly NCPoliceWarrantStatus Status = status;
+    public readonly string Reason = reason;
 }
