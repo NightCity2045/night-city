@@ -43,7 +43,7 @@
 - type: entity
   parent: IDCardStandard
   id: NCPDInspectorIDCard
-  name: ent-ncpd-inspector-id-card
+  name: NCPD inspector ID
   components:
   - type: Sprite
     layers:
@@ -61,8 +61,8 @@
 - type: entity
   parent: BaseSecurityPDA
   id: NCPDInspectorPDA
-  name: ent-ncpd-inspector-pda
-  description: ent-ncpd-pda-desc
+  name: NCPD inspector PDA
+  description: A rugged department terminal tied to its owner's persistent position.
   components:
   - type: Pda
     id: NCPDInspectorIDCard

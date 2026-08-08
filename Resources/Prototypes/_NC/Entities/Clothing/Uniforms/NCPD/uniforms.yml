@@ -5,8 +5,8 @@
 - type: entity
   parent: [ ClothingUniformBase, ClothingUniformFoldableBase, BaseRestrictedContraband ]
   id: ClothingUniformNCPDPatrol
-  name: ent-clothing-uniform-ncpd-patrol
-  description: ent-clothing-uniform-ncpd-patrol-desc
+  name: NCPD patrol uniform
+  description: A hard-wearing uniform for the underfunded streets of Night City.
   components:
   - type: Sprite
     sprite: _NC/Clothing/Uniforms/Jumpsuits/nspd_normis.rsi
@@ -16,8 +16,8 @@
 - type: entity
   parent: [ ClothingUniformBase, ClothingUniformFoldableBase, BaseRestrictedContraband ]
   id: ClothingUniformNCPDCommand
-  name: ent-clothing-uniform-ncpd-command
-  description: ent-clothing-uniform-ncpd-command-desc
+  name: NCPD command uniform
+  description: A command uniform marking authority within an NCPD precinct.
   components:
   - type: Sprite
     sprite: _NC/Clothing/Uniforms/Jumpsuits/nspd_cool.rsi
@@ -27,8 +27,8 @@
 - type: entity
   parent: [ ClothingUniformBase, ClothingUniformFoldableBase, BaseRestrictedContraband ]
   id: ClothingUniformNCPDChief
-  name: ent-clothing-uniform-ncpd-chief
-  description: ent-clothing-uniform-ncpd-chief-desc
+  name: NCPD chief uniform
+  description: A formal uniform for the politically exposed head of the department.
   components:
   - type: Sprite
     sprite: _NC/Clothing/Uniforms/Jumpsuits/nspd_cool_white.rsi

@@ -993,6 +993,93 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("nc_character_employment", (string)null);
                 });
 
+            // NC start - persistent NCPD records
+            modelBuilder.Entity("Content.Server.Database.NCPoliceRecord", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_by_name");
+
+                    b.Property<int?>("UpdatedByProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("updated_by_profile_id");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_police_record");
+
+                    b.ToTable("nc_police_record", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceRecordEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_police_record_event_id");
+
+                    b.Property<string>("ActorName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("actor_name");
+
+                    b.Property<int?>("ActorProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("actor_profile_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<byte>("EventType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("event_type");
+
+                    b.Property<byte>("NewStatus")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("new_status");
+
+                    b.Property<byte>("PreviousStatus")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("previous_status");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_police_record_event");
+
+                    b.HasIndex("ProfileId", "CreatedAt");
+
+                    b.ToTable("nc_police_record_event", (string)null);
+                });
+
+            // NC end
             modelBuilder.Entity("Content.Server.Database.PlayTime", b =>
                 {
                     b.Property<int>("Id")
@@ -1956,6 +2043,30 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Profile");
                 });
 
+            // NC start - persistent NCPD record relationships
+            modelBuilder.Entity("Content.Server.Database.NCPoliceRecord", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCPoliceRecord", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_police_record_profile_profile_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceRecordEvent", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCPoliceRecord", "Record")
+                        .WithMany("Events")
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_police_record_event_nc_police_record_profile_id");
+
+                    b.Navigation("Record");
+                });
+
+            // NC end
             modelBuilder.Entity("Content.Server.Database.Player", b =>
                 {
                     b.OwnsOne("Content.Server.Database.TypedHwid", "LastSeenHWId", b1 =>
@@ -2166,6 +2277,13 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Options");
                 });
 
+            // NC start - persistent NCPD record navigation
+            modelBuilder.Entity("Content.Server.Database.NCPoliceRecord", b =>
+                {
+                    b.Navigation("Events");
+                });
+
+            // NC end
             modelBuilder.Entity("Content.Server.Database.Player", b =>
                 {
                     b.Navigation("AdminLogs");

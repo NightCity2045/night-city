@@ -40,7 +40,7 @@
 - type: entity
   parent: IDCardStandard
   id: NCPDCommanderIDCard
-  name: ent-ncpd-commander-id-card
+  name: NCPD precinct commander ID
   components:
   - type: Sprite
     layers:
@@ -58,8 +58,8 @@
 - type: entity
   parent: BaseSecurityPDA
   id: NCPDCommanderPDA
-  name: ent-ncpd-commander-pda
-  description: ent-ncpd-pda-desc
+  name: NCPD precinct commander PDA
+  description: A rugged department terminal tied to its owner's persistent position.
   components:
   - type: Pda
     id: NCPDCommanderIDCard

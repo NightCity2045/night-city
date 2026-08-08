@@ -55,6 +55,7 @@ public abstract partial class ServerDbContext
     partial void ConfigureNCModels(ModelBuilder modelBuilder)
     {
         ConfigureNCBankModels(modelBuilder);
+        ConfigureNCPoliceModels(modelBuilder);
 
         modelBuilder.Entity<NCCharacterEmployment>()
             .HasOne(employment => employment.Profile)

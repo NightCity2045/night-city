@@ -6,18 +6,25 @@ using System.Text.Json;
 using Content.Server.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using NpgsqlTypes;
+
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 #nullable disable
 
 namespace Content.Server.Database.Migrations.Postgres
 {
     [DbContext(typeof(PostgresServerDbContext))]
-    partial class PostgresServerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260808102449_NCPersistentPoliceRecords")]
+    partial class NCPersistentPoliceRecords
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1047,7 +1054,6 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("nc_character_employment", (string)null);
                 });
 
-            // NC start - persistent NCPD records
             modelBuilder.Entity("Content.Server.Database.NCPoliceRecord", b =>
                 {
                     b.Property<int>("ProfileId")
@@ -1135,7 +1141,6 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("nc_police_record_event", (string)null);
                 });
 
-            // NC end
             modelBuilder.Entity("Content.Server.Database.PlayTime", b =>
                 {
                     b.Property<int>("Id")
@@ -2128,7 +2133,6 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.Navigation("Profile");
                 });
 
-            // NC start - persistent NCPD record relationships
             modelBuilder.Entity("Content.Server.Database.NCPoliceRecord", b =>
                 {
                     b.HasOne("Content.Server.Database.Profile", null)
@@ -2151,7 +2155,6 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.Navigation("Record");
                 });
 
-            // NC end
             modelBuilder.Entity("Content.Server.Database.Player", b =>
                 {
                     b.OwnsOne("Content.Server.Database.TypedHwid", "LastSeenHWId", b1 =>
@@ -2362,13 +2365,11 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.Navigation("Options");
                 });
 
-            // NC start - persistent NCPD record navigation
             modelBuilder.Entity("Content.Server.Database.NCPoliceRecord", b =>
                 {
                     b.Navigation("Events");
                 });
 
-            // NC end
             modelBuilder.Entity("Content.Server.Database.Player", b =>
                 {
                     b.Navigation("AdminLogs");
