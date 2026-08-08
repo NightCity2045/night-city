@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: BaseComputerAiAccess
+  id: NCComputerPoliceRecords
+  name: NCPD records terminal
+  description: A secured terminal for persistent Night City police dossiers.
+  components:
+  - type: NCPoliceRecordsConsole
+  - type: UserInterface
+    interfaces:
+      enum.NCPoliceRecordsUiKey.Key:
+        type: NCPoliceRecordsBoundUserInterface
+      enum.WiresUiKey.Key:
+        type: WiresBoundUserInterface
+  - type: ActivatableUI
+    key: enum.NCPoliceRecordsUiKey.Key
+  - type: Sprite
+    layers:
+    - map: ["computerLayerBody"]
+      state: computer
+    - map: ["computerLayerKeyboard"]
+      state: generic_keyboard
+    - map: ["computerLayerScreen"]
+      state: explosive
+    - map: ["computerLayerKeys"]
+      state: security_key
+    - map: ["enum.WiresVisualLayers.MaintenancePanel"]
+      state: generic_panel_open
+  - type: PointLight
+    radius: 1.5
+    energy: 4.0
+    color: "#1f8c28"
+  - type: Computer
+    board: NCPoliceRecordsComputerCircuitboard
+  - type: AccessReader
+    access: [[NCPD_Patrol]]
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: NCPoliceRecordsComputerCircuitboard
+  name: NCPD records terminal board
+  description: A computer printed circuit board for an NCPD records terminal.
+  components:
+  - type: Sprite
+    state: cpu_security
+  - type: ComputerBoard
+    prototype: NCComputerPoliceRecords

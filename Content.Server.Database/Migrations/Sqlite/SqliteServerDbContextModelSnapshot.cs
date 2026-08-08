@@ -926,6 +926,631 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("job", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCCharacterBankAccount", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("account_number");
+
+                    b.Property<int>("Balance")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("balance");
+
+                    b.Property<string>("Pin")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("pin");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_character_bank_account");
+
+                    b.HasIndex("AccountNumber")
+                        .IsUnique();
+
+                    b.ToTable("nc_character_bank_account", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("JobPrototypeId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("job_prototype_id");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("started_at");
+
+                    b.Property<byte>("State")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("state");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_character_employment");
+
+                    b.HasIndex("JobPrototypeId");
+
+                    b.ToTable("nc_character_employment", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCEmploymentEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_employment_event_id");
+
+                    b.Property<string>("ActorName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("actor_name");
+
+                    b.Property<int?>("ActorProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("actor_profile_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<byte>("EventType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("event_type");
+
+                    b.Property<string>("NewJobPrototypeId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("new_job_prototype_id");
+
+                    b.Property<byte>("NewState")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("new_state");
+
+                    b.Property<string>("PreviousJobPrototypeId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("previous_job_prototype_id");
+
+                    b.Property<byte?>("PreviousState")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("previous_state");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_employment_event");
+
+                    b.HasIndex("ProfileId", "CreatedAt");
+
+                    b.ToTable("nc_employment_event", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankAccount", b =>
+                {
+                    b.Property<string>("OrganizationPrototypeId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("organization_prototype_id");
+
+                    b.Property<int>("Balance")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("balance");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("OrganizationPrototypeId")
+                        .HasName("PK_nc_organization_bank_account");
+
+                    b.ToTable("nc_organization_bank_account", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankTransaction", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_organization_bank_transaction_id");
+
+                    b.Property<string>("ActorName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("actor_name");
+
+                    b.Property<int?>("ActorProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("actor_profile_id");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("amount");
+
+                    b.Property<int>("BalanceAfter")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("balance_after");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("OrganizationPrototypeId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("organization_prototype_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.Property<byte>("Type")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_organization_bank_transaction");
+
+                    b.HasIndex("OrganizationPrototypeId", "CreatedAt");
+
+                    b.ToTable("nc_organization_bank_transaction", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceCase", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_police_case_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedByName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_by_name");
+
+                    b.Property<int?>("CreatedByProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("created_by_profile_id");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("summary");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("title");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_police_case");
+
+                    b.ToTable("nc_police_case", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceCaseEntry", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_police_case_entry_id");
+
+                    b.Property<string>("AuthorName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("author_name");
+
+                    b.Property<int?>("AuthorProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("author_profile_id");
+
+                    b.Property<long>("CaseId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("case_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<byte>("EntryType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("entry_type");
+
+                    b.Property<byte?>("NewStatus")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("new_status");
+
+                    b.Property<byte?>("PreviousStatus")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("previous_status");
+
+                    b.Property<string>("SubjectName")
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("subject_name");
+
+                    b.Property<int?>("SubjectProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("subject_profile_id");
+
+                    b.Property<byte?>("SubjectRole")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("subject_role");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("text");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_police_case_entry");
+
+                    b.HasIndex("CaseId", "CreatedAt");
+
+                    b.ToTable("nc_police_case_entry", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceCaseSubject", b =>
+                {
+                    b.Property<long>("CaseId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("case_id");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("CharacterName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("character_name");
+
+                    b.Property<byte>("Role")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("role");
+
+                    b.HasKey("CaseId", "ProfileId")
+                        .HasName("PK_nc_police_case_subject");
+
+                    b.HasIndex("ProfileId");
+
+                    b.ToTable("nc_police_case_subject", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceFine", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_police_fine_id");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("Article")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("article");
+
+                    b.Property<DateTime>("DueAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("due_at");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("issued_at");
+
+                    b.Property<string>("IssuedByName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("issued_by_name");
+
+                    b.Property<int?>("IssuedByProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("issued_by_profile_id");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("paid_at");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TargetName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("target_name");
+
+                    b.Property<int>("TargetProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("target_profile_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_police_fine");
+
+                    b.HasIndex("TargetProfileId", "Status");
+
+                    b.ToTable("nc_police_fine", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceFineEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_police_fine_event_id");
+
+                    b.Property<string>("ActorName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("actor_name");
+
+                    b.Property<int?>("ActorProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("actor_profile_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<byte>("EventType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("event_type");
+
+                    b.Property<long>("FineId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("fine_id");
+
+                    b.Property<byte>("NewStatus")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("new_status");
+
+                    b.Property<byte>("PreviousStatus")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("previous_status");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_police_fine_event");
+
+                    b.HasIndex("FineId", "CreatedAt");
+
+                    b.ToTable("nc_police_fine_event", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceRecord", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("UpdatedByName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_by_name");
+
+                    b.Property<int?>("UpdatedByProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("updated_by_profile_id");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_police_record");
+
+                    b.ToTable("nc_police_record", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceRecordEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_police_record_event_id");
+
+                    b.Property<string>("ActorName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("actor_name");
+
+                    b.Property<int?>("ActorProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("actor_profile_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<byte>("EventType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("event_type");
+
+                    b.Property<byte>("NewStatus")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("new_status");
+
+                    b.Property<byte>("PreviousStatus")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("previous_status");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_police_record_event");
+
+                    b.HasIndex("ProfileId", "CreatedAt");
+
+                    b.ToTable("nc_police_record_event", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceWarrant", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_police_warrant_id");
+
+                    b.Property<long?>("CaseId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("case_id");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("issued_at");
+
+                    b.Property<string>("IssuedByName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("issued_by_name");
+
+                    b.Property<int?>("IssuedByProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("issued_by_profile_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("ResolutionReason")
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("resolution_reason");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("resolved_at");
+
+                    b.Property<string>("ResolvedByName")
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("resolved_by_name");
+
+                    b.Property<int?>("ResolvedByProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("resolved_by_profile_id");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TargetName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("target_name");
+
+                    b.Property<int>("TargetProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("target_profile_id");
+
+                    b.Property<byte>("Type")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_police_warrant");
+
+                    b.HasIndex("CaseId")
+                        .HasDatabaseName("IX_nc_police_warrant_case_id");
+
+                    b.HasIndex("TargetProfileId", "Status");
+
+                    b.ToTable("nc_police_warrant", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.PlayTime", b =>
                 {
                     b.Property<int>("Id")
@@ -1090,6 +1715,10 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Property<byte[]>("Markings")
                         .HasColumnType("jsonb")
                         .HasColumnName("markings");
+
+                    b.Property<string>("NCDepartmentPreference")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("ncdepartment_preference");
 
                     b.Property<byte[]>("OrganMarkings")
                         .HasColumnType("jsonb")
@@ -1863,6 +2492,121 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Profile");
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCCharacterBankAccount", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCCharacterBankAccount", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_bank_account_profile_profile_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", "Profile")
+                        .WithOne("NCEmployment")
+                        .HasForeignKey("Content.Server.Database.NCCharacterEmployment", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_employment_profile_profile_id");
+
+                    b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCEmploymentEvent", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCCharacterEmployment", "Employment")
+                        .WithMany("Events")
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_employment_event_nc_character_employment_employment_profile_id");
+
+                    b.Navigation("Employment");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankTransaction", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCOrganizationBankAccount", "Organization")
+                        .WithMany("Transactions")
+                        .HasForeignKey("OrganizationPrototypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_organization_bank_transaction_nc_organization_bank_account_organization_prototype_id1");
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceCaseEntry", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCPoliceCase", "Case")
+                        .WithMany("Entries")
+                        .HasForeignKey("CaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_police_case_entry_nc_police_case_case_id");
+
+                    b.Navigation("Case");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceCaseSubject", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCPoliceCase", "Case")
+                        .WithMany("Subjects")
+                        .HasForeignKey("CaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_police_case_subject_nc_police_case_case_id");
+
+                    b.Navigation("Case");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceFineEvent", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCPoliceFine", "Fine")
+                        .WithMany("Events")
+                        .HasForeignKey("FineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_police_fine_event_nc_police_fine_fine_id");
+
+                    b.Navigation("Fine");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceRecord", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCPoliceRecord", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_police_record_profile_profile_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceRecordEvent", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCPoliceRecord", "Record")
+                        .WithMany("Events")
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_police_record_event_nc_police_record_profile_id");
+
+                    b.Navigation("Record");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceWarrant", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCPoliceCase", "Case")
+                        .WithMany("Warrants")
+                        .HasForeignKey("CaseId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_nc_police_warrant_nc_police_case_case_id");
+
+                    b.Navigation("Case");
+                });
+
             modelBuilder.Entity("Content.Server.Database.Player", b =>
                 {
                     b.OwnsOne("Content.Server.Database.TypedHwid", "LastSeenHWId", b1 =>
@@ -2073,6 +2817,35 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Options");
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
+                {
+                    b.Navigation("Events");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCOrganizationBankAccount", b =>
+                {
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceCase", b =>
+                {
+                    b.Navigation("Entries");
+
+                    b.Navigation("Subjects");
+
+                    b.Navigation("Warrants");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceFine", b =>
+                {
+                    b.Navigation("Events");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPoliceRecord", b =>
+                {
+                    b.Navigation("Events");
+                });
+
             modelBuilder.Entity("Content.Server.Database.Player", b =>
                 {
                     b.Navigation("AdminLogs");
@@ -2120,6 +2893,8 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Jobs");
 
                     b.Navigation("Loadouts");
+
+                    b.Navigation("NCEmployment");
 
                     b.Navigation("Traits");
                 });

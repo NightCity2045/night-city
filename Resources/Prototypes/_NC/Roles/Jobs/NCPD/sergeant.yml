@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: NCPDSergeant
+  name: job-name-ncpd-sergeant
+  description: job-description-ncpd-sergeant
+  playTimeTracker: NCJobNCPDSergeant
+  supervisors: nc-job-supervisors-ncpd-lieutenants
+  weight: 45
+  salary: 160
+  setPreference: false
+  startingGear: NCPDSergeantGear
+  icon: JobIconNCPDSergeant
+  accessGroups: [ NCPDBasic ]
+  access: [ NCPD_Armory ]
+
+- type: startingGear
+  id: NCPDSergeantGear
+  equipment:
+    jumpsuit: ClothingUniformNCPDPatrol
+    back: ClothingBackpackSecurity
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHatBeretSecurity
+    eyes: ClothingEyesGlassesSecurity
+    id: NCPDSergeantPDA
+    ears: ClothingHeadsetSecurity
+    belt: ClothingBeltSecurityFilled
+    outerClothing: ClothingOuterArmorBasic
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconNCPDSergeant
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: ncpd_policer_serg
+  jobName: job-name-ncpd-sergeant
+
+- type: entity
+  parent: IDCardStandard
+  id: NCPDSergeantIDCard
+  name: NCPD sergeant ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#4777C8"
+    - state: stripe_bottom
+      color: "#2F5C9E"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: ncpd_policer_serg
+  - type: PresetIdCard
+    job: NCPDSergeant
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: NCPDSergeantPDA
+  name: NCPD sergeant PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: NCPDSergeantIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-warden
+  - type: PdaBorderColor
+    borderColor: "#4777C8"
+    accentVColor: "#2F5C9E"
+  - type: Icon
+    state: pda-warden

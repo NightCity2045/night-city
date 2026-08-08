@@ -1,0 +1,48 @@
+<!--
+SPDX-FileCopyrightText: 2026 Astro
+SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+-->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      x:Class="Content.Client._NC.Personnel.NCPersonnelConsoleWindow"
+                      Title="{Loc 'nc-personnel-title'}"
+                      SetSize="1050 650">
+    <BoxContainer Margin="10" Orientation="Vertical" SeparationOverride="8">
+        <Label Name="DepartmentLabel" StyleClasses="LabelHeading" />
+        <Label Name="ReadOnlyLabel" Text="{Loc 'nc-personnel-read-only'}" FontColorOverride="Orange" Visible="False" />
+        <PanelContainer StyleClasses="LowDivider" />
+        <BoxContainer Orientation="Horizontal" VerticalExpand="True" SeparationOverride="8">
+            <BoxContainer Orientation="Vertical" MinWidth="300" MaxWidth="300" SeparationOverride="5">
+                <Label Text="{Loc 'nc-personnel-employees'}" StyleClasses="LabelHeading" />
+                <ItemList Name="EmployeeList" MinHeight="210" VerticalExpand="True" />
+                <PanelContainer StyleClasses="LowDivider" />
+                <Label Text="{Loc 'nc-personnel-candidates'}" StyleClasses="LabelHeading" />
+                <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                    <LineEdit Name="SearchEdit" PlaceHolder="{Loc 'nc-personnel-search-placeholder'}" HorizontalExpand="True" />
+                    <Button Name="SearchButton" Text="{Loc 'nc-personnel-search'}" />
+                </BoxContainer>
+                <ItemList Name="CandidateList" MinHeight="180" VerticalExpand="True" />
+            </BoxContainer>
+            <PanelContainer StyleClasses="LowDivider" />
+            <BoxContainer Orientation="Vertical" MinWidth="330" MaxWidth="330" SeparationOverride="6">
+                <Label Name="SelectedLabel" Text="{Loc 'nc-personnel-select-character'}" StyleClasses="LabelHeading" />
+                <Label Text="{Loc 'nc-personnel-positions'}" StyleClasses="LabelSubHeading" />
+                <ItemList Name="PositionList" MinHeight="150" />
+                <OptionButton Name="PositionSelector" />
+                <Label Text="{Loc 'nc-personnel-reason-required'}" FontColorOverride="DarkGray" />
+                <TextEdit Name="ReasonEdit" MinHeight="100" />
+                <Button Name="HireButton" Text="{Loc 'nc-personnel-hire'}" Disabled="True" />
+                <Button Name="ChangePositionButton" Text="{Loc 'nc-personnel-change-position'}" Disabled="True" />
+                <Button Name="TerminateButton" Text="{Loc 'nc-personnel-terminate'}" Disabled="True" />
+            </BoxContainer>
+            <PanelContainer StyleClasses="LowDivider" />
+            <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" SeparationOverride="5">
+                <Label Text="{Loc 'nc-personnel-history'}" StyleClasses="LabelHeading" />
+                <Label Name="NoHistoryLabel" Text="{Loc 'nc-personnel-no-history'}" FontColorOverride="DarkGray" Align="Center" />
+                <ItemList Name="HistoryList" VerticalExpand="True" />
+            </BoxContainer>
+        </BoxContainer>
+    </BoxContainer>
+</controls:FancyWindow>

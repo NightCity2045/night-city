@@ -3,9 +3,11 @@ using System.Numerics;
 using Content.Client.Lobby.UI.Loadouts;
 using Content.Client.Lobby.UI.Roles;
 using Content.Shared.Clothing;
+using Content.Shared.GameTicking;
 using Content.Shared.Preferences;
 using Content.Shared.Preferences.Loadouts;
 using Content.Shared.Roles;
+using Content.Shared.StatusIcon; // NC - Department cards use their own data-driven icons.
 using Robust.Client.Graphics;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
@@ -115,6 +117,220 @@ public sealed partial class HumanoidProfileEditor
         JobList.RemoveAllChildren();
         _jobCategories.Clear();
         _jobPriorities.Clear();
+
+        // NC start - Night City uses the vanilla job editor refresh lifecycle for department employment.
+        var ncDepartments = _prototypeManager.EnumeratePrototypes<DepartmentPrototype>()
+            .Where(department => department.NCSelectable)
+            .ToList();
+        ncDepartments.Sort(DepartmentUIComparer.Instance);
+
+        ProtoId<JobPrototype>? employmentJob = null;
+        var hasEmploymentRecord = CharacterSlot is { } employmentSlot &&
+                                  _preferencesManager.TryGetNCEmploymentRecord(employmentSlot, out employmentJob);
+        var hasActiveEmployment = hasEmploymentRecord && employmentJob != null;
+        JobPrototype? activeJob = null;
+        ProtoId<DepartmentPrototype>? activeDepartment = null;
+        if (employmentJob is { } activeJobId && _prototypeManager.TryIndex(activeJobId, out activeJob))
+        {
+            foreach (var department in ncDepartments)
+            {
+                if (!department.Roles.Contains(activeJobId))
+                    continue;
+
+                activeDepartment = department.ID;
+                break;
+            }
+        }
+
+        if (ncDepartments.Count > 0)
+        {
+            PreferenceUnavailableButton.Visible = false;
+
+            JobList.AddChild(new Label
+            {
+                Text = Loc.GetString("nc-character-department-title"),
+                StyleClasses = { "LabelHeading" },
+                Margin = new Thickness(10, 10, 10, 2),
+            });
+
+            JobList.AddChild(new Label
+            {
+                Text = Loc.GetString("nc-character-department-explanation"),
+                Margin = new Thickness(10, 2, 10, 10),
+            });
+
+            var grid = new GridContainer
+            {
+                Columns = 2,
+                HSeparationOverride = 8,
+                VSeparationOverride = 8,
+                HorizontalExpand = true,
+                Margin = new Thickness(10, 0, 10, 10),
+            };
+            JobList.AddChild(grid);
+
+            var residentJob = _prototypeManager.Index<JobPrototype>(SharedGameTicker.FallbackOverflowJob);
+            // NC - Existing employment controls both the preview and selection; stale entry preferences are ignored.
+            if (hasActiveEmployment)
+                JobOverride = activeJob;
+
+            AddDepartmentCard(
+                null,
+                residentJob,
+                "NCDepartmentIconResident",
+                Loc.GetString("job-name-passenger"),
+                Loc.GetString("job-description-passenger"),
+                Color.FromHex("#777781"));
+
+            foreach (var department in ncDepartments)
+            {
+                if (department.NCEntryJob is not { } entryJobId ||
+                    !_prototypeManager.TryIndex(entryJobId, out var entryJob))
+                {
+                    _sawmill.Warning($"Selectable NC department {department.ID} has no valid entry job.");
+                    continue;
+                }
+
+                AddDepartmentCard(
+                    department.ID,
+                    entryJob,
+                    department.NCIcon,
+                    Loc.GetString(department.Name),
+                    Loc.GetString(department.Description),
+                    department.Color);
+            }
+
+            return;
+
+            void AddDepartmentCard(
+                ProtoId<DepartmentPrototype>? departmentId,
+                JobPrototype previewJob,
+                ProtoId<JobIconPrototype>? departmentIcon,
+                string title,
+                string description,
+                Color accentColor)
+            {
+                var selected = hasActiveEmployment
+                    ? departmentId == activeDepartment
+                    : Profile?.NCDepartmentPreference == departmentId;
+                var isActiveDepartment = hasActiveEmployment &&
+                                         departmentId == activeDepartment;
+                // NC - Militech and Zhirafa retain the entry-job fallback until dedicated _NC art exists.
+                var iconPrototype = _prototypeManager.Index(departmentIcon ?? previewJob.Icon);
+                var selectButton = new Button
+                {
+                    Text = Loc.GetString(isActiveDepartment
+                        ? "nc-character-employment-resign"
+                        : selected
+                            ? "nc-character-department-selected"
+                            : departmentId == null
+                                ? "nc-character-resident-select"
+                                : "nc-character-department-apply"),
+                    Disabled = hasActiveEmployment ? !isActiveDepartment : selected,
+                    MinWidth = 120,
+                    HorizontalAlignment = HAlignment.Right,
+                    VerticalAlignment = VAlignment.Center,
+                };
+
+                var confirmingResignation = false;
+                selectButton.OnPressed += _ =>
+                {
+                    if (isActiveDepartment)
+                    {
+                        if (!confirmingResignation)
+                        {
+                            confirmingResignation = true;
+                            selectButton.Text = Loc.GetString("nc-character-employment-resign-confirm");
+                            selectButton.AddStyleClass("negative");
+                            return;
+                        }
+
+                        selectButton.Disabled = true;
+                        _preferencesManager.ResignSelectedNCEmployment();
+                        return;
+                    }
+
+                    if (hasActiveEmployment)
+                        return;
+
+                    if (Profile == null)
+                        return;
+
+                    Profile = Profile.WithNCDepartmentPreference(departmentId);
+                    JobOverride = previewJob;
+                    ReloadPreview();
+                    RefreshJobs();
+                };
+
+                var descriptionLabel = new RichTextLabel
+                {
+                    HorizontalExpand = true,
+                    MinHeight = 54,
+                    // NC - Keep long department descriptions inside a two-column card.
+                    MaxWidth = 350,
+                    Margin = new Thickness(0, 8, 0, 0),
+                };
+                descriptionLabel.SetMessage(isActiveDepartment && activeJob != null
+                    ? $"{description}\n{Loc.GetString("nc-character-employment-current-position", ("job", activeJob.LocalizedName))}"
+                    : description);
+
+                grid.AddChild(new PanelContainer
+                {
+                    HorizontalExpand = true,
+                    VerticalExpand = true,
+                    PanelOverride = new StyleBoxFlat
+                    {
+                        BackgroundColor = selected
+                            ? accentColor.WithAlpha(0.24f)
+                            : Color.FromHex("#25252A"),
+                        BorderColor = selected
+                            ? accentColor
+                            : Color.FromHex("#45454F"),
+                        BorderThickness = new Thickness(selected ? 2 : 1),
+                        ContentMarginTopOverride = 10,
+                        ContentMarginBottomOverride = 10,
+                        ContentMarginLeftOverride = 10,
+                        ContentMarginRightOverride = 10,
+                    },
+                    Children =
+                    {
+                        new BoxContainer
+                        {
+                            Orientation = LayoutOrientation.Vertical,
+                            Children =
+                            {
+                                new BoxContainer
+                                {
+                                    Orientation = LayoutOrientation.Horizontal,
+                                    HorizontalExpand = true,
+                                    Children =
+                                    {
+                                        new TextureRect
+                                        {
+                                            Texture = _sprite.Frame0(iconPrototype.Icon),
+                                            TextureScale = new Vector2(2, 2),
+                                            VerticalAlignment = VAlignment.Center,
+                                            Margin = new Thickness(0, 0, 8, 0),
+                                        },
+                                        new Label
+                                        {
+                                            Text = title,
+                                            StyleClasses = { "LabelHeading" },
+                                            HorizontalExpand = true,
+                                            VerticalAlignment = VAlignment.Center,
+                                        },
+                                        selectButton,
+                                    },
+                                },
+                                descriptionLabel,
+                            },
+                        },
+                    },
+                });
+            }
+        }
+        // NC end
+
         var firstCategory = true;
 
         // Get all displayed departments

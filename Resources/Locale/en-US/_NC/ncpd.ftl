@@ -1,0 +1,29 @@
+ent-ClothingUniformNCPDPatrol = NCPD patrol uniform
+    .desc = A hard-wearing uniform for the underfunded streets of Night City.
+ent-ClothingUniformNCPDCommand = NCPD command uniform
+    .desc = A command uniform marking authority within an NCPD precinct.
+ent-ClothingUniformNCPDChief = NCPD chief uniform
+    .desc = A formal uniform for the politically exposed head of the department.
+
+ent-NCPDCadetIDCard = NCPD cadet ID
+ent-NCPDOfficerIDCard = NCPD officer ID
+ent-NCPDSergeantIDCard = NCPD sergeant ID
+ent-NCPDInspectorIDCard = NCPD inspector ID
+ent-NCPDLieutenantIDCard = NCPD lieutenant ID
+ent-NCPDCommanderIDCard = NCPD precinct commander ID
+ent-NCPDChiefIDCard = NCPD chief ID
+
+ent-NCPDCadetPDA = NCPD cadet PDA
+    .desc = A rugged department terminal tied to its owner's persistent position.
+ent-NCPDOfficerPDA = NCPD officer PDA
+    .desc = A rugged department terminal tied to its owner's persistent position.
+ent-NCPDSergeantPDA = NCPD sergeant PDA
+    .desc = A rugged department terminal tied to its owner's persistent position.
+ent-NCPDInspectorPDA = NCPD inspector PDA
+    .desc = A rugged department terminal tied to its owner's persistent position.
+ent-NCPDLieutenantPDA = NCPD lieutenant PDA
+    .desc = A rugged department terminal tied to its owner's persistent position.
+ent-NCPDCommanderPDA = NCPD precinct commander PDA
+    .desc = A rugged department terminal tied to its owner's persistent position.
+ent-NCPDChiefPDA = NCPD chief PDA
+    .desc = A rugged department terminal tied to its owner's persistent position.

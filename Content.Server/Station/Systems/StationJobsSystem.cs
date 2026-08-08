@@ -41,6 +41,10 @@ public sealed partial class StationJobsSystem : EntitySystem
 
     private void OnInit(Entity<StationJobsComponent> ent, ref ComponentInit args)
     {
+        // NC start - Persistent city positions must exist independently of a station map's round slots.
+        ConfigureNCJobs(ent.Comp);
+        // NC end
+
         ent.Comp.MidRoundTotalJobs = ent.Comp.SetupAvailableJobs.Values
             .Select(x => Math.Max(x[1], 0))
             .Sum();

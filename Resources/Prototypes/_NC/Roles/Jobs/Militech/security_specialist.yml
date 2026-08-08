@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: MilitechSecuritySpecialist
+  name: job-name-militech-security-specialist
+  description: job-description-militech-security-specialist
+  playTimeTracker: NCJobMilitechSecuritySpecialist
+  supervisors: nc-job-supervisors-militech-command
+  weight: 55
+  salary: 350
+  setPreference: false
+  startingGear: MilitechSecuritySpecialistGear
+  icon: JobIconSecurityOfficer
+  accessGroups: [ MilitechBasic ]
+  access: [ Militech_Operative, Militech_Armory ]
+
+- type: startingGear
+  id: MilitechSecuritySpecialistGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    back: ClothingBackpackSecurity
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHatBeretSecurity
+    eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesCombat
+    id: SecurityPDA
+    ears: ClothingHeadsetSecurity
+    belt: ClothingBeltSecurityFilled
+    outerClothing: ClothingOuterArmorBasic

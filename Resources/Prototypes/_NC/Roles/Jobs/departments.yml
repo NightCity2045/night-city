@@ -1,0 +1,197 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: department
+  id: NCPD
+  name: department-name-ncpd
+  description: department-desc-ncpd
+  color: "#4777C8"
+  weight: 50
+  startingBudget: 5000
+  ncSelectable: true
+  ncEntryJob: NCPDCadet
+  ncIcon: NCDepartmentIconNCPD
+  ncPersonnelManagers: [ NCPDChief, NCPDCommander, NCPDLieutenant ]
+  ncPositionLimits:
+    NCPDChief: 1
+    NCPDCommander: 2
+    NCPDLieutenant: 4
+    NCPDInspector: 6
+    NCPDSergeant: 8
+    NCPDOfficer: 20
+    NCPDCadet: 20
+  ncPositionRanks:
+    NCPDChief: 100
+    NCPDCommander: 90
+    NCPDLieutenant: 80
+    NCPDInspector: 70
+    NCPDSergeant: 60
+    NCPDOfficer: 50
+    NCPDCadet: 10
+  roles: [ NCPDChief, NCPDCommander, NCPDLieutenant, NCPDInspector, NCPDSergeant, NCPDOfficer, NCPDCadet ]
+
+- type: department
+  id: TraumaTeam
+  name: department-name-trauma-team
+  description: department-desc-trauma-team
+  color: "#4FB9D7"
+  weight: 40
+  startingBudget: 10000
+  ncSelectable: true
+  ncEntryJob: TraumaTeamParamedic
+  ncIcon: NCDepartmentIconTraumaTeam
+  ncPersonnelManagers: [ TraumaTeamOperative ]
+  ncPositionLimits:
+    TraumaTeamOperative: 10
+    TraumaTeamParamedic: 20
+  ncPositionRanks:
+    TraumaTeamOperative: 100
+    TraumaTeamParamedic: 50
+  roles: [ TraumaTeamParamedic, TraumaTeamOperative ]
+
+- type: department
+  id: MedicalNC
+  name: department-name-medical-nc
+  description: department-desc-medical-nc
+  color: "#66C58D"
+  weight: 35
+  startingBudget: 10000
+  ncSelectable: true
+  ncEntryJob: NCMedicalIntern
+  ncIcon: NCDepartmentIconMedical
+  ncPersonnelManagers: [ NCMedicalChief ]
+  ncPositionLimits:
+    NCMedicalChief: 1
+    NCMedicalCoroner: 4
+    NCMedicalPsychologist: 4
+    NCMedicalDoctor: 12
+    NCMedicalTechnician: 6
+    NCMedicalIntern: 12
+  ncPositionRanks:
+    NCMedicalChief: 100
+    NCMedicalCoroner: 70
+    NCMedicalPsychologist: 60
+    NCMedicalDoctor: 50
+    NCMedicalTechnician: 40
+    NCMedicalIntern: 10
+  roles: [ NCMedicalChief, NCMedicalDoctor, NCMedicalCoroner, NCMedicalPsychologist, NCMedicalIntern, NCMedicalTechnician ]
+
+- type: department
+  id: Biotechnica
+  name: department-name-biotechnica
+  description: department-desc-biotechnica
+  color: "#6DB15C"
+  weight: 30
+  startingBudget: 15000
+  ncSelectable: true
+  ncEntryJob: BiotechnicaOperative
+  ncIcon: NCDepartmentIconBiotechnica
+  ncPersonnelManagers: [ BiotechnicaChief, BiotechnicaOperativeLead ]
+  ncPositionLimits:
+    BiotechnicaChief: 1
+    BiotechnicaOperativeLead: 4
+    BiotechnicaOperative: 12
+    BiotechnicaNetrunner: 6
+    BiotechnicaRigger: 8
+    BiotechnicaMedTech: 8
+    BiotechnicaParamedic: 8
+    BiotechnicaTech: 8
+    BiotechnicaBotanist: 12
+  ncPositionRanks:
+    BiotechnicaChief: 100
+    BiotechnicaOperativeLead: 80
+    BiotechnicaOperative: 60
+    BiotechnicaNetrunner: 55
+    BiotechnicaRigger: 50
+    BiotechnicaMedTech: 50
+    BiotechnicaParamedic: 40
+    BiotechnicaTech: 40
+    BiotechnicaBotanist: 30
+  roles: [ BiotechnicaChief, BiotechnicaOperativeLead, BiotechnicaOperative, BiotechnicaRigger, BiotechnicaBotanist, BiotechnicaMedTech, BiotechnicaTech, BiotechnicaNetrunner, BiotechnicaParamedic ]
+
+- type: department
+  id: Militech
+  name: department-name-militech
+  description: department-desc-militech
+  color: "#8A8C91"
+  weight: 30
+  startingBudget: 25000
+  ncSelectable: true
+  ncEntryJob: MilitechOperative
+  ncPersonnelManagers: [ MilitechChief, MilitechOperativeLead ]
+  ncPositionLimits:
+    MilitechChief: 1
+    MilitechOperativeLead: 4
+    MilitechSecuritySpecialist: 12
+    MilitechOperative: 20
+    MilitechNetrunner: 6
+    MilitechRigger: 8
+    MilitechCombatMedic: 8
+    MilitechTech: 8
+    MilitechQuartermaster: 6
+  ncPositionRanks:
+    MilitechChief: 100
+    MilitechOperativeLead: 80
+    MilitechSecuritySpecialist: 60
+    MilitechOperative: 50
+    MilitechNetrunner: 50
+    MilitechRigger: 40
+    MilitechCombatMedic: 40
+    MilitechTech: 30
+    MilitechQuartermaster: 30
+  roles: [ MilitechChief, MilitechOperativeLead, MilitechOperative, MilitechRigger, MilitechNetrunner, MilitechSecuritySpecialist, MilitechCombatMedic, MilitechTech, MilitechQuartermaster ]
+
+- type: department
+  id: Zhirafa
+  name: department-name-zhirafa
+  description: department-desc-zhirafa
+  color: "#D8A650"
+  weight: 10
+  startingBudget: 5000
+  ncSelectable: true
+  ncEntryJob: ZhirafaJanitor
+  ncPersonnelManagers: [ ZhirafaEngineer ]
+  ncPositionLimits:
+    ZhirafaEngineer: 12
+    ZhirafaJanitor: 12
+  ncPositionRanks:
+    ZhirafaEngineer: 100
+    ZhirafaJanitor: 10
+  roles: [ ZhirafaJanitor, ZhirafaEngineer ]
+
+# Department selection icons are independent from entry-job icons.
+- type: jobIcon
+  parent: JobIcon
+  id: NCDepartmentIconResident
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: civ_citizen
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCDepartmentIconNCPD
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: ncpd_policer
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCDepartmentIconTraumaTeam
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: trauma-paramed
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCDepartmentIconMedical
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: trauma
+
+- type: jobIcon
+  parent: JobIcon
+  id: NCDepartmentIconBiotechnica
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: biotech

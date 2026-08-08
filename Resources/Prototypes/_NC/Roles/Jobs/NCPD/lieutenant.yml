@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: NCPDLieutenant
+  name: job-name-ncpd-lieutenant
+  description: job-description-ncpd-lieutenant
+  playTimeTracker: NCJobNCPDLieutenant
+  supervisors: nc-job-supervisors-ncpd-commander
+  weight: 85
+  salary: 220
+  setPreference: false
+  startingGear: NCPDLieutenantGear
+  icon: JobIconNCPDLieutenant
+  accessGroups: [ NCPDBasic ]
+  access: [ NCPD_Armory, NCPD_Investigations, NCPD_Command ]
+
+- type: startingGear
+  id: NCPDLieutenantGear
+  equipment:
+    jumpsuit: ClothingUniformNCPDCommand
+    back: ClothingBackpackSecurity
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHatWarden
+    eyes: ClothingEyesGlassesSecurity
+    id: NCPDLieutenantPDA
+    ears: ClothingHeadsetSecurity
+    belt: ClothingBeltSecurityFilled
+    outerClothing: ClothingOuterArmorBasic
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconNCPDLieutenant
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: ncpd_Letenant
+  jobName: job-name-ncpd-lieutenant
+
+- type: entity
+  parent: IDCardStandard
+  id: NCPDLieutenantIDCard
+  name: NCPD lieutenant ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#4777C8"
+    - state: stripe_bottom
+      color: "#2F5C9E"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: ncpd_Letenant
+  - type: PresetIdCard
+    job: NCPDLieutenant
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: NCPDLieutenantPDA
+  name: NCPD lieutenant PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: NCPDLieutenantIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-warden
+  - type: PdaBorderColor
+    borderColor: "#4777C8"
+    accentVColor: "#2F5C9E"
+  - type: Icon
+    state: pda-warden

@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: BiotechnicaMedTech
+  name: job-name-biotechnica-med-tech
+  description: job-description-biotechnica-med-tech
+  playTimeTracker: NCJobBiotechnicaMedTech
+  supervisors: nc-job-supervisors-biotechnica-management
+  weight: 55
+  salary: 200
+  setPreference: false
+  startingGear: BiotechnicaMedTechGear
+  icon: JobIconMedicalDoctor
+  accessGroups: [ BiotechBasic ]
+  access: [ Biotech_MedTech ]
+
+- type: startingGear
+  id: BiotechnicaMedTechGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitMedicalDoctor
+    back: ClothingBackpackMedical
+    shoes: ClothingShoesColorWhite
+    eyes: ClothingEyesHudMedical
+    mask: ClothingMaskSterile
+    gloves: ClothingHandsGlovesNitrile
+    id: MedicalPDA
+    ears: ClothingHeadsetMedical
+    belt: ClothingBeltMedicalFilled
+    outerClothing: ClothingOuterCoatLab

@@ -1,0 +1,12 @@
+department-name-ncpd = NCPD
+department-desc-ncpd = Night City Police Department.
+department-name-trauma-team = Trauma Team
+department-desc-trauma-team = Armed emergency extraction and field medicine.
+department-name-medical-nc = Medical
+department-desc-medical-nc = Clinics, hospitals, diagnostics, and civilian medicine.
+department-name-biotechnica = Biotechnica
+department-desc-biotechnica = Corporate agriculture, medicine, research, and field operations.
+department-name-militech = Militech
+department-desc-militech = Corporate security, logistics, and military operations.
+department-name-zhirafa = Zhirafa
+department-desc-zhirafa = Municipal maintenance and urban infrastructure.

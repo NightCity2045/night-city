@@ -1,0 +1,76 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: NCPDCommander
+  name: job-name-ncpd-commander
+  description: job-description-ncpd-commander
+  playTimeTracker: NCJobNCPDCommander
+  supervisors: nc-job-supervisors-ncpd-chief
+  weight: 90
+  salary: 300
+  setPreference: false
+  startingGear: NCPDCommanderGear
+  icon: JobIconNCPDCommander
+  accessGroups: [ NCPDBasic ]
+  access: [ NCPD_Command, NCPD_Armory, NCPD_Investigations ]
+
+- type: startingGear
+  id: NCPDCommanderGear
+  equipment:
+    jumpsuit: ClothingUniformNCPDCommand
+    back: ClothingBackpackSecurity
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHatWarden
+    eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesCombat
+    id: NCPDCommanderPDA
+    ears: ClothingHeadsetAltSecurity
+    belt: ClothingBeltSecurityFilled
+    outerClothing: ClothingOuterArmorBasic
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconNCPDCommander
+  icon:
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
+    state: ncpd_policer_commander
+  jobName: job-name-ncpd-commander
+
+- type: entity
+  parent: IDCardStandard
+  id: NCPDCommanderIDCard
+  name: NCPD precinct commander ID
+  components:
+  - type: Sprite
+    layers:
+    - state: default
+    - state: stripe_top
+      color: "#4777C8"
+    - state: stripe_bottom
+      color: "#2F5C9E"
+    - sprite: _NC/Interface/Misc/job_icons.rsi
+      offset: -0.09375, 0.0625
+      state: ncpd_policer_commander
+  - type: PresetIdCard
+    job: NCPDCommander
+
+- type: entity
+  parent: BaseSecurityPDA
+  id: NCPDCommanderPDA
+  name: NCPD precinct commander PDA
+  description: A rugged department terminal tied to its owner's persistent position.
+  components:
+  - type: Pda
+    id: NCPDCommanderIDCard
+  - type: Appearance
+    appearanceDataInit:
+      enum.PdaVisuals.PdaType:
+        !type:String
+        pda-warden
+  - type: PdaBorderColor
+    borderColor: "#4777C8"
+    accentVColor: "#2F5C9E"
+  - type: Icon
+    state: pda-warden

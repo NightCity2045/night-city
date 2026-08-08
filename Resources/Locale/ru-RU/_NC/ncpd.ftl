@@ -1,0 +1,29 @@
+ent-ClothingUniformNCPDPatrol = патрульная форма NCPD
+    .desc = Износостойкая форма для плохо финансируемых улиц Найт-Сити.
+ent-ClothingUniformNCPDCommand = командная форма NCPD
+    .desc = Форма, обозначающая командные полномочия внутри участка NCPD.
+ent-ClothingUniformNCPDChief = форма начальника NCPD
+    .desc = Официальная форма политически уязвимого главы департамента.
+
+ent-NCPDCadetIDCard = удостоверение кадета NCPD
+ent-NCPDOfficerIDCard = удостоверение офицера NCPD
+ent-NCPDSergeantIDCard = удостоверение сержанта NCPD
+ent-NCPDInspectorIDCard = удостоверение инспектора NCPD
+ent-NCPDLieutenantIDCard = удостоверение лейтенанта NCPD
+ent-NCPDCommanderIDCard = удостоверение командира участка NCPD
+ent-NCPDChiefIDCard = удостоверение начальника NCPD
+
+ent-NCPDCadetPDA = КПК кадета NCPD
+    .desc = Защищённый терминал департамента, привязанный к постоянной должности владельца.
+ent-NCPDOfficerPDA = КПК офицера NCPD
+    .desc = Защищённый терминал департамента, привязанный к постоянной должности владельца.
+ent-NCPDSergeantPDA = КПК сержанта NCPD
+    .desc = Защищённый терминал департамента, привязанный к постоянной должности владельца.
+ent-NCPDInspectorPDA = КПК инспектора NCPD
+    .desc = Защищённый терминал департамента, привязанный к постоянной должности владельца.
+ent-NCPDLieutenantPDA = КПК лейтенанта NCPD
+    .desc = Защищённый терминал департамента, привязанный к постоянной должности владельца.
+ent-NCPDCommanderPDA = КПК командира участка NCPD
+    .desc = Защищённый терминал департамента, привязанный к постоянной должности владельца.
+ent-NCPDChiefPDA = КПК начальника NCPD
+    .desc = Защищённый терминал департамента, привязанный к постоянной должности владельца.

@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: MilitechCombatMedic
+  name: job-name-militech-combat-medic
+  description: job-description-militech-combat-medic
+  playTimeTracker: NCJobMilitechCombatMedic
+  supervisors: nc-job-supervisors-militech-command
+  weight: 60
+  salary: 250
+  setPreference: false
+  startingGear: MilitechCombatMedicGear
+  icon: JobIconParamedic
+  accessGroups: [ MilitechBasic ]
+  access: [ Militech_Operative, Militech_Medical ]
+
+- type: startingGear
+  id: MilitechCombatMedicGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitParamedic
+    back: ClothingBackpackMedical
+    shoes: ClothingShoesBootsJack
+    eyes: ClothingEyesHudMedical
+    mask: ClothingMaskSterile
+    gloves: ClothingHandsGlovesNitrile
+    id: ParamedicPDA
+    ears: ClothingHeadsetMedical
+    belt: ClothingBeltMedicalFilled
+    outerClothing: ClothingOuterArmorBasic

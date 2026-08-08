@@ -12,7 +12,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Content.Server.Database
 {
-    public abstract class ServerDbContext : DbContext
+    // NC - Partial so Night City database models stay isolated under _NC.
+    public abstract partial class ServerDbContext : DbContext
     {
         protected ServerDbContext(DbContextOptions options) : base(options)
         {
@@ -299,7 +300,14 @@ namespace Content.Server.Database
 
             ModelBan.OnModelCreating(modelBuilder);
             ModelCustomVoteLog.OnModelCreating(modelBuilder);
+
+            // NC start - Configure Night City-owned persistence models without mixing them into upstream code.
+            ConfigureNCModels(modelBuilder);
+            // NC end
         }
+
+        // NC - Implemented by the Night City database model extension.
+        partial void ConfigureNCModels(ModelBuilder modelBuilder);
 
         public virtual IQueryable<AdminLog> SearchLogs(IQueryable<AdminLog> query, string searchText)
         {
@@ -344,9 +352,14 @@ namespace Content.Server.Database
         public string EyeColor { get; set; } = null!;
         public string SkinColor { get; set; } = null!;
         public int SpawnPriority { get; set; } = 0;
+        // NC - The initial department choice belongs to the character, not the account.
+        public string? NCDepartmentPreference { get; set; }
         public List<Job> Jobs { get; } = new();
         public List<Antag> Antags { get; } = new();
         public List<Trait> Traits { get; } = new();
+
+        // NC - Optional one-to-one employment record for this character.
+        public NCCharacterEmployment? NCEmployment { get; set; }
 
         public List<ProfileRoleLoadout> Loadouts { get; } = new();
 

@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: ZhirafaJanitor
+  name: job-name-zhirafa-janitor
+  description: job-description-zhirafa-janitor
+  playTimeTracker: NCJobZhirafaJanitor
+  supervisors: nc-job-supervisors-zhirafa-management
+  weight: 10
+  salary: 80
+  setPreference: false
+  startingGear: ZhirafaJanitorGear
+  icon: JobIconJanitor
+  accessGroups: [ ZhirafaBasic ]
+
+- type: startingGear
+  id: ZhirafaJanitorGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitJanitor
+    back: ClothingBackpack
+    shoes: ClothingShoesGaloshes
+    id: JanitorPDA
+    ears: ClothingHeadsetService
+    belt: ClothingBeltJanitorFilled
+    outerClothing: ClothingOuterWinterJani

@@ -1,0 +1,177 @@
+<!--
+SPDX-FileCopyrightText: 2026 Astro
+SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+-->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      x:Class="Content.Client._NC.Police.NCPoliceRecordsWindow"
+                      Title="{Loc 'nc-police-records-title'}"
+                      SetSize="1000 650">
+    <BoxContainer Margin="10" Orientation="Vertical" SeparationOverride="8">
+        <BoxContainer Orientation="Horizontal" SeparationOverride="6">
+            <LineEdit Name="SearchEdit"
+                      PlaceHolder="{Loc 'nc-police-records-search-placeholder'}"
+                      HorizontalExpand="True" />
+            <Button Name="SearchButton" Text="{Loc 'nc-police-records-search'}" MinWidth="120" />
+        </BoxContainer>
+
+        <PanelContainer StyleClasses="LowDivider" />
+
+        <BoxContainer Orientation="Horizontal" VerticalExpand="True" SeparationOverride="10">
+            <BoxContainer Orientation="Vertical" MinWidth="260" MaxWidth="260">
+                <Label Text="{Loc 'nc-police-records-results'}" StyleClasses="LabelHeading" />
+                <Label Name="NoResultsLabel"
+                       Text="{Loc 'nc-police-records-no-results'}"
+                       FontColorOverride="DarkGray"
+                       Align="Center" />
+                <ItemList Name="ResultsList" VerticalExpand="True" />
+            </BoxContainer>
+
+            <PanelContainer StyleClasses="LowDivider" />
+
+            <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+                <Label Name="SelectPrompt"
+                       Text="{Loc 'nc-police-records-select-prompt'}"
+                       FontColorOverride="DarkGray"
+                       Align="Center" />
+
+                <BoxContainer Name="RecordContainer"
+                              Orientation="Vertical"
+                              HorizontalExpand="True"
+                              VerticalExpand="True"
+                              Visible="False">
+                    <Label Name="CharacterNameLabel" StyleClasses="LabelHeading" />
+                    <TabContainer Name="RecordTabs" HorizontalExpand="True" VerticalExpand="True">
+                        <ScrollContainer Name="DossierTab">
+                            <BoxContainer Margin="8" Orientation="Vertical" SeparationOverride="6">
+                                <BoxContainer Orientation="Horizontal">
+                                    <Label Text="{Loc 'nc-police-records-job'}" StyleClasses="LabelKeyText" />
+                                    <Label Name="JobLabel" />
+                                </BoxContainer>
+                                <BoxContainer Orientation="Horizontal">
+                                    <Label Text="{Loc 'nc-police-records-current-status'}" StyleClasses="LabelKeyText" />
+                                    <Label Name="CurrentStatusLabel" />
+                                </BoxContainer>
+                                <BoxContainer Orientation="Horizontal">
+                                    <Label Text="{Loc 'nc-police-records-current-reason'}" StyleClasses="LabelKeyText" />
+                                    <Label Name="CurrentReasonLabel" HorizontalExpand="True" />
+                                </BoxContainer>
+                                <BoxContainer Orientation="Horizontal">
+                                    <Label Text="{Loc 'nc-police-records-updated-by'}" StyleClasses="LabelKeyText" />
+                                    <Label Name="UpdatedByLabel" />
+                                </BoxContainer>
+                                <PanelContainer StyleClasses="LowDivider" />
+                                <Label Text="{Loc 'nc-police-records-change-status'}" StyleClasses="LabelHeading" />
+                                <OptionButton Name="StatusSelector" MinWidth="220" />
+                                <LineEdit Name="ReasonEdit" PlaceHolder="{Loc 'nc-police-records-reason-placeholder'}" />
+                                <Button Name="ApplyButton" Text="{Loc 'nc-police-records-apply'}" />
+                                <PanelContainer StyleClasses="LowDivider" />
+                                <Label Text="{Loc 'nc-police-records-history'}" StyleClasses="LabelHeading" />
+                                <Label Name="NoHistoryLabel"
+                                       Text="{Loc 'nc-police-records-no-history'}"
+                                       FontColorOverride="DarkGray"
+                                       Align="Center" />
+                                <ItemList Name="HistoryList" MinHeight="180" VerticalExpand="True" />
+                            </BoxContainer>
+                        </ScrollContainer>
+
+                        <BoxContainer Name="CasesTab" Margin="8" Orientation="Horizontal" SeparationOverride="8">
+                            <BoxContainer Orientation="Vertical" MinWidth="240" MaxWidth="240" SeparationOverride="4">
+                                <Label Text="{Loc 'nc-police-cases-list'}" StyleClasses="LabelHeading" />
+                                <ItemList Name="CaseList" VerticalExpand="True" />
+                                <LineEdit Name="NewCaseTitle" PlaceHolder="{Loc 'nc-police-case-title-placeholder'}" />
+                                <TextEdit Name="NewCaseSummary" MinHeight="70" />
+                                <Button Name="CreateCaseButton" Text="{Loc 'nc-police-case-create'}" />
+                            </BoxContainer>
+                            <PanelContainer StyleClasses="LowDivider" />
+                            <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" SeparationOverride="4">
+                                <Label Name="CaseSelectPrompt"
+                                       Text="{Loc 'nc-police-case-select-prompt'}"
+                                       FontColorOverride="DarkGray"
+                                       Align="Center" />
+                                <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+                                    <BoxContainer Name="CaseDetailContainer" Orientation="Vertical" Visible="False" SeparationOverride="4">
+                                        <Label Name="CaseTitleLabel" StyleClasses="LabelHeading" />
+                                        <Label Name="CaseStatusLabel" />
+                                        <Label Name="CaseSummaryLabel" />
+                                        <Label Text="{Loc 'nc-police-case-subjects'}" StyleClasses="LabelSubHeading" />
+                                        <ItemList Name="CaseSubjectsList" MinHeight="80" />
+                                        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                                            <OptionButton Name="CaseSubjectRoleSelector" HorizontalExpand="True" />
+                                            <Button Name="LinkSubjectButton" Text="{Loc 'nc-police-case-link-resident'}" />
+                                        </BoxContainer>
+                                        <Label Text="{Loc 'nc-police-case-reports'}" StyleClasses="LabelSubHeading" />
+                                        <ItemList Name="CaseEntriesList" MinHeight="120" VerticalExpand="True" />
+                                        <TextEdit Name="CaseReportEdit" MinHeight="70" />
+                                        <Button Name="AddCaseReportButton" Text="{Loc 'nc-police-case-add-report'}" />
+                                        <PanelContainer StyleClasses="LowDivider" />
+                                        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                                            <OptionButton Name="CaseStatusSelector" HorizontalExpand="True" />
+                                            <LineEdit Name="CaseStatusReasonEdit"
+                                                      PlaceHolder="{Loc 'nc-police-case-status-reason'}"
+                                                      HorizontalExpand="True" />
+                                            <Button Name="ApplyCaseStatusButton" Text="{Loc 'nc-police-case-change-status'}" />
+                                        </BoxContainer>
+                                    </BoxContainer>
+                                </ScrollContainer>
+                            </BoxContainer>
+                        </BoxContainer>
+
+                        <BoxContainer Name="WarrantsTab" Margin="8" Orientation="Horizontal" SeparationOverride="8">
+                            <BoxContainer Orientation="Vertical" MinWidth="300" MaxWidth="300" SeparationOverride="4">
+                                <Label Text="{Loc 'nc-police-warrants-list'}" StyleClasses="LabelHeading" />
+                                <ItemList Name="WarrantList" VerticalExpand="True" />
+                                <OptionButton Name="NewWarrantTypeSelector" />
+                                <TextEdit Name="NewWarrantReason" MinHeight="70" />
+                                <Label Name="WarrantCaseLinkLabel" FontColorOverride="DarkGray" />
+                                <CheckBox Name="LinkWarrantToCase" Text="{Loc 'nc-police-warrant-link-selected-case'}" Pressed="True" />
+                                <Button Name="CreateWarrantButton" Text="{Loc 'nc-police-warrant-create'}" />
+                            </BoxContainer>
+                            <PanelContainer StyleClasses="LowDivider" />
+                            <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+                                <BoxContainer Name="WarrantDetailContainer" Orientation="Vertical" SeparationOverride="6">
+                                    <Label Name="WarrantTitleLabel" StyleClasses="LabelHeading" />
+                                    <Label Name="WarrantStatusLabel" />
+                                    <Label Name="WarrantReasonLabel" />
+                                    <Label Name="WarrantIssuedByLabel" />
+                                    <Label Name="WarrantResolutionLabel" />
+                                    <PanelContainer StyleClasses="LowDivider" />
+                                    <OptionButton Name="WarrantResolutionStatusSelector" />
+                                    <TextEdit Name="WarrantResolutionReason" MinHeight="70" />
+                                    <Button Name="ResolveWarrantButton" Text="{Loc 'nc-police-warrant-resolve'}" />
+                                </BoxContainer>
+                            </ScrollContainer>
+                        </BoxContainer>
+
+                        <BoxContainer Name="FinesTab" Margin="8" Orientation="Horizontal" SeparationOverride="8">
+                            <BoxContainer Orientation="Vertical" MinWidth="360" MaxWidth="360" SeparationOverride="4">
+                                <Label Text="{Loc 'nc-police-fines-list'}" StyleClasses="LabelHeading" />
+                                <ItemList Name="FineList" VerticalExpand="True" />
+                                <LineEdit Name="NewFineArticle" PlaceHolder="{Loc 'nc-police-fine-article-placeholder'}" />
+                                <LineEdit Name="NewFineAmount" PlaceHolder="{Loc 'nc-police-fine-amount-placeholder'}" />
+                                <TextEdit Name="NewFineReason" MinHeight="70" />
+                                <Button Name="CreateFineButton" Text="{Loc 'nc-police-fine-create'}" />
+                            </BoxContainer>
+                            <PanelContainer StyleClasses="LowDivider" />
+                            <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+                                <BoxContainer Name="FineDetailContainer" Orientation="Vertical" Visible="False" SeparationOverride="6">
+                                    <Label Name="FineTitleLabel" StyleClasses="LabelHeading" />
+                                    <Label Name="FineStatusLabel" />
+                                    <Label Name="FineReasonLabel" />
+                                    <Label Name="FineIssuedLabel" />
+                                    <Label Name="FineDueLabel" />
+                                    <PanelContainer StyleClasses="LowDivider" />
+                                    <OptionButton Name="FineStatusSelector" />
+                                    <TextEdit Name="FineStatusReason" MinHeight="70" />
+                                    <Button Name="ApplyFineStatusButton" Text="{Loc 'nc-police-fine-change-status'}" />
+                                </BoxContainer>
+                            </ScrollContainer>
+                        </BoxContainer>
+                    </TabContainer>
+                </BoxContainer>
+            </BoxContainer>
+        </BoxContainer>
+    </BoxContainer>
+</controls:FancyWindow>

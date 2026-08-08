@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: MilitechTech
+  name: job-name-militech-tech
+  description: job-description-militech-tech
+  playTimeTracker: NCJobMilitechTech
+  supervisors: nc-job-supervisors-militech-command
+  weight: 50
+  salary: 250
+  setPreference: false
+  startingGear: MilitechTechGear
+  icon: JobIconStationEngineer
+  accessGroups: [ MilitechBasic ]
+  access: [ Militech_Tech ]
+
+- type: startingGear
+  id: MilitechTechGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitEngineering
+    back: ClothingBackpackEngineering
+    shoes: ClothingShoesBootsWork
+    head: ClothingHeadHatHardhatYellow
+    eyes: ClothingEyesGlassesMeson
+    gloves: ClothingHandsGlovesColorYellow
+    id: EngineerPDA
+    ears: ClothingHeadsetEngineering
+    belt: ClothingBeltUtilityEngineering

@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: TraumaTeamParamedic
+  name: job-name-trauma-team-paramedic
+  description: job-description-trauma-team-paramedic
+  playTimeTracker: NCJobTraumaTeamParamedic
+  supervisors: nc-job-supervisors-trauma-team-command
+  weight: 70
+  salary: 350
+  setPreference: false
+  startingGear: TraumaTeamParamedicGear
+  icon: JobIconParamedic
+  accessGroups: [ TraumaBasic ]
+  access: [ Trauma_Morgue ]
+
+- type: startingGear
+  id: TraumaTeamParamedicGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitParamedic
+    back: ClothingBackpackMedical
+    shoes: ClothingShoesBootsWork
+    head: ClothingHeadHatParamedicsoft
+    eyes: ClothingEyesHudMedical
+    mask: ClothingMaskSterile
+    gloves: ClothingHandsGlovesLatex
+    id: ParamedicPDA
+    ears: ClothingHeadsetMedical
+    belt: ClothingBeltMedicalFilled
+    outerClothing: ClothingOuterCoatParamedicWB

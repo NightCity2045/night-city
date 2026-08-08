@@ -53,6 +53,8 @@ public sealed partial class LobbyUIController : UIController, IOnStateEntered<Lo
         base.Initialize();
         _prototypeManager.PrototypesReloaded += OnProtoReload;
         _preferencesManager.OnServerDataLoaded += PreferencesDataLoaded;
+        // NC - Personnel actions and resignations refresh the character cards immediately.
+        _preferencesManager.OnNCEmploymentUpdated += NCEmploymentUpdated;
         _requirements.Updated += OnRequirementsUpdated;
 
         _configurationManager.OnValueChanged(CCVars.FlavorText, args =>
@@ -127,6 +129,13 @@ public sealed partial class LobbyUIController : UIController, IOnStateEntered<Lo
             return;
 
         ReloadCharacterSetup();
+    }
+
+    // NC - Ignore employment snapshots outside the lobby; they remain cached for the next setup view.
+    private void NCEmploymentUpdated()
+    {
+        if (_stateManager.CurrentState is LobbyState && _preferencesManager.ServerDataLoaded)
+            ReloadCharacterSetup();
     }
 
     public void OnStateEntered(LobbyState state)

@@ -1,0 +1,12 @@
+department-name-ncpd = NCPD
+department-desc-ncpd = Полицейский департамент Найт-Сити.
+department-name-trauma-team = Trauma Team
+department-desc-trauma-team = Вооружённая медицинская эвакуация и полевая помощь.
+department-name-medical-nc = Медицина
+department-desc-medical-nc = Клиники, больницы, диагностика и гражданская медицина.
+department-name-biotechnica = Biotechnica
+department-desc-biotechnica = Корпоративная агрономия, медицина, исследования и полевые операции.
+department-name-militech = Militech
+department-desc-militech = Корпоративная безопасность, логистика и военные операции.
+department-name-zhirafa = Zhirafa
+department-desc-zhirafa = Городское обслуживание и инфраструктура.

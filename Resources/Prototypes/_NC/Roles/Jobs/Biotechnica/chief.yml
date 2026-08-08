@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: BiotechnicaChief
+  name: job-name-biotechnica-chief
+  description: job-description-biotechnica-chief
+  playTimeTracker: NCJobBiotechnicaChief
+  supervisors: nc-job-supervisors-biotechnica-management
+  weight: 100
+  salary: 600
+  setPreference: false
+  startingGear: BiotechnicaChiefGear
+  icon: JobIconResearchDirector
+  accessGroups: [ BiotechBasic ]
+  access: [ Biotech_Director, Biotech_HeadOfDepartment, Biotech_Botany, Biotech_MedTech, Biotech_Tech, Biotech_Operative ]
+
+- type: startingGear
+  id: BiotechnicaChiefGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitResearchDirector
+    back: ClothingBackpackScience
+    shoes: ClothingShoesColorWhite
+    head: ClothingHeadHatBeretRND
+    eyes: ClothingEyesGlasses
+    gloves: ClothingHandsGlovesNitrile
+    id: RnDPDA
+    ears: ClothingHeadsetRD
+    outerClothing: ClothingOuterCoatRD

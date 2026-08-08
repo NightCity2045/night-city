@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncBankConfiguration
+  id: Default
+  startingBalance: 500
+  accountPrefix: NC
+  pinDigits: 4
+  paydayIntervalSeconds: 1800
+  currencyStack: Credit
+
+- type: entity
+  id: NCATM
+  name: ent-NCATM
+  description: ent-NCATM-desc
+  parent: BaseComputer
+  components:
+  - type: NCAtm
+    taxRate: 0.1
+    maximumTransaction: 100000
+  - type: ActivatableUI
+    key: enum.NCAtmUiKey.Key
+    singleUser: true
+  - type: UserInterface
+    interfaces:
+      enum.NCAtmUiKey.Key:
+        type: NCAtmBoundUserInterface

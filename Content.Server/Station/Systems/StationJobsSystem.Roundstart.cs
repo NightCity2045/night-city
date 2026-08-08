@@ -55,6 +55,11 @@ public sealed partial class StationJobsSystem
     {
         DebugTools.Assert(stations.Count > 0);
 
+        // NC start - Employment persists between launches; round job priorities no longer assign positions.
+        if (TryAssignNCJobs(profiles, stations, out var ncAssigned))
+            return ncAssigned;
+        // NC end
+
         InitializeRoundStart();
 
         if (profiles.Count == 0)
