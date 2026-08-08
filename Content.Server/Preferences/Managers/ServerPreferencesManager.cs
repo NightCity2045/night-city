@@ -176,6 +176,7 @@ namespace Content.Server.Preferences.Managers
                 loadouts[role.RoleName] = loadout;
             }
 
+            // NC start - Department preference is part of this character, not the account.
             return new HumanoidCharacterProfile(
                 profile.CharacterName,
                 profile.FlavorText,
@@ -196,7 +197,8 @@ namespace Content.Server.Preferences.Managers
                 antags.ToHashSet(),
                 traits.ToHashSet(),
                 loadouts
-            );
+            ).WithNCDepartmentPreference(profile.NCDepartmentPreference);
+            // NC end
         }
 
         private async void HandleSelectCharacterMessage(MsgSelectCharacter message)
@@ -229,6 +231,11 @@ namespace Content.Server.Preferences.Managers
             if (ShouldStorePrefs(message.MsgChannel.AuthType))
             {
                 await _db.SaveSelectedCharacterIndexAsync(message.MsgChannel.UserId, message.SelectedCharacterIndex);
+                // NC - Resolve a saved initial department when this character is selected for the first time.
+                await CreateNCEntryEmploymentIfNeeded(
+                    userId,
+                    index,
+                    prefsData.Prefs.SelectedCharacter.NCDepartmentPreference);
             }
         }
 
@@ -270,7 +277,13 @@ namespace Content.Server.Preferences.Managers
             prefsData.Prefs = new PlayerPreferences(profiles, slot, curPrefs.AdminOOCColor, curPrefs.ConstructionFavorites);
 
             if (ShouldStorePrefs(session.Channel.AuthType))
+            {
                 await _db.SaveCharacterSlotAsync(userId, profile, slot);
+                // NC - New character slots receive their stable Profile.Id only after saving.
+                await RefreshNCCharacterData(userId);
+                // NC - A department choice creates only the character's first employment.
+                await CreateNCEntryEmploymentIfNeeded(userId, slot, profile.NCDepartmentPreference);
+            }
         }
 
         public async Task SetConstructionFavorites(NetUserId userId, List<ProtoId<ConstructionPrototype>> favorites)
@@ -345,6 +358,9 @@ namespace Content.Server.Preferences.Managers
                 {
                     await _db.SaveCharacterSlotAsync(userId, null, slot);
                 }
+
+                // NC - Remove the deleted character identity and employment from the runtime cache.
+                await RefreshNCCharacterData(userId);
             }
         }
 
@@ -410,7 +426,14 @@ namespace Content.Server.Preferences.Managers
                 async Task LoadPrefs()
                 {
                     var prefs = await GetOrCreatePreferencesAsync(session.UserId, cancel);
+                    // NC - Cache stable character IDs and server-owned employment before lobby setup completes.
+                    CacheNCCharacterData(session.UserId, prefs);
                     prefsData.Prefs = ConvertPreferences(prefs);
+                    // NC - Apply a previously saved department choice that predates entry-job assignment.
+                    await CreateNCEntryEmploymentIfNeeded(
+                        session.UserId,
+                        prefsData.Prefs.SelectedCharacterIndex,
+                        prefsData.Prefs.SelectedCharacter.NCDepartmentPreference);
                 }
             }
         }
@@ -438,6 +461,8 @@ namespace Content.Server.Preferences.Managers
         public void OnClientDisconnected(ICommonSession session)
         {
             _cachedPlayerPrefs.Remove(session.UserId);
+            // NC - Character records are reloaded on the next authenticated connection.
+            _ncCharacterData.Remove(session.UserId);
         }
 
         public bool HavePreferencesLoaded(ICommonSession session)

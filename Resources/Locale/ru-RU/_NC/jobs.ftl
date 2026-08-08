@@ -1,0 +1,92 @@
+job-name-passenger = Житель
+job-description-passenger = Постоянный житель Найт-Сити без назначенной должности.
+
+nc-character-department-title = Проживание и департамент
+nc-character-department-explanation = Выберите Жителя, чтобы остаться безработным, или департамент, чтобы начать с его стартовой должности.
+nc-character-department-apply = Устроиться
+nc-character-department-selected = Выбрано
+nc-character-resident-select = Остаться жителем
+
+nc-job-supervisors-city-administration = администрация Найт-Сити
+nc-job-supervisors-ncpd-command = командование NCPD
+nc-job-supervisors-trauma-team-command = командование Trauma Team
+nc-job-supervisors-medical-command = главный врач
+nc-job-supervisors-biotechnica-management = руководство Biotechnica
+nc-job-supervisors-militech-command = командование Militech
+nc-job-supervisors-zhirafa-management = руководство городских служб Zhirafa
+
+job-name-ncpd-cadet = Кадет NCPD
+job-description-ncpd-cadet = Начальная должность NCPD с работой под надзором старших сотрудников.
+job-name-ncpd-chief = Начальник NCPD
+job-description-ncpd-chief = Руководитель полицейского департамента Найт-Сити.
+job-name-ncpd-commander = Командир NCPD
+job-description-ncpd-commander = Руководит операциями и личным составом полиции.
+job-name-ncpd-inspector = Инспектор NCPD
+job-description-ncpd-inspector = Расследует тяжкие преступления.
+job-name-ncpd-lieutenant = Лейтенант NCPD
+job-description-ncpd-lieutenant = Руководит подразделением полиции.
+job-name-ncpd-sergeant = Сержант NCPD
+job-description-ncpd-sergeant = Руководит патрульными в поле.
+job-name-ncpd-officer = Офицер NCPD
+job-description-ncpd-officer = Несёт патрульную службу и обеспечивает правопорядок.
+
+job-name-trauma-team-paramedic = Парамедик Trauma Team
+job-description-trauma-team-paramedic = Стабилизирует клиентов во время вооружённой эвакуации.
+job-name-trauma-team-operative = Оперативник Trauma Team
+job-description-trauma-team-operative = Обеспечивает безопасность и эвакуацию клиентов.
+
+job-name-medical-chief = Главный врач
+job-description-medical-chief = Руководит гражданским медицинским учреждением.
+job-name-medical-doctor = Врач
+job-description-medical-doctor = Диагностирует и лечит пациентов.
+job-name-medical-coroner = Коронер
+job-description-medical-coroner = Исследует умерших и ведёт учёт морга.
+job-name-medical-psychologist = Психолог
+job-description-medical-psychologist = Проводит оценку и лечение психического состояния.
+job-name-medical-intern = Медицинский интерн
+job-description-medical-intern = Стажёр гражданской медицины под надзором.
+job-name-medical-technician = Медицинский техник
+job-description-medical-technician = Обслуживает оборудование и помогает в лечении.
+
+job-name-biotechnica-chief = Директор Biotechnica
+job-description-biotechnica-chief = Руководит операциями Biotechnica в Найт-Сити.
+job-name-biotechnica-operative-lead = Руководитель оперативников Biotechnica
+job-description-biotechnica-operative-lead = Руководит корпоративными полевыми операциями.
+job-name-biotechnica-operative = Оперативник Biotechnica
+job-description-biotechnica-operative = Выполняет корпоративные полевые задания.
+job-name-biotechnica-rigger = Риггер Biotechnica
+job-description-biotechnica-rigger = Обслуживает дроны и полевую технику.
+job-name-biotechnica-botanist = Агроном Biotechnica
+job-description-biotechnica-botanist = Работает с дефицитными культурами и биопроизводством.
+job-name-biotechnica-med-tech = Медтехник Biotechnica
+job-description-biotechnica-med-tech = Поддерживает корпоративную медицину.
+job-name-biotechnica-tech = Техник Biotechnica
+job-description-biotechnica-tech = Обслуживает корпоративные технические системы.
+job-name-biotechnica-netrunner = Нетраннер Biotechnica
+job-description-biotechnica-netrunner = Ведёт корпоративные сетевые операции.
+job-name-biotechnica-paramedic = Парамедик Biotechnica
+job-description-biotechnica-paramedic = Оказывает полевую помощь корпоративным группам.
+
+job-name-militech-chief = Директор Militech
+job-description-militech-chief = Руководит операциями Militech в Найт-Сити.
+job-name-militech-operative-lead = Руководитель оперативников Militech
+job-description-militech-operative-lead = Командует полевыми группами Militech.
+job-name-militech-operative = Оперативник Militech
+job-description-militech-operative = Выполняет вооружённые корпоративные операции.
+job-name-militech-rigger = Риггер Militech
+job-description-militech-rigger = Обслуживает дроны, транспорт и полевые системы.
+job-name-militech-netrunner = Нетраннер Militech
+job-description-militech-netrunner = Ведёт военные сетевые операции.
+job-name-militech-security-specialist = Специалист безопасности Militech
+job-description-militech-security-specialist = Защищает корпоративный персонал и имущество.
+job-name-militech-combat-medic = Боевой медик Militech
+job-description-militech-combat-medic = Оказывает помощь под огнём.
+job-name-militech-tech = Техник Militech
+job-description-militech-tech = Обслуживает военную технику.
+job-name-militech-quartermaster = Квартирмейстер Militech
+job-description-militech-quartermaster = Контролирует дефицитное корпоративное снабжение.
+
+job-name-zhirafa-janitor = Работник санитарной службы Zhirafa
+job-description-zhirafa-janitor = Обслуживает улицы и городские пространства.
+job-name-zhirafa-engineer = Инженер Zhirafa
+job-description-zhirafa-engineer = Обслуживает повреждённую городскую инфраструктуру.

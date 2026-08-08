@@ -34,7 +34,8 @@ job-name-librarian = Librarian
 job-name-mime = Mime
 job-name-musician = Musician
 job-name-paramedic = Paramedic
-job-name-passenger = Passenger
+# NC - Passenger is the technical overflow ID; Night City presents it as a persistent resident.
+job-name-passenger = Resident
 job-name-psychologist = Psychologist
 job-name-qm = Quartermaster
 job-name-rd = Research Director

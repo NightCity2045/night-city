@@ -1,0 +1,80 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# SharedJobSystem requires a unique tracker for each job prototype.
+- type: playTimeTracker
+  id: NCJobNCPDCadet
+- type: playTimeTracker
+  id: NCJobNCPDChief
+- type: playTimeTracker
+  id: NCJobNCPDCommander
+- type: playTimeTracker
+  id: NCJobNCPDInspector
+- type: playTimeTracker
+  id: NCJobNCPDLieutenant
+- type: playTimeTracker
+  id: NCJobNCPDSergeant
+- type: playTimeTracker
+  id: NCJobNCPDOfficer
+
+- type: playTimeTracker
+  id: NCJobTraumaTeamParamedic
+- type: playTimeTracker
+  id: NCJobTraumaTeamOperative
+
+- type: playTimeTracker
+  id: NCJobMedicalChief
+- type: playTimeTracker
+  id: NCJobMedicalDoctor
+- type: playTimeTracker
+  id: NCJobMedicalCoroner
+- type: playTimeTracker
+  id: NCJobMedicalPsychologist
+- type: playTimeTracker
+  id: NCJobMedicalIntern
+- type: playTimeTracker
+  id: NCJobMedicalTechnician
+
+- type: playTimeTracker
+  id: NCJobBiotechnicaChief
+- type: playTimeTracker
+  id: NCJobBiotechnicaOperativeLead
+- type: playTimeTracker
+  id: NCJobBiotechnicaOperative
+- type: playTimeTracker
+  id: NCJobBiotechnicaRigger
+- type: playTimeTracker
+  id: NCJobBiotechnicaBotanist
+- type: playTimeTracker
+  id: NCJobBiotechnicaMedTech
+- type: playTimeTracker
+  id: NCJobBiotechnicaTech
+- type: playTimeTracker
+  id: NCJobBiotechnicaNetrunner
+- type: playTimeTracker
+  id: NCJobBiotechnicaParamedic
+
+- type: playTimeTracker
+  id: NCJobMilitechChief
+- type: playTimeTracker
+  id: NCJobMilitechOperativeLead
+- type: playTimeTracker
+  id: NCJobMilitechOperative
+- type: playTimeTracker
+  id: NCJobMilitechRigger
+- type: playTimeTracker
+  id: NCJobMilitechNetrunner
+- type: playTimeTracker
+  id: NCJobMilitechSecuritySpecialist
+- type: playTimeTracker
+  id: NCJobMilitechCombatMedic
+- type: playTimeTracker
+  id: NCJobMilitechTech
+- type: playTimeTracker
+  id: NCJobMilitechQuartermaster
+
+- type: playTimeTracker
+  id: NCJobZhirafaJanitor
+- type: playTimeTracker
+  id: NCJobZhirafaEngineer

@@ -114,7 +114,9 @@ namespace Content.Client.Lobby
                 return;
             }
 
-            new LateJoinGui().OpenCentered();
+            // NC start - Concrete jobs are resolved from server-owned character employment.
+            _consoleHost.ExecuteCommand("ncjoingame");
+            // NC end
         }
 
         private void OnReadyToggled(BaseButton.ButtonToggledEventArgs args)

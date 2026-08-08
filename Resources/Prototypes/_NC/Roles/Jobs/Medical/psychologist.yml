@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: TraumaTeamPsych
+  name: job-name-medical-psychologist
+  description: job-description-medical-psychologist
+  playTimeTracker: NCJobMedicalPsychologist
+  supervisors: nc-job-supervisors-medical-command
+  weight: 80
+  setPreference: false
+  startingGear: NCMedicalPsychologistGear
+  icon: JobIconMedicalDoctor
+  accessGroups: [ MedicalBasic ]
+
+- type: startingGear
+  id: NCMedicalPsychologistGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitPsychologist
+    back: ClothingBackpackMedical
+    shoes: ClothingShoesColorWhite
+    id: PsychologistPDA
+    ears: ClothingHeadsetMedical
+    outerClothing: ClothingOuterCoatLab

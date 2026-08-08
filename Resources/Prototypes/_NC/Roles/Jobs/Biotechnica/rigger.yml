@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: BiotechnicaRigger
+  name: job-name-biotechnica-rigger
+  description: job-description-biotechnica-rigger
+  playTimeTracker: NCJobBiotechnicaRigger
+  supervisors: nc-job-supervisors-biotechnica-management
+  weight: 55
+  setPreference: false
+  startingGear: BiotechnicaRiggerGear
+  icon: JobIconStationEngineer
+  accessGroups: [ BiotechBasic ]
+  access: [ Biotech_Tech ]
+
+- type: startingGear
+  id: BiotechnicaRiggerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitEngineering
+    back: ClothingBackpackEngineering
+    shoes: ClothingShoesBootsWork
+    head: ClothingHeadHatHardhatYellow
+    eyes: ClothingEyesGlassesMeson
+    gloves: ClothingHandsGlovesColorYellow
+    id: EngineerPDA
+    ears: ClothingHeadsetEngineering
+    belt: ClothingBeltUtilityFilled

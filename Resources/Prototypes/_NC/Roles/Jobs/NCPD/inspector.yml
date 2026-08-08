@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: NCPDInspector
+  name: job-name-ncpd-inspector
+  description: job-description-ncpd-inspector
+  playTimeTracker: NCJobNCPDInspector
+  supervisors: nc-job-supervisors-ncpd-command
+  weight: 80
+  setPreference: false
+  startingGear: NCPDInspectorGear
+  icon: JobIconDetective
+  accessGroups: [ NCPDBasic ]
+  access: [ NCPD_Detective ]
+
+- type: startingGear
+  id: NCPDInspectorGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitDetective
+    back: ClothingBackpackSecurity
+    shoes: ClothingShoesColorBlack
+    head: ClothingHeadHatFedoraBrown
+    eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesForensic
+    id: DetectivePDA
+    ears: ClothingHeadsetSecurity
+    belt: ClothingBeltHolsterFilled
+  storage:
+    back:
+    - ForensicPad
+    - ForensicScanner

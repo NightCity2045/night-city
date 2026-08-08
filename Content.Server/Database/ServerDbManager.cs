@@ -26,7 +26,8 @@ using MSLogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Content.Server.Database
 {
-    public interface IServerDbManager
+    // NC - Partial so Night City persistence contracts stay under _NC.
+    public partial interface IServerDbManager
     {
         void Init();
 

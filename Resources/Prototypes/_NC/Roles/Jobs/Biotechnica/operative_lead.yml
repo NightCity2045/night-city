@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: BiotechnicaOperativeLead
+  name: job-name-biotechnica-operative-lead
+  description: job-description-biotechnica-operative-lead
+  playTimeTracker: NCJobBiotechnicaOperativeLead
+  supervisors: nc-job-supervisors-biotechnica-management
+  weight: 80
+  setPreference: false
+  startingGear: BiotechnicaOperativeLeadGear
+  icon: JobIconSecurityOfficer
+  accessGroups: [ BiotechBasic ]
+  access: [ Biotech_HeadOfDepartment, Biotech_Operative ]
+
+- type: startingGear
+  id: BiotechnicaOperativeLeadGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitWarden
+    back: ClothingBackpackSecurity
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHatBeretSecurity
+    eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesCombat
+    id: WardenPDA
+    ears: ClothingHeadsetSecurity
+    belt: ClothingBeltSecurityFilled
+    outerClothing: ClothingOuterArmorBasic

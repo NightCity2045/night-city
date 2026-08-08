@@ -9,7 +9,8 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Server.Preferences.Managers
 {
-    public interface IServerPreferencesManager
+    // NC - Partial so character identity and employment APIs remain in _NC.
+    public partial interface IServerPreferencesManager
     {
         void Init();
 

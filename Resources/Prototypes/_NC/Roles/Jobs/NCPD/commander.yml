@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: NCPDCommander
+  name: job-name-ncpd-commander
+  description: job-description-ncpd-commander
+  playTimeTracker: NCJobNCPDCommander
+  supervisors: nc-job-supervisors-ncpd-command
+  weight: 90
+  setPreference: false
+  startingGear: NCPDCommanderGear
+  icon: JobIconWarden
+  accessGroups: [ NCPDBasic ]
+  access: [ NCPD_Command, NCPD_Armory ]
+
+- type: startingGear
+  id: NCPDCommanderGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitWarden
+    back: ClothingBackpackSecurity
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHatWarden
+    eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesCombat
+    id: WardenPDA
+    ears: ClothingHeadsetAltSecurity
+    belt: ClothingBeltSecurityFilled
+    outerClothing: ClothingOuterArmorBasic

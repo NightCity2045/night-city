@@ -78,6 +78,11 @@ public sealed partial class ProfilePreviewSpriteView
     /// </summary>
     private JobPrototype GetPreferredJob(HumanoidCharacterProfile profile)
     {
+        // NC start - Preview the selected department's entry job instead of the legacy Passenger priority.
+        if (TryGetNCPreviewJob(profile, out var ncJob))
+            return ncJob;
+        // NC end
+
         var highPriorityJob = profile.JobPriorities.FirstOrDefault(p => p.Value == JobPriority.High).Key;
         // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract (what is resharper smoking?)
         return _prototypeManager.Index<JobPrototype>(highPriorityJob.Id ?? SharedGameTicker.FallbackOverflowJob);

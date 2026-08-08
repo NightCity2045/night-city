@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: MilitechRigger
+  name: job-name-militech-rigger
+  description: job-description-militech-rigger
+  playTimeTracker: NCJobMilitechRigger
+  supervisors: nc-job-supervisors-militech-command
+  weight: 55
+  setPreference: false
+  startingGear: MilitechRiggerGear
+  icon: JobIconStationEngineer
+  accessGroups: [ MilitechBasic ]
+  access: [ Militech_Tech ]
+
+- type: startingGear
+  id: MilitechRiggerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitEngineering
+    back: ClothingBackpackEngineering
+    shoes: ClothingShoesBootsWork
+    head: ClothingHeadHatHardhatYellow
+    eyes: ClothingEyesGlassesMeson
+    gloves: ClothingHandsGlovesColorYellow
+    id: EngineerPDA
+    ears: ClothingHeadsetEngineering
+    belt: ClothingBeltUtilityFilled

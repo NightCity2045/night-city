@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: MilitechNetrunner
+  name: job-name-militech-netrunner
+  description: job-description-militech-netrunner
+  playTimeTracker: NCJobMilitechNetrunner
+  supervisors: nc-job-supervisors-militech-command
+  weight: 60
+  setPreference: false
+  startingGear: MilitechNetrunnerGear
+  icon: JobIconScientist
+  accessGroups: [ MilitechBasic ]
+  access: [ Militech_Tech ]
+
+- type: startingGear
+  id: MilitechNetrunnerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitScientist
+    back: ClothingBackpackScience
+    shoes: ClothingShoesColorBlack
+    eyes: ClothingEyesGlasses
+    id: ScientistPDA
+    ears: ClothingHeadsetScience

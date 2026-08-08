@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: job
+  id: ZhirafaEngineer
+  name: job-name-zhirafa-engineer
+  description: job-description-zhirafa-engineer
+  playTimeTracker: NCJobZhirafaEngineer
+  supervisors: nc-job-supervisors-zhirafa-management
+  weight: 20
+  setPreference: false
+  startingGear: ZhirafaEngineerGear
+  icon: JobIconStationEngineer
+  accessGroups: [ NCBasic ]
+
+- type: startingGear
+  id: ZhirafaEngineerGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitEngineering
+    back: ClothingBackpackEngineering
+    shoes: ClothingShoesBootsWork
+    head: ClothingHeadHatHardhatYellow
+    eyes: ClothingEyesGlassesMeson
+    gloves: ClothingHandsGlovesColorYellow
+    id: EngineerPDA
+    ears: ClothingHeadsetEngineering
+    belt: ClothingBeltUtilityEngineering

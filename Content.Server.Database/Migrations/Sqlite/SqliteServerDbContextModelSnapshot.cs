@@ -926,6 +926,40 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("job", (string)null);
                 });
 
+            // NC start - Persistent character employment model.
+            modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("JobPrototypeId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("job_prototype_id");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("started_at");
+
+                    b.Property<byte>("State")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("state");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_character_employment");
+
+                    b.HasIndex("JobPrototypeId");
+
+                    b.ToTable("nc_character_employment", (string)null);
+                });
+            // NC end
+
             modelBuilder.Entity("Content.Server.Database.PlayTime", b =>
                 {
                     b.Property<int>("Id")
@@ -1090,6 +1124,12 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Property<byte[]>("Markings")
                         .HasColumnType("jsonb")
                         .HasColumnName("markings");
+
+                    // NC start - Per-character initial department.
+                    b.Property<string>("NCDepartmentPreference")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("ncdepartment_preference");
+                    // NC end
 
                     b.Property<byte[]>("OrganMarkings")
                         .HasColumnType("jsonb")
@@ -1863,6 +1903,19 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Profile");
                 });
 
+            // NC start - Character employment belongs to exactly one profile.
+            modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", "Profile")
+                        .WithOne("NCEmployment")
+                        .HasForeignKey("Content.Server.Database.NCCharacterEmployment", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_character_employment_profile_profile_id");
+
+                    b.Navigation("Profile");
+                });
+
             modelBuilder.Entity("Content.Server.Database.Player", b =>
                 {
                     b.OwnsOne("Content.Server.Database.TypedHwid", "LastSeenHWId", b1 =>
@@ -1893,6 +1946,7 @@ namespace Content.Server.Database.Migrations.Sqlite
 
                     b.Navigation("LastSeenHWId");
                 });
+            // NC end
 
             modelBuilder.Entity("Content.Server.Database.Profile", b =>
                 {
@@ -2120,6 +2174,10 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Jobs");
 
                     b.Navigation("Loadouts");
+
+                    // NC start - Optional current employment navigation.
+                    b.Navigation("NCEmployment");
+                    // NC end
 
                     b.Navigation("Traits");
                 });

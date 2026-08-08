@@ -41,12 +41,21 @@ public sealed partial class CharacterPickerButton : ContainerButton
 
         View.LoadPreview(profile);
 
-        var highPriorityJob = profile.JobPriorities.SingleOrDefault(p => p.Value == JobPriority.High).Key;
-        if (highPriorityJob != default)
+        // NC start - Department employment takes precedence over obsolete vanilla job priorities in the picker.
+        if (TryGetNCDisplayJob(prototypeManager, profile, out var ncJob))
         {
-            var jobName = prototypeManager.Index(highPriorityJob).LocalizedName;
-            description = $"{description}\n{jobName}";
+            description = $"{description}\n{ncJob.LocalizedName}";
         }
+        else
+        {
+            var highPriorityJob = profile.JobPriorities.SingleOrDefault(p => p.Value == JobPriority.High).Key;
+            if (highPriorityJob != default)
+            {
+                var jobName = prototypeManager.Index(highPriorityJob).LocalizedName;
+                description = $"{description}\n{jobName}";
+            }
+        }
+        // NC end
 
         Pressed = isSelected;
         DeleteButton.Visible = !isSelected;

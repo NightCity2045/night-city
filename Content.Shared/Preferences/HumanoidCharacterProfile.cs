@@ -193,6 +193,9 @@ namespace Content.Shared.Preferences
                 new HashSet<ProtoId<TraitPrototype>>(other.TraitPreferences),
                 new Dictionary<string, RoleLoadout>(other.Loadouts))
         {
+            // NC start - Preserve the per-character initial department when profiles are copied.
+            NCDepartmentPreference = other.NCDepartmentPreference;
+            // NC end
         }
 
         /// <summary>
@@ -612,6 +615,9 @@ namespace Content.Shared.Preferences
 
         public bool MemberwiseEquals(HumanoidCharacterProfile other)
         {
+            // NC start - Department preference belongs to the character profile.
+            if (NCDepartmentPreference != other.NCDepartmentPreference) return false;
+            // NC end
             if (Name != other.Name) return false;
             if (Age != other.Age) return false;
             if (Sex != other.Sex) return false;
@@ -632,6 +638,10 @@ namespace Content.Shared.Preferences
         {
             var configManager = collection.Resolve<IConfigurationManager>();
             var prototypeManager = collection.Resolve<IPrototypeManager>();
+
+            // NC start - Never accept a hidden or unknown department from the client.
+            EnsureNCDepartmentPreferenceValid(prototypeManager);
+            // NC end
 
             if (!prototypeManager.TryIndex(Species, out var speciesPrototype) || speciesPrototype.RoundStart == false)
             {
