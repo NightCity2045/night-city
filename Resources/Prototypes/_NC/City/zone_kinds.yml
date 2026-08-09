@@ -62,3 +62,16 @@
   - Polygon
   - TileMask
   - Volume
+
+- type: ncZoneKind
+  id: DungeonSlot
+  hierarchyRank: 4
+  contextSlot: DungeonSlot
+  allowedParents:
+  - Building
+  - Sector
+  editorColor: "#b94a4a"
+  allowedGeometry:
+  - Polygon
+  - TileMask
+  - Volume

@@ -104,3 +104,10 @@ public sealed class NCApartmentIdSerializer : NCCityObjectIdSerializer<NCApartme
     protected override string TypeName => nameof(NCApartmentId);
     protected override bool TryParse(string value, out NCApartmentId id) => NCApartmentId.TryParse(value, out id);
 }
+
+[TypeSerializer]
+public sealed class NCDungeonSlotIdSerializer : NCCityObjectIdSerializer<NCDungeonSlotId>
+{
+    protected override string TypeName => nameof(NCDungeonSlotId);
+    protected override bool TryParse(string value, out NCDungeonSlotId id) => NCDungeonSlotId.TryParse(value, out id);
+}

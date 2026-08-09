@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# The city map owns the shell walls and exterior entrance. This exact 8x8 template supplies floor,
+# interior entities and dynamic spawn markers for the bound DungeonSlot.
+- type: ncZoneTemplate
+  id: NCDungeonLayout8x8
+  name: nc-zone-template-dungeon-layout-8x8
+  targetZoneId: 8d7b2c44-9a31-4f67-b8e2-6c5d4a3f1808
+  kind: DungeonLayout
+  revision: 1
+  compatibleZoneKinds:
+  - DungeonSlot
+  floors:
+  - relativeZ: 0
+    mapPath: /Maps/_NC/Dungeons/Dungeon8x8.yml
+  tilePolicy: ReplaceNonEmpty
+  entityPolicy: InteriorOnly
+  cleanupPolicy: RestoreBaseline
+  cachePolicy: Always
+
+- type: ncDungeonDefinition
+  id: NCDungeon8x8
+  template: NCDungeonLayout8x8
+  maximumParticipants: 4
+  evacuationTime: 2m
+  dynamicSpawnPools:
+    Guards:
+    - MobSyndicateFootsoldier
+    Loot:
+    - WeaponPistolMk58
+    - MagazinePistol

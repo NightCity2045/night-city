@@ -1,0 +1,66 @@
+nc-property-card-denied = This key-card is not valid for the property.
+nc-property-card-accepted = The property lock accepts the key-card.
+nc-property-door-blocked = The credential is valid, but the door cannot open.
+
+ent-NCPropertyConsole = real-estate terminal
+    .desc = A public terminal for renting furnished Night City apartments.
+ent-NCPropertyConsoleCircuitboard = real-estate terminal board
+    .desc = A computer board for a Night City real-estate terminal.
+
+nc-zone-template-apartment-layout-5x5 = Compact furnished apartment (5×5)
+nc-zone-template-dungeon-layout-8x8 = Occupied warehouse dungeon (8×8)
+
+nc-property-console-title = Night City Real Estate
+nc-property-console-search-placeholder = Search by building or apartment...
+nc-property-console-search = Search
+nc-property-console-balance = Balance:
+nc-property-console-credits = {$amount} eb
+nc-property-console-no-account = No bank account
+nc-property-console-properties = Registered properties
+nc-property-console-empty = No properties match the current filter.
+nc-property-console-previous = Previous
+nc-property-console-next = Next
+nc-property-console-page = Page {$current}/{$pages} · {$total} properties
+nc-property-console-select = Select a property to view its terms.
+nc-property-console-building = Building:
+nc-property-console-id = Property ID:
+nc-property-console-status = Status:
+nc-property-console-occupancy = Your relation:
+nc-property-console-rent-selected = Rent selected design
+nc-property-console-end-lease = End lease
+nc-property-console-end-lease-confirm = Confirm move-out
+nc-property-console-rent-line = Rent: {$rent} eb every {$hours} h · grace: {$graceHours} h
+nc-property-console-next-rent = Next rent payment: {$date}
+nc-property-console-listing-line = {$building} / {$apartment} — {$status}
+nc-property-console-interior-title = Interior
+nc-property-console-interior-offer = {$interior} — {$rent} eb
+nc-property-console-current-interior = Current:
+nc-property-console-interior-none = not installed
+nc-property-console-invoke-interior = Invoke apartment
+nc-property-console-interior-active = Apartment is currently deployed
+nc-property-console-interior-ready = Apartment is ready to be invoked
+nc-property-console-occupancy-tenant = tenant
+nc-property-console-occupancy-none = none
+
+nc-property-console-status-unavailable = unavailable
+nc-property-console-status-available = available
+nc-property-console-status-reserved = reserved
+nc-property-console-status-owneroccupied = owner occupied
+nc-property-console-status-rented = rented
+nc-property-console-status-delinquent = delinquent
+nc-property-console-status-evictionpending = eviction pending
+
+nc-property-console-result-rented = Lease created and the first period paid. Your key-card has been issued.
+nc-property-console-result-lease-ended = Lease ended. All access cards have been revoked.
+nc-property-console-result-move-out-blocked = Remove all belongings and occupants before ending the lease.
+nc-property-console-result-interior-invoked = Apartment invocation has been queued.
+nc-property-console-result-interior-active = The apartment is already active or being prepared.
+nc-property-console-result-invalid-interior = This interior is not bound to the selected apartment.
+nc-property-console-result-interior-failed = The interior cannot be installed right now.
+nc-property-console-result-no-character = No active persistent character is selected.
+nc-property-console-result-no-account = This character has no bank account.
+nc-property-console-result-insufficient-funds = Insufficient funds.
+nc-property-console-result-not-available = The property is no longer available.
+nc-property-console-result-not-authorized = You are not authorized for this operation.
+nc-property-console-result-conflict = The property changed while the operation was processing. Refresh and try again.
+nc-property-console-result-failed = The real-estate operation failed.

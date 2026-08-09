@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  id: NCTemplateVerticalLinkMarker
+  parent: MarkerBase
+  name: template vertical link
+  suffix: NC, Mapping
+  components:
+  - type: Sprite
+    layers:
+    - state: pink
+  - type: NCTemplateVerticalLinkMarker
+    linkId: LinkA
+    targetLinkId: LinkB
+    relativeZ: 0
+    linkType: Stairs
+    direction: Bidirectional
+    required: true
+
+- type: entity
+  id: NCDungeonDynamicPointMarker
+  parent: MarkerBase
+  name: dungeon dynamic point
+  suffix: NC, Mapping
+  components:
+  - type: Sprite
+    layers:
+    - state: red
+  - type: NCDungeonDynamicPoint
+    poolId: Default
+    extractionPolicy: DeleteOnCleanup

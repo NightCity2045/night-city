@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncRentPolicy
+  id: StandardApartment
+  rentAmount: 0
+  # RobustToolbox TimeSpan YAML accepts seconds, minutes, or hours; days are expressed as hours.
+  billingInterval: 168h
+  gracePeriod: 48h
+
+- type: ncPropertyAccessPolicy
+  id: StandardApartment
+  tenantPermissions: All
+  maximumActiveCards: 16
+  keyCardPrototype: NCPropertyKeyCard

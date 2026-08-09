@@ -15,6 +15,7 @@ public static class NCCityObjectIdDatabaseCodec
     public static Guid Encode(NCStreetId id) => id.Value;
     public static Guid Encode(NCBuildingId id) => id.Value;
     public static Guid Encode(NCApartmentId id) => id.Value;
+    public static Guid Encode(NCDungeonSlotId id) => id.Value;
 
     public static bool TryDecodeDistrict(Guid value, out NCDistrictId id) =>
         NCDistrictId.TryParse(value.ToString("D"), out id);
@@ -30,4 +31,7 @@ public static class NCCityObjectIdDatabaseCodec
 
     public static bool TryDecodeApartment(Guid value, out NCApartmentId id) =>
         NCApartmentId.TryParse(value.ToString("D"), out id);
+
+    public static bool TryDecodeDungeonSlot(Guid value, out NCDungeonSlotId id) =>
+        NCDungeonSlotId.TryParse(value.ToString("D"), out id);
 }
