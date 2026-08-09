@@ -13,7 +13,7 @@ namespace Content.Server._NC.ZLevels.Power;
 /// <summary>
 /// Rebuilds vertical power connections when grids join or leave a Z-grid network.
 /// </summary>
-public sealed class NCZLevelPowerSystem : EntitySystem
+public sealed partial class NCZLevelPowerSystem : EntitySystem
 {
     [Dependency] private NodeGroupSystem _nodeGroup = default!;
 

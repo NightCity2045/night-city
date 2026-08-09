@@ -8,7 +8,7 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Client._NC.Housing;
 
-public sealed class NCPropertyConsoleBoundUserInterface(EntityUid owner, Enum uiKey)
+public sealed partial class NCPropertyConsoleBoundUserInterface(EntityUid owner, Enum uiKey)
     : BoundUserInterface(owner, uiKey)
 {
     [Dependency] private IPrototypeManager _prototypes = default!;

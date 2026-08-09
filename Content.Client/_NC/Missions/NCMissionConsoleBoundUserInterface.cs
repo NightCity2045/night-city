@@ -9,7 +9,7 @@ using Robust.Shared.Timing;
 
 namespace Content.Client._NC.Missions;
 
-public sealed class NCMissionConsoleBoundUserInterface(EntityUid owner, Enum uiKey)
+public sealed partial class NCMissionConsoleBoundUserInterface(EntityUid owner, Enum uiKey)
     : BoundUserInterface(owner, uiKey)
 {
     [Dependency] private IPrototypeManager _prototypes = default!;

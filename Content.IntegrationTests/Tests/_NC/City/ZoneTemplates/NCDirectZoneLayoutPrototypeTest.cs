@@ -104,7 +104,7 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
             Assert.That(listing.Interiors, Has.Count.EqualTo(1));
             Assert.That(listing.Interiors[0].Template, Is.EqualTo(ApartmentLayout));
             Assert.That(listing.Interiors[0].RentPolicy.Id, Is.EqualTo("StandardApartment"));
-            Assert.That(prototypes.TryIndex(listing.Interiors[0].RentPolicy, out NCRentPolicyPrototype? rentPolicy),
+            Assert.That(prototypes.TryIndex(listing.Interiors[0].RentPolicy, out NCRentPolicyPrototype rentPolicy),
                 Is.True);
             Assert.That(rentPolicy!.RentAmount, Is.Zero);
 
@@ -280,7 +280,7 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
                     dynamicPoints++;
                 if (entities.HasComponent<NCMissionEvacuationPointComponent>(uid))
                     evacuationPoints++;
-                if (entities.TryGetComponent(uid, out NCResolvedVerticalLinkComponent? link))
+                if (entities.TryGetComponent(uid, out NCResolvedVerticalLinkComponent link))
                     resolvedTargets.Add(link.Target.Z);
             }
 
