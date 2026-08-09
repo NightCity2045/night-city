@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# The city map permanently owns the apartment walls and entrance door. This prepared
+# template contributes only its non-empty floor tiles and movable interior entities.
+- type: ncZoneTemplate
+  id: NCApartmentLayout5x5
+  name: nc-zone-template-apartment-layout-5x5
+  targetZoneId: 67566dd3-93b9-4ec6-a823-772e5fc376fd
+  kind: ApartmentInterior
+  revision: 1
+  compatibleZoneKinds:
+  - Apartment
+  floors:
+  - relativeZ: 0
+    mapPath: /Maps/_NC/Housing/Apartment5x5.yml
+  tilePolicy: ReplaceNonEmpty
+  entityPolicy: InteriorOnly
+  cleanupPolicy: PreserveDeployment
+  cachePolicy: Always

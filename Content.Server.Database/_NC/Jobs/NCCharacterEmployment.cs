@@ -89,6 +89,8 @@ public abstract partial class ServerDbContext
     partial void ConfigureNCModels(ModelBuilder modelBuilder)
     {
         ConfigureNCBankModels(modelBuilder);
+        ConfigureNCHousingModels(modelBuilder);
+        ConfigureNCDungeonModels(modelBuilder);
         ConfigureNCPoliceModels(modelBuilder);
 
         modelBuilder.Entity<NCCharacterEmployment>()

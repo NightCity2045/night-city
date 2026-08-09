@@ -160,6 +160,18 @@ public sealed partial class NCZoneSystem : EntitySystem
         return false;
     }
 
+    public bool TryGetMissionSlotId(NCZoneId zoneId, out NCMissionSlotId missionSlotId)
+    {
+        if (HasContextSlot(zoneId, NCZoneContextSlot.MissionSlot))
+        {
+            missionSlotId = new NCMissionSlotId(zoneId);
+            return true;
+        }
+
+        missionSlotId = default;
+        return false;
+    }
+
     public bool TryGetDistrict(NCDistrictId id, out NCZoneInfo district) =>
         TryGetTypedZone(id.ZoneId, NCZoneContextSlot.District, out district);
 
@@ -174,6 +186,81 @@ public sealed partial class NCZoneSystem : EntitySystem
 
     public bool TryGetApartment(NCApartmentId id, out NCZoneInfo apartment) =>
         TryGetTypedZone(id.ZoneId, NCZoneContextSlot.Apartment, out apartment);
+
+    public bool TryGetMissionSlot(NCMissionSlotId id, out NCZoneInfo missionSlot) =>
+        TryGetTypedZone(id.ZoneId, NCZoneContextSlot.MissionSlot, out missionSlot);
+
+    /// <summary>
+    /// Copies all persistent mission slots for an explicit allocation request.
+    /// This is never called from Update and does not inspect runtime entities.
+    /// </summary>
+    public void GetMissionSlots(List<NCMissionSlotId> result)
+    {
+        result.Clear();
+        foreach (var zone in _zonesById.Values)
+        {
+            if (zone.Kind.ContextSlot == NCZoneContextSlot.MissionSlot)
+                result.Add(new NCMissionSlotId(zone.Definition.Id));
+        }
+
+        result.Sort(static (left, right) => left.ZoneId.Value.CompareTo(right.ZoneId.Value));
+    }
+
+    /// <summary>
+    /// Resolves the stable Z-network owning a zone without exposing mutable prototype data.
+    /// </summary>
+    public bool TryGetZoneNetwork(NCZoneId zoneId, out NCZNetworkId networkId)
+    {
+        if (_zonesById.TryGetValue(zoneId, out var zone))
+        {
+            networkId = zone.NetworkId;
+            return true;
+        }
+
+        networkId = default;
+        return false;
+    }
+
+    /// <summary>
+    /// Tests one persistent coordinate against one exact zone instead of a radius or entity scan.
+    /// </summary>
+    public bool Contains(NCZoneId zoneId, NCMapCoordinates coordinates)
+    {
+        return _zonesById.TryGetValue(zoneId, out var zone) &&
+               zone.NetworkId == coordinates.NetworkId &&
+               Contains(zone.Definition, coordinates);
+    }
+
+    /// <summary>
+    /// Copies immutable geometry snapshots for deployment validation and occupancy queries.
+    /// </summary>
+    public bool GetGeometry(NCZoneId zoneId, List<NCZoneGeometryInfo> result)
+    {
+        result.Clear();
+        if (!_zonesById.TryGetValue(zoneId, out var zone))
+            return false;
+
+        foreach (var geometry in zone.Definition.Geometry)
+        {
+            var chunks = new NCTileMaskChunkInfo[geometry.Chunks.Count];
+            for (var i = 0; i < geometry.Chunks.Count; i++)
+            {
+                var chunk = geometry.Chunks[i];
+                chunks[i] = new NCTileMaskChunkInfo(chunk.Z, chunk.Origin, chunk.Rows.ToArray());
+            }
+
+            result.Add(new NCZoneGeometryInfo(
+                geometry.Kind,
+                geometry.Global,
+                geometry.Z,
+                geometry.MinZ,
+                geometry.MaxZ,
+                geometry.Vertices.ToArray(),
+                chunks));
+        }
+
+        return true;
+    }
 
     private bool HasContextSlot(NCZoneId zoneId, NCZoneContextSlot slot)
     {
@@ -216,6 +303,7 @@ public sealed partial class NCZoneSystem : EntitySystem
         var street = default(NCStreetId);
         var building = default(NCBuildingId);
         var apartment = default(NCApartmentId);
+        var missionSlot = default(NCMissionSlotId);
         var visited = new HashSet<NCZoneId>();
         while (leaf != null && visited.Add(leaf.Definition.Id))
         {
@@ -236,6 +324,9 @@ public sealed partial class NCZoneSystem : EntitySystem
                 case NCZoneContextSlot.Apartment:
                     apartment = new NCApartmentId(leaf.Definition.Id);
                     break;
+                case NCZoneContextSlot.MissionSlot:
+                    missionSlot = new NCMissionSlotId(leaf.Definition.Id);
+                    break;
             }
 
             leaf = leaf.Definition.Parent.IsValid &&
@@ -251,7 +342,8 @@ public sealed partial class NCZoneSystem : EntitySystem
             sector,
             street,
             building,
-            apartment);
+            apartment,
+            missionSlot);
     }
 
     public bool TryGetActivityMode(NCZoneId zoneId, out NCZoneActivityMode mode)

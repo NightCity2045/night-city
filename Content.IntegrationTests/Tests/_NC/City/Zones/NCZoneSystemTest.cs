@@ -103,6 +103,25 @@ public sealed class NCZoneSystemTest : GameTest
               - 3,2
               - 3,3
               - 2,3
+          - id: c7112e20-3248-46a2-af7e-b6b179745d44
+            kind: MissionSlot
+            parent: ddf2ded2-d9ac-4201-936f-1badfc179a89
+            name: Test Multi-floor Mission Slot
+            geometry:
+            - kind: Polygon
+              z: 0
+              vertices:
+              - 4,3
+              - 6,3
+              - 6,6
+              - 4,6
+            - kind: Polygon
+              z: 1
+              vertices:
+              - 4,3
+              - 6,3
+              - 6,6
+              - 4,6
         """;
 
     private static readonly NCZNetworkId NetworkId =
@@ -113,6 +132,8 @@ public sealed class NCZoneSystemTest : GameTest
         new(Guid.Parse("ddf2ded2-d9ac-4201-936f-1badfc179a89"));
     private static readonly NCZoneId ApartmentZoneId =
         new(Guid.Parse("78fcc966-12cc-4a15-ae2d-d2f65bbd09c8"));
+    private static readonly NCZoneId MissionSlotZoneId =
+        new(Guid.Parse("c7112e20-3248-46a2-af7e-b6b179745d44"));
 
     public override PoolSettings PoolSettings => new()
     {
@@ -223,6 +244,15 @@ public sealed class NCZoneSystemTest : GameTest
             // A valid zone GUID cannot be silently used as the wrong semantic object type.
             Assert.That(zones.TryGetBuildingId(ApartmentZoneId, out _), Is.False);
             Assert.That(zones.TryGetApartmentId(ApartmentZoneId, out var checkedApartmentId), Is.True);
+            Assert.That(zones.TryGetMissionSlotId(ApartmentZoneId, out _), Is.False);
+            Assert.That(zones.TryGetApartmentId(MissionSlotZoneId, out _), Is.False);
+            Assert.That(zones.TryGetMissionSlotId(MissionSlotZoneId, out var missionSlotId), Is.True);
+            Assert.That(zones.Contains(MissionSlotZoneId,
+                new NCMapCoordinates(NetworkId, new Vector2(5f, 4f), 0)), Is.True);
+            Assert.That(zones.Contains(MissionSlotZoneId,
+                new NCMapCoordinates(NetworkId, new Vector2(5f, 4f), 1)), Is.True);
+            Assert.That(zones.Contains(MissionSlotZoneId,
+                new NCMapCoordinates(NetworkId, new Vector2(5f, 4f), 2)), Is.False);
 
             // Database persistence is a stable GUID scalar and round-trips without runtime entity IDs.
             var storedApartment = NCCityObjectIdDatabaseCodec.Encode(checkedApartmentId);
@@ -238,6 +268,7 @@ public sealed class NCZoneSystemTest : GameTest
             AssertYamlRoundTrip(serialization, context.StreetId);
             AssertYamlRoundTrip(serialization, context.BuildingId);
             AssertYamlRoundTrip(serialization, context.ApartmentId);
+            AssertYamlRoundTrip(serialization, missionSlotId);
 
             Assert.That(zones.SetActivityMode(DistrictId, NCZoneActivityMode.Warm), Is.True);
             Assert.That(zones.TryGetActivityMode(DistrictId, out var activity), Is.True);

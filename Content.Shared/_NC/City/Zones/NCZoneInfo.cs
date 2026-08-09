@@ -4,6 +4,7 @@
 
 using Content.Shared._NC.City.Zones.Prototypes;
 using Robust.Shared.Prototypes;
+using System.Numerics;
 
 namespace Content.Shared._NC.City.Zones;
 
@@ -21,3 +22,23 @@ public readonly record struct NCZoneInfo(
     NCZoneActivityMode ActivityMode);
 
 public readonly record struct NCZoneValidationError(string ZoneSet, NCZoneId Zone, string Message);
+
+/// <summary>
+/// Immutable copy of one geometry fragment. Runtime consumers cannot mutate mapper prototypes through it.
+/// </summary>
+public readonly record struct NCZoneGeometryInfo(
+    NCZoneGeometryKind Kind,
+    bool Global,
+    int Z,
+    int MinZ,
+    int MaxZ,
+    IReadOnlyList<Vector2> Vertices,
+    IReadOnlyList<NCTileMaskChunkInfo> Chunks);
+
+/// <summary>
+/// Immutable copy of one tile-mask chunk used by exact zone queries.
+/// </summary>
+public readonly record struct NCTileMaskChunkInfo(
+    int Z,
+    Vector2i Origin,
+    IReadOnlyList<ulong> Rows);

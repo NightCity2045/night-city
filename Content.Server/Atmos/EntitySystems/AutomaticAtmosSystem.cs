@@ -1,4 +1,7 @@
 using Content.Server.Shuttles.Systems;
+// NC start
+using Content.Server._NC.Atmos.Components;
+// NC end
 using Content.Shared.Atmos.Components;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Physics.Events;
@@ -21,6 +24,15 @@ public sealed partial class AutomaticAtmosSystem : EntitySystem
 
     private void OnMassDataChanged(Entity<MapGridComponent> ent, ref MassDataChangedEvent ev)
     {
+        // NC start: Night City maps use immutable ambient air and must never allocate per-tile atmos state.
+        var mapUid = Transform(ent).MapUid;
+        if (HasComp<NCUniformAirComponent>(ent) ||
+            mapUid != null && HasComp<NCUniformAirComponent>(mapUid.Value))
+        {
+            return;
+        }
+        // NC end
+
         if (_atmosphereSystem.HasAtmosphere(ent))
             return;
 

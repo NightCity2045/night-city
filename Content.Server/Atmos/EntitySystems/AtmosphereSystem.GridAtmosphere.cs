@@ -1,5 +1,8 @@
 using Content.Server.Atmos.Components;
 using Content.Server.Atmos.Reactions;
+// NC start
+using Content.Server._NC.Atmos.Components;
+// NC end
 using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
 using Content.Shared.Atmos.Reactions;
@@ -53,6 +56,18 @@ public sealed partial class AtmosphereSystem
 
     private void OnGridAtmosphereStartup(EntityUid uid, GridAtmosphereComponent component, ComponentStartup args)
     {
+        // NC start: uniform-air city maps provide an immutable map mixture and reject all per-tile atmos state.
+        var mapUid = Transform(uid).MapUid;
+        if (HasComp<NCUniformAirComponent>(uid) ||
+            mapUid != null && HasComp<NCUniformAirComponent>(mapUid.Value))
+        {
+            component.Simulated = false;
+            RemCompDeferred<GridAtmosphereComponent>(uid);
+            RemCompDeferred<GasTileOverlayComponent>(uid);
+            return;
+        }
+        // NC end
+
         if (!TryComp(uid, out MapGridComponent? mapGrid))
             return;
 

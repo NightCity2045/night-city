@@ -72,6 +72,23 @@ public sealed partial class NCBankSystem : EntitySystem
         return _database.AuthenticateNCBankAccountAsync(accountNumber, pin);
     }
 
+    /// <summary>
+    /// Serializes a database operation that mutates a character balance together with another aggregate.
+    /// The database operation itself must use one transaction; this gate also excludes ordinary ATM/payroll writes.
+    /// </summary>
+    public async Task<T> RunSerializedBalanceMutationAsync<T>(Func<Task<T>> operation)
+    {
+        await _transactionGate.WaitAsync();
+        try
+        {
+            return await operation();
+        }
+        finally
+        {
+            _transactionGate.Release();
+        }
+    }
+
     public async Task<NCBankAccountData?> TryDepositAsync(NCCharacterId characterId, int amount)
     {
         if (amount <= 0)

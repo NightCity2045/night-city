@@ -1,0 +1,65 @@
+nc-property-card-denied = Эта ключ-карта недействительна для данного объекта.
+nc-property-card-accepted = Замок объекта принимает ключ-карту.
+nc-property-door-blocked = Доступ подтверждён, но дверь не может открыться.
+
+ent-NCPropertyConsole = терминал недвижимости
+    .desc = Публичный терминал для аренды меблированных квартир Найт-Сити.
+ent-NCPropertyConsoleCircuitboard = плата терминала недвижимости
+    .desc = Компьютерная плата терминала недвижимости Найт-Сити.
+
+nc-zone-template-apartment-layout-5x5 = Компактная меблированная квартира (5×5)
+
+nc-property-console-title = Недвижимость Найт-Сити
+nc-property-console-search-placeholder = Поиск по зданию или квартире...
+nc-property-console-search = Найти
+nc-property-console-balance = Баланс:
+nc-property-console-credits = {$amount} евробаксов
+nc-property-console-no-account = Нет банковского счёта
+nc-property-console-properties = Зарегистрированные объекты
+nc-property-console-empty = По текущему фильтру ничего не найдено.
+nc-property-console-previous = Назад
+nc-property-console-next = Далее
+nc-property-console-page = Страница {$current}/{$pages} · объектов: {$total}
+nc-property-console-select = Выберите объект, чтобы посмотреть условия.
+nc-property-console-building = Здание:
+nc-property-console-id = ID собственности:
+nc-property-console-status = Статус:
+nc-property-console-occupancy = Ваше отношение:
+nc-property-console-rent-selected = Арендовать выбранный дизайн
+nc-property-console-end-lease = Прекратить аренду
+nc-property-console-end-lease-confirm = Подтвердить выселение
+nc-property-console-rent-line = Аренда: {$rent} еб каждые {$hours} ч · льготный период: {$graceHours} ч
+nc-property-console-next-rent = Следующий платёж: {$date}
+nc-property-console-listing-line = {$building} / {$apartment} — {$status}
+nc-property-console-interior-title = Интерьер
+nc-property-console-interior-offer = {$interior} — {$rent} еб
+nc-property-console-current-interior = Текущий:
+nc-property-console-interior-none = не установлен
+nc-property-console-invoke-interior = Вызвать апартаменты
+nc-property-console-interior-active = Апартаменты сейчас развёрнуты
+nc-property-console-interior-ready = Апартаменты готовы к вызову
+nc-property-console-occupancy-tenant = арендатор
+nc-property-console-occupancy-none = отсутствует
+
+nc-property-console-status-unavailable = недоступна
+nc-property-console-status-available = доступна
+nc-property-console-status-reserved = зарезервирована
+nc-property-console-status-owneroccupied = занята владельцем
+nc-property-console-status-rented = сдана в аренду
+nc-property-console-status-delinquent = имеется задолженность
+nc-property-console-status-evictionpending = ожидается выселение
+
+nc-property-console-result-rented = Аренда оформлена, первый период оплачен. Ключ-карта выдана.
+nc-property-console-result-lease-ended = Аренда прекращена. Все ключ-карты отозваны.
+nc-property-console-result-move-out-blocked = Уберите всех жильцов и личные вещи перед прекращением аренды.
+nc-property-console-result-interior-invoked = Вызов апартаментов поставлен в очередь.
+nc-property-console-result-interior-active = Апартаменты уже вызваны или подготавливаются.
+nc-property-console-result-invalid-interior = Этот интерьер не привязан к выбранной квартире.
+nc-property-console-result-interior-failed = Сейчас установить интерьер невозможно.
+nc-property-console-result-no-character = Не выбран активный постоянный персонаж.
+nc-property-console-result-no-account = У персонажа нет банковского счёта.
+nc-property-console-result-insufficient-funds = Недостаточно средств.
+nc-property-console-result-not-available = Объект уже недоступен.
+nc-property-console-result-not-authorized = У вас нет прав на эту операцию.
+nc-property-console-result-conflict = Состояние объекта изменилось во время операции. Обновите данные и повторите попытку.
+nc-property-console-result-failed = Операция с недвижимостью завершилась ошибкой.

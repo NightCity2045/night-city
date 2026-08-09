@@ -62,3 +62,16 @@
   - Polygon
   - TileMask
   - Volume
+
+- type: ncZoneKind
+  id: MissionSlot
+  hierarchyRank: 4
+  contextSlot: MissionSlot
+  allowedParents:
+  - Building
+  - Sector
+  editorColor: "#b94a4a"
+  allowedGeometry:
+  - Polygon
+  - TileMask
+  - Volume

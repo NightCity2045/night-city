@@ -993,6 +993,152 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("nc_character_employment", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCDungeonExtractedItemRecord", b =>
+                {
+                    b.Property<Guid>("ItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("item_id");
+
+                    b.Property<DateTime>("ExtractedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("extracted_at");
+
+                    b.Property<int?>("ExtractedByProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("extracted_by_profile_id");
+
+                    b.Property<string>("PersistentState")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("persistent_state");
+
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("run_id");
+
+                    b.HasKey("ItemId")
+                        .HasName("PK_nc_dungeon_extracted_item");
+
+                    b.HasIndex("ExtractedByProfileId");
+
+                    b.HasIndex("RunId");
+
+                    b.ToTable("nc_dungeon_extracted_item", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCDungeonObjectiveRecord", b =>
+                {
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("run_id");
+
+                    b.Property<string>("ObjectiveId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("objective_id");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("state");
+
+                    b.HasKey("RunId", "ObjectiveId")
+                        .HasName("PK_nc_dungeon_objective");
+
+                    b.ToTable("nc_dungeon_objective", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCDungeonRunParticipant", b =>
+                {
+                    b.Property<Guid>("RunId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("run_id");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.HasKey("RunId", "ProfileId")
+                        .HasName("PK_nc_dungeon_run_participant");
+
+                    b.HasIndex("ProfileId");
+
+                    b.ToTable("nc_dungeon_run_participant", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCDungeonRunRecord", b =>
+                {
+                    b.Property<Guid>("RunId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("run_id");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("completed_at");
+
+                    b.Property<string>("DefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("definition_id");
+
+                    b.Property<Guid>("DeploymentId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("deployment_id");
+
+                    b.Property<Guid>("DungeonSlotId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("dungeon_slot_id");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("error");
+
+                    b.Property<int>("Result")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("result");
+
+                    b.Property<int>("Seed")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("seed");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("started_at");
+
+                    b.Property<int>("State")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("state");
+
+                    b.Property<string>("TemplateId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("template_id");
+
+                    b.Property<int>("TemplateRevision")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("template_revision");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("version");
+
+                    b.HasKey("RunId")
+                        .HasName("PK_nc_dungeon_run");
+
+                    b.HasIndex("DeploymentId")
+                        .IsUnique();
+
+                    b.HasIndex("DungeonSlotId", "State");
+
+                    b.ToTable("nc_dungeon_run", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCEmploymentEvent", b =>
                 {
                     b.Property<long>("Id")
@@ -1549,6 +1695,335 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.HasIndex("TargetProfileId", "Status");
 
                     b.ToTable("nc_police_warrant", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPropertyAccessGrant", b =>
+                {
+                    b.Property<Guid>("GrantId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("grant_id");
+
+                    b.Property<int>("AccessRevision")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("access_revision");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("issued_at");
+
+                    b.Property<int>("Permissions")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("permissions");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("property_id");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<DateTime?>("ValidUntil")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("valid_until");
+
+                    b.HasKey("GrantId")
+                        .HasName("PK_nc_property_access_grant");
+
+                    b.HasIndex("ProfileId");
+
+                    b.HasIndex("PropertyId", "ProfileId", "RevokedAt");
+
+                    b.ToTable("nc_property_access_grant", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPropertyEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_property_event_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<byte>("EventType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("event_type");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("property_id");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("reason");
+
+                    b.Property<int?>("SubjectProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("subject_profile_id");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_property_event");
+
+                    b.HasIndex("PropertyId", "CreatedAt");
+
+                    b.ToTable("nc_property_event", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPropertyRecord", b =>
+                {
+                    b.Property<Guid>("PropertyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("property_id");
+
+                    b.Property<string>("AccessPolicyId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("access_policy_id");
+
+                    b.Property<int>("AccessRevision")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("access_revision");
+
+                    b.Property<DateTime?>("AcquiredAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("acquired_at");
+
+                    b.Property<Guid?>("ActiveDeploymentId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("active_deployment_id");
+
+                    b.Property<Guid>("BuildingId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("building_id");
+
+                    b.Property<string>("CurrentTemplateId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("current_template_id");
+
+                    b.Property<int?>("CurrentTemplateRevision")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("current_template_revision");
+
+                    b.Property<string>("InteriorState")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("interior_state");
+
+                    b.Property<DateTime?>("NextRentDueAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("next_rent_due_at");
+
+                    b.Property<int?>("OwnerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("owner_profile_id");
+
+                    b.Property<int>("PurchasePrice")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("purchase_price");
+
+                    b.Property<string>("RentPolicyId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("rent_policy_id");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("version");
+
+                    b.HasKey("PropertyId")
+                        .HasName("PK_nc_property_record");
+
+                    b.HasIndex("OwnerProfileId");
+
+                    b.HasIndex("Status", "BuildingId");
+
+                    b.ToTable("nc_property_record", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPropertyRoom", b =>
+                {
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("property_id");
+
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("room_id");
+
+                    b.HasKey("PropertyId", "RoomId")
+                        .HasName("PK_nc_property_room");
+
+                    b.ToTable("nc_property_room", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPropertySnapshot", b =>
+                {
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("property_id");
+
+                    b.Property<int>("EntityCount")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("entity_count");
+
+                    b.Property<int>("FormatVersion")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("format_version");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("payload");
+
+                    b.Property<int>("ResidentEntityCount")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("resident_entity_count");
+
+                    b.Property<string>("TemplateId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("template_id");
+
+                    b.Property<int>("TemplateRevision")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("template_revision");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("PropertyId")
+                        .HasName("PK_nc_property_snapshot");
+
+                    b.ToTable("nc_property_snapshot", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPropertyTenant", b =>
+                {
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("property_id");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("started_at");
+
+                    b.Property<DateTime?>("ValidUntil")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("valid_until");
+
+                    b.HasKey("PropertyId", "ProfileId")
+                        .HasName("PK_nc_property_tenant");
+
+                    b.HasIndex("ProfileId");
+
+                    b.ToTable("nc_property_tenant", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCZoneDeploymentJournal", b =>
+                {
+                    b.Property<Guid>("DeploymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("deployment_id");
+
+                    b.Property<int>("BaseZ")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("base_z");
+
+                    b.Property<string>("BaselineState")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("baseline_state");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("completed_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("DungeonRunId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("dungeon_run_id");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("error");
+
+                    b.Property<int>("ExpectedZoneVersion")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("expected_zone_version");
+
+                    b.Property<int?>("OwnerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("owner_profile_id");
+
+                    b.Property<int>("Purpose")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("purpose");
+
+                    b.Property<int>("State")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("state");
+
+                    b.Property<Guid>("TargetZoneId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("target_zone_id");
+
+                    b.Property<string>("TemplateId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("template_id");
+
+                    b.Property<int>("TemplateRevision")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("template_revision");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("DeploymentId")
+                        .HasName("PK_nc_zone_deployment_journal");
+
+                    b.HasIndex("TargetZoneId", "State");
+
+                    b.ToTable("nc_zone_deployment_journal", (string)null);
                 });
 
             modelBuilder.Entity("Content.Server.Database.PlayTime", b =>
@@ -2514,6 +2989,55 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Profile");
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCDungeonExtractedItemRecord", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("ExtractedByProfileId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_nc_dungeon_extracted_item_profile_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCDungeonRunRecord", "Run")
+                        .WithMany("ExtractedItems")
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_dungeon_extracted_item_nc_dungeon_run_run_temp_id");
+
+                    b.Navigation("Run");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCDungeonObjectiveRecord", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCDungeonRunRecord", "Run")
+                        .WithMany("Objectives")
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_dungeon_objective_nc_dungeon_run_run_temp_id1");
+
+                    b.Navigation("Run");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCDungeonRunParticipant", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_dungeon_run_participant_profile_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCDungeonRunRecord", "Run")
+                        .WithMany("Participants")
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_dungeon_run_participant_nc_dungeon_run_run_temp_id2");
+
+                    b.Navigation("Run");
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCEmploymentEvent", b =>
                 {
                     b.HasOne("Content.Server.Database.NCCharacterEmployment", "Employment")
@@ -2605,6 +3129,87 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasConstraintName("FK_nc_police_warrant_nc_police_case_case_id");
 
                     b.Navigation("Case");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPropertyAccessGrant", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_property_access_grant_profile_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCPropertyRecord", "Property")
+                        .WithMany("AccessGrants")
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_property_access_grant_nc_property_record_property_temp_id");
+
+                    b.Navigation("Property");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPropertyEvent", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCPropertyRecord", "Property")
+                        .WithMany("Events")
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_property_event_nc_property_record_property_temp_id1");
+
+                    b.Navigation("Property");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPropertyRecord", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerProfileId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_nc_property_record_profile_profile_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPropertyRoom", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCPropertyRecord", "Property")
+                        .WithMany("Rooms")
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_property_room_nc_property_record_property_id");
+
+                    b.Navigation("Property");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPropertySnapshot", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCPropertyRecord", null)
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCPropertySnapshot", "PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_property_snapshot_nc_property_record_ncproperty_record_property_id");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPropertyTenant", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_property_tenant_profile_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCPropertyRecord", "Property")
+                        .WithMany("Tenants")
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_property_tenant_nc_property_record_property_id");
+
+                    b.Navigation("Property");
                 });
 
             modelBuilder.Entity("Content.Server.Database.Player", b =>
@@ -2822,6 +3427,15 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Events");
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCDungeonRunRecord", b =>
+                {
+                    b.Navigation("ExtractedItems");
+
+                    b.Navigation("Objectives");
+
+                    b.Navigation("Participants");
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCOrganizationBankAccount", b =>
                 {
                     b.Navigation("Transactions");
@@ -2844,6 +3458,17 @@ namespace Content.Server.Database.Migrations.Sqlite
             modelBuilder.Entity("Content.Server.Database.NCPoliceRecord", b =>
                 {
                     b.Navigation("Events");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCPropertyRecord", b =>
+                {
+                    b.Navigation("AccessGrants");
+
+                    b.Navigation("Events");
+
+                    b.Navigation("Rooms");
+
+                    b.Navigation("Tenants");
                 });
 
             modelBuilder.Entity("Content.Server.Database.Player", b =>

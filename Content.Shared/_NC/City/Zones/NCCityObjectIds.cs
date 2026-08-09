@@ -120,3 +120,26 @@ public readonly record struct NCApartmentId(NCZoneId ZoneId)
         return false;
     }
 }
+
+/// <summary>
+/// Persistent identity of a reusable mission location. A run changes, while this zone identity does not.
+/// </summary>
+[Serializable, NetSerializable]
+public readonly record struct NCMissionSlotId(NCZoneId ZoneId)
+{
+    public Guid Value => ZoneId.Value;
+    public bool IsValid => ZoneId.IsValid;
+    public override string ToString() => ZoneId.ToString();
+
+    public static bool TryParse(string value, out NCMissionSlotId id)
+    {
+        if (NCZoneId.TryParse(value, out var zoneId))
+        {
+            id = new NCMissionSlotId(zoneId);
+            return true;
+        }
+
+        id = default;
+        return false;
+    }
+}

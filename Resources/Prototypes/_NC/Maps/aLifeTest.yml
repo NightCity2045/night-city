@@ -29,6 +29,17 @@
           - /Maps/_NC/NightCity/NightCity-3.yml
           - /Maps/_NC/NightCity/NightCity-4.yml
         zLevelsComponentOverrides:
+        # All nine Night City levels share infinite breathable air without pressure or gas simulation.
+        - type: MapAtmosphere
+          space: false
+          mixture:
+            volume: 2500
+            immutable: true
+            temperature: 293.15
+            moles:
+              Oxygen: 21.824879
+              Nitrogen: 82.10312
+        - type: NCUniformAir
         - type: NCZLevelRoof
         - type: Gravity
           enabled: true
