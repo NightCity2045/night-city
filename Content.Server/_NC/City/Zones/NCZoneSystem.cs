@@ -160,15 +160,15 @@ public sealed partial class NCZoneSystem : EntitySystem
         return false;
     }
 
-    public bool TryGetDungeonSlotId(NCZoneId zoneId, out NCDungeonSlotId dungeonSlotId)
+    public bool TryGetMissionSlotId(NCZoneId zoneId, out NCMissionSlotId missionSlotId)
     {
-        if (HasContextSlot(zoneId, NCZoneContextSlot.DungeonSlot))
+        if (HasContextSlot(zoneId, NCZoneContextSlot.MissionSlot))
         {
-            dungeonSlotId = new NCDungeonSlotId(zoneId);
+            missionSlotId = new NCMissionSlotId(zoneId);
             return true;
         }
 
-        dungeonSlotId = default;
+        missionSlotId = default;
         return false;
     }
 
@@ -187,20 +187,20 @@ public sealed partial class NCZoneSystem : EntitySystem
     public bool TryGetApartment(NCApartmentId id, out NCZoneInfo apartment) =>
         TryGetTypedZone(id.ZoneId, NCZoneContextSlot.Apartment, out apartment);
 
-    public bool TryGetDungeonSlot(NCDungeonSlotId id, out NCZoneInfo dungeonSlot) =>
-        TryGetTypedZone(id.ZoneId, NCZoneContextSlot.DungeonSlot, out dungeonSlot);
+    public bool TryGetMissionSlot(NCMissionSlotId id, out NCZoneInfo missionSlot) =>
+        TryGetTypedZone(id.ZoneId, NCZoneContextSlot.MissionSlot, out missionSlot);
 
     /// <summary>
-    /// Copies all persistent dungeon slots for an explicit allocation request.
+    /// Copies all persistent mission slots for an explicit allocation request.
     /// This is never called from Update and does not inspect runtime entities.
     /// </summary>
-    public void GetDungeonSlots(List<NCDungeonSlotId> result)
+    public void GetMissionSlots(List<NCMissionSlotId> result)
     {
         result.Clear();
         foreach (var zone in _zonesById.Values)
         {
-            if (zone.Kind.ContextSlot == NCZoneContextSlot.DungeonSlot)
-                result.Add(new NCDungeonSlotId(zone.Definition.Id));
+            if (zone.Kind.ContextSlot == NCZoneContextSlot.MissionSlot)
+                result.Add(new NCMissionSlotId(zone.Definition.Id));
         }
 
         result.Sort(static (left, right) => left.ZoneId.Value.CompareTo(right.ZoneId.Value));
@@ -303,7 +303,7 @@ public sealed partial class NCZoneSystem : EntitySystem
         var street = default(NCStreetId);
         var building = default(NCBuildingId);
         var apartment = default(NCApartmentId);
-        var dungeonSlot = default(NCDungeonSlotId);
+        var missionSlot = default(NCMissionSlotId);
         var visited = new HashSet<NCZoneId>();
         while (leaf != null && visited.Add(leaf.Definition.Id))
         {
@@ -324,8 +324,8 @@ public sealed partial class NCZoneSystem : EntitySystem
                 case NCZoneContextSlot.Apartment:
                     apartment = new NCApartmentId(leaf.Definition.Id);
                     break;
-                case NCZoneContextSlot.DungeonSlot:
-                    dungeonSlot = new NCDungeonSlotId(leaf.Definition.Id);
+                case NCZoneContextSlot.MissionSlot:
+                    missionSlot = new NCMissionSlotId(leaf.Definition.Id);
                     break;
             }
 
@@ -343,7 +343,7 @@ public sealed partial class NCZoneSystem : EntitySystem
             street,
             building,
             apartment,
-            dungeonSlot);
+            missionSlot);
     }
 
     public bool TryGetActivityMode(NCZoneId zoneId, out NCZoneActivityMode mode)

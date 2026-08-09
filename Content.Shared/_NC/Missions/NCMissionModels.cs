@@ -9,17 +9,18 @@ using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Identity;
 using Robust.Shared.Serialization;
 
-namespace Content.Shared._NC.Dungeons;
+namespace Content.Shared._NC.Missions;
 
 [Serializable, NetSerializable]
-public readonly record struct NCDungeonRunId(Guid Value)
+public readonly record struct NCMissionRunId(Guid Value)
 {
     public bool IsValid => Value != Guid.Empty;
-    public static NCDungeonRunId New() => new(Guid.NewGuid());
+    public static NCMissionRunId New() => new(Guid.NewGuid());
     public override string ToString() => Value.ToString("D");
 }
 
-public enum NCDungeonRunState : byte
+[Serializable, NetSerializable]
+public enum NCMissionRunState : byte
 {
     Requested,
     Preparing,
@@ -33,7 +34,8 @@ public enum NCDungeonRunState : byte
     Closed,
 }
 
-public enum NCDungeonRunResult : byte
+[Serializable, NetSerializable]
+public enum NCMissionRunResult : byte
 {
     None,
     Success,
@@ -41,7 +43,8 @@ public enum NCDungeonRunResult : byte
     Aborted,
 }
 
-public enum NCDungeonExtractionPolicy : byte
+[Serializable, NetSerializable]
+public enum NCMissionExtractionPolicy : byte
 {
     DeleteOnCleanup,
     CanBeExtracted,
@@ -50,17 +53,19 @@ public enum NCDungeonExtractionPolicy : byte
     NeverExtract,
 }
 
-public readonly record struct NCDungeonRunStatus(
-    NCDungeonRunId RunId,
-    NCDungeonSlotId SlotId,
+public readonly record struct NCMissionRunStatus(
+    NCMissionRunId RunId,
+    NCMissionSlotId SlotId,
     string TemplateId,
     NCZoneDeploymentId DeploymentId,
-    NCDungeonRunState State,
+    NCMissionRunState State,
     IReadOnlySet<NCCharacterId> Participants,
     int Seed,
     DateTime StartedAt,
+    DateTime ExpiresAt,
+    DateTime WarningAt,
     DateTime? CompletedAt,
-    NCDungeonRunResult Result,
+    NCMissionRunResult Result,
     string? Error);
 
-public readonly record struct NCDungeonStartResult(bool Success, NCDungeonRunId RunId, string Error);
+public readonly record struct NCMissionStartResult(bool Success, NCMissionRunId RunId, string Error);

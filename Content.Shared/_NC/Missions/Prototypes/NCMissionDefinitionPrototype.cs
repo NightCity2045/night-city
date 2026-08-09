@@ -7,13 +7,13 @@ using System.Collections.Generic;
 using Content.Shared._NC.City.ZoneTemplates.Prototypes;
 using Robust.Shared.Prototypes;
 
-namespace Content.Shared._NC.Dungeons.Prototypes;
+namespace Content.Shared._NC.Missions.Prototypes;
 
 /// <summary>
 /// Data-driven run recipe. Layout, dynamic content and slot compatibility contain no C# balance constants.
 /// </summary>
-[Prototype("ncDungeonDefinition")]
-public sealed partial class NCDungeonDefinitionPrototype : IPrototype
+[Prototype("ncMissionDefinition")]
+public sealed partial class NCMissionDefinitionPrototype : IPrototype
 {
     [IdDataField]
     public string ID { get; private set; } = default!;
@@ -24,6 +24,15 @@ public sealed partial class NCDungeonDefinitionPrototype : IPrototype
     [DataField]
     public int MaximumParticipants { get; private set; } = 8;
 
+    /// <summary>
+    /// Total real-world lifetime of one public deployment, including its final warning period.
+    /// </summary>
+    [DataField(required: true)]
+    public TimeSpan RunDuration { get; private set; }
+
+    /// <summary>
+    /// The final part of <see cref="RunDuration"/> displayed as an evacuation warning.
+    /// </summary>
     [DataField]
     public TimeSpan EvacuationTime { get; private set; } = TimeSpan.FromMinutes(2);
 

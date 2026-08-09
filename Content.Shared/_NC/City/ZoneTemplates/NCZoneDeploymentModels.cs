@@ -20,7 +20,7 @@ public readonly record struct NCZoneDeploymentId(Guid Value)
 public enum NCZoneDeploymentPurpose : byte
 {
     ApartmentInterior,
-    DungeonRun,
+    MissionRun,
     Administrative,
 }
 

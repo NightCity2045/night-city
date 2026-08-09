@@ -9,7 +9,7 @@ using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.City.Zones.Prototypes;
 using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.Coordinates.Systems;
-using Content.Shared._NC.Dungeons.Components;
+using Content.Shared._NC.Missions.Components;
 using Content.Shared.Mobs.Components;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
@@ -35,8 +35,55 @@ public sealed partial class NCZoneOccupancySystem : EntitySystem
     public bool IsOccupied(NCZoneId zoneId, out EntityUid blocker)
     {
         blocker = EntityUid.Invalid;
-        if (!_zones.TryGetZoneNetwork(zoneId, out var networkId) || !_zones.GetGeometry(zoneId, _geometry))
+        if (!TryCollectCandidates(zoneId))
             return true;
+
+        foreach (var uid in _candidates)
+        {
+            // Existing template-owned content is the cleanup target, not an external occupancy blocker.
+            if (HasComp<NCZoneDeploymentComponent>(uid))
+                continue;
+            if (!HasComp<MobStateComponent>(uid) &&
+                !HasComp<ActorComponent>(uid) &&
+                !HasComp<NCMissionOccupancyBlockerComponent>(uid))
+                continue;
+            if (!_coordinates.TryGetCoordinates(uid, out var coordinates) || !_zones.Contains(zoneId, coordinates))
+                continue;
+            blocker = uid;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Collects actors and mobs that came from the persistent world rather than the active deployment.
+    /// The caller supplies the result set so no internal spatial-query buffer escapes this system.
+    /// </summary>
+    public bool CollectExternalMobOccupants(NCZoneId zoneId, HashSet<EntityUid> result)
+    {
+        result.Clear();
+        if (!TryCollectCandidates(zoneId))
+            return false;
+
+        foreach (var uid in _candidates)
+        {
+            if (HasComp<NCZoneDeploymentComponent>(uid) ||
+                (!HasComp<MobStateComponent>(uid) && !HasComp<ActorComponent>(uid)) ||
+                !_coordinates.TryGetCoordinates(uid, out var coordinates) ||
+                !_zones.Contains(zoneId, coordinates))
+                continue;
+
+            result.Add(uid);
+        }
+
+        return true;
+    }
+
+    private bool TryCollectCandidates(NCZoneId zoneId)
+    {
+        if (!_zones.TryGetZoneNetwork(zoneId, out var networkId) || !_zones.GetGeometry(zoneId, _geometry))
+            return false;
 
         _candidates.Clear();
         foreach (var fragment in _geometry)
@@ -51,28 +98,13 @@ public sealed partial class NCZoneOccupancySystem : EntitySystem
             if (fragment.Vertices.Count == 0)
                 continue;
             var bounds = Bounds(fragment.Vertices);
-            var minimum = fragment.Global ? fragment.MinZ : fragment.Z;
-            var maximum = fragment.Global ? fragment.MaxZ : fragment.Z;
+            var minimum = fragment.Kind == NCZoneGeometryKind.Volume ? fragment.MinZ : fragment.Z;
+            var maximum = fragment.Kind == NCZoneGeometryKind.Volume ? fragment.MaxZ : fragment.Z;
             for (var z = minimum; z <= maximum; z++)
                 Collect(networkId, z, bounds);
         }
 
-        foreach (var uid in _candidates)
-        {
-            // Existing template-owned content is the cleanup target, not an external occupancy blocker.
-            if (HasComp<NCZoneDeploymentComponent>(uid))
-                continue;
-            if (!HasComp<MobStateComponent>(uid) &&
-                !HasComp<ActorComponent>(uid) &&
-                !HasComp<NCDungeonOccupancyBlockerComponent>(uid))
-                continue;
-            if (!_coordinates.TryGetCoordinates(uid, out var coordinates) || !_zones.Contains(zoneId, coordinates))
-                continue;
-            blocker = uid;
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     private void Collect(NCZNetworkId networkId, int z, Box2 bounds)

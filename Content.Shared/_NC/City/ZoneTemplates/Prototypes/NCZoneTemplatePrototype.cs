@@ -24,7 +24,7 @@ public sealed partial class NCZoneTemplatePrototype : IPrototype
     public LocId Name { get; private set; } = default!;
 
     /// <summary>
-    /// Exact apartment or dungeon slot whose geometry this map package must match.
+    /// Exact apartment or mission slot whose geometry this map package must match.
     /// </summary>
     [DataField(required: true, customTypeSerializer: typeof(NCZoneIdSerializer))]
     public NCZoneId TargetZoneId { get; private set; }
@@ -70,7 +70,7 @@ public sealed partial class NCZoneTemplateFloor
 public enum NCZoneTemplateKind : byte
 {
     ApartmentInterior,
-    DungeonLayout,
+    MissionLayout,
 }
 
 public enum NCZoneTemplateTilePolicy : byte

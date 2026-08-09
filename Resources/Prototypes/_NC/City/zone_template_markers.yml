@@ -18,16 +18,3 @@
     linkType: Stairs
     direction: Bidirectional
     required: true
-
-- type: entity
-  id: NCDungeonDynamicPointMarker
-  parent: MarkerBase
-  name: dungeon dynamic point
-  suffix: NC, Mapping
-  components:
-  - type: Sprite
-    layers:
-    - state: red
-  - type: NCDungeonDynamicPoint
-    poolId: Default
-    extractionPolicy: DeleteOnCleanup

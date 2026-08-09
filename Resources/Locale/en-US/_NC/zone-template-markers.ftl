@@ -4,6 +4,3 @@
 
 ent-NCTemplateVerticalLinkMarker = template vertical link
     .desc = Pairs floors of a multi-level source template without assuming a fixed room shape.
-
-ent-NCDungeonDynamicPointMarker = dungeon dynamic point
-    .desc = Marks a data-driven runtime spawn pool inside a dungeon source template.

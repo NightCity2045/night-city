@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: BaseComputer
+  id: NCMissionConsole
+  name: public mission terminal
+  description: Deploys a timed physical mission directly into the shared Night City world.
+  components:
+  - type: NCMissionConsole
+    definition: NCMission8x8
+    slotId: 8d7b2c44-9a31-4f67-b8e2-6c5d4a3f1808
+  - type: UserInterface
+    interfaces:
+      enum.NCMissionConsoleUiKey.Key:
+        type: NCMissionConsoleBoundUserInterface
+      enum.WiresUiKey.Key:
+        type: WiresBoundUserInterface
+  - type: ActivatableUI
+    key: enum.NCMissionConsoleUiKey.Key
+  - type: Sprite
+    layers:
+    - map: ["computerLayerBody"]
+      state: computer
+    - map: ["computerLayerKeyboard"]
+      state: generic_keyboard
+    - map: ["computerLayerScreen"]
+      state: comm_syndie
+    - map: ["computerLayerKeys"]
+      state: generic_keys
+    - map: ["enum.WiresVisualLayers.MaintenancePanel"]
+      state: generic_panel_open
+  - type: PointLight
+    radius: 1.5
+    energy: 3.0
+    color: "#D95745"
+  - type: Computer
+    board: NCMissionConsoleCircuitboard
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: NCMissionConsoleCircuitboard
+  name: public mission terminal board
+  description: A computer board for a Night City public mission terminal.
+  components:
+  - type: Sprite
+    state: cpu_supply
+  - type: ComputerBoard
+    prototype: NCMissionConsole

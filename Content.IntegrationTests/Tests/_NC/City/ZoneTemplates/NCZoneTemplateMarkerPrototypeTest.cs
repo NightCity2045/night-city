@@ -4,7 +4,7 @@
 
 using Content.IntegrationTests.Fixtures;
 using Content.Shared._NC.City.ZoneTemplates.Components;
-using Content.Shared._NC.Dungeons.Components;
+using Content.Shared._NC.Missions.Components;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
 
@@ -31,7 +31,11 @@ public sealed class NCZoneTemplateMarkerPrototypeTest : GameTest
                 prototypes,
                 components,
                 "NCTemplateVerticalLinkMarker");
-            AssertMarker<NCDungeonDynamicPointComponent>(prototypes, components, "NCDungeonDynamicPointMarker");
+            AssertMarker<NCMissionDynamicPointComponent>(prototypes, components, "NCMissionDynamicPointMarker");
+            AssertMarker<NCMissionEvacuationPointComponent>(
+                prototypes,
+                components,
+                "NCMissionEvacuationPointMarker");
         });
     }
 

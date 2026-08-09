@@ -83,10 +83,10 @@ public sealed partial class NCCityLocationSystem : EntitySystem
         return apartmentId.IsValid;
     }
 
-    public bool TryGetDungeonSlot(EntityUid uid, out NCDungeonSlotId dungeonSlotId)
+    public bool TryGetMissionSlot(EntityUid uid, out NCMissionSlotId missionSlotId)
     {
-        dungeonSlotId = TryGetContext(uid, out var context) ? context.DungeonSlotId : default;
-        return dungeonSlotId.IsValid;
+        missionSlotId = TryGetContext(uid, out var context) ? context.MissionSlotId : default;
+        return missionSlotId.IsValid;
     }
 
     public bool Refresh(EntityUid uid)

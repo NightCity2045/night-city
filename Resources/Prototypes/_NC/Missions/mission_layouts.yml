@@ -2,28 +2,31 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-# The city map owns the shell walls and exterior entrance. This exact 8x8 template supplies floor,
-# interior entities and dynamic spawn markers for the bound DungeonSlot.
+# A public mission is deployed directly onto two live Night City Z-levels. Its semantic markers
+# describe stairs, dynamic content, and safe timed evacuation without hardcoded world coordinates.
 - type: ncZoneTemplate
-  id: NCDungeonLayout8x8
-  name: nc-zone-template-dungeon-layout-8x8
+  id: NCMissionLayout8x8
+  name: nc-zone-template-mission-layout-8x8
   targetZoneId: 8d7b2c44-9a31-4f67-b8e2-6c5d4a3f1808
-  kind: DungeonLayout
+  kind: MissionLayout
   revision: 1
   compatibleZoneKinds:
-  - DungeonSlot
+  - MissionSlot
   floors:
   - relativeZ: 0
-    mapPath: /Maps/_NC/Dungeons/Dungeon8x8.yml
+    mapPath: /Maps/_NC/Missions/Mission8x8Floor0.yml
+  - relativeZ: 1
+    mapPath: /Maps/_NC/Missions/Mission8x8Floor1.yml
   tilePolicy: ReplaceNonEmpty
   entityPolicy: InteriorOnly
   cleanupPolicy: RestoreBaseline
   cachePolicy: Always
 
-- type: ncDungeonDefinition
-  id: NCDungeon8x8
-  template: NCDungeonLayout8x8
+- type: ncMissionDefinition
+  id: NCMission8x8
+  template: NCMissionLayout8x8
   maximumParticipants: 4
+  runDuration: 15m
   evacuationTime: 2m
   dynamicSpawnPools:
     Guards:

@@ -8,7 +8,6 @@ ent-NCPropertyConsoleCircuitboard = real-estate terminal board
     .desc = A computer board for a Night City real-estate terminal.
 
 nc-zone-template-apartment-layout-5x5 = Compact furnished apartment (5×5)
-nc-zone-template-dungeon-layout-8x8 = Occupied warehouse dungeon (8×8)
 
 nc-property-console-title = Night City Real Estate
 nc-property-console-search-placeholder = Search by building or apartment...

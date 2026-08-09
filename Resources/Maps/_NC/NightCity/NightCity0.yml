@@ -5,7 +5,7 @@ meta:
   forkId: ""
   forkVersion: ""
   time: 07/30/2026 02:33:38
-  entityCount: 3998
+  entityCount: 3999
 maps:
 - 1
 grids:
@@ -23819,4 +23819,11 @@ entities:
     components:
     - type: Transform
       pos: -51.5,88.5
+      parent: 1
+- proto: NCMissionConsole
+  entities:
+  - uid: 8250
+    components:
+    - type: Transform
+      pos: -6.5,20.5
       parent: 1

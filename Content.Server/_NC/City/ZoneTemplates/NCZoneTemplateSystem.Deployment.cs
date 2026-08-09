@@ -77,7 +77,7 @@ public sealed partial class NCZoneTemplateSystem
             template.Revision,
             request.Purpose,
             request.OwnerCharacterId,
-            request.DungeonRunId);
+            request.MissionRunId);
 
         _deployments.Add(deploymentId, job);
         _deploymentOrder.Add(deploymentId);
@@ -184,7 +184,7 @@ public sealed partial class NCZoneTemplateSystem
                 {
                     if (!_deployments.TryGetValue(lockOwner, out var previous) ||
                         previous.State != NCZoneDeploymentState.Active ||
-                        job.Purpose == NCZoneDeploymentPurpose.DungeonRun)
+                        job.Purpose == NCZoneDeploymentPurpose.MissionRun)
                     {
                         SetState(job, NCZoneDeploymentState.FailedClean, "Target zone is already reserved.");
                         return;
@@ -410,7 +410,7 @@ public sealed partial class NCZoneTemplateSystem
             switch (fragment.Kind)
             {
                 case NCZoneGeometryKind.Polygon when fragment.Global:
-                    error = "Direct apartment and dungeon layouts require explicit Z geometry, not a global polygon.";
+                    error = "Direct apartment and mission layouts require explicit Z geometry, not a global polygon.";
                     return false;
                 case NCZoneGeometryKind.Polygon:
                     unique.Add(fragment.Z);
@@ -810,7 +810,7 @@ public sealed partial class NCZoneTemplateSystem
         int templateRevision,
         NCZoneDeploymentPurpose purpose,
         NCCharacterId? ownerCharacterId,
-        Guid? dungeonRunId)
+        Guid? missionRunId)
     {
         public readonly NCZoneDeploymentId Id = id;
         public readonly NCZoneId ZoneId = zoneId;
@@ -818,7 +818,7 @@ public sealed partial class NCZoneTemplateSystem
         public readonly int TemplateRevision = templateRevision;
         public readonly NCZoneDeploymentPurpose Purpose = purpose;
         public readonly NCCharacterId? OwnerCharacterId = ownerCharacterId;
-        public readonly Guid? DungeonRunId = dungeonRunId;
+        public readonly Guid? MissionRunId = missionRunId;
         public readonly List<DeploymentFloor> Floors = [];
         public readonly List<BaselineTile> BaselineTiles = [];
         public CachedTemplate? Template;
@@ -880,7 +880,7 @@ public readonly record struct NCZoneDeploymentRequest(
     ProtoId<NCZoneTemplatePrototype> TemplateId,
     NCZoneDeploymentPurpose Purpose,
     NCCharacterId? OwnerCharacterId,
-    Guid? DungeonRunId);
+    Guid? MissionRunId);
 
 public readonly record struct NCZoneDeploymentStatus(
     NCZoneDeploymentId DeploymentId,

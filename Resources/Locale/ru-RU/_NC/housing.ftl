@@ -8,7 +8,6 @@ ent-NCPropertyConsoleCircuitboard = плата терминала недвижи
     .desc = Компьютерная плата терминала недвижимости Найт-Сити.
 
 nc-zone-template-apartment-layout-5x5 = Компактная меблированная квартира (5×5)
-nc-zone-template-dungeon-layout-8x8 = Захваченный склад-данж (8×8)
 
 nc-property-console-title = Недвижимость Найт-Сити
 nc-property-console-search-placeholder = Поиск по зданию или квартире...

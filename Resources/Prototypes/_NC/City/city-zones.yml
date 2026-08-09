@@ -42,3 +42,19 @@
       - -4,21
       - 1,21
       - 1,26
+  # Temporary public mission fixture drawn over the former apartment test footprint.
+  # The stable apartment zone remains registered so housing persistence/tests are not destroyed;
+  # only one of the overlapping test deployments should be active at a time.
+  - id: 8d7b2c44-9a31-4f67-b8e2-6c5d4a3f1808
+    kind: MissionSlot
+    parent: 2808c6d1-3131-4d6e-8162-caf8769f6409
+    name: "Glen1 Public Mission"
+    geometry:
+    - kind: Volume
+      minZ: 0
+      maxZ: 1
+      vertices:
+      - -4,26
+      - -4,18
+      - 4,18
+      - 4,26

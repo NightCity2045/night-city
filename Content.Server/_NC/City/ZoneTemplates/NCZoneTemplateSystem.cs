@@ -19,7 +19,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._NC.City.ZoneTemplates;
 
 /// <summary>
-/// Server-authoritative, budgeted deployment engine shared by apartments and physical city dungeons.
+/// Server-authoritative, budgeted deployment engine shared by apartments and physical city missions.
 /// It processes only explicit jobs and component indices; it never scans every entity from Update().
 /// </summary>
 public sealed partial class NCZoneTemplateSystem : EntitySystem
@@ -136,6 +136,24 @@ public sealed partial class NCZoneTemplateSystem : EntitySystem
             _deploymentEntities.Remove(id);
     }
 
+    /// <summary>
+    /// Copies the bounded entity set owned by one deployment. Callers never scan the global entity collection.
+    /// </summary>
+    public bool CollectDeploymentEntities(NCZoneDeploymentId id, HashSet<EntityUid> result)
+    {
+        result.Clear();
+        if (!_deploymentEntities.TryGetValue(id, out var entities))
+            return false;
+
+        foreach (var uid in entities)
+        {
+            if (Exists(uid))
+                result.Add(uid);
+        }
+
+        return true;
+    }
+
     private void EnsureStorageMap()
     {
         if (Exists(_storageMapUid))
@@ -152,7 +170,7 @@ public sealed partial class NCZoneTemplateSystem : EntitySystem
 }
 
 /// <summary>
-/// Raised after a deployment changes state so apartment, dungeon, persistence and admin systems can react.
+/// Raised after a deployment changes state so apartment, mission, persistence and admin systems can react.
 /// </summary>
 [ByRefEvent]
 public readonly record struct NCZoneDeploymentStateChangedEvent(

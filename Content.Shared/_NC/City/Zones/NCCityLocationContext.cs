@@ -20,12 +20,12 @@ public readonly record struct NCCityLocationContext(
     NCStreetId StreetId,
     NCBuildingId BuildingId,
     NCApartmentId ApartmentId,
-    NCDungeonSlotId DungeonSlotId)
+    NCMissionSlotId MissionSlotId)
 {
     public bool IsValid => NetworkId.IsValid;
 
     public NCZoneId MostSpecific =>
-        DungeonSlotId.IsValid ? DungeonSlotId.ZoneId :
+        MissionSlotId.IsValid ? MissionSlotId.ZoneId :
         ApartmentId.IsValid ? ApartmentId.ZoneId :
         BuildingId.IsValid ? BuildingId.ZoneId :
         StreetId.IsValid ? StreetId.ZoneId :
@@ -49,7 +49,7 @@ public enum NCZoneContextSlot : byte
     Street,
     Building,
     Apartment,
-    DungeonSlot,
+    MissionSlot,
 }
 
 public enum NCZoneActivityMode : byte

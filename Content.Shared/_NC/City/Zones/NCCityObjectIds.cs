@@ -122,20 +122,20 @@ public readonly record struct NCApartmentId(NCZoneId ZoneId)
 }
 
 /// <summary>
-/// Persistent identity of a reusable dungeon location. A run changes, while this zone identity does not.
+/// Persistent identity of a reusable mission location. A run changes, while this zone identity does not.
 /// </summary>
 [Serializable, NetSerializable]
-public readonly record struct NCDungeonSlotId(NCZoneId ZoneId)
+public readonly record struct NCMissionSlotId(NCZoneId ZoneId)
 {
     public Guid Value => ZoneId.Value;
     public bool IsValid => ZoneId.IsValid;
     public override string ToString() => ZoneId.ToString();
 
-    public static bool TryParse(string value, out NCDungeonSlotId id)
+    public static bool TryParse(string value, out NCMissionSlotId id)
     {
         if (NCZoneId.TryParse(value, out var zoneId))
         {
-            id = new NCDungeonSlotId(zoneId);
+            id = new NCMissionSlotId(zoneId);
             return true;
         }
 

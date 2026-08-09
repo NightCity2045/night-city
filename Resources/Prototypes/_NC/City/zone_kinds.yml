@@ -64,9 +64,9 @@
   - Volume
 
 - type: ncZoneKind
-  id: DungeonSlot
+  id: MissionSlot
   hierarchyRank: 4
-  contextSlot: DungeonSlot
+  contextSlot: MissionSlot
   allowedParents:
   - Building
   - Sector
