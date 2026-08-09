@@ -92,6 +92,7 @@ public abstract partial class ServerDbContext
         ConfigureNCHousingModels(modelBuilder);
         ConfigureNCDungeonModels(modelBuilder);
         ConfigureNCPoliceModels(modelBuilder);
+        ConfigureNCAgentModels(modelBuilder);
 
         modelBuilder.Entity<NCCharacterEmployment>()
             .HasOne(employment => employment.Profile)

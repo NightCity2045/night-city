@@ -45,6 +45,9 @@
       whitelist:
         components:
         - IdCard
+  # NC start - Night City treats the vanilla PDA as an Agent smartphone.
+  - type: NCAgent
+  # NC end
   - type: PdaVisuals
   - type: Item
     size: Small
@@ -101,8 +104,10 @@
     singleUser: true
   - type: UserInterface
     interfaces:
+      # NC start - Preserve the PDA UI key while rendering it through the Agent shell.
       enum.PdaUiKey.Key:
-        type: PdaBoundUserInterface
+        type: NCAgentBoundUserInterface
+      # NC end
       enum.StoreUiKey.Key:
         type: StoreBoundUserInterface
       enum.RingerUiKey.Key:
