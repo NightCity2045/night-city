@@ -8,7 +8,7 @@
   description: department-desc-ncpd
   color: "#4777C8"
   weight: 50
-  startingBudget: 5000
+  startingBudget: 50000
   ncSelectable: true
   ncEntryJob: NCPDCadet
   ncIcon: NCDepartmentIconNCPD
@@ -37,9 +37,9 @@
   description: department-desc-trauma-team
   color: "#4FB9D7"
   weight: 40
-  startingBudget: 10000
+  startingBudget: 100000
   ncSelectable: true
-  ncEntryJob: TraumaTeamParamedic
+  ncEntryJob: TraumaTeamOperative
   ncIcon: NCDepartmentIconTraumaTeam
   ncPersonnelManagers: [ TraumaTeamOperative ]
   ncPositionLimits:
@@ -56,7 +56,7 @@
   description: department-desc-medical-nc
   color: "#66C58D"
   weight: 35
-  startingBudget: 10000
+  startingBudget: 100000
   ncSelectable: true
   ncEntryJob: NCMedicalIntern
   ncIcon: NCDepartmentIconMedical
@@ -83,7 +83,7 @@
   description: department-desc-biotechnica
   color: "#6DB15C"
   weight: 30
-  startingBudget: 15000
+  startingBudget: 150000
   ncSelectable: true
   ncEntryJob: BiotechnicaOperative
   ncIcon: NCDepartmentIconBiotechnica
@@ -116,7 +116,7 @@
   description: department-desc-militech
   color: "#8A8C91"
   weight: 30
-  startingBudget: 25000
+  startingBudget: 250000
   ncSelectable: true
   ncEntryJob: MilitechOperative
   ncPersonnelManagers: [ MilitechChief, MilitechOperativeLead ]
