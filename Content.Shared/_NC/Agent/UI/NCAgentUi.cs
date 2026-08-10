@@ -114,6 +114,7 @@ public sealed class NCAgentUpdateMessage(
     string ownAddress,
     List<NCAgentDirectoryEntry> directory,
     List<NCAgentContactSummary> contacts,
+    List<NCAgentContactSummary> conversations,
     int? selectedCharacterId,
     List<NCAgentMessageSummary> messages,
     List<NCAgentCitiNetPostSummary> posts,
@@ -126,6 +127,7 @@ public sealed class NCAgentUpdateMessage(
     public readonly string OwnAddress = ownAddress;
     public readonly List<NCAgentDirectoryEntry> Directory = directory;
     public readonly List<NCAgentContactSummary> Contacts = contacts;
+    public readonly List<NCAgentContactSummary> Conversations = conversations;
     public readonly int? SelectedCharacterId = selectedCharacterId;
     public readonly List<NCAgentMessageSummary> Messages = messages;
     public readonly List<NCAgentCitiNetPostSummary> Posts = posts;

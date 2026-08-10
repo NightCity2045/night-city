@@ -46,6 +46,9 @@ public sealed partial class NCAgentConfigurationPrototype : IPrototype
     public int ConversationMessageLimit = 100;
 
     [DataField]
+    public int ConversationPeerLimit = 50;
+
+    [DataField]
     public int FeedPostLimit = 50;
 
     [DataField]

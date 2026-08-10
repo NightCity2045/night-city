@@ -40,9 +40,7 @@ public sealed partial class NCAgentSystem
 
         var target = new NCCharacterId(args.TargetCharacterId);
         if (_calls.ContainsKey(target) ||
-            !_boundAgents.TryGetValue(target, out var targetAgent) ||
-            Deleted(targetAgent) ||
-            !TryGetAgentHolder(targetAgent, out var targetHolder) ||
+            !TryResolveOnlineAgent(target, out var targetAgent, out var targetHolder) ||
             !view.Targets.TryGetValue(target, out var targetDetails))
         {
             view.Notice = "TARGET OFFLINE OR BUSY";

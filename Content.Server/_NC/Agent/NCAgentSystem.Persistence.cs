@@ -72,7 +72,7 @@ public sealed partial class NCAgentSystem
     private async void OnPlayerSpawnComplete(PlayerSpawnCompleteEvent args)
     {
         if (!_preferences.TryGetSelectedNCCharacterId(args.Player.UserId, out var characterId) ||
-            !TryFindEquippedAgent(args.Mob, out var agent))
+            !TryFindEquippedAgent(args.Mob, characterId, out var agent))
             return;
 
         BindAgent(agent, characterId);
@@ -382,7 +382,7 @@ public sealed partial class NCAgentSystem
     private async void OnSelectConversation(EntityUid uid, NCAgentComponent component, NCAgentSelectConversationMessage args)
     {
         if (!TryGetView(uid, args.Actor, out var user, out var view) ||
-            !view.ContactIds.Contains(args.CharacterId))
+            (!view.ContactIds.Contains(args.CharacterId) && !view.ConversationIds.Contains(args.CharacterId)))
             return;
 
         view.SelectedCharacterId = new NCCharacterId(args.CharacterId);
@@ -396,7 +396,8 @@ public sealed partial class NCAgentSystem
         var body = args.Body.Trim();
         if (!TryGetView(uid, args.Actor, out var user, out var view) ||
             view.SelectedCharacterId?.Value != args.RecipientCharacterId ||
-            !view.ContactIds.Contains(args.RecipientCharacterId) ||
+            (!view.ContactIds.Contains(args.RecipientCharacterId) &&
+             !view.ConversationIds.Contains(args.RecipientCharacterId)) ||
             body.Length is < 1 || body.Length > Configuration.MaximumMessageLength ||
             !_processing.Add((uid, user)))
             return;
@@ -512,6 +513,7 @@ public sealed partial class NCAgentSystem
             view.DirectoryQuery,
             DateTime.UtcNow,
             config.DirectoryResultLimit,
+            config.ConversationPeerLimit,
             config.ConversationMessageLimit,
             config.FeedPostLimit,
             config.FeedCommentLimit);
@@ -519,6 +521,7 @@ public sealed partial class NCAgentSystem
             return;
 
         view.ContactIds.Clear();
+        view.ConversationIds.Clear();
         view.VisibleDirectoryIds.Clear();
         view.PostIds.Clear();
         view.Targets.Clear();
@@ -531,6 +534,12 @@ public sealed partial class NCAgentSystem
             view.Targets[contact.CharacterId] = (contact.Alias, contact.Address);
         }
 
+        foreach (var conversation in snapshot.Conversations)
+        {
+            view.ConversationIds.Add(conversation.CharacterId.Value);
+            view.Targets[conversation.CharacterId] = (conversation.Alias, conversation.Address);
+        }
+
         foreach (var entry in snapshot.Directory)
         {
             view.VisibleDirectoryIds.Add(entry.CharacterId.Value);
@@ -540,7 +549,9 @@ public sealed partial class NCAgentSystem
         foreach (var post in snapshot.Posts)
             view.PostIds.Add(post.PostId);
 
-        if (view.SelectedCharacterId is { } selected && !view.ContactIds.Contains(selected.Value))
+        if (view.SelectedCharacterId is { } selected &&
+            !view.ContactIds.Contains(selected.Value) &&
+            !view.ConversationIds.Contains(selected.Value))
             view.SelectedCharacterId = null;
 
         var call = BuildCallSummary(view.Owner);
@@ -555,6 +566,10 @@ public sealed partial class NCAgentSystem
                 value.Address,
                 value.IsContact)).ToList(),
             snapshot.Contacts.Select(value => new NCAgentContactSummary(
+                value.CharacterId.Value,
+                value.Alias,
+                value.Address)).ToList(),
+            snapshot.Conversations.Select(value => new NCAgentContactSummary(
                 value.CharacterId.Value,
                 value.Alias,
                 value.Address)).ToList(),
@@ -631,6 +646,9 @@ public sealed partial class NCAgentSystem
         if (TryComp<NCAgentIdentityComponent>(agent, out var identity) && identity.CharacterId.IsValid)
         {
             owner = identity.CharacterId;
+            // Opening a stolen or recovered Agent makes that physical device the active endpoint
+            // without changing its original character ownership.
+            _boundAgents[owner] = agent;
             return true;
         }
 
@@ -655,19 +673,28 @@ public sealed partial class NCAgentSystem
         _boundAgents[owner] = agent;
     }
 
-    private bool TryFindEquippedAgent(EntityUid user, out EntityUid agent)
+    private bool TryFindEquippedAgent(EntityUid user, NCCharacterId owner, out EntityUid agent)
     {
         if (_inventory.TryGetSlotEntity(user, "id", out var id) &&
-            id is { } idEntity && HasComp<NCAgentComponent>(idEntity))
+            id is { } idEntity && IsAgentOwnedByOrUnbound(idEntity, owner))
         {
             agent = idEntity;
             return true;
         }
 
         if (_inventory.TryGetSlotEntity(user, "belt", out var belt) &&
-            belt is { } beltEntity && HasComp<NCAgentComponent>(beltEntity))
+            belt is { } beltEntity && IsAgentOwnedByOrUnbound(beltEntity, owner))
         {
             agent = beltEntity;
+            return true;
+        }
+
+        foreach (var held in _hands.EnumerateHeld(user))
+        {
+            if (!IsAgentOwnedByOrUnbound(held, owner))
+                continue;
+
+            agent = held;
             return true;
         }
 
@@ -675,13 +702,54 @@ public sealed partial class NCAgentSystem
         return false;
     }
 
+    private bool IsAgentOwnedByOrUnbound(EntityUid agent, NCCharacterId owner)
+    {
+        if (!HasComp<NCAgentComponent>(agent))
+            return false;
+
+        return !TryComp<NCAgentIdentityComponent>(agent, out var identity) ||
+               !identity.CharacterId.IsValid ||
+               identity.CharacterId == owner;
+    }
+
+    /// <summary>
+    /// Resolves an online Agent on demand instead of relying solely on a spawn-time cache.
+    /// This is event-driven and scans player sessions only for an explicit delivery attempt.
+    /// </summary>
+    private bool TryResolveOnlineAgent(NCCharacterId owner, out EntityUid agent, out EntityUid holder)
+    {
+        if (_boundAgents.TryGetValue(owner, out agent) &&
+            TryGetAgentHolder(agent, out holder) &&
+            _players.TryGetSessionByEntity(holder, out _))
+            return true;
+
+        foreach (var session in _players.Sessions)
+        {
+            if (!_preferences.TryGetSelectedNCCharacterId(session.UserId, out var activeCharacter) ||
+                activeCharacter != owner ||
+                session.AttachedEntity is not { Valid: true } user ||
+                !TryFindEquippedAgent(user, owner, out agent))
+            {
+                continue;
+            }
+
+            BindAgent(agent, owner);
+            holder = user;
+            return true;
+        }
+
+        agent = EntityUid.Invalid;
+        holder = EntityUid.Invalid;
+        return false;
+    }
+
     private void NotifyAgent(NCCharacterId owner, string text)
     {
-        if (!_boundAgents.TryGetValue(owner, out var agent) || Deleted(agent))
+        if (!TryResolveOnlineAgent(owner, out var agent, out var holder))
             return;
 
         _ringer.RingerPlayRingtone(agent);
-        if (TryGetAgentHolder(agent, out var holder) && _players.TryGetSessionByEntity(holder, out var session))
+        if (_players.TryGetSessionByEntity(holder, out var session))
             _chat.DispatchServerMessage(session, $"[AGENT] {text}");
     }
 
@@ -719,6 +787,7 @@ public sealed partial class NCAgentSystem
     {
         public readonly NCCharacterId Owner = owner;
         public readonly HashSet<int> ContactIds = [];
+        public readonly HashSet<int> ConversationIds = [];
         public readonly HashSet<int> VisibleDirectoryIds = [];
         public readonly HashSet<long> PostIds = [];
         public readonly Dictionary<NCCharacterId, (string Alias, string Address)> Targets = [];

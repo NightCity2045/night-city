@@ -162,8 +162,17 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     /// </summary>
     public void UpdateAgentData(NCAgentUpdateMessage update)
     {
+        var incomingCallStarted = update.Call.State == NCAgentCallState.Incoming &&
+                                  _agentData?.Call.State != NCAgentCallState.Incoming;
         _agentData = update;
         OwnerLabel.Text = $"USER // @{update.OwnAlias.ToUpperInvariant()}";
+
+        // Surface an incoming call immediately while preserving any active vanilla cartridge program.
+        if (incomingCallStarted && _currentView != ProgramContentView)
+        {
+            OpenAgentApp(NCAgentApp.Calls, "CALLS");
+            return;
+        }
 
         if (_currentView == BuiltInAppView)
             RenderAgentApp(update.ActiveApp);
@@ -267,6 +276,13 @@ public sealed partial class NCAgentMenu : NCAgentWindow
 
     private void BuildMessages(NCAgentUpdateMessage data)
     {
+        var conversationPeers = data.Contacts
+            .Concat(data.Conversations)
+            .GroupBy(value => value.CharacterId)
+            .Select(group => group.First())
+            .OrderBy(value => value.Alias)
+            .ToList();
+
         var contactRow = new WrapContainer
         {
             LayoutAxis = Axis.Horizontal,
@@ -274,7 +290,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             SeparationOverride = 2,
             CrossSeparationOverride = 2,
         };
-        foreach (var contact in data.Contacts)
+        foreach (var contact in conversationPeers)
         {
             var button = CreateActionButton(contact.Alias, data.SelectedCharacterId == contact.CharacterId ? "#77FFF2" : "#406E6B");
             button.OnPressed += _ => OnSelectConversation?.Invoke(contact.CharacterId);
@@ -284,11 +300,11 @@ public sealed partial class NCAgentMenu : NCAgentWindow
 
         if (data.SelectedCharacterId is not { } selected)
         {
-            BuiltInContent.AddChild(CreateMutedLabel("Select a saved contact to open a conversation."));
+            BuiltInContent.AddChild(CreateMutedLabel("Select a contact or incoming conversation."));
             return;
         }
 
-        var selectedContact = data.Contacts.FirstOrDefault(value => value.CharacterId == selected);
+        var selectedContact = conversationPeers.FirstOrDefault(value => value.CharacterId == selected);
         BuiltInContent.AddChild(CreateSectionTitle(selectedContact == null
             ? "CONVERSATION"
             : $"{selectedContact.Alias} // {selectedContact.Address}"));
@@ -379,12 +395,13 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             PlaceHolder = "CitiNet handle",
             HorizontalExpand = true,
         };
-        var changeAlias = CreateActionButton("CHANGE", "#E05CFF");
+        var changeAlias = CreateActionButton("SAVE HANDLE", "#E05CFF");
+        changeAlias.HorizontalExpand = true;
         changeAlias.OnPressed += _ => OnSetAlias?.Invoke(aliasInput.Text);
 
         var aliasRow = new BoxContainer
         {
-            Orientation = BoxContainer.LayoutOrientation.Horizontal,
+            Orientation = BoxContainer.LayoutOrientation.Vertical,
             HorizontalExpand = true,
         };
         aliasRow.AddChild(aliasInput);

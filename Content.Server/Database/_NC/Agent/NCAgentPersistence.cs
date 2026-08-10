@@ -50,6 +50,7 @@ public sealed record NCAgentSnapshotData(
     NCAgentProfileData Profile,
     IReadOnlyList<NCAgentDirectoryData> Directory,
     IReadOnlyList<NCAgentContactData> Contacts,
+    IReadOnlyList<NCAgentContactData> Conversations,
     IReadOnlyList<NCAgentMessageData> Messages,
     IReadOnlyList<NCCitiNetPostData> Posts);
 
@@ -73,6 +74,7 @@ public partial interface IServerDbManager
         string directoryQuery,
         DateTime now,
         int directoryLimit,
+        int conversationPeerLimit,
         int messageLimit,
         int postLimit,
         int commentLimit);
@@ -117,6 +119,7 @@ public sealed partial class ServerDbManager
         string directoryQuery,
         DateTime now,
         int directoryLimit,
+        int conversationPeerLimit,
         int messageLimit,
         int postLimit,
         int commentLimit)
@@ -128,6 +131,7 @@ public sealed partial class ServerDbManager
             directoryQuery,
             now,
             directoryLimit,
+            conversationPeerLimit,
             messageLimit,
             postLimit,
             commentLimit));
@@ -275,6 +279,7 @@ public abstract partial class ServerDbBase
         string directoryQuery,
         DateTime now,
         int directoryLimit,
+        int conversationPeerLimit,
         int messageLimit,
         int postLimit,
         int commentLimit)
@@ -301,6 +306,38 @@ public abstract partial class ServerDbBase
             .ToListAsync();
 
         var contactIds = contacts.Select(value => value.CharacterId.Value).ToList();
+
+        // Conversation peers are derived from live message history, so an unsolicited incoming message
+        // remains reachable without silently turning its sender into a saved contact.
+        var conversationActivity = await db.DbContext.NCAgentMessages
+            .AsNoTracking()
+            .Where(value => value.ExpiresAt > now &&
+                (value.SenderProfileId == characterId.Value || value.RecipientProfileId == characterId.Value))
+            .GroupBy(value => value.SenderProfileId == characterId.Value
+                ? value.RecipientProfileId
+                : value.SenderProfileId)
+            .Select(group => new
+            {
+                ProfileId = group.Key,
+                LastMessageAt = group.Max(value => value.SentAt),
+            })
+            .OrderByDescending(value => value.LastMessageAt)
+            .Take(Math.Clamp(conversationPeerLimit, 1, 200))
+            .ToListAsync();
+        var conversationIds = conversationActivity.Select(value => value.ProfileId).ToList();
+        var conversationProfiles = await db.DbContext.NCAgentProfiles
+            .AsNoTracking()
+            .Where(value => conversationIds.Contains(value.ProfileId))
+            .Select(value => new NCAgentContactData(
+                new NCCharacterId(value.ProfileId),
+                value.Alias ?? value.Profile.CharacterName,
+                value.Address))
+            .ToDictionaryAsync(value => value.CharacterId.Value);
+        var conversations = conversationActivity
+            .Where(value => conversationProfiles.ContainsKey(value.ProfileId))
+            .Select(value => conversationProfiles[value.ProfileId])
+            .ToList();
+
         var normalizedQuery = directoryQuery.Trim().ToLowerInvariant();
         IReadOnlyList<NCAgentDirectoryData> directory = Array.Empty<NCAgentDirectoryData>();
         if (normalizedQuery.Length > 0)
@@ -390,7 +427,13 @@ public abstract partial class ServerDbBase
             })
             .ToList();
 
-        return new NCAgentSnapshotData(ToProfileData(profile), directory, contacts, messages, postsWithComments);
+        return new NCAgentSnapshotData(
+            ToProfileData(profile),
+            directory,
+            contacts,
+            conversations,
+            messages,
+            postsWithComments);
     }
 
     public async Task<bool> AddNCAgentContactAsync(NCCharacterId owner, NCCharacterId contact)

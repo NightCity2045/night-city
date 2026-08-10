@@ -15,5 +15,6 @@
   maximumCommentLength: 1024
   directoryResultLimit: 30
   conversationMessageLimit: 100
+  conversationPeerLimit: 50
   feedPostLimit: 50
   feedCommentLimit: 200

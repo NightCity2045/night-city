@@ -39,6 +39,7 @@ public sealed class NCAgentPersistenceTest : GameTest
             Assert.That(configuration.MaximumMessageLength, Is.EqualTo(1024));
             Assert.That(configuration.MinimumAliasLength, Is.EqualTo(3));
             Assert.That(configuration.MaximumAliasLength, Is.EqualTo(32));
+            Assert.That(configuration.ConversationPeerLimit, Is.EqualTo(50));
         });
     }
 
@@ -73,8 +74,10 @@ public sealed class NCAgentPersistenceTest : GameTest
         Assert.That(await db.UpdateNCAgentAliasAsync(first, "chrome ghost", "CHROME GHOST"),
             Is.EqualTo(NCAgentAliasUpdateResult.Duplicate));
 
-        var snapshot = await db.GetNCAgentSnapshotAsync(first, second, "chrome", now, 30, 100, 50, 200);
+        var snapshot = await db.GetNCAgentSnapshotAsync(first, second, "chrome", now, 30, 50, 100, 50, 200);
+        var recipientSnapshot = await db.GetNCAgentSnapshotAsync(second, first, string.Empty, now, 30, 50, 100, 50, 200);
         Assert.That(snapshot, Is.Not.Null);
+        Assert.That(recipientSnapshot, Is.Not.Null);
         Assert.Multiple(() =>
         {
             Assert.That(repeatedProfile!.Address, Is.EqualTo(firstProfile!.Address));
@@ -85,6 +88,7 @@ public sealed class NCAgentPersistenceTest : GameTest
             Assert.That(snapshot.Directory.Single().Alias, Is.EqualTo("Chrome Ghost"));
             Assert.That(snapshot.Contacts.Single().CharacterId, Is.EqualTo(second));
             Assert.That(snapshot.Contacts.Single().Alias, Is.EqualTo("Chrome Ghost"));
+            Assert.That(snapshot.Conversations.Single().Alias, Is.EqualTo("Chrome Ghost"));
             Assert.That(snapshot.Messages.Single().Body, Is.EqualTo("Meet at the Afterlife."));
             Assert.That(snapshot.Messages.Single().SenderAlias, Is.EqualTo("Neon Raven"));
             Assert.That(snapshot.Messages.Single().RecipientAlias, Is.EqualTo("Chrome Ghost"));
@@ -93,11 +97,24 @@ public sealed class NCAgentPersistenceTest : GameTest
             Assert.That(snapshot.Posts.Single().AuthorAlias, Is.EqualTo("Chrome Ghost"));
             Assert.That(snapshot.Posts.Single().Comments.Single().Body, Is.EqualTo("Send details."));
             Assert.That(snapshot.Posts.Single().Comments.Single().AuthorAlias, Is.EqualTo("Neon Raven"));
+            Assert.That(recipientSnapshot!.Contacts, Is.Empty);
+            Assert.That(recipientSnapshot.Conversations.Single().Alias, Is.EqualTo("Neon Raven"));
+            Assert.That(recipientSnapshot.Messages.Single().Body, Is.EqualTo("Meet at the Afterlife."));
         });
 
         Assert.That(await db.PurgeExpiredNCAgentMessagesAsync(now.AddDays(31)), Is.EqualTo(1));
-        var expiredSnapshot = await db.GetNCAgentSnapshotAsync(first, second, string.Empty, now.AddDays(31), 30, 100, 50, 200);
+        var expiredSnapshot = await db.GetNCAgentSnapshotAsync(
+            first,
+            second,
+            string.Empty,
+            now.AddDays(31),
+            30,
+            50,
+            100,
+            50,
+            200);
         Assert.That(expiredSnapshot!.Messages, Is.Empty);
+        Assert.That(expiredSnapshot.Conversations, Is.Empty);
     }
 
     [Test]
@@ -116,6 +133,7 @@ public sealed class NCAgentPersistenceTest : GameTest
             string.Empty,
             DateTime.UtcNow,
             30,
+            50,
             100,
             50,
             200);
