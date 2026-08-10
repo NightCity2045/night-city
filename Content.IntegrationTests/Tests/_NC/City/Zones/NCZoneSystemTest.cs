@@ -153,6 +153,17 @@ public sealed class NCZoneSystemTest : GameTest
                 string.Join(Environment.NewLine, errors.Select(error => error.Message)));
 
             var result = new List<NCZoneInfo>();
+            zones.GetZones(NetworkId, result);
+            Assert.That(result.Select(zone => zone.Name), Is.EquivalentTo(new[]
+            {
+                "Watson Test District",
+                "Test Sector",
+                "Test Street",
+                "Test Building",
+                "Test Apartment",
+                "Test Multi-floor Mission Slot",
+            }));
+
             zones.GetZones(new NCMapCoordinates(NetworkId, new Vector2(2.5f, 2f), 0), result);
 
             Assert.That(result.Select(zone => zone.Kind.Id), Is.EqualTo(new[]

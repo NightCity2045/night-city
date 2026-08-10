@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System.Numerics;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._NC.Agent.UI;
@@ -25,6 +26,39 @@ public enum NCAgentCallState : byte
     Outgoing,
     Connected,
 }
+
+[Serializable, NetSerializable]
+public enum NCAgentMapFeatureKind : byte
+{
+    District,
+    Sector,
+    Street,
+    Building,
+}
+
+[Serializable, NetSerializable]
+public enum NCAgentMapGeometryKind : byte
+{
+    Polygon,
+    TileMask,
+}
+
+/// <summary>
+/// One compressed 32x32 tile-mask fragment. Each row stores occupied tiles as bits.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed record NCAgentMapTileChunk(int OriginX, int OriginY, List<ulong> Rows);
+
+/// <summary>
+/// Public cartography fragment derived from server-only city-zone geometry.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed record NCAgentMapFeature(
+    NCAgentMapFeatureKind Kind,
+    NCAgentMapGeometryKind GeometryKind,
+    string Name,
+    List<Vector2> Vertices,
+    List<NCAgentMapTileChunk> Chunks);
 
 [Serializable, NetSerializable]
 public sealed record NCAgentDirectoryEntry(int CharacterId, string Name, string Address, bool IsContact);
@@ -94,6 +128,24 @@ public sealed class NCAgentUpdateMessage(
     public readonly List<NCAgentMessageSummary> Messages = messages;
     public readonly List<NCAgentCitiNetPostSummary> Posts = posts;
     public readonly NCAgentCallSummary Call = call;
+    public readonly string Notice = notice;
+}
+
+/// <summary>
+/// City geometry is sent only when the map app opens so regular Agent updates remain small.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class NCAgentMapUpdateMessage(
+    string networkId,
+    int z,
+    Vector2 userPosition,
+    List<NCAgentMapFeature> features,
+    string notice) : BoundUserInterfaceMessage
+{
+    public readonly string NetworkId = networkId;
+    public readonly int Z = z;
+    public readonly Vector2 UserPosition = userPosition;
+    public readonly List<NCAgentMapFeature> Features = features;
     public readonly string Notice = notice;
 }
 

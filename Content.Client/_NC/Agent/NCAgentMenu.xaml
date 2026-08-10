@@ -1,9 +1,9 @@
 <pda:PdaWindow xmlns="https://spacestation14.io"
                xmlns:pda="clr-namespace:Content.Client.PDA"
                xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
-               MinSize="650 520"
-               SetSize="650 520">
-    <PanelContainer Name="AgentScreen" HorizontalExpand="True" VerticalExpand="True">
+               MinSize="576 400"
+               SetSize="650 470">
+    <PanelContainer Name="AgentScreen" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
         <PanelContainer.PanelOverride>
             <gfx:StyleBoxFlat BackgroundColor="#071015" BorderColor="#24E0D0" BorderThickness="1" />
         </PanelContainer.PanelOverride>
@@ -43,7 +43,7 @@
                                          InactiveFgColor="#727B6E" ActiveFgColor="#FFF386" />
             </BoxContainer>
 
-            <BoxContainer Name="ViewContainer" Access="Public" HorizontalExpand="True" VerticalExpand="True">
+            <BoxContainer Name="ViewContainer" Access="Public" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
                 <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
                     <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Margin="12">
                         <PanelContainer HorizontalExpand="True" MinHeight="76" Margin="0 0 0 10">
@@ -154,14 +154,14 @@
                 <BoxContainer Name="ProgramView" Access="Public" Orientation="Vertical"
                               HorizontalExpand="True" VerticalExpand="True" Margin="10" />
 
-                <BoxContainer Name="BuiltInView" Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Margin="18">
+                <BoxContainer Name="BuiltInView" Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Margin="14 8">
                     <Label Name="BuiltInTitle" Text="APP" FontColorOverride="#77FFF2" />
-                    <PanelContainer HorizontalExpand="True" VerticalExpand="True" Margin="0 12 0 0">
+                    <PanelContainer HorizontalExpand="True" VerticalExpand="True" Margin="0 6 0 0">
                         <PanelContainer.PanelOverride>
                             <gfx:StyleBoxFlat BackgroundColor="#0C1C22" BorderColor="#245C59" BorderThickness="1" />
                         </PanelContainer.PanelOverride>
                         <BoxContainer Name="BuiltInContent" Access="Public" Orientation="Vertical"
-                                      HorizontalExpand="True" VerticalExpand="True" Margin="10" />
+                                      HorizontalExpand="True" VerticalExpand="True" Margin="8" />
                     </PanelContainer>
                 </BoxContainer>
             </BoxContainer>

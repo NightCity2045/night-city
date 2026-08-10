@@ -98,12 +98,20 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
     protected override void ReceiveMessage(BoundUserInterfaceMessage message)
     {
         base.ReceiveMessage(message);
-        if (message is not NCAgentUpdateMessage update || _menu == null)
+        if (_menu == null)
             return;
 
-        if (EntMan.TryGetComponent<TransformComponent>(Owner, out var transform))
-            _menu.SetMapSource(transform.GridUid, Owner);
-        _menu.UpdateAgentData(update);
+        switch (message)
+        {
+            case NCAgentUpdateMessage update:
+                _menu.UpdateAgentData(update);
+                break;
+            case NCAgentMapUpdateMessage mapUpdate:
+                if (EntMan.TryGetComponent<TransformComponent>(Owner, out var transform))
+                    _menu.SetMapSource(transform.GridUid);
+                _menu.UpdateMapData(mapUpdate);
+                break;
+        }
     }
 
     protected override void AttachCartridgeUI(Control cartridgeUiFragment, string? title)

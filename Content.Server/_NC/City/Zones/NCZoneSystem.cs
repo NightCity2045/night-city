@@ -98,6 +98,26 @@ public sealed partial class NCZoneSystem : EntitySystem
     }
 
     /// <summary>
+    /// Copies every zone belonging to one Z-network for explicit cartography requests.
+    /// This is request-driven and never called from Update.
+    /// </summary>
+    public void GetZones(NCZNetworkId networkId, List<NCZoneInfo> result)
+    {
+        result.Clear();
+        foreach (var zone in _zonesById.Values)
+        {
+            if (zone.NetworkId == networkId)
+                result.Add(ToInfo(zone));
+        }
+
+        result.Sort(static (left, right) =>
+        {
+            var rank = left.HierarchyRank.CompareTo(right.HierarchyRank);
+            return rank != 0 ? rank : left.Id.Value.CompareTo(right.Id.Value);
+        });
+    }
+
+    /// <summary>
     /// Resolves a generic zone identity as a district and rejects identities belonging to another city level.
     /// </summary>
     public bool TryGetDistrictId(NCZoneId zoneId, out NCDistrictId districtId)

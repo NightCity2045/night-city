@@ -6,7 +6,6 @@ using System.Numerics;
 using System.Linq;
 using Content.Client.GameTicking.Managers;
 using Content.Client.PDA;
-using Content.Client.Pinpointer.UI;
 using Content.Shared._NC.Agent.UI;
 using Content.Shared.CartridgeLoader;
 using Content.Shared.PDA;
@@ -17,7 +16,6 @@ using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using Robust.Client.UserInterface.XAML;
 using Robust.Shared.Animations;
-using Robust.Shared.Map;
 using Robust.Shared.Timing;
 
 namespace Content.Client._NC.Agent;
@@ -73,12 +71,13 @@ public sealed partial class NCAgentMenu : PdaWindow
 
     [Dependency] private IGameTiming _gameTiming = default!;
     [Dependency] private IEntitySystemManager _entitySystems = default!;
+    [Dependency] private IUserInterfaceManager _uiManager = default!;
 
     private readonly ClientGameTicker _gameTicker;
     private int _currentView;
-    private EntityUid? _mapUid;
-    private EntityUid? _trackedEntity;
     private NCAgentUpdateMessage? _agentData;
+    private NCAgentMapUpdateMessage? _mapData;
+    private EntityUid? _mapGridUid;
 
     public event Action<EntityUid>? OnProgramItemPressed;
     public event Action<EntityUid>? OnUninstallButtonPressed;
@@ -101,6 +100,7 @@ public sealed partial class NCAgentMenu : PdaWindow
         IoCManager.InjectDependencies(this);
         _gameTicker = _entitySystems.GetEntitySystem<ClientGameTicker>();
         RobustXamlLoader.Load(this);
+        FitWindowToViewport();
 
         HomeButton.OnPressed += _ =>
         {
@@ -162,15 +162,6 @@ public sealed partial class NCAgentMenu : PdaWindow
     }
 
     /// <summary>
-    /// Supplies the current physical grid to the full-visibility city map app.
-    /// </summary>
-    public void SetMapSource(EntityUid? mapUid, EntityUid trackedEntity)
-    {
-        _mapUid = mapUid;
-        _trackedEntity = trackedEntity;
-    }
-
-    /// <summary>
     /// Applies a per-user Agent service update without disturbing an open vanilla cartridge UI.
     /// </summary>
     public void UpdateAgentData(NCAgentUpdateMessage update)
@@ -180,6 +171,24 @@ public sealed partial class NCAgentMenu : PdaWindow
 
         if (_currentView == BuiltInAppView)
             RenderAgentApp(update.ActiveApp);
+    }
+
+    /// <summary>
+    /// Applies the separate semantic city snapshot without rebuilding unrelated Agent applications.
+    /// </summary>
+    public void UpdateMapData(NCAgentMapUpdateMessage update)
+    {
+        _mapData = update;
+        if (_currentView == BuiltInAppView && _agentData?.ActiveApp == NCAgentApp.Map)
+            RenderAgentApp(NCAgentApp.Map);
+    }
+
+    /// <summary>
+    /// Supplies the physical grid whose synchronized NavMap data forms the architectural base layer.
+    /// </summary>
+    public void SetMapSource(EntityUid? gridUid)
+    {
+        _mapGridUid = gridUid;
     }
 
     private void RenderAgentApp(NCAgentApp app)
@@ -397,24 +406,38 @@ public sealed partial class NCAgentMenu : PdaWindow
 
     private void BuildMap()
     {
-        BuiltInContent.AddChild(CreateStatusLabel("FULL VISIBILITY // CURRENT CITY GRID", "#8FF7AF"));
-        if (_mapUid == null)
+        if (_mapData == null)
         {
-            BuiltInContent.AddChild(CreateMutedLabel("Map signal unavailable."));
+            BuiltInContent.AddChild(CreateMutedLabel("Receiving city cartography..."));
             return;
         }
 
-        var map = new NavMapControl
+        var map = new NCAgentMapControl
         {
-            MapUid = _mapUid,
             HorizontalExpand = true,
             VerticalExpand = true,
-            MinSize = new Vector2(560, 330),
         };
-        if (_trackedEntity is { } tracked)
-            map.TrackedCoordinates.Add(new EntityCoordinates(tracked, Vector2.Zero), (true, Color.Cyan));
-        map.ForceNavMapUpdate();
+        map.SetMapSource(_mapGridUid);
+        map.SetMapData(_mapData);
         BuiltInContent.AddChild(map);
+    }
+
+    /// <summary>
+    /// Keeps the Agent shell inside the current UI viewport while preserving its desktop dimensions.
+    /// The XAML dimensions remain the fallback for the short period before the root UI is measured.
+    /// </summary>
+    private void FitWindowToViewport()
+    {
+        const float viewportMargin = 12f;
+        var viewport = _uiManager.RootControl.Size;
+        if (viewport.X <= 0f || viewport.Y <= 0f)
+            return;
+
+        var width = MathF.Min(650f, MathF.Max(1f, viewport.X - viewportMargin));
+        var height = MathF.Min(470f, MathF.Max(1f, viewport.Y - viewportMargin));
+
+        SetSize = new Vector2(width, height);
+        MinSize = new Vector2(MathF.Min(576f, width), MathF.Min(400f, height));
     }
 
     private Control CreatePostCard(NCAgentCitiNetPostSummary post)
@@ -618,6 +641,9 @@ public sealed partial class NCAgentMenu : PdaWindow
 
     private void OpenAgentApp(NCAgentApp app, string title)
     {
+        if (app == NCAgentApp.Map)
+            _mapData = null;
+
         SetNavigationState();
         BuiltInTitle.Text = title;
         BuiltInContent.RemoveAllChildren();

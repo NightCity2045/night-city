@@ -5,6 +5,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Content.Server._NC.Agent.Components;
+using Content.Server._NC.City.Zones;
 using Content.Server.Chat.Managers;
 using Content.Server.Database;
 using Content.Server.PDA;
@@ -13,6 +14,9 @@ using Content.Server.Preferences.Managers;
 using Content.Shared._NC.Agent;
 using Content.Shared._NC.Agent.Components;
 using Content.Shared._NC.Agent.UI;
+using Content.Shared._NC.City.Zones;
+using Content.Shared._NC.City.Zones.Prototypes;
+using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.Identity;
 using Content.Shared.GameTicking;
 using Content.Shared.Inventory;
@@ -33,9 +37,11 @@ public sealed partial class NCAgentSystem
     [Dependency] private IServerPreferencesManager _preferences = default!;
     [Dependency] private ISharedPlayerManager _players = default!;
     [Dependency] private InventorySystem _inventory = default!;
+    [Dependency] private NCMapCoordinatesSystem _mapCoordinates = default!;
     [Dependency] private PdaSystem _pda = default!;
     [Dependency] private RingerSystem _ringer = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;
+    [Dependency] private NCZoneSystem _zones = default!;
 
     private readonly Dictionary<(EntityUid Agent, EntityUid User), AgentView> _views = [];
     private readonly Dictionary<NCCharacterId, EntityUid> _boundAgents = [];
@@ -118,7 +124,105 @@ public sealed partial class NCAgentSystem
 
         view.ActiveApp = args.App;
         view.Notice = string.Empty;
+        if (args.App == NCAgentApp.Map)
+            SendMapSnapshot(uid, user);
         await SendViewAsync(uid, user);
+    }
+
+    /// <summary>
+    /// Sends sanitized public cartography only for an explicit map-app request.
+    /// Server-only zone prototypes and private zone kinds never cross the network boundary.
+    /// </summary>
+    private void SendMapSnapshot(EntityUid agent, EntityUid user)
+    {
+        if (!_mapCoordinates.TryGetCoordinates(user, out var coordinates))
+        {
+            _ui.ServerSendUiMessage(agent, PdaUiKey.Key, new NCAgentMapUpdateMessage(
+                string.Empty,
+                0,
+                default,
+                [],
+                "CITY GRID SIGNAL UNAVAILABLE"), user);
+            return;
+        }
+
+        var zoneInfos = new List<NCZoneInfo>();
+        var geometryInfos = new List<NCZoneGeometryInfo>();
+        var features = new List<NCAgentMapFeature>();
+        _zones.GetZones(coordinates.NetworkId, zoneInfos);
+
+        foreach (var zone in zoneInfos)
+        {
+            if (!TryGetPublicMapKind(zone.ContextSlot, out var featureKind) ||
+                !_zones.GetGeometry(zone.Id, geometryInfos))
+            {
+                continue;
+            }
+
+            foreach (var geometry in geometryInfos)
+            {
+                switch (geometry.Kind)
+                {
+                    case NCZoneGeometryKind.Polygon when geometry.Global || geometry.Z == coordinates.Z:
+                    case NCZoneGeometryKind.Volume when geometry.Global ||
+                                                        coordinates.Z >= geometry.MinZ &&
+                                                        coordinates.Z <= geometry.MaxZ:
+                        if (geometry.Vertices.Count >= 3)
+                        {
+                            features.Add(new NCAgentMapFeature(
+                                featureKind,
+                                NCAgentMapGeometryKind.Polygon,
+                                zone.Name,
+                                geometry.Vertices.ToList(),
+                                []));
+                        }
+                        break;
+                    case NCZoneGeometryKind.TileMask:
+                    {
+                        var chunks = geometry.Chunks
+                            .Where(chunk => chunk.Z == coordinates.Z)
+                            .Select(chunk => new NCAgentMapTileChunk(
+                                chunk.Origin.X,
+                                chunk.Origin.Y,
+                                chunk.Rows.ToList()))
+                            .ToList();
+                        if (chunks.Count > 0)
+                        {
+                            features.Add(new NCAgentMapFeature(
+                                featureKind,
+                                NCAgentMapGeometryKind.TileMask,
+                                zone.Name,
+                                [],
+                                chunks));
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        _ui.ServerSendUiMessage(agent, PdaUiKey.Key, new NCAgentMapUpdateMessage(
+            coordinates.NetworkId.ToString(),
+            coordinates.Z,
+            coordinates.Position,
+            features,
+            features.Count == 0 ? "SEMANTIC CARTOGRAPHY UNAVAILABLE // GRID ONLY" : string.Empty), user);
+    }
+
+    private static bool TryGetPublicMapKind(NCZoneContextSlot contextSlot, out NCAgentMapFeatureKind kind)
+    {
+        kind = contextSlot switch
+        {
+            NCZoneContextSlot.District => NCAgentMapFeatureKind.District,
+            NCZoneContextSlot.Sector => NCAgentMapFeatureKind.Sector,
+            NCZoneContextSlot.Street => NCAgentMapFeatureKind.Street,
+            NCZoneContextSlot.Building => NCAgentMapFeatureKind.Building,
+            _ => default,
+        };
+        return contextSlot is NCZoneContextSlot.District or
+            NCZoneContextSlot.Sector or
+            NCZoneContextSlot.Street or
+            NCZoneContextSlot.Building;
     }
 
     private async void OnDirectorySearch(EntityUid uid, NCAgentComponent component, NCAgentDirectorySearchMessage args)
