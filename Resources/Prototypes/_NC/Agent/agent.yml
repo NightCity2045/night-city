@@ -16,5 +16,8 @@
   directoryResultLimit: 30
   conversationMessageLimit: 100
   conversationPeerLimit: 50
+  incomingCallTimeout: 30s
+  callHistoryRetention: 720h
+  callHistoryLimit: 50
   feedPostLimit: 50
   feedCommentLimit: 200

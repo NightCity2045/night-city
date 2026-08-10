@@ -101,7 +101,9 @@ public sealed partial class NCAgentSystem
             if (profile == null)
                 return;
 
-            await _database.PurgeExpiredNCAgentMessagesAsync(DateTime.UtcNow);
+            var now = DateTime.UtcNow;
+            await _database.PurgeExpiredNCAgentMessagesAsync(now);
+            await _database.PurgeExpiredNCAgentCallLogsAsync(now - Configuration.CallHistoryRetention);
             await SendViewAsync(uid, user);
         }
         catch (Exception exception)
@@ -507,14 +509,21 @@ public sealed partial class NCAgentSystem
             return;
 
         var config = Configuration;
+        var now = DateTime.UtcNow;
+        if (view.ActiveApp == NCAgentApp.Messages && view.SelectedCharacterId is { } selectedConversation)
+            await _database.MarkNCAgentConversationReadAsync(view.Owner, selectedConversation, now);
+        if (view.ActiveApp == NCAgentApp.Calls)
+            await _database.MarkNCAgentCallHistoryReadAsync(view.Owner, now);
+
         var snapshot = await _database.GetNCAgentSnapshotAsync(
             view.Owner,
             view.SelectedCharacterId,
             view.DirectoryQuery,
-            DateTime.UtcNow,
+            now,
             config.DirectoryResultLimit,
             config.ConversationPeerLimit,
             config.ConversationMessageLimit,
+            config.CallHistoryLimit,
             config.FeedPostLimit,
             config.FeedCommentLimit);
         if (snapshot == null || !_views.ContainsKey((agent, user)))
@@ -569,10 +578,12 @@ public sealed partial class NCAgentSystem
                 value.CharacterId.Value,
                 value.Alias,
                 value.Address)).ToList(),
-            snapshot.Conversations.Select(value => new NCAgentContactSummary(
+            snapshot.Conversations.Select(value => new NCAgentConversationSummary(
                 value.CharacterId.Value,
                 value.Alias,
-                value.Address)).ToList(),
+                value.Address,
+                value.LastMessageAt,
+                value.UnreadCount)).ToList(),
             view.SelectedCharacterId?.Value,
             snapshot.Messages.Select(value => new NCAgentMessageSummary(
                 value.MessageId,
@@ -598,6 +609,19 @@ public sealed partial class NCAgentSystem
                     comment.Body,
                     comment.CreatedAt)).ToList())).ToList(),
             call,
+            snapshot.CallHistory.Select(value => new NCAgentCallHistorySummary(
+                value.CallId,
+                value.IsOutgoing,
+                value.RemoteCharacterId.Value,
+                value.RemoteAlias,
+                value.RemoteAddress,
+                value.StartedAt,
+                value.AnsweredAt,
+                value.EndedAt,
+                value.Outcome,
+                value.IsUnread)).ToList(),
+            snapshot.UnreadMessageCount,
+            snapshot.MissedCallCount,
             view.Notice), user);
     }
 

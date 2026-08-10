@@ -75,7 +75,7 @@
                                     </PanelContainer.PanelOverride>
                                     <BoxContainer Orientation="Vertical" Margin="10 8">
                                         <Label Text="MESSAGES" FontColorOverride="#8FB8FF" />
-                                        <Label Text="encrypted threads" FontColorOverride="#5B718E" />
+                                        <Label Name="MessagesStatusLabel" Text="encrypted threads" FontColorOverride="#5B718E" />
                                     </BoxContainer>
                                 </PanelContainer>
                             </ContainerButton>
@@ -86,7 +86,7 @@
                                     </PanelContainer.PanelOverride>
                                     <BoxContainer Orientation="Vertical" Margin="10 8">
                                         <Label Text="CALLS" FontColorOverride="#FFE28D" />
-                                        <Label Text="voice-text relay" FontColorOverride="#8B805F" />
+                                        <Label Name="CallsStatusLabel" Text="voice-text relay" FontColorOverride="#8B805F" />
                                     </BoxContainer>
                                 </PanelContainer>
                             </ContainerButton>

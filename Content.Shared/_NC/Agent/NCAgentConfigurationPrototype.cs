@@ -49,6 +49,15 @@ public sealed partial class NCAgentConfigurationPrototype : IPrototype
     public int ConversationPeerLimit = 50;
 
     [DataField]
+    public TimeSpan IncomingCallTimeout = TimeSpan.FromSeconds(30);
+
+    [DataField]
+    public TimeSpan CallHistoryRetention = TimeSpan.FromDays(30);
+
+    [DataField]
+    public int CallHistoryLimit = 50;
+
+    [DataField]
     public int FeedPostLimit = 50;
 
     [DataField]

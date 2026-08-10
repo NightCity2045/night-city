@@ -69,6 +69,25 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         },
     };
 
+    private static readonly Animation NotificationPulseAnimation = new()
+    {
+        Length = TimeSpan.FromSeconds(0.5),
+        AnimationTracks =
+        {
+            new AnimationTrackControlProperty
+            {
+                Property = nameof(Control.Modulate),
+                InterpolationMode = AnimationInterpolationMode.Linear,
+                KeyFrames =
+                {
+                    new AnimationTrackProperty.KeyFrame(Color.White, 0f),
+                    new AnimationTrackProperty.KeyFrame(Color.FromHex("#76FF9580"), 0.2f),
+                    new AnimationTrackProperty.KeyFrame(Color.White, 0.5f),
+                },
+            },
+        },
+    };
+
     [Dependency] private IGameTiming _gameTiming = default!;
     [Dependency] private IEntitySystemManager _entitySystems = default!;
     [Dependency] private IUserInterfaceManager _uiManager = default!;
@@ -162,10 +181,32 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     /// </summary>
     public void UpdateAgentData(NCAgentUpdateMessage update)
     {
+        var previousNotificationCount = (_agentData?.UnreadMessageCount ?? 0) +
+                                        (_agentData?.MissedCallCount ?? 0);
         var incomingCallStarted = update.Call.State == NCAgentCallState.Incoming &&
                                   _agentData?.Call.State != NCAgentCallState.Incoming;
         _agentData = update;
         OwnerLabel.Text = $"USER // @{update.OwnAlias.ToUpperInvariant()}";
+
+        MessagesStatusLabel.Text = update.UnreadMessageCount > 0
+            ? $"{update.UnreadMessageCount} NEW"
+            : "encrypted threads";
+        MessagesStatusLabel.FontColorOverride = update.UnreadMessageCount > 0
+            ? Color.FromHex("#8FB8FF")
+            : Color.FromHex("#5B718E");
+        CallsStatusLabel.Text = update.MissedCallCount > 0
+            ? $"{update.MissedCallCount} MISSED"
+            : "voice-text relay";
+        CallsStatusLabel.FontColorOverride = update.MissedCallCount > 0
+            ? Color.FromHex("#FFE28D")
+            : Color.FromHex("#8B805F");
+
+        var notificationCount = update.UnreadMessageCount + update.MissedCallCount;
+        SignalDot.FontColorOverride = notificationCount > 0
+            ? Color.FromHex("#FFD66B")
+            : Color.FromHex("#76FF95");
+        if (notificationCount > previousNotificationCount)
+            SignalDot.PlayAnimation(NotificationPulseAnimation, "nc-agent-notification-pulse");
 
         // Surface an incoming call immediately while preserving any active vanilla cartridge program.
         if (incomingCallStarted && _currentView != ProgramContentView)
@@ -276,11 +317,24 @@ public sealed partial class NCAgentMenu : NCAgentWindow
 
     private void BuildMessages(NCAgentUpdateMessage data)
     {
-        var conversationPeers = data.Contacts
-            .Concat(data.Conversations)
-            .GroupBy(value => value.CharacterId)
-            .Select(group => group.First())
-            .OrderBy(value => value.Alias)
+        var conversationPeers = data.Conversations.ToList();
+        foreach (var contact in data.Contacts)
+        {
+            if (conversationPeers.Any(value => value.CharacterId == contact.CharacterId))
+                continue;
+
+            conversationPeers.Add(new NCAgentConversationSummary(
+                contact.CharacterId,
+                contact.Alias,
+                contact.Address,
+                DateTime.MinValue,
+                0));
+        }
+
+        conversationPeers = conversationPeers
+            .OrderByDescending(value => value.UnreadCount > 0)
+            .ThenByDescending(value => value.LastMessageAt)
+            .ThenBy(value => value.Alias)
             .ToList();
 
         var contactRow = new WrapContainer
@@ -292,7 +346,11 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         };
         foreach (var contact in conversationPeers)
         {
-            var button = CreateActionButton(contact.Alias, data.SelectedCharacterId == contact.CharacterId ? "#77FFF2" : "#406E6B");
+            var title = contact.UnreadCount > 0 ? $"{contact.Alias} [{contact.UnreadCount}]" : contact.Alias;
+            var color = data.SelectedCharacterId == contact.CharacterId || contact.UnreadCount > 0
+                ? "#77FFF2"
+                : "#406E6B";
+            var button = CreateActionButton(title, color);
             button.OnPressed += _ => OnSelectConversation?.Invoke(contact.CharacterId);
             contactRow.AddChild(button);
         }
@@ -361,6 +419,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
                 BuiltInContent.AddChild(CreateStatusLabel(
                     $"CALLING // {call.RemoteAlias} // {call.RemoteAddress}", "#FFE28D"));
                 AddEndCallButton();
+                AddCallHistory(data);
                 return;
             case NCAgentCallState.Connected:
                 BuiltInContent.AddChild(CreateStatusLabel(
@@ -368,6 +427,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
                 BuiltInContent.AddChild(CreateMutedLabel(
                     "Speak in ordinary IC chat. The remote party hears the message while both Agents remain in hand, ID slot, or belt slot."));
                 AddEndCallButton();
+                AddCallHistory(data);
                 return;
         }
 
@@ -378,6 +438,58 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             button.OnPressed += _ => OnStartCall?.Invoke(contact.CharacterId);
             BuiltInContent.AddChild(CreatePersonRow(contact.Alias, contact.Address, button));
         }
+
+        AddCallHistory(data);
+    }
+
+    private void AddCallHistory(NCAgentUpdateMessage data)
+    {
+        BuiltInContent.AddChild(CreateSectionTitle("RECENT CALLS"));
+        if (data.CallHistory.Count == 0)
+        {
+            BuiltInContent.AddChild(CreateMutedLabel("No call history."));
+            return;
+        }
+
+        // NC: Keep a long retained call history inside the Agent screen instead of growing past its frame.
+        var history = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Vertical,
+            HorizontalExpand = true,
+        };
+        foreach (var call in data.CallHistory)
+        {
+            var direction = call.IsOutgoing ? "OUT" : "IN";
+            var status = call.Outcome switch
+            {
+                NCAgentCallOutcome.Completed => "COMPLETED",
+                NCAgentCallOutcome.Rejected => "REJECTED",
+                NCAgentCallOutcome.Missed => "MISSED",
+                NCAgentCallOutcome.Cancelled => "CANCELLED",
+                NCAgentCallOutcome.Busy => "BUSY",
+                _ => "SIGNAL LOST",
+            };
+            var color = call.Outcome == NCAgentCallOutcome.Missed ? "#FF7897" : "#8B9E9B";
+            var content = new BoxContainer
+            {
+                Orientation = BoxContainer.LayoutOrientation.Vertical,
+                HorizontalExpand = true,
+                Margin = new Thickness(8, 6),
+            };
+            content.AddChild(CreateStatusLabel(
+                $"{direction} // {call.RemoteAlias} // {status}",
+                call.IsUnread ? "#FFE28D" : color));
+            content.AddChild(CreateMutedLabel(call.EndedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")));
+            history.AddChild(WrapCard(content, "#4E5559", "#11191D"));
+        }
+
+        var scroll = new ScrollContainer
+        {
+            HorizontalExpand = true,
+            VerticalExpand = true,
+        };
+        scroll.AddChild(history);
+        BuiltInContent.AddChild(scroll);
     }
 
     private void AddEndCallButton()

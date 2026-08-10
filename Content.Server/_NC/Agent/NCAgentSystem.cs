@@ -27,6 +27,13 @@ public sealed partial class NCAgentSystem : EntitySystem
         InitializeCalls();
     }
 
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+        // Only the small active-call set is inspected; this never scans world entities.
+        UpdateCallTimeouts();
+    }
+
     private void OnMapInit(Entity<NCAgentComponent> ent, ref MapInitEvent args)
     {
         RenameAgent(ent);

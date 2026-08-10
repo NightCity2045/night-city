@@ -7,6 +7,7 @@ using System.Linq;
 using Content.IntegrationTests.Fixtures;
 using Content.Server.Database;
 using Content.Shared._NC.Agent;
+using Content.Shared._NC.Agent.UI;
 using Content.Shared._NC.Identity;
 using Content.Shared.Preferences;
 using Microsoft.Data.Sqlite;
@@ -40,6 +41,9 @@ public sealed class NCAgentPersistenceTest : GameTest
             Assert.That(configuration.MinimumAliasLength, Is.EqualTo(3));
             Assert.That(configuration.MaximumAliasLength, Is.EqualTo(32));
             Assert.That(configuration.ConversationPeerLimit, Is.EqualTo(50));
+            Assert.That(configuration.IncomingCallTimeout, Is.EqualTo(TimeSpan.FromSeconds(30)));
+            Assert.That(configuration.CallHistoryRetention, Is.EqualTo(TimeSpan.FromDays(30)));
+            Assert.That(configuration.CallHistoryLimit, Is.EqualTo(50));
         });
     }
 
@@ -74,8 +78,8 @@ public sealed class NCAgentPersistenceTest : GameTest
         Assert.That(await db.UpdateNCAgentAliasAsync(first, "chrome ghost", "CHROME GHOST"),
             Is.EqualTo(NCAgentAliasUpdateResult.Duplicate));
 
-        var snapshot = await db.GetNCAgentSnapshotAsync(first, second, "chrome", now, 30, 50, 100, 50, 200);
-        var recipientSnapshot = await db.GetNCAgentSnapshotAsync(second, first, string.Empty, now, 30, 50, 100, 50, 200);
+        var snapshot = await db.GetNCAgentSnapshotAsync(first, second, "chrome", now, 30, 50, 100, 50, 50, 200);
+        var recipientSnapshot = await db.GetNCAgentSnapshotAsync(second, first, string.Empty, now, 30, 50, 100, 50, 50, 200);
         Assert.That(snapshot, Is.Not.Null);
         Assert.That(recipientSnapshot, Is.Not.Null);
         Assert.Multiple(() =>
@@ -89,6 +93,7 @@ public sealed class NCAgentPersistenceTest : GameTest
             Assert.That(snapshot.Contacts.Single().CharacterId, Is.EqualTo(second));
             Assert.That(snapshot.Contacts.Single().Alias, Is.EqualTo("Chrome Ghost"));
             Assert.That(snapshot.Conversations.Single().Alias, Is.EqualTo("Chrome Ghost"));
+            Assert.That(snapshot.Conversations.Single().UnreadCount, Is.EqualTo(0));
             Assert.That(snapshot.Messages.Single().Body, Is.EqualTo("Meet at the Afterlife."));
             Assert.That(snapshot.Messages.Single().SenderAlias, Is.EqualTo("Neon Raven"));
             Assert.That(snapshot.Messages.Single().RecipientAlias, Is.EqualTo("Chrome Ghost"));
@@ -99,10 +104,74 @@ public sealed class NCAgentPersistenceTest : GameTest
             Assert.That(snapshot.Posts.Single().Comments.Single().AuthorAlias, Is.EqualTo("Neon Raven"));
             Assert.That(recipientSnapshot!.Contacts, Is.Empty);
             Assert.That(recipientSnapshot.Conversations.Single().Alias, Is.EqualTo("Neon Raven"));
+            Assert.That(recipientSnapshot.Conversations.Single().UnreadCount, Is.EqualTo(1));
+            Assert.That(recipientSnapshot.UnreadMessageCount, Is.EqualTo(1));
             Assert.That(recipientSnapshot.Messages.Single().Body, Is.EqualTo("Meet at the Afterlife."));
         });
 
+        // Reading is scoped to the recipient and selected peer; it must not acknowledge another character's mail.
+        Assert.That(await db.MarkNCAgentConversationReadAsync(second, first, now.AddMinutes(3)), Is.EqualTo(1));
+        Assert.That(await db.MarkNCAgentConversationReadAsync(first, second, now.AddMinutes(3)), Is.EqualTo(0));
+
+        var completedCall = await db.CreateNCAgentCallLogAsync(
+            first,
+            second,
+            now.AddMinutes(4),
+            now.AddMinutes(5),
+            now.AddMinutes(6),
+            NCAgentCallOutcome.Completed);
+        var missedCall = await db.CreateNCAgentCallLogAsync(
+            first,
+            second,
+            now.AddMinutes(7),
+            null,
+            now.AddMinutes(8),
+            NCAgentCallOutcome.Missed);
+        Assert.That(completedCall, Is.Not.Null);
+        Assert.That(missedCall, Is.Not.Null);
+
+        recipientSnapshot = await db.GetNCAgentSnapshotAsync(
+            second,
+            first,
+            string.Empty,
+            now.AddMinutes(9),
+            30,
+            50,
+            100,
+            50,
+            50,
+            200);
+        Assert.Multiple(() =>
+        {
+            Assert.That(recipientSnapshot!.Conversations.Single().UnreadCount, Is.EqualTo(0));
+            Assert.That(recipientSnapshot.UnreadMessageCount, Is.EqualTo(0));
+            Assert.That(recipientSnapshot.CallHistory, Has.Count.EqualTo(2));
+            Assert.That(recipientSnapshot.CallHistory.Count(value => value.IsUnread), Is.EqualTo(1));
+            Assert.That(recipientSnapshot.MissedCallCount, Is.EqualTo(1));
+            Assert.That(recipientSnapshot.CallHistory.First().Outcome, Is.EqualTo(NCAgentCallOutcome.Missed));
+            Assert.That(recipientSnapshot.CallHistory.First().RemoteAlias, Is.EqualTo("Neon Raven"));
+        });
+
+        Assert.That(await db.MarkNCAgentCallHistoryReadAsync(second, now.AddMinutes(10)), Is.EqualTo(1));
+        recipientSnapshot = await db.GetNCAgentSnapshotAsync(
+            second,
+            first,
+            string.Empty,
+            now.AddMinutes(10),
+            30,
+            50,
+            100,
+            50,
+            50,
+            200);
+        Assert.Multiple(() =>
+        {
+            Assert.That(recipientSnapshot!.CallHistory, Has.None.Matches<NCAgentCallHistoryData>(value => value.IsUnread));
+            Assert.That(recipientSnapshot.MissedCallCount, Is.EqualTo(0));
+        });
+
         Assert.That(await db.PurgeExpiredNCAgentMessagesAsync(now.AddDays(31)), Is.EqualTo(1));
+        Assert.That(await db.PurgeExpiredNCAgentCallLogsAsync(now.AddDays(31)), Is.EqualTo(2));
         var expiredSnapshot = await db.GetNCAgentSnapshotAsync(
             first,
             second,
@@ -112,9 +181,13 @@ public sealed class NCAgentPersistenceTest : GameTest
             50,
             100,
             50,
+            50,
             200);
         Assert.That(expiredSnapshot!.Messages, Is.Empty);
         Assert.That(expiredSnapshot.Conversations, Is.Empty);
+        Assert.That(expiredSnapshot.CallHistory, Is.Empty);
+        Assert.That(expiredSnapshot.UnreadMessageCount, Is.EqualTo(0));
+        Assert.That(expiredSnapshot.MissedCallCount, Is.EqualTo(0));
     }
 
     [Test]
@@ -122,7 +195,17 @@ public sealed class NCAgentPersistenceTest : GameTest
     {
         var db = GetDb(Pair.Server);
         var (userId, characterId) = await CreateCharacterAsync(db, "Disposable Edge");
+        var (_, peerId) = await CreateCharacterAsync(db, "Patient Zero");
         Assert.That(await db.GetOrCreateNCAgentProfileAsync(characterId, "NC"), Is.Not.Null);
+        Assert.That(await db.GetOrCreateNCAgentProfileAsync(peerId, "NC"), Is.Not.Null);
+        var now = DateTime.UtcNow;
+        Assert.That(await db.CreateNCAgentCallLogAsync(
+            peerId,
+            characterId,
+            now,
+            null,
+            now.AddSeconds(30),
+            NCAgentCallOutcome.Missed), Is.Not.Null);
 
         // Agent records are character-owned, so the existing profile cascade is the deletion boundary.
         await db.SaveCharacterSlotAsync(userId, null, 0);
@@ -136,8 +219,23 @@ public sealed class NCAgentPersistenceTest : GameTest
             50,
             100,
             50,
+            50,
             200);
         Assert.That(snapshot, Is.Null);
+
+        // Both call-log foreign keys cascade, so the surviving peer cannot retain a dangling history row.
+        var peerSnapshot = await db.GetNCAgentSnapshotAsync(
+            peerId,
+            null,
+            string.Empty,
+            now.AddMinutes(1),
+            30,
+            50,
+            100,
+            50,
+            50,
+            200);
+        Assert.That(peerSnapshot!.CallHistory, Is.Empty);
     }
 
     private static async Task<(NetUserId UserId, NCCharacterId CharacterId)> CreateCharacterAsync(

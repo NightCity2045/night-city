@@ -12,14 +12,17 @@ using Content.Shared.Chat;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Inventory;
 using Robust.Shared.Utility;
+using Robust.Shared.Timing;
 
 namespace Content.Server._NC.Agent;
 
 public sealed partial class NCAgentSystem
 {
     [Dependency] private SharedHandsSystem _hands = default!;
+    [Dependency] private IGameTiming _gameTiming = default!;
 
     private readonly Dictionary<NCCharacterId, AgentCall> _calls = [];
+    private TimeSpan _nextCallTimeoutCheck;
 
     private void InitializeCalls()
     {
@@ -39,11 +42,21 @@ public sealed partial class NCAgentSystem
             return;
 
         var target = new NCCharacterId(args.TargetCharacterId);
+        if (!view.Targets.TryGetValue(target, out var targetDetails))
+            return;
+
+        var startedAt = DateTime.UtcNow;
         if (_calls.ContainsKey(target) ||
-            !TryResolveOnlineAgent(target, out var targetAgent, out var targetHolder) ||
-            !view.Targets.TryGetValue(target, out var targetDetails))
+            !TryResolveOnlineAgent(target, out var targetAgent, out var targetHolder))
         {
             view.Notice = "TARGET OFFLINE OR BUSY";
+            _ = PersistCallLogAsync(
+                view.Owner,
+                target,
+                startedAt,
+                null,
+                startedAt,
+                NCAgentCallOutcome.Busy);
             _ = SendViewAsync(ent.Owner, user);
             return;
         }
@@ -56,7 +69,9 @@ public sealed partial class NCAgentSystem
             view.OwnAlias,
             view.OwnAddress,
             targetDetails.Alias,
-            targetDetails.Address)
+            targetDetails.Address,
+            startedAt,
+            _gameTiming.CurTime + Configuration.IncomingCallTimeout)
         {
             CallerHolder = user,
             TargetHolder = targetHolder,
@@ -81,17 +96,18 @@ public sealed partial class NCAgentSystem
 
         if (!args.Accept)
         {
-            EndCall(call, "CALL REJECTED");
+            EndCall(call, "CALL REJECTED", NCAgentCallOutcome.Rejected);
             return;
         }
 
         if (!TryGetAgentHolder(call.CallerAgent, out var callerHolder))
         {
-            EndCall(call, "CALLER LOST SIGNAL");
+            EndCall(call, "CALLER LOST SIGNAL", NCAgentCallOutcome.SignalLost);
             return;
         }
 
         call.Connected = true;
+        call.AnsweredAt = DateTime.UtcNow;
         call.CallerHolder = callerHolder;
         call.TargetHolder = user;
         AttachCallRelay(callerHolder, call.Caller, call.CallerAgent);
@@ -109,13 +125,16 @@ public sealed partial class NCAgentSystem
             !IsAgentUsableBy(user, ent.Owner))
             return;
 
-        EndCall(call, "CALL ENDED");
+        EndCall(
+            call,
+            "CALL ENDED",
+            call.Connected ? NCAgentCallOutcome.Completed : NCAgentCallOutcome.Cancelled);
     }
 
     private void OnAgentParentChanged(Entity<NCAgentComponent> ent, ref EntParentChangedMessage args)
     {
         if (!TryComp<NCAgentIdentityComponent>(ent, out var identity) ||
-            !_calls.TryGetValue(identity.CharacterId, out var call) || !call.Connected)
+            !_calls.TryGetValue(identity.CharacterId, out var call))
             return;
 
         if (args.OldParent is { } oldParent &&
@@ -125,7 +144,7 @@ public sealed partial class NCAgentSystem
         var newParent = args.Transform.ParentUid;
         if (!newParent.Valid || !IsAgentUsableBy(newParent, ent.Owner))
         {
-            SetCallHolder(call, identity.CharacterId, null);
+            EndCall(call, "SIGNAL LOST", NCAgentCallOutcome.SignalLost);
             return;
         }
 
@@ -243,10 +262,14 @@ public sealed partial class NCAgentSystem
     {
         var call = _calls.Values.FirstOrDefault(value => value.CallerAgent == agent || value.TargetAgent == agent);
         if (call != null)
-            EndCall(call, "SIGNAL LOST");
+            EndCall(call, "SIGNAL LOST", NCAgentCallOutcome.SignalLost);
     }
 
-    private void EndCall(AgentCall call, string reason)
+    private void EndCall(
+        AgentCall call,
+        string reason,
+        NCAgentCallOutcome outcome,
+        string? targetReason = null)
     {
         _calls.Remove(call.Caller);
         _calls.Remove(call.Target);
@@ -256,9 +279,15 @@ public sealed partial class NCAgentSystem
         if (call.CallerHolder is { } callerHolder && !Deleted(callerHolder))
             NotifyCallHolder(callerHolder, reason);
         if (call.TargetHolder is { } targetHolder && !Deleted(targetHolder))
-            NotifyCallHolder(targetHolder, reason);
+            NotifyCallHolder(targetHolder, targetReason ?? reason);
 
-        _ = RefreshCallViewsAsync(call);
+        _ = PersistCallLogAsync(
+            call.Caller,
+            call.Target,
+            call.StartedAt,
+            call.AnsweredAt,
+            DateTime.UtcNow,
+            outcome);
     }
 
     private void RemoveCallRelay(EntityUid? holder, EntityUid agent)
@@ -276,15 +305,66 @@ public sealed partial class NCAgentSystem
         await RefreshOwnerViewsAsync(call.Target);
     }
 
+    private void UpdateCallTimeouts()
+    {
+        var now = _gameTiming.CurTime;
+        if (_calls.Count == 0 || now < _nextCallTimeoutCheck)
+            return;
+
+        // NC: Calls are indexed twice, so inspect only caller keys and throttle the scan to once per second.
+        _nextCallTimeoutCheck = now + TimeSpan.FromSeconds(1);
+        while (true)
+        {
+            AgentCall? expired = null;
+            foreach (var (owner, call) in _calls)
+            {
+                if (owner == call.Caller && !call.Connected && now >= call.Deadline)
+                {
+                    expired = call;
+                    break;
+                }
+            }
+
+            if (expired == null)
+                return;
+
+            EndCall(expired, "NO ANSWER", NCAgentCallOutcome.Missed, "MISSED CALL");
+        }
+    }
+
+    private async Task PersistCallLogAsync(
+        NCCharacterId caller,
+        NCCharacterId target,
+        DateTime startedAt,
+        DateTime? answeredAt,
+        DateTime endedAt,
+        NCAgentCallOutcome outcome)
+    {
+        try
+        {
+            await _database.CreateNCAgentCallLogAsync(
+                caller,
+                target,
+                startedAt,
+                answeredAt,
+                endedAt,
+                outcome);
+        }
+        catch (Exception exception)
+        {
+            Log.Error($"Failed to persist Agent call history: {exception}");
+        }
+        finally
+        {
+            await RefreshOwnerViewsAsync(caller);
+            await RefreshOwnerViewsAsync(target);
+        }
+    }
+
     private void ClearCalls()
     {
         foreach (var call in _calls.Values.Distinct().ToArray())
-        {
-            RemoveCallRelay(call.CallerHolder, call.CallerAgent);
-            RemoveCallRelay(call.TargetHolder, call.TargetAgent);
-        }
-
-        _calls.Clear();
+            EndCall(call, "SIGNAL LOST", NCAgentCallOutcome.SignalLost);
     }
 
     private sealed class AgentCall(
@@ -295,7 +375,9 @@ public sealed partial class NCAgentSystem
         string callerName,
         string callerAddress,
         string targetName,
-        string targetAddress)
+        string targetAddress,
+        DateTime startedAt,
+        TimeSpan deadline)
     {
         public readonly NCCharacterId Caller = caller;
         public readonly NCCharacterId Target = target;
@@ -305,8 +387,11 @@ public sealed partial class NCAgentSystem
         public readonly string CallerAddress = callerAddress;
         public string TargetName = targetName;
         public readonly string TargetAddress = targetAddress;
+        public readonly DateTime StartedAt = startedAt;
+        public readonly TimeSpan Deadline = deadline;
         public EntityUid? CallerHolder;
         public EntityUid? TargetHolder;
         public bool Connected;
+        public DateTime? AnsweredAt;
     }
 }

@@ -926,6 +926,53 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("job", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCAgentCallLog", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_agent_call_log_id");
+
+                    b.Property<DateTime?>("AnsweredAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("answered_at");
+
+                    b.Property<int>("CallerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("caller_profile_id");
+
+                    b.Property<DateTime>("EndedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("ended_at");
+
+                    b.Property<byte>("Outcome")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("outcome");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("started_at");
+
+                    b.Property<int>("TargetProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("target_profile_id");
+
+                    b.Property<DateTime?>("TargetReadAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("target_read_at");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_agent_call_log");
+
+                    b.HasIndex("CallerProfileId");
+
+                    b.HasIndex("EndedAt");
+
+                    b.HasIndex("TargetProfileId", "TargetReadAt");
+
+                    b.ToTable("nc_agent_call_log", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCAgentContact", b =>
                 {
                     b.Property<int>("OwnerProfileId")
@@ -3165,6 +3212,27 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasConstraintName("FK_job_profile_profile_id");
 
                     b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentCallLog", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Caller")
+                        .WithMany()
+                        .HasForeignKey("CallerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_call_log_caller_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Target")
+                        .WithMany()
+                        .HasForeignKey("TargetProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_call_log_target_profile_id");
+
+                    b.Navigation("Caller");
+
+                    b.Navigation("Target");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCAgentContact", b =>

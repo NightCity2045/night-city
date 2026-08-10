@@ -28,6 +28,17 @@ public enum NCAgentCallState : byte
 }
 
 [Serializable, NetSerializable]
+public enum NCAgentCallOutcome : byte
+{
+    Completed,
+    Rejected,
+    Missed,
+    Cancelled,
+    Busy,
+    SignalLost,
+}
+
+[Serializable, NetSerializable]
 public enum NCAgentMapFeatureKind : byte
 {
     District,
@@ -67,6 +78,14 @@ public sealed record NCAgentDirectoryEntry(int CharacterId, string Alias, string
 public sealed record NCAgentContactSummary(int CharacterId, string Alias, string Address);
 
 [Serializable, NetSerializable]
+public sealed record NCAgentConversationSummary(
+    int CharacterId,
+    string Alias,
+    string Address,
+    DateTime LastMessageAt,
+    int UnreadCount);
+
+[Serializable, NetSerializable]
 public sealed record NCAgentMessageSummary(
     long MessageId,
     int SenderCharacterId,
@@ -103,6 +122,19 @@ public sealed record NCAgentCallSummary(
     string RemoteAlias,
     string RemoteAddress);
 
+[Serializable, NetSerializable]
+public sealed record NCAgentCallHistorySummary(
+    long CallId,
+    bool IsOutgoing,
+    int RemoteCharacterId,
+    string RemoteAlias,
+    string RemoteAddress,
+    DateTime StartedAt,
+    DateTime? AnsweredAt,
+    DateTime EndedAt,
+    NCAgentCallOutcome Outcome,
+    bool IsUnread);
+
 /// <summary>
 /// Per-user Agent data sent separately from the vanilla PDA state and cartridge state.
 /// </summary>
@@ -114,11 +146,14 @@ public sealed class NCAgentUpdateMessage(
     string ownAddress,
     List<NCAgentDirectoryEntry> directory,
     List<NCAgentContactSummary> contacts,
-    List<NCAgentContactSummary> conversations,
+    List<NCAgentConversationSummary> conversations,
     int? selectedCharacterId,
     List<NCAgentMessageSummary> messages,
     List<NCAgentCitiNetPostSummary> posts,
     NCAgentCallSummary call,
+    List<NCAgentCallHistorySummary> callHistory,
+    int unreadMessageCount,
+    int missedCallCount,
     string notice) : BoundUserInterfaceMessage
 {
     public readonly NCAgentApp ActiveApp = activeApp;
@@ -127,11 +162,14 @@ public sealed class NCAgentUpdateMessage(
     public readonly string OwnAddress = ownAddress;
     public readonly List<NCAgentDirectoryEntry> Directory = directory;
     public readonly List<NCAgentContactSummary> Contacts = contacts;
-    public readonly List<NCAgentContactSummary> Conversations = conversations;
+    public readonly List<NCAgentConversationSummary> Conversations = conversations;
     public readonly int? SelectedCharacterId = selectedCharacterId;
     public readonly List<NCAgentMessageSummary> Messages = messages;
     public readonly List<NCAgentCitiNetPostSummary> Posts = posts;
     public readonly NCAgentCallSummary Call = call;
+    public readonly List<NCAgentCallHistorySummary> CallHistory = callHistory;
+    public readonly int UnreadMessageCount = unreadMessageCount;
+    public readonly int MissedCallCount = missedCallCount;
     public readonly string Notice = notice;
 }
 

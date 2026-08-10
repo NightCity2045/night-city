@@ -5,6 +5,7 @@
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Content.Shared._NC.Agent.UI;
 using Content.Shared._NC.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,13 @@ public sealed record NCAgentDirectoryData(
     bool IsContact);
 
 public sealed record NCAgentContactData(NCCharacterId CharacterId, string Alias, string Address);
+
+public sealed record NCAgentConversationData(
+    NCCharacterId CharacterId,
+    string Alias,
+    string Address,
+    DateTime LastMessageAt,
+    int UnreadCount);
 
 public sealed record NCAgentMessageData(
     long MessageId,
@@ -46,13 +54,28 @@ public sealed record NCCitiNetPostData(
     bool ReactedByViewer,
     IReadOnlyList<NCCitiNetCommentData> Comments);
 
+public sealed record NCAgentCallHistoryData(
+    long CallId,
+    bool IsOutgoing,
+    NCCharacterId RemoteCharacterId,
+    string RemoteAlias,
+    string RemoteAddress,
+    DateTime StartedAt,
+    DateTime? AnsweredAt,
+    DateTime EndedAt,
+    NCAgentCallOutcome Outcome,
+    bool IsUnread);
+
 public sealed record NCAgentSnapshotData(
     NCAgentProfileData Profile,
     IReadOnlyList<NCAgentDirectoryData> Directory,
     IReadOnlyList<NCAgentContactData> Contacts,
-    IReadOnlyList<NCAgentContactData> Conversations,
+    IReadOnlyList<NCAgentConversationData> Conversations,
     IReadOnlyList<NCAgentMessageData> Messages,
-    IReadOnlyList<NCCitiNetPostData> Posts);
+    IReadOnlyList<NCCitiNetPostData> Posts,
+    IReadOnlyList<NCAgentCallHistoryData> CallHistory,
+    int UnreadMessageCount,
+    int MissedCallCount);
 
 public enum NCAgentAliasUpdateResult : byte
 {
@@ -76,8 +99,13 @@ public partial interface IServerDbManager
         int directoryLimit,
         int conversationPeerLimit,
         int messageLimit,
+        int callHistoryLimit,
         int postLimit,
         int commentLimit);
+    Task<int> MarkNCAgentConversationReadAsync(
+        NCCharacterId owner,
+        NCCharacterId peer,
+        DateTime readAt);
     Task<bool> AddNCAgentContactAsync(NCCharacterId owner, NCCharacterId contact);
     Task<bool> RemoveNCAgentContactAsync(NCCharacterId owner, NCCharacterId contact);
     Task<NCAgentMessageData?> CreateNCAgentMessageAsync(
@@ -94,6 +122,15 @@ public partial interface IServerDbManager
         DateTime createdAt);
     Task<bool?> ToggleNCCitiNetReactionAsync(NCCharacterId characterId, long postId, DateTime createdAt);
     Task<int> PurgeExpiredNCAgentMessagesAsync(DateTime now);
+    Task<long?> CreateNCAgentCallLogAsync(
+        NCCharacterId caller,
+        NCCharacterId target,
+        DateTime startedAt,
+        DateTime? answeredAt,
+        DateTime endedAt,
+        NCAgentCallOutcome outcome);
+    Task<int> MarkNCAgentCallHistoryReadAsync(NCCharacterId target, DateTime readAt);
+    Task<int> PurgeExpiredNCAgentCallLogsAsync(DateTime cutoff);
 }
 
 public sealed partial class ServerDbManager
@@ -121,6 +158,7 @@ public sealed partial class ServerDbManager
         int directoryLimit,
         int conversationPeerLimit,
         int messageLimit,
+        int callHistoryLimit,
         int postLimit,
         int commentLimit)
     {
@@ -133,8 +171,18 @@ public sealed partial class ServerDbManager
             directoryLimit,
             conversationPeerLimit,
             messageLimit,
+            callHistoryLimit,
             postLimit,
             commentLimit));
+    }
+
+    public Task<int> MarkNCAgentConversationReadAsync(
+        NCCharacterId owner,
+        NCCharacterId peer,
+        DateTime readAt)
+    {
+        DbWriteOpsMetric.Inc();
+        return RunDbCommand(() => _db.MarkNCAgentConversationReadAsync(owner, peer, readAt));
     }
 
     public Task<bool> AddNCAgentContactAsync(NCCharacterId owner, NCCharacterId contact)
@@ -186,6 +234,36 @@ public sealed partial class ServerDbManager
     {
         DbWriteOpsMetric.Inc();
         return RunDbCommand(() => _db.PurgeExpiredNCAgentMessagesAsync(now));
+    }
+
+    public Task<long?> CreateNCAgentCallLogAsync(
+        NCCharacterId caller,
+        NCCharacterId target,
+        DateTime startedAt,
+        DateTime? answeredAt,
+        DateTime endedAt,
+        NCAgentCallOutcome outcome)
+    {
+        DbWriteOpsMetric.Inc();
+        return RunDbCommand(() => _db.CreateNCAgentCallLogAsync(
+            caller,
+            target,
+            startedAt,
+            answeredAt,
+            endedAt,
+            outcome));
+    }
+
+    public Task<int> MarkNCAgentCallHistoryReadAsync(NCCharacterId target, DateTime readAt)
+    {
+        DbWriteOpsMetric.Inc();
+        return RunDbCommand(() => _db.MarkNCAgentCallHistoryReadAsync(target, readAt));
+    }
+
+    public Task<int> PurgeExpiredNCAgentCallLogsAsync(DateTime cutoff)
+    {
+        DbWriteOpsMetric.Inc();
+        return RunDbCommand(() => _db.PurgeExpiredNCAgentCallLogsAsync(cutoff));
     }
 }
 
@@ -281,6 +359,7 @@ public abstract partial class ServerDbBase
         int directoryLimit,
         int conversationPeerLimit,
         int messageLimit,
+        int callHistoryLimit,
         int postLimit,
         int commentLimit)
     {
@@ -320,6 +399,8 @@ public abstract partial class ServerDbBase
             {
                 ProfileId = group.Key,
                 LastMessageAt = group.Max(value => value.SentAt),
+                UnreadCount = group.Count(value =>
+                    value.RecipientProfileId == characterId.Value && value.ReadAt == null),
             })
             .OrderByDescending(value => value.LastMessageAt)
             .Take(Math.Clamp(conversationPeerLimit, 1, 200))
@@ -335,8 +416,20 @@ public abstract partial class ServerDbBase
             .ToDictionaryAsync(value => value.CharacterId.Value);
         var conversations = conversationActivity
             .Where(value => conversationProfiles.ContainsKey(value.ProfileId))
-            .Select(value => conversationProfiles[value.ProfileId])
+            .Select(value => new NCAgentConversationData(
+                conversationProfiles[value.ProfileId].CharacterId,
+                conversationProfiles[value.ProfileId].Alias,
+                conversationProfiles[value.ProfileId].Address,
+                value.LastMessageAt,
+                value.UnreadCount))
             .ToList();
+
+        // Notification totals are not limited by the number of conversation buttons returned to the client.
+        var unreadMessageCount = await db.DbContext.NCAgentMessages
+            .AsNoTracking()
+            .CountAsync(value => value.RecipientProfileId == characterId.Value &&
+                                 value.ExpiresAt > now &&
+                                 value.ReadAt == null);
 
         var normalizedQuery = directoryQuery.Trim().ToLowerInvariant();
         IReadOnlyList<NCAgentDirectoryData> directory = Array.Empty<NCAgentDirectoryData>();
@@ -382,6 +475,34 @@ public abstract partial class ServerDbBase
             newestFirst.Reverse();
             messages = newestFirst;
         }
+
+        var callHistory = await db.DbContext.NCAgentCallLogs
+            .AsNoTracking()
+            .Where(value => value.CallerProfileId == characterId.Value ||
+                            value.TargetProfileId == characterId.Value)
+            .OrderByDescending(value => value.EndedAt)
+            .Take(Math.Clamp(callHistoryLimit, 1, 200))
+            .Select(value => new NCAgentCallHistoryData(
+                value.Id,
+                value.CallerProfileId == characterId.Value,
+                new NCCharacterId(value.CallerProfileId == characterId.Value
+                    ? value.TargetProfileId
+                    : value.CallerProfileId),
+                value.CallerProfileId == characterId.Value
+                    ? value.Target.Alias ?? value.Target.Profile.CharacterName
+                    : value.Caller.Alias ?? value.Caller.Profile.CharacterName,
+                value.CallerProfileId == characterId.Value
+                    ? value.Target.Address
+                    : value.Caller.Address,
+                value.StartedAt,
+                value.AnsweredAt,
+                value.EndedAt,
+                (NCAgentCallOutcome) value.Outcome,
+                value.TargetProfileId == characterId.Value && value.TargetReadAt == null))
+            .ToListAsync();
+        var missedCallCount = await db.DbContext.NCAgentCallLogs
+            .AsNoTracking()
+            .CountAsync(value => value.TargetProfileId == characterId.Value && value.TargetReadAt == null);
 
         var posts = await db.DbContext.NCCitiNetPosts
             .AsNoTracking()
@@ -433,7 +554,27 @@ public abstract partial class ServerDbBase
             contacts,
             conversations,
             messages,
-            postsWithComments);
+            postsWithComments,
+            callHistory,
+            unreadMessageCount,
+            missedCallCount);
+    }
+
+    public async Task<int> MarkNCAgentConversationReadAsync(
+        NCCharacterId owner,
+        NCCharacterId peer,
+        DateTime readAt)
+    {
+        if (!owner.IsValid || !peer.IsValid || owner == peer)
+            return 0;
+
+        await using var db = await GetDb();
+        return await db.DbContext.NCAgentMessages
+            .Where(value => value.RecipientProfileId == owner.Value &&
+                            value.SenderProfileId == peer.Value &&
+                            value.ExpiresAt > readAt &&
+                            value.ReadAt == null)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(value => value.ReadAt, readAt));
     }
 
     public async Task<bool> AddNCAgentContactAsync(NCCharacterId owner, NCCharacterId contact)
@@ -624,6 +765,63 @@ public abstract partial class ServerDbBase
         await using var db = await GetDb();
         return await db.DbContext.NCAgentMessages
             .Where(value => value.ExpiresAt <= now)
+            .ExecuteDeleteAsync();
+    }
+
+    public async Task<long?> CreateNCAgentCallLogAsync(
+        NCCharacterId caller,
+        NCCharacterId target,
+        DateTime startedAt,
+        DateTime? answeredAt,
+        DateTime endedAt,
+        NCAgentCallOutcome outcome)
+    {
+        if (!caller.IsValid || !target.IsValid || caller == target ||
+            endedAt < startedAt || answeredAt < startedAt || answeredAt > endedAt ||
+            !Enum.IsDefined(outcome))
+        {
+            return null;
+        }
+
+        await using var db = await GetDb();
+        if (!await db.DbContext.NCAgentProfiles.AnyAsync(value => value.ProfileId == caller.Value) ||
+            !await db.DbContext.NCAgentProfiles.AnyAsync(value => value.ProfileId == target.Value))
+        {
+            return null;
+        }
+
+        var call = new NCAgentCallLog
+        {
+            CallerProfileId = caller.Value,
+            TargetProfileId = target.Value,
+            StartedAt = startedAt,
+            AnsweredAt = answeredAt,
+            EndedAt = endedAt,
+            Outcome = (byte) outcome,
+            // Only missed calls create an unread notification for the target.
+            TargetReadAt = outcome == NCAgentCallOutcome.Missed ? null : endedAt,
+        };
+        db.DbContext.NCAgentCallLogs.Add(call);
+        await db.DbContext.SaveChangesAsync();
+        return call.Id;
+    }
+
+    public async Task<int> MarkNCAgentCallHistoryReadAsync(NCCharacterId target, DateTime readAt)
+    {
+        if (!target.IsValid)
+            return 0;
+
+        await using var db = await GetDb();
+        return await db.DbContext.NCAgentCallLogs
+            .Where(value => value.TargetProfileId == target.Value && value.TargetReadAt == null)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(value => value.TargetReadAt, readAt));
+    }
+
+    public async Task<int> PurgeExpiredNCAgentCallLogsAsync(DateTime cutoff)
+    {
+        await using var db = await GetDb();
+        return await db.DbContext.NCAgentCallLogs
+            .Where(value => value.EndedAt <= cutoff)
             .ExecuteDeleteAsync();
     }
 

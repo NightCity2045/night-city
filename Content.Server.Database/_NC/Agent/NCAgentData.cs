@@ -62,6 +62,22 @@ public sealed class NCAgentMessage
     public NCAgentProfile Recipient { get; set; } = null!;
 }
 
+[Table("nc_agent_call_log")]
+public sealed class NCAgentCallLog
+{
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+    public int CallerProfileId { get; set; }
+    public int TargetProfileId { get; set; }
+    public DateTime StartedAt { get; set; }
+    public DateTime? AnsweredAt { get; set; }
+    public DateTime EndedAt { get; set; }
+    public byte Outcome { get; set; }
+    public DateTime? TargetReadAt { get; set; }
+    public NCAgentProfile Caller { get; set; } = null!;
+    public NCAgentProfile Target { get; set; } = null!;
+}
+
 [Table("nc_citinet_post")]
 public sealed class NCCitiNetPost
 {
@@ -109,6 +125,7 @@ public abstract partial class ServerDbContext
     public DbSet<NCAgentProfile> NCAgentProfiles => Set<NCAgentProfile>();
     public DbSet<NCAgentContact> NCAgentContacts => Set<NCAgentContact>();
     public DbSet<NCAgentMessage> NCAgentMessages => Set<NCAgentMessage>();
+    public DbSet<NCAgentCallLog> NCAgentCallLogs => Set<NCAgentCallLog>();
     public DbSet<NCCitiNetPost> NCCitiNetPosts => Set<NCCitiNetPost>();
     public DbSet<NCCitiNetComment> NCCitiNetComments => Set<NCCitiNetComment>();
     public DbSet<NCCitiNetReaction> NCCitiNetReactions => Set<NCCitiNetReaction>();
@@ -159,6 +176,23 @@ public abstract partial class ServerDbContext
             .HasIndex(value => new { value.SenderProfileId, value.RecipientProfileId, value.SentAt });
         modelBuilder.Entity<NCAgentMessage>()
             .HasIndex(value => value.ExpiresAt);
+
+        modelBuilder.Entity<NCAgentCallLog>()
+            .HasOne(value => value.Caller)
+            .WithMany()
+            .HasForeignKey(value => value.CallerProfileId)
+            .HasConstraintName("FK_nc_agent_call_log_caller_profile_id")
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NCAgentCallLog>()
+            .HasOne(value => value.Target)
+            .WithMany()
+            .HasForeignKey(value => value.TargetProfileId)
+            .HasConstraintName("FK_nc_agent_call_log_target_profile_id")
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NCAgentCallLog>()
+            .HasIndex(value => new { value.TargetProfileId, value.TargetReadAt });
+        modelBuilder.Entity<NCAgentCallLog>()
+            .HasIndex(value => value.EndedAt);
 
         modelBuilder.Entity<NCCitiNetPost>()
             .HasOne(value => value.Author)
