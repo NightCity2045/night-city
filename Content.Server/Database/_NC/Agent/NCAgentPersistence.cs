@@ -10,36 +10,36 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Content.Server.Database;
 
-public sealed record NCAgentProfileData(NCCharacterId CharacterId, string CharacterName, string Address);
+public sealed record NCAgentProfileData(NCCharacterId CharacterId, string Alias, string Address);
 
 public sealed record NCAgentDirectoryData(
     NCCharacterId CharacterId,
-    string CharacterName,
+    string Alias,
     string Address,
     bool IsContact);
 
-public sealed record NCAgentContactData(NCCharacterId CharacterId, string CharacterName, string Address);
+public sealed record NCAgentContactData(NCCharacterId CharacterId, string Alias, string Address);
 
 public sealed record NCAgentMessageData(
     long MessageId,
     NCCharacterId SenderCharacterId,
-    string SenderName,
+    string SenderAlias,
     NCCharacterId RecipientCharacterId,
-    string RecipientName,
+    string RecipientAlias,
     string Body,
     DateTime SentAt);
 
 public sealed record NCCitiNetCommentData(
     long CommentId,
     NCCharacterId AuthorCharacterId,
-    string AuthorName,
+    string AuthorAlias,
     string Body,
     DateTime CreatedAt);
 
 public sealed record NCCitiNetPostData(
     long PostId,
     NCCharacterId AuthorCharacterId,
-    string AuthorName,
+    string AuthorAlias,
     string Body,
     DateTime CreatedAt,
     int ReactionCount,
@@ -53,9 +53,20 @@ public sealed record NCAgentSnapshotData(
     IReadOnlyList<NCAgentMessageData> Messages,
     IReadOnlyList<NCCitiNetPostData> Posts);
 
+public enum NCAgentAliasUpdateResult : byte
+{
+    Updated,
+    Duplicate,
+    MissingProfile,
+}
+
 public partial interface IServerDbManager
 {
     Task<NCAgentProfileData?> GetOrCreateNCAgentProfileAsync(NCCharacterId characterId, string addressPrefix);
+    Task<NCAgentAliasUpdateResult> UpdateNCAgentAliasAsync(
+        NCCharacterId characterId,
+        string alias,
+        string normalizedAlias);
     Task<NCAgentSnapshotData?> GetNCAgentSnapshotAsync(
         NCCharacterId characterId,
         NCCharacterId? selectedCharacterId,
@@ -89,6 +100,15 @@ public sealed partial class ServerDbManager
     {
         DbWriteOpsMetric.Inc();
         return RunDbCommand(() => _db.GetOrCreateNCAgentProfileAsync(characterId, addressPrefix));
+    }
+
+    public Task<NCAgentAliasUpdateResult> UpdateNCAgentAliasAsync(
+        NCCharacterId characterId,
+        string alias,
+        string normalizedAlias)
+    {
+        DbWriteOpsMetric.Inc();
+        return RunDbCommand(() => _db.UpdateNCAgentAliasAsync(characterId, alias, normalizedAlias));
     }
 
     public Task<NCAgentSnapshotData?> GetNCAgentSnapshotAsync(
@@ -167,6 +187,44 @@ public sealed partial class ServerDbManager
 
 public abstract partial class ServerDbBase
 {
+    public async Task<NCAgentAliasUpdateResult> UpdateNCAgentAliasAsync(
+        NCCharacterId characterId,
+        string alias,
+        string normalizedAlias)
+    {
+        if (!characterId.IsValid || alias.Length is < 1 or > 32 || normalizedAlias.Length is < 1 or > 32)
+            return NCAgentAliasUpdateResult.MissingProfile;
+
+        await using var db = await GetDb();
+        var profile = await db.DbContext.NCAgentProfiles
+            .Include(value => value.Profile)
+            .SingleOrDefaultAsync(value => value.ProfileId == characterId.Value);
+        if (profile == null)
+            return NCAgentAliasUpdateResult.MissingProfile;
+
+        // Null aliases still display the character name, so reserve those visible names as well.
+        var duplicate = await db.DbContext.NCAgentProfiles.AnyAsync(value =>
+            value.ProfileId != characterId.Value &&
+            (value.NormalizedAlias ?? value.Profile.CharacterName.ToUpper()) == normalizedAlias);
+        if (duplicate)
+            return NCAgentAliasUpdateResult.Duplicate;
+
+        profile.Alias = alias;
+        profile.NormalizedAlias = normalizedAlias;
+        profile.UpdatedAt = DateTime.UtcNow;
+
+        try
+        {
+            await db.DbContext.SaveChangesAsync();
+            return NCAgentAliasUpdateResult.Updated;
+        }
+        catch (DbUpdateException)
+        {
+            // The unique index closes the race between simultaneous rename requests.
+            return NCAgentAliasUpdateResult.Duplicate;
+        }
+    }
+
     public async Task<NCAgentProfileData?> GetOrCreateNCAgentProfileAsync(
         NCCharacterId characterId,
         string addressPrefix)
@@ -235,10 +293,10 @@ public abstract partial class ServerDbBase
         var contacts = await db.DbContext.NCAgentContacts
             .AsNoTracking()
             .Where(value => value.OwnerProfileId == characterId.Value)
-            .OrderBy(value => value.Contact.Profile.CharacterName)
+            .OrderBy(value => value.Contact.Alias ?? value.Contact.Profile.CharacterName)
             .Select(value => new NCAgentContactData(
                 new NCCharacterId(value.ContactProfileId),
-                value.Contact.Profile.CharacterName,
+                value.Contact.Alias ?? value.Contact.Profile.CharacterName,
                 value.Contact.Address))
             .ToListAsync();
 
@@ -247,16 +305,18 @@ public abstract partial class ServerDbBase
         IReadOnlyList<NCAgentDirectoryData> directory = Array.Empty<NCAgentDirectoryData>();
         if (normalizedQuery.Length > 0)
         {
+            var normalizedDirectoryQuery = normalizedQuery.ToUpperInvariant();
             directory = await db.DbContext.NCAgentProfiles
                 .AsNoTracking()
                 .Where(value => value.ProfileId != characterId.Value &&
                     (value.Address.ToLower().Contains(normalizedQuery) ||
-                     value.Profile.CharacterName.ToLower().Contains(normalizedQuery)))
-                .OrderBy(value => value.Profile.CharacterName)
+                     (value.NormalizedAlias ?? value.Profile.CharacterName.ToUpper())
+                     .Contains(normalizedDirectoryQuery)))
+                .OrderBy(value => value.Alias ?? value.Profile.CharacterName)
                 .Take(Math.Clamp(directoryLimit, 1, 100))
                 .Select(value => new NCAgentDirectoryData(
                     new NCCharacterId(value.ProfileId),
-                    value.Profile.CharacterName,
+                    value.Alias ?? value.Profile.CharacterName,
                     value.Address,
                     contactIds.Contains(value.ProfileId)))
                 .ToListAsync();
@@ -276,9 +336,9 @@ public abstract partial class ServerDbBase
                 .Select(value => new NCAgentMessageData(
                     value.Id,
                     new NCCharacterId(value.SenderProfileId),
-                    value.Sender.Profile.CharacterName,
+                    value.Sender.Alias ?? value.Sender.Profile.CharacterName,
                     new NCCharacterId(value.RecipientProfileId),
-                    value.Recipient.Profile.CharacterName,
+                    value.Recipient.Alias ?? value.Recipient.Profile.CharacterName,
                     value.Body,
                     value.SentAt))
                 .ToListAsync();
@@ -293,7 +353,7 @@ public abstract partial class ServerDbBase
             .Select(value => new NCCitiNetPostData(
                 value.Id,
                 new NCCharacterId(value.AuthorProfileId),
-                value.Author.Profile.CharacterName,
+                value.Author.Alias ?? value.Author.Profile.CharacterName,
                 value.Body,
                 value.CreatedAt,
                 value.Reactions.Count,
@@ -313,7 +373,7 @@ public abstract partial class ServerDbBase
                 Data = new NCCitiNetCommentData(
                     value.Id,
                     new NCCharacterId(value.AuthorProfileId),
-                    value.Author.Profile.CharacterName,
+                    value.Author.Alias ?? value.Author.Profile.CharacterName,
                     value.Body,
                     value.CreatedAt),
             })
@@ -408,9 +468,9 @@ public abstract partial class ServerDbBase
         return new NCAgentMessageData(
             message.Id,
             sender,
-            senderProfile.Profile.CharacterName,
+            senderProfile.Alias ?? senderProfile.Profile.CharacterName,
             recipient,
-            recipientProfile.Profile.CharacterName,
+            recipientProfile.Alias ?? recipientProfile.Profile.CharacterName,
             message.Body,
             message.SentAt);
     }
@@ -442,7 +502,7 @@ public abstract partial class ServerDbBase
         return new NCCitiNetPostData(
             post.Id,
             author,
-            profile.Profile.CharacterName,
+            profile.Alias ?? profile.Profile.CharacterName,
             post.Body,
             post.CreatedAt,
             0,
@@ -479,7 +539,7 @@ public abstract partial class ServerDbBase
         return new NCCitiNetCommentData(
             comment.Id,
             author,
-            profile.Profile.CharacterName,
+            profile.Alias ?? profile.Profile.CharacterName,
             comment.Body,
             comment.CreatedAt);
     }
@@ -528,7 +588,7 @@ public abstract partial class ServerDbBase
     {
         return new NCAgentProfileData(
             new NCCharacterId(profile.ProfileId),
-            profile.Profile.CharacterName,
+            profile.Alias ?? profile.Profile.CharacterName,
             profile.Address);
     }
 }

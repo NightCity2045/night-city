@@ -1,11 +1,10 @@
-<pda:PdaWindow xmlns="https://spacestation14.io"
-               xmlns:pda="clr-namespace:Content.Client.PDA"
-               xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
-               MinSize="576 400"
-               SetSize="650 470">
+<agent:NCAgentWindow xmlns="https://spacestation14.io"
+                     xmlns:agent="clr-namespace:Content.Client._NC.Agent"
+                     xmlns:pda="clr-namespace:Content.Client.PDA"
+                     xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client">
     <PanelContainer Name="AgentScreen" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
         <PanelContainer.PanelOverride>
-            <gfx:StyleBoxFlat BackgroundColor="#071015" BorderColor="#24E0D0" BorderThickness="1" />
+            <gfx:StyleBoxFlat BackgroundColor="#071015" />
         </PanelContainer.PanelOverride>
         <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
             <PanelContainer MinHeight="42" HorizontalExpand="True">
@@ -57,7 +56,7 @@
                             </BoxContainer>
                         </PanelContainer>
 
-                        <GridContainer Columns="3" HorizontalExpand="True">
+                        <GridContainer Columns="2" HorizontalExpand="True">
                             <ContainerButton Name="ContactsButton" MinHeight="86" Margin="4">
                                 <PanelContainer>
                                     <PanelContainer.PanelOverride>
@@ -154,7 +153,7 @@
                 <BoxContainer Name="ProgramView" Access="Public" Orientation="Vertical"
                               HorizontalExpand="True" VerticalExpand="True" Margin="10" />
 
-                <BoxContainer Name="BuiltInView" Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Margin="14 8">
+                <BoxContainer Name="BuiltInView" Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Margin="10 8">
                     <Label Name="BuiltInTitle" Text="APP" FontColorOverride="#77FFF2" />
                     <PanelContainer HorizontalExpand="True" VerticalExpand="True" Margin="0 6 0 0">
                         <PanelContainer.PanelOverride>
@@ -166,16 +165,6 @@
                 </BoxContainer>
             </BoxContainer>
 
-            <PanelContainer MinHeight="28" HorizontalExpand="True">
-                <PanelContainer.PanelOverride>
-                    <gfx:StyleBoxFlat BackgroundColor="#08171C" BorderColor="#184D49" BorderThickness="0 1 0 0" />
-                </PanelContainer.PanelOverride>
-                <BoxContainer Orientation="Horizontal" Margin="10 2">
-                    <Label Text="NCOS 0.8 // SECURE" FontColorOverride="#3A7772" />
-                    <Control HorizontalExpand="True" />
-                    <Label Name="AddressLabel" Text="--" FontColorOverride="#4EA69F" />
-                </BoxContainer>
-            </PanelContainer>
         </BoxContainer>
     </PanelContainer>
-</pda:PdaWindow>
+</agent:NCAgentWindow>

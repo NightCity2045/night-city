@@ -22,6 +22,12 @@ public sealed class NCAgentProfile
     [MaxLength(20)]
     public string Address { get; set; } = string.Empty;
 
+    [MaxLength(32)]
+    public string? Alias { get; set; }
+
+    [MaxLength(32)]
+    public string? NormalizedAlias { get; set; }
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public Profile Profile { get; set; } = null!;
@@ -117,6 +123,9 @@ public abstract partial class ServerDbContext
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<NCAgentProfile>()
             .HasIndex(value => value.Address)
+            .IsUnique();
+        modelBuilder.Entity<NCAgentProfile>()
+            .HasIndex(value => value.NormalizedAlias)
             .IsUnique();
 
         modelBuilder.Entity<NCAgentContact>()

@@ -59,6 +59,7 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
         _menu.ProgramCloseButton.OnPressed += _ => DeactivateActiveCartridge();
         _menu.OnOpenAgentApp += app => SendMessage(new NCAgentOpenAppMessage(app));
         _menu.OnDirectorySearch += query => SendMessage(new NCAgentDirectorySearchMessage(query));
+        _menu.OnSetAlias += alias => SendMessage(new NCAgentSetAliasMessage(alias));
         _menu.OnAddContact += characterId => SendMessage(new NCAgentAddContactMessage(characterId));
         _menu.OnRemoveContact += characterId => SendMessage(new NCAgentRemoveContactMessage(characterId));
         _menu.OnSelectConversation += characterId => SendMessage(new NCAgentSelectConversationMessage(characterId));
@@ -71,12 +72,6 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
         _menu.OnAnswerCall += accept => SendMessage(new NCAgentAnswerCallMessage(accept));
         _menu.OnEndCall += () => SendMessage(new NCAgentEndCallMessage());
 
-        if (EntMan.GetComponentOrNull<PdaBorderColorComponent>(Owner) is not { } colors)
-            return;
-
-        _menu.BorderColor = colors.BorderColor;
-        _menu.AccentHColor = colors.AccentHColor;
-        _menu.AccentVColor = colors.AccentVColor;
     }
 
     protected override void UpdateState(BoundUserInterfaceState state)

@@ -55,9 +55,9 @@ public sealed partial class NCAgentSystem
             target,
             ent.Owner,
             targetAgent,
-            view.OwnName,
+            view.OwnAlias,
             view.OwnAddress,
-            targetDetails.Name,
+            targetDetails.Alias,
             targetDetails.Address)
         {
             CallerHolder = user,
@@ -180,6 +180,20 @@ public sealed partial class NCAgentSystem
             isCaller ? call.TargetAddress : call.CallerAddress);
     }
 
+    /// <summary>
+    /// Keeps an in-flight call consistent when either participant changes their CitiNet handle.
+    /// </summary>
+    private void UpdateActiveCallAlias(NCCharacterId owner, string alias)
+    {
+        if (!_calls.TryGetValue(owner, out var call))
+            return;
+
+        if (call.Caller == owner)
+            call.CallerName = alias;
+        else if (call.Target == owner)
+            call.TargetName = alias;
+    }
+
     private bool TryGetAgentHolder(EntityUid agent, out EntityUid holder)
     {
         holder = EntityUid.Invalid;
@@ -289,9 +303,9 @@ public sealed partial class NCAgentSystem
         public readonly NCCharacterId Target = target;
         public readonly EntityUid CallerAgent = callerAgent;
         public readonly EntityUid TargetAgent = targetAgent;
-        public readonly string CallerName = callerName;
+        public string CallerName = callerName;
         public readonly string CallerAddress = callerAddress;
-        public readonly string TargetName = targetName;
+        public string TargetName = targetName;
         public readonly string TargetAddress = targetAddress;
         public EntityUid? CallerHolder;
         public EntityUid? TargetHolder;

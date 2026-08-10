@@ -24,7 +24,7 @@ namespace Content.Client._NC.Agent;
 /// Animated smartphone shell for the Agent. Existing PDA cartridges are hosted in the program view.
 /// </summary>
 [GenerateTypedNameReferences]
-public sealed partial class NCAgentMenu : PdaWindow
+public sealed partial class NCAgentMenu : NCAgentWindow
 {
     private const int HomeView = 0;
     private const int ProgramListView = 1;
@@ -84,6 +84,7 @@ public sealed partial class NCAgentMenu : PdaWindow
     public event Action<EntityUid>? OnInstallButtonPressed;
     public event Action<NCAgentApp>? OnOpenAgentApp;
     public event Action<string>? OnDirectorySearch;
+    public event Action<string>? OnSetAlias;
     public event Action<int>? OnAddContact;
     public event Action<int>? OnRemoveContact;
     public event Action<int>? OnSelectConversation;
@@ -135,9 +136,6 @@ public sealed partial class NCAgentMenu : PdaWindow
     {
         FlashlightButton.IsActive = state.FlashlightEnabled;
 
-        var actualOwner = state.PdaOwnerInfo.ActualOwnerName ?? Loc.GetString("comp-pda-ui-unknown");
-        OwnerLabel.Text = $"USER // {actualOwner.ToUpperInvariant()}";
-
         if (state.PdaOwnerInfo.IdOwner != null || state.PdaOwnerInfo.JobTitle != null)
         {
             var idOwner = state.PdaOwnerInfo.IdOwner ?? Loc.GetString("comp-pda-ui-unknown");
@@ -151,8 +149,6 @@ public sealed partial class NCAgentMenu : PdaWindow
 
         var station = state.StationName ?? Loc.GetString("comp-pda-ui-unknown");
         NetworkLabel.Text = $"NETWORK // {station}";
-        AddressLabel.Text = state.Address?.ToUpperInvariant() ?? "--";
-
         EjectVinButton.Disabled = state.PdaOwnerInfo.IdOwner == null && state.PdaOwnerInfo.JobTitle == null;
         EjectPenButton.Disabled = !state.HasPen;
         EjectPaiButton.Disabled = !state.HasPai;
@@ -167,7 +163,7 @@ public sealed partial class NCAgentMenu : PdaWindow
     public void UpdateAgentData(NCAgentUpdateMessage update)
     {
         _agentData = update;
-        AddressLabel.Text = update.OwnAddress;
+        OwnerLabel.Text = $"USER // @{update.OwnAlias.ToUpperInvariant()}";
 
         if (_currentView == BuiltInAppView)
             RenderAgentApp(update.ActiveApp);
@@ -231,7 +227,7 @@ public sealed partial class NCAgentMenu : PdaWindow
 
         var search = new LineEdit
         {
-            PlaceHolder = "name or Agent address",
+            PlaceHolder = "handle or Agent address",
             HorizontalExpand = true,
         };
         var searchButton = CreateActionButton("SEARCH", "#2DA69C");
@@ -250,7 +246,7 @@ public sealed partial class NCAgentMenu : PdaWindow
             var button = CreateActionButton(entry.IsContact ? "SAVED" : "ADD", "#2DA69C");
             button.Disabled = entry.IsContact;
             button.OnPressed += _ => OnAddContact?.Invoke(entry.CharacterId);
-            BuiltInContent.AddChild(CreatePersonRow(entry.Name, entry.Address, button));
+            BuiltInContent.AddChild(CreatePersonRow(entry.Alias, entry.Address, button));
         }
 
         BuiltInContent.AddChild(CreateSectionTitle("CONTACTS"));
@@ -265,20 +261,22 @@ public sealed partial class NCAgentMenu : PdaWindow
             call.OnPressed += _ => OnStartCall?.Invoke(contact.CharacterId);
             var remove = CreateActionButton("REMOVE", "#A64A61");
             remove.OnPressed += _ => OnRemoveContact?.Invoke(contact.CharacterId);
-            BuiltInContent.AddChild(CreatePersonRow(contact.Name, contact.Address, message, call, remove));
+            BuiltInContent.AddChild(CreatePersonRow(contact.Alias, contact.Address, message, call, remove));
         }
     }
 
     private void BuildMessages(NCAgentUpdateMessage data)
     {
-        var contactRow = new BoxContainer
+        var contactRow = new WrapContainer
         {
-            Orientation = BoxContainer.LayoutOrientation.Horizontal,
+            LayoutAxis = Axis.Horizontal,
             HorizontalExpand = true,
+            SeparationOverride = 2,
+            CrossSeparationOverride = 2,
         };
         foreach (var contact in data.Contacts)
         {
-            var button = CreateActionButton(contact.Name, data.SelectedCharacterId == contact.CharacterId ? "#77FFF2" : "#406E6B");
+            var button = CreateActionButton(contact.Alias, data.SelectedCharacterId == contact.CharacterId ? "#77FFF2" : "#406E6B");
             button.OnPressed += _ => OnSelectConversation?.Invoke(contact.CharacterId);
             contactRow.AddChild(button);
         }
@@ -293,7 +291,7 @@ public sealed partial class NCAgentMenu : PdaWindow
         var selectedContact = data.Contacts.FirstOrDefault(value => value.CharacterId == selected);
         BuiltInContent.AddChild(CreateSectionTitle(selectedContact == null
             ? "CONVERSATION"
-            : $"{selectedContact.Name} // {selectedContact.Address}"));
+            : $"{selectedContact.Alias} // {selectedContact.Address}"));
 
         var messageList = new BoxContainer
         {
@@ -332,7 +330,7 @@ public sealed partial class NCAgentMenu : PdaWindow
             case NCAgentCallState.Incoming:
             {
                 BuiltInContent.AddChild(CreateStatusLabel(
-                    $"INCOMING // {call.RemoteName} // {call.RemoteAddress}", "#FFE28D"));
+                    $"INCOMING // {call.RemoteAlias} // {call.RemoteAddress}", "#FFE28D"));
                 var accept = CreateActionButton("ACCEPT", "#69E890");
                 accept.OnPressed += _ => OnAnswerCall?.Invoke(true);
                 var reject = CreateActionButton("REJECT", "#FF7897");
@@ -345,12 +343,12 @@ public sealed partial class NCAgentMenu : PdaWindow
             }
             case NCAgentCallState.Outgoing:
                 BuiltInContent.AddChild(CreateStatusLabel(
-                    $"CALLING // {call.RemoteName} // {call.RemoteAddress}", "#FFE28D"));
+                    $"CALLING // {call.RemoteAlias} // {call.RemoteAddress}", "#FFE28D"));
                 AddEndCallButton();
                 return;
             case NCAgentCallState.Connected:
                 BuiltInContent.AddChild(CreateStatusLabel(
-                    $"CONNECTED // {call.RemoteName} // {call.RemoteAddress}", "#76FF95"));
+                    $"CONNECTED // {call.RemoteAlias} // {call.RemoteAddress}", "#76FF95"));
                 BuiltInContent.AddChild(CreateMutedLabel(
                     "Speak in ordinary IC chat. The remote party hears the message while both Agents remain in hand, ID slot, or belt slot."));
                 AddEndCallButton();
@@ -362,7 +360,7 @@ public sealed partial class NCAgentMenu : PdaWindow
         {
             var button = CreateActionButton("CALL", "#F0C75E");
             button.OnPressed += _ => OnStartCall?.Invoke(contact.CharacterId);
-            BuiltInContent.AddChild(CreatePersonRow(contact.Name, contact.Address, button));
+            BuiltInContent.AddChild(CreatePersonRow(contact.Alias, contact.Address, button));
         }
     }
 
@@ -375,6 +373,34 @@ public sealed partial class NCAgentMenu : PdaWindow
 
     private void BuildCitiNet(NCAgentUpdateMessage data)
     {
+        var aliasInput = new LineEdit
+        {
+            Text = data.OwnAlias,
+            PlaceHolder = "CitiNet handle",
+            HorizontalExpand = true,
+        };
+        var changeAlias = CreateActionButton("CHANGE", "#E05CFF");
+        changeAlias.OnPressed += _ => OnSetAlias?.Invoke(aliasInput.Text);
+
+        var aliasRow = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Horizontal,
+            HorizontalExpand = true,
+        };
+        aliasRow.AddChild(aliasInput);
+        aliasRow.AddChild(changeAlias);
+
+        var identity = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Vertical,
+            HorizontalExpand = true,
+            Margin = new Thickness(10, 8),
+        };
+        identity.AddChild(CreateStatusLabel($"HANDLE // @{data.OwnAlias}", "#EE9BFF"));
+        identity.AddChild(CreateMutedLabel($"ADDRESS // {data.OwnAddress}"));
+        identity.AddChild(aliasRow);
+        BuiltInContent.AddChild(WrapCard(identity, "#693576", "#17111C"));
+
         var postInput = new LineEdit
         {
             PlaceHolder = "publish to Night City",
@@ -423,21 +449,24 @@ public sealed partial class NCAgentMenu : PdaWindow
     }
 
     /// <summary>
-    /// Keeps the Agent shell inside the current UI viewport while preserving its desktop dimensions.
+    /// Fits the portrait Agent to the current viewport without changing its phone-like proportions on large screens.
     /// The XAML dimensions remain the fallback for the short period before the root UI is measured.
     /// </summary>
     private void FitWindowToViewport()
     {
-        const float viewportMargin = 12f;
+        const float viewportMargin = 16f;
         var viewport = _uiManager.RootControl.Size;
         if (viewport.X <= 0f || viewport.Y <= 0f)
             return;
 
-        var width = MathF.Min(650f, MathF.Max(1f, viewport.X - viewportMargin));
-        var height = MathF.Min(470f, MathF.Max(1f, viewport.Y - viewportMargin));
+        var availableWidth = MathF.Max(1f, viewport.X - viewportMargin);
+        var availableHeight = MathF.Max(1f, viewport.Y - viewportMargin);
+        var height = MathF.Min(760f, availableHeight);
+        var portraitWidth = Math.Clamp(height * 0.63f, 360f, 480f);
+        var width = MathF.Min(portraitWidth, availableWidth);
 
         SetSize = new Vector2(width, height);
-        MinSize = new Vector2(MathF.Min(576f, width), MathF.Min(400f, height));
+        MinSize = new Vector2(MathF.Min(360f, width), MathF.Min(500f, height));
     }
 
     private Control CreatePostCard(NCAgentCitiNetPostSummary post)
@@ -449,7 +478,7 @@ public sealed partial class NCAgentMenu : PdaWindow
             Margin = new Thickness(10, 8),
         };
         content.AddChild(CreateStatusLabel(
-            $"{post.AuthorName} // {post.CreatedAt.ToLocalTime():yyyy-MM-dd HH:mm}", "#EE9BFF"));
+            $"{post.AuthorAlias} // {post.CreatedAt.ToLocalTime():yyyy-MM-dd HH:mm}", "#EE9BFF"));
         content.AddChild(new Label { Text = post.Body, HorizontalExpand = true });
 
         var reaction = CreateActionButton(
@@ -458,7 +487,7 @@ public sealed partial class NCAgentMenu : PdaWindow
         content.AddChild(reaction);
 
         foreach (var comment in post.Comments)
-            content.AddChild(CreateMutedLabel($"{comment.AuthorName}: {comment.Body}"));
+            content.AddChild(CreateMutedLabel($"{comment.AuthorAlias}: {comment.Body}"));
 
         var commentInput = new LineEdit
         {
@@ -484,7 +513,7 @@ public sealed partial class NCAgentMenu : PdaWindow
             Margin = new Thickness(10, 6),
         };
         content.AddChild(CreateStatusLabel(
-            $"{message.SenderName} // {message.SentAt.ToLocalTime():MM-dd HH:mm}",
+            $"{message.SenderAlias} // {message.SentAt.ToLocalTime():MM-dd HH:mm}",
             message.IsOwn ? "#8FB8FF" : "#77FFF2"));
         content.AddChild(new Label { Text = message.Body, HorizontalExpand = true });
         return WrapCard(content, message.IsOwn ? "#355D9A" : "#2D8C84", message.IsOwn ? "#101925" : "#0D2022");
@@ -500,15 +529,24 @@ public sealed partial class NCAgentMenu : PdaWindow
         text.AddChild(new Label { Text = name, FontColorOverride = Color.FromHex("#D7FFFB") });
         text.AddChild(new Label { Text = address, FontColorOverride = Color.FromHex("#568783") });
 
+        var actionRow = new WrapContainer
+        {
+            LayoutAxis = Axis.Horizontal,
+            HorizontalExpand = true,
+            SeparationOverride = 2,
+            CrossSeparationOverride = 2,
+        };
+        foreach (var action in actions)
+            actionRow.AddChild(action);
+
         var row = new BoxContainer
         {
-            Orientation = BoxContainer.LayoutOrientation.Horizontal,
+            Orientation = BoxContainer.LayoutOrientation.Vertical,
             HorizontalExpand = true,
             Margin = new Thickness(8, 6),
         };
         row.AddChild(text);
-        foreach (var action in actions)
-            row.AddChild(action);
+        row.AddChild(actionRow);
         return WrapCard(row, "#245C59", "#0D2027");
     }
 

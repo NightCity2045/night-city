@@ -1,0 +1,51 @@
+<agent:NCAgentWindow xmlns="https://spacestation14.io"
+                     xmlns:agent="clr-namespace:Content.Client._NC.Agent"
+                     xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                     MouseFilter="Stop"
+                     MinSize="360 500"
+                     SetSize="480 760">
+    <PanelContainer>
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#05090D" BorderColor="#173D3A" BorderThickness="3" />
+        </PanelContainer.PanelOverride>
+    </PanelContainer>
+
+    <PanelContainer Margin="5">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#0A1116" BorderColor="#2A6F69" BorderThickness="1" />
+        </PanelContainer.PanelOverride>
+    </PanelContainer>
+
+    <BoxContainer Orientation="Vertical" Margin="9 6">
+        <BoxContainer Orientation="Horizontal" SetHeight="30" Margin="4 0">
+            <Label Text="O" FontColorOverride="#1B5853" VerticalAlignment="Center" />
+            <Control HorizontalExpand="True" />
+            <PanelContainer SetWidth="64" SetHeight="4" VerticalAlignment="Center">
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#132A30" BorderColor="#245C59" BorderThickness="1" />
+                </PanelContainer.PanelOverride>
+            </PanelContainer>
+            <Control HorizontalExpand="True" />
+            <Label Text="O" FontColorOverride="#55EBDD" VerticalAlignment="Center" Margin="0 0 8 0" />
+            <Button Name="CloseButton" Text="X" SetWidth="28" SetHeight="24" />
+        </BoxContainer>
+
+        <PanelContainer HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
+            <PanelContainer.PanelOverride>
+                <gfx:StyleBoxFlat BackgroundColor="#02070A" BorderColor="#24E0D0" BorderThickness="1" />
+            </PanelContainer.PanelOverride>
+            <BoxContainer Name="ContentsContainer" Access="Public" Orientation="Vertical"
+                          HorizontalExpand="True" VerticalExpand="True" Margin="2" />
+        </PanelContainer>
+
+        <BoxContainer Orientation="Horizontal" SetHeight="16" Margin="0 5 0 0">
+            <Control HorizontalExpand="True" />
+            <PanelContainer SetWidth="54" SetHeight="3" VerticalAlignment="Center">
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#1D5550" />
+                </PanelContainer.PanelOverride>
+            </PanelContainer>
+            <Control HorizontalExpand="True" />
+        </BoxContainer>
+    </BoxContainer>
+</agent:NCAgentWindow>

@@ -23,7 +23,7 @@ namespace Content.Client._NC.Agent;
 /// </summary>
 public sealed partial class NCAgentMapControl : LayoutContainer
 {
-    private const float CanvasTop = 34f;
+    private const float CanvasTop = 48f;
     private const float CanvasBottom = 38f;
     private const float MinimumCanvasHeight = CanvasTop + CanvasBottom + 48f;
     private const float MinimumZoom = 0.45f;
@@ -267,19 +267,27 @@ public sealed partial class NCAgentMapControl : LayoutContainer
 
     private Control CreateTopHud()
     {
-        var row = new BoxContainer
+        var statusRow = new BoxContainer
         {
             Orientation = BoxContainer.LayoutOrientation.Horizontal,
             HorizontalExpand = true,
-            Margin = new Thickness(10f, 5f),
         };
-        row.AddChild(_networkLabel);
-        row.AddChild(new Control { HorizontalExpand = true });
-        row.AddChild(CreateHudLabel("LAYER // ", Color.FromHex("#427C78")));
-        row.AddChild(_lodLabel);
-        row.AddChild(CreateHudLabel(" // SCALE ", Color.FromHex("#427C78")));
-        row.AddChild(_zoomLabel);
-        return WrapHud(row, HAlignment.Stretch, VAlignment.Top);
+        statusRow.AddChild(_networkLabel);
+        statusRow.AddChild(new Control { HorizontalExpand = true });
+        statusRow.AddChild(_lodLabel);
+        statusRow.AddChild(CreateHudLabel(" // ", Color.FromHex("#427C78")));
+        statusRow.AddChild(_zoomLabel);
+
+        // Two compact rows preserve all map status information on the portrait Agent screen.
+        var content = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Vertical,
+            HorizontalExpand = true,
+            Margin = new Thickness(8f, 3f),
+        };
+        content.AddChild(statusRow);
+        content.AddChild(_coordinateLabel);
+        return WrapHud(content, HAlignment.Stretch, VAlignment.Top);
     }
 
     private Control CreateBottomControls()
@@ -310,7 +318,6 @@ public sealed partial class NCAgentMapControl : LayoutContainer
         row.AddChild(fit);
         row.AddChild(_labelsButton);
         row.AddChild(new Control { HorizontalExpand = true });
-        row.AddChild(_coordinateLabel);
         return WrapHud(row, HAlignment.Stretch, VAlignment.Bottom);
     }
 

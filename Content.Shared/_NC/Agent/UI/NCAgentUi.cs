@@ -61,18 +61,18 @@ public sealed record NCAgentMapFeature(
     List<NCAgentMapTileChunk> Chunks);
 
 [Serializable, NetSerializable]
-public sealed record NCAgentDirectoryEntry(int CharacterId, string Name, string Address, bool IsContact);
+public sealed record NCAgentDirectoryEntry(int CharacterId, string Alias, string Address, bool IsContact);
 
 [Serializable, NetSerializable]
-public sealed record NCAgentContactSummary(int CharacterId, string Name, string Address);
+public sealed record NCAgentContactSummary(int CharacterId, string Alias, string Address);
 
 [Serializable, NetSerializable]
 public sealed record NCAgentMessageSummary(
     long MessageId,
     int SenderCharacterId,
-    string SenderName,
+    string SenderAlias,
     int RecipientCharacterId,
-    string RecipientName,
+    string RecipientAlias,
     string Body,
     DateTime SentAt,
     bool IsOwn);
@@ -81,7 +81,7 @@ public sealed record NCAgentMessageSummary(
 public sealed record NCAgentCitiNetCommentSummary(
     long CommentId,
     int AuthorCharacterId,
-    string AuthorName,
+    string AuthorAlias,
     string Body,
     DateTime CreatedAt);
 
@@ -89,7 +89,7 @@ public sealed record NCAgentCitiNetCommentSummary(
 public sealed record NCAgentCitiNetPostSummary(
     long PostId,
     int AuthorCharacterId,
-    string AuthorName,
+    string AuthorAlias,
     string Body,
     DateTime CreatedAt,
     int ReactionCount,
@@ -100,7 +100,7 @@ public sealed record NCAgentCitiNetPostSummary(
 public sealed record NCAgentCallSummary(
     NCAgentCallState State,
     int? RemoteCharacterId,
-    string RemoteName,
+    string RemoteAlias,
     string RemoteAddress);
 
 /// <summary>
@@ -110,6 +110,7 @@ public sealed record NCAgentCallSummary(
 public sealed class NCAgentUpdateMessage(
     NCAgentApp activeApp,
     int ownCharacterId,
+    string ownAlias,
     string ownAddress,
     List<NCAgentDirectoryEntry> directory,
     List<NCAgentContactSummary> contacts,
@@ -121,6 +122,7 @@ public sealed class NCAgentUpdateMessage(
 {
     public readonly NCAgentApp ActiveApp = activeApp;
     public readonly int OwnCharacterId = ownCharacterId;
+    public readonly string OwnAlias = ownAlias;
     public readonly string OwnAddress = ownAddress;
     public readonly List<NCAgentDirectoryEntry> Directory = directory;
     public readonly List<NCAgentContactSummary> Contacts = contacts;
@@ -159,6 +161,12 @@ public sealed class NCAgentOpenAppMessage(NCAgentApp app) : BoundUserInterfaceMe
 public sealed class NCAgentDirectorySearchMessage(string query) : BoundUserInterfaceMessage
 {
     public readonly string Query = query;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentSetAliasMessage(string alias) : BoundUserInterfaceMessage
+{
+    public readonly string Alias = alias;
 }
 
 [Serializable, NetSerializable]

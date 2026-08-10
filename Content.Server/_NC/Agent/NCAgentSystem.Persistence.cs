@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Content.Server._NC.Agent.Components;
 using Content.Server._NC.City.Zones;
@@ -56,6 +57,7 @@ public sealed partial class NCAgentSystem
         SubscribeLocalEvent<NCAgentComponent, ComponentShutdown>(OnAgentShutdown);
         SubscribeLocalEvent<NCAgentComponent, NCAgentOpenAppMessage>(OnOpenApp);
         SubscribeLocalEvent<NCAgentComponent, NCAgentDirectorySearchMessage>(OnDirectorySearch);
+        SubscribeLocalEvent<NCAgentComponent, NCAgentSetAliasMessage>(OnSetAlias);
         SubscribeLocalEvent<NCAgentComponent, NCAgentAddContactMessage>(OnAddContact);
         SubscribeLocalEvent<NCAgentComponent, NCAgentRemoveContactMessage>(OnRemoveContact);
         SubscribeLocalEvent<NCAgentComponent, NCAgentSelectConversationMessage>(OnSelectConversation);
@@ -240,6 +242,90 @@ public sealed partial class NCAgentSystem
         await SendViewAsync(uid, user);
     }
 
+    private async void OnSetAlias(EntityUid uid, NCAgentComponent component, NCAgentSetAliasMessage args)
+    {
+        if (!TryGetView(uid, args.Actor, out var user, out var view))
+            return;
+
+        var alias = NormalizeAlias(args.Alias);
+        if (!IsValidAlias(alias))
+        {
+            view.Notice = $"HANDLE MUST BE {Configuration.MinimumAliasLength}-{Configuration.MaximumAliasLength} CHARACTERS";
+            await SendViewAsync(uid, user);
+            return;
+        }
+
+        if (!_processing.Add((uid, user)))
+            return;
+
+        try
+        {
+            var result = await _database.UpdateNCAgentAliasAsync(
+                view.Owner,
+                alias,
+                alias.ToUpperInvariant());
+            switch (result)
+            {
+                case NCAgentAliasUpdateResult.Updated:
+                    view.Notice = "HANDLE UPDATED";
+                    UpdateActiveCallAlias(view.Owner, alias);
+                    await RefreshOpenViewsAsync();
+                    break;
+                case NCAgentAliasUpdateResult.Duplicate:
+                    view.Notice = "HANDLE ALREADY IN USE";
+                    await SendViewAsync(uid, user);
+                    break;
+                default:
+                    view.Notice = "CITINET PROFILE UNAVAILABLE";
+                    await SendViewAsync(uid, user);
+                    break;
+            }
+        }
+        catch (Exception exception)
+        {
+            HandleDatabaseError(uid, user, "change CitiNet handle", exception);
+            await SendViewAsync(uid, user);
+        }
+        finally
+        {
+            FinishOperation(uid, user);
+        }
+    }
+
+    /// <summary>
+    /// Canonicalizes user input before uniqueness checks so visually identical handles share one key.
+    /// </summary>
+    private static string NormalizeAlias(string input)
+    {
+        var source = input.Normalize(NormalizationForm.FormKC).Trim();
+        var builder = new StringBuilder(source.Length);
+        var previousWhitespace = false;
+        foreach (var value in source)
+        {
+            if (char.IsWhiteSpace(value))
+            {
+                if (!previousWhitespace)
+                    builder.Append(' ');
+                previousWhitespace = true;
+                continue;
+            }
+
+            previousWhitespace = false;
+            builder.Append(value);
+        }
+
+        return builder.ToString();
+    }
+
+    private bool IsValidAlias(string alias)
+    {
+        var config = Configuration;
+        if (alias.Length < config.MinimumAliasLength || alias.Length > config.MaximumAliasLength)
+            return false;
+
+        return alias.All(value => char.IsLetterOrDigit(value) || value is ' ' or '_' or '-' or '.');
+    }
+
     private async void OnAddContact(EntityUid uid, NCAgentComponent component, NCAgentAddContactMessage args)
     {
         if (!TryGetView(uid, args.Actor, out var user, out var view) ||
@@ -329,7 +415,7 @@ public sealed partial class NCAgentSystem
                 return;
 
             view.Notice = "MESSAGE SENT";
-            NotifyAgent(recipient, $"New message from {message.SenderName}");
+            NotifyAgent(recipient, $"New message from {message.SenderAlias}");
             await RefreshOwnerViewsAsync(recipient);
         }
         catch (Exception exception)
@@ -436,19 +522,19 @@ public sealed partial class NCAgentSystem
         view.VisibleDirectoryIds.Clear();
         view.PostIds.Clear();
         view.Targets.Clear();
-        view.OwnName = snapshot.Profile.CharacterName;
+        view.OwnAlias = snapshot.Profile.Alias;
         view.OwnAddress = snapshot.Profile.Address;
 
         foreach (var contact in snapshot.Contacts)
         {
             view.ContactIds.Add(contact.CharacterId.Value);
-            view.Targets[contact.CharacterId] = (contact.CharacterName, contact.Address);
+            view.Targets[contact.CharacterId] = (contact.Alias, contact.Address);
         }
 
         foreach (var entry in snapshot.Directory)
         {
             view.VisibleDirectoryIds.Add(entry.CharacterId.Value);
-            view.Targets[entry.CharacterId] = (entry.CharacterName, entry.Address);
+            view.Targets[entry.CharacterId] = (entry.Alias, entry.Address);
         }
 
         foreach (var post in snapshot.Posts)
@@ -461,30 +547,31 @@ public sealed partial class NCAgentSystem
         _ui.ServerSendUiMessage(agent, PdaUiKey.Key, new NCAgentUpdateMessage(
             view.ActiveApp,
             snapshot.Profile.CharacterId.Value,
+            snapshot.Profile.Alias,
             snapshot.Profile.Address,
             snapshot.Directory.Select(value => new NCAgentDirectoryEntry(
                 value.CharacterId.Value,
-                value.CharacterName,
+                value.Alias,
                 value.Address,
                 value.IsContact)).ToList(),
             snapshot.Contacts.Select(value => new NCAgentContactSummary(
                 value.CharacterId.Value,
-                value.CharacterName,
+                value.Alias,
                 value.Address)).ToList(),
             view.SelectedCharacterId?.Value,
             snapshot.Messages.Select(value => new NCAgentMessageSummary(
                 value.MessageId,
                 value.SenderCharacterId.Value,
-                value.SenderName,
+                value.SenderAlias,
                 value.RecipientCharacterId.Value,
-                value.RecipientName,
+                value.RecipientAlias,
                 value.Body,
                 value.SentAt,
                 value.SenderCharacterId == view.Owner)).ToList(),
             snapshot.Posts.Select(value => new NCAgentCitiNetPostSummary(
                 value.PostId,
                 value.AuthorCharacterId.Value,
-                value.AuthorName,
+                value.AuthorAlias,
                 value.Body,
                 value.CreatedAt,
                 value.ReactionCount,
@@ -492,7 +579,7 @@ public sealed partial class NCAgentSystem
                 value.Comments.Select(comment => new NCAgentCitiNetCommentSummary(
                     comment.CommentId,
                     comment.AuthorCharacterId.Value,
-                    comment.AuthorName,
+                    comment.AuthorAlias,
                     comment.Body,
                     comment.CreatedAt)).ToList())).ToList(),
             call,
@@ -634,12 +721,12 @@ public sealed partial class NCAgentSystem
         public readonly HashSet<int> ContactIds = [];
         public readonly HashSet<int> VisibleDirectoryIds = [];
         public readonly HashSet<long> PostIds = [];
-        public readonly Dictionary<NCCharacterId, (string Name, string Address)> Targets = [];
+        public readonly Dictionary<NCCharacterId, (string Alias, string Address)> Targets = [];
         public NCAgentApp ActiveApp = NCAgentApp.Home;
         public NCCharacterId? SelectedCharacterId;
         public string DirectoryQuery = string.Empty;
         public string Notice = string.Empty;
-        public string OwnName = string.Empty;
+        public string OwnAlias = string.Empty;
         public string OwnAddress = string.Empty;
     }
 }

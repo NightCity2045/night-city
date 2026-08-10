@@ -8,6 +8,8 @@
   # RobustToolbox TimeSpan YAML has no day suffix; thirty days are 720 hours.
   messageRetention: 720h
   maximumDirectoryQueryLength: 64
+  minimumAliasLength: 3
+  maximumAliasLength: 32
   maximumMessageLength: 1024
   maximumPostLength: 2048
   maximumCommentLength: 1024

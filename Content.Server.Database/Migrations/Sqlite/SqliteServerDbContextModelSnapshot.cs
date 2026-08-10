@@ -1005,9 +1005,19 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasColumnType("TEXT")
                         .HasColumnName("address");
 
+                    b.Property<string>("Alias")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("alias");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("NormalizedAlias")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("normalized_alias");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT")
@@ -1017,6 +1027,9 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasName("PK_nc_agent_profile");
 
                     b.HasIndex("Address")
+                        .IsUnique();
+
+                    b.HasIndex("NormalizedAlias")
                         .IsUnique();
 
                     b.ToTable("nc_agent_profile", (string)null);

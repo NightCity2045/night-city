@@ -25,6 +25,12 @@ public sealed partial class NCAgentConfigurationPrototype : IPrototype
     public int MaximumDirectoryQueryLength = 64;
 
     [DataField]
+    public int MinimumAliasLength = 3;
+
+    [DataField]
+    public int MaximumAliasLength = 32;
+
+    [DataField]
     public int MaximumMessageLength = 1024;
 
     [DataField]

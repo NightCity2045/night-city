@@ -1061,9 +1061,19 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("character varying(20)")
                         .HasColumnName("address");
 
+                    b.Property<string>("Alias")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("alias");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("NormalizedAlias")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("normalized_alias");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -1073,6 +1083,9 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasName("PK_nc_agent_profile");
 
                     b.HasIndex("Address")
+                        .IsUnique();
+
+                    b.HasIndex("NormalizedAlias")
                         .IsUnique();
 
                     b.ToTable("nc_agent_profile", (string)null);
