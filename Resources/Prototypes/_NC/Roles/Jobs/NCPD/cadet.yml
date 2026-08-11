@@ -27,6 +27,9 @@
     belt: ClothingBeltSecurityFilled
     outerClothing: ClothingOuterArmorBasic
     pocket2: BookSecurity
+  storage:
+    back:
+    - WantedListCartridge
 
 - type: jobIcon
   parent: JobIcon

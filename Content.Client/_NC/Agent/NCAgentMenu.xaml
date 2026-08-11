@@ -1,0 +1,231 @@
+<agent:NCAgentWindow xmlns="https://spacestation14.io"
+                     xmlns:agent="clr-namespace:Content.Client._NC.Agent"
+                     xmlns:pda="clr-namespace:Content.Client.PDA"
+                     xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client">
+    <PanelContainer Name="AgentScreen" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#071015" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+            <PanelContainer MinHeight="42" HorizontalExpand="True">
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#0B1E24" BorderColor="#24E0D0" BorderThickness="0 0 0 1" />
+                </PanelContainer.PanelOverride>
+                <BoxContainer Orientation="Horizontal" Margin="12 4">
+                    <Label Text="AGENT" FontColorOverride="#6BFFF1" />
+                    <Label Text=" // CITYNET" FontColorOverride="#2D918A" />
+                    <Control HorizontalExpand="True" />
+                    <Label Name="SignalDot" Text="●" FontColorOverride="#76FF95" Margin="0 0 6 0" />
+                    <Label Name="ClockLabel" Text="00:00:00" FontColorOverride="#BDEDE9" />
+                </BoxContainer>
+            </PanelContainer>
+
+            <BoxContainer MinHeight="38" HorizontalExpand="True">
+                <pda:PdaNavigationButton Name="HomeButton" LabelText="HOME" IsCurrent="True" MinWidth="88"
+                                         InactiveBgColor="#08171C" ActiveBgColor="#12383B"
+                                         InactiveFgColor="#43807D" ActiveFgColor="#77FFF2" />
+                <pda:PdaNavigationButton Name="ProgramListButton" LabelText="SHARDS" MinWidth="88"
+                                         InactiveBgColor="#08171C" ActiveBgColor="#12383B"
+                                         InactiveFgColor="#43807D" ActiveFgColor="#77FFF2" />
+                <pda:PdaNavigationButton Name="SettingsButton" LabelText="SYSTEM" MinWidth="88"
+                                         InactiveBgColor="#08171C" ActiveBgColor="#12383B"
+                                         InactiveFgColor="#43807D" ActiveFgColor="#77FFF2" />
+                <pda:PdaNavigationButton Name="ProgramTitle" Visible="False" HorizontalExpand="True"
+                                         InactiveBgColor="#08171C" ActiveBgColor="#12383B"
+                                         InactiveFgColor="#43807D" ActiveFgColor="#77FFF2" />
+                <Control HorizontalExpand="True" />
+                <pda:PdaNavigationButton Name="ProgramCloseButton" Access="Public" Visible="False" LabelText="×" SetWidth="38"
+                                         InactiveBgColor="#08171C" ActiveBgColor="#3A1520"
+                                         InactiveFgColor="#A64A61" ActiveFgColor="#FF7897" />
+                <pda:PdaNavigationButton Name="FlashlightButton" Access="Public" ToggleMode="True" LabelText="LIGHT" MinWidth="58"
+                                         InactiveBgColor="#08171C" ActiveBgColor="#3C3617"
+                                         InactiveFgColor="#727B6E" ActiveFgColor="#FFF386" />
+            </BoxContainer>
+
+            <BoxContainer Name="ViewContainer" Access="Public" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
+                <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+                    <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Margin="12">
+                        <PanelContainer HorizontalExpand="True" MinHeight="76" Margin="0 0 0 10">
+                            <PanelContainer.PanelOverride>
+                                <gfx:StyleBoxFlat BackgroundColor="#0D2027" BorderColor="#1E756F" BorderThickness="1" />
+                            </PanelContainer.PanelOverride>
+                            <BoxContainer Orientation="Vertical" Margin="12 8">
+                                <Label Name="OwnerLabel" Text="UNREGISTERED USER" FontColorOverride="#D7FFFB" />
+                                <Label Name="VinCardLabel" Text="VIN CARD // NOT DETECTED" FontColorOverride="#6CA6A1" />
+                                <Label Name="NetworkLabel" Text="NODE // --" FontColorOverride="#406E6B" />
+                                <Label Name="AgentServiceLabel" Text="CITYNET // CONNECTING" FontColorOverride="#76FF95" />
+                            </BoxContainer>
+                        </PanelContainer>
+
+                        <GridContainer Columns="2" HorizontalExpand="True">
+                            <ContainerButton Name="ContactsButton" MinHeight="86" Margin="4">
+                                <PanelContainer>
+                                    <PanelContainer.PanelOverride>
+                                        <gfx:StyleBoxFlat BackgroundColor="#10262D" BorderColor="#2DA69C" BorderThickness="0 0 0 2" />
+                                    </PanelContainer.PanelOverride>
+                                    <BoxContainer Orientation="Vertical" Margin="10 8">
+                                        <Label Text="CONTACTS" FontColorOverride="#77FFF2" />
+                                        <Label Text="people &amp; addresses" FontColorOverride="#568783" />
+                                    </BoxContainer>
+                                </PanelContainer>
+                            </ContainerButton>
+                            <ContainerButton Name="MessagesButton" MinHeight="86" Margin="4">
+                                <PanelContainer>
+                                    <PanelContainer.PanelOverride>
+                                        <gfx:StyleBoxFlat BackgroundColor="#17232E" BorderColor="#508DFF" BorderThickness="0 0 0 2" />
+                                    </PanelContainer.PanelOverride>
+                                    <BoxContainer Orientation="Vertical" Margin="10 8">
+                                        <Label Text="MESSAGES" FontColorOverride="#8FB8FF" />
+                                        <Label Name="MessagesStatusLabel" Text="encrypted threads" FontColorOverride="#5B718E" />
+                                    </BoxContainer>
+                                </PanelContainer>
+                            </ContainerButton>
+                            <ContainerButton Name="CallsButton" MinHeight="86" Margin="4">
+                                <PanelContainer>
+                                    <PanelContainer.PanelOverride>
+                                        <gfx:StyleBoxFlat BackgroundColor="#1E222A" BorderColor="#F0C75E" BorderThickness="0 0 0 2" />
+                                    </PanelContainer.PanelOverride>
+                                    <BoxContainer Orientation="Vertical" Margin="10 8">
+                                        <Label Text="CALLS" FontColorOverride="#FFE28D" />
+                                        <Label Name="CallsStatusLabel" Text="voice-text relay" FontColorOverride="#8B805F" />
+                                    </BoxContainer>
+                                </PanelContainer>
+                            </ContainerButton>
+                            <ContainerButton Name="CitiNetButton" MinHeight="86" Margin="4">
+                                <PanelContainer>
+                                    <PanelContainer.PanelOverride>
+                                        <gfx:StyleBoxFlat BackgroundColor="#261B2D" BorderColor="#E05CFF" BorderThickness="0 0 0 2" />
+                                    </PanelContainer.PanelOverride>
+                                    <BoxContainer Orientation="Vertical" Margin="10 8">
+                                        <Label Text="CITINET" FontColorOverride="#EE9BFF" />
+                                        <Label Text="Night City feed" FontColorOverride="#896192" />
+                                    </BoxContainer>
+                                </PanelContainer>
+                            </ContainerButton>
+                            <ContainerButton Name="MapButton" MinHeight="86" Margin="4">
+                                <PanelContainer>
+                                    <PanelContainer.PanelOverride>
+                                        <gfx:StyleBoxFlat BackgroundColor="#15291F" BorderColor="#69E890" BorderThickness="0 0 0 2" />
+                                    </PanelContainer.PanelOverride>
+                                    <BoxContainer Orientation="Vertical" Margin="10 8">
+                                        <Label Text="CITY MAP" FontColorOverride="#8FF7AF" />
+                                        <Label Text="full visibility" FontColorOverride="#5D8C6B" />
+                                    </BoxContainer>
+                                </PanelContainer>
+                            </ContainerButton>
+                            <ContainerButton Name="ShardsButton" MinHeight="86" Margin="4">
+                                <PanelContainer>
+                                    <PanelContainer.PanelOverride>
+                                        <gfx:StyleBoxFlat BackgroundColor="#241D18" BorderColor="#FF8248" BorderThickness="0 0 0 2" />
+                                    </PanelContainer.PanelOverride>
+                                    <BoxContainer Orientation="Vertical" Margin="10 8">
+                                        <Label Text="SHARDS" FontColorOverride="#FFA77D" />
+                                        <Label Text="installed programs" FontColorOverride="#8F6957" />
+                                    </BoxContainer>
+                                </PanelContainer>
+                            </ContainerButton>
+                        </GridContainer>
+                    </BoxContainer>
+                </ScrollContainer>
+
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Margin="10 8">
+                    <PanelContainer HorizontalExpand="True" Margin="4 0 4 6">
+                        <PanelContainer.PanelOverride>
+                            <gfx:StyleBoxFlat BackgroundColor="#101A20" BorderColor="#FF8248" BorderThickness="0 0 0 2" />
+                        </PanelContainer.PanelOverride>
+                        <BoxContainer Orientation="Vertical" Margin="10 7">
+                            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                                <Label Text="SHARD MEMORY" FontColorOverride="#FFA77D" />
+                                <Control HorizontalExpand="True" />
+                                <Label Name="ShardMemoryLabel" Text="0U / 0U" FontColorOverride="#FFD0BA" />
+                            </BoxContainer>
+                            <ProgressBar Name="ShardMemoryBar" MinValue="0" MaxValue="1" Value="0" MinHeight="8" Margin="0 5 0 0" />
+                            <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="0 4 0 0">
+                                <Label Name="ShardStatusLabel" Text="INSERT A PHYSICAL SHARD TO INSTALL"
+                                       FontColorOverride="#755A50" HorizontalExpand="True" />
+                                <Button Name="EjectShardButton" Text="EJECT CHIP" Disabled="True" MinWidth="94" MinHeight="25" />
+                            </BoxContainer>
+                        </BoxContainer>
+                    </PanelContainer>
+                    <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+                        <GridContainer Name="ProgramList" Columns="2" HorizontalExpand="True" Margin="0" />
+                    </ScrollContainer>
+                </BoxContainer>
+
+                <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+                    <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Margin="8">
+                        <BoxContainer Name="AgentSettingsContainer" Orientation="Vertical" HorizontalExpand="True" />
+                        <pda:PdaSettingsButton Name="RingtoneButton" Access="Public"
+                                               Text="RINGTONE" Description="Change incoming-call alert" />
+                        <pda:PdaSettingsButton Name="MusicButton" Access="Public" Visible="False"
+                                               Text="MUSIC" Description="Open Agent audio output" />
+                        <pda:PdaSettingsButton Name="ShowUplinkButton" Access="Public" Visible="False"
+                                               Text="ENCRYPTED LINK" Description="Open concealed uplink" />
+                        <pda:PdaSettingsButton Name="LockUplinkButton" Access="Public" Visible="False"
+                                               Text="LOCK LINK" Description="Hide concealed uplink" />
+                        <pda:PdaSettingsButton Name="EjectVinButton" Access="Public"
+                                               Text="EJECT VIN CARD" Description="Remove the inserted identity card" />
+                        <pda:PdaSettingsButton Name="EjectPenButton" Access="Public"
+                                               Text="EJECT PEN" Description="Remove Agent stylus" />
+                        <pda:PdaSettingsButton Name="EjectPaiButton" Access="Public"
+                                               Text="EJECT PAI" Description="Remove personal AI" />
+                    </BoxContainer>
+                </ScrollContainer>
+
+                <BoxContainer Name="ProgramView" Access="Public" Orientation="Vertical"
+                              HorizontalExpand="True" VerticalExpand="True" Margin="10" />
+
+                <BoxContainer Name="BuiltInView" Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Margin="10 8">
+                    <Label Name="BuiltInTitle" Text="APP" FontColorOverride="#77FFF2" />
+                    <PanelContainer HorizontalExpand="True" VerticalExpand="True" Margin="0 6 0 0">
+                        <PanelContainer.PanelOverride>
+                            <gfx:StyleBoxFlat BackgroundColor="#0C1C22" BorderColor="#245C59" BorderThickness="1" />
+                        </PanelContainer.PanelOverride>
+                        <BoxContainer Name="BuiltInContent" Access="Public" Orientation="Vertical"
+                                      HorizontalExpand="True" VerticalExpand="True" Margin="8" />
+                    </PanelContainer>
+                </BoxContainer>
+
+                <PanelContainer Name="LockView" HorizontalExpand="True" VerticalExpand="True" Margin="10 8">
+                    <PanelContainer.PanelOverride>
+                        <gfx:StyleBoxFlat BackgroundColor="#071419" BorderColor="#2DA69C" BorderThickness="1" />
+                    </PanelContainer.PanelOverride>
+                    <CenterContainer HorizontalExpand="True" VerticalExpand="True">
+                        <BoxContainer Orientation="Vertical" MinWidth="280" MaxWidth="340" Margin="18">
+                            <Label Name="PinTitleLabel" Text="AGENT LOCKED" Align="Center"
+                                   FontColorOverride="#77FFF2" Margin="0 0 0 4" />
+                            <Label Name="PinSubtitleLabel" Text="VERIFYING DEVICE SECURITY" Align="Center"
+                                   FontColorOverride="#568783" Margin="0 0 0 12" />
+                            <PanelContainer MinHeight="48" HorizontalExpand="True" Margin="0 0 0 10">
+                                <PanelContainer.PanelOverride>
+                                    <gfx:StyleBoxFlat BackgroundColor="#0D2027" BorderColor="#245C59" BorderThickness="1" />
+                                </PanelContainer.PanelOverride>
+                                <Label Name="PinDotsLabel" Text="----" Align="Center" VAlign="Center"
+                                       FontColorOverride="#D7FFFB" />
+                            </PanelContainer>
+                            <GridContainer Columns="3" HorizontalExpand="True">
+                                <Button Name="Pin1Button" Text="1" MinHeight="42" Margin="2" />
+                                <Button Name="Pin2Button" Text="2" MinHeight="42" Margin="2" />
+                                <Button Name="Pin3Button" Text="3" MinHeight="42" Margin="2" />
+                                <Button Name="Pin4Button" Text="4" MinHeight="42" Margin="2" />
+                                <Button Name="Pin5Button" Text="5" MinHeight="42" Margin="2" />
+                                <Button Name="Pin6Button" Text="6" MinHeight="42" Margin="2" />
+                                <Button Name="Pin7Button" Text="7" MinHeight="42" Margin="2" />
+                                <Button Name="Pin8Button" Text="8" MinHeight="42" Margin="2" />
+                                <Button Name="Pin9Button" Text="9" MinHeight="42" Margin="2" />
+                                <Button Name="PinClearButton" Text="CLEAR" MinHeight="42" Margin="2" />
+                                <Button Name="Pin0Button" Text="0" MinHeight="42" Margin="2" />
+                                <Button Name="PinBackspaceButton" Text="BACK" MinHeight="42" Margin="2" />
+                            </GridContainer>
+                            <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="0 8 0 0">
+                                <Button Name="PinCancelButton" Text="CANCEL" HorizontalExpand="True" Margin="2" />
+                                <Button Name="PinSubmitButton" Text="UNLOCK" HorizontalExpand="True" Margin="2" />
+                            </BoxContainer>
+                        </BoxContainer>
+                    </CenterContainer>
+                </PanelContainer>
+            </BoxContainer>
+
+        </BoxContainer>
+    </PanelContainer>
+</agent:NCAgentWindow>

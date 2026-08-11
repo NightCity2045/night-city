@@ -28,3 +28,7 @@
     id: EngineerPDA
     ears: ClothingHeadsetEngineering
     belt: ClothingBeltUtilityFilled
+  storage:
+    back:
+    - LogProbeCartridge
+    - AstroNavCartridge

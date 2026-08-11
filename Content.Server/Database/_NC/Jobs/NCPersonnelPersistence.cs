@@ -34,6 +34,7 @@ public sealed record NCPersonnelChangeData(NCPersonnelChangeResult Result, NetUs
 public partial interface IServerDbManager
 {
     Task<IReadOnlyList<NCPersonnelEmployeeData>> GetNCPersonnelRosterAsync(IReadOnlyCollection<string> jobIds);
+    Task<IReadOnlyList<NCPersonnelEmployeeData>> SearchNCPublicPersonnelAsync(string query, int limit);
     Task<IReadOnlyList<NCPersonnelCandidateData>> SearchNCPersonnelCandidatesAsync(string query, int limit);
     Task<IReadOnlyList<NCPersonnelHistoryData>> GetNCPersonnelHistoryAsync(NCCharacterId characterId, int limit);
     Task<string?> GetNCActiveJobAsync(NCCharacterId characterId);
@@ -52,6 +53,12 @@ public sealed partial class ServerDbManager
     {
         DbReadOpsMetric.Inc();
         return RunDbCommand(() => _db.GetNCPersonnelRosterAsync(jobIds));
+    }
+
+    public Task<IReadOnlyList<NCPersonnelEmployeeData>> SearchNCPublicPersonnelAsync(string query, int limit)
+    {
+        DbReadOpsMetric.Inc();
+        return RunDbCommand(() => _db.SearchNCPublicPersonnelAsync(query, limit));
     }
 
     public Task<IReadOnlyList<NCPersonnelCandidateData>> SearchNCPersonnelCandidatesAsync(string query, int limit)
@@ -108,6 +115,28 @@ public abstract partial class ServerDbBase
         return await db.DbContext.NCCharacterEmployment.AsNoTracking()
             .Where(value => value.State == NCEmploymentState.Active && jobs.Contains(value.JobPrototypeId))
             .OrderBy(value => value.JobPrototypeId).ThenBy(value => value.Profile.CharacterName)
+            .Select(value => new NCPersonnelEmployeeData(new NCCharacterId(value.ProfileId),
+                value.Profile.CharacterName, value.JobPrototypeId, value.StartedAt))
+            .ToListAsync();
+    }
+
+    public async Task<IReadOnlyList<NCPersonnelEmployeeData>> SearchNCPublicPersonnelAsync(string query, int limit)
+    {
+        var normalized = query.Trim().ToLowerInvariant();
+        await using var db = await GetDb();
+        var employees = db.DbContext.NCCharacterEmployment.AsNoTracking()
+            .Where(value => value.State == NCEmploymentState.Active);
+        if (normalized.Length > 0)
+        {
+            employees = employees.Where(value =>
+                value.Profile.CharacterName.ToLower().Contains(normalized) ||
+                value.JobPrototypeId.ToLower().Contains(normalized));
+        }
+
+        return await employees
+            .OrderBy(value => value.JobPrototypeId)
+            .ThenBy(value => value.Profile.CharacterName)
+            .Take(Math.Clamp(limit, 1, 200))
             .Select(value => new NCPersonnelEmployeeData(new NCCharacterId(value.ProfileId),
                 value.Profile.CharacterName, value.JobPrototypeId, value.StartedAt))
             .ToListAsync();

@@ -45,6 +45,12 @@
       whitelist:
         components:
         - IdCard
+  # NC start - Night City treats the vanilla PDA as an Agent smartphone.
+  - type: NCAgent
+  - type: NCAgentShardStorage
+    capacity: 16
+    defaultProgramSize: 1
+  # NC end
   - type: PdaVisuals
   - type: Item
     size: Small
@@ -80,6 +86,8 @@
     range: 500
   - type: CartridgeLoader
     uiKey: enum.PdaUiKey.Key
+    # NC - SHARDS applies a weighted memory budget; this remains only a defensive entity-count ceiling.
+    diskSpace: 64
     cartridgeSlot:
       priority: -1
       name: device-pda-slot-component-slot-name-cartridge
@@ -92,17 +100,19 @@
     containers:
       preinstalled-program-container: !type:AllSelector
         children:
-        - id: CrewManifestCartridge
+        # NC start - Base Agent firmware contains only local personal tools.
         - id: NotekeeperCartridge
         - id: NanoTaskCartridge
-        - id: NewsReaderCartridge
+        # NC end
   - type: ActivatableUI
     key: enum.PdaUiKey.Key
     singleUser: true
   - type: UserInterface
     interfaces:
+      # NC start - Preserve the PDA UI key while rendering it through the Agent shell.
       enum.PdaUiKey.Key:
-        type: PdaBoundUserInterface
+        type: NCAgentBoundUserInterface
+      # NC end
       enum.StoreUiKey.Key:
         type: StoreBoundUserInterface
       enum.RingerUiKey.Key:
@@ -157,11 +167,10 @@
     containers:
       preinstalled-program-container: !type:AllSelector
         children:
-        - id: CrewManifestCartridge
+        # NC start - All specialist applications remain physical shards.
         - id: NotekeeperCartridge
         - id: NanoTaskCartridge
-        - id: NewsReaderCartridge
-        - id: WantedListCartridge
+        # NC end
 
 - type: entity
   parent: BasePDA
@@ -172,11 +181,10 @@
     containers:
       preinstalled-program-container: !type:AllSelector
         children:
-        - id: CrewManifestCartridge
+        # NC start - All specialist applications remain physical shards.
         - id: NotekeeperCartridge
         - id: NanoTaskCartridge
-        - id: NewsReaderCartridge
-        - id: MedTekCartridge
+        # NC end
 
 - type: entity
   parent: BasePDA
@@ -436,8 +444,10 @@
     containers:
       preinstalled-program-container: !type:AllSelector
         children:
-        - id: CrewManifestCartridge
-        - id: NewsReaderCartridge
+        # NC start - Keep the muted Agent useful without bundling network-reader shards.
+        - id: NotekeeperCartridge
+        - id: NanoTaskCartridge
+        # NC end
 
 - type: entity
   name: chaplain PDA
@@ -490,11 +500,10 @@
     containers:
       preinstalled-program-container: !type:AllSelector
         children:
-        - id: CrewManifestCartridge
+        # NC start - Network readers remain physical shards.
         - id: NotekeeperCartridge
         - id: NanoTaskCartridge
-        - id: NewsReaderCartridge
-        - id: AstroNavCartridge
+        # NC end
 
 - type: entity
   parent: BasePDA
@@ -536,11 +545,10 @@
     containers:
       preinstalled-program-container: !type:AllSelector
         children:
-        - id: CrewManifestCartridge
+        # NC start - Network readers remain physical shards.
         - id: NotekeeperCartridge
         - id: NanoTaskCartridge
-        - id: NewsReaderCartridge
-        - id: AstroNavCartridge
+        # NC end
 
 - type: entity
   parent: BasePDA
@@ -887,12 +895,10 @@
     containers:
       preinstalled-program-container: !type:AllSelector
         children:
-        - id: CrewManifestCartridge
+        # NC start - Network readers remain physical shards.
         - id: NotekeeperCartridge
         - id: NanoTaskCartridge
-        - id: NewsReaderCartridge
-        - id: WantedListCartridge
-        - id: LogProbeCartridge
+        # NC end
 
 - type: entity
   parent: BaseSecurityPDA
@@ -958,14 +964,10 @@
     containers:
       preinstalled-program-container: !type:AllSelector
         children:
-        - id: CrewManifestCartridge
+        # NC start - Network readers remain physical shards.
         - id: NotekeeperCartridge
         - id: NanoTaskCartridge
-        - id: NewsReaderCartridge
-        - id: MedTekCartridge
-        - id: WantedListCartridge
-        - id: LogProbeCartridge
-        - id: AstroNavCartridge
+        # NC end
 
 - type: entity
   parent: CentcomPDA
@@ -986,14 +988,10 @@
     containers:
       preinstalled-program-container: !type:AllSelector
         children:
-        - id: CrewManifestCartridge
+        # NC start - Network readers remain physical shards.
         - id: NotekeeperCartridge
         - id: NanoTaskCartridge
-        - id: NewsReaderCartridge
-        - id: LogProbeCartridge
-        - id: WantedListCartridge
-        - id: MedTekCartridge
-        - id: AstroNavCartridge
+        # NC end
   - type: Tag #  Ignore Chameleon tags
     tags:
     - DoorBumpOpener
@@ -1149,9 +1147,10 @@
     containers:
       preinstalled-program-container: !type:AllSelector
         children:
+        # NC start - MEDTEK remains a physical shard even for the corpsman Agent.
         - id: NotekeeperCartridge
         - id: NanoTaskCartridge
-        - id: MedTekCartridge
+        # NC end
 
 - type: entity
   parent: [ SyndiOperativePDA, BaseSyndicateContraband ]
@@ -1193,14 +1192,10 @@
     containers:
       preinstalled-program-container: !type:AllSelector
         children:
-        - id: CrewManifestCartridge
+        # NC start - Network readers remain physical shards.
         - id: NotekeeperCartridge
         - id: NanoTaskCartridge
-        - id: NewsReaderCartridge
-        - id: MedTekCartridge
-        - id: WantedListCartridge
-        - id: LogProbeCartridge
-        - id: AstroNavCartridge
+        # NC end
 
 - type: entity
   parent: ERTLeaderPDA
@@ -1366,12 +1361,10 @@
     containers:
       preinstalled-program-container: !type:AllSelector
         children:
-        - id: CrewManifestCartridge
+        # NC start - Network readers remain physical shards.
         - id: NotekeeperCartridge
         - id: NanoTaskCartridge
-        - id: NewsReaderCartridge
-        - id: WantedListCartridge
-        - id: LogProbeCartridge
+        # NC end
 
 - type: entity
   parent: BaseMedicalPDA
@@ -1396,12 +1389,10 @@
     containers:
       preinstalled-program-container: !type:AllSelector
         children:
-        - id: CrewManifestCartridge
+        # NC start - Network readers remain physical shards.
         - id: NotekeeperCartridge
         - id: NanoTaskCartridge
-        - id: NewsReaderCartridge
-        - id: WantedListCartridge
-        - id: MedTekCartridge
+        # NC end
 
 - type: entity
   parent: ClownPDA

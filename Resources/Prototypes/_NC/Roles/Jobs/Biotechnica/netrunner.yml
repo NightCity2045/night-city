@@ -14,6 +14,7 @@
   startingGear: BiotechnicaNetrunnerGear
   icon: JobIconScientist
   accessGroups: [ BiotechBasic ]
+  access: [ Biotech_Tech ]
 
 - type: startingGear
   id: BiotechnicaNetrunnerGear
@@ -22,5 +23,9 @@
     back: ClothingBackpackScience
     shoes: ClothingShoesColorBlack
     eyes: ClothingEyesGlasses
-    id: ScientistPDA
+    id: SciencePDA
     ears: ClothingHeadsetScience
+  storage:
+    back:
+    - NetProbeCartridge
+    - LogProbeCartridge

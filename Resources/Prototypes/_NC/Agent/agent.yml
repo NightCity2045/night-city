@@ -1,0 +1,49 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncAgentConfiguration
+  id: Default
+  addressPrefix: NC
+  # RobustToolbox TimeSpan YAML has no day suffix; thirty days are 720 hours.
+  messageRetention: 720h
+  maximumDirectoryQueryLength: 64
+  minimumAliasLength: 3
+  maximumAliasLength: 32
+  maximumMessageLength: 1024
+  maximumPostLength: 2048
+  maximumCommentLength: 1024
+  directoryResultLimit: 30
+  conversationMessageLimit: 100
+  conversationPeerLimit: 50
+  incomingCallTimeout: 30s
+  callHistoryRetention: 720h
+  callHistoryLimit: 50
+  maximumGroupNameLength: 48
+  maximumGroupMembers: 20
+  groupConversationLimit: 30
+  groupMessageLimit: 100
+  contactRequestTimeout: 30s
+  contactShareRange: 2
+  groupInviteRetention: 24h
+  notificationOverlayDuration: 6s
+  notificationOverlayLimit: 3
+  serviceAvailable: true
+  defaultNetworkState: Online
+  degradedAllowsCalls: false
+  degradedAllowsMessages: true
+  degradedAllowsCitiNet: true
+  citinetPostRetention: 720h
+  citinetPostCooldown: 10s
+  citinetCommentCooldown: 3s
+  citinetReactionCooldown: 1s
+  maximumMentionsPerEntry: 10
+  feedPostLimit: 20
+  feedCommentLimit: 200
+  minimumPinLength: 4
+  maximumPinLength: 8
+  # Hash work stays modest because online attempt lockouts provide the primary defense.
+  pinHashIterations: 20000
+  pinMaximumAttempts: 5
+  pinLockoutDuration: 30s
+  pinUnlockSessionDuration: 5m

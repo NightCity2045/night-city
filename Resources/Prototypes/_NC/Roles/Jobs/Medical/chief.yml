@@ -30,3 +30,6 @@
     ears: ClothingHeadsetCMO
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatLabCmo
+  storage:
+    back:
+    - MedTekCartridge

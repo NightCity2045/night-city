@@ -287,6 +287,10 @@
       - id: LanternFlash
       - id: PowerCellHigh
       - id: NetProbeCartridge
+      # NC start - Rare loose public Agent shards; physical scarcity is preserved.
+      - id: NewsReaderCartridge
+      - id: AstroNavCartridge
+      # NC end
       - id: WelderIndustrial
       - id: SheetPlasteel10
       - id: ClothingMaskGasExplorer

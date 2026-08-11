@@ -1,0 +1,32 @@
+<medtek:NCAgentMedTekFragment xmlns="https://spacestation14.io"
+                              xmlns:medtek="clr-namespace:Content.Client._NC.Agent.Shards.MedTek"
+                              xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                              Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+    <PanelContainer Name="MedicalHeader" HorizontalExpand="True" Margin="0 0 0 6">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#0C2118" BorderColor="#58E887" BorderThickness="1 1 1 2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="10 7">
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                <Label Text="MEDTEK // FIELD DIAGNOSTICS" FontColorOverride="#76FF95" HorizontalExpand="True" />
+                <Label Name="HistoryCount" Text="0 / 12" FontColorOverride="#58956B" />
+            </BoxContainer>
+            <Label Name="MedicalStatus" Text="ARMED // USE AGENT ON PATIENT" FontColorOverride="#76FF95" />
+        </BoxContainer>
+    </PanelContainer>
+
+    <PanelContainer HorizontalExpand="True" Margin="0 0 0 6">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#08170F" BorderColor="#28593A" BorderThickness="1" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="8 6">
+            <Label Text="Scan a patient with the Agent. Live vitals open in the analyzer; this shard keeps the last 12 snapshots."
+                   FontColorOverride="#6C918E" HorizontalExpand="True" />
+            <Button Name="ClearButton" Text="CLEAR" MinWidth="72" Margin="6 0 0 0" Disabled="True" />
+        </BoxContainer>
+    </PanelContainer>
+
+    <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+        <BoxContainer Name="HistoryContainer" Orientation="Vertical" HorizontalExpand="True" />
+    </ScrollContainer>
+</medtek:NCAgentMedTekFragment>

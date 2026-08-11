@@ -1,4 +1,6 @@
 using System.Linq;
+// NC - Agent shards are physical cartridge entities and must survive installation.
+using Content.Shared._NC.Agent.Shards;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared.CartridgeLoader;
@@ -78,6 +80,20 @@ public sealed partial class CartridgeLoaderSystem
         if (!HasProgram(ent, program))
             return;
 
+        // NC start - Protected Agent programs authenticate against the currently inserted vanilla VIN card.
+        if (HasComp<NCAgentShardStorageComponent>(ent))
+        {
+            // A chip in the physical slot is visible to SHARDS but cannot execute before installation.
+            if (!GetDiskPrograms(ent).Contains(program))
+                return;
+
+            var authorization = new NCAgentShardAuthorizationAttemptEvent(ent, program);
+            RaiseLocalEvent(ref authorization);
+            if (authorization.Cancelled)
+                return;
+        }
+        // NC end
+
         if (ent.Comp.ActiveProgram is { } active)
             DeactivateProgram(ent, active);
 
@@ -130,8 +146,26 @@ public sealed partial class CartridgeLoaderSystem
     /// <param name="ent">The cartridge loader uid.</param>
     /// <param name="program">The uid of the program to be uninstalled.</param>
     /// <returns>Whether uninstalling the program was successful.</returns>
-    public bool UninstallProgram(Entity<CartridgeLoaderComponent> ent, EntityUid program)
+    public bool UninstallProgram(Entity<CartridgeLoaderComponent> ent, EntityUid program, EntityUid? user = null)
     {
+        // NC start - Move a physical Agent shard back to its cartridge slot without deleting its data.
+        if (HasComp<NCAgentShardStorageComponent>(ent))
+        {
+            if (!_container.TryGetContainer(ent, CartridgeLoaderComponent.RemovableContainerId, out var removable) ||
+                !removable.Contains(program) ||
+                ent.Comp.CartridgeSlot.HasItem)
+            {
+                return false;
+            }
+
+            return _itemSlotsSystem.TryInsert(ent,
+                ent.Comp.CartridgeSlot,
+                program,
+                user,
+                excludeUserAudio: true);
+        }
+        // NC end
+
         if (!GetDiskPrograms(ent).Contains(program))
             return false;
 
@@ -159,6 +193,26 @@ public sealed partial class CartridgeLoaderSystem
             if (MetaData(program).EntityPrototype is { } programProto && programProto == cartridgeProto)
                 return false;
         }
+
+        // NC start - Installing into an Agent moves the original shard entity instead of cloning its prototype.
+        // This preserves per-shard state such as notes, medical history, and navigation waypoints.
+        if (HasComp<NCAgentShardStorageComponent>(ent))
+        {
+            // Server authority only accepts the physical chip currently held by this Agent's cartridge slot.
+            if (ent.Comp.CartridgeSlot.Item != cartridge)
+                return false;
+
+            var attempt = new ProgramInstallationAttempt(ent, cartridgeProto.ID);
+            RaiseLocalEvent(ref attempt);
+            if (attempt.Cancelled ||
+                !_container.TryGetContainer(ent, CartridgeLoaderComponent.RemovableContainerId, out var removable))
+            {
+                return false;
+            }
+
+            return _container.Insert(cartridge, removable);
+        }
+        // NC end
 
         return InstallProgram(ent, cartridgeProto);
     }

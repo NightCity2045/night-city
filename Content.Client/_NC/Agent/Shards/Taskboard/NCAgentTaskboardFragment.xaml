@@ -1,0 +1,51 @@
+<taskboard:NCAgentTaskboardFragment xmlns="https://spacestation14.io"
+                                    xmlns:taskboard="clr-namespace:Content.Client._NC.Agent.Shards.Taskboard"
+                                    xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                                    Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+    <PanelContainer HorizontalExpand="True" Margin="0 0 0 6">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#101A24" BorderColor="#508DFF" BorderThickness="1 1 1 2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="10 7">
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                <Label Text="TASKBOARD // LOCAL QUEUE" FontColorOverride="#8FB8FF" HorizontalExpand="True" />
+                <Label Name="CountLabel" Text="0 TASKS" FontColorOverride="#5B718E" />
+            </BoxContainer>
+            <Label Name="StatusLabel" Text="DEVICE STORAGE // READY" FontColorOverride="#76FF95" />
+        </BoxContainer>
+    </PanelContainer>
+
+    <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="0 0 0 6">
+        <LineEdit Name="SearchInput" PlaceHolder="search tasks, targets or deadlines" HorizontalExpand="True" />
+        <Button Name="NewButton" Text="+ NEW" MinWidth="76" Margin="5 0 0 0" />
+    </BoxContainer>
+
+    <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+        <BoxContainer Name="TasksContainer" Orientation="Vertical" HorizontalExpand="True" />
+    </ScrollContainer>
+
+    <PanelContainer Name="EditorPanel" Visible="False" HorizontalExpand="True" Margin="0 6 0 0">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#08171F" BorderColor="#355D9A" BorderThickness="1" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="8" SeparationOverride="4">
+            <Label Name="EditorTitle" Text="NEW TASK" FontColorOverride="#8FB8FF" />
+            <LineEdit Name="DescriptionInput" PlaceHolder="task description" HorizontalExpand="True" />
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                <LineEdit Name="TargetInput" PlaceHolder="target / assignee" HorizontalExpand="True" />
+                <LineEdit Name="DeadlineInput" PlaceHolder="deadline" HorizontalExpand="True" Margin="5 0 0 0" />
+            </BoxContainer>
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                <OptionButton Name="PrioritySelector" HorizontalExpand="True" />
+                <OptionButton Name="StateSelector" HorizontalExpand="True" Margin="5 0 0 0" />
+            </BoxContainer>
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="0 3 0 0">
+                <Button Name="DeleteButton" Text="DELETE" Visible="False" />
+                <Button Name="PrintButton" Text="PRINT" Visible="False" Margin="4 0 0 0" />
+                <Control HorizontalExpand="True" />
+                <Button Name="CancelButton" Text="CANCEL" />
+                <Button Name="SaveButton" Text="SAVE" MinWidth="76" Margin="4 0 0 0" />
+            </BoxContainer>
+        </BoxContainer>
+    </PanelContainer>
+</taskboard:NCAgentTaskboardFragment>

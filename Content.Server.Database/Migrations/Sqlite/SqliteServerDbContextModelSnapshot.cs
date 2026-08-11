@@ -926,6 +926,367 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("job", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCAgentBlock", b =>
+                {
+                    b.Property<int>("OwnerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("owner_profile_id");
+
+                    b.Property<int>("BlockedProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("blocked_profile_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("OwnerProfileId", "BlockedProfileId")
+                        .HasName("PK_nc_agent_block");
+
+                    b.HasIndex("BlockedProfileId");
+
+                    b.ToTable("nc_agent_block", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentCallLog", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_agent_call_log_id");
+
+                    b.Property<DateTime?>("AnsweredAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("answered_at");
+
+                    b.Property<int>("CallerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("caller_profile_id");
+
+                    b.Property<DateTime>("EndedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("ended_at");
+
+                    b.Property<byte>("Outcome")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("outcome");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("started_at");
+
+                    b.Property<int>("TargetProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("target_profile_id");
+
+                    b.Property<DateTime?>("TargetReadAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("target_read_at");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_agent_call_log");
+
+                    b.HasIndex("CallerProfileId");
+
+                    b.HasIndex("EndedAt");
+
+                    b.HasIndex("TargetProfileId", "TargetReadAt");
+
+                    b.ToTable("nc_agent_call_log", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentContact", b =>
+                {
+                    b.Property<int>("OwnerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("owner_profile_id");
+
+                    b.Property<int>("ContactProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("contact_profile_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("OwnerProfileId", "ContactProfileId")
+                        .HasName("PK_nc_agent_contact");
+
+                    b.HasIndex("ContactProfileId");
+
+                    b.ToTable("nc_agent_contact", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentDirectConversationState", b =>
+                {
+                    b.Property<int>("OwnerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("owner_profile_id");
+
+                    b.Property<int>("PeerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("peer_profile_id");
+
+                    b.Property<DateTime?>("ClearedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("cleared_at");
+
+                    b.HasKey("OwnerProfileId", "PeerProfileId")
+                        .HasName("PK_nc_agent_direct_conversation_state");
+
+                    b.HasIndex("PeerProfileId");
+
+                    b.ToTable("nc_agent_direct_conversation_state", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroup", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_agent_group_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(48)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
+                    b.Property<int>("OwnerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("owner_profile_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_agent_group");
+
+                    b.HasIndex("OwnerProfileId");
+
+                    b.HasIndex("UpdatedAt");
+
+                    b.ToTable("nc_agent_group", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupInvite", b =>
+                {
+                    b.Property<long>("GroupId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("group_id");
+
+                    b.Property<int>("InviteeProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("invitee_profile_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("expires_at");
+
+                    b.Property<int>("InviterProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("inviter_profile_id");
+
+                    b.HasKey("GroupId", "InviteeProfileId")
+                        .HasName("PK_nc_agent_group_invite");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("InviteeProfileId");
+
+                    b.HasIndex("InviterProfileId");
+
+                    b.ToTable("nc_agent_group_invite", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupMember", b =>
+                {
+                    b.Property<long>("GroupId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("group_id");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<DateTime?>("ClearedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("cleared_at");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("joined_at");
+
+                    b.Property<DateTime?>("LastReadAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("last_read_at");
+
+                    b.Property<byte>("Role")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("role");
+
+                    b.HasKey("GroupId", "ProfileId")
+                        .HasName("PK_nc_agent_group_member");
+
+                    b.HasIndex("ProfileId")
+                        .HasDatabaseName("IX_nc_agent_group_member_profile_id");
+
+                    b.ToTable("nc_agent_group_member", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_agent_group_message_id");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("body");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("expires_at");
+
+                    b.Property<long>("GroupId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("group_id");
+
+                    b.Property<int>("SenderProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("sender_profile_id");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("sent_at");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_agent_group_message");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("SenderProfileId");
+
+                    b.HasIndex("GroupId", "SentAt");
+
+                    b.ToTable("nc_agent_group_message", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_agent_message_id");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("body");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("expires_at");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("read_at");
+
+                    b.Property<int>("RecipientProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("recipient_profile_id");
+
+                    b.Property<int>("SenderProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("sender_profile_id");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("sent_at");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_agent_message");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("RecipientProfileId");
+
+                    b.HasIndex("SenderProfileId", "RecipientProfileId", "SentAt");
+
+                    b.ToTable("nc_agent_message", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentProfile", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("address");
+
+                    b.Property<string>("Alias")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("alias");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("NormalizedAlias")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("normalized_alias");
+
+                    b.Property<bool>("NotificationSoundEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true)
+                        .HasColumnName("notification_sound_enabled");
+
+                    b.Property<bool>("OverlayNotificationsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true)
+                        .HasColumnName("overlay_notifications_enabled");
+
+                    b.Property<byte>("Presence")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("presence");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_agent_profile");
+
+                    b.HasIndex("Address")
+                        .IsUnique();
+
+                    b.HasIndex("NormalizedAlias")
+                        .IsUnique();
+
+                    b.ToTable("nc_agent_profile", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCCharacterBankAccount", b =>
                 {
                     b.Property<int>("ProfileId")
@@ -991,6 +1352,97 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.HasIndex("JobPrototypeId");
 
                     b.ToTable("nc_character_employment", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCitiNetComment", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_citinet_comment_id");
+
+                    b.Property<int>("AuthorProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("author_profile_id");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("body");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<long>("PostId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("post_id");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_citinet_comment");
+
+                    b.HasIndex("AuthorProfileId")
+                        .HasDatabaseName("IX_nc_citinet_comment_author_profile_id");
+
+                    b.HasIndex("PostId", "CreatedAt");
+
+                    b.ToTable("nc_citinet_comment", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCitiNetPost", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_citinet_post_id");
+
+                    b.Property<int>("AuthorProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("author_profile_id");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("body");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_citinet_post");
+
+                    b.HasIndex("AuthorProfileId")
+                        .HasDatabaseName("IX_nc_citinet_post_author_profile_id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.ToTable("nc_citinet_post", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCitiNetReaction", b =>
+                {
+                    b.Property<long>("PostId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("post_id");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("PostId", "ProfileId")
+                        .HasName("PK_nc_citinet_reaction");
+
+                    b.HasIndex("ProfileId")
+                        .HasDatabaseName("IX_nc_citinet_reaction_profile_id");
+
+                    b.ToTable("nc_citinet_reaction", (string)null);
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCDungeonExtractedItemRecord", b =>
@@ -2967,6 +3419,207 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Profile");
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCAgentBlock", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Blocked")
+                        .WithMany()
+                        .HasForeignKey("BlockedProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_block_blocked_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_block_owner_profile_id");
+
+                    b.Navigation("Blocked");
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentCallLog", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Caller")
+                        .WithMany()
+                        .HasForeignKey("CallerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_call_log_caller_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Target")
+                        .WithMany()
+                        .HasForeignKey("TargetProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_call_log_target_profile_id");
+
+                    b.Navigation("Caller");
+
+                    b.Navigation("Target");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentContact", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_contact_contact_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Owner")
+                        .WithMany("Contacts")
+                        .HasForeignKey("OwnerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_contact_owner_profile_id");
+
+                    b.Navigation("Contact");
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentDirectConversationState", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_direct_state_owner_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Peer")
+                        .WithMany()
+                        .HasForeignKey("PeerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_direct_state_peer_profile_id");
+
+                    b.Navigation("Owner");
+
+                    b.Navigation("Peer");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroup", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_owner_profile_id");
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupInvite", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentGroup", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_invite_group_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Invitee")
+                        .WithMany()
+                        .HasForeignKey("InviteeProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_invite_invitee_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Inviter")
+                        .WithMany()
+                        .HasForeignKey("InviterProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_invite_inviter_profile_id");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Invitee");
+
+                    b.Navigation("Inviter");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupMember", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentGroup", "Group")
+                        .WithMany("Members")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_member_group_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_member_profile_id");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupMessage", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentGroup", "Group")
+                        .WithMany("Messages")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_message_group_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_message_sender_profile_id");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentMessage", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Recipient")
+                        .WithMany()
+                        .HasForeignKey("RecipientProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_message_recipient_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_message_sender_profile_id");
+
+                    b.Navigation("Recipient");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentProfile", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", "Profile")
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCAgentProfile", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_profile_profile_profile_id");
+
+                    b.Navigation("Profile");
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCCharacterBankAccount", b =>
                 {
                     b.HasOne("Content.Server.Database.Profile", null)
@@ -2985,6 +3638,60 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_nc_character_employment_profile_profile_id");
+
+                    b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCitiNetComment", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_citinet_comment_author_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCCitiNetPost", "Post")
+                        .WithMany("Comments")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_citinet_comment_post_id");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCitiNetPost", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_citinet_post_author_profile_id");
+
+                    b.Navigation("Author");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCitiNetReaction", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCCitiNetPost", "Post")
+                        .WithMany("Reactions")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_citinet_reaction_post_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_citinet_reaction_profile_id");
+
+                    b.Navigation("Post");
 
                     b.Navigation("Profile");
                 });
@@ -3422,9 +4129,28 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Options");
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroup", b =>
+                {
+                    b.Navigation("Members");
+
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentProfile", b =>
+                {
+                    b.Navigation("Contacts");
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
                 {
                     b.Navigation("Events");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCitiNetPost", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Reactions");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCDungeonRunRecord", b =>

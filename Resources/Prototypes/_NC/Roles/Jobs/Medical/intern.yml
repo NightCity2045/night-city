@@ -29,3 +29,6 @@
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatLab
     pocket2: BookMedicalReferenceBook
+  storage:
+    back:
+    - MedTekCartridge

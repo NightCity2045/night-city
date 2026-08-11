@@ -13,6 +13,19 @@ public enum NanoTaskPriority : byte
     Low,
 };
 
+// NC start - Agent TASKBOARD workflow states.
+/// <summary>
+///     Persistent workflow state used by the Agent TASKBOARD interface.
+/// </summary>
+[Serializable, NetSerializable]
+public enum NanoTaskStatus : byte
+{
+    Open,
+    Active,
+    Done,
+};
+// NC end
+
 /// <summary>
 ///     The data relating to a single NanoTask item, but not its identifier
 /// </summary>
@@ -44,22 +57,49 @@ public sealed partial class NanoTaskItem : IRobustCloneable<NanoTaskItem>
     /// </summary>
     public readonly NanoTaskPriority Priority;
 
-    public NanoTaskItem(string description, string taskIsFor, bool isTaskDone, NanoTaskPriority priority)
+    // NC start - Agent TASKBOARD extended task data.
+    /// <summary>
+    ///     Workflow state. IsTaskDone remains synchronized for legacy NanoTask controls.
+    /// </summary>
+    public readonly NanoTaskStatus Status;
+
+    /// <summary>
+    ///     Optional free-form deadline kept deliberately short for the compact Agent display.
+    /// </summary>
+    public readonly string Deadline;
+    // NC end
+
+    public NanoTaskItem(
+        string description,
+        string taskIsFor,
+        bool isTaskDone,
+        NanoTaskPriority priority,
+        NanoTaskStatus status = NanoTaskStatus.Open,
+        string deadline = "")
     {
         Description = description;
         TaskIsFor = taskIsFor;
-        IsTaskDone = isTaskDone;
         Priority = priority;
+        // NC start - Old callers only set IsTaskDone, so completed legacy tasks remain completed.
+        Status = isTaskDone ? NanoTaskStatus.Done : status;
+        IsTaskDone = Status == NanoTaskStatus.Done;
+        Deadline = deadline;
+        // NC end
     }
 
     public bool Validate()
     {
-        return Description.Length <= MaximumStringLength && TaskIsFor.Length <= MaximumStringLength;
+        // NC - Deadline uses the same compact field limit as the original NanoTask strings.
+        return Description.Length <= MaximumStringLength &&
+               TaskIsFor.Length <= MaximumStringLength &&
+               Deadline.Length <= MaximumStringLength &&
+               Enum.IsDefined(Status);
     }
 
     public NanoTaskItem Clone()
     {
-        return new(Description, TaskIsFor, IsTaskDone, Priority);
+        // NC - Preserve extended TASKBOARD data when cloning a vanilla task record.
+        return new(Description, TaskIsFor, IsTaskDone, Priority, Status, Deadline);
     }
 };
 

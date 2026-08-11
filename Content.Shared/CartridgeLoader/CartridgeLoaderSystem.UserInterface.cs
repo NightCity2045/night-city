@@ -1,4 +1,7 @@
 using System.Linq;
+// NC - Agent program relay performs VIN authorization before protected use.
+using Content.Shared._NC.Agent.Components;
+using Content.Shared._NC.Agent.Shards;
 
 namespace Content.Shared.CartridgeLoader;
 
@@ -6,6 +9,16 @@ public sealed partial class CartridgeLoaderSystem
 {
     private void OnLoaderUiMessage(Entity<CartridgeLoaderComponent> ent, ref CartridgeLoaderUiMessage message)
     {
+        // NC start - Every Agent shard operation requires an authoritative unlocked device session.
+        if (HasComp<NCAgentComponent>(ent))
+        {
+            var access = new NCAgentDeviceAccessAttemptEvent(message.Actor);
+            RaiseLocalEvent(ent.Owner, ref access);
+            if (access.Cancelled)
+                return;
+        }
+        // NC end
+
         var cartridge = GetEntity(message.CartridgeUid);
 
         switch (message.Action)
@@ -20,7 +33,8 @@ public sealed partial class CartridgeLoaderSystem
                 InstallCartridge(ent, cartridge);
                 break;
             case CartridgeUiMessageAction.Uninstall:
-                UninstallProgram(ent, cartridge);
+                // NC - The actor is required when a physical Agent shard returns to its item slot.
+                UninstallProgram(ent, cartridge, message.Actor);
                 break;
             case CartridgeUiMessageAction.UIReady:
                 if (ent.Comp.ActiveProgram is { } foreground)
@@ -39,13 +53,38 @@ public sealed partial class CartridgeLoaderSystem
     /// </summary>
     private void OnUiMessage(Entity<CartridgeLoaderComponent> ent, ref CartridgeUiMessage args)
     {
+        // NC start - A still-open cartridge fragment cannot bypass a subsequently locked Agent.
+        if (HasComp<NCAgentComponent>(ent))
+        {
+            var access = new NCAgentDeviceAccessAttemptEvent(args.Actor);
+            RaiseLocalEvent(ent.Owner, ref access);
+            if (access.Cancelled)
+                return;
+        }
+        // NC end
+
         var cartridgeEvent = args.MessageEvent;
         cartridgeEvent.User = args.Actor;
         cartridgeEvent.LoaderUid = GetNetEntity(ent);
         cartridgeEvent.Actor = args.Actor;
 
-        if (ent.Comp.ActiveProgram is { } foreground)
-            RaiseLocalEvent(foreground, cartridgeEvent);
+        if (ent.Comp.ActiveProgram is not { } foreground)
+            return;
+
+        // NC start - Removing or replacing the VIN card revokes protected program use immediately.
+        if (HasComp<NCAgentShardStorageComponent>(ent))
+        {
+            var authorization = new NCAgentShardAuthorizationAttemptEvent(ent, foreground);
+            RaiseLocalEvent(ref authorization);
+            if (authorization.Cancelled)
+            {
+                DeactivateProgram(ent, foreground);
+                return;
+            }
+        }
+        // NC end
+
+        RaiseLocalEvent(foreground, cartridgeEvent);
     }
 
     /// <summary>

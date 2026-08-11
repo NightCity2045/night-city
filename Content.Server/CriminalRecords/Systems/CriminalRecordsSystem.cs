@@ -9,6 +9,8 @@ using Content.Shared.CartridgeLoader;
 using Content.Shared.CartridgeLoader.Cartridges;
 using Content.Shared.StationRecords.Events;
 using Content.Shared.StationRecords.Systems;
+// NC - Agent WATCHLIST uses persistent NCPD data.
+using Content.Shared._NC.Agent.Shards.Watchlist;
 
 namespace Content.Server.CriminalRecords.Systems;
 
@@ -163,6 +165,10 @@ public sealed partial class CriminalRecordsSystem : SharedCriminalRecordsSystem
 
     private void UpdateReaderUi(Entity<WantedListCartridgeComponent> ent, EntityUid loaderUid)
     {
+        // NC - The Agent-specific system owns WATCHLIST state; ordinary PDA cartridges remain vanilla.
+        if (HasComp<NCAgentWatchlistComponent>(ent))
+            return;
+
         if (_station.GetOwningStation(ent) is not { } station)
             return;
 

@@ -29,6 +29,9 @@
     ears: ClothingHeadsetAltSecurity
     belt: ClothingBeltSecurityFilled
     outerClothing: ClothingOuterCoatHoSTrench
+  storage:
+    back:
+    - WantedListCartridge
 
 - type: jobIcon
   parent: JobIcon
