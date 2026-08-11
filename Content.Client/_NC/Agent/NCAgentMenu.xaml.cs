@@ -1123,6 +1123,12 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         {
             var item = new NCAgentShardItem(program);
             item.OpenPressed += data => OnProgramItemPressed?.Invoke(data.Uid);
+            item.AccessDenied += data =>
+            {
+                ShardStatusLabel.Text = $"ACCESS DENIED // VIN {data.AccessLabel.ToUpperInvariant()} REQUIRED";
+                ShardStatusLabel.FontColorOverride = Color.FromHex("#FF7897");
+                RestartAnimation(ShardStatusLabel, ShardStatusPulseAnimation, "nc-agent-shard-status");
+            };
             item.UninstallPressed += data =>
             {
                 ShardStatusLabel.Text = $"REMOVING // {data.Name.ToUpperInvariant()}";

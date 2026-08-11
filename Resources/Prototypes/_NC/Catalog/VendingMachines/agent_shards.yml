@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Public programs remain obtainable, but every mapped vendor has finite physical stock.
+- type: vendingMachineInventory
+  id: NCAgentShardInventory
+  startingInventory:
+    NewsReaderCartridge: 4
+    CrewManifestCartridge: 4
+    AstroNavCartridge: 3
+    MedTekCartridge: 2
+    NetProbeCartridge: 2
+    LogProbeCartridge: 1
+
+- type: entity
+  parent: VendingMachineVendomat
+  id: NCVendingMachineAgentShards
+  name: DataTerm shard vendor
+  description: A battered street terminal selling a finite stock of licensed Agent shards.
+  components:
+  - type: VendingMachine
+    pack: NCAgentShardInventory
+    offState: off
+    brokenState: broken
+    normalState: normal-unshaded
+    ejectState: eject-unshaded
+    denyState: deny-unshaded
+  - type: PointLight
+    radius: 1.5
+    energy: 2.2
+    color: "#24E0D0"

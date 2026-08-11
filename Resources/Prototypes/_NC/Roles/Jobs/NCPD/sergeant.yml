@@ -28,6 +28,9 @@
     ears: ClothingHeadsetSecurity
     belt: ClothingBeltSecurityFilled
     outerClothing: ClothingOuterArmorBasic
+  storage:
+    back:
+    - WantedListCartridge
 
 - type: jobIcon
   parent: JobIcon

@@ -3,13 +3,13 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Client.UserInterface.Fragments;
-using Content.Shared.CartridgeLoader.Cartridges;
+using Content.Shared._NC.Agent.Shards.Watchlist;
 using Robust.Client.UserInterface;
 
 namespace Content.Client._NC.Agent.Shards.Watchlist;
 
 /// <summary>
-/// Presents the vanilla criminal-record query as the Agent WATCHLIST reader.
+/// Presents persistent read-only NCPD records as the Agent WATCHLIST reader.
 /// </summary>
 public sealed partial class NCAgentWatchlistUi : UIFragment
 {
@@ -24,7 +24,7 @@ public sealed partial class NCAgentWatchlistUi : UIFragment
 
     public override void UpdateState(BoundUserInterfaceState state)
     {
-        if (state is WantedListUiState watchlist)
+        if (state is NCAgentWatchlistUiState watchlist)
             _fragment?.UpdateState(watchlist.Records);
     }
 }

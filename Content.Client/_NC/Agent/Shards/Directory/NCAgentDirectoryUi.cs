@@ -3,13 +3,13 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Client.UserInterface.Fragments;
-using Content.Shared.CartridgeLoader.Cartridges;
+using Content.Shared._NC.Agent.Shards.Directory;
 using Robust.Client.UserInterface;
 
 namespace Content.Client._NC.Agent.Shards.Directory;
 
 /// <summary>
-/// Renders the vanilla public manifest as an Agent organization directory.
+/// Renders the persistent public Night City personnel registry.
 /// </summary>
 public sealed partial class NCAgentDirectoryUi : UIFragment
 {
@@ -24,7 +24,7 @@ public sealed partial class NCAgentDirectoryUi : UIFragment
 
     public override void UpdateState(BoundUserInterfaceState state)
     {
-        if (state is CrewManifestUiState directory)
-            _fragment?.UpdateState(directory.StationName, directory.Entries);
+        if (state is NCAgentDirectoryUiState directory)
+            _fragment?.UpdateState(directory.Records);
     }
 }

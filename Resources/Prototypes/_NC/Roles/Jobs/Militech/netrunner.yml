@@ -23,5 +23,9 @@
     back: ClothingBackpackScience
     shoes: ClothingShoesColorBlack
     eyes: ClothingEyesGlasses
-    id: ScientistPDA
+    id: SciencePDA
     ears: ClothingHeadsetScience
+  storage:
+    back:
+    - NetProbeCartridge
+    - LogProbeCartridge

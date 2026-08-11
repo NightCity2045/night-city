@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System.Linq;
 using Content.Shared.CartridgeLoader;
+using Content.Shared.Access.Components;
+using Content.Shared.PDA;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.Agent.Shards;
@@ -19,6 +22,7 @@ public sealed partial class NCAgentShardSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<ProgramInstallationAttempt>(OnInstallationAttempt);
+        SubscribeLocalEvent<NCAgentShardAuthorizationAttemptEvent>(OnAuthorizationAttempt);
     }
 
     private void OnInstallationAttempt(ref ProgramInstallationAttempt args)
@@ -29,6 +33,33 @@ public sealed partial class NCAgentShardSystem : EntitySystem
         var requested = GetPrototypeSize(args.Prototype, storage.DefaultProgramSize);
         if (requested <= 0 || GetUsedMemory(args.LoaderUid, storage) + requested > storage.Capacity)
             args.Cancelled = true;
+    }
+
+    private void OnAuthorizationAttempt(ref NCAgentShardAuthorizationAttemptEvent args)
+    {
+        if (!IsAuthorized(args.Loader, args.Program))
+            args.Cancelled = true;
+    }
+
+    /// <summary>
+    /// Checks the current vanilla ID card (presented as VIN card) inside the Agent.
+    /// Aliases and physical shard ownership never grant protected access by themselves.
+    /// </summary>
+    public bool IsAuthorized(EntityUid loader, EntityUid program)
+    {
+        if (!TryComp<NCAgentShardComponent>(program, out var shard) || shard.RequiredAccess.Count == 0)
+            return true;
+
+        if (!TryComp<PdaComponent>(loader, out var pda) ||
+            pda.ContainedId is not { } id ||
+            !TryComp<AccessComponent>(id, out var access) ||
+            !access.Enabled)
+        {
+            return false;
+        }
+
+        // Policies are any-of so one YAML list can represent police OR technical authorization.
+        return shard.RequiredAccess.Any(access.Tags.Contains);
     }
 
     /// <summary>

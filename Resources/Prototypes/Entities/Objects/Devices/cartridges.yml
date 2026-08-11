@@ -118,6 +118,9 @@
         sprite: Interface/Misc/program_icons.rsi
         state: crew_manifest
     - type: CrewManifestCartridge
+    # NC - Persistent public Night City personnel source.
+    - type: NCAgentDirectory
+      resultLimit: 100
     # NC start - Agent SHARDS metadata.
     - type: NCAgentShard
       displayName: DIRECTORY
@@ -190,6 +193,11 @@
       description: Extracts exposed access logs from compatible devices.
       size: 4
       category: Security
+      accessLabel: NCPD/TECH
+      requiredAccess:
+      - NCPD_Patrol
+      - Militech_Tech
+      - Biotech_Tech
       permissions:
       - NetworkRead
       - DeviceControl
@@ -217,6 +225,9 @@
       sprite: Objects/Misc/books.rsi
       state: icon_magnifier
   - type: WantedListCartridge
+  # NC - Persistent read-only NCPD watchlist source.
+  - type: NCAgentWatchlist
+    resultLimit: 100
   - type: StealTarget
     stealGroup: WantedListCartridge
   # NC start - Agent SHARDS metadata.
@@ -225,6 +236,9 @@
     description: Queries public and authorized wanted-person records.
     size: 5
     category: Security
+    accessLabel: NCPD
+    requiredAccess:
+    - NCPD_Patrol
     permissions:
     - NetworkRead
     - VinRead

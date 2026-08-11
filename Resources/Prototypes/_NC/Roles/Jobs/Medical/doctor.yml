@@ -28,3 +28,6 @@
     ears: ClothingHeadsetMedical
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatLab
+  storage:
+    back:
+    - MedTekCartridge

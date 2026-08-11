@@ -3,7 +3,9 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Robust.Shared.GameStates;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
+using Content.Shared.Access;
 
 namespace Content.Shared._NC.Agent.Shards;
 
@@ -27,6 +29,19 @@ public sealed partial class NCAgentShardComponent : Component
 
     [DataField, AutoNetworkedField]
     public List<NCAgentShardPermission> Permissions = [];
+
+    /// <summary>
+    /// Any one of these access tags on the Agent's inserted VIN card authorizes the program.
+    /// An empty list makes the program public.
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public List<ProtoId<AccessLevelPrototype>> RequiredAccess = [];
+
+    /// <summary>
+    /// Short presentation-only name for the authorization policy shown in SHARDS.
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public string AccessLabel = "PUBLIC";
 }
 
 /// <summary>
@@ -62,3 +77,10 @@ public enum NCAgentShardPermission : byte
     VinRead,
     DeviceControl,
 }
+
+/// <summary>
+/// Raised before an Agent opens or relays a message to a protected shard.
+/// Server authority and client prediction evaluate the same VIN policy.
+/// </summary>
+[ByRefEvent]
+public record struct NCAgentShardAuthorizationAttemptEvent(EntityUid Loader, EntityUid Program, bool Cancelled = false);

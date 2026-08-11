@@ -12,6 +12,8 @@ using Robust.Client.UserInterface.Controls;
 using Robust.Client.UserInterface.XAML;
 using Robust.Shared.Animations;
 using Robust.Shared.Utility;
+using Robust.Shared.Prototypes;
+using Content.Shared.Access;
 
 namespace Content.Client._NC.Agent.Shards;
 
@@ -45,6 +47,7 @@ public sealed partial class NCAgentShardItem : ContainerButton
     public event Action<NCAgentShardDisplayData>? OpenPressed;
     public event Action<NCAgentShardDisplayData>? InstallPressed;
     public event Action<NCAgentShardDisplayData>? UninstallPressed;
+    public event Action<NCAgentShardDisplayData>? AccessDenied;
 
     public NCAgentShardItem(NCAgentShardDisplayData data)
     {
@@ -61,6 +64,17 @@ public sealed partial class NCAgentShardItem : ContainerButton
             ? "PERM // NONE"
             : $"PERM // {string.Join(" + ", data.Permissions.Select(PermissionText))}";
 
+        if (data.RequiredAccess.Count == 0)
+        {
+            ShardPermissions.Text += " // ACCESS PUBLIC";
+        }
+        else
+        {
+            ShardPermissions.Text += data.Authorized
+                ? $" // VIN {data.AccessLabel.ToUpperInvariant()} VERIFIED"
+                : $" // VIN {data.AccessLabel.ToUpperInvariant()} REQUIRED";
+        }
+
         switch (data.Status)
         {
             case InstallationStatus.Cartridge:
@@ -69,18 +83,23 @@ public sealed partial class NCAgentShardItem : ContainerButton
                 ShardAction.Text = "INSTALL";
                 break;
             case InstallationStatus.Installed:
-                ShardState.Text = "LOCAL";
-                ShardState.FontColorOverride = Color.FromHex("#76FF95");
+                ShardState.Text = data.Authorized ? "LOCAL" : "LOCKED";
+                ShardState.FontColorOverride = data.Authorized
+                    ? Color.FromHex("#76FF95")
+                    : Color.FromHex("#FF7897");
+                // Removing a physical shard never requires permission to run its program.
                 ShardAction.Text = "REMOVE";
                 break;
             default:
-                ShardState.Text = "SYSTEM";
-                ShardState.FontColorOverride = Color.FromHex("#77FFF2");
-                ShardAction.Text = "OPEN";
+                ShardState.Text = data.Authorized ? "SYSTEM" : "LOCKED";
+                ShardState.FontColorOverride = data.Authorized
+                    ? Color.FromHex("#77FFF2")
+                    : Color.FromHex("#FF7897");
+                ShardAction.Text = data.Authorized ? "OPEN" : "LOCKED";
                 break;
         }
 
-        OnPressed += _ => OpenPressed?.Invoke(_data);
+        OnPressed += _ => OnPrimaryPressed();
         ShardAction.OnPressed += _ => OnActionPressed();
     }
 
@@ -92,6 +111,13 @@ public sealed partial class NCAgentShardItem : ContainerButton
 
     private void OnActionPressed()
     {
+        if (_data.Status == InstallationStatus.Readonly && !_data.Authorized)
+        {
+            AccessDenied?.Invoke(_data);
+            PlayDeniedAnimation();
+            return;
+        }
+
         switch (_data.Status)
         {
             case InstallationStatus.Cartridge:
@@ -104,6 +130,25 @@ public sealed partial class NCAgentShardItem : ContainerButton
                 OpenPressed?.Invoke(_data);
                 break;
         }
+    }
+
+    private void OnPrimaryPressed()
+    {
+        // A physical chip must be installed before it can run from Agent memory.
+        if (_data.Status == InstallationStatus.Cartridge)
+        {
+            OnActionPressed();
+            return;
+        }
+
+        if (!_data.Authorized)
+        {
+            AccessDenied?.Invoke(_data);
+            PlayDeniedAnimation();
+            return;
+        }
+
+        OpenPressed?.Invoke(_data);
     }
 
     private static string PermissionText(NCAgentShardPermission permission)
@@ -130,5 +175,8 @@ public sealed record NCAgentShardDisplayData(
     int Size,
     NCAgentShardCategory Category,
     IReadOnlyList<NCAgentShardPermission> Permissions,
+    IReadOnlyList<ProtoId<AccessLevelPrototype>> RequiredAccess,
+    string AccessLabel,
+    bool Authorized,
     InstallationStatus Status,
     SpriteSpecifier? Icon);

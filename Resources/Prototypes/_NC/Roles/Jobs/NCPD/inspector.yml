@@ -32,6 +32,8 @@
     back:
     - ForensicPad
     - ForensicScanner
+    - WantedListCartridge
+    - LogProbeCartridge
 
 - type: jobIcon
   parent: JobIcon

@@ -175,6 +175,9 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
                 shard is null ? defaultSize : Math.Max(1, shard.Size),
                 shard?.Category ?? NCAgentShardCategory.Legacy,
                 shard?.Permissions ?? [],
+                shard?.RequiredAccess ?? [],
+                shard?.AccessLabel ?? "PUBLIC",
+                _shardSystem.IsAuthorized(Owner, uid),
                 cartridge.InstallationStatus,
                 cartridge.Icon));
         }

@@ -6,9 +6,14 @@ using Content.IntegrationTests.Fixtures;
 using Content.Shared._NC.Agent.Shards;
 using Content.Shared._NC.Agent.Shards.MedTek;
 using Content.Shared._NC.Agent.Shards.Notes;
+using Content.Shared.Access;
+using Content.Shared.Access.Components;
 using Content.Shared.CartridgeLoader;
 using Content.Shared.CartridgeLoader.Cartridges;
+using Content.Shared.Containers.ItemSlots;
+using Content.Shared.PDA;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._NC.Agent;
 
@@ -16,6 +21,94 @@ namespace Content.IntegrationTests.Tests._NC.Agent;
 [TestOf(typeof(NCAgentShardSystem))]
 public sealed class NCAgentShardTest : GameTest
 {
+    [Test]
+    public async Task ProtectedShardUsesCurrentVinAccess()
+    {
+        var pair = Pair;
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var agent = EntityUid.Invalid;
+        var shard = EntityUid.Invalid;
+
+        await server.WaitPost(() =>
+        {
+            agent = server.EntMan.SpawnEntity("PassengerPDA", map.GridCoords);
+            shard = server.EntMan.SpawnEntity("WantedListCartridge", map.GridCoords);
+        });
+        await pair.RunTicksSync(1);
+
+        await server.WaitPost(() =>
+        {
+            var shardSystem = server.System<NCAgentShardSystem>();
+            var cartridges = server.System<CartridgeLoaderSystem>();
+            var slots = server.System<ItemSlotsSystem>();
+            var loader = server.EntMan.GetComponent<CartridgeLoaderComponent>(agent);
+            var pda = server.EntMan.GetComponent<PdaComponent>(agent);
+
+            Assert.That(slots.TryInsert(agent, loader.CartridgeSlot, shard, null), Is.True);
+            Assert.That(cartridges.InstallCartridge((agent, loader), shard), Is.True);
+            Assert.That(shardSystem.IsAuthorized(agent, shard), Is.False);
+
+            cartridges.ActivateProgram((agent, loader), shard);
+            Assert.That(loader.ActiveProgram, Is.Null);
+
+            Assert.That(pda.ContainedId, Is.Not.Null);
+            var vinAccess = server.EntMan.GetComponent<AccessComponent>(pda.ContainedId!.Value);
+            vinAccess.Tags.Add(new ProtoId<AccessLevelPrototype>("NCPD_Patrol"));
+
+            Assert.That(shardSystem.IsAuthorized(agent, shard), Is.True);
+            cartridges.ActivateProgram((agent, loader), shard);
+            Assert.That(loader.ActiveProgram, Is.EqualTo(shard));
+
+            server.EntMan.DeleteEntity(agent);
+        });
+    }
+
+    [Test]
+    public async Task PhysicalShardKeepsIdentityAcrossInstallAndRemove()
+    {
+        var pair = Pair;
+        var server = pair.Server;
+        var map = await pair.CreateTestMap();
+        var agent = EntityUid.Invalid;
+        var shard = EntityUid.Invalid;
+
+        await server.WaitPost(() =>
+        {
+            agent = server.EntMan.SpawnEntity("PassengerPDA", map.GridCoords);
+            shard = server.EntMan.SpawnEntity("AstroNavCartridge", map.GridCoords);
+        });
+        await pair.RunTicksSync(1);
+
+        await server.WaitPost(() =>
+        {
+            var cartridges = server.System<CartridgeLoaderSystem>();
+            var slots = server.System<ItemSlotsSystem>();
+            var loader = server.EntMan.GetComponent<CartridgeLoaderComponent>(agent);
+
+            Assert.That(slots.TryInsert(agent, loader.CartridgeSlot, shard, null), Is.True);
+            Assert.That(cartridges.InstallCartridge((agent, loader), shard), Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(cartridges.GetRemovablePrograms(agent), Does.Contain(shard));
+                Assert.That(server.EntMan.EntityExists(shard), Is.True);
+                Assert.That(server.EntMan.GetComponent<CartridgeComponent>(shard).InstallationStatus,
+                    Is.EqualTo(InstallationStatus.Installed));
+            });
+
+            Assert.That(cartridges.UninstallProgram((agent, loader), shard), Is.True);
+            Assert.Multiple(() =>
+            {
+                Assert.That(loader.CartridgeSlot.Item, Is.EqualTo(shard));
+                Assert.That(server.EntMan.EntityExists(shard), Is.True);
+                Assert.That(server.EntMan.GetComponent<CartridgeComponent>(shard).InstallationStatus,
+                    Is.EqualTo(InstallationStatus.Cartridge));
+            });
+
+            server.EntMan.DeleteEntity(agent);
+        });
+    }
+
     [Test]
     public async Task WeightedMemoryRejectsOverflow()
     {
