@@ -56,6 +56,12 @@ public sealed class NCAgentPersistenceTest : GameTest
             Assert.That(configuration.CitiNetReactionCooldown, Is.EqualTo(TimeSpan.FromSeconds(1)));
             Assert.That(configuration.MaximumMentionsPerEntry, Is.EqualTo(10));
             Assert.That(configuration.FeedPostLimit, Is.EqualTo(20));
+            Assert.That(configuration.MinimumPinLength, Is.EqualTo(4));
+            Assert.That(configuration.MaximumPinLength, Is.EqualTo(8));
+            Assert.That(configuration.PinHashIterations, Is.EqualTo(20000));
+            Assert.That(configuration.PinMaximumAttempts, Is.EqualTo(5));
+            Assert.That(configuration.PinLockoutDuration, Is.EqualTo(TimeSpan.FromSeconds(30)));
+            Assert.That(configuration.PinUnlockSessionDuration, Is.EqualTo(TimeSpan.FromMinutes(5)));
         });
     }
 

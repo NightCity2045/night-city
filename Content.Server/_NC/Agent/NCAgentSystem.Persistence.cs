@@ -96,8 +96,21 @@ public sealed partial class NCAgentSystem
             !TryGetOrBindOwner(uid, user, out var owner))
             return;
 
-        _views[(uid, user)] = new AgentView(owner);
+        var view = new AgentView(owner)
+        {
+            Authenticated = TryResumeUnlock(uid, user),
+        };
+        _views[(uid, user)] = view;
+        SendLockState(uid, user);
 
+        if (!view.Authenticated)
+            return;
+
+        await InitializeAuthenticatedViewAsync(uid, user, owner);
+    }
+
+    private async Task InitializeAuthenticatedViewAsync(EntityUid uid, EntityUid user, NCCharacterId owner)
+    {
         try
         {
             var profile = await _database.GetOrCreateNCAgentProfileAsync(owner, Configuration.AddressPrefix);
@@ -616,7 +629,10 @@ public sealed partial class NCAgentSystem
 
     private async Task SendViewAsync(EntityUid agent, EntityUid user)
     {
-        if (!_views.TryGetValue((agent, user), out var view) || Deleted(agent) || Deleted(user))
+        if (!_views.TryGetValue((agent, user), out var view) ||
+            !IsViewAuthenticated(agent, user, view) ||
+            Deleted(agent) ||
+            Deleted(user))
             return;
 
         var config = Configuration;
@@ -870,6 +886,20 @@ public sealed partial class NCAgentSystem
     {
         user = actor ?? EntityUid.Invalid;
         view = null!;
+        if (!user.Valid ||
+            Deleted(user) ||
+            !_views.TryGetValue((agent, user), out var found) ||
+            !IsViewAuthenticated(agent, user, found))
+            return false;
+
+        view = found;
+        return true;
+    }
+
+    private bool TryGetAnyView(EntityUid agent, EntityUid? actor, out EntityUid user, out AgentView view)
+    {
+        user = actor ?? EntityUid.Invalid;
+        view = null!;
         if (!user.Valid || Deleted(user) || !_views.TryGetValue((agent, user), out var found))
             return false;
 
@@ -1079,6 +1109,8 @@ public sealed partial class NCAgentSystem
             _processing.Remove(key);
         }
 
+        ClearAgentUnlockSessions(ent.Owner);
+
         if (TryComp<NCAgentIdentityComponent>(ent, out var identity) &&
             _boundAgents.GetValueOrDefault(identity.CharacterId) == ent.Owner)
             _boundAgents.Remove(identity.CharacterId);
@@ -1091,6 +1123,7 @@ public sealed partial class NCAgentSystem
         _views.Clear();
         _processing.Clear();
         _boundAgents.Clear();
+        ClearAgentLocks();
         ClearCommunication();
         ClearCalls();
     }
@@ -1116,5 +1149,6 @@ public sealed partial class NCAgentSystem
         public string Notice = string.Empty;
         public string OwnAlias = string.Empty;
         public string OwnAddress = string.Empty;
+        public bool Authenticated;
     }
 }

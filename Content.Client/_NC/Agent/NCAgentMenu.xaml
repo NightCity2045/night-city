@@ -185,6 +185,45 @@
                                       HorizontalExpand="True" VerticalExpand="True" Margin="8" />
                     </PanelContainer>
                 </BoxContainer>
+
+                <PanelContainer Name="LockView" HorizontalExpand="True" VerticalExpand="True" Margin="10 8">
+                    <PanelContainer.PanelOverride>
+                        <gfx:StyleBoxFlat BackgroundColor="#071419" BorderColor="#2DA69C" BorderThickness="1" />
+                    </PanelContainer.PanelOverride>
+                    <CenterContainer HorizontalExpand="True" VerticalExpand="True">
+                        <BoxContainer Orientation="Vertical" MinWidth="280" MaxWidth="340" Margin="18">
+                            <Label Name="PinTitleLabel" Text="AGENT LOCKED" Align="Center"
+                                   FontColorOverride="#77FFF2" Margin="0 0 0 4" />
+                            <Label Name="PinSubtitleLabel" Text="VERIFYING DEVICE SECURITY" Align="Center"
+                                   FontColorOverride="#568783" Margin="0 0 0 12" />
+                            <PanelContainer MinHeight="48" HorizontalExpand="True" Margin="0 0 0 10">
+                                <PanelContainer.PanelOverride>
+                                    <gfx:StyleBoxFlat BackgroundColor="#0D2027" BorderColor="#245C59" BorderThickness="1" />
+                                </PanelContainer.PanelOverride>
+                                <Label Name="PinDotsLabel" Text="----" Align="Center" VAlign="Center"
+                                       FontColorOverride="#D7FFFB" />
+                            </PanelContainer>
+                            <GridContainer Columns="3" HorizontalExpand="True">
+                                <Button Name="Pin1Button" Text="1" MinHeight="42" Margin="2" />
+                                <Button Name="Pin2Button" Text="2" MinHeight="42" Margin="2" />
+                                <Button Name="Pin3Button" Text="3" MinHeight="42" Margin="2" />
+                                <Button Name="Pin4Button" Text="4" MinHeight="42" Margin="2" />
+                                <Button Name="Pin5Button" Text="5" MinHeight="42" Margin="2" />
+                                <Button Name="Pin6Button" Text="6" MinHeight="42" Margin="2" />
+                                <Button Name="Pin7Button" Text="7" MinHeight="42" Margin="2" />
+                                <Button Name="Pin8Button" Text="8" MinHeight="42" Margin="2" />
+                                <Button Name="Pin9Button" Text="9" MinHeight="42" Margin="2" />
+                                <Button Name="PinClearButton" Text="CLEAR" MinHeight="42" Margin="2" />
+                                <Button Name="Pin0Button" Text="0" MinHeight="42" Margin="2" />
+                                <Button Name="PinBackspaceButton" Text="BACK" MinHeight="42" Margin="2" />
+                            </GridContainer>
+                            <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="0 8 0 0">
+                                <Button Name="PinCancelButton" Text="CANCEL" HorizontalExpand="True" Margin="2" />
+                                <Button Name="PinSubmitButton" Text="UNLOCK" HorizontalExpand="True" Margin="2" />
+                            </BoxContainer>
+                        </BoxContainer>
+                    </CenterContainer>
+                </PanelContainer>
             </BoxContainer>
 
         </BoxContainer>

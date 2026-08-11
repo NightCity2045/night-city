@@ -36,17 +36,36 @@ public sealed partial class NCAgentDirectoryFragment : BoxContainer
     };
 
     private List<NCAgentDirectoryRecord> _entries = [];
+    private List<string> _organizations = [];
+    private string? _selectedOrganization;
 
     public NCAgentDirectoryFragment()
     {
         RobustXamlLoader.Load(this);
         SearchInput.OnTextChanged += _ => Rebuild();
+        OrganizationFilter.OnItemSelected += args =>
+        {
+            OrganizationFilter.SelectId(args.Id);
+            _selectedOrganization = args.Id <= 0 || args.Id > _organizations.Count
+                ? null
+                : _organizations[args.Id - 1];
+            DetailPanel.Visible = false;
+            Rebuild();
+        };
         Rebuild();
     }
 
     public void UpdateState(List<NCAgentDirectoryRecord> entries)
     {
         _entries = entries;
+        _organizations = entries
+            .Select(entry => entry.Organization)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(value => value)
+            .ToList();
+        if (_selectedOrganization != null && !_organizations.Contains(_selectedOrganization, StringComparer.OrdinalIgnoreCase))
+            _selectedOrganization = null;
+        RebuildOrganizationFilter();
         OrganizationName.Text = "NIGHT CITY // PUBLIC PERSONNEL";
         EntryCount.Text = $"{_entries.Count} ENTRIES";
         Rebuild();
@@ -59,10 +78,13 @@ public sealed partial class NCAgentDirectoryFragment : BoxContainer
         EntryContainer.RemoveAllChildren();
         var query = SearchInput.Text.Trim();
         var visible = _entries
-            .Where(entry => string.IsNullOrEmpty(query) ||
-                entry.CharacterName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                entry.JobTitle.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                entry.Organization.Contains(query, StringComparison.OrdinalIgnoreCase))
+            .Where(entry => (_selectedOrganization == null ||
+                             entry.Organization.Equals(_selectedOrganization, StringComparison.OrdinalIgnoreCase)) &&
+                            (string.IsNullOrEmpty(query) ||
+                             entry.CharacterName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                             entry.JobTitle.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                             entry.JobPrototypeId.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                             entry.CharacterId.ToString().Contains(query, StringComparison.OrdinalIgnoreCase)))
             .OrderBy(entry => entry.Organization)
             .ThenBy(entry => entry.JobTitle)
             .ThenBy(entry => entry.CharacterName)
@@ -83,7 +105,7 @@ public sealed partial class NCAgentDirectoryFragment : BoxContainer
         }
     }
 
-    private static Control CreateEntry(NCAgentDirectoryRecord entry)
+    private Control CreateEntry(NCAgentDirectoryRecord entry)
     {
         var content = new BoxContainer
         {
@@ -96,7 +118,7 @@ public sealed partial class NCAgentDirectoryFragment : BoxContainer
         content.AddChild(new Label { Text = $"ORG // {entry.Organization.ToUpperInvariant()}", FontColorOverride = Color.FromHex("#5FA39E") });
         content.AddChild(new Label { Text = $"VIN RECORD // NC-{entry.CharacterId:D6}", FontColorOverride = Color.FromHex("#426D69") });
 
-        return new PanelContainer
+        var panel = new PanelContainer
         {
             HorizontalExpand = true,
             Margin = new Thickness(0, 0, 0, 5),
@@ -108,5 +130,48 @@ public sealed partial class NCAgentDirectoryFragment : BoxContainer
             },
             Children = { content },
         };
+        var button = new ContainerButton { HorizontalExpand = true };
+        button.AddChild(panel);
+        button.OnPressed += _ => ShowDetails(entry);
+        return button;
+    }
+
+    private void RebuildOrganizationFilter()
+    {
+        OrganizationFilter.Clear();
+        OrganizationFilter.AddItem("ALL ORGANIZATIONS", 0);
+        for (var i = 0; i < _organizations.Count; i++)
+            OrganizationFilter.AddItem(_organizations[i].ToUpperInvariant(), i + 1);
+
+        var selected = _selectedOrganization == null
+            ? 0
+            : _organizations.FindIndex(value => value.Equals(_selectedOrganization, StringComparison.OrdinalIgnoreCase)) + 1;
+        OrganizationFilter.SelectId(Math.Max(0, selected));
+    }
+
+    private void ShowDetails(NCAgentDirectoryRecord entry)
+    {
+        DetailContainer.RemoveAllChildren();
+        DetailContainer.AddChild(new Label
+        {
+            Text = $"PERSONNEL FILE // {entry.CharacterName.ToUpperInvariant()}",
+            FontColorOverride = Color.FromHex("#76FF95"),
+        });
+        DetailContainer.AddChild(new Label { Text = $"VIN // NC-{entry.CharacterId:D6}" });
+        DetailContainer.AddChild(new Label { Text = $"ORGANIZATION // {entry.Organization.ToUpperInvariant()}" });
+        DetailContainer.AddChild(new Label { Text = $"POSITION // {entry.JobTitle}" });
+        DetailContainer.AddChild(new Label
+        {
+            Text = $"JOB NODE // {entry.JobPrototypeId}",
+            FontColorOverride = Color.FromHex("#5FA39E"),
+        });
+        DetailContainer.AddChild(new Label
+        {
+            Text = $"REGISTERED // {entry.StartedAt:yyyy-MM-dd HH:mm}",
+            FontColorOverride = Color.FromHex("#426D69"),
+        });
+        DetailPanel.Visible = true;
+        DetailPanel.StopAnimation("nc-agent-directory-detail");
+        DetailPanel.PlayAnimation(SyncAnimation, "nc-agent-directory-detail");
     }
 }

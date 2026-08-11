@@ -26,6 +26,7 @@ public sealed partial class NCAgentSystem : EntitySystem
         InitializePersistence();
         InitializeCalls();
         InitializeCommunication();
+        InitializeLocks();
     }
 
     public override void Update(float frameTime)
@@ -34,6 +35,7 @@ public sealed partial class NCAgentSystem : EntitySystem
         // Only the small active-call set is inspected; this never scans world entities.
         UpdateCallTimeouts();
         UpdateCommunicationTimeouts();
+        UpdateAgentLocks();
     }
 
     private void OnMapInit(Entity<NCAgentComponent> ent, ref MapInitEvent args)

@@ -30,3 +30,6 @@
     ears: ClothingHeadsetMedical
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatParamedicWB
+  storage:
+    back:
+    - MedTekCartridge

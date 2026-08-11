@@ -115,10 +115,19 @@ public sealed partial class NCAgentSystem
     private async void OnNotificationAction(NCAgentNotificationActionEvent message, EntitySessionEventArgs args)
     {
         if (args.SenderSession.AttachedEntity is not { Valid: true } user ||
-            !_pendingNotifications.Remove(message.NotificationId, out var pending) ||
+            !_pendingNotifications.TryGetValue(message.NotificationId, out var pending) ||
             pending.ExpiresAt <= DateTime.UtcNow ||
             !TryFindEquippedAgent(user, pending.Recipient, out var agent))
             return;
+
+        if (!HasActiveUnlockSession(agent, user))
+        {
+            // A locked notification may wake the phone UI, but cannot consume or execute its action.
+            _ui.TryOpenUi(agent, PdaUiKey.Key, user);
+            return;
+        }
+
+        _pendingNotifications.Remove(message.NotificationId);
 
         var owner = pending.Recipient;
 
@@ -592,7 +601,16 @@ public sealed partial class NCAgentSystem
             return;
 
         var id = notificationId ?? Guid.NewGuid();
-        if (!actionable)
+        if (_pendingNotifications.TryGetValue(id, out var existing))
+        {
+            _pendingNotifications[id] = existing with
+            {
+                Title = title,
+                Detail = detail,
+                Actionable = actionable,
+            };
+        }
+        else
         {
             _pendingNotifications[id] = new PendingAgentNotification(
                 recipient,
@@ -600,13 +618,53 @@ public sealed partial class NCAgentSystem
                 app,
                 peer,
                 groupId,
-                DateTime.UtcNow + Configuration.NotificationOverlayDuration);
+                DateTime.UtcNow + Configuration.NotificationOverlayDuration,
+                title,
+                detail,
+                actionable);
         }
 
         if (profile.NotificationSoundEnabled)
             _ringer.RingerPlayRingtone(agent);
         if ((profile.OverlayNotificationsEnabled || forceOverlay) && _players.TryGetSessionByEntity(holder, out var session))
-            RaiseNetworkEvent(new NCAgentNotificationEvent(id, kind, title, detail, actionable), session);
+        {
+            var unlocked = HasActiveUnlockSession(agent, holder);
+            if (!unlocked && _pendingNotifications.TryGetValue(id, out var pending))
+                _pendingNotifications[id] = pending with { RedisplayAfterUnlock = true };
+            RaiseNetworkEvent(unlocked
+                ? new NCAgentNotificationEvent(id, kind, title, detail, actionable)
+                : new NCAgentNotificationEvent(
+                    id,
+                    NCAgentNotificationKind.System,
+                    "DEVICE LOCKED",
+                    "NEW ACTIVITY // UNLOCK DEVICE TO VIEW",
+                    false), session);
+        }
+    }
+
+    /// <summary>
+    /// Restores the full notification only after the holder proves access to the physical Agent.
+    /// </summary>
+    private void ResendPendingNotificationsAfterUnlock(NCCharacterId owner, EntityUid user)
+    {
+        if (!_players.TryGetSessionByEntity(user, out var session))
+            return;
+
+        var now = DateTime.UtcNow;
+        foreach (var (id, pending) in _pendingNotifications
+                     .Where(entry => entry.Value.Recipient == owner &&
+                                     entry.Value.ExpiresAt > now &&
+                                     entry.Value.RedisplayAfterUnlock)
+                     .ToArray())
+        {
+            RaiseNetworkEvent(new NCAgentNotificationEvent(
+                id,
+                pending.Kind,
+                pending.Title,
+                pending.Detail,
+                pending.Actionable), session);
+            _pendingNotifications[id] = pending with { RedisplayAfterUnlock = false };
+        }
     }
 
     private NCAgentNetworkState ResolveNetworkState(NCCharacterId owner)
@@ -736,5 +794,9 @@ public sealed partial class NCAgentSystem
         NCAgentApp App,
         NCCharacterId? Peer,
         long? GroupId,
-        DateTime ExpiresAt);
+        DateTime ExpiresAt,
+        string Title = "",
+        string Detail = "",
+        bool Actionable = false,
+        bool RedisplayAfterUnlock = false);
 }

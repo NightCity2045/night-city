@@ -258,6 +258,50 @@ public sealed class NCAgentUpdateMessage(
 }
 
 /// <summary>
+/// Server-authoritative lock state. PIN material is never included in this message.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class NCAgentLockUpdateMessage(
+    bool pinConfigured,
+    bool locked,
+    int failedAttempts,
+    int minimumPinLength,
+    int maximumPinLength,
+    TimeSpan retryAfter,
+    string notice) : BoundUserInterfaceMessage
+{
+    public readonly bool PinConfigured = pinConfigured;
+    public readonly bool Locked = locked;
+    public readonly int FailedAttempts = failedAttempts;
+    public readonly int MinimumPinLength = minimumPinLength;
+    public readonly int MaximumPinLength = maximumPinLength;
+    public readonly TimeSpan RetryAfter = retryAfter;
+    public readonly string Notice = notice;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentUnlockMessage(string pin) : BoundUserInterfaceMessage
+{
+    public readonly string Pin = pin;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentSetPinMessage(string currentPin, string newPin) : BoundUserInterfaceMessage
+{
+    public readonly string CurrentPin = currentPin;
+    public readonly string NewPin = newPin;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentDisablePinMessage(string currentPin) : BoundUserInterfaceMessage
+{
+    public readonly string CurrentPin = currentPin;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentLockMessage : BoundUserInterfaceMessage;
+
+/// <summary>
 /// City geometry is sent only when the map app opens so regular Agent updates remain small.
 /// </summary>
 [Serializable, NetSerializable]

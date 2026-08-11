@@ -119,4 +119,22 @@ public sealed partial class NCAgentConfigurationPrototype : IPrototype
 
     [DataField]
     public int FeedCommentLimit = 200;
+
+    [DataField]
+    public int MinimumPinLength = 4;
+
+    [DataField]
+    public int MaximumPinLength = 8;
+
+    [DataField]
+    public int PinHashIterations = 20000;
+
+    [DataField]
+    public int PinMaximumAttempts = 5;
+
+    [DataField]
+    public TimeSpan PinLockoutDuration = TimeSpan.FromSeconds(30);
+
+    [DataField]
+    public TimeSpan PinUnlockSessionDuration = TimeSpan.FromMinutes(5);
 }

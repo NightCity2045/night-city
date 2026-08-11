@@ -1,5 +1,6 @@
 using System.Linq;
 // NC - Agent program relay performs VIN authorization before protected use.
+using Content.Shared._NC.Agent.Components;
 using Content.Shared._NC.Agent.Shards;
 
 namespace Content.Shared.CartridgeLoader;
@@ -8,6 +9,16 @@ public sealed partial class CartridgeLoaderSystem
 {
     private void OnLoaderUiMessage(Entity<CartridgeLoaderComponent> ent, ref CartridgeLoaderUiMessage message)
     {
+        // NC start - Every Agent shard operation requires an authoritative unlocked device session.
+        if (HasComp<NCAgentComponent>(ent))
+        {
+            var access = new NCAgentDeviceAccessAttemptEvent(message.Actor);
+            RaiseLocalEvent(ent.Owner, ref access);
+            if (access.Cancelled)
+                return;
+        }
+        // NC end
+
         var cartridge = GetEntity(message.CartridgeUid);
 
         switch (message.Action)
@@ -42,6 +53,16 @@ public sealed partial class CartridgeLoaderSystem
     /// </summary>
     private void OnUiMessage(Entity<CartridgeLoaderComponent> ent, ref CartridgeUiMessage args)
     {
+        // NC start - A still-open cartridge fragment cannot bypass a subsequently locked Agent.
+        if (HasComp<NCAgentComponent>(ent))
+        {
+            var access = new NCAgentDeviceAccessAttemptEvent(args.Actor);
+            RaiseLocalEvent(ent.Owner, ref access);
+            if (access.Cancelled)
+                return;
+        }
+        // NC end
+
         var cartridgeEvent = args.MessageEvent;
         cartridgeEvent.User = args.Actor;
         cartridgeEvent.LoaderUid = GetNetEntity(ent);

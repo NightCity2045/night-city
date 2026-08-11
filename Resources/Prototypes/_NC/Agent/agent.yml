@@ -40,3 +40,10 @@
   maximumMentionsPerEntry: 10
   feedPostLimit: 20
   feedCommentLimit: 200
+  minimumPinLength: 4
+  maximumPinLength: 8
+  # Hash work stays modest because online attempt lockouts provide the primary defense.
+  pinHashIterations: 20000
+  pinMaximumAttempts: 5
+  pinLockoutDuration: 30s
+  pinUnlockSessionDuration: 5m

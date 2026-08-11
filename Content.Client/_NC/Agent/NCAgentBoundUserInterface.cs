@@ -100,6 +100,10 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
         _menu.OnStartCall += target => SendMessage(new NCAgentStartCallMessage(target));
         _menu.OnAnswerCall += accept => SendMessage(new NCAgentAnswerCallMessage(accept));
         _menu.OnEndCall += () => SendMessage(new NCAgentEndCallMessage());
+        _menu.OnUnlockPin += pin => SendMessage(new NCAgentUnlockMessage(pin));
+        _menu.OnSetPin += (currentPin, newPin) => SendMessage(new NCAgentSetPinMessage(currentPin, newPin));
+        _menu.OnDisablePin += currentPin => SendMessage(new NCAgentDisablePinMessage(currentPin));
+        _menu.OnLockAgent += () => SendMessage(new NCAgentLockMessage());
 
     }
 
@@ -127,6 +131,9 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
 
         switch (message)
         {
+            case NCAgentLockUpdateMessage lockUpdate:
+                _menu.UpdateLockState(lockUpdate);
+                break;
             case NCAgentUpdateMessage update:
                 _menu.UpdateAgentData(update);
                 break;

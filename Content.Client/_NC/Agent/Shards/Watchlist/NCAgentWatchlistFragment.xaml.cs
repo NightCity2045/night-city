@@ -37,20 +37,32 @@ public sealed partial class NCAgentWatchlistFragment : BoxContainer
     };
 
     private List<NCAgentWatchlistRecord> _records = [];
+    private List<NCAgentWatchlistWarrant> _warrants = [];
+    private WatchlistFilter _filter;
 
     public NCAgentWatchlistFragment()
     {
         RobustXamlLoader.Load(this);
         SearchInput.OnTextChanged += _ => Rebuild();
+        AllFilterButton.OnPressed += _ => SetFilter(WatchlistFilter.All);
+        PriorityFilterButton.OnPressed += _ => SetFilter(WatchlistFilter.Priority);
+        WarrantsFilterButton.OnPressed += _ => SetFilter(WatchlistFilter.Warrants);
+        SetFilter(WatchlistFilter.All);
         Rebuild();
     }
 
-    public void UpdateState(List<NCAgentWatchlistRecord> records)
+    public void UpdateState(List<NCAgentWatchlistRecord> records, List<NCAgentWatchlistWarrant> warrants)
     {
         _records = records;
-        RecordCount.Text = $"{records.Count} RECORDS";
-        QueryStatus.Text = records.Count == 0 ? "QUERY COMPLETE // NO ACTIVE RECORDS" : "QUERY COMPLETE // RECORDS RECEIVED";
-        QueryStatus.FontColorOverride = records.Count == 0 ? Color.FromHex("#76FF95") : Color.FromHex("#FFD66B");
+        _warrants = warrants;
+        var activeWarrants = warrants.Count(value => value.Status == NCPoliceWarrantStatus.Active);
+        RecordCount.Text = $"{records.Count} RECORDS // {activeWarrants} ACTIVE WARRANTS";
+        QueryStatus.Text = records.Count == 0 && activeWarrants == 0
+            ? "QUERY COMPLETE // NO ACTIVE FLAGS"
+            : "QUERY COMPLETE // NCPD DATA RECEIVED";
+        QueryStatus.FontColorOverride = records.Count == 0 && activeWarrants == 0
+            ? Color.FromHex("#76FF95")
+            : Color.FromHex("#FFD66B");
         Rebuild();
         RecordContainer.StopAnimation("nc-agent-watchlist-query");
         RecordContainer.PlayAnimation(QueryAnimation, "nc-agent-watchlist-query");
@@ -60,14 +72,34 @@ public sealed partial class NCAgentWatchlistFragment : BoxContainer
     {
         RecordContainer.RemoveAllChildren();
         var query = SearchInput.Text.Trim();
-        var visible = _records.Where(record => string.IsNullOrEmpty(query) ||
-            record.CharacterName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-            (record.JobPrototypeId?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false) ||
-            record.Status.ToString().Contains(query, StringComparison.OrdinalIgnoreCase) ||
-            (record.Reason?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false));
+        var records = _records.Where(record =>
+            _filter != WatchlistFilter.Warrants &&
+            (_filter != WatchlistFilter.Priority || IsPriority(record.Status)) &&
+            (string.IsNullOrEmpty(query) ||
+             record.CharacterName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+             (record.JobPrototypeId?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false) ||
+             record.Status.ToString().Contains(query, StringComparison.OrdinalIgnoreCase) ||
+             (record.Reason?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false)));
+
+        var warrants = _warrants.Where(warrant =>
+            (_filter != WatchlistFilter.Priority || warrant.Status == NCPoliceWarrantStatus.Active) &&
+            (string.IsNullOrEmpty(query) ||
+             warrant.TargetName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+             warrant.Type.ToString().Contains(query, StringComparison.OrdinalIgnoreCase) ||
+             warrant.Status.ToString().Contains(query, StringComparison.OrdinalIgnoreCase) ||
+             warrant.Reason.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+             warrant.IssuedByName.Contains(query, StringComparison.OrdinalIgnoreCase)));
 
         var any = false;
-        foreach (var record in visible.OrderByDescending(record => Severity(record.Status)).ThenBy(record => record.CharacterName))
+        foreach (var warrant in warrants
+                     .OrderBy(warrant => warrant.Status == NCPoliceWarrantStatus.Active ? 0 : 1)
+                     .ThenByDescending(warrant => warrant.IssuedAt))
+        {
+            any = true;
+            RecordContainer.AddChild(CreateWarrant(warrant));
+        }
+
+        foreach (var record in records.OrderByDescending(record => Severity(record.Status)).ThenBy(record => record.CharacterName))
         {
             any = true;
             RecordContainer.AddChild(CreateRecord(record));
@@ -77,7 +109,7 @@ public sealed partial class NCAgentWatchlistFragment : BoxContainer
         {
             RecordContainer.AddChild(new Label
             {
-                Text = _records.Count == 0 ? "NO ACTIVE NCPD RECORDS" : "NO MATCHING RECORDS",
+                Text = _records.Count == 0 && _warrants.Count == 0 ? "NO NCPD RECORDS" : "NO MATCHING RECORDS",
                 FontColorOverride = Color.FromHex("#6F454D"),
                 HorizontalAlignment = HAlignment.Center,
                 Margin = new Thickness(0, 18),
@@ -85,7 +117,7 @@ public sealed partial class NCAgentWatchlistFragment : BoxContainer
         }
     }
 
-    private static Control CreateRecord(NCAgentWatchlistRecord record)
+    private Control CreateRecord(NCAgentWatchlistRecord record)
     {
         var color = StatusColor(record.Status);
         var content = new BoxContainer
@@ -115,7 +147,7 @@ public sealed partial class NCAgentWatchlistFragment : BoxContainer
             FontColorOverride = Color.FromHex("#8C6870"),
         });
 
-        return new PanelContainer
+        var panel = new PanelContainer
         {
             HorizontalExpand = true,
             Margin = new Thickness(0, 0, 0, 5),
@@ -127,6 +159,130 @@ public sealed partial class NCAgentWatchlistFragment : BoxContainer
             },
             Children = { content },
         };
+        var button = new ContainerButton { HorizontalExpand = true };
+        button.AddChild(panel);
+        button.OnPressed += _ => ShowRecordDetails(record);
+        return button;
+    }
+
+    private Control CreateWarrant(NCAgentWatchlistWarrant warrant)
+    {
+        var active = warrant.Status == NCPoliceWarrantStatus.Active;
+        var color = active ? Color.FromHex("#FF3C56") : Color.FromHex("#77545D");
+        var content = new BoxContainer
+        {
+            Orientation = LayoutOrientation.Vertical,
+            HorizontalExpand = true,
+            Margin = new Thickness(10, 7),
+        };
+        var heading = new BoxContainer { Orientation = LayoutOrientation.Horizontal, HorizontalExpand = true };
+        heading.AddChild(new Label { Text = $"WARRANT #{warrant.WarrantId:D5}", FontColorOverride = Color.FromHex("#FFE4EA") });
+        heading.AddChild(new Control { HorizontalExpand = true });
+        heading.AddChild(new Label { Text = warrant.Status.ToString().ToUpperInvariant(), FontColorOverride = color });
+        content.AddChild(heading);
+        content.AddChild(new Label
+        {
+            Text = $"{warrant.Type.ToString().ToUpperInvariant()} // {warrant.TargetName.ToUpperInvariant()}",
+            FontColorOverride = Color.FromHex("#FF91A6"),
+        });
+        content.AddChild(new Label
+        {
+            Text = $"REASON // {warrant.Reason}",
+            FontColorOverride = Color.FromHex("#B58B94"),
+        });
+
+        var panel = new PanelContainer
+        {
+            HorizontalExpand = true,
+            Margin = new Thickness(0, 0, 0, 5),
+            PanelOverride = new StyleBoxFlat
+            {
+                BackgroundColor = active ? Color.FromHex("#251015") : Color.FromHex("#171216"),
+                BorderColor = color,
+                BorderThickness = new Thickness(1, 1, 1, 2),
+            },
+            Children = { content },
+        };
+        var button = new ContainerButton { HorizontalExpand = true };
+        button.AddChild(panel);
+        button.OnPressed += _ => ShowWarrantDetails(warrant);
+        return button;
+    }
+
+    private void ShowRecordDetails(NCAgentWatchlistRecord record)
+    {
+        DetailContainer.RemoveAllChildren();
+        DetailContainer.AddChild(new Label
+        {
+            Text = $"PERSON OF INTEREST // {record.CharacterName.ToUpperInvariant()}",
+            FontColorOverride = StatusColor(record.Status),
+        });
+        DetailContainer.AddChild(new Label { Text = $"VIN // NC-{record.CharacterId:D6}" });
+        DetailContainer.AddChild(new Label { Text = $"STATUS // {record.Status.ToString().ToUpperInvariant()}" });
+        DetailContainer.AddChild(new Label { Text = $"EMPLOYMENT // {record.JobPrototypeId ?? "UNAFFILIATED"}" });
+        DetailContainer.AddChild(new Label { Text = $"BASIS // {record.Reason ?? "UNSPECIFIED"}" });
+        DetailContainer.AddChild(new Label
+        {
+            Text = $"AUDIT // {record.UpdatedByName} // {record.UpdatedAt?.ToString("yyyy-MM-dd HH:mm") ?? "UNKNOWN"}",
+            FontColorOverride = Color.FromHex("#8C6870"),
+        });
+        DetailPanel.Visible = true;
+        RestartDetailAnimation();
+    }
+
+    private void ShowWarrantDetails(NCAgentWatchlistWarrant warrant)
+    {
+        DetailContainer.RemoveAllChildren();
+        DetailContainer.AddChild(new Label
+        {
+            Text = $"{warrant.Type.ToString().ToUpperInvariant()} WARRANT // #{warrant.WarrantId:D5}",
+            FontColorOverride = warrant.Status == NCPoliceWarrantStatus.Active
+                ? Color.FromHex("#FF3C56")
+                : Color.FromHex("#B58B94"),
+        });
+        DetailContainer.AddChild(new Label { Text = $"TARGET // {warrant.TargetName} // NC-{warrant.TargetCharacterId:D6}" });
+        DetailContainer.AddChild(new Label { Text = $"CASE // {(warrant.CaseId is { } caseId ? $"#{caseId:D5}" : "UNLINKED")}" });
+        DetailContainer.AddChild(new Label { Text = $"STATUS // {warrant.Status.ToString().ToUpperInvariant()}" });
+        DetailContainer.AddChild(new Label { Text = $"BASIS // {warrant.Reason}" });
+        DetailContainer.AddChild(new Label
+        {
+            Text = $"ISSUED // {warrant.IssuedByName} // {warrant.IssuedAt:yyyy-MM-dd HH:mm}",
+            FontColorOverride = Color.FromHex("#B58B94"),
+        });
+        if (warrant.ResolvedAt is { } resolvedAt)
+        {
+            DetailContainer.AddChild(new Label
+            {
+                Text = $"RESOLVED // {warrant.ResolvedByName ?? "UNKNOWN"} // {resolvedAt:yyyy-MM-dd HH:mm}",
+                FontColorOverride = Color.FromHex("#8C6870"),
+            });
+            DetailContainer.AddChild(new Label { Text = $"RESOLUTION // {warrant.ResolutionReason ?? "UNSPECIFIED"}" });
+        }
+        DetailPanel.Visible = true;
+        RestartDetailAnimation();
+    }
+
+    private void RestartDetailAnimation()
+    {
+        DetailPanel.StopAnimation("nc-agent-watchlist-detail");
+        DetailPanel.PlayAnimation(QueryAnimation, "nc-agent-watchlist-detail");
+    }
+
+    private void SetFilter(WatchlistFilter filter)
+    {
+        _filter = filter;
+        AllFilterButton.Disabled = filter == WatchlistFilter.All;
+        PriorityFilterButton.Disabled = filter == WatchlistFilter.Priority;
+        WarrantsFilterButton.Disabled = filter == WatchlistFilter.Warrants;
+        DetailPanel.Visible = false;
+        Rebuild();
+    }
+
+    private static bool IsPriority(NCPoliceOperationalStatus status)
+    {
+        return status is NCPoliceOperationalStatus.Dangerous or
+            NCPoliceOperationalStatus.Wanted or
+            NCPoliceOperationalStatus.Suspected;
     }
 
     private static int Severity(NCPoliceOperationalStatus status)
@@ -155,5 +311,12 @@ public sealed partial class NCAgentWatchlistFragment : BoxContainer
             NCPoliceOperationalStatus.Detained or NCPoliceOperationalStatus.Arrested or NCPoliceOperationalStatus.Imprisoned => Color.FromHex("#8FB8FF"),
             _ => Color.FromHex("#76FF95"),
         };
+    }
+
+    private enum WatchlistFilter : byte
+    {
+        All,
+        Priority,
+        Warrants,
     }
 }

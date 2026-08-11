@@ -33,6 +33,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     private const int SettingsView = 2;
     private const int ProgramContentView = 3;
     private const int BuiltInAppView = 4;
+    private const int LockViewIndex = 5;
 
     private static readonly Animation ViewEnterAnimation = new()
     {
@@ -109,6 +110,25 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         },
     };
 
+    private static readonly Animation PinFeedbackAnimation = new()
+    {
+        Length = TimeSpan.FromSeconds(0.36),
+        AnimationTracks =
+        {
+            new AnimationTrackControlProperty
+            {
+                Property = nameof(Control.Modulate),
+                InterpolationMode = AnimationInterpolationMode.Linear,
+                KeyFrames =
+                {
+                    new AnimationTrackProperty.KeyFrame(Color.White, 0f),
+                    new AnimationTrackProperty.KeyFrame(Color.FromHex("#FF789780"), 0.12f),
+                    new AnimationTrackProperty.KeyFrame(Color.White, 0.36f),
+                },
+            },
+        },
+    };
+
     [Dependency] private IGameTiming _gameTiming = default!;
     [Dependency] private IEntitySystemManager _entitySystems = default!;
     [Dependency] private IUserInterfaceManager _uiManager = default!;
@@ -122,6 +142,12 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     private int _shardCapacity = 1;
     private bool _shardSnapshotInitialized;
     private readonly Dictionary<EntityUid, (InstallationStatus Status, string Name)> _knownShards = new();
+    private NCAgentLockUpdateMessage? _lockState;
+    private PinFlow _pinFlow = PinFlow.Unlock;
+    private string _pinBuffer = string.Empty;
+    private string _pendingCurrentPin = string.Empty;
+    private string _pendingNewPin = string.Empty;
+    private TimeSpan _pinRetryEnd;
 
     public event Action<EntityUid>? OnProgramItemPressed;
     public event Action<EntityUid>? OnUninstallButtonPressed;
@@ -155,6 +181,10 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     public event Action<int>? OnStartCall;
     public event Action<bool>? OnAnswerCall;
     public event Action? OnEndCall;
+    public event Action<string>? OnUnlockPin;
+    public event Action<string, string>? OnSetPin;
+    public event Action<string>? OnDisablePin;
+    public event Action? OnLockAgent;
 
     public NCAgentMenu()
     {
@@ -191,10 +221,249 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             OnEjectShard?.Invoke();
         };
 
+        foreach (var (button, digit) in new (Button Button, char Digit)[]
+                 {
+                     (Pin0Button, '0'), (Pin1Button, '1'), (Pin2Button, '2'), (Pin3Button, '3'),
+                     (Pin4Button, '4'), (Pin5Button, '5'), (Pin6Button, '6'), (Pin7Button, '7'),
+                     (Pin8Button, '8'), (Pin9Button, '9'),
+                 })
+        {
+            button.OnPressed += _ => AppendPinDigit(digit);
+        }
+
+        PinClearButton.OnPressed += _ => ClearPinBuffer();
+        PinBackspaceButton.OnPressed += _ => RemovePinDigit();
+        PinSubmitButton.OnPressed += _ => SubmitPin();
+        PinCancelButton.OnPressed += _ => CancelPinFlow();
+
         HideAllViews();
-        ToHomeScreen();
+        ShowPinScreen(PinFlow.Unlock, "SECURITY CHECK", "VERIFYING DEVICE SECURITY");
+        SetPinKeypadDisabled(true);
         RestartAnimation(AgentScreen, ScreenBootAnimation, "nc-agent-screen-boot");
     }
+
+    /// <summary>
+    /// Applies server-authoritative device security without ever receiving the PIN hash or salt.
+    /// </summary>
+    public void UpdateLockState(NCAgentLockUpdateMessage update)
+    {
+        _lockState = update;
+        _pinRetryEnd = update.RetryAfter > TimeSpan.Zero
+            ? _gameTiming.CurTime + update.RetryAfter
+            : TimeSpan.Zero;
+
+        if (update.Locked)
+        {
+            var subtitle = !string.IsNullOrWhiteSpace(update.Notice)
+                ? update.Notice
+                : "ENTER PIN TO ACCESS CITYNET";
+            ShowPinScreen(PinFlow.Unlock, "AGENT LOCKED", subtitle);
+            SetPinKeypadDisabled(update.RetryAfter > TimeSpan.Zero);
+            if (update.FailedAttempts > 0 || update.RetryAfter > TimeSpan.Zero)
+                RestartAnimation(LockView, PinFeedbackAnimation, "nc-agent-pin-feedback");
+            return;
+        }
+
+        SetNavigationInputDisabled(false);
+        if (_currentView == LockViewIndex && _pinFlow == PinFlow.Unlock)
+        {
+            ToHomeScreen();
+            RestartAnimation(AgentScreen, ScreenBootAnimation, "nc-agent-unlock");
+        }
+
+        if (_currentView == SettingsView && _agentData is { } data)
+            BuildAgentSettings(data);
+    }
+
+    private void BeginPinConfiguration(bool changingExistingPin)
+    {
+        _pendingCurrentPin = string.Empty;
+        _pendingNewPin = string.Empty;
+        ShowPinScreen(
+            changingExistingPin ? PinFlow.ChangeCurrent : PinFlow.SetNew,
+            changingExistingPin ? "VERIFY CURRENT PIN" : "CREATE DEVICE PIN",
+            PinRequirementsText());
+        SetPinKeypadDisabled(false);
+    }
+
+    private void BeginPinDisable()
+    {
+        _pendingCurrentPin = string.Empty;
+        _pendingNewPin = string.Empty;
+        ShowPinScreen(PinFlow.DisableCurrent, "DISABLE DEVICE PIN", "ENTER CURRENT PIN TO CONFIRM");
+        SetPinKeypadDisabled(false);
+    }
+
+    private void ShowPinScreen(PinFlow flow, string title, string subtitle)
+    {
+        _pinFlow = flow;
+        _pinBuffer = string.Empty;
+        PinTitleLabel.Text = title;
+        PinSubtitleLabel.Text = subtitle;
+        PinCancelButton.Visible = flow != PinFlow.Unlock;
+        PinSubmitButton.Text = flow switch
+        {
+            PinFlow.Unlock => "UNLOCK",
+            PinFlow.SetConfirm or PinFlow.ChangeConfirm => "CONFIRM",
+            PinFlow.DisableCurrent => "DISABLE",
+            _ => "CONTINUE",
+        };
+        UpdatePinDisplay();
+        SetNavigationInputDisabled(true);
+        ChangeView(LockViewIndex);
+    }
+
+    private void AppendPinDigit(char digit)
+    {
+        if (_pinBuffer.Length >= MaximumPinLength || _gameTiming.CurTime < _pinRetryEnd)
+            return;
+
+        // Avoid string + char here: the .NET compiler emits a ReadOnlySpan<char>
+        // constructor that is forbidden by the RobustToolbox client sandbox.
+        _pinBuffer = string.Concat(_pinBuffer, digit.ToString());
+        UpdatePinDisplay();
+    }
+
+    private void RemovePinDigit()
+    {
+        if (_pinBuffer.Length == 0)
+            return;
+
+        // RobustToolbox client sandbox forbids the ReadOnlySpan constructor emitted by range syntax.
+        _pinBuffer = _pinBuffer.Remove(_pinBuffer.Length - 1, 1);
+        UpdatePinDisplay();
+    }
+
+    private void ClearPinBuffer()
+    {
+        _pinBuffer = string.Empty;
+        UpdatePinDisplay();
+    }
+
+    private void UpdatePinDisplay()
+    {
+        PinDotsLabel.Text = _pinBuffer.Length == 0
+            ? string.Join(" ", Enumerable.Repeat("○", MinimumPinLength))
+            : string.Join(" ", Enumerable.Repeat("●", _pinBuffer.Length));
+        PinSubmitButton.Disabled = _pinBuffer.Length < MinimumPinLength || _gameTiming.CurTime < _pinRetryEnd;
+    }
+
+    private void SubmitPin()
+    {
+        if (_pinBuffer.Length < MinimumPinLength || _pinBuffer.Length > MaximumPinLength)
+        {
+            ShowPinFeedback(PinRequirementsText());
+            return;
+        }
+
+        switch (_pinFlow)
+        {
+            case PinFlow.Unlock:
+            {
+                var pin = _pinBuffer;
+                ClearPinBuffer();
+                SetPinKeypadDisabled(true);
+                PinSubtitleLabel.Text = "VERIFYING CREDENTIALS";
+                OnUnlockPin?.Invoke(pin);
+                break;
+            }
+            case PinFlow.SetNew:
+                _pendingNewPin = _pinBuffer;
+                ShowPinScreen(PinFlow.SetConfirm, "CONFIRM DEVICE PIN", "RE-ENTER THE NEW PIN");
+                break;
+            case PinFlow.SetConfirm:
+                if (_pinBuffer != _pendingNewPin)
+                {
+                    _pendingNewPin = string.Empty;
+                    ShowPinScreen(PinFlow.SetNew, "CREATE DEVICE PIN", "PIN MISMATCH // START AGAIN");
+                    RestartAnimation(LockView, PinFeedbackAnimation, "nc-agent-pin-feedback");
+                    break;
+                }
+
+                var initialPin = _pendingNewPin;
+                ReturnFromPinFlow();
+                OnSetPin?.Invoke(string.Empty, initialPin);
+                break;
+            case PinFlow.ChangeCurrent:
+                _pendingCurrentPin = _pinBuffer;
+                ShowPinScreen(PinFlow.ChangeNew, "CREATE NEW PIN", PinRequirementsText());
+                break;
+            case PinFlow.ChangeNew:
+                _pendingNewPin = _pinBuffer;
+                ShowPinScreen(PinFlow.ChangeConfirm, "CONFIRM NEW PIN", "RE-ENTER THE NEW PIN");
+                break;
+            case PinFlow.ChangeConfirm:
+                if (_pinBuffer != _pendingNewPin)
+                {
+                    _pendingNewPin = string.Empty;
+                    ShowPinScreen(PinFlow.ChangeNew, "CREATE NEW PIN", "PIN MISMATCH // START AGAIN");
+                    RestartAnimation(LockView, PinFeedbackAnimation, "nc-agent-pin-feedback");
+                    break;
+                }
+
+                var currentPin = _pendingCurrentPin;
+                var newPin = _pendingNewPin;
+                ReturnFromPinFlow();
+                OnSetPin?.Invoke(currentPin, newPin);
+                break;
+            case PinFlow.DisableCurrent:
+                var disabledPin = _pinBuffer;
+                ReturnFromPinFlow();
+                OnDisablePin?.Invoke(disabledPin);
+                break;
+        }
+    }
+
+    private void CancelPinFlow()
+    {
+        if (_pinFlow == PinFlow.Unlock)
+            return;
+
+        ReturnFromPinFlow();
+    }
+
+    private void ReturnFromPinFlow()
+    {
+        _pendingCurrentPin = string.Empty;
+        _pendingNewPin = string.Empty;
+        _pinBuffer = string.Empty;
+        SetNavigationInputDisabled(false);
+        ToSettings();
+    }
+
+    private void ShowPinFeedback(string text)
+    {
+        PinSubtitleLabel.Text = text;
+        RestartAnimation(LockView, PinFeedbackAnimation, "nc-agent-pin-feedback");
+    }
+
+    private void SetPinKeypadDisabled(bool disabled)
+    {
+        foreach (var button in new[]
+                 {
+                     Pin0Button, Pin1Button, Pin2Button, Pin3Button, Pin4Button,
+                     Pin5Button, Pin6Button, Pin7Button, Pin8Button, Pin9Button,
+                     PinClearButton, PinBackspaceButton,
+                 })
+        {
+            button.Disabled = disabled;
+        }
+
+        PinSubmitButton.Disabled = disabled || _pinBuffer.Length < MinimumPinLength;
+    }
+
+    private void SetNavigationInputDisabled(bool disabled)
+    {
+        HomeButton.Disabled = disabled;
+        ProgramListButton.Disabled = disabled;
+        SettingsButton.Disabled = disabled;
+        ProgramTitle.Disabled = disabled;
+        ProgramCloseButton.Disabled = disabled;
+    }
+
+    private int MinimumPinLength => Math.Max(1, _lockState?.MinimumPinLength ?? 4);
+    private int MaximumPinLength => Math.Max(MinimumPinLength, _lockState?.MaximumPinLength ?? 8);
+    private string PinRequirementsText() => $"PIN MUST CONTAIN {MinimumPinLength}-{MaximumPinLength} DIGITS";
 
     /// <summary>
     /// Updates the Agent status area without changing the current application.
@@ -977,6 +1246,38 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         }
         AgentSettingsContainer.AddChild(statuses);
 
+        AgentSettingsContainer.AddChild(CreateSectionTitle("DEVICE SECURITY"));
+        var pinConfigured = _lockState?.PinConfigured == true;
+        AgentSettingsContainer.AddChild(CreateStatusLabel(
+            pinConfigured ? "PIN // ENABLED" : "PIN // NOT CONFIGURED",
+            pinConfigured ? "#76FF95" : "#FFE28D"));
+        if (!string.IsNullOrWhiteSpace(_lockState?.Notice))
+            AgentSettingsContainer.AddChild(CreateMutedLabel(_lockState.Notice));
+
+        var securityActions = new WrapContainer
+        {
+            LayoutAxis = Axis.Horizontal,
+            HorizontalExpand = true,
+            SeparationOverride = 2,
+            CrossSeparationOverride = 2,
+        };
+        var configurePin = CreateActionButton(pinConfigured ? "CHANGE PIN" : "SET PIN", "#77FFF2");
+        configurePin.OnPressed += _ => BeginPinConfiguration(pinConfigured);
+        securityActions.AddChild(configurePin);
+        if (pinConfigured)
+        {
+            var lockAgent = CreateActionButton("LOCK NOW", "#FFE28D");
+            lockAgent.OnPressed += _ => OnLockAgent?.Invoke();
+            securityActions.AddChild(lockAgent);
+
+            var disablePin = CreateActionButton("DISABLE PIN", "#FF7897");
+            disablePin.OnPressed += _ => BeginPinDisable();
+            securityActions.AddChild(disablePin);
+        }
+        AgentSettingsContainer.AddChild(securityActions);
+        AgentSettingsContainer.AddChild(CreateMutedLabel(
+            "The PIN protects this physical Agent and every installed shard for the current round."));
+
         AgentSettingsContainer.AddChild(CreateSectionTitle("HUD NOTIFICATIONS"));
         var overlay = new CheckBox
         {
@@ -1222,12 +1523,18 @@ public sealed partial class NCAgentMenu : NCAgentWindow
 
     public void ToHomeScreen()
     {
+        if (_lockState?.Locked == true)
+            return;
+
         SetNavigationState(home: true);
         ChangeView(HomeView);
     }
 
     public void ToProgramView(string title)
     {
+        if (_lockState?.Locked == true)
+            return;
+
         HomeButton.IsCurrent = false;
         ProgramListButton.Visible = false;
         SettingsButton.Visible = false;
@@ -1249,12 +1556,18 @@ public sealed partial class NCAgentMenu : NCAgentWindow
 
     private void ToProgramList()
     {
+        if (_lockState?.Locked == true)
+            return;
+
         SetNavigationState(programs: true);
         ChangeView(ProgramListView);
     }
 
     private void ToSettings()
     {
+        if (_lockState?.Locked == true)
+            return;
+
         SetNavigationState(settings: true);
         if (_agentData is { } data)
             BuildAgentSettings(data);
@@ -1263,6 +1576,9 @@ public sealed partial class NCAgentMenu : NCAgentWindow
 
     private void OpenAgentApp(NCAgentApp app, string title)
     {
+        if (_lockState?.Locked == true)
+            return;
+
         if (app == NCAgentApp.Map)
             _mapData = null;
 
@@ -1370,5 +1686,30 @@ public sealed partial class NCAgentMenu : NCAgentWindow
 
         var stationTime = _gameTiming.CurTime.Subtract(_gameTicker.RoundStartTimeSpan);
         ClockLabel.Text = stationTime.ToString("hh\\:mm\\:ss");
+
+        if (_currentView != LockViewIndex || _lockState?.Locked != true || _pinRetryEnd == TimeSpan.Zero)
+            return;
+
+        var remaining = _pinRetryEnd - _gameTiming.CurTime;
+        if (remaining > TimeSpan.Zero)
+        {
+            PinSubtitleLabel.Text = $"SECURITY LOCKOUT // {Math.Ceiling(remaining.TotalSeconds):0}s";
+            return;
+        }
+
+        _pinRetryEnd = TimeSpan.Zero;
+        PinSubtitleLabel.Text = "ENTER PIN TO ACCESS CITYNET";
+        SetPinKeypadDisabled(false);
+    }
+
+    private enum PinFlow : byte
+    {
+        Unlock,
+        SetNew,
+        SetConfirm,
+        ChangeCurrent,
+        ChangeNew,
+        ChangeConfirm,
+        DisableCurrent,
     }
 }

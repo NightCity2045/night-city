@@ -16,6 +16,9 @@ public sealed partial class NCAgentWatchlistComponent : Component
 {
     [DataField, AutoNetworkedField]
     public int ResultLimit = 100;
+
+    [DataField, AutoNetworkedField]
+    public int WarrantLimit = 100;
 }
 
 [Serializable, NetSerializable]
@@ -29,7 +32,25 @@ public sealed record NCAgentWatchlistRecord(
     DateTime? UpdatedAt);
 
 [Serializable, NetSerializable]
-public sealed class NCAgentWatchlistUiState(List<NCAgentWatchlistRecord> records) : BoundUserInterfaceState
+public sealed record NCAgentWatchlistWarrant(
+    long WarrantId,
+    long? CaseId,
+    int TargetCharacterId,
+    string TargetName,
+    NCPoliceWarrantType Type,
+    NCPoliceWarrantStatus Status,
+    string Reason,
+    string IssuedByName,
+    DateTime IssuedAt,
+    string? ResolvedByName,
+    string? ResolutionReason,
+    DateTime? ResolvedAt);
+
+[Serializable, NetSerializable]
+public sealed class NCAgentWatchlistUiState(
+    List<NCAgentWatchlistRecord> records,
+    List<NCAgentWatchlistWarrant> warrants) : BoundUserInterfaceState
 {
     public readonly List<NCAgentWatchlistRecord> Records = records;
+    public readonly List<NCAgentWatchlistWarrant> Warrants = warrants;
 }

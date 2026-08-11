@@ -15,7 +15,16 @@
         </BoxContainer>
     </PanelContainer>
 
-    <LineEdit Name="SearchInput" PlaceHolder="search name, position or organization" HorizontalExpand="True" Margin="0 0 0 6" />
+    <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="0 0 0 5">
+        <LineEdit Name="SearchInput" PlaceHolder="search name, position or VIN" HorizontalExpand="True" Margin="0 0 4 0" />
+        <OptionButton Name="OrganizationFilter" MinWidth="130" />
+    </BoxContainer>
+    <PanelContainer Name="DetailPanel" Visible="False" HorizontalExpand="True" Margin="0 0 0 5">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#0D2427" BorderColor="#76FF95" BorderThickness="1" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Name="DetailContainer" Orientation="Vertical" HorizontalExpand="True" Margin="10 7" />
+    </PanelContainer>
     <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
         <BoxContainer Name="EntryContainer" Orientation="Vertical" HorizontalExpand="True" />
     </ScrollContainer>

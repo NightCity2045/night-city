@@ -25,6 +25,6 @@ public sealed partial class NCAgentWatchlistUi : UIFragment
     public override void UpdateState(BoundUserInterfaceState state)
     {
         if (state is NCAgentWatchlistUiState watchlist)
-            _fragment?.UpdateState(watchlist.Records);
+            _fragment?.UpdateState(watchlist.Records, watchlist.Warrants);
     }
 }
