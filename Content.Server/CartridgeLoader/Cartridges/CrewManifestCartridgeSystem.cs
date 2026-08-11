@@ -84,17 +84,17 @@ public sealed partial class CrewManifestCartridgeSystem : EntitySystem
     {
         _unsecureViewersAllowed = unsecureViewersAllowed;
 
+        // NC start - DIRECTORY is a physical Agent shard and must never be silently installed on every loader.
+        // The CVar still controls whether installed shards may query the public manifest.
+        if (_unsecureViewersAllowed)
+            return;
+
         var allCartridgeLoaders = AllEntityQuery<CartridgeLoaderComponent>();
         while (allCartridgeLoaders.MoveNext(out var loaderUid, out var comp))
         {
-            if (_unsecureViewersAllowed)
-            {
-                _cartridgeLoader.InstallProgram((loaderUid, comp), CartridgePrototypeName, false);
-                return;
-            }
-
             if (_cartridgeLoader.TryGetProgram<CrewManifestCartridgeComponent>((loaderUid, comp)) is { } program)
                 _cartridgeLoader.UninstallProgram((loaderUid, comp), program);
         }
+        // NC end
     }
 }

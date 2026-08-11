@@ -1,0 +1,31 @@
+<logprobe:NCAgentLogProbeFragment xmlns="https://spacestation14.io"
+                                  xmlns:logprobe="clr-namespace:Content.Client._NC.Agent.Shards.LogProbe"
+                                  xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                                  Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+    <PanelContainer Name="ScanHeader" HorizontalExpand="True" Margin="0 0 0 6">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#20170C" BorderColor="#F0C75E" BorderThickness="1 1 1 2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="10 7">
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                <Label Text="LOGPROBE // ACCESS AUDIT" FontColorOverride="#FFD66B" HorizontalExpand="True" />
+                <Label Name="LogCount" Text="0 LOGS" FontColorOverride="#8F7540" />
+            </BoxContainer>
+            <Label Name="ProbeStatus" Text="ARMED // USE AGENT ON ACCESS DEVICE" FontColorOverride="#76FF95" />
+        </BoxContainer>
+    </PanelContainer>
+
+    <PanelContainer HorizontalExpand="True" Margin="0 0 0 6">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#101820" BorderColor="#385062" BorderThickness="1" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="8 6">
+            <Label Name="DeviceName" Text="TARGET // NONE" FontColorOverride="#8FB8FF" HorizontalExpand="True" />
+            <Button Name="PrintButton" Text="PRINT" MinWidth="76" Disabled="True" />
+        </BoxContainer>
+    </PanelContainer>
+
+    <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+        <BoxContainer Name="LogContainer" Orientation="Vertical" HorizontalExpand="True" />
+    </ScrollContainer>
+</logprobe:NCAgentLogProbeFragment>

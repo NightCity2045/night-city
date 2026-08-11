@@ -1,0 +1,37 @@
+<navigator:NCAgentNavigatorFragment xmlns="https://spacestation14.io"
+                                    xmlns:navigator="clr-namespace:Content.Client._NC.Agent.Shards.Navigator"
+                                    xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                                    Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+    <PanelContainer HorizontalExpand="True" Margin="0 0 0 6">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#0C2020" BorderColor="#F0C75E" BorderThickness="1 1 1 2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="10 7">
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                <Label Text="NAVIGATOR // CITY GRID" FontColorOverride="#FFD66B" HorizontalExpand="True" />
+                <Label Name="WaypointCount" Text="0 / 24" FontColorOverride="#8F815B" />
+            </BoxContainer>
+            <Label Name="SignalStatus" Text="ACQUIRING POSITION" FontColorOverride="#FFD66B" />
+        </BoxContainer>
+    </PanelContainer>
+
+    <PanelContainer HorizontalExpand="True" Margin="0 0 0 6">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#08171C" BorderColor="#376F69" BorderThickness="1" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="8">
+            <Label Name="CurrentCoordinates" Text="X -- // Y -- // Z --" FontColorOverride="#77FFF2" />
+            <Label Name="CurrentZone" Text="CITY GRID // SIGNAL UNAVAILABLE" FontColorOverride="#6C918E" />
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="0 5 0 0">
+                <LineEdit Name="WaypointLabel" PlaceHolder="waypoint label" HorizontalExpand="True" />
+                <Button Name="SaveButton" Text="SAVE HERE" MinWidth="92" Margin="5 0 0 0" />
+                <Button Name="RefreshButton" Text="REFRESH" MinWidth="76" Margin="5 0 0 0" />
+            </BoxContainer>
+        </BoxContainer>
+    </PanelContainer>
+
+    <Label Text="SAVED WAYPOINTS" FontColorOverride="#FFD66B" Margin="0 0 0 4" />
+    <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+        <BoxContainer Name="WaypointContainer" Orientation="Vertical" HorizontalExpand="True" />
+    </ScrollContainer>
+</navigator:NCAgentNavigatorFragment>

@@ -1,0 +1,22 @@
+<directory:NCAgentDirectoryFragment xmlns="https://spacestation14.io"
+                                    xmlns:directory="clr-namespace:Content.Client._NC.Agent.Shards.Directory"
+                                    xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                                    Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+    <PanelContainer HorizontalExpand="True" Margin="0 0 0 6">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#0C2020" BorderColor="#24E0D0" BorderThickness="1 1 1 2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="10 7">
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                <Label Text="DIRECTORY // PUBLIC REGISTRY" FontColorOverride="#77FFF2" HorizontalExpand="True" />
+                <Label Name="EntryCount" Text="0 ENTRIES" FontColorOverride="#5FA39E" />
+            </BoxContainer>
+            <Label Name="OrganizationName" Text="NETWORK DIRECTORY" FontColorOverride="#76FF95" />
+        </BoxContainer>
+    </PanelContainer>
+
+    <LineEdit Name="SearchInput" PlaceHolder="search name, position or organization" HorizontalExpand="True" Margin="0 0 0 6" />
+    <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+        <BoxContainer Name="EntryContainer" Orientation="Vertical" HorizontalExpand="True" />
+    </ScrollContainer>
+</directory:NCAgentDirectoryFragment>

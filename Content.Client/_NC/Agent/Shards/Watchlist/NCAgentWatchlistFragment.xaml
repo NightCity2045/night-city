@@ -1,0 +1,22 @@
+<watchlist:NCAgentWatchlistFragment xmlns="https://spacestation14.io"
+                                    xmlns:watchlist="clr-namespace:Content.Client._NC.Agent.Shards.Watchlist"
+                                    xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                                    Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+    <PanelContainer HorizontalExpand="True" Margin="0 0 0 6">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#271016" BorderColor="#FF5C7C" BorderThickness="1 1 1 2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="10 7">
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                <Label Text="WATCHLIST // NCPD QUERY" FontColorOverride="#FF91A6" HorizontalExpand="True" />
+                <Label Name="RecordCount" Text="0 RECORDS" FontColorOverride="#A85A69" />
+            </BoxContainer>
+            <Label Name="QueryStatus" Text="AUTHORIZED READ-ONLY CHANNEL" FontColorOverride="#FFD66B" />
+        </BoxContainer>
+    </PanelContainer>
+
+    <LineEdit Name="SearchInput" PlaceHolder="search name, status, job or reason" HorizontalExpand="True" Margin="0 0 0 6" />
+    <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+        <BoxContainer Name="RecordContainer" Orientation="Vertical" HorizontalExpand="True" />
+    </ScrollContainer>
+</watchlist:NCAgentWatchlistFragment>

@@ -44,8 +44,10 @@
 - type: entity
   parent: BasePDACartridge
   id: NanoTaskCartridge
-  name: NanoTask cartridge
-  description: A program that allows you to keep a list of tasks to do.
+  # NC start - Physical Agent shard presentation.
+  name: TASKBOARD shard
+  description: A local workflow board for an Agent.
+  # NC end
   components:
   - type: Sprite
     state: cart-nav
@@ -55,7 +57,8 @@
       sprite: Interface/Misc/program_icons.rsi
       state: nano_task
   - type: UIFragment
-    ui: !type:NanoTaskUi
+    # NC - Preserve NanoTask storage and relay while using the Agent-native TASKBOARD interface.
+    ui: !type:NCAgentTaskboardUi
   - type: NanoTaskCartridge
   # NC start - Agent SHARDS metadata.
   - type: NCAgentShard
@@ -70,13 +73,16 @@
 - type: entity
   parent: BasePDACartridge
   id: NewsReaderCartridge
-  name: news cartridge
-  description: A program for reading news.
+  # NC start - Physical Agent shard presentation.
+  name: NEWSWIRE shard
+  description: A public CityNet news feed for an Agent.
+  # NC end
   components:
   - type: Sprite
     state: cart-y
   - type: UIFragment
-    ui: !type:NewsReaderUi
+    # NC - Keep the vanilla news service while using the Agent-native NEWSWIRE reader.
+    ui: !type:NCAgentNewswireUi
   - type: Cartridge
     programName: news-read-program-name
     icon:
@@ -96,13 +102,16 @@
 - type: entity
   parent: BasePDACartridge
   id: CrewManifestCartridge
-  name: crew manifest cartridge
-  description: A program for listing your fellow crewmembers.
+  # NC start - Physical Agent shard presentation.
+  name: DIRECTORY shard
+  description: A public organization registry for an Agent.
+  # NC end
   components:
     - type: Sprite
       state: cart-y
     - type: UIFragment
-      ui: !type:CrewManifestUi
+      # NC - Keep the vanilla manifest service while using the Agent-native DIRECTORY reader.
+      ui: !type:NCAgentDirectoryUi
     - type: Cartridge
       programName: crew-manifest-program-name
       icon:
@@ -153,8 +162,10 @@
 - type: entity
   parent: BasePDACartridge
   id: LogProbeCartridge
-  name: LogProbe cartridge
-  description: A program for getting access logs from devices.
+  # NC start - Physical Agent shard presentation.
+  name: LOGPROBE shard
+  description: An access-device audit program for an Agent.
+  # NC end
   components:
     - type: Sprite
       state: cart-log
@@ -162,7 +173,8 @@
       sprite: Objects/Devices/cartridge.rsi
       state: cart-log
     - type: UIFragment
-      ui: !type:LogProbeUi
+      # NC - Keep vanilla scanning and printing behind the Agent-native LOGPROBE display.
+      ui: !type:NCAgentLogProbeUi
     - type: Cartridge
       programName: log-probe-program-name
       icon:
@@ -186,8 +198,10 @@
 - type: entity
   parent: BasePDACartridge
   id: WantedListCartridge
-  name: Wanted list cartridge
-  description: A program to get a list of wanted persons.
+  # NC start - Physical Agent shard presentation.
+  name: WATCHLIST shard
+  description: An NCPD wanted-record reader for an Agent.
+  # NC end
   components:
   - type: Sprite
     state: cart-sec
@@ -195,7 +209,8 @@
     sprite: Objects/Devices/cartridge.rsi
     state: cart-sec
   - type: UIFragment
-    ui: !type:WantedListUi
+    # NC - Keep the vanilla criminal-record query behind the Agent-native WATCHLIST display.
+    ui: !type:NCAgentWatchlistUi
   - type: Cartridge
     programName: wanted-list-program-name
     icon:
@@ -218,8 +233,10 @@
 - type: entity
   parent: BasePDACartridge
   id: MedTekCartridge
-  name: MedTek cartridge
-  description: A program that provides medical diagnostic tools.
+  # NC start - Physical Agent shard presentation.
+  name: MEDTEK shard
+  description: A field diagnostic program with device-local scan history.
+  # NC end
   components:
     - type: Sprite
       state: cart-med
@@ -232,6 +249,12 @@
         sprite: Objects/Specific/Medical/healthanalyzer.rsi
         state: icon
     - type: MedTekCartridge
+    # NC start - Agent-native MEDTEK history page; vanilla analyzer remains the live scan UI.
+    - type: UIFragment
+      ui: !type:NCAgentMedTekUi
+    - type: NCAgentMedTek
+      maximumHistory: 12
+    # NC end
     # NC start - Agent SHARDS metadata.
     - type: NCAgentShard
       displayName: MEDTEK
@@ -245,8 +268,10 @@
 - type: entity
   parent: BasePDACartridge
   id: AstroNavCartridge
-  name: AstroNav cartridge
-  description: A program for navigation that provides GPS coordinates.
+  # NC start - Physical Agent shard presentation.
+  name: NAVIGATOR shard
+  description: A city-grid navigator with local waypoint storage.
+  # NC end
   components:
     - type: Sprite
       state: cart-nav
@@ -259,6 +284,13 @@
         sprite: Objects/Devices/gps.rsi
         state: icon
     - type: AstroNavCartridge
+    # NC start - Agent-native NAVIGATOR UI and physical waypoint storage.
+    - type: UIFragment
+      ui: !type:NCAgentNavigatorUi
+    - type: NCAgentNavigator
+      maximumWaypoints: 24
+      maximumLabelLength: 30
+    # NC end
     # NC start - Agent SHARDS metadata.
     - type: NCAgentShard
       displayName: NAVIGATOR

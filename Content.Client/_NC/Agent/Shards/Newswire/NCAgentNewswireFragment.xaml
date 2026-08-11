@@ -1,0 +1,40 @@
+<newswire:NCAgentNewswireFragment xmlns="https://spacestation14.io"
+                                  xmlns:newswire="clr-namespace:Content.Client._NC.Agent.Shards.Newswire"
+                                  xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                                  Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+    <PanelContainer HorizontalExpand="True" Margin="0 0 0 6">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#211126" BorderColor="#E05CFF" BorderThickness="1 1 1 2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="10 7">
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                <Label Text="NEWSWIRE // PUBLIC FEED" FontColorOverride="#F29CFF" HorizontalExpand="True" />
+                <Label Name="ArticleIndex" Text="0 / 0" FontColorOverride="#9A659F" />
+            </BoxContainer>
+            <Label Name="FeedStatus" Text="CITYNET BROADCAST CHANNEL" FontColorOverride="#76FF95" />
+        </BoxContainer>
+    </PanelContainer>
+
+    <PanelContainer HorizontalExpand="True" VerticalExpand="True">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#0E141B" BorderColor="#5E3866" BorderThickness="1" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="10 8">
+            <Label Name="ArticleTitle" Text="NO PUBLICATIONS" FontColorOverride="#F6D8FF" />
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="0 2 0 5">
+                <Label Name="ArticleAuthor" Text="AUTHOR // UNKNOWN" FontColorOverride="#A989AD" HorizontalExpand="True" />
+                <Label Name="ArticleTime" Text="--:--:--" FontColorOverride="#6C918E" />
+            </BoxContainer>
+            <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+                <RichTextLabel Name="ArticleBody" HorizontalExpand="True" />
+            </ScrollContainer>
+        </BoxContainer>
+    </PanelContainer>
+
+    <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="0 6 0 0">
+        <Button Name="NotificationsButton" Text="ALERTS ON" MinWidth="100" />
+        <Control HorizontalExpand="True" />
+        <Button Name="PreviousButton" Text="&lt; PREV" MinWidth="76" />
+        <Button Name="NextButton" Text="NEXT &gt;" MinWidth="76" Margin="5 0 0 0" />
+    </BoxContainer>
+</newswire:NCAgentNewswireFragment>
