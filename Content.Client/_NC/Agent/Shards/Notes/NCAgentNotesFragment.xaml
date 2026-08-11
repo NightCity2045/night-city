@@ -1,0 +1,38 @@
+<notes:NCAgentNotesFragment xmlns="https://spacestation14.io"
+                            xmlns:notes="clr-namespace:Content.Client._NC.Agent.Shards.Notes"
+                            xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                            Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+    <PanelContainer HorizontalExpand="True" Margin="0 0 0 6">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#0D2027" BorderColor="#24E0D0" BorderThickness="1 1 1 2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="10 7">
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                <Label Text="LOCAL VAULT // NOTES" FontColorOverride="#77FFF2" HorizontalExpand="True" />
+                <Label Name="CountLabel" Text="0 / 64" FontColorOverride="#5FA39E" />
+            </BoxContainer>
+            <Label Name="StatusLabel" Text="ENCRYPTED DEVICE STORAGE" FontColorOverride="#426D69" />
+        </BoxContainer>
+    </PanelContainer>
+
+    <LineEdit Name="SearchInput" PlaceHolder="search local notes" HorizontalExpand="True" Margin="0 0 0 6" />
+
+    <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+        <BoxContainer Name="NotesContainer" Orientation="Vertical" HorizontalExpand="True" />
+    </ScrollContainer>
+
+    <PanelContainer HorizontalExpand="True" Margin="0 6 0 0">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#08171C" BorderColor="#245C59" BorderThickness="1" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="8">
+            <Label Name="EditorModeLabel" Text="NEW NOTE" FontColorOverride="#76FF95" />
+            <TextEdit Name="NoteInput" MinHeight="62" HorizontalExpand="True" />
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="0 5 0 0">
+                <Button Name="CancelEditButton" Text="CANCEL" Visible="False" MinWidth="80" />
+                <Control HorizontalExpand="True" />
+                <Button Name="SaveButton" Text="SAVE" MinWidth="96" />
+            </BoxContainer>
+        </BoxContainer>
+    </PanelContainer>
+</notes:NCAgentNotesFragment>

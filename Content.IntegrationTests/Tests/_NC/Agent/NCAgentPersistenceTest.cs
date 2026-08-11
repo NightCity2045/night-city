@@ -44,7 +44,193 @@ public sealed class NCAgentPersistenceTest : GameTest
             Assert.That(configuration.IncomingCallTimeout, Is.EqualTo(TimeSpan.FromSeconds(30)));
             Assert.That(configuration.CallHistoryRetention, Is.EqualTo(TimeSpan.FromDays(30)));
             Assert.That(configuration.CallHistoryLimit, Is.EqualTo(50));
+            Assert.That(configuration.MaximumGroupMembers, Is.EqualTo(20));
+            Assert.That(configuration.GroupConversationLimit, Is.EqualTo(30));
+            Assert.That(configuration.GroupMessageLimit, Is.EqualTo(100));
+            Assert.That(configuration.NotificationOverlayLimit, Is.EqualTo(3));
+            Assert.That(configuration.NotificationOverlayDuration, Is.EqualTo(TimeSpan.FromSeconds(6)));
+            Assert.That(configuration.ContactShareRange, Is.EqualTo(2));
+            Assert.That(configuration.CitiNetPostRetention, Is.EqualTo(TimeSpan.FromDays(30)));
+            Assert.That(configuration.CitiNetPostCooldown, Is.EqualTo(TimeSpan.FromSeconds(10)));
+            Assert.That(configuration.CitiNetCommentCooldown, Is.EqualTo(TimeSpan.FromSeconds(3)));
+            Assert.That(configuration.CitiNetReactionCooldown, Is.EqualTo(TimeSpan.FromSeconds(1)));
+            Assert.That(configuration.MaximumMentionsPerEntry, Is.EqualTo(10));
+            Assert.That(configuration.FeedPostLimit, Is.EqualTo(20));
         });
+    }
+
+    [Test]
+    public async Task CitiNetRespectsPrivacyPagingDeletionMentionsAndRetention()
+    {
+        var db = GetDb(Pair.Server);
+        var (_, viewer) = await CreateCharacterAsync(db, "Feed Viewer");
+        var (_, firstAuthor) = await CreateCharacterAsync(db, "First Author");
+        var (_, blockedAuthor) = await CreateCharacterAsync(db, "Blocked Author");
+        var (_, newestAuthor) = await CreateCharacterAsync(db, "Newest Author");
+        var now = DateTime.UtcNow;
+
+        foreach (var character in new[] { viewer, firstAuthor, blockedAuthor, newestAuthor })
+            Assert.That(await db.GetOrCreateNCAgentProfileAsync(character, "NC"), Is.Not.Null);
+        Assert.That(await db.UpdateNCAgentAliasAsync(firstAuthor, "Chrome Ghost", "CHROME GHOST"),
+            Is.EqualTo(NCAgentAliasUpdateResult.Updated));
+        Assert.That(await db.UpdateNCAgentAliasAsync(newestAuthor, "StaticBloom", "STATICBLOOM"),
+            Is.EqualTo(NCAgentAliasUpdateResult.Updated));
+
+        var firstPost = await db.CreateNCCitiNetPostAsync(firstAuthor, "First visible post", now);
+        var blockedPost = await db.CreateNCCitiNetPostAsync(blockedAuthor, "Hidden post", now.AddMinutes(1));
+        var newestPost = await db.CreateNCCitiNetPostAsync(newestAuthor, "Newest visible post", now.AddMinutes(2));
+        Assert.That(firstPost, Is.Not.Null);
+        Assert.That(blockedPost, Is.Not.Null);
+        Assert.That(newestPost, Is.Not.Null);
+
+        Assert.That(await db.SetNCAgentBlockedAsync(viewer, blockedAuthor, true, now.AddMinutes(3)), Is.True);
+        Assert.That(await db.CreateNCCitiNetCommentAsync(
+            blockedAuthor,
+            newestPost!.PostId,
+            "Hidden comment",
+            now.AddMinutes(4)), Is.Not.Null);
+        Assert.That(await db.CreateNCCitiNetCommentAsync(
+            firstAuthor,
+            newestPost.PostId,
+            "Visible comment",
+            now.AddMinutes(5)), Is.Not.Null);
+
+        var firstPage = await db.GetNCAgentSnapshotAsync(
+            viewer, null, null, string.Empty, now.AddMinutes(6), 30, 50, 100, 50, 30, 100, 0, 1, 200);
+        var secondPage = await db.GetNCAgentSnapshotAsync(
+            viewer, null, null, string.Empty, now.AddMinutes(6), 30, 50, 100, 50, 30, 100, 1, 1, 200);
+        Assert.Multiple(() =>
+        {
+            Assert.That(firstPage!.Posts.Single().PostId, Is.EqualTo(newestPost.PostId));
+            Assert.That(firstPage.Posts.Single().Comments.Single().Body, Is.EqualTo("Visible comment"));
+            Assert.That(firstPage.FeedHasOlderPosts, Is.True);
+            Assert.That(secondPage!.Posts.Single().PostId, Is.EqualTo(firstPost!.PostId));
+            Assert.That(secondPage.FeedHasOlderPosts, Is.False);
+        });
+
+        Assert.That(await db.CreateNCCitiNetCommentAsync(
+            viewer,
+            blockedPost!.PostId,
+            "Must be rejected",
+            now.AddMinutes(7)), Is.Null);
+        Assert.That(await db.ToggleNCCitiNetReactionAsync(viewer, blockedPost.PostId, now.AddMinutes(7)), Is.Null);
+
+        var mentionTargets = await db.ResolveNCCitiNetMentionRecipientsAsync(
+            viewer,
+            new[] { "CHROME GHOST", "STATICBLOOM", "BLOCKED AUTHOR" });
+        Assert.That(mentionTargets, Is.EquivalentTo(new[] { firstAuthor, newestAuthor }));
+
+        Assert.That(await db.DeleteNCCitiNetPostAsync(viewer, firstPost!.PostId), Is.False);
+        Assert.That(await db.DeleteNCCitiNetPostAsync(firstAuthor, firstPost.PostId), Is.True);
+        Assert.That(await db.PurgeExpiredNCCitiNetPostsAsync(now.AddDays(31)), Is.EqualTo(2));
+    }
+
+    [Test]
+    public async Task PrivacyPresenceAndGroupsRemainCharacterScoped()
+    {
+        var db = GetDb(Pair.Server);
+        var (_, owner) = await CreateCharacterAsync(db, "Rogue Signal");
+        var (_, member) = await CreateCharacterAsync(db, "Neon Shade");
+        var (_, invitee) = await CreateCharacterAsync(db, "Static Bloom");
+        var now = DateTime.UtcNow;
+
+        Assert.That(await db.GetOrCreateNCAgentProfileAsync(owner, "NC"), Is.Not.Null);
+        Assert.That(await db.GetOrCreateNCAgentProfileAsync(member, "NC"), Is.Not.Null);
+        Assert.That(await db.GetOrCreateNCAgentProfileAsync(invitee, "NC"), Is.Not.Null);
+        Assert.That(await db.UpdateNCAgentPresenceAsync(member, NCAgentPresenceStatus.DoNotDisturb), Is.True);
+        Assert.That(await db.UpdateNCAgentNotificationSettingsAsync(member, false, false), Is.True);
+        Assert.That(await db.AddNCAgentMutualContactsAsync(owner, member, now), Is.True);
+        Assert.That(await db.AddNCAgentMutualContactsAsync(owner, invitee, now), Is.True);
+
+        var memberSnapshot = await GetSnapshotAsync(db, member, owner, null, string.Empty, now);
+        Assert.Multiple(() =>
+        {
+            Assert.That(memberSnapshot!.Profile.Presence, Is.EqualTo(NCAgentPresenceStatus.DoNotDisturb));
+            Assert.That(memberSnapshot.Profile.OverlayNotificationsEnabled, Is.False);
+            Assert.That(memberSnapshot.Profile.NotificationSoundEnabled, Is.False);
+            Assert.That(memberSnapshot.Contacts.Single().CharacterId, Is.EqualTo(owner));
+        });
+
+        Assert.That(await db.CreateNCAgentMessageAsync(
+            owner,
+            member,
+            "Burn after reading.",
+            now.AddSeconds(1),
+            now.AddDays(30)), Is.Not.Null);
+        Assert.That(await db.ClearNCAgentConversationAsync(member, owner, now.AddSeconds(2)), Is.True);
+        memberSnapshot = await GetSnapshotAsync(db, member, owner, null, string.Empty, now.AddSeconds(3));
+        Assert.Multiple(() =>
+        {
+            Assert.That(memberSnapshot!.Messages, Is.Empty);
+            Assert.That(memberSnapshot.UnreadMessageCount, Is.EqualTo(0));
+        });
+
+        Assert.That(await db.SetNCAgentBlockedAsync(member, owner, true, now.AddSeconds(4)), Is.True);
+        Assert.That(await db.AreNCAgentProfilesBlockedAsync(owner, member), Is.True);
+        Assert.That(await db.CreateNCAgentMessageAsync(
+            owner,
+            member,
+            "This must not arrive.",
+            now.AddSeconds(5),
+            now.AddDays(30)), Is.Null);
+        memberSnapshot = await GetSnapshotAsync(db, member, null, null, "Rogue", now.AddSeconds(5));
+        Assert.Multiple(() =>
+        {
+            Assert.That(memberSnapshot!.Blocked.Single().CharacterId, Is.EqualTo(owner));
+            Assert.That(memberSnapshot.Directory, Is.Empty);
+            Assert.That(memberSnapshot.Contacts, Is.Empty);
+        });
+        Assert.That(await db.SetNCAgentBlockedAsync(member, owner, false, now.AddSeconds(6)), Is.True);
+
+        var group = await db.CreateNCAgentGroupAsync(
+            owner,
+            "Afterlife Crew",
+            new[] { member, invitee },
+            now.AddSeconds(7),
+            now.AddDays(1),
+            48,
+            20);
+        Assert.That(group, Is.Not.Null);
+        Assert.That(group!.InvitedCharacterIds, Is.EquivalentTo(new[] { member, invitee }));
+
+        memberSnapshot = await GetSnapshotAsync(db, member, null, null, string.Empty, now.AddSeconds(8));
+        Assert.That(memberSnapshot!.GroupInvites.Single().GroupId, Is.EqualTo(group.GroupId));
+        Assert.That(await db.RespondNCAgentGroupInviteAsync(
+            member,
+            group.GroupId,
+            true,
+            now.AddSeconds(9),
+            20), Is.True);
+        Assert.That(await db.CreateNCAgentGroupMessageAsync(
+            owner,
+            group.GroupId,
+            "One crew, one encrypted channel.",
+            now.AddSeconds(10),
+            now.AddDays(30),
+            1024), Is.Not.Null);
+
+        memberSnapshot = await GetSnapshotAsync(db, member, null, group.GroupId, string.Empty, now.AddSeconds(11));
+        Assert.Multiple(() =>
+        {
+            Assert.That(memberSnapshot!.Groups.Single().UnreadCount, Is.EqualTo(1));
+            Assert.That(memberSnapshot.UnreadGroupMessageCount, Is.EqualTo(1));
+            Assert.That(memberSnapshot.GroupMessages.Single().Body, Is.EqualTo("One crew, one encrypted channel."));
+            Assert.That(memberSnapshot.GroupMembers, Has.Count.EqualTo(2));
+        });
+
+        Assert.That(await db.ClearNCAgentGroupConversationAsync(member, group.GroupId, now.AddSeconds(12)), Is.True);
+        memberSnapshot = await GetSnapshotAsync(db, member, null, group.GroupId, string.Empty, now.AddSeconds(13));
+        Assert.Multiple(() =>
+        {
+            Assert.That(memberSnapshot!.GroupMessages, Is.Empty);
+            Assert.That(memberSnapshot.UnreadGroupMessageCount, Is.EqualTo(0));
+        });
+
+        Assert.That(await db.LeaveNCAgentGroupAsync(owner, group.GroupId, now.AddSeconds(14)), Is.True);
+        memberSnapshot = await GetSnapshotAsync(db, member, null, group.GroupId, string.Empty, now.AddSeconds(15));
+        Assert.That(memberSnapshot!.Groups.Single().Role, Is.EqualTo(NCAgentGroupRole.Owner));
+        Assert.That(await db.PurgeExpiredNCAgentGroupMessagesAsync(now.AddDays(31)), Is.EqualTo(1));
+        Assert.That(await db.PurgeExpiredNCAgentGroupInvitesAsync(now.AddDays(2)), Is.EqualTo(1));
     }
 
     [Test]
@@ -78,8 +264,10 @@ public sealed class NCAgentPersistenceTest : GameTest
         Assert.That(await db.UpdateNCAgentAliasAsync(first, "chrome ghost", "CHROME GHOST"),
             Is.EqualTo(NCAgentAliasUpdateResult.Duplicate));
 
-        var snapshot = await db.GetNCAgentSnapshotAsync(first, second, "chrome", now, 30, 50, 100, 50, 50, 200);
-        var recipientSnapshot = await db.GetNCAgentSnapshotAsync(second, first, string.Empty, now, 30, 50, 100, 50, 50, 200);
+        var snapshot = await db.GetNCAgentSnapshotAsync(
+            first, second, null, "chrome", now, 30, 50, 100, 50, 30, 100, 0, 50, 200);
+        var recipientSnapshot = await db.GetNCAgentSnapshotAsync(
+            second, first, null, string.Empty, now, 30, 50, 100, 50, 30, 100, 0, 50, 200);
         Assert.That(snapshot, Is.Not.Null);
         Assert.That(recipientSnapshot, Is.Not.Null);
         Assert.Multiple(() =>
@@ -133,12 +321,16 @@ public sealed class NCAgentPersistenceTest : GameTest
         recipientSnapshot = await db.GetNCAgentSnapshotAsync(
             second,
             first,
+            null,
             string.Empty,
             now.AddMinutes(9),
             30,
             50,
             100,
             50,
+            30,
+            100,
+            0,
             50,
             200);
         Assert.Multiple(() =>
@@ -156,12 +348,16 @@ public sealed class NCAgentPersistenceTest : GameTest
         recipientSnapshot = await db.GetNCAgentSnapshotAsync(
             second,
             first,
+            null,
             string.Empty,
             now.AddMinutes(10),
             30,
             50,
             100,
             50,
+            30,
+            100,
+            0,
             50,
             200);
         Assert.Multiple(() =>
@@ -175,12 +371,16 @@ public sealed class NCAgentPersistenceTest : GameTest
         var expiredSnapshot = await db.GetNCAgentSnapshotAsync(
             first,
             second,
+            null,
             string.Empty,
             now.AddDays(31),
             30,
             50,
             100,
             50,
+            30,
+            100,
+            0,
             50,
             200);
         Assert.That(expiredSnapshot!.Messages, Is.Empty);
@@ -213,12 +413,16 @@ public sealed class NCAgentPersistenceTest : GameTest
         var snapshot = await db.GetNCAgentSnapshotAsync(
             characterId,
             null,
+            null,
             string.Empty,
             DateTime.UtcNow,
             30,
             50,
             100,
             50,
+            30,
+            100,
+            0,
             50,
             200);
         Assert.That(snapshot, Is.Null);
@@ -227,12 +431,16 @@ public sealed class NCAgentPersistenceTest : GameTest
         var peerSnapshot = await db.GetNCAgentSnapshotAsync(
             peerId,
             null,
+            null,
             string.Empty,
             now.AddMinutes(1),
             30,
             50,
             100,
             50,
+            30,
+            100,
+            0,
             50,
             200);
         Assert.That(peerSnapshot!.CallHistory, Is.Empty);
@@ -245,6 +453,31 @@ public sealed class NCAgentPersistenceTest : GameTest
         var userId = new NetUserId(Guid.NewGuid());
         var preference = await db.InitPrefsAsync(userId, new HumanoidCharacterProfile { Name = name });
         return (userId, new NCCharacterId(preference.Profiles.Single().Id));
+    }
+
+    private static Task<NCAgentSnapshotData?> GetSnapshotAsync(
+        ServerDbSqlite db,
+        NCCharacterId owner,
+        NCCharacterId? selectedPeer,
+        long? selectedGroup,
+        string query,
+        DateTime now)
+    {
+        return db.GetNCAgentSnapshotAsync(
+            owner,
+            selectedPeer,
+            selectedGroup,
+            query,
+            now,
+            30,
+            50,
+            100,
+            50,
+            30,
+            100,
+            0,
+            50,
+            200);
     }
 
     private static ServerDbSqlite GetDb(RobustIntegrationTest.ServerIntegrationInstance server)

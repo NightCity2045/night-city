@@ -53,6 +53,7 @@
                                 <Label Name="OwnerLabel" Text="UNREGISTERED USER" FontColorOverride="#D7FFFB" />
                                 <Label Name="VinCardLabel" Text="VIN CARD // NOT DETECTED" FontColorOverride="#6CA6A1" />
                                 <Label Name="NetworkLabel" Text="NODE // --" FontColorOverride="#406E6B" />
+                                <Label Name="AgentServiceLabel" Text="CITYNET // CONNECTING" FontColorOverride="#76FF95" />
                             </BoxContainer>
                         </PanelContainer>
 
@@ -127,12 +128,33 @@
                     </BoxContainer>
                 </ScrollContainer>
 
-                <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
-                    <GridContainer Name="ProgramList" Columns="2" HorizontalExpand="True" VerticalExpand="True" Margin="10" />
-                </ScrollContainer>
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Margin="10 8">
+                    <PanelContainer HorizontalExpand="True" Margin="4 0 4 6">
+                        <PanelContainer.PanelOverride>
+                            <gfx:StyleBoxFlat BackgroundColor="#101A20" BorderColor="#FF8248" BorderThickness="0 0 0 2" />
+                        </PanelContainer.PanelOverride>
+                        <BoxContainer Orientation="Vertical" Margin="10 7">
+                            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                                <Label Text="SHARD MEMORY" FontColorOverride="#FFA77D" />
+                                <Control HorizontalExpand="True" />
+                                <Label Name="ShardMemoryLabel" Text="0U / 0U" FontColorOverride="#FFD0BA" />
+                            </BoxContainer>
+                            <ProgressBar Name="ShardMemoryBar" MinValue="0" MaxValue="1" Value="0" MinHeight="8" Margin="0 5 0 0" />
+                            <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="0 4 0 0">
+                                <Label Name="ShardStatusLabel" Text="INSERT A PHYSICAL SHARD TO INSTALL"
+                                       FontColorOverride="#755A50" HorizontalExpand="True" />
+                                <Button Name="EjectShardButton" Text="EJECT CHIP" Disabled="True" MinWidth="94" MinHeight="25" />
+                            </BoxContainer>
+                        </BoxContainer>
+                    </PanelContainer>
+                    <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+                        <GridContainer Name="ProgramList" Columns="2" HorizontalExpand="True" Margin="0" />
+                    </ScrollContainer>
+                </BoxContainer>
 
                 <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
                     <BoxContainer Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" Margin="8">
+                        <BoxContainer Name="AgentSettingsContainer" Orientation="Vertical" HorizontalExpand="True" />
                         <pda:PdaSettingsButton Name="RingtoneButton" Access="Public"
                                                Text="RINGTONE" Description="Change incoming-call alert" />
                         <pda:PdaSettingsButton Name="MusicButton" Access="Public" Visible="False"

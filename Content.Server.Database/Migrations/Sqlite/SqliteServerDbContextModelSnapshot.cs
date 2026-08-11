@@ -926,6 +926,28 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("job", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCAgentBlock", b =>
+                {
+                    b.Property<int>("OwnerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("owner_profile_id");
+
+                    b.Property<int>("BlockedProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("blocked_profile_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("OwnerProfileId", "BlockedProfileId")
+                        .HasName("PK_nc_agent_block");
+
+                    b.HasIndex("BlockedProfileId");
+
+                    b.ToTable("nc_agent_block", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCAgentCallLog", b =>
                 {
                     b.Property<long>("Id")
@@ -993,6 +1015,173 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.HasIndex("ContactProfileId");
 
                     b.ToTable("nc_agent_contact", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentDirectConversationState", b =>
+                {
+                    b.Property<int>("OwnerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("owner_profile_id");
+
+                    b.Property<int>("PeerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("peer_profile_id");
+
+                    b.Property<DateTime?>("ClearedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("cleared_at");
+
+                    b.HasKey("OwnerProfileId", "PeerProfileId")
+                        .HasName("PK_nc_agent_direct_conversation_state");
+
+                    b.HasIndex("PeerProfileId");
+
+                    b.ToTable("nc_agent_direct_conversation_state", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroup", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_agent_group_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(48)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
+                    b.Property<int>("OwnerProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("owner_profile_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_agent_group");
+
+                    b.HasIndex("OwnerProfileId");
+
+                    b.HasIndex("UpdatedAt");
+
+                    b.ToTable("nc_agent_group", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupInvite", b =>
+                {
+                    b.Property<long>("GroupId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("group_id");
+
+                    b.Property<int>("InviteeProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("invitee_profile_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("expires_at");
+
+                    b.Property<int>("InviterProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("inviter_profile_id");
+
+                    b.HasKey("GroupId", "InviteeProfileId")
+                        .HasName("PK_nc_agent_group_invite");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("InviteeProfileId");
+
+                    b.HasIndex("InviterProfileId");
+
+                    b.ToTable("nc_agent_group_invite", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupMember", b =>
+                {
+                    b.Property<long>("GroupId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("group_id");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<DateTime?>("ClearedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("cleared_at");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("joined_at");
+
+                    b.Property<DateTime?>("LastReadAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("last_read_at");
+
+                    b.Property<byte>("Role")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("role");
+
+                    b.HasKey("GroupId", "ProfileId")
+                        .HasName("PK_nc_agent_group_member");
+
+                    b.HasIndex("ProfileId")
+                        .HasDatabaseName("IX_nc_agent_group_member_profile_id");
+
+                    b.ToTable("nc_agent_group_member", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("nc_agent_group_message_id");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("body");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("expires_at");
+
+                    b.Property<long>("GroupId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("group_id");
+
+                    b.Property<int>("SenderProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("sender_profile_id");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("sent_at");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_agent_group_message");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("SenderProfileId");
+
+                    b.HasIndex("GroupId", "SentAt");
+
+                    b.ToTable("nc_agent_group_message", (string)null);
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCAgentMessage", b =>
@@ -1065,6 +1254,22 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasMaxLength(32)
                         .HasColumnType("TEXT")
                         .HasColumnName("normalized_alias");
+
+                    b.Property<bool>("NotificationSoundEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true)
+                        .HasColumnName("notification_sound_enabled");
+
+                    b.Property<bool>("OverlayNotificationsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true)
+                        .HasColumnName("overlay_notifications_enabled");
+
+                    b.Property<byte>("Presence")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("presence");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT")
@@ -3214,6 +3419,27 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Profile");
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCAgentBlock", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Blocked")
+                        .WithMany()
+                        .HasForeignKey("BlockedProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_block_blocked_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_block_owner_profile_id");
+
+                    b.Navigation("Blocked");
+
+                    b.Navigation("Owner");
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCAgentCallLog", b =>
                 {
                     b.HasOne("Content.Server.Database.NCAgentProfile", "Caller")
@@ -3254,6 +3480,111 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Navigation("Contact");
 
                     b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentDirectConversationState", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_direct_state_owner_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Peer")
+                        .WithMany()
+                        .HasForeignKey("PeerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_direct_state_peer_profile_id");
+
+                    b.Navigation("Owner");
+
+                    b.Navigation("Peer");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroup", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_owner_profile_id");
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupInvite", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentGroup", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_invite_group_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Invitee")
+                        .WithMany()
+                        .HasForeignKey("InviteeProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_invite_invitee_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Inviter")
+                        .WithMany()
+                        .HasForeignKey("InviterProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_invite_inviter_profile_id");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Invitee");
+
+                    b.Navigation("Inviter");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupMember", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentGroup", "Group")
+                        .WithMany("Members")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_member_group_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_member_profile_id");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupMessage", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentGroup", "Group")
+                        .WithMany("Messages")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_message_group_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_message_sender_profile_id");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCAgentMessage", b =>
@@ -3796,6 +4127,13 @@ namespace Content.Server.Database.Migrations.Sqlite
             modelBuilder.Entity("Content.Server.Database.CustomVoteLog", b =>
                 {
                     b.Navigation("Options");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroup", b =>
+                {
+                    b.Navigation("Members");
+
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCAgentProfile", b =>

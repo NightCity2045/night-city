@@ -1,0 +1,29 @@
+<ContainerButton xmlns="https://spacestation14.io"
+                 xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                 HorizontalExpand="True" MinHeight="118" Margin="4">
+    <PanelContainer Name="CardPanel" HorizontalExpand="True" VerticalExpand="True">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#0C1B21" BorderColor="#2C7772" BorderThickness="1 1 1 2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="10 8" HorizontalExpand="True">
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                <PanelContainer MinWidth="42" MinHeight="42" Margin="0 0 8 0">
+                    <PanelContainer.PanelOverride>
+                        <gfx:StyleBoxFlat BackgroundColor="#081318" BorderColor="#23524F" BorderThickness="1" />
+                    </PanelContainer.PanelOverride>
+                    <AnimatedTextureRect Name="ShardIcon" SetSize="32 32" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </PanelContainer>
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True">
+                    <Label Name="ShardName" Text="SHARD" FontColorOverride="#D7FFFB" />
+                    <Label Name="ShardMeta" Text="UTILITY // 1U" FontColorOverride="#5FA39E" />
+                </BoxContainer>
+                <Label Name="ShardState" Text="LOCAL" FontColorOverride="#76FF95" />
+            </BoxContainer>
+            <Label Name="ShardDescription" Text="Program data" FontColorOverride="#77928F" Margin="0 6 0 0" />
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True" Margin="0 6 0 0">
+                <Label Name="ShardPermissions" Text="PERM // NONE" FontColorOverride="#426D69" HorizontalExpand="True" />
+                <Button Name="ShardAction" Text="OPEN" MinWidth="76" MinHeight="26" />
+            </BoxContainer>
+        </BoxContainer>
+    </PanelContainer>
+</ContainerButton>

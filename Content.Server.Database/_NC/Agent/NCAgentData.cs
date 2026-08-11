@@ -28,6 +28,9 @@ public sealed class NCAgentProfile
     [MaxLength(32)]
     public string? NormalizedAlias { get; set; }
 
+    public byte Presence { get; set; }
+    public bool OverlayNotificationsEnabled { get; set; } = true;
+    public bool NotificationSoundEnabled { get; set; } = true;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public Profile Profile { get; set; } = null!;
@@ -42,6 +45,26 @@ public sealed class NCAgentContact
     public DateTime CreatedAt { get; set; }
     public NCAgentProfile Owner { get; set; } = null!;
     public NCAgentProfile Contact { get; set; } = null!;
+}
+
+[Table("nc_agent_block")]
+public sealed class NCAgentBlock
+{
+    public int OwnerProfileId { get; set; }
+    public int BlockedProfileId { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public NCAgentProfile Owner { get; set; } = null!;
+    public NCAgentProfile Blocked { get; set; } = null!;
+}
+
+[Table("nc_agent_direct_conversation_state")]
+public sealed class NCAgentDirectConversationState
+{
+    public int OwnerProfileId { get; set; }
+    public int PeerProfileId { get; set; }
+    public DateTime? ClearedAt { get; set; }
+    public NCAgentProfile Owner { get; set; } = null!;
+    public NCAgentProfile Peer { get; set; } = null!;
 }
 
 [Table("nc_agent_message")]
@@ -76,6 +99,66 @@ public sealed class NCAgentCallLog
     public DateTime? TargetReadAt { get; set; }
     public NCAgentProfile Caller { get; set; } = null!;
     public NCAgentProfile Target { get; set; } = null!;
+}
+
+[Table("nc_agent_group")]
+public sealed class NCAgentGroup
+{
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+    public int OwnerProfileId { get; set; }
+
+    [MaxLength(48)]
+    public string Name { get; set; } = string.Empty;
+
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+    public NCAgentProfile Owner { get; set; } = null!;
+    public List<NCAgentGroupMember> Members { get; set; } = [];
+    public List<NCAgentGroupMessage> Messages { get; set; } = [];
+}
+
+[Table("nc_agent_group_member")]
+public sealed class NCAgentGroupMember
+{
+    public long GroupId { get; set; }
+    public int ProfileId { get; set; }
+    public byte Role { get; set; }
+    public DateTime JoinedAt { get; set; }
+    public DateTime? LastReadAt { get; set; }
+    public DateTime? ClearedAt { get; set; }
+    public NCAgentGroup Group { get; set; } = null!;
+    public NCAgentProfile Profile { get; set; } = null!;
+}
+
+[Table("nc_agent_group_message")]
+public sealed class NCAgentGroupMessage
+{
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public long Id { get; set; }
+    public long GroupId { get; set; }
+    public int SenderProfileId { get; set; }
+
+    [MaxLength(1024)]
+    public string Body { get; set; } = string.Empty;
+
+    public DateTime SentAt { get; set; }
+    public DateTime ExpiresAt { get; set; }
+    public NCAgentGroup Group { get; set; } = null!;
+    public NCAgentProfile Sender { get; set; } = null!;
+}
+
+[Table("nc_agent_group_invite")]
+public sealed class NCAgentGroupInvite
+{
+    public long GroupId { get; set; }
+    public int InviteeProfileId { get; set; }
+    public int InviterProfileId { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime ExpiresAt { get; set; }
+    public NCAgentGroup Group { get; set; } = null!;
+    public NCAgentProfile Invitee { get; set; } = null!;
+    public NCAgentProfile Inviter { get; set; } = null!;
 }
 
 [Table("nc_citinet_post")]
@@ -124,8 +207,14 @@ public abstract partial class ServerDbContext
 {
     public DbSet<NCAgentProfile> NCAgentProfiles => Set<NCAgentProfile>();
     public DbSet<NCAgentContact> NCAgentContacts => Set<NCAgentContact>();
+    public DbSet<NCAgentBlock> NCAgentBlocks => Set<NCAgentBlock>();
+    public DbSet<NCAgentDirectConversationState> NCAgentDirectConversationStates => Set<NCAgentDirectConversationState>();
     public DbSet<NCAgentMessage> NCAgentMessages => Set<NCAgentMessage>();
     public DbSet<NCAgentCallLog> NCAgentCallLogs => Set<NCAgentCallLog>();
+    public DbSet<NCAgentGroup> NCAgentGroups => Set<NCAgentGroup>();
+    public DbSet<NCAgentGroupMember> NCAgentGroupMembers => Set<NCAgentGroupMember>();
+    public DbSet<NCAgentGroupMessage> NCAgentGroupMessages => Set<NCAgentGroupMessage>();
+    public DbSet<NCAgentGroupInvite> NCAgentGroupInvites => Set<NCAgentGroupInvite>();
     public DbSet<NCCitiNetPost> NCCitiNetPosts => Set<NCCitiNetPost>();
     public DbSet<NCCitiNetComment> NCCitiNetComments => Set<NCCitiNetComment>();
     public DbSet<NCCitiNetReaction> NCCitiNetReactions => Set<NCCitiNetReaction>();
@@ -144,6 +233,12 @@ public abstract partial class ServerDbContext
         modelBuilder.Entity<NCAgentProfile>()
             .HasIndex(value => value.NormalizedAlias)
             .IsUnique();
+        modelBuilder.Entity<NCAgentProfile>()
+            .Property(value => value.OverlayNotificationsEnabled)
+            .HasDefaultValue(true);
+        modelBuilder.Entity<NCAgentProfile>()
+            .Property(value => value.NotificationSoundEnabled)
+            .HasDefaultValue(true);
 
         modelBuilder.Entity<NCAgentContact>()
             .HasKey(value => new { value.OwnerProfileId, value.ContactProfileId });
@@ -152,6 +247,38 @@ public abstract partial class ServerDbContext
             .WithMany(value => value.Contacts)
             .HasForeignKey(value => value.OwnerProfileId)
             .HasConstraintName("FK_nc_agent_contact_owner_profile_id")
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<NCAgentBlock>()
+            .HasKey(value => new { value.OwnerProfileId, value.BlockedProfileId });
+        modelBuilder.Entity<NCAgentBlock>()
+            .HasOne(value => value.Owner)
+            .WithMany()
+            .HasForeignKey(value => value.OwnerProfileId)
+            .HasConstraintName("FK_nc_agent_block_owner_profile_id")
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NCAgentBlock>()
+            .HasOne(value => value.Blocked)
+            .WithMany()
+            .HasForeignKey(value => value.BlockedProfileId)
+            .HasConstraintName("FK_nc_agent_block_blocked_profile_id")
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NCAgentBlock>()
+            .HasIndex(value => value.BlockedProfileId);
+
+        modelBuilder.Entity<NCAgentDirectConversationState>()
+            .HasKey(value => new { value.OwnerProfileId, value.PeerProfileId });
+        modelBuilder.Entity<NCAgentDirectConversationState>()
+            .HasOne(value => value.Owner)
+            .WithMany()
+            .HasForeignKey(value => value.OwnerProfileId)
+            .HasConstraintName("FK_nc_agent_direct_state_owner_profile_id")
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NCAgentDirectConversationState>()
+            .HasOne(value => value.Peer)
+            .WithMany()
+            .HasForeignKey(value => value.PeerProfileId)
+            .HasConstraintName("FK_nc_agent_direct_state_peer_profile_id")
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<NCAgentContact>()
             .HasOne(value => value.Contact)
@@ -193,6 +320,72 @@ public abstract partial class ServerDbContext
             .HasIndex(value => new { value.TargetProfileId, value.TargetReadAt });
         modelBuilder.Entity<NCAgentCallLog>()
             .HasIndex(value => value.EndedAt);
+
+        modelBuilder.Entity<NCAgentGroup>()
+            .HasOne(value => value.Owner)
+            .WithMany()
+            .HasForeignKey(value => value.OwnerProfileId)
+            .HasConstraintName("FK_nc_agent_group_owner_profile_id")
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NCAgentGroup>()
+            .HasIndex(value => value.UpdatedAt);
+
+        modelBuilder.Entity<NCAgentGroupMember>()
+            .HasKey(value => new { value.GroupId, value.ProfileId });
+        modelBuilder.Entity<NCAgentGroupMember>()
+            .HasOne(value => value.Group)
+            .WithMany(value => value.Members)
+            .HasForeignKey(value => value.GroupId)
+            .HasConstraintName("FK_nc_agent_group_member_group_id")
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NCAgentGroupMember>()
+            .HasOne(value => value.Profile)
+            .WithMany()
+            .HasForeignKey(value => value.ProfileId)
+            .HasConstraintName("FK_nc_agent_group_member_profile_id")
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NCAgentGroupMember>()
+            .HasIndex(value => value.ProfileId);
+
+        modelBuilder.Entity<NCAgentGroupMessage>()
+            .HasOne(value => value.Group)
+            .WithMany(value => value.Messages)
+            .HasForeignKey(value => value.GroupId)
+            .HasConstraintName("FK_nc_agent_group_message_group_id")
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NCAgentGroupMessage>()
+            .HasOne(value => value.Sender)
+            .WithMany()
+            .HasForeignKey(value => value.SenderProfileId)
+            .HasConstraintName("FK_nc_agent_group_message_sender_profile_id")
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NCAgentGroupMessage>()
+            .HasIndex(value => new { value.GroupId, value.SentAt });
+        modelBuilder.Entity<NCAgentGroupMessage>()
+            .HasIndex(value => value.ExpiresAt);
+
+        modelBuilder.Entity<NCAgentGroupInvite>()
+            .HasKey(value => new { value.GroupId, value.InviteeProfileId });
+        modelBuilder.Entity<NCAgentGroupInvite>()
+            .HasOne(value => value.Group)
+            .WithMany()
+            .HasForeignKey(value => value.GroupId)
+            .HasConstraintName("FK_nc_agent_group_invite_group_id")
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NCAgentGroupInvite>()
+            .HasOne(value => value.Invitee)
+            .WithMany()
+            .HasForeignKey(value => value.InviteeProfileId)
+            .HasConstraintName("FK_nc_agent_group_invite_invitee_profile_id")
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NCAgentGroupInvite>()
+            .HasOne(value => value.Inviter)
+            .WithMany()
+            .HasForeignKey(value => value.InviterProfileId)
+            .HasConstraintName("FK_nc_agent_group_invite_inviter_profile_id")
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NCAgentGroupInvite>()
+            .HasIndex(value => value.ExpiresAt);
 
         modelBuilder.Entity<NCCitiNetPost>()
             .HasOne(value => value.Author)

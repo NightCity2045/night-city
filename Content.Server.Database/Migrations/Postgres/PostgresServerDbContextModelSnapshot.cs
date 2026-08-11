@@ -980,6 +980,28 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("job", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCAgentBlock", b =>
+                {
+                    b.Property<int>("OwnerProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("owner_profile_id");
+
+                    b.Property<int>("BlockedProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("blocked_profile_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("OwnerProfileId", "BlockedProfileId")
+                        .HasName("PK_nc_agent_block");
+
+                    b.HasIndex("BlockedProfileId");
+
+                    b.ToTable("nc_agent_block", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCAgentCallLog", b =>
                 {
                     b.Property<long>("Id")
@@ -1049,6 +1071,177 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.HasIndex("ContactProfileId");
 
                     b.ToTable("nc_agent_contact", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentDirectConversationState", b =>
+                {
+                    b.Property<int>("OwnerProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("owner_profile_id");
+
+                    b.Property<int>("PeerProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("peer_profile_id");
+
+                    b.Property<DateTime?>("ClearedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("cleared_at");
+
+                    b.HasKey("OwnerProfileId", "PeerProfileId")
+                        .HasName("PK_nc_agent_direct_conversation_state");
+
+                    b.HasIndex("PeerProfileId");
+
+                    b.ToTable("nc_agent_direct_conversation_state", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroup", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("nc_agent_group_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(48)
+                        .HasColumnType("character varying(48)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("OwnerProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("owner_profile_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_agent_group");
+
+                    b.HasIndex("OwnerProfileId");
+
+                    b.HasIndex("UpdatedAt");
+
+                    b.ToTable("nc_agent_group", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupInvite", b =>
+                {
+                    b.Property<long>("GroupId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("group_id");
+
+                    b.Property<int>("InviteeProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("invitee_profile_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<int>("InviterProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("inviter_profile_id");
+
+                    b.HasKey("GroupId", "InviteeProfileId")
+                        .HasName("PK_nc_agent_group_invite");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("InviteeProfileId");
+
+                    b.HasIndex("InviterProfileId");
+
+                    b.ToTable("nc_agent_group_invite", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupMember", b =>
+                {
+                    b.Property<long>("GroupId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("group_id");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("profile_id");
+
+                    b.Property<DateTime?>("ClearedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("cleared_at");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("joined_at");
+
+                    b.Property<DateTime?>("LastReadAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_read_at");
+
+                    b.Property<byte>("Role")
+                        .HasColumnType("smallint")
+                        .HasColumnName("role");
+
+                    b.HasKey("GroupId", "ProfileId")
+                        .HasName("PK_nc_agent_group_member");
+
+                    b.HasIndex("ProfileId")
+                        .HasDatabaseName("IX_nc_agent_group_member_profile_id");
+
+                    b.ToTable("nc_agent_group_member", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("nc_agent_group_message_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)")
+                        .HasColumnName("body");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<long>("GroupId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("group_id");
+
+                    b.Property<int>("SenderProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("sender_profile_id");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_at");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_agent_group_message");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("SenderProfileId");
+
+                    b.HasIndex("GroupId", "SentAt");
+
+                    b.ToTable("nc_agent_group_message", (string)null);
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCAgentMessage", b =>
@@ -1123,6 +1316,22 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
                         .HasColumnName("normalized_alias");
+
+                    b.Property<bool>("NotificationSoundEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("notification_sound_enabled");
+
+                    b.Property<bool>("OverlayNotificationsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("overlay_notifications_enabled");
+
+                    b.Property<byte>("Presence")
+                        .HasColumnType("smallint")
+                        .HasColumnName("presence");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -3323,6 +3532,27 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.Navigation("Profile");
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCAgentBlock", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Blocked")
+                        .WithMany()
+                        .HasForeignKey("BlockedProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_block_blocked_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_block_owner_profile_id");
+
+                    b.Navigation("Blocked");
+
+                    b.Navigation("Owner");
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCAgentCallLog", b =>
                 {
                     b.HasOne("Content.Server.Database.NCAgentProfile", "Caller")
@@ -3363,6 +3593,111 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.Navigation("Contact");
 
                     b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentDirectConversationState", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_direct_state_owner_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Peer")
+                        .WithMany()
+                        .HasForeignKey("PeerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_direct_state_peer_profile_id");
+
+                    b.Navigation("Owner");
+
+                    b.Navigation("Peer");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroup", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_owner_profile_id");
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupInvite", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentGroup", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_invite_group_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Invitee")
+                        .WithMany()
+                        .HasForeignKey("InviteeProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_invite_invitee_profile_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Inviter")
+                        .WithMany()
+                        .HasForeignKey("InviterProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_invite_inviter_profile_id");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Invitee");
+
+                    b.Navigation("Inviter");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupMember", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentGroup", "Group")
+                        .WithMany("Members")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_member_group_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Profile")
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_member_profile_id");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroupMessage", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCAgentGroup", "Group")
+                        .WithMany("Messages")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_message_group_id");
+
+                    b.HasOne("Content.Server.Database.NCAgentProfile", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_agent_group_message_sender_profile_id");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCAgentMessage", b =>
@@ -3905,6 +4240,13 @@ namespace Content.Server.Database.Migrations.Postgres
             modelBuilder.Entity("Content.Server.Database.CustomVoteLog", b =>
                 {
                     b.Navigation("Options");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCAgentGroup", b =>
+                {
+                    b.Navigation("Members");
+
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCAgentProfile", b =>

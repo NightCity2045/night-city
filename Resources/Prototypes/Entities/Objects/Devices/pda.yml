@@ -47,6 +47,9 @@
         - IdCard
   # NC start - Night City treats the vanilla PDA as an Agent smartphone.
   - type: NCAgent
+  - type: NCAgentShardStorage
+    capacity: 16
+    defaultProgramSize: 1
   # NC end
   - type: PdaVisuals
   - type: Item
@@ -83,6 +86,8 @@
     range: 500
   - type: CartridgeLoader
     uiKey: enum.PdaUiKey.Key
+    # NC - SHARDS applies a weighted memory budget; this remains only a defensive entity-count ceiling.
+    diskSpace: 64
     cartridgeSlot:
       priority: -1
       name: device-pda-slot-component-slot-name-cartridge

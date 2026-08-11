@@ -4,8 +4,10 @@
 
 using System.Numerics;
 using System.Linq;
+using Content.Client._NC.Agent.Shards;
 using Content.Client.GameTicking.Managers;
 using Content.Client.PDA;
+using Content.Shared._NC.Agent;
 using Content.Shared._NC.Agent.UI;
 using Content.Shared.CartridgeLoader;
 using Content.Shared.PDA;
@@ -88,6 +90,25 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         },
     };
 
+    private static readonly Animation ShardStatusPulseAnimation = new()
+    {
+        Length = TimeSpan.FromSeconds(0.42),
+        AnimationTracks =
+        {
+            new AnimationTrackControlProperty
+            {
+                Property = nameof(Control.Modulate),
+                InterpolationMode = AnimationInterpolationMode.Linear,
+                KeyFrames =
+                {
+                    new AnimationTrackProperty.KeyFrame(Color.White, 0f),
+                    new AnimationTrackProperty.KeyFrame(Color.FromHex("#FFA77D88"), 0.14f),
+                    new AnimationTrackProperty.KeyFrame(Color.White, 0.42f),
+                },
+            },
+        },
+    };
+
     [Dependency] private IGameTiming _gameTiming = default!;
     [Dependency] private IEntitySystemManager _entitySystems = default!;
     [Dependency] private IUserInterfaceManager _uiManager = default!;
@@ -97,20 +118,40 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     private NCAgentUpdateMessage? _agentData;
     private NCAgentMapUpdateMessage? _mapData;
     private EntityUid? _mapGridUid;
+    private int _shardUsedMemory;
+    private int _shardCapacity = 1;
+    private bool _shardSnapshotInitialized;
+    private readonly Dictionary<EntityUid, (InstallationStatus Status, string Name)> _knownShards = new();
 
     public event Action<EntityUid>? OnProgramItemPressed;
     public event Action<EntityUid>? OnUninstallButtonPressed;
     public event Action<EntityUid>? OnInstallButtonPressed;
+    public event Action? OnEjectShard;
     public event Action<NCAgentApp>? OnOpenAgentApp;
     public event Action<string>? OnDirectorySearch;
     public event Action<string>? OnSetAlias;
+    public event Action<NCAgentPresenceStatus>? OnSetPresence;
+    public event Action<bool, bool>? OnSetNotificationSettings;
     public event Action<int>? OnAddContact;
     public event Action<int>? OnRemoveContact;
+    public event Action<int>? OnRequestContactExchange;
+    public event Action<int, bool>? OnSetBlocked;
+    public event Action<int>? OnClearConversation;
     public event Action<int>? OnSelectConversation;
     public event Action<int, string>? OnSendDirectMessage;
+    public event Action<string, List<int>>? OnCreateGroup;
+    public event Action<long>? OnSelectGroup;
+    public event Action<long, string>? OnSendGroupMessage;
+    public event Action<long, int>? OnInviteGroupMember;
+    public event Action<long, bool>? OnRespondGroupInvite;
+    public event Action<long, int>? OnRemoveGroupMember;
+    public event Action<long>? OnLeaveGroup;
+    public event Action<long>? OnClearGroupConversation;
     public event Action<string>? OnCreatePost;
     public event Action<long, string>? OnCreateComment;
     public event Action<long>? OnToggleReaction;
+    public event Action<long>? OnDeletePost;
+    public event Action<int>? OnSetFeedOffset;
     public event Action<int>? OnStartCall;
     public event Action<bool>? OnAnswerCall;
     public event Action? OnEndCall;
@@ -142,10 +183,17 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         CitiNetButton.OnPressed += _ => OpenAgentApp(NCAgentApp.CitiNet, "CITINET");
         MapButton.OnPressed += _ => OpenAgentApp(NCAgentApp.Map, "CITY MAP");
         ShardsButton.OnPressed += _ => ToProgramList();
+        EjectShardButton.OnPressed += _ =>
+        {
+            ShardStatusLabel.Text = "EJECTING PHYSICAL SHARD";
+            ShardStatusLabel.FontColorOverride = Color.FromHex("#FFD66B");
+            RestartAnimation(ShardStatusLabel, ShardStatusPulseAnimation, "nc-agent-shard-status");
+            OnEjectShard?.Invoke();
+        };
 
         HideAllViews();
         ToHomeScreen();
-        AgentScreen.PlayAnimation(ScreenBootAnimation, "nc-agent-screen-boot");
+        RestartAnimation(AgentScreen, ScreenBootAnimation, "nc-agent-screen-boot");
     }
 
     /// <summary>
@@ -182,16 +230,20 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     public void UpdateAgentData(NCAgentUpdateMessage update)
     {
         var previousNotificationCount = (_agentData?.UnreadMessageCount ?? 0) +
+                                        (_agentData?.UnreadGroupMessageCount ?? 0) +
                                         (_agentData?.MissedCallCount ?? 0);
         var incomingCallStarted = update.Call.State == NCAgentCallState.Incoming &&
                                   _agentData?.Call.State != NCAgentCallState.Incoming;
         _agentData = update;
         OwnerLabel.Text = $"USER // @{update.OwnAlias.ToUpperInvariant()}";
+        AgentServiceLabel.Text = $"CITYNET // {NetworkText(update.NetworkState)} // {PresenceText(update.Presence)}";
+        AgentServiceLabel.FontColorOverride = NetworkColor(update.NetworkState);
 
-        MessagesStatusLabel.Text = update.UnreadMessageCount > 0
-            ? $"{update.UnreadMessageCount} NEW"
+        var unreadMessages = update.UnreadMessageCount + update.UnreadGroupMessageCount;
+        MessagesStatusLabel.Text = unreadMessages > 0
+            ? $"{unreadMessages} NEW"
             : "encrypted threads";
-        MessagesStatusLabel.FontColorOverride = update.UnreadMessageCount > 0
+        MessagesStatusLabel.FontColorOverride = unreadMessages > 0
             ? Color.FromHex("#8FB8FF")
             : Color.FromHex("#5B718E");
         CallsStatusLabel.Text = update.MissedCallCount > 0
@@ -201,12 +253,12 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             ? Color.FromHex("#FFE28D")
             : Color.FromHex("#8B805F");
 
-        var notificationCount = update.UnreadMessageCount + update.MissedCallCount;
+        var notificationCount = unreadMessages + update.MissedCallCount;
         SignalDot.FontColorOverride = notificationCount > 0
             ? Color.FromHex("#FFD66B")
             : Color.FromHex("#76FF95");
         if (notificationCount > previousNotificationCount)
-            SignalDot.PlayAnimation(NotificationPulseAnimation, "nc-agent-notification-pulse");
+            RestartAnimation(SignalDot, NotificationPulseAnimation, "nc-agent-notification-pulse");
 
         // Surface an incoming call immediately while preserving any active vanilla cartridge program.
         if (incomingCallStarted && _currentView != ProgramContentView)
@@ -217,6 +269,8 @@ public sealed partial class NCAgentMenu : NCAgentWindow
 
         if (_currentView == BuiltInAppView)
             RenderAgentApp(update.ActiveApp);
+        if (_currentView == SettingsView)
+            BuildAgentSettings(update);
     }
 
     /// <summary>
@@ -275,6 +329,27 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     {
         BuiltInContent.AddChild(CreateStatusLabel($"YOUR ADDRESS // {data.OwnAddress}", "#77FFF2"));
 
+        var nearbyHeader = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Horizontal,
+            HorizontalExpand = true,
+        };
+        nearbyHeader.AddChild(CreateSectionTitle("NEARBY AGENTS"));
+        var scan = CreateActionButton("SCAN", "#76FF95");
+        scan.OnPressed += _ => OnOpenAgentApp?.Invoke(NCAgentApp.Contacts);
+        nearbyHeader.AddChild(scan);
+        BuiltInContent.AddChild(nearbyHeader);
+        if (data.NearbyUsers.Count == 0)
+            BuiltInContent.AddChild(CreateMutedLabel("No Agent users detected nearby."));
+        foreach (var nearby in data.NearbyUsers)
+        {
+            var connected = data.Contacts.Any(value => value.CharacterId == nearby.CharacterId);
+            var exchange = CreateActionButton(connected ? "CONNECTED" : "EXCHANGE", "#76FF95");
+            exchange.Disabled = connected;
+            exchange.OnPressed += _ => OnRequestContactExchange?.Invoke(nearby.CharacterId);
+            BuiltInContent.AddChild(CreatePersonRow(nearby.Alias, nearby.Address, exchange));
+        }
+
         var search = new LineEdit
         {
             PlaceHolder = "handle or Agent address",
@@ -296,7 +371,10 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             var button = CreateActionButton(entry.IsContact ? "SAVED" : "ADD", "#2DA69C");
             button.Disabled = entry.IsContact;
             button.OnPressed += _ => OnAddContact?.Invoke(entry.CharacterId);
-            BuiltInContent.AddChild(CreatePersonRow(entry.Alias, entry.Address, button));
+            BuiltInContent.AddChild(CreatePersonRow(
+                entry.Alias,
+                $"{entry.Address} // {PresenceText(entry.Presence)} // {NetworkText(entry.NetworkState)}",
+                button));
         }
 
         BuiltInContent.AddChild(CreateSectionTitle("CONTACTS"));
@@ -311,12 +389,49 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             call.OnPressed += _ => OnStartCall?.Invoke(contact.CharacterId);
             var remove = CreateActionButton("REMOVE", "#A64A61");
             remove.OnPressed += _ => OnRemoveContact?.Invoke(contact.CharacterId);
-            BuiltInContent.AddChild(CreatePersonRow(contact.Alias, contact.Address, message, call, remove));
+            var block = CreateActionButton("BLOCK", "#FF7897");
+            block.OnPressed += _ => OnSetBlocked?.Invoke(contact.CharacterId, true);
+            BuiltInContent.AddChild(CreatePersonRow(
+                contact.Alias,
+                $"{contact.Address} // {PresenceText(contact.Presence)} // {NetworkText(contact.NetworkState)}",
+                message,
+                call,
+                remove,
+                block));
+        }
+
+        BuiltInContent.AddChild(CreateSectionTitle("BLOCKED ADDRESSES"));
+        if (data.Blocked.Count == 0)
+            BuiltInContent.AddChild(CreateMutedLabel("No blocked addresses."));
+        foreach (var blocked in data.Blocked)
+        {
+            var unblock = CreateActionButton("UNBLOCK", "#76FF95");
+            unblock.OnPressed += _ => OnSetBlocked?.Invoke(blocked.CharacterId, false);
+            BuiltInContent.AddChild(CreatePersonRow(blocked.Alias, blocked.Address, unblock));
         }
     }
 
     private void BuildMessages(NCAgentUpdateMessage data)
     {
+        BuildGroupComposer(data);
+
+        if (data.GroupInvites.Count > 0)
+        {
+            BuiltInContent.AddChild(CreateSectionTitle("GROUP INVITATIONS"));
+            foreach (var invite in data.GroupInvites)
+            {
+                var accept = CreateActionButton("ACCEPT", "#76FF95");
+                accept.OnPressed += _ => OnRespondGroupInvite?.Invoke(invite.GroupId, true);
+                var decline = CreateActionButton("DECLINE", "#FF7897");
+                decline.OnPressed += _ => OnRespondGroupInvite?.Invoke(invite.GroupId, false);
+                BuiltInContent.AddChild(CreatePersonRow(
+                    invite.GroupName,
+                    $"INVITED BY {invite.InviterAlias} // EXPIRES {invite.ExpiresAt.ToLocalTime():MM-dd HH:mm}",
+                    accept,
+                    decline));
+            }
+        }
+
         var conversationPeers = data.Conversations.ToList();
         foreach (var contact in data.Contacts)
         {
@@ -354,11 +469,26 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             button.OnPressed += _ => OnSelectConversation?.Invoke(contact.CharacterId);
             contactRow.AddChild(button);
         }
+
+        foreach (var group in data.Groups)
+        {
+            var title = group.UnreadCount > 0 ? $"# {group.Name} [{group.UnreadCount}]" : $"# {group.Name}";
+            var color = data.SelectedGroupId == group.GroupId || group.UnreadCount > 0 ? "#B79BFF" : "#65578A";
+            var button = CreateActionButton(title, color);
+            button.OnPressed += _ => OnSelectGroup?.Invoke(group.GroupId);
+            contactRow.AddChild(button);
+        }
         BuiltInContent.AddChild(contactRow);
+
+        if (data.SelectedGroupId is { } selectedGroup)
+        {
+            BuildSelectedGroup(data, selectedGroup);
+            return;
+        }
 
         if (data.SelectedCharacterId is not { } selected)
         {
-            BuiltInContent.AddChild(CreateMutedLabel("Select a contact or incoming conversation."));
+            BuiltInContent.AddChild(CreateMutedLabel("Select a direct conversation or group."));
             return;
         }
 
@@ -366,6 +496,15 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         BuiltInContent.AddChild(CreateSectionTitle(selectedContact == null
             ? "CONVERSATION"
             : $"{selectedContact.Alias} // {selectedContact.Address}"));
+
+        var privacyActions = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal };
+        var clear = CreateActionButton("CLEAR LOCAL", "#FFD66B");
+        clear.OnPressed += _ => OnClearConversation?.Invoke(selected);
+        var block = CreateActionButton("BLOCK", "#FF7897");
+        block.OnPressed += _ => OnSetBlocked?.Invoke(selected, true);
+        privacyActions.AddChild(clear);
+        privacyActions.AddChild(block);
+        BuiltInContent.AddChild(privacyActions);
 
         var messageList = new BoxContainer
         {
@@ -390,6 +529,128 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         };
         var send = CreateActionButton("SEND", "#508DFF");
         send.OnPressed += _ => OnSendDirectMessage?.Invoke(selected, input.Text);
+        var compose = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal };
+        compose.AddChild(input);
+        compose.AddChild(send);
+        BuiltInContent.AddChild(compose);
+    }
+
+    private void BuildGroupComposer(NCAgentUpdateMessage data)
+    {
+        var name = new LineEdit
+        {
+            PlaceHolder = "new group name",
+            HorizontalExpand = true,
+        };
+        var selected = new HashSet<int>();
+        var members = new WrapContainer
+        {
+            LayoutAxis = Axis.Horizontal,
+            HorizontalExpand = true,
+            SeparationOverride = 2,
+            CrossSeparationOverride = 2,
+        };
+        foreach (var contact in data.Contacts)
+        {
+            var member = new CheckBox { Text = contact.Alias };
+            member.OnToggled += args =>
+            {
+                if (args.Pressed)
+                    selected.Add(contact.CharacterId);
+                else
+                    selected.Remove(contact.CharacterId);
+            };
+            members.AddChild(member);
+        }
+
+        var create = CreateActionButton("CREATE GROUP", "#B79BFF");
+        create.OnPressed += _ => OnCreateGroup?.Invoke(name.Text, selected.ToList());
+        var content = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Vertical,
+            HorizontalExpand = true,
+            Margin = new Thickness(8, 6),
+        };
+        content.AddChild(name);
+        content.AddChild(members);
+        content.AddChild(create);
+        BuiltInContent.AddChild(WrapCard(content, "#65578A", "#131124"));
+    }
+
+    private void BuildSelectedGroup(NCAgentUpdateMessage data, long groupId)
+    {
+        var group = data.Groups.FirstOrDefault(value => value.GroupId == groupId);
+        if (group == null)
+            return;
+
+        BuiltInContent.AddChild(CreateSectionTitle($"# {group.Name} // OWNER {group.OwnerAlias}"));
+        var groupActions = new WrapContainer
+        {
+            LayoutAxis = Axis.Horizontal,
+            HorizontalExpand = true,
+            SeparationOverride = 2,
+        };
+        var clear = CreateActionButton("CLEAR LOCAL", "#FFD66B");
+        clear.OnPressed += _ => OnClearGroupConversation?.Invoke(groupId);
+        var leave = CreateActionButton("LEAVE", "#FF7897");
+        leave.OnPressed += _ => OnLeaveGroup?.Invoke(groupId);
+        groupActions.AddChild(clear);
+        groupActions.AddChild(leave);
+        BuiltInContent.AddChild(groupActions);
+
+        BuiltInContent.AddChild(CreateSectionTitle("MEMBERS"));
+        foreach (var member in data.GroupMembers)
+        {
+            var actions = new List<Button>();
+            if (group.Role == NCAgentGroupRole.Owner &&
+                member.Role != NCAgentGroupRole.Owner &&
+                member.CharacterId != data.OwnCharacterId)
+            {
+                var remove = CreateActionButton("REMOVE", "#FF7897");
+                remove.OnPressed += _ => OnRemoveGroupMember?.Invoke(groupId, member.CharacterId);
+                actions.Add(remove);
+            }
+
+            BuiltInContent.AddChild(CreatePersonRow(
+                member.Alias,
+                $"{member.Address} // {member.Role.ToString().ToUpperInvariant()}",
+                actions.ToArray()));
+        }
+
+        if (group.Role == NCAgentGroupRole.Owner)
+        {
+            var memberIds = data.GroupMembers.Select(value => value.CharacterId).ToHashSet();
+            foreach (var contact in data.Contacts.Where(value => !memberIds.Contains(value.CharacterId)))
+            {
+                var invite = CreateActionButton("INVITE", "#B79BFF");
+                invite.OnPressed += _ => OnInviteGroupMember?.Invoke(groupId, contact.CharacterId);
+                BuiltInContent.AddChild(CreatePersonRow(contact.Alias, contact.Address, invite));
+            }
+        }
+
+        var messageList = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Vertical,
+            HorizontalExpand = true,
+        };
+        foreach (var message in data.GroupMessages)
+            messageList.AddChild(CreateGroupMessageCard(message));
+
+        var scroll = new ScrollContainer
+        {
+            HorizontalExpand = true,
+            VerticalExpand = true,
+        };
+        scroll.AddChild(messageList);
+        BuiltInContent.AddChild(scroll);
+
+        var input = new LineEdit
+        {
+            PlaceHolder = "encrypted group message",
+            HorizontalExpand = true,
+        };
+        var send = CreateActionButton("SEND", "#B79BFF");
+        send.OnPressed += _ => OnSendGroupMessage?.Invoke(groupId, input.Text);
         var compose = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal };
         compose.AddChild(input);
         compose.AddChild(send);
@@ -541,12 +802,34 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         publishRow.AddChild(postInput);
         publishRow.AddChild(publish);
         BuiltInContent.AddChild(publishRow);
+        BuiltInContent.AddChild(CreateMutedLabel("MENTIONS // @Handle or @\"Handle With Spaces\""));
+
+        var pageControls = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Horizontal,
+            HorizontalExpand = true,
+        };
+        var newer = CreateActionButton("< NEWER", "#8B5AA0");
+        newer.Disabled = !data.FeedHasNewer;
+        newer.OnPressed += _ =>
+            OnSetFeedOffset?.Invoke(Math.Max(0, data.FeedOffset - Math.Max(1, data.Posts.Count)));
+        var page = CreateMutedLabel($"FEED OFFSET // {data.FeedOffset}");
+        page.HorizontalExpand = true;
+        var older = CreateActionButton("OLDER >", "#8B5AA0");
+        older.Disabled = !data.FeedHasOlder;
+        older.OnPressed += _ => OnSetFeedOffset?.Invoke(data.FeedOffset + data.Posts.Count);
+        pageControls.AddChild(newer);
+        pageControls.AddChild(page);
+        pageControls.AddChild(older);
+        BuiltInContent.AddChild(pageControls);
 
         var feed = new BoxContainer
         {
             Orientation = BoxContainer.LayoutOrientation.Vertical,
             HorizontalExpand = true,
         };
+        if (data.Posts.Count == 0)
+            feed.AddChild(CreateMutedLabel("No CitiNet posts on this page."));
         foreach (var post in data.Posts)
             feed.AddChild(CreatePostCard(post));
 
@@ -610,6 +893,13 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             $"{post.AuthorAlias} // {post.CreatedAt.ToLocalTime():yyyy-MM-dd HH:mm}", "#EE9BFF"));
         content.AddChild(new Label { Text = post.Body, HorizontalExpand = true });
 
+        if (post.IsOwn)
+        {
+            var delete = CreateActionButton("DELETE POST", "#FF7897");
+            delete.OnPressed += _ => OnDeletePost?.Invoke(post.PostId);
+            content.AddChild(delete);
+        }
+
         var reaction = CreateActionButton(
             $"{(post.ReactedByViewer ? "UNREACT" : "REACT")} // {post.ReactionCount}", "#E05CFF");
         reaction.OnPressed += _ => OnToggleReaction?.Invoke(post.PostId);
@@ -646,6 +936,64 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             message.IsOwn ? "#8FB8FF" : "#77FFF2"));
         content.AddChild(new Label { Text = message.Body, HorizontalExpand = true });
         return WrapCard(content, message.IsOwn ? "#355D9A" : "#2D8C84", message.IsOwn ? "#101925" : "#0D2022");
+    }
+
+    private Control CreateGroupMessageCard(NCAgentGroupMessageSummary message)
+    {
+        var content = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Vertical,
+            HorizontalExpand = true,
+            Margin = new Thickness(10, 6),
+        };
+        content.AddChild(CreateStatusLabel(
+            $"{message.SenderAlias} // {message.SentAt.ToLocalTime():MM-dd HH:mm}",
+            message.IsOwn ? "#8FB8FF" : "#B79BFF"));
+        content.AddChild(new Label { Text = message.Body, HorizontalExpand = true });
+        return WrapCard(content, message.IsOwn ? "#355D9A" : "#65578A", message.IsOwn ? "#101925" : "#131124");
+    }
+
+    private void BuildAgentSettings(NCAgentUpdateMessage data)
+    {
+        AgentSettingsContainer.RemoveAllChildren();
+        AgentSettingsContainer.AddChild(CreateSectionTitle("CITYNET PRESENCE"));
+        AgentSettingsContainer.AddChild(CreateStatusLabel(
+            $"NETWORK // {NetworkText(data.NetworkState)}",
+            NetworkColor(data.NetworkState).ToHex()));
+
+        var statuses = new WrapContainer
+        {
+            LayoutAxis = Axis.Horizontal,
+            HorizontalExpand = true,
+            SeparationOverride = 2,
+            CrossSeparationOverride = 2,
+        };
+        foreach (var presence in Enum.GetValues<NCAgentPresenceStatus>())
+        {
+            var button = CreateActionButton(PresenceText(presence), PresenceColor(presence).ToHex());
+            button.Disabled = presence == data.Presence;
+            button.OnPressed += _ => OnSetPresence?.Invoke(presence);
+            statuses.AddChild(button);
+        }
+        AgentSettingsContainer.AddChild(statuses);
+
+        AgentSettingsContainer.AddChild(CreateSectionTitle("HUD NOTIFICATIONS"));
+        var overlay = new CheckBox
+        {
+            Text = "Visual overlay",
+            Pressed = data.OverlayNotificationsEnabled,
+        };
+        var sound = new CheckBox
+        {
+            Text = "Notification sound",
+            Pressed = data.NotificationSoundEnabled,
+        };
+        overlay.OnToggled += args => OnSetNotificationSettings?.Invoke(args.Pressed, sound.Pressed);
+        sound.OnToggled += args => OnSetNotificationSettings?.Invoke(overlay.Pressed, args.Pressed);
+        AgentSettingsContainer.AddChild(overlay);
+        AgentSettingsContainer.AddChild(sound);
+        AgentSettingsContainer.AddChild(CreateMutedLabel(
+            "DND stores messages silently and rejects calls. OFFLINE stores messages but exposes no live endpoint."));
     }
 
     private Control CreatePersonRow(string name, string address, params Button[] actions)
@@ -736,10 +1084,22 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     }
 
     /// <summary>
-    /// Rebuilds the small cartridge grid only when the loader reports a new program state.
+    /// Rebuilds the Agent program catalog only when the loader reports a new program state.
     /// </summary>
-    public void UpdateAvailablePrograms(List<(EntityUid, CartridgeComponent)> programs)
+    public void UpdateAvailableShards(List<NCAgentShardDisplayData> programs, int usedMemory, int capacity)
     {
+        _shardUsedMemory = Math.Max(0, usedMemory);
+        _shardCapacity = Math.Max(1, capacity);
+        ShardMemoryLabel.Text = $"{_shardUsedMemory}U / {_shardCapacity}U";
+        ShardMemoryBar.MaxValue = _shardCapacity;
+        ShardMemoryBar.Value = Math.Min(_shardUsedMemory, _shardCapacity);
+        var hasPhysicalShard = programs.Any(program => program.Status == InstallationStatus.Cartridge);
+        EjectShardButton.Disabled = !hasPhysicalShard;
+        ShardStatusLabel.Text = hasPhysicalShard
+            ? "PHYSICAL SHARD DETECTED // READY"
+            : "INSERT A PHYSICAL SHARD TO INSTALL";
+        ShardStatusLabel.FontColorOverride = Color.FromHex("#755A50");
+        UpdateShardNotification(programs);
         ProgramList.RemoveAllChildren();
 
         if (programs.Count == 0)
@@ -754,17 +1114,104 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             return;
         }
 
-        foreach (var cartridge in programs)
+        var installedNames = programs
+            .Where(value => value.Status != InstallationStatus.Cartridge)
+            .Select(value => value.Name)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var program in programs)
         {
-            var item = new PdaProgramItem(cartridge);
-            item.OnProgramItemPressed += uid => OnProgramItemPressed?.Invoke(uid);
-            item.OnUninstallButtonPressed += uid => OnUninstallButtonPressed?.Invoke(uid);
-            item.OnInstallButtonPressed += uid => OnInstallButtonPressed?.Invoke(uid);
+            var item = new NCAgentShardItem(program);
+            item.OpenPressed += data => OnProgramItemPressed?.Invoke(data.Uid);
+            item.UninstallPressed += data =>
+            {
+                ShardStatusLabel.Text = $"REMOVING // {data.Name.ToUpperInvariant()}";
+                ShardStatusLabel.FontColorOverride = Color.FromHex("#FFD66B");
+                OnUninstallButtonPressed?.Invoke(data.Uid);
+            };
+            item.InstallPressed += data =>
+            {
+                if (installedNames.Contains(data.Name))
+                {
+                    ShardStatusLabel.Text = $"INSTALL ERROR // {data.Name.ToUpperInvariant()} ALREADY LOCAL";
+                    ShardStatusLabel.FontColorOverride = Color.FromHex("#FF7897");
+                    RestartAnimation(ShardStatusLabel, ShardStatusPulseAnimation, "nc-agent-shard-status");
+                    item.PlayDeniedAnimation();
+                    return;
+                }
+
+                if (_shardUsedMemory + data.Size > _shardCapacity)
+                {
+                    ShardStatusLabel.Text = $"MEMORY ERROR // NEED {data.Size}U // FREE {_shardCapacity - _shardUsedMemory}U";
+                    ShardStatusLabel.FontColorOverride = Color.FromHex("#FF7897");
+                    RestartAnimation(ShardStatusLabel, ShardStatusPulseAnimation, "nc-agent-shard-status");
+                    item.PlayDeniedAnimation();
+                    return;
+                }
+
+                ShardStatusLabel.Text = $"INSTALLING // {data.Name.ToUpperInvariant()} // {data.Size}U";
+                ShardStatusLabel.FontColorOverride = Color.FromHex("#76FF95");
+                OnInstallButtonPressed?.Invoke(data.Uid);
+            };
             ProgramList.AddChild(item);
         }
 
         if (programs.Count % 2 != 0)
             ProgramList.AddChild(new Control { HorizontalExpand = true });
+    }
+
+    private void UpdateShardNotification(List<NCAgentShardDisplayData> programs)
+    {
+        var current = programs.ToDictionary(value => value.Uid, value => (value.Status, value.Name));
+        if (!_shardSnapshotInitialized)
+        {
+            _knownShards.Clear();
+            foreach (var (uid, shard) in current)
+                _knownShards[uid] = shard;
+            _shardSnapshotInitialized = true;
+            return;
+        }
+
+        string? message = null;
+        var color = Color.FromHex("#76FF95");
+        foreach (var (uid, shard) in current)
+        {
+            if (_knownShards.ContainsKey(uid))
+                continue;
+
+            message = shard.Status switch
+            {
+                InstallationStatus.Installed => $"INSTALL COMPLETE // {shard.Name.ToUpperInvariant()}",
+                InstallationStatus.Cartridge => $"PHYSICAL SHARD DETECTED // {shard.Name.ToUpperInvariant()}",
+                _ => null,
+            };
+            if (message != null)
+                break;
+        }
+
+        if (message == null)
+        {
+            foreach (var (uid, shard) in _knownShards)
+            {
+                if (current.ContainsKey(uid) || shard.Status != InstallationStatus.Installed)
+                    continue;
+
+                message = $"REMOVED // {shard.Name.ToUpperInvariant()}";
+                color = Color.FromHex("#FFD66B");
+                break;
+            }
+        }
+
+        _knownShards.Clear();
+        foreach (var (uid, shard) in current)
+            _knownShards[uid] = shard;
+
+        if (message == null)
+            return;
+
+        ShardStatusLabel.Text = message;
+        ShardStatusLabel.FontColorOverride = color;
+        RestartAnimation(ShardStatusLabel, ShardStatusPulseAnimation, "nc-agent-shard-status");
     }
 
     public void ToHomeScreen()
@@ -803,6 +1250,8 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     private void ToSettings()
     {
         SetNavigationState(settings: true);
+        if (_agentData is { } data)
+            BuildAgentSettings(data);
         ChangeView(SettingsView);
     }
 
@@ -832,6 +1281,46 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         };
     }
 
+    private static string PresenceText(NCAgentPresenceStatus presence)
+    {
+        return presence switch
+        {
+            NCAgentPresenceStatus.DoNotDisturb => "DND",
+            _ => presence.ToString().ToUpperInvariant(),
+        };
+    }
+
+    private static Color PresenceColor(NCAgentPresenceStatus presence)
+    {
+        return presence switch
+        {
+            NCAgentPresenceStatus.Online => Color.FromHex("#76FF95"),
+            NCAgentPresenceStatus.Busy => Color.FromHex("#FFE28D"),
+            NCAgentPresenceStatus.DoNotDisturb => Color.FromHex("#FF7897"),
+            _ => Color.FromHex("#6C918E"),
+        };
+    }
+
+    private static string NetworkText(NCAgentNetworkState state)
+    {
+        return state switch
+        {
+            NCAgentNetworkState.LocalOnly => "LOCAL ONLY",
+            NCAgentNetworkState.ServiceUnavailable => "SERVICE UNAVAILABLE",
+            _ => state.ToString().ToUpperInvariant(),
+        };
+    }
+
+    private static Color NetworkColor(NCAgentNetworkState state)
+    {
+        return state switch
+        {
+            NCAgentNetworkState.Online => Color.FromHex("#76FF95"),
+            NCAgentNetworkState.Degraded or NCAgentNetworkState.LocalOnly => Color.FromHex("#FFE28D"),
+            _ => Color.FromHex("#FF7897"),
+        };
+    }
+
     private void SetNavigationState(bool home = false, bool programs = false, bool settings = false)
     {
         HideProgramHeader();
@@ -851,10 +1340,16 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         next.Visible = true;
         _currentView = view;
 
-        if (next.HasRunningAnimation("nc-agent-view-enter"))
-            next.StopAnimation("nc-agent-view-enter");
+        RestartAnimation(next, ViewEnterAnimation, "nc-agent-view-enter");
+    }
 
-        next.PlayAnimation(ViewEnterAnimation, "nc-agent-view-enter");
+    /// <summary>
+    /// RobustToolbox animation keys must be unique while running, so rapid UI updates restart explicitly.
+    /// </summary>
+    private static void RestartAnimation(Control control, Animation animation, string key)
+    {
+        control.StopAnimation(key);
+        control.PlayAnimation(animation, key);
     }
 
     private void HideAllViews()

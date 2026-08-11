@@ -19,5 +19,24 @@
   incomingCallTimeout: 30s
   callHistoryRetention: 720h
   callHistoryLimit: 50
-  feedPostLimit: 50
+  maximumGroupNameLength: 48
+  maximumGroupMembers: 20
+  groupConversationLimit: 30
+  groupMessageLimit: 100
+  contactRequestTimeout: 30s
+  contactShareRange: 2
+  groupInviteRetention: 24h
+  notificationOverlayDuration: 6s
+  notificationOverlayLimit: 3
+  serviceAvailable: true
+  defaultNetworkState: Online
+  degradedAllowsCalls: false
+  degradedAllowsMessages: true
+  degradedAllowsCitiNet: true
+  citinetPostRetention: 720h
+  citinetPostCooldown: 10s
+  citinetCommentCooldown: 3s
+  citinetReactionCooldown: 1s
+  maximumMentionsPerEntry: 10
+  feedPostLimit: 20
   feedCommentLimit: 200

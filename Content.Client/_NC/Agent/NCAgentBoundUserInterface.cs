@@ -3,8 +3,10 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Client.CartridgeLoader;
+using Content.Client._NC.Agent.Shards;
 using Content.Client.PDA;
 using Content.Shared._NC.Agent.UI;
+using Content.Shared._NC.Agent.Shards;
 using Content.Shared.CartridgeLoader;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.PDA;
@@ -20,6 +22,7 @@ namespace Content.Client._NC.Agent;
 public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterface
 {
     private readonly PdaSystem _pdaSystem;
+    private readonly NCAgentShardSystem _shardSystem;
 
     [ViewVariables]
     private NCAgentMenu? _menu;
@@ -27,6 +30,7 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
     public NCAgentBoundUserInterface(EntityUid owner, Enum uiKey) : base(owner, uiKey)
     {
         _pdaSystem = EntMan.System<PdaSystem>();
+        _shardSystem = EntMan.System<NCAgentShardSystem>();
     }
 
     protected override void Open()
@@ -56,18 +60,43 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
         _menu.OnProgramItemPressed += ActivateCartridge;
         _menu.OnInstallButtonPressed += InstallCartridge;
         _menu.OnUninstallButtonPressed += UninstallCartridge;
+        _menu.OnEjectShard += () =>
+            SendPredictedMessage(new ItemSlotButtonPressedEvent(CartridgeLoaderComponent.CartridgeSlotId));
         _menu.ProgramCloseButton.OnPressed += _ => DeactivateActiveCartridge();
         _menu.OnOpenAgentApp += app => SendMessage(new NCAgentOpenAppMessage(app));
         _menu.OnDirectorySearch += query => SendMessage(new NCAgentDirectorySearchMessage(query));
         _menu.OnSetAlias += alias => SendMessage(new NCAgentSetAliasMessage(alias));
+        _menu.OnSetPresence += presence => SendMessage(new NCAgentSetPresenceMessage(presence));
+        _menu.OnSetNotificationSettings += (overlay, sound) =>
+            SendMessage(new NCAgentSetNotificationSettingsMessage(overlay, sound));
         _menu.OnAddContact += characterId => SendMessage(new NCAgentAddContactMessage(characterId));
         _menu.OnRemoveContact += characterId => SendMessage(new NCAgentRemoveContactMessage(characterId));
+        _menu.OnRequestContactExchange += characterId =>
+            SendMessage(new NCAgentRequestContactExchangeMessage(characterId));
+        _menu.OnSetBlocked += (characterId, blocked) =>
+            SendMessage(new NCAgentSetBlockedMessage(characterId, blocked));
+        _menu.OnClearConversation += characterId =>
+            SendMessage(new NCAgentClearConversationMessage(characterId));
         _menu.OnSelectConversation += characterId => SendMessage(new NCAgentSelectConversationMessage(characterId));
         _menu.OnSendDirectMessage += (recipient, body) =>
             SendMessage(new NCAgentSendMessageMessage(recipient, body));
+        _menu.OnCreateGroup += (name, members) => SendMessage(new NCAgentCreateGroupMessage(name, members));
+        _menu.OnSelectGroup += groupId => SendMessage(new NCAgentSelectGroupMessage(groupId));
+        _menu.OnSendGroupMessage += (groupId, body) => SendMessage(new NCAgentSendGroupMessage(groupId, body));
+        _menu.OnInviteGroupMember += (groupId, characterId) =>
+            SendMessage(new NCAgentInviteGroupMemberMessage(groupId, characterId));
+        _menu.OnRespondGroupInvite += (groupId, accept) =>
+            SendMessage(new NCAgentRespondGroupInviteMessage(groupId, accept));
+        _menu.OnRemoveGroupMember += (groupId, characterId) =>
+            SendMessage(new NCAgentRemoveGroupMemberMessage(groupId, characterId));
+        _menu.OnLeaveGroup += groupId => SendMessage(new NCAgentLeaveGroupMessage(groupId));
+        _menu.OnClearGroupConversation += groupId =>
+            SendMessage(new NCAgentClearGroupConversationMessage(groupId));
         _menu.OnCreatePost += body => SendMessage(new NCAgentCreatePostMessage(body));
         _menu.OnCreateComment += (postId, body) => SendMessage(new NCAgentCreateCommentMessage(postId, body));
         _menu.OnToggleReaction += postId => SendMessage(new NCAgentToggleReactionMessage(postId));
+        _menu.OnDeletePost += postId => SendMessage(new NCAgentDeletePostMessage(postId));
+        _menu.OnSetFeedOffset += offset => SendMessage(new NCAgentSetFeedOffsetMessage(offset));
         _menu.OnStartCall += target => SendMessage(new NCAgentStartCallMessage(target));
         _menu.OnAnswerCall += accept => SendMessage(new NCAgentAnswerCallMessage(accept));
         _menu.OnEndCall += () => SendMessage(new NCAgentEndCallMessage());
@@ -127,6 +156,29 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
 
     protected override void UpdateAvailablePrograms(List<(EntityUid, CartridgeComponent)> programs)
     {
-        _menu?.UpdateAvailablePrograms(programs);
+        if (_menu == null)
+            return;
+
+        var storage = EntMan.GetComponentOrNull<NCAgentShardStorageComponent>(Owner);
+        var defaultSize = Math.Max(1, storage?.DefaultProgramSize ?? 1);
+        var capacity = Math.Max(1, storage?.Capacity ?? 8);
+        var displayPrograms = new List<NCAgentShardDisplayData>(programs.Count);
+
+        foreach (var (uid, cartridge) in programs)
+        {
+            var shard = EntMan.GetComponentOrNull<NCAgentShardComponent>(uid);
+            var meta = EntMan.GetComponentOrNull<MetaDataComponent>(uid);
+            displayPrograms.Add(new NCAgentShardDisplayData(
+                uid,
+                shard?.DisplayName ?? Loc.GetString(cartridge.ProgramName),
+                shard?.Description ?? meta?.EntityDescription ?? "Legacy cartridge program.",
+                shard is null ? defaultSize : Math.Max(1, shard.Size),
+                shard?.Category ?? NCAgentShardCategory.Legacy,
+                shard?.Permissions ?? [],
+                cartridge.InstallationStatus,
+                cartridge.Icon));
+        }
+
+        _menu.UpdateAvailableShards(displayPrograms, _shardSystem.GetUsedMemory(Owner), capacity);
     }
 }

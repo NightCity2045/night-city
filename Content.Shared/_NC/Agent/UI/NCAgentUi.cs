@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Numerics;
+using Content.Shared._NC.Agent;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._NC.Agent.UI;
@@ -72,10 +73,27 @@ public sealed record NCAgentMapFeature(
     List<NCAgentMapTileChunk> Chunks);
 
 [Serializable, NetSerializable]
-public sealed record NCAgentDirectoryEntry(int CharacterId, string Alias, string Address, bool IsContact);
+public sealed record NCAgentDirectoryEntry(
+    int CharacterId,
+    string Alias,
+    string Address,
+    bool IsContact,
+    NCAgentPresenceStatus Presence,
+    NCAgentNetworkState NetworkState);
 
 [Serializable, NetSerializable]
-public sealed record NCAgentContactSummary(int CharacterId, string Alias, string Address);
+public sealed record NCAgentContactSummary(
+    int CharacterId,
+    string Alias,
+    string Address,
+    NCAgentPresenceStatus Presence,
+    NCAgentNetworkState NetworkState);
+
+[Serializable, NetSerializable]
+public sealed record NCAgentNearbyUserSummary(int CharacterId, string Alias, string Address);
+
+[Serializable, NetSerializable]
+public sealed record NCAgentBlockedSummary(int CharacterId, string Alias, string Address);
 
 [Serializable, NetSerializable]
 public sealed record NCAgentConversationSummary(
@@ -113,6 +131,7 @@ public sealed record NCAgentCitiNetPostSummary(
     DateTime CreatedAt,
     int ReactionCount,
     bool ReactedByViewer,
+    bool IsOwn,
     List<NCAgentCitiNetCommentSummary> Comments);
 
 [Serializable, NetSerializable]
@@ -135,6 +154,41 @@ public sealed record NCAgentCallHistorySummary(
     NCAgentCallOutcome Outcome,
     bool IsUnread);
 
+[Serializable, NetSerializable]
+public sealed record NCAgentGroupSummary(
+    long GroupId,
+    string Name,
+    string OwnerAlias,
+    NCAgentGroupRole Role,
+    DateTime LastMessageAt,
+    int UnreadCount);
+
+[Serializable, NetSerializable]
+public sealed record NCAgentGroupMemberSummary(
+    int CharacterId,
+    string Alias,
+    string Address,
+    NCAgentGroupRole Role,
+    bool IsContact);
+
+[Serializable, NetSerializable]
+public sealed record NCAgentGroupMessageSummary(
+    long MessageId,
+    long GroupId,
+    int SenderCharacterId,
+    string SenderAlias,
+    string Body,
+    DateTime SentAt,
+    bool IsOwn);
+
+[Serializable, NetSerializable]
+public sealed record NCAgentGroupInviteSummary(
+    long GroupId,
+    string GroupName,
+    int InviterCharacterId,
+    string InviterAlias,
+    DateTime ExpiresAt);
+
 /// <summary>
 /// Per-user Agent data sent separately from the vanilla PDA state and cartridge state.
 /// </summary>
@@ -144,15 +198,30 @@ public sealed class NCAgentUpdateMessage(
     int ownCharacterId,
     string ownAlias,
     string ownAddress,
+    NCAgentPresenceStatus presence,
+    NCAgentNetworkState networkState,
+    bool overlayNotificationsEnabled,
+    bool notificationSoundEnabled,
     List<NCAgentDirectoryEntry> directory,
     List<NCAgentContactSummary> contacts,
+    List<NCAgentNearbyUserSummary> nearbyUsers,
+    List<NCAgentBlockedSummary> blocked,
     List<NCAgentConversationSummary> conversations,
     int? selectedCharacterId,
     List<NCAgentMessageSummary> messages,
     List<NCAgentCitiNetPostSummary> posts,
+    int feedOffset,
+    bool feedHasNewer,
+    bool feedHasOlder,
     NCAgentCallSummary call,
     List<NCAgentCallHistorySummary> callHistory,
+    List<NCAgentGroupSummary> groups,
+    long? selectedGroupId,
+    List<NCAgentGroupMemberSummary> groupMembers,
+    List<NCAgentGroupMessageSummary> groupMessages,
+    List<NCAgentGroupInviteSummary> groupInvites,
     int unreadMessageCount,
+    int unreadGroupMessageCount,
     int missedCallCount,
     string notice) : BoundUserInterfaceMessage
 {
@@ -160,15 +229,30 @@ public sealed class NCAgentUpdateMessage(
     public readonly int OwnCharacterId = ownCharacterId;
     public readonly string OwnAlias = ownAlias;
     public readonly string OwnAddress = ownAddress;
+    public readonly NCAgentPresenceStatus Presence = presence;
+    public readonly NCAgentNetworkState NetworkState = networkState;
+    public readonly bool OverlayNotificationsEnabled = overlayNotificationsEnabled;
+    public readonly bool NotificationSoundEnabled = notificationSoundEnabled;
     public readonly List<NCAgentDirectoryEntry> Directory = directory;
     public readonly List<NCAgentContactSummary> Contacts = contacts;
+    public readonly List<NCAgentNearbyUserSummary> NearbyUsers = nearbyUsers;
+    public readonly List<NCAgentBlockedSummary> Blocked = blocked;
     public readonly List<NCAgentConversationSummary> Conversations = conversations;
     public readonly int? SelectedCharacterId = selectedCharacterId;
     public readonly List<NCAgentMessageSummary> Messages = messages;
     public readonly List<NCAgentCitiNetPostSummary> Posts = posts;
+    public readonly int FeedOffset = feedOffset;
+    public readonly bool FeedHasNewer = feedHasNewer;
+    public readonly bool FeedHasOlder = feedHasOlder;
     public readonly NCAgentCallSummary Call = call;
     public readonly List<NCAgentCallHistorySummary> CallHistory = callHistory;
+    public readonly List<NCAgentGroupSummary> Groups = groups;
+    public readonly long? SelectedGroupId = selectedGroupId;
+    public readonly List<NCAgentGroupMemberSummary> GroupMembers = groupMembers;
+    public readonly List<NCAgentGroupMessageSummary> GroupMessages = groupMessages;
+    public readonly List<NCAgentGroupInviteSummary> GroupInvites = groupInvites;
     public readonly int UnreadMessageCount = unreadMessageCount;
+    public readonly int UnreadGroupMessageCount = unreadGroupMessageCount;
     public readonly int MissedCallCount = missedCallCount;
     public readonly string Notice = notice;
 }
@@ -210,6 +294,21 @@ public sealed class NCAgentSetAliasMessage(string alias) : BoundUserInterfaceMes
 }
 
 [Serializable, NetSerializable]
+public sealed class NCAgentSetPresenceMessage(NCAgentPresenceStatus presence) : BoundUserInterfaceMessage
+{
+    public readonly NCAgentPresenceStatus Presence = presence;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentSetNotificationSettingsMessage(
+    bool overlayEnabled,
+    bool soundEnabled) : BoundUserInterfaceMessage
+{
+    public readonly bool OverlayEnabled = overlayEnabled;
+    public readonly bool SoundEnabled = soundEnabled;
+}
+
+[Serializable, NetSerializable]
 public sealed class NCAgentAddContactMessage(int characterId) : BoundUserInterfaceMessage
 {
     public readonly int CharacterId = characterId;
@@ -217,6 +316,25 @@ public sealed class NCAgentAddContactMessage(int characterId) : BoundUserInterfa
 
 [Serializable, NetSerializable]
 public sealed class NCAgentRemoveContactMessage(int characterId) : BoundUserInterfaceMessage
+{
+    public readonly int CharacterId = characterId;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentRequestContactExchangeMessage(int characterId) : BoundUserInterfaceMessage
+{
+    public readonly int CharacterId = characterId;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentSetBlockedMessage(int characterId, bool blocked) : BoundUserInterfaceMessage
+{
+    public readonly int CharacterId = characterId;
+    public readonly bool Blocked = blocked;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentClearConversationMessage(int characterId) : BoundUserInterfaceMessage
 {
     public readonly int CharacterId = characterId;
 }
@@ -232,6 +350,59 @@ public sealed class NCAgentSendMessageMessage(int recipientCharacterId, string b
 {
     public readonly int RecipientCharacterId = recipientCharacterId;
     public readonly string Body = body;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentCreateGroupMessage(string name, List<int> memberCharacterIds) : BoundUserInterfaceMessage
+{
+    public readonly string Name = name;
+    public readonly List<int> MemberCharacterIds = memberCharacterIds;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentSelectGroupMessage(long groupId) : BoundUserInterfaceMessage
+{
+    public readonly long GroupId = groupId;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentSendGroupMessage(long groupId, string body) : BoundUserInterfaceMessage
+{
+    public readonly long GroupId = groupId;
+    public readonly string Body = body;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentInviteGroupMemberMessage(long groupId, int characterId) : BoundUserInterfaceMessage
+{
+    public readonly long GroupId = groupId;
+    public readonly int CharacterId = characterId;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentRespondGroupInviteMessage(long groupId, bool accept) : BoundUserInterfaceMessage
+{
+    public readonly long GroupId = groupId;
+    public readonly bool Accept = accept;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentRemoveGroupMemberMessage(long groupId, int characterId) : BoundUserInterfaceMessage
+{
+    public readonly long GroupId = groupId;
+    public readonly int CharacterId = characterId;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentLeaveGroupMessage(long groupId) : BoundUserInterfaceMessage
+{
+    public readonly long GroupId = groupId;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentClearGroupConversationMessage(long groupId) : BoundUserInterfaceMessage
+{
+    public readonly long GroupId = groupId;
 }
 
 [Serializable, NetSerializable]
@@ -251,6 +422,18 @@ public sealed class NCAgentCreateCommentMessage(long postId, string body) : Boun
 public sealed class NCAgentToggleReactionMessage(long postId) : BoundUserInterfaceMessage
 {
     public readonly long PostId = postId;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentDeletePostMessage(long postId) : BoundUserInterfaceMessage
+{
+    public readonly long PostId = postId;
+}
+
+[Serializable, NetSerializable]
+public sealed class NCAgentSetFeedOffsetMessage(int offset) : BoundUserInterfaceMessage
+{
+    public readonly int Offset = offset;
 }
 
 [Serializable, NetSerializable]

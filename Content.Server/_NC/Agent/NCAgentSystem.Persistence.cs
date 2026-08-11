@@ -37,6 +37,7 @@ public sealed partial class NCAgentSystem
     [Dependency] private IServerDbManager _database = default!;
     [Dependency] private IServerPreferencesManager _preferences = default!;
     [Dependency] private ISharedPlayerManager _players = default!;
+    [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private InventorySystem _inventory = default!;
     [Dependency] private NCMapCoordinatesSystem _mapCoordinates = default!;
     [Dependency] private PdaSystem _pda = default!;
@@ -65,6 +66,8 @@ public sealed partial class NCAgentSystem
         SubscribeLocalEvent<NCAgentComponent, NCAgentCreatePostMessage>(OnCreatePost);
         SubscribeLocalEvent<NCAgentComponent, NCAgentCreateCommentMessage>(OnCreateComment);
         SubscribeLocalEvent<NCAgentComponent, NCAgentToggleReactionMessage>(OnToggleReaction);
+        SubscribeLocalEvent<NCAgentComponent, NCAgentDeletePostMessage>(OnDeletePost);
+        SubscribeLocalEvent<NCAgentComponent, NCAgentSetFeedOffsetMessage>(OnSetFeedOffset);
         SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawnComplete);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
     }
@@ -103,7 +106,10 @@ public sealed partial class NCAgentSystem
 
             var now = DateTime.UtcNow;
             await _database.PurgeExpiredNCAgentMessagesAsync(now);
+            await _database.PurgeExpiredNCAgentGroupMessagesAsync(now);
+            await _database.PurgeExpiredNCAgentGroupInvitesAsync(now);
             await _database.PurgeExpiredNCAgentCallLogsAsync(now - Configuration.CallHistoryRetention);
+            await _database.PurgeExpiredNCCitiNetPostsAsync(now - Configuration.CitiNetPostRetention);
             await SendViewAsync(uid, user);
         }
         catch (Exception exception)
@@ -128,6 +134,8 @@ public sealed partial class NCAgentSystem
 
         view.ActiveApp = args.App;
         view.Notice = string.Empty;
+        if (args.App == NCAgentApp.CitiNet)
+            view.FeedOffset = 0;
         if (args.App == NCAgentApp.Map)
             SendMapSnapshot(uid, user);
         await SendViewAsync(uid, user);
@@ -233,6 +241,14 @@ public sealed partial class NCAgentSystem
     {
         if (!TryGetView(uid, args.Actor, out var user, out var view))
             return;
+
+        if (!CanUseCitiNetService(view.Owner, out var failure))
+        {
+            view.DirectoryQuery = string.Empty;
+            view.Notice = failure;
+            await SendViewAsync(uid, user);
+            return;
+        }
 
         var query = args.Query.Trim();
         if (query.Length > Configuration.MaximumDirectoryQueryLength)
@@ -388,6 +404,7 @@ public sealed partial class NCAgentSystem
             return;
 
         view.SelectedCharacterId = new NCCharacterId(args.CharacterId);
+        view.SelectedGroupId = null;
         view.ActiveApp = NCAgentApp.Messages;
         view.Notice = string.Empty;
         await SendViewAsync(uid, user);
@@ -408,6 +425,12 @@ public sealed partial class NCAgentSystem
         {
             var now = DateTime.UtcNow;
             var recipient = new NCCharacterId(args.RecipientCharacterId);
+            if (!CanRouteMessage(view.Owner, recipient, out var failure))
+            {
+                view.Notice = failure;
+                return;
+            }
+
             var message = await _database.CreateNCAgentMessageAsync(
                 view.Owner,
                 recipient,
@@ -415,10 +438,20 @@ public sealed partial class NCAgentSystem
                 now,
                 now + Configuration.MessageRetention);
             if (message == null)
+            {
+                view.Notice = "ADDRESS UNAVAILABLE";
                 return;
+            }
 
             view.Notice = "MESSAGE SENT";
-            NotifyAgent(recipient, $"New message from {message.SenderAlias}");
+            await SendAgentNotificationAsync(
+                recipient,
+                NCAgentNotificationKind.DirectMessage,
+                "NEW MESSAGE",
+                $"New encrypted message from {message.SenderAlias}",
+                false,
+                peer: view.Owner,
+                app: NCAgentApp.Messages);
             await RefreshOwnerViewsAsync(recipient);
         }
         catch (Exception exception)
@@ -442,8 +475,33 @@ public sealed partial class NCAgentSystem
 
         try
         {
-            if (await _database.CreateNCCitiNetPostAsync(view.Owner, body, DateTime.UtcNow) != null)
+            if (!CanUseCitiNetService(view.Owner, out var failure))
+            {
+                view.Notice = failure;
+                return;
+            }
+
+            if (!TryConsumeCitiNetCooldown(
+                    view.Owner,
+                    NCAgentCitiNetOperation.Post,
+                    Configuration.CitiNetPostCooldown,
+                    out var remaining))
+            {
+                view.Notice = CitiNetRateLimitNotice(remaining);
+                return;
+            }
+
+            var post = await _database.CreateNCCitiNetPostAsync(view.Owner, body, DateTime.UtcNow);
+            if (post != null)
+            {
+                view.FeedOffset = 0;
                 view.Notice = "POST PUBLISHED";
+                await NotifyCitiNetMentionsAsync(
+                    view.Owner,
+                    post.AuthorAlias,
+                    body,
+                    new HashSet<NCCharacterId>());
+            }
         }
         catch (Exception exception)
         {
@@ -467,8 +525,45 @@ public sealed partial class NCAgentSystem
 
         try
         {
-            if (await _database.CreateNCCitiNetCommentAsync(view.Owner, args.PostId, body, DateTime.UtcNow) != null)
+            if (!CanUseCitiNetService(view.Owner, out var failure))
+            {
+                view.Notice = failure;
+                return;
+            }
+
+            if (!TryConsumeCitiNetCooldown(
+                    view.Owner,
+                    NCAgentCitiNetOperation.Comment,
+                    Configuration.CitiNetCommentCooldown,
+                    out var remaining))
+            {
+                view.Notice = CitiNetRateLimitNotice(remaining);
+                return;
+            }
+
+            var created = await _database.CreateNCCitiNetCommentAsync(
+                view.Owner,
+                args.PostId,
+                body,
+                DateTime.UtcNow);
+            if (created != null)
+            {
                 view.Notice = "COMMENT PUBLISHED";
+                var notified = new HashSet<NCCharacterId> { view.Owner };
+                if (created.PostAuthorCharacterId != view.Owner)
+                {
+                    notified.Add(created.PostAuthorCharacterId);
+                    await SendAgentNotificationAsync(
+                        created.PostAuthorCharacterId,
+                        NCAgentNotificationKind.CitiNetComment,
+                        "NEW CITINET COMMENT",
+                        $"{created.Comment.AuthorAlias} replied to your post",
+                        false,
+                        app: NCAgentApp.CitiNet);
+                }
+
+                await NotifyCitiNetMentionsAsync(view.Owner, created.Comment.AuthorAlias, body, notified);
+            }
         }
         catch (Exception exception)
         {
@@ -490,6 +585,22 @@ public sealed partial class NCAgentSystem
 
         try
         {
+            if (!CanUseCitiNetService(view.Owner, out var failure))
+            {
+                view.Notice = failure;
+                return;
+            }
+
+            if (!TryConsumeCitiNetCooldown(
+                    view.Owner,
+                    NCAgentCitiNetOperation.Reaction,
+                    Configuration.CitiNetReactionCooldown,
+                    out var remaining))
+            {
+                view.Notice = CitiNetRateLimitNotice(remaining);
+                return;
+            }
+
             await _database.ToggleNCCitiNetReactionAsync(view.Owner, args.PostId, DateTime.UtcNow);
         }
         catch (Exception exception)
@@ -512,26 +623,57 @@ public sealed partial class NCAgentSystem
         var now = DateTime.UtcNow;
         if (view.ActiveApp == NCAgentApp.Messages && view.SelectedCharacterId is { } selectedConversation)
             await _database.MarkNCAgentConversationReadAsync(view.Owner, selectedConversation, now);
+        if (view.ActiveApp == NCAgentApp.Messages && view.SelectedGroupId is { } selectedGroup)
+            await _database.MarkNCAgentGroupReadAsync(view.Owner, selectedGroup, now);
         if (view.ActiveApp == NCAgentApp.Calls)
             await _database.MarkNCAgentCallHistoryReadAsync(view.Owner, now);
 
         var snapshot = await _database.GetNCAgentSnapshotAsync(
             view.Owner,
             view.SelectedCharacterId,
+            view.SelectedGroupId,
             view.DirectoryQuery,
             now,
             config.DirectoryResultLimit,
             config.ConversationPeerLimit,
             config.ConversationMessageLimit,
             config.CallHistoryLimit,
-            config.FeedPostLimit,
+            config.GroupConversationLimit,
+            config.GroupMessageLimit,
+            view.FeedOffset,
+            view.ActiveApp == NCAgentApp.CitiNet ? config.FeedPostLimit : 0,
             config.FeedCommentLimit);
         if (snapshot == null || !_views.ContainsKey((agent, user)))
             return;
 
+        IReadOnlyList<NCAgentProfileData> nearbyProfiles = Array.Empty<NCAgentProfileData>();
+        if (view.ActiveApp == NCAgentApp.Contacts)
+        {
+            var nearbyOwners = FindNearbyAgentOwners(user, view.Owner);
+            nearbyProfiles = await _database.GetNCAgentProfilesAsync(nearbyOwners);
+        }
+
+        if (!_views.ContainsKey((agent, user)))
+            return;
+
+        IReadOnlyList<NCCitiNetPostData> visiblePosts = snapshot.Posts;
+        var feedHasOlderPosts = snapshot.FeedHasOlderPosts;
+        if (!CanUseCitiNetService(view.Owner, out var feedFailure))
+        {
+            visiblePosts = Array.Empty<NCCitiNetPostData>();
+            feedHasOlderPosts = false;
+            if (view.ActiveApp == NCAgentApp.CitiNet)
+                view.Notice = feedFailure;
+        }
+
         view.ContactIds.Clear();
         view.ConversationIds.Clear();
         view.VisibleDirectoryIds.Clear();
+        view.NearbyShareIds.Clear();
+        view.BlockedIds.Clear();
+        view.GroupIds.Clear();
+        view.GroupNames.Clear();
+        view.GroupMemberIds.Clear();
         view.PostIds.Clear();
         view.Targets.Clear();
         view.OwnAlias = snapshot.Profile.Alias;
@@ -555,7 +697,22 @@ public sealed partial class NCAgentSystem
             view.Targets[entry.CharacterId] = (entry.Alias, entry.Address);
         }
 
-        foreach (var post in snapshot.Posts)
+        foreach (var nearby in nearbyProfiles)
+            view.NearbyShareIds.Add(nearby.CharacterId.Value);
+
+        foreach (var blocked in snapshot.Blocked)
+            view.BlockedIds.Add(blocked.CharacterId.Value);
+
+        foreach (var group in snapshot.Groups)
+        {
+            view.GroupIds.Add(group.GroupId);
+            view.GroupNames[group.GroupId] = group.Name;
+        }
+
+        foreach (var member in snapshot.GroupMembers)
+            view.GroupMemberIds.Add(member.CharacterId.Value);
+
+        foreach (var post in visiblePosts)
             view.PostIds.Add(post.PostId);
 
         if (view.SelectedCharacterId is { } selected &&
@@ -563,18 +720,40 @@ public sealed partial class NCAgentSystem
             !view.ConversationIds.Contains(selected.Value))
             view.SelectedCharacterId = null;
 
+        if (view.SelectedGroupId is { } selectedGroupId && !view.GroupIds.Contains(selectedGroupId))
+            view.SelectedGroupId = null;
+
         var call = BuildCallSummary(view.Owner);
         _ui.ServerSendUiMessage(agent, PdaUiKey.Key, new NCAgentUpdateMessage(
             view.ActiveApp,
             snapshot.Profile.CharacterId.Value,
             snapshot.Profile.Alias,
             snapshot.Profile.Address,
+            snapshot.Profile.Presence,
+            ResolveNetworkState(view.Owner),
+            snapshot.Profile.OverlayNotificationsEnabled,
+            snapshot.Profile.NotificationSoundEnabled,
             snapshot.Directory.Select(value => new NCAgentDirectoryEntry(
                 value.CharacterId.Value,
                 value.Alias,
                 value.Address,
-                value.IsContact)).ToList(),
+                value.IsContact,
+                value.Presence,
+                ResolveNetworkState(value.CharacterId))).ToList(),
             snapshot.Contacts.Select(value => new NCAgentContactSummary(
+                value.CharacterId.Value,
+                value.Alias,
+                value.Address,
+                value.Presence,
+                ResolveNetworkState(value.CharacterId))).ToList(),
+            nearbyProfiles
+                .OrderBy(value => value.Alias)
+                .Select(value => new NCAgentNearbyUserSummary(
+                    value.CharacterId.Value,
+                    value.Alias,
+                    value.Address))
+                .ToList(),
+            snapshot.Blocked.Select(value => new NCAgentBlockedSummary(
                 value.CharacterId.Value,
                 value.Alias,
                 value.Address)).ToList(),
@@ -594,7 +773,7 @@ public sealed partial class NCAgentSystem
                 value.Body,
                 value.SentAt,
                 value.SenderCharacterId == view.Owner)).ToList(),
-            snapshot.Posts.Select(value => new NCAgentCitiNetPostSummary(
+            visiblePosts.Select(value => new NCAgentCitiNetPostSummary(
                 value.PostId,
                 value.AuthorCharacterId.Value,
                 value.AuthorAlias,
@@ -602,12 +781,16 @@ public sealed partial class NCAgentSystem
                 value.CreatedAt,
                 value.ReactionCount,
                 value.ReactedByViewer,
+                value.AuthorCharacterId == view.Owner,
                 value.Comments.Select(comment => new NCAgentCitiNetCommentSummary(
                     comment.CommentId,
                     comment.AuthorCharacterId.Value,
                     comment.AuthorAlias,
                     comment.Body,
                     comment.CreatedAt)).ToList())).ToList(),
+            view.FeedOffset,
+            view.FeedOffset > 0,
+            feedHasOlderPosts,
             call,
             snapshot.CallHistory.Select(value => new NCAgentCallHistorySummary(
                 value.CallId,
@@ -620,7 +803,36 @@ public sealed partial class NCAgentSystem
                 value.EndedAt,
                 value.Outcome,
                 value.IsUnread)).ToList(),
+            snapshot.Groups.Select(value => new NCAgentGroupSummary(
+                value.GroupId,
+                value.Name,
+                value.OwnerAlias,
+                value.Role,
+                value.LastMessageAt,
+                value.UnreadCount)).ToList(),
+            view.SelectedGroupId,
+            snapshot.GroupMembers.Select(value => new NCAgentGroupMemberSummary(
+                value.CharacterId.Value,
+                value.Alias,
+                value.Address,
+                value.Role,
+                value.IsContact)).ToList(),
+            snapshot.GroupMessages.Select(value => new NCAgentGroupMessageSummary(
+                value.MessageId,
+                value.GroupId,
+                value.SenderCharacterId.Value,
+                value.SenderAlias,
+                value.Body,
+                value.SentAt,
+                value.SenderCharacterId == view.Owner)).ToList(),
+            snapshot.GroupInvites.Select(value => new NCAgentGroupInviteSummary(
+                value.GroupId,
+                value.GroupName,
+                value.InviterCharacterId.Value,
+                value.InviterAlias,
+                value.ExpiresAt)).ToList(),
             snapshot.UnreadMessageCount,
+            snapshot.UnreadGroupMessageCount,
             snapshot.MissedCallCount,
             view.Notice), user);
     }
@@ -726,6 +938,91 @@ public sealed partial class NCAgentSystem
         return false;
     }
 
+    /// <summary>
+    /// Finds the physical Agent currently usable by a holder without assuming that its stored identity
+    /// belongs to that holder. This preserves vanilla stolen-PDA behavior for Agent services.
+    /// </summary>
+    private bool TryFindUsableAgent(EntityUid user, out EntityUid agent)
+    {
+        if (_inventory.TryGetSlotEntity(user, "id", out var id) &&
+            id is { } idEntity && HasComp<NCAgentComponent>(idEntity))
+        {
+            agent = idEntity;
+            return true;
+        }
+
+        if (_inventory.TryGetSlotEntity(user, "belt", out var belt) &&
+            belt is { } beltEntity && HasComp<NCAgentComponent>(beltEntity))
+        {
+            agent = beltEntity;
+            return true;
+        }
+
+        foreach (var held in _hands.EnumerateHeld(user))
+        {
+            if (!HasComp<NCAgentComponent>(held))
+                continue;
+
+            agent = held;
+            return true;
+        }
+
+        agent = EntityUid.Invalid;
+        return false;
+    }
+
+    /// <summary>
+    /// Uses the spatial lookup only while the Contacts app is refreshed; no world-wide player scan is performed.
+    /// Every returned character is carrying an Agent in a usable slot or hand within the configured range.
+    /// </summary>
+    private List<NCCharacterId> FindNearbyAgentOwners(EntityUid user, NCCharacterId owner)
+    {
+        var owners = new HashSet<NCCharacterId>();
+        foreach (var candidate in _lookup.GetEntitiesInRange(
+                     user,
+                     Configuration.ContactShareRange,
+                     LookupFlags.Dynamic | LookupFlags.Uncontained))
+        {
+            if (candidate == user ||
+                !TryFindUsableAgent(candidate, out var candidateAgent) ||
+                !TryGetOrBindOwner(candidateAgent, candidate, out var candidateOwner) ||
+                candidateOwner == owner)
+            {
+                continue;
+            }
+
+            owners.Add(candidateOwner);
+        }
+
+        return owners.ToList();
+    }
+
+    /// <summary>
+    /// Repeats the proximity and physical-Agent validation when the client selects an exchange target.
+    /// </summary>
+    private bool TryFindNearbyAgentHolder(EntityUid user, NCCharacterId target, out EntityUid holder)
+    {
+        foreach (var candidate in _lookup.GetEntitiesInRange(
+                     user,
+                     Configuration.ContactShareRange,
+                     LookupFlags.Dynamic | LookupFlags.Uncontained))
+        {
+            if (candidate == user ||
+                !TryFindUsableAgent(candidate, out var candidateAgent) ||
+                !TryGetOrBindOwner(candidateAgent, candidate, out var candidateOwner) ||
+                candidateOwner != target)
+            {
+                continue;
+            }
+
+            holder = candidate;
+            return true;
+        }
+
+        holder = EntityUid.Invalid;
+        return false;
+    }
+
     private bool IsAgentOwnedByOrUnbound(EntityUid agent, NCCharacterId owner)
     {
         if (!HasComp<NCAgentComponent>(agent))
@@ -767,16 +1064,6 @@ public sealed partial class NCAgentSystem
         return false;
     }
 
-    private void NotifyAgent(NCCharacterId owner, string text)
-    {
-        if (!TryResolveOnlineAgent(owner, out var agent, out var holder))
-            return;
-
-        _ringer.RingerPlayRingtone(agent);
-        if (_players.TryGetSessionByEntity(holder, out var session))
-            _chat.DispatchServerMessage(session, $"[AGENT] {text}");
-    }
-
     private void HandleDatabaseError(EntityUid agent, EntityUid user, string operation, Exception exception)
     {
         Log.Error($"Agent {agent} failed to {operation}: {exception}");
@@ -804,6 +1091,7 @@ public sealed partial class NCAgentSystem
         _views.Clear();
         _processing.Clear();
         _boundAgents.Clear();
+        ClearCommunication();
         ClearCalls();
     }
 
@@ -813,10 +1101,17 @@ public sealed partial class NCAgentSystem
         public readonly HashSet<int> ContactIds = [];
         public readonly HashSet<int> ConversationIds = [];
         public readonly HashSet<int> VisibleDirectoryIds = [];
+        public readonly HashSet<int> NearbyShareIds = [];
+        public readonly HashSet<int> BlockedIds = [];
+        public readonly HashSet<long> GroupIds = [];
+        public readonly Dictionary<long, string> GroupNames = [];
+        public readonly HashSet<int> GroupMemberIds = [];
         public readonly HashSet<long> PostIds = [];
         public readonly Dictionary<NCCharacterId, (string Alias, string Address)> Targets = [];
         public NCAgentApp ActiveApp = NCAgentApp.Home;
         public NCCharacterId? SelectedCharacterId;
+        public long? SelectedGroupId;
+        public int FeedOffset;
         public string DirectoryQuery = string.Empty;
         public string Notice = string.Empty;
         public string OwnAlias = string.Empty;

@@ -1,0 +1,30 @@
+<scanner:NCAgentScannerFragment xmlns="https://spacestation14.io"
+                                xmlns:scanner="clr-namespace:Content.Client._NC.Agent.Shards.Scanner"
+                                xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                                Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+    <PanelContainer Name="ScanPulse" HorizontalExpand="True" Margin="0 0 0 7">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#101925" BorderColor="#508DFF" BorderThickness="1 1 1 2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="10 7">
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                <Label Text="SCANNER // NETPROBE" FontColorOverride="#8FB8FF" HorizontalExpand="True" />
+                <Label Name="ResultCount" Text="0 / 9" FontColorOverride="#5B718E" />
+            </BoxContainer>
+            <Label Name="ScannerStatus" Text="ARMED // USE AGENT ON A NETWORK DEVICE" FontColorOverride="#76FF95" />
+        </BoxContainer>
+    </PanelContainer>
+
+    <PanelContainer HorizontalExpand="True" Margin="0 0 0 7">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#081318" BorderColor="#23524F" BorderThickness="1" />
+        </PanelContainer.PanelOverride>
+        <Label Text="Select the Agent, then interact with the target device. New addresses are stored on this physical Agent."
+               FontColorOverride="#6C918E" Margin="8 6" />
+    </PanelContainer>
+
+    <Label Text="SCAN HISTORY" FontColorOverride="#77FFF2" Margin="0 0 0 4" />
+    <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+        <BoxContainer Name="ResultsContainer" Orientation="Vertical" HorizontalExpand="True" />
+    </ScrollContainer>
+</scanner:NCAgentScannerFragment>

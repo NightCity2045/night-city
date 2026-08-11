@@ -5,6 +5,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Content.Server._NC.Agent.Components;
+using Content.Shared._NC.Agent;
 using Content.Shared._NC.Agent.Components;
 using Content.Shared._NC.Agent.UI;
 using Content.Shared._NC.Identity;
@@ -33,11 +34,11 @@ public sealed partial class NCAgentSystem
         SubscribeLocalEvent<NCActiveAgentCallComponent, EntitySpokeEvent>(OnSpokeDuringCall);
     }
 
-    private void OnStartCall(Entity<NCAgentComponent> ent, ref NCAgentStartCallMessage args)
+    private async void OnStartCall(EntityUid uid, NCAgentComponent component, NCAgentStartCallMessage args)
     {
-        if (!TryGetView(ent.Owner, args.Actor, out var user, out var view) ||
+        if (!TryGetView(uid, args.Actor, out var user, out var view) ||
             !view.ContactIds.Contains(args.TargetCharacterId) ||
-            !IsAgentUsableBy(user, ent.Owner) ||
+            !IsAgentUsableBy(user, uid) ||
             _calls.ContainsKey(view.Owner))
             return;
 
@@ -45,45 +46,93 @@ public sealed partial class NCAgentSystem
         if (!view.Targets.TryGetValue(target, out var targetDetails))
             return;
 
-        var startedAt = DateTime.UtcNow;
-        if (_calls.ContainsKey(target) ||
-            !TryResolveOnlineAgent(target, out var targetAgent, out var targetHolder))
+        // NC: Serialize an individual Agent's dial attempt across the asynchronous DB policy checks.
+        if (!_processing.Add((uid, user)))
+            return;
+
+        try
         {
-            view.Notice = "TARGET OFFLINE OR BUSY";
-            _ = PersistCallLogAsync(
+            var startedAt = DateTime.UtcNow;
+            if (await _database.AreNCAgentProfilesBlockedAsync(view.Owner, target))
+            {
+                view.Notice = "ADDRESS UNAVAILABLE";
+                await SendViewAsync(uid, user);
+                return;
+            }
+
+            var targetProfile = await _database.GetOrCreateNCAgentProfileAsync(target, Configuration.AddressPrefix);
+            if (targetProfile == null ||
+                targetProfile.Presence is NCAgentPresenceStatus.DoNotDisturb or NCAgentPresenceStatus.Offline)
+            {
+                view.Notice = "ADDRESS UNAVAILABLE";
+                await SendViewAsync(uid, user);
+                return;
+            }
+
+            if (_calls.ContainsKey(view.Owner) || _calls.ContainsKey(target) ||
+                !TryResolveOnlineAgent(target, out var targetAgent, out var targetHolder))
+            {
+                view.Notice = "TARGET OFFLINE OR BUSY";
+                _ = PersistCallLogAsync(
+                    view.Owner,
+                    target,
+                    startedAt,
+                    null,
+                    startedAt,
+                    NCAgentCallOutcome.Busy);
+                _ = SendViewAsync(uid, user);
+                return;
+            }
+
+            if (!CanConnectCall(user, targetHolder, out var networkFailure))
+            {
+                view.Notice = networkFailure;
+                await SendViewAsync(uid, user);
+                return;
+            }
+
+            var call = new AgentCall(
                 view.Owner,
                 target,
+                uid,
+                targetAgent,
+                view.OwnAlias,
+                view.OwnAddress,
+                targetDetails.Alias,
+                targetDetails.Address,
                 startedAt,
-                null,
-                startedAt,
-                NCAgentCallOutcome.Busy);
-            _ = SendViewAsync(ent.Owner, user);
-            return;
+                _gameTiming.CurTime + Configuration.IncomingCallTimeout)
+            {
+                CallerHolder = user,
+                TargetHolder = targetHolder,
+            };
+
+            _calls[view.Owner] = call;
+            _calls[target] = call;
+            view.Notice = targetProfile.Presence == NCAgentPresenceStatus.Busy
+                ? "CALLING // TARGET BUSY"
+                : "CALLING";
+
+            await SendAgentNotificationAsync(
+                target,
+                NCAgentNotificationKind.IncomingCall,
+                "INCOMING CALL",
+                $"Incoming call from {call.CallerName}",
+                false,
+                peer: view.Owner,
+                app: NCAgentApp.Calls,
+                knownHolder: targetHolder);
+            _ = RefreshCallViewsAsync(call);
         }
-
-        var call = new AgentCall(
-            view.Owner,
-            target,
-            ent.Owner,
-            targetAgent,
-            view.OwnAlias,
-            view.OwnAddress,
-            targetDetails.Alias,
-            targetDetails.Address,
-            startedAt,
-            _gameTiming.CurTime + Configuration.IncomingCallTimeout)
+        catch (Exception exception)
         {
-            CallerHolder = user,
-            TargetHolder = targetHolder,
-        };
-
-        _calls[view.Owner] = call;
-        _calls[target] = call;
-        view.Notice = "CALLING";
-
-        _ringer.RingerPlayRingtone(targetAgent);
-        NotifyCallHolder(targetHolder, $"Incoming Agent call from {call.CallerName}. Open CALLS to answer.");
-        _ = RefreshCallViewsAsync(call);
+            HandleDatabaseError(uid, user, "start call", exception);
+            await SendViewAsync(uid, user);
+        }
+        finally
+        {
+            FinishOperation(uid, user);
+        }
     }
 
     private void OnAnswerCall(Entity<NCAgentComponent> ent, ref NCAgentAnswerCallMessage args)
@@ -288,6 +337,18 @@ public sealed partial class NCAgentSystem
             call.AnsweredAt,
             DateTime.UtcNow,
             outcome);
+
+        if (outcome == NCAgentCallOutcome.Missed)
+        {
+            _ = SendAgentNotificationAsync(
+                call.Target,
+                NCAgentNotificationKind.MissedCall,
+                "MISSED CALL",
+                $"Missed call from {call.CallerName}",
+                false,
+                peer: call.Caller,
+                app: NCAgentApp.Calls);
+        }
     }
 
     private void RemoveCallRelay(EntityUid? holder, EntityUid agent)
