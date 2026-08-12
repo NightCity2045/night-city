@@ -176,7 +176,7 @@ public sealed class NCSystemicAuthorityTest : GameTest
     public void ElectricalExposureCreatesProductionShockableArrestAndDefibrillationClearsLatch()
     {
         var body = SSpawn(HumanMob);
-        var defibrillator = SSpawn("NCFieldDefibrillator");
+        var defibrillator = SSpawn("DefibrillatorOneHandedUnpowered");
 
         Assert.That(_damageable.TryChangeDamage(
             body,
@@ -186,7 +186,7 @@ public sealed class NCSystemicAuthorityTest : GameTest
         Assert.That(SComp<NCCirculationComponent>(body).HeartRhythm,
             Is.EqualTo(NCHeartRhythm.ShockableArrest));
 
-        var result = _emergency.Defibrillate(body, defibrillator, TimeSpan.Zero);
+        var result = _emergency.DefibrillateWithExternalPower(body, defibrillator, TimeSpan.Zero);
         Assert.That(_scheduler.ProcessNow(body, TimeSpan.Zero), Is.True);
         Assert.Multiple(() =>
         {

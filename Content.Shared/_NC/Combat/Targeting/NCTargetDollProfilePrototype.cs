@@ -56,6 +56,20 @@ public sealed partial class NCTargetDollZonePresentation
     [DataField(required: true)]
     public Vector2 Position { get; private set; }
 
+    /// <summary>
+    /// Optional visual size on the 32px doll canvas. Cropped selection textures come from a different
+    /// source silhouette than the Status RSI, so limbs use this to match the authoritative status layer.
+    /// </summary>
+    [DataField]
+    public Vector2? DisplaySize { get; private set; }
+
+    /// <summary>
+    /// Transparent interactive padding around the visual. This keeps small hands and feet comfortable to
+    /// click without changing or displacing the rendered overlay.
+    /// </summary>
+    [DataField]
+    public Vector2 HitboxPadding { get; private set; } = Vector2.Zero;
+
     [DataField(required: true)]
     public ResPath SelectedTexture { get; private set; } = default!;
 

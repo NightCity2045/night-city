@@ -3,17 +3,22 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Linq;
-using Content.Server._NC.Combat.Targeting;
+using Content.Server._NC.Medical.Diagnostics;
+using Content.Server._NC.Medical.Pharmacology;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Anatomy.Detachment;
+using Content.Shared._NC.Medical.Diagnostics;
+using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Surgery;
 using Content.Shared.Body;
 using Content.Shared.Buckle.Components;
+using Content.Shared.Hands;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
 using Robust.Server.GameObjects;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 
 namespace Content.Server._NC.Medical.Surgery;
 
@@ -26,17 +31,21 @@ public sealed partial class NCSurgeryConsoleSystem : EntitySystem
     private const int OrganTraversalLimit = 64;
 
     [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private IGameTiming _timing = default!;
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;
     [Dependency] private NCAnatomySystem _anatomy = default!;
-    [Dependency] private NCTargetingSelectionSystem _targeting = default!;
+    [Dependency] private NCMedicalStatusSnapshotSystem _medicalStatus = default!;
+    [Dependency] private NCPharmacologySystem _pharmacology = default!;
     [Dependency] private NCSurgeryInteractionSystem _interactions = default!;
     [Dependency] private NCSurgerySystem _surgery = default!;
 
     private readonly HashSet<(EntityUid Console, EntityUid User)> _openViews = [];
+    private readonly HashSet<EntityUid> _patientsAwaitingRefresh = [];
+    private bool _refreshAllOpenViews;
 
     public override void Initialize()
     {
@@ -45,9 +54,87 @@ public sealed partial class NCSurgeryConsoleSystem : EntitySystem
         SubscribeLocalEvent<NCSurgeryConsoleComponent, BoundUIOpenedEvent>(OnUiOpened);
         SubscribeLocalEvent<NCSurgeryConsoleComponent, BoundUIClosedEvent>(OnUiClosed);
         SubscribeLocalEvent<NCSurgeryConsoleComponent, NCSurgeryConsoleSelectMessage>(OnSelect);
+        SubscribeLocalEvent<NCSurgeryConsoleComponent, NCSurgeryConsoleSelectZoneMessage>(OnSelectZone);
         SubscribeLocalEvent<NCSurgeryConsoleComponent, NCSurgeryConsoleClearSelectionMessage>(OnClear);
         SubscribeLocalEvent<NCSurgeryConsoleComponent, NCSurgeryConsoleRefreshMessage>(OnRefresh);
+        SubscribeLocalEvent<NCSurgeryConsoleComponent, NCSurgeryConsoleExecuteStepMessage>(OnExecuteStep);
+        // Robust permits only one handler per component/event pair. The surgical patient-state component is
+        // materialized when a console resolves its buckled patient, so it is a conflict-free observation key.
+        SubscribeLocalEvent<NCSurgeryPatientStateComponent, NCMedicalBodyChangedEvent>(OnPatientMedicalStateChanged);
+        SubscribeLocalEvent<NCSurgeryPatientStateComponent, NCPhysiologyEvaluatedEvent>(OnPatientPhysiologyEvaluated);
+        SubscribeLocalEvent<NCMedicalBodyComponent, BuckledEvent>(OnPatientFacilityBindingChanged);
+        SubscribeLocalEvent<NCMedicalBodyComponent, UnbuckledEvent>(OnPatientFacilityBindingChanged);
+        SubscribeLocalEvent<NCMedicalBodyComponent, NCSurgeryStepExecutionChangedEvent>(OnStepExecutionChanged);
+        SubscribeLocalEvent<NCSurgeryToolComponent, GotEquippedHandEvent>(OnSurgicalToolChangedHands);
+        SubscribeLocalEvent<NCSurgeryToolComponent, GotUnequippedHandEvent>(OnSurgicalToolChangedHands);
+        SubscribeLocalEvent<NCSurgeryToolComponent, HandSelectedEvent>(OnSurgicalToolSelected);
+        SubscribeLocalEvent<NCSurgeryToolComponent, HandDeselectedEvent>(OnSurgicalToolDeselected);
         SubscribeLocalEvent<NCDetachedOrganMedicalDataComponent, AfterInteractEvent>(OnGraftAfterInteract);
+    }
+
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+        if (!_refreshAllOpenViews && _patientsAwaitingRefresh.Count == 0)
+            return;
+
+        // Snapshot and clear first. If rebuilding a view causes another medical mutation, that mutation is
+        // retained for the next frame instead of being erased at the end of this pass.
+        var refreshAll = _refreshAllOpenViews;
+        var patients = _patientsAwaitingRefresh.ToArray();
+        _refreshAllOpenViews = false;
+        _patientsAwaitingRefresh.Clear();
+
+        // This loops only directed BUI views that are actually open. It never scans consoles, patients or
+        // world entities, and multiple medical changes in one server tick collapse into one snapshot.
+        foreach (var (console, user) in _openViews.ToArray())
+        {
+            if (Deleted(console) || Deleted(user) || !TryComp<NCSurgeryConsoleComponent>(console, out var component))
+            {
+                _openViews.Remove((console, user));
+                continue;
+            }
+
+            if (refreshAll)
+            {
+                SendView(console, component, user, NCSurgeryConsoleNotice.None);
+                continue;
+            }
+
+            if (TryResolveBoundPatient(console, component, user, out _, out var patient, out _) &&
+                patients.Contains(patient))
+            {
+                SendView(console, component, user, NCSurgeryConsoleNotice.None);
+            }
+        }
+    }
+
+    private void OnPatientMedicalStateChanged(
+        Entity<NCSurgeryPatientStateComponent> patient,
+        ref NCMedicalBodyChangedEvent args)
+    {
+        _patientsAwaitingRefresh.Add(patient.Owner);
+    }
+
+    private void OnPatientPhysiologyEvaluated(
+        Entity<NCSurgeryPatientStateComponent> patient,
+        ref NCPhysiologyEvaluatedEvent args)
+    {
+        _patientsAwaitingRefresh.Add(patient.Owner);
+    }
+
+    private void OnPatientFacilityBindingChanged(
+        Entity<NCMedicalBodyComponent> patient,
+        ref BuckledEvent args)
+    {
+        _refreshAllOpenViews = true;
+    }
+
+    private void OnPatientFacilityBindingChanged(
+        Entity<NCMedicalBodyComponent> patient,
+        ref UnbuckledEvent args)
+    {
+        _refreshAllOpenViews = true;
     }
 
     private void OnUiOpened(EntityUid uid, NCSurgeryConsoleComponent component, BoundUIOpenedEvent args)
@@ -104,6 +191,37 @@ public sealed partial class NCSurgeryConsoleSystem : EntitySystem
         SendView(uid, component, user, NCSurgeryConsoleNotice.SelectionBound);
     }
 
+    private void OnSelectZone(
+        EntityUid uid,
+        NCSurgeryConsoleComponent component,
+        NCSurgeryConsoleSelectZoneMessage args)
+    {
+        if (!TryGetOpenActor(uid, args.Actor, out var user))
+            return;
+
+        if (!TryResolveBoundPatient(uid, component, user, out var facility, out var patient, out var notice))
+        {
+            SendView(uid, component, user, notice);
+            return;
+        }
+
+        if (!TryComp<NCMedicalBodyComponent>(patient, out var medical) ||
+            !_anatomy.TryGetProfile((patient, medical), out var profile) ||
+            !profile.TargetZones.Contains(args.Zone) ||
+            !_anatomy.TryResolveSelectedZone(patient, args.Zone, out _, out _))
+        {
+            SendView(uid, component, user, NCSurgeryConsoleNotice.SelectTargetZone);
+            return;
+        }
+
+        var planning = EnsureComp<NCSurgeryConsolePlanningComponent>(user);
+        planning.Patient = patient;
+        planning.Facility = facility;
+        planning.Zone = args.Zone;
+        RemComp<NCSurgeryGameplaySelectionComponent>(user);
+        SendView(uid, component, user, NCSurgeryConsoleNotice.None);
+    }
+
     private void OnClear(
         EntityUid uid,
         NCSurgeryConsoleComponent component,
@@ -114,6 +232,97 @@ public sealed partial class NCSurgeryConsoleSystem : EntitySystem
 
         RemComp<NCSurgeryGameplaySelectionComponent>(user);
         SendView(uid, component, user, NCSurgeryConsoleNotice.None);
+    }
+
+    private void OnExecuteStep(
+        EntityUid uid,
+        NCSurgeryConsoleComponent component,
+        NCSurgeryConsoleExecuteStepMessage args)
+    {
+        if (!TryGetOpenActor(uid, args.Actor, out var user))
+            return;
+
+        if (!TryResolveBoundPatient(uid, component, user, out var facility, out var patient, out var notice))
+        {
+            SendView(uid, component, user, notice);
+            return;
+        }
+
+        if (!TryComp<NCSurgeryGameplaySelectionComponent>(user, out var selection) ||
+            selection.Patient != patient || selection.Facility != facility)
+        {
+            SendView(uid, component, user, NCSurgeryConsoleNotice.SelectProcedure);
+            return;
+        }
+
+        var result = _interactions.TryStartCurrentStep(user, patient, facility, out _);
+        SendView(uid, component, user, result);
+    }
+
+    private void OnStepExecutionChanged(
+        Entity<NCMedicalBodyComponent> patient,
+        ref NCSurgeryStepExecutionChangedEvent args)
+    {
+        var notice = args.Cancelled
+            ? NCSurgeryConsoleNotice.StepCancelled
+            : args.ProcedureCompleted
+                ? NCSurgeryConsoleNotice.ProcedureCompleted
+                : NCSurgeryConsoleNotice.None;
+        foreach (var (console, user) in _openViews.ToArray())
+        {
+            if (user != args.Practitioner ||
+                !TryComp<NCSurgeryConsoleComponent>(console, out var component) ||
+                !TryResolveBoundPatient(console, component, user, out _, out var resolvedPatient, out _) ||
+                resolvedPatient != patient.Owner)
+            {
+                continue;
+            }
+
+            SendView(console, component, user, notice);
+        }
+    }
+
+    /// <summary>
+    /// Rebuilds only the directed views owned by the surgeon whose active inventory changed. This keeps
+    /// tool guidance responsive without polling consoles or exposing the patient state to other clients.
+    /// </summary>
+    private void OnSurgicalToolChangedHands(
+        Entity<NCSurgeryToolComponent> tool,
+        ref GotEquippedHandEvent args)
+    {
+        RefreshOpenViews(args.User);
+    }
+
+    private void OnSurgicalToolChangedHands(
+        Entity<NCSurgeryToolComponent> tool,
+        ref GotUnequippedHandEvent args)
+    {
+        RefreshOpenViews(args.User);
+    }
+
+    private void OnSurgicalToolSelected(
+        Entity<NCSurgeryToolComponent> tool,
+        ref HandSelectedEvent args)
+    {
+        RefreshOpenViews(args.User);
+    }
+
+    private void OnSurgicalToolDeselected(
+        Entity<NCSurgeryToolComponent> tool,
+        ref HandDeselectedEvent args)
+    {
+        RefreshOpenViews(args.User);
+    }
+
+    private void RefreshOpenViews(EntityUid user)
+    {
+        foreach (var (console, viewer) in _openViews.ToArray())
+        {
+            if (viewer != user || !TryComp<NCSurgeryConsoleComponent>(console, out var component))
+                continue;
+
+            SendView(console, component, viewer, NCSurgeryConsoleNotice.None);
+        }
     }
 
     private void OnRefresh(
@@ -206,6 +415,23 @@ public sealed partial class NCSurgeryConsoleSystem : EntitySystem
             : null;
         var active = FindActiveSession(patient);
         var graft = GetValidGraft(facility, user, component.FacilitySearchRange);
+        var heldTool = _hands.GetActiveItem(user);
+        var heldToolName = heldTool is { } heldUid && Exists(heldUid)
+            ? MetaData(heldUid).EntityName
+            : null;
+        var procedureId = active?.Session.Procedure ?? selection?.Procedure;
+        var currentStepIndex = active?.Session.CurrentStepIndex ?? 0;
+        var steps = BuildSteps(user, procedureId, currentStepIndex, selection);
+        var progressDuration = selection is { StepInProgress: true }
+            ? TimeSpan.FromTicks(Math.Max(0L, (selection.StepEndsAt - selection.StepStartedAt).Ticks))
+            : TimeSpan.Zero;
+        var progressElapsed = selection is { StepInProgress: true }
+            ? TimeSpan.FromTicks(Math.Clamp(
+                (_timing.CurTime - selection.StepStartedAt).Ticks,
+                0L,
+                progressDuration.Ticks))
+            : TimeSpan.Zero;
+        var medical = Comp<NCMedicalBodyComponent>(patient);
         var notice = requestedNotice != NCSurgeryConsoleNotice.None
             ? requestedNotice
             : hasOptions
@@ -218,6 +444,8 @@ public sealed partial class NCSurgeryConsoleSystem : EntitySystem
             new NCSurgeryConsoleUpdateMessage(
                 MetaData(patient).EntityName,
                 MetaData(facility).EntityName,
+                medical.Profile,
+                _medicalStatus.BuildOwnerStatusSnapshot(patient),
                 selectedZone,
                 selectedRegion,
                 selectedSite?.AccessDepth ?? NCSurgicalAccessDepth.Closed,
@@ -226,10 +454,16 @@ public sealed partial class NCSurgeryConsoleSystem : EntitySystem
                 selection != null && TryGetCategory(selection.TargetRegion, out var selectionCategory)
                     ? (ProtoId<OrganCategoryPrototype>?) selectionCategory
                     : (ProtoId<OrganCategoryPrototype>?) null,
-                active?.Procedure,
-                active?.CurrentStepIndex ?? 0,
-                active?.State,
+                active?.Session.Procedure,
+                currentStepIndex,
+                active?.Session.State,
                 candidates.Select(candidate => candidate.Entry).ToList(),
+                steps,
+                BuildPatientSummary(patient),
+                heldToolName,
+                selection?.StepInProgress ?? false,
+                progressElapsed,
+                progressDuration,
                 notice),
             user);
     }
@@ -248,9 +482,10 @@ public sealed partial class NCSurgeryConsoleSystem : EntitySystem
         selectedRegion = null;
         candidates = [];
         notice = NCSurgeryConsoleNotice.SelectTargetZone;
-        var target = _targeting.GetSelection(user);
-        if (target.Mode != NCTargetingMode.SelectedZone || target.SelectedZone is not { } requested ||
-            !_anatomy.TryResolveSelectedZone(patient, requested, out var actual, out var root) ||
+        if (!TryComp<NCSurgeryConsolePlanningComponent>(user, out var planning) ||
+            planning.Patient != patient || planning.Facility != facility ||
+            string.IsNullOrWhiteSpace(planning.Zone.Id) ||
+            !_anatomy.TryResolveSelectedZone(patient, planning.Zone, out var actual, out var root) ||
             !TryGetCategory(root, out var rootCategory))
         {
             return false;
@@ -431,14 +666,109 @@ public sealed partial class NCSurgeryConsoleSystem : EntitySystem
         return false;
     }
 
-    private NCSurgerySessionComponent? FindActiveSession(EntityUid patient)
+    private List<NCSurgeryConsoleStepEntry> BuildSteps(
+        EntityUid user,
+        ProtoId<NCSurgeryProcedurePrototype>? procedureId,
+        int currentStepIndex,
+        NCSurgeryGameplaySelectionComponent? selection)
+    {
+        var result = new List<NCSurgeryConsoleStepEntry>();
+        if (procedureId is not { } resolvedProcedure ||
+            !_prototypes.TryIndex(resolvedProcedure, out NCSurgeryProcedurePrototype? procedure))
+        {
+            return result;
+        }
+
+        NCSurgeryToolComponent? heldTool = null;
+        EntityUid? heldToolUid = null;
+        if (_hands.TryGetActiveItem(user, out var held) && held is { } heldUid)
+        {
+            heldToolUid = heldUid;
+            TryComp(heldUid, out heldTool);
+        }
+
+        for (var index = 0; index < procedure.Steps.Count; index++)
+        {
+            if (!_prototypes.TryIndex(procedure.Steps[index], out NCSurgeryStepPrototype? step))
+                continue;
+
+            var tools = new List<NCSurgeryConsoleToolRequirementEntry>();
+            foreach (var requirement in step.Tools)
+            {
+                if (!_prototypes.TryIndex(requirement.Capability, out NCSurgeryToolCapabilityPrototype? capability))
+                    continue;
+
+                var toolName = _prototypes.TryIndex(capability.RepresentativeTool, out EntityPrototype? toolPrototype)
+                    ? toolPrototype.Name
+                    : capability.RepresentativeTool.Id;
+                tools.Add(new NCSurgeryConsoleToolRequirementEntry(
+                    requirement.Capability,
+                    capability.Name,
+                    capability.RepresentativeTool,
+                    toolName,
+                    requirement.MinimumQuality,
+                    requirement.MinimumSterility,
+                    requirement.ConsumedUses,
+                    heldTool != null && ToolMatches(heldToolUid, heldTool, requirement)));
+            }
+
+            var state = index < currentStepIndex
+                ? NCSurgeryConsoleStepState.Completed
+                : index == currentStepIndex
+                    ? NCSurgeryConsoleStepState.Current
+                    : NCSurgeryConsoleStepState.Upcoming;
+            var canExecute = index == currentStepIndex &&
+                             selection is { StepInProgress: false } &&
+                             heldToolUid != null &&
+                             heldTool != null &&
+                             _interactions.CanToolPerform(heldToolUid.Value, heldTool, step);
+            result.Add(new NCSurgeryConsoleStepEntry(
+                step.ID,
+                step.Name,
+                index,
+                step.Duration,
+                step.RequiredAccessDepth,
+                state,
+                tools,
+                canExecute));
+        }
+
+        return result;
+    }
+
+    private bool ToolMatches(
+        EntityUid? toolUid,
+        NCSurgeryToolComponent tool,
+        NCSurgeryToolRequirement requirement)
+    {
+        return toolUid is { } uid && _surgery.CanToolSatisfy(uid, tool, requirement);
+    }
+
+    private NCSurgeryConsolePatientSummary BuildPatientSummary(EntityUid patient)
+    {
+        var circulation = CompOrNull<NCCirculationComponent>(patient);
+        var physiology = CompOrNull<NCPhysiologyComponent>(patient);
+        var drugs = _pharmacology.GetModifiers(patient);
+        return new NCSurgeryConsolePatientSummary(
+            Math.Clamp(circulation?.Perfusion ?? 0f, 0f, 1f),
+            Math.Clamp(physiology?.Oxygenation ?? 0f, 0f, 1f),
+            Math.Clamp(physiology?.Shock ?? 0f, 0f, 1f),
+            MathF.Max(0f, physiology?.TotalPain ?? 0f),
+            physiology?.Condition ?? NCPhysiologicalCondition.Stable,
+            physiology?.Consciousness ?? NCConsciousnessState.Alert,
+            Math.Clamp(drugs.Analgesia, 0f, 1f),
+            Math.Clamp(drugs.Sedation, 0f, 1f),
+            Math.Clamp(drugs.Anesthesia, 0f, 1f));
+    }
+
+    private (EntityUid Region, NCSurgerySessionComponent Session)? FindActiveSession(EntityUid patient)
     {
         foreach (var region in CollectRegions(patient).OrderBy(entry => entry.Category.Id, StringComparer.Ordinal))
         {
             if (TryComp<NCSurgerySessionComponent>(region.Region, out var session) &&
                 session.State is NCSurgerySessionState.Running or NCSurgerySessionState.Paused)
             {
-                return session;
+                return (region.Region, session);
             }
         }
         return null;
@@ -465,6 +795,8 @@ public sealed partial class NCSurgeryConsoleSystem : EntitySystem
             string.Empty,
             string.Empty,
             null,
+            new List<NCMedicalZoneStatus>(),
+            null,
             null,
             NCSurgicalAccessDepth.Closed,
             null,
@@ -473,7 +805,22 @@ public sealed partial class NCSurgeryConsoleSystem : EntitySystem
             null,
             0,
             null,
-            [],
+            new List<NCSurgeryConsoleProcedureEntry>(),
+            new List<NCSurgeryConsoleStepEntry>(),
+            new NCSurgeryConsolePatientSummary(
+                0f,
+                0f,
+                0f,
+                0f,
+                NCPhysiologicalCondition.Stable,
+                NCConsciousnessState.Alert,
+                0f,
+                0f,
+                0f),
+            null,
+            false,
+            TimeSpan.Zero,
+            TimeSpan.Zero,
             notice);
     }
 

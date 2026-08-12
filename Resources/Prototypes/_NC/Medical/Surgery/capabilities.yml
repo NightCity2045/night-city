@@ -5,82 +5,102 @@
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolDisinfection
   name: disinfection
+  representativeTool: Cautery
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolIncision
   name: controlled incision
+  representativeTool: Scalpel
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolHemostasis
   name: hemostasis
+  representativeTool: Hemostat
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolRetraction
   name: tissue retraction
+  representativeTool: Retractor
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolSuturing
   name: suturing
+  representativeTool: MedicatedSuture
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolDebridement
   name: debridement
+  representativeTool: Scalpel
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolVascularRepair
   name: vascular repair
+  representativeTool: MedicatedSuture
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolBoneReduction
   name: bone reduction
+  representativeTool: Drill
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolBoneFixation
   name: bone fixation
+  representativeTool: Drill
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolOrganRepair
   name: organ repair
+  representativeTool: Cautery
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolIrrigation
   name: sterile irrigation
+  representativeTool: SyringeSaline
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolForeignBodyExtraction
   name: foreign body extraction
+  representativeTool: Hemostat
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolTendonRepair
   name: tendon repair
+  representativeTool: MedicatedSuture
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolNerveRepair
   name: nerve repair
+  representativeTool: MedicatedSuture
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolOrganSeparation
   name: organ separation
+  representativeTool: Saw
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolTransplant
   name: transplant anastomosis
+  representativeTool: MedicatedSuture
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolCranialAccess
   name: cranial access
+  representativeTool: Drill
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolOphthalmicRepair
   name: ophthalmic repair
+  representativeTool: MedicatedSuture
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolAmputation
   name: controlled amputation
+  representativeTool: Saw
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolAutopsy
   name: forensic dissection
+  representativeTool: Scalpel
 
 - type: ncSurgeryFacilityCapability
   id: NCSurgeryFacilityStableSurface

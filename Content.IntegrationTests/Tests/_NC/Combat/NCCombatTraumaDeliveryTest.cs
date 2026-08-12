@@ -8,16 +8,20 @@ using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
 using Content.Server._NC.Combat.Armor;
 using Content.Server._NC.Combat.Damage;
+using Content.Server._NC.Medical.Physiology;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Armor;
 using Content.Shared._NC.Combat.Damage;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Wounds;
+using Content.Shared._NC.Medical.Physiology;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Prototypes;
 using Content.Shared.Damage.Systems;
 using Content.Shared.FixedPoint;
 using Content.Shared.Inventory;
+using Content.Shared.Mobs;
+using Content.Shared.Mobs.Components;
 using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._NC.Combat;
@@ -31,6 +35,7 @@ public sealed class NCCombatTraumaDeliveryTest : GameTest
     [SidedDependency(Side.Server)] private InventorySystem _inventory = default!;
     [SidedDependency(Side.Server)] private NCArmorResolutionSystem _armor = default!;
     [SidedDependency(Side.Server)] private NCCombatTraumaDeliverySystem _delivery = default!;
+    [SidedDependency(Side.Server)] private NCPhysiologySchedulerSystem _physiology = default!;
 
     public override PoolSettings PoolSettings => new()
     {
@@ -96,5 +101,65 @@ public sealed class NCCombatTraumaDeliveryTest : GameTest
 #pragma warning disable CS0618 // Compatibility HP is observed only to prove NC delivery did not mutate it.
         Assert.That(_damageable.GetTotalDamage(body), Is.EqualTo(hpBefore));
 #pragma warning restore CS0618
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void OneStandardPistolHitDoesNotCollapseAnOtherwiseHealthyHuman()
+    {
+        string[] zones =
+        {
+            "NCZoneHead",
+            "NCZoneChest",
+            "NCZoneAbdomen",
+            "NCZoneGroin",
+            "NCZoneArmLeft",
+            "NCZoneArmRight",
+            "NCZoneHandLeft",
+            "NCZoneHandRight",
+            "NCZoneLegLeft",
+            "NCZoneLegRight",
+            "NCZoneFootLeft",
+            "NCZoneFootRight",
+        };
+        ProtoId<DamageTypePrototype> piercingId = "Piercing";
+        var damage = new DamageSpecifier(_prototypes.Index(piercingId), 16);
+
+        for (var i = 0; i < zones.Length; i++)
+        {
+            var body = SSpawn("MobHuman");
+            Assert.That(_physiology.ProcessNow(body, TimeSpan.Zero), Is.True, $"healthy baseline for {zones[i]}");
+
+            var impact = new NCResolvedCombatImpact(
+                new NCActionResolutionId(new Guid(i + 1, 0, 0, new byte[8])),
+                0,
+                0,
+                (ulong) i + 1UL,
+                body,
+                null,
+                null,
+                null,
+                body,
+                NCTargetingMode.SelectedZone,
+                zones[i],
+                "NCBallisticStandard",
+                damage,
+                Vector2.Zero,
+                Vector2.UnitX,
+                0f,
+                TimeSpan.FromSeconds(1));
+
+            Assert.That(_delivery.TryDeliver(impact, out var delivered), Is.True, zones[i]);
+            Assert.That(delivered.Applied, Is.True, zones[i]);
+            Assert.That(_physiology.ProcessNow(body, TimeSpan.Zero), Is.True, zones[i]);
+
+            var state = SComp<MobStateComponent>(body).CurrentState;
+            var physiology = SComp<NCPhysiologyComponent>(body);
+            Assert.That(
+                state,
+                Is.EqualTo(MobState.Alive),
+                $"{zones[i]} resolved as {physiology.Condition}/{physiology.Consciousness}, " +
+                $"shock={physiology.Shock}, oxygenation={physiology.Oxygenation}");
+        }
     }
 }

@@ -3,11 +3,9 @@
   startingInventory:
     HandheldHealthAnalyzer: 1
     # NC start - Authoritative trauma supplies available through the existing clinic vendor.
-    NCDiagnosticHandheldAnalyzer: 1
     NCPressureDressing: 2
-    NCFieldBandage: 3
     NCHemostaticGauze: 2
-    NCFieldTourniquet: 2
+    Tourniquet: 2
     NCOxygenDeliveryKit: 1
     NCCrystalloidBag: 2
     NCBloodBagONegative: 1
@@ -50,30 +48,23 @@
     # Medical Essential Gear
     ClothingBeltMedicalFilled: 2
     # NC start - Authoritative trauma, resuscitation and surgery stock.
-    NCDiagnosticHandheldAnalyzer: 3
-    NCDiagnosticBodyScanner: 1
     NCPressureDressing: 4
-    NCFieldBandage: 6
     NCHemostaticGauze: 4
-    NCFieldTourniquet: 4
+    Tourniquet: 4
     NCOxygenDeliveryKit: 2
     NCManualVentilator: 2
     NCCrystalloidBag: 4
     NCBloodBagAPositive: 2
     NCBloodBagBPositive: 2
     NCBloodBagONegative: 3
-    NCFieldDefibrillator: 2
-    NCScalpel: 2
-    NCHemostat: 2
-    NCRetractor: 2
-    NCCautery: 2
-    NCSurgicalSuture: 4
-    NCBoneFixator: 2
-    NCSurgicalIrrigator: 2
-    NCMicrosurgeryKit: 2
-    NCCranialDrill: 1
-    NCSurgicalSaw: 1
-    NCForensicAutopsyKit: 1
+    Scalpel: 2
+    Hemostat: 2
+    Retractor: 2
+    Cautery: 2
+    MedicatedSuture: 4
+    Drill: 2
+    SyringeSaline: 2
+    Saw: 1
     NCSyringeTraumaAnalgesic: 4
     NCSyringeSurgicalAnesthetic: 3
     NCSyringeSedative: 3

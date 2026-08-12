@@ -32,6 +32,42 @@
         Heat: 5
     soundHit:
       path: /Audio/Effects/lightburn.ogg
+  # NC start - Reuse the mapped surgical tool for authoritative NC procedures.
+  - type: NCSurgeryTool
+    capabilities:
+      NCSurgeryToolDisinfection: 0.8
+      NCSurgeryToolHemostasis: 0.9
+      NCSurgeryToolOrganRepair: 0.75
+    sterility: 1
+    startingProcedures:
+    - NCSurgeryDeepWoundTreatment
+    - NCSurgeryVascularRepair
+    - NCSurgeryFractureFixation
+    - NCSurgeryExposeOrgan
+    - NCSurgeryOrganRepair
+    - NCSurgeryWoundIrrigation
+    - NCSurgeryForeignBodyExtraction
+    - NCSurgeryTendonRepair
+    - NCSurgeryPeripheralNerveRepair
+    - NCSurgeryCranialDecompression
+    - NCSurgeryBrainRepair
+    - NCSurgeryEyeRepair
+    - NCSurgeryOrganRemoval
+    - NCSurgeryEyeRemoval
+    - NCSurgeryOrganTransplant
+    - NCSurgeryEyeTransplant
+    - NCSurgeryLimbAmputation
+    - NCSurgeryLimbReattachment
+  - type: NCSurgeryAuthorizationProvider
+    authorizations:
+    - NCSurgeryAuthorizationGeneral
+    - NCSurgeryAuthorizationVascular
+    - NCSurgeryAuthorizationOrthopedic
+    - NCSurgeryAuthorizationOrgan
+    - NCSurgeryAuthorizationNeural
+    - NCSurgeryAuthorizationTransplant
+    - NCSurgeryAuthorizationForensic
+  # NC end
 
 # Drill
 
@@ -57,6 +93,18 @@
       path: /Audio/Items/drill_hit.ogg
   - type: StaticPrice
     price: 40
+  # NC start - The existing drill provides cranial and fixation capabilities.
+  - type: NCSurgeryTool
+    capabilities:
+      NCSurgeryToolCranialAccess: 1
+      NCSurgeryToolBoneReduction: 0.8
+      NCSurgeryToolBoneFixation: 0.8
+    sterility: 1
+  - type: NCSurgeryAuthorizationProvider
+    authorizations:
+    - NCSurgeryAuthorizationOrthopedic
+    - NCSurgeryAuthorizationNeural
+  # NC end
 
 # Scalpel
 
@@ -88,6 +136,25 @@
         Slash: 8
     soundHit:
       path: /Audio/Weapons/bladeslice.ogg
+  # NC start - Reuse the existing scalpel instead of a parallel NC entity.
+  - type: NCSurgeryTool
+    capabilities:
+      NCSurgeryToolIncision: 1
+      NCSurgeryToolDebridement: 0.8
+      NCSurgeryToolOrganRepair: 0.65
+      NCSurgeryToolForeignBodyExtraction: 0.8
+      NCSurgeryToolOrganSeparation: 0.75
+      NCSurgeryToolOphthalmicRepair: 0.7
+      NCSurgeryToolAutopsy: 0.8
+    sterility: 1
+  - type: NCSurgeryAuthorizationProvider
+    authorizations:
+    - NCSurgeryAuthorizationGeneral
+    - NCSurgeryAuthorizationVascular
+    - NCSurgeryAuthorizationOrthopedic
+    - NCSurgeryAuthorizationOrgan
+    - NCSurgeryAuthorizationForensic
+  # NC end
 
 - type: entity
   name: shiv
@@ -151,6 +218,18 @@
   - type: Item
     sprite: Objects/Specific/Medical/Surgery/scissors.rsi
     storedRotation: 90
+  # NC start - Reuse the mapped retractor for NC soft-tissue access.
+  - type: NCSurgeryTool
+    capabilities:
+      NCSurgeryToolRetraction: 1
+    sterility: 1
+  - type: NCSurgeryAuthorizationProvider
+    authorizations:
+    - NCSurgeryAuthorizationGeneral
+    - NCSurgeryAuthorizationVascular
+    - NCSurgeryAuthorizationOrthopedic
+    - NCSurgeryAuthorizationOrgan
+  # NC end
 
 - type: entity
   name: hemostat
@@ -163,6 +242,22 @@
   - type: Item
     heldPrefix: hemostat
     storedRotation: 90
+  # NC start - Override the inherited retractor contract with hemostat capabilities.
+  - type: NCSurgeryTool
+    capabilities:
+      NCSurgeryToolHemostasis: 1
+      NCSurgeryToolVascularRepair: 0.9
+      NCSurgeryToolBoneReduction: 0.55
+      NCSurgeryToolForeignBodyExtraction: 0.9
+      NCSurgeryToolOrganSeparation: 0.8
+    sterility: 1
+  - type: NCSurgeryAuthorizationProvider
+    authorizations:
+    - NCSurgeryAuthorizationGeneral
+    - NCSurgeryAuthorizationVascular
+    - NCSurgeryAuthorizationOrthopedic
+    - NCSurgeryAuthorizationOrgan
+  # NC end
 
   # - type: entity
   #   name: bone setter
@@ -188,6 +283,19 @@
     size: Normal
     sprite: Objects/Specific/Medical/Surgery/saw.rsi
     storedRotation: 90
+  # NC start - Reuse the existing surgical saw for controlled separation.
+  - type: NCSurgeryTool
+    capabilities:
+      NCSurgeryToolAmputation: 1
+      NCSurgeryToolOrganSeparation: 0.85
+      NCSurgeryToolBoneReduction: 0.8
+    sterility: 1
+  - type: NCSurgeryAuthorizationProvider
+    authorizations:
+    - NCSurgeryAuthorizationVascular
+    - NCSurgeryAuthorizationOrthopedic
+    - NCSurgeryAuthorizationOrgan
+  # NC end
   - type: Tool
     qualities:
     - Sawing

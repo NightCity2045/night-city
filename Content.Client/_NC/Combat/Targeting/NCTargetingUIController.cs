@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Client.Gameplay;
+using Content.Client.UserInterface.Systems.Gameplay;
 using Content.Shared._NC.Combat.Targeting;
 using JetBrains.Annotations;
 using Robust.Client.UserInterface;
@@ -24,6 +25,14 @@ public sealed partial class NCTargetingUIController : UIController,
 
     private NCTargetingHudOverlay? _overlay;
 
+    public override void Initialize()
+    {
+        base.Initialize();
+        var gameplayScreen = UIManager.GetUIController<GameplayStateLoadController>();
+        gameplayScreen.OnScreenLoad += AttachToViewport;
+        gameplayScreen.OnScreenUnload += DetachFromScreen;
+    }
+
     public void OnSystemLoaded(NCTargetingClientSystem system)
     {
         system.TargetingChanged += OnTargetingChanged;
@@ -38,8 +47,7 @@ public sealed partial class NCTargetingUIController : UIController,
     {
         _overlay = new NCTargetingHudOverlay();
         _overlay.Doll.TargetingChanged += OnDollChanged;
-        UIManager.RootControl.AddChild(_overlay);
-        LayoutContainer.SetAnchorPreset(_overlay, LayoutContainer.LayoutPreset.Wide);
+        AttachToViewport();
 
         _targeting?.RefreshLocalPlayer();
         SynchronizePresenter();
@@ -53,6 +61,32 @@ public sealed partial class NCTargetingUIController : UIController,
         _overlay.Doll.TargetingChanged -= OnDollChanged;
         _overlay.Orphan();
         _overlay = null;
+    }
+
+    private void AttachToViewport()
+    {
+        if (_overlay == null)
+            return;
+
+        // The separated-chat screen gives the chat its own sibling panel. Parenting the targeting HUD to
+        // the gameplay viewport keeps BottomRight relative to the playable area at every chat width.
+        var viewport = UIManager.ActiveScreen?.FindControl<LayoutContainer>("ViewportContainer");
+        if (viewport == null)
+        {
+            _overlay.Orphan();
+            _overlay.Visible = false;
+            return;
+        }
+
+        _overlay.Orphan();
+        viewport.AddChild(_overlay);
+        LayoutContainer.SetAnchorPreset(_overlay, LayoutContainer.LayoutPreset.Wide);
+        SynchronizePresenter();
+    }
+
+    private void DetachFromScreen()
+    {
+        _overlay?.Orphan();
     }
 
     private void OnDollChanged(NCTargetingState requested)

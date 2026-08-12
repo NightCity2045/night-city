@@ -50,6 +50,17 @@ public readonly record struct NCSurgeryMedicalStateChangedEvent(
     EntityUid TargetRegion);
 
 /// <summary>
+/// Local UI refresh boundary for a timed surgical interaction. It carries only the practitioner identity and
+/// execution state; the console resolves patient, facility and the live step again from authoritative ECS state.
+/// </summary>
+[ByRefEvent]
+public readonly record struct NCSurgeryStepExecutionChangedEvent(
+    EntityUid Practitioner,
+    bool Running,
+    bool Cancelled,
+    bool ProcedureCompleted = false);
+
+/// <summary>
 /// One explicit surgery step carried through the engine DoAfter. The session/step tuple prevents a
 /// stale completion from advancing a different procedure that later reused the same region.
 /// </summary>

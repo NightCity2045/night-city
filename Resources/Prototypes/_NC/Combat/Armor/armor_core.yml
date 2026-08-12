@@ -140,47 +140,6 @@
   id: NCArmorSubdermal
   sections: [ NCArmorSectionSubdermal ]
 
-# Playable clean-room armor variants reuse existing SS14 presentation and slots while NC owns local protection.
-- type: entity
-  id: NCClothingOuterArmorKevlar
-  parent: ClothingOuterArmorBasic
-  suffix: NC Kevlar SP 7
-  components:
-  - type: NCArmor
-    profile: NCArmorKevlar
-
-- type: entity
-  id: NCClothingOuterArmorLightArmorjack
-  parent: ClothingOuterArmorBasic
-  suffix: NC Light Armorjack SP 11
-  components:
-  - type: NCArmor
-    profile: NCArmorLightArmorjack
-
-- type: entity
-  id: NCClothingOuterArmorPlateCarrier
-  parent: ClothingOuterArmorBulletproof
-  suffix: NC Plate Carrier SP 13
-  components:
-  - type: NCArmor
-    profile: NCArmorPlateCarrier
-
-- type: entity
-  id: NCClothingHeadHelmetClosed
-  parent: ClothingHeadHelmetBasic
-  suffix: NC Closed Helmet SP 11
-  components:
-  - type: NCArmor
-    profile: NCArmorClosedHelmet
-
-- type: entity
-  id: NCClothingHeadHelmetRiot
-  parent: ClothingHeadHelmetRiot
-  suffix: NC Riot Helmet SP 11
-  components:
-  - type: NCArmor
-    profile: NCArmorClosedHelmet
-
 # Consumable field service kit. It can patch common fabric, plate and composite sections to 75% of MaxSP.
 - type: entity
   id: NCArmorRepairKit

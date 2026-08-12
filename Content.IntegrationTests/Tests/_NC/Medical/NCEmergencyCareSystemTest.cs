@@ -72,21 +72,21 @@ public sealed class NCEmergencyCareSystemTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
-    public void DefibrillationRejectsWrongRhythmAndConsumesPhysicalCharge()
+    public void ExternallyPoweredDefibrillationRejectsWrongRhythmWithoutParallelCharges()
     {
         var body = SSpawn(HumanMob);
-        var defibrillator = SSpawn("NCFieldDefibrillator");
+        var defibrillator = SSpawn("DefibrillatorOneHandedUnpowered");
         var circulation = SComp<NCCirculationComponent>(body);
         var item = SComp<NCEmergencyCareItemComponent>(defibrillator);
         var bloodBefore = circulation.BloodVolume;
         circulation.HeartRhythm = NCHeartRhythm.Normal;
 
-        var result = _emergency.Defibrillate(body, defibrillator, TimeSpan.Zero);
+        var result = _emergency.DefibrillateWithExternalPower(body, defibrillator, TimeSpan.Zero);
 
         Assert.Multiple(() =>
         {
             Assert.That(result.Outcome, Is.EqualTo(NCEmergencyCareOutcome.WrongRhythm));
-            Assert.That(item.ChargesRemaining, Is.EqualTo(2));
+            Assert.That(item.ChargesRemaining, Is.Zero);
             Assert.That(result.ChargesConsumed, Is.EqualTo(1));
             Assert.That(circulation.HeartRhythm, Is.EqualTo(NCHeartRhythm.Normal));
             Assert.That(circulation.BloodVolume, Is.EqualTo(bloodBefore));
@@ -101,14 +101,14 @@ public sealed class NCEmergencyCareSystemTest : GameTest
     public void ShockableArrestConvertsDeterministicallyAndBurnNeverTouchesLegacyHp()
     {
         var body = SSpawn(HumanMob);
-        var defibrillator = SSpawn("NCFieldDefibrillator");
+        var defibrillator = SSpawn("DefibrillatorOneHandedUnpowered");
         var circulation = SComp<NCCirculationComponent>(body);
         var damageable = SComp<DamageableComponent>(body);
         var legacyBefore = _damageable.GetTotalDamage((body, damageable));
         var bloodBefore = circulation.BloodVolume;
         circulation.HeartRhythm = NCHeartRhythm.ShockableArrest;
 
-        var result = _emergency.Defibrillate(body, defibrillator, TimeSpan.Zero);
+        var result = _emergency.DefibrillateWithExternalPower(body, defibrillator, TimeSpan.Zero);
         var wounds = SComp<NCWoundContainerComponent>(body);
 
         Assert.Multiple(() =>
@@ -116,7 +116,7 @@ public sealed class NCEmergencyCareSystemTest : GameTest
             Assert.That(result.Outcome, Is.EqualTo(NCEmergencyCareOutcome.Applied));
             Assert.That(circulation.HeartRhythm, Is.EqualTo(NCHeartRhythm.Normal));
             Assert.That(circulation.BloodVolume, Is.EqualTo(bloodBefore));
-            Assert.That(SComp<NCEmergencyCareItemComponent>(defibrillator).ChargesRemaining, Is.EqualTo(2));
+            Assert.That(SComp<NCEmergencyCareItemComponent>(defibrillator).ChargesRemaining, Is.Zero);
             Assert.That(wounds.Wounds.Values.Any(wound =>
                 wound.TargetZone.Id == "NCZoneChest" && wound.WoundType == NCWoundType.Thermal), Is.True);
             Assert.That(_damageable.GetTotalDamage((body, damageable)), Is.EqualTo(legacyBefore));

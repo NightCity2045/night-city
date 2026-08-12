@@ -3,6 +3,7 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 nc-medical-diagnostics-title = Medical diagnostics
+nc-medical-diagnostics-scanner-verb = View trauma scan
 nc-medical-diagnostics-tab-overview = Overview
 nc-medical-diagnostics-tab-regions = Regions
 nc-medical-diagnostics-tab-wounds = Wounds

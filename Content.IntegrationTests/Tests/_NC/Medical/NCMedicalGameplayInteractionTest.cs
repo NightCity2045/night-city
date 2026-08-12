@@ -77,9 +77,9 @@ public sealed class NCMedicalGameplayInteractionTest : GameTest
     {
         var bandageCapability = _prototypes.Index<NCTreatmentCapabilityPrototype>("NCFieldBandageCapability");
         var oxygenCapability = _prototypes.Index<NCEmergencyCareCapabilityPrototype>("NCOxygenDeliveryCapability");
-        var bandage = SSpawn("NCFieldBandage");
+        var bandage = SSpawn("Gauze");
         var oxygen = SSpawn("NCOxygenDeliveryKit");
-        var cautery = SSpawn("NCCautery");
+        var cautery = SSpawn("Cautery");
         var table = SSpawn("OperatingTable");
 
         Assert.Multiple(() =>

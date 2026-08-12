@@ -7,10 +7,12 @@ using System.Numerics;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
 using Content.Server._NC.Combat.Projectiles;
+using Content.Server._NC.Medical.Physiology;
 using Content.Server._NC.Medical.Systemic;
 using Content.Server.Stunnable.Components;
 using Content.Shared._NC.Combat.Damage;
 using Content.Shared._NC.Combat.Projectiles;
+using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Systemic;
 using Content.Shared._NC.Medical.Trauma;
 using Content.Shared._NC.Medical.Wounds;
@@ -18,6 +20,8 @@ using Content.Shared.Damage;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Prototypes;
 using Content.Shared.FixedPoint;
+using Content.Shared.Mobs;
+using Content.Shared.Mobs.Components;
 using Content.Shared.Projectiles;
 using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared.Weapons.Ranged.Events;
@@ -33,6 +37,7 @@ public sealed class NCProjectileDamageProfileTest : GameTest
     [SidedDependency(Side.Server)] private IPrototypeManager _prototypes = default!;
     [SidedDependency(Side.Server)] private NCProjectileContextSystem _contexts = default!;
     [SidedDependency(Side.Server)] private NCProjectileImpactSystem _impacts = default!;
+    [SidedDependency(Side.Server)] private NCPhysiologySchedulerSystem _physiology = default!;
     [SidedDependency(Side.Server)] private NCSystemicSystem _systemic = default!;
 
     public override PoolSettings PoolSettings => new()
@@ -175,6 +180,33 @@ public sealed class NCProjectileDamageProfileTest : GameTest
             out _), Is.True);
 
         Assert.That(_systemic.GetBurden(body, NCSystemicChannel.Radiation), Is.EqualTo(22f));
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void StandardPistolPhysicalImpactDoesNotCollapseHealthyHuman()
+    {
+        var projectileUid = SSpawn("BulletPistol");
+        var projectile = SComp<ProjectileComponent>(projectileUid);
+        AttachShotContext(projectileUid);
+        var body = SSpawn("MobHuman");
+        Assert.That(_physiology.ProcessNow(body, TimeSpan.Zero), Is.True);
+
+        Assert.That(_impacts.TryHandleImpact(
+            (projectileUid, projectile),
+            body,
+            projectile.Damage,
+            Vector2.UnitX,
+            out _,
+            out _), Is.True);
+        Assert.That(_physiology.ProcessNow(body, TimeSpan.Zero), Is.True);
+
+        var physiology = SComp<NCPhysiologyComponent>(body);
+        Assert.That(
+            SComp<MobStateComponent>(body).CurrentState,
+            Is.EqualTo(MobState.Alive),
+            $".35 auto impact resolved as {physiology.Condition}/{physiology.Consciousness}, " +
+            $"shock={physiology.Shock}, oxygenation={physiology.Oxygenation}");
     }
 
     [Test]

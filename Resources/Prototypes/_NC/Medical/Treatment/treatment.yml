@@ -89,13 +89,6 @@
   maxCount: 5
 
 - type: stack
-  id: NCFieldBandageStack
-  name: nc-stack-field-bandage
-  icon: { sprite: /Textures/Objects/Specific/Medical/medical.rsi, state: gauze }
-  spawn: NCFieldBandage
-  maxCount: 5
-
-- type: stack
   id: NCHemostaticGauzeStack
   name: nc-stack-hemostatic-gauze
   icon: { sprite: /Textures/Objects/Specific/Medical/medical.rsi, state: brutepack }
@@ -103,11 +96,11 @@
   maxCount: 5
 
 - type: stack
-  id: NCFieldTourniquetStack
+  id: NCTourniquetTreatmentStack
   name: nc-stack-field-tourniquet
   icon: { sprite: /Textures/Objects/Specific/Medical/medical.rsi, state: tourniquet }
-  spawn: NCFieldTourniquet
-  maxCount: 3
+  spawn: Tourniquet
+  maxCount: 1
 
 - type: entity
   id: NCPressureDressing
@@ -126,22 +119,6 @@
     count: 5
 
 - type: entity
-  id: NCFieldBandage
-  parent: BaseHealingItem
-  name: field bandage
-  description: A sterile field dressing that stabilizes an external wound without repairing deep trauma.
-  components:
-  - type: Sprite
-    state: gauze
-  - type: Item
-    heldPrefix: gauze
-  - type: NCTreatmentItem
-    capability: NCFieldBandageCapability
-  - type: Stack
-    stackType: NCFieldBandageStack
-    count: 5
-
-- type: entity
   id: NCHemostaticGauze
   parent: BaseHealingItem
   name: hemostatic gauze
@@ -156,19 +133,3 @@
   - type: Stack
     stackType: NCHemostaticGauzeStack
     count: 5
-
-- type: entity
-  id: NCFieldTourniquet
-  parent: BaseHealingItem
-  name: field tourniquet
-  description: A limb-only bleeding control device marked for timed, controlled release.
-  components:
-  - type: Sprite
-    state: tourniquet
-  - type: Item
-    heldPrefix: tourniquet
-  - type: NCTreatmentItem
-    capability: NCFieldTourniquetCapability
-  - type: Stack
-    stackType: NCFieldTourniquetStack
-    count: 3

@@ -22,8 +22,9 @@ public sealed partial class NCSurgeryConsoleBoundUserInterface(EntityUid owner, 
         _window.OnSelect += entry => SendMessage(new NCSurgeryConsoleSelectMessage(
             entry.Procedure,
             entry.TargetCategory));
+        _window.OnZoneSelect += zone => SendMessage(new NCSurgeryConsoleSelectZoneMessage(zone));
+        _window.OnExecuteStep += () => SendMessage(new NCSurgeryConsoleExecuteStepMessage());
         _window.OnClear += () => SendMessage(new NCSurgeryConsoleClearSelectionMessage());
-        _window.OnRefresh += () => SendMessage(new NCSurgeryConsoleRefreshMessage());
         _window.OpenCentered();
     }
 

@@ -5,6 +5,10 @@
   description: A bulky medical scanner.
   components:
   - type: MedicalScanner
+  # NC start - The vanilla scanner exposes authoritative internal trauma diagnostics for its occupant.
+  - type: NCDiagnosticCapability
+    capability: NCDiagnosticsScannerInternal
+  # NC end
   - type: DeviceNetwork
     deviceNetId: Wired
     receiveFrequencyId: BasicDevice

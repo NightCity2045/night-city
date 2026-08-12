@@ -21,6 +21,14 @@ public sealed partial class NCSurgeryToolCapabilityPrototype : IPrototype
 
     [DataField(required: true)]
     public string Name { get; private set; } = default!;
+
+    /// <summary>
+    /// Representative physical item shown by the surgery console. The resolver still accepts every held
+    /// tool that supplies this capability; this prototype exists only so the player sees a concrete item
+    /// instead of an internal capability identifier.
+    /// </summary>
+    [DataField(required: true)]
+    public EntProtoId RepresentativeTool { get; private set; }
 }
 
 /// <summary>
@@ -73,7 +81,11 @@ public sealed partial class NCSurgeryProcedurePrototype : IPrototype
 
     [DataField]
     public List<NCAnatomicalMaterialKind> CompatibleMaterials { get; private set; } =
-        [NCAnatomicalMaterialKind.Organic, NCAnatomicalMaterialKind.Hybrid];
+        new()
+        {
+            NCAnatomicalMaterialKind.Organic,
+            NCAnatomicalMaterialKind.Hybrid,
+        };
 
     [DataField]
     public List<ProtoId<OrganCategoryPrototype>> CompatibleTargetCategories { get; private set; } = [];
@@ -96,7 +108,11 @@ public sealed partial class NCSurgeryProcedurePrototype : IPrototype
 
     [DataField]
     public List<NCAnatomicalMaterialKind> CompatibleGraftMaterials { get; private set; } =
-        [NCAnatomicalMaterialKind.Organic, NCAnatomicalMaterialKind.Hybrid];
+        new()
+        {
+            NCAnatomicalMaterialKind.Organic,
+            NCAnatomicalMaterialKind.Hybrid,
+        };
 
     /// <summary>
     /// Observable pathology that must still be present when the procedure starts and before every step.
@@ -107,7 +123,11 @@ public sealed partial class NCSurgeryProcedurePrototype : IPrototype
 
     [DataField]
     public List<NCSurgicalAccessDepth> StartingAccessDepths { get; private set; } =
-        [NCSurgicalAccessDepth.Closed, NCSurgicalAccessDepth.ClosedPostOp];
+        new()
+        {
+            NCSurgicalAccessDepth.Closed,
+            NCSurgicalAccessDepth.ClosedPostOp,
+        };
 
     [DataField]
     public NCSurgeryFacilityRequirement Facility { get; private set; } = new();

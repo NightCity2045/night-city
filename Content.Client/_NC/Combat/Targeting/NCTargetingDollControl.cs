@@ -41,6 +41,15 @@ public sealed partial class NCTargetingDollControl : BoxContainer
     private readonly Dictionary<ProtoId<NCTargetZonePrototype>, byte> _statusLevels = [];
     private float _displayScale = DefaultDisplayScale;
 
+    /// <summary>
+    /// Combat HUDs allow automatic targeting, while medical workflows require an explicit anatomical zone.
+    /// </summary>
+    public bool ShowAutomaticSelection
+    {
+        get => _automaticButton.Visible;
+        set => _automaticButton.Visible = value;
+    }
+
     public float DisplayScale
     {
         get => _displayScale;
@@ -241,6 +250,8 @@ public sealed partial class NCTargetingDollControl : BoxContainer
                 hover.Texture,
                 presentation.SelectedRegion,
                 presentation.HoverRegion,
+                presentation.DisplaySize,
+                presentation.HitboxPadding,
                 _displayScale)
             {
                 Group = _selectionGroup,
@@ -252,7 +263,9 @@ public sealed partial class NCTargetingDollControl : BoxContainer
                 notify: true);
 
             _canvas.AddChild(button);
-            LayoutContainer.SetPosition(button, presentation.Position * _displayScale);
+            LayoutContainer.SetPosition(
+                button,
+                (presentation.Position - presentation.HitboxPadding) * _displayScale);
             _zoneButtons.Add(presentation.Zone, button);
         }
     }

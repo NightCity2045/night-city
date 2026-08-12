@@ -102,7 +102,6 @@
     count: 10
   - type: StackPrice
     price: 20
-
 - type: entity
   id: OintmentAdvanced1
   parent: RegenerativeMesh
@@ -198,6 +197,24 @@
     count: 10
   - type: StackPrice
     price: 20
+  # NC start - The existing suture stack is the authoritative NC closure material.
+  - type: NCSurgeryTool
+    capabilities:
+      NCSurgeryToolSuturing: 1
+      NCSurgeryToolVascularRepair: 0.75
+      NCSurgeryToolOrganRepair: 0.75
+      NCSurgeryToolTendonRepair: 0.85
+      NCSurgeryToolNerveRepair: 0.8
+      NCSurgeryToolTransplant: 0.8
+      NCSurgeryToolOphthalmicRepair: 0.85
+    sterility: 1
+  - type: NCSurgeryAuthorizationProvider
+    authorizations:
+    - NCSurgeryAuthorizationGeneral
+    - NCSurgeryAuthorizationVascular
+    - NCSurgeryAuthorizationOrthopedic
+    - NCSurgeryAuthorizationOrgan
+  # NC end
 
 - type: entity
   id: BrutepackAdvanced1
@@ -260,6 +277,13 @@
   name: tourniquet
   description: Stops bleeding! Hopefully.
   components:
+    # NC start - Reuse the vanilla tourniquet in the authoritative limb-treatment path.
+    - type: NCTreatmentItem
+      capability: NCFieldTourniquetCapability
+    - type: Stack
+      stackType: NCTourniquetTreatmentStack
+      count: 1
+    # NC end
     - type: Tag
       tags:
         - SecBeltEquip
@@ -295,6 +319,10 @@
   id: Gauze
   suffix: Full
   components:
+  # NC start - Reuse vanilla gauze as the authoritative field-bandage stack.
+  - type: NCTreatmentItem
+    capability: NCFieldBandageCapability
+  # NC end
   - type: Tag
     tags:
     - Gauze
@@ -988,6 +1016,19 @@
       reagents:
       - ReagentId: Saline
         Quantity: 15
+  # NC start - Reuse the existing saline syringe as the physical irrigation tool.
+  - type: NCSurgeryTool
+    capabilities:
+      NCSurgeryToolDisinfection: 0.9
+      NCSurgeryToolIrrigation: 1
+    sterility: 1
+    solutionResource: injector
+    solutionUnitsPerUse: 5
+  - type: NCSurgeryAuthorizationProvider
+    authorizations:
+    - NCSurgeryAuthorizationGeneral
+    - NCSurgeryAuthorizationNeural
+  # NC end
 
 #this is where all the syringes are so i didn't know where to put it
 - type: entity

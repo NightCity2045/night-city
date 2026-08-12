@@ -7,6 +7,13 @@ using Robust.Shared.Serialization;
 
 namespace Content.Shared._NC.Medical.Diagnostics.Detail;
 
+/// <summary>
+/// Local server event raised after a vanilla health analyzer completes its authoritative scan.
+/// Kept separate from Agent MEDTEK storage so each ECS subscription has a unique event contract.
+/// </summary>
+[ByRefEvent]
+public record struct NCHealthAnalyzerScanCompletedEvent(EntityUid User, EntityUid Target);
+
 [Serializable, NetSerializable]
 public enum NCDiagnosticAccessFailure : byte
 {

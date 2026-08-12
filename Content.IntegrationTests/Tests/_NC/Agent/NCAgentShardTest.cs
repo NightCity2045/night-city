@@ -148,8 +148,9 @@ public sealed class NCAgentShardTest : GameTest
 
             var medTek = cartridges.TryGetProgram<NCAgentMedTekComponent>((agent, loader));
             Assert.That(medTek.HasValue, Is.True);
-            var scan = new NCAgentMedicalScanCompletedEvent(patient);
-            server.EntMan.EventBus.RaiseLocalEvent(agent, ref scan);
+            var analyzer = server.EntMan.SpawnEntity("HandheldHealthAnalyzer", map.GridCoords);
+            var scan = new NCAgentMedicalScanCompletedEvent(agent, patient);
+            server.EntMan.EventBus.RaiseLocalEvent(analyzer, ref scan);
             Assert.Multiple(() =>
             {
                 Assert.That(medTek!.Value.Comp.History, Has.Count.EqualTo(1));

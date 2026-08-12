@@ -52,6 +52,8 @@ public sealed partial class NCEmergencyCareItemComponent : Component
     [DataField(required: true)]
     public ProtoId<NCEmergencyCareCapabilityPrototype> Capability;
 
-    [DataField(required: true)]
+    // Devices backed by vanilla power (for example defibrillators) intentionally do not use
+    // a second NC charge counter. Consumable emergency items still configure this field in YAML.
+    [DataField]
     public int ChargesRemaining;
 }

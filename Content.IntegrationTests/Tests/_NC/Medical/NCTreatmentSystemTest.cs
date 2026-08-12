@@ -187,9 +187,9 @@ public sealed class NCTreatmentSystemTest : GameTest
         var itemIds = new EntProtoId[]
         {
             "NCPressureDressing",
-            "NCFieldBandage",
+            "Gauze",
             "NCHemostaticGauze",
-            "NCFieldTourniquet",
+            "Tourniquet",
         };
 
         foreach (var itemId in itemIds)
@@ -203,7 +203,7 @@ public sealed class NCTreatmentSystemTest : GameTest
             actionId,
             TimeSpan.FromMinutes(1),
             HumanMob,
-            new EntProtoId("NCFieldBandage"),
+            new EntProtoId("Gauze"),
             new ProtoId<NCTreatmentCapabilityPrototype>("NCFieldBandageCapability"));
         var result = _treatment.BandageWound(body, woundId, context);
         var state = SComp<NCTreatmentStateComponent>(body);
@@ -233,7 +233,7 @@ public sealed class NCTreatmentSystemTest : GameTest
             Assert.That(state.ProcessedActions.Count(id => id == actionId), Is.EqualTo(1));
             Assert.That(state.AuditHistory, Has.Count.EqualTo(auditCountAfterFirstResolution));
             Assert.That(audit.ActorPrototype, Is.EqualTo((EntProtoId?) HumanMob));
-            Assert.That(audit.ItemPrototype, Is.EqualTo((EntProtoId?) new EntProtoId("NCFieldBandage")));
+            Assert.That(audit.ItemPrototype, Is.EqualTo((EntProtoId?) new EntProtoId("Gauze")));
             Assert.That(audit.Capability?.Id, Is.EqualTo("NCFieldBandageCapability"));
             Assert.That(SComp<NCBleedingComponent>(body).Sources
                 .Single(source => source.WoundId == woundId && source.Channel != NCBleedingChannel.Internal)

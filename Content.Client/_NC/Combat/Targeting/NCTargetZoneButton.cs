@@ -22,6 +22,7 @@ public sealed class NCTargetZoneButton : TextureButton
     private readonly Texture _hoverTexture;
     private readonly UIBox2? _selectedRegion;
     private readonly UIBox2? _hoverRegion;
+    private readonly Vector2 _displaySize;
     private readonly float _displayScale;
 
     public NCTargetZoneButton(
@@ -30,6 +31,8 @@ public sealed class NCTargetZoneButton : TextureButton
         Texture hoverTexture,
         NCTextureRegion? selectedRegion,
         NCTextureRegion? hoverRegion,
+        Vector2? displaySize,
+        Vector2 hitboxPadding,
         float displayScale)
     {
         Zone = zone;
@@ -41,7 +44,8 @@ public sealed class NCTargetZoneButton : TextureButton
 
         var selectedSize = _selectedRegion?.Size ?? selectedTexture.Size;
         var hoverSize = _hoverRegion?.Size ?? hoverTexture.Size;
-        SetSize = Vector2.Max(selectedSize, hoverSize) * displayScale;
+        _displaySize = displaySize ?? Vector2.Max(selectedSize, hoverSize);
+        SetSize = (_displaySize + hitboxPadding * 2f) * displayScale;
     }
 
     protected override void Draw(DrawingHandleScreen handle)
@@ -58,8 +62,7 @@ public sealed class NCTargetZoneButton : TextureButton
 
     private void DrawCentered(DrawingHandleScreen handle, Texture texture, UIBox2? source)
     {
-        var sourceSize = source?.Size ?? texture.Size;
-        var drawSize = sourceSize * _displayScale * UIScale;
+        var drawSize = _displaySize * _displayScale * UIScale;
         var drawPosition = (PixelSize - drawSize) / 2f;
         handle.DrawTextureRectRegion(
             texture,

@@ -27,7 +27,7 @@ namespace Content.IntegrationTests.Tests._NC.Medical;
 public sealed class NCSurgerySystemTest : GameTest
 {
     private static readonly EntProtoId HumanMob = "MobHuman";
-    private static readonly EntProtoId OperatingTable = "NCOperatingTable";
+    private static readonly EntProtoId OperatingTable = "OperatingTable";
     private static readonly ProtoId<NCSurgeryProcedurePrototype> VascularRepair = "NCSurgeryVascularRepair";
     private static readonly ProtoId<NCSurgeryProcedurePrototype> DeepWoundTreatment = "NCSurgeryDeepWoundTreatment";
 
@@ -105,7 +105,12 @@ public sealed class NCSurgerySystemTest : GameTest
                     $"{procedure.ID}: {step.ID} requires {step.RequiredAccessDepth} after {string.Join(", ", possibleDepths)}.");
 
                 foreach (var tool in step.Tools)
-                    Assert.That(_prototypes.HasIndex(tool.Capability), Is.True, $"{step.ID}: {tool.Capability}");
+                {
+                    Assert.That(_prototypes.TryIndex(tool.Capability, out var capability), Is.True,
+                        $"{step.ID}: {tool.Capability}");
+                    Assert.That(_prototypes.HasIndex(capability!.RepresentativeTool), Is.True,
+                        $"{step.ID}: {tool.Capability} has no concrete UI tool example.");
+                }
                 ValidateFacilityCapabilities(step.ID, step.Facility);
 
                 var transitions = step.SuccessEffects
@@ -144,6 +149,10 @@ public sealed class NCSurgerySystemTest : GameTest
 
         var requestFields = typeof(NCSurgeryConsoleSelectMessage).GetFields(
             BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+        var zoneRequestFields = typeof(NCSurgeryConsoleSelectZoneMessage).GetFields(
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+        var executeRequestFields = typeof(NCSurgeryConsoleExecuteStepMessage).GetFields(
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
         Assert.Multiple(() =>
         {
             Assert.That(requestFields.Select(field => field.Name),
@@ -153,6 +162,9 @@ public sealed class NCSurgerySystemTest : GameTest
                                                    field.FieldType == typeof(Guid)),
                 Is.False,
                 "An untrusted BUI request must not carry a patient, live target, graft, or wound identity.");
+            Assert.That(zoneRequestFields.Select(field => field.Name), Is.EquivalentTo(new[] { "Zone" }));
+            Assert.That(executeRequestFields, Is.Empty,
+                "The step button advances only the server-owned current step; the client cannot choose an index.");
         });
     }
 
@@ -197,11 +209,11 @@ public sealed class NCSurgerySystemTest : GameTest
         var patient = SSpawn(HumanMob);
         var surgeon = SSpawn(HumanMob);
         var table = SSpawn(OperatingTable);
-        var scalpel = SSpawn("NCScalpel");
-        var hemostat = SSpawn("NCHemostat");
-        var retractor = SSpawn("NCRetractor");
-        var cautery = SSpawn("NCCautery");
-        var suture = SSpawn("NCSurgicalSuture");
+        var scalpel = SSpawn("Scalpel");
+        var hemostat = SSpawn("Hemostat");
+        var retractor = SSpawn("Retractor");
+        var cautery = SSpawn("Cautery");
+        var suture = SSpawn("MedicatedSuture");
 
         Assert.Multiple(() =>
         {
@@ -301,8 +313,8 @@ public sealed class NCSurgerySystemTest : GameTest
         var secondPatient = SSpawn(HumanMob);
         var surgeon = SSpawn(HumanMob);
         var table = SSpawn(OperatingTable);
-        var cautery = SSpawn("NCCautery");
-        var scalpel = SSpawn("NCScalpel");
+        var cautery = SSpawn("Cautery");
+        var scalpel = SSpawn("Scalpel");
 
         Assert.That(_anatomy.TryGetOrgan(firstPatient, "Thorax", out var firstRegion), Is.True);
         Assert.That(_anatomy.TryGetOrgan(secondPatient, "Thorax", out var secondRegion), Is.True);

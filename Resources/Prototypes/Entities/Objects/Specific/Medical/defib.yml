@@ -40,6 +40,10 @@
     - type: GuideHelp
       guides:
       - MedicalDoctor
+    # NC start - Reuse every vanilla defibrillator through its existing power-cell and DoAfter workflow.
+    - type: NCEmergencyCareItem
+      capability: NCFieldDefibrillatorCapability
+    # NC end
 
 - type: entity
   id: Defibrillator

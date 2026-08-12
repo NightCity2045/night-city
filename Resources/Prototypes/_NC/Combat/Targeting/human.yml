@@ -199,34 +199,50 @@
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/groin.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/groin_hover.png
   - zone: NCZoneArmRight
-    position: 6,5
+    position: 7,10
+    displaySize: 5,6
+    hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/rightarm.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/rightarm_hover.png
   - zone: NCZoneHandRight
-    position: 6,13
+    position: 7,16
+    displaySize: 4,4
+    hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/righthand.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/righthand_hover.png
   - zone: NCZoneArmLeft
-    position: 20,5
+    position: 19,10
+    displaySize: 5,6
+    hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/leftarm.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/leftarm_hover.png
   - zone: NCZoneHandLeft
-    position: 20,13
+    position: 20,16
+    displaySize: 4,4
+    hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/lefthand.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/lefthand_hover.png
   - zone: NCZoneLegRight
-    position: 10,21
+    position: 11,20
+    displaySize: 4,6
+    hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/rightleg.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/rightleg_hover.png
   - zone: NCZoneFootRight
-    position: 8,29
+    position: 9,26
+    displaySize: 6,3
+    hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/rightfoot.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/rightfoot_hover.png
   - zone: NCZoneLegLeft
-    position: 16,21
+    position: 16,20
+    displaySize: 4,6
+    hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/leftleg.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/leftleg_hover.png
   - zone: NCZoneFootLeft
-    position: 16,29
+    position: 16,26
+    displaySize: 6,3
+    hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/leftfoot.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/leftfoot_hover.png

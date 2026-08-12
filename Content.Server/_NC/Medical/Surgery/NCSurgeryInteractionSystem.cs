@@ -16,6 +16,7 @@ using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
 using Content.Shared.Popups;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 
 namespace Content.Server._NC.Medical.Surgery;
 
@@ -26,6 +27,7 @@ namespace Content.Server._NC.Medical.Surgery;
 public sealed partial class NCSurgeryInteractionSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
@@ -38,55 +40,56 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<NCSurgeryToolComponent, AfterInteractEvent>(OnAfterInteract);
         SubscribeLocalEvent<NCSurgeryToolComponent, NCSurgeryStepDoAfterEvent>(OnDoAfter);
     }
 
-    private void OnAfterInteract(Entity<NCSurgeryToolComponent> tool, ref AfterInteractEvent args)
+    /// <summary>
+    /// Starts the current server-bound step from the operating-console UI. The client supplies no tool or
+    /// patient entity: the active hand and the physically buckled patient are resolved before every attempt.
+    /// </summary>
+    public NCSurgeryConsoleNotice TryStartCurrentStep(
+        EntityUid user,
+        EntityUid patient,
+        EntityUid facility,
+        out string stepName)
     {
-        if (args.Handled || args.Target is not { } patient || !HasComp<NCMedicalBodyComponent>(patient))
-            return;
-
-        args.Handled = true;
-        if (!ValidateHeldAndRange(tool, args.User, patient))
+        stepName = string.Empty;
+        if (!HasComp<NCMedicalBodyComponent>(patient) ||
+            !_hands.TryGetActiveItem(user, out var held) || held is not { } toolUid ||
+            !TryComp<NCSurgeryToolComponent>(toolUid, out var toolComponent))
         {
-            PopupInvalid(patient, args.User);
-            return;
+            return NCSurgeryConsoleNotice.HoldRequiredTool;
         }
+
+        var tool = new Entity<NCSurgeryToolComponent>(toolUid, toolComponent);
+        if (!ValidateHeldAndRange(tool, user, patient))
+            return NCSurgeryConsoleNotice.StepUnavailable;
 
         SynchronizePreparation(patient);
-        SynchronizeAuthorization(args.User, tool.Owner);
-
-        if (!TryGetOrStartSession(tool, args.User, patient, out var region, out var session, out var failure))
+        SynchronizeAuthorization(user, tool.Owner);
+        if (!TryComp<NCSurgeryPatientStateComponent>(patient, out var preparation) ||
+            preparation.CurrentFacility != facility ||
+            !TryComp<NCSurgeryGameplaySelectionComponent>(user, out var selection) ||
+            selection.Patient != patient || selection.Facility != facility)
         {
-            _popup.PopupEntity(
-                Loc.GetString("nc-medical-surgery-start-failed", ("reason", failure)),
-                patient,
-                args.User);
-            return;
+            return NCSurgeryConsoleNotice.SelectionRejected;
         }
+
+        if (selection.StepInProgress)
+            return NCSurgeryConsoleNotice.StepUnavailable;
+
+        if (!TryGetOrStartSession(tool, user, patient, out var region, out var session, out _))
+            return NCSurgeryConsoleNotice.StepUnavailable;
 
         if (session.State == NCSurgerySessionState.Paused &&
-            !_surgery.TryResume(region, args.User, out failure))
-        {
-            _popup.PopupEntity(
-                Loc.GetString("nc-medical-surgery-start-failed", ("reason", failure)),
-                patient,
-                args.User);
-            return;
-        }
+            !_surgery.TryResume(region, user, out _))
+            return NCSurgeryConsoleNotice.StepUnavailable;
 
-        if (!ValidateSessionRange(session, args.User))
-        {
-            PopupInvalid(patient, args.User);
-            return;
-        }
+        if (!ValidateSessionRange(session, user))
+            return NCSurgeryConsoleNotice.StepUnavailable;
 
-        if (!TryGetCurrentStep(session, out var step) || !CanToolPerform(tool.Comp, step))
-        {
-            _popup.PopupEntity(Loc.GetString("nc-medical-surgery-wrong-tool"), patient, args.User);
-            return;
-        }
+        if (!TryGetCurrentStep(session, out var step) || !CanToolPerform(tool.Owner, tool.Comp, step))
+            return NCSurgeryConsoleNotice.ToolUnsuitable;
 
         var eventArgs = new NCSurgeryStepDoAfterEvent(
             session.ResolutionId,
@@ -95,7 +98,7 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
             session.CurrentStepIndex);
         var doAfter = new DoAfterArgs(
             EntityManager,
-            args.User,
+            user,
             step.Duration,
             eventArgs,
             tool.Owner,
@@ -108,21 +111,40 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
             DistanceThreshold = SharedInteractionSystem.InteractionRange,
         };
 
-        if (_doAfter.TryStartDoAfter(doAfter))
-        {
-            _popup.PopupEntity(
-                Loc.GetString("nc-medical-surgery-step-started", ("step", step.Name)),
-                patient,
-                args.User);
-        }
+        if (!_doAfter.TryStartDoAfter(doAfter))
+            return NCSurgeryConsoleNotice.StepUnavailable;
+
+        selection.StepInProgress = true;
+        selection.ExecutingStepIndex = session.CurrentStepIndex;
+        selection.StepStartedAt = _timing.CurTime;
+        selection.StepEndsAt = _timing.CurTime + step.Duration;
+        stepName = step.Name;
+        var changed = new NCSurgeryStepExecutionChangedEvent(user, true, false);
+        RaiseLocalEvent(patient, ref changed);
+        return NCSurgeryConsoleNotice.StepStarted;
     }
 
     private void OnDoAfter(Entity<NCSurgeryToolComponent> tool, ref NCSurgeryStepDoAfterEvent args)
     {
-        if (args.Handled || args.Cancelled || args.Target is not { } patient || args.Used != tool.Owner)
+        if (args.Handled || args.Target is not { } patient || args.Used != tool.Owner)
             return;
 
         args.Handled = true;
+        if (TryComp<NCSurgeryGameplaySelectionComponent>(args.User, out var selection))
+        {
+            selection.StepInProgress = false;
+            selection.ExecutingStepIndex = -1;
+            selection.StepStartedAt = TimeSpan.Zero;
+            selection.StepEndsAt = TimeSpan.Zero;
+        }
+
+        if (args.Cancelled)
+        {
+            var cancelled = new NCSurgeryStepExecutionChangedEvent(args.User, false, true);
+            RaiseLocalEvent(patient, ref cancelled);
+            return;
+        }
+
         var region = GetEntity(args.TargetRegion);
         if (!ValidateHeldAndRange(tool, args.User, patient) ||
             !TryComp<NCSurgerySessionComponent>(region, out var session) ||
@@ -133,9 +155,11 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
             session.State != NCSurgerySessionState.Running ||
             !ValidateSessionRange(session, args.User) ||
             !TryGetCurrentStep(session, out var step) ||
-            !CanToolPerform(tool.Comp, step))
+            !CanToolPerform(tool.Owner, tool.Comp, step))
         {
             PopupInvalid(patient, args.User);
+            var invalidated = new NCSurgeryStepExecutionChangedEvent(args.User, false, true);
+            RaiseLocalEvent(patient, ref invalidated);
             return;
         }
 
@@ -148,6 +172,11 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
             ? "nc-medical-surgery-step-complete"
             : "nc-medical-surgery-step-failed";
         _popup.PopupEntity(Loc.GetString(key, ("reason", result.Failure)), patient, args.User);
+        var procedureCompleted = result.Status == NCSurgeryStepResolutionStatus.Completed;
+        if (procedureCompleted)
+            RemComp<NCSurgeryGameplaySelectionComponent>(args.User);
+        var completed = new NCSurgeryStepExecutionChangedEvent(args.User, false, false, procedureCompleted);
+        RaiseLocalEvent(patient, ref completed);
     }
 
     private bool TryGetOrStartSession(
@@ -200,7 +229,7 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
             if (!_prototypes.TryIndex(procedureId, out NCSurgeryProcedurePrototype? procedure) ||
                 procedure.Steps.Count == 0 ||
                 !_prototypes.TryIndex(procedure.Steps[0], out NCSurgeryStepPrototype? firstStep) ||
-                !CanToolPerform(tool.Comp, firstStep) ||
+                !CanToolPerform(tool.Owner, tool.Comp, firstStep) ||
                 !_surgery.TryPrepareProcedureTarget(
                     patient,
                     region,
@@ -285,24 +314,9 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
                _prototypes.TryIndex(procedure.Steps[session.CurrentStepIndex], out step!);
     }
 
-    private static bool CanToolPerform(NCSurgeryToolComponent tool, NCSurgeryStepPrototype step)
+    public bool CanToolPerform(EntityUid toolUid, NCSurgeryToolComponent tool, NCSurgeryStepPrototype step)
     {
-        foreach (var requirement in step.Tools)
-        {
-            if (!tool.Capabilities.TryGetValue(requirement.Capability, out var quality) ||
-                quality < requirement.MinimumQuality ||
-                tool.Sterility < requirement.MinimumSterility ||
-                tool.Broken ||
-                requirement.ConsumedUses > 0 && tool.UsesRemaining >= 0 &&
-                tool.UsesRemaining < requirement.ConsumedUses)
-            {
-                continue;
-            }
-
-            return true;
-        }
-
-        return step.Tools.Count == 0;
+        return _surgery.CanToolPerform(toolUid, tool, step);
     }
 
     /// <summary>

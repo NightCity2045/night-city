@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-using System.Buffers.Binary;
-using System.Security.Cryptography;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._NC.ActionResolution;
@@ -28,13 +26,10 @@ public readonly record struct NCActionResolutionId(Guid Value)
     /// </summary>
     public ulong DeriveSeed(uint stream = 0)
     {
-        Span<byte> bytes = stackalloc byte[16];
-        Value.TryWriteBytes(bytes);
-
         const ulong offset = 14695981039346656037UL;
         const ulong prime = 1099511628211UL;
         var hash = offset;
-        foreach (var value in bytes)
+        foreach (var value in Value.ToByteArray())
         {
             hash ^= value;
             hash *= prime;
@@ -51,14 +46,52 @@ public readonly record struct NCActionResolutionId(Guid Value)
     /// </summary>
     public Guid DeriveGuid(uint primaryStream = 0, uint secondaryStream = 0)
     {
-        Span<byte> input = stackalloc byte[24];
-        Value.TryWriteBytes(input[..16]);
-        BinaryPrimitives.WriteUInt32LittleEndian(input[16..20], primaryStream);
-        BinaryPrimitives.WriteUInt32LittleEndian(input[20..24], secondaryStream);
+        // Content.Shared runs inside the Robust sandbox and must not depend on cryptographic APIs.
+        // Two independently salted FNV streams provide stable 128-bit correlation identity; this is not
+        // used for security, secrecy or gameplay randomness.
+        // Keep this implementation on ordinary arrays and scalar values: Content.Shared is also passed
+        // through ILVerify, which cannot verify every stackalloc/Span construction emitted by the compiler.
+        var source = Value.ToByteArray();
+        var low = DeriveFnv(source, primaryStream, secondaryStream, 14695981039346656037UL);
+        var high = DeriveFnv(source, primaryStream, secondaryStream, 7809847782465536322UL);
 
-        Span<byte> digest = stackalloc byte[32];
-        SHA256.HashData(input, digest);
-        return new Guid(digest[..16]);
+        return new Guid(
+            unchecked((int) low),
+            unchecked((short) (low >> 32)),
+            unchecked((short) (low >> 48)),
+            (byte) high,
+            (byte) (high >> 8),
+            (byte) (high >> 16),
+            (byte) (high >> 24),
+            (byte) (high >> 32),
+            (byte) (high >> 40),
+            (byte) (high >> 48),
+            (byte) (high >> 56));
+    }
+
+    private static ulong DeriveFnv(byte[] bytes, uint primaryStream, uint secondaryStream, ulong offset)
+    {
+        const ulong prime = 1099511628211UL;
+        var hash = offset;
+        foreach (var value in bytes)
+        {
+            hash ^= value;
+            hash *= prime;
+        }
+
+        for (var shift = 0; shift < 32; shift += 8)
+        {
+            hash ^= (byte) (primaryStream >> shift);
+            hash *= prime;
+        }
+
+        for (var shift = 0; shift < 32; shift += 8)
+        {
+            hash ^= (byte) (secondaryStream >> shift);
+            hash *= prime;
+        }
+
+        return hash;
     }
 
     public override string ToString()

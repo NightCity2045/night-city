@@ -164,18 +164,3 @@
   - type: NCEmergencyCareItem
     capability: NCBloodONegativeCapability
     chargesRemaining: 1
-
-- type: entity
-  id: NCFieldDefibrillator
-  parent: BaseItem
-  name: field defibrillator
-  description: A rugged rhythm-conversion unit. It cannot replace blood or destroyed vital organs.
-  components:
-  - type: Sprite
-    sprite: Objects/Specific/Medical/defib.rsi
-    state: icon
-  - type: Item
-    size: Large
-  - type: NCEmergencyCareItem
-    capability: NCFieldDefibrillatorCapability
-    chargesRemaining: 3

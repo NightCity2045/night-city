@@ -282,6 +282,39 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
         EntityUid item,
         in NCEmergencyCareActionContext context)
     {
+        return Defibrillate(patient, item, context, true);
+    }
+
+    /// <summary>
+    /// Resolves a discharge whose energy was already consumed by the vanilla power-cell defibrillator.
+    /// This keeps one physical device, one battery and one authoritative physiology mutation.
+    /// </summary>
+    public NCEmergencyCareResult DefibrillateWithExternalPower(
+        EntityUid patient,
+        EntityUid item,
+        TimeSpan? timestamp = null,
+        EntityUid? actor = null)
+    {
+        return Defibrillate(patient, item, CreateActionContext(timestamp, actor, item), false);
+    }
+
+    /// <summary>
+    /// Resolves an externally powered discharge with an existing authoritative action identity.
+    /// </summary>
+    public NCEmergencyCareResult DefibrillateWithExternalPower(
+        EntityUid patient,
+        EntityUid item,
+        in NCEmergencyCareActionContext context)
+    {
+        return Defibrillate(patient, item, context, false);
+    }
+
+    private NCEmergencyCareResult Defibrillate(
+        EntityUid patient,
+        EntityUid item,
+        in NCEmergencyCareActionContext context,
+        bool consumeComponentCharge)
+    {
         if (!TryPrepare(patient, context, out var state, out var profile, out var early))
             return early;
         if (TryGetDuplicate(state, context, out var duplicate))
@@ -298,7 +331,7 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
         }
 
         enriched = enriched with { Capability = itemState.Capability };
-        if (!HasCharges(itemState, capability))
+        if (consumeComponentCharge && !HasCharges(itemState, capability))
         {
             return CompleteAction(patient, state, profile, enriched, NCEmergencyCareKind.Defibrillation,
                 NewResult(enriched, NCEmergencyCareOutcome.DeviceDepleted));
@@ -306,7 +339,9 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
 
         // A physical discharge consumes a charge even when the measured rhythm is not shockable.
         var previousRhythm = (float) circulation.HeartRhythm;
-        var consumed = ConsumeCharges(itemState, capability);
+        var consumed = consumeComponentCharge
+            ? ConsumeCharges(itemState, capability)
+            : capability.ChargeCost;
         if (physiology.Irreversible)
         {
             return CompleteAction(patient, state, profile, enriched, NCEmergencyCareKind.Defibrillation,

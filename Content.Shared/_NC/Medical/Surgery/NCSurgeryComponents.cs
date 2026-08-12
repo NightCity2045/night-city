@@ -5,6 +5,7 @@
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared.Body;
+using Content.Shared.FixedPoint;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.Medical.Surgery;
@@ -114,6 +115,16 @@ public sealed partial class NCSurgeryToolComponent : Component
     /// </summary>
     [DataField]
     public int UsesRemaining = -1;
+
+    /// <summary>
+    /// Optional real solution container consumed by surgical steps. This is used for vanilla syringes and
+    /// avoids an invisible counter that can disagree with the reagent volume shown by the base game.
+    /// </summary>
+    [DataField]
+    public string? SolutionResource;
+
+    [DataField]
+    public FixedPoint2 SolutionUnitsPerUse;
 
     /// <summary>
     /// Ordered, explicit procedures this tool may start when no UI selection exists. This avoids scanning

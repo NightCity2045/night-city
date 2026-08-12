@@ -9,6 +9,7 @@ using Content.Shared._NC.Medical.Emergency;
 using Content.Shared.DoAfter;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
+using Content.Shared.Medical;
 using Content.Shared.Popups;
 using Content.Shared.Standing;
 using Robust.Shared.Prototypes;
@@ -45,6 +46,11 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
 
     private void OnItemAfterInteract(Entity<NCEmergencyCareItemComponent> item, ref AfterInteractEvent args)
     {
+        // Vanilla defibrillators own their toggle, battery, DoAfter and effects; their server hook calls the
+        // same NC resolver after the physical discharge succeeds.
+        if (HasComp<DefibrillatorComponent>(item.Owner))
+            return;
+
         if (args.Handled || args.Target is not { } patient || !HasComp<NCMedicalBodyComponent>(patient))
             return;
 

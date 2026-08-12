@@ -3,6 +3,7 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 nc-medical-diagnostics-title = Медицинская диагностика
+nc-medical-diagnostics-scanner-verb = Просмотреть травма-скан
 nc-medical-diagnostics-tab-overview = Обзор
 nc-medical-diagnostics-tab-regions = Области
 nc-medical-diagnostics-tab-wounds = Раны

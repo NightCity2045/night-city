@@ -13,6 +13,8 @@ using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Surgery;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
+using Content.Shared.Chemistry.EntitySystems;
+using Content.Shared.Stacks;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
@@ -29,6 +31,8 @@ public sealed partial class NCSurgerySystem : EntitySystem
     [Dependency] private NCMedicalBodySystem _medicalBodies = default!;
     [Dependency] private NCOrganDetachmentSystem _detachment = default!;
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
+    [Dependency] private SharedStackSystem _stacks = default!;
+    [Dependency] private SharedSolutionContainerSystem _solutions = default!;
 
     public override void Initialize()
     {
@@ -494,8 +498,8 @@ public sealed partial class NCSurgerySystem : EntitySystem
         }
 
         // Physical consumables are charged only after every requested effect was actually applied.
-        if (tool != null && toolRequirement != null && toolRequirement.ConsumedUses > 0 && tool.UsesRemaining >= 0)
-            tool.UsesRemaining -= toolRequirement.ConsumedUses;
+        if (request.Tool is { } toolUid && tool != null && toolRequirement != null)
+            ConsumeToolResource(toolUid, tool, toolRequirement.ConsumedUses);
         MarkMedicalDirty(session.Patient);
 
         var resolvedIndex = session.CurrentStepIndex;
@@ -776,8 +780,7 @@ public sealed partial class NCSurgerySystem : EntitySystem
                 continue;
 
             sawSterility = true;
-            if (candidate.ConsumedUses > 0 && tool.UsesRemaining >= 0 &&
-                tool.UsesRemaining < candidate.ConsumedUses)
+            if (!HasToolResource(uid, tool, candidate.ConsumedUses))
             {
                 continue;
             }
@@ -794,6 +797,67 @@ public sealed partial class NCSurgerySystem : EntitySystem
         if (!sawSterility)
             return NCSurgeryStepFailure.ToolSterilityInsufficient;
         return NCSurgeryStepFailure.ToolExhausted;
+    }
+
+    public bool CanToolPerform(EntityUid uid, NCSurgeryToolComponent tool, NCSurgeryStepPrototype step)
+    {
+        return step.Tools.Count == 0 || step.Tools.Any(requirement => CanToolSatisfy(uid, tool, requirement));
+    }
+
+    public bool CanToolSatisfy(
+        EntityUid uid,
+        NCSurgeryToolComponent tool,
+        NCSurgeryToolRequirement requirement)
+    {
+        return !tool.Broken &&
+               tool.Capabilities.TryGetValue(requirement.Capability, out var quality) &&
+               float.IsFinite(quality) &&
+               quality >= requirement.MinimumQuality &&
+               float.IsFinite(tool.Sterility) &&
+               tool.Sterility >= requirement.MinimumSterility &&
+               HasToolResource(uid, tool, requirement.ConsumedUses);
+    }
+
+    private bool HasToolResource(EntityUid uid, NCSurgeryToolComponent tool, int amount)
+    {
+        if (amount <= 0)
+            return true;
+
+        if (!string.IsNullOrWhiteSpace(tool.SolutionResource) && tool.SolutionUnitsPerUse > 0)
+        {
+            return _solutions.TryGetSolution(uid, tool.SolutionResource, out _, out var solution) &&
+                   solution.Volume >= tool.SolutionUnitsPerUse * amount;
+        }
+
+        if (TryComp<StackComponent>(uid, out var stack))
+            return stack.Unlimited || stack.Count >= amount;
+
+        return tool.UsesRemaining < 0 || tool.UsesRemaining >= amount;
+    }
+
+    private void ConsumeToolResource(EntityUid uid, NCSurgeryToolComponent tool, int amount)
+    {
+        if (amount <= 0)
+            return;
+
+        if (!string.IsNullOrWhiteSpace(tool.SolutionResource) &&
+            tool.SolutionUnitsPerUse > 0 &&
+            _solutions.TryGetSolution(uid, tool.SolutionResource, out var solutionEntity, out _))
+        {
+            _solutions.SplitSolution(solutionEntity.Value, tool.SolutionUnitsPerUse * amount);
+            return;
+        }
+
+        // Existing stackable medical supplies remain the resource authority. The legacy counter is retained
+        // only for custom tools that explicitly have no vanilla stack, solution or battery resource.
+        if (TryComp<StackComponent>(uid, out var stack))
+        {
+            _stacks.TryUse((uid, stack), amount);
+            return;
+        }
+
+        if (tool.UsesRemaining >= 0)
+            tool.UsesRemaining -= amount;
     }
 
     private NCSurgeryConditionSnapshot BuildConditionSnapshot(

@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
 using Content.Shared._NC.Combat.Targeting;
@@ -123,6 +124,40 @@ public sealed class NCAnatomyTest : GameTest
                     $"Zone {presentation.Zone} is missing selected overlay {presentation.SelectedTexture}.");
                 Assert.That(_resources.ContentFileExists(presentation.HoverTexture), Is.True,
                     $"Zone {presentation.Zone} is missing hover overlay {presentation.HoverTexture}.");
+                Assert.That(float.IsFinite(presentation.Position.X) && float.IsFinite(presentation.Position.Y),
+                    Is.True, $"Zone {presentation.Zone} has a non-finite overlay position.");
+                Assert.That(presentation.HitboxPadding.X, Is.GreaterThanOrEqualTo(0f), presentation.Zone.Id);
+                Assert.That(presentation.HitboxPadding.Y, Is.GreaterThanOrEqualTo(0f), presentation.Zone.Id);
+                if (presentation.DisplaySize is { } displaySize)
+                {
+                    Assert.That(displaySize.X, Is.GreaterThan(0f), presentation.Zone.Id);
+                    Assert.That(displaySize.Y, Is.GreaterThan(0f), presentation.Zone.Id);
+                    Assert.That(presentation.Position.X + displaySize.X, Is.LessThanOrEqualTo(doll.CanvasSize.X),
+                        presentation.Zone.Id);
+                    Assert.That(presentation.Position.Y + displaySize.Y, Is.LessThanOrEqualTo(doll.CanvasSize.Y),
+                        presentation.Zone.Id);
+                }
+            });
+        }
+
+        var expectedLimbGeometry = new Dictionary<string, (Vector2 Position, Vector2 Size)>
+        {
+            ["NCZoneArmRight"] = (new Vector2(7, 10), new Vector2(5, 6)),
+            ["NCZoneHandRight"] = (new Vector2(7, 16), new Vector2(4, 4)),
+            ["NCZoneArmLeft"] = (new Vector2(19, 10), new Vector2(5, 6)),
+            ["NCZoneHandLeft"] = (new Vector2(20, 16), new Vector2(4, 4)),
+            ["NCZoneLegRight"] = (new Vector2(11, 20), new Vector2(4, 6)),
+            ["NCZoneFootRight"] = (new Vector2(9, 26), new Vector2(6, 3)),
+            ["NCZoneLegLeft"] = (new Vector2(16, 20), new Vector2(4, 6)),
+            ["NCZoneFootLeft"] = (new Vector2(16, 26), new Vector2(6, 3)),
+        };
+        foreach (var (zone, expected) in expectedLimbGeometry)
+        {
+            var presentation = doll.Zones.Single(entry => entry.Zone.Id == zone);
+            Assert.Multiple(() =>
+            {
+                Assert.That(presentation.Position, Is.EqualTo(expected.Position), zone);
+                Assert.That(presentation.DisplaySize, Is.EqualTo(expected.Size), zone);
             });
         }
 

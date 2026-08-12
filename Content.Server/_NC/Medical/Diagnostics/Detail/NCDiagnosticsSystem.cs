@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Linq;
+using Content.Server.Medical.Components;
 using Content.Server.Power.EntitySystems;
 using Content.Server.Players.RateLimiting;
 using Content.Server._NC.Medical.Cyberware;
@@ -28,6 +29,7 @@ using Content.Shared.Interaction;
 using Content.Shared.Power.Components;
 using Content.Shared.Power.EntitySystems;
 using Content.Shared.Players.RateLimiting;
+using Content.Shared.Verbs;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
@@ -68,6 +70,8 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
 
         SubscribeNetworkEvent<NCDiagnosticSnapshotRequest>(OnSnapshotRequest);
         SubscribeLocalEvent<NCDiagnosticCapabilityComponent, AfterInteractEvent>(OnAfterInteract);
+        SubscribeLocalEvent<NCDiagnosticCapabilityComponent, NCHealthAnalyzerScanCompletedEvent>(OnAnalyzerScanCompleted);
+        SubscribeLocalEvent<NCDiagnosticCapabilityComponent, GetVerbsEvent<AlternativeVerb>>(OnGetScannerVerbs);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
         _rateLimit.Register(
             RequestRateLimitKey,
@@ -998,6 +1002,11 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
 
     private void OnAfterInteract(Entity<NCDiagnosticCapabilityComponent> entity, ref AfterInteractEvent args)
     {
+        // Vanilla analyzers own their scan delay, power use, sounds and primary UI. The completion event below
+        // supplies the authoritative NC detail only after that existing workflow succeeds.
+        if (HasComp<HealthAnalyzerComponent>(entity.Owner))
+            return;
+
         if (args.Handled || args.Target is not { } target || !args.CanReach ||
             !_prototypes.TryIndex(entity.Comp.Capability, out NCDiagnosticCapabilityPrototype? capability) ||
             !capability.RequiresHeld ||
@@ -1017,6 +1026,71 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             out var failure);
         SendResponse(actor.PlayerSession, 0, resolutionId, accepted, failure, accepted ? snapshot : null);
         args.Handled = accepted;
+    }
+
+    /// <summary>
+    /// Reuses the completed vanilla health-analyzer scan instead of starting a second instant NC interaction.
+    /// </summary>
+    private void OnAnalyzerScanCompleted(
+        Entity<NCDiagnosticCapabilityComponent> entity,
+        ref NCHealthAnalyzerScanCompletedEvent args)
+    {
+        if (!_prototypes.TryIndex(entity.Comp.Capability, out NCDiagnosticCapabilityPrototype? capability) ||
+            !TryComp<ActorComponent>(args.User, out var actor))
+        {
+            return;
+        }
+
+        var resolutionId = NCActionResolutionId.New();
+        var accepted = TryBuildForActor(
+            resolutionId,
+            args.User,
+            args.Target,
+            entity.Owner,
+            capability.Tier,
+            out var snapshot,
+            out var failure);
+        SendResponse(actor.PlayerSession, 0, resolutionId, accepted, failure, accepted ? snapshot : null);
+    }
+
+    /// <summary>
+    /// Adds diagnostics to the existing scanner's verb set. The patient is derived from its authoritative
+    /// container; neither the client nor a second NC scanner entity can substitute another target.
+    /// </summary>
+    private void OnGetScannerVerbs(
+        Entity<NCDiagnosticCapabilityComponent> entity,
+        ref GetVerbsEvent<AlternativeVerb> args)
+    {
+        if (!args.CanAccess ||
+            !args.CanInteract ||
+            !TryComp<MedicalScannerComponent>(entity.Owner, out var scanner) ||
+            scanner.BodyContainer.ContainedEntity is not { } patient ||
+            !_prototypes.TryIndex(entity.Comp.Capability, out NCDiagnosticCapabilityPrototype? capability) ||
+            !TryComp<ActorComponent>(args.User, out var actor))
+        {
+            return;
+        }
+
+        var user = args.User;
+        var session = actor.PlayerSession;
+        args.Verbs.Add(new AlternativeVerb
+        {
+            Text = Loc.GetString("nc-medical-diagnostics-scanner-verb"),
+            Priority = 2,
+            Act = () =>
+            {
+                var resolutionId = NCActionResolutionId.New();
+                var accepted = TryBuildForActor(
+                    resolutionId,
+                    user,
+                    patient,
+                    entity.Owner,
+                    capability.Tier,
+                    out var snapshot,
+                    out var failure);
+                SendResponse(session, 0, resolutionId, accepted, failure, accepted ? snapshot : null);
+            },
+        });
     }
 
     private void SendResponse(

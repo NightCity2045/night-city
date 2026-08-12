@@ -30,3 +30,7 @@
   - type: GuideHelp
     guides:
     - MedicalDoctor
+  # NC start - Reuse the vanilla analyzer as the authoritative handheld trauma diagnostic tool.
+  - type: NCDiagnosticCapability
+    capability: NCDiagnosticsHandheldApproximate
+  # NC end
