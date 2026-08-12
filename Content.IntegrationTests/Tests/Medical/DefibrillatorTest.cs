@@ -23,7 +23,10 @@ public sealed class DefibrillatorTest : InteractionTest
     protected override string PlayerPrototype => "MobHuman";
 
     private static readonly EntProtoId DefibrillatorProtoId = "Defibrillator";
-    private static readonly EntProtoId TargetProtoId = "MobHuman";
+    // NC start - This upstream test validates threshold-HP defibrillation on a legacy medical mob.
+    // Authoritative human arrest/rhythm/defibrillation is covered by NCEmergencyCareSystemTest.
+    private static readonly EntProtoId TargetProtoId = "MobDwarf";
+    // NC end
     private static readonly ProtoId<DamageTypePrototype> BluntDamageTypeId = "Blunt";
 
     /// <summary>

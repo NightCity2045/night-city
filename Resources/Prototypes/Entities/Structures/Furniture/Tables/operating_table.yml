@@ -2,7 +2,9 @@
   id: OperatingTable
   parent: Bed
   name: operating table
-  description: Special medical table for surgery. This one just seems to be a useless prop, though.
+  # NC start - this mapped table now provides the authoritative surgical facility contract.
+  description: A powered clinical table with restraint, monitoring and airway support for surgery.
+  # NC end
   components:
   - type: Sprite
     sprite: Structures/Furniture/Tables/optable.rsi
@@ -12,3 +14,36 @@
     sprite: Structures/Furniture/Tables/optable.rsi
     state: operating_table
   - type: AmbientMusicMarkerMedical
+  # NC start - existing mapped clinic tables are authoritative surgery facilities.
+  - type: NCSurgeryFacility
+    capabilities:
+    - NCSurgeryFacilityStableSurface
+    - NCSurgeryFacilitySterileField
+    - NCSurgeryFacilityMonitoring
+    - NCSurgeryFacilityVentilation
+    - NCSurgeryFacilityBoneFixation
+    quality: 1
+    sterility: 0.95
+    powered: true
+    stableSurface: true
+  - type: NCSurgeryEnvironment
+    sterility: 0.9
+    lighting: 1
+    motion: 0
+    contamination: 0.05
+  - type: NCSurgeryPreparationProvider
+    movement: 0
+    restrained: true
+    airwayMonitored: true
+  - type: NCSurgeryConsole
+    facilitySearchRange: 2.5
+  - type: NCSurgeryGraftSlot
+  - type: UserInterface
+    interfaces:
+      enum.NCSurgeryConsoleUiKey.Key:
+        type: NCSurgeryConsoleBoundUserInterface
+  - type: ActivatableUI
+    key: enum.NCSurgeryConsoleUiKey.Key
+    verbOnly: true
+    verbText: nc-medical-surgery-console-title
+  # NC end

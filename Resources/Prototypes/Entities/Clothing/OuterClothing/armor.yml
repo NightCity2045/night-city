@@ -29,6 +29,10 @@
   parent: [ BaseSecurityContraband, ClothingOuterArmorBase ]
   id: ClothingOuterArmorBasic
   components:
+  # NC start - authoritative human trauma uses zonal SP; legacy Armor remains for non-NC entities only.
+  - type: NCArmor
+    profile: NCArmorLightArmorjack
+  # NC end
   - type: Tag
     tags:
     - WhitelistChameleon
@@ -52,6 +56,10 @@
   name: bulletproof vest
   description: A Type III heavy bulletproof vest that excels in protecting the wearer against traditional projectile weaponry and explosives to a minor extent.
   components:
+  # NC start - the common armory vest is the real gameplay plate-carrier rollout.
+  - type: NCArmor
+    profile: NCArmorPlateCarrier
+  # NC end
   - type: Sprite
     sprite: Clothing/OuterClothing/Armor/bulletproof.rsi
   - type: Clothing

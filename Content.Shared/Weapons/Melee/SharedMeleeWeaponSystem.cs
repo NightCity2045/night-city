@@ -505,7 +505,9 @@ public abstract partial class SharedMeleeWeaponSystem : EntitySystem
 
         // For consistency with wide attacks stuff needs damageable.
         if (Deleted(target) ||
-            !HasComp<DamageableComponent>(target) ||
+            // NC start: authoritative medical bodies do not require compatibility HP to receive a physical hit.
+            !HasComp<DamageableComponent>(target) && !NCIsAuthoritativeMedicalTarget(target.Value) ||
+            // NC end
             !TryComp(target, out TransformComponent? targetXform) ||
             // Not in LOS.
             !InRange(user, target.Value, component.Range, session))
@@ -541,6 +543,10 @@ public abstract partial class SharedMeleeWeaponSystem : EntitySystem
         if (hitEvent.Handled)
             return;
 
+        // NC start: snapshot private targeting intent once, after the accepted physical attack event.
+        NCBeginAuthoritativeMedicalAttack(user, meleeUid, target.Value);
+        // NC end
+
         var targets = new List<EntityUid>(1)
         {
             target.Value
@@ -561,7 +567,16 @@ public abstract partial class SharedMeleeWeaponSystem : EntitySystem
 
         var modifiedDamage = DamageSpecifier.ApplyModifierSets(damage + hitEvent.BonusDamage + attackedEvent.BonusDamage, hitEvent.ModifiersList);
 
-        if (Damageable.TryChangeDamage(target.Value, modifiedDamage, out var damageResult, origin:user, ignoreResistances:resistanceBypass))
+        // NC start: an NC human uses zonal armor/trauma and never mutates legacy Damageable on either side.
+        if (NCTryApplyAuthoritativeMedicalImpact(
+                user,
+                meleeUid,
+                target.Value,
+                modifiedDamage,
+                null,
+                out var damageResult) ||
+            Damageable.TryChangeDamage(target.Value, modifiedDamage, out damageResult, origin:user, ignoreResistances:resistanceBypass))
+        // NC end
         {
             // If the target has stamina and is taking blunt damage, they should also take stamina damage based on their blunt to stamina factor
             if (damageResult.DamageDict.TryGetValue("Blunt", out var bluntDamage))
@@ -590,6 +605,10 @@ public abstract partial class SharedMeleeWeaponSystem : EntitySystem
         {
             DoDamageEffect(targets, user, targetXform);
         }
+
+        // NC start: discard the synchronous action snapshot before another swing can reuse it.
+        NCEndAuthoritativeMedicalAttack(user, meleeUid);
+        // NC end
     }
 
     protected abstract void DoDamageEffect(List<EntityUid> targets, EntityUid? user,  TransformComponent targetXform);
@@ -671,7 +690,9 @@ public abstract partial class SharedMeleeWeaponSystem : EntitySystem
         foreach (var entity in entities)
         {
             if (entity == user ||
-                !_damageQuery.HasComponent(entity))
+                // NC start: authoritative medical bodies may outlive the compatibility Damageable component.
+                !_damageQuery.HasComponent(entity) && !NCIsAuthoritativeMedicalTarget(entity))
+                // NC end
                 continue;
 
             targets.Add(entity);
@@ -685,6 +706,10 @@ public abstract partial class SharedMeleeWeaponSystem : EntitySystem
 
         if (hitEvent.Handled)
             return true;
+
+        // NC start: a wide swing gets one resolution ID, but no selected intended target.
+        NCBeginAuthoritativeMedicalAttack(user, meleeUid, null);
+        // NC end
 
         var weapon = GetEntity(ev.Weapon);
 
@@ -719,7 +744,19 @@ public abstract partial class SharedMeleeWeaponSystem : EntitySystem
             RaiseLocalEvent(entity, attackedEvent);
             var modifiedDamage = DamageSpecifier.ApplyModifierSets(damage + hitEvent.BonusDamage + attackedEvent.BonusDamage, hitEvent.ModifiersList);
 
-            var damageResult = Damageable.ChangeDamage(entity, modifiedDamage, origin: user, ignoreResistances: resistanceBypass);
+            // NC start: every validated contact gets one deterministic impact sequence in this swing.
+            DamageSpecifier damageResult;
+            if (!NCTryApplyAuthoritativeMedicalImpact(
+                    user,
+                    meleeUid,
+                    entity,
+                    modifiedDamage,
+                    direction,
+                    out damageResult))
+            {
+                damageResult = Damageable.ChangeDamage(entity, modifiedDamage, origin: user, ignoreResistances: resistanceBypass);
+            }
+            // NC end
 
             if (damageResult.GetTotal() > FixedPoint2.Zero)
             {
@@ -759,6 +796,10 @@ public abstract partial class SharedMeleeWeaponSystem : EntitySystem
         {
             DoDamageEffect(targets, user, Transform(targets[0]));
         }
+
+        // NC start: discard the synchronous action snapshot before another swing can reuse it.
+        NCEndAuthoritativeMedicalAttack(user, meleeUid);
+        // NC end
 
         return true;
     }

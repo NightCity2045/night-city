@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+nc-medical-diagnostics-title = Medical diagnostics
+nc-medical-diagnostics-tab-overview = Overview
+nc-medical-diagnostics-tab-regions = Regions
+nc-medical-diagnostics-tab-wounds = Wounds
+nc-medical-diagnostics-tab-organs = Organs
+nc-medical-diagnostics-tab-cyberware = Cyberware
+nc-medical-diagnostics-tab-drugs = Drugs
+nc-medical-diagnostics-unavailable = Diagnostic result unavailable
+nc-medical-diagnostics-failure = Scan rejected: {$reason}
+nc-medical-diagnostics-tier = Diagnostic tier: {$tier}
+nc-medical-diagnostics-revision = Revision {$revision}
+nc-medical-diagnostics-observed = Observed at {$time}
+nc-medical-diagnostics-vitals = Vitals
+nc-medical-diagnostics-condition = Condition: {$condition} | Consciousness: {$consciousness}
+nc-medical-diagnostics-pain-shock = Pain: {$pain} | Shock: {$shock}
+nc-medical-diagnostics-pressure = Blood pressure: {$value}
+nc-medical-diagnostics-rhythm = Heart rhythm: {$value}
+nc-medical-diagnostics-oxygen = Oxygenation: {$value}
+nc-medical-diagnostics-volume = Circulating blood: {$value}
+nc-medical-diagnostics-perfusion = Perfusion: {$value}
+nc-medical-diagnostics-external-bleed = External bleeding: {$value}
+nc-medical-diagnostics-internal-bleed = Internal bleeding: {$value}
+nc-medical-diagnostics-warnings = Findings and warnings
+nc-medical-diagnostics-none = No findings available at this diagnostic tier.
+nc-medical-diagnostics-surgery = Active surgery
+nc-medical-diagnostics-surgery-row = {$region} | {$procedure} | step {$step} | {$state} | access {$access}
+nc-medical-diagnostics-region-row = {$zone} | burden {$burden} | function {$function}
+nc-medical-diagnostics-wound-count = wounds {$count}
+nc-medical-diagnostics-bone = bone {$state}
+nc-medical-diagnostics-wound-row = {$zone} | {$severity} {$type}
+nc-medical-diagnostics-foreign-body = foreign body
+nc-medical-diagnostics-organ-row = {$organ} | {$type} | integrity {$integrity} | function {$function} {$rejection} {$vital} {$failing}
+nc-medical-diagnostics-rejection = rejection {$value}
+nc-medical-diagnostics-cyberware-row = {$module} | {$placement} | integrity {$integrity} | function {$function} | power {$power} | heat {$heat} | neural {$neural} | {$state} {$emp}
+nc-medical-diagnostics-cyberware-online = online
+nc-medical-diagnostics-cyberware-offline = offline
+nc-medical-diagnostics-cyberware-emp = EMP disabled
+nc-medical-diagnostics-drug-row = {$drug} | {$category} | {$concentration} | {$state}
+nc-medical-diagnostics-drug-therapeutic = therapeutic
+nc-medical-diagnostics-drug-toxic = TOXIC
+nc-medical-diagnostics-drug-subtherapeutic = subtherapeutic
+nc-medical-diagnostics-vital = VITAL
+nc-medical-diagnostics-failing = FAILING
+nc-medical-diagnostics-omitted = {$count} additional records were withheld or omitted.

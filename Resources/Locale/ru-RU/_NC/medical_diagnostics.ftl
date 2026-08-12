@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+nc-medical-diagnostics-title = Медицинская диагностика
+nc-medical-diagnostics-tab-overview = Обзор
+nc-medical-diagnostics-tab-regions = Области
+nc-medical-diagnostics-tab-wounds = Раны
+nc-medical-diagnostics-tab-organs = Органы
+nc-medical-diagnostics-tab-cyberware = Киберимпланты
+nc-medical-diagnostics-tab-drugs = Препараты
+nc-medical-diagnostics-unavailable = Результат диагностики недоступен
+nc-medical-diagnostics-failure = Диагностика отклонена: {$reason}
+nc-medical-diagnostics-tier = Уровень диагностики: {$tier}
+nc-medical-diagnostics-revision = Ревизия {$revision}
+nc-medical-diagnostics-observed = Время наблюдения: {$time}
+nc-medical-diagnostics-vitals = Жизненные показатели
+nc-medical-diagnostics-condition = Состояние: {$condition} | Сознание: {$consciousness}
+nc-medical-diagnostics-pain-shock = Боль: {$pain} | Шок: {$shock}
+nc-medical-diagnostics-pressure = Кровяное давление: {$value}
+nc-medical-diagnostics-rhythm = Сердечный ритм: {$value}
+nc-medical-diagnostics-oxygen = Оксигенация: {$value}
+nc-medical-diagnostics-volume = Циркулирующая кровь: {$value}
+nc-medical-diagnostics-perfusion = Перфузия: {$value}
+nc-medical-diagnostics-external-bleed = Наружное кровотечение: {$value}
+nc-medical-diagnostics-internal-bleed = Внутреннее кровотечение: {$value}
+nc-medical-diagnostics-warnings = Находки и предупреждения
+nc-medical-diagnostics-none = На этом уровне диагностики данных нет.
+nc-medical-diagnostics-surgery = Активная операция
+nc-medical-diagnostics-surgery-row = {$region} | {$procedure} | этап {$step} | {$state} | доступ {$access}
+nc-medical-diagnostics-region-row = {$zone} | тяжесть {$burden} | функция {$function}
+nc-medical-diagnostics-wound-count = ран: {$count}
+nc-medical-diagnostics-bone = кость: {$state}
+nc-medical-diagnostics-wound-row = {$zone} | {$severity}, {$type}
+nc-medical-diagnostics-foreign-body = инородное тело
+nc-medical-diagnostics-organ-row = {$organ} | {$type} | целостность {$integrity} | функция {$function} {$rejection} {$vital} {$failing}
+nc-medical-diagnostics-rejection = отторжение {$value}
+nc-medical-diagnostics-cyberware-row = {$module} | {$placement} | целостность {$integrity} | функция {$function} | питание {$power} | нагрев {$heat} | нейросвязь {$neural} | {$state} {$emp}
+nc-medical-diagnostics-cyberware-online = работает
+nc-medical-diagnostics-cyberware-offline = отключён
+nc-medical-diagnostics-cyberware-emp = отключён EMP
+nc-medical-diagnostics-drug-row = {$drug} | {$category} | {$concentration} | {$state}
+nc-medical-diagnostics-drug-therapeutic = терапевтическая концентрация
+nc-medical-diagnostics-drug-toxic = ТОКСИЧЕСКАЯ КОНЦЕНТРАЦИЯ
+nc-medical-diagnostics-drug-subtherapeutic = ниже терапевтической
+nc-medical-diagnostics-vital = ЖИЗНЕННО ВАЖЕН
+nc-medical-diagnostics-failing = ОТКАЗ
+nc-medical-diagnostics-omitted = Дополнительных скрытых или пропущенных записей: {$count}.

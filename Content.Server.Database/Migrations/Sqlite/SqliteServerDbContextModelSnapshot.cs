@@ -1322,6 +1322,47 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("nc_character_bank_account", (string)null);
                 });
 
+            // NC start - Persistent bounded medical state owned by a Night City character profile.
+            modelBuilder.Entity("Content.Server.Database.NCMedicalCharacterSnapshot", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("profile_id");
+
+                    b.Property<DateTime>("CapturedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("captured_at");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasMaxLength(524288)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("payload");
+
+                    b.Property<long>("Revision")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("revision");
+
+                    b.Property<int>("SnapshotVersion")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("snapshot_version");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_medical_character_snapshot");
+
+                    b.ToTable("nc_medical_character_snapshot", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_nc_medical_snapshot_payload_length", "length(payload) <= 524288");
+                            t.HasCheckConstraint("CK_nc_medical_snapshot_revision", "revision > 0");
+                            t.HasCheckConstraint("CK_nc_medical_snapshot_version", "snapshot_version > 0");
+                        });
+                });
+            // NC end
+
             modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
                 {
                     b.Property<int>("ProfileId")
@@ -3629,6 +3670,20 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .IsRequired()
                         .HasConstraintName("FK_nc_character_bank_account_profile_profile_id");
                 });
+
+            // NC start - Medical snapshot/profile ownership relation.
+            modelBuilder.Entity("Content.Server.Database.NCMedicalCharacterSnapshot", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", "Profile")
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCMedicalCharacterSnapshot", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_medical_character_snapshot_profile_profile_id");
+
+                    b.Navigation("Profile");
+                });
+            // NC end
 
             modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
                 {

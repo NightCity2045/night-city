@@ -12,7 +12,10 @@ namespace Content.IntegrationTests.Tests.Weapons;
 public sealed class WeaponTests : InteractionTest
 {
     protected override string PlayerPrototype => "MobHuman"; // The default test mob only has one hand
-    private static readonly EntProtoId MobHuman = "MobHuman";
+    // NC start - The target remains on legacy Damageable so this upstream wield test can measure a hit.
+    // Authoritative human projectile wounds are asserted in NCProjectileDamageProfileTest.
+    private static readonly EntProtoId LegacyTarget = "MobDwarf";
+    // NC end
     private static readonly EntProtoId SniperMosin = "WeaponSniperMosin";
 
     [Test]
@@ -23,7 +26,7 @@ public sealed class WeaponTests : InteractionTest
 
         await AddAtmosphere(); // prevent the Urist from suffocating
 
-        var urist = await SpawnTarget(MobHuman);
+        var urist = await SpawnTarget(LegacyTarget);
         var damageComp = Comp<DamageableComponent>(urist);
 
         var mosinNet = await PlaceInHands(SniperMosin);

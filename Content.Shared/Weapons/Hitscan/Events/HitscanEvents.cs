@@ -52,6 +52,18 @@ public record struct HitscanRaycastFiredData
     /// </summary>
     public EntityUid? HitEntity;
 
+    // NC start - Preserve the validated collision point and immutable aim intent for authoritative local trauma.
+    /// <summary>
+    /// Map-space point returned by the physical raycast.
+    /// </summary>
+    public Vector2 HitPosition;
+
+    /// <summary>
+    /// Entity selected when the trace began; it is intentionally distinct from the entity actually hit.
+    /// </summary>
+    public EntityUid? IntendedTarget;
+    // NC end
+
     /// <summary>
     /// Gun that fired the raycast.
     /// </summary>

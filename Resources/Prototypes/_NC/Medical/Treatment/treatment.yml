@@ -1,0 +1,174 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncTreatmentProfile
+  id: NCHumanFieldTreatment
+  defaultForHumans: true
+  # All values multiply the server-measured BaseRate. Internal sources deliberately remain unchanged.
+  pressureMultipliers:
+    ExternalCapillary: 0.2
+    ExternalVenous: 0.35
+    ExternalArterial: 0.65
+    Internal: 1
+  bandageMultipliers:
+    ExternalCapillary: 0
+    ExternalVenous: 0.25
+    ExternalArterial: 0.8
+    Internal: 1
+  hemostaticMultipliers:
+    ExternalCapillary: 0
+    ExternalVenous: 0.1
+    ExternalArterial: 0.4
+    Internal: 1
+  tourniquetMultipliers:
+    ExternalCapillary: 0
+    ExternalVenous: 0.02
+    ExternalArterial: 0.03
+    Internal: 1
+  # Distal targets share the proximal tourniquet root; torso zones are intentionally absent.
+  tourniquetZoneRoots:
+    NCZoneArmLeft: NCZoneArmLeft
+    NCZoneHandLeft: NCZoneArmLeft
+    NCZoneArmRight: NCZoneArmRight
+    NCZoneHandRight: NCZoneArmRight
+    NCZoneLegLeft: NCZoneLegLeft
+    NCZoneFootLeft: NCZoneLegLeft
+    NCZoneLegRight: NCZoneLegRight
+    NCZoneFootRight: NCZoneLegRight
+  bandageAbsorptionCapacity: 80
+  bandageSterility: 0.9
+  # Dressings lose sterility over online treatment time and add contamination when fully saturated.
+  bandageSterilityDecayPerSecond: 0.00001
+  saturatedBandageContamination: 0.12
+  controlledReleaseAfter: 30m
+  ischemiaRiskAfter: 45m
+  criticalIschemiaAfter: 90m
+  releaseReboundDuration: 5m
+  releaseReboundMultiplier: 1.25
+  processedActionCapacity: 128
+  auditHistoryCapacity: 128
+
+- type: ncTreatmentCapability
+  id: NCPressureDressingCapability
+  kind: Pressure
+  profile: NCHumanFieldTreatment
+  applicationDuration: 2s
+  resourceKind: Stack
+  resourceCost: 1
+
+- type: ncTreatmentCapability
+  id: NCFieldBandageCapability
+  kind: Bandage
+  profile: NCHumanFieldTreatment
+  applicationDuration: 3s
+  resourceKind: Stack
+  resourceCost: 1
+
+- type: ncTreatmentCapability
+  id: NCHemostaticGauzeCapability
+  kind: Hemostatic
+  profile: NCHumanFieldTreatment
+  applicationDuration: 4s
+  resourceKind: Stack
+  resourceCost: 1
+
+- type: ncTreatmentCapability
+  id: NCFieldTourniquetCapability
+  kind: Tourniquet
+  profile: NCHumanFieldTreatment
+  applicationDuration: 3s
+  resourceKind: Stack
+  resourceCost: 1
+
+- type: stack
+  id: NCPressureDressingStack
+  name: nc-stack-pressure-dressing
+  icon: { sprite: /Textures/Objects/Specific/Medical/medical.rsi, state: gauze }
+  spawn: NCPressureDressing
+  maxCount: 5
+
+- type: stack
+  id: NCFieldBandageStack
+  name: nc-stack-field-bandage
+  icon: { sprite: /Textures/Objects/Specific/Medical/medical.rsi, state: gauze }
+  spawn: NCFieldBandage
+  maxCount: 5
+
+- type: stack
+  id: NCHemostaticGauzeStack
+  name: nc-stack-hemostatic-gauze
+  icon: { sprite: /Textures/Objects/Specific/Medical/medical.rsi, state: brutepack }
+  spawn: NCHemostaticGauze
+  maxCount: 5
+
+- type: stack
+  id: NCFieldTourniquetStack
+  name: nc-stack-field-tourniquet
+  icon: { sprite: /Textures/Objects/Specific/Medical/medical.rsi, state: tourniquet }
+  spawn: NCFieldTourniquet
+  maxCount: 3
+
+- type: entity
+  id: NCPressureDressing
+  parent: BaseHealingItem
+  name: pressure dressing
+  description: A compact pressure pad for temporarily controlling an external wound.
+  components:
+  - type: Sprite
+    state: gauze
+  - type: Item
+    heldPrefix: gauze
+  - type: NCTreatmentItem
+    capability: NCPressureDressingCapability
+  - type: Stack
+    stackType: NCPressureDressingStack
+    count: 5
+
+- type: entity
+  id: NCFieldBandage
+  parent: BaseHealingItem
+  name: field bandage
+  description: A sterile field dressing that stabilizes an external wound without repairing deep trauma.
+  components:
+  - type: Sprite
+    state: gauze
+  - type: Item
+    heldPrefix: gauze
+  - type: NCTreatmentItem
+    capability: NCFieldBandageCapability
+  - type: Stack
+    stackType: NCFieldBandageStack
+    count: 5
+
+- type: entity
+  id: NCHemostaticGauze
+  parent: BaseHealingItem
+  name: hemostatic gauze
+  description: Treated packing for reducing severe external bleeding until surgery is available.
+  components:
+  - type: Sprite
+    state: brutepack
+  - type: Item
+    heldPrefix: brutepack
+  - type: NCTreatmentItem
+    capability: NCHemostaticGauzeCapability
+  - type: Stack
+    stackType: NCHemostaticGauzeStack
+    count: 5
+
+- type: entity
+  id: NCFieldTourniquet
+  parent: BaseHealingItem
+  name: field tourniquet
+  description: A limb-only bleeding control device marked for timed, controlled release.
+  components:
+  - type: Sprite
+    state: tourniquet
+  - type: Item
+    heldPrefix: tourniquet
+  - type: NCTreatmentItem
+    capability: NCFieldTourniquetCapability
+  - type: Stack
+    stackType: NCFieldTourniquetStack
+    count: 3

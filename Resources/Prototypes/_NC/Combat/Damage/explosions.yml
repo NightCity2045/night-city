@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Significant fragments are aggregated into a bounded number of regional impacts rather than spawned as
+# hundreds of short-lived ECS entities. The upstream explosion already decided whether cover let the blast through.
+- type: ncCombatDamageProfile
+  id: NCExplosionFragmentStandard
+  traumaProfile: BallisticProjectile
+  armorDamageClass: Ballistic
+  ablationAmount: 1
+  traumaFlags: [ Penetrating, CanEmbed ]
+
+- type: ncExplosionMedicalProfile
+  id: NCExplosionHumanDefault
+  defaultForHumans: true
+  primaryImpact:
+    damageProfile: NCEnvironmentExplosiveStandard
+    sourceDamageTypes: [ Blunt ]
+    damageMultiplier: 1
+    count: 1
+    zoneSelection: Primary
+  secondaryImpacts:
+  # The pressure wave reaches two nearby regions with diminishing local magnitude.
+  - damageProfile: NCEnvironmentExplosiveStandard
+    sourceDamageTypes: [ Blunt ]
+    damageMultiplier: 0.5
+    count: 2
+    zoneSelection: Neighbor
+  # Piercing payload is represented by two aggregate fragment channels.
+  - damageProfile: NCExplosionFragmentStandard
+    sourceDamageTypes: [ Piercing ]
+    damageMultiplier: 0.5
+    count: 2
+    zoneSelection: Neighbor
+  # Heat is local and remains a separate trauma mechanism from blast and fragments.
+  - damageProfile: NCEnvironmentThermalStandard
+    sourceDamageTypes: [ Heat ]
+    damageMultiplier: 0.5
+    count: 1
+    zoneSelection: Primary
+  maxAblationApplicationsPerSection: 1

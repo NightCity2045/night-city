@@ -1,3 +1,6 @@
+// NC start: authoritative human medicine integration.
+using Content.Shared._NC.Medical.Anatomy;
+// NC end.
 using Content.Shared.Alert;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Events;
@@ -66,6 +69,15 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
         var query = EntityQueryEnumerator<BloodstreamComponent>();
         while (query.MoveNext(out var uid, out var bloodstream))
         {
+            // NC start: NC circulation owns blood regeneration, loss and physiological consequences.
+            if (HasComp<NCMedicalBodyComponent>(uid))
+            {
+                if (bloodstream.BleedAmount > 0f)
+                    TryModifyBleedAmount((uid, bloodstream), -bloodstream.BleedAmount);
+                continue;
+            }
+            // NC end.
+
             if (curTime < bloodstream.NextUpdate)
                 continue;
 
@@ -184,6 +196,11 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
 
     private void OnDamageChanged(Entity<BloodstreamComponent> ent, ref DamageChangedEvent args)
     {
+        // NC start: localized wounds create the only authoritative human bleeding sources.
+        if (HasComp<NCMedicalBodyComponent>(ent.Owner))
+            return;
+        // NC end.
+
         // The incoming state from the server raises a DamageChangedEvent as well.
         // But the changes to the bloodstream have also been dirtied,
         // so we prevent applying them twice.
@@ -289,6 +306,11 @@ public abstract partial class SharedBloodstreamSystem : EntitySystem
 
     private void OnRejuvenate(Entity<BloodstreamComponent> ent, ref RejuvenateEvent args)
     {
+        // NC start: the trusted NC rejuvenation boundary resets circulation and mirrors it atomically.
+        if (HasComp<NCMedicalBodyComponent>(ent.Owner))
+            return;
+        // NC end.
+
         TryModifyBleedAmount(ent.AsNullable(), -ent.Comp.BleedAmount);
 
         if (SolutionContainer.ResolveSolution(ent.Owner, ent.Comp.BloodSolutionName, ref ent.Comp.BloodSolution))

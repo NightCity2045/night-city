@@ -1,0 +1,99 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncSystemicPhysiologyProfile
+  id: NCHumanSystemicPhysiology
+  defaultForHumans: true
+  unstableRhythmThreshold: 0.35
+  shockableArrestThreshold: 0.7
+  defibrillationReleaseThreshold: 0.2
+  activeUpdateInterval: 1s
+  processedPayloadCapacity: 128
+  channels:
+    Hypoxia:
+      maximumBurden: 40
+      # Safe breathing already produces measured negative Asphyxiation through RespiratorSystem. A second
+      # time-based clearance here would cancel vacuum exposure before it can accumulate.
+      naturalRecoveryPerSecond: 0
+      oxygenationPenaltyAtMaximum: 1
+      cardiacOutputPenaltyAtMaximum: 0.15
+      shockContributionAtMaximum: 0.25
+      brainFunctionPenaltyAtMaximum: 0.35
+      rhythmInstabilityAtMaximum: 0.1
+    Toxin:
+      maximumBurden: 100
+      naturalRecoveryPerSecond: 0.15
+      oxygenationPenaltyAtMaximum: 0.2
+      cardiacOutputPenaltyAtMaximum: 0.45
+      shockContributionAtMaximum: 0.55
+      brainFunctionPenaltyAtMaximum: 0.35
+      rhythmInstabilityAtMaximum: 0.45
+    Radiation:
+      maximumBurden: 200
+      naturalRecoveryPerSecond: 0
+      oxygenationPenaltyAtMaximum: 0.15
+      cardiacOutputPenaltyAtMaximum: 0.35
+      shockContributionAtMaximum: 0.5
+      brainFunctionPenaltyAtMaximum: 0.65
+      rhythmInstabilityAtMaximum: 0.25
+    Cellular:
+      maximumBurden: 100
+      naturalRecoveryPerSecond: 0
+      oxygenationPenaltyAtMaximum: 0.2
+      cardiacOutputPenaltyAtMaximum: 0.65
+      shockContributionAtMaximum: 0.75
+      brainFunctionPenaltyAtMaximum: 0.9
+      rhythmInstabilityAtMaximum: 0.5
+    Electrical:
+      maximumBurden: 20
+      naturalRecoveryPerSecond: 0.25
+      oxygenationPenaltyAtMaximum: 0.05
+      cardiacOutputPenaltyAtMaximum: 0.35
+      shockContributionAtMaximum: 0.45
+      brainFunctionPenaltyAtMaximum: 0.3
+      rhythmInstabilityAtMaximum: 1
+    Sepsis:
+      maximumBurden: 100
+      naturalRecoveryPerSecond: 0.02
+      oxygenationPenaltyAtMaximum: 0.2
+      cardiacOutputPenaltyAtMaximum: 0.5
+      shockContributionAtMaximum: 0.9
+      brainFunctionPenaltyAtMaximum: 0.45
+      rhythmInstabilityAtMaximum: 0.35
+
+- type: ncSystemicDamageProfile
+  id: NCHypoxiaSystemicDamage
+  channel: Hypoxia
+  exposurePerDamage: 1
+  recoveryPerHealing: 1
+
+- type: ncSystemicDamageProfile
+  id: NCToxinSystemicDamage
+  channel: Toxin
+  exposurePerDamage: 1
+  recoveryPerHealing: 1
+
+- type: ncSystemicDamageProfile
+  id: NCRadiationSystemicDamage
+  channel: Radiation
+  exposurePerDamage: 1
+  recoveryPerHealing: 1
+
+- type: ncSystemicDamageProfile
+  id: NCCellularSystemicDamage
+  channel: Cellular
+  exposurePerDamage: 1
+  recoveryPerHealing: 1
+
+- type: ncSystemicDamageProfile
+  id: NCElectricalSystemicDamage
+  channel: Electrical
+  exposurePerDamage: 1
+  recoveryPerHealing: 1
+
+- type: ncSystemicDamageProfile
+  id: NCSepsisSystemicDamage
+  channel: Sepsis
+  exposurePerDamage: 1
+  recoveryPerHealing: 1

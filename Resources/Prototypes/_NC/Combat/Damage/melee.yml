@@ -1,0 +1,59 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# A stopped heavy blunt contact may still transfer a small deterministic local trauma.
+- type: ncBluntTransferProfile
+  id: NCMeleeStoppedBluntTransfer
+  traumaProfile: BluntImpact
+  rules:
+  - minimumRawDamage: 10
+    appliedTrauma: 1
+  - minimumRawDamage: 20
+    appliedTrauma: 3
+  - minimumRawDamage: 30
+    appliedTrauma: 5
+
+- type: ncCombatDamageProfile
+  id: NCMeleeBluntStandard
+  traumaProfile: BluntImpact
+  armorDamageClass: Blunt
+  ablationAmount: 1
+  bluntTransferProfile: NCMeleeStoppedBluntTransfer
+
+- type: ncCombatDamageProfile
+  id: NCMeleeSlashStandard
+  traumaProfile: SlashingImpact
+  armorDamageClass: Slash
+  ablationAmount: 1
+
+- type: ncCombatDamageProfile
+  id: NCMeleePiercingStandard
+  traumaProfile: PiercingImpact
+  armorDamageClass: Pierce
+  ablationAmount: 1
+  traumaFlags: [ Penetrating ]
+
+- type: ncCombatDamageProfile
+  id: NCMeleeThermalStandard
+  traumaProfile: ThermalImpact
+  armorDamageClass: Thermal
+  ablationAmount: 1
+
+- type: ncCombatDamageProfile
+  id: NCMeleeElectricalStandard
+  traumaProfile: ElectricalImpact
+  armorDamageClass: Electrical
+  ablationAmount: 0
+
+# The highest positive mapped entry selects the profile for a mixed vanilla DamageSpecifier.
+# Special weapons may replace it with NCMeleeDamageProfile on their own prototype.
+- type: ncMeleeDamageProfileMap
+  id: NCMeleeDefaultDamageProfileMap
+  defaultForHumans: true
+  profiles:
+    Blunt: NCMeleeBluntStandard
+    Slash: NCMeleeSlashStandard
+    Piercing: NCMeleePiercingStandard
+    Heat: NCMeleeThermalStandard
+    Shock: NCMeleeElectricalStandard

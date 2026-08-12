@@ -1,0 +1,131 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolDisinfection
+  name: disinfection
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolIncision
+  name: controlled incision
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolHemostasis
+  name: hemostasis
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolRetraction
+  name: tissue retraction
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolSuturing
+  name: suturing
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolDebridement
+  name: debridement
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolVascularRepair
+  name: vascular repair
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolBoneReduction
+  name: bone reduction
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolBoneFixation
+  name: bone fixation
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolOrganRepair
+  name: organ repair
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolIrrigation
+  name: sterile irrigation
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolForeignBodyExtraction
+  name: foreign body extraction
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolTendonRepair
+  name: tendon repair
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolNerveRepair
+  name: nerve repair
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolOrganSeparation
+  name: organ separation
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolTransplant
+  name: transplant anastomosis
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolCranialAccess
+  name: cranial access
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolOphthalmicRepair
+  name: ophthalmic repair
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolAmputation
+  name: controlled amputation
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolAutopsy
+  name: forensic dissection
+
+- type: ncSurgeryFacilityCapability
+  id: NCSurgeryFacilityStableSurface
+  name: stable patient surface
+
+- type: ncSurgeryFacilityCapability
+  id: NCSurgeryFacilitySterileField
+  name: sterile field
+
+- type: ncSurgeryFacilityCapability
+  id: NCSurgeryFacilityMonitoring
+  name: physiological monitoring
+
+- type: ncSurgeryFacilityCapability
+  id: NCSurgeryFacilityVentilation
+  name: assisted ventilation
+
+- type: ncSurgeryFacilityCapability
+  id: NCSurgeryFacilityBoneFixation
+  name: orthopedic fixation
+
+- type: ncSurgeryAuthorization
+  id: NCSurgeryAuthorizationGeneral
+  name: general surgery authorization
+
+- type: ncSurgeryAuthorization
+  id: NCSurgeryAuthorizationVascular
+  name: vascular surgery authorization
+
+- type: ncSurgeryAuthorization
+  id: NCSurgeryAuthorizationOrthopedic
+  name: orthopedic surgery authorization
+
+- type: ncSurgeryAuthorization
+  id: NCSurgeryAuthorizationOrgan
+  name: organ surgery authorization
+
+- type: ncSurgeryAuthorization
+  id: NCSurgeryAuthorizationNeural
+  name: neural surgery authorization
+
+- type: ncSurgeryAuthorization
+  id: NCSurgeryAuthorizationTransplant
+  name: transplant surgery authorization
+
+- type: ncSurgeryAuthorization
+  id: NCSurgeryAuthorizationForensic
+  name: forensic pathology authorization

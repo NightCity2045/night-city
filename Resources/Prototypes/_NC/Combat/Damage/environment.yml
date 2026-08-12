@@ -1,0 +1,186 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# These NC-only damage types let explicit blast and barotrauma sources retain their physical mechanism when they
+# still enter through Damageable. Existing vanilla explosions remain safely classified by their dominant payload.
+- type: damageType
+  id: NCExplosive
+  name: damage-type-blunt
+  armorCoefficientPrice: 2
+  armorFlatPrice: 10
+
+- type: damageType
+  id: NCPressure
+  name: damage-type-blunt
+  armorCoefficientPrice: 2
+  armorFlatPrice: 10
+
+- type: ncTraumaProfile
+  id: NCColdImpact
+  mechanism: Cold
+
+- type: ncTraumaProfile
+  id: NCExplosiveImpact
+  mechanism: Explosive
+
+- type: ncTraumaProfile
+  id: NCPressureImpact
+  mechanism: Pressure
+
+# Cold and barotrauma use distinct wound records so diagnostics and treatment never need to infer the mechanism
+# from a generic thermal/blast family.
+- type: ncWound
+  id: NCWoundCold
+  woundType: Cold
+  tissueDepth: SoftTissue
+  canMergeMinor: true
+  areaPerDamage: 0.9
+  painPerDamage: 0.8
+  contaminationMultiplier: 0
+  scarRiskPerDamage: 0.02
+  naturalHealingMultiplier: 0.75
+  infectionSusceptibility: 0.4
+  reopenSusceptibility: 0.7
+  naturalIntegrityRecoveryFraction: 0.25
+  statusDamageMultiplier: 0.8
+  regionIntegrityDamageMultiplier: 0.7
+  containedOrganDamageMultiplier: 0.15
+  functionLossPerDamage: 0.01
+  containedOrganDamageFromSeverity: Critical
+  tendonDamageFromSeverity: Critical
+  tendonIntegrityLossPerDamage: 0.02
+  tendonRuptureIntegrityThreshold: 0.1
+  nerveDamageFromSeverity: Severe
+  nerveIntegrityLossPerDamage: 0.035
+  nerveMotorLossPerDamage: 0.04
+  jointDamageFromSeverity: Catastrophic
+  jointStabilityLossPerDamage: 0.01
+  jointDislocationStabilityThreshold: 0.1
+
+- type: ncWound
+  id: NCWoundPressure
+  woundType: Pressure
+  tissueDepth: InternalOrgan
+  canMergeMinor: false
+  areaPerDamage: 0.65
+  internalBleedPerDamage: 0.55
+  painPerDamage: 1.15
+  contaminationMultiplier: 0
+  scarRiskPerDamage: 0.01
+  naturalHealingMultiplier: 0.6
+  infectionSusceptibility: 0.35
+  reopenSusceptibility: 0.8
+  naturalIntegrityRecoveryFraction: 0.1
+  statusDamageMultiplier: 1
+  regionIntegrityDamageMultiplier: 0.8
+  containedStructureDamageMultiplier: 0.2
+  containedOrganDamageMultiplier: 0.8
+  functionLossPerDamage: 0.025
+  structuralDamageFromSeverity: Critical
+  containedOrganDamageFromSeverity: Moderate
+  containedTargetCount: 2
+  tendonDamageFromSeverity: Catastrophic
+  tendonIntegrityLossPerDamage: 0.015
+  tendonRuptureIntegrityThreshold: 0.1
+  nerveDamageFromSeverity: Severe
+  nerveIntegrityLossPerDamage: 0.025
+  nerveMotorLossPerDamage: 0.035
+  jointDamageFromSeverity: Severe
+  jointStabilityLossPerDamage: 0.025
+  jointDislocationStabilityThreshold: 0.15
+
+- type: ncCombatDamageProfile
+  id: NCEnvironmentBluntStandard
+  traumaProfile: BluntImpact
+  armorDamageClass: Blunt
+  ablationAmount: 0
+  traumaFlags: [ None ]
+
+- type: ncCombatDamageProfile
+  id: NCEnvironmentSlashStandard
+  traumaProfile: SlashingImpact
+  armorDamageClass: Slash
+  ablationAmount: 1
+  traumaFlags: [ None ]
+
+- type: ncCombatDamageProfile
+  id: NCEnvironmentPiercingStandard
+  traumaProfile: PiercingImpact
+  armorDamageClass: Pierce
+  ablationAmount: 1
+  traumaFlags: [ Penetrating ]
+
+- type: ncCombatDamageProfile
+  id: NCEnvironmentThermalStandard
+  traumaProfile: ThermalImpact
+  armorDamageClass: Thermal
+  ablationAmount: 0
+  traumaFlags: [ Incendiary ]
+
+- type: ncCombatDamageProfile
+  id: NCEnvironmentColdStandard
+  traumaProfile: NCColdImpact
+  armorDamageClass: Thermal
+  ablationAmount: 0
+  traumaFlags: [ None ]
+
+- type: ncCombatDamageProfile
+  id: NCEnvironmentElectricalStandard
+  traumaProfile: ElectricalImpact
+  armorDamageClass: Electrical
+  ablationAmount: 0
+  traumaFlags: [ None ]
+
+- type: ncCombatDamageProfile
+  id: NCEnvironmentChemicalStandard
+  traumaProfile: ChemicalImpact
+  armorDamageClass: Chemical
+  ablationAmount: 0
+  traumaFlags: [ None ]
+
+- type: ncCombatDamageProfile
+  id: NCEnvironmentExplosiveStandard
+  traumaProfile: NCExplosiveImpact
+  armorDamageClass: Blast
+  ablationAmount: 1
+  traumaFlags: [ None ]
+
+- type: ncCombatDamageProfile
+  id: NCEnvironmentPressureStandard
+  traumaProfile: NCPressureImpact
+  armorDamageClass: Blast
+  ablationAmount: 0
+  traumaFlags: [ None ]
+
+# Systemic entries are semantically partitioned from local trauma. Shock intentionally exists in both maps:
+# the same measured electrical scalar creates an electrical contact wound and rhythm instability exactly once.
+- type: ncEnvironmentDamageProfileMap
+  id: NCEnvironmentDefaultDamageProfileMap
+  defaultForHumans: true
+  profiles:
+    Blunt: NCEnvironmentBluntStandard
+    Slash: NCEnvironmentSlashStandard
+    Piercing: NCEnvironmentPiercingStandard
+    Heat: NCEnvironmentThermalStandard
+    Cold: NCEnvironmentColdStandard
+    Shock: NCEnvironmentElectricalStandard
+    Caustic: NCEnvironmentChemicalStandard
+    NCExplosive: NCEnvironmentExplosiveStandard
+    NCPressure: NCEnvironmentPressureStandard
+  systemicProfiles:
+    Asphyxiation: NCHypoxiaSystemicDamage
+    Poison: NCToxinSystemicDamage
+    Radiation: NCRadiationSystemicDamage
+    Cellular: NCCellularSystemicDamage
+    Shock: NCElectricalSystemicDamage
+  rejectedLocalHealing:
+  - Blunt
+  - Slash
+  - Piercing
+  - Heat
+  - Cold
+  - Shock
+  - Caustic
+  - NCExplosive
+  - NCPressure

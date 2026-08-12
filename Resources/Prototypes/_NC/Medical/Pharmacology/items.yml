@@ -1,0 +1,198 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  id: NCSyringeTraumaAnalgesic
+  parent: PrefilledSyringe
+  suffix: NC trauma analgesic
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-trauma-analgesic
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCTraumaAnalgesic
+        Quantity: 10
+
+- type: entity
+  id: NCSyringeSurgicalAnesthetic
+  parent: PrefilledSyringe
+  suffix: NC surgical anesthetic
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-surgical-anesthetic
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCSurgicalAnesthetic
+        Quantity: 10
+
+- type: entity
+  id: NCSyringeSedative
+  parent: PrefilledSyringe
+  suffix: NC sedative
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-sedative
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCSedative
+        Quantity: 10
+
+- type: entity
+  id: NCSyringeVasopressor
+  parent: PrefilledSyringe
+  suffix: NC vasopressor
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-vasopressor
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCVasopressor
+        Quantity: 10
+
+- type: entity
+  id: NCSyringeAntiarrhythmic
+  parent: PrefilledSyringe
+  suffix: NC antiarrhythmic
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-antiarrhythmic
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCAntiarrhythmic
+        Quantity: 10
+
+- type: entity
+  id: NCSyringeRespiratoryStimulant
+  parent: PrefilledSyringe
+  suffix: NC respiratory stimulant
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-respiratory-stimulant
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCRespiratoryStimulant
+        Quantity: 10
+
+- type: entity
+  id: NCSyringeBroadAntibiotic
+  parent: PrefilledSyringe
+  suffix: NC broad antibiotic
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-broad-antibiotic
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCBroadAntibiotic
+        Quantity: 10
+
+- type: entity
+  id: NCSyringeAntitoxin
+  parent: PrefilledSyringe
+  suffix: NC antitoxin
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-antitoxin
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCAntitoxin
+        Quantity: 10
+
+- type: entity
+  id: NCSyringeImmunosuppressant
+  parent: PrefilledSyringe
+  suffix: NC immunosuppressant
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-immunosuppressant
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCImmunosuppressant
+        Quantity: 10
+
+- type: entity
+  id: NCSyringeProcoagulant
+  parent: PrefilledSyringe
+  suffix: NC procoagulant
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-procoagulant
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCProcoagulant
+        Quantity: 10
+
+- type: entity
+  id: NCSyringeStimulant
+  parent: PrefilledSyringe
+  suffix: NC stimulant
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-stimulant
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCStimulant
+        Quantity: 10
+
+- type: entity
+  id: NCSyringeAnticoagulant
+  parent: PrefilledSyringe
+  suffix: NC anticoagulant
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-anticoagulant
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCAnticoagulant
+        Quantity: 10
+
+- type: entity
+  id: NCSyringeVasodilator
+  parent: PrefilledSyringe
+  suffix: NC vasodilator
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-vasodilator
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCVasodilator
+        Quantity: 10
+
+- type: entity
+  id: NCSyringeSyntheticOxygenCarrier
+  parent: PrefilledSyringe
+  suffix: NC synthetic oxygen carrier
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-synthetic-oxygen-carrier
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCSyntheticOxygenCarrier
+        Quantity: 10
+
+- type: entity
+  id: NCSyringeCyberwareCoolantAgent
+  parent: PrefilledSyringe
+  suffix: NC cyberware coolant agent
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-cyberware-coolant-agent
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCCyberwareCoolantAgent
+        Quantity: 10

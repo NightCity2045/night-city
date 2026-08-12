@@ -13,7 +13,10 @@ namespace Content.IntegrationTests.Tests.Chemistry;
 [TestOf(typeof(RiggableSystem))]
 public sealed class RiggableTest : InteractionTest
 {
-    private static readonly EntProtoId HumanProtoId = "MobHuman";
+    // NC start - Riggable's upstream assertions specifically exercise legacy Damageable explosion HP.
+    // Authoritative MobHuman explosion trauma is covered by NCExplosionMedicalAdapterTest.
+    private static readonly EntProtoId LegacyMobProtoId = "MobDwarf";
+    // NC end
     private static readonly EntProtoId BatteryProto = "PowerCellSmall";
     private static readonly EntProtoId FlashlightProto = "EmptyFlashlightLantern";
     private static readonly EntProtoId StunbatonProto = "Stunbaton";
@@ -50,7 +53,7 @@ public sealed class RiggableTest : InteractionTest
     public async Task<bool> RigBatteryTest(string syringe)
     {
         await AddAtmosphere();
-        await SpawnTarget(HumanProtoId);
+        await SpawnTarget(LegacyMobProtoId);
 
         Entity<DamageableComponent> mob = (STarget.Value, Comp<DamageableComponent>());
         Assert.That(_damageable.GetPositiveDamage(mob).GetTotal(), Is.EqualTo(FixedPoint2.Zero),
@@ -98,7 +101,7 @@ public sealed class RiggableTest : InteractionTest
     public async Task RigActivatedTest()
     {
         await AddAtmosphere();
-        await SpawnTarget(HumanProtoId);
+        await SpawnTarget(LegacyMobProtoId);
 
         Entity<DamageableComponent> mob = (STarget.Value, Comp<DamageableComponent>());
         Assert.That(_damageable.GetPositiveDamage(mob).GetTotal(), Is.EqualTo(FixedPoint2.Zero),

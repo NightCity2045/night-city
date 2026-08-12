@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncTraumaProfile
+  id: BallisticProjectile
+  mechanism: Projectile
+
+- type: ncTraumaProfile
+  id: BluntImpact
+  mechanism: Blunt
+
+- type: ncTraumaProfile
+  id: SlashingImpact
+  mechanism: Slash
+
+- type: ncTraumaProfile
+  id: PiercingImpact
+  mechanism: Pierce
+
+- type: ncTraumaProfile
+  id: ThermalImpact
+  mechanism: Heat
+
+- type: ncTraumaProfile
+  id: ElectricalImpact
+  mechanism: Electrical
+
+- type: ncTraumaProfile
+  id: ChemicalImpact
+  mechanism: Chemical

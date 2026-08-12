@@ -132,6 +132,10 @@
     damage:
       types:
         Blunt: 1
+  # NC start - Practice rounds use deterministic nonlethal blunt trauma and never ablate armor.
+  - type: NCProjectileDamageProfile
+    profile: NCBallisticPractice
+  # NC end
 
 - type: entity
   id: BaseBulletIncendiary
@@ -144,6 +148,10 @@
       types:
         Piercing: 10
         Heat: 4
+  # NC start - Incendiary effects are snapshotted with the projectile context.
+  - type: NCProjectileDamageProfile
+    profile: NCBallisticIncendiary
+  # NC end
   - type: PointLight
     enabled: true
     color: "#ff4300"
@@ -167,6 +175,10 @@
       types:
         Piercing: 11 # 20% decrease
     ignoreResistances: true
+  # NC start - AP ammunition ablates every participating zonal section by two.
+  - type: NCProjectileDamageProfile
+    profile: NCBallisticArmorPiercing
+  # NC end
 
 - type: entity
   id: BaseBulletUranium

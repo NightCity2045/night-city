@@ -91,13 +91,77 @@
   parent:
   - AppearanceHuman
   - BaseSpeciesMobOrganic
-  id: MobHuman
-  name: Urist McHands
+  # NC start - Keep the shared humanoid base free of human-only authoritative medicine.
+  # Species such as dwarves inherit the upstream human appearance and organic mob behavior, but
+  # only the concrete MobHuman below opts into the Night City human medical graph.
+  id: MobHumanBase
+  abstract: true
+  # NC end
   components:
   - type: Butcherable
     spawned:
     - id: FoodMeatHuman
       amount: 5
+
+- type: entity
+  parent: MobHumanBase
+  id: MobHuman
+  name: Urist McHands
+  components:
+  # NC start - Authoritative Night City human anatomy extends the live SS14 organ graph.
+  - type: NCMedicalBody
+    profile: Human
+  - type: NCBodyFunction
+    profile: NCHumanBodyFunction
+  - type: NCCyberwareBodyState
+    processedActionCapacity: 128
+  - type: InitialBody
+    organs:
+      Torso: NCOrganHumanTorso
+      Head: NCOrganHumanHead
+      ArmLeft: NCOrganHumanArmLeft
+      ArmRight: NCOrganHumanArmRight
+      HandRight: NCOrganHumanHandRight
+      HandLeft: NCOrganHumanHandLeft
+      LegLeft: NCOrganHumanLegLeft
+      LegRight: NCOrganHumanLegRight
+      FootLeft: NCOrganHumanFootLeft
+      FootRight: NCOrganHumanFootRight
+      Thorax: NCOrganHumanThorax
+      Abdomen: NCOrganHumanAbdomen
+      PelvisGroin: NCOrganHumanPelvisGroin
+      Skull: NCOrganHumanSkull
+      RibCage: NCOrganHumanRibCage
+      PelvisBone: NCOrganHumanPelvisBone
+      ArmBoneLeft: NCOrganHumanArmBoneLeft
+      ArmBoneRight: NCOrganHumanArmBoneRight
+      TendonSetLeftArm: NCOrganHumanTendonSetLeftArm
+      TendonSetRightArm: NCOrganHumanTendonSetRightArm
+      LegBoneLeft: NCOrganHumanLegBoneLeft
+      LegBoneRight: NCOrganHumanLegBoneRight
+      TendonSetLeftLeg: NCOrganHumanTendonSetLeftLeg
+      TendonSetRightLeg: NCOrganHumanTendonSetRightLeg
+      Brain: NCOrganHumanBrain
+      Eyes: NCOrganHumanEyes
+      Tongue: NCOrganHumanTongue
+      Appendix: NCOrganHumanAppendix
+      Ears: NCOrganHumanEars
+      Lungs: NCOrganHumanLungs
+      Heart: NCOrganHumanHeart
+      Stomach: NCOrganHumanStomach
+      Liver: NCOrganHumanLiver
+      Kidneys: NCOrganHumanKidneys
+    relationships:
+      Torso: [ Head, ArmLeft, ArmRight, LegLeft, LegRight, Thorax, Abdomen, PelvisGroin ]
+      Thorax: [ RibCage, Heart, Lungs ]
+      Abdomen: [ Liver, Kidneys, Stomach, Appendix ]
+      PelvisGroin: [ PelvisBone ]
+      Head: [ Skull, Brain, Eyes, Tongue, Ears ]
+      ArmLeft: [ ArmBoneLeft, TendonSetLeftArm, HandLeft ]
+      ArmRight: [ ArmBoneRight, TendonSetRightArm, HandRight ]
+      LegLeft: [ LegBoneLeft, TendonSetLeftLeg, FootLeft ]
+      LegRight: [ LegBoneRight, TendonSetRightLeg, FootRight ]
+  # NC end
 
 - type: entity
   parent: OrganBaseOrganic

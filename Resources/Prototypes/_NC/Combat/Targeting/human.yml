@@ -1,0 +1,232 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncTargetZone
+  id: NCZoneHead
+  displayName: nc-target-zone-head
+  externalOrganCategory: Head
+  medicalRegionCategory: Head
+  automaticWeight: 12
+  armorLocation: Head
+  fallbackZone: NCZoneChest
+  neighborZones: [ NCZoneChest, NCZoneArmLeft, NCZoneArmRight ]
+
+- type: ncTargetZone
+  id: NCZoneChest
+  displayName: nc-target-zone-chest
+  externalOrganCategory: Torso
+  medicalRegionCategory: Thorax
+  automaticWeight: 28
+  armorLocation: Chest
+  neighborZones: [ NCZoneAbdomen, NCZoneHead, NCZoneArmLeft, NCZoneArmRight ]
+
+- type: ncTargetZone
+  id: NCZoneAbdomen
+  displayName: nc-target-zone-abdomen
+  externalOrganCategory: Torso
+  medicalRegionCategory: Abdomen
+  automaticWeight: 16
+  armorLocation: Abdomen
+  fallbackZone: NCZoneChest
+  neighborZones: [ NCZoneChest, NCZoneGroin ]
+
+- type: ncTargetZone
+  id: NCZoneGroin
+  displayName: nc-target-zone-groin
+  externalOrganCategory: Torso
+  medicalRegionCategory: PelvisGroin
+  automaticWeight: 4
+  armorLocation: Groin
+  fallbackZone: NCZoneAbdomen
+  neighborZones: [ NCZoneAbdomen, NCZoneLegLeft, NCZoneLegRight ]
+
+- type: ncTargetZone
+  id: NCZoneArmLeft
+  displayName: nc-target-zone-arm-left
+  externalOrganCategory: ArmLeft
+  medicalRegionCategory: ArmLeft
+  automaticWeight: 8
+  armorLocation: ArmLeft
+  fallbackZone: NCZoneChest
+  neighborZones: [ NCZoneChest, NCZoneHandLeft ]
+
+- type: ncTargetZone
+  id: NCZoneArmRight
+  displayName: nc-target-zone-arm-right
+  externalOrganCategory: ArmRight
+  medicalRegionCategory: ArmRight
+  automaticWeight: 8
+  armorLocation: ArmRight
+  fallbackZone: NCZoneChest
+  neighborZones: [ NCZoneChest, NCZoneHandRight ]
+
+- type: ncTargetZone
+  id: NCZoneHandLeft
+  displayName: nc-target-zone-hand-left
+  externalOrganCategory: HandLeft
+  medicalRegionCategory: HandLeft
+  automaticWeight: 2
+  armorLocation: HandLeft
+  fallbackZone: NCZoneArmLeft
+  neighborZones: [ NCZoneArmLeft ]
+
+- type: ncTargetZone
+  id: NCZoneHandRight
+  displayName: nc-target-zone-hand-right
+  externalOrganCategory: HandRight
+  medicalRegionCategory: HandRight
+  automaticWeight: 2
+  armorLocation: HandRight
+  fallbackZone: NCZoneArmRight
+  neighborZones: [ NCZoneArmRight ]
+
+- type: ncTargetZone
+  id: NCZoneLegLeft
+  displayName: nc-target-zone-leg-left
+  externalOrganCategory: LegLeft
+  medicalRegionCategory: LegLeft
+  automaticWeight: 8
+  armorLocation: LegLeft
+  fallbackZone: NCZoneAbdomen
+  neighborZones: [ NCZoneGroin, NCZoneFootLeft ]
+
+- type: ncTargetZone
+  id: NCZoneLegRight
+  displayName: nc-target-zone-leg-right
+  externalOrganCategory: LegRight
+  medicalRegionCategory: LegRight
+  automaticWeight: 8
+  armorLocation: LegRight
+  fallbackZone: NCZoneAbdomen
+  neighborZones: [ NCZoneGroin, NCZoneFootRight ]
+
+- type: ncTargetZone
+  id: NCZoneFootLeft
+  displayName: nc-target-zone-foot-left
+  externalOrganCategory: FootLeft
+  medicalRegionCategory: FootLeft
+  automaticWeight: 2
+  armorLocation: FootLeft
+  fallbackZone: NCZoneLegLeft
+  neighborZones: [ NCZoneLegLeft ]
+
+- type: ncTargetZone
+  id: NCZoneFootRight
+  displayName: nc-target-zone-foot-right
+  externalOrganCategory: FootRight
+  medicalRegionCategory: FootRight
+  automaticWeight: 2
+  armorLocation: FootRight
+  fallbackZone: NCZoneLegRight
+  neighborZones: [ NCZoneLegRight ]
+
+- type: ncTargetDoll
+  id: NCHumanTargetDoll
+  canvasSize: 32,32
+  statusLayers:
+  - id: head
+    sprite: /Textures/_NC/Interface/Targeting/Status/head.rsi
+    statePrefix: head
+    sourceZones: [ NCZoneHead ]
+  - id: torso
+    sprite: /Textures/_NC/Interface/Targeting/Status/torso.rsi
+    statePrefix: torso
+    sourceZones: [ NCZoneChest, NCZoneAbdomen ]
+  - id: groin
+    sprite: /Textures/_NC/Interface/Targeting/Status/groin.rsi
+    statePrefix: groin
+    sourceZones: [ NCZoneGroin ]
+  - id: rightarm
+    sprite: /Textures/_NC/Interface/Targeting/Status/rightarm.rsi
+    statePrefix: rightarm
+    sourceZones: [ NCZoneArmRight ]
+  - id: righthand
+    sprite: /Textures/_NC/Interface/Targeting/Status/righthand.rsi
+    statePrefix: righthand
+    sourceZones: [ NCZoneHandRight ]
+  - id: leftarm
+    sprite: /Textures/_NC/Interface/Targeting/Status/leftarm.rsi
+    statePrefix: leftarm
+    sourceZones: [ NCZoneArmLeft ]
+  - id: lefthand
+    sprite: /Textures/_NC/Interface/Targeting/Status/lefthand.rsi
+    statePrefix: lefthand
+    sourceZones: [ NCZoneHandLeft ]
+  - id: rightleg
+    sprite: /Textures/_NC/Interface/Targeting/Status/rightleg.rsi
+    statePrefix: rightleg
+    sourceZones: [ NCZoneLegRight ]
+  - id: rightfoot
+    sprite: /Textures/_NC/Interface/Targeting/Status/rightfoot.rsi
+    statePrefix: rightfoot
+    sourceZones: [ NCZoneFootRight ]
+  - id: leftleg
+    sprite: /Textures/_NC/Interface/Targeting/Status/leftleg.rsi
+    statePrefix: leftleg
+    sourceZones: [ NCZoneLegLeft ]
+  - id: leftfoot
+    sprite: /Textures/_NC/Interface/Targeting/Status/leftfoot.rsi
+    statePrefix: leftfoot
+    sourceZones: [ NCZoneFootLeft ]
+  zones:
+  - zone: NCZoneHead
+    position: 10,2
+    selectedTexture: /Textures/_NC/Interface/Targeting/Doll/head.png
+    hoverTexture: /Textures/_NC/Interface/Targeting/Doll/head_hover.png
+  - zone: NCZoneChest
+    position: 10,9
+    selectedTexture: /Textures/_NC/Interface/Targeting/Doll/torso.png
+    hoverTexture: /Textures/_NC/Interface/Targeting/Doll/torso_hover.png
+    selectedRegion:
+      position: 0,0
+      size: 9,6
+    hoverRegion:
+      position: 0,0
+      size: 11,7
+  - zone: NCZoneAbdomen
+    position: 10,15
+    selectedTexture: /Textures/_NC/Interface/Targeting/Doll/torso.png
+    hoverTexture: /Textures/_NC/Interface/Targeting/Doll/torso_hover.png
+    selectedRegion:
+      position: 0,6
+      size: 9,4
+    hoverRegion:
+      position: 0,6
+      size: 11,6
+  - zone: NCZoneGroin
+    position: 10,19
+    selectedTexture: /Textures/_NC/Interface/Targeting/Doll/groin.png
+    hoverTexture: /Textures/_NC/Interface/Targeting/Doll/groin_hover.png
+  - zone: NCZoneArmRight
+    position: 6,5
+    selectedTexture: /Textures/_NC/Interface/Targeting/Doll/rightarm.png
+    hoverTexture: /Textures/_NC/Interface/Targeting/Doll/rightarm_hover.png
+  - zone: NCZoneHandRight
+    position: 6,13
+    selectedTexture: /Textures/_NC/Interface/Targeting/Doll/righthand.png
+    hoverTexture: /Textures/_NC/Interface/Targeting/Doll/righthand_hover.png
+  - zone: NCZoneArmLeft
+    position: 20,5
+    selectedTexture: /Textures/_NC/Interface/Targeting/Doll/leftarm.png
+    hoverTexture: /Textures/_NC/Interface/Targeting/Doll/leftarm_hover.png
+  - zone: NCZoneHandLeft
+    position: 20,13
+    selectedTexture: /Textures/_NC/Interface/Targeting/Doll/lefthand.png
+    hoverTexture: /Textures/_NC/Interface/Targeting/Doll/lefthand_hover.png
+  - zone: NCZoneLegRight
+    position: 10,21
+    selectedTexture: /Textures/_NC/Interface/Targeting/Doll/rightleg.png
+    hoverTexture: /Textures/_NC/Interface/Targeting/Doll/rightleg_hover.png
+  - zone: NCZoneFootRight
+    position: 8,29
+    selectedTexture: /Textures/_NC/Interface/Targeting/Doll/rightfoot.png
+    hoverTexture: /Textures/_NC/Interface/Targeting/Doll/rightfoot_hover.png
+  - zone: NCZoneLegLeft
+    position: 16,21
+    selectedTexture: /Textures/_NC/Interface/Targeting/Doll/leftleg.png
+    hoverTexture: /Textures/_NC/Interface/Targeting/Doll/leftleg_hover.png
+  - zone: NCZoneFootLeft
+    position: 16,29
+    selectedTexture: /Textures/_NC/Interface/Targeting/Doll/leftfoot.png
+    hoverTexture: /Textures/_NC/Interface/Targeting/Doll/leftfoot_hover.png

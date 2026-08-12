@@ -34,6 +34,10 @@
   name: security helmet
   description: Standard security gear. Protects the head from impacts, and comes with a visor which can be lowered to protect the eyes.
   components:
+  # NC start - head-only zonal SP for the real security/loadout helmet.
+  - type: NCArmor
+    profile: NCArmorCombatHelmet
+  # NC end
   - type: Sprite
     sprite: Clothing/Head/Helmets/security.rsi
     layers:
@@ -123,6 +127,10 @@
   name: light riot helmet
   description: It's a helmet specifically designed to protect against close range attacks.
   components:
+  # NC start - riot stock participates in the same head-only authoritative armor path.
+  - type: NCArmor
+    profile: NCArmorCombatHelmet
+  # NC end
   - type: Sprite
     sprite: Clothing/Head/Helmets/light_riot.rsi
   - type: Clothing

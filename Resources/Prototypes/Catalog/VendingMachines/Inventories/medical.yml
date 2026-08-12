@@ -2,6 +2,22 @@
   id: NanoMedInventory
   startingInventory:
     HandheldHealthAnalyzer: 1
+    # NC start - Authoritative trauma supplies available through the existing clinic vendor.
+    NCDiagnosticHandheldAnalyzer: 1
+    NCPressureDressing: 2
+    NCFieldBandage: 3
+    NCHemostaticGauze: 2
+    NCFieldTourniquet: 2
+    NCOxygenDeliveryKit: 1
+    NCCrystalloidBag: 2
+    NCBloodBagONegative: 1
+    NCSyringeTraumaAnalgesic: 2
+    NCSyringeVasopressor: 1
+    NCSyringeRespiratoryStimulant: 1
+    NCSyringeProcoagulant: 1
+    NCSyringeStimulant: 1
+    NCSyringeSyntheticOxygenCarrier: 1
+    # NC end
     Gauze: 3
     Brutepack: 3
     Ointment: 3
@@ -33,6 +49,47 @@
   startingInventory:
     # Medical Essential Gear
     ClothingBeltMedicalFilled: 2
+    # NC start - Authoritative trauma, resuscitation and surgery stock.
+    NCDiagnosticHandheldAnalyzer: 3
+    NCDiagnosticBodyScanner: 1
+    NCPressureDressing: 4
+    NCFieldBandage: 6
+    NCHemostaticGauze: 4
+    NCFieldTourniquet: 4
+    NCOxygenDeliveryKit: 2
+    NCManualVentilator: 2
+    NCCrystalloidBag: 4
+    NCBloodBagAPositive: 2
+    NCBloodBagBPositive: 2
+    NCBloodBagONegative: 3
+    NCFieldDefibrillator: 2
+    NCScalpel: 2
+    NCHemostat: 2
+    NCRetractor: 2
+    NCCautery: 2
+    NCSurgicalSuture: 4
+    NCBoneFixator: 2
+    NCSurgicalIrrigator: 2
+    NCMicrosurgeryKit: 2
+    NCCranialDrill: 1
+    NCSurgicalSaw: 1
+    NCForensicAutopsyKit: 1
+    NCSyringeTraumaAnalgesic: 4
+    NCSyringeSurgicalAnesthetic: 3
+    NCSyringeSedative: 3
+    NCSyringeVasopressor: 3
+    NCSyringeAntiarrhythmic: 3
+    NCSyringeRespiratoryStimulant: 3
+    NCSyringeBroadAntibiotic: 4
+    NCSyringeAntitoxin: 3
+    NCSyringeImmunosuppressant: 2
+    NCSyringeProcoagulant: 3
+    NCSyringeStimulant: 2
+    NCSyringeAnticoagulant: 1
+    NCSyringeVasodilator: 2
+    NCSyringeSyntheticOxygenCarrier: 3
+    NCSyringeCyberwareCoolantAgent: 2
+    # NC end
     # Shared Essential
     HandheldHealthAnalyzer: 3
     JetInjector: 3

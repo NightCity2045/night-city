@@ -21,6 +21,9 @@
     RiotBulletShield: 2
     RadioHandheldSecurity: 5
     SecurityBola: 6
+    # NC start - finite field-service stock for authoritative armor ablation.
+    NCArmorRepairKit: 3
+    # NC end
   # security officers need to follow a diet regimen!
   contrabandInventory:
     WeaponMeleeNeedle: 2

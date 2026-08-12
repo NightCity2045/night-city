@@ -1,7 +1,9 @@
 - type: species
   id: Vox
   name: species-name-vox
-  roundStart: true
+  # NC start - Night City player characters use the authoritative human anatomy only.
+  roundStart: false
+  # NC end
   prototype: MobVox
   dollPrototype: AppearanceVox
   skinColoration: VoxFeathers
