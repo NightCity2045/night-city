@@ -133,7 +133,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             wounds,
             bleeding,
             warnings);
-        var woundRows = BuildWounds(policy, wounds, out var woundsOmitted, warnings);
+        var woundRows = BuildWounds(policy, wounds, bleeding, out var woundsOmitted, warnings);
         var organRows = BuildOrgans(policy, organs, out var organsOmitted, warnings);
         var cyberwareRows = BuildCyberware(
             target,
@@ -635,13 +635,16 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             var bone = FindWorstBone(region, organs);
             var nerveFunction = FindWorstLocalFunction(region, organs);
             var organState = FindWorstOrganFunction(region, organs);
-            var internalBleed = zoneWounds.Sum(wound => MathF.Max(0f, wound.InternalBleedRate));
-            if (bleeding != null)
-            {
-                internalBleed += bleeding.Sources
+            var internalBleed = bleeding != null
+                ? bleeding.Sources
                     .Where(source => source.TargetZone == zoneId && source.Channel == NCBleedingChannel.Internal)
-                    .Sum(source => MathF.Max(0f, source.CurrentRate));
-            }
+                    .Sum(source => MathF.Max(0f, source.CurrentRate))
+                : zoneWounds.Sum(wound => MathF.Max(0f, wound.InternalBleedRate));
+            var externalBleed = bleeding != null
+                ? bleeding.Sources
+                    .Where(source => source.TargetZone == zoneId && source.Channel != NCBleedingChannel.Internal)
+                    .Sum(source => MathF.Max(0f, source.CurrentRate))
+                : zoneWounds.Sum(wound => MathF.Max(0f, wound.ExternalBleedRate));
 
             if (Has(policy.Disclosures, NCDiagnosticDisclosure.SubjectiveSymptoms) &&
                 zoneWounds.Any(wound => wound.Pain > 0f))
@@ -660,7 +663,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             }
 
             if (Has(policy.Disclosures, NCDiagnosticDisclosure.ExternalBleeding) &&
-                zoneWounds.Any(wound => wound.ExternalBleedRate > 0f))
+                externalBleed > 0f)
             {
                 findings |= NCDiagnosticFindingFlags.ExternalBleeding;
             }
@@ -748,6 +751,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
     private List<NCMedicalWoundSummary> BuildWounds(
         NCDiagnosticCapabilityPrototype policy,
         List<NCWoundRecord> wounds,
+        NCBleedingComponent? bleeding,
         out int omitted,
         HashSet<NCDiagnosticWarning> warnings)
     {
@@ -765,6 +769,18 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             var hasInternal = Has(policy.Disclosures, NCDiagnosticDisclosure.InternalBleeding);
             var hasInfection = Has(policy.Disclosures, NCDiagnosticDisclosure.Infection);
             var hasForeignBody = Has(policy.Disclosures, NCDiagnosticDisclosure.ForeignBodies);
+            var currentExternal = bleeding == null
+                ? wound.ExternalBleedRate
+                : bleeding.Sources
+                    .Where(source => source.WoundId == wound.WoundId &&
+                                     source.Channel != NCBleedingChannel.Internal)
+                    .Sum(source => MathF.Max(0f, source.CurrentRate));
+            var currentInternal = bleeding == null
+                ? wound.InternalBleedRate
+                : bleeding.Sources
+                    .Where(source => source.WoundId == wound.WoundId &&
+                                     source.Channel == NCBleedingChannel.Internal)
+                    .Sum(source => MathF.Max(0f, source.CurrentRate));
             result.Add(new NCMedicalWoundSummary(
                 wound.TargetZone,
                 detailed ? (ProtoId<NCWoundPrototype>?) wound.Prototype : null,
@@ -773,9 +789,9 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                 detailed ? wound.Stage : null,
                 detailed ? wound.TissueDepth : null,
                 Has(policy.Disclosures, NCDiagnosticDisclosure.ExternalBleeding)
-                    ? ToRateBand(wound.ExternalBleedRate)
+                    ? ToRateBand(currentExternal)
                     : NCDiagnosticBand.None,
-                hasInternal ? ToRateBand(wound.InternalBleedRate) : NCDiagnosticBand.None,
+                hasInternal ? ToRateBand(currentInternal) : NCDiagnosticBand.None,
                 hasInfection ? ToFractionBand(wound.Infection) : NCDiagnosticBand.None,
                 hasForeignBody && wound.EmbeddedObjectId != null,
                 wound.VisualX,

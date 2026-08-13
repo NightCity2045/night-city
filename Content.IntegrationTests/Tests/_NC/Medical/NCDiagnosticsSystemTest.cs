@@ -199,6 +199,34 @@ public sealed class NCDiagnosticsSystemTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
+    public void DiagnosticsReportsControlledLiveBleedingInsteadOfOriginalWoundRate()
+    {
+        var body = SSpawn(HumanMob);
+        SeedDiagnosticState(body, woundCount: 1);
+        var bleeding = SComp<NCBleedingComponent>(body);
+        foreach (var source in bleeding.Sources.Where(source => source.Channel != NCBleedingChannel.Internal))
+            source.CurrentRate = 0f;
+        bleeding.ActiveExternalRate = 0f;
+
+        Assert.That(_diagnostics.TryBuildSnapshot(
+            body,
+            "NCDiagnosticsHandheldApproximate",
+            NCActionResolutionId.New(),
+            TimeSpan.Zero,
+            out var snapshot), Is.True);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(snapshot.Vitals.ExternalBleeding, Is.EqualTo(NCDiagnosticBand.None));
+            Assert.That(snapshot.Wounds, Has.Count.EqualTo(1));
+            Assert.That(snapshot.Wounds[0].ExternalBleeding, Is.EqualTo(NCDiagnosticBand.None));
+            Assert.That(snapshot.Regions.Single(region => region.Zone == ChestZone).Findings
+                .HasFlag(NCDiagnosticFindingFlags.ExternalBleeding), Is.False);
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
     public void CirculatingBloodUsesTheBodiesVanillaSolutionUnits()
     {
         var body = SSpawn(HumanMob);
@@ -282,6 +310,31 @@ public sealed class NCDiagnosticsSystemTest : GameTest
         }
 
         var bleeding = SEntMan.EnsureComponent<NCBleedingComponent>(body);
+        bleeding.Sources.Clear();
+        var sourceIndex = 0;
+        foreach (var wound in wounds.Wounds.Values)
+        {
+            bleeding.Sources.Add(new NCBleedingSourceRecord
+            {
+                SourceId = DeterministicGuid(2000 + sourceIndex++),
+                WoundId = wound.WoundId,
+                TargetZone = wound.TargetZone,
+                RegionCategory = wound.RegionCategory,
+                Channel = NCBleedingChannel.ExternalVenous,
+                BaseRate = 2f / woundCount,
+                CurrentRate = 2f / woundCount,
+            });
+            bleeding.Sources.Add(new NCBleedingSourceRecord
+            {
+                SourceId = DeterministicGuid(2000 + sourceIndex++),
+                WoundId = wound.WoundId,
+                TargetZone = wound.TargetZone,
+                RegionCategory = wound.RegionCategory,
+                Channel = NCBleedingChannel.Internal,
+                BaseRate = 3f / woundCount,
+                CurrentRate = 3f / woundCount,
+            });
+        }
         bleeding.ActiveExternalRate = 2f;
         bleeding.ActiveInternalRate = 3f;
         bleeding.InternalBloodLoss = 500f;

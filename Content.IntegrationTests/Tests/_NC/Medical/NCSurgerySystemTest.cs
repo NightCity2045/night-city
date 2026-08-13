@@ -30,6 +30,7 @@ public sealed class NCSurgerySystemTest : GameTest
 {
     private static readonly EntProtoId HumanMob = "MobHuman";
     private static readonly EntProtoId OperatingTable = "OperatingTable";
+    private static readonly EntProtoId DebugMultitool = "NCSurgeryDebugMultitool";
     private static readonly ProtoId<NCSurgeryProcedurePrototype> VascularRepair = "NCSurgeryVascularRepair";
     private static readonly ProtoId<NCSurgeryProcedurePrototype> DeepWoundTreatment = "NCSurgeryDeepWoundTreatment";
 
@@ -179,6 +180,101 @@ public sealed class NCSurgerySystemTest : GameTest
             Assert.That(zoneRequestFields.Select(field => field.Name), Is.EquivalentTo(new[] { "Zone" }));
             Assert.That(executeRequestFields, Is.Empty,
                 "The step button advances only the server-owned current step; the client cannot choose an index.");
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void DebugMultitoolCoversEverySurgeryInstrumentStage()
+    {
+        var toolUid = SSpawn(DebugMultitool);
+        var tool = SComp<NCSurgeryToolComponent>(toolUid);
+        var authorizationProvider = SComp<NCSurgeryAuthorizationProviderComponent>(toolUid);
+        var procedures = _prototypes.EnumeratePrototypes<NCSurgeryProcedurePrototype>().ToList();
+        var steps = _prototypes.EnumeratePrototypes<NCSurgeryStepPrototype>().ToList();
+        var requiredCapabilities = steps
+            .SelectMany(step => step.Tools)
+            .Select(requirement => requirement.Capability)
+            .ToHashSet();
+        var requiredAuthorizations = procedures
+            .SelectMany(procedure => procedure.RequiredAuthorizations)
+            .ToHashSet();
+        var procedureIds = procedures
+            .Select(procedure => (ProtoId<NCSurgeryProcedurePrototype>) procedure.ID)
+            .ToHashSet();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(tool.Broken, Is.False);
+            Assert.That(tool.Sterility, Is.EqualTo(1f));
+            Assert.That(tool.UsesRemaining, Is.LessThan(0),
+                "The debug tool must not run out during a full procedure.");
+            Assert.That(tool.SolutionResource, Is.Null,
+                "The debug tool must not depend on a reagent container.");
+            Assert.That(tool.Capabilities.Keys, Is.SupersetOf(requiredCapabilities));
+            Assert.That(tool.StartingProcedures, Is.EquivalentTo(procedureIds),
+                "Every production surgery procedure must be directly selectable with the debug tool.");
+            Assert.That(authorizationProvider.Authorizations, Is.SupersetOf(requiredAuthorizations),
+                "The debug tool must expose every authorization used by the production catalogue.");
+        });
+
+        foreach (var step in steps)
+        {
+            Assert.That(_surgery.CanToolPerform(toolUid, tool, step), Is.True,
+                $"{DebugMultitool} cannot perform {step.ID}.");
+
+            foreach (var requirement in step.Tools)
+            {
+                Assert.That(_surgery.CanToolSatisfy(toolUid, tool, requirement), Is.True,
+                    $"{DebugMultitool} does not satisfy {step.ID}: {requirement.Capability}.");
+            }
+        }
+
+        // Exercise the real resolver with one procedure that crosses disinfection, incision, hemostasis,
+        // retraction, debridement and suturing. Clinical prerequisites remain authoritative; only the
+        // physical instrument changes between a production workflow and this debug workflow.
+        var patient = SSpawn(HumanMob);
+        var surgeon = SSpawn(HumanMob);
+        var table = SSpawn(OperatingTable);
+        Assert.That(_anatomy.TryGetOrgan(patient, "Thorax", out var region), Is.True);
+        var wound = AddWound(patient, region, NCWoundType.Slash, 2f);
+        PreparePatient(patient, table, table, airwayMonitored: true);
+        SEntMan.EnsureComponent<NCSurgeryPractitionerComponent>(surgeon)
+            .Authorizations.UnionWith(authorizationProvider.Authorizations);
+
+        Assert.That(
+            _surgery.StartSurgery(
+                new NCSurgeryStartRequest(
+                    NCActionResolutionId.New(),
+                    patient,
+                    surgeon,
+                    region,
+                    DeepWoundTreatment,
+                    table,
+                    table,
+                    wound),
+                out var sessionUid,
+                out var startFailure),
+            Is.True,
+            startFailure.ToString());
+
+        var procedure = _prototypes.Index(DeepWoundTreatment);
+        for (var index = 0; index < procedure.Steps.Count; index++)
+        {
+            var expected = index == procedure.Steps.Count - 1
+                ? NCSurgeryStepResolutionStatus.Completed
+                : NCSurgeryStepResolutionStatus.Resolved;
+            ResolveExpected(sessionUid, surgeon, toolUid, expected);
+        }
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(SComp<NCSurgerySessionComponent>(sessionUid).State,
+                Is.EqualTo(NCSurgerySessionState.Completed));
+            Assert.That(SComp<NCSurgerySessionComponent>(sessionUid).History,
+                Has.Count.EqualTo(procedure.Steps.Count));
+            Assert.That(tool.UsesRemaining, Is.LessThan(0),
+                "A completed procedure must not consume the debug tool's infinite resource.");
         });
     }
 

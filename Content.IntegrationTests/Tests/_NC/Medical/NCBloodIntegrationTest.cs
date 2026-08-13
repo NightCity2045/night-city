@@ -130,14 +130,24 @@ public sealed class NCBloodIntegrationTest : GameTest
         circulation.TransfusionCompatibility = "NC-A-Positive";
         Assert.That(_blood.SynchronizeSolution(body), Is.True);
 
-        var rejected = _emergency.TransfuseBlood(body, SSpawn("NCBloodBagBPositive"), TimeSpan.Zero);
+        var compatibility = new Dictionary<string, List<string>>
+        {
+            ["NC-O-Negative"] = ["NC-A-Positive"],
+            ["NC-B-Positive"] = ["NC-B-Positive"],
+        };
+        var rejected = _blood.TryTransfuse(
+            body,
+            "NC-B-Positive",
+            450f,
+            1f,
+            compatibility);
         var afterRejected = circulation.BloodVolume;
-        var accepted = _emergency.TransfuseBlood(body, SSpawn("NCBloodBagAPositive"), TimeSpan.Zero);
+        var accepted = _emergency.TransfuseBlood(body, SSpawn("Bloodpack"), TimeSpan.Zero);
         var upstreamFraction = _upstream.GetBloodLevel((body, SComp<BloodstreamComponent>(body)));
 
         Assert.Multiple(() =>
         {
-            Assert.That(rejected.Outcome, Is.EqualTo(NCEmergencyCareOutcome.IncompatibleBlood));
+            Assert.That(rejected.Outcome, Is.EqualTo(NCBloodTransfusionOutcome.Incompatible));
             Assert.That(afterRejected, Is.EqualTo(profile.NominalBloodVolume - 600f));
             Assert.That(accepted.Outcome, Is.EqualTo(NCEmergencyCareOutcome.Applied));
             Assert.That(upstreamFraction,

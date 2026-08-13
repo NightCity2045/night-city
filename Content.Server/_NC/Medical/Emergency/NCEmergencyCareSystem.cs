@@ -16,6 +16,7 @@ using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
 using Content.Shared.Damage;
+using Content.Shared.Stacks;
 using Content.Shared.Standing;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
@@ -34,6 +35,7 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
     [Dependency] private NCMedicalBodySystem _medicalBodies = default!;
     [Dependency] private NCCirculationBloodSystem _blood = default!;
     [Dependency] private NCSystemicSystem _systemic = default!;
+    [Dependency] private SharedStackSystem _stacks = default!;
     [Dependency] private StandingStateSystem _standing = default!;
 
     /// <summary>
@@ -167,7 +169,7 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
         }
 
         enriched = enriched with { Capability = itemState.Capability };
-        if (!HasCharges(itemState, capability))
+        if (!HasResource(item, itemState, capability))
         {
             return CompleteAction(patient, state, profile, enriched, NCEmergencyCareKind.Crystalloid,
                 NewResult(enriched, NCEmergencyCareOutcome.DeviceDepleted));
@@ -182,7 +184,7 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
                     previous, previous, 0));
         }
 
-        var consumed = ConsumeCharges(itemState, capability);
+        var consumed = ConsumeResource(item, itemState, capability);
         state.CrystalloidVolume = previous + delivered;
         var result = new NCEmergencyCareResult(
             enriched.ResolutionId,
@@ -224,7 +226,7 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
         }
 
         enriched = enriched with { Capability = itemState.Capability };
-        if (!HasCharges(itemState, capability))
+        if (!HasResource(item, itemState, capability))
         {
             return CompleteAction(patient, state, profile, enriched, NCEmergencyCareKind.BloodTransfusion,
                 NewResult(enriched, NCEmergencyCareOutcome.DeviceDepleted));
@@ -256,7 +258,7 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
                 NewResult(enriched, NCEmergencyCareOutcome.InvalidProfile));
         }
 
-        var consumed = ConsumeCharges(itemState, capability);
+        var consumed = ConsumeResource(item, itemState, capability);
         var result = new NCEmergencyCareResult(
             enriched.ResolutionId,
             NCEmergencyCareOutcome.Applied,
@@ -331,7 +333,7 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
         }
 
         enriched = enriched with { Capability = itemState.Capability };
-        if (consumeComponentCharge && !HasCharges(itemState, capability))
+        if (consumeComponentCharge && !HasResource(item, itemState, capability))
         {
             return CompleteAction(patient, state, profile, enriched, NCEmergencyCareKind.Defibrillation,
                 NewResult(enriched, NCEmergencyCareOutcome.DeviceDepleted));
@@ -340,7 +342,7 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
         // A physical discharge consumes a charge even when the measured rhythm is not shockable.
         var previousRhythm = (float) circulation.HeartRhythm;
         var consumed = consumeComponentCharge
-            ? ConsumeCharges(itemState, capability)
+            ? ConsumeResource(item, itemState, capability)
             : capability.ChargeCost;
         if (physiology.Irreversible)
         {
@@ -474,7 +476,7 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
         }
 
         enriched = enriched with { Capability = itemState.Capability };
-        if (!HasCharges(itemState, capability))
+        if (!HasResource(item, itemState, capability))
         {
             return CompleteAction(patient, state, profile, enriched, kind,
                 NewResult(enriched, NCEmergencyCareOutcome.DeviceDepleted));
@@ -492,7 +494,7 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
                     previous, previous, 0));
         }
 
-        var consumed = ConsumeCharges(itemState, capability);
+        var consumed = ConsumeResource(item, itemState, capability);
         remaining = next;
         var result = new NCEmergencyCareResult(
             enriched.ResolutionId,
@@ -620,21 +622,40 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
                !string.IsNullOrWhiteSpace(capability.DonorCompatibility);
     }
 
-    private static bool HasCharges(
+    private bool HasResource(
+        EntityUid itemUid,
         NCEmergencyCareItemComponent item,
         NCEmergencyCareCapabilityPrototype capability)
     {
-        return item.ChargesRemaining >= capability.ChargeCost;
+        return capability.ResourceKind switch
+        {
+            NCEmergencyCareResourceKind.ComponentCharges => item.ChargesRemaining >= capability.ChargeCost,
+            NCEmergencyCareResourceKind.Stack => TryComp<StackComponent>(itemUid, out var stack) &&
+                                                 stack.Count >= capability.ChargeCost,
+            _ => false,
+        };
     }
 
-    private static int ConsumeCharges(
+    private int ConsumeResource(
+        EntityUid itemUid,
         NCEmergencyCareItemComponent itemState,
         NCEmergencyCareCapabilityPrototype capability)
     {
-        itemState.ChargesRemaining -= capability.ChargeCost;
-        // Exact device charges are server-owned. This component is deliberately not networked,
-        // so there is no component state to dirty after the authoritative mutation.
-        return capability.ChargeCost;
+        switch (capability.ResourceKind)
+        {
+            case NCEmergencyCareResourceKind.ComponentCharges:
+                itemState.ChargesRemaining -= capability.ChargeCost;
+                // Exact device charges are server-owned. This component is deliberately not networked,
+                // so there is no component state to dirty after the authoritative mutation.
+                return capability.ChargeCost;
+            case NCEmergencyCareResourceKind.Stack:
+                return TryComp<StackComponent>(itemUid, out var stack) &&
+                       _stacks.TryUse((itemUid, stack), capability.ChargeCost)
+                    ? capability.ChargeCost
+                    : 0;
+            default:
+                return 0;
+        }
     }
 
     private bool HasViableVitalOrgan(EntityUid patient, NCOrganFunctionType functionType)

@@ -259,6 +259,10 @@
       params:
         volume: 1.0
         variation: 0.125
+  # NC start - Reuse the vanilla blood pack for authoritative human transfusion.
+  - type: NCEmergencyCareItem
+    capability: NCBloodpackCapability
+  # NC end
   - type: Stack
     stackType: Bloodpack
     count: 10

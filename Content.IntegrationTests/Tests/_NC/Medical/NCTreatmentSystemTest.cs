@@ -7,18 +7,22 @@ using System.Reflection;
 using System.Linq;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
+using Content.Server._NC.Medical.Emergency;
 using Content.Server._NC.Medical.Physiology;
 using Content.Server._NC.Medical.Treatment;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Bleeding;
+using Content.Shared._NC.Medical.Emergency;
+using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Trauma;
 using Content.Shared._NC.Medical.Treatment;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
 using Content.Shared.Damage;
 using Content.Shared.FixedPoint;
+using Content.Shared.Stacks;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
@@ -35,6 +39,7 @@ public sealed class NCTreatmentSystemTest : GameTest
     [SidedDependency(Side.Server)] private NCAnatomySystem _anatomy = default!;
     [SidedDependency(Side.Server)] private NCMedicalBodySystem _medicalBodies = default!;
     [SidedDependency(Side.Server)] private NCPhysiologySchedulerSystem _scheduler = default!;
+    [SidedDependency(Side.Server)] private NCEmergencyCareSystem _emergency = default!;
     [SidedDependency(Side.Server)] private IGameTiming _timing = default!;
 
     public override PoolSettings PoolSettings => new()
@@ -103,6 +108,49 @@ public sealed class NCTreatmentSystemTest : GameTest
 
         _scheduler.Update(0f);
         Assert.That(_scheduler.GetRemainingDelay(body), Is.GreaterThan(TimeSpan.Zero));
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void TwoBallisticLegWoundsCanBeControlledAndVanillaBloodpackRestoresBlood()
+    {
+        var body = SSpawn(HumanMob);
+        var firstWound = CreateWound(body, "NCZoneLegRight", "LegRight", "BallisticProjectile", 16f);
+        var secondWound = CreateWound(body, "NCZoneLegRight", "LegRight", "BallisticProjectile", 16f);
+        var wounds = SComp<NCWoundContainerComponent>(body);
+        var bleeding = SComp<NCBleedingComponent>(body);
+        var initialRate = bleeding.ActiveExternalRate;
+
+        var bandage = _treatment.BandageWound(body, firstWound);
+        var bandagedRate = bleeding.ActiveExternalRate;
+        var hemostatic = _treatment.ApplyHemostatic(body, firstWound);
+        var packedRate = bleeding.ActiveExternalRate;
+        var tourniquet = _treatment.SetTourniquet(body, "NCZoneLegRight");
+
+        var circulation = SComp<NCCirculationComponent>(body);
+        circulation.BloodVolume -= 900f;
+        var beforeTransfusion = circulation.BloodVolume;
+        var bloodpack = SSpawn("Bloodpack");
+        var stack = SComp<StackComponent>(bloodpack);
+        var stackBefore = stack.Count;
+        var transfusion = _emergency.TransfuseBlood(body, bloodpack);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(wounds.Wounds.Keys, Is.EquivalentTo(new[] { firstWound, secondWound }));
+            Assert.That(initialRate, Is.GreaterThan(0f));
+            Assert.That(bandage.Outcome, Is.EqualTo(NCTreatmentOutcome.Applied));
+            Assert.That(bandagedRate, Is.LessThan(initialRate).And.GreaterThan(0f));
+            Assert.That(hemostatic.Outcome, Is.EqualTo(NCTreatmentOutcome.Applied));
+            Assert.That(packedRate, Is.LessThan(bandagedRate).And.GreaterThan(0f));
+            Assert.That(tourniquet.Outcome, Is.EqualTo(NCTreatmentOutcome.Applied));
+            Assert.That(bleeding.ActiveExternalRate, Is.Zero.Within(0.001f));
+            Assert.That(bleeding.Sources.Where(source => source.Channel != NCBleedingChannel.Internal),
+                Has.All.Matches<NCBleedingSourceRecord>(source => source.Tourniqueted && source.CurrentRate == 0f));
+            Assert.That(transfusion.Outcome, Is.EqualTo(NCEmergencyCareOutcome.Applied));
+            Assert.That(circulation.BloodVolume, Is.EqualTo(beforeTransfusion + 450f).Within(0.001f));
+            Assert.That(stack.Count, Is.EqualTo(stackBefore - 1));
+        });
     }
 
     [Test]

@@ -189,7 +189,13 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
         if (!ConsumeResource(item.Owner, capability))
             return;
 
-        _popup.PopupEntity(Loc.GetString("nc-medical-treatment-complete"), patient, args.User);
+        var message = capability.Kind is NCTreatmentKind.Pressure or
+            NCTreatmentKind.Bandage or
+            NCTreatmentKind.Hemostatic or
+            NCTreatmentKind.Tourniquet
+            ? TreatmentBleedingMessage(result)
+            : Loc.GetString("nc-medical-treatment-complete");
+        _popup.PopupEntity(message, patient, args.User);
     }
 
     /// <summary>
@@ -341,6 +347,20 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
             NCTreatmentKind.Splint => true,
             _ => false,
         };
+    }
+
+    private string TreatmentBleedingMessage(in NCTreatmentResult result)
+    {
+        if (result.CurrentBleedRate <= 0f)
+            return Loc.GetString("nc-medical-treatment-bleeding-controlled");
+
+        var reduction = result.PreviousBleedRate > 0f
+            ? (int) MathF.Round(Math.Clamp(
+                1f - result.CurrentBleedRate / result.PreviousBleedRate,
+                0f,
+                1f) * 100f)
+            : 0;
+        return Loc.GetString("nc-medical-treatment-bleeding-reduced", ("percent", reduction));
     }
 
     private EntProtoId? GetPrototypeId(EntityUid entity)

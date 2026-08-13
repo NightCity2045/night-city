@@ -308,6 +308,7 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
         ref HashSet<Guid>? refreshSources)
     {
         var saturated = 0;
+        var intervalStart = now - TimeSpan.FromSeconds(seconds);
         foreach (var (woundId, record) in treatment.WoundTreatments)
         {
             if ((record.AppliedFlags & NCWoundTreatmentFlags.Bandaged) == 0 ||
@@ -324,11 +325,14 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
                 absorbedRate += MathF.Max(0f, source.BaseRate - source.CurrentRate);
             }
 
+            // A treatment applied at this boundary must not absorb blood from the interval before it existed.
+            // This matters when a treatment action wakes a body whose previous physiology tick was seconds ago.
+            var activeSeconds = OverlapSeconds(intervalStart, now, record.BandagedAt, now);
             record.BandageAbsorptionRemaining = MathF.Max(
                 0f,
-                record.BandageAbsorptionRemaining - absorbedRate * seconds);
+                record.BandageAbsorptionRemaining - absorbedRate * activeSeconds);
             record.BandageSterility = Math.Clamp(
-                record.BandageSterility - profile.BandageSterilityDecayPerSecond * seconds,
+                record.BandageSterility - profile.BandageSterilityDecayPerSecond * activeSeconds,
                 0f,
                 1f);
             record.ModifiedAt = now;

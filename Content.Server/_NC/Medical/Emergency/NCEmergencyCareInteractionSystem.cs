@@ -7,12 +7,14 @@ using Content.Server._NC.Medical.Treatment;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Emergency;
+using Content.Shared._NC.Medical.Physiology;
 using Content.Shared.DoAfter;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
 using Content.Shared.Medical;
 using Content.Shared.Popups;
 using Content.Shared.Standing;
+using Content.Shared.Stacks;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
@@ -115,7 +117,7 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
                 0),
         };
 
-        PopupResult(patient, args.User, result);
+        PopupResult(patient, args.User, capability.Kind, result);
     }
 
     private void OnPatientInteractHand(Entity<NCMedicalBodyComponent> patient, ref InteractHandEvent args)
@@ -188,7 +190,11 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
             args.ResolutionId,
             _timing.CurTime,
             GetPrototypeId(args.User));
-        PopupResult(patient.Owner, args.User, _emergency.PerformCpr(patient.Owner, context));
+        PopupResult(
+            patient.Owner,
+            args.User,
+            NCEmergencyCareKind.Cpr,
+            _emergency.PerformCpr(patient.Owner, context));
     }
 
     private bool TryValidateItem(
@@ -208,13 +214,46 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
                capability.ApplicationDuration > TimeSpan.Zero &&
                capability.InteractionRange > 0f &&
                capability.ChargeCost > 0 &&
-               item.Comp.ChargesRemaining >= capability.ChargeCost &&
+               HasResource(item, capability) &&
                _hands.IsHolding(user, item.Owner) &&
                _interaction.InRangeUnobstructed(user, patient, capability.InteractionRange);
     }
 
-    private void PopupResult(EntityUid patient, EntityUid user, NCEmergencyCareResult result)
+    private bool HasResource(
+        Entity<NCEmergencyCareItemComponent> item,
+        NCEmergencyCareCapabilityPrototype capability)
     {
+        return capability.ResourceKind switch
+        {
+            NCEmergencyCareResourceKind.ComponentCharges =>
+                item.Comp.ChargesRemaining >= capability.ChargeCost,
+            NCEmergencyCareResourceKind.Stack =>
+                TryComp<StackComponent>(item.Owner, out var stack) && stack.Count >= capability.ChargeCost,
+            _ => false,
+        };
+    }
+
+    private void PopupResult(
+        EntityUid patient,
+        EntityUid user,
+        NCEmergencyCareKind kind,
+        NCEmergencyCareResult result)
+    {
+        if (result.Succeeded && kind == NCEmergencyCareKind.BloodTransfusion &&
+            TryComp<NCCirculationComponent>(patient, out var circulation) &&
+            _prototypes.TryIndex(circulation.Profile, out NCPhysiologyProfilePrototype? profile) &&
+            profile.NominalBloodVolume > 0f)
+        {
+            var restoredPercent = (int) MathF.Round(MathF.Max(
+                0f,
+                result.CurrentValue - result.PreviousValue) / profile.NominalBloodVolume * 100f);
+            _popup.PopupEntity(
+                Loc.GetString("nc-medical-transfusion-complete", ("percent", restoredPercent)),
+                patient,
+                user);
+            return;
+        }
+
         var key = result.Succeeded ? "nc-medical-emergency-complete" : "nc-medical-emergency-failed";
         _popup.PopupEntity(Loc.GetString(key, ("reason", result.Outcome)), patient, user);
     }

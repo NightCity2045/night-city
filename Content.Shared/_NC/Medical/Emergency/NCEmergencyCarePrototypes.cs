@@ -111,6 +111,9 @@ public sealed partial class NCEmergencyCareCapabilityPrototype : IPrototype
     [DataField(required: true)]
     public int ChargeCost { get; private set; }
 
+    [DataField]
+    public NCEmergencyCareResourceKind ResourceKind { get; private set; }
+
     [DataField(required: true)]
     public TimeSpan ApplicationDuration { get; private set; }
 

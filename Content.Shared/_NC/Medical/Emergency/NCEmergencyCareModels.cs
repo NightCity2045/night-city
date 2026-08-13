@@ -17,6 +17,16 @@ public enum NCEmergencyCareKind : byte
     Defibrillation,
 }
 
+/// <summary>
+/// Physical resource owned by an emergency-care item. Vanilla medical stacks use their existing stack
+/// count, while reusable devices keep their bounded server-side NC charge counter.
+/// </summary>
+public enum NCEmergencyCareResourceKind : byte
+{
+    ComponentCharges,
+    Stack,
+}
+
 public enum NCEmergencyCareOutcome : byte
 {
     Applied,

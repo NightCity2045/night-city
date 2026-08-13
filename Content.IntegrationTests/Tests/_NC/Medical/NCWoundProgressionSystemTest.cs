@@ -245,6 +245,8 @@ public sealed class NCWoundProgressionSystemTest : GameTest
         var wounds = SComp<NCWoundContainerComponent>(body);
         var wound = wounds.Wounds[woundId];
         var contaminationBefore = wound.Contamination;
+        var treatment = SComp<NCTreatmentStateComponent>(body).WoundTreatments[woundId];
+        treatment.BandageAbsorptionRemaining = 1f;
         var source = SComp<NCBleedingComponent>(body).Sources.Single(candidate =>
             candidate.WoundId == woundId && candidate.Channel != NCBleedingChannel.Internal);
         var controlledRate = source.CurrentRate;
@@ -252,7 +254,7 @@ public sealed class NCWoundProgressionSystemTest : GameTest
         var result = _progression.AdvanceBody(
             body,
             TimeSpan.FromMinutes(1),
-            TimeSpan.FromMinutes(1));
+            treatment.BandagedAt + TimeSpan.FromMinutes(1));
 
         Assert.Multiple(() =>
         {

@@ -56,30 +56,14 @@
   applicationDuration: 6s
 
 - type: ncEmergencyCareCapability
-  id: NCBloodAPositiveCapability
+  id: NCBloodpackCapability
   kind: BloodTransfusion
   profile: NCHumanEmergencyCare
   infusionVolume: 450
-  donorCompatibility: NC-A-Positive
-  chargeCost: 1
-  applicationDuration: 8s
-
-- type: ncEmergencyCareCapability
-  id: NCBloodBPositiveCapability
-  kind: BloodTransfusion
-  profile: NCHumanEmergencyCare
-  infusionVolume: 450
-  donorCompatibility: NC-B-Positive
-  chargeCost: 1
-  applicationDuration: 8s
-
-- type: ncEmergencyCareCapability
-  id: NCBloodONegativeCapability
-  kind: BloodTransfusion
-  profile: NCHumanEmergencyCare
-  infusionVolume: 450
+  # Vanilla Bloodpack is a universal synthetic replacement in its existing description.
   donorCompatibility: NC-O-Negative
   chargeCost: 1
+  resourceKind: Stack
   applicationDuration: 8s
 
 - type: ncEmergencyCareCapability
@@ -116,36 +100,4 @@
     heldPrefix: bloodpack
   - type: NCEmergencyCareItem
     capability: NCCrystalloidInfusionCapability
-    chargesRemaining: 1
-
-- type: entity
-  id: NCBloodBagAPositive
-  parent: BaseHealingItem
-  name: A-positive blood bag
-  description: A sealed, compatibility-labelled unit of whole blood.
-  components:
-  - type: Sprite
-    state: bloodpack
-  - type: Item
-    heldPrefix: bloodpack
-  - type: NCEmergencyCareItem
-    capability: NCBloodAPositiveCapability
-    chargesRemaining: 1
-
-- type: entity
-  id: NCBloodBagBPositive
-  parent: NCBloodBagAPositive
-  name: B-positive blood bag
-  components:
-  - type: NCEmergencyCareItem
-    capability: NCBloodBPositiveCapability
-    chargesRemaining: 1
-
-- type: entity
-  id: NCBloodBagONegative
-  parent: NCBloodBagAPositive
-  name: O-negative blood bag
-  components:
-  - type: NCEmergencyCareItem
-    capability: NCBloodONegativeCapability
     chargesRemaining: 1

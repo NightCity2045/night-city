@@ -16,6 +16,7 @@ using Content.Shared.Body;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Standing;
+using Content.Shared.Stacks;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
 
@@ -186,28 +187,25 @@ public sealed class NCEmergencyCareSystemTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
-    public void IncompatibleBloodIsRejectedAndCompatibleBloodRespectsCap()
+    public void VanillaBloodpackUsesItsStackAndRespectsBloodVolumeCap()
     {
         var body = SSpawn(HumanMob);
         var circulation = SComp<NCCirculationComponent>(body);
         var profile = _physiology.GetProfile(body);
         circulation.BloodVolume = profile.NominalBloodVolume - 200f;
         circulation.TransfusionCompatibility = "NC-A-Positive";
-        var incompatible = SSpawn("NCBloodBagBPositive");
-        var compatible = SSpawn("NCBloodBagAPositive");
+        var bloodpack = SSpawn("Bloodpack");
+        var stack = SComp<StackComponent>(bloodpack);
+        var stackBefore = stack.Count;
 
-        var rejected = _emergency.TransfuseBlood(body, incompatible, TimeSpan.Zero);
-        var bloodAfterRejected = circulation.BloodVolume;
-        var accepted = _emergency.TransfuseBlood(body, compatible, TimeSpan.Zero);
+        var accepted = _emergency.TransfuseBlood(body, bloodpack, TimeSpan.Zero);
 
         Assert.Multiple(() =>
         {
-            Assert.That(rejected.Outcome, Is.EqualTo(NCEmergencyCareOutcome.IncompatibleBlood));
-            Assert.That(SComp<NCEmergencyCareItemComponent>(incompatible).ChargesRemaining, Is.EqualTo(1));
-            Assert.That(bloodAfterRejected, Is.EqualTo(profile.NominalBloodVolume - 200f));
             Assert.That(accepted.Outcome, Is.EqualTo(NCEmergencyCareOutcome.Applied));
             Assert.That(circulation.BloodVolume, Is.EqualTo(profile.NominalBloodVolume));
-            Assert.That(SComp<NCEmergencyCareItemComponent>(compatible).ChargesRemaining, Is.Zero);
+            Assert.That(stack.Count, Is.EqualTo(stackBefore - 1));
+            Assert.That(accepted.ChargesConsumed, Is.EqualTo(1));
         });
     }
 

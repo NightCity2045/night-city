@@ -13,18 +13,18 @@
     Internal: 1
   bandageMultipliers:
     ExternalCapillary: 0
-    ExternalVenous: 0.25
-    ExternalArterial: 0.8
+    ExternalVenous: 0.1
+    ExternalArterial: 0.65
     Internal: 1
   hemostaticMultipliers:
     ExternalCapillary: 0
-    ExternalVenous: 0.1
-    ExternalArterial: 0.4
+    ExternalVenous: 0.02
+    ExternalArterial: 0.1
     Internal: 1
   tourniquetMultipliers:
     ExternalCapillary: 0
-    ExternalVenous: 0.02
-    ExternalArterial: 0.03
+    ExternalVenous: 0
+    ExternalArterial: 0
     Internal: 1
   # Distal targets share the proximal tourniquet root; torso zones are intentionally absent.
   tourniquetZoneRoots:
@@ -36,7 +36,7 @@
     NCZoneFootLeft: NCZoneLegLeft
     NCZoneLegRight: NCZoneLegRight
     NCZoneFootRight: NCZoneLegRight
-  bandageAbsorptionCapacity: 80
+  bandageAbsorptionCapacity: 3600
   bandageSterility: 0.9
   # Dressings lose sterility over online treatment time and add contamination when fully saturated.
   bandageSterilityDecayPerSecond: 0.00001

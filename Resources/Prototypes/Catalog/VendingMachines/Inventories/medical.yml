@@ -6,7 +6,6 @@
     Tourniquet: 2
     NCFieldSplint: 2
     NCCrystalloidBag: 2
-    NCBloodBagONegative: 1
     NCSyringeTraumaAnalgesic: 2
     NCSyringeVasopressor: 1
     NCSyringeRespiratoryStimulant: 1
@@ -50,9 +49,6 @@
     NCFieldSplint: 4
     NCManualVentilator: 2
     NCCrystalloidBag: 4
-    NCBloodBagAPositive: 2
-    NCBloodBagBPositive: 2
-    NCBloodBagONegative: 3
     Scalpel: 2
     Hemostat: 2
     Retractor: 2
