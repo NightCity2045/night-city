@@ -14,7 +14,7 @@
   maxRegionRecords: 12
   maxWoundRecords: 0
   maxOrganRecords: 0
-  bloodVolumeQuantum: 1000
+  bloodVolumeUnitsQuantum: 120
   ratioQuantum: 0.2
   bleedRateQuantum: 1
 
@@ -27,7 +27,7 @@
   maxRegionRecords: 12
   maxWoundRecords: 8
   maxOrganRecords: 0
-  bloodVolumeQuantum: 1000
+  bloodVolumeUnitsQuantum: 120
   ratioQuantum: 0.2
   bleedRateQuantum: 1
 
@@ -46,7 +46,7 @@
   maxRegionRecords: 12
   maxWoundRecords: 8
   maxOrganRecords: 0
-  bloodVolumeQuantum: 1000
+  bloodVolumeUnitsQuantum: 120
   ratioQuantum: 0.2
   bleedRateQuantum: 1
 
@@ -66,7 +66,7 @@
   maxRegionRecords: 12
   maxWoundRecords: 12
   maxOrganRecords: 0
-  bloodVolumeQuantum: 500
+  bloodVolumeUnitsQuantum: 60
   ratioQuantum: 0.1
   bleedRateQuantum: 0.5
 
@@ -97,7 +97,7 @@
   maxOrganRecords: 16
   maxCyberwareRecords: 16
   maxDrugRecords: 16
-  bloodVolumeQuantum: 100
+  bloodVolumeUnitsQuantum: 12
   ratioQuantum: 0.02
   bleedRateQuantum: 0.1
   drugConcentrationQuantum: 0.05
@@ -129,7 +129,7 @@
   maxOrganRecords: 32
   maxCyberwareRecords: 32
   maxDrugRecords: 32
-  bloodVolumeQuantum: 50
+  bloodVolumeUnitsQuantum: 6
   ratioQuantum: 0.01
   bleedRateQuantum: 0.05
   drugConcentrationQuantum: 0.025

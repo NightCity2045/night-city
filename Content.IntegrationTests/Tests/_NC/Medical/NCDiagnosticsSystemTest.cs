@@ -17,6 +17,7 @@ using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
+using Content.Shared.Body.Components;
 using Content.Shared.FixedPoint;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
@@ -169,6 +170,53 @@ public sealed class NCDiagnosticsSystemTest : GameTest
             Assert.That(admin.Wounds.All(wound => wound.WoundId != Guid.Empty), Is.True);
             Assert.That(admin.Drugs, Has.Count.EqualTo(1));
             Assert.That(admin.Drugs[0].Concentration, Is.GreaterThan(0f));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void CirculatingBloodUsesTheBodiesVanillaSolutionUnits()
+    {
+        var body = SSpawn(HumanMob);
+        var circulation = SComp<NCCirculationComponent>(body);
+        var bloodstream = SComp<BloodstreamComponent>(body);
+        var physiologyProfile = _prototypes.Index(circulation.Profile);
+        var nominalSolutionUnits = (int) MathF.Round((float) bloodstream.BloodReferenceSolution.Volume);
+
+        circulation.BloodVolume = physiologyProfile.NominalBloodVolume;
+        Assert.That(
+            _diagnostics.TryBuildSnapshot(
+                body,
+                NetworkCapabilities[(int) NCDiagnosticTier.ScannerInternal],
+                NCActionResolutionId.New(),
+                TimeSpan.Zero,
+                out var fullSnapshot),
+            Is.True);
+
+        circulation.BloodVolume = physiologyProfile.NominalBloodVolume * 0.5f;
+        Assert.That(
+            _diagnostics.TryBuildSnapshot(
+                body,
+                NetworkCapabilities[(int) NCDiagnosticTier.ScannerInternal],
+                NCActionResolutionId.New(),
+                TimeSpan.Zero,
+                out var halfSnapshot),
+            Is.True);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(nominalSolutionUnits, Is.EqualTo(600));
+            Assert.That(fullSnapshot.Vitals.NominalBloodVolumeUnits, Is.EqualTo(nominalSolutionUnits));
+            Assert.That(fullSnapshot.Vitals.BloodVolumeUnits, Is.Not.Null);
+            Assert.That(fullSnapshot.Vitals.BloodVolumeUnits!.Value.Minimum,
+                Is.LessThanOrEqualTo(nominalSolutionUnits));
+            Assert.That(fullSnapshot.Vitals.BloodVolumeUnits.Value.Maximum,
+                Is.GreaterThanOrEqualTo(nominalSolutionUnits));
+
+            Assert.That(halfSnapshot.Vitals.NominalBloodVolumeUnits, Is.EqualTo(nominalSolutionUnits));
+            Assert.That(halfSnapshot.Vitals.BloodVolumeUnits, Is.Not.Null);
+            Assert.That(halfSnapshot.Vitals.BloodVolumeUnits!.Value.Minimum, Is.EqualTo(300));
+            Assert.That(halfSnapshot.Vitals.BloodVolumeUnits.Value.Maximum, Is.EqualTo(312));
         });
     }
 

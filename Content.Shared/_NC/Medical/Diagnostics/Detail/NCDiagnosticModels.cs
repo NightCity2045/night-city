@@ -120,7 +120,7 @@ public enum NCDiagnosticWarning : byte
 }
 
 /// <summary>
-/// Quantized inclusive range. Units are fixed by the field carrying it (millilitres, permille or milliunits/s).
+/// Quantized inclusive range. Units are fixed by the field carrying it (solution units, permille or milliunits/s).
 /// </summary>
 [Serializable, NetSerializable]
 public readonly record struct NCDiagnosticNumericRange(int Minimum, int Maximum);
@@ -134,8 +134,11 @@ public readonly record struct NCMedicalVitalsSummary(
     NCBloodPressureState? BloodPressure,
     NCHeartRhythm? HeartRhythm,
     NCDiagnosticNumericRange? OxygenationPermille,
-    NCDiagnosticNumericRange? BloodVolumeMl,
+    NCDiagnosticNumericRange? BloodVolumeUnits,
+    int? NominalBloodVolumeUnits,
     NCDiagnosticNumericRange? PerfusionPermille,
+    NCDiagnosticBand ExternalBleeding,
+    NCDiagnosticBand InternalBleeding,
     NCDiagnosticNumericRange? ExternalBleedMilliunits,
     NCDiagnosticNumericRange? InternalBleedMilliunits);
 

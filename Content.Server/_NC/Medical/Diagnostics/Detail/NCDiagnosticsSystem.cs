@@ -22,6 +22,7 @@ using Content.Shared._NC.Medical.Systemic;
 using Content.Shared._NC.Medical.Transplantation;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
+using Content.Shared.Body.Components;
 using Content.Shared.CCVar;
 using Content.Shared.FixedPoint;
 using Content.Shared.Hands.EntitySystems;
@@ -120,7 +121,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
         var circulation = CompOrNull<NCCirculationComponent>(target);
         var warnings = new HashSet<NCDiagnosticWarning>();
 
-        var vitals = BuildVitals(policy, physiology, circulation, bleeding, warnings);
+        var vitals = BuildVitals(target, policy, physiology, circulation, bleeding, warnings);
         var regions = BuildRegions(
             target,
             medical,
@@ -452,6 +453,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
     }
 
     private NCMedicalVitalsSummary BuildVitals(
+        EntityUid target,
         NCDiagnosticCapabilityPrototype policy,
         NCPhysiologyComponent? physiology,
         NCCirculationComponent? circulation,
@@ -503,6 +505,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
 
         var hasManual = Has(disclosures, NCDiagnosticDisclosure.ManualVitals);
         var hasApproximate = Has(disclosures, NCDiagnosticDisclosure.ApproximateVitals);
+        var bloodVolumeUnits = ResolveBloodVolumeUnits(target, circulation, out var nominalBloodVolumeUnits);
         return new NCMedicalVitalsSummary(
             ToBand(pain),
             hasManual ? ToBand(shock) : NCDiagnosticBand.None,
@@ -514,17 +517,55 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                 ? QuantizeRatio(oxygenation, policy.RatioQuantum)
                 : null,
             hasApproximate
-                ? Quantize(circulation?.BloodVolume ?? 0f, policy.BloodVolumeQuantum, 1f)
+                ? Quantize(bloodVolumeUnits ?? 0f, policy.BloodVolumeUnitsQuantum, 1f)
                 : null,
+            hasApproximate ? nominalBloodVolumeUnits : null,
             hasApproximate
                 ? QuantizeRatio(perfusion, policy.RatioQuantum)
                 : null,
+            Has(disclosures, NCDiagnosticDisclosure.ExternalBleeding)
+                ? ToRateBand(externalBleed)
+                : NCDiagnosticBand.None,
+            Has(disclosures, NCDiagnosticDisclosure.InternalBleeding)
+                ? ToRateBand(internalBleed)
+                : NCDiagnosticBand.None,
             Has(disclosures, NCDiagnosticDisclosure.ExternalBleeding)
                 ? Quantize(externalBleed, policy.BleedRateQuantum, 1000f)
                 : null,
             Has(disclosures, NCDiagnosticDisclosure.InternalBleeding)
                 ? Quantize(internalBleed, policy.BleedRateQuantum, 1000f)
                 : null);
+    }
+
+    /// <summary>
+    /// Converts the authoritative medical volume into the same solution units shown by the vanilla
+    /// bloodstream inspector. The reference solution is read from this body, so species or blood-reagent
+    /// overrides cannot silently desynchronize diagnostic presentation from chemistry.
+    /// </summary>
+    private float? ResolveBloodVolumeUnits(
+        EntityUid target,
+        NCCirculationComponent? circulation,
+        out int? nominalBloodVolumeUnits)
+    {
+        nominalBloodVolumeUnits = null;
+        if (circulation == null ||
+            !_prototypes.TryIndex(circulation.Profile, out NCPhysiologyProfilePrototype? physiologyProfile) ||
+            physiologyProfile.NominalBloodVolume <= 0f ||
+            !float.IsFinite(physiologyProfile.NominalBloodVolume) ||
+            !TryComp<BloodstreamComponent>(target, out var bloodstream))
+        {
+            return null;
+        }
+
+        var referenceUnits = (float) bloodstream.BloodReferenceSolution.Volume;
+        if (referenceUnits <= 0f || !float.IsFinite(referenceUnits))
+            return null;
+
+        nominalBloodVolumeUnits = (int) MathF.Round(referenceUnits);
+        var medicalVolume = float.IsFinite(circulation.BloodVolume)
+            ? MathF.Max(0f, circulation.BloodVolume)
+            : 0f;
+        return medicalVolume / physiologyProfile.NominalBloodVolume * referenceUnits;
     }
 
     private List<NCMedicalRegionSummary> BuildRegions(
@@ -997,7 +1038,10 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             resolutionId,
             accepted,
             failure,
-            accepted ? snapshot : null);
+            accepted ? snapshot : null,
+            target,
+            tool,
+            request.Tier);
     }
 
     private void OnAfterInteract(Entity<NCDiagnosticCapabilityComponent> entity, ref AfterInteractEvent args)
@@ -1024,7 +1068,16 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             capability.Tier,
             out var snapshot,
             out var failure);
-        SendResponse(actor.PlayerSession, 0, resolutionId, accepted, failure, accepted ? snapshot : null);
+        SendResponse(
+            actor.PlayerSession,
+            0,
+            resolutionId,
+            accepted,
+            failure,
+            accepted ? snapshot : null,
+            target,
+            entity.Owner,
+            capability.Tier);
         args.Handled = accepted;
     }
 
@@ -1050,7 +1103,16 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             capability.Tier,
             out var snapshot,
             out var failure);
-        SendResponse(actor.PlayerSession, 0, resolutionId, accepted, failure, accepted ? snapshot : null);
+        SendResponse(
+            actor.PlayerSession,
+            0,
+            resolutionId,
+            accepted,
+            failure,
+            accepted ? snapshot : null,
+            args.Target,
+            entity.Owner,
+            capability.Tier);
     }
 
     /// <summary>
@@ -1088,7 +1150,16 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                     capability.Tier,
                     out var snapshot,
                     out var failure);
-                SendResponse(session, 0, resolutionId, accepted, failure, accepted ? snapshot : null);
+                SendResponse(
+                    session,
+                    0,
+                    resolutionId,
+                    accepted,
+                    failure,
+                    accepted ? snapshot : null,
+                    patient,
+                    entity.Owner,
+                    capability.Tier);
             },
         });
     }
@@ -1099,11 +1170,28 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
         NCActionResolutionId resolutionId,
         bool accepted,
         NCDiagnosticAccessFailure failure,
-        NCMedicalSnapshot? snapshot)
+        NCMedicalSnapshot? snapshot,
+        EntityUid? target = null,
+        EntityUid? tool = null,
+        NCDiagnosticTier tier = NCDiagnosticTier.SelfSensations)
     {
         // This overload targets exactly one session. Medical snapshots must never use a PVS or broadcast filter.
+        var netTarget = target is { Valid: true } targetUid && Exists(targetUid)
+            ? GetNetEntity(targetUid)
+            : (NetEntity?) null;
+        var netTool = tool is { Valid: true } toolUid && Exists(toolUid)
+            ? GetNetEntity(toolUid)
+            : (NetEntity?) null;
         RaiseNetworkEvent(
-            new NCDiagnosticSnapshotResponse(requestId, resolutionId, accepted, failure, snapshot),
+            new NCDiagnosticSnapshotResponse(
+                requestId,
+                resolutionId,
+                accepted,
+                failure,
+                netTarget,
+                netTool,
+                tier,
+                snapshot),
             session);
     }
 

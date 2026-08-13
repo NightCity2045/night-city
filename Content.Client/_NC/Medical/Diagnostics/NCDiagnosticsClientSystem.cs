@@ -13,12 +13,18 @@ namespace Content.Client._NC.Medical.Diagnostics;
 /// </summary>
 public sealed partial class NCDiagnosticsClientSystem : EntitySystem
 {
+    private const float RefreshIntervalSeconds = 1f;
+
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IUserInterfaceManager _ui = default!;
 
     private NCDiagnosticWindow? _window;
     private uint _nextRequestId;
     private uint? _pendingRequestId;
+    private EntityUid? _observedTarget;
+    private EntityUid? _observedTool;
+    private NCDiagnosticTier _observedTier;
+    private float _refreshTimer;
 
     public override void Initialize()
     {
@@ -31,7 +37,30 @@ public sealed partial class NCDiagnosticsClientSystem : EntitySystem
         _window?.Close();
         _window = null;
         _pendingRequestId = null;
+        ClearObservation();
         base.Shutdown();
+    }
+
+    public override void FrameUpdate(float frameTime)
+    {
+        base.FrameUpdate(frameTime);
+        if (_window is not { Disposed: false, IsOpen: true } ||
+            _observedTarget is not { } target ||
+            _pendingRequestId != null)
+        {
+            return;
+        }
+
+        _refreshTimer -= frameTime;
+        if (_refreshTimer > 0f)
+            return;
+
+        _refreshTimer = RefreshIntervalSeconds;
+        if (!RequestSnapshot(target, _observedTool, _observedTier))
+        {
+            _window.ShowFailure(NCDiagnosticAccessFailure.TargetUnavailable);
+            ClearObservation();
+        }
     }
 
     /// <summary>
@@ -73,9 +102,19 @@ public sealed partial class NCDiagnosticsClientSystem : EntitySystem
 
         EnsureWindow();
         if (!response.Accepted || response.Snapshot == null)
+        {
             _window!.ShowFailure(response.Failure);
+        }
         else
-            _window!.SetSnapshot(response.Snapshot);
+        {
+            var target = response.Target is { } netTarget ? GetEntity(netTarget) : (EntityUid?) null;
+            var tool = response.Tool is { } netTool ? GetEntity(netTool) : (EntityUid?) null;
+            _observedTarget = target is { Valid: true } targetUid && Exists(targetUid) ? targetUid : null;
+            _observedTool = tool is { Valid: true } toolUid && Exists(toolUid) ? toolUid : null;
+            _observedTier = response.Tier;
+            _refreshTimer = RefreshIntervalSeconds;
+            _window!.SetSnapshot(response.Snapshot, _observedTarget);
+        }
 
         if (!_window.IsOpen)
         {
@@ -90,5 +129,14 @@ public sealed partial class NCDiagnosticsClientSystem : EntitySystem
             return;
 
         _window = new NCDiagnosticWindow(_prototypes);
+        _window.OnClose += ClearObservation;
+    }
+
+    private void ClearObservation()
+    {
+        _observedTarget = null;
+        _observedTool = null;
+        _pendingRequestId = null;
+        _refreshTimer = 0f;
     }
 }

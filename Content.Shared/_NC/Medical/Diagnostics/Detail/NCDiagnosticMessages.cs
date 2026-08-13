@@ -59,11 +59,17 @@ public sealed class NCDiagnosticSnapshotResponse(
     NCActionResolutionId resolutionId,
     bool accepted,
     NCDiagnosticAccessFailure failure,
+    NetEntity? target,
+    NetEntity? tool,
+    NCDiagnosticTier tier,
     NCMedicalSnapshot? snapshot) : EntityEventArgs
 {
     public uint RequestId { get; } = requestId;
     public NCActionResolutionId ResolutionId { get; } = resolutionId;
     public bool Accepted { get; } = accepted;
     public NCDiagnosticAccessFailure Failure { get; } = failure;
+    public NetEntity? Target { get; } = target;
+    public NetEntity? Tool { get; } = tool;
+    public NCDiagnosticTier Tier { get; } = tier;
     public NCMedicalSnapshot? Snapshot { get; } = snapshot;
 }

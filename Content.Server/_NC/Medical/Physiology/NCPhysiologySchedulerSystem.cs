@@ -50,6 +50,13 @@ public sealed partial class NCPhysiologySchedulerSystem : EntitySystem
         if (_processingBodies.Contains(entity.Owner))
             return;
 
+        // An unscheduled body has been event-driven and healthy since its last evaluation. New wounds and
+        // bleeding sources begin at this mutation boundary, so they must never be integrated over that idle
+        // interval. Bodies already in the heap retain their anchor because their existing timed state has
+        // genuinely been accruing since the previous evaluation.
+        if (!_heapIndices.ContainsKey(entity.Owner))
+            entity.Comp.LastEvaluation = _timing.CurTime;
+
         Schedule(entity.Owner);
     }
 

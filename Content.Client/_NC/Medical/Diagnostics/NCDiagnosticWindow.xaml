@@ -5,56 +5,200 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
 -->
 <controls:FancyWindow xmlns="https://spacestation14.io"
                       xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                      xmlns:targeting="clr-namespace:Content.Client._NC.Combat.Targeting"
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       x:Class="Content.Client._NC.Medical.Diagnostics.NCDiagnosticWindow"
                       Title="{Loc 'nc-medical-diagnostics-title'}"
-                      SetSize="900 660">
-    <BoxContainer Margin="10" Orientation="Vertical" SeparationOverride="8">
-        <BoxContainer Orientation="Horizontal" SeparationOverride="12">
-            <Label Name="TierLabel" StyleClasses="LabelHeading" HorizontalExpand="True" />
-            <Label Name="RevisionLabel" FontColorOverride="#8A9BA8" />
-        </BoxContainer>
-        <Label Name="ObservationLabel" FontColorOverride="#8A9BA8" />
-        <Label Name="FailureLabel" FontColorOverride="#FF6B6B" Visible="False" />
-        <PanelContainer StyleClasses="LowDivider" />
+                      SetSize="1040 720"
+                      MinSize="820 500">
+    <PanelContainer HorizontalExpand="True" VerticalExpand="True">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#04090D" BorderColor="#174D4A" BorderThickness="2" />
+        </PanelContainer.PanelOverride>
 
-        <TabContainer Name="Tabs" HorizontalExpand="True" VerticalExpand="True">
-            <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
-                <BoxContainer Name="OverviewContainer"
-                              Margin="8"
-                              Orientation="Vertical"
-                              SeparationOverride="5" />
-            </ScrollContainer>
-            <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
-                <BoxContainer Name="RegionsContainer"
-                              Margin="8"
-                              Orientation="Vertical"
-                              SeparationOverride="5" />
-            </ScrollContainer>
-            <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
-                <BoxContainer Name="WoundsContainer"
-                              Margin="8"
-                              Orientation="Vertical"
-                              SeparationOverride="5" />
-            </ScrollContainer>
-            <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
-                <BoxContainer Name="OrgansContainer"
-                              Margin="8"
-                              Orientation="Vertical"
-                              SeparationOverride="5" />
-            </ScrollContainer>
-            <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
-                <BoxContainer Name="CyberwareContainer"
-                              Margin="8"
-                              Orientation="Vertical"
-                              SeparationOverride="5" />
-            </ScrollContainer>
-            <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
-                <BoxContainer Name="DrugsContainer"
-                              Margin="8"
-                              Orientation="Vertical"
-                              SeparationOverride="5" />
-            </ScrollContainer>
-        </TabContainer>
-    </BoxContainer>
+        <BoxContainer Margin="6" Orientation="Vertical" SeparationOverride="6"
+                      HorizontalExpand="True" VerticalExpand="True">
+            <PanelContainer SetHeight="30" HorizontalExpand="True">
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#07161B" BorderColor="#29D8C8" BorderThickness="0 0 0 1" />
+                </PanelContainer.PanelOverride>
+                <BoxContainer Margin="10 3" Orientation="Horizontal">
+                    <Label Text="{Loc 'nc-medical-diagnostics-system-title'}" FontColorOverride="#75FFF2" />
+                    <Label Text=" // " FontColorOverride="#286D69" />
+                    <Label Text="{Loc 'nc-medical-diagnostics-system-channel'}" FontColorOverride="#52A8A1" />
+                    <Control HorizontalExpand="True" />
+                    <Label Text="●" FontColorOverride="#67E89A" Margin="0 0 5 0" />
+                    <Label Text="{Loc 'nc-medical-diagnostics-system-secure'}" FontColorOverride="#75A8A4" />
+                </BoxContainer>
+            </PanelContainer>
+
+            <PanelContainer MinHeight="88" HorizontalExpand="True">
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#091A20" BorderColor="#246D68" BorderThickness="1" />
+                </PanelContainer.PanelOverride>
+                <BoxContainer Margin="11 8" Orientation="Horizontal" SeparationOverride="12">
+                    <PanelContainer SetSize="68 68">
+                        <PanelContainer.PanelOverride>
+                            <gfx:StyleBoxFlat BackgroundColor="#03090C" BorderColor="#1C5754" BorderThickness="1" />
+                        </PanelContainer.PanelOverride>
+                        <SpriteView Name="PatientSprite" SetSize="64 64" Scale="2 2" OverrideDirection="South" />
+                    </PanelContainer>
+                    <BoxContainer Orientation="Vertical" SeparationOverride="2" HorizontalExpand="True">
+                        <Label Text="{Loc 'nc-medical-diagnostics-patient-record'}" FontColorOverride="#4D918C" />
+                        <Label Name="PatientNameLabel" StyleClasses="LabelHeadingBigger" FontColorOverride="#D8FFFB" />
+                        <Label Name="PatientStateLabel" />
+                        <Label Text="{Loc 'nc-medical-diagnostics-data-scope'}" FontColorOverride="#4D918C" />
+                        <BoxContainer Orientation="Horizontal" SeparationOverride="7">
+                            <Label Name="TierLabel" FontColorOverride="#6DE9DC" />
+                            <Label Text="//" FontColorOverride="#286D69" />
+                            <Label Name="ConfidenceLabel" FontColorOverride="#7B999E" />
+                        </BoxContainer>
+                    </BoxContainer>
+                    <BoxContainer Orientation="Vertical" HorizontalAlignment="Right" SeparationOverride="3">
+                        <Label Name="FreshnessLabel" Align="Right" />
+                        <Label Name="ConnectionLabel" Align="Right" FontColorOverride="#67E89A" />
+                    </BoxContainer>
+                </BoxContainer>
+            </PanelContainer>
+
+            <PanelContainer Name="FailurePanel" Visible="False" HorizontalExpand="True">
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#2A1117" BorderColor="#FF5E78" BorderThickness="0 0 0 2" />
+                </PanelContainer.PanelOverride>
+                <Label Name="FailureLabel" Margin="9 5" FontColorOverride="#FF8294" />
+            </PanelContainer>
+
+            <TabContainer Name="Tabs" HorizontalExpand="True" VerticalExpand="True">
+                <ScrollContainer Name="OverviewTab" HScrollEnabled="False"
+                                 HorizontalExpand="True" VerticalExpand="True">
+                    <BoxContainer Margin="8" Orientation="Vertical" SeparationOverride="9"
+                                  HorizontalExpand="True">
+                        <BoxContainer Orientation="Horizontal">
+                            <Label Text="{Loc 'nc-medical-diagnostics-triage-feed'}"
+                                   StyleClasses="LabelHeading"
+                                   FontColorOverride="#75FFF2"
+                                   HorizontalExpand="True" />
+                            <Label Text="{Loc 'nc-medical-diagnostics-live-feed'}" FontColorOverride="#67E89A" />
+                        </BoxContainer>
+                        <PanelContainer HorizontalExpand="True">
+                            <PanelContainer.PanelOverride>
+                                <gfx:StyleBoxFlat BackgroundColor="#081419" BorderColor="#2D8B84" BorderThickness="1" />
+                            </PanelContainer.PanelOverride>
+                            <!-- The overview page owns scrolling. Keeping triage in normal layout makes every
+                                 action line visible and avoids a cramped nested scrollbar. -->
+                            <BoxContainer Name="ThreatsContainer"
+                                          Margin="12 9"
+                                          Orientation="Vertical"
+                                          SeparationOverride="7"
+                                          HorizontalExpand="True" />
+                        </PanelContainer>
+
+                        <BoxContainer Orientation="Horizontal" SeparationOverride="10"
+                                      HorizontalExpand="True">
+                            <BoxContainer Orientation="Vertical" SeparationOverride="6" SetWidth="214">
+                                <BoxContainer Orientation="Horizontal">
+                                    <Label Text="{Loc 'nc-medical-diagnostics-body-map'}"
+                                           FontColorOverride="#75FFF2"
+                                           HorizontalExpand="True" />
+                                    <Button Name="AllBodyButton"
+                                            Text="{Loc 'nc-medical-diagnostics-body-all'}"
+                                            StyleClasses="ButtonSmall" />
+                                </BoxContainer>
+                                <PanelContainer MinHeight="300" VerticalExpand="True">
+                                    <PanelContainer.PanelOverride>
+                                        <gfx:StyleBoxFlat BackgroundColor="#03090C" BorderColor="#267B75" BorderThickness="1" />
+                                    </PanelContainer.PanelOverride>
+                                    <BoxContainer Margin="8" Orientation="Vertical" HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center">
+                                        <Label Text="{Loc 'nc-medical-diagnostics-body-map-code'}"
+                                               FontColorOverride="#376E6A" Align="Center" />
+                                        <targeting:NCTargetingDollControl Name="BodyDoll" />
+                                    </BoxContainer>
+                                </PanelContainer>
+                                <Label Name="BodyFilterLabel" Align="Center" FontColorOverride="#76ABA7" />
+                            </BoxContainer>
+
+                            <BoxContainer Orientation="Vertical" SeparationOverride="8" HorizontalExpand="True">
+                                <Label Text="{Loc 'nc-medical-diagnostics-vital-stream'}"
+                                       StyleClasses="LabelHeading"
+                                       FontColorOverride="#75FFF2" />
+                                <BoxContainer Orientation="Horizontal" SeparationOverride="7" HorizontalExpand="True">
+                                    <PanelContainer HorizontalExpand="True" SizeFlagsStretchRatio="1">
+                                        <PanelContainer.PanelOverride>
+                                            <gfx:StyleBoxFlat BackgroundColor="#0A2024" BorderColor="#27968C" BorderThickness="0 0 0 2" />
+                                        </PanelContainer.PanelOverride>
+                                        <BoxContainer Margin="9 7" Orientation="Vertical">
+                                            <Label Text="{Loc 'nc-medical-diagnostics-oxygen-short'}" FontColorOverride="#62BDB6" />
+                                            <Label Name="OxygenValue" StyleClasses="LabelHeadingBigger" />
+                                            <ProgressBar Name="OxygenBar" MinValue="0" MaxValue="1" SetHeight="9" />
+                                        </BoxContainer>
+                                    </PanelContainer>
+                                    <PanelContainer HorizontalExpand="True" SizeFlagsStretchRatio="1.65">
+                                        <PanelContainer.PanelOverride>
+                                            <gfx:StyleBoxFlat BackgroundColor="#0A2024" BorderColor="#27968C" BorderThickness="0 0 0 2" />
+                                        </PanelContainer.PanelOverride>
+                                        <BoxContainer Margin="9 7" Orientation="Vertical">
+                                            <Label Text="{Loc 'nc-medical-diagnostics-blood-short'}" FontColorOverride="#62BDB6" />
+                                            <Label Name="BloodValue" StyleClasses="LabelHeadingBigger" />
+                                            <ProgressBar Name="BloodBar" MinValue="0" MaxValue="1" SetHeight="9" />
+                                        </BoxContainer>
+                                    </PanelContainer>
+                                    <PanelContainer HorizontalExpand="True" SizeFlagsStretchRatio="1">
+                                        <PanelContainer.PanelOverride>
+                                            <gfx:StyleBoxFlat BackgroundColor="#0A2024" BorderColor="#27968C" BorderThickness="0 0 0 2" />
+                                        </PanelContainer.PanelOverride>
+                                        <BoxContainer Margin="9 7" Orientation="Vertical">
+                                            <Label Text="{Loc 'nc-medical-diagnostics-perfusion-short'}" FontColorOverride="#62BDB6" />
+                                            <Label Name="PerfusionValue" StyleClasses="LabelHeadingBigger" />
+                                            <ProgressBar Name="PerfusionBar" MinValue="0" MaxValue="1" SetHeight="9" />
+                                        </BoxContainer>
+                                    </PanelContainer>
+                                </BoxContainer>
+
+                                <PanelContainer HorizontalExpand="True">
+                                    <PanelContainer.PanelOverride>
+                                        <gfx:StyleBoxFlat BackgroundColor="#071419" BorderColor="#1D514F" BorderThickness="1" />
+                                    </PanelContainer.PanelOverride>
+                                    <GridContainer Margin="10 7" Columns="4" HSeparationOverride="10" VSeparationOverride="5">
+                                        <Label Text="{Loc 'nc-medical-diagnostics-pressure-label'}" FontColorOverride="#5EA8A2" />
+                                        <Label Name="PressureValue" />
+                                        <Label Text="{Loc 'nc-medical-diagnostics-rhythm-label'}" FontColorOverride="#5EA8A2" />
+                                        <Label Name="RhythmValue" />
+                                        <Label Text="{Loc 'nc-medical-diagnostics-pain-label'}" FontColorOverride="#5EA8A2" />
+                                        <Label Name="PainValue" />
+                                        <Label Text="{Loc 'nc-medical-diagnostics-shock-label'}" FontColorOverride="#5EA8A2" />
+                                        <Label Name="ShockValue" />
+                                        <Label Text="{Loc 'nc-medical-diagnostics-external-bleed-label'}" FontColorOverride="#5EA8A2" />
+                                        <Label Name="ExternalBleedValue" />
+                                        <Label Text="{Loc 'nc-medical-diagnostics-internal-bleed-label'}" FontColorOverride="#5EA8A2" />
+                                        <Label Name="InternalBleedValue" />
+                                    </GridContainer>
+                                </PanelContainer>
+                            </BoxContainer>
+                        </BoxContainer>
+
+                        <BoxContainer Name="OverviewContainer" Orientation="Vertical" SeparationOverride="7"
+                                      HorizontalExpand="True" />
+                    </BoxContainer>
+                </ScrollContainer>
+
+                <ScrollContainer Name="RegionsTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True">
+                    <BoxContainer Name="RegionsContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
+                </ScrollContainer>
+                <ScrollContainer Name="WoundsTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True">
+                    <BoxContainer Name="WoundsContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
+                </ScrollContainer>
+                <ScrollContainer Name="OrgansTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True">
+                    <BoxContainer Name="OrgansContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
+                </ScrollContainer>
+                <ScrollContainer Name="CyberwareTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True">
+                    <BoxContainer Name="CyberwareContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
+                </ScrollContainer>
+                <ScrollContainer Name="DrugsTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True">
+                    <BoxContainer Name="DrugsContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
+                </ScrollContainer>
+            </TabContainer>
+        </BoxContainer>
+    </PanelContainer>
 </controls:FancyWindow>
