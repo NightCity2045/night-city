@@ -111,6 +111,9 @@
   # NC start - Authoritative Night City human anatomy extends the live SS14 organ graph.
   - type: NCMedicalBody
     profile: Human
+  # NC start - Replicate only the bounded external wound projection used by the world sprite overlay.
+  - type: NCVisibleWound
+  # NC end
   - type: NCBodyFunction
     profile: NCHumanBodyFunction
   - type: NCCyberwareBodyState

@@ -119,6 +119,8 @@ public sealed partial class NCTargetingUIController : UIController,
         if (!_overlay.Doll.SetState(_targeting.State))
             _overlay.Doll.SetState(new NCTargetingState(NCTargetingMode.Automatic, null));
 
-        _overlay.Doll.SetStatusLevels(_targeting.StatusLevels);
+        // Target selection has a stable healthy silhouette. Owner health is rendered by the separate
+        // medical HUD so combat intent and medical state never compete for the same colors.
+        _overlay.Doll.ClearStatusLevels();
     }
 }

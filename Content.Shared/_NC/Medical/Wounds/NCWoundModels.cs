@@ -118,6 +118,19 @@ public sealed partial class NCWoundRecord
     [DataField]
     public Guid ForensicResolutionId;
 
+    /// <summary>
+    /// Stable normalized surface placement used by pixel-art medical presentation. Values span the full
+    /// byte range so persistence never depends on a particular HUD scale or texture resolution.
+    /// </summary>
+    [DataField]
+    public byte VisualX;
+
+    [DataField]
+    public byte VisualY;
+
+    [DataField]
+    public byte VisualDirection;
+
     [DataField]
     public TimeSpan CreatedAt;
 
@@ -161,6 +174,15 @@ public sealed partial class NCScarRecord
 
     [DataField]
     public float Contracture;
+
+    [DataField]
+    public byte VisualX;
+
+    [DataField]
+    public byte VisualY;
+
+    [DataField]
+    public byte VisualDirection;
 
     [DataField]
     public TimeSpan CreatedAt;

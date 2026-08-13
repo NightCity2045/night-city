@@ -184,26 +184,36 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
                 migrated = CloneSnapshot(snapshot);
                 InitializeLegacyLongitudinalWounds(migrated);
                 InitializeLegacySystemicChannels(migrated);
+                InitializeLegacyWoundVisualization(migrated);
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
             case NCMedicalSnapshotVersions.LongitudinalWounds:
                 migrated = CloneSnapshot(snapshot);
                 InitializeLegacySystemicChannels(migrated);
+                InitializeLegacyWoundVisualization(migrated);
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
             case NCMedicalSnapshotVersions.CyberwareGraph:
                 migrated = CloneSnapshot(snapshot);
                 migrated.Pharmacology = null;
                 InitializeLegacySystemicChannels(migrated);
+                InitializeLegacyWoundVisualization(migrated);
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
             case NCMedicalSnapshotVersions.PharmacologyGraph:
                 migrated = CloneSnapshot(snapshot);
                 InitializeLegacySystemicChannels(migrated);
+                InitializeLegacyWoundVisualization(migrated);
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
             case NCMedicalSnapshotVersions.SystemicSepsis:
                 migrated = CloneSnapshot(snapshot);
+                InitializeLegacyWoundVisualization(migrated);
+                migrated.Version = NCMedicalSnapshotVersions.Current;
+                return true;
+            case NCMedicalSnapshotVersions.TransplantRejection:
+                migrated = CloneSnapshot(snapshot);
+                InitializeLegacyWoundVisualization(migrated);
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
             case NCMedicalSnapshotVersions.Current:
@@ -212,6 +222,35 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
             default:
                 return false;
         }
+    }
+
+    /// <summary>
+    /// Legacy wounds did not preserve an impact point. Stable wound identifiers provide a deterministic
+    /// fallback so upgraded characters retain fixed marks instead of reshuffling on every diagnostic scan.
+    /// </summary>
+    private static void InitializeLegacyWoundVisualization(NCMedicalStateSnapshot snapshot)
+    {
+        if (snapshot.Wounds is not { } wounds)
+            return;
+
+        foreach (var wound in wounds.Records.Values)
+            InitializeLegacyWoundVisualization(wound.WoundId, wound);
+
+        foreach (var scar in wounds.Scars)
+        {
+            var bytes = scar.ScarId.ToByteArray();
+            scar.VisualX = bytes[0];
+            scar.VisualY = bytes[1];
+            scar.VisualDirection = bytes[2];
+        }
+    }
+
+    private static void InitializeLegacyWoundVisualization(Guid id, NCWoundRecordSnapshot wound)
+    {
+        var bytes = id.ToByteArray();
+        wound.VisualX = bytes[0];
+        wound.VisualY = bytes[1];
+        wound.VisualDirection = bytes[2];
     }
 
     /// <summary>

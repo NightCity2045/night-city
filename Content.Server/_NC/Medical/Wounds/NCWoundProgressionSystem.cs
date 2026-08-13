@@ -738,6 +738,9 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
             Area = MathF.Max(0f, wound.Area),
             Disfigurement = Math.Clamp(wound.ScarRisk, 0f, 1f),
             Contracture = progression.ScarContractureBySeverity[wound.Severity],
+            VisualX = wound.VisualX,
+            VisualY = wound.VisualY,
+            VisualDirection = wound.VisualDirection,
             CreatedAt = now,
         };
 

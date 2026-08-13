@@ -60,6 +60,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
         _entities = IoCManager.Resolve<IEntityManager>();
 
         BodyDoll.DisplayScale = 4f;
+        BodyDoll.InteractionEnabled = true;
         BodyDoll.ShowAutomaticSelection = false;
         BodyDoll.SetProfile(HumanAnatomy);
         BodyDoll.TargetingChanged += OnBodyZoneSelected;
@@ -246,6 +247,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
             levels[region.Zone] = level;
         }
         BodyDoll.SetStatusLevels(levels);
+        BodyDoll.SetWoundMarkers(snapshot.Wounds);
         RefreshBodyFilterLabel();
     }
 
@@ -553,6 +555,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
     {
         _selectedZone = null;
         BodyDoll.SetState(new NCTargetingState(NCTargetingMode.Automatic, null));
+        BodyDoll.SetWoundMarkers([]);
         RefreshBodyFilterLabel();
         RefreshFilteredSections();
     }

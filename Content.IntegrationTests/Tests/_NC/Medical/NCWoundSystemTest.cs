@@ -13,6 +13,7 @@ using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Bleeding;
+using Content.Shared._NC.Medical.Diagnostics;
 using Content.Shared._NC.Medical.Trauma;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared._NC.Medical.Physiology;
@@ -274,13 +275,77 @@ public sealed class NCWoundSystemTest : GameTest
         });
     }
 
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void SeparateImpactsKeepSeparateStableVisualCoordinatesAndOwnerFlags()
+    {
+        var body = SSpawn(HumanMob);
+        var firstRequest = CreateRequest(
+            body,
+            "NCZoneLegRight",
+            "LegRight",
+            "BallisticProjectile",
+            9f,
+            localHitPosition: new Vector2(-0.25f, 0.25f),
+            impactDirection: Vector2.UnitX);
+        var secondRequest = CreateRequest(
+            body,
+            "NCZoneLegRight",
+            "LegRight",
+            "BallisticProjectile",
+            9f,
+            localHitPosition: new Vector2(0.25f, -0.25f),
+            impactDirection: Vector2.UnitY);
+
+        var firstEvent = new NCCombatTraumaRequestedEvent(firstRequest);
+        var secondEvent = new NCCombatTraumaRequestedEvent(secondRequest);
+        SEntMan.EventBus.RaiseLocalEvent(body, ref firstEvent);
+        SEntMan.EventBus.RaiseLocalEvent(body, ref secondEvent);
+
+        var wounds = SComp<NCWoundContainerComponent>(body).Wounds.Values
+            .Where(wound => wound.TargetZone.Id == "NCZoneLegRight")
+            .ToList();
+        var visibleMarkers = SComp<NCVisibleWoundComponent>(body).Markers
+            .Where(marker => marker.Zone.Id == "NCZoneLegRight")
+            .ToList();
+        var status = _status.BuildOwnerStatusSnapshot(body)
+            .Single(zone => zone.Zone.Id == "NCZoneLegRight");
+        Assert.Multiple(() =>
+        {
+            Assert.That(firstEvent.Applied, Is.True);
+            Assert.That(secondEvent.Applied, Is.True);
+            Assert.That(wounds, Has.Count.EqualTo(2));
+            Assert.That(wounds.Select(wound => (wound.VisualX, wound.VisualY)), Is.Unique);
+            Assert.That(wounds.Select(wound => wound.VisualDirection), Is.Unique);
+            Assert.That(visibleMarkers, Has.Count.EqualTo(2));
+            Assert.That(visibleMarkers.Select(marker => (marker.VisualX, marker.VisualY)), Is.Unique);
+            Assert.That(visibleMarkers.All(marker => marker.Type == NCWoundType.Ballistic), Is.True);
+            Assert.That(status.Flags.HasFlag(NCMedicalZoneStatusFlags.ExternalBleeding), Is.True);
+            Assert.That(typeof(NCVisibleWoundMarker).GetProperties()
+                .All(property => property.PropertyType != typeof(Guid)), Is.True,
+                "Public world marks must not expose wound or forensic identity.");
+        });
+
+        Assert.That(_anatomy.TryGetOrgan(body, "LegRight", out var leg), Is.True);
+        SComp<NCOrganIntegrityComponent>(leg).FunctionalEfficiency = 0f;
+        status = _status.BuildOwnerStatusSnapshot(body)
+            .Single(zone => zone.Zone.Id == "NCZoneLegRight");
+        Assert.Multiple(() =>
+        {
+            Assert.That(status.Flags.HasFlag(NCMedicalZoneStatusFlags.FunctionLost), Is.True);
+            Assert.That(status.Severity, Is.EqualTo(8));
+        });
+    }
+
     private static NCCombatTraumaRequest CreateRequest(
         EntityUid body,
         ProtoId<NCTargetZonePrototype> zone,
         ProtoId<OrganCategoryPrototype> region,
         ProtoId<NCTraumaProfilePrototype> traumaProfile,
         float postArmorDamage,
-        float transferredBluntDamage = 0f)
+        float transferredBluntDamage = 0f,
+        Vector2? localHitPosition = null,
+        Vector2? impactDirection = null)
     {
         return new NCCombatTraumaRequest(
             NCActionResolutionId.New(),
@@ -298,8 +363,8 @@ public sealed class NCWoundSystemTest : GameTest
             FixedPoint2.Zero,
             FixedPoint2.New(postArmorDamage),
             FixedPoint2.New(transferredBluntDamage),
-            Vector2.Zero,
-            Vector2.UnitX,
+            localHitPosition ?? Vector2.Zero,
+            impactDirection ?? Vector2.UnitX,
             transferredBluntDamage > 0f ? NCTraumaFlags.ArmorStopped : NCTraumaFlags.ArmorPenetrated,
             0.1f,
             TimeSpan.Zero);

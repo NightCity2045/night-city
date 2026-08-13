@@ -5,6 +5,7 @@
 using Content.Server._NC.Medical.Wounds;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Bleeding;
 using Content.Shared._NC.Medical.Diagnostics;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Wounds;
@@ -74,10 +75,48 @@ public sealed partial class NCMedicalStatusSnapshotSystem : EntitySystem
         {
             var level = ResolveBurdenLevel(burden[zone], woundSystemProfile.StatusDamageThresholds);
             level = Math.Max(level, severityFloor[zone]);
-            result.Add(new NCMedicalZoneStatus(zone, (byte) Math.Clamp((int) level, 0, 8)));
+            var flags = ResolvePresentationFlags(body, zone);
+            if ((flags & NCMedicalZoneStatusFlags.FunctionLost) != 0)
+                level = 8;
+            result.Add(new NCMedicalZoneStatus(zone, (byte) Math.Clamp((int) level, 0, 8), flags));
         }
 
         return result;
+    }
+
+    private NCMedicalZoneStatusFlags ResolvePresentationFlags(
+        EntityUid body,
+        ProtoId<NCTargetZonePrototype> zoneId)
+    {
+        var flags = NCMedicalZoneStatusFlags.None;
+        if (!_prototypes.TryIndex(zoneId, out var zone) ||
+            !_anatomy.TryGetOrgan(body, zone.MedicalRegionCategory, out var region))
+        {
+            return NCMedicalZoneStatusFlags.Missing;
+        }
+
+        if ((TryComp<NCOrganIntegrityComponent>(region, out var integrity) &&
+             integrity.FunctionalEfficiency <= 0.1f) ||
+            (TryComp<NCNerveComponent>(region, out var nerve) && nerve.MotorFunction <= 0.1f))
+        {
+            flags |= NCMedicalZoneStatusFlags.FunctionLost;
+        }
+
+        if (TryComp<NCBleedingComponent>(body, out var bleeding))
+        {
+            foreach (var source in bleeding.Sources)
+            {
+                if (source.TargetZone == zoneId &&
+                    source.Channel != NCBleedingChannel.Internal &&
+                    source.CurrentRate > 0f)
+                {
+                    flags |= NCMedicalZoneStatusFlags.ExternalBleeding;
+                    break;
+                }
+            }
+        }
+
+        return flags;
     }
 
     private void OnSnapshotRequest(NCMedicalStatusSnapshotRequest request, EntitySessionEventArgs args)

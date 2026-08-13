@@ -500,6 +500,7 @@ public sealed partial class NCMedicalPersistenceSystem
                 NCMedicalSnapshotVersions.CyberwareGraph or
                 NCMedicalSnapshotVersions.PharmacologyGraph or
                 NCMedicalSnapshotVersions.SystemicSepsis or
+                NCMedicalSnapshotVersions.TransplantRejection or
                 NCMedicalSnapshotVersions.Current) ||
             runtimeAnchor < TimeSpan.Zero ||
             !HasNonNullSnapshotShape(source))

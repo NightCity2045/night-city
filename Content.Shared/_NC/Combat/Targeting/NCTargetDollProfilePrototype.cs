@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Numerics;
+using Content.Shared.Humanoid;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 
@@ -55,6 +56,13 @@ public sealed partial class NCTargetDollZonePresentation
 
     [DataField(required: true)]
     public Vector2 Position { get; private set; }
+
+    /// <summary>
+    /// Humanoid sprite layers whose alpha defines the visible world silhouette for this anatomical zone.
+    /// The wound renderer uses the current RSI direction, so side-facing and prone bodies remain clipped correctly.
+    /// </summary>
+    [DataField(required: true)]
+    public List<HumanoidVisualLayers> WorldVisualLayers { get; private set; } = [];
 
     /// <summary>
     /// Optional visual size on the 32px doll canvas. Cropped selection textures come from a different

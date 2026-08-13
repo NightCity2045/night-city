@@ -230,6 +230,9 @@ public sealed partial class NCMedicalPersistenceSystem
             EmbeddedObjectId = wound.EmbeddedObjectId,
             ExitWoundId = wound.ExitWoundId,
             ForensicResolutionId = wound.ForensicResolutionId,
+            VisualX = wound.VisualX,
+            VisualY = wound.VisualY,
+            VisualDirection = wound.VisualDirection,
             CreatedAt = wound.CreatedAt,
             ModifiedAt = wound.ModifiedAt,
             Age = wound.Age,
@@ -249,6 +252,9 @@ public sealed partial class NCMedicalPersistenceSystem
             Area = scar.Area,
             Disfigurement = scar.Disfigurement,
             Contracture = scar.Contracture,
+            VisualX = scar.VisualX,
+            VisualY = scar.VisualY,
+            VisualDirection = scar.VisualDirection,
             CreatedAt = scar.CreatedAt,
         };
     }
@@ -589,6 +595,9 @@ public sealed partial class NCMedicalPersistenceSystem
             EmbeddedObjectId = wound.EmbeddedObjectId,
             ExitWoundId = wound.ExitWoundId,
             ForensicResolutionId = wound.ForensicResolutionId,
+            VisualX = wound.VisualX,
+            VisualY = wound.VisualY,
+            VisualDirection = wound.VisualDirection,
             CreatedAt = wound.CreatedAt,
             ModifiedAt = wound.ModifiedAt,
             Age = wound.Age,
@@ -608,6 +617,9 @@ public sealed partial class NCMedicalPersistenceSystem
             Area = scar.Area,
             Disfigurement = scar.Disfigurement,
             Contracture = scar.Contracture,
+            VisualX = scar.VisualX,
+            VisualY = scar.VisualY,
+            VisualDirection = scar.VisualDirection,
             CreatedAt = scar.CreatedAt,
         };
     }

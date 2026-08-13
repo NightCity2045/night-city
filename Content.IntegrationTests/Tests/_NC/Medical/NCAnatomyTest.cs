@@ -5,18 +5,25 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Content.Client._NC.Medical.Wounds;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
+using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Function;
+using Content.Shared._NC.Medical.Trauma;
+using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
+using Content.Shared.Damage;
+using Content.Shared.FixedPoint;
 using Content.Shared.Humanoid.Prototypes;
 using Content.Shared.Random;
 using Robust.Shared.Containers;
 using Robust.Shared.ContentPack;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Localization;
+using Robust.Shared.Maths;
 using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._NC.Medical;
@@ -128,6 +135,10 @@ public sealed class NCAnatomyTest : GameTest
                     Is.True, $"Zone {presentation.Zone} has a non-finite overlay position.");
                 Assert.That(presentation.HitboxPadding.X, Is.GreaterThanOrEqualTo(0f), presentation.Zone.Id);
                 Assert.That(presentation.HitboxPadding.Y, Is.GreaterThanOrEqualTo(0f), presentation.Zone.Id);
+                Assert.That(presentation.WorldVisualLayers, Is.Not.Empty,
+                    $"Zone {presentation.Zone} has no directional humanoid silhouette layers.");
+                Assert.That(presentation.WorldVisualLayers, Is.Unique,
+                    $"Zone {presentation.Zone} repeats a directional humanoid silhouette layer.");
                 if (presentation.DisplaySize is { } displaySize)
                 {
                     Assert.That(displaySize.X, Is.GreaterThan(0f), presentation.Zone.Id);
@@ -364,8 +375,74 @@ public sealed class NCMedicalBodyNetworkTest : GameTest
                 Is.EqualTo("Human"));
             Assert.That(Client.EntMan.GetComponent<NCMedicalBodyComponent>(clientBody).Profile.Id,
                 Is.EqualTo("Human"));
+            Assert.That(Server.EntMan.GetComponent<NCVisibleWoundComponent>(serverBody).Markers, Is.Empty);
+            Assert.That(Client.EntMan.GetComponent<NCVisibleWoundComponent>(clientBody).Markers, Is.Empty);
+        });
+
+        await Server.WaitPost(() =>
+        {
+            var first = new NCCombatTraumaRequestedEvent(CreateRequest(
+                serverBody,
+                new Vector2(-0.25f, 0.25f),
+                Vector2.UnitX));
+            var second = new NCCombatTraumaRequestedEvent(CreateRequest(
+                serverBody,
+                new Vector2(0.25f, -0.25f),
+                Vector2.UnitY));
+            Server.EntMan.EventBus.RaiseLocalEvent(serverBody, ref first);
+            Server.EntMan.EventBus.RaiseLocalEvent(serverBody, ref second);
+            Assert.That(first.Applied, Is.True);
+            Assert.That(second.Applied, Is.True);
+        });
+        await Pair.RunTicksSync(5);
+
+        Assert.Multiple(() =>
+        {
+            var serverMarkers = Server.EntMan.GetComponent<NCVisibleWoundComponent>(serverBody).Markers;
+            var clientMarkers = Client.EntMan.GetComponent<NCVisibleWoundComponent>(clientBody).Markers;
+            var overlaySystem = Client.EntMan.System<NCWorldWoundOverlaySystem>();
+            Assert.That(serverMarkers, Has.Count.EqualTo(2));
+            Assert.That(clientMarkers, Is.EqualTo(serverMarkers));
+            Assert.That(clientMarkers.Select(marker => (marker.VisualX, marker.VisualY)), Is.Unique);
+            Assert.That(overlaySystem.IsIndexed(clientBody), Is.True,
+                "A client body with replicated wound markers must be scheduled for world rendering.");
+            var legBounds = Box2.FromDimensions(new Vector2(11f, 20f), new Vector2(4f, 6f));
+            Assert.That(clientMarkers.All(marker =>
+            {
+                var point = NCWoundMarkerProjection.ResolveBasePoint(marker, legBounds);
+                return point.X >= legBounds.Left && point.X < legBounds.Right &&
+                       point.Y >= legBounds.Bottom && point.Y < legBounds.Top;
+            }), Is.True, "Every replicated wound must project inside its configured sprite zone.");
         });
 
         await Server.WaitPost(() => Server.EntMan.DeleteEntity(map.MapUid));
+    }
+
+    private static NCCombatTraumaRequest CreateRequest(
+        EntityUid body,
+        Vector2 localHitPosition,
+        Vector2 impactDirection)
+    {
+        return new NCCombatTraumaRequest(
+            NCActionResolutionId.New(),
+            1,
+            1,
+            body,
+            null,
+            null,
+            null,
+            "NCZoneLegRight",
+            "LegRight",
+            "BallisticProjectile",
+            new DamageSpecifier(),
+            FixedPoint2.New(9f),
+            FixedPoint2.Zero,
+            FixedPoint2.New(9f),
+            FixedPoint2.Zero,
+            localHitPosition,
+            impactDirection,
+            NCTraumaFlags.ArmorPenetrated,
+            0.1f,
+            TimeSpan.Zero);
     }
 }

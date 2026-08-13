@@ -4,7 +4,6 @@
 
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
-using Content.Shared._NC.Medical.Diagnostics;
 using Robust.Client.Player;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
@@ -25,23 +24,17 @@ public sealed partial class NCTargetingClientSystem : EntitySystem
     public ProtoId<NCAnatomyProfilePrototype>? ActiveProfile { get; private set; }
     public NCTargetingState State { get; private set; } = AutomaticState;
     public bool HasPendingRequest => _latestRequestId != null;
-    public IReadOnlyDictionary<ProtoId<NCTargetZonePrototype>, byte> StatusLevels => _statusLevels;
 
     private static readonly NCTargetingState AutomaticState = new(NCTargetingMode.Automatic, null);
 
     private uint _nextRequestId;
     private uint? _latestRequestId;
-    private uint _nextStatusRequestId;
-    private uint? _latestStatusRequestId;
-    private uint _statusRevision;
-    private readonly Dictionary<ProtoId<NCTargetZonePrototype>, byte> _statusLevels = [];
 
     public override void Initialize()
     {
         base.Initialize();
 
         SubscribeNetworkEvent<NCTargetingSelectionAck>(OnSelectionAck);
-        SubscribeNetworkEvent<NCMedicalStatusSnapshotResponse>(OnStatusSnapshot);
         SubscribeLocalEvent<NCMedicalBodyComponent, LocalPlayerAttachedEvent>(OnPlayerAttached);
         SubscribeLocalEvent<NCMedicalBodyComponent, LocalPlayerDetachedEvent>(OnPlayerDetached);
         SubscribeLocalEvent<NCMedicalBodyComponent, ComponentShutdown>(OnAnatomyShutdown);
@@ -117,48 +110,6 @@ public sealed partial class NCTargetingClientSystem : EntitySystem
         TargetingChanged?.Invoke();
     }
 
-    private void OnStatusSnapshot(NCMedicalStatusSnapshotResponse message)
-    {
-        // RequestId zero is an event-driven owner refresh. Non-zero responses must match the newest query.
-        if (message.RequestId != 0)
-        {
-            if (_latestStatusRequestId != message.RequestId)
-                return;
-            _latestStatusRequestId = null;
-        }
-
-        if (!message.Accepted || ActiveProfile is not { } profileId ||
-            !_prototypes.TryIndex(profileId, out var profile) ||
-            message.Revision < _statusRevision)
-        {
-            if (!message.Accepted)
-            {
-                _statusLevels.Clear();
-                _statusRevision = 0;
-                TargetingChanged?.Invoke();
-            }
-            return;
-        }
-
-        var sanitized = new Dictionary<ProtoId<NCTargetZonePrototype>, byte>();
-        foreach (var status in message.Zones)
-        {
-            if (status.Severity > NCTargetingDollControl.MaximumStatusLevel ||
-                !profile.TargetZones.Contains(status.Zone))
-            {
-                continue;
-            }
-
-            sanitized[status.Zone] = Math.Max(sanitized.GetValueOrDefault(status.Zone), status.Severity);
-        }
-
-        _statusLevels.Clear();
-        foreach (var (zone, severity) in sanitized)
-            _statusLevels.Add(zone, severity);
-        _statusRevision = message.Revision;
-        TargetingChanged?.Invoke();
-    }
-
     private void ActivateProfile(
         ProtoId<NCAnatomyProfilePrototype> profile,
         bool queryServer)
@@ -172,9 +123,6 @@ public sealed partial class NCTargetingClientSystem : EntitySystem
         ActiveProfile = profile;
         State = AutomaticState;
         _latestRequestId = null;
-        _latestStatusRequestId = null;
-        _statusLevels.Clear();
-        _statusRevision = 0;
         TargetingChanged?.Invoke();
 
         if (!queryServer)
@@ -182,21 +130,16 @@ public sealed partial class NCTargetingClientSystem : EntitySystem
 
         var requestId = BeginRequest();
         RaiseNetworkEvent(new NCTargetingSelectionQuery(requestId));
-        RequestStatusSnapshot();
     }
 
     private void ClearLocalState()
     {
-        if (ActiveProfile == null && State == AutomaticState && _latestRequestId == null &&
-            _latestStatusRequestId == null && _statusLevels.Count == 0)
+        if (ActiveProfile == null && State == AutomaticState && _latestRequestId == null)
             return;
 
         ActiveProfile = null;
         State = AutomaticState;
         _latestRequestId = null;
-        _latestStatusRequestId = null;
-        _statusLevels.Clear();
-        _statusRevision = 0;
         TargetingChanged?.Invoke();
     }
 
@@ -229,19 +172,6 @@ public sealed partial class NCTargetingClientSystem : EntitySystem
 
         _latestRequestId = _nextRequestId;
         return _nextRequestId;
-    }
-
-    private void RequestStatusSnapshot()
-    {
-        unchecked
-        {
-            _nextStatusRequestId++;
-            if (_nextStatusRequestId == 0)
-                _nextStatusRequestId++;
-        }
-
-        _latestStatusRequestId = _nextStatusRequestId;
-        RaiseNetworkEvent(new NCMedicalStatusSnapshotRequest(_nextStatusRequestId));
     }
 
     private static NCTargetingState Normalize(NCTargetingState state)

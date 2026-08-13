@@ -73,6 +73,15 @@ namespace Content.Client.Clickable
             return SampleClickMap(clickMap, pos, clickMap.Size, Vector2i.Zero);
         }
 
+        // NC start - world wound overlays need exact alpha clipping, without the interaction click radius.
+        public bool IsOpaque(Texture texture, Vector2i pos)
+        {
+            return _textureMaps.TryGetValue(texture, out var clickMap) &&
+                   IsInside(pos, clickMap.Size) &&
+                   clickMap.IsOccluded(pos);
+        }
+        // NC end
+
         public bool IsOccluding(RSI rsi, RSI.StateId state, RsiDirection dir, int frame, Vector2i pos)
         {
             if (!_rsiMaps.TryGetValue(rsi, out var rsiData))
@@ -94,6 +103,28 @@ namespace Content.Client.Clickable
             var offset = dirDat[frame];
             return SampleClickMap(rsiData.ClickMap, pos, rsi.Size, offset);
         }
+
+        // NC start - exact RSI-frame alpha sampling reuses the vanilla CPU click-map atlas.
+        public bool IsOpaque(RSI rsi, RSI.StateId state, RsiDirection dir, int frame, Vector2i pos)
+        {
+            if (!_rsiMaps.TryGetValue(rsi, out var rsiData) ||
+                !rsiData.Offsets.TryGetValue(state, out var stateData) ||
+                stateData.Length <= (int) dir ||
+                stateData[(int) dir].Length <= frame ||
+                !IsInside(pos, rsi.Size))
+            {
+                return false;
+            }
+
+            return rsiData.ClickMap.IsOccluded(pos + stateData[(int) dir][frame]);
+        }
+
+        private static bool IsInside(Vector2i position, Vector2i size)
+        {
+            return position.X >= 0 && position.Y >= 0 &&
+                   position.X < size.X && position.Y < size.Y;
+        }
+        // NC end
 
         private static bool SampleClickMap(ClickMap map, Vector2i pos, Vector2i bounds, Vector2i offset)
         {
@@ -213,5 +244,11 @@ namespace Content.Client.Clickable
         public bool IsOccluding(Texture texture, Vector2i pos);
 
         public bool IsOccluding(RSI rsi, RSI.StateId state, RsiDirection dir, int frame, Vector2i pos);
+
+        // NC start - exact alpha queries for pixel-perfect world overlays.
+        public bool IsOpaque(Texture texture, Vector2i pos);
+
+        public bool IsOpaque(RSI rsi, RSI.StateId state, RsiDirection dir, int frame, Vector2i pos);
+        // NC end
     }
 }

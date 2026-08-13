@@ -14,7 +14,20 @@ namespace Content.Shared._NC.Medical.Diagnostics;
 [Serializable, NetSerializable]
 public readonly record struct NCMedicalZoneStatus(
     ProtoId<NCTargetZonePrototype> Zone,
-    byte Severity);
+    byte Severity,
+    NCMedicalZoneStatusFlags Flags = NCMedicalZoneStatusFlags.None);
+
+/// <summary>
+/// Owner-safe presentation hints. They describe only what the HUD may show and expose no wound records.
+/// </summary>
+[Flags, Serializable, NetSerializable]
+public enum NCMedicalZoneStatusFlags : byte
+{
+    None = 0,
+    ExternalBleeding = 1 << 0,
+    FunctionLost = 1 << 1,
+    Missing = 1 << 2,
+}
 
 /// <summary>
 /// Requests the current body-status doll for the entity controlled by the sending session.
@@ -27,7 +40,7 @@ public sealed class NCMedicalStatusSnapshotRequest(uint requestId) : EntityEvent
 }
 
 /// <summary>
-/// Directed owner-only response used by the targeting doll. Detailed wounds remain server-only.
+/// Directed owner-only response used by the read-only body-status HUD. Detailed wounds remain server-only.
 /// </summary>
 [Serializable, NetSerializable]
 public sealed class NCMedicalStatusSnapshotResponse(

@@ -3,13 +3,18 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Numerics;
+using System.Linq;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Diagnostics;
+using Content.Shared._NC.Medical.Diagnostics.Detail;
+using Content.Client._NC.Medical.Diagnostics;
 using Robust.Client.Graphics;
 using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 
 namespace Content.Client._NC.Combat.Targeting;
 
@@ -26,6 +31,7 @@ public sealed partial class NCTargetingDollControl : BoxContainer
 
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IResourceCache _resources = default!;
+    [Dependency] private IGameTiming _timing = default!;
 
     public event Action<NCTargetingState>? TargetingChanged;
 
@@ -39,6 +45,11 @@ public sealed partial class NCTargetingDollControl : BoxContainer
     private readonly Dictionary<ProtoId<NCTargetZonePrototype>, NCTargetZoneButton> _zoneButtons = [];
     private readonly Dictionary<string, (TextureRect Control, NCTargetDollStatusLayer Definition)> _statusLayers = [];
     private readonly Dictionary<ProtoId<NCTargetZonePrototype>, byte> _statusLevels = [];
+    private readonly Dictionary<ProtoId<NCTargetZonePrototype>, NCMedicalZoneStatusFlags> _statusFlags = [];
+    private readonly Dictionary<ProtoId<NCTargetZonePrototype>, UIBox2> _zoneBounds = [];
+    private readonly NCWoundMarkerOverlay _woundMarkers;
+    private bool _showAutomaticSelection = true;
+    private bool _interactionEnabled = true;
     private float _displayScale = DefaultDisplayScale;
 
     /// <summary>
@@ -46,8 +57,29 @@ public sealed partial class NCTargetingDollControl : BoxContainer
     /// </summary>
     public bool ShowAutomaticSelection
     {
-        get => _automaticButton.Visible;
-        set => _automaticButton.Visible = value;
+        get => _showAutomaticSelection;
+        set
+        {
+            _showAutomaticSelection = value;
+            RefreshInteractionVisibility();
+        }
+    }
+
+    /// <summary>
+    /// Read-only medical/HUD dolls render the same Status layers without combat hitboxes or selection text.
+    /// </summary>
+    public bool InteractionEnabled
+    {
+        get => _interactionEnabled;
+        set
+        {
+            if (_interactionEnabled == value)
+                return;
+
+            _interactionEnabled = value;
+            RebuildActiveProfile();
+            RefreshInteractionVisibility();
+        }
     }
 
     public float DisplayScale
@@ -62,6 +94,16 @@ public sealed partial class NCTargetingDollControl : BoxContainer
             _displayScale = clamped;
             RebuildActiveProfile();
         }
+    }
+
+    /// <summary>
+    /// Targeting and diagnostic controls keep their framed canvas, while the passive owner HUD renders only
+    /// the composed body pixels over the world viewport.
+    /// </summary>
+    public bool ShowCanvasBackground
+    {
+        get => _canvas.ShowBackground;
+        set => _canvas.ShowBackground = value;
     }
 
     public NCTargetingDollControl()
@@ -98,7 +140,9 @@ public sealed partial class NCTargetingDollControl : BoxContainer
         AddChild(_automaticButton);
         AddChild(_canvas);
         AddChild(_selectionLabel);
+        _woundMarkers = new NCWoundMarkerOverlay();
         SetCanvasSize(EmptyCanvasSize);
+        RefreshInteractionVisibility();
     }
 
     public bool SetProfile(ProtoId<NCAnatomyProfilePrototype> profileId)
@@ -112,7 +156,10 @@ public sealed partial class NCTargetingDollControl : BoxContainer
 
         var previousState = State;
         if (ActiveProfile != profileId)
+        {
             _statusLevels.Clear();
+            _statusFlags.Clear();
+        }
 
         ActiveProfile = profileId;
         BuildProfile(profile, doll);
@@ -151,6 +198,9 @@ public sealed partial class NCTargetingDollControl : BoxContainer
         _zoneButtons.Clear();
         _statusLayers.Clear();
         _statusLevels.Clear();
+        _statusFlags.Clear();
+        _zoneBounds.Clear();
+        _woundMarkers.SetWounds([]);
         SetCanvasSize(EmptyCanvasSize);
         SetState(new NCTargetingState(NCTargetingMode.Automatic, null));
     }
@@ -182,6 +232,7 @@ public sealed partial class NCTargetingDollControl : BoxContainer
     public void SetStatusLevels(IReadOnlyDictionary<ProtoId<NCTargetZonePrototype>, byte> levels)
     {
         _statusLevels.Clear();
+        _statusFlags.Clear();
         foreach (var (zone, level) in levels)
         {
             if (level <= MaximumStatusLevel)
@@ -190,6 +241,51 @@ public sealed partial class NCTargetingDollControl : BoxContainer
 
         foreach (var (_, layer) in _statusLayers)
             RefreshStatusLayer(layer.Control, layer.Definition);
+    }
+
+    public void ClearStatusLevels()
+    {
+        _statusLevels.Clear();
+        _statusFlags.Clear();
+        foreach (var (_, layer) in _statusLayers)
+            RefreshStatusLayer(layer.Control, layer.Definition);
+    }
+
+    /// <summary>
+    /// Applies the owner-only body-status projection, including bleeding pulse and missing-part visibility.
+    /// </summary>
+    public void SetZoneStatuses(IReadOnlyList<NCMedicalZoneStatus> statuses)
+    {
+        _statusLevels.Clear();
+        _statusFlags.Clear();
+        foreach (var status in statuses)
+        {
+            if (status.Severity > MaximumStatusLevel)
+                continue;
+
+            _statusLevels[status.Zone] = status.Severity;
+            _statusFlags[status.Zone] = status.Flags;
+        }
+
+        foreach (var (_, layer) in _statusLayers)
+            RefreshStatusLayer(layer.Control, layer.Definition);
+    }
+
+    public void SetWoundMarkers(IReadOnlyList<NCMedicalWoundSummary> wounds)
+    {
+        _woundMarkers.SetWounds(wounds);
+    }
+
+    protected override void FrameUpdate(FrameEventArgs args)
+    {
+        base.FrameUpdate(args);
+        var alpha = 0.58f + 0.42f * (MathF.Sin((float) _timing.CurTime.TotalSeconds * MathF.Tau * 1.25f) * 0.5f + 0.5f);
+        foreach (var (_, layer) in _statusLayers)
+        {
+            var bleeding = layer.Definition.SourceZones.Any(zone =>
+                (_statusFlags.GetValueOrDefault(zone) & NCMedicalZoneStatusFlags.ExternalBleeding) != 0);
+            layer.Control.Modulate = Color.White.WithAlpha(bleeding ? alpha : 1f);
+        }
     }
 
     private void RebuildActiveProfile()
@@ -213,6 +309,7 @@ public sealed partial class NCTargetingDollControl : BoxContainer
         ClearCanvas();
         _zoneButtons.Clear();
         _statusLayers.Clear();
+        _zoneBounds.Clear();
         SetCanvasSize(doll.CanvasSize);
 
         // Each Status RSI state is a full-canvas transparent layer; stacking them forms the base body.
@@ -244,6 +341,12 @@ public sealed partial class NCTargetingDollControl : BoxContainer
                 continue;
             }
 
+            var displaySize = presentation.DisplaySize ?? presentation.SelectedRegion?.Size ?? selected.Texture.Size;
+            _zoneBounds[presentation.Zone] = UIBox2.FromDimensions(presentation.Position, displaySize);
+
+            if (!_interactionEnabled)
+                continue;
+
             var button = new NCTargetZoneButton(
                 presentation.Zone,
                 selected.Texture,
@@ -268,6 +371,13 @@ public sealed partial class NCTargetingDollControl : BoxContainer
                 (presentation.Position - presentation.HitboxPadding) * _displayScale);
             _zoneButtons.Add(presentation.Zone, button);
         }
+
+        // Wound marks must remain legible over a selected-zone tint. MouseFilter Ignore preserves every
+        // underlying hitbox even though this purely visual layer is drawn last.
+        _canvas.AddChild(_woundMarkers);
+        LayoutContainer.SetPosition(_woundMarkers, Vector2.Zero);
+        _woundMarkers.Configure(_zoneBounds, doll.CanvasSize, _displayScale);
+        RefreshInteractionVisibility();
     }
 
     private bool RefreshStatusLayer(TextureRect control, NCTargetDollStatusLayer definition)
@@ -276,6 +386,8 @@ public sealed partial class NCTargetingDollControl : BoxContainer
             return false;
 
         control.Texture = texture;
+        control.Visible = definition.SourceZones.Any(zone =>
+            (_statusFlags.GetValueOrDefault(zone) & NCMedicalZoneStatusFlags.Missing) == 0);
         return true;
     }
 
@@ -347,14 +459,25 @@ public sealed partial class NCTargetingDollControl : BoxContainer
             : Loc.GetString("nc-targeting-doll-unknown-target");
     }
 
+    private void RefreshInteractionVisibility()
+    {
+        _automaticButton.Visible = _interactionEnabled && _showAutomaticSelection;
+        _selectionLabel.Visible = _interactionEnabled;
+    }
+
     private sealed class NCTargetingCanvas : LayoutContainer
     {
         private static readonly Color BackgroundColor = Color.FromHex("#05090DE8");
         private static readonly Color BorderColor = Color.FromHex("#5D7F86A0");
 
+        public bool ShowBackground { get; set; } = true;
+
         protected override void Draw(DrawingHandleScreen handle)
         {
             base.Draw(handle);
+            if (!ShowBackground)
+                return;
+
             handle.DrawRect(PixelSizeBox, BackgroundColor);
             handle.DrawRect(PixelSizeBox, BorderColor, filled: false);
         }

@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Linq;
+using System.Numerics;
 using Content.Server._NC.Medical.Bleeding;
 using Content.Server._NC.Medical.Cyberware;
 using Content.Shared._NC.Medical.Anatomy;
@@ -336,9 +337,28 @@ public sealed partial class NCWoundSystem : EntitySystem
             Contamination = Math.Clamp(request.Contamination * prototype.ContaminationMultiplier, 0f, 1f),
             ScarRisk = Math.Clamp(traumaAmount * prototype.ScarRiskPerDamage, 0f, 1f),
             ForensicResolutionId = request.ResolutionId.Value,
+            VisualX = QuantizeSurfaceCoordinate(request.TargetLocalHitPosition.X + 0.5f),
+            VisualY = QuantizeSurfaceCoordinate(0.5f - request.TargetLocalHitPosition.Y),
+            VisualDirection = QuantizeDirection(request.ImpactDirection),
             CreatedAt = now,
             ModifiedAt = now,
         };
+    }
+
+    private static byte QuantizeSurfaceCoordinate(float value)
+    {
+        value = float.IsFinite(value) ? Math.Clamp(value, 0f, 1f) : 0.5f;
+        return (byte) Math.Clamp((int) MathF.Round(value * byte.MaxValue), 0, byte.MaxValue);
+    }
+
+    private static byte QuantizeDirection(Vector2 direction)
+    {
+        if (!float.IsFinite(direction.X) || !float.IsFinite(direction.Y) || direction.IsLengthZero())
+            return 0;
+
+        var angle = MathF.Atan2(direction.Y, direction.X);
+        var normalized = (angle + MathF.PI) / (MathF.PI * 2f);
+        return QuantizeSurfaceCoordinate(normalized);
     }
 
     private void ApplyLocalConsequences(

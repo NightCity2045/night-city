@@ -165,7 +165,10 @@ public readonly record struct NCMedicalWoundSummary(
     NCDiagnosticBand ExternalBleeding,
     NCDiagnosticBand InternalBleeding,
     NCDiagnosticBand Infection,
-    bool ForeignBody);
+    bool ForeignBody,
+    byte VisualX,
+    byte VisualY,
+    byte VisualDirection);
 
 [Serializable, NetSerializable]
 public readonly record struct NCMedicalOrganSummary(

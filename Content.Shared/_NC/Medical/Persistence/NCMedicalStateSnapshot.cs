@@ -33,7 +33,8 @@ public static class NCMedicalSnapshotVersions
     public const ushort PharmacologyGraph = 5;
     public const ushort SystemicSepsis = 6;
     public const ushort TransplantRejection = 7;
-    public const ushort Current = TransplantRejection;
+    public const ushort WoundVisualization = 8;
+    public const ushort Current = WoundVisualization;
 }
 
 /// <summary>
@@ -322,6 +323,9 @@ public sealed partial class NCWoundRecordSnapshot
     [DataField] public Guid? EmbeddedObjectId;
     [DataField] public Guid? ExitWoundId;
     [DataField] public Guid ForensicResolutionId;
+    [DataField] public byte VisualX;
+    [DataField] public byte VisualY;
+    [DataField] public byte VisualDirection;
     [DataField] public TimeSpan CreatedAt;
     [DataField] public TimeSpan ModifiedAt;
     [DataField] public TimeSpan Age;
@@ -339,6 +343,9 @@ public sealed partial class NCScarRecordSnapshot
     [DataField] public float Area;
     [DataField] public float Disfigurement;
     [DataField] public float Contracture;
+    [DataField] public byte VisualX;
+    [DataField] public byte VisualY;
+    [DataField] public byte VisualDirection;
     [DataField] public TimeSpan CreatedAt;
 }
 

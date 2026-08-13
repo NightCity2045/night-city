@@ -736,7 +736,10 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                     : NCDiagnosticBand.None,
                 hasInternal ? ToRateBand(wound.InternalBleedRate) : NCDiagnosticBand.None,
                 hasInfection ? ToFractionBand(wound.Infection) : NCDiagnosticBand.None,
-                hasForeignBody && wound.EmbeddedObjectId != null));
+                hasForeignBody && wound.EmbeddedObjectId != null,
+                wound.VisualX,
+                wound.VisualY,
+                wound.VisualDirection));
 
             if (hasForeignBody && wound.EmbeddedObjectId != null)
                 warnings.Add(NCDiagnosticWarning.ForeignBody);

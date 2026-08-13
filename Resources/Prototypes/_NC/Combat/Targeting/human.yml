@@ -172,10 +172,12 @@
   zones:
   - zone: NCZoneHead
     position: 10,2
+    worldVisualLayers: [ Head ]
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/head.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/head_hover.png
   - zone: NCZoneChest
     position: 10,9
+    worldVisualLayers: [ Chest ]
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/torso.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/torso_hover.png
     selectedRegion:
@@ -186,6 +188,7 @@
       size: 11,7
   - zone: NCZoneAbdomen
     position: 10,15
+    worldVisualLayers: [ Chest ]
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/torso.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/torso_hover.png
     selectedRegion:
@@ -196,52 +199,61 @@
       size: 11,6
   - zone: NCZoneGroin
     position: 10,19
+    worldVisualLayers: [ Chest ]
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/groin.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/groin_hover.png
   - zone: NCZoneArmRight
     position: 7,10
+    worldVisualLayers: [ RArm ]
     displaySize: 5,6
     hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/rightarm.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/rightarm_hover.png
   - zone: NCZoneHandRight
     position: 7,16
+    worldVisualLayers: [ RHand ]
     displaySize: 4,4
     hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/righthand.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/righthand_hover.png
   - zone: NCZoneArmLeft
     position: 19,10
+    worldVisualLayers: [ LArm ]
     displaySize: 5,6
     hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/leftarm.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/leftarm_hover.png
   - zone: NCZoneHandLeft
     position: 20,16
+    worldVisualLayers: [ LHand ]
     displaySize: 4,4
     hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/lefthand.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/lefthand_hover.png
   - zone: NCZoneLegRight
     position: 11,20
+    worldVisualLayers: [ RLeg ]
     displaySize: 4,6
     hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/rightleg.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/rightleg_hover.png
   - zone: NCZoneFootRight
     position: 9,26
+    worldVisualLayers: [ RFoot ]
     displaySize: 6,3
     hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/rightfoot.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/rightfoot_hover.png
   - zone: NCZoneLegLeft
     position: 16,20
+    worldVisualLayers: [ LLeg ]
     displaySize: 4,6
     hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/leftleg.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/leftleg_hover.png
   - zone: NCZoneFootLeft
     position: 16,26
+    worldVisualLayers: [ LFoot ]
     displaySize: 6,3
     hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/leftfoot.png
