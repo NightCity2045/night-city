@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Cyberware;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
@@ -102,6 +103,16 @@ public sealed partial class NCSurgeryProcedurePrototype : IPrototype
 
     [DataField]
     public bool RequiresGraft { get; private set; }
+
+    /// <summary>
+    /// Optional cyberware operation performed through this ordinary deterministic procedure. Installation
+    /// consumes the staged physical module from the table; removal binds an installed module server-side.
+    /// </summary>
+    [DataField]
+    public NCSurgeryCyberwareOperation CyberwareOperation { get; private set; }
+
+    [DataField]
+    public List<ProtoId<NCCyberwarePrototype>> CompatibleCyberwareProfiles { get; private set; } = [];
 
     [DataField]
     public List<ProtoId<OrganCategoryPrototype>> CompatibleGraftCategories { get; private set; } = [];
@@ -433,6 +444,8 @@ public enum NCSurgeryEffectKind : byte
     DetachTargetOrgan,
     AttachGraft,
     RecordAutopsy,
+    InstallCyberware,
+    RemoveCyberware,
 }
 
 public enum NCSurgeryWoundScope : byte
@@ -445,4 +458,12 @@ public enum NCSurgeryEffectTarget : byte
 {
     TargetRegion,
     Graft,
+    CyberwareTarget,
+}
+
+public enum NCSurgeryCyberwareOperation : byte
+{
+    None,
+    Install,
+    Remove,
 }

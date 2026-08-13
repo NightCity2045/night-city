@@ -52,6 +52,9 @@ public sealed partial class NCDiagnosticCapabilityPrototype : IPrototype
     public int MaxDrugRecords { get; private set; }
 
     [DataField]
+    public int MaxHistoryRecords { get; private set; }
+
+    [DataField]
     public float BloodVolumeUnitsQuantum { get; private set; } = 60f;
 
     [DataField]

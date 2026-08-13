@@ -76,9 +76,9 @@ public sealed class NCMedicalGameplayInteractionTest : GameTest
     public void GameplayItemsExposeTimedConsumableAndPreparationContracts()
     {
         var bandageCapability = _prototypes.Index<NCTreatmentCapabilityPrototype>("NCFieldBandageCapability");
-        var oxygenCapability = _prototypes.Index<NCEmergencyCareCapabilityPrototype>("NCOxygenDeliveryCapability");
+        var ventilationCapability = _prototypes.Index<NCEmergencyCareCapabilityPrototype>("NCManualVentilatorCapability");
         var bandage = SSpawn("Gauze");
-        var oxygen = SSpawn("NCOxygenDeliveryKit");
+        var ventilator = SSpawn("NCManualVentilator");
         var cautery = SSpawn("Cautery");
         var table = SSpawn("OperatingTable");
 
@@ -87,9 +87,9 @@ public sealed class NCMedicalGameplayInteractionTest : GameTest
             Assert.That(bandageCapability.ApplicationDuration, Is.GreaterThan(TimeSpan.Zero));
             Assert.That(bandageCapability.ResourceKind, Is.EqualTo(NCTreatmentResourceKind.Stack));
             Assert.That(SComp<StackComponent>(bandage).Count, Is.GreaterThan(0));
-            Assert.That(oxygenCapability.ApplicationDuration, Is.GreaterThan(TimeSpan.Zero));
-            Assert.That(SComp<NCEmergencyCareItemComponent>(oxygen).ChargesRemaining,
-                Is.GreaterThanOrEqualTo(oxygenCapability.ChargeCost));
+            Assert.That(ventilationCapability.ApplicationDuration, Is.GreaterThan(TimeSpan.Zero));
+            Assert.That(SComp<NCEmergencyCareItemComponent>(ventilator).ChargesRemaining,
+                Is.GreaterThanOrEqualTo(ventilationCapability.ChargeCost));
             Assert.That(SComp<NCSurgeryToolComponent>(cautery).StartingProcedures, Is.Not.Empty);
             Assert.That(SComp<NCSurgeryAuthorizationProviderComponent>(cautery).Authorizations, Is.Not.Empty);
             Assert.That(SComp<NCSurgeryFacilityComponent>(table).Capabilities, Is.Not.Empty);

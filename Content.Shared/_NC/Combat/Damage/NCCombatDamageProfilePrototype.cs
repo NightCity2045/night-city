@@ -37,6 +37,29 @@ public sealed partial class NCCombatDamageProfilePrototype : IPrototype
 
     [DataField]
     public bool CanOverpenetrateBody { get; private set; }
+
+    /// <summary>
+    /// Minimum positive post-armor trauma required to leave a stable foreign-body record. Zero disables it.
+    /// Exit takes precedence when both thresholds are satisfied.
+    /// </summary>
+    [DataField]
+    public float EmbedMinimumPostArmorDamage { get; private set; }
+
+    /// <summary>
+    /// Minimum positive post-armor trauma required for a linked exit wound. Zero disables it.
+    /// </summary>
+    [DataField]
+    public float ExitMinimumPostArmorDamage { get; private set; }
+
+    [DataField]
+    public float ExitTraumaMultiplier { get; private set; } = 0.5f;
+
+    /// <summary>
+    /// Utility payloads can keep their vanilla collision effect while explicitly producing no local wound.
+    /// Systemic routing still runs before this local suppression.
+    /// </summary>
+    [DataField]
+    public bool SuppressLocalTrauma { get; private set; }
 }
 
 /// <summary>

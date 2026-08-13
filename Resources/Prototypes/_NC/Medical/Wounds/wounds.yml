@@ -154,6 +154,39 @@
   jointDislocationStabilityThreshold: 0.2
 
 - type: ncWound
+  id: NCWoundBallisticExpansive
+  woundType: Ballistic
+  tissueDepth: Vascular
+  canMergeMinor: false
+  areaPerDamage: 0.7
+  externalBleedPerDamage: 0.8
+  internalBleedPerDamage: 0.45
+  arterialFromSeverity: Severe
+  arterialRateMultiplier: 4
+  painPerDamage: 1.4
+  contaminationMultiplier: 1
+  scarRiskPerDamage: 0.05
+  naturalHealingMultiplier: 0.6
+  infectionSusceptibility: 1.4
+  reopenSusceptibility: 1.35
+  naturalIntegrityRecoveryFraction: 0.08
+  regionIntegrityDamageMultiplier: 1.2
+  containedStructureDamageMultiplier: 0.55
+  containedOrganDamageMultiplier: 0.35
+  functionLossPerDamage: 0.025
+  structuralDamageFromSeverity: Moderate
+  containedOrganDamageFromSeverity: Severe
+  tendonDamageFromSeverity: Moderate
+  tendonIntegrityLossPerDamage: 0.055
+  tendonRuptureIntegrityThreshold: 0.3
+  nerveDamageFromSeverity: Moderate
+  nerveIntegrityLossPerDamage: 0.045
+  nerveMotorLossPerDamage: 0.055
+  jointDamageFromSeverity: Severe
+  jointStabilityLossPerDamage: 0.04
+  jointDislocationStabilityThreshold: 0.25
+
+- type: ncWound
   id: NCWoundSlash
   woundType: Slash
   tissueDepth: Vascular

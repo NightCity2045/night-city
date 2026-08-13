@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Linq;
+using Content.Server._NC.Medical.Treatment;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Emergency;
@@ -31,6 +32,7 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private StandingStateSystem _standing = default!;
     [Dependency] private NCEmergencyCareSystem _emergency = default!;
+    [Dependency] private NCTreatmentInteractionSystem _treatment = default!;
 
     public override void Initialize()
     {
@@ -118,11 +120,19 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
 
     private void OnPatientInteractHand(Entity<NCMedicalBodyComponent> patient, ref InteractHandEvent args)
     {
-        if (args.Handled || args.User == patient.Owner || !_standing.IsDown(patient.Owner) ||
-            _hands.TryGetActiveItem(args.User, out _))
+        if (args.Handled || args.User == patient.Owner || _hands.TryGetActiveItem(args.User, out _))
         {
             return;
         }
+
+        if (_treatment.TryStartManualPressure(args.User, patient.Owner))
+        {
+            args.Handled = true;
+            return;
+        }
+
+        if (!_standing.IsDown(patient.Owner))
+            return;
 
         args.Handled = true;
         var profile = _prototypes.EnumeratePrototypes<NCEmergencyCareProfilePrototype>()
@@ -211,7 +221,7 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
 
     private EntProtoId? GetPrototypeId(EntityUid entity)
     {
-        return TryComp<MetaDataComponent>(entity, out var metadata) && metadata.EntityPrototype?.ID is { } id
+        return TryComp(entity, out MetaDataComponent? metadata) && metadata.EntityPrototype?.ID is { } id
             ? id
             : null;
     }

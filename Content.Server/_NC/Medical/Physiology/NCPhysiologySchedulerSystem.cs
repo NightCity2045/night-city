@@ -96,7 +96,7 @@ public sealed partial class NCPhysiologySchedulerSystem : EntitySystem
         if (!Exists(body) || !HasComp<NCMedicalBodyComponent>(body))
             return false;
 
-        // Explicit processing supersedes any older due entry (admin/A-Life/test callers included).
+        // Explicit processing supersedes any older due entry (admin and test callers included).
         Unschedule(body);
         if (!_processingBodies.Add(body))
             return false;

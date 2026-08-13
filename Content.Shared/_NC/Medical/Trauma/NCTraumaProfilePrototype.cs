@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Robust.Shared.Prototypes;
+using Content.Shared._NC.Medical.Wounds;
 
 namespace Content.Shared._NC.Medical.Trauma;
 
@@ -18,6 +19,13 @@ public sealed partial class NCTraumaProfilePrototype : IPrototype
 
     [DataField(required: true)]
     public NCTraumaMechanism Mechanism { get; private set; }
+
+    /// <summary>
+    /// Optional wound behavior override for special physical payloads such as expanding ammunition.
+    /// The mechanism remains useful for generic maps while all balance stays in the wound prototype.
+    /// </summary>
+    [DataField]
+    public ProtoId<NCWoundPrototype>? WoundPrototype { get; private set; }
 }
 
 public enum NCTraumaMechanism : byte

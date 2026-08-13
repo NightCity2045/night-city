@@ -68,6 +68,7 @@ public sealed partial class NCProjectileContextSystem : EntitySystem
             return;
         }
 
+        var projectilesInShot = (uint) args.FiredProjectiles.Count;
         uint sequence = 0;
         foreach (var projectile in args.FiredProjectiles)
         {
@@ -84,6 +85,7 @@ public sealed partial class NCProjectileContextSystem : EntitySystem
             var context = EnsureComp<NCProjectileHitContextComponent>(projectile);
             context.ResolutionId = pending.ResolutionId;
             context.ProjectileSequence = sequence;
+            context.ProjectilesInShot = Math.Max(1u, projectilesInShot);
             context.NextImpactSequence = 0;
             context.Shooter = pending.Shooter;
             context.Weapon = pending.Weapon;

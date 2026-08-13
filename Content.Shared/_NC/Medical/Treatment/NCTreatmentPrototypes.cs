@@ -69,6 +69,19 @@ public sealed partial class NCTreatmentProfilePrototype : IPrototype
     public float ReleaseReboundMultiplier { get; private set; }
 
     [DataField(required: true)]
+    public float SplintMinimumStability { get; private set; }
+
+    [DataField(required: true)]
+    public float SplintSecondaryDamageRiskMultiplier { get; private set; }
+
+    /// <summary>
+    /// Direct hand pressure is temporary and must be actively renewed; it never becomes a permanent
+    /// treatment merely because the interaction completed once.
+    /// </summary>
+    [DataField(required: true)]
+    public TimeSpan ManualPressureDuration { get; private set; }
+
+    [DataField(required: true)]
     public int ProcessedActionCapacity { get; private set; }
 
     [DataField(required: true)]

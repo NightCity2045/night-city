@@ -15,6 +15,7 @@ using Content.Shared._NC.Medical.Bleeding;
 using Content.Shared._NC.Medical.Diagnostics.Detail;
 using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Physiology;
+using Content.Shared._NC.Medical.Surgery;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
 using Content.Shared.Body.Components;
@@ -60,6 +61,15 @@ public sealed class NCDiagnosticsSystemTest : GameTest
         var body = SSpawn(HumanMob);
         SeedDiagnosticState(body, woundCount: 30);
 
+        var autopsy = new NCAutopsyRecordedEvent(ThoraxRegion, 2, [NCWoundType.Ballistic]);
+        SEntMan.EventBus.RaiseLocalEvent(body, ref autopsy);
+        var injury = new NCWoundCreatedEvent(
+            Guid.Parse("c5521357-54ac-4f77-ae1a-f97031d2fe59"),
+            ChestZone,
+            NCWoundSeverity.Severe,
+            NCWoundType.Ballistic);
+        SEntMan.EventBus.RaiseLocalEvent(body, ref injury);
+
         var resolutionId = new NCActionResolutionId(Guid.Parse("45cf812c-fab8-4143-847b-bd6748941484"));
         var observedAt = TimeSpan.FromSeconds(2045);
         var snapshots = new List<NCMedicalSnapshot>(NetworkCapabilities.Length);
@@ -80,6 +90,7 @@ public sealed class NCDiagnosticsSystemTest : GameTest
                 Assert.That(snapshot.Wounds.Count, Is.LessThanOrEqualTo(policy.MaxWoundRecords));
                 Assert.That(snapshot.Organs.Count, Is.LessThanOrEqualTo(policy.MaxOrganRecords));
                 Assert.That(snapshot.Drugs.Count, Is.LessThanOrEqualTo(policy.MaxDrugRecords));
+                Assert.That(snapshot.History.Count, Is.LessThanOrEqualTo(policy.MaxHistoryRecords));
             });
         }
 
@@ -96,6 +107,7 @@ public sealed class NCDiagnosticsSystemTest : GameTest
         var manual = snapshots[(int) NCDiagnosticTier.Manual];
         var handheld = snapshots[(int) NCDiagnosticTier.HandheldApproximate];
         var scanner = snapshots[(int) NCDiagnosticTier.ScannerInternal];
+        var surgical = snapshots[(int) NCDiagnosticTier.SurgicalConsole];
 
         Assert.Multiple(() =>
         {
@@ -135,6 +147,18 @@ public sealed class NCDiagnosticsSystemTest : GameTest
             Assert.That(scanner.Drugs, Has.Count.EqualTo(1));
             Assert.That(scanner.Drugs[0].Profile.Id, Is.EqualTo("NCDrugSurgicalAnesthetic"));
             Assert.That(scanner.Warnings, Does.Contain(NCDiagnosticWarning.Anesthetized));
+            Assert.That(scanner.History, Is.Empty);
+            Assert.That(surgical.History, Has.Count.EqualTo(3));
+            var autopsyHistory = surgical.History.Single(record => record.Kind == NCMedicalHistoryKind.Autopsy);
+            var medicationHistory = surgical.History.Single(record => record.Kind == NCMedicalHistoryKind.Medication);
+            var injuryHistory = surgical.History.Single(record => record.Kind == NCMedicalHistoryKind.Injury);
+            Assert.That(autopsyHistory.AutopsyRegion, Is.EqualTo(ThoraxRegion));
+            Assert.That(autopsyHistory.AutopsyWoundCount, Is.EqualTo(2));
+            Assert.That(autopsyHistory.AutopsyWoundTypes, Is.EqualTo(new[] { NCWoundType.Ballistic }));
+            Assert.That(medicationHistory.Drug?.Id, Is.EqualTo("NCDrugSurgicalAnesthetic"));
+            Assert.That(injuryHistory.Zone, Is.EqualTo(ChestZone));
+            Assert.That(injuryHistory.WoundSeverity, Is.EqualTo(NCWoundSeverity.Severe));
+            Assert.That(injuryHistory.WoundType, Is.EqualTo(NCWoundType.Ballistic));
         });
 
         Assert.That(

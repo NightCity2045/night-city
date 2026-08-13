@@ -4,6 +4,7 @@
  */
 
 using Content.Shared._NC.ZLevels.Core.EntitySystems;
+using Content.Shared._NC.Combat.Physical;
 using Content.Shared.CCVar;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Prototypes;
@@ -93,7 +94,17 @@ public sealed partial class NCZLevelDamageSystem : EntitySystem
             if (otherDamage > 0)
             {
                 var otherDmgSpec = new DamageSpecifier(_prototypes.Index(PhysicalDamageType), (int) otherDamage);
-                _damageable.TryChangeDamage(victim, otherDmgSpec, origin: ent);
+                // NC start: give authoritative human medicine the physical fall provenance before HP fallback.
+                var physicalImpact = new NCPhysicalImpactRequestedEvent(
+                    NCPhysicalImpactSourceKind.FallingBody,
+                    otherDmgSpec,
+                    ent.Owner,
+                    ent.Owner,
+                    default);
+                RaiseLocalEvent(victim, ref physicalImpact);
+                if (!physicalImpact.Handled)
+                    _damageable.TryChangeDamage(victim, otherDmgSpec, origin: ent);
+                // NC end
             }
         }
 
@@ -104,7 +115,17 @@ public sealed partial class NCZLevelDamageSystem : EntitySystem
         if (damageAmount > 0)
         {
             var selfDmgSpec = new DamageSpecifier(_prototypes.Index(PhysicalDamageType), (int) damageAmount);
-            _damageable.TryChangeDamage(ent.Owner, selfDmgSpec);
+            // NC start: vertical landing trauma bypasses compatibility HP for authoritative humans.
+            var physicalImpact = new NCPhysicalImpactRequestedEvent(
+                NCPhysicalImpactSourceKind.Fall,
+                selfDmgSpec,
+                null,
+                ent.Owner,
+                default);
+            RaiseLocalEvent(ent.Owner, ref physicalImpact);
+            if (!physicalImpact.Handled)
+                _damageable.TryChangeDamage(ent.Owner, selfDmgSpec);
+            // NC end
         }
 
         var knockdownTime = MathF.Min(args.ImpactPower * args.ImpactPower * BaseFallingStunTime * stunModifier, 5f);

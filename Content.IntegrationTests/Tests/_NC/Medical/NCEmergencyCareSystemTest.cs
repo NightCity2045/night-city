@@ -136,8 +136,8 @@ public sealed class NCEmergencyCareSystemTest : GameTest
         _scheduler.ProcessNow(arrested, TimeSpan.Zero);
         var baseline = SComp<NCPhysiologyComponent>(perfused).Oxygenation;
 
-        var perfusedResult = _emergency.ApplyOxygen(perfused, SSpawn("NCOxygenDeliveryKit"), TimeSpan.Zero);
-        var arrestedResult = _emergency.ApplyOxygen(arrested, SSpawn("NCOxygenDeliveryKit"), TimeSpan.Zero);
+        var perfusedResult = _emergency.ApplyOxygen(perfused, CreateEmergencyItem("NCOxygenDeliveryCapability"), TimeSpan.Zero);
+        var arrestedResult = _emergency.ApplyOxygen(arrested, CreateEmergencyItem("NCOxygenDeliveryCapability"), TimeSpan.Zero);
         _scheduler.ProcessNow(perfused, TimeSpan.FromSeconds(1));
         _scheduler.ProcessNow(arrested, TimeSpan.FromSeconds(1));
 
@@ -149,6 +149,15 @@ public sealed class NCEmergencyCareSystemTest : GameTest
             Assert.That(SComp<NCCirculationComponent>(arrested).Perfusion, Is.Zero);
             Assert.That(SComp<NCPhysiologyComponent>(arrested).Oxygenation, Is.Zero);
         });
+    }
+
+    private EntityUid CreateEmergencyItem(ProtoId<NCEmergencyCareCapabilityPrototype> capability)
+    {
+        var item = SSpawn(null);
+        var component = SEntMan.EnsureComponent<NCEmergencyCareItemComponent>(item);
+        component.Capability = capability;
+        component.ChargesRemaining = 4;
+        return item;
     }
 
     [Test]

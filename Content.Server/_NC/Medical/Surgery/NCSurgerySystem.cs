@@ -5,10 +5,12 @@
 using System.Linq;
 using Content.Shared._NC.ActionResolution;
 using Content.Server._NC.Medical.Anatomy.Detachment;
+using Content.Server._NC.Medical.Cyberware;
 using Content.Server._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Anatomy.Detachment;
 using Content.Shared._NC.Medical.Bleeding;
+using Content.Shared._NC.Medical.Cyberware;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Surgery;
 using Content.Shared._NC.Medical.Wounds;
@@ -30,6 +32,7 @@ public sealed partial class NCSurgerySystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCMedicalBodySystem _medicalBodies = default!;
     [Dependency] private NCOrganDetachmentSystem _detachment = default!;
+    [Dependency] private NCCyberwareSystem _cyberware = default!;
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
     [Dependency] private SharedStackSystem _stacks = default!;
     [Dependency] private SharedSolutionContainerSystem _solutions = default!;
@@ -123,7 +126,9 @@ public sealed partial class NCSurgerySystem : EntitySystem
 
         if (!ValidateGraft(patient, targetRegion, graft, procedure))
         {
-            failure = graft == null
+            failure = procedure.CyberwareOperation == NCSurgeryCyberwareOperation.Remove
+                ? NCSurgeryStartFailure.IncompatibleTarget
+                : graft == null
                 ? NCSurgeryStartFailure.GraftUnavailable
                 : NCSurgeryStartFailure.GraftIncompatible;
             return false;
@@ -211,9 +216,22 @@ public sealed partial class NCSurgerySystem : EntitySystem
 
         if (!ValidateGraft(request.Patient, request.TargetRegion, request.Graft, procedure))
         {
-            failure = request.Graft == null
+            failure = procedure.CyberwareOperation == NCSurgeryCyberwareOperation.Remove
+                ? NCSurgeryStartFailure.IncompatibleTarget
+                : request.Graft == null
                 ? NCSurgeryStartFailure.GraftUnavailable
                 : NCSurgeryStartFailure.GraftIncompatible;
+            return false;
+        }
+
+        if (!TryResolveCyberwareTarget(
+                request.Patient,
+                request.TargetRegion,
+                request.Graft,
+                procedure,
+                out var cyberwareTarget))
+        {
+            failure = NCSurgeryStartFailure.IncompatibleTarget;
             return false;
         }
 
@@ -256,6 +274,8 @@ public sealed partial class NCSurgerySystem : EntitySystem
         session.Environment = request.Environment;
         session.TargetWoundId = request.TargetWoundId;
         session.Graft = request.Graft;
+        session.CyberwareTarget = cyberwareTarget;
+        session.CyberwareMutationApplied = false;
         session.DetachedResult = null;
         session.Procedure = request.Procedure;
         session.CurrentStepIndex = 0;
@@ -402,7 +422,13 @@ public sealed partial class NCSurgerySystem : EntitySystem
         }
 
 
-        if (!ValidateGraft(session.Patient, session.TargetRegion, session.Graft, procedure))
+        if (!ValidateGraft(
+                session.Patient,
+                session.TargetRegion,
+                session.Graft,
+                procedure,
+                session.CyberwareMutationApplied,
+                session.CyberwareTarget))
         {
             PauseInternal(sessionUid, session, NCSurgeryInterruptionReason.ConditionsChanged);
             return Rejected(
@@ -482,9 +508,9 @@ public sealed partial class NCSurgerySystem : EntitySystem
                 conditions);
         }
 
-        if (!ApplyEffects(session, effects) ||
-            !ApplyEffects(session, complicationEffects) ||
-            isFinalStep && !ApplyEffects(session, procedure.CompletionEffects))
+        if (!ApplyEffects(session, effects, request.ActionResolutionId) ||
+            !ApplyEffects(session, complicationEffects, request.ActionResolutionId) ||
+            isFinalStep && !ApplyEffects(session, procedure.CompletionEffects, request.ActionResolutionId))
         {
             PauseInternal(sessionUid, session, NCSurgeryInterruptionReason.ConditionsChanged);
             return Rejected(
@@ -679,7 +705,8 @@ public sealed partial class NCSurgerySystem : EntitySystem
         if (_prototypes.TryIndex(session.Procedure, out var procedure) &&
             CanApplyEffects(session, procedure.AbortEffects))
         {
-            mutated = procedure.AbortEffects.Count > 0 && ApplyEffects(session, procedure.AbortEffects);
+            mutated = procedure.AbortEffects.Count > 0 &&
+                      ApplyEffects(session, procedure.AbortEffects, actionResolutionId);
             if (procedure.AbortEffects.Count > 0 && !mutated)
                 Logger.Error($"Failed to apply validated abort effects for surgery {session.ResolutionId}.");
             if (mutated)
@@ -1281,8 +1308,51 @@ public sealed partial class NCSurgerySystem : EntitySystem
         EntityUid patient,
         EntityUid targetRegion,
         EntityUid? graftUid,
-        NCSurgeryProcedurePrototype procedure)
+        NCSurgeryProcedurePrototype procedure,
+        bool allowAppliedCyberware = false,
+        EntityUid? expectedCyberware = null)
     {
+        if (procedure.CyberwareOperation == NCSurgeryCyberwareOperation.Install)
+        {
+            if (!procedure.RequiresGraft || graftUid is not { } module || Deleted(module) ||
+                !TryComp<NCCyberwareComponent>(module, out var cyberware) ||
+                procedure.CompatibleCyberwareProfiles.Count > 0 &&
+                !procedure.CompatibleCyberwareProfiles.Contains(cyberware.Profile))
+            {
+                return false;
+            }
+
+            if (allowAppliedCyberware && expectedCyberware == module &&
+                cyberware.InstalledSlot != null &&
+                TryComp<ChildOrganComponent>(module, out var installedChild) &&
+                installedChild.Parent == targetRegion)
+            {
+                return true;
+            }
+
+            return _cyberware.TryFindInstallSlot(patient, targetRegion, module, out _);
+        }
+
+        if (procedure.CyberwareOperation == NCSurgeryCyberwareOperation.Remove)
+        {
+            if (procedure.RequiresGraft || graftUid != null)
+                return false;
+
+            if (allowAppliedCyberware && expectedCyberware is { } removed &&
+                TryComp<NCCyberwareComponent>(removed, out var removedState) &&
+                removedState.InstalledSlot == null)
+            {
+                return true;
+            }
+
+            return _cyberware.TryFindInstalledModule(
+                patient,
+                targetRegion,
+                procedure.CompatibleCyberwareProfiles,
+                out var found) &&
+                   (expectedCyberware == null || expectedCyberware == found);
+        }
+
         if (!procedure.RequiresGraft)
             return graftUid == null;
 
@@ -1304,6 +1374,37 @@ public sealed partial class NCSurgerySystem : EntitySystem
         }
 
         return _detachment.CanAttachOrgan(patient, parentCategory, graft);
+    }
+
+    private bool TryResolveCyberwareTarget(
+        EntityUid patient,
+        EntityUid targetRegion,
+        EntityUid? graft,
+        NCSurgeryProcedurePrototype procedure,
+        out EntityUid? target)
+    {
+        target = null;
+        switch (procedure.CyberwareOperation)
+        {
+            case NCSurgeryCyberwareOperation.None:
+                return true;
+            case NCSurgeryCyberwareOperation.Install when graft is { } module:
+                target = module;
+                return true;
+            case NCSurgeryCyberwareOperation.Remove:
+                if (!_cyberware.TryFindInstalledModule(
+                        patient,
+                        targetRegion,
+                        procedure.CompatibleCyberwareProfiles,
+                        out var installed))
+                {
+                    return false;
+                }
+                target = installed;
+                return true;
+            default:
+                return false;
+        }
     }
 
     private bool CanApplyEffects(
@@ -1385,6 +1486,27 @@ public sealed partial class NCSurgerySystem : EntitySystem
                         !TryGetRegionCategory(target, out _))
                         return false;
                     break;
+                case NCSurgeryEffectKind.InstallCyberware:
+                    if (effect.Target != NCSurgeryEffectTarget.Graft ||
+                        session.CyberwareMutationApplied ||
+                        session.Graft != target ||
+                        !_cyberware.TryFindInstallSlot(session.Patient, session.TargetRegion, target, out _))
+                    {
+                        return false;
+                    }
+                    break;
+                case NCSurgeryEffectKind.RemoveCyberware:
+                    if (effect.Target != NCSurgeryEffectTarget.CyberwareTarget ||
+                        session.CyberwareMutationApplied ||
+                        session.CyberwareTarget != target ||
+                        !TryComp<NCCyberwareComponent>(target, out var installed) ||
+                        installed.InstalledSlot == null ||
+                        !TryComp<ChildOrganComponent>(target, out var installedChild) ||
+                        installedChild.Parent != session.TargetRegion)
+                    {
+                        return false;
+                    }
+                    break;
                 default:
                     return false;
             }
@@ -1409,6 +1531,9 @@ public sealed partial class NCSurgerySystem : EntitySystem
             case NCSurgeryEffectTarget.Graft when session.Graft is { } graft:
                 target = graft;
                 return !Deleted(target);
+            case NCSurgeryEffectTarget.CyberwareTarget when session.CyberwareTarget is { } cyberware:
+                target = cyberware;
+                return !Deleted(target);
             default:
                 target = default;
                 return false;
@@ -1417,7 +1542,8 @@ public sealed partial class NCSurgerySystem : EntitySystem
 
     private bool ApplyEffects(
         NCSurgerySessionComponent session,
-        IReadOnlyList<NCSurgeryEffectDefinition> effects)
+        IReadOnlyList<NCSurgeryEffectDefinition> effects,
+        NCActionResolutionId actionResolutionId)
     {
         foreach (var effect in effects)
         {
@@ -1470,6 +1596,11 @@ public sealed partial class NCSurgerySystem : EntitySystem
                     var bone = Comp<NCBoneComponent>(target);
                     bone.State = effect.BoneState;
                     bone.RequiresFixation = effect.BoneState is NCBoneState.BrokenDisplaced or NCBoneState.Shattered;
+                    if (effect.BoneState < NCBoneState.Cracked)
+                    {
+                        bone.Splinted = false;
+                        bone.SplintedAt = TimeSpan.Zero;
+                    }
                     break;
                 }
                 case NCSurgeryEffectKind.SetBoneStability:
@@ -1584,6 +1715,45 @@ public sealed partial class NCSurgerySystem : EntitySystem
                     if (!RecordAutopsy(session, target))
                         return false;
                     break;
+                case NCSurgeryEffectKind.InstallCyberware:
+                {
+                    if (!_cyberware.TryFindInstallSlot(
+                            session.Patient,
+                            session.TargetRegion,
+                            target,
+                            out var slot))
+                    {
+                        return false;
+                    }
+
+                    var cyberAction = new NCActionResolutionId(
+                        actionResolutionId.DeriveGuid(0x43594245U, (uint) effect.Kind));
+                    var result = _cyberware.TryInstall(new NCCyberwareInstallRequest(
+                        cyberAction,
+                        session.Patient,
+                        session.TargetRegion,
+                        target,
+                        slot,
+                        true,
+                        true));
+                    if (!result.Accepted)
+                        return false;
+                    session.CyberwareMutationApplied = true;
+                    break;
+                }
+                case NCSurgeryEffectKind.RemoveCyberware:
+                {
+                    var cyberAction = new NCActionResolutionId(
+                        actionResolutionId.DeriveGuid(0x43594245U, (uint) effect.Kind));
+                    var result = _cyberware.TryRemove(new NCCyberwareRemoveRequest(
+                        cyberAction,
+                        session.Patient,
+                        target));
+                    if (!result.Accepted)
+                        return false;
+                    session.CyberwareMutationApplied = true;
+                    break;
+                }
                 default:
                     return false;
             }
@@ -1629,6 +1799,9 @@ public sealed partial class NCSurgerySystem : EntitySystem
         record.WoundTypes.Sort();
         record.ForensicResolutionIds.Sort();
         EnsureComp<NCAutopsyRecordComponent>(session.Patient).Regions[category] = record;
+
+        var recorded = new NCAutopsyRecordedEvent(category, record.WoundCount, record.WoundTypes);
+        RaiseLocalEvent(session.Patient, ref recorded);
         return true;
     }
 

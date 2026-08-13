@@ -102,6 +102,11 @@
   name: forensic dissection
   representativeTool: Scalpel
 
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolCyberware
+  name: cyberware interface and calibration
+  representativeTool: Multitool
+
 - type: ncSurgeryFacilityCapability
   id: NCSurgeryFacilityStableSurface
   name: stable patient surface

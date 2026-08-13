@@ -21,6 +21,7 @@ using Content.Shared.Damage;
 using Content.Shared.FixedPoint;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 
 namespace Content.IntegrationTests.Tests._NC.Medical;
 
@@ -31,8 +32,10 @@ public sealed class NCTreatmentSystemTest : GameTest
     private static readonly EntProtoId HumanMob = "MobHuman";
 
     [SidedDependency(Side.Server)] private NCTreatmentSystem _treatment = default!;
+    [SidedDependency(Side.Server)] private NCAnatomySystem _anatomy = default!;
     [SidedDependency(Side.Server)] private NCMedicalBodySystem _medicalBodies = default!;
     [SidedDependency(Side.Server)] private NCPhysiologySchedulerSystem _scheduler = default!;
+    [SidedDependency(Side.Server)] private IGameTiming _timing = default!;
 
     public override PoolSettings PoolSettings => new()
     {
@@ -58,11 +61,16 @@ public sealed class NCTreatmentSystemTest : GameTest
         _medicalBodies.TryClearDirty(body, NCMedicalDirtyDomains.All);
         var revision = SComp<NCMedicalBodyComponent>(body).MedicalRevision;
 
-        var pressure = _treatment.ApplyPressure(body, woundId, TimeSpan.FromSeconds(10));
+        // Integration pools retain their simulation clock between fixtures. Treatment timestamps are absolute,
+        // so anchor this lifecycle to the current server time instead of assuming a fresh zero-time process.
+        var treatmentStartedAt = _timing.CurTime;
+        var pressure = _treatment.ApplyPressure(body, woundId, treatmentStartedAt);
         var pressureRate = source.CurrentRate;
-        var bandage = _treatment.BandageWound(body, woundId, TimeSpan.FromSeconds(20));
+        var pressureActiveAfterApply = source.PressureApplied &&
+                                       wound.TreatmentFlags.HasFlag(NCWoundTreatmentFlags.Pressure);
+        var bandage = _treatment.BandageWound(body, woundId, treatmentStartedAt + TimeSpan.FromSeconds(20));
         var bandagedRate = source.CurrentRate;
-        var hemostatic = _treatment.ApplyHemostatic(body, woundId, TimeSpan.FromSeconds(30));
+        var hemostatic = _treatment.ApplyHemostatic(body, woundId, treatmentStartedAt + TimeSpan.FromSeconds(30));
         var packedRate = source.CurrentRate;
 
         var state = SComp<NCTreatmentStateComponent>(body);
@@ -75,9 +83,11 @@ public sealed class NCTreatmentSystemTest : GameTest
             Assert.That(pressureRate, Is.GreaterThan(0f).And.LessThan(baseRate));
             Assert.That(bandagedRate, Is.GreaterThan(0f).And.LessThan(pressureRate));
             Assert.That(packedRate, Is.GreaterThan(0f).And.LessThan(bandagedRate));
-            Assert.That(source.PressureApplied, Is.True);
+            Assert.That(pressureActiveAfterApply, Is.True);
+            Assert.That(source.PressureApplied, Is.False,
+                "manual pressure must expire when it is no longer actively renewed");
             Assert.That(source.Bandaged, Is.True);
-            Assert.That(wound.TreatmentFlags.HasFlag(NCWoundTreatmentFlags.Pressure), Is.True);
+            Assert.That(wound.TreatmentFlags.HasFlag(NCWoundTreatmentFlags.Pressure), Is.False);
             Assert.That(wound.TreatmentFlags.HasFlag(NCWoundTreatmentFlags.Bandaged), Is.True);
             Assert.That(wound.TreatmentFlags.HasFlag(NCWoundTreatmentFlags.Hemostatic), Is.True);
             Assert.That(wound.IntegrityDamage, Is.EqualTo(originalIntegrity));
@@ -186,10 +196,10 @@ public sealed class NCTreatmentSystemTest : GameTest
         var woundId = CreateWound(body, "NCZoneLegRight", "LegRight", "SlashingImpact", 6f);
         var itemIds = new EntProtoId[]
         {
-            "NCPressureDressing",
             "Gauze",
-            "NCHemostaticGauze",
+            "Brutepack",
             "Tourniquet",
+            "NCFieldSplint",
         };
 
         foreach (var itemId in itemIds)
@@ -242,6 +252,37 @@ public sealed class NCTreatmentSystemTest : GameTest
                 Is.EqualTo(revisionAfterFirstResolution));
             Assert.That(persistentRecordTypes, Does.Not.Contain(typeof(EntityUid)));
             Assert.That(SComp<NCWoundContainerComponent>(body).Wounds, Has.Count.EqualTo(1));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void FieldSplintStabilizesButDoesNotRepairFracture()
+    {
+        var body = SSpawn(HumanMob);
+        var woundId = CreateWound(body, "NCZoneLegRight", "LegRight", "BluntImpact", 10f);
+        Assert.That(_anatomy.TryGetOrgan(body, "LegBoneRight", out var boneUid), Is.True);
+        var bone = SComp<NCBoneComponent>(boneUid);
+        var originalState = bone.State;
+        var originalFixation = bone.RequiresFixation;
+        var originalRisk = bone.SecondaryDamageRisk;
+
+        var result = _treatment.SplintZone(body, "NCZoneLegRight", TimeSpan.FromSeconds(10));
+        var duplicate = _treatment.SplintZone(body, "NCZoneLegRight", TimeSpan.FromSeconds(11));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Outcome, Is.EqualTo(NCTreatmentOutcome.Applied));
+            Assert.That(duplicate.Outcome, Is.EqualTo(NCTreatmentOutcome.AlreadyApplied));
+            Assert.That(result.WoundId, Is.Null);
+            Assert.That(result.Zone?.Id, Is.EqualTo("NCZoneLegRight"));
+            Assert.That(bone.State, Is.EqualTo(originalState).And.GreaterThanOrEqualTo(NCBoneState.Cracked));
+            Assert.That(bone.RequiresFixation, Is.EqualTo(originalFixation).And.True);
+            Assert.That(bone.Splinted, Is.True);
+            Assert.That(bone.SplintedAt, Is.EqualTo(TimeSpan.FromSeconds(10)));
+            Assert.That(bone.Stability, Is.GreaterThanOrEqualTo(0.65f));
+            Assert.That(bone.SecondaryDamageRisk, Is.LessThanOrEqualTo(originalRisk));
+            Assert.That(SComp<NCWoundContainerComponent>(body).Wounds, Does.ContainKey(woundId));
         });
     }
 

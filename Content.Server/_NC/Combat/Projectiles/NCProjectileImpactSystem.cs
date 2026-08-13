@@ -4,11 +4,14 @@
 
 using System.Numerics;
 using Content.Server._NC.Combat.Damage;
+using Content.Shared._NC.Combat.Damage;
+using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Combat.Environment;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Systemic;
 using Content.Shared.Damage;
 using Content.Shared.Projectiles;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
 namespace Content.Server._NC.Combat.Projectiles;
@@ -25,6 +28,8 @@ public sealed partial class NCProjectileImpactSystem : EntitySystem
     [Dependency] private NCCombatTraumaDeliverySystem _delivery = default!;
     [Dependency] private NCMedicalDamageRoutingSystem _routing = default!;
     [Dependency] private NCProjectileContextSystem _contexts = default!;
+    [Dependency] private NCProjectileVolleySystem _volleys = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
 
     /// <summary>
@@ -91,8 +96,25 @@ public sealed partial class NCProjectileImpactSystem : EntitySystem
             return true;
         }
 
+        if (_prototypes.TryIndex(damageProfile, out NCCombatDamageProfilePrototype? resolvedProfile) &&
+            resolvedProfile.SuppressLocalTrauma)
+        {
+            return true;
+        }
+
         var impactSeed = context.Seed ^ (ImpactSeedStride * (impactSequence + 1UL));
         var localHit = _transform.GetRelativePosition(Transform(projectile), target);
+        var compoundVolley = context.ProjectilesInShot > 1;
+        ProtoId<NCTargetZonePrototype>? distributedZone = null;
+        if (compoundVolley &&
+            _volleys.TryGetDistributedZone(
+                target,
+                context.ResolutionId,
+                context.ProjectileSequence,
+                out var resolvedDistributedZone))
+        {
+            distributedZone = resolvedDistributedZone;
+        }
         var impact = new NCResolvedCombatImpact(
             context.ResolutionId,
             context.ProjectileSequence,
@@ -103,14 +125,20 @@ public sealed partial class NCProjectileImpactSystem : EntitySystem
             context.Weapon,
             projectile,
             context.IntendedTarget,
-            context.TargetingMode,
-            context.SelectedZone,
+            compoundVolley ? NCTargetingMode.Automatic : context.TargetingMode,
+            compoundVolley ? null : context.SelectedZone,
             damageProfile,
             partition.LocalTrauma,
             localHit,
             impactDirection,
             0f,
-            _timing.CurTime);
+            _timing.CurTime)
+        {
+            // Only the first accepted pellet establishes the primary collision zone. Later pellets consume the
+            // same action result and deterministic neighbour spread instead of each rolling their own anatomy.
+            ForcedZone = distributedZone,
+            HasPhysicalHitPosition = distributedZone == null,
+        };
 
         if (!_delivery.TryDeliver(impact, out var delivery))
         {
@@ -119,6 +147,8 @@ public sealed partial class NCProjectileImpactSystem : EntitySystem
         }
 
         feedbackDamage = delivery.FeedbackDamage;
+        if (compoundVolley && distributedZone == null)
+            _volleys.RecordPrimary(target, context.ResolutionId, delivery.ActualZone);
         projectileSpent = delivery.Cancelled ||
                           !delivery.CanOverpenetrateBody ||
                           delivery.Armor.Stopped;

@@ -862,3 +862,90 @@
   - NCSurgeryStepAutopsyRetract
   - NCSurgeryStepRecordAutopsy
   - NCSurgeryStepCloseSite
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryCyberwareInstallation
+  name: cyberware module installation
+  description: Installs and calibrates a staged physical implant in a compatible live anatomical bay.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationGeneral, NCSurgeryAuthorizationOrgan ]
+  compatibleTargetCategories: [ Head, Thorax ]
+  targetRequirements: Integrity
+  requiresGraft: true
+  cyberwareOperation: Install
+  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCCirculatoryAssistMk1 ]
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
+    minimumQuality: 0.7
+    minimumSterility: 0.7
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.65
+    minimumLighting: 0.75
+    maximumMotion: 0.08
+    maximumContamination: 0.3
+  patient:
+    minimumOxygenation: 0.35
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.55
+    minimumSedation: 0.5
+    minimumAnesthesia: 0.6
+    maximumMovement: 0.06
+    requireAirwayMonitoring: true
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepInstallCyberware
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCloseSite
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.18
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryCyberwareRemoval
+  name: cyberware module removal
+  description: Safely disconnects and extracts one installed module selected from the live host organ.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationGeneral, NCSurgeryAuthorizationOrgan ]
+  compatibleTargetCategories: [ Head, Thorax ]
+  targetRequirements: Integrity
+  cyberwareOperation: Remove
+  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCCirculatoryAssistMk1 ]
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
+    minimumQuality: 0.65
+    minimumSterility: 0.65
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.6
+    minimumLighting: 0.7
+    maximumMotion: 0.1
+    maximumContamination: 0.35
+  patient:
+    minimumOxygenation: 0.3
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.5
+    minimumSedation: 0.45
+    minimumAnesthesia: 0.55
+    maximumMovement: 0.07
+    requireAirwayMonitoring: true
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepRemoveCyberware
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCloseSite
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.2

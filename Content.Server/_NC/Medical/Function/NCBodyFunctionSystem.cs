@@ -81,7 +81,7 @@ public sealed partial class NCBodyFunctionSystem : EntitySystem
     }
 
     /// <summary>
-    /// Explicit deterministic refresh hook for tests, surgery and future offline/A-Life restore boundaries.
+    /// Explicit deterministic refresh hook for tests, surgery and restore boundaries.
     /// </summary>
     public bool RefreshBody(EntityUid body)
     {

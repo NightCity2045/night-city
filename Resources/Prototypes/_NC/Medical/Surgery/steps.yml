@@ -817,3 +817,63 @@
     enabled: false
   - kind: SetAccessDepth
     accessDepth: ReadyForClosure
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepInstallCyberware
+  name: seat and calibrate cyberware module
+  duration: 10s
+  requiredAccessDepth: SoftTissueRetracted
+  tools:
+  - capability: NCSurgeryToolCyberware
+    minimumQuality: 0.75
+    minimumSterility: 0.6
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring ]
+    minimumQuality: 0.65
+    requirePower: true
+    requireStableSurface: true
+  patient:
+    minimumOxygenation: 0.35
+    maximumShockStage: Severe
+    minimumAnesthesia: 0.6
+    maximumMovement: 0.06
+    requireAirwayMonitoring: true
+  successEffects:
+  - kind: InstallCyberware
+    target: Graft
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.12
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepRemoveCyberware
+  name: disconnect and extract cyberware module
+  duration: 9s
+  requiredAccessDepth: SoftTissueRetracted
+  tools:
+  - capability: NCSurgeryToolCyberware
+    minimumQuality: 0.7
+    minimumSterility: 0.55
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring ]
+    minimumQuality: 0.6
+    requirePower: true
+    requireStableSurface: true
+  patient:
+    minimumOxygenation: 0.3
+    maximumShockStage: Severe
+    minimumAnesthesia: 0.55
+    maximumMovement: 0.07
+    requireAirwayMonitoring: true
+  successEffects:
+  - kind: RemoveCyberware
+    target: CyberwareTarget
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.14

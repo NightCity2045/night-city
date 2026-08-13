@@ -143,6 +143,86 @@ public sealed partial class NCCyberwareSystem : EntitySystem
     }
 
     /// <summary>
+    /// Read-only surgical preflight for a physical implant and one live host organ. Slot choice is stable by
+    /// prototype ID and is repeated by <see cref="TryInstall"/> after the timed surgery step completes.
+    /// </summary>
+    public bool TryFindInstallSlot(
+        EntityUid patient,
+        EntityUid hostOrgan,
+        EntityUid moduleUid,
+        out ProtoId<NCCyberwareSlotPrototype> slotId)
+    {
+        slotId = default;
+        if (!TryComp<NCMedicalBodyComponent>(patient, out _) ||
+            !TryComp<NCCyberwareComponent>(moduleUid, out var module) ||
+            !TryGetProfile(module.Profile, out var profile) ||
+            profile.Form != NCCyberwareForm.Implant ||
+            module.InstalledSlot != null ||
+            TryComp<ChildOrganComponent>(moduleUid, out var child) && child.Parent != null ||
+            TryComp<OrganComponent>(moduleUid, out var organ) && organ.Body != null ||
+            !TryResolveHost(patient, hostOrgan, out var host, out var hostCategory) ||
+            host.Modules == null)
+        {
+            return false;
+        }
+
+        foreach (var candidate in host.Slots.OrderBy(value => value.Id, StringComparer.Ordinal))
+        {
+            if (!_prototypes.TryIndex(candidate, out NCCyberwareSlotPrototype? slot) ||
+                !slot.HostCategories.Contains(hostCategory) ||
+                !profile.CompatibleSlots.Contains(candidate) ||
+                profile.Size > slot.Capacity ||
+                FindInstalledInSlot(host, candidate) != null)
+            {
+                continue;
+            }
+
+            slotId = candidate;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Resolves one installed module in a live host without scanning the world. Profile and stable instance
+    /// identity provide deterministic ordering when a future host exposes more than one populated slot.
+    /// </summary>
+    public bool TryFindInstalledModule(
+        EntityUid patient,
+        EntityUid hostOrgan,
+        IReadOnlyCollection<ProtoId<NCCyberwarePrototype>> compatibleProfiles,
+        out EntityUid moduleUid)
+    {
+        moduleUid = default;
+        if (!TryResolveHost(patient, hostOrgan, out var host, out _) || host.Modules == null)
+            return false;
+
+        var candidates = new List<(EntityUid Uid, string Profile, Guid StableId)>();
+        foreach (var contained in host.Modules.ContainedEntities)
+        {
+            if (!TryComp<NCCyberwareComponent>(contained, out var module) ||
+                module.InstalledSlot == null ||
+                compatibleProfiles.Count > 0 && !compatibleProfiles.Contains(module.Profile))
+            {
+                continue;
+            }
+
+            candidates.Add((contained, module.Profile.Id, module.StableInstanceId));
+        }
+
+        if (candidates.Count == 0)
+            return false;
+
+        moduleUid = candidates
+            .OrderBy(value => value.Profile, StringComparer.Ordinal)
+            .ThenBy(value => value.StableId)
+            .ThenBy(value => value.Uid.Id)
+            .First().Uid;
+        return true;
+    }
+
+    /// <summary>
     /// Surgery-facing installation boundary. The caller supplies only entities already validated by its DoAfter;
     /// this method revalidates the live body graph and performs one idempotent physical transition.
     /// </summary>

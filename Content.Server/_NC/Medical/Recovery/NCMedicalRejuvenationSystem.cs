@@ -279,6 +279,8 @@ public sealed partial class NCMedicalRejuvenationSystem : EntitySystem
             bone.OpenFracture = false;
             bone.SecondaryDamageRisk = 0f;
             bone.RequiresFixation = false;
+            bone.Splinted = false;
+            bone.SplintedAt = TimeSpan.Zero;
         }
 
         if (TryComp<NCTendonComponent>(organ, out var tendon))

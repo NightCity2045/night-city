@@ -46,16 +46,19 @@
   criticalIschemiaAfter: 90m
   releaseReboundDuration: 5m
   releaseReboundMultiplier: 1.25
+  splintMinimumStability: 0.65
+  splintSecondaryDamageRiskMultiplier: 0.25
+  manualPressureDuration: 12s
   processedActionCapacity: 128
   auditHistoryCapacity: 128
 
 - type: ncTreatmentCapability
-  id: NCPressureDressingCapability
+  id: NCManualPressureCapability
   kind: Pressure
   profile: NCHumanFieldTreatment
   applicationDuration: 2s
-  resourceKind: Stack
-  resourceCost: 1
+  resourceKind: None
+  resourceCost: 0
 
 - type: ncTreatmentCapability
   id: NCFieldBandageCapability
@@ -81,18 +84,19 @@
   resourceKind: Stack
   resourceCost: 1
 
-- type: stack
-  id: NCPressureDressingStack
-  name: nc-stack-pressure-dressing
-  icon: { sprite: /Textures/Objects/Specific/Medical/medical.rsi, state: gauze }
-  spawn: NCPressureDressing
-  maxCount: 5
+- type: ncTreatmentCapability
+  id: NCFieldSplintCapability
+  kind: Splint
+  profile: NCHumanFieldTreatment
+  applicationDuration: 5s
+  resourceKind: Stack
+  resourceCost: 1
 
 - type: stack
-  id: NCHemostaticGauzeStack
-  name: nc-stack-hemostatic-gauze
-  icon: { sprite: /Textures/Objects/Specific/Medical/medical.rsi, state: brutepack }
-  spawn: NCHemostaticGauze
+  id: NCFieldSplintStack
+  name: nc-stack-field-splint
+  icon: { sprite: /Textures/Objects/Specific/Medical/medical.rsi, state: cast }
+  spawn: NCFieldSplint
   maxCount: 5
 
 - type: stack
@@ -103,33 +107,15 @@
   maxCount: 1
 
 - type: entity
-  id: NCPressureDressing
+  id: NCFieldSplint
   parent: BaseHealingItem
-  name: pressure dressing
-  description: A compact pressure pad for temporarily controlling an external wound.
+  name: field splint
+  description: A rigid disposable splint that stabilizes a fractured limb without repairing it.
   components:
   - type: Sprite
-    state: gauze
-  - type: Item
-    heldPrefix: gauze
+    state: cast
   - type: NCTreatmentItem
-    capability: NCPressureDressingCapability
+    capability: NCFieldSplintCapability
   - type: Stack
-    stackType: NCPressureDressingStack
-    count: 5
-
-- type: entity
-  id: NCHemostaticGauze
-  parent: BaseHealingItem
-  name: hemostatic gauze
-  description: Treated packing for reducing severe external bleeding until surgery is available.
-  components:
-  - type: Sprite
-    state: brutepack
-  - type: Item
-    heldPrefix: brutepack
-  - type: NCTreatmentItem
-    capability: NCHemostaticGauzeCapability
-  - type: Stack
-    stackType: NCHemostaticGauzeStack
+    stackType: NCFieldSplintStack
     count: 5

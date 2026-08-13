@@ -19,7 +19,11 @@
   armorDamageClass: Ballistic
   ablationAmount: 1
   bluntTransferProfile: NCBallisticStoppedTransfer
-  traumaFlags: [ Penetrating, CanEmbed ]
+  traumaFlags: [ Penetrating, CanEmbed, CanExit ]
+  embedMinimumPostArmorDamage: 1
+  exitMinimumPostArmorDamage: 14
+  exitTraumaMultiplier: 0.45
+  canOverpenetrateBody: true
 
 - type: ncCombatDamageProfile
   id: NCBallisticArmorPiercing
@@ -27,7 +31,11 @@
   armorDamageClass: Ballistic
   ablationAmount: 2
   bluntTransferProfile: NCBallisticStoppedTransfer
-  traumaFlags: [ Penetrating, ArmorPiercing, CanEmbed ]
+  traumaFlags: [ Penetrating, ArmorPiercing, CanEmbed, CanExit ]
+  embedMinimumPostArmorDamage: 1
+  exitMinimumPostArmorDamage: 9
+  exitTraumaMultiplier: 0.55
+  canOverpenetrateBody: true
 
 - type: ncCombatDamageProfile
   id: NCBallisticIncendiary
@@ -35,7 +43,11 @@
   armorDamageClass: Ballistic
   ablationAmount: 1
   bluntTransferProfile: NCBallisticStoppedTransfer
-  traumaFlags: [ Penetrating, Incendiary, CanEmbed ]
+  traumaFlags: [ Penetrating, Incendiary, CanEmbed, CanExit ]
+  embedMinimumPostArmorDamage: 1
+  exitMinimumPostArmorDamage: 16
+  exitTraumaMultiplier: 0.4
+  canOverpenetrateBody: true
 
 - type: ncCombatDamageProfile
   id: NCBallisticPractice
@@ -43,6 +55,23 @@
   armorDamageClass: Blunt
   ablationAmount: 0
   traumaFlags: [ NonLethal ]
+
+- type: ncCombatDamageProfile
+  id: NCBallisticExpansive
+  traumaProfile: BallisticExpansiveProjectile
+  armorDamageClass: Ballistic
+  ablationAmount: 1
+  bluntTransferProfile: NCBallisticStoppedTransfer
+  traumaFlags: [ Penetrating, CanEmbed ]
+  embedMinimumPostArmorDamage: 1
+
+- type: ncCombatDamageProfile
+  id: NCProjectileEmpUtility
+  traumaProfile: ElectricalImpact
+  armorDamageClass: Electrical
+  ablationAmount: 0
+  traumaFlags: [ None ]
+  suppressLocalTrauma: true
 
 - type: ncCombatDamageProfile
   id: NCProjectileBluntStandard
@@ -64,6 +93,7 @@
   armorDamageClass: Pierce
   ablationAmount: 1
   traumaFlags: [ Penetrating, CanEmbed ]
+  embedMinimumPostArmorDamage: 1
 
 - type: ncCombatDamageProfile
   id: NCProjectileThermalStandard

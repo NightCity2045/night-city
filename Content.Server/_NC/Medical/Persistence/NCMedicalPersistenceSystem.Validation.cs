@@ -603,7 +603,6 @@ public sealed partial class NCMedicalPersistenceSystem
             NCMedicalStableOwnerKind.Unassigned => key.Length == 0,
             NCMedicalStableOwnerKind.PlayerCharacter =>
                 int.TryParse(key, out var profileId) && profileId > 0,
-            NCMedicalStableOwnerKind.NamedNpc => !string.IsNullOrWhiteSpace(key),
             _ => false,
         };
     }
@@ -757,6 +756,8 @@ public sealed partial class NCMedicalPersistenceSystem
                     OpenFracture = bone.OpenFracture,
                     SecondaryDamageRisk = bone.SecondaryDamageRisk,
                     RequiresFixation = bone.RequiresFixation,
+                    Splinted = bone.Splinted,
+                    SplintedAt = bone.SplintedAt,
                 }
                 : null,
             Tendon = source.Tendon is { } tendon
@@ -909,7 +910,8 @@ public sealed partial class NCMedicalPersistenceSystem
                 ScarRisk = wound.ScarRisk,
                 EmbeddedObjectId = wound.EmbeddedObjectId,
                 ExitWoundId = wound.ExitWoundId,
-                ForensicResolutionId = wound.ForensicResolutionId,
+                // Keep the migration field empty when cloning a validated persistence payload.
+                ForensicResolutionId = Guid.Empty,
                 VisualX = wound.VisualX,
                 VisualY = wound.VisualY,
                 VisualDirection = wound.VisualDirection,

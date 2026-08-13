@@ -172,6 +172,11 @@
     tags:
       - Multitool
       - DoorElectronicsConfigurator
+  # NC start: reuse the vanilla multitool as the physical cyberware interface tool.
+  - type: NCSurgeryTool
+    capabilities:
+      NCSurgeryToolCyberware: 1
+  # NC end
   - type: PhysicalComposition
     materialComposition:
       Steel: 100

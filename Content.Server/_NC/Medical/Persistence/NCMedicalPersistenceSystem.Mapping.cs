@@ -88,6 +88,8 @@ public sealed partial class NCMedicalPersistenceSystem
                 OpenFracture = bone.OpenFracture,
                 SecondaryDamageRisk = bone.SecondaryDamageRisk,
                 RequiresFixation = bone.RequiresFixation,
+                Splinted = bone.Splinted,
+                SplintedAt = bone.SplintedAt,
             };
         }
 
@@ -229,7 +231,8 @@ public sealed partial class NCMedicalPersistenceSystem
             ScarRisk = wound.ScarRisk,
             EmbeddedObjectId = wound.EmbeddedObjectId,
             ExitWoundId = wound.ExitWoundId,
-            ForensicResolutionId = wound.ForensicResolutionId,
+            // Combat provenance is intentionally round-local and never enters character persistence.
+            ForensicResolutionId = Guid.Empty,
             VisualX = wound.VisualX,
             VisualY = wound.VisualY,
             VisualDirection = wound.VisualDirection,
@@ -471,6 +474,8 @@ public sealed partial class NCMedicalPersistenceSystem
                 bone.OpenFracture = boneState.OpenFracture;
                 bone.SecondaryDamageRisk = boneState.SecondaryDamageRisk;
                 bone.RequiresFixation = boneState.RequiresFixation;
+                bone.Splinted = boneState.Splinted;
+                bone.SplintedAt = boneState.SplintedAt;
             }
 
             if (state.Tendon is { } tendonState && TryComp<NCTendonComponent>(organ, out var tendon))
@@ -594,7 +599,8 @@ public sealed partial class NCMedicalPersistenceSystem
             ScarRisk = wound.ScarRisk,
             EmbeddedObjectId = wound.EmbeddedObjectId,
             ExitWoundId = wound.ExitWoundId,
-            ForensicResolutionId = wound.ForensicResolutionId,
+            // Ignore legacy stored provenance when materializing a new round-local wound record.
+            ForensicResolutionId = Guid.Empty,
             VisualX = wound.VisualX,
             VisualY = wound.VisualY,
             VisualDirection = wound.VisualDirection,

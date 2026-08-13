@@ -17,6 +17,7 @@ public enum NCTreatmentKind : byte
     Tourniquet,
     PressureRelease,
     TourniquetRelease,
+    Splint,
 }
 
 public enum NCTreatmentOutcome : byte
@@ -34,6 +35,7 @@ public enum NCTreatmentOutcome : byte
     UnsupportedItem,
     InvalidAction,
     DuplicateAction,
+    NoFracture,
 }
 
 /// <summary>

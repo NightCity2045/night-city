@@ -20,6 +20,14 @@ public sealed partial class NCProjectileHitContextComponent : Component
     [ViewVariables]
     public uint ProjectileSequence;
 
+    /// <summary>
+    /// Number of physical projectiles emitted by the same accepted gun shot. Values above one are resolved as
+    /// a compound volley: the first contact establishes a primary zone and the remaining projectiles spread
+    /// deterministically across that zone and its configured neighbours.
+    /// </summary>
+    [ViewVariables]
+    public uint ProjectilesInShot = 1;
+
     [ViewVariables]
     public uint NextImpactSequence;
 

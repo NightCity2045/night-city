@@ -36,7 +36,26 @@ public readonly record struct NCCombatTraumaRequest(
     Vector2 ImpactDirection,
     NCTraumaFlags Flags,
     float Contamination,
-    TimeSpan Timestamp);
+    TimeSpan Timestamp)
+{
+    /// <summary>
+    /// Deterministic projectile fate resolved from the data profile after armor. It is forensic identity only;
+    /// no transient EntityUid is stored in a wound or persistence snapshot.
+    /// </summary>
+    public NCTraumaProjectileDisposition ProjectileDisposition { get; init; }
+
+    /// <summary>
+    /// Fraction of entry trauma used to create the linked exit wound when disposition is Exit.
+    /// </summary>
+    public float ExitTraumaMultiplier { get; init; }
+}
+
+public enum NCTraumaProjectileDisposition : byte
+{
+    None,
+    Embedded,
+    Exit,
+}
 
 /// <summary>
 /// Cancellable local event used by projectile, melee and environment adapters.

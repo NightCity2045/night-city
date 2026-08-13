@@ -11,6 +11,8 @@
   armorLocation: Head
   fallbackZone: NCZoneChest
   neighborZones: [ NCZoneChest, NCZoneArmLeft, NCZoneArmRight ]
+  hitBounds: { position: "0.35,0.75", size: "0.30,0.25" }
+  downedWeightMultiplier: 0.8
 
 - type: ncTargetZone
   id: NCZoneChest
@@ -20,6 +22,8 @@
   automaticWeight: 28
   armorLocation: Chest
   neighborZones: [ NCZoneAbdomen, NCZoneHead, NCZoneArmLeft, NCZoneArmRight ]
+  hitBounds: { position: "0.30,0.52", size: "0.40,0.23" }
+  downedWeightMultiplier: 1.15
 
 - type: ncTargetZone
   id: NCZoneAbdomen
@@ -30,6 +34,8 @@
   armorLocation: Abdomen
   fallbackZone: NCZoneChest
   neighborZones: [ NCZoneChest, NCZoneGroin ]
+  hitBounds: { position: "0.33,0.37", size: "0.34,0.15" }
+  downedWeightMultiplier: 1.15
 
 - type: ncTargetZone
   id: NCZoneGroin
@@ -40,6 +46,8 @@
   armorLocation: Groin
   fallbackZone: NCZoneAbdomen
   neighborZones: [ NCZoneAbdomen, NCZoneLegLeft, NCZoneLegRight ]
+  hitBounds: { position: "0.38,0.28", size: "0.24,0.09" }
+  downedWeightMultiplier: 1.1
 
 - type: ncTargetZone
   id: NCZoneArmLeft
@@ -50,6 +58,9 @@
   armorLocation: ArmLeft
   fallbackZone: NCZoneChest
   neighborZones: [ NCZoneChest, NCZoneHandLeft ]
+  hitBounds: { position: "0.70,0.52", size: "0.30,0.23" }
+  downedWeightMultiplier: 0.9
+  directionWeightMultipliers: { Left: 1.5, Right: 0.7 }
 
 - type: ncTargetZone
   id: NCZoneArmRight
@@ -60,6 +71,9 @@
   armorLocation: ArmRight
   fallbackZone: NCZoneChest
   neighborZones: [ NCZoneChest, NCZoneHandRight ]
+  hitBounds: { position: "0.00,0.52", size: "0.30,0.23" }
+  downedWeightMultiplier: 0.9
+  directionWeightMultipliers: { Left: 0.7, Right: 1.5 }
 
 - type: ncTargetZone
   id: NCZoneHandLeft
@@ -70,6 +84,9 @@
   armorLocation: HandLeft
   fallbackZone: NCZoneArmLeft
   neighborZones: [ NCZoneArmLeft ]
+  hitBounds: { position: "0.67,0.37", size: "0.33,0.15" }
+  downedWeightMultiplier: 0.9
+  directionWeightMultipliers: { Left: 1.5, Right: 0.7 }
 
 - type: ncTargetZone
   id: NCZoneHandRight
@@ -80,6 +97,9 @@
   armorLocation: HandRight
   fallbackZone: NCZoneArmRight
   neighborZones: [ NCZoneArmRight ]
+  hitBounds: { position: "0.00,0.37", size: "0.33,0.15" }
+  downedWeightMultiplier: 0.9
+  directionWeightMultipliers: { Left: 0.7, Right: 1.5 }
 
 - type: ncTargetZone
   id: NCZoneLegLeft
@@ -90,6 +110,9 @@
   armorLocation: LegLeft
   fallbackZone: NCZoneAbdomen
   neighborZones: [ NCZoneGroin, NCZoneFootLeft ]
+  hitBounds: { position: "0.50,0.10", size: "0.25,0.18" }
+  downedWeightMultiplier: 0.9
+  directionWeightMultipliers: { Left: 1.4, Right: 0.75 }
 
 - type: ncTargetZone
   id: NCZoneLegRight
@@ -100,6 +123,9 @@
   armorLocation: LegRight
   fallbackZone: NCZoneAbdomen
   neighborZones: [ NCZoneGroin, NCZoneFootRight ]
+  hitBounds: { position: "0.25,0.10", size: "0.25,0.18" }
+  downedWeightMultiplier: 0.9
+  directionWeightMultipliers: { Left: 0.75, Right: 1.4 }
 
 - type: ncTargetZone
   id: NCZoneFootLeft
@@ -110,6 +136,9 @@
   armorLocation: FootLeft
   fallbackZone: NCZoneLegLeft
   neighborZones: [ NCZoneLegLeft ]
+  hitBounds: { position: "0.50,0.00", size: "0.35,0.10" }
+  downedWeightMultiplier: 0.9
+  directionWeightMultipliers: { Left: 1.4, Right: 0.75 }
 
 - type: ncTargetZone
   id: NCZoneFootRight
@@ -120,6 +149,9 @@
   armorLocation: FootRight
   fallbackZone: NCZoneLegRight
   neighborZones: [ NCZoneLegRight ]
+  hitBounds: { position: "0.15,0.00", size: "0.35,0.10" }
+  downedWeightMultiplier: 0.9
+  directionWeightMultipliers: { Left: 0.75, Right: 1.4 }
 
 - type: ncTargetDoll
   id: NCHumanTargetDoll

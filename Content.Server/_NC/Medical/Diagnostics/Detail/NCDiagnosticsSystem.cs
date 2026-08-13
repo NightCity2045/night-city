@@ -49,6 +49,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
     private const int AbsoluteMaxOrgans = 64;
     private const int AbsoluteMaxCyberware = 64;
     private const int AbsoluteMaxDrugs = 32;
+    private const int AbsoluteMaxHistory = 128;
     private const int OrganTraversalLimit = 64;
 
     [Dependency] private IGameTiming _timing = default!;
@@ -73,6 +74,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
         SubscribeLocalEvent<NCDiagnosticCapabilityComponent, AfterInteractEvent>(OnAfterInteract);
         SubscribeLocalEvent<NCDiagnosticCapabilityComponent, NCHealthAnalyzerScanCompletedEvent>(OnAnalyzerScanCompleted);
         SubscribeLocalEvent<NCDiagnosticCapabilityComponent, GetVerbsEvent<AlternativeVerb>>(OnGetScannerVerbs);
+        SubscribeLocalEvent<NCMedicalBodyComponent, GetVerbsEvent<AlternativeVerb>>(OnGetPatientDiagnosticVerbs);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
         _rateLimit.Register(
             RequestRateLimitKey,
@@ -140,6 +142,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             out var cyberwareOmitted,
             warnings);
         var drugRows = BuildDrugs(target, policy, out var drugsOmitted, warnings);
+        var historyRows = BuildHistory(target, policy, out var historyOmitted);
         if (Has(policy.Disclosures, NCDiagnosticDisclosure.Infection) &&
             _systemic.GetBurden(target, NCSystemicChannel.Sepsis) > 0f)
         {
@@ -160,13 +163,51 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             organRows,
             cyberwareRows,
             drugRows,
+            historyRows,
             surgery,
             warnings.OrderBy(value => value).ToList(),
             (ushort) Math.Clamp(woundsOmitted, 0, ushort.MaxValue),
             (ushort) Math.Clamp(organsOmitted, 0, ushort.MaxValue),
             (ushort) Math.Clamp(cyberwareOmitted, 0, ushort.MaxValue),
-            (ushort) Math.Clamp(drugsOmitted, 0, ushort.MaxValue));
+            (ushort) Math.Clamp(drugsOmitted, 0, ushort.MaxValue),
+            (ushort) Math.Clamp(historyOmitted, 0, ushort.MaxValue));
         return true;
+    }
+
+    private List<NCMedicalHistorySummary> BuildHistory(
+        EntityUid body,
+        NCDiagnosticCapabilityPrototype policy,
+        out int omitted)
+    {
+        omitted = 0;
+        if (!Has(policy.Disclosures, NCDiagnosticDisclosure.TreatmentHistory) ||
+            !TryComp<NCMedicalHistoryComponent>(body, out var history))
+        {
+            return [];
+        }
+
+        var limit = Math.Clamp(policy.MaxHistoryRecords, 0, AbsoluteMaxHistory);
+        var ordered = history.Records
+            .OrderByDescending(record => record.Timestamp)
+            .ToList();
+        omitted = Math.Max(0, ordered.Count - limit);
+        return ordered.Take(limit)
+            .Select(record => new NCMedicalHistorySummary(
+                record.Timestamp,
+                record.Kind,
+                record.Zone,
+                record.WoundSeverity,
+                record.WoundType,
+                record.Treatment,
+                record.EmergencyCare,
+                record.Procedure,
+                record.SurgeryStep,
+                record.SurgeryOutcome,
+                record.Drug,
+                record.AutopsyRegion,
+                record.AutopsyWoundCount,
+                record.AutopsyWoundTypes is { } types ? new List<NCWoundType>(types) : null))
+            .ToList();
     }
 
     /// <summary>
@@ -1167,6 +1208,77 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
         });
     }
 
+    /// <summary>
+    /// Exposes the unassisted diagnostic tiers through normal server verbs. The patient is the entity that
+    /// owns this component, so the client never supplies a target identity for visual or manual examination.
+    /// </summary>
+    private void OnGetPatientDiagnosticVerbs(
+        Entity<NCMedicalBodyComponent> entity,
+        ref GetVerbsEvent<AlternativeVerb> args)
+    {
+        if (!args.CanAccess || !TryComp<ActorComponent>(args.User, out var actor))
+            return;
+
+        var user = args.User;
+        var patient = entity.Owner;
+        var session = actor.PlayerSession;
+        var verbs = args.Verbs;
+
+        if (user == patient)
+        {
+            AddDiagnosticVerb(
+                "nc-medical-diagnostics-self-assessment-verb",
+                NCDiagnosticTier.SelfSensations,
+                3);
+        }
+
+        AddDiagnosticVerb(
+            "nc-medical-diagnostics-visual-examination-verb",
+            NCDiagnosticTier.Visual,
+            1);
+
+        if (args.CanInteract)
+        {
+            AddDiagnosticVerb(
+                "nc-medical-diagnostics-manual-examination-verb",
+                NCDiagnosticTier.Manual,
+                2);
+        }
+
+        return;
+
+        void AddDiagnosticVerb(string text, NCDiagnosticTier tier, int priority)
+        {
+            verbs.Add(new AlternativeVerb
+            {
+                Text = Loc.GetString(text),
+                Priority = priority,
+                Act = () =>
+                {
+                    var resolutionId = NCActionResolutionId.New();
+                    var accepted = TryBuildForActor(
+                        resolutionId,
+                        user,
+                        patient,
+                        null,
+                        tier,
+                        out var snapshot,
+                        out var failure);
+                    SendResponse(
+                        session,
+                        0,
+                        resolutionId,
+                        accepted,
+                        failure,
+                        accepted ? snapshot : null,
+                        patient,
+                        null,
+                        tier);
+                },
+            });
+        }
+    }
+
     private void SendResponse(
         ICommonSession session,
         uint requestId,
@@ -1213,7 +1325,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             var defaults = group.OrderBy(policy => policy.ID, StringComparer.Ordinal).ToArray();
             if (defaults.Length != 1)
             {
-                Logger.Error($"Diagnostic tier {group.Key} has {defaults.Length} unassisted defaults; exactly one is required.");
+                Log.Error($"Diagnostic tier {group.Key} has {defaults.Length} unassisted defaults; exactly one is required.");
                 continue;
             }
 

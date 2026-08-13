@@ -38,14 +38,12 @@ public static class NCMedicalSnapshotVersions
 }
 
 /// <summary>
-/// Stable persistence namespaces. Player keys are server-resolved profile IDs; named NPC keys belong to
-/// the A-Life system. Neither form contains runtime entity identity.
+/// Stable persistence namespace for player characters. Runtime entity identity is never persisted.
 /// </summary>
 public enum NCMedicalStableOwnerKind : byte
 {
     Unassigned,
     PlayerCharacter,
-    NamedNpc,
 }
 
 /// <summary>
@@ -234,6 +232,8 @@ public sealed partial class NCBoneStateSnapshot
     [DataField] public bool OpenFracture;
     [DataField] public float SecondaryDamageRisk;
     [DataField] public bool RequiresFixation;
+    [DataField] public bool Splinted;
+    [DataField] public TimeSpan SplintedAt;
 }
 
 [DataDefinition]
@@ -322,6 +322,10 @@ public sealed partial class NCWoundRecordSnapshot
     [DataField] public float ScarRisk;
     [DataField] public Guid? EmbeddedObjectId;
     [DataField] public Guid? ExitWoundId;
+    /// <summary>
+    /// Legacy migration slot. New captures always write an empty value and restore ignores it so combat-event
+    /// provenance remains round-local instead of entering character storage.
+    /// </summary>
     [DataField] public Guid ForensicResolutionId;
     [DataField] public byte VisualX;
     [DataField] public byte VisualY;
@@ -461,29 +465,6 @@ public sealed partial class NCPhysiologyStateSnapshot
     [DataField] public float BrainFunction;
     [DataField] public TimeSpan TimeBelowCriticalPerfusion;
     [DataField] public bool Irreversible;
-}
-
-/// <summary>
-/// Engine-independent envelope used by named NPC/A-Life storage. The caller owns durable storage and
-/// revision policy; NC medicine owns validation, capture, CurTime rebasing and materialization.
-/// </summary>
-[DataDefinition]
-public sealed partial class NCMedicalAbstractStateSnapshot
-{
-    [DataField]
-    public NCMedicalStableOwnerKind OwnerKind;
-
-    [DataField]
-    public string OwnerKey = string.Empty;
-
-    [DataField]
-    public long Revision;
-
-    [DataField]
-    public DateTime CapturedUtc;
-
-    [DataField(required: true)]
-    public NCMedicalStateSnapshot Medical = new();
 }
 
 /// <summary>

@@ -13,9 +13,9 @@ namespace Content.Server._NC.Medical.Physiology;
 /// environment/item handlers may still provide their messages and visuals, but compatibility HP can
 /// never be the source of death for an NC human.
 /// </summary>
-public sealed class NCAuthoritativeSuicideSystem : EntitySystem
+public sealed partial class NCAuthoritativeSuicideSystem : EntitySystem
 {
-    [Dependency] private readonly NCPhysiologySystem _physiology = default!;
+    [Dependency] private NCPhysiologySystem _physiology = default!;
 
     public override void Initialize()
     {

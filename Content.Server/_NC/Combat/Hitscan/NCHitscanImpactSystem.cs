@@ -107,7 +107,10 @@ public sealed partial class NCHitscanImpactSystem : EntitySystem
             localHit,
             args.Raycast.ShotDirection,
             0f,
-            _timing.CurTime);
+            _timing.CurTime)
+        {
+            HasPhysicalHitPosition = true,
+        };
 
         if (!_delivery.TryDeliver(impact, out var delivered))
         {

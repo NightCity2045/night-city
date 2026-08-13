@@ -18,11 +18,20 @@ public sealed partial class NCVisibleWoundSystem : EntitySystem
     {
         base.Initialize();
 
+        SubscribeLocalEvent<NCVisibleWoundComponent, ComponentInit>(OnComponentInit);
         SubscribeLocalEvent<NCVisibleWoundComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<NCVisibleWoundComponent, NCMedicalBodyChangedEvent>(OnMedicalBodyChanged);
         SubscribeLocalEvent<NCVisibleWoundComponent, NCWoundCreatedEvent>(OnWoundMutation);
         SubscribeLocalEvent<NCVisibleWoundComponent, NCWoundChangedEvent>(OnWoundMutation);
         SubscribeLocalEvent<NCVisibleWoundComponent, NCWoundProgressedEvent>(OnWoundMutation);
+    }
+
+    private void OnComponentInit(Entity<NCVisibleWoundComponent> entity, ref ComponentInit args)
+    {
+        // The marker list is a derived network projection, never prototype-authored state. Give every entity
+        // its own fresh collection so pooled components and inherited prototype data cannot leak wounds across
+        // respawns, test-pair recycling or round boundaries.
+        entity.Comp.Markers = [];
     }
 
     private void OnMapInit(Entity<NCVisibleWoundComponent> entity, ref MapInitEvent args)

@@ -102,7 +102,7 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
     }
 
     /// <summary>
-    /// Explicit deterministic entry point for scheduler, tests and materialized A-Life simulation.
+    /// Explicit deterministic entry point for the scheduler and tests.
     /// <paramref name="timestamp"/> is the interval end; acute state never advances while dematerialized.
     /// </summary>
     public NCWoundProgressionResult AdvanceBody(

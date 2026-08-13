@@ -3,6 +3,9 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Shared._NC.ActionResolution;
+using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Wounds;
+using Content.Shared.Body;
 using Content.Shared.DoAfter;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
@@ -39,6 +42,16 @@ public readonly record struct NCSurgeryAbortedEvent(
     NCActionResolutionId ResolutionId,
     NCActionResolutionId ActionResolutionId,
     NCSurgeryAbortReason Reason);
+
+/// <summary>
+/// Round-local forensic finding produced by a completed autopsy step. Hidden wound/action identifiers remain
+/// server-only; diagnostic clients receive only this sanitized anatomical summary.
+/// </summary>
+[ByRefEvent]
+public readonly record struct NCAutopsyRecordedEvent(
+    ProtoId<OrganCategoryPrototype> Region,
+    int WoundCount,
+    IReadOnlyList<NCWoundType> WoundTypes);
 
 /// <summary>
 /// Raised after any applied surgical mutation so physiology, diagnostics and persistence adapters can

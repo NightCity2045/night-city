@@ -9,6 +9,7 @@ using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Anatomy.Detachment;
 using Content.Shared._NC.Medical.Diagnostics;
+using Content.Shared._NC.Medical.Cyberware;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Surgery;
 using Content.Shared.Body;
@@ -70,6 +71,7 @@ public sealed partial class NCSurgeryConsoleSystem : EntitySystem
         SubscribeLocalEvent<NCSurgeryToolComponent, HandSelectedEvent>(OnSurgicalToolSelected);
         SubscribeLocalEvent<NCSurgeryToolComponent, HandDeselectedEvent>(OnSurgicalToolDeselected);
         SubscribeLocalEvent<NCDetachedOrganMedicalDataComponent, AfterInteractEvent>(OnGraftAfterInteract);
+        SubscribeLocalEvent<NCCyberwareComponent, AfterInteractEvent>(OnCyberwareAfterInteract);
     }
 
     public override void Update(float frameTime)
@@ -342,26 +344,43 @@ public sealed partial class NCSurgeryConsoleSystem : EntitySystem
         Entity<NCDetachedOrganMedicalDataComponent> graft,
         ref AfterInteractEvent args)
     {
-        if (args.Handled || args.Target is not { } facility ||
-            !HasComp<NCSurgeryFacilityComponent>(facility) ||
-            !_hands.IsHolding(args.User, graft.Owner) ||
-            !_interaction.InRangeUnobstructed(args.User, facility))
+        TryBindGraft(graft.Owner, ref args);
+    }
+
+    private void OnCyberwareAfterInteract(
+        Entity<NCCyberwareComponent> module,
+        ref AfterInteractEvent args)
+    {
+        if (module.Comp.InstalledSlot != null ||
+            TryComp<ChildOrganComponent>(module.Owner, out var child) && child.Parent != null ||
+            TryComp<OrganComponent>(module.Owner, out var organ) && organ.Body != null)
         {
             return;
         }
+
+        TryBindGraft(module.Owner, ref args);
+    }
+
+    private void TryBindGraft(EntityUid graft, ref AfterInteractEvent args)
+    {
+        if (args.Handled || args.Target is not { } facility ||
+            !HasComp<NCSurgeryFacilityComponent>(facility) ||
+            !_hands.IsHolding(args.User, graft) ||
+            !_interaction.InRangeUnobstructed(args.User, facility))
+            return;
 
         // The binding has a physical world consequence: the graft leaves the user's hand and is dropped
         // at the selected facility. A mere client-side selection can therefore never stage a transplant.
         if (!_hands.TryDrop(
                 args.User,
-                graft.Owner,
+                graft,
                 targetDropLocation: Transform(facility).Coordinates))
         {
             return;
         }
 
         var slot = EnsureComp<NCSurgeryGraftSlotComponent>(facility);
-        slot.Graft = graft.Owner;
+        slot.Graft = graft;
         slot.BoundBy = args.User;
         args.Handled = true;
 
@@ -624,7 +643,8 @@ public sealed partial class NCSurgeryConsoleSystem : EntitySystem
     private EntityUid? GetValidGraft(EntityUid facility, EntityUid user, float range)
     {
         if (!TryComp<NCSurgeryGraftSlotComponent>(facility, out var slot) || slot.Graft is not { } graft ||
-            Deleted(graft) || !HasComp<NCDetachedOrganMedicalDataComponent>(graft) ||
+            Deleted(graft) ||
+            !HasComp<NCDetachedOrganMedicalDataComponent>(graft) && !IsStageableCyberware(graft) ||
             !_interaction.InRangeUnobstructed(user, graft, range) ||
             !_interaction.InRangeUnobstructed(facility, graft, range))
         {
@@ -637,6 +657,14 @@ public sealed partial class NCSurgeryConsoleSystem : EntitySystem
         }
 
         return graft;
+    }
+
+    private bool IsStageableCyberware(EntityUid entity)
+    {
+        return TryComp<NCCyberwareComponent>(entity, out var module) &&
+               module.InstalledSlot == null &&
+               (!TryComp<ChildOrganComponent>(entity, out var child) || child.Parent == null) &&
+               (!TryComp<OrganComponent>(entity, out var organ) || organ.Body == null);
     }
 
     private List<RegionEntry> CollectRegions(EntityUid patient)

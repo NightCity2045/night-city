@@ -3,11 +3,13 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System;
+using System.Linq;
 using System.Numerics;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
 using Content.Server._NC.Combat.Armor;
 using Content.Server._NC.Combat.Damage;
+using Content.Server._NC.Combat.Projectiles;
 using Content.Server._NC.Medical.Physiology;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Armor;
@@ -22,6 +24,7 @@ using Content.Shared.FixedPoint;
 using Content.Shared.Inventory;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
+using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._NC.Combat;
@@ -35,6 +38,7 @@ public sealed class NCCombatTraumaDeliveryTest : GameTest
     [SidedDependency(Side.Server)] private InventorySystem _inventory = default!;
     [SidedDependency(Side.Server)] private NCArmorResolutionSystem _armor = default!;
     [SidedDependency(Side.Server)] private NCCombatTraumaDeliverySystem _delivery = default!;
+    [SidedDependency(Side.Server)] private NCProjectileVolleySystem _volleys = default!;
     [SidedDependency(Side.Server)] private NCPhysiologySchedulerSystem _physiology = default!;
 
     public override PoolSettings PoolSettings => new()
@@ -81,6 +85,7 @@ public sealed class NCCombatTraumaDeliveryTest : GameTest
         {
             Assert.That(first.Applied, Is.True);
             Assert.That(first.ActualZone.Id, Is.EqualTo("NCZoneChest"));
+            Assert.That(first.LocationSource, Is.EqualTo(NCHitLocationSource.Selected));
             Assert.That(first.Armor.EffectiveSp, Is.EqualTo(FixedPoint2.New(11)));
             Assert.That(first.Armor.PostArmorDamage, Is.EqualTo(FixedPoint2.New(4)));
             Assert.That(wounds.Wounds, Has.Count.EqualTo(1));
@@ -101,6 +106,110 @@ public sealed class NCCombatTraumaDeliveryTest : GameTest
 #pragma warning disable CS0618 // Compatibility HP is observed only to prove NC delivery did not mutate it.
         Assert.That(_damageable.GetTotalDamage(body), Is.EqualTo(hpBefore));
 #pragma warning restore CS0618
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void AutomaticPhysicalContactsResolveConfiguredAnatomicalFootprint()
+    {
+        var body = SSpawn("MobHuman");
+        ProtoId<DamageTypePrototype> piercingId = "Piercing";
+        var damage = new DamageSpecifier(_prototypes.Index(piercingId), 1);
+        var contacts = new (Vector2 LocalHit, string ExpectedZone)[]
+        {
+            (new Vector2(0f, 0.35f), "NCZoneHead"),
+            (new Vector2(-0.4f, 0.1f), "NCZoneArmRight"),
+            (new Vector2(0.2f, -0.45f), "NCZoneFootLeft"),
+        };
+
+        for (var i = 0; i < contacts.Length; i++)
+        {
+            var impact = new NCResolvedCombatImpact(
+                new NCActionResolutionId(new Guid(100 + i, 0, 0, new byte[8])),
+                (uint) i,
+                0,
+                (ulong) i + 1UL,
+                body,
+                null,
+                null,
+                null,
+                null,
+                NCTargetingMode.Automatic,
+                null,
+                "NCBallisticStandard",
+                damage,
+                contacts[i].LocalHit,
+                Vector2.UnitY,
+                0f,
+                TimeSpan.FromSeconds(1))
+            {
+                HasPhysicalHitPosition = true,
+            };
+
+            Assert.That(_delivery.TryDeliver(impact, out var delivered), Is.True, contacts[i].ExpectedZone);
+            Assert.Multiple(() =>
+            {
+                Assert.That(delivered.ActualZone.Id, Is.EqualTo(contacts[i].ExpectedZone));
+                Assert.That(delivered.LocationSource, Is.EqualTo(NCHitLocationSource.Collision));
+            });
+        }
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void ProjectileFateCreatesStableForeignBodyOrLinkedExitWounds()
+    {
+        ProtoId<DamageTypePrototype> piercingId = "Piercing";
+
+        var embeddedBody = SSpawn("MobHuman");
+        var embeddedImpact = CreateSelectedImpact(
+            embeddedBody,
+            Guid.Parse("cb63c957-ea59-4c84-a3e4-b9b598ca2aa3"),
+            new DamageSpecifier(_prototypes.Index(piercingId), 8));
+        Assert.That(_delivery.TryDeliver(embeddedImpact, out var embeddedDelivery), Is.True);
+        var embeddedWounds = SComp<NCWoundContainerComponent>(embeddedBody).Wounds.Values.ToArray();
+        Assert.Multiple(() =>
+        {
+            Assert.That(embeddedDelivery.CanOverpenetrateBody, Is.False);
+            Assert.That(embeddedWounds, Has.Length.EqualTo(1));
+            Assert.That(embeddedWounds[0].EmbeddedObjectId, Is.Not.Null);
+            Assert.That(embeddedWounds[0].ExitWoundId, Is.Null);
+        });
+
+        var exitBody = SSpawn("MobHuman");
+        var exitImpact = CreateSelectedImpact(
+            exitBody,
+            Guid.Parse("68fc98ad-daaa-4057-a7c3-655a0dbd5900"),
+            new DamageSpecifier(_prototypes.Index(piercingId), 16));
+        Assert.That(_delivery.TryDeliver(exitImpact, out var exitDelivery), Is.True);
+        var exitWounds = SComp<NCWoundContainerComponent>(exitBody).Wounds.Values.ToArray();
+        Assert.Multiple(() =>
+        {
+            Assert.That(exitDelivery.CanOverpenetrateBody, Is.True);
+            Assert.That(exitWounds, Has.Length.EqualTo(2));
+            Assert.That(exitWounds, Has.All.Matches<NCWoundRecord>(wound => wound.EmbeddedObjectId == null));
+            Assert.That(exitWounds[0].ExitWoundId, Is.EqualTo(exitWounds[1].WoundId));
+            Assert.That(exitWounds[1].ExitWoundId, Is.EqualTo(exitWounds[0].WoundId));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void CompoundVolleyUsesOnePrimaryZoneAndConfiguredNeighbours()
+    {
+        var body = SSpawn("MobHuman");
+        var action = new NCActionResolutionId(Guid.Parse("62eb0789-4a74-4125-842e-d628af8f28ff"));
+        _volleys.RecordPrimary(body, action, "NCZoneChest");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_volleys.TryGetDistributedZone(body, action, 0, out var primary), Is.True);
+            Assert.That(primary.Id, Is.EqualTo("NCZoneChest"));
+            Assert.That(_volleys.TryGetDistributedZone(body, action, 1, out var firstNeighbor), Is.True);
+            Assert.That(firstNeighbor.Id, Is.EqualTo("NCZoneAbdomen"));
+            Assert.That(_volleys.TryGetDistributedZone(body, action, 3, out var secondNeighbor), Is.True);
+            Assert.That(secondNeighbor.Id, Is.EqualTo("NCZoneHead"));
+        });
     }
 
     [Test]
@@ -161,5 +270,30 @@ public sealed class NCCombatTraumaDeliveryTest : GameTest
                 $"{zones[i]} resolved as {physiology.Condition}/{physiology.Consciousness}, " +
                 $"shock={physiology.Shock}, oxygenation={physiology.Oxygenation}");
         }
+    }
+
+    private static NCResolvedCombatImpact CreateSelectedImpact(
+        EntityUid body,
+        Guid action,
+        DamageSpecifier damage)
+    {
+        return new NCResolvedCombatImpact(
+            new NCActionResolutionId(action),
+            0,
+            0,
+            0xA11CEUL,
+            body,
+            null,
+            null,
+            null,
+            body,
+            NCTargetingMode.SelectedZone,
+            "NCZoneChest",
+            "NCBallisticStandard",
+            damage,
+            Vector2.Zero,
+            Vector2.UnitX,
+            0f,
+            TimeSpan.FromSeconds(1));
     }
 }

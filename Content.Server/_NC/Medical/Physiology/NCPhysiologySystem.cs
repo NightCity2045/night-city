@@ -172,7 +172,7 @@ public sealed partial class NCPhysiologySystem : EntitySystem
 
     /// <summary>
     /// Re-evaluates one body after an event or scheduler interval. Elapsed time is explicit so tests and
-    /// future abstract A-Life simulation use the exact same deterministic transition API.
+    /// test and restore callers use the exact same deterministic transition API.
     /// </summary>
     public bool EvaluateBody(EntityUid body, TimeSpan elapsed)
     {

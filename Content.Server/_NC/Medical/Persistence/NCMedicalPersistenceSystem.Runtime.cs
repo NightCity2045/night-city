@@ -102,7 +102,7 @@ public sealed partial class NCMedicalPersistenceSystem
         var binding = new PlayerBinding(characterId, state);
         _playerBindings[body] = binding;
         BindOwner(body, NCMedicalStableOwnerKind.PlayerCharacter,
-            characterId.Value.ToString(CultureInfo.InvariantCulture), 0, externalStorage: false);
+            characterId.Value.ToString(CultureInfo.InvariantCulture), 0);
         _loadingBodies.Add(body);
 
         NCMedicalStoredSnapshotData? stored;
@@ -367,14 +367,12 @@ public sealed partial class NCMedicalPersistenceSystem
         EntityUid body,
         NCMedicalStableOwnerKind kind,
         string key,
-        long revision,
-        bool externalStorage)
+        long revision)
     {
         var owner = EnsureComp<NCMedicalPersistenceOwnerComponent>(body);
         owner.Kind = kind;
         owner.Key = key;
         owner.Revision = revision;
-        owner.ExternalStorage = externalStorage;
         owner.SaveBlocked = false;
     }
 
@@ -384,7 +382,7 @@ public sealed partial class NCMedicalPersistenceSystem
         string key,
         long revision)
     {
-        BindOwner(body, kind, key, revision, externalStorage: false);
+        BindOwner(body, kind, key, revision);
         SetOwnerBlocked(body);
     }
 
@@ -575,95 +573,6 @@ public sealed partial class NCMedicalPersistenceSystem
         result.CapturedAt = runtimeAnchor;
         rebased = result;
         return true;
-    }
-
-    /// <summary>
-    /// Captures a named NPC for an external A-Life store. Callers must persist the returned semantic
-    /// envelope before deleting the materialized entity.
-    /// </summary>
-    public bool TryDematerializeStableOwner(
-        EntityUid body,
-        string ownerKey,
-        long revision,
-        out NCMedicalAbstractStateSnapshot state)
-    {
-        state = default!;
-        if (!IsValidNamedOwnerKey(ownerKey) || revision < 0 ||
-            !TryComp<NCMedicalPersistenceOwnerComponent>(body, out var owner) ||
-            owner.Kind != NCMedicalStableOwnerKind.NamedNpc ||
-            !string.Equals(owner.Key, ownerKey, StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        var snapshot = SerializeMedicalState(body);
-        if (snapshot == null)
-            return false;
-        state = new NCMedicalAbstractStateSnapshot
-        {
-            OwnerKind = NCMedicalStableOwnerKind.NamedNpc,
-            OwnerKey = ownerKey,
-            Revision = revision,
-            CapturedUtc = DateTime.UtcNow,
-            Medical = snapshot,
-        };
-        return true;
-    }
-
-    /// <summary>
-    /// Restores one externally stored named NPC graph. This path cannot bind player ownership and therefore
-    /// cannot bypass the selected-character preference check used by reconnect loading.
-    /// </summary>
-    public bool TryMaterializeStableOwner(EntityUid body, NCMedicalAbstractStateSnapshot state)
-    {
-        if (state == null ||
-            state.OwnerKind != NCMedicalStableOwnerKind.NamedNpc ||
-            !IsValidNamedOwnerKey(state.OwnerKey) ||
-            state.Revision < 0 ||
-            state.Medical == null ||
-            _playerBindings.ContainsKey(body) ||
-            TryComp<NCMedicalPersistenceOwnerComponent>(body, out var existingOwner) &&
-            (existingOwner.Kind != NCMedicalStableOwnerKind.NamedNpc ||
-             !string.Equals(existingOwner.Key, state.OwnerKey, StringComparison.Ordinal)) ||
-            !TryRebaseSnapshotForRuntime(state.Medical, _timing.CurTime, out var rebased))
-        {
-            return false;
-        }
-
-        BindOwner(body, state.OwnerKind, state.OwnerKey, state.Revision, externalStorage: true);
-        _suppressPersistenceEvents.Add(body);
-        try
-        {
-            if (RestoreMedicalState(body, rebased))
-                return true;
-        }
-        finally
-        {
-            _suppressPersistenceEvents.Remove(body);
-        }
-
-        RemComp<NCMedicalPersistenceOwnerComponent>(body);
-        return false;
-    }
-
-    /// <summary>Assigns a new materialized named NPC before its first A-Life capture.</summary>
-    public bool TryBindNewStableOwner(EntityUid body, string ownerKey)
-    {
-        if (!HasComp<NCMedicalBodyComponent>(body) ||
-            _playerBindings.ContainsKey(body) ||
-            !IsValidNamedOwnerKey(ownerKey) ||
-            HasComp<NCMedicalPersistenceOwnerComponent>(body))
-        {
-            return false;
-        }
-
-        BindOwner(body, NCMedicalStableOwnerKind.NamedNpc, ownerKey, 0, externalStorage: true);
-        return true;
-    }
-
-    private static bool IsValidNamedOwnerKey(string key)
-    {
-        return !string.IsNullOrWhiteSpace(key) && key.Length <= MaxStableOwnerKeyLength;
     }
 
     private static bool TryGetDelta(TimeSpan target, TimeSpan source, out TimeSpan delta)

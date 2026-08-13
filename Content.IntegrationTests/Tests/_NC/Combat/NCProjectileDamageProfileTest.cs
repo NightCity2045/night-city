@@ -81,12 +81,26 @@ public sealed class NCProjectileDamageProfileTest : GameTest
         var incendiaryDamage = SComp<ProjectileComponent>(incendiary).Damage;
         Assert.That(_contexts.TryResolveDamageProfile(incendiary, incendiaryDamage, out var fire), Is.True);
 
+        var expansive = SSpawn("NCBulletPistolExpansive");
+        var expansiveDamage = SComp<ProjectileComponent>(expansive).Damage;
+        Assert.That(_contexts.TryResolveDamageProfile(expansive, expansiveDamage, out var softPoint), Is.True);
+
+        var emp = SSpawn("BulletGrenadeEMP");
+        var empDamage = SComp<ProjectileComponent>(emp).Damage;
+        Assert.That(_contexts.TryResolveDamageProfile(emp, empDamage, out var empUtility), Is.True);
+
         Assert.Multiple(() =>
         {
             Assert.That(SEntMan.HasComponent<NCProjectileDamageProfileComponent>(armorPiercing), Is.True);
             Assert.That(ap.Id, Is.EqualTo("NCBallisticArmorPiercing"));
             Assert.That(SEntMan.HasComponent<NCProjectileDamageProfileComponent>(incendiary), Is.True);
             Assert.That(fire.Id, Is.EqualTo("NCBallisticIncendiary"));
+            Assert.That(softPoint.Id, Is.EqualTo("NCBallisticExpansive"));
+            Assert.That(empUtility.Id, Is.EqualTo("NCProjectileEmpUtility"));
+            Assert.That(_prototypes.Index(empUtility).SuppressLocalTrauma, Is.True);
+            Assert.That(
+                _prototypes.Index(_prototypes.Index(softPoint).TraumaProfile).WoundPrototype?.Id,
+                Is.EqualTo("NCWoundBallisticExpansive"));
         });
     }
 

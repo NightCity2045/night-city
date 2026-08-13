@@ -389,7 +389,10 @@ public sealed partial class ShuttleSystem
                     damageSpec.DamageDict["Blunt"] = scaledDamage;
                     damageSpec.DamageDict["Structural"] = scaledDamage * _structuralDamage;
 
-                    _damageSys.ChangeDamage((localEnt, damageable), damageSpec);
+                    // NC start: kinetic collision uses authoritative zonal medicine for human targets.
+                    if (!TryApplyNcShuttleImpact(localEnt.Owner, uid, damageSpec, throwDirection))
+                        _damageSys.ChangeDamage((localEnt, damageable), damageSpec);
+                    // NC end
                 }
                 // might've been destroyed
                 if (TerminatingOrDeleted(localEnt) || EntityManager.IsQueuedForDeletion(localEnt))

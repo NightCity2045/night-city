@@ -7,6 +7,11 @@
   mechanism: Projectile
 
 - type: ncTraumaProfile
+  id: BallisticExpansiveProjectile
+  mechanism: Projectile
+  woundPrototype: NCWoundBallisticExpansive
+
+- type: ncTraumaProfile
   id: BluntImpact
   mechanism: Blunt
 

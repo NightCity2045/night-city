@@ -9,6 +9,7 @@ using System.Linq;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
 using Content.Server._NC.Medical.Anatomy.Detachment;
+using Content.Server._NC.Medical.Diagnostics.Detail;
 using Content.Server._NC.Medical.Persistence;
 using Content.Server._NC.Medical.Pharmacology;
 using Content.Server._NC.Medical.Physiology;
@@ -75,6 +76,7 @@ public sealed class NCMedicalPersistenceSystemTest : GameTest
         sourceWound.PeakHealingProgress = 0.4f;
         sourceWound.ReopenStress = 2f;
         sourceWound.Age = TimeSpan.FromMinutes(10);
+        sourceWound.ForensicResolutionId = Guid.Parse("24fbb22a-1508-46e3-b86a-a6d45ca7ffbd");
         var scarId = Guid.NewGuid();
         var scarSourceId = Guid.NewGuid();
         sourceWounds.Scars.Add(new NCScarRecord
@@ -115,6 +117,11 @@ public sealed class NCMedicalPersistenceSystemTest : GameTest
         circulation.EffectiveCirculatingVolume = circulation.BloodVolume;
         Assert.That(_scheduler.ProcessNow(source, TimeSpan.Zero), Is.True);
 
+        // The clinical timeline belongs to the current round only. Treatments and medication above
+        // populate it, but it must never enter the character persistence payload.
+        var sourceHistory = SComp<NCMedicalHistoryComponent>(source);
+        Assert.That(sourceHistory.Records, Is.Not.Empty);
+
         var first = _persistence.SerializeMedicalState(source);
         Assert.That(first, Is.Not.Null);
         var target = SSpawn(HumanMob);
@@ -127,6 +134,7 @@ public sealed class NCMedicalPersistenceSystemTest : GameTest
         var targetSite = SComp<NCSurgicalSiteComponent>(targetArm);
         var targetTreatment = SComp<NCTreatmentStateComponent>(target);
         var targetEmergency = SComp<NCEmergencyCareStateComponent>(target);
+        var targetHistory = SComp<NCMedicalHistoryComponent>(target);
         var secondWounds = second!.Wounds!;
         Assert.Multiple(() =>
         {
@@ -152,6 +160,8 @@ public sealed class NCMedicalPersistenceSystemTest : GameTest
             Assert.That(secondWounds.Records[woundId].PeakHealingProgress, Is.EqualTo(0.4f));
             Assert.That(secondWounds.Records[woundId].ReopenStress, Is.EqualTo(2f));
             Assert.That(secondWounds.Records[woundId].Age, Is.EqualTo(TimeSpan.FromMinutes(10)));
+            Assert.That(first.Wounds.Records[woundId].ForensicResolutionId, Is.EqualTo(Guid.Empty));
+            Assert.That(secondWounds.Records[woundId].ForensicResolutionId, Is.EqualTo(Guid.Empty));
             Assert.That(secondWounds.Scars, Has.Count.EqualTo(1));
             Assert.That(secondWounds.Scars[0].ScarId, Is.EqualTo(scarId));
             Assert.That(secondWounds.Scars[0].SourceWoundId, Is.EqualTo(scarSourceId));
@@ -168,6 +178,7 @@ public sealed class NCMedicalPersistenceSystemTest : GameTest
             Assert.That(targetEmergency.CrystalloidVolume, Is.EqualTo(100f));
             Assert.That(targetEmergency.ProcessedActions, Is.Empty);
             Assert.That(targetEmergency.AuditHistory, Is.Empty);
+            Assert.That(targetHistory.Records, Is.Empty);
             Assert.That(second.Circulation.BloodVolume, Is.EqualTo(first.Circulation.BloodVolume));
             Assert.That(second.Pharmacology, Is.Not.Null);
             Assert.That(second.Pharmacology!.ActiveDrugs, Has.Count.EqualTo(1));
@@ -354,31 +365,6 @@ public sealed class NCMedicalPersistenceSystemTest : GameTest
             Assert.That(SComp<NCCirculationComponent>(body).BloodVolume, Is.EqualTo(originalBlood));
             Assert.That(_anatomy.TryGetOrgan(body, "ArmRight", out var currentArm), Is.True);
             Assert.That(currentArm, Is.EqualTo(arm));
-        });
-    }
-
-    [Test]
-    [RunOnSide(Side.Server)]
-    public void NamedNpcMaterializeDematerializeUsesStableOwnerContract()
-    {
-        const string ownerKey = "alife:npc:trauma-vendor-17";
-        var source = SSpawn(HumanMob);
-        Assert.That(_persistence.TryBindNewStableOwner(source, ownerKey), Is.True);
-        Assert.That(_anatomy.TryGetOrgan(source, "ArmLeft", out var sourceArm), Is.True);
-        SComp<NCOrganIntegrityComponent>(sourceArm).CurrentIntegrity = 47f;
-        Assert.That(_persistence.TryDematerializeStableOwner(source, ownerKey, 9, out var stored), Is.True);
-
-        var target = SSpawn(HumanMob);
-        Assert.That(_persistence.TryMaterializeStableOwner(target, stored), Is.True);
-        Assert.That(_anatomy.TryGetOrgan(target, "ArmLeft", out var targetArm), Is.True);
-        var owner = SComp<NCMedicalPersistenceOwnerComponent>(target);
-        Assert.Multiple(() =>
-        {
-            Assert.That(SComp<NCOrganIntegrityComponent>(targetArm).CurrentIntegrity, Is.EqualTo(47f));
-            Assert.That(owner.Kind, Is.EqualTo(NCMedicalStableOwnerKind.NamedNpc));
-            Assert.That(owner.Key, Is.EqualTo(ownerKey));
-            Assert.That(owner.Revision, Is.EqualTo(9));
-            Assert.That(owner.ExternalStorage, Is.True);
         });
     }
 

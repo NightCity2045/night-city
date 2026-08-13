@@ -86,6 +86,15 @@ public sealed partial class NCBoneComponent : Component
 
     [DataField]
     public bool RequiresFixation;
+
+    /// <summary>
+    /// Field stabilization reduces movement loss and secondary injury but does not repair the fracture.
+    /// </summary>
+    [DataField]
+    public bool Splinted;
+
+    [DataField]
+    public TimeSpan SplintedAt;
 }
 
 [RegisterComponent]

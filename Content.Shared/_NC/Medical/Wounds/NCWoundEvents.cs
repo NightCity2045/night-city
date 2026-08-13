@@ -11,7 +11,8 @@ namespace Content.Shared._NC.Medical.Wounds;
 public readonly record struct NCWoundCreatedEvent(
     Guid WoundId,
     ProtoId<NCTargetZonePrototype> TargetZone,
-    NCWoundSeverity Severity);
+    NCWoundSeverity Severity,
+    NCWoundType WoundType);
 
 [ByRefEvent]
 public readonly record struct NCWoundChangedEvent(

@@ -58,6 +58,8 @@
     - NCSurgeryEyeTransplant
     - NCSurgeryLimbAmputation
     - NCSurgeryLimbReattachment
+    - NCSurgeryCyberwareInstallation
+    - NCSurgeryCyberwareRemoval
   - type: NCSurgeryAuthorizationProvider
     authorizations:
     - NCSurgeryAuthorizationGeneral

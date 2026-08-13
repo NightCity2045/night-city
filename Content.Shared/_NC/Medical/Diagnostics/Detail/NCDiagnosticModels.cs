@@ -6,9 +6,11 @@ using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Cyberware;
+using Content.Shared._NC.Medical.Emergency;
 using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Surgery;
+using Content.Shared._NC.Medical.Treatment;
 using Content.Shared._NC.Medical.Transplantation;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
@@ -52,6 +54,21 @@ public enum NCDiagnosticDisclosure : uint
     SurgicalState = 1 << 13,
     Cyberware = 1 << 14,
     Drugs = 1 << 15,
+    TreatmentHistory = 1 << 16,
+}
+
+[Serializable, NetSerializable]
+public enum NCMedicalHistoryKind : byte
+{
+    Injury,
+    Treatment,
+    EmergencyCare,
+    Medication,
+    SurgeryStarted,
+    SurgeryStep,
+    SurgeryCompleted,
+    SurgeryAborted,
+    Autopsy,
 }
 
 [Flags, Serializable, NetSerializable]
@@ -210,6 +227,23 @@ public readonly record struct NCMedicalSurgerySummary(
     NCSurgerySessionState State,
     NCSurgicalAccessDepth AccessDepth);
 
+[Serializable, NetSerializable]
+public readonly record struct NCMedicalHistorySummary(
+    TimeSpan Timestamp,
+    NCMedicalHistoryKind Kind,
+    ProtoId<NCTargetZonePrototype>? Zone,
+    NCWoundSeverity? WoundSeverity,
+    NCWoundType? WoundType,
+    NCTreatmentKind? Treatment,
+    NCEmergencyCareKind? EmergencyCare,
+    ProtoId<NCSurgeryProcedurePrototype>? Procedure,
+    ProtoId<NCSurgeryStepPrototype>? SurgeryStep,
+    NCSurgeryStepOutcome? SurgeryOutcome,
+    ProtoId<NCDrugProfilePrototype>? Drug,
+    ProtoId<OrganCategoryPrototype>? AutopsyRegion,
+    byte? AutopsyWoundCount,
+    List<NCWoundType>? AutopsyWoundTypes);
+
 /// <summary>
 /// Capability-filtered, deterministic network DTO. It contains no EntityUid, wound Guid or hidden history.
 /// </summary>
@@ -227,12 +261,14 @@ public sealed class NCMedicalSnapshot(
     List<NCMedicalOrganSummary> organs,
     List<NCMedicalCyberwareSummary> cyberware,
     List<NCMedicalDrugSummary> drugs,
+    List<NCMedicalHistorySummary> history,
     NCMedicalSurgerySummary? surgery,
     List<NCDiagnosticWarning> warnings,
     ushort woundsOmitted,
     ushort organsOmitted,
     ushort cyberwareOmitted,
-    ushort drugsOmitted)
+    ushort drugsOmitted,
+    ushort historyOmitted)
 {
     /// <summary>
     /// Server-authoritative correlation for this observation. It is not a wound or forensic identifier.
@@ -249,10 +285,12 @@ public sealed class NCMedicalSnapshot(
     public List<NCMedicalOrganSummary> Organs { get; } = organs;
     public List<NCMedicalCyberwareSummary> Cyberware { get; } = cyberware;
     public List<NCMedicalDrugSummary> Drugs { get; } = drugs;
+    public List<NCMedicalHistorySummary> History { get; } = history;
     public NCMedicalSurgerySummary? Surgery { get; } = surgery;
     public List<NCDiagnosticWarning> Warnings { get; } = warnings;
     public ushort WoundsOmitted { get; } = woundsOmitted;
     public ushort OrgansOmitted { get; } = organsOmitted;
     public ushort CyberwareOmitted { get; } = cyberwareOmitted;
     public ushort DrugsOmitted { get; } = drugsOmitted;
+    public ushort HistoryOmitted { get; } = historyOmitted;
 }

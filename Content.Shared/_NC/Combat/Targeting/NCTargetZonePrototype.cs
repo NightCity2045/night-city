@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Shared.Body;
+using System.Numerics;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.Combat.Targeting;
@@ -54,6 +55,52 @@ public sealed partial class NCTargetZonePrototype : IPrototype
 
     [DataField]
     public List<ProtoId<NCTargetZonePrototype>> NeighborZones { get; private set; } = [];
+
+    /// <summary>
+    /// Optional normalized footprint rectangle used when physics supplied a real contact point. Coordinates
+    /// are in the target's local [-0.5, 0.5] footprint converted to [0, 1]. Overlap is rejected by tests.
+    /// </summary>
+    [DataField]
+    public NCTargetZoneHitBounds? HitBounds { get; private set; }
+
+    /// <summary>
+    /// Multiplier applied to automatic selection while the target is down. This changes anatomical exposure,
+    /// never whether the physical attack hit.
+    /// </summary>
+    [DataField]
+    public float DownedWeightMultiplier { get; private set; } = 1f;
+
+    /// <summary>
+    /// Optional exposure multipliers for the local direction from which the impact arrived.
+    /// </summary>
+    [DataField]
+    public Dictionary<NCHitApproachDirection, float> DirectionWeightMultipliers { get; private set; } = new();
+}
+
+[DataDefinition]
+public sealed partial class NCTargetZoneHitBounds
+{
+    [DataField(required: true)]
+    public Vector2 Position { get; private set; }
+
+    [DataField(required: true)]
+    public Vector2 Size { get; private set; }
+}
+
+public enum NCHitApproachDirection : byte
+{
+    Front,
+    Rear,
+    Left,
+    Right,
+}
+
+public enum NCHitLocationSource : byte
+{
+    Scripted,
+    Selected,
+    Collision,
+    Weighted,
 }
 
 public enum NCArmorLocation : byte

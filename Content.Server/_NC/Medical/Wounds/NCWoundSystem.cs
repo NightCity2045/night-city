@@ -37,7 +37,23 @@ public sealed partial class NCWoundSystem : EntitySystem
     {
         base.Initialize();
 
+        SubscribeLocalEvent<NCWoundContainerComponent, ComponentInit>(OnContainerInit);
         SubscribeLocalEvent<NCMedicalBodyComponent, NCCombatTraumaRequestedEvent>(OnTraumaRequested);
+    }
+
+    private void OnContainerInit(Entity<NCWoundContainerComponent> entity, ref ComponentInit args)
+    {
+        // This component is attached lazily and owns server-runtime collections. Robust can recycle component
+        // instances between deleted entities, so every new owner must start with isolated medical state.
+        entity.Comp.Profile = default;
+        entity.Comp.Wounds = new Dictionary<Guid, NCWoundRecord>();
+        entity.Comp.Scars = [];
+        entity.Comp.OverflowTraumaByZone = new();
+        entity.Comp.OverflowPain = 0f;
+        entity.Comp.ProcessedImpacts = new HashSet<NCProcessedImpactKey>();
+        entity.Comp.ProcessedImpactOrder = new Queue<NCProcessedImpactKey>();
+        entity.Comp.PendingMovementDistance = 0f;
+        entity.Comp.LastProgressionPersistenceEventAt = TimeSpan.Zero;
     }
 
     private void OnTraumaRequested(
@@ -70,9 +86,18 @@ public sealed partial class NCWoundSystem : EntitySystem
 
         var container = EnsureInitialized(body);
         if (!_prototypes.TryIndex(container.Profile, out var systemProfile) ||
-            !_prototypes.TryIndex(request.TraumaProfile, out var traumaProfile) ||
-            !systemProfile.Wounds.TryGetValue(traumaProfile.Mechanism, out var woundPrototypeId) ||
-            !_prototypes.TryIndex(woundPrototypeId, out var woundPrototype))
+            !_prototypes.TryIndex(request.TraumaProfile, out var traumaProfile))
+        {
+            return NCWoundApplicationResult.Rejected;
+        }
+
+        ProtoId<NCWoundPrototype> resolvedWoundPrototypeId;
+        if (traumaProfile.WoundPrototype is { } overrideWound)
+            resolvedWoundPrototypeId = overrideWound;
+        else if (!systemProfile.Wounds.TryGetValue(traumaProfile.Mechanism, out resolvedWoundPrototypeId))
+            return NCWoundApplicationResult.Rejected;
+
+        if (!_prototypes.TryIndex(resolvedWoundPrototypeId, out var woundPrototype))
         {
             return NCWoundApplicationResult.Rejected;
         }
@@ -135,7 +160,7 @@ public sealed partial class NCWoundSystem : EntitySystem
 
         var wound = CreateWound(
             request,
-            woundPrototypeId,
+            resolvedWoundPrototypeId,
             woundPrototype,
             traumaAmount,
             severity,
@@ -143,6 +168,40 @@ public sealed partial class NCWoundSystem : EntitySystem
             vascularDensity,
             hasMajorArtery,
             hasBodyCavity);
+
+        NCWoundRecord? exitWound = null;
+        if (request.ProjectileDisposition == NCTraumaProjectileDisposition.Embedded)
+        {
+            // This GUID identifies the retained foreign body for surgery/forensics without persisting an entity.
+            wound.EmbeddedObjectId = request.ResolutionId.DeriveGuid(
+                request.ProjectileSequence ^ 0x40000000u,
+                request.ImpactSequence);
+        }
+        else if (request.ProjectileDisposition == NCTraumaProjectileDisposition.Exit &&
+                 float.IsFinite(request.ExitTraumaMultiplier) &&
+                 request.ExitTraumaMultiplier > 0f)
+        {
+            var exitTrauma = traumaAmount * Math.Clamp(request.ExitTraumaMultiplier, 0f, 1f);
+            if (exitTrauma > 0f)
+            {
+                exitWound = CreateWound(
+                    request,
+                    resolvedWoundPrototypeId,
+                    woundPrototype,
+                    exitTrauma,
+                    ResolveSeverity(exitTrauma, systemProfile.SeverityThresholds),
+                    now,
+                    vascularDensity,
+                    hasMajorArtery,
+                    hasBodyCavity,
+                    0x80000000u);
+                exitWound.VisualX = (byte) (byte.MaxValue - wound.VisualX);
+                exitWound.VisualDirection = QuantizeDirection(-request.ImpactDirection);
+                wound.ExitWoundId = exitWound.WoundId;
+                exitWound.ExitWoundId = wound.WoundId;
+            }
+        }
+
         ApplyLocalConsequences(
             body,
             region,
@@ -152,7 +211,8 @@ public sealed partial class NCWoundSystem : EntitySystem
             severity,
             traumaAmount);
 
-        if (TryMerge(body, container, systemProfile, woundPrototype, wound, out var merged))
+        if (exitWound == null &&
+            TryMerge(body, container, systemProfile, woundPrototype, wound, out var merged))
         {
             _bleeding.SynchronizeWoundSources(body, merged);
             MarkChanged(body, medical);
@@ -160,16 +220,18 @@ public sealed partial class NCWoundSystem : EntitySystem
         }
 
         var capacity = Math.Max(1, systemProfile.MaxActiveWounds);
-        if (container.Wounds.Count >= capacity)
+        var requiredSlots = exitWound == null ? 1 : 2;
+        if (container.Wounds.Count + requiredSlots > capacity)
         {
             container.OverflowTraumaByZone[wound.TargetZone] =
                 container.OverflowTraumaByZone.GetValueOrDefault(wound.TargetZone) +
-                traumaAmount * MathF.Max(0f, woundPrototype.StatusDamageMultiplier);
-            container.OverflowPain += wound.Pain;
+                (traumaAmount + (exitWound?.IntegrityDamage.Float() ?? 0f)) *
+                MathF.Max(0f, woundPrototype.StatusDamageMultiplier);
+            container.OverflowPain += wound.Pain + (exitWound?.Pain ?? 0f);
             _bleeding.AddOverflow(
                 body,
-                wound.ExternalBleedRate,
-                wound.InternalBleedRate,
+                wound.ExternalBleedRate + (exitWound?.ExternalBleedRate ?? 0f),
+                wound.InternalBleedRate + (exitWound?.InternalBleedRate ?? 0f),
                 wound.RegionCategory);
             MarkChanged(body, medical);
             return new NCWoundApplicationResult(true, false, false, true, null);
@@ -177,10 +239,28 @@ public sealed partial class NCWoundSystem : EntitySystem
 
         container.Wounds.Add(wound.WoundId, wound);
         _bleeding.SynchronizeWoundSources(body, wound);
+        if (exitWound != null)
+        {
+            container.Wounds.Add(exitWound.WoundId, exitWound);
+            _bleeding.SynchronizeWoundSources(body, exitWound);
+        }
         MarkChanged(body, medical);
 
-        var created = new NCWoundCreatedEvent(wound.WoundId, wound.TargetZone, wound.Severity);
+        var created = new NCWoundCreatedEvent(
+            wound.WoundId,
+            wound.TargetZone,
+            wound.Severity,
+            wound.WoundType);
         RaiseLocalEvent(body, ref created);
+        if (exitWound != null)
+        {
+            var exitCreated = new NCWoundCreatedEvent(
+                exitWound.WoundId,
+                exitWound.TargetZone,
+                exitWound.Severity,
+                exitWound.WoundType);
+            RaiseLocalEvent(body, ref exitCreated);
+        }
         return new NCWoundApplicationResult(true, true, false, false, wound.WoundId);
     }
 
@@ -290,7 +370,8 @@ public sealed partial class NCWoundSystem : EntitySystem
         TimeSpan now,
         float vascularDensity,
         bool hasMajorArtery,
-        bool hasBodyCavity)
+        bool hasBodyCavity,
+        uint identitySalt = 0)
     {
         var externalRate = traumaAmount * MathF.Max(0f, prototype.ExternalBleedPerDamage) * vascularDensity;
         var arterial = hasMajorArtery &&
@@ -317,7 +398,9 @@ public sealed partial class NCWoundSystem : EntitySystem
         return new NCWoundRecord
         {
             // Stable action-derived IDs make persistence/replay deterministic without introducing a gameplay roll.
-            WoundId = request.ResolutionId.DeriveGuid(request.ProjectileSequence, request.ImpactSequence),
+            WoundId = request.ResolutionId.DeriveGuid(
+                request.ProjectileSequence ^ identitySalt,
+                request.ImpactSequence),
             Prototype = prototypeId,
             TargetZone = request.ActualZone,
             RegionCategory = request.MedicalRegion,

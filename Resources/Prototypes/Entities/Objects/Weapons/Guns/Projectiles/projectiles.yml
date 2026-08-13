@@ -989,6 +989,10 @@
     radius: 3.5
     color: blue
     energy: 0.5
+  # NC start - EMP uses its existing trigger effect and never masquerades as a blunt organic wound.
+  - type: NCProjectileDamageProfile
+    profile: NCProjectileEmpUtility
+  # NC end
 
 - type: entity
   id: BulletCap

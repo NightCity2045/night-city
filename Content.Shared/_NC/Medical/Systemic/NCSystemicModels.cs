@@ -38,6 +38,9 @@ public enum NCSystemicDamageSourceKind : byte
     Atmosphere,
     Reagent,
     Scripted,
+    Fall,
+    ThrownObject,
+    Collision,
 }
 
 public readonly record struct NCProcessedSystemicPayloadKey(

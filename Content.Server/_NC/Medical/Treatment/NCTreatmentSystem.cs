@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Linq;
+using Content.Shared.Body;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
@@ -25,6 +26,8 @@ public sealed partial class NCTreatmentSystem : EntitySystem
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCMedicalBodySystem _medicalBodies = default!;
+    [Dependency] private NCAnatomySystem _anatomy = default!;
+    [Dependency] private OrganRelationSystem _organRelations = default!;
 
     public override void Initialize()
     {
@@ -453,6 +456,75 @@ public sealed partial class NCTreatmentSystem : EntitySystem
     }
 
     /// <summary>
+    /// Stabilizes the worst fractured bone in the selected live anatomy region. A field splint changes
+    /// stability and secondary-injury risk only; fracture state and fixation requirements remain intact.
+    /// </summary>
+    public NCTreatmentResult SplintZone(
+        EntityUid patient,
+        ProtoId<NCTargetZonePrototype> zone,
+        TimeSpan? timestamp = null,
+        ProtoId<NCTreatmentProfilePrototype>? profileOverride = null)
+    {
+        var context = CreateActionContext(timestamp);
+        return SplintZone(patient, zone, context, profileOverride);
+    }
+
+    public NCTreatmentResult SplintZone(
+        EntityUid patient,
+        ProtoId<NCTargetZonePrototype> zone,
+        in NCTreatmentActionContext context,
+        ProtoId<NCTreatmentProfilePrototype>? profileOverride = null)
+    {
+        if (!HasComp<NCMedicalBodyComponent>(patient))
+            return new NCTreatmentResult(NCTreatmentOutcome.PatientNotAuthoritative, null, zone, 0f, 0f);
+        if (!TryEnsureStateAndProfile(patient, profileOverride, out var state, out var profile))
+            return new NCTreatmentResult(NCTreatmentOutcome.InvalidProfile, null, zone, 0f, 0f);
+        if (!context.ResolutionId.IsValid)
+            return new NCTreatmentResult(NCTreatmentOutcome.InvalidAction, null, zone, 0f, 0f);
+        if (TryGetDuplicate(state, context, out var duplicate))
+            return duplicate;
+
+        if (!TryGetFracturedBone(patient, zone, out _, out var bone))
+        {
+            var noFracture = new NCTreatmentResult(NCTreatmentOutcome.NoFracture, null, zone, 0f, 0f);
+            return CompleteAction(patient, state, profile, context, NCTreatmentKind.Splint, noFracture);
+        }
+
+        if (bone.Splinted)
+        {
+            var alreadyApplied = new NCTreatmentResult(
+                NCTreatmentOutcome.AlreadyApplied,
+                null,
+                zone,
+                bone.Stability,
+                bone.Stability);
+            return CompleteAction(patient, state, profile, context, NCTreatmentKind.Splint, alreadyApplied);
+        }
+
+        var previous = bone.Stability;
+        bone.Splinted = true;
+        bone.SplintedAt = context.Timestamp;
+        bone.Stability = MathF.Max(bone.Stability, profile.SplintMinimumStability);
+        bone.SecondaryDamageRisk = Math.Clamp(
+            bone.SecondaryDamageRisk * profile.SplintSecondaryDamageRiskMultiplier,
+            0f,
+            1f);
+
+        var result = new NCTreatmentResult(NCTreatmentOutcome.Applied, null, zone, previous, bone.Stability);
+        CompleteAction(patient, state, profile, context, NCTreatmentKind.Splint, result);
+        MarkChanged(patient, context.ResolutionId, NCTreatmentKind.Splint, null, zone, previous, bone.Stability);
+        return result;
+    }
+
+    /// <summary>
+    /// Bounded gameplay query used to avoid starting a splint DoAfter for an intact region.
+    /// </summary>
+    public bool CanSplintZone(EntityUid patient, ProtoId<NCTargetZonePrototype> zone)
+    {
+        return TryGetFracturedBone(patient, zone, out _, out var bone) && !bone.Splinted;
+    }
+
+    /// <summary>
     /// Adapter-ready item entry point. It contains no interaction validation; a caller must first perform
     /// the engine's normal range, hand and DoAfter checks, then pass the server-observed patient/wound.
     /// </summary>
@@ -493,6 +565,8 @@ public sealed partial class NCTreatmentSystem : EntitySystem
             NCTreatmentKind.Hemostatic => ApplyHemostatic(patient, woundId, enriched, capability.Profile),
             NCTreatmentKind.Tourniquet when TryGetWound(patient, woundId, out var wound, out _) =>
                 SetTourniquet(patient, wound.TargetZone, enriched, capability.Profile),
+            NCTreatmentKind.Splint when TryGetWoundRecord(patient, woundId, out var splintWound) =>
+                SplintZone(patient, splintWound.TargetZone, enriched, capability.Profile),
             _ => new NCTreatmentResult(NCTreatmentOutcome.WoundNotFound, woundId, null, 0f, 0f),
         };
     }
@@ -646,6 +720,11 @@ public sealed partial class NCTreatmentSystem : EntitySystem
             profile.ReleaseReboundDuration <= TimeSpan.Zero ||
             !float.IsFinite(profile.ReleaseReboundMultiplier) ||
             profile.ReleaseReboundMultiplier < 1f ||
+            !float.IsFinite(profile.SplintMinimumStability) ||
+            profile.SplintMinimumStability is < 0f or > 1f ||
+            !float.IsFinite(profile.SplintSecondaryDamageRiskMultiplier) ||
+            profile.SplintSecondaryDamageRiskMultiplier is < 0f or > 1f ||
+            profile.ManualPressureDuration <= TimeSpan.Zero ||
             profile.ProcessedActionCapacity <= 0 ||
             profile.AuditHistoryCapacity <= 0 ||
             profile.TourniquetZoneRoots.Count == 0)
@@ -805,6 +884,24 @@ public sealed partial class NCTreatmentSystem : EntitySystem
 
         if (wounds != null)
         {
+            foreach (var (woundId, treatment) in state.WoundTreatments)
+            {
+                if ((treatment.AppliedFlags & NCWoundTreatmentFlags.Pressure) == 0 ||
+                    now - treatment.PressureAppliedAt < profile.ManualPressureDuration)
+                {
+                    continue;
+                }
+
+                treatment.AppliedFlags &= ~NCWoundTreatmentFlags.Pressure;
+                treatment.ModifiedAt = now;
+                if (wounds.Wounds.TryGetValue(woundId, out var expiredWound))
+                {
+                    expiredWound.TreatmentFlags &= ~NCWoundTreatmentFlags.Pressure;
+                    expiredWound.ModifiedAt = now;
+                }
+                changed = true;
+            }
+
             foreach (var wound in wounds.Wounds.Values)
                 wound.TreatmentFlags &= ~NCWoundTreatmentFlags.Tourniqueted;
         }
@@ -930,6 +1027,54 @@ public sealed partial class NCTreatmentSystem : EntitySystem
 
         wound = resolvedWound;
         bleeding = resolvedBleeding;
+        return true;
+    }
+
+    private bool TryGetWoundRecord(EntityUid patient, Guid woundId, out NCWoundRecord wound)
+    {
+        wound = default!;
+        if (!TryComp<NCWoundContainerComponent>(patient, out var wounds) ||
+            !wounds.Wounds.TryGetValue(woundId, out var resolved))
+        {
+            return false;
+        }
+
+        wound = resolved;
+        return true;
+    }
+
+    private bool TryGetFracturedBone(
+        EntityUid patient,
+        ProtoId<NCTargetZonePrototype> zone,
+        out EntityUid boneUid,
+        out NCBoneComponent bone)
+    {
+        boneUid = default;
+        bone = default!;
+        if (!_anatomy.TryGetZone((patient, null), zone, out _, out var region))
+            return false;
+
+        var candidates = new List<(EntityUid Uid, NCBoneComponent Bone)>();
+        if (TryComp<NCBoneComponent>(region, out var regionBone) && regionBone.State >= NCBoneState.Cracked)
+            candidates.Add((region, regionBone));
+
+        foreach (var child in _organRelations.AllChildren(region))
+        {
+            if (TryComp<NCBoneComponent>(child.Owner, out var childBone) && childBone.State >= NCBoneState.Cracked)
+                candidates.Add((child.Owner, childBone));
+        }
+
+        if (candidates.Count == 0)
+            return false;
+
+        var selected = candidates
+            .OrderBy(candidate => candidate.Bone.Splinted)
+            .ThenByDescending(candidate => candidate.Bone.State)
+            .ThenBy(candidate => candidate.Bone.Stability)
+            .ThenBy(candidate => candidate.Uid.Id)
+            .First();
+        boneUid = selected.Uid;
+        bone = selected.Bone;
         return true;
     }
 

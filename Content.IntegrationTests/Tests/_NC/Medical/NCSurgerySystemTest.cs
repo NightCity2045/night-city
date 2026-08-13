@@ -13,10 +13,12 @@ using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Bleeding;
+using Content.Shared._NC.Medical.Cyberware;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Surgery;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
+using Content.Shared.Stacks;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
 
@@ -67,6 +69,8 @@ public sealed class NCSurgerySystemTest : GameTest
             "NCSurgeryLimbAmputation",
             "NCSurgeryLimbReattachment",
             "NCSurgeryRegionalAutopsy",
+            "NCSurgeryCyberwareInstallation",
+            "NCSurgeryCyberwareRemoval",
         };
         Assert.That(procedures.Select(procedure => procedure.ID), Is.SupersetOf(expectedProcedures));
         Assert.That(_prototypes.EnumeratePrototypes<NCSurgeryStepPrototype>(), Is.Not.Empty);
@@ -79,6 +83,14 @@ public sealed class NCSurgerySystemTest : GameTest
                 Assert.That(procedure.StartingAccessDepths, Is.Not.Empty, procedure.ID);
                 Assert.That(procedure.Steps, Is.Not.Empty, procedure.ID);
                 Assert.That(procedure.Steps, Is.Unique, procedure.ID);
+
+                if (procedure.CyberwareOperation != NCSurgeryCyberwareOperation.None)
+                {
+                    Assert.That(procedure.CompatibleCyberwareProfiles, Is.Not.Empty, procedure.ID);
+                    Assert.That(procedure.RequiresGraft,
+                        Is.EqualTo(procedure.CyberwareOperation == NCSurgeryCyberwareOperation.Install),
+                        procedure.ID);
+                }
 
                 // This catalogue intentionally has no awake live-patient path. Every such procedure must
                 // be gated by all three server-authoritative pharmacological effects.
@@ -94,6 +106,8 @@ public sealed class NCSurgerySystemTest : GameTest
                 Assert.That(_prototypes.HasIndex(bodyProfile), Is.True, $"{procedure.ID}: {bodyProfile}");
             foreach (var authorization in procedure.RequiredAuthorizations)
                 Assert.That(_prototypes.HasIndex(authorization), Is.True, $"{procedure.ID}: {authorization}");
+            foreach (var cyberware in procedure.CompatibleCyberwareProfiles)
+                Assert.That(_prototypes.HasIndex(cyberware), Is.True, $"{procedure.ID}: {cyberware}");
             ValidateFacilityCapabilities(procedure.ID, procedure.Facility);
 
             var possibleDepths = new HashSet<NCSurgicalAccessDepth>(procedure.StartingAccessDepths);
@@ -298,7 +312,9 @@ public sealed class NCSurgerySystemTest : GameTest
             Assert.That(wound.ClosureState, Is.EqualTo(NCWoundClosureState.Sutured));
             Assert.That(bleeding.Sources.Single().CurrentRate, Is.Zero);
             Assert.That(bleeding.ActiveExternalRate, Is.Zero);
-            Assert.That(SComp<NCSurgeryToolComponent>(suture).UsesRemaining, Is.EqualTo(2));
+            // MedicatedSuture is a vanilla stack. Surgery consumes that physical resource instead of the
+            // fallback counter reserved for custom non-stack tools.
+            Assert.That(SComp<StackComponent>(suture).Count, Is.EqualTo(8));
             Assert.That(SComp<NCSurgeryPractitionerComponent>(surgeon).ActiveSession, Is.Null);
             Assert.That(SComp<NCMedicalBodyComponent>(patient).MedicalRevision,
                 Is.GreaterThanOrEqualTo(revisionBeforeSteps + 7));
@@ -422,6 +438,88 @@ public sealed class NCSurgerySystemTest : GameTest
                 out failure),
             Is.False);
         Assert.That(failure, Is.EqualTo(NCSurgeryStartFailure.StartingAccessMismatch));
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void CyberwareInstallationAndRemovalArePhysicalSurgeryProcedures()
+    {
+        var patient = SSpawn(HumanMob);
+        var surgeon = SSpawn(HumanMob);
+        var table = SSpawn(OperatingTable);
+        var module = SSpawn("NCImplantNeuralLinkMk1");
+        var cautery = SSpawn("Cautery");
+        var scalpel = SSpawn("Scalpel");
+        var hemostat = SSpawn("Hemostat");
+        var retractor = SSpawn("Retractor");
+        var multitool = SSpawn("Multitool");
+        var suture = SSpawn("MedicatedSuture");
+
+        Assert.That(_anatomy.TryGetOrgan(patient, "Head", out var head), Is.True);
+        PreparePatient(patient, table, table, airwayMonitored: true);
+        Authorize(surgeon, "NCSurgeryAuthorizationGeneral");
+        Authorize(surgeon, "NCSurgeryAuthorizationOrgan");
+
+        Assert.That(_surgery.StartSurgery(
+                new NCSurgeryStartRequest(
+                    NCActionResolutionId.New(),
+                    patient,
+                    surgeon,
+                    head,
+                    "NCSurgeryCyberwareInstallation",
+                    table,
+                    table,
+                    Graft: module),
+                out var installation,
+                out var failure),
+            Is.True,
+            failure.ToString());
+
+        ResolveExpected(installation, surgeon, cautery, NCSurgeryStepResolutionStatus.Resolved);
+        ResolveExpected(installation, surgeon, scalpel, NCSurgeryStepResolutionStatus.Resolved);
+        ResolveExpected(installation, surgeon, hemostat, NCSurgeryStepResolutionStatus.Resolved);
+        ResolveExpected(installation, surgeon, retractor, NCSurgeryStepResolutionStatus.Resolved);
+        ResolveExpected(installation, surgeon, multitool, NCSurgeryStepResolutionStatus.Resolved);
+        ResolveExpected(installation, surgeon, retractor, NCSurgeryStepResolutionStatus.Resolved);
+        ResolveExpected(installation, surgeon, suture, NCSurgeryStepResolutionStatus.Completed);
+
+        var installed = SComp<NCCyberwareComponent>(module);
+        Assert.Multiple(() =>
+        {
+            Assert.That(installed.InstalledSlot?.Id, Is.EqualTo("NCSlotNeuralCore"));
+            Assert.That(SComp<ChildOrganComponent>(module).Parent, Is.EqualTo(head));
+            Assert.That(installed.Calibrated, Is.True);
+            Assert.That(installed.NeuralState, Is.EqualTo(NCCyberwareNeuralState.Linked));
+        });
+
+        Assert.That(_surgery.StartSurgery(
+                new NCSurgeryStartRequest(
+                    NCActionResolutionId.New(),
+                    patient,
+                    surgeon,
+                    head,
+                    "NCSurgeryCyberwareRemoval",
+                    table,
+                    table),
+                out var removal,
+                out failure),
+            Is.True,
+            failure.ToString());
+
+        ResolveExpected(removal, surgeon, cautery, NCSurgeryStepResolutionStatus.Resolved);
+        ResolveExpected(removal, surgeon, scalpel, NCSurgeryStepResolutionStatus.Resolved);
+        ResolveExpected(removal, surgeon, hemostat, NCSurgeryStepResolutionStatus.Resolved);
+        ResolveExpected(removal, surgeon, retractor, NCSurgeryStepResolutionStatus.Resolved);
+        ResolveExpected(removal, surgeon, multitool, NCSurgeryStepResolutionStatus.Resolved);
+        ResolveExpected(removal, surgeon, retractor, NCSurgeryStepResolutionStatus.Resolved);
+        ResolveExpected(removal, surgeon, suture, NCSurgeryStepResolutionStatus.Completed);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(installed.InstalledSlot, Is.Null);
+            Assert.That(SComp<ChildOrganComponent>(module).Parent, Is.Null);
+            Assert.That(installed.NeuralState, Is.EqualTo(NCCyberwareNeuralState.Disconnected));
+        });
     }
 
     private NCSurgeryStepResolution ResolveExpected(

@@ -56,6 +56,18 @@ public sealed class NCBluntTransferTest : GameTest
                 Assert.That(_prototypes.HasIndex(damageProfile.TraumaProfile), Is.True,
                     $"Combat profile {damageProfile.ID} references an unknown trauma profile.");
                 Assert.That(damageProfile.AblationAmount, Is.GreaterThanOrEqualTo(0));
+                Assert.That(damageProfile.EmbedMinimumPostArmorDamage, Is.GreaterThanOrEqualTo(0f));
+                Assert.That(damageProfile.ExitMinimumPostArmorDamage, Is.GreaterThanOrEqualTo(0f));
+                Assert.That(damageProfile.ExitTraumaMultiplier, Is.InRange(0f, 1f));
+                if (damageProfile.CanOverpenetrateBody)
+                {
+                    Assert.That(damageProfile.ExitMinimumPostArmorDamage, Is.GreaterThan(0f),
+                        $"Combat profile {damageProfile.ID} can overpenetrate without an exit threshold.");
+                    Assert.That(
+                        (damageProfile.TraumaFlags & Content.Shared._NC.Medical.Trauma.NCTraumaFlags.CanExit) != 0,
+                        Is.True,
+                        $"Combat profile {damageProfile.ID} can overpenetrate without CanExit.");
+                }
                 if (damageProfile.BluntTransferProfile is { } transfer)
                     Assert.That(_prototypes.HasIndex(transfer), Is.True,
                         $"Combat profile {damageProfile.ID} references an unknown blunt-transfer profile.");

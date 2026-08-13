@@ -198,6 +198,9 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                 <ScrollContainer Name="DrugsTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True">
                     <BoxContainer Name="DrugsContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
                 </ScrollContainer>
+                <ScrollContainer Name="HistoryTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True">
+                    <BoxContainer Name="HistoryContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
+                </ScrollContainer>
             </TabContainer>
         </BoxContainer>
     </PanelContainer>

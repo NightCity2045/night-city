@@ -54,7 +54,6 @@
     count: 10
   - type: StackPrice
     price: 5
-
 - type: entity
   id: Ointment1
   parent: Ointment
@@ -148,6 +147,10 @@
     count: 10
   - type: StackPrice
     price: 5
+  # NC start - Reuse the vanilla bruise pack as hemostatic wound packing for authoritative humans.
+  - type: NCTreatmentItem
+    capability: NCHemostaticGauzeCapability
+  # NC end
 
 - type: entity
   id: Brutepack1

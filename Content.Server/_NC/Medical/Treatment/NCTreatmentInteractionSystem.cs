@@ -28,6 +28,9 @@ namespace Content.Server._NC.Medical.Treatment;
 /// </summary>
 public sealed partial class NCTreatmentInteractionSystem : EntitySystem
 {
+    private static readonly ProtoId<NCTreatmentCapabilityPrototype> ManualPressureCapability =
+        "NCManualPressureCapability";
+
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
@@ -45,6 +48,79 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
 
         SubscribeLocalEvent<NCTreatmentItemComponent, AfterInteractEvent>(OnAfterInteract);
         SubscribeLocalEvent<NCTreatmentItemComponent, NCTreatmentDoAfterEvent>(OnDoAfter);
+        SubscribeLocalEvent<NCMedicalBodyComponent, NCTreatmentDoAfterEvent>(OnManualPressureDoAfter);
+    }
+
+    /// <summary>
+    /// Gives empty-hand first aid priority over CPR on the same patient interaction. The emergency
+    /// interaction system owns the single InteractHand subscription and delegates here first.
+    /// </summary>
+    public bool TryStartManualPressure(EntityUid user, EntityUid patient)
+    {
+        if (user == patient || !HasComp<NCMedicalBodyComponent>(patient) ||
+            _hands.TryGetActiveItem(user, out _) ||
+            !_prototypes.TryIndex(ManualPressureCapability, out var capability) ||
+            !_interaction.InRangeUnobstructed(user, patient, capability.InteractionRange) ||
+            !TrySelectWound(user, patient, NCTreatmentKind.Pressure, out var woundId))
+        {
+            return false;
+        }
+
+        var doAfter = new DoAfterArgs(
+            EntityManager,
+            user,
+            capability.ApplicationDuration,
+            new NCTreatmentDoAfterEvent(NCActionResolutionId.New(), woundId, capability.ID),
+            patient,
+            target: patient)
+        {
+            NeedHand = true,
+            NeedFreeHand = true,
+            BreakOnMove = true,
+            BreakOnDamage = false,
+            DistanceThreshold = capability.InteractionRange,
+        };
+
+        if (_doAfter.TryStartDoAfter(doAfter))
+        {
+            _popup.PopupEntity(Loc.GetString("nc-medical-treatment-started"), patient, user);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void OnManualPressureDoAfter(Entity<NCMedicalBodyComponent> patient, ref NCTreatmentDoAfterEvent args)
+    {
+        if (args.Handled || args.Cancelled || args.Target != patient.Owner ||
+            !_prototypes.TryIndex(args.Capability, out NCTreatmentCapabilityPrototype? capability) ||
+            capability.Kind != NCTreatmentKind.Pressure)
+        {
+            return;
+        }
+
+        args.Handled = true;
+        if (_hands.TryGetActiveItem(args.User, out _) ||
+            !_interaction.InRangeUnobstructed(args.User, patient.Owner, capability.InteractionRange) ||
+            !TryComp<NCWoundContainerComponent>(patient.Owner, out var wounds) ||
+            !wounds.Wounds.ContainsKey(args.WoundId))
+        {
+            _popup.PopupEntity(Loc.GetString("nc-medical-interaction-invalidated"), patient.Owner, args.User);
+            return;
+        }
+
+        var context = new NCTreatmentActionContext(
+            args.ResolutionId,
+            _timing.CurTime,
+            GetPrototypeId(args.User),
+            null,
+            args.Capability);
+        var result = _treatment.ApplyPressure(patient.Owner, args.WoundId, context, capability.Profile);
+        _popup.PopupEntity(
+            Loc.GetString(result.Succeeded ? "nc-medical-treatment-complete" : "nc-medical-treatment-failed",
+                ("reason", result.Outcome)),
+            patient.Owner,
+            args.User);
     }
 
     private void OnAfterInteract(Entity<NCTreatmentItemComponent> item, ref AfterInteractEvent args)
@@ -127,11 +203,10 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
         out Guid woundId)
     {
         woundId = default;
-        if (!TryComp<NCWoundContainerComponent>(patient, out var wounds) ||
-            !TryComp<NCBleedingComponent>(patient, out var bleeding))
-        {
+        if (!TryComp<NCWoundContainerComponent>(patient, out var wounds))
             return false;
-        }
+
+        TryComp<NCBleedingComponent>(patient, out var bleeding);
 
         var selected = _targeting.GetSelection(user);
         var preferredZone = selected.Mode == NCTargetingMode.SelectedZone ? selected.SelectedZone : null;
@@ -139,6 +214,16 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
         foreach (var wound in wounds.Wounds.Values)
         {
             if (!CanReceive(wound, kind))
+                continue;
+
+            if (kind == NCTreatmentKind.Splint)
+            {
+                if (_treatment.CanSplintZone(patient, wound.TargetZone))
+                    candidates.Add((wound, wound.IntegrityDamage.Float(), 0));
+                continue;
+            }
+
+            if (bleeding == null)
                 continue;
 
             var rate = 0f;
@@ -253,13 +338,14 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
             NCTreatmentKind.Bandage => !wound.TreatmentFlags.HasFlag(NCWoundTreatmentFlags.Bandaged),
             NCTreatmentKind.Hemostatic => !wound.TreatmentFlags.HasFlag(NCWoundTreatmentFlags.Hemostatic),
             NCTreatmentKind.Tourniquet => !wound.TreatmentFlags.HasFlag(NCWoundTreatmentFlags.Tourniqueted),
+            NCTreatmentKind.Splint => true,
             _ => false,
         };
     }
 
     private EntProtoId? GetPrototypeId(EntityUid entity)
     {
-        return TryComp<MetaDataComponent>(entity, out var metadata) && metadata.EntityPrototype?.ID is { } id
+        return TryComp(entity, out MetaDataComponent? metadata) && metadata.EntityPrototype?.ID is { } id
             ? id
             : null;
     }

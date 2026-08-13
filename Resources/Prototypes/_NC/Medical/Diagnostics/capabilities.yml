@@ -122,6 +122,7 @@
   - SurgicalState
   - Cyberware
   - Drugs
+  - TreatmentHistory
   requiresPower: true
   range: 2.5
   maxRegionRecords: 12
@@ -129,6 +130,7 @@
   maxOrganRecords: 32
   maxCyberwareRecords: 32
   maxDrugRecords: 32
+  maxHistoryRecords: 64
   bloodVolumeUnitsQuantum: 6
   ratioQuantum: 0.01
   bleedRateQuantum: 0.05

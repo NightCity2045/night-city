@@ -46,6 +46,16 @@ public sealed partial class NCSurgerySessionComponent : Component
     public EntityUid? Graft;
 
     /// <summary>
+    /// Exact installed module selected by the server for a removal procedure. This session is unsaved and
+    /// clients never submit or receive this entity identifier.
+    /// </summary>
+    [DataField]
+    public EntityUid? CyberwareTarget;
+
+    [ViewVariables]
+    public bool CyberwareMutationApplied;
+
+    /// <summary>
     /// Exact live subtree produced by a completed removal/amputation effect. Runtime-only handoff data.
     /// </summary>
     [ViewVariables]
@@ -236,8 +246,8 @@ public sealed partial class NCSurgeryConsoleComponent : Component
 }
 
 /// <summary>
-/// Runtime graft tray on one physical surgical facility. A detached organ must be placed through a real
-/// held-item interaction; clients cannot submit an entity identifier through the planner UI.
+/// Runtime graft tray on one physical surgical facility. A detached organ or standalone implant must be
+/// placed through a real held-item interaction; clients cannot submit an entity identifier through the UI.
 /// </summary>
 [RegisterComponent, UnsavedComponent]
 public sealed partial class NCSurgeryGraftSlotComponent : Component
@@ -253,7 +263,7 @@ public sealed partial class NCSurgeryGraftSlotComponent : Component
 /// Persistence-safe pathological findings produced by deterministic regional autopsy procedures.
 /// Records contain stable resolution/wound identifiers and prototype categories only.
 /// </summary>
-[RegisterComponent]
+[RegisterComponent, UnsavedComponent]
 public sealed partial class NCAutopsyRecordComponent : Component
 {
     [DataField]

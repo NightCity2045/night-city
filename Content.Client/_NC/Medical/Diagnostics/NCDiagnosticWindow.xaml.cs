@@ -66,7 +66,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
         BodyDoll.TargetingChanged += OnBodyZoneSelected;
         AllBodyButton.OnPressed += _ => ClearBodyFilter();
 
-        SetTabTitles(0, 0, 0, 0, 0);
+        SetTabTitles(0, 0, 0, 0, 0, 0);
         ShowEmptyHeader();
     }
 
@@ -218,12 +218,14 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
         PopulateOrgans(snapshot);
         PopulateCyberware(snapshot);
         PopulateDrugs(snapshot);
+        PopulateHistory(snapshot);
         SetTabTitles(
             snapshot.Regions.Count,
             snapshot.Wounds.Count + snapshot.WoundsOmitted,
             snapshot.Organs.Count + snapshot.OrgansOmitted,
             snapshot.Cyberware.Count + snapshot.CyberwareOmitted,
-            snapshot.Drugs.Count + snapshot.DrugsOmitted);
+            snapshot.Drugs.Count + snapshot.DrugsOmitted,
+            snapshot.History.Count + snapshot.HistoryOmitted);
     }
 
     private void PopulateDoll(NCMedicalSnapshot snapshot)
@@ -544,6 +546,67 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
         AddOmitted(DrugsContainer, snapshot.DrugsOmitted);
     }
 
+    private void PopulateHistory(NCMedicalSnapshot snapshot)
+    {
+        if (!Has(snapshot.Disclosures, NCDiagnosticDisclosure.TreatmentHistory))
+        {
+            AddUnavailable(HistoryContainer, NCDiagnosticTier.SurgicalConsole);
+            return;
+        }
+        if (snapshot.History.Count == 0)
+        {
+            AddEmpty(HistoryContainer);
+            return;
+        }
+
+        foreach (var record in snapshot.History.Take(MaximumRowsPerSection))
+        {
+            var title = Loc.GetString(
+                "nc-medical-diagnostics-history-title",
+                ("time", record.Timestamp.ToString(@"hh\:mm\:ss")),
+                ("kind", Value(record.Kind)));
+            var details = new List<string>();
+            if (record.Zone is { } zone)
+                details.Add(ZoneName(zone));
+            if (record.WoundSeverity is { } severity)
+                details.Add(Value(severity));
+            if (record.WoundType is { } woundType)
+                details.Add(Value(woundType));
+            if (record.Treatment is { } treatment)
+                details.Add(Value(treatment));
+            if (record.EmergencyCare is { } emergency)
+                details.Add(Value(emergency));
+            if (record.Procedure is { } procedure)
+                details.Add(SurgeryProcedureName(procedure));
+            if (record.SurgeryStep is { } step)
+                details.Add(SurgeryStepName(step));
+            if (record.SurgeryOutcome is { } outcome)
+                details.Add(Value(outcome));
+            if (record.Drug is { } drug)
+                details.Add(DrugName(drug));
+            if (record.AutopsyRegion is { } autopsyRegion)
+                details.Add(OrganName(autopsyRegion.Id));
+            if (record.AutopsyWoundCount is { } woundCount)
+            {
+                var woundTypes = record.AutopsyWoundTypes is { Count: > 0 }
+                    ? string.Join(", ", record.AutopsyWoundTypes.Select(type => Value(type)))
+                    : Loc.GetString("nc-medical-diagnostics-autopsy-no-wounds");
+                details.Add(Loc.GetString(
+                    "nc-medical-diagnostics-autopsy-findings",
+                    ("count", woundCount),
+                    ("types", woundTypes)));
+            }
+
+            AddCard(
+                HistoryContainer,
+                title,
+                details.Count > 0 ? string.Join(" · ", details) : Unknown(),
+                MutedColor,
+                "•");
+        }
+        AddOmitted(HistoryContainer, snapshot.HistoryOmitted);
+    }
+
     private void OnBodyZoneSelected(NCTargetingState state)
     {
         _selectedZone = state.Mode == NCTargetingMode.SelectedZone ? state.SelectedZone : null;
@@ -625,7 +688,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
             ("value", FormatRange(range.Value, " mU/s")));
     }
 
-    private void SetTabTitles(int regions, int wounds, int organs, int cyberware, int drugs)
+    private void SetTabTitles(int regions, int wounds, int organs, int cyberware, int drugs, int history)
     {
         Tabs.SetTabTitle(0, Loc.GetString("nc-medical-diagnostics-tab-overview"));
         Tabs.SetTabTitle(1, CountedTab("nc-medical-diagnostics-tab-regions", regions));
@@ -633,6 +696,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
         Tabs.SetTabTitle(3, CountedTab("nc-medical-diagnostics-tab-organs", organs));
         Tabs.SetTabTitle(4, CountedTab("nc-medical-diagnostics-tab-cyberware", cyberware));
         Tabs.SetTabTitle(5, CountedTab("nc-medical-diagnostics-tab-drugs", drugs));
+        Tabs.SetTabTitle(6, CountedTab("nc-medical-diagnostics-tab-history", history));
     }
 
     private static string CountedTab(string locId, int count)
@@ -775,6 +839,11 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
     private string SurgeryProcedureName(ProtoId<NCSurgeryProcedurePrototype> id) =>
         _prototypes.TryIndex(id, out NCSurgeryProcedurePrototype? procedure)
             ? procedure.Name
+            : PrototypeName(id.Id);
+
+    private string SurgeryStepName(ProtoId<NCSurgeryStepPrototype> id) =>
+        _prototypes.TryIndex(id, out NCSurgeryStepPrototype? step)
+            ? step.Name
             : PrototypeName(id.Id);
 
     private string CyberwareName(ProtoId<NCCyberwarePrototype> id) =>
@@ -951,6 +1020,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
         OrgansContainer.RemoveAllChildren();
         CyberwareContainer.RemoveAllChildren();
         DrugsContainer.RemoveAllChildren();
+        HistoryContainer.RemoveAllChildren();
     }
 
     private readonly record struct ThreatPresentation(

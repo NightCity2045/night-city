@@ -90,21 +90,6 @@
   applicationDuration: 4s
 
 - type: entity
-  id: NCOxygenDeliveryKit
-  parent: BaseItem
-  name: oxygen delivery kit
-  description: A portable oxygen mask and regulator for short-term respiratory support.
-  components:
-  - type: Sprite
-    sprite: Objects/Tanks/emergency.rsi
-  - type: Item
-    size: Small
-    sprite: Objects/Tanks/emergency.rsi
-  - type: NCEmergencyCareItem
-    capability: NCOxygenDeliveryCapability
-    chargesRemaining: 4
-
-- type: entity
   id: NCManualVentilator
   parent: BaseItem
   name: manual ventilator

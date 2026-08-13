@@ -623,7 +623,6 @@ public sealed partial class NCOrganDetachmentSystem : EntitySystem
         IReadOnlyList<EntityUid> subtree)
     {
         var detachedOwner = EnsureComp<NCDetachedOrganPersistenceOwnerComponent>(organRoot);
-        detachedOwner.RequiresExternalStorage = true;
         if (!TryComp<NCMedicalPersistenceOwnerComponent>(body, out var bodyOwner))
         {
             detachedOwner.Kind = NCMedicalStableOwnerKind.Unassigned;

@@ -5,6 +5,7 @@
 using System.Numerics;
 using Content.Server.Administration.Logs;
 using Content.Server._NC.Combat.Armor;
+using Content.Server._NC.Combat.Targeting;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Armor;
 using Content.Shared._NC.Combat.Damage;
@@ -52,6 +53,12 @@ public readonly record struct NCResolvedCombatImpact(
     /// This is used by distributed explosions so aggregated regional impacts cannot shred one item repeatedly.
     /// </summary>
     public IReadOnlySet<NCArmorSectionHandle>? AblationExclusions { get; init; }
+
+    /// <summary>
+    /// True only when the adapter received an actual contact point from physics/raycast geometry.
+    /// Synthetic source positions must not masquerade as anatomical collision evidence.
+    /// </summary>
+    public bool HasPhysicalHitPosition { get; init; }
 }
 
 /// <summary>
@@ -59,6 +66,7 @@ public readonly record struct NCResolvedCombatImpact(
 /// </summary>
 public sealed record NCCombatTraumaDeliveryResult(
     ProtoId<NCTargetZonePrototype> ActualZone,
+    NCHitLocationSource LocationSource,
     ProtoId<Content.Shared.Body.OrganCategoryPrototype> MedicalRegion,
     NCArmorResolution Armor,
     FixedPoint2 AppliedTrauma,
@@ -74,7 +82,7 @@ public sealed partial class NCCombatTraumaDeliverySystem : EntitySystem
 {
     [Dependency] private IAdminLogManager _adminLogger = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
-    [Dependency] private NCAnatomySystem _anatomy = default!;
+    [Dependency] private NCHitLocationSystem _hitLocations = default!;
     [Dependency] private NCArmorResolutionSystem _armor = default!;
 
     /// <summary>
@@ -96,36 +104,12 @@ public sealed partial class NCCombatTraumaDeliverySystem : EntitySystem
         if (rawDamage <= FixedPoint2.Zero)
             return false;
 
-        ProtoId<NCTargetZonePrototype> actualZone;
-        bool resolved;
-        if (impact.ForcedZone is { } forcedZone)
-        {
-            // Trusted adapters still pass through live anatomy validation, including missing-part fallback.
-            resolved = _anatomy.TryResolveSelectedZone(
+        if (!_hitLocations.TryResolve(
+                impact,
                 (impact.Target, medicalBody),
-                forcedZone,
-                out actualZone,
-                out _);
-        }
-        else
-        {
-            var selectedApplies = impact.IntendedTarget == impact.Target &&
-                                  impact.TargetingMode == NCTargetingMode.SelectedZone &&
-                                  impact.SelectedZone is { } selectedZone;
-            resolved = selectedApplies
-                ? _anatomy.TryResolveSelectedZone(
-                    (impact.Target, medicalBody),
-                    selectedZone,
-                    out actualZone,
-                    out _)
-                : _anatomy.TryResolveAutomaticZone(
-                    (impact.Target, medicalBody),
-                    impact.Seed,
-                    out actualZone,
-                    out _);
-        }
-
-        if (!resolved ||
+                out var actualZone,
+                out _,
+                out var locationSource) ||
             !_prototypes.TryIndex(actualZone, out NCTargetZonePrototype? zone))
         {
             return false;
@@ -156,6 +140,8 @@ public sealed partial class NCCombatTraumaDeliverySystem : EntitySystem
         if (armorResolution.Penetrated)
             flags |= NCTraumaFlags.ArmorPenetrated;
 
+        var projectileDisposition = ResolveProjectileDisposition(damageProfile, armorResolution.PostArmorDamage);
+
         // DamageSpecifier is mutable, so medicine receives a defensive copy.
         var request = new NCCombatTraumaRequest(
             impact.ResolutionId,
@@ -177,7 +163,11 @@ public sealed partial class NCCombatTraumaDeliverySystem : EntitySystem
             impact.ImpactDirection.IsLengthZero() ? Vector2.Zero : impact.ImpactDirection.Normalized(),
             flags,
             Math.Clamp(impact.Contamination, 0f, 1f),
-            impact.Timestamp);
+            impact.Timestamp)
+        {
+            ProjectileDisposition = projectileDisposition,
+            ExitTraumaMultiplier = damageProfile.ExitTraumaMultiplier,
+        };
 
         var traumaEvent = new NCCombatTraumaRequestedEvent(request);
         RaiseLocalEvent(impact.Target, ref traumaEvent);
@@ -190,13 +180,14 @@ public sealed partial class NCCombatTraumaDeliverySystem : EntitySystem
         var appliedTrauma = FixedPoint2.Max(armorResolution.PostArmorDamage, transferredBluntDamage);
         result = new NCCombatTraumaDeliveryResult(
             actualZone,
+            locationSource,
             zone.MedicalRegionCategory,
             armorResolution,
             appliedTrauma,
             ScaleDamage(impact.Damage, rawDamage, appliedTrauma),
             traumaEvent.Applied,
             traumaEvent.Cancelled,
-            damageProfile.CanOverpenetrateBody);
+            damageProfile.CanOverpenetrateBody && projectileDisposition == NCTraumaProjectileDisposition.Exit);
 
         var source = impact.Projectile ?? impact.Weapon ?? impact.Instigator;
         var sourceDescription = source is { } sourceUid && Exists(sourceUid)
@@ -205,12 +196,39 @@ public sealed partial class NCCombatTraumaDeliverySystem : EntitySystem
         _adminLogger.Add(
             LogType.Damaged,
             LogImpact.Medium,
-            $"NC impact {impact.ResolutionId:resolution} from {sourceDescription:source} hit " +
-            $"{ToPrettyString(impact.Target):target} in {actualZone.Id:zone}; raw {rawDamage:damage}, " +
-            $"effective SP {armorResolution.EffectiveSp:sp}, local trauma {appliedTrauma:damage}, " +
-            $"accepted {traumaEvent.Handled:handled}, applied {traumaEvent.Applied:applied}, " +
-            $"cancelled {traumaEvent.Cancelled:cancelled}.");
+            // LogStringHandler forwards format labels to the runtime formatter for generic values.
+            // Enums, booleans and NC value types therefore must not use structured entity labels.
+            $"NC impact {impact.ResolutionId} from {sourceDescription} hit " +
+            $"{ToPrettyString(impact.Target):target} in {actualZone.Id} via {locationSource}; raw {rawDamage}, " +
+            $"effective SP {armorResolution.EffectiveSp}, local trauma {appliedTrauma}, " +
+            $"accepted {traumaEvent.Handled}, applied {traumaEvent.Applied}, " +
+            $"cancelled {traumaEvent.Cancelled}.");
         return true;
+    }
+
+    private static NCTraumaProjectileDisposition ResolveProjectileDisposition(
+        NCCombatDamageProfilePrototype profile,
+        FixedPoint2 postArmorDamage)
+    {
+        var damage = postArmorDamage.Float();
+        if (damage <= 0f)
+            return NCTraumaProjectileDisposition.None;
+
+        if ((profile.TraumaFlags & NCTraumaFlags.CanExit) != 0 &&
+            profile.ExitMinimumPostArmorDamage > 0f &&
+            damage >= profile.ExitMinimumPostArmorDamage)
+        {
+            return NCTraumaProjectileDisposition.Exit;
+        }
+
+        if ((profile.TraumaFlags & NCTraumaFlags.CanEmbed) != 0 &&
+            profile.EmbedMinimumPostArmorDamage > 0f &&
+            damage >= profile.EmbedMinimumPostArmorDamage)
+        {
+            return NCTraumaProjectileDisposition.Embedded;
+        }
+
+        return NCTraumaProjectileDisposition.None;
     }
 
     private static DamageSpecifier ScaleDamage(
