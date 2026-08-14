@@ -197,10 +197,8 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
         foreach (var procedure in _prototypes.EnumeratePrototypes<NCSurgeryProcedurePrototype>()
                      .OrderBy(procedure => procedure.ID, StringComparer.Ordinal))
         {
-            var directStepIndex = GetDirectStartStep(procedure);
-            if (directStepIndex < 0 ||
-                !_prototypes.TryIndex(procedure.Steps[directStepIndex], out NCSurgeryStepPrototype? step) ||
-                !CanToolPerform(tool.Owner, tool.Comp, step))
+            var directStepIndex = GetDirectStartStep(procedure, tool.Owner, tool.Comp);
+            if (directStepIndex < 0)
             {
                 continue;
             }
@@ -255,14 +253,19 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
         return candidates.Count > 0;
     }
 
-    private int GetDirectStartStep(NCSurgeryProcedurePrototype procedure)
+    private int GetDirectStartStep(
+        NCSurgeryProcedurePrototype procedure,
+        EntityUid toolUid,
+        NCSurgeryToolComponent tool)
     {
         for (var index = 0; index < procedure.Steps.Count; index++)
         {
             if (!_prototypes.TryIndex(procedure.Steps[index], out NCSurgeryStepPrototype? step))
                 return -1;
-            if (!step.OptionalAtDirectStart)
+            if (CanToolPerform(toolUid, tool, step))
                 return index;
+            if (!step.OptionalAtDirectStart)
+                return -1;
         }
 
         return -1;

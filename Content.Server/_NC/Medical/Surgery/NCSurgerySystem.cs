@@ -1643,6 +1643,18 @@ public sealed partial class NCSurgerySystem : EntitySystem
                         return false;
                     }
 
+                    // Mechanical replacement organs use the same live SS14 organ graph as biological grafts.
+                    // Attaching the physical graft also completes its neural calibration; slot-based implants
+                    // remain owned by the dedicated InstallCyberware effect above.
+                    if (TryComp<NCCyberwareComponent>(target, out var replacement) &&
+                        replacement.NeuralState != NCCyberwareNeuralState.NotApplicable)
+                    {
+                        var cyberAction = new NCActionResolutionId(
+                            actionResolutionId.DeriveGuid(0x43595250U, (uint) effect.Kind));
+                        if (!_cyberware.TrySetNeuralInterface(target, cyberAction, true, true).Accepted)
+                            return false;
+                    }
+
                     break;
                 }
                 case NCSurgeryEffectKind.RecordAutopsy:

@@ -9,9 +9,11 @@ using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
 using Content.Server._NC.Medical.Pharmacology;
 using Content.Server._NC.Medical.Surgery;
+using Content.Server._NC.Medical.Anatomy.Detachment;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Anatomy.Detachment;
 using Content.Shared._NC.Medical.Bleeding;
 using Content.Shared._NC.Medical.Cyberware;
 using Content.Shared._NC.Medical.Physiology;
@@ -38,6 +40,7 @@ public sealed class NCSurgerySystemTest : GameTest
     [SidedDependency(Side.Server)] private NCAnatomySystem _anatomy = default!;
     [SidedDependency(Side.Server)] private NCPharmacologySystem _pharmacology = default!;
     [SidedDependency(Side.Server)] private NCSurgerySystem _surgery = default!;
+    [SidedDependency(Side.Server)] private NCOrganDetachmentSystem _detachment = default!;
 
     public override PoolSettings PoolSettings => new()
     {
@@ -718,6 +721,65 @@ public sealed class NCSurgerySystemTest : GameTest
             Assert.That(installed.InstalledSlot, Is.Null);
             Assert.That(SComp<ChildOrganComponent>(module).Parent, Is.Null);
             Assert.That(installed.NeuralState, Is.EqualTo(NCCyberwareNeuralState.Disconnected));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void MechanicalReplacementIsACompatibleCalibratedLiveGraft()
+    {
+        var patient = SSpawn(HumanMob);
+        var surgeon = SSpawn(HumanMob);
+        var table = SSpawn(OperatingTable);
+        var debugTool = SSpawn(DebugMultitool);
+        var replacement = SSpawn("NCOrganHumanCyberArmLeft");
+
+        Assert.That(_detachment.TryDetachOrgan(patient, "ArmLeft", out _), Is.True);
+        Assert.That(_anatomy.TryGetOrgan(patient, "Torso", out var torso), Is.True);
+        PreparePatient(patient, table, table, airwayMonitored: true);
+        Authorize(surgeon, "NCSurgeryAuthorizationOrthopedic");
+        Authorize(surgeon, "NCSurgeryAuthorizationVascular");
+        Authorize(surgeon, "NCSurgeryAuthorizationTransplant");
+
+        var payload = SComp<NCDetachedOrganMedicalDataComponent>(replacement);
+        var integrity = SComp<NCOrganIntegrityComponent>(replacement);
+        Assert.Multiple(() =>
+        {
+            Assert.That(payload.SourceBodyProfile.Id, Is.EqualTo("Human"));
+            Assert.That(payload.RequiredParentCategory.Id, Is.EqualTo("Torso"));
+            Assert.That(integrity.Material, Is.EqualTo(NCAnatomicalMaterialKind.Mechanical));
+        });
+
+        Assert.That(_surgery.StartSurgery(
+                new NCSurgeryStartRequest(
+                    NCActionResolutionId.New(),
+                    patient,
+                    surgeon,
+                    torso,
+                    "NCSurgeryLimbReattachment",
+                    table,
+                    table,
+                    Graft: replacement),
+                out var session,
+                out var failure),
+            Is.True,
+            failure.ToString());
+
+        for (var index = 0; index < 8; index++)
+            ResolveExpected(session, surgeon, debugTool, NCSurgeryStepResolutionStatus.Resolved);
+        ResolveExpected(session, surgeon, debugTool, NCSurgeryStepResolutionStatus.Completed);
+
+        Assert.That(_anatomy.TryGetOrgan(patient, "ArmLeft", out var attached), Is.True);
+        var cyberware = SComp<NCCyberwareComponent>(replacement);
+        Assert.Multiple(() =>
+        {
+            Assert.That(attached, Is.EqualTo(replacement));
+            Assert.That(SComp<OrganComponent>(replacement).Body, Is.EqualTo(patient));
+            Assert.That(SComp<ChildOrganComponent>(replacement).Parent, Is.EqualTo(torso));
+            Assert.That(SEntMan.HasComponent<NCDetachedOrganMedicalDataComponent>(replacement), Is.False);
+            Assert.That(cyberware.Calibrated, Is.True);
+            Assert.That(cyberware.NeuralState, Is.EqualTo(NCCyberwareNeuralState.Linked));
+            Assert.That(cyberware.Operational, Is.True);
         });
     }
 

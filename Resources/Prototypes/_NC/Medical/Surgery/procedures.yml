@@ -640,6 +640,7 @@
   targetRequirements: Integrity
   requiresGraft: true
   compatibleGraftCategories: [ Heart, Lungs, Liver, Kidneys, Stomach, Appendix ]
+  compatibleGraftMaterials: [ Organic, Hybrid, Mechanical ]
   facility:
     required: true
     capabilities: [ NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
@@ -685,6 +686,7 @@
   targetRequirements: Integrity
   requiresGraft: true
   compatibleGraftCategories: [ Eyes ]
+  compatibleGraftMaterials: [ Organic, Hybrid, Mechanical ]
   facility:
     required: true
     capabilities: [ NCSurgeryFacilityMonitoring ]
@@ -770,8 +772,8 @@
 
 - type: ncSurgeryProcedure
   id: NCSurgeryLimbReattachment
-  name: organic limb reattachment
-  description: Attaches a staged limb, hand or foot graft to its exact original parent region.
+  name: limb reattachment
+  description: Attaches a staged biological or mechanical limb, hand or foot graft to its exact parent region.
   compatibleBodyProfiles: [ Human ]
   requiredAuthorizations:
   - NCSurgeryAuthorizationOrthopedic
@@ -789,6 +791,7 @@
   - LegRight
   - FootLeft
   - FootRight
+  compatibleGraftMaterials: [ Organic, Hybrid, Mechanical ]
   facility:
     required: true
     capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]

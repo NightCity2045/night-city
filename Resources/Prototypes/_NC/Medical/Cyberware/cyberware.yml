@@ -295,6 +295,9 @@
     cyberprostheticInterface: true
   - type: NCCyberware
     profile: NCIndustrialCyberArm
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: Torso
 
 - type: entity
   id: NCOrganHumanCyberArmRight
@@ -313,6 +316,9 @@
     cyberprostheticInterface: true
   - type: NCCyberware
     profile: NCIndustrialCyberArm
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: Torso
 
 - type: entity
   id: NCOrganHumanCyberEyes
@@ -330,6 +336,9 @@
     cyberprostheticInterface: true
   - type: NCCyberware
     profile: NCCyberopticsMk1
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: Head
 
 - type: entity
   id: NCOrganHumanCyberHeart
@@ -349,3 +358,6 @@
     oxygenDemand: 0.2
   - type: NCCyberware
     profile: NCCyberheartMk1
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: Thorax
