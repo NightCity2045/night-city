@@ -78,6 +78,20 @@ public sealed partial class NCTargetDollZonePresentation
     [DataField]
     public Vector2 HitboxPadding { get; private set; } = Vector2.Zero;
 
+    /// <summary>
+    /// Optional interactive rectangle relative to <see cref="Position"/>. It is independent from the rendered
+    /// hover texture, so a broad highlight can never steal clicks from a neighbouring anatomical zone.
+    /// </summary>
+    [DataField]
+    public NCTextureRegion? InteractionRegion { get; private set; }
+
+    /// <summary>
+    /// Optional wound-projection rectangle relative to <see cref="Position"/>. This follows the composed Status
+    /// silhouette instead of the loose selection texture when those assets have different crops.
+    /// </summary>
+    [DataField]
+    public NCTextureRegion? WoundRegion { get; private set; }
+
     [DataField(required: true)]
     public ResPath SelectedTexture { get; private set; } = default!;
 

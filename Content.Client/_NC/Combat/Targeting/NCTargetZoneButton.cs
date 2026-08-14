@@ -22,7 +22,9 @@ public sealed class NCTargetZoneButton : TextureButton
     private readonly Texture _hoverTexture;
     private readonly UIBox2? _selectedRegion;
     private readonly UIBox2? _hoverRegion;
+    private readonly UIBox2? _interactionRegion;
     private readonly Vector2 _displaySize;
+    private readonly Vector2 _hitboxPadding;
     private readonly float _displayScale;
 
     public NCTargetZoneButton(
@@ -33,6 +35,7 @@ public sealed class NCTargetZoneButton : TextureButton
         NCTextureRegion? hoverRegion,
         Vector2? displaySize,
         Vector2 hitboxPadding,
+        NCTextureRegion? interactionRegion,
         float displayScale)
     {
         Zone = zone;
@@ -40,12 +43,25 @@ public sealed class NCTargetZoneButton : TextureButton
         _hoverTexture = hoverTexture;
         _selectedRegion = ToBox(selectedRegion);
         _hoverRegion = ToBox(hoverRegion);
+        _interactionRegion = ToBox(interactionRegion);
+        _hitboxPadding = hitboxPadding;
         _displayScale = displayScale;
 
         var selectedSize = _selectedRegion?.Size ?? selectedTexture.Size;
         var hoverSize = _hoverRegion?.Size ?? hoverTexture.Size;
         _displaySize = displaySize ?? Vector2.Max(selectedSize, hoverSize);
         SetSize = (_displaySize + hitboxPadding * 2f) * displayScale;
+    }
+
+    protected override bool HasPoint(Vector2 point)
+    {
+        if (_interactionRegion is not { } region)
+            return base.HasPoint(point);
+
+        var origin = (_hitboxPadding + region.TopLeft) * _displayScale;
+        var size = region.Size * _displayScale;
+        return point.X >= origin.X && point.Y >= origin.Y &&
+               point.X < origin.X + size.X && point.Y < origin.Y + size.Y;
     }
 
     protected override void Draw(DrawingHandleScreen handle)

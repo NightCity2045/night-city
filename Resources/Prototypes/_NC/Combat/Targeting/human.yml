@@ -235,14 +235,16 @@
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/head.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/head_hover.png
   - zone: NCZoneEyes
-    position: 12,5
+    position: 13,5
     worldVisualLayers: [ Head ]
+    displaySize: 5,3
     hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/eyes.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/eyes_hover.png
   - zone: NCZoneMouth
-    position: 13,7
+    position: 14,7
     worldVisualLayers: [ Head ]
+    displaySize: 3,2
     hitboxPadding: 1,1
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/mouth.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/mouth_hover.png
@@ -269,8 +271,15 @@
       position: 0,6
       size: 11,6
   - zone: NCZoneGroin
-    position: 10,19
+    position: 11,17
     worldVisualLayers: [ Chest ]
+    displaySize: 9,4
+    interactionRegion:
+      position: 0,0
+      size: 9,3
+    woundRegion:
+      position: 0,0
+      size: 9,5
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/groin.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/groin_hover.png
   - zone: NCZoneArmRight

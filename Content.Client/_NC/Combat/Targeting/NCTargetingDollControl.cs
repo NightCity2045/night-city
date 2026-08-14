@@ -347,7 +347,9 @@ public sealed partial class NCTargetingDollControl : BoxContainer
             }
 
             var displaySize = presentation.DisplaySize ?? presentation.SelectedRegion?.Size ?? selected.Texture.Size;
-            _zoneBounds[presentation.Zone] = UIBox2.FromDimensions(presentation.Position, displaySize);
+            var woundPosition = presentation.Position + (presentation.WoundRegion?.Position ?? Vector2.Zero);
+            var woundSize = presentation.WoundRegion?.Size ?? displaySize;
+            _zoneBounds[presentation.Zone] = UIBox2.FromDimensions(woundPosition, woundSize);
 
             if (!_interactionEnabled)
                 continue;
@@ -360,6 +362,7 @@ public sealed partial class NCTargetingDollControl : BoxContainer
                 presentation.HoverRegion,
                 presentation.DisplaySize,
                 presentation.HitboxPadding,
+                presentation.InteractionRegion,
                 _displayScale)
             {
                 Group = _selectionGroup,

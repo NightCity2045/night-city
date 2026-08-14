@@ -232,6 +232,30 @@ public sealed class NCAnatomyTest : GameTest
             });
         }
 
+        var eyesPresentation = doll.Zones.Single(entry => entry.Zone == EyesZone);
+        var mouthPresentation = doll.Zones.Single(entry => entry.Zone == MouthZone);
+        var groinPresentation = doll.Zones.Single(entry => entry.Zone == GroinZone);
+        var groinInteractionRegion = groinPresentation.InteractionRegion!;
+        var groinWoundRegion = groinPresentation.WoundRegion!;
+        var groinWounds = UIBox2.FromDimensions(
+            groinPresentation.Position + groinWoundRegion.Position,
+            groinWoundRegion.Size);
+        Assert.Multiple(() =>
+        {
+            Assert.That(eyesPresentation.Position, Is.EqualTo(new Vector2(13f, 5f)));
+            Assert.That(mouthPresentation.Position, Is.EqualTo(new Vector2(14f, 7f)));
+            Assert.That(groinPresentation.Position, Is.EqualTo(new Vector2(11f, 17f)));
+            Assert.That(groinPresentation.Position.Y + groinInteractionRegion.Size.Y,
+                Is.LessThanOrEqualTo(expectedLimbGeometry["NCZoneLegLeft"].Position.Y),
+                "The groin interaction region must not steal actual left-leg pixels.");
+            Assert.That(groinPresentation.Position.Y + groinInteractionRegion.Size.Y,
+                Is.LessThanOrEqualTo(expectedLimbGeometry["NCZoneLegRight"].Position.Y),
+                "The groin interaction region must not steal actual right-leg pixels.");
+            Assert.That(groinWounds, Is.EqualTo(UIBox2.FromDimensions(
+                new Vector2(11f, 17f),
+                new Vector2(9f, 5f))));
+        });
+
         AssertFallbackGraphIsAcyclic(profile);
     }
 

@@ -49,8 +49,126 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<NCSurgeryToolComponent, AfterInteractEvent>(OnAfterInteract);
+        SubscribeLocalEvent<NCCyberwareComponent, AfterInteractEvent>(OnCyberwareAfterInteract);
         SubscribeLocalEvent<NCSurgeryToolComponent, NCSurgeryStepDoAfterEvent>(OnDoAfter);
         SubscribeNetworkEvent<NCSurgeryDirectChoiceRequest>(OnDirectChoice);
+    }
+
+    /// <summary>
+    /// Stages a detached biological or mechanical graft against the selected missing body zone. The graft does
+    /// not perform surgery by itself; it creates a server-owned plan that the required physical tools advance.
+    /// </summary>
+    private void OnCyberwareAfterInteract(
+        Entity<NCCyberwareComponent> cyberware,
+        ref AfterInteractEvent args)
+    {
+        if (args.Handled ||
+            args.Target is not { Valid: true } patient ||
+            !args.CanReach ||
+            !HasComp<NCMedicalBodyComponent>(patient) ||
+            !_hands.IsHolding(args.User, cyberware.Owner))
+        {
+            return;
+        }
+
+        args.Handled = true;
+        if (!TryStageCyberware(args.User, patient, cyberware.Owner))
+        {
+            _popup.PopupEntity(Loc.GetString("nc-medical-surgery-graft-incompatible"), patient, args.User);
+            return;
+        }
+
+        _popup.PopupEntity(Loc.GetString("nc-medical-surgery-graft-staged"), patient, args.User);
+    }
+
+    /// <summary>
+    /// Converts a physical implant/prosthesis click into one server-owned installation plan. Replacement limbs
+    /// use the detached organ edge; internal modules use a compatible live host slot in the selected region.
+    /// </summary>
+    public bool TryStageCyberware(EntityUid user, EntityUid patient, EntityUid module)
+    {
+        if (!TryComp<NCCyberwareComponent>(module, out var cyberware))
+            return false;
+
+        if (HasComp<NCDetachedOrganMedicalDataComponent>(module))
+            return TryStageGraft(user, patient, module);
+
+        var targeting = _targeting.GetSelection(user);
+        if (targeting.Mode != NCTargetingMode.SelectedZone ||
+            targeting.SelectedZone is not { } selectedZone ||
+            !_anatomy.TryResolveSelectedZone(patient, selectedZone, out _, out var targetRegion))
+        {
+            return false;
+        }
+
+        foreach (var procedure in _prototypes.EnumeratePrototypes<NCSurgeryProcedurePrototype>()
+                     .Where(candidate => candidate.CyberwareOperation == NCSurgeryCyberwareOperation.Install)
+                     .OrderBy(candidate => candidate.ID, StringComparer.Ordinal))
+        {
+            if (procedure.CompatibleCyberwareProfiles.Count > 0 &&
+                !procedure.CompatibleCyberwareProfiles.Contains(cyberware.Profile) ||
+                !_surgery.TryPrepareProcedureTarget(
+                    patient,
+                    targetRegion,
+                    procedure.ID,
+                    module,
+                    out _,
+                    out _))
+            {
+                continue;
+            }
+
+            BindStagedProcedure(user, patient, procedure.ID, targetRegion, module);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Binds one exact matching graft to a selected missing zone. This is public for server-side gameplay
+    /// adapters and deterministic integration tests; all entity identities are revalidated here.
+    /// </summary>
+    public bool TryStageGraft(EntityUid user, EntityUid patient, EntityUid graft)
+    {
+        if (Deleted(user) || Deleted(patient) || Deleted(graft) ||
+            !HasComp<NCMedicalBodyComponent>(patient) ||
+            !TryResolveMissingGraftSite(user, patient, [graft], out var parent, out _, out var matched) ||
+            matched != graft ||
+            !_surgery.TryPrepareProcedureTarget(
+                patient,
+                parent,
+                "NCSurgeryLimbReattachment",
+                graft,
+                out _,
+                out _))
+        {
+            return false;
+        }
+
+        BindStagedProcedure(user, patient, "NCSurgeryLimbReattachment", parent, graft);
+        return true;
+    }
+
+    private void BindStagedProcedure(
+        EntityUid user,
+        EntityUid patient,
+        ProtoId<NCSurgeryProcedurePrototype> procedure,
+        EntityUid targetRegion,
+        EntityUid graft)
+    {
+        SynchronizePreparation(patient);
+        var selection = EnsureComp<NCSurgeryGameplaySelectionComponent>(user);
+        selection.Patient = patient;
+        selection.Procedure = procedure;
+        selection.TargetRegion = targetRegion;
+        selection.Facility = Comp<NCSurgeryPatientStateComponent>(patient).CurrentFacility;
+        selection.Graft = graft;
+        selection.InitialStepIndex = 0;
+        selection.StepInProgress = false;
+        selection.ExecutingStepIndex = -1;
+        selection.StepStartedAt = TimeSpan.Zero;
+        selection.StepEndsAt = TimeSpan.Zero;
     }
 
     /// <summary>
@@ -185,18 +303,41 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
         out List<NCSurgeryDirectCandidate> candidates)
     {
         candidates = [];
-        if (!TryResolveSelectedRegion(surgeon, patient, out var selectedRoot))
+        IReadOnlyList<EntityUid> grafts = GetCandidateGrafts(facility, surgeon);
+        List<SurgicalRegion> regions;
+        var missingAttachmentSite = false;
+        if (TryResolveSelectedRegion(surgeon, patient, out var selectedRoot))
+        {
+            regions = CollectSurgicalRegions(patient)
+                .Where(region => IsWithinRegion(region.Region, selectedRoot))
+                .OrderBy(region => region.Category.Id, StringComparer.Ordinal)
+                .ToList();
+        }
+        else if (TryResolveMissingGraftSite(
+                     surgeon,
+                     patient,
+                     grafts,
+                     out var parent,
+                     out var parentCategory,
+                     out var matchedGraft))
+        {
+            // A missing organ has no EntityUid to select. Its detached payload carries the severed parent edge,
+            // so the live parent remains the sole authoritative operation site.
+            regions = [new SurgicalRegion(parent, parentCategory)];
+            grafts = [matchedGraft];
+            missingAttachmentSite = true;
+        }
+        else
+        {
             return false;
-
-        var grafts = GetCandidateGrafts(facility, surgeon);
-        var regions = CollectSurgicalRegions(patient)
-            .Where(region => IsWithinRegion(region.Region, selectedRoot))
-            .OrderBy(region => region.Category.Id, StringComparer.Ordinal)
-            .ToList();
+        }
 
         foreach (var procedure in _prototypes.EnumeratePrototypes<NCSurgeryProcedurePrototype>()
                      .OrderBy(procedure => procedure.ID, StringComparer.Ordinal))
         {
+            if (missingAttachmentSite && !procedure.RequiresGraft)
+                continue;
+
             var directStepIndex = GetDirectStartStep(procedure, tool.Owner, tool.Comp);
             if (directStepIndex < 0)
             {
@@ -251,6 +392,46 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
         }
 
         return candidates.Count > 0;
+    }
+
+    private bool TryResolveMissingGraftSite(
+        EntityUid surgeon,
+        EntityUid patient,
+        IReadOnlyList<EntityUid> grafts,
+        out EntityUid parent,
+        out ProtoId<OrganCategoryPrototype> parentCategory,
+        out EntityUid matchedGraft)
+    {
+        parent = default;
+        parentCategory = default;
+        matchedGraft = default;
+        var selection = _targeting.GetSelection(surgeon);
+        if (selection.Mode != NCTargetingMode.SelectedZone ||
+            selection.SelectedZone is not { } selectedZone ||
+            !_prototypes.TryIndex(selectedZone, out NCTargetZonePrototype? zone))
+        {
+            return false;
+        }
+
+        foreach (var candidate in grafts.OrderBy(uid => uid.Id))
+        {
+            if (!TryComp<OrganComponent>(candidate, out var organ) ||
+                organ.Category is not { } graftCategory ||
+                graftCategory != zone.ExternalOrganCategory && graftCategory != zone.MedicalRegionCategory ||
+                _anatomy.TryGetOrgan(patient, graftCategory, out _) ||
+                !TryComp<NCDetachedOrganMedicalDataComponent>(candidate, out var payload) ||
+                !_anatomy.TryGetOrgan(patient, payload.RequiredParentCategory, out var liveParent))
+            {
+                continue;
+            }
+
+            parent = liveParent;
+            parentCategory = payload.RequiredParentCategory;
+            matchedGraft = candidate;
+            return true;
+        }
+
+        return false;
     }
 
     private int GetDirectStartStep(

@@ -439,7 +439,7 @@ public sealed class NCWorldWoundOverlay : Overlay
         var zones = new Dictionary<ProtoId<NCTargetZonePrototype>, WoundZoneLayout>();
         foreach (var presentation in doll.Zones)
         {
-            var size = presentation.DisplaySize ?? presentation.SelectedRegion?.Size;
+            var size = presentation.WoundRegion?.Size ?? presentation.DisplaySize ?? presentation.SelectedRegion?.Size;
             if (size == null)
             {
                 if (!_resources.TryGetResource<TextureResource>(presentation.SelectedTexture, out var texture))
@@ -448,8 +448,9 @@ public sealed class NCWorldWoundOverlay : Overlay
             }
 
             var restrictVertical = presentation.WorldVisualLayers.Any(layer => layerUsage[layer] > 1);
+            var position = presentation.Position + (presentation.WoundRegion?.Position ?? Vector2.Zero);
             zones[presentation.Zone] = new WoundZoneLayout(
-                Box2.FromDimensions(presentation.Position, size.Value),
+                Box2.FromDimensions(position, size.Value),
                 presentation.WorldVisualLayers,
                 restrictVertical);
         }

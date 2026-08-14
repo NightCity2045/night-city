@@ -44,10 +44,13 @@
   freshToOpenDelay: 5s
   naturalClosureMaximumSeverity: Minor
   naturalClosureProgress: 0.25
-  openContaminationPerSecond: 0.000002
-  sterileContaminationDecayPerSecond: 0.000004
+  # An untreated open wound reaches the infection threshold in roughly 10 minutes of active simulation.
+  openContaminationPerSecond: 0.00025
+  # A fresh sterile dressing must overcome the residual exposure of an open wound instead of merely slowing it.
+  sterileContaminationDecayPerSecond: 0.00002
   infectionContaminationThreshold: 0.15
-  infectionGrowthPerSecond: 0.00003
+  # Untreated moderate wounds progress to a localized infection on the scale of one round, not real-world days.
+  infectionGrowthPerSecond: 0.0003
   debridementInfectionRecoveryPerSecond: 0.00002
   antibioticRecoveryPerPowerPerSecond: 0.00006
   immunosuppressionInfectionMultiplier: 1

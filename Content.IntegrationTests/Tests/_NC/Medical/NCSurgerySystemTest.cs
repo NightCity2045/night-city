@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
+using Content.Server._NC.Combat.Targeting;
 using Content.Server._NC.Medical.Pharmacology;
 using Content.Server._NC.Medical.Surgery;
 using Content.Server._NC.Medical.Anatomy.Detachment;
@@ -40,6 +41,8 @@ public sealed class NCSurgerySystemTest : GameTest
     [SidedDependency(Side.Server)] private NCAnatomySystem _anatomy = default!;
     [SidedDependency(Side.Server)] private NCPharmacologySystem _pharmacology = default!;
     [SidedDependency(Side.Server)] private NCSurgerySystem _surgery = default!;
+    [SidedDependency(Side.Server)] private NCSurgeryInteractionSystem _surgeryInteraction = default!;
+    [SidedDependency(Side.Server)] private NCTargetingSelectionSystem _targeting = default!;
     [SidedDependency(Side.Server)] private NCOrganDetachmentSystem _detachment = default!;
 
     public override PoolSettings PoolSettings => new()
@@ -661,6 +664,21 @@ public sealed class NCSurgerySystemTest : GameTest
         PreparePatient(patient, table, table, airwayMonitored: true);
         Authorize(surgeon, "NCSurgeryAuthorizationGeneral");
         Authorize(surgeon, "NCSurgeryAuthorizationOrgan");
+        Assert.That(_targeting.TrySetSelection(
+                surgeon,
+                new NCTargetingState(NCTargetingMode.SelectedZone, "NCZoneHead"),
+                out _,
+                out _),
+            Is.True);
+        Assert.That(_surgeryInteraction.TryStageCyberware(surgeon, patient, module), Is.True,
+            "Clicking an internal implant on a compatible selected region must stage installation.");
+        var staged = SComp<NCSurgeryGameplaySelectionComponent>(surgeon);
+        Assert.Multiple(() =>
+        {
+            Assert.That(staged.Procedure.Id, Is.EqualTo("NCSurgeryCyberwareInstallation"));
+            Assert.That(staged.TargetRegion, Is.EqualTo(head));
+            Assert.That(staged.Graft, Is.EqualTo(module));
+        });
 
         Assert.That(_surgery.StartSurgery(
                 new NCSurgeryStartRequest(
@@ -733,9 +751,28 @@ public sealed class NCSurgerySystemTest : GameTest
         var table = SSpawn(OperatingTable);
         var debugTool = SSpawn(DebugMultitool);
         var replacement = SSpawn("NCOrganHumanCyberArmLeft");
+        var wrongSide = SSpawn("NCOrganHumanCyberArmRight");
 
         Assert.That(_detachment.TryDetachOrgan(patient, "ArmLeft", out _), Is.True);
         Assert.That(_anatomy.TryGetOrgan(patient, "Torso", out var torso), Is.True);
+        Assert.That(_targeting.TrySetSelection(
+                surgeon,
+                new NCTargetingState(NCTargetingMode.SelectedZone, "NCZoneArmLeft"),
+                out _,
+                out _),
+            Is.True);
+        Assert.That(_surgeryInteraction.TryStageCyberware(surgeon, patient, wrongSide), Is.False,
+            "A right cyberarm must never bind to a selected missing left arm.");
+        Assert.That(_surgeryInteraction.TryStageCyberware(surgeon, patient, replacement), Is.True,
+            "Clicking the matching cyberarm on the patient must stage limb reattachment.");
+        var staged = SComp<NCSurgeryGameplaySelectionComponent>(surgeon);
+        Assert.Multiple(() =>
+        {
+            Assert.That(staged.Patient, Is.EqualTo(patient));
+            Assert.That(staged.Procedure.Id, Is.EqualTo("NCSurgeryLimbReattachment"));
+            Assert.That(staged.TargetRegion, Is.EqualTo(torso));
+            Assert.That(staged.Graft, Is.EqualTo(replacement));
+        });
         PreparePatient(patient, table, table, airwayMonitored: true);
         Authorize(surgeon, "NCSurgeryAuthorizationOrthopedic");
         Authorize(surgeon, "NCSurgeryAuthorizationVascular");
