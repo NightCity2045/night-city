@@ -1,0 +1,83 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Traumatic separation is deterministic. Ordinary sidearms cannot satisfy the per-impact energy gate even
+# after repeated hits; heavy penetrating, explosive, crushing or cutting trauma must also destroy live structure.
+- type: ncTraumaticSeveranceProfile
+  id: NCHumanTraumaticSeverance
+  stumpTraumaProfile: TraumaticAmputationImpact
+  mechanisms:
+    Ballistic:
+      minimumSeverity: Catastrophic
+      minimumImpactTrauma: 28
+      maximumIntegrityFraction: 0.8
+      minimumBoneState: Shattered
+      maximumTendonIntegrity: 0.45
+      mechanicalMinimumImpactTrauma: 45
+      mechanicalMaximumIntegrityFraction: 0.55
+    Slash:
+      minimumSeverity: Catastrophic
+      minimumImpactTrauma: 30
+      maximumIntegrityFraction: 0.7
+      minimumBoneState: Shattered
+      maximumTendonIntegrity: 0.15
+      mechanicalMinimumImpactTrauma: 48
+      mechanicalMaximumIntegrityFraction: 0.5
+    Blast:
+      minimumSeverity: Catastrophic
+      minimumImpactTrauma: 25
+      maximumIntegrityFraction: 0.7
+      minimumBoneState: Shattered
+      maximumTendonIntegrity: 0.3
+      mechanicalMinimumImpactTrauma: 42
+      mechanicalMaximumIntegrityFraction: 0.55
+    Blunt:
+      minimumSeverity: Catastrophic
+      minimumImpactTrauma: 40
+      maximumIntegrityFraction: 0.55
+      minimumBoneState: Shattered
+      maximumTendonIntegrity: 0.2
+      mechanicalMinimumImpactTrauma: 55
+      mechanicalMaximumIntegrityFraction: 0.4
+  regions:
+    ArmLeft:
+      targetZone: NCZoneArmLeft
+      boneCategory: ArmBoneLeft
+      tendonCategory: TendonSetLeftArm
+      stumpTrauma: 12
+      mechanicalStumpTraumaMultiplier: 0.65
+    ArmRight:
+      targetZone: NCZoneArmRight
+      boneCategory: ArmBoneRight
+      tendonCategory: TendonSetRightArm
+      stumpTrauma: 12
+      mechanicalStumpTraumaMultiplier: 0.65
+    HandLeft:
+      targetZone: NCZoneHandLeft
+      stumpTrauma: 8
+      mechanicalStumpTraumaMultiplier: 0.5
+    HandRight:
+      targetZone: NCZoneHandRight
+      stumpTrauma: 8
+      mechanicalStumpTraumaMultiplier: 0.5
+    LegLeft:
+      targetZone: NCZoneLegLeft
+      boneCategory: LegBoneLeft
+      tendonCategory: TendonSetLeftLeg
+      stumpTrauma: 14
+      mechanicalStumpTraumaMultiplier: 0.65
+    LegRight:
+      targetZone: NCZoneLegRight
+      boneCategory: LegBoneRight
+      tendonCategory: TendonSetRightLeg
+      stumpTrauma: 14
+      mechanicalStumpTraumaMultiplier: 0.65
+    FootLeft:
+      targetZone: NCZoneFootLeft
+      stumpTrauma: 8
+      mechanicalStumpTraumaMultiplier: 0.5
+    FootRight:
+      targetZone: NCZoneFootRight
+      stumpTrauma: 8
+      mechanicalStumpTraumaMultiplier: 0.5

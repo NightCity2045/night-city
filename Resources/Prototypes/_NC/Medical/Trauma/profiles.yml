@@ -34,3 +34,8 @@
 - type: ncTraumaProfile
   id: ChemicalImpact
   mechanism: Chemical
+
+- type: ncTraumaProfile
+  id: TraumaticAmputationImpact
+  mechanism: Slash
+  woundPrototype: NCWoundAmputationStump

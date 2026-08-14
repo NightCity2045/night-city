@@ -200,6 +200,7 @@ public enum NCWoundType : byte
     Cold,
     Pressure,
     Chemical,
+    Amputation,
 }
 
 public enum NCTissueDepth : byte

@@ -4,6 +4,7 @@
 
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Trauma;
+using Content.Shared.Body;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.Medical.Wounds;
@@ -31,6 +32,30 @@ public readonly record struct NCWoundImpactAppliedEvent(
     NCWoundType WoundType,
     NCWoundSeverity Severity,
     float ExternalBleedRate);
+
+/// <summary>
+/// Dedicated server-local handoff to the severance resolver. A distinct event type is required because
+/// Robust permits only one component/event subscription pair and the blood-impact system owns the event above.
+/// </summary>
+[ByRefEvent]
+public readonly record struct NCSeveranceAssessmentEvent(
+    NCCombatTraumaRequest Request,
+    NCWoundType WoundType,
+    NCWoundSeverity Severity,
+    float AppliedTrauma);
+
+/// <summary>
+/// Raised after the live organ subtree has been detached so WoundSystem can create the remaining stump wound.
+/// </summary>
+[ByRefEvent]
+public readonly record struct NCTraumaticAmputationEvent(
+    NCCombatTraumaRequest SourceRequest,
+    ProtoId<OrganCategoryPrototype> DetachedCategory,
+    ProtoId<OrganCategoryPrototype> ParentCategory,
+    ProtoId<NCTargetZonePrototype> TargetZone,
+    ProtoId<NCTraumaProfilePrototype> StumpTraumaProfile,
+    float StumpTrauma,
+    bool Mechanical);
 
 [ByRefEvent]
 public readonly record struct NCWoundProgressedEvent(

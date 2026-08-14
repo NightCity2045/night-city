@@ -108,6 +108,13 @@ public sealed class NCWoundMarkerOverlay : Control
         var color = WoundColor(wound);
         switch (wound.Type)
         {
+            case NCWoundType.Amputation:
+                DrawCell(handle, bounds, point, color);
+                DrawCell(handle, bounds, point + Vector2.UnitX, color.WithAlpha(0.9f));
+                DrawCell(handle, bounds, point - Vector2.UnitX, color.WithAlpha(0.9f));
+                DrawCell(handle, bounds, point + Vector2.UnitY, color.WithAlpha(0.9f));
+                DrawCell(handle, bounds, point - Vector2.UnitY, color.WithAlpha(0.9f));
+                return;
             case NCWoundType.Slash:
                 DrawSlash(handle, bounds, point, wound.VisualDirection, wound.Severity, color);
                 return;
@@ -186,6 +193,7 @@ public sealed class NCWoundMarkerOverlay : Control
             NCWoundType.Chemical => Color.FromHex("#B6E447"),
             NCWoundType.Blunt => Color.FromHex("#A93F78"),
             NCWoundType.Pierce => Color.FromHex("#FF4F69"),
+            NCWoundType.Amputation => Color.FromHex("#C90F24"),
             _ => Color.FromHex("#FF2738"),
         };
     }

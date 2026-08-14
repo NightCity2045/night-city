@@ -6,7 +6,9 @@ using System.Linq;
 using System.Numerics;
 using Content.Server._NC.Medical.Bleeding;
 using Content.Server._NC.Medical.Cyberware;
+using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Anatomy.Detachment;
 using Content.Shared._NC.Medical.Bleeding;
 using Content.Shared._NC.Medical.Cyberware;
 using Content.Shared._NC.Medical.Physiology;
@@ -39,6 +41,7 @@ public sealed partial class NCWoundSystem : EntitySystem
 
         SubscribeLocalEvent<NCWoundContainerComponent, ComponentInit>(OnContainerInit);
         SubscribeLocalEvent<NCMedicalBodyComponent, NCCombatTraumaRequestedEvent>(OnTraumaRequested);
+        SubscribeLocalEvent<NCWoundContainerComponent, NCTraumaticAmputationEvent>(OnTraumaticAmputation);
     }
 
     private void OnContainerInit(Entity<NCWoundContainerComponent> entity, ref ComponentInit args)
@@ -88,7 +91,47 @@ public sealed partial class NCWoundSystem : EntitySystem
                 severity,
                 result.ExternalBleedRate);
             RaiseLocalEvent(entity.Owner, ref applied);
+
+            var appliedTrauma = args.Request.PostArmorDamage > FixedPoint2.Zero
+                ? args.Request.PostArmorDamage.Float()
+                : args.Request.TransferredBluntDamage.Float();
+            var assessment = new NCSeveranceAssessmentEvent(
+                args.Request,
+                woundType,
+                severity,
+                MathF.Max(0f, appliedTrauma));
+            RaiseLocalEvent(entity.Owner, ref assessment);
         }
+    }
+
+    private void OnTraumaticAmputation(
+        Entity<NCWoundContainerComponent> entity,
+        ref NCTraumaticAmputationEvent args)
+    {
+        if (!float.IsFinite(args.StumpTrauma) || args.StumpTrauma <= 0f)
+            return;
+
+        // The detached subtree takes its original wounds with it. A separate action-derived wound remains
+        // on the live parent so pressure, bandages and a tourniquet can treat the traumatic stump normally.
+        var stumpResolution = new NCActionResolutionId(args.SourceRequest.ResolutionId.DeriveGuid(
+            args.SourceRequest.ProjectileSequence ^ 0x53455652u,
+            args.SourceRequest.ImpactSequence ^ 0x5354554Du));
+        var stumpRequest = args.SourceRequest with
+        {
+            ResolutionId = stumpResolution,
+            ProjectileSequence = args.SourceRequest.ProjectileSequence ^ 0x80000000u,
+            ActualZone = args.TargetZone,
+            MedicalRegion = args.ParentCategory,
+            TraumaProfile = args.StumpTraumaProfile,
+            RawDamage = FixedPoint2.New(args.StumpTrauma),
+            EffectiveSp = FixedPoint2.Zero,
+            PostArmorDamage = FixedPoint2.New(args.StumpTrauma),
+            TransferredBluntDamage = FixedPoint2.Zero,
+            Flags = NCTraumaFlags.None,
+            ProjectileDisposition = NCTraumaProjectileDisposition.None,
+            ExitTraumaMultiplier = 0f,
+        };
+        ApplyTrauma(entity, stumpRequest);
     }
 
     /// <summary>
@@ -121,37 +164,6 @@ public sealed partial class NCWoundSystem : EntitySystem
         if (!_anatomy.TryGetOrgan(body, request.MedicalRegion, out var region))
             return NCWoundApplicationResult.Rejected;
 
-        // NC cyberware owns mechanical frame damage. It must never enter the organic wound, bleeding,
-        // contamination or infection pipeline merely because it occupies a human anatomical category.
-        if (TryComp<NCCyberwareComponent>(region, out _) &&
-            TryComp<NCOrganIntegrityComponent>(region, out var mechanicalIntegrity) &&
-            mechanicalIntegrity.Material == NCAnatomicalMaterialKind.Mechanical)
-        {
-            var mechanicalTrauma = request.PostArmorDamage > FixedPoint2.Zero
-                ? request.PostArmorDamage
-                : request.TransferredBluntDamage;
-            if (mechanicalTrauma <= FixedPoint2.Zero)
-                return NCWoundApplicationResult.AcceptedWithoutWound;
-
-            var result = _cyberware.TryApplyMechanicalTrauma(
-                body,
-                region,
-                request.ResolutionId,
-                request.ProjectileSequence,
-                request.ImpactSequence,
-                mechanicalTrauma.Float());
-            return result.Status switch
-            {
-                NCCyberwareMutationStatus.Applied =>
-                    new NCWoundApplicationResult(true, false, false, false, null, true),
-                NCCyberwareMutationStatus.Duplicate => NCWoundApplicationResult.Duplicate,
-                _ => NCWoundApplicationResult.Rejected,
-            };
-        }
-
-        if (IsDuplicate(container, request, systemProfile.ProcessedImpactCapacity))
-            return NCWoundApplicationResult.Duplicate;
-
         // A stopped hit can still create a deterministic blunt-transfer wound. The impact adapter switches
         // that request to BluntImpact, so medicine consumes one authoritative scalar without a second check.
         var appliedTrauma = request.PostArmorDamage > FixedPoint2.Zero
@@ -160,9 +172,42 @@ public sealed partial class NCWoundSystem : EntitySystem
         var traumaAmount = MathF.Max(0f, appliedTrauma.Float());
         if (traumaAmount <= 0f)
             return NCWoundApplicationResult.AcceptedWithoutWound;
+        var severity = ResolveSeverity(traumaAmount, systemProfile.SeverityThresholds);
+
+        // NC cyberware owns mechanical frame damage. It must never enter the organic wound, bleeding,
+        // contamination or infection pipeline merely because it occupies a human anatomical category.
+        if (TryComp<NCCyberwareComponent>(region, out _) &&
+            TryComp<NCOrganIntegrityComponent>(region, out var mechanicalIntegrity) &&
+            mechanicalIntegrity.Material == NCAnatomicalMaterialKind.Mechanical)
+        {
+            var result = _cyberware.TryApplyMechanicalTrauma(
+                body,
+                region,
+                request.ResolutionId,
+                request.ProjectileSequence,
+                request.ImpactSequence,
+                traumaAmount);
+            return result.Status switch
+            {
+                NCCyberwareMutationStatus.Applied =>
+                    new NCWoundApplicationResult(
+                        true,
+                        false,
+                        false,
+                        false,
+                        null,
+                        true,
+                        woundPrototype.WoundType,
+                        severity),
+                NCCyberwareMutationStatus.Duplicate => NCWoundApplicationResult.Duplicate,
+                _ => NCWoundApplicationResult.Rejected,
+            };
+        }
+
+        if (IsDuplicate(container, request, systemProfile.ProcessedImpactCapacity))
+            return NCWoundApplicationResult.Duplicate;
 
         var now = request.Timestamp > TimeSpan.Zero ? request.Timestamp : _timing.CurTime;
-        var severity = ResolveSeverity(traumaAmount, systemProfile.SeverityThresholds);
         var vascularDensity = 1f;
         var hasMajorArtery = false;
         var hasBodyCavity = false;

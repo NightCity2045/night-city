@@ -91,6 +91,7 @@
   defaultForHumans: true
   progressionProfile: NCHumanWoundProgression
   impactBloodProfile: NCHumanImpactBlood
+  severanceProfile: NCHumanTraumaticSeverance
   maxActiveWounds: 32
   processedImpactCapacity: 128
   mergeContaminationTolerance: 0.05
@@ -103,8 +104,9 @@
   boneStabilityLossPerDamage: 0.01
   displacementFromState: BrokenDisplaced
   fixationFromState: BrokenStable
-  # Damage 1-4/5-8/9-12/13-16/17+ follows the authoritative damage design.
-  severityThresholds: [ 4, 8, 12, 16 ]
+  # Standard 14-point handgun hits are severe, not immediately critical; catastrophic trauma is reserved
+  # for high-energy weapons and explosions. These are inclusive upper bounds.
+  severityThresholds: [ 4, 9, 16, 24 ]
   statusDamageThresholds: [ 1, 3, 5, 8, 12, 17, 24, 32 ]
   severityStatusLevels:
     Minor: 1
@@ -166,32 +168,53 @@
   tissueDepth: Cavity
   canMergeMinor: false
   areaPerDamage: 0.35
-  externalBleedPerDamage: 0.55
-  internalBleedPerDamage: 0.65
+  externalBleedPerDamage: 0.35
+  internalBleedPerDamage: 0.45
   arterialFromSeverity: Critical
   arterialRateMultiplier: 3.5
-  painPerDamage: 1.25
+  painPerDamage: 0.85
   contaminationMultiplier: 1
   scarRiskPerDamage: 0.035
   naturalHealingMultiplier: 0.7
   infectionSusceptibility: 1.35
   reopenSusceptibility: 1.2
   naturalIntegrityRecoveryFraction: 0.1
-  regionIntegrityDamageMultiplier: 1
-  containedStructureDamageMultiplier: 0.5
-  containedOrganDamageMultiplier: 0.65
-  functionLossPerDamage: 0.02
+  regionIntegrityDamageMultiplier: 0.75
+  containedStructureDamageMultiplier: 0.38
+  containedOrganDamageMultiplier: 0.45
+  functionLossPerDamage: 0.015
   structuralDamageFromSeverity: Severe
-  containedOrganDamageFromSeverity: Moderate
-  tendonDamageFromSeverity: Moderate
-  tendonIntegrityLossPerDamage: 0.04
+  containedOrganDamageFromSeverity: Severe
+  tendonDamageFromSeverity: Severe
+  tendonIntegrityLossPerDamage: 0.02
   tendonRuptureIntegrityThreshold: 0.25
-  nerveDamageFromSeverity: Moderate
-  nerveIntegrityLossPerDamage: 0.03
-  nerveMotorLossPerDamage: 0.04
+  nerveDamageFromSeverity: Severe
+  nerveIntegrityLossPerDamage: 0.018
+  nerveMotorLossPerDamage: 0.022
   jointDamageFromSeverity: Severe
-  jointStabilityLossPerDamage: 0.03
+  jointStabilityLossPerDamage: 0.018
   jointDislocationStabilityThreshold: 0.2
+
+- type: ncWound
+  id: NCWoundAmputationStump
+  woundType: Amputation
+  tissueDepth: Vascular
+  canMergeMinor: false
+  areaPerDamage: 0.75
+  externalBleedPerDamage: 0.45
+  arterialFromSeverity: Moderate
+  arterialRateMultiplier: 3
+  painPerDamage: 0.9
+  contaminationMultiplier: 1.25
+  scarRiskPerDamage: 0.06
+  naturalHealingMultiplier: 0.35
+  infectionSusceptibility: 1.5
+  reopenSusceptibility: 1.5
+  naturalIntegrityRecoveryFraction: 0
+  regionIntegrityDamageMultiplier: 0
+  containedStructureDamageMultiplier: 0
+  containedOrganDamageMultiplier: 0
+  functionLossPerDamage: 0
 
 - type: ncWound
   id: NCWoundBallisticExpansive

@@ -128,7 +128,7 @@ public sealed class NCWoundSystemTest : GameTest
         var body = SSpawn(HumanMob);
         var circulation = SComp<NCCirculationComponent>(body);
         var before = circulation.BloodVolume;
-        var request = CreateRequest(body, "NCZoneLegLeft", "LegLeft", "BallisticImpact", 10f);
+        var request = CreateRequest(body, "NCZoneLegLeft", "LegLeft", "BallisticProjectile", 10f);
         var first = new NCCombatTraumaRequestedEvent(request);
         SEntMan.EventBus.RaiseLocalEvent(body, ref first);
         var afterFirst = circulation.BloodVolume;
@@ -342,6 +342,7 @@ public sealed class NCWoundSystemTest : GameTest
         }
 
         var container = SComp<NCWoundContainerComponent>(body);
+        var expectedZoneCount = _prototypes.Index(SComp<NCMedicalBodyComponent>(body).Profile).TargetZones.Count;
         var first = _status.BuildOwnerStatusSnapshot(body);
         var second = _status.BuildOwnerStatusSnapshot(body);
         Assert.Multiple(() =>
@@ -349,7 +350,7 @@ public sealed class NCWoundSystemTest : GameTest
             Assert.That(container.Wounds, Has.Count.EqualTo(profile.MaxActiveWounds));
             Assert.That(container.OverflowTraumaByZone["NCZoneHead"], Is.GreaterThan(0f));
             Assert.That(first, Is.EqualTo(second));
-            Assert.That(first, Has.Count.EqualTo(12));
+            Assert.That(first, Has.Count.EqualTo(expectedZoneCount));
             Assert.That(first.Single(zone => zone.Zone.Id == "NCZoneHead").Severity, Is.EqualTo(8));
             Assert.That(first.All(zone => zone.Severity <= 8), Is.True);
         });

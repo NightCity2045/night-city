@@ -21,8 +21,8 @@
   bluntTransferProfile: NCBallisticStoppedTransfer
   traumaFlags: [ Penetrating, CanEmbed, CanExit ]
   embedMinimumPostArmorDamage: 1
-  exitMinimumPostArmorDamage: 14
-  exitTraumaMultiplier: 0.45
+  exitMinimumPostArmorDamage: 18
+  exitTraumaMultiplier: 0.35
   canOverpenetrateBody: true
 
 - type: ncCombatDamageProfile
@@ -33,8 +33,8 @@
   bluntTransferProfile: NCBallisticStoppedTransfer
   traumaFlags: [ Penetrating, ArmorPiercing, CanEmbed, CanExit ]
   embedMinimumPostArmorDamage: 1
-  exitMinimumPostArmorDamage: 9
-  exitTraumaMultiplier: 0.55
+  exitMinimumPostArmorDamage: 12
+  exitTraumaMultiplier: 0.45
   canOverpenetrateBody: true
 
 - type: ncCombatDamageProfile
@@ -45,8 +45,8 @@
   bluntTransferProfile: NCBallisticStoppedTransfer
   traumaFlags: [ Penetrating, Incendiary, CanEmbed, CanExit ]
   embedMinimumPostArmorDamage: 1
-  exitMinimumPostArmorDamage: 16
-  exitTraumaMultiplier: 0.4
+  exitMinimumPostArmorDamage: 18
+  exitTraumaMultiplier: 0.3
   canOverpenetrateBody: true
 
 - type: ncCombatDamageProfile

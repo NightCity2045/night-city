@@ -275,7 +275,7 @@ public sealed class NCBloodIntegrationTest : GameTest
             null,
             "NCZoneLegLeft",
             "LegLeft",
-            "BallisticImpact",
+            "BallisticProjectile",
             new DamageSpecifier(),
             FixedPoint2.New(10),
             FixedPoint2.Zero,
