@@ -455,6 +455,36 @@ public sealed class NCMedicalBodyNetworkTest : GameTest
             }), Is.True, "Every replicated wound must project inside its configured sprite zone.");
         });
 
+        EntityUid scanner = default;
+        await Server.WaitPost(() =>
+        {
+            scanner = Server.EntMan.SpawnAtPosition("MedicalScanner", map.GridCoords);
+            var containers = Server.EntMan.System<SharedContainerSystem>();
+            var bodySlot = containers.GetContainer(scanner, "scanner-bodyContainer");
+            Assert.That(containers.Insert(serverBody, bodySlot, force: true), Is.True);
+        });
+        await Pair.RunTicksSync(5);
+
+        Assert.That(
+            Client.EntMan.System<NCWorldWoundOverlaySystem>().ShouldRenderWorldWounds(clientBody),
+            Is.False,
+            "World wound pixels must disappear with the contained humanoid sprite.");
+
+        await Server.WaitPost(() =>
+        {
+            var containers = Server.EntMan.System<SharedContainerSystem>();
+            var bodySlot = containers.GetContainer(scanner, "scanner-bodyContainer");
+            Assert.That(
+                containers.Remove(serverBody, bodySlot, force: true, destination: map.GridCoords),
+                Is.True);
+        });
+        await Pair.RunTicksSync(5);
+
+        Assert.That(
+            Client.EntMan.System<NCWorldWoundOverlaySystem>().ShouldRenderWorldWounds(clientBody),
+            Is.True,
+            "World wound pixels must return after the body leaves the container.");
+
         await Server.WaitPost(() => Server.EntMan.DeleteEntity(map.MapUid));
     }
 

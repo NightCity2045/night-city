@@ -14,7 +14,7 @@
     sprite: Structures/Furniture/Tables/optable.rsi
     state: operating_table
   - type: AmbientMusicMarkerMedical
-  # NC start - existing mapped clinic tables are authoritative surgery facilities.
+  # NC start - existing mapped clinic tables are authoritative facilities for direct tool-on-patient surgery.
   - type: NCSurgeryFacility
     capabilities:
     - NCSurgeryFacilityStableSurface
@@ -35,15 +35,8 @@
     movement: 0
     restrained: true
     airwayMonitored: true
-  - type: NCSurgeryConsole
-    facilitySearchRange: 2.5
   - type: NCSurgeryGraftSlot
-  - type: UserInterface
-    interfaces:
-      enum.NCSurgeryConsoleUiKey.Key:
-        type: NCSurgeryConsoleBoundUserInterface
-  - type: ActivatableUI
-    key: enum.NCSurgeryConsoleUiKey.Key
-    verbOnly: true
-    verbText: nc-medical-surgery-console-title
+  - type: GuideHelp
+    guides:
+    - NCSurgeryGuide
   # NC end

@@ -175,6 +175,13 @@ public sealed partial class NCSurgeryStepPrototype : IPrototype
     [DataField]
     public TimeSpan Duration { get; private set; } = TimeSpan.FromSeconds(1);
 
+    /// <summary>
+    /// Optional preparation that a console workflow may retain but the direct Aurora-style tool sequence may
+    /// skip. Only leading optional steps can be skipped; the core validates the requested initial index.
+    /// </summary>
+    [DataField]
+    public bool OptionalAtDirectStart { get; private set; }
+
     [DataField(required: true)]
     public NCSurgicalAccessDepth RequiredAccessDepth { get; private set; }
 

@@ -174,6 +174,14 @@ public sealed partial class NCSurgerySystem : EntitySystem
             return false;
         }
 
+        if (request.InitialStepIndex < 0 ||
+            request.InitialStepIndex >= procedure.Steps.Count ||
+            !CanStartAtStep(procedure, request.InitialStepIndex))
+        {
+            failure = NCSurgeryStartFailure.InvalidInitialStep;
+            return false;
+        }
+
         if (!procedure.CompatibleBodyProfiles.Contains(medical.Profile))
         {
             failure = NCSurgeryStartFailure.IncompatibleBodyProfile;
@@ -249,13 +257,7 @@ public sealed partial class NCSurgerySystem : EntitySystem
             return false;
         }
 
-        var conditionFailure = ValidateBoundConditions(
-            request.Patient,
-            request.Facility,
-            request.Environment,
-            procedure.Facility,
-            procedure.Environment,
-            procedure.Patient);
+        var conditionFailure = ValidateHardPatientConditions(request.Patient, procedure.Patient);
 
         if (conditionFailure != NCSurgeryConditionFailure.None)
         {
@@ -278,7 +280,7 @@ public sealed partial class NCSurgerySystem : EntitySystem
         session.CyberwareMutationApplied = false;
         session.DetachedResult = null;
         session.Procedure = request.Procedure;
-        session.CurrentStepIndex = 0;
+        session.CurrentStepIndex = request.InitialStepIndex;
         session.State = NCSurgerySessionState.Running;
         session.PauseReason = NCSurgeryInterruptionReason.None;
         session.StartedAt = _timing.CurTime;
@@ -296,6 +298,25 @@ public sealed partial class NCSurgerySystem : EntitySystem
             request.TargetRegion,
             request.Procedure);
         RaiseLocalEvent(request.Patient, ref started);
+        return true;
+    }
+
+    /// <summary>
+    /// Direct interactions may omit only a contiguous prefix explicitly marked optional in prototype data.
+    /// This keeps the state-machine transition auditable and prevents arbitrary trusted callers from jumping
+    /// over an operative step.
+    /// </summary>
+    private bool CanStartAtStep(NCSurgeryProcedurePrototype procedure, int requestedIndex)
+    {
+        for (var index = 0; index < requestedIndex; index++)
+        {
+            if (!_prototypes.TryIndex(procedure.Steps[index], out NCSurgeryStepPrototype? skipped) ||
+                !skipped.OptionalAtDirectStart)
+            {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -452,23 +473,12 @@ public sealed partial class NCSurgerySystem : EntitySystem
                 step.Duration);
         }
 
+        RefreshPhysicalContext(session);
         var conditions = BuildConditionSnapshot(session, site, tool, toolQuality);
-        var conditionFailure = ValidateBoundConditions(
-            session.Patient,
-            session.Facility,
-            session.Environment,
-            procedure.Facility,
-            procedure.Environment,
-            procedure.Patient);
+        var conditionFailure = ValidateHardPatientConditions(session.Patient, procedure.Patient);
         if (conditionFailure == NCSurgeryConditionFailure.None)
         {
-            conditionFailure = ValidateBoundConditions(
-                session.Patient,
-                session.Facility,
-                session.Environment,
-                step.Facility,
-                step.Environment,
-                step.Patient);
+            conditionFailure = ValidateHardPatientConditions(session.Patient, step.Patient);
         }
 
         if (conditionFailure != NCSurgeryConditionFailure.None)
@@ -484,7 +494,7 @@ public sealed partial class NCSurgerySystem : EntitySystem
                 conditions);
         }
 
-        var outcome = ResolveOutcome(step, conditions);
+        var outcome = ResolveOutcome(procedure, step, conditions);
         // A compromised result is still a completed deterministic transition. Its effects are applied
         // after the ordinary transition effects, so YAML only declares the additional complication.
         var effects = step.SuccessEffects;
@@ -627,13 +637,8 @@ public sealed partial class NCSurgerySystem : EntitySystem
             return false;
         }
 
-        var conditionFailure = ValidateBoundConditions(
-            session.Patient,
-            session.Facility,
-            session.Environment,
-            procedure.Facility,
-            procedure.Environment,
-            procedure.Patient);
+        RefreshPhysicalContext(session);
+        var conditionFailure = ValidateHardPatientConditions(session.Patient, procedure.Patient);
         if (conditionFailure != NCSurgeryConditionFailure.None)
         {
             failure = MapStartFailure(conditionFailure);
@@ -903,15 +908,18 @@ public sealed partial class NCSurgerySystem : EntitySystem
         if (session.Facility is { } facilityUid &&
             TryComp<NCSurgeryFacilityComponent>(facilityUid, out var facility))
         {
+            result.FacilityPresent = true;
             result.FacilityQuality = facility.Quality;
             result.FacilitySterility = facility.Sterility;
             result.FacilityPowered = facility.Powered;
             result.FacilityStable = facility.StableSurface;
+            result.FacilityCapabilities.UnionWith(facility.Capabilities);
         }
 
         if (session.Environment is { } environmentUid &&
             TryComp<NCSurgeryEnvironmentComponent>(environmentUid, out var environment))
         {
+            result.EnvironmentPresent = true;
             result.EnvironmentSterility = environment.Sterility;
             result.EnvironmentLighting = environment.Lighting;
             result.EnvironmentMotion = environment.Motion;
@@ -943,163 +951,51 @@ public sealed partial class NCSurgerySystem : EntitySystem
         return result;
     }
 
-    private NCSurgeryConditionFailure ValidateBoundConditions(
-        EntityUid patientUid,
-        EntityUid? facilityUid,
-        EntityUid? environmentUid,
-        NCSurgeryFacilityRequirement facilityRequirement,
-        NCSurgeryEnvironmentRequirement environmentRequirement,
-        NCSurgeryPatientRequirement patientRequirement)
+    /// <summary>
+    /// Refreshes optional preparation sources from the patient's live physical state. Losing a table no longer
+    /// invalidates the operation; it immediately degrades the next deterministic condition snapshot instead.
+    /// </summary>
+    private void RefreshPhysicalContext(NCSurgerySessionComponent session)
     {
-        var facilityFailure = ValidateFacility(patientUid, facilityUid, facilityRequirement);
-        if (facilityFailure != NCSurgeryConditionFailure.None)
-            return facilityFailure;
+        if (!TryComp<NCSurgeryPatientStateComponent>(session.Patient, out var patient))
+        {
+            session.Facility = null;
+            session.Environment = null;
+            return;
+        }
 
-        var environmentFailure = ValidateEnvironment(patientUid, environmentUid, environmentRequirement);
-        if (environmentFailure != NCSurgeryConditionFailure.None)
-            return environmentFailure;
-
-        return ValidatePatient(patientUid, patientRequirement);
+        session.Facility = patient.CurrentFacility is { } facility &&
+                           !Deleted(facility) &&
+                           HasComp<NCSurgeryFacilityComponent>(facility)
+            ? facility
+            : null;
+        session.Environment = patient.CurrentEnvironment is { } environment &&
+                              !Deleted(environment) &&
+                              HasComp<NCSurgeryEnvironmentComponent>(environment)
+            ? environment
+            : null;
     }
 
-    private NCSurgeryConditionFailure ValidateFacility(
-        EntityUid patientUid,
-        EntityUid? facilityUid,
-        NCSurgeryFacilityRequirement requirement)
-    {
-        var hasRequirements = requirement.Required ||
-                              requirement.Capabilities.Count > 0 ||
-                              requirement.MinimumQuality > 0f ||
-                              requirement.MinimumSterility > 0f ||
-                              requirement.RequirePower ||
-                              requirement.RequireStableSurface;
-        if (!hasRequirements && facilityUid == null)
-            return NCSurgeryConditionFailure.None;
-
-        if (facilityUid is not { } uid ||
-            Deleted(uid) ||
-            !TryComp<NCSurgeryFacilityComponent>(uid, out var facility))
-        {
-            return NCSurgeryConditionFailure.FacilityUnavailable;
-        }
-
-        if (requirement.Required &&
-            (!TryComp<NCSurgeryPatientStateComponent>(patientUid, out var patient) ||
-             patient.CurrentFacility != uid))
-        {
-            return NCSurgeryConditionFailure.PatientMoved;
-        }
-
-        foreach (var capability in requirement.Capabilities)
-        {
-            if (!facility.Capabilities.Contains(capability))
-                return NCSurgeryConditionFailure.FacilityCapabilityMissing;
-        }
-
-        if (!float.IsFinite(facility.Quality) ||
-            !float.IsFinite(facility.Sterility) ||
-            facility.Quality < requirement.MinimumQuality ||
-            facility.Sterility < requirement.MinimumSterility ||
-            requirement.RequirePower && !facility.Powered ||
-            requirement.RequireStableSurface && !facility.StableSurface)
-        {
-            return NCSurgeryConditionFailure.FacilityUnavailable;
-        }
-
-        return NCSurgeryConditionFailure.None;
-    }
-
-    private NCSurgeryConditionFailure ValidateEnvironment(
-        EntityUid patientUid,
-        EntityUid? environmentUid,
-        NCSurgeryEnvironmentRequirement requirement)
-    {
-        var hasRequirements = requirement.Required ||
-                              requirement.MinimumSterility > 0f ||
-                              requirement.MinimumLighting > 0f ||
-                              requirement.MaximumMotion < 1f ||
-                              requirement.MaximumContamination < 1f;
-        if (!hasRequirements && environmentUid == null)
-            return NCSurgeryConditionFailure.None;
-
-        if (environmentUid is not { } uid ||
-            Deleted(uid) ||
-            !TryComp<NCSurgeryEnvironmentComponent>(uid, out var environment))
-        {
-            return NCSurgeryConditionFailure.EnvironmentUnavailable;
-        }
-
-        if (requirement.Required &&
-            (!TryComp<NCSurgeryPatientStateComponent>(patientUid, out var patient) ||
-             patient.CurrentEnvironment != uid))
-        {
-            return NCSurgeryConditionFailure.PatientMoved;
-        }
-
-        if (!float.IsFinite(environment.Sterility) ||
-            !float.IsFinite(environment.Lighting) ||
-            !float.IsFinite(environment.Motion) ||
-            !float.IsFinite(environment.Contamination) ||
-            environment.Sterility < requirement.MinimumSterility ||
-            environment.Lighting < requirement.MinimumLighting ||
-            environment.Motion > requirement.MaximumMotion ||
-            environment.Contamination > requirement.MaximumContamination)
-        {
-            return NCSurgeryConditionFailure.EnvironmentUnsafe;
-        }
-
-        return NCSurgeryConditionFailure.None;
-    }
-
-    private NCSurgeryConditionFailure ValidatePatient(
+    /// <summary>
+    /// Only semantic patient states remain hard gates. Numeric safety and preparation thresholds are quality
+    /// inputs: street surgery is allowed, but resolves as compromised through prototype-owned effects.
+    /// </summary>
+    private NCSurgeryConditionFailure ValidateHardPatientConditions(
         EntityUid patientUid,
         NCSurgeryPatientRequirement requirement)
     {
-        var oxygenation = 1f;
-        var shock = NCShockStage.None;
         var consciousness = NCConsciousnessState.Alert;
         var condition = NCPhysiologicalCondition.Stable;
         if (TryComp<NCPhysiologyComponent>(patientUid, out var physiology))
         {
-            oxygenation = physiology.Oxygenation;
-            shock = physiology.ShockStage;
             consciousness = physiology.Consciousness;
             condition = physiology.Condition;
         }
 
-        var pharmacology = _pharmacology.GetModifiers(patientUid);
-        var analgesia = pharmacology.Analgesia;
-        var sedation = pharmacology.Sedation;
-        var anesthesia = pharmacology.Anesthesia;
-        var movement = 0f;
-        var restrained = false;
-        var airwayMonitored = false;
-        if (TryComp<NCSurgeryPatientStateComponent>(patientUid, out var patient))
-        {
-            movement = patient.Movement;
-            restrained = patient.Restrained;
-            airwayMonitored = patient.AirwayMonitored;
-        }
-
-        if (!float.IsFinite(oxygenation) ||
-            !float.IsFinite(analgesia) ||
-            !float.IsFinite(sedation) ||
-            !float.IsFinite(anesthesia) ||
-            !float.IsFinite(movement) ||
-            oxygenation < requirement.MinimumOxygenation ||
-            shock > requirement.MaximumShockStage ||
-            requirement.AllowedConsciousness.Count > 0 &&
+        if (requirement.AllowedConsciousness.Count > 0 &&
             !requirement.AllowedConsciousness.Contains(consciousness) ||
             requirement.AllowedConditions.Count > 0 &&
-            !requirement.AllowedConditions.Contains(condition) ||
-            analgesia < requirement.MinimumAnalgesia ||
-            sedation < requirement.MinimumSedation ||
-            anesthesia < requirement.MinimumAnesthesia ||
-            movement > requirement.MaximumMovement ||
-            requirement.RequireRestraintWhenConscious &&
-            consciousness < NCConsciousnessState.Unconscious &&
-            !restrained ||
-            requirement.RequireAirwayMonitoring && !airwayMonitored)
+            !requirement.AllowedConditions.Contains(condition))
         {
             return NCSurgeryConditionFailure.PatientUnstable;
         }
@@ -1108,9 +1004,17 @@ public sealed partial class NCSurgerySystem : EntitySystem
     }
 
     private static NCSurgeryStepOutcome ResolveOutcome(
+        NCSurgeryProcedurePrototype procedure,
         NCSurgeryStepPrototype step,
         NCSurgeryConditionSnapshot snapshot)
     {
+        // Analgesia, sedation and anesthesia are preparation quality, not permission to operate. Falling below
+        // either procedure or step thresholds deterministically applies the step's compromised complication
+        // effects while still allowing the physical transition to complete.
+        if (!MeetsPreparation(procedure.Facility, procedure.Environment, procedure.Patient, snapshot) ||
+            !MeetsPreparation(step.Facility, step.Environment, step.Patient, snapshot))
+            return NCSurgeryStepOutcome.Compromised;
+
         foreach (var rule in step.OutcomeRules)
         {
             if (RuleMatches(rule, snapshot))
@@ -1118,6 +1022,36 @@ public sealed partial class NCSurgerySystem : EntitySystem
         }
 
         return step.DefaultOutcome;
+    }
+
+    private static bool MeetsPreparation(
+        NCSurgeryFacilityRequirement facility,
+        NCSurgeryEnvironmentRequirement environment,
+        NCSurgeryPatientRequirement patient,
+        NCSurgeryConditionSnapshot snapshot)
+    {
+        var facilityMeets = (!facility.Required || snapshot.FacilityPresent) &&
+                            facility.Capabilities.All(snapshot.FacilityCapabilities.Contains) &&
+                            snapshot.FacilityQuality >= facility.MinimumQuality &&
+                            snapshot.FacilitySterility >= facility.MinimumSterility &&
+                            (!facility.RequirePower || snapshot.FacilityPowered) &&
+                            (!facility.RequireStableSurface || snapshot.FacilityStable);
+        var environmentMeets = (!environment.Required || snapshot.EnvironmentPresent) &&
+                               snapshot.EnvironmentSterility >= environment.MinimumSterility &&
+                               snapshot.EnvironmentLighting >= environment.MinimumLighting &&
+                               snapshot.EnvironmentMotion <= environment.MaximumMotion &&
+                               snapshot.EnvironmentContamination <= environment.MaximumContamination;
+        var patientMeets = snapshot.PatientOxygenation >= patient.MinimumOxygenation &&
+                           snapshot.PatientShock <= patient.MaximumShockStage &&
+                           snapshot.PatientAnalgesia >= patient.MinimumAnalgesia &&
+                           snapshot.PatientSedation >= patient.MinimumSedation &&
+                           snapshot.PatientAnesthesia >= patient.MinimumAnesthesia &&
+                           snapshot.PatientMovement <= patient.MaximumMovement &&
+                           (!patient.RequireRestraintWhenConscious ||
+                            snapshot.PatientConsciousness >= NCConsciousnessState.Unconscious ||
+                            snapshot.PatientRestrained) &&
+                           (!patient.RequireAirwayMonitoring || snapshot.AirwayMonitored);
+        return facilityMeets && environmentMeets && patientMeets;
     }
 
     private static bool RuleMatches(NCSurgeryOutcomeRule rule, NCSurgeryConditionSnapshot value)

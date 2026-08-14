@@ -6,6 +6,7 @@
   id: NCSurgeryStepPrepareField
   name: prepare surgical field
   duration: 3s
+  optionalAtDirectStart: true
   requiredAccessDepth: Closed
   tools:
   - capability: NCSurgeryToolDisinfection

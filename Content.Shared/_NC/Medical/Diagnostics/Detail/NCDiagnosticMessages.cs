@@ -31,6 +31,9 @@ public enum NCDiagnosticAccessFailure : byte
     ToolUnpowered,
     SelfOnly,
     OutOfRange,
+    ScannerDisconnected,
+    ScannerEmpty,
+    ScannerPatientChanged,
     RateLimited,
 }
 

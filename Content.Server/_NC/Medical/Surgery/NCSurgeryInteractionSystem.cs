@@ -7,6 +7,8 @@ using Content.Server._NC.Combat.Targeting;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Anatomy.Detachment;
+using Content.Shared._NC.Medical.Cyberware;
 using Content.Shared._NC.Medical.Surgery;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
@@ -15,6 +17,7 @@ using Content.Shared.DoAfter;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
 using Content.Shared.Popups;
+using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
@@ -26,11 +29,16 @@ namespace Content.Server._NC.Medical.Surgery;
 /// </summary>
 public sealed partial class NCSurgeryInteractionSystem : EntitySystem
 {
+    private const int OrganTraversalLimit = 64;
+    private const int MaximumDirectCandidates = 64;
+    private static readonly TimeSpan DirectChoiceLifetime = TimeSpan.FromSeconds(12);
+
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
+    [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private NCAnatomySystem _anatomy = default!;
     [Dependency] private NCTargetingSelectionSystem _targeting = default!;
@@ -40,17 +48,370 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
     {
         base.Initialize();
 
+        SubscribeLocalEvent<NCSurgeryToolComponent, AfterInteractEvent>(OnAfterInteract);
         SubscribeLocalEvent<NCSurgeryToolComponent, NCSurgeryStepDoAfterEvent>(OnDoAfter);
+        SubscribeNetworkEvent<NCSurgeryDirectChoiceRequest>(OnDirectChoice);
     }
+
+    /// <summary>
+    /// Aurora-style entrypoint: select a body zone, hold an instrument and use it on the patient. An existing
+    /// procedure advances immediately; a new ambiguous operation produces a private prototype-only radial.
+    /// </summary>
+    private void OnAfterInteract(Entity<NCSurgeryToolComponent> tool, ref AfterInteractEvent args)
+    {
+        if (args.Handled ||
+            args.Target is not { Valid: true } patient ||
+            !args.CanReach ||
+            !HasComp<NCMedicalBodyComponent>(patient) ||
+            !ValidateHeldAndRange(tool, args.User, patient))
+        {
+            return;
+        }
+
+        args.Handled = true;
+        SynchronizePreparation(patient);
+        SynchronizeAuthorization(args.User, tool.Owner);
+        var prepared = Comp<NCSurgeryPatientStateComponent>(patient);
+        var facility = prepared.CurrentFacility;
+
+        if (TryComp<NCSurgeryGameplaySelectionComponent>(args.User, out var existing) &&
+            existing.Patient == patient)
+        {
+            existing.Facility = facility;
+            var result = TryStartCurrentStep(args.User, patient, out var stepName);
+            if (result == NCSurgeryInteractionNotice.StepStarted || HasLiveSession(args.User, patient))
+            {
+                PopupStartResult(patient, args.User, result, stepName);
+                return;
+            }
+
+            // A bound plan without a live session can become stale when pathology, graft or target state
+            // changes. Discard it and resolve the current physical interaction from authoritative state.
+            RemComp<NCSurgeryGameplaySelectionComponent>(args.User);
+        }
+
+        if (!TryBuildDirectCandidates(tool, args.User, patient, facility, out var candidates))
+        {
+            PopupStartFailure(patient, args.User, NCSurgeryInteractionNotice.NoCompatibleProcedure);
+            return;
+        }
+
+        if (candidates.Count == 1)
+        {
+            var result = BindAndStartDirect(args.User, patient, facility, tool.Owner, candidates[0], out var stepName);
+            PopupStartResult(patient, args.User, result, stepName);
+            return;
+        }
+
+        if (!TryComp<ActorComponent>(args.User, out var actor))
+            return;
+
+        var offerId = NCActionResolutionId.New();
+        var pending = EnsureComp<NCSurgeryDirectChoiceComponent>(args.User);
+        pending.OfferId = offerId;
+        pending.Patient = patient;
+        pending.Tool = tool.Owner;
+        pending.Facility = facility;
+        pending.ExpiresAt = _timing.CurTime + DirectChoiceLifetime;
+        pending.Candidates.Clear();
+        pending.Candidates.AddRange(candidates);
+
+        var options = candidates
+            .Select(candidate => new NCSurgeryDirectProcedureOption(
+                candidate.Procedure,
+                candidate.TargetCategory,
+                MetaData(candidate.TargetRegion).EntityName))
+            .ToList();
+        RaiseNetworkEvent(new NCSurgeryDirectChoiceOffer(offerId, options), actor.PlayerSession);
+        _popup.PopupEntity(Loc.GetString("nc-medical-surgery-direct-choose"), patient, args.User);
+    }
+
+    private void OnDirectChoice(NCSurgeryDirectChoiceRequest request, EntitySessionEventArgs args)
+    {
+        if (args.SenderSession.AttachedEntity is not { Valid: true } user ||
+            !TryComp<NCSurgeryDirectChoiceComponent>(user, out var pending) ||
+            pending.OfferId != request.OfferId ||
+            _timing.CurTime > pending.ExpiresAt)
+        {
+            return;
+        }
+
+        NCSurgeryDirectCandidate? selected = null;
+        foreach (var candidate in pending.Candidates)
+        {
+            if (candidate.Procedure == request.Procedure && candidate.TargetCategory == request.TargetCategory)
+            {
+                selected = candidate;
+                break;
+            }
+        }
+
+        var patient = pending.Patient;
+        var toolUid = pending.Tool;
+        var facility = pending.Facility;
+        RemCompDeferred<NCSurgeryDirectChoiceComponent>(user);
+        if (selected is not { } choice ||
+            !TryComp<NCSurgeryToolComponent>(toolUid, out var toolComponent) ||
+            !ValidateHeldAndRange((toolUid, toolComponent), user, patient))
+        {
+            PopupStartFailure(patient, user, NCSurgeryInteractionNotice.SelectionRejected);
+            return;
+        }
+
+        SynchronizePreparation(patient);
+        var prepared = Comp<NCSurgeryPatientStateComponent>(patient);
+        facility = prepared.CurrentFacility;
+        if (!_surgery.TryPrepareProcedureTarget(
+                patient,
+                choice.TargetRegion,
+                choice.Procedure,
+                choice.Graft,
+                out _,
+                out _))
+        {
+            PopupStartFailure(patient, user, NCSurgeryInteractionNotice.SelectionRejected);
+            return;
+        }
+
+        var result = BindAndStartDirect(user, patient, facility, toolUid, choice, out var stepName);
+        PopupStartResult(patient, user, result, stepName);
+    }
+
+    private bool TryBuildDirectCandidates(
+        Entity<NCSurgeryToolComponent> tool,
+        EntityUid surgeon,
+        EntityUid patient,
+        EntityUid? facility,
+        out List<NCSurgeryDirectCandidate> candidates)
+    {
+        candidates = [];
+        if (!TryResolveSelectedRegion(surgeon, patient, out var selectedRoot))
+            return false;
+
+        var grafts = GetCandidateGrafts(facility, surgeon);
+        var regions = CollectSurgicalRegions(patient)
+            .Where(region => IsWithinRegion(region.Region, selectedRoot))
+            .OrderBy(region => region.Category.Id, StringComparer.Ordinal)
+            .ToList();
+
+        foreach (var procedure in _prototypes.EnumeratePrototypes<NCSurgeryProcedurePrototype>()
+                     .OrderBy(procedure => procedure.ID, StringComparer.Ordinal))
+        {
+            var directStepIndex = GetDirectStartStep(procedure);
+            if (directStepIndex < 0 ||
+                !_prototypes.TryIndex(procedure.Steps[directStepIndex], out NCSurgeryStepPrototype? step) ||
+                !CanToolPerform(tool.Owner, tool.Comp, step))
+            {
+                continue;
+            }
+
+            foreach (var region in regions)
+            {
+                EntityUid? boundGraft = null;
+                if (procedure.RequiresGraft)
+                {
+                    foreach (var graft in grafts)
+                    {
+                        if (!_surgery.TryPrepareProcedureTarget(
+                                patient,
+                                region.Region,
+                                procedure.ID,
+                                graft,
+                                out _,
+                                out _))
+                        {
+                            continue;
+                        }
+
+                        boundGraft = graft;
+                        break;
+                    }
+
+                    if (boundGraft == null)
+                        continue;
+                }
+                else if (!_surgery.TryPrepareProcedureTarget(
+                        patient,
+                        region.Region,
+                        procedure.ID,
+                        null,
+                        out _,
+                        out _))
+                {
+                    continue;
+                }
+
+                candidates.Add(new NCSurgeryDirectCandidate(
+                    procedure.ID,
+                    region.Category,
+                    region.Region,
+                    boundGraft,
+                    directStepIndex));
+                if (candidates.Count >= MaximumDirectCandidates)
+                    return true;
+            }
+        }
+
+        return candidates.Count > 0;
+    }
+
+    private int GetDirectStartStep(NCSurgeryProcedurePrototype procedure)
+    {
+        for (var index = 0; index < procedure.Steps.Count; index++)
+        {
+            if (!_prototypes.TryIndex(procedure.Steps[index], out NCSurgeryStepPrototype? step))
+                return -1;
+            if (!step.OptionalAtDirectStart)
+                return index;
+        }
+
+        return -1;
+    }
+
+    private NCSurgeryInteractionNotice BindAndStartDirect(
+        EntityUid user,
+        EntityUid patient,
+        EntityUid? facility,
+        EntityUid tool,
+        NCSurgeryDirectCandidate candidate,
+        out string stepName)
+    {
+        SynchronizeAuthorization(user, tool);
+        var selection = EnsureComp<NCSurgeryGameplaySelectionComponent>(user);
+        selection.Patient = patient;
+        selection.Procedure = candidate.Procedure;
+        selection.TargetRegion = candidate.TargetRegion;
+        selection.Facility = facility;
+        selection.Graft = candidate.Graft;
+        selection.InitialStepIndex = candidate.InitialStepIndex;
+        selection.StepInProgress = false;
+        selection.ExecutingStepIndex = -1;
+        selection.StepStartedAt = TimeSpan.Zero;
+        selection.StepEndsAt = TimeSpan.Zero;
+        return TryStartCurrentStep(user, patient, out stepName);
+    }
+
+    private List<SurgicalRegion> CollectSurgicalRegions(EntityUid patient)
+    {
+        var result = new List<SurgicalRegion>();
+        if (!TryComp<BodyComponent>(patient, out var body) || body.Organs == null)
+            return result;
+
+        var organs = body.Organs.ContainedEntities;
+        foreach (var region in organs)
+        {
+            if (!HasComp<NCSurgicalSiteComponent>(region) ||
+                !TryComp<OrganComponent>(region, out var organ) ||
+                organ.Category is not { } category)
+            {
+                continue;
+            }
+
+            result.Add(new SurgicalRegion(region, category));
+        }
+
+        return result;
+    }
+
+    private bool IsWithinRegion(EntityUid candidate, EntityUid root)
+    {
+        EntityUid? current = candidate;
+        var remaining = OrganTraversalLimit;
+        while (current is { } uid && remaining-- > 0)
+        {
+            if (uid == root)
+                return true;
+            current = CompOrNull<ChildOrganComponent>(uid)?.Parent;
+        }
+
+        return false;
+    }
+
+    private IReadOnlyList<EntityUid> GetCandidateGrafts(EntityUid? facility, EntityUid surgeon)
+    {
+        var candidates = new HashSet<EntityUid>();
+        foreach (var held in _hands.EnumerateHeld(surgeon))
+        {
+            if (IsPotentialGraft(held))
+                candidates.Add(held);
+        }
+
+        if (facility is { } facilityUid &&
+            TryComp<NCSurgeryGraftSlotComponent>(facilityUid, out var slot) &&
+            slot.Graft is { Valid: true } staged &&
+            IsPotentialGraft(staged) &&
+            _interaction.InRangeUnobstructed(surgeon, staged))
+        {
+            candidates.Add(staged);
+        }
+
+        var coordinates = Transform(surgeon).Coordinates;
+        foreach (var nearby in _lookup.GetEntitiesInRange<NCDetachedOrganMedicalDataComponent>(
+                     coordinates,
+                     SharedInteractionSystem.InteractionRange,
+                     LookupFlags.Uncontained))
+        {
+            candidates.Add(nearby.Owner);
+        }
+
+        foreach (var nearby in _lookup.GetEntitiesInRange<NCCyberwareComponent>(
+                     coordinates,
+                     SharedInteractionSystem.InteractionRange,
+                     LookupFlags.Uncontained))
+        {
+            candidates.Add(nearby.Owner);
+        }
+
+        return candidates
+            .Where(candidate => !Deleted(candidate) && _interaction.InRangeUnobstructed(surgeon, candidate))
+            .OrderBy(candidate => candidate.Id)
+            .ToList();
+    }
+
+    private bool IsPotentialGraft(EntityUid candidate)
+    {
+        return !Deleted(candidate) &&
+               (HasComp<NCDetachedOrganMedicalDataComponent>(candidate) ||
+                HasComp<NCCyberwareComponent>(candidate));
+    }
+
+    private void PopupStartResult(
+        EntityUid patient,
+        EntityUid user,
+        NCSurgeryInteractionNotice result,
+        string stepName)
+    {
+        if (result == NCSurgeryInteractionNotice.StepStarted)
+        {
+            _popup.PopupEntity(
+                Loc.GetString("nc-medical-surgery-step-started", ("step", stepName)),
+                patient,
+                user);
+            return;
+        }
+
+        PopupStartFailure(patient, user, result);
+    }
+
+    private void PopupStartFailure(EntityUid patient, EntityUid user, NCSurgeryInteractionNotice reason)
+    {
+        _popup.PopupEntity(
+            Loc.GetString("nc-medical-surgery-start-failed", ("reason", reason)),
+            patient,
+            user);
+    }
+
+    private readonly record struct SurgicalRegion(
+        EntityUid Region,
+        ProtoId<OrganCategoryPrototype> Category);
 
     /// <summary>
     /// Starts the current server-bound step from the operating-console UI. The client supplies no tool or
     /// patient entity: the active hand and the physically buckled patient are resolved before every attempt.
     /// </summary>
-    public NCSurgeryConsoleNotice TryStartCurrentStep(
+    public NCSurgeryInteractionNotice TryStartCurrentStep(
         EntityUid user,
         EntityUid patient,
-        EntityUid facility,
         out string stepName)
     {
         stepName = string.Empty;
@@ -58,38 +419,38 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
             !_hands.TryGetActiveItem(user, out var held) || held is not { } toolUid ||
             !TryComp<NCSurgeryToolComponent>(toolUid, out var toolComponent))
         {
-            return NCSurgeryConsoleNotice.HoldRequiredTool;
+            return NCSurgeryInteractionNotice.HoldRequiredTool;
         }
 
         var tool = new Entity<NCSurgeryToolComponent>(toolUid, toolComponent);
         if (!ValidateHeldAndRange(tool, user, patient))
-            return NCSurgeryConsoleNotice.StepUnavailable;
+            return NCSurgeryInteractionNotice.StepUnavailable;
 
         SynchronizePreparation(patient);
         SynchronizeAuthorization(user, tool.Owner);
-        if (!TryComp<NCSurgeryPatientStateComponent>(patient, out var preparation) ||
-            preparation.CurrentFacility != facility ||
-            !TryComp<NCSurgeryGameplaySelectionComponent>(user, out var selection) ||
-            selection.Patient != patient || selection.Facility != facility)
+        var preparation = Comp<NCSurgeryPatientStateComponent>(patient);
+        if (!TryComp<NCSurgeryGameplaySelectionComponent>(user, out var selection) ||
+            selection.Patient != patient)
         {
-            return NCSurgeryConsoleNotice.SelectionRejected;
+            return NCSurgeryInteractionNotice.SelectionRejected;
         }
+        selection.Facility = preparation.CurrentFacility;
 
         if (selection.StepInProgress)
-            return NCSurgeryConsoleNotice.StepUnavailable;
+            return NCSurgeryInteractionNotice.StepUnavailable;
 
         if (!TryGetOrStartSession(tool, user, patient, out var region, out var session, out _))
-            return NCSurgeryConsoleNotice.StepUnavailable;
+            return NCSurgeryInteractionNotice.StepUnavailable;
 
         if (session.State == NCSurgerySessionState.Paused &&
             !_surgery.TryResume(region, user, out _))
-            return NCSurgeryConsoleNotice.StepUnavailable;
+            return NCSurgeryInteractionNotice.StepUnavailable;
 
         if (!ValidateSessionRange(session, user))
-            return NCSurgeryConsoleNotice.StepUnavailable;
+            return NCSurgeryInteractionNotice.StepUnavailable;
 
         if (!TryGetCurrentStep(session, out var step) || !CanToolPerform(tool.Owner, tool.Comp, step))
-            return NCSurgeryConsoleNotice.ToolUnsuitable;
+            return NCSurgeryInteractionNotice.ToolUnsuitable;
 
         var eventArgs = new NCSurgeryStepDoAfterEvent(
             session.ResolutionId,
@@ -112,7 +473,7 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
         };
 
         if (!_doAfter.TryStartDoAfter(doAfter))
-            return NCSurgeryConsoleNotice.StepUnavailable;
+            return NCSurgeryInteractionNotice.StepUnavailable;
 
         selection.StepInProgress = true;
         selection.ExecutingStepIndex = session.CurrentStepIndex;
@@ -121,7 +482,7 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
         stepName = step.Name;
         var changed = new NCSurgeryStepExecutionChangedEvent(user, true, false);
         RaiseLocalEvent(patient, ref changed);
-        return NCSurgeryConsoleNotice.StepStarted;
+        return NCSurgeryInteractionNotice.StepStarted;
     }
 
     private void OnDoAfter(Entity<NCSurgeryToolComponent> tool, ref NCSurgeryStepDoAfterEvent args)
@@ -210,11 +571,9 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
         {
             boundSelection = selected;
             region = selected.TargetRegion;
-            var prepared = CompOrNull<NCSurgeryPatientStateComponent>(patient);
-            if (Deleted(region) || Deleted(selected.Facility) ||
-                prepared?.CurrentFacility != selected.Facility)
+            if (Deleted(region))
             {
-                failure = NCSurgeryStartFailure.FacilityUnavailable;
+                failure = NCSurgeryStartFailure.IncompatibleTarget;
                 return false;
             }
         }
@@ -248,10 +607,11 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
                 surgeon,
                 region,
                 procedureId,
-                boundSelection?.Facility ?? prepared?.CurrentFacility,
-                boundSelection?.Facility ?? prepared?.CurrentEnvironment,
+                prepared?.CurrentFacility,
+                prepared?.CurrentEnvironment,
                 woundId,
-                boundSelection?.Graft);
+                boundSelection?.Graft,
+                boundSelection?.InitialStepIndex ?? 0);
             if (!_surgery.StartSurgery(request, out var sessionUid, out failure) ||
                 !TryComp<NCSurgerySessionComponent>(sessionUid, out session!))
             {
@@ -373,22 +733,18 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
 
     private bool ValidateSessionRange(NCSurgerySessionComponent session, EntityUid surgeon)
     {
-        if (session.Facility is { } facility &&
-            (!_interaction.InRangeUnobstructed(surgeon, facility) ||
-             !TryComp<NCSurgeryPatientStateComponent>(session.Patient, out var patient) ||
-             patient.CurrentFacility != facility))
-        {
-            return false;
-        }
+        return session.Graft is not { } graft ||
+               _interaction.InRangeUnobstructed(surgeon, graft);
+    }
 
-        if (session.Graft is not { } graft ||
-            !_interaction.InRangeUnobstructed(surgeon, graft))
-        {
-            return session.Graft == null;
-        }
-
-        return session.Facility is not { } graftFacility ||
-               _interaction.InRangeUnobstructed(graftFacility, graft);
+    private bool HasLiveSession(EntityUid surgeon, EntityUid patient)
+    {
+        return TryComp<NCSurgeryPractitionerComponent>(surgeon, out var practitioner) &&
+               practitioner.ActiveSession is { } region &&
+               TryComp<NCSurgerySessionComponent>(region, out var session) &&
+               session.Patient == patient &&
+               session.Surgeon == surgeon &&
+               session.State is NCSurgerySessionState.Running or NCSurgerySessionState.Paused;
     }
 
     private void PopupInvalid(EntityUid patient, EntityUid user)

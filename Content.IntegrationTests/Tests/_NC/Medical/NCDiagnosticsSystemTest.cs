@@ -7,7 +7,11 @@ using System.Linq;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
 using Content.Server._NC.Medical.Diagnostics.Detail;
+using Content.Server._NC.Medical.Diagnostics.Scanner;
 using Content.Server._NC.Medical.Pharmacology;
+using Content.Server.DeviceLinking.Systems;
+using Content.Server.Medical;
+using Content.Server.Medical.Components;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
@@ -48,6 +52,9 @@ public sealed class NCDiagnosticsSystemTest : GameTest
     [SidedDependency(Side.Server)] private NCDiagnosticsSystem _diagnostics = default!;
     [SidedDependency(Side.Server)] private NCPharmacologySystem _pharmacology = default!;
     [SidedDependency(Side.Server)] private IPrototypeManager _prototypes = default!;
+    [SidedDependency(Side.Server)] private DeviceLinkSystem _deviceLink = default!;
+    [SidedDependency(Side.Server)] private MedicalScannerSystem _medicalScanner = default!;
+    [SidedDependency(Side.Server)] private NCBodyScannerConsoleSystem _bodyScanner = default!;
 
     public override PoolSettings PoolSettings => new()
     {
@@ -131,8 +138,8 @@ public sealed class NCDiagnosticsSystemTest : GameTest
             Assert.That(handheld.Wounds.All(wound =>
                 wound.InternalBleeding == NCDiagnosticBand.None && wound.Prototype == null), Is.True);
 
-            Assert.That(scanner.Wounds, Has.Count.EqualTo(24));
-            Assert.That(scanner.WoundsOmitted, Is.EqualTo(6));
+            Assert.That(scanner.Wounds, Has.Count.EqualTo(30));
+            Assert.That(scanner.WoundsOmitted, Is.Zero);
             Assert.That(scanner.Vitals.InternalBleedMilliunits, Is.Not.Null);
             Assert.That(scanner.Warnings, Does.Contain(NCDiagnosticWarning.ConfirmedInternalBleeding));
             Assert.That(scanner.Warnings, Does.Contain(NCDiagnosticWarning.FractureConfirmed));
@@ -195,6 +202,36 @@ public sealed class NCDiagnosticsSystemTest : GameTest
             Assert.That(admin.Drugs, Has.Count.EqualTo(1));
             Assert.That(admin.Drugs[0].Concentration, Is.GreaterThan(0f));
         });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void FullDiagnosticsUsesLinkedVanillaScannerAndBodyScannerComputer()
+    {
+        var patient = SSpawn(HumanMob);
+        var scannerUid = SSpawn("MedicalScanner");
+        var consoleUid = SSpawn("computerBodyScanner");
+        var scanner = SComp<MedicalScannerComponent>(scannerUid);
+        var console = SComp<NCBodyScannerConsoleComponent>(consoleUid);
+        var capability = SComp<NCDiagnosticCapabilityComponent>(consoleUid);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(SEntMan.HasComponent<NCDiagnosticCapabilityComponent>(scannerUid), Is.False,
+                "The capsule itself must not expose the full diagnostic UI.");
+            Assert.That(capability.Capability.Id, Is.EqualTo("NCDiagnosticsScannerInternal"));
+            Assert.That(_bodyScanner.TryGetPatient((consoleUid, console), out _, out var disconnected), Is.False);
+            Assert.That(disconnected, Is.EqualTo(NCDiagnosticAccessFailure.ScannerDisconnected));
+        });
+
+        _deviceLink.LinkDefaults(null, consoleUid, scannerUid);
+        _medicalScanner.InsertBody(scannerUid, patient, scanner);
+
+        Assert.That(
+            _bodyScanner.TryGetPatient((consoleUid, console), out var occupant, out var failure),
+            Is.True,
+            failure.ToString());
+        Assert.That(occupant, Is.EqualTo(patient));
     }
 
     [Test]
@@ -268,7 +305,7 @@ public sealed class NCDiagnosticsSystemTest : GameTest
             Assert.That(halfSnapshot.Vitals.NominalBloodVolumeUnits, Is.EqualTo(nominalSolutionUnits));
             Assert.That(halfSnapshot.Vitals.BloodVolumeUnits, Is.Not.Null);
             Assert.That(halfSnapshot.Vitals.BloodVolumeUnits!.Value.Minimum, Is.EqualTo(300));
-            Assert.That(halfSnapshot.Vitals.BloodVolumeUnits.Value.Maximum, Is.EqualTo(312));
+            Assert.That(halfSnapshot.Vitals.BloodVolumeUnits.Value.Maximum, Is.EqualTo(306));
         });
     }
 

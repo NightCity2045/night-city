@@ -7,6 +7,7 @@ using Content.Shared._NC.Medical.Wounds;
 using Robust.Client.Graphics;
 using Robust.Client.ResourceManagement;
 using Robust.Shared.Analyzers;
+using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
 
 namespace Content.Client._NC.Medical.Wounds;
@@ -20,6 +21,7 @@ public sealed partial class NCWorldWoundOverlaySystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IResourceCache _resources = default!;
     [Dependency] private IClickMapManager _clickMaps = default!;
+    [Dependency] private SharedContainerSystem _containers = default!;
 
     private readonly HashSet<EntityUid> _woundedEntities = [];
     private NCWorldWoundOverlay? _overlay;
@@ -33,6 +35,17 @@ public sealed partial class NCWorldWoundOverlaySystem : EntitySystem
     public bool IsIndexed(EntityUid uid)
     {
         return _woundedEntities.Contains(uid);
+    }
+
+    /// <summary>
+    /// World marks follow the same containment visibility boundary as the entity sprite. Diagnostic and targeting
+    /// dolls do not use this method, so clinicians can still inspect wounds while the patient is inside a scanner.
+    /// </summary>
+    public bool ShouldRenderWorldWounds(EntityUid uid)
+    {
+        return TryComp<MetaDataComponent>(uid, out var meta) &&
+               TryComp<TransformComponent>(uid, out var xform) &&
+               !_containers.IsEntityOrParentInContainer(uid, meta, xform);
     }
 
     public override void Initialize()

@@ -356,17 +356,6 @@
   - type: Computer
     board: MedicalRecordsComputerCircuitboard
   - type: AmbientMusicMarkerMedical
-  # NC start - Reuse the vanilla body-scanner computer as the operating-theatre console.
-  - type: NCSurgeryConsole
-    facilitySearchRange: 2.5
-  - type: UserInterface
-    interfaces:
-      enum.NCSurgeryConsoleUiKey.Key:
-        type: NCSurgeryConsoleBoundUserInterface
-  - type: ActivatableUI
-    key: enum.NCSurgeryConsoleUiKey.Key
-    verbText: nc-medical-surgery-console-title
-  # NC end
 
 - type: entity
   parent: BaseComputerAiAccess
@@ -749,6 +738,21 @@
     energy: 4.0
     color: "#1f8c28"
   - type: AmbientMusicMarkerMedical
+  # NC start - The vanilla console reads the occupant of a physically linked vanilla medical scanner.
+  - type: NCBodyScannerConsole
+  - type: NCDiagnosticCapability
+    capability: NCDiagnosticsScannerInternal
+  - type: DeviceList
+  - type: DeviceNetwork
+    deviceNetId: Wired
+  - type: DeviceLinkSource
+    range: 4
+    ports:
+    - MedicalScannerSender
+  - type: GuideHelp
+    guides:
+    - NCDiagnosticsAndTriage
+  # NC end
 
 - type: entity
   parent: BaseComputerAiAccess

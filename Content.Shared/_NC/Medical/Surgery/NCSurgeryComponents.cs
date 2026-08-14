@@ -235,17 +235,6 @@ public sealed partial class NCSurgeryPatientStateComponent : Component
 }
 
 /// <summary>
-/// Marks a physical operating table or console that may open the private surgery planner. The server
-/// resolves a patient only from an occupied surgical facility within this bounded radius.
-/// </summary>
-[RegisterComponent]
-public sealed partial class NCSurgeryConsoleComponent : Component
-{
-    [DataField]
-    public float FacilitySearchRange = 2.5f;
-}
-
-/// <summary>
 /// Runtime graft tray on one physical surgical facility. A detached organ or standalone implant must be
 /// placed through a real held-item interaction; clients cannot submit an entity identifier through the UI.
 /// </summary>

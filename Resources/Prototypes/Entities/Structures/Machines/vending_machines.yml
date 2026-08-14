@@ -940,7 +940,9 @@
     color: "#9dc5c9"
   - type: GuideHelp
     guides:
-    - MedicalDoctor
+    # NC start - Open the authoritative NC medical manual.
+    - NCDoctor
+    # NC end
   - type: AmbientMusicMarkerMedical
 
 - type: entity

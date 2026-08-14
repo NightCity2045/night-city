@@ -90,17 +90,16 @@
   - Cyberware
   - Drugs
   requiresPower: true
-  requiresHeld: true
-  range: 3
-  maxRegionRecords: 12
-  maxWoundRecords: 24
-  maxOrganRecords: 16
-  maxCyberwareRecords: 16
-  maxDrugRecords: 16
-  bloodVolumeUnitsQuantum: 12
-  ratioQuantum: 0.02
-  bleedRateQuantum: 0.1
-  drugConcentrationQuantum: 0.05
+  range: 4
+  maxRegionRecords: 32
+  maxWoundRecords: 64
+  maxOrganRecords: 64
+  maxCyberwareRecords: 64
+  maxDrugRecords: 32
+  bloodVolumeUnitsQuantum: 6
+  ratioQuantum: 0.01
+  bleedRateQuantum: 0.05
+  drugConcentrationQuantum: 0.025
 
 - type: ncDiagnosticCapability
   id: NCDiagnosticsSurgicalConsole

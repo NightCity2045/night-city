@@ -3,6 +3,9 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 nc-medical-diagnostics-title = Medical diagnostics
+nc-medical-diagnostics-value-scanner-disconnected = no linked medical scanner
+nc-medical-diagnostics-value-scanner-empty = linked medical scanner is empty
+nc-medical-diagnostics-value-scanner-patient-changed = scanner occupant changed
 nc-medical-diagnostics-system-title = MEDTECH TRAUMA SCAN
 nc-medical-diagnostics-system-channel = CITYNET CLINICAL LINK
 nc-medical-diagnostics-system-secure = SECURE CHANNEL

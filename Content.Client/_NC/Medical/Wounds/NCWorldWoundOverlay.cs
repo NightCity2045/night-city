@@ -73,7 +73,8 @@ public sealed class NCWorldWoundOverlay : Overlay
         var transformQuery = _entities.GetEntityQuery<TransformComponent>();
         foreach (var uid in _system.WoundedEntities)
         {
-            if (!woundQuery.TryGetComponent(uid, out var wounds) ||
+            if (!_system.ShouldRenderWorldWounds(uid) ||
+                !woundQuery.TryGetComponent(uid, out var wounds) ||
                 wounds.Markers.Count == 0 ||
                 !medicalQuery.TryGetComponent(uid, out var medical) ||
                 !spriteQuery.TryGetComponent(uid, out var sprite) ||

@@ -2,6 +2,10 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+nc-medical-diagnostics-value-scanner-disconnected = медицинский сканер не подключён
+nc-medical-diagnostics-value-scanner-empty = подключённый медицинский сканер пуст
+nc-medical-diagnostics-value-scanner-patient-changed = пациент в сканере изменился
+
 nc-medical-diagnostics-title = Медицинская диагностика
 nc-medical-diagnostics-system-title = MEDTECH ТРАВМА-СКАН
 nc-medical-diagnostics-system-channel = КЛИНИЧЕСКИЙ КАНАЛ CITYNET

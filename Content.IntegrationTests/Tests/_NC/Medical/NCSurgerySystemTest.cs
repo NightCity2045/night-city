@@ -93,8 +93,8 @@ public sealed class NCSurgerySystemTest : GameTest
                         procedure.ID);
                 }
 
-                // This catalogue intentionally has no awake live-patient path. Every such procedure must
-                // be gated by all three server-authoritative pharmacological effects.
+                // Live procedures declare pharmacological preparation thresholds. They are deterministic
+                // quality thresholds for compromised outcomes, not a hard permission gate.
                 if (!procedure.Patient.AllowedConditions.Contains(NCPhysiologicalCondition.Dead))
                 {
                     Assert.That(procedure.Patient.MinimumAnalgesia, Is.GreaterThan(0f), procedure.ID);
@@ -162,24 +162,17 @@ public sealed class NCSurgerySystemTest : GameTest
             }
         }
 
-        var requestFields = typeof(NCSurgeryConsoleSelectMessage).GetFields(
-            BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
-        var zoneRequestFields = typeof(NCSurgeryConsoleSelectZoneMessage).GetFields(
-            BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
-        var executeRequestFields = typeof(NCSurgeryConsoleExecuteStepMessage).GetFields(
+        var requestProperties = typeof(NCSurgeryDirectChoiceRequest).GetProperties(
             BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
         Assert.Multiple(() =>
         {
-            Assert.That(requestFields.Select(field => field.Name),
-                Is.EquivalentTo(new[] { "Procedure", "TargetCategory" }));
-            Assert.That(requestFields.Any(field => field.FieldType == typeof(EntityUid) ||
-                                                   field.FieldType == typeof(NetEntity) ||
-                                                   field.FieldType == typeof(Guid)),
+            Assert.That(requestProperties.Select(property => property.Name),
+                Is.EquivalentTo(new[] { "OfferId", "Procedure", "TargetCategory" }));
+            Assert.That(requestProperties.Any(property => property.PropertyType == typeof(EntityUid) ||
+                                                        property.PropertyType == typeof(NetEntity) ||
+                                                        property.PropertyType == typeof(Guid)),
                 Is.False,
-                "An untrusted BUI request must not carry a patient, live target, graft, or wound identity.");
-            Assert.That(zoneRequestFields.Select(field => field.Name), Is.EquivalentTo(new[] { "Zone" }));
-            Assert.That(executeRequestFields, Is.Empty,
-                "The step button advances only the server-owned current step; the client cannot choose an index.");
+                "An untrusted direct choice must not carry a patient, tool, live target, graft, or wound identity.");
         });
     }
 
@@ -280,7 +273,7 @@ public sealed class NCSurgerySystemTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
-    public void LiveSurgeryRequiresAuthoritativePharmacology()
+    public void LiveSurgeryWithoutAnesthesiaStartsWithCompromisedOutcome()
     {
         var patient = SSpawn(HumanMob);
         var surgeon = SSpawn(HumanMob);
@@ -290,6 +283,7 @@ public sealed class NCSurgerySystemTest : GameTest
         var wound = AddWound(patient, region, NCWoundType.Slash, 2f);
         PreparePatient(patient, table, table, airwayMonitored: true, administerAnesthetic: false);
         Authorize(surgeon, "NCSurgeryAuthorizationGeneral");
+        var cautery = SSpawn("Cautery");
 
         var request = new NCSurgeryStartRequest(
             NCActionResolutionId.New(),
@@ -300,16 +294,123 @@ public sealed class NCSurgerySystemTest : GameTest
             table,
             table,
             wound);
-        Assert.That(_surgery.StartSurgery(request, out _, out var failure), Is.False);
-        Assert.That(failure, Is.EqualTo(NCSurgeryStartFailure.PatientConditionNotMet));
-
-        Assert.That(_pharmacology.ApplyDose(patient, "NCDrugSurgicalAnesthetic", 5f).Accepted, Is.True);
-        Assert.That(_surgery.StartSurgery(request with { ResolutionId = NCActionResolutionId.New() },
-                out var session,
-                out failure),
+        Assert.That(_surgery.StartSurgery(request, out var session, out var failure),
             Is.True,
             failure.ToString());
-        Assert.That(SComp<NCSurgerySessionComponent>(session).Patient, Is.EqualTo(patient));
+        var result = _surgery.ResolveStep(
+            session,
+            new NCSurgeryStepRequest(NCActionResolutionId.New(), surgeon, cautery));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Status, Is.EqualTo(NCSurgeryStepResolutionStatus.Resolved));
+            Assert.That(result.Outcome, Is.EqualTo(NCSurgeryStepOutcome.Compromised));
+            Assert.That(SComp<NCSurgerySessionComponent>(session).Patient, Is.EqualTo(patient));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void SurgeryOnGroundStartsAndDeterministicallyAppliesFieldComplications()
+    {
+        var patient = SSpawn(HumanMob);
+        var surgeon = SSpawn(HumanMob);
+        var cautery = SSpawn("Cautery");
+
+        Assert.That(_anatomy.TryGetOrgan(patient, "Thorax", out var region), Is.True);
+        var wound = AddWound(patient, region, NCWoundType.Slash, 2f);
+        Authorize(surgeon, "NCSurgeryAuthorizationGeneral");
+
+        var request = new NCSurgeryStartRequest(
+            NCActionResolutionId.New(),
+            patient,
+            surgeon,
+            region,
+            DeepWoundTreatment,
+            TargetWoundId: wound);
+        Assert.That(_surgery.StartSurgery(request, out var session, out var failure),
+            Is.True,
+            failure.ToString());
+
+        var result = _surgery.ResolveStep(
+            session,
+            new NCSurgeryStepRequest(NCActionResolutionId.New(), surgeon, cautery));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Status, Is.EqualTo(NCSurgeryStepResolutionStatus.Resolved));
+            Assert.That(result.Outcome, Is.EqualTo(NCSurgeryStepOutcome.Compromised));
+            Assert.That(result.Conditions?.FacilityPresent, Is.False);
+            Assert.That(result.Conditions?.EnvironmentPresent, Is.False);
+            Assert.That(result.Conditions?.PatientMovement, Is.EqualTo(1f));
+            Assert.That(SComp<NCSurgicalSiteComponent>(region).Contamination, Is.GreaterThan(0f));
+            Assert.That(SComp<NCSurgerySessionComponent>(session).State,
+                Is.EqualTo(NCSurgerySessionState.Running));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void DirectSurgerySkipsOnlyPrototypeMarkedPreparationPrefix()
+    {
+        var patient = SSpawn(HumanMob);
+        var surgeon = SSpawn(HumanMob);
+        var table = SSpawn(OperatingTable);
+        var scalpel = SSpawn("Scalpel");
+
+        Assert.That(_anatomy.TryGetOrgan(patient, "Thorax", out var region), Is.True);
+        var wound = AddWound(patient, region, NCWoundType.Slash, 2f);
+        PreparePatient(patient, table, table, airwayMonitored: true);
+        Authorize(surgeon, "NCSurgeryAuthorizationGeneral");
+
+        Assert.That(
+            _surgery.StartSurgery(
+                new NCSurgeryStartRequest(
+                    NCActionResolutionId.New(),
+                    patient,
+                    surgeon,
+                    region,
+                    DeepWoundTreatment,
+                    table,
+                    table,
+                    wound,
+                    InitialStepIndex: 1),
+                out var session,
+                out var failure),
+            Is.True,
+            failure.ToString());
+        Assert.That(SComp<NCSurgerySessionComponent>(session).CurrentStepIndex, Is.EqualTo(1));
+        ResolveExpected(session, surgeon, scalpel, NCSurgeryStepResolutionStatus.Resolved);
+
+        Assert.That(
+            _surgery.Abort(
+                session,
+                surgeon,
+                NCActionResolutionId.New(),
+                NCSurgeryAbortReason.Manual,
+                out var abortFailure),
+            Is.True,
+            abortFailure.ToString());
+
+        var secondPatient = SSpawn(HumanMob);
+        Assert.That(_anatomy.TryGetOrgan(secondPatient, "Thorax", out var secondRegion), Is.True);
+        var secondWound = AddWound(secondPatient, secondRegion, NCWoundType.Slash, 2f);
+        PreparePatient(secondPatient, table, table, airwayMonitored: true);
+
+        Assert.That(
+            _surgery.StartSurgery(
+                new NCSurgeryStartRequest(
+                    NCActionResolutionId.New(),
+                    secondPatient,
+                    surgeon,
+                    secondRegion,
+                    DeepWoundTreatment,
+                    table,
+                    table,
+                    secondWound,
+                    InitialStepIndex: 2),
+                out _,
+                out failure),
+            Is.False);
+        Assert.That(failure, Is.EqualTo(NCSurgeryStartFailure.InvalidInitialStep));
     }
 
     [Test]
@@ -327,7 +428,6 @@ public sealed class NCSurgerySystemTest : GameTest
 
         Assert.Multiple(() =>
         {
-            Assert.That(SEntMan.HasComponent<NCSurgeryConsoleComponent>(table), Is.True);
             Assert.That(SEntMan.HasComponent<NCSurgeryGraftSlotComponent>(table), Is.True);
         });
 
@@ -419,7 +519,7 @@ public sealed class NCSurgerySystemTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
-    public void ChangedConditionsPauseAndAbortPreservesPhysicalSiteState()
+    public void LeavingTableContinuesAsCompromisedAndAbortPreservesPhysicalSiteState()
     {
         var firstPatient = SSpawn(HumanMob);
         var secondPatient = SSpawn(HumanMob);
@@ -470,21 +570,24 @@ public sealed class NCSurgerySystemTest : GameTest
 
         var patientState = SComp<NCSurgeryPatientStateComponent>(firstPatient);
         patientState.CurrentFacility = null;
-        var paused = _surgery.ResolveStep(
+        patientState.CurrentEnvironment = null;
+        patientState.Movement = 1f;
+        patientState.Restrained = false;
+        patientState.AirwayMonitored = false;
+        var fieldStep = _surgery.ResolveStep(
             sessionUid,
             new NCSurgeryStepRequest(NCActionResolutionId.New(), surgeon, cautery));
         Assert.Multiple(() =>
         {
-            Assert.That(paused.Status, Is.EqualTo(NCSurgeryStepResolutionStatus.Paused));
-            Assert.That(SComp<NCSurgerySessionComponent>(sessionUid).State, Is.EqualTo(NCSurgerySessionState.Paused));
-            Assert.That(SComp<NCSurgerySessionComponent>(sessionUid).PauseReason,
-                Is.EqualTo(NCSurgeryInterruptionReason.PatientMoved));
+            Assert.That(fieldStep.Status, Is.EqualTo(NCSurgeryStepResolutionStatus.Resolved));
+            Assert.That(fieldStep.Outcome, Is.EqualTo(NCSurgeryStepOutcome.Compromised));
+            Assert.That(fieldStep.Conditions?.FacilityPresent, Is.False);
+            Assert.That(fieldStep.Conditions?.EnvironmentPresent, Is.False);
+            Assert.That(SComp<NCSurgerySessionComponent>(sessionUid).State,
+                Is.EqualTo(NCSurgerySessionState.Running));
             Assert.That(SComp<NCSurgicalSiteComponent>(firstRegion).ActiveProcedure, Is.Not.Null);
         });
 
-        patientState.CurrentFacility = table;
-        Assert.That(_surgery.TryResume(sessionUid, surgeon, out failure), Is.True, failure.ToString());
-        ResolveExpected(sessionUid, surgeon, cautery, NCSurgeryStepResolutionStatus.Resolved);
         ResolveExpected(sessionUid, surgeon, scalpel, NCSurgeryStepResolutionStatus.Resolved);
         Assert.That(SComp<NCSurgicalSiteComponent>(firstRegion).AccessDepth,
             Is.EqualTo(NCSurgicalAccessDepth.Incised));

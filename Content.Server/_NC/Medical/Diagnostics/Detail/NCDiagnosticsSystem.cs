@@ -9,6 +9,7 @@ using Content.Server.Players.RateLimiting;
 using Content.Server._NC.Medical.Cyberware;
 using Content.Server._NC.Medical.Pharmacology;
 using Content.Server._NC.Medical.Systemic;
+using Content.Server._NC.Medical.Diagnostics.Scanner;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
@@ -63,6 +64,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
     [Dependency] private NCCyberwareSystem _cyberware = default!;
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
     [Dependency] private NCSystemicSystem _systemic = default!;
+    [Dependency] private NCBodyScannerConsoleSystem _bodyScanner = default!;
 
     private readonly Dictionary<NCDiagnosticTier, ProtoId<NCDiagnosticCapabilityPrototype>> _unassisted = [];
 
@@ -73,7 +75,8 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
         SubscribeNetworkEvent<NCDiagnosticSnapshotRequest>(OnSnapshotRequest);
         SubscribeLocalEvent<NCDiagnosticCapabilityComponent, AfterInteractEvent>(OnAfterInteract);
         SubscribeLocalEvent<NCDiagnosticCapabilityComponent, NCHealthAnalyzerScanCompletedEvent>(OnAnalyzerScanCompleted);
-        SubscribeLocalEvent<NCDiagnosticCapabilityComponent, GetVerbsEvent<AlternativeVerb>>(OnGetScannerVerbs);
+        SubscribeLocalEvent<NCBodyScannerConsoleComponent, ActivateInWorldEvent>(OnScannerActivated);
+        SubscribeLocalEvent<NCBodyScannerConsoleComponent, GetVerbsEvent<AlternativeVerb>>(OnGetScannerVerbs);
         SubscribeLocalEvent<NCMedicalBodyComponent, GetVerbsEvent<AlternativeVerb>>(OnGetPatientDiagnosticVerbs);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
         _rateLimit.Register(
@@ -305,6 +308,18 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             {
                 failure = NCDiagnosticAccessFailure.ToolUnpowered;
                 return false;
+            }
+
+            if (TryComp<NCBodyScannerConsoleComponent>(toolUid, out var scannerConsole))
+            {
+                if (!_bodyScanner.TryGetPatient((toolUid, scannerConsole), out var occupant, out failure))
+                    return false;
+
+                if (occupant != target)
+                {
+                    failure = NCDiagnosticAccessFailure.ScannerPatientChanged;
+                    return false;
+                }
             }
 
             var inRange = capability.RequiresHeld
@@ -1176,52 +1191,89 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
     }
 
     /// <summary>
-    /// Adds diagnostics to the existing scanner's verb set. The patient is derived from its authoritative
-    /// container; neither the client nor a second NC scanner entity can substitute another target.
+    /// Opens the detailed record through a normal interaction with the vanilla body-scanner computer.
+    /// The patient still comes exclusively from the linked scanner capsule.
+    /// </summary>
+    private void OnScannerActivated(
+        Entity<NCBodyScannerConsoleComponent> entity,
+        ref ActivateInWorldEvent args)
+    {
+        if (args.Handled || !args.Complex)
+            return;
+
+        args.Handled = TrySendScannerSnapshot(entity, args.User);
+    }
+
+    /// <summary>
+    /// Adds diagnostics to the existing body-scanner computer. The patient is derived from the linked vanilla
+    /// scanner container; neither the client nor the console can substitute another target.
     /// </summary>
     private void OnGetScannerVerbs(
-        Entity<NCDiagnosticCapabilityComponent> entity,
+        Entity<NCBodyScannerConsoleComponent> entity,
         ref GetVerbsEvent<AlternativeVerb> args)
     {
         if (!args.CanAccess ||
             !args.CanInteract ||
-            !TryComp<MedicalScannerComponent>(entity.Owner, out var scanner) ||
-            scanner.BodyContainer.ContainedEntity is not { } patient ||
-            !_prototypes.TryIndex(entity.Comp.Capability, out NCDiagnosticCapabilityPrototype? capability) ||
+            !_bodyScanner.TryGetPatient(entity, out var patient, out _) ||
+            !TryComp<NCDiagnosticCapabilityComponent>(entity.Owner, out var observed) ||
+            !_prototypes.TryIndex(observed.Capability, out NCDiagnosticCapabilityPrototype? capability) ||
             !TryComp<ActorComponent>(args.User, out var actor))
         {
             return;
         }
 
         var user = args.User;
-        var session = actor.PlayerSession;
         args.Verbs.Add(new AlternativeVerb
         {
             Text = Loc.GetString("nc-medical-diagnostics-scanner-verb"),
             Priority = 2,
-            Act = () =>
-            {
-                var resolutionId = NCActionResolutionId.New();
-                var accepted = TryBuildForActor(
-                    resolutionId,
-                    user,
-                    patient,
-                    entity.Owner,
-                    capability.Tier,
-                    out var snapshot,
-                    out var failure);
-                SendResponse(
-                    session,
-                    0,
-                    resolutionId,
-                    accepted,
-                    failure,
-                    accepted ? snapshot : null,
-                    patient,
-                    entity.Owner,
-                    capability.Tier);
-            },
+            Act = () => TrySendScannerSnapshot(entity, user),
         });
+    }
+
+    private bool TrySendScannerSnapshot(Entity<NCBodyScannerConsoleComponent> entity, EntityUid user)
+    {
+        if (!TryComp<ActorComponent>(user, out var actor) ||
+            !TryComp<NCDiagnosticCapabilityComponent>(entity.Owner, out var observed) ||
+            !_prototypes.TryIndex(observed.Capability, out NCDiagnosticCapabilityPrototype? capability))
+        {
+            return false;
+        }
+
+        var resolutionId = NCActionResolutionId.New();
+        if (!_bodyScanner.TryGetPatient(entity, out var patient, out var failure))
+        {
+            SendResponse(
+                actor.PlayerSession,
+                0,
+                resolutionId,
+                false,
+                failure,
+                null,
+                tool: entity.Owner,
+                tier: capability.Tier);
+            return true;
+        }
+
+        var accepted = TryBuildForActor(
+            resolutionId,
+            user,
+            patient,
+            entity.Owner,
+            capability.Tier,
+            out var snapshot,
+            out failure);
+        SendResponse(
+            actor.PlayerSession,
+            0,
+            resolutionId,
+            accepted,
+            failure,
+            accepted ? snapshot : null,
+            patient,
+            entity.Owner,
+            capability.Tier);
+        return true;
     }
 
     /// <summary>

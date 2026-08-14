@@ -19,7 +19,8 @@ public readonly record struct NCSurgeryStartRequest(
     EntityUid? Facility = null,
     EntityUid? Environment = null,
     Guid? TargetWoundId = null,
-    EntityUid? Graft = null);
+    EntityUid? Graft = null,
+    int InitialStepIndex = 0);
 
 public readonly record struct NCSurgeryStepRequest(
     NCActionResolutionId ActionResolutionId,
@@ -52,6 +53,12 @@ public sealed partial class NCSurgeryConditionSnapshot
     public float FacilityQuality;
 
     [DataField]
+    public bool FacilityPresent;
+
+    [DataField]
+    public HashSet<ProtoId<NCSurgeryFacilityCapabilityPrototype>> FacilityCapabilities = [];
+
+    [DataField]
     public float FacilitySterility;
 
     [DataField]
@@ -64,13 +71,16 @@ public sealed partial class NCSurgeryConditionSnapshot
     public float EnvironmentSterility;
 
     [DataField]
+    public bool EnvironmentPresent;
+
+    [DataField]
     public float EnvironmentLighting;
 
     [DataField]
-    public float EnvironmentMotion;
+    public float EnvironmentMotion = 1f;
 
     [DataField]
-    public float EnvironmentContamination;
+    public float EnvironmentContamination = 1f;
 
     [DataField]
     public float PatientOxygenation = 1f;
@@ -94,7 +104,7 @@ public sealed partial class NCSurgeryConditionSnapshot
     public float PatientAnesthesia;
 
     [DataField]
-    public float PatientMovement;
+    public float PatientMovement = 1f;
 
     [DataField]
     public bool PatientRestrained;
@@ -181,6 +191,7 @@ public enum NCSurgeryStartFailure : byte
     EntityUnavailable,
     PatientNotAuthoritative,
     ProcedureUnavailable,
+    InvalidInitialStep,
     RegionNotInPatient,
     SurgicalSiteUnavailable,
     SiteBusy,
