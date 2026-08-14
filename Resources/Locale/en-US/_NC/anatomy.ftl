@@ -3,6 +3,8 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 nc-target-zone-head = Head
+nc-target-zone-eyes = Eyes
+nc-target-zone-mouth = Mouth
 nc-target-zone-chest = Chest
 nc-target-zone-abdomen = Abdomen
 nc-target-zone-groin = Groin

@@ -117,7 +117,7 @@ public sealed class NCCombatTraumaDeliveryTest : GameTest
         var damage = new DamageSpecifier(_prototypes.Index(piercingId), 1);
         var contacts = new (Vector2 LocalHit, string ExpectedZone)[]
         {
-            (new Vector2(0f, 0.35f), "NCZoneHead"),
+            (new Vector2(0f, 0.35f), "NCZoneEyes"),
             (new Vector2(-0.4f, 0.1f), "NCZoneArmRight"),
             (new Vector2(0.2f, -0.45f), "NCZoneFootLeft"),
         };
@@ -219,6 +219,8 @@ public sealed class NCCombatTraumaDeliveryTest : GameTest
         string[] zones =
         {
             "NCZoneHead",
+            "NCZoneEyes",
+            "NCZoneMouth",
             "NCZoneChest",
             "NCZoneAbdomen",
             "NCZoneGroin",

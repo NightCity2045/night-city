@@ -64,6 +64,13 @@ public sealed partial class NCTargetZonePrototype : IPrototype
     public NCTargetZoneHitBounds? HitBounds { get; private set; }
 
     /// <summary>
+    /// Resolves intentionally nested precision zones. Higher-priority rectangles win physical overlap and
+    /// their doll buttons are placed above broader neighbours, so eyes, mouth and groin remain clickable.
+    /// </summary>
+    [DataField]
+    public int HitPriority { get; private set; }
+
+    /// <summary>
     /// Multiplier applied to automatic selection while the target is down. This changes anatomical exposure,
     /// never whether the physical attack hit.
     /// </summary>

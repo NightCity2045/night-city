@@ -20,8 +20,11 @@ using Content.Shared._NC.Medical.Trauma;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Damage;
 using Content.Shared.FixedPoint;
+using Content.Shared.Item;
+using Robust.Shared.ContentPack;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Utility;
 
 namespace Content.IntegrationTests.Tests._NC.Medical;
 
@@ -35,11 +38,48 @@ public sealed class NCCyberwareSystemTest : GameTest
     [SidedDependency(Side.Server)] private NCCyberwareSystem _cyberware = default!;
     [SidedDependency(Side.Server)] private NCDiagnosticsSystem _diagnostics = default!;
     [SidedDependency(Side.Server)] private NCMedicalPersistenceSystem _persistence = default!;
+    [SidedDependency(Side.Server)] private IComponentFactory _components = default!;
+    [SidedDependency(Side.Server)] private IPrototypeManager _prototypes = default!;
+    [SidedDependency(Side.Server)] private IResourceManager _resources = default!;
 
     public override PoolSettings PoolSettings => new()
     {
         Connected = false,
     };
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void EveryCyberwareProfileAndPhysicalItemHasAResolvablePlaceholderIcon()
+    {
+        var profiles = _prototypes.EnumeratePrototypes<NCCyberwarePrototype>().ToArray();
+        Assert.That(profiles, Is.Not.Empty);
+        foreach (var profile in profiles)
+        {
+            foreach (var specifier in profile.HostIcons.Values.Append(profile.Icon))
+            {
+                Assert.That(specifier, Is.TypeOf<SpriteSpecifier.Rsi>(), profile.ID);
+                var icon = (SpriteSpecifier.Rsi) specifier;
+                var root = new ResPath("/Textures") / icon.RsiPath;
+                Assert.Multiple(() =>
+                {
+                    Assert.That(_resources.ContentFileExists(root / "meta.json"), Is.True, profile.ID);
+                    Assert.That(_resources.ContentFileExists(root / $"{icon.RsiState}.png"), Is.True, profile.ID);
+                });
+            }
+        }
+
+        string[] physicalItems =
+        [
+            "NCImplantNeuralLinkMk1",
+            "NCImplantCirculatoryAssistMk1",
+            "NCOrganHumanCyberArmLeft",
+            "NCOrganHumanCyberArmRight",
+            "NCOrganHumanCyberEyes",
+            "NCOrganHumanCyberHeart",
+        ];
+        foreach (var id in physicalItems)
+            Assert.That(_prototypes.Index<EntityPrototype>(id).HasComp<ItemComponent>(_components), Is.True, id);
+    }
 
     [Test]
     [RunOnSide(Side.Server)]

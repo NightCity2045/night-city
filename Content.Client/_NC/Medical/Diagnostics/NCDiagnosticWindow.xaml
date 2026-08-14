@@ -10,15 +10,15 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       x:Class="Content.Client._NC.Medical.Diagnostics.NCDiagnosticWindow"
                       Title="{Loc 'nc-medical-diagnostics-title'}"
-                      SetSize="1040 720"
-                      MinSize="820 500">
-    <PanelContainer HorizontalExpand="True" VerticalExpand="True">
+                      SetSize="1120 760"
+                      MinSize="820 540">
+    <PanelContainer HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
         <PanelContainer.PanelOverride>
             <gfx:StyleBoxFlat BackgroundColor="#04090D" BorderColor="#174D4A" BorderThickness="2" />
         </PanelContainer.PanelOverride>
 
         <BoxContainer Margin="6" Orientation="Vertical" SeparationOverride="6"
-                      HorizontalExpand="True" VerticalExpand="True">
+                      HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
             <PanelContainer SetHeight="30" HorizontalExpand="True">
                 <PanelContainer.PanelOverride>
                     <gfx:StyleBoxFlat BackgroundColor="#07161B" BorderColor="#29D8C8" BorderThickness="0 0 0 1" />
@@ -46,8 +46,9 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                     </PanelContainer>
                     <BoxContainer Orientation="Vertical" SeparationOverride="2" HorizontalExpand="True">
                         <Label Text="{Loc 'nc-medical-diagnostics-patient-record'}" FontColorOverride="#4D918C" />
-                        <Label Name="PatientNameLabel" StyleClasses="LabelHeadingBigger" FontColorOverride="#D8FFFB" />
-                        <Label Name="PatientStateLabel" />
+                        <Label Name="PatientNameLabel" StyleClasses="LabelHeadingBigger" FontColorOverride="#D8FFFB"
+                               ClipText="True" />
+                        <RichTextLabel Name="PatientStateLabel" HorizontalExpand="True" />
                         <Label Text="{Loc 'nc-medical-diagnostics-data-scope'}" FontColorOverride="#4D918C" />
                         <BoxContainer Orientation="Horizontal" SeparationOverride="7">
                             <Label Name="TierLabel" FontColorOverride="#6DE9DC" />
@@ -69,9 +70,9 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                 <Label Name="FailureLabel" Margin="9 5" FontColorOverride="#FF8294" />
             </PanelContainer>
 
-            <TabContainer Name="Tabs" HorizontalExpand="True" VerticalExpand="True">
+            <TabContainer Name="Tabs" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
                 <ScrollContainer Name="OverviewTab" HScrollEnabled="False"
-                                 HorizontalExpand="True" VerticalExpand="True">
+                                 HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
                     <BoxContainer Margin="8" Orientation="Vertical" SeparationOverride="9"
                                   HorizontalExpand="True">
                         <BoxContainer Orientation="Horizontal">
@@ -156,23 +157,65 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                                     </PanelContainer>
                                 </BoxContainer>
 
-                                <PanelContainer HorizontalExpand="True">
+                                <PanelContainer HorizontalExpand="True" RectClipContent="True">
                                     <PanelContainer.PanelOverride>
                                         <gfx:StyleBoxFlat BackgroundColor="#071419" BorderColor="#1D514F" BorderThickness="1" />
                                     </PanelContainer.PanelOverride>
-                                    <GridContainer Margin="10 7" Columns="4" HSeparationOverride="10" VSeparationOverride="5">
-                                        <Label Text="{Loc 'nc-medical-diagnostics-pressure-label'}" FontColorOverride="#5EA8A2" />
-                                        <Label Name="PressureValue" />
-                                        <Label Text="{Loc 'nc-medical-diagnostics-rhythm-label'}" FontColorOverride="#5EA8A2" />
-                                        <Label Name="RhythmValue" />
-                                        <Label Text="{Loc 'nc-medical-diagnostics-pain-label'}" FontColorOverride="#5EA8A2" />
-                                        <Label Name="PainValue" />
-                                        <Label Text="{Loc 'nc-medical-diagnostics-shock-label'}" FontColorOverride="#5EA8A2" />
-                                        <Label Name="ShockValue" />
-                                        <Label Text="{Loc 'nc-medical-diagnostics-external-bleed-label'}" FontColorOverride="#5EA8A2" />
-                                        <Label Name="ExternalBleedValue" />
-                                        <Label Text="{Loc 'nc-medical-diagnostics-internal-bleed-label'}" FontColorOverride="#5EA8A2" />
-                                        <Label Name="InternalBleedValue" />
+                                    <GridContainer Margin="10 7" Columns="3" HSeparationOverride="7" VSeparationOverride="7">
+                                        <PanelContainer HorizontalExpand="True">
+                                            <PanelContainer.PanelOverride>
+                                                <gfx:StyleBoxFlat BackgroundColor="#091B20" BorderColor="#163C3C" BorderThickness="1" />
+                                            </PanelContainer.PanelOverride>
+                                            <BoxContainer Margin="7 5" Orientation="Vertical">
+                                                <Label Text="{Loc 'nc-medical-diagnostics-pressure-label'}" FontColorOverride="#5EA8A2" />
+                                                <RichTextLabel Name="PressureValue" HorizontalExpand="True" />
+                                            </BoxContainer>
+                                        </PanelContainer>
+                                        <PanelContainer HorizontalExpand="True">
+                                            <PanelContainer.PanelOverride>
+                                                <gfx:StyleBoxFlat BackgroundColor="#091B20" BorderColor="#163C3C" BorderThickness="1" />
+                                            </PanelContainer.PanelOverride>
+                                            <BoxContainer Margin="7 5" Orientation="Vertical">
+                                                <Label Text="{Loc 'nc-medical-diagnostics-rhythm-label'}" FontColorOverride="#5EA8A2" />
+                                                <RichTextLabel Name="RhythmValue" HorizontalExpand="True" />
+                                            </BoxContainer>
+                                        </PanelContainer>
+                                        <PanelContainer HorizontalExpand="True">
+                                            <PanelContainer.PanelOverride>
+                                                <gfx:StyleBoxFlat BackgroundColor="#091B20" BorderColor="#163C3C" BorderThickness="1" />
+                                            </PanelContainer.PanelOverride>
+                                            <BoxContainer Margin="7 5" Orientation="Vertical">
+                                                <Label Text="{Loc 'nc-medical-diagnostics-pain-label'}" FontColorOverride="#5EA8A2" />
+                                                <RichTextLabel Name="PainValue" HorizontalExpand="True" />
+                                            </BoxContainer>
+                                        </PanelContainer>
+                                        <PanelContainer HorizontalExpand="True">
+                                            <PanelContainer.PanelOverride>
+                                                <gfx:StyleBoxFlat BackgroundColor="#091B20" BorderColor="#163C3C" BorderThickness="1" />
+                                            </PanelContainer.PanelOverride>
+                                            <BoxContainer Margin="7 5" Orientation="Vertical">
+                                                <Label Text="{Loc 'nc-medical-diagnostics-shock-label'}" FontColorOverride="#5EA8A2" />
+                                                <RichTextLabel Name="ShockValue" HorizontalExpand="True" />
+                                            </BoxContainer>
+                                        </PanelContainer>
+                                        <PanelContainer HorizontalExpand="True">
+                                            <PanelContainer.PanelOverride>
+                                                <gfx:StyleBoxFlat BackgroundColor="#091B20" BorderColor="#163C3C" BorderThickness="1" />
+                                            </PanelContainer.PanelOverride>
+                                            <BoxContainer Margin="7 5" Orientation="Vertical">
+                                                <Label Text="{Loc 'nc-medical-diagnostics-external-bleed-label'}" FontColorOverride="#5EA8A2" />
+                                                <RichTextLabel Name="ExternalBleedValue" HorizontalExpand="True" />
+                                            </BoxContainer>
+                                        </PanelContainer>
+                                        <PanelContainer HorizontalExpand="True">
+                                            <PanelContainer.PanelOverride>
+                                                <gfx:StyleBoxFlat BackgroundColor="#091B20" BorderColor="#163C3C" BorderThickness="1" />
+                                            </PanelContainer.PanelOverride>
+                                            <BoxContainer Margin="7 5" Orientation="Vertical">
+                                                <Label Text="{Loc 'nc-medical-diagnostics-internal-bleed-label'}" FontColorOverride="#5EA8A2" />
+                                                <RichTextLabel Name="InternalBleedValue" HorizontalExpand="True" />
+                                            </BoxContainer>
+                                        </PanelContainer>
                                     </GridContainer>
                                 </PanelContainer>
                             </BoxContainer>
@@ -183,22 +226,22 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                     </BoxContainer>
                 </ScrollContainer>
 
-                <ScrollContainer Name="RegionsTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True">
+                <ScrollContainer Name="RegionsTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
                     <BoxContainer Name="RegionsContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
                 </ScrollContainer>
-                <ScrollContainer Name="WoundsTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True">
+                <ScrollContainer Name="WoundsTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
                     <BoxContainer Name="WoundsContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
                 </ScrollContainer>
-                <ScrollContainer Name="OrgansTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True">
+                <ScrollContainer Name="OrgansTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
                     <BoxContainer Name="OrgansContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
                 </ScrollContainer>
-                <ScrollContainer Name="CyberwareTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True">
+                <ScrollContainer Name="CyberwareTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
                     <BoxContainer Name="CyberwareContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
                 </ScrollContainer>
-                <ScrollContainer Name="DrugsTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True">
+                <ScrollContainer Name="DrugsTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
                     <BoxContainer Name="DrugsContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
                 </ScrollContainer>
-                <ScrollContainer Name="HistoryTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True">
+                <ScrollContainer Name="HistoryTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
                     <BoxContainer Name="HistoryContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
                 </ScrollContainer>
             </TabContainer>

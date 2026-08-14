@@ -36,10 +36,16 @@ public sealed class NCAnatomyTest : GameTest
     private static readonly EntProtoId HumanMob = "MobHuman";
     private static readonly EntProtoId DwarfMob = "MobDwarf";
     private static readonly ProtoId<WeightedRandomSpeciesPrototype> SpeciesWeights = "SpeciesWeights";
+    private static readonly ProtoId<NCTargetZonePrototype> HeadZone = "NCZoneHead";
+    private static readonly ProtoId<NCTargetZonePrototype> EyesZone = "NCZoneEyes";
+    private static readonly ProtoId<NCTargetZonePrototype> MouthZone = "NCZoneMouth";
+    private static readonly ProtoId<NCTargetZonePrototype> GroinZone = "NCZoneGroin";
+    private static readonly ProtoId<NCTargetZonePrototype> LeftLegZone = "NCZoneLegLeft";
+    private static readonly ProtoId<NCTargetZonePrototype> RightLegZone = "NCZoneLegRight";
 
     private static readonly HashSet<string> ExpectedZones =
     [
-        "NCZoneHead", "NCZoneChest", "NCZoneAbdomen", "NCZoneGroin",
+        "NCZoneHead", "NCZoneEyes", "NCZoneMouth", "NCZoneChest", "NCZoneAbdomen", "NCZoneGroin",
         "NCZoneArmLeft", "NCZoneArmRight", "NCZoneHandLeft", "NCZoneHandRight",
         "NCZoneLegLeft", "NCZoneLegRight", "NCZoneFootLeft", "NCZoneFootRight",
     ];
@@ -69,7 +75,7 @@ public sealed class NCAnatomyTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
-    public void HumanProfileHasTwelveDataDrivenZonesAndDoll()
+    public void HumanProfileHasFourteenDataDrivenZonesAndDoll()
     {
         var profile = _prototypes.Index(HumanAnatomy);
         var doll = _prototypes.Index(profile.TargetDoll);
@@ -102,6 +108,7 @@ public sealed class NCAnatomyTest : GameTest
                 Assert.That(zone.AutomaticWeight, Is.GreaterThan(0f));
                 Assert.That(zone.Selectable, Is.True);
                 Assert.That(zone.StandardCombatAllowed, Is.True);
+                Assert.That(zone.HitPriority, Is.GreaterThanOrEqualTo(0));
                 Assert.That(float.IsFinite(zone.DownedWeightMultiplier), Is.True);
                 Assert.That(zone.DownedWeightMultiplier, Is.GreaterThan(0f));
                 Assert.That(zone.HitBounds, Is.Not.Null, $"Zone {zone.ID} has no physical hit bounds.");
@@ -134,13 +141,32 @@ public sealed class NCAnatomyTest : GameTest
                 var overlapHeight = MathF.Min(a.Position.Y + a.Size.Y, b.Position.Y + b.Size.Y) -
                                     MathF.Max(a.Position.Y, b.Position.Y);
                 var overlaps = overlapWidth > epsilon && overlapHeight > epsilon;
-                Assert.That(overlaps, Is.False, $"Physical hit bounds overlap: {a.Zone} and {b.Zone}.");
+                if (!overlaps)
+                    continue;
+
+                var aPriority = _prototypes.Index<NCTargetZonePrototype>(a.Zone).HitPriority;
+                var bPriority = _prototypes.Index<NCTargetZonePrototype>(b.Zone).HitPriority;
+                Assert.That(aPriority, Is.Not.EqualTo(bPriority),
+                    $"Physical hit bounds overlap without an explicit priority: {a.Zone} and {b.Zone}.");
             }
         }
 
         Assert.That(totalWeight, Is.EqualTo(100f).Within(0.001f));
         Assert.That(doll.StatusLayers.Single(layer => layer.Id == "torso").SourceZones.Select(zone => zone.Id),
             Is.EquivalentTo(new[] { "NCZoneChest", "NCZoneAbdomen" }));
+        Assert.That(doll.StatusLayers.Single(layer => layer.Id == "head").SourceZones.Select(zone => zone.Id),
+            Is.EquivalentTo(new[] { "NCZoneHead", "NCZoneEyes", "NCZoneMouth" }));
+        Assert.Multiple(() =>
+        {
+            Assert.That(_prototypes.Index(EyesZone).HitPriority,
+                Is.GreaterThan(_prototypes.Index(HeadZone).HitPriority));
+            Assert.That(_prototypes.Index(MouthZone).HitPriority,
+                Is.GreaterThan(_prototypes.Index(HeadZone).HitPriority));
+            Assert.That(_prototypes.Index(GroinZone).HitPriority,
+                Is.GreaterThan(_prototypes.Index(LeftLegZone).HitPriority));
+            Assert.That(_prototypes.Index(GroinZone).HitPriority,
+                Is.GreaterThan(_prototypes.Index(RightLegZone).HitPriority));
+        });
 
         foreach (var layer in doll.StatusLayers)
         {

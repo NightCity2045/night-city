@@ -95,6 +95,8 @@
   id: Human
   targetZones:
   - NCZoneHead
+  - NCZoneEyes
+  - NCZoneMouth
   - NCZoneChest
   - NCZoneAbdomen
   - NCZoneGroin

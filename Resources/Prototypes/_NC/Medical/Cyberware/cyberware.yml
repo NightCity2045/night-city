@@ -79,6 +79,9 @@
   id: NCNeuralLinkMk1
   name: neural link Mk.1
   manufacturer: Zhirafa Technical Collective
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: neural_link
   form: Implant
   compatibleSlots: [ NCSlotNeuralCore ]
   size: 1
@@ -115,6 +118,9 @@
   id: NCCirculatoryAssistMk1
   name: circulatory assist pump Mk.1
   manufacturer: Biotechnica Night City
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: circulatory_assist
   form: Implant
   compatibleSlots: [ NCSlotThoracicSupport ]
   size: 2
@@ -149,6 +155,16 @@
   id: NCIndustrialCyberArm
   name: industrial cyberarm
   manufacturer: Militech Industrial Systems
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberarm_right
+  hostIcons:
+    ArmLeft:
+      sprite: _NC/Objects/Cyberware/implants.rsi
+      state: cyberarm_left
+    ArmRight:
+      sprite: _NC/Objects/Cyberware/implants.rsi
+      state: cyberarm_right
   form: LimbReplacement
   size: 5
   maximumIntegrity: 160
@@ -184,6 +200,9 @@
   id: NCCyberopticsMk1
   name: cyberoptics Mk.1
   manufacturer: Kiroshi Optics
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberoptics
   form: OrganReplacement
   size: 1
   maximumIntegrity: 65
@@ -219,6 +238,9 @@
   id: NCCyberheartMk1
   name: cyberheart Mk.1
   manufacturer: Biotechnica Night City
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberheart
   form: OrganReplacement
   size: 3
   maximumIntegrity: 110
@@ -264,6 +286,11 @@
   name: neural link Mk.1
   description: A clinical cranial neural-interface module. It is inert until installed and calibrated.
   components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: neural_link
+  - type: Item
+    sprite: _NC/Objects/Cyberware/implants.rsi
   - type: NCCyberware
     profile: NCNeuralLinkMk1
 
@@ -273,6 +300,11 @@
   name: circulatory assist pump Mk.1
   description: A powered thoracic support pump for later physiology integrations.
   components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: circulatory_assist
+  - type: Item
+    sprite: _NC/Objects/Cyberware/implants.rsi
   - type: NCCyberware
     profile: NCCirculatoryAssistMk1
 
@@ -283,6 +315,11 @@
   parent: NCOrganHumanDetachableParentRegionBase
   name: left industrial cyberarm
   components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberarm_left
+  - type: Item
+    sprite: _NC/Objects/Cyberware/implants.rsi
   - type: Organ
     category: ArmLeft
   - type: NCAnatomicalRegion
@@ -304,6 +341,11 @@
   parent: NCOrganHumanDetachableParentRegionBase
   name: right industrial cyberarm
   components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberarm_right
+  - type: Item
+    sprite: _NC/Objects/Cyberware/implants.rsi
   - type: Organ
     category: ArmRight
   - type: NCAnatomicalRegion
@@ -325,6 +367,11 @@
   parent: NCOrganHumanRegionBase
   name: cyberoptics Mk.1
   components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberoptics
+  - type: Item
+    sprite: _NC/Objects/Cyberware/implants.rsi
   - type: Organ
     category: Eyes
   - type: NCAnatomicalRegion
@@ -345,6 +392,11 @@
   parent: NCOrganHumanRegionBase
   name: cyberheart Mk.1
   components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberheart
+  - type: Item
+    sprite: _NC/Objects/Cyberware/implants.rsi
   - type: Organ
     category: Heart
   - type: NCAnatomicalRegion

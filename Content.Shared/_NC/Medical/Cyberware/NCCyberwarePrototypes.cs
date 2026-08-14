@@ -5,6 +5,7 @@
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared.Body;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Utility;
 
 namespace Content.Shared._NC.Medical.Cyberware;
 
@@ -80,6 +81,20 @@ public sealed partial class NCCyberwarePrototype : IPrototype
 
     [DataField(required: true)]
     public string Manufacturer { get; private set; } = default!;
+
+    /// <summary>
+    /// Shared presentation icon used by diagnostics and other capability-filtered medical interfaces.
+    /// Physical entity prototypes use the same RSI state, keeping inventory and UI identity consistent.
+    /// </summary>
+    [DataField(required: true)]
+    public SpriteSpecifier Icon { get; private set; } = default!;
+
+    /// <summary>
+    /// Optional host-specific presentation, used by mirrored replacement limbs without duplicating their
+    /// gameplay profile. Diagnostics resolves this only from the already disclosed host category.
+    /// </summary>
+    [DataField]
+    public Dictionary<ProtoId<OrganCategoryPrototype>, SpriteSpecifier> HostIcons { get; private set; } = [];
 
     [DataField(required: true)]
     public NCCyberwareForm Form { get; private set; }

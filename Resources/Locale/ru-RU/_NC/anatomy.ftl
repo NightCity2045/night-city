@@ -3,6 +3,8 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 nc-target-zone-head = Голова
+nc-target-zone-eyes = Глаза
+nc-target-zone-mouth = Рот
 nc-target-zone-chest = Грудь
 nc-target-zone-abdomen = Живот
 nc-target-zone-groin = Пах

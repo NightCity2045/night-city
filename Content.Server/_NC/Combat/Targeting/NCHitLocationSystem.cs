@@ -84,6 +84,8 @@ public sealed partial class NCHitLocationSystem : EntitySystem
         if (point.X < 0f || point.X > 1f || point.Y < 0f || point.Y > 1f)
             return false;
 
+        ProtoId<NCTargetZonePrototype>? bestZone = null;
+        var bestPriority = int.MinValue;
         foreach (var zoneId in profile.TargetZones)
         {
             if (!_prototypes.TryIndex(zoneId, out NCTargetZonePrototype? zone) ||
@@ -96,10 +98,17 @@ public sealed partial class NCHitLocationSystem : EntitySystem
                 continue;
             }
 
-            return _anatomy.TryResolveSelectedZone(body, zoneId, out actualZone, out region);
+            // Equal-priority rectangles remain stable by anatomy-profile order. Semantic prototype tests reject
+            // those overlaps, while explicit higher priorities allow small facial regions inside the head.
+            if (zone.HitPriority > bestPriority)
+            {
+                bestZone = zoneId;
+                bestPriority = zone.HitPriority;
+            }
         }
 
-        return false;
+        return bestZone is { } selected &&
+               _anatomy.TryResolveSelectedZone(body, selected, out actualZone, out region);
     }
 
     private bool TryResolveWeighted(

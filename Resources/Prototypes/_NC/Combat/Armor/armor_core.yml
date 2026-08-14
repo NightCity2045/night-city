@@ -86,7 +86,7 @@
 - type: ncArmorSection
   id: NCArmorSectionClosedHelmet
   displayName: nc-armor-section-closed-helmet
-  coveredZones: [ NCZoneHead ]
+  coveredZones: [ NCZoneHead, NCZoneEyes, NCZoneMouth ]
   maxSp: 11
   applicableDamageClasses: [ Ballistic, Blunt, Slash, Pierce, Blast ]
   conditionProfile: NCArmorConditionStandard
@@ -100,6 +100,8 @@
   displayName: nc-armor-section-subdermal
   coveredZones:
   - NCZoneHead
+  - NCZoneEyes
+  - NCZoneMouth
   - NCZoneChest
   - NCZoneAbdomen
   - NCZoneGroin

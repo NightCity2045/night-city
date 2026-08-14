@@ -7,11 +7,37 @@
   displayName: nc-target-zone-head
   externalOrganCategory: Head
   medicalRegionCategory: Head
-  automaticWeight: 12
+  automaticWeight: 10
   armorLocation: Head
   fallbackZone: NCZoneChest
   neighborZones: [ NCZoneChest, NCZoneArmLeft, NCZoneArmRight ]
   hitBounds: { position: "0.35,0.75", size: "0.30,0.25" }
+  downedWeightMultiplier: 0.8
+
+- type: ncTargetZone
+  id: NCZoneEyes
+  displayName: nc-target-zone-eyes
+  externalOrganCategory: Head
+  medicalRegionCategory: Eyes
+  automaticWeight: 1
+  armorLocation: Face
+  fallbackZone: NCZoneHead
+  neighborZones: [ NCZoneHead, NCZoneMouth ]
+  hitBounds: { position: "0.39,0.84", size: "0.22,0.06" }
+  hitPriority: 20
+  downedWeightMultiplier: 0.8
+
+- type: ncTargetZone
+  id: NCZoneMouth
+  displayName: nc-target-zone-mouth
+  externalOrganCategory: Head
+  medicalRegionCategory: Tongue
+  automaticWeight: 1
+  armorLocation: Face
+  fallbackZone: NCZoneHead
+  neighborZones: [ NCZoneHead, NCZoneEyes ]
+  hitBounds: { position: "0.43,0.77", size: "0.14,0.05" }
+  hitPriority: 20
   downedWeightMultiplier: 0.8
 
 - type: ncTargetZone
@@ -47,6 +73,7 @@
   fallbackZone: NCZoneAbdomen
   neighborZones: [ NCZoneAbdomen, NCZoneLegLeft, NCZoneLegRight ]
   hitBounds: { position: "0.38,0.28", size: "0.24,0.09" }
+  hitPriority: 10
   downedWeightMultiplier: 1.1
 
 - type: ncTargetZone
@@ -160,7 +187,7 @@
   - id: head
     sprite: /Textures/_NC/Interface/Targeting/Status/head.rsi
     statePrefix: head
-    sourceZones: [ NCZoneHead ]
+    sourceZones: [ NCZoneHead, NCZoneEyes, NCZoneMouth ]
   - id: torso
     sprite: /Textures/_NC/Interface/Targeting/Status/torso.rsi
     statePrefix: torso
@@ -207,6 +234,18 @@
     worldVisualLayers: [ Head ]
     selectedTexture: /Textures/_NC/Interface/Targeting/Doll/head.png
     hoverTexture: /Textures/_NC/Interface/Targeting/Doll/head_hover.png
+  - zone: NCZoneEyes
+    position: 12,5
+    worldVisualLayers: [ Head ]
+    hitboxPadding: 1,1
+    selectedTexture: /Textures/_NC/Interface/Targeting/Doll/eyes.png
+    hoverTexture: /Textures/_NC/Interface/Targeting/Doll/eyes_hover.png
+  - zone: NCZoneMouth
+    position: 13,7
+    worldVisualLayers: [ Head ]
+    hitboxPadding: 1,1
+    selectedTexture: /Textures/_NC/Interface/Targeting/Doll/mouth.png
+    hoverTexture: /Textures/_NC/Interface/Targeting/Doll/mouth_hover.png
   - zone: NCZoneChest
     position: 10,9
     worldVisualLayers: [ Chest ]

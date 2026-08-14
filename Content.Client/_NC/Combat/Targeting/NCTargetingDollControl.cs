@@ -331,7 +331,12 @@ public sealed partial class NCTargetingDollControl : BoxContainer
         }
 
         // Interaction overlays are intentionally above all medical status layers.
-        foreach (var presentation in doll.Zones)
+        // Broad regions are added first. Higher-priority precision zones are therefore drawn and hit-tested last,
+        // preventing padded limb buttons from intercepting the groin, eyes or mouth.
+        foreach (var presentation in doll.Zones.OrderBy(entry =>
+                     _prototypes.TryIndex(entry.Zone, out NCTargetZonePrototype? zone)
+                         ? zone.HitPriority
+                         : int.MinValue))
         {
             if (!profile.TargetZones.Contains(presentation.Zone) ||
                 !_prototypes.TryIndex(presentation.Zone, out var zone) ||
