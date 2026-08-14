@@ -136,6 +136,46 @@ public sealed partial class NCBleedingSystem : EntitySystem
         return application.TotalLost;
     }
 
+    /// <summary>
+    /// Applies the one-time external pulse produced by an accepted open impact. It uses the same authoritative
+    /// circulation-to-bloodstream bridge as ongoing bleeding, so the visual response cannot create free blood.
+    /// </summary>
+    public float ApplyExternalPulse(EntityUid body, float requestedVolume)
+    {
+        if (!float.IsFinite(requestedVolume) || requestedVolume <= 0f ||
+            !_blood.TryApplyBleedingLoss(
+                body,
+                requestedVolume,
+                new Dictionary<ProtoId<OrganCategoryPrototype>, float>(),
+                0f,
+                out var application) ||
+            application.ExternalLost <= 0f)
+        {
+            return 0f;
+        }
+
+        var bleeding = EnsureComp<NCBleedingComponent>(body);
+        _medicalBodies.TryMarkDirty(
+            body,
+            NCMedicalDirtyDomains.Vascular |
+            NCMedicalDirtyDomains.Pain |
+            NCMedicalDirtyDomains.OrganFunction |
+            NCMedicalDirtyDomains.Consciousness |
+            NCMedicalDirtyDomains.Diagnostics |
+            NCMedicalDirtyDomains.Persistence,
+            true);
+
+        var changed = new NCBleedingChangedEvent(
+            application.TotalLost,
+            application.ExternalLost,
+            0f,
+            bleeding.ActiveExternalRate,
+            bleeding.ActiveInternalRate,
+            bleeding.ActiveArterialRate);
+        RaiseLocalEvent(body, ref changed);
+        return application.ExternalLost;
+    }
+
     public bool HasActiveBleeding(EntityUid body)
     {
         return TryComp<NCBleedingComponent>(body, out var bleeding) &&

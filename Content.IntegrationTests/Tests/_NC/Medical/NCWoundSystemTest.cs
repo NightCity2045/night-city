@@ -123,6 +123,86 @@ public sealed class NCWoundSystemTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
+    public void OrganicImpactBloodPulseIsPhysicalAndExactlyOnce()
+    {
+        var body = SSpawn(HumanMob);
+        var circulation = SComp<NCCirculationComponent>(body);
+        var before = circulation.BloodVolume;
+        var request = CreateRequest(body, "NCZoneLegLeft", "LegLeft", "BallisticImpact", 10f);
+        var first = new NCCombatTraumaRequestedEvent(request);
+        SEntMan.EventBus.RaiseLocalEvent(body, ref first);
+        var afterFirst = circulation.BloodVolume;
+
+        var duplicate = new NCCombatTraumaRequestedEvent(request);
+        SEntMan.EventBus.RaiseLocalEvent(body, ref duplicate);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(first.Applied, Is.True);
+            Assert.That(first.AppliedWoundType, Is.EqualTo(NCWoundType.Ballistic));
+            Assert.That(first.AppliedSeverity, Is.EqualTo(NCWoundSeverity.Severe));
+            Assert.That(first.AppliedExternalBleedRate, Is.GreaterThan(0f));
+            Assert.That(afterFirst, Is.EqualTo(before - 15f).Within(0.01f));
+            Assert.That(duplicate.Applied, Is.False);
+            Assert.That(circulation.BloodVolume, Is.EqualTo(afterFirst).Within(0.01f),
+                "Replaying one impact key must not eject blood twice.");
+        });
+    }
+
+    [TestCase("BluntImpact")]
+    [TestCase("ThermalImpact")]
+    [RunOnSide(Side.Server)]
+    public void ClosedOrNonBleedingTraumaDoesNotCreateImpactBlood(string traumaProfile)
+    {
+        var body = SSpawn(HumanMob);
+        var circulation = SComp<NCCirculationComponent>(body);
+        var before = circulation.BloodVolume;
+        var request = CreateRequest(body, "NCZoneLegLeft", "LegLeft", traumaProfile, 10f);
+        var trauma = new NCCombatTraumaRequestedEvent(request);
+        SEntMan.EventBus.RaiseLocalEvent(body, ref trauma);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(trauma.Applied, Is.True);
+            Assert.That(circulation.BloodVolume, Is.EqualTo(before).Within(0.01f));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void HumanImpactBloodProfileIsBoundedAndComplete()
+    {
+        var woundSystem = _prototypes.Index<NCWoundSystemProfilePrototype>(HumanWounds);
+        var profile = _prototypes.Index<NCImpactBloodProfilePrototype>(woundSystem.ImpactBloodProfile);
+        var severities = Enum.GetValues<NCWoundSeverity>();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(profile.BloodLossBySeverity.Keys, Is.EquivalentTo(severities));
+            Assert.That(profile.DropletsBySeverity.Keys, Is.EquivalentTo(severities));
+            Assert.That(profile.DecalsBySeverity.Keys, Is.EquivalentTo(severities));
+            Assert.That(profile.BloodLossBySeverity.Values, Is.All.GreaterThanOrEqualTo(0f));
+            Assert.That(profile.DropletsBySeverity.Values, Is.All.InRange(0, byte.MaxValue));
+            Assert.That(profile.DecalsBySeverity.Values, Is.All.GreaterThanOrEqualTo(0));
+            Assert.That(profile.MaximumDecalsPerImpact, Is.InRange(0, 4));
+            Assert.That(profile.MaximumNearbyDecals, Is.InRange(1, 16));
+            Assert.That(profile.MaximumClientBursts, Is.InRange(1, 128));
+            Assert.That(profile.EffectDuration, Is.GreaterThan(TimeSpan.Zero));
+            Assert.That(profile.SprayDistance, Is.GreaterThan(0f));
+            Assert.That(profile.SprayConeDegrees, Is.InRange(0f, 180f));
+            Assert.That(profile.DropletSize, Is.GreaterThan(0f));
+            Assert.That(profile.WoundTypes, Does.Contain(NCWoundType.Ballistic));
+            Assert.That(profile.WoundTypes, Does.Not.Contain(NCWoundType.Blunt));
+            Assert.That(profile.WoundTypes, Does.Not.Contain(NCWoundType.Thermal));
+        });
+
+        var first = NCImpactBloodRules.SampleDirection(Vector2.UnitX, profile.SprayConeDegrees, 42UL, 3u);
+        var repeated = NCImpactBloodRules.SampleDirection(Vector2.UnitX, profile.SprayConeDegrees, 42UL, 3u);
+        Assert.That(repeated, Is.EqualTo(first), "Spray layout must be replay-deterministic.");
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
     public void CoreTraumaMechanismsCreateDistinctAuthoritativeWounds()
     {
         var body = SSpawn(HumanMob);

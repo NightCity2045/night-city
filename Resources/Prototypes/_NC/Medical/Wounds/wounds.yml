@@ -90,6 +90,7 @@
   id: NCHumanWoundSystem
   defaultForHumans: true
   progressionProfile: NCHumanWoundProgression
+  impactBloodProfile: NCHumanImpactBlood
   maxActiveWounds: 32
   processedImpactCapacity: 128
   mergeContaminationTolerance: 0.05
@@ -122,6 +123,42 @@
     Explosive: NCWoundBlast
     Pressure: NCWoundPressure
     Chemical: NCWoundChemical
+
+# The pulse is real NC circulation loss. The upstream bloodstream bridge converts it to solution units and
+# accumulates/spills it through vanilla puddles; droplets and cleanable decals are bounded visual feedback.
+- type: ncImpactBloodProfile
+  id: NCHumanImpactBlood
+  woundTypes: [ Ballistic, Slash, Pierce, Blast ]
+  bloodLossBySeverity:
+    Minor: 0
+    Moderate: 5
+    Severe: 15
+    Critical: 35
+    Catastrophic: 75
+  dropletsBySeverity:
+    Minor: 0
+    Moderate: 4
+    Severe: 7
+    Critical: 10
+    Catastrophic: 14
+  decalsBySeverity:
+    Minor: 0
+    Moderate: 0
+    Severe: 1
+    Critical: 2
+    Catastrophic: 3
+  decal: splatter
+  color: '#720909CC'
+  effectDuration: 0.5s
+  sprayDistance: 1.35
+  sprayConeDegrees: 38
+  dropletSize: 0.045
+  embeddedDistanceMultiplier: 0.55
+  exitDistanceMultiplier: 1.4
+  maximumDecalsPerImpact: 2
+  maximumNearbyDecals: 6
+  nearbyDecalRadius: 0.9
+  maximumClientBursts: 64
 
 - type: ncWound
   id: NCWoundBallistic

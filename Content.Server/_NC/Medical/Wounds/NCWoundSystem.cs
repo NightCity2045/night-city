@@ -73,6 +73,22 @@ public sealed partial class NCWoundSystem : EntitySystem
 
         var result = ApplyTrauma(entity.Owner, args.Request);
         args.Applied = result.Created || result.Merged || result.Overflowed || result.MechanicalDamage;
+        args.AppliedWoundType = result.WoundType;
+        args.AppliedSeverity = result.Severity;
+        args.AppliedExternalBleedRate = result.ExternalBleedRate;
+
+        if (args.Applied &&
+            result.WoundType is { } woundType &&
+            result.Severity is { } severity)
+        {
+            // Secondary systems consume the accepted result instead of competing for the trauma-request subscription.
+            var applied = new NCWoundImpactAppliedEvent(
+                args.Request,
+                woundType,
+                severity,
+                result.ExternalBleedRate);
+            RaiseLocalEvent(entity.Owner, ref applied);
+        }
     }
 
     /// <summary>
@@ -216,7 +232,15 @@ public sealed partial class NCWoundSystem : EntitySystem
         {
             _bleeding.SynchronizeWoundSources(body, merged);
             MarkChanged(body, medical);
-            return new NCWoundApplicationResult(true, false, true, false, merged.WoundId);
+            return new NCWoundApplicationResult(
+                true,
+                false,
+                true,
+                false,
+                merged.WoundId,
+                WoundType: wound.WoundType,
+                Severity: severity,
+                ExternalBleedRate: wound.ExternalBleedRate);
         }
 
         var capacity = Math.Max(1, systemProfile.MaxActiveWounds);
@@ -234,7 +258,15 @@ public sealed partial class NCWoundSystem : EntitySystem
                 wound.InternalBleedRate + (exitWound?.InternalBleedRate ?? 0f),
                 wound.RegionCategory);
             MarkChanged(body, medical);
-            return new NCWoundApplicationResult(true, false, false, true, null);
+            return new NCWoundApplicationResult(
+                true,
+                false,
+                false,
+                true,
+                null,
+                WoundType: wound.WoundType,
+                Severity: severity,
+                ExternalBleedRate: wound.ExternalBleedRate + (exitWound?.ExternalBleedRate ?? 0f));
         }
 
         container.Wounds.Add(wound.WoundId, wound);
@@ -261,7 +293,15 @@ public sealed partial class NCWoundSystem : EntitySystem
                 exitWound.WoundType);
             RaiseLocalEvent(body, ref exitCreated);
         }
-        return new NCWoundApplicationResult(true, true, false, false, wound.WoundId);
+        return new NCWoundApplicationResult(
+            true,
+            true,
+            false,
+            false,
+            wound.WoundId,
+            WoundType: wound.WoundType,
+            Severity: severity,
+            ExternalBleedRate: wound.ExternalBleedRate + (exitWound?.ExternalBleedRate ?? 0f));
     }
 
     public NCWoundContainerComponent EnsureInitialized(EntityUid body)
@@ -771,7 +811,10 @@ public readonly record struct NCWoundApplicationResult(
     bool Merged,
     bool Overflowed,
     Guid? WoundId,
-    bool MechanicalDamage = false)
+    bool MechanicalDamage = false,
+    NCWoundType? WoundType = null,
+    NCWoundSeverity? Severity = null,
+    float ExternalBleedRate = 0f)
 {
     public static NCWoundApplicationResult Rejected => new(false, false, false, false, null);
     public static NCWoundApplicationResult Duplicate => new(true, false, false, false, null);

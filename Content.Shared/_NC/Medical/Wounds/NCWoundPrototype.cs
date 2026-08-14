@@ -4,6 +4,7 @@
 
 using Content.Shared._NC.Medical.Trauma;
 using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Bleeding;
 using Content.Shared._NC.Medical.Systemic;
 using Robust.Shared.Prototypes;
 
@@ -161,6 +162,9 @@ public sealed partial class NCWoundSystemProfilePrototype : IPrototype
 
     [DataField(required: true)]
     public ProtoId<NCWoundProgressionProfilePrototype> ProgressionProfile { get; private set; }
+
+    [DataField(required: true)]
+    public ProtoId<NCImpactBloodProfilePrototype> ImpactBloodProfile { get; private set; }
 
     [DataField(required: true)]
     public Dictionary<NCWoundSeverity, NCBoneState> BoneStateBySeverity { get; private set; } = new();

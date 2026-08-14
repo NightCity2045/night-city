@@ -5,6 +5,7 @@
 using System.Numerics;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
+using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
 using Content.Shared.Damage;
 using Content.Shared.FixedPoint;
@@ -66,7 +67,10 @@ public record struct NCCombatTraumaRequestedEvent(
     NCCombatTraumaRequest Request,
     bool Handled = false,
     bool Applied = false,
-    bool Cancelled = false);
+    bool Cancelled = false,
+    NCWoundType? AppliedWoundType = null,
+    NCWoundSeverity? AppliedSeverity = null,
+    float AppliedExternalBleedRate = 0f);
 
 /// <summary>
 /// Small result shared with audit and feedback systems. Detailed wound records remain server-only.

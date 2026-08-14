@@ -3,19 +3,28 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
+using Content.Server.Decals;
 using Content.Server._NC.Medical.Anatomy.Detachment;
 using Content.Server._NC.Medical.Bleeding;
 using Content.Server._NC.Medical.Emergency;
 using Content.Server._NC.Medical.Physiology;
 using Content.Server.Body.Systems;
 using Content.Server.Fluids.EntitySystems;
+using Content.Shared._NC.ActionResolution;
+using Content.Shared._NC.Medical.Trauma;
+using Content.Shared._NC.Medical.Wounds;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Bleeding;
 using Content.Shared._NC.Medical.Emergency;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared.Body.Components;
+using Content.Shared.Damage;
+using Content.Shared.Decals;
+using Content.Shared.FixedPoint;
 using Content.Shared.Fluids.Components;
 using Content.Shared.Maps;
 using Robust.Shared.GameObjects;
@@ -88,6 +97,48 @@ public sealed class NCBloodIntegrationTest : GameTest
                 Is.EqualTo(20f).Within(0.01f));
             Assert.That(Server.EntMan.GetComponent<BloodstreamComponent>(external).BleedAmount, Is.Zero,
                 "Legacy BleedAmount must never cause a second loss pass.");
+        });
+
+        await Server.WaitPost(() => Server.EntMan.DeleteEntity(map.MapUid));
+    }
+
+    [Test]
+    public async Task ImpactBloodCreatesOneBoundedCleanableDecalExactlyOnce()
+    {
+        var map = await Pair.CreateTestMap();
+
+        await Server.WaitPost(() =>
+        {
+            var body = Server.EntMan.SpawnAtPosition(HumanMob, map.GridCoords);
+            var request = CreateBallisticRequest(body);
+            var first = new NCCombatTraumaRequestedEvent(request);
+            Server.EntMan.EventBus.RaiseLocalEvent(body, ref first);
+
+            var decals = Server.System<DecalSystem>().GetDecalsInRange(
+                map.Grid.Owner,
+                map.GridCoords.Position,
+                2f,
+                decal => decal.Id == "splatter");
+            Assert.Multiple(() =>
+            {
+                Assert.That(first.Applied, Is.True);
+                Assert.That(decals, Has.Count.EqualTo(1));
+                Assert.That(decals.Single().Decal.Cleanable, Is.True);
+            });
+
+            var duplicate = new NCCombatTraumaRequestedEvent(request);
+            Server.EntMan.EventBus.RaiseLocalEvent(body, ref duplicate);
+            decals = Server.System<DecalSystem>().GetDecalsInRange(
+                map.Grid.Owner,
+                map.GridCoords.Position,
+                2f,
+                decal => decal.Id == "splatter");
+            Assert.Multiple(() =>
+            {
+                Assert.That(duplicate.Applied, Is.False);
+                Assert.That(decals, Has.Count.EqualTo(1),
+                    "Replaying one impact must not create another persistent decal.");
+            });
         });
 
         await Server.WaitPost(() => Server.EntMan.DeleteEntity(map.MapUid));
@@ -210,5 +261,30 @@ public sealed class NCBloodIntegrationTest : GameTest
         }
 
         return null;
+    }
+
+    private static NCCombatTraumaRequest CreateBallisticRequest(EntityUid body)
+    {
+        return new NCCombatTraumaRequest(
+            NCActionResolutionId.New(),
+            1,
+            1,
+            body,
+            null,
+            null,
+            null,
+            "NCZoneLegLeft",
+            "LegLeft",
+            "BallisticImpact",
+            new DamageSpecifier(),
+            FixedPoint2.New(10),
+            FixedPoint2.Zero,
+            FixedPoint2.New(10),
+            FixedPoint2.Zero,
+            Vector2.Zero,
+            Vector2.UnitX,
+            NCTraumaFlags.ArmorPenetrated,
+            0.1f,
+            TimeSpan.Zero);
     }
 }
