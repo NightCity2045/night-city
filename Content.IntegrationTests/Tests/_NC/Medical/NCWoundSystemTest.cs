@@ -188,6 +188,9 @@ public sealed class NCWoundSystemTest : GameTest
             Assert.That(profile.DecalsBySeverity.Values, Is.All.GreaterThanOrEqualTo(0));
             Assert.That(profile.MaximumDecalsPerImpact, Is.InRange(0, 4));
             Assert.That(profile.MaximumNearbyDecals, Is.InRange(1, 16));
+            Assert.That(profile.MaximumSurfaceStainsPerEntity, Is.InRange(1, 24));
+            Assert.That(profile.MaximumActiveSurfaceEntities, Is.InRange(1, 512));
+            Assert.That(profile.SurfaceStainScale, Is.InRange(0.1f, 1f));
             Assert.That(profile.MaximumClientBursts, Is.InRange(1, 128));
             Assert.That(profile.EffectDuration, Is.GreaterThan(TimeSpan.Zero));
             Assert.That(profile.SprayDistance, Is.GreaterThan(0f));

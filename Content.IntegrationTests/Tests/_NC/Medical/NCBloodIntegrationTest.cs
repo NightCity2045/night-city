@@ -27,9 +27,13 @@ using Content.Shared.Decals;
 using Content.Shared.FixedPoint;
 using Content.Shared.Fluids.Components;
 using Content.Shared.Maps;
+using Content.Shared.Physics;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Maths;
+using Robust.Shared.Physics;
+using Robust.Shared.Physics.Systems;
 using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._NC.Medical;
@@ -106,39 +110,140 @@ public sealed class NCBloodIntegrationTest : GameTest
     public async Task ImpactBloodCreatesOneBoundedCleanableDecalExactlyOnce()
     {
         var map = await Pair.CreateTestMap();
+        EntityUid body = default;
 
         await Server.WaitPost(() =>
         {
-            var body = Server.EntMan.SpawnAtPosition(HumanMob, map.GridCoords);
+            var mapSystem = Server.System<SharedMapSystem>();
+            for (var x = -1; x <= 3; x++)
+            {
+                for (var y = -2; y <= 2; y++)
+                    mapSystem.SetTile(map.Grid.Owner, map.Grid.Comp, new Vector2i(x, y), new Tile(1));
+            }
+
+            body = Server.EntMan.SpawnAtPosition(HumanMob, map.GridCoords);
+        });
+        await Server.WaitRunTicks(1);
+
+        await Server.WaitPost(() =>
+        {
             var request = CreateBallisticRequest(body);
             var first = new NCCombatTraumaRequestedEvent(request);
             Server.EntMan.EventBus.RaiseLocalEvent(body, ref first);
 
-            var decals = Server.System<DecalSystem>().GetDecalsInRange(
+            var allDecals = Server.System<DecalSystem>().GetDecalsIntersecting(
                 map.Grid.Owner,
-                map.GridCoords.Position,
-                2f,
-                decal => decal.Id == "splatter");
+                new Box2(-4f, -4f, 4f, 4f));
+            var decals = allDecals
+                .Where(decal => decal.Decal.Id.StartsWith("NCBlood", StringComparison.Ordinal))
+                .ToList();
             Assert.Multiple(() =>
             {
                 Assert.That(first.Applied, Is.True);
-                Assert.That(decals, Has.Count.EqualTo(1));
+                Assert.That(first.AppliedExternalBleedRate, Is.GreaterThan(0f),
+                    "The fixture must create an externally bleeding wound before visual blood is asserted.");
+                Assert.That(decals, Has.Count.EqualTo(1),
+                    $"Nearby decals: {string.Join(", ", allDecals.Select(decal => decal.Decal.Id))}");
                 Assert.That(decals.Single().Decal.Cleanable, Is.True);
             });
 
             var duplicate = new NCCombatTraumaRequestedEvent(request);
             Server.EntMan.EventBus.RaiseLocalEvent(body, ref duplicate);
-            decals = Server.System<DecalSystem>().GetDecalsInRange(
+            allDecals = Server.System<DecalSystem>().GetDecalsIntersecting(
                 map.Grid.Owner,
-                map.GridCoords.Position,
-                2f,
-                decal => decal.Id == "splatter");
+                new Box2(-4f, -4f, 4f, 4f));
+            decals = allDecals
+                .Where(decal => decal.Decal.Id.StartsWith("NCBlood", StringComparison.Ordinal))
+                .ToList();
             Assert.Multiple(() =>
             {
                 Assert.That(duplicate.Applied, Is.False);
                 Assert.That(decals, Has.Count.EqualTo(1),
                     "Replaying one impact must not create another persistent decal.");
             });
+        });
+
+        await Server.WaitPost(() => Server.EntMan.DeleteEntity(map.MapUid));
+    }
+
+    [Test]
+    public async Task ImpactBloodSettlesOnClosedWallBeforeFloorEndpoint()
+    {
+        var map = await Pair.CreateTestMap();
+        EntityUid body = default;
+        var walls = new List<EntityUid>();
+
+        await Server.WaitPost(() =>
+        {
+            body = Server.EntMan.SpawnAtPosition(HumanMob, map.GridCoords);
+        });
+        await Server.WaitRunTicks(1);
+
+        await Server.WaitPost(() =>
+        {
+            var transform = Server.System<SharedTransformSystem>();
+            var bodyMap = transform.GetMapCoordinates(body);
+            var gridTransform = Server.EntMan.GetComponent<TransformComponent>(map.Grid.Owner);
+            for (var y = -1; y <= 1; y++)
+            {
+                var wallMap = new MapCoordinates(
+                    new Vector2(
+                        MathF.Floor(bodyMap.Position.X) + 1.5f,
+                        MathF.Floor(bodyMap.Position.Y) + 0.5f + y),
+                    bodyMap.MapId);
+                var wallCoordinates = transform.ToCoordinates((map.Grid.Owner, gridTransform), wallMap);
+                walls.Add(Server.EntMan.SpawnAtPosition("WallSolid", wallCoordinates));
+            }
+        });
+        await Server.WaitRunTicks(1);
+
+        await Server.WaitPost(() =>
+        {
+            var transform = Server.System<SharedTransformSystem>();
+            var bodyMap = transform.GetMapCoordinates(body);
+            var hits = Server.System<SharedPhysicsSystem>().IntersectRayWithPredicate(
+                bodyMap.MapId,
+                new CollisionRay(bodyMap.Position, Vector2.UnitX, (int) CollisionGroup.BulletImpassable),
+                maxLength: 2f,
+                predicate: uid => !walls.Contains(uid),
+                returnOnFirstHit: true).ToList();
+            Assert.That(hits.Any(hit => walls.Contains(hit.HitEntity)), Is.True,
+                $"The test wall row must be raycastable from body={bodyMap.Position}.");
+
+            var request = CreateBallisticRequest(body);
+            var trauma = new NCCombatTraumaRequestedEvent(request);
+            Server.EntMan.EventBus.RaiseLocalEvent(body, ref trauma);
+
+            var stainedSurfaces = new List<NCBloodStainSurfaceComponent>();
+            foreach (var wall in walls)
+            {
+                if (Server.EntMan.TryGetComponent<NCBloodStainSurfaceComponent>(wall, out var surface))
+                    stainedSurfaces.Add(surface);
+            }
+
+            var stainedSurface = stainedSurfaces.SingleOrDefault();
+            Assert.Multiple(() =>
+            {
+                Assert.That(trauma.Applied, Is.True);
+                Assert.That(stainedSurfaces, Has.Count.EqualTo(1),
+                    "A closed wall intersecting the spray ray must own the persistent mark.");
+                Assert.That(stainedSurface?.Stains, Has.Count.EqualTo(1));
+                Assert.That(stainedSurface?.Stains[0].LocalPosition.X, Is.InRange(-0.55f, 0.55f));
+                Assert.That(stainedSurface?.Stains[0].LocalPosition.Y, Is.InRange(-0.55f, 0.55f));
+
+                var floorDecals = Server.System<DecalSystem>().GetDecalsIntersecting(
+                        map.Grid.Owner,
+                        new Box2(-4f, -4f, 4f, 4f))
+                    .Where(decal => decal.Decal.Id.StartsWith("NCBlood", StringComparison.Ordinal));
+                Assert.That(floorDecals, Is.Empty,
+                    "The same persistent mark must not be duplicated on the floor after hitting a wall.");
+            });
+
+            var impactBlood = Server.System<NCImpactBloodSystem>();
+            var stainedWall = walls.Single(impactBlood.HasSurfaceStains);
+            Assert.That(impactBlood.TryCleanSurface(stainedWall), Is.True);
+            Assert.That(impactBlood.HasSurfaceStains(stainedWall), Is.False,
+                "The completed standard cleaning action must be able to clear all attached marks.");
         });
 
         await Server.WaitPost(() => Server.EntMan.DeleteEntity(map.MapUid));
@@ -266,7 +371,7 @@ public sealed class NCBloodIntegrationTest : GameTest
     private static NCCombatTraumaRequest CreateBallisticRequest(EntityUid body)
     {
         return new NCCombatTraumaRequest(
-            NCActionResolutionId.New(),
+            new NCActionResolutionId(new Guid("00000001-0000-0000-0000-000000000000")),
             1,
             1,
             body,

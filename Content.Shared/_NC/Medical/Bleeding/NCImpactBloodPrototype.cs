@@ -75,6 +75,24 @@ public sealed partial class NCImpactBloodProfilePrototype : IPrototype
     [DataField]
     public float NearbyDecalRadius { get; private set; } = 0.9f;
 
+    /// <summary>
+    /// Maximum compact marks retained on one wall, window or door. Oldest marks are replaced first.
+    /// </summary>
+    [DataField]
+    public int MaximumSurfaceStainsPerEntity { get; private set; } = 10;
+
+    /// <summary>
+    /// Global round cap for stained structures. The server evicts the least recently stained surface first.
+    /// </summary>
+    [DataField]
+    public int MaximumActiveSurfaceEntities { get; private set; } = 256;
+
+    /// <summary>
+    /// Scales floor-oriented decal artwork down to a readable mark on a one-tile vertical structure.
+    /// </summary>
+    [DataField]
+    public float SurfaceStainScale { get; private set; } = 0.72f;
+
     [DataField]
     public int MaximumClientBursts { get; private set; } = 64;
 }

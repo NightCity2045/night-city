@@ -11,6 +11,7 @@ using Content.Shared._NC.Medical.Trauma;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Decals;
 using Robust.Shared.Map;
+using Robust.Shared.Maths;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 
@@ -35,6 +36,7 @@ public sealed partial class NCImpactBloodSystem : EntitySystem
 
         // WoundSystem is the sole trauma-request owner and emits this event only after exactly-once acceptance.
         SubscribeLocalEvent<NCMedicalBodyComponent, NCWoundImpactAppliedEvent>(OnWoundImpactApplied);
+        InitializeSurfaceStains();
     }
 
     private void OnWoundImpactApplied(
@@ -117,13 +119,8 @@ public sealed partial class NCImpactBloodSystem : EntitySystem
         int requestedCount,
         float distanceMultiplier)
     {
-        if (requestedCount <= 0 ||
-            profile.MaximumNearbyDecals <= 0 ||
-            !float.IsFinite(profile.NearbyDecalRadius) ||
-            profile.NearbyDecalRadius <= 0f)
-        {
+        if (requestedCount <= 0)
             return;
-        }
 
         var originMap = _transform.ToMapCoordinates(origin);
         if (originMap.MapId == MapId.Nullspace)
@@ -135,13 +132,9 @@ public sealed partial class NCImpactBloodSystem : EntitySystem
 
         var gridTransform = Transform(grid);
         var localOrigin = _transform.ToCoordinates((grid, gridTransform), originMap);
-        var nearby = _decals.GetDecalsInRange(
-            grid,
-            localOrigin.Position,
-            profile.NearbyDecalRadius,
-            decal => IsImpactDecal(profile, decal.Id)).Count;
-        var remaining = Math.Max(0, profile.MaximumNearbyDecals - nearby);
-        var count = Math.Min(requestedCount, remaining);
+        var nearby = CountNearbyImpactDecals(grid, localOrigin.Position, profile);
+        var floorRemaining = Math.Max(0, profile.MaximumNearbyDecals - nearby);
+        var count = Math.Min(requestedCount, Math.Max(0, profile.MaximumDecalsPerImpact));
 
         for (var index = 0; index < count; index++)
         {
@@ -177,6 +170,29 @@ public sealed partial class NCImpactBloodSystem : EntitySystem
             var angle = useStreak
                 ? sprayDirection.ToWorldAngle()
                 : new Angle(NCImpactBloodRules.Sample01(seed, (uint) index + 0x200u) * MathF.Tau);
+
+            var sizeSample = NCImpactBloodRules.Sample01(seed, (uint) index + 0x240u);
+            var surfaceSize = useStreak
+                ? new Vector2(
+                    pattern.StreakWidth * (0.82f + sizeSample * 0.36f),
+                    pattern.SplatSize * pattern.StreakLengthMultiplier * (0.72f + sizeSample * 0.38f))
+                : new Vector2(pattern.SplatSize * (0.78f + sizeSample * 0.36f));
+            surfaceSize *= profile.SurfaceStainScale;
+            if (TryDepositSurfaceStain(
+                    originMap,
+                    sprayDirection,
+                    distance,
+                    decal,
+                    angle,
+                    surfaceSize,
+                    profile))
+            {
+                continue;
+            }
+
+            if (floorRemaining <= 0)
+                continue;
+
             _decals.TryAddDecal(
                 decal.Id,
                 coordinates,
@@ -185,7 +201,42 @@ public sealed partial class NCImpactBloodSystem : EntitySystem
                 angle,
                 zIndex: 5,
                 cleanable: true);
+            floorRemaining--;
         }
+    }
+
+    /// <summary>
+    /// Counts stains across every intersecting decal chunk. The vanilla range helper only reads the chunk
+    /// containing the query point, which would allow the bounded blood budget to be bypassed at chunk borders.
+    /// </summary>
+    private int CountNearbyImpactDecals(
+        EntityUid grid,
+        Vector2 center,
+        NCImpactBloodProfilePrototype profile)
+    {
+        if (profile.MaximumNearbyDecals <= 0 ||
+            !float.IsFinite(profile.NearbyDecalRadius) ||
+            profile.NearbyDecalRadius <= 0f)
+        {
+            return profile.MaximumNearbyDecals;
+        }
+
+        var radius = profile.NearbyDecalRadius;
+        var extent = new Vector2(radius);
+        var radiusSquared = radius * radius;
+        var count = 0;
+        foreach (var (_, decal) in _decals.GetDecalsIntersecting(grid, new Box2(center - extent, center + extent)))
+        {
+            if (!IsImpactDecal(profile, decal.Id))
+                continue;
+
+            // Decal coordinates describe their tile corner; use the same center convention as DecalSystem.
+            var decalCenter = decal.Coordinates + new Vector2(0.5f);
+            if (Vector2.DistanceSquared(center, decalCenter) <= radiusSquared)
+                count++;
+        }
+
+        return count;
     }
 
     /// <summary>

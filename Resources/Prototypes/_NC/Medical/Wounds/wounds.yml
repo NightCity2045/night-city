@@ -252,6 +252,9 @@
   maximumDecalsPerImpact: 3
   maximumNearbyDecals: 8
   nearbyDecalRadius: 2
+  maximumSurfaceStainsPerEntity: 10
+  maximumActiveSurfaceEntities: 256
+  surfaceStainScale: 0.72
   maximumClientBursts: 64
 
 - type: ncWound
