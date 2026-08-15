@@ -180,7 +180,7 @@ public sealed class NCCombatTraumaDeliveryTest : GameTest
         var exitImpact = CreateSelectedImpact(
             exitBody,
             Guid.Parse("68fc98ad-daaa-4057-a7c3-655a0dbd5900"),
-            new DamageSpecifier(_prototypes.Index(piercingId), 16));
+            new DamageSpecifier(_prototypes.Index(piercingId), 18));
         Assert.That(_delivery.TryDeliver(exitImpact, out var exitDelivery), Is.True);
         var exitWounds = SComp<NCWoundContainerComponent>(exitBody).Wounds.Values.ToArray();
         Assert.Multiple(() =>

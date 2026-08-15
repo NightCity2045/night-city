@@ -47,6 +47,7 @@ public sealed partial class NCImpactBloodSystem : EntitySystem
             !_prototypes.TryIndex(wounds.Profile, out NCWoundSystemProfilePrototype? woundSystem) ||
             !_prototypes.TryIndex(woundSystem.ImpactBloodProfile, out NCImpactBloodProfilePrototype? profile) ||
             !profile.WoundTypes.Contains(args.WoundType) ||
+            !profile.Patterns.TryGetValue(args.WoundType, out var pattern) ||
             !profile.BloodLossBySeverity.TryGetValue(args.Severity, out var requestedLoss) ||
             !float.IsFinite(requestedLoss) ||
             requestedLoss <= 0f)
@@ -68,20 +69,24 @@ public sealed partial class NCImpactBloodSystem : EntitySystem
         var origin = ResolveOrigin(entity, args.Request.TargetLocalHitPosition);
         var originMap = _transform.ToMapCoordinates(origin);
 
-        var configuredDroplets = profile.DropletsBySeverity.GetValueOrDefault(args.Severity);
-        var dropletCount = (byte) Math.Clamp(
-            (int) MathF.Ceiling(configuredDroplets * intensity),
-            0,
-            byte.MaxValue);
-        if (dropletCount > 0 && originMap.MapId != MapId.Nullspace)
+        var dropletCount = ScaleCount(profile.DropletsBySeverity.GetValueOrDefault(args.Severity), intensity);
+        var splatCount = ScaleCount(
+            pattern.SplatsBySeverity.GetValueOrDefault(args.Severity),
+            intensity);
+        var streakCount = ScaleCount(pattern.StreaksBySeverity.GetValueOrDefault(args.Severity), intensity);
+        if ((dropletCount > 0 || splatCount > 0 || streakCount > 0) &&
+            originMap.MapId != MapId.Nullspace)
         {
             RaiseNetworkEvent(
                 new NCImpactBloodEffectEvent(
                     GetNetCoordinates(origin),
                     direction,
                     woundSystem.ImpactBloodProfile,
+                    args.WoundType,
                     seed,
                     dropletCount,
+                    splatCount,
+                    streakCount,
                     distanceMultiplier),
                 Filter.Pvs(origin, entityMan: EntityManager));
         }
@@ -91,7 +96,7 @@ public sealed partial class NCImpactBloodSystem : EntitySystem
             (int) MathF.Ceiling(configuredDecals * intensity),
             0,
             Math.Max(0, profile.MaximumDecalsPerImpact));
-        AddDecals(origin, direction, profile, seed, decalCount, distanceMultiplier);
+        AddDecals(origin, direction, profile, pattern, seed, decalCount, distanceMultiplier);
     }
 
     private EntityCoordinates ResolveOrigin(EntityUid body, Vector2 requestedLocalHit)
@@ -107,6 +112,7 @@ public sealed partial class NCImpactBloodSystem : EntitySystem
         EntityCoordinates origin,
         Vector2 direction,
         NCImpactBloodProfilePrototype profile,
+        NCImpactBloodPattern pattern,
         ulong seed,
         int requestedCount,
         float distanceMultiplier)
@@ -133,34 +139,76 @@ public sealed partial class NCImpactBloodSystem : EntitySystem
             grid,
             localOrigin.Position,
             profile.NearbyDecalRadius,
-            decal => decal.Id == profile.Decal.Id).Count;
+            decal => IsImpactDecal(profile, decal.Id)).Count;
         var remaining = Math.Max(0, profile.MaximumNearbyDecals - nearby);
         var count = Math.Min(requestedCount, remaining);
 
         for (var index = 0; index < count; index++)
         {
-            var sprayDirection = NCImpactBloodRules.SampleDirection(
+            var sprayDirection = NCImpactBloodRules.SamplePatternDirection(
                 direction,
-                profile.SprayConeDegrees,
+                pattern.Kind,
+                pattern.DirectionOffsetDegrees,
+                pattern.ConeDegrees,
                 seed,
                 (uint) index);
+            var useStreak = pattern.StreakDecals.Count > 0 &&
+                            (pattern.SplatDecals.Count == 0 ||
+                             NCImpactBloodRules.Sample01(seed, (uint) index + 0x180u) <
+                             pattern.PersistentStreakFraction);
+            var candidates = useStreak ? pattern.StreakDecals : pattern.SplatDecals;
+            if (candidates.Count == 0)
+                continue;
+
+            var decalIndex = NCImpactBloodRules.PickIndex(candidates.Count, seed, (uint) index + 0x1C0u);
+            var decal = candidates[decalIndex];
             var distanceSample = NCImpactBloodRules.Sample01(seed, (uint) index + 0x100u);
             var distance = MathF.Max(0f, profile.SprayDistance) *
+                           MathF.Max(0f, pattern.DistanceMultiplier) *
                            MathF.Max(0f, distanceMultiplier) *
                            (0.35f + distanceSample * 0.65f);
+            if (useStreak)
+                distance *= 0.55f;
+
             var mapPosition = originMap.Position + sprayDirection * distance;
             var coordinates = _transform.ToCoordinates(
                 (grid, gridTransform),
                 new MapCoordinates(mapPosition, originMap.MapId));
+            var angle = useStreak
+                ? sprayDirection.ToWorldAngle()
+                : new Angle(NCImpactBloodRules.Sample01(seed, (uint) index + 0x200u) * MathF.Tau);
             _decals.TryAddDecal(
-                profile.Decal.Id,
+                decal.Id,
                 coordinates,
                 out _,
-                profile.Color,
-                sprayDirection.ToAngle(),
+                profile.DecalColor,
+                angle,
                 zIndex: 5,
                 cleanable: true);
         }
+    }
+
+    /// <summary>
+    /// Counts only this profile's bounded decal set; unrelated map decals never consume the impact budget.
+    /// </summary>
+    private static bool IsImpactDecal(NCImpactBloodProfilePrototype profile, string id)
+    {
+        foreach (var pattern in profile.Patterns.Values)
+        {
+            foreach (var decal in pattern.SplatDecals)
+            {
+                if (decal.Id == id)
+                    return true;
+            }
+
+            foreach (var decal in pattern.StreakDecals)
+            {
+                if (decal.Id == id)
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     private static Vector2 ResolveDirection(
@@ -171,6 +219,14 @@ public sealed partial class NCImpactBloodSystem : EntitySystem
             ? requested.Normalized()
             : Vector2.UnitY;
         return disposition == NCTraumaProjectileDisposition.Embedded ? -direction : direction;
+    }
+
+    private static byte ScaleCount(int configured, float intensity)
+    {
+        return (byte) Math.Clamp(
+            (int) MathF.Ceiling(Math.Max(0, configured) * Math.Clamp(intensity, 0f, 1f)),
+            0,
+            byte.MaxValue);
     }
 
     private static bool IsFinite(Vector2 value)

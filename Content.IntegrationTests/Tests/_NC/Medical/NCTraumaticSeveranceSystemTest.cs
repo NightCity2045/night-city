@@ -70,6 +70,150 @@ public sealed class NCTraumaticSeveranceSystemTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
+    public void ShotgunPelletsFromOneActionAggregateInsideOneLimb()
+    {
+        var body = SSpawn(HumanMob);
+        var action = NCActionResolutionId.New();
+
+        for (uint projectile = 0; projectile < 2; projectile++)
+        {
+            var impact = new NCCombatTraumaRequestedEvent(CreateRequest(
+                body,
+                "NCZoneLegLeft",
+                "LegLeft",
+                "BallisticProjectile",
+                10f,
+                action,
+                projectile));
+            SEntMan.EventBus.RaiseLocalEvent(body, ref impact);
+            Assert.Multiple(() =>
+            {
+                Assert.That(impact.Applied, Is.True);
+                Assert.That(_anatomy.TryGetOrgan(body, "LegLeft", out _), Is.True);
+            });
+        }
+
+        var finishingPellet = new NCCombatTraumaRequestedEvent(CreateRequest(
+            body,
+            "NCZoneLegLeft",
+            "LegLeft",
+            "BallisticProjectile",
+            10f,
+            action,
+            2));
+        SEntMan.EventBus.RaiseLocalEvent(body, ref finishingPellet);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(finishingPellet.Applied, Is.True);
+            Assert.That(_anatomy.TryGetOrgan(body, "LegLeft", out _), Is.False);
+            Assert.That(_anatomy.TryGetOrgan(body, "FootLeft", out _), Is.False);
+            Assert.That(SComp<NCWoundContainerComponent>(body).Wounds.Values.Count(wound =>
+                wound.WoundType == NCWoundType.Amputation), Is.EqualTo(1));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void PelletTraumaDoesNotAggregateAcrossRegionsAndArmorKeepsStructureSafe()
+    {
+        var splitBody = SSpawn(HumanMob);
+        var splitAction = NCActionResolutionId.New();
+        for (uint projectile = 0; projectile < 4; projectile++)
+        {
+            var left = projectile % 2 == 0;
+            var impact = new NCCombatTraumaRequestedEvent(CreateRequest(
+                splitBody,
+                left ? "NCZoneLegLeft" : "NCZoneLegRight",
+                left ? "LegLeft" : "LegRight",
+                "BallisticProjectile",
+                10f,
+                splitAction,
+                projectile));
+            SEntMan.EventBus.RaiseLocalEvent(splitBody, ref impact);
+        }
+
+        var armoredBody = SSpawn(HumanMob);
+        var armoredAction = NCActionResolutionId.New();
+        for (uint projectile = 0; projectile < 6; projectile++)
+        {
+            var impact = new NCCombatTraumaRequestedEvent(CreateRequest(
+                armoredBody,
+                "NCZoneArmRight",
+                "ArmRight",
+                "BallisticProjectile",
+                6f,
+                armoredAction,
+                projectile));
+            SEntMan.EventBus.RaiseLocalEvent(armoredBody, ref impact);
+        }
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_anatomy.TryGetOrgan(splitBody, "LegLeft", out _), Is.True);
+            Assert.That(_anatomy.TryGetOrgan(splitBody, "LegRight", out _), Is.True);
+            Assert.That(_anatomy.TryGetOrgan(armoredBody, "ArmRight", out _), Is.True);
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void RepeatedOrdinaryCutsOnlyDetachAnAlreadyMangledLimb()
+    {
+        var body = SSpawn(HumanMob);
+
+        for (var cut = 0; cut < 6; cut++)
+        {
+            var impact = new NCCombatTraumaRequestedEvent(CreateRequest(
+                body,
+                "NCZoneArmLeft",
+                "ArmLeft",
+                "SlashingImpact",
+                10f));
+            SEntMan.EventBus.RaiseLocalEvent(body, ref impact);
+            Assert.That(_anatomy.TryGetOrgan(body, "ArmLeft", out _), Is.True,
+                $"Ordinary cut {cut + 1} detached the limb before the mangled-state gate.");
+        }
+
+        var finishingCut = new NCCombatTraumaRequestedEvent(CreateRequest(
+            body,
+            "NCZoneArmLeft",
+            "ArmLeft",
+            "SlashingImpact",
+            10f));
+        SEntMan.EventBus.RaiseLocalEvent(body, ref finishingCut);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(finishingCut.Applied, Is.True);
+            Assert.That(_anatomy.TryGetOrgan(body, "ArmLeft", out _), Is.False);
+            Assert.That(_anatomy.TryGetOrgan(body, "HandLeft", out _), Is.False);
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void HeavyChoppingImpactCanDetachAnUnprotectedLimb()
+    {
+        var body = SSpawn(HumanMob);
+        var impact = new NCCombatTraumaRequestedEvent(CreateRequest(
+            body,
+            "NCZoneArmRight",
+            "ArmRight",
+            "SlashingImpact",
+            20f));
+        SEntMan.EventBus.RaiseLocalEvent(body, ref impact);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(impact.Applied, Is.True);
+            Assert.That(_anatomy.TryGetOrgan(body, "ArmRight", out _), Is.False);
+            Assert.That(_anatomy.TryGetOrgan(body, "HandRight", out _), Is.False);
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
     public void CatastrophicBlastDetachesLiveSubtreeAndCreatesTreatableArterialStump()
     {
         var body = SSpawn(HumanMob);
@@ -120,6 +264,15 @@ public sealed class NCTraumaticSeveranceSystemTest : GameTest
             Assert.That(profile.Regions.Keys.All(key => key.Id is not "Head" and not "Torso"), Is.True);
             Assert.That(profile.Mechanisms.Keys,
                 Is.EquivalentTo(new[] { NCWoundType.Ballistic, NCWoundType.Slash, NCWoundType.Blast, NCWoundType.Blunt }));
+            Assert.That(profile.Mechanisms.Values.All(mechanism =>
+                NCTraumaticSeveranceRules.IsValid(mechanism.Impact) &&
+                NCTraumaticSeveranceRules.IsValid(mechanism.MechanicalImpact) &&
+                (mechanism.CompoundAction == null || NCTraumaticSeveranceRules.IsValid(mechanism.CompoundAction)) &&
+                (mechanism.MangledFinisher == null || NCTraumaticSeveranceRules.IsValid(mechanism.MangledFinisher)) &&
+                (mechanism.MechanicalCompoundAction == null ||
+                 NCTraumaticSeveranceRules.IsValid(mechanism.MechanicalCompoundAction)) &&
+                (mechanism.MechanicalMangledFinisher == null ||
+                 NCTraumaticSeveranceRules.IsValid(mechanism.MechanicalMangledFinisher))), Is.True);
             Assert.That(profile.Regions.Values.All(rule =>
                 float.IsFinite(rule.StumpTrauma) && rule.StumpTrauma > 0f &&
                 float.IsFinite(rule.MechanicalStumpTraumaMultiplier) &&
@@ -133,6 +286,7 @@ public sealed class NCTraumaticSeveranceSystemTest : GameTest
                 ballistic,
                 NCWoundSeverity.Severe,
                 14f,
+                14f,
                 0.1f,
                 NCAnatomicalMaterialKind.Organic,
                 NCBoneState.Shattered,
@@ -140,6 +294,7 @@ public sealed class NCTraumaticSeveranceSystemTest : GameTest
             Assert.That(NCTraumaticSeveranceRules.CanSever(
                 ballistic,
                 NCWoundSeverity.Catastrophic,
+                28f,
                 28f,
                 0.79f,
                 NCAnatomicalMaterialKind.Organic,
@@ -172,12 +327,15 @@ public sealed class NCTraumaticSeveranceSystemTest : GameTest
         ProtoId<NCTargetZonePrototype> zone,
         ProtoId<OrganCategoryPrototype> region,
         ProtoId<NCTraumaProfilePrototype> traumaProfile,
-        float postArmorDamage)
+        float postArmorDamage,
+        NCActionResolutionId? resolutionId = null,
+        uint projectileSequence = 1,
+        uint impactSequence = 1)
     {
         return new NCCombatTraumaRequest(
-            NCActionResolutionId.New(),
-            1,
-            1,
+            resolutionId ?? NCActionResolutionId.New(),
+            projectileSequence,
+            impactSequence,
             body,
             null,
             null,

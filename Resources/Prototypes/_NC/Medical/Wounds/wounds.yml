@@ -139,27 +139,119 @@
     Catastrophic: 75
   dropletsBySeverity:
     Minor: 0
-    Moderate: 4
-    Severe: 7
-    Critical: 10
-    Catastrophic: 14
+    Moderate: 2
+    Severe: 3
+    Critical: 5
+    Catastrophic: 7
   decalsBySeverity:
     Minor: 0
-    Moderate: 0
+    Moderate: 1
     Severe: 1
     Critical: 2
     Catastrophic: 3
-  decal: splatter
-  color: '#720909CC'
-  effectDuration: 0.5s
-  sprayDistance: 1.35
-  sprayConeDegrees: 38
+  patterns:
+    Ballistic:
+      kind: Directed
+      splatDecals: [ NCBloodSplat0, NCBloodSplat1, NCBloodSplat2, NCBloodSplat3, NCBloodSplat4, NCBloodSplat5 ]
+      streakDecals: [ NCBloodStreakShort, NCBloodStreakThin, NCBloodStreakSlash ]
+      splatsBySeverity:
+        Minor: 0
+        Moderate: 1
+        Severe: 1
+        Critical: 2
+        Catastrophic: 2
+      streaksBySeverity:
+        Minor: 0
+        Moderate: 0
+        Severe: 1
+        Critical: 2
+        Catastrophic: 3
+      coneDegrees: 24
+      distanceMultiplier: 1.15
+      splatRadius: 0.18
+      splatSize: 0.62
+      streakLengthMultiplier: 1.35
+      streakWidth: 0.24
+      persistentStreakFraction: 0.55
+    Slash:
+      kind: Arc
+      splatDecals: [ NCBloodSplat0, NCBloodSplat1, NCBloodSplat2, NCBloodSplat3, NCBloodSplat4, NCBloodSplat5 ]
+      streakDecals: [ NCBloodStreakSlash, NCBloodStreakShort, NCBloodStreakThin ]
+      splatsBySeverity:
+        Minor: 0
+        Moderate: 1
+        Severe: 1
+        Critical: 2
+        Catastrophic: 2
+      streaksBySeverity:
+        Minor: 0
+        Moderate: 1
+        Severe: 1
+        Critical: 2
+        Catastrophic: 3
+      coneDegrees: 58
+      distanceMultiplier: 0.85
+      splatRadius: 0.2
+      splatSize: 0.58
+      streakLengthMultiplier: 1.05
+      streakWidth: 0.28
+      persistentStreakFraction: 0.8
+    Pierce:
+      kind: Directed
+      splatDecals: [ NCBloodSplat0, NCBloodSplat1, NCBloodSplat2, NCBloodSplat3, NCBloodSplat4, NCBloodSplat5 ]
+      streakDecals: [ NCBloodStreakThin, NCBloodStreakSlash ]
+      splatsBySeverity:
+        Minor: 0
+        Moderate: 1
+        Severe: 1
+        Critical: 1
+        Catastrophic: 2
+      streaksBySeverity:
+        Minor: 0
+        Moderate: 0
+        Severe: 1
+        Critical: 1
+        Catastrophic: 2
+      coneDegrees: 14
+      distanceMultiplier: 0.9
+      splatRadius: 0.12
+      splatSize: 0.46
+      streakLengthMultiplier: 1.15
+      streakWidth: 0.17
+      persistentStreakFraction: 0.4
+    Blast:
+      kind: Radial
+      splatDecals: [ NCBloodSplat0, NCBloodSplat1, NCBloodSplat2, NCBloodSplat3, NCBloodSplat4, NCBloodSplat5 ]
+      streakDecals: [ NCBloodStreakShort, NCBloodStreakSlash, NCBloodStreakThin ]
+      splatsBySeverity:
+        Minor: 0
+        Moderate: 1
+        Severe: 2
+        Critical: 2
+        Catastrophic: 3
+      streaksBySeverity:
+        Minor: 0
+        Moderate: 1
+        Severe: 2
+        Critical: 3
+        Catastrophic: 4
+      coneDegrees: 360
+      distanceMultiplier: 0.95
+      splatRadius: 0.26
+      splatSize: 0.72
+      streakLengthMultiplier: 1.2
+      streakWidth: 0.3
+      persistentStreakFraction: 0.45
+  decalColor: '#7E0F13E8'
+  effectColor: '#BC181BEA'
+  effectDuration: 0.48s
+  sprayDistance: 1.55
   dropletSize: 0.045
   embeddedDistanceMultiplier: 0.55
   exitDistanceMultiplier: 1.4
-  maximumDecalsPerImpact: 2
-  maximumNearbyDecals: 6
-  nearbyDecalRadius: 0.9
+  maximumDecalsPerImpact: 3
+  maximumNearbyDecals: 8
+  nearbyDecalRadius: 2
   maximumClientBursts: 64
 
 - type: ncWound

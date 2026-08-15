@@ -1,0 +1,104 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# NC reuses the existing tintable vanilla splatter RSI instead of duplicating its CC-BY-SA artwork.
+- type: decal
+  id: NCBloodSplat0
+  tags: [ NCImpactBlood ]
+  showMenu: false
+  defaultCleanable: true
+  defaultCustomColor: true
+  defaultSnap: false
+  sprite:
+    sprite: Fluids/splatter.rsi
+    state: splatter-0
+
+- type: decal
+  id: NCBloodSplat1
+  tags: [ NCImpactBlood ]
+  showMenu: false
+  defaultCleanable: true
+  defaultCustomColor: true
+  defaultSnap: false
+  sprite:
+    sprite: Fluids/splatter.rsi
+    state: splatter-1
+
+- type: decal
+  id: NCBloodSplat2
+  tags: [ NCImpactBlood ]
+  showMenu: false
+  defaultCleanable: true
+  defaultCustomColor: true
+  defaultSnap: false
+  sprite:
+    sprite: Fluids/splatter.rsi
+    state: splatter-2
+
+- type: decal
+  id: NCBloodSplat3
+  tags: [ NCImpactBlood ]
+  showMenu: false
+  defaultCleanable: true
+  defaultCustomColor: true
+  defaultSnap: false
+  sprite:
+    sprite: Fluids/splatter.rsi
+    state: splatter-3
+
+- type: decal
+  id: NCBloodSplat4
+  tags: [ NCImpactBlood ]
+  showMenu: false
+  defaultCleanable: true
+  defaultCustomColor: true
+  defaultSnap: false
+  sprite:
+    sprite: Fluids/splatter.rsi
+    state: splatter-4
+
+- type: decal
+  id: NCBloodSplat5
+  tags: [ NCImpactBlood ]
+  showMenu: false
+  defaultCleanable: true
+  defaultCustomColor: true
+  defaultSnap: false
+  sprite:
+    sprite: Fluids/splatter.rsi
+    state: splatter-5
+
+# Separate hidden prototypes reuse vanilla line artwork while keeping crayon markings out of the NC blood cap.
+- type: decal
+  id: NCBloodStreakShort
+  tags: [ NCImpactBlood ]
+  showMenu: false
+  defaultCleanable: true
+  defaultCustomColor: true
+  defaultSnap: false
+  sprite:
+    sprite: Effects/crayondecals.rsi
+    state: shortline
+
+- type: decal
+  id: NCBloodStreakThin
+  tags: [ NCImpactBlood ]
+  showMenu: false
+  defaultCleanable: true
+  defaultCustomColor: true
+  defaultSnap: false
+  sprite:
+    sprite: Effects/crayondecals.rsi
+    state: thinline
+
+- type: decal
+  id: NCBloodStreakSlash
+  tags: [ NCImpactBlood ]
+  showMenu: false
+  defaultCleanable: true
+  defaultCustomColor: true
+  defaultSnap: false
+  sprite:
+    sprite: Effects/crayondecals.rsi
+    state: slash

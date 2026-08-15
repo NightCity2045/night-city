@@ -12,7 +12,8 @@ using Robust.Shared.Timing;
 namespace Content.Client._NC.Medical.Bleeding;
 
 /// <summary>
-/// Draws short-lived pixel-sized droplets without spawning one entity per particle.
+/// Draws a bounded combination of irregular splatter sprites, stretched directional streaks and a few loose
+/// droplets without spawning one entity per particle.
 /// </summary>
 public sealed class NCImpactBloodOverlay : Overlay
 {
@@ -52,22 +53,113 @@ public sealed class NCImpactBloodOverlay : Overlay
             var progress = Math.Clamp(elapsed / duration, 0f, 1f);
             var travelProgress = 1f - (1f - progress) * (1f - progress);
             var alpha = Math.Clamp(1f - progress, 0f, 1f);
-            for (var index = 0; index < burst.DropletCount; index++)
-            {
-                var direction = NCImpactBloodRules.SampleDirection(
-                    burst.Direction,
-                    burst.ConeDegrees,
-                    burst.Seed,
-                    (uint) index);
-                var distanceSample = NCImpactBloodRules.Sample01(burst.Seed, (uint) index + 0x100u);
-                var sizeSample = NCImpactBloodRules.Sample01(burst.Seed, (uint) index + 0x200u);
-                var distance = burst.Distance * burst.DistanceMultiplier *
-                               (0.35f + distanceSample * 0.65f) * travelProgress;
-                var position = burst.Origin + direction * distance;
-                var size = burst.DropletSize * (0.7f + sizeSample * 0.6f) * (1f - progress * 0.25f);
-                var color = burst.Color.WithAlpha(burst.Color.A * alpha);
-                handle.DrawRect(Box2.FromDimensions(position - new Vector2(size * 0.5f), new Vector2(size)), color);
-            }
+            DrawSplats(handle, burst, progress);
+            DrawStreaks(handle, burst, progress);
+            DrawDroplets(handle, burst, travelProgress, alpha, progress);
+        }
+    }
+
+    private static void DrawSplats(
+        DrawingHandleWorld handle,
+        in NCImpactBloodBurst burst,
+        float progress)
+    {
+        if (burst.SplatCount == 0 || burst.SplatTextures.Length == 0)
+            return;
+
+        // A few irregular masks replace the old circular cloud of independent micro-particles.
+        var reveal = Math.Clamp(progress / 0.12f, 0f, 1f);
+        var fade = 1f - Math.Clamp((progress - 0.28f) / 0.72f, 0f, 1f);
+        for (var index = 0; index < burst.SplatCount; index++)
+        {
+            var direction = NCImpactBloodRules.SamplePatternDirection(
+                burst.Direction,
+                burst.PatternKind,
+                burst.DirectionOffsetDegrees,
+                burst.ConeDegrees,
+                burst.Seed,
+                (uint) index + 0x500u);
+            var distanceSample = NCImpactBloodRules.Sample01(burst.Seed, (uint) index + 0x600u);
+            var sizeSample = NCImpactBloodRules.Sample01(burst.Seed, (uint) index + 0x700u);
+            var rotationSample = NCImpactBloodRules.Sample01(burst.Seed, (uint) index + 0x780u);
+            var textureIndex = NCImpactBloodRules.PickIndex(
+                burst.SplatTextures.Length,
+                burst.Seed,
+                (uint) index + 0x790u);
+            var distance = burst.SplatRadius * (0.2f + distanceSample * 0.8f) * reveal;
+            var position = burst.Origin + direction * distance;
+            var size = burst.SplatSize * (0.72f + sizeSample * 0.42f) * (0.78f + reveal * 0.22f);
+            var bounds = Box2.CenteredAround(position, new Vector2(size));
+            var rotated = new Box2Rotated(bounds, new Angle(rotationSample * MathF.Tau), position);
+            var color = burst.Color.WithAlpha(burst.Color.A * fade);
+            handle.DrawTextureRect(burst.SplatTextures[textureIndex], rotated, color);
+        }
+    }
+
+    private static void DrawStreaks(
+        DrawingHandleWorld handle,
+        in NCImpactBloodBurst burst,
+        float progress)
+    {
+        if (burst.StreakCount == 0 || burst.StreakTextures.Length == 0)
+            return;
+
+        var headProgress = 1f - (1f - Math.Clamp(progress / 0.6f, 0f, 1f)) *
+            (1f - Math.Clamp(progress / 0.6f, 0f, 1f));
+        var fade = 1f - Math.Clamp((progress - 0.35f) / 0.65f, 0f, 1f);
+        for (var index = 0; index < burst.StreakCount; index++)
+        {
+            var direction = NCImpactBloodRules.SamplePatternDirection(
+                burst.Direction,
+                burst.PatternKind,
+                burst.DirectionOffsetDegrees,
+                burst.ConeDegrees,
+                burst.Seed,
+                (uint) index + 0x800u);
+            var distanceSample = NCImpactBloodRules.Sample01(burst.Seed, (uint) index + 0x900u);
+            var widthSample = NCImpactBloodRules.Sample01(burst.Seed, (uint) index + 0xA00u);
+            var textureIndex = NCImpactBloodRules.PickIndex(
+                burst.StreakTextures.Length,
+                burst.Seed,
+                (uint) index + 0xA80u);
+            var length = burst.Distance * burst.DistanceMultiplier * burst.PatternDistanceMultiplier *
+                         burst.StreakLengthMultiplier * (0.48f + distanceSample * 0.52f) * headProgress;
+            var width = burst.StreakWidth * (0.78f + widthSample * 0.44f);
+            if (length <= 0f || width <= 0f)
+                continue;
+
+            var midpoint = burst.Origin + direction * length * 0.5f;
+            var box = new Box2(-width * 0.5f, -length * 0.5f, width * 0.5f, length * 0.5f);
+            var rotated = new Box2Rotated(box.Translated(midpoint), direction.ToWorldAngle(), midpoint);
+            var color = burst.Color.WithAlpha(burst.Color.A * fade);
+            handle.DrawTextureRect(burst.StreakTextures[textureIndex], rotated, color);
+        }
+    }
+
+    private static void DrawDroplets(
+        DrawingHandleWorld handle,
+        in NCImpactBloodBurst burst,
+        float travelProgress,
+        float alpha,
+        float progress)
+    {
+        for (var index = 0; index < burst.DropletCount; index++)
+        {
+            var direction = NCImpactBloodRules.SamplePatternDirection(
+                burst.Direction,
+                burst.PatternKind,
+                burst.DirectionOffsetDegrees,
+                burst.ConeDegrees,
+                burst.Seed,
+                (uint) index + 0xB00u);
+            var distanceSample = NCImpactBloodRules.Sample01(burst.Seed, (uint) index + 0xC00u);
+            var sizeSample = NCImpactBloodRules.Sample01(burst.Seed, (uint) index + 0xD00u);
+            var distance = burst.Distance * burst.DistanceMultiplier * burst.PatternDistanceMultiplier *
+                           (0.35f + distanceSample * 0.65f) * travelProgress;
+            var position = burst.Origin + direction * distance;
+            var size = burst.DropletSize * (0.7f + sizeSample * 0.6f) * (1f - progress * 0.25f);
+            var color = burst.Color.WithAlpha(burst.Color.A * alpha);
+            handle.DrawRect(Box2.FromDimensions(position - new Vector2(size * 0.5f), new Vector2(size)), color);
         }
     }
 
@@ -88,10 +180,21 @@ public readonly record struct NCImpactBloodBurst(
     Vector2 Direction,
     ulong Seed,
     byte DropletCount,
+    byte SplatCount,
+    byte StreakCount,
+    Texture[] SplatTextures,
+    Texture[] StreakTextures,
     float DistanceMultiplier,
     TimeSpan Duration,
     float Distance,
+    NCImpactBloodPatternKind PatternKind,
     float ConeDegrees,
+    float DirectionOffsetDegrees,
+    float PatternDistanceMultiplier,
+    float SplatRadius,
+    float SplatSize,
+    float StreakLengthMultiplier,
+    float StreakWidth,
     float DropletSize,
     Color Color,
     int MaximumActiveBursts,

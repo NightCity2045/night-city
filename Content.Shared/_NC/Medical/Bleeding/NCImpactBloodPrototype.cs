@@ -35,20 +35,27 @@ public sealed partial class NCImpactBloodProfilePrototype : IPrototype
     [DataField(required: true)]
     public Dictionary<NCWoundSeverity, int> DecalsBySeverity { get; private set; } = new();
 
+    /// <summary>
+    /// Visual shape for each open wound mechanism. Counts remain severity-dependent while geometry is
+    /// mechanism-dependent, allowing a cut, a projectile exit and a blast to read differently.
+    /// </summary>
     [DataField(required: true)]
-    public ProtoId<DecalPrototype> Decal { get; private set; }
+    public Dictionary<NCWoundType, NCImpactBloodPattern> Patterns { get; private set; } = new();
 
     [DataField(required: true)]
-    public Color Color { get; private set; }
+    public Color DecalColor { get; private set; }
+
+    /// <summary>
+    /// Fresh airborne blood is brighter than the persistent floor stain so the short effect remains readable.
+    /// </summary>
+    [DataField(required: true)]
+    public Color EffectColor { get; private set; }
 
     [DataField(required: true)]
     public TimeSpan EffectDuration { get; private set; }
 
     [DataField(required: true)]
     public float SprayDistance { get; private set; }
-
-    [DataField(required: true)]
-    public float SprayConeDegrees { get; private set; }
 
     [DataField(required: true)]
     public float DropletSize { get; private set; }
@@ -73,6 +80,69 @@ public sealed partial class NCImpactBloodProfilePrototype : IPrototype
 }
 
 /// <summary>
+/// Data-only geometry for one impact-blood mechanism. The server uses it for cleanable decal placement and the
+/// client copies the same values into a bounded transient burst.
+/// </summary>
+[DataDefinition]
+public sealed partial class NCImpactBloodPattern
+{
+    [DataField(required: true)]
+    public NCImpactBloodPatternKind Kind { get; private set; }
+
+    /// <summary>
+    /// Existing tintable decal sprites used for irregular impact marks. NC owns only the selection policy.
+    /// </summary>
+    [DataField(required: true)]
+    public List<ProtoId<DecalPrototype>> SplatDecals { get; private set; } = new();
+
+    /// <summary>
+    /// Existing tintable line decals stretched along the resolved impact direction.
+    /// </summary>
+    [DataField(required: true)]
+    public List<ProtoId<DecalPrototype>> StreakDecals { get; private set; } = new();
+
+    [DataField(required: true)]
+    public Dictionary<NCWoundSeverity, int> SplatsBySeverity { get; private set; } = new();
+
+    [DataField(required: true)]
+    public Dictionary<NCWoundSeverity, int> StreaksBySeverity { get; private set; } = new();
+
+    [DataField(required: true)]
+    public float ConeDegrees { get; private set; }
+
+    [DataField]
+    public float DirectionOffsetDegrees { get; private set; }
+
+    [DataField]
+    public float DistanceMultiplier { get; private set; } = 1f;
+
+    [DataField]
+    public float SplatRadius { get; private set; } = 0.16f;
+
+    [DataField]
+    public float SplatSize { get; private set; } = 0.6f;
+
+    [DataField]
+    public float StreakLengthMultiplier { get; private set; } = 1f;
+
+    [DataField]
+    public float StreakWidth { get; private set; } = 0.22f;
+
+    /// <summary>
+    /// Fraction of persistent marks that use a directional streak instead of a compact splatter.
+    /// </summary>
+    [DataField]
+    public float PersistentStreakFraction { get; private set; } = 0.5f;
+}
+
+public enum NCImpactBloodPatternKind : byte
+{
+    Directed,
+    Arc,
+    Radial,
+}
+
+/// <summary>
 /// Pure deterministic sampling shared by the server decal placement and the client transient effect.
 /// </summary>
 public static class NCImpactBloodRules
@@ -91,13 +161,44 @@ public static class NCImpactBloodRules
     public static Vector2 SampleDirection(Vector2 direction, float coneDegrees, ulong seed, uint stream)
     {
         direction = direction.IsLengthZero() ? Vector2.UnitY : direction.Normalized();
-        var halfCone = Math.Clamp(coneDegrees, 0f, 180f) * MathF.PI / 360f;
+        var halfCone = Math.Clamp(coneDegrees, 0f, 360f) * MathF.PI / 360f;
         var offset = (Sample01(seed, stream) * 2f - 1f) * halfCone;
         var sin = MathF.Sin(offset);
         var cos = MathF.Cos(offset);
         return new Vector2(
             direction.X * cos - direction.Y * sin,
             direction.X * sin + direction.Y * cos);
+    }
+
+    /// <summary>
+    /// Resolves one deterministic ray for directed projectile spray, a cross-cut arc or a radial blast.
+    /// </summary>
+    public static Vector2 SamplePatternDirection(
+        Vector2 direction,
+        NCImpactBloodPatternKind kind,
+        float directionOffsetDegrees,
+        float coneDegrees,
+        ulong seed,
+        uint stream)
+    {
+        if (kind == NCImpactBloodPatternKind.Radial)
+        {
+            var angle = Sample01(seed, stream) * MathF.Tau;
+            return new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+        }
+
+        direction = direction.IsLengthZero() ? Vector2.UnitY : direction.Normalized();
+        var offset = directionOffsetDegrees;
+        if (kind == NCImpactBloodPatternKind.Arc)
+            offset += 90f;
+
+        var radians = offset * MathF.PI / 180f;
+        var sin = MathF.Sin(radians);
+        var cos = MathF.Cos(radians);
+        var rotated = new Vector2(
+            direction.X * cos - direction.Y * sin,
+            direction.X * sin + direction.Y * cos);
+        return SampleDirection(rotated, coneDegrees, seed, stream);
     }
 
     public static float ResolveDistanceMultiplier(
@@ -110,5 +211,16 @@ public static class NCImpactBloodRules
             NCTraumaProjectileDisposition.Exit => profile.ExitDistanceMultiplier,
             _ => 1f,
         };
+    }
+
+    /// <summary>
+    /// Selects a stable index without relying on collection ordering outside the explicitly ordered YAML list.
+    /// </summary>
+    public static int PickIndex(int count, ulong seed, uint stream)
+    {
+        if (count <= 1)
+            return 0;
+
+        return Math.Min(count - 1, (int) (Sample01(seed, stream) * count));
     }
 }

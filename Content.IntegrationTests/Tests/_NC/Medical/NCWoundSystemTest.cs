@@ -19,6 +19,7 @@ using Content.Shared._NC.Medical.Wounds;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared.Body;
 using Content.Shared.Damage;
+using Content.Shared.Decals;
 using Content.Shared.FixedPoint;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
@@ -181,6 +182,7 @@ public sealed class NCWoundSystemTest : GameTest
             Assert.That(profile.BloodLossBySeverity.Keys, Is.EquivalentTo(severities));
             Assert.That(profile.DropletsBySeverity.Keys, Is.EquivalentTo(severities));
             Assert.That(profile.DecalsBySeverity.Keys, Is.EquivalentTo(severities));
+            Assert.That(profile.Patterns.Keys, Is.EquivalentTo(profile.WoundTypes));
             Assert.That(profile.BloodLossBySeverity.Values, Is.All.GreaterThanOrEqualTo(0f));
             Assert.That(profile.DropletsBySeverity.Values, Is.All.InRange(0, byte.MaxValue));
             Assert.That(profile.DecalsBySeverity.Values, Is.All.GreaterThanOrEqualTo(0));
@@ -189,16 +191,78 @@ public sealed class NCWoundSystemTest : GameTest
             Assert.That(profile.MaximumClientBursts, Is.InRange(1, 128));
             Assert.That(profile.EffectDuration, Is.GreaterThan(TimeSpan.Zero));
             Assert.That(profile.SprayDistance, Is.GreaterThan(0f));
-            Assert.That(profile.SprayConeDegrees, Is.InRange(0f, 180f));
             Assert.That(profile.DropletSize, Is.GreaterThan(0f));
+            Assert.That(profile.EffectColor.A, Is.GreaterThan(0f));
+            Assert.That(profile.DecalColor.A, Is.GreaterThan(0f));
             Assert.That(profile.WoundTypes, Does.Contain(NCWoundType.Ballistic));
             Assert.That(profile.WoundTypes, Does.Not.Contain(NCWoundType.Blunt));
             Assert.That(profile.WoundTypes, Does.Not.Contain(NCWoundType.Thermal));
         });
 
-        var first = NCImpactBloodRules.SampleDirection(Vector2.UnitX, profile.SprayConeDegrees, 42UL, 3u);
-        var repeated = NCImpactBloodRules.SampleDirection(Vector2.UnitX, profile.SprayConeDegrees, 42UL, 3u);
-        Assert.That(repeated, Is.EqualTo(first), "Spray layout must be replay-deterministic.");
+        foreach (var (woundType, pattern) in profile.Patterns)
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(pattern.SplatsBySeverity.Keys, Is.EquivalentTo(severities),
+                    $"{woundType} splat counts must cover every severity.");
+                Assert.That(pattern.StreaksBySeverity.Keys, Is.EquivalentTo(severities),
+                    $"{woundType} streak counts must cover every severity.");
+                Assert.That(pattern.SplatsBySeverity.Values, Is.All.InRange(0, byte.MaxValue));
+                Assert.That(pattern.StreaksBySeverity.Values, Is.All.InRange(0, byte.MaxValue));
+                Assert.That(pattern.SplatDecals, Is.Not.Empty);
+                Assert.That(pattern.StreakDecals, Is.Not.Empty);
+                Assert.That(pattern.SplatDecals.Select(id => id.Id), Is.Unique);
+                Assert.That(pattern.StreakDecals.Select(id => id.Id), Is.Unique);
+                Assert.That(pattern.ConeDegrees, Is.InRange(0f, 360f));
+                Assert.That(pattern.DistanceMultiplier, Is.GreaterThan(0f));
+                Assert.That(pattern.SplatRadius, Is.GreaterThanOrEqualTo(0f));
+                Assert.That(pattern.SplatSize, Is.GreaterThan(0f));
+                Assert.That(pattern.StreakLengthMultiplier, Is.GreaterThan(0f));
+                Assert.That(pattern.StreakWidth, Is.GreaterThan(0f));
+                Assert.That(pattern.PersistentStreakFraction, Is.InRange(0f, 1f));
+            });
+
+            foreach (var decal in pattern.SplatDecals.Concat(pattern.StreakDecals))
+                Assert.That(_prototypes.TryIndex<DecalPrototype>(decal, out _), Is.True,
+                    $"{woundType} references missing decal {decal}.");
+
+            var first = NCImpactBloodRules.SamplePatternDirection(
+                Vector2.UnitX,
+                pattern.Kind,
+                pattern.DirectionOffsetDegrees,
+                pattern.ConeDegrees,
+                42UL,
+                3u);
+            var repeated = NCImpactBloodRules.SamplePatternDirection(
+                Vector2.UnitX,
+                pattern.Kind,
+                pattern.DirectionOffsetDegrees,
+                pattern.ConeDegrees,
+                42UL,
+                3u);
+            Assert.Multiple(() =>
+            {
+                Assert.That(repeated, Is.EqualTo(first), "Spray layout must be replay-deterministic.");
+                Assert.That(first.Length(), Is.EqualTo(1f).Within(0.0001f));
+            });
+        }
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(profile.Patterns[NCWoundType.Ballistic].Kind, Is.EqualTo(NCImpactBloodPatternKind.Directed));
+            Assert.That(profile.Patterns[NCWoundType.Slash].Kind, Is.EqualTo(NCImpactBloodPatternKind.Arc));
+            Assert.That(profile.Patterns[NCWoundType.Blast].Kind, Is.EqualTo(NCImpactBloodPatternKind.Radial));
+            Assert.That(profile.Patterns[NCWoundType.Ballistic].SplatDecals.Select(id => id.Id),
+                Does.Contain("NCBloodSplat0"));
+            Assert.That(profile.Patterns[NCWoundType.Ballistic].StreakDecals.Select(id => id.Id),
+                Does.Contain("NCBloodStreakThin"));
+            Assert.That(NCImpactBloodRules.ResolveDistanceMultiplier(
+                    profile,
+                    NCTraumaProjectileDisposition.Exit),
+                Is.GreaterThan(NCImpactBloodRules.ResolveDistanceMultiplier(
+                    profile,
+                    NCTraumaProjectileDisposition.Embedded)));
+        });
     }
 
     [Test]

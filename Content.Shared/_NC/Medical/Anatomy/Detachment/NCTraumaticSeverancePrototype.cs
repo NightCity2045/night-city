@@ -34,10 +34,40 @@ public sealed partial class NCTraumaticSeveranceProfilePrototype : IPrototype
 public sealed partial class NCSeveranceMechanismRule
 {
     [DataField(required: true)]
+    public NCSeverancePathRule Impact { get; private set; } = new();
+
+    /// <summary>
+    /// Optional aggregate gate for multiple physical contacts belonging to one immutable action, such as pellets
+    /// from one shotgun shell. Trauma is accumulated per body region, never across separate attacks.
+    /// </summary>
+    [DataField]
+    public NCSeverancePathRule? CompoundAction { get; private set; }
+
+    /// <summary>
+    /// Optional finishing gate for a new impact against a limb whose live structure is already nearly destroyed.
+    /// This uses no historical damage counter: integrity, bone and tendon entities remain the source of truth.
+    /// </summary>
+    [DataField]
+    public NCSeverancePathRule? MangledFinisher { get; private set; }
+
+    [DataField(required: true)]
+    public NCSeverancePathRule MechanicalImpact { get; private set; } = new();
+
+    [DataField]
+    public NCSeverancePathRule? MechanicalCompoundAction { get; private set; }
+
+    [DataField]
+    public NCSeverancePathRule? MechanicalMangledFinisher { get; private set; }
+}
+
+[DataDefinition]
+public sealed partial class NCSeverancePathRule
+{
+    [DataField(required: true)]
     public NCWoundSeverity MinimumSeverity { get; private set; }
 
     [DataField(required: true)]
-    public float MinimumImpactTrauma { get; private set; }
+    public float MinimumTrauma { get; private set; }
 
     [DataField(required: true)]
     public float MaximumIntegrityFraction { get; private set; }
@@ -47,12 +77,6 @@ public sealed partial class NCSeveranceMechanismRule
 
     [DataField]
     public float? MaximumTendonIntegrity { get; private set; }
-
-    [DataField(required: true)]
-    public float MechanicalMinimumImpactTrauma { get; private set; }
-
-    [DataField(required: true)]
-    public float MechanicalMaximumIntegrityFraction { get; private set; }
 }
 
 [DataDefinition]
@@ -83,6 +107,7 @@ public static class NCTraumaticSeveranceRules
         NCSeveranceMechanismRule mechanism,
         NCWoundSeverity severity,
         float impactTrauma,
+        float compoundActionTrauma,
         float integrityFraction,
         NCAnatomicalMaterialKind material,
         NCBoneState? boneState,
@@ -90,32 +115,62 @@ public static class NCTraumaticSeveranceRules
     {
         if (!float.IsFinite(impactTrauma) ||
             !float.IsFinite(integrityFraction) ||
+            !float.IsFinite(compoundActionTrauma) ||
             impactTrauma <= 0f ||
-            severity < mechanism.MinimumSeverity)
+            compoundActionTrauma < impactTrauma)
         {
             return false;
         }
 
         if (material == NCAnatomicalMaterialKind.Mechanical)
         {
-            return impactTrauma >= mechanism.MechanicalMinimumImpactTrauma &&
-                   integrityFraction <= mechanism.MechanicalMaximumIntegrityFraction;
+            return Passes(mechanism.MechanicalImpact, severity, impactTrauma, integrityFraction, null, null) ||
+                   mechanism.MechanicalCompoundAction is { } compound &&
+                   Passes(compound, severity, compoundActionTrauma, integrityFraction, null, null) ||
+                   mechanism.MechanicalMangledFinisher is { } finisher &&
+                   Passes(finisher, severity, impactTrauma, integrityFraction, null, null);
         }
 
-        if (impactTrauma < mechanism.MinimumImpactTrauma ||
-            integrityFraction > mechanism.MaximumIntegrityFraction)
+        return Passes(mechanism.Impact, severity, impactTrauma, integrityFraction, boneState, tendonIntegrity) ||
+               mechanism.CompoundAction is { } compoundAction &&
+               Passes(compoundAction, severity, compoundActionTrauma, integrityFraction, boneState, tendonIntegrity) ||
+               mechanism.MangledFinisher is { } mangled &&
+               Passes(mangled, severity, impactTrauma, integrityFraction, boneState, tendonIntegrity);
+    }
+
+    public static bool IsValid(NCSeverancePathRule rule)
+    {
+        return float.IsFinite(rule.MinimumTrauma) &&
+               rule.MinimumTrauma > 0f &&
+               float.IsFinite(rule.MaximumIntegrityFraction) &&
+               rule.MaximumIntegrityFraction is >= 0f and <= 1f &&
+               (rule.MaximumTendonIntegrity is not { } tendon ||
+                float.IsFinite(tendon) && tendon is >= 0f and <= 1f);
+    }
+
+    private static bool Passes(
+        NCSeverancePathRule rule,
+        NCWoundSeverity severity,
+        float trauma,
+        float integrityFraction,
+        NCBoneState? boneState,
+        float? tendonIntegrity)
+    {
+        if (severity < rule.MinimumSeverity ||
+            trauma < rule.MinimumTrauma ||
+            integrityFraction > rule.MaximumIntegrityFraction)
         {
             return false;
         }
 
-        if (mechanism.MinimumBoneState is { } requiredBone &&
+        if (rule.MinimumBoneState is { } requiredBone &&
             boneState is { } actualBone &&
             actualBone < requiredBone)
         {
             return false;
         }
 
-        if (mechanism.MaximumTendonIntegrity is { } maximumTendon &&
+        if (rule.MaximumTendonIntegrity is { } maximumTendon &&
             tendonIntegrity is { } actualTendon &&
             actualTendon > maximumTendon)
         {
