@@ -1,0 +1,428 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+using System.Collections.Generic;
+using System.Linq;
+using Content.IntegrationTests.Fixtures;
+using Content.IntegrationTests.Fixtures.Attributes;
+using Content.Server._NC.Medical.Diagnostics.Detail;
+using Content.Server._NC.Medical.Diagnostics.Scanner;
+using Content.Server._NC.Medical.Pharmacology;
+using Content.Server.DeviceLinking.Systems;
+using Content.Shared._NC.ActionResolution;
+using Content.Shared._NC.Combat.Targeting;
+using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Bleeding;
+using Content.Shared._NC.Medical.Diagnostics.Detail;
+using Content.Shared._NC.Medical.Pharmacology;
+using Content.Shared._NC.Medical.Physiology;
+using Content.Shared._NC.Medical.Surgery;
+using Content.Shared._NC.Medical.Wounds;
+using Content.Shared.Body;
+using Content.Shared.Body.Components;
+using Content.Shared.Buckle;
+using Content.Shared.Buckle.Components;
+using Content.Shared.FixedPoint;
+using Robust.Shared.GameObjects;
+using Robust.Shared.Prototypes;
+
+namespace Content.IntegrationTests.Tests._NC.Medical;
+
+[TestFixture]
+[TestOf(typeof(NCDiagnosticsSystem))]
+public sealed class NCDiagnosticsSystemTest : GameTest
+{
+    private static readonly EntProtoId HumanMob = "MobHuman";
+    private static readonly ProtoId<NCTargetZonePrototype> ChestZone = "NCZoneChest";
+    private static readonly ProtoId<OrganCategoryPrototype> ThoraxRegion = "Thorax";
+    private static readonly ProtoId<NCWoundPrototype> BallisticWound = "NCWoundBallistic";
+
+    private static readonly ProtoId<NCDiagnosticCapabilityPrototype>[] NetworkCapabilities =
+    [
+        "NCDiagnosticsSelfSensations",
+        "NCDiagnosticsVisual",
+        "NCDiagnosticsManual",
+        "NCDiagnosticsHandheldApproximate",
+        "NCDiagnosticsScannerInternal",
+        "NCDiagnosticsSurgicalConsole",
+    ];
+
+    [SidedDependency(Side.Server)] private NCAnatomySystem _anatomy = default!;
+    [SidedDependency(Side.Server)] private NCDiagnosticsSystem _diagnostics = default!;
+    [SidedDependency(Side.Server)] private NCPharmacologySystem _pharmacology = default!;
+    [SidedDependency(Side.Server)] private IPrototypeManager _prototypes = default!;
+    [SidedDependency(Side.Server)] private DeviceLinkSystem _deviceLink = default!;
+    [SidedDependency(Side.Server)] private SharedBuckleSystem _buckle = default!;
+    [SidedDependency(Side.Server)] private NCBodyScannerConsoleSystem _bodyScanner = default!;
+
+    public override PoolSettings PoolSettings => new()
+    {
+        Connected = false,
+    };
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void TiersAreMonotonicDeterministicBoundedAndDoNotLeakWoundIds()
+    {
+        var body = SSpawn(HumanMob);
+        SeedDiagnosticState(body, woundCount: 30);
+
+        var autopsy = new NCAutopsyRecordedEvent(ThoraxRegion, 2, [NCWoundType.Ballistic]);
+        SEntMan.EventBus.RaiseLocalEvent(body, ref autopsy);
+        var injury = new NCWoundCreatedEvent(
+            Guid.Parse("c5521357-54ac-4f77-ae1a-f97031d2fe59"),
+            ChestZone,
+            NCWoundSeverity.Severe,
+            NCWoundType.Ballistic);
+        SEntMan.EventBus.RaiseLocalEvent(body, ref injury);
+
+        var resolutionId = new NCActionResolutionId(Guid.Parse("45cf812c-fab8-4143-847b-bd6748941484"));
+        var observedAt = TimeSpan.FromSeconds(2045);
+        var snapshots = new List<NCMedicalSnapshot>(NetworkCapabilities.Length);
+        foreach (var capabilityId in NetworkCapabilities)
+        {
+            Assert.That(
+                _diagnostics.TryBuildSnapshot(body, capabilityId, resolutionId, observedAt, out var snapshot),
+                Is.True,
+                $"Capability {capabilityId} did not produce a snapshot.");
+            snapshots.Add(snapshot);
+
+            var policy = _prototypes.Index(capabilityId);
+            Assert.Multiple(() =>
+            {
+                Assert.That(snapshot.ResolutionId, Is.EqualTo(resolutionId));
+                Assert.That(snapshot.ObservedAt, Is.EqualTo(observedAt));
+                Assert.That(snapshot.Regions.Count, Is.LessThanOrEqualTo(policy.MaxRegionRecords));
+                Assert.That(snapshot.Wounds.Count, Is.LessThanOrEqualTo(policy.MaxWoundRecords));
+                Assert.That(snapshot.Organs.Count, Is.LessThanOrEqualTo(policy.MaxOrganRecords));
+                Assert.That(snapshot.Drugs.Count, Is.LessThanOrEqualTo(policy.MaxDrugRecords));
+                Assert.That(snapshot.History.Count, Is.LessThanOrEqualTo(policy.MaxHistoryRecords));
+            });
+        }
+
+        var previous = NCDiagnosticDisclosure.None;
+        foreach (var snapshot in snapshots)
+        {
+            Assert.That(snapshot.Disclosures & previous, Is.EqualTo(previous),
+                $"Tier {snapshot.Tier} removed a disclosure from the previous tier.");
+            previous = snapshot.Disclosures;
+        }
+
+        var self = snapshots[(int) NCDiagnosticTier.SelfSensations];
+        var visual = snapshots[(int) NCDiagnosticTier.Visual];
+        var manual = snapshots[(int) NCDiagnosticTier.Manual];
+        var handheld = snapshots[(int) NCDiagnosticTier.HandheldApproximate];
+        var scanner = snapshots[(int) NCDiagnosticTier.ScannerInternal];
+        var surgical = snapshots[(int) NCDiagnosticTier.SurgicalConsole];
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(self.Wounds, Is.Empty);
+            Assert.That(self.Organs, Is.Empty);
+            Assert.That(self.Regions.All(region => region.WoundCount == null), Is.True);
+
+            Assert.That(visual.Wounds, Has.Count.EqualTo(8));
+            Assert.That(visual.WoundsOmitted, Is.EqualTo(22));
+            Assert.That(visual.Wounds.All(wound => wound.Prototype == null && wound.Stage == null && wound.Depth == null),
+                Is.True);
+
+            Assert.That(manual.Warnings, Does.Contain(NCDiagnosticWarning.FractureSuspected));
+            Assert.That(manual.Regions.Any(region =>
+                region.Findings.HasFlag(NCDiagnosticFindingFlags.FractureSuspected) && region.BoneState == null), Is.True);
+
+            Assert.That(handheld.Vitals.InternalBleedMilliunits, Is.Null);
+            Assert.That(handheld.Warnings, Does.Contain(NCDiagnosticWarning.SuspectedInternalBleeding));
+            Assert.That(handheld.Organs, Is.Empty);
+            Assert.That(handheld.Drugs, Is.Empty);
+            Assert.That(handheld.Wounds.All(wound =>
+                wound.InternalBleeding == NCDiagnosticBand.None && wound.Prototype == null), Is.True);
+
+            Assert.That(scanner.Wounds, Has.Count.EqualTo(30));
+            Assert.That(scanner.WoundsOmitted, Is.Zero);
+            Assert.That(scanner.Vitals.InternalBleedMilliunits, Is.Not.Null);
+            Assert.That(scanner.Warnings, Does.Contain(NCDiagnosticWarning.ConfirmedInternalBleeding));
+            Assert.That(scanner.Warnings, Does.Contain(NCDiagnosticWarning.FractureConfirmed));
+            Assert.That(scanner.Warnings, Does.Contain(NCDiagnosticWarning.OrganFailure));
+            Assert.That(scanner.Regions.Any(region =>
+                region.Findings.HasFlag(NCDiagnosticFindingFlags.InternalBleeding) &&
+                region.Findings.HasFlag(NCDiagnosticFindingFlags.FractureConfirmed) &&
+                region.Findings.HasFlag(NCDiagnosticFindingFlags.OrganFailure) &&
+                region.BoneState >= NCBoneState.BrokenDisplaced), Is.True);
+            Assert.That(scanner.Organs.Any(organ =>
+                organ.Category.Id == "Heart" && organ.Failing && organ.Function == NCDiagnosticBand.Critical), Is.True);
+            Assert.That(scanner.Drugs, Has.Count.EqualTo(1));
+            Assert.That(scanner.Drugs[0].Profile.Id, Is.EqualTo("NCDrugSurgicalAnesthetic"));
+            Assert.That(scanner.Warnings, Does.Contain(NCDiagnosticWarning.Anesthetized));
+            Assert.That(scanner.History, Is.Empty);
+            Assert.That(surgical.History, Has.Count.EqualTo(3));
+            var autopsyHistory = surgical.History.Single(record => record.Kind == NCMedicalHistoryKind.Autopsy);
+            var medicationHistory = surgical.History.Single(record => record.Kind == NCMedicalHistoryKind.Medication);
+            var injuryHistory = surgical.History.Single(record => record.Kind == NCMedicalHistoryKind.Injury);
+            Assert.That(autopsyHistory.AutopsyRegion, Is.EqualTo(ThoraxRegion));
+            Assert.That(autopsyHistory.AutopsyWoundCount, Is.EqualTo(2));
+            Assert.That(autopsyHistory.AutopsyWoundTypes, Is.EqualTo(new[] { NCWoundType.Ballistic }));
+            Assert.That(medicationHistory.Drug?.Id, Is.EqualTo("NCDrugSurgicalAnesthetic"));
+            Assert.That(injuryHistory.Zone, Is.EqualTo(ChestZone));
+            Assert.That(injuryHistory.WoundSeverity, Is.EqualTo(NCWoundSeverity.Severe));
+            Assert.That(injuryHistory.WoundType, Is.EqualTo(NCWoundType.Ballistic));
+        });
+
+        Assert.That(
+            _diagnostics.TryBuildSnapshot(
+                body,
+                NetworkCapabilities[(int) NCDiagnosticTier.ScannerInternal],
+                resolutionId,
+                observedAt,
+                out var repeated),
+            Is.True);
+        Assert.Multiple(() =>
+        {
+            Assert.That(repeated.Vitals, Is.EqualTo(scanner.Vitals));
+            Assert.That(repeated.Regions, Is.EqualTo(scanner.Regions));
+            Assert.That(repeated.Wounds, Is.EqualTo(scanner.Wounds));
+            Assert.That(repeated.Organs, Is.EqualTo(scanner.Organs));
+            Assert.That(repeated.Drugs, Is.EqualTo(scanner.Drugs));
+            Assert.That(repeated.Warnings, Is.EqualTo(scanner.Warnings));
+            Assert.That(repeated.WoundsOmitted, Is.EqualTo(scanner.WoundsOmitted));
+            Assert.That(repeated.OrgansOmitted, Is.EqualTo(scanner.OrgansOmitted));
+        });
+
+        Assert.That(typeof(NCMedicalWoundSummary).GetProperties().Any(property =>
+            property.Name.Contains("WoundId", StringComparison.Ordinal) || property.PropertyType == typeof(Guid)), Is.False);
+        Assert.That(typeof(NCMedicalSnapshot).GetProperties().Any(property =>
+            property.Name.Contains("WoundId", StringComparison.Ordinal)), Is.False);
+
+        Assert.That(_diagnostics.TryBuildAdminExactSnapshot(body, resolutionId, out var admin), Is.True);
+        Assert.Multiple(() =>
+        {
+            Assert.That(admin.ResolutionId, Is.EqualTo(resolutionId));
+            Assert.That(admin.Wounds, Has.Count.EqualTo(30));
+            Assert.That(admin.Wounds.All(wound => wound.WoundId != Guid.Empty), Is.True);
+            Assert.That(admin.Drugs, Has.Count.EqualTo(1));
+            Assert.That(admin.Drugs[0].Concentration, Is.GreaterThan(0f));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void FullDiagnosticsUsesPatientBuckledToLinkedOperatingTable()
+    {
+        var patient = SSpawn(HumanMob);
+        var replacement = SSpawn(HumanMob);
+        var scannerUid = SSpawn("MedicalScanner");
+        var tableUid = SSpawn("OperatingTable");
+        var consoleUid = SSpawn("computerBodyScanner");
+        var console = SComp<NCBodyScannerConsoleComponent>(consoleUid);
+        var capability = SComp<NCDiagnosticCapabilityComponent>(consoleUid);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(SEntMan.HasComponent<NCDiagnosticCapabilityComponent>(scannerUid), Is.False,
+                "The capsule itself must not expose the full diagnostic UI.");
+            Assert.That(capability.Capability.Id, Is.EqualTo("NCDiagnosticsScannerInternal"));
+            Assert.That(_bodyScanner.TryGetPatient((consoleUid, console), out _, out var disconnected), Is.False);
+            Assert.That(disconnected, Is.EqualTo(NCDiagnosticAccessFailure.OperatingTableDisconnected));
+        });
+
+        // A vanilla medical scanner is no longer a valid source for the diagnostic console.
+        _deviceLink.LinkDefaults(null, consoleUid, scannerUid);
+        Assert.That(_bodyScanner.TryGetPatient((consoleUid, console), out _, out var stillDisconnected), Is.False);
+        Assert.That(stillDisconnected, Is.EqualTo(NCDiagnosticAccessFailure.OperatingTableDisconnected));
+
+        _deviceLink.LinkDefaults(null, consoleUid, tableUid);
+        Assert.That(_bodyScanner.TryGetPatient((consoleUid, console), out _, out var empty), Is.False);
+        Assert.That(empty, Is.EqualTo(NCDiagnosticAccessFailure.OperatingTableEmpty));
+
+        Assert.That(_buckle.TryBuckle(patient, patient, tableUid, popup: false), Is.True);
+
+        Assert.That(
+            _bodyScanner.TryGetPatient((consoleUid, console), out var occupant, out var failure),
+            Is.True,
+            failure.ToString());
+        Assert.That(occupant, Is.EqualTo(patient));
+
+        _buckle.Unbuckle((patient, SComp<BuckleComponent>(patient)), null);
+        Assert.That(_bodyScanner.TryGetPatient((consoleUid, console), out _, out var removed), Is.False);
+        Assert.That(removed, Is.EqualTo(NCDiagnosticAccessFailure.OperatingTableEmpty));
+
+        Assert.That(_buckle.TryBuckle(replacement, replacement, tableUid, popup: false), Is.True);
+        Assert.That(_bodyScanner.TryGetPatient((consoleUid, console), out occupant, out failure), Is.True);
+        Assert.That(occupant, Is.EqualTo(replacement));
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void DiagnosticsReportsControlledLiveBleedingInsteadOfOriginalWoundRate()
+    {
+        var body = SSpawn(HumanMob);
+        SeedDiagnosticState(body, woundCount: 1);
+        var bleeding = SComp<NCBleedingComponent>(body);
+        foreach (var source in bleeding.Sources.Where(source => source.Channel != NCBleedingChannel.Internal))
+            source.CurrentRate = 0f;
+        bleeding.ActiveExternalRate = 0f;
+
+        Assert.That(_diagnostics.TryBuildSnapshot(
+            body,
+            "NCDiagnosticsHandheldApproximate",
+            NCActionResolutionId.New(),
+            TimeSpan.Zero,
+            out var snapshot), Is.True);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(snapshot.Vitals.ExternalBleeding, Is.EqualTo(NCDiagnosticBand.None));
+            Assert.That(snapshot.Wounds, Has.Count.EqualTo(1));
+            Assert.That(snapshot.Wounds[0].ExternalBleeding, Is.EqualTo(NCDiagnosticBand.None));
+            Assert.That(snapshot.Regions.Single(region => region.Zone == ChestZone).Findings
+                .HasFlag(NCDiagnosticFindingFlags.ExternalBleeding), Is.False);
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void CirculatingBloodUsesTheBodiesVanillaSolutionUnits()
+    {
+        var body = SSpawn(HumanMob);
+        var circulation = SComp<NCCirculationComponent>(body);
+        var bloodstream = SComp<BloodstreamComponent>(body);
+        var physiologyProfile = _prototypes.Index(circulation.Profile);
+        var nominalSolutionUnits = (int) MathF.Round((float) bloodstream.BloodReferenceSolution.Volume);
+
+        circulation.BloodVolume = physiologyProfile.NominalBloodVolume;
+        Assert.That(
+            _diagnostics.TryBuildSnapshot(
+                body,
+                NetworkCapabilities[(int) NCDiagnosticTier.ScannerInternal],
+                NCActionResolutionId.New(),
+                TimeSpan.Zero,
+                out var fullSnapshot),
+            Is.True);
+
+        circulation.BloodVolume = physiologyProfile.NominalBloodVolume * 0.5f;
+        Assert.That(
+            _diagnostics.TryBuildSnapshot(
+                body,
+                NetworkCapabilities[(int) NCDiagnosticTier.ScannerInternal],
+                NCActionResolutionId.New(),
+                TimeSpan.Zero,
+                out var halfSnapshot),
+            Is.True);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(nominalSolutionUnits, Is.EqualTo(600));
+            Assert.That(fullSnapshot.Vitals.NominalBloodVolumeUnits, Is.EqualTo(nominalSolutionUnits));
+            Assert.That(fullSnapshot.Vitals.BloodVolumeUnits, Is.Not.Null);
+            Assert.That(fullSnapshot.Vitals.BloodVolumeUnits!.Value.Minimum,
+                Is.LessThanOrEqualTo(nominalSolutionUnits));
+            Assert.That(fullSnapshot.Vitals.BloodVolumeUnits.Value.Maximum,
+                Is.GreaterThanOrEqualTo(nominalSolutionUnits));
+
+            Assert.That(halfSnapshot.Vitals.NominalBloodVolumeUnits, Is.EqualTo(nominalSolutionUnits));
+            Assert.That(halfSnapshot.Vitals.BloodVolumeUnits, Is.Not.Null);
+            Assert.That(halfSnapshot.Vitals.BloodVolumeUnits!.Value.Minimum, Is.EqualTo(300));
+            Assert.That(halfSnapshot.Vitals.BloodVolumeUnits.Value.Maximum, Is.EqualTo(306));
+        });
+    }
+
+    private void SeedDiagnosticState(EntityUid body, int woundCount)
+    {
+        // Use the prototype's therapeutic concentration so the diagnostic warning crosses the
+        // configured anesthesia threshold instead of merely proving trace-drug disclosure.
+        Assert.That(_pharmacology.ApplyDose(body, "NCDrugSurgicalAnesthetic", 5f).Accepted, Is.True);
+
+        // Wound/bleeding storage is allocated lazily by the trauma pipeline in live play.
+        var wounds = SEntMan.EnsureComponent<NCWoundContainerComponent>(body);
+        wounds.Wounds.Clear();
+        for (var i = 0; i < woundCount; i++)
+        {
+            var woundId = DeterministicGuid(i + 1);
+            wounds.Wounds.Add(woundId, new NCWoundRecord
+            {
+                WoundId = woundId,
+                Prototype = BallisticWound,
+                TargetZone = ChestZone,
+                RegionCategory = ThoraxRegion,
+                WoundType = NCWoundType.Ballistic,
+                TissueDepth = NCTissueDepth.Cavity,
+                Severity = NCWoundSeverity.Severe,
+                Stage = NCWoundStage.Fresh,
+                ClosureState = NCWoundClosureState.Open,
+                IntegrityDamage = FixedPoint2.New(8f),
+                Area = 1f,
+                ExternalBleedRate = 0.25f,
+                InternalBleedRate = 0.75f,
+                PrimaryBleedKind = NCBleedKind.Internal,
+                Pain = 2f,
+                Infection = i == 0 ? 0.5f : 0f,
+                EmbeddedObjectId = i == 0 ? DeterministicGuid(500) : null,
+                ForensicResolutionId = DeterministicGuid(1000 + i),
+                CreatedAt = TimeSpan.FromTicks(i),
+                ModifiedAt = TimeSpan.FromTicks(i),
+            });
+        }
+
+        var bleeding = SEntMan.EnsureComponent<NCBleedingComponent>(body);
+        bleeding.Sources.Clear();
+        var sourceIndex = 0;
+        foreach (var wound in wounds.Wounds.Values)
+        {
+            bleeding.Sources.Add(new NCBleedingSourceRecord
+            {
+                SourceId = DeterministicGuid(2000 + sourceIndex++),
+                WoundId = wound.WoundId,
+                TargetZone = wound.TargetZone,
+                RegionCategory = wound.RegionCategory,
+                Channel = NCBleedingChannel.ExternalVenous,
+                BaseRate = 2f / woundCount,
+                CurrentRate = 2f / woundCount,
+            });
+            bleeding.Sources.Add(new NCBleedingSourceRecord
+            {
+                SourceId = DeterministicGuid(2000 + sourceIndex++),
+                WoundId = wound.WoundId,
+                TargetZone = wound.TargetZone,
+                RegionCategory = wound.RegionCategory,
+                Channel = NCBleedingChannel.Internal,
+                BaseRate = 3f / woundCount,
+                CurrentRate = 3f / woundCount,
+            });
+        }
+        bleeding.ActiveExternalRate = 2f;
+        bleeding.ActiveInternalRate = 3f;
+        bleeding.InternalBloodLoss = 500f;
+
+        var physiology = SEntMan.EnsureComponent<NCPhysiologyComponent>(body);
+        physiology.Oxygenation = 0.82f;
+        physiology.TotalPain = 8f;
+        physiology.PainLevel = NCPainLevel.Severe;
+        physiology.Shock = 0.6f;
+        physiology.ShockStage = NCShockStage.Severe;
+        physiology.Condition = NCPhysiologicalCondition.Critical;
+
+        var circulation = SEntMan.EnsureComponent<NCCirculationComponent>(body);
+        circulation.BloodVolume = 3500f;
+        circulation.EffectiveCirculatingVolume = 3000f;
+        circulation.Perfusion = 0.6f;
+        circulation.BloodPressureState = NCBloodPressureState.Hypotensive;
+        circulation.HeartRhythm = NCHeartRhythm.Unstable;
+
+        Assert.That(_anatomy.TryGetOrgan(body, "RibCage", out var ribs), Is.True);
+        var bone = SComp<NCBoneComponent>(ribs);
+        bone.State = NCBoneState.BrokenDisplaced;
+        bone.Stability = 0.2f;
+
+        Assert.That(_anatomy.TryGetOrgan(body, "Heart", out var heart), Is.True);
+        var heartFunction = SComp<NCOrganFunctionComponent>(heart);
+        heartFunction.CurrentCapacity = 0f;
+        var heartIntegrity = SComp<NCOrganIntegrityComponent>(heart);
+        heartIntegrity.CurrentIntegrity = 5f;
+        heartIntegrity.FunctionalEfficiency = 0f;
+    }
+
+    private static Guid DeterministicGuid(int value)
+    {
+        return new Guid(value, 0, 0, new byte[8]);
+    }
+}

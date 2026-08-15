@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Generated for Night City with OpenAI image generation and curated by Astro, 2026",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "neural_link"
+    },
+    {
+      "name": "circulatory_assist"
+    },
+    {
+      "name": "cyberarm_left"
+    },
+    {
+      "name": "cyberarm_right"
+    },
+    {
+      "name": "cyberoptics"
+    },
+    {
+      "name": "cyberheart"
+    }
+  ]
+}

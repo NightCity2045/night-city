@@ -1,0 +1,136 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Disclosure profiles are cumulative. Record limits and quantization are authoritative privacy bounds,
+# not UI hints; the server clamps them again to defensive absolute maxima.
+- type: ncDiagnosticCapability
+  id: NCDiagnosticsSelfSensations
+  tier: SelfSensations
+  disclosures: [ SubjectiveSymptoms ]
+  unassistedDefault: true
+  selfOnly: true
+  range: 0
+  maxRegionRecords: 12
+  maxWoundRecords: 0
+  maxOrganRecords: 0
+  bloodVolumeUnitsQuantum: 120
+  ratioQuantum: 0.2
+  bleedRateQuantum: 1
+
+- type: ncDiagnosticCapability
+  id: NCDiagnosticsVisual
+  tier: Visual
+  disclosures: [ SubjectiveSymptoms, VisibleTrauma, ExternalBleeding ]
+  unassistedDefault: true
+  range: 4
+  maxRegionRecords: 12
+  maxWoundRecords: 8
+  maxOrganRecords: 0
+  bloodVolumeUnitsQuantum: 120
+  ratioQuantum: 0.2
+  bleedRateQuantum: 1
+
+- type: ncDiagnosticCapability
+  id: NCDiagnosticsManual
+  tier: Manual
+  disclosures:
+  - SubjectiveSymptoms
+  - VisibleTrauma
+  - ExternalBleeding
+  - ManualVitals
+  - StructuralInstability
+  - ProbableRegions
+  unassistedDefault: true
+  range: 1.5
+  maxRegionRecords: 12
+  maxWoundRecords: 8
+  maxOrganRecords: 0
+  bloodVolumeUnitsQuantum: 120
+  ratioQuantum: 0.2
+  bleedRateQuantum: 1
+
+- type: ncDiagnosticCapability
+  id: NCDiagnosticsHandheldApproximate
+  tier: HandheldApproximate
+  disclosures:
+  - SubjectiveSymptoms
+  - VisibleTrauma
+  - ExternalBleeding
+  - ManualVitals
+  - StructuralInstability
+  - ApproximateVitals
+  - ProbableRegions
+  requiresHeld: true
+  range: 1.5
+  maxRegionRecords: 12
+  maxWoundRecords: 12
+  maxOrganRecords: 0
+  bloodVolumeUnitsQuantum: 60
+  ratioQuantum: 0.1
+  bleedRateQuantum: 0.5
+
+- type: ncDiagnosticCapability
+  id: NCDiagnosticsScannerInternal
+  tier: ScannerInternal
+  disclosures:
+  - SubjectiveSymptoms
+  - VisibleTrauma
+  - ExternalBleeding
+  - ManualVitals
+  - StructuralInstability
+  - ApproximateVitals
+  - ProbableRegions
+  - InternalBleeding
+  - Fractures
+  - DetailedWounds
+  - Organs
+  - Infection
+  - ForeignBodies
+  - Cyberware
+  - Drugs
+  requiresPower: true
+  range: 4
+  maxRegionRecords: 32
+  maxWoundRecords: 64
+  maxOrganRecords: 64
+  maxCyberwareRecords: 64
+  maxDrugRecords: 32
+  bloodVolumeUnitsQuantum: 6
+  ratioQuantum: 0.01
+  bleedRateQuantum: 0.05
+  drugConcentrationQuantum: 0.025
+
+- type: ncDiagnosticCapability
+  id: NCDiagnosticsSurgicalConsole
+  tier: SurgicalConsole
+  disclosures:
+  - SubjectiveSymptoms
+  - VisibleTrauma
+  - ExternalBleeding
+  - ManualVitals
+  - StructuralInstability
+  - ApproximateVitals
+  - ProbableRegions
+  - InternalBleeding
+  - Fractures
+  - DetailedWounds
+  - Organs
+  - Infection
+  - ForeignBodies
+  - SurgicalState
+  - Cyberware
+  - Drugs
+  - TreatmentHistory
+  requiresPower: true
+  range: 2.5
+  maxRegionRecords: 12
+  maxWoundRecords: 32
+  maxOrganRecords: 32
+  maxCyberwareRecords: 32
+  maxDrugRecords: 32
+  maxHistoryRecords: 64
+  bloodVolumeUnitsQuantum: 6
+  ratioQuantum: 0.01
+  bleedRateQuantum: 0.05
+  drugConcentrationQuantum: 0.025

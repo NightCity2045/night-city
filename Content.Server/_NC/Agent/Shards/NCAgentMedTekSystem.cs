@@ -7,6 +7,7 @@ using Content.Server.CartridgeLoader.Cartridges;
 using Content.Server.Medical;
 using Content.Shared._NC.Agent.Components;
 using Content.Shared._NC.Agent.Shards.MedTek;
+using Content.Shared._NC.Medical.Diagnostics.Detail;
 using Content.Shared.Administration.Logs;
 using Content.Shared.CartridgeLoader;
 using Content.Shared.Damage.Components;
@@ -28,15 +29,18 @@ public sealed partial class NCAgentMedTekSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<NCAgentComponent, NCAgentMedicalScanCompletedEvent>(OnScanCompleted);
+        SubscribeLocalEvent<NCDiagnosticCapabilityComponent, NCAgentMedicalScanCompletedEvent>(OnScanCompleted);
         SubscribeLocalEvent<NCAgentMedTekComponent, CartridgeUiReadyEvent>(OnUiReady);
         SubscribeLocalEvent<NCAgentMedTekComponent, CartridgeMessageEvent>(OnUiMessage);
     }
 
-    private void OnScanCompleted(Entity<NCAgentComponent> ent, ref NCAgentMedicalScanCompletedEvent args)
+    private void OnScanCompleted(
+        Entity<NCDiagnosticCapabilityComponent> ent,
+        ref NCAgentMedicalScanCompletedEvent args)
     {
-        if (!TryComp<CartridgeLoaderComponent>(ent, out var loader) ||
-            _cartridges.TryGetProgram<NCAgentMedTekComponent>((ent.Owner, loader)) is not { } medTek ||
+        if (!TryComp<NCAgentComponent>(args.User, out _) ||
+            !TryComp<CartridgeLoaderComponent>(args.User, out var loader) ||
+            _cartridges.TryGetProgram<NCAgentMedTekComponent>((args.User, loader)) is not { } medTek ||
             !TryComp<DamageableComponent>(args.Target, out var damageable))
         {
             return;
@@ -66,8 +70,8 @@ public sealed partial class NCAgentMedTekSystem : EntitySystem
         _adminLog.Add(
             LogType.PdaInteract,
             LogImpact.Low,
-            $"{ToPrettyString(ent)} stored a MEDTEK scan of {ToPrettyString(args.Target)}");
-        UpdateUi(medTek, ent.Owner);
+            $"{ToPrettyString(args.User)} stored a MEDTEK scan of {ToPrettyString(args.Target)}");
+        UpdateUi(medTek, args.User);
     }
 
     private void OnUiReady(Entity<NCAgentMedTekComponent> ent, ref CartridgeUiReadyEvent args)

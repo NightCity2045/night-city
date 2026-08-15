@@ -50,7 +50,10 @@ public sealed partial class ContentSpriteSystem : EntitySystem
 
         _control.QueuedTextures.Clear();
 
-        _ui.RootControl.RemoveChild(_control);
+        // NC start: Shutdown may run after the UI root has already released or reparented its children.
+        // Orphan is idempotent and removes the control from its actual parent without masking the original error.
+        _control.Orphan();
+        // NC end
     }
 
     /// <summary>

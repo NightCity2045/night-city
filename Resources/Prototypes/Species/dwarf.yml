@@ -1,7 +1,9 @@
 - type: species
   id: Dwarf
   name: species-name-dwarf
-  roundStart: true
+  # NC start - Night City player characters use the authoritative human anatomy only.
+  roundStart: false
+  # NC end
   prototype: MobDwarf
   dollPrototype: AppearanceDwarf
   skinColoration: HumanToned

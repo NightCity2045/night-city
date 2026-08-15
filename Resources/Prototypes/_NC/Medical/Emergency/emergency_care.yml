@@ -1,0 +1,103 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncEmergencyCareProfile
+  id: NCHumanEmergencyCare
+  defaultForHumans: true
+  # CPR remains below the brain-injury threshold and only slows the injury clock.
+  cprDuration: 6s
+  cprApplicationDuration: 3s
+  cprInteractionRange: 2
+  cprAssistedPerfusion: 0.18
+  cprBrainInjuryRateMultiplier: 0.35
+  cprMaximumNaturalPerfusion: 0.2
+  cprAssessmentZone: NCZoneChest
+  cprMaximumChestTrauma: 24
+  oxygenRespiratorySupport: 0.72
+  ventilationRespiratorySupport: 0.82
+  # Crystalloid is tracked separately and never becomes oxygen-carrying blood.
+  maximumCrystalloidVolume: 2000
+  maximumBloodVolumeMultiplier: 1
+  transfusionCompatibility:
+    NC-O-Negative: [ NC-O-Negative, NC-A-Positive, NC-B-Positive, NC-AB-Positive ]
+    NC-A-Positive: [ NC-A-Positive, NC-AB-Positive ]
+    NC-B-Positive: [ NC-B-Positive, NC-AB-Positive ]
+    NC-AB-Positive: [ NC-AB-Positive ]
+  defibrillationBurnProfile: NCEnvironmentThermalStandard
+  defibrillationBurnDamageType: Heat
+  defibrillationBurnZone: NCZoneChest
+  defibrillationBurnDamage: 2
+  processedActionCapacity: 128
+  auditHistoryCapacity: 128
+
+- type: ncEmergencyCareCapability
+  id: NCOxygenDeliveryCapability
+  kind: Oxygen
+  profile: NCHumanEmergencyCare
+  supportDuration: 60s
+  chargeCost: 1
+  applicationDuration: 2s
+
+- type: ncEmergencyCareCapability
+  id: NCManualVentilatorCapability
+  kind: Ventilation
+  profile: NCHumanEmergencyCare
+  supportDuration: 30s
+  chargeCost: 1
+  applicationDuration: 2s
+
+- type: ncEmergencyCareCapability
+  id: NCCrystalloidInfusionCapability
+  kind: Crystalloid
+  profile: NCHumanEmergencyCare
+  infusionVolume: 500
+  chargeCost: 1
+  applicationDuration: 6s
+
+- type: ncEmergencyCareCapability
+  id: NCBloodpackCapability
+  kind: BloodTransfusion
+  profile: NCHumanEmergencyCare
+  infusionVolume: 450
+  # Vanilla Bloodpack is a universal synthetic replacement in its existing description.
+  donorCompatibility: NC-O-Negative
+  chargeCost: 1
+  resourceKind: Stack
+  applicationDuration: 8s
+
+- type: ncEmergencyCareCapability
+  id: NCFieldDefibrillatorCapability
+  kind: Defibrillation
+  profile: NCHumanEmergencyCare
+  chargeCost: 1
+  applicationDuration: 4s
+
+- type: entity
+  id: NCManualVentilator
+  parent: BaseItem
+  name: manual ventilator
+  description: A hand-operated resuscitator that provides measured temporary ventilation.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/healthanalyzer.rsi
+    state: icon
+  - type: Item
+    size: Small
+  - type: NCEmergencyCareItem
+    capability: NCManualVentilatorCapability
+    chargesRemaining: 10
+
+- type: entity
+  id: NCCrystalloidBag
+  parent: BaseHealingItem
+  name: crystalloid IV bag
+  description: A measured isotonic volume expander. It restores circulating fluid, not blood cells.
+  components:
+  - type: Sprite
+    state: bloodpack
+  - type: Item
+    heldPrefix: bloodpack
+  - type: NCEmergencyCareItem
+    capability: NCCrystalloidInfusionCapability
+    chargesRemaining: 1

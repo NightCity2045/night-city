@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncPhysiologyProfile
+  id: NCHumanPhysiology
+  defaultForHumans: true
+  nominalBloodVolume: 5000
+  defaultTransfusionCompatibility: NC-A-Positive
+  criticalPerfusionThreshold: 0.5
+  arrestPerfusionThreshold: 0.2
+  brainInjuryPerfusionThreshold: 0.3
+  brainDeathDelay: 180s
+  brainRecoveryRate: 0.25
+  dazedThreshold: 0.8
+  confusedThreshold: 0.65
+  stuporousThreshold: 0.5
+  unconsciousThreshold: 0.35
+  comatoseThreshold: 0.2
+  painThresholds: [ 1, 5, 12, 24, 40 ]
+  shockThresholds: [ 0.15, 0.35, 0.6, 0.85 ]
+  painShockContribution: 0.35
+  shockConsciousnessPenalty: 0.15
+  criticalUpdateInterval: 0.25s
+  activeBleedingUpdateInterval: 0.5s
+  stableInjuredUpdateInterval: 1s

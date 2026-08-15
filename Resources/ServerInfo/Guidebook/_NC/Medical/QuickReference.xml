@@ -1,0 +1,56 @@
+<Document>
+# Краткая памятка врача
+
+## Наружное кровотечение
+
+1. Выберите область на таргетинге.
+2. Пустая рука: прямое давление.
+3. Gauze: повязка на выбранную наружную рану.
+4. Brutepack: гемостатик на выбранную наружную рану.
+5. Tourniquet: жгут на каноническую область руки или ноги.
+6. Повторите скан и восполните потерянный объём.
+
+## Потеря сознания или остановка кровообращения
+
+1. Проверьте кислород, циркулирующую кровь, перфузию и ритм.
+2. Остановите наружные источники крови.
+3. Примените кислород или NCManualVentilator.
+4. При отсутствующей перфузии выполняйте СЛР пустой рукой.
+5. При Shockable Arrest примените Defibrillator.
+6. Введите совместимую кровь или кристаллоид.
+7. Повторите скан.
+
+## Перелом
+
+1. Выберите повреждённую область.
+2. Примените NCFieldSplint для временной фиксации.
+3. Подтвердите перелом полным сканером.
+4. Выполните: Cautery → Scalpel → Hemostat → Retractor → Drill → Drill → Drill → MedicatedSuture.
+
+## Внутренняя травма
+
+1. Поместите пациента в MedicalScanner.
+2. Откройте computerBodyScanner.
+3. Проверьте Regions, Wounds, Organs, Cyberware и Drugs.
+4. Выберите область тела.
+5. Выполните соответствующую операцию из раздела «Хирургия».
+6. Повторите полный скан.
+
+## Основной набор
+
+<Box>
+<GuideEntityEmbed Entity="HandheldHealthAnalyzer"/>
+<GuideEntityEmbed Entity="Gauze"/>
+<GuideEntityEmbed Entity="Brutepack"/>
+<GuideEntityEmbed Entity="Tourniquet"/>
+</Box>
+<Box>
+<GuideEntityEmbed Entity="Bloodpack"/>
+<GuideEntityEmbed Entity="NCManualVentilator"/>
+<GuideEntityEmbed Entity="Defibrillator"/>
+<GuideEntityEmbed Entity="NCFieldSplint"/>
+</Box>
+
+[textlink="Полный справочник врача" link="NCDoctor"]
+[textlink="Все хирургические операции" link="NCSurgery"]
+</Document>

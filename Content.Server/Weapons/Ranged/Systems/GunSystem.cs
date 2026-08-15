@@ -1,5 +1,8 @@
 using System.Numerics;
 using Content.Server.Cargo.Systems;
+// NC start - authoritative physical projectile context adapter.
+using Content.Server._NC.Combat.Projectiles;
+// NC end
 using Content.Server.Weapons.Ranged.Components;
 using Content.Shared.Cargo;
 using Content.Shared.Damage;
@@ -24,6 +27,9 @@ public sealed partial class GunSystem : SharedGunSystem
 {
     [Dependency] private PricingSystem _pricing = default!;
     [Dependency] private SharedMapSystem _map = default!;
+    // NC start - snapshots private zone intent only after pre-shot cancellation succeeds.
+    [Dependency] private NCProjectileContextSystem _ncProjectileContext = default!;
+    // NC end
 
     private const float DamagePitchVariation = 0.05f;
 
@@ -64,6 +70,10 @@ public sealed partial class GunSystem : SharedGunSystem
                 return;
             }
         }
+
+        // NC start - physical trajectory remains vanilla; only immutable downstream context is added.
+        _ncProjectileContext.PrepareShot(gun, user);
+        // NC end
 
         var fromMap = TransformSystem.ToMapCoordinates(fromCoordinates);
         var toMap = TransformSystem.ToMapCoordinates(toCoordinates).Position;

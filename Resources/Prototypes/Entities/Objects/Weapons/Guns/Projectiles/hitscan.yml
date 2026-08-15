@@ -35,6 +35,10 @@
       state: impact_laser
   - type: HitscanReflect
   - type: HitscanBasicEffects
+  # NC start - Validated raycasts carry a data-driven profile into authoritative human trauma.
+  - type: NCHitscanDamageProfile
+    profile: NCThermalHitscanStandard
+  # NC end
 
 - type: entity
   parent: BasicHitscan
@@ -100,6 +104,10 @@
     damage:
       types:
         Heat: 1
+  # NC start - Practice beams never ablate armor and use a nonlethal profile.
+  - type: NCHitscanDamageProfile
+    profile: NCThermalHitscanPractice
+  # NC end
 
 - type: entity
   parent: BasicHitscan

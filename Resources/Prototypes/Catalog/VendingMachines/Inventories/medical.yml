@@ -2,6 +2,17 @@
   id: NanoMedInventory
   startingInventory:
     HandheldHealthAnalyzer: 1
+    # NC start - Authoritative trauma supplies available through the existing clinic vendor.
+    Tourniquet: 2
+    NCFieldSplint: 2
+    NCCrystalloidBag: 2
+    NCSyringeTraumaAnalgesic: 2
+    NCSyringeVasopressor: 1
+    NCSyringeRespiratoryStimulant: 1
+    NCSyringeProcoagulant: 1
+    NCSyringeStimulant: 1
+    NCSyringeSyntheticOxygenCarrier: 1
+    # NC end
     Gauze: 3
     Brutepack: 3
     Ointment: 3
@@ -33,6 +44,35 @@
   startingInventory:
     # Medical Essential Gear
     ClothingBeltMedicalFilled: 2
+    # NC start - Authoritative trauma, resuscitation and surgery stock.
+    Tourniquet: 4
+    NCFieldSplint: 4
+    NCManualVentilator: 2
+    NCCrystalloidBag: 4
+    Scalpel: 2
+    Hemostat: 2
+    Retractor: 2
+    Cautery: 2
+    MedicatedSuture: 4
+    Drill: 2
+    SyringeSaline: 2
+    Saw: 1
+    NCSyringeTraumaAnalgesic: 4
+    NCSyringeSurgicalAnesthetic: 3
+    NCSyringeSedative: 3
+    NCSyringeVasopressor: 3
+    NCSyringeAntiarrhythmic: 3
+    NCSyringeRespiratoryStimulant: 3
+    NCSyringeBroadAntibiotic: 4
+    NCSyringeAntitoxin: 3
+    NCSyringeImmunosuppressant: 2
+    NCSyringeProcoagulant: 3
+    NCSyringeStimulant: 2
+    NCSyringeAnticoagulant: 1
+    NCSyringeVasodilator: 2
+    NCSyringeSyntheticOxygenCarrier: 3
+    NCSyringeCyberwareCoolantAgent: 2
+    # NC end
     # Shared Essential
     HandheldHealthAnalyzer: 3
     JetInjector: 3

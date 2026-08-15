@@ -39,7 +39,13 @@
       price: 30
     - type: GuideHelp
       guides:
-      - MedicalDoctor
+      # NC start - Point the mapped defibrillator at the authoritative NC medical guide.
+      - NCDoctor
+      # NC end
+    # NC start - Reuse every vanilla defibrillator through its existing power-cell and DoAfter workflow.
+    - type: NCEmergencyCareItem
+      capability: NCFieldDefibrillatorCapability
+    # NC end
 
 - type: entity
   id: Defibrillator

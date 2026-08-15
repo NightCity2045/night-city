@@ -1,0 +1,56 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Expanding .35 ammunition is new gameplay content; all generic gun, casing, magazine and box behavior is
+# inherited from existing SS14 entities rather than duplicated.
+- type: entity
+  id: NCBulletPistolExpansive
+  parent: BulletPistol
+  categories: [ HideSpawnMenu ]
+  name: bullet (.35 auto expanding)
+  components:
+  - type: NCProjectileDamageProfile
+    profile: NCBallisticExpansive
+
+- type: entity
+  id: NCCartridgePistolExpansive
+  parent: CartridgePistol
+  name: cartridge (.35 auto expanding)
+  description: A soft-point .35 cartridge intended to deform in unarmored tissue. It performs poorly as a substitute for armor-piercing ammunition.
+  components:
+  - type: CartridgeAmmo
+    proto: NCBulletPistolExpansive
+  - type: Sprite
+    layers:
+    - state: base
+      map: [ "enum.AmmoVisualLayers.Base" ]
+    - state: tip
+      map: [ "enum.AmmoVisualLayers.Tip" ]
+      color: "#c77b45"
+
+- type: entity
+  id: NCMagazinePistolExpansive
+  parent: MagazinePistol
+  name: pistol magazine (.35 auto expanding)
+  description: A 10-round pistol magazine loaded with expanding .35 ammunition.
+  components:
+  - type: BallisticAmmoProvider
+    proto: NCCartridgePistolExpansive
+  - type: Sprite
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-1
+      map: [ "enum.GunVisualLayers.Mag" ]
+    - state: stripe
+      color: "#c77b45"
+
+- type: entity
+  id: NCMagazineBoxPistolExpansive
+  parent: MagazineBoxPistol
+  name: ammunition box (.35 auto expanding)
+  description: A box of expanding .35 cartridges.
+  components:
+  - type: BallisticAmmoProvider
+    proto: NCCartridgePistolExpansive

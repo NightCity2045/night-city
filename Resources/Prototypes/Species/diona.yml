@@ -1,7 +1,9 @@
 - type: species
   id: Diona
   name: species-name-diona
-  roundStart: true
+  # NC start - Night City player characters use the authoritative human anatomy only.
+  roundStart: false
+  # NC end
   prototype: MobDiona
   defaultSkinTone: "#cdb369"
   dollPrototype: AppearanceDiona

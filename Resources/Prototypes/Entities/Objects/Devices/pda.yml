@@ -236,7 +236,9 @@
     state: pda-internmed
   - type: GuideHelp
     guides:
-    - MedicalDoctor
+    # NC start - Open the authoritative NC medical manual.
+    - NCDoctor
+    # NC end
 
 - type: entity
   parent: BaseSecurityPDA
@@ -783,7 +785,9 @@
     state: pda-medical
   - type: GuideHelp
     guides:
-    - MedicalDoctor
+    # NC start - Open the authoritative NC medical manual.
+    - NCDoctor
+    # NC end
 
 - type: entity
   parent: MedicalPDA

@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncTransplantRejectionProfile
+  id: NCHumanTransplantRejection
+  defaultForHumans: true
+  activeUpdateInterval: 2s
+  maximumBurden: 100
+  baseGrowthPerSecond: 0.006
+  growthSuppressionAtMaximumImmunosuppression: 1
+  recoveryPerImmunosuppressionPerSecond: 0.018
+  stageThresholds: [ 5, 20, 45, 75 ]
+  integrityDamagePerSecond:
+    None: 0
+    Early: 0.0005
+    Active: 0.002
+    Severe: 0.008
+    Critical: 0.02
+  functionDamagePerSecond:
+    None: 0
+    Early: 0.0004
+    Active: 0.0015
+    Severe: 0.006
+    Critical: 0.016
+  necrosisPerSecond:
+    None: 0
+    Early: 0
+    Active: 0.000002
+    Severe: 0.00001
+    Critical: 0.00004

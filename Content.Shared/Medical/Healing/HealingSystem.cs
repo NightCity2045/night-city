@@ -1,4 +1,7 @@
 using Content.Shared.Administration.Logs;
+// NC start - Authoritative trauma treatment owns medical item effects for NC bodies.
+using Content.Shared._NC.Medical.Anatomy;
+// NC end
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Systems;
 using Content.Shared.Chemistry.EntitySystems;
@@ -161,6 +164,11 @@ public sealed partial class HealingSystem : EntitySystem
 
     private void OnHealingUse(Entity<HealingComponent> healing, ref UseInHandEvent args)
     {
+        // NC start - Avoid consuming vanilla healing items through the legacy HP path on authoritative bodies.
+        if (HasComp<NCMedicalBodyComponent>(args.User))
+            return;
+        // NC end
+
         if (args.Handled)
             return;
 
@@ -170,6 +178,11 @@ public sealed partial class HealingSystem : EntitySystem
 
     private void OnHealingAfterInteract(Entity<HealingComponent> healing, ref AfterInteractEvent args)
     {
+        // NC start - NC treatment components on the same physical item handle wounds and resource use.
+        if (args.Target is { } ncTarget && HasComp<NCMedicalBodyComponent>(ncTarget))
+            return;
+        // NC end
+
         if (args.Handled || !args.CanReach || args.Target == null)
             return;
 

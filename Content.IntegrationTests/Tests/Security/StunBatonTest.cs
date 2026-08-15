@@ -17,7 +17,10 @@ namespace Content.IntegrationTests.Tests.Security;
 public sealed class StunBatonTests : InteractionTest
 {
     private static readonly EntProtoId StunBatonProtoId = "Stunbaton";
-    private static readonly EntProtoId HumanProtoId = "MobHuman";
+    // NC start - This upstream component test exercises legacy Damageable behavior on a non-NC mob.
+    // Authoritative MobHuman melee damage is covered by the dedicated NC adapter tests.
+    private static readonly EntProtoId LegacyMobProtoId = "MobDwarf";
+    // NC end
 
     // If you are rebalancing stun batons you will have to change this number.
     private const int NumberOfHitsToStun = 3;
@@ -47,7 +50,7 @@ public sealed class StunBatonTests : InteractionTest
         }
 
         // Spawn a target mob.
-        await SpawnTarget(HumanProtoId);
+        await SpawnTarget(LegacyMobProtoId);
         var standingStateComp = Comp<StandingStateComponent>();
         var staminaComp = Comp<StaminaComponent>();
         Entity<DamageableComponent> mob = (STarget.Value, Comp<DamageableComponent>());
@@ -120,7 +123,7 @@ public sealed class StunBatonTests : InteractionTest
         }
 
         // Spawn a target mob.
-        await SpawnTarget(HumanProtoId);
+        await SpawnTarget(LegacyMobProtoId);
         var standingStateComp = Comp<StandingStateComponent>();
         var staminaComp = Comp<StaminaComponent>();
         Entity<DamageableComponent> mob = (STarget.Value, Comp<DamageableComponent>());

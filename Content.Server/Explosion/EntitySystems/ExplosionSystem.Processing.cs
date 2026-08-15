@@ -452,7 +452,10 @@ public sealed partial class ExplosionSystem
                     continue;
 
                 // TODO EXPLOSIONS turn explosions into entities, and pass the the entity in as the damage origin.
-                _damageableSystem.ChangeDamage((entity, damageable), damage);
+                // NC start - authoritative human medicine consumes the resistance-adjusted physical explosion here.
+                if (!NCTryApplyMedicalExplosion(entity, epicenter, damage, id, cause))
+                    _damageableSystem.ChangeDamage((entity, damageable), damage);
+                // NC end
 
                 if (_actorQuery.HasComp(entity))
                 {

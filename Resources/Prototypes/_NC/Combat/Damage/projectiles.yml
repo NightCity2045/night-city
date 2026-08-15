@@ -1,0 +1,143 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncBluntTransferProfile
+  id: NCBallisticStoppedTransfer
+  traumaProfile: BluntImpact
+  rules:
+  - minimumRawDamage: 18
+    appliedTrauma: 1
+  - minimumRawDamage: 28
+    appliedTrauma: 3
+  - minimumRawDamage: 40
+    appliedTrauma: 6
+
+- type: ncCombatDamageProfile
+  id: NCBallisticStandard
+  traumaProfile: BallisticProjectile
+  armorDamageClass: Ballistic
+  ablationAmount: 1
+  bluntTransferProfile: NCBallisticStoppedTransfer
+  traumaFlags: [ Penetrating, CanEmbed, CanExit ]
+  embedMinimumPostArmorDamage: 1
+  embeddedObjectEntityPrototype: NCExtractedBullet
+  exitMinimumPostArmorDamage: 18
+  exitTraumaMultiplier: 0.35
+  canOverpenetrateBody: true
+
+- type: ncCombatDamageProfile
+  id: NCBallisticArmorPiercing
+  traumaProfile: BallisticProjectile
+  armorDamageClass: Ballistic
+  ablationAmount: 2
+  bluntTransferProfile: NCBallisticStoppedTransfer
+  traumaFlags: [ Penetrating, ArmorPiercing, CanEmbed, CanExit ]
+  embedMinimumPostArmorDamage: 1
+  embeddedObjectEntityPrototype: NCExtractedBullet
+  exitMinimumPostArmorDamage: 12
+  exitTraumaMultiplier: 0.45
+  canOverpenetrateBody: true
+
+- type: ncCombatDamageProfile
+  id: NCBallisticIncendiary
+  traumaProfile: BallisticProjectile
+  armorDamageClass: Ballistic
+  ablationAmount: 1
+  bluntTransferProfile: NCBallisticStoppedTransfer
+  traumaFlags: [ Penetrating, Incendiary, CanEmbed, CanExit ]
+  embedMinimumPostArmorDamage: 1
+  embeddedObjectEntityPrototype: NCExtractedBullet
+  exitMinimumPostArmorDamage: 18
+  exitTraumaMultiplier: 0.3
+  canOverpenetrateBody: true
+
+- type: ncCombatDamageProfile
+  id: NCBallisticPractice
+  traumaProfile: BluntImpact
+  armorDamageClass: Blunt
+  ablationAmount: 0
+  traumaFlags: [ NonLethal ]
+
+- type: ncCombatDamageProfile
+  id: NCBallisticExpansive
+  traumaProfile: BallisticExpansiveProjectile
+  armorDamageClass: Ballistic
+  ablationAmount: 1
+  bluntTransferProfile: NCBallisticStoppedTransfer
+  traumaFlags: [ Penetrating, CanEmbed ]
+  embedMinimumPostArmorDamage: 1
+  embeddedObjectEntityPrototype: NCExtractedBullet
+
+- type: ncCombatDamageProfile
+  id: NCProjectileEmpUtility
+  traumaProfile: ElectricalImpact
+  armorDamageClass: Electrical
+  ablationAmount: 0
+  traumaFlags: [ None ]
+  suppressLocalTrauma: true
+
+- type: ncCombatDamageProfile
+  id: NCProjectileBluntStandard
+  traumaProfile: BluntImpact
+  armorDamageClass: Blunt
+  ablationAmount: 0
+  traumaFlags: [ None ]
+
+- type: ncCombatDamageProfile
+  id: NCProjectileSlashStandard
+  traumaProfile: SlashingImpact
+  armorDamageClass: Slash
+  ablationAmount: 1
+  traumaFlags: [ None ]
+
+- type: ncCombatDamageProfile
+  id: NCProjectilePiercingStandard
+  traumaProfile: PiercingImpact
+  armorDamageClass: Pierce
+  ablationAmount: 1
+  traumaFlags: [ Penetrating, CanEmbed ]
+  embedMinimumPostArmorDamage: 1
+  embeddedObjectEntityPrototype: NCExtractedBullet
+
+- type: ncCombatDamageProfile
+  id: NCProjectileThermalStandard
+  traumaProfile: ThermalImpact
+  armorDamageClass: Thermal
+  ablationAmount: 1
+  traumaFlags: [ Incendiary ]
+
+- type: ncCombatDamageProfile
+  id: NCProjectileColdStandard
+  traumaProfile: NCColdImpact
+  armorDamageClass: Thermal
+  ablationAmount: 0
+  traumaFlags: [ None ]
+
+- type: ncCombatDamageProfile
+  id: NCProjectileElectricalStandard
+  traumaProfile: ElectricalImpact
+  armorDamageClass: Electrical
+  ablationAmount: 0
+  traumaFlags: [ None ]
+
+- type: ncCombatDamageProfile
+  id: NCProjectileChemicalStandard
+  traumaProfile: ChemicalImpact
+  armorDamageClass: Chemical
+  ablationAmount: 1
+  traumaFlags: [ None ]
+
+# Physical projectile prototypes without an exact ammunition override resolve from their actual positive payload.
+# Radiation and other systemic types remain absent: their physiology adapters own those effects, never ballistics.
+- type: ncProjectileDamageProfileMap
+  id: NCProjectileDefaultDamageProfileMap
+  defaultForHumans: true
+  profiles:
+    Blunt: NCProjectileBluntStandard
+    Slash: NCProjectileSlashStandard
+    Piercing: NCBallisticStandard
+    Heat: NCProjectileThermalStandard
+    Cold: NCProjectileColdStandard
+    Shock: NCProjectileElectricalStandard
+    Caustic: NCProjectileChemicalStandard

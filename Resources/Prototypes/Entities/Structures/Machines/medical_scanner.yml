@@ -73,4 +73,6 @@
     - scanner-bodyContainer
   - type: GuideHelp
     guides:
-    - Cloning
+    # NC start - The mapped scanner is the entrance to authoritative detailed diagnostics.
+    - NCDiagnosticsAndTriage
+    # NC end

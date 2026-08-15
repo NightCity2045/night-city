@@ -1,0 +1,954 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryDeepWoundTreatment
+  name: deep wound treatment
+  description: Debrides and closes one explicitly selected deep wound.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationGeneral ]
+  targetRequirements: Integrity
+  requiresTargetWound: true
+  compatibleWoundTypes: [ Ballistic, Slash, Pierce, Thermal, Blast ]
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityStableSurface ]
+    minimumQuality: 0.45
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumLighting: 0.5
+    maximumMotion: 0.25
+    maximumContamination: 0.6
+  patient:
+    minimumOxygenation: 0.25
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.3
+    minimumSedation: 0.25
+    minimumAnesthesia: 0.35
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepDebrideWound
+  - NCSurgeryStepSutureClosure
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.08
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryVascularRepair
+  name: vascular repair
+  description: Exposes and repairs a damaged vessel before definitive closure.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationVascular ]
+  targetRequirements: Vascular
+  requiresTargetWound: true
+  compatibleWoundTypes: [ Ballistic, Slash, Pierce, Blast ]
+  targetState:
+    requireActiveBleeding: true
+  facility:
+    required: true
+    capabilities:
+    - NCSurgeryFacilityStableSurface
+    - NCSurgeryFacilityMonitoring
+    minimumQuality: 0.6
+    minimumSterility: 0.55
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.5
+    minimumLighting: 0.65
+    maximumMotion: 0.15
+    maximumContamination: 0.4
+  patient:
+    minimumOxygenation: 0.3
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.4
+    minimumSedation: 0.35
+    minimumAnesthesia: 0.45
+    maximumMovement: 0.15
+    requireAirwayMonitoring: true
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepRepairVessel
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepSutureClosure
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.12
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryFractureFixation
+  name: open fracture fixation
+  description: Reduces and fixates one materialized bone structure.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationOrthopedic ]
+  targetRequirements: Bone
+  compatibleTargetCategories:
+  - Skull
+  - RibCage
+  - PelvisBone
+  - ArmBoneLeft
+  - ArmBoneRight
+  - LegBoneLeft
+  - LegBoneRight
+  targetState:
+    allowedBoneStates: [ Cracked, BrokenStable, BrokenDisplaced, Shattered ]
+  facility:
+    required: true
+    capabilities:
+    - NCSurgeryFacilityStableSurface
+    - NCSurgeryFacilityBoneFixation
+    minimumQuality: 0.6
+    minimumSterility: 0.5
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.45
+    minimumLighting: 0.6
+    maximumMotion: 0.15
+    maximumContamination: 0.45
+  patient:
+    minimumOxygenation: 0.3
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.45
+    minimumSedation: 0.4
+    minimumAnesthesia: 0.5
+    maximumMovement: 0.1
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepOpenBoneCasing
+  - NCSurgeryStepReduceBone
+  - NCSurgeryStepFixBone
+  - NCSurgeryStepCloseSite
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.15
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryExposeOrgan
+  name: expose internal organ
+  description: Opens a controlled path to one materialized internal organ for a following procedure.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationOrgan ]
+  compatibleTargetCategories:
+  - Brain
+  - Eyes
+  - Tongue
+  - Ears
+  - Appendix
+  - Lungs
+  - Heart
+  - Stomach
+  - Liver
+  - Kidneys
+  targetRequirements: Integrity
+  facility:
+    required: true
+    capabilities:
+    - NCSurgeryFacilityMonitoring
+    - NCSurgeryFacilityVentilation
+    minimumQuality: 0.65
+    minimumSterility: 0.6
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.55
+    minimumLighting: 0.7
+    maximumMotion: 0.1
+    maximumContamination: 0.35
+  patient:
+    minimumOxygenation: 0.35
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.5
+    minimumSedation: 0.45
+    minimumAnesthesia: 0.55
+    maximumMovement: 0.08
+    requireAirwayMonitoring: true
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepOpenCavity
+  - NCSurgeryStepExposeOrgan
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.18
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryOrganRepair
+  name: internal organ repair
+  description: Repairs one already exposed vital or supporting organ.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationOrgan ]
+  targetRequirements: Function
+  compatibleTargetCategories:
+  - Lungs
+  - Heart
+  - Stomach
+  - Liver
+  - Kidneys
+  targetState:
+    maximumIntegrityRatio: 0.95
+  startingAccessDepths: [ OrganExposed ]
+  facility:
+    required: true
+    capabilities:
+    - NCSurgeryFacilityMonitoring
+    - NCSurgeryFacilityVentilation
+    minimumQuality: 0.65
+    minimumSterility: 0.65
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.6
+    minimumLighting: 0.7
+    maximumMotion: 0.1
+    maximumContamination: 0.3
+  patient:
+    minimumOxygenation: 0.35
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.5
+    minimumSedation: 0.45
+    minimumAnesthesia: 0.55
+    maximumMovement: 0.08
+    requireAirwayMonitoring: true
+  steps:
+  - NCSurgeryStepRepairOrgan
+  - NCSurgeryStepCloseSite
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.2
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryWoundIrrigation
+  name: wound irrigation and decontamination
+  description: Irrigates one contaminated deep wound before deterministic closure.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationGeneral ]
+  targetRequirements: Integrity
+  requiresTargetWound: true
+  compatibleWoundTypes: [ Ballistic, Slash, Pierce, Thermal, Blast, Chemical ]
+  targetState:
+    minimumWoundContamination: 0.1
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityStableSurface ]
+    minimumQuality: 0.5
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.4
+    minimumLighting: 0.5
+    maximumMotion: 0.2
+    maximumContamination: 0.5
+  patient:
+    minimumOxygenation: 0.25
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.35
+    minimumSedation: 0.3
+    minimumAnesthesia: 0.4
+    maximumMovement: 0.2
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepIrrigateWound
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepSutureClosure
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.12
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryForeignBodyExtraction
+  name: embedded foreign body extraction
+  description: Removes the object bound to one exact wound record and closes the access path.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationGeneral ]
+  targetRequirements: Integrity
+  requiresTargetWound: true
+  compatibleWoundTypes: [ Ballistic, Slash, Pierce, Blast ]
+  targetState:
+    requireEmbeddedObject: true
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityStableSurface ]
+    minimumQuality: 0.5
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.4
+    minimumLighting: 0.55
+    maximumMotion: 0.15
+    maximumContamination: 0.5
+  patient:
+    minimumOxygenation: 0.25
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.4
+    minimumSedation: 0.35
+    minimumAnesthesia: 0.45
+    maximumMovement: 0.12
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepExtractForeignBody
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepSutureClosure
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.14
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryTendonRepair
+  name: tendon reconstruction
+  description: Repairs one ruptured or materially divided tendon set.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationOrthopedic ]
+  compatibleTargetCategories:
+  - TendonSetLeftArm
+  - TendonSetRightArm
+  - TendonSetLeftLeg
+  - TendonSetRightLeg
+  targetRequirements: Tendon
+  targetState:
+    maximumTendonIntegrity: 0.95
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityStableSurface ]
+    minimumQuality: 0.6
+    minimumSterility: 0.55
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.5
+    minimumLighting: 0.65
+    maximumMotion: 0.1
+    maximumContamination: 0.4
+  patient:
+    minimumOxygenation: 0.3
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.45
+    minimumSedation: 0.4
+    minimumAnesthesia: 0.5
+    maximumMovement: 0.1
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepRepairTendon
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCloseSite
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.15
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryPeripheralNerveRepair
+  name: peripheral nerve reconstruction
+  description: Restores one damaged organic nerve path under monitored conditions.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationNeural ]
+  compatibleTargetCategories:
+  - ArmLeft
+  - ArmRight
+  - HandLeft
+  - HandRight
+  - LegLeft
+  - LegRight
+  - FootLeft
+  - FootRight
+  targetRequirements: Nerve
+  targetState:
+    maximumNerveIntegrity: 0.95
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring ]
+    minimumQuality: 0.65
+    minimumSterility: 0.6
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.55
+    minimumLighting: 0.7
+    maximumMotion: 0.08
+    maximumContamination: 0.35
+  patient:
+    minimumOxygenation: 0.35
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.5
+    minimumSedation: 0.45
+    minimumAnesthesia: 0.55
+    maximumMovement: 0.08
+    requireAirwayMonitoring: true
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepRepairNerve
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCloseSite
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.16
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryCranialDecompression
+  name: cranial hematoma evacuation
+  description: Opens the cranial casing, evacuates retained blood and leaves a controlled drain.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationNeural ]
+  compatibleTargetCategories: [ Head ]
+  targetRequirements: Integrity
+  targetState:
+    minimumCavityBloodVolume: 25
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
+    minimumQuality: 0.75
+    minimumSterility: 0.7
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.7
+    minimumLighting: 0.8
+    maximumMotion: 0.05
+    maximumContamination: 0.25
+  patient:
+    minimumOxygenation: 0.25
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.6
+    minimumSedation: 0.55
+    minimumAnesthesia: 0.65
+    maximumMovement: 0.05
+    requireAirwayMonitoring: true
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepOpenCranium
+  - NCSurgeryStepDecompressCranium
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCloseSite
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.25
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryBrainRepair
+  name: viable brain tissue repair
+  description: Stabilizes damaged but not brain-dead neural tissue; it cannot reverse brain death.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationNeural ]
+  compatibleTargetCategories: [ Brain ]
+  targetRequirements: Integrity, Function
+  targetState:
+    maximumIntegrityRatio: 0.95
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
+    minimumQuality: 0.8
+    minimumSterility: 0.75
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.75
+    minimumLighting: 0.85
+    maximumMotion: 0.04
+    maximumContamination: 0.2
+  patient:
+    minimumOxygenation: 0.4
+    maximumShockStage: Moderate
+    allowedConsciousness: [ Alert, Dazed, Confused, Stuporous, Unconscious, Comatose ]
+    minimumAnalgesia: 0.65
+    minimumSedation: 0.6
+    minimumAnesthesia: 0.7
+    maximumMovement: 0.04
+    requireAirwayMonitoring: true
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepOpenCavity
+  - NCSurgeryStepExposeOrgan
+  - NCSurgeryStepRepairBrain
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCloseSite
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.28
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryEyeRepair
+  name: ocular reconstruction
+  description: Repairs one damaged biological eye structure.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationOrgan ]
+  compatibleTargetCategories: [ Eyes ]
+  targetRequirements: Integrity, Function
+  targetState:
+    maximumIntegrityRatio: 0.95
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring ]
+    minimumQuality: 0.68
+    minimumSterility: 0.65
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.65
+    minimumLighting: 0.8
+    maximumMotion: 0.06
+    maximumContamination: 0.25
+  patient:
+    minimumOxygenation: 0.3
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.55
+    minimumSedation: 0.5
+    minimumAnesthesia: 0.6
+    maximumMovement: 0.06
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepOpenCavity
+  - NCSurgeryStepExposeOrgan
+  - NCSurgeryStepRepairEye
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCloseSite
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.2
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryOrganRemoval
+  name: internal organ removal
+  description: Separates, closes and removes one exact internal organ subtree.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationOrgan ]
+  compatibleTargetCategories: [ Heart, Lungs, Liver, Kidneys, Stomach, Appendix ]
+  targetRequirements: Integrity
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
+    minimumQuality: 0.7
+    minimumSterility: 0.65
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.65
+    minimumLighting: 0.75
+    maximumMotion: 0.06
+    maximumContamination: 0.3
+  patient:
+    minimumOxygenation: 0.3
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.55
+    minimumSedation: 0.5
+    minimumAnesthesia: 0.6
+    maximumMovement: 0.06
+    requireAirwayMonitoring: true
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepOpenCavity
+  - NCSurgeryStepExposeOrgan
+  - NCSurgeryStepSeparateOrgan
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCompleteRemoval
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.22
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryEyeRemoval
+  name: damaged eye removal
+  description: Removes the selected biological eye structure as a live detached graft.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationOrgan ]
+  compatibleTargetCategories: [ Eyes ]
+  targetRequirements: Integrity
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring ]
+    minimumQuality: 0.65
+    minimumSterility: 0.6
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.6
+    minimumLighting: 0.75
+    maximumMotion: 0.06
+    maximumContamination: 0.3
+  patient:
+    minimumOxygenation: 0.3
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.55
+    minimumSedation: 0.5
+    minimumAnesthesia: 0.6
+    maximumMovement: 0.06
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepOpenCavity
+  - NCSurgeryStepExposeOrgan
+  - NCSurgeryStepSeparateOrgan
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCompleteRemoval
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.2
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryOrganTransplant
+  name: internal organ transplant
+  description: Attaches a physically staged compatible organ graft to its original anatomical parent.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationTransplant ]
+  compatibleTargetCategories: [ Thorax, Abdomen ]
+  targetRequirements: Integrity
+  requiresGraft: true
+  compatibleGraftCategories: [ Heart, Lungs, Liver, Kidneys, Stomach, Appendix ]
+  compatibleGraftMaterials: [ Organic, Hybrid, Mechanical ]
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
+    minimumQuality: 0.75
+    minimumSterility: 0.72
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.72
+    minimumLighting: 0.8
+    maximumMotion: 0.05
+    maximumContamination: 0.25
+  patient:
+    minimumOxygenation: 0.35
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.6
+    minimumSedation: 0.55
+    minimumAnesthesia: 0.65
+    maximumMovement: 0.05
+    requireAirwayMonitoring: true
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepOpenCavity
+  - NCSurgeryStepPrepareGraftBed
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCloseSite
+  - NCSurgeryStepAttachGraft
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.24
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryEyeTransplant
+  name: biological eye transplant
+  description: Attaches a staged compatible biological eye graft to the head organ graph.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationTransplant ]
+  compatibleTargetCategories: [ Head ]
+  targetRequirements: Integrity
+  requiresGraft: true
+  compatibleGraftCategories: [ Eyes ]
+  compatibleGraftMaterials: [ Organic, Hybrid, Mechanical ]
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring ]
+    minimumQuality: 0.72
+    minimumSterility: 0.7
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.7
+    minimumLighting: 0.8
+    maximumMotion: 0.05
+    maximumContamination: 0.25
+  patient:
+    minimumOxygenation: 0.3
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.6
+    minimumSedation: 0.55
+    minimumAnesthesia: 0.65
+    maximumMovement: 0.05
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepOpenCavity
+  - NCSurgeryStepPrepareGraftBed
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCloseSite
+  - NCSurgeryStepAttachGraft
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.22
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryLimbAmputation
+  name: controlled limb amputation
+  description: Divides and removes one exact limb, hand or foot subtree after vascular control.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationOrthopedic, NCSurgeryAuthorizationVascular ]
+  compatibleTargetCategories:
+  - ArmLeft
+  - ArmRight
+  - HandLeft
+  - HandRight
+  - LegLeft
+  - LegRight
+  - FootLeft
+  - FootRight
+  targetRequirements: Integrity, Vascular
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring ]
+    minimumQuality: 0.65
+    minimumSterility: 0.58
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.55
+    minimumLighting: 0.7
+    maximumMotion: 0.06
+    maximumContamination: 0.35
+  patient:
+    minimumOxygenation: 0.3
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.55
+    minimumSedation: 0.5
+    minimumAnesthesia: 0.6
+    maximumMovement: 0.06
+    requireAirwayMonitoring: true
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepAmputate
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCompleteRemoval
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.2
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryLimbReattachment
+  name: limb reattachment
+  description: Attaches a staged biological or mechanical limb, hand or foot graft to its exact parent region.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations:
+  - NCSurgeryAuthorizationOrthopedic
+  - NCSurgeryAuthorizationVascular
+  - NCSurgeryAuthorizationTransplant
+  compatibleTargetCategories: [ Torso, ArmLeft, ArmRight, LegLeft, LegRight ]
+  targetRequirements: Integrity
+  requiresGraft: true
+  compatibleGraftCategories:
+  - ArmLeft
+  - ArmRight
+  - HandLeft
+  - HandRight
+  - LegLeft
+  - LegRight
+  - FootLeft
+  - FootRight
+  compatibleGraftMaterials: [ Organic, Hybrid, Mechanical ]
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
+    minimumQuality: 0.75
+    minimumSterility: 0.7
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.7
+    minimumLighting: 0.8
+    maximumMotion: 0.05
+    maximumContamination: 0.25
+  patient:
+    minimumOxygenation: 0.35
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.6
+    minimumSedation: 0.55
+    minimumAnesthesia: 0.65
+    maximumMovement: 0.05
+    requireAirwayMonitoring: true
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepOpenCavity
+  - NCSurgeryStepPrepareGraftBed
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCloseSite
+  - NCSurgeryStepAttachGraft
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.24
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryRegionalAutopsy
+  name: regional forensic autopsy
+  description: Documents bounded wound and structural findings for one selected external region of a dead patient.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationForensic ]
+  compatibleTargetCategories:
+  - Head
+  - Thorax
+  - Abdomen
+  - PelvisGroin
+  - ArmLeft
+  - ArmRight
+  - HandLeft
+  - HandRight
+  - LegLeft
+  - LegRight
+  - FootLeft
+  - FootRight
+  targetRequirements: Integrity
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityStableSurface ]
+    minimumQuality: 0.4
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumLighting: 0.5
+    maximumMotion: 0.2
+    maximumContamination: 1
+  patient:
+    allowedConditions: [ Dead ]
+    maximumMovement: 0
+  steps:
+  - NCSurgeryStepAutopsyExternalExam
+  - NCSurgeryStepAutopsyRetract
+  - NCSurgeryStepRecordAutopsy
+  - NCSurgeryStepCloseSite
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryCyberwareInstallation
+  name: cyberware module installation
+  description: Installs and calibrates a staged physical implant in a compatible live anatomical bay.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationGeneral, NCSurgeryAuthorizationOrgan ]
+  compatibleTargetCategories: [ Head, Thorax ]
+  targetRequirements: Integrity
+  requiresGraft: true
+  cyberwareOperation: Install
+  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCCirculatoryAssistMk1 ]
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
+    minimumQuality: 0.7
+    minimumSterility: 0.7
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.65
+    minimumLighting: 0.75
+    maximumMotion: 0.08
+    maximumContamination: 0.3
+  patient:
+    minimumOxygenation: 0.35
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.55
+    minimumSedation: 0.5
+    minimumAnesthesia: 0.6
+    maximumMovement: 0.06
+    requireAirwayMonitoring: true
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepInstallCyberware
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCloseSite
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.18
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryCyberwareRemoval
+  name: cyberware module removal
+  description: Safely disconnects and extracts one installed module selected from the live host organ.
+  compatibleBodyProfiles: [ Human ]
+  requiredAuthorizations: [ NCSurgeryAuthorizationGeneral, NCSurgeryAuthorizationOrgan ]
+  compatibleTargetCategories: [ Head, Thorax ]
+  targetRequirements: Integrity
+  cyberwareOperation: Remove
+  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCCirculatoryAssistMk1 ]
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
+    minimumQuality: 0.65
+    minimumSterility: 0.65
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.6
+    minimumLighting: 0.7
+    maximumMotion: 0.1
+    maximumContamination: 0.35
+  patient:
+    minimumOxygenation: 0.3
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.5
+    minimumSedation: 0.45
+    minimumAnesthesia: 0.55
+    maximumMovement: 0.07
+    requireAirwayMonitoring: true
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepRemoveCyberware
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCloseSite
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.2

@@ -1,7 +1,9 @@
 - type: species
   id: Arachnid
   name: species-name-arachnid
-  roundStart: true
+  # NC start - Night City player characters use the authoritative human anatomy only.
+  roundStart: false
+  # NC end
   prototype: MobArachnid
   defaultSkinTone: "#385878"
   dollPrototype: AppearanceArachnid

@@ -3,7 +3,9 @@
   name: guide-entry-medical
   text: "/ServerInfo/Guidebook/Medical/Medical.xml"
   children:
-  - MedicalDoctor
+  # NC start - Replace the obsolete HP-based doctor guide with the authoritative NC medical manual.
+  - NCDoctor
+  # NC end
   - Chemist
   - Cloning
   - Cryogenics

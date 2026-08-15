@@ -20,4 +20,4 @@ public sealed class NCAgentMedTekClearMessage : CartridgeMessageEvent;
 /// Local server event raised once after the vanilla health analyzer completes a scan.
 /// </summary>
 [ByRefEvent]
-public record struct NCAgentMedicalScanCompletedEvent(EntityUid Target);
+public record struct NCAgentMedicalScanCompletedEvent(EntityUid User, EntityUid Target);

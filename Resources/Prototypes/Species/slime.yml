@@ -1,7 +1,9 @@
 - type: species
   id: SlimePerson
   name: species-name-slime
-  roundStart: true
+  # NC start - Night City player characters use the authoritative human anatomy only.
+  roundStart: false
+  # NC end
   prototype: MobSlimePerson
   defaultSkinTone: "#b8b8b8"
   dollPrototype: AppearanceSlimePerson

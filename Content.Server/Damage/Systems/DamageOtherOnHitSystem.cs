@@ -33,7 +33,11 @@ public sealed partial class DamageOtherOnHitSystem : SharedDamageOtherOnHitSyste
         if (TerminatingOrDeleted(args.Target))
             return;
 
-        var dmg = _damageable.ChangeDamage(args.Target, component.Damage * _damageable.UniversalThrownDamageModifier, component.IgnoreResistances, origin: args.Component.Thrower);
+        // NC start: authoritative human medicine replaces compatibility HP while preserving throw feedback.
+        var dmg = TryApplyNcThrownImpact(uid, component, args, out var ncFeedback)
+            ? ncFeedback
+            : _damageable.ChangeDamage(args.Target, component.Damage * _damageable.UniversalThrownDamageModifier, component.IgnoreResistances, origin: args.Component.Thrower);
+        // NC end
 
         // Log damage only for mobs. Useful for when people throw spears at each other, but also avoids log-spam when explosions send glass shards flying.
         if (HasComp<MobStateComponent>(args.Target))

@@ -1,0 +1,516 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# These categories extend only the human NC body graph. Other upstream species retain their own anatomy.
+- type: organCategory
+  id: Thorax
+- type: organCategory
+  id: Abdomen
+- type: organCategory
+  id: PelvisGroin
+- type: organCategory
+  id: Skull
+- type: organCategory
+  id: RibCage
+- type: organCategory
+  id: PelvisBone
+- type: organCategory
+  id: ArmBoneLeft
+- type: organCategory
+  id: ArmBoneRight
+- type: organCategory
+  id: TendonSetLeftArm
+- type: organCategory
+  id: TendonSetRightArm
+- type: organCategory
+  id: LegBoneLeft
+- type: organCategory
+  id: LegBoneRight
+- type: organCategory
+  id: TendonSetLeftLeg
+- type: organCategory
+  id: TendonSetRightLeg
+
+- type: entity
+  id: NCOrganHumanRegionBase
+  abstract: true
+  parent: [ OrganHuman, OrganBaseChildInternal ]
+  components:
+  - type: NCOrganIntegrity
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanParentRegionBase
+  abstract: true
+  parent: NCOrganHumanRegionBase
+  components:
+  # Internal cavity regions can own child organs, but cannot be detached as standalone limbs.
+  - type: ParentOrgan
+
+- type: entity
+  id: NCOrganHumanDetachableParentRegionBase
+  abstract: true
+  parent: [ OrganHuman, OrganBaseChildExternal, OrganBaseParent ]
+  components:
+  # External replacement limbs remain detachable while owning their distal subtree.
+  - type: NCOrganIntegrity
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanStructureBase
+  abstract: true
+  parent: NCOrganHumanRegionBase
+  components:
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanBoneTissue
+
+- type: entity
+  id: NCOrganHumanTorso
+  parent: OrganHumanTorso
+  components:
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanCavityTissue
+    vitalImportance: Vital
+    armorLocations: [ Chest, Abdomen, Groin ]
+  - type: NCOrganIntegrity
+  - type: NCVascularRegion
+    vascularDensity: 1.2
+    hasMajorArtery: true
+    cavity: Thoracic
+  - type: NCNerve
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanHead
+  parent: OrganHumanHead
+  components:
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanCavityTissue
+    vitalImportance: Vital
+    armorLocations: [ Head, Face ]
+  - type: NCOrganIntegrity
+  - type: NCVascularRegion
+    vascularDensity: 1.1
+    hasMajorArtery: true
+    cavity: Cranial
+  - type: NCCavityFluid
+    cavity: Cranial
+    maximumBloodVolume: 300
+    pressureFullScaleVolume: 150
+    compressionFullScaleVolume: 100
+  - type: NCNerve
+  - type: NCSurgicalSite
+  - type: NCCyberwareSlotHost
+    slots: [ NCSlotNeuralCore, NCSlotCranialUtility ]
+
+- type: entity
+  id: NCOrganHumanArmLeft
+  parent: OrganHumanArmLeft
+  components:
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanExternalTissue
+    movementContribution: 0.5
+    gripContribution: 0.35
+    armorLocations: [ ArmLeft ]
+  - type: NCOrganIntegrity
+  - type: NCVascularRegion
+    vascularDensity: 0.8
+    hasMajorArtery: true
+  - type: NCJoint
+  - type: NCNerve
+  - type: NCSurgicalSite
+  - type: NCCyberwareSlotHost
+    slots: [ NCSlotArmUtilityLeft ]
+
+- type: entity
+  id: NCOrganHumanArmRight
+  parent: OrganHumanArmRight
+  components:
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanExternalTissue
+    movementContribution: 0.5
+    gripContribution: 0.35
+    armorLocations: [ ArmRight ]
+  - type: NCOrganIntegrity
+  - type: NCVascularRegion
+    vascularDensity: 0.8
+    hasMajorArtery: true
+  - type: NCJoint
+  - type: NCNerve
+  - type: NCSurgicalSite
+  - type: NCCyberwareSlotHost
+    slots: [ NCSlotArmUtilityRight ]
+
+- type: entity
+  id: NCOrganHumanHandLeft
+  parent: OrganHumanHandLeft
+  components:
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanExternalTissue
+    movementContribution: 0.25
+    gripContribution: 0.65
+    armorLocations: [ HandLeft ]
+  - type: NCOrganIntegrity
+  - type: NCVascularRegion
+    vascularDensity: 0.55
+  - type: NCJoint
+  - type: NCNerve
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanHandRight
+  parent: OrganHumanHandRight
+  components:
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanExternalTissue
+    movementContribution: 0.25
+    gripContribution: 0.65
+    armorLocations: [ HandRight ]
+  - type: NCOrganIntegrity
+  - type: NCVascularRegion
+    vascularDensity: 0.55
+  - type: NCJoint
+  - type: NCNerve
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanLegLeft
+  parent: OrganHumanLegLeft
+  components:
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanExternalTissue
+    movementContribution: 0.65
+    armorLocations: [ LegLeft ]
+  - type: NCOrganIntegrity
+  - type: NCVascularRegion
+    vascularDensity: 0.9
+    hasMajorArtery: true
+  - type: NCJoint
+  - type: NCNerve
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanLegRight
+  parent: OrganHumanLegRight
+  components:
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanExternalTissue
+    movementContribution: 0.65
+    armorLocations: [ LegRight ]
+  - type: NCOrganIntegrity
+  - type: NCVascularRegion
+    vascularDensity: 0.9
+    hasMajorArtery: true
+  - type: NCJoint
+  - type: NCNerve
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanFootLeft
+  parent: OrganHumanFootLeft
+  components:
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanExternalTissue
+    movementContribution: 0.35
+    armorLocations: [ FootLeft ]
+  - type: NCOrganIntegrity
+  - type: NCVascularRegion
+    vascularDensity: 0.45
+  - type: NCJoint
+  - type: NCNerve
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanFootRight
+  parent: OrganHumanFootRight
+  components:
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanExternalTissue
+    movementContribution: 0.35
+    armorLocations: [ FootRight ]
+  - type: NCOrganIntegrity
+  - type: NCVascularRegion
+    vascularDensity: 0.45
+  - type: NCJoint
+  - type: NCNerve
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanThorax
+  parent: NCOrganHumanParentRegionBase
+  name: thorax
+  components:
+  - type: Organ
+    category: Thorax
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanCavityTissue
+    vitalImportance: Vital
+    armorLocations: [ Chest ]
+  - type: NCVascularRegion
+    vascularDensity: 1.2
+    hasMajorArtery: true
+    cavity: Thoracic
+  - type: NCCavityFluid
+    cavity: Thoracic
+    maximumBloodVolume: 3000
+    pressureFullScaleVolume: 1800
+    compressionFullScaleVolume: 1200
+  - type: NCCyberwareSlotHost
+    slots: [ NCSlotThoracicSupport, NCSlotSubdermalThorax ]
+
+- type: entity
+  id: NCOrganHumanAbdomen
+  parent: NCOrganHumanParentRegionBase
+  name: abdomen
+  components:
+  - type: Organ
+    category: Abdomen
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanCavityTissue
+    vitalImportance: Important
+    armorLocations: [ Abdomen ]
+  - type: NCVascularRegion
+    vascularDensity: 1.1
+    hasMajorArtery: true
+    cavity: Abdominal
+  - type: NCCavityFluid
+    cavity: Abdominal
+    maximumBloodVolume: 3500
+    pressureFullScaleVolume: 2500
+    compressionFullScaleVolume: 1800
+
+- type: entity
+  id: NCOrganHumanPelvisGroin
+  parent: NCOrganHumanParentRegionBase
+  name: pelvis and groin
+  components:
+  - type: Organ
+    category: PelvisGroin
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanCavityTissue
+    vitalImportance: Important
+    movementContribution: 0.35
+    armorLocations: [ Groin ]
+  - type: NCVascularRegion
+    vascularDensity: 1.2
+    hasMajorArtery: true
+    cavity: Pelvic
+  - type: NCCavityFluid
+    cavity: Pelvic
+    maximumBloodVolume: 2000
+    pressureFullScaleVolume: 1400
+    compressionFullScaleVolume: 1000
+
+- type: entity
+  id: NCOrganHumanSkull
+  parent: NCOrganHumanStructureBase
+  name: skull
+  components:
+  - type: Organ
+    category: Skull
+  - type: NCBone
+
+- type: entity
+  id: NCOrganHumanRibCage
+  parent: NCOrganHumanStructureBase
+  name: rib cage
+  components:
+  - type: Organ
+    category: RibCage
+  - type: NCBone
+
+- type: entity
+  id: NCOrganHumanPelvisBone
+  parent: NCOrganHumanStructureBase
+  name: pelvis
+  components:
+  - type: Organ
+    category: PelvisBone
+  - type: NCBone
+
+- type: entity
+  id: NCOrganHumanArmBoneLeft
+  parent: NCOrganHumanStructureBase
+  name: left arm bone
+  components:
+  - type: Organ
+    category: ArmBoneLeft
+  - type: NCBone
+
+- type: entity
+  id: NCOrganHumanArmBoneRight
+  parent: NCOrganHumanStructureBase
+  name: right arm bone
+  components:
+  - type: Organ
+    category: ArmBoneRight
+  - type: NCBone
+
+- type: entity
+  id: NCOrganHumanLegBoneLeft
+  parent: NCOrganHumanStructureBase
+  name: left leg bone
+  components:
+  - type: Organ
+    category: LegBoneLeft
+  - type: NCBone
+
+- type: entity
+  id: NCOrganHumanLegBoneRight
+  parent: NCOrganHumanStructureBase
+  name: right leg bone
+  components:
+  - type: Organ
+    category: LegBoneRight
+  - type: NCBone
+
+- type: entity
+  id: NCOrganHumanTendonSetLeftArm
+  parent: NCOrganHumanRegionBase
+  name: left arm tendons
+  components:
+  - type: Organ
+    category: TendonSetLeftArm
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanTendonTissue
+  - type: NCTendon
+    gripContribution: 1
+
+- type: entity
+  id: NCOrganHumanTendonSetRightArm
+  parent: NCOrganHumanRegionBase
+  name: right arm tendons
+  components:
+  - type: Organ
+    category: TendonSetRightArm
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanTendonTissue
+  - type: NCTendon
+    gripContribution: 1
+
+- type: entity
+  id: NCOrganHumanTendonSetLeftLeg
+  parent: NCOrganHumanRegionBase
+  name: left leg tendons
+  components:
+  - type: Organ
+    category: TendonSetLeftLeg
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanTendonTissue
+  - type: NCTendon
+
+- type: entity
+  id: NCOrganHumanTendonSetRightLeg
+  parent: NCOrganHumanRegionBase
+  name: right leg tendons
+  components:
+  - type: Organ
+    category: TendonSetRightLeg
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanTendonTissue
+  - type: NCTendon
+
+# Existing functional organs are specialized for the authoritative NC medical body.
+- type: entity
+  id: NCOrganHumanBrain
+  parent: OrganHumanBrain
+  components:
+  - type: NCOrganIntegrity
+    recoverable: false
+  - type: NCOrganFunction
+    functionType: Brain
+    vital: true
+    recoverable: false
+    perfusionDemand: 1
+    oxygenDemand: 1
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanEyes
+  parent: OrganHumanEyes
+  components:
+  - type: NCOrganIntegrity
+  - type: NCOrganFunction
+    functionType: Vision
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanTongue
+  parent: OrganHumanTongue
+  components:
+  - type: NCOrganIntegrity
+  - type: NCOrganFunction
+    functionType: Speech
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanEars
+  parent: OrganHumanEars
+  components:
+  - type: NCOrganIntegrity
+  - type: NCOrganFunction
+    functionType: Hearing
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanAppendix
+  parent: OrganHumanAppendix
+  components:
+  - type: NCOrganIntegrity
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanLungs
+  parent: OrganHumanLungs
+  components:
+  - type: NCOrganIntegrity
+  - type: NCOrganFunction
+    functionType: Respiration
+    vital: true
+    perfusionDemand: 0.8
+    oxygenDemand: 0.3
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanHeart
+  parent: OrganHumanHeart
+  components:
+  - type: NCOrganIntegrity
+  - type: NCOrganFunction
+    functionType: Circulation
+    vital: true
+    perfusionDemand: 0.8
+    oxygenDemand: 0.8
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanStomach
+  parent: OrganHumanStomach
+  components:
+  - type: NCOrganIntegrity
+  - type: NCOrganFunction
+    functionType: Digestion
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanLiver
+  parent: OrganHumanLiver
+  components:
+  - type: NCOrganIntegrity
+  - type: NCOrganFunction
+    functionType: Metabolism
+    perfusionDemand: 0.6
+    oxygenDemand: 0.4
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCOrganHumanKidneys
+  parent: OrganHumanKidneys
+  components:
+  - type: NCOrganIntegrity
+  - type: NCOrganFunction
+    functionType: Filtration
+    perfusionDemand: 0.7
+    oxygenDemand: 0.4
+  - type: NCSurgicalSite

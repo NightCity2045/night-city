@@ -48,6 +48,8 @@ public sealed partial class NCMappingHubUIController : UIController, IOnStateCha
     private NCZoneActivityMode _selectedActivity = NCZoneActivityMode.Active;
     private int _brushSize = 1;
     private PendingTileBrush? _pendingTileBrush;
+    private NCMappingHubClientSystem? _subscribedMapping;
+    private NCZoneEditorClientSystem? _subscribedZones;
 
     private EntitySpawningUIController EntitySpawningController =>
         UIManager.GetUIController<EntitySpawningUIController>();
@@ -60,22 +62,41 @@ public sealed partial class NCMappingHubUIController : UIController, IOnStateCha
 
     public void OnStateEntered(GameplayState state)
     {
+        if (_subscribedMapping != null || _subscribedZones != null)
+            return;
+
         EnsureWindow();
         _mapping.FloorChangeCompleted += OnFloorChangeCompleted;
         _zones.SnapshotUpdated += RefreshZones;
         _zones.OperationCompleted += OnZoneOperationCompleted;
         _zones.ToolChanged += RefreshToolStatus;
         _zones.ValidationUpdated += RefreshValidation;
+        // UI-system dependencies may be cleared before OnStateExited during a disconnect. Retain the
+        // exact system instances used for subscription so teardown can always remove these delegates.
+        _subscribedMapping = _mapping;
+        _subscribedZones = _zones;
     }
 
     public void OnStateExited(GameplayState state)
     {
-        _mapping.FloorChangeCompleted -= OnFloorChangeCompleted;
-        _zones.SnapshotUpdated -= RefreshZones;
-        _zones.OperationCompleted -= OnZoneOperationCompleted;
-        _zones.ToolChanged -= RefreshToolStatus;
-        _zones.ValidationUpdated -= RefreshValidation;
-        _zones.CancelTool();
+        // A disconnected integration client may leave GameplayState before UI-system dependencies were
+        // injected and OnStateEntered ran. Only touch those systems when this controller subscribed.
+        if (_subscribedMapping is { } mapping)
+        {
+            mapping.FloorChangeCompleted -= OnFloorChangeCompleted;
+            _subscribedMapping = null;
+        }
+
+        if (_subscribedZones is { } zones)
+        {
+            zones.SnapshotUpdated -= RefreshZones;
+            zones.OperationCompleted -= OnZoneOperationCompleted;
+            zones.ToolChanged -= RefreshToolStatus;
+            zones.ValidationUpdated -= RefreshValidation;
+            zones.CancelTool();
+            _subscribedZones = null;
+        }
+
         _window?.Close();
         _window = null;
         _availableDepths.Clear();

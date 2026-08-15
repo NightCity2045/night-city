@@ -1,0 +1,555 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncWoundProgressionProfile
+  id: NCHumanWoundProgression
+  healingDurationBySeverity:
+    Minor: 20m
+    Moderate: 2h
+    Severe: 6h
+    Critical: 12h
+    Catastrophic: 24h
+  closureHealingMultipliers:
+    Open: 0.2
+    TemporarilyClosed: 0.65
+    Sutured: 1
+    Sealed: 1.15
+    Healed: 0
+  reopenStressThresholds:
+    Minor: 8
+    Moderate: 12
+    Severe: 18
+    Critical: 24
+    Catastrophic: 32
+  impactReopenStressBySeverity:
+    Minor: 4
+    Moderate: 8
+    Severe: 14
+    Critical: 22
+    Catastrophic: 32
+  infectionSeverityMultipliers:
+    Minor: 0.7
+    Moderate: 1
+    Severe: 1.25
+    Critical: 1.5
+    Catastrophic: 2
+  scarContractureBySeverity:
+    Minor: 0
+    Moderate: 0.04
+    Severe: 0.1
+    Critical: 0.18
+    Catastrophic: 0.3
+  infectionStageThresholds: [ 0.08, 0.25, 0.45, 0.65, 0.85 ]
+  freshToOpenDelay: 5s
+  naturalClosureMaximumSeverity: Minor
+  naturalClosureProgress: 0.25
+  # An untreated open wound reaches the infection threshold in roughly 10 minutes of active simulation.
+  openContaminationPerSecond: 0.00025
+  # A fresh sterile dressing must overcome the residual exposure of an open wound instead of merely slowing it.
+  sterileContaminationDecayPerSecond: 0.00002
+  infectionContaminationThreshold: 0.15
+  # Untreated moderate wounds progress to a localized infection on the scale of one round, not real-world days.
+  infectionGrowthPerSecond: 0.0003
+  debridementInfectionRecoveryPerSecond: 0.00002
+  antibioticRecoveryPerPowerPerSecond: 0.00006
+  immunosuppressionInfectionMultiplier: 1
+  embeddedObjectInfectionMultiplier: 1.75
+  closedInfectionMultiplier: 0.35
+  healingBlockedAtInfectionStage: Localized
+  necrosisStartsAtInfectionStage: Deep
+  infectionNecrosisPerSecond: 0.000015
+  necroticThreshold: 0.65
+  healingBleedReductionFraction: 1
+  healingPainReductionFraction: 0.8
+  minimumHealingPerfusion: 0.35
+  reopenHealingRetention: 0.35
+  reopenBleedFraction: 0.75
+  reopenContamination: 0.08
+  reopenScarRisk: 0.12
+  reopenStressDecayPerSecond: 0.0005
+  movementStressPerTile: 1
+  maximumPendingMovementDistance: 64
+  persistenceCheckpointInterval: 30s
+  scarCreationThreshold: 0.15
+  guaranteedScarFromSeverity: Severe
+  maximumScars: 64
+  ischemiaIntegrityDamagePerSecond: 0.002
+  criticalIschemiaIntegrityDamagePerSecond: 0.01
+  ischemiaNerveDamagePerSecond: 0.00002
+  criticalIschemiaNerveDamagePerSecond: 0.0001
+  ischemiaNecrosisPerSecond: 0.00002
+  criticalIschemiaNecrosisPerSecond: 0.0001
+  sepsisSystemicProfile: NCSepsisSystemicDamage
+  sepsisExposurePerSecondByStage:
+    Systemic: 0.015
+    Sepsis: 0.05
+  sepsisAntibioticRecoveryPerPowerPerSecond: 0.08
+
+- type: ncWoundSystemProfile
+  id: NCHumanWoundSystem
+  defaultForHumans: true
+  progressionProfile: NCHumanWoundProgression
+  impactBloodProfile: NCHumanImpactBlood
+  severanceProfile: NCHumanTraumaticSeverance
+  maxActiveWounds: 32
+  processedImpactCapacity: 128
+  mergeContaminationTolerance: 0.05
+  boneStateBySeverity:
+    Minor: Bruised
+    Moderate: Cracked
+    Severe: BrokenStable
+    Critical: BrokenDisplaced
+    Catastrophic: Shattered
+  boneStabilityLossPerDamage: 0.01
+  displacementFromState: BrokenDisplaced
+  fixationFromState: BrokenStable
+  # Standard 14-point handgun hits are severe, not immediately critical; catastrophic trauma is reserved
+  # for high-energy weapons and explosions. These are inclusive upper bounds.
+  severityThresholds: [ 4, 9, 16, 24 ]
+  statusDamageThresholds: [ 1, 3, 5, 8, 12, 17, 24, 32 ]
+  severityStatusLevels:
+    Minor: 1
+    Moderate: 3
+    Severe: 5
+    Critical: 7
+    Catastrophic: 8
+  wounds:
+    Projectile: NCWoundBallistic
+    Slash: NCWoundSlash
+    Pierce: NCWoundPierce
+    Blunt: NCWoundBlunt
+    Heat: NCWoundThermal
+    Cold: NCWoundCold
+    Electrical: NCWoundElectrical
+    Explosive: NCWoundBlast
+    Pressure: NCWoundPressure
+    Chemical: NCWoundChemical
+
+# The pulse is real NC circulation loss. The upstream bloodstream bridge converts it to solution units and
+# accumulates/spills it through vanilla puddles; droplets and cleanable decals are bounded visual feedback.
+- type: ncImpactBloodProfile
+  id: NCHumanImpactBlood
+  woundTypes: [ Ballistic, Slash, Pierce, Blast ]
+  bloodLossBySeverity:
+    Minor: 0
+    Moderate: 5
+    Severe: 15
+    Critical: 35
+    Catastrophic: 75
+  dropletsBySeverity:
+    Minor: 0
+    Moderate: 2
+    Severe: 3
+    Critical: 5
+    Catastrophic: 7
+  decalsBySeverity:
+    Minor: 0
+    Moderate: 1
+    Severe: 1
+    Critical: 2
+    Catastrophic: 3
+  patterns:
+    Ballistic:
+      kind: Directed
+      splatDecals: [ NCBloodSplat0, NCBloodSplat1, NCBloodSplat2, NCBloodSplat3, NCBloodSplat4, NCBloodSplat5 ]
+      streakDecals: [ NCBloodStreakShort, NCBloodStreakThin, NCBloodStreakSlash ]
+      splatsBySeverity:
+        Minor: 0
+        Moderate: 1
+        Severe: 1
+        Critical: 2
+        Catastrophic: 2
+      streaksBySeverity:
+        Minor: 0
+        Moderate: 0
+        Severe: 1
+        Critical: 2
+        Catastrophic: 3
+      coneDegrees: 24
+      distanceMultiplier: 1.15
+      splatRadius: 0.18
+      splatSize: 0.62
+      streakLengthMultiplier: 1.35
+      streakWidth: 0.24
+      persistentStreakFraction: 0.55
+    Slash:
+      kind: Arc
+      splatDecals: [ NCBloodSplat0, NCBloodSplat1, NCBloodSplat2, NCBloodSplat3, NCBloodSplat4, NCBloodSplat5 ]
+      streakDecals: [ NCBloodStreakSlash, NCBloodStreakShort, NCBloodStreakThin ]
+      splatsBySeverity:
+        Minor: 0
+        Moderate: 1
+        Severe: 1
+        Critical: 2
+        Catastrophic: 2
+      streaksBySeverity:
+        Minor: 0
+        Moderate: 1
+        Severe: 1
+        Critical: 2
+        Catastrophic: 3
+      coneDegrees: 58
+      distanceMultiplier: 0.85
+      splatRadius: 0.2
+      splatSize: 0.58
+      streakLengthMultiplier: 1.05
+      streakWidth: 0.28
+      persistentStreakFraction: 0.8
+    Pierce:
+      kind: Directed
+      splatDecals: [ NCBloodSplat0, NCBloodSplat1, NCBloodSplat2, NCBloodSplat3, NCBloodSplat4, NCBloodSplat5 ]
+      streakDecals: [ NCBloodStreakThin, NCBloodStreakSlash ]
+      splatsBySeverity:
+        Minor: 0
+        Moderate: 1
+        Severe: 1
+        Critical: 1
+        Catastrophic: 2
+      streaksBySeverity:
+        Minor: 0
+        Moderate: 0
+        Severe: 1
+        Critical: 1
+        Catastrophic: 2
+      coneDegrees: 14
+      distanceMultiplier: 0.9
+      splatRadius: 0.12
+      splatSize: 0.46
+      streakLengthMultiplier: 1.15
+      streakWidth: 0.17
+      persistentStreakFraction: 0.4
+    Blast:
+      kind: Radial
+      splatDecals: [ NCBloodSplat0, NCBloodSplat1, NCBloodSplat2, NCBloodSplat3, NCBloodSplat4, NCBloodSplat5 ]
+      streakDecals: [ NCBloodStreakShort, NCBloodStreakSlash, NCBloodStreakThin ]
+      splatsBySeverity:
+        Minor: 0
+        Moderate: 1
+        Severe: 2
+        Critical: 2
+        Catastrophic: 3
+      streaksBySeverity:
+        Minor: 0
+        Moderate: 1
+        Severe: 2
+        Critical: 3
+        Catastrophic: 4
+      coneDegrees: 360
+      distanceMultiplier: 0.95
+      splatRadius: 0.26
+      splatSize: 0.72
+      streakLengthMultiplier: 1.2
+      streakWidth: 0.3
+      persistentStreakFraction: 0.45
+  decalColor: '#7E0F13E8'
+  effectColor: '#BC181BEA'
+  effectDuration: 0.48s
+  sprayDistance: 1.55
+  dropletSize: 0.045
+  embeddedDistanceMultiplier: 0.55
+  exitDistanceMultiplier: 1.4
+  maximumDecalsPerImpact: 3
+  maximumNearbyDecals: 8
+  nearbyDecalRadius: 2
+  maximumSurfaceStainsPerEntity: 10
+  maximumActiveSurfaceEntities: 256
+  surfaceStainScale: 0.72
+  maximumClientBursts: 64
+
+- type: ncWound
+  id: NCWoundBallistic
+  woundType: Ballistic
+  tissueDepth: Cavity
+  canMergeMinor: false
+  areaPerDamage: 0.35
+  externalBleedPerDamage: 0.35
+  internalBleedPerDamage: 0.45
+  arterialFromSeverity: Critical
+  arterialRateMultiplier: 3.5
+  painPerDamage: 0.85
+  contaminationMultiplier: 1
+  scarRiskPerDamage: 0.035
+  naturalHealingMultiplier: 0.7
+  infectionSusceptibility: 1.35
+  reopenSusceptibility: 1.2
+  naturalIntegrityRecoveryFraction: 0.1
+  regionIntegrityDamageMultiplier: 0.75
+  containedStructureDamageMultiplier: 0.38
+  containedOrganDamageMultiplier: 0.45
+  functionLossPerDamage: 0.015
+  structuralDamageFromSeverity: Severe
+  containedOrganDamageFromSeverity: Severe
+  tendonDamageFromSeverity: Severe
+  tendonIntegrityLossPerDamage: 0.02
+  tendonRuptureIntegrityThreshold: 0.25
+  nerveDamageFromSeverity: Severe
+  nerveIntegrityLossPerDamage: 0.018
+  nerveMotorLossPerDamage: 0.022
+  jointDamageFromSeverity: Severe
+  jointStabilityLossPerDamage: 0.018
+  jointDislocationStabilityThreshold: 0.2
+
+- type: ncWound
+  id: NCWoundAmputationStump
+  woundType: Amputation
+  tissueDepth: Vascular
+  canMergeMinor: false
+  areaPerDamage: 0.75
+  externalBleedPerDamage: 0.45
+  arterialFromSeverity: Moderate
+  arterialRateMultiplier: 3
+  painPerDamage: 0.9
+  contaminationMultiplier: 1.25
+  scarRiskPerDamage: 0.06
+  naturalHealingMultiplier: 0.35
+  infectionSusceptibility: 1.5
+  reopenSusceptibility: 1.5
+  naturalIntegrityRecoveryFraction: 0
+  regionIntegrityDamageMultiplier: 0
+  containedStructureDamageMultiplier: 0
+  containedOrganDamageMultiplier: 0
+  functionLossPerDamage: 0
+
+- type: ncWound
+  id: NCWoundBallisticExpansive
+  woundType: Ballistic
+  tissueDepth: Vascular
+  canMergeMinor: false
+  areaPerDamage: 0.7
+  externalBleedPerDamage: 0.8
+  internalBleedPerDamage: 0.45
+  arterialFromSeverity: Severe
+  arterialRateMultiplier: 4
+  painPerDamage: 1.4
+  contaminationMultiplier: 1
+  scarRiskPerDamage: 0.05
+  naturalHealingMultiplier: 0.6
+  infectionSusceptibility: 1.4
+  reopenSusceptibility: 1.35
+  naturalIntegrityRecoveryFraction: 0.08
+  regionIntegrityDamageMultiplier: 1.2
+  containedStructureDamageMultiplier: 0.55
+  containedOrganDamageMultiplier: 0.35
+  functionLossPerDamage: 0.025
+  structuralDamageFromSeverity: Moderate
+  containedOrganDamageFromSeverity: Severe
+  tendonDamageFromSeverity: Moderate
+  tendonIntegrityLossPerDamage: 0.055
+  tendonRuptureIntegrityThreshold: 0.3
+  nerveDamageFromSeverity: Moderate
+  nerveIntegrityLossPerDamage: 0.045
+  nerveMotorLossPerDamage: 0.055
+  jointDamageFromSeverity: Severe
+  jointStabilityLossPerDamage: 0.04
+  jointDislocationStabilityThreshold: 0.25
+
+- type: ncWound
+  id: NCWoundSlash
+  woundType: Slash
+  tissueDepth: Vascular
+  canMergeMinor: true
+  areaPerDamage: 0.8
+  externalBleedPerDamage: 0.9
+  arterialFromSeverity: Severe
+  arterialRateMultiplier: 4
+  painPerDamage: 1.1
+  contaminationMultiplier: 1
+  scarRiskPerDamage: 0.025
+  naturalHealingMultiplier: 1
+  infectionSusceptibility: 1
+  reopenSusceptibility: 1.25
+  naturalIntegrityRecoveryFraction: 0.35
+  regionIntegrityDamageMultiplier: 1
+  containedStructureDamageMultiplier: 0.2
+  containedOrganDamageMultiplier: 0.25
+  functionLossPerDamage: 0.012
+  structuralDamageFromSeverity: Critical
+  containedOrganDamageFromSeverity: Severe
+  tendonDamageFromSeverity: Moderate
+  tendonIntegrityLossPerDamage: 0.07
+  tendonRuptureIntegrityThreshold: 0.3
+  nerveDamageFromSeverity: Severe
+  nerveIntegrityLossPerDamage: 0.05
+  nerveMotorLossPerDamage: 0.05
+  jointDamageFromSeverity: Critical
+  jointStabilityLossPerDamage: 0.025
+  jointDislocationStabilityThreshold: 0.15
+
+- type: ncWound
+  id: NCWoundPierce
+  woundType: Pierce
+  tissueDepth: Cavity
+  canMergeMinor: false
+  areaPerDamage: 0.25
+  externalBleedPerDamage: 0.4
+  internalBleedPerDamage: 0.75
+  arterialFromSeverity: Critical
+  arterialRateMultiplier: 3.5
+  painPerDamage: 1.15
+  contaminationMultiplier: 1
+  scarRiskPerDamage: 0.02
+  naturalHealingMultiplier: 0.75
+  infectionSusceptibility: 1.25
+  reopenSusceptibility: 1.1
+  naturalIntegrityRecoveryFraction: 0.15
+  regionIntegrityDamageMultiplier: 1
+  containedStructureDamageMultiplier: 0.3
+  containedOrganDamageMultiplier: 0.75
+  functionLossPerDamage: 0.022
+  structuralDamageFromSeverity: Severe
+  containedOrganDamageFromSeverity: Moderate
+  tendonDamageFromSeverity: Severe
+  tendonIntegrityLossPerDamage: 0.05
+  tendonRuptureIntegrityThreshold: 0.25
+  nerveDamageFromSeverity: Severe
+  nerveIntegrityLossPerDamage: 0.045
+  nerveMotorLossPerDamage: 0.05
+  jointDamageFromSeverity: Critical
+  jointStabilityLossPerDamage: 0.02
+  jointDislocationStabilityThreshold: 0.15
+
+- type: ncWound
+  id: NCWoundBlunt
+  woundType: Blunt
+  tissueDepth: Structural
+  canMergeMinor: true
+  areaPerDamage: 1.15
+  internalBleedPerDamage: 0.2
+  painPerDamage: 0.9
+  contaminationMultiplier: 0
+  scarRiskPerDamage: 0.005
+  naturalHealingMultiplier: 1.1
+  infectionSusceptibility: 0.2
+  reopenSusceptibility: 0.7
+  naturalIntegrityRecoveryFraction: 0.4
+  regionIntegrityDamageMultiplier: 1.2
+  containedStructureDamageMultiplier: 0.9
+  containedOrganDamageMultiplier: 0.25
+  functionLossPerDamage: 0.01
+  structuralDamageFromSeverity: Moderate
+  containedOrganDamageFromSeverity: Severe
+  tendonDamageFromSeverity: Severe
+  tendonIntegrityLossPerDamage: 0.035
+  tendonRuptureIntegrityThreshold: 0.2
+  nerveDamageFromSeverity: Severe
+  nerveIntegrityLossPerDamage: 0.025
+  nerveMotorLossPerDamage: 0.035
+  jointDamageFromSeverity: Moderate
+  jointStabilityLossPerDamage: 0.06
+  jointDislocationStabilityThreshold: 0.3
+
+- type: ncWound
+  id: NCWoundThermal
+  woundType: Thermal
+  tissueDepth: SoftTissue
+  canMergeMinor: true
+  areaPerDamage: 1.1
+  painPerDamage: 1.35
+  contaminationMultiplier: 0.25
+  scarRiskPerDamage: 0.04
+  naturalHealingMultiplier: 0.65
+  infectionSusceptibility: 1.2
+  reopenSusceptibility: 0.8
+  naturalIntegrityRecoveryFraction: 0.2
+  regionIntegrityDamageMultiplier: 0.8
+  containedOrganDamageMultiplier: 0.2
+  functionLossPerDamage: 0.008
+  containedOrganDamageFromSeverity: Critical
+  tendonDamageFromSeverity: Critical
+  tendonIntegrityLossPerDamage: 0.02
+  tendonRuptureIntegrityThreshold: 0.15
+  nerveDamageFromSeverity: Critical
+  nerveIntegrityLossPerDamage: 0.025
+  nerveMotorLossPerDamage: 0.025
+  jointDamageFromSeverity: Catastrophic
+  jointStabilityLossPerDamage: 0.01
+  jointDislocationStabilityThreshold: 0.1
+
+- type: ncWound
+  id: NCWoundElectrical
+  woundType: Electrical
+  tissueDepth: InternalOrgan
+  canMergeMinor: true
+  areaPerDamage: 0.45
+  painPerDamage: 1.45
+  contaminationMultiplier: 0
+  scarRiskPerDamage: 0.015
+  naturalHealingMultiplier: 0.8
+  infectionSusceptibility: 0.35
+  reopenSusceptibility: 0.6
+  naturalIntegrityRecoveryFraction: 0.1
+  regionIntegrityDamageMultiplier: 0.35
+  containedOrganDamageMultiplier: 0.65
+  functionLossPerDamage: 0.03
+  containedOrganDamageFromSeverity: Minor
+  tendonDamageFromSeverity: Severe
+  tendonIntegrityLossPerDamage: 0.02
+  tendonRuptureIntegrityThreshold: 0.2
+  nerveDamageFromSeverity: Minor
+  nerveIntegrityLossPerDamage: 0.07
+  nerveMotorLossPerDamage: 0.09
+  jointDamageFromSeverity: Severe
+  jointStabilityLossPerDamage: 0.025
+  jointDislocationStabilityThreshold: 0.2
+
+- type: ncWound
+  id: NCWoundChemical
+  woundType: Chemical
+  tissueDepth: SoftTissue
+  canMergeMinor: true
+  areaPerDamage: 1
+  painPerDamage: 1.2
+  contaminationMultiplier: 1
+  scarRiskPerDamage: 0.04
+  naturalHealingMultiplier: 0.6
+  infectionSusceptibility: 1.4
+  reopenSusceptibility: 0.9
+  naturalIntegrityRecoveryFraction: 0.1
+  regionIntegrityDamageMultiplier: 0.85
+  containedOrganDamageMultiplier: 0.25
+  functionLossPerDamage: 0.012
+  containedOrganDamageFromSeverity: Severe
+  tendonDamageFromSeverity: Critical
+  tendonIntegrityLossPerDamage: 0.025
+  tendonRuptureIntegrityThreshold: 0.15
+  nerveDamageFromSeverity: Severe
+  nerveIntegrityLossPerDamage: 0.035
+  nerveMotorLossPerDamage: 0.035
+  jointDamageFromSeverity: Catastrophic
+  jointStabilityLossPerDamage: 0.01
+  jointDislocationStabilityThreshold: 0.1
+
+- type: ncWound
+  id: NCWoundBlast
+  woundType: Blast
+  tissueDepth: InternalOrgan
+  canMergeMinor: false
+  areaPerDamage: 1.25
+  externalBleedPerDamage: 0.35
+  internalBleedPerDamage: 0.8
+  arterialFromSeverity: Critical
+  arterialRateMultiplier: 3
+  painPerDamage: 1.3
+  contaminationMultiplier: 1.25
+  scarRiskPerDamage: 0.04
+  naturalHealingMultiplier: 0.5
+  infectionSusceptibility: 1.6
+  reopenSusceptibility: 1.3
+  naturalIntegrityRecoveryFraction: 0.05
+  regionIntegrityDamageMultiplier: 1.2
+  containedStructureDamageMultiplier: 0.8
+  containedOrganDamageMultiplier: 0.7
+  functionLossPerDamage: 0.025
+  structuralDamageFromSeverity: Moderate
+  containedOrganDamageFromSeverity: Moderate
+  containedTargetCount: 2
+  tendonDamageFromSeverity: Moderate
+  tendonIntegrityLossPerDamage: 0.055
+  tendonRuptureIntegrityThreshold: 0.3
+  nerveDamageFromSeverity: Moderate
+  nerveIntegrityLossPerDamage: 0.045
+  nerveMotorLossPerDamage: 0.06
+  jointDamageFromSeverity: Moderate
+  jointStabilityLossPerDamage: 0.07
+  jointDislocationStabilityThreshold: 0.35

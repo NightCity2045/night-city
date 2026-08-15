@@ -1,7 +1,9 @@
 - type: species
   id: Reptilian
   name: species-name-reptilian
-  roundStart: true
+  # NC start - Night City player characters use the authoritative human anatomy only.
+  roundStart: false
+  # NC end
   prototype: MobReptilian
   defaultSkinTone: "#34a223"
   dollPrototype: AppearanceReptilian

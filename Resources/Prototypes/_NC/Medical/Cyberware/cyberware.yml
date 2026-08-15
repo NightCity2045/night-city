@@ -1,0 +1,415 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Slots are attached only to the listed live human organ categories. Capacity is physical bay volume.
+- type: ncCyberwareSlot
+  id: NCSlotNeuralCore
+  name: cranial neural core bay
+  hostCategories: [ Head ]
+  capacity: 2
+
+- type: ncCyberwareSlot
+  id: NCSlotCranialUtility
+  name: cranial utility bay
+  hostCategories: [ Head ]
+  capacity: 1
+
+- type: ncCyberwareSlot
+  id: NCSlotThoracicSupport
+  name: thoracic support bay
+  hostCategories: [ Thorax ]
+  capacity: 3
+
+- type: ncCyberwareSlot
+  id: NCSlotSubdermalThorax
+  name: thoracic subdermal bay
+  hostCategories: [ Thorax ]
+  capacity: 4
+
+- type: ncCyberwareSlot
+  id: NCSlotArmUtilityLeft
+  name: left arm utility bay
+  hostCategories: [ ArmLeft ]
+  capacity: 1
+
+- type: ncCyberwareSlot
+  id: NCSlotArmUtilityRight
+  name: right arm utility bay
+  hostCategories: [ ArmRight ]
+  capacity: 1
+
+- type: ncCyberwareRepairProfile
+  id: NCRepairProfileStreetCyberware
+  name: street cyberware service pack
+  integrityPerUnit: 20
+  powerPerUnit: 600
+  coolingPerUnit: 30
+  neuralIntegrityPerUnit: 0.15
+  maximumUnitsPerAction: 2
+  maximumUnitsPerTarget: 2
+  maximumTargetsPerAction: 4
+  distribution: MostDamagedFirst
+
+- type: ncCyberwareRepairProfile
+  id: NCRepairProfileClinicalCyberware
+  name: clinical cyberware service pack
+  integrityPerUnit: 35
+  powerPerUnit: 1200
+  coolingPerUnit: 50
+  neuralIntegrityPerUnit: 0.25
+  maximumUnitsPerAction: 2
+  maximumUnitsPerTarget: 2
+  maximumTargetsPerAction: 4
+  distribution: MostDamagedFirst
+
+- type: ncCyberwareRepairProfile
+  id: NCCoolantServiceAgent
+  name: cyberware coolant service agent
+  integrityPerUnit: 0
+  powerPerUnit: 0
+  coolingPerUnit: 35
+  neuralIntegrityPerUnit: 0
+  maximumUnitsPerAction: 4
+  maximumUnitsPerTarget: 1
+  maximumTargetsPerAction: 4
+  distribution: HottestFirst
+
+- type: ncCyberware
+  id: NCNeuralLinkMk1
+  name: neural link Mk.1
+  manufacturer: Zhirafa Technical Collective
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: neural_link
+  form: Implant
+  compatibleSlots: [ NCSlotNeuralCore ]
+  size: 1
+  maximumIntegrity: 60
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
+  powerCapacity: 3600
+  startingPowerFraction: 1
+  minimumOperationalPower: 1
+  idlePowerPerSecond: 0.5
+  loadedPowerPerSecond: 2
+  heatCapacity: 100
+  idleHeatPerSecond: 0.15
+  loadedHeatPerSecond: 1.2
+  passiveCoolingPerSecond: 0.4
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  empResistance: 500
+  empSurgeDamagePerEnergy: 0.002
+  maximumEmpSurgeDamage: 25
+  empHeatPerEnergy: 0.003
+  maximumEmpHeat: 60
+  empDisableDurationMultiplier: 1
+  neuralDamagePerEmpEnergy: 0.00002
+  neuralRequirement: Required
+  neuralDegradedThreshold: 0.7
+  neuralMinimumOperationalIntegrity: 0.2
+  updateInterval: 1s
+  capabilities: [ NeuralInterface, SmartDeviceBus ]
+
+- type: ncCyberware
+  id: NCCirculatoryAssistMk1
+  name: circulatory assist pump Mk.1
+  manufacturer: Biotechnica Night City
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: circulatory_assist
+  form: Implant
+  compatibleSlots: [ NCSlotThoracicSupport ]
+  size: 2
+  maximumIntegrity: 90
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
+  powerCapacity: 7200
+  startingPowerFraction: 1
+  minimumOperationalPower: 1
+  idlePowerPerSecond: 1
+  loadedPowerPerSecond: 3
+  heatCapacity: 120
+  idleHeatPerSecond: 0.3
+  loadedHeatPerSecond: 1.5
+  passiveCoolingPerSecond: 0.6
+  heatDeratingThreshold: 75
+  heatShutdownThreshold: 100
+  heatDamageThreshold: 105
+  heatDamagePerSecond: 1.5
+  empResistance: 750
+  empSurgeDamagePerEnergy: 0.0015
+  maximumEmpSurgeDamage: 30
+  empHeatPerEnergy: 0.002
+  maximumEmpHeat: 70
+  empDisableDurationMultiplier: 0.8
+  neuralDamagePerEmpEnergy: 0
+  neuralRequirement: None
+  updateInterval: 1s
+  capabilities: [ CirculatoryAssist ]
+
+- type: ncCyberware
+  id: NCIndustrialCyberArm
+  name: industrial cyberarm
+  manufacturer: Militech Industrial Systems
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberarm_right
+  hostIcons:
+    ArmLeft:
+      sprite: _NC/Objects/Cyberware/implants.rsi
+      state: cyberarm_left
+    ArmRight:
+      sprite: _NC/Objects/Cyberware/implants.rsi
+      state: cyberarm_right
+  form: LimbReplacement
+  size: 5
+  maximumIntegrity: 160
+  repairProfile: NCRepairProfileStreetCyberware
+  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
+  powerCapacity: 10800
+  startingPowerFraction: 1
+  minimumOperationalPower: 1
+  idlePowerPerSecond: 0.5
+  loadedPowerPerSecond: 5
+  heatCapacity: 160
+  idleHeatPerSecond: 0.2
+  loadedHeatPerSecond: 2.5
+  passiveCoolingPerSecond: 0.8
+  heatDeratingThreshold: 95
+  heatShutdownThreshold: 130
+  heatDamageThreshold: 140
+  heatDamagePerSecond: 2
+  empResistance: 1200
+  empSurgeDamagePerEnergy: 0.001
+  maximumEmpSurgeDamage: 45
+  empHeatPerEnergy: 0.002
+  maximumEmpHeat: 90
+  empDisableDurationMultiplier: 0.75
+  neuralDamagePerEmpEnergy: 0.00001
+  neuralRequirement: Required
+  neuralDegradedThreshold: 0.65
+  neuralMinimumOperationalIntegrity: 0.15
+  updateInterval: 1s
+  capabilities: [ Movement, Grip, ServiceHatch ]
+
+- type: ncCyberware
+  id: NCCyberopticsMk1
+  name: cyberoptics Mk.1
+  manufacturer: Kiroshi Optics
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberoptics
+  form: OrganReplacement
+  size: 1
+  maximumIntegrity: 65
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
+  powerCapacity: 5400
+  startingPowerFraction: 1
+  minimumOperationalPower: 1
+  idlePowerPerSecond: 0.4
+  loadedPowerPerSecond: 1.5
+  heatCapacity: 80
+  idleHeatPerSecond: 0.1
+  loadedHeatPerSecond: 0.7
+  passiveCoolingPerSecond: 0.3
+  heatDeratingThreshold: 50
+  heatShutdownThreshold: 70
+  heatDamageThreshold: 75
+  heatDamagePerSecond: 0.8
+  empResistance: 450
+  empSurgeDamagePerEnergy: 0.002
+  maximumEmpSurgeDamage: 25
+  empHeatPerEnergy: 0.0025
+  maximumEmpHeat: 50
+  empDisableDurationMultiplier: 1.1
+  neuralDamagePerEmpEnergy: 0.00002
+  neuralRequirement: Required
+  neuralDegradedThreshold: 0.75
+  neuralMinimumOperationalIntegrity: 0.25
+  updateInterval: 1s
+  capabilities: [ Vision ]
+
+- type: ncCyberware
+  id: NCCyberheartMk1
+  name: cyberheart Mk.1
+  manufacturer: Biotechnica Night City
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberheart
+  form: OrganReplacement
+  size: 3
+  maximumIntegrity: 110
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
+  powerCapacity: 14400
+  startingPowerFraction: 1
+  minimumOperationalPower: 1
+  idlePowerPerSecond: 1.2
+  loadedPowerPerSecond: 2.5
+  heatCapacity: 130
+  idleHeatPerSecond: 0.35
+  loadedHeatPerSecond: 1
+  passiveCoolingPerSecond: 0.6
+  heatDeratingThreshold: 80
+  heatShutdownThreshold: 110
+  heatDamageThreshold: 115
+  heatDamagePerSecond: 1.5
+  empResistance: 1000
+  empSurgeDamagePerEnergy: 0.0015
+  maximumEmpSurgeDamage: 35
+  empHeatPerEnergy: 0.002
+  maximumEmpHeat: 70
+  empDisableDurationMultiplier: 0.7
+  neuralDamagePerEmpEnergy: 0
+  neuralRequirement: None
+  updateInterval: 1s
+  capabilities: [ Circulation ]
+
+- type: entity
+  id: NCCyberwareImplantBase
+  abstract: true
+  parent: BaseItem
+  components:
+  - type: ChildOrgan
+  - type: NCOrganIntegrity
+    material: Mechanical
+  - type: NCSurgicalSite
+
+- type: entity
+  id: NCImplantNeuralLinkMk1
+  parent: NCCyberwareImplantBase
+  name: neural link Mk.1
+  description: A clinical cranial neural-interface module. It is inert until installed and calibrated.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: neural_link
+  - type: Item
+    sprite: _NC/Objects/Cyberware/implants.rsi
+  - type: NCCyberware
+    profile: NCNeuralLinkMk1
+
+- type: entity
+  id: NCImplantCirculatoryAssistMk1
+  parent: NCCyberwareImplantBase
+  name: circulatory assist pump Mk.1
+  description: A powered thoracic support pump for later physiology integrations.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: circulatory_assist
+  - type: Item
+    sprite: _NC/Objects/Cyberware/implants.rsi
+  - type: NCCyberware
+    profile: NCCirculatoryAssistMk1
+
+# Mechanical anatomical replacements retain the normal organ categories, so existing detachment and
+# AttachGraft surgery can install them without a parallel body graph.
+- type: entity
+  id: NCOrganHumanCyberArmLeft
+  parent: NCOrganHumanDetachableParentRegionBase
+  name: left industrial cyberarm
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberarm_left
+  - type: Item
+    sprite: _NC/Objects/Cyberware/implants.rsi
+  - type: Organ
+    category: ArmLeft
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    movementContribution: 0.5
+    gripContribution: 0.35
+    armorLocations: [ ArmLeft ]
+  - type: NCJoint
+  - type: NCNerve
+    cyberprostheticInterface: true
+  - type: NCCyberware
+    profile: NCIndustrialCyberArm
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: Torso
+
+- type: entity
+  id: NCOrganHumanCyberArmRight
+  parent: NCOrganHumanDetachableParentRegionBase
+  name: right industrial cyberarm
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberarm_right
+  - type: Item
+    sprite: _NC/Objects/Cyberware/implants.rsi
+  - type: Organ
+    category: ArmRight
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    movementContribution: 0.5
+    gripContribution: 0.35
+    armorLocations: [ ArmRight ]
+  - type: NCJoint
+  - type: NCNerve
+    cyberprostheticInterface: true
+  - type: NCCyberware
+    profile: NCIndustrialCyberArm
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: Torso
+
+- type: entity
+  id: NCOrganHumanCyberEyes
+  parent: NCOrganHumanRegionBase
+  name: cyberoptics Mk.1
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberoptics
+  - type: Item
+    sprite: _NC/Objects/Cyberware/implants.rsi
+  - type: Organ
+    category: Eyes
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    armorLocations: [ Face ]
+  - type: NCOrganFunction
+    functionType: Vision
+  - type: NCNerve
+    cyberprostheticInterface: true
+  - type: NCCyberware
+    profile: NCCyberopticsMk1
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: Head
+
+- type: entity
+  id: NCOrganHumanCyberHeart
+  parent: NCOrganHumanRegionBase
+  name: cyberheart Mk.1
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberheart
+  - type: Item
+    sprite: _NC/Objects/Cyberware/implants.rsi
+  - type: Organ
+    category: Heart
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    vitalImportance: Vital
+    armorLocations: [ Chest ]
+  - type: NCOrganFunction
+    functionType: Circulation
+    vital: true
+    perfusionDemand: 0.8
+    oxygenDemand: 0.2
+  - type: NCCyberware
+    profile: NCCyberheartMk1
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: Thorax

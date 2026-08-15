@@ -192,18 +192,22 @@ public abstract partial class SharedDefibrillatorSystem : EntitySystem
             _useDelay.TryResetDelay((ent.Owner, useDelay), id: ent.Comp.DelayId);
         }
 
-        var failedRevive = true;
-        if (_rotting.IsRotten(target))
+        // NC start - The server can replace legacy HP revival with authoritative physiology while retaining
+        // the vanilla power cell, DoAfter, sounds, electrocution and interaction events.
+        var ncHandled = TryHandleAuthoritativeZap(ent.Owner, target, user, out var ncSucceeded);
+        var failedRevive = ncHandled ? !ncSucceeded : true;
+        // NC end
+        if (!ncHandled && _rotting.IsRotten(target))
         {
             _chat.TrySendInGameICMessage(ent.Owner, Loc.GetString("defibrillator-rotten"),
                 InGameICChatType.Speak, true);
         }
-        else if (TryComp<UnrevivableComponent>(target, out var unrevivable))
+        else if (!ncHandled && TryComp<UnrevivableComponent>(target, out var unrevivable))
         {
             _chat.TrySendInGameICMessage(ent.Owner, Loc.GetString(unrevivable.ReasonMessage),
                 InGameICChatType.Speak, true);
         }
-        else
+        else if (!ncHandled)
         {
             if (_mobState.IsDead(target, targetMobState))
                 _damageable.TryChangeDamage(target, ent.Comp.ZapHeal, true, origin: user);
@@ -242,6 +246,18 @@ public abstract partial class SharedDefibrillatorSystem : EntitySystem
         var ev = new TargetDefibrillatedEvent(user, (ent.Owner, ent.Comp));
         RaiseLocalEvent(target, ref ev);
     }
+
+    // NC start - Server-only hook; the client keeps predicting the existing physical feedback.
+    protected virtual bool TryHandleAuthoritativeZap(
+        EntityUid defibrillator,
+        EntityUid target,
+        EntityUid user,
+        out bool succeeded)
+    {
+        succeeded = false;
+        return false;
+    }
+    // NC end
 
     // TODO: SharedEuiManager so that we can just directly open the eui from shared.
     protected virtual void OpenReturnToBodyEui(Entity<MindComponent> mind, ICommonSession session) { }

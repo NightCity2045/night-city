@@ -1,0 +1,60 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncBodyFunctionProfile
+  id: NCHumanBodyFunction
+  # These totals are the intact contributions declared by the human NC anatomical regions.
+  expectedMovementContribution: 2.35
+  expectedLeftGripContribution: 1
+  expectedRightGripContribution: 1
+  expectedVisionCapacity: 1
+  expectedHearingCapacity: 1
+  expectedSpeechCapacity: 1
+  regions:
+  - category: PelvisGroin
+    side: Center
+    includeMovement: true
+  - category: ArmLeft
+    side: Left
+    includeGrip: true
+  - category: HandLeft
+    side: Left
+    includeGrip: true
+    includeParentSupport: true
+  - category: ArmRight
+    side: Right
+    includeGrip: true
+  - category: HandRight
+    side: Right
+    includeGrip: true
+    includeParentSupport: true
+  - category: LegLeft
+    side: Left
+    includeMovement: true
+  - category: FootLeft
+    side: Left
+    includeMovement: true
+    includeParentSupport: true
+  - category: LegRight
+    side: Right
+    includeMovement: true
+  - category: FootRight
+    side: Right
+    includeMovement: true
+    includeParentSupport: true
+  # Intact, bruised, cracked, stable break, displaced break, shattered.
+  boneStateMultipliers: [ 1, 0.92, 0.78, 0.55, 0.3, 0 ]
+  # None, mild, moderate, severe, excruciating, overwhelming.
+  painMotorMultipliers: [ 1, 0.96, 0.86, 0.68, 0.42, 0.2 ]
+  # Alert, dazed, confused, stuporous, unconscious, comatose, brain-dead.
+  consciousnessMotorMultipliers: [ 1, 0.9, 0.72, 0.4, 0, 0, 0 ]
+  consciousnessSensoryMultipliers: [ 1, 0.92, 0.78, 0.5, 0, 0, 0 ]
+  dislocatedJointMultiplier: 0.2
+  rupturedTendonMultiplier: 0
+  sprintFunctionThreshold: 0.65
+  restrictedSprintMultiplier: 0.4
+  functionalGripThreshold: 0.2
+  functionalVisionThreshold: 0.05
+  functionalHearingThreshold: 0.05
+  functionalSpeechThreshold: 0.05

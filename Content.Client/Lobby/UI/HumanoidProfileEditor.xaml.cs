@@ -2,6 +2,7 @@ using Content.Client.Humanoid;
 using Content.Client.Message;
 using Content.Client.Players.PlayTimeTracking;
 using Content.Client.Sprite;
+using Content.Shared._NC.Preferences; // NC - Human-only character profiles.
 using Content.Shared.CCVar;
 using Content.Shared.GameTicking;
 using Content.Shared.Humanoid;
@@ -370,7 +371,9 @@ namespace Content.Client.Lobby.UI
         /// </summary>
         public void SetProfile(HumanoidCharacterProfile? profile, int? slot)
         {
-            Profile = profile?.Clone();
+            // NC start - imports and profiles loaded from older databases enter the editor as humans.
+            Profile = profile == null ? null : NCHumanProfileRules.Normalize(profile).Clone();
+            // NC end
             CharacterSlot = slot;
             IsDirty = false;
             JobOverride = null;

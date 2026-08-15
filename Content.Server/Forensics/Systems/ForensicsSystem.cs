@@ -23,6 +23,7 @@ using Robust.Shared.Random;
 using Content.Shared.Verbs;
 using Robust.Shared.Utility;
 using Content.Shared.Hands.Components;
+using Content.Server._NC.Medical.Bleeding; // NC
 
 namespace Content.Server.Forensics
 {
@@ -33,6 +34,9 @@ namespace Content.Server.Forensics
         [Dependency] private DoAfterSystem _doAfterSystem = default!;
         [Dependency] private PopupSystem _popupSystem = default!;
         [Dependency] private SharedSolutionContainerSystem _solutionContainerSystem = default!;
+        // NC start: lets the existing forensic-cleaning interaction remove bounded blood marks from structures.
+        [Dependency] private NCImpactBloodSystem _ncImpactBlood = default!;
+        // NC end
 
         public override void Initialize()
         {
@@ -213,16 +217,18 @@ namespace Content.Server.Forensics
         /// <returns>True if the target can be cleaned and has some sort of DNA or fingerprints / fibers and false otherwise.</returns>
         public bool TryStartCleaning(Entity<CleansForensicsComponent> cleanForensicsEntity, EntityUid user, EntityUid target)
         {
-            if (!TryComp<ForensicsComponent>(target, out var forensicsComp))
+            // NC start: a stained wall does not need a permanent ForensicsComponent just to use this interaction.
+            var hasNcSurfaceBlood = _ncImpactBlood.HasSurfaceStains(target);
+            if (!TryComp<ForensicsComponent>(target, out var forensicsComp) && !hasNcSurfaceBlood)
             {
                 _popupSystem.PopupEntity(Loc.GetString("forensics-cleaning-cannot-clean", ("target", Identity.Entity(target, EntityManager))), user, user, PopupType.MediumCaution);
                 return false;
             }
 
-            var totalPrintsAndFibers = forensicsComp.Fingerprints.Count + forensicsComp.Fibers.Count;
-            var hasRemovableDNA = forensicsComp.DNAs.Count > 0 && forensicsComp.CanDnaBeCleaned;
+            var totalPrintsAndFibers = forensicsComp?.Fingerprints.Count + forensicsComp?.Fibers.Count ?? 0;
+            var hasRemovableDNA = forensicsComp != null && forensicsComp.DNAs.Count > 0 && forensicsComp.CanDnaBeCleaned;
 
-            if (hasRemovableDNA || totalPrintsAndFibers > 0)
+            if (hasRemovableDNA || totalPrintsAndFibers > 0 || hasNcSurfaceBlood)
             {
                 var cleanDelay = cleanForensicsEntity.Comp.CleanDelay;
                 var doAfterArgs = new DoAfterArgs(EntityManager, user, cleanDelay, new CleanForensicsDoAfterEvent(), cleanForensicsEntity, target: target, used: cleanForensicsEntity)
@@ -231,7 +237,7 @@ namespace Content.Server.Forensics
                     BreakOnDamage = true,
                     BreakOnMove = true,
                     MovementThreshold = 0.01f,
-                    DistanceThreshold = forensicsComp.CleanDistance,
+                    DistanceThreshold = forensicsComp?.CleanDistance ?? 1.5f,
                 };
 
                 _doAfterSystem.TryStartDoAfter(doAfterArgs);
@@ -245,6 +251,7 @@ namespace Content.Server.Forensics
                 _popupSystem.PopupEntity(Loc.GetString("forensics-cleaning-cannot-clean", ("target", Identity.Entity(target, EntityManager))), user, user, PopupType.MediumCaution);
                 return false;
             }
+            // NC end
 
         }
 
@@ -253,7 +260,12 @@ namespace Content.Server.Forensics
             if (args.Handled || args.Cancelled || args.Args.Target == null)
                 return;
 
-            if (!TryComp<ForensicsComponent>(args.Target, out var targetComp))
+            // NC start: attached surface marks share the completed vanilla cleaning action.
+            var target = args.Args.Target.Value;
+            _ncImpactBlood.TryCleanSurface(target);
+            // NC end
+
+            if (!TryComp<ForensicsComponent>(target, out var targetComp))
                 return;
 
             targetComp.Fibers = new();

@@ -1,0 +1,880 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepPrepareField
+  name: prepare surgical field
+  duration: 3s
+  optionalAtDirectStart: true
+  requiredAccessDepth: Closed
+  tools:
+  - capability: NCSurgeryToolDisinfection
+    minimumQuality: 0.5
+    minimumSterility: 0.5
+  environment:
+    required: true
+    minimumLighting: 0.4
+    maximumMotion: 0.4
+    maximumContamination: 0.65
+  outcomeRules:
+  - outcome: Compromised
+    maximumToolSterility: 0.74
+  - outcome: Compromised
+    maximumEnvironmentSterility: 0.59
+  - outcome: Compromised
+    minimumEnvironmentContamination: 0.35
+  successEffects:
+  - kind: AddSiteContamination
+    amount: -0.35
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.2
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepIncise
+  name: make controlled incision
+  duration: 4s
+  requiredAccessDepth: Closed
+  tools:
+  - capability: NCSurgeryToolIncision
+    minimumQuality: 0.55
+    minimumSterility: 0.5
+  patient:
+    minimumAnesthesia: 0.35
+    maximumMovement: 0.3
+    requireRestraintWhenConscious: true
+  outcomeRules:
+  - outcome: Compromised
+    maximumToolQuality: 0.74
+  - outcome: Compromised
+    maximumToolSterility: 0.74
+  - outcome: Compromised
+    minimumPatientMovement: 0.15
+  successEffects:
+  - kind: SetAccessDepth
+    accessDepth: Incised
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.12
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepControlBleeders
+  name: control incision bleeding
+  duration: 3s
+  requiredAccessDepth: Incised
+  tools:
+  - capability: NCSurgeryToolHemostasis
+    minimumQuality: 0.5
+    minimumSterility: 0.45
+  successEffects:
+  - kind: SetBleedingControlled
+  - kind: SetAccessDepth
+    accessDepth: BleedersControlled
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepRetractTissue
+  name: retract soft tissue
+  duration: 4s
+  requiredAccessDepth: BleedersControlled
+  tools:
+  - capability: NCSurgeryToolRetraction
+    minimumQuality: 0.5
+    minimumSterility: 0.45
+  patient:
+    maximumMovement: 0.25
+  successEffects:
+  - kind: SetTissuesRetracted
+  - kind: SetAccessDepth
+    accessDepth: SoftTissueRetracted
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepDebrideWound
+  name: remove contaminated and necrotic tissue
+  duration: 6s
+  requiredAccessDepth: SoftTissueRetracted
+  tools:
+  - capability: NCSurgeryToolDebridement
+    minimumQuality: 0.6
+    minimumSterility: 0.55
+  facility:
+    required: true
+    capabilities:
+    - NCSurgeryFacilityStableSurface
+    minimumQuality: 0.45
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.35
+    minimumLighting: 0.5
+    maximumMotion: 0.25
+    maximumContamination: 0.6
+  outcomeRules:
+  - outcome: Compromised
+    maximumToolQuality: 0.74
+  - outcome: Compromised
+    maximumEnvironmentSterility: 0.64
+  successEffects:
+  - kind: AddWoundTreatmentFlags
+    treatmentFlags: Debrided
+  - kind: AdjustWoundContamination
+    amount: -0.75
+  - kind: SetAccessDepth
+    accessDepth: ReadyForClosure
+  compromisedEffects:
+  - kind: AdjustWoundContamination
+    amount: 0.25
+  - kind: AddSiteContamination
+    amount: 0.15
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepRepairVessel
+  name: repair damaged vessel
+  duration: 8s
+  requiredAccessDepth: SoftTissueRetracted
+  tools:
+  - capability: NCSurgeryToolVascularRepair
+    minimumQuality: 0.7
+    minimumSterility: 0.65
+    consumedUses: 1
+  facility:
+    required: true
+    capabilities:
+    - NCSurgeryFacilityMonitoring
+    minimumQuality: 0.6
+    minimumSterility: 0.6
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.55
+    minimumLighting: 0.65
+    maximumMotion: 0.15
+    maximumContamination: 0.4
+  patient:
+    minimumOxygenation: 0.3
+    maximumShockStage: Severe
+    minimumAnesthesia: 0.45
+    maximumMovement: 0.15
+    requireAirwayMonitoring: true
+  outcomeRules:
+  - outcome: Compromised
+    maximumToolQuality: 0.84
+  - outcome: Compromised
+    maximumFacilitySterility: 0.74
+  - outcome: Compromised
+    minimumShockStage: Severe
+  successEffects:
+  - kind: ControlBleeding
+  - kind: AddWoundTreatmentFlags
+    treatmentFlags: Clamped
+  - kind: SetBleedingControlled
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.18
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepReduceBone
+  name: reduce displaced bone
+  duration: 7s
+  requiredAccessDepth: EncasedStructureOpened
+  tools:
+  - capability: NCSurgeryToolBoneReduction
+    minimumQuality: 0.65
+    minimumSterility: 0.5
+  facility:
+    required: true
+    capabilities:
+    - NCSurgeryFacilityBoneFixation
+    minimumQuality: 0.55
+    requireStableSurface: true
+  patient:
+    minimumAnesthesia: 0.5
+    maximumMovement: 0.1
+  successEffects:
+  - kind: SetBoneState
+    boneState: BrokenStable
+  - kind: SetBoneStability
+    amount: 0.55
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepOpenBoneCasing
+  name: open bone casing
+  duration: 6s
+  requiredAccessDepth: SoftTissueRetracted
+  tools:
+  - capability: NCSurgeryToolBoneReduction
+    minimumQuality: 0.6
+    minimumSterility: 0.5
+  patient:
+    minimumAnesthesia: 0.5
+    maximumMovement: 0.1
+  successEffects:
+  - kind: SetBoneCasingOpen
+  - kind: SetAccessDepth
+    accessDepth: EncasedStructureOpened
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepFixBone
+  name: fixate bone
+  duration: 10s
+  requiredAccessDepth: ProcedureInProgress
+  tools:
+  - capability: NCSurgeryToolBoneFixation
+    minimumQuality: 0.7
+    minimumSterility: 0.6
+    consumedUses: 1
+  facility:
+    required: true
+    capabilities:
+    - NCSurgeryFacilityBoneFixation
+    minimumQuality: 0.6
+    requireStableSurface: true
+  outcomeRules:
+  - outcome: Compromised
+    maximumToolQuality: 0.84
+  successEffects:
+  - kind: SetBoneState
+    boneState: Cracked
+  - kind: SetBoneStability
+    amount: 0.9
+  - kind: AdjustIntegrity
+    amount: 20
+  - kind: SetAccessDepth
+    accessDepth: ReadyForClosure
+  compromisedEffects:
+  - kind: SetBoneStability
+    amount: 0.7
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepRepairOrgan
+  name: repair organ tissue
+  duration: 10s
+  requiredAccessDepth: OrganExposed
+  tools:
+  - capability: NCSurgeryToolOrganRepair
+    minimumQuality: 0.7
+    minimumSterility: 0.65
+    consumedUses: 1
+  facility:
+    required: true
+    capabilities:
+    - NCSurgeryFacilityMonitoring
+    - NCSurgeryFacilityVentilation
+    minimumQuality: 0.65
+    minimumSterility: 0.65
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.6
+    minimumLighting: 0.7
+    maximumMotion: 0.1
+    maximumContamination: 0.3
+  patient:
+    minimumOxygenation: 0.35
+    maximumShockStage: Severe
+    minimumAnesthesia: 0.55
+    maximumMovement: 0.08
+    requireAirwayMonitoring: true
+  successEffects:
+  - kind: AdjustIntegrity
+    amount: 25
+  - kind: AdjustOrganFunction
+    amount: 0.25
+  - kind: SetAccessDepth
+    accessDepth: ReadyForClosure
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.2
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepOpenCavity
+  name: open body cavity
+  duration: 7s
+  requiredAccessDepth: SoftTissueRetracted
+  tools:
+  - capability: NCSurgeryToolIncision
+    minimumQuality: 0.65
+    minimumSterility: 0.6
+  facility:
+    required: true
+    capabilities:
+    - NCSurgeryFacilityMonitoring
+    minimumQuality: 0.6
+    requirePower: true
+    requireStableSurface: true
+  patient:
+    minimumAnesthesia: 0.5
+    maximumMovement: 0.1
+    requireAirwayMonitoring: true
+  successEffects:
+  - kind: SetAccessDepth
+    accessDepth: CavityOpened
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepExposeOrgan
+  name: expose target organ
+  duration: 6s
+  requiredAccessDepth: CavityOpened
+  tools:
+  - capability: NCSurgeryToolRetraction
+    minimumQuality: 0.6
+    minimumSterility: 0.55
+  patient:
+    maximumMovement: 0.1
+  successEffects:
+  - kind: SetAccessDepth
+    accessDepth: OrganExposed
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepPrepareClosure
+  name: prepare tissue closure
+  duration: 3s
+  requiredAccessDepth: ProcedureInProgress
+  tools:
+  - capability: NCSurgeryToolRetraction
+    minimumQuality: 0.5
+    minimumSterility: 0.45
+  successEffects:
+  - kind: SetTissuesRetracted
+    enabled: false
+  - kind: SetAccessDepth
+    accessDepth: ReadyForClosure
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepSutureClosure
+  name: suture surgical site
+  duration: 6s
+  requiredAccessDepth: ReadyForClosure
+  tools:
+  - capability: NCSurgeryToolSuturing
+    minimumQuality: 0.6
+    minimumSterility: 0.55
+    consumedUses: 1
+  environment:
+    required: true
+    minimumLighting: 0.45
+    maximumMotion: 0.25
+    maximumContamination: 0.55
+  outcomeRules:
+  - outcome: Compromised
+    maximumToolSterility: 0.74
+  successEffects:
+  - kind: SetWoundClosure
+    closureState: Sutured
+  - kind: SetTissuesRetracted
+    enabled: false
+  - kind: SetBoneCasingOpen
+    enabled: false
+  - kind: SetAccessDepth
+    accessDepth: ClosedPostOp
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.2
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepCloseSite
+  name: close surgical site
+  duration: 6s
+  requiredAccessDepth: ReadyForClosure
+  tools:
+  - capability: NCSurgeryToolSuturing
+    minimumQuality: 0.6
+    minimumSterility: 0.55
+    consumedUses: 1
+  environment:
+    required: true
+    minimumLighting: 0.45
+    maximumMotion: 0.25
+    maximumContamination: 0.55
+  outcomeRules:
+  - outcome: Compromised
+    maximumToolSterility: 0.74
+  successEffects:
+  - kind: SetTissuesRetracted
+    enabled: false
+  - kind: SetBoneCasingOpen
+    enabled: false
+  - kind: SetAccessDepth
+    accessDepth: ClosedPostOp
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.2
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepIrrigateWound
+  name: irrigate and clean deep wound
+  duration: 6s
+  requiredAccessDepth: SoftTissueRetracted
+  tools:
+  - capability: NCSurgeryToolIrrigation
+    minimumQuality: 0.65
+    minimumSterility: 0.65
+    consumedUses: 1
+  environment:
+    required: true
+    minimumSterility: 0.45
+    minimumLighting: 0.5
+    maximumMotion: 0.2
+    maximumContamination: 0.5
+  outcomeRules:
+  - outcome: Compromised
+    maximumToolSterility: 0.79
+  successEffects:
+  - kind: AdjustWoundContamination
+    amount: -0.65
+  - kind: AddWoundTreatmentFlags
+    treatmentFlags: Debrided
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.12
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepExtractForeignBody
+  name: extract embedded foreign body
+  duration: 8s
+  requiredAccessDepth: SoftTissueRetracted
+  tools:
+  - capability: NCSurgeryToolForeignBodyExtraction
+    minimumQuality: 0.7
+    minimumSterility: 0.55
+  patient:
+    minimumAnesthesia: 0.45
+    maximumMovement: 0.12
+  outcomeRules:
+  - outcome: Compromised
+    maximumToolQuality: 0.84
+  successEffects:
+  - kind: RemoveEmbeddedObject
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.16
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepRepairTendon
+  name: repair divided tendon
+  duration: 10s
+  requiredAccessDepth: SoftTissueRetracted
+  tools:
+  - capability: NCSurgeryToolTendonRepair
+    minimumQuality: 0.72
+    minimumSterility: 0.65
+    consumedUses: 1
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityStableSurface ]
+    minimumQuality: 0.6
+    requireStableSurface: true
+  patient:
+    minimumAnesthesia: 0.5
+    maximumMovement: 0.1
+  outcomeRules:
+  - outcome: Compromised
+    maximumToolQuality: 0.84
+  successEffects:
+  - kind: AdjustTendonIntegrity
+    amount: 1
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+  compromisedEffects:
+  - kind: AdjustTendonIntegrity
+    amount: -0.2
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepRepairNerve
+  name: repair divided peripheral nerve
+  duration: 12s
+  requiredAccessDepth: SoftTissueRetracted
+  tools:
+  - capability: NCSurgeryToolNerveRepair
+    minimumQuality: 0.75
+    minimumSterility: 0.7
+    consumedUses: 1
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring ]
+    minimumQuality: 0.65
+    requirePower: true
+    requireStableSurface: true
+  patient:
+    minimumAnesthesia: 0.55
+    maximumMovement: 0.08
+  outcomeRules:
+  - outcome: Compromised
+    maximumToolQuality: 0.87
+  successEffects:
+  - kind: AdjustNerveIntegrity
+    amount: 1
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+  compromisedEffects:
+  - kind: AdjustNerveIntegrity
+    amount: -0.15
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepOpenCranium
+  name: open cranial casing
+  duration: 10s
+  requiredAccessDepth: SoftTissueRetracted
+  tools:
+  - capability: NCSurgeryToolCranialAccess
+    minimumQuality: 0.75
+    minimumSterility: 0.7
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
+    minimumQuality: 0.7
+    requirePower: true
+    requireStableSurface: true
+  patient:
+    minimumAnesthesia: 0.65
+    maximumMovement: 0.05
+    requireAirwayMonitoring: true
+  successEffects:
+  - kind: SetBoneCasingOpen
+  - kind: SetAccessDepth
+    accessDepth: EncasedStructureOpened
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepDecompressCranium
+  name: evacuate cranial hematoma
+  duration: 12s
+  requiredAccessDepth: EncasedStructureOpened
+  tools:
+  - capability: NCSurgeryToolIrrigation
+    minimumQuality: 0.75
+    minimumSterility: 0.7
+    consumedUses: 1
+  patient:
+    minimumOxygenation: 0.25
+    maximumShockStage: Severe
+    minimumAnesthesia: 0.65
+    maximumMovement: 0.05
+    requireAirwayMonitoring: true
+  successEffects:
+  - kind: AdjustCavityBloodVolume
+    amount: -1000
+  - kind: SetCavityDrainRate
+    amount: 8
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.2
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepRepairBrain
+  name: repair viable brain tissue
+  duration: 14s
+  requiredAccessDepth: OrganExposed
+  tools:
+  - capability: NCSurgeryToolNerveRepair
+    minimumQuality: 0.85
+    minimumSterility: 0.8
+    consumedUses: 1
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
+    minimumQuality: 0.8
+    minimumSterility: 0.75
+    requirePower: true
+    requireStableSurface: true
+  patient:
+    minimumOxygenation: 0.4
+    maximumShockStage: Moderate
+    allowedConsciousness: [ Alert, Dazed, Confused, Stuporous, Unconscious, Comatose ]
+    minimumAnesthesia: 0.7
+    maximumMovement: 0.04
+    requireAirwayMonitoring: true
+  successEffects:
+  - kind: AdjustIntegrity
+    amount: 12
+  - kind: AdjustOrganFunction
+    amount: 0.12
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+  compromisedEffects:
+  - kind: AdjustOrganFunction
+    amount: -0.08
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepRepairEye
+  name: repair ocular tissue
+  duration: 10s
+  requiredAccessDepth: OrganExposed
+  tools:
+  - capability: NCSurgeryToolOphthalmicRepair
+    minimumQuality: 0.78
+    minimumSterility: 0.7
+    consumedUses: 1
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring ]
+    minimumQuality: 0.65
+    requirePower: true
+    requireStableSurface: true
+  patient:
+    minimumAnesthesia: 0.6
+    maximumMovement: 0.06
+  successEffects:
+  - kind: AdjustIntegrity
+    amount: 22
+  - kind: AdjustOrganFunction
+    amount: 0.25
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+  compromisedEffects:
+  - kind: AdjustOrganFunction
+    amount: -0.1
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepSeparateOrgan
+  name: separate organ pedicle
+  duration: 10s
+  requiredAccessDepth: OrganExposed
+  tools:
+  - capability: NCSurgeryToolOrganSeparation
+    minimumQuality: 0.72
+    minimumSterility: 0.68
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring ]
+    minimumQuality: 0.65
+    requirePower: true
+    requireStableSurface: true
+  patient:
+    minimumAnesthesia: 0.6
+    maximumMovement: 0.06
+    requireAirwayMonitoring: true
+  successEffects:
+  - kind: SetBleedingControlled
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.18
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepCompleteRemoval
+  name: close pedicle and remove structure
+  duration: 9s
+  requiredAccessDepth: ReadyForClosure
+  tools:
+  - capability: NCSurgeryToolSuturing
+    minimumQuality: 0.7
+    minimumSterility: 0.65
+    consumedUses: 1
+  successEffects:
+  - kind: SetTissuesRetracted
+    enabled: false
+  - kind: SetBoneCasingOpen
+    enabled: false
+  - kind: SetAccessDepth
+    accessDepth: ClosedPostOp
+  - kind: DetachTargetOrgan
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.2
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepPrepareGraftBed
+  name: prepare vascular graft bed
+  duration: 10s
+  requiredAccessDepth: CavityOpened
+  tools:
+  - capability: NCSurgeryToolTransplant
+    minimumQuality: 0.78
+    minimumSterility: 0.75
+    consumedUses: 1
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
+    minimumQuality: 0.7
+    minimumSterility: 0.7
+    requirePower: true
+    requireStableSurface: true
+  patient:
+    minimumOxygenation: 0.35
+    maximumShockStage: Severe
+    minimumAnesthesia: 0.65
+    maximumMovement: 0.05
+    requireAirwayMonitoring: true
+  successEffects:
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepAttachGraft
+  name: complete graft anastomosis
+  duration: 12s
+  requiredAccessDepth: ClosedPostOp
+  tools:
+  - capability: NCSurgeryToolTransplant
+    minimumQuality: 0.8
+    minimumSterility: 0.75
+    consumedUses: 1
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
+    minimumQuality: 0.7
+    minimumSterility: 0.7
+    requirePower: true
+    requireStableSurface: true
+  patient:
+    minimumOxygenation: 0.35
+    maximumShockStage: Severe
+    minimumAnesthesia: 0.65
+    maximumMovement: 0.05
+    requireAirwayMonitoring: true
+  successEffects:
+  - kind: AttachGraft
+    target: Graft
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.15
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepAmputate
+  name: divide limb under vascular control
+  duration: 12s
+  requiredAccessDepth: SoftTissueRetracted
+  tools:
+  - capability: NCSurgeryToolAmputation
+    minimumQuality: 0.7
+    minimumSterility: 0.6
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring ]
+    minimumQuality: 0.6
+    requirePower: true
+    requireStableSurface: true
+  patient:
+    minimumOxygenation: 0.3
+    maximumShockStage: Severe
+    minimumAnesthesia: 0.6
+    maximumMovement: 0.06
+    requireAirwayMonitoring: true
+  successEffects:
+  - kind: SetBleedingControlled
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.18
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepAutopsyExternalExam
+  name: document external pathology
+  duration: 5s
+  requiredAccessDepth: Closed
+  tools:
+  - capability: NCSurgeryToolAutopsy
+    minimumQuality: 0.45
+    minimumSterility: 0
+  environment:
+    required: true
+    minimumLighting: 0.5
+    maximumMotion: 0.2
+  successEffects:
+  - kind: SetAccessDepth
+    accessDepth: Incised
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepAutopsyRetract
+  name: expose forensic region
+  duration: 7s
+  requiredAccessDepth: Incised
+  tools:
+  - capability: NCSurgeryToolAutopsy
+    minimumQuality: 0.5
+    minimumSterility: 0
+  successEffects:
+  - kind: SetBleedingControlled
+  - kind: SetTissuesRetracted
+  - kind: SetAccessDepth
+    accessDepth: CavityOpened
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepRecordAutopsy
+  name: record internal forensic findings
+  duration: 10s
+  requiredAccessDepth: CavityOpened
+  tools:
+  - capability: NCSurgeryToolAutopsy
+    minimumQuality: 0.55
+    minimumSterility: 0
+  successEffects:
+  - kind: RecordAutopsy
+  - kind: SetTissuesRetracted
+    enabled: false
+  - kind: SetAccessDepth
+    accessDepth: ReadyForClosure
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepInstallCyberware
+  name: seat and calibrate cyberware module
+  duration: 10s
+  requiredAccessDepth: SoftTissueRetracted
+  tools:
+  - capability: NCSurgeryToolCyberware
+    minimumQuality: 0.75
+    minimumSterility: 0.6
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring ]
+    minimumQuality: 0.65
+    requirePower: true
+    requireStableSurface: true
+  patient:
+    minimumOxygenation: 0.35
+    maximumShockStage: Severe
+    minimumAnesthesia: 0.6
+    maximumMovement: 0.06
+    requireAirwayMonitoring: true
+  successEffects:
+  - kind: InstallCyberware
+    target: Graft
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.12
+
+- type: ncSurgeryStep
+  id: NCSurgeryStepRemoveCyberware
+  name: disconnect and extract cyberware module
+  duration: 9s
+  requiredAccessDepth: SoftTissueRetracted
+  tools:
+  - capability: NCSurgeryToolCyberware
+    minimumQuality: 0.7
+    minimumSterility: 0.55
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityMonitoring ]
+    minimumQuality: 0.6
+    requirePower: true
+    requireStableSurface: true
+  patient:
+    minimumOxygenation: 0.3
+    maximumShockStage: Severe
+    minimumAnesthesia: 0.55
+    maximumMovement: 0.07
+    requireAirwayMonitoring: true
+  successEffects:
+  - kind: RemoveCyberware
+    target: CyberwareTarget
+  - kind: SetAccessDepth
+    accessDepth: ProcedureInProgress
+  compromisedEffects:
+  - kind: AddSiteContamination
+    amount: 0.14

@@ -1,0 +1,63 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: guideEntry
+  id: NCDoctor
+  name: guide-entry-nc-doctor
+  text: "/ServerInfo/Guidebook/_NC/Medical/Doctor.xml"
+  children:
+  - NCDiagnosticsAndTriage
+  - NCWoundsAndTrauma
+  - NCFieldTreatment
+  - NCEmergencyMedicine
+  - NCPharmacologyGuide
+  - NCSurgeryGuide
+  - NCCyberwareMedicine
+  - NCAftercare
+  - NCDoctorQuickReference
+
+- type: guideEntry
+  id: NCDiagnosticsAndTriage
+  name: guide-entry-nc-diagnostics-triage
+  text: "/ServerInfo/Guidebook/_NC/Medical/DiagnosticsAndTriage.xml"
+
+- type: guideEntry
+  id: NCWoundsAndTrauma
+  name: guide-entry-nc-wounds-trauma
+  text: "/ServerInfo/Guidebook/_NC/Medical/WoundsAndTrauma.xml"
+
+- type: guideEntry
+  id: NCFieldTreatment
+  name: guide-entry-nc-field-treatment
+  text: "/ServerInfo/Guidebook/_NC/Medical/FieldTreatment.xml"
+
+- type: guideEntry
+  id: NCEmergencyMedicine
+  name: guide-entry-nc-emergency-medicine
+  text: "/ServerInfo/Guidebook/_NC/Medical/EmergencyMedicine.xml"
+
+- type: guideEntry
+  id: NCPharmacologyGuide
+  name: guide-entry-nc-pharmacology
+  text: "/ServerInfo/Guidebook/_NC/Medical/Pharmacology.xml"
+
+- type: guideEntry
+  id: NCSurgeryGuide
+  name: guide-entry-nc-surgery
+  text: "/ServerInfo/Guidebook/_NC/Medical/Surgery.xml"
+
+- type: guideEntry
+  id: NCCyberwareMedicine
+  name: guide-entry-nc-cyberware-medicine
+  text: "/ServerInfo/Guidebook/_NC/Medical/CyberwareMedicine.xml"
+
+- type: guideEntry
+  id: NCAftercare
+  name: guide-entry-nc-aftercare
+  text: "/ServerInfo/Guidebook/_NC/Medical/Aftercare.xml"
+
+- type: guideEntry
+  id: NCDoctorQuickReference
+  name: guide-entry-nc-doctor-quick-reference
+  text: "/ServerInfo/Guidebook/_NC/Medical/QuickReference.xml"

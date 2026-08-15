@@ -1,4 +1,7 @@
 using Content.Server.Administration.Logs;
+// NC start - Authoritative human projectile trauma adapter.
+using Content.Server._NC.Combat.Projectiles;
+// NC end
 using Content.Server.Destructible;
 using Content.Server.Effects;
 using Content.Server.Weapons.Ranged.Systems;
@@ -22,6 +25,9 @@ public sealed partial class ProjectileSystem : SharedProjectileSystem
     [Dependency] private DestructibleSystem _destructibleSystem = default!;
     [Dependency] private GunSystem _guns = default!;
     [Dependency] private SharedCameraRecoilSystem _sharedCameraRecoil = default!;
+    // NC start - Authoritative human projectile trauma adapter.
+    [Dependency] private NCProjectileImpactSystem _ncProjectileImpact = default!;
+    // NC end
 
     public override void Initialize()
     {
@@ -58,7 +64,24 @@ public sealed partial class ProjectileSystem : SharedProjectileSystem
         }
         var deleted = Deleted(target);
 
-        if (_damageableSystem.TryChangeDamage((target, damageableComponent), ev.Damage, out var damage, component.IgnoreResistances, origin: component.Shooter) && Exists(component.Shooter))
+        // NC start - A physical collision accepted by NC medicine bypasses legacy body HP exactly once.
+        DamageSpecifier damage;
+        if (_ncProjectileImpact.TryHandleImpact(
+                (uid, component),
+                target,
+                ev.Damage,
+                args.OurBody.LinearVelocity,
+                out var ncDamage,
+                out var ncProjectileSpent))
+        {
+            damage = ncDamage;
+            if (!deleted)
+                _color.RaiseEffect(Color.Red, new List<EntityUid> { target }, Filter.Pvs(target, entityManager: EntityManager));
+
+            component.ProjectileSpent = ncProjectileSpent;
+        }
+        else if (_damageableSystem.TryChangeDamage((target, damageableComponent), ev.Damage, out damage, component.IgnoreResistances, origin: component.Shooter) && Exists(component.Shooter))
+        // NC end
         {
             if (!deleted)
             {

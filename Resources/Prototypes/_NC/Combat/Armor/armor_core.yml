@@ -1,0 +1,215 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncArmorConditionProfile
+  id: NCArmorConditionStandard
+  stages:
+  - stage: Intact
+    minimumFraction: 0.76
+  - stage: Worn
+    minimumFraction: 0.51
+  - stage: Damaged
+    minimumFraction: 0.26
+  - stage: Critical
+    minimumFraction: 0.01
+  - stage: Destroyed
+    minimumFraction: 0
+
+- type: ncArmorRepairProfile
+  id: NCArmorRepairFabricField
+  acceptedCapabilities: [ ArmorFabric ]
+  repairPerUse: 2
+  maximumRepairFraction: 0.75
+
+- type: ncArmorRepairProfile
+  id: NCArmorRepairPlateField
+  acceptedCapabilities: [ ArmorPlate ]
+  repairPerUse: 1
+  maximumRepairFraction: 0.75
+
+- type: ncArmorRepairProfile
+  id: NCArmorRepairCompositeField
+  acceptedCapabilities: [ ArmorComposite ]
+  repairPerUse: 1
+  maximumRepairFraction: 0.75
+
+- type: ncArmorSection
+  id: NCArmorSectionKevlarBody
+  displayName: nc-armor-section-kevlar-body
+  coveredZones: [ NCZoneChest, NCZoneAbdomen, NCZoneGroin ]
+  maxSp: 7
+  applicableDamageClasses: [ Ballistic, Blunt, Slash, Pierce ]
+  conditionProfile: NCArmorConditionStandard
+  ablationGroup: body
+  repairProfile: NCArmorRepairFabricField
+
+- type: ncArmorSection
+  id: NCArmorSectionLightArmorjackBody
+  displayName: nc-armor-section-armorjack-body
+  coveredZones:
+  - NCZoneChest
+  - NCZoneAbdomen
+  - NCZoneGroin
+  - NCZoneArmLeft
+  - NCZoneArmRight
+  - NCZoneLegLeft
+  - NCZoneLegRight
+  maxSp: 11
+  applicableDamageClasses: [ Ballistic, Blunt, Slash, Pierce, Blast ]
+  conditionProfile: NCArmorConditionStandard
+  ablationGroup: body
+  repairProfile: NCArmorRepairFabricField
+
+- type: ncArmorSection
+  id: NCArmorSectionPlateCarrierTorso
+  displayName: nc-armor-section-plate-carrier
+  coveredZones: [ NCZoneChest, NCZoneAbdomen ]
+  maxSp: 13
+  applicableDamageClasses: [ Ballistic, Blunt, Slash, Pierce, Blast ]
+  conditionProfile: NCArmorConditionStandard
+  ablationGroup: torsoPlate
+  rigid: true
+  repairProfile: NCArmorRepairPlateField
+
+- type: ncArmorSection
+  id: NCArmorSectionCombatHelmet
+  displayName: nc-armor-section-combat-helmet
+  coveredZones: [ NCZoneHead ]
+  maxSp: 11
+  applicableDamageClasses: [ Ballistic, Blunt, Slash, Pierce, Blast ]
+  conditionProfile: NCArmorConditionStandard
+  ablationGroup: head
+  rigid: true
+  repairProfile: NCArmorRepairCompositeField
+
+- type: ncArmorSection
+  id: NCArmorSectionClosedHelmet
+  displayName: nc-armor-section-closed-helmet
+  coveredZones: [ NCZoneHead, NCZoneEyes, NCZoneMouth ]
+  maxSp: 11
+  applicableDamageClasses: [ Ballistic, Blunt, Slash, Pierce, Blast ]
+  conditionProfile: NCArmorConditionStandard
+  ablationGroup: head
+  rigid: true
+  sealed: true
+  repairProfile: NCArmorRepairCompositeField
+
+- type: ncArmorSection
+  id: NCArmorSectionSubdermal
+  displayName: nc-armor-section-subdermal
+  coveredZones:
+  - NCZoneHead
+  - NCZoneEyes
+  - NCZoneMouth
+  - NCZoneChest
+  - NCZoneAbdomen
+  - NCZoneGroin
+  - NCZoneArmLeft
+  - NCZoneArmRight
+  - NCZoneHandLeft
+  - NCZoneHandRight
+  - NCZoneLegLeft
+  - NCZoneLegRight
+  - NCZoneFootLeft
+  - NCZoneFootRight
+  maxSp: 11
+  applicableDamageClasses: [ Ballistic, Blunt, Slash, Pierce ]
+  conditionProfile: NCArmorConditionStandard
+  ablationGroup: subdermal
+
+- type: ncArmorProfile
+  id: NCArmorKevlar
+  sections: [ NCArmorSectionKevlarBody ]
+
+- type: ncArmorProfile
+  id: NCArmorLightArmorjack
+  sections: [ NCArmorSectionLightArmorjackBody ]
+
+- type: ncArmorProfile
+  id: NCArmorPlateCarrier
+  sections: [ NCArmorSectionPlateCarrierTorso ]
+
+- type: ncArmorProfile
+  id: NCArmorCombatHelmet
+  sections: [ NCArmorSectionCombatHelmet ]
+
+- type: ncArmorProfile
+  id: NCArmorClosedHelmet
+  sections: [ NCArmorSectionClosedHelmet ]
+
+- type: ncArmorProfile
+  id: NCArmorSubdermal
+  sections: [ NCArmorSectionSubdermal ]
+
+# Consumable field service kit. It can patch common fabric, plate and composite sections to 75% of MaxSP.
+- type: entity
+  id: NCArmorRepairKit
+  parent: BaseItem
+  name: armor field repair kit
+  description: A finite set of replacement fibers, resin and plate patches. It cannot restore workshop-grade protection.
+  components:
+  - type: Sprite
+    sprite: Objects/Tools/rcd.rsi
+    state: icon
+  - type: Item
+    size: Small
+  - type: Appearance
+  - type: LimitedCharges
+    maxCharges: 4
+  - type: NCArmorRepairTool
+    capabilities: [ ArmorFabric, ArmorPlate, ArmorComposite ]
+    repairDelay: 4
+    interactionRange: 1.5
+    chargeCost: 1
+  - type: PhysicalComposition
+    materialComposition:
+      Steel: 100
+      Plastic: 100
+  - type: StaticPrice
+    price: 150
+
+# Hidden source entities exercise the same prototype/component initialization path used by real equipment.
+- type: entity
+  id: NCArmorTestKevlar
+  parent: ClothingOuterArmorBase
+  name: NC armor test kevlar
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: NCArmor
+    profile: NCArmorKevlar
+
+- type: entity
+  id: NCArmorTestLightArmorjack
+  parent: ClothingOuterArmorBase
+  name: NC armor test light armorjack
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: NCArmor
+    profile: NCArmorLightArmorjack
+
+- type: entity
+  id: NCArmorTestPlateCarrier
+  parent: ClothingOuterArmorBase
+  name: NC armor test plate carrier
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: NCArmor
+    profile: NCArmorPlateCarrier
+
+- type: entity
+  id: NCArmorTestClosedHelmet
+  parent: ClothingHeadHelmetBasic
+  name: NC armor test closed helmet
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: NCArmor
+    profile: NCArmorClosedHelmet
+
+- type: entity
+  id: NCArmorTestSubdermal
+  name: NC armor test subdermal
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: NCArmor
+    profile: NCArmorSubdermal

@@ -1,0 +1,70 @@
+<Document>
+# Киберимпланты
+
+## Диагностика
+
+1. Поместите пациента в [color=#58e6d9]MedicalScanner[/color].
+2. Откройте [color=#58e6d9]computerBodyScanner[/color].
+3. Откройте вкладку [color=#58e6d9]Cyberware[/color].
+4. Проверьте слот, целостность, питание, нагрев, ЭМИ-блокировку, нейросвязь и функциональность.
+
+<Box>
+<GuideEntityEmbed Entity="MedicalScanner"/>
+<GuideEntityEmbed Entity="computerBodyScanner"/>
+<GuideEntityEmbed Entity="NCSyringeCyberwareCoolantAgent"/>
+</Box>
+
+## Внутренние модули
+
+- [color=#58e6d9]Neural link Mk.1[/color]: физический предмет NCImplantNeuralLinkMk1; цель Head; слот NCSlotNeuralCore.
+- [color=#58e6d9]Circulatory assist pump Mk.1[/color]: физический предмет NCImplantCirculatoryAssistMk1; цель Chest; слот NCSlotThoracicSupport.
+
+### Установка внутреннего модуля
+
+1. Возьмите модуль во вторую руку или положите рядом.
+2. Выберите Head для neural link либо Chest для circulatory assist pump.
+3. Выполните: Cautery → Scalpel → Hemostat → Retractor → Multitool → Retractor → MedicatedSuture.
+4. Подтвердите модуль во вкладке Cyberware полного сканера.
+
+### Удаление внутреннего модуля
+
+1. Выберите Head либо Chest с установленным модулем.
+2. Выполните: Cautery → Scalpel → Hemostat → Retractor → Multitool → Retractor → MedicatedSuture.
+3. Извлечённый модуль становится физическим предметом.
+
+## Механические замены
+
+- [color=#58e6d9]Industrial cyberarm[/color]: NCOrganHumanCyberArmLeft или NCOrganHumanCyberArmRight; заменяет соответствующую руку.
+- [color=#58e6d9]Cyberoptics Mk.1[/color]: NCOrganHumanCyberEyes; заменяет глаза.
+- [color=#58e6d9]Cyberheart Mk.1[/color]: NCOrganHumanCyberHeart; заменяет сердце.
+
+### Установка киберруки
+
+1. Выберите соответствующую руку.
+2. Удалите старую конечность операцией [color=#58e6d9]Ампутация конечности[/color].
+3. Возьмите соответствующую левую или правую киберруку либо положите её рядом.
+4. На свободной категории выполните [color=#58e6d9]Повторное присоединение конечности[/color]: Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
+
+### Установка киберглаз
+
+1. Выберите Head.
+2. Выполните [color=#58e6d9]Удаление глаза[/color].
+3. Разместите NCOrganHumanCyberEyes в руке или рядом.
+4. Выполните [color=#58e6d9]Трансплантацию глаза[/color]: Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
+
+### Установка киберсердца
+
+1. Выберите Chest.
+2. Выполните [color=#58e6d9]Удаление внутреннего органа — heart[/color].
+3. Разместите NCOrganHumanCyberHeart в руке или рядом.
+4. Выполните [color=#58e6d9]Трансплантацию внутреннего органа — heart[/color]: Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
+
+После присоединения механическая часть занимает обычную категорию живого графа органов и получает связанную нейрокалибровку.
+
+## Обслуживание
+
+- Cyberware coolant agent распределяется между совместимыми модулями с дефицитом охлаждения и снижает нагрев.
+- Сервисный ремонт восстанавливает только параметры, заданные профилем ремонтного средства.
+- Механическая травма уменьшает целостность и функцию киберчасти без создания органической раны.
+- ЭМИ временно отключает модуль и может повредить нейроинтерфейс.
+</Document>

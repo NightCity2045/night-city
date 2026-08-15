@@ -67,6 +67,10 @@ public sealed partial class HitscanBasicRaycastSystem : EntitySystem
             Gun = args.Gun,
             Shooter = args.Shooter,
             HitEntity = result?.HitEntity,
+            // NC start - Snapshot physical hit geometry and aim intent for downstream local trauma.
+            HitPosition = result?.HitPos ?? mapCords.Position + args.ShotDirection * distanceTried,
+            IntendedTarget = args.Target,
+            // NC end
         };
 
         var attemptEvent = new AttemptHitscanRaycastFiredEvent { Data = data };

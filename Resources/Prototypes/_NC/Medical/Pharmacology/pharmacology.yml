@@ -1,0 +1,530 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncPharmacologyProfile
+  id: NCHumanPharmacology
+  defaultForHumans: true
+  activeDrugCapacity: 16
+  activeUpdateInterval: 1s
+  maximumOverdoseBurden: 100
+  overdoseRecoveryPerSecond: 0.2
+  maximumRecordedCumulativeDose: 1000
+  maximumRecordedExposureAge: 720h
+  minimumPhysiologyMultiplier: 0.05
+  maximumPhysiologyMultiplier: 1.5
+  minimumClottingMultiplier: 0.25
+  maximumClottingMultiplier: 2
+  maximumInteractionMultiplier: 4
+  maximumToxinRecoveryPerSecond: 2
+  overdoseShockAtMaximum: 1
+  overdoseBrainPenaltyAtMaximum: 0.8
+  overdoseCardiacPenaltyAtMaximum: 0.9
+  overdoseRespiratoryPenaltyAtMaximum: 0.9
+  overdoseRhythmInstabilityAtMaximum: 1
+  overdoseArrhythmiaThreshold: 0.35
+  overdoseMotorControlPenaltyAtMaximum: 0.85
+  organDamageThreshold: 0.35
+  liverDamagePerSecondAtMaximum: 0.002
+  kidneyDamagePerSecondAtMaximum: 0.0025
+  toxinSystemicProfile: NCToxinSystemicDamage
+
+- type: ncDrugProfile
+  id: NCDrugTraumaAnalgesic
+  category: Analgesic
+  maximumConcentration: 30
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 6
+  toxicConcentration: 12
+  clearancePerSecond: 0.05
+  baselineClearanceFraction: 0.1
+  liverClearanceFraction: 0.6
+  kidneyClearanceFraction: 0.3
+  analgesiaAtTherapeutic: 0.75
+  sedationAtTherapeutic: 0.15
+  overdoseBurdenPerSecondAtMaximum: 1.2
+  interactions:
+    NCDrugSedative:
+      therapeuticMultiplier: 1
+      toxicityMultiplier: 1.25
+
+- type: ncDrugProfile
+  id: NCDrugSurgicalAnesthetic
+  category: Anesthetic
+  maximumConcentration: 30
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 5
+  toxicConcentration: 10
+  clearancePerSecond: 0.04
+  baselineClearanceFraction: 0.05
+  liverClearanceFraction: 0.7
+  kidneyClearanceFraction: 0.25
+  analgesiaAtTherapeutic: 0.9
+  sedationAtTherapeutic: 0.8
+  anesthesiaAtTherapeutic: 0.9
+  motorControlMultiplierAtTherapeutic: 0.15
+  respiratoryTransferMultiplierAtTherapeutic: 0.7
+  overdoseBurdenPerSecondAtMaximum: 1.8
+  interactions:
+    NCDrugSedative:
+      therapeuticMultiplier: 1.15
+      toxicityMultiplier: 1.75
+
+- type: ncDrugProfile
+  id: NCDrugSedative
+  category: Sedative
+  maximumConcentration: 30
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 6
+  toxicConcentration: 13
+  clearancePerSecond: 0.045
+  baselineClearanceFraction: 0.05
+  liverClearanceFraction: 0.7
+  kidneyClearanceFraction: 0.25
+  analgesiaAtTherapeutic: 0.15
+  sedationAtTherapeutic: 0.65
+  motorControlMultiplierAtTherapeutic: 0.7
+  respiratoryTransferMultiplierAtTherapeutic: 0.85
+  overdoseBurdenPerSecondAtMaximum: 1.5
+  interactions:
+    NCDrugTraumaAnalgesic:
+      therapeuticMultiplier: 1
+      toxicityMultiplier: 1.25
+    NCDrugSurgicalAnesthetic:
+      therapeuticMultiplier: 1.15
+      toxicityMultiplier: 1.75
+    NCDrugRespiratoryStimulant:
+      therapeuticMultiplier: 0.7
+      toxicityMultiplier: 1.1
+    NCDrugStimulant:
+      therapeuticMultiplier: 0.7
+      toxicityMultiplier: 1.25
+
+- type: ncDrugProfile
+  id: NCDrugVasopressor
+  category: Vasopressor
+  maximumConcentration: 25
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 0.75
+  therapeuticConcentration: 4
+  toxicConcentration: 9
+  clearancePerSecond: 0.065
+  baselineClearanceFraction: 0.1
+  liverClearanceFraction: 0.45
+  kidneyClearanceFraction: 0.45
+  cardiacOutputMultiplierAtTherapeutic: 1.25
+  overdoseBurdenPerSecondAtMaximum: 1.5
+  interactions:
+    NCDrugAntiarrhythmic:
+      therapeuticMultiplier: 1
+      toxicityMultiplier: 0.9
+    NCDrugVasodilator:
+      therapeuticMultiplier: 0.5
+      toxicityMultiplier: 1.1
+
+- type: ncDrugProfile
+  id: NCDrugAntiarrhythmic
+  category: Antiarrhythmic
+  maximumConcentration: 25
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 0.75
+  therapeuticConcentration: 4
+  toxicConcentration: 10
+  clearancePerSecond: 0.055
+  baselineClearanceFraction: 0.05
+  liverClearanceFraction: 0.55
+  kidneyClearanceFraction: 0.4
+  cardiacOutputMultiplierAtTherapeutic: 0.95
+  rhythmStabilityAtTherapeutic: 0.55
+  overdoseBurdenPerSecondAtMaximum: 1.2
+  interactions:
+    NCDrugVasopressor:
+      therapeuticMultiplier: 1
+      toxicityMultiplier: 0.9
+
+- type: ncDrugProfile
+  id: NCDrugRespiratoryStimulant
+  category: RespiratoryStimulant
+  maximumConcentration: 25
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 0.75
+  therapeuticConcentration: 4
+  toxicConcentration: 10
+  clearancePerSecond: 0.06
+  baselineClearanceFraction: 0.1
+  liverClearanceFraction: 0.45
+  kidneyClearanceFraction: 0.45
+  respiratoryTransferMultiplierAtTherapeutic: 1.3
+  oxygenationMultiplierAtTherapeutic: 1.1
+  overdoseBurdenPerSecondAtMaximum: 1.35
+  interactions:
+    NCDrugSedative:
+      therapeuticMultiplier: 0.7
+      toxicityMultiplier: 1.1
+
+- type: ncDrugProfile
+  id: NCDrugBroadAntibiotic
+  category: Antibiotic
+  maximumConcentration: 30
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 5
+  toxicConcentration: 16
+  clearancePerSecond: 0.035
+  baselineClearanceFraction: 0.05
+  liverClearanceFraction: 0.45
+  kidneyClearanceFraction: 0.5
+  antibioticPowerAtTherapeutic: 0.8
+  overdoseBurdenPerSecondAtMaximum: 0.8
+
+- type: ncDrugProfile
+  id: NCDrugAntitoxin
+  category: Antitoxin
+  maximumConcentration: 30
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 5
+  toxicConcentration: 16
+  clearancePerSecond: 0.04
+  baselineClearanceFraction: 0.05
+  liverClearanceFraction: 0.35
+  kidneyClearanceFraction: 0.6
+  toxinRecoveryPerSecondAtTherapeutic: 1
+  overdoseBurdenPerSecondAtMaximum: 0.8
+
+- type: ncDrugProfile
+  id: NCDrugImmunosuppressant
+  category: Immunosuppressant
+  maximumConcentration: 30
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 5
+  toxicConcentration: 14
+  clearancePerSecond: 0.03
+  baselineClearanceFraction: 0.05
+  liverClearanceFraction: 0.55
+  kidneyClearanceFraction: 0.4
+  immunosuppressionAtTherapeutic: 0.85
+  overdoseBurdenPerSecondAtMaximum: 1
+
+- type: ncDrugProfile
+  id: NCDrugProcoagulant
+  category: Procoagulant
+  maximumConcentration: 25
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 0.75
+  therapeuticConcentration: 4
+  toxicConcentration: 11
+  clearancePerSecond: 0.055
+  baselineClearanceFraction: 0.1
+  liverClearanceFraction: 0.45
+  kidneyClearanceFraction: 0.45
+  bleedingMultiplierAtTherapeutic: 0.45
+  overdoseBurdenPerSecondAtMaximum: 1.15
+  interactions:
+    NCDrugAnticoagulant:
+      therapeuticMultiplier: 0.5
+      toxicityMultiplier: 1.25
+
+- type: ncDrugProfile
+  id: NCDrugStimulant
+  category: Stimulant
+  maximumConcentration: 25
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 0.75
+  therapeuticConcentration: 4
+  toxicConcentration: 9
+  clearancePerSecond: 0.06
+  baselineClearanceFraction: 0.1
+  liverClearanceFraction: 0.45
+  kidneyClearanceFraction: 0.45
+  arousalAtTherapeutic: 0.55
+  cardiacOutputMultiplierAtTherapeutic: 1.15
+  respiratoryTransferMultiplierAtTherapeutic: 1.1
+  overdoseBurdenPerSecondAtMaximum: 1.8
+  interactions:
+    NCDrugSedative:
+      therapeuticMultiplier: 0.7
+      toxicityMultiplier: 1.25
+
+- type: ncDrugProfile
+  id: NCDrugAnticoagulant
+  category: Anticoagulant
+  maximumConcentration: 25
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 0.75
+  therapeuticConcentration: 4
+  toxicConcentration: 10
+  clearancePerSecond: 0.05
+  baselineClearanceFraction: 0.1
+  liverClearanceFraction: 0.55
+  kidneyClearanceFraction: 0.35
+  bleedingMultiplierAtTherapeutic: 1.7
+  overdoseBurdenPerSecondAtMaximum: 1.4
+  interactions:
+    NCDrugProcoagulant:
+      therapeuticMultiplier: 0.5
+      toxicityMultiplier: 1.25
+
+- type: ncDrugProfile
+  id: NCDrugVasodilator
+  category: Vasodilator
+  maximumConcentration: 25
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 0.75
+  therapeuticConcentration: 4
+  toxicConcentration: 9
+  clearancePerSecond: 0.065
+  baselineClearanceFraction: 0.1
+  liverClearanceFraction: 0.45
+  kidneyClearanceFraction: 0.45
+  cardiacOutputMultiplierAtTherapeutic: 0.8
+  overdoseBurdenPerSecondAtMaximum: 1.5
+  interactions:
+    NCDrugVasopressor:
+      therapeuticMultiplier: 0.5
+      toxicityMultiplier: 1.1
+
+- type: ncDrugProfile
+  id: NCDrugSyntheticOxygenCarrier
+  category: SyntheticOxygenCarrier
+  maximumConcentration: 30
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 6
+  toxicConcentration: 18
+  clearancePerSecond: 0.025
+  baselineClearanceFraction: 0.05
+  liverClearanceFraction: 0.35
+  kidneyClearanceFraction: 0.6
+  oxygenCarrierContributionAtTherapeutic: 0.35
+  overdoseBurdenPerSecondAtMaximum: 0.7
+
+- type: reagent
+  id: NCTraumaAnalgesic
+  name: nc-reagent-name-trauma-analgesic
+  group: Medicine
+  desc: nc-reagent-desc-trauma-analgesic
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#5c7fa8"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugTraumaAnalgesic
+
+- type: reagent
+  id: NCSurgicalAnesthetic
+  name: nc-reagent-name-surgical-anesthetic
+  group: Medicine
+  desc: nc-reagent-desc-surgical-anesthetic
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#8e77a8"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugSurgicalAnesthetic
+
+- type: reagent
+  id: NCSedative
+  name: nc-reagent-name-sedative
+  group: Medicine
+  desc: nc-reagent-desc-sedative
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#6b628f"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugSedative
+
+- type: reagent
+  id: NCVasopressor
+  name: nc-reagent-name-vasopressor
+  group: Medicine
+  desc: nc-reagent-desc-vasopressor
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#bf4b4b"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugVasopressor
+
+- type: reagent
+  id: NCAntiarrhythmic
+  name: nc-reagent-name-antiarrhythmic
+  group: Medicine
+  desc: nc-reagent-desc-antiarrhythmic
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#5fa6a0"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugAntiarrhythmic
+
+- type: reagent
+  id: NCRespiratoryStimulant
+  name: nc-reagent-name-respiratory-stimulant
+  group: Medicine
+  desc: nc-reagent-desc-respiratory-stimulant
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#75b7d1"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugRespiratoryStimulant
+
+- type: reagent
+  id: NCBroadAntibiotic
+  name: nc-reagent-name-broad-antibiotic
+  group: Medicine
+  desc: nc-reagent-desc-broad-antibiotic
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#71a36a"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugBroadAntibiotic
+
+- type: reagent
+  id: NCAntitoxin
+  name: nc-reagent-name-antitoxin
+  group: Medicine
+  desc: nc-reagent-desc-antitoxin
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#7c9c56"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugAntitoxin
+
+- type: reagent
+  id: NCImmunosuppressant
+  name: nc-reagent-name-immunosuppressant
+  group: Medicine
+  desc: nc-reagent-desc-immunosuppressant
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#c18c59"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugImmunosuppressant
+
+- type: reagent
+  id: NCProcoagulant
+  name: nc-reagent-name-procoagulant
+  group: Medicine
+  desc: nc-reagent-desc-procoagulant
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#8f3939"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugProcoagulant
+
+- type: reagent
+  id: NCStimulant
+  name: nc-reagent-name-stimulant
+  group: Medicine
+  desc: nc-reagent-desc-stimulant
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#d29a3a"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugStimulant
+
+- type: reagent
+  id: NCAnticoagulant
+  name: nc-reagent-name-anticoagulant
+  group: Medicine
+  desc: nc-reagent-desc-anticoagulant
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#b94462"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugAnticoagulant
+
+- type: reagent
+  id: NCVasodilator
+  name: nc-reagent-name-vasodilator
+  group: Medicine
+  desc: nc-reagent-desc-vasodilator
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#9e5475"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugVasodilator
+
+- type: reagent
+  id: NCSyntheticOxygenCarrier
+  name: nc-reagent-name-synthetic-oxygen-carrier
+  group: Medicine
+  desc: nc-reagent-desc-synthetic-oxygen-carrier
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#2f809c"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugSyntheticOxygenCarrier
+
+- type: reagent
+  id: NCCyberwareCoolantAgent
+  name: nc-reagent-name-cyberware-coolant-agent
+  group: Medicine
+  desc: nc-reagent-desc-cyberware-coolant-agent
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: metallic
+  color: "#38b8bd"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.25
+      effects:
+      - !type:NCApplyCyberwareServiceAgent
+        serviceProfile: NCCoolantServiceAgent
+        unitsPerReagent: 0.25

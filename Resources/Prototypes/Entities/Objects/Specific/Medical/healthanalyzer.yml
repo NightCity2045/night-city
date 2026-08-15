@@ -29,4 +29,10 @@
     - DiscreteHealthAnalyzer
   - type: GuideHelp
     guides:
-    - MedicalDoctor
+    # NC start - Point the mapped analyzer at the authoritative NC medical guide.
+    - NCDoctor
+    # NC end
+  # NC start - Reuse the vanilla analyzer as the authoritative handheld trauma diagnostic tool.
+  - type: NCDiagnosticCapability
+    capability: NCDiagnosticsHandheldApproximate
+  # NC end

@@ -1,0 +1,121 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncTreatmentProfile
+  id: NCHumanFieldTreatment
+  defaultForHumans: true
+  # All values multiply the server-measured BaseRate. Internal sources deliberately remain unchanged.
+  pressureMultipliers:
+    ExternalCapillary: 0.2
+    ExternalVenous: 0.35
+    ExternalArterial: 0.65
+    Internal: 1
+  bandageMultipliers:
+    ExternalCapillary: 0
+    ExternalVenous: 0.1
+    ExternalArterial: 0.65
+    Internal: 1
+  hemostaticMultipliers:
+    ExternalCapillary: 0
+    ExternalVenous: 0.02
+    ExternalArterial: 0.1
+    Internal: 1
+  tourniquetMultipliers:
+    ExternalCapillary: 0
+    ExternalVenous: 0
+    ExternalArterial: 0
+    Internal: 1
+  # Distal targets share the proximal tourniquet root; torso zones are intentionally absent.
+  tourniquetZoneRoots:
+    NCZoneArmLeft: NCZoneArmLeft
+    NCZoneHandLeft: NCZoneArmLeft
+    NCZoneArmRight: NCZoneArmRight
+    NCZoneHandRight: NCZoneArmRight
+    NCZoneLegLeft: NCZoneLegLeft
+    NCZoneFootLeft: NCZoneLegLeft
+    NCZoneLegRight: NCZoneLegRight
+    NCZoneFootRight: NCZoneLegRight
+  bandageAbsorptionCapacity: 3600
+  bandageSterility: 0.9
+  # Dressings lose sterility over online treatment time and add contamination when fully saturated.
+  bandageSterilityDecayPerSecond: 0.00001
+  saturatedBandageContamination: 0.12
+  controlledReleaseAfter: 30m
+  ischemiaRiskAfter: 45m
+  criticalIschemiaAfter: 90m
+  releaseReboundDuration: 5m
+  releaseReboundMultiplier: 1.25
+  splintMinimumStability: 0.65
+  splintSecondaryDamageRiskMultiplier: 0.25
+  manualPressureDuration: 12s
+  processedActionCapacity: 128
+  auditHistoryCapacity: 128
+
+- type: ncTreatmentCapability
+  id: NCManualPressureCapability
+  kind: Pressure
+  profile: NCHumanFieldTreatment
+  applicationDuration: 2s
+  resourceKind: None
+  resourceCost: 0
+
+- type: ncTreatmentCapability
+  id: NCFieldBandageCapability
+  kind: Bandage
+  profile: NCHumanFieldTreatment
+  applicationDuration: 3s
+  resourceKind: Stack
+  resourceCost: 1
+
+- type: ncTreatmentCapability
+  id: NCHemostaticGauzeCapability
+  kind: Hemostatic
+  profile: NCHumanFieldTreatment
+  applicationDuration: 4s
+  resourceKind: Stack
+  resourceCost: 1
+
+- type: ncTreatmentCapability
+  id: NCFieldTourniquetCapability
+  kind: Tourniquet
+  profile: NCHumanFieldTreatment
+  applicationDuration: 3s
+  resourceKind: Stack
+  resourceCost: 1
+
+- type: ncTreatmentCapability
+  id: NCFieldSplintCapability
+  kind: Splint
+  profile: NCHumanFieldTreatment
+  applicationDuration: 5s
+  resourceKind: Stack
+  resourceCost: 1
+
+- type: stack
+  id: NCFieldSplintStack
+  name: nc-stack-field-splint
+  icon: { sprite: /Textures/Objects/Specific/Medical/medical.rsi, state: cast }
+  spawn: NCFieldSplint
+  maxCount: 5
+
+- type: stack
+  id: NCTourniquetTreatmentStack
+  name: nc-stack-field-tourniquet
+  icon: { sprite: /Textures/Objects/Specific/Medical/medical.rsi, state: tourniquet }
+  spawn: Tourniquet
+  maxCount: 1
+
+- type: entity
+  id: NCFieldSplint
+  parent: BaseHealingItem
+  name: field splint
+  description: A rigid disposable splint that stabilizes a fractured limb without repairing it.
+  components:
+  - type: Sprite
+    state: cast
+  - type: NCTreatmentItem
+    capability: NCFieldSplintCapability
+  - type: Stack
+    stackType: NCFieldSplintStack
+    count: 5
