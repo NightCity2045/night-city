@@ -321,6 +321,8 @@ public sealed partial class NCWoundRecordSnapshot
     [DataField] public float ReopenStress;
     [DataField] public float ScarRisk;
     [DataField] public Guid? EmbeddedObjectId;
+    [DataField] public EntProtoId? EmbeddedObjectEntityPrototype;
+    [DataField] public EntProtoId? SourceProjectilePrototype;
     [DataField] public Guid? ExitWoundId;
     /// <summary>
     /// Legacy migration slot. New captures always write an empty value and restore ignores it so combat-event
@@ -330,6 +332,7 @@ public sealed partial class NCWoundRecordSnapshot
     [DataField] public byte VisualX;
     [DataField] public byte VisualY;
     [DataField] public byte VisualDirection;
+    [DataField] public NCWoundSurface Surface;
     [DataField] public TimeSpan CreatedAt;
     [DataField] public TimeSpan ModifiedAt;
     [DataField] public TimeSpan Age;
@@ -350,6 +353,7 @@ public sealed partial class NCScarRecordSnapshot
     [DataField] public byte VisualX;
     [DataField] public byte VisualY;
     [DataField] public byte VisualDirection;
+    [DataField] public NCWoundSurface Surface;
     [DataField] public TimeSpan CreatedAt;
 }
 

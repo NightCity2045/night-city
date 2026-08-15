@@ -28,6 +28,8 @@ namespace Content.Server._NC.Medical.Surgery;
 /// </summary>
 public sealed partial class NCSurgerySystem : EntitySystem
 {
+    private static readonly EntProtoId LegacyExtractedForeignBody = "NCExtractedBullet";
+
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCMedicalBodySystem _medicalBodies = default!;
@@ -1385,10 +1387,19 @@ public sealed partial class NCSurgerySystem : EntitySystem
                 case NCSurgeryEffectKind.AddWoundTreatmentFlags:
                 case NCSurgeryEffectKind.SetWoundClosure:
                 case NCSurgeryEffectKind.AdjustWoundContamination:
-                case NCSurgeryEffectKind.RemoveEmbeddedObject:
                     if (effect.Target != NCSurgeryEffectTarget.TargetRegion ||
                         !TryCollectWounds(session, effect.WoundScope, out var records) || records.Count == 0)
                         return false;
+                    break;
+                case NCSurgeryEffectKind.RemoveEmbeddedObject:
+                    if (effect.Target != NCSurgeryEffectTarget.TargetRegion ||
+                        !TryCollectWounds(session, effect.WoundScope, out var embedded) ||
+                        embedded.Count == 0 ||
+                        embedded.Any(wound => wound.EmbeddedObjectId == null ||
+                                              !CanMaterializeEmbeddedObject(wound)))
+                    {
+                        return false;
+                    }
                     break;
                 case NCSurgeryEffectKind.ControlBleeding:
                     if (effect.Target != NCSurgeryEffectTarget.TargetRegion ||
@@ -1591,7 +1602,12 @@ public sealed partial class NCSurgerySystem : EntitySystem
                         return false;
                     foreach (var wound in extracted)
                     {
+                        if (!TryMaterializeEmbeddedObject(session, wound))
+                            return false;
+
                         wound.EmbeddedObjectId = null;
+                        wound.EmbeddedObjectEntityPrototype = null;
+                        wound.SourceProjectilePrototype = null;
                         wound.ModifiedAt = _timing.CurTime;
                     }
                     break;
@@ -1705,6 +1721,36 @@ public sealed partial class NCSurgerySystem : EntitySystem
             }
         }
 
+        return true;
+    }
+
+    /// <summary>
+    /// Legacy persisted wounds predate the extracted-entity field. They resolve to the generic inert bullet;
+    /// all new impacts carry a data-driven prototype from their combat damage profile.
+    /// </summary>
+    private bool CanMaterializeEmbeddedObject(NCWoundRecord wound)
+    {
+        var prototype = wound.EmbeddedObjectEntityPrototype ?? LegacyExtractedForeignBody;
+        return _prototypes.HasIndex<EntityPrototype>(prototype);
+    }
+
+    /// <summary>
+    /// Materializes one inert forensic item at the patient and binds it to the stable wound-side identifier.
+    /// No live projectile EntityUid survives inside medical state.
+    /// </summary>
+    private bool TryMaterializeEmbeddedObject(NCSurgerySessionComponent session, NCWoundRecord wound)
+    {
+        if (wound.EmbeddedObjectId is not { } foreignBodyId)
+            return false;
+
+        var prototype = wound.EmbeddedObjectEntityPrototype ?? LegacyExtractedForeignBody;
+        if (!_prototypes.HasIndex<EntityPrototype>(prototype))
+            return false;
+
+        var extracted = Spawn(prototype, Transform(session.Patient).Coordinates);
+        var forensic = EnsureComp<NCExtractedForeignBodyComponent>(extracted);
+        forensic.ForeignBodyId = foreignBodyId;
+        forensic.SourceProjectilePrototype = wound.SourceProjectilePrototype;
         return true;
     }
 

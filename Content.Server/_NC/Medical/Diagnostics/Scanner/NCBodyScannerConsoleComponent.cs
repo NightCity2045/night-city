@@ -5,12 +5,12 @@
 namespace Content.Server._NC.Medical.Diagnostics.Scanner;
 
 /// <summary>
-/// Server-only runtime binding between a vanilla body-scanner computer and its linked medical scanner.
-/// The occupant is always resolved from the scanner container; no client-selected patient is trusted.
+/// Server-only runtime binding between the vanilla body-scanner computer and its linked operating table.
+/// The patient is always resolved from the table strap; no client-selected patient is trusted.
 /// </summary>
 [RegisterComponent, UnsavedComponent, Access(typeof(NCBodyScannerConsoleSystem))]
 public sealed partial class NCBodyScannerConsoleComponent : Component
 {
     [ViewVariables]
-    public EntityUid? ConnectedScanner;
+    public EntityUid? ConnectedTable;
 }

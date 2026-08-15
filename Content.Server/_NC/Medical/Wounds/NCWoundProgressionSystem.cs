@@ -745,6 +745,7 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
             VisualX = wound.VisualX,
             VisualY = wound.VisualY,
             VisualDirection = wound.VisualDirection,
+            Surface = wound.Surface,
             CreatedAt = now,
         };
 
@@ -761,7 +762,9 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
         NCScarRecord? compatible = null;
         foreach (var existing in container.Scars)
         {
-            if (existing.TargetZone != scar.TargetZone || existing.WoundType != scar.WoundType ||
+            if (existing.TargetZone != scar.TargetZone ||
+                existing.WoundType != scar.WoundType ||
+                existing.Surface != scar.Surface ||
                 compatible != null && existing.ScarId.CompareTo(compatible.ScarId) >= 0)
             {
                 continue;

@@ -112,6 +112,18 @@ public sealed partial class NCWoundRecord
     [DataField]
     public Guid? EmbeddedObjectId;
 
+    /// <summary>
+    /// Inert entity to materialize when this retained foreign body is surgically extracted.
+    /// </summary>
+    [DataField]
+    public EntProtoId? EmbeddedObjectEntityPrototype;
+
+    /// <summary>
+    /// Original projectile prototype retained for round-to-round forensic identity without an EntityUid.
+    /// </summary>
+    [DataField]
+    public EntProtoId? SourceProjectilePrototype;
+
     [DataField]
     public Guid? ExitWoundId;
 
@@ -130,6 +142,13 @@ public sealed partial class NCWoundRecord
 
     [DataField]
     public byte VisualDirection;
+
+    /// <summary>
+    /// Body-local surface on which the wound is visible. Front is intentionally the zero value so snapshots
+    /// created before surface tracking remain deterministic and never appear on every side of the body.
+    /// </summary>
+    [DataField]
+    public NCWoundSurface Surface;
 
     [DataField]
     public TimeSpan CreatedAt;
@@ -185,6 +204,9 @@ public sealed partial class NCScarRecord
     public byte VisualDirection;
 
     [DataField]
+    public NCWoundSurface Surface;
+
+    [DataField]
     public TimeSpan CreatedAt;
 }
 
@@ -233,6 +255,18 @@ public enum NCWoundStage : byte
     Reopened,
     Infected,
     Necrotic,
+}
+
+/// <summary>
+/// Cardinal body-local surface used only for physical wound presentation. Diagnostic views may still disclose
+/// every wound regardless of which side of the patient is currently visible.
+/// </summary>
+public enum NCWoundSurface : byte
+{
+    Front,
+    Rear,
+    Left,
+    Right,
 }
 
 public enum NCInfectionStage : byte

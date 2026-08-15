@@ -173,7 +173,11 @@ public sealed class NCCombatTraumaDeliveryTest : GameTest
             Assert.That(embeddedDelivery.CanOverpenetrateBody, Is.False);
             Assert.That(embeddedWounds, Has.Length.EqualTo(1));
             Assert.That(embeddedWounds[0].EmbeddedObjectId, Is.Not.Null);
+            Assert.That(embeddedWounds[0].EmbeddedObjectEntityPrototype?.Id, Is.EqualTo("NCExtractedBullet"));
+            Assert.That(embeddedWounds[0].SourceProjectilePrototype, Is.Null,
+                "Synthetic impacts without a live projectile must not invent forensic provenance.");
             Assert.That(embeddedWounds[0].ExitWoundId, Is.Null);
+            Assert.That(embeddedWounds[0].Surface, Is.EqualTo(NCWoundSurface.Right));
         });
 
         var exitBody = SSpawn("MobHuman");
@@ -190,6 +194,10 @@ public sealed class NCCombatTraumaDeliveryTest : GameTest
             Assert.That(exitWounds, Has.All.Matches<NCWoundRecord>(wound => wound.EmbeddedObjectId == null));
             Assert.That(exitWounds[0].ExitWoundId, Is.EqualTo(exitWounds[1].WoundId));
             Assert.That(exitWounds[1].ExitWoundId, Is.EqualTo(exitWounds[0].WoundId));
+            Assert.That(
+                exitWounds.Select(wound => wound.Surface),
+                Is.EquivalentTo(new[] { NCWoundSurface.Right, NCWoundSurface.Left }),
+                "Entry and exit marks must live on opposite body surfaces.");
         });
     }
 

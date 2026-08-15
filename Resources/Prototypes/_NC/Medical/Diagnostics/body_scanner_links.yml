@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Dedicated ports keep the body-scanner console independent from vanilla cloning and medical-scanner links.
+- type: sourcePort
+  id: NCOperatingTableSender
+  name: nc-signal-port-name-operating-table-sender
+  description: nc-signal-port-description-operating-table-sender
+  defaultLinks: [ NCOperatingTableReceiver ]
+
+- type: sinkPort
+  id: NCOperatingTableReceiver
+  name: nc-signal-port-name-operating-table-receiver
+  description: nc-signal-port-description-operating-table-receiver

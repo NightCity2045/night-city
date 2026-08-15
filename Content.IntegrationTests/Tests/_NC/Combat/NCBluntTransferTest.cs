@@ -59,6 +59,17 @@ public sealed class NCBluntTransferTest : GameTest
                 Assert.That(damageProfile.EmbedMinimumPostArmorDamage, Is.GreaterThanOrEqualTo(0f));
                 Assert.That(damageProfile.ExitMinimumPostArmorDamage, Is.GreaterThanOrEqualTo(0f));
                 Assert.That(damageProfile.ExitTraumaMultiplier, Is.InRange(0f, 1f));
+                if ((damageProfile.TraumaFlags & Content.Shared._NC.Medical.Trauma.NCTraumaFlags.CanEmbed) != 0 &&
+                    damageProfile.EmbedMinimumPostArmorDamage > 0f)
+                {
+                    Assert.That(damageProfile.EmbeddedObjectEntityPrototype, Is.Not.Null,
+                        $"Combat profile {damageProfile.ID} can embed without an extracted entity prototype.");
+                    Assert.That(
+                        damageProfile.EmbeddedObjectEntityPrototype is { } embedded &&
+                        _prototypes.HasIndex<EntityPrototype>(embedded),
+                        Is.True,
+                        $"Combat profile {damageProfile.ID} references an unknown extracted entity prototype.");
+                }
                 if (damageProfile.CanOverpenetrateBody)
                 {
                     Assert.That(damageProfile.ExitMinimumPostArmorDamage, Is.GreaterThan(0f),

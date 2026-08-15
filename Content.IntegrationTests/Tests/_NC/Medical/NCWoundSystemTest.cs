@@ -97,6 +97,41 @@ public sealed class NCWoundSystemTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
+    public void OppositeSurfaceMinorWoundsNeverMerge()
+    {
+        var body = SSpawn(HumanMob);
+        var right = new NCCombatTraumaRequestedEvent(CreateRequest(
+            body,
+            "NCZoneArmLeft",
+            "ArmLeft",
+            "SlashingImpact",
+            3f,
+            impactDirection: Vector2.UnitX));
+        var left = new NCCombatTraumaRequestedEvent(CreateRequest(
+            body,
+            "NCZoneArmLeft",
+            "ArmLeft",
+            "SlashingImpact",
+            3f,
+            impactDirection: -Vector2.UnitX));
+
+        SEntMan.EventBus.RaiseLocalEvent(body, ref right);
+        SEntMan.EventBus.RaiseLocalEvent(body, ref left);
+
+        var surfaces = SComp<NCWoundContainerComponent>(body).Wounds.Values
+            .Select(wound => wound.Surface)
+            .ToArray();
+        Assert.Multiple(() =>
+        {
+            Assert.That(right.Applied, Is.True);
+            Assert.That(left.Applied, Is.True);
+            Assert.That(surfaces, Has.Length.EqualTo(2));
+            Assert.That(surfaces, Is.EquivalentTo(new[] { NCWoundSurface.Right, NCWoundSurface.Left }));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
     public void InvalidActionResolutionCannotCreateNondeterministicWoundIdentity()
     {
         var body = SSpawn(HumanMob);
@@ -465,8 +500,12 @@ public sealed class NCWoundSystemTest : GameTest
             Assert.That(wounds, Has.Count.EqualTo(2));
             Assert.That(wounds.Select(wound => (wound.VisualX, wound.VisualY)), Is.Unique);
             Assert.That(wounds.Select(wound => wound.VisualDirection), Is.Unique);
+            Assert.That(
+                wounds.Select(wound => wound.Surface),
+                Is.EquivalentTo(new[] { NCWoundSurface.Right, NCWoundSurface.Front }));
             Assert.That(visibleMarkers, Has.Count.EqualTo(2));
             Assert.That(visibleMarkers.Select(marker => (marker.VisualX, marker.VisualY)), Is.Unique);
+            Assert.That(visibleMarkers.Select(marker => marker.Surface), Is.EquivalentTo(wounds.Select(wound => wound.Surface)));
             Assert.That(visibleMarkers.All(marker => marker.Type == NCWoundType.Ballistic), Is.True);
             Assert.That(status.Flags.HasFlag(NCMedicalZoneStatusFlags.ExternalBleeding), Is.True);
             Assert.That(typeof(NCVisibleWoundMarker).GetProperties()

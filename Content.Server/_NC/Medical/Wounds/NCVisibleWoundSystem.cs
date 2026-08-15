@@ -87,7 +87,8 @@ public sealed partial class NCVisibleWoundSystem : EntitySystem
                     wound.Stage,
                     wound.VisualX,
                     wound.VisualY,
-                    wound.VisualDirection));
+                    wound.VisualDirection,
+                    wound.Surface));
             }
 
             foreach (var scar in wounds.Scars)
@@ -99,7 +100,8 @@ public sealed partial class NCVisibleWoundSystem : EntitySystem
                     NCWoundStage.Scarred,
                     scar.VisualX,
                     scar.VisualY,
-                    scar.VisualDirection));
+                    scar.VisualDirection,
+                    scar.Surface));
             }
 
             markers.Sort(CompareMarkers);
@@ -115,6 +117,9 @@ public sealed partial class NCVisibleWoundSystem : EntitySystem
     private static int CompareMarkers(NCVisibleWoundMarker left, NCVisibleWoundMarker right)
     {
         var result = string.CompareOrdinal(left.Zone.Id, right.Zone.Id);
+        if (result != 0)
+            return result;
+        result = left.Surface.CompareTo(right.Surface);
         if (result != 0)
             return result;
         result = left.VisualY.CompareTo(right.VisualY);

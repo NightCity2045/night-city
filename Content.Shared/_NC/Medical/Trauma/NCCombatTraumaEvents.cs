@@ -46,6 +46,16 @@ public readonly record struct NCCombatTraumaRequest(
     public NCTraumaProjectileDisposition ProjectileDisposition { get; init; }
 
     /// <summary>
+    /// Inert entity produced by successful foreign-body extraction.
+    /// </summary>
+    public EntProtoId? EmbeddedObjectEntityPrototype { get; init; }
+
+    /// <summary>
+    /// Semantic identity of the original physical projectile. A runtime EntityUid is never retained.
+    /// </summary>
+    public EntProtoId? SourceProjectilePrototype { get; init; }
+
+    /// <summary>
     /// Fraction of entry trauma used to create the linked exit wound when disposition is Exit.
     /// </summary>
     public float ExitTraumaMultiplier { get; init; }

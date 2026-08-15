@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Content.Server.Afk;
 using Content.Server.Database;
+using Content.Shared._NC.Preferences; // NC - Human-only character profiles.
 using Content.Shared.Body;
 using Content.Shared.CCVar;
 using Content.Shared.Construction.Prototypes;
@@ -273,6 +274,9 @@ namespace Content.Server.Preferences.Managers
             var ncDepartmentChanged = curPrefs.Characters.TryGetValue(slot, out var previousProfile) &&
                                       previousProfile.NCDepartmentPreference != profile.NCDepartmentPreference;
 
+            // NC start - Never trust a client-supplied species; player characters use human anatomy only.
+            profile = NCHumanProfileRules.Normalize(profile);
+            // NC end
             profile.EnsureValid(session, _dependencies);
 
             var profiles = new Dictionary<int, HumanoidCharacterProfile>(curPrefs.Characters)
@@ -419,7 +423,8 @@ namespace Content.Server.Preferences.Managers
                 {
                     PrefsLoaded = true,
                     Prefs = new PlayerPreferences(
-                        new[] { new KeyValuePair<int, HumanoidCharacterProfile>(0, HumanoidCharacterProfile.Random()) },
+                        // NC - Guest characters use the same human-only creation rule.
+                        new[] { new KeyValuePair<int, HumanoidCharacterProfile>(0, HumanoidCharacterProfile.RandomWithSpecies()) },
                         0, Color.Transparent, [])
                 };
 
@@ -536,11 +541,9 @@ namespace Content.Server.Preferences.Managers
             {
                 // The player has no characters, so the Company assigns them one
 
-                var speciesToBlacklist =
-                    new HashSet<string>(_cfg.GetCVar(CCVars.ICNewAccountSpeciesBlacklist).Split(","));
-
-                //Randomize species and set job priorities from cvar
-                var profile = HumanoidCharacterProfile.Random(speciesToBlacklist);
+                // NC start - New accounts always receive a human character.
+                var profile = HumanoidCharacterProfile.RandomWithSpecies();
+                // NC end
                 profile = profile.WithJobFromCvar(_cfg);
 
                 return await _db.InitPrefsAsync(userId, profile, cancel);
@@ -556,7 +559,10 @@ namespace Content.Server.Preferences.Managers
 
             return new PlayerPreferences(prefs.Characters.Select(p =>
             {
-                return new KeyValuePair<int, HumanoidCharacterProfile>(p.Key, p.Value.Validated(session, collection));
+                // NC start - Stored legacy species are normalized before reaching the lobby or spawn pipeline.
+                var profile = NCHumanProfileRules.Normalize(p.Value);
+                return new KeyValuePair<int, HumanoidCharacterProfile>(p.Key, profile.Validated(session, collection));
+                // NC end
             }), prefs.SelectedCharacterIndex, prefs.AdminOOCColor, prefs.ConstructionFavorites);
         }
 

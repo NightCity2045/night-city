@@ -729,7 +729,9 @@
   parent: BaseComputerAiAccess
   id: computerBodyScanner
   name: body scanner computer
-  description: A body scanner.
+  # NC start - detailed diagnostics now read the patient on the linked operating table.
+  description: Displays detailed medical telemetry for a patient on a linked operating table.
+  # NC end
   components:
   - type: Computer
     board: BodyScannerComputerCircuitboard
@@ -738,7 +740,7 @@
     energy: 4.0
     color: "#1f8c28"
   - type: AmbientMusicMarkerMedical
-  # NC start - The vanilla console reads the occupant of a physically linked vanilla medical scanner.
+  # NC start - The vanilla console reads the patient buckled to its physically linked operating table.
   - type: NCBodyScannerConsole
   - type: NCDiagnosticCapability
     capability: NCDiagnosticsScannerInternal
@@ -748,7 +750,7 @@
   - type: DeviceLinkSource
     range: 4
     ports:
-    - MedicalScannerSender
+    - NCOperatingTableSender
   - type: GuideHelp
     guides:
     - NCDiagnosticsAndTriage

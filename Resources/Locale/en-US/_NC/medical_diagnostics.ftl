@@ -3,9 +3,9 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 nc-medical-diagnostics-title = Medical diagnostics
-nc-medical-diagnostics-value-scanner-disconnected = no linked medical scanner
-nc-medical-diagnostics-value-scanner-empty = linked medical scanner is empty
-nc-medical-diagnostics-value-scanner-patient-changed = scanner occupant changed
+nc-medical-diagnostics-value-operating-table-disconnected = no linked operating table
+nc-medical-diagnostics-value-operating-table-empty = the linked operating table has no patient
+nc-medical-diagnostics-value-operating-table-patient-changed = operating table patient changed
 nc-medical-diagnostics-system-title = MEDTECH TRAUMA SCAN
 nc-medical-diagnostics-system-channel = CITYNET CLINICAL LINK
 nc-medical-diagnostics-system-secure = SECURE CHANNEL
@@ -15,6 +15,10 @@ nc-medical-diagnostics-triage-feed = PRIORITY TRIAGE FEED
 nc-medical-diagnostics-live-feed = ● LIVE
 nc-medical-diagnostics-vital-stream = VITAL TELEMETRY
 nc-medical-diagnostics-scanner-verb = View trauma scan
+nc-signal-port-name-operating-table-sender = operating table monitor
+nc-signal-port-description-operating-table-sender = Links the diagnostic console to an operating table.
+nc-signal-port-name-operating-table-receiver = diagnostic console
+nc-signal-port-description-operating-table-receiver = Supplies the buckled patient to a linked diagnostic console.
 nc-medical-diagnostics-self-assessment-verb = Assess symptoms
 nc-medical-diagnostics-visual-examination-verb = Visually assess trauma
 nc-medical-diagnostics-manual-examination-verb = Perform manual examination
@@ -130,7 +134,7 @@ nc-medical-diagnostics-tier-self-sensations = Patient sensations
 nc-medical-diagnostics-tier-visual = Visual examination
 nc-medical-diagnostics-tier-manual = Manual examination
 nc-medical-diagnostics-tier-handheld-approximate = Handheld analyzer
-nc-medical-diagnostics-tier-scanner-internal = Medical scanner
+nc-medical-diagnostics-tier-scanner-internal = Operating table monitor
 nc-medical-diagnostics-tier-surgical-console = Surgical console
 nc-medical-diagnostics-tier-admin-exact = Exact administrative scan
 nc-medical-diagnostics-confidence-self-sensations = subjective report

@@ -133,12 +133,16 @@ public sealed class NCWorldWoundOverlay : Overlay
                 layout.CanvasSize,
                 screenRotation,
                 out var layerMatrix,
-                out var mask))
+                out var mask,
+                out var renderedDirection))
             {
                 continue;
             }
 
-            if (!TryResolvePoint(marker, zone.Bounds, mask, out var point))
+            if (!NCWoundMarkerProjection.IsSurfaceVisible(marker.Surface, renderedDirection))
+                continue;
+
+            if (!TryResolvePoint(marker, mask, out var point))
                 continue;
 
             var transform = Matrix3x2.Multiply(layerMatrix, spriteMatrix);
@@ -159,7 +163,8 @@ public sealed class NCWorldWoundOverlay : Overlay
         Vector2 canvasSize,
         Angle screenRotation,
         out Matrix3x2 layerMatrix,
-        out HashSet<Vector2i> mask)
+        out HashSet<Vector2i> mask,
+        out RsiDirection renderedDirection)
     {
         foreach (var visualLayer in zone.VisualLayers)
         {
@@ -174,7 +179,12 @@ public sealed class NCWorldWoundOverlay : Overlay
                 : RsiDirection.South;
             layer.GetLayerDrawMatrix(geometryDirection, out layerMatrix);
 
-            var layerMask = GetLayerMask(sprite, layer, geometryDirection, canvasSize);
+            var layerMask = GetLayerMask(
+                sprite,
+                layer,
+                geometryDirection,
+                canvasSize,
+                out renderedDirection);
             if (layerMask.Count == 0)
                 continue;
 
@@ -207,6 +217,7 @@ public sealed class NCWorldWoundOverlay : Overlay
 
         layerMatrix = default;
         mask = default!;
+        renderedDirection = default;
         return false;
     }
 
@@ -214,7 +225,8 @@ public sealed class NCWorldWoundOverlay : Overlay
         SpriteComponent sprite,
         SpriteComponent.Layer layer,
         RsiDirection geometryDirection,
-        Vector2 canvasSize)
+        Vector2 canvasSize,
+        out RsiDirection renderedDirection)
     {
         var canvasPixels = new Vector2i(
             Math.Max(1, (int) MathF.Round(canvasSize.X)),
@@ -222,7 +234,7 @@ public sealed class NCWorldWoundOverlay : Overlay
 
         if (layer.ActualRsi is { } rsi && layer.ActualState is { } state)
         {
-            var renderedDirection = geometryDirection;
+            renderedDirection = geometryDirection;
             if (sprite.EnableDirectionOverride)
                 renderedDirection = sprite.DirectionOverride.Convert(state.RsiDirections);
             renderedDirection = renderedDirection.OffsetRsiDir(layer.DirOffset);
@@ -250,6 +262,7 @@ public sealed class NCWorldWoundOverlay : Overlay
 
         if (layer.Texture is { } texture)
         {
+            renderedDirection = RsiDirection.South;
             var key = new LayerMaskKey(texture, default, RsiDirection.South, 0, canvasPixels);
             if (_layerMasks.TryGetValue(key, out var cached))
                 return cached;
@@ -271,6 +284,7 @@ public sealed class NCWorldWoundOverlay : Overlay
             return result;
         }
 
+        renderedDirection = default;
         return [];
     }
 
@@ -283,12 +297,15 @@ public sealed class NCWorldWoundOverlay : Overlay
 
     private bool TryResolvePoint(
         NCVisibleWoundMarker marker,
-        Box2 bounds,
         HashSet<Vector2i> mask,
         out Vector2 point)
     {
-        var basePoint = NCWoundMarkerProjection.ResolveBasePoint(marker, bounds);
-        var desired = new Vector2i((int) MathF.Floor(basePoint.X), (int) MathF.Floor(basePoint.Y));
+        if (!NCWoundMarkerProjection.TryResolveMaskedPoint(marker, mask, out var desired))
+        {
+            point = default;
+            return false;
+        }
+
         if (!TryFindNearestCell(mask, desired, true, out var resolved) &&
             !TryFindNearestCell(mask, desired, false, out resolved))
         {

@@ -356,6 +356,7 @@ public sealed partial class NCMedicalPersistenceSystem
                 !Enum.IsDefined(wound.ClosureState) ||
                 !Enum.IsDefined(wound.PrimaryBleedKind) ||
                 !Enum.IsDefined(wound.InfectionStage) ||
+                !Enum.IsDefined(wound.Surface) ||
                 !ValidTreatmentFlags(wound.TreatmentFlags) ||
                 !Finite(wound.IntegrityDamage.Float(), 0f, 1_000_000_000f) ||
                 !Finite(wound.Area, 0f, 1_000_000_000f) ||
@@ -372,6 +373,12 @@ public sealed partial class NCMedicalPersistenceSystem
                 !Finite(wound.PeakHealingProgress, wound.HealingProgress, 1f) ||
                 !Finite(wound.ReopenStress, 0f, 1_000_000f) ||
                 !Finite(wound.ScarRisk, 0f, 1f) ||
+                wound.EmbeddedObjectId == null &&
+                    (wound.EmbeddedObjectEntityPrototype != null || wound.SourceProjectilePrototype != null) ||
+                wound.EmbeddedObjectEntityPrototype is { } extractedPrototype &&
+                    !_prototypes.HasIndex<EntityPrototype>(extractedPrototype) ||
+                wound.SourceProjectilePrototype is { } sourceProjectile &&
+                    !_prototypes.HasIndex<EntityPrototype>(sourceProjectile) ||
                 !ValidTime(wound.Age) ||
                 !ValidAbsoluteTime(wound.CreatedAt) ||
                 !ValidAbsoluteTime(wound.ModifiedAt) ||
@@ -395,6 +402,7 @@ public sealed partial class NCMedicalPersistenceSystem
                 zone.MedicalRegionCategory != scar.RegionCategory ||
                 !Enum.IsDefined(scar.WoundType) ||
                 !Enum.IsDefined(scar.OriginalSeverity) ||
+                !Enum.IsDefined(scar.Surface) ||
                 !Finite(scar.Area, 0f, 1_000_000_000f) ||
                 !Finite(scar.Disfigurement, 0f, 1f) ||
                 !Finite(scar.Contracture, 0f, 1f) ||
@@ -871,6 +879,7 @@ public sealed partial class NCMedicalPersistenceSystem
                 VisualX = scar.VisualX,
                 VisualY = scar.VisualY,
                 VisualDirection = scar.VisualDirection,
+                Surface = scar.Surface,
                 CreatedAt = scar.CreatedAt,
             }).ToList(),
             OverflowTraumaByZone = new Dictionary<ProtoId<NCTargetZonePrototype>, float>(source.OverflowTraumaByZone),
@@ -909,12 +918,15 @@ public sealed partial class NCMedicalPersistenceSystem
                 ReopenStress = wound.ReopenStress,
                 ScarRisk = wound.ScarRisk,
                 EmbeddedObjectId = wound.EmbeddedObjectId,
+                EmbeddedObjectEntityPrototype = wound.EmbeddedObjectEntityPrototype,
+                SourceProjectilePrototype = wound.SourceProjectilePrototype,
                 ExitWoundId = wound.ExitWoundId,
                 // Keep the migration field empty when cloning a validated persistence payload.
                 ForensicResolutionId = Guid.Empty,
                 VisualX = wound.VisualX,
                 VisualY = wound.VisualY,
                 VisualDirection = wound.VisualDirection,
+                Surface = wound.Surface,
                 CreatedAt = wound.CreatedAt,
                 ModifiedAt = wound.ModifiedAt,
                 Age = wound.Age,

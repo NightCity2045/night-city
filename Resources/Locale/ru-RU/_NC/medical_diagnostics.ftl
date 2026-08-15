@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-nc-medical-diagnostics-value-scanner-disconnected = медицинский сканер не подключён
-nc-medical-diagnostics-value-scanner-empty = подключённый медицинский сканер пуст
-nc-medical-diagnostics-value-scanner-patient-changed = пациент в сканере изменился
+nc-medical-diagnostics-value-operating-table-disconnected = операционный стол не подключён
+nc-medical-diagnostics-value-operating-table-empty = на подключённом операционном столе нет пациента
+nc-medical-diagnostics-value-operating-table-patient-changed = пациент на операционном столе изменился
 
 nc-medical-diagnostics-title = Медицинская диагностика
 nc-medical-diagnostics-system-title = MEDTECH ТРАВМА-СКАН
@@ -16,6 +16,10 @@ nc-medical-diagnostics-triage-feed = ПРИОРИТЕТНАЯ СВОДКА
 nc-medical-diagnostics-live-feed = ● LIVE
 nc-medical-diagnostics-vital-stream = ТЕЛЕМЕТРИЯ ПОКАЗАТЕЛЕЙ
 nc-medical-diagnostics-scanner-verb = Просмотреть травма-скан
+nc-signal-port-name-operating-table-sender = монитор операционного стола
+nc-signal-port-description-operating-table-sender = Подключает диагностическую консоль к операционному столу.
+nc-signal-port-name-operating-table-receiver = диагностическая консоль
+nc-signal-port-description-operating-table-receiver = Передаёт подключённой консоли данные пациента, пристёгнутого к столу.
 nc-medical-diagnostics-self-assessment-verb = Оценить свои симптомы
 nc-medical-diagnostics-visual-examination-verb = Визуально осмотреть травмы
 nc-medical-diagnostics-manual-examination-verb = Провести ручной осмотр
@@ -127,7 +131,7 @@ nc-medical-diagnostics-tier-self-sensations = Ощущения пациента
 nc-medical-diagnostics-tier-visual = Визуальный осмотр
 nc-medical-diagnostics-tier-manual = Ручной осмотр
 nc-medical-diagnostics-tier-handheld-approximate = Ручной анализатор
-nc-medical-diagnostics-tier-scanner-internal = Медицинский сканер
+nc-medical-diagnostics-tier-scanner-internal = Монитор операционного стола
 nc-medical-diagnostics-tier-surgical-console = Хирургическая консоль
 nc-medical-diagnostics-tier-admin-exact = Точное административное сканирование
 nc-medical-diagnostics-confidence-self-sensations = субъективные ощущения

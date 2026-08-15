@@ -230,12 +230,15 @@ public sealed partial class NCMedicalPersistenceSystem
             ReopenStress = wound.ReopenStress,
             ScarRisk = wound.ScarRisk,
             EmbeddedObjectId = wound.EmbeddedObjectId,
+            EmbeddedObjectEntityPrototype = wound.EmbeddedObjectEntityPrototype,
+            SourceProjectilePrototype = wound.SourceProjectilePrototype,
             ExitWoundId = wound.ExitWoundId,
             // Combat provenance is intentionally round-local and never enters character persistence.
             ForensicResolutionId = Guid.Empty,
             VisualX = wound.VisualX,
             VisualY = wound.VisualY,
             VisualDirection = wound.VisualDirection,
+            Surface = wound.Surface,
             CreatedAt = wound.CreatedAt,
             ModifiedAt = wound.ModifiedAt,
             Age = wound.Age,
@@ -258,6 +261,7 @@ public sealed partial class NCMedicalPersistenceSystem
             VisualX = scar.VisualX,
             VisualY = scar.VisualY,
             VisualDirection = scar.VisualDirection,
+            Surface = scar.Surface,
             CreatedAt = scar.CreatedAt,
         };
     }
@@ -598,12 +602,15 @@ public sealed partial class NCMedicalPersistenceSystem
             ReopenStress = wound.ReopenStress,
             ScarRisk = wound.ScarRisk,
             EmbeddedObjectId = wound.EmbeddedObjectId,
+            EmbeddedObjectEntityPrototype = wound.EmbeddedObjectEntityPrototype,
+            SourceProjectilePrototype = wound.SourceProjectilePrototype,
             ExitWoundId = wound.ExitWoundId,
             // Ignore legacy stored provenance when materializing a new round-local wound record.
             ForensicResolutionId = Guid.Empty,
             VisualX = wound.VisualX,
             VisualY = wound.VisualY,
             VisualDirection = wound.VisualDirection,
+            Surface = wound.Surface,
             CreatedAt = wound.CreatedAt,
             ModifiedAt = wound.ModifiedAt,
             Age = wound.Age,
@@ -626,6 +633,7 @@ public sealed partial class NCMedicalPersistenceSystem
             VisualX = scar.VisualX,
             VisualY = scar.VisualY,
             VisualDirection = scar.VisualDirection,
+            Surface = scar.Surface,
             CreatedAt = scar.CreatedAt,
         };
     }

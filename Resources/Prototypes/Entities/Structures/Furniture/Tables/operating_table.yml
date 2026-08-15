@@ -36,6 +36,13 @@
     restrained: true
     airwayMonitored: true
   - type: NCSurgeryGraftSlot
+  # The existing table is also the authoritative diagnostic patient source for a linked body-scanner console.
+  - type: DeviceList
+  - type: DeviceNetwork
+    deviceNetId: Wired
+  - type: DeviceLinkSink
+    ports:
+    - NCOperatingTableReceiver
   - type: GuideHelp
     guides:
     - NCSurgeryGuide

@@ -55,7 +55,8 @@ namespace Content.Client.Lobby.UI
 
             _createNewCharacterButton.OnPressed += args =>
             {
-                _preferencesManager.CreateCharacter(HumanoidCharacterProfile.Random().WithJobFromCvar(_cfg));
+                // NC - Character creation supports humans only.
+                _preferencesManager.CreateCharacter(HumanoidCharacterProfile.RandomWithSpecies().WithJobFromCvar(_cfg));
                 ReloadCharacterPickers();
                 args.Event.Handle();
             };

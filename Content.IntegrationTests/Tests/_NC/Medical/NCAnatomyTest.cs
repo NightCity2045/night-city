@@ -22,6 +22,7 @@ using Content.Shared.Random;
 using Robust.Shared.Containers;
 using Robust.Shared.ContentPack;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Graphics.RSI;
 using Robust.Shared.Localization;
 using Robust.Shared.Maths;
 using Robust.Shared.Prototypes;
@@ -442,6 +443,70 @@ public sealed class NCAnatomyTest : GameTest
 [TestOf(typeof(NCMedicalBodyComponent))]
 public sealed class NCMedicalBodyNetworkTest : GameTest
 {
+    [Test]
+    public void WorldWoundProjectionFollowsDirectionalAbdomenSilhouette()
+    {
+        var marker = new NCVisibleWoundMarker(
+            "NCZoneAbdomen",
+            NCWoundType.Ballistic,
+            NCWoundSeverity.Severe,
+            NCWoundStage.Open,
+            0,
+            128,
+            0,
+            NCWoundSurface.Front);
+        var frontMask = new HashSet<Vector2i>();
+        var sideMask = new HashSet<Vector2i>();
+        for (var y = 15; y <= 18; y++)
+        {
+            for (var x = 10; x <= 18; x++)
+                frontMask.Add(new Vector2i(x, y));
+            for (var x = 14; x <= 16; x++)
+                sideMask.Add(new Vector2i(x, y));
+        }
+
+        Assert.That(
+            NCWoundMarkerProjection.TryResolveMaskedPoint(marker, frontMask, out var frontPoint),
+            Is.True);
+        Assert.That(
+            NCWoundMarkerProjection.TryResolveMaskedPoint(marker, sideMask, out var sidePoint),
+            Is.True);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(frontMask, Does.Contain(frontPoint));
+            Assert.That(sideMask, Does.Contain(sidePoint));
+            Assert.That(frontPoint.X, Is.EqualTo(10));
+            Assert.That(sidePoint.X, Is.EqualTo(14));
+            Assert.That(sidePoint.Y, Is.InRange(15, 18),
+                "Abdomen projection must remain inside the abdomen slice of the shared torso layer.");
+            Assert.That(frontPoint, Is.Not.EqualTo(sidePoint),
+                "Changing the rendered silhouette must reproject the wound instead of leaving it screen-fixed.");
+            Assert.That(
+                NCWoundMarkerProjection.TryResolveMaskedPoint(marker, new HashSet<Vector2i>(), out _),
+                Is.False);
+            Assert.That(
+                NCWoundMarkerProjection.IsSurfaceVisible(NCWoundSurface.Front, RsiDirection.South),
+                Is.True);
+            Assert.That(
+                NCWoundMarkerProjection.IsSurfaceVisible(NCWoundSurface.Front, RsiDirection.North),
+                Is.False,
+                "A chest or abdomen entry wound must not bleed through onto the back frame.");
+            Assert.That(
+                NCWoundMarkerProjection.IsSurfaceVisible(NCWoundSurface.Rear, RsiDirection.North),
+                Is.True);
+            Assert.That(
+                NCWoundMarkerProjection.IsSurfaceVisible(NCWoundSurface.Right, RsiDirection.East),
+                Is.True);
+            Assert.That(
+                NCWoundMarkerProjection.IsSurfaceVisible(NCWoundSurface.Right, RsiDirection.West),
+                Is.False);
+            Assert.That(
+                NCWoundMarkerProjection.IsSurfaceVisible(NCWoundSurface.Left, RsiDirection.SouthWest),
+                Is.True);
+        });
+    }
+
     [Test]
     public async Task HumanAuthoritativeProfileReplicatesToClient()
     {

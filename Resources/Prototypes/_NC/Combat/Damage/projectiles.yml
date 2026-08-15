@@ -21,6 +21,7 @@
   bluntTransferProfile: NCBallisticStoppedTransfer
   traumaFlags: [ Penetrating, CanEmbed, CanExit ]
   embedMinimumPostArmorDamage: 1
+  embeddedObjectEntityPrototype: NCExtractedBullet
   exitMinimumPostArmorDamage: 18
   exitTraumaMultiplier: 0.35
   canOverpenetrateBody: true
@@ -33,6 +34,7 @@
   bluntTransferProfile: NCBallisticStoppedTransfer
   traumaFlags: [ Penetrating, ArmorPiercing, CanEmbed, CanExit ]
   embedMinimumPostArmorDamage: 1
+  embeddedObjectEntityPrototype: NCExtractedBullet
   exitMinimumPostArmorDamage: 12
   exitTraumaMultiplier: 0.45
   canOverpenetrateBody: true
@@ -45,6 +47,7 @@
   bluntTransferProfile: NCBallisticStoppedTransfer
   traumaFlags: [ Penetrating, Incendiary, CanEmbed, CanExit ]
   embedMinimumPostArmorDamage: 1
+  embeddedObjectEntityPrototype: NCExtractedBullet
   exitMinimumPostArmorDamage: 18
   exitTraumaMultiplier: 0.3
   canOverpenetrateBody: true
@@ -64,6 +67,7 @@
   bluntTransferProfile: NCBallisticStoppedTransfer
   traumaFlags: [ Penetrating, CanEmbed ]
   embedMinimumPostArmorDamage: 1
+  embeddedObjectEntityPrototype: NCExtractedBullet
 
 - type: ncCombatDamageProfile
   id: NCProjectileEmpUtility
@@ -94,6 +98,7 @@
   ablationAmount: 1
   traumaFlags: [ Penetrating, CanEmbed ]
   embedMinimumPostArmorDamage: 1
+  embeddedObjectEntityPrototype: NCExtractedBullet
 
 - type: ncCombatDamageProfile
   id: NCProjectileThermalStandard

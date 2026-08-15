@@ -21,6 +21,7 @@ using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Surgery;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
+using Content.Shared.Projectiles;
 using Content.Shared.Stacks;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
@@ -36,6 +37,8 @@ public sealed class NCSurgerySystemTest : GameTest
     private static readonly EntProtoId DebugMultitool = "NCSurgeryDebugMultitool";
     private static readonly ProtoId<NCSurgeryProcedurePrototype> VascularRepair = "NCSurgeryVascularRepair";
     private static readonly ProtoId<NCSurgeryProcedurePrototype> DeepWoundTreatment = "NCSurgeryDeepWoundTreatment";
+    private static readonly ProtoId<NCSurgeryProcedurePrototype> ForeignBodyExtraction = "NCSurgeryForeignBodyExtraction";
+    private static readonly EntProtoId ExtractedBullet = "NCExtractedBullet";
 
     [SidedDependency(Side.Server)] private IPrototypeManager _prototypes = default!;
     [SidedDependency(Side.Server)] private NCAnatomySystem _anatomy = default!;
@@ -311,6 +314,80 @@ public sealed class NCSurgerySystemTest : GameTest
             Assert.That(result.Status, Is.EqualTo(NCSurgeryStepResolutionStatus.Resolved));
             Assert.That(result.Outcome, Is.EqualTo(NCSurgeryStepOutcome.Compromised));
             Assert.That(SComp<NCSurgerySessionComponent>(session).Patient, Is.EqualTo(patient));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void ForeignBodyExtractionMaterializesOneInertForensicBullet()
+    {
+        var patient = SSpawn(HumanMob);
+        var surgeon = SSpawn(HumanMob);
+        var table = SSpawn(OperatingTable);
+        var tool = SSpawn(DebugMultitool);
+
+        Assert.That(_anatomy.TryGetOrgan(patient, "Thorax", out var region), Is.True);
+        var woundId = AddWound(patient, region, NCWoundType.Ballistic, 5f);
+        var wound = SComp<NCWoundContainerComponent>(patient).Wounds[woundId];
+        var foreignBodyId = Guid.NewGuid();
+        wound.EmbeddedObjectId = foreignBodyId;
+        wound.EmbeddedObjectEntityPrototype = ExtractedBullet;
+        wound.SourceProjectilePrototype = "BulletPistol";
+
+        PreparePatient(patient, table, table, airwayMonitored: true);
+        var authorizations = SComp<NCSurgeryAuthorizationProviderComponent>(tool).Authorizations;
+        SEntMan.EnsureComponent<NCSurgeryPractitionerComponent>(surgeon)
+            .Authorizations.UnionWith(authorizations);
+
+        Assert.That(
+            _surgery.StartSurgery(
+                new NCSurgeryStartRequest(
+                    NCActionResolutionId.New(),
+                    patient,
+                    surgeon,
+                    region,
+                    ForeignBodyExtraction,
+                    table,
+                    table,
+                    woundId),
+                out var session,
+                out var failure),
+            Is.True,
+            failure.ToString());
+
+        var procedure = _prototypes.Index(ForeignBodyExtraction);
+        for (var index = 0; index < procedure.Steps.Count; index++)
+        {
+            var expected = index == procedure.Steps.Count - 1
+                ? NCSurgeryStepResolutionStatus.Completed
+                : NCSurgeryStepResolutionStatus.Resolved;
+            ResolveExpected(session, surgeon, tool, expected);
+        }
+
+        var matches = new List<(EntityUid Uid, NCExtractedForeignBodyComponent Component)>();
+        var query = SEntMan.EntityQueryEnumerator<NCExtractedForeignBodyComponent>();
+        while (query.MoveNext(out var uid, out var component))
+        {
+            if (component.ForeignBodyId == foreignBodyId)
+                matches.Add((uid, component));
+        }
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(wound.EmbeddedObjectId, Is.Null);
+            Assert.That(wound.EmbeddedObjectEntityPrototype, Is.Null);
+            Assert.That(wound.SourceProjectilePrototype, Is.Null);
+            Assert.That(matches, Has.Count.EqualTo(1));
+        });
+
+        var extracted = matches.Single();
+        Assert.Multiple(() =>
+        {
+            Assert.That(SEntMan.GetComponent<MetaDataComponent>(extracted.Uid).EntityPrototype?.ID,
+                Is.EqualTo(ExtractedBullet.Id));
+            Assert.That(extracted.Component.SourceProjectilePrototype?.Id, Is.EqualTo("BulletPistol"));
+            Assert.That(SEntMan.HasComponent<ProjectileComponent>(extracted.Uid), Is.False,
+                "An extracted bullet must be inert and cannot collide as a live projectile.");
         });
     }
 

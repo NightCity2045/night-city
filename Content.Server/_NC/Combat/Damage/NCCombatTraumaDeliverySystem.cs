@@ -141,6 +141,13 @@ public sealed partial class NCCombatTraumaDeliverySystem : EntitySystem
             flags |= NCTraumaFlags.ArmorPenetrated;
 
         var projectileDisposition = ResolveProjectileDisposition(damageProfile, armorResolution.PostArmorDamage);
+        EntProtoId? sourceProjectilePrototype = null;
+        if (projectileDisposition == NCTraumaProjectileDisposition.Embedded &&
+            impact.Projectile is { } projectile &&
+            Exists(projectile))
+        {
+            sourceProjectilePrototype = MetaData(projectile).EntityPrototype?.ID;
+        }
 
         // DamageSpecifier is mutable, so medicine receives a defensive copy.
         var request = new NCCombatTraumaRequest(
@@ -166,6 +173,10 @@ public sealed partial class NCCombatTraumaDeliverySystem : EntitySystem
             impact.Timestamp)
         {
             ProjectileDisposition = projectileDisposition,
+            EmbeddedObjectEntityPrototype = projectileDisposition == NCTraumaProjectileDisposition.Embedded
+                ? damageProfile.EmbeddedObjectEntityPrototype
+                : null,
+            SourceProjectilePrototype = sourceProjectilePrototype,
             ExitTraumaMultiplier = damageProfile.ExitTraumaMultiplier,
         };
 

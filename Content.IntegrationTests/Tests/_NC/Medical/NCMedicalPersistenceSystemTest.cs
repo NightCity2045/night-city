@@ -76,7 +76,12 @@ public sealed class NCMedicalPersistenceSystemTest : GameTest
         sourceWound.PeakHealingProgress = 0.4f;
         sourceWound.ReopenStress = 2f;
         sourceWound.Age = TimeSpan.FromMinutes(10);
+        var embeddedObjectId = Guid.NewGuid();
+        sourceWound.EmbeddedObjectId = embeddedObjectId;
+        sourceWound.EmbeddedObjectEntityPrototype = "NCExtractedBullet";
+        sourceWound.SourceProjectilePrototype = "BulletPistol";
         sourceWound.ForensicResolutionId = Guid.Parse("24fbb22a-1508-46e3-b86a-a6d45ca7ffbd");
+        sourceWound.Surface = NCWoundSurface.Rear;
         var scarId = Guid.NewGuid();
         var scarSourceId = Guid.NewGuid();
         sourceWounds.Scars.Add(new NCScarRecord
@@ -90,6 +95,7 @@ public sealed class NCMedicalPersistenceSystemTest : GameTest
             Area = 2f,
             Disfigurement = 0.4f,
             Contracture = 0.05f,
+            Surface = NCWoundSurface.Left,
             CreatedAt = TimeSpan.Zero,
         });
         var treatmentAction = NCActionResolutionId.New();
@@ -160,12 +166,19 @@ public sealed class NCMedicalPersistenceSystemTest : GameTest
             Assert.That(secondWounds.Records[woundId].PeakHealingProgress, Is.EqualTo(0.4f));
             Assert.That(secondWounds.Records[woundId].ReopenStress, Is.EqualTo(2f));
             Assert.That(secondWounds.Records[woundId].Age, Is.EqualTo(TimeSpan.FromMinutes(10)));
+            Assert.That(secondWounds.Records[woundId].EmbeddedObjectId, Is.EqualTo(embeddedObjectId));
+            Assert.That(secondWounds.Records[woundId].EmbeddedObjectEntityPrototype?.Id,
+                Is.EqualTo("NCExtractedBullet"));
+            Assert.That(secondWounds.Records[woundId].SourceProjectilePrototype?.Id,
+                Is.EqualTo("BulletPistol"));
+            Assert.That(secondWounds.Records[woundId].Surface, Is.EqualTo(NCWoundSurface.Rear));
             Assert.That(first.Wounds.Records[woundId].ForensicResolutionId, Is.EqualTo(Guid.Empty));
             Assert.That(secondWounds.Records[woundId].ForensicResolutionId, Is.EqualTo(Guid.Empty));
             Assert.That(secondWounds.Scars, Has.Count.EqualTo(1));
             Assert.That(secondWounds.Scars[0].ScarId, Is.EqualTo(scarId));
             Assert.That(secondWounds.Scars[0].SourceWoundId, Is.EqualTo(scarSourceId));
             Assert.That(secondWounds.Scars[0].Disfigurement, Is.EqualTo(0.4f));
+            Assert.That(secondWounds.Scars[0].Surface, Is.EqualTo(NCWoundSurface.Left));
             Assert.That(second.Bleeding!.Sources.Select(record => record.SourceId),
                 Is.EquivalentTo(first.Bleeding!.Sources.Select(record => record.SourceId)));
             Assert.That(second.Treatment!.WoundTreatments.Keys,

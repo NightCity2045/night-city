@@ -46,6 +46,13 @@ public sealed partial class NCCombatDamageProfilePrototype : IPrototype
     public float EmbedMinimumPostArmorDamage { get; private set; }
 
     /// <summary>
+    /// Inert item materialized when surgery extracts a projectile retained by this profile.
+    /// The original live projectile is never kept inside the wound.
+    /// </summary>
+    [DataField]
+    public EntProtoId? EmbeddedObjectEntityPrototype { get; private set; }
+
+    /// <summary>
     /// Minimum positive post-armor trauma required for a linked exit wound. Zero disables it.
     /// </summary>
     [DataField]

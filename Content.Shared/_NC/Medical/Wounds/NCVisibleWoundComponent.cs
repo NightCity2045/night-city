@@ -21,7 +21,8 @@ public readonly record struct NCVisibleWoundMarker(
     NCWoundStage Stage,
     byte VisualX,
     byte VisualY,
-    byte VisualDirection);
+    byte VisualDirection,
+    NCWoundSurface Surface);
 
 /// <summary>
 /// Bounded PVS state used by the client world overlay. Authoritative wound records remain server-only.

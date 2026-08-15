@@ -34,6 +34,7 @@ public sealed partial class NCWoundSystem : EntitySystem
     [Dependency] private NCMedicalBodySystem _medicalBodies = default!;
     [Dependency] private NCAnatomySystem _anatomy = default!;
     [Dependency] private NCCyberwareSystem _cyberware = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
 
     public override void Initialize()
     {
@@ -129,6 +130,8 @@ public sealed partial class NCWoundSystem : EntitySystem
             TransferredBluntDamage = FixedPoint2.Zero,
             Flags = NCTraumaFlags.None,
             ProjectileDisposition = NCTraumaProjectileDisposition.None,
+            EmbeddedObjectEntityPrototype = null,
+            SourceProjectilePrototype = null,
             ExitTraumaMultiplier = 0f,
         };
         ApplyTrauma(entity, stumpRequest);
@@ -219,6 +222,8 @@ public sealed partial class NCWoundSystem : EntitySystem
                             HasComp<NCCavityFluidComponent>(region);
         }
 
+        var entrySurface = ResolveImpactSurface(body, request.ImpactDirection);
+
         var wound = CreateWound(
             request,
             resolvedWoundPrototypeId,
@@ -228,15 +233,19 @@ public sealed partial class NCWoundSystem : EntitySystem
             now,
             vascularDensity,
             hasMajorArtery,
-            hasBodyCavity);
+            hasBodyCavity,
+            entrySurface);
 
         NCWoundRecord? exitWound = null;
         if (request.ProjectileDisposition == NCTraumaProjectileDisposition.Embedded)
         {
-            // This GUID identifies the retained foreign body for surgery/forensics without persisting an entity.
+            // The live projectile is gone. Surgery and persistence retain only stable semantic identity until
+            // extraction materializes the configured inert evidence item.
             wound.EmbeddedObjectId = request.ResolutionId.DeriveGuid(
                 request.ProjectileSequence ^ 0x40000000u,
                 request.ImpactSequence);
+            wound.EmbeddedObjectEntityPrototype = request.EmbeddedObjectEntityPrototype;
+            wound.SourceProjectilePrototype = request.SourceProjectilePrototype;
         }
         else if (request.ProjectileDisposition == NCTraumaProjectileDisposition.Exit &&
                  float.IsFinite(request.ExitTraumaMultiplier) &&
@@ -255,6 +264,7 @@ public sealed partial class NCWoundSystem : EntitySystem
                     vascularDensity,
                     hasMajorArtery,
                     hasBodyCavity,
+                    Opposite(entrySurface),
                     0x80000000u);
                 exitWound.VisualX = (byte) (byte.MaxValue - wound.VisualX);
                 exitWound.VisualDirection = QuantizeDirection(-request.ImpactDirection);
@@ -408,6 +418,7 @@ public sealed partial class NCWoundSystem : EntitySystem
                 existing.TargetZone != incoming.TargetZone ||
                 existing.RegionCategory != incoming.RegionCategory ||
                 existing.WoundType != incoming.WoundType ||
+                existing.Surface != incoming.Surface ||
                 existing.TissueDepth != incoming.TissueDepth ||
                 existing.Severity != NCWoundSeverity.Minor ||
                 existing.Stage != incoming.Stage ||
@@ -456,6 +467,7 @@ public sealed partial class NCWoundSystem : EntitySystem
         float vascularDensity,
         bool hasMajorArtery,
         bool hasBodyCavity,
+        NCWoundSurface surface,
         uint identitySalt = 0)
     {
         var externalRate = traumaAmount * MathF.Max(0f, prototype.ExternalBleedPerDamage) * vascularDensity;
@@ -508,8 +520,41 @@ public sealed partial class NCWoundSystem : EntitySystem
             VisualX = QuantizeSurfaceCoordinate(request.TargetLocalHitPosition.X + 0.5f),
             VisualY = QuantizeSurfaceCoordinate(0.5f - request.TargetLocalHitPosition.Y),
             VisualDirection = QuantizeDirection(request.ImpactDirection),
+            Surface = surface,
             CreatedAt = now,
             ModifiedAt = now,
+        };
+    }
+
+    /// <summary>
+    /// Converts a world-space travel vector into the body-local surface first touched by an impact. The target's
+    /// rotation is snapshotted at impact time, so turning later cannot move a front wound onto the back sprite.
+    /// </summary>
+    public NCWoundSurface ResolveImpactSurface(EntityUid target, Vector2 worldTravelDirection)
+    {
+        if (!float.IsFinite(worldTravelDirection.X) ||
+            !float.IsFinite(worldTravelDirection.Y) ||
+            worldTravelDirection.IsLengthZero())
+        {
+            return NCWoundSurface.Front;
+        }
+
+        var localTravel = (-_transform.GetWorldRotation(target)).RotateVec(worldTravelDirection.Normalized());
+        if (MathF.Abs(localTravel.X) > MathF.Abs(localTravel.Y))
+            return localTravel.X > 0f ? NCWoundSurface.Right : NCWoundSurface.Left;
+
+        return localTravel.Y > 0f ? NCWoundSurface.Front : NCWoundSurface.Rear;
+    }
+
+    private static NCWoundSurface Opposite(NCWoundSurface surface)
+    {
+        return surface switch
+        {
+            NCWoundSurface.Front => NCWoundSurface.Rear,
+            NCWoundSurface.Rear => NCWoundSurface.Front,
+            NCWoundSurface.Left => NCWoundSurface.Right,
+            NCWoundSurface.Right => NCWoundSurface.Left,
+            _ => NCWoundSurface.Front,
         };
     }
 

@@ -317,7 +317,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
 
                 if (occupant != target)
                 {
-                    failure = NCDiagnosticAccessFailure.ScannerPatientChanged;
+                    failure = NCDiagnosticAccessFailure.OperatingTablePatientChanged;
                     return false;
                 }
             }
@@ -1192,7 +1192,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
 
     /// <summary>
     /// Opens the detailed record through a normal interaction with the vanilla body-scanner computer.
-    /// The patient still comes exclusively from the linked scanner capsule.
+    /// The patient still comes exclusively from the linked operating table.
     /// </summary>
     private void OnScannerActivated(
         Entity<NCBodyScannerConsoleComponent> entity,
@@ -1206,7 +1206,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
 
     /// <summary>
     /// Adds diagnostics to the existing body-scanner computer. The patient is derived from the linked vanilla
-    /// scanner container; neither the client nor the console can substitute another target.
+    /// operating table; neither the client nor the console can substitute another target.
     /// </summary>
     private void OnGetScannerVerbs(
         Entity<NCBodyScannerConsoleComponent> entity,

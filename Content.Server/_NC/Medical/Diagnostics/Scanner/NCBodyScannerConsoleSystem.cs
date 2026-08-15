@@ -3,8 +3,10 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Server.DeviceLinking.Systems;
-using Content.Server.Medical.Components;
 using Content.Shared._NC.Medical.Diagnostics.Detail;
+using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Surgery;
+using Content.Shared.Buckle.Components;
 using Content.Shared.DeviceLinking;
 using Content.Shared.DeviceLinking.Events;
 using Robust.Shared.Prototypes;
@@ -12,12 +14,13 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._NC.Medical.Diagnostics.Scanner;
 
 /// <summary>
-/// Maintains an event-driven link to the vanilla medical scanner. It never scans the world and never stores
-/// the patient: the patient is read from the authoritative scanner container for every diagnostic request.
+/// Maintains an event-driven link to the vanilla operating table. It never scans the world after map startup and
+/// never stores the patient: every diagnostic request reads the authoritative occupant from the table strap.
 /// </summary>
 public sealed partial class NCBodyScannerConsoleSystem : EntitySystem
 {
-    public static readonly ProtoId<SourcePortPrototype> ScannerPort = "MedicalScannerSender";
+    public static readonly ProtoId<SourcePortPrototype> TablePort = "NCOperatingTableSender";
+    public static readonly ProtoId<SinkPortPrototype> TableReceiverPort = "NCOperatingTableReceiver";
 
     [Dependency] private DeviceLinkSystem _deviceLink = default!;
     [Dependency] private EntityLookupSystem _lookup = default!;
@@ -34,8 +37,8 @@ public sealed partial class NCBodyScannerConsoleSystem : EntitySystem
     }
 
     /// <summary>
-    /// Resolves the current occupant through the linked vanilla scanner. This is called for initial scans and
-    /// every live refresh so ejecting or replacing a patient immediately invalidates the old observation.
+    /// Resolves the current patient through the linked operating table. This is called for initial scans and every
+    /// live refresh, so unbuckling or replacing a patient immediately invalidates the old observation.
     /// </summary>
     public bool TryGetPatient(
         Entity<NCBodyScannerConsoleComponent> console,
@@ -43,18 +46,36 @@ public sealed partial class NCBodyScannerConsoleSystem : EntitySystem
         out NCDiagnosticAccessFailure failure)
     {
         patient = default;
-        failure = NCDiagnosticAccessFailure.ScannerDisconnected;
-        if (console.Comp.ConnectedScanner is not { Valid: true } scannerUid ||
-            !TryComp<MedicalScannerComponent>(scannerUid, out var scanner))
+        failure = NCDiagnosticAccessFailure.OperatingTableDisconnected;
+        if (console.Comp.ConnectedTable is not { Valid: true } tableUid ||
+            !TryComp<StrapComponent>(tableUid, out var table) ||
+            !TryComp<NCSurgeryFacilityComponent>(tableUid, out _) ||
+            !TryComp<DeviceLinkSinkComponent>(tableUid, out var sink))
         {
             return false;
         }
 
-        failure = NCDiagnosticAccessFailure.ScannerEmpty;
-        if (scanner.BodyContainer.ContainedEntity is not { Valid: true } occupant || !Exists(occupant))
+        var sinkPorts = sink.Ports;
+        if (!sinkPorts.Contains(TableReceiverPort))
             return false;
 
-        patient = occupant;
+        failure = NCDiagnosticAccessFailure.OperatingTableEmpty;
+        EntityUid? selected = null;
+        foreach (var occupant in table.BuckledEntities)
+        {
+            if (!Exists(occupant) || !HasComp<NCMedicalBodyComponent>(occupant))
+                continue;
+
+            // An operating table normally contains one patient. Stable selection keeps malformed multi-occupant
+            // states deterministic without ever accepting a client-provided entity.
+            if (selected is null || occupant.Id < selected.Value.Id)
+                selected = occupant;
+        }
+
+        if (selected is not { } selectedPatient)
+            return false;
+
+        patient = selectedPatient;
         failure = NCDiagnosticAccessFailure.None;
         return true;
     }
@@ -63,7 +84,7 @@ public sealed partial class NCBodyScannerConsoleSystem : EntitySystem
         Entity<NCBodyScannerConsoleComponent> console,
         ref ComponentInit args)
     {
-        _deviceLink.EnsureSourcePorts(console.Owner, ScannerPort);
+        _deviceLink.EnsureSourcePorts(console.Owner, TablePort);
     }
 
     private void OnMapInit(
@@ -74,14 +95,14 @@ public sealed partial class NCBodyScannerConsoleSystem : EntitySystem
             return;
 
         var outputs = source.Outputs;
-        // A source port is expected to have one body scanner. If a malformed map links several, choosing the
+        // A source port is expected to have one operating table. If a malformed map links several, choosing the
         // lowest UID keeps the authoritative result stable until the wiring is corrected.
         EntityUid? selected = null;
-        if (outputs.TryGetValue(ScannerPort, out var sinks))
+        if (outputs.TryGetValue(TablePort, out var sinks))
         {
             foreach (var sink in sinks)
             {
-                if (!HasComp<MedicalScannerComponent>(sink) || selected is { } current && current.Id <= sink.Id)
+                if (!IsDiagnosticTable(sink) || selected is { } current && current.Id <= sink.Id)
                     continue;
 
                 selected = sink;
@@ -90,26 +111,29 @@ public sealed partial class NCBodyScannerConsoleSystem : EntitySystem
 
         if (selected is { })
         {
-            console.Comp.ConnectedScanner = selected;
+            console.Comp.ConnectedTable = selected;
             return;
         }
 
-        // Maps predating this feature do not serialize a body-computer link. Establish a real device link to
-        // the nearest vanilla scanner through one bounded spatial query; subsequent state stays event-driven.
+        // Maps predating this feature do not serialize a body-computer link. Establish a real device link to the
+        // nearest compatible table through one bounded spatial query; subsequent state stays event-driven.
         var origin = _transform.GetWorldPosition(console.Owner);
         var bestDistance = float.MaxValue;
-        foreach (var scanner in _lookup.GetEntitiesInRange<MedicalScannerComponent>(
+        foreach (var table in _lookup.GetEntitiesInRange<StrapComponent>(
                      Transform(console.Owner).Coordinates,
                      source.Range))
         {
-            var distance = (origin - _transform.GetWorldPosition(scanner.Owner)).LengthSquared();
+            if (!IsDiagnosticTable(table.Owner))
+                continue;
+
+            var distance = (origin - _transform.GetWorldPosition(table.Owner)).LengthSquared();
             if (distance > bestDistance ||
-                MathHelper.CloseTo(distance, bestDistance) && selected is { } current && current.Id <= scanner.Owner.Id)
+                MathHelper.CloseTo(distance, bestDistance) && selected is { } current && current.Id <= table.Owner.Id)
             {
                 continue;
             }
 
-            selected = scanner.Owner;
+            selected = table.Owner;
             bestDistance = distance;
         }
 
@@ -122,10 +146,10 @@ public sealed partial class NCBodyScannerConsoleSystem : EntitySystem
         ref NewLinkEvent args)
     {
         if (args.Source == console.Owner &&
-            args.SourcePort == ScannerPort.Id &&
-            HasComp<MedicalScannerComponent>(args.Sink))
+            args.SourcePort == TablePort.Id &&
+            IsDiagnosticTable(args.Sink))
         {
-            console.Comp.ConnectedScanner = args.Sink;
+            console.Comp.ConnectedTable = args.Sink;
         }
     }
 
@@ -133,7 +157,21 @@ public sealed partial class NCBodyScannerConsoleSystem : EntitySystem
         Entity<NCBodyScannerConsoleComponent> console,
         ref PortDisconnectedEvent args)
     {
-        if (args.Port == ScannerPort.Id)
-            console.Comp.ConnectedScanner = null;
+        if (args.Port == TablePort.Id)
+            console.Comp.ConnectedTable = null;
+    }
+
+    private bool IsDiagnosticTable(EntityUid uid)
+    {
+        if (Deleted(uid) ||
+            !HasComp<NCSurgeryFacilityComponent>(uid) ||
+            !HasComp<StrapComponent>(uid) ||
+            !TryComp<DeviceLinkSinkComponent>(uid, out var sink))
+        {
+            return false;
+        }
+
+        var ports = sink.Ports;
+        return ports.Contains(TableReceiverPort);
     }
 }

@@ -10,8 +10,6 @@ using Content.Server._NC.Medical.Diagnostics.Detail;
 using Content.Server._NC.Medical.Diagnostics.Scanner;
 using Content.Server._NC.Medical.Pharmacology;
 using Content.Server.DeviceLinking.Systems;
-using Content.Server.Medical;
-using Content.Server.Medical.Components;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
@@ -23,6 +21,8 @@ using Content.Shared._NC.Medical.Surgery;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
 using Content.Shared.Body.Components;
+using Content.Shared.Buckle;
+using Content.Shared.Buckle.Components;
 using Content.Shared.FixedPoint;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
@@ -53,7 +53,7 @@ public sealed class NCDiagnosticsSystemTest : GameTest
     [SidedDependency(Side.Server)] private NCPharmacologySystem _pharmacology = default!;
     [SidedDependency(Side.Server)] private IPrototypeManager _prototypes = default!;
     [SidedDependency(Side.Server)] private DeviceLinkSystem _deviceLink = default!;
-    [SidedDependency(Side.Server)] private MedicalScannerSystem _medicalScanner = default!;
+    [SidedDependency(Side.Server)] private SharedBuckleSystem _buckle = default!;
     [SidedDependency(Side.Server)] private NCBodyScannerConsoleSystem _bodyScanner = default!;
 
     public override PoolSettings PoolSettings => new()
@@ -206,12 +206,13 @@ public sealed class NCDiagnosticsSystemTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
-    public void FullDiagnosticsUsesLinkedVanillaScannerAndBodyScannerComputer()
+    public void FullDiagnosticsUsesPatientBuckledToLinkedOperatingTable()
     {
         var patient = SSpawn(HumanMob);
+        var replacement = SSpawn(HumanMob);
         var scannerUid = SSpawn("MedicalScanner");
+        var tableUid = SSpawn("OperatingTable");
         var consoleUid = SSpawn("computerBodyScanner");
-        var scanner = SComp<MedicalScannerComponent>(scannerUid);
         var console = SComp<NCBodyScannerConsoleComponent>(consoleUid);
         var capability = SComp<NCDiagnosticCapabilityComponent>(consoleUid);
 
@@ -221,17 +222,33 @@ public sealed class NCDiagnosticsSystemTest : GameTest
                 "The capsule itself must not expose the full diagnostic UI.");
             Assert.That(capability.Capability.Id, Is.EqualTo("NCDiagnosticsScannerInternal"));
             Assert.That(_bodyScanner.TryGetPatient((consoleUid, console), out _, out var disconnected), Is.False);
-            Assert.That(disconnected, Is.EqualTo(NCDiagnosticAccessFailure.ScannerDisconnected));
+            Assert.That(disconnected, Is.EqualTo(NCDiagnosticAccessFailure.OperatingTableDisconnected));
         });
 
+        // A vanilla medical scanner is no longer a valid source for the diagnostic console.
         _deviceLink.LinkDefaults(null, consoleUid, scannerUid);
-        _medicalScanner.InsertBody(scannerUid, patient, scanner);
+        Assert.That(_bodyScanner.TryGetPatient((consoleUid, console), out _, out var stillDisconnected), Is.False);
+        Assert.That(stillDisconnected, Is.EqualTo(NCDiagnosticAccessFailure.OperatingTableDisconnected));
+
+        _deviceLink.LinkDefaults(null, consoleUid, tableUid);
+        Assert.That(_bodyScanner.TryGetPatient((consoleUid, console), out _, out var empty), Is.False);
+        Assert.That(empty, Is.EqualTo(NCDiagnosticAccessFailure.OperatingTableEmpty));
+
+        Assert.That(_buckle.TryBuckle(patient, patient, tableUid, popup: false), Is.True);
 
         Assert.That(
             _bodyScanner.TryGetPatient((consoleUid, console), out var occupant, out var failure),
             Is.True,
             failure.ToString());
         Assert.That(occupant, Is.EqualTo(patient));
+
+        _buckle.Unbuckle((patient, SComp<BuckleComponent>(patient)), null);
+        Assert.That(_bodyScanner.TryGetPatient((consoleUid, console), out _, out var removed), Is.False);
+        Assert.That(removed, Is.EqualTo(NCDiagnosticAccessFailure.OperatingTableEmpty));
+
+        Assert.That(_buckle.TryBuckle(replacement, replacement, tableUid, popup: false), Is.True);
+        Assert.That(_bodyScanner.TryGetPatient((consoleUid, console), out occupant, out failure), Is.True);
+        Assert.That(occupant, Is.EqualTo(replacement));
     }
 
     [Test]
