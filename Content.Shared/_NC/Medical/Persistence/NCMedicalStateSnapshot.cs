@@ -44,6 +44,7 @@ public enum NCMedicalStableOwnerKind : byte
 {
     Unassigned,
     PlayerCharacter,
+    PersistentActor,
 }
 
 /// <summary>

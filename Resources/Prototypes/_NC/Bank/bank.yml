@@ -9,6 +9,7 @@
   pinDigits: 4
   paydayIntervalSeconds: 1800
   currencyStack: Credit
+  currencyId: EB
 
 - type: entity
   id: NCATM

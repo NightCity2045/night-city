@@ -1,0 +1,89 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+using Content.Shared._NC.LivingCity.Economy;
+using Content.Shared._NC.Persistence.Identity;
+using Content.Shared._NC.Persistence.Time;
+using Robust.Shared.GameObjects;
+
+namespace Content.Server._NC.LivingCity.Economy;
+
+public enum NCEconomyMutationStatus : byte
+{
+    Applied,
+    Duplicate,
+    NotFound,
+    VersionConflict,
+    InsufficientFunds,
+    ClockUnavailable,
+    Rejected,
+    StorageFailure,
+}
+
+public sealed record NCAccountRecord(
+    NCAccountSnapshot Snapshot,
+    long AggregateVersion,
+    NCSessionEpoch SessionEpoch,
+    NCActiveWorldTime PersistedAt);
+
+public sealed record NCLedgerTransactionRecord(
+    NCLedgerTransactionSnapshot Snapshot,
+    long AggregateVersion,
+    NCSessionEpoch SessionEpoch,
+    NCActiveWorldTime PersistedAt);
+
+public sealed record NCCreateAccountRequest(
+    Guid CommandId,
+    NCAccountId AccountId,
+    NCPartyRef Owner,
+    NCAccountKind Kind,
+    string CurrencyId,
+    bool AllowsNegativeBalance,
+    Guid CorrelationId,
+    Guid? CausationId = null,
+    string AuditSource = "system");
+
+public sealed record NCSetAccountStatusRequest(
+    Guid CommandId,
+    NCAccountId AccountId,
+    long ExpectedVersion,
+    NCAccountStatus Status,
+    NCPartyRef Initiator,
+    Guid CorrelationId,
+    Guid? CausationId = null,
+    string AuditSource = "system");
+
+public sealed record NCLedgerLegRequest(NCAccountId AccountId, long ExpectedVersion, long Amount);
+
+public sealed record NCPostLedgerTransactionRequest(
+    Guid CommandId,
+    NCTransactionId TransactionId,
+    NCLedgerTransactionKind Kind,
+    string Reference,
+    NCLedgerLegRequest[] Legs,
+    NCPartyRef Initiator,
+    Guid CorrelationId,
+    Guid? CausationId = null,
+    string AuditSource = "system");
+
+public sealed record NCEconomyMutationResult(
+    NCEconomyMutationStatus Status,
+    IReadOnlyList<NCAccountRecord> Accounts,
+    NCLedgerTransactionRecord? Transaction,
+    string? Error);
+
+public sealed class NCAccountPersistedEvent(
+    NCAccountId accountId,
+    NCPartyRef owner,
+    long aggregateVersion,
+    long balance,
+    NCAccountStatus status) : EntityEventArgs
+{
+    public NCAccountId AccountId { get; } = accountId;
+    public NCPartyRef Owner { get; } = owner;
+    public long AggregateVersion { get; } = aggregateVersion;
+    public long Balance { get; } = balance;
+    public NCAccountStatus Status { get; } = status;
+}
+

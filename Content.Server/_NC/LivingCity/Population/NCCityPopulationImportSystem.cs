@@ -1,0 +1,588 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Content.Server._NC.City.Zones;
+using Content.Server._NC.LivingCity.Actors;
+using Content.Server._NC.LivingCity.Time;
+using Content.Shared._NC.City.Connectivity;
+using Content.Shared._NC.LivingCity.Actors;
+using Content.Shared._NC.LivingCity.Population;
+using Content.Shared._NC.Persistence.Identity;
+using Robust.Shared.Prototypes;
+
+namespace Content.Server._NC.LivingCity.Population;
+
+/// <summary>
+/// Explicit, bounded and restart-safe importer for persistent city residents. It creates no ECS entities.
+/// Every slot has deterministic actor and command identities, so an interrupted import can be safely repeated.
+/// </summary>
+public sealed partial class NCCityPopulationImportSystem : EntitySystem
+{
+    private const string DefaultPolicyId = "NCDefaultPopulationImportPolicy";
+    private const int MaximumTextLength = 128;
+    private const int MaximumStableLocalIdLength = 128;
+    private const int MaximumAliases = 16;
+
+    [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private NCZoneSystem _zones = default!;
+    [Dependency] private NCActiveWorldTimeSystem _clock = default!;
+    [Dependency] private NCCityActorRegistrySystem _actors = default!;
+
+    private readonly object _runLock = new();
+    private CancellationTokenSource? _runCancellation;
+    private NCCityPopulationImportProgress _progress = new(false, null, 0, 0, 0, 0, 0, 0);
+
+    public NCCityPopulationImportProgress Progress
+    {
+        get
+        {
+            lock (_runLock)
+                return _progress;
+        }
+    }
+
+    public override void Initialize()
+    {
+        base.Initialize();
+        SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
+        SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
+    }
+
+    public async Task<NCCityPopulationImportReport> ImportAsync(
+        ProtoId<NCCityPopulationProfilePrototype> profileId,
+        string auditSource = "system:population-import")
+    {
+        if (!_prototypes.TryIndex(profileId, out NCCityPopulationProfilePrototype? profile) || profile == null)
+            return Rejected(profileId.Id, $"Unknown population profile {profileId}.");
+        string? policyError = null;
+        if (!_prototypes.TryIndex(
+                new ProtoId<NCCityPopulationImportPolicyPrototype>(DefaultPolicyId),
+                out NCCityPopulationImportPolicyPrototype? policy) ||
+            policy == null || !TryValidatePolicy(policy, out policyError))
+        {
+            return Rejected(profile.ID, policyError ?? $"Missing population import policy {DefaultPolicyId}.");
+        }
+
+        var errors = new List<string>();
+        if (!ValidateProfile(profile, policy, errors))
+            return Rejected(profile.ID, string.Join(" ", errors));
+        if (string.IsNullOrWhiteSpace(auditSource) || auditSource.Length > MaximumTextLength)
+            return Rejected(profile.ID, "The audit source is invalid.");
+        if (!_clock.TryGetCurrentTime(out _, out _))
+            return Rejected(profile.ID, "Population imports require an active-world round.");
+
+        CancellationTokenSource cancellation;
+        lock (_runLock)
+        {
+            if (_runCancellation != null)
+            {
+                return new NCCityPopulationImportReport(
+                    NCCityPopulationImportStatus.AlreadyRunning,
+                    profile.ID,
+                    CountActors(profile),
+                    0,
+                    0,
+                    0,
+                    0,
+                    []);
+            }
+
+            cancellation = new CancellationTokenSource();
+            _runCancellation = cancellation;
+            _progress = new NCCityPopulationImportProgress(
+                true,
+                profile.ID,
+                CountActors(profile),
+                0,
+                0,
+                0,
+                0,
+                0);
+        }
+
+        try
+        {
+            return await ExecuteImport(profile, policy, auditSource.Trim(), cancellation.Token);
+        }
+        finally
+        {
+            lock (_runLock)
+            {
+                if (ReferenceEquals(_runCancellation, cancellation))
+                {
+                    _runCancellation.Dispose();
+                    _runCancellation = null;
+                    _progress = _progress with { Running = false };
+                }
+            }
+        }
+    }
+
+    public bool ValidateProfile(
+        NCCityPopulationProfilePrototype profile,
+        NCCityPopulationImportPolicyPrototype policy,
+        List<string> errors)
+    {
+        errors.Clear();
+        if (profile.ScopeId == Guid.Empty)
+            errors.Add("scopeId must be a non-empty GUID.");
+        if (profile.Cohorts.Count == 0 && profile.Actors.Count == 0)
+            errors.Add("A population profile must contain at least one cohort or authored actor.");
+
+        var total = CountActors(profile);
+        if (total < 1 || total > policy.MaximumActorsPerProfile)
+            errors.Add($"Actor count {total} is outside the policy limit 1..{policy.MaximumActorsPerProfile}.");
+
+        var authoredStableIds = new HashSet<string>(StringComparer.Ordinal);
+        var cohortIds = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var cohort in profile.Cohorts)
+        {
+            if (string.IsNullOrWhiteSpace(cohort.Id) || cohort.Id.Length > MaximumTextLength ||
+                !cohortIds.Add(cohort.Id))
+            {
+                errors.Add("Cohort IDs must be non-empty, bounded and unique.");
+                continue;
+            }
+
+            if (BuildCohortStableLocalId(profile.ID, cohort.Id, 0).Length > MaximumStableLocalIdLength)
+                errors.Add($"Cohort {cohort.Id} produces stable actor IDs longer than {MaximumStableLocalIdLength} characters.");
+
+            if (cohort.Count < 1)
+                errors.Add($"Cohort {cohort.Id} must contain at least one actor.");
+            if (!_prototypes.TryIndex(cohort.IdentityPool, out NCCityIdentityPoolPrototype? pool) || pool == null)
+            {
+                errors.Add($"Cohort {cohort.Id} references missing identity pool {cohort.IdentityPool}.");
+            }
+            else
+            {
+                ValidateIdentityPool(pool, errors);
+                var capacity = (long) pool.GivenNames.Count * pool.FamilyNames.Count;
+                if (cohort.Count > capacity)
+                    errors.Add($"Cohort {cohort.Id} needs {cohort.Count} unique names but pool capacity is {capacity}.");
+                if (capacity > int.MaxValue)
+                    errors.Add($"Identity pool {pool.ID} exceeds the supported deterministic permutation size.");
+            }
+
+            ValidatePlacement(cohort.Archetype, cohort.HomeZone, cohort.WorkZone, $"Cohort {cohort.Id}", errors);
+        }
+
+        foreach (var actor in profile.Actors)
+        {
+            if (string.IsNullOrWhiteSpace(actor.StableLocalId) || actor.StableLocalId.Length > MaximumTextLength)
+            {
+                errors.Add("Authored actor stableLocalId values must be non-empty and bounded.");
+            }
+            else
+            {
+                var stableId = BuildAuthoredStableLocalId(profile.ID, actor.StableLocalId);
+                if (stableId.Length > MaximumStableLocalIdLength || !authoredStableIds.Add(stableId))
+                    errors.Add("Authored actor stableLocalId values must be unique and fit the persistent identity bound.");
+            }
+
+            if (string.IsNullOrWhiteSpace(actor.FullName) || actor.FullName.Length > MaximumTextLength ||
+                actor.Aliases.Count > MaximumAliases ||
+                actor.Aliases.Any(alias => string.IsNullOrWhiteSpace(alias) || alias.Length > MaximumTextLength))
+            {
+                errors.Add($"Authored actor {actor.StableLocalId} has invalid identity text.");
+            }
+
+            ValidatePlacement(actor.Archetype, actor.HomeZone, actor.WorkZone,
+                $"Authored actor {actor.StableLocalId}", errors);
+        }
+
+        return errors.Count == 0;
+    }
+
+    public bool ValidateProfile(ProtoId<NCCityPopulationProfilePrototype> profileId, List<string> errors)
+    {
+        errors.Clear();
+        if (!_prototypes.TryIndex(profileId, out NCCityPopulationProfilePrototype? profile) || profile == null)
+        {
+            errors.Add($"Unknown population profile {profileId}.");
+            return false;
+        }
+
+        string? policyError = null;
+        if (!_prototypes.TryIndex(
+                new ProtoId<NCCityPopulationImportPolicyPrototype>(DefaultPolicyId),
+                out NCCityPopulationImportPolicyPrototype? policy) ||
+            policy == null || !TryValidatePolicy(policy, out policyError))
+        {
+            errors.Add(policyError ?? $"Missing population import policy {DefaultPolicyId}.");
+            return false;
+        }
+
+        return ValidateProfile(profile, policy, errors);
+    }
+
+    public static string BuildCohortStableLocalId(string profileId, string cohortId, int zeroBasedIndex)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(profileId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(cohortId);
+        ArgumentOutOfRangeException.ThrowIfNegative(zeroBasedIndex);
+        return $"population/{profileId}/cohort/{cohortId}/{zeroBasedIndex:D8}";
+    }
+
+    public static string BuildAuthoredStableLocalId(string profileId, string stableLocalId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(profileId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(stableLocalId);
+        return $"population/{profileId}/actor/{stableLocalId.Trim()}";
+    }
+
+    private async Task<NCCityPopulationImportReport> ExecuteImport(
+        NCCityPopulationProfilePrototype profile,
+        NCCityPopulationImportPolicyPrototype policy,
+        string auditSource,
+        CancellationToken cancellation)
+    {
+        var failures = new List<NCCityPopulationImportFailure>();
+        var failureLock = new object();
+        using var concurrency = new SemaphoreSlim(policy.MaximumConcurrentCreates);
+        var pending = new List<Task>(policy.MaximumConcurrentCreates);
+
+        foreach (var candidate in EnumerateCandidates(profile))
+        {
+            if (cancellation.IsCancellationRequested)
+                break;
+
+            try
+            {
+                await concurrency.WaitAsync(cancellation);
+            }
+            catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+            {
+                break;
+            }
+
+            var task = ImportOneBounded(
+                candidate,
+                profile.ScopeId,
+                policy,
+                auditSource,
+                failures,
+                failureLock,
+                concurrency,
+                cancellation);
+            pending.Add(task);
+
+            // Retain only the bounded active window instead of one Task per city resident.
+            if (pending.Count >= policy.MaximumConcurrentCreates * 2)
+            {
+                await Task.WhenAny(pending);
+                pending.RemoveAll(static task => task.IsCompleted);
+            }
+        }
+
+        await Task.WhenAll(pending);
+        var progress = Progress;
+        return new NCCityPopulationImportReport(
+            cancellation.IsCancellationRequested
+                ? NCCityPopulationImportStatus.Cancelled
+                : NCCityPopulationImportStatus.Completed,
+            profile.ID,
+            progress.Requested,
+            progress.Created,
+            progress.Existing,
+            progress.Conflicts,
+            progress.Failed,
+            failures.OrderBy(static failure => failure.StableLocalId, StringComparer.Ordinal).ToArray());
+    }
+
+    private async Task ImportOneBounded(
+        PopulationCandidate candidate,
+        Guid scopeId,
+        NCCityPopulationImportPolicyPrototype policy,
+        string auditSource,
+        List<NCCityPopulationImportFailure> failures,
+        object failureLock,
+        SemaphoreSlim concurrency,
+        CancellationToken cancellation)
+    {
+        try
+        {
+            await ImportOne(candidate, scopeId, policy, auditSource, failures, failureLock, cancellation);
+        }
+        finally
+        {
+            concurrency.Release();
+        }
+    }
+
+    private async Task ImportOne(
+        PopulationCandidate candidate,
+        Guid scopeId,
+        NCCityPopulationImportPolicyPrototype policy,
+        string auditSource,
+        List<NCCityPopulationImportFailure> failures,
+        object failureLock,
+        CancellationToken cancellation)
+    {
+        NCCityActorMutationResult? result = null;
+        for (var attempt = 0; attempt <= policy.StorageRetryCount; attempt++)
+        {
+            if (cancellation.IsCancellationRequested)
+                return;
+
+            result = await _actors.CreateAsync(new NCCityActorCreateRequest(
+                CreateDeterministicCommandId(scopeId, candidate.StableLocalId),
+                scopeId,
+                candidate.StableLocalId,
+                candidate.FullName,
+                candidate.Aliases,
+                candidate.Archetype,
+                candidate.HomeZone,
+                candidate.WorkZone,
+                CreateDeterministicCorrelationId(scopeId, candidate.StableLocalId),
+                AuditSource: auditSource));
+            if (result.Status != NCCityActorMutationStatus.StorageFailure || attempt == policy.StorageRetryCount)
+                break;
+
+            try
+            {
+                await Task.Delay(policy.StorageRetryDelay, cancellation);
+            }
+            catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+            {
+                return;
+            }
+        }
+
+        if (result == null)
+            return;
+
+        lock (_runLock)
+        {
+            _progress = result.Status switch
+            {
+                NCCityActorMutationStatus.Applied => _progress with
+                {
+                    Processed = _progress.Processed + 1,
+                    Created = _progress.Created + 1,
+                },
+                NCCityActorMutationStatus.Duplicate => _progress with
+                {
+                    Processed = _progress.Processed + 1,
+                    Existing = _progress.Existing + 1,
+                },
+                NCCityActorMutationStatus.VersionConflict => _progress with
+                {
+                    Processed = _progress.Processed + 1,
+                    Conflicts = _progress.Conflicts + 1,
+                },
+                _ => _progress with
+                {
+                    Processed = _progress.Processed + 1,
+                    Failed = _progress.Failed + 1,
+                },
+            };
+        }
+
+        if (result.Status is NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate)
+            return;
+
+        lock (failureLock)
+        {
+            failures.Add(new NCCityPopulationImportFailure(
+                candidate.StableLocalId,
+                result.ActorId,
+                result.Error ?? result.Status.ToString()));
+        }
+    }
+
+    private IEnumerable<PopulationCandidate> EnumerateCandidates(NCCityPopulationProfilePrototype profile)
+    {
+        foreach (var cohort in profile.Cohorts.OrderBy(static cohort => cohort.Id, StringComparer.Ordinal))
+        {
+            var pool = _prototypes.Index(cohort.IdentityPool);
+            var capacity = checked(pool.GivenNames.Count * pool.FamilyNames.Count);
+            var permutation = CreateNamePermutation(profile.ScopeId, profile.ID, cohort.Id, capacity);
+            for (var index = 0; index < cohort.Count; index++)
+            {
+                var flatIndex = (permutation.Start + (long) index * permutation.Step) % capacity;
+                var givenIndex = (int) (flatIndex % pool.GivenNames.Count);
+                var familyIndex = (int) (flatIndex / pool.GivenNames.Count);
+                yield return new PopulationCandidate(
+                    BuildCohortStableLocalId(profile.ID, cohort.Id, index),
+                    $"{pool.GivenNames[givenIndex].Trim()} {pool.FamilyNames[familyIndex].Trim()}",
+                    [],
+                    cohort.Archetype,
+                    cohort.HomeZone,
+                    cohort.WorkZone);
+            }
+        }
+
+        foreach (var actor in profile.Actors.OrderBy(static actor => actor.StableLocalId, StringComparer.Ordinal))
+        {
+            yield return new PopulationCandidate(
+                BuildAuthoredStableLocalId(profile.ID, actor.StableLocalId),
+                actor.FullName.Trim(),
+                actor.Aliases.Select(static alias => alias.Trim()).ToArray(),
+                actor.Archetype,
+                actor.HomeZone,
+                actor.WorkZone);
+        }
+    }
+
+    private void ValidatePlacement(
+        ProtoId<NCCityActorArchetypePrototype> archetypeId,
+        Content.Shared._NC.City.Zones.NCZoneId homeZone,
+        Content.Shared._NC.City.Zones.NCZoneId workZone,
+        string label,
+        List<string> errors)
+    {
+        if (!_prototypes.TryIndex(archetypeId, out NCCityActorArchetypePrototype? archetype) || archetype == null)
+        {
+            errors.Add($"{label} references missing actor archetype {archetypeId}.");
+            return;
+        }
+
+        if (!HasSingleTravelMode(archetype.TravelMode) || !Enum.IsDefined(archetype.CognitionTier) ||
+            !_prototypes.HasIndex(archetype.EntityPrototype) ||
+            !_prototypes.HasIndex(archetype.SpawnCandidateProfile) ||
+            !_prototypes.HasIndex(archetype.RoutineProfile))
+        {
+            errors.Add($"{label} references an incomplete actor archetype {archetypeId}.");
+        }
+
+        if (!_zones.TryGetZone(homeZone, out var home) || !archetype.AllowedHomeContexts.Contains(home.ContextSlot))
+            errors.Add($"{label} has a missing or incompatible home zone.");
+        if (workZone.IsValid &&
+            (!_zones.TryGetZone(workZone, out var work) || !archetype.AllowedWorkContexts.Contains(work.ContextSlot)))
+        {
+            errors.Add($"{label} has a missing or incompatible work zone.");
+        }
+    }
+
+    private static void ValidateIdentityPool(NCCityIdentityPoolPrototype pool, List<string> errors)
+    {
+        if (pool.GivenNames.Count == 0 || pool.FamilyNames.Count == 0 ||
+            pool.GivenNames.Any(name => string.IsNullOrWhiteSpace(name) || name.Length > MaximumTextLength) ||
+            pool.FamilyNames.Any(name => string.IsNullOrWhiteSpace(name) || name.Length > MaximumTextLength) ||
+            pool.GivenNames.Distinct(StringComparer.OrdinalIgnoreCase).Count() != pool.GivenNames.Count ||
+            pool.FamilyNames.Distinct(StringComparer.OrdinalIgnoreCase).Count() != pool.FamilyNames.Count)
+        {
+            errors.Add($"Identity pool {pool.ID} must contain unique, non-empty, bounded given and family names.");
+        }
+    }
+
+    private static bool TryValidatePolicy(NCCityPopulationImportPolicyPrototype policy, out string? error)
+    {
+        if (policy.MaximumActorsPerProfile is < 1 or > 1000000 ||
+            policy.MaximumConcurrentCreates is < 1 or > 64 ||
+            policy.StorageRetryCount is < 0 or > 10 ||
+            policy.StorageRetryDelay < TimeSpan.Zero || policy.StorageRetryDelay > TimeSpan.FromMinutes(1))
+        {
+            error = "The population import policy is outside safe operational bounds.";
+            return false;
+        }
+
+        error = null;
+        return true;
+    }
+
+    private static int CountActors(NCCityPopulationProfilePrototype profile)
+    {
+        long total = profile.Actors.Count;
+        foreach (var cohort in profile.Cohorts)
+            total += Math.Max(0, cohort.Count);
+        return total > int.MaxValue ? int.MaxValue : (int) total;
+    }
+
+    private static (int Start, int Step) CreateNamePermutation(
+        Guid scopeId,
+        string profileId,
+        string cohortId,
+        int capacity)
+    {
+        var hash = Hash(scopeId, $"names/{profileId}/{cohortId}");
+        var start = (int) (BitConverter.ToUInt64(hash, 0) % (ulong) capacity);
+        var step = (int) (BitConverter.ToUInt64(hash, 8) % (ulong) capacity);
+        if (step == 0)
+            step = 1;
+        while (GreatestCommonDivisor(step, capacity) != 1)
+            step = step == capacity - 1 ? 1 : step + 1;
+        return (start, step);
+    }
+
+    private static int GreatestCommonDivisor(int left, int right)
+    {
+        while (right != 0)
+            (left, right) = (right, left % right);
+        return Math.Abs(left);
+    }
+
+    private static Guid CreateDeterministicCommandId(Guid scopeId, string stableLocalId)
+    {
+        return GuidFromHash(Hash(scopeId, $"command/create/{stableLocalId}"));
+    }
+
+    private static Guid CreateDeterministicCorrelationId(Guid scopeId, string stableLocalId)
+    {
+        return GuidFromHash(Hash(scopeId, $"correlation/import/{stableLocalId}"));
+    }
+
+    private static byte[] Hash(Guid scopeId, string value)
+    {
+        var scope = scopeId.ToByteArray();
+        var text = Encoding.UTF8.GetBytes(value);
+        var input = new byte[scope.Length + text.Length];
+        scope.CopyTo(input, 0);
+        text.CopyTo(input, scope.Length);
+        return SHA256.HashData(input);
+    }
+
+    private static Guid GuidFromHash(byte[] hash)
+    {
+        hash[6] = (byte) ((hash[6] & 0x0F) | 0x50);
+        hash[8] = (byte) ((hash[8] & 0x3F) | 0x80);
+        return new Guid(hash.AsSpan(0, 16));
+    }
+
+    private void OnSessionClosed(NCActiveWorldSessionClosedEvent args)
+    {
+        lock (_runLock)
+            _runCancellation?.Cancel();
+    }
+
+    private void OnClockFailed(NCActiveWorldClockFailedEvent args)
+    {
+        lock (_runLock)
+            _runCancellation?.Cancel();
+    }
+
+    private static bool HasSingleTravelMode(NCCityTravelMode travelMode)
+    {
+        var raw = (byte) travelMode;
+        return raw != 0 && (raw & (raw - 1)) == 0;
+    }
+
+    private static NCCityPopulationImportReport Rejected(string profileId, string error)
+    {
+        return new NCCityPopulationImportReport(
+            NCCityPopulationImportStatus.Rejected,
+            profileId,
+            0,
+            0,
+            0,
+            0,
+            1,
+            [new NCCityPopulationImportFailure(string.Empty, default, error)]);
+    }
+
+    private sealed record PopulationCandidate(
+        string StableLocalId,
+        string FullName,
+        string[] Aliases,
+        ProtoId<NCCityActorArchetypePrototype> Archetype,
+        Content.Shared._NC.City.Zones.NCZoneId HomeZone,
+        Content.Shared._NC.City.Zones.NCZoneId WorkZone);
+}

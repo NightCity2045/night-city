@@ -1,0 +1,168 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncCityActorSummaryPolicy
+  id: NCDefaultCityActorSummaryPolicy
+  immobileMovementThreshold: 0.1
+  impairedMovementThreshold: 0.75
+  activeBleedingRateThreshold: 0.001
+  failedCyberwareIntegrityRatio: 0.1
+  degradedCyberwareIntegrityRatio: 0.75
+  maximumInventoryItems: 512
+  maximumContainerDepth: 8
+  maximumCommodityBundles: 128
+
+- type: ncCitySchedulePolicy
+  id: NCDefaultCitySchedulePolicy
+  snapshotPageSize: 250
+  maximumDispatchesPerTick: 4
+  maximumConcurrentMutations: 8
+  mutationRetryDelay: 5s
+
+- type: ncCityPopulationImportPolicy
+  id: NCDefaultPopulationImportPolicy
+  maximumActorsPerProfile: 10000
+  maximumConcurrentCreates: 8
+  storageRetryCount: 3
+  storageRetryDelay: 1s
+
+- type: ncCityZoneStatePolicy
+  id: NCDefaultCityZoneStatePolicy
+  snapshotPageSize: 250
+  maximumWritesPerTick: 2
+  maximumConcurrentWrites: 4
+  coalesceDelay: 1s
+  storageRetryDelay: 5s
+  maximumArchetypesPerScope: 256
+  archetypeOverflowBucketId: other
+  districtActivitySaturation: 1000
+  sectorActivitySaturation: 250
+  activityStatusWeights:
+    Active: 1
+    Working: 1
+    Traveling: 0.8
+    Resting: 0.1
+    Hiding: 0.25
+    Injured: 0.2
+    Hospitalized: 0.05
+    Arrested: 0.05
+    Imprisoned: 0.05
+    Unconscious: 0
+    Missing: 0
+    Dead: 0
+  activityAvailabilityWeights:
+    Available: 1
+    Busy: 0.8
+    OnCall: 0.6
+    Unavailable: 0
+
+- type: ncCityMaterializationPolicy
+  id: NCDefaultCityMaterializationPolicy
+  maximumQueuedRequests: 1024
+  maximumDispatchesPerTick: 2
+  maximumConcurrentLoads: 4
+  maximumCandidateChecks: 32
+  maximumCompletedRequestHistory: 2048
+  maximumPriority: 1000
+  playerVisibilityExclusionRadius: 24
+  actorOccupancyExclusionRadius: 1
+  retryDelay: 2s
+  defaultMaximumWait: 30s
+  maximumWait: 5m
+
+- type: ncCityRelevancePolicy
+  id: NCDefaultCityRelevancePolicy
+  evaluationInterval: 1s
+  clusterMergeRadius: 40
+  clusterSplitRadius: 52
+  dematerializationRadius: 36
+  materializationCooldown: 15s
+  globalSoftMaterializedBudget: 100
+  globalHardMaterializedBudget: 150
+  clusterSoftMaterializedBudget: 32
+  maximumAnchors: 128
+  catalogPageSize: 250
+  maximumCandidateInspectionsPerCluster: 128
+  maximumMaterializationRequestsPerEvaluation: 4
+  maximumDematerializationInspectionsPerEvaluation: 64
+  maximumDematerializationRequestsPerEvaluation: 2
+  playerRelevancePriority: 500
+  maximumQueuedDematerializations: 256
+  maximumDematerializationDispatchesPerTick: 2
+  maximumConcurrentDematerializations: 4
+  maximumCompletedDematerializationHistory: 1024
+  dematerializationRetryDelay: 2s
+  dematerializationMaximumWait: 2m
+
+- type: ncCityAbstractTravelPolicy
+  id: NCDefaultAbstractTravelPolicy
+  snapshotPageSize: 250
+  maximumDispatchesPerTick: 4
+  maximumConcurrentMutations: 8
+  retryDelay: 10s
+  minimumTravelDuration: 1s
+  maximumTravelDuration: 6h
+  durationMultiplier: 1
+
+- type: ncCityGroupProfile
+  id: NCDefaultStreetGroup
+  maximumMembers: 16
+  maximumSnapshotHistory: 128
+  allowSplit: true
+  allowMerge: true
+  materializeTogether: true
+  formationPolicy: Loose
+  initialTransportCapacity: 0
+  initialCargoUnits: 0
+  initialSupplyUnits: 0
+  initialMorale: 0.5
+
+- type: ncCityGroupPhysicalizationPolicy
+  id: NCDefaultCityGroupPhysicalizationPolicy
+  catalogPageSize: 100
+  maximumQueuedRequests: 128
+  maximumDispatchesPerTick: 1
+  maximumConcurrentLoads: 2
+  maximumActiveRequestPollsPerTick: 8
+  maximumMembersPerRequest: 32
+  maximumCompletedRequestHistory: 512
+  maximumPriority: 1000
+  retryDelay: 2s
+  defaultMaximumWait: 2m
+  maximumWait: 5m
+  rollbackMaximumWait: 2m
+  looseSpacing: 2.25
+  columnSpacing: 1.5
+  wedgeSpacing: 1.75
+  defensiveSpacing: 2
+
+- type: ncCityRoutineProfile
+  id: NCDefaultCivilianRoutine
+  cycleDuration: 24h
+  entries:
+  - at: 0s
+    activity: sleep
+    goal: recover-at-home
+    target: Home
+    availability: Unavailable
+  - at: 7h
+    activity: prepare
+    goal: prepare-for-work
+    target: Home
+    availability: Busy
+  - at: 8h
+    activity: work
+    goal: complete-work-shift
+    target: Work
+    availability: Busy
+  - at: 17h
+    activity: return-home
+    goal: finish-daily-obligations
+    target: Home
+    availability: Available
+  - at: 23h
+    activity: sleep
+    goal: recover-at-home
+    target: Home
+    availability: Unavailable

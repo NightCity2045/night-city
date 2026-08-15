@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncPersistentOutboxPolicy
+  id: NCDefaultPersistentOutboxPolicy
+  fetchBatchSize: 16
+  maximumConcurrentDeliveries: 8
+  maximumAttempts: 8
+  pollInterval: 0.25s
+  initialRetryDelay: 1s
+  maximumRetryDelay: 5m
+  deliveryTimeout: 15s
+  retryMultiplier: 2

@@ -57,4 +57,9 @@ public readonly record struct NCActiveWorldTime(long Ticks) : IComparable<NCActi
     {
         return Ticks.CompareTo(other.Ticks);
     }
+
+    public static bool operator <(NCActiveWorldTime left, NCActiveWorldTime right) => left.Ticks < right.Ticks;
+    public static bool operator <=(NCActiveWorldTime left, NCActiveWorldTime right) => left.Ticks <= right.Ticks;
+    public static bool operator >(NCActiveWorldTime left, NCActiveWorldTime right) => left.Ticks > right.Ticks;
+    public static bool operator >=(NCActiveWorldTime left, NCActiveWorldTime right) => left.Ticks >= right.Ticks;
 }

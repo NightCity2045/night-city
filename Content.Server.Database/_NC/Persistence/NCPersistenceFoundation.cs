@@ -104,6 +104,7 @@ public sealed class NCOutboxMessage
 public sealed class NCActiveWorldClockRecord
 {
     [Key]
+    [Column("id")]
     public byte Id { get; set; }
 
     public Guid SessionEpoch { get; set; }

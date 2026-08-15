@@ -4,6 +4,8 @@
 
 using System.Linq;
 using Content.Server._NC.Combat.Targeting;
+using Content.Server._NC.LivingCity.Actors;
+using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
@@ -41,6 +43,7 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
     [Dependency] private SharedChargesSystem _charges = default!;
     [Dependency] private NCTargetingSelectionSystem _targeting = default!;
     [Dependency] private NCTreatmentSystem _treatment = default!;
+    [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
 
     public override void Initialize()
     {
@@ -83,6 +86,9 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
 
         if (_doAfter.TryStartDoAfter(doAfter))
         {
+            _dematerialization.BeginBlocker(
+                patient,
+                NCCityDematerializationBlockerFlags.PlayerTreatment);
             _popup.PopupEntity(Loc.GetString("nc-medical-treatment-started"), patient, user);
             return true;
         }
@@ -92,6 +98,9 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
 
     private void OnManualPressureDoAfter(Entity<NCMedicalBodyComponent> patient, ref NCTreatmentDoAfterEvent args)
     {
+        _dematerialization.EndBlocker(
+            patient.Owner,
+            NCCityDematerializationBlockerFlags.PlayerTreatment);
         if (args.Handled || args.Cancelled || args.Target != patient.Owner ||
             !_prototypes.TryIndex(args.Capability, out NCTreatmentCapabilityPrototype? capability) ||
             capability.Kind != NCTreatmentKind.Pressure)
@@ -153,11 +162,22 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
         };
 
         if (_doAfter.TryStartDoAfter(doAfter))
+        {
+            _dematerialization.BeginBlocker(
+                patient,
+                NCCityDematerializationBlockerFlags.PlayerTreatment);
             _popup.PopupEntity(Loc.GetString("nc-medical-treatment-started"), patient, args.User);
+        }
     }
 
     private void OnDoAfter(Entity<NCTreatmentItemComponent> item, ref NCTreatmentDoAfterEvent args)
     {
+        if (args.Target is { } blockerTarget)
+        {
+            _dematerialization.EndBlocker(
+                blockerTarget,
+                NCCityDematerializationBlockerFlags.PlayerTreatment);
+        }
         if (args.Handled || args.Cancelled || args.Target is not { } patient || args.Used != item.Owner)
             return;
 

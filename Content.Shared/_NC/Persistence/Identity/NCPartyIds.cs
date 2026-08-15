@@ -27,6 +27,25 @@ public readonly record struct NCActorId(Guid Value)
 }
 
 /// <summary>
+/// Stable identity of a persistent strategic or social actor group. Groups are not runtime ECS entities.
+/// </summary>
+[Serializable, NetSerializable]
+public readonly record struct NCGroupId(Guid Value)
+{
+    public bool IsValid => Value != Guid.Empty;
+
+    public static NCGroupId New()
+    {
+        return new NCGroupId(Guid.NewGuid());
+    }
+
+    public override string ToString()
+    {
+        return Value.ToString("D");
+    }
+}
+
+/// <summary>
 /// Stable identity of an organization that can own assets or enter agreements.
 /// </summary>
 [Serializable, NetSerializable]
@@ -94,6 +113,63 @@ public readonly record struct NCEstateId(Guid Value)
     public static NCEstateId New()
     {
         return new NCEstateId(Guid.NewGuid());
+    }
+
+    public override string ToString()
+    {
+        return Value.ToString("D");
+    }
+}
+
+/// <summary>
+/// Stable identity of one money account. An account is persistent and never represented by an ECS entity.
+/// </summary>
+[Serializable, NetSerializable]
+public readonly record struct NCAccountId(Guid Value)
+{
+    public bool IsValid => Value != Guid.Empty;
+
+    public static NCAccountId New()
+    {
+        return new NCAccountId(Guid.NewGuid());
+    }
+
+    public override string ToString()
+    {
+        return Value.ToString("D");
+    }
+}
+
+/// <summary>
+/// Stable identity of one immutable ledger transaction.
+/// </summary>
+[Serializable, NetSerializable]
+public readonly record struct NCTransactionId(Guid Value)
+{
+    public bool IsValid => Value != Guid.Empty;
+
+    public static NCTransactionId New()
+    {
+        return new NCTransactionId(Guid.NewGuid());
+    }
+
+    public override string ToString()
+    {
+        return Value.ToString("D");
+    }
+}
+
+/// <summary>
+/// Stable identity of a concrete employment relation. It is distinct from both employee and employer.
+/// </summary>
+[Serializable, NetSerializable]
+public readonly record struct NCEmploymentId(Guid Value)
+{
+    public bool IsValid => Value != Guid.Empty;
+
+    public static NCEmploymentId New()
+    {
+        return new NCEmploymentId(Guid.NewGuid());
     }
 
     public override string ToString()
@@ -219,5 +295,46 @@ public readonly record struct NCPartyRef(
         return Kind == NCPartyKind.Character
             ? $"character:{CharacterId}"
             : $"{Kind.ToString().ToLowerInvariant()}:{PersistentId:D}";
+    }
+
+    /// <summary>
+    /// Parses the canonical storage key emitted by <see cref="ToString"/>. Arbitrary untyped strings are rejected.
+    /// </summary>
+    public static bool TryParse(string value, out NCPartyRef party)
+    {
+        party = default;
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        var separator = value.IndexOf(':');
+        if (separator < 1 || separator == value.Length - 1)
+            return false;
+
+        var kindValue = value[..separator];
+        var identityValue = value[(separator + 1)..];
+        if (kindValue.Equals("character", StringComparison.OrdinalIgnoreCase) &&
+            NCCharacterId.TryParse(identityValue, out var characterId))
+        {
+            party = ForCharacter(characterId);
+            return true;
+        }
+
+        if (!Guid.TryParse(identityValue, out var persistentId) || persistentId == Guid.Empty)
+            return false;
+
+        var kind = kindValue.ToLowerInvariant() switch
+        {
+            "actor" => NCPartyKind.Actor,
+            "organization" => NCPartyKind.Organization,
+            "business" => NCPartyKind.Business,
+            "cityservice" => NCPartyKind.CityService,
+            "estate" => NCPartyKind.Estate,
+            _ => NCPartyKind.None,
+        };
+        if (kind == NCPartyKind.None)
+            return false;
+
+        party = new NCPartyRef(kind, default, persistentId);
+        return party.IsValid;
     }
 }
