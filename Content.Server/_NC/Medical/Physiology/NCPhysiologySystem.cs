@@ -64,7 +64,7 @@ public sealed partial class NCPhysiologySystem : EntitySystem
     {
         var circulation = EnsureComp<NCCirculationComponent>(body);
         var physiology = EnsureComp<NCPhysiologyComponent>(body);
-        if (circulation.Initialized && !string.IsNullOrWhiteSpace(circulation.Profile.Id))
+        if (circulation.StateInitialized && !string.IsNullOrWhiteSpace(circulation.Profile.Id))
         {
             // Older authoritative snapshots predate the compatibility token. Migrate the empty value from
             // the same physiology profile instead of inventing a code-side blood type.
@@ -79,7 +79,7 @@ public sealed partial class NCPhysiologySystem : EntitySystem
         var profile = GetDefaultProfile();
         ValidateProfile(profile);
         circulation.Profile = profile.ID;
-        circulation.Initialized = true;
+        circulation.StateInitialized = true;
         circulation.BloodVolume = profile.NominalBloodVolume;
         circulation.EffectiveCirculatingVolume = profile.NominalBloodVolume;
         circulation.CardiacOutput = 1f;
@@ -106,7 +106,7 @@ public sealed partial class NCPhysiologySystem : EntitySystem
         ValidateProfile(profile);
         var circulation = EnsureComp<NCCirculationComponent>(body);
         circulation.Profile = profile.ID;
-        circulation.Initialized = true;
+        circulation.StateInitialized = true;
         circulation.BloodVolume = profile.NominalBloodVolume;
         circulation.EffectiveCirculatingVolume = profile.NominalBloodVolume;
         circulation.CardiacOutput = 1f;

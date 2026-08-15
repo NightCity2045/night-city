@@ -27,6 +27,11 @@ namespace Content.IntegrationTests.Tests._NC.Medical;
 [TestOf(typeof(NCSurgeryInteractionSystem))]
 public sealed class NCMedicalGameplayInteractionTest : GameTest
 {
+    private static readonly ProtoId<NCTreatmentCapabilityPrototype> FieldBandageCapability =
+        "NCFieldBandageCapability";
+    private static readonly ProtoId<NCEmergencyCareCapabilityPrototype> ManualVentilatorCapability =
+        "NCManualVentilatorCapability";
+
     [SidedDependency(Side.Server)] private IPrototypeManager _prototypes = default!;
     [SidedDependency(Side.Server)] private NCTargetingSelectionSystem _targeting = default!;
     [SidedDependency(Side.Server)] private NCTreatmentInteractionSystem _treatment = default!;
@@ -75,8 +80,8 @@ public sealed class NCMedicalGameplayInteractionTest : GameTest
     [RunOnSide(Side.Server)]
     public void GameplayItemsExposeTimedConsumableAndPreparationContracts()
     {
-        var bandageCapability = _prototypes.Index<NCTreatmentCapabilityPrototype>("NCFieldBandageCapability");
-        var ventilationCapability = _prototypes.Index<NCEmergencyCareCapabilityPrototype>("NCManualVentilatorCapability");
+        var bandageCapability = _prototypes.Index(FieldBandageCapability);
+        var ventilationCapability = _prototypes.Index(ManualVentilatorCapability);
         var bandage = SSpawn("Gauze");
         var ventilator = SSpawn("NCManualVentilator");
         var cautery = SSpawn("Cautery");

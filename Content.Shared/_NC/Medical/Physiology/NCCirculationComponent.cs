@@ -16,8 +16,8 @@ public sealed partial class NCCirculationComponent : Component
     [DataField]
     public ProtoId<NCPhysiologyProfilePrototype> Profile;
 
-    [DataField]
-    public bool Initialized;
+    [DataField("initialized")]
+    public bool StateInitialized;
 
     [DataField]
     public float BloodVolume;

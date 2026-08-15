@@ -98,7 +98,7 @@ public sealed partial class NCTransplantRejectionSystem : EntitySystem
 
         var state = EnsureComp<NCTransplantRejectionComponent>(organRoot);
         state.Profile = defaults[0].ID;
-        state.Initialized = true;
+        state.StateInitialized = true;
         state.DonorKind = identity.DonorKind;
         state.DonorKey = identity.DonorKey;
         state.RecipientKind = recipient.Kind;
@@ -122,7 +122,7 @@ public sealed partial class NCTransplantRejectionSystem : EntitySystem
         foreach (var organ in CollectGrafts(body))
         {
             var state = Comp<NCTransplantRejectionComponent>(organ);
-            if (!state.Initialized && !ReconcileGraft(body, organ) ||
+            if (!state.StateInitialized && !ReconcileGraft(body, organ) ||
                 !_prototypes.TryIndex(state.Profile, out NCTransplantRejectionProfilePrototype? profile) ||
                 !ValidateProfile(profile))
             {

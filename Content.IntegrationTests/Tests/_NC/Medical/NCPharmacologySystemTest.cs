@@ -30,6 +30,7 @@ namespace Content.IntegrationTests.Tests._NC.Medical;
 public sealed class NCPharmacologySystemTest : GameTest
 {
     private static readonly EntProtoId HumanMob = "MobHuman";
+    private static readonly ProtoId<ReagentPrototype> CyberwareCoolantAgent = "NCCyberwareCoolantAgent";
 
     [SidedDependency(Side.Server)] private IPrototypeManager _prototypes = default!;
     [SidedDependency(Side.Server)] private NCPharmacologySystem _pharmacology = default!;
@@ -103,7 +104,7 @@ public sealed class NCPharmacologySystemTest : GameTest
             .ToHashSet();
         Assert.That(bridged, Is.EquivalentTo(drugs.Select(drug => (ProtoId<NCDrugProfilePrototype>) drug.ID)));
 
-        var coolantBridge = _prototypes.Index<ReagentPrototype>("NCCyberwareCoolantAgent")
+        var coolantBridge = _prototypes.Index(CyberwareCoolantAgent)
             .Metabolisms!.Metabolisms.Values
             .SelectMany(entry => entry.Effects)
             .OfType<NCApplyCyberwareServiceAgent>()

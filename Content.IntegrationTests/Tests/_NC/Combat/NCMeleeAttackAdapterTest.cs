@@ -27,7 +27,9 @@ namespace Content.IntegrationTests.Tests._NC.Combat;
 public sealed class NCMeleeAttackAdapterTest : GameTest
 {
     private static readonly ProtoId<DamageTypePrototype> Blunt = "Blunt";
+    private static readonly ProtoId<DamageTypePrototype> Heat = "Heat";
     private static readonly ProtoId<DamageTypePrototype> Piercing = "Piercing";
+    private static readonly ProtoId<DamageTypePrototype> Shock = "Shock";
 
     [SidedDependency(Side.Server)] private IPrototypeManager _prototypes = default!;
     [SidedDependency(Side.Server)] private DamageableSystem _damageable = default!;
@@ -132,7 +134,7 @@ public sealed class NCMeleeAttackAdapterTest : GameTest
         var attacker = SSpawn("MobHuman");
         var target = SSpawn("MobHuman");
         var weapon = SSpawn(null);
-        var damage = new DamageSpecifier(_prototypes.Index<DamageTypePrototype>("Heat"), 8);
+        var damage = new DamageSpecifier(_prototypes.Index(Heat), 8);
         damage.DamageDict["Radiation"] = FixedPoint2.New(50);
 
         _melee.BeginAttack(attacker, weapon, target);
@@ -157,7 +159,7 @@ public sealed class NCMeleeAttackAdapterTest : GameTest
         var attacker = SSpawn("MobHuman");
         var target = SSpawn("MobHuman");
         var weapon = SSpawn(null);
-        var damage = new DamageSpecifier(_prototypes.Index<DamageTypePrototype>("Shock"), 6);
+        var damage = new DamageSpecifier(_prototypes.Index(Shock), 6);
 
         _melee.BeginAttack(attacker, weapon, target);
         Assert.That(_melee.TryApplyImpact(attacker, weapon, target, damage, Vector2.UnitX, out _), Is.True);

@@ -45,7 +45,6 @@ public sealed class NCBloodIntegrationTest : GameTest
     private static readonly EntProtoId HumanMob = "MobHuman";
 
     [SidedDependency(Side.Server)] private NCCirculationBloodSystem _blood = default!;
-    [SidedDependency(Side.Server)] private NCBleedingSystem _bleeding = default!;
     [SidedDependency(Side.Server)] private NCEmergencyCareSystem _emergency = default!;
     [SidedDependency(Side.Server)] private NCPhysiologySystem _physiology = default!;
     [SidedDependency(Side.Server)] private NCAnatomySystem _anatomy = default!;

@@ -166,7 +166,7 @@ public sealed partial class NCMedicalPersistenceSystem
             result.Rejection = new NCTransplantRejectionStateSnapshot
             {
                 Profile = rejection.Profile,
-                Initialized = rejection.Initialized,
+                Initialized = rejection.StateInitialized,
                 DonorKind = rejection.DonorKind,
                 DonorKey = rejection.DonorKey,
                 RecipientKind = rejection.RecipientKind,
@@ -385,7 +385,7 @@ public sealed partial class NCMedicalPersistenceSystem
         return new NCCirculationStateSnapshot
         {
             Profile = circulation.Profile,
-            Initialized = circulation.Initialized,
+            Initialized = circulation.StateInitialized,
             BloodVolume = circulation.BloodVolume,
             EffectiveCirculatingVolume = circulation.EffectiveCirculatingVolume,
             CardiacOutput = circulation.CardiacOutput,
@@ -528,7 +528,7 @@ public sealed partial class NCMedicalPersistenceSystem
             {
                 var rejection = EnsureComp<NCTransplantRejectionComponent>(organ);
                 rejection.Profile = rejectionState.Profile;
-                rejection.Initialized = rejectionState.Initialized;
+                rejection.StateInitialized = rejectionState.Initialized;
                 rejection.DonorKind = rejectionState.DonorKind;
                 rejection.DonorKey = rejectionState.DonorKey;
                 rejection.RecipientKind = rejectionState.RecipientKind;
@@ -779,7 +779,7 @@ public sealed partial class NCMedicalPersistenceSystem
     {
         var circulation = EnsureComp<NCCirculationComponent>(character);
         circulation.Profile = state.Profile;
-        circulation.Initialized = state.Initialized;
+        circulation.StateInitialized = state.Initialized;
         circulation.BloodVolume = state.BloodVolume;
         circulation.EffectiveCirculatingVolume = state.EffectiveCirculatingVolume;
         circulation.CardiacOutput = state.CardiacOutput;

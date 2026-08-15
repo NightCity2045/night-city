@@ -16,8 +16,8 @@ public sealed partial class NCPharmacologyComponent : Component
     [DataField]
     public ProtoId<NCPharmacologyProfilePrototype> Profile;
 
-    [DataField]
-    public bool Initialized;
+    [DataField("initialized")]
+    public bool StateInitialized;
 
     [DataField]
     public Dictionary<ProtoId<NCDrugProfilePrototype>, NCActiveDrugExposure> ActiveDrugs = new();

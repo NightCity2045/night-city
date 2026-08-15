@@ -17,8 +17,8 @@ public sealed partial class NCTransplantRejectionComponent : Component
     [DataField]
     public ProtoId<NCTransplantRejectionProfilePrototype> Profile;
 
-    [DataField]
-    public bool Initialized;
+    [DataField("initialized")]
+    public bool StateInitialized;
 
     [DataField]
     public NCMedicalStableOwnerKind DonorKind;

@@ -43,8 +43,8 @@ public sealed partial class NCWorldWoundOverlaySystem : EntitySystem
     /// </summary>
     public bool ShouldRenderWorldWounds(EntityUid uid)
     {
-        return TryComp<MetaDataComponent>(uid, out var meta) &&
-               TryComp<TransformComponent>(uid, out var xform) &&
+        return TryComp(uid, out MetaDataComponent? meta) &&
+               TryComp(uid, out TransformComponent? xform) &&
                !_containers.IsEntityOrParentInContainer(uid, meta, xform);
     }
 

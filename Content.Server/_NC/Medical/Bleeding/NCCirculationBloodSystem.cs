@@ -249,7 +249,7 @@ public sealed partial class NCCirculationBloodSystem : EntitySystem
         upstream = default!;
         if (!HasComp<NCMedicalBodyComponent>(body) ||
             !TryComp<NCCirculationComponent>(body, out var resolvedCirculation) ||
-            !resolvedCirculation.Initialized ||
+            !resolvedCirculation.StateInitialized ||
             !_prototypes.TryIndex(resolvedCirculation.Profile, out var resolvedProfile) ||
             resolvedProfile.NominalBloodVolume <= 0f ||
             !float.IsFinite(resolvedProfile.NominalBloodVolume) ||
