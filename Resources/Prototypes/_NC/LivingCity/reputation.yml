@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncReputationPolicy
+  id: Default
+  maximumScore: 1000
+  maximumVisibility: 1000
+  maximumEvidence: 1000000
+  maximumEffectMagnitude: 10
+  maximumSingleEffectDelta: 1000
+  maximumEntriesPerSubject: 512
+  maximumQueryCount: 100
+
+- type: ncReputationDomain
+  id: NightCityPublic
+  stableKey: night-city-public
+  channel: Public
+
+- type: ncReputationDomain
+  id: GeneralProfessional
+  stableKey: general-professional
+  channel: Professional
+
+- type: ncReputationEffect
+  id: ReputationReliableAction
+  allowedChannels:
+  - Personal
+  - Faction
+  - Professional
+  - Public
+  scoreDelta: 50
+  visibilityDelta: 15
+  evidenceDelta: 1
+
+- type: ncReputationEffect
+  id: ReputationBetrayal
+  allowedChannels:
+  - Personal
+  - Faction
+  - Professional
+  - Public
+  scoreDelta: -150
+  visibilityDelta: 80
+  evidenceDelta: 1
+
+- type: ncReputationEffect
+  id: ReputationPublicViolence
+  allowedChannels:
+  - Faction
+  - Professional
+  - Public
+  scoreDelta: -30
+  visibilityDelta: 140
+  evidenceDelta: 1

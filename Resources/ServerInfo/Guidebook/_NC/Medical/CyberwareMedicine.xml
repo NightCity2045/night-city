@@ -1,12 +1,12 @@
 <Document>
-# Киберимпланты
+# Cyberware
 
-## Диагностика
+## Diagnostics
 
-1. Поместите пациента в [color=#58e6d9]MedicalScanner[/color].
-2. Откройте [color=#58e6d9]computerBodyScanner[/color].
-3. Откройте вкладку [color=#58e6d9]Cyberware[/color].
-4. Проверьте слот, целостность, питание, нагрев, ЭМИ-блокировку, нейросвязь и функциональность.
+1. Place the patient in [color=#58e6d9]MedicalScanner[/color].
+2. Open [color=#58e6d9]computerBodyScanner[/color].
+3. Open the [color=#58e6d9]Cyberware[/color] tab.
+4. Check the slot, integrity, power, heat, EMP lockout, neural link, and functionality.
 
 <Box>
 <GuideEntityEmbed Entity="MedicalScanner"/>
@@ -14,57 +14,57 @@
 <GuideEntityEmbed Entity="NCSyringeCyberwareCoolantAgent"/>
 </Box>
 
-## Внутренние модули
+## Internal modules
 
-- [color=#58e6d9]Neural link Mk.1[/color]: физический предмет NCImplantNeuralLinkMk1; цель Head; слот NCSlotNeuralCore.
-- [color=#58e6d9]Circulatory assist pump Mk.1[/color]: физический предмет NCImplantCirculatoryAssistMk1; цель Chest; слот NCSlotThoracicSupport.
+- [color=#58e6d9]Neural link Mk.1[/color]: physical item NCImplantNeuralLinkMk1; target Head; slot NCSlotNeuralCore.
+- [color=#58e6d9]Circulatory assist pump Mk.1[/color]: physical item NCImplantCirculatoryAssistMk1; target Chest; slot NCSlotThoracicSupport.
 
-### Установка внутреннего модуля
+### Installing an internal module
 
-1. Возьмите модуль во вторую руку или положите рядом.
-2. Выберите Head для neural link либо Chest для circulatory assist pump.
-3. Выполните: Cautery → Scalpel → Hemostat → Retractor → Multitool → Retractor → MedicatedSuture.
-4. Подтвердите модуль во вкладке Cyberware полного сканера.
+1. Take the module in the off hand or place it nearby.
+2. Select Head for the neural link or Chest for the circulatory assist pump.
+3. Perform: Cautery → Scalpel → Hemostat → Retractor → Multitool → Retractor → MedicatedSuture.
+4. Confirm the module in the Cyberware tab of the full scanner.
 
-### Удаление внутреннего модуля
+### Removing an internal module
 
-1. Выберите Head либо Chest с установленным модулем.
-2. Выполните: Cautery → Scalpel → Hemostat → Retractor → Multitool → Retractor → MedicatedSuture.
-3. Извлечённый модуль становится физическим предметом.
+1. Select Head or Chest with an installed module.
+2. Perform: Cautery → Scalpel → Hemostat → Retractor → Multitool → Retractor → MedicatedSuture.
+3. The removed module becomes a physical item.
 
-## Механические замены
+## Mechanical replacements
 
-- [color=#58e6d9]Industrial cyberarm[/color]: NCOrganHumanCyberArmLeft или NCOrganHumanCyberArmRight; заменяет соответствующую руку.
-- [color=#58e6d9]Cyberoptics Mk.1[/color]: NCOrganHumanCyberEyes; заменяет глаза.
-- [color=#58e6d9]Cyberheart Mk.1[/color]: NCOrganHumanCyberHeart; заменяет сердце.
+- [color=#58e6d9]Industrial cyberarm[/color]: NCOrganHumanCyberArmLeft or NCOrganHumanCyberArmRight; replaces the matching arm.
+- [color=#58e6d9]Cyberoptics Mk.1[/color]: NCOrganHumanCyberEyes; replaces the eyes.
+- [color=#58e6d9]Cyberheart Mk.1[/color]: NCOrganHumanCyberHeart; replaces the heart.
 
-### Установка киберруки
+### Installing a cyberarm
 
-1. Выберите соответствующую руку.
-2. Удалите старую конечность операцией [color=#58e6d9]Ампутация конечности[/color].
-3. Возьмите соответствующую левую или правую киберруку либо положите её рядом.
-4. На свободной категории выполните [color=#58e6d9]Повторное присоединение конечности[/color]: Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
+1. Select the matching arm.
+2. Remove the old limb using the [color=#58e6d9]Limb amputation[/color] operation.
+3. Take the matching left or right cyberarm, or place it nearby.
+4. On the empty category, perform [color=#58e6d9]Limb reattachment[/color]: Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
 
-### Установка киберглаз
+### Installing cyberoptics
 
-1. Выберите Head.
-2. Выполните [color=#58e6d9]Удаление глаза[/color].
-3. Разместите NCOrganHumanCyberEyes в руке или рядом.
-4. Выполните [color=#58e6d9]Трансплантацию глаза[/color]: Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
+1. Select Head.
+2. Perform [color=#58e6d9]Eye removal[/color].
+3. Place NCOrganHumanCyberEyes in hand or nearby.
+4. Perform [color=#58e6d9]Eye transplantation[/color]: Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
 
-### Установка киберсердца
+### Installing a cyberheart
 
-1. Выберите Chest.
-2. Выполните [color=#58e6d9]Удаление внутреннего органа — heart[/color].
-3. Разместите NCOrganHumanCyberHeart в руке или рядом.
-4. Выполните [color=#58e6d9]Трансплантацию внутреннего органа — heart[/color]: Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
+1. Select Chest.
+2. Perform [color=#58e6d9]Internal organ removal — heart[/color].
+3. Place NCOrganHumanCyberHeart in hand or nearby.
+4. Perform [color=#58e6d9]Internal organ transplantation — heart[/color]: Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
 
-После присоединения механическая часть занимает обычную категорию живого графа органов и получает связанную нейрокалибровку.
+After attachment, the mechanical part occupies the normal category in the living organ graph and receives the linked neural calibration.
 
-## Обслуживание
+## Maintenance
 
-- Cyberware coolant agent распределяется между совместимыми модулями с дефицитом охлаждения и снижает нагрев.
-- Сервисный ремонт восстанавливает только параметры, заданные профилем ремонтного средства.
-- Механическая травма уменьшает целостность и функцию киберчасти без создания органической раны.
-- ЭМИ временно отключает модуль и может повредить нейроинтерфейс.
+- Cyberware coolant agent distributes across compatible modules with cooling deficits and reduces heat.
+- Service repair restores only the parameters defined by the repair item profile.
+- Mechanical trauma reduces cyber-part integrity and function without creating an organic wound.
+- EMP temporarily disables the module and can damage the neural interface.
 </Document>

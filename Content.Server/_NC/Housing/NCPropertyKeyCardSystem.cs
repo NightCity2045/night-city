@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using Content.Server.Doors.Systems;
 using Content.Server.Popups;
+using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.Housing.Components;
 using Content.Shared.Doors;
 using Content.Shared.Doors.Components;
@@ -21,6 +22,7 @@ public sealed partial class NCPropertyKeyCardSystem : EntitySystem
 {
     [Dependency] private DoorSystem _doors = default!;
     [Dependency] private PopupSystem _popup = default!;
+    [Dependency] private NCActiveWorldTimeSystem _clock = default!;
 
     private readonly HashSet<(EntityUid Door, EntityUid User)> _authorizedSwipes = [];
 
@@ -49,10 +51,11 @@ public sealed partial class NCPropertyKeyCardSystem : EntitySystem
             return;
 
         args.Handled = true;
-        if (!entity.Comp.Enabled || card.PropertyId != entity.Comp.PropertyId ||
+        if (!_clock.TryGetCurrentTime(out _, out var now) || !entity.Comp.Enabled ||
+            card.PropertyId != entity.Comp.PropertyId ||
             card.AccessRevision != entity.Comp.AccessRevision ||
             !card.Permissions.HasFlag(entity.Comp.RequiredPermission) ||
-            card.ValidUntil is { } expiry && expiry <= DateTime.UtcNow)
+            card.ValidUntil is { } expiry && expiry <= now)
         {
             _popup.PopupEntity(Loc.GetString("nc-property-card-denied"), entity.Owner, args.User);
             return;

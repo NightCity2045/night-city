@@ -56,6 +56,29 @@ public sealed record NCSetAccountStatusRequest(
 
 public sealed record NCLedgerLegRequest(NCAccountId AccountId, long ExpectedVersion, long Amount);
 
+/// <summary>
+/// Already validated non-ledger aggregate mutation that must commit in the same database transaction as money.
+/// The owning domain remains responsible for all gameplay rules and for reloading its snapshot on command replay.
+/// </summary>
+public sealed record NCAtomicLedgerParticipantWrite(
+    Guid EventId,
+    string EventType,
+    string AggregateType,
+    string AggregateId,
+    long ExpectedAggregateVersion,
+    int SnapshotFormatVersion,
+    string SnapshotPayload,
+    string EventPayload);
+
+/// <summary>
+/// Reliable message attached to one participant event in an atomic ledger settlement.
+/// </summary>
+public sealed record NCAtomicLedgerOutboxWrite(
+    Guid MessageId,
+    Guid EventId,
+    string MessageType,
+    string Payload);
+
 public sealed record NCPostLedgerTransactionRequest(
     Guid CommandId,
     NCTransactionId TransactionId,
@@ -65,7 +88,9 @@ public sealed record NCPostLedgerTransactionRequest(
     NCPartyRef Initiator,
     Guid CorrelationId,
     Guid? CausationId = null,
-    string AuditSource = "system");
+    string AuditSource = "system",
+    IReadOnlyList<NCAtomicLedgerParticipantWrite>? ParticipantWrites = null,
+    IReadOnlyList<NCAtomicLedgerOutboxWrite>? ParticipantOutboxMessages = null);
 
 public sealed record NCEconomyMutationResult(
     NCEconomyMutationStatus Status,
@@ -86,4 +111,3 @@ public sealed class NCAccountPersistedEvent(
     public long Balance { get; } = balance;
     public NCAccountStatus Status { get; } = status;
 }
-

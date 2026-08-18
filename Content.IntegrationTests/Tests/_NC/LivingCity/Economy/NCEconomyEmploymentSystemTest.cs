@@ -6,6 +6,8 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Content.IntegrationTests.Fixtures;
+using Content.Server.Database;
+using Content.Server._NC.Bank;
 using Content.Server.GameTicking;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Economy;
@@ -13,6 +15,7 @@ using Content.Server._NC.LivingCity.Employment;
 using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.City.Zones;
+using Content.Shared._NC.Bank;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Economy;
 using Content.Shared._NC.LivingCity.Employment;
@@ -108,6 +111,136 @@ public sealed class NCEconomyEmploymentSystemTest : GameTest
         new(Guid.Parse("6a8f1971-e7ee-472a-b985-bf3557b8c13e"));
     private static readonly ProtoId<NCCityActorArchetypePrototype> Archetype =
         new("NCEconomyEmploymentIntegrationActor");
+
+    [Test]
+    public async Task FinanceAdapterReloadsCurrentVersionsAndPagesImmutableHistory()
+    {
+        var server = Pair.Server;
+        var clock = server.System<NCActiveWorldTimeSystem>();
+        var directory = server.System<NCPartyDirectorySystem>();
+        var ledger = server.System<NCEconomyLedgerSystem>();
+        var finance = server.System<NCPartyFinanceAdapterSystem>();
+        var database = server.ResolveDependency<IServerDbManager>();
+        await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(
+            EventSource.Local,
+            new GameRunLevelChangedEvent(GameRunLevel.PreRoundLobby, GameRunLevel.InRound)));
+        await WaitUntil(server, () => clock.IsReady, "The active-world clock did not start.");
+
+        var organization = NCPartyRef.ForOrganization(NCOrganizationId.New());
+        var business = NCPartyRef.ForBusiness(NCBusinessId.New());
+        Assert.That((await directory.RegisterAsync(new NCPartyDirectoryRegisterRequest(
+            Guid.NewGuid(), organization, "History Test Organization", Guid.NewGuid(),
+            AuditSource: "integration-test"))).Status, Is.EqualTo(NCPartyDirectoryMutationStatus.Applied));
+        Assert.That((await directory.RegisterAsync(new NCPartyDirectoryRegisterRequest(
+            Guid.NewGuid(), business, "History Test Business", Guid.NewGuid(),
+            AuditSource: "integration-test"))).Status, Is.EqualTo(NCPartyDirectoryMutationStatus.Applied));
+
+        var organizationAccount = await finance.EnsurePrimaryAccountAsync(organization, "integration-test");
+        var businessAccount = await finance.EnsurePrimaryAccountAsync(business, "integration-test");
+        var clearingAccount = await finance.EnsureIssuanceAccountAsync("integration-test");
+        Assert.Multiple(() =>
+        {
+            Assert.That(organizationAccount.IsResolved, Is.True);
+            Assert.That(businessAccount.IsResolved, Is.True);
+            Assert.That(clearingAccount.IsResolved, Is.True);
+        });
+
+        var openingTransactionId = NCTransactionId.New();
+        var opening = await ledger.PostTransactionAsync(new NCPostLedgerTransactionRequest(
+            Guid.NewGuid(),
+            openingTransactionId,
+            NCLedgerTransactionKind.OpeningBalance,
+            "history test opening balance",
+            [
+                new NCLedgerLegRequest(clearingAccount.AccountId, clearingAccount.Account!.AggregateVersion, -500),
+                new NCLedgerLegRequest(organizationAccount.AccountId, organizationAccount.Account!.AggregateVersion, 500),
+            ],
+            clearingAccount.Owner,
+            Guid.NewGuid(),
+            AuditSource: "integration-test"));
+        Assert.That(opening.Status, Is.EqualTo(NCEconomyMutationStatus.Applied));
+
+        var transferTransactionId = NCTransactionId.New();
+        var transfer = await finance.TransferAsync(new NCPartyTransferRequest(
+            Guid.NewGuid(),
+            transferTransactionId,
+            organization,
+            business,
+            125,
+            NCLedgerTransactionKind.Transfer,
+            "history test transfer",
+            organization,
+            Guid.NewGuid(),
+            AuditSource: "integration-test"));
+        Assert.That(transfer.Status, Is.EqualTo(NCEconomyMutationStatus.Applied));
+
+        var firstPage = await finance.GetTransactionHistoryAsync(organization, null, 1);
+        var secondPage = await finance.GetTransactionHistoryAsync(
+            organization,
+            firstPage.NextBeforeAggregateVersion,
+            1);
+        Assert.Multiple(() =>
+        {
+            Assert.That(firstPage.IsValid, Is.True);
+            Assert.That(firstPage.Entries, Has.Count.EqualTo(1));
+            Assert.That(firstPage.Entries[0].Transaction.Snapshot.TransactionId,
+                Is.EqualTo(transferTransactionId));
+            Assert.That(firstPage.NextBeforeAggregateVersion, Is.EqualTo(3));
+            Assert.That(secondPage.IsValid, Is.True);
+            Assert.That(secondPage.Entries, Has.Count.EqualTo(1));
+            Assert.That(secondPage.Entries[0].Transaction.Snapshot.TransactionId,
+                Is.EqualTo(openingTransactionId));
+            Assert.That(firstPage.Entries[0].RecordedAt, Is.Not.EqualTo(default(DateTime)));
+        });
+
+        // Housing and other aggregate owners use the ledger request directly. This synthetic participant verifies
+        // that their state and money commit once under the same idempotent command.
+        var currentOrganization = await finance.GetPrimaryAccountAsync(organization, true);
+        var currentBusiness = await finance.GetPrimaryAccountAsync(business, true);
+        Assert.That(currentOrganization, Is.Not.Null);
+        Assert.That(currentBusiness, Is.Not.Null);
+        var participantEventId = Guid.NewGuid();
+        var participantRequest = new NCPostLedgerTransactionRequest(
+            Guid.NewGuid(),
+            NCTransactionId.New(),
+            NCLedgerTransactionKind.Adjustment,
+            "atomic participant test",
+            [
+                new NCLedgerLegRequest(currentBusiness!.Snapshot.AccountId, currentBusiness.AggregateVersion, -25),
+                new NCLedgerLegRequest(currentOrganization!.Snapshot.AccountId, currentOrganization.AggregateVersion, 25),
+            ],
+            business,
+            Guid.NewGuid(),
+            AuditSource: "integration-test",
+            ParticipantWrites:
+            [
+                new NCAtomicLedgerParticipantWrite(
+                    participantEventId,
+                    "living-city.test-settlement.committed",
+                    "living-city.test-settlement",
+                    "settlement-1",
+                    0,
+                    1,
+                    "{\"state\":\"committed\"}",
+                    "{\"amount\":25}"),
+            ]);
+        var participantApplied = await ledger.PostTransactionAsync(participantRequest);
+        var participantDuplicate = await ledger.PostTransactionAsync(participantRequest);
+        var participantSnapshot = await database.GetNCAggregateSnapshotAsync(
+            "living-city.test-settlement",
+            "settlement-1");
+        Assert.Multiple(() =>
+        {
+            Assert.That(participantApplied.Status, Is.EqualTo(NCEconomyMutationStatus.Applied));
+            Assert.That(participantDuplicate.Status, Is.EqualTo(NCEconomyMutationStatus.Duplicate));
+            Assert.That(participantSnapshot?.AggregateVersion, Is.EqualTo(1));
+            Assert.That(participantSnapshot?.Payload, Is.EqualTo("{\"state\":\"committed\"}"));
+            Assert.That(participantApplied.Accounts.Single(account => account.Snapshot.Owner == organization)
+                .Snapshot.Balance, Is.EqualTo(400));
+            Assert.That(participantDuplicate.Accounts.Single(account => account.Snapshot.Owner == business)
+                .Snapshot.Balance, Is.EqualTo(100));
+        });
+    }
 
     [Test]
     public async Task PartyLedgerAndEmploymentRemainTypedBalancedAndIdempotent()
@@ -208,7 +341,7 @@ public sealed class NCEconomyEmploymentSystemTest : GameTest
             Guid.NewGuid(),
             NCTransactionId.New(),
             NCLedgerTransactionKind.OpeningBalance,
-            "legacy organization opening balance",
+            "organization opening balance",
             [
                 new NCLedgerLegRequest(clearingAccountId, 1, -1_000),
                 new NCLedgerLegRequest(organizationAccountId, 1, 1_000),

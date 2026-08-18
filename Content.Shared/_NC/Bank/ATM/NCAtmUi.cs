@@ -4,6 +4,7 @@
 
 using Robust.Shared.Serialization;
 using Content.Shared.Database._NC.Police;
+using Content.Shared._NC.LivingCity.Police;
 
 namespace Content.Shared._NC.Bank.ATM;
 
@@ -16,7 +17,7 @@ public enum NCAtmUiKey : byte
 [Serializable, NetSerializable]
 public sealed class NCAtmBoundUserInterfaceState : BoundUserInterfaceState
 {
-    public readonly int BankBalance;
+    public readonly long BankBalance;
     public readonly string AccountNumber;
     public readonly bool IsLoggedIn;
     public readonly float TaxRate;
@@ -25,7 +26,7 @@ public sealed class NCAtmBoundUserInterfaceState : BoundUserInterfaceState
     public readonly List<NCAtmFineSummary> Fines;
 
     public NCAtmBoundUserInterfaceState(
-        int bankBalance,
+        long bankBalance,
         string accountNumber,
         bool isLoggedIn,
         float taxRate,
@@ -63,11 +64,11 @@ public sealed class NCAtmWithdrawMessage(int amount) : BoundUserInterfaceMessage
 public sealed class NCAtmDepositMessage : BoundUserInterfaceMessage;
 
 [Serializable, NetSerializable]
-public sealed record NCAtmFineSummary(long Id, string Article, string Reason, int Amount,
-    NCPoliceFineStatus Status, DateTime DueAt);
+public sealed record NCAtmFineSummary(NCPoliceFineId Id, string Article, string Reason, long Amount,
+    NCPoliceFineStatus Status, TimeSpan DueIn);
 
 [Serializable, NetSerializable]
-public sealed class NCAtmPayFineMessage(long fineId) : BoundUserInterfaceMessage
+public sealed class NCAtmPayFineMessage(NCPoliceFineId fineId) : BoundUserInterfaceMessage
 {
-    public readonly long FineId = fineId;
+    public readonly NCPoliceFineId FineId = fineId;
 }

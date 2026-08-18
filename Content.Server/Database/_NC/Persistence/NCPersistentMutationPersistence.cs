@@ -131,6 +131,23 @@ public sealed record NCAggregateSnapshotData(
     string Payload,
     DateTime CreatedAt);
 
+/// <summary>
+/// Read-only journal projection used by bounded audit/history views. Domain code must still load and validate the
+/// referenced aggregate snapshot before presenting authoritative state.
+/// </summary>
+public sealed record NCPersistentEventData(
+    Guid EventId,
+    string EventType,
+    string AggregateType,
+    string AggregateId,
+    long AggregateVersion,
+    Guid CorrelationId,
+    Guid? CausationId,
+    NCSessionEpoch SessionEpoch,
+    NCActiveWorldTime ActiveWorldTime,
+    string Payload,
+    DateTime CreatedAt);
+
 public sealed record NCOutboxMessageData(
     Guid MessageId,
     Guid EventId,
@@ -157,6 +174,16 @@ public partial interface IServerDbManager
     Task<IReadOnlyList<NCAggregateSnapshotData>> GetNCAggregateSnapshotPageAsync(
         string aggregateType,
         string? afterAggregateId,
+        int limit);
+    Task<IReadOnlyList<NCAggregateSnapshotData>> GetNCAggregateSnapshotPageDescendingAsync(
+        string aggregateType,
+        string? beforeAggregateId,
+        int limit);
+    Task<IReadOnlyList<NCPersistentEventData>> GetNCPersistentEventPageAsync(
+        string aggregateType,
+        string aggregateId,
+        string? eventType,
+        long? beforeAggregateVersion,
         int limit);
     Task<IReadOnlyList<NCOutboxMessageData>> GetPendingNCOutboxMessagesAsync(
         DateTime availableAt,
@@ -203,6 +230,32 @@ public sealed partial class ServerDbManager
     {
         DbReadOpsMetric.Inc();
         return RunDbCommand(() => _db.GetNCAggregateSnapshotPageAsync(aggregateType, afterAggregateId, limit));
+    }
+
+    public Task<IReadOnlyList<NCAggregateSnapshotData>> GetNCAggregateSnapshotPageDescendingAsync(
+        string aggregateType,
+        string? beforeAggregateId,
+        int limit)
+    {
+        DbReadOpsMetric.Inc();
+        return RunDbCommand(() =>
+            _db.GetNCAggregateSnapshotPageDescendingAsync(aggregateType, beforeAggregateId, limit));
+    }
+
+    public Task<IReadOnlyList<NCPersistentEventData>> GetNCPersistentEventPageAsync(
+        string aggregateType,
+        string aggregateId,
+        string? eventType,
+        long? beforeAggregateVersion,
+        int limit)
+    {
+        DbReadOpsMetric.Inc();
+        return RunDbCommand(() => _db.GetNCPersistentEventPageAsync(
+            aggregateType,
+            aggregateId,
+            eventType,
+            beforeAggregateVersion,
+            limit));
     }
 
     public Task<IReadOnlyList<NCOutboxMessageData>> GetPendingNCOutboxMessagesAsync(
@@ -650,6 +703,89 @@ public abstract partial class ServerDbBase
                 value.AggregateId,
                 value.AggregateVersion,
                 value.FormatVersion,
+                new NCSessionEpoch(value.SessionEpoch),
+                new NCActiveWorldTime(value.ActiveWorldTicks),
+                value.Payload,
+                value.CreatedAt))
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// Reads a newest-key-first page. Time-ordered aggregate identities can use this without an unbounded scan.
+    /// </summary>
+    public async Task<IReadOnlyList<NCAggregateSnapshotData>> GetNCAggregateSnapshotPageDescendingAsync(
+        string aggregateType,
+        string? beforeAggregateId,
+        int limit)
+    {
+        ValidateIdentityPart(aggregateType, nameof(aggregateType), 64);
+        if (beforeAggregateId != null)
+            ValidateIdentityPart(beforeAggregateId, nameof(beforeAggregateId), 128);
+        if (limit is < 1 or > NCPersistenceReadLimit)
+            throw new ArgumentOutOfRangeException(nameof(limit), limit, $"Limit must be 1..{NCPersistenceReadLimit}.");
+
+        await using var db = await GetDb();
+        var query = db.DbContext.NCAggregateSnapshots
+            .AsNoTracking()
+            .Where(value => value.AggregateType == aggregateType);
+        if (beforeAggregateId != null)
+            query = query.Where(value => value.AggregateId.CompareTo(beforeAggregateId) < 0);
+
+        return await query
+            .OrderByDescending(value => value.AggregateId)
+            .Take(limit)
+            .Select(value => new NCAggregateSnapshotData(
+                value.AggregateType,
+                value.AggregateId,
+                value.AggregateVersion,
+                value.FormatVersion,
+                new NCSessionEpoch(value.SessionEpoch),
+                new NCActiveWorldTime(value.ActiveWorldTicks),
+                value.Payload,
+                value.CreatedAt))
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// Reads newest-first journal rows for exactly one aggregate. Version keyset pagination keeps the query bounded
+    /// and uses the unique aggregate journal index instead of offset-scanning the global event table.
+    /// </summary>
+    public async Task<IReadOnlyList<NCPersistentEventData>> GetNCPersistentEventPageAsync(
+        string aggregateType,
+        string aggregateId,
+        string? eventType,
+        long? beforeAggregateVersion,
+        int limit)
+    {
+        ValidateIdentityPart(aggregateType, nameof(aggregateType), 64);
+        ValidateIdentityPart(aggregateId, nameof(aggregateId), 128);
+        if (eventType != null)
+            ValidateIdentityPart(eventType, nameof(eventType), 96);
+        if (beforeAggregateVersion is < 1)
+            throw new ArgumentOutOfRangeException(nameof(beforeAggregateVersion));
+        if (limit is < 1 or > NCPersistenceReadLimit)
+            throw new ArgumentOutOfRangeException(nameof(limit), limit, $"Limit must be 1..{NCPersistenceReadLimit}.");
+
+        await using var db = await GetDb();
+        var query = db.DbContext.NCEventJournal
+            .AsNoTracking()
+            .Where(value => value.AggregateType == aggregateType && value.AggregateId == aggregateId);
+        if (eventType != null)
+            query = query.Where(value => value.EventType == eventType);
+        if (beforeAggregateVersion != null)
+            query = query.Where(value => value.AggregateVersion < beforeAggregateVersion.Value);
+
+        return await query
+            .OrderByDescending(value => value.AggregateVersion)
+            .Take(limit)
+            .Select(value => new NCPersistentEventData(
+                value.EventId,
+                value.EventType,
+                value.AggregateType,
+                value.AggregateId,
+                value.AggregateVersion,
+                value.CorrelationId,
+                value.CausationId,
                 new NCSessionEpoch(value.SessionEpoch),
                 new NCActiveWorldTime(value.ActiveWorldTicks),
                 value.Payload,

@@ -6,9 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Content.Server._NC.Bank;
 using Content.Server._NC.City.ZoneTemplates;
-using Content.Server.Database;
+using Content.Server._NC.LivingCity.Housing;
+using Content.Server._NC.LivingCity.Time;
 using Content.Server.GameTicking;
 using Content.Server.Gibbing.Systems;
 using Content.Server.Preferences.Managers;
@@ -19,6 +19,9 @@ using Content.Shared._NC.Housing;
 using Content.Shared._NC.Housing.Components;
 using Content.Shared._NC.Housing.Prototypes;
 using Content.Shared._NC.Identity;
+using Content.Shared._NC.LivingCity.Housing;
+using Content.Shared._NC.Persistence.Identity;
+using Content.Shared._NC.Persistence.Time;
 using Content.Shared.GameTicking;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
@@ -26,14 +29,18 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._NC.Housing;
 
 /// <summary>
-/// Server authority for apartment tenancy, recurring rent, access credentials and interiors.
-/// Mutable state is persisted by CharacterId; this runtime cache only avoids database reads on door swipes.
+/// Runtime Housing facade. Persistent tenure, access and rent deadlines live only in the common property aggregate;
+/// this system coordinates those facts with round-local locks, key cards, interiors and bounded rent scheduling.
 /// </summary>
 public sealed partial class NCApartmentSystem : EntitySystem
 {
+    private static readonly ProtoId<NCPropertyRuntimeConfigurationPrototype> DefaultRuntimeConfiguration = "Default";
+
     [Dependency] private IPrototypeManager _prototypes = default!;
-    [Dependency] private IServerDbManager _database = default!;
-    [Dependency] private NCBankSystem _bank = default!;
+    [Dependency] private NCPropertyRegistrySystem _registry = default!;
+    [Dependency] private NCPropertySettlementSystem _settlements = default!;
+    [Dependency] private NCHousingServiceSystem _housingService = default!;
+    [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private City.Zones.NCZoneSystem _zones = default!;
     [Dependency] private NCZoneTemplateSystem _templates = default!;
     [Dependency] private NCZoneOccupancySystem _occupancy = default!;
@@ -41,17 +48,25 @@ public sealed partial class NCApartmentSystem : EntitySystem
     [Dependency] private MetaDataSystem _metadata = default!;
     [Dependency] private IServerPreferencesManager _preferences = default!;
 
-    private readonly Dictionary<NCApartmentId, NCPropertyData> _properties = [];
+    private readonly Dictionary<NCApartmentId, NCPropertyAggregateRecord> _properties = [];
     private readonly Dictionary<NCApartmentId, HashSet<EntityUid>> _locks = [];
     private readonly Dictionary<NCZoneDeploymentId, PendingInterior> _pendingInteriors = [];
     private readonly Dictionary<NCApartmentId, NCZoneDeploymentId> _runtimeInteriors = [];
     private readonly HashSet<NCApartmentId> _rentProcessing = [];
+    private readonly PriorityQueue<RentDueEntry, long> _rentQueue = new();
+
+    private int _rentOperationsInFlight;
     private bool _roundSnapshotsCaptured;
+    private bool _initializing;
+
+    private NCPropertyRuntimeConfigurationPrototype RuntimeConfiguration =>
+        _prototypes.Index(DefaultRuntimeConfiguration);
 
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<PostGameMapLoad>(OnPostGameMapLoad);
+        SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
+        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(OnSessionClosing);
         SubscribeLocalEvent<RoundEndMessageEvent>(OnRoundEnd, before: [typeof(GibOnRoundEndSystem)]);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart, before: [typeof(NCZoneTemplateSystem)]);
         SubscribeLocalEvent<PlayerAttachedEvent>(OnPlayerAttached);
@@ -60,53 +75,111 @@ public sealed partial class NCApartmentSystem : EntitySystem
         SubscribeLocalEvent<NCZoneDeploymentStateChangedEvent>(OnDeploymentStateChanged);
     }
 
-    private async void OnPostGameMapLoad(PostGameMapLoad ev)
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+        if (!_clock.TryGetCurrentTime(out _, out var now))
+            return;
+
+        var configuration = RuntimeConfiguration;
+        var started = 0;
+        while (started < configuration.MaximumRentOperationsPerTick &&
+               _rentOperationsInFlight < configuration.MaximumConcurrentRentOperations &&
+               _rentQueue.TryPeek(out var entry, out var dueTicks) && dueTicks <= now.Ticks)
+        {
+            _rentQueue.Dequeue();
+            if (!_properties.TryGetValue(entry.PropertyId, out var current) ||
+                current.AggregateVersion != entry.AggregateVersion ||
+                !TryGetProcessingTime(current.Snapshot, out var expected) || expected.Ticks != dueTicks ||
+                !_rentProcessing.Add(entry.PropertyId))
+            {
+                continue;
+            }
+
+            started++;
+            _rentOperationsInFlight++;
+            ProcessScheduledRentAsync(current);
+        }
+    }
+
+    private void OnSessionStarted(NCActiveWorldSessionStartedEvent args)
     {
         _roundSnapshotsCaptured = false;
+        _ = InitializePropertiesAsync();
+    }
+
+    private async Task InitializePropertiesAsync()
+    {
+        if (_initializing)
+            return;
+
+        _initializing = true;
+        _snapshots.BeginRoundLoad();
         try
         {
+            if (!await _housingService.EnsureReadyAsync("housing-round-initialization"))
+            {
+                Log.Error("Canonical Housing service could not be initialized.");
+                return;
+            }
+
+            var loaded = new List<NCPropertyAggregateRecord>();
             foreach (var listing in _prototypes.EnumeratePrototypes<NCPropertyListingPrototype>())
             {
                 if (!_zones.TryGetApartment(listing.ApartmentId, out var apartment) ||
                     !_zones.TryGetBuilding(new NCBuildingId(apartment.Parent), out _))
                 {
-                    Log.Error($"Property listing {listing.ID} does not reference an apartment nested in a building.");
+                    // A round may intentionally load a map without this prototype's city sector. The listing remains
+                    // unavailable until its mapper-authored apartment/building hierarchy is present.
+                    Log.Warning($"Property listing {listing.ID} is unavailable because its apartment/building " +
+                                "geography is not loaded.");
                     continue;
                 }
 
-                var property = await _database.EnsureNCPropertyAsync(new NCPropertySeedData(
+                var registration = await _registry.RegisterAsync(new NCRegisterPropertyRequest(
+                    NCHousingIdentity.Command("register-property", listing.ApartmentId),
                     listing.ApartmentId,
                     new NCBuildingId(apartment.Parent),
                     [listing.ApartmentId.ZoneId],
+                    listing.ID,
+                    _housingService.Party,
                     0,
-                    string.Empty,
-                    listing.AccessPolicy.Id));
+                    listing.AccessPolicy.Id,
+                    NCHousingIdentity.Correlation("register-property", listing.ApartmentId),
+                    AuditSource: "housing-round-initialization"));
+                var property = registration.Property ?? await _registry.GetAsync(listing.ApartmentId, true);
                 if (property == null)
-                    Log.Error($"Property listing {listing.ID} could not be seeded into persistent storage.");
-            }
+                {
+                    Log.Error($"Property listing {listing.ID} could not be registered in canonical storage: " +
+                              registration.Error);
+                    continue;
+                }
+                if (property.Snapshot.ListingId != listing.ID ||
+                    property.Snapshot.BuildingId != new NCBuildingId(apartment.Parent) ||
+                    property.Snapshot.AccessPolicyId != listing.AccessPolicy.Id)
+                {
+                    Log.Error($"Property listing {listing.ID} conflicts with its persisted canonical identity.");
+                    continue;
+                }
 
-            var now = DateTime.UtcNow;
-            var loaded = await _database.GetNCPropertiesAsync();
-            var properties = new List<NCPropertyData>(loaded.Count);
-            foreach (var loadedProperty in loaded)
-            {
-                var property = await ConvertLegacyOwnerAsync(loadedProperty, now);
-                property = await ProcessRentLifecycleAsync(property, now, liveRound: false);
-                properties.Add(property);
+                loaded.Add(property);
                 Cache(property);
             }
 
-            await _snapshots.LoadPreparedSnapshotsAsync(properties);
+            await _snapshots.LoadPreparedSnapshotsAsync(loaded);
         }
         catch (Exception exception)
         {
-            Log.Error($"Failed to initialize persistent properties: {exception}");
+            Log.Error($"Failed to initialize canonical properties: {exception}");
+        }
+        finally
+        {
+            _initializing = false;
         }
     }
 
     private void OnRoundRestart(RoundRestartCleanupEvent ev)
     {
-        // A direct restart may skip the normal round-end message, so cleanup remains a guarded fallback.
         CaptureActiveRoundSnapshots();
         _snapshots.BeginRoundLoad();
         _properties.Clear();
@@ -114,6 +187,8 @@ public sealed partial class NCApartmentSystem : EntitySystem
         _pendingInteriors.Clear();
         _runtimeInteriors.Clear();
         _rentProcessing.Clear();
+        _rentQueue.Clear();
+        _rentOperationsInFlight = 0;
     }
 
     private void OnPlayerAttached(PlayerAttachedEvent ev)
@@ -122,131 +197,141 @@ public sealed partial class NCApartmentSystem : EntitySystem
             _ = ProcessCharacterRentAsync(characterId);
     }
 
-    private async Task<NCPropertyData> ConvertLegacyOwnerAsync(NCPropertyData property, DateTime now)
-    {
-        if (property.OwnerCharacterId is not { } owner ||
-            !TryGetListing(property.PropertyId, out var listing))
-            return property;
-
-        var offer = listing.Interiors.FirstOrDefault(value => value.Template.Id == property.CurrentTemplateId) ??
-                    listing.Interiors.FirstOrDefault();
-        if (offer == null ||
-            !_prototypes.TryIndex(offer.Template, out NCZoneTemplatePrototype? template) ||
-            !_prototypes.TryIndex(offer.RentPolicy, out NCRentPolicyPrototype? rentPolicy))
-        {
-            Log.Error($"Legacy property {property.PropertyId} cannot be converted because its interior offer is invalid.");
-            return property;
-        }
-
-        var result = await _database.TryConvertNCPropertyOwnerToRentalAsync(
-            property.PropertyId,
-            owner,
-            offer.Template.Id,
-            template.Revision,
-            offer.RentPolicy.Id,
-            now + rentPolicy.BillingInterval,
-            property.Version);
-        if (result.Result != NCPropertyMutationResult.Success || result.Property == null)
-        {
-            Log.Error($"Legacy property {property.PropertyId} could not be converted to tenancy: {result.Result}.");
-            return result.Property ?? property;
-        }
-
-        return result.Property;
-    }
-
-    /// <summary>
-    /// Processes only this character's due leases. Called on attach and terminal open, never from Update().
-    /// </summary>
+    /// <summary>Retries due rent only for this character; the global due queue never scans characters or entities.</summary>
     public async Task ProcessCharacterRentAsync(NCCharacterId characterId)
     {
+        if (!_clock.TryGetCurrentTime(out _, out var now))
+            return;
+
+        var tenant = NCPartyRef.ForCharacter(characterId);
         var properties = _properties.Values
-            .Where(property => IsActiveTenant(property, characterId))
+            .Where(property => IsActiveTenant(property.Snapshot, tenant, now) &&
+                               property.Snapshot.NextRentDueAt is { } due && due <= now)
             .ToArray();
         foreach (var property in properties)
         {
-            if (!_rentProcessing.Add(property.PropertyId))
+            if (!_rentProcessing.Add(property.Snapshot.PropertyId))
                 continue;
 
             try
             {
-                var updated = await ProcessRentLifecycleAsync(property, DateTime.UtcNow, liveRound: true);
-                Cache(updated);
-            }
-            catch (Exception exception)
-            {
-                Log.Error($"Failed to process rent for property {property.PropertyId}: {exception}");
+                await ProcessRentLifecycleAsync(property, now, liveRound: true);
             }
             finally
             {
-                _rentProcessing.Remove(property.PropertyId);
+                _rentProcessing.Remove(property.Snapshot.PropertyId);
             }
         }
     }
 
-    private async Task<NCPropertyData> ProcessRentLifecycleAsync(
-        NCPropertyData property,
-        DateTime now,
+    private async void ProcessScheduledRentAsync(NCPropertyAggregateRecord property)
+    {
+        try
+        {
+            if (_clock.TryGetCurrentTime(out _, out var now))
+                await ProcessRentLifecycleAsync(property, now, liveRound: true);
+        }
+        catch (Exception exception)
+        {
+            Log.Error($"Failed to process scheduled rent for {property.Snapshot.PropertyId}: {exception}");
+        }
+        finally
+        {
+            _rentProcessing.Remove(property.Snapshot.PropertyId);
+            _rentOperationsInFlight--;
+        }
+    }
+
+    private async Task ProcessRentLifecycleAsync(
+        NCPropertyAggregateRecord property,
+        NCActiveWorldTime now,
         bool liveRound)
     {
-        if (property.Status is not (NCPropertyStatus.Rented or NCPropertyStatus.Delinquent) ||
-            property.NextRentDueAt is not { } dueAt || now < dueAt ||
-            !_prototypes.TryIndex<NCRentPolicyPrototype>(property.RentPolicyId, out var rentPolicy))
-            return property;
+        var snapshot = property.Snapshot;
+        if (snapshot.Status is not (NCPropertyStatus.Rented or NCPropertyStatus.Delinquent) ||
+            snapshot.NextRentDueAt is not { } due || now < due ||
+            !_prototypes.TryIndex<NCRentPolicyPrototype>(snapshot.RentPolicyId, out var rentPolicy))
+            return;
 
-        var tenant = property.Tenants
-            .Where(value => value.RevokedAt == null)
-            .OrderBy(value => value.StartedAt)
+        var tenant = snapshot.Occupants
+            .Where(value => value.Kind == NCPropertyOccupancyKind.Tenancy &&
+                            (value.ValidUntil == null || value.ValidUntil > now))
+            .OrderBy(value => value.StartedAt.Ticks)
             .FirstOrDefault();
         if (tenant == null)
-            return property;
+            return;
 
-        if (now > dueAt + rentPolicy.GracePeriod)
+        NCActiveWorldTime graceEnd;
+        try
         {
-            var eviction = await _database.TryEvictNCPropertyForNonPaymentAsync(
-                property.PropertyId,
-                property.Version);
-            if (eviction.Result != NCPropertyMutationResult.Success || eviction.Property == null)
-                return eviction.Property ?? property;
-
-            if (liveRound)
-            {
-                _snapshots.ConfiscateLiveContents(property);
-                if (_runtimeInteriors.TryGetValue(property.PropertyId, out var deploymentId) &&
-                    !_templates.TryCloseDeployment(deploymentId, out var error))
-                {
-                    Log.Error($"Evicted property {property.PropertyId} could not close its interior: {error}");
-                }
-                _runtimeInteriors.Remove(property.PropertyId);
-                _snapshots.ForgetSnapshot(property);
-            }
-
-            return eviction.Property;
+            graceEnd = due.Advance(rentPolicy.GracePeriod);
+        }
+        catch (OverflowException)
+        {
+            Log.Error($"Rent grace deadline overflowed for property {snapshot.PropertyId}.");
+            return;
         }
 
-        var renewal = await _bank.RunSerializedBalanceMutationAsync(() =>
-            _database.TryRenewNCPropertyRentAsync(
-                property.PropertyId,
-                tenant.CharacterId,
-                rentPolicy.RentAmount,
-                now + rentPolicy.BillingInterval,
-                property.Version));
-        if (renewal.Result == NCPropertyMutationResult.Success && renewal.Property != null)
-            return renewal.Property;
-        if (renewal.Result is not (NCPropertyMutationResult.InsufficientFunds or
-            NCPropertyMutationResult.BankAccountNotFound))
-            return renewal.Property ?? property;
+        if (now > graceEnd)
+        {
+            var evicted = await EvictAsync(property);
+            if (evicted.Property != null)
+                Cache(evicted.Property);
+            if (evicted.Result != NCPropertyMutationResult.Success || !liveRound)
+                return;
 
-        var delinquent = await _database.TryMarkNCPropertyRentDelinquentAsync(
-            property.PropertyId,
-            property.Version);
-        return delinquent.Property ?? property;
+            _snapshots.ConfiscateLiveContents(snapshot);
+            if (_runtimeInteriors.TryGetValue(snapshot.PropertyId, out var deploymentId) &&
+                !_templates.TryCloseDeployment(deploymentId, out var error))
+            {
+                Log.Error($"Evicted property {snapshot.PropertyId} could not close its interior: {error}");
+            }
+            _runtimeInteriors.Remove(snapshot.PropertyId);
+            await _snapshots.DeleteSnapshotAsync(snapshot);
+            return;
+        }
+
+        var renewal = await _settlements.RenewAsync(new NCRenewPropertyRentSettlementRequest(
+            Guid.NewGuid(),
+            NCTransactionId.New(),
+            snapshot.PropertyId,
+            property.AggregateVersion,
+            tenant.Occupant,
+            rentPolicy.RentAmount,
+            rentPolicy.BillingInterval.Ticks,
+            Guid.NewGuid(),
+            AuditSource: "housing-rent-renewal"));
+        if (renewal.Property != null)
+            Cache(renewal.Property);
+        if (renewal.Status is NCPropertySettlementStatus.Applied or NCPropertySettlementStatus.Duplicate)
+            return;
+        if (renewal.Status != NCPropertySettlementStatus.InsufficientFunds)
+            return;
+
+        var current = renewal.Property ?? await _registry.GetAsync(snapshot.PropertyId, true);
+        if (current == null)
+            return;
+        var delinquent = await UpdatePropertyAsync(
+            current,
+            current.Snapshot with { Status = NCPropertyStatus.Delinquent },
+            tenant.Occupant,
+            "living-city.property.rent-delinquent",
+            "housing-rent-delinquent");
+        if (delinquent.Property != null)
+            Cache(delinquent.Property);
     }
 
     private void OnRoundEnd(RoundEndMessageEvent ev)
     {
-        // Capture before round-end systems can gib or otherwise mutate entities that belong in the snapshot.
         CaptureActiveRoundSnapshots();
+    }
+
+    private void OnSessionClosing(NCActiveWorldSessionClosingEvent ev)
+    {
+        // RoundEndMessage normally captures first. This fallback makes the durability contract independent from
+        // game-ticker event ordering and registers the already-running write with the active-world close barrier.
+        CaptureActiveRoundSnapshots();
+        ev.AddPendingWrite(_snapshots.WaitForPendingSaveAsync());
     }
 
     private void CaptureActiveRoundSnapshots()
@@ -258,17 +343,17 @@ public sealed partial class NCApartmentSystem : EntitySystem
         foreach (var (propertyId, deploymentId) in _runtimeInteriors)
         {
             if (_properties.TryGetValue(propertyId, out var property))
-                active.Add(new NCPropertySnapshotCapture(property, deploymentId));
+                active.Add(new NCPropertySnapshotCapture(property.Snapshot, deploymentId));
         }
 
         _snapshots.CaptureRoundSnapshots(active);
         _roundSnapshotsCaptured = true;
     }
 
-    public bool TryGetProperty(NCApartmentId propertyId, out NCPropertyData property) =>
+    public bool TryGetProperty(NCApartmentId propertyId, out NCPropertyAggregateRecord property) =>
         _properties.TryGetValue(propertyId, out property!);
 
-    public async Task<NCPropertyMutationData> TryRentAsync(
+    public async Task<NCPropertyRuntimeMutationResult> TryRentAsync(
         NCApartmentId propertyId,
         NCCharacterId characterId,
         ProtoId<NCZoneTemplatePrototype> templateId,
@@ -276,39 +361,47 @@ public sealed partial class NCApartmentSystem : EntitySystem
     {
         if (!TryGetListing(propertyId, out var listing) ||
             !TryGetInteriorOffer(listing, templateId, out var offer, out var template, out var rentPolicy) ||
-            !_prototypes.TryIndex(listing.AccessPolicy, out var accessPolicy))
-            return new NCPropertyMutationData(NCPropertyMutationResult.InvalidRequest, null, null, null);
+            !_prototypes.TryIndex(listing.AccessPolicy, out NCPropertyAccessPolicyPrototype? accessPolicy) ||
+            !_properties.TryGetValue(propertyId, out var current))
+            return Failed(NCPropertyMutationResult.InvalidRequest);
 
-        var result = await _bank.RunSerializedBalanceMutationAsync(() =>
-            _database.TryRentNCPropertyAsync(
-                propertyId,
-                characterId,
-                offer.Template.Id,
-                template.Revision,
-                offer.RentPolicy.Id,
-                rentPolicy.RentAmount,
-                DateTime.UtcNow + rentPolicy.BillingInterval,
-                accessPolicy.TenantPermissions));
-        ApplyMutation(result, accessPolicy, cardRecipient);
-        return result;
+        var tenant = NCPartyRef.ForCharacter(characterId);
+        var grantId = Guid.NewGuid();
+        var result = await _settlements.RentAsync(new NCRentPropertySettlementRequest(
+            Guid.NewGuid(),
+            NCTransactionId.New(),
+            propertyId,
+            current.AggregateVersion,
+            tenant,
+            rentPolicy.RentAmount,
+            offer.RentPolicy.Id,
+            rentPolicy.BillingInterval.Ticks,
+            offer.Template.Id,
+            template.Revision,
+            accessPolicy.TenantPermissions,
+            grantId,
+            Guid.NewGuid(),
+            AuditSource: "housing-player-rent"));
+
+        var runtime = FromSettlement(result, grantId);
+        ApplyMutation(runtime, accessPolicy, cardRecipient);
+        return runtime;
     }
 
-    /// <summary>
-    /// Applies starting housing through the same paid rental transaction as the public terminal.
-    /// Character creation can expose an explicit design choice later; the first configured offer is the safe default.
-    /// </summary>
-    public async Task<NCPropertyMutationData> TryAssignStartingHousingAsync(
+    public async Task<NCPropertyRuntimeMutationResult> TryAssignStartingHousingAsync(
         NCCharacterId characterId,
         EntityUid cardRecipient)
     {
-        if (_properties.Values.Any(property => IsActiveTenant(property, characterId)))
-            return new NCPropertyMutationData(NCPropertyMutationResult.Conflict, null, null, null);
+        var tenant = NCPartyRef.ForCharacter(characterId);
+        if (_properties.Values.Any(property => property.Snapshot.Occupants.Any(value =>
+                value.Kind == NCPropertyOccupancyKind.Tenancy && value.Occupant == tenant)))
+            return Failed(NCPropertyMutationResult.Conflict);
 
         foreach (var listing in _prototypes.EnumeratePrototypes<NCPropertyListingPrototype>())
         {
             if (!listing.StartingHousingEligible ||
                 !_properties.TryGetValue(listing.ApartmentId, out var property) ||
-                property.Status != NCPropertyStatus.Available ||
+                property.Snapshot.Status != NCPropertyStatus.Available ||
                 listing.Interiors.FirstOrDefault() is not { } offer)
                 continue;
 
@@ -317,71 +410,85 @@ public sealed partial class NCApartmentSystem : EntitySystem
                 return result;
         }
 
-        return new NCPropertyMutationData(NCPropertyMutationResult.NotAvailable, null, null, null);
+        return Failed(NCPropertyMutationResult.NotAvailable);
     }
 
-    public async Task<NCPropertyMutationData> TryReleaseAsync(
+    public async Task<NCPropertyRuntimeMutationResult> TryReleaseAsync(
         NCApartmentId propertyId,
         NCCharacterId characterId,
         NCPropertyReleaseReason reason)
     {
-        if (!TryGetListing(propertyId, out _) || reason == NCPropertyReleaseReason.Sale)
-            return new NCPropertyMutationData(NCPropertyMutationResult.InvalidRequest, null, null, null);
-        if (reason == NCPropertyReleaseReason.VoluntaryMoveOut &&
-            _properties.TryGetValue(propertyId, out var rental) &&
-            _snapshots.HasResidentItems(rental))
-        {
-            return new NCPropertyMutationData(
-                NCPropertyMutationResult.Conflict,
-                rental,
-                null,
-                null);
-        }
-        if (reason == NCPropertyReleaseReason.VoluntaryMoveOut &&
-            _occupancy.IsOccupied(propertyId.ZoneId, out _))
-            return new NCPropertyMutationData(
-                NCPropertyMutationResult.Conflict,
-                _properties.GetValueOrDefault(propertyId),
-                null,
-                null);
-        var current = _properties.GetValueOrDefault(propertyId);
-        var deploymentToClose = _runtimeInteriors.GetValueOrDefault(propertyId);
-        if (!deploymentToClose.IsValid && current != null)
-            deploymentToClose = current.ActiveDeploymentId;
+        if (!TryGetListing(propertyId, out _) || reason == NCPropertyReleaseReason.Sale ||
+            !_properties.TryGetValue(propertyId, out var current))
+            return Failed(NCPropertyMutationResult.InvalidRequest);
 
-        var result = await _bank.RunSerializedBalanceMutationAsync(() =>
-            _database.TryReleaseNCPropertyAsync(propertyId, characterId, reason, 0));
-        ApplyMutation(result, null, null);
-        if (result.Result == NCPropertyMutationResult.Success && deploymentToClose.IsValid)
-        {
-            if (!_templates.TryCloseDeployment(deploymentToClose, out var error))
-                Log.Error($"Property {propertyId} was released but interior cleanup could not start: {error}");
-        }
-        if (result.Result == NCPropertyMutationResult.Success && current != null)
-            _snapshots.ForgetSnapshot(current);
+        var actor = NCPartyRef.ForCharacter(characterId);
+        if (!current.Snapshot.Occupants.Any(value =>
+                value.Kind == NCPropertyOccupancyKind.Tenancy && value.Occupant == actor))
+            return Failed(NCPropertyMutationResult.NotAuthorized, current);
+        if (reason == NCPropertyReleaseReason.VoluntaryMoveOut &&
+            (_snapshots.HasResidentItems(current.Snapshot) || _occupancy.IsOccupied(propertyId.ZoneId, out _)))
+            return Failed(NCPropertyMutationResult.Conflict, current);
+
+        var deploymentToClose = _runtimeInteriors.GetValueOrDefault(propertyId);
+        if (!deploymentToClose.IsValid)
+            deploymentToClose = current.Snapshot.ActiveDeploymentId;
+
+        var result = await UpdatePropertyAsync(
+            current,
+            Vacate(current.Snapshot),
+            actor,
+            "living-city.property.lease-ended",
+            $"housing-release-{reason.ToString().ToLowerInvariant()}");
+        if (result.Property != null)
+            Cache(result.Property);
+        if (result.Result != NCPropertyMutationResult.Success)
+            return result;
+
+        if (deploymentToClose.IsValid && !_templates.TryCloseDeployment(deploymentToClose, out var error))
+            Log.Error($"Property {propertyId} was released but interior cleanup could not start: {error}");
+        await _snapshots.DeleteSnapshotAsync(current.Snapshot);
         return result;
     }
 
-    public async Task<NCPropertyMutationData> TryIssueKeyCardAsync(
+    public async Task<NCPropertyRuntimeMutationResult> TryIssueKeyCardAsync(
         NCApartmentId propertyId,
         NCCharacterId actorCharacterId,
         NCCharacterId subjectCharacterId,
         NCPropertyPermission permissions,
-        DateTime? validUntil,
+        NCActiveWorldTime? validUntil,
         EntityUid cardRecipient)
     {
         if (!TryGetListing(propertyId, out var listing) ||
-            !_prototypes.TryIndex(listing.AccessPolicy, out var accessPolicy))
-            return new NCPropertyMutationData(NCPropertyMutationResult.InvalidRequest, null, null, null);
+            !_prototypes.TryIndex(listing.AccessPolicy, out NCPropertyAccessPolicyPrototype? accessPolicy) ||
+            !_properties.TryGetValue(propertyId, out var current) ||
+            !_clock.TryGetCurrentTime(out _, out var now) || permissions == NCPropertyPermission.None ||
+            validUntil is { } expiry && expiry <= now)
+            return Failed(NCPropertyMutationResult.InvalidRequest);
 
-        var result = await _bank.RunSerializedBalanceMutationAsync(() =>
-            _database.GrantNCPropertyAccessAsync(
-                propertyId,
-                actorCharacterId,
-                subjectCharacterId,
-                permissions,
-                validUntil,
-                accessPolicy.MaximumActiveCards));
+        var actor = NCPartyRef.ForCharacter(actorCharacterId);
+        var subject = NCPartyRef.ForCharacter(subjectCharacterId);
+        if (!current.Snapshot.Occupants.Any(value =>
+                value.Kind == NCPropertyOccupancyKind.Tenancy && value.Occupant == actor))
+            return Failed(NCPropertyMutationResult.NotAuthorized, current);
+        if (current.Snapshot.AccessGrants.Count(value => value.ValidUntil == null || value.ValidUntil > now) >=
+            accessPolicy.MaximumActiveCards)
+            return Failed(NCPropertyMutationResult.Conflict, current);
+
+        var grant = new NCPropertyAccessGrantSnapshot(
+            Guid.NewGuid(),
+            subject,
+            permissions,
+            current.Snapshot.AccessRevision,
+            now,
+            validUntil);
+        var result = await UpdatePropertyAsync(
+            current,
+            current.Snapshot with { AccessGrants = current.Snapshot.AccessGrants.Append(grant).ToArray() },
+            actor,
+            "living-city.property.access-granted",
+            "housing-access-grant",
+            grant);
         ApplyMutation(result, accessPolicy, cardRecipient);
         return result;
     }
@@ -394,11 +501,15 @@ public sealed partial class NCApartmentSystem : EntitySystem
     {
         deploymentId = default;
         error = string.Empty;
-        if (!_properties.TryGetValue(propertyId, out var property) || !IsActiveTenant(property, actorCharacterId))
+        if (!_clock.TryGetCurrentTime(out _, out var now) ||
+            !_properties.TryGetValue(propertyId, out var record) ||
+            !IsActiveTenant(record.Snapshot, NCPartyRef.ForCharacter(actorCharacterId), now))
         {
             error = "Only the active renter may invoke an interior.";
             return false;
         }
+
+        var property = record.Snapshot;
         if (property.CurrentTemplateId is not { } selected ||
             property.CurrentTemplateRevision is not { } selectedRevision)
         {
@@ -416,7 +527,7 @@ public sealed partial class NCApartmentSystem : EntitySystem
             return false;
         }
 
-        return TryDeployInterior(property, actorCharacterId, templateId, out deploymentId, out error);
+        return TryDeployInterior(record, actorCharacterId, templateId, out deploymentId, out error);
     }
 
     public bool IsInteriorActiveOrPending(NCApartmentId propertyId)
@@ -432,7 +543,7 @@ public sealed partial class NCApartmentSystem : EntitySystem
     public bool AreInteriorSnapshotsReady => _snapshots.IsReady;
 
     private bool TryDeployInterior(
-        NCPropertyData property,
+        NCPropertyAggregateRecord property,
         NCCharacterId actorCharacterId,
         ProtoId<NCZoneTemplatePrototype> templateId,
         out NCZoneDeploymentId deploymentId,
@@ -440,12 +551,12 @@ public sealed partial class NCApartmentSystem : EntitySystem
     {
         deploymentId = default;
         error = string.Empty;
-        if (property.CurrentTemplateId != null && !_snapshots.IsReady)
+        if (property.Snapshot.CurrentTemplateId != null && !_snapshots.IsReady)
         {
             error = "Persistent apartment snapshots are still loading.";
             return false;
         }
-        if (IsInteriorActiveOrPending(property.PropertyId))
+        if (IsInteriorActiveOrPending(property.Snapshot.PropertyId))
         {
             error = "This property's interior is already active or pending.";
             return false;
@@ -453,7 +564,7 @@ public sealed partial class NCApartmentSystem : EntitySystem
 
         var request = new NCZoneDeploymentRequest(
             NCZoneDeploymentId.New(),
-            property.PropertyId.ZoneId,
+            property.Snapshot.PropertyId.ZoneId,
             templateId,
             NCZoneDeploymentPurpose.ApartmentInterior,
             actorCharacterId,
@@ -461,7 +572,10 @@ public sealed partial class NCApartmentSystem : EntitySystem
         if (!_templates.TryRequestDeployment(request, out deploymentId, out error))
             return false;
 
-        _pendingInteriors[deploymentId] = new PendingInterior(property.PropertyId, templateId.Id, property.Version);
+        _pendingInteriors[deploymentId] = new PendingInterior(
+            property.Snapshot.PropertyId,
+            templateId.Id,
+            property.AggregateVersion);
         return true;
     }
 
@@ -495,17 +609,32 @@ public sealed partial class NCApartmentSystem : EntitySystem
     {
         try
         {
-            var property = await _database.SetNCPropertyInteriorAsync(
-                pending.PropertyId,
-                deploymentId,
-                pending.TemplateId,
-                templateRevision,
-                "active",
-                pending.ExpectedVersion);
-            if (property != null)
-                Cache(property);
+            var current = await _registry.GetAsync(pending.PropertyId, true);
+            if (current == null || current.AggregateVersion != pending.ExpectedVersion)
+            {
+                Log.Error($"Interior deployment {deploymentId} became active after its property version changed.");
+                return;
+            }
+
+            var actor = current.Snapshot.Occupants
+                .FirstOrDefault(value => value.Kind == NCPropertyOccupancyKind.Tenancy)?.Occupant ??
+                _housingService.Party;
+            var result = await UpdatePropertyAsync(
+                current,
+                current.Snapshot with
+                {
+                    ActiveDeploymentId = deploymentId,
+                    CurrentTemplateId = pending.TemplateId,
+                    CurrentTemplateRevision = templateRevision,
+                    InteriorState = "active",
+                },
+                actor,
+                "living-city.property.interior-activated",
+                "housing-interior-activation");
+            if (result.Property != null)
+                Cache(result.Property);
             else
-                Log.Error($"Interior deployment {deploymentId} became active but its property version conflicted.");
+                Log.Error($"Interior deployment {deploymentId} could not update its canonical property.");
         }
         catch (Exception exception)
         {
@@ -514,73 +643,90 @@ public sealed partial class NCApartmentSystem : EntitySystem
     }
 
     private void ApplyMutation(
-        NCPropertyMutationData result,
+        NCPropertyRuntimeMutationResult result,
         NCPropertyAccessPolicyPrototype? accessPolicy,
         EntityUid? cardRecipient)
     {
         if (result.Property != null)
             Cache(result.Property);
-        if (result.Result != NCPropertyMutationResult.Success || result.Grant == null ||
-            accessPolicy == null || cardRecipient is not { } recipient || !Exists(recipient))
+        if (result.Result != NCPropertyMutationResult.Success || result.Grant == null || accessPolicy == null ||
+            cardRecipient is not { } recipient || !Exists(recipient))
             return;
 
         var card = Spawn(accessPolicy.KeyCardPrototype, Transform(recipient).Coordinates);
         var credential = EnsureComp<NCPropertyKeyCardComponent>(card);
         credential.GrantId = result.Grant.GrantId;
-        credential.PropertyId = result.Grant.PropertyId;
+        credential.PropertyId = result.Property!.Snapshot.PropertyId;
         credential.AccessRevision = result.Grant.AccessRevision;
         credential.Permissions = result.Grant.Permissions;
         credential.ValidUntil = result.Grant.ValidUntil;
         Dirty(card, credential);
-        _metadata.SetEntityName(card, $"Property key-card {result.Grant.PropertyId}");
+        _metadata.SetEntityName(card, $"Property key-card {credential.PropertyId}");
     }
 
-    private void Cache(NCPropertyData property)
+    private void Cache(NCPropertyAggregateRecord property)
     {
-        _properties[property.PropertyId] = property;
-        if (_locks.TryGetValue(property.PropertyId, out var locks))
+        _properties[property.Snapshot.PropertyId] = property;
+        if (_locks.TryGetValue(property.Snapshot.PropertyId, out var locks))
         {
             foreach (var uid in locks.ToArray())
             {
                 if (!TryComp(uid, out NCPropertyLockComponent? propertyLock))
                     continue;
-                propertyLock.AccessRevision = property.AccessRevision;
-                propertyLock.Enabled = property.Status != NCPropertyStatus.Unavailable;
+                propertyLock.AccessRevision = property.Snapshot.AccessRevision;
+                propertyLock.Enabled = property.Snapshot.Status != NCPropertyStatus.Unavailable;
                 Dirty(uid, propertyLock);
             }
         }
 
-        var ev = new NCPropertyChangedEvent(property.PropertyId);
+        if (TryGetProcessingTime(property.Snapshot, out var processingAt))
+            _rentQueue.Enqueue(new RentDueEntry(property.Snapshot.PropertyId, property.AggregateVersion), processingAt.Ticks);
+
+        var ev = new NCPropertyChangedEvent(property.Snapshot.PropertyId);
         RaiseLocalEvent(ref ev);
+    }
+
+    private bool TryGetProcessingTime(NCPropertyAggregateSnapshot property, out NCActiveWorldTime processingAt)
+    {
+        processingAt = default;
+        if (property.NextRentDueAt is not { } due ||
+            !_prototypes.TryIndex<NCRentPolicyPrototype>(property.RentPolicyId, out var policy))
+            return false;
+
+        if (property.Status == NCPropertyStatus.Rented)
+        {
+            processingAt = due;
+            return true;
+        }
+        if (property.Status != NCPropertyStatus.Delinquent)
+            return false;
+
+        try
+        {
+            processingAt = due.Advance(policy.GracePeriod);
+            return true;
+        }
+        catch (OverflowException)
+        {
+            return false;
+        }
     }
 
     private void OnLockStartup(Entity<NCPropertyLockComponent> entity, ref ComponentStartup args)
     {
-        IndexPropertyLock(entity);
+        if (!entity.Comp.PropertyId.IsValid)
+            return;
+        if (!_locks.TryGetValue(entity.Comp.PropertyId, out var locks))
+            _locks[entity.Comp.PropertyId] = locks = [];
+        locks.Add(entity.Owner);
         ApplyPropertyLockState(entity);
     }
 
     private void OnLockShutdown(Entity<NCPropertyLockComponent> entity, ref ComponentShutdown args)
     {
-        RemovePropertyLock(entity.Owner);
-    }
-
-    private void IndexPropertyLock(Entity<NCPropertyLockComponent> entity)
-    {
-        // Invalid serialized IDs are ignored defensively; valid layouts bind directly to their apartment zone.
-        if (!entity.Comp.PropertyId.IsValid)
-            return;
-
-        if (!_locks.TryGetValue(entity.Comp.PropertyId, out var locks))
-            _locks[entity.Comp.PropertyId] = locks = [];
-        locks.Add(entity.Owner);
-    }
-
-    private void RemovePropertyLock(EntityUid uid)
-    {
         foreach (var (propertyId, locks) in _locks.ToArray())
         {
-            locks.Remove(uid);
+            locks.Remove(entity.Owner);
             if (locks.Count == 0)
                 _locks.Remove(propertyId);
         }
@@ -591,8 +737,8 @@ public sealed partial class NCApartmentSystem : EntitySystem
         if (!_properties.TryGetValue(entity.Comp.PropertyId, out var property))
             return;
 
-        entity.Comp.AccessRevision = property.AccessRevision;
-        entity.Comp.Enabled = property.Status != NCPropertyStatus.Unavailable;
+        entity.Comp.AccessRevision = property.Snapshot.AccessRevision;
+        entity.Comp.Enabled = property.Snapshot.Status != NCPropertyStatus.Unavailable;
         Dirty(entity, entity.Comp);
     }
 
@@ -624,8 +770,7 @@ public sealed partial class NCApartmentSystem : EntitySystem
             !_prototypes.TryIndex(offer.Template, out NCZoneTemplatePrototype? resolvedTemplate) ||
             resolvedTemplate.TargetZoneId != listing.ApartmentId.ZoneId ||
             !_prototypes.TryIndex(offer.RentPolicy, out NCRentPolicyPrototype? resolvedPolicy) ||
-            resolvedPolicy.RentAmount < 0 ||
-            resolvedPolicy.BillingInterval <= TimeSpan.Zero ||
+            resolvedPolicy.RentAmount < 0 || resolvedPolicy.BillingInterval <= TimeSpan.Zero ||
             resolvedPolicy.GracePeriod < TimeSpan.Zero)
             return false;
 
@@ -634,14 +779,100 @@ public sealed partial class NCApartmentSystem : EntitySystem
         return true;
     }
 
-    private static bool IsActiveTenant(NCPropertyData property, NCCharacterId characterId)
+    private async Task<NCPropertyRuntimeMutationResult> EvictAsync(NCPropertyAggregateRecord current)
     {
-        return property.Tenants.Any(tenant => tenant.CharacterId == characterId &&
-            tenant.RevokedAt == null &&
-            (tenant.ValidUntil is not { } expiry || expiry > DateTime.UtcNow));
+        return await UpdatePropertyAsync(
+            current,
+            Vacate(current.Snapshot),
+            _housingService.Party,
+            "living-city.property.evicted",
+            "housing-nonpayment-eviction");
     }
 
-    private readonly record struct PendingInterior(NCApartmentId PropertyId, string TemplateId, int ExpectedVersion);
+    private async Task<NCPropertyRuntimeMutationResult> UpdatePropertyAsync(
+        NCPropertyAggregateRecord current,
+        NCPropertyAggregateSnapshot proposed,
+        NCPartyRef initiator,
+        string eventType,
+        string auditSource,
+        NCPropertyAccessGrantSnapshot? grant = null)
+    {
+        var result = await _registry.UpdateAsync(new NCUpdatePropertyRequest(
+            Guid.NewGuid(),
+            current.AggregateVersion,
+            proposed,
+            eventType,
+            initiator,
+            Guid.NewGuid(),
+            AuditSource: auditSource));
+        return result.Status switch
+        {
+            NCPropertyAggregateMutationStatus.Applied or NCPropertyAggregateMutationStatus.Duplicate =>
+                new NCPropertyRuntimeMutationResult(NCPropertyMutationResult.Success, result.Property, grant, null),
+            NCPropertyAggregateMutationStatus.NotFound => Failed(NCPropertyMutationResult.NotFound, result.Property),
+            NCPropertyAggregateMutationStatus.VersionConflict => Failed(NCPropertyMutationResult.Conflict, result.Property),
+            _ => Failed(NCPropertyMutationResult.InvalidRequest, result.Property),
+        };
+    }
+
+    private static NCPropertyAggregateSnapshot Vacate(NCPropertyAggregateSnapshot snapshot)
+    {
+        return snapshot with
+        {
+            Occupants = snapshot.Occupants.Where(value => value.Kind != NCPropertyOccupancyKind.Tenancy).ToArray(),
+            AccessGrants = [],
+            Status = NCPropertyStatus.Available,
+            AcquiredAt = null,
+            AccessRevision = checked(snapshot.AccessRevision + 1),
+            RentPolicyId = string.Empty,
+            CurrentTemplateId = null,
+            CurrentTemplateRevision = null,
+            ActiveDeploymentId = default,
+            InteriorState = "empty",
+            NextRentDueAt = null,
+        };
+    }
+
+    private static bool IsActiveTenant(
+        NCPropertyAggregateSnapshot property,
+        NCPartyRef party,
+        NCActiveWorldTime now)
+    {
+        return property.Occupants.Any(value => value.Kind == NCPropertyOccupancyKind.Tenancy &&
+            value.Occupant == party && (value.ValidUntil == null || value.ValidUntil > now));
+    }
+
+    private static NCPropertyRuntimeMutationResult FromSettlement(
+        NCPropertySettlementResult result,
+        Guid grantId)
+    {
+        NCPropertyAccessGrantSnapshot? grant = null;
+        if (result.Property != null)
+            grant = result.Property.Snapshot.AccessGrants.SingleOrDefault(value => value.GrantId == grantId);
+
+        var status = result.Status switch
+        {
+            NCPropertySettlementStatus.Applied or NCPropertySettlementStatus.Duplicate => NCPropertyMutationResult.Success,
+            NCPropertySettlementStatus.NotFound => NCPropertyMutationResult.NotFound,
+            NCPropertySettlementStatus.NotAvailable => NCPropertyMutationResult.NotAvailable,
+            NCPropertySettlementStatus.NotAuthorized => NCPropertyMutationResult.NotAuthorized,
+            NCPropertySettlementStatus.InsufficientFunds => NCPropertyMutationResult.InsufficientFunds,
+            NCPropertySettlementStatus.VersionConflict => NCPropertyMutationResult.Conflict,
+            _ => NCPropertyMutationResult.InvalidRequest,
+        };
+        return new NCPropertyRuntimeMutationResult(status, result.Property, grant, null);
+    }
+
+    private static NCPropertyRuntimeMutationResult Failed(
+        NCPropertyMutationResult result,
+        NCPropertyAggregateRecord? property = null) => new(result, property, null, null);
+
+    private readonly record struct PendingInterior(
+        NCApartmentId PropertyId,
+        string TemplateId,
+        long ExpectedVersion);
+
+    private readonly record struct RentDueEntry(NCApartmentId PropertyId, long AggregateVersion);
 }
 
 /// <summary>Raised whenever the authoritative property cache changes.</summary>

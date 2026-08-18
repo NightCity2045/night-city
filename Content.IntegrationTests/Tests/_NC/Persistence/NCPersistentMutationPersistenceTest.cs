@@ -161,6 +161,11 @@ public sealed class NCPersistentMutationPersistenceTest : GameTest
             "test-aggregate",
             firstPage[^1].AggregateId,
             2);
+        var newestPage = await db.GetNCAggregateSnapshotPageDescendingAsync("test-aggregate", null, 2);
+        var olderPage = await db.GetNCAggregateSnapshotPageDescendingAsync(
+            "test-aggregate",
+            newestPage[^1].AggregateId,
+            2);
 
         Assert.Multiple(() =>
         {
@@ -168,8 +173,57 @@ public sealed class NCPersistentMutationPersistenceTest : GameTest
                 Is.EqualTo(new[] { "aggregate-1", "aggregate-2" }));
             Assert.That(secondPage.Select(value => value.AggregateId),
                 Is.EqualTo(new[] { "aggregate-3" }));
+            Assert.That(newestPage.Select(value => value.AggregateId),
+                Is.EqualTo(new[] { "aggregate-3", "aggregate-2" }));
+            Assert.That(olderPage.Select(value => value.AggregateId),
+                Is.EqualTo(new[] { "aggregate-1" }));
             Assert.That(firstPage.Concat(secondPage), Has.All.Matches<NCAggregateSnapshotData>(value =>
                 value.AggregateType == "test-aggregate"));
+        });
+    }
+
+    [Test]
+    public async Task AggregateJournalUsesNewestFirstVersionKeysetAndEventFilter()
+    {
+        var db = GetDb(Pair.Server);
+        var epoch = NCSessionEpoch.New();
+        var clock = await db.StartNCActiveWorldSessionAsync(epoch);
+        var aggregateId = $"journal-{Guid.NewGuid():N}";
+
+        var first = CreateRequest(epoch, clock.Time, 0, "{\"state\":1}", aggregateId: aggregateId);
+        var second = CreateRequest(epoch, clock.Time, 1, "{\"state\":2}", aggregateId: aggregateId) with
+        {
+            EventType = "living-city.test.other-changed",
+        };
+        var third = CreateRequest(epoch, clock.Time, 2, "{\"state\":3}", aggregateId: aggregateId);
+        Assert.That((await db.ApplyNCPersistentMutationAsync(first)).Status,
+            Is.EqualTo(NCPersistentMutationStatus.Applied));
+        Assert.That((await db.ApplyNCPersistentMutationAsync(second)).Status,
+            Is.EqualTo(NCPersistentMutationStatus.Applied));
+        Assert.That((await db.ApplyNCPersistentMutationAsync(third)).Status,
+            Is.EqualTo(NCPersistentMutationStatus.Applied));
+
+        var all = await db.GetNCPersistentEventPageAsync("test-aggregate", aggregateId, null, null, 10);
+        var changed = await db.GetNCPersistentEventPageAsync(
+            "test-aggregate",
+            aggregateId,
+            "living-city.test.changed",
+            null,
+            1);
+        var changedNext = await db.GetNCPersistentEventPageAsync(
+            "test-aggregate",
+            aggregateId,
+            "living-city.test.changed",
+            changed[^1].AggregateVersion,
+            1);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(all.Select(value => value.AggregateVersion), Is.EqualTo(new long[] { 3, 2, 1 }));
+            Assert.That(changed.Select(value => value.AggregateVersion), Is.EqualTo(new long[] { 3 }));
+            Assert.That(changedNext.Select(value => value.AggregateVersion), Is.EqualTo(new long[] { 1 }));
+            Assert.That(all, Has.All.Matches<NCPersistentEventData>(value =>
+                value.AggregateId == aggregateId && value.SessionEpoch == epoch));
         });
     }
 

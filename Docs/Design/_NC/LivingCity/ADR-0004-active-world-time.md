@@ -15,5 +15,6 @@ Round end performs a flush and snapshot. Crash recovery restores the last commit
 
 - Persistent timestamps that control gameplay use active world time, not `DateTime.UtcNow`.
 - Wall-clock timestamps remain appropriate for audit, operations, retention, and external request expiry.
-- Existing systems that currently schedule rent or other gameplay effects with wall-clock timestamps require migration adapters.
+- Rent, fine deadlines and A-Life schedules are created directly in active-world time; wall-clock gameplay deadlines
+  are rejected by their canonical APIs.
 - Interrupted incidents resume at the saved stage; a separate offline hold-for-play policy is unnecessary.

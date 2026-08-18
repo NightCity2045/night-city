@@ -1,44 +1,44 @@
 <Document>
-# Раны и травма
+# Wounds and Trauma
 
-## Типы травмы
+## Trauma types
 
-- [color=#ff5c5c]Баллистическая[/color] — глубокая рана, наружное или внутреннее кровотечение, возможное повреждение органа, кости, нерва и сухожилия.
-- [color=#ff5c5c]Колющая[/color] — узкая глубокая рана с высокой вероятностью повреждения сосуда или органа.
-- [color=#ff5c5c]Режущая[/color] — открытая рана с повреждением сосудов, сухожилий и нервов.
-- [color=#ffcc66]Тупая[/color] — ушиб, перелом и повреждение внутренних структур.
-- [color=#ffcc66]Взрывная[/color] — несколько локальных повреждений и системное воздействие.
-- [color=#ffcc66]Термическая[/color] — ожог или холодовая травма тканей.
-- [color=#ffcc66]Электрическая[/color] — локальная травма и нагрузка на сердечный ритм.
-- [color=#ffcc66]Химическая[/color] — повреждение тканей и системная токсическая нагрузка.
-- [color=#ffcc66]Баротравма[/color] — повреждение от давления.
+- [color=#ff5c5c]Ballistic[/color] — deep wound, external or internal bleeding, possible damage to an organ, bone, nerve, and tendon.
+- [color=#ff5c5c]Piercing[/color] — narrow deep wound with a high chance of vessel or organ damage.
+- [color=#ff5c5c]Cutting[/color] — open wound with vessel, tendon, and nerve damage.
+- [color=#ffcc66]Blunt[/color] — bruise, fracture, and internal structure damage.
+- [color=#ffcc66]Blast[/color] — multiple local injuries and a systemic effect.
+- [color=#ffcc66]Thermal[/color] — burn or cold injury to tissue.
+- [color=#ffcc66]Electrical[/color] — local trauma and strain on heart rhythm.
+- [color=#ffcc66]Chemical[/color] — tissue damage and systemic toxic load.
+- [color=#ffcc66]Barotrauma[/color] — pressure damage.
 
-## Параметры раны
+## Wound parameters
 
-- область тела;
-- глубина и тяжесть;
-- открытое или закрытое состояние;
-- капиллярный, венозный, артериальный или внутренний источник крови;
-- загрязнение, стадия инфекции и некроз;
-- повязка, гемостатик, давление и жгут;
-- прогресс заживления и рубец;
-- инородное тело и выходная рана.
+- body region;
+- depth and severity;
+- open or closed state;
+- capillary, venous, arterial, or internal blood source;
+- contamination, infection stage, and necrosis;
+- bandage, hemostatic, pressure, and tourniquet;
+- healing progress and scar;
+- foreign body and exit wound.
 
-## Структурные повреждения
+## Structural damage
 
-- [color=#58e6d9]Кость[/color] — состояние перелома, стабильность, смещение и необходимость фиксации.
-- [color=#58e6d9]Сустав[/color] — стабильность, вывих и ограничение движения.
-- [color=#58e6d9]Сухожилие[/color] — целостность, движение и хват.
-- [color=#58e6d9]Нерв[/color] — чувствительность, моторная функция и нейроинтерфейс.
-- [color=#58e6d9]Орган[/color] — структурная целостность и функциональная способность.
+- [color=#58e6d9]Bone[/color] — fracture state, stability, displacement, and need for splinting.
+- [color=#58e6d9]Joint[/color] — stability, dislocation, and movement restriction.
+- [color=#58e6d9]Tendon[/color] — integrity, movement, and grip.
+- [color=#58e6d9]Nerve[/color] — sensitivity, motor function, and neural interface.
+- [color=#58e6d9]Organ[/color] — structural integrity and functional capacity.
 
-## Развитие раны
+## Wound progression
 
-1. Загрязнение повышает инфекционную нагрузку.
-2. Инфекция проходит стадии: загрязнение, локальная, глубокая, органная, системная и сепсис.
-3. Глубокая инфекция создаёт некроз.
-4. Движение и повторная травма могут снова открыть рану.
-5. Зажившая тяжёлая рана формирует рубец.
+1. Contamination increases infection load.
+2. Infection progresses through the stages: contamination, local, deep, organ, systemic, and sepsis.
+3. Deep infection creates necrosis.
+4. Movement and repeated trauma can reopen a wound.
+5. A healed severe wound forms a scar.
 
-Для выбора лечения используйте вкладки [color=#58e6d9]Wounds[/color], [color=#58e6d9]Regions[/color] и [color=#58e6d9]Organs[/color].
+For treatment selection, use the [color=#58e6d9]Wounds[/color], [color=#58e6d9]Regions[/color], and [color=#58e6d9]Organs[/color] tabs.
 </Document>

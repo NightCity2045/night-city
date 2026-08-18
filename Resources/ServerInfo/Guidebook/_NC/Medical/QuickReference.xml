@@ -1,42 +1,42 @@
 <Document>
-# Краткая памятка врача
+# Doctor's Quick Reference
 
-## Наружное кровотечение
+## External bleeding
 
-1. Выберите область на таргетинге.
-2. Пустая рука: прямое давление.
-3. Gauze: повязка на выбранную наружную рану.
-4. Brutepack: гемостатик на выбранную наружную рану.
-5. Tourniquet: жгут на каноническую область руки или ноги.
-6. Повторите скан и восполните потерянный объём.
+1. Select the area on the targeting UI.
+2. Empty hand: direct pressure.
+3. Gauze: bandage the selected external wound.
+4. Brutepack: apply a hemostatic to the selected external wound.
+5. Tourniquet: apply to the canonical arm or leg region.
+6. Re-scan and restore the lost volume.
 
-## Потеря сознания или остановка кровообращения
+## Loss of consciousness or circulation
 
-1. Проверьте кислород, циркулирующую кровь, перфузию и ритм.
-2. Остановите наружные источники крови.
-3. Примените кислород или NCManualVentilator.
-4. При отсутствующей перфузии выполняйте СЛР пустой рукой.
-5. При Shockable Arrest примените Defibrillator.
-6. Введите совместимую кровь или кристаллоид.
-7. Повторите скан.
+1. Check oxygen, circulating blood, perfusion, and rhythm.
+2. Stop external blood sources.
+3. Apply oxygen or NCManualVentilator.
+4. If perfusion is absent, perform CPR with an empty hand.
+5. If Shockable Arrest is present, use Defibrillator.
+6. Administer compatible blood or crystalloid.
+7. Re-scan.
 
-## Перелом
+## Fracture
 
-1. Выберите повреждённую область.
-2. Примените NCFieldSplint для временной фиксации.
-3. Подтвердите перелом полным сканером.
-4. Выполните: Cautery → Scalpel → Hemostat → Retractor → Drill → Drill → Drill → MedicatedSuture.
+1. Select the damaged area.
+2. Apply NCFieldSplint for temporary stabilization.
+3. Confirm the fracture with a full scanner.
+4. Perform: Cautery → Scalpel → Hemostat → Retractor → Drill → Drill → Drill → MedicatedSuture.
 
-## Внутренняя травма
+## Internal injury
 
-1. Поместите пациента в MedicalScanner.
-2. Откройте computerBodyScanner.
-3. Проверьте Regions, Wounds, Organs, Cyberware и Drugs.
-4. Выберите область тела.
-5. Выполните соответствующую операцию из раздела «Хирургия».
-6. Повторите полный скан.
+1. Place the patient in MedicalScanner.
+2. Open computerBodyScanner.
+3. Check Regions, Wounds, Organs, Cyberware, and Drugs.
+4. Select a body region.
+5. Perform the corresponding operation from the Surgery section.
+6. Re-scan fully.
 
-## Основной набор
+## Core kit
 
 <Box>
 <GuideEntityEmbed Entity="HandheldHealthAnalyzer"/>
@@ -51,6 +51,6 @@
 <GuideEntityEmbed Entity="NCFieldSplint"/>
 </Box>
 
-[textlink="Полный справочник врача" link="NCDoctor"]
-[textlink="Все хирургические операции" link="NCSurgery"]
+[textlink="Full Doctor Guidebook" link="NCDoctor"]
+[textlink="All Surgical Operations" link="NCSurgery"]
 </Document>

@@ -9,6 +9,20 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.Housing.Prototypes;
 
+/// <summary>Bounded runtime scheduling limits for canonical Housing work.</summary>
+[Prototype("ncPropertyRuntimeConfiguration")]
+public sealed partial class NCPropertyRuntimeConfigurationPrototype : IPrototype
+{
+    [IdDataField]
+    public string ID { get; private set; } = string.Empty;
+
+    [DataField(required: true)]
+    public int MaximumRentOperationsPerTick { get; private set; } = 4;
+
+    [DataField(required: true)]
+    public int MaximumConcurrentRentOperations { get; private set; } = 4;
+}
+
 /// <summary>
 /// Static rental configuration for one apartment zone. Mutable tenancy remains in the database.
 /// </summary>

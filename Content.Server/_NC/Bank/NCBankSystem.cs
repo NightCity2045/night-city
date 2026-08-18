@@ -2,21 +2,25 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-using System.Threading;
+using System.Linq;
 using System.Threading.Tasks;
 using Content.Server.Chat.Managers;
 using Content.Server.Database;
 using Content.Server.Preferences.Managers;
+using Content.Server._NC.LivingCity.Economy;
+using Content.Server._NC.LivingCity.Identity;
 using Content.Shared._NC.Bank;
 using Content.Shared._NC.Identity;
+using Content.Shared._NC.LivingCity.Economy;
+using Content.Shared._NC.Persistence.Identity;
 using Content.Shared.GameTicking;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.Bank;
 
 /// <summary>
-/// Server authority for character-owned bank accounts.
-/// A single gate serializes balance mutations and prevents concurrent withdrawals from overspending an account.
+/// Player-facing bank facade over the canonical double-entry ledger. The relational row retains only login
+/// credentials for the ATM; its historical Balance column is never read as financial authority.
 /// </summary>
 public sealed partial class NCBankSystem : EntitySystem
 {
@@ -26,8 +30,8 @@ public sealed partial class NCBankSystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IServerDbManager _database = default!;
     [Dependency] private IServerPreferencesManager _preferences = default!;
-
-    private readonly SemaphoreSlim _transactionGate = new(1, 1);
+    [Dependency] private NCPartyFinanceAdapterSystem _finance = default!;
+    [Dependency] private NCPartyResolverSystem _parties = default!;
 
     public NCBankConfigurationPrototype Configuration => _prototypes.Index(DefaultConfiguration);
 
@@ -48,7 +52,7 @@ public sealed partial class NCBankSystem : EntitySystem
             if (account == null)
                 return;
 
-            // Credentials are sent only to the owning session, never through a networked component.
+            // Credentials are sent only to the owning session; balances are fetched from the common ledger.
             _chat.DispatchServerMessage(
                 args.Player,
                 Loc.GetString(
@@ -62,107 +66,76 @@ public sealed partial class NCBankSystem : EntitySystem
         }
     }
 
-    public Task<NCBankAccountData?> GetAccountAsync(NCCharacterId characterId)
+    public async Task<NCBankAccountData?> GetAccountAsync(NCCharacterId characterId)
     {
-        return _database.GetNCBankAccountAsync(characterId);
+        var credentials = await _database.GetNCBankCredentialAsync(characterId);
+        var account = await _finance.GetPrimaryAccountAsync(NCPartyRef.ForCharacter(characterId));
+        return credentials == null || account == null
+            ? null
+            : ToAccount(credentials, account.Snapshot.Balance);
     }
 
-    public Task<NCBankAccountData?> AuthenticateAsync(string accountNumber, string pin)
+    public async Task<NCBankAccountData?> AuthenticateAsync(string accountNumber, string pin)
     {
-        return _database.AuthenticateNCBankAccountAsync(accountNumber, pin);
+        var credentials = await _database.AuthenticateNCBankCredentialAsync(accountNumber, pin);
+        return credentials == null ? null : await GetAccountAsync(credentials.CharacterId);
     }
 
-    /// <summary>
-    /// Serializes a database operation that mutates a character balance together with another aggregate.
-    /// The database operation itself must use one transaction; this gate also excludes ordinary ATM/payroll writes.
-    /// </summary>
-    public async Task<T> RunSerializedBalanceMutationAsync<T>(Func<Task<T>> operation)
-    {
-        await _transactionGate.WaitAsync();
-        try
-        {
-            return await operation();
-        }
-        finally
-        {
-            _transactionGate.Release();
-        }
-    }
-
-    public async Task<NCBankAccountData?> TryDepositAsync(NCCharacterId characterId, int amount)
-    {
-        if (amount <= 0)
-            return null;
-
-        return await AdjustBalanceAsync(characterId, amount);
-    }
-
-    public async Task<NCBankAccountData?> TryWithdrawAsync(NCCharacterId characterId, int amount)
-    {
-        if (amount <= 0)
-            return null;
-
-        return await AdjustBalanceAsync(characterId, -amount);
-    }
-
-    /// <summary>
-    /// Creates an organization's persistent account once and preserves its balance across rounds.
-    /// </summary>
     public async Task<NCOrganizationBankAccountData?> EnsureOrganizationAccountAsync(
         string organizationPrototypeId,
         int startingBalance)
     {
-        await _transactionGate.WaitAsync();
-        try
-        {
-            return await _database.GetOrCreateNCOrganizationBankAccountAsync(
-                organizationPrototypeId,
-                startingBalance);
-        }
-        finally
-        {
-            _transactionGate.Release();
-        }
+        if (startingBalance < 0)
+            return null;
+        var owner = NCPersistentIdentity.Organization(organizationPrototypeId);
+        var registered = await _finance.EnsureOrganizationAsync(
+            organizationPrototypeId,
+            organizationPrototypeId,
+            "organization-account-open");
+        if (!registered.IsResolved)
+            return null;
+
+        var opened = await _finance.EnsurePrimaryAccountWithOpeningBalanceAsync(
+            owner,
+            startingBalance,
+            "organization-account-open");
+        return opened.Account == null
+            ? null
+            : new NCOrganizationBankAccountData(organizationPrototypeId, opened.Account.Snapshot.Balance);
     }
 
-    public Task<IReadOnlyList<NCOrganizationBankTransactionData>> GetOrganizationTransactionsAsync(
+    public async Task<IReadOnlyList<NCOrganizationBankTransactionData>> GetOrganizationTransactionsAsync(
         string organizationPrototypeId,
         int limit)
     {
-        return _database.GetNCOrganizationBankTransactionsAsync(organizationPrototypeId, limit);
+        var owner = NCPersistentIdentity.Organization(organizationPrototypeId);
+        var history = await _finance.GetTransactionHistoryAsync(owner, null, Math.Clamp(limit, 1, 200));
+        if (!history.IsValid)
+            return [];
+
+        var result = new List<NCOrganizationBankTransactionData>(history.Entries.Count);
+        foreach (var entry in history.Entries)
+        {
+            var leg = entry.Transaction.Snapshot.Legs.Single(value => value.AccountId == history.AccountId);
+            var initiator = entry.Transaction.Snapshot.Initiator;
+            var identity = await _parties.ResolveAsync(initiator);
+            result.Add(new NCOrganizationBankTransactionData(
+                entry.AccountAggregateVersion,
+                entry.Transaction.Snapshot.Kind == NCLedgerTransactionKind.Salary
+                    ? NCOrganizationBankTransactionType.Salary
+                    : leg.Amount > 0
+                        ? NCOrganizationBankTransactionType.Deposit
+                        : NCOrganizationBankTransactionType.Withdrawal,
+                Math.Abs(leg.Amount),
+                leg.BalanceAfter,
+                initiator.TryGetCharacter(out var characterId) ? characterId.Value : null,
+                identity.IsResolved ? identity.DisplayName : initiator.ToString(),
+                entry.Transaction.Snapshot.Reference,
+                entry.RecordedAt));
+        }
+        return result;
     }
 
-    /// <summary>
-    /// Applies a manager-authorized cash deposit or withdrawal to an organization budget.
-    /// </summary>
-    public async Task<NCOrganizationBudgetMutationData> TryChangeOrganizationBudgetAsync(
-        string organizationPrototypeId,
-        int startingBalance,
-        int delta,
-        NCCharacterId actorCharacterId,
-        string actorName,
-        string reason)
-    {
-        await _transactionGate.WaitAsync();
-        try
-        {
-            return await _database.TryChangeNCOrganizationBudgetAsync(
-                organizationPrototypeId,
-                startingBalance,
-                delta,
-                actorCharacterId,
-                actorName,
-                reason);
-        }
-        finally
-        {
-            _transactionGate.Release();
-        }
-    }
-
-    /// <summary>
-    /// Pays one employed character from an organization's persistent budget.
-    /// </summary>
     public async Task<NCSalaryPaymentData> TryPaySalaryAsync(
         NCCharacterId characterId,
         string organizationPrototypeId,
@@ -170,47 +143,77 @@ public sealed partial class NCBankSystem : EntitySystem
         int salary,
         string jobPrototypeId)
     {
-        await _transactionGate.WaitAsync();
-        try
-        {
-            // Active characters normally receive an account on spawn. Ensuring it here also closes
-            // the short race between spawn persistence and the first payroll run.
-            if (await EnsureAccountAsync(characterId) == null)
-                return new(NCSalaryPaymentResult.CharacterAccountNotFound, 0, null);
+        if (!characterId.IsValid || salary <= 0 ||
+            await EnsureAccountAsync(characterId) == null ||
+            await EnsureOrganizationAccountAsync(organizationPrototypeId, startingBalance) == null)
+            return new(NCSalaryPaymentResult.InvalidRequest, 0, null);
 
-            return await _database.TryPayNCSalaryAsync(
-                characterId,
-                organizationPrototypeId,
-                startingBalance,
-                salary,
-                jobPrototypeId);
-        }
-        finally
+        var employee = NCPartyRef.ForCharacter(characterId);
+        var employer = NCPersistentIdentity.Organization(organizationPrototypeId);
+        var transactionId = NCTransactionId.New();
+        var request = new NCPartyTransferRequest(
+            Guid.NewGuid(),
+            transactionId,
+            employer,
+            employee,
+            salary,
+            NCLedgerTransactionKind.Salary,
+            jobPrototypeId.Trim(),
+            employer,
+            Guid.NewGuid(),
+            AuditSource: "organization-payday");
+        NCEconomyMutationResult? mutation = null;
+        for (var attempt = 0; attempt < 4; attempt++)
         {
-            _transactionGate.Release();
+            // A failed command receipt is immutable. Keep the transaction identity stable for exactly-once posting,
+            // but use a fresh command identity after an explicit optimistic conflict.
+            mutation = await _finance.TransferAsync(request with
+            {
+                CommandId = attempt == 0 ? request.CommandId : Guid.NewGuid(),
+            });
+            if (mutation.Status != NCEconomyMutationStatus.VersionConflict)
+                break;
         }
+
+        var organization = await _finance.GetPrimaryAccountAsync(employer, true);
+        var character = await _finance.GetPrimaryAccountAsync(employee, true);
+        return mutation?.Status switch
+        {
+            NCEconomyMutationStatus.Applied or NCEconomyMutationStatus.Duplicate =>
+                new(NCSalaryPaymentResult.Success, organization?.Snapshot.Balance ?? 0,
+                    character?.Snapshot.Balance),
+            NCEconomyMutationStatus.InsufficientFunds =>
+                new(NCSalaryPaymentResult.InsufficientOrganizationFunds, organization?.Snapshot.Balance ?? 0,
+                    character?.Snapshot.Balance),
+            _ => new(NCSalaryPaymentResult.InvalidRequest, organization?.Snapshot.Balance ?? 0,
+                character?.Snapshot.Balance),
+        };
     }
 
     private async Task<NCBankAccountData?> EnsureAccountAsync(NCCharacterId characterId)
     {
         var configuration = Configuration;
-        return await _database.GetOrCreateNCBankAccountAsync(
+        // The historical numeric column is seeded with zero and ignored; this row represents credentials only.
+        var credentials = await _database.GetOrCreateNCBankCredentialAsync(
             characterId,
-            configuration.StartingBalance,
             configuration.AccountPrefix.ToUpperInvariant(),
             configuration.PinDigits);
+        if (credentials == null)
+            return null;
+
+        var opened = await _finance.EnsurePrimaryAccountWithOpeningBalanceAsync(
+            NCPartyRef.ForCharacter(characterId),
+            configuration.StartingBalance,
+            "character-account-open");
+        return opened.Account == null ? null : ToAccount(credentials, opened.Account.Snapshot.Balance);
     }
 
-    private async Task<NCBankAccountData?> AdjustBalanceAsync(NCCharacterId characterId, int delta)
+    private static NCBankAccountData ToAccount(NCBankCredentialData credentials, long balance)
     {
-        await _transactionGate.WaitAsync();
-        try
-        {
-            return await _database.TryAdjustNCBankBalanceAsync(characterId, delta);
-        }
-        finally
-        {
-            _transactionGate.Release();
-        }
+        return new NCBankAccountData(
+            credentials.CharacterId,
+            credentials.AccountNumber,
+            credentials.Pin,
+            balance);
     }
 }

@@ -1,48 +1,48 @@
 <Document>
-# Наблюдение после лечения
+# Aftercare
 
-## Контролируемые показатели
+## Monitored indicators
 
-- кислород, циркулирующая кровь и перфузия;
-- давление, сердечный ритм, шок и сознание;
-- наружное и внутреннее кровотечение;
-- насыщение и загрязнение повязок;
-- инфекция, некроз и состояние рубца;
-- функция органа, кости, сухожилия, нерва и сустава;
-- активные препараты и токсическая нагрузка;
-- питание, нагрев, ЭМИ и нейросвязь киберимплантов.
+- oxygen, circulating blood, and perfusion;
+- pressure, heart rhythm, shock, and consciousness;
+- external and internal bleeding;
+- bandage saturation and contamination;
+- infection, necrosis, and scar state;
+- organ, bone, tendon, nerve, and joint function;
+- active drugs and toxic load;
+- power, heat, EMP, and cyberware neural link.
 
-## После повязки или гемостатика
+## After a bandage or hemostatic
 
-1. Повторите анализ.
-2. Проверьте изменение скорости наружного кровотечения.
-3. Следите за насыщением повязки.
-4. При насыщении замените средство или выполните сосудистое восстановление.
+1. Re-scan.
+2. Check the change in external bleeding rate.
+3. Monitor bandage saturation.
+4. Once saturated, replace the item or perform vascular repair.
 
-## После жгута
+## After a tourniquet
 
-1. Запишите IC-время установки.
-2. Контролируйте ишемию конечности.
-3. Перед снятием подготовьте средство контроля раны и кровь.
-4. Снимите жгут.
-5. Проверьте возврат кровотечения и состояние дистальных областей.
+1. Record the in-character application time.
+2. Monitor limb ischemia.
+3. Before removal, prepare wound control and blood.
+4. Remove the tourniquet.
+5. Check for bleeding return and the condition of distal areas.
 
-## После переливания
+## After transfusion
 
-1. Повторите скан крови и перфузии.
-2. Проверьте реакцию совместимости.
-3. Убедитесь, что активный источник крови контролируется.
+1. Re-scan blood and perfusion.
+2. Check the compatibility response.
+3. Make sure the active blood source is controlled.
 
-## После операции
+## After surgery
 
-1. Проверьте закрытие хирургического доступа.
-2. Проверьте наружное и внутреннее кровотечение.
-3. Проверьте функцию оперированного органа или конечности.
-4. Проверьте инфекцию, загрязнение и некроз.
-5. Проверьте активные препараты и токсическую нагрузку.
-6. Повторите полный скан после изменения состояния.
+1. Verify surgical access is closed.
+2. Check external and internal bleeding.
+3. Check the function of the operated organ or limb.
+4. Check infection, contamination, and necrosis.
+5. Check active drugs and toxic load.
+6. Repeat a full scan after the state changes.
 
-## IC-передача пациента
+## IC patient handoff
 
-Передайте: механизм и время травмы, поражённые области, активные источники крови, время жгута, введённые препараты, переливания, выполненные хирургические этапы, установленный трансплантат или киберимплант и оставшиеся ограничения.
+Provide: injury mechanism and time, affected areas, active blood sources, tourniquet time, administered drugs, transfusions, completed surgical steps, installed graft or cyberware, and remaining restrictions.
 </Document>

@@ -1,179 +1,179 @@
 <Document>
-# Хирургия
+# Surgery
 
-## Управление
+## Overview
 
-1. Просканируйте пациента и определите патологию.
-2. Выберите область тела на кукле таргетинга.
-3. Возьмите первый инструмент в активную руку и примените его к пациенту.
-4. Если радиальное меню показывает несколько процедур, выберите нужную.
-5. Дождитесь окончания действия, затем примените следующий инструмент из последовательности.
-6. После закрытия доступа выполните повторный полный скан.
+1. Scan the patient and identify the pathology.
+2. Select the body region on the targeting doll.
+3. Take the first tool in your active hand and apply it to the patient.
+4. If the radial menu shows multiple procedures, choose the correct one.
+5. Wait for the action to finish, then apply the next tool in the sequence.
+6. After closing the access, perform a full rescan.
 
-[color=#58e6d9]Cautery[/color] — необязательная подготовка поля в процедурах, где первым шагом указана подготовка. Если начать Scalpel, этот шаг пропускается. Если начать Cautery, подготовка выполняется как настоящий первый этап.
+[color=#58e6d9]Cautery[/color] is an optional field-prep step in procedures where preparation is listed first. If you begin with Scalpel, that step is skipped. If you begin with Cautery, preparation is performed as the real first stage.
 
-Операционный стол не является обязательным условием запуска. Стол, освещение, стерильность, фиксация, мониторинг, вентиляция, анальгезия, седация и анестезия влияют на детерминированный результат этапа. Недостаточные условия дают скомпрометированный результат: дополнительную боль, загрязнение, кровотечение или осложнение.
+The operating table is not a hard requirement to start. The table, lighting, sterility, restraint, monitoring, ventilation, analgesia, sedation, and anesthesia all affect the deterministic result of the step. Insufficient conditions produce a compromised result: extra pain, contamination, bleeding, or a complication.
 
-## Инструменты
+## Tools
 
 <Box>
-<GuideEntityEmbed Entity="Cautery" Caption="подготовка поля и гемостаз"/>
-<GuideEntityEmbed Entity="Scalpel" Caption="разрез, дебридмент, доступ"/>
-<GuideEntityEmbed Entity="Hemostat" Caption="гемостаз и работа с сосудами"/>
-<GuideEntityEmbed Entity="Retractor" Caption="разведение и закрытие тканей"/>
+<GuideEntityEmbed Entity="Cautery" Caption="field prep and hemostasis"/>
+<GuideEntityEmbed Entity="Scalpel" Caption="incision, debridement, access"/>
+<GuideEntityEmbed Entity="Hemostat" Caption="hemostasis and vessel work"/>
+<GuideEntityEmbed Entity="Retractor" Caption="tissue separation and closure"/>
 </Box>
 <Box>
-<GuideEntityEmbed Entity="Drill" Caption="кость и череп"/>
-<GuideEntityEmbed Entity="Saw" Caption="отделение органа или конечности"/>
-<GuideEntityEmbed Entity="SyringeSaline" Caption="промывание"/>
-<GuideEntityEmbed Entity="MedicatedSuture" Caption="восстановление и закрытие"/>
+<GuideEntityEmbed Entity="Drill" Caption="bone and skull"/>
+<GuideEntityEmbed Entity="Saw" Caption="organ or limb separation"/>
+<GuideEntityEmbed Entity="SyringeSaline" Caption="irrigation"/>
+<GuideEntityEmbed Entity="MedicatedSuture" Caption="repair and closure"/>
 </Box>
 <Box>
-<GuideEntityEmbed Entity="Multitool" Caption="киберимпланты"/>
-<GuideEntityEmbed Entity="NCSurgeryDebugMultitool" Caption="административная проверка всех этапов"/>
+<GuideEntityEmbed Entity="Multitool" Caption="cyberware"/>
+<GuideEntityEmbed Entity="NCSurgeryDebugMultitool" Caption="admin check for every stage"/>
 </Box>
 
-Стрелка [color=#58e6d9]→[/color] означает следующий инструмент. Начальный Cautery можно пропустить в последовательностях, где сразу после него указан Scalpel.
+The [color=#58e6d9]→[/color] arrow means the next tool. The opening Cautery can be skipped in sequences where Scalpel is listed immediately after it.
 
-## Раны и сосуды
+## Wounds and vessels
 
-### 1. Обработка глубокой раны
+### 1. Deep wound treatment
 
-Цель: тяжёлая открытая рана, загрязнение или некроз.
+Target: severe open wound, contamination, or necrosis.
 
 Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture.
 
-### 2. Восстановление сосуда
+### 2. Vessel repair
 
-Цель: сосудистое повреждение или продолжающийся тяжёлый источник крови.
+Target: vascular damage or an ongoing heavy blood source.
 
 Cautery → Scalpel → Hemostat → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
 
-### 3. Промывание раны
+### 3. Wound irrigation
 
-Цель: загрязнённая или инфицированная рана.
+Target: contaminated or infected wound.
 
 Cautery → Scalpel → Hemostat → Retractor → SyringeSaline → Retractor → MedicatedSuture.
 
-### 4. Извлечение инородного тела
+### 4. Foreign body removal
 
-Цель: рана с отдельным инородным телом.
+Target: a wound with a separate foreign body.
 
 Cautery → Scalpel → Hemostat → Retractor → Hemostat → Retractor → MedicatedSuture.
 
-## Кости, сухожилия и нервы
+## Bones, tendons, and nerves
 
-### 5. Фиксация перелома
+### 5. Fracture fixation
 
-Цель: подтверждённый перелом выбранной области.
+Target: confirmed fracture in the selected area.
 
 Cautery → Scalpel → Hemostat → Retractor → Drill → Drill → Drill → MedicatedSuture.
 
-### 6. Восстановление сухожилия
+### 6. Tendon repair
 
-Цель: разрыв или потеря целостности сухожилия.
-
-Cautery → Scalpel → Hemostat → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
-
-### 7. Восстановление периферического нерва
-
-Цель: неврологический дефицит или повреждение нерва.
+Target: tendon rupture or loss of integrity.
 
 Cautery → Scalpel → Hemostat → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
 
-## Органы, мозг и глаза
+### 7. Peripheral nerve repair
 
-### 8. Открытие доступа к внутреннему органу
+Target: neurological deficit or nerve damage.
 
-Цель: внутренний орган в выбранной области. Эта операция оставляет доступ открытым для последующего ремонта.
+Cautery → Scalpel → Hemostat → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
+
+## Organs, brain, and eyes
+
+### 8. Open internal organ access
+
+Target: an internal organ in the selected area. This operation leaves the access open for later repair.
 
 Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor.
 
-### 9. Восстановление открытого органа
+### 9. Repair open organ
 
-Условие: доступ к органу уже открыт операцией № 8.
+Requirement: organ access is already open from operation #8.
 
 Cautery → MedicatedSuture.
 
-### 10. Декомпрессия черепа
+### 10. Skull decompression
 
-Цель: повреждение черепа или внутричерепное осложнение.
+Target: skull damage or an intracranial complication.
 
 Cautery → Scalpel → Hemostat → Retractor → Drill → SyringeSaline → Retractor → MedicatedSuture.
 
-### 11. Восстановление мозга
+### 11. Brain repair
 
-Цель: повреждение мозга.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
-
-### 12. Восстановление глаза
-
-Цель: повреждённые глаза.
+Target: brain damage.
 
 Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
 
-### 13. Удаление внутреннего органа
+### 12. Eye repair
 
-Цель: выбранный внутренний орган.
+Target: damaged eyes.
+
+Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
+
+### 13. Internal organ removal
+
+Target: the selected internal organ.
 
 Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor → Saw → Retractor → MedicatedSuture.
 
-### 14. Удаление глаза
+### 14. Eye removal
 
-Цель: глаза.
+Target: the eyes.
 
 Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor → Saw → Retractor → MedicatedSuture.
 
-### 15. Трансплантация внутреннего органа
+### 15. Internal organ transplantation
 
-Условие: категория органа свободна; совместимый орган находится в руке или рядом.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
-
-### 16. Трансплантация глаза
-
-Условие: глаза удалены; совместимый трансплантат находится в руке или рядом.
+Requirement: the organ category is free; a compatible organ is in hand or nearby.
 
 Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
 
-## Конечности
+### 16. Eye transplantation
 
-### 17. Ампутация конечности
+Requirement: the eyes are removed; a compatible graft is in hand or nearby.
 
-Цель: выбранная рука, кисть, нога или стопа.
+Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
+
+## Limbs
+
+### 17. Limb amputation
+
+Target: the selected arm, hand, leg, or foot.
 
 Cautery → Scalpel → Hemostat → Retractor → Saw → Retractor → MedicatedSuture.
 
-### 18. Повторное присоединение конечности
+### 18. Limb reattachment
 
-Условие: категория конечности свободна; совместимая отделённая часть находится в руке или рядом.
+Requirement: the limb category is free; a compatible detached part is in hand or nearby.
 
 Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
 
-## Судебная медицина
+## Forensics
 
-### 19. Региональная аутопсия
+### 19. Regional autopsy
 
-Условие: пациент мёртв. Цель: выбранная область тела.
+Requirement: the patient is dead. Target: the selected body region.
 
 Scalpel → Scalpel → Scalpel → MedicatedSuture.
 
-## Киберимпланты
+## Cyberware
 
-### 20. Установка внутреннего киберимпланта
+### 20. Internal cyberware installation
 
-Условие: совместимый физический модуль находится в руке или рядом; слот органа-носителя свободен.
-
-Cautery → Scalpel → Hemostat → Retractor → Multitool → Retractor → MedicatedSuture.
-
-### 21. Удаление внутреннего киберимпланта
-
-Условие: в выбранном органе установлен совместимый модуль.
+Requirement: a compatible physical module is in hand or nearby; the host organ slot is free.
 
 Cautery → Scalpel → Hemostat → Retractor → Multitool → Retractor → MedicatedSuture.
 
-## Трансплантат
+### 21. Internal cyberware removal
 
-Трансплантатом является реальная отделённая часть тела или заводская механическая замена. Категория должна совпадать со свободной категорией пациента. После присоединения часть входит в живой граф органов; механическая замена автоматически калибрует нейроинтерфейс.
+Requirement: a compatible module is installed in the selected organ.
+
+Cautery → Scalpel → Hemostat → Retractor → Multitool → Retractor → MedicatedSuture.
+
+## Grafts
+
+A graft is either a real detached body part or a factory-made mechanical replacement. The category must match a free category on the patient. After attachment, the part enters the living organ graph; a mechanical replacement automatically calibrates the neural interface.
 </Document>

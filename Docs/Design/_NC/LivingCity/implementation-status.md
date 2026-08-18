@@ -1,6 +1,6 @@
 # Living City implementation status
 
-Updated: 2026-08-15
+Updated: 2026-08-16
 
 This file tracks implemented foundations against the full dependency plan. It is not an MVP or vertical-slice scope.
 
@@ -23,16 +23,35 @@ This file tracks implemented foundations against the full dependency plan. It is
 - Party finance adapters give persistent `Character` and `Actor` identities the same deterministic primary-account
   boundary. Every balance change remains a typed double-entry ledger transaction; the adapter never accepts an
   `EntityUid` and never mutates an account projection directly.
-- Explicit legacy Bank/Jobs migration reads credential-free, bounded keyset pages and projects character balances,
-  organization balances and employment into the common ledger/registry. Stable source identities, revisions,
-  transaction IDs, command IDs and versioned provenance bindings make repeated apply safe while preserving the legacy
-  tables unchanged.
+- Account history uses bounded newest-first journal keyset pages and then validates every immutable transaction against
+  the requested account. A malformed or missing transaction fails the page instead of presenting a silently incomplete
+  audit log. Replayed deterministic account creation reloads the current aggregate version before later mutations.
+- Atomic ledger participants let Housing, Police, stock and contract domains attach their already validated aggregate
+  writes and outbox messages to the same idempotent serializable commit as money. Participant domains retain all rules;
+  the ledger protects its own aggregate types and provides only the commit boundary.
+- Common property aggregates reuse mapper `NCApartmentId`, `NCBuildingId` and room `NCZoneId` identities while owning
+  typed owner/occupants, active grants, tenure, access revision, interior choice and settlement provenance. Rent due time
+  is active-world time and cannot advance while no round is running.
+- Mapper listings register directly into common property storage. Purchase, initial rent and renewal atomically commit
+  property plus ledger and exact command replay cannot charge or change tenure twice.
+- Player Bank, organization budgets, payroll, Housing terminals, access cards and rent lifecycle all call the common
+  authorities directly. The relational ATM credential row exposes no balance, and old relational balance/property
+  mutation APIs do not exist in runtime code.
+- Police fines are versioned active-world aggregates. Payment transfers money to the NCPD party and marks the fine paid
+  in the same ledger batch; a repeated payment resolves the original immutable transaction instead of charging again.
+- ATM and organization-budget cash operations use the durable `living-city.cash-handoff` state machine. The signed
+  ledger change and `PendingPhysical` state commit atomically, while exact cash entity IDs remain in a non-interactive
+  terminal escrow. A deposit moves its original stack into escrow before awaiting storage and consumes it only after
+  commit. A withdrawal is staged in escrow, marked complete, and only then released to the map; concurrent users cannot
+  share one terminal operation. Completion and reversal are idempotent. On a later round, an interrupted deposit
+  completes because its consumed cash cannot survive the old round, while an interrupted withdrawal is refunded because
+  its undelivered cash cannot survive it. A persistent UUIDv7 recovery watermark prevents a full lifetime scan on every
+  round start, and terminals remain closed until recovery succeeds.
+- Apartment contents use a separate bounded versioned aggregate. The active-world clock raises a final-capture event and
+  waits on its durability barrier before closing the epoch.
 - Bank opening/adjustment and employment replacement are restart-safe across their unavoidable split durable commits.
   Recovery accepts only the exact persisted deterministic transaction/command receipt; unrelated common-domain changes
   fail closed as reconciliation conflicts instead of being overwritten.
-- Mapping-authorized `alife_legacy_bank_jobs_rehearse verify|apply` and status commands provide explicit dual-read
-  rehearsal, bounded issue reporting and progress in `alife_status`. Nothing starts this migration automatically, and
-  `verify` performs no common-domain or legacy writes.
 - SQLite and PostgreSQL persistence foundation: active clock, aggregate snapshots, command receipts, event journal,
   transactional outbox, optimistic aggregate versions, and idempotent command results.
 - Bounded multi-aggregate persistence commits. Up to 32 validated aggregate writes and their outbox records share one
@@ -157,6 +176,18 @@ This file tracks implemented foundations against the full dependency plan. It is
 - An explicit semi-release scale gate executes the production importer and persistence registries with 10,000 actors
   and 300 groups, verifies keyset recovery and cache eviction/reload, and asserts that the abstract population creates
   no ECS entities. It is deliberately excluded from ordinary fast test runs.
+- Directed persistent relationships use deterministic `observer NCPartyRef -> subject NCPartyRef` identities and
+  separately model trust, fear, respect, affection, hostility, perceived debt and obligation. Only a validated
+  authoritative `WorldEventId` plus a YAML `ncRelationshipEffect` can change them. The relationship, bounded
+  newest-first observer index and immutable application marker commit atomically, so cognition never scans the city and
+  replay of an old event remains a duplicate even after later relationship changes. Agent contacts and neural output
+  are not relationship authorities.
+- Canonical subject reputation is distinct from directed relationships and rumors. Bounded entries explicitly separate
+  personal, faction, professional and public channels; professional/public prototypes resolve through stable domain
+  keys. Signed score, unsigned visibility, evidence and monotonic change order are changed only by a YAML effect plus
+  authoritative `WorldEventId`. The subject snapshot and immutable provenance marker commit atomically, so an old event
+  cannot apply twice and an altered initiator cannot masquerade as a valid replay. Subject-first reads require no city
+  scan or unbounded audience aggregate.
 
 ## Deliberately unchanged
 
@@ -178,11 +209,11 @@ export; implementation code must not invent replacement district/building/apartm
 
 ## Next dependency work
 
-- Caller-by-caller Bank/Jobs authority migration, successful production rehearsal, rollback drill and removal of legacy
-  mutation paths. There is no dual-write period; old fields become read-only for one schema cycle only after the switch.
-  Social relationships remain in the social simulation phase rather than reusing the player-only Agent address book.
+- Episodic memory, deterministic consolidation, rumors and ConversationSession remain in the social simulation phase.
+  They will consume relationship/reputation authorities without reusing the player-only Agent address book as
+  persistent social truth.
 - Route capacity reservations plus incident-driven access/threat changes.
-- Physical AI, cognition, social memory, economy, housing ownership migration, incidents and services in the order
+- Physical AI, cognition, social memory, economy, housing behavior, incidents and services in the order
   defined by the full development plan.
 
 ## Current implementation boundary
@@ -209,8 +240,6 @@ export; implementation code must not invent replacement district/building/apartm
 - The zone-state schema and ingestion boundary for scarcity, threat and control are implemented, but those values are
   intentionally unavailable until their later authoritative domains exist. The projection never substitutes a
   fabricated neutral value for missing city facts.
-- The common ledger/employment destination, adapters, backfill and dual-read reconciliation are implemented. Existing
-  player-facing Bank/Jobs paths remain the legacy authority and are not dual-written; an administrator must explicitly
-  run the rehearsal. Caller migration, a production rehearsal and rollback drill must succeed before legacy mutation
-  paths are disabled, after which old fields remain read-only for one schema cycle. No automatic payroll coordinator
-  is active yet.
+- The common ledger/employment/property/fine authorities are directly wired to their player-facing callers. Historical
+  relational schema remains only in old EF migrations until the pre-release database baseline is squashed; no runtime
+  API can use it as a second authority. No automatic employment/payroll coordinator is active yet.

@@ -5,7 +5,7 @@
 using System;
 using System.Linq;
 using Content.Server.Administration;
-using Content.Server.Database;
+using Content.Server._NC.LivingCity.Housing;
 using Content.Server.Preferences.Managers;
 using Content.Shared._NC.City.ZoneTemplates.Prototypes;
 using Content.Shared._NC.Housing;
@@ -56,9 +56,11 @@ public sealed partial class NCPropertyCommand : IConsoleCommand
                 }
 
                 shell.WriteLine(
-                    $"Property={property.PropertyId}, Status={property.Status}, " +
-                    $"Tenants={property.Tenants.Count}, Revision={property.AccessRevision}, " +
-                    $"Interior={property.CurrentTemplateId ?? "none"}, Deployment={property.ActiveDeploymentId}");
+                    $"Property={property.Snapshot.PropertyId}, Status={property.Snapshot.Status}, " +
+                    $"Tenants={property.Snapshot.Occupants.Count(value => value.Kind == NCPropertyOccupancyKind.Tenancy)}, " +
+                    $"Revision={property.Snapshot.AccessRevision}, " +
+                    $"Interior={property.Snapshot.CurrentTemplateId ?? "none"}, " +
+                    $"Deployment={property.Snapshot.ActiveDeploymentId}");
                 return;
 
             case "rent":
@@ -154,10 +156,12 @@ public sealed partial class NCPropertyCommand : IConsoleCommand
         return true;
     }
 
-    private static void WriteMutation(IConsoleShell shell, NCPropertyMutationData result)
+    private static void WriteMutation(IConsoleShell shell, NCPropertyRuntimeMutationResult result)
     {
         var balance = result.Balance is { } current ? $", Balance={current}" : string.Empty;
-        var revision = result.Property is { } property ? $", Revision={property.AccessRevision}" : string.Empty;
+        var revision = result.Property is { } property
+            ? $", Revision={property.Snapshot.AccessRevision}"
+            : string.Empty;
         shell.WriteLine($"Result={result.Result}{balance}{revision}");
     }
 

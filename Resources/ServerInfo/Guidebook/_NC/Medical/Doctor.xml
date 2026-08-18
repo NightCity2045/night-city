@@ -1,28 +1,28 @@
 <Document>
-# Медицинский справочник
+# Medical Guidebook
 
-## Порядок оказания помощи
+## Order of Care
 
-1. Выберите область тела на кукле таргетинга.
-2. Остановите наружное кровотечение.
-3. Проверьте кислород, циркулирующую кровь, перфузию и сердечный ритм.
-4. Выполните ручной анализ или полный скан.
-5. Стабилизируйте дыхание и кровообращение.
-6. Обработайте раны и зафиксируйте переломы.
-7. Проведите требуемую операцию.
-8. Повторите диагностику.
+1. Select a body region on the targeting doll.
+2. Stop external bleeding.
+3. Check oxygen, circulating blood, perfusion, and heart rhythm.
+4. Perform a handheld analysis or a full scan.
+5. Stabilize breathing and circulation.
+6. Treat wounds and splint fractures.
+7. Perform the required surgery.
+8. Re-scan.
 
-## Основные предметы
+## Core Items
 
-- [color=#58e6d9]HandheldHealthAnalyzer[/color] — приблизительная диагностика жизненных показателей и наружных повреждений.
-- [color=#58e6d9]MedicalScanner + computerBodyScanner[/color] — полный список ран, органов, переломов, препаратов и киберимплантов.
-- [color=#58e6d9]Gauze[/color] — повязка для наружного капиллярного и венозного кровотечения.
-- [color=#58e6d9]Brutepack[/color] — гемостатическая упаковка глубокой наружной раны.
-- [color=#58e6d9]Tourniquet[/color] — перекрытие наружного кровотечения на конечности.
-- [color=#58e6d9]NCFieldSplint[/color] — стабилизация перелома конечности.
-- [color=#58e6d9]NCManualVentilator[/color] — временная искусственная вентиляция.
-- [color=#58e6d9]Bloodpack[/color] — восполнение крови в bloodstream.
-- [color=#58e6d9]Defibrillator[/color] — восстановление шокового сердечного ритма.
+- [color=#58e6d9]HandheldHealthAnalyzer[/color] — approximate diagnostics for vital signs and external injuries.
+- [color=#58e6d9]MedicalScanner + computerBodyScanner[/color] — full list of wounds, organs, fractures, drugs, and cyberware.
+- [color=#58e6d9]Gauze[/color] — bandage for external capillary and venous bleeding.
+- [color=#58e6d9]Brutepack[/color] — hemostatic pack for a deep external wound.
+- [color=#58e6d9]Tourniquet[/color] — blocks external bleeding on a limb.
+- [color=#58e6d9]NCFieldSplint[/color] — limb fracture stabilization.
+- [color=#58e6d9]NCManualVentilator[/color] — temporary artificial ventilation.
+- [color=#58e6d9]Bloodpack[/color] — restores blood in the bloodstream.
+- [color=#58e6d9]Defibrillator[/color] — restores a shockable cardiac rhythm.
 
 <Box>
 <GuideEntityEmbed Entity="HandheldHealthAnalyzer"/>
@@ -37,14 +37,14 @@
 <GuideEntityEmbed Entity="Defibrillator"/>
 </Box>
 
-## Разделы
+## Sections
 
-- [textlink="Диагностика и триаж" link="NCDiagnosticsAndTriage"] — приборы и чтение медицинского интерфейса.
-- [textlink="Раны и травма" link="NCWoundsAndTrauma"] — механизмы травмы и структурные повреждения.
-- [textlink="Полевая помощь" link="NCFieldTreatment"] — бинты, гемостатик, жгут и шина.
-- [textlink="Экстренная медицина" link="NCEmergencyMedicine"] — СЛР, вентиляция, кровь и дефибрилляция.
-- [textlink="Фармакология" link="NCPharmacology"] — назначение препаратов.
-- [textlink="Хирургия" link="NCSurgery"] — все операции и порядок инструментов.
-- [textlink="Медицина киберимплантов" link="NCCyberwareMedicine"] — установка, удаление и обслуживание.
-- [textlink="Краткая памятка" link="NCDoctorQuickReference"] — экстренные последовательности.
+- [textlink="Diagnostics and Triage" link="NCDiagnosticsAndTriage"] — devices and reading the medical interface.
+- [textlink="Wounds and Trauma" link="NCWoundsAndTrauma"] — trauma mechanisms and structural damage.
+- [textlink="Field Treatment" link="NCFieldTreatment"] — bandages, hemostatic, tourniquet, and splint.
+- [textlink="Emergency Medicine" link="NCEmergencyMedicine"] — CPR, ventilation, blood, and defibrillation.
+- [textlink="Pharmacology" link="NCPharmacology"] — drug administration.
+- [textlink="Surgery" link="NCSurgery"] — all operations and tool order.
+- [textlink="Cyberware Medicine" link="NCCyberwareMedicine"] — installation, removal, and maintenance.
+- [textlink="Quick Reference" link="NCDoctorQuickReference"] — emergency sequences.
 </Document>

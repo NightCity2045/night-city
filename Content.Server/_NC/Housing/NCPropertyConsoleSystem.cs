@@ -6,8 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Content.Server._NC.Bank;
-using Content.Server.Database;
+using Content.Server._NC.LivingCity.Economy;
+using Content.Server._NC.LivingCity.Time;
 using Content.Server.Preferences.Managers;
 using Content.Shared._NC.City.ZoneTemplates.Prototypes;
 using Content.Shared._NC.City.Zones;
@@ -16,6 +16,7 @@ using Content.Shared._NC.Housing.Components;
 using Content.Shared._NC.Housing.Prototypes;
 using Content.Shared._NC.Housing.UI;
 using Content.Shared._NC.Identity;
+using Content.Shared._NC.Persistence.Identity;
 using Robust.Server.GameObjects;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
@@ -30,7 +31,8 @@ public sealed partial class NCPropertyConsoleSystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private ISharedPlayerManager _players = default!;
     [Dependency] private IServerPreferencesManager _preferences = default!;
-    [Dependency] private NCBankSystem _bank = default!;
+    [Dependency] private NCPartyFinanceAdapterSystem _finance = default!;
+    [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCApartmentSystem _apartments = default!;
     [Dependency] private City.Zones.NCZoneSystem _zones = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;
@@ -214,7 +216,9 @@ public sealed partial class NCPropertyConsoleSystem : EntitySystem
         {
             // The database repeats this tenancy check so a forged BUI message cannot terminate another lease.
             if (!_apartments.TryGetProperty(listing.ApartmentId, out var property) ||
-                !property.Tenants.Any(value => value.CharacterId == characterId && value.RevokedAt == null))
+                !property.Snapshot.Occupants.Any(value =>
+                    value.Kind == NCPropertyOccupancyKind.Tenancy &&
+                    value.Occupant == NCPartyRef.ForCharacter(characterId)))
             {
                 view.Notice = "nc-property-console-result-not-authorized";
             }
@@ -252,8 +256,9 @@ public sealed partial class NCPropertyConsoleSystem : EntitySystem
             return;
         }
 
-        var account = await _bank.GetAccountAsync(characterId);
-        var balance = account?.Balance ?? 0;
+        var account = await _finance.GetPrimaryAccountAsync(NCPartyRef.ForCharacter(characterId));
+        var balance = account?.Snapshot.Balance ?? 0;
+        _clock.TryGetCurrentTime(out _, out var now);
         var listings = BuildVisibleListings(view.Query);
         var pageSize = Math.Max(1, component.PageSize);
         var pageCount = Math.Max(1, (listings.Count + pageSize - 1) / pageSize);
@@ -270,10 +275,12 @@ public sealed partial class NCPropertyConsoleSystem : EntitySystem
         foreach (var entry in page)
         {
             _apartments.TryGetProperty(entry.Listing.ApartmentId, out var property);
-            var status = property?.Status ?? NCPropertyStatus.Unavailable;
-            var isTenant = property?.Tenants.Any(tenant => tenant.CharacterId == characterId &&
-                tenant.RevokedAt == null &&
-                (tenant.ValidUntil is not { } expiry || expiry > DateTime.UtcNow)) == true;
+            var snapshot = property?.Snapshot;
+            var status = snapshot?.Status ?? NCPropertyStatus.Unavailable;
+            var party = NCPartyRef.ForCharacter(characterId);
+            var isTenant = snapshot?.Occupants.Any(tenant =>
+                tenant.Kind == NCPropertyOccupancyKind.Tenancy && tenant.Occupant == party &&
+                (tenant.ValidUntil is not { } expiry || expiry > now)) == true;
             var interiors = new List<NCPropertyConsoleInteriorOfferSummary>();
             foreach (var offer in entry.Listing.Interiors)
             {
@@ -290,12 +297,12 @@ public sealed partial class NCPropertyConsoleSystem : EntitySystem
             }
 
             var interiorActive = _apartments.IsInteriorActiveOrPending(entry.Listing.ApartmentId);
-            var currentRent = property != null &&
-                              _prototypes.TryIndex<NCRentPolicyPrototype>(property.RentPolicyId, out var policy)
+            var currentRent = snapshot != null &&
+                              _prototypes.TryIndex<NCRentPolicyPrototype>(snapshot.RentPolicyId, out var policy)
                 ? policy
                 : null;
-            var nextRentDue = property?.NextRentDueAt is { } dueAt
-                ? new DateTimeOffset(DateTime.SpecifyKind(dueAt, DateTimeKind.Utc)).ToUnixTimeSeconds()
+            var nextRentDue = snapshot?.NextRentDueAt is { } dueAt
+                ? Math.Max(0, (dueAt.Ticks - now.Ticks) / TimeSpan.TicksPerSecond)
                 : (long?) null;
 
             summaries.Add(new NCPropertyConsoleListingSummary(
@@ -312,10 +319,10 @@ public sealed partial class NCPropertyConsoleSystem : EntitySystem
                 account != null && status == NCPropertyStatus.Available &&
                     interiors.Any(offer => balance >= offer.RentAmount),
                 isTenant,
-                isTenant && property?.CurrentTemplateId != null && !interiorActive &&
+                isTenant && snapshot?.CurrentTemplateId != null && !interiorActive &&
                     _apartments.AreInteriorSnapshotsReady,
                 interiorActive,
-                property?.CurrentTemplateId,
+                snapshot?.CurrentTemplateId,
                 interiors));
         }
 

@@ -39,4 +39,5 @@ public sealed partial class NCBankConfigurationPrototype : IPrototype
     /// </summary>
     [DataField]
     public string CurrencyId = "EB";
+
 }

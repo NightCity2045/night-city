@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncRelationshipPolicy
+  id: Default
+  maximumScore: 1000
+  maximumAbsoluteDebt: 1000000
+  maximumEffectMagnitude: 10
+  maximumSingleEffectDelta: 1000
+  maximumRelationshipsPerObserver: 512
+  maximumQueryCount: 100
+
+- type: ncRelationshipEffect
+  id: Assisted
+  trustDelta: 80
+  respectDelta: 45
+  affectionDelta: 25
+  debtDelta: 50
+  obligationDelta: 30
+
+- type: ncRelationshipEffect
+  id: Threatened
+  trustDelta: -90
+  fearDelta: 120
+  respectDelta: -20
+  hostilityDelta: 80
+
+- type: ncRelationshipEffect
+  id: Betrayed
+  trustDelta: -250
+  respectDelta: -150
+  affectionDelta: -120
+  hostilityDelta: 220
+
+- type: ncRelationshipEffect
+  id: KeptPromise
+  trustDelta: 100
+  respectDelta: 60
+  obligationDelta: -25
+
+- type: ncRelationshipEffect
+  id: BrokePromise
+  trustDelta: -160
+  respectDelta: -80
+  hostilityDelta: 70

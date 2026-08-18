@@ -25,12 +25,15 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
 {
     public const string AccountAggregateType = "living-city.account";
     public const string TransactionAggregateType = "living-city.ledger-transaction";
+    public const string AccountLedgerPostedEventType = "living-city.account.ledger-posted";
     public const int SnapshotFormatVersion = 1;
 
     private const int MaximumCurrencyIdLength = 32;
     private const int MaximumReferenceLength = 256;
     private const int MaximumAuditSourceLength = 128;
     private const int MaximumLegs = 16;
+    private const int MaximumParticipantWrites = 8;
+    private const int MaximumParticipantOutboxMessages = 16;
     private const int MutationGateStripeCount = 128;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -323,7 +326,8 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
             if (accounts.Any(account => account.Snapshot.Status != NCAccountStatus.Active))
                 return Reject(NCEconomyMutationStatus.Rejected, "Frozen or closed accounts cannot post transactions.");
 
-            var accountWrites = new List<NCPersistentAggregateWrite>(accounts.Count + 1);
+            var participantWrites = request.ParticipantWrites ?? [];
+            var accountWrites = new List<NCPersistentAggregateWrite>(accounts.Count + 1 + participantWrites.Count);
             var accountReceipts = new List<AccountReceipt>(accounts.Count);
             var transactionLegs = new NCLedgerLeg[accounts.Count];
             for (var i = 0; i < accounts.Count; i++)
@@ -350,7 +354,7 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
                 accountReceipts.Add(new AccountReceipt(next, requestedLeg.ExpectedVersion + 1));
                 accountWrites.Add(new NCPersistentAggregateWrite(
                     accountEventId,
-                    "living-city.account.ledger-posted",
+                    AccountLedgerPostedEventType,
                     AccountAggregateType,
                     AccountKey(requestedLeg.AccountId),
                     requestedLeg.ExpectedVersion,
@@ -359,7 +363,7 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
                     JsonSerializer.Serialize(new AccountEvent(
                         requestedLeg.AccountId,
                         next.Owner,
-                        "living-city.account.ledger-posted",
+                        AccountLedgerPostedEventType,
                         request.AuditSource,
                         request.TransactionId,
                         balance,
@@ -392,6 +396,18 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
                     currency,
                     transactionLegs), JsonOptions)));
 
+            // Participant writes were validated by their owning domain before this call. The ledger only supplies the
+            // shared serializable commit boundary; it never interprets property, fine, stock, or contract rules.
+            accountWrites.AddRange(participantWrites.Select(write => new NCPersistentAggregateWrite(
+                write.EventId,
+                write.EventType,
+                write.AggregateType,
+                write.AggregateId,
+                write.ExpectedAggregateVersion,
+                write.SnapshotFormatVersion,
+                write.SnapshotPayload,
+                write.EventPayload)));
+
             var receipt = new EconomyReceipt(
                 accountReceipts.ToArray(),
                 new TransactionReceipt(transaction, 1),
@@ -408,7 +424,12 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
                 request.CausationId,
                 epoch,
                 now,
-                []));
+                (request.ParticipantOutboxMessages ?? []).Select(message =>
+                    new NCPersistentBatchOutboxWrite(
+                        message.MessageId,
+                        message.EventId,
+                        message.MessageType,
+                        message.Payload)).ToArray()));
             return ApplyBatchResult(persisted, receipt);
         }
         catch (Exception exception)
@@ -587,6 +608,45 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
         {
             error = "Double-entry ledger legs must sum to zero.";
             return false;
+        }
+
+        var participantWrites = request.ParticipantWrites ?? [];
+        var participantOutbox = request.ParticipantOutboxMessages ?? [];
+        if (participantWrites.Count > MaximumParticipantWrites ||
+            participantOutbox.Count > MaximumParticipantOutboxMessages)
+        {
+            error = "The atomic ledger settlement exceeds its participant limits.";
+            return false;
+        }
+
+        var identities = new HashSet<(string AggregateType, string AggregateId)>();
+        var eventIds = new HashSet<Guid>();
+        foreach (var write in participantWrites)
+        {
+            if (write.EventId == Guid.Empty || !eventIds.Add(write.EventId) ||
+                write.AggregateType is AccountAggregateType or TransactionAggregateType ||
+                string.IsNullOrWhiteSpace(write.EventType) || write.EventType.Length > 96 ||
+                string.IsNullOrWhiteSpace(write.AggregateType) || write.AggregateType.Length > 64 ||
+                string.IsNullOrWhiteSpace(write.AggregateId) || write.AggregateId.Length > 128 ||
+                write.ExpectedAggregateVersion < 0 || write.SnapshotFormatVersion < 1 ||
+                string.IsNullOrWhiteSpace(write.SnapshotPayload) || string.IsNullOrWhiteSpace(write.EventPayload) ||
+                !identities.Add((write.AggregateType, write.AggregateId)))
+            {
+                error = "An atomic ledger participant write is invalid or duplicates a protected aggregate.";
+                return false;
+            }
+        }
+
+        var messageIds = new HashSet<Guid>();
+        foreach (var message in participantOutbox)
+        {
+            if (message.MessageId == Guid.Empty || !messageIds.Add(message.MessageId) ||
+                !eventIds.Contains(message.EventId) || string.IsNullOrWhiteSpace(message.MessageType) ||
+                message.MessageType.Length > 96 || string.IsNullOrWhiteSpace(message.Payload))
+            {
+                error = "An atomic ledger participant outbox message is invalid.";
+                return false;
+            }
         }
 
         error = null;

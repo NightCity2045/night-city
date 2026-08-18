@@ -6,7 +6,12 @@ using Content.Server.CriminalRecords.Systems;
 using Content.Server.Database;
 using Content.Server.Popups;
 using Content.Server.Preferences.Managers;
+using Content.Server._NC.LivingCity.Police;
+using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.Identity;
+using Content.Shared._NC.LivingCity.Police;
+using Content.Shared._NC.Persistence.Identity;
+using Content.Shared._NC.Persistence.Time;
 using Content.Shared._NC.Police.Components;
 using Content.Shared._NC.Police.UI;
 using Content.Shared.Access.Systems;
@@ -33,6 +38,8 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
     [Dependency] private AccessReaderSystem _access = default!;
     [Dependency] private CriminalRecordsSystem _criminalRecords = default!;
     [Dependency] private IServerDbManager _database = default!;
+    [Dependency] private NCPoliceFineRegistrySystem _fines = default!;
+    [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private IdentitySystem _identity = default!;
     [Dependency] private ISharedPlayerManager _players = default!;
     [Dependency] private PopupSystem _popup = default!;
@@ -325,8 +332,15 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
             return;
         try
         {
-            if (await _database.CreateNCPoliceFineAsync(target, article, reason, args.Amount,
-                    DateTime.UtcNow + component.FineDuePeriod, actorId, actorName) == null)
+            var result = await _fines.CreateAsync(
+                NCPartyRef.ForCharacter(target),
+                article,
+                reason,
+                args.Amount,
+                component.FineDuePeriod,
+                NCPartyRef.ForCharacter(actorId),
+                "police-records-console");
+            if (result.Status is not (NCPoliceFineMutationStatus.Applied or NCPoliceFineMutationStatus.Duplicate))
                 return;
             await RefreshOpenViewsAsync();
         }
@@ -346,7 +360,13 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
             return;
         try
         {
-            if (await _database.SetNCPoliceFineStatusAsync(args.FineId, args.Status, reason, actorId, actorName) == null)
+            var result = await _fines.SetStatusAsync(
+                args.FineId,
+                args.Status,
+                reason,
+                NCPartyRef.ForCharacter(actorId),
+                "police-records-console");
+            if (result.Status is not (NCPoliceFineMutationStatus.Applied or NCPoliceFineMutationStatus.Duplicate))
                 return;
             await RefreshOpenViewsAsync();
         }
@@ -471,10 +491,10 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
         foreach (var warrant in warrants)
             view.WarrantIds.Add(warrant.Id);
 
-        var fines = await _database.GetNCPoliceFinesAsync(component.FineListLimit);
+        var fines = await _fines.GetPageAsync(component.FineListLimit);
         view.FineIds.Clear();
         foreach (var fine in fines)
-            view.FineIds.Add(fine.Id);
+            view.FineIds.Add(fine.Snapshot.FineId);
 
         var summaries = results
             .Select(value => ToSummary(value, _presentThisRound.Contains(value.CharacterId)))
@@ -489,7 +509,7 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
             cases.Select(ToCaseSummary).ToList(),
             selectedCase == null ? null : ToCaseSummary(selectedCase),
             warrants.Select(ToWarrantSummary).ToList(),
-            fines.Select(ToFineSummary).ToList(),
+            fines.Select(value => ToFineSummary(value, CurrentActiveTime())).ToList(),
             true), user);
     }
 
@@ -614,11 +634,31 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
             value.ResolvedAt);
     }
 
-    private static NCPoliceFineSummary ToFineSummary(NCPoliceFineData value)
+    private NCPoliceFineSummary ToFineSummary(NCPoliceFineRecord value, NCActiveWorldTime now)
     {
-        return new NCPoliceFineSummary(value.Id, value.TargetCharacterId.Value, value.TargetName,
-            value.Article, value.Reason, value.Amount, value.Status, value.IssuedByName,
-            value.IssuedAt, value.DueAt, value.PaidAt);
+        var snapshot = value.Snapshot;
+        return new NCPoliceFineSummary(
+            snapshot.FineId,
+            snapshot.Target.CharacterId.Value,
+            snapshot.TargetName,
+            snapshot.Article,
+            snapshot.Reason,
+            snapshot.Amount,
+            _fines.EffectiveStatus(snapshot, now),
+            snapshot.IssuedByName,
+            Since(now, snapshot.IssuedAt),
+            TimeSpan.FromTicks(snapshot.DueAt.Ticks - now.Ticks),
+            snapshot.PaidAt is { } paidAt ? Since(now, paidAt) : null);
+    }
+
+    private NCActiveWorldTime CurrentActiveTime()
+    {
+        return _clock.TryGetCurrentTime(out _, out var now) ? now : NCActiveWorldTime.Zero;
+    }
+
+    private static TimeSpan Since(NCActiveWorldTime now, NCActiveWorldTime earlier)
+    {
+        return TimeSpan.FromTicks(Math.Max(0, now.Ticks - earlier.Ticks));
     }
 
     private sealed class ConsoleView
@@ -626,7 +666,7 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
         public readonly List<NCCharacterId> ResultIds = new();
         public readonly HashSet<long> CaseIds = new();
         public readonly HashSet<long> WarrantIds = new();
-        public readonly HashSet<long> FineIds = new();
+        public readonly HashSet<NCPoliceFineId> FineIds = new();
         public string Query = string.Empty;
         public NCCharacterId? Selected;
         public long? SelectedCaseId;

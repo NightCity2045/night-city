@@ -12,7 +12,6 @@ using Content.Server._NC.LivingCity.Economy;
 using Content.Server._NC.LivingCity.Employment;
 using Content.Server._NC.LivingCity.Groups;
 using Content.Server._NC.LivingCity.Identity;
-using Content.Server._NC.LivingCity.Migration;
 using Content.Server._NC.LivingCity.Population;
 using Content.Server._NC.LivingCity.Time;
 using Content.Server._NC.Persistence.Outbox;
@@ -44,7 +43,6 @@ public sealed partial class NCLivingCityStatusCommand : LocalizedEntityCommands
     [Dependency] private NCPartyDirectorySystem _parties = default!;
     [Dependency] private NCEconomyLedgerSystem _economy = default!;
     [Dependency] private NCEmploymentRegistrySystem _employment = default!;
-    [Dependency] private NCLegacyBankJobsMigrationSystem _legacyBankJobs = default!;
     [Dependency] private NCPersistentOutboxDispatcherSystem _outbox = default!;
 
     public override string Command => "alife_status";
@@ -80,11 +78,6 @@ public sealed partial class NCLivingCityStatusCommand : LocalizedEntityCommands
             $"Parties/economy/employment: directory={_parties.CachedPartyCount}, " +
             $"accounts={_economy.CachedAccountCount}, transactions={_economy.CachedTransactionCount}, " +
             $"employments={_employment.CachedEmploymentCount}, employeeIndexes={_employment.CachedEmployeeIndexCount}.");
-        var legacyMigration = _legacyBankJobs.Progress;
-        shell.WriteLine(
-            $"Legacy Bank/Jobs rehearsal: running={legacyMigration.Running}, mode={legacyMigration.Mode}, " +
-            $"phase={legacyMigration.Phase}, processed={legacyMigration.Processed}, " +
-            $"conflicts={legacyMigration.Conflicts}, failed={legacyMigration.Failed}.");
         shell.WriteLine(
             $"Group physicalization: active={_groupPhysicalization.IsActive}, " +
             $"catalogReady={_groupPhysicalization.CatalogRecovered}, " +

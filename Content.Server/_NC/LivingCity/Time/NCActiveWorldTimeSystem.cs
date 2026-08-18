@@ -19,15 +19,15 @@ namespace Content.Server._NC.LivingCity.Time;
 /// Owns the authoritative city clock. It advances only while the game ticker is in a live round and
 /// persists coalesced checkpoints instead of performing database work from every simulation tick.
 /// </summary>
-public sealed class NCActiveWorldTimeSystem : EntitySystem
+public sealed partial class NCActiveWorldTimeSystem : EntitySystem
 {
     private static readonly TimeSpan MinimumCheckpointInterval = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan PersistenceRetryDelay = TimeSpan.FromSeconds(5);
 
-    [Dependency] private readonly IConfigurationManager _configuration = default!;
-    [Dependency] private readonly IGameTiming _timing = default!;
-    [Dependency] private readonly IServerDbManager _database = default!;
-    [Dependency] private readonly ITaskManager _taskManager = default!;
+    [Dependency] private IConfigurationManager _configuration = default!;
+    [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private IServerDbManager _database = default!;
+    [Dependency] private ITaskManager _taskManager = default!;
 
     private readonly LinkedList<ClockOperation> _operations = [];
     private ActiveSessionState? _current;
@@ -108,11 +108,7 @@ public sealed class NCActiveWorldTimeSystem : EntitySystem
         // A forced run-level transition can begin a new round before a prior close callback returns.
         // Queue ordering guarantees that the prior close reaches durable storage before this epoch starts.
         if (_current is { Active: true } previous)
-        {
-            SampleActiveTime(previous);
-            previous.Active = false;
-            QueueClose(previous);
-        }
+            PrepareRoundClose(previous);
 
         var state = new ActiveSessionState(NCSessionEpoch.New(), _timing.CurTime);
         _current = state;
@@ -124,9 +120,56 @@ public sealed class NCActiveWorldTimeSystem : EntitySystem
         if (_current is not { Active: true } state)
             return;
 
+        PrepareRoundClose(state);
+    }
+
+    private void PrepareRoundClose(ActiveSessionState state)
+    {
         SampleActiveTime(state);
+        NCActiveWorldTime finalTime;
+        try
+        {
+            finalTime = state.PersistedTime.Advance(state.Pending + state.InFlight);
+        }
+        catch (OverflowException exception)
+        {
+            state.Active = false;
+            FailState(state, $"final active-world time overflowed: {exception.Message}");
+            return;
+        }
+        var closing = new NCActiveWorldSessionClosingEvent(state.Epoch, finalTime);
+
+        // Closing handlers run synchronously while the clock is still available, so they can capture immutable
+        // world state and start their durable writes. The queue then waits for those writes before closing the epoch.
+        RaiseLocalEvent(closing);
         state.Active = false;
-        QueueClose(state);
+        if (closing.PendingWrites.Count != 0)
+            QueueCloseBarrier(state, closing.PendingWrites);
+        else
+            QueueClose(state);
+    }
+
+    private void QueueCloseBarrier(ActiveSessionState state, IReadOnlyCollection<Task> pendingWrites)
+    {
+        var writes = new Task[pendingWrites.Count];
+        var index = 0;
+        foreach (var write in pendingWrites)
+            writes[index++] = write;
+        var operation = new ClockOperation(
+            $"durability barrier for epoch {state.Epoch}",
+            async () =>
+            {
+                await Task.WhenAll(writes);
+                return null;
+            },
+            _ => QueueClose(state),
+            exception =>
+            {
+                // Closing an epoch after a failed final write would make that lost state impossible to repair.
+                // Keep the database epoch active and fail all further persistent mutations closed.
+                FailState(state, $"final durability barrier failed: {exception.Message}");
+            });
+        EnqueueLast(operation);
     }
 
     private void SampleActiveTime(ActiveSessionState state)
@@ -490,6 +533,27 @@ public sealed class NCActiveWorldSessionStartedEvent(
 {
     public NCSessionEpoch Epoch { get; } = epoch;
     public NCActiveWorldTime Time { get; } = time;
+}
+
+/// <summary>
+/// Raised while the ending epoch is still writable. Handlers capture their immutable final state immediately and
+/// register only the resulting write tasks; the clock will not close the durable epoch until every task completes.
+/// </summary>
+public sealed class NCActiveWorldSessionClosingEvent(
+    NCSessionEpoch epoch,
+    NCActiveWorldTime time) : EntityEventArgs
+{
+    private readonly List<Task> _pendingWrites = [];
+
+    public NCSessionEpoch Epoch { get; } = epoch;
+    public NCActiveWorldTime Time { get; } = time;
+    public IReadOnlyCollection<Task> PendingWrites => _pendingWrites;
+
+    public void AddPendingWrite(Task task)
+    {
+        ArgumentNullException.ThrowIfNull(task);
+        _pendingWrites.Add(task);
+    }
 }
 
 /// <summary>

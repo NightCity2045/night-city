@@ -23,8 +23,6 @@ public enum NCPropertyPermission : ushort
     ManageCards = 1 << 1,
     ManageTenants = 1 << 2,
     OrderInterior = 1 << 3,
-    // Legacy database/card bit retained for compatibility; player rental flows never grant it.
-    Sell = 1 << 4,
     All = Enter | ManageCards | ManageTenants | OrderInterior,
 }
 
@@ -41,4 +39,17 @@ public enum NCPropertyReleaseReason : byte
     Eviction,
     LegalEvent,
     Administrative,
+}
+
+public enum NCPropertyMutationResult : byte
+{
+    Success,
+    NotFound,
+    CharacterNotFound,
+    BankAccountNotFound,
+    InsufficientFunds,
+    NotAvailable,
+    NotAuthorized,
+    Conflict,
+    InvalidRequest,
 }
