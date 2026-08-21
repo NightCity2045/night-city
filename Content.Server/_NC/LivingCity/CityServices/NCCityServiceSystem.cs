@@ -108,6 +108,33 @@ public sealed partial class NCCityServiceSystem : EntitySystem
     public Task<NCServiceDispatchRecord?> GetDispatchAsync(NCServiceDispatchId id, bool forceReload = false) =>
         GetAsync(id, DispatchAggregateType, _dispatches, DeserializeDispatch, forceReload);
 
+    /// <summary>
+    /// Rehydrates one dispatch into the active-time scheduler. Queued work is promoted only through the canonical
+    /// capacity transition, while an en-route dispatch is merely re-enqueued at its persisted due time.
+    /// </summary>
+    public async Task<NCServiceDispatchRecord?> RecoverDispatchAsync(NCServiceDispatchId id)
+    {
+        if (!_active || !id.IsValid)
+            return null;
+        var dispatch = await GetDispatchAsync(id, true);
+        if (dispatch == null)
+            return null;
+        if (dispatch.Snapshot.Status == NCServiceDispatchStatus.EnRoute &&
+            dispatch.Snapshot.ExpectedArrivalAt is { } due)
+        {
+            Enqueue(id, due);
+        }
+        else if (dispatch.Snapshot.Status == NCServiceDispatchStatus.Queued)
+        {
+            var service = await GetServiceAsync(dispatch.Snapshot.ServiceId, true);
+            if (service != null)
+                await PromoteQueueAsync(service);
+            dispatch = await GetDispatchAsync(id, true) ?? dispatch;
+        }
+        RaiseLocalEvent(new NCServiceDispatchPersistedEvent(dispatch));
+        return dispatch;
+    }
+
     public async Task<NCCityServiceMutationResult> CreateContractAsync(NCCreateServiceContractRequest request)
     {
         if (request.CommandId == Guid.Empty || !request.ContractId.IsValid || !request.ServiceId.IsValid ||

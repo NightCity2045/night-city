@@ -201,26 +201,26 @@ public sealed partial class ServerDbManager
     public Task<NCPersistentMutationResult> ApplyNCPersistentMutationAsync(NCPersistentMutationRequest request)
     {
         DbWriteOpsMetric.Inc();
-        return RunDbCommand(() => _db.ApplyNCPersistentMutationAsync(request));
+        return RunNCPersistentDbCommand(true, () => _db.ApplyNCPersistentMutationAsync(request));
     }
 
     public Task<NCPersistentBatchMutationResult> ApplyNCPersistentBatchMutationAsync(
         NCPersistentBatchMutationRequest request)
     {
         DbWriteOpsMetric.Inc();
-        return RunDbCommand(() => _db.ApplyNCPersistentBatchMutationAsync(request));
+        return RunNCPersistentDbCommand(true, () => _db.ApplyNCPersistentBatchMutationAsync(request));
     }
 
     public Task<NCAggregateSnapshotData?> GetNCAggregateSnapshotAsync(string aggregateType, string aggregateId)
     {
         DbReadOpsMetric.Inc();
-        return RunDbCommand(() => _db.GetNCAggregateSnapshotAsync(aggregateType, aggregateId));
+        return RunNCPersistentDbCommand(false, () => _db.GetNCAggregateSnapshotAsync(aggregateType, aggregateId));
     }
 
     public Task<NCPersistentCommandResultData?> GetNCPersistentCommandResultAsync(Guid commandId)
     {
         DbReadOpsMetric.Inc();
-        return RunDbCommand(() => _db.GetNCPersistentCommandResultAsync(commandId));
+        return RunNCPersistentDbCommand(false, () => _db.GetNCPersistentCommandResultAsync(commandId));
     }
 
     public Task<IReadOnlyList<NCAggregateSnapshotData>> GetNCAggregateSnapshotPageAsync(
@@ -229,7 +229,8 @@ public sealed partial class ServerDbManager
         int limit)
     {
         DbReadOpsMetric.Inc();
-        return RunDbCommand(() => _db.GetNCAggregateSnapshotPageAsync(aggregateType, afterAggregateId, limit));
+        return RunNCPersistentDbCommand(false,
+            () => _db.GetNCAggregateSnapshotPageAsync(aggregateType, afterAggregateId, limit));
     }
 
     public Task<IReadOnlyList<NCAggregateSnapshotData>> GetNCAggregateSnapshotPageDescendingAsync(
@@ -238,7 +239,7 @@ public sealed partial class ServerDbManager
         int limit)
     {
         DbReadOpsMetric.Inc();
-        return RunDbCommand(() =>
+        return RunNCPersistentDbCommand(false, () =>
             _db.GetNCAggregateSnapshotPageDescendingAsync(aggregateType, beforeAggregateId, limit));
     }
 
@@ -250,7 +251,7 @@ public sealed partial class ServerDbManager
         int limit)
     {
         DbReadOpsMetric.Inc();
-        return RunDbCommand(() => _db.GetNCPersistentEventPageAsync(
+        return RunNCPersistentDbCommand(false, () => _db.GetNCPersistentEventPageAsync(
             aggregateType,
             aggregateId,
             eventType,
@@ -264,37 +265,40 @@ public sealed partial class ServerDbManager
         int maximumAttempts = int.MaxValue)
     {
         DbReadOpsMetric.Inc();
-        return RunDbCommand(() => _db.GetPendingNCOutboxMessagesAsync(availableAt, limit, maximumAttempts));
+        return RunNCPersistentDbCommand(false,
+            () => _db.GetPendingNCOutboxMessagesAsync(availableAt, limit, maximumAttempts));
     }
 
     public Task<NCOutboxMessageData?> GetNCOutboxMessageAsync(Guid messageId)
     {
         DbReadOpsMetric.Inc();
-        return RunDbCommand(() => _db.GetNCOutboxMessageAsync(messageId));
+        return RunNCPersistentDbCommand(false, () => _db.GetNCOutboxMessageAsync(messageId));
     }
 
     public Task<NCOutboxStatusData> GetNCOutboxStatusAsync(DateTime readyAt, int maximumAttempts)
     {
         DbReadOpsMetric.Inc();
-        return RunDbCommand(() => _db.GetNCOutboxStatusAsync(readyAt, maximumAttempts));
+        return RunNCPersistentDbCommand(false, () => _db.GetNCOutboxStatusAsync(readyAt, maximumAttempts));
     }
 
     public Task<bool> MarkNCOutboxMessageProcessedAsync(Guid messageId, DateTime processedAt)
     {
         DbWriteOpsMetric.Inc();
-        return RunDbCommand(() => _db.MarkNCOutboxMessageProcessedAsync(messageId, processedAt));
+        return RunNCPersistentDbCommand(true, () => _db.MarkNCOutboxMessageProcessedAsync(messageId, processedAt));
     }
 
     public Task<bool> RecordNCOutboxMessageFailureAsync(Guid messageId, string error, DateTime retryAt)
     {
         DbWriteOpsMetric.Inc();
-        return RunDbCommand(() => _db.RecordNCOutboxMessageFailureAsync(messageId, error, retryAt));
+        return RunNCPersistentDbCommand(true,
+            () => _db.RecordNCOutboxMessageFailureAsync(messageId, error, retryAt));
     }
 
     public Task<bool> RequeueNCOutboxMessageAsync(Guid messageId, DateTime availableAt, bool resetAttempts)
     {
         DbWriteOpsMetric.Inc();
-        return RunDbCommand(() => _db.RequeueNCOutboxMessageAsync(messageId, availableAt, resetAttempts));
+        return RunNCPersistentDbCommand(true,
+            () => _db.RequeueNCOutboxMessageAsync(messageId, availableAt, resetAttempts));
     }
 }
 

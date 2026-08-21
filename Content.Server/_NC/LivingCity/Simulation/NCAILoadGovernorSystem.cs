@@ -17,6 +17,7 @@ namespace Content.Server._NC.LivingCity.Simulation;
 /// </summary>
 public sealed partial class NCAILoadGovernorSystem : EntitySystem
 {
+    private const int TelemetryFrameCapacity = 256;
     private const string DefaultPolicyId = "NCDefaultAILoadGovernorPolicy";
     private const string DefaultRelevancePolicyId = "NCDefaultCityRelevancePolicy";
 
@@ -28,6 +29,9 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
     private readonly Dictionary<Guid, int> _materializationReservations = [];
     private readonly Dictionary<NCAILoadDispatchKind, float> _dispatchCredits = [];
     private readonly NCAILoadGovernorStateMachine _stateMachine = new();
+    private readonly double[] _workMillisecondsByKindWindow = new double[Enum.GetValues<NCAILoadWorkKind>().Length];
+    private readonly float[] _lastWorkMillisecondsByKind = new float[Enum.GetValues<NCAILoadWorkKind>().Length];
+    private readonly float[] _frameTelemetry = new float[TelemetryFrameCapacity];
 
     private NCAILoadGovernorPolicyPrototype? _policy;
     private NCAILoadGovernorThresholds _thresholds;
@@ -38,6 +42,17 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
     private float _smoothedFrameMilliseconds;
     private double _workMillisecondsWindow;
     private double _frameMillisecondsWindow;
+    private float _lastWorkMilliseconds;
+    private long _lastAllocatedBytes;
+    private long _allocatedBytesSinceLastSample;
+    private int _lastGen0Collections;
+    private int _lastGen1Collections;
+    private int _lastGen2Collections;
+    private int _gen0CollectionsSinceLastSample;
+    private int _gen1CollectionsSinceLastSample;
+    private int _gen2CollectionsSinceLastSample;
+    private int _frameTelemetryWriteIndex;
+    private int _frameTelemetryCount;
     private float _alifeWorkRatio;
     private float _maximumQueueRatio;
     private int _materializedActors;
@@ -81,6 +96,9 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
             : frameMilliseconds;
         _hasFrameSample = true;
         _frameMillisecondsWindow += frameMilliseconds;
+        _frameTelemetry[_frameTelemetryWriteIndex] = frameMilliseconds;
+        _frameTelemetryWriteIndex = (_frameTelemetryWriteIndex + 1) % _frameTelemetry.Length;
+        _frameTelemetryCount = Math.Min(_frameTelemetry.Length, _frameTelemetryCount + 1);
         if (now < _nextSample)
             return;
 
@@ -92,6 +110,13 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         _alifeWorkRatio = _frameMillisecondsWindow > 0d
             ? Math.Clamp((float) (_workMillisecondsWindow / _frameMillisecondsWindow), 0f, 1f)
             : 0f;
+        _lastWorkMilliseconds = (float) _workMillisecondsWindow;
+        for (var index = 0; index < _workMillisecondsByKindWindow.Length; index++)
+        {
+            _lastWorkMillisecondsByKind[index] = (float) _workMillisecondsByKindWindow[index];
+            _workMillisecondsByKindWindow[index] = 0d;
+        }
+        CaptureGarbageCollectorTelemetry();
 
         var materializedRatio = _hardMaterializedBudget > 0
             ? (float) (_materializedActors + _reservedMaterializations) / _hardMaterializedBudget
@@ -154,9 +179,9 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
     {
         if (!_active || startedAt == 0L)
             return;
-        // Kind is retained by the scope for future per-domain telemetry; the governor currently enforces one total.
-        _ = kind;
-        _workMillisecondsWindow += Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds;
+        var elapsed = Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds;
+        _workMillisecondsWindow += elapsed;
+        _workMillisecondsByKindWindow[(int) kind] += elapsed;
     }
 
     /// <summary>
@@ -329,6 +354,27 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         _admissionRejected,
         _configurationError);
 
+    public NCAILoadTelemetrySnapshot GetTelemetrySnapshot()
+    {
+        var samples = new float[_frameTelemetryCount];
+        Array.Copy(_frameTelemetry, samples, samples.Length);
+        Array.Sort(samples);
+        var work = new Dictionary<NCAILoadWorkKind, float>(_lastWorkMillisecondsByKind.Length);
+        foreach (var kind in Enum.GetValues<NCAILoadWorkKind>())
+            work.Add(kind, _lastWorkMillisecondsByKind[(int) kind]);
+        return new NCAILoadTelemetrySnapshot(
+            CalculatePercentile(samples, 0.50f),
+            CalculatePercentile(samples, 0.95f),
+            CalculatePercentile(samples, 0.99f),
+            _lastWorkMilliseconds,
+            work,
+            _allocatedBytesSinceLastSample,
+            _gen0CollectionsSinceLastSample,
+            _gen1CollectionsSinceLastSample,
+            _gen2CollectionsSinceLastSample,
+            samples.Length);
+    }
+
     private void OnSessionStarted(NCActiveWorldSessionStartedEvent args)
     {
         Reset();
@@ -359,6 +405,10 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         _nextSample = args.Time.Advance(policy.SampleInterval);
         _lastTransitionAt = args.Time;
         _active = true;
+        _lastAllocatedBytes = GC.GetTotalAllocatedBytes(false);
+        _lastGen0Collections = GC.CollectionCount(0);
+        _lastGen1Collections = GC.CollectionCount(1);
+        _lastGen2Collections = GC.CollectionCount(2);
     }
 
     private void OnSessionClosed(NCActiveWorldSessionClosedEvent args)
@@ -385,6 +435,13 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         _smoothedFrameMilliseconds = 0f;
         _workMillisecondsWindow = 0d;
         _frameMillisecondsWindow = 0d;
+        _lastWorkMilliseconds = 0f;
+        _allocatedBytesSinceLastSample = 0L;
+        _gen0CollectionsSinceLastSample = 0;
+        _gen1CollectionsSinceLastSample = 0;
+        _gen2CollectionsSinceLastSample = 0;
+        _frameTelemetryWriteIndex = 0;
+        _frameTelemetryCount = 0;
         _alifeWorkRatio = 0f;
         _maximumQueueRatio = 0f;
         _materializedActors = 0;
@@ -401,7 +458,34 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         _backlogs.Clear();
         _materializationReservations.Clear();
         _dispatchCredits.Clear();
+        Array.Clear(_workMillisecondsByKindWindow);
+        Array.Clear(_lastWorkMillisecondsByKind);
+        Array.Clear(_frameTelemetry);
         _stateMachine.Reset();
+    }
+
+    private void CaptureGarbageCollectorTelemetry()
+    {
+        var allocated = GC.GetTotalAllocatedBytes(false);
+        _allocatedBytesSinceLastSample = Math.Max(0L, allocated - _lastAllocatedBytes);
+        _lastAllocatedBytes = allocated;
+        var gen0 = GC.CollectionCount(0);
+        var gen1 = GC.CollectionCount(1);
+        var gen2 = GC.CollectionCount(2);
+        _gen0CollectionsSinceLastSample = Math.Max(0, gen0 - _lastGen0Collections);
+        _gen1CollectionsSinceLastSample = Math.Max(0, gen1 - _lastGen1Collections);
+        _gen2CollectionsSinceLastSample = Math.Max(0, gen2 - _lastGen2Collections);
+        _lastGen0Collections = gen0;
+        _lastGen1Collections = gen1;
+        _lastGen2Collections = gen2;
+    }
+
+    internal static float CalculatePercentile(float[] sorted, float percentile)
+    {
+        if (sorted.Length == 0)
+            return 0f;
+        var index = Math.Clamp((int) Math.Ceiling(sorted.Length * percentile) - 1, 0, sorted.Length - 1);
+        return sorted[index];
     }
 
     private NCAILoadPressureReason BuildReasons(

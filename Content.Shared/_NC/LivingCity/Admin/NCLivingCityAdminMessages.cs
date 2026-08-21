@@ -98,6 +98,11 @@ public enum NCLivingCityAdminPopulationAction : byte
 public enum NCLivingCityAdminInfrastructureAction : byte
 {
     RequeueOutboxMessage,
+    ReconcileEconomyPage,
+    RebuildDistrictSafety,
+    RecoverServiceDispatch,
+    ReloadProperty,
+    ResetNeuralCircuit,
 }
 
 [Serializable, NetSerializable]

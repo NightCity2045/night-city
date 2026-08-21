@@ -336,6 +336,17 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
             },
             result =>
             {
+                if (result != null && result.SessionEpoch != state.Epoch)
+                {
+                    // A newer server/round already owns the singleton clock row. This inactive session must not
+                    // damage that epoch or report a false same-epoch consistency failure while its close finishes.
+                    state.CloseQueued = false;
+                    state.Closed = true;
+                    Log.Warning($"Close for superseded active-world epoch {state.Epoch} was safely discarded; " +
+                                $"current epoch is {result.SessionEpoch}.");
+                    return;
+                }
+
                 if (result is not { RoundActive: false } || result.SessionEpoch != state.Epoch)
                 {
                     state.CloseQueued = false;
@@ -364,12 +375,24 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
     private async Task<NCActiveWorldClockData?> ExecuteCloseAsync(CloseAttempt attempt)
     {
         // Only attempt-local data is touched after awaiting the database; ECS state remains on the main thread.
-        attempt.Basis ??= await _database.StartNCActiveWorldSessionAsync(attempt.Epoch);
-        return await _database.CloseNCActiveWorldSessionAsync(
+        if (attempt.Basis == null)
+        {
+            var current = await _database.GetNCActiveWorldClockAsync();
+            if (current != null && current.SessionEpoch != attempt.Epoch)
+                return current;
+
+            attempt.Basis = current ?? await _database.StartNCActiveWorldSessionAsync(attempt.Epoch);
+        }
+
+        var result = await _database.CloseNCActiveWorldSessionAsync(
             attempt.Epoch,
             attempt.Basis.Time,
             attempt.Basis.Version,
             attempt.Elapsed);
+
+        // A null close is ambiguous: distinguish a real same-epoch version conflict from a newer epoch that
+        // legitimately superseded this already inactive session.
+        return result ?? await _database.GetNCActiveWorldClockAsync();
     }
 
     private void ApplyPersistedState(ActiveSessionState state, NCActiveWorldClockData data)

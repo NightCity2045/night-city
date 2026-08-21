@@ -79,6 +79,7 @@ public enum NCAILoadWorkKind : byte
     PhysicalExecution,
     PhysicalPerception,
     Cognition,
+    Ambient,
 }
 
 /// <summary>
@@ -102,6 +103,21 @@ public sealed record NCAILoadGovernorSnapshot(
     long AdmissionAccepted,
     long AdmissionRejected,
     string? ConfigurationError);
+
+/// <summary>
+/// Bounded runtime telemetry. Percentiles are calculated only when an administrator requests a snapshot.
+/// </summary>
+public sealed record NCAILoadTelemetrySnapshot(
+    float FrameP50Milliseconds,
+    float FrameP95Milliseconds,
+    float FrameP99Milliseconds,
+    float AILifeWorkMilliseconds,
+    IReadOnlyDictionary<NCAILoadWorkKind, float> WorkMillisecondsByKind,
+    long AllocatedBytesSinceLastSample,
+    int Gen0CollectionsSinceLastSample,
+    int Gen1CollectionsSinceLastSample,
+    int Gen2CollectionsSinceLastSample,
+    int FrameSamples);
 
 internal readonly record struct NCAILoadGovernorThresholds(
     int DegradeSamples,

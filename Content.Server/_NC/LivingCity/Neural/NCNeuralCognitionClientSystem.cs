@@ -100,6 +100,16 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     public NCNeuralRuntimeSnapshot GetRuntimeSnapshot() => new(_active, Mode(), _queue.Count, _inFlight,
         _inputTokens, _outputTokens, _accepted, _fallbacks, _timeouts, _rejects, _failures, _circuitOpenUntil);
 
+    /// <summary>Clears only transient failure state; token budgets, queues and accepted gameplay state are untouched.</summary>
+    public bool ResetCircuitBreaker()
+    {
+        if (!_active)
+            return false;
+        _failures = 0;
+        _circuitOpenUntil = null;
+        return true;
+    }
+
     private async Task ExecuteAsync(NCNeuralRequestEnvelope request)
     {
         try

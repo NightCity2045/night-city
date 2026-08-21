@@ -110,6 +110,7 @@ public sealed partial class NCLivingCityAdminSystem
         NCLivingCityAdminField[] fields,
         string? error)
     {
+        NCLivingCityAdminTelemetry.Record(SuccessfulResponse(status), error, fields);
         RaiseNetworkEvent(new NCLivingCityAdminGeographyActionResult(
             request.RequestId, request.Action, status, confirmationToken, fields, error), args.SenderSession);
     }

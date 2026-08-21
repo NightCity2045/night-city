@@ -38,6 +38,7 @@ using Robust.UnitTesting;
 namespace Content.IntegrationTests.Tests._NC.LivingCity.Actors;
 
 [TestFixture]
+[NonParallelizable]
 [TestOf(typeof(NCCityActorMaterializationSystem))]
 public sealed class NCCityActorMaterializationSystemTest : GameTest
 {

@@ -28,6 +28,7 @@ using Robust.UnitTesting;
 namespace Content.IntegrationTests.Tests._NC.LivingCity.Groups;
 
 [TestFixture]
+[NonParallelizable]
 [TestOf(typeof(NCCityGroupPhysicalizationSystem))]
 public sealed class NCCityGroupPhysicalizationSystemTest : GameTest
 {

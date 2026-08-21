@@ -70,7 +70,7 @@ public sealed partial class NCDistrictSafetyProjectionSystem : EntitySystem
             Rebuild(district);
     }
 
-    private void RebuildAll()
+    public int RebuildAll()
     {
         var affected = _incidents.Values.Select(value => value.LocationZone)
             .Concat(_dispatches.Values.Select(value => value.DestinationZone))
@@ -78,6 +78,7 @@ public sealed partial class NCDistrictSafetyProjectionSystem : EntitySystem
             .Where(value => value.IsValid).Distinct().ToArray();
         foreach (var district in affected)
             Rebuild(district);
+        return affected.Length;
     }
 
     private void Rebuild(NCZoneId district)

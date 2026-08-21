@@ -25,6 +25,7 @@ using Robust.UnitTesting;
 namespace Content.IntegrationTests.Tests._NC.LivingCity.Population;
 
 [TestFixture]
+[NonParallelizable]
 [TestOf(typeof(NCCityPopulationImportSystem))]
 public sealed class NCCityPersistentScaleGateTest : GameTest
 {

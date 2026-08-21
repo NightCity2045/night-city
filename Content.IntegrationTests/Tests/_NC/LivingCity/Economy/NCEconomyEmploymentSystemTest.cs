@@ -27,6 +27,7 @@ using Robust.UnitTesting;
 namespace Content.IntegrationTests.Tests._NC.LivingCity.Economy;
 
 [TestFixture]
+[NonParallelizable]
 [TestOf(typeof(NCEconomyLedgerSystem))]
 public sealed class NCEconomyEmploymentSystemTest : GameTest
 {

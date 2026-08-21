@@ -11,6 +11,7 @@ using Content.Server._NC.City.Connectivity;
 using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Actors.Domains;
+using Content.Server._NC.LivingCity.Ambient;
 using Content.Server._NC.LivingCity.Cognition;
 using Content.Server._NC.LivingCity.CityServices;
 using Content.Server._NC.LivingCity.Economy;
@@ -21,6 +22,7 @@ using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.LivingCity.Market;
 using Content.Server._NC.LivingCity.Lifecycle;
 using Content.Server._NC.LivingCity.Neural;
+using Content.Server._NC.LivingCity.Observability;
 using Content.Server._NC.LivingCity.Police;
 using Content.Server._NC.LivingCity.Population;
 using Content.Server._NC.LivingCity.Social;
@@ -68,6 +70,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCCityActorMaterializationSystem _materialization = default!;
     [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
     [Dependency] private NCCityRelevanceSystem _relevance = default!;
+    [Dependency] private NCAmbientCrowdSystem _ambient = default!;
     [Dependency] private NCCityActorScheduleSchedulerSystem _scheduler = default!;
     [Dependency] private NCCityAbstractTravelSystem _travel = default!;
     [Dependency] private NCCityPhysicalExecutionSystem _physicalExecution = default!;
@@ -113,6 +116,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCCityNewsRegistrySystem _cityNews = default!;
     [Dependency] private NCEstateRegistrySystem _estates = default!;
     [Dependency] private NCNeuralCognitionClientSystem _neural = default!;
+    [Dependency] private NCLivingCityObservabilitySystem _observability = default!;
 
     private readonly Dictionary<NetUserId, TimeSpan> _lastRequestAt = [];
     private readonly NCLivingCityAdminConfirmationStore _confirmations = new();
@@ -165,6 +169,15 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
 
         fields.Add("actors", "cached", _actors.CachedActorCount);
         fields.Add("actors", "materialized", _actorRuntime.MaterializedActorCount);
+        var ambient = _ambient.GetCounters();
+        fields.Add("ambient", "active", ambient.Active);
+        fields.Add("ambient", "interactive", ambient.InteractiveEntities);
+        fields.Add("ambient", "decorative", ambient.DecorativeVisuals);
+        fields.Add("ambient", "spawned", ambient.Spawned);
+        fields.Add("ambient", "despawned", ambient.Despawned);
+        fields.Add("ambient", "spawn-rejected", ambient.SpawnRejected);
+        fields.Add("ambient", "threat-reactions", ambient.ThreatReactions);
+        fields.Add("ambient", "configuration-error", ambient.ConfigurationError ?? "none");
         fields.Add("materialization", "active", _materialization.IsActive);
         fields.Add("materialization", "queued", _materialization.PendingRequestCount);
         fields.Add("materialization", "in-flight", _materialization.InFlightCount);
@@ -250,6 +263,9 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("neural", "accepted", neural.Accepted);
         fields.Add("neural", "fallbacks", neural.Fallbacks);
         fields.Add("neural", "validation-rejects", neural.ValidationRejects);
+        fields.Add("neural", "timeouts", neural.Timeouts);
+        fields.Add("neural", "consecutive-failures", neural.ConsecutiveFailures);
+        fields.Add("neural", "circuit-open-until", neural.CircuitOpenUntil?.Elapsed.ToString() ?? "none");
 
         var load = _loadGovernor.GetSnapshot();
         fields.Add("load-governor", "active", load.Active);
@@ -376,15 +392,52 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
             fields.Add("outbox-storage", "pending", outbox.Pending);
             fields.Add("outbox-storage", "ready", outbox.Ready);
             fields.Add("outbox-storage", "exhausted", outbox.Exhausted);
+            var oldestAge = outbox.OldestUnprocessedAt is { } pendingSince
+                ? TimeSpan.FromTicks(Math.Max(0, (storageNow - pendingSince).Ticks))
+                : (TimeSpan?) null;
             fields.Add("outbox-storage", "oldest-unprocessed-age",
-                outbox.OldestUnprocessedAt is { } oldest
-                    ? TimeSpan.FromTicks(Math.Max(0, (storageNow - oldest).Ticks))
-                    : "none");
+                oldestAge?.ToString() ?? "none");
+            _observability.ReportOutboxStatus(oldestAge, outbox.Exhausted);
         }
         catch (Exception exception)
         {
             Log.Error($"Living City F7 outbox status read failed: {exception}");
             fields.Add("outbox-storage", "error", "storage-read-failed");
+        }
+
+        var observability = _observability.GetSnapshot();
+        fields.Add("observability", "active", observability.Active);
+        fields.Add("observability", "configuration-error", observability.ConfigurationError ?? "none");
+        fields.Add("observability", "frame-p50-ms", observability.Load.FrameP50Milliseconds.ToString("0.00"));
+        fields.Add("observability", "frame-p95-ms", observability.Load.FrameP95Milliseconds.ToString("0.00"));
+        fields.Add("observability", "frame-p99-ms", observability.Load.FrameP99Milliseconds.ToString("0.00"));
+        fields.Add("observability", "alife-work-ms", observability.Load.AILifeWorkMilliseconds.ToString("0.00"));
+        foreach (var (kind, milliseconds) in observability.Load.WorkMillisecondsByKind)
+            fields.Add("alife-cpu", kind.ToString(), milliseconds.ToString("0.00"));
+        fields.Add("observability", "allocated-sample-bytes", observability.Load.AllocatedBytesSinceLastSample);
+        fields.Add("observability", "gc-collections",
+            $"{observability.Load.Gen0CollectionsSinceLastSample}/" +
+            $"{observability.Load.Gen1CollectionsSinceLastSample}/" +
+            $"{observability.Load.Gen2CollectionsSinceLastSample}");
+        fields.Add("persistence", "reads", observability.Persistence.Reads);
+        fields.Add("persistence", "writes", observability.Persistence.Writes);
+        fields.Add("persistence", "failures", observability.Persistence.Failures);
+        fields.Add("persistence", "version-conflicts", observability.Persistence.VersionConflicts);
+        fields.Add("persistence", "duplicate-replays", observability.Persistence.DuplicateReplays);
+        fields.Add("persistence", "latency-p50-ms", observability.Persistence.LatencyP50Milliseconds.ToString("0.00"));
+        fields.Add("persistence", "latency-p95-ms", observability.Persistence.LatencyP95Milliseconds.ToString("0.00"));
+        fields.Add("persistence", "latency-p99-ms", observability.Persistence.LatencyP99Milliseconds.ToString("0.00"));
+        fields.Add("admin-network", "responses", observability.Admin.Responses);
+        fields.Add("admin-network", "rejected", observability.Admin.RejectedResponses);
+        fields.Add("admin-network", "errors", observability.Admin.ErrorResponses);
+        fields.Add("admin-network", "approximate-payload-bytes", observability.Admin.ApproximatePayloadBytes);
+        fields.Add("alerts", "active", observability.Alerts.Count(alert => alert.Active));
+        fields.Add("alerts", "retained", observability.Alerts.Count);
+        foreach (var alert in observability.Alerts)
+        {
+            fields.Add("alerts", alert.Id,
+                $"{(alert.Active ? "active" : "resolved")} {alert.Severity}; " +
+                $"value={alert.Value:0.##}; threshold={alert.Threshold:0.##}; occurrences={alert.Occurrences}");
         }
 
         SendOverview(args, request.RequestId, true, fields.Build(), null);
@@ -459,6 +512,11 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         return Convert.ToHexStringLower(SHA256.HashData(bytes));
     }
 
+    private static bool SuccessfulResponse(NCLivingCityAdminMutationStatus status) => status is
+        NCLivingCityAdminMutationStatus.ConfirmationRequired or
+        NCLivingCityAdminMutationStatus.Applied or
+        NCLivingCityAdminMutationStatus.Duplicate;
+
     private static string AdminAuditSource(NetUserId userId, string reason)
     {
         var prefix = $"admin-f7:{userId}:";
@@ -490,6 +548,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         NCLivingCityAdminField[] fields,
         string? error)
     {
+        NCLivingCityAdminTelemetry.Record(authorized && error == null, error, fields);
         RaiseNetworkEvent(new NCLivingCityAdminOverviewSnapshot(requestId, authorized, fields, error),
             args.SenderSession);
     }
@@ -502,6 +561,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         NCLivingCityAdminField[] fields,
         string? error)
     {
+        NCLivingCityAdminTelemetry.Record(authorized && success, error, fields);
         RaiseNetworkEvent(new NCLivingCityAdminInspectResult(
             request.RequestId, request.Kind, authorized, success, fields, error), args.SenderSession);
     }

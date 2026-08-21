@@ -40,6 +40,7 @@ using Robust.UnitTesting;
 namespace Content.IntegrationTests.Tests._NC.LivingCity.Actors;
 
 [TestFixture]
+[NonParallelizable]
 [TestOf(typeof(NCCityActorRegistrySystem))]
 public sealed class NCCityActorRegistrySystemTest : GameTest
 {
@@ -902,8 +903,19 @@ public sealed class NCCityActorRegistrySystemTest : GameTest
         await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(
             EventSource.Local,
             new GameRunLevelChangedEvent(GameRunLevel.PreRoundLobby, GameRunLevel.InRound)));
-        await WaitUntil(server, () => clock.IsReady && projections.InitialLoadComplete,
-            "The city zone-state projector did not finish its bounded initial load.", 300);
+        await WaitUntil(server, () => clock.IsReady && projections.InitialLoadComplete &&
+                                  projections.PendingScopeCount == 0 && projections.InFlightWriteCount == 0,
+            "The city zone-state projector did not finish and persist its bounded initial load.", 600);
+
+        // Pooled integration databases deliberately survive between tests. Assert the projection delta produced
+        // by this test instead of assuming the authored test zones have never held an actor before.
+        var initialDistrict = await zoneStates.GetAsync(DistrictZone, true);
+        var initialSector = await zoneStates.GetAsync(SectorZone, true);
+        var initialDistrictTotal = initialDistrict?.Snapshot.Population.TotalActors ?? 0;
+        var initialDistrictLiving = initialDistrict?.Snapshot.Population.LivingActors ?? 0;
+        var initialSectorTotal = initialSector?.Snapshot.Population.TotalActors ?? 0;
+        var initialSectorLiving = initialSector?.Snapshot.Population.LivingActors ?? 0;
+        var initialSectorDead = initialSector?.Snapshot.Population.DeadActors ?? 0;
 
         var populationScope = Guid.NewGuid();
         var first = await actors.CreateAsync(new NCCityActorCreateRequest(
@@ -925,13 +937,13 @@ public sealed class NCCityActorRegistrySystemTest : GameTest
             "Persistent population projection must not materialize NPC entities.");
 
         var district = await WaitForZoneState(server, zoneStates, DistrictZone,
-            record => record.Snapshot.Population.TotalActors == 2);
+            record => record.Snapshot.Population.TotalActors == initialDistrictTotal + 2);
         var sector = await WaitForZoneState(server, zoneStates, SectorZone,
-            record => record.Snapshot.Population.TotalActors == 2);
+            record => record.Snapshot.Population.TotalActors == initialSectorTotal + 2);
         Assert.Multiple(() =>
         {
-            Assert.That(district.Snapshot.Population.LivingActors, Is.EqualTo(2));
-            Assert.That(sector.Snapshot.Population.LivingActors, Is.EqualTo(2));
+            Assert.That(district.Snapshot.Population.LivingActors, Is.EqualTo(initialDistrictLiving + 2));
+            Assert.That(sector.Snapshot.Population.LivingActors, Is.EqualTo(initialSectorLiving + 2));
             Assert.That(sector.Snapshot.Population.Archetypes.Single().ArchetypeId,
                 Is.EqualTo(Archetype.Id));
             Assert.That(sector.Snapshot.Signals.Single(signal => signal.Kind == NCCityStateSignalKind.Activity)
@@ -948,13 +960,13 @@ public sealed class NCCityActorRegistrySystemTest : GameTest
         Assert.That(dead.Status, Is.EqualTo(NCCityActorMutationStatus.Applied));
 
         sector = await WaitForZoneState(server, zoneStates, SectorZone,
-            record => record.Snapshot.Population.DeadActors == 1);
+            record => record.Snapshot.Population.DeadActors == initialSectorDead + 1);
         Assert.Multiple(() =>
         {
-            Assert.That(sector.Snapshot.Population.TotalActors, Is.EqualTo(2));
-            Assert.That(sector.Snapshot.Population.LivingActors, Is.EqualTo(1));
+            Assert.That(sector.Snapshot.Population.TotalActors, Is.EqualTo(initialSectorTotal + 2));
+            Assert.That(sector.Snapshot.Population.LivingActors, Is.EqualTo(initialSectorLiving + 1));
             Assert.That(sector.Snapshot.Population.Statuses.Single(entry => entry.Status == NCCityActorStatus.Dead)
-                .Count, Is.EqualTo(1));
+                .Count, Is.EqualTo(initialSectorDead + 1));
         });
 
         var acceptedSignal = false;
