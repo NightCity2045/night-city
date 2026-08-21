@@ -8,7 +8,6 @@ using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.Coordinates.Systems;
 using Robust.Client.Graphics;
 using Robust.Client.Player;
-using Robust.Shared.Console;
 
 namespace Content.Client._NC.City.Connectivity;
 
@@ -25,6 +24,7 @@ public sealed partial class NCCityConnectivityDebugClientSystem : EntitySystem
     public bool Enabled => Snapshot?.Enabled == true;
     public IReadOnlySet<NCZoneId> ErrorZones => _errorZones;
     public IReadOnlySet<NCZoneId> WarningZones => _warningZones;
+    public event Action<NCCityConnectivityDebugSnapshot>? SnapshotReceived;
 
     private readonly HashSet<NCZoneId> _errorZones = [];
     private readonly HashSet<NCZoneId> _warningZones = [];
@@ -65,6 +65,7 @@ public sealed partial class NCCityConnectivityDebugClientSystem : EntitySystem
     private void OnSnapshot(NCCityConnectivityDebugSnapshot snapshot)
     {
         Snapshot = snapshot;
+        SnapshotReceived?.Invoke(snapshot);
         _errorZones.Clear();
         _warningZones.Clear();
         foreach (var issue in snapshot.Issues)
@@ -92,28 +93,5 @@ public sealed partial class NCCityConnectivityDebugClientSystem : EntitySystem
         if (_overlay != null)
             _overlays.RemoveOverlay(_overlay);
         _overlay = null;
-    }
-}
-
-public sealed partial class NCShowCityConnectivityDebugCommand : LocalizedCommands
-{
-    [Dependency] private IEntityManager _entities = default!;
-
-    public override string Command => "nccitygraph-overlay";
-    public override string Description => "Toggle the authorized Night City connectivity overlay.";
-
-    public override void Execute(IConsoleShell shell, string argStr, string[] args)
-    {
-        if (args.Length != 0)
-        {
-            shell.WriteError($"Usage: {Command}");
-            return;
-        }
-
-        var system = _entities.System<NCCityConnectivityDebugClientSystem>();
-        system.SetEnabled(!system.Enabled);
-        shell.WriteLine(system.Enabled
-            ? "Connectivity overlay disable requested."
-            : "Connectivity overlay enable requested; Mapping permission is required.");
     }
 }

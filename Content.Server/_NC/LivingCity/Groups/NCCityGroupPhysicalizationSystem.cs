@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Time;
+using Content.Server._NC.LivingCity.Simulation;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Groups;
 using Content.Shared._NC.Persistence.Identity;
@@ -35,6 +36,7 @@ public sealed partial class NCCityGroupPhysicalizationSystem : EntitySystem
     [Dependency] private NCCityActorMaterializationSystem _materialization = default!;
     [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
     [Dependency] private NCCityGroupRuntimeFormationSystem _formations = default!;
+    [Dependency] private NCAILoadGovernorSystem _loadGovernor = default!;
 
     private readonly Dictionary<Guid, NCCityGroupPhysicalizationRequestState> _states = [];
     private readonly Dictionary<Guid, PendingRequest> _pending = [];
@@ -79,6 +81,11 @@ public sealed partial class NCCityGroupPhysicalizationSystem : EntitySystem
             return;
         }
 
+        using var work = _loadGovernor.MeasureWork(NCAILoadWorkKind.GroupPhysicalization);
+        _loadGovernor.ReportQueue(
+            NCAILoadQueueKind.GroupPhysicalization,
+            _pending.Count,
+            _policy.MaximumQueuedRequests);
         DispatchLoads(now);
         PollActive(now);
     }
@@ -181,8 +188,11 @@ public sealed partial class NCCityGroupPhysicalizationSystem : EntitySystem
     {
         if (_policy == null)
             return;
+        var dispatchLimit = _loadGovernor.TakeDispatchLimit(
+            NCAILoadDispatchKind.GroupPhysicalization,
+            _policy.MaximumDispatchesPerTick);
         var dispatched = 0;
-        while (dispatched < _policy.MaximumDispatchesPerTick &&
+        while (dispatched < dispatchLimit &&
                _inFlight < _policy.MaximumConcurrentLoads &&
                _queue.TryPeek(out var queued, out var priority) && priority.DueTicks <= now.Ticks)
         {

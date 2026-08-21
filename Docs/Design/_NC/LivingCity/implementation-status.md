@@ -1,6 +1,6 @@
 # Living City implementation status
 
-Updated: 2026-08-16
+Updated: 2026-08-21
 
 This file tracks implemented foundations against the full dependency plan. It is not an MVP or vertical-slice scope.
 
@@ -67,8 +67,25 @@ This file tracks implemented foundations against the full dependency plan. It is
 - Materialized-NPC route composer: CityGraph route -> Room/Portal targets -> bounded coordinates for the unchanged
   Robust tile pathfinding/steering pipeline.
 - Actor-specific portal filters for access, controller, and blockage rules without polluting the shared route cache.
-- Mapping-authorized CityGraph diagnostics: server summary/validation/zone inspection commands plus an on-demand client
-  overlay for zones, rooms, portals, costs, logical floors and validation severity.
+- Active-round physical execution owns only the hard-capped materialized actor set. It loads durable travel intent,
+  gives vanilla steering one bounded local target at a time, activates authoritative door/floor-link controllers,
+  blacklists a failed round-local portal per goal, replans with bounded backoff, and persists arrival, blockage or abort
+  idempotently. It never requests city-wide tile pathfinding.
+- YAML StateTree/HFSM profiles resolve stable physical modes from objective ECS conditions. Reactive adapters cover
+  combat, perceived threat, critical state, detention, medical, police, conversation and scripted claims. Existing SS14
+  NPC/HTN and owning gameplay domains remain the action executors; exclusive behavior ownership prevents them from
+  competing with route steering.
+- Local physical perception is materialized-only, uses faction-aware spatial queries plus actual line of sight, stores a
+  bounded observation set and runs from a governor-controlled due-time queue. It neither scans all entities nor writes
+  persistent beliefs directly.
+- The neutral physical action boundary calls actual Robust interaction for activation and typed ECS subscribers for
+  domain actions. It reports handled gameplay outcomes and contains no RED skills, dice or universal resolution formula.
+- Exhausted movement uses the archetype StateTree's data-driven safe fallback: safe idle, retreat from the nearest
+  perceived hostile, return to a candidate in the current public street zone, or durable plan abort. Exact failure and
+  transition history is retained in a bounded deterministic trace.
+- Mapping-authorized CityGraph diagnostics in the F7 Living City geography panel: bounded summary/validation/zone
+  inspection, confirmed runtime activity changes, and an on-demand overlay for zones, rooms, portals, costs, logical
+  floors and validation severity. Only mapper artifact helpers for ID generation and draft export remain commands.
 - Persistent actor root aggregate with deterministic `NCActorId`, identity/presentation seeds, semantic location,
   lifecycle/tombstone state, schedule coordination and cognition tier. Health, finance, inventory and social facts remain
   separate authoritative aggregates instead of one monolithic actor blob.
@@ -125,6 +142,9 @@ This file tracks implemented foundations against the full dependency plan. It is
 - Complete runtime formations contain only round-local `EntityUid` bindings, stable leader-first slots, roles and
   data-driven Loose/Column/Wedge/Defensive offsets. The persistent group remains the authority for membership and
   formation policy. A group mutation or any lost actor binding invalidates the entire runtime formation immediately.
+- Complete formations may share one immutable semantic trunk route. Every member still owns vanilla local steering;
+  spacing is applied only to the final destination and never to exact portal targets. One member rejecting a trunk
+  invalidates it for the other bounded physical members while retaining the failing member's configured replan delay.
 - Group materialization validates active, co-located members before spawning. A child failure waits for every in-flight
   actor request to settle, then compensates only entities created by that group request. No partial formation is
   published. Group dematerialization performs a bounded all-member safety preflight and uses the atomic per-actor
@@ -132,11 +152,21 @@ This file tracks implemented foundations against the full dependency plan. It is
 - Relevance waits for both actor and group catalogs, reserves soft actor budgets by the full group size, and will not
   enqueue a group dematerialization while any member is in cooldown, player/camera relevance, combat, treatment or an
   explicit gameplay blocker. Formation members reject ordinary single-actor dematerialization.
+- The active-round A-Life load governor samples an EWMA of server frame time, the measured wall-clock share of eight
+  allocation-free A-Life hot paths, plus current bounded queue, due-backlog and materialized-capacity signals. YAML
+  thresholds enforce the 10-15% tick target, and consecutive-sample hysteresis selects `Normal`, `Elevated` or
+  `Critical`; the state is always reset when the round closes and never advances during server downtime.
+- Degradation increases relevance cadence, lowers background materialization/schedule/travel/group-load dispatch and
+  reduces global/per-cluster soft materialization budgets. Every asynchronous spawn first reserves a governor slot, so
+  concurrent single and group requests cannot overrun the absolute hard cap. Incident, service and administrator work
+  may use protected headroom only at the YAML priority required by the current state; ordinary relevance is deferred.
+  Direct reverse actor hand-off retains its full dispatch budget so pressure can be relieved.
 - Active-round reliable outbox dispatcher with typed handler ownership, bounded polling/concurrency, per-delivery
   timeout, exponential retry and a maximum-attempt exhausted state. Delivery is at-least-once and `MessageId` is the
   mandatory idempotency key for external effects.
-- Actor health and inventory subdomain aggregates. New actors receive root, default health and empty inventory in one
-  serializable three-aggregate transaction, so schedulers never observe a partially initialized persistent resident.
+- Actor health, inventory, cognition and belief-set subdomain aggregates. New actors receive the root and all four
+  mandatory subdomains in one serializable five-aggregate transaction, so schedulers never observe a partially
+  initialized persistent resident.
 - The health adapter stores the complete validated NC Medicine snapshot as an opaque actor-owned payload and publishes
   a bounded strategic projection for condition, bleeding, mobility, consciousness, critical wounds, treatment and
   cyberware. Restore rebases monotonic medical timestamps to current runtime time, so server downtime advances nothing.
@@ -159,20 +189,53 @@ This file tracks implemented foundations against the full dependency plan. It is
   refreshes instead of being overwritten by defaults.
 - Outbox reconciliation storage and mapping-authorized operations expose backlog/ready/exhausted counts, safe message
   metadata inspection and explicit requeue. Payloads are not printed, and processed messages cannot be reopened.
-- Mapping-authorized actor operations: Living City status, inspect (including safe domain summaries), deterministic
-  create, freeze/unfreeze, semantic move, atomic domain capture and full medical restore, plus population
-  validation/import. Corrective writes include the invoking admin identity in their persisted event payload.
-- Mapping-authorized materialization operations queue one actor and inspect retained request status; `alife_status`
-  exposes active, queued, in-flight and retained counts without leaking aggregate payloads.
-- Mapping-authorized dematerialization and relevance operations queue/inspect reverse hand-offs, report catalog and
-  cluster health, list bounded cluster summaries and derive one actor's current LOD without exposing snapshot payloads.
-- Mapping-authorized zone-state operations expose bounded projector health in `alife_status`, inspect one district or
-  sector without payload leakage, and restart keyset recovery during an active round.
-- Mapping-authorized group inspect/create/add/remove/transfer/leader/order commands with audit source propagation.
-- Mapping-authorized group materialize/dematerialize, retained-request inspection and complete runtime formation
-  inspection. `alife_status` reports group catalog, queue, in-flight and physical-formation counts.
-- Mapping-authorized read-only party, account, transaction and employment inspection. `alife_status` reports bounded
-  cache counts; no admin command can set a balance or bypass a ledger transaction.
+- The dedicated F7 `Living City` tab exposes a bounded overview of the active-world clock, actors, scheduler, travel,
+  materialization/dematerialization, relevance, groups, population projections, canonical authorities and outbox.
+  Read access and mutation access are independently checked on every server request, and all responses are bounded and
+  redacted before crossing the network.
+- The same F7 overview monitors the load governor state, explicit pressure reasons, smoothed frame time, measured A-Life
+  work ratio, current and reserved materializations, effective soft/hard limits, maximum queue pressure, due backlogs,
+  hysteresis progress, transitions and admission totals. Runtime governor control is automatic; no console or
+  unaudited manual override is introduced.
+- Physical execution monitoring in the same F7 tab exposes queue/load state, StateTree transitions, bounded local
+  perception, neutral action results and group trunk cache counters. Actor inspection includes mode, behavior owner,
+  route trace and current observations; group inspection includes the active trunk version. No operational command is
+  added.
+- Hybrid cognition stores actor beliefs and BDI commitment in separate stable-ID aggregates while keeping the
+  Blackboard, `EntityUid` bindings, planning frontiers and caches round-local. Bounded keyed providers project actor,
+  medical, inventory, employment, ledger, memory, group/faction, crime, service and local-perception authorities into
+  source-versioned facts. A typed extension accepts Humanity, cyberware load and cyberpsychosis risk from their owning
+  domain without recalculating them in A-Life.
+- Data-driven Utility curves and considerations generate desires; minimum commitment, switching cost and explicit
+  priority interrupts prevent intention twitching. Abstract actors use a lower configurable active-world cadence, and
+  all cognition stops with the round instead of catching up over server downtime.
+- The task-aware Plan Router dispatches routine, reactive, procedural, group, strategic and conversation tasks to
+  StateTree, reactive, HTN, partial-order, resumable deterministic UCB/MCTS and conversation StateTree planners. MCTS
+  compares server-authored YAML outcomes with round-local visits/reward frontiers under node and wall-time budgets. Immutable
+  plans carry dependency versions and deterministic seeds; a reverse dependency cache rejects stale work and drains
+  mass invalidation through bounded batches. Every route has a deterministic safe fallback and works with no neural
+  provider.
+- Cognition execution delegates schedule/movement and typed domain steps to their existing authorities; it never owns
+  combat, medical, police or economy outcome rules and contains no RED skill/dice resolution. F7 exposes bounded
+  cognition workload plus a dedicated actor inspector for facts, beliefs, desires, Utility, intention, plan and trace.
+- Its typed inspector covers actors and safe domain summaries, actor relevance and retained hand-off requests, groups,
+  memberships, retained physicalization requests and runtime formations, district/sector zone states, parties,
+  accounts, immutable transactions, employment, directed relationships, reputation, structured episodic memory,
+  property/access summaries, property-content metadata, police fines and redacted outbox message metadata.
+- Its actor panel provides deterministic create, freeze/unfreeze, semantic move, atomic domain capture, full medical
+  restore and materialize/dematerialize operations. Its group panel provides create, add/remove/transfer member,
+  leader/directive changes and coordinated physicalization. Its population panel provides profile validation,
+  idempotent import and active-round zone-state projection rebuild. Its infrastructure panel provides an audited,
+  exactly-confirmed outbox requeue operation and can optionally reset the attempt counter.
+- Its geography panel provides zone/connectivity inspection and validation, graph and spawn-index monitoring, a
+  Mapping-authorized visual overlay, and confirmed/audited changes to the active-round zone activity mode.
+- Every causality-changing F7 operation requires a reason and a 15-second, single-use server confirmation bound to the
+  authenticated administrator and exact request fingerprint. Accepted attempts enter the admin log; persistent domain
+  mutations also receive the authenticated audit source and request correlation identity.
+- The former Living City actor, group, population, common-economy, outbox, property-debug and CityGraph operational
+  console command adapters have been removed. F7 is the only administrator-facing A-Life control surface; gameplay and
+  schedulers continue to call canonical domain APIs directly, and no panel can set a balance or bypass a ledger
+  transaction. Mapper-only ID generation and zone-editor draft export remain authoring helpers, not live operations.
 - An explicit semi-release scale gate executes the production importer and persistence registries with 10,000 actors
   and 300 groups, verifies keyset recovery and cache eviction/reload, and asserts that the abstract population creates
   no ECS entities. It is deliberately excluded from ordinary fast test runs.
@@ -188,6 +251,13 @@ This file tracks implemented foundations against the full dependency plan. It is
   authoritative `WorldEventId`. The subject snapshot and immutable provenance marker commit atomically, so an old event
   cannot apply twice and an altered initiator cannot masquerade as a valid replay. Subject-first reads require no city
   scan or unbounded audience aggregate.
+- Structured episodic memory is a separate owner-first authority for characters and persistent actors. YAML event,
+  emotion, retention and policy prototypes define bounded episodes with provenance, participants, salience, confidence,
+  privacy, active-world expiry and permanent critical retention. Remember, deterministic consolidation and actual
+  cognition recall use atomic immutable application markers. Consolidated records preserve bounded source IDs and
+  semantics without generated prose; queries are privacy-bounded, and restart/replay cannot duplicate an episode.
+- Routine Living City administration uses a dedicated F7 tab with typed bounded requests, server-side permissions,
+  exact-operation confirmations and audit. The covered A-Life console entry points no longer exist.
 
 ## Deliberately unchanged
 
@@ -209,27 +279,34 @@ export; implementation code must not invent replacement district/building/apartm
 
 ## Next dependency work
 
-- Episodic memory, deterministic consolidation, rumors and ConversationSession remain in the social simulation phase.
-  They will consume relationship/reputation authorities without reusing the player-only Agent address book as
-  persistent social truth.
+- Rumors, personality/social preferences, language profiles and ConversationSession remain in the social simulation
+  phase. They will consume relationship, reputation and memory authorities without reusing the player-only Agent
+  address book as persistent social truth.
+- Add each future cognition, economy, property, incident, service and neural administration operation to the same typed
+  F7 boundary as its domain is implemented; do not introduce new A-Life console entry points.
 - Route capacity reservations plus incident-driven access/threat changes.
-- Physical AI, cognition, social memory, economy, housing behavior, incidents and services in the order
-  defined by the full development plan.
+- Remaining social simulation, economy behavior, housing behavior, incidents and services in the order defined by the
+  full development plan.
 
 ## Current implementation boundary
 
 - The schedule scheduler produces semantic travel intent. The abstract executor completes CityGraph travel for
   unmaterialized actors; materialization and atomic dematerialization transfer ownership to/from a physical NPC.
-  Physical movement remains delegated to the unchanged local Robust pathfinding pipeline. Dialogue and pursuit owners
-  still need to acquire the implemented blocker lease when those later systems are added.
+  The completed physical executor composes hierarchical waypoints and delegates each local segment to unchanged Robust
+  pathfinding. Later dialogue and pursuit workflows can claim typed physical ownership and must also acquire the
+  implemented dematerialization blocker lease for their full visible interaction.
+- Cognition now supplies durable intention and a validated plan above that execution boundary. Routine steps reuse the
+  scheduler/physical executor; other domains explicitly claim typed steps. Humanity and cyberpsychosis remain facts
+  owned by their future/profile domain, with the ingestion contract implemented and no placeholder formula invented.
 - CityGraph route selection includes traversal threat cost. Abstract elapsed duration intentionally sums the selected
   edges' base travel seconds; capacity reservations and live incident modifiers are not implemented yet.
 - No production population profile or resident roster is invented until mapper-owned home/work `NCZoneId` data is
   complete. The shipped archetype, routine, importer and scheduler policies are reusable defaults, not placeholder
   residents.
 - The shipped group profile defines structural policy only. No production gang, corporation squad or resident group is
-  fabricated without authored faction, actor and geography data. Group split/merge planning and physical formation AI
-  steering remain later systems; membership transfer and physical/strategic hand-off are implemented.
+  fabricated without authored faction, actor and geography data. Shared trunk routing, per-member steering,
+  membership transfer and physical/strategic hand-off are implemented; strategic group split/merge planning remains a
+  later system.
 - The outbox transport and reconciliation path is production-ready infrastructure, but no production external adapter
   is registered yet. Unknown message types retry and then remain exhausted for inspection; they are never discarded.
 - Actor inventory persistence currently stores stable references supplied by an economy adapter; the economy-owned

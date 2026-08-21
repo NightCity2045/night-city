@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Content.Shared._NC.LivingCity.Social;
@@ -91,6 +93,83 @@ public static class NCPersistentIdentity
         return CreateGuid($"reputation-application/{entryId}/{worldEventId:D}");
     }
 
+    public static NCMemoryBookId MemoryBook(NCPartyRef owner)
+    {
+        if (!owner.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(owner));
+
+        return new NCMemoryBookId(CreateGuid($"memory-book/{owner}"));
+    }
+
+    public static NCMemoryId Memory(NCPartyRef owner, Guid worldEventId)
+    {
+        if (!owner.IsValid || worldEventId == Guid.Empty)
+            throw new ArgumentOutOfRangeException(nameof(owner));
+
+        return new NCMemoryId(CreateGuid($"memory/{owner}/{worldEventId:D}"));
+    }
+
+    public static NCMemorySummaryId MemorySummary(NCPartyRef owner, IReadOnlyList<NCMemoryId> sourceMemoryIds)
+    {
+        if (!owner.IsValid || sourceMemoryIds.Count == 0 || sourceMemoryIds.Any(id => !id.IsValid))
+            throw new ArgumentOutOfRangeException(nameof(owner));
+
+        var sources = string.Join('/', sourceMemoryIds.Select(id => id.Value).Order());
+        return new NCMemorySummaryId(CreateGuid($"memory-summary/{owner}/{sources}"));
+    }
+
+    public static Guid MemoryApplication(NCMemoryId memoryId)
+    {
+        if (!memoryId.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(memoryId));
+
+        return CreateGuid($"memory-application/{memoryId}");
+    }
+
+    public static Guid MemoryConsolidationApplication(NCMemoryBookId bookId, Guid consolidationEventId)
+    {
+        if (!bookId.IsValid || consolidationEventId == Guid.Empty)
+            throw new ArgumentOutOfRangeException(nameof(bookId));
+
+        return CreateGuid($"memory-consolidation-application/{bookId}/{consolidationEventId:D}");
+    }
+
+    public static Guid MemoryRecallApplication(NCMemoryBookId bookId, Guid recallEventId)
+    {
+        if (!bookId.IsValid || recallEventId == Guid.Empty)
+            throw new ArgumentOutOfRangeException(nameof(bookId));
+
+        return CreateGuid($"memory-recall-application/{bookId}/{recallEventId:D}");
+    }
+
+    public static Guid CognitionBelief(NCActorId actorId, string key, string subject, string source)
+    {
+        if (!actorId.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(actorId));
+        return CreateGuid($"cognition/belief/{actorId}/{Normalize(key)}/{NormalizeOptional(subject)}/{Normalize(source)}");
+    }
+
+    public static Guid CognitionDesire(NCActorId actorId, string capabilityId)
+    {
+        if (!actorId.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(actorId));
+        return CreateGuid($"cognition/desire/{actorId}/{Normalize(capabilityId)}");
+    }
+
+    public static Guid CognitionIntention(NCActorId actorId, string capabilityId, long revision)
+    {
+        if (!actorId.IsValid || revision < 1)
+            throw new ArgumentOutOfRangeException(nameof(actorId));
+        return CreateGuid($"cognition/intention/{actorId}/{Normalize(capabilityId)}/{revision}");
+    }
+
+    public static Guid CognitionPlan(Guid intentionId, string planner, long dependencyVersion)
+    {
+        if (intentionId == Guid.Empty || dependencyVersion < 1)
+            throw new ArgumentOutOfRangeException(nameof(intentionId));
+        return CreateGuid($"cognition/plan/{intentionId:D}/{Normalize(planner)}/{dependencyVersion}");
+    }
+
     private static Guid CreateGuid(string value)
     {
         Span<byte> scope = stackalloc byte[16];
@@ -113,4 +192,7 @@ public static class NCPersistentIdentity
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
         return value.Trim().ToLowerInvariant();
     }
+
+    private static string NormalizeOptional(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? "none" : value.Trim().ToLowerInvariant();
 }

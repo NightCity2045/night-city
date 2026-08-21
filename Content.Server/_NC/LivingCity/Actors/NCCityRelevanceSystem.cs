@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Groups;
+using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Coordinates.Systems;
@@ -43,6 +44,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
     [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
     [Dependency] private NCCityGroupPhysicalizationSystem _groupPhysicalization = default!;
     [Dependency] private NCCityRelevanceAnchorIndexSystem _anchorIndex = default!;
+    [Dependency] private NCAILoadGovernorSystem _loadGovernor = default!;
 
     private readonly Dictionary<NCActorId, ActorCatalogEntry> _catalog = [];
     private readonly Dictionary<NCZoneId, ZoneBucket> _zoneBuckets = [];
@@ -89,7 +91,8 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
             return;
         }
 
-        _nextEvaluation = now.Advance(_policy.EvaluationInterval);
+        using var work = _loadGovernor.MeasureWork(NCAILoadWorkKind.Relevance);
+        _nextEvaluation = now.Advance(_loadGovernor.ScaleEvaluationInterval(_policy.EvaluationInterval));
         ReapCompletedRequests();
         RebuildClusters();
         EvaluateMaterialization();
@@ -233,7 +236,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                 localZones,
                 group.Count(static anchor => anchor.PlayerAttached),
                 materialized,
-                _policy.ClusterSoftMaterializedBudget));
+                _loadGovernor.ScaleSoftBudget(_policy.ClusterSoftMaterializedBudget)));
         }
 
         _linkedAnchorPairs.Clear();
@@ -315,18 +318,24 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
 
     private void EvaluateMaterialization()
     {
-        if (_policy == null || !_catalogRecovered || !_groupPhysicalization.CatalogRecovered ||
-            _runtime.MaterializedActorCount >= _policy.GlobalSoftMaterializedBudget)
+        if (_policy == null || !_catalogRecovered || !_groupPhysicalization.CatalogRecovered)
         {
             return;
         }
 
-        var remainingGlobal = _policy.GlobalSoftMaterializedBudget - _runtime.MaterializedActorCount;
+        var globalSoftBudget = _loadGovernor.GetEffectiveSoftMaterializedBudget(
+            _policy.GlobalSoftMaterializedBudget);
+        var remainingGlobal = globalSoftBudget - _runtime.MaterializedActorCount -
+            _loadGovernor.ReservedMaterializationCount;
+        if (remainingGlobal <= 0)
+            return;
+        var maximumRequests = _loadGovernor.TakeAutomaticMaterializationRequests(
+            _policy.MaximumMaterializationRequestsPerEvaluation);
         var requestedOperations = 0;
         var inspected = new HashSet<NCActorId>();
         foreach (var cluster in _clusters.OrderByDescending(static cluster => cluster.AttachedPlayerCount))
         {
-            if (remainingGlobal <= 0 || requestedOperations >= _policy.MaximumMaterializationRequestsPerEvaluation)
+            if (remainingGlobal <= 0 || requestedOperations >= maximumRequests)
                 break;
             var clusterRemaining = Math.Max(0, cluster.SoftMaterializedBudget - cluster.MaterializedActorCount);
             if (clusterRemaining == 0)
@@ -336,7 +345,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
             foreach (var zoneId in cluster.ActiveZoneIds)
             {
                 if (remainingGlobal <= 0 || clusterRemaining <= 0 ||
-                    requestedOperations >= _policy.MaximumMaterializationRequestsPerEvaluation ||
+                    requestedOperations >= maximumRequests ||
                     inspections >= _policy.MaximumCandidateInspectionsPerCluster)
                 {
                     break;
@@ -406,7 +415,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                         clusterRemaining--;
                     }
                     if (remainingGlobal <= 0 || clusterRemaining <= 0 ||
-                        requestedOperations >= _policy.MaximumMaterializationRequestsPerEvaluation)
+                        requestedOperations >= maximumRequests)
                         break;
                 }
             }
@@ -435,7 +444,8 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                 continue;
             }
 
-            var pressure = _bindingBuffer.Count > _policy.GlobalHardMaterializedBudget;
+            var pressure = _bindingBuffer.Count > _loadGovernor.GetEffectiveSoftMaterializedBudget(
+                _policy.GlobalSoftMaterializedBudget);
             if (_groupPhysicalization.TryGetMaterializeTogetherGroup(
                     binding.ActorId,
                     out var groupId,

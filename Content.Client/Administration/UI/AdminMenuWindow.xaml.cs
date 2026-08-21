@@ -20,6 +20,9 @@ public sealed partial class AdminMenuWindow : DefaultWindow
         MasterTabContainer.SetTabTitle((int) TabIndex.Atmos, Loc.GetString("admin-menu-atmos-tab"));
         MasterTabContainer.SetTabTitle((int) TabIndex.Round, Loc.GetString("admin-menu-round-tab"));
         MasterTabContainer.SetTabTitle((int) TabIndex.Server, Loc.GetString("admin-menu-server-tab"));
+        // NC start: the custom tab is localized from the _NC locale bundle.
+        MasterTabContainer.SetTabTitle((int) TabIndex.LivingCity, Loc.GetString("nc-living-city-admin-tab"));
+        // NC end
         MasterTabContainer.SetTabTitle((int) TabIndex.PanicBunker, Loc.GetString("admin-menu-panic-bunker-tab"));
         MasterTabContainer.SetTabTitle((int) TabIndex.Players, Loc.GetString("admin-menu-players-tab"));
         MasterTabContainer.SetTabTitle((int) TabIndex.Objects, Loc.GetString("admin-menu-objects-tab"));
@@ -31,6 +34,10 @@ public sealed partial class AdminMenuWindow : DefaultWindow
         var tabEnum = (TabIndex)tabIndex;
         if (tabEnum == TabIndex.Objects)
             ObjectsTabControl.RefreshObjectList();
+        // NC start: refresh only when the administrator actually selects the tab.
+        if (tabEnum == TabIndex.LivingCity)
+            LivingCityTabControl.OnSelected();
+        // NC end
     }
 
     protected override void Dispose(bool disposing)
@@ -47,6 +54,9 @@ public sealed partial class AdminMenuWindow : DefaultWindow
         Atmos,
         Round,
         Server,
+        // NC start
+        LivingCity,
+        // NC end
         PanicBunker,
         Players,
         Objects,

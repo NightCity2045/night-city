@@ -512,7 +512,8 @@ public sealed class NCCityConnectivitySystem : EntitySystem
                     link.Target,
                     NCCityPortalKind.Vertical,
                     profileId,
-                    stableId),
+                    stableId,
+                    uid),
                 out _))
             {
                 continue;

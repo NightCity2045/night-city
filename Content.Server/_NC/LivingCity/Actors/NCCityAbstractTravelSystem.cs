@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Content.Server._NC.City.Connectivity;
 using Content.Server._NC.LivingCity.Time;
+using Content.Server._NC.LivingCity.Simulation;
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Identity;
@@ -31,6 +32,7 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
     [Dependency] private NCCityConnectivitySystem _city = default!;
+    [Dependency] private NCAILoadGovernorSystem _loadGovernor = default!;
 
     private readonly PriorityQueue<ScheduledTravel, TravelPriority> _queue = new();
     private readonly Dictionary<NCActorId, NCActiveWorldTime> _scheduled = [];
@@ -72,11 +74,15 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
             return;
         }
 
+        using var work = _loadGovernor.MeasureWork(NCAILoadWorkKind.AbstractTravel);
         if (!InitialLoadComplete && !_pageLoadInFlight && now >= _pageRetryAt)
             BeginPageLoad(_generation, _pageCursor);
 
+        var dispatchLimit = _loadGovernor.TakeDispatchLimit(
+            NCAILoadDispatchKind.AbstractTravel,
+            _policy.MaximumDispatchesPerTick);
         var dispatched = 0;
-        while (dispatched < _policy.MaximumDispatchesPerTick &&
+        while (dispatched < dispatchLimit &&
                _inFlight < _policy.MaximumConcurrentMutations &&
                _queue.TryPeek(out var scheduled, out var priority) &&
                priority.DueTicks <= now.Ticks)
@@ -93,6 +99,10 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
             else
                 BeginActorLoad(_generation, scheduled.ActorId);
         }
+
+        var backlogged = _queue.TryPeek(out _, out var remainingPriority) &&
+            remainingPriority.DueTicks <= now.Ticks;
+        _loadGovernor.ReportBacklog(NCAILoadBacklogKind.AbstractTravel, backlogged);
     }
 
     private void OnSessionStarted(NCActiveWorldSessionStartedEvent args)

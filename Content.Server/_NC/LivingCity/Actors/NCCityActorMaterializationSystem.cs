@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Content.Server._NC.City.Connectivity;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Actors.Domains;
+using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.Coordinates.Systems;
@@ -44,6 +45,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
     [Dependency] private NCCityActorDomainRegistrySystem _domains = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
     [Dependency] private NCCitySpawnCandidateSystem _spawnCandidates = default!;
+    [Dependency] private NCAILoadGovernorSystem _loadGovernor = default!;
 
     private readonly Dictionary<Guid, NCCityMaterializationRequestState> _states = [];
     private readonly Dictionary<Guid, PendingRequest> _pending = [];
@@ -82,8 +84,17 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
             return;
         }
 
+        using var work = _loadGovernor.MeasureWork(NCAILoadWorkKind.ActorMaterialization);
+        _loadGovernor.ReportMaterializedActors(_runtime.MaterializedActorCount);
+        _loadGovernor.ReportQueue(
+            NCAILoadQueueKind.Materialization,
+            _pending.Count,
+            _policy.MaximumQueuedRequests);
+        var dispatchLimit = _loadGovernor.TakeDispatchLimit(
+            NCAILoadDispatchKind.ActorMaterialization,
+            _policy.MaximumDispatchesPerTick);
         var dispatched = 0;
-        while (dispatched < _policy.MaximumDispatchesPerTick &&
+        while (dispatched < dispatchLimit &&
                _inFlight < _policy.MaximumConcurrentLoads &&
                _queue.TryPeek(out var queued, out var priority) && priority.DueTicks <= now.Ticks)
         {
@@ -199,6 +210,32 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
                 now,
                 default,
                 "The bounded materialization queue is full.");
+            RetainTerminal(rejected);
+            return rejected;
+        }
+
+        var protectedRequest = request.Reason is NCCityMaterializationReason.Incident or
+            NCCityMaterializationReason.ServiceResponse or NCCityMaterializationReason.Admin;
+        // Admission uses the current binding index, not the governor's previous periodic sample.
+        _loadGovernor.ReportMaterializedActors(_runtime.MaterializedActorCount);
+        if (!_loadGovernor.TryReserveMaterialization(
+                request.RequestId,
+                1,
+                request.Priority,
+                protectedRequest,
+                out var governorError))
+        {
+            var rejected = new NCCityMaterializationRequestState(
+                request.RequestId,
+                request.ActorId,
+                request.Reason,
+                NCCityMaterializationRequestStatus.Rejected,
+                request.Priority,
+                0,
+                now,
+                now,
+                default,
+                governorError);
             RetainTerminal(rejected);
             return rejected;
         }
@@ -462,6 +499,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         string? error,
         EntityUid entityUid = default)
     {
+        _loadGovernor.ReleaseMaterialization(pending.Request.RequestId);
         _pending.Remove(pending.Request.RequestId);
         _requestByActor.Remove(pending.Request.ActorId);
         SetState(pending, status, error, entityUid);
@@ -567,6 +605,8 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
 
     private void Reset()
     {
+        foreach (var requestId in _pending.Keys)
+            _loadGovernor.ReleaseMaterialization(requestId);
         _generation++;
         _active = false;
         _policy = null;

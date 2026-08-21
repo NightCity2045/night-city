@@ -9,6 +9,7 @@ using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Actors.Domains;
 using Content.Server._NC.LivingCity.Groups.Components;
+using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.LivingCity.Actors;
@@ -43,6 +44,7 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
     [Dependency] private NCCityActorDomainRegistrySystem _domains = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
     [Dependency] private NCCityRelevanceAnchorIndexSystem _anchorIndex = default!;
+    [Dependency] private NCAILoadGovernorSystem _loadGovernor = default!;
 
     private readonly Dictionary<Guid, NCCityDematerializationRequestState> _states = [];
     private readonly Dictionary<Guid, PendingRequest> _pending = [];
@@ -84,6 +86,11 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
             return;
         }
 
+        using var work = _loadGovernor.MeasureWork(NCAILoadWorkKind.ActorDematerialization);
+        _loadGovernor.ReportQueue(
+            NCAILoadQueueKind.Dematerialization,
+            _pending.Count,
+            _policy.MaximumQueuedDematerializations);
         var dispatched = 0;
         while (dispatched < _policy.MaximumDematerializationDispatchesPerTick &&
                _inFlight < _policy.MaximumConcurrentDematerializations &&

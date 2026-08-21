@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Content.Server._NC.LivingCity.Time;
+using Content.Server._NC.LivingCity.Simulation;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
@@ -27,6 +28,7 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCCityActorRegistrySystem _registry = default!;
     [Dependency] private NCCityRoutineSystem _routines = default!;
+    [Dependency] private NCAILoadGovernorSystem _loadGovernor = default!;
 
     private readonly PriorityQueue<ScheduledActor, SchedulePriority> _queue = new();
     private readonly Dictionary<NCActorId, NCActiveWorldTime> _scheduled = [];
@@ -65,11 +67,15 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
             return;
         }
 
+        using var work = _loadGovernor.MeasureWork(NCAILoadWorkKind.Schedule);
         if (!InitialLoadComplete && !_pageLoadInFlight && now >= _pageRetryAt)
             BeginPageLoad(_generation, _pageCursor);
 
+        var dispatchLimit = _loadGovernor.TakeDispatchLimit(
+            NCAILoadDispatchKind.Schedule,
+            _policy.MaximumDispatchesPerTick);
         var dispatched = 0;
-        while (dispatched < _policy.MaximumDispatchesPerTick &&
+        while (dispatched < dispatchLimit &&
                _inFlight < _policy.MaximumConcurrentMutations &&
                _queue.TryPeek(out var scheduled, out var priority) &&
                priority.DueTicks <= now.Ticks)
@@ -89,6 +95,10 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
             else
                 BeginActorLoad(_generation, scheduled.ActorId);
         }
+
+        var backlogged = _queue.TryPeek(out _, out var remainingPriority) &&
+            remainingPriority.DueTicks <= now.Ticks;
+        _loadGovernor.ReportBacklog(NCAILoadBacklogKind.Schedule, backlogged);
     }
 
     public bool TryGetScheduledAt(NCActorId actorId, out NCActiveWorldTime dueAt)

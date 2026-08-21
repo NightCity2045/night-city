@@ -1,0 +1,125 @@
+// SPDX-FileCopyrightText: 2026 Astro
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+using Robust.Shared.Prototypes;
+
+namespace Content.Shared._NC.LivingCity.Actors;
+
+public enum NCCityPhysicalMode : byte
+{
+    SafeIdle,
+    Traveling,
+    Combat,
+    Medical,
+    Police,
+    Conversation,
+    Scripted,
+    Incapacitated,
+}
+
+public enum NCCityPhysicalCondition : byte
+{
+    TravelIntent,
+    CombatActive,
+    ThreatObserved,
+    MedicalClaim,
+    PoliceClaim,
+    ConversationClaim,
+    ScriptedClaim,
+    Detained,
+    Incapacitated,
+}
+
+public enum NCCityPhysicalBehaviorOwner : byte
+{
+    None,
+    RouteExecutor,
+    ExistingNpc,
+    ExternalSystem,
+}
+
+public enum NCCityPhysicalFallback : byte
+{
+    SafeIdle,
+    Replan,
+    Retreat,
+    ReturnToPublicZone,
+    AbortPlan,
+}
+
+/// <summary>
+/// One prioritized physical state rule. Conditions are objective ECS facts supplied by adapters, never skill checks.
+/// </summary>
+[DataDefinition]
+public sealed partial class NCCityPhysicalStateRule
+{
+    [DataField(required: true)]
+    public NCCityPhysicalMode Mode { get; private set; }
+
+    [DataField(required: true)]
+    public int Priority { get; private set; }
+
+    [DataField]
+    public HashSet<NCCityPhysicalCondition> RequiredAll { get; private set; } = [];
+
+    [DataField]
+    public HashSet<NCCityPhysicalCondition> Forbidden { get; private set; } = [];
+
+    [DataField(required: true)]
+    public NCCityPhysicalBehaviorOwner Owner { get; private set; }
+
+    [DataField(required: true)]
+    public TimeSpan EvaluationInterval { get; private set; }
+}
+
+/// <summary>
+/// Cheap event/scheduler-driven HFSM definition for materialized actors.
+/// </summary>
+[Prototype("ncCityPhysicalStateTree")]
+public sealed partial class NCCityPhysicalStateTreePrototype : IPrototype
+{
+    [IdDataField]
+    public string ID { get; private set; } = default!;
+
+    [DataField(required: true)]
+    public int MaximumRules { get; private set; }
+
+    [DataField(required: true)]
+    public List<NCCityPhysicalStateRule> Rules { get; private set; } = [];
+
+    [DataField(required: true)]
+    public NCCityPhysicalFallback BlockedFallback { get; private set; }
+}
+
+/// <summary>
+/// Bounded local observation policy. It is separate from cognition and never creates persistent beliefs directly.
+/// </summary>
+[Prototype("ncCityLocalPerceptionProfile")]
+public sealed partial class NCCityLocalPerceptionProfilePrototype : IPrototype
+{
+    [IdDataField]
+    public string ID { get; private set; } = default!;
+
+    [DataField(required: true)]
+    public float Radius { get; private set; }
+
+    [DataField(required: true)]
+    public int MaximumObservedEntities { get; private set; }
+
+    [DataField(required: true)]
+    public TimeSpan EvaluationInterval { get; private set; }
+}
+
+[Prototype("ncCityLocalPerceptionPolicy")]
+public sealed partial class NCCityLocalPerceptionPolicyPrototype : IPrototype
+{
+    [IdDataField]
+    public string ID { get; private set; } = default!;
+
+    [DataField(required: true)]
+    public int MaximumTrackedActors { get; private set; }
+
+    [DataField(required: true)]
+    public int MaximumUpdatesPerTick { get; private set; }
+}

@@ -1,0 +1,276 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncCognitionUtilityCurve
+  id: NCUtilityBoolean
+  kind: Step
+  minimumInput: 0
+  maximumInput: 1
+  minimumOutput: 0
+  maximumOutput: 1
+  threshold: 0.5
+
+- type: ncCognitionUtilityCurve
+  id: NCUtilityLinear
+  kind: Linear
+  minimumInput: 0
+  maximumInput: 1
+  minimumOutput: 0
+  maximumOutput: 1
+
+- type: ncCognitionUtilityCurve
+  id: NCUtilityInverseLinear
+  kind: InverseLinear
+  minimumInput: 0
+  maximumInput: 1
+  minimumOutput: 0
+  maximumOutput: 1
+
+- type: ncCognitionCapability
+  id: NCCognitionIncapacitated
+  domain: Medical
+  taskKind: ImmediateReaction
+  preferredPlanner: Reactive
+  fallbackPlanner: DeterministicFallback
+  baseUtility: 100
+  priority: 1000
+  requiredBeliefs: [ actor.incapacitated ]
+  interruptsRoutine: true
+  procedureSteps:
+  - id: yield-control
+    action: yield-to-medical-authority
+
+- type: ncCognitionCapability
+  id: NCCognitionRespondToThreat
+  domain: Safety
+  taskKind: ImmediateReaction
+  preferredPlanner: Reactive
+  fallbackPlanner: DeterministicFallback
+  baseUtility: 80
+  priority: 900
+  requiredBeliefs: [ perception.hostile-present ]
+  interruptsRoutine: true
+  requiresMaterialization: true
+  procedureSteps:
+  - id: yield-combat
+    action: yield-to-combat-authority
+
+- type: ncCognitionCapability
+  id: NCCognitionSeekMedicalCare
+  domain: Medical
+  taskKind: KnownProcedure
+  preferredPlanner: Htn
+  fallbackPlanner: StateTree
+  baseUtility: 25
+  priority: 700
+  requiredBeliefs: [ medical.needs-care ]
+  considerations:
+  - beliefKey: medical.severity
+    curve: NCUtilityLinear
+    weight: 50
+    missingInput: 0
+  procedureSteps:
+  - id: select-service
+    action: select-medical-service
+  - id: reach-service
+    action: follow-schedule-travel
+    dependsOn: [ select-service ]
+  - id: yield-treatment
+    action: yield-to-medical-authority
+    dependsOn: [ reach-service ]
+
+- type: ncCognitionCapability
+  id: NCCognitionFulfilEmployment
+  domain: Jobs
+  taskKind: KnownProcedure
+  preferredPlanner: Htn
+  fallbackPlanner: StateTree
+  baseUtility: 35
+  priority: 500
+  requiredBeliefs: [ employment.active, routine.work-due ]
+  procedureSteps:
+  - id: follow-work-travel
+    action: follow-schedule-travel
+  - id: perform-work
+    action: perform-authoritative-work
+    dependsOn: [ follow-work-travel ]
+
+- type: ncCognitionCapability
+  id: NCCognitionFollowRoutine
+  domain: Routine
+  taskKind: Routine
+  preferredPlanner: StateTree
+  fallbackPlanner: DeterministicFallback
+  baseUtility: 15
+  priority: 100
+  requiredBeliefs: [ actor.can-act ]
+  considerations:
+  - beliefKey: routine.due
+    curve: NCUtilityBoolean
+    weight: 20
+    missingInput: 0
+  procedureSteps:
+  - id: follow-schedule
+    action: follow-schedule
+
+- type: ncCognitionCapability
+  id: NCCognitionGroupDirective
+  domain: Faction
+  taskKind: GroupOperation
+  preferredPlanner: PartialOrder
+  fallbackPlanner: Htn
+  baseUtility: 30
+  priority: 550
+  requiredBeliefs: [ group.has-directive ]
+  procedureSteps:
+  - id: prepare
+    action: prepare-group-role
+  - id: acquire-resources
+    action: acquire-group-resources
+  - id: rendezvous
+    action: follow-group-route
+    dependsOn: [ prepare, acquire-resources ]
+  - id: execute
+    action: execute-group-directive
+    dependsOn: [ rendezvous ]
+
+- type: ncCognitionCapability
+  id: NCCognitionStrategicFallback
+  domain: Services
+  taskKind: StrategicChoice
+  preferredPlanner: Mcts
+  fallbackPlanner: Htn
+  baseUtility: 5
+  priority: 20
+  requiredBeliefs: [ actor.can-act ]
+  procedureSteps:
+  - id: evaluate-safe-option
+    action: evaluate-safe-option
+  - id: remain-available
+    action: remain-available
+    dependsOn: [ evaluate-safe-option ]
+  strategicOptions:
+  - id: cautious-availability
+    minimumOutcome: 0.45
+    maximumOutcome: 0.75
+    procedureSteps:
+    - id: evaluate-safe-option
+      action: evaluate-safe-option
+    - id: remain-available
+      action: remain-available
+      dependsOn: [ evaluate-safe-option ]
+  - id: resume-routine
+    minimumOutcome: 0.30
+    maximumOutcome: 0.90
+    procedureSteps:
+    - id: evaluate-routine-option
+      action: evaluate-safe-option
+    - id: follow-schedule
+      action: follow-schedule
+      dependsOn: [ evaluate-routine-option ]
+
+- type: ncCognitionCapability
+  id: NCCognitionConversation
+  domain: Social
+  taskKind: SocialConversation
+  preferredPlanner: ConversationStateTree
+  fallbackPlanner: StateTree
+  baseUtility: 20
+  priority: 400
+  requiredBeliefs: [ social.conversation-requested ]
+  requiresMaterialization: true
+  procedureSteps:
+  - id: yield-conversation
+    action: yield-to-conversation-authority
+
+- type: ncCognitionCapabilityProfile
+  id: NCDefaultCivilianCapabilities
+  capabilities:
+  - NCCognitionIncapacitated
+  - NCCognitionRespondToThreat
+  - NCCognitionSeekMedicalCare
+  - NCCognitionFulfilEmployment
+  - NCCognitionFollowRoutine
+  - NCCognitionGroupDirective
+  - NCCognitionStrategicFallback
+  - NCCognitionConversation
+
+- type: ncCognitionDecisionPolicy
+  id: NCDefaultCognitionDecisionPolicy
+  evaluationInterval: 5s
+  minimumCommitment: 15s
+  intentionLifetime: 2m
+  beliefLifetime: 5m
+  beliefAgingTime: 1m
+  agingConfidenceMultiplier: 0.8
+  staleConfidenceMultiplier: 0.5
+  switchUtilityDelta: 12
+  switchCost: 5
+  minimumBeliefConfidence: 0.35
+  maximumBeliefs: 128
+  maximumDesires: 16
+
+- type: ncCognitionRoutingProfile
+  id: NCDefaultCognitionRouting
+  routes:
+    Routine: StateTree
+    ImmediateReaction: Reactive
+    KnownProcedure: Htn
+    GroupOperation: PartialOrder
+    StrategicChoice: Mcts
+    SocialConversation: ConversationStateTree
+  budgets:
+  - planner: StateTree
+    maximumNodesPerTick: 8
+    maximumTotalNodes: 32
+    maximumMillisecondsPerTick: 0.25
+    explorationConstant: 0
+  - planner: Reactive
+    maximumNodesPerTick: 4
+    maximumTotalNodes: 8
+    maximumMillisecondsPerTick: 0.25
+    explorationConstant: 0
+  - planner: Htn
+    maximumNodesPerTick: 16
+    maximumTotalNodes: 128
+    maximumMillisecondsPerTick: 0.5
+    explorationConstant: 0
+  - planner: PartialOrder
+    maximumNodesPerTick: 16
+    maximumTotalNodes: 256
+    maximumMillisecondsPerTick: 0.75
+    explorationConstant: 0
+  - planner: Mcts
+    maximumNodesPerTick: 32
+    maximumTotalNodes: 512
+    maximumMillisecondsPerTick: 1.5
+    explorationConstant: 1.4142135
+  - planner: ConversationStateTree
+    maximumNodesPerTick: 8
+    maximumTotalNodes: 32
+    maximumMillisecondsPerTick: 0.25
+    explorationConstant: 0
+  - planner: DeterministicFallback
+    maximumNodesPerTick: 2
+    maximumTotalNodes: 8
+    maximumMillisecondsPerTick: 0.1
+    explorationConstant: 0
+
+- type: ncCognitionRuntimePolicy
+  id: NCDefaultCognitionRuntimePolicy
+  maximumTrackedActors: 10000
+  maximumQueuedActors: 50000
+  maximumDispatchesPerTick: 4
+  maximumConcurrentLoads: 8
+  maximumFacts: 128
+  maximumCapabilities: 32
+  maximumPlanSteps: 128
+  maximumTraceEntries: 64
+  maximumAbstractTraceEntries: 8
+  maximumCachedPlans: 20000
+  maximumInvalidationsPerTick: 64
+  maximumPlanningMillisecondsPerTick: 3
+  loadRetryDelay: 2s
+  failureRetryDelay: 10s
+  minimumAbstractEvaluationInterval: 1m

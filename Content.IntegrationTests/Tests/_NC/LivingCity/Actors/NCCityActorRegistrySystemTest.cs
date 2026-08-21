@@ -15,6 +15,7 @@ using Content.Server._NC.City.Connectivity;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Actors.Domains;
+using Content.Server._NC.LivingCity.Cognition;
 using Content.Server._NC.LivingCity.Groups;
 using Content.Server._NC.LivingCity.Population;
 using Content.Server._NC.LivingCity.Time;
@@ -189,6 +190,7 @@ public sealed class NCCityActorRegistrySystemTest : GameTest
         var entities = server.ResolveDependency<IEntityManager>();
         var clock = server.System<NCActiveWorldTimeSystem>();
         var registry = server.System<NCCityActorRegistrySystem>();
+        var cognitionRegistry = server.System<NCCognitionRegistrySystem>();
         var runtime = server.System<NCCityActorRuntimeIndexSystem>();
 
         await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(
@@ -213,6 +215,8 @@ public sealed class NCCityActorRegistrySystemTest : GameTest
 
         var applied = await registry.CreateAsync(create);
         var duplicate = await registry.CreateAsync(create);
+        var cognition = await cognitionRegistry.GetCognitionAsync(expectedId, true);
+        var beliefs = await cognitionRegistry.GetBeliefsAsync(expectedId, true);
 
         Assert.Multiple(() =>
         {
@@ -228,6 +232,11 @@ public sealed class NCCityActorRegistrySystemTest : GameTest
             Assert.That(duplicate.Record?.Snapshot.Identity.Aliases, Is.EqualTo(new[] { "Switch" }));
             Assert.That(duplicate.Record?.Snapshot.LastAppliedEventId,
                 Is.EqualTo(applied.Record?.Snapshot.LastAppliedEventId));
+            Assert.That(cognition?.Snapshot.ActorId, Is.EqualTo(expectedId));
+            Assert.That(cognition?.Snapshot.DecisionPolicyId, Is.EqualTo("NCDefaultCognitionDecisionPolicy"));
+            Assert.That(cognition?.AggregateVersion, Is.GreaterThanOrEqualTo(1));
+            Assert.That(beliefs?.Snapshot.ActorId, Is.EqualTo(expectedId));
+            Assert.That(beliefs?.AggregateVersion, Is.GreaterThanOrEqualTo(1));
         });
 
         var deathCommand = new NCCityActorStatusMutationRequest(

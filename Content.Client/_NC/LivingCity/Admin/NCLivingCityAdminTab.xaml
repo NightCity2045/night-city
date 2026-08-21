@@ -1,0 +1,240 @@
+<admin:NCLivingCityAdminTab
+    xmlns="https://spacestation14.io"
+    xmlns:admin="clr-namespace:Content.Client._NC.LivingCity.Admin"
+    xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls">
+    <TabContainer Name="Tabs" Access="Public" VerticalExpand="True" HorizontalExpand="True">
+        <BoxContainer Orientation="Vertical" Margin="10" SeparationOverride="8">
+            <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                <Label Name="OverviewStatus" Access="Public" Text="{Loc nc-living-city-admin-loading}" HorizontalExpand="True" />
+                <Button Name="RefreshOverview" Access="Public" Text="{Loc nc-living-city-admin-refresh}" />
+            </BoxContainer>
+            <ItemList Name="OverviewFields" Access="Public" VerticalExpand="True" />
+        </BoxContainer>
+
+        <BoxContainer Orientation="Vertical" Margin="10" SeparationOverride="8">
+            <GridContainer Columns="2">
+                <Label Text="{Loc nc-living-city-admin-inspect-kind}" />
+                <OptionButton Name="InspectKind" Access="Public" HorizontalExpand="True" />
+                <Label Text="{Loc nc-living-city-admin-target}" />
+                <LineEdit Name="InspectTarget" Access="Public"
+                    PlaceHolder="{Loc nc-living-city-admin-target-placeholder}" HorizontalExpand="True" />
+                <Label Text="{Loc nc-living-city-admin-secondary-target}" />
+                <LineEdit Name="InspectSecondaryTarget" Access="Public"
+                    PlaceHolder="{Loc nc-living-city-admin-secondary-placeholder}" HorizontalExpand="True" />
+            </GridContainer>
+            <Button Name="RunInspection" Access="Public" Text="{Loc nc-living-city-admin-inspect}" />
+            <Label Name="InspectStatus" Access="Public" Text="" />
+            <ItemList Name="InspectionFields" Access="Public" VerticalExpand="True" />
+        </BoxContainer>
+
+        <ScrollContainer VerticalExpand="True">
+            <BoxContainer Orientation="Vertical" Margin="10" SeparationOverride="8">
+                <Label Text="{Loc nc-living-city-admin-actor-create-heading}" />
+                <GridContainer Columns="2">
+                    <Label Text="{Loc nc-living-city-admin-population-scope}" />
+                    <LineEdit Name="ActorPopulationScope" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-stable-local-id}" />
+                    <LineEdit Name="ActorStableLocalId" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-archetype}" />
+                    <LineEdit Name="ActorArchetype" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-home-zone}" />
+                    <LineEdit Name="ActorHomeZone" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-work-zone}" />
+                    <LineEdit Name="ActorWorkZone" Access="Public" Text="none" />
+                    <Label Text="{Loc nc-living-city-admin-full-name}" />
+                    <LineEdit Name="ActorFullName" Access="Public" />
+                </GridContainer>
+                <controls:ConfirmButton Name="CreateActor" Access="Public"
+                    Text="{Loc nc-living-city-admin-create-actor}"
+                    ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+
+                <Label Text="{Loc nc-living-city-admin-actor-actions-heading}" />
+                <GridContainer Columns="2">
+                    <Label Text="{Loc nc-living-city-admin-actor-id}" />
+                    <LineEdit Name="ActionActorId" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-target-zone}" />
+                    <LineEdit Name="ActorTargetZone" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-priority}" />
+                    <LineEdit Name="ActorPriority" Access="Public" Text="900" />
+                    <Label Text="{Loc nc-living-city-admin-reason}" />
+                    <LineEdit Name="ActorReason" Access="Public" />
+                </GridContainer>
+                <GridContainer Columns="2">
+                    <controls:ConfirmButton Name="FreezeActor" Access="Public"
+                        Text="{Loc nc-living-city-admin-freeze-actor}"
+                        ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                    <controls:ConfirmButton Name="UnfreezeActor" Access="Public"
+                        Text="{Loc nc-living-city-admin-unfreeze-actor}"
+                        ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                    <controls:ConfirmButton Name="MoveActor" Access="Public"
+                        Text="{Loc nc-living-city-admin-move-actor}"
+                        ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                    <controls:ConfirmButton Name="CaptureActorDomains" Access="Public"
+                        Text="{Loc nc-living-city-admin-capture-domains}"
+                        ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                    <controls:ConfirmButton Name="RestoreActorHealth" Access="Public"
+                        Text="{Loc nc-living-city-admin-restore-health}"
+                        ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                    <controls:ConfirmButton Name="MaterializeActor" Access="Public"
+                        Text="{Loc nc-living-city-admin-materialize-actor}"
+                        ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                    <controls:ConfirmButton Name="DematerializeActor" Access="Public"
+                        Text="{Loc nc-living-city-admin-dematerialize-actor}"
+                        ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                </GridContainer>
+                <Label Name="ActorActionStatus" Access="Public" Text="" />
+                <ItemList Name="ActorActionFields" Access="Public" MinHeight="160" />
+            </BoxContainer>
+        </ScrollContainer>
+
+        <ScrollContainer VerticalExpand="True">
+            <BoxContainer Orientation="Vertical" Margin="10" SeparationOverride="8">
+                <Label Text="{Loc nc-living-city-admin-group-create-heading}" />
+                <GridContainer Columns="2">
+                    <Label Text="{Loc nc-living-city-admin-group-scope}" />
+                    <LineEdit Name="GroupScope" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-stable-local-id}" />
+                    <LineEdit Name="GroupStableLocalId" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-display-name}" />
+                    <LineEdit Name="GroupDisplayName" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-profile}" />
+                    <LineEdit Name="GroupProfile" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-faction-id}" />
+                    <LineEdit Name="GroupFactionId" Access="Public" Text="none" />
+                    <Label Text="{Loc nc-living-city-admin-leader-actor-id}" />
+                    <LineEdit Name="GroupLeaderActorId" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-role}" />
+                    <LineEdit Name="GroupLeaderRole" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-current-zone}" />
+                    <LineEdit Name="GroupCurrentZone" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-purpose}" />
+                    <LineEdit Name="GroupPurpose" Access="Public" />
+                </GridContainer>
+                <controls:ConfirmButton Name="CreateGroup" Access="Public"
+                    Text="{Loc nc-living-city-admin-create-group}"
+                    ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+
+                <Label Text="{Loc nc-living-city-admin-group-actions-heading}" />
+                <GridContainer Columns="2">
+                    <Label Text="{Loc nc-living-city-admin-group-id}" />
+                    <LineEdit Name="ActionGroupId" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-destination-group-id}" />
+                    <LineEdit Name="DestinationGroupId" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-actor-id}" />
+                    <LineEdit Name="GroupActorId" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-successor-actor-id}" />
+                    <LineEdit Name="GroupSuccessorActorId" Access="Public" Text="none" />
+                    <Label Text="{Loc nc-living-city-admin-role}" />
+                    <LineEdit Name="GroupRole" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-current-order}" />
+                    <LineEdit Name="GroupCurrentOrder" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-mission-reference}" />
+                    <LineEdit Name="GroupMissionReference" Access="Public" Text="none" />
+                    <Label Text="{Loc nc-living-city-admin-incident-id}" />
+                    <LineEdit Name="GroupIncidentId" Access="Public" Text="none" />
+                    <Label Text="{Loc nc-living-city-admin-priority}" />
+                    <LineEdit Name="GroupPriority" Access="Public" Text="900" />
+                    <Label Text="{Loc nc-living-city-admin-reason}" />
+                    <LineEdit Name="GroupReason" Access="Public" />
+                </GridContainer>
+                <GridContainer Columns="2">
+                    <controls:ConfirmButton Name="AddGroupMember" Access="Public"
+                        Text="{Loc nc-living-city-admin-add-group-member}"
+                        ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                    <controls:ConfirmButton Name="RemoveGroupMember" Access="Public"
+                        Text="{Loc nc-living-city-admin-remove-group-member}"
+                        ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                    <controls:ConfirmButton Name="TransferGroupMember" Access="Public"
+                        Text="{Loc nc-living-city-admin-transfer-group-member}"
+                        ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                    <controls:ConfirmButton Name="SetGroupLeader" Access="Public"
+                        Text="{Loc nc-living-city-admin-set-group-leader}"
+                        ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                    <controls:ConfirmButton Name="SetGroupDirective" Access="Public"
+                        Text="{Loc nc-living-city-admin-set-group-directive}"
+                        ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                    <controls:ConfirmButton Name="MaterializeGroup" Access="Public"
+                        Text="{Loc nc-living-city-admin-materialize-group}"
+                        ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                    <controls:ConfirmButton Name="DematerializeGroup" Access="Public"
+                        Text="{Loc nc-living-city-admin-dematerialize-group}"
+                        ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                </GridContainer>
+                <Label Name="GroupActionStatus" Access="Public" Text="" />
+                <ItemList Name="GroupActionFields" Access="Public" MinHeight="160" />
+            </BoxContainer>
+        </ScrollContainer>
+
+        <ScrollContainer VerticalExpand="True">
+            <BoxContainer Orientation="Vertical" Margin="10" SeparationOverride="8">
+                <Label Text="{Loc nc-living-city-admin-population-heading}" />
+                <GridContainer Columns="2">
+                    <Label Text="{Loc nc-living-city-admin-population-profile}" />
+                    <LineEdit Name="PopulationProfile" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-reason}" />
+                    <LineEdit Name="PopulationReason" Access="Public" />
+                </GridContainer>
+                <Button Name="ValidatePopulationProfile" Access="Public"
+                    Text="{Loc nc-living-city-admin-validate-population}" />
+                <controls:ConfirmButton Name="ImportPopulationProfile" Access="Public"
+                    Text="{Loc nc-living-city-admin-import-population}"
+                    ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                <controls:ConfirmButton Name="RebuildZoneStates" Access="Public"
+                    Text="{Loc nc-living-city-admin-rebuild-zone-states}"
+                    ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                <Label Name="PopulationActionStatus" Access="Public" Text="" />
+                <ItemList Name="PopulationActionFields" Access="Public" MinHeight="240" />
+            </BoxContainer>
+        </ScrollContainer>
+
+        <ScrollContainer VerticalExpand="True">
+            <BoxContainer Orientation="Vertical" Margin="10" SeparationOverride="8">
+                <Label Text="{Loc nc-living-city-admin-infrastructure-heading}" />
+                <GridContainer Columns="2">
+                    <Label Text="{Loc nc-living-city-admin-outbox-message-id}" />
+                    <LineEdit Name="OutboxMessageId" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-reset-outbox-attempts}" />
+                    <CheckBox Name="ResetOutboxAttempts" Access="Public" Pressed="True" />
+                    <Label Text="{Loc nc-living-city-admin-reason}" />
+                    <LineEdit Name="InfrastructureReason" Access="Public" />
+                </GridContainer>
+                <controls:ConfirmButton Name="RequeueOutboxMessage" Access="Public"
+                    Text="{Loc nc-living-city-admin-requeue-outbox-message}"
+                    ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                <Label Name="InfrastructureActionStatus" Access="Public" Text="" />
+                <ItemList Name="InfrastructureActionFields" Access="Public" MinHeight="240" />
+            </BoxContainer>
+        </ScrollContainer>
+
+        <ScrollContainer VerticalExpand="True">
+            <BoxContainer Orientation="Vertical" Margin="10" SeparationOverride="8">
+                <Label Text="{Loc nc-living-city-admin-geography-heading}" />
+                <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                    <Button Name="ValidateGeography" Access="Public"
+                        Text="{Loc nc-living-city-admin-validate-geography}" />
+                    <Button Name="ToggleConnectivityOverlay" Access="Public"
+                        Text="{Loc nc-living-city-admin-enable-connectivity-overlay}" />
+                </BoxContainer>
+                <GridContainer Columns="2">
+                    <Label Text="{Loc nc-living-city-admin-city-zone-id}" />
+                    <LineEdit Name="GeographyZoneId" Access="Public" />
+                    <Label Text="{Loc nc-living-city-admin-zone-activity-mode}" />
+                    <OptionButton Name="GeographyActivityMode" Access="Public" HorizontalExpand="True" />
+                    <Label Text="{Loc nc-living-city-admin-reason}" />
+                    <LineEdit Name="GeographyReason" Access="Public" />
+                </GridContainer>
+                <GridContainer Columns="2">
+                    <Button Name="InspectCityZone" Access="Public"
+                        Text="{Loc nc-living-city-admin-inspect-city-zone}" />
+                    <Button Name="InspectConnectivityZone" Access="Public"
+                        Text="{Loc nc-living-city-admin-inspect-connectivity-zone}" />
+                    <controls:ConfirmButton Name="SetZoneActivity" Access="Public"
+                        Text="{Loc nc-living-city-admin-set-zone-activity}"
+                        ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                </GridContainer>
+                <Label Name="GeographyStatus" Access="Public" Text="" />
+                <ItemList Name="GeographyFields" Access="Public" MinHeight="260" />
+            </BoxContainer>
+        </ScrollContainer>
+    </TabContainer>
+</admin:NCLivingCityAdminTab>

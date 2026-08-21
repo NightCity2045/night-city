@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Content.Server.Database;
 using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors.Domains;
+using Content.Server._NC.LivingCity.Cognition;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Actors;
@@ -50,6 +51,7 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCZoneSystem _zones = default!;
     [Dependency] private NCCityActorDomainRegistrySystem _domains = default!;
+    [Dependency] private NCCognitionRegistrySystem _cognition = default!;
     [Dependency] private ITaskManager _taskManager = default!;
 
     private readonly ConcurrentDictionary<NCActorId, NCCityActorRecord> _cache = [];
@@ -183,6 +185,7 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
                 "living-city.actor.created",
                 0,
                 snapshot,
+                archetype,
                 request.CorrelationId,
                 request.CausationId,
                 request.AuditSource,
@@ -201,7 +204,8 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
     }
 
     /// <summary>
-    /// Creates the actor root and mandatory health/inventory subdomains under one serializable transaction.
+    /// Creates the actor root plus mandatory health, inventory, cognition and belief subdomains under one serializable
+    /// transaction.
     /// A partially initialized persistent person can therefore never become visible to the schedulers.
     /// </summary>
     private async Task<NCCityActorMutationResult> PersistCreate(
@@ -212,6 +216,7 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
         string eventType,
         long expectedVersion,
         NCCityActorSnapshot snapshot,
+        NCCityActorArchetypePrototype archetype,
         Guid correlationId,
         Guid? causationId,
         string auditSource,
@@ -236,6 +241,7 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
                     JsonOptions)),
         };
         writes.AddRange(_domains.BuildInitialWrites(actorId, time, auditSource));
+        writes.AddRange(_cognition.BuildInitialWrites(actorId, archetype, time, auditSource));
 
         var result = await _database.ApplyNCPersistentBatchMutationAsync(new NCPersistentBatchMutationRequest(
             commandId,
