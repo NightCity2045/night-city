@@ -4,6 +4,7 @@
 
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.City.Zones.Serialization;
+using Content.Shared._NC.Housing;
 
 namespace Content.Server._NC.Housing.Components;
 
@@ -15,4 +16,7 @@ public sealed partial class NCPropertyResidentItemComponent : Component
 {
     [DataField(required: true, customTypeSerializer: typeof(NCZoneIdSerializer))]
     public NCZoneId PropertyId;
+
+    [DataField]
+    public NCPropertyAssetClass AssetClass = NCPropertyAssetClass.PersonalProperty;
 }

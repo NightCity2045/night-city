@@ -16,6 +16,7 @@ public enum NCPropertyAggregateMutationStatus : byte
     Duplicate,
     NotFound,
     VersionConflict,
+    NotAuthorized,
     ClockUnavailable,
     Rejected,
     StorageFailure,
@@ -37,6 +38,8 @@ public sealed record NCRegisterPropertyRequest(
     NCPartyRef Owner,
     long PurchasePrice,
     string AccessPolicyId,
+    NCPropertyStorageBudget StorageBudget,
+    string BlueprintSourceId,
     Guid CorrelationId,
     Guid? CausationId = null,
     string AuditSource = "property-registration");

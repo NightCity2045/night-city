@@ -9,13 +9,27 @@
 
 - type: ncRentPolicy
   id: StandardApartment
-  rentAmount: 0
+  rentAmount: 500
   # RobustToolbox TimeSpan YAML accepts seconds, minutes, or hours; days are expressed as hours.
   billingInterval: 168h
   gracePeriod: 48h
+  voluntaryDepositRefundBasisPoints: 10000
+  evictionDepositRefundBasisPoints: 0
 
 - type: ncPropertyAccessPolicy
   id: StandardApartment
   tenantPermissions: All
   maximumActiveCards: 16
   keyCardPrototype: NCPropertyKeyCard
+
+- type: ncPropertyMarketPolicy
+  id: Default
+  maximumListingLifetime: 720h
+  maximumQuoteLifetime: 10m
+  maximumReservationLifetime: 5m
+  maximumDiscoveryResults: 100
+
+- type: ncPropertyLegalPolicy
+  id: Default
+  condemnationCompensationBasisPoints: 7500
+  destroyContentsOnDemolition: true

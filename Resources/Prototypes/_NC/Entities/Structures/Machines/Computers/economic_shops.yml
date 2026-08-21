@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: BaseComputer
+  id: NCComputerEconomicShopBase
+  abstract: true
+  components:
+  - type: UserInterface
+    interfaces:
+      enum.NCEconomicShopUiKey.Key:
+        type: NCEconomicShopBoundUserInterface
+      enum.WiresUiKey.Key:
+        type: WiresBoundUserInterface
+  - type: ActivatableUI
+    key: enum.NCEconomicShopUiKey.Key
+    singleUser: true
+  - type: Sprite
+    layers:
+    - map: ["computerLayerBody"]
+      state: computer
+    - map: ["computerLayerKeyboard"]
+      state: generic_keyboard
+    - map: ["computerLayerScreen"]
+      state: service
+    - map: ["computerLayerKeys"]
+      state: generic_keys
+    - map: ["enum.WiresVisualLayers.MaintenancePanel"]
+      state: generic_panel_open
+
+# Finite bootstrap stock is idempotent. Once sold or consumed it is not recreated by a map reload; production and
+# logistics become the only restocking paths in phase 10.
+- type: entity
+  parent: NCComputerEconomicShopBase
+  id: NCComputerStreetMedicalShop
+  name: street medical storefront
+  description: A hardwired storefront connected to a finite Night City stock ledger.
+  components:
+  - type: NCEconomicShop
+    shopId: street-medical-demo
+    displayName: Kabuki Street Medical
+    sellerOrganizationId: kabuki-street-medical
+    semanticLocationKey: city.shop.kabuki-street-medical
+    maximumListings: 100
+    initialCommodities:
+    - commodity: NCCommodityTraumaAnalgesic
+      quantity: 500
+    - commodity: NCCommoditySyntheticOxygenCarrier
+      quantity: 300
+    initialItems:
+    - definition: NCItemCyberwareNeuralLinkMk1
+      quantity: 4
+    - definition: NCItemWeaponBudgetPistolMk1
+      quantity: 3
+  - type: PointLight
+    color: "#4DD0A7"

@@ -176,6 +176,16 @@ public sealed partial class NCPropertyRegistrySystem : EntitySystem
                 "empty",
                 null,
                 default,
+                NCPropertyLegalState.Clear,
+                request.StorageBudget,
+                [],
+                [],
+                request.BlueprintSourceId.Trim(),
+                0,
+                0,
+                default,
+                null,
+                null,
                 now,
                 1,
                 eventId);
@@ -240,6 +250,15 @@ public sealed partial class NCPropertyRegistrySystem : EntitySystem
                 return Reject(NCPropertyAggregateMutationStatus.NotFound, "The property does not exist.");
             if (current.AggregateVersion != request.ExpectedVersion)
                 return new(NCPropertyAggregateMutationStatus.VersionConflict, current, "The property version changed.");
+            var legalAuthority = request.Initiator.Kind == NCPartyKind.CityService &&
+                                 request.EventType.StartsWith("living-city.property.legal-",
+                                     StringComparison.Ordinal);
+            if (!legalAuthority && request.Initiator != current.Snapshot.Owner &&
+                !current.Snapshot.AccessGrants.Any(grant =>
+                    grant.Subject == request.Initiator && grant.AccessRevision == current.Snapshot.AccessRevision &&
+                    (grant.ValidUntil == null || grant.ValidUntil > now)))
+                return Reject(NCPropertyAggregateMutationStatus.Rejected,
+                    "The initiator has no current property authority.");
             if (!ImmutableFieldsMatch(current.Snapshot, request.Proposed))
                 return Reject(NCPropertyAggregateMutationStatus.Rejected,
                     "A non-monetary update attempted to change immutable geography, listing or ownership.");
@@ -366,7 +385,8 @@ public sealed partial class NCPropertyRegistrySystem : EntitySystem
             !request.BuildingId.IsValid || request.RoomIds == null || request.RoomIds.Length is < 1 or > MaximumRooms ||
             request.RoomIds.Any(value => !value.IsValid) || request.RoomIds.Distinct().Count() != request.RoomIds.Length ||
             !ValidRequiredId(request.ListingId) || !request.Owner.IsValid || request.PurchasePrice < 0 ||
-            !ValidRequiredId(request.AccessPolicyId) || string.IsNullOrWhiteSpace(request.AuditSource) ||
+            !ValidRequiredId(request.AccessPolicyId) || !Valid(request.StorageBudget) ||
+            !ValidRequiredId(request.BlueprintSourceId) || string.IsNullOrWhiteSpace(request.AuditSource) ||
             request.AuditSource.Length > MaximumAuditSourceLength)
         {
             error = "The property registration command is invalid.";
@@ -401,7 +421,11 @@ public sealed partial class NCPropertyRegistrySystem : EntitySystem
                current.RoomIds.SequenceEqual(proposed.RoomIds) && current.ListingId == proposed.ListingId &&
                current.Owner == proposed.Owner && current.PurchasePrice == proposed.PurchasePrice &&
                current.AccessPolicyId == proposed.AccessPolicyId &&
-               current.LastSettlementTransactionId == proposed.LastSettlementTransactionId;
+               current.LastSettlementTransactionId == proposed.LastSettlementTransactionId &&
+               current.StorageBudget == proposed.StorageBudget &&
+               current.BlueprintSourceId == proposed.BlueprintSourceId &&
+               current.SecurityDepositAmount == proposed.SecurityDepositAmount &&
+               current.SecurityDepositAccountId == proposed.SecurityDepositAccountId;
     }
 
     private static bool ValidSnapshot(NCPropertyAggregateSnapshot? snapshot, bool persisted)
@@ -417,13 +441,26 @@ public sealed partial class NCPropertyRegistrySystem : EntitySystem
             snapshot.CurrentTemplateRevision is <= 0 ||
             (snapshot.CurrentTemplateId == null) != (snapshot.CurrentTemplateRevision == null) ||
             string.IsNullOrWhiteSpace(snapshot.InteriorState) ||
-            snapshot.InteriorState.Length > MaximumInteriorStateLength || snapshot.DataVersion < 0)
+            snapshot.InteriorState.Length > MaximumInteriorStateLength || snapshot.DataVersion < 0 ||
+            !Enum.IsDefined(snapshot.LegalState) || !Valid(snapshot.StorageBudget) ||
+            snapshot.FixtureItemIds == null || snapshot.IncludedAssetIds == null ||
+            snapshot.FixtureItemIds.Length > snapshot.StorageBudget.MaximumFixtureItems ||
+            snapshot.IncludedAssetIds.Length > snapshot.StorageBudget.MaximumIncludedAssets ||
+            snapshot.FixtureItemIds.Any(id => !id.IsValid) || snapshot.IncludedAssetIds.Any(id => !id.IsValid) ||
+            snapshot.FixtureItemIds.Distinct().Count() != snapshot.FixtureItemIds.Length ||
+            snapshot.IncludedAssetIds.Distinct().Count() != snapshot.IncludedAssetIds.Length ||
+            snapshot.FixtureItemIds.Intersect(snapshot.IncludedAssetIds).Any() ||
+            !ValidRequiredId(snapshot.BlueprintSourceId) || snapshot.RenovationRevision < 0 ||
+            snapshot.SecurityDepositAmount < 0 ||
+            (snapshot.SecurityDepositAmount == 0) != !snapshot.SecurityDepositAccountId.IsValid)
         {
             return false;
         }
 
         if (snapshot.AcquiredAt is { } acquiredAt && !acquiredAt.IsValid ||
-            snapshot.NextRentDueAt is { } rentDueAt && !rentDueAt.IsValid)
+            snapshot.NextRentDueAt is { } rentDueAt && !rentDueAt.IsValid ||
+            snapshot.DelinquentSince is { } delinquentAt && !delinquentAt.IsValid ||
+            snapshot.EvictionAt is { } evictionAt && !evictionAt.IsValid)
             return false;
 
         var occupants = new HashSet<NCPartyRef>();
@@ -458,6 +495,15 @@ public sealed partial class NCPropertyRegistrySystem : EntitySystem
                 NCPropertyStatus.EvictionPending && snapshot.NextRentDueAt == null)
             return false;
 
+        if (snapshot.Status == NCPropertyStatus.Delinquent && snapshot.DelinquentSince == null ||
+            snapshot.Status == NCPropertyStatus.EvictionPending && snapshot.EvictionAt == null ||
+            snapshot.Status == NCPropertyStatus.LegalHold && snapshot.LegalState != NCPropertyLegalState.Hold ||
+            snapshot.Status == NCPropertyStatus.Condemned && snapshot.LegalState != NCPropertyLegalState.Condemned ||
+            snapshot.Status == NCPropertyStatus.Destroyed &&
+            (snapshot.LegalState != NCPropertyLegalState.Destroyed || snapshot.Occupants.Length != 0 ||
+             snapshot.AccessGrants.Length != 0))
+            return false;
+
         return !persisted || snapshot.ChangedAt.IsValid && snapshot.DataVersion >= 1 &&
             snapshot.LastAppliedEventId != Guid.Empty;
     }
@@ -485,6 +531,12 @@ public sealed partial class NCPropertyRegistrySystem : EntitySystem
         return value == null || ValidRequiredId(value);
     }
 
+    private static bool Valid(NCPropertyStorageBudget value) => value != null &&
+        value.MaximumFixtureItems is >= 0 and <= 512 &&
+        value.MaximumIncludedAssets is >= 0 and <= 512 &&
+        value.MaximumPersonalItems is >= 0 and <= 1024 &&
+        value.MaximumMaterializedEntities is > 0 and <= 2048;
+
     private static NCPropertyAggregateRecord? Deserialize(NCAggregateSnapshotData? stored, NCApartmentId propertyId)
     {
         if (stored == null || stored.FormatVersion != SnapshotFormatVersion || !stored.SessionEpoch.IsValid ||
@@ -493,7 +545,8 @@ public sealed partial class NCPropertyRegistrySystem : EntitySystem
 
         try
         {
-            var snapshot = JsonSerializer.Deserialize<NCPropertyAggregateSnapshot>(stored.Payload, JsonOptions);
+            var snapshot = NormalizeLegacy(JsonSerializer.Deserialize<NCPropertyAggregateSnapshot>(stored.Payload,
+                JsonOptions));
             return snapshot?.PropertyId == propertyId && ValidSnapshot(snapshot, persisted: true)
                 ? new NCPropertyAggregateRecord(
                     snapshot,
@@ -515,6 +568,8 @@ public sealed partial class NCPropertyRegistrySystem : EntitySystem
         try
         {
             var receipt = JsonSerializer.Deserialize<PropertyReceipt>(payload, JsonOptions);
+            if (receipt != null)
+                receipt = receipt with { Snapshot = NormalizeLegacy(receipt.Snapshot)! };
             return receipt != null && receipt.AggregateVersion >= 1 && receipt.SessionEpoch.IsValid &&
                    receipt.PersistedAt.IsValid && ValidSnapshot(receipt.Snapshot, persisted: true)
                 ? receipt
@@ -530,6 +585,28 @@ public sealed partial class NCPropertyRegistrySystem : EntitySystem
     {
         return _cache.AddOrUpdate(candidate.Snapshot.PropertyId, candidate,
             (_, current) => current.AggregateVersion > candidate.AggregateVersion ? current : candidate);
+    }
+
+    private static NCPropertyAggregateSnapshot? NormalizeLegacy(NCPropertyAggregateSnapshot? snapshot)
+    {
+        if (snapshot == null)
+            return null;
+        return snapshot with
+        {
+            StorageBudget = snapshot.StorageBudget ?? new NCPropertyStorageBudget(128, 128, 256, 512),
+            FixtureItemIds = snapshot.FixtureItemIds ?? [],
+            IncludedAssetIds = snapshot.IncludedAssetIds ?? [],
+            BlueprintSourceId = string.IsNullOrWhiteSpace(snapshot.BlueprintSourceId)
+                ? snapshot.CurrentTemplateId ?? snapshot.ListingId
+                : snapshot.BlueprintSourceId,
+            LegalState = snapshot.Status switch
+            {
+                NCPropertyStatus.LegalHold => NCPropertyLegalState.Hold,
+                NCPropertyStatus.Condemned => NCPropertyLegalState.Condemned,
+                NCPropertyStatus.Destroyed => NCPropertyLegalState.Destroyed,
+                _ => snapshot.LegalState,
+            },
+        };
     }
 
     private void Publish(NCPropertyAggregateRecord record)

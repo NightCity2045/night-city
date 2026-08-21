@@ -1,8 +1,27 @@
 # Living City implementation status
 
-Updated: 2026-08-21
+Updated: 2026-08-22
 
 This file tracks implemented foundations against the full dependency plan. It is not an MVP or vertical-slice scope.
+
+## Semi-release phase completion
+
+| Phase | Delivered scope | Status |
+| --- | --- | --- |
+| 9 | Canonical commodities, stock batches, unique items, reservations, quotes, atomic settlement, payroll, physicalization and reconciliation | Complete |
+| 10 | Market demand, production, businesses, shipments, cargo hand-off and shop UI | Complete |
+| 11 | Property discovery, quotes, reservations, purchase/rent/resale, occupancy, access, content budgets and legal lifecycle | Complete |
+| 12 | Fixer access, deals, escrow, obligations, cognition bridge and Night Market policy | Complete |
+| 13 | Factions, territory, district safety, incidents, evidence/information, news, missions, cyberpsychosis and city services | Complete |
+| 14 | Active-round death handling, estates, asset claims and succession | Complete |
+| 15 | Agent/CitiNet city views and player-facing economic/property/service operations | Complete |
+| 16 | Optional Neural Cognition Service, redacted bounded context, strict schema validation, circuit breaker and deterministic fallback | Complete |
+| 17 | F7 administration/monitoring, permission checks, confirmations, audit, safe recovery operations and content audit tooling | Complete |
+| 18 | Cross-domain integration, compile/content gates and focused load/regression hardening | Complete |
+
+Validation on 2026-08-22: Shared, Server, Client and IntegrationTests build successfully; 16 focused integration/load
+tests passed, one unrelated apartment-move test remains explicitly skipped; the production scale gate passed with
+10,000 actors and 300 groups; 883 prototype identities passed the content audit; `git diff --check` passed.
 
 ## Implemented foundations
 
@@ -164,9 +183,9 @@ This file tracks implemented foundations against the full dependency plan. It is
 - Active-round reliable outbox dispatcher with typed handler ownership, bounded polling/concurrency, per-delivery
   timeout, exponential retry and a maximum-attempt exhausted state. Delivery is at-least-once and `MessageId` is the
   mandatory idempotency key for external effects.
-- Actor health, inventory, cognition and belief-set subdomain aggregates. New actors receive the root and all four
-  mandatory subdomains in one serializable five-aggregate transaction, so schedulers never observe a partially
-  initialized persistent resident.
+- Actor health, inventory, cognition, belief-set and immutable social-profile subdomain aggregates. New actors receive
+  the root and all five mandatory subdomains in one serializable six-aggregate transaction, so schedulers never
+  observe a partially initialized persistent resident.
 - The health adapter stores the complete validated NC Medicine snapshot as an opaque actor-owned payload and publishes
   a bounded strategic projection for condition, bleeding, mobility, consciousness, critical wounds, treatment and
   cyberware. Restore rebases monotonic medical timestamps to current runtime time, so server downtime advances nothing.
@@ -221,7 +240,8 @@ This file tracks implemented foundations against the full dependency plan. It is
 - Its typed inspector covers actors and safe domain summaries, actor relevance and retained hand-off requests, groups,
   memberships, retained physicalization requests and runtime formations, district/sector zone states, parties,
   accounts, immutable transactions, employment, directed relationships, reputation, structured episodic memory,
-  property/access summaries, property-content metadata, police fines and redacted outbox message metadata.
+  immutable social profiles, rumor books, social obligations, round-local conversations, property/access summaries,
+  property-content metadata, police fines and redacted outbox message metadata.
 - Its actor panel provides deterministic create, freeze/unfreeze, semantic move, atomic domain capture, full medical
   restore and materialize/dematerialize operations. Its group panel provides create, add/remove/transfer member,
   leader/directive changes and coordinated physicalization. Its population panel provides profile validation,
@@ -256,6 +276,20 @@ This file tracks implemented foundations against the full dependency plan. It is
   privacy, active-world expiry and permanent critical retention. Remember, deterministic consolidation and actual
   cognition recall use atomic immutable application markers. Consolidated records preserve bounded source IDs and
   semantics without generated prose; queries are privacy-bounded, and restart/replay cannot duplicate an episode.
+- Every newly created persistent actor receives an immutable social-profile aggregate in the same atomic creation
+  command as its root, health, inventory, cognition and belief set. Personality, values, RU/EN speech preferences and
+  bounded Utility modifiers are copied from validated YAML, so rebalance does not rewrite an existing person and a
+  preference cannot grant a cognition capability.
+- Rumor books are bounded owner-first knowledge authorities distinct from world truth. Structured topic/subject,
+  source-event provenance, immediate source, confidence, distortion, hop count, privacy and active-world retention are
+  persisted; learn and propagation retries use immutable markers, and propagation never scans other actors.
+- Promises, favors and debts are stable social-obligation aggregates with atomic debtor/creditor indexes and terminal,
+  replay-safe outcomes. YAML consequences reach directed relationships and episodic memory through the transactional
+  outbox, preserving each receiving authority instead of cross-mutating its storage.
+- Conversation sessions are server-owned, bounded and round-local. They retain only semantic speech acts and external
+  Agent record references, never raw message/call bodies, expire by active-world time and are cleared at round close.
+  The social-context projection applies purpose and conversation disclosure ceilings before neural consumption and
+  strips provenance IDs. Dialogue cannot mutate gameplay or reintroduce RED checks.
 - Routine Living City administration uses a dedicated F7 tab with typed bounded requests, server-side permissions,
   exact-operation confirmations and audit. The covered A-Life console entry points no longer exist.
 
@@ -277,46 +311,27 @@ The current mapper data references zone IDs that are absent from `Resources/Prot
 Automated zone-template validation correctly rejects those references. The missing geometry must come from the mapper
 export; implementation code must not invent replacement district/building/apartment/dungeon geography.
 
-## Next dependency work
+## Remaining content work
 
-- Rumors, personality/social preferences, language profiles and ConversationSession remain in the social simulation
-  phase. They will consume relationship, reputation and memory authorities without reusing the player-only Agent
-  address book as persistent social truth.
-- Add each future cognition, economy, property, incident, service and neural administration operation to the same typed
-  F7 boundary as its domain is implemented; do not introduce new A-Life console entry points.
-- Route capacity reservations plus incident-driven access/threat changes.
-- Remaining social simulation, economy behavior, housing behavior, incidents and services in the order defined by the
-  full development plan.
+- Supply mapper-owned geometry for the two missing zone IDs listed above.
+- Author production residents, organizations, businesses, factions, inventories, homes, workplaces and service rosters.
+- Balance YAML economy, market, housing, incident, service, fixer and neural policies against long-running round data.
+- Register a production Neural Cognition Service endpoint only when the external deployment is available; deterministic
+  local cognition remains the required authority-safe fallback.
 
 ## Current implementation boundary
 
 - The schedule scheduler produces semantic travel intent. The abstract executor completes CityGraph travel for
   unmaterialized actors; materialization and atomic dematerialization transfer ownership to/from a physical NPC.
   The completed physical executor composes hierarchical waypoints and delegates each local segment to unchanged Robust
-  pathfinding. Later dialogue and pursuit workflows can claim typed physical ownership and must also acquire the
-  implemented dematerialization blocker lease for their full visible interaction.
-- Cognition now supplies durable intention and a validated plan above that execution boundary. Routine steps reuse the
-  scheduler/physical executor; other domains explicitly claim typed steps. Humanity and cyberpsychosis remain facts
-  owned by their future/profile domain, with the ingestion contract implemented and no placeholder formula invented.
-- CityGraph route selection includes traversal threat cost. Abstract elapsed duration intentionally sums the selected
-  edges' base travel seconds; capacity reservations and live incident modifiers are not implemented yet.
-- No production population profile or resident roster is invented until mapper-owned home/work `NCZoneId` data is
-  complete. The shipped archetype, routine, importer and scheduler policies are reusable defaults, not placeholder
-  residents.
-- The shipped group profile defines structural policy only. No production gang, corporation squad or resident group is
-  fabricated without authored faction, actor and geography data. Shared trunk routing, per-member steering,
-  membership transfer and physical/strategic hand-off are implemented; strategic group split/merge planning remains a
-  later system.
-- The outbox transport and reconciliation path is production-ready infrastructure, but no production external adapter
-  is registered yet. Unknown message types retry and then remain exhausted for inspection; they are never discarded.
-- Actor inventory persistence currently stores stable references supplied by an economy adapter; the economy-owned
-  unique-item/commodity rows and item re-materializer are later work. Vanilla inventory is neither a second authority
-  nor mutated by this package. Materialization therefore accepts only an initialized empty inventory aggregate. An
-  unmaterialized actor may have no full medical payload until its first safe materialization/capture; in that case the
-  entity prototype's validated default medical state is used.
-- The zone-state schema and ingestion boundary for scarcity, threat and control are implemented, but those values are
-  intentionally unavailable until their later authoritative domains exist. The projection never substitutes a
-  fabricated neutral value for missing city facts.
-- The common ledger/employment/property/fine authorities are directly wired to their player-facing callers. Historical
-  relational schema remains only in old EF migrations until the pre-release database baseline is squashed; no runtime
-  API can use it as a second authority. No automatic employment/payroll coordinator is active yet.
+  pathfinding. Dialogue, pursuit, service and scripted workflows use typed ownership and dematerialization blockers.
+- Economy, market, property, fixer, incident, service, faction, lifecycle and neural integrations mutate only through
+  their canonical aggregate systems. Cross-domain effects use atomic ledger participants or the durable outbox.
+- Humanity and cyberpsychosis remain owned by their dedicated registry and medical/cyberware bridge. Cognition and the
+  neural service consume bounded facts and cannot author gameplay outcomes.
+- Unknown outbox message types retry and remain exhausted for F7 inspection; they are never discarded. External effects
+  must use the message ID as their idempotency key.
+- Historical relational schema remains only in old EF migrations until the pre-release database baseline is squashed;
+  no runtime API can use it as a second authority.
+- Production readiness still depends on mapper/content data and balancing. The implementation does not fabricate city
+  geography, residents, faction rosters or a live external neural endpoint.

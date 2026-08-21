@@ -171,7 +171,7 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
             Assert.That(listing.Interiors[0].RentPolicy.Id, Is.EqualTo("StandardApartment"));
             Assert.That(prototypes.TryIndex(listing.Interiors[0].RentPolicy, out NCRentPolicyPrototype rentPolicy),
                 Is.True);
-            Assert.That(rentPolicy!.RentAmount, Is.Zero);
+            Assert.That(rentPolicy!.RentAmount, Is.EqualTo(500));
 
             Assert.That(prototypes.TryIndex(MissionLayout, out var mission), Is.True);
             Assert.That(mission!.TargetZoneId, Is.EqualTo(MissionZoneId));
@@ -659,6 +659,8 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
             housing.Party,
             0,
             "StandardApartment",
+            new NCPropertyStorageBudget(128, 128, 256, 512),
+            "integration-blueprint",
             NCHousingIdentity.Correlation("register-property", propertyId),
             AuditSource: "housing-round-initialization"));
         Assert.That(registration.Status,

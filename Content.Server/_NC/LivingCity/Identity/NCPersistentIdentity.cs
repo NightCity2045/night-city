@@ -6,6 +6,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Content.Shared._NC.LivingCity.Economy;
+using Content.Shared._NC.LivingCity.Fixers;
+using Content.Shared._NC.LivingCity.CityServices;
+using Content.Shared._NC.LivingCity.Market;
+using Content.Shared._NC.LivingCity.Housing;
+using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.Persistence.Identity;
 
@@ -24,6 +30,9 @@ public static class NCPersistentIdentity
 
     public static NCPartyRef CityService(string stableServiceId) => NCPartyRef.ForCityService(
         new NCCityServiceId(CreateGuid($"party/city-service/{Normalize(stableServiceId)}")));
+
+    public static NCPartyRef Business(string stableBusinessId) => NCPartyRef.ForBusiness(
+        new NCBusinessId(CreateGuid($"party/business/{Normalize(stableBusinessId)}")));
 
     public static NCAccountId PrimaryAccount(NCPartyRef owner)
     {
@@ -44,6 +53,114 @@ public static class NCPersistentIdentity
 
     public static NCTransactionId Transaction(string domain, string operation, string stableKey) =>
         new(CreateGuid($"transaction/{Normalize(domain)}/{Normalize(operation)}/{Normalize(stableKey)}"));
+
+    public static NCStockNodeId StockNode(NCPartyRef owner, string stableKey)
+    {
+        if (!owner.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(owner));
+        return new NCStockNodeId(CreateGuid($"stock-node/{owner}/{Normalize(stableKey)}"));
+    }
+
+    public static NCMarketRequestId MarketRequest(NCPartyRef requester, string stableKey)
+    {
+        if (!requester.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(requester));
+        return new NCMarketRequestId(CreateGuid($"market-request/{requester}/{Normalize(stableKey)}"));
+    }
+
+    public static NCPropertyListingId PropertyListing(NCApartmentId propertyId, string stableKey)
+    {
+        if (!propertyId.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(propertyId));
+        return new NCPropertyListingId(CreateGuid($"property-listing/{propertyId}/{Normalize(stableKey)}"));
+    }
+
+    public static NCPropertyQuoteId PropertyQuote(NCPropertyListingId listingId, NCPartyRef buyer, string stableKey)
+    {
+        if (!listingId.IsValid || !buyer.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(listingId));
+        return new NCPropertyQuoteId(CreateGuid($"property-quote/{listingId}/{buyer}/{Normalize(stableKey)}"));
+    }
+
+    public static NCPropertyReservationId PropertyReservation(NCPropertyQuoteId quoteId, string stableKey)
+    {
+        if (!quoteId.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(quoteId));
+        return new NCPropertyReservationId(CreateGuid($"property-reservation/{quoteId}/{Normalize(stableKey)}"));
+    }
+
+    public static NCFixerNetworkId FixerNetwork(NCPartyRef fixer)
+    {
+        if (!fixer.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(fixer));
+        return new NCFixerNetworkId(CreateGuid($"fixer-network/{fixer}"));
+    }
+
+    public static NCFixerDealId FixerDeal(NCFixerNetworkId networkId, string stableKey)
+    {
+        if (!networkId.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(networkId));
+        return new NCFixerDealId(CreateGuid($"fixer-deal/{networkId}/{Normalize(stableKey)}"));
+    }
+
+    public static NCNightMarketId NightMarket(NCPartyRef organizer, string stableKey)
+    {
+        if (!organizer.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(organizer));
+        return new NCNightMarketId(CreateGuid($"night-market/{organizer}/{Normalize(stableKey)}"));
+    }
+
+    public static NCSocialObligationId SocialObligation(NCFixerDealId dealId, Guid legId)
+    {
+        if (!dealId.IsValid || legId == Guid.Empty)
+            throw new ArgumentOutOfRangeException(nameof(dealId));
+        return new NCSocialObligationId(CreateGuid($"fixer-obligation/{dealId}/{legId:D}"));
+    }
+
+    public static NCCityIncidentId CityIncident(Guid sourceWorldEventId, string kind)
+    {
+        if (sourceWorldEventId == Guid.Empty)
+            throw new ArgumentOutOfRangeException(nameof(sourceWorldEventId));
+        return new NCCityIncidentId(CreateGuid($"city-incident/{sourceWorldEventId:D}/{Normalize(kind)}"));
+    }
+
+    public static NCServiceDispatchId ServiceDispatch(NCCityIncidentId incidentId, NCCityServiceId serviceId)
+    {
+        if (!incidentId.IsValid || !serviceId.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(incidentId));
+        return new NCServiceDispatchId(CreateGuid($"service-dispatch/{incidentId}/{serviceId}"));
+    }
+
+    public static NCServiceContractId ServiceContract(NCCityServiceId serviceId, NCPartyRef subscriber,
+        string stableKey)
+    {
+        if (!serviceId.IsValid || !subscriber.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(serviceId));
+        return new NCServiceContractId(CreateGuid(
+            $"service-contract/{serviceId}/{subscriber}/{Normalize(stableKey)}"));
+    }
+
+    public static NCCityNewsId CityNews(NCCityIncidentId incidentId, NCCityIncidentStage stage)
+    {
+        if (!incidentId.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(incidentId));
+        return new NCCityNewsId(CreateGuid($"city-news/{incidentId}/{stage}"));
+    }
+
+    public static NCEstateId Estate(NCPartyRef decedent)
+    {
+        if (!decedent.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(decedent));
+        return new NCEstateId(CreateGuid($"estate/{decedent}"));
+    }
+
+    public static NCCommodityBatchId CommodityBatch(string commodityId, Guid sourceWorldEventId, string lotKey)
+    {
+        if (sourceWorldEventId == Guid.Empty)
+            throw new ArgumentOutOfRangeException(nameof(sourceWorldEventId));
+        return new NCCommodityBatchId(CreateGuid(
+            $"commodity-batch/{Normalize(commodityId)}/{sourceWorldEventId:D}/{Normalize(lotKey)}"));
+    }
 
     public static NCRelationshipId Relationship(NCPartyRef observer, NCPartyRef subject)
     {
@@ -140,6 +257,51 @@ public static class NCPersistentIdentity
             throw new ArgumentOutOfRangeException(nameof(bookId));
 
         return CreateGuid($"memory-recall-application/{bookId}/{recallEventId:D}");
+    }
+
+    public static Guid RumorBook(NCPartyRef owner)
+    {
+        if (!owner.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(owner));
+        return CreateGuid($"rumor-book/{owner}");
+    }
+
+    public static NCInformationId Information(string topicKey, NCInformationSubject subject, Guid sourceWorldEventId)
+    {
+        if (sourceWorldEventId == Guid.Empty || string.IsNullOrWhiteSpace(topicKey) || !subject.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(sourceWorldEventId));
+        return new NCInformationId(CreateGuid(
+            $"information/{Normalize(topicKey)}/{subject.Kind}/{Normalize(subject.StableId)}/{sourceWorldEventId:D}"));
+    }
+
+    public static NCRumorKnowledgeId RumorKnowledge(NCPartyRef owner, NCInformationId informationId)
+    {
+        if (!owner.IsValid || !informationId.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(owner));
+        return new NCRumorKnowledgeId(CreateGuid($"rumor-knowledge/{owner}/{informationId}"));
+    }
+
+    public static Guid RumorPropagationApplication(
+        NCRumorKnowledgeId targetKnowledgeId,
+        Guid propagationEventId)
+    {
+        if (!targetKnowledgeId.IsValid || propagationEventId == Guid.Empty)
+            throw new ArgumentOutOfRangeException(nameof(targetKnowledgeId));
+        return CreateGuid($"rumor-propagation/{targetKnowledgeId}/{propagationEventId:D}");
+    }
+
+    public static Guid SocialObligationIndex(NCPartyRef owner)
+    {
+        if (!owner.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(owner));
+        return CreateGuid($"social-obligation-index/{owner}");
+    }
+
+    public static Guid SocialObligationConsequence(NCSocialObligationId obligationId, int version)
+    {
+        if (!obligationId.IsValid || version < 1)
+            throw new ArgumentOutOfRangeException(nameof(obligationId));
+        return CreateGuid($"social-obligation-consequence/{obligationId}/{version}");
     }
 
     public static Guid CognitionBelief(NCActorId actorId, string key, string subject, string source)

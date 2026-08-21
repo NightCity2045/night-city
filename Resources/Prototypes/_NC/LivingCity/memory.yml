@@ -138,3 +138,24 @@
   defaultConfidence: 1000
   defaultPrivacy: Restricted
   critical: true
+
+- type: ncMemoryEvent
+  id: MemoryObligationCreated
+  stableKey: obligation-created
+  consolidationKey: social-obligation
+  retention: MemoryRetentionPermanent
+  defaultSalience: 800
+  defaultConfidence: 1000
+  defaultPrivacy: Restricted
+  critical: true
+
+- type: ncMemoryEvent
+  id: MemoryObligationFulfilled
+  stableKey: obligation-fulfilled
+  consolidationKey: social-obligation
+  retention: MemoryRetentionPermanent
+  emotionalTags: [MemoryEmotionGratitude]
+  defaultSalience: 850
+  defaultConfidence: 1000
+  defaultPrivacy: Restricted
+  critical: true

@@ -31,6 +31,7 @@ public sealed partial class NCPropertySettlementSystem : EntitySystem
     [Dependency] private NCPartyFinanceAdapterSystem _finance = default!;
     [Dependency] private NCEconomyLedgerSystem _ledger = default!;
     [Dependency] private NCPropertyRegistrySystem _properties = default!;
+    [Dependency] private NCHousingServiceSystem _housing = default!;
 
     private readonly SemaphoreSlim[] _gates = CreateGates();
 
@@ -60,6 +61,7 @@ public sealed partial class NCPropertySettlementSystem : EntitySystem
             if (current.AggregateVersion != request.ExpectedPropertyVersion)
                 return Reject(NCPropertySettlementStatus.VersionConflict, "The property version changed.", current);
             if (current.Snapshot.Status != NCPropertyStatus.Available ||
+                current.Snapshot.LegalState != NCPropertyLegalState.Clear ||
                 current.Snapshot.Occupants.Any(value => value.Kind == NCPropertyOccupancyKind.Tenancy))
                 return Reject(NCPropertySettlementStatus.NotAvailable, "The property is not available.", current);
             if (!_clock.TryGetCurrentTime(out _, out var now))
@@ -89,6 +91,8 @@ public sealed partial class NCPropertySettlementSystem : EntitySystem
                 AccessRevision = accessRevision,
                 RentPolicyId = string.Empty,
                 NextRentDueAt = null,
+                DelinquentSince = null,
+                EvictionAt = null,
             };
             return await CommitAsync(
                 request.CommandId,
@@ -140,6 +144,7 @@ public sealed partial class NCPropertySettlementSystem : EntitySystem
             if (current.AggregateVersion != request.ExpectedPropertyVersion)
                 return Reject(NCPropertySettlementStatus.VersionConflict, "The property version changed.", current);
             if (current.Snapshot.Status != NCPropertyStatus.Available ||
+                current.Snapshot.LegalState != NCPropertyLegalState.Clear ||
                 current.Snapshot.Occupants.Any(value => value.Kind == NCPropertyOccupancyKind.Tenancy))
                 return Reject(NCPropertySettlementStatus.NotAvailable, "The property is not available.", current);
             if (current.Snapshot.Owner == request.Tenant || !_clock.TryGetCurrentTime(out _, out var now))
@@ -183,6 +188,8 @@ public sealed partial class NCPropertySettlementSystem : EntitySystem
                 CurrentTemplateRevision = request.TemplateRevision,
                 InteriorState = "ready",
                 NextRentDueAt = due,
+                DelinquentSince = null,
+                EvictionAt = null,
             };
             if (request.InitialCharge == 0)
             {
@@ -263,6 +270,8 @@ public sealed partial class NCPropertySettlementSystem : EntitySystem
             {
                 Status = NCPropertyStatus.Rented,
                 NextRentDueAt = due,
+                DelinquentSince = null,
+                EvictionAt = null,
             };
             if (request.Charge == 0)
             {
@@ -290,6 +299,227 @@ public sealed partial class NCPropertySettlementSystem : EntitySystem
                 request.CorrelationId,
                 request.CausationId,
                 request.AuditSource);
+        }
+        finally
+        {
+            gate.Release();
+        }
+    }
+
+    public async Task<NCPropertySettlementResult> ReleaseLeaseAsync(
+        NCReleasePropertyLeaseSettlementRequest request)
+    {
+        if (request.CommandId == Guid.Empty || !request.TransactionId.IsValid || !request.PropertyId.IsValid ||
+            request.ExpectedPropertyVersion <= 0 || !request.Tenant.IsValid || !request.Initiator.IsValid ||
+            !Enum.IsDefined(request.Reason) || request.DepositRefundBasisPoints is < 0 or > 10_000 ||
+            request.CorrelationId == Guid.Empty || string.IsNullOrWhiteSpace(request.AuditSource) ||
+            request.AuditSource.Length > MaximumAuditSourceLength)
+            return Reject(NCPropertySettlementStatus.Rejected, "The lease release request is invalid.");
+        var gate = GetGate(request.PropertyId);
+        await gate.WaitAsync();
+        try
+        {
+            var current = await _properties.GetAsync(request.PropertyId, true);
+            if (current == null)
+                return Reject(NCPropertySettlementStatus.NotFound, "The property does not exist.");
+            if (current.AggregateVersion != request.ExpectedPropertyVersion)
+                return Reject(NCPropertySettlementStatus.VersionConflict, "The property version changed.", current);
+            if (!current.Snapshot.Occupants.Any(occupant =>
+                    occupant.Kind == NCPropertyOccupancyKind.Tenancy && occupant.Occupant == request.Tenant) ||
+                request.Initiator != request.Tenant && request.Initiator != current.Snapshot.Owner)
+                return Reject(NCPropertySettlementStatus.NotAuthorized,
+                    "The lease release parties are not authorized.", current);
+            var proposed = current.Snapshot with
+            {
+                Occupants = current.Snapshot.Occupants
+                    .Where(occupant => occupant.Kind != NCPropertyOccupancyKind.Tenancy &&
+                                       occupant.Kind != NCPropertyOccupancyKind.Resident &&
+                                       occupant.Kind != NCPropertyOccupancyKind.Guest).ToArray(),
+                AccessGrants = [],
+                Status = NCPropertyStatus.Available,
+                AcquiredAt = null,
+                AccessRevision = checked(current.Snapshot.AccessRevision + 1),
+                RentPolicyId = string.Empty,
+                CurrentTemplateId = null,
+                CurrentTemplateRevision = null,
+                ActiveDeploymentId = default,
+                InteriorState = "empty",
+                NextRentDueAt = null,
+                SecurityDepositAmount = 0,
+                SecurityDepositAccountId = default,
+                DelinquentSince = null,
+                EvictionAt = null,
+            };
+            if (current.Snapshot.SecurityDepositAmount == 0)
+                return await CommitWithoutMoneyAsync(request.CommandId, current, proposed, request.Initiator,
+                    "living-city.property.lease-released", request.CorrelationId, request.CausationId,
+                    request.AuditSource);
+            var escrow = await _ledger.GetAccountAsync(current.Snapshot.SecurityDepositAccountId, true);
+            var tenant = await _finance.EnsurePrimaryAccountAsync(request.Tenant, request.AuditSource,
+                request.CausationId);
+            var owner = await _finance.EnsurePrimaryAccountAsync(current.Snapshot.Owner, request.AuditSource,
+                request.CausationId);
+            if (escrow == null || !tenant.IsResolved || !owner.IsResolved ||
+                escrow.Snapshot.Balance < current.Snapshot.SecurityDepositAmount)
+                return Reject(NCPropertySettlementStatus.StorageFailure,
+                    "The lease deposit accounts are inconsistent.", current);
+            if (!_properties.TryPrepareSettlementWrite(current, proposed, request.TransactionId,
+                    "living-city.property.lease-released", request.AuditSource, out var participant, out _,
+                    out var error))
+                return Reject(NCPropertySettlementStatus.Rejected,
+                    error ?? "The released property state is invalid.", current);
+            var refund = checked(current.Snapshot.SecurityDepositAmount * request.DepositRefundBasisPoints / 10_000);
+            var retained = checked(current.Snapshot.SecurityDepositAmount - refund);
+            var legs = new List<NCLedgerLegRequest>
+            {
+                new(escrow.Snapshot.AccountId, escrow.AggregateVersion,
+                    -current.Snapshot.SecurityDepositAmount),
+            };
+            if (refund > 0)
+                legs.Add(new NCLedgerLegRequest(tenant.AccountId, tenant.Account!.AggregateVersion, refund));
+            if (retained > 0)
+                legs.Add(new NCLedgerLegRequest(owner.AccountId, owner.Account!.AggregateVersion, retained));
+            var economy = await _ledger.PostTransactionAsync(new NCPostLedgerTransactionRequest(
+                request.CommandId, request.TransactionId, NCLedgerTransactionKind.Refund,
+                $"property lease release {request.PropertyId}", legs.ToArray(), request.Initiator,
+                request.CorrelationId, request.CausationId, request.AuditSource, [participant!]));
+            if (economy.Status is not (NCEconomyMutationStatus.Applied or NCEconomyMutationStatus.Duplicate))
+                return Reject(Map(economy.Status), economy.Error ?? "The deposit release was rejected.",
+                    current, economy);
+            var property = await _properties.GetAsync(request.PropertyId, true);
+            return property == null
+                ? Reject(NCPropertySettlementStatus.StorageFailure,
+                    "The released property could not be reloaded.", null, economy)
+                : new(economy.Status == NCEconomyMutationStatus.Applied
+                    ? NCPropertySettlementStatus.Applied
+                    : NCPropertySettlementStatus.Duplicate, property, economy, null);
+        }
+        finally
+        {
+            gate.Release();
+        }
+    }
+
+    public async Task<NCPropertySettlementResult> RenovateAsync(NCRenovatePropertySettlementRequest request)
+    {
+        if (request.CommandId == Guid.Empty || !request.TransactionId.IsValid || !request.PropertyId.IsValid ||
+            request.ExpectedPropertyVersion <= 0 || !request.Actor.IsValid || request.Price < 0 ||
+            string.IsNullOrWhiteSpace(request.TemplateId) || request.TemplateId.Length > 64 ||
+            request.TemplateRevision <= 0 || request.CorrelationId == Guid.Empty ||
+            string.IsNullOrWhiteSpace(request.AuditSource) || request.AuditSource.Length > MaximumAuditSourceLength ||
+            !_clock.TryGetCurrentTime(out _, out var now))
+            return Reject(NCPropertySettlementStatus.Rejected, "The renovation request is invalid.");
+        var gate = GetGate(request.PropertyId);
+        await gate.WaitAsync();
+        try
+        {
+            var current = await _properties.GetAsync(request.PropertyId, true);
+            if (current == null)
+                return Reject(NCPropertySettlementStatus.NotFound, "The property does not exist.");
+            if (current.AggregateVersion != request.ExpectedPropertyVersion)
+                return Reject(NCPropertySettlementStatus.VersionConflict, "The property version changed.", current);
+            var authorized = current.Snapshot.Owner == request.Actor || current.Snapshot.AccessGrants.Any(grant =>
+                grant.Subject == request.Actor && grant.AccessRevision == current.Snapshot.AccessRevision &&
+                grant.Permissions.HasFlag(NCPropertyPermission.Renovate) &&
+                (grant.ValidUntil == null || grant.ValidUntil > now));
+            if (!authorized || current.Snapshot.LegalState != NCPropertyLegalState.Clear ||
+                current.Snapshot.Status is NCPropertyStatus.Destroyed or NCPropertyStatus.Condemned or
+                    NCPropertyStatus.LegalHold)
+                return Reject(NCPropertySettlementStatus.NotAuthorized,
+                    "The actor or property state does not permit renovation.", current);
+            var proposed = current.Snapshot with
+            {
+                CurrentTemplateId = request.TemplateId.Trim(),
+                CurrentTemplateRevision = request.TemplateRevision,
+                ActiveDeploymentId = default,
+                InteriorState = "renovation-pending",
+                RenovationRevision = checked(current.Snapshot.RenovationRevision + 1),
+            };
+            if (request.Price == 0)
+                return await CommitWithoutMoneyAsync(request.CommandId, current, proposed, request.Actor,
+                    "living-city.property.renovation-paid-free", request.CorrelationId, request.CausationId,
+                    request.AuditSource);
+            if (!await _housing.EnsureReadyAsync(request.AuditSource))
+                return Reject(NCPropertySettlementStatus.StorageFailure,
+                    "The renovation service is unavailable.", current);
+            return await CommitAsync(request.CommandId, request.TransactionId, current, proposed, request.Actor,
+                _housing.Party, request.Price, NCLedgerTransactionKind.Purchase,
+                $"property renovation {request.PropertyId}", "living-city.property.renovation-paid",
+                request.CorrelationId, request.CausationId, request.AuditSource);
+        }
+        finally
+        {
+            gate.Release();
+        }
+    }
+
+    public async Task<NCPropertySettlementResult> RollbackRenovationAsync(
+        NCRollbackPropertyRenovationRequest request)
+    {
+        if (request.CommandId == Guid.Empty || !request.RefundTransactionId.IsValid || !request.PropertyId.IsValid ||
+            request.ExpectedPropertyVersion <= 0 || !request.Actor.IsValid || request.RefundAmount < 0 ||
+            (request.PreviousTemplateId == null) != (request.PreviousTemplateRevision == null) ||
+            request.PreviousTemplateRevision is <= 0 || string.IsNullOrWhiteSpace(request.PreviousInteriorState) ||
+            request.PreviousInteriorState.Length > 128 || request.PreviousRenovationRevision < 0 ||
+            request.CorrelationId == Guid.Empty || string.IsNullOrWhiteSpace(request.AuditSource) ||
+            request.AuditSource.Length > MaximumAuditSourceLength)
+            return Reject(NCPropertySettlementStatus.Rejected, "The renovation rollback request is invalid.");
+        var gate = GetGate(request.PropertyId);
+        await gate.WaitAsync();
+        try
+        {
+            var current = await _properties.GetAsync(request.PropertyId, true);
+            if (current == null)
+                return Reject(NCPropertySettlementStatus.NotFound, "The property does not exist.");
+            if (current.AggregateVersion != request.ExpectedPropertyVersion)
+                return Reject(NCPropertySettlementStatus.VersionConflict, "The property version changed.", current);
+            if (current.Snapshot.InteriorState != "renovation-pending" ||
+                current.Snapshot.RenovationRevision != request.PreviousRenovationRevision + 1)
+                return Reject(NCPropertySettlementStatus.Rejected, "The renovation is not rollback-safe.", current);
+            var proposed = current.Snapshot with
+            {
+                CurrentTemplateId = request.PreviousTemplateId,
+                CurrentTemplateRevision = request.PreviousTemplateRevision,
+                ActiveDeploymentId = default,
+                InteriorState = request.PreviousInteriorState,
+                RenovationRevision = request.PreviousRenovationRevision,
+            };
+            if (request.RefundAmount == 0)
+                return await CommitWithoutMoneyAsync(request.CommandId, current, proposed, request.Actor,
+                    "living-city.property.renovation-rolled-back-free", request.CorrelationId,
+                    request.CausationId, request.AuditSource);
+            if (!await _housing.EnsureReadyAsync(request.AuditSource))
+                return Reject(NCPropertySettlementStatus.StorageFailure,
+                    "The renovation refund service is unavailable.", current);
+            var payer = await _finance.EnsurePrimaryAccountAsync(_housing.Party, request.AuditSource,
+                request.CausationId);
+            var payee = await _finance.EnsurePrimaryAccountAsync(request.Actor, request.AuditSource,
+                request.CausationId);
+            if (!payer.IsResolved || !payee.IsResolved)
+                return Reject(NCPropertySettlementStatus.StorageFailure,
+                    "The renovation refund accounts are unavailable.", current);
+            if (!_properties.TryPrepareSettlementWrite(current, proposed, request.RefundTransactionId,
+                    "living-city.property.renovation-rolled-back", request.AuditSource,
+                    out var participant, out _, out var error))
+                return Reject(NCPropertySettlementStatus.StorageFailure,
+                    error ?? "The renovation refund participant is unavailable.", current);
+            var economy = await _ledger.PostTransactionAsync(new NCPostLedgerTransactionRequest(
+                request.CommandId, request.RefundTransactionId, NCLedgerTransactionKind.Refund,
+                $"property renovation rollback {request.PropertyId}",
+                [
+                    new NCLedgerLegRequest(payer.AccountId, payer.Account!.AggregateVersion, -request.RefundAmount),
+                    new NCLedgerLegRequest(payee.AccountId, payee.Account!.AggregateVersion, request.RefundAmount),
+                ], _housing.Party, request.CorrelationId, request.CausationId, request.AuditSource, [participant!]));
+            if (economy.Status is not (NCEconomyMutationStatus.Applied or NCEconomyMutationStatus.Duplicate))
+                return Reject(Map(economy.Status), economy.Error ?? "The renovation refund was rejected.",
+                    current, economy);
+            var loaded = await _properties.GetAsync(request.PropertyId, true);
+            return loaded == null
+                ? Reject(NCPropertySettlementStatus.StorageFailure,
+                    "The rolled-back property could not be reloaded.", null, economy)
+                : new(economy.Status == NCEconomyMutationStatus.Applied
+                    ? NCPropertySettlementStatus.Applied
+                    : NCPropertySettlementStatus.Duplicate, loaded, economy, null);
         }
         finally
         {

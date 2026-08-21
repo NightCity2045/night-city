@@ -13,6 +13,10 @@ public enum NCPropertyStatus : byte
     Rented,
     Delinquent,
     EvictionPending,
+    ResaleListed,
+    LegalHold,
+    Condemned,
+    Destroyed,
 }
 
 [Flags]
@@ -23,13 +27,33 @@ public enum NCPropertyPermission : ushort
     ManageCards = 1 << 1,
     ManageTenants = 1 << 2,
     OrderInterior = 1 << 3,
-    All = Enter | ManageCards | ManageTenants | OrderInterior,
+    StoreItems = 1 << 4,
+    Renovate = 1 << 5,
+    Transfer = 1 << 6,
+    All = Enter | ManageCards | ManageTenants | OrderInterior | StoreItems | Renovate | Transfer,
 }
 
 public enum NCPropertyOccupancyKind : byte
 {
     Ownership,
     Tenancy,
+    Resident,
+    Guest,
+}
+
+public enum NCPropertyLegalState : byte
+{
+    Clear,
+    Hold,
+    Condemned,
+    Destroyed,
+}
+
+public enum NCPropertyAssetClass : byte
+{
+    Fixture,
+    IncludedAsset,
+    PersonalProperty,
 }
 
 public enum NCPropertyReleaseReason : byte

@@ -8,6 +8,15 @@
   apartmentId: 67566dd3-93b9-4ec6-a823-772e5fc376fd
   accessPolicy: StandardApartment
   startingHousingEligible: true
+  allowsPurchase: true
+  allowsRent: true
+  purchasePrice: 25000
+  securityDeposit: 1000
+  maximumFixtureItems: 128
+  maximumIncludedAssets: 128
+  maximumPersonalItems: 256
+  maximumMaterializedEntities: 512
   interiors:
   - template: NCApartmentLayout5x5
     rentPolicy: StandardApartment
+    renovationPrice: 2500

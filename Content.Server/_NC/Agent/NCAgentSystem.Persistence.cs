@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Content.Server._NC.Agent.Components;
 using Content.Server._NC.City.Zones;
+using Content.Server._NC.LivingCity.Social;
 using Content.Server.Chat.Managers;
 using Content.Server.Database;
 using Content.Server.PDA;
@@ -19,6 +20,7 @@ using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.City.Zones.Prototypes;
 using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.Identity;
+using Content.Shared._NC.LivingCity.Social;
 using Content.Shared.GameTicking;
 using Content.Shared.Inventory;
 using Content.Shared.PDA;
@@ -151,6 +153,8 @@ public sealed partial class NCAgentSystem
             view.FeedOffset = 0;
         if (args.App == NCAgentApp.Map)
             SendMapSnapshot(uid, user);
+        if (args.App == NCAgentApp.City)
+            _ = SendCitySnapshotAsync(uid, user, view.Owner);
         await SendViewAsync(uid, user);
     }
 
@@ -455,6 +459,13 @@ public sealed partial class NCAgentSystem
                 view.Notice = "ADDRESS UNAVAILABLE";
                 return;
             }
+
+            _conversationSessions.RecordAgentActivity(
+                NCConversationChannel.AgentDirectMessage,
+                view.Owner,
+                [recipient],
+                $"agent-message:{message.MessageId}",
+                NCSpeechActKind.Statement);
 
             view.Notice = "MESSAGE SENT";
             await SendAgentNotificationAsync(

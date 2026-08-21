@@ -104,6 +104,12 @@ public static class NCCognitionDecisionEngine
                 continue;
 
             var utility = capability.BaseUtility;
+            var personalityModifier = BestBelief(
+                beliefs,
+                $"social.utility-modifier.{capability.ID}",
+                policy);
+            if (personalityModifier != null)
+                utility += Numeric(personalityModifier.Value) * personalityModifier.Confidence;
             var valid = true;
             foreach (var consideration in capability.Considerations)
             {

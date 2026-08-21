@@ -16,6 +16,7 @@ using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Housing;
 using Content.Shared._NC.Identity;
 using Content.Shared._NC.LivingCity.Economy;
+using Content.Shared._NC.LivingCity.Housing;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared.Database._NC.Police;
 using Content.Shared.Preferences;
@@ -77,6 +78,8 @@ public sealed class NCCanonicalMoneyPropertyFineSystemTest : GameTest
             housing.Party,
             0,
             "integration-access",
+            new NCPropertyStorageBudget(128, 128, 256, 512),
+            "integration-blueprint",
             Guid.NewGuid(),
             AuditSource: "integration-test"));
         Assert.That(registration.Status, Is.EqualTo(NCPropertyAggregateMutationStatus.Applied));

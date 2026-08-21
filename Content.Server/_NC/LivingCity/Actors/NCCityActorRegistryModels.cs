@@ -8,6 +8,7 @@ using Content.Server._NC.LivingCity.Actors.Domains;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
+using Content.Server.Database;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
 
@@ -53,7 +54,8 @@ public sealed record NCCityActorDematerializationCommitRequest(
     NCCityActorDomainCapture Domains,
     Guid CorrelationId,
     Guid? CausationId = null,
-    string AuditSource = "system");
+    string AuditSource = "system",
+    IReadOnlyList<NCPersistentAggregateWrite>? ParticipantWrites = null);
 
 public sealed record NCCityActorDematerializationCommitResult(
     NCCityActorMutationStatus Status,

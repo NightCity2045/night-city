@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Shared._NC.LivingCity.Actors;
+using Content.Shared._NC.LivingCity.Economy;
 using Content.Shared._NC.Persistence.Identity;
 
 namespace Content.Server._NC.LivingCity.Actors.Components;
@@ -23,7 +24,21 @@ public sealed partial class NCCityPersistentItemAdapterComponent : Component
     public string CommodityId = string.Empty;
 
     [DataField]
+    public NCCommodityBatchId CommodityBatchId;
+
+    [DataField]
     public long CommodityUnits;
+}
+
+/// <summary>
+/// Read-only physical projection of an economic weapon assembly. Runtime combat adapters may inspect these stable
+/// part identities, but assembly ownership remains in the economic item aggregates.
+/// </summary>
+[RegisterComponent]
+public sealed partial class NCEconomicAssemblyAdapterComponent : Component
+{
+    [DataField]
+    public List<NCItemId> InstalledPartIds = [];
 }
 
 /// <summary>

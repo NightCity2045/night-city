@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System.Linq;
 using System.Threading.Tasks;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Actors.Domains;
@@ -12,6 +13,7 @@ using Content.Server._NC.LivingCity.Social;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Cognition;
 using Content.Shared._NC.LivingCity.Employment;
+using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 
@@ -27,6 +29,10 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
     [Dependency] private NCEmploymentRegistrySystem _employment = default!;
     [Dependency] private NCPartyFinanceAdapterSystem _finance = default!;
     [Dependency] private NCMemoryRegistrySystem _memory = default!;
+    [Dependency] private NCSocialProfileRegistrySystem _socialProfiles = default!;
+    [Dependency] private NCRelationshipRegistrySystem _relationships = default!;
+    [Dependency] private NCRumorRegistrySystem _rumors = default!;
+    [Dependency] private NCSocialObligationRegistrySystem _obligations = default!;
     [Dependency] private NCCityGroupRegistrySystem _groups = default!;
 
     public async Task<NCCognitionFact[]> CollectAsync(
@@ -43,8 +49,14 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
         var employmentTask = _employment.FindCurrentByEmployeeAsync(party);
         var accountTask = _finance.GetPrimaryAccountAsync(party);
         var memoryTask = _memory.GetAsync(party);
+        var socialProfileTask = _socialProfiles.GetAsync(actorId);
+        var socialLimit = Math.Min(32, Math.Max(1, maximumFacts / 8));
+        var relationshipTask = _relationships.GetForObserverAsync(party, socialLimit);
+        var rumorTask = _rumors.GetKnownAsync(party, NCMemoryPrivacy.Secret, socialLimit);
+        var obligationTask = _obligations.GetForPartyAsync(party, socialLimit);
         var membershipTask = _groups.GetMembershipAsync(actorId);
-        await Task.WhenAll(healthTask, inventoryTask, employmentTask, accountTask, memoryTask, membershipTask);
+        await Task.WhenAll(healthTask, inventoryTask, employmentTask, accountTask, memoryTask, socialProfileTask,
+            relationshipTask, rumorTask, obligationTask, membershipTask);
 
         var sink = new NCCognitionFactSink(maximumFacts);
         var root = actor.Snapshot;
@@ -110,6 +122,72 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
             Add(sink, "social.memory-count", NCCognitionDomain.Social, "memory-book", memories.AggregateVersion,
                 NCCognitionValue.FromNumber(memories.Snapshot.Episodes.Count + memories.Snapshot.Summaries.Count),
                 now, lifetime);
+        }
+
+        var socialProfile = await socialProfileTask;
+        if (socialProfile != null)
+        {
+            var profile = socialProfile.Snapshot;
+            Add(sink, "personality.risk-tolerance", NCCognitionDomain.Social, "social-profile",
+                socialProfile.AggregateVersion, NCCognitionValue.FromNumber(profile.Personality.RiskTolerance / 1000f),
+                now, lifetime);
+            Add(sink, "personality.aggression", NCCognitionDomain.Social, "social-profile",
+                socialProfile.AggregateVersion, NCCognitionValue.FromNumber(profile.Personality.Aggression / 1000f),
+                now, lifetime);
+            Add(sink, "personality.empathy", NCCognitionDomain.Social, "social-profile",
+                socialProfile.AggregateVersion, NCCognitionValue.FromNumber(profile.Personality.Empathy / 1000f),
+                now, lifetime);
+            Add(sink, "personality.secrecy", NCCognitionDomain.Social, "social-profile",
+                socialProfile.AggregateVersion, NCCognitionValue.FromNumber(profile.Personality.Secrecy / 1000f),
+                now, lifetime);
+            Add(sink, "values.survival", NCCognitionDomain.Social, "social-profile",
+                socialProfile.AggregateVersion, NCCognitionValue.FromNumber(profile.Values.Survival / 1000f),
+                now, lifetime);
+            foreach (var (capability, modifier) in profile.CapabilityUtilityModifiers)
+            {
+                Add(sink, $"social.utility-modifier.{capability}", NCCognitionDomain.Social, "social-profile",
+                    socialProfile.AggregateVersion, NCCognitionValue.FromNumber(modifier), now, lifetime);
+            }
+        }
+
+        foreach (var relationship in await relationshipTask)
+        {
+            var value = relationship.Snapshot;
+            var subject = new NCCognitionSubjectRef(NCCognitionReferenceKind.Party, value.Subject.ToString());
+            var source = $"relationship:{value.RelationshipId}";
+            Add(sink, "social.relationship.trust", NCCognitionDomain.Social, source,
+                relationship.AggregateVersion, NCCognitionValue.FromNumber(value.Trust / 1000f), now, lifetime,
+                subject);
+            Add(sink, "social.relationship.hostility", NCCognitionDomain.Social, source,
+                relationship.AggregateVersion, NCCognitionValue.FromNumber(value.Hostility / 1000f), now, lifetime,
+                subject);
+            Add(sink, "social.relationship.debt", NCCognitionDomain.Social, source,
+                relationship.AggregateVersion, NCCognitionValue.FromNumber(value.Debt), now, lifetime, subject);
+            Add(sink, "social.relationship.obligation", NCCognitionDomain.Social, source,
+                relationship.AggregateVersion, NCCognitionValue.FromNumber(value.Obligation / 1000f), now, lifetime,
+                subject);
+        }
+
+        foreach (var rumor in await rumorTask)
+        {
+            var subject = new NCCognitionSubjectRef(NCCognitionReferenceKind.StableKey, rumor.Subject.StableId);
+            Add(sink, $"social.rumor.{rumor.TopicKey}", NCCognitionDomain.Social,
+                $"rumor:{rumor.KnowledgeId}", rumor.DataVersion,
+                NCCognitionValue.FromNumber(rumor.Confidence / 1000f), now, lifetime, subject);
+        }
+
+        var obligations = await obligationTask;
+        Add(sink, "social.obligation.active-count", NCCognitionDomain.Social, "social-obligation-index",
+            obligations.Count == 0 ? 0 : obligations.Max(value => value.AggregateVersion),
+            NCCognitionValue.FromNumber(obligations.Count), now, lifetime);
+        foreach (var obligation in obligations)
+        {
+            var value = obligation.Snapshot;
+            var counterparty = value.Debtor == party ? value.Creditor : value.Debtor;
+            Add(sink, value.Debtor == party ? "social.obligation.owed" : "social.obligation.expected",
+                NCCognitionDomain.Social, $"social-obligation:{value.ObligationId}", obligation.AggregateVersion,
+                NCCognitionValue.FromBoolean(true), now, lifetime,
+                new NCCognitionSubjectRef(NCCognitionReferenceKind.Party, counterparty.ToString()));
         }
 
         var membership = await membershipTask;

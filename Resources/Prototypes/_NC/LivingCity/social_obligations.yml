@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncSocialObligationPolicy
+  id: Default
+  maximumObligationsPerParty: 256
+  maximumQueryCount: 50
+  maximumQuantity: 1000000000
+  maximumDueTime: 8760h
+  consequences:
+  - kind: Promise
+    status: Active
+    relationshipEffect: PromiseMade
+    memoryEvent: MemoryObligationCreated
+  - kind: Promise
+    status: Fulfilled
+    relationshipEffect: KeptPromise
+    memoryEvent: MemoryObligationFulfilled
+  - kind: Promise
+    status: Breached
+    relationshipEffect: BrokePromise
+    memoryEvent: MemoryBetrayal
+  - kind: Favor
+    status: Active
+    relationshipEffect: FavorPromised
+    memoryEvent: MemoryObligationCreated
+  - kind: Favor
+    status: Fulfilled
+    relationshipEffect: KeptPromise
+    memoryEvent: MemoryObligationFulfilled
+  - kind: Favor
+    status: Breached
+    relationshipEffect: BrokePromise
+    memoryEvent: MemoryBetrayal
+  - kind: Debt
+    status: Active
+    relationshipEffect: DebtAcknowledged
+    memoryEvent: MemoryObligationCreated
+  - kind: Debt
+    status: Fulfilled
+    relationshipEffect: DebtSettled
+    memoryEvent: MemoryObligationFulfilled
+  - kind: Debt
+    status: Breached
+    relationshipEffect: DebtDefaulted
+    memoryEvent: MemoryBetrayal
+

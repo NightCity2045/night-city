@@ -690,6 +690,38 @@ public sealed partial class NCCityGroupRegistrySystem : EntitySystem
             });
     }
 
+    /// <summary>
+    /// Changes only the strategic group route. Member actor locations are advanced by the coordinating domain so
+    /// physicalization continues to verify that every member is co-located with the aggregate.
+    /// </summary>
+    public async Task<NCCityGroupMutationResult> SetRouteAsync(NCCityGroupSetRouteRequest request)
+    {
+        if (!TryValidateMutationMetadata(request.GroupId, request.CommandId, request.ExpectedGroupVersion,
+                request.CorrelationId, request.AuditSource, out var error) || !request.CurrentZone.IsValid ||
+            !Enum.IsDefined(request.Status) || request.Status is NCCityGroupStatus.Disbanded or
+                NCCityGroupStatus.Archived || request.DestinationZone.IsValid !=
+                (request.TravelMode != NCCityTravelMode.None && request.ExpectedArrivalAt != null))
+            return Reject(request.GroupId, NCCityGroupMutationStatus.Rejected,
+                error ?? "The group route is invalid.");
+
+        return await MutateSingleGroup(request.GroupId, request.CommandId, request.ExpectedGroupVersion,
+            request.CorrelationId, request.CausationId, request.AuditSource, "living-city.group.set-route",
+            "living-city.group.route-changed", (current, now, eventId) =>
+            {
+                if (current.Status is NCCityGroupStatus.Disbanded or NCCityGroupStatus.Archived ||
+                    request.ExpectedArrivalAt is { } arrival && arrival <= now)
+                    return null;
+                return current with
+                {
+                    Route = new NCCityGroupRoute(request.CurrentZone, request.DestinationZone,
+                        request.TravelMode, request.ExpectedArrivalAt),
+                    Status = request.Status,
+                    DataVersion = checked(current.DataVersion + 1),
+                    LastAppliedEventId = eventId,
+                };
+            });
+    }
+
     public static NCGroupId CreateDeterministicId(Guid groupScopeId, string stableLocalId)
     {
         ArgumentOutOfRangeException.ThrowIfEqual(groupScopeId, Guid.Empty);

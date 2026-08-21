@@ -142,6 +142,9 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
                     _menu.SetMapSource(transform.GridUid);
                 _menu.UpdateMapData(mapUpdate);
                 break;
+            case NCAgentCityUpdateMessage cityUpdate:
+                _menu.UpdateCityData(cityUpdate);
+                break;
         }
     }
 

@@ -564,6 +564,30 @@ public sealed partial class NCLivingCityAdminTab : Control
         NCLivingCityAdminInspectKind.Relationship => Loc.GetString("nc-living-city-admin-kind-relationship"),
         NCLivingCityAdminInspectKind.Reputation => Loc.GetString("nc-living-city-admin-kind-reputation"),
         NCLivingCityAdminInspectKind.Memory => Loc.GetString("nc-living-city-admin-kind-memory"),
+        NCLivingCityAdminInspectKind.SocialProfile => Loc.GetString("nc-living-city-admin-kind-social-profile"),
+        NCLivingCityAdminInspectKind.RumorBook => Loc.GetString("nc-living-city-admin-kind-rumor-book"),
+        NCLivingCityAdminInspectKind.SocialObligation =>
+            Loc.GetString("nc-living-city-admin-kind-social-obligation"),
+        NCLivingCityAdminInspectKind.Conversation => Loc.GetString("nc-living-city-admin-kind-conversation"),
+        NCLivingCityAdminInspectKind.EconomicStockNode =>
+            Loc.GetString("nc-living-city-admin-kind-economic-stock-node"),
+        NCLivingCityAdminInspectKind.EconomicCommodityBatch =>
+            Loc.GetString("nc-living-city-admin-kind-economic-commodity-batch"),
+        NCLivingCityAdminInspectKind.EconomicItem => Loc.GetString("nc-living-city-admin-kind-economic-item"),
+        NCLivingCityAdminInspectKind.EconomicQuote => Loc.GetString("nc-living-city-admin-kind-economic-quote"),
+        NCLivingCityAdminInspectKind.EconomicReservation =>
+            Loc.GetString("nc-living-city-admin-kind-economic-reservation"),
+        NCLivingCityAdminInspectKind.EconomicTransfer =>
+            Loc.GetString("nc-living-city-admin-kind-economic-transfer"),
+        NCLivingCityAdminInspectKind.EconomicFulfillment =>
+            Loc.GetString("nc-living-city-admin-kind-economic-fulfillment"),
+        NCLivingCityAdminInspectKind.EconomicReconciliation =>
+            Loc.GetString("nc-living-city-admin-kind-economic-reconciliation"),
+        NCLivingCityAdminInspectKind.MarketListing => Loc.GetString("nc-living-city-admin-kind-market-listing"),
+        NCLivingCityAdminInspectKind.MarketRequest => Loc.GetString("nc-living-city-admin-kind-market-request"),
+        NCLivingCityAdminInspectKind.Business => Loc.GetString("nc-living-city-admin-kind-business"),
+        NCLivingCityAdminInspectKind.ProductionJob => Loc.GetString("nc-living-city-admin-kind-production-job"),
+        NCLivingCityAdminInspectKind.Shipment => Loc.GetString("nc-living-city-admin-kind-shipment"),
         NCLivingCityAdminInspectKind.Property => Loc.GetString("nc-living-city-admin-kind-property"),
         NCLivingCityAdminInspectKind.PropertyContents =>
             Loc.GetString("nc-living-city-admin-kind-property-contents"),

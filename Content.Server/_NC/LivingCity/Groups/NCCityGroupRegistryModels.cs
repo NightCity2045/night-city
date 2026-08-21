@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Shared._NC.City.Zones;
+using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.LivingCity.Groups;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
@@ -111,6 +112,19 @@ public sealed record NCCityGroupSetDirectiveRequest(
     string CurrentOrder,
     string MissionReference,
     Guid? IncidentId,
+    Guid CorrelationId,
+    Guid? CausationId = null,
+    string AuditSource = "system");
+
+public sealed record NCCityGroupSetRouteRequest(
+    Guid CommandId,
+    NCGroupId GroupId,
+    long ExpectedGroupVersion,
+    NCZoneId CurrentZone,
+    NCZoneId DestinationZone,
+    NCCityTravelMode TravelMode,
+    NCActiveWorldTime? ExpectedArrivalAt,
+    NCCityGroupStatus Status,
     Guid CorrelationId,
     Guid? CausationId = null,
     string AuditSource = "system");

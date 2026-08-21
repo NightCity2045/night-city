@@ -18,6 +18,7 @@ using Content.Server._NC.LivingCity.Actors.Domains;
 using Content.Server._NC.LivingCity.Cognition;
 using Content.Server._NC.LivingCity.Groups;
 using Content.Server._NC.LivingCity.Population;
+using Content.Server._NC.LivingCity.Social;
 using Content.Server._NC.LivingCity.Time;
 using Content.Server._NC.Persistence.Outbox;
 using Content.Shared._NC.City.Connectivity;
@@ -26,6 +27,7 @@ using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Groups;
 using Content.Shared._NC.LivingCity.Population;
+using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
@@ -191,6 +193,7 @@ public sealed class NCCityActorRegistrySystemTest : GameTest
         var clock = server.System<NCActiveWorldTimeSystem>();
         var registry = server.System<NCCityActorRegistrySystem>();
         var cognitionRegistry = server.System<NCCognitionRegistrySystem>();
+        var socialProfiles = server.System<NCSocialProfileRegistrySystem>();
         var runtime = server.System<NCCityActorRuntimeIndexSystem>();
 
         await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(
@@ -217,6 +220,7 @@ public sealed class NCCityActorRegistrySystemTest : GameTest
         var duplicate = await registry.CreateAsync(create);
         var cognition = await cognitionRegistry.GetCognitionAsync(expectedId, true);
         var beliefs = await cognitionRegistry.GetBeliefsAsync(expectedId, true);
+        var socialProfile = await socialProfiles.GetAsync(expectedId, true);
 
         Assert.Multiple(() =>
         {
@@ -237,6 +241,10 @@ public sealed class NCCityActorRegistrySystemTest : GameTest
             Assert.That(cognition?.AggregateVersion, Is.GreaterThanOrEqualTo(1));
             Assert.That(beliefs?.Snapshot.ActorId, Is.EqualTo(expectedId));
             Assert.That(beliefs?.AggregateVersion, Is.GreaterThanOrEqualTo(1));
+            Assert.That(socialProfile?.Snapshot.ActorId, Is.EqualTo(expectedId));
+            Assert.That(socialProfile?.Snapshot.Speech.Languages,
+                Is.EquivalentTo(new[] { NCLanguage.Russian, NCLanguage.English }));
+            Assert.That(socialProfile?.AggregateVersion, Is.EqualTo(1));
         });
 
         var deathCommand = new NCCityActorStatusMutationRequest(

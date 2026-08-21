@@ -10,6 +10,7 @@ using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Admin;
 using Content.Shared._NC.LivingCity.Police;
+using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.Persistence.Identity;
 
 namespace Content.Server._NC.LivingCity.Admin;
@@ -38,6 +39,23 @@ public sealed partial class NCLivingCityAdminSystem
         NCLivingCityAdminInspectKind.Relationship => InspectRelationshipAsync(request.Target, request.SecondaryTarget),
         NCLivingCityAdminInspectKind.Reputation => InspectReputationAsync(request.Target),
         NCLivingCityAdminInspectKind.Memory => InspectMemoryAsync(request.Target),
+        NCLivingCityAdminInspectKind.SocialProfile => InspectSocialProfileAsync(request.Target),
+        NCLivingCityAdminInspectKind.RumorBook => InspectRumorBookAsync(request.Target),
+        NCLivingCityAdminInspectKind.SocialObligation => InspectSocialObligationAsync(request.Target),
+        NCLivingCityAdminInspectKind.Conversation => Task.FromResult(InspectConversation(request.Target)),
+        NCLivingCityAdminInspectKind.EconomicStockNode => InspectEconomicStockNodeAsync(request.Target),
+        NCLivingCityAdminInspectKind.EconomicCommodityBatch => InspectEconomicCommodityBatchAsync(request.Target),
+        NCLivingCityAdminInspectKind.EconomicItem => InspectEconomicItemAsync(request.Target),
+        NCLivingCityAdminInspectKind.EconomicQuote => InspectEconomicQuoteAsync(request.Target),
+        NCLivingCityAdminInspectKind.EconomicReservation => InspectEconomicReservationAsync(request.Target),
+        NCLivingCityAdminInspectKind.EconomicTransfer => InspectEconomicTransferAsync(request.Target),
+        NCLivingCityAdminInspectKind.EconomicFulfillment => InspectEconomicFulfillmentAsync(request.Target),
+        NCLivingCityAdminInspectKind.EconomicReconciliation => InspectEconomicReconciliationAsync(request.Target),
+        NCLivingCityAdminInspectKind.MarketListing => InspectMarketListingAsync(request.Target),
+        NCLivingCityAdminInspectKind.MarketRequest => InspectMarketRequestAsync(request.Target),
+        NCLivingCityAdminInspectKind.Business => InspectBusinessAsync(request.Target),
+        NCLivingCityAdminInspectKind.ProductionJob => InspectProductionJobAsync(request.Target),
+        NCLivingCityAdminInspectKind.Shipment => InspectShipmentAsync(request.Target),
         NCLivingCityAdminInspectKind.Property => InspectPropertyAsync(request.Target),
         NCLivingCityAdminInspectKind.PropertyContents => InspectPropertyContentsAsync(request.Target),
         NCLivingCityAdminInspectKind.PoliceFine => InspectPoliceFineAsync(request.Target),
@@ -47,6 +65,14 @@ public sealed partial class NCLivingCityAdminSystem
             Task.FromResult(InspectCityConnectivityZone(request.Target)),
         NCLivingCityAdminInspectKind.CityConnectivityValidation =>
             Task.FromResult(InspectCityConnectivityValidation()),
+        NCLivingCityAdminInspectKind.Incident => InspectIncidentAsync(request.Target),
+        NCLivingCityAdminInspectKind.CityService => InspectCityServiceAsync(request.Target),
+        NCLivingCityAdminInspectKind.ServiceDispatch => InspectServiceDispatchAsync(request.Target),
+        NCLivingCityAdminInspectKind.Faction => InspectFactionAsync(request.Target),
+        NCLivingCityAdminInspectKind.DistrictSafety => Task.FromResult(InspectDistrictSafety(request.Target)),
+        NCLivingCityAdminInspectKind.CityNews => InspectCityNewsAsync(request.Target),
+        NCLivingCityAdminInspectKind.Estate => InspectEstateAsync(request.Target),
+        NCLivingCityAdminInspectKind.NeuralRuntime => Task.FromResult(InspectNeuralRuntime()),
         _ => Task.FromResult(Fail("unsupported-inspection-kind")),
     };
 
@@ -169,6 +195,7 @@ public sealed partial class NCLivingCityAdminSystem
             fields.Add("inventory", "documents", inventory.Snapshot.Summary.Documents.Length);
             fields.Add("inventory", "credentials", inventory.Snapshot.Summary.Credentials.Length);
             fields.Add("inventory", "commodities", inventory.Snapshot.Summary.Commodities.Length);
+            fields.Add("inventory", "installed-cyberware", inventory.Snapshot.Summary.InstalledCyberware.Length);
             fields.Add("inventory", "equipped-loadout", inventory.Snapshot.Summary.EquippedLoadoutId);
         }
         return Ok(fields);
@@ -699,6 +726,122 @@ public sealed partial class NCLivingCityAdminSystem
             fields.Add(section, "privacy", summary.Privacy);
             fields.Add(section, "expires-at", summary.ExpiresAt.Elapsed);
             fields.Add(section, "recalls", summary.RecallCount);
+        }
+        return Ok(fields);
+    }
+
+    private async Task<InspectionResult> InspectSocialProfileAsync(string target)
+    {
+        if (!Guid.TryParse(target.Trim(), out var value) || value == Guid.Empty)
+            return Fail("invalid-actor-id");
+        var profile = await _socialProfiles.GetAsync(new NCActorId(value), true);
+        if (profile == null)
+            return Fail("social-profile-not-found");
+        var snapshot = profile.Snapshot;
+        var fields = new FieldBuilder();
+        fields.Add("social-profile", "actor-id", snapshot.ActorId);
+        fields.Add("social-profile", "personality-profile", snapshot.PersonalityProfileId);
+        fields.Add("social-profile", "values-profile", snapshot.ValuesProfileId);
+        fields.Add("social-profile", "preference-profile", snapshot.PreferenceProfileId);
+        fields.Add("social-profile", "speech-profile", snapshot.SpeechProfileId);
+        fields.Add("personality", "temperament", snapshot.Personality.Temperament);
+        fields.Add("personality", "risk-tolerance", snapshot.Personality.RiskTolerance);
+        fields.Add("personality", "aggression", snapshot.Personality.Aggression);
+        fields.Add("personality", "empathy", snapshot.Personality.Empathy);
+        fields.Add("personality", "secrecy", snapshot.Personality.Secrecy);
+        fields.Add("personality", "loyalty", snapshot.Personality.Loyalty);
+        fields.Add("speech", "language", snapshot.Speech.PreferredLanguage);
+        fields.Add("speech", "locale", snapshot.Speech.PreferredLocale);
+        fields.Add("speech", "languages", string.Join(",", snapshot.Speech.Languages));
+        fields.Add("speech", "forbidden-topics", string.Join(",", snapshot.Speech.ForbiddenTopics));
+        foreach (var modifier in snapshot.CapabilityUtilityModifiers.Take(64))
+            fields.Add("utility", modifier.Key, modifier.Value);
+        return Ok(fields);
+    }
+
+    private async Task<InspectionResult> InspectRumorBookAsync(string target)
+    {
+        if (!NCPartyRef.TryParse(target.Trim(), out var owner))
+            return Fail("invalid-rumor-owner-party");
+        var book = await _rumors.GetAsync(owner, true);
+        if (book == null)
+            return Fail("rumor-book-not-found");
+        var fields = new FieldBuilder();
+        fields.Add("rumor-book", "owner", book.Snapshot.Owner);
+        fields.Add("rumor-book", "knowledge", book.Snapshot.Knowledge.Count);
+        fields.Add("rumor-book", "total-learned", book.Snapshot.TotalLearned);
+        fields.Add("rumor-book", "total-propagated", book.Snapshot.TotalPropagated);
+        fields.Add("rumor-book", "total-forgotten", book.Snapshot.TotalForgotten);
+        fields.Add("rumor-book", "aggregate-version", book.AggregateVersion);
+        foreach (var rumor in book.Snapshot.Knowledge.Take(24))
+        {
+            var section = $"rumor-{rumor.KnowledgeId}";
+            fields.Add(section, "information-id", rumor.InformationId);
+            fields.Add(section, "topic", rumor.TopicKey);
+            fields.Add(section, "subject", $"{rumor.Subject.Kind}:{rumor.Subject.StableId}");
+            fields.Add(section, "originator", rumor.Originator);
+            fields.Add(section, "immediate-source", rumor.ImmediateSource);
+            fields.Add(section, "source-events", string.Join(",", rumor.SourceWorldEventIds));
+            fields.Add(section, "confidence", rumor.Confidence);
+            fields.Add(section, "distortion", rumor.Distortion);
+            fields.Add(section, "hops", rumor.HopCount);
+            fields.Add(section, "privacy", rumor.Privacy);
+            fields.Add(section, "expires-at", rumor.ExpiresAt?.Elapsed);
+        }
+        return Ok(fields);
+    }
+
+    private async Task<InspectionResult> InspectSocialObligationAsync(string target)
+    {
+        if (!Guid.TryParse(target.Trim(), out var value) || value == Guid.Empty)
+            return Fail("invalid-social-obligation-id");
+        var obligation = await _socialObligations.GetAsync(new NCSocialObligationId(value), true);
+        if (obligation == null)
+            return Fail("social-obligation-not-found");
+        var snapshot = obligation.Snapshot;
+        var fields = new FieldBuilder();
+        fields.Add("obligation", "obligation-id", snapshot.ObligationId);
+        fields.Add("obligation", "kind", snapshot.Kind);
+        fields.Add("obligation", "status", snapshot.Status);
+        fields.Add("obligation", "debtor", snapshot.Debtor);
+        fields.Add("obligation", "creditor", snapshot.Creditor);
+        fields.Add("obligation", "purpose", snapshot.Terms.PurposeKey);
+        fields.Add("obligation", "quantity", snapshot.Terms.Quantity);
+        fields.Add("obligation", "unit", snapshot.Terms.UnitKey);
+        fields.Add("obligation", "privacy", snapshot.Privacy);
+        fields.Add("obligation", "created-at", snapshot.CreatedAt.Elapsed);
+        fields.Add("obligation", "due-at", snapshot.DueAt?.Elapsed);
+        fields.Add("obligation", "resolved-at", snapshot.ResolvedAt?.Elapsed);
+        fields.Add("obligation", "aggregate-version", obligation.AggregateVersion);
+        return Ok(fields);
+    }
+
+    private InspectionResult InspectConversation(string target)
+    {
+        if (!Guid.TryParse(target.Trim(), out var value) || value == Guid.Empty ||
+            !_conversations.TryGet(new NCConversationSessionId(value), out var session))
+            return Fail("conversation-not-found");
+        var fields = new FieldBuilder();
+        fields.Add("conversation", "session-id", session.SessionId);
+        fields.Add("conversation", "participants", string.Join(",", session.Participants));
+        fields.Add("conversation", "channel", session.Channel);
+        fields.Add("conversation", "location", $"{session.LocationContext.Kind}:{session.LocationContext.StableId}");
+        fields.Add("conversation", "status", session.Status);
+        fields.Add("conversation", "version", session.ConversationVersion);
+        fields.Add("conversation", "language", session.Language);
+        fields.Add("conversation", "locale", session.Locale);
+        fields.Add("conversation", "maximum-disclosure", session.MaximumDisclosure);
+        fields.Add("conversation", "topics", string.Join(",", session.CurrentTopicKeys));
+        fields.Add("conversation", "turns", session.Turns.Count);
+        fields.Add("conversation", "end-reason", session.EndReason);
+        foreach (var turn in session.Turns.Take(32))
+        {
+            var section = $"turn-{turn.Sequence}";
+            fields.Add(section, "speaker", turn.Speaker);
+            fields.Add(section, "act", turn.Act);
+            fields.Add(section, "semantic-key", turn.SemanticKey);
+            fields.Add(section, "external-reference", turn.ExternalReference);
+            fields.Add(section, "at", turn.At.Elapsed);
         }
         return Ok(fields);
     }

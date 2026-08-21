@@ -44,3 +44,34 @@
   trustDelta: -160
   respectDelta: -80
   hostilityDelta: 70
+
+- type: ncRelationshipEffect
+  id: PromiseMade
+  trustDelta: 20
+  obligationDelta: 100
+
+- type: ncRelationshipEffect
+  id: FavorPromised
+  trustDelta: 10
+  debtDelta: -100
+  obligationDelta: 100
+
+- type: ncRelationshipEffect
+  id: DebtAcknowledged
+  respectDelta: 10
+  debtDelta: -100
+  obligationDelta: 100
+
+- type: ncRelationshipEffect
+  id: DebtSettled
+  trustDelta: 80
+  respectDelta: 50
+  debtDelta: 100
+  obligationDelta: -100
+
+- type: ncRelationshipEffect
+  id: DebtDefaulted
+  trustDelta: -180
+  respectDelta: -100
+  hostilityDelta: 100
+  obligationDelta: -50

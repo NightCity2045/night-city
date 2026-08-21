@@ -17,6 +17,22 @@ public enum NCAgentApp : byte
     Calls,
     CitiNet,
     Map,
+    City,
+}
+
+[Serializable, NetSerializable]
+public enum NCAgentCityArea : byte { Market, Property, Services, Fixer, Shipments, Business, Obligations, News }
+
+[Serializable, NetSerializable]
+public sealed record NCAgentCityEntry(NCAgentCityArea Area, string Id, string Title, string Details,
+    long Version, bool ActionAvailable);
+
+[Serializable, NetSerializable]
+public sealed class NCAgentCityUpdateMessage(List<NCAgentCityEntry> entries, string notice)
+    : BoundUserInterfaceMessage
+{
+    public readonly List<NCAgentCityEntry> Entries = entries;
+    public readonly string Notice = notice;
 }
 
 [Serializable, NetSerializable]

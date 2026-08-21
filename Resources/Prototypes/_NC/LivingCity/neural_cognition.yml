@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncNeuralPolicy
+  id: Default
+  enabled: false
+  endpoint: http://neural-cognition:8080/v1/cognition
+  maximumQueued: 512
+  maximumConcurrent: 4
+  maximumFacts: 64
+  maximumCapabilities: 32
+  maximumTextLength: 512
+  sessionTokenTarget: 200000
+  sessionTokenHardCap: 300000
+  economyThreshold: 150000
+  restrictedThreshold: 240000
+  circuitFailureThreshold: 5
+  requestTimeout: 8s
+  requestLifetime: 20s
+  circuitOpenDuration: 2m
+
+- type: ncNeuralPromptProfile
+  id: NCLivingCityDefault
+  stableKey: living-city-default
+  version: 1
+  model: gpt-5.6-luna
+  allowedKinds: [SocialCognition, StrategicDecision, DialogueContinuation, MemorySummary, NarrativeRender]

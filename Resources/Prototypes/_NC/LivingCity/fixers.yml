@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncFixerPolicy
+  id: Default
+  maximumContacts: 512
+  maximumDealLegs: 16
+  maximumEvidence: 32
+  maximumActiveDealsPerNetwork: 256
+  quoteLifetime: 15m
+  reservationLifetime: 10m
+  maximumBrokerFeeBasisPoints: 2500
+  maximumRiskBasisPoints: 10000
+  maximumLifecycleAdvancesPerTick: 8
+
+- type: ncNightMarketPolicy
+  id: Default
+  maximumVendors: 64
+  minimumAssemblyLead: 10m
+  maximumDuration: 8h
+  maximumIncidents: 64
+
+- type: entity
+  id: NCFixerDeadDrop
+  name: dead drop
+  description: A concealed handoff point whose access is controlled by a persistent fixer deal.
+  components:
+  - type: Transform
+  - type: MetaData
+  - type: NCFixerHandoff
+
+- type: entity
+  id: NCNightMarketVenueController
+  name: night market venue controller
+  description: Round-local controller for a persistent Night Market event.
+  components:
+  - type: Transform
+  - type: MetaData
+  - type: NCNightMarketVenue
+
+- type: entity
+  id: NCNightMarketVendorStall
+  name: night market stall
+  components:
+  - type: Transform
+  - type: MetaData
+  - type: NCNightMarketVendorStall

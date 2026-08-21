@@ -5,6 +5,7 @@
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Cognition;
+using Content.Shared._NC.LivingCity.Social;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.LivingCity.Actors;
@@ -68,4 +69,20 @@ public sealed partial class NCCityActorArchetypePrototype : IPrototype
     [DataField]
     public ProtoId<NCCognitionRoutingProfilePrototype> CognitionRoutingProfile { get; private set; } =
         new("NCDefaultCognitionRouting");
+
+    [DataField]
+    public ProtoId<NCPersonalityProfilePrototype> PersonalityProfile { get; private set; } =
+        new("NCDefaultCivilianPersonality");
+
+    [DataField]
+    public ProtoId<NCValuesProfilePrototype> ValuesProfile { get; private set; } =
+        new("NCDefaultCivilianValues");
+
+    [DataField]
+    public ProtoId<NCSocialPreferenceProfilePrototype> SocialPreferenceProfile { get; private set; } =
+        new("NCDefaultCivilianSocialPreferences");
+
+    [DataField]
+    public ProtoId<NCSpeechProfilePrototype> SpeechProfile { get; private set; } =
+        new("NCDefaultBilingualSpeech");
 }

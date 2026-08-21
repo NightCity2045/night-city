@@ -137,6 +137,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     private int _currentView;
     private NCAgentUpdateMessage? _agentData;
     private NCAgentMapUpdateMessage? _mapData;
+    private NCAgentCityUpdateMessage? _cityData;
     private EntityUid? _mapGridUid;
     private int _shardUsedMemory;
     private int _shardCapacity = 1;
@@ -212,6 +213,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         CallsButton.OnPressed += _ => OpenAgentApp(NCAgentApp.Calls, "CALLS");
         CitiNetButton.OnPressed += _ => OpenAgentApp(NCAgentApp.CitiNet, "CITINET");
         MapButton.OnPressed += _ => OpenAgentApp(NCAgentApp.Map, "CITY MAP");
+        CityButton.OnPressed += _ => OpenAgentApp(NCAgentApp.City, "CITY SERVICES");
         ShardsButton.OnPressed += _ => ToProgramList();
         EjectShardButton.OnPressed += _ =>
         {
@@ -552,6 +554,13 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             RenderAgentApp(NCAgentApp.Map);
     }
 
+    public void UpdateCityData(NCAgentCityUpdateMessage update)
+    {
+        _cityData = update;
+        if (_currentView == BuiltInAppView && _agentData?.ActiveApp == NCAgentApp.City)
+            RenderAgentApp(NCAgentApp.City);
+    }
+
     /// <summary>
     /// Supplies the physical grid whose synchronized NavMap data forms the architectural base layer.
     /// </summary>
@@ -588,9 +597,38 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             case NCAgentApp.Map:
                 BuildMap();
                 break;
+            case NCAgentApp.City:
+                BuildCity();
+                break;
             default:
                 BuiltInContent.AddChild(CreateStatusLabel("SELECT AN APPLICATION", "#77FFF2"));
                 break;
+        }
+    }
+
+    private void BuildCity()
+    {
+        if (_cityData == null)
+        {
+            BuiltInContent.AddChild(CreateMutedLabel("Loading city services..."));
+            return;
+        }
+        if (!string.IsNullOrWhiteSpace(_cityData.Notice))
+            BuiltInContent.AddChild(CreateStatusLabel(_cityData.Notice, "#FFD66B"));
+        foreach (var area in Enum.GetValues<NCAgentCityArea>())
+        {
+            var entries = _cityData.Entries.Where(value => value.Area == area).ToArray();
+            if (entries.Length == 0) continue;
+            BuiltInContent.AddChild(CreateSectionTitle(area.ToString().ToUpperInvariant()));
+            foreach (var entry in entries)
+            {
+                var content = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical,
+                    HorizontalExpand = true, Margin = new Thickness(8, 6) };
+                content.AddChild(CreateStatusLabel(entry.Title, "#D7FFFB"));
+                content.AddChild(CreateMutedLabel(entry.Details));
+                content.AddChild(CreateMutedLabel($"ID {entry.Id} // V{entry.Version}"));
+                BuiltInContent.AddChild(WrapCard(content, "#245C59", "#0C1C22"));
+            }
         }
     }
 
@@ -1599,6 +1637,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             NCAgentApp.Calls => "CALLS",
             NCAgentApp.CitiNet => "CITINET",
             NCAgentApp.Map => "CITY MAP",
+            NCAgentApp.City => "CITY SERVICES",
             _ => "AGENT",
         };
     }

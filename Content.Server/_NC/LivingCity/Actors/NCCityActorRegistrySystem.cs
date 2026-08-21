@@ -15,6 +15,8 @@ using Content.Server.Database;
 using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors.Domains;
 using Content.Server._NC.LivingCity.Cognition;
+using Content.Server._NC.LivingCity.Economy;
+using Content.Server._NC.LivingCity.Social;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Actors;
@@ -52,6 +54,7 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
     [Dependency] private NCZoneSystem _zones = default!;
     [Dependency] private NCCityActorDomainRegistrySystem _domains = default!;
     [Dependency] private NCCognitionRegistrySystem _cognition = default!;
+    [Dependency] private NCSocialProfileRegistrySystem _socialProfiles = default!;
     [Dependency] private ITaskManager _taskManager = default!;
 
     private readonly ConcurrentDictionary<NCActorId, NCCityActorRecord> _cache = [];
@@ -242,6 +245,8 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
         };
         writes.AddRange(_domains.BuildInitialWrites(actorId, time, auditSource));
         writes.AddRange(_cognition.BuildInitialWrites(actorId, archetype, time, auditSource));
+        writes.Add(_socialProfiles.BuildInitialWrite(actorId, archetype, time, auditSource));
+        writes.Add(NCEconomicAssetRegistrySystem.BuildInitialActorStockNodeWrite(actorId, time, auditSource));
 
         var result = await _database.ApplyNCPersistentBatchMutationAsync(new NCPersistentBatchMutationRequest(
             commandId,
@@ -456,6 +461,7 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
                         JsonOptions)),
             };
             writes.AddRange(_domains.BuildCaptureWrites(request.Domains, request.AuditSource));
+            writes.AddRange(request.ParticipantWrites ?? []);
 
             var persistence = await _database.ApplyNCPersistentBatchMutationAsync(
                 new NCPersistentBatchMutationRequest(
@@ -972,6 +978,7 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
             request.Domains.ExpectedHealthVersion < 1 || request.Domains.ExpectedInventoryVersion < 1 ||
             request.Domains.Health.ActorId != request.ActorId ||
             request.Domains.Inventory.ActorId != request.ActorId ||
+            !ValidDematerializationParticipants(request.ParticipantWrites) ||
             !_zones.TryGetZone(request.CurrentZone, out _))
         {
             error = "The actor dematerialization metadata, domain capture, or semantic city zone is invalid.";
@@ -979,6 +986,23 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
         }
 
         return true;
+    }
+
+    private static bool ValidDematerializationParticipants(IReadOnlyList<NCPersistentAggregateWrite>? writes)
+    {
+        if (writes == null)
+            return true;
+        if (writes.Count > 29)
+            return false;
+        var aggregates = new HashSet<(string Type, string Id)>();
+        var events = new HashSet<Guid>();
+        return writes.All(write => write.EventId != Guid.Empty && events.Add(write.EventId) &&
+            !string.IsNullOrWhiteSpace(write.EventType) && !string.IsNullOrWhiteSpace(write.AggregateType) &&
+            !string.IsNullOrWhiteSpace(write.AggregateId) && write.ExpectedAggregateVersion >= 0 &&
+            write.SnapshotFormatVersion >= 1 && !string.IsNullOrWhiteSpace(write.SnapshotPayload) &&
+            !string.IsNullOrWhiteSpace(write.EventPayload) && aggregates.Add((write.AggregateType, write.AggregateId)) &&
+            write.AggregateType is not (AggregateType or NCCityActorDomainRegistrySystem.HealthAggregateType or
+                NCCityActorDomainRegistrySystem.InventoryAggregateType));
     }
 
     private static bool TryValidateMutationMetadata(

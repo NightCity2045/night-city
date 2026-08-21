@@ -184,6 +184,19 @@
   - id: yield-conversation
     action: yield-to-conversation-authority
 
+- type: ncCognitionCapability
+  id: NCCognitionManageFixerDeal
+  domain: Economy
+  taskKind: KnownProcedure
+  preferredPlanner: Htn
+  fallbackPlanner: StateTree
+  baseUtility: 45
+  priority: 600
+  requiredBeliefs: [ fixer.deal-actionable ]
+  procedureSteps:
+  - id: progress-deal
+    action: manage-fixer-deal
+
 - type: ncCognitionCapabilityProfile
   id: NCDefaultCivilianCapabilities
   capabilities:
@@ -195,6 +208,7 @@
   - NCCognitionGroupDirective
   - NCCognitionStrategicFallback
   - NCCognitionConversation
+  - NCCognitionManageFixerDeal
 
 - type: ncCognitionDecisionPolicy
   id: NCDefaultCognitionDecisionPolicy

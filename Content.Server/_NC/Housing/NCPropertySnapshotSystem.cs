@@ -21,6 +21,7 @@ using Content.Shared._NC.City.Zones.Prototypes;
 using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.Housing.Prototypes;
+using Content.Shared._NC.Housing;
 using Content.Shared._NC.LivingCity.Housing;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
@@ -184,6 +185,26 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
         _pendingSave = PersistCapturesAsync(snapshots);
     }
 
+    /// <summary>
+    /// Captures one live property before a mid-round legal unload or renovation. The bounded zone query runs on the
+    /// main thread; only the immutable payload is persisted asynchronously.
+    /// </summary>
+    public async Task<bool> CapturePropertySnapshotAsync(NCPropertyAggregateSnapshot property)
+    {
+        if (!TryCapture(property, out var snapshot, out var error))
+        {
+            Log.Error($"Property {property.PropertyId} snapshot was not captured: {error}");
+            return false;
+        }
+        if (!await _content.UpsertAsync(snapshot, "housing-live-content-capture"))
+            return false;
+        var persisted = await _content.GetAsync(property.PropertyId, true);
+        if (persisted?.Snapshot.Present != true)
+            return false;
+        _snapshots[property.PropertyId] = persisted.Snapshot;
+        return true;
+    }
+
     public bool HasResidentItems(NCPropertyAggregateSnapshot property)
     {
         if (IsActiveDeployment(property.ActiveDeploymentId))
@@ -324,6 +345,9 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
         var rootCount = 0;
         var entityCount = 0;
         var residentCount = 0;
+        var fixtureCount = 0;
+        var includedCount = 0;
+        var personalCount = 0;
         _capturing = true;
         try
         {
@@ -339,7 +363,8 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
 
                 _graph.Clear();
                 foreach (var root in _roots)
-                    CollectSerializableTree(root, property.PropertyId, _graph, ref residentCount);
+                    CollectSerializableTree(root, property.PropertyId, _graph, ref residentCount,
+                        ref fixtureCount, ref includedCount, ref personalCount);
                 entityCount += _graph.Count;
                 if (entityCount > policy.MaxTotalEntities)
                 {
@@ -393,6 +418,9 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
             payload,
             entityCount,
             residentCount,
+            fixtureCount,
+            includedCount,
+            personalCount,
             default,
             0,
             Guid.Empty);
@@ -431,7 +459,9 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
         {
             if (!Exists(uid) || IsExcludedSubtree(uid))
                 continue;
-            if (HasComp<NCPropertyResidentItemComponent>(uid) || !HasComp<NCZoneDeploymentComponent>(uid))
+            if ((TryComp<NCPropertyResidentItemComponent>(uid, out var resident) &&
+                 resident.AssetClass == NCPropertyAssetClass.PersonalProperty) ||
+                !HasComp<NCZoneDeploymentComponent>(uid))
                 return true;
 
             var children = Transform(uid).ChildEnumerator;
@@ -449,7 +479,8 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
         if (!Exists(uid) || IsExcludedSubtree(uid))
             return;
 
-        var residentContent = HasComp<NCPropertyResidentItemComponent>(uid) ||
+        var residentContent = (TryComp<NCPropertyResidentItemComponent>(uid, out var resident) &&
+                               resident.AssetClass == NCPropertyAssetClass.PersonalProperty) ||
                               !HasComp<NCZoneDeploymentComponent>(uid);
         if (residentContent && !ancestorConfiscated)
         {
@@ -466,7 +497,10 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
         EntityUid root,
         NCApartmentId propertyId,
         HashSet<EntityUid> result,
-        ref int residentCount)
+        ref int residentCount,
+        ref int fixtureCount,
+        ref int includedCount,
+        ref int personalCount)
     {
         if (!Exists(root) || IsExcludedSubtree(root))
             return;
@@ -478,11 +512,21 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
             resident.PropertyId = propertyId.ZoneId;
         }
         if (HasComp<NCPropertyResidentItemComponent>(root))
+        {
             residentCount++;
+            var classification = Comp<NCPropertyResidentItemComponent>(root).AssetClass;
+            if (classification == NCPropertyAssetClass.IncludedAsset)
+                includedCount++;
+            else
+                personalCount++;
+        }
+        else
+            fixtureCount++;
 
         var children = Transform(root).ChildEnumerator;
         while (children.MoveNext(out var child))
-            CollectSerializableTree(child, propertyId, result, ref residentCount);
+            CollectSerializableTree(child, propertyId, result, ref residentCount, ref fixtureCount,
+                ref includedCount, ref personalCount);
     }
 
     private void CollectFloorRoots(NCApartmentId propertyId, FloorContext floor, bool markResidents)

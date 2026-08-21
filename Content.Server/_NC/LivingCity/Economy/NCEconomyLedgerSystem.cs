@@ -32,7 +32,9 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
     private const int MaximumReferenceLength = 256;
     private const int MaximumAuditSourceLength = 128;
     private const int MaximumLegs = 16;
-    private const int MaximumParticipantWrites = 8;
+    // A purchase may include a bounded weapon parent plus up to eighteen installed part aggregates, stock indexes,
+    // quote and reservation. Account and transaction writes still keep the complete DB batch below its hard limit.
+    private const int MaximumParticipantWrites = 24;
     private const int MaximumParticipantOutboxMessages = 16;
     private const int MutationGateStripeCount = 128;
 

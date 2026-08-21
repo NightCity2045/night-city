@@ -28,6 +28,12 @@ public sealed record NCPropertyAccessGrantSnapshot(
     NCActiveWorldTime IssuedAt,
     NCActiveWorldTime? ValidUntil);
 
+public sealed record NCPropertyStorageBudget(
+    int MaximumFixtureItems,
+    int MaximumIncludedAssets,
+    int MaximumPersonalItems,
+    int MaximumMaterializedEntities);
+
 /// <summary>
 /// Common property authority. Static geography stays mapper-owned in city zones; this aggregate owns mutable tenure,
 /// occupancy, access revision, interior selection and settlement provenance.
@@ -52,6 +58,16 @@ public sealed record NCPropertyAggregateSnapshot(
     string InteriorState,
     NCActiveWorldTime? NextRentDueAt,
     NCTransactionId LastSettlementTransactionId,
+    NCPropertyLegalState LegalState,
+    NCPropertyStorageBudget StorageBudget,
+    NCItemId[] FixtureItemIds,
+    NCItemId[] IncludedAssetIds,
+    string BlueprintSourceId,
+    int RenovationRevision,
+    long SecurityDepositAmount,
+    NCAccountId SecurityDepositAccountId,
+    NCActiveWorldTime? DelinquentSince,
+    NCActiveWorldTime? EvictionAt,
     NCActiveWorldTime ChangedAt,
     int DataVersion,
     Guid LastAppliedEventId);

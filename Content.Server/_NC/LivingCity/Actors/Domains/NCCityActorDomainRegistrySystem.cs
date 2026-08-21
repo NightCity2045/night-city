@@ -107,7 +107,7 @@ public sealed partial class NCCityActorDomainRegistrySystem : EntitySystem
             healthEventId);
         var inventory = new NCCityActorInventorySnapshot(
             actorId,
-            new NCCityActorInventorySummary([], [], [], [], [], string.Empty),
+            new NCCityActorInventorySummary([], [], [], [], [], [], string.Empty),
             0,
             now,
             1,
@@ -544,7 +544,8 @@ public sealed partial class NCCityActorDomainRegistrySystem : EntitySystem
             return null;
         try
         {
-            var snapshot = JsonSerializer.Deserialize<NCCityActorInventorySnapshot>(stored.Payload, JsonOptions);
+            var snapshot = NormalizeInventory(
+                JsonSerializer.Deserialize<NCCityActorInventorySnapshot>(stored.Payload, JsonOptions));
             return ValidInventory(snapshot, actorId)
                 ? new NCCityActorInventoryRecord(snapshot!, stored.AggregateVersion, stored.SessionEpoch,
                     stored.ActiveWorldTime)
@@ -563,6 +564,8 @@ public sealed partial class NCCityActorDomainRegistrySystem : EntitySystem
         try
         {
             var receipt = JsonSerializer.Deserialize<DomainReceipt>(payload, JsonOptions);
+            if (receipt != null)
+                receipt = receipt with { Inventory = NormalizeInventory(receipt.Inventory)! };
             return receipt != null && receipt.HealthVersion >= 1 && receipt.InventoryVersion >= 1 &&
                    receipt.Health.ActorId == receipt.Inventory.ActorId &&
                    ValidHealth(receipt.Health, receipt.Health.ActorId) &&
@@ -588,6 +591,16 @@ public sealed partial class NCCityActorDomainRegistrySystem : EntitySystem
                      snapshot.MedicalStatePayload.Length <= NCMedicalCharacterSnapshot.MaximumPayloadLength);
     }
 
+    private static NCCityActorInventorySnapshot? NormalizeInventory(NCCityActorInventorySnapshot? snapshot)
+    {
+        if (snapshot?.Summary == null || snapshot.Summary.InstalledCyberware != null)
+            return snapshot;
+        return snapshot with
+        {
+            Summary = snapshot.Summary with { InstalledCyberware = [] },
+        };
+    }
+
     private static bool ValidInventory(NCCityActorInventorySnapshot? snapshot, NCActorId actorId)
     {
         if (snapshot == null || !actorId.IsValid || snapshot.ActorId != actorId || snapshot.DataVersion != 1 ||
@@ -595,7 +608,8 @@ public sealed partial class NCCityActorDomainRegistrySystem : EntitySystem
             snapshot.LastAppliedEventId == Guid.Empty || snapshot.Summary == null ||
             snapshot.Summary.UniqueItems == null || snapshot.Summary.Weapons == null ||
             snapshot.Summary.Documents == null || snapshot.Summary.Credentials == null ||
-            snapshot.Summary.Commodities == null || snapshot.Summary.EquippedLoadoutId == null ||
+            snapshot.Summary.Commodities == null || snapshot.Summary.InstalledCyberware == null ||
+            snapshot.Summary.EquippedLoadoutId == null ||
             snapshot.Summary.EquippedLoadoutId.Length > 128)
         {
             return false;
@@ -603,14 +617,20 @@ public sealed partial class NCCityActorDomainRegistrySystem : EntitySystem
 
         return snapshot.Summary.UniqueItems.Length <= 512 && snapshot.Summary.Weapons.Length <= 512 &&
                snapshot.Summary.Documents.Length <= 512 && snapshot.Summary.Credentials.Length <= 512 &&
-               snapshot.Summary.Commodities.Length <= 128 &&
+               snapshot.Summary.Commodities.Length <= 128 && snapshot.Summary.InstalledCyberware.Length <= 512 &&
                snapshot.Summary.UniqueItems.All(static id => id.IsValid) &&
+               snapshot.Summary.InstalledCyberware.All(static id => id.IsValid) &&
+               snapshot.Summary.InstalledCyberware.Distinct().Count() ==
+               snapshot.Summary.InstalledCyberware.Length &&
+               snapshot.Summary.InstalledCyberware.All(snapshot.Summary.UniqueItems.Contains) &&
                snapshot.Summary.Weapons.All(static id => id.IsValid) &&
                snapshot.Summary.Documents.All(static id => id.IsValid) &&
                snapshot.Summary.Credentials.All(static id => id.IsValid) &&
                snapshot.Summary.Commodities.All(static bundle => bundle != null &&
+                   bundle.BatchId.IsValid &&
                    !string.IsNullOrWhiteSpace(bundle.CommodityId) && bundle.CommodityId.Length <= 128 &&
-                   bundle.Units > 0);
+                   bundle.Units > 0) && snapshot.Summary.Commodities.Select(static bundle => bundle.BatchId)
+                   .Distinct().Count() == snapshot.Summary.Commodities.Length;
     }
 
     private NCCityActorHealthRecord CacheNewest(NCCityActorHealthRecord candidate)

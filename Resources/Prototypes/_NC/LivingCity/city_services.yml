@@ -1,0 +1,149 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncIncidentPolicy
+  id: Default
+  maximumParticipants: 64
+  maximumEvidence: 128
+  maximumWitnessStatements: 64
+  maximumDispatches: 16
+  maximumSeverity: 1000
+  defaultEscalationDelay: 5m
+  verificationDelay: 1m
+  dispatchRetryDelay: 2m
+  abstractResolutionDelay: 10m
+  closureDelay: 2m
+  maxTacSeverityThreshold: 800
+  maxTacCyberpsychosisThreshold: 600
+  maximumAdvancesPerTick: 8
+  responseServices:
+    Crime: [NCPD]
+    Violence: [NCPD]
+    MedicalEmergency: [CityMedical]
+    Cyberpsychosis: [NCPD, MaxTac]
+    FactionConflict: [NCPD]
+    GangActivity: [NCPD]
+    CorporateAction: [NCPD]
+    LogisticsDisruption: [NCPD]
+    PropertyEmergency: [CityMedical]
+
+- type: ncFactionPolicy
+  id: Default
+  maximumTerritories: 256
+  maximumRelations: 128
+  maximumInfluence: 1000
+  controlThreshold: 500
+  controlMargin: 100
+
+- type: ncHumanityPolicy
+  id: Default
+  defaultMaximumHumanity: 100
+  strainedThreshold: 50
+  dissociatingThreshold: 25
+  cyberpsychosisThreshold: 0
+  maximumAppliedSources: 512
+
+- type: ncDistrictSafetyPolicy
+  id: Default
+  severityThreatPermille: 1000
+  incidentThreat: 25
+  enforcedLawPressure: 400
+  patrolPressurePermille: 1000
+  policeDispatchPressure: 50
+  maximumProjectionValue: 10000
+
+- type: ncCityServicePolicy
+  id: NCPD
+  kind: Ncpd
+  defaultTeams: 12
+  maximumQueue: 128
+  maximumThreatBasisPoints: 7000
+  travelMode: Vehicle
+  minimumEta: 1m
+  maximumEta: 20m
+  severityThreshold: 150
+
+- type: ncCityServicePolicy
+  id: TraumaTeam
+  kind: TraumaTeam
+  defaultTeams: 6
+  maximumQueue: 48
+  maximumThreatBasisPoints: 6500
+  travelMode: Vehicle
+  minimumEta: 1m
+  maximumEta: 15m
+  severityThreshold: 250
+  requiresContract: true
+
+- type: ncCityServicePolicy
+  id: MaxTac
+  kind: MaxTac
+  defaultTeams: 2
+  maximumQueue: 16
+  maximumThreatBasisPoints: 10000
+  travelMode: Vehicle
+  minimumEta: 2m
+  maximumEta: 25m
+  severityThreshold: 800
+
+- type: ncCityServicePolicy
+  id: Medical
+  kind: Medical
+  defaultTeams: 8
+  maximumQueue: 96
+  maximumThreatBasisPoints: 4000
+  travelMode: Pedestrian
+  minimumEta: 1m
+  maximumEta: 30m
+  severityThreshold: 100
+
+- type: ncCityServicePolicy
+  id: GangResponse
+  kind: Gang
+  defaultTeams: 8
+  maximumQueue: 64
+  maximumThreatBasisPoints: 8500
+  travelMode: Pedestrian
+  minimumEta: 2m
+  maximumEta: 30m
+  severityThreshold: 300
+
+- type: ncCityServicePolicy
+  id: CorporateResponse
+  kind: Corporate
+  defaultTeams: 8
+  maximumQueue: 64
+  maximumThreatBasisPoints: 9000
+  travelMode: Vehicle
+  minimumEta: 2m
+  maximumEta: 25m
+  severityThreshold: 300
+
+- type: ncCityService
+  id: NCPD
+  stableKey: ncpd
+  displayName: Night City Police Department
+  policy: NCPD
+  baseZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f
+
+- type: ncCityService
+  id: TraumaTeam
+  stableKey: trauma-team
+  displayName: Trauma Team
+  policy: TraumaTeam
+  baseZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f
+
+- type: ncCityService
+  id: MaxTac
+  stableKey: maxtac
+  displayName: MaxTac
+  policy: MaxTac
+  baseZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f
+
+- type: ncCityService
+  id: CityMedical
+  stableKey: city-medical-response
+  displayName: Night City Medical Response
+  policy: Medical
+  baseZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f

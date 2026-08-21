@@ -64,6 +64,47 @@ public sealed record NCRenewPropertyRentSettlementRequest(
     Guid? CausationId = null,
     string AuditSource = "property-rent-renewal");
 
+public sealed record NCReleasePropertyLeaseSettlementRequest(
+    Guid CommandId,
+    NCTransactionId TransactionId,
+    NCApartmentId PropertyId,
+    long ExpectedPropertyVersion,
+    NCPartyRef Tenant,
+    NCPartyRef Initiator,
+    NCPropertyReleaseReason Reason,
+    int DepositRefundBasisPoints,
+    Guid CorrelationId,
+    Guid? CausationId = null,
+    string AuditSource = "property-lease-release");
+
+public sealed record NCRenovatePropertySettlementRequest(
+    Guid CommandId,
+    NCTransactionId TransactionId,
+    NCApartmentId PropertyId,
+    long ExpectedPropertyVersion,
+    NCPartyRef Actor,
+    long Price,
+    string TemplateId,
+    int TemplateRevision,
+    Guid CorrelationId,
+    Guid? CausationId = null,
+    string AuditSource = "property-renovation");
+
+public sealed record NCRollbackPropertyRenovationRequest(
+    Guid CommandId,
+    NCTransactionId RefundTransactionId,
+    NCApartmentId PropertyId,
+    long ExpectedPropertyVersion,
+    NCPartyRef Actor,
+    long RefundAmount,
+    string? PreviousTemplateId,
+    int? PreviousTemplateRevision,
+    string PreviousInteriorState,
+    int PreviousRenovationRevision,
+    Guid CorrelationId,
+    Guid? CausationId = null,
+    string AuditSource = "property-renovation-rollback");
+
 public sealed record NCPropertySettlementResult(
     NCPropertySettlementStatus Status,
     NCPropertyAggregateRecord? Property,

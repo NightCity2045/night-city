@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Content.Server._NC.City.Connectivity;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Actors.Domains;
+using Content.Server._NC.LivingCity.Economy;
 using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.City.Connectivity;
@@ -46,6 +47,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
     [Dependency] private NCCitySpawnCandidateSystem _spawnCandidates = default!;
     [Dependency] private NCAILoadGovernorSystem _loadGovernor = default!;
+    [Dependency] private NCEconomicPhysicalizationSystem _physicalization = default!;
 
     private readonly Dictionary<Guid, NCCityMaterializationRequestState> _states = [];
     private readonly Dictionary<Guid, PendingRequest> _pending = [];
@@ -259,6 +261,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         NCCityActorRecord? actor = null;
         NCCityActorHealthRecord? health = null;
         NCCityActorInventoryRecord? inventory = null;
+        NCActorInventoryMaterializationPlan? inventoryPlan = null;
         Exception? error = null;
         try
         {
@@ -269,6 +272,15 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
             actor = await actorTask;
             health = await healthTask;
             inventory = await inventoryTask;
+            if (inventory != null)
+            {
+                var plan = await _physicalization.BuildActorInventoryPlanAsync(
+                    pending.Request.ActorId,
+                    inventory.Snapshot);
+                inventoryPlan = plan.Plan;
+                if (!plan.IsSuccess)
+                    error = new InvalidOperationException(plan.Error);
+            }
         }
         catch (Exception exception)
         {
@@ -276,7 +288,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         }
 
         _taskManager.RunOnMainThread(() => CompleteLoad(generation, pending.Request.RequestId,
-            actor, health, inventory, error));
+            actor, health, inventory, inventoryPlan, error));
     }
 
     private void CompleteLoad(
@@ -285,6 +297,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         NCCityActorRecord? actor,
         NCCityActorHealthRecord? health,
         NCCityActorInventoryRecord? inventory,
+        NCActorInventoryMaterializationPlan? inventoryPlan,
         Exception? loadError)
     {
         if (generation != _generation || !_active || _policy == null ||
@@ -301,7 +314,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
             Retry(pending, now, $"Persistent actor load failed: {loadError.Message}");
             return;
         }
-        if (actor == null || health == null || inventory == null)
+        if (actor == null || health == null || inventory == null || inventoryPlan == null)
         {
             CompleteTerminal(pending, NCCityMaterializationRequestStatus.Rejected,
                 "The actor root or one of its mandatory health/inventory aggregates is missing or unreadable.");
@@ -322,12 +335,6 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         {
             CompleteTerminal(pending, NCCityMaterializationRequestStatus.Rejected,
                 $"Actor archetype {snapshot.Identity.ArchetypeId} is missing.");
-            return;
-        }
-        if (!InventoryCanRehydrate(inventory.Snapshot))
-        {
-            CompleteTerminal(pending, NCCityMaterializationRequestStatus.Rejected,
-                "The actor owns persistent inventory that has no economy re-materializer yet.");
             return;
         }
         if (!TrySelectSafeCandidate(archetype, snapshot.Location.CurrentZone,
@@ -371,6 +378,15 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
             QueueDel(entity);
             CompleteTerminal(pending, NCCityMaterializationRequestStatus.Rejected,
                 "The actor's authoritative medical state could not be restored.");
+            return;
+        }
+
+        if (!_physicalization.TryMaterialize(entity, inventoryPlan, out var inventoryError))
+        {
+            _runtime.Unbind(entity);
+            QueueDel(entity);
+            CompleteTerminal(pending, NCCityMaterializationRequestStatus.Rejected,
+                inventoryError ?? "The actor's authoritative economic inventory could not be materialized.");
             return;
         }
 
@@ -439,14 +455,6 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         }
 
         return false;
-    }
-
-    private static bool InventoryCanRehydrate(NCCityActorInventorySnapshot inventory)
-    {
-        var summary = inventory.Summary;
-        return summary.UniqueItems.Length == 0 && summary.Weapons.Length == 0 &&
-               summary.Documents.Length == 0 && summary.Credentials.Length == 0 &&
-               summary.Commodities.Length == 0 && string.IsNullOrWhiteSpace(summary.EquippedLoadoutId);
     }
 
     private void Retry(PendingRequest pending, NCActiveWorldTime now, string error)

@@ -23,6 +23,9 @@ public sealed record NCPropertyContentSnapshot(
     string Payload,
     int EntityCount,
     int ResidentEntityCount,
+    int FixtureEntityCount,
+    int IncludedAssetEntityCount,
+    int PersonalPropertyEntityCount,
     NCActiveWorldTime CapturedAt,
     int DataVersion,
     Guid LastAppliedEventId);
@@ -51,6 +54,7 @@ public sealed partial class NCPropertyContentSnapshotSystem : EntitySystem
 
     [Dependency] private IServerDbManager _database = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
+    [Dependency] private NCPropertyRegistrySystem _properties = default!;
 
     private readonly ConcurrentDictionary<NCApartmentId, NCPropertyContentRecord> _cache = [];
     private readonly SemaphoreSlim[] _gates = CreateGates();
@@ -116,12 +120,24 @@ public sealed partial class NCPropertyContentSnapshotSystem : EntitySystem
                     Payload = string.Empty,
                     EntityCount = 0,
                     ResidentEntityCount = 0,
+                    FixtureEntityCount = 0,
+                    IncludedAssetEntityCount = 0,
+                    PersonalPropertyEntityCount = 0,
                     CapturedAt = now,
                     DataVersion = checked((current?.Snapshot.DataVersion ?? 0) + 1),
                     LastAppliedEventId = eventId,
                 };
             if (!Valid(next))
                 return false;
+            if (present)
+            {
+                var property = await _properties.GetAsync(next.PropertyId, true);
+                if (property == null || next.FixtureEntityCount > property.Snapshot.StorageBudget.MaximumFixtureItems ||
+                    next.IncludedAssetEntityCount > property.Snapshot.StorageBudget.MaximumIncludedAssets ||
+                    next.PersonalPropertyEntityCount > property.Snapshot.StorageBudget.MaximumPersonalItems ||
+                    next.EntityCount > property.Snapshot.StorageBudget.MaximumMaterializedEntities)
+                    return false;
+            }
 
             var receipt = new ContentReceipt(next, expectedVersion + 1, epoch, now);
             var result = await _database.ApplyNCPersistentMutationAsync(new NCPersistentMutationRequest(
@@ -162,11 +178,19 @@ public sealed partial class NCPropertyContentSnapshotSystem : EntitySystem
             return false;
         if (!snapshot.Present)
             return snapshot.TemplateId.Length == 0 && snapshot.TemplateRevision == 0 && snapshot.FormatVersion == 0 &&
-                   snapshot.Payload.Length == 0 && snapshot.EntityCount == 0 && snapshot.ResidentEntityCount == 0;
+                   snapshot.Payload.Length == 0 && snapshot.EntityCount == 0 && snapshot.ResidentEntityCount == 0 &&
+                   snapshot.FixtureEntityCount == 0 && snapshot.IncludedAssetEntityCount == 0 &&
+                   snapshot.PersonalPropertyEntityCount == 0;
 
         return snapshot.TemplateId.Length is > 0 and <= 64 && snapshot.TemplateRevision > 0 &&
                snapshot.FormatVersion > 0 && snapshot.Payload.Length > 0 && snapshot.EntityCount >= 0 &&
-               snapshot.ResidentEntityCount >= 0 && snapshot.ResidentEntityCount <= snapshot.EntityCount;
+               snapshot.ResidentEntityCount >= 0 && snapshot.ResidentEntityCount <= snapshot.EntityCount &&
+               snapshot.FixtureEntityCount >= 0 && snapshot.IncludedAssetEntityCount >= 0 &&
+               snapshot.PersonalPropertyEntityCount >= 0 &&
+               snapshot.FixtureEntityCount + snapshot.IncludedAssetEntityCount +
+               snapshot.PersonalPropertyEntityCount == snapshot.EntityCount &&
+               snapshot.ResidentEntityCount == snapshot.IncludedAssetEntityCount +
+               snapshot.PersonalPropertyEntityCount;
     }
 
     private static NCPropertyContentRecord? Deserialize(NCAggregateSnapshotData? stored, NCApartmentId propertyId)
@@ -175,7 +199,8 @@ public sealed partial class NCPropertyContentSnapshotSystem : EntitySystem
             return null;
         try
         {
-            var snapshot = JsonSerializer.Deserialize<NCPropertyContentSnapshot>(stored.Payload, JsonOptions);
+            var snapshot = NormalizeLegacy(JsonSerializer.Deserialize<NCPropertyContentSnapshot>(stored.Payload,
+                JsonOptions));
             return snapshot != null && snapshot.PropertyId == propertyId && Valid(snapshot)
                 ? new NCPropertyContentRecord(snapshot, stored.AggregateVersion, stored.SessionEpoch,
                     stored.ActiveWorldTime)
@@ -193,6 +218,20 @@ public sealed partial class NCPropertyContentSnapshotSystem : EntitySystem
         for (var i = 0; i < gates.Length; i++)
             gates[i] = new SemaphoreSlim(1, 1);
         return gates;
+    }
+
+    private static NCPropertyContentSnapshot? NormalizeLegacy(NCPropertyContentSnapshot? snapshot)
+    {
+        if (snapshot == null || !snapshot.Present || snapshot.EntityCount == 0 ||
+            snapshot.FixtureEntityCount + snapshot.IncludedAssetEntityCount +
+            snapshot.PersonalPropertyEntityCount == snapshot.EntityCount)
+            return snapshot;
+        return snapshot with
+        {
+            FixtureEntityCount = Math.Max(0, snapshot.EntityCount - snapshot.ResidentEntityCount),
+            IncludedAssetEntityCount = 0,
+            PersonalPropertyEntityCount = snapshot.ResidentEntityCount,
+        };
     }
 
     private static string Key(NCApartmentId propertyId) => propertyId.Value.ToString("D");

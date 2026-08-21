@@ -5,9 +5,11 @@
 using System.Numerics;
 using System.Linq;
 using System.Threading.Tasks;
+using Content.Server.Database;
 using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Actors.Domains;
+using Content.Server._NC.LivingCity.Economy;
 using Content.Server._NC.LivingCity.Groups.Components;
 using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
@@ -45,6 +47,7 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
     [Dependency] private NCCityRelevanceAnchorIndexSystem _anchorIndex = default!;
     [Dependency] private NCAILoadGovernorSystem _loadGovernor = default!;
+    [Dependency] private NCEconomicPhysicalizationSystem _physicalization = default!;
 
     private readonly Dictionary<Guid, NCCityDematerializationRequestState> _states = [];
     private readonly Dictionary<Guid, PendingRequest> _pending = [];
@@ -181,6 +184,7 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
             ++_sequence,
             now,
             Guid.NewGuid(),
+            null,
             null);
         _pending.Add(request.RequestId, pending);
         _requestByActor.Add(request.ActorId, request.RequestId);
@@ -406,7 +410,20 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
             return;
         }
 
-        pending = pending with { Capture = capture };
+        if (!_physicalization.TryBuildDematerializationWrites(
+                pending.Request.ActorId,
+                capture.Inventory.Summary,
+                now,
+                pending.Request.Source,
+                out var economyWrites,
+                out error))
+        {
+            _inFlight = Math.Max(0, _inFlight - 1);
+            Retry(pending, now, error ?? "The physical economy state could not be captured safely.", false);
+            return;
+        }
+
+        pending = pending with { Capture = capture, EconomyWrites = economyWrites };
         _pending[requestId] = pending;
         SetState(pending, NCCityDematerializationStatus.Committing, null);
         _ = ObserveCommit(generation, pending, actor.AggregateVersion, currentZone, capture);
@@ -431,7 +448,8 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
                     capture,
                     pending.Request.RequestId,
                     null,
-                    pending.Request.Source));
+                    pending.Request.Source,
+                    pending.EconomyWrites));
         }
         catch (Exception exception)
         {
@@ -470,6 +488,7 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
 
         if (!TryResolveBinding(pending, out var entityUid))
         {
+            _physicalization.TryRelease(pending.Request.ActorId, pending.Request.EntityUid);
             CompleteTerminal(pending, NCCityDematerializationStatus.Dematerialized, null);
             RaiseLocalEvent(new NCCityActorDematerializedEvent(
                 requestId,
@@ -506,6 +525,7 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
         }
 
         _runtime.Unbind(entityUid);
+        _physicalization.TryRelease(pending.Request.ActorId, entityUid);
         QueueDel(entityUid);
         CompleteTerminal(pending, NCCityDematerializationStatus.Dematerialized, null);
         RaiseLocalEvent(new NCCityActorDematerializedEvent(
@@ -783,7 +803,8 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
         long Sequence,
         NCActiveWorldTime DueAt,
         Guid CommitCommandId,
-        NCCityActorDomainCapture? Capture);
+        NCCityActorDomainCapture? Capture,
+        IReadOnlyList<NCPersistentAggregateWrite>? EconomyWrites);
 
     private readonly record struct QueuedRequest(Guid RequestId, long Sequence);
 

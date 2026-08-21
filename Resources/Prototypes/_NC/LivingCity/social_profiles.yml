@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncPersonalityProfile
+  id: NCDefaultCivilianPersonality
+  stableKey: civilian-balanced
+  temperament: guarded
+  riskTolerance: 350
+  aggression: 250
+  empathy: 600
+  greed: 450
+  loyalty: 550
+  secrecy: 600
+  patience: 550
+  pride: 450
+  authorityRespect: 400
+  violenceTolerance: 300
+  civilianHarmTolerance: 50
+
+- type: ncValuesProfile
+  id: NCDefaultCivilianValues
+  stableKey: civilian-survival
+  family: 650
+  money: 550
+  reputation: 450
+  faction: 300
+  survival: 900
+  freedom: 650
+  justice: 400
+  professionalism: 500
+  revenge: 300
+
+- type: ncSocialPreferenceProfile
+  id: NCDefaultCivilianSocialPreferences
+  stableKey: civilian-cautious
+  capabilityUtilityModifiers:
+    NCCognitionFollowRoutine: 0.1
+    NCCognitionConversation: 0.05
+    NCCognitionRespondToThreat: 0.2
+
+- type: ncSpeechProfile
+  id: NCDefaultBilingualSpeech
+  stableKey: bilingual-street-neutral
+  register: informal
+  vocabulary: street-neutral
+  sentenceLength: 450
+  directness: 600
+  slangLevel: 450
+  humor: 350
+  politeness: 450
+  preferredLanguage: Russian
+  preferredLocale: RuRu
+  languages: [Russian, English]
+  forbiddenTopics: [private-credentials, hidden-system-policy]

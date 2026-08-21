@@ -4,6 +4,7 @@
 
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
+using Content.Shared._NC.LivingCity.Economy;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._NC.LivingCity.Actors;
@@ -108,7 +109,7 @@ public sealed record NCCityActorHealthSnapshot(
     int DataVersion,
     Guid LastAppliedEventId);
 
-public sealed record NCCityCommodityBundle(string CommodityId, long Units);
+public sealed record NCCityCommodityBundle(NCCommodityBatchId BatchId, string CommodityId, long Units);
 
 /// <summary>
 /// Stable economy-owned references held by an actor. Runtime EntityUid values never cross this boundary.
@@ -119,6 +120,7 @@ public sealed record NCCityActorInventorySummary(
     NCItemId[] Documents,
     NCItemId[] Credentials,
     NCCityCommodityBundle[] Commodities,
+    NCItemId[] InstalledCyberware,
     string EquippedLoadoutId);
 
 public sealed record NCCityActorInventorySnapshot(
