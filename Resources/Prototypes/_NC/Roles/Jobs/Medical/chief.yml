@@ -10,6 +10,7 @@
   supervisors: nc-job-supervisors-city-administration
   weight: 100
   salary: 650
+  ncNpcAllowed: false
   setPreference: false
   startingGear: NCMedicalChiefGear
   icon: JobIconChiefMedicalOfficer

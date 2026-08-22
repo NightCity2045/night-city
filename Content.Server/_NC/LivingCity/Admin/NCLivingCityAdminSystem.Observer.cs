@@ -98,6 +98,14 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-presence", "unknown-presence",
             Math.Max(0, districtActors - publicActors - abstractHomeActors - physicalHomeActors));
 
+        fields.Add("observer-society", "formal-workers", _workforce.IndexedAssignmentCount);
+        fields.Add("observer-society", "civilian-livelihoods-cached", _livelihoods.CachedActorCount);
+        fields.Add("observer-society", "faction-profiles", _factionBootstrap.ProfileCount);
+        fields.Add("observer-society", "faction-load-complete", _factionBootstrap.InitialLoadComplete);
+        fields.Add("observer-society", "affiliated-actors-cached", _factionMemberships.CachedActorCount);
+        fields.Add("observer-society", "configuration-error",
+            _workforce.ConfigurationError ?? _factionBootstrap.ConfigurationError ?? "none");
+
         fields.Add("observer-pipeline", "projection-ready", _zoneStates.InitialLoadComplete);
         fields.Add("observer-pipeline", "projected-scopes", _zoneStates.ScopeCount);
         fields.Add("observer-pipeline", "dirty-scopes", _zoneStates.PendingScopeCount);
@@ -208,6 +216,36 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-intent", "materialized", _actorRuntime.TryGetEntity(actorId, out var entityUid));
         fields.Add("observer-intent", "entity", entityUid.IsValid() ? entityUid : "abstract");
         fields.Add("observer-intent", "lod", _relevance.TryGetLod(actorId, out var lod) ? lod : "unindexed");
+
+        var employment = await _employment.FindCurrentByEmployeeAsync(NCPartyRef.ForActor(actorId));
+        if (employment != null)
+        {
+            fields.Add("observer-employment", "employer", employment.Snapshot.Employer);
+            fields.Add("observer-employment", "position", employment.Snapshot.PositionId);
+            fields.Add("observer-employment", "status", employment.Snapshot.Status);
+            fields.Add("observer-employment", "salary", employment.Snapshot.SalaryAmount);
+        }
+        else
+        {
+            fields.Add("observer-employment", "status", "unemployed");
+        }
+
+        var livelihood = await _livelihoods.GetAsync(actorId);
+        fields.Add("observer-livelihood", "profile", livelihood?.Snapshot.ProfileId ?? "none");
+
+        var affiliations = await _factionMemberships.GetAsync(actorId);
+        fields.Add("observer-affiliations", "count", affiliations?.Snapshot.Memberships.Count ?? 0);
+        if (affiliations != null)
+        {
+            for (var index = 0; index < Math.Min(affiliations.Snapshot.Memberships.Count, 8); index++)
+            {
+                var membership = affiliations.Snapshot.Memberships[index];
+                var section = $"observer-affiliation-{index + 1}";
+                fields.Add(section, "faction", membership.FactionId);
+                fields.Add(section, "role", membership.Role);
+                fields.Add(section, "status", membership.Status);
+            }
+        }
         if (entityUid.IsValid() &&
             TryComp<NCCityMaterializationLeaseComponent>(entityUid, out var lease))
         {

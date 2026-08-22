@@ -5,6 +5,9 @@
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.City.Zones.Serialization;
 using Content.Shared._NC.LivingCity.Actors;
+using Content.Shared._NC.LivingCity.CityServices;
+using Content.Shared._NC.LivingCity.Employment;
+using Content.Shared.Roles;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.LivingCity.Population;
@@ -69,6 +72,25 @@ public sealed partial class NCCityPopulationCohort
 
     [DataField(customTypeSerializer: typeof(NCZoneIdSerializer))]
     public NCZoneId WorkZone { get; private set; }
+
+    /// <summary>
+    /// Optional formal employment. It references the same JobPrototype available to players; the owning department
+    /// is resolved from DepartmentPrototype.Roles during import.
+    /// </summary>
+    [DataField]
+    public ProtoId<JobPrototype>? Job { get; private set; }
+
+    /// <summary>
+    /// Optional civilian occupation for residents outside formal organizations. It must not be combined with Job.
+    /// </summary>
+    [DataField]
+    public ProtoId<NCLivelihoodProfilePrototype>? Livelihood { get; private set; }
+
+    [DataField]
+    public ProtoId<NCFactionProfilePrototype>? Faction { get; private set; }
+
+    [DataField]
+    public string FactionRole { get; private set; } = "member";
 }
 
 /// <summary>
@@ -94,6 +116,18 @@ public sealed partial class NCCityPopulationActorEntry
 
     [DataField(customTypeSerializer: typeof(NCZoneIdSerializer))]
     public NCZoneId WorkZone { get; private set; }
+
+    [DataField]
+    public ProtoId<JobPrototype>? Job { get; private set; }
+
+    [DataField]
+    public ProtoId<NCLivelihoodProfilePrototype>? Livelihood { get; private set; }
+
+    [DataField]
+    public ProtoId<NCFactionProfilePrototype>? Faction { get; private set; }
+
+    [DataField]
+    public string FactionRole { get; private set; } = "member";
 }
 
 /// <summary>

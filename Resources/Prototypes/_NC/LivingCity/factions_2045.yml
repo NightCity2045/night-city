@@ -1,0 +1,451 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# These are strategic organizations, not automatic combat factions. Physical hostility is created by an incident,
+# an operation, or an explicit relationship escalation rather than mere territorial overlap.
+- type: ncFactionProfile
+  id: NC6thStreet
+  stableKey: 6th-street
+  displayName: 6th Street
+  archetype: Security
+  ideologyKeys: [community-defense, veteran-tradition]
+  startingFunds: 12000
+  availableManpower: 35
+  protectionBasisPoints: 500
+  patrolPriority: 700
+  supplyPriority: 500
+  enforcesLaw: true
+  territories: [{ zone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, influence: 520, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCEurotrashers
+  stableKey: eurotrashers
+  displayName: Eurotrashers
+  archetype: StreetGang
+  ideologyKeys: [status, nightlife]
+  startingFunds: 9000
+  availableManpower: 22
+  protectionBasisPoints: 300
+  patrolPriority: 300
+  supplyPriority: 650
+  usesCovertOperations: true
+  territories: [{ zone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, influence: 320, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCMaelstrom
+  stableKey: maelstrom
+  displayName: Maelstrom
+  archetype: StreetGang
+  ideologyKeys: [chrome-supremacy, intimidation]
+  startingFunds: 18000
+  availableManpower: 55
+  protectionBasisPoints: 700
+  patrolPriority: 650
+  supplyPriority: 800
+  usesCovertOperations: true
+  territories:
+  - { zone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, influence: 360, claimsControl: false }
+  - { zone: e49d1531-7134-4212-bb1f-44fc76f325ec, influence: 460, claimsControl: false }
+  - { zone: dab954b5-52a7-4551-a874-d6101d1f1429, influence: 420, claimsControl: false }
+  - { zone: e2e35b70-5277-4359-91a6-0792e01fb477, influence: 380, claimsControl: false }
+
+- type: ncFactionProfile
+  id: NCUndertow
+  stableKey: undertow
+  displayName: Undertow
+  archetype: StreetGang
+  ideologyKeys: [smuggling, mutual-aid]
+  startingFunds: 10000
+  availableManpower: 30
+  protectionBasisPoints: 400
+  patrolPriority: 350
+  supplyPriority: 750
+  usesCovertOperations: true
+  territories:
+  - { zone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, influence: 340, claimsControl: false }
+  - { zone: eca1baef-2094-4278-95dc-88ac7e2c6a40, influence: 390, claimsControl: false }
+
+- type: ncFactionProfile
+  id: NCPrimeTimePlayers
+  stableKey: prime-time-players
+  displayName: Prime-Time Players
+  archetype: StreetGang
+  ideologyKeys: [celebrity, spectacle]
+  startingFunds: 11000
+  availableManpower: 24
+  protectionBasisPoints: 250
+  patrolPriority: 300
+  supplyPriority: 600
+  usesCovertOperations: true
+  territories: [{ zone: e49d1531-7134-4212-bb1f-44fc76f325ec, influence: 340, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCStreetQueens
+  stableKey: street-queens
+  displayName: Street Queens
+  archetype: StreetGang
+  ideologyKeys: [territory, solidarity]
+  startingFunds: 9000
+  availableManpower: 28
+  protectionBasisPoints: 450
+  patrolPriority: 500
+  supplyPriority: 450
+  territories: [{ zone: e49d1531-7134-4212-bb1f-44fc76f325ec, influence: 430, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCEasternTigersTriad
+  stableKey: eastern-tigers-triad
+  displayName: Eastern Tigers Triad
+  archetype: CrimeSyndicate
+  ideologyKeys: [profit, hierarchy]
+  startingFunds: 30000
+  availableManpower: 45
+  taxBasisPoints: 250
+  protectionBasisPoints: 700
+  patrolPriority: 400
+  supplyPriority: 850
+  usesCovertOperations: true
+  territories: [{ zone: eca1baef-2094-4278-95dc-88ac7e2c6a40, influence: 520, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCSkivFamily
+  stableKey: skiv-family
+  displayName: Skiv Family
+  archetype: CrimeSyndicate
+  ideologyKeys: [family, profit]
+  startingFunds: 22000
+  availableManpower: 34
+  taxBasisPoints: 200
+  protectionBasisPoints: 650
+  patrolPriority: 350
+  supplyPriority: 750
+  usesCovertOperations: true
+  territories: [{ zone: eca1baef-2094-4278-95dc-88ac7e2c6a40, influence: 470, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCLightningCats
+  stableKey: lightning-cats
+  displayName: Lightning Cats
+  archetype: StreetGang
+  ideologyKeys: [speed, salvage]
+  startingFunds: 8000
+  availableManpower: 26
+  protectionBasisPoints: 300
+  patrolPriority: 500
+  supplyPriority: 600
+  territories: [{ zone: dab954b5-52a7-4551-a874-d6101d1f1429, influence: 380, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCReckoners
+  stableKey: reckoners
+  displayName: Reckoners
+  archetype: Cult
+  ideologyKeys: [apocalypse, purification]
+  startingFunds: 5000
+  availableManpower: 32
+  protectionBasisPoints: 200
+  patrolPriority: 550
+  supplyPriority: 350
+  usesCovertOperations: true
+  territories:
+  - { zone: dab954b5-52a7-4551-a874-d6101d1f1429, influence: 390, claimsControl: false }
+  - { zone: c20733c2-faa0-4d43-aaf6-37c3f6bd886b, influence: 360, claimsControl: false }
+  - { zone: 88684957-b4da-4f20-862d-b67b4b030882, influence: 410, claimsControl: false }
+
+- type: ncFactionProfile
+  id: NCScavvers
+  stableKey: scavvers
+  displayName: Scavvers
+  archetype: Scavenger
+  ideologyKeys: [salvage, survival]
+  startingFunds: 3000
+  availableManpower: 40
+  patrolPriority: 200
+  supplyPriority: 900
+  usesCovertOperations: true
+  territories: [{ zone: dab954b5-52a7-4551-a874-d6101d1f1429, influence: 300, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCGoldDragons
+  stableKey: gold-dragons
+  displayName: Gold Dragons
+  archetype: Security
+  ideologyKeys: [community-defense, commerce]
+  startingFunds: 16000
+  availableManpower: 36
+  protectionBasisPoints: 600
+  patrolPriority: 650
+  supplyPriority: 600
+  enforcesLaw: true
+  territories: [{ zone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, influence: 520, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCRedChromeLegion
+  stableKey: red-chrome-legion
+  displayName: Red Chrome Legion
+  archetype: StreetGang
+  ideologyKeys: [hate, chrome, domination]
+  startingFunds: 14000
+  availableManpower: 48
+  protectionBasisPoints: 650
+  patrolPriority: 700
+  supplyPriority: 650
+  territories:
+  - { zone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, influence: 360, claimsControl: false }
+  - { zone: e2e35b70-5277-4359-91a6-0792e01fb477, influence: 540, claimsControl: false }
+  relations:
+  - { faction: NCIronSights, status: War, trust: -900, hostility: 950 }
+
+- type: ncFactionProfile
+  id: NCWengFangTong
+  stableKey: weng-fang-tong
+  displayName: Weng Fang Tong
+  archetype: CrimeSyndicate
+  ideologyKeys: [profit, family, influence]
+  startingFunds: 26000
+  availableManpower: 42
+  taxBasisPoints: 250
+  protectionBasisPoints: 700
+  patrolPriority: 450
+  supplyPriority: 800
+  usesCovertOperations: true
+  territories:
+  - { zone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, influence: 480, claimsControl: false }
+  - { zone: c20733c2-faa0-4d43-aaf6-37c3f6bd886b, influence: 410, claimsControl: false }
+
+- type: ncFactionProfile
+  id: NCPhilharmonicVampyres
+  stableKey: philharmonic-vampyres
+  displayName: Philharmonic Vampyres
+  archetype: Community
+  ideologyKeys: [art, performance, mutual-aid]
+  startingFunds: 7000
+  availableManpower: 24
+  patrolPriority: 250
+  supplyPriority: 450
+  territories: [{ zone: c4f78018-c60c-4e1f-b114-0ce90b7424c5, influence: 360, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCPrincessesOfJustice
+  stableKey: princesses-of-justice
+  displayName: Princesses of Justice
+  archetype: Security
+  ideologyKeys: [justice, protection, performance]
+  startingFunds: 9000
+  availableManpower: 25
+  protectionBasisPoints: 300
+  patrolPriority: 700
+  supplyPriority: 450
+  enforcesLaw: true
+  territories: [{ zone: c4f78018-c60c-4e1f-b114-0ce90b7424c5, influence: 450, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCDeadWoods
+  stableKey: deadwoods
+  displayName: DeadWoods
+  archetype: Nomad
+  ideologyKeys: [transport, family, protection]
+  startingFunds: 17000
+  availableManpower: 46
+  protectionBasisPoints: 400
+  patrolPriority: 550
+  supplyPriority: 900
+  territories:
+  - { zone: c20733c2-faa0-4d43-aaf6-37c3f6bd886b, influence: 360, claimsControl: false }
+  - { zone: 88684957-b4da-4f20-862d-b67b4b030882, influence: 420, claimsControl: false }
+  - { zone: 504dd7a0-4f25-43df-a96c-3f4069ea6de5, influence: 500, claimsControl: false }
+
+- type: ncFactionProfile
+  id: NCKillKrashers
+  stableKey: kill-krashers
+  displayName: Kill Krashers
+  archetype: StreetGang
+  ideologyKeys: [violence, vehicles, territory]
+  startingFunds: 11000
+  availableManpower: 38
+  protectionBasisPoints: 500
+  patrolPriority: 700
+  supplyPriority: 600
+  territories:
+  - { zone: c20733c2-faa0-4d43-aaf6-37c3f6bd886b, influence: 430, claimsControl: false }
+  - { zone: 88684957-b4da-4f20-862d-b67b4b030882, influence: 440, claimsControl: false }
+
+- type: ncFactionProfile
+  id: NCIronSights
+  stableKey: iron-sights
+  displayName: Iron Sights
+  archetype: StreetGang
+  ideologyKeys: [weapons, domination]
+  startingFunds: 15000
+  availableManpower: 44
+  protectionBasisPoints: 650
+  patrolPriority: 750
+  supplyPriority: 750
+  territories:
+  - { zone: e2e35b70-5277-4359-91a6-0792e01fb477, influence: 520, claimsControl: false }
+  - { zone: 0122fb70-1fcc-46c7-968a-0245372d8484, influence: 440, claimsControl: false }
+  relations:
+  - { faction: NCRedChromeLegion, status: War, trust: -900, hostility: 950 }
+
+- type: ncFactionProfile
+  id: NCShroomers
+  stableKey: shroomers
+  displayName: Shroomers
+  archetype: Community
+  ideologyKeys: [community, survival, altered-consciousness]
+  startingFunds: 5000
+  availableManpower: 30
+  patrolPriority: 250
+  supplyPriority: 500
+  territories:
+  - { zone: e2e35b70-5277-4359-91a6-0792e01fb477, influence: 350, claimsControl: false }
+  - { zone: 0122fb70-1fcc-46c7-968a-0245372d8484, influence: 410, claimsControl: false }
+
+- type: ncFactionProfile
+  id: NCTygerClaws
+  stableKey: tyger-claws
+  displayName: Tyger Claws
+  archetype: CrimeSyndicate
+  ideologyKeys: [profit, tradition, territory]
+  startingFunds: 30000
+  availableManpower: 58
+  taxBasisPoints: 300
+  protectionBasisPoints: 750
+  patrolPriority: 650
+  supplyPriority: 850
+  usesCovertOperations: true
+  territories:
+  - { zone: e2e35b70-5277-4359-91a6-0792e01fb477, influence: 560, claimsControl: false }
+  - { zone: 88684957-b4da-4f20-862d-b67b4b030882, influence: 480, claimsControl: false }
+
+- type: ncFactionProfile
+  id: NCBozos
+  stableKey: bozos
+  displayName: Bozos
+  archetype: Cult
+  ideologyKeys: [terror, spectacle, chaos]
+  startingFunds: 8000
+  availableManpower: 34
+  patrolPriority: 550
+  supplyPriority: 450
+  usesCovertOperations: true
+  territories: [{ zone: 88684957-b4da-4f20-862d-b67b4b030882, influence: 390, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCEnhanced
+  stableKey: enhanced
+  displayName: Enhanced
+  archetype: StreetGang
+  ideologyKeys: [augmentation, status, survival]
+  startingFunds: 12000
+  availableManpower: 32
+  protectionBasisPoints: 400
+  patrolPriority: 500
+  supplyPriority: 750
+  territories: [{ zone: 88684957-b4da-4f20-862d-b67b4b030882, influence: 400, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCKanzakiFamily
+  stableKey: kanzaki-family
+  displayName: Kanzaki Family
+  archetype: CrimeSyndicate
+  ideologyKeys: [family, profit, tradition]
+  startingFunds: 24000
+  availableManpower: 40
+  taxBasisPoints: 250
+  protectionBasisPoints: 700
+  patrolPriority: 450
+  supplyPriority: 800
+  usesCovertOperations: true
+  territories: [{ zone: 88684957-b4da-4f20-862d-b67b4b030882, influence: 460, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCSinfulAdams
+  stableKey: sinful-adams
+  displayName: Sinful Adams
+  archetype: StreetGang
+  ideologyKeys: [territory, intimidation]
+  startingFunds: 7000
+  availableManpower: 27
+  protectionBasisPoints: 450
+  patrolPriority: 500
+  supplyPriority: 400
+  territories: [{ zone: 88684957-b4da-4f20-862d-b67b4b030882, influence: 350, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCZoners
+  stableKey: zoners
+  displayName: Zoners
+  archetype: Political
+  ideologyKeys: [local-autonomy, community]
+  startingFunds: 6000
+  availableManpower: 36
+  patrolPriority: 300
+  supplyPriority: 550
+  territories: [{ zone: 88684957-b4da-4f20-862d-b67b4b030882, influence: 430, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCConsortium
+  stableKey: consortium
+  displayName: Consortium
+  archetype: CrimeSyndicate
+  ideologyKeys: [shipping, profit, influence]
+  startingFunds: 35000
+  availableManpower: 48
+  taxBasisPoints: 350
+  protectionBasisPoints: 750
+  patrolPriority: 500
+  supplyPriority: 950
+  usesCovertOperations: true
+  territories: [{ zone: 504dd7a0-4f25-43df-a96c-3f4069ea6de5, influence: 600, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCTombstonePreservers
+  stableKey: tombstone-preservers
+  displayName: Tombstone Preservers
+  archetype: Community
+  ideologyKeys: [history, preservation, community]
+  startingFunds: 5000
+  availableManpower: 30
+  patrolPriority: 400
+  supplyPriority: 450
+  territories: [{ zone: a54f1778-e26b-4dc9-af62-267003c660c7, influence: 520, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCEdgerunnersInc
+  stableKey: edgerunners-inc
+  displayName: Edgerunners Inc
+  archetype: Security
+  ideologyKeys: [local-order, contracts, survival]
+  startingFunds: 18000
+  availableManpower: 38
+  protectionBasisPoints: 600
+  patrolPriority: 750
+  supplyPriority: 650
+  enforcesLaw: true
+  territories: [{ zone: 0122fb70-1fcc-46c7-968a-0245372d8484, influence: 540, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCFaded
+  stableKey: faded
+  displayName: Faded
+  archetype: Community
+  ideologyKeys: [old-combat-zone, mutual-aid, survival]
+  startingFunds: 4000
+  availableManpower: 32
+  patrolPriority: 300
+  supplyPriority: 500
+  territories: [{ zone: 0122fb70-1fcc-46c7-968a-0245372d8484, influence: 430, claimsControl: false }]
+
+- type: ncFactionProfile
+  id: NCGenerationRed
+  stableKey: generation-red
+  displayName: Generation Red
+  archetype: Community
+  ideologyKeys: [youth, survival, reconstruction]
+  startingFunds: 4500
+  availableManpower: 35
+  patrolPriority: 350
+  supplyPriority: 550
+  territories: [{ zone: 0122fb70-1fcc-46c7-968a-0245372d8484, influence: 450, claimsControl: false }]

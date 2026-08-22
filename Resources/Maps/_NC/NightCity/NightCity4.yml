@@ -4,7 +4,7 @@ meta:
   engineVersion: 284.0.2
   forkId: ""
   forkVersion: ""
-  time: 08/21/2026 15:45:23
+  time: 08/22/2026 21:51:29
   entityCount: 680
 maps:
 - 1
@@ -37,7 +37,7 @@ entities:
   - uid: 1
     components:
     - type: MetaData
-      name: NightCity [4]
+      name: Mapping NC ALife Test [4]
     - type: Transform
     - type: Map
       mapPaused: True

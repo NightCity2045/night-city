@@ -106,6 +106,8 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCShipmentSystem _shipments = default!;
     [Dependency] private NCShipmentCargoSystem _shipmentCargo = default!;
     [Dependency] private NCEmploymentRegistrySystem _employment = default!;
+    [Dependency] private NCOrganizationWorkforceSystem _workforce = default!;
+    [Dependency] private NCLivelihoodRegistrySystem _livelihoods = default!;
     [Dependency] private NCPropertyRegistrySystem _properties = default!;
     [Dependency] private NCPropertyContentSnapshotSystem _propertyContents = default!;
     [Dependency] private NCPoliceFineRegistrySystem _fines = default!;
@@ -121,6 +123,8 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCCityIncidentRegistrySystem _incidents = default!;
     [Dependency] private NCCityServiceSystem _cityServices = default!;
     [Dependency] private NCFactionRegistrySystem _factions = default!;
+    [Dependency] private NCFactionBootstrapSystem _factionBootstrap = default!;
+    [Dependency] private NCFactionMembershipRegistrySystem _factionMemberships = default!;
     [Dependency] private NCDistrictSafetyProjectionSystem _districtSafety = default!;
     [Dependency] private NCCityNewsRegistrySystem _cityNews = default!;
     [Dependency] private NCEstateRegistrySystem _estates = default!;
@@ -345,6 +349,16 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("population-import", "existing", population.Existing);
         fields.Add("population-import", "conflicts", population.Conflicts);
         fields.Add("population-import", "failed", population.Failed);
+        fields.Add("workforce", "indexed-assignments", _workforce.IndexedAssignmentCount);
+        fields.Add("workforce", "configuration-error", _workforce.ConfigurationError ?? "none");
+        fields.Add("workforce", "civilian-livelihoods-cached", _livelihoods.CachedActorCount);
+        fields.Add("factions", "initial-load-complete", _factionBootstrap.InitialLoadComplete);
+        fields.Add("factions", "profiles", _factionBootstrap.ProfileCount);
+        fields.Add("factions", "created", _factionBootstrap.CreatedCount);
+        fields.Add("factions", "existing", _factionBootstrap.ExistingCount);
+        fields.Add("factions", "failed", _factionBootstrap.FailedCount);
+        fields.Add("factions", "membership-actors-cached", _factionMemberships.CachedActorCount);
+        fields.Add("factions", "configuration-error", _factionBootstrap.ConfigurationError ?? "none");
         fields.Add("residences", "allocation-running", _residences.IsRunning);
         if (_residences.LastReport is { } residences)
         {

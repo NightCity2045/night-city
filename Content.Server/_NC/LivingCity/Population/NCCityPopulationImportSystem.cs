@@ -11,12 +11,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors;
+using Content.Server._NC.LivingCity.CityServices;
+using Content.Server._NC.LivingCity.Employment;
+using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.LivingCity.Actors;
+using Content.Shared._NC.LivingCity.CityServices;
+using Content.Shared._NC.LivingCity.Employment;
 using Content.Shared._NC.LivingCity.Population;
 using Content.Shared._NC.Persistence.Identity;
 using Robust.Shared.Prototypes;
+using Content.Shared.Roles;
 
 namespace Content.Server._NC.LivingCity.Population;
 
@@ -35,6 +41,9 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
     [Dependency] private NCZoneSystem _zones = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
+    [Dependency] private NCOrganizationWorkforceSystem _workforce = default!;
+    [Dependency] private NCLivelihoodRegistrySystem _livelihoods = default!;
+    [Dependency] private NCFactionMembershipRegistrySystem _affiliations = default!;
 
     private readonly object _runLock = new();
     private CancellationTokenSource? _runCancellation;
@@ -171,7 +180,9 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
                     errors.Add($"Identity pool {pool.ID} exceeds the supported deterministic permutation size.");
             }
 
-            ValidatePlacement(cohort.Archetype, cohort.HomeZone, cohort.WorkZone, $"Cohort {cohort.Id}", errors);
+            ValidatePlacement(cohort.Archetype, cohort.HomeZone, cohort.WorkZone, cohort.Job, cohort.Livelihood,
+                cohort.Faction, cohort.FactionRole,
+                $"Cohort {cohort.Id}", errors);
         }
 
         foreach (var actor in profile.Actors)
@@ -194,7 +205,8 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
                 errors.Add($"Authored actor {actor.StableLocalId} has invalid identity text.");
             }
 
-            ValidatePlacement(actor.Archetype, actor.HomeZone, actor.WorkZone,
+            ValidatePlacement(actor.Archetype, actor.HomeZone, actor.WorkZone, actor.Job, actor.Livelihood,
+                actor.Faction, actor.FactionRole,
                 $"Authored actor {actor.StableLocalId}", errors);
         }
 
@@ -359,6 +371,40 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
         if (result == null)
             return;
 
+        NCWorkforceAssignmentResult? assignment = null;
+        if (result.Status is NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate &&
+            candidate.Job is { } job)
+        {
+            assignment = await _workforce.EnsureEmploymentAsync(result.ActorId, job, auditSource);
+        }
+
+        NCLivelihoodMutationResult? livelihood = null;
+        if (result.Status is NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate &&
+            candidate.Livelihood is { } livelihoodProfile)
+        {
+            var stableKey = $"{result.ActorId}/{livelihoodProfile.Id}";
+            livelihood = await _livelihoods.EnsureAsync(new NCEnsureLivelihoodRequest(
+                NCPersistentIdentity.Command("population", "livelihood", stableKey),
+                result.ActorId,
+                livelihoodProfile,
+                NCPersistentIdentity.Correlation("population", "livelihood", stableKey),
+                AuditSource: auditSource));
+        }
+
+        NCFactionMembershipMutationResult? affiliation = null;
+        if (result.Status is NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate &&
+            candidate.Faction is { } faction)
+        {
+            var stableKey = $"{result.ActorId}/{faction.Id}";
+            affiliation = await _affiliations.EnsureAsync(new NCEnsureFactionMembershipRequest(
+                NCPersistentIdentity.Command("population", "affiliation", stableKey),
+                result.ActorId,
+                faction,
+                candidate.FactionRole,
+                NCPersistentIdentity.Correlation("population", "affiliation", stableKey),
+                AuditSource: auditSource));
+        }
+
         lock (_runLock)
         {
             _progress = result.Status switch
@@ -387,7 +433,34 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
         }
 
         if (result.Status is NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate)
+        {
+            var assignmentOk = assignment == null || assignment.Status is NCWorkforceAssignmentStatus.Applied or
+                NCWorkforceAssignmentStatus.Existing;
+            var livelihoodOk = livelihood == null || livelihood.Status is NCLivelihoodMutationStatus.Applied or
+                NCLivelihoodMutationStatus.Duplicate;
+            var affiliationOk = affiliation == null || affiliation.Status is NCFactionMembershipMutationStatus.Applied
+                or NCFactionMembershipMutationStatus.Duplicate;
+            if (assignmentOk && livelihoodOk && affiliationOk)
+            {
+                return;
+            }
+
+            lock (_runLock)
+                _progress = _progress with { Failed = _progress.Failed + 1 };
+            lock (failureLock)
+            {
+                failures.Add(new NCCityPopulationImportFailure(
+                    candidate.StableLocalId,
+                    result.ActorId,
+                    string.Join(" ", new[]
+                    {
+                        assignmentOk ? null : assignment?.Error ?? assignment?.Status.ToString(),
+                        livelihoodOk ? null : livelihood?.Error ?? livelihood?.Status.ToString(),
+                        affiliationOk ? null : affiliation?.Error ?? affiliation?.Status.ToString(),
+                    }.Where(static value => !string.IsNullOrWhiteSpace(value)))));
+            }
             return;
+        }
 
         lock (failureLock)
         {
@@ -416,7 +489,11 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
                     [],
                     cohort.Archetype,
                     cohort.HomeZone,
-                    cohort.WorkZone);
+                    cohort.WorkZone,
+                    cohort.Job,
+                    cohort.Livelihood,
+                    cohort.Faction,
+                    cohort.FactionRole);
             }
         }
 
@@ -428,7 +505,11 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
                 actor.Aliases.Select(static alias => alias.Trim()).ToArray(),
                 actor.Archetype,
                 actor.HomeZone,
-                actor.WorkZone);
+                actor.WorkZone,
+                actor.Job,
+                actor.Livelihood,
+                actor.Faction,
+                actor.FactionRole);
         }
     }
 
@@ -436,6 +517,10 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
         ProtoId<NCCityActorArchetypePrototype> archetypeId,
         Content.Shared._NC.City.Zones.NCZoneId homeZone,
         Content.Shared._NC.City.Zones.NCZoneId workZone,
+        ProtoId<JobPrototype>? jobId,
+        ProtoId<NCLivelihoodProfilePrototype>? livelihoodId,
+        ProtoId<NCFactionProfilePrototype>? factionId,
+        string factionRole,
         string label,
         List<string> errors)
     {
@@ -459,6 +544,18 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
             (!_zones.TryGetZone(workZone, out var work) || !archetype.AllowedWorkContexts.Contains(work.ContextSlot)))
         {
             errors.Add($"{label} has a missing or incompatible work zone.");
+        }
+
+        if (jobId is { } job && !_workforce.TryResolveNpcJob(job, out _, out _, out var jobError))
+            errors.Add($"{label} has invalid formal employment: {jobError}");
+        if (jobId != null && livelihoodId != null)
+            errors.Add($"{label} cannot combine formal employment with a civilian livelihood.");
+        if (livelihoodId is { } livelihood && !_prototypes.HasIndex(livelihood))
+            errors.Add($"{label} references missing livelihood {livelihood}.");
+        if (factionId is { } faction &&
+            (!_prototypes.HasIndex(faction) || string.IsNullOrWhiteSpace(factionRole) || factionRole.Length > 64))
+        {
+            errors.Add($"{label} has invalid faction membership.");
         }
     }
 
@@ -584,5 +681,9 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
         string[] Aliases,
         ProtoId<NCCityActorArchetypePrototype> Archetype,
         Content.Shared._NC.City.Zones.NCZoneId HomeZone,
-        Content.Shared._NC.City.Zones.NCZoneId WorkZone);
+        Content.Shared._NC.City.Zones.NCZoneId WorkZone,
+        ProtoId<JobPrototype>? Job,
+        ProtoId<NCLivelihoodProfilePrototype>? Livelihood,
+        ProtoId<NCFactionProfilePrototype>? Faction,
+        string FactionRole);
 }

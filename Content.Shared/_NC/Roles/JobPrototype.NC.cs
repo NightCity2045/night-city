@@ -11,4 +11,11 @@ public sealed partial class JobPrototype
     /// </summary>
     [DataField("salary")]
     public int Salary { get; private set; }
+
+    /// <summary>
+    /// Whether this existing player-facing job may also be assigned to a persistent A-Life actor.
+    /// This does not consume or alter station/player job slots.
+    /// </summary>
+    [DataField("ncNpcAllowed")]
+    public bool NCNpcAllowed { get; private set; } = true;
 }

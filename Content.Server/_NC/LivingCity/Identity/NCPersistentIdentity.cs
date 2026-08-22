@@ -45,6 +45,19 @@ public static class NCPersistentIdentity
     public static NCAccountId SystemAccount(string stableAccountId) =>
         new(CreateGuid($"account/system/{Normalize(stableAccountId)}"));
 
+    /// <summary>
+    /// Stable identity for an authored initial employment. Later dismiss/re-hire operations may deliberately use a
+    /// new identity, while population bootstrap retries always converge on this one relation.
+    /// </summary>
+    public static NCEmploymentId Employment(NCPartyRef employee, NCPartyRef employer, string positionId)
+    {
+        if (!employee.IsValid || !employer.IsValid || string.IsNullOrWhiteSpace(positionId))
+            throw new ArgumentOutOfRangeException(nameof(employee));
+
+        return new NCEmploymentId(CreateGuid(
+            $"employment/bootstrap/{employee}/{employer}/{Normalize(positionId)}"));
+    }
+
     public static Guid Command(string domain, string operation, string stableKey) =>
         CreateGuid($"command/{Normalize(domain)}/{Normalize(operation)}/{Normalize(stableKey)}");
 

@@ -10,6 +10,7 @@
   supervisors: nc-job-supervisors-militech-command
   weight: 100
   salary: 650
+  ncNpcAllowed: false
   setPreference: false
   startingGear: MilitechChiefGear
   icon: JobIconHeadOfSecurity
