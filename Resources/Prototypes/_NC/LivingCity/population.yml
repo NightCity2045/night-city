@@ -102,6 +102,15 @@
 
 # This explicit profile is an idempotent abstract bootstrap for the two currently authored district zones.
 # Mappers can later add apartment/building profiles without changing these stable district resident identities.
+- type: ncCityResidenceAllocationPolicy
+  id: NCDefaultResidenceAllocationPolicy
+  snapshotPageSize: 250
+  maximumActorsPerRun: 20000
+  maximumConcurrentMutations: 8
+  physicalResidentsPerApartment: 2
+  # Most residents remain coordinate-free; mapped apartments are reserved for a visible minority.
+  physicalResidentShare: 0.25
+
 - type: ncCityPopulationProfile
   id: NCLivingCityDistrictBootstrapPopulation
   scopeId: 6ea21928-4d15-47cc-b66f-f925f3468c13

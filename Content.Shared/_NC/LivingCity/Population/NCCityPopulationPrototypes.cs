@@ -119,6 +119,32 @@ public sealed partial class NCCityPopulationImportPolicyPrototype : IPrototype
 }
 
 /// <summary>
+/// Controls the explicit mapping of a bounded minority of residents into mapper-authored apartment zones.
+/// Remaining residents keep their district-level, coordinate-free homes.
+/// </summary>
+[Prototype("ncCityResidenceAllocationPolicy")]
+public sealed partial class NCCityResidenceAllocationPolicyPrototype : IPrototype
+{
+    [IdDataField]
+    public string ID { get; private set; } = default!;
+
+    [DataField]
+    public int SnapshotPageSize { get; private set; } = 250;
+
+    [DataField]
+    public int MaximumActorsPerRun { get; private set; } = 20000;
+
+    [DataField]
+    public int MaximumConcurrentMutations { get; private set; } = 8;
+
+    [DataField]
+    public int PhysicalResidentsPerApartment { get; private set; } = 2;
+
+    [DataField]
+    public float PhysicalResidentShare { get; private set; } = 0.25f;
+}
+
+/// <summary>
 /// Bounded active-round projection policy. Activity weights are gameplay data; the projection system only applies
 /// the configured table and never embeds a hidden simulation formula.
 /// </summary>

@@ -120,7 +120,8 @@ public sealed partial class NCCityPhysicalExecutionSystem
             component.Availability,
             component.NextScheduleUpdateAt,
             component.GoalId == Guid.Empty ? Guid.NewGuid() : component.GoalId,
-            AuditSource: "system:physical-execution");
+            AuditSource: "system:physical-execution",
+            PresenceMode: component.PresenceMode);
         _pendingMutations[component.ActorId] = new PendingLocationMutation(
             entityUid,
             kind,

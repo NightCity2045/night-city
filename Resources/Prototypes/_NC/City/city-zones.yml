@@ -218,3 +218,133 @@
       - 216,186
       - 218,171
       - 218,152
+  - id: 8acce8f0-9929-484f-9daa-95b3f37a82f6
+    kind: Street
+    parent: c20733c2-faa0-4d43-aaf6-37c3f6bd886b
+    name: "E 22nd Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 57,31
+      - 57,4
+      - -0,4
+      - 0,31
+  - id: e1acb51c-9b2b-4b05-af52-011bcef55ebe
+    kind: Street
+    parent: c20733c2-faa0-4d43-aaf6-37c3f6bd886b
+    name: "23rd Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -0,4
+      - 57,4
+      - 57,-20
+      - 15,-20
+      - 15,-23
+      - -0,-23
+  - id: 624ada25-1e0d-4240-a6c2-0884d28abcf5
+    kind: Street
+    parent: c20733c2-faa0-4d43-aaf6-37c3f6bd886b
+    name: "24th Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 0,-23
+      - 15,-23
+      - 15,-20
+      - 57,-20
+      - 57,-45
+      - 46,-45
+      - 46,-43
+      - 2,-43
+      - 2,-39
+      - -0,-39
+  - id: ddd0d6b9-f239-4ecb-b704-bda14df210b1
+    kind: Street
+    parent: c20733c2-faa0-4d43-aaf6-37c3f6bd886b
+    name: "Prospect Ave."
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -0,31
+      - 0,-39
+      - -5,-39
+      - -5,-35
+      - -28,-35
+      - -28,-32
+      - -39,-32
+      - -39,-39
+      - -41,-39
+      - -41,-16
+      - -31,-16
+      - -31,31
+  - id: 4f59226c-9e3f-4300-b981-7b1951a9f7c1
+    kind: Street
+    parent: c20733c2-faa0-4d43-aaf6-37c3f6bd886b
+    name: "Potomac Ave."
+    geometry:
+    - kind: Polygon
+      z: 0
+      vertices:
+      - -41,-39
+      - -71,-39
+      - -71,-3
+      - -82,-3
+      - -82,31
+      - -31,31
+      - -31,-16
+      - -41,-16
+  - id: 0f025855-4327-482a-8a82-1cdd1b8087d5
+    kind: Building
+    parent: ddd0d6b9-f239-4ecb-b704-bda14df210b1
+    name: "487th Prospect Building"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -22,-17
+      - -5,-17
+      - -5,-32
+      - -5,-33
+      - -22,-33
+  - id: 0cb44ded-299d-432a-84a6-b2e16a7c432b
+    kind: Apartment
+    parent: 0f025855-4327-482a-8a82-1cdd1b8087d5
+    name: "302th Apartment"
+    geometry:
+    - kind: Polygon
+      z: 0
+      vertices:
+      - -17,-22
+      - -5,-22
+      - -5,-33
+      - -17,-33
+  - id: c62f9270-8924-422f-af9c-1a1621f70e57
+    kind: Building
+    parent: 624ada25-1e0d-4240-a6c2-0884d28abcf5
+    name: "24th Street Building"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 5,-39
+      - 22,-39
+      - 22,-31
+      - 5,-31
+  - id: 1f03e315-ac7d-4f1c-9efc-7015f884cb86
+    kind: Apartment
+    parent: c62f9270-8924-422f-af9c-1a1621f70e57
+    name: "523th Apart"
+    geometry:
+    - kind: Polygon
+      z: 0
+      vertices:
+      - 12,-34
+      - 21,-34
+      - 22,-34
+      - 22,-39
+      - 12,-39

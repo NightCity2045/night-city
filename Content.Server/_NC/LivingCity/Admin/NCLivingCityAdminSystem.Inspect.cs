@@ -104,6 +104,8 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("location", "current-zone", snapshot.Location.CurrentZone);
         fields.Add("location", "destination-zone", snapshot.Location.DestinationZone);
         fields.Add("location", "home-zone", snapshot.Location.HomeZone);
+        fields.Add("location", "residence-kind",
+            _zones.TryGetApartmentId(snapshot.Location.HomeZone, out _) ? "physical-apartment" : "abstract");
         fields.Add("location", "work-zone", snapshot.Location.WorkZone);
         fields.Add("location", "travel-phase", snapshot.Location.TravelPhase);
         fields.Add("location", "travel-mode", snapshot.Location.TravelMode);
@@ -112,6 +114,7 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("schedule", "activity", snapshot.Schedule.CurrentActivity);
         fields.Add("schedule", "goal", snapshot.Schedule.CurrentGoal);
         fields.Add("schedule", "availability", snapshot.Schedule.Availability);
+        fields.Add("schedule", "presence", snapshot.Schedule.PresenceMode);
         fields.Add("schedule", "next-update", snapshot.Schedule.NextUpdateAt.Elapsed);
         fields.Add("schedule", "commitment-count", snapshot.Schedule.Commitments.Length);
         fields.Add("physical-execution", "materialized", _actorRuntime.TryGetEntity(actorId, out var runtimeEntity));

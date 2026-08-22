@@ -9,6 +9,7 @@ using System.Numerics;
 using Content.Server._NC.City.Zones;
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.City.Zones;
+using Content.Shared._NC.City.Zones.Prototypes;
 using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.Coordinates.Systems;
 using Robust.Shared.Map;
@@ -44,6 +45,8 @@ public sealed class NCCitySpawnCandidateSystem : EntitySystem
     private readonly Dictionary<NCCitySpawnCandidateId, NCCitySpawnCandidateInfo> _candidates = [];
     private readonly Dictionary<EntityUid, HashSet<NCCitySpawnCandidateId>> _byGrid = [];
     private readonly Dictionary<ProtoId<NCCitySpawnCandidateProfilePrototype>, List<NCCitySpawnCandidateId>> _byProfile = [];
+    private readonly Dictionary<(ProtoId<NCCitySpawnCandidateProfilePrototype> Profile, NCZoneId Ancestor),
+        List<NCCitySpawnCandidateId>> _byProfileAndAncestor = [];
     private readonly HashSet<EntityUid> _analyzedGrids = [];
     private readonly List<NCRoomNavigationSample> _samples = [];
     private readonly List<NCRoomPortalInfo> _portals = [];
@@ -80,6 +83,28 @@ public sealed class NCCitySpawnCandidateSystem : EntitySystem
     }
 
     /// <summary>
+    /// Resolves candidates below a semantic district/sector/building. This permits abstract public actors to enter
+    /// authored map space without inventing coordinates for their strategic home or work district.
+    /// </summary>
+    public void GetCandidatesInHierarchy(
+        ProtoId<NCCitySpawnCandidateProfilePrototype> profile,
+        NCZoneId ancestorZoneId,
+        List<NCCitySpawnCandidateInfo> result)
+    {
+        result.Clear();
+        if (!_byProfileAndAncestor.TryGetValue((profile, ancestorZoneId), out var candidateIds))
+            return;
+
+        foreach (var candidateId in candidateIds)
+        {
+            if (_candidates.TryGetValue(candidateId, out var candidate))
+                result.Add(candidate);
+        }
+
+        result.Sort(CompareCandidates);
+    }
+
+    /// <summary>
     /// Deterministically selects from an already stable sorted index. A-Life can persist its own seed, never an ID.
     /// </summary>
     public bool TrySelectCandidate(
@@ -91,6 +116,27 @@ public sealed class NCCitySpawnCandidateSystem : EntitySystem
     {
         var candidates = new List<NCCitySpawnCandidateInfo>();
         GetCandidates(profile, zoneId, candidates);
+        if (predicate != null)
+            candidates.RemoveAll(item => !predicate(item));
+        if (candidates.Count == 0)
+        {
+            candidate = default;
+            return false;
+        }
+
+        candidate = candidates[(int) (selectionSeed % (uint) candidates.Count)];
+        return true;
+    }
+
+    public bool TrySelectCandidateInHierarchy(
+        ProtoId<NCCitySpawnCandidateProfilePrototype> profile,
+        NCZoneId ancestorZoneId,
+        uint selectionSeed,
+        out NCCitySpawnCandidateInfo candidate,
+        Func<NCCitySpawnCandidateInfo, bool>? predicate = null)
+    {
+        var candidates = new List<NCCitySpawnCandidateInfo>();
+        GetCandidatesInHierarchy(profile, ancestorZoneId, candidates);
         if (predicate != null)
             candidates.RemoveAll(item => !predicate(item));
         if (candidates.Count == 0)
@@ -117,7 +163,9 @@ public sealed class NCCitySpawnCandidateSystem : EntitySystem
 
     private void OnPrototypesReloaded(PrototypesReloadedEventArgs args)
     {
-        if (!args.WasModified<NCCitySpawnCandidateProfilePrototype>())
+        if (!args.WasModified<NCCitySpawnCandidateProfilePrototype>() &&
+            !args.WasModified<NCZoneSetPrototype>() &&
+            !args.WasModified<NCZoneKindPrototype>())
             return;
 
         foreach (var gridUid in _analyzedGrids.ToArray())
@@ -207,6 +255,7 @@ public sealed class NCCitySpawnCandidateSystem : EntitySystem
             if (!_byProfile.TryGetValue(candidate.Profile, out var profileCandidates))
                 _byProfile[candidate.Profile] = profileCandidates = [];
             profileCandidates.Add(candidate.Id);
+            IndexCandidateHierarchy(candidate, true);
             accepted.Add(sample.Target);
         }
     }
@@ -275,6 +324,34 @@ public sealed class NCCitySpawnCandidateSystem : EntitySystem
             profileCandidates.Remove(candidateId);
             if (profileCandidates.Count == 0)
                 _byProfile.Remove(candidate.Profile);
+            IndexCandidateHierarchy(candidate, false);
+        }
+    }
+
+    /// <summary>
+    /// Maintains a bounded hierarchy index when room graphs change, avoiding district-wide candidate scans during
+    /// the hot materialization and physical-routing paths.
+    /// </summary>
+    private void IndexCandidateHierarchy(NCCitySpawnCandidateInfo candidate, bool add)
+    {
+        var current = candidate.ZoneId;
+        var depth = 0;
+        while (current.IsValid && depth++ < 16 && _zones.TryGetZone(current, out var zone))
+        {
+            var key = (candidate.Profile, current);
+            if (add)
+            {
+                if (!_byProfileAndAncestor.TryGetValue(key, out var candidates))
+                    _byProfileAndAncestor[key] = candidates = [];
+                candidates.Add(candidate.Id);
+            }
+            else if (_byProfileAndAncestor.TryGetValue(key, out var candidates))
+            {
+                candidates.Remove(candidate.Id);
+                if (candidates.Count == 0)
+                    _byProfileAndAncestor.Remove(key);
+            }
+            current = zone.Parent;
         }
     }
 

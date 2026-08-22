@@ -56,6 +56,20 @@ public enum NCCityActorAvailability : byte
     Unavailable,
 }
 
+/// <summary>
+/// Distinguishes an actor's semantic activity from whether that activity has a physical place on the loaded map.
+/// AbstractHome deliberately has no coordinates and therefore must never create an ECS entity.
+/// </summary>
+[Serializable, NetSerializable]
+public enum NCCityActorPresenceMode : byte
+{
+    // Reserved migration value for snapshots written before explicit presence existed.
+    Unknown,
+    Public,
+    AbstractHome,
+    PhysicalHome,
+}
+
 [Serializable, NetSerializable]
 public enum NCCityRoutineTarget : byte
 {
@@ -124,7 +138,11 @@ public sealed record NCCityActorScheduleSummary(
     string CurrentActivity,
     string CurrentGoal,
     NCCityActorAvailability Availability,
-    NCActiveWorldTime NextUpdateAt);
+    NCActiveWorldTime NextUpdateAt)
+{
+    // An init-only trailing member keeps version-one JSON snapshots readable; absent data defaults to Public.
+    public NCCityActorPresenceMode PresenceMode { get; init; } = NCCityActorPresenceMode.Unknown;
+}
 
 /// <summary>
 /// Lifecycle invariants shared by every actor subdomain. Dead is irreversible through normal domain commands.

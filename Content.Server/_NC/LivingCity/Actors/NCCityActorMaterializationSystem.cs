@@ -380,6 +380,13 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
                 "The actor's authoritative medical state could not be restored.");
             return;
         }
+        if (snapshot.Schedule.PresenceMode == NCCityActorPresenceMode.AbstractHome &&
+            snapshot.Location.TravelPhase == NCCityActorTravelPhase.Stationary)
+        {
+            CompleteTerminal(pending, NCCityMaterializationRequestStatus.Rejected,
+                "An actor at an abstract residence has no physical map entity.");
+            return;
+        }
 
         if (!_physicalization.TryMaterialize(entity, inventoryPlan, out var inventoryError))
         {
@@ -405,7 +412,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         out NCCitySpawnCandidateInfo selected)
     {
         selected = default;
-        _spawnCandidates.GetCandidates(archetype.SpawnCandidateProfile, zoneId, _candidateBuffer);
+        _spawnCandidates.GetCandidatesInHierarchy(archetype.SpawnCandidateProfile, zoneId, _candidateBuffer);
         if (_candidateBuffer.Count == 0 || _policy == null)
             return false;
 

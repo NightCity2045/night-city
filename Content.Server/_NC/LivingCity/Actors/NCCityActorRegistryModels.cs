@@ -93,6 +93,19 @@ public sealed record NCCityActorLocationMutationRequest(
     NCActiveWorldTime NextUpdateAt,
     Guid CorrelationId,
     Guid? CausationId = null,
+    string AuditSource = "system",
+    NCCityActorPresenceMode PresenceMode = NCCityActorPresenceMode.Public);
+
+/// <summary>
+/// Changes only the durable residence reference. The scheduler decides when and how the actor travels there.
+/// </summary>
+public sealed record NCCityActorResidenceMutationRequest(
+    Guid CommandId,
+    NCActorId ActorId,
+    long ExpectedVersion,
+    NCZoneId HomeZone,
+    Guid CorrelationId,
+    Guid? CausationId = null,
     string AuditSource = "system");
 
 public sealed record NCCityActorStatusMutationRequest(
@@ -147,7 +160,8 @@ public sealed class NCCityActorPersistedEvent(
     NCZoneId currentZone,
     string archetypeId,
     NCCityActorCognitionTier cognitionTier,
-    NCCityActorAvailability availability) : EntityEventArgs
+    NCCityActorAvailability availability,
+    NCCityActorPresenceMode presenceMode) : EntityEventArgs
 {
     public NCActorId ActorId { get; } = actorId;
     public long AggregateVersion { get; } = aggregateVersion;
@@ -161,6 +175,7 @@ public sealed class NCCityActorPersistedEvent(
     public string ArchetypeId { get; } = archetypeId;
     public NCCityActorCognitionTier CognitionTier { get; } = cognitionTier;
     public NCCityActorAvailability Availability { get; } = availability;
+    public NCCityActorPresenceMode PresenceMode { get; } = presenceMode;
 }
 
 /// <summary>

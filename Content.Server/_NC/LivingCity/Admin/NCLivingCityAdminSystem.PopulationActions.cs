@@ -92,6 +92,8 @@ public sealed partial class NCLivingCityAdminSystem
             NCLivingCityAdminPopulationAction.ImportProfile => ImportPopulationProfileAsync(request, administrator),
             NCLivingCityAdminPopulationAction.RebuildZoneStates =>
                 Task.FromResult(RebuildZoneStateProjections()),
+            NCLivingCityAdminPopulationAction.AllocateResidences =>
+                AllocateResidencesAsync(request, administrator),
             _ => Task.FromResult(new PopulationActionExecution(
                 NCLivingCityAdminMutationStatus.Rejected, [], "unsupported-population-action")),
         };
@@ -156,6 +158,28 @@ public sealed partial class NCLivingCityAdminSystem
             started ? null : "active-world-round-required");
     }
 
+    private async Task<PopulationActionExecution> AllocateResidencesAsync(
+        NCLivingCityAdminPopulationActionRequest request,
+        Robust.Shared.Network.NetUserId administrator)
+    {
+        var report = await _residences.AllocateAsync(AdminAuditSource(administrator, request.Reason));
+        var fields = new FieldBuilder();
+        fields.Add("residences", "status", report.Status);
+        fields.Add("residences", "scanned-actors", report.ScannedActors);
+        fields.Add("residences", "apartment-zones", report.ApartmentZones);
+        fields.Add("residences", "districts-with-apartments", report.DistrictsWithApartments);
+        fields.Add("residences", "existing-physical", report.ExistingPhysicalResidents);
+        fields.Add("residences", "newly-assigned", report.AssignedPhysicalResidents);
+        fields.Add("residences", "abstract", report.AbstractResidents);
+        fields.Add("residences", "unresolved", report.UnresolvedResidents);
+        fields.Add("residences", "failed-mutations", report.FailedMutations);
+        var success = report.Status == NCCityResidenceAllocationStatus.Completed;
+        return new PopulationActionExecution(
+            success ? NCLivingCityAdminMutationStatus.Applied : NCLivingCityAdminMutationStatus.Rejected,
+            fields.Build(),
+            success ? null : report.Error ?? "residence-allocation-not-complete");
+    }
+
     private static bool ValidPopulationActionRequest(
         NCLivingCityAdminPopulationActionRequest request,
         bool validationOnly)
@@ -181,9 +205,12 @@ public sealed partial class NCLivingCityAdminSystem
             request.Reason.Trim());
 
     private static string PopulationAuditTarget(NCLivingCityAdminPopulationActionRequest request) =>
-        request.Action == NCLivingCityAdminPopulationAction.RebuildZoneStates
-            ? "all-zone-state-projections"
-            : $"profile={request.ProfileId.Trim()}";
+        request.Action switch
+        {
+            NCLivingCityAdminPopulationAction.RebuildZoneStates => "all-zone-state-projections",
+            NCLivingCityAdminPopulationAction.AllocateResidences => "all-resident-homes",
+            _ => $"profile={request.ProfileId.Trim()}",
+        };
 
     private void SendPopulationResult(
         EntitySessionEventArgs args,

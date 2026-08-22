@@ -12,6 +12,7 @@ namespace Content.Client._NC.LivingCity.Admin;
 public sealed partial class NCLivingCityAdminClientSystem : EntitySystem
 {
     public event Action<NCLivingCityAdminOverviewSnapshot>? OverviewReceived;
+    public event Action<NCLivingCityAdminObserverSnapshot>? ObserverReceived;
     public event Action<NCLivingCityAdminInspectResult>? InspectionReceived;
     public event Action<NCLivingCityAdminActorActionResult>? ActorActionReceived;
     public event Action<NCLivingCityAdminGroupActionResult>? GroupActionReceived;
@@ -23,6 +24,7 @@ public sealed partial class NCLivingCityAdminClientSystem : EntitySystem
     {
         base.Initialize();
         SubscribeNetworkEvent<NCLivingCityAdminOverviewSnapshot>(OnOverview);
+        SubscribeNetworkEvent<NCLivingCityAdminObserverSnapshot>(OnObserver);
         SubscribeNetworkEvent<NCLivingCityAdminInspectResult>(OnInspection);
         SubscribeNetworkEvent<NCLivingCityAdminActorActionResult>(OnActorAction);
         SubscribeNetworkEvent<NCLivingCityAdminGroupActionResult>(OnGroupAction);
@@ -35,6 +37,13 @@ public sealed partial class NCLivingCityAdminClientSystem : EntitySystem
     {
         var requestId = Guid.NewGuid();
         RaiseNetworkEvent(new NCLivingCityAdminOverviewRequest(requestId));
+        return requestId;
+    }
+
+    public Guid RequestObserver(string zoneId, string actorId)
+    {
+        var requestId = Guid.NewGuid();
+        RaiseNetworkEvent(new NCLivingCityAdminObserverRequest(requestId, zoneId, actorId));
         return requestId;
     }
 
@@ -167,6 +176,8 @@ public sealed partial class NCLivingCityAdminClientSystem : EntitySystem
     }
 
     private void OnOverview(NCLivingCityAdminOverviewSnapshot snapshot) => OverviewReceived?.Invoke(snapshot);
+
+    private void OnObserver(NCLivingCityAdminObserverSnapshot snapshot) => ObserverReceived?.Invoke(snapshot);
 
     private void OnInspection(NCLivingCityAdminInspectResult result) => InspectionReceived?.Invoke(result);
 

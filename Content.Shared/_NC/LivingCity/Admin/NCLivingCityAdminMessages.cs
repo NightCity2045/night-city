@@ -92,6 +92,7 @@ public enum NCLivingCityAdminPopulationAction : byte
     ValidateProfile,
     ImportProfile,
     RebuildZoneStates,
+    AllocateResidences,
 }
 
 [Serializable, NetSerializable]
@@ -149,6 +150,61 @@ public sealed class NCLivingCityAdminOverviewSnapshot(
     public Guid RequestId { get; } = requestId;
     public bool Authorized { get; } = authorized;
     public NCLivingCityAdminField[] Fields { get; } = fields;
+    public string? Error { get; } = error;
+}
+
+/// <summary>
+/// Read-only, query-driven A-Life observer request. Blank filters return district aggregates without enumerating
+/// persistent actors; an exact actor identity enables one bounded diagnostic trace.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class NCLivingCityAdminObserverRequest(
+    Guid requestId,
+    string zoneId,
+    string actorId) : EntityEventArgs
+{
+    public Guid RequestId { get; } = requestId;
+    public string ZoneId { get; } = zoneId;
+    public string ActorId { get; } = actorId;
+}
+
+/// <summary>
+/// One district or sector row prepared by the authoritative projection. Signal values use -1 when their source is
+/// unavailable, keeping zero available as a meaningful city-state value.
+/// </summary>
+[Serializable, NetSerializable]
+public readonly record struct NCLivingCityAdminObserverZone(
+    string ZoneId,
+    string Name,
+    string Scope,
+    int TotalActors,
+    int LivingActors,
+    int FrozenActors,
+    int TravelingActors,
+    int PublicActors,
+    int AbstractHomeActors,
+    int PhysicalHomeActors,
+    float Activity,
+    float Scarcity,
+    float Threat,
+    float Control);
+
+[Serializable, NetSerializable]
+public sealed class NCLivingCityAdminObserverSnapshot(
+    Guid requestId,
+    bool authorized,
+    NCLivingCityAdminField[] summaryFields,
+    NCLivingCityAdminObserverZone[] zones,
+    NCLivingCityAdminField[] actorFields,
+    string? actorError,
+    string? error) : EntityEventArgs
+{
+    public Guid RequestId { get; } = requestId;
+    public bool Authorized { get; } = authorized;
+    public NCLivingCityAdminField[] SummaryFields { get; } = summaryFields;
+    public NCLivingCityAdminObserverZone[] Zones { get; } = zones;
+    public NCLivingCityAdminField[] ActorFields { get; } = actorFields;
+    public string? ActorError { get; } = actorError;
     public string? Error { get; } = error;
 }
 

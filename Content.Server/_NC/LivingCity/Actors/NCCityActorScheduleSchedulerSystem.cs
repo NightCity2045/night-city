@@ -313,7 +313,8 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
             decision.Goal,
             decision.Availability,
             decision.NextUpdateAt,
-            Guid.NewGuid());
+            Guid.NewGuid(),
+            PresenceMode: decision.PresenceMode);
         _pendingMutations[actorId] = new PendingMutation(request);
         BeginMutation(generation, request);
     }

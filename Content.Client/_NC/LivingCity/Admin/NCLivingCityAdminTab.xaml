@@ -170,6 +170,7 @@
                                     <Button Name="ValidatePopulationProfile" Access="Public" Text="{Loc nc-living-city-admin-validate-population}" />
                                     <controls:ConfirmButton Name="ImportPopulationProfile" Access="Public" Text="{Loc nc-living-city-admin-import-population}" ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
                                     <controls:ConfirmButton Name="RebuildZoneStates" Access="Public" Text="{Loc nc-living-city-admin-rebuild-zone-states}" ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
+                                    <controls:ConfirmButton Name="AllocateResidences" Access="Public" Text="{Loc nc-living-city-admin-allocate-residences}" ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
                                 </GridContainer>
                             </BoxContainer>
                         </PanelContainer>
@@ -230,6 +231,41 @@
                         </PanelContainer>
                         <Label Name="GeographyStatus" Access="Public" Text="" FontColorOverride="#7896A1" />
                         <BoxContainer Name="GeographyFields" Access="Public" Orientation="Vertical" HorizontalExpand="True" SeparationOverride="8" />
+                    </BoxContainer>
+                </ScrollContainer>
+
+                <ScrollContainer VerticalExpand="True">
+                    <BoxContainer Orientation="Vertical" Margin="12" SeparationOverride="10">
+                        <PanelContainer HorizontalExpand="True">
+                            <PanelContainer.PanelOverride><gfx:StyleBoxFlat BackgroundColor="#10202A" BorderColor="#2E7588" BorderThickness="1" /></PanelContainer.PanelOverride>
+                            <BoxContainer Orientation="Vertical" Margin="12 10" SeparationOverride="7">
+                                <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                                    <BoxContainer Orientation="Vertical" HorizontalExpand="True">
+                                        <Label Text="{Loc nc-living-city-admin-observer-heading}" StyleClasses="LabelHeading" FontColorOverride="#9DE8F8" />
+                                        <Label Text="{Loc nc-living-city-admin-observer-help}" FontColorOverride="#7896A1" />
+                                    </BoxContainer>
+                                    <Button Name="RefreshObserver" Access="Public" Text="{Loc nc-living-city-admin-refresh}" MinWidth="120" />
+                                </BoxContainer>
+                                <GridContainer Columns="2" HSeparationOverride="6" VSeparationOverride="6">
+                                    <Label Text="{Loc nc-living-city-admin-observer-zone-filter}" StyleClasses="LabelKeyText" />
+                                    <LineEdit Name="ObserverZoneFilter" Access="Public" PlaceHolder="{Loc nc-living-city-admin-observer-zone-placeholder}" HorizontalExpand="True" />
+                                    <Label Text="{Loc nc-living-city-admin-observer-actor-filter}" StyleClasses="LabelKeyText" />
+                                    <LineEdit Name="ObserverActorId" Access="Public" PlaceHolder="{Loc nc-living-city-admin-placeholder-actor-id}" HorizontalExpand="True" />
+                                </GridContainer>
+                                <Label Name="ObserverStatus" Access="Public" Text="{Loc nc-living-city-admin-observer-waiting}" FontColorOverride="#7896A1" />
+                            </BoxContainer>
+                        </PanelContainer>
+
+                        <Label Text="{Loc nc-living-city-admin-observer-summary}" StyleClasses="LabelHeading" FontColorOverride="#9DE8F8" />
+                        <BoxContainer Name="ObserverSummaryFields" Access="Public" Orientation="Vertical" HorizontalExpand="True" SeparationOverride="8" />
+
+                        <Label Text="{Loc nc-living-city-admin-observer-zones}" StyleClasses="LabelHeading" FontColorOverride="#9DE8F8" />
+                        <Label Text="{Loc nc-living-city-admin-observer-zones-help}" FontColorOverride="#7896A1" />
+                        <GridContainer Name="ObserverZones" Access="Public" Columns="2" HorizontalExpand="True" HSeparationOverride="8" VSeparationOverride="8" />
+
+                        <Label Text="{Loc nc-living-city-admin-observer-actor-trace}" StyleClasses="LabelHeading" FontColorOverride="#9DE8F8" />
+                        <Label Name="ObserverActorStatus" Access="Public" Text="{Loc nc-living-city-admin-observer-no-actor}" FontColorOverride="#7896A1" />
+                        <BoxContainer Name="ObserverActorFields" Access="Public" Orientation="Vertical" HorizontalExpand="True" SeparationOverride="8" />
                     </BoxContainer>
                 </ScrollContainer>
             </TabContainer>

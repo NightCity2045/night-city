@@ -32,6 +32,7 @@ public sealed partial class NCLivingCityAdminTab : Control
     private NCLivingCityAdminClientSystem _admin = default!;
     private NCCityConnectivityDebugClientSystem _connectivityDebug = default!;
     private Guid _overviewRequest;
+    private Guid _observerRequest;
     private Guid _inspectRequest;
     private Guid _geographyInspectRequest;
     private bool _monitoringActive;
@@ -63,6 +64,7 @@ public sealed partial class NCLivingCityAdminTab : Control
         _admin = _systems.GetEntitySystem<NCLivingCityAdminClientSystem>();
         _connectivityDebug = _systems.GetEntitySystem<NCCityConnectivityDebugClientSystem>();
         _admin.OverviewReceived += OnOverview;
+        _admin.ObserverReceived += OnObserver;
         _admin.InspectionReceived += OnInspection;
         _admin.ActorActionReceived += OnActorAction;
         _admin.GroupActionReceived += OnGroupAction;
@@ -78,6 +80,7 @@ public sealed partial class NCLivingCityAdminTab : Control
         Tabs.SetTabTitle(4, Loc.GetString("nc-living-city-admin-population-tab"));
         Tabs.SetTabTitle(5, Loc.GetString("nc-living-city-admin-infrastructure-tab"));
         Tabs.SetTabTitle(6, Loc.GetString("nc-living-city-admin-geography-tab"));
+        Tabs.SetTabTitle(7, Loc.GetString("nc-living-city-admin-observer-tab"));
         foreach (var kind in Enum.GetValues<NCLivingCityAdminInspectKind>())
             InspectKind.AddItem(InspectKindName(kind), (int) kind);
         InspectKind.SelectId((int) NCLivingCityAdminInspectKind.Actor);
@@ -89,6 +92,7 @@ public sealed partial class NCLivingCityAdminTab : Control
         PopulationProfile.OnItemSelected += args => args.Button.SelectId(args.Id);
 
         RefreshOverview.OnPressed += _ => RequestOverview();
+        RefreshObserver.OnPressed += _ => RequestObserver();
         RunInspection.OnPressed += _ => RequestInspection();
         BindActorAction(CreateActor, NCLivingCityAdminActorAction.Create);
         BindActorAction(FreezeActor, NCLivingCityAdminActorAction.Freeze);
@@ -112,6 +116,7 @@ public sealed partial class NCLivingCityAdminTab : Control
             SendPopulationAction(NCLivingCityAdminPopulationAction.ValidateProfile, Guid.Empty);
         BindPopulationAction(ImportPopulationProfile, NCLivingCityAdminPopulationAction.ImportProfile);
         BindPopulationAction(RebuildZoneStates, NCLivingCityAdminPopulationAction.RebuildZoneStates);
+        BindPopulationAction(AllocateResidences, NCLivingCityAdminPopulationAction.AllocateResidences);
         BindInfrastructureAction(
             RequeueOutboxMessage,
             NCLivingCityAdminInfrastructureAction.RequeueOutboxMessage);
@@ -179,6 +184,7 @@ public sealed partial class NCLivingCityAdminTab : Control
         if (disposing)
         {
             _admin.OverviewReceived -= OnOverview;
+            _admin.ObserverReceived -= OnObserver;
             _admin.InspectionReceived -= OnInspection;
             _admin.ActorActionReceived -= OnActorAction;
             _admin.GroupActionReceived -= OnGroupAction;
@@ -201,6 +207,21 @@ public sealed partial class NCLivingCityAdminTab : Control
             RefreshOverview.Disabled = true;
         }
         _overviewRequest = _admin.RequestOverview();
+    }
+
+    private void RequestObserver(bool automatic = false)
+    {
+        if (_observerRequest != Guid.Empty)
+            return;
+
+        if (!automatic)
+        {
+            SetStatus(ObserverStatus, Loc.GetString("nc-living-city-admin-loading"), StatusTone.Loading);
+            RefreshObserver.Disabled = true;
+        }
+        _observerRequest = _admin.RequestObserver(
+            ObserverZoneFilter.Text.Trim(),
+            ObserverActorId.Text.Trim());
     }
 
     private void RequestInspection(bool automatic = false)
@@ -269,6 +290,52 @@ public sealed partial class NCLivingCityAdminTab : Control
                 .Where(static field => field.Section is "population-import" or "zone-states")
                 .ToArray();
             RenderFields(PopulationActionFields, populationFields);
+        }
+    }
+
+    private void OnObserver(NCLivingCityAdminObserverSnapshot snapshot)
+    {
+        if (snapshot.RequestId != _observerRequest)
+            return;
+        _observerRequest = Guid.Empty;
+        RefreshObserver.Disabled = false;
+        var success = snapshot.Authorized && snapshot.Error == null;
+        SetStatus(
+            ObserverStatus,
+            success
+                ? Loc.GetString("nc-living-city-admin-observer-live")
+                : snapshot.Error ?? Loc.GetString("nc-living-city-admin-not-authorized"),
+            success ? StatusTone.Success : StatusTone.Error);
+        if (!success)
+        {
+            ObserverSummaryFields.RemoveAllChildren();
+            ObserverZones.RemoveAllChildren();
+            ObserverActorFields.RemoveAllChildren();
+            return;
+        }
+
+        RenderFields(ObserverSummaryFields, snapshot.SummaryFields);
+        RenderObserverZones(ObserverZones, snapshot.Zones);
+        if (ObserverActorId.Text.Trim().Length == 0)
+        {
+            SetStatus(
+                ObserverActorStatus,
+                Loc.GetString("nc-living-city-admin-observer-no-actor"),
+                StatusTone.Info);
+            ObserverActorFields.RemoveAllChildren();
+        }
+        else if (snapshot.ActorError != null)
+        {
+            SetStatus(ObserverActorStatus, snapshot.ActorError, StatusTone.Error);
+            ObserverActorFields.RemoveAllChildren();
+        }
+        else
+        {
+            SetStatus(
+                ObserverActorStatus,
+                Loc.GetString("nc-living-city-admin-observer-actor-live"),
+                StatusTone.Success);
+            RenderFields(ObserverActorFields, snapshot.ActorFields);
         }
     }
 
@@ -766,7 +833,147 @@ public sealed partial class NCLivingCityAdminTab : Control
                     _lastGeographyInspectTarget,
                     true);
                 break;
+            case 7:
+                RequestObserver(true);
+                break;
         }
+    }
+
+    /// <summary>
+    /// Renders district projections as compact operational cards. Progress bars visualize normalized signals while
+    /// retaining exact actor counts for diagnosis.
+    /// </summary>
+    private static void RenderObserverZones(
+        GridContainer list,
+        IReadOnlyList<NCLivingCityAdminObserverZone> zones)
+    {
+        list.RemoveAllChildren();
+        if (zones.Count == 0)
+        {
+            list.AddChild(new Label
+            {
+                Text = Loc.GetString("nc-living-city-admin-observer-no-zones"),
+                FontColorOverride = Color.FromHex("#7896A1"),
+                Margin = new Thickness(4, 8),
+            });
+            return;
+        }
+
+        foreach (var zone in zones)
+        {
+            var content = new BoxContainer
+            {
+                Orientation = BoxContainer.LayoutOrientation.Vertical,
+                HorizontalExpand = true,
+                Margin = new Thickness(11, 9),
+            };
+            content.AddChild(new Label
+            {
+                Text = string.IsNullOrWhiteSpace(zone.Name) ? zone.ZoneId : zone.Name,
+                StyleClasses = { StyleClass.LabelHeading },
+                FontColorOverride = Color.FromHex("#9DE8F8"),
+                ClipText = true,
+                ToolTip = zone.Name,
+            });
+            content.AddChild(new Label
+            {
+                Text = $"{zone.Scope} // {zone.ZoneId}",
+                FontColorOverride = Color.FromHex("#587987"),
+                ClipText = true,
+                ToolTip = zone.ZoneId,
+                Margin = new Thickness(0, 0, 0, 6),
+            });
+
+            var population = new GridContainer
+            {
+                Columns = 2,
+                HorizontalExpand = true,
+            };
+            AddObserverValue(population, "nc-living-city-admin-observer-population", zone.TotalActors);
+            AddObserverValue(population, "nc-living-city-admin-observer-living", zone.LivingActors);
+            AddObserverValue(population, "nc-living-city-admin-observer-traveling", zone.TravelingActors);
+            AddObserverValue(population, "nc-living-city-admin-observer-frozen", zone.FrozenActors);
+            AddObserverValue(population, "nc-living-city-admin-observer-public", zone.PublicActors);
+            AddObserverValue(population, "nc-living-city-admin-observer-abstract-home", zone.AbstractHomeActors);
+            AddObserverValue(population, "nc-living-city-admin-observer-physical-home", zone.PhysicalHomeActors);
+            content.AddChild(population);
+
+            AddObserverSignal(content, "nc-living-city-admin-observer-activity", zone.Activity, "#4BC6E0");
+            AddObserverSignal(content, "nc-living-city-admin-observer-threat", zone.Threat, "#E7657C");
+            AddObserverSignal(content, "nc-living-city-admin-observer-scarcity", zone.Scarcity, "#D7A84A");
+            AddObserverSignal(content, "nc-living-city-admin-observer-control", zone.Control, "#77D6A0");
+
+            list.AddChild(new PanelContainer
+            {
+                HorizontalExpand = true,
+                PanelOverride = new StyleBoxFlat
+                {
+                    BackgroundColor = Color.FromHex("#101C25"),
+                    BorderColor = ObserverZoneColor(zone),
+                    BorderThickness = new Thickness(1, 1, 1, 2),
+                },
+                Children = { content },
+            });
+        }
+    }
+
+    private static void AddObserverValue(GridContainer grid, string localeKey, int value)
+    {
+        grid.AddChild(new Label
+        {
+            Text = Loc.GetString(localeKey),
+            FontColorOverride = Color.FromHex("#7896A1"),
+            Margin = new Thickness(0, 1, 8, 1),
+        });
+        grid.AddChild(new Label
+        {
+            Text = value.ToString(),
+            FontColorOverride = Color.FromHex("#D8F7FF"),
+            Margin = new Thickness(0, 1),
+        });
+    }
+
+    private static void AddObserverSignal(BoxContainer content, string localeKey, float value, string color)
+    {
+        var available = value >= 0f;
+        var row = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Horizontal,
+            HorizontalExpand = true,
+            Margin = new Thickness(0, 4, 0, 0),
+        };
+        row.AddChild(new Label
+        {
+            Text = Loc.GetString(localeKey),
+            HorizontalExpand = true,
+            FontColorOverride = Color.FromHex("#7896A1"),
+        });
+        row.AddChild(new Label
+        {
+            Text = available
+                ? $"{Math.Clamp(value, 0f, 1f) * 100f:0}%"
+                : Loc.GetString("nc-living-city-admin-observer-unavailable"),
+            FontColorOverride = available ? Color.FromHex(color) : Color.FromHex("#587987"),
+        });
+        content.AddChild(row);
+        content.AddChild(new ProgressBar
+        {
+            MinValue = 0f,
+            MaxValue = 1f,
+            Value = available ? Math.Clamp(value, 0f, 1f) : 0f,
+            SetHeight = 5f,
+            BackgroundStyleBoxOverride = new StyleBoxFlat { BackgroundColor = Color.FromHex("#182832") },
+            ForegroundStyleBoxOverride = new StyleBoxFlat { BackgroundColor = Color.FromHex(color) },
+        });
+    }
+
+    private static Color ObserverZoneColor(NCLivingCityAdminObserverZone zone)
+    {
+        if (zone.Threat >= 0.75f || zone.Scarcity >= 0.85f)
+            return Color.FromHex("#A94E65");
+        if (zone.Threat >= 0.45f || zone.Scarcity >= 0.55f)
+            return Color.FromHex("#A98A48");
+        return Color.FromHex("#315B70");
     }
 
     private void BindGeographyAction(

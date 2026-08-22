@@ -77,6 +77,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCCognitionRegistrySystem _cognitionRegistry = default!;
     [Dependency] private NCCognitionSystem _cognition = default!;
     [Dependency] private NCCityPopulationImportSystem _population = default!;
+    [Dependency] private NCCityResidenceAllocationSystem _residences = default!;
     [Dependency] private NCCityZoneStateRegistrySystem _zoneStateRegistry = default!;
     [Dependency] private NCCityZoneStateProjectionSystem _zoneStates = default!;
     [Dependency] private NCCityGroupRegistrySystem _groups = default!;
@@ -119,12 +120,14 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCLivingCityObservabilitySystem _observability = default!;
 
     private readonly Dictionary<NetUserId, TimeSpan> _lastRequestAt = [];
+    private readonly Dictionary<NetUserId, TimeSpan> _lastObserverRequestAt = [];
     private readonly NCLivingCityAdminConfirmationStore _confirmations = new();
 
     public override void Initialize()
     {
         base.Initialize();
         SubscribeNetworkEvent<NCLivingCityAdminOverviewRequest>(OnOverviewRequest);
+        SubscribeNetworkEvent<NCLivingCityAdminObserverRequest>(OnObserverRequest);
         SubscribeNetworkEvent<NCLivingCityAdminInspectRequest>(OnInspectRequest);
         SubscribeNetworkEvent<NCLivingCityAdminActorActionRequest>(OnActorActionRequest);
         SubscribeNetworkEvent<NCLivingCityAdminGroupActionRequest>(OnGroupActionRequest);
@@ -136,6 +139,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     public override void Shutdown()
     {
         _lastRequestAt.Clear();
+        _lastObserverRequestAt.Clear();
         _confirmations.Clear();
         base.Shutdown();
     }
@@ -311,6 +315,16 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("population-import", "existing", population.Existing);
         fields.Add("population-import", "conflicts", population.Conflicts);
         fields.Add("population-import", "failed", population.Failed);
+        fields.Add("residences", "allocation-running", _residences.IsRunning);
+        if (_residences.LastReport is { } residences)
+        {
+            fields.Add("residences", "last-status", residences.Status);
+            fields.Add("residences", "physical", residences.ExistingPhysicalResidents +
+                residences.AssignedPhysicalResidents);
+            fields.Add("residences", "abstract", residences.AbstractResidents);
+            fields.Add("residences", "apartments", residences.ApartmentZones);
+            fields.Add("residences", "unresolved", residences.UnresolvedResidents);
+        }
         fields.Add("zone-states", "initial-load-complete", _zoneStates.InitialLoadComplete);
         fields.Add("zone-states", "indexed-actors", _zoneStates.IndexedActorCount);
         fields.Add("zone-states", "scopes", _zoneStates.ScopeCount);
@@ -492,6 +506,17 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         if (_lastRequestAt.Count >= 256 && !_lastRequestAt.ContainsKey(userId))
             _lastRequestAt.Clear();
         _lastRequestAt[userId] = now;
+        return true;
+    }
+
+    private bool AcceptObserverRate(NetUserId userId)
+    {
+        var now = _timing.RealTime;
+        if (_lastObserverRequestAt.TryGetValue(userId, out var last) && now - last < RequestInterval)
+            return false;
+        if (_lastObserverRequestAt.Count >= 256 && !_lastObserverRequestAt.ContainsKey(userId))
+            _lastObserverRequestAt.Clear();
+        _lastObserverRequestAt[userId] = now;
         return true;
     }
 

@@ -450,7 +450,8 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
             schedule.Availability,
             schedule.NextUpdateAt,
             Guid.NewGuid(),
-            AuditSource: "system:abstract-travel");
+            AuditSource: "system:abstract-travel",
+            PresenceMode: schedule.PresenceMode);
         _pendingMutations[request.ActorId] = request;
         BeginMutation(_generation, request);
     }

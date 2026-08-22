@@ -12,6 +12,7 @@ using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Groups;
 using Content.Shared._NC.City.Connectivity;
+using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.LivingCity.Actors;
@@ -54,6 +55,7 @@ public sealed partial class NCCityPhysicalExecutionSystem
         component.Activity = snapshot.Schedule.CurrentActivity;
         component.Goal = snapshot.Schedule.CurrentGoal;
         component.Availability = snapshot.Schedule.Availability;
+        component.PresenceMode = snapshot.Schedule.PresenceMode;
         component.NextScheduleUpdateAt = snapshot.Schedule.NextUpdateAt;
 
         if (!_prototypes.TryIndex(
@@ -106,12 +108,36 @@ public sealed partial class NCCityPhysicalExecutionSystem
         }
 
         var seed = StableSelectionSeed(snapshot.Identity.ActorId.Value, location.DestinationZone.Value, actor.AggregateVersion);
-        if (!_spawnCandidates.TrySelectCandidate(
+        var compatible = (NCCitySpawnCandidateInfo candidate) =>
+            (candidate.TravelMode & location.TravelMode) == location.TravelMode;
+        var hasDestination = _spawnCandidates.TrySelectCandidate(
+            archetype.SpawnCandidateProfile,
+            location.DestinationZone,
+            seed,
+            out var destination,
+            compatible);
+        if (!hasDestination)
+        {
+            // Broad strategic destinations enter the physical map through a public street when one is authored.
+            hasDestination = _spawnCandidates.TrySelectCandidateInHierarchy(
                 archetype.SpawnCandidateProfile,
                 location.DestinationZone,
                 seed,
-                out var destination) ||
-            (destination.TravelMode & location.TravelMode) != location.TravelMode)
+                out destination,
+                candidate => compatible(candidate) &&
+                             _zones.TryGetZone(candidate.ZoneId, out var zone) &&
+                             zone.ContextSlot == NCZoneContextSlot.Street);
+        }
+        if (!hasDestination)
+        {
+            hasDestination = _spawnCandidates.TrySelectCandidateInHierarchy(
+                archetype.SpawnCandidateProfile,
+                location.DestinationZone,
+                seed,
+                out destination,
+                compatible);
+        }
+        if (!hasDestination)
         {
             FailGoal(entityUid, component, now, "destination-zone-has-no-compatible-navigation-target");
             return;

@@ -359,6 +359,11 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                     inspections++;
                     if (!inspected.Add(actorId) || !_catalog.TryGetValue(actorId, out var actor) ||
                         actor.Frozen || actor.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived ||
+                        actor is
+                        {
+                            PresenceMode: NCCityActorPresenceMode.AbstractHome,
+                            TravelPhase: NCCityActorTravelPhase.Stationary,
+                        } ||
                         _runtime.TryGetEntity(actorId, out _) || _materializationRequests.ContainsKey(actorId))
                     {
                         continue;
@@ -594,7 +599,9 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
             args.AggregateVersion,
             args.CurrentZone,
             args.Status,
-            args.Frozen));
+            args.Frozen,
+            args.TravelPhase,
+            args.PresenceMode));
     }
 
     private void UpsertCatalog(NCCityActorRecord record)
@@ -605,7 +612,9 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
             record.AggregateVersion,
             snapshot.Location.CurrentZone,
             snapshot.Lifecycle.Status,
-            snapshot.Lifecycle.Frozen));
+            snapshot.Lifecycle.Frozen,
+            snapshot.Location.TravelPhase,
+            snapshot.Schedule.PresenceMode));
     }
 
     private void UpsertCatalog(ActorCatalogEntry candidate)
@@ -722,7 +731,9 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
         long Version,
         NCZoneId CurrentZone,
         NCCityActorStatus Status,
-        bool Frozen);
+        bool Frozen,
+        NCCityActorTravelPhase TravelPhase,
+        NCCityActorPresenceMode PresenceMode);
 
     private sealed class ZoneBucket
     {

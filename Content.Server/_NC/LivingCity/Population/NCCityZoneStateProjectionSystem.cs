@@ -57,6 +57,40 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
     public int PendingScopeCount => _dirty.Count;
     public int InFlightWriteCount => _inFlightWrites;
 
+    /// <summary>
+    /// Copies bounded per-zone observer data from counters already maintained by actor persistence events. This is
+    /// request-driven and therefore never scans the persistent actor table or ECS entities.
+    /// </summary>
+    public void GetObserverProjections(List<NCCityZoneObserverProjection> result)
+    {
+        result.Clear();
+        if (_policy == null)
+            return;
+
+        foreach (var population in _population.Values)
+        {
+            var saturation = population.ScopeSlot == NCZoneContextSlot.District
+                ? _policy.DistrictActivitySaturation
+                : _policy.SectorActivitySaturation;
+            result.Add(new NCCityZoneObserverProjection(
+                population.ScopeZone,
+                population.ScopeSlot,
+                population.TotalActors,
+                population.LivingActors,
+                population.FrozenActors,
+                population.TravelingActors,
+                population.Presence(NCCityActorPresenceMode.Public),
+                population.Presence(NCCityActorPresenceMode.AbstractHome),
+                population.Presence(NCCityActorPresenceMode.PhysicalHome),
+                Math.Clamp((float) population.WeightedActivityUnits / saturation, 0f, 1f),
+                Signal(population.ScopeZone, NCCityStateSignalKind.Scarcity),
+                Signal(population.ScopeZone, NCCityStateSignalKind.Threat),
+                Signal(population.ScopeZone, NCCityStateSignalKind.Control)));
+        }
+
+        result.Sort(static (left, right) => left.ScopeZone.Value.CompareTo(right.ScopeZone.Value));
+    }
+
     public override void Initialize()
     {
         base.Initialize();
@@ -200,7 +234,8 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
             args.CognitionTier,
             args.Availability,
             args.Frozen,
-            args.TravelPhase),
+            args.TravelPhase,
+            args.PresenceMode),
             InitialLoadComplete);
     }
 
@@ -282,7 +317,8 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
                 actor.CognitionTier,
                 actor.Schedule.Availability,
                 actor.Lifecycle.Frozen,
-                actor.Location.TravelPhase),
+                actor.Location.TravelPhase,
+                actor.Schedule.PresenceMode),
                 false);
         }
 
@@ -558,6 +594,14 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
         return default;
     }
 
+    private float Signal(NCZoneId scopeZone, NCCityStateSignalKind kind)
+    {
+        return _externalSignals.TryGetValue((scopeZone, kind), out var signal) &&
+               signal.Availability == NCCityStateSignalAvailability.Available
+            ? signal.Value
+            : -1f;
+    }
+
     private static bool ValidatePolicy(NCCityZoneStatePolicyPrototype policy)
     {
         return policy.SnapshotPageSize is > 0 and <= 500 &&
@@ -605,7 +649,8 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
         NCCityActorCognitionTier CognitionTier,
         NCCityActorAvailability Availability,
         bool Frozen,
-        NCCityActorTravelPhase TravelPhase);
+        NCCityActorTravelPhase TravelPhase,
+        NCCityActorPresenceMode PresenceMode);
 
     private readonly record struct DirtyScope(NCZoneId ScopeZone, long Sequence);
     private readonly record struct DirtyState(long Sequence, NCActiveWorldTime DueAt);
@@ -623,6 +668,7 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
         private readonly Dictionary<NCCityActorStatus, int> _statuses = [];
         private readonly Dictionary<NCCityActorCognitionTier, int> _cognition = [];
         private readonly Dictionary<NCCityActorAvailability, int> _availability = [];
+        private readonly Dictionary<NCCityActorPresenceMode, int> _presence = [];
         private readonly Dictionary<string, int> _archetypes = new(StringComparer.Ordinal);
 
         public NCZoneId ScopeZone { get; } = scopeZone;
@@ -652,6 +698,7 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
             Adjust(_statuses, actor.Status, delta);
             Adjust(_cognition, actor.CognitionTier, delta);
             Adjust(_availability, actor.Availability, delta);
+            Adjust(_presence, actor.PresenceMode, delta);
             Adjust(_archetypes, actor.ArchetypeId, delta);
 
             var statusWeight = policy.ActivityStatusWeights.GetValueOrDefault(actor.Status);
@@ -698,6 +745,8 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
                     .Select(pair => new NCCityPopulationAvailabilityCount(pair.Key, pair.Value)).ToArray(),
                 archetypes.ToArray());
         }
+
+        public int Presence(NCCityActorPresenceMode mode) => _presence.GetValueOrDefault(mode);
 
         private static void Adjust<TKey>(Dictionary<TKey, int> counters, TKey key, int delta) where TKey : notnull
         {
