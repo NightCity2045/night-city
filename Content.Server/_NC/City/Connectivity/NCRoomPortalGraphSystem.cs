@@ -19,6 +19,7 @@ using Robust.Shared.Map.Components;
 using Robust.Shared.Physics;
 using Robust.Shared.Physics.Events;
 using Robust.Shared.Prototypes;
+using DiagnosticsStopwatch = System.Diagnostics.Stopwatch;
 
 namespace Content.Server._NC.City.Connectivity;
 
@@ -47,8 +48,28 @@ public sealed class NCRoomPortalGraphSystem : EntitySystem
 
     private long _nextRoomId = 1;
     private long _nextPortalId = 1;
+    private long _successfulRebuilds;
+    private long _structuralInvalidations;
+    private long _staticCollisionInvalidations;
+    private long _ignoredDynamicCollisionChanges;
+    private long _ignoredNonStructuralStaticCollisionChanges;
+    private double _lastRebuildMilliseconds;
+    private double _maximumRebuildMilliseconds;
 
     public long GraphVersion { get; private set; }
+
+    /// <summary>
+    /// Exposes O(1) topology counters for F7 without traversing the room graph.
+    /// </summary>
+    public NCRoomPortalGraphRuntimeCounters GetRuntimeCounters() => new(
+        _structurallyDirtyGrids.Count,
+        _successfulRebuilds,
+        _structuralInvalidations,
+        _staticCollisionInvalidations,
+        _ignoredDynamicCollisionChanges,
+        _ignoredNonStructuralStaticCollisionChanges,
+        _lastRebuildMilliseconds,
+        _maximumRebuildMilliseconds);
 
     public override void Initialize()
     {
@@ -242,10 +263,34 @@ public sealed class NCRoomPortalGraphSystem : EntitySystem
     {
         // Door state is evaluated by the eventual actor-specific traversal rule; opening a normal door must not
         // destroy and recreate room topology. Door creation/deletion is handled by component lifecycle events.
-        if (HasComp<DoorComponent>(args.BodyUid) || !TryComp(args.BodyUid, out TransformComponent? transform))
+        if (HasComp<DoorComponent>(args.BodyUid))
+            return;
+
+        // Moving mobs, pulled casualties and other dynamic bodies may toggle CanCollide during combat. They are
+        // transient pathfinding obstacles, never architectural room boundaries, so rebuilding the complete grid for
+        // them creates a topology/replan storm without changing any room or portal.
+        if (args.Body.BodyType != BodyType.Static)
+        {
+            _ignoredDynamicCollisionChanges++;
+            return;
+        }
+
+        // Static does not mean architectural. Puddles, triggers and visual effects use soft fixtures and are absent
+        // from the navigation graph, so treating their component startup as a wall change caused blood to delete
+        // the complete RoomGraph and expose a transient invalid topology to A-Life and F7 validation.
+        if (!_pathfinding.IsNCCityStructuralCollisionBody(args.BodyUid))
+        {
+            _ignoredNonStructuralStaticCollisionChanges++;
+            return;
+        }
+
+        if (!TryComp(args.BodyUid, out TransformComponent? transform))
             return;
         if (transform.GridUid is { } gridUid)
+        {
+            _staticCollisionInvalidations++;
             MarkStructurallyDirty(gridUid);
+        }
     }
 
     private void OnDoorStartup(Entity<DoorComponent> entity, ref ComponentStartup args)
@@ -302,9 +347,10 @@ public sealed class NCRoomPortalGraphSystem : EntitySystem
 
     private void MarkStructurallyDirty(EntityUid gridUid)
     {
-        _structurallyDirtyGrids.Add(gridUid);
-        // Structural invalidation fails closed until vanilla pathfinding publishes its rebuilt graph.
-        RemoveGridGraph(gridUid, true);
+        if (_structurallyDirtyGrids.Add(gridUid))
+            _structuralInvalidations++;
+        // Keep the last complete graph available while vanilla pathfinding rebuilds its dirty chunks. RebuildGrid
+        // replaces it synchronously once the new snapshot is ready, so consumers never observe an empty half-state.
     }
 
     private void RebuildGrid(EntityUid gridUid, long expectedRevision)
@@ -318,26 +364,35 @@ public sealed class NCRoomPortalGraphSystem : EntitySystem
             return;
         }
 
-        RemoveGridGraph(gridUid, false);
-        var graph = new GridGraph(gridUid, revision);
-        var nodes = BuildNavigationNodes(gridUid, rules.DoorDetectionRadius, out var doors);
-        BuildRooms(graph, nodes);
-        foreach (var node in nodes.Values)
+        var rebuildStarted = DiagnosticsStopwatch.GetTimestamp();
+        using (_city.BeginMutationBatch())
         {
-            if (!node.IsDoor && graph.NodeRooms.TryGetValue(node.Snapshot.Key, out var roomId))
+            RemoveGridGraph(gridUid, false);
+            var graph = new GridGraph(gridUid, revision);
+            var nodes = BuildNavigationNodes(gridUid, rules.DoorDetectionRadius, out var doors);
+            BuildRooms(graph, nodes);
+            foreach (var node in nodes.Values)
             {
-                graph.NavigationSamples.Add(new NCRoomNavigationSample(
-                    roomId,
-                    gridUid,
-                    node.ZoneId,
-                    node.CityCoordinates));
+                if (!node.IsDoor && graph.NodeRooms.TryGetValue(node.Snapshot.Key, out var roomId))
+                {
+                    graph.NavigationSamples.Add(new NCRoomNavigationSample(
+                        roomId,
+                        gridUid,
+                        node.ZoneId,
+                        node.CityCoordinates));
+                }
             }
+
+            var doorDetectionRadiusSquared = rules.DoorDetectionRadius * rules.DoorDetectionRadius;
+            BuildDoorPortals(graph, nodes, doors, doorDetectionRadiusSquared);
+            BuildOpenBoundaryPortals(graph, nodes, doors, doorDetectionRadiusSquared);
+            RegisterCityPortals(graph, rules);
+            _gridGraphs[gridUid] = graph;
         }
-        var doorDetectionRadiusSquared = rules.DoorDetectionRadius * rules.DoorDetectionRadius;
-        BuildDoorPortals(graph, nodes, doors, doorDetectionRadiusSquared);
-        BuildOpenBoundaryPortals(graph, nodes, doors, doorDetectionRadiusSquared);
-        RegisterCityPortals(graph, rules);
-        _gridGraphs[gridUid] = graph;
+
+        _successfulRebuilds++;
+        _lastRebuildMilliseconds = DiagnosticsStopwatch.GetElapsedTime(rebuildStarted).TotalMilliseconds;
+        _maximumRebuildMilliseconds = Math.Max(_maximumRebuildMilliseconds, _lastRebuildMilliseconds);
         InvalidateGraph(gridUid);
     }
 
@@ -610,8 +665,11 @@ public sealed class NCRoomPortalGraphSystem : EntitySystem
         if (!_gridGraphs.Remove(gridUid, out var graph))
             return;
 
-        foreach (var cityPortal in graph.CityPortals)
-            _city.RemovePortal(cityPortal);
+        using (_city.BeginMutationBatch())
+        {
+            foreach (var cityPortal in graph.CityPortals)
+                _city.RemovePortal(cityPortal);
+        }
         foreach (var portalId in graph.Portals)
         {
             if (!_portals.Remove(portalId, out var portal))
@@ -765,3 +823,13 @@ public sealed class NCRoomPortalGraphSystem : EntitySystem
         }
     }
 }
+
+public readonly record struct NCRoomPortalGraphRuntimeCounters(
+    int StructurallyDirtyGrids,
+    long SuccessfulRebuilds,
+    long StructuralInvalidations,
+    long StaticCollisionInvalidations,
+    long IgnoredDynamicCollisionChanges,
+    long IgnoredNonStructuralStaticCollisionChanges,
+    double LastRebuildMilliseconds,
+    double MaximumRebuildMilliseconds);

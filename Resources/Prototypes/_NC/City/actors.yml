@@ -86,12 +86,13 @@
   id: NCDefaultLocalPerception
   radius: 10
   maximumObservedEntities: 32
-  evaluationInterval: 0.5s
+  maximumLineOfSightChecks: 8
+  evaluationInterval: 0.75s
 
 - type: ncCityLocalPerceptionPolicy
   id: NCDefaultLocalPerceptionPolicy
   maximumTrackedActors: 160
-  maximumUpdatesPerTick: 16
+  maximumUpdatesPerTick: 4
 
 - type: ncCityPhysicalExecutionPolicy
   id: NCDefaultCityPhysicalExecutionPolicy
@@ -161,7 +162,8 @@
   maximumCandidateChecks: 32
   maximumCompletedRequestHistory: 2048
   maximumPriority: 1000
-  playerVisibilityExclusionRadius: 24
+  playerVisibilityExclusionRadius: 18
+  playerRelevanceMaximumRadius: 28
   actorOccupancyExclusionRadius: 1
   retryDelay: 2s
   defaultMaximumWait: 30s
@@ -172,11 +174,13 @@
   evaluationInterval: 1s
   clusterMergeRadius: 40
   clusterSplitRadius: 52
-  dematerializationRadius: 36
+  dematerializationRadius: 40
   materializationCooldown: 15s
+  offscreenGracePeriod: 8s
   globalSoftMaterializedBudget: 100
   globalHardMaterializedBudget: 150
-  clusterSoftMaterializedBudget: 32
+  # Leave headroom for incident attackers/defenders while keeping automatic local residents inexpensive.
+  clusterSoftMaterializedBudget: 6
   maximumAnchors: 128
   catalogPageSize: 250
   maximumCandidateInspectionsPerCluster: 128
@@ -197,10 +201,11 @@
   frameTimeEwmaAlpha: 0.15
   degradeSamples: 3
   recoverSamples: 5
-  elevatedEnterFrameMilliseconds: 28
-  elevatedExitFrameMilliseconds: 22
-  criticalEnterFrameMilliseconds: 45
-  criticalExitFrameMilliseconds: 32
+  # At 30 Hz, 33.33 ms is healthy. These thresholds react to real loop overruns, not the fixed simulation step.
+  elevatedEnterFrameMilliseconds: 42
+  elevatedExitFrameMilliseconds: 37
+  criticalEnterFrameMilliseconds: 65
+  criticalExitFrameMilliseconds: 50
   elevatedEnterWorkRatio: 0.12
   elevatedExitWorkRatio: 0.08
   criticalEnterWorkRatio: 0.18

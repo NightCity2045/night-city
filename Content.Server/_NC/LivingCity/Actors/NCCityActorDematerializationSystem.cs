@@ -6,6 +6,9 @@ using System.Numerics;
 using System.Linq;
 using System.Threading.Tasks;
 using Content.Server.Database;
+using Content.Server.NPC.Components;
+using Content.Server.NPC.HTN;
+using Content.Server.NPC.Systems;
 using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Actors.Domains;
@@ -18,11 +21,14 @@ using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 using Content.Shared.CombatMode;
+using Content.Shared.Movement.Pulling.Components;
+using Content.Shared.Movement.Pulling.Systems;
 using Robust.Server.Player;
 using Robust.Shared.Asynchronous;
 using Robust.Shared.Map;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 
 namespace Content.Server._NC.LivingCity.Actors;
 
@@ -38,6 +44,7 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private ITaskManager _taskManager = default!;
     [Dependency] private IPlayerManager _players = default!;
+    [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
     [Dependency] private NCZoneSystem _zones = default!;
@@ -48,6 +55,10 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
     [Dependency] private NCCityRelevanceAnchorIndexSystem _anchorIndex = default!;
     [Dependency] private NCAILoadGovernorSystem _loadGovernor = default!;
     [Dependency] private NCEconomicPhysicalizationSystem _physicalization = default!;
+    [Dependency] private SharedCombatModeSystem _combatMode = default!;
+    [Dependency] private HTNSystem _htn = default!;
+    [Dependency] private NPCSteeringSystem _steering = default!;
+    [Dependency] private PullingSystem _pulling = default!;
 
     private readonly Dictionary<Guid, NCCityDematerializationRequestState> _states = [];
     private readonly Dictionary<Guid, PendingRequest> _pending = [];
@@ -57,18 +68,26 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
     private readonly List<EntityUid> _anchorBuffer = [];
     private readonly Queue<Guid> _completedOrder = [];
     private readonly PriorityQueue<QueuedRequest, RequestPriority> _queue = new();
+    private readonly Queue<PreparedDespawn> _despawnQueue = [];
 
     private NCCityRelevancePolicyPrototype? _policy;
     private NCSessionEpoch _epoch;
     private int _generation;
     private int _inFlight;
     private long _sequence;
+    private long _queuedEntityDeletions;
+    private EntityUid? _lastQueuedEntityDeletion;
+    private GameTick _lastQueuedEntityDeletionTick;
     private bool _active;
 
     public bool IsActive => _active;
     public int PendingRequestCount => _pending.Count;
     public int InFlightCount => _inFlight;
     public int RetainedResultCount => _states.Count - _pending.Count;
+    public int PreparedDespawnCount => _despawnQueue.Count;
+    public long QueuedEntityDeletionCount => _queuedEntityDeletions;
+    public EntityUid? LastQueuedEntityDeletion => _lastQueuedEntityDeletion;
+    public GameTick LastQueuedEntityDeletionTick => _lastQueuedEntityDeletionTick;
 
     public override void Initialize()
     {
@@ -83,6 +102,7 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
+        FlushPreparedDespawns();
         if (!_active || _policy == null ||
             !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
         {
@@ -239,18 +259,29 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
 
     public bool IsEligible(NCActorId actorId, EntityUid entityUid, out string? error)
     {
-        return IsEligible(actorId, entityUid, false, out error);
+        return IsEligible(actorId, entityUid, false, false, out error);
+    }
+
+    public bool IsEligibleForOffscreenHandOff(NCActorId actorId, EntityUid entityUid, out string? error)
+    {
+        return IsEligible(actorId, entityUid, false, true, out error);
     }
 
     public bool IsEligibleForGroupHandOff(NCActorId actorId, EntityUid entityUid, out string? error)
     {
-        return IsEligible(actorId, entityUid, true, out error);
+        return IsEligible(actorId, entityUid, true, false, out error);
+    }
+
+    public bool IsEligibleForOffscreenGroupHandOff(NCActorId actorId, EntityUid entityUid, out string? error)
+    {
+        return IsEligible(actorId, entityUid, true, true, out error);
     }
 
     private bool IsEligible(
         NCActorId actorId,
         EntityUid entityUid,
         bool allowGroupHandOff,
+        bool allowOffscreenCombat,
         out string? error)
     {
         error = null;
@@ -280,7 +311,8 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
             return false;
         }
 
-        if (TryComp<CombatModeComponent>(entityUid, out var combat) && combat.IsInCombatMode)
+        if (!allowOffscreenCombat &&
+            TryComp<CombatModeComponent>(entityUid, out var combat) && combat.IsInCombatMode)
         {
             error = "The actor is in physical combat mode.";
             return false;
@@ -377,10 +409,14 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
             CompleteTerminal(pending, NCCityDematerializationStatus.AlreadyDematerialized, null);
             return;
         }
+        var allowOffscreenCombat = pending.Request.Reason is
+            NCCityDematerializationReason.PlayerIrrelevant or NCCityDematerializationReason.BudgetPressure or
+            NCCityDematerializationReason.GroupHandOff;
         if (!IsEligible(
                 pending.Request.ActorId,
                 entityUid,
                 pending.Request.Reason == NCCityDematerializationReason.GroupHandOff,
+                allowOffscreenCombat,
                 out var error))
         {
             _inFlight = Math.Max(0, _inFlight - 1);
@@ -500,10 +536,14 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
 
         var changedDuringCommit = PhysicalStateChangedDuringCommit(pending, entityUid, now);
         string? eligibilityError = null;
+        var allowOffscreenCombat = pending.Request.Reason is
+            NCCityDematerializationReason.PlayerIrrelevant or NCCityDematerializationReason.BudgetPressure or
+            NCCityDematerializationReason.GroupHandOff;
         var remainsEligible = IsEligible(
             pending.Request.ActorId,
             entityUid,
             pending.Request.Reason == NCCityDematerializationReason.GroupHandOff,
+            allowOffscreenCombat,
             out eligibilityError);
         if (changedDuringCommit || !remainsEligible)
         {
@@ -524,15 +564,75 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
             return;
         }
 
+        if (!TryPrepareForDespawn(entityUid, out var preparationError))
+        {
+            if (result.Health != null)
+            {
+                _domains.TrySetMaterializedHealthRevision(
+                    pending.Request.ActorId,
+                    entityUid,
+                    result.Health.AggregateVersion);
+            }
+            CompleteTerminal(pending, NCCityDematerializationStatus.CommittedRetained, preparationError);
+            return;
+        }
+
         _runtime.Unbind(entityUid);
         _physicalization.TryRelease(pending.Request.ActorId, entityUid);
-        QueueDel(entityUid);
+        _despawnQueue.Enqueue(new PreparedDespawn(entityUid, _timing.CurTick + 1));
         CompleteTerminal(pending, NCCityDematerializationStatus.Dematerialized, null);
         RaiseLocalEvent(new NCCityActorDematerializedEvent(
             requestId,
             pending.Request.ActorId,
             entityUid,
             pending.Request.Reason));
+    }
+
+    /// <summary>
+    /// Ends transient vanilla NPC ownership before the entity leaves the physical world. Pull joints and steering
+    /// are detached first so the following tick cannot delete an entity from a stale interaction hierarchy.
+    /// </summary>
+    private bool TryPrepareForDespawn(EntityUid entityUid, out string? error)
+    {
+        error = null;
+        if (!Exists(entityUid))
+            return true;
+
+        if (TryComp<PullableComponent>(entityUid, out var pullable) &&
+            pullable.Puller != null && !_pulling.TryStopPull(entityUid, pullable))
+        {
+            error = "The actor could not leave an active pull relationship.";
+            return false;
+        }
+        if (TryComp<PullerComponent>(entityUid, out var puller) && puller.Pulling is { } pulled &&
+            TryComp<PullableComponent>(pulled, out var pulledComponent) &&
+            !_pulling.TryStopPull(pulled, pulledComponent, entityUid))
+        {
+            error = "The actor could not release the entity it was pulling.";
+            return false;
+        }
+
+        _steering.Unregister(entityUid);
+        if (TryComp<HTNComponent>(entityUid, out var htn))
+            _htn.SetHTNEnabled((entityUid, htn), false);
+        if (TryComp<CombatModeComponent>(entityUid, out var combat))
+            _combatMode.SetInCombatMode(entityUid, false, combat);
+        return true;
+    }
+
+    private void FlushPreparedDespawns()
+    {
+        while (_despawnQueue.TryPeek(out var prepared) && prepared.ReadyAt <= _timing.CurTick)
+        {
+            _despawnQueue.Dequeue();
+            if (!Exists(prepared.EntityUid))
+                continue;
+
+            QueueDel(prepared.EntityUid);
+            _queuedEntityDeletions++;
+            _lastQueuedEntityDeletion = prepared.EntityUid;
+            _lastQueuedEntityDeletionTick = _timing.CurTick;
+        }
     }
 
     private bool PhysicalStateChangedDuringCommit(PendingRequest pending, EntityUid entityUid, NCActiveWorldTime now)
@@ -786,6 +886,9 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
         _policy = null;
         _epoch = default;
         _inFlight = 0;
+        _queuedEntityDeletions = 0;
+        _lastQueuedEntityDeletion = null;
+        _lastQueuedEntityDeletionTick = default;
         _pending.Clear();
         _requestByActor.Clear();
         _states.Clear();
@@ -793,6 +896,7 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
         _blockerLeases.Clear();
         _completedOrder.Clear();
         _queue.Clear();
+        _despawnQueue.Clear();
     }
 
     private sealed record PendingRequest(
@@ -811,6 +915,8 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
     private readonly record struct BlockerLeaseKey(
         EntityUid EntityUid,
         NCCityDematerializationBlockerFlags Blocker);
+
+    private readonly record struct PreparedDespawn(EntityUid EntityUid, GameTick ReadyAt);
 
     private readonly record struct RequestPriority(
         long DueTicks,

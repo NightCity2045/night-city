@@ -35,6 +35,15 @@ public sealed partial class NCCityConnectivityDebugSystem : EntitySystem
     private readonly List<NCRoomNodeInfo> _roomBuffer = [];
     private readonly List<NCRoomPortalInfo> _roomPortalBuffer = [];
     private readonly List<NCCityConnectivityValidationIssue> _issueBuffer = [];
+    private bool _refreshPending;
+    private long _coalescedRefreshRequests;
+    private long _sentSnapshots;
+
+    public NCConnectivityDebugRuntimeCounters GetRuntimeCounters() => new(
+        _enabled.Count,
+        _refreshPending,
+        _coalescedRefreshRequests,
+        _sentSnapshots);
 
     public override void Initialize()
     {
@@ -50,7 +59,20 @@ public sealed partial class NCCityConnectivityDebugSystem : EntitySystem
     {
         _players.PlayerStatusChanged -= OnPlayerStatusChanged;
         _enabled.Clear();
+        _refreshPending = false;
         base.Shutdown();
+    }
+
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+        if (!_refreshPending)
+            return;
+
+        // Several authoritative indexes can change during one structural transaction. Build and transmit only
+        // the final snapshot on the next update, after every graph has reached the same topology generation.
+        _refreshPending = false;
+        RefreshSubscribers();
     }
 
     private void OnRequest(NCCityConnectivityDebugRequest request, EntitySessionEventArgs args)
@@ -79,9 +101,19 @@ public sealed partial class NCCityConnectivityDebugSystem : EntitySystem
             _enabled.Remove(args.Session.UserId);
     }
 
-    private void OnCityGraphChanged(ref NCCityConnectivityChangedEvent args) => RefreshSubscribers();
-    private void OnRoomGraphChanged(ref NCRoomPortalGraphChangedEvent args) => RefreshSubscribers();
-    private void OnSpawnIndexChanged(ref NCCitySpawnCandidateIndexChangedEvent args) => RefreshSubscribers();
+    private void OnCityGraphChanged(ref NCCityConnectivityChangedEvent args) => QueueRefresh();
+    private void OnRoomGraphChanged(ref NCRoomPortalGraphChangedEvent args) => QueueRefresh();
+    private void OnSpawnIndexChanged(ref NCCitySpawnCandidateIndexChangedEvent args) => QueueRefresh();
+
+    private void QueueRefresh()
+    {
+        if (_enabled.Count == 0)
+            return;
+
+        if (_refreshPending)
+            _coalescedRefreshRequests++;
+        _refreshPending = true;
+    }
 
     private void RefreshSubscribers()
     {
@@ -105,6 +137,7 @@ public sealed partial class NCCityConnectivityDebugSystem : EntitySystem
 
     private void SendSnapshot(ICommonSession session)
     {
+        _sentSnapshots++;
         _zones.GetZones(_zoneBuffer);
         _rooms.GetRooms(_roomBuffer);
         _rooms.GetPortals(_roomPortalBuffer);
@@ -188,3 +221,9 @@ public sealed partial class NCCityConnectivityDebugSystem : EntitySystem
             []);
     }
 }
+
+public readonly record struct NCConnectivityDebugRuntimeCounters(
+    int Subscribers,
+    bool RefreshPending,
+    long CoalescedRefreshRequests,
+    long SentSnapshots);

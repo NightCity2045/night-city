@@ -9,6 +9,7 @@ using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Wounds;
 using Robust.Shared.Timing;
+using DiagnosticsStopwatch = System.Diagnostics.Stopwatch;
 
 namespace Content.Server._NC.Medical.Physiology;
 
@@ -29,6 +30,27 @@ public sealed partial class NCPhysiologySchedulerSystem : EntitySystem
     private readonly List<ScheduledUpdate> _updateHeap = new();
     private readonly Dictionary<EntityUid, int> _heapIndices = new();
     private readonly HashSet<EntityUid> _processingBodies = new();
+    private long _processedBodies;
+    private long _budgetDeferrals;
+    private int _lastBatchBodies;
+    private double _lastBodyMilliseconds;
+    private double _maximumBodyMilliseconds;
+    private double _lastBatchMilliseconds;
+    private double _maximumBatchMilliseconds;
+
+    public NCPhysiologySchedulerCounters GetRuntimeCounters()
+    {
+        return new NCPhysiologySchedulerCounters(
+            _updateHeap.Count,
+            _updateHeap.Count > 0 && _updateHeap[0].Due <= _timing.CurTime,
+            _processedBodies,
+            _budgetDeferrals,
+            _lastBatchBodies,
+            _lastBodyMilliseconds,
+            _maximumBodyMilliseconds,
+            _lastBatchMilliseconds,
+            _maximumBatchMilliseconds);
+    }
 
     public override void Initialize()
     {
@@ -132,22 +154,51 @@ public sealed partial class NCPhysiologySchedulerSystem : EntitySystem
             return;
 
         var now = _timing.CurTime;
+        var batchStarted = DiagnosticsStopwatch.GetTimestamp();
+        var processed = 0;
+        var maximumBodies = int.MaxValue;
+        var maximumWorkTime = TimeSpan.MaxValue;
         while (_updateHeap.Count > 0)
         {
             var scheduled = _updateHeap[0];
             if (scheduled.Due > now)
                 break;
 
-            RemoveScheduledAt(0);
             var body = scheduled.Body;
             if (!TryComp<NCCirculationComponent>(body, out var circulation))
+            {
+                RemoveScheduledAt(0);
                 continue;
+            }
 
+            var profile = _physiology.GetProfile(body);
+            maximumBodies = Math.Min(maximumBodies, profile.MaximumScheduledBodiesPerTick);
+            maximumWorkTime = maximumWorkTime <= profile.MaximumSchedulerWorkTime
+                ? maximumWorkTime
+                : profile.MaximumSchedulerWorkTime;
+            if (processed > 0 &&
+                (processed >= maximumBodies ||
+                 DiagnosticsStopwatch.GetElapsedTime(batchStarted) >= maximumWorkTime))
+            {
+                _budgetDeferrals++;
+                break;
+            }
+
+            RemoveScheduledAt(0);
             var elapsed = now > circulation.LastEvaluation
                 ? now - circulation.LastEvaluation
                 : TimeSpan.Zero;
-            ProcessNow(body, elapsed);
+            var bodyStarted = DiagnosticsStopwatch.GetTimestamp();
+            if (ProcessNow(body, elapsed))
+                _processedBodies++;
+            _lastBodyMilliseconds = DiagnosticsStopwatch.GetElapsedTime(bodyStarted).TotalMilliseconds;
+            _maximumBodyMilliseconds = Math.Max(_maximumBodyMilliseconds, _lastBodyMilliseconds);
+            processed++;
         }
+
+        _lastBatchBodies = processed;
+        _lastBatchMilliseconds = DiagnosticsStopwatch.GetElapsedTime(batchStarted).TotalMilliseconds;
+        _maximumBatchMilliseconds = Math.Max(_maximumBatchMilliseconds, _lastBatchMilliseconds);
     }
 
     private void ScheduleNext(EntityUid body)
@@ -172,6 +223,9 @@ public sealed partial class NCPhysiologySchedulerSystem : EntitySystem
             next = profile.StableInjuredUpdateInterval;
         }
 
+        if (next is { } recurring)
+            next = AddStablePhase(body, recurring, profile.SchedulingPhaseWindow);
+
         var interventionExpiry = _emergencyCare.GetNextInterventionDelay(body);
         if (interventionExpiry != null && (next == null || interventionExpiry < next))
             next = interventionExpiry;
@@ -193,6 +247,18 @@ public sealed partial class NCPhysiologySchedulerSystem : EntitySystem
         if (next != null)
             Schedule(body, next);
         // Healthy bodies without timed support remain event-driven and allocate no recurring work.
+    }
+
+    private static TimeSpan AddStablePhase(EntityUid body, TimeSpan interval, TimeSpan configuredWindow)
+    {
+        // Keep critical cadence precise: phase spreading may consume at most one eighth of the base interval.
+        var windowTicks = Math.Min(configuredWindow.Ticks, interval.Ticks / 8);
+        if (windowTicks <= 0)
+            return interval;
+
+        var hash = unchecked((uint) body.Id * 2654435761u);
+        var phaseTicks = (long) ((ulong) hash % (ulong) windowTicks);
+        return interval + TimeSpan.FromTicks(phaseTicks);
     }
 
     private void Unschedule(EntityUid body)
@@ -275,3 +341,14 @@ public sealed partial class NCPhysiologySchedulerSystem : EntitySystem
             : left.Body.CompareTo(right.Body);
     }
 }
+
+public readonly record struct NCPhysiologySchedulerCounters(
+    int QueuedBodies,
+    bool HasOverdueBodies,
+    long ProcessedBodies,
+    long BudgetDeferrals,
+    int LastBatchBodies,
+    double LastBodyMilliseconds,
+    double MaximumBodyMilliseconds,
+    double LastBatchMilliseconds,
+    double MaximumBatchMilliseconds);

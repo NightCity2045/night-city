@@ -36,8 +36,33 @@ public sealed class NCCityConnectivitySystem : EntitySystem
     private readonly Dictionary<DepthRouteCacheKey, NCCityRouteStep[]> _depthRouteCache = [];
 
     private long _nextPortalId = 1;
+    private int _mutationBatchDepth;
+    private bool _mutationBatchDirty;
+    private long _publishedVersionChanges;
+    private long _deferredInvalidations;
+    private long _completedMutationBatches;
 
     public long GraphVersion { get; private set; }
+
+    /// <summary>
+    /// Returns graph-mutation counters without walking nodes or portals. F7 uses them to distinguish a real topology
+    /// change from a portal-by-portal invalidation storm.
+    /// </summary>
+    public NCCityConnectivityMutationCounters GetMutationCounters() => new(
+        _publishedVersionChanges,
+        _deferredInvalidations,
+        _completedMutationBatches,
+        _mutationBatchDepth);
+
+    /// <summary>
+    /// Defers version publication while one logical topology replacement removes and recreates multiple portals.
+    /// The graph is still mutated synchronously on the main thread, but consumers observe one atomic revision.
+    /// </summary>
+    public NCCityConnectivityMutationBatch BeginMutationBatch()
+    {
+        _mutationBatchDepth++;
+        return new NCCityConnectivityMutationBatch(this);
+    }
 
     public override void Initialize()
     {
@@ -391,6 +416,9 @@ public sealed class NCCityConnectivitySystem : EntitySystem
 
     private void OnZoneIndexRebuilt(ref NCZoneIndexRebuiltEvent args)
     {
+        // A zone deployment can invalidate semantic and vertical links together. Publish one coherent revision
+        // after both indexes agree instead of waking every A-Life consumer between the two rebuilds.
+        using var mutationBatch = BeginMutationBatch();
         RebuildSemanticIndex();
         RebuildVerticalLinks();
     }
@@ -424,6 +452,7 @@ public sealed class NCCityConnectivitySystem : EntitySystem
             return;
         }
 
+        using var mutationBatch = BeginMutationBatch();
         foreach (var portalId in _portals.Keys.ToArray())
         {
             var portal = _portals[portalId];
@@ -438,6 +467,7 @@ public sealed class NCCityConnectivitySystem : EntitySystem
 
     private void RebuildSemanticIndex()
     {
+        using var mutationBatch = BeginMutationBatch();
         _nodes.Clear();
         var zones = new List<NCZoneInfo>();
         _zones.GetZones(zones);
@@ -464,6 +494,7 @@ public sealed class NCCityConnectivitySystem : EntitySystem
 
     private void RebuildVerticalLinks()
     {
+        using var mutationBatch = BeginMutationBatch();
         foreach (var scopeId in _deploymentLinks.Keys.ToArray())
             RemoveDeploymentLinks(scopeId);
 
@@ -481,6 +512,7 @@ public sealed class NCCityConnectivitySystem : EntitySystem
 
     private void RegisterVerticalLinks(Guid scopeId)
     {
+        using var mutationBatch = BeginMutationBatch();
         RemoveDeploymentLinks(scopeId);
         if (!TryGetConnectivityRules(out var rules))
             return;
@@ -530,6 +562,7 @@ public sealed class NCCityConnectivitySystem : EntitySystem
         if (!_deploymentLinks.Remove(scopeId, out var links))
             return;
 
+        using var mutationBatch = BeginMutationBatch();
         foreach (var stableId in links)
         {
             if (_stableLinks.TryGetValue(stableId, out var portalId))
@@ -609,12 +642,58 @@ public sealed class NCCityConnectivitySystem : EntitySystem
 
     private void InvalidateGraph()
     {
-        var oldVersion = GraphVersion;
-        GraphVersion = GraphVersion == long.MaxValue ? 1 : GraphVersion + 1;
+        // Cached routes are invalid immediately, even while event publication is deferred until the outer batch ends.
         _routeCache.Clear();
         _depthRouteCache.Clear();
+        if (_mutationBatchDepth > 0)
+        {
+            _mutationBatchDirty = true;
+            _deferredInvalidations++;
+            return;
+        }
+
+        PublishGraphChange();
+    }
+
+    private void EndMutationBatch()
+    {
+        if (_mutationBatchDepth <= 0)
+            throw new InvalidOperationException("City connectivity mutation batch underflow.");
+
+        _mutationBatchDepth--;
+        if (_mutationBatchDepth != 0)
+            return;
+
+        _completedMutationBatches++;
+        if (!_mutationBatchDirty)
+            return;
+
+        _mutationBatchDirty = false;
+        PublishGraphChange();
+    }
+
+    private void PublishGraphChange()
+    {
+        var oldVersion = GraphVersion;
+        GraphVersion = GraphVersion == long.MaxValue ? 1 : GraphVersion + 1;
+        _publishedVersionChanges++;
         var ev = new NCCityConnectivityChangedEvent(oldVersion, GraphVersion);
         RaiseLocalEvent(ref ev);
+    }
+
+    public readonly struct NCCityConnectivityMutationBatch : IDisposable
+    {
+        private readonly NCCityConnectivitySystem _owner;
+
+        internal NCCityConnectivityMutationBatch(NCCityConnectivitySystem owner)
+        {
+            _owner = owner;
+        }
+
+        public void Dispose()
+        {
+            _owner.EndMutationBatch();
+        }
     }
 
     private static NCCityPortalInfo ToInfo(RuntimePortal portal)
@@ -671,6 +750,12 @@ public sealed class NCCityConnectivitySystem : EntitySystem
         NCCityPortalId PortalId,
         float EdgeCost);
 }
+
+public readonly record struct NCCityConnectivityMutationCounters(
+    long PublishedVersionChanges,
+    long DeferredInvalidations,
+    long CompletedMutationBatches,
+    int ActiveMutationBatchDepth);
 
 /// <summary>
 /// Raised after semantic nodes, portals, costs or availability change and cached routes are invalidated.

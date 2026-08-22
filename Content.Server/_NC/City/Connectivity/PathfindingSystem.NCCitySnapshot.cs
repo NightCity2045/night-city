@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Content.Shared.NPC;
 using Robust.Shared.Map;
+using Robust.Shared.Physics;
+using Robust.Shared.Physics.Components;
 
 namespace Content.Server.NPC.Pathfinding;
 
@@ -112,6 +114,18 @@ public sealed partial class PathfindingSystem
 
         key = ToNCNodeKey(polygon);
         return true;
+    }
+
+    /// <summary>
+    /// Reports whether a static physics entity contributes hard geometry to the vanilla navigation graph. Static
+    /// presentation entities such as blood puddles have soft fixtures and must never invalidate RoomGraph topology.
+    /// </summary>
+    public bool IsNCCityStructuralCollisionBody(EntityUid uid)
+    {
+        return TryComp<PhysicsComponent>(uid, out var body) &&
+               body.BodyType == BodyType.Static &&
+               TryComp<FixturesComponent>(uid, out var fixtures) &&
+               IsBodyRelevant(fixtures);
     }
 
     private void RaiseNCCityPathGraphUpdated(EntityUid gridUid)

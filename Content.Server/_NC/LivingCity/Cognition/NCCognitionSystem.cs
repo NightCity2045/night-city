@@ -247,7 +247,10 @@ public sealed partial class NCCognitionSystem : EntitySystem
         state.ActorVersion = args.AggregateVersion;
         state.CognitionTier = args.CognitionTier;
         NotifyDependencyChanged(NCCognitionDependencyKind.ActorRoot, args.ActorId.ToString(), args.AggregateVersion);
-        ScheduleDecision(args.ActorId, args.NextUpdateAt);
+        var dueAt = args.NextUpdateAt;
+        if (_clock.TryGetCurrentTime(out var epoch, out var now) && epoch == _epoch)
+            dueAt = StaggerOverdueDecision(args.ActorId, dueAt, now);
+        ScheduleDecision(args.ActorId, dueAt);
     }
 
     private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
@@ -322,6 +325,7 @@ public sealed partial class NCCognitionSystem : EntitySystem
                 _pageRetryAt = now.Advance(_policy.LoadRetryDelay);
             return;
         }
+        _clock.TryGetCurrentTime(out var currentEpoch, out var currentTime);
         foreach (var actor in page.Records)
         {
             if (_states.Count >= _policy.MaximumTrackedActors)
@@ -332,7 +336,10 @@ public sealed partial class NCCognitionSystem : EntitySystem
             var state = GetOrCreateState(actor.Snapshot.Identity.ActorId);
             state.ActorVersion = actor.AggregateVersion;
             state.CognitionTier = actor.Snapshot.CognitionTier;
-            ScheduleDecision(actor.Snapshot.Identity.ActorId, actor.Snapshot.Schedule.NextUpdateAt);
+            var dueAt = actor.Snapshot.Schedule.NextUpdateAt;
+            if (currentEpoch == _epoch)
+                dueAt = StaggerOverdueDecision(actor.Snapshot.Identity.ActorId, dueAt, currentTime);
+            ScheduleDecision(actor.Snapshot.Identity.ActorId, dueAt);
         }
         if (_states.Count < _policy.MaximumTrackedActors && page.HasMore &&
             page.ContinuationActorId is { IsValid: true } continuation)
@@ -420,7 +427,8 @@ public sealed partial class NCCognitionSystem : EntitySystem
         Exception? error = null;
         try
         {
-            facts = await _providers.CollectAsync(actor, perception, requestedAt, beliefLifetime, maximumFacts);
+            facts = await _providers.CollectAsync(actor, perception, requestedAt, beliefLifetime, maximumFacts,
+                _policy!.MissingCapabilityRefreshInterval);
         }
         catch (Exception exception)
         {
@@ -455,6 +463,18 @@ public sealed partial class NCCognitionSystem : EntitySystem
         _scheduledDecisions[actorId] = dueAt;
         var item = new ScheduledActor(actorId, dueAt, ++_sequence);
         _decisionQueue.Enqueue(item, new SchedulePriority(dueAt.Ticks, item.Sequence));
+    }
+
+    private NCActiveWorldTime StaggerOverdueDecision(
+        NCActorId actorId,
+        NCActiveWorldTime dueAt,
+        NCActiveWorldTime now)
+    {
+        if (_policy == null || dueAt > now || _policy.InitialDecisionStagger <= TimeSpan.Zero)
+            return dueAt;
+        var windowTicks = Math.Max(1L, _policy.InitialDecisionStagger.Ticks);
+        var hash = unchecked((uint) actorId.Value.GetHashCode());
+        return now.Advance(TimeSpan.FromTicks(hash % windowTicks));
     }
 
     private RuntimeState GetOrCreateState(NCActorId actorId)

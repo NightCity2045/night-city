@@ -12,6 +12,7 @@ using Content.Server._NC.LivingCity.Economy;
 using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.City.Connectivity;
+using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Identity;
@@ -33,6 +34,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
 {
     private const string DefaultPolicyId = "NCDefaultCityMaterializationPolicy";
     private const int MaximumSourceLength = 128;
+    private const float MaximumPreferredRadius = 128f;
 
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private ITaskManager _taskManager = default!;
@@ -45,6 +47,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
     [Dependency] private NCCityActorDomainRegistrySystem _domains = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
+    [Dependency] private NCCityRelevanceAnchorIndexSystem _anchorIndex = default!;
     [Dependency] private NCCitySpawnCandidateSystem _spawnCandidates = default!;
     [Dependency] private NCAILoadGovernorSystem _loadGovernor = default!;
     [Dependency] private NCEconomicPhysicalizationSystem _physicalization = default!;
@@ -55,6 +58,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
     private readonly Queue<Guid> _completedOrder = [];
     private readonly PriorityQueue<QueuedRequest, RequestPriority> _queue = new();
     private readonly List<NCCitySpawnCandidateInfo> _candidateBuffer = [];
+    private readonly List<EntityUid> _anchorBuffer = [];
 
     private NCCityMaterializationPolicyPrototype? _policy;
     private NCSessionEpoch _epoch;
@@ -329,6 +333,15 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
                 "Dead, archived or frozen actors cannot be materialized.");
             return;
         }
+        // An abstract residence has no map coordinates. Reject before spawning so incident requests cannot leave
+        // an armed but rejected ECS entity bound to the persistent actor.
+        if (snapshot.Schedule.PresenceMode == NCCityActorPresenceMode.AbstractHome &&
+            snapshot.Location.TravelPhase == NCCityActorTravelPhase.Stationary)
+        {
+            CompleteTerminal(pending, NCCityMaterializationRequestStatus.Rejected,
+                "An actor at an abstract residence has no physical map entity.");
+            return;
+        }
         if (!_prototypes.TryIndex(
                 new ProtoId<NCCityActorArchetypePrototype>(snapshot.Identity.ArchetypeId),
                 out NCCityActorArchetypePrototype? archetype) || archetype == null)
@@ -338,7 +351,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
             return;
         }
         if (!TrySelectSafeCandidate(archetype, snapshot.Location.CurrentZone,
-                pending.Request.SelectionSeed + (uint) pending.Attempts, out var candidate) ||
+                pending.Request.SelectionSeed + (uint) pending.Attempts, pending.Request, out var candidate) ||
             !_coordinates.TryResolve(candidate.Target, out var spawnCoordinates))
         {
             Retry(pending, now, "No hidden, unoccupied spawn candidate is currently available.");
@@ -380,14 +393,6 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
                 "The actor's authoritative medical state could not be restored.");
             return;
         }
-        if (snapshot.Schedule.PresenceMode == NCCityActorPresenceMode.AbstractHome &&
-            snapshot.Location.TravelPhase == NCCityActorTravelPhase.Stationary)
-        {
-            CompleteTerminal(pending, NCCityMaterializationRequestStatus.Rejected,
-                "An actor at an abstract residence has no physical map entity.");
-            return;
-        }
-
         if (!_physicalization.TryMaterialize(entity, inventoryPlan, out var inventoryError))
         {
             _runtime.Unbind(entity);
@@ -396,6 +401,13 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
                 inventoryError ?? "The actor's authoritative economic inventory could not be materialized.");
             return;
         }
+
+        // Every physical actor has an explicit owner. Automatic relevance may later hand it back to the
+        // strategic simulation; admin projections remain manual until an administrator removes them.
+        var lease = EnsureComp<NCCityMaterializationLeaseComponent>(entity);
+        lease.Reason = pending.Request.Reason;
+        lease.MaterializedAt = now;
+        lease.LastRelevantAt = now;
 
         CompleteTerminal(pending, NCCityMaterializationRequestStatus.Materialized, null, entity);
         RaiseLocalEvent(new NCCityActorRehydratedEvent(
@@ -409,6 +421,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         NCCityActorArchetypePrototype archetype,
         Content.Shared._NC.City.Zones.NCZoneId zoneId,
         uint seed,
+        NCCityMaterializationRequest request,
         out NCCitySpawnCandidateInfo selected)
     {
         selected = default;
@@ -422,7 +435,11 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         {
             var candidate = _candidateBuffer[(start + i) % _candidateBuffer.Count];
             if (!_coordinates.TryResolve(candidate.Target, out var mapCoordinates) ||
-                IsNearAttachedPlayer(mapCoordinates, _policy.PlayerVisibilityExclusionRadius) ||
+                IsNearPlayerOrAnchor(mapCoordinates, _policy.PlayerVisibilityExclusionRadius) ||
+                request.Reason == NCCityMaterializationReason.PlayerRelevance &&
+                !IsNearPlayerOrAnchor(mapCoordinates, _policy.PlayerRelevanceMaximumRadius) ||
+                request.PreferredTarget is { } preferred &&
+                !IsWithinPreferredTarget(candidate.Target, preferred, request.PreferredRadius!.Value) ||
                 IsOccupiedByActor(mapCoordinates, _policy.ActorOccupancyExclusionRadius))
             {
                 continue;
@@ -435,7 +452,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         return false;
     }
 
-    private bool IsNearAttachedPlayer(MapCoordinates target, float radius)
+    private bool IsNearPlayerOrAnchor(MapCoordinates target, float radius)
     {
         var radiusSquared = radius * radius;
         foreach (var session in _players.Sessions)
@@ -450,7 +467,33 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
             }
         }
 
+        _anchorIndex.GetAnchors(_anchorBuffer);
+        foreach (var anchor in _anchorBuffer)
+        {
+            if (!Exists(anchor) ||
+                !TryComp<NCCityRelevanceAnchorComponent>(anchor, out var component) || !component.Enabled)
+            {
+                continue;
+            }
+
+            var coordinates = _transform.GetMapCoordinates(anchor);
+            if (coordinates.MapId == target.MapId &&
+                Vector2.DistanceSquared(coordinates.Position, target.Position) <= radiusSquared)
+            {
+                return true;
+            }
+        }
+
         return false;
+    }
+
+    private static bool IsWithinPreferredTarget(
+        NCMapCoordinates candidate,
+        NCMapCoordinates preferred,
+        float radius)
+    {
+        return candidate.NetworkId == preferred.NetworkId && candidate.Z == preferred.Z &&
+               Vector2.DistanceSquared(candidate.Position, preferred.Position) <= radius * radius;
     }
 
     private bool IsOccupiedByActor(MapCoordinates target, float radius)
@@ -593,10 +636,15 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
     {
         error = null;
         var wait = request.MaximumWait ?? policy.DefaultMaximumWait;
+        var hasPreferredTarget = request.PreferredTarget is { NetworkId.IsValid: true };
+        var hasPreferredRadius = request.PreferredRadius is { } preferredRadius &&
+                                 float.IsFinite(preferredRadius) && preferredRadius > 0f &&
+                                 preferredRadius <= MaximumPreferredRadius;
         if (request.RequestId == Guid.Empty || !request.ActorId.IsValid || !Enum.IsDefined(request.Reason) ||
             request.Priority < 0 || request.Priority > policy.MaximumPriority ||
             string.IsNullOrWhiteSpace(request.Source) || request.Source.Length > MaximumSourceLength ||
-            wait <= TimeSpan.Zero || wait > policy.MaximumWait)
+            wait <= TimeSpan.Zero || wait > policy.MaximumWait ||
+            hasPreferredTarget != hasPreferredRadius)
         {
             error = "Materialization request identity, priority, lifetime or source is invalid.";
             return false;
@@ -613,6 +661,8 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
                policy.MaximumCandidateChecks > 0 && policy.MaximumCompletedRequestHistory > 0 &&
                policy.MaximumPriority > 0 &&
                float.IsFinite(policy.PlayerVisibilityExclusionRadius) && policy.PlayerVisibilityExclusionRadius > 0f &&
+               float.IsFinite(policy.PlayerRelevanceMaximumRadius) &&
+               policy.PlayerRelevanceMaximumRadius > policy.PlayerVisibilityExclusionRadius &&
                float.IsFinite(policy.ActorOccupancyExclusionRadius) && policy.ActorOccupancyExclusionRadius > 0f &&
                policy.RetryDelay > TimeSpan.Zero && policy.DefaultMaximumWait > TimeSpan.Zero &&
                policy.DefaultMaximumWait <= policy.MaximumWait;
@@ -633,6 +683,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         _completedOrder.Clear();
         _queue.Clear();
         _candidateBuffer.Clear();
+        _anchorBuffer.Clear();
     }
 
     private sealed record PendingRequest(

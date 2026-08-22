@@ -84,4 +84,23 @@ public sealed partial class NCPhysiologyProfilePrototype : IPrototype
 
     [DataField]
     public TimeSpan StableInjuredUpdateInterval { get; private set; } = TimeSpan.FromSeconds(1);
+
+    /// <summary>
+    /// Hard per-tick cap for scheduled body evaluations. Excess work remains in the indexed heap with its original
+    /// timestamp, so authoritative elapsed medical time is preserved on the following tick.
+    /// </summary>
+    [DataField]
+    public int MaximumScheduledBodiesPerTick { get; private set; } = 4;
+
+    /// <summary>
+    /// Wall-clock budget for the scheduled physiology batch, separate from explicit admin/test evaluations.
+    /// </summary>
+    [DataField]
+    public TimeSpan MaximumSchedulerWorkTime { get; private set; } = TimeSpan.FromMilliseconds(3);
+
+    /// <summary>
+    /// Stable entity-derived delay added to recurring deadlines so combatants injured together do not wake together.
+    /// </summary>
+    [DataField]
+    public TimeSpan SchedulingPhaseWindow { get; private set; } = TimeSpan.FromMilliseconds(100);
 }

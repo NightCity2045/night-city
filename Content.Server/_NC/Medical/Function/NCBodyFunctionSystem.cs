@@ -28,6 +28,14 @@ public sealed partial class NCBodyFunctionSystem : EntitySystem
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
 
     private readonly HashSet<ProtoId<NCBodyFunctionProfilePrototype>> _validatedProfiles = [];
+    private readonly Dictionary<EntityUid, PhysiologyFunctionState> _physiologyStates = [];
+    private long _refreshes;
+    private long _suppressedPhysiologyRefreshes;
+
+    public NCBodyFunctionRuntimeCounters GetRuntimeCounters() => new(
+        _physiologyStates.Count,
+        _refreshes,
+        _suppressedPhysiologyRefreshes);
 
     public override void Initialize()
     {
@@ -40,6 +48,7 @@ public sealed partial class NCBodyFunctionSystem : EntitySystem
         SubscribeLocalEvent<NCMedicalBodyComponent, NCPhysiologyEvaluatedEvent>(OnPhysiologyEvaluated);
         SubscribeLocalEvent<NCMedicalBodyComponent, OrganInsertedIntoEvent>(OnOrganInserted);
         SubscribeLocalEvent<NCMedicalBodyComponent, OrganRemovedFromEvent>(OnOrganRemoved);
+        SubscribeLocalEvent<NCBodyFunctionComponent, ComponentShutdown>(OnBodyShutdown);
     }
 
     private void OnBodyMapInit(Entity<NCBodyFunctionComponent> entity, ref MapInitEvent args)
@@ -49,18 +58,24 @@ public sealed partial class NCBodyFunctionSystem : EntitySystem
 
     private void OnMedicalBodyChanged(Entity<NCBodyFunctionComponent> entity, ref NCMedicalBodyChangedEvent args)
     {
-        const NCMedicalDirtyDomains relevant = NCMedicalDirtyDomains.Anatomy |
-                                               NCMedicalDirtyDomains.OrganFunction |
-                                               NCMedicalDirtyDomains.Pain |
-                                               NCMedicalDirtyDomains.Consciousness;
-        if ((args.Domains & relevant) != 0)
+        const NCMedicalDirtyDomains structural = NCMedicalDirtyDomains.Anatomy |
+                                                 NCMedicalDirtyDomains.OrganFunction;
+        if ((args.Domains & structural) != 0)
+        {
             RefreshBody(entity.Owner);
+            return;
+        }
+
+        const NCMedicalDirtyDomains physiology = NCMedicalDirtyDomains.Pain |
+                                                  NCMedicalDirtyDomains.Consciousness;
+        if ((args.Domains & physiology) != 0)
+            RefreshBodyForPhysiologyChange(entity.Owner);
     }
 
     private void OnPhysiologyEvaluated(Entity<NCMedicalBodyComponent> entity, ref NCPhysiologyEvaluatedEvent args)
     {
         // This event is emitted after pain and consciousness have reached their current authoritative values.
-        RefreshBody(entity.Owner);
+        RefreshBodyForPhysiologyChange(entity.Owner);
     }
 
     private void OnOrganInserted(Entity<NCMedicalBodyComponent> entity, ref OrganInsertedIntoEvent args)
@@ -80,6 +95,32 @@ public sealed partial class NCBodyFunctionSystem : EntitySystem
         RefreshBody(entity.Owner);
     }
 
+    private void OnBodyShutdown(Entity<NCBodyFunctionComponent> entity, ref ComponentShutdown args)
+    {
+        _physiologyStates.Remove(entity.Owner);
+    }
+
+    /// <summary>
+    /// Ongoing bleeding evaluates physiology frequently, but motor/sensory function changes only when its discrete
+    /// pain or consciousness band changes. Suppress the full organ-graph reduction while both bands are stable.
+    /// </summary>
+    private void RefreshBodyForPhysiologyChange(EntityUid body)
+    {
+        if (!TryGetPhysiologyFunctionState(body, out var current))
+        {
+            RefreshBody(body);
+            return;
+        }
+
+        if (_physiologyStates.TryGetValue(body, out var previous) && previous == current)
+        {
+            _suppressedPhysiologyRefreshes++;
+            return;
+        }
+
+        RefreshBody(body);
+    }
+
     /// <summary>
     /// Explicit deterministic refresh hook for tests, surgery and restore boundaries.
     /// </summary>
@@ -96,6 +137,8 @@ public sealed partial class NCBodyFunctionSystem : EntitySystem
 
         if (_validatedProfiles.Add(aggregate.Profile))
             ValidateProfile(profile);
+
+        _refreshes++;
 
         // All dictionaries are bounded by the organ count of this one body (34 for an unmodified human).
         var organsByCategory = new Dictionary<ProtoId<OrganCategoryPrototype>, EntityUid>();
@@ -179,7 +222,10 @@ public sealed partial class NCBodyFunctionSystem : EntitySystem
         {
             pain = physiology.PainLevel;
             consciousness = physiology.Consciousness;
+            _physiologyStates[body] = new PhysiologyFunctionState(pain, consciousness);
         }
+        else
+            _physiologyStates.Remove(body);
 
         var painMultiplier = profile.PainMotorMultipliers[(int) pain];
         var motorConsciousness = profile.ConsciousnessMotorMultipliers[(int) consciousness];
@@ -427,4 +473,25 @@ public sealed partial class NCBodyFunctionSystem : EntitySystem
         Movement,
         Grip,
     }
+
+    private bool TryGetPhysiologyFunctionState(EntityUid body, out PhysiologyFunctionState state)
+    {
+        if (!TryComp<NCPhysiologyComponent>(body, out var physiology))
+        {
+            state = default;
+            return false;
+        }
+
+        state = new PhysiologyFunctionState(physiology.PainLevel, physiology.Consciousness);
+        return true;
+    }
+
+    private readonly record struct PhysiologyFunctionState(
+        NCPainLevel Pain,
+        NCConsciousnessState Consciousness);
 }
+
+public readonly record struct NCBodyFunctionRuntimeCounters(
+    int TrackedPhysiologyStates,
+    long Refreshes,
+    long SuppressedPhysiologyRefreshes);

@@ -22,6 +22,7 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
     private const string DefaultRelevancePolicyId = "NCDefaultCityRelevancePolicy";
 
     [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private Robust.Shared.Timing.IGameTiming _timing = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
 
     private readonly Dictionary<NCAILoadQueueKind, float> _queueRatios = [];
@@ -90,7 +91,9 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
             return;
         }
 
-        var frameMilliseconds = Math.Max(0f, frameTime * 1000f);
+        // EntitySystem.Update receives the fixed simulation step (33.33 ms at 30 Hz), not measured server load.
+        // RealFrameTime captures actual loop duration and therefore exposes stalls from pathfinding or other systems.
+        var frameMilliseconds = Math.Max(0f, (float) _timing.RealFrameTime.TotalMilliseconds);
         _smoothedFrameMilliseconds = _hasFrameSample
             ? Lerp(_smoothedFrameMilliseconds, frameMilliseconds, _policy.FrameTimeEwmaAlpha)
             : frameMilliseconds;

@@ -27,6 +27,7 @@ public sealed partial class NCTargetingClientSystem : EntitySystem
 
     private static readonly NCTargetingState AutomaticState = new(NCTargetingMode.Automatic, null);
 
+    private EntityUid? _activeBody;
     private uint _nextRequestId;
     private uint? _latestRequestId;
 
@@ -52,7 +53,7 @@ public sealed partial class NCTargetingClientSystem : EntitySystem
             return;
         }
 
-        ActivateProfile(anatomy.Profile, queryServer: true);
+        ActivateProfile(player, anatomy.Profile, queryServer: true);
     }
 
     /// <summary>
@@ -78,14 +79,14 @@ public sealed partial class NCTargetingClientSystem : EntitySystem
         if (_players.LocalEntity != entity.Owner)
             return;
 
-        ActivateProfile(entity.Comp.Profile, queryServer: true);
+        ActivateProfile(entity.Owner, entity.Comp.Profile, queryServer: true);
     }
 
     private void OnPlayerDetached(
         Entity<NCMedicalBodyComponent> entity,
         ref LocalPlayerDetachedEvent args)
     {
-        if (_players.LocalEntity == entity.Owner)
+        if (_activeBody == entity.Owner)
             ClearLocalState();
     }
 
@@ -93,7 +94,7 @@ public sealed partial class NCTargetingClientSystem : EntitySystem
         Entity<NCMedicalBodyComponent> entity,
         ref ComponentShutdown args)
     {
-        if (_players.LocalEntity == entity.Owner)
+        if (_activeBody == entity.Owner)
             ClearLocalState();
     }
 
@@ -111,6 +112,7 @@ public sealed partial class NCTargetingClientSystem : EntitySystem
     }
 
     private void ActivateProfile(
+        EntityUid body,
         ProtoId<NCAnatomyProfilePrototype> profile,
         bool queryServer)
     {
@@ -120,6 +122,12 @@ public sealed partial class NCTargetingClientSystem : EntitySystem
             return;
         }
 
+        // Player attach and gameplay-HUD creation can occur in either order. The first activation owns the
+        // authoritative query; rebuilding the same HUD must not send an identical request a second time.
+        if (_activeBody == body && ActiveProfile == profile)
+            return;
+
+        _activeBody = body;
         ActiveProfile = profile;
         State = AutomaticState;
         _latestRequestId = null;
@@ -134,9 +142,10 @@ public sealed partial class NCTargetingClientSystem : EntitySystem
 
     private void ClearLocalState()
     {
-        if (ActiveProfile == null && State == AutomaticState && _latestRequestId == null)
+        if (_activeBody == null && ActiveProfile == null && State == AutomaticState && _latestRequestId == null)
             return;
 
+        _activeBody = null;
         ActiveProfile = null;
         State = AutomaticState;
         _latestRequestId = null;

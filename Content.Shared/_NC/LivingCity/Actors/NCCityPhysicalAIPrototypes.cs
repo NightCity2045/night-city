@@ -108,6 +108,9 @@ public sealed partial class NCCityLocalPerceptionProfilePrototype : IPrototype
     public int MaximumObservedEntities { get; private set; }
 
     [DataField(required: true)]
+    public int MaximumLineOfSightChecks { get; private set; }
+
+    [DataField(required: true)]
     public TimeSpan EvaluationInterval { get; private set; }
 }
 

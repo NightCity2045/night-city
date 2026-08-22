@@ -47,6 +47,158 @@
   allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
   routineProfile: NCDefaultCivilianRoutine
 
+# These stable street-scoped IDs may already exist in persistent actor records. They now resolve to
+# ordinary civilians and no longer provide factions, combat equipment, or Street War behavior.
+- type: ncCityActorArchetype
+  id: NCE22UtilityResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Utility
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCE22PlannerResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCE22NeuralResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: NeuralEligible
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NC23UtilityResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Utility
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NC23PlannerResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NC23NeuralResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: NeuralEligible
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NC24UtilityResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Utility
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NC24PlannerResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NC24NeuralResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: NeuralEligible
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCProspectUtilityResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Utility
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCProspectPlannerResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCProspectNeuralResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: NeuralEligible
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCPotomacUtilityResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Utility
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCPotomacPlannerResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCPotomacNeuralResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: NeuralEligible
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
 - type: ncCityIdentityPool
   id: NCNightCityResidentNames
   givenNames:
@@ -100,8 +252,7 @@
   - Tanaka
   - Welles
 
-# This explicit profile is an idempotent abstract bootstrap for the two currently authored district zones.
-# Mappers can later add apartment/building profiles without changing these stable district resident identities.
+# This allocation keeps most Glen residents abstract while using mapper-authored apartments for a visible minority.
 - type: ncCityResidenceAllocationPolicy
   id: NCDefaultResidenceAllocationPolicy
   snapshotPageSize: 250
@@ -113,41 +264,18 @@
 
 - type: ncCityPopulationProfile
   id: NCLivingCityDistrictBootstrapPopulation
-  scopeId: 6ea21928-4d15-47cc-b66f-f925f3468c13
+  scopeId: 7b379e0d-506c-4b7a-b9ba-1d191e6aaef4
   cohorts:
-  - id: little-china-utility
-    count: 96
-    identityPool: NCNightCityResidentNames
-    archetype: NCLivingCityUtilityResident
-    homeZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f
-    workZone: e2e35b70-5277-4359-91a6-0792e01fb477
-  - id: little-china-planner
-    count: 24
-    identityPool: NCNightCityResidentNames
-    archetype: NCLivingCityPlannerResident
-    homeZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f
-    workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f
-  - id: little-china-neural
-    count: 8
-    identityPool: NCNightCityResidentNames
-    archetype: NCLivingCityNeuralResident
-    homeZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f
-    workZone: e2e35b70-5277-4359-91a6-0792e01fb477
-  - id: japan-town-utility
-    count: 96
-    identityPool: NCNightCityResidentNames
-    archetype: NCLivingCityUtilityResident
-    homeZone: e2e35b70-5277-4359-91a6-0792e01fb477
-    workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f
-  - id: japan-town-planner
-    count: 24
-    identityPool: NCNightCityResidentNames
-    archetype: NCLivingCityPlannerResident
-    homeZone: e2e35b70-5277-4359-91a6-0792e01fb477
-    workZone: e2e35b70-5277-4359-91a6-0792e01fb477
-  - id: japan-town-neural
-    count: 8
-    identityPool: NCNightCityResidentNames
-    archetype: NCLivingCityNeuralResident
-    homeZone: e2e35b70-5277-4359-91a6-0792e01fb477
-    workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f
+  - { id: e22-utility, count: 7, identityPool: NCNightCityResidentNames, archetype: NCE22UtilityResident, homeZone: 8acce8f0-9929-484f-9daa-95b3f37a82f6, workZone: 8acce8f0-9929-484f-9daa-95b3f37a82f6 }
+  - { id: e22-planner, count: 2, identityPool: NCNightCityResidentNames, archetype: NCE22PlannerResident, homeZone: 8acce8f0-9929-484f-9daa-95b3f37a82f6, workZone: 8acce8f0-9929-484f-9daa-95b3f37a82f6 }
+  - { id: e22-neural, count: 1, identityPool: NCNightCityResidentNames, archetype: NCE22NeuralResident, homeZone: 8acce8f0-9929-484f-9daa-95b3f37a82f6, workZone: 8acce8f0-9929-484f-9daa-95b3f37a82f6 }
+  - { id: street-23-utility, count: 7, identityPool: NCNightCityResidentNames, archetype: NC23UtilityResident, homeZone: e1acb51c-9b2b-4b05-af52-011bcef55ebe, workZone: e1acb51c-9b2b-4b05-af52-011bcef55ebe }
+  - { id: street-23-planner, count: 2, identityPool: NCNightCityResidentNames, archetype: NC23PlannerResident, homeZone: e1acb51c-9b2b-4b05-af52-011bcef55ebe, workZone: e1acb51c-9b2b-4b05-af52-011bcef55ebe }
+  - { id: street-23-neural, count: 1, identityPool: NCNightCityResidentNames, archetype: NC23NeuralResident, homeZone: e1acb51c-9b2b-4b05-af52-011bcef55ebe, workZone: e1acb51c-9b2b-4b05-af52-011bcef55ebe }
+  - { id: street-24-utility, count: 8, identityPool: NCNightCityResidentNames, archetype: NC24UtilityResident, homeZone: 624ada25-1e0d-4240-a6c2-0884d28abcf5, workZone: 624ada25-1e0d-4240-a6c2-0884d28abcf5 }
+  - { id: street-24-planner, count: 1, identityPool: NCNightCityResidentNames, archetype: NC24PlannerResident, homeZone: 624ada25-1e0d-4240-a6c2-0884d28abcf5, workZone: 624ada25-1e0d-4240-a6c2-0884d28abcf5 }
+  - { id: street-24-neural, count: 1, identityPool: NCNightCityResidentNames, archetype: NC24NeuralResident, homeZone: 624ada25-1e0d-4240-a6c2-0884d28abcf5, workZone: 624ada25-1e0d-4240-a6c2-0884d28abcf5 }
+  - { id: prospect-utility, count: 8, identityPool: NCNightCityResidentNames, archetype: NCProspectUtilityResident, homeZone: ddd0d6b9-f239-4ecb-b704-bda14df210b1, workZone: ddd0d6b9-f239-4ecb-b704-bda14df210b1 }
+  - { id: prospect-planner, count: 2, identityPool: NCNightCityResidentNames, archetype: NCProspectPlannerResident, homeZone: ddd0d6b9-f239-4ecb-b704-bda14df210b1, workZone: ddd0d6b9-f239-4ecb-b704-bda14df210b1 }
+  - { id: potomac-utility, count: 8, identityPool: NCNightCityResidentNames, archetype: NCPotomacUtilityResident, homeZone: 4f59226c-9e3f-4300-b981-7b1951a9f7c1, workZone: 4f59226c-9e3f-4300-b981-7b1951a9f7c1 }
+  - { id: potomac-planner, count: 2, identityPool: NCNightCityResidentNames, archetype: NCPotomacPlannerResident, homeZone: 4f59226c-9e3f-4300-b981-7b1951a9f7c1, workZone: 4f59226c-9e3f-4300-b981-7b1951a9f7c1 }

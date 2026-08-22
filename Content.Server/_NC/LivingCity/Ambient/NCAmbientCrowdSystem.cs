@@ -611,9 +611,21 @@ public sealed partial class NCAmbientCrowdSystem : EntitySystem
         _nextEvaluation = args.Time;
         if (!_prototypes.TryIndex(
                 new ProtoId<NCAmbientCrowdPolicyPrototype>(DefaultPolicyId),
-                out NCAmbientCrowdPolicyPrototype? policy) || policy == null || !ValidatePolicy(policy))
+                out NCAmbientCrowdPolicyPrototype? policy) || policy == null)
         {
-            _configurationError = $"Ambient crowd policy {DefaultPolicyId} is missing or invalid.";
+            _configurationError = $"Ambient crowd policy {DefaultPolicyId} is missing.";
+            Log.Error(_configurationError);
+            return;
+        }
+
+        // A disabled policy owns no ECS entities and publishes no decorative overlay. This lets authored persistent
+        // A-Life populations replace both ambient layers without deleting the reusable bounded crowd subsystem.
+        if (!policy.Enabled)
+            return;
+
+        if (!ValidatePolicy(policy))
+        {
+            _configurationError = $"Ambient crowd policy {DefaultPolicyId} is invalid.";
             Log.Error(_configurationError);
             return;
         }

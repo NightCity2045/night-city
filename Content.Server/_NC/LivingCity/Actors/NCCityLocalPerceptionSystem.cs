@@ -138,6 +138,7 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         component.NearestCritical = EntityUid.Invalid;
         var nearestHostileDistance = float.MaxValue;
         var nearestCriticalDistance = float.MaxValue;
+        var lineOfSightChecks = 0;
         var origin = _transform.GetMapCoordinates(entityUid);
         _observedBuffer.Clear();
         if (TryComp<NpcFactionMemberComponent>(entityUid, out var ownFaction))
@@ -147,11 +148,15 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
             {
                 if (component.Observations.Count >= profile.MaximumObservedEntities)
                     break;
-                if (!_observedBuffer.Add(hostile) ||
-                    !_interaction.InRangeUnobstructed(entityUid, hostile, profile.Radius))
+                if (!_observedBuffer.Add(hostile))
                 {
                     continue;
                 }
+                if (lineOfSightChecks >= profile.MaximumLineOfSightChecks)
+                    break;
+                lineOfSightChecks++;
+                if (!_interaction.InRangeUnobstructed(entityUid, hostile, profile.Radius))
+                    continue;
 
                 var target = _transform.GetMapCoordinates(hostile);
                 var distanceSquared = System.Numerics.Vector2.DistanceSquared(origin.Position, target.Position);
@@ -173,11 +178,15 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
             if (component.Observations.Count >= profile.MaximumObservedEntities)
                 break;
             if (candidate.Owner == entityUid || candidate.Comp.CurrentState != MobState.Critical ||
-                !_observedBuffer.Add(candidate.Owner) ||
-                !_interaction.InRangeUnobstructed(entityUid, candidate.Owner, profile.Radius))
+                !_observedBuffer.Add(candidate.Owner))
             {
                 continue;
             }
+            if (lineOfSightChecks >= profile.MaximumLineOfSightChecks)
+                break;
+            lineOfSightChecks++;
+            if (!_interaction.InRangeUnobstructed(entityUid, candidate.Owner, profile.Radius))
+                continue;
             var target = _transform.GetMapCoordinates(candidate.Owner);
             var distanceSquared = System.Numerics.Vector2.DistanceSquared(origin.Position, target.Position);
             component.Observations.Add(new NCCityLocalObservation(
@@ -281,7 +290,9 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
 
     internal static bool Validate(NCCityLocalPerceptionProfilePrototype profile) =>
         float.IsFinite(profile.Radius) && profile.Radius > 0f &&
-        profile.MaximumObservedEntities > 0 && profile.EvaluationInterval > TimeSpan.Zero;
+        profile.MaximumObservedEntities > 0 && profile.MaximumLineOfSightChecks > 0 &&
+        profile.MaximumLineOfSightChecks <= profile.MaximumObservedEntities &&
+        profile.EvaluationInterval > TimeSpan.Zero;
 
     private readonly record struct ScheduledEvaluation(EntityUid EntityUid, NCActiveWorldTime DueAt, long Sequence);
 

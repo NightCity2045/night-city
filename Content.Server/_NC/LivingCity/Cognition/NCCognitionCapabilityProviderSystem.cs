@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System.Collections.Concurrent;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Actors.Domains;
@@ -10,6 +12,7 @@ using Content.Server._NC.LivingCity.Economy;
 using Content.Server._NC.LivingCity.Employment;
 using Content.Server._NC.LivingCity.Groups;
 using Content.Server._NC.LivingCity.Social;
+using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Cognition;
 using Content.Shared._NC.LivingCity.Employment;
@@ -35,26 +38,54 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
     [Dependency] private NCSocialObligationRegistrySystem _obligations = default!;
     [Dependency] private NCCityGroupRegistrySystem _groups = default!;
 
+    private readonly ConcurrentDictionary<NCActorId, MissingCapabilityEntry> _missingCapabilities = [];
+    private long _suppressedCapabilityReads;
+
+    public int MissingCapabilityCacheActors => _missingCapabilities.Count;
+    public long SuppressedCapabilityReads => Interlocked.Read(ref _suppressedCapabilityReads);
+
+    public override void Initialize()
+    {
+        base.Initialize();
+        SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(_ => ResetMissingCache());
+        SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => ResetMissingCache());
+        SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => ResetMissingCache());
+    }
+
     public async Task<NCCognitionFact[]> CollectAsync(
         NCCityActorRecord actor,
         NCCognitionPerceptionInput perception,
         NCActiveWorldTime now,
         TimeSpan lifetime,
-        int maximumFacts)
+        int maximumFacts,
+        TimeSpan missingCapabilityRefreshInterval)
     {
         var actorId = actor.Snapshot.Identity.ActorId;
         var party = NCPartyRef.ForActor(actorId);
+        var cacheValid = _missingCapabilities.TryGetValue(actorId, out var missingEntry) &&
+                         missingEntry.ExpiresAt > now;
+        var missing = cacheValid ? missingEntry.Flags : MissingCapability.None;
+        if (cacheValid)
+            Interlocked.Add(ref _suppressedCapabilityReads, CountFlags(missing));
         var healthTask = _domains.GetHealthAsync(actorId);
         var inventoryTask = _domains.GetInventoryAsync(actorId);
-        var employmentTask = _employment.FindCurrentByEmployeeAsync(party);
-        var accountTask = _finance.GetPrimaryAccountAsync(party);
-        var memoryTask = _memory.GetAsync(party);
-        var socialProfileTask = _socialProfiles.GetAsync(actorId);
+        var employmentTask = LoadUnlessMissing(missing, MissingCapability.Employment,
+            () => _employment.FindCurrentByEmployeeAsync(party));
+        var accountTask = LoadUnlessMissing(missing, MissingCapability.Account,
+            () => _finance.GetPrimaryAccountAsync(party));
+        var memoryTask = LoadUnlessMissing(missing, MissingCapability.Memory,
+            () => _memory.GetAsync(party));
+        var socialProfileTask = LoadUnlessMissing(missing, MissingCapability.SocialProfile,
+            () => _socialProfiles.GetAsync(actorId));
         var socialLimit = Math.Min(32, Math.Max(1, maximumFacts / 8));
-        var relationshipTask = _relationships.GetForObserverAsync(party, socialLimit);
-        var rumorTask = _rumors.GetKnownAsync(party, NCMemoryPrivacy.Secret, socialLimit);
-        var obligationTask = _obligations.GetForPartyAsync(party, socialLimit);
-        var membershipTask = _groups.GetMembershipAsync(actorId);
+        var relationshipTask = LoadUnlessMissing(missing, MissingCapability.Relationships,
+            () => _relationships.GetForObserverAsync(party, socialLimit));
+        var rumorTask = LoadUnlessMissing(missing, MissingCapability.Rumors,
+            () => _rumors.GetKnownAsync(party, NCMemoryPrivacy.Secret, socialLimit));
+        var obligationTask = LoadUnlessMissing(missing, MissingCapability.Obligations,
+            () => _obligations.GetForPartyAsync(party, socialLimit));
+        var membershipTask = LoadUnlessMissing(missing, MissingCapability.GroupMembership,
+            () => _groups.GetMembershipAsync(actorId));
         await Task.WhenAll(healthTask, inventoryTask, employmentTask, accountTask, memoryTask, socialProfileTask,
             relationshipTask, rumorTask, obligationTask, membershipTask);
 
@@ -150,7 +181,8 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
             }
         }
 
-        foreach (var relationship in await relationshipTask)
+        var relationships = await relationshipTask ?? [];
+        foreach (var relationship in relationships)
         {
             var value = relationship.Snapshot;
             var subject = new NCCognitionSubjectRef(NCCognitionReferenceKind.Party, value.Subject.ToString());
@@ -168,7 +200,8 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
                 subject);
         }
 
-        foreach (var rumor in await rumorTask)
+        var rumors = await rumorTask ?? [];
+        foreach (var rumor in rumors)
         {
             var subject = new NCCognitionSubjectRef(NCCognitionReferenceKind.StableKey, rumor.Subject.StableId);
             Add(sink, $"social.rumor.{rumor.TopicKey}", NCCognitionDomain.Social,
@@ -176,7 +209,7 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
                 NCCognitionValue.FromNumber(rumor.Confidence / 1000f), now, lifetime, subject);
         }
 
-        var obligations = await obligationTask;
+        var obligations = await obligationTask ?? [];
         Add(sink, "social.obligation.active-count", NCCognitionDomain.Social, "social-obligation-index",
             obligations.Count == 0 ? 0 : obligations.Max(value => value.AggregateVersion),
             NCCognitionValue.FromNumber(obligations.Count), now, lifetime);
@@ -203,6 +236,35 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
                     now, lifetime,
                     new NCCognitionSubjectRef(NCCognitionReferenceKind.Group, group.Snapshot.GroupId.ToString()));
             }
+        }
+
+        var refreshedMissing = MissingCapability.None;
+        if (employment == null)
+            refreshedMissing |= MissingCapability.Employment;
+        if (account == null)
+            refreshedMissing |= MissingCapability.Account;
+        if (memories == null)
+            refreshedMissing |= MissingCapability.Memory;
+        if (socialProfile == null)
+            refreshedMissing |= MissingCapability.SocialProfile;
+        if (relationships.Count == 0)
+            refreshedMissing |= MissingCapability.Relationships;
+        if (rumors.Count == 0)
+            refreshedMissing |= MissingCapability.Rumors;
+        if (obligations.Count == 0)
+            refreshedMissing |= MissingCapability.Obligations;
+        if (membership == null)
+            refreshedMissing |= MissingCapability.GroupMembership;
+        if (refreshedMissing == MissingCapability.None || missingCapabilityRefreshInterval <= TimeSpan.Zero)
+        {
+            _missingCapabilities.TryRemove(actorId, out _);
+        }
+        else
+        {
+            var expiresAt = cacheValid
+                ? missingEntry.ExpiresAt
+                : now.Advance(missingCapabilityRefreshInterval);
+            _missingCapabilities[actorId] = new MissingCapabilityEntry(refreshedMissing, expiresAt);
         }
 
         Add(sink, "perception.hostile-present", NCCognitionDomain.Safety, "local-perception", perception.Revision,
@@ -239,4 +301,48 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
         NCCityOverallCondition.Dead => 1f,
         _ => 0f,
     };
+
+    private static Task<T> LoadUnlessMissing<T>(
+        MissingCapability missing,
+        MissingCapability capability,
+        Func<Task<T>> load)
+    {
+        return (missing & capability) != 0 ? Task.FromResult(default(T)!) : load();
+    }
+
+    private void ResetMissingCache()
+    {
+        _missingCapabilities.Clear();
+        Interlocked.Exchange(ref _suppressedCapabilityReads, 0);
+    }
+
+    private static int CountFlags(MissingCapability flags)
+    {
+        var value = (ushort) flags;
+        var count = 0;
+        while (value != 0)
+        {
+            count += value & 1;
+            value >>= 1;
+        }
+        return count;
+    }
+
+    [Flags]
+    private enum MissingCapability : ushort
+    {
+        None = 0,
+        Employment = 1 << 0,
+        Account = 1 << 1,
+        Memory = 1 << 2,
+        SocialProfile = 1 << 3,
+        Relationships = 1 << 4,
+        Rumors = 1 << 5,
+        Obligations = 1 << 6,
+        GroupMembership = 1 << 7,
+    }
+
+    private readonly record struct MissingCapabilityEntry(
+        MissingCapability Flags,
+        NCActiveWorldTime ExpiresAt);
 }

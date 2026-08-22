@@ -288,3 +288,6 @@
   loadRetryDelay: 2s
   failureRetryDelay: 10s
   minimumAbstractEvaluationInterval: 1m
+  # Optional domains absent on bootstrap NPCs are rechecked periodically instead of on every decision.
+  missingCapabilityRefreshInterval: 30s
+  initialDecisionStagger: 5s

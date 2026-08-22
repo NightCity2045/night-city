@@ -28,6 +28,11 @@ using Content.Server._NC.LivingCity.Population;
 using Content.Server._NC.LivingCity.Social;
 using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
+using Content.Server._NC.Medical.Persistence;
+using Content.Server._NC.Medical.Diagnostics;
+using Content.Server._NC.Medical.Function;
+using Content.Server._NC.Medical.Physiology;
+using Content.Server._NC.Medical.Wounds;
 using Content.Server._NC.Persistence.Outbox;
 using Content.Shared._NC.LivingCity.Admin;
 using Content.Shared._NC.City.Zones;
@@ -52,6 +57,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     private const int MaximumValueLength = 512;
     private const int MaximumTargetLength = 160;
     private static readonly TimeSpan RequestInterval = TimeSpan.FromMilliseconds(200);
+    private static readonly TimeSpan OutboxStorageRefreshInterval = TimeSpan.FromSeconds(5);
 
     [Dependency] private ISharedAdminManager _admins = default!;
     [Dependency] private IAdminLogManager _adminLog = default!;
@@ -63,6 +69,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCRoomPortalGraphSystem _roomConnectivity = default!;
     [Dependency] private NCCitySpawnCandidateSystem _spawnCandidates = default!;
     [Dependency] private NCCityConnectivityValidationSystem _connectivityValidation = default!;
+    [Dependency] private NCCityConnectivityDebugSystem _connectivityDebug = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
     [Dependency] private NCCityActorDomainRegistrySystem _actorDomains = default!;
@@ -76,6 +83,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCCityPhysicalExecutionSystem _physicalExecution = default!;
     [Dependency] private NCCognitionRegistrySystem _cognitionRegistry = default!;
     [Dependency] private NCCognitionSystem _cognition = default!;
+    [Dependency] private NCCognitionCapabilityProviderSystem _cognitionProviders = default!;
     [Dependency] private NCCityPopulationImportSystem _population = default!;
     [Dependency] private NCCityResidenceAllocationSystem _residences = default!;
     [Dependency] private NCCityZoneStateRegistrySystem _zoneStateRegistry = default!;
@@ -118,10 +126,21 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCEstateRegistrySystem _estates = default!;
     [Dependency] private NCNeuralCognitionClientSystem _neural = default!;
     [Dependency] private NCLivingCityObservabilitySystem _observability = default!;
+    [Dependency] private NCMedicalPersistenceSystem _medicalPersistence = default!;
+    [Dependency] private NCMedicalStatusSnapshotSystem _medicalStatusSnapshots = default!;
+    [Dependency] private NCPhysiologySchedulerSystem _physiologyScheduler = default!;
+    [Dependency] private NCBodyFunctionSystem _bodyFunctions = default!;
+    [Dependency] private NCVisibleWoundSystem _visibleWounds = default!;
 
     private readonly Dictionary<NetUserId, TimeSpan> _lastRequestAt = [];
     private readonly Dictionary<NetUserId, TimeSpan> _lastObserverRequestAt = [];
     private readonly NCLivingCityAdminConfirmationStore _confirmations = new();
+    private readonly object _outboxStatusLock = new();
+    private NCOutboxStatusData? _cachedOutboxStatus;
+    private string? _cachedOutboxStatusError;
+    private bool _outboxStatusRefreshInFlight;
+    private TimeSpan _nextOutboxStatusRefresh;
+    private GeographyOverviewSnapshot? _cachedGeographyOverview;
 
     public override void Initialize()
     {
@@ -141,10 +160,17 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         _lastRequestAt.Clear();
         _lastObserverRequestAt.Clear();
         _confirmations.Clear();
+        _cachedGeographyOverview = null;
+        lock (_outboxStatusLock)
+        {
+            _cachedOutboxStatus = null;
+            _cachedOutboxStatusError = null;
+            _outboxStatusRefreshInFlight = false;
+        }
         base.Shutdown();
     }
 
-    private async void OnOverviewRequest(NCLivingCityAdminOverviewRequest request, EntitySessionEventArgs args)
+    private void OnOverviewRequest(NCLivingCityAdminOverviewRequest request, EntitySessionEventArgs args)
     {
         if (request.RequestId == Guid.Empty)
             return;
@@ -194,6 +220,8 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("relevance", "catalog-ready", _relevance.CatalogRecovered);
         fields.Add("relevance", "catalog-actors", _relevance.CatalogActorCount);
         fields.Add("relevance", "clusters", _relevance.ClusterCount);
+        fields.Add("relevance", "automatic-physical-budget", _relevance.AutomaticMaterializedBudget);
+        fields.Add("relevance", "traveling-candidates-skipped", _relevance.TravelingCandidatesSkipped);
         fields.Add("scheduler", "initial-load-complete", _scheduler.InitialLoadComplete);
         fields.Add("scheduler", "queued", _scheduler.QueuedActorCount);
         fields.Add("scheduler", "in-flight", _scheduler.InFlightCount);
@@ -252,6 +280,8 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("cognition", "plans-invalidated", cognition.PlansInvalidated);
         fields.Add("cognition", "fallback-plans", cognition.FallbackPlans);
         fields.Add("cognition", "mcts-nodes-expanded", cognition.MctsNodesExpanded);
+        fields.Add("cognition", "missing-domain-cache-actors", _cognitionProviders.MissingCapabilityCacheActors);
+        fields.Add("cognition", "suppressed-persistence-reads", _cognitionProviders.SuppressedCapabilityReads);
         fields.Add("cognition", "configuration-error", cognition.ConfigurationError ?? "none");
 
         fields.Add("incidents", "cached", _incidents.CachedCount);
@@ -332,31 +362,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("zone-states", "in-flight", _zoneStates.InFlightWriteCount);
         fields.Add("zone-states", "cached", _zoneStateRegistry.CachedScopeCount);
 
-        var cityZones = new List<NCZoneInfo>();
-        var cityRooms = new List<NCRoomNodeInfo>();
-        var roomPortals = new List<NCRoomPortalInfo>();
-        var cityPortals = new List<Content.Shared._NC.City.Connectivity.NCCityPortalInfo>();
-        var connectivityIssues = new List<NCCityConnectivityValidationIssue>();
-        _zones.GetZones(cityZones);
-        _roomConnectivity.GetRooms(cityRooms);
-        _roomConnectivity.GetPortals(roomPortals);
-        var cityPortalCount = 0;
-        foreach (var zone in cityZones)
-        {
-            _cityConnectivity.GetOutgoingPortals(zone.Id, cityPortals);
-            cityPortalCount += cityPortals.Count;
-        }
-        var connectivity = _connectivityValidation.Validate(connectivityIssues);
-        fields.Add("geography", "zones", cityZones.Count);
-        fields.Add("geography", "city-graph-version", _cityConnectivity.GraphVersion);
-        fields.Add("geography", "city-portals", cityPortalCount);
-        fields.Add("geography", "room-graph-version", _roomConnectivity.GraphVersion);
-        fields.Add("geography", "rooms", cityRooms.Count);
-        fields.Add("geography", "room-portals", roomPortals.Count);
-        fields.Add("geography", "spawn-index-version", _spawnCandidates.IndexVersion);
-        fields.Add("geography", "validation-version", connectivity.ValidationVersion);
-        fields.Add("geography", "validation-errors", connectivity.Errors);
-        fields.Add("geography", "validation-warnings", connectivity.Warnings);
+        AppendGeographyOverview(fields);
 
         fields.Add("authorities", "parties", _parties.CachedPartyCount);
         fields.Add("authorities", "accounts", _economy.CachedAccountCount);
@@ -399,25 +405,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("outbox", "exhausted-session", _outbox.ExhaustedThisSession);
         fields.Add("outbox", "last-fetch-error", _outbox.LastFetchError ?? "none");
 
-        try
-        {
-            var storageNow = DateTime.UtcNow;
-            var outbox = await _database.GetNCOutboxStatusAsync(storageNow, Math.Max(1, _outbox.MaximumAttempts));
-            fields.Add("outbox-storage", "pending", outbox.Pending);
-            fields.Add("outbox-storage", "ready", outbox.Ready);
-            fields.Add("outbox-storage", "exhausted", outbox.Exhausted);
-            var oldestAge = outbox.OldestUnprocessedAt is { } pendingSince
-                ? TimeSpan.FromTicks(Math.Max(0, (storageNow - pendingSince).Ticks))
-                : (TimeSpan?) null;
-            fields.Add("outbox-storage", "oldest-unprocessed-age",
-                oldestAge?.ToString() ?? "none");
-            _observability.ReportOutboxStatus(oldestAge, outbox.Exhausted);
-        }
-        catch (Exception exception)
-        {
-            Log.Error($"Living City F7 outbox status read failed: {exception}");
-            fields.Add("outbox-storage", "error", "storage-read-failed");
-        }
+        AppendOutboxStorageOverview(fields);
 
         var observability = _observability.GetSnapshot();
         fields.Add("observability", "active", observability.Active);
@@ -441,6 +429,52 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("persistence", "latency-p50-ms", observability.Persistence.LatencyP50Milliseconds.ToString("0.00"));
         fields.Add("persistence", "latency-p95-ms", observability.Persistence.LatencyP95Milliseconds.ToString("0.00"));
         fields.Add("persistence", "latency-p99-ms", observability.Persistence.LatencyP99Milliseconds.ToString("0.00"));
+        var medicalPersistence = _medicalPersistence.GetRuntimeCounters();
+        fields.Add("medical-persistence", "bound-players", medicalPersistence.BoundPlayers);
+        fields.Add("medical-persistence", "debounced-writes", medicalPersistence.DebouncedWrites);
+        fields.Add("medical-persistence", "queued-writes", medicalPersistence.QueuedWrites);
+        fields.Add("medical-persistence", "in-flight-writes", medicalPersistence.InFlightWrites);
+        fields.Add("medical-persistence", "captured-writes", medicalPersistence.CapturedWrites);
+        fields.Add("medical-persistence", "last-capture-ms",
+            medicalPersistence.LastCaptureMilliseconds.ToString("0.00"));
+        fields.Add("medical-persistence", "maximum-capture-ms",
+            medicalPersistence.MaximumCaptureMilliseconds.ToString("0.00"));
+        var medicalSnapshots = _medicalStatusSnapshots.GetRuntimeCounters();
+        fields.Add("medical-snapshots", "pending-bodies", medicalSnapshots.PendingBodies);
+        fields.Add("medical-snapshots", "cached-projections", medicalSnapshots.CachedProjections);
+        fields.Add("medical-snapshots", "client-requests", medicalSnapshots.SnapshotRequests);
+        fields.Add("medical-snapshots", "body-change-events", medicalSnapshots.BodyChangeEvents);
+        fields.Add("medical-snapshots", "coalesced-body-changes", medicalSnapshots.CoalescedBodyChanges);
+        fields.Add("medical-snapshots", "snapshots-built", medicalSnapshots.SnapshotsBuilt);
+        fields.Add("medical-snapshots", "pushes-sent", medicalSnapshots.PushesSent);
+        fields.Add("medical-snapshots", "unchanged-pushes-suppressed", medicalSnapshots.SuppressedPushes);
+        fields.Add("medical-snapshots", "last-build-ms",
+            medicalSnapshots.LastBuildMilliseconds.ToString("0.00"));
+        fields.Add("medical-snapshots", "maximum-build-ms",
+            medicalSnapshots.MaximumBuildMilliseconds.ToString("0.00"));
+        var physiologyScheduler = _physiologyScheduler.GetRuntimeCounters();
+        fields.Add("medical-physiology", "queued-bodies", physiologyScheduler.QueuedBodies);
+        fields.Add("medical-physiology", "has-overdue-bodies", physiologyScheduler.HasOverdueBodies);
+        fields.Add("medical-physiology", "processed-bodies", physiologyScheduler.ProcessedBodies);
+        fields.Add("medical-physiology", "budget-deferrals", physiologyScheduler.BudgetDeferrals);
+        fields.Add("medical-physiology", "last-batch-bodies", physiologyScheduler.LastBatchBodies);
+        fields.Add("medical-physiology", "last-body-ms",
+            physiologyScheduler.LastBodyMilliseconds.ToString("0.00"));
+        fields.Add("medical-physiology", "maximum-body-ms",
+            physiologyScheduler.MaximumBodyMilliseconds.ToString("0.00"));
+        fields.Add("medical-physiology", "last-batch-ms",
+            physiologyScheduler.LastBatchMilliseconds.ToString("0.00"));
+        fields.Add("medical-physiology", "maximum-batch-ms",
+            physiologyScheduler.MaximumBatchMilliseconds.ToString("0.00"));
+        var bodyFunctions = _bodyFunctions.GetRuntimeCounters();
+        fields.Add("medical-body-functions", "tracked-states", bodyFunctions.TrackedPhysiologyStates);
+        fields.Add("medical-body-functions", "refreshes", bodyFunctions.Refreshes);
+        fields.Add("medical-body-functions", "unchanged-refreshes-suppressed",
+            bodyFunctions.SuppressedPhysiologyRefreshes);
+        var visibleWounds = _visibleWounds.GetRuntimeCounters();
+        fields.Add("medical-visible-wounds", "rebuilds", visibleWounds.Rebuilds);
+        fields.Add("medical-visible-wounds", "unchanged-rebuilds", visibleWounds.UnchangedRebuilds);
+        fields.Add("medical-visible-wounds", "published-rebuilds", visibleWounds.PublishedRebuilds);
         fields.Add("admin-network", "responses", observability.Admin.Responses);
         fields.Add("admin-network", "rejected", observability.Admin.RejectedResponses);
         fields.Add("admin-network", "errors", observability.Admin.ErrorResponses);
@@ -455,6 +489,155 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         }
 
         SendOverview(args, request.RequestId, true, fields.Build(), null);
+    }
+
+    /// <summary>
+    /// Reuses the bounded geography projection until one of its authoritative graph revisions changes. The F7
+    /// one-second monitor must not rebuild lists and walk every portal when the mapper data is unchanged.
+    /// </summary>
+    private void AppendGeographyOverview(FieldBuilder fields)
+    {
+        var cityVersion = _cityConnectivity.GraphVersion;
+        var roomVersion = _roomConnectivity.GraphVersion;
+        var spawnVersion = _spawnCandidates.IndexVersion;
+        var snapshot = _cachedGeographyOverview;
+        if (snapshot == null ||
+            snapshot.CityGraphVersion != cityVersion ||
+            snapshot.RoomGraphVersion != roomVersion ||
+            snapshot.SpawnIndexVersion != spawnVersion)
+        {
+            var cityZones = new List<NCZoneInfo>();
+            var cityRooms = new List<NCRoomNodeInfo>();
+            var roomPortals = new List<NCRoomPortalInfo>();
+            var cityPortals = new List<Content.Shared._NC.City.Connectivity.NCCityPortalInfo>();
+            var connectivityIssues = new List<NCCityConnectivityValidationIssue>();
+            _zones.GetZones(cityZones);
+            _roomConnectivity.GetRooms(cityRooms);
+            _roomConnectivity.GetPortals(roomPortals);
+            var cityPortalCount = 0;
+            foreach (var zone in cityZones)
+            {
+                _cityConnectivity.GetOutgoingPortals(zone.Id, cityPortals);
+                cityPortalCount += cityPortals.Count;
+            }
+
+            var validation = _connectivityValidation.Validate(connectivityIssues);
+            snapshot = new GeographyOverviewSnapshot(
+                cityVersion,
+                roomVersion,
+                spawnVersion,
+                cityZones.Count,
+                cityPortalCount,
+                cityRooms.Count,
+                roomPortals.Count,
+                validation.ValidationVersion,
+                validation.Errors,
+                validation.Warnings);
+            _cachedGeographyOverview = snapshot;
+        }
+
+        fields.Add("geography", "zones", snapshot.ZoneCount);
+        fields.Add("geography", "city-graph-version", snapshot.CityGraphVersion);
+        fields.Add("geography", "city-portals", snapshot.CityPortalCount);
+        fields.Add("geography", "room-graph-version", snapshot.RoomGraphVersion);
+        fields.Add("geography", "rooms", snapshot.RoomCount);
+        fields.Add("geography", "room-portals", snapshot.RoomPortalCount);
+        fields.Add("geography", "spawn-index-version", snapshot.SpawnIndexVersion);
+        fields.Add("geography", "validation-version", snapshot.ValidationVersion);
+        fields.Add("geography", "validation-errors", snapshot.ValidationErrors);
+        fields.Add("geography", "validation-warnings", snapshot.ValidationWarnings);
+
+        // Runtime counters make accidental topology storms visible without forcing another graph traversal.
+        var cityMutations = _cityConnectivity.GetMutationCounters();
+        var roomRuntime = _roomConnectivity.GetRuntimeCounters();
+        var debugRuntime = _connectivityDebug.GetRuntimeCounters();
+        fields.Add("geography-runtime", "city-published-revisions", cityMutations.PublishedVersionChanges);
+        fields.Add("geography-runtime", "city-deferred-invalidations", cityMutations.DeferredInvalidations);
+        fields.Add("geography-runtime", "city-completed-mutation-batches", cityMutations.CompletedMutationBatches);
+        fields.Add("geography-runtime", "room-successful-rebuilds", roomRuntime.SuccessfulRebuilds);
+        fields.Add("geography-runtime", "room-structural-invalidations", roomRuntime.StructuralInvalidations);
+        fields.Add("geography-runtime", "room-static-collision-invalidations", roomRuntime.StaticCollisionInvalidations);
+        fields.Add("geography-runtime", "room-dynamic-collision-events-ignored", roomRuntime.IgnoredDynamicCollisionChanges);
+        fields.Add("geography-runtime", "room-nonstructural-static-events-ignored",
+            roomRuntime.IgnoredNonStructuralStaticCollisionChanges);
+        fields.Add("geography-runtime", "room-dirty-grids", roomRuntime.StructurallyDirtyGrids);
+        fields.Add("geography-runtime", "room-last-rebuild-ms", roomRuntime.LastRebuildMilliseconds.ToString("0.00"));
+        fields.Add("geography-runtime", "room-maximum-rebuild-ms", roomRuntime.MaximumRebuildMilliseconds.ToString("0.00"));
+        fields.Add("geography-runtime", "debug-subscribers", debugRuntime.Subscribers);
+        fields.Add("geography-runtime", "debug-refresh-pending", debugRuntime.RefreshPending);
+        fields.Add("geography-runtime", "debug-coalesced-refreshes", debugRuntime.CoalescedRefreshRequests);
+        fields.Add("geography-runtime", "debug-snapshots-sent", debugRuntime.SentSnapshots);
+    }
+
+    /// <summary>
+    /// Returns the latest stored outbox counters immediately and refreshes them at most once per five seconds.
+    /// Database latency therefore cannot hold up the one-second F7 response or stack overlapping overview requests.
+    /// </summary>
+    private void AppendOutboxStorageOverview(FieldBuilder fields)
+    {
+        var refreshDue = _timing.CurTime >= _nextOutboxStatusRefresh;
+        if (refreshDue)
+        {
+            var startRefresh = false;
+            lock (_outboxStatusLock)
+            {
+                if (!_outboxStatusRefreshInFlight)
+                {
+                    _outboxStatusRefreshInFlight = true;
+                    startRefresh = true;
+                    _nextOutboxStatusRefresh = _timing.CurTime + OutboxStorageRefreshInterval;
+                }
+            }
+
+            if (startRefresh)
+                _ = RefreshOutboxStorageStatusAsync(DateTime.UtcNow);
+        }
+
+        NCOutboxStatusData? status;
+        string? error;
+        lock (_outboxStatusLock)
+        {
+            status = _cachedOutboxStatus;
+            error = _cachedOutboxStatusError;
+        }
+
+        var storageNow = DateTime.UtcNow;
+        var oldestAge = status?.OldestUnprocessedAt is { } pendingSince
+            ? TimeSpan.FromTicks(Math.Max(0, (storageNow - pendingSince).Ticks))
+            : (TimeSpan?) null;
+        fields.Add("outbox-storage", "pending", status?.Pending.ToString() ?? "refreshing");
+        fields.Add("outbox-storage", "ready", status?.Ready.ToString() ?? "refreshing");
+        fields.Add("outbox-storage", "exhausted", status?.Exhausted.ToString() ?? "refreshing");
+        fields.Add("outbox-storage", "oldest-unprocessed-age", oldestAge?.ToString() ?? "none");
+        fields.Add("outbox-storage", "error", error ?? "none");
+        if (status != null)
+            _observability.ReportOutboxStatus(oldestAge, status.Exhausted);
+    }
+
+    private async Task RefreshOutboxStorageStatusAsync(DateTime storageNow)
+    {
+        try
+        {
+            var status = await _database.GetNCOutboxStatusAsync(
+                storageNow,
+                Math.Max(1, _outbox.MaximumAttempts));
+            lock (_outboxStatusLock)
+            {
+                _cachedOutboxStatus = status;
+                _cachedOutboxStatusError = null;
+            }
+        }
+        catch (Exception exception)
+        {
+            Log.Error($"Living City F7 outbox status read failed: {exception}");
+            lock (_outboxStatusLock)
+                _cachedOutboxStatusError = "storage-read-failed";
+        }
+        finally
+        {
+            lock (_outboxStatusLock)
+                _outboxStatusRefreshInFlight = false;
+        }
     }
 
     private async void OnInspectRequest(NCLivingCityAdminInspectRequest request, EntitySessionEventArgs args)
@@ -595,6 +778,18 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         bool Success,
         NCLivingCityAdminField[] Fields,
         string? Error);
+
+    private sealed record GeographyOverviewSnapshot(
+        long CityGraphVersion,
+        long RoomGraphVersion,
+        long SpawnIndexVersion,
+        int ZoneCount,
+        int CityPortalCount,
+        int RoomCount,
+        int RoomPortalCount,
+        long ValidationVersion,
+        int ValidationErrors,
+        int ValidationWarnings);
 
     private sealed class FieldBuilder
     {

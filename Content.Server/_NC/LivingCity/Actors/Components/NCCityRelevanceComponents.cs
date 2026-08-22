@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Server._NC.LivingCity.Actors;
+using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.GameStates;
 
 namespace Content.Server._NC.LivingCity.Actors.Components;
@@ -37,4 +39,21 @@ public sealed partial class NCCityRelevanceAnchorComponent : Component
 {
     [DataField]
     public bool Enabled = true;
+}
+
+/// <summary>
+/// Records why a persistent actor currently owns a physical ECS projection.
+/// Relevance refreshes the lease while a player or an enabled observer remains nearby.
+/// </summary>
+[RegisterComponent]
+public sealed partial class NCCityMaterializationLeaseComponent : Component
+{
+    [ViewVariables]
+    public NCCityMaterializationReason Reason;
+
+    [ViewVariables]
+    public NCActiveWorldTime MaterializedAt;
+
+    [ViewVariables]
+    public NCActiveWorldTime LastRelevantAt;
 }

@@ -186,7 +186,15 @@ public sealed class NCWorldWoundOverlay : Overlay
                 canvasSize,
                 out renderedDirection);
             if (layerMask.Count == 0)
+            {
+                // Some humanoid RSI layers can become renderable before their CPU click-map atlas is available.
+                // Keep the wound attached to the correct body-layer matrix and use the bounded mapper-authored zone
+                // rectangle for that frame instead of dropping the physical wound from the character completely.
+                mask = GetFallbackZoneMask(zoneId, zone.Bounds, canvasSize);
+                if (mask.Count > 0)
+                    return true;
                 continue;
+            }
 
             if (!zone.RestrictVertical)
             {
@@ -219,6 +227,33 @@ public sealed class NCWorldWoundOverlay : Overlay
         mask = default!;
         renderedDirection = default;
         return false;
+    }
+
+    private HashSet<Vector2i> GetFallbackZoneMask(
+        ProtoId<NCTargetZonePrototype> zoneId,
+        Box2 bounds,
+        Vector2 canvasSize)
+    {
+        if (!_zoneMasks.TryGetValue(zoneId, out var mask))
+        {
+            mask = [];
+            _zoneMasks.Add(zoneId, mask);
+        }
+
+        if (!_builtZoneMasks.Add(zoneId))
+            return mask;
+
+        var minimumX = Math.Clamp((int) MathF.Floor(bounds.Left), 0, (int) MathF.Ceiling(canvasSize.X));
+        var maximumX = Math.Clamp((int) MathF.Ceiling(bounds.Right), 0, (int) MathF.Ceiling(canvasSize.X));
+        var minimumY = Math.Clamp((int) MathF.Floor(bounds.Bottom), 0, (int) MathF.Ceiling(canvasSize.Y));
+        var maximumY = Math.Clamp((int) MathF.Ceiling(bounds.Top), 0, (int) MathF.Ceiling(canvasSize.Y));
+        for (var y = minimumY; y < maximumY; y++)
+        {
+            for (var x = minimumX; x < maximumX; x++)
+                mask.Add(new Vector2i(x, y));
+        }
+
+        return mask;
     }
 
     private HashSet<Vector2i> GetLayerMask(

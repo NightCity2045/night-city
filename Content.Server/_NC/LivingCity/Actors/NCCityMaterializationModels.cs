@@ -4,6 +4,7 @@
 
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
+using Content.Shared._NC.Coordinates;
 using Robust.Shared.GameObjects;
 
 namespace Content.Server._NC.LivingCity.Actors;
@@ -34,7 +35,9 @@ public sealed record NCCityMaterializationRequest(
     int Priority,
     uint SelectionSeed,
     TimeSpan? MaximumWait,
-    string Source);
+    string Source,
+    NCMapCoordinates? PreferredTarget = null,
+    float? PreferredRadius = null);
 
 public sealed record NCCityMaterializationRequestState(
     Guid RequestId,

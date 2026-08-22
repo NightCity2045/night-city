@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System.Diagnostics;
 using Content.Server._NC.Medical.Wounds;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
@@ -24,12 +25,80 @@ public sealed partial class NCMedicalStatusSnapshotSystem : EntitySystem
     [Dependency] private NCAnatomySystem _anatomy = default!;
     [Dependency] private NCWoundSystem _wounds = default!;
 
+    private readonly HashSet<EntityUid> _pendingBodyUpdates = [];
+    private readonly List<EntityUid> _bodyUpdateBuffer = [];
+    private readonly Dictionary<EntityUid, NCMedicalZoneStatus[]> _lastOwnerProjections = [];
+    private long _snapshotRequests;
+    private long _bodyChangeEvents;
+    private long _coalescedBodyChanges;
+    private long _snapshotsBuilt;
+    private long _pushesSent;
+    private long _suppressedPushes;
+    private double _lastBuildMilliseconds;
+    private double _maximumBuildMilliseconds;
+
     public override void Initialize()
     {
         base.Initialize();
 
         SubscribeNetworkEvent<NCMedicalStatusSnapshotRequest>(OnSnapshotRequest);
         SubscribeLocalEvent<NCWoundContainerComponent, NCMedicalBodyChangedEvent>(OnMedicalBodyChanged);
+        SubscribeLocalEvent<NCMedicalBodyComponent, ComponentRemove>(OnMedicalBodyRemoved);
+    }
+
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+        if (_pendingBodyUpdates.Count == 0)
+            return;
+
+        // Clear the set before building snapshots. A medical mutation raised during a build is retained for the
+        // following tick instead of modifying the collection currently being processed.
+        _bodyUpdateBuffer.Clear();
+        _bodyUpdateBuffer.AddRange(_pendingBodyUpdates);
+        _pendingBodyUpdates.Clear();
+
+        foreach (var body in _bodyUpdateBuffer)
+        {
+            if (!Exists(body) ||
+                !TryComp<ActorComponent>(body, out var actor) ||
+                !TryComp<NCMedicalBodyComponent>(body, out var medical))
+            {
+                continue;
+            }
+
+            var zones = BuildTrackedOwnerStatusSnapshot(body);
+            if (ProjectionEquals(_lastOwnerProjections.GetValueOrDefault(body), zones))
+            {
+                _suppressedPushes++;
+                continue;
+            }
+
+            RememberProjection(body, zones);
+            RaiseNetworkEvent(
+                new NCMedicalStatusSnapshotResponse(
+                    0,
+                    true,
+                    medical.MedicalRevision,
+                    zones),
+                actor.PlayerSession);
+            _pushesSent++;
+        }
+    }
+
+    public NCMedicalStatusSnapshotCounters GetRuntimeCounters()
+    {
+        return new NCMedicalStatusSnapshotCounters(
+            _pendingBodyUpdates.Count,
+            _lastOwnerProjections.Count,
+            _snapshotRequests,
+            _bodyChangeEvents,
+            _coalescedBodyChanges,
+            _snapshotsBuilt,
+            _pushesSent,
+            _suppressedPushes,
+            _lastBuildMilliseconds,
+            _maximumBuildMilliseconds);
     }
 
     /// <summary>
@@ -121,6 +190,7 @@ public sealed partial class NCMedicalStatusSnapshotSystem : EntitySystem
 
     private void OnSnapshotRequest(NCMedicalStatusSnapshotRequest request, EntitySessionEventArgs args)
     {
+        _snapshotRequests++;
         if (args.SenderSession.AttachedEntity is not { Valid: true } body ||
             !Exists(body) ||
             !TryComp<NCMedicalBodyComponent>(body, out var medical))
@@ -131,12 +201,14 @@ public sealed partial class NCMedicalStatusSnapshotSystem : EntitySystem
             return;
         }
 
+        var zones = BuildTrackedOwnerStatusSnapshot(body);
+        RememberProjection(body, zones);
         RaiseNetworkEvent(
             new NCMedicalStatusSnapshotResponse(
                 request.RequestId,
                 true,
                 medical.MedicalRevision,
-                BuildOwnerStatusSnapshot(body)),
+                zones),
             args.SenderSession);
     }
 
@@ -145,20 +217,61 @@ public sealed partial class NCMedicalStatusSnapshotSystem : EntitySystem
         ref NCMedicalBodyChangedEvent args)
     {
         if ((args.Domains & NCMedicalDirtyDomains.Diagnostics) == 0 ||
-            !TryComp<ActorComponent>(entity.Owner, out var actor) ||
-            !TryComp<NCMedicalBodyComponent>(entity.Owner, out var medical))
+            !HasComp<ActorComponent>(entity.Owner) ||
+            !HasComp<NCMedicalBodyComponent>(entity.Owner))
         {
             return;
         }
 
-        // RequestId zero denotes a server-pushed refresh and cannot acknowledge a client query.
-        RaiseNetworkEvent(
-            new NCMedicalStatusSnapshotResponse(
-                0,
-                true,
-                medical.MedicalRevision,
-                BuildOwnerStatusSnapshot(entity.Owner)),
-            actor.PlayerSession);
+        _bodyChangeEvents++;
+        if (!_pendingBodyUpdates.Add(entity.Owner))
+            _coalescedBodyChanges++;
+    }
+
+    private void OnMedicalBodyRemoved(Entity<NCMedicalBodyComponent> entity, ref ComponentRemove args)
+    {
+        _pendingBodyUpdates.Remove(entity.Owner);
+        _lastOwnerProjections.Remove(entity.Owner);
+    }
+
+    private void RememberProjection(EntityUid body, IReadOnlyList<NCMedicalZoneStatus> zones)
+    {
+        var copy = new NCMedicalZoneStatus[zones.Count];
+        for (var index = 0; index < zones.Count; index++)
+            copy[index] = zones[index];
+        _lastOwnerProjections[body] = copy;
+    }
+
+    private static bool ProjectionEquals(
+        IReadOnlyList<NCMedicalZoneStatus>? left,
+        IReadOnlyList<NCMedicalZoneStatus> right)
+    {
+        if (left == null || left.Count != right.Count)
+            return false;
+
+        for (var index = 0; index < left.Count; index++)
+        {
+            if (left[index] != right[index])
+                return false;
+        }
+
+        return true;
+    }
+
+    private List<NCMedicalZoneStatus> BuildTrackedOwnerStatusSnapshot(EntityUid body)
+    {
+        var started = Stopwatch.GetTimestamp();
+        try
+        {
+            return BuildOwnerStatusSnapshot(body);
+        }
+        finally
+        {
+            var elapsed = Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+            _snapshotsBuilt++;
+            _lastBuildMilliseconds = elapsed;
+            _maximumBuildMilliseconds = Math.Max(_maximumBuildMilliseconds, elapsed);
+        }
     }
 
     private static byte ResolveBurdenLevel(float burden, IReadOnlyList<float> thresholds)
@@ -186,3 +299,15 @@ public sealed partial class NCMedicalStatusSnapshotSystem : EntitySystem
         return values.Count == 0 || float.IsFinite(values[^1]);
     }
 }
+
+public readonly record struct NCMedicalStatusSnapshotCounters(
+    int PendingBodies,
+    int CachedProjections,
+    long SnapshotRequests,
+    long BodyChangeEvents,
+    long CoalescedBodyChanges,
+    long SnapshotsBuilt,
+    long PushesSent,
+    long SuppressedPushes,
+    double LastBuildMilliseconds,
+    double MaximumBuildMilliseconds);

@@ -124,7 +124,7 @@ public sealed partial class NCCityGroupPhysicalizationSystem : EntitySystem
             if (!_runtime.TryGetEntity(actorId, out var entity) || !Exists(entity))
                 continue;
             materialized++;
-            if (!_dematerialization.IsEligibleForGroupHandOff(actorId, entity, out error))
+            if (!_dematerialization.IsEligibleForOffscreenGroupHandOff(actorId, entity, out error))
                 return false;
         }
         if (materialized == 0)
@@ -318,10 +318,14 @@ public sealed partial class NCCityGroupPhysicalizationSystem : EntitySystem
 
     private void BeginDematerialization(PendingRequest pending)
     {
+        var allowOffscreenCombat = pending.Request.Reason is NCCityGroupPhysicalizationReason.PlayerRelevance or
+            NCCityGroupPhysicalizationReason.BudgetPressure;
         foreach (var member in pending.Group!.Snapshot.Members)
         {
             if (_runtime.TryGetEntity(member.ActorId, out var entity) && Exists(entity) &&
-                !_dematerialization.IsEligibleForGroupHandOff(member.ActorId, entity, out var error))
+                !(allowOffscreenCombat
+                    ? _dematerialization.IsEligibleForOffscreenGroupHandOff(member.ActorId, entity, out var error)
+                    : _dematerialization.IsEligibleForGroupHandOff(member.ActorId, entity, out error)))
             {
                 pending.Phase = PendingPhase.WaitingDematerializationEligibility;
                 AddActive(pending.Request.RequestId);

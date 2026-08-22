@@ -31,6 +31,12 @@ public sealed partial class NCCityRelevancePolicyPrototype : IPrototype
     [DataField]
     public TimeSpan MaterializationCooldown { get; private set; } = TimeSpan.FromSeconds(15);
 
+    /// <summary>
+    /// A physical projection must remain outside all player/observer radii for this long before hand-off.
+    /// </summary>
+    [DataField]
+    public TimeSpan OffscreenGracePeriod { get; private set; } = TimeSpan.FromSeconds(8);
+
     [DataField]
     public int GlobalSoftMaterializedBudget { get; private set; } = 100;
 

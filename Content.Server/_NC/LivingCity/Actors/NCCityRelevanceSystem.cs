@@ -11,6 +11,7 @@ using Content.Server._NC.LivingCity.Groups;
 using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.City.Zones;
+using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Identity;
@@ -64,6 +65,13 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
     private NCActiveWorldTime _nextEvaluation;
     private int _generation;
     private int _dematerializationCursor;
+    private int _automaticMaterializedBudget;
+    private int _travelingCandidatesSkipped;
+    private int _observerRetainedActors;
+    private int _graceRetainedActors;
+    private int _adminRetainedActors;
+    private int _eligibilityBlockedActors;
+    private int _offscreenRequests;
     private bool _catalogRecovered;
     private bool _active;
 
@@ -72,6 +80,38 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
     public int CatalogActorCount => _catalog.Count;
     public int ClusterCount => _clusters.Count;
     public IReadOnlyList<NCCityPlayerCluster> Clusters => _clusters;
+    public int AutomaticMaterializedBudget => _automaticMaterializedBudget;
+    public int TravelingCandidatesSkipped => _travelingCandidatesSkipped;
+    public int ObserverRetainedActors => _observerRetainedActors;
+    public int GraceRetainedActors => _graceRetainedActors;
+    public int AdminRetainedActors => _adminRetainedActors;
+    public int EligibilityBlockedActors => _eligibilityBlockedActors;
+    public int OffscreenRequests => _offscreenRequests;
+    public float LocalMaterializationRadius => _policy?.DematerializationRadius ?? 0f;
+
+    /// <summary>
+    /// Returns a stable player/camera origin for an active local zone without scanning the actor population.
+    /// Incident systems use it to stage bounded physical encounters near an observed street.
+    /// </summary>
+    public bool TryGetLocalMaterializationOrigin(NCZoneId zoneId, out NCMapCoordinates origin)
+    {
+        origin = default;
+        if (!_active || !zoneId.IsValid || !_activeLocalZones.Contains(zoneId))
+            return false;
+
+        foreach (var cluster in _clusters)
+        {
+            if (!cluster.ActiveZoneIds.Contains(zoneId))
+                continue;
+            foreach (var anchor in cluster.AnchorEntities)
+            {
+                if (Exists(anchor) && _coordinates.TryGetCoordinates(anchor, out origin))
+                    return true;
+            }
+        }
+
+        return false;
+    }
 
     public override void Initialize()
     {
@@ -96,7 +136,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
         ReapCompletedRequests();
         RebuildClusters();
         EvaluateMaterialization();
-        EvaluateDematerialization();
+        EvaluateDematerialization(now);
     }
 
     public bool TryGetLod(NCActorId actorId, out NCCityActorLod lod)
@@ -220,7 +260,9 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                 var coordinates = _transform.GetMapCoordinates(entityUid);
                 if (coordinates.MapId != group[0].Coordinates.MapId)
                     continue;
-                if (group.Any(anchor => Vector2.DistanceSquared(
+                var overlapsLocalZone = _coordinates.TryConvert(coordinates, out var stable) &&
+                                        HasLocalZoneOverlap(_zones.GetLocationContext(stable), localZones);
+                if (overlapsLocalZone || group.Any(anchor => Vector2.DistanceSquared(
                         anchor.Coordinates.Position,
                         coordinates.Position) <= _policy.DematerializationRadius *
                         _policy.DematerializationRadius))
@@ -301,8 +343,6 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
             context.ApartmentId.ZoneId,
             context.BuildingId.ZoneId,
             context.StreetId.ZoneId,
-            context.SectorId.ZoneId,
-            context.DistrictId.ZoneId,
         };
         foreach (var zone in ordered)
         {
@@ -316,8 +356,17 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
             strategic.Add(context.DistrictId.ZoneId);
     }
 
+    private static bool HasLocalZoneOverlap(NCCityLocationContext context, IReadOnlyList<NCZoneId> localZones)
+    {
+        return context.MissionSlotId.IsValid && localZones.Contains(context.MissionSlotId.ZoneId) ||
+               context.ApartmentId.IsValid && localZones.Contains(context.ApartmentId.ZoneId) ||
+               context.BuildingId.IsValid && localZones.Contains(context.BuildingId.ZoneId) ||
+               context.StreetId.IsValid && localZones.Contains(context.StreetId.ZoneId);
+    }
+
     private void EvaluateMaterialization()
     {
+        _travelingCandidatesSkipped = 0;
         if (_policy == null || !_catalogRecovered || !_groupPhysicalization.CatalogRecovered)
         {
             return;
@@ -325,7 +374,9 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
 
         var globalSoftBudget = _loadGovernor.GetEffectiveSoftMaterializedBudget(
             _policy.GlobalSoftMaterializedBudget);
-        var remainingGlobal = globalSoftBudget - _runtime.MaterializedActorCount -
+        var clusterBudget = _clusters.Sum(static cluster => cluster.SoftMaterializedBudget);
+        _automaticMaterializedBudget = Math.Min(globalSoftBudget, clusterBudget);
+        var remainingGlobal = _automaticMaterializedBudget - _runtime.MaterializedActorCount -
             _loadGovernor.ReservedMaterializationCount;
         if (remainingGlobal <= 0)
             return;
@@ -359,15 +410,19 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                     inspections++;
                     if (!inspected.Add(actorId) || !_catalog.TryGetValue(actorId, out var actor) ||
                         actor.Frozen || actor.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived ||
-                        actor is
-                        {
-                            PresenceMode: NCCityActorPresenceMode.AbstractHome,
-                            TravelPhase: NCCityActorTravelPhase.Stationary,
-                        } ||
                         _runtime.TryGetEntity(actorId, out _) || _materializationRequests.ContainsKey(actorId))
                     {
                         continue;
                     }
+                    // Strategic travel remains abstract until arrival. Materializing it here hands a city-scale
+                    // destination to local steering, suppresses HTN and creates expensive no-path replan loops.
+                    if (actor.TravelPhase != NCCityActorTravelPhase.Stationary)
+                    {
+                        _travelingCandidatesSkipped++;
+                        continue;
+                    }
+                    if (actor.PresenceMode == NCCityActorPresenceMode.AbstractHome)
+                        continue;
 
                     if (_groupPhysicalization.TryGetMaterializeTogetherGroup(
                             actorId,
@@ -427,8 +482,13 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
         }
     }
 
-    private void EvaluateDematerialization()
+    private void EvaluateDematerialization(NCActiveWorldTime now)
     {
+        _observerRetainedActors = 0;
+        _graceRetainedActors = 0;
+        _adminRetainedActors = 0;
+        _eligibilityBlockedActors = 0;
+        _offscreenRequests = 0;
         if (_policy == null)
             return;
 
@@ -449,8 +509,35 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                 continue;
             }
 
-            var pressure = _bindingBuffer.Count > _loadGovernor.GetEffectiveSoftMaterializedBudget(
-                _policy.GlobalSoftMaterializedBudget);
+            // A lease makes materialization ownership symmetric. Player/observer proximity refreshes it; once the
+            // grace period expires the physical projection must return to strategic simulation. Admin projections
+            // intentionally remain manual.
+            var lease = EnsureComp<NCCityMaterializationLeaseComponent>(binding.EntityUid);
+            if (!lease.MaterializedAt.IsValid)
+            {
+                lease.Reason = NCCityMaterializationReason.PlayerRelevance;
+                lease.MaterializedAt = now;
+                lease.LastRelevantAt = now;
+            }
+            if (lease.Reason == NCCityMaterializationReason.Admin)
+            {
+                _adminRetainedActors++;
+                continue;
+            }
+            if (IsWithinObserverRadius(binding.EntityUid, _policy.DematerializationRadius))
+            {
+                lease.LastRelevantAt = now;
+                _observerRetainedActors++;
+                continue;
+            }
+            if (lease.LastRelevantAt.IsValid &&
+                lease.LastRelevantAt.Advance(_policy.OffscreenGracePeriod) > now)
+            {
+                _graceRetainedActors++;
+                continue;
+            }
+
+            var pressure = _bindingBuffer.Count > _automaticMaterializedBudget;
             if (_groupPhysicalization.TryGetMaterializeTogetherGroup(
                     binding.ActorId,
                     out var groupId,
@@ -460,6 +547,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                     _groupPhysicalization.HasActiveRequest(groupId) ||
                     !_groupPhysicalization.IsEligibleForDematerialization(groupId, out _))
                 {
+                    _eligibilityBlockedActors++;
                     continue;
                 }
                 var groupRequestId = Guid.NewGuid();
@@ -477,14 +565,18 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                 {
                     _groupDematerializationRequests[groupId] = groupRequestId;
                     requested++;
+                    _offscreenRequests++;
                 }
                 if (requested >= _policy.MaximumDematerializationRequestsPerEvaluation)
                     break;
                 continue;
             }
 
-            if (!_dematerialization.IsEligible(binding.ActorId, binding.EntityUid, out _))
+            if (!_dematerialization.IsEligibleForOffscreenHandOff(binding.ActorId, binding.EntityUid, out _))
+            {
+                _eligibilityBlockedActors++;
                 continue;
+            }
             var requestId = Guid.NewGuid();
             var state = _dematerialization.Request(new NCCityDematerializationRequest(
                 requestId,
@@ -500,11 +592,34 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
             {
                 _dematerializationRequests[binding.ActorId] = requestId;
                 requested++;
+                _offscreenRequests++;
             }
             if (requested >= _policy.MaximumDematerializationRequestsPerEvaluation)
                 break;
         }
         _dematerializationCursor = (_dematerializationCursor + inspections) % _bindingBuffer.Count;
+    }
+
+    private bool IsWithinObserverRadius(EntityUid entityUid, float radius)
+    {
+        if (!Exists(entityUid))
+            return false;
+        var target = _transform.GetMapCoordinates(entityUid);
+        var radiusSquared = radius * radius;
+        foreach (var cluster in _clusters)
+        {
+            if (cluster.MapId != target.MapId)
+                continue;
+            foreach (var anchor in cluster.AnchorEntities)
+            {
+                if (!Exists(anchor))
+                    continue;
+                var coordinates = _transform.GetMapCoordinates(anchor);
+                if (Vector2.DistanceSquared(target.Position, coordinates.Position) <= radiusSquared)
+                    return true;
+            }
+        }
+        return false;
     }
 
     private void ReapCompletedRequests()
@@ -675,6 +790,13 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
         _epoch = default;
         _nextEvaluation = default;
         _dematerializationCursor = 0;
+        _automaticMaterializedBudget = 0;
+        _travelingCandidatesSkipped = 0;
+        _observerRetainedActors = 0;
+        _graceRetainedActors = 0;
+        _adminRetainedActors = 0;
+        _eligibilityBlockedActors = 0;
+        _offscreenRequests = 0;
         _catalog.Clear();
         _zoneBuckets.Clear();
         _materializationRequests.Clear();

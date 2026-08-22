@@ -75,6 +75,9 @@ public sealed partial class NCAmbientCrowdPolicyPrototype : IPrototype
     [IdDataField]
     public string ID { get; private set; } = default!;
 
+    [DataField]
+    public bool Enabled { get; private set; } = true;
+
     [DataField(required: true)]
     public List<ProtoId<NCAmbientCrowdProfilePrototype>> Profiles { get; private set; } = [];
 

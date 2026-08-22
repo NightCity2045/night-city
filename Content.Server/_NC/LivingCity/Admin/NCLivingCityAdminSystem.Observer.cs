@@ -4,6 +4,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
+using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Population;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Admin;
@@ -105,6 +106,21 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-pipeline", "materialization-queued", _materialization.PendingRequestCount);
         fields.Add("observer-pipeline", "dematerialization-queued", _dematerialization.PendingRequestCount);
         fields.Add("observer-pipeline", "player-clusters", _relevance.ClusterCount);
+        fields.Add("observer-pipeline", "automatic-physical-budget", _relevance.AutomaticMaterializedBudget);
+        fields.Add("observer-pipeline", "traveling-candidates-skipped", _relevance.TravelingCandidatesSkipped);
+        fields.Add("observer-handoff", "retained-by-observer", _relevance.ObserverRetainedActors);
+        fields.Add("observer-handoff", "retained-by-grace", _relevance.GraceRetainedActors);
+        fields.Add("observer-handoff", "retained-by-admin", _relevance.AdminRetainedActors);
+        fields.Add("observer-handoff", "blocked", _relevance.EligibilityBlockedActors);
+        fields.Add("observer-handoff", "requests", _relevance.OffscreenRequests);
+        fields.Add("observer-handoff", "prepared-despawns", _dematerialization.PreparedDespawnCount);
+        fields.Add("observer-handoff", "queued-entity-deletions", _dematerialization.QueuedEntityDeletionCount);
+        fields.Add("observer-handoff", "last-queued-entity",
+            _dematerialization.LastQueuedEntityDeletion?.ToString() ?? "none");
+        fields.Add("observer-handoff", "last-queued-tick",
+            _dematerialization.LastQueuedEntityDeletion == null
+                ? "none"
+                : _dematerialization.LastQueuedEntityDeletionTick.ToString());
         return fields.Build();
     }
 
@@ -192,6 +208,16 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-intent", "materialized", _actorRuntime.TryGetEntity(actorId, out var entityUid));
         fields.Add("observer-intent", "entity", entityUid.IsValid() ? entityUid : "abstract");
         fields.Add("observer-intent", "lod", _relevance.TryGetLod(actorId, out var lod) ? lod : "unindexed");
+        if (entityUid.IsValid() &&
+            TryComp<NCCityMaterializationLeaseComponent>(entityUid, out var lease))
+        {
+            fields.Add("observer-physical-lease", "reason", lease.Reason);
+            fields.Add("observer-physical-lease", "materialized-at", lease.MaterializedAt.Elapsed);
+            fields.Add("observer-physical-lease", "last-relevant-at", lease.LastRelevantAt.Elapsed);
+            fields.Add("observer-physical-lease", "offscreen-eligible",
+                _dematerialization.IsEligibleForOffscreenHandOff(actorId, entityUid, out var handoffError));
+            fields.Add("observer-physical-lease", "retention-reason", handoffError ?? "none");
+        }
 
         if (_physicalExecution.TryGetSnapshot(actorId, out var physical))
         {

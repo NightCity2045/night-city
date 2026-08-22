@@ -143,4 +143,6 @@ public sealed partial class NCCognitionRuntimePolicyPrototype : IPrototype
     [DataField(required: true)] public TimeSpan LoadRetryDelay { get; private set; }
     [DataField(required: true)] public TimeSpan FailureRetryDelay { get; private set; }
     [DataField(required: true)] public TimeSpan MinimumAbstractEvaluationInterval { get; private set; }
+    [DataField(required: true)] public TimeSpan MissingCapabilityRefreshInterval { get; private set; }
+    [DataField(required: true)] public TimeSpan InitialDecisionStagger { get; private set; }
 }

@@ -88,6 +88,11 @@ public sealed partial class NCBodyStatusClientSystem : EntitySystem
             return;
         }
 
+        // LocalPlayerAttachedEvent and gameplay-HUD creation can both activate the same body. Preserve the current
+        // owner-only stream instead of issuing a duplicate snapshot query.
+        if (_activeBody == body && ActiveProfile == profile)
+            return;
+
         _activeBody = body;
         ActiveProfile = profile;
         _statuses.Clear();
