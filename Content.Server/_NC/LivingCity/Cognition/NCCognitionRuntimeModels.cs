@@ -4,6 +4,7 @@
 
 using System.Linq;
 using Content.Server._NC.LivingCity.Actors;
+using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Cognition;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
@@ -117,6 +118,26 @@ public sealed class NCCognitionExecuteStepEvent(
     public bool Handled { get; set; }
     public bool Completed { get; set; }
     public string? Failure { get; set; }
+}
+
+/// <summary>
+/// Read-only post-decision boundary. Optional advisers may request a future reevaluation, but cannot replace the
+/// authoritative BDI result or execute a gameplay action from this event.
+/// </summary>
+public sealed class NCCognitionDecisionAppliedEvent(
+    NCActorId actorId,
+    NCCityActorCognitionTier cognitionTier,
+    long actorVersion,
+    NCCognitionDesireSnapshot[] desires,
+    NCCognitionIntentionSnapshot? intention,
+    NCActiveWorldTime decidedAt) : EntityEventArgs
+{
+    public NCActorId ActorId { get; } = actorId;
+    public NCCityActorCognitionTier CognitionTier { get; } = cognitionTier;
+    public long ActorVersion { get; } = actorVersion;
+    public NCCognitionDesireSnapshot[] Desires { get; } = desires;
+    public NCCognitionIntentionSnapshot? Intention { get; } = intention;
+    public NCActiveWorldTime DecidedAt { get; } = decidedAt;
 }
 
 public sealed class NCCognitionFactSink

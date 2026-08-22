@@ -46,9 +46,15 @@ public sealed partial class NCNeuralPolicyPrototype : IPrototype
     [DataField] public int EconomyThreshold { get; private set; } = 150000;
     [DataField] public int RestrictedThreshold { get; private set; } = 240000;
     [DataField] public int CircuitFailureThreshold { get; private set; } = 5;
+    [DataField] public int MinimumSuggestionConfidence { get; private set; } = 400;
+    [DataField] public float MaximumUtilityBoost { get; private set; } = 40f;
+    [DataField] public int MaximumPendingCorrelations { get; private set; } = 1024;
+    [DataField] public int MaximumAppliedSuggestions { get; private set; } = 10000;
     [DataField] public TimeSpan RequestTimeout { get; private set; } = TimeSpan.FromSeconds(8);
     [DataField] public TimeSpan RequestLifetime { get; private set; } = TimeSpan.FromSeconds(20);
     [DataField] public TimeSpan CircuitOpenDuration { get; private set; } = TimeSpan.FromMinutes(2);
+    [DataField] public TimeSpan SuggestionLifetime { get; private set; } = TimeSpan.FromSeconds(20);
+    [DataField] public TimeSpan StrategicRequestCooldown { get; private set; } = TimeSpan.FromMinutes(2);
 }
 
 [Prototype("ncNeuralPromptProfile")]

@@ -16,9 +16,15 @@
   economyThreshold: 150000
   restrictedThreshold: 240000
   circuitFailureThreshold: 5
+  minimumSuggestionConfidence: 400
+  maximumUtilityBoost: 40
+  maximumPendingCorrelations: 1024
+  maximumAppliedSuggestions: 10000
   requestTimeout: 8s
   requestLifetime: 20s
   circuitOpenDuration: 2m
+  suggestionLifetime: 20s
+  strategicRequestCooldown: 2m
 
 - type: ncNeuralPromptProfile
   id: NCLivingCityDefault

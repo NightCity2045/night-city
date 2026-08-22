@@ -15,4 +15,5 @@ services:
     security_opt: [no-new-privileges:true]
 networks:
   night-city-private:
-    internal: true
+    # No host port is published here, but the service still needs outbound access to the OpenAI API.
+    internal: false

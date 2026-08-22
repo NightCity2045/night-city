@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Explicit opt-in preset for a local Neural Cognition Service. The normal server configuration stays deterministic.
+[nc_neural]
+enabled = true
+endpoint = "http://127.0.0.1:8080/v1/cognition"

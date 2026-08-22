@@ -158,10 +158,14 @@
                             <BoxContainer Orientation="Vertical" Margin="12 10" SeparationOverride="7">
                                 <Label Text="{Loc nc-living-city-admin-population-heading}" StyleClasses="LabelHeading" FontColorOverride="#9DE8F8" />
                                 <Label Text="{Loc nc-living-city-admin-population-help}" FontColorOverride="#7896A1" />
-                                <GridContainer Columns="2" HSeparationOverride="6" VSeparationOverride="6">
-                                    <Label Text="{Loc nc-living-city-admin-population-profile}" StyleClasses="LabelKeyText" /><LineEdit Name="PopulationProfile" Access="Public" />
-                                    <Label Text="{Loc nc-living-city-admin-reason}" StyleClasses="LabelKeyText" /><LineEdit Name="PopulationReason" Access="Public" PlaceHolder="{Loc nc-living-city-admin-reason-placeholder}" />
-                                </GridContainer>
+                                <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="4">
+                                    <Label Text="{Loc nc-living-city-admin-population-profile}" StyleClasses="LabelKeyText" />
+                                    <OptionButton Name="PopulationProfile" Access="Public" HorizontalExpand="True" MinWidth="360" />
+                                </BoxContainer>
+                                <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="4">
+                                    <Label Text="{Loc nc-living-city-admin-reason}" StyleClasses="LabelKeyText" />
+                                    <LineEdit Name="PopulationReason" Access="Public" HorizontalExpand="True" MinWidth="360" PlaceHolder="{Loc nc-living-city-admin-reason-placeholder}" />
+                                </BoxContainer>
                                 <GridContainer Columns="2" HSeparationOverride="6" VSeparationOverride="6">
                                     <Button Name="ValidatePopulationProfile" Access="Public" Text="{Loc nc-living-city-admin-validate-population}" />
                                     <controls:ConfirmButton Name="ImportPopulationProfile" Access="Public" Text="{Loc nc-living-city-admin-import-population}" ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />

@@ -27,6 +27,11 @@ public sealed partial class AdminMenuWindow : DefaultWindow
         MasterTabContainer.SetTabTitle((int) TabIndex.Players, Loc.GetString("admin-menu-players-tab"));
         MasterTabContainer.SetTabTitle((int) TabIndex.Objects, Loc.GetString("admin-menu-objects-tab"));
         MasterTabContainer.OnTabChanged += OnTabChanged;
+        // NC start: Living City polling exists only while F7 is open on its dedicated tab.
+        OnOpen += () => LivingCityTabControl.SetMonitoringActive(
+            (TabIndex) MasterTabContainer.CurrentTab == TabIndex.LivingCity);
+        OnClose += () => LivingCityTabControl.SetMonitoringActive(false);
+        // NC end
     }
 
     private void OnTabChanged(int tabIndex)
@@ -34,9 +39,8 @@ public sealed partial class AdminMenuWindow : DefaultWindow
         var tabEnum = (TabIndex)tabIndex;
         if (tabEnum == TabIndex.Objects)
             ObjectsTabControl.RefreshObjectList();
-        // NC start: refresh only when the administrator actually selects the tab.
-        if (tabEnum == TabIndex.LivingCity)
-            LivingCityTabControl.OnSelected();
+        // NC start: refresh only while the administrator actually views the tab.
+        LivingCityTabControl.SetMonitoringActive(tabEnum == TabIndex.LivingCity);
         // NC end
     }
 

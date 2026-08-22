@@ -7,10 +7,12 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Time;
+using Content.Shared._NC.Configuration;
 using Content.Shared._NC.LivingCity.Neural;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Asynchronous;
+using Robust.Shared.Configuration;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.LivingCity.Neural;
@@ -37,6 +39,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     private readonly HashSet<Guid> _known = [];
     private readonly Dictionary<(NCActorId Actor, NCNeuralRequestKind Kind), NCNeuralResponseEnvelope> _cache = [];
     [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private IConfigurationManager _configuration = default!;
     [Dependency] private ITaskManager _tasks = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
@@ -53,6 +56,9 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     private long _timeouts;
     private long _rejects;
     private bool _active;
+
+    /// <summary>True only when the current round may spend provider tokens.</summary>
+    public bool IsProviderEnabled => _active && ProviderEnabled;
 
     public override void Initialize()
     {
@@ -84,7 +90,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     {
         if (!_active || _policy == null || !_known.Add(request.RequestId) || !Valid(request, _policy)) return false;
         var mode = Mode();
-        if (!_policy.Enabled || mode == NCNeuralBudgetMode.FallbackOnly ||
+        if (!ProviderEnabled || mode == NCNeuralBudgetMode.FallbackOnly ||
             mode == NCNeuralBudgetMode.Restricted && request.Priority != NCNeuralPriority.P0 ||
             mode == NCNeuralBudgetMode.Economy && request.Priority > NCNeuralPriority.P2)
         {
@@ -121,7 +127,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
                 return;
             }
             using var cancellation = new CancellationTokenSource(_policy!.RequestTimeout);
-            using var response = await _http.PostAsJsonAsync(_policy.Endpoint, request, cancellation.Token);
+            using var response = await _http.PostAsJsonAsync(ProviderEndpoint, request, cancellation.Token);
             response.EnsureSuccessStatusCode();
             var value = await response.Content.ReadFromJsonAsync<NCNeuralResponseEnvelope>(cancellation.Token);
             var result = await ValidateAsync(request, value);
@@ -187,13 +193,22 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         RaiseLocalEvent(new NCNeuralResultEvent(result)));
     private NCNeuralBudgetMode Mode()
     {
-        if (_policy == null || !_policy.Enabled || _inputTokens + _outputTokens >= _policy.SessionTokenHardCap)
+        if (_policy == null || !ProviderEnabled || _inputTokens + _outputTokens >= _policy.SessionTokenHardCap)
             return NCNeuralBudgetMode.FallbackOnly;
         var used = _inputTokens + _outputTokens;
         return used >= _policy.RestrictedThreshold ? NCNeuralBudgetMode.Restricted :
             used >= _policy.EconomyThreshold ? NCNeuralBudgetMode.Economy : NCNeuralBudgetMode.Normal;
     }
     private NCActiveWorldTime CurrentTime() => _clock.TryGetCurrentTime(out _, out var now) ? now : default;
+    private bool ProviderEnabled => _policy?.Enabled == true || _configuration.GetCVar(NCCVars.NeuralEnabled);
+    private string ProviderEndpoint
+    {
+        get
+        {
+            var configured = _configuration.GetCVar(NCCVars.NeuralEndpoint).Trim();
+            return configured.Length == 0 ? _policy!.Endpoint : configured;
+        }
+    }
     private void OnStarted(NCActiveWorldSessionStartedEvent args)
     {
         Reset();
@@ -210,7 +225,10 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         value.MaximumCapabilities is > 0 and <= 128 && value.MaximumTextLength is > 0 and <= 4096 &&
         value.EconomyThreshold > 0 && value.RestrictedThreshold >= value.EconomyThreshold &&
         value.SessionTokenHardCap >= value.RestrictedThreshold && value.RequestTimeout > TimeSpan.Zero &&
-        value.RequestLifetime >= value.RequestTimeout &&
+        value.RequestLifetime >= value.RequestTimeout && value.MinimumSuggestionConfidence is >= 0 and <= 1000 &&
+        float.IsFinite(value.MaximumUtilityBoost) && value.MaximumUtilityBoost is >= 0 and <= 1000 &&
+        value.MaximumPendingCorrelations is > 0 and <= 16384 && value.SuggestionLifetime > TimeSpan.Zero &&
+        value.MaximumAppliedSuggestions is > 0 and <= 100000 && value.StrategicRequestCooldown > TimeSpan.Zero &&
         Uri.TryCreate(value.Endpoint, UriKind.Absolute, out _);
     private static bool Valid(NCNeuralRequestEnvelope value, NCNeuralPolicyPrototype policy) =>
         value.RequestId != Guid.Empty && value.ActorId.IsValid && value.SessionEpoch.IsValid &&

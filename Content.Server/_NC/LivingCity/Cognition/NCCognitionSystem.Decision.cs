@@ -298,6 +298,13 @@ public sealed partial class NCCognitionSystem
             state.Intention?.CapabilityId ?? "none");
         ScheduleDecision(state.ActorId, nextDecision);
         CopyToMaterialized(state);
+        RaiseLocalEvent(new NCCognitionDecisionAppliedEvent(
+            state.ActorId,
+            state.CognitionTier,
+            state.ActorVersion,
+            output.Desires,
+            state.Intention,
+            decidedAt));
         if (!materialized)
             _registry.Unload(state.ActorId);
     }
