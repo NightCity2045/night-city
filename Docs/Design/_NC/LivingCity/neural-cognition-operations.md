@@ -1,8 +1,10 @@
 # Neural Cognition Service operations
 
 The game remains authoritative and fully functional while the service is disabled or unavailable. The default
-configuration is deterministic: `nc_neural.enabled` is false. The API key exists only in the isolated service and is
-never passed to the game server, a CVar, a prototype, or the repository.
+configuration is deterministic: `nc_neural.enabled` is false. The API key is loaded from the confidential server-only
+`nc_neural.api_key` CVar. The server forwards it to the loopback cognition service in an Authorization header for one
+request; it is never included in the gameplay payload, diagnostics, prototypes, Docker image, or repository. Plain
+HTTP is accepted only for a loopback endpoint; a remote cognition endpoint must use HTTPS.
 
 The service accepts structured facts and capability allowlists. It cannot call game APIs. The server rejects expired,
 wrong-epoch, stale-version, malformed, over-budget, or non-allowlisted results and falls back deterministically.
@@ -16,14 +18,24 @@ container metrics. No catch-up request is issued after downtime.
 
 ## Local test with GPT-5.6 Luna
 
-From `Tools/_NC/NeuralCognitionService`, set `OPENAI_API_KEY` in the shell environment, then start the service with:
+From `Tools/_NC/NeuralCognitionService`, start the service with:
 
 ```powershell
 docker compose -f compose.yml -f compose.dev.yml up --build
 ```
 
 The development override exposes only `127.0.0.1:8080`; the base compose file publishes no host port. Check
-`http://127.0.0.1:8080/health/ready`, then run the game server with the explicit opt-in preset:
+`http://127.0.0.1:8080/health/ready`. Set the credential only in the private server configuration, which must not be
+committed:
+
+```toml
+[nc_neural]
+enabled = true
+endpoint = "http://127.0.0.1:8080/v1/cognition"
+api_key = "sk-proj-..."
+```
+
+Then run the game server with that configuration. The repository preset intentionally contains an empty key:
 
 ```powershell
 dotnet run --project Content.Server -- --config-file Resources/ConfigPresets/_NC/neural-luna.toml

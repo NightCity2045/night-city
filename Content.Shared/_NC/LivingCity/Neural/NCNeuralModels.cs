@@ -20,10 +20,16 @@ public enum NCNeuralBudgetMode : byte { Normal, Economy, Restricted, FallbackOnl
 public enum NCNeuralResultStatus : byte { Accepted, Fallback, Expired, Stale, Invalid, Timeout, CircuitOpen, BudgetDenied }
 
 public sealed record NCNeuralFact(string Domain, string Key, string Subject, float Confidence, string Privacy);
+/// <summary>
+/// Ephemeral, provider-bound dialogue data. It is never written to the Living City persistence layer and remains
+/// untrusted prose; the server still owns every gameplay mutation.
+/// </summary>
+public sealed record NCNeuralDialogueInput(string ActorDisplayName, string Utterance);
 public sealed record NCNeuralRequestEnvelope(Guid RequestId, NCNeuralRequestKind Kind, NCNeuralPriority Priority,
     NCActorId ActorId, NCSessionEpoch SessionEpoch, long ContextVersion, NCActiveWorldTime ExpiresAt,
     ProtoId<NCNeuralPromptProfilePrototype> PromptProfile, IReadOnlyList<NCNeuralFact> Facts,
-    IReadOnlyList<string> AllowedCapabilityIds, IReadOnlyList<string> TopicKeys, string Locale);
+    IReadOnlyList<string> AllowedCapabilityIds, IReadOnlyList<string> TopicKeys, string Locale,
+    NCNeuralDialogueInput? DialogueInput = null);
 public sealed record NCNeuralResponseEnvelope(Guid RequestId, int SchemaVersion, long ContextVersion,
     string SelectedCapabilityId, string SpeechActKey, string RenderedText, string SummaryKey, int Confidence,
     int InputTokens, int OutputTokens, string ProviderRequestId);
@@ -41,6 +47,7 @@ public sealed partial class NCNeuralPolicyPrototype : IPrototype
     [DataField] public int MaximumFacts { get; private set; } = 64;
     [DataField] public int MaximumCapabilities { get; private set; } = 32;
     [DataField] public int MaximumTextLength { get; private set; } = 512;
+    [DataField] public int MaximumDialogueInputLength { get; private set; } = 512;
     [DataField] public int SessionTokenTarget { get; private set; } = 200000;
     [DataField] public int SessionTokenHardCap { get; private set; } = 300000;
     [DataField] public int EconomyThreshold { get; private set; } = 150000;

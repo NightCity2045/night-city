@@ -7,7 +7,6 @@ services:
     build: .
     restart: unless-stopped
     environment:
-      OPENAI_API_KEY: ${OPENAI_API_KEY:?set OPENAI_API_KEY outside the repository}
       NC_NEURAL_MODEL: ${NC_NEURAL_MODEL:-gpt-5.6-luna}
     networks: [night-city-private]
     read_only: true

@@ -21,6 +21,7 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
 {
     private static readonly ProtoId<NCNeuralPolicyPrototype> DefaultPolicy = "Default";
     private static readonly ProtoId<NCNeuralPromptProfilePrototype> DefaultPrompt = "NCLivingCityDefault";
+    private const string DialogueCapability = "social.dialogue.reply";
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
@@ -41,7 +42,8 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
     }
 
     public async Task<bool> SubmitAsync(NCActorId actorId, NCNeuralRequestKind kind, NCNeuralPriority priority,
-        IReadOnlyList<string> allowedCapabilities, NCConversationSessionId? conversation = null)
+        IReadOnlyList<string> allowedCapabilities, NCConversationSessionId? conversation = null,
+        string? transientUtterance = null)
     {
         if (!_client.IsProviderEnabled || !_clock.TryGetCurrentTime(out var epoch, out var now) ||
             !_prototypes.TryIndex(DefaultPolicy, out NCNeuralPolicyPrototype? policy) ||
@@ -60,10 +62,19 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         NCConversationSessionSnapshot? conversationSnapshot = null;
         if (conversation is { } sessionId && !_conversations.TryGet(sessionId, out conversationSnapshot!))
             return false;
+        NCNeuralDialogueInput? dialogueInput = null;
+        if (kind == NCNeuralRequestKind.DialogueContinuation)
+        {
+            var utterance = NormalizeDialogueText(transientUtterance, policy.MaximumDialogueInputLength);
+            var actorName = NormalizeDialogueText(actor.Snapshot.Identity.FullName, 128);
+            if (utterance.Length == 0 || actorName.Length == 0)
+                return false;
+            dialogueInput = new NCNeuralDialogueInput(actorName, utterance);
+        }
         var request = new NCNeuralRequestEnvelope(Guid.NewGuid(), kind, priority, actorId, epoch,
             actor.AggregateVersion, now.Advance(policy.RequestLifetime), DefaultPrompt, facts,
             allowedCapabilities.Distinct().Take(policy.MaximumCapabilities).ToArray(),
-            conversationSnapshot?.CurrentTopicKeys ?? [], "ru-RU");
+            conversationSnapshot?.CurrentTopicKeys ?? [], "ru-RU", dialogueInput);
         var trackedDialogue = kind == NCNeuralRequestKind.DialogueContinuation && conversationSnapshot != null;
         if (trackedDialogue && !_suggestions.TryTrackDialogue(
                 request.RequestId,
@@ -85,11 +96,13 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             return;
         var actor = session.Participants.FirstOrDefault(value => value.TryGetActor(out _) &&
             value != session.Turns[session.Turns.Count - 1].Speaker);
-        if (!actor.TryGetActor(out var actorId) || !_cognition.TryGetSnapshot(actorId, out var cognition)) return;
-        var capabilities = cognition.Desires.Select(value => value.CapabilityId).Distinct().ToArray();
-        if (capabilities.Length > 0)
-            _ = SubmitAsync(actorId, NCNeuralRequestKind.DialogueContinuation, NCNeuralPriority.P1,
-                capabilities, session.SessionId);
+        if (!actor.TryGetActor(out var actorId))
+            return;
+
+        // Dialogue rendering has one speech-only capability and never inherits gameplay mutation capabilities from
+        // the planner. This keeps prompt output outside police, combat, economy, and access authorities.
+        _ = SubmitAsync(actorId, NCNeuralRequestKind.DialogueContinuation, NCNeuralPriority.P1,
+            [DialogueCapability], session.SessionId, args.TransientUtterance);
     }
 
     private void OnDecisionApplied(NCCognitionDecisionAppliedEvent args)
@@ -119,5 +132,14 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         return string.IsNullOrWhiteSpace(normalized)
             ? "unknown"
             : normalized.Substring(0, Math.Min(128, normalized.Length));
+    }
+
+    private static string NormalizeDialogueText(string? value, int maximumLength)
+    {
+        if (string.IsNullOrWhiteSpace(value) || maximumLength < 1)
+            return string.Empty;
+        var normalized = string.Join(' ', value.Split((char[]?) null,
+            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+        return normalized.Substring(0, Math.Min(maximumLength, normalized.Length));
     }
 }

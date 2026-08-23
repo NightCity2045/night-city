@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Content.Server._NC.LivingCity.Actors;
@@ -126,8 +127,31 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
                 Publish(Fallback(request, NCNeuralResultStatus.CircuitOpen, "circuit-open"));
                 return;
             }
+
+            // The credential is read from the confidential server CVar immediately before the request. It is sent
+            // only in the authorization header and is never included in the cognition payload or diagnostics.
+            var apiKey = ProviderApiKey;
+            if (apiKey.Length == 0)
+            {
+                Publish(Fallback(request, NCNeuralResultStatus.Fallback, "provider-key-missing"));
+                return;
+            }
+
+            if (!TryGetProviderUri(out var providerUri))
+            {
+                Publish(Fallback(request, NCNeuralResultStatus.Fallback, "provider-endpoint-insecure"));
+                return;
+            }
+
             using var cancellation = new CancellationTokenSource(_policy!.RequestTimeout);
-            using var response = await _http.PostAsJsonAsync(ProviderEndpoint, request, cancellation.Token);
+            using var message = new HttpRequestMessage(HttpMethod.Post, providerUri)
+            {
+                // Domain wrappers and enums are intentionally flattened into a stable provider transport contract.
+                // Serializing the domain record directly would expose implementation-specific JSON shapes.
+                Content = JsonContent.Create(ToProviderRequest(request)),
+            };
+            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            using var response = await _http.SendAsync(message, cancellation.Token);
             response.EnsureSuccessStatusCode();
             var value = await response.Content.ReadFromJsonAsync<NCNeuralResponseEnvelope>(cancellation.Token);
             var result = await ValidateAsync(request, value);
@@ -161,14 +185,20 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         if (!_active || request.SessionEpoch != _epoch) return new(NCNeuralResultStatus.Stale, request, null, "epoch");
         if (request.ExpiresAt <= CurrentTime()) return new(NCNeuralResultStatus.Expired, request, null, "expiry");
         var actor = await _actors.GetAsync(request.ActorId, true);
-        if (actor == null || actor.AggregateVersion != request.ContextVersion)
+        // Dialogue is correlated against the authoritative conversation version at delivery time. Unrelated routine
+        // or location persistence may advance the actor aggregate while the provider is composing a harmless line.
+        // Strategic suggestions retain strict optimistic concurrency because they can influence later planning.
+        if (actor == null || request.Kind != NCNeuralRequestKind.DialogueContinuation &&
+            actor.AggregateVersion != request.ContextVersion)
             return new(NCNeuralResultStatus.Stale, request, null, "context-version");
         if (response == null || response.RequestId != request.RequestId || response.SchemaVersion != 1 ||
             response.ContextVersion != request.ContextVersion || response.Confidence is < 0 or > 1000 ||
             response.InputTokens < 0 || response.OutputTokens < 0 ||
             !request.AllowedCapabilityIds.Contains(response.SelectedCapabilityId) ||
             response.SpeechActKey.Length > 96 || response.SummaryKey.Length > 128 ||
-            response.RenderedText.Length > _policy!.MaximumTextLength)
+            response.RenderedText.Length > _policy!.MaximumTextLength ||
+            request.Kind == NCNeuralRequestKind.DialogueContinuation &&
+            string.IsNullOrWhiteSpace(response.RenderedText))
             return new(NCNeuralResultStatus.Invalid, request, null, "schema-or-capability");
         return new(NCNeuralResultStatus.Accepted, request, response, string.Empty);
     }
@@ -200,7 +230,9 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             used >= _policy.EconomyThreshold ? NCNeuralBudgetMode.Economy : NCNeuralBudgetMode.Normal;
     }
     private NCActiveWorldTime CurrentTime() => _clock.TryGetCurrentTime(out _, out var now) ? now : default;
-    private bool ProviderEnabled => _policy?.Enabled == true || _configuration.GetCVar(NCCVars.NeuralEnabled);
+    private bool ProviderEnabled =>
+        (_policy?.Enabled == true || _configuration.GetCVar(NCCVars.NeuralEnabled)) && ProviderApiKey.Length > 0;
+    private string ProviderApiKey => _configuration.GetCVar(NCCVars.NeuralApiKey).Trim();
     private string ProviderEndpoint
     {
         get
@@ -208,6 +240,32 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             var configured = _configuration.GetCVar(NCCVars.NeuralEndpoint).Trim();
             return configured.Length == 0 ? _policy!.Endpoint : configured;
         }
+    }
+    private bool TryGetProviderUri(out Uri providerUri)
+    {
+        if (!Uri.TryCreate(ProviderEndpoint, UriKind.Absolute, out providerUri!))
+            return false;
+
+        // A bearer credential may use plain HTTP only over loopback. Remote services must terminate TLS.
+        return providerUri.Scheme == Uri.UriSchemeHttps ||
+               providerUri.Scheme == Uri.UriSchemeHttp && providerUri.IsLoopback;
+    }
+    private static NCNeuralProviderRequest ToProviderRequest(NCNeuralRequestEnvelope request)
+    {
+        return new NCNeuralProviderRequest(
+            request.RequestId,
+            request.Kind.ToString(),
+            request.Priority.ToString(),
+            new NCNeuralProviderGuid(request.ActorId.Value),
+            new NCNeuralProviderGuid(request.SessionEpoch.Value),
+            request.ContextVersion,
+            new NCNeuralProviderTime(request.ExpiresAt.Ticks),
+            request.PromptProfile.Id,
+            request.Facts,
+            request.AllowedCapabilityIds,
+            request.TopicKeys,
+            request.Locale,
+            request.DialogueInput);
     }
     private void OnStarted(NCActiveWorldSessionStartedEvent args)
     {
@@ -223,6 +281,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     private static bool Valid(NCNeuralPolicyPrototype value) => value.MaximumQueued is > 0 and <= 4096 &&
         value.MaximumConcurrent is > 0 and <= 32 && value.MaximumFacts is > 0 and <= 256 &&
         value.MaximumCapabilities is > 0 and <= 128 && value.MaximumTextLength is > 0 and <= 4096 &&
+        value.MaximumDialogueInputLength is > 0 and <= 4096 &&
         value.EconomyThreshold > 0 && value.RestrictedThreshold >= value.EconomyThreshold &&
         value.SessionTokenHardCap >= value.RestrictedThreshold && value.RequestTimeout > TimeSpan.Zero &&
         value.RequestLifetime >= value.RequestTimeout && value.MinimumSuggestionConfidence is >= 0 and <= 1000 &&
@@ -236,10 +295,43 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         value.AllowedCapabilityIds.Count is > 0 && value.AllowedCapabilityIds.Count <= policy.MaximumCapabilities &&
         value.AllowedCapabilityIds.All(Stable) && value.TopicKeys.All(Stable) && value.Facts.All(fact =>
             Stable(fact.Domain) && Stable(fact.Key) && Stable(fact.Subject) && float.IsFinite(fact.Confidence) &&
-            fact.Confidence is >= 0 and <= 1 && Stable(fact.Privacy));
+            fact.Confidence is >= 0 and <= 1 && Stable(fact.Privacy)) &&
+        ValidDialogue(value, policy);
+    private static bool ValidDialogue(NCNeuralRequestEnvelope value, NCNeuralPolicyPrototype policy)
+    {
+        if (value.Kind != NCNeuralRequestKind.DialogueContinuation)
+            return value.DialogueInput == null;
+        return value.DialogueInput is { } dialogue &&
+               dialogue.ActorDisplayName.Length is > 0 and <= 128 &&
+               dialogue.Utterance.Length is > 0 && dialogue.Utterance.Length <= policy.MaximumDialogueInputLength &&
+               dialogue.ActorDisplayName.All(character => !char.IsControl(character)) &&
+               dialogue.Utterance.All(character => !char.IsControl(character));
+    }
     private static bool Stable(string value) => value.Length is > 0 and <= 128 && value.All(character =>
         char.IsAsciiLetterOrDigit(character) || character is '-' or '_' or '.' or ':');
 }
 
 public sealed class NCNeuralResultEvent(NCNeuralResult result) : EntityEventArgs
 { public NCNeuralResult Result { get; } = result; }
+
+/// <summary>
+/// Primitive-only HTTP contract. It prevents RobustToolbox and persistence wrapper serialization details from
+/// becoming part of the external Neural Cognition Service protocol.
+/// </summary>
+internal sealed record NCNeuralProviderRequest(
+    Guid RequestId,
+    string Kind,
+    string Priority,
+    NCNeuralProviderGuid ActorId,
+    NCNeuralProviderGuid SessionEpoch,
+    long ContextVersion,
+    NCNeuralProviderTime ExpiresAt,
+    string PromptProfile,
+    IReadOnlyList<NCNeuralFact> Facts,
+    IReadOnlyList<string> AllowedCapabilityIds,
+    IReadOnlyList<string> TopicKeys,
+    string Locale,
+    NCNeuralDialogueInput? DialogueInput);
+
+internal sealed record NCNeuralProviderGuid(Guid Value);
+internal sealed record NCNeuralProviderTime(long Ticks);

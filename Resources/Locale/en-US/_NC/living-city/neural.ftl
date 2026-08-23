@@ -1,0 +1,7 @@
+nc-neural-conversation-talk-verb = Talk
+nc-neural-conversation-provider-unavailable = The Neural Cognition Service is disabled or unavailable.
+nc-neural-conversation-start-failed = The conversation could not be started.
+nc-neural-conversation-started = Conversation started. Speak to the officer through ordinary local chat.
+nc-neural-conversation-ended = The conversation ended because the other person is unavailable or too far away.
+nc-neural-conversation-fallback = Sorry, the neural link is unstable. Try again in a moment.
+nc-neural-test-officer-name = Officer Alex Rivera

@@ -149,7 +149,8 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
     public bool TryRecordTurn(
         NCConversationTurnRequest request,
         out NCConversationSessionSnapshot session,
-        out string? error)
+        out string? error,
+        string? transientUtterance = null)
     {
         session = default!;
         error = null;
@@ -188,7 +189,9 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
             };
             _active[session.SessionId] = session;
         }
-        RaiseLocalEvent(new NCConversationTurnRecordedEvent(session));
+        // Raw speech is carried only by this round-local event. The durable conversation snapshot keeps semantic
+        // keys and external references, so provider prose never becomes persistence authority.
+        RaiseLocalEvent(new NCConversationTurnRecordedEvent(session, transientUtterance));
         return true;
     }
 
@@ -370,7 +373,10 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
         value.All(character => char.IsAsciiLetterOrDigit(character) || character is '-' or '_' or '.');
 }
 
-public sealed class NCConversationTurnRecordedEvent(NCConversationSessionSnapshot session) : EntityEventArgs
+public sealed class NCConversationTurnRecordedEvent(
+    NCConversationSessionSnapshot session,
+    string? transientUtterance = null) : EntityEventArgs
 {
     public NCConversationSessionSnapshot Session { get; } = session;
+    public string? TransientUtterance { get; } = transientUtterance;
 }

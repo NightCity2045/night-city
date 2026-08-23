@@ -3,10 +3,8 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 import json
-import os
 import unittest
 from types import SimpleNamespace
-from unittest.mock import patch
 
 from fastapi import HTTPException
 
@@ -36,6 +34,22 @@ class _FakeClient:
     def __init__(self, selected_capability: str):
         self.responses = _FakeResponses(selected_capability)
 
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, _exc_type, _exc_value, _traceback):
+        return False
+
+
+class _FakeClientFactory:
+    def __init__(self, selected_capability: str):
+        self._selected_capability = selected_capability
+
+    def __call__(self, *, api_key: str):
+        if api_key != "test-key":
+            raise AssertionError("unexpected provider credential")
+        return _FakeClient(self._selected_capability)
+
 
 class NeuralCognitionServiceTest(unittest.IsolatedAsyncioTestCase):
     def request(self) -> main.Request:
@@ -61,13 +75,12 @@ class NeuralCognitionServiceTest(unittest.IsolatedAsyncioTestCase):
         })
 
     async def test_allowlisted_structured_answer_is_returned_in_game_contract(self):
-        old_client = main.client
-        main.client = _FakeClient("NCCognitionStrategicFallback")
+        old_factory = main.AsyncOpenAI
+        main.AsyncOpenAI = _FakeClientFactory("NCCognitionStrategicFallback")
         try:
-            with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}):
-                result = await main.cognition(self.request())
+            result = await main.cognition(self.request(), authorization="Bearer test-key")
         finally:
-            main.client = old_client
+            main.AsyncOpenAI = old_factory
 
         self.assertEqual(result["selectedCapabilityId"], "NCCognitionStrategicFallback")
         self.assertEqual(result["speechActKey"], "statement")
@@ -75,16 +88,21 @@ class NeuralCognitionServiceTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result["providerRequestId"], "fake-provider-request")
 
     async def test_non_allowlisted_capability_is_rejected(self):
-        old_client = main.client
-        main.client = _FakeClient("NCCognitionRespondToThreat")
+        old_factory = main.AsyncOpenAI
+        main.AsyncOpenAI = _FakeClientFactory("NCCognitionRespondToThreat")
         try:
-            with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}):
-                with self.assertRaises(HTTPException) as raised:
-                    await main.cognition(self.request())
+            with self.assertRaises(HTTPException) as raised:
+                await main.cognition(self.request(), authorization="Bearer test-key")
         finally:
-            main.client = old_client
+            main.AsyncOpenAI = old_factory
 
         self.assertEqual(raised.exception.status_code, 502)
+
+    async def test_missing_bearer_credential_is_rejected(self):
+        with self.assertRaises(HTTPException) as raised:
+            await main.cognition(self.request(), authorization=None)
+
+        self.assertEqual(raised.exception.status_code, 401)
 
 
 if __name__ == "__main__":

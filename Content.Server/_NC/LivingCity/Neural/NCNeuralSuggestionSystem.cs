@@ -89,17 +89,35 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
     {
         var result = args.Result;
         _dialogues.Remove(result.Request.RequestId, out var dialogue);
-        if (!_active || _policy == null || result.Status != NCNeuralResultStatus.Accepted ||
-            result.Response is not { } response || response.ContextVersion != result.Request.ContextVersion ||
-            response.Confidence < _policy.MinimumSuggestionConfidence ||
-            !result.Request.AllowedCapabilityIds.Contains(response.SelectedCapabilityId) ||
-            !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != result.Request.SessionEpoch ||
-            result.Request.ExpiresAt <= now)
+        var policy = _policy;
+        var response = result.Response;
+        var hasCurrentTime = _clock.TryGetCurrentTime(out var epoch, out var now);
+        // Confidence gates planning influence. A dialogue line has no mutation authority and is instead guarded by
+        // its conversation correlation, speech-act allowlist and ordinary ChatSystem checks.
+        var meetsConfidence = result.Request.Kind == NCNeuralRequestKind.DialogueContinuation ||
+            response?.Confidence >= policy?.MinimumSuggestionConfidence;
+        var accepted = _active && policy != null && response != null && hasCurrentTime &&
+            result.Status == NCNeuralResultStatus.Accepted &&
+            response.ContextVersion == result.Request.ContextVersion &&
+            meetsConfidence &&
+            result.Request.AllowedCapabilityIds.Contains(response.SelectedCapabilityId) &&
+            epoch == result.Request.SessionEpoch && result.Request.ExpiresAt > now;
+
+        if (result.Request.Kind == NCNeuralRequestKind.DialogueContinuation && dialogue != null)
+        {
+            if (accepted && result.Response is { } dialogueResponse)
+                TryDeliverDialogue(result.Request.ActorId, result.Request.RequestId, dialogue, dialogueResponse);
+            else
+                TryDeliverDialogueFallback(result.Request.ActorId, result.Request.RequestId, dialogue);
+            return;
+        }
+
+        if (!accepted || response == null || policy == null)
             return;
 
-        if (_suggestions.Count < _policy.MaximumAppliedSuggestions || _suggestions.ContainsKey(result.Request.ActorId))
+        if (_suggestions.Count < policy.MaximumAppliedSuggestions || _suggestions.ContainsKey(result.Request.ActorId))
         {
-            var expiresAt = now.Advance(_policy.SuggestionLifetime);
+            var expiresAt = now.Advance(policy.SuggestionLifetime);
             var suggestion = new AppliedSuggestion(
                 result.Request.RequestId,
                 response.SelectedCapabilityId,
@@ -112,8 +130,6 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
             _cognition.ForceSchedule(result.Request.ActorId, now);
         }
 
-        if (result.Request.Kind == NCNeuralRequestKind.DialogueContinuation && dialogue != null)
-            TryDeliverDialogue(result.Request.ActorId, result.Request.RequestId, dialogue, response);
     }
 
     private void OnCollectFacts(NCCognitionCollectFactsEvent args)
@@ -163,6 +179,39 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         _chat.TrySendInGameICMessage(
             entityUid,
             response.RenderedText.Trim(),
+            InGameICChatType.Speak,
+            hideChat: false,
+            checkRadioPrefix: false);
+    }
+
+    private void TryDeliverDialogueFallback(
+        NCActorId actorId,
+        Guid requestId,
+        DialogueCorrelation dialogue)
+    {
+        if (!_conversations.TryGet(dialogue.SessionId, out var session) ||
+            session.ConversationVersion != dialogue.ConversationVersion ||
+            session.Channel != NCConversationChannel.InPerson ||
+            !_runtime.TryGetEntity(actorId, out var entityUid) || !Exists(entityUid) ||
+            !TryComp<NCNeuralConversationTargetComponent>(entityUid, out var target))
+        {
+            return;
+        }
+
+        if (!_conversations.TryRecordTurn(new NCConversationTurnRequest(
+                session.SessionId,
+                NCPartyRef.ForActor(actorId),
+                NCSpeechActKind.Statement,
+                "neural.fallback",
+                $"neural:{requestId:N}",
+                requestId), out _, out _))
+        {
+            return;
+        }
+
+        _chat.TrySendInGameICMessage(
+            entityUid,
+            Loc.GetString(target.FallbackMessage),
             InGameICChatType.Speak,
             hideChat: false,
             checkRadioPrefix: false);

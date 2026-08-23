@@ -6,3 +6,5 @@
 [nc_neural]
 enabled = true
 endpoint = "http://127.0.0.1:8080/v1/cognition"
+# Set this only in the private deployment config. Never commit a real credential.
+api_key = ""

@@ -11,6 +11,7 @@
   maximumFacts: 64
   maximumCapabilities: 32
   maximumTextLength: 512
+  maximumDialogueInputLength: 512
   sessionTokenTarget: 200000
   sessionTokenHardCap: 300000
   economyThreshold: 150000

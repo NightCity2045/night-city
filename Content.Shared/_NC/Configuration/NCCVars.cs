@@ -8,8 +8,7 @@ using Robust.Shared.Configuration;
 namespace Content.Shared._NC.Configuration;
 
 /// <summary>
-/// Server-only Night City configuration. Secrets never belong in CVars; the neural API key is owned by the
-/// isolated cognition service.
+/// Server-only Night City configuration.
 /// </summary>
 [CVarDefs]
 public sealed class NCCVars : CVars
@@ -20,4 +19,11 @@ public sealed class NCCVars : CVars
     /// <summary>An empty value keeps the endpoint authored by the neural policy prototype.</summary>
     public static readonly CVarDef<string> NeuralEndpoint =
         CVarDef.Create("nc_neural.endpoint", string.Empty, CVar.SERVERONLY);
+
+    /// <summary>
+    /// OpenAI credential forwarded to the isolated cognition service for the duration of one request.
+    /// CONFIDENTIAL prevents the value from being exposed through configuration console output.
+    /// </summary>
+    public static readonly CVarDef<string> NeuralApiKey =
+        CVarDef.Create("nc_neural.api_key", string.Empty, CVar.SERVERONLY | CVar.CONFIDENTIAL);
 }
