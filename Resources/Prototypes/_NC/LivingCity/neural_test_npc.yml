@@ -11,14 +11,6 @@
   components:
   - type: Loadout
     prototypes: []
-  - type: NCNeuralConversationTarget
-    interactionRange: 2.5
-    maximumUtteranceLength: 512
-    topicKeys: [night-city-2045, ncpd, patrol-officer, api-test]
-    maximumDisclosure: Public
-    language: Russian
-    locale: RuRu
-    fallbackMessage: nc-neural-conversation-fallback
 
 - type: ncCityActorArchetype
   id: NCLivingCityNeuralNcpdTestOfficerArchetype
@@ -29,3 +21,10 @@
   allowedHomeContexts: [District, Sector, Street, Building, Apartment]
   allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
   routineProfile: NCDefaultCivilianRoutine
+  cognitionCapabilityProfile: NCNcpdFieldOfficerCapabilities
+  neuralPersonaProfile: NCNeuralAlexRiveraPersona
+  neuralAutonomyPolicy: NCNcpdNeuralAutonomy
+  personalityProfile: NCNcpdFieldOfficerPersonality
+  valuesProfile: NCNcpdFieldOfficerValues
+  socialPreferenceProfile: NCNcpdFieldOfficerPreferences
+  speechProfile: NCNcpdFieldOfficerSpeech

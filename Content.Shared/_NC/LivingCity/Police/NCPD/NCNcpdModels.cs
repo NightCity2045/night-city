@@ -90,19 +90,6 @@ public enum NCNcpdUnitRole : byte
 }
 
 [Serializable, NetSerializable]
-public enum NCNcpdWorkAnchorKind : byte
-{
-    Muster,
-    Dispatch,
-    PatrolExit,
-    Booking,
-    Holding,
-    Evidence,
-    Armory,
-    ReportDesk,
-}
-
-[Serializable, NetSerializable]
 public enum NCNcpdForceLevel : byte
 {
     Presence,

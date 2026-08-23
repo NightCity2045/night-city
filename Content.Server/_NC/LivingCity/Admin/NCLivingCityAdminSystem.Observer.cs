@@ -101,12 +101,31 @@ public sealed partial class NCLivingCityAdminSystem
             Math.Max(0, districtActors - publicActors - abstractHomeActors - physicalHomeActors));
 
         fields.Add("observer-society", "formal-workers", _workforce.IndexedAssignmentCount);
+        fields.Add("observer-society", "profession-profiles", _professions.ProfileCount);
+        fields.Add("observer-society", "profession-jobs", _professions.JobCount);
         fields.Add("observer-society", "civilian-livelihoods-cached", _livelihoods.CachedActorCount);
         fields.Add("observer-society", "faction-profiles", _factionBootstrap.ProfileCount);
         fields.Add("observer-society", "faction-load-complete", _factionBootstrap.InitialLoadComplete);
         fields.Add("observer-society", "affiliated-actors-cached", _factionMemberships.CachedActorCount);
+        fields.Add("observer-society", "physical-affiliations", _factionActors.ProjectedActors);
         fields.Add("observer-society", "configuration-error",
             _workforce.ConfigurationError ?? _factionBootstrap.ConfigurationError ?? "none");
+        fields.Add("observer-human-mind", "active-conversations", _conversations.ActiveSessionCount);
+        fields.Add("observer-human-mind", "recent-conversations", _conversations.RecentSessionCount);
+        fields.Add("observer-human-mind", "physical-conversations", _neuralConversations.ActivePhysicalConversations);
+        fields.Add("observer-human-mind", "ambient-conversations-scheduled",
+            _neuralConversations.ScheduledAmbientInitiatives);
+        var memory = _humanMemory.GetCounters();
+        fields.Add("observer-human-mind", "memory-writes-in-flight", memory.WritesInFlight);
+        fields.Add("observer-human-mind", "memories-remembered", memory.Remembered);
+        fields.Add("observer-human-mind", "memory-rejections", memory.Rejected);
+        fields.Add("observer-human-mind", "directives-in-flight", _humanDirectives.InFlight);
+        fields.Add("observer-human-mind", "directives-accepted", _humanDirectives.Accepted);
+        fields.Add("observer-human-mind", "directives-rejected", _humanDirectives.Rejected);
+        fields.Add("observer-human-mind", "last-directive-result", _humanDirectives.LastResult);
+        fields.Add("observer-human-mind", "actors-with-place-knowledge", _locationKnowledge.ActorCount);
+        fields.Add("observer-affordances", "catalog-version", _affordances.Version);
+        fields.Add("observer-affordances", "entries", _affordances.EntryCount);
 
         fields.Add("observer-pipeline", "projection-ready", _zoneStates.InitialLoadComplete);
         fields.Add("observer-pipeline", "projected-scopes", _zoneStates.ScopeCount);
@@ -209,6 +228,7 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-location", "travel-mode", snapshot.Location.TravelMode);
         fields.Add("observer-location", "expected-arrival", snapshot.Location.ExpectedArrivalAt?.Elapsed);
         fields.Add("observer-location", "presence", snapshot.Schedule.PresenceMode);
+        fields.Add("observer-location", "known-zones", _locationKnowledge.CountKnown(actorId));
 
         fields.Add("observer-intent", "activity", snapshot.Schedule.CurrentActivity);
         fields.Add("observer-intent", "goal", snapshot.Schedule.CurrentGoal);
@@ -231,9 +251,31 @@ public sealed partial class NCLivingCityAdminSystem
         {
             fields.Add("observer-employment", "status", "unemployed");
         }
+        if (_professions.TryGetProfile(actorId, out var profession))
+        {
+            fields.Add("observer-profession", "profile", profession.ID);
+            fields.Add("observer-profession", "skills", string.Join(", ", profession.SkillKeys));
+            fields.Add("observer-profession", "capability-overlays",
+                string.Join(", ", profession.CapabilityOverlays.Select(value => value.Id)));
+        }
 
         var livelihood = await _livelihoods.GetAsync(actorId);
         fields.Add("observer-livelihood", "profile", livelihood?.Snapshot.ProfileId ?? "none");
+
+        var memoryBook = await _memories.GetAsync(NCPartyRef.ForActor(actorId));
+        fields.Add("observer-memory", "episodes", memoryBook?.Snapshot.Episodes.Count ?? 0);
+        fields.Add("observer-memory", "summaries", memoryBook?.Snapshot.Summaries.Count ?? 0);
+        fields.Add("observer-memory", "total-remembered", memoryBook?.Snapshot.TotalRemembered ?? 0);
+        fields.Add("observer-memory", "active-conversations",
+            _conversations.GetForParticipant(NCPartyRef.ForActor(actorId), 50).Count);
+        if (entityUid.IsValid() && TryComp<NCHumanDirectiveComponent>(entityUid, out var directive))
+        {
+            fields.Add("observer-directive", "request", directive.RequestId);
+            fields.Add("observer-directive", "action", directive.Action);
+            fields.Add("observer-directive", "order", directive.Order);
+            fields.Add("observer-directive", "target-zone", directive.TargetZone);
+            fields.Add("observer-directive", "accepted-at", directive.AcceptedAt.Elapsed);
+        }
 
         var affiliations = await _factionMemberships.GetAsync(actorId);
         fields.Add("observer-affiliations", "count", affiliations?.Snapshot.Memberships.Count ?? 0);

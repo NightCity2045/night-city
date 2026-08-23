@@ -232,7 +232,7 @@ public sealed partial class NCCognitionSystem
                 return (state.TravelPhase is NCCityActorTravelPhase.Stationary or
                     NCCityActorTravelPhase.Arrived, null);
             case "perform-authoritative-work":
-                return (!state.CurrentActivity.Equals("work", StringComparison.OrdinalIgnoreCase), null);
+                return ExecuteProfessionalWork(state);
         }
 
         EntityUid? entity = _runtime.TryGetEntity(state.ActorId, out var entityUid) && Exists(entityUid)
@@ -243,6 +243,24 @@ public sealed partial class NCCognitionSystem
         return execution.Handled
             ? (execution.Completed, execution.Failure)
             : (false, $"unhandled-action:{step.ActionId}");
+    }
+
+    private (bool Completed, string? Failure) ExecuteProfessionalWork(RuntimeState state)
+    {
+        // Abstract actors remain at work until their authoritative schedule advances. Physical actors must perform a
+        // real role interaction; merely waiting at the workplace is not counted as completed professional work.
+        if (!_runtime.TryGetEntity(state.ActorId, out var worker) || !Exists(worker))
+            return (!state.CurrentActivity.Equals("work", StringComparison.OrdinalIgnoreCase), null);
+        if (!_workforce.TryGetAssignment(state.ActorId, out var organization, out var job))
+            return (false, "professional-employment-missing");
+        if (!_professions.TryGetProfile(state.ActorId, out var profile))
+            return (false, "professional-profile-missing");
+
+        var request = new NCProfessionalWorkRequestedEvent(state.ActorId, worker, organization, job, profile);
+        RaiseLocalEvent(request);
+        return request.Handled
+            ? (request.Completed, request.Failure)
+            : (false, $"professional-adapter-missing:{profile.ID}");
     }
 
     private void ReplaceWithRuntimeFallback(RuntimeState state, NCActiveWorldTime now, string failure)

@@ -4,6 +4,7 @@
 
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Persistence.Identity;
+using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.LivingCity.Police.NCPD;
@@ -50,22 +51,14 @@ public sealed partial class NCNcpdPoliceClaimComponent : Component
 }
 
 /// <summary>
-/// Mapper-authored stable point for station work. StableKey is an identity, not a localized label.
+/// Round-local projection of the incident an officer has reported. Dispatch remains authoritative over assignments.
 /// </summary>
 [RegisterComponent]
-public sealed partial class NCNcpdWorkAnchorComponent : Component
+public sealed partial class NCNcpdIncidentReportComponent : Component
 {
-    [DataField(required: true)] public string StableKey = string.Empty;
-    [DataField] public NCNcpdWorkAnchorKind Kind;
-}
-
-/// <summary>
-/// Mapper-authored stable waypoint inside one Street zone. Patrol route generation consumes these points later.
-/// </summary>
-[RegisterComponent]
-public sealed partial class NCNcpdPatrolAnchorComponent : Component
-{
-    [DataField(required: true)] public string StableKey = string.Empty;
+    [ViewVariables(VVAccess.ReadOnly)] public Guid ReportId;
+    [ViewVariables(VVAccess.ReadOnly)] public string SuspectHandle = string.Empty;
+    [ViewVariables(VVAccess.ReadOnly)] public NCActiveWorldTime ReportedAt;
 }
 
 /// <summary>

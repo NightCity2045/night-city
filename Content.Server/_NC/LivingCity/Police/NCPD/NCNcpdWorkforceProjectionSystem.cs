@@ -7,6 +7,7 @@ using Content.Server._NC.LivingCity.Employment;
 using Content.Shared._NC.LivingCity.Police.NCPD;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared.Roles;
+using Content.Shared.SSDIndicator;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.LivingCity.Police.NCPD;
@@ -202,5 +203,9 @@ public sealed partial class NCNcpdWorkforceProjectionSystem : EntitySystem
         officer.RoleProfile = profileId;
         officer.StationZone = profile.WorkZone;
         EnsureComp<NCNcpdPoliceClaimComponent>(entityUid);
+
+        // SSD is a player-session indicator. Server-owned employees retain their universal HTN instead.
+        if (HasComp<SSDIndicatorComponent>(entityUid))
+            RemCompDeferred<SSDIndicatorComponent>(entityUid);
     }
 }

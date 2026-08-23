@@ -68,8 +68,8 @@ public sealed record NCNcpdUnitSnapshot(
 
 public sealed record NCNcpdMappingDiagnostics(
     bool StationValid,
-    int WorkAnchors,
-    int PatrolAnchors,
+    int StationAffordances,
+    int PatrolAreas,
     string[] Errors);
 
 public sealed record NCNcpdCommandRecord(

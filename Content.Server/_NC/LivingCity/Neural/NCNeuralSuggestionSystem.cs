@@ -30,6 +30,7 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCCognitionSystem _cognition = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
+    [Dependency] private NCCityLocalPerceptionSystem _perception = default!;
     [Dependency] private NCConversationSessionSystem _conversations = default!;
     [Dependency] private ChatSystem _chat = default!;
 
@@ -75,6 +76,18 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
 
     public void ForgetDialogue(Guid requestId) => _dialogues.Remove(requestId);
 
+    public bool TryGetSuggestionSnapshot(NCActorId actorId, out NCNeuralSuggestionSnapshot snapshot)
+    {
+        if (!_suggestions.TryGetValue(actorId, out var value))
+        {
+            snapshot = default!;
+            return false;
+        }
+        snapshot = new NCNeuralSuggestionSnapshot(value.RequestId, value.CapabilityId, value.GoalKey,
+            value.TargetHandle, value.Confidence, value.AcceptedAt, value.ExpiresAt);
+        return true;
+    }
+
     private void OnStarted(NCActiveWorldSessionStartedEvent args)
     {
         Clear();
@@ -101,12 +114,25 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
             response.ContextVersion == result.Request.ContextVersion &&
             meetsConfidence &&
             result.Request.AllowedCapabilityIds.Contains(response.SelectedCapabilityId) &&
+            (response.Intent?.TargetHandle.Length is not > 0 ||
+             _perception.TryResolveSubjectHandle(result.Request.ActorId, response.Intent.TargetHandle, now, out _)) &&
             epoch == result.Request.SessionEpoch && result.Request.ExpiresAt > now;
 
         if (result.Request.Kind == NCNeuralRequestKind.DialogueContinuation && dialogue != null)
         {
             if (accepted && result.Response is { } dialogueResponse)
-                TryDeliverDialogue(result.Request.ActorId, result.Request.RequestId, dialogue, dialogueResponse);
+            {
+                if (dialogueResponse.Intent != null && policy != null)
+                    ApplySuggestion(result.Request, dialogueResponse, policy, now);
+                if (TryDeliverDialogue(result.Request.ActorId, result.Request.RequestId, dialogue, dialogueResponse))
+                {
+                    RaiseLocalEvent(new NCNeuralDialogueIntentAcceptedEvent(
+                        result.Request.ActorId,
+                        dialogue.SessionId,
+                        result.Request,
+                        dialogueResponse));
+                }
+            }
             else
                 TryDeliverDialogueFallback(result.Request.ActorId, result.Request.RequestId, dialogue);
             return;
@@ -115,27 +141,41 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         if (!accepted || response == null || policy == null)
             return;
 
-        if (_suggestions.Count < policy.MaximumAppliedSuggestions || _suggestions.ContainsKey(result.Request.ActorId))
-        {
-            var expiresAt = now.Advance(policy.SuggestionLifetime);
-            var suggestion = new AppliedSuggestion(
-                result.Request.RequestId,
-                response.SelectedCapabilityId,
-                result.Request.ContextVersion,
-                response.Confidence,
-                now,
-                expiresAt);
-            _suggestions[result.Request.ActorId] = suggestion;
-            _expiries.Enqueue(new SuggestionExpiry(result.Request.ActorId, suggestion.RequestId), expiresAt.Ticks);
-            _cognition.ForceSchedule(result.Request.ActorId, now);
-        }
+        ApplySuggestion(result.Request, response, policy, now);
 
+    }
+
+    private void ApplySuggestion(
+        NCNeuralRequestEnvelope request,
+        NCNeuralResponseEnvelope response,
+        NCNeuralPolicyPrototype policy,
+        NCActiveWorldTime now)
+    {
+        if (response.Intent == null ||
+            _suggestions.Count >= policy.MaximumAppliedSuggestions && !_suggestions.ContainsKey(request.ActorId))
+        {
+            return;
+        }
+        var expiresAt = now.Advance(policy.SuggestionLifetime);
+        var suggestion = new AppliedSuggestion(
+            request.RequestId,
+            response.SelectedCapabilityId,
+            request.ContextVersion,
+            response.Confidence,
+            response.Intent.TargetHandle,
+            response.Intent.GoalKey,
+            now,
+            expiresAt);
+        _suggestions[request.ActorId] = suggestion;
+        _expiries.Enqueue(new SuggestionExpiry(request.ActorId, suggestion.RequestId), expiresAt.Ticks);
+        _cognition.ForceSchedule(request.ActorId, now);
     }
 
     private void OnCollectFacts(NCCognitionCollectFactsEvent args)
     {
         if (!_active || _policy == null || !_suggestions.TryGetValue(args.ActorId, out var suggestion) ||
-            suggestion.ExpiresAt <= args.Now)
+            suggestion.ExpiresAt <= args.Now || suggestion.TargetHandle.Length > 0 &&
+            !_perception.TryResolveSubjectHandle(args.ActorId, suggestion.TargetHandle, args.Now, out _))
             return;
 
         var confidence = suggestion.Confidence / 1000f;
@@ -149,9 +189,21 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
             NCCognitionValue.FromNumber(_policy.MaximumUtilityBoost * confidence),
             suggestion.AcceptedAt,
             suggestion.ExpiresAt));
+        if (suggestion.TargetHandle.Length > 0)
+        {
+            args.Sink.Add(new NCCognitionFact(
+                $"neural.target.{suggestion.CapabilityId}",
+                new NCCognitionSubjectRef(NCCognitionReferenceKind.StableKey, suggestion.TargetHandle),
+                NCCognitionDomain.Core,
+                SuggestionSource,
+                suggestion.ContextVersion,
+                NCCognitionValue.FromStableKey(suggestion.GoalKey),
+                suggestion.AcceptedAt,
+                suggestion.ExpiresAt));
+        }
     }
 
-    private void TryDeliverDialogue(
+    private bool TryDeliverDialogue(
         NCActorId actorId,
         Guid requestId,
         DialogueCorrelation dialogue,
@@ -163,7 +215,7 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
             session.Channel != NCConversationChannel.InPerson ||
             !session.Participants.Contains(NCPartyRef.ForActor(actorId)) ||
             !_runtime.TryGetEntity(actorId, out var entityUid) || !Exists(entityUid))
-            return;
+            return false;
 
         var recorded = _conversations.TryRecordTurn(new NCConversationTurnRequest(
             session.SessionId,
@@ -171,9 +223,9 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
             act,
             $"neural.{response.SpeechActKey.ToLowerInvariant()}",
             $"neural:{requestId:N}",
-            requestId), out _, out _);
+            requestId), out _, out _, response.RenderedText.Trim());
         if (!recorded)
-            return;
+            return false;
 
         // ChatSystem remains the physical speech authority and applies the normal speech blockers and sanitization.
         _chat.TrySendInGameICMessage(
@@ -182,6 +234,7 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
             InGameICChatType.Speak,
             hideChat: false,
             checkRadioPrefix: false);
+        return true;
     }
 
     private void TryDeliverDialogueFallback(
@@ -204,7 +257,7 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
                 NCSpeechActKind.Statement,
                 "neural.fallback",
                 $"neural:{requestId:N}",
-                requestId), out _, out _))
+                requestId), out _, out _, Loc.GetString(target.FallbackMessage)))
         {
             return;
         }
@@ -249,9 +302,36 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         string CapabilityId,
         long ContextVersion,
         int Confidence,
+        string TargetHandle,
+        string GoalKey,
         NCActiveWorldTime AcceptedAt,
         NCActiveWorldTime ExpiresAt);
 
     private readonly record struct SuggestionExpiry(NCActorId ActorId, Guid RequestId);
     private sealed record DialogueCorrelation(NCConversationSessionId SessionId, int ConversationVersion);
 }
+
+/// <summary>
+/// Published only after a correlated in-person response was validated, recorded and spoken. Domain adapters still
+/// have to authorize and execute the proposed intent through their own server authorities.
+/// </summary>
+public sealed class NCNeuralDialogueIntentAcceptedEvent(
+    NCActorId actorId,
+    NCConversationSessionId sessionId,
+    NCNeuralRequestEnvelope request,
+    NCNeuralResponseEnvelope response) : EntityEventArgs
+{
+    public NCActorId ActorId { get; } = actorId;
+    public NCConversationSessionId SessionId { get; } = sessionId;
+    public NCNeuralRequestEnvelope Request { get; } = request;
+    public NCNeuralResponseEnvelope Response { get; } = response;
+}
+
+public sealed record NCNeuralSuggestionSnapshot(
+    Guid RequestId,
+    string CapabilityId,
+    string GoalKey,
+    string TargetHandle,
+    int Confidence,
+    NCActiveWorldTime AcceptedAt,
+    NCActiveWorldTime ExpiresAt);

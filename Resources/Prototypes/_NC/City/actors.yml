@@ -88,6 +88,7 @@
   maximumObservedEntities: 32
   maximumLineOfSightChecks: 8
   evaluationInterval: 0.75s
+  witnessedEventLifetime: 30s
 
 - type: ncCityLocalPerceptionPolicy
   id: NCDefaultLocalPerceptionPolicy

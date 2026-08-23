@@ -6,10 +6,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Content.Server._NC.City.Connectivity;
 using Content.Server._NC.LivingCity.Actors.Components;
+using Content.Server._NC.LivingCity.Police.NCPD;
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Admin;
 using Content.Shared._NC.LivingCity.Police;
+using Content.Shared._NC.LivingCity.Police.NCPD;
 using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.Persistence.Identity;
 
@@ -243,6 +245,23 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("runtime", "desire-count", runtime.Desires.Length);
         fields.Add("runtime", "last-failure", runtime.LastFailure ?? "none");
         AddIntention(fields, "runtime-intention", runtime.Intention);
+        if (runtime.EntityUid is { } physical &&
+            TryComp<NCNcpdIncidentReportComponent>(physical, out var policeReport))
+        {
+            fields.Add("ncpd-incident", "report-id", policeReport.ReportId);
+            fields.Add("ncpd-incident", "suspect-handle", policeReport.SuspectHandle);
+            fields.Add("ncpd-incident", "reported-at", policeReport.ReportedAt.Elapsed);
+        }
+        if (_neuralSuggestions.TryGetSuggestionSnapshot(actorId, out var neural))
+        {
+            fields.Add("neural-intent", "request-id", neural.RequestId);
+            fields.Add("neural-intent", "capability", neural.CapabilityId);
+            fields.Add("neural-intent", "goal", neural.GoalKey);
+            fields.Add("neural-intent", "target-handle", neural.TargetHandle.Length == 0 ? "none" : neural.TargetHandle);
+            fields.Add("neural-intent", "confidence", neural.Confidence);
+            fields.Add("neural-intent", "accepted-at", neural.AcceptedAt.Elapsed);
+            fields.Add("neural-intent", "expires-at", neural.ExpiresAt.Elapsed);
+        }
 
         foreach (var fact in runtime.Facts.Take(8))
         {

@@ -8,9 +8,11 @@ using System.Text;
 using Content.Server.Clothing.Systems;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Actors.Components;
+using Content.Server._NC.LivingCity.Cognition;
 using Content.Server._NC.LivingCity.Employment;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.Actors;
+using Content.Shared._NC.LivingCity.Cognition;
 using Content.Shared._NC.LivingCity.Police.NCPD;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared.Roles;
@@ -42,13 +44,15 @@ public sealed partial class NCNeuralTestNpcSystem : EntitySystem
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
     [Dependency] private NCOrganizationWorkforceSystem _workforce = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
+    [Dependency] private NCCognitionRegistrySystem _cognition = default!;
 
     public void RequestSpawn(ICommonSession session, Action<NCNeuralTestNpcSpawnResult> completed)
     {
         if (session.AttachedEntity is not { } attached || !Exists(attached) ||
             !_clock.TryGetCurrentTime(out var epoch, out _) ||
             !_prototypes.TryIndex(OfficerRole, out NCNcpdRoleProfilePrototype? role) || role == null ||
-            !_prototypes.HasIndex(TestArchetype) || !_prototypes.HasIndex(TestEntity) ||
+            !_prototypes.TryIndex(TestArchetype, out NCCityActorArchetypePrototype? archetype) || archetype == null ||
+            !_prototypes.HasIndex(TestEntity) ||
             !_prototypes.HasIndex(OfficerGear))
         {
             completed(new(false, default, default,
@@ -56,13 +60,19 @@ public sealed partial class NCNeuralTestNpcSystem : EntitySystem
             return;
         }
 
-        _ = PrepareSpawnAsync(session, epoch, role, completed);
+        _ = PrepareSpawnAsync(
+            session,
+            epoch,
+            role,
+            archetype.CognitionCapabilityProfile.Id,
+            completed);
     }
 
     private async Task PrepareSpawnAsync(
         ICommonSession session,
         Content.Shared._NC.Persistence.Time.NCSessionEpoch epoch,
         NCNcpdRoleProfilePrototype role,
+        string capabilityProfile,
         Action<NCNeuralTestNpcSpawnResult> completed)
     {
         NCCityActorMutationResult actorResult;
@@ -107,7 +117,66 @@ public sealed partial class NCNeuralTestNpcSystem : EntitySystem
             return;
         }
 
+        var cognitionError = await ReconcileCognitionProfileAsync(actorResult.ActorId, capabilityProfile);
+        if (cognitionError != null)
+        {
+            CompleteOnMainThread(completed, new(false, default, actorResult.ActorId, cognitionError));
+            return;
+        }
+
         _tasks.RunOnMainThread(() => FinishSpawn(session, epoch, actorResult.ActorId, completed));
+    }
+
+    /// <summary>
+    /// The command actor has stable round identity. Re-running the command after a prototype update therefore
+    /// migrates only its capability allowlist and clears an incompatible old intention instead of duplicating it.
+    /// </summary>
+    private async Task<string?> ReconcileCognitionProfileAsync(NCActorId actorId, string capabilityProfile)
+    {
+        for (var attempt = 0; attempt < 2; attempt++)
+        {
+            var cognitionTask = _cognition.GetCognitionAsync(actorId, true);
+            var beliefsTask = _cognition.GetBeliefsAsync(actorId, true);
+            await Task.WhenAll(cognitionTask, beliefsTask);
+            var cognition = await cognitionTask;
+            var beliefs = await beliefsTask;
+            if (cognition == null || beliefs == null)
+                return "The test officer cognition aggregates are unavailable.";
+            if (cognition.Snapshot.CapabilityProfileId == capabilityProfile)
+                return null;
+
+            var beliefEvent = Guid.NewGuid();
+            var cognitionEvent = Guid.NewGuid();
+            var nextBeliefs = beliefs.Snapshot with
+            {
+                DataVersion = beliefs.Snapshot.DataVersion + 1,
+                LastEventId = beliefEvent,
+            };
+            var nextCognition = cognition.Snapshot with
+            {
+                CapabilityProfileId = capabilityProfile,
+                BeliefSetVersion = beliefs.AggregateVersion + 1,
+                CurrentDesire = null,
+                CurrentIntention = null,
+                DataVersion = cognition.Snapshot.DataVersion + 1,
+                LastEventId = cognitionEvent,
+            };
+            var result = await _cognition.CommitAsync(new NCCognitionCommitRequest(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                null,
+                actorId,
+                cognition.AggregateVersion,
+                beliefs.AggregateVersion,
+                nextCognition,
+                nextBeliefs,
+                "console-neural-ncpd-profile-reconcile"));
+            if (result.Status is NCCognitionMutationStatus.Applied or NCCognitionMutationStatus.Duplicate)
+                return null;
+            if (result.Status != NCCognitionMutationStatus.VersionConflict)
+                return result.Error ?? "The test officer cognition profile could not be updated.";
+        }
+        return "The test officer cognition profile changed concurrently; run the command again.";
     }
 
     private void FinishSpawn(

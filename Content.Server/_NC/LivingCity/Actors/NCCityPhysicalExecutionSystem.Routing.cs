@@ -25,6 +25,8 @@ namespace Content.Server._NC.LivingCity.Actors;
 
 public sealed partial class NCCityPhysicalExecutionSystem
 {
+    private const string RouteSteeringLeaseOwner = "living-city-route";
+
     [Dependency] private NCCityNavigationPlannerSystem _navigation = default!;
     [Dependency] private NCCitySpawnCandidateSystem _spawnCandidates = default!;
     [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
@@ -36,6 +38,7 @@ public sealed partial class NCCityPhysicalExecutionSystem
     [Dependency] private NCCityPhysicalBehaviorAdapterSystem _behaviorAdapters = default!;
     [Dependency] private NCCityLocalPerceptionSystem _perception = default!;
     [Dependency] private NCCityPhysicalActionResolutionSystem _actionResolution = default!;
+    [Dependency] private NCCityNpcSteeringLeaseSystem _steeringLease = default!;
     [Dependency] private SharedMapSystem _maps = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
 
@@ -342,6 +345,11 @@ public sealed partial class NCCityPhysicalExecutionSystem
                 return;
             }
 
+            if (!_steeringLease.Acquire(entityUid, RouteSteeringLeaseOwner))
+            {
+                RequestReplan(entityUid, component, now, "npc-steering-activation-unavailable");
+                return;
+            }
             var steering = _steering.Register(entityUid, target);
             steering.Range = _policy.WaypointReachRange;
             steering.ArriveOnLineOfSight = false;
@@ -724,7 +732,10 @@ public sealed partial class NCCityPhysicalExecutionSystem
         if (!component.OwnsSteering)
             return;
         if (Exists(entityUid))
+        {
             _steering.Unregister(entityUid);
+            _steeringLease.Release(entityUid, RouteSteeringLeaseOwner);
+        }
         component.OwnsSteering = false;
     }
 

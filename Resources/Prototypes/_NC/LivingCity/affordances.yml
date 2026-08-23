@@ -1,0 +1,56 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncCityAffordance
+  id: NCStreetPatrolArea
+  kind: PatrolArea
+  knowledgeKey: location.street.patrol-area
+
+# Universal places are derived from the mapper's semantic zones and existing safe navigation candidates. They are
+# available to civilians, organizations and gangs alike and require no invisible anchors on the map.
+- type: ncCityAffordance
+  id: NCCityWorkplace
+  kind: Workplace
+  knowledgeKey: location.city.workplace
+
+- type: ncCityAffordance
+  id: NCCityResidence
+  kind: Residence
+  knowledgeKey: location.city.residence
+
+- type: ncCityAffordance
+  id: NCCityPublicEntrance
+  kind: PublicEntrance
+  knowledgeKey: location.city.public-entrance
+
+- type: ncCityAffordance
+  id: NCCityBuildingExit
+  kind: BuildingExit
+  knowledgeKey: location.city.building-exit
+
+- type: ncCityAffordance
+  id: NCCityRestArea
+  kind: RestArea
+  knowledgeKey: location.city.rest-area
+
+- type: ncCityZoneAffordanceSource
+  id: NCStreetPatrolAffordances
+  requiredContext: Street
+  candidateProfile: NCPedestrianSpawnCandidates
+  affordances: [NCStreetPatrolArea]
+  maximumCandidates: 512
+
+- type: ncCityZoneAffordanceSource
+  id: NCCityBuildingAffordances
+  requiredContext: Building
+  candidateProfile: NCPedestrianSpawnCandidates
+  affordances: [NCCityWorkplace, NCCityPublicEntrance, NCCityBuildingExit, NCCityRestArea]
+  maximumCandidates: 1024
+
+- type: ncCityZoneAffordanceSource
+  id: NCCityApartmentAffordances
+  requiredContext: Apartment
+  candidateProfile: NCPedestrianSpawnCandidates
+  affordances: [NCCityResidence, NCCityRestArea]
+  maximumCandidates: 2048

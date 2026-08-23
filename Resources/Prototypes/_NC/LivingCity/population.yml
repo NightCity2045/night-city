@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+# This is the single physical foundation for every persistent human NPC. Jobs add capabilities and equipment;
+# they do not replace this HTN root with profession-specific brains.
 # Persistent Living City actors deliberately do not receive the station's NanoTrasen NPC faction.
 - type: entity
   id: NCLivingCityCivilian
@@ -11,11 +13,37 @@
   components:
   - type: InputMover
   - type: MobMover
+  - type: NCHumanSocialAction
+    approachRange: 1.5
+  - type: NCNeuralConversationTarget
+    interactionRange: 2.5
+    listenToLocalSpeech: true
+    listeningRange: 5
+    maximumUtteranceLength: 512
+    topicKeys: [night-city-2045, local-life]
+    maximumDisclosure: Public
+    language: Russian
+    locale: RuRu
+    fallbackMessage: nc-neural-conversation-fallback
+  - type: HTN
+    rootTask:
+      task: NCLivingHumanCompound
+    planCooldown: 1
+    blackboard:
+      IdleRange: !type:Single
+        4
+      MinimumIdleTime: !type:Single
+        3
+      MaximumIdleTime: !type:Single
+        8
   - type: RandomHumanoidAppearance
   - type: Loadout
     prototypes: [LimitedPassengerGear]
   - type: NpcFactionMember
     factions: [Passive]
+  - type: FactionException
+  - type: NPCRetaliation
+    attackMemoryLength: 30s
 
 - type: ncCityActorArchetype
   id: NCLivingCityUtilityResident
@@ -26,6 +54,7 @@
   allowedHomeContexts: [District, Sector, Street, Building, Apartment]
   allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
   routineProfile: NCDefaultCivilianRoutine
+  neuralPersonaProfile: NCDefaultResidentPersona
 
 - type: ncCityActorArchetype
   id: NCLivingCityPlannerResident
@@ -36,6 +65,7 @@
   allowedHomeContexts: [District, Sector, Street, Building, Apartment]
   allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
   routineProfile: NCDefaultCivilianRoutine
+  neuralPersonaProfile: NCDefaultResidentPersona
 
 - type: ncCityActorArchetype
   id: NCLivingCityNeuralResident
@@ -46,6 +76,7 @@
   allowedHomeContexts: [District, Sector, Street, Building, Apartment]
   allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
   routineProfile: NCDefaultCivilianRoutine
+  neuralPersonaProfile: NCDefaultResidentPersona
 
 # These stable street-scoped IDs may already exist in persistent actor records. They now resolve to
 # ordinary civilians and no longer provide factions, combat equipment, or Street War behavior.

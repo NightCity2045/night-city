@@ -71,6 +71,7 @@ public sealed partial class NCCityPhysicalStateRule
 
     [DataField(required: true)]
     public TimeSpan EvaluationInterval { get; private set; }
+
 }
 
 /// <summary>
@@ -112,6 +113,9 @@ public sealed partial class NCCityLocalPerceptionProfilePrototype : IPrototype
 
     [DataField(required: true)]
     public TimeSpan EvaluationInterval { get; private set; }
+
+    [DataField(required: true)]
+    public TimeSpan WitnessedEventLifetime { get; private set; }
 }
 
 [Prototype("ncCityLocalPerceptionPolicy")]

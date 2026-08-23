@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Server._NC.LivingCity.Actors;
+using Content.Server._NC.LivingCity.Cognition;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Police.NCPD;
@@ -45,6 +46,7 @@ public sealed partial class NCNcpdDutySystem : EntitySystem
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(_ => BootstrapOfficers());
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => ClearRound());
+        SubscribeLocalEvent<NCProfessionalWorkRequestedEvent>(OnProfessionalWork);
         BootstrapOfficers();
     }
 
@@ -79,6 +81,24 @@ public sealed partial class NCNcpdDutySystem : EntitySystem
             if (changed)
                 Enqueue(actorId);
         }
+    }
+
+    private void OnProfessionalWork(NCProfessionalWorkRequestedEvent args)
+    {
+        if (args.Organization.Id != "NCPD")
+            return;
+        args.Handled = true;
+        if (!_states.TryGetValue(args.ActorId, out var duty))
+        {
+            args.Failure = "ncpd-duty-state-missing";
+            return;
+        }
+
+        // Check-in and dispatch are authoritative NCPD work. An assigned unit remains executing its command through
+        // the command/physical systems; an available unit has completed this bounded duty cycle.
+        args.Completed = duty.Status is NCNcpdDutyStatus.Available or NCNcpdDutyStatus.Assigned;
+        if (duty.Status is NCNcpdDutyStatus.OffDuty or NCNcpdDutyStatus.CheckOut)
+            args.Failure = "ncpd-off-duty";
     }
 
     private void OnOfficerProjected(NCNcpdOfficerProjectedEvent args)

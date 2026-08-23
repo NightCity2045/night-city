@@ -191,14 +191,18 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         if (actor == null || request.Kind != NCNeuralRequestKind.DialogueContinuation &&
             actor.AggregateVersion != request.ContextVersion)
             return new(NCNeuralResultStatus.Stale, request, null, "context-version");
-        if (response == null || response.RequestId != request.RequestId || response.SchemaVersion != 1 ||
+        if (response == null || response.RequestId != request.RequestId || response.SchemaVersion != 2 ||
             response.ContextVersion != request.ContextVersion || response.Confidence is < 0 or > 1000 ||
             response.InputTokens < 0 || response.OutputTokens < 0 ||
             !request.AllowedCapabilityIds.Contains(response.SelectedCapabilityId) ||
+            response.Intent != null &&
+            !response.Intent.RequestedCapabilityIds.Contains(response.SelectedCapabilityId) ||
             response.SpeechActKey.Length > 96 || response.SummaryKey.Length > 128 ||
             response.RenderedText.Length > _policy!.MaximumTextLength ||
+            request.Kind != NCNeuralRequestKind.DialogueContinuation &&
+            response.Confidence < (request.Autonomy?.MinimumIntentConfidence ?? int.MaxValue) ||
             request.Kind == NCNeuralRequestKind.DialogueContinuation &&
-            string.IsNullOrWhiteSpace(response.RenderedText))
+            string.IsNullOrWhiteSpace(response.RenderedText) || !ValidIntent(request, response.Intent))
             return new(NCNeuralResultStatus.Invalid, request, null, "schema-or-capability");
         return new(NCNeuralResultStatus.Accepted, request, response, string.Empty);
     }
@@ -210,7 +214,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             cached.ContextVersion == request.ContextVersion && request.AllowedCapabilityIds.Contains(
                 cached.SelectedCapabilityId)) return new(NCNeuralResultStatus.Fallback, request, cached, $"cached:{reason}");
         var capability = request.AllowedCapabilityIds.FirstOrDefault() ?? string.Empty;
-        return new(status, request, new NCNeuralResponseEnvelope(request.RequestId, 1, request.ContextVersion,
+        return new(status, request, new NCNeuralResponseEnvelope(request.RequestId, 2, request.ContextVersion,
             capability, "safe-default", string.Empty, "safe-default", 0, 0, 0, string.Empty), reason);
     }
 
@@ -265,6 +269,11 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             request.AllowedCapabilityIds,
             request.TopicKeys,
             request.Locale,
+            request.Persona,
+            request.Autonomy,
+            request.PerceivedSubjects ?? [],
+            request.PerceivedEvents ?? [],
+            request.KnownLocations ?? [],
             request.DialogueInput);
     }
     private void OnStarted(NCActiveWorldSessionStartedEvent args)
@@ -280,7 +289,9 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     }
     private static bool Valid(NCNeuralPolicyPrototype value) => value.MaximumQueued is > 0 and <= 4096 &&
         value.MaximumConcurrent is > 0 and <= 32 && value.MaximumFacts is > 0 and <= 256 &&
-        value.MaximumCapabilities is > 0 and <= 128 && value.MaximumTextLength is > 0 and <= 4096 &&
+        value.MaximumCapabilities is > 0 and <= 128 && value.MaximumPerceivedSubjects is > 0 and <= 128 &&
+        value.MaximumKnownLocations is > 0 and <= 512 &&
+        value.MaximumTextLength is > 0 and <= 4096 &&
         value.MaximumDialogueInputLength is > 0 and <= 4096 &&
         value.EconomyThreshold > 0 && value.RestrictedThreshold >= value.EconomyThreshold &&
         value.SessionTokenHardCap >= value.RestrictedThreshold && value.RequestTimeout > TimeSpan.Zero &&
@@ -296,7 +307,43 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         value.AllowedCapabilityIds.All(Stable) && value.TopicKeys.All(Stable) && value.Facts.All(fact =>
             Stable(fact.Domain) && Stable(fact.Key) && Stable(fact.Subject) && float.IsFinite(fact.Confidence) &&
             fact.Confidence is >= 0 and <= 1 && Stable(fact.Privacy)) &&
+        (value.PerceivedSubjects?.Count ?? 0) <= policy.MaximumPerceivedSubjects &&
+        (value.PerceivedSubjects ?? []).All(subject => Stable(subject.Handle) && Stable(subject.Kind) &&
+            subject.DisplayName.Length is > 0 and <= 128 &&
+            subject.DisplayName.All(character => !char.IsControl(character)) &&
+            float.IsFinite(subject.Confidence) && subject.Confidence is >= 0 and <= 1 && subject.ExpiresAtTicks > 0) &&
+        (value.PerceivedEvents?.Count ?? 0) <= policy.MaximumPerceivedSubjects &&
+        (value.PerceivedEvents ?? []).All(perceivedEvent => Stable(perceivedEvent.Kind) &&
+            Stable(perceivedEvent.ActorHandle) && Stable(perceivedEvent.TargetHandle) &&
+            float.IsFinite(perceivedEvent.Confidence) && perceivedEvent.Confidence is >= 0 and <= 1 &&
+            perceivedEvent.ObservedAtTicks > 0 && perceivedEvent.ExpiresAtTicks > perceivedEvent.ObservedAtTicks) &&
+        (value.KnownLocations?.Count ?? 0) <= policy.MaximumKnownLocations &&
+        (value.KnownLocations ?? []).All(location => Stable(location.Handle) && Stable(location.Kind) &&
+            location.DisplayName.Length is > 0 and <= 128 &&
+            location.DisplayName.All(character => !char.IsControl(character))) &&
+        value.Autonomy is { } autonomy && Stable(autonomy.PolicyKey) &&
+        autonomy.MinimumIntentConfidence is >= 0 and <= 1000 &&
+        autonomy.MaximumIntentPriority is >= 0 and <= 1000 &&
         ValidDialogue(value, policy);
+
+    private static bool ValidIntent(NCNeuralRequestEnvelope request, NCNeuralIntentProposal? intent)
+    {
+        if (intent == null)
+            return request.Kind == NCNeuralRequestKind.DialogueContinuation;
+        var autonomy = request.Autonomy;
+        if (autonomy == null || !Stable(intent.GoalKey) || !Stable(intent.ExpectedOutcomeKey) ||
+            intent.Priority < 0 || intent.Priority > autonomy.MaximumIntentPriority ||
+            intent.RequestedCapabilityIds.Count is < 1 or > 16 ||
+            intent.RequestedCapabilityIds.Any(value => !request.AllowedCapabilityIds.Contains(value)) ||
+            intent.InformationGapKeys.Count > 16 || intent.InformationGapKeys.Any(value => !Stable(value)) ||
+            intent.Arguments.Count > 16 || intent.Arguments.Any(value =>
+                !Stable(value.Key) || value.Value.Length > 256 || value.Value.Any(char.IsControl)))
+            return false;
+        if (intent.TargetHandle.Length == 0)
+            return true;
+        return autonomy.TargetedIntentsAllowed && Stable(intent.TargetHandle) && (request.PerceivedSubjects ?? [])
+            .Any(value => value.Handle == intent.TargetHandle);
+    }
     private static bool ValidDialogue(NCNeuralRequestEnvelope value, NCNeuralPolicyPrototype policy)
     {
         if (value.Kind != NCNeuralRequestKind.DialogueContinuation)
@@ -304,6 +351,8 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         return value.DialogueInput is { } dialogue &&
                dialogue.ActorDisplayName.Length is > 0 and <= 128 &&
                dialogue.Utterance.Length is > 0 && dialogue.Utterance.Length <= policy.MaximumDialogueInputLength &&
+               (dialogue.SpeakerHandle.Length == 0 || Stable(dialogue.SpeakerHandle) &&
+                   (value.PerceivedSubjects ?? []).Any(subject => subject.Handle == dialogue.SpeakerHandle)) &&
                dialogue.ActorDisplayName.All(character => !char.IsControl(character)) &&
                dialogue.Utterance.All(character => !char.IsControl(character));
     }
@@ -331,6 +380,11 @@ internal sealed record NCNeuralProviderRequest(
     IReadOnlyList<string> AllowedCapabilityIds,
     IReadOnlyList<string> TopicKeys,
     string Locale,
+    NCNeuralPersonaContext? Persona,
+    NCNeuralAutonomyContext? Autonomy,
+    IReadOnlyList<NCNeuralPerceivedSubject> PerceivedSubjects,
+    IReadOnlyList<NCNeuralPerceivedEvent> PerceivedEvents,
+    IReadOnlyList<NCNeuralKnownLocation> KnownLocations,
     NCNeuralDialogueInput? DialogueInput);
 
 internal sealed record NCNeuralProviderGuid(Guid Value);

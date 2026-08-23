@@ -27,3 +27,4 @@ ent-NCPDCommanderPDA = NCPD precinct commander PDA
     .desc = A rugged department terminal tied to its owner's persistent position.
 ent-NCPDChiefPDA = NCPD chief PDA
     .desc = A rugged department terminal tied to its owner's persistent position.
+nc-ncpd-ai-lawful-order = NCPD! Stop and keep your hands where I can see them!

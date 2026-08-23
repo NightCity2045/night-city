@@ -71,7 +71,6 @@ public sealed partial class NCNcpdDutyPolicyPrototype : IPrototype
     [DataField] public int MaximumPatrolSize { get; private set; } = 4;
     [DataField] public int ReserveActors { get; private set; } = 2;
     [DataField] public int MaximumTransitionsPerEvent { get; private set; } = 32;
-    [DataField] public List<NCNcpdWorkAnchorKind> RequiredAnchors { get; private set; } = [];
 }
 
 [Prototype("ncNcpdPatrolPolicy")]
@@ -106,6 +105,12 @@ public sealed partial class NCNcpdUseOfForcePolicyPrototype : IPrototype
     [DataField] public int LethalThreat { get; private set; } = 800;
     [DataField] public bool StopForceOnSurrender { get; private set; } = true;
     [DataField] public bool StopForceOnIncapacitation { get; private set; } = true;
+    [DataField] public float IncidentObservationRadius { get; private set; } = 8f;
+    [DataField] public TimeSpan SuspectObservationLifetime { get; private set; } = TimeSpan.FromSeconds(45);
+    [DataField] public float VerbalOrderRange { get; private set; } = 6f;
+    [DataField] public float RestraintRange { get; private set; } = 1.25f;
+    [DataField] public TimeSpan RestraintRetryDelay { get; private set; } = TimeSpan.FromSeconds(4);
+    [DataField] public string VerbalOrderLocKey { get; private set; } = "nc-ncpd-ai-lawful-order";
 }
 
 [Prototype("ncNcpdDetentionPolicy")]

@@ -1,0 +1,93 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# These profiles extend the common human mind. Jobs and rank remain authoritative in the same player-facing
+# DepartmentPrototype/JobPrototype definitions; player-only chiefs are intentionally absent.
+- type: ncProfessionProfile
+  id: NCProfessionNcpd
+  organization: NCPD
+  jobs: [NCPDCommander, NCPDLieutenant, NCPDInspector, NCPDSergeant, NCPDOfficer, NCPDCadet]
+  capabilityOverlays: [NCNcpdRespondToObservedAssault]
+  skillKeys: [law-enforcement, patrol, investigation, restraint, radio-procedure, first-aid]
+
+- type: ncProfessionProfile
+  id: NCProfessionTraumaTeam
+  organization: TraumaTeam
+  jobs: [TraumaTeamOperative, TraumaTeamParamedic]
+  capabilityOverlays: [NCMedicalRespondToCritical]
+  skillKeys: [emergency-medicine, casualty-extraction, armed-escort, triage, radio-procedure]
+
+- type: ncProfessionProfile
+  id: NCProfessionCityMedical
+  organization: MedicalNC
+  jobs: [NCMedicalDoctor, NCMedicalCoroner, NCMedicalPsychologist, NCMedicalIntern, NCMedicalTechnician]
+  capabilityOverlays: [NCMedicalRespondToCritical]
+  skillKeys: [medicine, diagnostics, triage, patient-care, medical-records]
+
+- type: ncProfessionProfile
+  id: NCProfessionBiotechnicaOperations
+  organization: Biotechnica
+  jobs: [BiotechnicaOperativeLead, BiotechnicaOperative, BiotechnicaNetrunner, BiotechnicaRigger,
+    BiotechnicaTech, BiotechnicaBotanist]
+  capabilityOverlays: [NCProfessionalPerformAssignedDuty]
+  skillKeys: [corporate-procedure, biotechnology, site-security, technical-maintenance]
+  workAffordance: Workplace
+
+- type: ncProfessionProfile
+  id: NCProfessionBiotechnicaMedical
+  organization: Biotechnica
+  jobs: [BiotechnicaMedTech, BiotechnicaParamedic]
+  capabilityOverlays: [NCMedicalRespondToCritical]
+  skillKeys: [corporate-procedure, biotechnology, medicine, emergency-medicine]
+
+- type: ncProfessionProfile
+  id: NCProfessionMilitechOperations
+  organization: Militech
+  jobs: [MilitechOperativeLead, MilitechSecuritySpecialist, MilitechOperative, MilitechNetrunner,
+    MilitechRigger, MilitechTech, MilitechQuartermaster]
+  capabilityOverlays: [NCProfessionalPerformAssignedDuty]
+  skillKeys: [corporate-procedure, armed-security, squad-tactics, logistics, radio-procedure]
+  workAffordance: PatrolArea
+
+- type: ncProfessionProfile
+  id: NCProfessionMilitechMedical
+  organization: Militech
+  jobs: [MilitechCombatMedic]
+  capabilityOverlays: [NCMedicalRespondToCritical]
+  skillKeys: [corporate-procedure, armed-security, squad-tactics, emergency-medicine, radio-procedure]
+
+- type: ncProfessionProfile
+  id: NCProfessionZhirafaEngineer
+  organization: Zhirafa
+  jobs: [ZhirafaEngineer]
+  capabilityOverlays: [NCMaintenanceRepairInfrastructure]
+  skillKeys: [urban-maintenance, construction, repair, public-safety]
+
+- type: ncProfessionProfile
+  id: NCProfessionZhirafaJanitor
+  organization: Zhirafa
+  jobs: [ZhirafaJanitor]
+  capabilityOverlays: [NCJanitorialMaintainWorkplace]
+  skillKeys: [urban-maintenance, sanitation, hazardous-cleanup, public-safety]
+
+- type: ncJanitorialWorkPolicy
+  id: NCDefaultJanitorialWorkPolicy
+  capability: NCJanitorialMaintainWorkplace
+  searchRadius: 8
+  interactionRange: 1.35
+  maximumCandidates: 12
+
+- type: ncMaintenanceWorkPolicy
+  id: NCDefaultMaintenanceWorkPolicy
+  capability: NCMaintenanceRepairInfrastructure
+  searchRadius: 8
+  interactionRange: 1.35
+  maximumCandidates: 12
+  completionTimeout: 00:00:20
+
+- type: ncGenericProfessionalWorkPolicy
+  id: NCDefaultGenericProfessionalWorkPolicy
+  capability: NCProfessionalPerformAssignedDuty
+  arrivalRange: 1.25
+  maximumCatalogCandidates: 32

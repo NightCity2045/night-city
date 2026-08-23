@@ -10,6 +10,12 @@
   lethalThreat: 800
   stopForceOnSurrender: true
   stopForceOnIncapacitation: true
+  incidentObservationRadius: 8
+  suspectObservationLifetime: 45s
+  verbalOrderRange: 6
+  restraintRange: 1.25
+  restraintRetryDelay: 4s
+  verbalOrderLocKey: nc-ncpd-ai-lawful-order
 
 - type: ncNcpdDutyPolicy
   id: NCDefaultNcpdDutyPolicy
@@ -18,7 +24,6 @@
   maximumPatrolSize: 4
   reserveActors: 2
   maximumTransitionsPerEvent: 32
-  requiredAnchors: [Muster, Dispatch, PatrolExit, Booking, Holding, Evidence, Armory, ReportDesk]
 
 - type: ncNcpdPatrolPolicy
   id: NCDefaultNcpdPatrolPolicy
@@ -196,99 +201,3 @@
   canInvestigate: false
   workZone: a9c069f8-8558-493c-844b-b7bfe8775521
   forcePolicy: NCDefaultNcpdUseOfForce
-
-# Mapper-facing station anchors. Stable keys are intentionally explicit on each placed instance.
-- type: entity
-  abstract: true
-  id: NCNcpdWorkAnchorBase
-  parent: MarkerBase
-  name: NCPD work anchor
-  suffix: NC, NCPD, Mapping
-  components:
-  - type: Sprite
-    layers:
-    - state: pink
-
-- type: entity
-  id: NCNcpdMusterAnchor
-  parent: NCNcpdWorkAnchorBase
-  name: NCPD muster anchor
-  components:
-  - type: NCNcpdWorkAnchor
-    stableKey: ncpd-glen-muster
-    kind: Muster
-
-- type: entity
-  id: NCNcpdDispatchAnchor
-  parent: NCNcpdWorkAnchorBase
-  name: NCPD dispatch anchor
-  components:
-  - type: NCNcpdWorkAnchor
-    stableKey: ncpd-glen-dispatch
-    kind: Dispatch
-
-- type: entity
-  id: NCNcpdPatrolExitAnchor
-  parent: NCNcpdWorkAnchorBase
-  name: NCPD patrol exit anchor
-  components:
-  - type: NCNcpdWorkAnchor
-    stableKey: ncpd-glen-patrol-exit
-    kind: PatrolExit
-
-- type: entity
-  id: NCNcpdBookingAnchor
-  parent: NCNcpdWorkAnchorBase
-  name: NCPD booking anchor
-  components:
-  - type: NCNcpdWorkAnchor
-    stableKey: ncpd-glen-booking
-    kind: Booking
-
-- type: entity
-  id: NCNcpdHoldingAnchor
-  parent: NCNcpdWorkAnchorBase
-  name: NCPD holding anchor
-  components:
-  - type: NCNcpdWorkAnchor
-    stableKey: ncpd-glen-holding
-    kind: Holding
-
-- type: entity
-  id: NCNcpdEvidenceAnchor
-  parent: NCNcpdWorkAnchorBase
-  name: NCPD evidence anchor
-  components:
-  - type: NCNcpdWorkAnchor
-    stableKey: ncpd-glen-evidence
-    kind: Evidence
-
-- type: entity
-  id: NCNcpdArmoryAnchor
-  parent: NCNcpdWorkAnchorBase
-  name: NCPD armory anchor
-  components:
-  - type: NCNcpdWorkAnchor
-    stableKey: ncpd-glen-armory
-    kind: Armory
-
-- type: entity
-  id: NCNcpdReportDeskAnchor
-  parent: NCNcpdWorkAnchorBase
-  name: NCPD report desk anchor
-  components:
-  - type: NCNcpdWorkAnchor
-    stableKey: ncpd-glen-report-desk
-    kind: ReportDesk
-
-- type: entity
-  id: NCNcpdPatrolAnchor
-  parent: MarkerBase
-  name: NCPD patrol anchor
-  suffix: NC, NCPD, Mapping
-  components:
-  - type: Sprite
-    layers:
-    - state: pink
-  - type: NCNcpdPatrolAnchor
-    stableKey: replace-on-map

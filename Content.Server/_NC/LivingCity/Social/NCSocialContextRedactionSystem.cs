@@ -29,7 +29,8 @@ public sealed partial class NCSocialContextRedactionSystem : EntitySystem
     public async Task<NCRedactedSocialContext?> BuildAsync(
         NCPartyRef owner,
         NCSocialContextPurpose purpose,
-        NCConversationSessionId? conversationSessionId = null)
+        NCConversationSessionId? conversationSessionId = null,
+        IReadOnlyDictionary<NCPartyRef, string>? participantAliases = null)
     {
         if (!owner.IsValid || !Enum.IsDefined(purpose) || !TryGetPolicy(out var policy))
             return null;
@@ -63,25 +64,48 @@ public sealed partial class NCSocialContextRedactionSystem : EntitySystem
         await Task.WhenAll(memoryBookTask, memoriesTask, rumorBookTask, rumorsTask, obligationsTask);
 
         var facts = new List<NCRedactedSocialFact>(policy.MaximumItemsPerDomain * 3);
+        var opaqueParties = new Dictionary<NCPartyRef, string>();
+        var memoryFacts = 0;
         foreach (var item in await memoriesTask)
         {
+            if (memoryFacts >= policy.MaximumItemsPerDomain)
+                break;
             if (item.Episode is { } episode)
             {
-                facts.Add(new NCRedactedSocialFact(
-                    "memory",
-                    episode.EventTypeKey,
-                    episode.Participants.FirstOrDefault().ToString(),
-                    episode.Confidence / 1000f,
-                    episode.Privacy));
+                // Directly witnessed violence stores actor first and victim second. Preserve both roles as
+                // structured facts so a neural rendering cannot confuse who performed the act.
+                for (var index = 0; index < Math.Min(2, episode.Participants.Count); index++)
+                {
+                    if (memoryFacts >= policy.MaximumItemsPerDomain)
+                        break;
+                    facts.Add(new NCRedactedSocialFact(
+                        "memory",
+                        index == 0 ? episode.EventTypeKey : $"{episode.EventTypeKey}.target",
+                        SafePartySubject(episode.Participants[index], participantAliases, opaqueParties),
+                        episode.Confidence / 1000f,
+                        episode.Privacy));
+                    memoryFacts++;
+                }
+                if (episode.Participants.Count == 0 && memoryFacts < policy.MaximumItemsPerDomain)
+                {
+                    facts.Add(new NCRedactedSocialFact(
+                        "memory",
+                        episode.EventTypeKey,
+                        "unknown-person",
+                        episode.Confidence / 1000f,
+                        episode.Privacy));
+                    memoryFacts++;
+                }
             }
             else if (item.Summary is { } summary)
             {
                 facts.Add(new NCRedactedSocialFact(
                     "memory-summary",
                     summary.ConsolidationKey,
-                    summary.Participants.FirstOrDefault().ToString(),
+                    SafePartySubject(summary.Participants.FirstOrDefault(), participantAliases, opaqueParties),
                     summary.MinimumConfidence / 1000f,
                     summary.Privacy));
+                memoryFacts++;
             }
         }
         foreach (var rumor in await rumorsTask)
@@ -101,7 +125,7 @@ public sealed partial class NCSocialContextRedactionSystem : EntitySystem
             facts.Add(new NCRedactedSocialFact(
                 "obligation",
                 snapshot.Terms.PurposeKey,
-                counterparty.ToString(),
+                SafePartySubject(counterparty, participantAliases, opaqueParties),
                 1f,
                 snapshot.Privacy));
         }
@@ -145,4 +169,24 @@ public sealed partial class NCSocialContextRedactionSystem : EntitySystem
         Enum.IsDefined(value.ConversationMaximumPrivacy) && Enum.IsDefined(value.PublicMaximumPrivacy) &&
         value.ConversationMaximumPrivacy <= value.InternalMaximumPrivacy &&
         value.PublicMaximumPrivacy <= value.ConversationMaximumPrivacy;
+
+    /// <summary>
+    /// Converts canonical identity to a request-scoped handle. A supplied perception alias preserves the connection
+    /// between a remembered participant and the person currently in view; all other identities remain opaque.
+    /// </summary>
+    private static string SafePartySubject(
+        NCPartyRef party,
+        IReadOnlyDictionary<NCPartyRef, string>? aliases,
+        Dictionary<NCPartyRef, string> opaqueParties)
+    {
+        if (!party.IsValid)
+            return "unknown-person";
+        if (aliases != null && aliases.TryGetValue(party, out var alias) && !string.IsNullOrWhiteSpace(alias))
+            return alias;
+        if (opaqueParties.TryGetValue(party, out var existing))
+            return existing;
+        var handle = $"known-person-{opaqueParties.Count + 1}";
+        opaqueParties.Add(party, handle);
+        return handle;
+    }
 }

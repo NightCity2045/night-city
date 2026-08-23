@@ -13,6 +13,7 @@ using Content.Server._NC.GameRules;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Actors.Domains;
 using Content.Server._NC.LivingCity.Ambient;
+using Content.Server._NC.LivingCity.Affordances;
 using Content.Server._NC.LivingCity.Cognition;
 using Content.Server._NC.LivingCity.CityServices;
 using Content.Server._NC.LivingCity.Economy;
@@ -38,6 +39,7 @@ using Content.Server._NC.Medical.Wounds;
 using Content.Server._NC.Persistence.Outbox;
 using Content.Server.GameTicking;
 using Content.Shared._NC.LivingCity.Admin;
+using Content.Shared._NC.LivingCity.Affordances;
 using Content.Shared._NC.City.Zones;
 using Content.Shared.Administration;
 using Content.Shared.Administration.Managers;
@@ -83,6 +85,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
     [Dependency] private NCCityRelevanceSystem _relevance = default!;
     [Dependency] private NCAmbientCrowdSystem _ambient = default!;
+    [Dependency] private NCCityAffordanceCatalogSystem _affordances = default!;
     [Dependency] private NCCityActorScheduleSchedulerSystem _scheduler = default!;
     [Dependency] private NCCityAbstractTravelSystem _travel = default!;
     [Dependency] private NCCityPhysicalExecutionSystem _physicalExecution = default!;
@@ -98,6 +101,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCCityGroupRuntimeFormationSystem _groupFormations = default!;
     [Dependency] private NCCityGroupTrunkRouteSystem _groupRoutes = default!;
     [Dependency] private NCCityLocalPerceptionSystem _localPerception = default!;
+    [Dependency] private NCLocationKnowledgeSystem _locationKnowledge = default!;
     [Dependency] private NCCityPhysicalStateTreeSystem _physicalStateTree = default!;
     [Dependency] private NCCityPhysicalActionResolutionSystem _physicalActions = default!;
     [Dependency] private NCPartyDirectorySystem _parties = default!;
@@ -112,6 +116,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCShipmentCargoSystem _shipmentCargo = default!;
     [Dependency] private NCEmploymentRegistrySystem _employment = default!;
     [Dependency] private NCOrganizationWorkforceSystem _workforce = default!;
+    [Dependency] private NCProfessionProfileSystem _professions = default!;
     [Dependency] private NCNcpdWorkforceProjectionSystem _ncpdWorkforce = default!;
     [Dependency] private NCNcpdDutySystem _ncpdDuty = default!;
     [Dependency] private NCNcpdUnitSystem _ncpdUnits = default!;
@@ -128,6 +133,8 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCRumorRegistrySystem _rumors = default!;
     [Dependency] private NCSocialObligationRegistrySystem _socialObligations = default!;
     [Dependency] private NCConversationSessionSystem _conversations = default!;
+    [Dependency] private NCHumanMemoryBridgeSystem _humanMemory = default!;
+    [Dependency] private NCHumanDirectiveSystem _humanDirectives = default!;
     [Dependency] private NCPersistentOutboxDispatcherSystem _outbox = default!;
     [Dependency] private NCAILoadGovernorSystem _loadGovernor = default!;
     [Dependency] private NCCityIncidentRegistrySystem _incidents = default!;
@@ -135,10 +142,13 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCFactionRegistrySystem _factions = default!;
     [Dependency] private NCFactionBootstrapSystem _factionBootstrap = default!;
     [Dependency] private NCFactionMembershipRegistrySystem _factionMemberships = default!;
+    [Dependency] private NCFactionActorProjectionSystem _factionActors = default!;
     [Dependency] private NCDistrictSafetyProjectionSystem _districtSafety = default!;
     [Dependency] private NCCityNewsRegistrySystem _cityNews = default!;
     [Dependency] private NCEstateRegistrySystem _estates = default!;
     [Dependency] private NCNeuralCognitionClientSystem _neural = default!;
+    [Dependency] private NCNeuralSuggestionSystem _neuralSuggestions = default!;
+    [Dependency] private NCNeuralConversationSystem _neuralConversations = default!;
     [Dependency] private NCLivingCityObservabilitySystem _observability = default!;
     [Dependency] private NCMedicalPersistenceSystem _medicalPersistence = default!;
     [Dependency] private NCMedicalStatusSnapshotSystem _medicalStatusSnapshots = default!;
@@ -361,6 +371,9 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("population-import", "failed", population.Failed);
         fields.Add("workforce", "indexed-assignments", _workforce.IndexedAssignmentCount);
         fields.Add("workforce", "configuration-error", _workforce.ConfigurationError ?? "none");
+        fields.Add("workforce", "profession-profiles", _professions.ProfileCount);
+        fields.Add("workforce", "profession-jobs", _professions.JobCount);
+        fields.Add("workforce", "profession-configuration-error", _professions.ConfigurationError ?? "none");
         fields.Add("workforce", "civilian-livelihoods-cached", _livelihoods.CachedActorCount);
         var ncpdConfigurationError = _ncpdWorkforce.ConfigurationError ?? _ncpdUnits.ConfigurationError;
         var ncpdReady = ncpdConfigurationError == null && _ncpdMapping.MappingErrorCount == 0;
@@ -379,17 +392,26 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("ncpd-units", "active-orders", _ncpdCommands.ActiveCommandCount);
         fields.Add("ncpd-units", "dispatch-history", _ncpdCommands.RetainedCommandCount);
         fields.Add("ncpd-mapping", "station-zone-valid", _ncpdMapping.StationValid);
-        fields.Add("ncpd-mapping", "work-anchors",
-            $"{_ncpdMapping.WorkAnchorCount} / {_ncpdMapping.RequiredWorkAnchorCount}");
-        fields.Add("ncpd-mapping", "patrol-anchors", _ncpdMapping.PatrolAnchorCount);
+        fields.Add("ncpd-mapping", "station-affordances",
+            $"{_ncpdMapping.StationAffordanceCount} / {_ncpdMapping.RequiredStationAffordanceCount}");
+        fields.Add("ncpd-mapping", "patrol-areas", _ncpdMapping.PatrolAreaCount);
         fields.Add("ncpd-mapping", "mapping-errors", _ncpdMapping.MappingErrorCount);
         fields.Add("ncpd-mapping", "first-error", _ncpdMapping.FirstError ?? "none");
+        fields.Add("affordances", "catalog-version", _affordances.Version);
+        fields.Add("affordances", "total", _affordances.EntryCount);
+        fields.Add("affordances", "workplaces", _affordances.Count(NCCityAffordanceKind.Workplace));
+        fields.Add("affordances", "residences", _affordances.Count(NCCityAffordanceKind.Residence));
+        fields.Add("affordances", "public-entrances", _affordances.Count(NCCityAffordanceKind.PublicEntrance));
+        fields.Add("affordances", "building-exits", _affordances.Count(NCCityAffordanceKind.BuildingExit));
+        fields.Add("affordances", "rest-areas", _affordances.Count(NCCityAffordanceKind.RestArea));
+        fields.Add("human-mind", "actors-with-learned-locations", _locationKnowledge.ActorCount);
         fields.Add("factions", "initial-load-complete", _factionBootstrap.InitialLoadComplete);
         fields.Add("factions", "profiles", _factionBootstrap.ProfileCount);
         fields.Add("factions", "created", _factionBootstrap.CreatedCount);
         fields.Add("factions", "existing", _factionBootstrap.ExistingCount);
         fields.Add("factions", "failed", _factionBootstrap.FailedCount);
         fields.Add("factions", "membership-actors-cached", _factionMemberships.CachedActorCount);
+        fields.Add("factions", "physical-membership-projections", _factionActors.ProjectedActors);
         fields.Add("factions", "configuration-error", _factionBootstrap.ConfigurationError ?? "none");
         fields.Add("residences", "allocation-running", _residences.IsRunning);
         if (_residences.LastReport is { } residences)

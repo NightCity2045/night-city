@@ -81,6 +81,66 @@
     dependsOn: [ reach-service ]
 
 - type: ncCognitionCapability
+  id: NCMedicalRespondToCritical
+  domain: Medical
+  taskKind: KnownProcedure
+  preferredPlanner: Htn
+  fallbackPlanner: StateTree
+  baseUtility: 65
+  priority: 850
+  requiredBeliefs: [ perception.critical-person-present ]
+  interruptsRoutine: true
+  requiresMaterialization: true
+  procedureSteps:
+  - id: approach-patient
+    action: human-approach-person
+  - id: control-bleeding
+    action: medical-provide-manual-pressure
+    dependsOn: [ approach-patient ]
+
+- type: ncCognitionCapability
+  id: NCJanitorialMaintainWorkplace
+  domain: Jobs
+  taskKind: KnownProcedure
+  preferredPlanner: Htn
+  fallbackPlanner: StateTree
+  baseUtility: 40
+  priority: 510
+  requiredBeliefs: [ employment.active, routine.work-due ]
+  requiresMaterialization: true
+  procedureSteps:
+  - id: clean-local-area
+    action: perform-authoritative-work
+
+- type: ncCognitionCapability
+  id: NCMaintenanceRepairInfrastructure
+  domain: Jobs
+  taskKind: KnownProcedure
+  preferredPlanner: Htn
+  fallbackPlanner: StateTree
+  baseUtility: 40
+  priority: 510
+  requiredBeliefs: [ employment.active, routine.work-due ]
+  requiresMaterialization: true
+  procedureSteps:
+  - id: repair-local-infrastructure
+    action: perform-authoritative-work
+
+- type: ncCognitionCapability
+  id: NCProfessionalPerformAssignedDuty
+  domain: Jobs
+  taskKind: KnownProcedure
+  preferredPlanner: Htn
+  fallbackPlanner: StateTree
+  baseUtility: 38
+  priority: 505
+  requiredBeliefs: [ employment.active, routine.work-due ]
+  requiresMaterialization: true
+  procedureSteps:
+  - id: inspect-assigned-area
+    action: perform-authoritative-work
+
+- type: ncCognitionCapability
   id: NCCognitionFulfilEmployment
   domain: Jobs
   taskKind: KnownProcedure
@@ -185,6 +245,33 @@
     action: yield-to-conversation-authority
 
 - type: ncCognitionCapability
+  id: NCCognitionApproachPerson
+  domain: Social
+  taskKind: SocialConversation
+  preferredPlanner: ConversationStateTree
+  fallbackPlanner: StateTree
+  baseUtility: 45
+  priority: 425
+  requiredBeliefs: [neural.target.NCCognitionApproachPerson]
+  requiresMaterialization: true
+  procedureSteps:
+  - id: approach-person
+    action: human-approach-person
+
+- type: ncCognitionCapability
+  id: NCCognitionAcceptDirective
+  domain: Faction
+  taskKind: GroupOperation
+  preferredPlanner: PartialOrder
+  fallbackPlanner: StateTree
+  baseUtility: 55
+  priority: 650
+  requiresMaterialization: true
+  procedureSteps:
+  - id: accept-authorized-directive
+    action: human-accept-authorized-directive
+
+- type: ncCognitionCapability
   id: NCCognitionManageFixerDeal
   domain: Economy
   taskKind: KnownProcedure
@@ -197,6 +284,36 @@
   - id: progress-deal
     action: manage-fixer-deal
 
+- type: ncCognitionCapability
+  id: NCNcpdRespondToObservedAssault
+  domain: Crime
+  taskKind: KnownProcedure
+  preferredPlanner: Htn
+  fallbackPlanner: StateTree
+  baseUtility: 90
+  priority: 950
+  requiredBeliefs: [ncpd.on-duty, ncpd.suspect-observed]
+  interruptsRoutine: true
+  requiresMaterialization: true
+  procedureSteps:
+  - id: assess-scene
+    action: ncpd-assess-scene
+  - id: report-incident
+    action: ncpd-report-incident
+    dependsOn: [assess-scene]
+  - id: issue-order
+    action: ncpd-issue-lawful-order
+    dependsOn: [assess-scene]
+  - id: pursue
+    action: ncpd-pursue-suspect
+    dependsOn: [report-incident, issue-order]
+  - id: restrain
+    action: ncpd-restrain-suspect
+    dependsOn: [pursue]
+  - id: escort
+    action: ncpd-begin-escort
+    dependsOn: [restrain]
+
 - type: ncCognitionCapabilityProfile
   id: NCDefaultCivilianCapabilities
   capabilities:
@@ -208,7 +325,23 @@
   - NCCognitionGroupDirective
   - NCCognitionStrategicFallback
   - NCCognitionConversation
+  - NCCognitionApproachPerson
+  - NCCognitionAcceptDirective
   - NCCognitionManageFixerDeal
+
+- type: ncCognitionCapabilityProfile
+  id: NCNcpdFieldOfficerCapabilities
+  capabilities:
+  - NCCognitionIncapacitated
+  - NCNcpdRespondToObservedAssault
+  - NCCognitionSeekMedicalCare
+  - NCCognitionFulfilEmployment
+  - NCCognitionFollowRoutine
+  - NCCognitionGroupDirective
+  - NCCognitionStrategicFallback
+  - NCCognitionConversation
+  - NCCognitionApproachPerson
+  - NCCognitionAcceptDirective
 
 - type: ncCognitionDecisionPolicy
   id: NCDefaultCognitionDecisionPolicy

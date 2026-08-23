@@ -8,12 +8,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Actors.Domains;
+using Content.Server._NC.LivingCity.CityServices;
 using Content.Server._NC.LivingCity.Economy;
 using Content.Server._NC.LivingCity.Employment;
 using Content.Server._NC.LivingCity.Groups;
 using Content.Server._NC.LivingCity.Social;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.Actors;
+using Content.Shared._NC.LivingCity.CityServices;
 using Content.Shared._NC.LivingCity.Cognition;
 using Content.Shared._NC.LivingCity.Employment;
 using Content.Shared._NC.LivingCity.Social;
@@ -37,6 +39,7 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
     [Dependency] private NCRumorRegistrySystem _rumors = default!;
     [Dependency] private NCSocialObligationRegistrySystem _obligations = default!;
     [Dependency] private NCCityGroupRegistrySystem _groups = default!;
+    [Dependency] private NCFactionMembershipRegistrySystem _factionMemberships = default!;
 
     private readonly ConcurrentDictionary<NCActorId, MissingCapabilityEntry> _missingCapabilities = [];
     private long _suppressedCapabilityReads;
@@ -86,8 +89,10 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
             () => _obligations.GetForPartyAsync(party, socialLimit));
         var membershipTask = LoadUnlessMissing(missing, MissingCapability.GroupMembership,
             () => _groups.GetMembershipAsync(actorId));
+        var factionMembershipTask = LoadUnlessMissing(missing, MissingCapability.FactionMembership,
+            () => _factionMemberships.GetAsync(actorId));
         await Task.WhenAll(healthTask, inventoryTask, employmentTask, accountTask, memoryTask, socialProfileTask,
-            relationshipTask, rumorTask, obligationTask, membershipTask);
+            relationshipTask, rumorTask, obligationTask, membershipTask, factionMembershipTask);
 
         var sink = new NCCognitionFactSink(maximumFacts);
         var root = actor.Snapshot;
@@ -238,6 +243,19 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
             }
         }
 
+        var factionMembership = await factionMembershipTask;
+        var activeFaction = factionMembership?.Snapshot.Memberships.FirstOrDefault(value =>
+            value.Status == NCFactionMembershipStatus.Active);
+        if (activeFaction != null)
+        {
+            Add(sink, "faction.member", NCCognitionDomain.Faction, "faction-membership",
+                factionMembership!.AggregateVersion, NCCognitionValue.FromBoolean(true), now, lifetime,
+                new NCCognitionSubjectRef(NCCognitionReferenceKind.Party, activeFaction.FactionId.ToString()));
+            Add(sink, "faction.role", NCCognitionDomain.Faction, "faction-membership",
+                factionMembership.AggregateVersion, NCCognitionValue.FromStableKey(activeFaction.Role), now, lifetime,
+                new NCCognitionSubjectRef(NCCognitionReferenceKind.Party, activeFaction.FactionId.ToString()));
+        }
+
         var refreshedMissing = MissingCapability.None;
         if (employment == null)
             refreshedMissing |= MissingCapability.Employment;
@@ -255,6 +273,8 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
             refreshedMissing |= MissingCapability.Obligations;
         if (membership == null)
             refreshedMissing |= MissingCapability.GroupMembership;
+        if (factionMembership == null)
+            refreshedMissing |= MissingCapability.FactionMembership;
         if (refreshedMissing == MissingCapability.None || missingCapabilityRefreshInterval <= TimeSpan.Zero)
         {
             _missingCapabilities.TryRemove(actorId, out _);
@@ -273,6 +293,22 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
             perception.Revision, NCCognitionValue.FromBoolean(perception.CriticalPersonPresent), now, lifetime);
         Add(sink, "social.conversation-requested", NCCognitionDomain.Social, "physical-state", perception.Revision,
             NCCognitionValue.FromBoolean(perception.ConversationRequested), now, lifetime);
+
+        // Specific observations share the aggregate belief key so existing capabilities acquire a safe concrete
+        // target. These handles are round-local and can never resolve outside the physical perception adapter.
+        foreach (var subject in perception.Subjects ?? [])
+        {
+            if (!subject.Subject.IsValid || subject.ExpiresAt <= now || !float.IsFinite(subject.Confidence))
+                continue;
+            Add(sink, subject.FactKey,
+                subject.FactKey == "perception.critical-person-present" ? NCCognitionDomain.Medical :
+                subject.FactKey.StartsWith("ncpd.", StringComparison.Ordinal) ? NCCognitionDomain.Crime :
+                NCCognitionDomain.Safety,
+                $"local-perception:{subject.Subject.StableId}", perception.Revision,
+                NCCognitionValue.FromBoolean(true), subject.ObservedAt,
+                subject.ExpiresAt.ElapsedSince(now) > lifetime ? lifetime : subject.ExpiresAt.ElapsedSince(now),
+                subject.Subject);
+        }
 
         return sink.ToArray();
     }
@@ -340,6 +376,7 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
         Rumors = 1 << 5,
         Obligations = 1 << 6,
         GroupMembership = 1 << 7,
+        FactionMembership = 1 << 8,
     }
 
     private readonly record struct MissingCapabilityEntry(

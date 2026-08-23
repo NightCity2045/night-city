@@ -75,10 +75,12 @@ public sealed partial class NCCognitionSystem
 
         var projectedBeliefs = NCCognitionDecisionEngine.ProjectBeliefs(
             actorId, beliefs.Snapshot.Beliefs, facts, decisionPolicy, now);
+        var capabilityIds = capabilityProfile.Capabilities.ToList();
+        _professions.AddCapabilityOverlays(actorId, capabilityIds);
         var candidates = FilterTier(
             actor.Snapshot.CognitionTier,
             NCCognitionDecisionEngine.EvaluateCapabilities(
-                _prototypes, capabilityProfile, decisionPolicy, projectedBeliefs));
+                _prototypes, capabilityIds, decisionPolicy, projectedBeliefs));
         var selection = NCCognitionDecisionEngine.SelectIntention(
             actorId,
             cognition.Snapshot.CurrentIntention,

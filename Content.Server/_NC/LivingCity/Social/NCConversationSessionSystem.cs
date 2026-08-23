@@ -8,14 +8,15 @@ using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.Identity;
 using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.Persistence.Identity;
+using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
 namespace Content.Server._NC.LivingCity.Social;
 
 /// <summary>
-/// Server-owned, round-local conversation state. It stores semantic acts and external record IDs, never player text;
-/// a sentence cannot execute a gameplay mutation or pretend that a promise, payment, or transfer happened.
+/// Server-owned conversation state. Durable snapshots keep semantic acts; a separate bounded round-local transcript
+/// gives dialogue cognition continuity without turning provider prose into persistence authority.
 /// </summary>
 public sealed partial class NCConversationSessionSystem : EntitySystem
 {
@@ -32,6 +33,7 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
     private readonly Dictionary<NCConversationSessionId, NCConversationSessionSnapshot> _active = [];
     private readonly Dictionary<NCPartyRef, HashSet<NCConversationSessionId>> _byParticipant = [];
     private readonly Queue<NCConversationSessionSnapshot> _recent = [];
+    private readonly Dictionary<NCConversationSessionId, List<NCConversationTranscriptTurn>> _transcripts = [];
     private TimeSpan _nextSweep;
     private bool _roundActive;
 
@@ -188,6 +190,15 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
                 ConversationVersion = checked(current.ConversationVersion + 1),
             };
             _active[session.SessionId] = session;
+            if (!string.IsNullOrWhiteSpace(transientUtterance))
+            {
+                if (!_transcripts.TryGetValue(session.SessionId, out var transcript))
+                    _transcripts[session.SessionId] = transcript = [];
+                transcript.Add(new NCConversationTranscriptTurn(request.Speaker, request.Act,
+                    NormalizeUtterance(transientUtterance), now));
+                while (transcript.Count > policy.MaximumTurns)
+                    transcript.RemoveAt(0);
+            }
         }
         // Raw speech is carried only by this round-local event. The durable conversation snapshot keeps semantic
         // keys and external references, so provider prose never becomes persistence authority.
@@ -248,6 +259,18 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
                 .OrderByDescending(value => value.LastActivityAt.Ticks)
                 .Take(Math.Min(limit, 50))
                 .ToArray();
+        }
+    }
+
+    public IReadOnlyList<NCConversationTranscriptTurn> GetTranscript(NCConversationSessionId sessionId, int limit)
+    {
+        if (!sessionId.IsValid || limit < 1)
+            return [];
+        lock (_sync)
+        {
+            return _transcripts.TryGetValue(sessionId, out var transcript)
+                ? transcript.TakeLast(Math.Min(limit, 32)).ToArray()
+                : [];
         }
     }
 
@@ -322,7 +345,10 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
         }
         _recent.Enqueue(session);
         while (_recent.Count > policy.MaximumRecentSessions)
-            _recent.Dequeue();
+        {
+            var removed = _recent.Dequeue();
+            _transcripts.Remove(removed.SessionId);
+        }
     }
 
     private void Clear()
@@ -333,6 +359,7 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
             _active.Clear();
             _byParticipant.Clear();
             _recent.Clear();
+            _transcripts.Clear();
         }
     }
 
@@ -368,10 +395,22 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
     private static NCInformationSubject Normalize(NCInformationSubject value) =>
         value with { StableId = value.StableId.Trim().ToLowerInvariant() };
     private static string Normalize(string value) => value.Trim().ToLowerInvariant();
+    private static string NormalizeUtterance(string value)
+    {
+        var normalized = string.Join(' ', value.Split((char[]?) null,
+            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+        return normalized[..Math.Min(normalized.Length, 512)];
+    }
     private static bool IsStableKey(string value) => !string.IsNullOrWhiteSpace(value) &&
         value.Length <= MaximumStableKeyLength && value == Normalize(value) &&
         value.All(character => char.IsAsciiLetterOrDigit(character) || character is '-' or '_' or '.');
 }
+
+public sealed record NCConversationTranscriptTurn(
+    NCPartyRef Speaker,
+    NCSpeechActKind Act,
+    string Utterance,
+    NCActiveWorldTime At);
 
 public sealed class NCConversationTurnRecordedEvent(
     NCConversationSessionSnapshot session,

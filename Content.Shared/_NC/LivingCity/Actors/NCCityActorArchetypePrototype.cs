@@ -6,6 +6,7 @@ using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Cognition;
 using Content.Shared._NC.LivingCity.Social;
+using Content.Shared._NC.LivingCity.Neural;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.LivingCity.Actors;
@@ -85,4 +86,13 @@ public sealed partial class NCCityActorArchetypePrototype : IPrototype
     [DataField]
     public ProtoId<NCSpeechProfilePrototype> SpeechProfile { get; private set; } =
         new("NCDefaultBilingualSpeech");
+
+    /// <summary>Optional neural-facing biography; it grants no cognition capability or gameplay authority.</summary>
+    [DataField]
+    public ProtoId<NCNeuralPersonaProfilePrototype>? NeuralPersonaProfile { get; private set; } =
+        new("NCDefaultResidentPersona");
+
+    [DataField]
+    public ProtoId<NCNeuralAutonomyPolicyPrototype> NeuralAutonomyPolicy { get; private set; } =
+        new("NCDefaultNeuralAutonomy");
 }

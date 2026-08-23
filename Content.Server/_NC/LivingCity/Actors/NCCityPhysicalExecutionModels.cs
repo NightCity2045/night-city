@@ -35,6 +35,7 @@ public enum NCCityPhysicalInterruptFlags : ushort
     Medical = 1 << 3,
     Scripted = 1 << 4,
     Police = 1 << 5,
+    Work = 1 << 6,
 }
 
 /// <summary>

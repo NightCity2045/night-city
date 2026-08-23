@@ -6,8 +6,10 @@ using System.Linq;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Cognition;
+using Content.Shared._NC.LivingCity.Employment;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
+using Content.Shared.Roles;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.LivingCity.Cognition;
@@ -16,7 +18,15 @@ public readonly record struct NCCognitionPerceptionInput(
     long Revision,
     bool HostilePresent,
     bool CriticalPersonPresent,
-    bool ConversationRequested);
+    bool ConversationRequested,
+    IReadOnlyList<NCCognitionObservedSubject>? Subjects = null);
+
+public readonly record struct NCCognitionObservedSubject(
+    NCCognitionSubjectRef Subject,
+    string FactKey,
+    float Confidence,
+    NCActiveWorldTime ObservedAt,
+    NCActiveWorldTime ExpiresAt);
 
 public sealed record NCCognitionCapabilityCandidate(
     ProtoId<NCCognitionCapabilityPrototype> Capability,
@@ -115,6 +125,27 @@ public sealed class NCCognitionExecuteStepEvent(
     public EntityUid? EntityUid { get; } = entityUid;
     public NCCognitionIntentionSnapshot Intention { get; } = intention;
     public NCCognitionPlanStep Step { get; } = step;
+    public bool Handled { get; set; }
+    public bool Completed { get; set; }
+    public string? Failure { get; set; }
+}
+
+/// <summary>
+/// Authoritative physical-work boundary shared by every profession. A role adapter may handle only its own profile
+/// and must execute through ordinary gameplay systems; cognition itself cannot simulate a successful interaction.
+/// </summary>
+public sealed class NCProfessionalWorkRequestedEvent(
+    NCActorId actorId,
+    EntityUid worker,
+    ProtoId<DepartmentPrototype> organization,
+    ProtoId<JobPrototype> job,
+    NCProfessionProfilePrototype profile) : EntityEventArgs
+{
+    public NCActorId ActorId { get; } = actorId;
+    public EntityUid Worker { get; } = worker;
+    public ProtoId<DepartmentPrototype> Organization { get; } = organization;
+    public ProtoId<JobPrototype> Job { get; } = job;
+    public NCProfessionProfilePrototype Profile { get; } = profile;
     public bool Handled { get; set; }
     public bool Completed { get; set; }
     public string? Failure { get; set; }

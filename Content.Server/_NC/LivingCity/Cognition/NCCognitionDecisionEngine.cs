@@ -92,10 +92,17 @@ public static class NCCognitionDecisionEngine
         IPrototypeManager prototypes,
         NCCognitionCapabilityProfilePrototype profile,
         NCCognitionDecisionPolicyPrototype policy,
+        IReadOnlyList<NCBeliefSnapshot> beliefs) =>
+        EvaluateCapabilities(prototypes, profile.Capabilities, policy, beliefs);
+
+    public static NCCognitionCapabilityCandidate[] EvaluateCapabilities(
+        IPrototypeManager prototypes,
+        IReadOnlyList<ProtoId<NCCognitionCapabilityPrototype>> capabilityIds,
+        NCCognitionDecisionPolicyPrototype policy,
         IReadOnlyList<NCBeliefSnapshot> beliefs)
     {
         var candidates = new List<NCCognitionCapabilityCandidate>();
-        foreach (var capabilityId in profile.Capabilities)
+        foreach (var capabilityId in capabilityIds.Distinct())
         {
             if (!prototypes.TryIndex(capabilityId, out var capability) || capability == null)
                 continue;
@@ -131,7 +138,10 @@ public static class NCCognitionDecisionEngine
             if (!valid || !float.IsFinite(utility))
                 continue;
 
-            var target = beliefs
+            var neuralTarget = BestBelief(beliefs, $"neural.target.{capability.ID}", policy);
+            var target = neuralTarget?.Subject.IsValid == true
+                ? neuralTarget.Subject
+                : beliefs
                 .Where(value => capability.RequiredBeliefs.Contains(value.Key) && value.Subject.IsValid)
                 .OrderByDescending(value => value.Confidence)
                 .Select(value => value.Subject)

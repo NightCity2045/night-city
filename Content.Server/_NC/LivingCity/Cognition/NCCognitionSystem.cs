@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Cognition.Components;
+using Content.Server._NC.LivingCity.Employment;
 using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.Actors;
@@ -34,6 +35,8 @@ public sealed partial class NCCognitionSystem : EntitySystem
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
     [Dependency] private NCCognitionRegistrySystem _registry = default!;
     [Dependency] private NCCognitionCapabilityProviderSystem _providers = default!;
+    [Dependency] private NCOrganizationWorkforceSystem _workforce = default!;
+    [Dependency] private NCProfessionProfileSystem _professions = default!;
     [Dependency] private NCAILoadGovernorSystem _governor = default!;
 
     private readonly PriorityQueue<ScheduledActor, SchedulePriority> _decisionQueue = new();
@@ -449,7 +452,22 @@ public sealed partial class NCCognitionSystem : EntitySystem
             perception.Revision,
             perception.HostileCount > 0,
             perception.CriticalCount > 0,
-            conversation);
+            conversation,
+            perception.Observations
+                .Where(value => value.Kind is NCCityLocalObservationKind.Hostile or
+                    NCCityLocalObservationKind.Suspect or NCCityLocalObservationKind.Critical)
+                .Select(value => new NCCognitionObservedSubject(
+                new NCCognitionSubjectRef(NCCognitionReferenceKind.StableKey, value.SubjectHandle),
+                value.Kind switch
+                {
+                    NCCityLocalObservationKind.Hostile => "perception.hostile-present",
+                    NCCityLocalObservationKind.Suspect => "ncpd.suspect-observed",
+                    NCCityLocalObservationKind.Critical => "perception.critical-person-present",
+                    _ => throw new InvalidOperationException("Unsupported actionable perception kind."),
+                },
+                value.Confidence,
+                value.ObservedAt,
+                value.ExpiresAt)).ToArray());
     }
 
     private void ScheduleDecision(NCActorId actorId, NCActiveWorldTime dueAt)

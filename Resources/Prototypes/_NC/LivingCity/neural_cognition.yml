@@ -10,6 +10,7 @@
   maximumConcurrent: 4
   maximumFacts: 64
   maximumCapabilities: 32
+  maximumPerceivedSubjects: 32
   maximumTextLength: 512
   maximumDialogueInputLength: 512
   sessionTokenTarget: 200000
@@ -26,6 +27,7 @@
   circuitOpenDuration: 2m
   suggestionLifetime: 20s
   strategicRequestCooldown: 2m
+  incidentEscalationCooldown: 30s
 
 - type: ncNeuralPromptProfile
   id: NCLivingCityDefault
@@ -33,3 +35,37 @@
   version: 1
   model: gpt-5.6-luna
   allowedKinds: [SocialCognition, StrategicDecision, DialogueContinuation, MemorySummary, NarrativeRender]
+
+- type: ncNeuralPersonaProfile
+  id: NCDefaultResidentPersona
+  stableKey: night-city-resident
+  roleKey: city-resident
+  organizationKey: independent
+  biography: A persistent resident of Night City in 2045 with a home, work, relationships, incomplete knowledge and a personal history. This person experiences the city as reality and never describes it as a game or simulation.
+  principleKeys: [survive, remember-debts, protect-close-people, respect-lived-experience]
+  habitKeys: [observe-surroundings, speak-from-known-facts, avoid-impossible-promises]
+
+- type: ncNeuralPersonaProfile
+  id: NCNeuralAlexRiveraPersona
+  stableKey: alex-rivera
+  roleKey: ncpd-patrol-officer
+  organizationKey: ncpd
+  biography: Alex Rivera is a patrol officer assigned to a local Night City precinct in 2045. He knows this city as a dangerous, fractured home, not as a simulation.
+  principleKeys: [protect-civilians, preserve-partner, lawful-orders, proportional-force, professional-discretion]
+  habitKeys: [observe-before-accusing, concise-radio-speech, guarded-with-strangers, checks-exits]
+
+- type: ncNeuralAutonomyPolicy
+  id: NCDefaultNeuralAutonomy
+  stableKey: resident-deliberative
+  allowedKinds: [SocialCognition, StrategicDecision, DialogueContinuation, MemorySummary, NarrativeRender]
+  minimumIntentConfidence: 500
+  maximumIntentPriority: 700
+  targetedIntentsAllowed: true
+
+- type: ncNeuralAutonomyPolicy
+  id: NCNcpdNeuralAutonomy
+  stableKey: ncpd-field-officer
+  allowedKinds: [SocialCognition, StrategicDecision, DialogueContinuation, MemorySummary]
+  minimumIntentConfidence: 400
+  maximumIntentPriority: 900
+  targetedIntentsAllowed: true

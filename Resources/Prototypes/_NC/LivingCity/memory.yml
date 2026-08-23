@@ -83,6 +83,15 @@
   defaultPrivacy: Personal
 
 - type: ncMemoryEvent
+  id: MemoryDirectiveAccepted
+  stableKey: directive-accepted
+  consolidationKey: accepted-directives
+  retention: MemoryRetentionDurable
+  defaultSalience: 700
+  defaultConfidence: 1000
+  defaultPrivacy: Restricted
+
+- type: ncMemoryEvent
   id: MemoryAssistanceReceived
   stableKey: assistance-received
   consolidationKey: social-assistance
