@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System;
 using System.Collections.Generic;
 using Content.Shared._NC.City.ZoneTemplates.Components;
 using Robust.Shared.Prototypes;
@@ -54,4 +55,23 @@ public sealed partial class NCCityConnectivityRulesPrototype : IPrototype
     /// </summary>
     [DataField(required: true)]
     public float DoorDetectionRadius { get; private set; }
+
+    /// <summary>
+    /// Quiet period after the latest structural pathfinding revision before Room/Portal Graph is rebuilt.
+    /// Mapper brush strokes therefore collapse into one authoritative topology transaction.
+    /// </summary>
+    [DataField(required: true)]
+    public TimeSpan StructuralRebuildDebounce { get; private set; }
+
+    /// <summary>
+    /// Interval used to recheck deferred paused mapping grids without polling them every simulation tick.
+    /// </summary>
+    [DataField(required: true)]
+    public TimeSpan PausedGridPollInterval { get; private set; }
+
+    /// <summary>
+    /// Hard cap preventing several large Z-level grids from rebuilding during the same server update.
+    /// </summary>
+    [DataField(required: true)]
+    public int MaximumRebuildsPerUpdate { get; private set; }
 }

@@ -19,6 +19,7 @@ using Robust.Shared.Map.Components;
 using Robust.Shared.Physics;
 using Robust.Shared.Physics.Events;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 using DiagnosticsStopwatch = System.Diagnostics.Stopwatch;
 
 namespace Content.Server._NC.City.Connectivity;
@@ -35,7 +36,9 @@ public sealed partial class NCRoomPortalGraphSystem : EntitySystem
     [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
     [Dependency] private NCZoneSystem _zones = default!;
     [Dependency] private PathfindingSystem _pathfinding = default!;
+    [Dependency] private SharedMapSystem _maps = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private IGameTiming _timing = default!;
 
     private readonly Dictionary<EntityUid, GridGraph> _gridGraphs = [];
     private readonly Dictionary<NCRoomNodeId, RuntimeRoom> _rooms = [];
@@ -43,6 +46,11 @@ public sealed partial class NCRoomPortalGraphSystem : EntitySystem
     private readonly Dictionary<NCRoomNodeId, List<NCRoomPortalId>> _outgoing = [];
     private readonly Dictionary<NCLocalNavigationNodeKey, NCRoomNodeId> _nodeRooms = [];
     private readonly HashSet<EntityUid> _structurallyDirtyGrids = [];
+    private readonly Dictionary<EntityUid, PendingGridRebuild> _pendingRebuilds = [];
+    private readonly HashSet<EntityUid> _pausedPendingGrids = [];
+    private readonly List<EntityUid> _dueRebuilds = [];
+    private readonly List<EntityUid> _deferredRebuilds = [];
+    private readonly List<EntityUid> _invalidPendingGrids = [];
     private readonly List<NCLocalNavigationNodeSnapshot> _navigationSnapshot = [];
     private readonly HashSet<EntityUid> _lookupCandidates = [];
 
@@ -53,8 +61,10 @@ public sealed partial class NCRoomPortalGraphSystem : EntitySystem
     private long _staticCollisionInvalidations;
     private long _ignoredDynamicCollisionChanges;
     private long _ignoredNonStructuralStaticCollisionChanges;
+    private long _coalescedRebuildRequests;
     private double _lastRebuildMilliseconds;
     private double _maximumRebuildMilliseconds;
+    private TimeSpan? _nextPendingEvaluation;
 
     public long GraphVersion { get; private set; }
 
@@ -63,11 +73,14 @@ public sealed partial class NCRoomPortalGraphSystem : EntitySystem
     /// </summary>
     public NCRoomPortalGraphRuntimeCounters GetRuntimeCounters() => new(
         _structurallyDirtyGrids.Count,
+        _pendingRebuilds.Count,
+        _pausedPendingGrids.Count,
         _successfulRebuilds,
         _structuralInvalidations,
         _staticCollisionInvalidations,
         _ignoredDynamicCollisionChanges,
         _ignoredNonStructuralStaticCollisionChanges,
+        _coalescedRebuildRequests,
         _lastRebuildMilliseconds,
         _maximumRebuildMilliseconds);
 
@@ -84,6 +97,73 @@ public sealed partial class NCRoomPortalGraphSystem : EntitySystem
         SubscribeLocalEvent<DoorComponent, ComponentShutdown>(OnDoorShutdown);
         SubscribeLocalEvent<NCZoneIndexRebuiltEvent>(OnZoneIndexRebuilt);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
+    }
+
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+        if (_pendingRebuilds.Count == 0 ||
+            _nextPendingEvaluation is not { } next ||
+            _timing.CurTime < next ||
+            !TryGetRules(out var rules))
+        {
+            return;
+        }
+
+        var now = _timing.CurTime;
+        _dueRebuilds.Clear();
+        _deferredRebuilds.Clear();
+        _invalidPendingGrids.Clear();
+
+        // Mapping Z-networks are paused by their loader. Keep their latest revision pending instead of building a
+        // city-wide snapshot after every brush stroke; a single rebuild will run after the map becomes playable.
+        foreach (var (gridUid, pending) in _pendingRebuilds)
+        {
+            if (!Exists(gridUid))
+            {
+                _invalidPendingGrids.Add(gridUid);
+                continue;
+            }
+            if (pending.DueAt > now)
+                continue;
+            if (_structurallyDirtyGrids.Contains(gridUid) || IsGridPaused(gridUid))
+            {
+                _deferredRebuilds.Add(gridUid);
+                continue;
+            }
+            _dueRebuilds.Add(gridUid);
+        }
+
+        foreach (var gridUid in _invalidPendingGrids)
+        {
+            _pendingRebuilds.Remove(gridUid);
+            _pausedPendingGrids.Remove(gridUid);
+            _structurallyDirtyGrids.Remove(gridUid);
+        }
+        foreach (var gridUid in _deferredRebuilds)
+        {
+            if (!_pendingRebuilds.TryGetValue(gridUid, out var pending))
+                continue;
+            var paused = IsGridPaused(gridUid);
+            if (paused)
+                _pausedPendingGrids.Add(gridUid);
+            else
+                _pausedPendingGrids.Remove(gridUid);
+            _pendingRebuilds[gridUid] = pending with { DueAt = now + rules.PausedGridPollInterval };
+        }
+
+        _dueRebuilds.Sort(static (left, right) => left.Id.CompareTo(right.Id));
+        var rebuildCount = Math.Min(rules.MaximumRebuildsPerUpdate, _dueRebuilds.Count);
+        for (var index = 0; index < rebuildCount; index++)
+        {
+            var gridUid = _dueRebuilds[index];
+            if (!_pendingRebuilds.Remove(gridUid, out var pending))
+                continue;
+            _pausedPendingGrids.Remove(gridUid);
+            RebuildGrid(gridUid, pending.PathfindingRevision);
+        }
+
+        RecalculateNextPendingEvaluation();
     }
 
     public bool TryGetRoom(EntityCoordinates coordinates, out NCRoomNodeId roomId)
@@ -251,6 +331,9 @@ public sealed partial class NCRoomPortalGraphSystem : EntitySystem
     private void OnGridRemoved(GridRemovalEvent args)
     {
         _structurallyDirtyGrids.Remove(args.EntityUid);
+        _pendingRebuilds.Remove(args.EntityUid);
+        _pausedPendingGrids.Remove(args.EntityUid);
+        RecalculateNextPendingEvaluation();
         RemoveGridGraph(args.EntityUid, true);
     }
 
@@ -308,20 +391,13 @@ public sealed partial class NCRoomPortalGraphSystem : EntitySystem
         if (!_structurallyDirtyGrids.Remove(args.GridUid) && _gridGraphs.ContainsKey(args.GridUid))
             return;
 
-        RebuildGrid(args.GridUid, args.Revision);
+        QueueRebuild(args.GridUid, args.Revision);
     }
 
     private void OnZoneIndexRebuilt(ref NCZoneIndexRebuiltEvent args)
     {
-        foreach (var gridUid in _gridGraphs.Keys.ToArray())
-        {
-            RemoveGridGraph(gridUid, false);
-            _structurallyDirtyGrids.Add(gridUid);
-            if (_pathfinding.TryGetNCCityNavigationSnapshot(gridUid, _navigationSnapshot, out var revision))
-                RebuildGrid(gridUid, revision);
-        }
-
-        InvalidateGraph();
+        foreach (var graph in _gridGraphs.Values)
+            QueueRebuild(graph.GridUid, graph.PathfindingRevision);
     }
 
     private void OnPrototypesReloaded(PrototypesReloadedEventArgs args)
@@ -329,14 +405,8 @@ public sealed partial class NCRoomPortalGraphSystem : EntitySystem
         if (!args.WasModified<NCCityConnectivityRulesPrototype>())
             return;
 
-        foreach (var gridUid in _gridGraphs.Keys.ToArray())
-        {
-            RemoveGridGraph(gridUid, false);
-            if (_pathfinding.TryGetNCCityNavigationSnapshot(gridUid, _navigationSnapshot, out var revision))
-                RebuildGrid(gridUid, revision);
-        }
-
-        InvalidateGraph();
+        foreach (var graph in _gridGraphs.Values)
+            QueueRebuild(graph.GridUid, graph.PathfindingRevision);
     }
 
     private void MarkDoorGridDirty(EntityUid doorUid)
@@ -349,8 +419,36 @@ public sealed partial class NCRoomPortalGraphSystem : EntitySystem
     {
         if (_structurallyDirtyGrids.Add(gridUid))
             _structuralInvalidations++;
-        // Keep the last complete graph available while vanilla pathfinding rebuilds its dirty chunks. RebuildGrid
-        // replaces it synchronously once the new snapshot is ready, so consumers never observe an empty half-state.
+        // Keep the last complete graph available while vanilla pathfinding rebuilds its dirty chunks. The debounced
+        // replacement is published atomically, so consumers never observe an empty half-state.
+    }
+
+    private void QueueRebuild(EntityUid gridUid, long pathfindingRevision)
+    {
+        if (!gridUid.IsValid() || pathfindingRevision <= 0 || !TryGetRules(out var rules))
+            return;
+
+        if (_pendingRebuilds.ContainsKey(gridUid))
+            _coalescedRebuildRequests++;
+        var dueAt = _timing.CurTime + rules.StructuralRebuildDebounce;
+        _pendingRebuilds[gridUid] = new PendingGridRebuild(pathfindingRevision, dueAt);
+        if (_nextPendingEvaluation == null || dueAt < _nextPendingEvaluation)
+            _nextPendingEvaluation = dueAt;
+    }
+
+    private bool IsGridPaused(EntityUid gridUid)
+    {
+        return TryComp(gridUid, out TransformComponent? transform) && _maps.IsPaused(transform.MapID);
+    }
+
+    private void RecalculateNextPendingEvaluation()
+    {
+        _nextPendingEvaluation = null;
+        foreach (var pending in _pendingRebuilds.Values)
+        {
+            if (_nextPendingEvaluation == null || pending.DueAt < _nextPendingEvaluation)
+                _nextPendingEvaluation = pending.DueAt;
+        }
     }
 
     private void RebuildGrid(EntityUid gridUid, long expectedRevision)
@@ -689,13 +787,17 @@ public sealed partial class NCRoomPortalGraphSystem : EntitySystem
     private bool TryGetRules(out NCCityConnectivityRulesPrototype rules)
     {
         var loaded = _prototypes.EnumeratePrototypes<NCCityConnectivityRulesPrototype>().ToArray();
-        if (loaded.Length == 1)
+        if (loaded.Length == 1 &&
+            float.IsFinite(loaded[0].DoorDetectionRadius) && loaded[0].DoorDetectionRadius > 0f &&
+            loaded[0].StructuralRebuildDebounce > TimeSpan.Zero &&
+            loaded[0].PausedGridPollInterval > TimeSpan.Zero &&
+            loaded[0].MaximumRebuildsPerUpdate is > 0 and <= 16)
         {
             rules = loaded[0];
             return true;
         }
 
-        Log.Error($"Expected exactly one city connectivity rules prototype, found {loaded.Length}.");
+        Log.Error($"Expected exactly one valid city connectivity rules prototype, found {loaded.Length}.");
         rules = default!;
         return false;
     }
@@ -815,6 +917,8 @@ public sealed partial class NCRoomPortalGraphSystem : EntitySystem
 
     private readonly record struct DoorPoint(EntityUid Uid, Vector2 Position);
 
+    private readonly record struct PendingGridRebuild(long PathfindingRevision, TimeSpan DueAt);
+
     private readonly record struct RoomPair(NCRoomNodeId First, NCRoomNodeId Second)
     {
         public static RoomPair Create(NCRoomNodeId left, NCRoomNodeId right)
@@ -826,10 +930,13 @@ public sealed partial class NCRoomPortalGraphSystem : EntitySystem
 
 public readonly record struct NCRoomPortalGraphRuntimeCounters(
     int StructurallyDirtyGrids,
+    int PendingRebuilds,
+    int PausedPendingRebuilds,
     long SuccessfulRebuilds,
     long StructuralInvalidations,
     long StaticCollisionInvalidations,
     long IgnoredDynamicCollisionChanges,
     long IgnoredNonStructuralStaticCollisionChanges,
+    long CoalescedRebuildRequests,
     double LastRebuildMilliseconds,
     double MaximumRebuildMilliseconds);

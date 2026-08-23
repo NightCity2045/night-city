@@ -56,6 +56,10 @@
   doorProfile: NCTraversalDoor
   openBoundaryProfile: NCTraversalOpenBoundary
   doorDetectionRadius: 0.85
+  # Mapper brush strokes are coalesced, while paused mapping grids remain deferred until gameplay resumes.
+  structuralRebuildDebounce: 1.5s
+  pausedGridPollInterval: 1s
+  maximumRebuildsPerUpdate: 1
 
 - type: ncCitySpawnCandidateProfile
   id: NCPedestrianSpawnCandidates

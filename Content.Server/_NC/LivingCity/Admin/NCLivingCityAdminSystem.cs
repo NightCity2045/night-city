@@ -607,6 +607,9 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("geography-runtime", "room-nonstructural-static-events-ignored",
             roomRuntime.IgnoredNonStructuralStaticCollisionChanges);
         fields.Add("geography-runtime", "room-dirty-grids", roomRuntime.StructurallyDirtyGrids);
+        fields.Add("geography-runtime", "room-pending-rebuilds", roomRuntime.PendingRebuilds);
+        fields.Add("geography-runtime", "room-paused-pending-rebuilds", roomRuntime.PausedPendingRebuilds);
+        fields.Add("geography-runtime", "room-coalesced-rebuild-requests", roomRuntime.CoalescedRebuildRequests);
         fields.Add("geography-runtime", "room-last-rebuild-ms", roomRuntime.LastRebuildMilliseconds.ToString("0.00"));
         fields.Add("geography-runtime", "room-maximum-rebuild-ms", roomRuntime.MaximumRebuildMilliseconds.ToString("0.00"));
         fields.Add("geography-runtime", "debug-subscribers", debugRuntime.Subscribers);
