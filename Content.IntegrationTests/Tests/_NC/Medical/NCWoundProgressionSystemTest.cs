@@ -111,18 +111,21 @@ public sealed class NCWoundProgressionSystemTest : GameTest
 
         Assert.That(_pharmacology.ApplyDose(treated, "NCDrugBroadAntibiotic", 5f).Accepted, Is.True);
         Assert.That(_pharmacology.ApplyDose(immunosuppressed, "NCDrugImmunosuppressant", 5f).Accepted, Is.True);
+        // Compare normalized infection while every branch is below the 1.0 saturation boundary. A one-hour step
+        // intentionally drives both untreated branches to sepsis and cannot express their different growth rates.
+        var comparisonInterval = TimeSpan.FromMinutes(10);
         var untreatedResult = _progression.AdvanceBody(
             untreated,
-            TimeSpan.FromHours(1),
-            TimeSpan.FromHours(1));
+            comparisonInterval,
+            comparisonInterval);
         var treatedResult = _progression.AdvanceBody(
             treated,
-            TimeSpan.FromHours(1),
-            TimeSpan.FromHours(1));
+            comparisonInterval,
+            comparisonInterval);
         var immunosuppressedResult = _progression.AdvanceBody(
             immunosuppressed,
-            TimeSpan.FromHours(1),
-            TimeSpan.FromHours(1));
+            comparisonInterval,
+            comparisonInterval);
         var untreatedWound = SComp<NCWoundContainerComponent>(untreated).Wounds[untreatedId];
         var treatedWound = SComp<NCWoundContainerComponent>(treated).Wounds[treatedId];
         var immunosuppressedWound = SComp<NCWoundContainerComponent>(immunosuppressed)

@@ -27,15 +27,15 @@ namespace Content.Server._NC.City.Connectivity;
 /// Builds a round-local Room/Portal cache from vanilla Robust pathfinding polygons. It never replaces or executes
 /// tile pathfinding; it only narrows a city route to bounded local targets for materialized NPCs.
 /// </summary>
-public sealed class NCRoomPortalGraphSystem : EntitySystem
+public sealed partial class NCRoomPortalGraphSystem : EntitySystem
 {
-    [Dependency] private readonly IPrototypeManager _prototypes = default!;
-    [Dependency] private readonly EntityLookupSystem _lookup = default!;
-    [Dependency] private readonly NCCityConnectivitySystem _city = default!;
-    [Dependency] private readonly NCMapCoordinatesSystem _coordinates = default!;
-    [Dependency] private readonly NCZoneSystem _zones = default!;
-    [Dependency] private readonly PathfindingSystem _pathfinding = default!;
-    [Dependency] private readonly SharedTransformSystem _transform = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private EntityLookupSystem _lookup = default!;
+    [Dependency] private NCCityConnectivitySystem _city = default!;
+    [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
+    [Dependency] private NCZoneSystem _zones = default!;
+    [Dependency] private PathfindingSystem _pathfinding = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
 
     private readonly Dictionary<EntityUid, GridGraph> _gridGraphs = [];
     private readonly Dictionary<NCRoomNodeId, RuntimeRoom> _rooms = [];

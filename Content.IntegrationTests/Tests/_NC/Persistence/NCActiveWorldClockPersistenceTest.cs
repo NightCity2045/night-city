@@ -184,6 +184,44 @@ public sealed class NCActiveWorldClockPersistenceTest : GameTest
         });
     }
 
+    [Test]
+    public async Task RoundExitDrainsLivingCityPersistenceBeforeReturning()
+    {
+        var server = Pair.Server;
+        var database = server.ResolveDependency<IServerDbManager>();
+        var clock = server.System<NCActiveWorldTimeSystem>();
+
+        await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(
+            EventSource.Local,
+            new GameRunLevelChangedEvent(GameRunLevel.PreRoundLobby, GameRunLevel.InRound)));
+
+        var ready = false;
+        for (var i = 0; i < 120 && !ready; i++)
+        {
+            await server.WaitRunTicks(1);
+            await server.WaitPost(() => ready = clock.IsReady);
+        }
+
+        Assert.That(ready, Is.True, "The active-world epoch did not become ready within 120 ticks.");
+
+        NCSessionEpoch epoch = default;
+        await server.WaitPost(() => Assert.That(clock.TryGetCurrentTime(out epoch, out _), Is.True));
+
+        // GameTicker starts cleanup and the next vanilla round database write after this transition returns. The
+        // run-level boundary therefore must synchronously drain the old Living City durability queue.
+        await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(
+            EventSource.Local,
+            new GameRunLevelChangedEvent(GameRunLevel.InRound, GameRunLevel.PostRound)));
+
+        var stored = await database.GetNCActiveWorldClockAsync();
+        Assert.Multiple(() =>
+        {
+            Assert.That(clock.IsReady, Is.False);
+            Assert.That(stored?.SessionEpoch, Is.EqualTo(epoch));
+            Assert.That(stored?.RoundActive, Is.False);
+        });
+    }
+
     private static ServerDbSqlite GetDb(RobustIntegrationTest.ServerIntegrationInstance server)
     {
         var configuration = server.ResolveDependency<IConfigurationManager>();

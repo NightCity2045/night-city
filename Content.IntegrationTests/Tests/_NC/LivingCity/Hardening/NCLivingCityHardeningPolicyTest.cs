@@ -22,24 +22,18 @@ public sealed class NCLivingCityHardeningPolicyTest : GameTest
     public override PoolSettings PoolSettings => new() { Connected = false };
 
     [Test]
-    public void AmbientAndObservabilityPoliciesAreBoundedAndDataDriven()
+    public void AmbientDisablementAndObservabilityPoliciesAreBoundedAndDataDriven()
     {
         var prototypes = Pair.Server.ResolveDependency<IPrototypeManager>();
         var ambient = prototypes.Index<NCAmbientCrowdPolicyPrototype>("NCDefaultAmbientCrowdPolicy");
-        var decorative = prototypes.Index<NCAmbientCrowdProfilePrototype>("NCDecorativePedestrian");
-        var interactive = prototypes.Index<NCAmbientCrowdProfilePrototype>("NCInteractivePedestrian");
         var observability = prototypes.Index<NCLivingCityObservabilityPolicyPrototype>(
             "NCDefaultLivingCityObservabilityPolicy");
 
         Assert.Multiple(() =>
         {
-            Assert.That(ambient.MaximumDecorativePerClient, Is.InRange(1, 256));
-            Assert.That(ambient.MaximumInteractiveGlobal, Is.InRange(1, 256));
-            Assert.That(ambient.CriticalDensityMultiplier, Is.Zero);
-            Assert.That(decorative.Kind, Is.EqualTo(NCAmbientCrowdKind.Decorative));
-            Assert.That(decorative.EntityPrototype, Is.Null);
-            Assert.That(interactive.Kind, Is.EqualTo(NCAmbientCrowdKind.Interactive));
-            Assert.That(interactive.EntityPrototype, Is.Not.Null);
+            Assert.That(ambient.Enabled, Is.False,
+                "Persistent A-Life actors own visible population; the removed ambient silhouettes must stay off.");
+            Assert.That(ambient.Profiles, Is.Empty);
             Assert.That(observability.FrameP95CriticalMilliseconds,
                 Is.GreaterThan(observability.FrameP95WarningMilliseconds));
             Assert.That(observability.PersistenceP95CriticalMilliseconds,

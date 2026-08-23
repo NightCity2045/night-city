@@ -36,6 +36,7 @@ namespace Content.Server._NC.Housing;
 public sealed partial class NCApartmentSystem : EntitySystem
 {
     private static readonly ProtoId<NCPropertyRuntimeConfigurationPrototype> DefaultRuntimeConfiguration = "Default";
+    private static readonly ProtoId<NCPropertyMarketPolicyPrototype> DefaultMarketPolicy = "Default";
 
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCPropertyRegistrySystem _registry = default!;
@@ -408,7 +409,7 @@ public sealed partial class NCApartmentSystem : EntitySystem
         var marketListing = await _propertyMarket.GetListingAsync(listingId, true);
         if (marketListing == null || marketListing.Snapshot.Status != NCPropertyListingStatus.Open)
             return Failed(NCPropertyMutationResult.NotAvailable, current);
-        var policy = _prototypes.Index<NCPropertyMarketPolicyPrototype>("Default");
+        var policy = _prototypes.Index(DefaultMarketPolicy);
         var quoteStable = $"{characterId}.{current.AggregateVersion}.{marketListing.AggregateVersion}";
         var quoteId = NCPersistentIdentity.PropertyQuote(listingId, tenant, quoteStable);
         var quoteResult = await _propertyMarket.CreateQuoteAsync(new NCCreatePropertyQuoteRequest(

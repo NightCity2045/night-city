@@ -17,7 +17,8 @@ public sealed partial class NCPharmacologyComponent : Component
     public ProtoId<NCPharmacologyProfilePrototype> Profile;
 
     [DataField]
-    public bool Initialized;
+    // This is the initialized state of the pharmacology model, distinct from the ECS component lifecycle.
+    public new bool Initialized;
 
     [DataField]
     public Dictionary<ProtoId<NCDrugProfilePrototype>, NCActiveDrugExposure> ActiveDrugs = new();

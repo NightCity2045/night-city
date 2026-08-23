@@ -268,6 +268,23 @@
                         <BoxContainer Name="ObserverActorFields" Access="Public" Orientation="Vertical" HorizontalExpand="True" SeparationOverride="8" />
                     </BoxContainer>
                 </ScrollContainer>
+
+                <ScrollContainer VerticalExpand="True">
+                    <BoxContainer Orientation="Vertical" Margin="12" SeparationOverride="10">
+                        <PanelContainer HorizontalExpand="True">
+                            <PanelContainer.PanelOverride><gfx:StyleBoxFlat BackgroundColor="#101C25" BorderColor="#4678B8" BorderThickness="1" /></PanelContainer.PanelOverride>
+                            <BoxContainer Orientation="Horizontal" Margin="12 10" SeparationOverride="8">
+                                <BoxContainer Orientation="Vertical" HorizontalExpand="True">
+                                    <Label Text="{Loc nc-living-city-admin-ncpd-heading}" StyleClasses="LabelHeading" FontColorOverride="#A9D8FF" />
+                                    <Label Text="{Loc nc-living-city-admin-ncpd-help}" FontColorOverride="#7896A1" />
+                                    <Label Name="NcpdStatus" Access="Public" Text="{Loc nc-living-city-admin-loading}" FontColorOverride="#F3C969" />
+                                </BoxContainer>
+                                <Button Name="RefreshNcpd" Access="Public" Text="{Loc nc-living-city-admin-refresh}" MinWidth="120" />
+                            </BoxContainer>
+                        </PanelContainer>
+                        <BoxContainer Name="NcpdFields" Access="Public" Orientation="Vertical" HorizontalExpand="True" SeparationOverride="8" />
+                    </BoxContainer>
+                </ScrollContainer>
             </TabContainer>
         </BoxContainer>
     </PanelContainer>

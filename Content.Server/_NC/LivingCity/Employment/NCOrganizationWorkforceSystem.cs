@@ -53,6 +53,7 @@ public sealed partial class NCOrganizationWorkforceSystem : EntitySystem
         base.Initialize();
         BuildOrganizationIndex();
         SubscribeLocalEvent<NCCityActorRehydratedEvent>(OnActorRehydrated);
+        SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
     }
 
     public bool TryResolveNpcJob(
@@ -194,6 +195,39 @@ public sealed partial class NCOrganizationWorkforceSystem : EntitySystem
         }
     }
 
+    public void GetActorProjections(List<NCWorkforceActorProjection> result)
+    {
+        result.Clear();
+        lock (_assignmentLock)
+        {
+            foreach (var (actorId, assignment) in _assignments
+                         .OrderBy(static value => value.Key.Value))
+            {
+                result.Add(new NCWorkforceActorProjection(actorId, assignment.Organization, assignment.Job));
+            }
+        }
+    }
+
+    public bool TryGetAssignment(
+        NCActorId actorId,
+        out ProtoId<DepartmentPrototype> organization,
+        out ProtoId<JobPrototype> job)
+    {
+        lock (_assignmentLock)
+        {
+            if (_assignments.TryGetValue(actorId, out var assignment))
+            {
+                organization = assignment.Organization;
+                job = assignment.Job;
+                return true;
+            }
+        }
+
+        organization = default;
+        job = default;
+        return false;
+    }
+
     private void BuildOrganizationIndex()
     {
         _organizationByJob.Clear();
@@ -218,6 +252,12 @@ public sealed partial class NCOrganizationWorkforceSystem : EntitySystem
                 _organizationByJob[job] = organization.ID;
             }
         }
+    }
+
+    private void OnPrototypesReloaded(PrototypesReloadedEventArgs args)
+    {
+        if (args.WasModified<DepartmentPrototype>() || args.WasModified<JobPrototype>())
+            BuildOrganizationIndex();
     }
 
     private void OnActorRehydrated(NCCityActorRehydratedEvent args)
@@ -272,8 +312,20 @@ public sealed partial class NCOrganizationWorkforceSystem : EntitySystem
         ProtoId<DepartmentPrototype> organization,
         ProtoId<JobPrototype> job)
     {
+        var changed = false;
         lock (_assignmentLock)
-            _assignments[actorId] = (organization, job);
+        {
+            var next = (Organization: organization, Job: job);
+            changed = !_assignments.TryGetValue(actorId, out var current) || current != next;
+            _assignments[actorId] = next;
+        }
+
+        if (!changed)
+            return;
+
+        // Employment I/O completes asynchronously; ECS consumers are notified only on the simulation thread.
+        _taskManager.RunOnMainThread(() =>
+            RaiseLocalEvent(new NCWorkforceAssignmentChangedEvent(actorId, organization, job)));
     }
 
     private static NCWorkforceAssignmentResult Reject(

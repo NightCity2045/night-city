@@ -29,3 +29,22 @@ public sealed record NCWorkforcePositionProjection(
     ProtoId<DepartmentPrototype> Organization,
     ProtoId<JobPrototype> Job,
     int AssignedActors);
+
+public sealed record NCWorkforceActorProjection(
+    NCActorId ActorId,
+    ProtoId<DepartmentPrototype> Organization,
+    ProtoId<JobPrototype> Job);
+
+/// <summary>
+/// Main-thread notification that a persistent actor has a canonical organization/job projection.
+/// Consumers must treat it as an index update, not as a new hire command.
+/// </summary>
+public sealed class NCWorkforceAssignmentChangedEvent(
+    NCActorId actorId,
+    ProtoId<DepartmentPrototype> organization,
+    ProtoId<JobPrototype> job) : EntityEventArgs
+{
+    public NCActorId ActorId { get; } = actorId;
+    public ProtoId<DepartmentPrototype> Organization { get; } = organization;
+    public ProtoId<JobPrototype> Job { get; } = job;
+}

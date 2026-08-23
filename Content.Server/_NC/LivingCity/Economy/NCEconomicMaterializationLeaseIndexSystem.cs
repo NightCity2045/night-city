@@ -19,7 +19,8 @@ public sealed partial class NCEconomicMaterializationLeaseIndexSystem : EntitySy
     private readonly Dictionary<NCStockNodeId, Guid> _externalByStockNode = [];
     private readonly Dictionary<Guid, (NCStockNodeId StockNodeId, EntityUid Entity)> _stockByExternalLease = [];
 
-    public int Count => _stockByActor.Count + _stockByExternalLease.Count;
+    // This is an index metric, not EntitySystem.Count(Type).
+    public new int Count => _stockByActor.Count + _stockByExternalLease.Count;
 
     public override void Initialize()
     {

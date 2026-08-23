@@ -74,6 +74,8 @@ public sealed partial class NCLivingCityAdminSystem
         IReadOnlyList<NCCityZoneObserverProjection> projections)
     {
         var fields = new FieldBuilder();
+        fields.Add("observer-round", "game-preset", _gameTicker.CurrentPreset?.ID ?? "none");
+        fields.Add("observer-round", "night-city-rule", _nightCityRule.IsActive ? "active" : "inactive");
         if (_clock.TryGetCurrentTime(out _, out var now))
         {
             fields.Add("observer-round", "state", "active");

@@ -86,6 +86,7 @@ public sealed partial class NCLivingCityAdminTab : Control
         Tabs.SetTabTitle(5, Loc.GetString("nc-living-city-admin-infrastructure-tab"));
         Tabs.SetTabTitle(6, Loc.GetString("nc-living-city-admin-geography-tab"));
         Tabs.SetTabTitle(7, Loc.GetString("nc-living-city-admin-observer-tab"));
+        Tabs.SetTabTitle(8, Loc.GetString("nc-living-city-admin-ncpd-tab"));
         foreach (var kind in Enum.GetValues<NCLivingCityAdminInspectKind>())
             InspectKind.AddItem(InspectKindName(kind), (int) kind);
         InspectKind.SelectId((int) NCLivingCityAdminInspectKind.Actor);
@@ -98,6 +99,11 @@ public sealed partial class NCLivingCityAdminTab : Control
 
         RefreshOverview.OnPressed += _ => RequestOverview();
         RefreshObserver.OnPressed += _ => RequestObserver();
+        RefreshNcpd.OnPressed += _ =>
+        {
+            SetStatus(NcpdStatus, Loc.GetString("nc-living-city-admin-loading"), StatusTone.Loading);
+            RequestOverview();
+        };
         RunInspection.OnPressed += _ => RequestInspection();
         BindActorAction(CreateActor, NCLivingCityAdminActorAction.Create);
         BindActorAction(FreezeActor, NCLivingCityAdminActorAction.Freeze);
@@ -298,6 +304,20 @@ public sealed partial class NCLivingCityAdminTab : Control
                 .Where(static field => field.Section is "population-import" or "zone-states")
                 .ToArray();
             RenderFields(PopulationActionFields, populationFields);
+        }
+
+        if (Tabs.CurrentTab == 8)
+        {
+            SetStatus(
+                NcpdStatus,
+                success
+                    ? Loc.GetString("nc-living-city-admin-ncpd-live")
+                    : snapshot.Error ?? Loc.GetString("nc-living-city-admin-not-authorized"),
+                success ? StatusTone.Success : StatusTone.Error);
+            var ncpdFields = snapshot.Fields
+                .Where(static field => field.Section.StartsWith("ncpd-", StringComparison.Ordinal))
+                .ToArray();
+            RenderFields(NcpdFields, ncpdFields);
         }
     }
 
@@ -843,6 +863,9 @@ public sealed partial class NCLivingCityAdminTab : Control
                 break;
             case 7:
                 RequestObserver(true);
+                break;
+            case 8:
+                RequestOverview(true);
                 break;
         }
     }

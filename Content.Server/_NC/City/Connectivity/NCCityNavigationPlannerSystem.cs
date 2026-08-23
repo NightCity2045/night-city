@@ -16,14 +16,14 @@ namespace Content.Server._NC.City.Connectivity;
 /// Composes semantic CityGraph routing and local Room/Portal routing into bounded targets. Movement remains owned by
 /// the vanilla Robust pathfinding and NPC steering systems.
 /// </summary>
-public sealed class NCCityNavigationPlannerSystem : EntitySystem
+public sealed partial class NCCityNavigationPlannerSystem : EntitySystem
 {
-    [Dependency] private readonly NCCityConnectivitySystem _city = default!;
-    [Dependency] private readonly NCMapCoordinatesSystem _coordinates = default!;
-    [Dependency] private readonly NCRoomPortalGraphSystem _rooms = default!;
-    [Dependency] private readonly SharedMapSystem _maps = default!;
-    [Dependency] private readonly SharedTransformSystem _transform = default!;
-    [Dependency] private readonly NCZoneSystem _zones = default!;
+    [Dependency] private NCCityConnectivitySystem _city = default!;
+    [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
+    [Dependency] private NCRoomPortalGraphSystem _rooms = default!;
+    [Dependency] private SharedMapSystem _maps = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private NCZoneSystem _zones = default!;
 
     private readonly List<NCCityRouteStep> _cityRoute = [];
     private readonly List<NCRoomRouteStep> _roomRoute = [];

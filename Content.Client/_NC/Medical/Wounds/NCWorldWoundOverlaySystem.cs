@@ -43,8 +43,8 @@ public sealed partial class NCWorldWoundOverlaySystem : EntitySystem
     /// </summary>
     public bool ShouldRenderWorldWounds(EntityUid uid)
     {
-        return TryComp<MetaDataComponent>(uid, out var meta) &&
-               TryComp<TransformComponent>(uid, out var xform) &&
+        return TryComp(uid, out MetaDataComponent? meta) &&
+               TryComp(uid, out TransformComponent? xform) &&
                HasStableWorldTransform(uid, meta, xform) &&
                !_containers.IsEntityOrParentInContainer(uid, meta, xform);
     }
@@ -75,8 +75,9 @@ public sealed partial class NCWorldWoundOverlaySystem : EntitySystem
                 return false;
             if (parent == map)
                 return true;
-            if (!TryComp<TransformComponent>(parent, out currentTransform))
+            if (!TryComp(parent, out TransformComponent? parentTransform))
                 return false;
+            currentTransform = parentTransform;
             current = parent;
         }
 

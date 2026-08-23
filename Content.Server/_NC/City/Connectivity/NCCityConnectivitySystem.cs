@@ -21,11 +21,11 @@ namespace Content.Server._NC.City.Connectivity;
 /// Versioned semantic connectivity graph for NPC and A-Life routing. Zone containment comes from city_zone;
 /// traversable edges are registered by map analysis and explicit vertical/deployment links.
 /// </summary>
-public sealed class NCCityConnectivitySystem : EntitySystem
+public sealed partial class NCCityConnectivitySystem : EntitySystem
 {
-    [Dependency] private readonly IPrototypeManager _prototypes = default!;
-    [Dependency] private readonly NCMapCoordinatesSystem _coordinates = default!;
-    [Dependency] private readonly NCZoneSystem _zones = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
+    [Dependency] private NCZoneSystem _zones = default!;
 
     private readonly Dictionary<NCZoneId, SemanticNode> _nodes = [];
     private readonly Dictionary<NCCityPortalId, RuntimePortal> _portals = [];

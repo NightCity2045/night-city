@@ -125,7 +125,7 @@
   stableKey: ncpd
   displayName: Night City Police Department
   policy: NCPD
-  baseZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f
+  baseZone: a9c069f8-8558-493c-844b-b7bfe8775521
 
 - type: ncCityService
   id: TraumaTeam

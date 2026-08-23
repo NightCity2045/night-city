@@ -36,6 +36,7 @@ public sealed partial class NCPersistentOutboxDispatcherSystem : EntitySystem
     [Dependency] private IGameTiming _timing = default!;
 
     private readonly Dictionary<string, NCPersistentOutboxHandler> _handlers = [];
+    private readonly List<Task> _backgroundOperations = [];
     private NCPersistentOutboxPolicyPrototype? _policy;
     private CancellationTokenSource? _sessionCancellation;
     private TimeSpan _nextFetchAt;
@@ -70,6 +71,7 @@ public sealed partial class NCPersistentOutboxDispatcherSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
+        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(OnSessionClosing);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
     }
@@ -149,6 +151,14 @@ public sealed partial class NCPersistentOutboxDispatcherSystem : EntitySystem
         StopSession();
     }
 
+    private void OnSessionClosing(NCActiveWorldSessionClosingEvent args)
+    {
+        // Stop producing work before the clock closes. The clock's durability barrier then waits for any fetch or
+        // delivery already in progress, preventing it from leaking into the next vanilla round transaction.
+        StopSession();
+        args.AddPendingWrite(WaitForIdleAsync());
+    }
+
     private void OnClockFailed(NCActiveWorldClockFailedEvent args)
     {
         StopSession();
@@ -170,7 +180,7 @@ public sealed partial class NCPersistentOutboxDispatcherSystem : EntitySystem
     {
         _fetchInFlight = true;
         var limit = Math.Min(policy.FetchBatchSize, policy.MaximumConcurrentDeliveries);
-        _ = ObserveFetch(generation, limit, policy.MaximumAttempts);
+        Track(ObserveFetch(generation, limit, policy.MaximumAttempts));
     }
 
     private async Task ObserveFetch(int generation, int limit, int maximumAttempts)
@@ -216,8 +226,26 @@ public sealed partial class NCPersistentOutboxDispatcherSystem : EntitySystem
         {
             _handlers.TryGetValue(message.MessageType, out var handler);
             _deliveriesInFlight++;
-            _ = ObserveDelivery(generation, message, handler, token, _policy);
+            Track(ObserveDelivery(generation, message, handler, token, _policy));
         }
+    }
+
+    /// <summary>
+    /// Returns a snapshot barrier for already-started outbox operations. StopSession must be called first when this
+    /// is used during a round transition so no new work can enter after the snapshot.
+    /// </summary>
+    public Task WaitForIdleAsync()
+    {
+        _backgroundOperations.RemoveAll(task => task.IsCompleted);
+        return _backgroundOperations.Count == 0
+            ? Task.CompletedTask
+            : Task.WhenAll(_backgroundOperations.ToArray());
+    }
+
+    private void Track(Task operation)
+    {
+        _backgroundOperations.RemoveAll(task => task.IsCompleted);
+        _backgroundOperations.Add(operation);
     }
 
     private async Task ObserveDelivery(

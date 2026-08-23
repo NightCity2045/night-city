@@ -11,6 +11,7 @@ using Content.Shared._NC.LivingCity.Fixers;
 using Content.Shared._NC.LivingCity.CityServices;
 using Content.Shared._NC.LivingCity.Market;
 using Content.Shared._NC.LivingCity.Housing;
+using Content.Shared._NC.LivingCity.Police.NCPD;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.Persistence.Identity;
@@ -343,6 +344,24 @@ public static class NCPersistentIdentity
         if (intentionId == Guid.Empty || dependencyVersion < 1)
             throw new ArgumentOutOfRangeException(nameof(intentionId));
         return CreateGuid($"cognition/plan/{intentionId:D}/{Normalize(planner)}/{dependencyVersion}");
+    }
+
+    public static NCNcpdUnitId NcpdUnit(NCZoneId stationZone, IEnumerable<NCActorId> members)
+    {
+        if (!stationZone.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(stationZone));
+
+        var ordered = members
+            .Where(static actor => actor.IsValid)
+            .Select(static actor => actor.Value)
+            .Distinct()
+            .Order()
+            .ToArray();
+        if (ordered.Length == 0)
+            throw new ArgumentOutOfRangeException(nameof(members));
+
+        return new NCNcpdUnitId(CreateGuid(
+            $"ncpd/unit/{stationZone}/{string.Join('/', ordered.Select(static value => value.ToString("D")))}"));
     }
 
     private static Guid CreateGuid(string value)

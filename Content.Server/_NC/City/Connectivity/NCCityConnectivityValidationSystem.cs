@@ -16,13 +16,13 @@ namespace Content.Server._NC.City.Connectivity;
 /// Lazily validates the current derived city topology. Graph changes only mark the report dirty; the potentially
 /// city-wide audit runs on an explicit admin/test/deployment-boundary request, never from Update().
 /// </summary>
-public sealed class NCCityConnectivityValidationSystem : EntitySystem
+public sealed partial class NCCityConnectivityValidationSystem : EntitySystem
 {
-    [Dependency] private readonly IPrototypeManager _prototypes = default!;
-    [Dependency] private readonly NCCityConnectivitySystem _city = default!;
-    [Dependency] private readonly NCRoomPortalGraphSystem _rooms = default!;
-    [Dependency] private readonly NCCitySpawnCandidateSystem _spawns = default!;
-    [Dependency] private readonly NCZoneSystem _zones = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private NCCityConnectivitySystem _city = default!;
+    [Dependency] private NCRoomPortalGraphSystem _rooms = default!;
+    [Dependency] private NCCitySpawnCandidateSystem _spawns = default!;
+    [Dependency] private NCZoneSystem _zones = default!;
 
     private readonly List<NCCityConnectivityValidationIssue> _cachedIssues = [];
     private readonly List<NCZoneInfo> _zoneBuffer = [];

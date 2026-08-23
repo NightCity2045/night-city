@@ -2,11 +2,6 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-ent-NCComputerNCPDPersonnel = NCPD personnel console
-    .desc = A secured terminal for persistent NCPD personnel decisions.
-ent-NCNCPDPersonnelComputerCircuitboard = NCPD personnel console board
-    .desc = A computer board for an NCPD personnel console.
-
 nc-personnel-title = Personnel management
 nc-personnel-department-line = Organization: {$department}
 nc-personnel-read-only = Your current position does not grant personnel authority.

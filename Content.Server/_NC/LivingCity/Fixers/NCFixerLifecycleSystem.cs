@@ -22,6 +22,7 @@ public sealed partial class NCFixerLifecycleSystem : EntitySystem
 {
     private const int RecoveryPageSize = 100;
     private const int MaximumRecoveredPerType = 10_000;
+    private static readonly ProtoId<NCFixerPolicyPrototype> DefaultPolicy = "Default";
 
     [Dependency] private IServerDbManager _database = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
@@ -54,7 +55,7 @@ public sealed partial class NCFixerLifecycleSystem : EntitySystem
     {
         base.Update(frameTime);
         if (!_active || !_clock.TryGetCurrentTime(out _, out var now) ||
-            !_prototypes.TryIndex<NCFixerPolicyPrototype>("Default", out var policy))
+            !_prototypes.TryIndex(DefaultPolicy, out var policy))
             return;
         var count = 0;
         while (count < policy.MaximumLifecycleAdvancesPerTick &&

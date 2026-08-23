@@ -12,6 +12,8 @@ namespace Content.Server._NC.LivingCity.CityServices;
 /// <summary>Event-driven contested territory projection consumed by taxation, patrol and supply systems.</summary>
 public sealed partial class NCTerritoryProjectionSystem : EntitySystem
 {
+    private static readonly ProtoId<NCFactionPolicyPrototype> DefaultPolicy = "Default";
+
     [Dependency] private IPrototypeManager _prototypes = default!;
     private readonly Dictionary<NCZoneId, Dictionary<NCOrganizationId, (NCFactionTerritoryStake Stake,
         NCFactionPolicy Policy, long Version)>> _stakes = [];
@@ -57,7 +59,7 @@ public sealed partial class NCTerritoryProjectionSystem : EntitySystem
     private void Rebuild(NCZoneId zoneId, Dictionary<NCOrganizationId,
         (NCFactionTerritoryStake Stake, NCFactionPolicy Policy, long Version)> contenders)
     {
-        if (!_prototypes.TryIndex<NCFactionPolicyPrototype>("Default", out var policy))
+        if (!_prototypes.TryIndex(DefaultPolicy, out var policy))
             return;
         var ranked = contenders.OrderByDescending(value => value.Value.Stake.Influence)
             .ThenBy(value => value.Key.Value).ToArray();

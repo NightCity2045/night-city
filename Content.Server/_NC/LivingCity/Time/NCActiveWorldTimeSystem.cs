@@ -31,6 +31,7 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
 
     private readonly LinkedList<ClockOperation> _operations = [];
     private ActiveSessionState? _current;
+    private TaskCompletionSource? _idleCompletion;
     private bool _operationInFlight;
     private TimeSpan _checkpointInterval = TimeSpan.FromSeconds(30);
 
@@ -100,7 +101,28 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
         }
 
         if (args.Old == GameRunLevel.InRound && args.New != GameRunLevel.InRound)
+        {
             CloseRoundSession();
+
+            // RestartRound starts the next vanilla round database write immediately after the run-level transition.
+            // Drain the old Living City epoch here, before shared cleanup and AddNewRound can begin.
+            var idle = WaitForIdleAsync();
+            _taskManager.BlockWaitOnTask(idle);
+            idle.GetAwaiter().GetResult();
+        }
+    }
+
+    /// <summary>
+    /// Completes after every operation currently ordered by the authoritative clock, including closing durability
+    /// barriers registered by other Living City systems. Main-thread callers must use ITaskManager.BlockWaitOnTask.
+    /// </summary>
+    public Task WaitForIdleAsync()
+    {
+        if (!_operationInFlight && _operations.Count == 0)
+            return Task.CompletedTask;
+
+        _idleCompletion ??= new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        return _idleCompletion.Task;
     }
 
     private void StartRoundSession()
@@ -504,7 +526,18 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
             // Keep this true during callbacks so a callback can prepend follow-up work without racing the queue.
             _operationInFlight = false;
             StartNextOperation();
+            CompleteIdleWaiter();
         }
+    }
+
+    private void CompleteIdleWaiter()
+    {
+        if (_operationInFlight || _operations.Count != 0 || _idleCompletion == null)
+            return;
+
+        var completion = _idleCompletion;
+        _idleCompletion = null;
+        completion.TrySetResult();
     }
 
     private sealed class ActiveSessionState(NCSessionEpoch epoch, TimeSpan lastSample)

@@ -21,7 +21,7 @@ namespace Content.Server._NC.City.Connectivity;
 /// Maintains deterministic, round-local materialization targets derived from Room/Portal samples. Rebuilds are
 /// bounded to the grid reported by structural graph invalidation and never run from Update().
 /// </summary>
-public sealed class NCCitySpawnCandidateSystem : EntitySystem
+public sealed partial class NCCitySpawnCandidateSystem : EntitySystem
 {
     private static readonly Vector2[] ClearanceDirections =
     [
@@ -35,12 +35,12 @@ public sealed class NCCitySpawnCandidateSystem : EntitySystem
         Vector2.Normalize(-Vector2.One),
     ];
 
-    [Dependency] private readonly IPrototypeManager _prototypes = default!;
-    [Dependency] private readonly NCMapCoordinatesSystem _coordinates = default!;
-    [Dependency] private readonly NCRoomPortalGraphSystem _rooms = default!;
-    [Dependency] private readonly NCZoneSystem _zones = default!;
-    [Dependency] private readonly SharedMapSystem _maps = default!;
-    [Dependency] private readonly SharedTransformSystem _transform = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
+    [Dependency] private NCRoomPortalGraphSystem _rooms = default!;
+    [Dependency] private NCZoneSystem _zones = default!;
+    [Dependency] private SharedMapSystem _maps = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
 
     private readonly Dictionary<NCCitySpawnCandidateId, NCCitySpawnCandidateInfo> _candidates = [];
     private readonly Dictionary<EntityUid, HashSet<NCCitySpawnCandidateId>> _byGrid = [];
