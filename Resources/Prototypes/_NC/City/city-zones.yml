@@ -21,7 +21,7 @@
       - 218,152
   - id: e2e35b70-5277-4359-91a6-0792e01fb477
     kind: District
-    name: "Old Japan Town"
+    name: "Old Japantown"
     geometry:
     - kind: Polygon
       global: true
@@ -218,3 +218,1668 @@
       - 216,186
       - 218,171
       - 218,152
+  - id: 8acce8f0-9929-484f-9daa-95b3f37a82f6
+    kind: Street
+    parent: c20733c2-faa0-4d43-aaf6-37c3f6bd886b
+    name: "G 22nd Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 57,31
+      - 57,4
+      - -0,4
+      - 0,31
+  - id: e1acb51c-9b2b-4b05-af52-011bcef55ebe
+    kind: Street
+    parent: c20733c2-faa0-4d43-aaf6-37c3f6bd886b
+    name: "G 23rd Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -0,4
+      - 57,4
+      - 57,-20
+      - 15,-20
+      - 15,-23
+      - -0,-23
+  - id: 624ada25-1e0d-4240-a6c2-0884d28abcf5
+    kind: Street
+    parent: c20733c2-faa0-4d43-aaf6-37c3f6bd886b
+    name: "G 24th Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 0,-23
+      - 15,-23
+      - 15,-20
+      - 57,-20
+      - 57,-45
+      - 46,-45
+      - 46,-43
+      - 2,-43
+      - 2,-39
+      - -0,-39
+  - id: ddd0d6b9-f239-4ecb-b704-bda14df210b1
+    kind: Street
+    parent: c20733c2-faa0-4d43-aaf6-37c3f6bd886b
+    name: "G Prospect Ave."
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -0,31
+      - 0,-39
+      - -5,-39
+      - -5,-35
+      - -28,-35
+      - -28,-32
+      - -39,-32
+      - -39,-39
+      - -41,-39
+      - -41,-16
+      - -31,-16
+      - -31,31
+  - id: 4f59226c-9e3f-4300-b981-7b1951a9f7c1
+    kind: Street
+    parent: c20733c2-faa0-4d43-aaf6-37c3f6bd886b
+    name: "G Potomac Ave."
+    geometry:
+    - kind: Polygon
+      z: 0
+      vertices:
+      - -41,-39
+      - -71,-39
+      - -71,-3
+      - -82,-3
+      - -82,31
+      - -31,31
+      - -31,-16
+      - -41,-16
+  - id: 54f1b62c-bba3-4cf4-accd-198f058cad16
+    kind: Street
+    parent: c20733c2-faa0-4d43-aaf6-37c3f6bd886b
+    name: "G Parkway Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 57,31
+      - 57,57
+      - -71,57
+      - -71,31
+  - id: 409932d0-2ec0-4e8d-9678-f476e6747ec8
+    kind: Street
+    parent: e2e35b70-5277-4359-91a6-0792e01fb477
+    name: "OJT 16th Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 98,86
+      - 98,62
+      - 164,62
+      - 164,86
+  - id: 14ad9fcc-82e1-4236-9c6b-c2a3505182ae
+    kind: Street
+    parent: e2e35b70-5277-4359-91a6-0792e01fb477
+    name: "OJT 18th Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 98,62
+      - 164,62
+      - 164,42
+      - 98,42
+  - id: 77a84db4-45a7-4370-b1ce-f893f6d79e84
+    kind: Street
+    parent: e2e35b70-5277-4359-91a6-0792e01fb477
+    name: "OJT 19th Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 57,50
+      - 98,50
+      - 98,42
+      - 218,42
+      - 218,9
+      - 166,9
+      - 166,21
+      - 118,21
+      - 108,30
+      - 57,30
+  - id: 14710e8a-76d5-4257-bfa9-3999cd780874
+    kind: Street
+    parent: e2e35b70-5277-4359-91a6-0792e01fb477
+    name: "OJT 21st Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 57,30
+      - 57,5
+      - 97,5
+      - 97,0
+      - 136,0
+      - 148,5
+      - 166,5
+      - 166,21
+      - 118,21
+      - 108,30
+  - id: 988bb3d7-dad4-447f-ad97-c297f138751e
+    kind: Street
+    parent: e2e35b70-5277-4359-91a6-0792e01fb477
+    name: "OJT 26th Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 57,5
+      - 57,-22
+      - 95,-22
+      - 95,-32
+      - 134,-32
+      - 145,-19
+      - 218,-19
+      - 218,9
+      - 166,9
+      - 166,5
+      - 148,5
+      - 136,-0
+      - 97,-0
+      - 97,5
+  - id: 4e58cf4e-7d1f-44c2-bd15-34cf5042abbf
+    kind: Street
+    parent: 0122fb70-1fcc-46c7-968a-0245372d8484
+    name: "OCZ 27th Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 57,-22
+      - 95,-22
+      - 95,-42
+      - 90,-42
+      - 90,-61
+      - 69,-61
+      - 69,-58
+      - 57,-58
+  - id: 9d61c759-ea19-42a2-b99d-a08fe97b5a4e
+    kind: Street
+    parent: 0122fb70-1fcc-46c7-968a-0245372d8484
+    name: "OCZ Ventura Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 57,-58
+      - 69,-58
+      - 69,-61
+      - 90,-61
+      - 90,-42
+      - 95,-42
+      - 95,-32
+      - 134,-32
+      - 134,-109
+      - 57,-109
+  - id: e3ecccbe-dc38-4da4-baca-4957c7fff03f
+    kind: Street
+    parent: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f
+    name: "LC Vine Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 218,86
+      - 164,86
+      - 164,116
+      - 182,116
+      - 182,152
+      - 218,152
+  - id: 0d623e28-711a-4747-9ef2-f72483889757
+    kind: Street
+    parent: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f
+    name: "LC S. Mall Street"
+    geometry:
+    - kind: Polygon
+      z: 0
+      vertices:
+      - 182,152
+      - 182,116
+      - 164,116
+      - 164,86
+      - 127,86
+      - 127,117
+      - 138,117
+      - 138,136
+      - 165,136
+      - 165,152
+  - id: 8b4ddff9-2cbc-402e-a9d4-6974574293a3
+    kind: Street
+    parent: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f
+    name: "LC N. Mall Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 165,152
+      - 105,152
+      - 98,145
+      - 98,86
+      - 127,86
+      - 127,117
+      - 138,117
+      - 138,136
+      - 165,136
+  - id: afd74602-8bd0-4223-bbc7-a7c0fa202b3a
+    kind: Street
+    parent: e2e35b70-5277-4359-91a6-0792e01fb477
+    name: "OJT 29th Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 164,86
+      - 218,86
+      - 218,42
+      - 164,42
+  - id: d678368a-9680-476d-91b1-5a400f5fb795
+    kind: Street
+    parent: a54f1778-e26b-4dc9-af62-267003c660c7
+    name: "RZ 30rd Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 26,-43
+      - 2,-43
+      - 2,-39
+      - -42,-39
+      - -42,-109
+      - 26,-109
+  - id: b4760bad-a2b9-4ec0-b1c0-985dd28daa6f
+    kind: Street
+    parent: a54f1778-e26b-4dc9-af62-267003c660c7
+    name: "RZ Scoffield"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 57,-45
+      - 46,-45
+      - 46,-43
+      - 26,-43
+      - 26,-109
+      - 57,-109
+  - id: 42e9e0b7-b7e5-4947-9cee-31ed01f38406
+    kind: Street
+    parent: a54f1778-e26b-4dc9-af62-267003c660c7
+    name: "RZ 31st Street"
+    geometry:
+    - kind: Polygon
+      z: 0
+      vertices:
+      - -42,-39
+      - -42,-109
+      - -91,-109
+      - -91,-39
+  - id: d9f34d37-2de2-41eb-8e4c-0a6400dabdf6
+    kind: Street
+    parent: 504dd7a0-4f25-43df-a96c-3f4069ea6de5
+    name: "PNC W 25th Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -71,-39
+      - -71,-3
+      - -130,-3
+      - -130,-8
+      - -145,-8
+      - -145,-3
+      - -180,-3
+      - -180,-33
+      - -142,-33
+      - -142,-31
+      - -126,-31
+      - -122,-34
+      - -98,-34
+      - -98,-37
+      - -92,-37
+      - -92,-39
+  - id: 78875927-4582-48a7-b50f-d3b288c08cd6
+    kind: Street
+    parent: 504dd7a0-4f25-43df-a96c-3f4069ea6de5
+    name: "PNC W 26th Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -92,-39
+      - -92,-37
+      - -98,-37
+      - -98,-34
+      - -122,-34
+      - -126,-31
+      - -142,-31
+      - -142,-33
+      - -180,-33
+      - -180,-109
+      - -91,-109
+      - -91,-39
+  - id: 89697013-bfd8-44db-9e68-d993e735dcf9
+    kind: Street
+    parent: 88684957-b4da-4f20-862d-b67b4b030882
+    name: "SNC W 22nd Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -180,-3
+      - -145,-3
+      - -145,-8
+      - -130,-8
+      - -130,-3
+      - -82,-3
+      - -82,31
+      - -145,31
+      - -145,14
+      - -180,14
+  - id: 8cf40fab-27d1-4831-a8d2-eb40cdd7f3ad
+    kind: Street
+    parent: c4f78018-c60c-4e1f-b114-0ce90b7424c5
+    name: "UD Skyline"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -200,83
+      - -180,83
+      - -180,80
+      - -127,80
+      - -127,53
+      - -145,53
+      - -145,14
+      - -200,14
+  - id: c13d63aa-b1b5-4721-bc3f-d2986de13f00
+    kind: Street
+    parent: c4f78018-c60c-4e1f-b114-0ce90b7424c5
+    name: "UD Alexandria"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -127,80
+      - -106,80
+      - -106,31
+      - -145,31
+      - -145,53
+      - -127,53
+  - id: 2af5474c-76d9-4df5-85fd-57e5fbe16b59
+    kind: Street
+    parent: c4f78018-c60c-4e1f-b114-0ce90b7424c5
+    name: "UD Bay Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -106,31
+      - -71,31
+      - -71,54
+      - -106,54
+  - id: 1e7a53e8-5480-4366-bc15-a8aec11ffa3b
+    kind: Street
+    parent: c4f78018-c60c-4e1f-b114-0ce90b7424c5
+    name: "UD Farren"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -106,54
+      - -71,54
+      - -71,57
+      - -30,57
+      - -30,104
+      - -83,104
+      - -83,80
+      - -106,80
+  - id: 098393d2-ead2-41d2-ac33-7fd57688eecd
+    kind: Street
+    parent: eca1baef-2094-4278-95dc-88ac7e2c6a40
+    name: "DT 14th Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -200,83
+      - -180,83
+      - -180,80
+      - -106,80
+      - -106,108
+      - -150,108
+      - -150,117
+      - -206,117
+      - -206,116
+  - id: 452e6800-00e1-43b4-8084-a6d5f06dfcaa
+    kind: Street
+    parent: eca1baef-2094-4278-95dc-88ac7e2c6a40
+    name: "DT 12th Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -106,80
+      - -83,80
+      - -83,104
+      - -30,104
+      - -50,126
+      - -86,126
+      - -93,128
+      - -104,128
+      - -104,108
+      - -106,108
+  - id: d213c6b6-76e1-437b-b70f-0d656a85c76b
+    kind: Street
+    parent: eca1baef-2094-4278-95dc-88ac7e2c6a40
+    name: "DT 9th Street"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -104,108
+      - -104,128
+      - -109,132
+      - -150,132
+      - -150,108
+  - id: cfb139bc-9db3-4f04-82d0-a0cfc083da63
+    kind: Street
+    parent: eca1baef-2094-4278-95dc-88ac7e2c6a40
+    name: "DT Stone Beach"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -150,132
+      - -150,145
+      - -206,145
+      - -206,117
+      - -150,117
+  - id: a19967c1-e050-4a30-88a2-696728e4ae3a
+    kind: Street
+    parent: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2
+    name: "LE Republic Way"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -86,126
+      - -87,127
+      - -87,203
+      - -196,203
+      - -206,169
+      - -206,145
+      - -150,145
+      - -150,132
+      - -109,132
+      - -104,128
+      - -93,128
+  - id: 9094d2be-cc72-470f-8891-fe609b9b471e
+    kind: Street
+    parent: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2
+    name: "LE Barkeley Ave."
+    geometry:
+    - kind: Polygon
+      z: 0
+      vertices:
+      - -54,126
+      - -54,203
+      - -87,203
+      - -87,127
+      - -86,126
+  - id: a9c069f8-8558-493c-844b-b7bfe8775521
+    kind: Building
+    parent: 8acce8f0-9929-484f-9daa-95b3f37a82f6
+    name: "G NCPD #1"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 4,12
+      - 4,24
+      - 39,24
+      - 39,12
+  - id: 2f68355a-7155-43d4-bc82-f8a82c111e74
+    kind: Building
+    parent: 8acce8f0-9929-484f-9daa-95b3f37a82f6
+    name: "G Glen Shop"
+    geometry:
+    - kind: Polygon
+      z: 0
+      vertices:
+      - 40,12
+      - 50,12
+      - 50,24
+      - 40,24
+  - id: 78091418-0030-489d-bffd-264aba8fa7af
+    kind: Building
+    parent: e1acb51c-9b2b-4b05-af52-011bcef55ebe
+    name: "G Office"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 4,3
+      - 27,3
+      - 27,-14
+      - 13,-14
+      - 13,-21
+      - 4,-21
+  - id: 0854d920-2349-4114-9cde-58d8aea85fff
+    kind: Building
+    parent: e1acb51c-9b2b-4b05-af52-011bcef55ebe
+    name: "G Hall of Justice"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 35,-18
+      - 35,-15
+      - 30,-15
+      - 30,-0
+      - 49,-0
+      - 49,-18
+  - id: 4faa965b-1cdb-4ff4-811f-0974640d4784
+    kind: Building
+    parent: 624ada25-1e0d-4240-a6c2-0884d28abcf5
+    name: "G 241 Building"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 5,-40
+      - 22,-40
+      - 22,-31
+      - 5,-31
+  - id: 332256ed-a384-4121-8d25-6eb3e43059d2
+    kind: Building
+    parent: 624ada25-1e0d-4240-a6c2-0884d28abcf5
+    name: "G City Hall"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 24,-42
+      - 24,-31
+      - 46,-31
+      - 46,-27
+      - 57,-27
+      - 57,-44
+      - 47,-44
+      - 47,-42
+  - id: 3e64cbc4-0fdb-4553-a6d7-3d06a91a5e92
+    kind: Building
+    parent: ddd0d6b9-f239-4ecb-b704-bda14df210b1
+    name: "G 101 Building"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -5,-33
+      - -22,-33
+      - -22,-17
+      - -5,-17
+  - id: eae5c592-d455-4c64-8d34-cc5df493bf1e
+    kind: Building
+    parent: ddd0d6b9-f239-4ecb-b704-bda14df210b1
+    name: "G Night City Bank"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -5,4
+      - -22,4
+      - -22,6
+      - -27,6
+      - -27,21
+      - -22,21
+      - -22,23
+      - -5,23
+  - id: b47a903b-d4ba-41d2-8c07-a333e2767cfe
+    kind: Building
+    parent: ddd0d6b9-f239-4ecb-b704-bda14df210b1
+    name: "G 102 Building"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -5,-13
+      - -5,2
+      - -22,2
+      - -22,-13
+  - id: cbc8ee73-e97a-4996-9abc-3bc03aecc5ad
+    kind: Building
+    parent: ddd0d6b9-f239-4ecb-b704-bda14df210b1
+    name: "G 103 Building"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -25,-30
+      - -25,-17
+      - -36,-17
+      - -36,-23
+      - -39,-23
+      - -39,-30
+  - id: f93ca0a4-13f2-5084-8d96-f46e06dfb47a
+    kind: Building
+    parent: 452e6800-00e1-43b4-8084-a6d5f06dfcaa
+    name: "DT 12th Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -103,110
+      - -92,110
+      - -92,127
+      - -103,127
+  - id: 9112ee59-4007-50cc-85d1-bd62ffb6d41f
+    kind: Building
+    parent: 452e6800-00e1-43b4-8084-a6d5f06dfcaa
+    name: "DT 12th Street Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -84,124
+      - -84,106
+      - -66,106
+      - -66,124
+  - id: aceb9e65-902c-58e1-bc91-8fb8173c3b70
+    kind: Building
+    parent: 452e6800-00e1-43b4-8084-a6d5f06dfcaa
+    name: "DT 12th Street Building 03"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -90,90
+      - -92,90
+      - -92,102
+      - -102,102
+      - -102,81
+      - -90,81
+  - id: e162c857-b4d2-5f9d-9b17-d6b4bd8e41bb
+    kind: Building
+    parent: 098393d2-ead2-41d2-ac33-7fd57688eecd
+    name: "DT 14th Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -152,116
+      - -175,116
+      - -175,110
+      - -184,110
+      - -184,101
+      - -152,101
+  - id: d3f16429-b39e-54bd-b11f-d95a3e70ae62
+    kind: Building
+    parent: 098393d2-ead2-41d2-ac33-7fd57688eecd
+    name: "DT 14th Street Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -117,97
+      - -117,106
+      - -124,106
+      - -124,105
+      - -144,105
+      - -144,97
+  - id: 8a179521-f338-5e24-a569-ac3e2285a34a
+    kind: Building
+    parent: 098393d2-ead2-41d2-ac33-7fd57688eecd
+    name: "DT 14th Street Building 03"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -152,100
+      - -176,100
+      - -176,80
+      - -152,80
+  - id: 7fd9b5e1-11d2-56c9-893e-7e7af59b02b9
+    kind: Building
+    parent: 098393d2-ead2-41d2-ac33-7fd57688eecd
+    name: "DT 14th Street Building 04"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -111,90
+      - -110,90
+      - -110,91
+      - -143,91
+      - -143,81
+      - -111,81
+  - id: 016f44df-7b69-5349-a240-66a529147c68
+    kind: Building
+    parent: d213c6b6-76e1-437b-b70f-0d656a85c76b
+    name: "DT 9th Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -111,111
+      - -111,110
+      - -110,110
+      - -110,131
+      - -143,131
+      - -143,111
+  - id: 141a274b-37ff-5ec7-b9c5-39a51a4547ea
+    kind: Building
+    parent: cfb139bc-9db3-4f04-82d0-a0cfc083da63
+    name: "DT Stone Beach Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -152,144
+      - -175,144
+      - -175,117
+      - -152,117
+  - id: 09f3b13e-af8d-5599-8761-b5699b8c487a
+    kind: Building
+    parent: cfb139bc-9db3-4f04-82d0-a0cfc083da63
+    name: "DT Stone Beach Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -199,123
+      - -179,123
+      - -179,143
+      - -199,143
+  - id: b4ced0bd-eb15-5fdf-9d5d-ab30d229d4e4
+    kind: Building
+    parent: 54f1b62c-bba3-4cf4-accd-198f058cad16
+    name: "G Parkway Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 23,33
+      - 51,33
+      - 51,50
+      - 38,50
+      - 38,43
+      - 23,43
+  - id: d1283e34-4859-5a65-8571-95472dfedc17
+    kind: Building
+    parent: 54f1b62c-bba3-4cf4-accd-198f058cad16
+    name: "G Parkway Street Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -40,49
+      - -69,49
+      - -69,33
+      - -40,33
+  - id: 768509f0-d433-57e4-b3fd-972c1cb1360b
+    kind: Building
+    parent: 54f1b62c-bba3-4cf4-accd-198f058cad16
+    name: "G Parkway Street Building 03"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -34,34
+      - -15,34
+      - -15,49
+      - -34,49
+  - id: c481b9fd-35d4-53e9-841c-63eedce0d1aa
+    kind: Building
+    parent: 4f59226c-9e3f-4300-b981-7b1951a9f7c1
+    name: "G Potomac Ave. Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -34,7
+      - -32,7
+      - -32,24
+      - -56,24
+      - -56,20
+      - -79,20
+      - -79,-1
+      - -34,-1
+  - id: 1390d662-2dfa-5c0e-a0e2-22d757f891e5
+    kind: Building
+    parent: 4f59226c-9e3f-4300-b981-7b1951a9f7c1
+    name: "G Potomac Ave. Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -61,-3
+      - -70,-3
+      - -70,-16
+      - -61,-16
+  - id: 2d3b7e52-19a8-5fb0-acd2-546473d20376
+    kind: Building
+    parent: 4f59226c-9e3f-4300-b981-7b1951a9f7c1
+    name: "G Potomac Ave. Building 03"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -46,-36
+      - -46,-25
+      - -57,-25
+      - -57,-19
+      - -66,-19
+      - -66,-36
+  - id: 5e60e6bb-0dca-55aa-8f4c-bc4f56b7d83d
+    kind: Building
+    parent: 0d623e28-711a-4747-9ef2-f72483889757
+    name: "LC S. Mall Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 159,118
+      - 159,135
+      - 139,135
+      - 139,118
+  - id: 63ae7b60-494c-5405-ab89-a8bd87671378
+    kind: Building
+    parent: 0d623e28-711a-4747-9ef2-f72483889757
+    name: "LC S. Mall Street Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 138,113
+      - 128,113
+      - 128,90
+      - 138,90
+  - id: 32b0f5f6-8aff-5783-9a04-505e7ad162a6
+    kind: Building
+    parent: e3ecccbe-dc38-4da4-baca-4957c7fff03f
+    name: "LC Vine Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 185,118
+      - 201,118
+      - 201,141
+      - 185,141
+  - id: e8e7664e-56d2-5491-b28f-af16bf4a0a78
+    kind: Building
+    parent: e3ecccbe-dc38-4da4-baca-4957c7fff03f
+    name: "LC Vine Street Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 177,94
+      - 194,94
+      - 194,113
+      - 177,113
+  - id: 265be399-32dd-5700-bf2b-219043edd08d
+    kind: Building
+    parent: 9094d2be-cc72-470f-8891-fe609b9b471e
+    name: "LE Barkeley Ave. Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -57,165
+      - -57,182
+      - -85,182
+      - -85,165
+  - id: 8ad925dd-bd11-5f96-9ccc-fbf741d5266d
+    kind: Building
+    parent: 9094d2be-cc72-470f-8891-fe609b9b471e
+    name: "LE Barkeley Ave. Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -84,127
+      - -56,127
+      - -56,142
+      - -67,142
+      - -67,152
+      - -84,152
+  - id: b793ea17-72a4-5017-8459-534de69fd5fb
+    kind: Building
+    parent: a19967c1-e050-4a30-88a2-696728e4ae3a
+    name: "LE Republic Way Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -107,190
+      - -107,181
+      - -87,181
+      - -87,190
+  - id: b3998d12-25a2-5643-99d0-d6beaf646dd4
+    kind: Building
+    parent: a19967c1-e050-4a30-88a2-696728e4ae3a
+    name: "LE Republic Way Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -115,168
+      - -115,170
+      - -110,170
+      - -110,187
+      - -128,187
+      - -128,168
+  - id: 41793f58-473b-5932-ae60-08907e0dc48e
+    kind: Building
+    parent: a19967c1-e050-4a30-88a2-696728e4ae3a
+    name: "LE Republic Way Building 03"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -180,184
+      - -180,174
+      - -159,174
+      - -159,184
+  - id: 12f5b190-c768-514c-8d36-a1ac7ae198d9
+    kind: Building
+    parent: a19967c1-e050-4a30-88a2-696728e4ae3a
+    name: "LE Republic Way Building 04"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -134,165
+      - -134,184
+      - -156,184
+      - -156,165
+  - id: 7c3ffd74-1b53-507c-b561-2e11d78b6aa6
+    kind: Building
+    parent: a19967c1-e050-4a30-88a2-696728e4ae3a
+    name: "LE Republic Way Building 05"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -162,147
+      - -162,166
+      - -179,166
+      - -179,147
+  - id: 931d1453-7fb7-57cf-a3d7-ad1c293ce677
+    kind: Building
+    parent: a19967c1-e050-4a30-88a2-696728e4ae3a
+    name: "LE Republic Way Building 06"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -127,165
+      - -127,148
+      - -111,148
+      - -111,165
+  - id: acf08da7-a071-55a5-8af7-8ca09eb11702
+    kind: Building
+    parent: a19967c1-e050-4a30-88a2-696728e4ae3a
+    name: "LE Republic Way Building 07"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -152,162
+      - -152,147
+      - -130,147
+      - -130,162
+  - id: 480feeca-c369-5fc0-94ae-8c5ea43478f9
+    kind: Building
+    parent: a19967c1-e050-4a30-88a2-696728e4ae3a
+    name: "LE Republic Way Building 08"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -198,155
+      - -198,145
+      - -185,145
+      - -185,155
+  - id: 6939490e-0486-5cf7-ae30-aba2e508ca0d
+    kind: Building
+    parent: 4e58cf4e-7d1f-44c2-bd15-34cf5042abbf
+    name: "OCZ 27th Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 70,-47
+      - 70,-60
+      - 87,-60
+      - 87,-47
+  - id: 33749dc0-2b7a-5038-b046-1cc1a37e6291
+    kind: Building
+    parent: 9d61c759-ea19-42a2-b99d-a08fe97b5a4e
+    name: "OCZ Ventura Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 91,-43
+      - 91,-60
+      - 95,-60
+      - 95,-65
+      - 112,-65
+      - 112,-43
+  - id: 3302edc2-d801-5dd1-ae0b-fef0fccb12e4
+    kind: Building
+    parent: 9d61c759-ea19-42a2-b99d-a08fe97b5a4e
+    name: "OCZ Ventura Street Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 114,-51
+      - 114,-67
+      - 125,-67
+      - 125,-51
+  - id: 15e5d005-665e-516b-b776-bef9fd7a8126
+    kind: Building
+    parent: 9d61c759-ea19-42a2-b99d-a08fe97b5a4e
+    name: "OCZ Ventura Street Building 03"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 70,-77
+      - 91,-77
+      - 91,-63
+      - 70,-63
+  - id: 7be604ff-18c2-505d-adae-1c69eda9314a
+    kind: Building
+    parent: 9d61c759-ea19-42a2-b99d-a08fe97b5a4e
+    name: "OCZ Ventura Street Building 04"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 93,-69
+      - 93,-77
+      - 110,-77
+      - 110,-79
+      - 123,-79
+      - 123,-78
+      - 125,-78
+      - 125,-69
+  - id: 7948dd59-e863-5537-a4d8-b76941beb51a
+    kind: Building
+    parent: 14ad9fcc-82e1-4236-9c6b-c2a3505182ae
+    name: "OJT 18th Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 146,44
+      - 146,58
+      - 134,58
+      - 134,44
+  - id: 9eeb9598-ef13-5d58-b93d-83a34526523c
+    kind: Building
+    parent: 77a84db4-45a7-4370-b1ce-f893f6d79e84
+    name: "OJT 19th Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 62,45
+      - 62,33
+      - 80,33
+      - 80,45
+  - id: e8747cba-9d01-5bce-87cb-6356387cc569
+    kind: Building
+    parent: 77a84db4-45a7-4370-b1ce-f893f6d79e84
+    name: "OJT 19th Street Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 152,39
+      - 152,38
+      - 151,38
+      - 151,24
+      - 152,24
+      - 152,23
+      - 159,23
+      - 159,24
+      - 160,24
+      - 160,38
+      - 159,38
+      - 159,39
+  - id: be480e58-8f2c-5961-9d07-e2de28f1651c
+    kind: Building
+    parent: 77a84db4-45a7-4370-b1ce-f893f6d79e84
+    name: "OJT 19th Street Building 03"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 127,38
+      - 110,38
+      - 110,32
+      - 116,32
+      - 116,31
+      - 119,31
+      - 119,23
+      - 127,23
+  - id: 17c3da45-7a35-5502-b5da-41a10dc7a2e6
+    kind: Building
+    parent: 77a84db4-45a7-4370-b1ce-f893f6d79e84
+    name: "OJT 19th Street Building 04"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 133,23
+      - 146,23
+      - 146,38
+      - 133,38
+  - id: fdcd81ee-36f3-5104-bd17-72b3990fec6c
+    kind: Building
+    parent: 77a84db4-45a7-4370-b1ce-f893f6d79e84
+    name: "OJT 19th Street Building 05"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 168,37
+      - 168,9
+      - 169,9
+      - 169,10
+      - 187,10
+      - 187,37
+  - id: 4f7697ca-891b-506a-be31-7f81784ec5bd
+    kind: Building
+    parent: 988bb3d7-dad4-447f-ad97-c297f138751e
+    name: "OJT 26th Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 187,7
+      - 168,7
+      - 168,1
+      - 166,1
+      - 166,-6
+      - 179,-6
+      - 179,-5
+      - 187,-5
+  - id: e029d299-720e-5a53-a329-bc38b3128bf5
+    kind: Building
+    parent: 988bb3d7-dad4-447f-ad97-c297f138751e
+    name: "OJT 26th Street Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 163,1
+      - 150,1
+      - 150,0
+      - 146,0
+      - 146,-2
+      - 140,-2
+      - 140,-8
+      - 147,-8
+      - 147,-7
+      - 163,-7
+  - id: cf56fae1-79a3-565a-a9db-cb68cc9e20cf
+    kind: Building
+    parent: 988bb3d7-dad4-447f-ad97-c297f138751e
+    name: "OJT 26th Street Building 03"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 94,-3
+      - 94,-13
+      - 96,-13
+      - 96,-11
+      - 113,-11
+      - 113,-3
+  - id: fdeeb0ed-5668-5052-9074-f8711c2db23b
+    kind: Building
+    parent: afd74602-8bd0-4223-bbc7-a7c0fa202b3a
+    name: "OJT 29th Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 168,46
+      - 193,46
+      - 193,86
+      - 168,86
+  - id: 2f06cd92-3dc4-5703-b496-b953b43327a0
+    kind: Building
+    parent: d9f34d37-2de2-41eb-8e4c-0a6400dabdf6
+    name: "PNC W 25th Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -141,-20
+      - -139,-20
+      - -139,-22
+      - -128,-22
+      - -128,-21
+      - -127,-21
+      - -127,-11
+      - -128,-11
+      - -128,-9
+      - -141,-9
+  - id: 5e1e6915-7974-5b2f-96b6-6b9ea2f9c7f3
+    kind: Building
+    parent: d9f34d37-2de2-41eb-8e4c-0a6400dabdf6
+    name: "PNC W 25th Street Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -115,-18
+      - -116,-18
+      - -116,-16
+      - -122,-16
+      - -122,-23
+      - -124,-23
+      - -124,-26
+      - -125,-26
+      - -125,-31
+      - -124,-31
+      - -124,-32
+      - -123,-32
+      - -123,-33
+      - -116,-33
+      - -116,-24
+      - -115,-24
+  - id: c0b5ec31-093a-5d10-8d92-e940c4002995
+    kind: Building
+    parent: 78875927-4582-48a7-b50f-d3b288c08cd6
+    name: "PNC W 26th Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -154,-56
+      - -154,-53
+      - -161,-53
+      - -161,-62
+      - -159,-62
+      - -159,-70
+      - -147,-70
+      - -147,-56
+  - id: 5bea000c-1dcc-5779-bb34-1eac151d2d75
+    kind: Building
+    parent: 78875927-4582-48a7-b50f-d3b288c08cd6
+    name: "PNC W 26th Street Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -93,-57
+      - -114,-57
+      - -114,-62
+      - -115,-62
+      - -115,-64
+      - -122,-64
+      - -122,-70
+      - -93,-70
+  - id: 8965b6de-e3cc-5c0f-ad21-105737e74a7c
+    kind: Building
+    parent: d678368a-9680-476d-91b1-5a400f5fb795
+    name: "RZ 30rd Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -29,-48
+      - -29,-39
+      - -39,-39
+      - -39,-48
+  - id: 799feb23-41db-5003-b898-aa5e809b5d16
+    kind: Building
+    parent: d678368a-9680-476d-91b1-5a400f5fb795
+    name: "RZ 30rd Street Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -26,-39
+      - -26,-53
+      - -5,-53
+      - -5,-39
+  - id: 411864e5-0241-5b96-a6e5-79cd498ccca7
+    kind: Building
+    parent: d678368a-9680-476d-91b1-5a400f5fb795
+    name: "RZ 30rd Street Building 03"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 25,-44
+      - 4,-44
+      - 4,-59
+      - 25,-59
+  - id: 27360cd5-2439-5f82-b1da-afa229e5d552
+    kind: Building
+    parent: d678368a-9680-476d-91b1-5a400f5fb795
+    name: "RZ 30rd Street Building 04"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -27,-63
+      - -27,-59
+      - -28,-59
+      - -28,-50
+      - -39,-50
+      - -39,-63
+  - id: 67ee74fc-a267-5dfe-b605-74a751a7bd03
+    kind: Building
+    parent: d678368a-9680-476d-91b1-5a400f5fb795
+    name: "RZ 30rd Street Building 05"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -25,-55
+      - -25,-63
+      - -14,-63
+      - -14,-55
+  - id: fe307b6f-4a79-5bee-a1a1-6d92b30755e9
+    kind: Building
+    parent: d678368a-9680-476d-91b1-5a400f5fb795
+    name: "RZ 30rd Street Building 06"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -13,-65
+      - -13,-77
+      - -5,-77
+      - -5,-65
+  - id: ab5ea231-6f41-5dee-aafe-9c91a96f0179
+    kind: Building
+    parent: d678368a-9680-476d-91b1-5a400f5fb795
+    name: "RZ 30rd Street Building 07"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 21,-68
+      - 4,-68
+      - 4,-78
+      - 21,-78
+  - id: 334f6f04-d7bc-5749-b523-1bf6801a14a8
+    kind: Building
+    parent: 42e9e0b7-b7e5-4947-9cee-31ed01f38406
+    name: "RZ 31st Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -46,-52
+      - -46,-39
+      - -70,-39
+      - -70,-52
+  - id: 24a86fd6-2eb7-5c31-85b9-576893c093e1
+    kind: Building
+    parent: 42e9e0b7-b7e5-4947-9cee-31ed01f38406
+    name: "RZ 31st Street Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -46,-73
+      - -46,-55
+      - -78,-55
+      - -78,-73
+  - id: f3c62840-6fee-572e-86e4-01132e1dd344
+    kind: Building
+    parent: b4760bad-a2b9-4ec0-b1c0-985dd28daa6f
+    name: "RZ Scoffield Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - 45,-44
+      - 27,-44
+      - 27,-78
+      - 45,-78
+  - id: ab9cb4bc-497d-598b-a91e-a9d9e3f37acc
+    kind: Building
+    parent: 89697013-bfd8-44db-9e68-d993e735dcf9
+    name: "SNC W 22nd Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -143,13
+      - -114,13
+      - -114,24
+      - -143,24
+  - id: 28eb8b60-d3b7-58e6-b4b2-c1759df750f3
+    kind: Building
+    parent: 89697013-bfd8-44db-9e68-d993e735dcf9
+    name: "SNC W 22nd Street Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -98,-1
+      - -86,-1
+      - -86,24
+      - -98,24
+  - id: dd968476-9e6c-5c57-bb6d-d7e60b13248b
+    kind: Building
+    parent: c13d63aa-b1b5-4721-bc3f-d2986de13f00
+    name: "UD Alexandria Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -113,59
+      - -113,72
+      - -126,72
+      - -126,59
+  - id: 4fd7105d-7637-53f0-a085-724ade2376e6
+    kind: Building
+    parent: c13d63aa-b1b5-4721-bc3f-d2986de13f00
+    name: "UD Alexandria Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -126,50
+      - -126,43
+      - -143,43
+      - -143,33
+      - -114,33
+      - -114,50
+  - id: 0c55e643-da2d-59e6-a555-9dbcbc9865a3
+    kind: Building
+    parent: 2af5474c-76d9-4df5-85fd-57e5fbe16b59
+    name: "UD Bay Street Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -73,33
+      - -73,50
+      - -98,50
+      - -98,33
+  - id: 307132c7-b586-589d-ba23-a8b18c2d86fc
+    kind: Building
+    parent: 1e7a53e8-5480-4366-bc15-a8aec11ffa3b
+    name: "UD Farren Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -81,103
+      - -81,81
+      - -68,81
+      - -68,103
+  - id: 7477ab92-be56-56f7-a505-9b3fc1baa81f
+    kind: Building
+    parent: 1e7a53e8-5480-4366-bc15-a8aec11ffa3b
+    name: "UD Farren Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -38,103
+      - -64,103
+      - -64,71
+      - -38,71
+  - id: 9858c1a5-e21b-549e-b2ef-a3856c4507c2
+    kind: Building
+    parent: 1e7a53e8-5480-4366-bc15-a8aec11ffa3b
+    name: "UD Farren Building 03"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -84,59
+      - -84,72
+      - -98,72
+      - -98,59
+  - id: c51894dd-c036-52ed-9bb4-f3d2ffa96bbb
+    kind: Building
+    parent: 1e7a53e8-5480-4366-bc15-a8aec11ffa3b
+    name: "UD Farren Building 04"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -82,72
+      - -82,59
+      - -66,59
+      - -66,72
+  - id: cc02d148-bd4c-5be5-97cd-80e1000d03b4
+    kind: Building
+    parent: 1e7a53e8-5480-4366-bc15-a8aec11ffa3b
+    name: "UD Farren Building 05"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -36,59
+      - -36,68
+      - -64,68
+      - -64,59
+  - id: dee03897-0e08-5755-9c17-b733a76d124e
+    kind: Building
+    parent: 8cf40fab-27d1-4831-a8d2-eb40cdd7f3ad
+    name: "UD Skyline Building 01"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -128,59
+      - -128,72
+      - -143,72
+      - -143,59
+  - id: 60ce12d0-41e3-5b54-a2a0-803fbf4c0234
+    kind: Building
+    parent: 8cf40fab-27d1-4831-a8d2-eb40cdd7f3ad
+    name: "UD Skyline Building 02"
+    geometry:
+    - kind: Polygon
+      global: true
+      vertices:
+      - -152,71
+      - -175,71
+      - -175,70
+      - -176,70
+      - -176,69
+      - -177,69
+      - -177,68
+      - -178,68
+      - -178,67
+      - -179,67
+      - -179,66
+      - -180,66
+      - -180,41
+      - -179,41
+      - -179,40
+      - -178,40
+      - -178,39
+      - -177,39
+      - -177,38
+      - -176,38
+      - -176,37
+      - -175,37
+      - -175,36
+      - -174,36
+      - -174,35
+      - -173,35
+      - -173,34
+      - -152,34
+  - id: 7b559196-93fd-4e17-90af-998ed0cffa62
+    kind: Apartment
+    parent: 4faa965b-1cdb-4ff4-811f-0974640d4784
+    name: "G 241-1"
+    geometry:
+    - kind: Polygon
+      z: 0
+      vertices:
+      - 12,-39
+      - 12,-34
+      - 22,-34
+      - 22,-40
+      - 12,-40
+  - id: 9a8d206c-a63e-426a-8e65-05162a583cea
+    kind: Apartment
+    parent: 4faa965b-1cdb-4ff4-811f-0974640d4784
+    name: "G 241-2"
+    geometry:
+    - kind: Polygon
+      z: 1
+      vertices:
+      - 12,-40
+      - 12,-34
+      - 22,-34
+      - 22,-40
+  - id: 94373a6b-0560-478e-ad0b-64b3437df3d1
+    kind: Apartment
+    parent: 4faa965b-1cdb-4ff4-811f-0974640d4784
+    name: "G 241-3"
+    geometry:
+    - kind: Polygon
+      z: 2
+      vertices:
+      - 12,-40
+      - 12,-34
+      - 22,-34
+      - 22,-40
+  - id: ea639634-ef4a-45d4-a7cb-ffbe0a19e802
+    kind: Apartment
+    parent: 4faa965b-1cdb-4ff4-811f-0974640d4784
+    name: "G 241-4"
+    geometry:
+    - kind: Polygon
+      z: 3
+      vertices:
+      - 12,-40
+      - 12,-34
+      - 19,-34
+      - 19,-40
