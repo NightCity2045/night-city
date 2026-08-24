@@ -18,12 +18,14 @@ public sealed partial class NCFixerCognitionSystem : EntitySystem
     [Dependency] private NCFixerRegistrySystem _fixers = default!;
     [Dependency] private NCFixerDealOrchestrationSystem _orchestration = default!;
     [Dependency] private NCFixerEscrowSystem _escrow = default!;
+    private readonly Dictionary<Guid, Task<FixerActionResult>> _pending = [];
 
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<NCCognitionCollectFactsEvent>(OnCollectFacts);
-        SubscribeLocalEvent<NCCognitionExecuteStepEvent>(OnExecuteStep);
+        SubscribeLocalEvent<NCHumanActionExecutionEvent>(OnExecuteStep);
+        SubscribeLocalEvent<NCHumanActionInterruptedEvent>(OnInterrupted);
     }
 
     private void OnCollectFacts(NCCognitionCollectFactsEvent args)
@@ -48,7 +50,7 @@ public sealed partial class NCFixerCognitionSystem : EntitySystem
         }
     }
 
-    private void OnExecuteStep(NCCognitionExecuteStepEvent args)
+    private void OnExecuteStep(NCHumanActionExecutionEvent args)
     {
         if (args.Step.ActionId != "manage-fixer-deal" ||
             args.Intention.Target.Kind != NCCognitionReferenceKind.StableKey ||
@@ -64,12 +66,59 @@ public sealed partial class NCFixerCognitionSystem : EntitySystem
             args.Failure = "fixer-deal-unavailable";
             return;
         }
-        args.Completed = true;
-        if (deal.Snapshot.Status == NCFixerDealStatus.EscrowFunded)
-            _ = _orchestration.ActivateAsync(dealId, deal.AggregateVersion, party);
-        else if (deal.Snapshot.Status == NCFixerDealStatus.AwaitingHandoff)
-            _ = _escrow.SettleAsync(dealId, deal.AggregateVersion, party);
+        if (!_pending.TryGetValue(args.InstanceId, out var operation))
+        {
+            if (deal.Snapshot.Status is not (NCFixerDealStatus.EscrowFunded or NCFixerDealStatus.AwaitingHandoff))
+            {
+                args.Failure = "fixer-deal-not-actionable";
+                return;
+            }
+            operation = ExecuteAsync(deal, party);
+            _pending[args.InstanceId] = operation;
+        }
+        if (!operation.IsCompleted)
+            return;
+
+        _pending.Remove(args.InstanceId);
+        var result = operation.GetAwaiter().GetResult();
+        if (result.Success)
+            args.Completed = true;
         else
-            args.Failure = "fixer-deal-not-actionable";
+            args.Failure = result.Error ?? "fixer-deal-mutation-rejected";
     }
+
+    private async Task<FixerActionResult> ExecuteAsync(NCFixerDealRecord deal, NCPartyRef party)
+    {
+        try
+        {
+            NCFixerMutationStatus status;
+            string? error;
+            if (deal.Snapshot.Status == NCFixerDealStatus.EscrowFunded)
+            {
+                var result = await _orchestration.ActivateAsync(deal.Snapshot.DealId, deal.AggregateVersion, party);
+                status = result.Status;
+                error = result.Error;
+            }
+            else
+            {
+                var result = await _escrow.SettleAsync(deal.Snapshot.DealId, deal.AggregateVersion, party);
+                status = result.Status;
+                error = result.Error;
+            }
+            return new FixerActionResult(status is NCFixerMutationStatus.Applied or NCFixerMutationStatus.Duplicate,
+                error);
+        }
+        catch (Exception exception)
+        {
+            return new FixerActionResult(false, $"fixer-deal-exception:{exception.GetType().Name}");
+        }
+    }
+
+    private void OnInterrupted(NCHumanActionInterruptedEvent args)
+    {
+        if (args.ActionId == "manage-fixer-deal")
+            _pending.Remove(args.InstanceId);
+    }
+
+    private readonly record struct FixerActionResult(bool Success, string? Error);
 }

@@ -8,7 +8,9 @@ using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Population;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Admin;
+using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Identity;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.LivingCity.Admin;
 
@@ -90,15 +92,17 @@ public sealed partial class NCLivingCityAdminSystem
         var districtActors = districts.Sum(static value => value.TotalActors);
         var publicActors = districts.Sum(static value => value.PublicActors);
         var abstractHomeActors = districts.Sum(static value => value.AbstractHomeActors);
-        var physicalHomeActors = districts.Sum(static value => value.PhysicalHomeActors);
+        var residenceAssignedActors = districts.Sum(static value => value.ResidenceAssignedActors);
         fields.Add("observer-presence", "indexed-actors", _zoneStates.IndexedActorCount);
         fields.Add("observer-presence", "district-actors", districtActors);
         fields.Add("observer-presence", "materialized", _actorRuntime.MaterializedActorCount);
         fields.Add("observer-presence", "public", publicActors);
         fields.Add("observer-presence", "abstract-home", abstractHomeActors);
-        fields.Add("observer-presence", "physical-home", physicalHomeActors);
+        fields.Add("observer-presence", "residence-assigned", residenceAssignedActors);
+        fields.Add("observer-presence", "residence-unassigned",
+            Math.Max(0, districtActors - residenceAssignedActors));
         fields.Add("observer-presence", "unknown-presence",
-            Math.Max(0, districtActors - publicActors - abstractHomeActors - physicalHomeActors));
+            Math.Max(0, districtActors - publicActors - abstractHomeActors));
 
         fields.Add("observer-society", "formal-workers", _workforce.IndexedAssignmentCount);
         fields.Add("observer-society", "profession-profiles", _professions.ProfileCount);
@@ -189,7 +193,7 @@ public sealed partial class NCLivingCityAdminSystem
                 projection.TravelingActors,
                 projection.PublicActors,
                 projection.AbstractHomeActors,
-                projection.PhysicalHomeActors,
+                projection.ResidenceAssignedActors,
                 projection.Activity,
                 projection.Scarcity,
                 projection.Threat,
@@ -215,6 +219,15 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-actor", "actor-id", actorId);
         fields.Add("observer-actor", "full-name", snapshot.Identity.FullName);
         fields.Add("observer-actor", "archetype", snapshot.Identity.ArchetypeId);
+        if (_prototypes.TryIndex(new ProtoId<NCCityActorArchetypePrototype>(snapshot.Identity.ArchetypeId),
+                out NCCityActorArchetypePrototype? archetype) && archetype != null)
+        {
+            var narrativeProfile = snapshot.Identity.NarrativeActorProfileId ?? archetype.NarrativeActorProfile?.Id;
+            fields.Add("observer-actor", "population-class",
+                narrativeProfile == null ? "Resident" : "Actor");
+            fields.Add("observer-actor", "narrative-profile",
+                narrativeProfile ?? "none");
+        }
         fields.Add("observer-actor", "status", snapshot.Lifecycle.Status);
         fields.Add("observer-actor", "frozen", snapshot.Lifecycle.Frozen);
         fields.Add("observer-actor", "cognition-tier", snapshot.CognitionTier);
@@ -229,6 +242,19 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-location", "expected-arrival", snapshot.Location.ExpectedArrivalAt?.Elapsed);
         fields.Add("observer-location", "presence", snapshot.Schedule.PresenceMode);
         fields.Add("observer-location", "known-zones", _locationKnowledge.CountKnown(actorId));
+
+        var residence = snapshot.Location.Residence;
+        fields.Add("observer-residence", "assigned", residence is { ResidenceId.IsValid: true });
+        if (residence is { ResidenceId.IsValid: true })
+        {
+            fields.Add("observer-residence", "residence-id", residence.ResidenceId);
+            fields.Add("observer-residence", "residence-profile", residence.ProfileId);
+            fields.Add("observer-residence", "residence-kind", residence.Kind);
+            fields.Add("observer-residence", "residence-quality", residence.Quality);
+            fields.Add("observer-residence", "residence-district", residence.DistrictZone);
+            fields.Add("observer-residence", "residence-local-zone", residence.LocalZone);
+            fields.Add("observer-residence", "weekly-cost", residence.WeeklyCost);
+        }
 
         fields.Add("observer-intent", "activity", snapshot.Schedule.CurrentActivity);
         fields.Add("observer-intent", "goal", snapshot.Schedule.CurrentGoal);
@@ -350,6 +376,26 @@ public sealed partial class NCLivingCityAdminSystem
         else
         {
             fields.Add("observer-mind", "runtime", false);
+        }
+
+        if (_humanActions.TryGetSnapshot(actorId, out var action))
+        {
+            fields.Add("observer-human-action", "id", action.ActionId);
+            fields.Add("observer-human-action", "state", action.State);
+            fields.Add("observer-human-action", "executor", action.Executor);
+            fields.Add("observer-human-action", "target", action.Target);
+            fields.Add("observer-human-action", "started-at", action.StartedAt.Elapsed);
+            fields.Add("observer-human-action", "updated-at", action.UpdatedAt.Elapsed);
+            fields.Add("observer-human-action", "timeout-at", action.TimeoutAt.Elapsed);
+            fields.Add("observer-human-action", "failure", action.Failure ?? "none");
+            foreach (var trace in action.Trace.TakeLast(8))
+            {
+                var section = $"observer-human-action-trace-{trace.Sequence}";
+                fields.Add(section, "at", trace.At.Elapsed);
+                fields.Add(section, "state", trace.State);
+                fields.Add(section, "event", trace.Event);
+                fields.Add(section, "detail", trace.Detail);
+            }
         }
 
         return (fields.Build(), null);

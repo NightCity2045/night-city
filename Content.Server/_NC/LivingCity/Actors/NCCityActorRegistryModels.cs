@@ -6,6 +6,7 @@ using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors.Domains;
 using Content.Shared._NC.LivingCity.Actors;
+using Content.Shared._NC.LivingCity.Neural;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 using Content.Server.Database;
@@ -76,7 +77,8 @@ public sealed record NCCityActorCreateRequest(
     NCZoneId WorkZone,
     Guid CorrelationId,
     Guid? CausationId = null,
-    string AuditSource = "system");
+    string AuditSource = "system",
+    ProtoId<NCNarrativeActorProfilePrototype>? NarrativeActorProfile = null);
 
 public sealed record NCCityActorLocationMutationRequest(
     Guid CommandId,
@@ -104,6 +106,18 @@ public sealed record NCCityActorResidenceMutationRequest(
     NCActorId ActorId,
     long ExpectedVersion,
     NCZoneId HomeZone,
+    Guid CorrelationId,
+    Guid? CausationId = null,
+    string AuditSource = "system");
+
+/// <summary>Promotes an existing deterministic population slot to an authored identity without replacing the person.</summary>
+public sealed record NCCityActorIdentityMutationRequest(
+    Guid CommandId,
+    NCActorId ActorId,
+    long ExpectedVersion,
+    string FullName,
+    string[] Aliases,
+    ProtoId<NCNarrativeActorProfilePrototype>? NarrativeActorProfile,
     Guid CorrelationId,
     Guid? CausationId = null,
     string AuditSource = "system");
@@ -161,7 +175,8 @@ public sealed class NCCityActorPersistedEvent(
     string archetypeId,
     NCCityActorCognitionTier cognitionTier,
     NCCityActorAvailability availability,
-    NCCityActorPresenceMode presenceMode) : EntityEventArgs
+    NCCityActorPresenceMode presenceMode,
+    bool hasAbstractResidence) : EntityEventArgs
 {
     public NCActorId ActorId { get; } = actorId;
     public long AggregateVersion { get; } = aggregateVersion;
@@ -176,6 +191,7 @@ public sealed class NCCityActorPersistedEvent(
     public NCCityActorCognitionTier CognitionTier { get; } = cognitionTier;
     public NCCityActorAvailability Availability { get; } = availability;
     public NCCityActorPresenceMode PresenceMode { get; } = presenceMode;
+    public bool HasAbstractResidence { get; } = hasAbstractResidence;
 }
 
 /// <summary>

@@ -954,7 +954,7 @@ public sealed partial class NCLivingCityAdminTab : Control
             AddObserverValue(population, "nc-living-city-admin-observer-frozen"),
             AddObserverValue(population, "nc-living-city-admin-observer-public"),
             AddObserverValue(population, "nc-living-city-admin-observer-abstract-home"),
-            AddObserverValue(population, "nc-living-city-admin-observer-physical-home"),
+            AddObserverValue(population, "nc-living-city-admin-observer-residence-assigned"),
         };
         content.AddChild(population);
 
@@ -993,7 +993,7 @@ public sealed partial class NCLivingCityAdminTab : Control
         controls.PopulationValues[3].Text = zone.FrozenActors.ToString();
         controls.PopulationValues[4].Text = zone.PublicActors.ToString();
         controls.PopulationValues[5].Text = zone.AbstractHomeActors.ToString();
-        controls.PopulationValues[6].Text = zone.PhysicalHomeActors.ToString();
+        controls.PopulationValues[6].Text = zone.ResidenceAssignedActors.ToString();
         UpdateObserverSignal(controls.Signals[0], zone.Activity);
         UpdateObserverSignal(controls.Signals[1], zone.Threat);
         UpdateObserverSignal(controls.Signals[2], zone.Scarcity);

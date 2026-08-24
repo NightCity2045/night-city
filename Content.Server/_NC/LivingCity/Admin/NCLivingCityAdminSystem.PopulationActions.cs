@@ -136,12 +136,27 @@ public sealed partial class NCLivingCityAdminSystem
         if (report.Failures.Count > 20)
             fields.Add("failures", "omitted", report.Failures.Count - 20);
 
-        var success = report.Status == NCCityPopulationImportStatus.Completed &&
-                      report.Conflicts == 0 && report.Failed == 0;
+        var importComplete = report.Status == NCCityPopulationImportStatus.Completed &&
+                             report.Conflicts == 0 && report.Failed == 0;
+        NCCityResidenceAllocationReport? residences = null;
+        if (importComplete)
+        {
+            // Population import is the canonical bootstrap path, so old residents receive coordinate-free homes in
+            // this same audited operation instead of requiring a hidden second setup step.
+            residences = await _residences.AllocateAsync(AdminAuditSource(administrator, request.Reason));
+            fields.Add("residences", "status", residences.Status);
+            fields.Add("residences", "profiles", residences.ResidenceProfiles);
+            fields.Add("residences", "existing", residences.ExistingResidences);
+            fields.Add("residences", "assigned", residences.AssignedResidences);
+            fields.Add("residences", "unassigned", residences.UnassignedResidences);
+            fields.Add("residences", "failed-mutations", residences.FailedMutations);
+        }
+
+        var success = importComplete && residences?.Status == NCCityResidenceAllocationStatus.Completed;
         return new PopulationActionExecution(
             success ? NCLivingCityAdminMutationStatus.Applied : NCLivingCityAdminMutationStatus.Rejected,
             fields.Build(),
-            success ? null : "population-import-not-complete");
+            success ? null : residences?.Error ?? "population-import-not-complete");
     }
 
     private PopulationActionExecution RebuildZoneStateProjections()
@@ -166,12 +181,11 @@ public sealed partial class NCLivingCityAdminSystem
         var fields = new FieldBuilder();
         fields.Add("residences", "status", report.Status);
         fields.Add("residences", "scanned-actors", report.ScannedActors);
-        fields.Add("residences", "apartment-zones", report.ApartmentZones);
-        fields.Add("residences", "districts-with-apartments", report.DistrictsWithApartments);
-        fields.Add("residences", "existing-physical", report.ExistingPhysicalResidents);
-        fields.Add("residences", "newly-assigned", report.AssignedPhysicalResidents);
-        fields.Add("residences", "abstract", report.AbstractResidents);
-        fields.Add("residences", "unresolved", report.UnresolvedResidents);
+        fields.Add("residences", "profiles", report.ResidenceProfiles);
+        fields.Add("residences", "existing", report.ExistingResidences);
+        fields.Add("residences", "assigned", report.AssignedResidences);
+        fields.Add("residences", "abstract-home", report.AbstractHomeActors);
+        fields.Add("residences", "unassigned", report.UnassignedResidences);
         fields.Add("residences", "failed-mutations", report.FailedMutations);
         var success = report.Status == NCCityResidenceAllocationStatus.Completed;
         return new PopulationActionExecution(

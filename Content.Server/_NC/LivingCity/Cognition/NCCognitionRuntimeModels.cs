@@ -118,11 +118,13 @@ public sealed class NCCognitionCollectFactsEvent(
 public sealed class NCCognitionExecuteStepEvent(
     NCActorId actorId,
     EntityUid? entityUid,
+    Guid planId,
     NCCognitionIntentionSnapshot intention,
     NCCognitionPlanStep step) : EntityEventArgs
 {
     public NCActorId ActorId { get; } = actorId;
     public EntityUid? EntityUid { get; } = entityUid;
+    public Guid PlanId { get; } = planId;
     public NCCognitionIntentionSnapshot Intention { get; } = intention;
     public NCCognitionPlanStep Step { get; } = step;
     public bool Handled { get; set; }

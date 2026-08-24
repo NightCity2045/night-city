@@ -2,6 +2,11 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+- type: gameMapPool
+  id: NCNightCityMapPool
+  maps:
+  - NCALifeTest
+
 - type: gameMap
   id: NCALifeTest
   mapName: NC ALife Test

@@ -25,6 +25,25 @@
     associate: 15
     contact: 5
 
+# Natural orders are deliberately closed and route through ordinary commitments and profession systems.
+- type: ncHumanDirectiveAction
+  id: go-to-location
+
+- type: ncHumanDirectiveAction
+  id: patrol-location
+  allowsCompanion: true
+
+- type: ncHumanDirectiveAction
+  id: guard-location
+  allowsCompanion: true
+
+- type: ncHumanDirectiveAction
+  id: wait-at-location
+  allowsCompanion: true
+
+- type: ncHumanDirectiveAction
+  id: report-to-location
+
 - type: htnCompound
   id: NCLivingHumanCompound
   branches:

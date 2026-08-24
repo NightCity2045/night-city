@@ -14,6 +14,7 @@ public enum NCCognitionUtilityCurveKind : byte
     Bell,
 }
 
+/// <summary>Names the existing authority that executes a plan step; it does not duplicate that authority.</summary>
 [Prototype("ncCognitionUtilityCurve")]
 public sealed partial class NCCognitionUtilityCurvePrototype : IPrototype
 {

@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Threading;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.Configuration;
@@ -57,6 +58,8 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     private long _timeouts;
     private long _rejects;
     private bool _active;
+    private int _generation;
+    private CancellationTokenSource? _sessionCancellation;
 
     /// <summary>True only when the current round may spend provider tokens.</summary>
     public bool IsProviderEnabled => _active && ProviderEnabled;
@@ -65,13 +68,15 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     {
         base.Initialize();
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnStarted);
-        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(_ => _active = false);
+        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(_ => Deactivate());
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => Reset());
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => Reset());
     }
 
     public override void Shutdown()
     {
+        Deactivate();
+        _sessionCancellation?.Dispose();
         _http.Dispose();
         base.Shutdown();
     }
@@ -82,24 +87,46 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         if (!_active || _policy == null) return;
         while (_inFlight < _policy.MaximumConcurrent && _queue.TryDequeue(out var request, out _))
         {
-            if (request.ExpiresAt <= CurrentTime()) Publish(Fallback(request, NCNeuralResultStatus.Expired, "expired"));
-            else { _inFlight++; _ = ExecuteAsync(request); }
+            var now = CurrentTime();
+            if (request.ExpiresAt <= now)
+            {
+                Publish(Fallback(request, NCNeuralResultStatus.Expired, "expired"));
+                continue;
+            }
+            if (_circuitOpenUntil is { } open && open > now)
+            {
+                Publish(Fallback(request, NCNeuralResultStatus.CircuitOpen, "circuit-open"));
+                continue;
+            }
+            var cancellation = _sessionCancellation;
+            if (cancellation == null || !TryGetProviderUri(out var providerUri))
+            {
+                Publish(Fallback(request, NCNeuralResultStatus.Fallback, "provider-endpoint-insecure"));
+                continue;
+            }
+            _inFlight++;
+            _ = ExecuteAsync(request, _generation, ServiceToken, providerUri, _policy.RequestTimeout,
+                cancellation.Token);
         }
     }
 
     public bool Submit(NCNeuralRequestEnvelope request)
     {
-        if (!_active || _policy == null || !_known.Add(request.RequestId) || !Valid(request, _policy)) return false;
+        if (!_active || _policy == null || !Valid(request, _policy) || _known.Contains(request.RequestId))
+            return false;
         var mode = Mode();
         if (!ProviderEnabled || mode == NCNeuralBudgetMode.FallbackOnly ||
             mode == NCNeuralBudgetMode.Restricted && request.Priority != NCNeuralPriority.P0 ||
             mode == NCNeuralBudgetMode.Economy && request.Priority > NCNeuralPriority.P2)
         {
+            _known.Add(request.RequestId);
             Publish(Fallback(request, mode == NCNeuralBudgetMode.FallbackOnly
                 ? NCNeuralResultStatus.BudgetDenied : NCNeuralResultStatus.Fallback, mode.ToString()));
             return true;
         }
-        if (_queue.Count >= _policy.MaximumQueued) return false;
+        if (_queue.Count >= _policy.MaximumQueued)
+            return false;
+        _known.Add(request.RequestId);
         _queue.Enqueue(request, ((byte) request.Priority, _sequence++));
         return true;
     }
@@ -117,74 +144,97 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         return true;
     }
 
-    private async Task ExecuteAsync(NCNeuralRequestEnvelope request)
+    private async Task ExecuteAsync(
+        NCNeuralRequestEnvelope request,
+        int generation,
+        string serviceToken,
+        Uri providerUri,
+        TimeSpan timeout,
+        CancellationToken sessionToken)
     {
+        NCNeuralResponseEnvelope? responseValue = null;
+        NCCityActorRecord? actor = null;
+        Exception? error = null;
+        var timedOut = false;
         try
         {
-            var now = CurrentTime();
-            if (_circuitOpenUntil is { } open && open > now)
-            {
-                Publish(Fallback(request, NCNeuralResultStatus.CircuitOpen, "circuit-open"));
-                return;
-            }
-
-            // The credential is read from the confidential server CVar immediately before the request. It is sent
-            // only in the authorization header and is never included in the cognition payload or diagnostics.
-            var apiKey = ProviderApiKey;
-            if (apiKey.Length == 0)
-            {
-                Publish(Fallback(request, NCNeuralResultStatus.Fallback, "provider-key-missing"));
-                return;
-            }
-
-            if (!TryGetProviderUri(out var providerUri))
-            {
-                Publish(Fallback(request, NCNeuralResultStatus.Fallback, "provider-endpoint-insecure"));
-                return;
-            }
-
-            using var cancellation = new CancellationTokenSource(_policy!.RequestTimeout);
+            using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(sessionToken);
+            cancellation.CancelAfter(timeout);
             using var message = new HttpRequestMessage(HttpMethod.Post, providerUri)
             {
                 // Domain wrappers and enums are intentionally flattened into a stable provider transport contract.
                 // Serializing the domain record directly would expose implementation-specific JSON shapes.
                 Content = JsonContent.Create(ToProviderRequest(request)),
             };
-            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", serviceToken);
             using var response = await _http.SendAsync(message, cancellation.Token);
             response.EnsureSuccessStatusCode();
-            var value = await response.Content.ReadFromJsonAsync<NCNeuralResponseEnvelope>(cancellation.Token);
-            var result = await ValidateAsync(request, value);
-            if (result.Status == NCNeuralResultStatus.Accepted)
-            {
-                _inputTokens = checked(_inputTokens + value!.InputTokens);
-                _outputTokens = checked(_outputTokens + value.OutputTokens);
-                _failures = 0;
-                _accepted++;
-                _cache[(request.ActorId, request.Kind)] = value;
-            }
-            else { _rejects++; FailCircuit(); }
-            Publish(result);
+            responseValue = await response.Content.ReadFromJsonAsync<NCNeuralResponseEnvelope>(cancellation.Token);
+            actor = await _actors.GetAsync(request.ActorId, true);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException exception)
         {
-            _timeouts++; FailCircuit();
-            Publish(Fallback(request, NCNeuralResultStatus.Timeout, "timeout"));
+            error = exception;
+            timedOut = !sessionToken.IsCancellationRequested;
         }
         catch (Exception exception)
         {
-            FailCircuit();
-            Publish(Fallback(request, NCNeuralResultStatus.Fallback, exception.GetType().Name));
+            error = exception;
         }
-        finally { _inFlight--; }
+        _tasks.RunOnMainThread(() => CompleteExecution(
+            generation, request, responseValue, actor, error, timedOut));
     }
 
-    private async Task<NCNeuralResult> ValidateAsync(NCNeuralRequestEnvelope request,
-        NCNeuralResponseEnvelope? response)
+    private void CompleteExecution(
+        int generation,
+        NCNeuralRequestEnvelope request,
+        NCNeuralResponseEnvelope? response,
+        NCCityActorRecord? actor,
+        Exception? error,
+        bool timedOut)
     {
-        if (!_active || request.SessionEpoch != _epoch) return new(NCNeuralResultStatus.Stale, request, null, "epoch");
-        if (request.ExpiresAt <= CurrentTime()) return new(NCNeuralResultStatus.Expired, request, null, "expiry");
-        var actor = await _actors.GetAsync(request.ActorId, true);
+        if (generation != _generation || !_active || request.SessionEpoch != _epoch)
+            return;
+        _inFlight = Math.Max(0, _inFlight - 1);
+        if (timedOut)
+        {
+            _timeouts++;
+            FailCircuit();
+            Publish(Fallback(request, NCNeuralResultStatus.Timeout, "timeout"));
+            return;
+        }
+        if (error != null)
+        {
+            FailCircuit();
+            Publish(Fallback(request, NCNeuralResultStatus.Fallback, error.GetType().Name));
+            return;
+        }
+
+        var result = Validate(request, response, actor, CurrentTime());
+        if (result.Status == NCNeuralResultStatus.Accepted)
+        {
+            _inputTokens = checked(_inputTokens + response!.InputTokens);
+            _outputTokens = checked(_outputTokens + response.OutputTokens);
+            _failures = 0;
+            _accepted++;
+            _cache[(request.ActorId, request.Kind)] = response;
+        }
+        else if (result.Status == NCNeuralResultStatus.Invalid)
+        {
+            _rejects++;
+            FailCircuit();
+        }
+        Publish(result);
+    }
+
+    private NCNeuralResult Validate(
+        NCNeuralRequestEnvelope request,
+        NCNeuralResponseEnvelope? response,
+        NCCityActorRecord? actor,
+        NCActiveWorldTime now)
+    {
+        if (request.ExpiresAt <= now)
+            return new(NCNeuralResultStatus.Expired, request, null, "expiry");
         // Dialogue is correlated against the authoritative conversation version at delivery time. Unrelated routine
         // or location persistence may advance the actor aggregate while the provider is composing a harmless line.
         // Strategic suggestions retain strict optimistic concurrency because they can influence later planning.
@@ -223,8 +273,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         if (++_failures >= _policy!.CircuitFailureThreshold)
             _circuitOpenUntil = CurrentTime().Advance(_policy.CircuitOpenDuration);
     }
-    private void Publish(NCNeuralResult result) => _tasks.RunOnMainThread(() =>
-        RaiseLocalEvent(new NCNeuralResultEvent(result)));
+    private void Publish(NCNeuralResult result) => RaiseLocalEvent(new NCNeuralResultEvent(result));
     private NCNeuralBudgetMode Mode()
     {
         if (_policy == null || !ProviderEnabled || _inputTokens + _outputTokens >= _policy.SessionTokenHardCap)
@@ -235,8 +284,15 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     }
     private NCActiveWorldTime CurrentTime() => _clock.TryGetCurrentTime(out _, out var now) ? now : default;
     private bool ProviderEnabled =>
-        (_policy?.Enabled == true || _configuration.GetCVar(NCCVars.NeuralEnabled)) && ProviderApiKey.Length > 0;
-    private string ProviderApiKey => _configuration.GetCVar(NCCVars.NeuralApiKey).Trim();
+        (_policy?.Enabled == true || _configuration.GetCVar(NCCVars.NeuralEnabled)) && ServiceToken.Length > 0;
+    private string ServiceToken
+    {
+        get
+        {
+            var token = _configuration.GetCVar(NCCVars.NeuralServiceToken).Trim();
+            return token.Length > 0 ? token : _configuration.GetCVar(NCCVars.NeuralApiKey).Trim();
+        }
+    }
     private string ProviderEndpoint
     {
         get
@@ -274,17 +330,34 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             request.PerceivedSubjects ?? [],
             request.PerceivedEvents ?? [],
             request.KnownLocations ?? [],
-            request.DialogueInput);
+            request.DialogueInput,
+            request.AllowedDirectiveActionIds ?? []);
     }
     private void OnStarted(NCActiveWorldSessionStartedEvent args)
     {
         Reset();
         if (_prototypes.TryIndex(DefaultPolicy, out NCNeuralPolicyPrototype? policy) && Valid(policy))
-        { _policy = policy; _epoch = args.Epoch; _active = true; }
+        {
+            _policy = policy;
+            _epoch = args.Epoch;
+            _sessionCancellation = new CancellationTokenSource();
+            _active = true;
+        }
+    }
+    private void Deactivate()
+    {
+        _active = false;
+        _generation++;
+        _sessionCancellation?.Cancel();
+        _queue.Clear();
+        _inFlight = 0;
     }
     private void Reset()
     {
-        _active = false; _queue.Clear(); _known.Clear(); _cache.Clear(); _inFlight = 0; _inputTokens = 0;
+        Deactivate();
+        _sessionCancellation?.Dispose();
+        _sessionCancellation = null;
+        _known.Clear(); _cache.Clear(); _inputTokens = 0;
         _outputTokens = 0; _failures = 0; _circuitOpenUntil = null;
     }
     private static bool Valid(NCNeuralPolicyPrototype value) => value.MaximumQueued is > 0 and <= 4096 &&
@@ -321,6 +394,8 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         (value.KnownLocations ?? []).All(location => Stable(location.Handle) && Stable(location.Kind) &&
             location.DisplayName.Length is > 0 and <= 128 &&
             location.DisplayName.All(character => !char.IsControl(character))) &&
+        (value.AllowedDirectiveActionIds?.Count ?? 0) <= 64 &&
+        (value.AllowedDirectiveActionIds ?? []).All(Stable) &&
         value.Autonomy is { } autonomy && Stable(autonomy.PolicyKey) &&
         autonomy.MinimumIntentConfidence is >= 0 and <= 1000 &&
         autonomy.MaximumIntentPriority is >= 0 and <= 1000 &&
@@ -385,7 +460,8 @@ internal sealed record NCNeuralProviderRequest(
     IReadOnlyList<NCNeuralPerceivedSubject> PerceivedSubjects,
     IReadOnlyList<NCNeuralPerceivedEvent> PerceivedEvents,
     IReadOnlyList<NCNeuralKnownLocation> KnownLocations,
-    NCNeuralDialogueInput? DialogueInput);
+    NCNeuralDialogueInput? DialogueInput,
+    IReadOnlyList<string> AllowedDirectiveActionIds);
 
 internal sealed record NCNeuralProviderGuid(Guid Value);
 internal sealed record NCNeuralProviderTime(long Ticks);

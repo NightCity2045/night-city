@@ -5,6 +5,7 @@
 using System.Threading;
 using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors;
+using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Actors;
@@ -25,18 +26,17 @@ public enum NCCityResidenceAllocationStatus : byte
 public sealed record NCCityResidenceAllocationReport(
     NCCityResidenceAllocationStatus Status,
     int ScannedActors,
-    int ApartmentZones,
-    int DistrictsWithApartments,
-    int ExistingPhysicalResidents,
-    int AssignedPhysicalResidents,
-    int AbstractResidents,
-    int UnresolvedResidents,
+    int ResidenceProfiles,
+    int ExistingResidences,
+    int AssignedResidences,
+    int AbstractHomeActors,
+    int UnassignedResidences,
     int FailedMutations,
     string? Error);
 
 /// <summary>
-/// Explicitly assigns a data-driven minority of district residents to real apartment zones. It never creates map
-/// entities, fake zone geometry, or apartments beyond what the mapper authored.
+/// Idempotently assigns canonical coordinate-free homes and persists normalization of legacy PhysicalHome records.
+/// It never reads apartment geometry and never creates an ECS entity, map marker, room, or property occupancy.
 /// </summary>
 public sealed partial class NCCityResidenceAllocationSystem : EntitySystem
 {
@@ -47,7 +47,6 @@ public sealed partial class NCCityResidenceAllocationSystem : EntitySystem
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
 
-    private readonly List<NCZoneInfo> _zoneBuffer = [];
     private int _running;
 
     public bool IsRunning => Volatile.Read(ref _running) != 0;
@@ -70,23 +69,6 @@ public sealed partial class NCCityResidenceAllocationSystem : EntitySystem
                     error: "active-round-or-residence-policy-invalid");
             }
 
-            _zones.GetZones(_zoneBuffer);
-            var apartmentsByDistrict = new Dictionary<NCZoneId, List<NCZoneId>>();
-            foreach (var zone in _zoneBuffer)
-            {
-                if (zone.ContextSlot != NCZoneContextSlot.Apartment ||
-                    !TryResolveDistrict(zone.Id, out var district))
-                {
-                    continue;
-                }
-
-                if (!apartmentsByDistrict.TryGetValue(district, out var apartments))
-                    apartmentsByDistrict[district] = apartments = [];
-                apartments.Add(zone.Id);
-            }
-            foreach (var apartments in apartmentsByDistrict.Values)
-                apartments.Sort(static (left, right) => left.Value.CompareTo(right.Value));
-
             var records = await ReadActors(policy);
             if (records == null)
             {
@@ -94,98 +76,54 @@ public sealed partial class NCCityResidenceAllocationSystem : EntitySystem
                     error: "actor-count-exceeds-residence-policy");
             }
 
-            var abstractByDistrict = new Dictionary<NCZoneId, List<NCCityActorRecord>>();
-            var occupancy = new Dictionary<NCZoneId, int>();
-            var existingPhysical = 0;
+            var existingResidences = 0;
+            var abstractHomeActors = 0;
+            var missingResidences = new List<NCActorId>();
             var unresolved = 0;
             foreach (var actor in records)
             {
                 var homeZone = actor.Snapshot.Location.HomeZone;
-                if (!TryResolveDistrict(homeZone, out var district))
+                if (!_zones.TryGetZone(homeZone, out _))
                 {
                     unresolved++;
                     continue;
                 }
 
-                if (_zones.TryGetZone(homeZone, out var home) &&
-                    home.ContextSlot == NCZoneContextSlot.Apartment)
-                {
-                    existingPhysical++;
-                    occupancy[homeZone] = occupancy.GetValueOrDefault(homeZone) + 1;
-                    continue;
-                }
-
-                if (!abstractByDistrict.TryGetValue(district, out var residents))
-                    abstractByDistrict[district] = residents = [];
-                residents.Add(actor);
-            }
-
-            var assignments = new List<(NCCityActorRecord Actor, NCZoneId Apartment)>();
-            foreach (var (district, apartments) in apartmentsByDistrict.OrderBy(static pair => pair.Key.Value))
-            {
-                if (!abstractByDistrict.TryGetValue(district, out var residents) || residents.Count == 0)
-                    continue;
-                residents.Sort(static (left, right) =>
-                    left.Snapshot.Identity.ActorId.Value.CompareTo(right.Snapshot.Identity.ActorId.Value));
-                var eligibleResidents = residents
-                    .Where(static actor => !actor.Snapshot.Lifecycle.Frozen &&
-                        actor.Snapshot.Lifecycle.Status is not
-                            (NCCityActorStatus.Dead or NCCityActorStatus.Archived))
-                    .ToArray();
-
-                var occupied = apartments.Sum(apartment => occupancy.GetValueOrDefault(apartment));
-                var districtResidents = occupied + residents.Count;
-                var capacity = checked(apartments.Count * policy.PhysicalResidentsPerApartment);
-                var targetPhysical = Math.Min(capacity,
-                    (int) Math.Ceiling(districtResidents * policy.PhysicalResidentShare));
-                var required = Math.Min(eligibleResidents.Length, Math.Max(0, targetPhysical - occupied));
-                for (var index = 0; index < required; index++)
-                {
-                    var apartment = apartments
-                        .Where(value => occupancy.GetValueOrDefault(value) < policy.PhysicalResidentsPerApartment)
-                        .OrderBy(value => occupancy.GetValueOrDefault(value))
-                        .ThenBy(static value => value.Value)
-                        .FirstOrDefault();
-                    if (!apartment.IsValid)
-                        break;
-                    assignments.Add((eligibleResidents[index], apartment));
-                    occupancy[apartment] = occupancy.GetValueOrDefault(apartment) + 1;
-                }
+                if (actor.Snapshot.Schedule.PresenceMode == NCCityActorPresenceMode.AbstractHome)
+                    abstractHomeActors++;
+                if (NCCityActorRegistrySystem.HasCanonicalAbstractResidence(actor.Snapshot))
+                    existingResidences++;
+                else
+                    missingResidences.Add(actor.Snapshot.Identity.ActorId);
             }
 
             var assigned = 0;
             var failed = 0;
-            for (var offset = 0; offset < assignments.Count; offset += policy.MaximumConcurrentMutations)
+            for (var offset = 0; offset < missingResidences.Count; offset += policy.MaximumConcurrentMutations)
             {
-                var batch = assignments.Skip(offset).Take(policy.MaximumConcurrentMutations)
-                    .Select(assignment => _actors.SetResidenceAsync(new NCCityActorResidenceMutationRequest(
-                        Guid.NewGuid(),
-                        assignment.Actor.Snapshot.Identity.ActorId,
-                        assignment.Actor.AggregateVersion,
-                        assignment.Apartment,
-                        Guid.NewGuid(),
-                        AuditSource: auditSource)))
+                var batch = missingResidences.Skip(offset).Take(policy.MaximumConcurrentMutations)
+                    .Select(actorId => EnsureResidenceAsync(actorId, auditSource, policy))
                     .ToArray();
                 var results = await Task.WhenAll(batch);
-                assigned += results.Count(static result => result.Status is
-                    NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate);
-                failed += results.Count(static result => result.Status is not
-                    (NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate));
+                assigned += results.Count(static result => result == ResidenceEnsureStatus.Assigned);
+                existingResidences += results.Count(static result => result == ResidenceEnsureStatus.Existing);
+                unresolved += results.Count(static result => result == ResidenceEnsureStatus.Unresolved);
+                failed += results.Count(static result => result == ResidenceEnsureStatus.Failed);
             }
 
-            var abstractResidents = records.Count - unresolved - existingPhysical - assigned;
-            var status = failed == 0 ? NCCityResidenceAllocationStatus.Completed : NCCityResidenceAllocationStatus.Partial;
+            var status = failed == 0 && unresolved == 0
+                ? NCCityResidenceAllocationStatus.Completed
+                : NCCityResidenceAllocationStatus.Partial;
             return LastReport = new NCCityResidenceAllocationReport(
                 status,
                 records.Count,
-                apartmentsByDistrict.Values.Sum(static list => list.Count),
-                apartmentsByDistrict.Count,
-                existingPhysical,
+                policy.ResidenceProfiles.Count,
+                existingResidences,
                 assigned,
-                abstractResidents,
-                unresolved,
+                abstractHomeActors,
+                unresolved + failed,
                 failed,
-                failed == 0 ? null : "one-or-more-residence-mutations-failed");
+                failed == 0 && unresolved == 0 ? null : "one-or-more-residences-could-not-be-normalized");
         }
         catch (Exception exception)
         {
@@ -213,33 +151,62 @@ public sealed partial class NCCityResidenceAllocationSystem : EntitySystem
         return records;
     }
 
-    private bool TryResolveDistrict(NCZoneId zoneId, out NCZoneId district)
+    private async Task<ResidenceEnsureStatus> EnsureResidenceAsync(
+        NCActorId actorId,
+        string auditSource,
+        NCCityResidenceAllocationPolicyPrototype policy)
     {
-        district = default;
-        var current = zoneId;
-        var depth = 0;
-        while (current.IsValid && depth++ < 16 && _zones.TryGetZone(current, out var zone))
+        for (var attempt = 0; attempt <= policy.StorageRetryCount; attempt++)
         {
-            if (zone.ContextSlot == NCZoneContextSlot.District)
+            var actor = await _actors.GetAsync(actorId, true);
+            if (actor == null)
+                return ResidenceEnsureStatus.Unresolved;
+            if (NCCityActorRegistrySystem.HasCanonicalAbstractResidence(actor.Snapshot))
+                return ResidenceEnsureStatus.Existing;
+            if (!_zones.TryGetZone(actor.Snapshot.Location.HomeZone, out _))
+                return ResidenceEnsureStatus.Unresolved;
+
+            var stableKey = $"{actorId}/{actor.Snapshot.Location.HomeZone}/{actor.AggregateVersion}";
+            var result = await _actors.SetResidenceAsync(new NCCityActorResidenceMutationRequest(
+                NCPersistentIdentity.Command("residence", "ensure", stableKey),
+                actorId,
+                actor.AggregateVersion,
+                actor.Snapshot.Location.HomeZone,
+                NCPersistentIdentity.Correlation("residence", "ensure", actorId.ToString()),
+                AuditSource: auditSource));
+            if (result.Status is NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate)
+                return ResidenceEnsureStatus.Assigned;
+            if (result.Status is not (NCCityActorMutationStatus.VersionConflict or
+                NCCityActorMutationStatus.StorageFailure) || attempt == policy.StorageRetryCount)
             {
-                district = current;
-                return true;
+                return ResidenceEnsureStatus.Failed;
             }
-            current = zone.Parent;
+
+            await Task.Delay(policy.StorageRetryDelay);
         }
-        return false;
+
+        return ResidenceEnsureStatus.Failed;
     }
 
     private static bool ValidPolicy(NCCityResidenceAllocationPolicyPrototype policy) =>
         policy.SnapshotPageSize is > 0 and <= 1000 &&
         policy.MaximumActorsPerRun > 0 &&
         policy.MaximumConcurrentMutations is > 0 and <= 64 &&
-        policy.PhysicalResidentsPerApartment is > 0 and <= 32 &&
-        float.IsFinite(policy.PhysicalResidentShare) &&
-        policy.PhysicalResidentShare is > 0f and < 0.5f;
+        policy.ResidenceProfiles.Count is > 0 and <= 64 &&
+        policy.ResidenceProfiles.Distinct().Count() == policy.ResidenceProfiles.Count &&
+        policy.StorageRetryCount is >= 0 and <= 10 &&
+        policy.StorageRetryDelay >= TimeSpan.Zero && policy.StorageRetryDelay <= TimeSpan.FromMinutes(1);
 
     private static NCCityResidenceAllocationReport Report(
         NCCityResidenceAllocationStatus status,
         string? error = null) =>
-        new(status, 0, 0, 0, 0, 0, 0, 0, 0, error);
+        new(status, 0, 0, 0, 0, 0, 0, 0, error);
+
+    private enum ResidenceEnsureStatus : byte
+    {
+        Existing,
+        Assigned,
+        Unresolved,
+        Failed,
+    }
 }

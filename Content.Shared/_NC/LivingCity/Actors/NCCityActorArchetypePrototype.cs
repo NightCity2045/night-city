@@ -87,12 +87,9 @@ public sealed partial class NCCityActorArchetypePrototype : IPrototype
     public ProtoId<NCSpeechProfilePrototype> SpeechProfile { get; private set; } =
         new("NCDefaultBilingualSpeech");
 
-    /// <summary>Optional neural-facing biography; it grants no cognition capability or gameplay authority.</summary>
+    /// <summary>
+    /// Optional authored profile for an important narrative actor. Ordinary residents never receive Neural access.
+    /// </summary>
     [DataField]
-    public ProtoId<NCNeuralPersonaProfilePrototype>? NeuralPersonaProfile { get; private set; } =
-        new("NCDefaultResidentPersona");
-
-    [DataField]
-    public ProtoId<NCNeuralAutonomyPolicyPrototype> NeuralAutonomyPolicy { get; private set; } =
-        new("NCDefaultNeuralAutonomy");
+    public ProtoId<NCNarrativeActorProfilePrototype>? NarrativeActorProfile { get; private set; }
 }

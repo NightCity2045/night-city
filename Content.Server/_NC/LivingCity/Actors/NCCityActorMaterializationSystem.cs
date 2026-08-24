@@ -11,6 +11,7 @@ using Content.Server._NC.LivingCity.Actors.Domains;
 using Content.Server._NC.LivingCity.Economy;
 using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
+using Content.Server._NC.LivingCity.Neural;
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.Coordinates.Systems;
@@ -371,6 +372,13 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         }
 
         _metadata.SetEntityName(entity, snapshot.Identity.FullName);
+        // NC: Neural access follows the persistent authored identity, with archetype metadata kept as a legacy
+        // fallback for the standalone API test officer.
+        if (!string.IsNullOrWhiteSpace(snapshot.Identity.NarrativeActorProfileId) ||
+            archetype.NarrativeActorProfile != null)
+            EnsureComp<NCNeuralConversationTargetComponent>(entity);
+        else
+            RemComp<NCNeuralConversationTargetComponent>(entity);
         if (!_runtime.TryBind(snapshot.Identity.ActorId, entity))
         {
             QueueDel(entity);

@@ -49,14 +49,12 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
     [Dependency] private NCNeuralCognitionClientSystem _client = default!;
     [Dependency] private NCNeuralSuggestionSystem _suggestions = default!;
     [Dependency] private NCNeuralConversationSystem _neuralConversations = default!;
-    private readonly Dictionary<NCActorId, NCActiveWorldTime> _nextStrategicRequest = [];
     private readonly Dictionary<NCActorId, NCActiveWorldTime> _nextIncidentEscalation = [];
 
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<NCConversationTurnRecordedEvent>(OnConversationTurn);
-        SubscribeLocalEvent<NCCognitionDecisionAppliedEvent>(OnDecisionApplied);
         SubscribeLocalEvent<NCCityLocalIncidentObservedEvent>(OnIncidentObserved);
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(_ => ClearCooldowns());
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => ClearCooldowns());
@@ -68,24 +66,24 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         string? transientUtterance = null)
     {
         return await SubmitCoreAsync(actorId, kind, priority, allowedCapabilities, conversation,
-            transientUtterance, false);
+            transientUtterance);
     }
 
     private async Task<bool> SubmitCoreAsync(NCActorId actorId, NCNeuralRequestKind kind,
         NCNeuralPriority priority, IReadOnlyList<string> allowedCapabilities,
-        NCConversationSessionId? conversation, string? transientUtterance, bool eventEscalation)
+        NCConversationSessionId? conversation, string? transientUtterance)
     {
         if (!_client.IsProviderEnabled || !_clock.TryGetCurrentTime(out var epoch, out var now) ||
             !_prototypes.TryIndex(DefaultPolicy, out NCNeuralPolicyPrototype? policy) ||
             !_prototypes.TryIndex(DefaultPrompt, out NCNeuralPromptProfilePrototype? prompt) ||
             !prompt.AllowedKinds.Contains(kind)) return false;
         var actor = await _actors.GetAsync(actorId, true);
-        if (actor == null || !eventEscalation && kind != NCNeuralRequestKind.DialogueContinuation &&
-            actor.Snapshot.CognitionTier != NCCityActorCognitionTier.NeuralEligible)
+        if (actor == null)
             return false;
         if (!_prototypes.TryIndex(new ProtoId<NCCityActorArchetypePrototype>(actor.Snapshot.Identity.ArchetypeId),
                 out var archetype) || archetype == null ||
-            !_prototypes.TryIndex(archetype.NeuralAutonomyPolicy, out var autonomyPolicy) || autonomyPolicy == null ||
+            !TryResolveNarrativeProfile(actor, archetype, out var narrativeProfile) ||
+            !_prototypes.TryIndex(narrativeProfile.AutonomyPolicy, out var autonomyPolicy) || autonomyPolicy == null ||
             !autonomyPolicy.AllowedKinds.Contains(kind))
             return false;
         EntityUid speakerEntity = EntityUid.Invalid;
@@ -179,7 +177,9 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         var socialProfile = await socialProfileTask;
         var factionMembership = await factionMembershipTask;
         AddRoleFacts(actorId, factionMembership, facts);
-        var persona = BuildPersona(actor, socialProfile, factionMembership);
+        var persona = BuildPersona(actor, socialProfile, factionMembership, narrativeProfile);
+        if (persona == null)
+            return false;
         var autonomy = new NCNeuralAutonomyContext(
             autonomyPolicy.StableKey,
             autonomyPolicy.MinimumIntentConfidence,
@@ -214,11 +214,17 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             .ToArray();
         if (effectiveCapabilities.Length == 0)
             return false;
+        var directiveActions = effectiveCapabilities.Contains(AcceptDirectiveCapability)
+            ? _prototypes.EnumeratePrototypes<NCHumanDirectiveActionPrototype>()
+                .Select(value => value.ID)
+                .Order(StringComparer.Ordinal)
+                .ToArray()
+            : [];
         var request = new NCNeuralRequestEnvelope(Guid.NewGuid(), kind, priority, actorId, epoch,
             actor.AggregateVersion, now.Advance(policy.RequestLifetime), DefaultPrompt,
             facts.Take(policy.MaximumFacts).ToArray(),
             effectiveCapabilities, conversationSnapshot?.CurrentTopicKeys ?? [], "ru-RU", persona, autonomy,
-            perceived, perceivedEvents, knownLocations, dialogueInput);
+            perceived, perceivedEvents, knownLocations, dialogueInput, directiveActions);
         var trackedDialogue = kind == NCNeuralRequestKind.DialogueContinuation && conversationSnapshot != null;
         if (trackedDialogue && !_suggestions.TryTrackDialogue(
                 request.RequestId,
@@ -273,26 +279,6 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             .ToArray();
     }
 
-    private void OnDecisionApplied(NCCognitionDecisionAppliedEvent args)
-    {
-        if (args.CognitionTier != NCCityActorCognitionTier.NeuralEligible || !_client.IsProviderEnabled ||
-            !_clock.TryGetCurrentTime(out _, out var now) ||
-            !_prototypes.TryIndex(DefaultPolicy, out NCNeuralPolicyPrototype? policy) ||
-            _nextStrategicRequest.TryGetValue(args.ActorId, out var next) && next > now)
-            return;
-
-        var capabilities = args.Desires
-            .Where(value => value.TaskKind is NCCognitionTaskKind.KnownProcedure or
-                NCCognitionTaskKind.GroupOperation or NCCognitionTaskKind.StrategicChoice)
-            .Select(value => value.CapabilityId)
-            .Distinct()
-            .ToArray();
-        if (capabilities.Length == 0)
-            return;
-        _nextStrategicRequest[args.ActorId] = now.Advance(policy.StrategicRequestCooldown);
-        _ = SubmitAsync(args.ActorId, NCNeuralRequestKind.StrategicDecision, NCNeuralPriority.P3, capabilities);
-    }
-
     private void OnIncidentObserved(NCCityLocalIncidentObservedEvent args)
     {
         if (!_client.IsProviderEnabled ||
@@ -312,13 +298,13 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         if (actor == null ||
             !_prototypes.TryIndex(new ProtoId<NCCityActorArchetypePrototype>(actor.Snapshot.Identity.ArchetypeId),
                 out var archetype) || archetype == null ||
+            !TryResolveNarrativeProfile(actor, archetype, out var narrativeProfile) ||
+            !narrativeProfile.IncidentEscalationEnabled ||
             !_prototypes.TryIndex(archetype.CognitionCapabilityProfile, out NCCognitionCapabilityProfilePrototype? profile) ||
             profile == null)
             return;
 
-        // An event-triggered request is permitted for every human cognition tier. It remains advisory: the
-        // selected capability must already exist in the actor's normal profile or profession overlay and still
-        // passes the authoritative cognition/action boundary before it can affect the world.
+        // Only explicitly authored narrative Actors may escalate an incident to Neural Cognition.
         var capabilities = profile.Capabilities.ToList();
         _professions.AddCapabilityOverlays(actorId, capabilities);
         var allowed = capabilities.Select(value => value.Id).Distinct(StringComparer.Ordinal).ToArray();
@@ -326,13 +312,31 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             return;
         await SubmitCoreAsync(actorId, NCNeuralRequestKind.StrategicDecision,
             kind == NCCityLocalPerceivedEventKind.Killing ? NCNeuralPriority.P1 : NCNeuralPriority.P2,
-            allowed, null, null, true);
+            allowed, null, null);
     }
 
     private void ClearCooldowns()
     {
-        _nextStrategicRequest.Clear();
         _nextIncidentEscalation.Clear();
+    }
+
+    private bool TryResolveNarrativeProfile(
+        NCCityActorRecord actor,
+        NCCityActorArchetypePrototype archetype,
+        out NCNarrativeActorProfilePrototype narrativeProfile)
+    {
+        narrativeProfile = default!;
+        var profileId = !string.IsNullOrWhiteSpace(actor.Snapshot.Identity.NarrativeActorProfileId)
+            ? new ProtoId<NCNarrativeActorProfilePrototype>(actor.Snapshot.Identity.NarrativeActorProfileId)
+            : archetype.NarrativeActorProfile;
+        if (profileId is not { } selected ||
+            !_prototypes.TryIndex(selected, out NCNarrativeActorProfilePrototype? resolved) || resolved == null)
+        {
+            return false;
+        }
+
+        narrativeProfile = resolved;
+        return true;
     }
 
     private static string StableSubject(string value)
@@ -356,11 +360,10 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
     private NCNeuralPersonaContext? BuildPersona(
         NCCityActorRecord actor,
         NCSocialProfileRecord? socialProfile,
-        NCFactionMembershipRecord? factionMembership)
+        NCFactionMembershipRecord? factionMembership,
+        NCNarrativeActorProfilePrototype narrativeProfile)
     {
-        if (!_prototypes.TryIndex(new ProtoId<NCCityActorArchetypePrototype>(actor.Snapshot.Identity.ArchetypeId),
-                out var archetype) || archetype?.NeuralPersonaProfile is not { } personaId ||
-            !_prototypes.TryIndex(personaId, out var persona) || persona == null)
+        if (!_prototypes.TryIndex(narrativeProfile.PersonaProfile, out var persona) || persona == null)
             return null;
         if (!StableKey(persona.StableKey) || !StableKey(persona.RoleKey) ||
             !StableKey(persona.OrganizationKey))

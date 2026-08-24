@@ -10,10 +10,12 @@ using Content.Server._NC.LivingCity.Police.NCPD;
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Admin;
+using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Police;
 using Content.Shared._NC.LivingCity.Police.NCPD;
 using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.Persistence.Identity;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.LivingCity.Admin;
 
@@ -97,6 +99,14 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("identity", "full-name", snapshot.Identity.FullName);
         fields.Add("identity", "aliases", string.Join(", ", snapshot.Identity.Aliases));
         fields.Add("identity", "archetype", snapshot.Identity.ArchetypeId);
+        if (_prototypes.TryIndex(new ProtoId<NCCityActorArchetypePrototype>(snapshot.Identity.ArchetypeId),
+                out NCCityActorArchetypePrototype? archetype) && archetype != null)
+        {
+            var narrativeProfile = snapshot.Identity.NarrativeActorProfileId ?? archetype.NarrativeActorProfile?.Id;
+            fields.Add("identity", "population-class",
+                narrativeProfile == null ? "Resident" : "Actor");
+            fields.Add("identity", "narrative-profile", narrativeProfile ?? "none");
+        }
         fields.Add("identity", "aggregate-version", actor.AggregateVersion);
         fields.Add("identity", "data-version", snapshot.Identity.DataVersion);
         fields.Add("lifecycle", "status", snapshot.Lifecycle.Status);
@@ -106,12 +116,21 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("location", "current-zone", snapshot.Location.CurrentZone);
         fields.Add("location", "destination-zone", snapshot.Location.DestinationZone);
         fields.Add("location", "home-zone", snapshot.Location.HomeZone);
-        fields.Add("location", "residence-kind",
-            _zones.TryGetApartmentId(snapshot.Location.HomeZone, out _) ? "physical-apartment" : "abstract");
         fields.Add("location", "work-zone", snapshot.Location.WorkZone);
         fields.Add("location", "travel-phase", snapshot.Location.TravelPhase);
         fields.Add("location", "travel-mode", snapshot.Location.TravelMode);
         fields.Add("location", "expected-arrival", snapshot.Location.ExpectedArrivalAt?.Elapsed);
+        fields.Add("residence", "assigned", snapshot.Location.Residence is { ResidenceId.IsValid: true });
+        if (snapshot.Location.Residence is { ResidenceId.IsValid: true } residence)
+        {
+            fields.Add("residence", "residence-id", residence.ResidenceId);
+            fields.Add("residence", "profile", residence.ProfileId);
+            fields.Add("residence", "kind", residence.Kind);
+            fields.Add("residence", "quality", residence.Quality);
+            fields.Add("residence", "district", residence.DistrictZone);
+            fields.Add("residence", "local-zone", residence.LocalZone);
+            fields.Add("residence", "weekly-cost", residence.WeeklyCost);
+        }
         fields.Add("schedule", "routine", snapshot.Schedule.RoutineProfileId);
         fields.Add("schedule", "activity", snapshot.Schedule.CurrentActivity);
         fields.Add("schedule", "goal", snapshot.Schedule.CurrentGoal);

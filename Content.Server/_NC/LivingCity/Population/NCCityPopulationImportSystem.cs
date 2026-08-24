@@ -19,6 +19,7 @@ using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.CityServices;
 using Content.Shared._NC.LivingCity.Employment;
+using Content.Shared._NC.LivingCity.Neural;
 using Content.Shared._NC.LivingCity.Population;
 using Content.Shared._NC.Persistence.Identity;
 using Robust.Shared.Prototypes;
@@ -151,6 +152,7 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
             errors.Add($"Actor count {total} is outside the policy limit 1..{policy.MaximumActorsPerProfile}.");
 
         var authoredStableIds = new HashSet<string>(StringComparer.Ordinal);
+        var replacedSlots = new HashSet<string>(StringComparer.Ordinal);
         var cohortIds = new HashSet<string>(StringComparer.Ordinal);
         foreach (var cohort in profile.Cohorts)
         {
@@ -181,7 +183,7 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
             }
 
             ValidatePlacement(cohort.Archetype, cohort.HomeZone, cohort.WorkZone, cohort.Job, cohort.Livelihood,
-                cohort.Faction, cohort.FactionRole,
+                cohort.Faction, cohort.FactionRole, null,
                 $"Cohort {cohort.Id}", errors);
         }
 
@@ -193,9 +195,25 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
             }
             else
             {
-                var stableId = BuildAuthoredStableLocalId(profile.ID, actor.StableLocalId);
+                var replacementRequested = !string.IsNullOrWhiteSpace(actor.ReplacesCohortId) ||
+                                           actor.ReplacesCohortIndex >= 0;
+                var replacementCohort = replacementRequested
+                    ? profile.Cohorts.FirstOrDefault(value => value.Id == actor.ReplacesCohortId)
+                    : null;
+                var validReplacement = replacementCohort != null && actor.ReplacesCohortIndex >= 0 &&
+                                       actor.ReplacesCohortIndex < replacementCohort.Count;
+                if (replacementRequested && !validReplacement)
+                {
+                    errors.Add($"Authored actor {actor.StableLocalId} replaces an invalid cohort slot.");
+                }
+
+                var stableId = validReplacement
+                    ? BuildCohortStableLocalId(profile.ID, replacementCohort!.Id, actor.ReplacesCohortIndex)
+                    : BuildAuthoredStableLocalId(profile.ID, actor.StableLocalId);
                 if (stableId.Length > MaximumStableLocalIdLength || !authoredStableIds.Add(stableId))
                     errors.Add("Authored actor stableLocalId values must be unique and fit the persistent identity bound.");
+                if (validReplacement && !replacedSlots.Add(stableId))
+                    errors.Add($"More than one authored actor replaces cohort slot {stableId}.");
             }
 
             if (string.IsNullOrWhiteSpace(actor.FullName) || actor.FullName.Length > MaximumTextLength ||
@@ -206,7 +224,7 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
             }
 
             ValidatePlacement(actor.Archetype, actor.HomeZone, actor.WorkZone, actor.Job, actor.Livelihood,
-                actor.Faction, actor.FactionRole,
+                actor.Faction, actor.FactionRole, actor.NarrativeActorProfile,
                 $"Authored actor {actor.StableLocalId}", errors);
         }
 
@@ -354,7 +372,8 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
                 candidate.HomeZone,
                 candidate.WorkZone,
                 CreateDeterministicCorrelationId(scopeId, candidate.StableLocalId),
-                AuditSource: auditSource));
+                AuditSource: auditSource,
+                NarrativeActorProfile: candidate.NarrativeActorProfile));
             if (result.Status != NCCityActorMutationStatus.StorageFailure || attempt == policy.StorageRetryCount)
                 break;
 
@@ -370,6 +389,14 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
 
         if (result == null)
             return;
+
+        NCCityActorMutationResult? identityUpdate = null;
+        if (candidate.Authored &&
+            result.Status is NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate)
+        {
+            identityUpdate = await EnsureAuthoredIdentity(candidate, result.ActorId, scopeId, auditSource,
+                cancellation);
+        }
 
         NCWorkforceAssignmentResult? assignment = null;
         if (result.Status is NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate &&
@@ -440,7 +467,9 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
                 NCLivelihoodMutationStatus.Duplicate;
             var affiliationOk = affiliation == null || affiliation.Status is NCFactionMembershipMutationStatus.Applied
                 or NCFactionMembershipMutationStatus.Duplicate;
-            if (assignmentOk && livelihoodOk && affiliationOk)
+            var identityOk = identityUpdate == null || identityUpdate.Status is NCCityActorMutationStatus.Applied or
+                NCCityActorMutationStatus.Duplicate;
+            if (assignmentOk && livelihoodOk && affiliationOk && identityOk)
             {
                 return;
             }
@@ -457,6 +486,7 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
                         assignmentOk ? null : assignment?.Error ?? assignment?.Status.ToString(),
                         livelihoodOk ? null : livelihood?.Error ?? livelihood?.Status.ToString(),
                         affiliationOk ? null : affiliation?.Error ?? affiliation?.Status.ToString(),
+                        identityOk ? null : identityUpdate?.Error ?? identityUpdate?.Status.ToString(),
                     }.Where(static value => !string.IsNullOrWhiteSpace(value)))));
             }
             return;
@@ -473,6 +503,10 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
 
     private IEnumerable<PopulationCandidate> EnumerateCandidates(NCCityPopulationProfilePrototype profile)
     {
+        var replacements = profile.Actors
+            .Where(static actor => !string.IsNullOrWhiteSpace(actor.ReplacesCohortId) &&
+                                   actor.ReplacesCohortIndex >= 0)
+            .ToDictionary(actor => (actor.ReplacesCohortId, actor.ReplacesCohortIndex));
         foreach (var cohort in profile.Cohorts.OrderBy(static cohort => cohort.Id, StringComparer.Ordinal))
         {
             var pool = _prototypes.Index(cohort.IdentityPool);
@@ -480,6 +514,13 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
             var permutation = CreateNamePermutation(profile.ScopeId, profile.ID, cohort.Id, capacity);
             for (var index = 0; index < cohort.Count; index++)
             {
+                if (replacements.TryGetValue((cohort.Id, index), out var authored))
+                {
+                    yield return BuildAuthoredCandidate(authored,
+                        BuildCohortStableLocalId(profile.ID, cohort.Id, index));
+                    continue;
+                }
+
                 var flatIndex = (permutation.Start + (long) index * permutation.Step) % capacity;
                 var givenIndex = (int) (flatIndex % pool.GivenNames.Count);
                 var familyIndex = (int) (flatIndex / pool.GivenNames.Count);
@@ -493,24 +534,38 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
                     cohort.Job,
                     cohort.Livelihood,
                     cohort.Faction,
-                    cohort.FactionRole);
+                    cohort.FactionRole,
+                    null,
+                    false);
             }
         }
 
-        foreach (var actor in profile.Actors.OrderBy(static actor => actor.StableLocalId, StringComparer.Ordinal))
+        foreach (var actor in profile.Actors
+                     .Where(static actor => string.IsNullOrWhiteSpace(actor.ReplacesCohortId))
+                     .OrderBy(static actor => actor.StableLocalId, StringComparer.Ordinal))
         {
-            yield return new PopulationCandidate(
-                BuildAuthoredStableLocalId(profile.ID, actor.StableLocalId),
-                actor.FullName.Trim(),
-                actor.Aliases.Select(static alias => alias.Trim()).ToArray(),
-                actor.Archetype,
-                actor.HomeZone,
-                actor.WorkZone,
-                actor.Job,
-                actor.Livelihood,
-                actor.Faction,
-                actor.FactionRole);
+            yield return BuildAuthoredCandidate(actor,
+                BuildAuthoredStableLocalId(profile.ID, actor.StableLocalId));
         }
+    }
+
+    private static PopulationCandidate BuildAuthoredCandidate(
+        NCCityPopulationActorEntry actor,
+        string stableLocalId)
+    {
+        return new PopulationCandidate(
+            stableLocalId,
+            actor.FullName.Trim(),
+            actor.Aliases.Select(static alias => alias.Trim()).ToArray(),
+            actor.Archetype,
+            actor.HomeZone,
+            actor.WorkZone,
+            actor.Job,
+            actor.Livelihood,
+            actor.Faction,
+            actor.FactionRole,
+            actor.NarrativeActorProfile,
+            true);
     }
 
     private void ValidatePlacement(
@@ -521,6 +576,7 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
         ProtoId<NCLivelihoodProfilePrototype>? livelihoodId,
         ProtoId<NCFactionProfilePrototype>? factionId,
         string factionRole,
+        ProtoId<NCNarrativeActorProfilePrototype>? narrativeActorProfile,
         string label,
         List<string> errors)
     {
@@ -536,6 +592,15 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
             !_prototypes.HasIndex(archetype.RoutineProfile))
         {
             errors.Add($"{label} references an incomplete actor archetype {archetypeId}.");
+        }
+
+        var narrativeId = narrativeActorProfile ?? archetype.NarrativeActorProfile;
+        if (narrativeId is { } selectedNarrativeId &&
+            (!_prototypes.TryIndex(selectedNarrativeId, out NCNarrativeActorProfilePrototype? narrative) ||
+             narrative == null || !_prototypes.HasIndex(narrative.PersonaProfile) ||
+             !_prototypes.HasIndex(narrative.AutonomyPolicy)))
+        {
+            errors.Add($"{label} references an incomplete narrative actor profile {selectedNarrativeId}.");
         }
 
         if (!_zones.TryGetZone(homeZone, out var home) || !archetype.AllowedHomeContexts.Contains(home.ContextSlot))
@@ -588,10 +653,55 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
 
     private static int CountActors(NCCityPopulationProfilePrototype profile)
     {
-        long total = profile.Actors.Count;
+        long total = profile.Actors.Count(static actor => string.IsNullOrWhiteSpace(actor.ReplacesCohortId));
         foreach (var cohort in profile.Cohorts)
             total += Math.Max(0, cohort.Count);
         return total > int.MaxValue ? int.MaxValue : (int) total;
+    }
+
+    private static bool IdentityMatches(NCCityActorIdentity identity, PopulationCandidate candidate)
+    {
+        return identity.FullName == candidate.FullName &&
+               identity.Aliases.SequenceEqual(candidate.Aliases, StringComparer.Ordinal) &&
+               identity.NarrativeActorProfileId == candidate.NarrativeActorProfile?.Id;
+    }
+
+    private async Task<NCCityActorMutationResult?> EnsureAuthoredIdentity(
+        PopulationCandidate candidate,
+        NCActorId actorId,
+        Guid scopeId,
+        string auditSource,
+        CancellationToken cancellation)
+    {
+        NCCityActorMutationResult? last = null;
+        for (var attempt = 0; attempt < 4 && !cancellation.IsCancellationRequested; attempt++)
+        {
+            // The original idempotent creation receipt can contain an old snapshot, so identity migration always
+            // reads the latest aggregate version before applying an optimistic write.
+            var current = await _actors.GetAsync(actorId, true);
+            if (current == null)
+            {
+                return new NCCityActorMutationResult(NCCityActorMutationStatus.NotFound, actorId, 0, null,
+                    "The authored population actor disappeared during identity migration.");
+            }
+            if (IdentityMatches(current.Snapshot.Identity, candidate))
+                return null;
+
+            last = await _actors.SetAuthoredIdentityAsync(new NCCityActorIdentityMutationRequest(
+                CreateDeterministicIdentityCommandId(scopeId, candidate.StableLocalId, candidate.FullName,
+                    candidate.NarrativeActorProfile?.Id, current.AggregateVersion),
+                actorId,
+                current.AggregateVersion,
+                candidate.FullName,
+                candidate.Aliases,
+                candidate.NarrativeActorProfile,
+                CreateDeterministicCorrelationId(scopeId, candidate.StableLocalId),
+                AuditSource: auditSource));
+            if (last.Status != NCCityActorMutationStatus.VersionConflict)
+                return last;
+        }
+
+        return last;
     }
 
     private static (int Start, int Step) CreateNamePermutation(
@@ -620,6 +730,17 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
     private static Guid CreateDeterministicCommandId(Guid scopeId, string stableLocalId)
     {
         return GuidFromHash(Hash(scopeId, $"command/create/{stableLocalId}"));
+    }
+
+    private static Guid CreateDeterministicIdentityCommandId(
+        Guid scopeId,
+        string stableLocalId,
+        string fullName,
+        string? narrativeProfileId,
+        long expectedVersion)
+    {
+        return GuidFromHash(Hash(scopeId,
+            $"command/author-identity/{stableLocalId}/{fullName.Trim()}/{narrativeProfileId ?? "resident"}/{expectedVersion}"));
     }
 
     private static Guid CreateDeterministicCorrelationId(Guid scopeId, string stableLocalId)
@@ -685,5 +806,7 @@ public sealed partial class NCCityPopulationImportSystem : EntitySystem
         ProtoId<JobPrototype>? Job,
         ProtoId<NCLivelihoodProfilePrototype>? Livelihood,
         ProtoId<NCFactionProfilePrototype>? Faction,
-        string FactionRole);
+        string FactionRole,
+        ProtoId<NCNarrativeActorProfilePrototype>? NarrativeActorProfile,
+        bool Authored);
 }

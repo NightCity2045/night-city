@@ -37,13 +37,14 @@ public sealed partial class NCHumanSocialActionSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<NCCognitionExecuteStepEvent>(OnExecuteStep);
+        SubscribeLocalEvent<NCHumanActionExecutionEvent>(OnExecuteStep);
+        SubscribeLocalEvent<NCHumanActionInterruptedEvent>(OnInterrupted);
         SubscribeLocalEvent<NCHumanSocialActionComponent, ComponentShutdown>(OnActorShutdown);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => StopAll());
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => StopAll());
     }
 
-    private void OnExecuteStep(NCCognitionExecuteStepEvent args)
+    private void OnExecuteStep(NCHumanActionExecutionEvent args)
     {
         if (args.Step.ActionId != ApproachAction)
             return;
@@ -99,6 +100,12 @@ public sealed partial class NCHumanSocialActionSystem : EntitySystem
         _steeringActors.Add(actor);
         // Entity-relative steering follows a moving speaker while vanilla navigation owns path and collision checks.
         _steering.Register(actor, new EntityCoordinates(target, Vector2.Zero));
+    }
+
+    private void OnInterrupted(NCHumanActionInterruptedEvent args)
+    {
+        if (args.ActionId == ApproachAction && args.EntityUid is { } entity)
+            Stop(entity);
     }
 
     private void OnActorShutdown(Entity<NCHumanSocialActionComponent> actor, ref ComponentShutdown args)

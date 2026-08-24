@@ -81,7 +81,7 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
                 population.TravelingActors,
                 population.Presence(NCCityActorPresenceMode.Public),
                 population.Presence(NCCityActorPresenceMode.AbstractHome),
-                population.Presence(NCCityActorPresenceMode.PhysicalHome),
+                population.ResidenceAssignedActors,
                 Math.Clamp((float) population.WeightedActivityUnits / saturation, 0f, 1f),
                 Signal(population.ScopeZone, NCCityStateSignalKind.Scarcity),
                 Signal(population.ScopeZone, NCCityStateSignalKind.Threat),
@@ -235,7 +235,8 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
             args.Availability,
             args.Frozen,
             args.TravelPhase,
-            args.PresenceMode),
+            args.PresenceMode,
+            args.HasAbstractResidence),
             InitialLoadComplete);
     }
 
@@ -318,7 +319,8 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
                 actor.Schedule.Availability,
                 actor.Lifecycle.Frozen,
                 actor.Location.TravelPhase,
-                actor.Schedule.PresenceMode),
+                actor.Schedule.PresenceMode,
+                NCCityActorRegistrySystem.HasCanonicalAbstractResidence(actor)),
                 false);
         }
 
@@ -650,7 +652,8 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
         NCCityActorAvailability Availability,
         bool Frozen,
         NCCityActorTravelPhase TravelPhase,
-        NCCityActorPresenceMode PresenceMode);
+        NCCityActorPresenceMode PresenceMode,
+        bool HasAbstractResidence);
 
     private readonly record struct DirtyScope(NCZoneId ScopeZone, long Sequence);
     private readonly record struct DirtyState(long Sequence, NCActiveWorldTime DueAt);
@@ -678,6 +681,7 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
         public int DeadActors { get; private set; }
         public int FrozenActors { get; private set; }
         public int TravelingActors { get; private set; }
+        public int ResidenceAssignedActors { get; private set; }
         public double WeightedActivityUnits { get; private set; }
 
         public void Apply(ActorContribution actor, int delta, NCCityZoneStatePolicyPrototype policy)
@@ -694,6 +698,8 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
             {
                 TravelingActors += delta;
             }
+            if (actor.HasAbstractResidence)
+                ResidenceAssignedActors += delta;
 
             Adjust(_statuses, actor.Status, delta);
             Adjust(_cognition, actor.CognitionTier, delta);

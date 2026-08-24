@@ -3,6 +3,8 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 import json
+import hmac
+import logging
 import os
 import time
 from typing import Literal
@@ -10,13 +12,17 @@ from typing import Literal
 from fastapi import FastAPI, Header, HTTPException
 from openai import AsyncOpenAI
 from prometheus_client import Counter, Histogram, make_asgi_app
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 app = FastAPI(title="Night City Neural Cognition Service", version="1")
 app.mount("/metrics", make_asgi_app())
 requests_total = Counter("nc_neural_requests_total", "Neural requests", ["kind", "result"])
 latency = Histogram("nc_neural_latency_seconds", "Provider latency", ["kind"])
 default_model = os.environ.get("NC_NEURAL_MODEL", "gpt-5.6-luna")
+service_token = os.environ.get("NC_NEURAL_SERVICE_TOKEN", "").strip()
+provider_api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+provider_client = AsyncOpenAI(api_key=provider_api_key) if provider_api_key else None
+logger = logging.getLogger("uvicorn.error")
 
 
 class Fact(BaseModel):
@@ -114,7 +120,9 @@ class IntentProposal(BaseModel):
     expected_outcome_key: str = Field(alias="expectedOutcomeKey", min_length=1, max_length=128,
                                       pattern=r"^[A-Za-z0-9_.:-]+$")
     information_gap_keys: list[str] = Field(alias="informationGapKeys", max_length=16)
-    arguments: list[IntentArgument] = Field(default_factory=list, max_length=16)
+    # Strict Responses API schemas require every declared property to be required. The model returns [] when the
+    # selected intent has no semantic arguments.
+    arguments: list[IntentArgument] = Field(max_length=16)
 
 
 class Request(BaseModel):
@@ -129,6 +137,8 @@ class Request(BaseModel):
     prompt_profile: str = Field(alias="promptProfile")
     facts: list[Fact] = Field(max_length=256)
     allowed_capability_ids: list[str] = Field(alias="allowedCapabilityIds", min_length=1, max_length=128)
+    allowed_directive_action_ids: list[str] = Field(
+        default_factory=list, alias="allowedDirectiveActionIds", max_length=64)
     topic_keys: list[str] = Field(alias="topicKeys", max_length=64)
     locale: str = Field(max_length=16)
     persona: PersonaContext | None = None
@@ -141,7 +151,7 @@ class Request(BaseModel):
         default_factory=list, alias="knownLocations", max_length=512)
     dialogue_input: DialogueInput | None = Field(default=None, alias="dialogueInput")
 
-    @field_validator("allowed_capability_ids", "topic_keys")
+    @field_validator("allowed_capability_ids", "allowed_directive_action_ids", "topic_keys")
     @classmethod
     def stable_keys(cls, values: list[str]) -> list[str]:
         if any(not value or len(value) > 128 or not all(c.isalnum() or c in "-_.:" for c in value)
@@ -170,20 +180,23 @@ async def live():
 
 @app.get("/health/ready")
 async def ready():
-    return {"status": "ready", "credentialMode": "request-bearer"}
+    if not service_token or provider_client is None:
+        raise HTTPException(503, "service authentication or provider credential is missing")
+    return {"status": "ready", "credentialMode": "service-bearer"}
 
 
 @app.post("/v1/cognition")
 async def cognition(request: Request, authorization: str | None = Header(default=None)):
-    scheme, separator, api_key = (authorization or "").partition(" ")
-    if separator != " " or scheme.lower() != "bearer" or not api_key.strip():
-        raise HTTPException(401, "bearer credential is required")
-    api_key = api_key.strip()
+    scheme, separator, supplied_token = (authorization or "").partition(" ")
+    if (separator != " " or scheme.lower() != "bearer" or not service_token or
+            not hmac.compare_digest(supplied_token.strip(), service_token)):
+        raise HTTPException(401, "valid service bearer is required")
+    if provider_client is None:
+        raise HTTPException(503, "provider credential is unavailable")
     started = time.monotonic()
     try:
-        # The server-owned credential exists in this process only for this request and is never logged or persisted.
-        async with AsyncOpenAI(api_key=api_key) as client:
-            response = await client.responses.create(
+        # The game authenticates with an internal token; only this isolated process owns the provider credential.
+        response = await provider_client.responses.create(
                 model=default_model,
                 instructions=("You are the bounded deliberative layer of one persistent Night City 2045 resident. "
                               "Stay consistent with persona, current cognition facts, personally perceived subjects, "
@@ -203,7 +216,7 @@ async def cognition(request: Request, authorization: str | None = Header(default
                               "be dialogueInput.speakerHandle. Never promise or claim an action without its matching intent. "
                               "Use dialogueInput.history as the actual recent conversation and never pretend prior turns did not "
                               "happen. A spoken work or group order uses NCCognitionAcceptDirective and arguments: action is a "
-                              "short semantic action key, location is exactly a knownLocations handle when a destination was named, "
+                              "semantic action ID selected exactly from allowedDirectiveActionIds, location is exactly a knownLocations handle, "
                               "companion is exactly a perceivedSubjects handle when another named visible person must join, "
                               "and order is a concise faithful summary. Do not invent location handles. Use topicKeys and persona "
                               "as role context. For other kinds, return a concrete intent whose "
@@ -211,9 +224,9 @@ async def cognition(request: Request, authorization: str | None = Header(default
                               "selected_capability_id. Use Russian for rendered_text when locale is ru-RU. Do not claim "
                               "that an action, payment, access change, or world mutation already occurred."),
                 input=json.dumps(request.model_dump(by_alias=True), separators=(",", ":")),
-                text={"format": {"type": "json_schema", "name": "cognition_answer", "strict": True,
-                        "schema": ProviderAnswer.model_json_schema()}},
-            )
+            text={"format": {"type": "json_schema", "name": "cognition_answer", "strict": True,
+                    "schema": ProviderAnswer.model_json_schema()}},
+        )
         answer = ProviderAnswer.model_validate_json(response.output_text)
         if answer.selected_capability_id not in request.allowed_capability_ids:
             raise ValueError("provider selected a capability outside the server allowlist")
@@ -226,6 +239,10 @@ async def cognition(request: Request, authorization: str | None = Header(default
             if any(value not in request.allowed_capability_ids
                    for value in answer.intent.requested_capability_ids):
                 raise ValueError("intent requested a capability outside the server allowlist")
+            if answer.selected_capability_id == "NCCognitionAcceptDirective":
+                arguments = {value.key: value.value for value in answer.intent.arguments}
+                if arguments.get("action") not in request.allowed_directive_action_ids:
+                    raise ValueError("directive action is outside the server allowlist")
             if answer.confidence < request.autonomy.minimum_intent_confidence:
                 raise ValueError("intent confidence is below the server autonomy threshold")
             if answer.intent.priority > request.autonomy.maximum_intent_priority:
@@ -252,6 +269,24 @@ async def cognition(request: Request, authorization: str | None = Header(default
                 "intent": answer.intent.model_dump(by_alias=True) if answer.intent is not None else None}
     except Exception as error:
         requests_total.labels(request.kind, "failed").inc()
+        # Never log the credential or request context. Provider metadata and validation locations are sufficient to
+        # diagnose schema, quota and model-access failures without exposing a resident's private cognition payload.
+        if isinstance(error, ValidationError):
+            detail = "; ".join(
+                f"{item['type']}@{'.'.join(map(str, item['loc']))}"
+                for item in error.errors(include_input=False, include_url=False)
+            )
+        elif type(error) is ValueError:
+            detail = str(error)
+        else:
+            detail = str(getattr(error, "message", type(error).__name__))
+        logger.error(
+            "Neural provider request rejected: type=%s status=%s providerRequestId=%s detail=%s",
+            type(error).__name__,
+            getattr(error, "status_code", "n/a"),
+            getattr(error, "request_id", "n/a"),
+            detail,
+        )
         raise HTTPException(502, f"provider response rejected: {type(error).__name__}") from error
     finally:
         latency.labels(request.kind).observe(time.monotonic() - started)

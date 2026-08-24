@@ -40,6 +40,7 @@ using Content.Server._NC.Persistence.Outbox;
 using Content.Server.GameTicking;
 using Content.Shared._NC.LivingCity.Admin;
 using Content.Shared._NC.LivingCity.Affordances;
+using Content.Shared._NC.LivingCity.Cognition;
 using Content.Shared._NC.City.Zones;
 using Content.Shared.Administration;
 using Content.Shared.Administration.Managers;
@@ -91,6 +92,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCCityPhysicalExecutionSystem _physicalExecution = default!;
     [Dependency] private NCCognitionRegistrySystem _cognitionRegistry = default!;
     [Dependency] private NCCognitionSystem _cognition = default!;
+    [Dependency] private NCHumanActionRouterSystem _humanActions = default!;
     [Dependency] private NCCognitionCapabilityProviderSystem _cognitionProviders = default!;
     [Dependency] private NCCityPopulationImportSystem _population = default!;
     [Dependency] private NCCityResidenceAllocationSystem _residences = default!;
@@ -290,6 +292,17 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("physical-actions", "unavailable", actions.Unavailable);
         fields.Add("physical-actions", "unhandled", actions.Unhandled);
 
+        var routedActions = _humanActions.GetCounters();
+        fields.Add("human-actions", "active", routedActions.Active);
+        fields.Add("human-actions", "running", routedActions.Running);
+        fields.Add("human-actions", "started", routedActions.Started);
+        fields.Add("human-actions", "completed", routedActions.Completed);
+        fields.Add("human-actions", "failed", routedActions.Failed);
+        fields.Add("human-actions", "interrupted", routedActions.Interrupted);
+        fields.Add("human-actions", "timed-out", routedActions.TimedOut);
+        fields.Add("human-actions", "unhandled", routedActions.Unhandled);
+        fields.Add("human-actions", "configuration-error", routedActions.ConfigurationError ?? "none");
+
         var cognition = _cognition.GetCounters();
         fields.Add("cognition", "active", cognition.Active);
         fields.Add("cognition", "tracked", cognition.TrackedActors);
@@ -307,6 +320,8 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("cognition", "missing-domain-cache-actors", _cognitionProviders.MissingCapabilityCacheActors);
         fields.Add("cognition", "suppressed-persistence-reads", _cognitionProviders.SuppressedCapabilityReads);
         fields.Add("cognition", "configuration-error", cognition.ConfigurationError ?? "none");
+        fields.Add("cognition", "action-catalog",
+            _prototypes.EnumeratePrototypes<NCHumanActionPrototype>().Count());
 
         fields.Add("incidents", "cached", _incidents.CachedCount);
         fields.Add("services", "cached", _cityServices.CachedServiceCount);
@@ -417,11 +432,10 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         if (_residences.LastReport is { } residences)
         {
             fields.Add("residences", "last-status", residences.Status);
-            fields.Add("residences", "physical", residences.ExistingPhysicalResidents +
-                residences.AssignedPhysicalResidents);
-            fields.Add("residences", "abstract", residences.AbstractResidents);
-            fields.Add("residences", "apartments", residences.ApartmentZones);
-            fields.Add("residences", "unresolved", residences.UnresolvedResidents);
+            fields.Add("residences", "profiles", residences.ResidenceProfiles);
+            fields.Add("residences", "existing", residences.ExistingResidences);
+            fields.Add("residences", "assigned", residences.AssignedResidences);
+            fields.Add("residences", "unassigned", residences.UnassignedResidences);
         }
         fields.Add("zone-states", "initial-load-complete", _zoneStates.InitialLoadComplete);
         fields.Add("zone-states", "indexed-actors", _zoneStates.IndexedActorCount);

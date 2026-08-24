@@ -212,55 +212,19 @@ public sealed partial class NCCognitionSystem
 
     private (bool Completed, string? Failure) ExecuteStep(RuntimeState state, NCCognitionPlanStep step)
     {
-        switch (step.ActionId)
-        {
-            case "remain-available":
-            case "yield-to-medical-authority":
-            case "yield-to-combat-authority":
-            case "yield-to-conversation-authority":
-            case "select-medical-service":
-            case "prepare-group-role":
-            case "acquire-group-resources":
-            case "evaluate-safe-option":
-            case "execute-group-directive":
-                return (true, null);
-            case "follow-schedule":
-                return (state.TravelPhase is not (NCCityActorTravelPhase.Planned or
-                    NCCityActorTravelPhase.InTransit), null);
-            case "follow-schedule-travel":
-            case "follow-group-route":
-                return (state.TravelPhase is NCCityActorTravelPhase.Stationary or
-                    NCCityActorTravelPhase.Arrived, null);
-            case "perform-authoritative-work":
-                return ExecuteProfessionalWork(state);
-        }
-
         EntityUid? entity = _runtime.TryGetEntity(state.ActorId, out var entityUid) && Exists(entityUid)
             ? entityUid
             : null;
-        var execution = new NCCognitionExecuteStepEvent(state.ActorId, entity, state.Intention!, step);
+        var execution = new NCCognitionExecuteStepEvent(
+            state.ActorId,
+            entity,
+            state.Plan!.PlanId,
+            state.Intention!,
+            step);
         RaiseLocalEvent(execution);
         return execution.Handled
             ? (execution.Completed, execution.Failure)
             : (false, $"unhandled-action:{step.ActionId}");
-    }
-
-    private (bool Completed, string? Failure) ExecuteProfessionalWork(RuntimeState state)
-    {
-        // Abstract actors remain at work until their authoritative schedule advances. Physical actors must perform a
-        // real role interaction; merely waiting at the workplace is not counted as completed professional work.
-        if (!_runtime.TryGetEntity(state.ActorId, out var worker) || !Exists(worker))
-            return (!state.CurrentActivity.Equals("work", StringComparison.OrdinalIgnoreCase), null);
-        if (!_workforce.TryGetAssignment(state.ActorId, out var organization, out var job))
-            return (false, "professional-employment-missing");
-        if (!_professions.TryGetProfile(state.ActorId, out var profile))
-            return (false, "professional-profile-missing");
-
-        var request = new NCProfessionalWorkRequestedEvent(state.ActorId, worker, organization, job, profile);
-        RaiseLocalEvent(request);
-        return request.Handled
-            ? (request.Completed, request.Failure)
-            : (false, $"professional-adapter-missing:{profile.ID}");
     }
 
     private void ReplaceWithRuntimeFallback(RuntimeState state, NCActiveWorldTime now, string failure)
@@ -459,6 +423,17 @@ public sealed partial class NCCognitionSystem
         }
         foreach (var capability in _prototypes.EnumeratePrototypes<NCCognitionCapabilityPrototype>())
         {
+            var authoredSteps = capability.ProcedureSteps
+                .Concat(capability.StrategicOptions.SelectMany(value => value.ProcedureSteps))
+                .ToArray();
+            if (authoredSteps.Any(value => string.IsNullOrWhiteSpace(value.Action) ||
+                    !_prototypes.TryIndex(new ProtoId<NCHumanActionPrototype>(value.Action),
+                        out NCHumanActionPrototype? action) || action == null ||
+                    action.RequiresPhysicalEntity && !capability.RequiresMaterialization))
+            {
+                error = $"Capability {capability.ID} references an unknown or incompatible action.";
+                return false;
+            }
             var procedure = capability.ProcedureSteps.Select(value => new NCCognitionPlanStep(
                 value.Id, value.Action, NCCognitionSubjectRef.None, value.DependsOn, value.Optional)).ToArray();
             var optionsValid = capability.StrategicOptions.Select(option =>

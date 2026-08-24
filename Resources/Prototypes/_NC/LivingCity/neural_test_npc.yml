@@ -11,19 +11,28 @@
   components:
   - type: Loadout
     prototypes: []
+  - type: NCNeuralConversationTarget
+    interactionRange: 2.5
+    listenToLocalSpeech: true
+    listeningRange: 5
+    maximumUtteranceLength: 512
+    topicKeys: [night-city-2045, local-life, ncpd]
+    maximumDisclosure: Public
+    language: Russian
+    locale: RuRu
+    fallbackMessage: nc-neural-conversation-fallback
 
 - type: ncCityActorArchetype
   id: NCLivingCityNeuralNcpdTestOfficerArchetype
   entityPrototype: NCLivingCityNeuralNcpdTestOfficer
   spawnCandidateProfile: NCPedestrianSpawnCandidates
   travelMode: Pedestrian
-  cognitionTier: NeuralEligible
+  cognitionTier: Planner
   allowedHomeContexts: [District, Sector, Street, Building, Apartment]
   allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
   routineProfile: NCDefaultCivilianRoutine
   cognitionCapabilityProfile: NCNcpdFieldOfficerCapabilities
-  neuralPersonaProfile: NCNeuralAlexRiveraPersona
-  neuralAutonomyPolicy: NCNcpdNeuralAutonomy
+  narrativeActorProfile: NCNarrativeAlexRivera
   personalityProfile: NCNcpdFieldOfficerPersonality
   valuesProfile: NCNcpdFieldOfficerValues
   socialPreferenceProfile: NCNcpdFieldOfficerPreferences

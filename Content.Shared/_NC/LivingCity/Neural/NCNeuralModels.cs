@@ -101,7 +101,8 @@ public sealed record NCNeuralRequestEnvelope(Guid RequestId, NCNeuralRequestKind
     IReadOnlyList<NCNeuralPerceivedSubject>? PerceivedSubjects = null,
     IReadOnlyList<NCNeuralPerceivedEvent>? PerceivedEvents = null,
     IReadOnlyList<NCNeuralKnownLocation>? KnownLocations = null,
-    NCNeuralDialogueInput? DialogueInput = null);
+    NCNeuralDialogueInput? DialogueInput = null,
+    IReadOnlyList<string>? AllowedDirectiveActionIds = null);
 public sealed record NCNeuralResponseEnvelope(Guid RequestId, int SchemaVersion, long ContextVersion,
     string SelectedCapabilityId, string SpeechActKey, string RenderedText, string SummaryKey, int Confidence,
     int InputTokens, int OutputTokens, string ProviderRequestId, NCNeuralIntentProposal? Intent = null);
@@ -160,6 +161,19 @@ public sealed partial class NCNeuralAutonomyPolicyPrototype : IPrototype
     [DataField] public int MinimumIntentConfidence { get; private set; } = 500;
     [DataField] public int MaximumIntentPriority { get; private set; } = 750;
     [DataField] public bool TargetedIntentsAllowed { get; private set; } = true;
+}
+
+/// <summary>
+/// Explicitly marks a rare authored NPC as a narrative Actor. A cognition tier alone never grants Neural access.
+/// </summary>
+[Prototype("ncNarrativeActorProfile")]
+public sealed partial class NCNarrativeActorProfilePrototype : IPrototype
+{
+    [IdDataField] public string ID { get; private set; } = default!;
+    [DataField(required: true)] public string StableKey { get; private set; } = string.Empty;
+    [DataField(required: true)] public ProtoId<NCNeuralPersonaProfilePrototype> PersonaProfile { get; private set; }
+    [DataField(required: true)] public ProtoId<NCNeuralAutonomyPolicyPrototype> AutonomyPolicy { get; private set; }
+    [DataField] public bool IncidentEscalationEnabled { get; private set; } = true;
 }
 
 [Prototype("ncNeuralPromptProfile")]

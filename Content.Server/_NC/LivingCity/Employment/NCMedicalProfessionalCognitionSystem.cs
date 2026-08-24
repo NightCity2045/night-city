@@ -37,7 +37,8 @@ public sealed partial class NCMedicalProfessionalCognitionSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<NCCognitionExecuteStepEvent>(OnExecuteStep);
+        SubscribeLocalEvent<NCHumanActionExecutionEvent>(OnExecuteStep);
+        SubscribeLocalEvent<NCHumanActionInterruptedEvent>(OnInterrupted);
         SubscribeLocalEvent<NCProfessionalWorkRequestedEvent>(OnProfessionalWork);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => _pending.Clear());
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => _pending.Clear());
@@ -59,7 +60,7 @@ public sealed partial class NCMedicalProfessionalCognitionSystem : EntitySystem
         args.Completed = perception.CriticalCount == 0;
     }
 
-    private void OnExecuteStep(NCCognitionExecuteStepEvent args)
+    private void OnExecuteStep(NCHumanActionExecutionEvent args)
     {
         if (args.Step.ActionId != TreatmentAction)
             return;
@@ -119,6 +120,12 @@ public sealed partial class NCMedicalProfessionalCognitionSystem : EntitySystem
             patient,
             woundId,
             now.Advance(capability.ApplicationDuration + TimeSpan.FromSeconds(1)));
+    }
+
+    private void OnInterrupted(NCHumanActionInterruptedEvent args)
+    {
+        if (args.ActionId == TreatmentAction)
+            _pending.Remove(args.ActorId);
     }
 
     private readonly record struct PendingTreatment(

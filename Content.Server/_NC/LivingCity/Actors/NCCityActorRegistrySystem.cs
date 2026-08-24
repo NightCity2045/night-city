@@ -20,6 +20,8 @@ using Content.Server._NC.LivingCity.Social;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Actors;
+using Content.Shared._NC.LivingCity.Neural;
+using Content.Shared._NC.LivingCity.Population;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Asynchronous;
@@ -41,6 +43,7 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
     private const int MaximumCommitmentCount = 64;
     private const int MaximumAuditSourceLength = 128;
     private const int MutationGateStripeCount = 64;
+    private const string DefaultResidencePolicyId = "NCDefaultResidenceAllocationPolicy";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -145,6 +148,9 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
         }
 
         var actorId = CreateDeterministicId(request.PopulationScopeId, request.StableLocalId);
+        if (!TryBuildAbstractResidence(actorId, request.HomeZone, out var residence, out error))
+            return Reject(actorId, NCCityActorMutationStatus.Rejected, error!);
+
         var gate = GetMutationGate(actorId);
         await gate.WaitAsync();
         try
@@ -159,7 +165,10 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
                     archetype.ID,
                     appearanceSeed,
                     biographySeed,
-                    1),
+                    1)
+                {
+                    NarrativeActorProfileId = request.NarrativeActorProfile?.Id,
+                },
                 new NCCityActorLocation(
                     request.HomeZone,
                     default,
@@ -168,7 +177,10 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
                     NCCityActorTravelPhase.Stationary,
                     archetype.TravelMode,
                     null,
-                    now),
+                    now)
+                {
+                    Residence = residence,
+                },
                 new NCCityActorScheduleSummary(
                     archetype.RoutineProfile.Id,
                     [],
@@ -177,9 +189,9 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
                     NCCityActorAvailability.Available,
                     now)
                 {
-                    PresenceMode = _zones.TryGetApartmentId(request.HomeZone, out _)
-                        ? NCCityActorPresenceMode.PhysicalHome
-                        : NCCityActorPresenceMode.AbstractHome,
+                    // NC: homes are coordinate-free strategic locations. Mapper-authored apartments remain
+                    // geography and never keep a resident physically spawned while they are at home.
+                    PresenceMode = NCCityActorPresenceMode.AbstractHome,
                 },
                 new NCCityActorLifecycle(NCCityActorStatus.Active, false, null, null),
                 archetype.CognitionTier,
@@ -366,6 +378,47 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
     }
 
     /// <summary>
+    /// Applies authored presentation and narrative metadata to the same deterministic resident. No ECS entity,
+    /// profession, faction membership or simulation state is replaced by this migration.
+    /// </summary>
+    public async Task<NCCityActorMutationResult> SetAuthoredIdentityAsync(NCCityActorIdentityMutationRequest request)
+    {
+        if (!TryValidateMutationMetadata(request.ActorId, request.CommandId, request.ExpectedVersion,
+                request.CorrelationId, request.AuditSource, out var error) ||
+            string.IsNullOrWhiteSpace(request.FullName) || request.FullName.Length > MaximumNameLength ||
+            request.Aliases == null || request.Aliases.Length > MaximumAliasCount ||
+            request.Aliases.Any(static alias => string.IsNullOrWhiteSpace(alias) || alias.Length > MaximumNameLength) ||
+            request.NarrativeActorProfile is { } narrative && !_prototypes.HasIndex(narrative))
+        {
+            return Reject(request.ActorId, NCCityActorMutationStatus.Rejected,
+                error ?? "Authored actor identity is invalid.");
+        }
+
+        var fullName = request.FullName.Trim();
+        var aliases = request.Aliases.Select(static alias => alias.Trim()).ToArray();
+        return await Mutate(
+            request.ActorId,
+            request.CommandId,
+            request.ExpectedVersion,
+            request.CorrelationId,
+            request.CausationId,
+            request.AuditSource,
+            "living-city.actor.author-identity",
+            "living-city.actor.identity-authored",
+            (current, _, eventId) => current.Snapshot with
+            {
+                Identity = current.Snapshot.Identity with
+                {
+                    FullName = fullName,
+                    Aliases = aliases,
+                    NarrativeActorProfileId = request.NarrativeActorProfile?.Id,
+                    DataVersion = checked(current.Snapshot.Identity.DataVersion + 1),
+                },
+                LastAppliedEventId = eventId,
+            });
+    }
+
+    /// <summary>
     /// Reassigns a residence without teleporting a materialized or traveling actor. Scheduling is made due
     /// immediately so the normal A-Life pipeline owns the resulting movement and presence transition.
     /// </summary>
@@ -377,11 +430,21 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
                 request.ExpectedVersion,
                 request.CorrelationId,
                 request.AuditSource,
-                out var error) ||
-            !_zones.TryGetZone(request.HomeZone, out var home))
+                out var error))
         {
             return Reject(request.ActorId, NCCityActorMutationStatus.Rejected,
-                error ?? "The residence zone does not exist.");
+                error ?? "The residence mutation metadata is invalid.");
+        }
+        if (!_zones.TryGetZone(request.HomeZone, out var home))
+            return Reject(request.ActorId, NCCityActorMutationStatus.Rejected, "The residence zone does not exist.");
+        if (!TryBuildAbstractResidence(
+                request.ActorId,
+                request.HomeZone,
+                out var residence,
+                out var residenceError))
+        {
+            return Reject(request.ActorId, NCCityActorMutationStatus.Rejected,
+                residenceError ?? "The abstract residence is invalid.");
         }
 
         return await Mutate(
@@ -411,8 +474,18 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
                     {
                         DataVersion = checked(current.Snapshot.Identity.DataVersion + 1),
                     },
-                    Location = current.Snapshot.Location with { HomeZone = request.HomeZone },
-                    Schedule = current.Snapshot.Schedule with { NextUpdateAt = now },
+                    Location = current.Snapshot.Location with
+                    {
+                        HomeZone = request.HomeZone,
+                        Residence = residence,
+                    },
+                    Schedule = current.Snapshot.Schedule with
+                    {
+                        NextUpdateAt = now,
+                        PresenceMode = current.Snapshot.Schedule.PresenceMode == NCCityActorPresenceMode.PhysicalHome
+                            ? NCCityActorPresenceMode.AbstractHome
+                            : current.Snapshot.Schedule.PresenceMode,
+                    },
                     LastAppliedEventId = eventId,
                 };
             });
@@ -966,6 +1039,12 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
 
         archetype = loaded;
 
+        if (request.NarrativeActorProfile is { } narrative && !_prototypes.HasIndex(narrative))
+        {
+            error = $"Unknown narrative actor profile {narrative}.";
+            return false;
+        }
+
         if (!_zones.TryGetZone(request.HomeZone, out var home) ||
             !archetype.AllowedHomeContexts.Contains(home.ContextSlot))
         {
@@ -999,7 +1078,8 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
             request.CurrentActivity == null || request.CurrentGoal == null ||
             request.CurrentActivity.Length > MaximumNameLength || request.CurrentGoal.Length > MaximumNameLength ||
             !Enum.IsDefined(request.Availability) ||
-            !Enum.IsDefined(request.PresenceMode) || request.PresenceMode == NCCityActorPresenceMode.Unknown ||
+            !Enum.IsDefined(request.PresenceMode) ||
+            request.PresenceMode is NCCityActorPresenceMode.Unknown or NCCityActorPresenceMode.PhysicalHome ||
             !_zones.TryGetZone(request.CurrentZone, out _))
         {
             error = "Location mutation metadata is invalid.";
@@ -1184,7 +1264,12 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
             return false;
 
         var presenceMode = snapshot.Schedule.PresenceMode;
-        if (presenceMode == NCCityActorPresenceMode.Unknown)
+        if (presenceMode == NCCityActorPresenceMode.PhysicalHome)
+        {
+            // NC: databases created before abstract-only housing may contain this removed mode.
+            presenceMode = NCCityActorPresenceMode.AbstractHome;
+        }
+        else if (presenceMode == NCCityActorPresenceMode.Unknown)
         {
             var homeActivity = snapshot.Schedule.CurrentActivity is "sleep" or "prepare" or "return-home" ||
                                snapshot.Schedule.CurrentGoal.Contains("home", StringComparison.OrdinalIgnoreCase);
@@ -1194,9 +1279,13 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
                 : NCCityActorPresenceMode.Public;
         }
 
+        var residence = ValidResidence(snapshot.Location.Residence)
+            ? snapshot.Location.Residence
+            : null;
         normalized = snapshot with
         {
             Identity = snapshot.Identity with { Aliases = aliases },
+            Location = snapshot.Location with { Residence = residence },
             Schedule = snapshot.Schedule with
             {
                 Commitments = commitments,
@@ -1205,6 +1294,138 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
         };
         return true;
     }
+
+    /// <summary>
+    /// Creates a stable coordinate-free residence from authored geography and YAML housing profiles. Selection is
+    /// deterministic for an actor/home pair, so retries and imports cannot silently reroll housing.
+    /// </summary>
+    private bool TryBuildAbstractResidence(
+        NCActorId actorId,
+        NCZoneId homeZone,
+        out NCCityAbstractResidence residence,
+        out string? error)
+    {
+        residence = default!;
+        error = null;
+        if (!actorId.IsValid || !_zones.TryGetZone(homeZone, out var home) ||
+            !_prototypes.TryIndex(
+                new ProtoId<NCCityResidenceAllocationPolicyPrototype>(DefaultResidencePolicyId),
+                out NCCityResidenceAllocationPolicyPrototype? policy) || policy == null ||
+            policy.ResidenceProfiles.Count == 0 ||
+            !TryResolveResidenceScopes(homeZone, out var districtZone, out var localZone))
+        {
+            error = "The abstract residence policy or semantic home geography is invalid.";
+            return false;
+        }
+
+        var candidates = new List<NCAbstractResidenceProfilePrototype>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var profileId in policy.ResidenceProfiles)
+        {
+            if (!_prototypes.TryIndex(profileId, out NCAbstractResidenceProfilePrototype? profile) || profile == null ||
+                !seen.Add(profile.ID) || profile.SelectionWeight <= 0 || profile.WeeklyCost < 0 ||
+                !Enum.IsDefined(profile.Kind) || !Enum.IsDefined(profile.Quality) ||
+                profile.AllowedHomeContexts.Count == 0 ||
+                profile.AllowedHomeContexts.Any(static value => !Enum.IsDefined(value)))
+            {
+                error = "The abstract residence profile set is invalid.";
+                return false;
+            }
+
+            if (profile.AllowedHomeContexts.Contains(home.ContextSlot))
+                candidates.Add(profile);
+        }
+
+        candidates.Sort(static (left, right) => string.CompareOrdinal(left.ID, right.ID));
+        var totalWeight = candidates.Sum(static profile => (long) profile.SelectionWeight);
+        if (candidates.Count == 0 || totalWeight is <= 0 or > int.MaxValue)
+        {
+            error = "No abstract residence profile accepts the actor's home context.";
+            return false;
+        }
+
+        var selectionHash = ResidenceHash(actorId, homeZone, "profile");
+        var ticket = (long) (BitConverter.ToUInt64(selectionHash, 0) % (ulong) totalWeight);
+        NCAbstractResidenceProfilePrototype? selected = null;
+        foreach (var candidate in candidates)
+        {
+            if (ticket < candidate.SelectionWeight)
+            {
+                selected = candidate;
+                break;
+            }
+            ticket -= candidate.SelectionWeight;
+        }
+
+        if (selected == null)
+        {
+            error = "The deterministic residence profile selection failed.";
+            return false;
+        }
+
+        var idHash = ResidenceHash(actorId, homeZone, "identity");
+        idHash[6] = (byte) ((idHash[6] & 0x0F) | 0x50);
+        idHash[8] = (byte) ((idHash[8] & 0x3F) | 0x80);
+        residence = new NCCityAbstractResidence(
+            new NCAbstractResidenceId(new Guid(idHash.AsSpan(0, 16))),
+            districtZone,
+            localZone,
+            selected.ID,
+            selected.Kind,
+            selected.Quality,
+            selected.WeeklyCost);
+        return true;
+    }
+
+    private bool TryResolveResidenceScopes(
+        NCZoneId homeZone,
+        out NCZoneId districtZone,
+        out NCZoneId localZone)
+    {
+        districtZone = default;
+        localZone = homeZone;
+        var current = homeZone;
+        var foundLocal = false;
+        for (var depth = 0; current.IsValid && depth < 16 && _zones.TryGetZone(current, out var zone); depth++)
+        {
+            if (!foundLocal && zone.ContextSlot is NCZoneContextSlot.Street or NCZoneContextSlot.Sector)
+            {
+                localZone = current;
+                foundLocal = true;
+            }
+            if (zone.ContextSlot == NCZoneContextSlot.District)
+            {
+                districtZone = current;
+                return true;
+            }
+            current = zone.Parent;
+        }
+        return false;
+    }
+
+    private static byte[] ResidenceHash(NCActorId actorId, NCZoneId homeZone, string purpose)
+    {
+        var purposeBytes = Encoding.UTF8.GetBytes(purpose);
+        var input = new byte[32 + purposeBytes.Length];
+        actorId.Value.TryWriteBytes(input.AsSpan(0, 16));
+        homeZone.Value.TryWriteBytes(input.AsSpan(16, 16));
+        purposeBytes.CopyTo(input, 32);
+        return SHA256.HashData(input);
+    }
+
+    private static bool ValidResidence(NCCityAbstractResidence? residence) =>
+        residence is
+        {
+            ResidenceId.IsValid: true,
+            DistrictZone.IsValid: true,
+            LocalZone.IsValid: true,
+            WeeklyCost: >= 0,
+        } &&
+        !string.IsNullOrWhiteSpace(residence.ProfileId) && residence.ProfileId.Length <= MaximumNameLength &&
+        Enum.IsDefined(residence.Kind) && Enum.IsDefined(residence.Quality);
+
+    public static bool HasCanonicalAbstractResidence(NCCityActorSnapshot snapshot) =>
+        ValidResidence(snapshot.Location.Residence);
 
     private static bool HasSingleTravelMode(Content.Shared._NC.City.Connectivity.NCCityTravelMode travelMode)
     {
@@ -1247,6 +1468,7 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
         var cognitionTier = record.Snapshot.CognitionTier;
         var availability = record.Snapshot.Schedule.Availability;
         var presenceMode = record.Snapshot.Schedule.PresenceMode;
+        var hasAbstractResidence = ValidResidence(record.Snapshot.Location.Residence);
         _taskManager.RunOnMainThread(() => RaiseLocalEvent(new NCCityActorPersistedEvent(
             actorId,
             record.AggregateVersion,
@@ -1260,7 +1482,8 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
             archetypeId,
             cognitionTier,
             availability,
-            presenceMode)));
+            presenceMode,
+            hasAbstractResidence)));
     }
 
     private static (int AppearanceSeed, int BiographySeed) CreatePresentationSeeds(NCActorId actorId)

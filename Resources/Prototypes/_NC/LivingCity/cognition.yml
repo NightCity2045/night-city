@@ -2,6 +2,216 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+# Closed execution inventory. These entries point at existing ECS/vanilla authorities; they contain no gameplay
+# formulas and do not implement a second item, combat, movement or medical system.
+- type: ncHumanAction
+  id: yield-to-medical-authority
+  executor: MedicalAdapter
+  targetKind: None
+  completion: AuthorityReleased
+  timeout: 10m
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, RoundEnded]
+
+- type: ncHumanAction
+  id: yield-to-combat-authority
+  executor: VanillaCombat
+  targetKind: Person
+  completion: AuthorityReleased
+  timeout: 2m
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: select-medical-service
+  executor: MedicalAdapter
+  targetKind: None
+  completion: DomainMutationConfirmed
+  timeout: 5s
+  interrupts: [PlanChanged, RoundEnded]
+
+- type: ncHumanAction
+  id: follow-schedule-travel
+  executor: VanillaMovement
+  targetKind: None
+  completion: ArrivalConfirmed
+  timeout: 10m
+  interrupts: [PlanChanged, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-approach-person
+  executor: VanillaMovement
+  targetKind: Person
+  completion: RangeConfirmed
+  timeout: 1m
+  requiresPhysicalEntity: true
+  maximumRange: 40
+  completionRange: 2
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: medical-provide-manual-pressure
+  executor: MedicalAdapter
+  targetKind: Person
+  completion: WorldStateChanged
+  timeout: 1m
+  requiresPhysicalEntity: true
+  maximumRange: 8
+  completionRange: 1.5
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: perform-authoritative-work
+  executor: ProfessionAdapter
+  targetKind: None
+  completion: WorldStateChanged
+  timeout: 2m
+  interrupts: [PlanChanged, Combat, Conversation, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: follow-schedule
+  executor: Core
+  targetKind: None
+  completion: PlannerConfirmed
+  timeout: 2m
+  interrupts: [PlanChanged, RoundEnded]
+
+- type: ncHumanAction
+  id: prepare-group-role
+  executor: Core
+  targetKind: None
+  completion: DomainMutationConfirmed
+  timeout: 10s
+  interrupts: [PlanChanged, RoundEnded]
+
+- type: ncHumanAction
+  id: acquire-group-resources
+  executor: Core
+  targetKind: None
+  completion: WorldStateChanged
+  timeout: 30s
+  interrupts: [PlanChanged, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: follow-group-route
+  executor: VanillaMovement
+  targetKind: None
+  completion: ArrivalConfirmed
+  timeout: 10m
+  interrupts: [PlanChanged, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: execute-group-directive
+  executor: Core
+  targetKind: None
+  completion: DomainMutationConfirmed
+  timeout: 2m
+  interrupts: [PlanChanged, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: evaluate-safe-option
+  executor: Core
+  targetKind: None
+  completion: PlannerConfirmed
+  timeout: 1s
+  interrupts: [PlanChanged, RoundEnded]
+
+- type: ncHumanAction
+  id: remain-available
+  executor: Core
+  targetKind: None
+  completion: PlannerConfirmed
+  timeout: 1s
+  interrupts: [PlanChanged, RoundEnded]
+
+- type: ncHumanAction
+  id: yield-to-conversation-authority
+  executor: SocialAdapter
+  targetKind: Person
+  completion: AuthorityReleased
+  timeout: 5m
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-accept-authorized-directive
+  executor: SocialAdapter
+  targetKind: Person
+  completion: DomainMutationConfirmed
+  timeout: 15s
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: manage-fixer-deal
+  executor: FixerAdapter
+  targetKind: DomainRecord
+  completion: DomainMutationConfirmed
+  timeout: 1m
+  interrupts: [PlanChanged, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-assess-scene
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: PlannerConfirmed
+  timeout: 15s
+  requiresPhysicalEntity: true
+  maximumRange: 20
+  interrupts: [PlanChanged, Dematerialized, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-report-incident
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: DomainMutationConfirmed
+  timeout: 15s
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-issue-lawful-order
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: InteractionConfirmed
+  timeout: 15s
+  requiresPhysicalEntity: true
+  maximumRange: 8
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-pursue-suspect
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: RangeConfirmed
+  timeout: 2m
+  requiresPhysicalEntity: true
+  maximumRange: 40
+  completionRange: 6
+  interrupts: [PlanChanged, Dematerialized, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-restrain-suspect
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: WorldStateChanged
+  timeout: 45s
+  requiresPhysicalEntity: true
+  maximumRange: 8
+  completionRange: 1.5
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-begin-escort
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: WorldStateChanged
+  timeout: 15s
+  requiresPhysicalEntity: true
+  maximumRange: 4
+  completionRange: 1.5
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
+
 - type: ncCognitionUtilityCurve
   id: NCUtilityBoolean
   kind: Step
@@ -37,6 +247,7 @@
   priority: 1000
   requiredBeliefs: [ actor.incapacitated ]
   interruptsRoutine: true
+  requiresMaterialization: true
   procedureSteps:
   - id: yield-control
     action: yield-to-medical-authority
@@ -65,6 +276,7 @@
   baseUtility: 25
   priority: 700
   requiredBeliefs: [ medical.needs-care ]
+  requiresMaterialization: true
   considerations:
   - beliefKey: medical.severity
     curve: NCUtilityLinear

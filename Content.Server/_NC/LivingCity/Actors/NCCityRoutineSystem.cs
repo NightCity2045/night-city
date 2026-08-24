@@ -218,7 +218,7 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
             ? defaultTravelMode
             : entry.TravelMode;
         var presenceMode = entry.Target == NCCityRoutineTarget.Home
-            ? ResolveHomePresence(actor.Location.HomeZone)
+            ? NCCityActorPresenceMode.AbstractHome
             : NCCityActorPresenceMode.Public;
 
         return new NCCityRoutineDecision(
@@ -231,14 +231,6 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
             entry.Availability,
             presenceMode,
             now.Advance(TimeSpan.FromTicks(ticksUntilNext)));
-    }
-
-    private NCCityActorPresenceMode ResolveHomePresence(NCZoneId homeZone)
-    {
-        return _zones.TryGetZone(homeZone, out var zone) &&
-               zone.ContextSlot == NCZoneContextSlot.Apartment
-            ? NCCityActorPresenceMode.PhysicalHome
-            : NCCityActorPresenceMode.AbstractHome;
     }
 
     private static bool HasSingleTravelMode(NCCityTravelMode travelMode)

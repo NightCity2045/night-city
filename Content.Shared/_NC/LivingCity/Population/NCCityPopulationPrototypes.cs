@@ -7,6 +7,7 @@ using Content.Shared._NC.City.Zones.Serialization;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.CityServices;
 using Content.Shared._NC.LivingCity.Employment;
+using Content.Shared._NC.LivingCity.Neural;
 using Content.Shared.Roles;
 using Robust.Shared.Prototypes;
 
@@ -128,6 +129,20 @@ public sealed partial class NCCityPopulationActorEntry
 
     [DataField]
     public string FactionRole { get; private set; } = "member";
+
+    /// <summary>The rare authored profile that turns this resident into a narrative Actor.</summary>
+    [DataField]
+    public ProtoId<NCNarrativeActorProfilePrototype>? NarrativeActorProfile { get; private set; }
+
+    /// <summary>
+    /// Optional deterministic cohort slot replaced by this named person. This preserves population size and lets an
+    /// existing development database promote the same persistent actor instead of creating a duplicate.
+    /// </summary>
+    [DataField]
+    public string ReplacesCohortId { get; private set; } = string.Empty;
+
+    [DataField]
+    public int ReplacesCohortIndex { get; private set; } = -1;
 }
 
 /// <summary>
@@ -153,8 +168,7 @@ public sealed partial class NCCityPopulationImportPolicyPrototype : IPrototype
 }
 
 /// <summary>
-/// Controls the explicit mapping of a bounded minority of residents into mapper-authored apartment zones.
-/// Remaining residents keep their district-level, coordinate-free homes.
+/// Controls bounded migration of legacy physical residences into coordinate-free homes.
 /// </summary>
 [Prototype("ncCityResidenceAllocationPolicy")]
 public sealed partial class NCCityResidenceAllocationPolicyPrototype : IPrototype
@@ -171,11 +185,14 @@ public sealed partial class NCCityResidenceAllocationPolicyPrototype : IPrototyp
     [DataField]
     public int MaximumConcurrentMutations { get; private set; } = 8;
 
-    [DataField]
-    public int PhysicalResidentsPerApartment { get; private set; } = 2;
+    [DataField(required: true)]
+    public List<ProtoId<NCAbstractResidenceProfilePrototype>> ResidenceProfiles { get; private set; } = [];
 
     [DataField]
-    public float PhysicalResidentShare { get; private set; } = 0.25f;
+    public int StorageRetryCount { get; private set; } = 3;
+
+    [DataField]
+    public TimeSpan StorageRetryDelay { get; private set; } = TimeSpan.FromSeconds(1);
 }
 
 /// <summary>

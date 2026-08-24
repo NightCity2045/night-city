@@ -62,11 +62,11 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<NCNeuralDialogueIntentAcceptedEvent>(OnIntent);
-        SubscribeLocalEvent<NCCognitionExecuteStepEvent>(OnExecuteStep);
+        SubscribeLocalEvent<NCHumanActionExecutionEvent>(OnExecuteStep);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => Reset());
     }
 
-    private void OnExecuteStep(NCCognitionExecuteStepEvent args)
+    private void OnExecuteStep(NCHumanActionExecutionEvent args)
     {
         if (args.Step.ActionId != AcceptAction)
             return;
@@ -106,6 +106,11 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
         var order = Normalize(arguments.GetValueOrDefault("order", args.Request.DialogueInput?.Utterance ?? action),
             policy.MaximumOrderLength);
         if (action.Length == 0 || order.Length == 0 ||
+            args.Request.AllowedDirectiveActionIds is not { } allowedDirectiveActions ||
+            !allowedDirectiveActions.Contains(action, StringComparer.Ordinal) ||
+            !_prototypes.TryIndex(new ProtoId<NCHumanDirectiveActionPrototype>(action),
+                out NCHumanDirectiveActionPrototype? actionDefinition) || actionDefinition == null ||
+            actionDefinition.RequiresKnownLocation && string.IsNullOrWhiteSpace(arguments.GetValueOrDefault("location")) ||
             !TryResolveZone(arguments.GetValueOrDefault("location"), args.ActorId, out var targetZone))
         {
             Finish(args.Request.RequestId, false, "The spoken directive has no valid action or known destination.");
@@ -116,7 +121,8 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
         if (arguments.TryGetValue("companion", out var companionHandle) &&
             !string.IsNullOrWhiteSpace(companionHandle))
         {
-            if (!_perception.TryResolveSubjectHandle(args.ActorId, companionHandle, now, out var companionEntity) ||
+            if (!actionDefinition.AllowsCompanion ||
+                !_perception.TryResolveSubjectHandle(args.ActorId, companionHandle, now, out var companionEntity) ||
                 !_runtime.TryGetActor(companionEntity, out var resolvedCompanion) ||
                 resolvedCompanion == args.ActorId)
             {

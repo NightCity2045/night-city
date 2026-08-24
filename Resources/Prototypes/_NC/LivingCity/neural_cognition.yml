@@ -69,3 +69,10 @@
   minimumIntentConfidence: 400
   maximumIntentPriority: 900
   targetedIntentsAllowed: true
+
+- type: ncNarrativeActorProfile
+  id: NCNarrativeAlexRivera
+  stableKey: alex-rivera
+  personaProfile: NCNeuralAlexRiveraPersona
+  autonomyPolicy: NCNcpdNeuralAutonomy
+  incidentEscalationEnabled: true

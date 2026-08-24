@@ -84,7 +84,7 @@
   searchRadius: 8
   interactionRange: 1.35
   maximumCandidates: 12
-  completionTimeout: 00:00:20
+  completionTimeout: 20s
 
 - type: ncGenericProfessionalWorkPolicy
   id: NCDefaultGenericProfessionalWorkPolicy

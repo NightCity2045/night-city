@@ -114,7 +114,11 @@ public sealed record NCCityActorIdentity(
     string ArchetypeId,
     int AppearanceSeed,
     int BiographySeed,
-    int DataVersion);
+    int DataVersion)
+{
+    // Optional so version-one resident snapshots remain readable. Only explicitly authored people receive it.
+    public string? NarrativeActorProfileId { get; init; }
+}
 
 /// <summary>
 /// Semantic position and travel intent. It never persists room IDs, portal IDs, map IDs or EntityUid values.
@@ -127,7 +131,11 @@ public sealed record NCCityActorLocation(
     NCCityActorTravelPhase TravelPhase,
     NCCityTravelMode TravelMode,
     NCActiveWorldTime? ExpectedArrivalAt,
-    NCActiveWorldTime LastKnownLocationAt);
+    NCActiveWorldTime LastKnownLocationAt)
+{
+    // Optional so snapshots written before canonical abstract residences remain readable and migratable.
+    public NCCityAbstractResidence? Residence { get; init; }
+}
 
 /// <summary>
 /// Scheduler-facing durable intent summary. Blackboard and local physical plan nodes remain runtime-only.

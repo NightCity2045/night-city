@@ -44,9 +44,11 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
         SubscribeLocalEvent<NCCityAffordanceProviderComponent, ComponentShutdown>(OnProviderShutdown);
         SubscribeLocalEvent<NCCityAffordanceProviderComponent, NCZoneChangedEvent>(OnProviderZoneChanged);
         SubscribeLocalEvent<NCCitySpawnCandidateIndexChangedEvent>(OnSpawnCandidatesChanged);
-        SubscribeLocalEvent<NCZoneIndexRebuiltEvent>(_ => RebuildGenerated());
+        SubscribeLocalEvent<NCZoneIndexRebuiltEvent>(OnZoneIndexRebuilt);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
     }
+
+    private void OnZoneIndexRebuilt(ref NCZoneIndexRebuiltEvent args) => RebuildGenerated();
 
     public void Get(NCCityAffordanceKind kind, NCZoneId withinZone, List<NCCityAffordanceInfo> result)
     {

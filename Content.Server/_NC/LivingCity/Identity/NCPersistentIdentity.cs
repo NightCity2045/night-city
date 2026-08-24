@@ -346,6 +346,13 @@ public static class NCPersistentIdentity
         return CreateGuid($"cognition/plan/{intentionId:D}/{Normalize(planner)}/{dependencyVersion}");
     }
 
+    public static Guid CognitionAction(Guid planId, string stepId)
+    {
+        if (planId == Guid.Empty || string.IsNullOrWhiteSpace(stepId))
+            throw new ArgumentOutOfRangeException(nameof(planId));
+        return CreateGuid($"cognition/action/{planId:D}/{Normalize(stepId)}");
+    }
+
     public static NCNcpdUnitId NcpdUnit(NCZoneId stationZone, IEnumerable<NCActorId> members)
     {
         if (!stationZone.IsValid)

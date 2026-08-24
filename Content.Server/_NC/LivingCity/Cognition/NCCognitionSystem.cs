@@ -35,7 +35,6 @@ public sealed partial class NCCognitionSystem : EntitySystem
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
     [Dependency] private NCCognitionRegistrySystem _registry = default!;
     [Dependency] private NCCognitionCapabilityProviderSystem _providers = default!;
-    [Dependency] private NCOrganizationWorkforceSystem _workforce = default!;
     [Dependency] private NCProfessionProfileSystem _professions = default!;
     [Dependency] private NCAILoadGovernorSystem _governor = default!;
 

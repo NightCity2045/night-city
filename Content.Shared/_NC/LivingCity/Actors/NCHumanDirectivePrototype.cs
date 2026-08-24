@@ -18,3 +18,15 @@ public sealed partial class NCHumanDirectivePolicyPrototype : IPrototype
     [DataField] public bool ApplyToCurrentGroup { get; private set; } = true;
     [DataField] public Dictionary<string, int> FactionRoleRanks { get; private set; } = [];
 }
+
+/// <summary>
+/// Closed vocabulary for natural-language orders. Luna may select one of these IDs, but cannot invent new server
+/// actions or grant itself a gameplay authority.
+/// </summary>
+[Prototype("ncHumanDirectiveAction")]
+public sealed partial class NCHumanDirectiveActionPrototype : IPrototype
+{
+    [IdDataField] public string ID { get; private set; } = string.Empty;
+    [DataField] public bool RequiresKnownLocation { get; private set; } = true;
+    [DataField] public bool AllowsCompanion { get; private set; }
+}

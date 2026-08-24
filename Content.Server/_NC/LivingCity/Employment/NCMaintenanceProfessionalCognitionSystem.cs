@@ -4,7 +4,6 @@
 
 using System.Numerics;
 using Content.Server._NC.LivingCity.Actors;
-using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Cognition;
 using Content.Server._NC.LivingCity.Time;
 using Content.Server.NPC.Components;
@@ -57,7 +56,8 @@ public sealed partial class NCMaintenanceProfessionalCognitionSystem : EntitySys
     {
         base.Initialize();
         SubscribeLocalEvent<NCProfessionalWorkRequestedEvent>(OnProfessionalWork);
-        SubscribeLocalEvent<NCCityActorBindingComponent, ComponentShutdown>(OnActorShutdown);
+        SubscribeLocalEvent<NCHumanActionInterruptedEvent>(OnInterrupted);
+        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
     }
 
     private void OnProfessionalWork(NCProfessionalWorkRequestedEvent args)
@@ -216,8 +216,17 @@ public sealed partial class NCMaintenanceProfessionalCognitionSystem : EntitySys
         }
     }
 
-    private void OnActorShutdown(Entity<NCCityActorBindingComponent> actor, ref ComponentShutdown args) =>
-        Stop(actor.Owner, false);
+    private void OnInterrupted(NCHumanActionInterruptedEvent args)
+    {
+        if (args.ActionId == "perform-authoritative-work" && args.EntityUid is { } worker)
+            Stop(worker);
+    }
+
+    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    {
+        if (!args.Materialized)
+            Stop(args.EntityUid, false);
+    }
 
     private void Stop(EntityUid worker, bool restoreHtn = true)
     {

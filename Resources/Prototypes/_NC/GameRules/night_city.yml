@@ -10,6 +10,7 @@
   name: nc-night-city-title
   description: nc-night-city-description
   showInVote: true
+  supportedMaps: NCNightCityMapPool
   rules:
   - NCNightCityRule
 

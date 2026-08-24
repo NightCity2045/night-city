@@ -20,10 +20,11 @@ public sealed class NCCVars : CVars
     public static readonly CVarDef<string> NeuralEndpoint =
         CVarDef.Create("nc_neural.endpoint", string.Empty, CVar.SERVERONLY);
 
-    /// <summary>
-    /// OpenAI credential forwarded to the isolated cognition service for the duration of one request.
-    /// CONFIDENTIAL prevents the value from being exposed through configuration console output.
-    /// </summary>
+    /// <summary>Internal bearer shared only with NeuralCognitionService; this is not the OpenAI provider key.</summary>
+    public static readonly CVarDef<string> NeuralServiceToken =
+        CVarDef.Create("nc_neural.service_token", string.Empty, CVar.SERVERONLY | CVar.CONFIDENTIAL);
+
+    /// <summary>Legacy configuration alias retained for one migration cycle.</summary>
     public static readonly CVarDef<string> NeuralApiKey =
         CVarDef.Create("nc_neural.api_key", string.Empty, CVar.SERVERONLY | CVar.CONFIDENTIAL);
 }

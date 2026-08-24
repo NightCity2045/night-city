@@ -5,7 +5,6 @@
 using System.Numerics;
 using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors;
-using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Affordances;
 using Content.Server._NC.LivingCity.Cognition;
 using Content.Server.NPC.Components;
@@ -54,7 +53,8 @@ public sealed partial class NCGenericProfessionalCognitionSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<NCProfessionalWorkRequestedEvent>(OnProfessionalWork);
-        SubscribeLocalEvent<NCCityActorBindingComponent, ComponentShutdown>(OnActorShutdown);
+        SubscribeLocalEvent<NCHumanActionInterruptedEvent>(OnInterrupted);
+        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
     }
 
     private void OnProfessionalWork(NCProfessionalWorkRequestedEvent args)
@@ -150,10 +150,19 @@ public sealed partial class NCGenericProfessionalCognitionSystem : EntitySystem
         _coordinates.TryGetCoordinates(worker, out var current) && current.NetworkId == target.NetworkId &&
         current.Z == target.Z && Vector2.DistanceSquared(current.Position, target.Position) <= range * range;
 
-    private void OnActorShutdown(Entity<NCCityActorBindingComponent> actor, ref ComponentShutdown args)
+    private void OnInterrupted(NCHumanActionInterruptedEvent args)
     {
-        Stop(actor.Owner, false);
-        _cycles.Remove(actor.Owner);
+        if (args.ActionId == "perform-authoritative-work" && args.EntityUid is { } worker)
+            Stop(worker);
+    }
+
+    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    {
+        if (args.Materialized)
+            return;
+
+        Stop(args.EntityUid, false);
+        _cycles.Remove(args.EntityUid);
     }
 
     private void Stop(EntityUid worker, bool restoreHtn = true)

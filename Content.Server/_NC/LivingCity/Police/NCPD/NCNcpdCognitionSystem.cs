@@ -57,7 +57,8 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
         base.Initialize();
         SubscribeLocalEvent<NCCityLocalIncidentObservedEvent>(OnIncidentObserved);
         SubscribeLocalEvent<NCCognitionCollectFactsEvent>(OnCollectFacts);
-        SubscribeLocalEvent<NCCognitionExecuteStepEvent>(OnExecuteStep);
+        SubscribeLocalEvent<NCHumanActionExecutionEvent>(OnExecuteStep);
+        SubscribeLocalEvent<NCHumanActionInterruptedEvent>(OnInterrupted);
         SubscribeLocalEvent<NCNcpdOfficerComponent, ComponentShutdown>(OnOfficerShutdown);
     }
 
@@ -106,7 +107,7 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
             args.Now.Advance(TimeSpan.FromMinutes(1))));
     }
 
-    private void OnExecuteStep(NCCognitionExecuteStepEvent args)
+    private void OnExecuteStep(NCHumanActionExecutionEvent args)
     {
         if (!args.Step.ActionId.StartsWith("ncpd-", StringComparison.Ordinal) ||
             args.EntityUid is not { } officer || !Exists(officer) ||
@@ -128,10 +129,17 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
         switch (args.Step.ActionId)
         {
             case "ncpd-assess-scene":
+                if (!TryComp<NCCityLocalPerceptionComponent>(officer, out var perception) ||
+                    !perception.RecentEvents.Any(value => value.ActorHandle == args.Intention.Target.StableId &&
+                                                         value.ExpiresAt > now))
+                {
+                    args.Failure = "ncpd-incident-evidence-expired";
+                    return;
+                }
                 args.Completed = true;
                 return;
             case "ncpd-report-incident":
-                ReportIncident(officer, args.Intention.Target.StableId, now);
+                ReportIncident(args.InstanceId, officer, args.Intention.Target.StableId, now);
                 args.Completed = true;
                 return;
             case "ncpd-pursue-suspect":
@@ -194,7 +202,7 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
         EntityUid suspect,
         NCNcpdUseOfForcePolicyPrototype policy,
         Content.Shared._NC.Persistence.Time.NCActiveWorldTime now,
-        NCCognitionExecuteStepEvent args)
+        NCHumanActionExecutionEvent args)
     {
         if (_cuffable.IsCuffed(suspect))
         {
@@ -249,12 +257,14 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
     }
 
     private void ReportIncident(
+        Guid reportId,
         EntityUid officer,
         string suspectHandle,
         Content.Shared._NC.Persistence.Time.NCActiveWorldTime now)
     {
         var report = EnsureComp<NCNcpdIncidentReportComponent>(officer);
-        report.ReportId = Guid.NewGuid();
+        // The action identity makes report creation idempotent across execution retries.
+        report.ReportId = reportId;
         report.SuspectHandle = suspectHandle;
         report.ReportedAt = now;
         RaiseLocalEvent(new NCNcpdIncidentReportedEvent(
@@ -277,6 +287,15 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
         _restraintAttempts.Remove(officer.Owner);
         StopPoliceSteering(officer.Owner, false);
         _suspendedHumanHtn.Remove(officer.Owner);
+    }
+
+    private void OnInterrupted(NCHumanActionInterruptedEvent args)
+    {
+        if (args.ActionId.StartsWith("ncpd-", StringComparison.Ordinal) && args.EntityUid is { } officer)
+        {
+            _restraintAttempts.Remove(officer);
+            StopPoliceSteering(officer);
+        }
     }
 
     private void StopPoliceSteering(EntityUid officer, bool restoreHumanHtn = true)
