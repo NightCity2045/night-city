@@ -94,6 +94,7 @@
   id: NCDefaultLocalPerceptionPolicy
   maximumTrackedActors: 160
   maximumUpdatesPerTick: 4
+  maximumIncidentCorrelations: 1024
 
 - type: ncCityPhysicalExecutionPolicy
   id: NCDefaultCityPhysicalExecutionPolicy

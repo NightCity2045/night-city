@@ -7,9 +7,16 @@
 - type: ncProfessionProfile
   id: NCProfessionNcpd
   organization: NCPD
-  jobs: [NCPDCommander, NCPDLieutenant, NCPDInspector, NCPDSergeant, NCPDOfficer, NCPDCadet]
+  jobs: [NCPDCommander, NCPDLieutenant, NCPDSergeant, NCPDOfficer, NCPDCadet]
   capabilityOverlays: [NCNcpdRespondToObservedAssault]
   skillKeys: [law-enforcement, patrol, investigation, restraint, radio-procedure, first-aid]
+
+- type: ncProfessionProfile
+  id: NCProfessionNcpdInspector
+  organization: NCPD
+  jobs: [NCPDInspector]
+  capabilityOverlays: [NCNcpdRespondToObservedAssault, NCNcpdInvestigateAssignedCase]
+  skillKeys: [law-enforcement, investigation, evidence, witness-interview, restraint, radio-procedure]
 
 - type: ncProfessionProfile
   id: NCProfessionTraumaTeam

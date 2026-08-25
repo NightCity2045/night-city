@@ -118,7 +118,9 @@ public sealed partial class NCNcpdUnitSystem : EntitySystem
             {
                 if (state.Status is not (NCNcpdDutyStatus.Available or NCNcpdDutyStatus.Assigned) ||
                     !_officers.TryGetRoleProfile(state.ActorId, out _, out var role) ||
-                    !role.AllowedAssignments.Contains(NCNcpdAssignmentKind.Patrol))
+                    !role.AllowedAssignments.Contains(NCNcpdAssignmentKind.Patrol) &&
+                    !(role.MayWorkAlone && role.AllowedAssignments.Any(kind => kind is
+                        NCNcpdAssignmentKind.Response or NCNcpdAssignmentKind.Investigation)))
                 {
                     continue;
                 }
@@ -133,6 +135,15 @@ public sealed partial class NCNcpdUnitSystem : EntitySystem
                 .OrderByDescending(candidate => GetRank(candidate.Profile.Job))
                 .ThenBy(static candidate => candidate.ActorId.Value)
                 .ToList();
+
+            // Specialist roles such as Inspector are valid one-person units and must not be excluded merely because
+            // they do not perform ordinary street patrols.
+            foreach (var specialist in available.Where(candidate => candidate.Profile.MayWorkAlone &&
+                         !candidate.Profile.AllowedAssignments.Contains(NCNcpdAssignmentKind.Patrol)).ToArray())
+            {
+                CreateSoloUnit(policy.StationZone, specialist);
+                available.Remove(specialist);
+            }
 
             var usable = Math.Max(0, available.Count - policy.ReserveActors);
             while (usable >= 2)
@@ -173,8 +184,9 @@ public sealed partial class NCNcpdUnitSystem : EntitySystem
     {
         foreach (var unit in _units.Values.ToArray())
         {
-            var valid = unit.Members.Length >= 2 && unit.Members.Length <= policy.MaximumPatrolSize &&
+            var valid = unit.Members.Length >= 1 && unit.Members.Length <= policy.MaximumPatrolSize &&
                         eligible.TryGetValue(unit.Leader, out var leader) && leader.Profile.CanLead &&
+                        (unit.Members.Length > 1 || leader.Profile.MayWorkAlone) &&
                         unit.Members.All(eligible.ContainsKey) &&
                         unit.Members.Where(actor => eligible[actor].Profile.OfficerRole == NCNcpdOfficerRole.Cadet)
                             .All(actor => actor != unit.Leader);
@@ -197,6 +209,14 @@ public sealed partial class NCNcpdUnitSystem : EntitySystem
             _unitByActor[actorId] = unitId;
     }
 
+    private void CreateSoloUnit(NCZoneId stationZone, OfficerCandidate specialist)
+    {
+        var members = new[] { specialist.ActorId };
+        var unitId = NCPersistentIdentity.NcpdUnit(stationZone, members);
+        _units[unitId] = new UnitState(unitId, specialist.ActorId, members);
+        _unitByActor[specialist.ActorId] = unitId;
+    }
+
     private void ReleasePartnersForWaitingCadets(IReadOnlyDictionary<NCActorId, OfficerCandidate> eligible)
     {
         var waitingCadets = eligible.Values.Count(candidate =>
@@ -210,6 +230,8 @@ public sealed partial class NCNcpdUnitSystem : EntitySystem
         {
             if (waitingCadets == 0)
                 break;
+            if (unit.Members.Length < 2)
+                continue;
             if (unit.Members.Any(actor => eligible[actor].Profile.OfficerRole == NCNcpdOfficerRole.Cadet))
                 continue;
 

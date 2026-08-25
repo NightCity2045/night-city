@@ -13,9 +13,14 @@
   incidentObservationRadius: 8
   suspectObservationLifetime: 45s
   verbalOrderRange: 6
+  complianceWindow: 4s
+  complianceMovementTolerance: 1
+  flightDistance: 2.5
   restraintRange: 1.25
   restraintRetryDelay: 4s
   verbalOrderLocKey: nc-ncpd-ai-lawful-order
+  observedAssaultSeverity: 450
+  observedKillingSeverity: 900
 
 - type: ncNcpdDutyPolicy
   id: NCDefaultNcpdDutyPolicy
@@ -33,13 +38,19 @@
   maximumReplans: 3
   replanBackoff: 5s
   followSpacing: 1.5
+  arrivalRange: 1.25
+  evaluationInterval: 500ms
+  maximumUpdatesPerTick: 8
 
 - type: ncNcpdDispatchPolicy
   id: NCDefaultNcpdDispatchPolicy
   maximumAssignmentsPerEvaluation: 8
+  maximumTrackedDispatches: 64
   cadetMaximumSeverity: 300
   inspectorMinimumSeverity: 500
   assignmentTimeout: 2m
+  retryDelay: 5s
+  materializationMaximumWait: 2m
 
 - type: ncNcpdDetentionPolicy
   id: NCDefaultNcpdDetentionPolicy
@@ -47,12 +58,40 @@
   requireRestraintsForEscort: true
   confiscateDangerousWeapons: true
   bookingTimeout: 5m
+  arrivalRange: 1.25
+  maximumRouteReplans: 3
+  routeRetryDelay: 3s
+  searchRange: 1.5
+  maximumSearchItems: 32
+  maximumSearchDepth: 1
+  maximumSeizedItems: 8
+  searchInteractionRetryDelay: 8s
+  seizeGuns: true
+  seizeMeleeWeapons: true
+  seizeContraband: true
+  physicalEvidenceReliability: 900
+  physicalEvidenceAdmissible: true
+  evidenceStorageSearchRadius: 3
+  evidenceStorageReceivers: [LockerEvidence]
+  abstractCustodyReviewInterval: 1h
 
 - type: ncNcpdInvestigationPolicy
   id: NCDefaultNcpdInvestigationPolicy
   maximumEvidencePerIncident: 128
   maximumWitnessesPerIncident: 64
   unresolvedCaseRetention: 24h
+  witnessInterviewRadius: 6
+  maximumWitnessCandidates: 24
+  maximumWitnessesPerInterview: 3
+  minimumWitnessConfidence: 0.5
+  memoryAvailabilityWait: 10s
+  maximumPersistenceRetries: 3
+  minimumCorroboratingRecords: 1
+  minimumEvidenceReliability: 500
+  maximumActiveInvestigations: 16
+  witnessQuestionLocKey: nc-ncpd-ai-witness-question
+  witnessAssaultLocKey: nc-ncpd-ai-witness-assault
+  witnessKillingLocKey: nc-ncpd-ai-witness-killing
 
 - type: ncNcpdCommandPolicy
   id: NCDefaultNcpdCommandPolicy

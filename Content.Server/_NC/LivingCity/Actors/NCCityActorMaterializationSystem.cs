@@ -336,7 +336,8 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         }
         // An abstract residence has no map coordinates. Reject before spawning so incident requests cannot leave
         // an armed but rejected ECS entity bound to the persistent actor.
-        if (snapshot.Schedule.PresenceMode == NCCityActorPresenceMode.AbstractHome &&
+        if (snapshot.Schedule.PresenceMode is
+                (NCCityActorPresenceMode.AbstractHome or NCCityActorPresenceMode.AbstractCustody) &&
             snapshot.Location.TravelPhase == NCCityActorTravelPhase.Stationary)
         {
             CompleteTerminal(pending, NCCityMaterializationRequestStatus.Rejected,

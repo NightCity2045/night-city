@@ -13,11 +13,35 @@ public enum NCHumanActionExecutorKind : byte
     VanillaMovement,
     VanillaCombat,
     VanillaInteraction,
+    VanillaHands,
+    VanillaSpeech,
     ProfessionAdapter,
     MedicalAdapter,
     PoliceAdapter,
     SocialAdapter,
     FixerAdapter,
+}
+
+/// <summary>
+/// Closed list of vanilla operations. Action prototypes select an operation; the adapter never infers one from prose.
+/// </summary>
+public enum NCHumanActionOperationKind : byte
+{
+    None,
+    ApproachTarget,
+    FollowTarget,
+    FleeFromTarget,
+    CombatAuthority,
+    ActivateTarget,
+    AltInteractTarget,
+    PickupTarget,
+    DropTarget,
+    EquipTarget,
+    UnequipTarget,
+    UseHeldTarget,
+    Speak,
+    StartPullingTarget,
+    StopPulling,
 }
 
 public enum NCHumanActionTargetKind : byte
@@ -66,8 +90,10 @@ public sealed partial class NCHumanActionPrototype : IPrototype
     [DataField(required: true)] public NCHumanActionTargetKind TargetKind { get; private set; }
     [DataField(required: true)] public NCHumanActionCompletionKind Completion { get; private set; }
     [DataField(required: true)] public TimeSpan Timeout { get; private set; }
+    [DataField] public NCHumanActionOperationKind Operation { get; private set; }
     [DataField] public bool RequiresPhysicalEntity { get; private set; }
     [DataField] public float MaximumRange { get; private set; }
     [DataField] public float CompletionRange { get; private set; }
+    [DataField] public string SpeechLocId { get; private set; } = string.Empty;
     [DataField] public HashSet<NCHumanActionInterruptKind> Interrupts { get; private set; } = [];
 }

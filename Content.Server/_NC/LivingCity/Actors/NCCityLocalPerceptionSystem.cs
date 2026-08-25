@@ -5,6 +5,7 @@
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
+using Content.Shared.Cuffs;
 using Content.Shared.Interaction;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
@@ -15,6 +16,7 @@ using Content.Shared.NPC.Systems;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Time;
 using Content.Shared._NC.Persistence.Identity;
+using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.LivingCity.Actors;
@@ -41,6 +43,7 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
+    [Dependency] private SharedCuffableSystem _cuffable = default!;
     [Dependency] private NpcFactionSystem _factions = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
 
@@ -48,6 +51,8 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
     private readonly Dictionary<EntityUid, NCActiveWorldTime> _scheduled = [];
     private readonly HashSet<EntityUid> _tracked = [];
     private readonly HashSet<EntityUid> _observedBuffer = [];
+    private readonly Dictionary<(EntityUid Actor, EntityUid Target), IncidentCorrelation> _incidentCorrelations = [];
+    private readonly PriorityQueue<IncidentCorrelationEntry, long> _incidentCorrelationExpiry = new();
     private NCCityLocalPerceptionPolicyPrototype? _policy;
     private NCSessionEpoch _epoch;
     private long _sequence;
@@ -56,6 +61,7 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
     private long _rejectedConfigurations;
     private bool _active;
     private float _maximumObservationRadius;
+    private TimeSpan _maximumWitnessedEventLifetime;
     private string? _configurationError;
 
     public override void Initialize()
@@ -141,11 +147,12 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         }
 
         var coordinates = _transform.GetMapCoordinates(victim.Owner);
+        var worldEventId = CorrelateIncident(attacker, victim.Owner, now);
         foreach (var observer in _lookup.GetEntitiesInRange<NCCityLocalPerceptionComponent>(
                      coordinates,
                      _maximumObservationRadius))
         {
-            if (observer.Owner == attacker || observer.Owner == victim.Owner ||
+            if (observer.Owner == attacker ||
                 !_prototypes.TryIndex(observer.Comp.Profile, out var profile) || profile == null ||
                 !_transform.InRange(Transform(observer.Owner).Coordinates, Transform(victim.Owner).Coordinates,
                     profile.Radius) ||
@@ -154,7 +161,7 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
                 continue;
             }
             ObserveIncident(observer.Owner, NCCityLocalPerceivedEventKind.Assault, attacker, victim.Owner, now,
-                profile.WitnessedEventLifetime);
+                profile.WitnessedEventLifetime, worldEventId: worldEventId);
         }
     }
 
@@ -277,10 +284,15 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         EntityUid target,
         NCActiveWorldTime now,
         TimeSpan lifetime,
-        float confidence = 1f)
+        float confidence = 1f,
+        Guid? worldEventId = null)
     {
-        if (!ObserveSubject(observer, actor, NCCityLocalObservationKind.Suspect, now, lifetime, confidence) ||
-            !ObserveSubject(observer, target, NCCityLocalObservationKind.Neutral, now, lifetime, confidence) ||
+        var actorKind = observer == target
+            ? NCCityLocalObservationKind.Hostile
+            : NCCityLocalObservationKind.Suspect;
+        if (!ObserveSubject(observer, actor, actorKind, now, lifetime, confidence) ||
+            observer != target && !ObserveSubject(observer, target, NCCityLocalObservationKind.Neutral, now, lifetime,
+                confidence) ||
             !TryComp<NCCityLocalPerceptionComponent>(observer, out var perception) ||
             !_prototypes.TryIndex(perception.Profile, out var profile) || profile == null)
         {
@@ -288,7 +300,9 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         }
 
         var actorObservation = perception.Observations.First(value => value.EntityUid == actor);
-        var targetObservation = perception.Observations.First(value => value.EntityUid == target);
+        var targetHandle = observer == target
+            ? "self"
+            : perception.Observations.First(value => value.EntityUid == target).SubjectHandle;
         var existing = perception.RecentEvents.FindIndex(value => value.Kind == kind && value.ActorEntity == actor &&
             value.TargetEntity == target);
         if (existing >= 0)
@@ -305,18 +319,19 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         }
         if (perception.RecentEvents.Count >= profile.MaximumObservedEntities)
             perception.RecentEvents.RemoveAt(perception.RecentEvents.Count - 1);
-        var eventId = Guid.NewGuid();
+        var eventId = worldEventId is { } correlated && correlated != Guid.Empty ? correlated : Guid.NewGuid();
         perception.RecentEvents.Insert(0, new NCCityLocalPerceivedEvent(
             eventId,
             kind,
             actor,
             actorObservation.SubjectHandle,
             target,
-            targetObservation.SubjectHandle,
+            targetHandle,
             Math.Clamp(confidence, 0f, 1f),
             now,
             now.Advance(lifetime)));
         perception.Revision++;
+        RefreshImmediateHostileSummary(perception, now);
 
         // Profession systems interpret this witnessed fact without subscribing to DamageDealtEvent themselves.
         RaiseLocalEvent(new NCCityLocalIncidentObservedEvent(observer, eventId, kind, actor, target, now));
@@ -332,39 +347,17 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         EntityUid suspect,
         NCActiveWorldTime now,
         TimeSpan lifetime,
-        float confidence = 1f)
+        float confidence = 1f,
+        bool hostile = false)
     {
-        if (!_active || _policy == null || lifetime <= TimeSpan.Zero || !Exists(observer) || !Exists(suspect) ||
-            observer == suspect || !TryComp<NCCityLocalPerceptionComponent>(observer, out var perception) ||
-            !_prototypes.TryIndex(perception.Profile, out var profile) || profile == null)
-        {
+        var kind = hostile && !IsNeutralized(suspect)
+            ? NCCityLocalObservationKind.Hostile
+            : NCCityLocalObservationKind.Suspect;
+        if (!ObserveSubject(observer, suspect, kind, now, lifetime, confidence) ||
+            !TryComp<NCCityLocalPerceptionComponent>(observer, out var perception))
             return false;
-        }
 
-        var previous = perception.Observations.FirstOrDefault(value => value.EntityUid == suspect);
-        perception.Observations.RemoveAll(value => value.EntityUid == suspect);
-        if (perception.Observations.Count >= profile.MaximumObservedEntities)
-            perception.Observations.RemoveAt(perception.Observations.Count - 1);
-
-        var observerCoordinates = _transform.GetMapCoordinates(observer);
-        var suspectCoordinates = _transform.GetMapCoordinates(suspect);
-        var distanceSquared = System.Numerics.Vector2.DistanceSquared(
-            observerCoordinates.Position,
-            suspectCoordinates.Position);
-        perception.Observations.Insert(0, new NCCityLocalObservation(
-            suspect,
-            string.IsNullOrWhiteSpace(previous.SubjectHandle)
-                ? SubjectHandle(new Dictionary<EntityUid, string>(), suspect)
-                : previous.SubjectHandle,
-            NCCityLocalObservationKind.Suspect,
-            distanceSquared,
-            Math.Clamp(confidence, 0f, 1f),
-            now,
-            now.Advance(lifetime)));
-        perception.HostileCount = Math.Max(1, perception.HostileCount);
-        perception.NearestHostile = suspect;
-        perception.Revision++;
-        _observations++;
+        RefreshImmediateHostileSummary(perception, now);
         return true;
     }
 
@@ -379,8 +372,9 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
 
         // Handles survive consecutive observations but disappear with the bounded sensory cache. This gives neural
         // decisions a stable short-lived target without leaking EntityUid or accumulating a global target table.
-        var retainedSuspects = component.Observations
-            .Where(value => value.Kind == NCCityLocalObservationKind.Suspect &&
+        var retainedPeopleOfInterest = component.Observations
+            .Where(value => value.Kind is (NCCityLocalObservationKind.Suspect or
+                                NCCityLocalObservationKind.Hostile) &&
                             value.ExpiresAt > now && Exists(value.EntityUid))
             .Take(profile.MaximumObservedEntities)
             .ToArray();
@@ -400,15 +394,19 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         var lineOfSightChecks = 0;
         var origin = _transform.GetMapCoordinates(entityUid);
         _observedBuffer.Clear();
-        foreach (var suspect in retainedSuspects)
+        foreach (var observed in retainedPeopleOfInterest)
         {
-            component.Observations.Add(suspect);
-            _observedBuffer.Add(suspect.EntityUid);
+            var retained = RefreshRetainedObservation(entityUid, observed, origin, profile, now,
+                ref lineOfSightChecks);
+            component.Observations.Add(retained);
+            _observedBuffer.Add(retained.EntityUid);
+            if (retained.Kind != NCCityLocalObservationKind.Hostile)
+                continue;
             component.HostileCount++;
-            if (suspect.DistanceSquared < nearestHostileDistance)
+            if (retained.DistanceSquared < nearestHostileDistance)
             {
-                nearestHostileDistance = suspect.DistanceSquared;
-                component.NearestHostile = suspect.EntityUid;
+                nearestHostileDistance = retained.DistanceSquared;
+                component.NearestHostile = retained.EntityUid;
             }
         }
         if (TryComp<NpcFactionMemberComponent>(entityUid, out var ownFaction))
@@ -420,6 +418,11 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
                     break;
                 if (!_observedBuffer.Add(hostile))
                 {
+                    continue;
+                }
+                if (IsNeutralized(hostile))
+                {
+                    _factions.DeAggroEntity((entityUid, exception), hostile);
                     continue;
                 }
                 if (lineOfSightChecks >= profile.MaximumLineOfSightChecks)
@@ -491,6 +494,69 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         Schedule(entityUid, component.NextEvaluationAt);
     }
 
+    /// <summary>
+    /// A suspect is evidence for police cognition, while a hostile is an immediate visible combat fact. Hostility is
+    /// downgraded once sight is lost or vanilla state says that the subject can no longer fight.
+    /// </summary>
+    private NCCityLocalObservation RefreshRetainedObservation(
+        EntityUid observer,
+        NCCityLocalObservation observed,
+        MapCoordinates origin,
+        NCCityLocalPerceptionProfilePrototype profile,
+        NCActiveWorldTime now,
+        ref int lineOfSightChecks)
+    {
+        if (IsNeutralized(observed.EntityUid))
+        {
+            _factions.DeAggroEntity(observer, observed.EntityUid);
+            return observed with { Kind = NCCityLocalObservationKind.Suspect };
+        }
+
+        var target = _transform.GetMapCoordinates(observed.EntityUid);
+        if (target.MapId != origin.MapId)
+            return observed with { Kind = NCCityLocalObservationKind.Suspect };
+        var distanceSquared = System.Numerics.Vector2.DistanceSquared(origin.Position, target.Position);
+        if (observed.Kind != NCCityLocalObservationKind.Hostile)
+            return observed with { DistanceSquared = distanceSquared };
+
+        var visible = distanceSquared <= profile.Radius * profile.Radius &&
+                      lineOfSightChecks < profile.MaximumLineOfSightChecks;
+        if (visible)
+        {
+            lineOfSightChecks++;
+            visible = _interaction.InRangeUnobstructed(observer, observed.EntityUid, profile.Radius);
+        }
+        return observed with
+        {
+            Kind = visible ? NCCityLocalObservationKind.Hostile : NCCityLocalObservationKind.Suspect,
+            DistanceSquared = distanceSquared,
+            ObservedAt = visible ? now : observed.ObservedAt,
+        };
+    }
+
+    private bool IsNeutralized(EntityUid entityUid) =>
+        _cuffable.IsCuffed(entityUid, requireFullyCuffed: false) ||
+        TryComp<MobStateComponent>(entityUid, out var mobState) && mobState.CurrentState != MobState.Alive;
+
+    /// <summary>Updates the synchronous combat fact after an authoritative incident without waiting for the queue.</summary>
+    private void RefreshImmediateHostileSummary(NCCityLocalPerceptionComponent perception, NCActiveWorldTime now)
+    {
+        perception.HostileCount = 0;
+        perception.NearestHostile = EntityUid.Invalid;
+        var nearestDistance = float.MaxValue;
+        foreach (var observation in perception.Observations)
+        {
+            if (observation.Kind != NCCityLocalObservationKind.Hostile || observation.ExpiresAt <= now ||
+                !Exists(observation.EntityUid) || IsNeutralized(observation.EntityUid))
+                continue;
+            perception.HostileCount++;
+            if (observation.DistanceSquared >= nearestDistance)
+                continue;
+            nearestDistance = observation.DistanceSquared;
+            perception.NearestHostile = observation.EntityUid;
+        }
+    }
+
     private void PromoteLethalEvents(
         EntityUid observer,
         NCCityLocalPerceptionComponent perception,
@@ -542,7 +608,8 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         Reset();
         if (!_prototypes.TryIndex(
                 new ProtoId<NCCityLocalPerceptionPolicyPrototype>(DefaultPolicyId),
-                out var policy) || policy == null || policy.MaximumTrackedActors <= 0 || policy.MaximumUpdatesPerTick <= 0)
+                out var policy) || policy == null || policy.MaximumTrackedActors <= 0 ||
+            policy.MaximumUpdatesPerTick <= 0 || policy.MaximumIncidentCorrelations <= 0)
         {
             _configurationError = "default-local-perception-policy-invalid";
             return;
@@ -552,6 +619,11 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
             .Select(value => value.Radius)
             .Where(value => float.IsFinite(value) && value > 0f)
             .DefaultIfEmpty(0f)
+            .Max();
+        _maximumWitnessedEventLifetime = _prototypes.EnumeratePrototypes<NCCityLocalPerceptionProfilePrototype>()
+            .Select(value => value.WitnessedEventLifetime)
+            .Where(value => value > TimeSpan.Zero)
+            .DefaultIfEmpty(TimeSpan.FromSeconds(30))
             .Max();
         _epoch = args.Epoch;
         _active = true;
@@ -582,6 +654,8 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         _tracked.Clear();
         _scheduled.Clear();
         _queue.Clear();
+        _incidentCorrelations.Clear();
+        _incidentCorrelationExpiry.Clear();
         _policy = null;
         _epoch = default;
         _sequence = 0;
@@ -590,6 +664,7 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         _rejectedConfigurations = 0;
         _configurationError = null;
         _maximumObservationRadius = 0f;
+        _maximumWitnessedEventLifetime = TimeSpan.Zero;
         _governor.ReportQueue(NCAILoadQueueKind.PhysicalPerception, 0, 1);
         _governor.ReportBacklog(NCAILoadBacklogKind.PhysicalPerception, false);
     }
@@ -611,6 +686,54 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         var normalized = MathF.Sqrt(Math.Max(0f, distanceSquared)) / radius;
         return Math.Clamp(1f - normalized * 0.5f, 0.5f, 1f);
     }
+
+    private Guid CorrelateIncident(EntityUid actor, EntityUid target, NCActiveWorldTime now)
+    {
+        var key = (actor, target);
+        TrimIncidentCorrelations(now);
+        if (_incidentCorrelations.TryGetValue(key, out var existing) && existing.ExpiresAt > now)
+        {
+            var refreshed = existing with { ExpiresAt = now.Advance(_maximumWitnessedEventLifetime) };
+            _incidentCorrelations[key] = refreshed;
+            _incidentCorrelationExpiry.Enqueue(new IncidentCorrelationEntry(key, refreshed.ExpiresAt),
+                refreshed.ExpiresAt.Ticks);
+            return refreshed.EventId;
+        }
+
+        if (_policy != null && _incidentCorrelations.Count >= _policy.MaximumIncidentCorrelations)
+            EvictOldestIncidentCorrelation();
+        var created = new IncidentCorrelation(Guid.NewGuid(), now.Advance(_maximumWitnessedEventLifetime));
+        _incidentCorrelations[key] = created;
+        _incidentCorrelationExpiry.Enqueue(new IncidentCorrelationEntry(key, created.ExpiresAt),
+            created.ExpiresAt.Ticks);
+        return created.EventId;
+    }
+
+    private void TrimIncidentCorrelations(NCActiveWorldTime now)
+    {
+        while (_incidentCorrelationExpiry.TryPeek(out var entry, out var ticks) && ticks <= now.Ticks)
+        {
+            _incidentCorrelationExpiry.Dequeue();
+            if (_incidentCorrelations.TryGetValue(entry.Key, out var current) && current.ExpiresAt == entry.ExpiresAt)
+                _incidentCorrelations.Remove(entry.Key);
+        }
+    }
+
+    private void EvictOldestIncidentCorrelation()
+    {
+        while (_incidentCorrelationExpiry.TryDequeue(out var entry, out _))
+        {
+            if (!_incidentCorrelations.TryGetValue(entry.Key, out var current) || current.ExpiresAt != entry.ExpiresAt)
+                continue;
+            _incidentCorrelations.Remove(entry.Key);
+            return;
+        }
+    }
+
+    private readonly record struct IncidentCorrelation(Guid EventId, NCActiveWorldTime ExpiresAt);
+    private readonly record struct IncidentCorrelationEntry(
+        (EntityUid Actor, EntityUid Target) Key,
+        NCActiveWorldTime ExpiresAt);
 
     private readonly record struct ScheduledEvaluation(EntityUid EntityUid, NCActiveWorldTime DueAt, long Sequence);
 

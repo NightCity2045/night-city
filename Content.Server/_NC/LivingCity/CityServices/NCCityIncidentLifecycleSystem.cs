@@ -110,9 +110,15 @@ public sealed partial class NCCityIncidentLifecycleSystem : EntitySystem
                 if (!Guid.TryParse(stored.AggregateId, out var raw))
                     continue;
                 var incident = await _incidents.GetAsync(new NCCityIncidentId(raw), true);
-                if (incident?.Snapshot.EscalatesAt is { } due && incident.Snapshot.Stage is not
+                if (incident != null && incident.Snapshot.Stage is not
                     (NCCityIncidentStage.Closed or NCCityIncidentStage.Cancelled))
-                    Enqueue(incident.Snapshot.IncidentId, due);
+                {
+                    // Re-publish recovered authority so round-local dispatch, investigation and UI projections do
+                    // not depend on a fresh database mutation after server restart.
+                    RaiseLocalEvent(new NCCityIncidentPersistedEvent(incident));
+                    if (incident.Snapshot.EscalatesAt is { } due)
+                        Enqueue(incident.Snapshot.IncidentId, due);
+                }
             }
             if (page.Count < RecoveryPageSize)
                 break;
@@ -210,7 +216,7 @@ public sealed partial class NCCityIncidentLifecycleSystem : EntitySystem
         NCActiveWorldTime now, NCPartyRef actor)
     {
         if (incident.Snapshot.MaterializationPolicy != NCIncidentMaterializationPolicy.AbstractUnlessObserved ||
-            _occupancy.IsOccupied(incident.Snapshot.LocationZone, out _))
+            _occupancy.IsPlayerObserved(incident.Snapshot.LocationZone, out _))
         {
             await _incidents.ScheduleEscalationAsync(incident.Snapshot.IncidentId, incident.AggregateVersion,
                 now.Advance(policy.DispatchRetryDelay), actor, $"observed.{incident.AggregateVersion}");

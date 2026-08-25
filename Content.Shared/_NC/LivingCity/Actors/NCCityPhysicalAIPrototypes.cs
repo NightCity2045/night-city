@@ -129,4 +129,7 @@ public sealed partial class NCCityLocalPerceptionPolicyPrototype : IPrototype
 
     [DataField(required: true)]
     public int MaximumUpdatesPerTick { get; private set; }
+
+    [DataField]
+    public int MaximumIncidentCorrelations { get; private set; } = 1024;
 }

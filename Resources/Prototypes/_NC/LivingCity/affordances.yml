@@ -34,6 +34,50 @@
   kind: RestArea
   knowledgeKey: location.city.rest-area
 
+# NCPD service functions are derived from the authored station Building and its safe navigation samples. They are
+# semantic capabilities, not mapper entities, so the station remains usable without invisible Booking/Holding anchors.
+- type: ncCityAffordance
+  id: NCNcpdMuster
+  kind: Muster
+  knowledgeKey: location.ncpd.muster
+  organizationKey: NCPD
+
+- type: ncCityAffordance
+  id: NCNcpdDispatch
+  kind: Dispatch
+  knowledgeKey: location.ncpd.dispatch
+  organizationKey: NCPD
+
+- type: ncCityAffordance
+  id: NCNcpdBooking
+  kind: Booking
+  knowledgeKey: location.ncpd.booking
+  organizationKey: NCPD
+
+- type: ncCityAffordance
+  id: NCNcpdHolding
+  kind: Holding
+  knowledgeKey: location.ncpd.holding
+  organizationKey: NCPD
+
+- type: ncCityAffordance
+  id: NCNcpdEvidenceStorage
+  kind: EvidenceStorage
+  knowledgeKey: location.ncpd.evidence-storage
+  organizationKey: NCPD
+
+- type: ncCityAffordance
+  id: NCNcpdArmory
+  kind: Armory
+  knowledgeKey: location.ncpd.armory
+  organizationKey: NCPD
+
+- type: ncCityAffordance
+  id: NCNcpdReportDesk
+  kind: ReportDesk
+  knowledgeKey: location.ncpd.report-desk
+  organizationKey: NCPD
+
 - type: ncCityZoneAffordanceSource
   id: NCStreetPatrolAffordances
   requiredContext: Street
@@ -54,3 +98,11 @@
   candidateProfile: NCPedestrianSpawnCandidates
   affordances: [NCCityResidence, NCCityRestArea]
   maximumCandidates: 2048
+
+- type: ncCityZoneAffordanceSource
+  id: NCNcpdStationAffordances
+  zone: a9c069f8-8558-493c-844b-b7bfe8775521
+  requiredContext: Building
+  candidateProfile: NCPedestrianSpawnCandidates
+  affordances: [NCNcpdMuster, NCNcpdDispatch, NCNcpdBooking, NCNcpdHolding, NCNcpdEvidenceStorage, NCNcpdArmory, NCNcpdReportDesk]
+  maximumCandidates: 16

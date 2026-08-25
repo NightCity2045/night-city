@@ -83,6 +83,9 @@ public sealed partial class NCNcpdPatrolPolicyPrototype : IPrototype
     [DataField] public int MaximumReplans { get; private set; } = 3;
     [DataField] public TimeSpan ReplanBackoff { get; private set; } = TimeSpan.FromSeconds(5);
     [DataField] public float FollowSpacing { get; private set; } = 1.5f;
+    [DataField] public float ArrivalRange { get; private set; } = 1.25f;
+    [DataField] public TimeSpan EvaluationInterval { get; private set; } = TimeSpan.FromMilliseconds(500);
+    [DataField] public int MaximumUpdatesPerTick { get; private set; } = 8;
 }
 
 [Prototype("ncNcpdDispatchPolicy")]
@@ -90,9 +93,12 @@ public sealed partial class NCNcpdDispatchPolicyPrototype : IPrototype
 {
     [IdDataField] public string ID { get; private set; } = string.Empty;
     [DataField] public int MaximumAssignmentsPerEvaluation { get; private set; } = 8;
+    [DataField] public int MaximumTrackedDispatches { get; private set; } = 64;
     [DataField] public int CadetMaximumSeverity { get; private set; } = 300;
     [DataField] public int InspectorMinimumSeverity { get; private set; } = 500;
     [DataField] public TimeSpan AssignmentTimeout { get; private set; } = TimeSpan.FromMinutes(2);
+    [DataField] public TimeSpan RetryDelay { get; private set; } = TimeSpan.FromSeconds(5);
+    [DataField] public TimeSpan MaterializationMaximumWait { get; private set; } = TimeSpan.FromMinutes(2);
 }
 
 [Prototype("ncNcpdUseOfForcePolicy")]
@@ -108,9 +114,14 @@ public sealed partial class NCNcpdUseOfForcePolicyPrototype : IPrototype
     [DataField] public float IncidentObservationRadius { get; private set; } = 8f;
     [DataField] public TimeSpan SuspectObservationLifetime { get; private set; } = TimeSpan.FromSeconds(45);
     [DataField] public float VerbalOrderRange { get; private set; } = 6f;
+    [DataField] public TimeSpan ComplianceWindow { get; private set; } = TimeSpan.FromSeconds(4);
+    [DataField] public float ComplianceMovementTolerance { get; private set; } = 1f;
+    [DataField] public float FlightDistance { get; private set; } = 2.5f;
     [DataField] public float RestraintRange { get; private set; } = 1.25f;
     [DataField] public TimeSpan RestraintRetryDelay { get; private set; } = TimeSpan.FromSeconds(4);
     [DataField] public string VerbalOrderLocKey { get; private set; } = "nc-ncpd-ai-lawful-order";
+    [DataField] public int ObservedAssaultSeverity { get; private set; } = 450;
+    [DataField] public int ObservedKillingSeverity { get; private set; } = 900;
 }
 
 [Prototype("ncNcpdDetentionPolicy")]
@@ -121,6 +132,22 @@ public sealed partial class NCNcpdDetentionPolicyPrototype : IPrototype
     [DataField] public bool RequireRestraintsForEscort { get; private set; } = true;
     [DataField] public bool ConfiscateDangerousWeapons { get; private set; } = true;
     [DataField] public TimeSpan BookingTimeout { get; private set; } = TimeSpan.FromMinutes(5);
+    [DataField] public float ArrivalRange { get; private set; } = 1.25f;
+    [DataField] public int MaximumRouteReplans { get; private set; } = 3;
+    [DataField] public TimeSpan RouteRetryDelay { get; private set; } = TimeSpan.FromSeconds(3);
+    [DataField] public float SearchRange { get; private set; } = 1.5f;
+    [DataField] public int MaximumSearchItems { get; private set; } = 32;
+    [DataField] public int MaximumSearchDepth { get; private set; } = 1;
+    [DataField] public int MaximumSeizedItems { get; private set; } = 8;
+    [DataField] public TimeSpan SearchInteractionRetryDelay { get; private set; } = TimeSpan.FromSeconds(3);
+    [DataField] public bool SeizeGuns { get; private set; } = true;
+    [DataField] public bool SeizeMeleeWeapons { get; private set; } = true;
+    [DataField] public bool SeizeContraband { get; private set; } = true;
+    [DataField] public int PhysicalEvidenceReliability { get; private set; } = 900;
+    [DataField] public bool PhysicalEvidenceAdmissible { get; private set; } = true;
+    [DataField] public float EvidenceStorageSearchRadius { get; private set; } = 3f;
+    [DataField] public List<EntProtoId> EvidenceStorageReceivers { get; private set; } = ["LockerEvidence"];
+    [DataField] public TimeSpan AbstractCustodyReviewInterval { get; private set; } = TimeSpan.FromHours(1);
 }
 
 [Prototype("ncNcpdInvestigationPolicy")]
@@ -130,4 +157,16 @@ public sealed partial class NCNcpdInvestigationPolicyPrototype : IPrototype
     [DataField] public int MaximumEvidencePerIncident { get; private set; } = 128;
     [DataField] public int MaximumWitnessesPerIncident { get; private set; } = 64;
     [DataField] public TimeSpan UnresolvedCaseRetention { get; private set; } = TimeSpan.FromHours(24);
+    [DataField] public float WitnessInterviewRadius { get; private set; } = 6f;
+    [DataField] public int MaximumWitnessCandidates { get; private set; } = 24;
+    [DataField] public int MaximumWitnessesPerInterview { get; private set; } = 3;
+    [DataField] public float MinimumWitnessConfidence { get; private set; } = 0.5f;
+    [DataField] public TimeSpan MemoryAvailabilityWait { get; private set; } = TimeSpan.FromSeconds(10);
+    [DataField] public int MaximumPersistenceRetries { get; private set; } = 3;
+    [DataField] public int MinimumCorroboratingRecords { get; private set; } = 1;
+    [DataField] public int MinimumEvidenceReliability { get; private set; } = 500;
+    [DataField] public int MaximumActiveInvestigations { get; private set; } = 16;
+    [DataField] public string WitnessQuestionLocKey { get; private set; } = "nc-ncpd-ai-witness-question";
+    [DataField] public string WitnessAssaultLocKey { get; private set; } = "nc-ncpd-ai-witness-assault";
+    [DataField] public string WitnessKillingLocKey { get; private set; } = "nc-ncpd-ai-witness-killing";
 }

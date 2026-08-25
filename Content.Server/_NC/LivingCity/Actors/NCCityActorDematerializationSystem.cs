@@ -397,10 +397,12 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
                 "The actor root or a mandatory domain aggregate is missing or unreadable.");
             return;
         }
-        if (actor.Snapshot.Lifecycle.Status is NCCityActorStatus.Arrested or NCCityActorStatus.Imprisoned)
+        // NC: Arrested means an active physical escort. Imprisoned actors may return to the abstract holding state
+        // once the detention system releases its explicit blocker and ordinary player relevance permits it.
+        if (actor.Snapshot.Lifecycle.Status == NCCityActorStatus.Arrested)
         {
             _inFlight = Math.Max(0, _inFlight - 1);
-            Retry(pending, now, "A detained or imprisoned physical actor cannot be dematerialized.", false);
+            Retry(pending, now, "An arrested physical actor cannot be dematerialized during escort.", false);
             return;
         }
         if (!TryResolveBinding(pending, out var entityUid))

@@ -396,7 +396,15 @@ public sealed partial class NCCityServiceSystem : EntitySystem
                 var dispatch = await GetDispatchAsync(new NCServiceDispatchId(raw), true);
                 if (dispatch?.Snapshot.Status == NCServiceDispatchStatus.EnRoute &&
                     dispatch.Snapshot.ExpectedArrivalAt is { } due)
+                {
                     Enqueue(dispatch.Snapshot.DispatchId, due);
+                    // Re-publish active work so service-specific adapters rebuild their round-local execution state.
+                    RaiseLocalEvent(new NCServiceDispatchPersistedEvent(dispatch));
+                }
+                else if (dispatch?.Snapshot.Status == NCServiceDispatchStatus.OnScene)
+                {
+                    RaiseLocalEvent(new NCServiceDispatchPersistedEvent(dispatch));
+                }
             }
             if (page.Count < RecoveryPageSize)
                 break;
@@ -447,6 +455,16 @@ public sealed partial class NCCityServiceSystem : EntitySystem
             if (dispatch.Snapshot.ExpectedArrivalAt is { } future && future > now)
             {
                 Enqueue(id, future);
+                return;
+            }
+            // NC: a physical service adapter may require a factual arrival instead of accepting ETA as proof.
+            var arrivalAttempt = new NCServiceDispatchArrivalAttemptEvent(dispatch, now);
+            RaiseLocalEvent(arrivalAttempt);
+            if (arrivalAttempt.Deferred)
+            {
+                Enqueue(id, now.Advance(arrivalAttempt.RetryAfter > TimeSpan.Zero
+                    ? arrivalAttempt.RetryAfter
+                    : TimeSpan.FromSeconds(1)));
                 return;
             }
             var eventId = Guid.NewGuid();
@@ -655,4 +673,19 @@ public sealed partial class NCCityServiceSystem : EntitySystem
 public sealed class NCServiceDispatchPersistedEvent(NCServiceDispatchRecord dispatch) : EntityEventArgs
 {
     public NCServiceDispatchRecord Dispatch { get; } = dispatch;
+}
+
+/// <summary>
+/// Allows a physical responder adapter to defer the ETA transition until its real unit has arrived. Deferral is
+/// round-local and bounded by the adapter retry policy; no persistence write occurs for a failed arrival probe.
+/// </summary>
+public sealed class NCServiceDispatchArrivalAttemptEvent(
+    NCServiceDispatchRecord dispatch,
+    NCActiveWorldTime attemptedAt) : EntityEventArgs
+{
+    public NCServiceDispatchRecord Dispatch { get; } = dispatch;
+    public NCActiveWorldTime AttemptedAt { get; } = attemptedAt;
+    public bool Deferred { get; set; }
+    public TimeSpan RetryAfter { get; set; } = TimeSpan.FromSeconds(1);
+    public string Reason { get; set; } = string.Empty;
 }

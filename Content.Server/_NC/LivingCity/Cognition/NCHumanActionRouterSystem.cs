@@ -325,10 +325,13 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
             if (string.IsNullOrWhiteSpace(action.ID) || action.Timeout <= TimeSpan.Zero ||
                 action.Timeout > TimeSpan.FromHours(24) || !float.IsFinite(action.MaximumRange) ||
                 !float.IsFinite(action.CompletionRange) || action.MaximumRange < 0f ||
-                action.CompletionRange < 0f ||
+                action.CompletionRange < 0f || action.SpeechLocId.Length > 128 ||
                 action.MaximumRange > 0f && action.CompletionRange > action.MaximumRange ||
                 !Enum.IsDefined(action.Executor) || !Enum.IsDefined(action.TargetKind) ||
-                !Enum.IsDefined(action.Completion) || action.Interrupts.Any(value => !Enum.IsDefined(value)))
+                !Enum.IsDefined(action.Completion) || !Enum.IsDefined(action.Operation) ||
+                action.Operation == NCHumanActionOperationKind.Speak &&
+                string.IsNullOrWhiteSpace(action.SpeechLocId) ||
+                action.Interrupts.Any(value => !Enum.IsDefined(value)))
             {
                 return $"human-action-invalid:{action.ID}";
             }

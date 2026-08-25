@@ -1590,6 +1590,7 @@ public sealed partial class NCLivingCityAdminTab : Control
         NCLivingCityAdminInspectKind.PropertyContents =>
             Loc.GetString("nc-living-city-admin-kind-property-contents"),
         NCLivingCityAdminInspectKind.PoliceFine => Loc.GetString("nc-living-city-admin-kind-police-fine"),
+        NCLivingCityAdminInspectKind.PoliceWanted => Loc.GetString("nc-living-city-admin-kind-police-wanted"),
         NCLivingCityAdminInspectKind.OutboxMessage => Loc.GetString("nc-living-city-admin-kind-outbox-message"),
         NCLivingCityAdminInspectKind.CityZone => Loc.GetString("nc-living-city-admin-kind-city-zone"),
         NCLivingCityAdminInspectKind.CityConnectivityZone =>

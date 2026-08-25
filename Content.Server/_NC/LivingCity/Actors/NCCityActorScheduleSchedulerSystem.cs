@@ -150,7 +150,8 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         if (!_active || args.SessionEpoch != _epoch)
             return;
 
-        if (args.Frozen || args.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived)
+        if (args.Frozen || args.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived or
+            NCCityActorStatus.Arrested or NCCityActorStatus.Imprisoned)
         {
             _scheduled.Remove(args.ActorId);
             _pendingMutations.Remove(args.ActorId);
@@ -202,7 +203,8 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         foreach (var actor in page.Records)
         {
             if (!actor.Snapshot.Lifecycle.Frozen &&
-                actor.Snapshot.Lifecycle.Status is not (NCCityActorStatus.Dead or NCCityActorStatus.Archived))
+                actor.Snapshot.Lifecycle.Status is not (NCCityActorStatus.Dead or NCCityActorStatus.Archived or
+                    NCCityActorStatus.Arrested or NCCityActorStatus.Imprisoned))
             {
                 Enqueue(actor.Snapshot.Identity.ActorId, actor.Snapshot.Schedule.NextUpdateAt);
             }
@@ -270,7 +272,8 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         }
 
         if (actor.Snapshot.Lifecycle.Frozen ||
-            actor.Snapshot.Lifecycle.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived)
+            actor.Snapshot.Lifecycle.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived or
+                NCCityActorStatus.Arrested or NCCityActorStatus.Imprisoned)
         {
             Finish(actorId);
             return;

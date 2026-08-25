@@ -57,6 +57,7 @@ nc-living-city-admin-kind-shipment = Market: shipment
 nc-living-city-admin-kind-property = Property
 nc-living-city-admin-kind-property-contents = Property contents snapshot
 nc-living-city-admin-kind-police-fine = Police fine
+nc-living-city-admin-kind-police-wanted = NCPD wanted record
 nc-living-city-admin-kind-outbox-message = Outbox message
 nc-living-city-admin-kind-city-zone = Authored city zone
 nc-living-city-admin-kind-city-connectivity-zone = City connectivity for zone

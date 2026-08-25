@@ -58,6 +58,7 @@ public enum NCLivingCityAdminInspectKind : byte
     CityNews,
     Estate,
     NeuralRuntime,
+    PoliceWanted,
 }
 
 [Serializable, NetSerializable]

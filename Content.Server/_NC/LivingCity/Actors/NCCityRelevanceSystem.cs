@@ -421,7 +421,8 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                         _travelingCandidatesSkipped++;
                         continue;
                     }
-                    if (actor.PresenceMode == NCCityActorPresenceMode.AbstractHome)
+                    if (actor.PresenceMode is
+                        (NCCityActorPresenceMode.AbstractHome or NCCityActorPresenceMode.AbstractCustody))
                         continue;
 
                     if (_groupPhysicalization.TryGetMaterializeTogetherGroup(

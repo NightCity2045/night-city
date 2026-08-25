@@ -68,6 +68,7 @@ public enum NCCityActorPresenceMode : byte
     Public,
     AbstractHome,
     PhysicalHome,
+    AbstractCustody,
 }
 
 [Serializable, NetSerializable]

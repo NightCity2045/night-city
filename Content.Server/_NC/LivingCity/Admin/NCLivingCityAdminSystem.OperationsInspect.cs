@@ -4,6 +4,7 @@
 
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.CityServices;
+using Content.Shared._NC.LivingCity.Police;
 using Content.Shared._NC.Persistence.Identity;
 
 namespace Content.Server._NC.LivingCity.Admin;
@@ -21,6 +22,32 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("incident", "participants", value.Participants.Count); fields.Add("incident", "evidence", value.Evidence.Count);
         fields.Add("incident", "witnesses", value.WitnessStatements.Count); fields.Add("incident", "dispatches", value.DispatchIds.Count);
         fields.Add("incident", "escalates-at", value.EscalatesAt?.Elapsed); fields.Add("incident", "outcome", value.Outcome?.OutcomeKey);
+        return Ok(fields);
+    }
+
+    private async Task<InspectionResult> InspectPoliceWantedAsync(string target)
+    {
+        if (!TryGuid(target, out var raw))
+            return Fail("invalid-wanted-id");
+        var record = await _wanted.GetAsync(new NCPoliceWantedId(raw), true);
+        if (record == null)
+            return Fail("wanted-record-not-found");
+
+        var snapshot = record.Snapshot;
+        var fields = new FieldBuilder();
+        fields.Add("wanted", "wanted-id", snapshot.WantedId);
+        fields.Add("wanted", "subject", snapshot.Subject);
+        fields.Add("wanted", "subject-name", snapshot.SubjectName);
+        fields.Add("wanted", "status", snapshot.Status);
+        fields.Add("wanted", "risk", snapshot.Risk);
+        fields.Add("wanted", "reason", snapshot.ReasonKey);
+        fields.Add("wanted", "incident-id", snapshot.IncidentId);
+        fields.Add("wanted", "source-world-event", snapshot.SourceWorldEventId);
+        fields.Add("wanted", "issued-by", snapshot.IssuedBy);
+        fields.Add("wanted", "issued-by-name", snapshot.IssuedByName);
+        fields.Add("wanted", "issued-at", snapshot.IssuedAt.Elapsed);
+        fields.Add("wanted", "updated-at", snapshot.UpdatedAt.Elapsed);
+        fields.Add("wanted", "aggregate-version", record.AggregateVersion);
         return Ok(fields);
     }
     private async Task<InspectionResult> InspectCityServiceAsync(string target)
@@ -43,7 +70,16 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("dispatch", "service", value.ServiceId); fields.Add("dispatch", "incident", value.IncidentId);
         fields.Add("dispatch", "status", value.Status); fields.Add("dispatch", "destination", value.DestinationZone);
         fields.Add("dispatch", "threat", value.ThreatBasisPoints); fields.Add("dispatch", "eta", value.ExpectedArrivalAt?.Elapsed);
-        fields.Add("dispatch", "group", value.ResponseGroupId); return Ok(fields);
+        fields.Add("dispatch", "group", value.ResponseGroupId);
+        if (_ncpdServiceDispatch.TryGetSnapshot(value.DispatchId, out var ncpd))
+        {
+            fields.Add("ncpd-response", "unit", ncpd.UnitId);
+            fields.Add("ncpd-response", "command", ncpd.CommandId);
+            fields.Add("ncpd-response", "adapter-status", ncpd.AdapterStatus);
+            fields.Add("ncpd-response", "updated-at", ncpd.UpdatedAt.Elapsed);
+            fields.Add("ncpd-response", "failure", ncpd.Failure.Length == 0 ? "none" : ncpd.Failure);
+        }
+        return Ok(fields);
     }
     private async Task<InspectionResult> InspectFactionAsync(string target)
     {

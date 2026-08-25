@@ -57,6 +57,7 @@ nc-living-city-admin-kind-shipment = Рынок: грузовая доставк
 nc-living-city-admin-kind-property = Недвижимость
 nc-living-city-admin-kind-property-contents = Слепок содержимого недвижимости
 nc-living-city-admin-kind-police-fine = Полицейский штраф
+nc-living-city-admin-kind-police-wanted = Розыск NCPD
 nc-living-city-admin-kind-outbox-message = Сообщение outbox
 nc-living-city-admin-kind-city-zone = Размеченная зона города
 nc-living-city-admin-kind-city-connectivity-zone = Связность городской зоны

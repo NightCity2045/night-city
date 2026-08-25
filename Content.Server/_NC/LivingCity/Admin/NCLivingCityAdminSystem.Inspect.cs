@@ -63,6 +63,7 @@ public sealed partial class NCLivingCityAdminSystem
         NCLivingCityAdminInspectKind.Property => InspectPropertyAsync(request.Target),
         NCLivingCityAdminInspectKind.PropertyContents => InspectPropertyContentsAsync(request.Target),
         NCLivingCityAdminInspectKind.PoliceFine => InspectPoliceFineAsync(request.Target),
+        NCLivingCityAdminInspectKind.PoliceWanted => InspectPoliceWantedAsync(request.Target),
         NCLivingCityAdminInspectKind.OutboxMessage => InspectOutboxMessageAsync(request.Target),
         NCLivingCityAdminInspectKind.CityZone => Task.FromResult(InspectCityZone(request.Target)),
         NCLivingCityAdminInspectKind.CityConnectivityZone =>
@@ -171,6 +172,30 @@ public sealed partial class NCLivingCityAdminSystem
                 fields.Add("local-perception", "nearest-hostile", perception.NearestHostile);
                 fields.Add("local-perception", "nearest-critical", perception.NearestCritical);
             }
+            if (TryComp<NCNcpdSuspectClaimComponent>(physical.EntityUid, out var suspectClaim))
+            {
+                fields.Add("ncpd-suspect", "source-world-event", suspectClaim.SourceWorldEventId);
+                fields.Add("ncpd-suspect", "incident-id", suspectClaim.IncidentId);
+                fields.Add("ncpd-suspect", "entity", suspectClaim.Suspect);
+                fields.Add("ncpd-suspect", "handle", suspectClaim.SuspectHandle);
+                fields.Add("ncpd-suspect", "basis", suspectClaim.Basis);
+                fields.Add("ncpd-suspect", "status", suspectClaim.Status);
+                fields.Add("ncpd-suspect", "force-level", suspectClaim.ForceLevel);
+                fields.Add("ncpd-suspect", "claimed-at", suspectClaim.ClaimedAt.Elapsed);
+                fields.Add("ncpd-suspect", "updated-at", suspectClaim.UpdatedAt.Elapsed);
+                fields.Add("ncpd-suspect", "ordered-at", suspectClaim.OrderedAt?.Elapsed.ToString() ?? "none");
+                fields.Add("ncpd-suspect", "response-deadline",
+                    suspectClaim.ResponseDeadline?.Elapsed.ToString() ?? "none");
+                fields.Add("ncpd-suspect", "result", suspectClaim.ResultReason);
+            }
+            if (TryComp<NCNcpdEvidenceSearchComponent>(physical.EntityUid, out var evidenceSearch))
+                AddNcpdEvidenceSearch(fields, evidenceSearch);
+            if (TryComp<NCNcpdEvidenceSubmissionComponent>(physical.EntityUid, out var evidenceSubmission))
+                AddNcpdEvidenceSubmission(fields, evidenceSubmission);
+            if (TryComp<NCNcpdWitnessInterviewComponent>(physical.EntityUid, out var witnessInterview))
+                AddNcpdWitnessInterview(fields, witnessInterview);
+            if (TryComp<NCNcpdInvestigationComponent>(physical.EntityUid, out var investigation))
+                AddNcpdInvestigation(fields, investigation);
             foreach (var trace in physical.Trace.TakeLast(32))
             {
                 var section = $"physical-trace-{trace.Sequence}";
@@ -268,8 +293,67 @@ public sealed partial class NCLivingCityAdminSystem
             TryComp<NCNcpdIncidentReportComponent>(physical, out var policeReport))
         {
             fields.Add("ncpd-incident", "report-id", policeReport.ReportId);
+            fields.Add("ncpd-incident", "source-world-event", policeReport.SourceWorldEventId);
+            fields.Add("ncpd-incident", "incident-id", policeReport.IncidentId);
             fields.Add("ncpd-incident", "suspect-handle", policeReport.SuspectHandle);
             fields.Add("ncpd-incident", "reported-at", policeReport.ReportedAt.Elapsed);
+            fields.Add("ncpd-incident", "status", policeReport.Status);
+            fields.Add("ncpd-incident", "failure", policeReport.Failure.Length == 0 ? "none" : policeReport.Failure);
+        }
+        if (runtime.EntityUid is { } officer && TryComp<NCNcpdSuspectClaimComponent>(officer, out var suspectClaim))
+        {
+            fields.Add("ncpd-suspect", "source-world-event", suspectClaim.SourceWorldEventId);
+            fields.Add("ncpd-suspect", "incident-id", suspectClaim.IncidentId);
+            fields.Add("ncpd-suspect", "party", suspectClaim.SuspectParty);
+            fields.Add("ncpd-suspect", "entity", suspectClaim.Suspect);
+            fields.Add("ncpd-suspect", "handle", suspectClaim.SuspectHandle);
+            fields.Add("ncpd-suspect", "basis", suspectClaim.Basis);
+            fields.Add("ncpd-suspect", "status", suspectClaim.Status);
+            fields.Add("ncpd-suspect", "force-level", suspectClaim.ForceLevel);
+            fields.Add("ncpd-suspect", "updated-at", suspectClaim.UpdatedAt.Elapsed);
+            fields.Add("ncpd-suspect", "result", suspectClaim.ResultReason);
+        }
+        if (runtime.EntityUid is { } evidenceOfficer &&
+            TryComp<NCNcpdEvidenceSearchComponent>(evidenceOfficer, out var evidenceSearch))
+        {
+            AddNcpdEvidenceSearch(fields, evidenceSearch);
+        }
+        if (runtime.EntityUid is { } submittingOfficer &&
+            TryComp<NCNcpdEvidenceSubmissionComponent>(submittingOfficer, out var evidenceSubmission))
+        {
+            AddNcpdEvidenceSubmission(fields, evidenceSubmission);
+        }
+        if (runtime.EntityUid is { } interviewingOfficer &&
+            TryComp<NCNcpdWitnessInterviewComponent>(interviewingOfficer, out var witnessInterview))
+        {
+            AddNcpdWitnessInterview(fields, witnessInterview);
+        }
+        if (runtime.EntityUid is { } wantedOfficer &&
+            TryComp<NCNcpdWantedProjectionComponent>(wantedOfficer, out var wanted))
+        {
+            fields.Add("ncpd-wanted", "wanted-id", wanted.WantedId.IsValid ? wanted.WantedId.ToString() : "pending");
+            fields.Add("ncpd-wanted", "incident-id", wanted.IncidentId);
+            fields.Add("ncpd-wanted", "subject", wanted.Subject);
+            fields.Add("ncpd-wanted", "status", wanted.Status);
+            fields.Add("ncpd-wanted", "submitting", wanted.Submitting);
+            fields.Add("ncpd-wanted", "updated-at", wanted.UpdatedAt.Elapsed);
+            fields.Add("ncpd-wanted", "failure", wanted.Failure.Length == 0 ? "none" : wanted.Failure);
+        }
+        if (runtime.EntityUid is { } inspector &&
+            TryComp<NCNcpdInvestigationComponent>(inspector, out var investigation))
+        {
+            AddNcpdInvestigation(fields, investigation);
+        }
+        if (runtime.EntityUid is { } detainee && TryComp<NCNcpdCustodyComponent>(detainee, out var custody))
+        {
+            fields.Add("ncpd-custody", "booking-id",
+                custody.BookingId == Guid.Empty ? "pending" : custody.BookingId.ToString("D"));
+            fields.Add("ncpd-custody", "incident-id", custody.IncidentId);
+            fields.Add("ncpd-custody", "detainee", custody.Detainee);
+            fields.Add("ncpd-custody", "arresting-officer", custody.ArrestingOfficer);
+            fields.Add("ncpd-custody", "status", custody.Status);
+            fields.Add("ncpd-custody", "updated-at", custody.UpdatedAt.Elapsed);
+            fields.Add("ncpd-custody", "failure", custody.Failure.Length == 0 ? "none" : custody.Failure);
         }
         if (_neuralSuggestions.TryGetSuggestionSnapshot(actorId, out var neural))
         {
@@ -341,6 +425,90 @@ public sealed partial class NCLivingCityAdminSystem
             fields.Add(section, "detail", trace.Detail);
         }
         return Ok(fields);
+    }
+
+    private void AddNcpdEvidenceSearch(FieldBuilder fields, NCNcpdEvidenceSearchComponent search)
+    {
+        fields.Add("ncpd-evidence-search", "incident-id", search.IncidentId);
+        fields.Add("ncpd-evidence-search", "suspect-entity", search.Suspect);
+        fields.Add("ncpd-evidence-search", "suspect-party", search.SuspectParty);
+        fields.Add("ncpd-evidence-search", "status", search.Status);
+        fields.Add("ncpd-evidence-search", "inspected-items", search.InspectedItems);
+        fields.Add("ncpd-evidence-search", "dangerous-items", search.DangerousItems.Count);
+        fields.Add("ncpd-evidence-search", "seized-items", search.SeizedItems.Count);
+        fields.Add("ncpd-evidence-search", "updated-at", search.UpdatedAt.Elapsed);
+        fields.Add("ncpd-evidence-search", "failure", search.Failure.Length == 0 ? "none" : search.Failure);
+        foreach (var item in search.DangerousItems.Take(8))
+        {
+            var section = $"ncpd-dangerous-item-{item}";
+            fields.Add(section, "entity", item);
+            fields.Add(section, "name", Exists(item) ? MetaData(item).EntityName : "missing");
+            AddNcpdEvidenceItem(fields, section, item);
+        }
+        foreach (var item in search.SeizedItems.Take(8))
+        {
+            var section = $"ncpd-seized-item-{item}";
+            fields.Add(section, "entity", item);
+            fields.Add(section, "name", Exists(item) ? MetaData(item).EntityName : "missing");
+            AddNcpdEvidenceItem(fields, section, item);
+        }
+    }
+
+    private static void AddNcpdEvidenceSubmission(
+        FieldBuilder fields,
+        NCNcpdEvidenceSubmissionComponent submission)
+    {
+        fields.Add("ncpd-evidence-submission", "incident-id", submission.IncidentId);
+        fields.Add("ncpd-evidence-submission", "status", submission.Status);
+        fields.Add("ncpd-evidence-submission", "destination", submission.Destination);
+        fields.Add("ncpd-evidence-submission", "receiver", submission.Receiver);
+        fields.Add("ncpd-evidence-submission", "submitted-items", submission.SubmittedItems);
+        fields.Add("ncpd-evidence-submission", "updated-at", submission.UpdatedAt.Elapsed);
+        fields.Add("ncpd-evidence-submission", "failure",
+            submission.Failure.Length == 0 ? "none" : submission.Failure);
+    }
+
+    private static void AddNcpdWitnessInterview(
+        FieldBuilder fields,
+        NCNcpdWitnessInterviewComponent interview)
+    {
+        fields.Add("ncpd-witness-interview", "incident-id", interview.IncidentId);
+        fields.Add("ncpd-witness-interview", "source-world-event", interview.SourceWorldEventId);
+        fields.Add("ncpd-witness-interview", "status", interview.Status);
+        fields.Add("ncpd-witness-interview", "candidates", interview.Candidates);
+        fields.Add("ncpd-witness-interview", "recorded-statements", interview.RecordedStatements);
+        fields.Add("ncpd-witness-interview", "current-witness", interview.CurrentWitness);
+        fields.Add("ncpd-witness-interview", "updated-at", interview.UpdatedAt.Elapsed);
+        fields.Add("ncpd-witness-interview", "failure",
+            interview.Failure.Length == 0 ? "none" : interview.Failure);
+    }
+
+    private static void AddNcpdInvestigation(
+        FieldBuilder fields,
+        NCNcpdInvestigationComponent investigation)
+    {
+        fields.Add("ncpd-investigation", "incident-id", investigation.IncidentId);
+        fields.Add("ncpd-investigation", "source-world-event", investigation.SourceWorldEventId);
+        fields.Add("ncpd-investigation", "incident-version", investigation.IncidentVersion);
+        fields.Add("ncpd-investigation", "status", investigation.Status);
+        fields.Add("ncpd-investigation", "evidence", investigation.EvidenceCount);
+        fields.Add("ncpd-investigation", "witnesses", investigation.WitnessCount);
+        fields.Add("ncpd-investigation", "updated-at", investigation.UpdatedAt.Elapsed);
+        fields.Add("ncpd-investigation", "failure",
+            investigation.Failure.Length == 0 ? "none" : investigation.Failure);
+    }
+
+    private void AddNcpdEvidenceItem(FieldBuilder fields, string section, EntityUid item)
+    {
+        if (!Exists(item) || !TryComp<NCNcpdEvidenceItemComponent>(item, out var evidence))
+            return;
+        fields.Add(section, "evidence-id", evidence.EvidenceId);
+        fields.Add(section, "incident-id", evidence.IncidentId);
+        fields.Add(section, "seized-from", evidence.SeizedFrom);
+        fields.Add(section, "seized-by", evidence.SeizedBy);
+        fields.Add(section, "status", evidence.Status);
+        fields.Add(section, "updated-at", evidence.UpdatedAt.Elapsed);
+        fields.Add(section, "failure", evidence.Failure.Length == 0 ? "none" : evidence.Failure);
     }
 
     private static void AddIntention(

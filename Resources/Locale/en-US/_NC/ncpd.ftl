@@ -28,3 +28,6 @@ ent-NCPDCommanderPDA = NCPD precinct commander PDA
 ent-NCPDChiefPDA = NCPD chief PDA
     .desc = A rugged department terminal tied to its owner's persistent position.
 nc-ncpd-ai-lawful-order = NCPD! Stop and keep your hands where I can see them!
+nc-ncpd-ai-witness-question = NCPD. Tell me exactly what you witnessed.
+nc-ncpd-ai-witness-assault = I saw { $actor } attack { $target }.
+nc-ncpd-ai-witness-killing = I saw { $actor } kill { $target }.

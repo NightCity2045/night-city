@@ -21,6 +21,13 @@ public sealed partial class NCNcpdMappingValidationSystem : EntitySystem
         NCCityAffordanceKind.Workplace,
         NCCityAffordanceKind.PublicEntrance,
         NCCityAffordanceKind.BuildingExit,
+        NCCityAffordanceKind.Muster,
+        NCCityAffordanceKind.Dispatch,
+        NCCityAffordanceKind.Booking,
+        NCCityAffordanceKind.Holding,
+        NCCityAffordanceKind.EvidenceStorage,
+        NCCityAffordanceKind.Armory,
+        NCCityAffordanceKind.ReportDesk,
     ];
 
     [Dependency] private IPrototypeManager _prototypes = default!;

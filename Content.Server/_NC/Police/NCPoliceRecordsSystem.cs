@@ -73,6 +73,40 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
     }
 
+    /// <summary>
+    /// Persistence boundary used by authorized NPC police workflows. The caller must validate the legal basis;
+    /// this method only commits through the same NCPD record store used by the physical console.
+    /// </summary>
+    public Task<NCPoliceRecordData?> PersistStatusAsync(
+        NCCharacterId target,
+        NCPoliceOperationalStatus status,
+        string reason,
+        NCCharacterId? actorCharacterId,
+        string actorName,
+        NCPoliceRecordEventType eventType = NCPoliceRecordEventType.StatusChanged)
+    {
+        if (!target.IsValid || !Enum.IsDefined(status) || string.IsNullOrWhiteSpace(reason) ||
+            reason.Trim().Length > 256 || string.IsNullOrWhiteSpace(actorName) || actorName.Trim().Length > 128)
+        {
+            return Task.FromResult<NCPoliceRecordData?>(null);
+        }
+
+        return _database.SetNCPoliceStatusAsync(
+            target,
+            status,
+            reason.Trim(),
+            actorCharacterId,
+            actorName.Trim(),
+            eventType);
+    }
+
+    /// <summary>Projects an already committed record into the live vanilla security record.</summary>
+    public void ApplyCommittedStatus(NCPoliceRecordData record)
+    {
+        UpdateLiveRecord(record);
+        _ = RefreshOpenViewsAsync();
+    }
+
     private async void OnUiOpened(EntityUid uid, NCPoliceRecordsConsoleComponent component, BoundUIOpenedEvent args)
     {
         if (args.Actor is not { Valid: true } user || !CanUse(uid, user))

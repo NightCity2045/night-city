@@ -28,3 +28,6 @@ ent-NCPDCommanderPDA = КПК командира участка NCPD
 ent-NCPDChiefPDA = КПК начальника NCPD
     .desc = Защищённый терминал департамента, привязанный к постоянной должности владельца.
 nc-ncpd-ai-lawful-order = НСПД! Стоять, руки держать на виду!
+nc-ncpd-ai-witness-question = НСПД. Расскажите точно, что вы видели.
+nc-ncpd-ai-witness-assault = Я видел, как { $actor } напал на { $target }.
+nc-ncpd-ai-witness-killing = Я видел, как { $actor } убил { $target }.

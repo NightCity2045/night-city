@@ -124,10 +124,17 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCNcpdUnitSystem _ncpdUnits = default!;
     [Dependency] private NCNcpdMappingValidationSystem _ncpdMapping = default!;
     [Dependency] private NCNcpdCommandSystem _ncpdCommands = default!;
+    [Dependency] private NCNcpdServiceDispatchSystem _ncpdServiceDispatch = default!;
+    [Dependency] private NCNcpdDetentionSystem _ncpdDetention = default!;
+    [Dependency] private NCNcpdEvidenceSystem _ncpdEvidence = default!;
     [Dependency] private NCLivelihoodRegistrySystem _livelihoods = default!;
     [Dependency] private NCPropertyRegistrySystem _properties = default!;
     [Dependency] private NCPropertyContentSnapshotSystem _propertyContents = default!;
     [Dependency] private NCPoliceFineRegistrySystem _fines = default!;
+    [Dependency] private NCPoliceWantedRegistrySystem _wanted = default!;
+    [Dependency] private NCNcpdWantedSystem _ncpdWanted = default!;
+    [Dependency] private NCNcpdInvestigationSystem _ncpdInvestigations = default!;
+    [Dependency] private NCNcpdOffscreenCustodySystem _ncpdOffscreenCustody = default!;
     [Dependency] private NCRelationshipRegistrySystem _relationships = default!;
     [Dependency] private NCReputationRegistrySystem _reputations = default!;
     [Dependency] private NCMemoryRegistrySystem _memories = default!;
@@ -390,7 +397,8 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("workforce", "profession-jobs", _professions.JobCount);
         fields.Add("workforce", "profession-configuration-error", _professions.ConfigurationError ?? "none");
         fields.Add("workforce", "civilian-livelihoods-cached", _livelihoods.CachedActorCount);
-        var ncpdConfigurationError = _ncpdWorkforce.ConfigurationError ?? _ncpdUnits.ConfigurationError;
+        var ncpdConfigurationError = _ncpdWorkforce.ConfigurationError ?? _ncpdUnits.ConfigurationError ??
+                                     _ncpdServiceDispatch.ConfigurationError;
         var ncpdReady = ncpdConfigurationError == null && _ncpdMapping.MappingErrorCount == 0;
         fields.Add("ncpd-readiness", "state", ncpdReady ? "ready" : "action-required");
         fields.Add("ncpd-readiness", "configuration-error", ncpdConfigurationError ?? "none");
@@ -406,6 +414,30 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("ncpd-units", "cadets-without-supervisor", _ncpdUnits.CadetsWithoutSupervisor);
         fields.Add("ncpd-units", "active-orders", _ncpdCommands.ActiveCommandCount);
         fields.Add("ncpd-units", "dispatch-history", _ncpdCommands.RetainedCommandCount);
+        fields.Add("ncpd-service-dispatch", "tracked", _ncpdServiceDispatch.TrackedDispatches);
+        fields.Add("ncpd-service-dispatch", "assigned", _ncpdServiceDispatch.AssignedDispatches);
+        fields.Add("ncpd-service-dispatch", "awaiting-unit", _ncpdServiceDispatch.AwaitingUnitCount);
+        fields.Add("ncpd-service-dispatch", "preparation-in-flight", _ncpdServiceDispatch.PreparationInFlight);
+        fields.Add("ncpd-service-dispatch", "abstract-on-scene", _ncpdServiceDispatch.AbstractOnSceneCount);
+        fields.Add("ncpd-service-dispatch", "physicalization-pending",
+            _ncpdServiceDispatch.PhysicalizationPendingCount);
+        fields.Add("ncpd-custody", "active-detainees", _ncpdDetention.ActiveCustodyCount);
+        fields.Add("ncpd-custody", "physical-routes", _ncpdDetention.ActiveRouteCount);
+        fields.Add("ncpd-custody", "persistence-in-flight", _ncpdDetention.PendingMutationCount);
+        fields.Add("ncpd-evidence", "persistence-in-flight", _ncpdEvidence.PendingEvidenceMutations);
+        fields.Add("ncpd-wanted", "cached-records", _wanted.CachedCount);
+        fields.Add("ncpd-wanted", "persistence-in-flight", _ncpdWanted.PendingMutations);
+        fields.Add("ncpd-investigations", "active-cases", _ncpdInvestigations.ActiveCount);
+        fields.Add("ncpd-investigations", "assigned-inspectors", _ncpdInvestigations.AssignedCount);
+        fields.Add("ncpd-investigations", "persistence-in-flight", _ncpdInvestigations.PendingMutationCount);
+        fields.Add("ncpd-investigations", "completed-this-round", _ncpdInvestigations.CompletedCount);
+        fields.Add("ncpd-investigations", "blocked-actions", _ncpdInvestigations.BlockedCount);
+        fields.Add("ncpd-investigations", "last-error", _ncpdInvestigations.LastError ?? "none");
+        fields.Add("ncpd-offscreen-custody", "persistence-in-flight", _ncpdOffscreenCustody.PendingCount);
+        fields.Add("ncpd-offscreen-custody", "imprisoned", _ncpdOffscreenCustody.ImprisonedCount);
+        fields.Add("ncpd-offscreen-custody", "wanted", _ncpdOffscreenCustody.WantedCount);
+        fields.Add("ncpd-offscreen-custody", "failed", _ncpdOffscreenCustody.FailedCount);
+        fields.Add("ncpd-offscreen-custody", "last-error", _ncpdOffscreenCustody.LastError ?? "none");
         fields.Add("ncpd-mapping", "station-zone-valid", _ncpdMapping.StationValid);
         fields.Add("ncpd-mapping", "station-affordances",
             $"{_ncpdMapping.StationAffordanceCount} / {_ncpdMapping.RequiredStationAffordanceCount}");

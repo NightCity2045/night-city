@@ -16,6 +16,7 @@
 - type: ncHumanAction
   id: yield-to-combat-authority
   executor: VanillaCombat
+  operation: CombatAuthority
   targetKind: Person
   completion: AuthorityReleased
   timeout: 2m
@@ -41,12 +42,144 @@
 - type: ncHumanAction
   id: human-approach-person
   executor: VanillaMovement
+  operation: ApproachTarget
   targetKind: Person
   completion: RangeConfirmed
   timeout: 1m
   requiresPhysicalEntity: true
   maximumRange: 40
   completionRange: 2
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+# Universal vanilla capabilities. Profession and directive layers compose these actions instead of replacing them.
+- type: ncHumanAction
+  id: human-follow-person
+  executor: VanillaMovement
+  operation: FollowTarget
+  targetKind: Person
+  completion: RangeConfirmed
+  timeout: 30m
+  requiresPhysicalEntity: true
+  maximumRange: 40
+  completionRange: 2
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-flee-from-threat
+  executor: VanillaMovement
+  operation: FleeFromTarget
+  targetKind: Person
+  completion: RangeConfirmed
+  timeout: 1m
+  requiresPhysicalEntity: true
+  maximumRange: 40
+  completionRange: 12
+  interrupts: [PlanChanged, Dematerialized, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-activate-target
+  executor: VanillaInteraction
+  operation: ActivateTarget
+  targetKind: Entity
+  completion: InteractionConfirmed
+  timeout: 10s
+  requiresPhysicalEntity: true
+  maximumRange: 2
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-alt-interact-target
+  executor: VanillaInteraction
+  operation: AltInteractTarget
+  targetKind: Entity
+  completion: InteractionConfirmed
+  timeout: 10s
+  requiresPhysicalEntity: true
+  maximumRange: 2
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-pickup-item
+  executor: VanillaHands
+  operation: PickupTarget
+  targetKind: Item
+  completion: WorldStateChanged
+  timeout: 10s
+  requiresPhysicalEntity: true
+  maximumRange: 2
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-drop-item
+  executor: VanillaHands
+  operation: DropTarget
+  targetKind: Item
+  completion: WorldStateChanged
+  timeout: 10s
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-equip-item
+  executor: VanillaHands
+  operation: EquipTarget
+  targetKind: Item
+  completion: WorldStateChanged
+  timeout: 30s
+  requiresPhysicalEntity: true
+  maximumRange: 2
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-unequip-item
+  executor: VanillaHands
+  operation: UnequipTarget
+  targetKind: Item
+  completion: WorldStateChanged
+  timeout: 30s
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-use-held-item
+  executor: VanillaHands
+  operation: UseHeldTarget
+  targetKind: Item
+  completion: InteractionConfirmed
+  timeout: 10s
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-speak-acknowledgement
+  executor: VanillaSpeech
+  operation: Speak
+  targetKind: None
+  completion: InteractionConfirmed
+  timeout: 10s
+  requiresPhysicalEntity: true
+  speechLocId: nc-human-action-speak-acknowledgement
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-start-pulling
+  executor: VanillaInteraction
+  operation: StartPullingTarget
+  targetKind: Person
+  completion: WorldStateChanged
+  timeout: 15s
+  requiresPhysicalEntity: true
+  maximumRange: 2
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-stop-pulling
+  executor: VanillaInteraction
+  operation: StopPulling
+  targetKind: None
+  completion: WorldStateChanged
+  timeout: 10s
+  requiresPhysicalEntity: true
   interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
@@ -191,6 +324,16 @@
   interrupts: [PlanChanged, Dematerialized, Incapacitated, RoundEnded]
 
 - type: ncHumanAction
+  id: ncpd-await-compliance
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: WorldStateChanged
+  timeout: 15s
+  requiresPhysicalEntity: true
+  maximumRange: 10
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
   id: ncpd-restrain-suspect
   executor: PoliceAdapter
   targetKind: Person
@@ -210,6 +353,120 @@
   requiresPhysicalEntity: true
   maximumRange: 4
   completionRange: 1.5
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-search-restrained-suspect
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: WorldStateChanged
+  timeout: 30s
+  requiresPhysicalEntity: true
+  maximumRange: 4
+  completionRange: 1.5
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-seize-dangerous-items
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: DomainMutationConfirmed
+  timeout: 2m
+  requiresPhysicalEntity: true
+  maximumRange: 4
+  completionRange: 1.5
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-deliver-to-booking
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: ArrivalConfirmed
+  timeout: 5m
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-book-detainee
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: DomainMutationConfirmed
+  timeout: 30s
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-place-in-holding
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: DomainMutationConfirmed
+  timeout: 5m
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-deliver-evidence-storage
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: ArrivalConfirmed
+  timeout: 5m
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-submit-evidence
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: WorldStateChanged
+  timeout: 1m
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-interview-witnesses
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: DomainMutationConfirmed
+  timeout: 30s
+  requiresPhysicalEntity: true
+  maximumRange: 8
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-create-wanted-record
+  executor: PoliceAdapter
+  targetKind: Person
+  completion: DomainMutationConfirmed
+  timeout: 30s
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-review-case-file
+  executor: PoliceAdapter
+  targetKind: DomainRecord
+  completion: DomainMutationConfirmed
+  timeout: 30s
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-interview-assigned-witnesses
+  executor: PoliceAdapter
+  targetKind: DomainRecord
+  completion: DomainMutationConfirmed
+  timeout: 30s
+  requiresPhysicalEntity: true
+  maximumRange: 8
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
+
+- type: ncHumanAction
+  id: ncpd-conclude-investigation
+  executor: PoliceAdapter
+  targetKind: DomainRecord
+  completion: DomainMutationConfirmed
+  timeout: 1m
+  requiresPhysicalEntity: true
   interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
 
 - type: ncCognitionUtilityCurve
@@ -259,7 +516,7 @@
   preferredPlanner: Reactive
   fallbackPlanner: DeterministicFallback
   baseUtility: 80
-  priority: 900
+  priority: 975
   requiredBeliefs: [ perception.hostile-present ]
   interruptsRoutine: true
   requiresMaterialization: true
@@ -516,15 +773,71 @@
   - id: issue-order
     action: ncpd-issue-lawful-order
     dependsOn: [assess-scene]
+  - id: await-compliance
+    action: ncpd-await-compliance
+    dependsOn: [issue-order]
   - id: pursue
     action: ncpd-pursue-suspect
-    dependsOn: [report-incident, issue-order]
+    dependsOn: [report-incident, await-compliance]
+  - id: wanted-after-pursuit
+    action: ncpd-create-wanted-record
+    dependsOn: [pursue]
   - id: restrain
     action: ncpd-restrain-suspect
-    dependsOn: [pursue]
+    dependsOn: [wanted-after-pursuit]
+  - id: wanted-after-restraint
+    action: ncpd-create-wanted-record
+    dependsOn: [restrain]
+  - id: search-restrained
+    action: ncpd-search-restrained-suspect
+    dependsOn: [wanted-after-restraint]
+  - id: seize-dangerous-items
+    action: ncpd-seize-dangerous-items
+    dependsOn: [search-restrained]
+  - id: interview-witnesses
+    action: ncpd-interview-witnesses
+    dependsOn: [seize-dangerous-items]
+    optional: true
   - id: escort
     action: ncpd-begin-escort
-    dependsOn: [restrain]
+    dependsOn: [seize-dangerous-items]
+  - id: deliver-booking
+    action: ncpd-deliver-to-booking
+    dependsOn: [escort]
+  - id: book-detainee
+    action: ncpd-book-detainee
+    dependsOn: [deliver-booking]
+  - id: place-holding
+    action: ncpd-place-in-holding
+    dependsOn: [book-detainee]
+  - id: deliver-evidence
+    action: ncpd-deliver-evidence-storage
+    dependsOn: [place-holding]
+  - id: submit-evidence
+    action: ncpd-submit-evidence
+    dependsOn: [deliver-evidence]
+
+- type: ncCognitionCapability
+  id: NCNcpdInvestigateAssignedCase
+  domain: Crime
+  taskKind: KnownProcedure
+  preferredPlanner: Htn
+  fallbackPlanner: StateTree
+  baseUtility: 70
+  priority: 800
+  requiredBeliefs: [ncpd.on-duty, ncpd.investigation-assigned]
+  interruptsRoutine: true
+  requiresMaterialization: true
+  procedureSteps:
+  - id: review-case
+    action: ncpd-review-case-file
+  - id: interview-witnesses
+    action: ncpd-interview-assigned-witnesses
+    dependsOn: [review-case]
+    optional: true
+  - id: conclude-case
+    action: ncpd-conclude-investigation
+    dependsOn: [review-case, interview-witnesses]
 
 - type: ncCognitionCapabilityProfile
   id: NCDefaultCivilianCapabilities

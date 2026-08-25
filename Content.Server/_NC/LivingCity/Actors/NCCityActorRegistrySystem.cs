@@ -555,6 +555,9 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
                     Commitments = (current.Snapshot.Schedule.Commitments ?? [])
                         .Where(commitment => commitment.EndsAt > now)
                         .ToArray(),
+                    PresenceMode = current.Snapshot.Lifecycle.Status == NCCityActorStatus.Imprisoned
+                        ? NCCityActorPresenceMode.AbstractCustody
+                        : current.Snapshot.Schedule.PresenceMode,
                 },
                 LastAppliedEventId = eventId,
             };

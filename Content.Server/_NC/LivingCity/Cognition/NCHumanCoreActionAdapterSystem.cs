@@ -47,9 +47,6 @@ public sealed partial class NCHumanCoreActionAdapterSystem : EntitySystem
             case "yield-to-medical-authority":
                 ResolveAuthority(args, NCCityDematerializationBlockerFlags.PlayerTreatment);
                 return;
-            case "yield-to-combat-authority":
-                ResolveAuthority(args, NCCityDematerializationBlockerFlags.Combat);
-                return;
             case "yield-to-conversation-authority":
                 ResolveAuthority(args, NCCityDematerializationBlockerFlags.Conversation);
                 return;

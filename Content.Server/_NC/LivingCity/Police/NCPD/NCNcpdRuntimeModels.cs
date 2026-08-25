@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Shared._NC.LivingCity.Police.NCPD;
+using Content.Shared._NC.LivingCity.CityServices;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Identity;
 using Content.Shared._NC.Persistence.Identity;
@@ -40,6 +41,28 @@ public sealed class NCNcpdCommandChangedEvent(
     public NCNcpdCommandStatus Status { get; } = status;
 }
 
+/// <summary>Signals that an already-authorized dispatch order was projected onto a physical officer.</summary>
+public sealed class NCNcpdAssignmentAppliedEvent(
+    EntityUid entityUid,
+    NCNcpdCommandId commandId) : EntityEventArgs
+{
+    public EntityUid EntityUid { get; } = entityUid;
+    public NCNcpdCommandId CommandId { get; } = commandId;
+}
+
+/// <summary>Raised only after vanilla pulling accepted a restrained suspect.</summary>
+public sealed class NCNcpdEscortStartedEvent(
+    EntityUid officer,
+    EntityUid suspect,
+    NCCityIncidentId incidentId,
+    NCActiveWorldTime startedAt) : EntityEventArgs
+{
+    public EntityUid Officer { get; } = officer;
+    public EntityUid Suspect { get; } = suspect;
+    public NCCityIncidentId IncidentId { get; } = incidentId;
+    public NCActiveWorldTime StartedAt { get; } = startedAt;
+}
+
 public sealed class NCNcpdUnitMembershipAppliedEvent(
     NCActorId actorId,
     EntityUid entityUid,
@@ -65,6 +88,25 @@ public sealed record NCNcpdUnitSnapshot(
     NCNcpdUnitId UnitId,
     NCActorId LeaderActorId,
     NCActorId[] Members);
+
+public sealed record NCNcpdServiceDispatchAdapterSnapshot(
+    NCServiceDispatchId DispatchId,
+    NCCityIncidentId IncidentId,
+    NCServiceDispatchStatus ServiceStatus,
+    NCNcpdUnitId UnitId,
+    NCNcpdCommandId CommandId,
+    string AdapterStatus,
+    string Failure,
+    NCActiveWorldTime UpdatedAt);
+
+/// <summary>Signals that an authoritative investigation dispatch has selected its real NCPD unit.</summary>
+public sealed class NCNcpdInvestigationUnitAssignedEvent(
+    NCCityIncidentId incidentId,
+    NCNcpdUnitId unitId) : EntityEventArgs
+{
+    public NCCityIncidentId IncidentId { get; } = incidentId;
+    public NCNcpdUnitId UnitId { get; } = unitId;
+}
 
 public sealed record NCNcpdMappingDiagnostics(
     bool StationValid,

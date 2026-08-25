@@ -139,7 +139,8 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
     private void OnActorPersisted(NCCityActorPersistedEvent args)
     {
         if (!_active || args.SessionEpoch != _epoch ||
-            args.Frozen || args.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived ||
+            args.Frozen || args.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived or
+                NCCityActorStatus.Arrested or NCCityActorStatus.Imprisoned ||
             _runtime.TryGetEntity(args.ActorId, out _))
         {
             _scheduled.Remove(args.ActorId);
@@ -257,7 +258,8 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
     {
         var snapshot = actor.Snapshot;
         if (snapshot.Lifecycle.Frozen ||
-            snapshot.Lifecycle.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived ||
+            snapshot.Lifecycle.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived or
+                NCCityActorStatus.Arrested or NCCityActorStatus.Imprisoned ||
             _runtime.TryGetEntity(snapshot.Identity.ActorId, out _))
         {
             return;
@@ -323,7 +325,8 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
             return;
         }
         if (actor.Snapshot.Lifecycle.Frozen ||
-            actor.Snapshot.Lifecycle.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived ||
+            actor.Snapshot.Lifecycle.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived or
+                NCCityActorStatus.Arrested or NCCityActorStatus.Imprisoned ||
             _runtime.TryGetEntity(actorId, out _))
         {
             Finish(actorId);
