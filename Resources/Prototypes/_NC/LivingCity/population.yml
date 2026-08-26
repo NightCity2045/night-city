@@ -13,8 +13,6 @@
   components:
   - type: InputMover
   - type: MobMover
-  - type: NCHumanSocialAction
-    approachRange: 1.5
   - type: HTN
     rootTask:
       task: NCLivingHumanCompound

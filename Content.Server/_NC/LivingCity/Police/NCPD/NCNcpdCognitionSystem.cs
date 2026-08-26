@@ -70,8 +70,8 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
     [Dependency] private InventorySystem _inventory = default!;
     [Dependency] private SharedCuffableSystem _cuffable = default!;
     [Dependency] private PullingSystem _pulling = default!;
-    [Dependency] private NpcFactionSystem _factions = default!;
     [Dependency] private NCNcpdAssignmentExecutionSystem _assignmentExecution = default!;
+    [Dependency] private NCNcpdUseOfForceSystem _useOfForce = default!;
 
     private readonly Dictionary<EntityUid, RestraintAttempt> _restraintAttempts = [];
     private readonly Dictionary<Guid, PendingIncidentReport> _pendingReports = [];
@@ -118,6 +118,11 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
             var claim = EnsureComp<NCNcpdSuspectClaimComponent>(args.Observer);
             if (claim.SourceWorldEventId != args.EventId || claim.Suspect != args.Actor)
             {
+                if (claim.Suspect.IsValid() && Exists(claim.Suspect) && claim.Suspect != args.Actor)
+                {
+                    _useOfForce.End(args.Observer, claim.Suspect, NCNcpdSuspectStatus.Lost,
+                        NCNcpdForceLevel.Presence, args.ObservedAt, "claim-replaced");
+                }
                 claim.SourceWorldEventId = args.EventId;
                 claim.IncidentId = default;
                 claim.Suspect = args.Actor;
@@ -133,12 +138,22 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
             claim.Basis = args.Kind == NCCityLocalPerceivedEventKind.Killing
                 ? "witnessed-killing"
                 : "witnessed-assault";
+            var severity = args.Kind == NCCityLocalPerceivedEventKind.Killing
+                ? policy.ObservedKillingSeverity
+                : policy.ObservedAssaultSeverity;
+            var forceLevel = severity >= policy.LethalThreat
+                ? NCNcpdForceLevel.Lethal
+                : severity >= policy.NonLethalThreat
+                    ? NCNcpdForceLevel.NonLethal
+                    : severity >= policy.RestraintThreat
+                        ? NCNcpdForceLevel.Restraint
+                        : NCNcpdForceLevel.VerbalOrder;
             claim.Status = immediateThreat ? NCNcpdSuspectStatus.Resisting : NCNcpdSuspectStatus.Observed;
-            claim.ForceLevel = immediateThreat ? NCNcpdForceLevel.NonLethal : NCNcpdForceLevel.Presence;
+            claim.ForceLevel = immediateThreat ? forceLevel : NCNcpdForceLevel.Presence;
             claim.UpdatedAt = args.ObservedAt;
             // The universal vanilla combat compound reads faction hostility. NCPD only supplies the lawful intent.
             if (immediateThreat)
-                _factions.AggroEntity(args.Observer, args.Actor);
+                _useOfForce.Begin(args.Observer, args.Actor, forceLevel);
             // A witnessed incident is immediate and must not wait for the routine cognition cadence.
             _cognition.ForceSchedule(officer.ActorId, args.ObservedAt);
         }
@@ -189,8 +204,8 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
                 TryComp<NCNcpdSuspectClaimComponent>(officer, out var lostClaim) &&
                 lostClaim.IncidentId.IsValid && lostClaim.SuspectParty.IsValid)
             {
-                UpdateClaim(lostClaim, NCNcpdSuspectStatus.Lost, NCNcpdForceLevel.Presence, now,
-                    "suspect-no-longer-observed");
+                _useOfForce.End(officer, lostClaim.Suspect, NCNcpdSuspectStatus.Lost,
+                    NCNcpdForceLevel.Presence, now, "suspect-no-longer-observed");
                 args.Completed = true;
                 return;
             }
@@ -303,15 +318,15 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
 
         if (_cuffable.IsCuffed(suspect, requireFullyCuffed: false))
         {
-            UpdateClaim(claim, NCNcpdSuspectStatus.Restrained, NCNcpdForceLevel.Restraint, now,
-                "suspect-already-restrained");
+            _useOfForce.End(officer, suspect, NCNcpdSuspectStatus.Restrained,
+                NCNcpdForceLevel.Restraint, now, "suspect-already-restrained");
             args.Completed = true;
             return;
         }
         if (TryComp<MobStateComponent>(suspect, out var mobState) && mobState.CurrentState != MobState.Alive)
         {
-            UpdateClaim(claim, NCNcpdSuspectStatus.Incapacitated, NCNcpdForceLevel.Presence, now,
-                "suspect-incapacitated");
+            _useOfForce.End(officer, suspect, NCNcpdSuspectStatus.Incapacitated,
+                NCNcpdForceLevel.Presence, now, "suspect-incapacitated");
             args.Failure = "ncpd-suspect-incapacitated";
             return;
         }
@@ -342,8 +357,8 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
         if (displacementSquared <= policy.ComplianceMovementTolerance * policy.ComplianceMovementTolerance &&
             inOrderRange)
         {
-            UpdateClaim(claim, NCNcpdSuspectStatus.Complying, NCNcpdForceLevel.Restraint, now,
-                "suspect-remained-in-place");
+            _useOfForce.End(officer, suspect, NCNcpdSuspectStatus.Complying,
+                NCNcpdForceLevel.Restraint, now, "suspect-remained-in-place");
         }
         else if (!inOrderRange || displacementSquared >= policy.FlightDistance * policy.FlightDistance)
         {
@@ -407,17 +422,15 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
         if (_cuffable.IsCuffed(suspect))
         {
             _restraintAttempts.Remove(officer);
-            if (TryComp<NCNcpdSuspectClaimComponent>(officer, out var claim) && claim.Suspect == suspect)
-                UpdateClaim(claim, NCNcpdSuspectStatus.Restrained, NCNcpdForceLevel.Restraint, now,
-                    "restraints-confirmed");
+            _useOfForce.End(officer, suspect, NCNcpdSuspectStatus.Restrained,
+                NCNcpdForceLevel.Restraint, now, "restraints-confirmed");
             args.Completed = true;
             return;
         }
         if (TryComp<MobStateComponent>(suspect, out var mobState) && mobState.CurrentState != MobState.Alive)
         {
-            if (TryComp<NCNcpdSuspectClaimComponent>(officer, out var claim))
-                UpdateClaim(claim, NCNcpdSuspectStatus.Incapacitated, NCNcpdForceLevel.Presence, now,
-                    "suspect-incapacitated-before-restraint");
+            _useOfForce.End(officer, suspect, NCNcpdSuspectStatus.Incapacitated,
+                NCNcpdForceLevel.Presence, now, "suspect-incapacitated-before-restraint");
             args.Failure = "ncpd-suspect-incapacitated";
             return;
         }
@@ -629,14 +642,23 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
 
     private void OnOfficerShutdown(Entity<NCNcpdOfficerComponent> officer, ref ComponentShutdown args)
     {
+        // Keep component shutdown ownership centralized and let other NCPD systems clean up through a domain event.
+        RaiseLocalEvent(new NCNcpdOfficerRuntimeRemovedEvent(officer.Owner));
         _restraintAttempts.Remove(officer.Owner);
         foreach (var instanceId in _pendingReports.Where(value => value.Value.Officer == officer.Owner)
                      .Select(value => value.Key).ToArray())
             _pendingReports.Remove(instanceId);
         StopPoliceSteering(officer.Owner, false);
         _suspendedHumanHtn.Remove(officer.Owner);
-        if (Exists(officer.Owner) && HasComp<NCNcpdSuspectClaimComponent>(officer.Owner))
+        if (Exists(officer.Owner) && TryComp<NCNcpdSuspectClaimComponent>(officer.Owner, out var claim))
+        {
+            if (_clock.TryGetCurrentTime(out _, out var now) && claim.Suspect.IsValid())
+            {
+                _useOfForce.End(officer.Owner, claim.Suspect, NCNcpdSuspectStatus.Lost,
+                    NCNcpdForceLevel.Presence, now, "officer-projection-ended");
+            }
             RemCompDeferred<NCNcpdSuspectClaimComponent>(officer.Owner);
+        }
     }
 
     private void OnInterrupted(NCHumanActionInterruptedEvent args)

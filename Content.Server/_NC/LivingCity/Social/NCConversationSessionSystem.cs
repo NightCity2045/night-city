@@ -160,7 +160,8 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
             !request.SessionId.IsValid || !request.Speaker.IsValid || !Enum.IsDefined(request.Act) ||
             !IsStableKey(request.SemanticKey) || request.ExternalReference == null ||
             request.ExternalReference.Length > MaximumExternalReferenceLength ||
-            request.WorldEventId == Guid.Empty)
+            request.WorldEventId == Guid.Empty || request.SummaryKey.Length > MaximumStableKeyLength ||
+            request.SummaryKey.Length > 0 && !IsStableKey(request.SummaryKey))
         {
             error = "The conversation turn is invalid.";
             return false;
@@ -181,7 +182,8 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
                 Normalize(request.SemanticKey),
                 request.ExternalReference.Trim(),
                 request.WorldEventId,
-                now));
+                now,
+                request.SummaryKey.Length == 0 ? string.Empty : Normalize(request.SummaryKey)));
             session = current with
             {
                 Turns = turns,

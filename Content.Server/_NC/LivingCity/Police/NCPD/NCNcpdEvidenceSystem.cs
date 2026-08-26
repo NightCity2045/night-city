@@ -98,7 +98,7 @@ public sealed partial class NCNcpdEvidenceSystem : EntitySystem
         base.Initialize();
         SubscribeLocalEvent<NCHumanActionExecutionEvent>(OnExecute);
         SubscribeLocalEvent<NCHumanActionInterruptedEvent>(OnInterrupted);
-        SubscribeLocalEvent<NCNcpdOfficerComponent, ComponentShutdown>(OnOfficerShutdown);
+        SubscribeLocalEvent<NCNcpdOfficerRuntimeRemovedEvent>(OnOfficerRemoved);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => Clear());
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => Clear());
     }
@@ -841,18 +841,18 @@ public sealed partial class NCNcpdEvidenceSystem : EntitySystem
             _routes.Remove(args.InstanceId);
     }
 
-    private void OnOfficerShutdown(Entity<NCNcpdOfficerComponent> officer, ref ComponentShutdown args)
+    private void OnOfficerRemoved(NCNcpdOfficerRuntimeRemovedEvent args)
     {
-        foreach (var id in _pending.Where(value => value.Value.Officer == officer.Owner)
+        foreach (var id in _pending.Where(value => value.Value.Officer == args.EntityUid)
                      .Select(value => value.Key).ToArray())
             _pending.Remove(id);
-        foreach (var id in _removals.Where(value => value.Value.Officer == officer.Owner)
+        foreach (var id in _removals.Where(value => value.Value.Officer == args.EntityUid)
                      .Select(value => value.Key).ToArray())
             _removals.Remove(id);
-        foreach (var id in _routes.Where(value => value.Value.Officer == officer.Owner)
+        foreach (var id in _routes.Where(value => value.Value.Officer == args.EntityUid)
                      .Select(value => value.Key).ToArray())
             _routes.Remove(id);
-        StopSteering(officer.Owner);
+        StopSteering(args.EntityUid);
     }
 
     private void Clear()

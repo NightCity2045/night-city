@@ -25,6 +25,7 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
 {
     private static readonly ProtoId<NCNeuralPolicyPrototype> DefaultPolicy = "Default";
     private const string SuggestionSource = "neural-suggestion";
+    private const string DirectiveCapability = "NCCognitionAcceptDirective";
 
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
@@ -120,18 +121,27 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
 
         if (result.Request.Kind == NCNeuralRequestKind.DialogueContinuation && dialogue != null)
         {
-            if (accepted && result.Response is { } dialogueResponse)
+            if (accepted && policy != null && result.Response is { } dialogueResponse)
             {
-                if (dialogueResponse.Intent != null && policy != null)
-                    ApplySuggestion(result.Request, dialogueResponse, policy, now);
-                if (TryDeliverDialogue(result.Request.ActorId, result.Request.RequestId, dialogue, dialogueResponse))
+                if (dialogueResponse.SelectedCapabilityId == DirectiveCapability && dialogueResponse.Intent != null)
                 {
-                    RaiseLocalEvent(new NCNeuralDialogueIntentAcceptedEvent(
+                    // Natural orders are deferred: the domain authority must validate and commit them before the NPC
+                    // may acknowledge anything. The handler later releases both the BDI hint and the spoken response.
+                    var proposed = new NCNeuralDialogueDirectiveProposedEvent(
                         result.Request.ActorId,
                         dialogue.SessionId,
+                        dialogue.ConversationVersion,
                         result.Request,
-                        dialogueResponse));
+                        dialogueResponse);
+                    RaiseLocalEvent(proposed);
+                    if (!proposed.Handled)
+                        TryDeliverDialogueFallback(result.Request.ActorId, result.Request.RequestId, dialogue);
+                    return;
                 }
+                if (dialogueResponse.Intent != null)
+                    ApplySuggestion(result.Request, dialogueResponse, policy, now);
+                // Non-directive dialogue intents retain their ordinary immediate cognition path.
+                TryDeliverDialogue(result.Request.ActorId, result.Request.RequestId, dialogue, dialogueResponse);
             }
             else
                 TryDeliverDialogueFallback(result.Request.ActorId, result.Request.RequestId, dialogue);
@@ -170,6 +180,25 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         _expiries.Enqueue(new SuggestionExpiry(request.ActorId, suggestion.RequestId), expiresAt.Ticks);
         _cognition.ForceSchedule(request.ActorId, now);
     }
+
+    /// <summary>Releases a directive suggestion only after its server-owned authority committed the order.</summary>
+    public bool TryApplyDeferredSuggestion(NCNeuralRequestEnvelope request, NCNeuralResponseEnvelope response)
+    {
+        if (!_active || _policy == null || !_clock.TryGetCurrentTime(out var epoch, out var now) ||
+            epoch != request.SessionEpoch || request.ExpiresAt <= now || response.Intent == null)
+            return false;
+        ApplySuggestion(request, response, _policy, now);
+        return true;
+    }
+
+    /// <summary>Speaks a deferred order response after the executor has observed that the order actually started.</summary>
+    public bool TryDeliverDeferredDialogue(
+        NCActorId actorId,
+        Guid requestId,
+        NCConversationSessionId sessionId,
+        int conversationVersion,
+        NCNeuralResponseEnvelope response) =>
+        TryDeliverDialogue(actorId, requestId, new DialogueCorrelation(sessionId, conversationVersion), response);
 
     private void OnCollectFacts(NCCognitionCollectFactsEvent args)
     {
@@ -223,7 +252,8 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
             act,
             $"neural.{response.SpeechActKey.ToLowerInvariant()}",
             $"neural:{requestId:N}",
-            requestId), out _, out _, response.RenderedText.Trim());
+            requestId,
+            response.SummaryKey), out _, out _, response.RenderedText.Trim());
         if (!recorded)
             return false;
 
@@ -312,19 +342,22 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
 }
 
 /// <summary>
-/// Published only after a correlated in-person response was validated, recorded and spoken. Domain adapters still
-/// have to authorize and execute the proposed intent through their own server authorities.
+/// Published before a natural order is spoken. Exactly one domain authority must claim it and later release the
+/// response after authorization and observable execution have started.
 /// </summary>
-public sealed class NCNeuralDialogueIntentAcceptedEvent(
+public sealed class NCNeuralDialogueDirectiveProposedEvent(
     NCActorId actorId,
     NCConversationSessionId sessionId,
+    int conversationVersion,
     NCNeuralRequestEnvelope request,
     NCNeuralResponseEnvelope response) : EntityEventArgs
 {
     public NCActorId ActorId { get; } = actorId;
     public NCConversationSessionId SessionId { get; } = sessionId;
+    public int ConversationVersion { get; } = conversationVersion;
     public NCNeuralRequestEnvelope Request { get; } = request;
     public NCNeuralResponseEnvelope Response { get; } = response;
+    public bool Handled { get; set; }
 }
 
 public sealed record NCNeuralSuggestionSnapshot(

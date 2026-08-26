@@ -30,6 +30,8 @@ public enum NCHumanActionOperationKind : byte
     None,
     ApproachTarget,
     FollowTarget,
+    HoldPosition,
+    PatrolZone,
     FleeFromTarget,
     CombatAuthority,
     ActivateTarget,

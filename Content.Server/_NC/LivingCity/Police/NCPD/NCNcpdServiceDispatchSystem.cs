@@ -35,6 +35,7 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
     [Dependency] private NCCityActorMaterializationSystem _materialization = default!;
     [Dependency] private NCCityServiceSystem _services = default!;
+    [Dependency] private NCCityIncidentRegistrySystem _incidents = default!;
     [Dependency] private NCNcpdUnitSystem _units = default!;
     [Dependency] private NCNcpdCommandSystem _commands = default!;
     [Dependency] private NCNcpdWorkforceProjectionSystem _workforce = default!;
@@ -44,6 +45,8 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
     private readonly Dictionary<NCServiceDispatchId, NCActiveWorldTime> _scheduled = [];
     private readonly Dictionary<(NCServiceDispatchId, NCActorId), Guid> _materializationRequests = [];
     private readonly HashSet<NCCityIncidentId> _investigationIncidents = [];
+    private readonly HashSet<NCCityIncidentId> _recoveredIncidents = [];
+    private readonly HashSet<NCCityIncidentId> _incidentRecoveries = [];
     private readonly PriorityQueue<ScheduledDispatch, DispatchPriority> _queue = new();
     private readonly List<NCNcpdUnitSnapshot> _unitBuffer = [];
     private readonly List<NCActorId> _arrivalActorBuffer = [];
@@ -58,6 +61,10 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
     public int AbstractOnSceneCount => _work.Values.Count(static value => value.Status == "on-scene-abstract");
     public int PhysicalizationPendingCount => _work.Values.Count(static value =>
         value.Status == "on-scene-materialization-requested");
+    public int RecoveryPendingCount => _incidentRecoveries.Count;
+    public int RecoveredIncidentCount { get; private set; }
+    public int RecoveryFailureCount { get; private set; }
+    public string? LastRecoveryError { get; private set; }
     public string? ConfigurationError { get; private set; }
 
     public override void Initialize()
@@ -182,6 +189,56 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
         }
 
         Schedule(dispatch.DispatchId, now);
+        RecoverIncident(dispatch.IncidentId);
+    }
+
+    /// <summary>
+    /// Dispatch aggregates are recovered independently from incident aggregates. Re-publishing the attached incident
+    /// reconstructs investigation and custody adapters without inventing a new result or blocking the main thread.
+    /// </summary>
+    private void RecoverIncident(NCCityIncidentId incidentId)
+    {
+        if (!incidentId.IsValid || _recoveredIncidents.Contains(incidentId) ||
+            !_incidentRecoveries.Add(incidentId))
+        {
+            return;
+        }
+
+        var generation = _generation;
+        _ = RecoverIncidentAsync(generation, incidentId);
+    }
+
+    private async Task RecoverIncidentAsync(int generation, NCCityIncidentId incidentId)
+    {
+        NCCityIncidentRecord? incident = null;
+        string? error = null;
+        try
+        {
+            incident = await _incidents.GetAsync(incidentId, true);
+        }
+        catch (Exception exception)
+        {
+            error = exception.Message;
+        }
+
+        _taskManager.RunOnMainThread(() =>
+        {
+            if (generation != _generation || !_active)
+                return;
+            _incidentRecoveries.Remove(incidentId);
+            if (error != null || incident == null)
+            {
+                RecoveryFailureCount++;
+                LastRecoveryError = error ?? $"Incident {incidentId} was not found during dispatch recovery.";
+                return;
+            }
+
+            if (_recoveredIncidents.Add(incidentId))
+            {
+                RecoveredIncidentCount++;
+                RaiseLocalEvent(new NCCityIncidentPersistedEvent(incident));
+            }
+        });
     }
 
     private void OnArrivalAttempt(NCServiceDispatchArrivalAttemptEvent args)
@@ -236,6 +293,7 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
 
     private void OnIncidentPersisted(NCCityIncidentPersistedEvent args)
     {
+        _recoveredIncidents.Add(args.Incident.Snapshot.IncidentId);
         if (args.Incident.Snapshot.Stage == NCCityIncidentStage.Investigation &&
             _clock.TryGetCurrentTime(out _, out var investigationNow) && TryPolicy(out _))
         {
@@ -647,7 +705,12 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
         _scheduled.Clear();
         _materializationRequests.Clear();
         _investigationIncidents.Clear();
+        _recoveredIncidents.Clear();
+        _incidentRecoveries.Clear();
         _queue.Clear();
+        RecoveredIncidentCount = 0;
+        RecoveryFailureCount = 0;
+        LastRecoveryError = null;
     }
 
     private sealed class DispatchWork(NCServiceDispatchSnapshot dispatch, NCActiveWorldTime updatedAt)

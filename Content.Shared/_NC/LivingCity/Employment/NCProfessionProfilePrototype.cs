@@ -4,6 +4,7 @@
 
 using Content.Shared._NC.LivingCity.Cognition;
 using Content.Shared._NC.LivingCity.Affordances;
+using Content.Shared._NC.Medical.Treatment;
 using Content.Shared.Roles;
 using Robust.Shared.Prototypes;
 
@@ -32,4 +33,20 @@ public sealed partial class NCGenericProfessionalWorkPolicyPrototype : IPrototyp
     [DataField(required: true)] public ProtoId<NCCognitionCapabilityPrototype> Capability { get; private set; }
     [DataField] public float ArrivalRange { get; private set; } = 1.25f;
     [DataField] public int MaximumCatalogCandidates { get; private set; } = 32;
+}
+
+/// <summary>
+/// Bounded physical-care policy for City Medical clinical staff. Treatment priorities and search limits live in
+/// content data so the cognition adapter only selects and executes existing authoritative medical interactions.
+/// </summary>
+[Prototype("ncCityMedicalWorkPolicy")]
+public sealed partial class NCCityMedicalWorkPolicyPrototype : IPrototype
+{
+    [IdDataField] public string ID { get; private set; } = default!;
+    [DataField(required: true)] public ProtoId<DepartmentPrototype> Organization { get; private set; }
+    [DataField(required: true)] public ProtoId<NCCognitionCapabilityPrototype> Capability { get; private set; }
+    [DataField(required: true)] public NCTreatmentKind[] TreatmentPriority { get; private set; } = [];
+    [DataField] public int MaximumInventoryCandidates { get; private set; } = 32;
+    [DataField] public int MaximumInterventionsPerPatient { get; private set; } = 3;
+    [DataField] public TimeSpan CompletionGrace { get; private set; } = TimeSpan.FromSeconds(2);
 }

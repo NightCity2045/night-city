@@ -26,11 +26,19 @@
   skillKeys: [emergency-medicine, casualty-extraction, armed-escort, triage, radio-procedure]
 
 - type: ncProfessionProfile
-  id: NCProfessionCityMedical
+  id: NCProfessionCityMedicalClinical
   organization: MedicalNC
-  jobs: [NCMedicalDoctor, NCMedicalCoroner, NCMedicalPsychologist, NCMedicalIntern, NCMedicalTechnician]
-  capabilityOverlays: [NCMedicalRespondToCritical]
-  skillKeys: [medicine, diagnostics, triage, patient-care, medical-records]
+  jobs: [NCMedicalDoctor, NCMedicalIntern]
+  capabilityOverlays: [NCCityMedicalRespondToCritical]
+  skillKeys: [medicine, diagnostics, triage, emergency-care, patient-care, medical-records]
+
+- type: ncProfessionProfile
+  id: NCProfessionCityMedicalSupport
+  organization: MedicalNC
+  jobs: [NCMedicalCoroner, NCMedicalPsychologist, NCMedicalTechnician]
+  capabilityOverlays: [NCProfessionalPerformAssignedDuty]
+  skillKeys: [medicine, diagnostics, patient-care, medical-records, technical-support]
+  workAffordance: Workplace
 
 - type: ncProfessionProfile
   id: NCProfessionBiotechnicaOperations
@@ -98,3 +106,12 @@
   capability: NCProfessionalPerformAssignedDuty
   arrivalRange: 1.25
   maximumCatalogCandidates: 32
+
+- type: ncCityMedicalWorkPolicy
+  id: NCCityMedicalClinicalWorkPolicy
+  organization: MedicalNC
+  capability: NCCityMedicalRespondToCritical
+  treatmentPriority: [Hemostatic, Bandage, Tourniquet]
+  maximumInventoryCandidates: 32
+  maximumInterventionsPerPatient: 3
+  completionGrace: 2s

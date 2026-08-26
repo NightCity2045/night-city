@@ -27,10 +27,13 @@ public sealed partial class NCHumanCoreActionAdapterSystem : EntitySystem
     {
         switch (args.Action.ID)
         {
-            case "remain-available":
             case "evaluate-safe-option":
-                args.Handled = true;
-                args.Completed = true;
+                ResolvePlannerReadiness(args, false);
+                return;
+            case "remain-available":
+                // This is the terminal safe fallback, not a request to change schedule availability. Waiting for an
+                // unavailable resident here recursively recreates the same fallback until its timeout expires.
+                ResolvePlannerReadiness(args, false);
                 return;
             case "follow-schedule":
                 args.Handled = true;
@@ -70,6 +73,31 @@ public sealed partial class NCHumanCoreActionAdapterSystem : EntitySystem
         }
         phase = default;
         return false;
+    }
+
+    private void ResolvePlannerReadiness(NCHumanActionExecutionEvent args, bool requireStationaryAvailability)
+    {
+        args.Handled = true;
+        if (!_actors.TryGetCached(args.ActorId, out var actor))
+        {
+            args.Failure = "human-planner-actor-unavailable";
+            return;
+        }
+
+        var snapshot = actor.Snapshot;
+        if (snapshot.Lifecycle.Frozen || snapshot.Lifecycle.Status is NCCityActorStatus.Missing or
+            NCCityActorStatus.Dead or NCCityActorStatus.Archived or NCCityActorStatus.Unconscious)
+        {
+            args.Failure = "human-planner-actor-cannot-act";
+            return;
+        }
+
+        // Planner bookkeeping is complete only after observing an authoritative actor state. This prevents the
+        // fallback path from reporting a successful physical action without any confirmed condition.
+        args.Completed = !requireStationaryAvailability ||
+                         snapshot.Schedule.Availability != NCCityActorAvailability.Unavailable &&
+                         snapshot.Location.TravelPhase is not (NCCityActorTravelPhase.Planned or
+                             NCCityActorTravelPhase.InTransit);
     }
 
     private void ResolveAuthority(NCHumanActionExecutionEvent args, NCCityDematerializationBlockerFlags owner)

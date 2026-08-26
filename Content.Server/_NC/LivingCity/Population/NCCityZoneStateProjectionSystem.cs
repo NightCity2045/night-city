@@ -47,12 +47,27 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
     private NCActiveWorldTime _pageRetryAt;
     private int _generation;
     private int _inFlightWrites;
+    private int _activeActorCount;
+    private int _narrativeActorCount;
+    private int _workingActorCount;
+    private int _travelingActorCount;
+    private int _publicActorCount;
+    private int _abstractHomeActorCount;
+    private int _residenceAssignedActorCount;
     private long _dirtySequence;
     private bool _active;
     private bool _pageLoadInFlight;
 
     public bool InitialLoadComplete { get; private set; }
     public int IndexedActorCount => _actorContributions.Count;
+    public int ActiveActorCount => _activeActorCount;
+    public int NarrativeActorCount => _narrativeActorCount;
+    public int ResidentCount => Math.Max(0, _activeActorCount - _narrativeActorCount);
+    public int WorkingActorCount => _workingActorCount;
+    public int TravelingActorCount => _travelingActorCount;
+    public int PublicActorCount => _publicActorCount;
+    public int AbstractHomeActorCount => _abstractHomeActorCount;
+    public int ResidenceAssignedActorCount => _residenceAssignedActorCount;
     public int ScopeCount => _population.Count;
     public int PendingScopeCount => _dirty.Count;
     public int InFlightWriteCount => _inFlightWrites;
@@ -82,6 +97,8 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
                 population.Presence(NCCityActorPresenceMode.Public),
                 population.Presence(NCCityActorPresenceMode.AbstractHome),
                 population.ResidenceAssignedActors,
+                population.NarrativeActors,
+                population.WorkingActors,
                 Math.Clamp((float) population.WeightedActivityUnits / saturation, 0f, 1f),
                 Signal(population.ScopeZone, NCCityStateSignalKind.Scarcity),
                 Signal(population.ScopeZone, NCCityStateSignalKind.Threat),
@@ -236,7 +253,8 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
             args.Frozen,
             args.TravelPhase,
             args.PresenceMode,
-            args.HasAbstractResidence),
+            args.HasAbstractResidence,
+            args.IsNarrativeActor),
             InitialLoadComplete);
     }
 
@@ -250,6 +268,13 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
         _inFlightScopes.Clear();
         _pendingRetries.Clear();
         _inFlightWrites = 0;
+        _activeActorCount = 0;
+        _narrativeActorCount = 0;
+        _workingActorCount = 0;
+        _travelingActorCount = 0;
+        _publicActorCount = 0;
+        _abstractHomeActorCount = 0;
+        _residenceAssignedActorCount = 0;
         _pageCursor = null;
         _pageRetryAt = now;
         _pageLoadInFlight = false;
@@ -320,7 +345,8 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
                 actor.Lifecycle.Frozen,
                 actor.Location.TravelPhase,
                 actor.Schedule.PresenceMode,
-                NCCityActorRegistrySystem.HasCanonicalAbstractResidence(actor)),
+                NCCityActorRegistrySystem.HasCanonicalAbstractResidence(actor),
+                IsNarrativeActor(actor)),
                 false);
         }
 
@@ -350,9 +376,13 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
         }
 
         if (previous.ActorId.IsValid)
+        {
             ApplyToScopes(previous, -1);
+            ApplyGlobal(previous, -1);
+        }
         _actorContributions[candidate.ActorId] = candidate;
         ApplyToScopes(candidate, 1);
+        ApplyGlobal(candidate, 1);
 
         if (!markDirty || !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
             return;
@@ -374,6 +404,29 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
         {
             sector.Apply(actor, delta, _policy);
         }
+    }
+
+    private void ApplyGlobal(ActorContribution actor, int delta)
+    {
+        if (actor.Status == NCCityActorStatus.Archived)
+            return;
+
+        _activeActorCount += delta;
+        if (actor.IsNarrativeActor)
+            _narrativeActorCount += delta;
+        if (actor.Status == NCCityActorStatus.Working)
+            _workingActorCount += delta;
+        if (actor.TravelPhase is NCCityActorTravelPhase.Planned or NCCityActorTravelPhase.InTransit or
+            NCCityActorTravelPhase.Blocked)
+        {
+            _travelingActorCount += delta;
+        }
+        if (actor.PresenceMode == NCCityActorPresenceMode.Public)
+            _publicActorCount += delta;
+        if (actor.PresenceMode == NCCityActorPresenceMode.AbstractHome)
+            _abstractHomeActorCount += delta;
+        if (actor.HasAbstractResidence)
+            _residenceAssignedActorCount += delta;
     }
 
     private void MarkContributionScopes(ActorContribution actor, NCActiveWorldTime dueAt)
@@ -596,6 +649,16 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
         return default;
     }
 
+    private bool IsNarrativeActor(NCCityActorSnapshot actor)
+    {
+        if (!string.IsNullOrWhiteSpace(actor.Identity.NarrativeActorProfileId))
+            return true;
+        return _prototypes.TryIndex(
+                   new ProtoId<NCCityActorArchetypePrototype>(actor.Identity.ArchetypeId),
+                   out NCCityActorArchetypePrototype? archetype) &&
+               archetype?.NarrativeActorProfile != null;
+    }
+
     private float Signal(NCZoneId scopeZone, NCCityStateSignalKind kind)
     {
         return _externalSignals.TryGetValue((scopeZone, kind), out var signal) &&
@@ -631,6 +694,13 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
         _pageLoadInFlight = false;
         InitialLoadComplete = false;
         _inFlightWrites = 0;
+        _activeActorCount = 0;
+        _narrativeActorCount = 0;
+        _workingActorCount = 0;
+        _travelingActorCount = 0;
+        _publicActorCount = 0;
+        _abstractHomeActorCount = 0;
+        _residenceAssignedActorCount = 0;
         _actorContributions.Clear();
         _population.Clear();
         _externalSignals.Clear();
@@ -653,7 +723,8 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
         bool Frozen,
         NCCityActorTravelPhase TravelPhase,
         NCCityActorPresenceMode PresenceMode,
-        bool HasAbstractResidence);
+        bool HasAbstractResidence,
+        bool IsNarrativeActor);
 
     private readonly record struct DirtyScope(NCZoneId ScopeZone, long Sequence);
     private readonly record struct DirtyState(long Sequence, NCActiveWorldTime DueAt);
@@ -682,6 +753,8 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
         public int FrozenActors { get; private set; }
         public int TravelingActors { get; private set; }
         public int ResidenceAssignedActors { get; private set; }
+        public int NarrativeActors { get; private set; }
+        public int WorkingActors { get; private set; }
         public double WeightedActivityUnits { get; private set; }
 
         public void Apply(ActorContribution actor, int delta, NCCityZoneStatePolicyPrototype policy)
@@ -700,6 +773,10 @@ public sealed partial class NCCityZoneStateProjectionSystem : EntitySystem
             }
             if (actor.HasAbstractResidence)
                 ResidenceAssignedActors += delta;
+            if (actor.IsNarrativeActor)
+                NarrativeActors += delta;
+            if (actor.Status == NCCityActorStatus.Working)
+                WorkingActors += delta;
 
             Adjust(_statuses, actor.Status, delta);
             Adjust(_cognition, actor.CognitionTier, delta);

@@ -51,8 +51,13 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
     [Dependency] private NCFactionMembershipRegistrySystem _factions = default!;
     [Dependency] private NCZoneSystem _zones = default!;
     [Dependency] private NCMemoryRegistrySystem _memories = default!;
+    [Dependency] private NCCognitionSystem _cognition = default!;
+    [Dependency] private NCNeuralSuggestionSystem _suggestions = default!;
 
     private readonly HashSet<Guid> _pending = [];
+    private readonly Dictionary<NCActorId, ActiveDirective> _directives = [];
+    private readonly PriorityQueue<DirectiveExpiry, long> _expiries = new();
+    private readonly Dictionary<Guid, PendingDirectiveDialogue> _pendingDialogues = [];
     public long Accepted { get; private set; }
     public long Rejected { get; private set; }
     public int InFlight => _pending.Count;
@@ -61,13 +66,21 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<NCNeuralDialogueIntentAcceptedEvent>(OnIntent);
+        SubscribeLocalEvent<NCNeuralDialogueDirectiveProposedEvent>(OnIntent);
         SubscribeLocalEvent<NCHumanActionExecutionEvent>(OnExecuteStep);
+        SubscribeLocalEvent<NCCognitionCollectFactsEvent>(OnCollectFacts);
+        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => Reset());
+        SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => Reset());
     }
 
     private void OnExecuteStep(NCHumanActionExecutionEvent args)
     {
+        if (args.Step.ActionId is "human-execute-zone-directive" or "human-execute-person-directive")
+        {
+            ExecuteDirective(args);
+            return;
+        }
         if (args.Step.ActionId != AcceptAction)
             return;
 
@@ -85,7 +98,7 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
         args.Completed = true;
     }
 
-    private void OnIntent(NCNeuralDialogueIntentAcceptedEvent args)
+    private void OnIntent(NCNeuralDialogueDirectiveProposedEvent args)
     {
         var intent = args.Response.Intent;
         if (args.Response.SelectedCapabilityId != Capability || intent == null ||
@@ -98,6 +111,7 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
         {
             return;
         }
+        args.Handled = true;
 
         var arguments = intent.Arguments
             .GroupBy(value => value.Key, StringComparer.OrdinalIgnoreCase)
@@ -111,10 +125,29 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
             !_prototypes.TryIndex(new ProtoId<NCHumanDirectiveActionPrototype>(action),
                 out NCHumanDirectiveActionPrototype? actionDefinition) || actionDefinition == null ||
             actionDefinition.RequiresKnownLocation && string.IsNullOrWhiteSpace(arguments.GetValueOrDefault("location")) ||
-            !TryResolveZone(arguments.GetValueOrDefault("location"), args.ActorId, out var targetZone))
+            !TryResolveDirectiveZone(actionDefinition, arguments.GetValueOrDefault("location"),
+                args.ActorId, out var targetZone))
         {
-            Finish(args.Request.RequestId, false, "The spoken directive has no valid action or known destination.");
+            Reject(args, "The spoken directive has no valid action or known destination.");
             return;
+        }
+
+        var targetSubject = actionDefinition.Execution is NCHumanDirectiveExecutionKind.ApproachIssuer or
+            NCHumanDirectiveExecutionKind.FollowIssuer
+                ? speakerEntity
+                : (EntityUid?) null;
+        var targetHandle = targetSubject != null ? intent.TargetHandle : string.Empty;
+        if (actionDefinition.RequiresSubject)
+        {
+            if (!arguments.TryGetValue("subject", out var subjectHandle) ||
+                !_perception.TryResolveSubjectHandle(args.ActorId, subjectHandle, now, out var subjectEntity) ||
+                subjectEntity == targetEntity)
+            {
+                Reject(args, "The directive subject is not a distinct person currently known to the recipient.");
+                return;
+            }
+            targetSubject = subjectEntity;
+            targetHandle = subjectHandle;
         }
 
         NCActorId? companionActor = null;
@@ -126,7 +159,7 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
                 !_runtime.TryGetActor(companionEntity, out var resolvedCompanion) ||
                 resolvedCompanion == args.ActorId)
             {
-                Finish(args.Request.RequestId, false,
+                Reject(args,
                     "The named companion is not a distinct actor currently known to the recipient.");
                 return;
             }
@@ -134,16 +167,26 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
             companionActor = resolvedCompanion;
         }
 
-        _ = AuthorizeAndApplyAsync(args.Request.RequestId, args.ActorId, speakerEntity, speakerParty, action, order,
-            targetZone, companionActor, Math.Min(intent.Priority, policy.MaximumPriority), policy, now);
+        _ = AuthorizeAndApplyAsync(args, speakerEntity, speakerParty, actionDefinition, order,
+            targetZone, targetSubject, targetHandle, companionActor,
+            Math.Min(intent.Priority, policy.MaximumPriority), policy, now);
     }
 
-    private async Task AuthorizeAndApplyAsync(Guid requestId, NCActorId targetActor, EntityUid speakerEntity,
+    private async Task AuthorizeAndApplyAsync(NCNeuralDialogueDirectiveProposedEvent proposal,
+        EntityUid speakerEntity,
         NCPartyRef speakerParty,
-        string action, string order, NCZoneId targetZone, NCActorId? companionActor, int priority,
+        NCHumanDirectiveActionPrototype actionDefinition,
+        string order,
+        NCZoneId targetZone,
+        EntityUid? targetSubject,
+        string targetHandle,
+        NCActorId? companionActor,
+        int priority,
         NCHumanDirectivePolicyPrototype policy,
         Content.Shared._NC.Persistence.Time.NCActiveWorldTime now)
     {
+        var requestId = proposal.Request.RequestId;
+        var targetActor = proposal.ActorId;
         var recipients = new List<NCActorId> { targetActor };
         if (companionActor is { } companion)
             recipients.Add(companion);
@@ -163,14 +206,15 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
         // Luna from smuggling unrelated citizens into an otherwise valid organizational command.
         foreach (var recipient in recipients)
         {
-            if (await IsAuthorizedAsync(speakerEntity, recipient, policy))
+            if (IsActionAllowed(recipient, actionDefinition) &&
+                await IsAuthorizedAsync(speakerEntity, recipient, policy))
                 continue;
-            _tasks.RunOnMainThread(() => Finish(requestId, false,
-                "The speaker has no organizational or group authority over every named recipient."));
+            _tasks.RunOnMainThread(() => Reject(proposal,
+                "The speaker has no authority for this action over every named recipient."));
             return;
         }
 
-        var applied = 0;
+        var applied = new List<AppliedDirective>();
         foreach (var recipient in recipients)
         {
             var actor = await _actors.GetAsync(recipient, true);
@@ -182,14 +226,14 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
                 DeterministicGuid(requestId, recipient.Value, 1),
                 recipient,
                 actor.AggregateVersion,
-                new NCCityActorCommitment(commitmentId, action, order, targetZone, now,
+                new NCCityActorCommitment(commitmentId, actionDefinition.ID, order, targetZone, now,
                     now.Advance(policy.DefaultDuration), NCCityActorAvailability.Busy, priority),
                 requestId,
                 requestId,
                 "human-natural-directive"));
             if (result.Status is NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate)
             {
-                applied++;
+                applied.Add(new AppliedDirective(recipient, commitmentId));
                 var worldEvent = DeterministicGuid(requestId, recipient.Value, 2);
                 await _memories.RememberAsync(new NCRememberWorldEventRequest(
                     DeterministicGuid(requestId, recipient.Value, 3),
@@ -212,21 +256,52 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
 
         _tasks.RunOnMainThread(() =>
         {
-            foreach (var recipient in recipients)
+            if (applied.All(value => value.ActorId != targetActor))
             {
-                if (!_runtime.TryGetEntity(recipient, out var entity) || !Exists(entity))
-                    continue;
-                var component = EnsureComp<NCHumanDirectiveComponent>(entity);
-                component.RequestId = requestId;
-                component.IssuedTo = recipient;
-                component.Action = action;
-                component.Order = order;
-                component.TargetZone = targetZone;
-                component.AcceptedAt = now;
+                foreach (var partial in applied)
+                    _ = RemoveCommitmentAsync(partial.ActorId, partial.CommitmentId, requestId);
+                Reject(proposal, "The primary recipient could not commit the directive.");
+                return;
             }
-            Finish(requestId, applied > 0,
-                applied > 0 ? $"Authorized directive committed for {applied} actor(s)." :
-                    "The directive could not be committed.");
+
+            foreach (var projection in applied)
+            {
+                if (_directives.TryGetValue(projection.ActorId, out var previous))
+                    FinishDirective(previous.ActorId, previous.RequestId, "nc-human-directive-replaced");
+                var directive = new ActiveDirective(
+                    requestId,
+                    projection.ActorId,
+                    projection.CommitmentId,
+                    actionDefinition.ID,
+                    actionDefinition.Execution,
+                    order,
+                    targetZone,
+                    targetSubject,
+                    targetHandle,
+                    now,
+                    now.Advance(policy.DefaultDuration),
+                    NCHumanDirectiveExecutionPhase.Accepted,
+                    Guid.Empty,
+                    string.Empty);
+                _directives[projection.ActorId] = directive;
+                _expiries.Enqueue(new DirectiveExpiry(projection.ActorId, requestId), directive.ExpiresAt.Ticks);
+                MirrorDirective(directive);
+                _cognition.ForceSchedule(projection.ActorId, now);
+            }
+
+            _pendingDialogues[requestId] = new PendingDirectiveDialogue(
+                targetActor,
+                proposal.SessionId,
+                proposal.ConversationVersion,
+                proposal.Request,
+                proposal.Response,
+                applied.Count,
+                recipients.Count);
+            _suggestions.TryApplyDeferredSuggestion(proposal.Request, proposal.Response);
+            Finish(requestId, true,
+                applied.Count == recipients.Count
+                    ? $"Authorized directive committed for {applied.Count} actor(s)."
+                    : $"Authorized directive partially committed for {applied.Count} of {recipients.Count} actor(s).");
         });
     }
 
@@ -258,6 +333,14 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
         var speakerJob = new ProtoId<JobPrototype>(activeJobId);
         return department.Roles.Contains(speakerJob) &&
                HigherRank(department, speakerJob, targetJob, policy.AllowEqualRank);
+    }
+
+    private bool IsActionAllowed(NCActorId recipient, NCHumanDirectiveActionPrototype action)
+    {
+        if (action.AllowedOrganizations.Count == 0)
+            return true;
+        return _workforce.TryGetAssignment(recipient, out var organization, out _) &&
+               action.AllowedOrganizations.Contains(organization);
     }
 
     private bool TryCompareWorkforce(NCActorId speaker, NCActorId target, bool allowEqual)
@@ -299,13 +382,22 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
         department.NCPositionRanks.TryGetValue(target, out var targetRank) &&
         (speakerRank > targetRank || allowEqual && speakerRank == targetRank);
 
-    private bool TryResolveZone(string? handle, NCActorId actorId, out NCZoneId zoneId)
+    private bool TryResolveDirectiveZone(
+        NCHumanDirectiveActionPrototype action,
+        string? handle,
+        NCActorId actorId,
+        out NCZoneId zoneId)
     {
         if (!string.IsNullOrWhiteSpace(handle) && handle.StartsWith("zone:", StringComparison.Ordinal) &&
             Guid.TryParse(handle[5..], out var raw) && _zones.TryGetZone(new NCZoneId(raw), out _))
         {
             zoneId = new NCZoneId(raw);
             return true;
+        }
+        if (action.RequiresKnownLocation)
+        {
+            zoneId = default;
+            return false;
         }
         if (_actors.TryGetCached(actorId, out var actor) &&
             _zones.TryGetZone(actor.Snapshot.Location.CurrentZone, out _))
@@ -315,6 +407,23 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
         }
         zoneId = default;
         return false;
+    }
+
+    private void Reject(NCNeuralDialogueDirectiveProposedEvent proposal, string result)
+    {
+        Finish(proposal.Request.RequestId, false, result);
+        var refusal = proposal.Response with
+        {
+            SpeechActKey = "refusal",
+            RenderedText = Loc.GetString("nc-human-directive-refused"),
+            Intent = null,
+        };
+        _suggestions.TryDeliverDeferredDialogue(
+            proposal.ActorId,
+            proposal.Request.RequestId,
+            proposal.SessionId,
+            proposal.ConversationVersion,
+            refusal);
     }
 
     private bool TryResolveParty(EntityUid entity, out NCPartyRef party)
@@ -343,7 +452,12 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
 
     private void Reset()
     {
+        foreach (var directive in _directives.Values)
+            StopPhysicalDirective(directive);
         _pending.Clear();
+        _directives.Clear();
+        _expiries.Clear();
+        _pendingDialogues.Clear();
         Accepted = 0;
         Rejected = 0;
         LastResult = "No natural directives processed.";
@@ -369,4 +483,34 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
         bytes[0] ^= discriminator;
         return new Guid(bytes);
     }
+
+    private sealed record ActiveDirective(
+        Guid RequestId,
+        NCActorId ActorId,
+        NCCityCommitmentId CommitmentId,
+        string ActionId,
+        NCHumanDirectiveExecutionKind Execution,
+        string Order,
+        NCZoneId TargetZone,
+        EntityUid? TargetEntity,
+        string TargetHandle,
+        Content.Shared._NC.Persistence.Time.NCActiveWorldTime AcceptedAt,
+        Content.Shared._NC.Persistence.Time.NCActiveWorldTime ExpiresAt,
+        NCHumanDirectiveExecutionPhase Phase,
+        Guid ChildInstanceId,
+        string ChildActionId);
+
+    private sealed record PendingDirectiveDialogue(
+        NCActorId ActorId,
+        NCConversationSessionId SessionId,
+        int ConversationVersion,
+        NCNeuralRequestEnvelope Request,
+        NCNeuralResponseEnvelope Response,
+        int AppliedRecipients,
+        int RequestedRecipients);
+
+    private readonly record struct DirectiveExpiry(NCActorId ActorId, Guid RequestId);
+    private readonly record struct AppliedDirective(
+        NCActorId ActorId,
+        NCCityCommitmentId CommitmentId);
 }

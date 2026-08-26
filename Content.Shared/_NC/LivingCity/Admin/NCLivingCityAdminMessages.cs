@@ -105,6 +105,8 @@ public enum NCLivingCityAdminInfrastructureAction : byte
     RecoverServiceDispatch,
     ReloadProperty,
     ResetNeuralCircuit,
+    DisableNeuralForRound,
+    AdvanceCivilTime,
 }
 
 [Serializable, NetSerializable]

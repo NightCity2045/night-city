@@ -173,6 +173,20 @@ public sealed partial class NCCognitionSystem : EntitySystem
         _mctsNodesExpanded,
         _configurationError);
 
+    public bool TryGetEarliestDecision(out NCActiveWorldTime dueAt, out bool dueNow)
+    {
+        if (!TryPeekScheduled(_decisionQueue, _scheduledDecisions, out var scheduled, out _))
+        {
+            dueAt = default;
+            dueNow = false;
+            return false;
+        }
+
+        dueAt = scheduled.DueAt;
+        dueNow = _clock.TryGetCurrentTime(out var epoch, out var now) && epoch == _epoch && dueAt <= now;
+        return true;
+    }
+
     public void NotifyDependencyChanged(
         NCCognitionDependencyKind kind,
         string stableId,
@@ -549,6 +563,24 @@ public sealed partial class NCCognitionSystem : EntitySystem
             }
             return priority.DueTicks <= now.Ticks;
         }
+        return false;
+    }
+
+    private static bool TryPeekScheduled(
+        PriorityQueue<ScheduledActor, SchedulePriority> queue,
+        Dictionary<NCActorId, NCActiveWorldTime> scheduled,
+        out ScheduledActor actor,
+        out SchedulePriority priority)
+    {
+        while (queue.TryPeek(out actor, out priority))
+        {
+            if (scheduled.TryGetValue(actor.ActorId, out var dueAt) && dueAt == actor.DueAt)
+                return true;
+            queue.Dequeue();
+        }
+
+        actor = default;
+        priority = default;
         return false;
     }
 

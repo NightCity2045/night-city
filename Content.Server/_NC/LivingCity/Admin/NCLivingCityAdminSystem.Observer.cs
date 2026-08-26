@@ -9,6 +9,7 @@ using Content.Server._NC.LivingCity.Population;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Admin;
 using Content.Shared._NC.LivingCity.Actors;
+using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.Persistence.Identity;
 using Robust.Shared.Prototypes;
 
@@ -90,19 +91,23 @@ public sealed partial class NCLivingCityAdminSystem
 
         var districts = projections.Where(static value => value.ScopeSlot == NCZoneContextSlot.District).ToArray();
         var districtActors = districts.Sum(static value => value.TotalActors);
-        var publicActors = districts.Sum(static value => value.PublicActors);
-        var abstractHomeActors = districts.Sum(static value => value.AbstractHomeActors);
-        var residenceAssignedActors = districts.Sum(static value => value.ResidenceAssignedActors);
+        var publicActors = _zoneStates.PublicActorCount;
+        var abstractHomeActors = _zoneStates.AbstractHomeActorCount;
+        var residenceAssignedActors = _zoneStates.ResidenceAssignedActorCount;
         fields.Add("observer-presence", "indexed-actors", _zoneStates.IndexedActorCount);
         fields.Add("observer-presence", "district-actors", districtActors);
+        fields.Add("observer-presence", "residents", _zoneStates.ResidentCount);
+        fields.Add("observer-presence", "narrative-actors", _zoneStates.NarrativeActorCount);
         fields.Add("observer-presence", "materialized", _actorRuntime.MaterializedActorCount);
         fields.Add("observer-presence", "public", publicActors);
         fields.Add("observer-presence", "abstract-home", abstractHomeActors);
+        fields.Add("observer-presence", "working", _zoneStates.WorkingActorCount);
+        fields.Add("observer-presence", "traveling", _zoneStates.TravelingActorCount);
         fields.Add("observer-presence", "residence-assigned", residenceAssignedActors);
         fields.Add("observer-presence", "residence-unassigned",
-            Math.Max(0, districtActors - residenceAssignedActors));
+            Math.Max(0, _zoneStates.ActiveActorCount - residenceAssignedActors));
         fields.Add("observer-presence", "unknown-presence",
-            Math.Max(0, districtActors - publicActors - abstractHomeActors));
+            Math.Max(0, _zoneStates.ActiveActorCount - publicActors - abstractHomeActors));
 
         fields.Add("observer-society", "formal-workers", _workforce.IndexedAssignmentCount);
         fields.Add("observer-society", "profession-profiles", _professions.ProfileCount);
@@ -292,8 +297,46 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-memory", "episodes", memoryBook?.Snapshot.Episodes.Count ?? 0);
         fields.Add("observer-memory", "summaries", memoryBook?.Snapshot.Summaries.Count ?? 0);
         fields.Add("observer-memory", "total-remembered", memoryBook?.Snapshot.TotalRemembered ?? 0);
-        fields.Add("observer-memory", "active-conversations",
-            _conversations.GetForParticipant(NCPartyRef.ForActor(actorId), 50).Count);
+        var conversations = _conversations.GetForParticipant(NCPartyRef.ForActor(actorId), 50);
+        var activeConversations = conversations.Where(value => value.Status is NCConversationStatus.Starting or
+            NCConversationStatus.Active or NCConversationStatus.WaitingForActor or
+            NCConversationStatus.WaitingForPlayer).ToArray();
+        fields.Add("observer-memory", "active-conversations", activeConversations.Length);
+        if (activeConversations.FirstOrDefault() is { } conversation)
+        {
+            fields.Add("observer-conversation", "session", conversation.SessionId);
+            fields.Add("observer-conversation", "channel", conversation.Channel);
+            fields.Add("observer-conversation", "status", conversation.Status);
+            fields.Add("observer-conversation", "version", conversation.ConversationVersion);
+            fields.Add("observer-conversation", "participants", conversation.Participants.Count);
+            fields.Add("observer-conversation", "topics", string.Join(", ", conversation.CurrentTopicKeys));
+            fields.Add("observer-conversation", "turns", conversation.Turns.Count);
+        }
+
+        var neuralRuntime = _neural.GetRuntimeSnapshot();
+        fields.Add("observer-neural", "runtime-data", _neural.TryGetActorRuntimeSnapshot(actorId, out var neural));
+        fields.Add("observer-neural", "budget-mode", neuralRuntime.BudgetMode);
+        if (neural != null)
+        {
+            fields.Add("observer-neural", "input-tokens", neural.InputTokens);
+            fields.Add("observer-neural", "cached-input-tokens", neural.CachedInputTokens);
+            fields.Add("observer-neural", "output-tokens", neural.OutputTokens);
+            fields.Add("observer-neural", "cost-usd-micros", neural.CostUsdMicros);
+            fields.Add("observer-neural", "results", neural.Results);
+            fields.Add("observer-neural", "accepted", neural.Accepted);
+            fields.Add("observer-neural", "last-request", neural.LastRequestId);
+            fields.Add("observer-neural", "last-kind", neural.LastRequestKind);
+            fields.Add("observer-neural", "last-status", neural.LastStatus);
+            fields.Add("observer-neural", "last-failure-kind", neural.LastFailureKind);
+            fields.Add("observer-neural", "last-reason",
+                neural.LastReason.Length == 0 ? "none" : neural.LastReason);
+            fields.Add("observer-neural", "last-capability",
+                neural.LastCapabilityId.Length == 0 ? "none" : neural.LastCapabilityId);
+            fields.Add("observer-neural", "last-summary",
+                neural.LastSummaryKey.Length == 0 ? "none" : neural.LastSummaryKey);
+            fields.Add("observer-neural", "provider-model",
+                neural.LastProviderModel.Length == 0 ? "none" : neural.LastProviderModel);
+        }
         if (entityUid.IsValid() && TryComp<NCHumanDirectiveComponent>(entityUid, out var directive))
         {
             fields.Add("observer-directive", "request", directive.RequestId);

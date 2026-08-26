@@ -138,10 +138,17 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                         perceivedEvent.ExpiresAtTicks);
             }
         }
-        var purpose = conversation == null ? NCSocialContextPurpose.InternalReasoning :
-            NCSocialContextPurpose.ConversationRendering;
+        var owner = NCPartyRef.ForActor(actorId);
+        var disclosurePurpose = conversation == null
+            ? NCSocialContextPurpose.InternalReasoning
+            : NCSocialContextPurpose.ConversationRendering;
+        if (!_redaction.TryResolveMaximumPrivacy(owner, disclosurePurpose, conversation, out var disclosureMaximum))
+            return false;
+
+        // The Actor may reason about everything it legitimately knows, including its own secrets. The separate
+        // disclosure allowlist below limits which of those facts may appear in the actual spoken response.
         var context = await _redaction.BuildAsync(
-            NCPartyRef.ForActor(actorId), purpose, conversation, participantAliases);
+            owner, NCSocialContextPurpose.InternalReasoning, null, participantAliases);
         if (context == null)
             return false;
         var facts = context.Facts.Where(value => !context.ForbiddenTopics.Contains(value.FactKey))
@@ -162,11 +169,13 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                     value.Subject.StableId, "Unknown person", value.Key, 1f, value.ExpiresAt.Ticks));
             }
             facts.AddRange(physicalFacts.Select(value => new NCNeuralFact(
-                value.Domain.ToString(), value.Key, value.Subject.StableId, 1f, "Observed")));
+                value.Domain.ToString(), value.Key, value.Subject.StableId, 1f,
+                NCMemoryPrivacy.Public.ToString())));
             if (cognition.Intention is { } intention)
             {
                 facts.Add(new NCNeuralFact(
-                    "Core", "cognition.current-intention", StableSubject(intention.CapabilityId), 1f, "Observed"));
+                    "Core", "cognition.current-intention", StableSubject(intention.CapabilityId), 1f,
+                    NCMemoryPrivacy.Public.ToString()));
             }
         }
         var perceived = perceivedByHandle.Values.Take(policy.MaximumPerceivedSubjects).ToArray();
@@ -176,8 +185,8 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         await Task.WhenAll(socialProfileTask, factionMembershipTask);
         var socialProfile = await socialProfileTask;
         var factionMembership = await factionMembershipTask;
-        AddRoleFacts(actorId, factionMembership, facts);
-        var persona = BuildPersona(actor, socialProfile, factionMembership, narrativeProfile);
+        AddRoleFacts(actorId, factionMembership, context.EffectiveMaximumPrivacy, context.ForbiddenTopics, facts);
+        var persona = BuildPersona(actor, socialProfile, narrativeProfile);
         if (persona == null)
             return false;
         var autonomy = new NCNeuralAutonomyContext(
@@ -196,7 +205,7 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             if (utterance.Length == 0 || actorName.Length == 0)
                 return false;
             var history = conversation is { } transcriptSession
-                ? _conversations.GetTranscript(transcriptSession, 13).SkipLast(1)
+                ? _conversations.GetTranscript(transcriptSession, policy.MaximumDialogueHistoryTurns + 1).SkipLast(1)
                     .Select(value => new NCNeuralDialogueTurn(
                         value.Speaker == NCPartyRef.ForActor(actorId) ? "self" : "interlocutor",
                         value.Act.ToString().ToLowerInvariant(),
@@ -204,7 +213,22 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                         value.At.Ticks))
                     .ToArray()
                 : [];
-            dialogueInput = new NCNeuralDialogueInput(actorName, utterance, speakerHandle, history);
+            var priorTurns = conversationSnapshot?.Turns.SkipLast(1).ToArray() ?? [];
+            var earlierTurnCount = Math.Max(0, priorTurns.Length - history.Length);
+            var summaryKeys = priorTurns
+                .Where(value => value.SummaryKey.Length > 0)
+                .Select(value => value.SummaryKey)
+                .Distinct(StringComparer.Ordinal)
+                .Take(policy.MaximumDialogueSummaryKeys)
+                .ToArray();
+            var earlierSummary = earlierTurnCount > 0 || summaryKeys.Length > 0 ||
+                conversationSnapshot?.CurrentTopicKeys.Count > 0
+                ? new NCNeuralDialogueSummary(
+                    earlierTurnCount,
+                    conversationSnapshot?.CurrentTopicKeys.Take(policy.MaximumDialogueSummaryKeys).ToArray() ?? [],
+                    summaryKeys)
+                : null;
+            dialogueInput = new NCNeuralDialogueInput(actorName, utterance, speakerHandle, history, earlierSummary);
         }
         var effectiveCapabilities = allowedCapabilities
             .Where(value => value != ApproachPersonCapability || speakerHandle.Length > 0)
@@ -214,17 +238,29 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             .ToArray();
         if (effectiveCapabilities.Length == 0)
             return false;
+        var hasOrganization = _workforce.TryGetAssignment(actorId, out var actorOrganization, out _);
         var directiveActions = effectiveCapabilities.Contains(AcceptDirectiveCapability)
             ? _prototypes.EnumeratePrototypes<NCHumanDirectiveActionPrototype>()
+                .Where(value => value.AllowedOrganizations.Count == 0 ||
+                    hasOrganization && value.AllowedOrganizations.Contains(actorOrganization))
                 .Select(value => value.ID)
                 .Order(StringComparer.Ordinal)
                 .ToArray()
             : [];
+        var packetFacts = BuildFactPacket(facts, policy.MaximumFacts);
+        var disclosure = new NCNeuralDisclosureContext(
+            disclosureMaximum.ToString(),
+            packetFacts.Select(value => value.Handle).ToArray(),
+            packetFacts.Where(value => CanDisclose(value, disclosureMaximum))
+                .Select(value => value.Handle)
+                .ToArray(),
+            context.ForbiddenAssertionKeys,
+            context.ForbiddenTopics);
         var request = new NCNeuralRequestEnvelope(Guid.NewGuid(), kind, priority, actorId, epoch,
             actor.AggregateVersion, now.Advance(policy.RequestLifetime), DefaultPrompt,
-            facts.Take(policy.MaximumFacts).ToArray(),
+            packetFacts,
             effectiveCapabilities, conversationSnapshot?.CurrentTopicKeys ?? [], "ru-RU", persona, autonomy,
-            perceived, perceivedEvents, knownLocations, dialogueInput, directiveActions);
+            perceived, perceivedEvents, knownLocations, dialogueInput, directiveActions, disclosure);
         var trackedDialogue = kind == NCNeuralRequestKind.DialogueContinuation && conversationSnapshot != null;
         if (trackedDialogue && !_suggestions.TryTrackDialogue(
                 request.RequestId,
@@ -360,7 +396,6 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
     private NCNeuralPersonaContext? BuildPersona(
         NCCityActorRecord actor,
         NCSocialProfileRecord? socialProfile,
-        NCFactionMembershipRecord? factionMembership,
         NCNarrativeActorProfilePrototype narrativeProfile)
     {
         if (!_prototypes.TryIndex(narrativeProfile.PersonaProfile, out var persona) || persona == null)
@@ -380,13 +415,8 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             if (_prototypes.TryIndex(jobId, out JobPrototype? job) && job != null)
                 biography = $"{biography} Current occupation: {job.LocalizedName}.".Trim();
         }
-        else if (TryGetActiveFaction(factionMembership, out var membership, out var faction))
-        {
-            roleKey = StableOrUnknown(membership.Role);
-            organizationKey = faction.StableKey;
-            principles.AddRange(faction.IdeologyKeys.Where(StableKey));
-            biography = $"{biography} Affiliation: {faction.DisplayName}; role: {membership.Role}.".Trim();
-        }
+        // Hidden faction membership is never inferred into the provider-facing persona. Authored persona data is the
+        // public identity; private affiliations travel only through the purpose-bounded fact packet below.
         return new NCNeuralPersonaContext(
             persona.StableKey,
             roleKey,
@@ -406,26 +436,66 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             StableOrUnknown(social?.Speech.Vocabulary));
     }
 
-    private void AddRoleFacts(NCActorId actorId, NCFactionMembershipRecord? affiliation, List<NCNeuralFact> facts)
+    private void AddRoleFacts(
+        NCActorId actorId,
+        NCFactionMembershipRecord? affiliation,
+        NCMemoryPrivacy maximumPrivacy,
+        IReadOnlyList<string> forbiddenTopics,
+        List<NCNeuralFact> facts)
     {
         if (_workforce.TryGetAssignment(actorId, out var organization, out var job))
         {
-            facts.Add(new NCNeuralFact("Jobs", "employment.organization", StableSubject(organization.Id),
-                1f, "Private"));
-            facts.Add(new NCNeuralFact("Jobs", "employment.position", StableSubject(job.Id), 1f, "Private"));
+            TryAddFact(facts, forbiddenTopics, maximumPrivacy, "Jobs", "employment.organization",
+                organization.Id, NCMemoryPrivacy.Public);
+            TryAddFact(facts, forbiddenTopics, maximumPrivacy, "Jobs", "employment.position",
+                job.Id, NCMemoryPrivacy.Public);
             if (_professions.TryGetProfile(actorId, out var profession))
             {
                 foreach (var skill in profession.SkillKeys.Where(StableKey).Distinct(StringComparer.Ordinal))
-                    facts.Add(new NCNeuralFact("Jobs", "employment.skill", StableSubject(skill), 1f, "Private"));
+                    TryAddFact(facts, forbiddenTopics, maximumPrivacy, "Jobs", "employment.skill",
+                        skill, NCMemoryPrivacy.Personal);
             }
         }
 
         if (!TryGetActiveFaction(affiliation, out var membership, out var faction))
             return;
-        facts.Add(new NCNeuralFact("Faction", "faction.membership", StableSubject(faction.StableKey),
-            1f, "Private"));
-        facts.Add(new NCNeuralFact("Faction", "faction.role", StableSubject(membership.Role), 1f, "Private"));
+        TryAddFact(facts, forbiddenTopics, maximumPrivacy, "Faction", "faction.membership",
+            faction.StableKey, NCMemoryPrivacy.Secret);
+        TryAddFact(facts, forbiddenTopics, maximumPrivacy, "Faction", "faction.role",
+            membership.Role, NCMemoryPrivacy.Secret);
     }
+
+    private static void TryAddFact(
+        ICollection<NCNeuralFact> facts,
+        IReadOnlyList<string> forbiddenTopics,
+        NCMemoryPrivacy maximumPrivacy,
+        string domain,
+        string key,
+        string subject,
+        NCMemoryPrivacy privacy)
+    {
+        if (privacy > maximumPrivacy || forbiddenTopics.Contains(key))
+            return;
+        facts.Add(new NCNeuralFact(domain, key, StableSubject(subject), 1f, privacy.ToString()));
+    }
+
+    private static NCNeuralFact[] BuildFactPacket(IEnumerable<NCNeuralFact> facts, int maximum)
+    {
+        return facts
+            .Where(value => StableKey(value.Domain) && StableKey(value.Key) && StableKey(value.Subject) &&
+                Enum.TryParse<NCMemoryPrivacy>(value.Privacy, true, out _))
+            .GroupBy(value => (value.Domain, value.Key, value.Subject, value.Privacy))
+            .Select(group => group.OrderByDescending(value => value.Confidence).First())
+            .OrderBy(value => value.Domain, StringComparer.Ordinal)
+            .ThenBy(value => value.Key, StringComparer.Ordinal)
+            .ThenBy(value => value.Subject, StringComparer.Ordinal)
+            .Take(Math.Max(0, maximum))
+            .Select((value, index) => value with { Handle = $"fact-{index + 1:D3}" })
+            .ToArray();
+    }
+
+    private static bool CanDisclose(NCNeuralFact fact, NCMemoryPrivacy maximumPrivacy) =>
+        Enum.TryParse<NCMemoryPrivacy>(fact.Privacy, true, out var privacy) && privacy <= maximumPrivacy;
 
     private bool TryGetActiveFaction(
         NCFactionMembershipRecord? record,

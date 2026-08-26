@@ -19,6 +19,7 @@
   maximumDispatchesPerTick: 4
   maximumConcurrentMutations: 8
   mutationRetryDelay: 5s
+  reevaluateOnSessionStart: true
 
 - type: ncCityPhysicalNavigationProfile
   id: NCDefaultPedestrianPhysicalNavigation
@@ -277,6 +278,10 @@
 - type: ncCityRoutineProfile
   id: NCDefaultCivilianRoutine
   cycleDuration: 24h
+  activeCycleDuration: 2h
+  cyclePhaseOffset: 6h
+  actorPhaseSpread: 2h
+  maximumManualAdvance: 24h
   entries:
   - at: 0s
     activity: sleep

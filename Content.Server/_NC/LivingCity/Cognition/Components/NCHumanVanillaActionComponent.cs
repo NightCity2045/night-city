@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Server._NC.LivingCity.Actors;
+using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.LivingCity.Cognition;
 
 namespace Content.Server._NC.LivingCity.Cognition.Components;
@@ -16,6 +17,9 @@ public sealed partial class NCHumanVanillaActionComponent : Component
     [ViewVariables(VVAccess.ReadOnly)] public Guid InstanceId;
     [ViewVariables(VVAccess.ReadOnly)] public NCHumanActionOperationKind Operation;
     [ViewVariables(VVAccess.ReadOnly)] public EntityUid Target = EntityUid.Invalid;
+    [ViewVariables(VVAccess.ReadOnly)] public NCMapCoordinates TargetCoordinates;
+    [ViewVariables(VVAccess.ReadOnly)] public bool HasTargetCoordinates;
+    [ViewVariables(VVAccess.ReadOnly)] public uint PatrolCycle;
     [ViewVariables(VVAccess.ReadOnly)] public bool OwnsSteering;
     [ViewVariables(VVAccess.ReadOnly)] public bool SuspendedHtn;
     [ViewVariables(VVAccess.ReadOnly)] public bool OwnsCombatBlocker;

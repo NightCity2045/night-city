@@ -20,6 +20,8 @@ public readonly record struct NCCityZoneObserverProjection(
     int PublicActors,
     int AbstractHomeActors,
     int ResidenceAssignedActors,
+    int NarrativeActors,
+    int WorkingActors,
     float Activity,
     float Scarcity,
     float Threat,

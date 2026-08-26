@@ -5,6 +5,7 @@
 using System.Numerics;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Actors.Components;
+using Content.Server._NC.LivingCity.Affordances;
 using Content.Server._NC.LivingCity.Cognition.Components;
 using Content.Server._NC.LivingCity.Time;
 using Content.Server.Chat.Systems;
@@ -19,10 +20,15 @@ using Content.Shared.Interaction;
 using Content.Shared.Inventory;
 using Content.Shared.Movement.Pulling.Components;
 using Content.Shared.Movement.Pulling.Systems;
+using Content.Shared._NC.City.Zones;
+using Content.Shared._NC.Coordinates;
+using Content.Shared._NC.Coordinates.Systems;
+using Content.Shared._NC.LivingCity.Affordances;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Cognition;
 using Content.Shared._NC.Persistence.Identity;
 using Robust.Shared.Map;
+using Robust.Shared.Map.Components;
 
 namespace Content.Server._NC.LivingCity.Cognition;
 
@@ -39,6 +45,9 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
     [Dependency] private NCCityNpcSteeringLeaseSystem _steeringLease = default!;
     [Dependency] private NCCityPhysicalExecutionSystem _physical = default!;
     [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
+    [Dependency] private NCCityAffordanceCatalogSystem _affordances = default!;
+    [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
+    [Dependency] private SharedMapSystem _maps = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private NPCSteeringSystem _steering = default!;
     [Dependency] private HTNSystem _htn = default!;
@@ -80,6 +89,12 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
             case NCHumanActionOperationKind.FollowTarget:
                 ExecuteFollow(actor, state, args);
                 return;
+            case NCHumanActionOperationKind.HoldPosition:
+                ExecuteHold(actor, state, args);
+                return;
+            case NCHumanActionOperationKind.PatrolZone:
+                ExecutePatrolZone(actor, state, args);
+                return;
             case NCHumanActionOperationKind.FleeFromTarget:
                 ExecuteFlee(actor, state, args);
                 return;
@@ -115,7 +130,7 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
     private NCHumanVanillaActionComponent GetState(EntityUid actor, NCHumanActionExecutionEvent args)
     {
         if (TryComp<NCHumanVanillaActionComponent>(actor, out var existing) &&
-            existing.InstanceId != args.InstanceId)
+            (existing.InstanceId != args.InstanceId || existing.Operation != args.Action.Operation))
         {
             Cleanup(actor, existing);
         }
@@ -132,7 +147,12 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
         NCHumanVanillaActionComponent state,
         NCHumanActionExecutionEvent args)
     {
-        if (!TryResolveVisibleTarget(args, out var target) || target == actor)
+        // A person resolved through a bounded perception handle remains valid for this one action instance. This
+        // lets a real follow action continue after the original speech/perception snapshot expires.
+        var target = state.Target.IsValid() && Exists(state.Target)
+            ? state.Target
+            : EntityUid.Invalid;
+        if ((!target.IsValid() && !TryResolveVisibleTarget(args, out target)) || target == actor)
         {
             Fail(actor, args, "vanilla-movement-target-unavailable");
             return;
@@ -145,8 +165,9 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
             Fail(actor, args, "vanilla-movement-target-out-of-range");
             return;
         }
-        if (_transform.InRange(Transform(actor).Coordinates, Transform(target).Coordinates,
-                args.Action.CompletionRange))
+        var inRange = _transform.InRange(Transform(actor).Coordinates, Transform(target).Coordinates,
+            args.Action.CompletionRange);
+        if (inRange && args.Action.Operation == NCHumanActionOperationKind.ApproachTarget)
         {
             Complete(actor, args);
             return;
@@ -160,8 +181,71 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
         if (!AcquireMovement(actor, state, InterruptFor(args)))
             return;
 
+        if (inRange)
+        {
+            // Keep the lease and HTN suspension, but do not path into the followed person's collision body.
+            _steering.Unregister(actor);
+            return;
+        }
+
         // Entity-relative steering keeps following a moving human and preserves vanilla collision/path checks.
         _steering.Register(actor, new EntityCoordinates(target, Vector2.Zero));
+    }
+
+    private void ExecuteHold(
+        EntityUid actor,
+        NCHumanVanillaActionComponent state,
+        NCHumanActionExecutionEvent args)
+    {
+        // Holding is intentionally non-terminal. The directive owner completes or interrupts it when the authorized
+        // order expires; the vanilla adapter only owns steering/HTN suspension while it remains active.
+        AcquireMovement(actor, state, InterruptFor(args));
+    }
+
+    private void ExecutePatrolZone(
+        EntityUid actor,
+        NCHumanVanillaActionComponent state,
+        NCHumanActionExecutionEvent args)
+    {
+        if (args.Target.Kind != NCCognitionReferenceKind.Zone ||
+            !Guid.TryParse(args.Target.StableId, out var rawZone))
+        {
+            Fail(actor, args, "vanilla-patrol-zone-invalid");
+            return;
+        }
+
+        if (state.HasTargetCoordinates && IsReached(actor, state.TargetCoordinates, args.Action.CompletionRange))
+        {
+            // Keep the same bounded steering authority while selecting another catalogued point in this zone.
+            _steering.Unregister(actor);
+            state.HasTargetCoordinates = false;
+            state.PatrolCycle++;
+        }
+        if (state.OwnsSteering && TryComp<NPCSteeringComponent>(actor, out var steering) &&
+            steering.Status == SteeringStatus.NoPath)
+        {
+            _steering.Unregister(actor);
+            state.HasTargetCoordinates = false;
+            state.PatrolCycle++;
+        }
+        if (!state.HasTargetCoordinates)
+        {
+            var zone = new NCZoneId(rawZone);
+            if (!_affordances.TrySelect(NCCityAffordanceKind.PatrolArea, zone,
+                    StableSeed(args.ActorId.Value, state.PatrolCycle), out var affordance) ||
+                !TryResolveEntityCoordinates(affordance.Target, out _))
+            {
+                Fail(actor, args, "vanilla-patrol-zone-has-no-reachable-points");
+                return;
+            }
+            state.TargetCoordinates = affordance.Target;
+            state.HasTargetCoordinates = true;
+        }
+
+        if (!AcquireMovement(actor, state, InterruptFor(args)) ||
+            !TryResolveEntityCoordinates(state.TargetCoordinates, out var destination))
+            return;
+        _steering.Register(actor, destination);
     }
 
     private void ExecuteFlee(
@@ -466,7 +550,8 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
     {
         return args.Intention.CapabilityId switch
         {
-            "NCMedicalRespondToCritical" => NCCityPhysicalInterruptFlags.Medical,
+            "NCMedicalRespondToCritical" or "NCCityMedicalRespondToCritical" =>
+                NCCityPhysicalInterruptFlags.Medical,
             "NCCognitionConversation" or "NCCognitionApproachPerson" =>
                 NCCityPhysicalInterruptFlags.Conversation,
             _ => NCCityPhysicalInterruptFlags.Scripted,
@@ -489,6 +574,31 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
         }
         target = candidate;
         return true;
+    }
+
+    private bool TryResolveEntityCoordinates(NCMapCoordinates target, out EntityCoordinates coordinates)
+    {
+        coordinates = default;
+        if (!_coordinates.TryResolve(target, out var mapCoordinates) ||
+            !_maps.TryGetMap(mapCoordinates.MapId, out var mapUid) || mapUid is not { } map ||
+            !_maps.TryFindGridAt(map, mapCoordinates.Position, out var gridUid, out _))
+            return false;
+        coordinates = _transform.ToCoordinates((gridUid, null), mapCoordinates);
+        return true;
+    }
+
+    private bool IsReached(EntityUid actor, NCMapCoordinates target, float range) =>
+        _coordinates.TryGetCoordinates(actor, out var current) && current.NetworkId == target.NetworkId &&
+        current.Z == target.Z && Vector2.DistanceSquared(current.Position, target.Position) <= range * range;
+
+    private static uint StableSeed(Guid actorId, uint cycle)
+    {
+        Span<byte> bytes = stackalloc byte[16];
+        actorId.TryWriteBytes(bytes);
+        var hash = 2166136261u;
+        foreach (var value in bytes)
+            hash = (hash ^ value) * 16777619u;
+        return (hash ^ cycle) * 16777619u;
     }
 
     private bool TryResolveItemTarget(

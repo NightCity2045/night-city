@@ -65,6 +65,27 @@
   interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
+  id: human-hold-position
+  executor: VanillaMovement
+  operation: HoldPosition
+  targetKind: None
+  completion: AuthorityReleased
+  timeout: 4h
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-patrol-zone
+  executor: VanillaMovement
+  operation: PatrolZone
+  targetKind: Zone
+  completion: AuthorityReleased
+  timeout: 4h
+  requiresPhysicalEntity: true
+  completionRange: 1.25
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
   id: human-flee-from-threat
   executor: VanillaMovement
   operation: FleeFromTarget
@@ -194,6 +215,28 @@
   interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
+  id: medical-provide-cpr
+  executor: MedicalAdapter
+  targetKind: Person
+  completion: WorldStateChanged
+  timeout: 1m
+  requiresPhysicalEntity: true
+  maximumRange: 8
+  completionRange: 1.5
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: medical-provide-definitive-trauma-care
+  executor: MedicalAdapter
+  targetKind: Person
+  completion: WorldStateChanged
+  timeout: 2m
+  requiresPhysicalEntity: true
+  maximumRange: 8
+  completionRange: 1.5
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
   id: perform-authoritative-work
   executor: ProfessionAdapter
   targetKind: None
@@ -272,6 +315,23 @@
   targetKind: Person
   completion: DomainMutationConfirmed
   timeout: 15s
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-execute-zone-directive
+  executor: SocialAdapter
+  targetKind: Zone
+  completion: DomainMutationConfirmed
+  timeout: 4h
+  interrupts: [PlanChanged, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-execute-person-directive
+  executor: SocialAdapter
+  targetKind: Person
+  completion: DomainMutationConfirmed
+  timeout: 4h
   requiresPhysicalEntity: true
   interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
 
@@ -568,6 +628,30 @@
     dependsOn: [ approach-patient ]
 
 - type: ncCognitionCapability
+  id: NCCityMedicalRespondToCritical
+  domain: Medical
+  taskKind: KnownProcedure
+  preferredPlanner: Htn
+  fallbackPlanner: StateTree
+  baseUtility: 70
+  priority: 875
+  requiredBeliefs: [ perception.critical-person-present ]
+  interruptsRoutine: true
+  requiresMaterialization: true
+  procedureSteps:
+  - id: approach-patient
+    action: human-approach-person
+  - id: control-immediate-bleeding
+    action: medical-provide-manual-pressure
+    dependsOn: [ approach-patient ]
+  - id: support-circulation
+    action: medical-provide-cpr
+    dependsOn: [ control-immediate-bleeding ]
+  - id: provide-definitive-field-care
+    action: medical-provide-definitive-trauma-care
+    dependsOn: [ support-circulation ]
+
+- type: ncCognitionCapability
   id: NCJanitorialMaintainWorkplace
   domain: Jobs
   taskKind: KnownProcedure
@@ -741,6 +825,35 @@
     action: human-accept-authorized-directive
 
 - type: ncCognitionCapability
+  id: NCCognitionExecuteZoneDirective
+  domain: Faction
+  taskKind: GroupOperation
+  preferredPlanner: StateTree
+  fallbackPlanner: DeterministicFallback
+  baseUtility: 80
+  priority: 875
+  requiredBeliefs: [human.directive.zone-active]
+  interruptsRoutine: true
+  procedureSteps:
+  - id: execute-zone-directive
+    action: human-execute-zone-directive
+
+- type: ncCognitionCapability
+  id: NCCognitionExecutePersonDirective
+  domain: Faction
+  taskKind: GroupOperation
+  preferredPlanner: StateTree
+  fallbackPlanner: DeterministicFallback
+  baseUtility: 85
+  priority: 900
+  requiredBeliefs: [human.directive.person-active]
+  interruptsRoutine: true
+  requiresMaterialization: true
+  procedureSteps:
+  - id: execute-person-directive
+    action: human-execute-person-directive
+
+- type: ncCognitionCapability
   id: NCCognitionManageFixerDeal
   domain: Economy
   taskKind: KnownProcedure
@@ -852,6 +965,8 @@
   - NCCognitionConversation
   - NCCognitionApproachPerson
   - NCCognitionAcceptDirective
+  - NCCognitionExecuteZoneDirective
+  - NCCognitionExecutePersonDirective
   - NCCognitionManageFixerDeal
 
 - type: ncCognitionCapabilityProfile
@@ -867,6 +982,8 @@
   - NCCognitionConversation
   - NCCognitionApproachPerson
   - NCCognitionAcceptDirective
+  - NCCognitionExecuteZoneDirective
+  - NCCognitionExecutePersonDirective
 
 - type: ncCognitionDecisionPolicy
   id: NCDefaultCognitionDecisionPolicy

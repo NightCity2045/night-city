@@ -39,7 +39,7 @@
   replanBackoff: 5s
   followSpacing: 1.5
   arrivalRange: 1.25
-  evaluationInterval: 500ms
+  evaluationInterval: 0.5s
   maximumUpdatesPerTick: 8
 
 - type: ncNcpdDispatchPolicy

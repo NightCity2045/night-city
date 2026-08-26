@@ -31,6 +31,7 @@ public sealed record NCRedactedSocialContext(
     NCMemoryPrivacy EffectiveMaximumPrivacy,
     IReadOnlyList<NCRedactedSocialFact> Facts,
     IReadOnlyList<string> ForbiddenTopics,
+    IReadOnlyList<string> ForbiddenAssertionKeys,
     int RedactedMemoryCount,
     int RedactedRumorCount,
     int RedactedObligationCount);
@@ -40,8 +41,9 @@ public sealed partial class NCSocialContextPolicyPrototype : IPrototype
 {
     [IdDataField] public string ID { get; private set; } = default!;
     [DataField] public int MaximumItemsPerDomain { get; private set; } = 24;
+    [DataField] public int MaximumForbiddenTopics { get; private set; } = 32;
     [DataField] public NCMemoryPrivacy InternalMaximumPrivacy { get; private set; } = NCMemoryPrivacy.Secret;
     [DataField] public NCMemoryPrivacy ConversationMaximumPrivacy { get; private set; } = NCMemoryPrivacy.Restricted;
     [DataField] public NCMemoryPrivacy PublicMaximumPrivacy { get; private set; } = NCMemoryPrivacy.Public;
+    [DataField] public List<string> ForbiddenAssertionKeys { get; private set; } = [];
 }
-

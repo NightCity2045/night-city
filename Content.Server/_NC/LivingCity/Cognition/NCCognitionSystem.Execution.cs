@@ -190,6 +190,11 @@ public sealed partial class NCCognitionSystem
                     state.CompletedStepIds.Add(step.StepId);
                 else
                 {
+                    if (IsTerminalRuntimeFallback(state.Plan, step))
+                    {
+                        FailTerminalRuntimeFallback(state, now, result.Failure);
+                        continue;
+                    }
                     ReplaceWithRuntimeFallback(state, now, result.Failure);
                     continue;
                 }
@@ -256,6 +261,37 @@ public sealed partial class NCCognitionSystem
         ScheduleExecution(state.ActorId, now);
         Trace(state, now, "planner", "fallback-selected", failure);
         CopyToMaterialized(state);
+    }
+
+    /// <summary>
+    /// Prevents a failed safe fallback from recursively replacing itself and monopolizing the execution queue.
+    /// </summary>
+    private void FailTerminalRuntimeFallback(RuntimeState state, NCActiveWorldTime now, string failure)
+    {
+        if (_policy == null || state.Plan == null)
+            return;
+
+        state.Plan = state.Plan with
+        {
+            Status = NCCognitionPlanStatus.Failed,
+            CurrentStep = state.CompletedStepIds.Count,
+            UpdatedAt = now,
+            Failure = failure,
+        };
+        state.LastFailure = failure;
+        Trace(state, now, "execution", "terminal-fallback-failed", failure);
+        ScheduleDecision(state.ActorId, now.Advance(_policy.FailureRetryDelay));
+        CopyToMaterialized(state);
+    }
+
+    private static bool IsTerminalRuntimeFallback(
+        NCCognitionPlanSnapshot plan,
+        NCCognitionPlanStep step)
+    {
+        return plan.Planner == NCCognitionPlannerKind.DeterministicFallback &&
+               plan.Steps.Length == 1 &&
+               step.StepId == "safe-fallback" &&
+               step.ActionId == "remain-available";
     }
 
     private void SchedulePlanning(NCActorId actorId)

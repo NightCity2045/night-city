@@ -1472,6 +1472,11 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
         var availability = record.Snapshot.Schedule.Availability;
         var presenceMode = record.Snapshot.Schedule.PresenceMode;
         var hasAbstractResidence = ValidResidence(record.Snapshot.Location.Residence);
+        var isNarrativeActor = !string.IsNullOrWhiteSpace(record.Snapshot.Identity.NarrativeActorProfileId) ||
+                               _prototypes.TryIndex(
+                                   new ProtoId<NCCityActorArchetypePrototype>(archetypeId),
+                                   out NCCityActorArchetypePrototype? archetype) &&
+                               archetype?.NarrativeActorProfile != null;
         _taskManager.RunOnMainThread(() => RaiseLocalEvent(new NCCityActorPersistedEvent(
             actorId,
             record.AggregateVersion,
@@ -1486,7 +1491,8 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
             cognitionTier,
             availability,
             presenceMode,
-            hasAbstractResidence)));
+            hasAbstractResidence,
+            isNarrativeActor)));
     }
 
     private static (int AppearanceSeed, int BiographySeed) CreatePresentationSeeds(NCActorId actorId)

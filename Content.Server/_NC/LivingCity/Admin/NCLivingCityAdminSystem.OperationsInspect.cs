@@ -125,11 +125,25 @@ public sealed partial class NCLivingCityAdminSystem
     {
         var value = _neural.GetRuntimeSnapshot(); var fields = new FieldBuilder();
         fields.Add("neural", "active", value.Active); fields.Add("neural", "mode", value.BudgetMode);
+        fields.Add("neural", "administratively-disabled", value.AdministrativelyDisabled);
+        fields.Add("neural", "budget-ready", value.BudgetReady);
         fields.Add("neural", "queued", value.Queued); fields.Add("neural", "in-flight", value.InFlight);
         fields.Add("neural", "input-tokens", value.SessionInputTokens); fields.Add("neural", "output-tokens", value.SessionOutputTokens);
+        fields.Add("neural", "cost-usd-micros", value.SessionCostUsdMicros);
+        fields.Add("neural", "weekly-period", value.WeeklyPeriodKey);
+        fields.Add("neural", "weekly-cost-usd-micros", value.WeeklyCostUsdMicros);
+        fields.Add("neural", "requests-social-cognition", value.SocialCognitionRequests);
+        fields.Add("neural", "requests-strategic-decision", value.StrategicDecisionRequests);
+        fields.Add("neural", "requests-dialogue-continuation", value.DialogueContinuationRequests);
+        fields.Add("neural", "requests-memory-summary", value.MemorySummaryRequests);
+        fields.Add("neural", "requests-narrative-render", value.NarrativeRenderRequests);
         fields.Add("neural", "accepted", value.Accepted); fields.Add("neural", "fallbacks", value.Fallbacks);
+        fields.Add("neural", "stale", value.Stale); fields.Add("neural", "invalid", value.Invalid);
+        fields.Add("neural", "provider-failures", value.ProviderFailures);
         fields.Add("neural", "timeouts", value.Timeouts); fields.Add("neural", "rejects", value.ValidationRejects);
         fields.Add("neural", "failures", value.ConsecutiveFailures); fields.Add("neural", "circuit-until", value.CircuitOpenUntil?.Elapsed);
+        fields.Add("neural", "last-failure-kind", value.LastFailureKind);
+        fields.Add("neural", "last-failure-reason", value.LastFailureReason);
         return Ok(fields);
     }
 }

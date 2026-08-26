@@ -3,8 +3,22 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Robust.Shared.Prototypes;
+using Content.Shared.Roles;
 
 namespace Content.Shared._NC.LivingCity.Actors;
+
+/// <summary>Closed server-owned execution shapes available to natural-language directives.</summary>
+public enum NCHumanDirectiveExecutionKind : byte
+{
+    GoToZone,
+    ReportToZone,
+    WaitAtZone,
+    GuardZone,
+    PatrolZone,
+    ApproachIssuer,
+    FollowIssuer,
+    EscortSubjectToZone,
+}
 
 /// <summary>Data-driven limits for natural-language commitments shared by every Living City profession.</summary>
 [Prototype("ncHumanDirectivePolicy")]
@@ -27,6 +41,10 @@ public sealed partial class NCHumanDirectivePolicyPrototype : IPrototype
 public sealed partial class NCHumanDirectiveActionPrototype : IPrototype
 {
     [IdDataField] public string ID { get; private set; } = string.Empty;
+    [DataField(required: true)] public NCHumanDirectiveExecutionKind Execution { get; private set; }
     [DataField] public bool RequiresKnownLocation { get; private set; } = true;
     [DataField] public bool AllowsCompanion { get; private set; }
+    [DataField] public bool RequiresSubject { get; private set; }
+    [DataField] public bool RequiresRestrainedSubject { get; private set; }
+    [DataField] public HashSet<ProtoId<DepartmentPrototype>> AllowedOrganizations { get; private set; } = [];
 }

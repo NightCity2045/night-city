@@ -26,6 +26,16 @@ public sealed record NCEmploymentRecord(
     NCSessionEpoch SessionEpoch,
     NCActiveWorldTime PersistedAt);
 
+/// <summary>
+/// Stable keyset page used by restart recovery. The continuation follows the last database row even when one
+/// snapshot was unreadable, so corrupt data cannot make the workforce recovery loop repeat forever.
+/// </summary>
+public sealed record NCEmploymentPage(
+    IReadOnlyList<NCEmploymentRecord> Records,
+    NCEmploymentId? ContinuationEmploymentId,
+    bool HasMore,
+    int SourceRowCount);
+
 public sealed record NCPartyEmploymentIndexRecord(
     NCPartyEmploymentIndexSnapshot Snapshot,
     long AggregateVersion,

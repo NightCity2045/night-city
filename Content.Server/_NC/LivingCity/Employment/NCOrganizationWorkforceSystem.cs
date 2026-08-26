@@ -8,6 +8,7 @@ using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Economy;
 using Content.Server._NC.LivingCity.Employment.Components;
 using Content.Server._NC.LivingCity.Identity;
+using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.Employment;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared.Roles;
@@ -36,8 +37,16 @@ public sealed partial class NCOrganizationWorkforceSystem : EntitySystem
     private readonly Dictionary<NCActorId, (ProtoId<DepartmentPrototype> Organization, ProtoId<JobPrototype> Job)>
         _assignments = [];
     private readonly object _assignmentLock = new();
+    private readonly HashSet<NCActorId> _recoveryTouchedActors = [];
+    private int _recoveryGeneration;
+    private bool _active;
 
     public string? ConfigurationError { get; private set; }
+    public bool RecoveryRunning { get; private set; }
+    public bool RecoveryComplete { get; private set; }
+    public int RecoveredAssignmentCount { get; private set; }
+    public int RecoveryFailureCount { get; private set; }
+    public string? LastRecoveryError { get; private set; }
 
     public int IndexedAssignmentCount
     {
@@ -53,6 +62,10 @@ public sealed partial class NCOrganizationWorkforceSystem : EntitySystem
         base.Initialize();
         BuildOrganizationIndex();
         SubscribeLocalEvent<NCCityActorRehydratedEvent>(OnActorRehydrated);
+        SubscribeLocalEvent<NCEmploymentPersistedEvent>(OnEmploymentPersisted);
+        SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
+        SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => StopRecovery());
+        SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => StopRecovery());
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
     }
 
@@ -113,11 +126,20 @@ public sealed partial class NCOrganizationWorkforceSystem : EntitySystem
         {
             if (current.Snapshot.Employer == employer &&
                 current.Snapshot.PositionId == job.ID &&
-                current.Snapshot.Status is NCEmploymentStatus.Active or NCEmploymentStatus.Suspended)
+                current.Snapshot.Status == NCEmploymentStatus.Active)
             {
                 Remember(actorId, organization.ID, job.ID);
                 return new(NCWorkforceAssignmentStatus.Existing, actorId, organization.ID, job.ID,
                     current.Snapshot.EmploymentId, null);
+            }
+
+            if (current.Snapshot.Employer == employer &&
+                current.Snapshot.PositionId == job.ID &&
+                current.Snapshot.Status == NCEmploymentStatus.Suspended)
+            {
+                RemoveAssignment(actorId);
+                return new(NCWorkforceAssignmentStatus.Conflict, actorId, organization.ID, job.ID,
+                    current.Snapshot.EmploymentId, "The employment relation is suspended.");
             }
 
             return new(NCWorkforceAssignmentStatus.Conflict, actorId, organization.ID, job.ID,
@@ -257,7 +279,248 @@ public sealed partial class NCOrganizationWorkforceSystem : EntitySystem
     private void OnPrototypesReloaded(PrototypesReloadedEventArgs args)
     {
         if (args.WasModified<DepartmentPrototype>() || args.WasModified<JobPrototype>())
+        {
             BuildOrganizationIndex();
+            if (_active)
+                StartRecovery();
+        }
+    }
+
+    private void OnSessionStarted(NCActiveWorldSessionStartedEvent args)
+    {
+        _active = true;
+        StartRecovery();
+    }
+
+    private void OnEmploymentPersisted(NCEmploymentPersistedEvent args)
+    {
+        if (!_active || !args.Employee.TryGetActor(out var actorId))
+            return;
+
+        _recoveryTouchedActors.Add(actorId);
+        if (args.Status != NCEmploymentStatus.Active)
+        {
+            RemoveAssignment(actorId);
+            return;
+        }
+
+        var generation = _recoveryGeneration;
+        _ = RefreshEmploymentAsync(generation, args.EmploymentId, actorId);
+    }
+
+    private void StartRecovery()
+    {
+        _recoveryGeneration++;
+        _recoveryTouchedActors.Clear();
+        RecoveryComplete = false;
+        RecoveryRunning = false;
+        RecoveredAssignmentCount = 0;
+        LastRecoveryError = null;
+
+        if (!_prototypes.TryIndex(DefaultPolicy, out NCCityWorkforcePolicyPrototype? policy) || policy == null ||
+            policy.RecoveryPageSize is < 1 or > 500 ||
+            policy.MaximumRecoveryRecords < policy.MaximumEmployees)
+        {
+            RecoveryFailureCount++;
+            LastRecoveryError = "The workforce recovery policy is invalid.";
+            return;
+        }
+
+        RecoveryRunning = true;
+        _ = RecoverAssignmentsAsync(_recoveryGeneration, policy.RecoveryPageSize, policy.MaximumRecoveryRecords);
+    }
+
+    private async Task RecoverAssignmentsAsync(int generation, int pageSize, int maximumRecords)
+    {
+        var recovered = new Dictionary<NCActorId, NCEmploymentRecord>();
+        NCEmploymentId? after = null;
+        var inspected = 0;
+        var reachedEnd = false;
+        string? error = null;
+        try
+        {
+            while (inspected < maximumRecords)
+            {
+                var page = await _employment.GetPageResultAsync(after,
+                    Math.Min(pageSize, maximumRecords - inspected));
+                inspected += page.SourceRowCount;
+                foreach (var record in page.Records)
+                {
+                    var snapshot = record.Snapshot;
+                    if (snapshot.Status != NCEmploymentStatus.Active ||
+                        !snapshot.Employee.TryGetActor(out var actorId))
+                    {
+                        continue;
+                    }
+
+                    if (!recovered.TryGetValue(actorId, out var current) ||
+                        record.AggregateVersion > current.AggregateVersion)
+                    {
+                        recovered[actorId] = record;
+                    }
+                }
+
+                if (!page.HasMore)
+                {
+                    reachedEnd = true;
+                    break;
+                }
+                if (page.ContinuationEmploymentId is not { IsValid: true } continuation)
+                    throw new InvalidOperationException("Employment recovery returned an invalid continuation.");
+                after = continuation;
+            }
+
+            if (!reachedEnd && inspected >= maximumRecords)
+            {
+                // A full final page is ambiguous: probe once so exactly-at-limit databases do not report a false
+                // failure while genuinely truncated history remains visible to administrators.
+                var probe = await _employment.GetPageResultAsync(after, 1);
+                if (probe.SourceRowCount > 0)
+                {
+                    throw new InvalidOperationException(
+                        "Employment recovery reached its configured historical-row limit.");
+                }
+            }
+        }
+        catch (Exception exception)
+        {
+            error = exception.Message;
+        }
+
+        _taskManager.RunOnMainThread(() => ApplyRecovery(generation, recovered, error));
+    }
+
+    private void ApplyRecovery(
+        int generation,
+        IReadOnlyDictionary<NCActorId, NCEmploymentRecord> recovered,
+        string? error)
+    {
+        if (!_active || generation != _recoveryGeneration)
+            return;
+
+        RecoveryRunning = false;
+        if (error != null)
+        {
+            RecoveryFailureCount++;
+            LastRecoveryError = error;
+            return;
+        }
+
+        var next = new Dictionary<NCActorId,
+            (ProtoId<DepartmentPrototype> Organization, ProtoId<JobPrototype> Job)>();
+        foreach (var (actorId, employment) in recovered)
+        {
+            // A live mutation that arrived after recovery began is newer than the scanned page and wins.
+            if (_recoveryTouchedActors.Contains(actorId) ||
+                !TryResolveEmployment(employment, out var organization, out var job))
+            {
+                continue;
+            }
+
+            next[actorId] = (organization, job.ID);
+        }
+
+        List<(NCActorId ActorId, ProtoId<DepartmentPrototype> Organization, ProtoId<JobPrototype> Job)> changed = [];
+        List<(NCActorId ActorId, ProtoId<DepartmentPrototype> Organization, ProtoId<JobPrototype> Job)> removed = [];
+        lock (_assignmentLock)
+        {
+            foreach (var (actorId, assignment) in next)
+            {
+                if (!_assignments.TryGetValue(actorId, out var current) || current != assignment)
+                {
+                    _assignments[actorId] = assignment;
+                    changed.Add((actorId, assignment.Organization, assignment.Job));
+                }
+            }
+
+            foreach (var (actorId, assignment) in _assignments.ToArray())
+            {
+                if (_recoveryTouchedActors.Contains(actorId) || next.ContainsKey(actorId))
+                    continue;
+                _assignments.Remove(actorId);
+                removed.Add((actorId, assignment.Organization, assignment.Job));
+            }
+        }
+
+        foreach (var assignment in removed)
+            ApplyRemoval(assignment.ActorId, assignment.Organization, assignment.Job);
+        foreach (var assignment in changed)
+        {
+            if (_runtime.TryGetEntity(assignment.ActorId, out var entityUid) &&
+                _prototypes.TryIndex(assignment.Job, out JobPrototype? job) && job != null)
+            {
+                ApplyPhysicalEmployment(assignment.ActorId, entityUid, assignment.Organization, job);
+            }
+            RaiseLocalEvent(new NCWorkforceAssignmentChangedEvent(
+                assignment.ActorId, assignment.Organization, assignment.Job));
+        }
+
+        RecoveredAssignmentCount = next.Count;
+        RecoveryComplete = true;
+    }
+
+    private async Task RefreshEmploymentAsync(int generation, NCEmploymentId employmentId, NCActorId actorId)
+    {
+        NCEmploymentRecord? employment = null;
+        string? error = null;
+        try
+        {
+            employment = await _employment.GetAsync(employmentId, true);
+        }
+        catch (Exception exception)
+        {
+            error = exception.Message;
+        }
+
+        _taskManager.RunOnMainThread(() =>
+        {
+            if (!_active || generation != _recoveryGeneration)
+                return;
+            if (error != null)
+            {
+                RecoveryFailureCount++;
+                LastRecoveryError = error;
+                return;
+            }
+            if (employment == null || employment.Snapshot.Status != NCEmploymentStatus.Active ||
+                !TryResolveEmployment(employment, out var organization, out var job))
+            {
+                RemoveAssignment(actorId);
+                return;
+            }
+            Remember(actorId, organization, job.ID);
+        });
+    }
+
+    private bool TryResolveEmployment(
+        NCEmploymentRecord employment,
+        out ProtoId<DepartmentPrototype> organizationId,
+        out JobPrototype job)
+    {
+        organizationId = default;
+        job = default!;
+        if (employment.Snapshot.Status != NCEmploymentStatus.Active ||
+            !employment.Snapshot.Employer.TryGetOrganization(out var organizationIdentity) ||
+            !_organizationByIdentity.TryGetValue(organizationIdentity, out organizationId) ||
+            !_prototypes.TryIndex<JobPrototype>(employment.Snapshot.PositionId, out var resolvedJob) ||
+            resolvedJob == null ||
+            !_organizationByJob.TryGetValue(resolvedJob.ID, out var jobOrganization) ||
+            jobOrganization != organizationId || !resolvedJob.NCNpcAllowed)
+        {
+            return false;
+        }
+
+        job = resolvedJob;
+        return true;
+    }
+
+    private void StopRecovery()
+    {
+        _active = false;
+        _recoveryGeneration++;
+        _recoveryTouchedActors.Clear();
+        RecoveryRunning = false;
+        RecoveryComplete = false;
     }
 
     private void OnActorRehydrated(NCCityActorRehydratedEvent args)
@@ -326,6 +589,29 @@ public sealed partial class NCOrganizationWorkforceSystem : EntitySystem
         // Employment I/O completes asynchronously; ECS consumers are notified only on the simulation thread.
         _taskManager.RunOnMainThread(() =>
             RaiseLocalEvent(new NCWorkforceAssignmentChangedEvent(actorId, organization, job)));
+    }
+
+    private void RemoveAssignment(NCActorId actorId)
+    {
+        (ProtoId<DepartmentPrototype> Organization, ProtoId<JobPrototype> Job) removed;
+        lock (_assignmentLock)
+        {
+            if (!_assignments.Remove(actorId, out removed))
+                return;
+        }
+
+        // Employment mutations may complete off the simulation thread; component removal and events remain main-thread.
+        _taskManager.RunOnMainThread(() => ApplyRemoval(actorId, removed.Organization, removed.Job));
+    }
+
+    private void ApplyRemoval(
+        NCActorId actorId,
+        ProtoId<DepartmentPrototype> organization,
+        ProtoId<JobPrototype> job)
+    {
+        if (_runtime.TryGetEntity(actorId, out var entityUid) && Exists(entityUid))
+            RemComp<NCCityWorkerComponent>(entityUid);
+        RaiseLocalEvent(new NCWorkforceAssignmentChangedEvent(actorId, organization, job, false));
     }
 
     private static NCWorkforceAssignmentResult Reject(

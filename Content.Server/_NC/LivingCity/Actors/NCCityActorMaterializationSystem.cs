@@ -373,8 +373,8 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         }
 
         _metadata.SetEntityName(entity, snapshot.Identity.FullName);
-        // NC: Neural access follows the persistent authored identity, with archetype metadata kept as a legacy
-        // fallback for the standalone API test officer.
+        // Neural access follows the persistent authored identity. Archetype metadata remains only for compatible
+        // loading of older Actor records created before the profile moved into persistent identity.
         if (!string.IsNullOrWhiteSpace(snapshot.Identity.NarrativeActorProfileId) ||
             archetype.NarrativeActorProfile != null)
             EnsureComp<NCNeuralConversationTargetComponent>(entity);

@@ -6,3 +6,5 @@
   id: NCDefaultWorkforcePolicy
   payrollInterval: 24h
   maximumEmployees: 20000
+  recoveryPageSize: 100
+  maximumRecoveryRecords: 100000

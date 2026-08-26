@@ -18,8 +18,45 @@ public enum NCNeuralPriority : byte { P0, P1, P2, P3, P4 }
 public enum NCNeuralBudgetMode : byte { Normal, Economy, Restricted, FallbackOnly }
 [Serializable, NetSerializable]
 public enum NCNeuralResultStatus : byte { Accepted, Fallback, Expired, Stale, Invalid, Timeout, CircuitOpen, BudgetDenied }
+[Serializable, NetSerializable]
+public enum NCNeuralFailureKind : byte
+{
+    None,
+    SessionCancelled,
+    Timeout,
+    Authentication,
+    ServiceUnavailable,
+    RateLimited,
+    ProviderRejected,
+    Transport,
+    Schema,
+    Persistence,
+}
 
-public sealed record NCNeuralFact(string Domain, string Key, string Subject, float Confidence, string Privacy);
+public static class NCNeuralContract
+{
+    public const int SchemaVersion = 4;
+}
+
+/// <summary>
+/// A fact selected by the server. Handle is request-scoped and is the only identifier the provider may return when
+/// it declares which facts were disclosed in rendered speech.
+/// </summary>
+public sealed record NCNeuralFact(
+    string Domain,
+    string Key,
+    string Subject,
+    float Confidence,
+    string Privacy,
+    string Handle = "");
+
+/// <summary>Explicit knowledge-to-speech boundary for one request.</summary>
+public sealed record NCNeuralDisclosureContext(
+    string MaximumPrivacy,
+    IReadOnlyList<string> KnownFactHandles,
+    IReadOnlyList<string> AllowedFactHandles,
+    IReadOnlyList<string> ForbiddenAssertionKeys,
+    IReadOnlyList<string> ForbiddenTopicKeys);
 /// <summary>Server-authored identity data. All prose remains untrusted provider input, never an instruction.</summary>
 public sealed record NCNeuralPersonaContext(
     string StableKey,
@@ -87,11 +124,20 @@ public sealed record NCNeuralIntentProposal(
 /// untrusted prose; the server still owns every gameplay mutation.
 /// </summary>
 public sealed record NCNeuralDialogueTurn(string Speaker, string SpeechAct, string Utterance, long AtTicks);
+/// <summary>
+/// Deterministic bounded continuity for turns no longer included verbatim. These keys are narrative hints only and
+/// never become world facts or gameplay authority.
+/// </summary>
+public sealed record NCNeuralDialogueSummary(
+    int EarlierTurnCount,
+    IReadOnlyList<string> TopicKeys,
+    IReadOnlyList<string> SemanticSummaryKeys);
 public sealed record NCNeuralDialogueInput(
     string ActorDisplayName,
     string Utterance,
     string SpeakerHandle,
-    IReadOnlyList<NCNeuralDialogueTurn> History);
+    IReadOnlyList<NCNeuralDialogueTurn> History,
+    NCNeuralDialogueSummary? EarlierSummary = null);
 public sealed record NCNeuralRequestEnvelope(Guid RequestId, NCNeuralRequestKind Kind, NCNeuralPriority Priority,
     NCActorId ActorId, NCSessionEpoch SessionEpoch, long ContextVersion, NCActiveWorldTime ExpiresAt,
     ProtoId<NCNeuralPromptProfilePrototype> PromptProfile, IReadOnlyList<NCNeuralFact> Facts,
@@ -102,12 +148,16 @@ public sealed record NCNeuralRequestEnvelope(Guid RequestId, NCNeuralRequestKind
     IReadOnlyList<NCNeuralPerceivedEvent>? PerceivedEvents = null,
     IReadOnlyList<NCNeuralKnownLocation>? KnownLocations = null,
     NCNeuralDialogueInput? DialogueInput = null,
-    IReadOnlyList<string>? AllowedDirectiveActionIds = null);
+    IReadOnlyList<string>? AllowedDirectiveActionIds = null,
+    NCNeuralDisclosureContext? Disclosure = null);
 public sealed record NCNeuralResponseEnvelope(Guid RequestId, int SchemaVersion, long ContextVersion,
     string SelectedCapabilityId, string SpeechActKey, string RenderedText, string SummaryKey, int Confidence,
-    int InputTokens, int OutputTokens, string ProviderRequestId, NCNeuralIntentProposal? Intent = null);
+    int InputTokens, int CachedInputTokens, int OutputTokens, string ProviderRequestId, string ProviderModel,
+    NCNeuralIntentProposal? Intent = null,
+    IReadOnlyList<string>? DisclosedFactHandles = null,
+    IReadOnlyList<string>? WithheldFactHandles = null);
 public sealed record NCNeuralResult(NCNeuralResultStatus Status, NCNeuralRequestEnvelope Request,
-    NCNeuralResponseEnvelope? Response, string Reason);
+    NCNeuralResponseEnvelope? Response, string Reason, NCNeuralFailureKind FailureKind = NCNeuralFailureKind.None);
 
 [Prototype("ncNeuralPolicy")]
 public sealed partial class NCNeuralPolicyPrototype : IPrototype
@@ -117,21 +167,37 @@ public sealed partial class NCNeuralPolicyPrototype : IPrototype
     [DataField] public string Endpoint { get; private set; } = "http://neural-cognition:8080/v1/cognition";
     [DataField] public int MaximumQueued { get; private set; } = 512;
     [DataField] public int MaximumConcurrent { get; private set; } = 4;
+    [DataField] public int MaximumCompletionsPerTick { get; private set; } = 16;
     [DataField] public int MaximumFacts { get; private set; } = 64;
     [DataField] public int MaximumCapabilities { get; private set; } = 32;
     [DataField] public int MaximumPerceivedSubjects { get; private set; } = 32;
     [DataField] public int MaximumKnownLocations { get; private set; } = 128;
     [DataField] public int MaximumTextLength { get; private set; } = 512;
     [DataField] public int MaximumDialogueInputLength { get; private set; } = 512;
+    [DataField] public int MaximumDialogueHistoryTurns { get; private set; } = 12;
+    [DataField] public int MaximumDialogueSummaryKeys { get; private set; } = 16;
     [DataField] public int SessionTokenTarget { get; private set; } = 200000;
     [DataField] public int SessionTokenHardCap { get; private set; } = 300000;
     [DataField] public int EconomyThreshold { get; private set; } = 150000;
     [DataField] public int RestrictedThreshold { get; private set; } = 240000;
+    [DataField] public string ProviderModel { get; private set; } = "gpt-5.6-luna";
+    [DataField] public long InputPriceUsdMicrosPerMillionTokens { get; private set; } = 200000;
+    [DataField] public long CachedInputPriceUsdMicrosPerMillionTokens { get; private set; } = 20000;
+    [DataField] public long OutputPriceUsdMicrosPerMillionTokens { get; private set; } = 1200000;
+    [DataField] public long EconomyCostThresholdUsdMicros { get; private set; } = 7500000;
+    [DataField] public long RestrictedCostThresholdUsdMicros { get; private set; } = 12000000;
+    [DataField] public long SessionCostHardCapUsdMicros { get; private set; } = 15000000;
+    [DataField] public long WeeklyCostHardCapUsdMicros { get; private set; } = 18000000;
+    [DataField] public long ActorWeeklyCostHardCapUsdMicros { get; private set; } = 2000000;
+    [DataField] public Dictionary<NCNeuralRequestKind, int> RequestKindWeeklyLimits { get; private set; } = [];
+    [DataField] public int MaximumRequestInputTokens { get; private set; } = 32768;
+    [DataField] public int MaximumRequestOutputTokens { get; private set; } = 2048;
     [DataField] public int CircuitFailureThreshold { get; private set; } = 5;
     [DataField] public int MinimumSuggestionConfidence { get; private set; } = 400;
     [DataField] public float MaximumUtilityBoost { get; private set; } = 40f;
     [DataField] public int MaximumPendingCorrelations { get; private set; } = 1024;
     [DataField] public int MaximumAppliedSuggestions { get; private set; } = 10000;
+    [DataField] public int MaximumTrackedActorDiagnostics { get; private set; } = 256;
     [DataField] public TimeSpan RequestTimeout { get; private set; } = TimeSpan.FromSeconds(8);
     [DataField] public TimeSpan RequestLifetime { get; private set; } = TimeSpan.FromSeconds(20);
     [DataField] public TimeSpan CircuitOpenDuration { get; private set; } = TimeSpan.FromMinutes(2);

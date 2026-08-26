@@ -6,6 +6,7 @@ using Content.Shared._NC.LivingCity.Admin;
 using Content.Shared._NC.LivingCity.CityServices;
 using Content.Shared._NC.City.Zones;
 using Content.Server._NC.LivingCity.Economy;
+using System.Globalization;
 
 namespace Content.Server._NC.LivingCity.Admin;
 
@@ -150,6 +151,53 @@ public sealed partial class NCLivingCityAdminSystem
                     fields.Add("neural-recovery", "consecutive-failures", neural.ConsecutiveFailures);
                     fields.Add("neural-recovery", "circuit-open-until", "none");
                     break;
+                case NCLivingCityAdminInfrastructureAction.DisableNeuralForRound:
+                    if (!_neural.TryDisableProviderForRound())
+                    {
+                        error = "neural-runtime-inactive-or-already-disabled";
+                        break;
+                    }
+                    status = NCLivingCityAdminMutationStatus.Applied;
+                    var disabledNeural = _neural.GetRuntimeSnapshot();
+                    fields.Add("neural-recovery", "administratively-disabled",
+                        disabledNeural.AdministrativelyDisabled);
+                    fields.Add("neural-recovery", "budget-mode", disabledNeural.BudgetMode);
+                    fields.Add("neural-recovery", "queued-fallbacks", disabledNeural.Queued);
+                    break;
+                case NCLivingCityAdminInfrastructureAction.AdvanceCivilTime:
+                    if (!int.TryParse(request.TargetId, NumberStyles.None, CultureInfo.InvariantCulture,
+                            out var gameMinutes) || gameMinutes <= 0)
+                    {
+                        error = "civil-time-minutes-invalid";
+                        break;
+                    }
+                    if (!_scheduler.IsActive)
+                    {
+                        error = "civil-time-scheduler-inactive";
+                        break;
+                    }
+                    if (!_routines.TryAdvanceCivilTime(
+                            TimeSpan.FromMinutes(gameMinutes),
+                            out var civilTime,
+                            out error))
+                    {
+                        break;
+                    }
+                    if (!_scheduler.TryReevaluateAll(out var requeuedActors))
+                    {
+                        error = "civil-time-scheduler-inactive";
+                        break;
+                    }
+
+                    status = NCLivingCityAdminMutationStatus.Applied;
+                    fields.Add("civil-time-advance", "advanced-game-minutes", gameMinutes);
+                    fields.Add("civil-time-advance", "city-day", civilTime.Day);
+                    fields.Add("civil-time-advance", "city-time",
+                        civilTime.TimeOfDay.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture));
+                    fields.Add("civil-time-advance", "manual-civil-advance", civilTime.ManualAdvance);
+                    fields.Add("civil-time-advance", "actors-requeued", requeuedActors);
+                    fields.Add("civil-time-advance", "active-world-time-unchanged", true);
+                    break;
             }
         }
         catch (Exception exception)
@@ -172,7 +220,8 @@ public sealed partial class NCLivingCityAdminSystem
     private static bool InfrastructureTargetRequired(NCLivingCityAdminInfrastructureAction action) => action is
         NCLivingCityAdminInfrastructureAction.RequeueOutboxMessage or
         NCLivingCityAdminInfrastructureAction.RecoverServiceDispatch or
-        NCLivingCityAdminInfrastructureAction.ReloadProperty;
+        NCLivingCityAdminInfrastructureAction.ReloadProperty or
+        NCLivingCityAdminInfrastructureAction.AdvanceCivilTime;
 
     private static string InfrastructureActionFingerprint(
         NCLivingCityAdminInfrastructureActionRequest request) => Fingerprint(

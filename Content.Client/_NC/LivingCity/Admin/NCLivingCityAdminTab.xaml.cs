@@ -128,6 +128,9 @@ public sealed partial class NCLivingCityAdminTab : Control
         BindPopulationAction(ImportPopulationProfile, NCLivingCityAdminPopulationAction.ImportProfile);
         BindPopulationAction(RebuildZoneStates, NCLivingCityAdminPopulationAction.RebuildZoneStates);
         BindPopulationAction(AllocateResidences, NCLivingCityAdminPopulationAction.AllocateResidences);
+        CityTimePresetOneHour.OnPressed += _ => CityTimeMinutes.Text = "60";
+        CityTimePresetSixHours.OnPressed += _ => CityTimeMinutes.Text = "360";
+        BindInfrastructureAction(AdvanceCityTime, NCLivingCityAdminInfrastructureAction.AdvanceCivilTime);
         BindInfrastructureAction(
             RequeueOutboxMessage,
             NCLivingCityAdminInfrastructureAction.RequeueOutboxMessage);
@@ -141,6 +144,8 @@ public sealed partial class NCLivingCityAdminTab : Control
             NCLivingCityAdminInfrastructureAction.ReloadProperty);
         BindInfrastructureAction(ResetNeuralCircuit,
             NCLivingCityAdminInfrastructureAction.ResetNeuralCircuit);
+        BindInfrastructureAction(DisableNeuralForRound,
+            NCLivingCityAdminInfrastructureAction.DisableNeuralForRound);
 
         foreach (var mode in Enum.GetValues<NCZoneActivityMode>())
             GeographyActivityMode.AddItem(mode.ToString(), (int) mode);
@@ -740,12 +745,15 @@ public sealed partial class NCLivingCityAdminTab : Control
         button.OnConfirming += _ => SendInfrastructureAction(action, Guid.Empty);
         button.OnPressed += _ =>
         {
+            var statusLabel = action == NCLivingCityAdminInfrastructureAction.AdvanceCivilTime
+                ? CityTimeActionStatus
+                : InfrastructureActionStatus;
             var token = _infrastructureConfirmations.GetValueOrDefault(action);
             if (token == Guid.Empty)
             {
                 button.IsConfirming = true;
                 SetStatus(
-                    InfrastructureActionStatus,
+                    statusLabel,
                     Loc.GetString("nc-living-city-admin-waiting-confirmation"),
                     StatusTone.Warning);
                 return;
@@ -758,40 +766,56 @@ public sealed partial class NCLivingCityAdminTab : Control
         NCLivingCityAdminInfrastructureAction action,
         Guid confirmationToken)
     {
+        var civilTimeAction = action == NCLivingCityAdminInfrastructureAction.AdvanceCivilTime;
+        var statusLabel = civilTimeAction ? CityTimeActionStatus : InfrastructureActionStatus;
+        var reason = civilTimeAction ? CityTimeReason.Text : InfrastructureReason.Text;
         var targetRequired = action is NCLivingCityAdminInfrastructureAction.RequeueOutboxMessage or
             NCLivingCityAdminInfrastructureAction.RecoverServiceDispatch or
-            NCLivingCityAdminInfrastructureAction.ReloadProperty;
-        if (!Require(InfrastructureActionStatus,
-                (Loc.GetString("nc-living-city-admin-reason"), InfrastructureReason.Text)))
+            NCLivingCityAdminInfrastructureAction.ReloadProperty or
+            NCLivingCityAdminInfrastructureAction.AdvanceCivilTime;
+        if (!Require(statusLabel,
+                (Loc.GetString("nc-living-city-admin-reason"), reason)))
             return;
-        var target = targetRequired ? OutboxMessageId.Text.Trim() : string.Empty;
-        if (targetRequired && !Guid.TryParse(target, out _))
+        var target = civilTimeAction
+            ? CityTimeMinutes.Text.Trim()
+            : targetRequired
+                ? OutboxMessageId.Text.Trim()
+                : string.Empty;
+        if (civilTimeAction && (!int.TryParse(target, out var gameMinutes) || gameMinutes <= 0))
         {
             SetStatus(
-                InfrastructureActionStatus,
-                Loc.GetString("nc-living-city-admin-invalid-guid"),
+                statusLabel,
+                Loc.GetString("nc-living-city-admin-invalid-game-minutes"),
                 StatusTone.Error);
             return;
         }
+        if (!civilTimeAction && targetRequired && !Guid.TryParse(target, out _))
+        {
+            SetStatus(statusLabel, Loc.GetString("nc-living-city-admin-invalid-guid"), StatusTone.Error);
+            return;
+        }
 
-        SetStatus(InfrastructureActionStatus, Loc.GetString("nc-living-city-admin-loading"), StatusTone.Loading);
+        SetStatus(statusLabel, Loc.GetString("nc-living-city-admin-loading"), StatusTone.Loading);
         _admin.RequestInfrastructureAction(
             action,
             target,
             ResetOutboxAttempts.Pressed,
-            InfrastructureReason.Text,
+            reason,
             confirmationToken);
     }
 
     private void OnInfrastructureAction(NCLivingCityAdminInfrastructureActionResult result)
     {
+        var civilTimeAction = result.Action == NCLivingCityAdminInfrastructureAction.AdvanceCivilTime;
+        var statusLabel = civilTimeAction ? CityTimeActionStatus : InfrastructureActionStatus;
+        var resultFields = civilTimeAction ? CityTimeActionFields : InfrastructureActionFields;
         if (result.Status == NCLivingCityAdminMutationStatus.ConfirmationRequired)
         {
             _infrastructureConfirmations[result.Action] = result.ConfirmationToken;
             if (_infrastructureButtons.TryGetValue(result.Action, out var button))
                 button.IsConfirming = true;
             SetStatus(
-                InfrastructureActionStatus,
+                statusLabel,
                 Loc.GetString("nc-living-city-admin-server-confirmation-ready"),
                 StatusTone.Warning);
             return;
@@ -802,12 +826,12 @@ public sealed partial class NCLivingCityAdminTab : Control
             completedButton.IsConfirming = false;
         var success = Successful(result.Status);
         SetStatus(
-            InfrastructureActionStatus,
+            statusLabel,
             success
                 ? Loc.GetString("nc-living-city-admin-action-complete")
-                : result.Error ?? Loc.GetString("nc-living-city-admin-action-failed"),
+                : LocalizedServerError(result.Error),
             success ? StatusTone.Success : StatusTone.Error);
-        RenderFields(InfrastructureActionFields, result.Fields);
+        RenderFields(resultFields, result.Fields);
         if (Successful(result.Status))
             RequestOverview();
     }
@@ -1292,6 +1316,15 @@ public sealed partial class NCLivingCityAdminTab : Control
             StatusTone.Loading => Color.FromHex("#F3C969"),
             _ => Color.FromHex("#77DCEB"),
         };
+    }
+
+    private static string LocalizedServerError(string? error)
+    {
+        if (string.IsNullOrWhiteSpace(error))
+            return Loc.GetString("nc-living-city-admin-action-failed");
+
+        var key = $"nc-living-city-admin-error-{error}";
+        return Loc.TryGetString(key, out var localized) ? localized : error;
     }
 
     /// <summary>

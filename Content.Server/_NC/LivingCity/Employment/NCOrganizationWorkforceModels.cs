@@ -42,9 +42,11 @@ public sealed record NCWorkforceActorProjection(
 public sealed class NCWorkforceAssignmentChangedEvent(
     NCActorId actorId,
     ProtoId<DepartmentPrototype> organization,
-    ProtoId<JobPrototype> job) : EntityEventArgs
+    ProtoId<JobPrototype> job,
+    bool active = true) : EntityEventArgs
 {
     public NCActorId ActorId { get; } = actorId;
     public ProtoId<DepartmentPrototype> Organization { get; } = organization;
     public ProtoId<JobPrototype> Job { get; } = job;
+    public bool Active { get; } = active;
 }

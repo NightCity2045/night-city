@@ -58,7 +58,8 @@ public sealed record NCConversationTurn(
     string SemanticKey,
     string ExternalReference,
     Guid? WorldEventId,
-    NCActiveWorldTime At);
+    NCActiveWorldTime At,
+    string SummaryKey = "");
 
 public sealed record NCConversationSessionSnapshot(
     NCConversationSessionId SessionId,
@@ -94,5 +95,5 @@ public sealed record NCConversationTurnRequest(
     NCSpeechActKind Act,
     string SemanticKey,
     string ExternalReference,
-    Guid? WorldEventId);
-
+    Guid? WorldEventId,
+    string SummaryKey = "");

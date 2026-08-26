@@ -65,6 +65,41 @@ public sealed partial class NCEmploymentRegistrySystem : EntitySystem
         return record == null ? null : CacheNewest(record);
     }
 
+    /// <summary>
+    /// Reads a bounded stable page without materializing employees. This is the canonical restart-recovery boundary
+    /// for workforce consumers and avoids one database lookup per city actor.
+    /// </summary>
+    public async Task<NCEmploymentPage> GetPageResultAsync(
+        NCEmploymentId? afterEmploymentId,
+        int limit,
+        bool cache = false)
+    {
+        if (limit < 1)
+            return new NCEmploymentPage([], null, false, 0);
+
+        var boundedLimit = Math.Min(limit, 500);
+        var page = await _database.GetNCAggregateSnapshotPageAsync(
+            EmploymentAggregateType,
+            afterEmploymentId is { IsValid: true } after ? EmploymentKey(after) : null,
+            boundedLimit);
+        var records = new List<NCEmploymentRecord>(page.Count);
+        foreach (var stored in page)
+        {
+            if (!Guid.TryParse(stored.AggregateId, out var rawId))
+                continue;
+            var employmentId = new NCEmploymentId(rawId);
+            var record = DeserializeEmployment(stored, employmentId);
+            if (record == null)
+                continue;
+            records.Add(cache ? CacheNewest(record) : record);
+        }
+
+        NCEmploymentId? continuation = null;
+        if (page.Count > 0 && Guid.TryParse(page[^1].AggregateId, out var lastId))
+            continuation = new NCEmploymentId(lastId);
+        return new NCEmploymentPage(records, continuation, page.Count == boundedLimit, page.Count);
+    }
+
     public async Task<NCPartyEmploymentIndexRecord?> GetEmployeeIndexAsync(
         NCPartyRef employee,
         bool forceReload = false)

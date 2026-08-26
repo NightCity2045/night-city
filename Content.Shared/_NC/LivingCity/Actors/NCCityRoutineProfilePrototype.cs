@@ -22,6 +22,31 @@ public sealed partial class NCCityRoutineProfilePrototype : IPrototype
     [DataField(required: true)]
     public TimeSpan CycleDuration { get; private set; }
 
+    /// <summary>
+    /// Amount of active-world time needed to complete one full routine cycle.
+    /// This keeps civil time scaling local to schedules instead of accelerating medical or persistence deadlines.
+    /// </summary>
+    [DataField(required: true)]
+    public TimeSpan ActiveCycleDuration { get; private set; }
+
+    /// <summary>
+    /// Civil-time phase at active-world time zero. It lets a fresh city session begin during an active part of the day.
+    /// </summary>
+    [DataField]
+    public TimeSpan CyclePhaseOffset { get; private set; }
+
+    /// <summary>
+    /// Total deterministic phase range distributed around <see cref="CyclePhaseOffset"/> by stable actor identity.
+    /// </summary>
+    [DataField]
+    public TimeSpan ActorPhaseSpread { get; private set; }
+
+    /// <summary>
+    /// Largest civil-time jump accepted from one administrative operation.
+    /// </summary>
+    [DataField(required: true)]
+    public TimeSpan MaximumManualAdvance { get; private set; }
+
     [DataField(required: true)]
     public List<NCCityRoutineEntry> Entries { get; private set; } = [];
 }
@@ -74,4 +99,11 @@ public sealed partial class NCCitySchedulePolicyPrototype : IPrototype
 
     [DataField]
     public TimeSpan MutationRetryDelay { get; private set; } = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// Reconciles persisted schedules with the current routine policy at the beginning of every active-world session.
+    /// Work is still admitted through the normal bounded scheduler queue.
+    /// </summary>
+    [DataField]
+    public bool ReevaluateOnSessionStart { get; private set; } = true;
 }

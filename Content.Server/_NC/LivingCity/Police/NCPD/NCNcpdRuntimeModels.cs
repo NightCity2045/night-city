@@ -21,6 +21,15 @@ public sealed class NCNcpdOfficerProjectedEvent(
     public ProtoId<NCNcpdRoleProfilePrototype> RoleProfile { get; } = roleProfile;
 }
 
+/// <summary>
+/// Fans out cleanup after the single canonical subscription to the officer component shutdown event.
+/// RobustToolbox permits only one handler for a specific component event pair.
+/// </summary>
+public sealed class NCNcpdOfficerRuntimeRemovedEvent(EntityUid entityUid) : EntityEventArgs
+{
+    public EntityUid EntityUid { get; } = entityUid;
+}
+
 public sealed class NCNcpdDutyChangedEvent(
     NCActorId actorId,
     NCNcpdDutyStatus oldStatus,
@@ -98,6 +107,13 @@ public sealed record NCNcpdServiceDispatchAdapterSnapshot(
     string AdapterStatus,
     string Failure,
     NCActiveWorldTime UpdatedAt);
+
+/// <summary>Bounded observability for the vanilla-backed NCPD force lifecycle.</summary>
+public readonly record struct NCNcpdUseOfForceCounters(
+    long ForceStarted,
+    long ForceStopped,
+    long SurrenderStops,
+    long IncapacitationStops);
 
 /// <summary>Signals that an authoritative investigation dispatch has selected its real NCPD unit.</summary>
 public sealed class NCNcpdInvestigationUnitAssignedEvent(

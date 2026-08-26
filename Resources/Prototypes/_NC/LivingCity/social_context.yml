@@ -5,7 +5,15 @@
 - type: ncSocialContextPolicy
   id: Default
   maximumItemsPerDomain: 24
+  maximumForbiddenTopics: 32
   internalMaximumPrivacy: Secret
   conversationMaximumPrivacy: Restricted
   publicMaximumPrivacy: Public
-
+  forbiddenAssertionKeys:
+  - hidden-identity
+  - unknown-location
+  - nonexistent-resource
+  - other-party-secret
+  - unconfirmed-action-result
+  - internal-system-state
+  - unsourced-faction-plan

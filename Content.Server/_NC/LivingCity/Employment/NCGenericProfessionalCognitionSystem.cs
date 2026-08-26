@@ -75,9 +75,9 @@ public sealed partial class NCGenericProfessionalCognitionSystem : EntitySystem
         {
             if (!TrySelectTarget(args, policy, out target))
             {
-                // A map without semantic geography is valid for isolated developer tests. The employee remains
-                // available at work instead of inventing an unreachable point or scanning the whole map.
-                args.Completed = true;
+                // Missing semantic geography cannot confirm work. Report the exact configuration gap instead of
+                // inventing an unreachable point or declaring a no-op professional action successful.
+                args.Failure = "professional-work-affordance-unavailable";
                 return;
             }
             _targets[worker] = target;

@@ -67,7 +67,8 @@ public sealed partial class NCNcpdWorkforceProjectionSystem : EntitySystem
 
     private void OnWorkforceAssignmentChanged(NCWorkforceAssignmentChangedEvent args)
     {
-        if (args.Organization != NcpdOrganization || !_profileByJob.TryGetValue(args.Job, out var profile))
+        if (!args.Active || args.Organization != NcpdOrganization ||
+            !_profileByJob.TryGetValue(args.Job, out var profile))
         {
             RemoveProjection(args.ActorId);
             return;

@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using Content.Server.Administration.Logs;
@@ -88,6 +89,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCAmbientCrowdSystem _ambient = default!;
     [Dependency] private NCCityAffordanceCatalogSystem _affordances = default!;
     [Dependency] private NCCityActorScheduleSchedulerSystem _scheduler = default!;
+    [Dependency] private NCCityRoutineSystem _routines = default!;
     [Dependency] private NCCityAbstractTravelSystem _travel = default!;
     [Dependency] private NCCityPhysicalExecutionSystem _physicalExecution = default!;
     [Dependency] private NCCognitionRegistrySystem _cognitionRegistry = default!;
@@ -119,6 +121,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCEmploymentRegistrySystem _employment = default!;
     [Dependency] private NCOrganizationWorkforceSystem _workforce = default!;
     [Dependency] private NCProfessionProfileSystem _professions = default!;
+    [Dependency] private NCMedicalProfessionalCognitionSystem _cityMedicalCognition = default!;
     [Dependency] private NCNcpdWorkforceProjectionSystem _ncpdWorkforce = default!;
     [Dependency] private NCNcpdDutySystem _ncpdDuty = default!;
     [Dependency] private NCNcpdUnitSystem _ncpdUnits = default!;
@@ -127,6 +130,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCNcpdServiceDispatchSystem _ncpdServiceDispatch = default!;
     [Dependency] private NCNcpdDetentionSystem _ncpdDetention = default!;
     [Dependency] private NCNcpdEvidenceSystem _ncpdEvidence = default!;
+    [Dependency] private NCNcpdUseOfForceSystem _ncpdUseOfForce = default!;
     [Dependency] private NCLivelihoodRegistrySystem _livelihoods = default!;
     [Dependency] private NCPropertyRegistrySystem _properties = default!;
     [Dependency] private NCPropertyContentSnapshotSystem _propertyContents = default!;
@@ -224,6 +228,20 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
             fields.Add("clock", "state", "active");
             fields.Add("clock", "epoch", epoch.ToString());
             fields.Add("clock", "active-world-time", now.Elapsed.ToString());
+            if (_routines.TryGetCivilTime(out var civilTime, out var civilTimeError))
+            {
+                var scale = (decimal) civilTime.CivilDayDuration.Ticks / civilTime.ActiveDayDuration.Ticks;
+                fields.Add("clock", "city-day", civilTime.Day);
+                fields.Add("clock", "city-time",
+                    civilTime.TimeOfDay.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture));
+                fields.Add("clock", "time-scale", $"x{scale.ToString("0.##", CultureInfo.InvariantCulture)}");
+                fields.Add("clock", "active-day-duration", civilTime.ActiveDayDuration.ToString());
+                fields.Add("clock", "manual-civil-advance", civilTime.ManualAdvance.ToString());
+            }
+            else
+            {
+                fields.Add("clock", "civil-time-error", civilTimeError ?? "civil-time-unavailable");
+            }
         }
         else
         {
@@ -259,6 +277,9 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("scheduler", "queued", _scheduler.QueuedActorCount);
         fields.Add("scheduler", "in-flight", _scheduler.InFlightCount);
         fields.Add("scheduler", "pending-retries", _scheduler.PendingMutationCount);
+        var hasScheduleDue = _scheduler.TryGetEarliestDue(out var scheduleDueAt, out var scheduleDueNow);
+        fields.Add("scheduler", "earliest-due", hasScheduleDue ? scheduleDueAt.Elapsed : null);
+        fields.Add("scheduler", "due-now", hasScheduleDue && scheduleDueNow);
         fields.Add("abstract-travel", "initial-load-complete", _travel.InitialLoadComplete);
         fields.Add("abstract-travel", "queued", _travel.QueuedActorCount);
         fields.Add("abstract-travel", "in-flight", _travel.InFlightCount);
@@ -324,11 +345,15 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("cognition", "plans-invalidated", cognition.PlansInvalidated);
         fields.Add("cognition", "fallback-plans", cognition.FallbackPlans);
         fields.Add("cognition", "mcts-nodes-expanded", cognition.MctsNodesExpanded);
-        fields.Add("cognition", "missing-domain-cache-actors", _cognitionProviders.MissingCapabilityCacheActors);
+        fields.Add("cognition", "actors-with-missing-optional-records",
+            _cognitionProviders.MissingCapabilityCacheActors);
         fields.Add("cognition", "suppressed-persistence-reads", _cognitionProviders.SuppressedCapabilityReads);
         fields.Add("cognition", "configuration-error", cognition.ConfigurationError ?? "none");
         fields.Add("cognition", "action-catalog",
             _prototypes.EnumeratePrototypes<NCHumanActionPrototype>().Count());
+        var hasCognitionDue = _cognition.TryGetEarliestDecision(out var cognitionDueAt, out var cognitionDueNow);
+        fields.Add("cognition", "earliest-due", hasCognitionDue ? cognitionDueAt.Elapsed : null);
+        fields.Add("cognition", "due-now", hasCognitionDue && cognitionDueNow);
 
         fields.Add("incidents", "cached", _incidents.CachedCount);
         fields.Add("services", "cached", _cityServices.CachedServiceCount);
@@ -336,11 +361,23 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("services", "dispatches", _cityServices.CachedDispatchCount);
         var neural = _neural.GetRuntimeSnapshot();
         fields.Add("neural", "active", neural.Active);
+        fields.Add("neural", "administratively-disabled", neural.AdministrativelyDisabled);
         fields.Add("neural", "budget-mode", neural.BudgetMode);
         fields.Add("neural", "queued", neural.Queued);
         fields.Add("neural", "in-flight", neural.InFlight);
         fields.Add("neural", "tokens", neural.SessionInputTokens + neural.SessionOutputTokens);
+        fields.Add("neural", "cost-usd-micros", neural.SessionCostUsdMicros);
+        fields.Add("neural", "weekly-period", neural.WeeklyPeriodKey);
+        fields.Add("neural", "weekly-cost-usd-micros", neural.WeeklyCostUsdMicros);
+        fields.Add("neural", "requests-social-cognition", neural.SocialCognitionRequests);
+        fields.Add("neural", "requests-strategic-decision", neural.StrategicDecisionRequests);
+        fields.Add("neural", "requests-dialogue-continuation", neural.DialogueContinuationRequests);
+        fields.Add("neural", "requests-memory-summary", neural.MemorySummaryRequests);
+        fields.Add("neural", "requests-narrative-render", neural.NarrativeRenderRequests);
         fields.Add("neural", "accepted", neural.Accepted);
+        fields.Add("neural", "stale", neural.Stale);
+        fields.Add("neural", "invalid", neural.Invalid);
+        fields.Add("neural", "provider-failures", neural.ProviderFailures);
         fields.Add("neural", "fallbacks", neural.Fallbacks);
         fields.Add("neural", "validation-rejects", neural.ValidationRejects);
         fields.Add("neural", "timeouts", neural.Timeouts);
@@ -392,19 +429,43 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("population-import", "conflicts", population.Conflicts);
         fields.Add("population-import", "failed", population.Failed);
         fields.Add("workforce", "indexed-assignments", _workforce.IndexedAssignmentCount);
+        fields.Add("workforce", "recovery-running", _workforce.RecoveryRunning);
+        fields.Add("workforce", "recovery-complete", _workforce.RecoveryComplete);
+        fields.Add("workforce", "recovered-assignments", _workforce.RecoveredAssignmentCount);
+        fields.Add("workforce", "recovery-failures", _workforce.RecoveryFailureCount);
+        fields.Add("workforce", "last-recovery-error", _workforce.LastRecoveryError ?? "none");
         fields.Add("workforce", "configuration-error", _workforce.ConfigurationError ?? "none");
         fields.Add("workforce", "profession-profiles", _professions.ProfileCount);
         fields.Add("workforce", "profession-jobs", _professions.JobCount);
         fields.Add("workforce", "profession-configuration-error", _professions.ConfigurationError ?? "none");
         fields.Add("workforce", "civilian-livelihoods-cached", _livelihoods.CachedActorCount);
-        var ncpdConfigurationError = _ncpdWorkforce.ConfigurationError ?? _ncpdUnits.ConfigurationError ??
+        var ncpdConfigurationError = _workforce.LastRecoveryError ?? _ncpdServiceDispatch.LastRecoveryError ??
+                                     _ncpdWorkforce.ConfigurationError ??
+                                     _ncpdUnits.ConfigurationError ??
                                      _ncpdServiceDispatch.ConfigurationError;
-        var ncpdReady = ncpdConfigurationError == null && _ncpdMapping.MappingErrorCount == 0;
+        var ncpdRecoveryReady = _workforce.RecoveryComplete && !_workforce.RecoveryRunning &&
+                                _ncpdServiceDispatch.RecoveryPendingCount == 0;
+        var ncpdReady = ncpdRecoveryReady && ncpdConfigurationError == null &&
+                        _ncpdMapping.MappingErrorCount == 0;
         fields.Add("ncpd-readiness", "state", ncpdReady ? "ready" : "action-required");
         fields.Add("ncpd-readiness", "configuration-error", ncpdConfigurationError ?? "none");
         fields.Add("ncpd-readiness", "next-action", ncpdReady
             ? "NCPD workforce and mapping are ready for operational orders."
-            : _ncpdMapping.FirstError ?? ncpdConfigurationError ?? "Review NCPD configuration.");
+            : _workforce.RecoveryRunning
+                ? "Persistent workforce recovery is still running."
+                : _ncpdServiceDispatch.RecoveryPendingCount > 0
+                    ? "Persistent NCPD dispatch incidents are still being recovered."
+                : _ncpdMapping.FirstError ?? ncpdConfigurationError ?? "Review NCPD configuration.");
+        fields.Add("ncpd-recovery", "recovery-running", _workforce.RecoveryRunning);
+        fields.Add("ncpd-recovery", "recovery-complete", _workforce.RecoveryComplete);
+        fields.Add("ncpd-recovery", "recovered-assignments", _workforce.RecoveredAssignmentCount);
+        fields.Add("ncpd-recovery", "recovery-failures", _workforce.RecoveryFailureCount);
+        fields.Add("ncpd-recovery", "last-recovery-error", _workforce.LastRecoveryError ?? "none");
+        fields.Add("ncpd-recovery", "dispatch-recovery-pending", _ncpdServiceDispatch.RecoveryPendingCount);
+        fields.Add("ncpd-recovery", "recovered-incidents", _ncpdServiceDispatch.RecoveredIncidentCount);
+        fields.Add("ncpd-recovery", "dispatch-recovery-failures", _ncpdServiceDispatch.RecoveryFailureCount);
+        fields.Add("ncpd-recovery", "last-dispatch-recovery-error",
+            _ncpdServiceDispatch.LastRecoveryError ?? "none");
         fields.Add("ncpd-shift", "officers", _ncpdWorkforce.OfficerCount);
         fields.Add("ncpd-shift", "on-duty", _ncpdDuty.OnDutyCount);
         fields.Add("ncpd-shift", "available", _ncpdDuty.AvailableCount);
@@ -424,6 +485,18 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("ncpd-custody", "active-detainees", _ncpdDetention.ActiveCustodyCount);
         fields.Add("ncpd-custody", "physical-routes", _ncpdDetention.ActiveRouteCount);
         fields.Add("ncpd-custody", "persistence-in-flight", _ncpdDetention.PendingMutationCount);
+        var ncpdForce = _ncpdUseOfForce.GetCounters();
+        fields.Add("ncpd-force", "force-started", ncpdForce.ForceStarted);
+        fields.Add("ncpd-force", "force-stopped", ncpdForce.ForceStopped);
+        fields.Add("ncpd-force", "surrender-stops", ncpdForce.SurrenderStops);
+        fields.Add("ncpd-force", "incapacitation-stops", ncpdForce.IncapacitationStops);
+        var cityMedical = _cityMedicalCognition.GetCounters();
+        fields.Add("city-medical", "cpr-started", cityMedical.CprStarted);
+        fields.Add("city-medical", "cpr-completed", cityMedical.CprCompleted);
+        fields.Add("city-medical", "treatments-started", cityMedical.TreatmentsStarted);
+        fields.Add("city-medical", "treatments-completed", cityMedical.TreatmentsCompleted);
+        fields.Add("city-medical", "clinical-failures", cityMedical.ClinicalFailures);
+        fields.Add("city-medical", "configuration-error", cityMedical.ConfigurationError ?? "none");
         fields.Add("ncpd-evidence", "persistence-in-flight", _ncpdEvidence.PendingEvidenceMutations);
         fields.Add("ncpd-wanted", "cached-records", _wanted.CachedCount);
         fields.Add("ncpd-wanted", "persistence-in-flight", _ncpdWanted.PendingMutations);

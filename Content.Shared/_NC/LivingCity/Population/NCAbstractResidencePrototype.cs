@@ -32,6 +32,12 @@ public sealed partial class NCAbstractResidenceProfilePrototype : IPrototype
 
     [DataField]
     public List<NCZoneContextSlot> AllowedHomeContexts { get; private set; } =
-        [NCZoneContextSlot.District, NCZoneContextSlot.Sector, NCZoneContextSlot.Street,
-            NCZoneContextSlot.Building, NCZoneContextSlot.Apartment];
+        new()
+        {
+            NCZoneContextSlot.District,
+            NCZoneContextSlot.Sector,
+            NCZoneContextSlot.Street,
+            NCZoneContextSlot.Building,
+            NCZoneContextSlot.Apartment,
+        };
 }

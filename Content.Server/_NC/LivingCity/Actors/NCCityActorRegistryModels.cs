@@ -176,7 +176,8 @@ public sealed class NCCityActorPersistedEvent(
     NCCityActorCognitionTier cognitionTier,
     NCCityActorAvailability availability,
     NCCityActorPresenceMode presenceMode,
-    bool hasAbstractResidence) : EntityEventArgs
+    bool hasAbstractResidence,
+    bool isNarrativeActor) : EntityEventArgs
 {
     public NCActorId ActorId { get; } = actorId;
     public long AggregateVersion { get; } = aggregateVersion;
@@ -192,6 +193,7 @@ public sealed class NCCityActorPersistedEvent(
     public NCCityActorAvailability Availability { get; } = availability;
     public NCCityActorPresenceMode PresenceMode { get; } = presenceMode;
     public bool HasAbstractResidence { get; } = hasAbstractResidence;
+    public bool IsNarrativeActor { get; } = isNarrativeActor;
 }
 
 /// <summary>

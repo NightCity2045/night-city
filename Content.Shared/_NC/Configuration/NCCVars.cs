@@ -24,7 +24,7 @@ public sealed class NCCVars : CVars
     public static readonly CVarDef<string> NeuralServiceToken =
         CVarDef.Create("nc_neural.service_token", string.Empty, CVar.SERVERONLY | CVar.CONFIDENTIAL);
 
-    /// <summary>Legacy configuration alias retained for one migration cycle.</summary>
+    /// <summary>Legacy ignored alias retained only so an old server config does not fail CVar parsing.</summary>
     public static readonly CVarDef<string> NeuralApiKey =
         CVarDef.Create("nc_neural.api_key", string.Empty, CVar.SERVERONLY | CVar.CONFIDENTIAL);
 }

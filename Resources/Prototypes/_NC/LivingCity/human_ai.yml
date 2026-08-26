@@ -10,7 +10,8 @@
   maximumPriority: 900
   maximumOrderLength: 128
   allowEqualRank: false
-  applyToCurrentGroup: true
+  # Named recipients are exact. A spoken order must never silently absorb an actor's whole persistent group.
+  applyToCurrentGroup: false
   factionRoleRanks:
     leader: 100
     organizer: 80
@@ -28,21 +29,47 @@
 # Natural orders are deliberately closed and route through ordinary commitments and profession systems.
 - type: ncHumanDirectiveAction
   id: go-to-location
+  execution: GoToZone
 
 - type: ncHumanDirectiveAction
   id: patrol-location
+  execution: PatrolZone
   allowsCompanion: true
+  allowedOrganizations: [NCPD]
 
 - type: ncHumanDirectiveAction
   id: guard-location
+  execution: GuardZone
   allowsCompanion: true
+  allowedOrganizations: [NCPD]
 
 - type: ncHumanDirectiveAction
   id: wait-at-location
+  execution: WaitAtZone
   allowsCompanion: true
 
 - type: ncHumanDirectiveAction
   id: report-to-location
+  execution: ReportToZone
+
+- type: ncHumanDirectiveAction
+  id: approach-person
+  execution: ApproachIssuer
+  requiresKnownLocation: false
+  allowsCompanion: true
+
+- type: ncHumanDirectiveAction
+  id: follow-person
+  execution: FollowIssuer
+  requiresKnownLocation: false
+  allowsCompanion: true
+
+- type: ncHumanDirectiveAction
+  id: escort-person
+  execution: EscortSubjectToZone
+  requiresSubject: true
+  requiresRestrainedSubject: true
+  allowedOrganizations: [NCPD]
 
 - type: htnCompound
   id: NCLivingHumanCompound

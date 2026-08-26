@@ -21,4 +21,12 @@ public sealed partial class NCCityWorkforcePolicyPrototype : IPrototype
 
     [DataField]
     public int MaximumEmployees { get; private set; } = 20_000;
+
+    /// <summary>Bounded keyset page used to rebuild the in-memory workforce index after a server restart.</summary>
+    [DataField]
+    public int RecoveryPageSize { get; private set; } = 100;
+
+    /// <summary>Safety ceiling for historical employment rows inspected during one recovery pass.</summary>
+    [DataField]
+    public int MaximumRecoveryRecords { get; private set; } = 100_000;
 }

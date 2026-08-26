@@ -35,22 +35,8 @@ public sealed partial class NCSocialContextRedactionSystem : EntitySystem
         if (!owner.IsValid || !Enum.IsDefined(purpose) || !TryGetPolicy(out var policy))
             return null;
 
-        var maximum = purpose switch
-        {
-            NCSocialContextPurpose.InternalReasoning => policy.InternalMaximumPrivacy,
-            NCSocialContextPurpose.ConversationRendering => policy.ConversationMaximumPrivacy,
-            NCSocialContextPurpose.PublicRendering => policy.PublicMaximumPrivacy,
-            _ => NCMemoryPrivacy.Public,
-        };
-        if (purpose == NCSocialContextPurpose.ConversationRendering)
-        {
-            if (conversationSessionId is not { IsValid: true } sessionId ||
-                !_conversations.TryGet(sessionId, out var session) || !session.Participants.Contains(owner))
-            {
-                return null;
-            }
-            maximum = (NCMemoryPrivacy) Math.Min((byte) maximum, (byte) session.MaximumDisclosure);
-        }
+        if (!TryResolveMaximumPrivacy(owner, purpose, conversationSessionId, out var maximum))
+            return null;
 
         var memoryBookTask = _memories.GetAsync(owner);
         var memoriesTask = _memories.GetRelevantAsync(owner,
@@ -142,7 +128,8 @@ public sealed partial class NCSocialContextRedactionSystem : EntitySystem
             maximum,
             facts.OrderBy(value => value.Domain, StringComparer.Ordinal)
                 .ThenBy(value => value.FactKey, StringComparer.Ordinal).ToArray(),
-            profile?.Snapshot.Speech.ForbiddenTopics ?? [],
+            (profile?.Snapshot.Speech.ForbiddenTopics ?? []).Take(policy.MaximumForbiddenTopics).ToArray(),
+            policy.ForbiddenAssertionKeys.Take(64).ToArray(),
             Math.Max(0, allMemories - (await memoriesTask).Count),
             Math.Max(0, allRumors - (await rumorsTask).Count),
             obligations.Count(value => value.Snapshot.Privacy > maximum));
@@ -161,14 +148,49 @@ public sealed partial class NCSocialContextRedactionSystem : EntitySystem
         return errors.Count == initial;
     }
 
+    /// <summary>Resolves the effective ceiling without loading any social aggregate.</summary>
+    public bool TryResolveMaximumPrivacy(
+        NCPartyRef owner,
+        NCSocialContextPurpose purpose,
+        NCConversationSessionId? conversationSessionId,
+        out NCMemoryPrivacy maximum)
+    {
+        maximum = NCMemoryPrivacy.Public;
+        if (!owner.IsValid || !Enum.IsDefined(purpose) || !TryGetPolicy(out var policy))
+            return false;
+
+        maximum = purpose switch
+        {
+            NCSocialContextPurpose.InternalReasoning => policy.InternalMaximumPrivacy,
+            NCSocialContextPurpose.ConversationRendering => policy.ConversationMaximumPrivacy,
+            NCSocialContextPurpose.PublicRendering => policy.PublicMaximumPrivacy,
+            _ => NCMemoryPrivacy.Public,
+        };
+        if (purpose != NCSocialContextPurpose.ConversationRendering)
+            return true;
+        if (conversationSessionId is not { IsValid: true } sessionId ||
+            !_conversations.TryGet(sessionId, out var session) || !session.Participants.Contains(owner))
+        {
+            return false;
+        }
+
+        maximum = (NCMemoryPrivacy) Math.Min((byte) maximum, (byte) session.MaximumDisclosure);
+        return true;
+    }
+
     private bool TryGetPolicy(out NCSocialContextPolicyPrototype policy) =>
         _prototypes.TryIndex(DefaultPolicy, out policy!) && Valid(policy);
 
     private static bool Valid(NCSocialContextPolicyPrototype value) =>
-        value.MaximumItemsPerDomain is > 0 and <= 32 && Enum.IsDefined(value.InternalMaximumPrivacy) &&
+        value.MaximumItemsPerDomain is > 0 and <= 32 && value.MaximumForbiddenTopics is > 0 and <= 128 &&
+        value.ForbiddenAssertionKeys.Count <= 64 && value.ForbiddenAssertionKeys.All(StableKey) &&
+        Enum.IsDefined(value.InternalMaximumPrivacy) &&
         Enum.IsDefined(value.ConversationMaximumPrivacy) && Enum.IsDefined(value.PublicMaximumPrivacy) &&
         value.ConversationMaximumPrivacy <= value.InternalMaximumPrivacy &&
         value.PublicMaximumPrivacy <= value.ConversationMaximumPrivacy;
+
+    private static bool StableKey(string value) => value.Length is > 0 and <= 128 && value.All(character =>
+        char.IsAsciiLetterOrDigit(character) || character is '-' or '_' or '.' or ':');
 
     /// <summary>
     /// Converts canonical identity to a request-scoped handle. A supplied perception alias preserves the connection

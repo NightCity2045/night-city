@@ -8,20 +8,43 @@
   endpoint: http://neural-cognition:8080/v1/cognition
   maximumQueued: 512
   maximumConcurrent: 4
+  maximumCompletionsPerTick: 16
   maximumFacts: 64
   maximumCapabilities: 32
   maximumPerceivedSubjects: 32
   maximumTextLength: 512
   maximumDialogueInputLength: 512
-  sessionTokenTarget: 200000
-  sessionTokenHardCap: 300000
-  economyThreshold: 150000
-  restrictedThreshold: 240000
+  maximumDialogueHistoryTurns: 12
+  maximumDialogueSummaryKeys: 16
+  sessionTokenTarget: 10000000
+  sessionTokenHardCap: 20000000
+  economyThreshold: 10000000
+  restrictedThreshold: 16000000
+  # GPT-5.6 Luna list prices in million-token units; keep them data-driven so pricing changes need no code patch.
+  providerModel: gpt-5.6-luna
+  inputPriceUsdMicrosPerMillionTokens: 200000
+  cachedInputPriceUsdMicrosPerMillionTokens: 20000
+  outputPriceUsdMicrosPerMillionTokens: 1200000
+  economyCostThresholdUsdMicros: 7500000
+  restrictedCostThresholdUsdMicros: 12000000
+  sessionCostHardCapUsdMicros: 15000000
+  # Real provider spend is capped across server restarts by an ISO-week ledger.
+  weeklyCostHardCapUsdMicros: 18000000
+  actorWeeklyCostHardCapUsdMicros: 2000000
+  requestKindWeeklyLimits:
+    SocialCognition: 600
+    StrategicDecision: 150
+    DialogueContinuation: 2000
+    MemorySummary: 300
+    NarrativeRender: 300
+  maximumRequestInputTokens: 32768
+  maximumRequestOutputTokens: 2048
   circuitFailureThreshold: 5
   minimumSuggestionConfidence: 400
   maximumUtilityBoost: 40
   maximumPendingCorrelations: 1024
   maximumAppliedSuggestions: 10000
+  maximumTrackedActorDiagnostics: 256
   requestTimeout: 8s
   requestLifetime: 20s
   circuitOpenDuration: 2m
@@ -45,15 +68,6 @@
   principleKeys: [survive, remember-debts, protect-close-people, respect-lived-experience]
   habitKeys: [observe-surroundings, speak-from-known-facts, avoid-impossible-promises]
 
-- type: ncNeuralPersonaProfile
-  id: NCNeuralAlexRiveraPersona
-  stableKey: alex-rivera
-  roleKey: ncpd-patrol-officer
-  organizationKey: ncpd
-  biography: Alex Rivera is a patrol officer assigned to a local Night City precinct in 2045. He knows this city as a dangerous, fractured home, not as a simulation.
-  principleKeys: [protect-civilians, preserve-partner, lawful-orders, proportional-force, professional-discretion]
-  habitKeys: [observe-before-accusing, concise-radio-speech, guarded-with-strangers, checks-exits]
-
 - type: ncNeuralAutonomyPolicy
   id: NCDefaultNeuralAutonomy
   stableKey: resident-deliberative
@@ -69,10 +83,3 @@
   minimumIntentConfidence: 400
   maximumIntentPriority: 900
   targetedIntentsAllowed: true
-
-- type: ncNarrativeActorProfile
-  id: NCNarrativeAlexRivera
-  stableKey: alex-rivera
-  personaProfile: NCNeuralAlexRiveraPersona
-  autonomyPolicy: NCNcpdNeuralAutonomy
-  incidentEscalationEnabled: true

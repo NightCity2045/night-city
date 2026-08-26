@@ -146,7 +146,7 @@ public sealed partial class NCNcpdDetentionPolicyPrototype : IPrototype
     [DataField] public int PhysicalEvidenceReliability { get; private set; } = 900;
     [DataField] public bool PhysicalEvidenceAdmissible { get; private set; } = true;
     [DataField] public float EvidenceStorageSearchRadius { get; private set; } = 3f;
-    [DataField] public List<EntProtoId> EvidenceStorageReceivers { get; private set; } = ["LockerEvidence"];
+    [DataField] public List<EntProtoId> EvidenceStorageReceivers { get; private set; } = new() { "LockerEvidence" };
     [DataField] public TimeSpan AbstractCustodyReviewInterval { get; private set; } = TimeSpan.FromHours(1);
 }
 
