@@ -106,6 +106,8 @@ public sealed partial class NCApartmentSystem : EntitySystem
 
     private void OnRoundRestart(RoundRestartCleanupEvent ev)
     {
+        Log.Info($"NCApartment round restart cleanup started for {_properties.Count} property record(s).");
+
         // A direct restart may skip the normal round-end message, so cleanup remains a guarded fallback.
         CaptureActiveRoundSnapshots();
         _snapshots.BeginRoundLoad();
@@ -114,6 +116,8 @@ public sealed partial class NCApartmentSystem : EntitySystem
         _pendingInteriors.Clear();
         _runtimeInteriors.Clear();
         _rentProcessing.Clear();
+
+        Log.Info("NCApartment round restart cleanup finished.");
     }
 
     private void OnPlayerAttached(PlayerAttachedEvent ev)
