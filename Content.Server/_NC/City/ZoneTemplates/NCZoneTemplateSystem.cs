@@ -83,8 +83,6 @@ public sealed partial class NCZoneTemplateSystem : EntitySystem
 
     private void OnRoundRestart(RoundRestartCleanupEvent ev)
     {
-        Log.Info($"NCZoneTemplate round restart cleanup started for {_deployments.Count} deployment(s).");
-
         foreach (var deployment in _deployments.Values)
             DeleteDeploymentEntities(deployment.Id);
 
@@ -103,8 +101,6 @@ public sealed partial class NCZoneTemplateSystem : EntitySystem
 
         _storageMapUid = EntityUid.Invalid;
         _storageMapId = MapId.Nullspace;
-
-        Log.Info("NCZoneTemplate round restart cleanup finished.");
     }
 
     private void OnPrototypesReloaded(PrototypesReloadedEventArgs args)

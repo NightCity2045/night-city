@@ -1120,16 +1120,12 @@ public sealed partial class NCAgentSystem
 
     private void OnRoundRestart(RoundRestartCleanupEvent args)
     {
-        Log.Info($"NCAgent persistence round restart cleanup started for {_views.Count} open view(s), {_boundAgents.Count} bound agent(s).");
-
         _views.Clear();
         _processing.Clear();
         _boundAgents.Clear();
         ClearAgentLocks();
         ClearCommunication();
         ClearCalls();
-
-        Log.Info("NCAgent persistence round restart cleanup finished.");
     }
 
     private sealed class AgentView(NCCharacterId owner)

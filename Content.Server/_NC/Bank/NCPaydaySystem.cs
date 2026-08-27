@@ -99,9 +99,7 @@ public sealed partial class NCPaydaySystem : EntitySystem
 
     private void OnRoundRestart(RoundRestartCleanupEvent args)
     {
-        Log.Info("NCPayday round restart cleanup started.");
         _elapsed = 0f;
-        Log.Info("NCPayday round restart cleanup finished.");
     }
 
     private async void ProcessPaydayAsync()

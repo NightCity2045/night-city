@@ -646,8 +646,6 @@ public sealed partial class NCMissionSystem : EntitySystem
 
     private void OnRoundRestart(RoundRestartCleanupEvent ev)
     {
-        Log.Info($"NCMission round restart cleanup started for {_runs.Count} run(s).");
-
         _runs.Clear();
         _activeBySlot.Clear();
         _runsByDeployment.Clear();
@@ -657,8 +655,6 @@ public sealed partial class NCMissionSystem : EntitySystem
         _deploymentEntityBuffer.Clear();
         _evacuees.Clear();
         _nextLifecycleUpdate = TimeSpan.Zero;
-
-        Log.Info("NCMission round restart cleanup finished.");
     }
 
     private sealed class MissionRun(

@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Diagnostics;
 using System.Numerics;
 using Content.Server.Announcements;
 using Content.Server.Discord;
@@ -711,41 +710,26 @@ namespace Content.Server.GameTicking
         private void ResettingCleanup()
         {
             // Move everybody currently in the server to lobby.
-            var restartCleanupStopwatch = Stopwatch.StartNew();
-
-            _sawmill.Info("Round restart cleanup: moving players to lobby.");
             foreach (var player in _playerManager.Sessions)
             {
                 PlayerJoinLobby(player);
             }
 
             // Round restart cleanup event, so entity systems can reset.
-            _sawmill.Info("Round restart cleanup: raising RoundRestartCleanupEvent.");
             var ev = new RoundRestartCleanupEvent();
             RaiseLocalEvent(ev);
-            _sawmill.Info($"Round restart cleanup: RoundRestartCleanupEvent completed in {restartCleanupStopwatch.Elapsed}.");
 
             // So clients' entity systems can clean up too...
-            _sawmill.Info("Round restart cleanup: raising network cleanup event.");
             RaiseNetworkEvent(ev);
-            _sawmill.Info($"Round restart cleanup: network cleanup completed in {restartCleanupStopwatch.Elapsed}.");
 
-            _sawmill.Info("Round restart cleanup: flushing entities.");
             EntityManager.FlushEntities();
-            _sawmill.Info($"Round restart cleanup: entity flush completed in {restartCleanupStopwatch.Elapsed}.");
 
-            _sawmill.Info("Round restart cleanup: restarting bans.");
             _banManager.Restart();
-            _sawmill.Info($"Round restart cleanup: ban reset completed in {restartCleanupStopwatch.Elapsed}.");
 
-            _sawmill.Info("Round restart cleanup: clearing selected map.");
             _gameMapManager.ClearSelectedMap();
-            _sawmill.Info($"Round restart cleanup: map clear completed in {restartCleanupStopwatch.Elapsed}.");
 
             // Clear up any game rules.
-            _sawmill.Info("Round restart cleanup: clearing game rules.");
             ClearGameRules();
-            _sawmill.Info($"Round restart cleanup: game rules cleared in {restartCleanupStopwatch.Elapsed}.");
             CurrentPreset = null;
 
             _allPreviousGameRules.Clear();
@@ -756,8 +740,6 @@ namespace Content.Server.GameTicking
             {
                 _playerGameStatuses[session.UserId] = LobbyEnabled ? PlayerGameStatus.NotReadyToPlay : PlayerGameStatus.ReadyToPlay;
             }
-
-            _sawmill.Info($"Round restart cleanup completed in {restartCleanupStopwatch.Elapsed}.");
         }
 
         public bool DelayStart(TimeSpan time)

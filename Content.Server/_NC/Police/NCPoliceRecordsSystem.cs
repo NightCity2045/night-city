@@ -392,13 +392,9 @@ public sealed partial class NCPoliceRecordsSystem : EntitySystem
 
     private void OnRoundRestart(RoundRestartCleanupEvent args)
     {
-        Log.Info($"NCPoliceRecords round restart cleanup started for {_views.Count} view(s) and {_liveRecords.Count} live record(s).");
-
         _views.Clear();
         _liveRecords.Clear();
         _presentThisRound.Clear();
-
-        Log.Info("NCPoliceRecords round restart cleanup finished.");
     }
 
     private bool CanUse(EntityUid console, EntityUid user)

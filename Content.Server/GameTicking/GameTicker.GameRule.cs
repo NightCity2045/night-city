@@ -236,9 +236,7 @@ public sealed partial class GameTicker
         _adminLogger.Add(LogType.EventStopped, $"Ended game rule {ToPrettyString(ruleEntity)}");
 
         var ev = new GameRuleEndedEvent(ruleEntity, id);
-        _sawmill.Info($"Raising GameRuleEndedEvent for {ToPrettyString(ruleEntity)}.");
         RaiseLocalEvent(ruleEntity, ref ev, true);
-        _sawmill.Info($"Finished GameRuleEndedEvent for {ToPrettyString(ruleEntity)}.");
         return true;
     }
 
@@ -342,16 +340,10 @@ public sealed partial class GameTicker
 
     public void ClearGameRules()
     {
-        var rules = GetAddedGameRules().ToArray();
-        _sawmill.Info($"Clearing {rules.Length} game rule(s) during round restart.");
-
-        foreach (var rule in rules)
+        foreach (var rule in GetAddedGameRules())
         {
-            _sawmill.Info($"Ending game rule {ToPrettyString(rule)} during round restart.");
             EndGameRule(rule);
         }
-
-        _sawmill.Info("Finished clearing game rules during round restart.");
     }
 
     /// <summary>

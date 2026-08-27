@@ -216,18 +216,13 @@ public sealed partial class NCMedicalPersistenceSystem
 
     private void OnRoundRestart(RoundRestartCleanupEvent args)
     {
-        Log.Info($"NCMedicalPersistence round restart cleanup started for {_playerBindings.Count} bound body/bodies.");
-
         // Run before SharedMindSystem detaches players and queues their bodies. A direct restart may skip
         // the normal round-end message, so this is the last guaranteed complete graph boundary.
         foreach (var (body, binding) in _playerBindings.ToArray())
         {
-            Log.Info($"NCMedicalPersistence round restart cleanup capturing {ToPrettyString(body)}.");
             ForceCapturePlayerWrite(body, allowTerminating: false);
             ReleasePlayerBinding(body, binding, keepSaveState: true);
         }
-
-        Log.Info("NCMedicalPersistence round restart cleanup finished.");
     }
 
     private void ForceCaptureAllPlayers()
