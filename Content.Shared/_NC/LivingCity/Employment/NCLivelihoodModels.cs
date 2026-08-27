@@ -4,6 +4,7 @@
 
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
+using Content.Shared._NC.LivingCity.Affordances;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 
@@ -37,6 +38,10 @@ public sealed partial class NCLivelihoodProfilePrototype : IPrototype
 
     [DataField]
     public bool PublicFacing { get; private set; } = true;
+
+    /// <summary>Local semantic destination used while this resident performs their ordinary livelihood.</summary>
+    [DataField]
+    public NCCityAffordanceKind WorkAffordance { get; private set; } = NCCityAffordanceKind.Workplace;
 
     [DataField]
     public List<string> Capabilities { get; private set; } = [];

@@ -19,7 +19,6 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
 {
     private const int TelemetryFrameCapacity = 256;
     private const string DefaultPolicyId = "NCDefaultAILoadGovernorPolicy";
-    private const string DefaultRelevancePolicyId = "NCDefaultCityRelevancePolicy";
 
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private Robust.Shared.Timing.IGameTiming _timing = default!;
@@ -57,8 +56,6 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
     private float _alifeWorkRatio;
     private float _maximumQueueRatio;
     private int _materializedActors;
-    private int _baseSoftMaterializedBudget;
-    private int _hardMaterializedBudget;
     private int _reservedMaterializations;
     private int _backloggedSubsystems;
     private long _transitionCount;
@@ -121,9 +118,9 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         }
         CaptureGarbageCollectorTelemetry();
 
-        var materializedRatio = _hardMaterializedBudget > 0
-            ? (float) (_materializedActors + _reservedMaterializations) / _hardMaterializedBudget
-            : 0f;
+        // Physical population has no count cap. Load degradation is driven by measured frame/work pressure and
+        // bounded queues; it slows admissions but never refuses a resident required by local semantic relevance.
+        const float materializedRatio = 0f;
         _reasons = BuildReasons(
             _smoothedFrameMilliseconds,
             _alifeWorkRatio,
@@ -188,8 +185,8 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
     }
 
     /// <summary>
-    /// Reserves capacity before an asynchronous materialization is queued. Protected incident/service/admin work may
-    /// use headroom between the current soft limit and the absolute hard cap when its priority is high enough.
+    /// Tracks asynchronous materialization reservations. Count-based admission caps are intentionally absent: local
+    /// semantic relevance is authoritative, while dispatch throughput remains governed separately.
     /// </summary>
     public bool TryReserveMaterialization(
         Guid requestId,
@@ -213,28 +210,6 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
             return true;
 
         actorCount = Math.Max(1, actorCount);
-        var projected = _materializedActors + _reservedMaterializations + actorCount;
-        if (_hardMaterializedBudget > 0 && projected > _hardMaterializedBudget)
-        {
-            _admissionRejected++;
-            error = $"A-Life load governor hard cap {_hardMaterializedBudget} would be exceeded.";
-            return false;
-        }
-
-        var softLimit = EffectiveSoftMaterializedBudget;
-        if (projected > softLimit)
-        {
-            var minimumPriority = ProtectedMaterializationPriority;
-            if (!protectedRequest || priority < minimumPriority)
-            {
-                _admissionRejected++;
-                error = protectedRequest
-                    ? $"A-Life load state {State} requires protected priority {minimumPriority} above soft cap {softLimit}."
-                    : $"A-Life load state {State} defers non-critical materialization above soft cap {softLimit}.";
-                return false;
-            }
-        }
-
         _materializationReservations.Add(requestId, actorCount);
         _reservedMaterializations += actorCount;
         _admissionAccepted++;
@@ -301,36 +276,6 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
     public int TakeAutomaticMaterializationRequests(int baseline) =>
         TakeDispatchLimit(NCAILoadDispatchKind.RelevanceMaterialization, baseline);
 
-    public int GetEffectiveSoftMaterializedBudget(int baseline)
-    {
-        if (!_active || _policy == null)
-            return baseline;
-        return ScaleSoftBudget(baseline);
-    }
-
-    public int ScaleSoftBudget(int baseline)
-    {
-        if (baseline <= 0)
-            return 0;
-        var multiplier = State switch
-        {
-            NCAILoadState.Elevated => _policy?.ElevatedSoftMaterializedBudgetMultiplier ?? 1f,
-            NCAILoadState.Critical => _policy?.CriticalSoftMaterializedBudgetMultiplier ?? 1f,
-            _ => 1f,
-        };
-        return Math.Clamp((int) Math.Floor(baseline * multiplier), 1, baseline);
-    }
-
-    public int EffectiveSoftMaterializedBudget
-    {
-        get
-        {
-            if (_baseSoftMaterializedBudget <= 0)
-                return 0;
-            return Math.Min(ScaleSoftBudget(_baseSoftMaterializedBudget), _hardMaterializedBudget);
-        }
-    }
-
     public int ProtectedMaterializationPriority => State switch
     {
         NCAILoadState.Elevated => _policy?.ElevatedProtectedMaterializationPriority ?? 0,
@@ -346,8 +291,8 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         _alifeWorkRatio,
         _materializedActors,
         _reservedMaterializations,
-        EffectiveSoftMaterializedBudget,
-        _hardMaterializedBudget,
+        0,
+        0,
         _maximumQueueRatio,
         _backloggedSubsystems,
         _stateMachine.CandidateSamples,
@@ -389,21 +334,8 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
             Log.Error(_configurationError);
             return;
         }
-        if (!_prototypes.TryIndex(
-                new ProtoId<NCCityRelevancePolicyPrototype>(DefaultRelevancePolicyId),
-                out NCCityRelevancePolicyPrototype? relevance) || relevance == null ||
-            relevance.GlobalSoftMaterializedBudget <= 0 ||
-            relevance.GlobalHardMaterializedBudget < relevance.GlobalSoftMaterializedBudget)
-        {
-            _configurationError = $"Relevance policy {DefaultRelevancePolicyId} is missing or invalid.";
-            Log.Error(_configurationError);
-            return;
-        }
-
         _policy = policy;
         _thresholds = NCAILoadGovernorThresholds.FromPrototype(policy);
-        _baseSoftMaterializedBudget = relevance.GlobalSoftMaterializedBudget;
-        _hardMaterializedBudget = relevance.GlobalHardMaterializedBudget;
         _epoch = args.Epoch;
         _nextSample = args.Time.Advance(policy.SampleInterval);
         _lastTransitionAt = args.Time;
@@ -448,8 +380,6 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         _alifeWorkRatio = 0f;
         _maximumQueueRatio = 0f;
         _materializedActors = 0;
-        _baseSoftMaterializedBudget = 0;
-        _hardMaterializedBudget = 0;
         _reservedMaterializations = 0;
         _backloggedSubsystems = 0;
         _transitionCount = 0;

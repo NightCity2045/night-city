@@ -12,18 +12,21 @@
   id: NCStreetVendor
   displayName: street vendor
   category: Trade
+  workAffordance: PublicEntrance
   capabilities: [street-trade, barter]
 
 - type: ncLivelihoodProfile
   id: NCCourier
   displayName: courier
   category: Logistics
+  workAffordance: BuildingExit
   capabilities: [delivery, city-travel]
 
 - type: ncLivelihoodProfile
   id: NCDriver
   displayName: driver
   category: Logistics
+  workAffordance: BuildingExit
   capabilities: [transport, delivery]
 
 - type: ncLivelihoodProfile
@@ -56,10 +59,12 @@
   displayName: unemployed
   category: Unemployed
   publicFacing: false
+  workAffordance: RestArea
   capabilities: []
 
 - type: ncLivelihoodProfile
   id: NCFixer
   displayName: fixer
   category: Trade
+  workAffordance: RestArea
   capabilities: [brokerage, contracts, obligations, night-market]

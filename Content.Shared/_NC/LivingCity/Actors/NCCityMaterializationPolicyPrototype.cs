@@ -38,6 +38,12 @@ public sealed partial class NCCityMaterializationPolicyPrototype : IPrototype
     public float PlayerVisibilityExclusionRadius { get; private set; } = 24f;
 
     /// <summary>
+    /// Visible fallback points must still keep a small collision-safe distance from players and observer anchors.
+    /// </summary>
+    [DataField]
+    public float PlayerSpawnExclusionRadius { get; private set; } = 2f;
+
+    /// <summary>
     /// Automatic player-relevance spawns must remain inside this radius of a player or enabled camera anchor.
     /// Keeping it at or below the dematerialization radius prevents a spawn/despawn feedback loop.
     /// </summary>

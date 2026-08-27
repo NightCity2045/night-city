@@ -39,6 +39,13 @@
     NarrativeRender: 300
   maximumRequestInputTokens: 32768
   maximumRequestOutputTokens: 2048
+  ordinaryDialogueMaximumOutputTokens: 384
+  ordinaryDialogueMaximumFacts: 20
+  ordinaryDialogueMaximumPerceivedSubjects: 12
+  ordinaryDialogueMaximumKnownLocations: 16
+  ordinaryDialogueMaximumInputLength: 256
+  ordinaryDialogueMaximumHistoryTurns: 4
+  ordinaryDialogueMaximumSummaryKeys: 6
   circuitFailureThreshold: 5
   minimumSuggestionConfidence: 400
   maximumUtilityBoost: 40
@@ -75,6 +82,14 @@
   minimumIntentConfidence: 500
   maximumIntentPriority: 700
   targetedIntentsAllowed: true
+
+- type: ncNeuralAutonomyPolicy
+  id: NCOrdinaryResidentDialogueAutonomy
+  stableKey: resident-dialogue-only
+  allowedKinds: [DialogueContinuation]
+  minimumIntentConfidence: 700
+  maximumIntentPriority: 250
+  targetedIntentsAllowed: false
 
 - type: ncNeuralAutonomyPolicy
   id: NCNcpdNeuralAutonomy

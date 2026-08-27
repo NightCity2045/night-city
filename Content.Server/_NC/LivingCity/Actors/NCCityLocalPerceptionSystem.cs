@@ -93,11 +93,11 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
             Evaluate(entityUid, now);
             dispatched++;
         }
-        _governor.ReportQueue(
-            NCAILoadQueueKind.PhysicalPerception,
-            _scheduled.Count,
-            _policy.MaximumTrackedActors);
-        _governor.ReportBacklog(NCAILoadBacklogKind.PhysicalPerception, HasDue(now));
+        // Every tracked actor always owns one future schedule entry, so scheduled/tracked is naturally 100% and is
+        // not queue pressure. Only work still due after the bounded dispatch pass represents saturation.
+        var dueBacklog = HasDue(now);
+        _governor.ReportQueue(NCAILoadQueueKind.PhysicalPerception, dueBacklog ? 1 : 0, 1);
+        _governor.ReportBacklog(NCAILoadBacklogKind.PhysicalPerception, dueBacklog);
     }
 
     public bool Configure(EntityUid entityUid, ProtoId<NCCityLocalPerceptionProfilePrototype> profileId)
@@ -108,12 +108,6 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
             _rejectedConfigurations++;
             return false;
         }
-        if (!_tracked.Contains(entityUid) && _tracked.Count >= _policy.MaximumTrackedActors)
-        {
-            _rejectedConfigurations++;
-            return false;
-        }
-
         var component = EnsureComp<NCCityLocalPerceptionComponent>(entityUid);
         component.Profile = profileId;
         _tracked.Add(entityUid);
@@ -608,8 +602,8 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         Reset();
         if (!_prototypes.TryIndex(
                 new ProtoId<NCCityLocalPerceptionPolicyPrototype>(DefaultPolicyId),
-                out var policy) || policy == null || policy.MaximumTrackedActors <= 0 ||
-            policy.MaximumUpdatesPerTick <= 0 || policy.MaximumIncidentCorrelations <= 0)
+                out var policy) || policy == null || policy.MaximumUpdatesPerTick <= 0 ||
+            policy.MaximumIncidentCorrelations <= 0)
         {
             _configurationError = "default-local-perception-policy-invalid";
             return;

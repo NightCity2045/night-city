@@ -22,6 +22,5 @@ public sealed record NCCityPlayerCluster(
     IReadOnlyList<EntityUid> AnchorEntities,
     IReadOnlyList<NCZoneId> ActiveZoneIds,
     int AttachedPlayerCount,
-    int MaterializedActorCount,
-    int SoftMaterializedBudget);
+    int MaterializedActorCount);
 

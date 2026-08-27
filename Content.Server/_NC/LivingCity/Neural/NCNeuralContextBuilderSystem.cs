@@ -14,6 +14,7 @@ using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Cognition;
 using Content.Shared._NC.LivingCity.CityServices;
+using Content.Shared._NC.LivingCity.Employment;
 using Content.Shared._NC.LivingCity.Neural;
 using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.City.Zones;
@@ -21,6 +22,9 @@ using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Prototypes;
 using Content.Shared.Roles;
+using Content.Server.Chat.Systems;
+using Content.Shared.Chat;
+using System.Threading;
 
 namespace Content.Server._NC.LivingCity.Neural;
 
@@ -29,6 +33,10 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
 {
     private static readonly ProtoId<NCNeuralPolicyPrototype> DefaultPolicy = "Default";
     private static readonly ProtoId<NCNeuralPromptProfilePrototype> DefaultPrompt = "NCLivingCityDefault";
+    private static readonly ProtoId<NCNeuralPersonaProfilePrototype> DefaultResidentPersona =
+        "NCDefaultResidentPersona";
+    private static readonly ProtoId<NCNeuralAutonomyPolicyPrototype> OrdinaryDialogueAutonomy =
+        "NCOrdinaryResidentDialogueAutonomy";
     private const string DialogueCapability = "social.dialogue.reply";
     private const string ApproachPersonCapability = "NCCognitionApproachPerson";
     private const string AcceptDirectiveCapability = "NCCognitionAcceptDirective";
@@ -44,12 +52,21 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
     [Dependency] private NCSocialContextRedactionSystem _redaction = default!;
     [Dependency] private NCSocialProfileRegistrySystem _socialProfiles = default!;
     [Dependency] private NCOrganizationWorkforceSystem _workforce = default!;
+    [Dependency] private NCLivelihoodRegistrySystem _livelihoods = default!;
     [Dependency] private NCProfessionProfileSystem _professions = default!;
     [Dependency] private NCFactionMembershipRegistrySystem _factionMemberships = default!;
     [Dependency] private NCNeuralCognitionClientSystem _client = default!;
     [Dependency] private NCNeuralSuggestionSystem _suggestions = default!;
     [Dependency] private NCNeuralConversationSystem _neuralConversations = default!;
+    [Dependency] private ChatSystem _chat = default!;
     private readonly Dictionary<NCActorId, NCActiveWorldTime> _nextIncidentEscalation = [];
+    private long _ordinaryDialogueSubmissions;
+    private long _narrativeDialogueSubmissions;
+    private long _localDialogueFallbacks;
+
+    public long OrdinaryDialogueSubmissions => Interlocked.Read(ref _ordinaryDialogueSubmissions);
+    public long NarrativeDialogueSubmissions => Interlocked.Read(ref _narrativeDialogueSubmissions);
+    public long LocalDialogueFallbacks => Interlocked.Read(ref _localDialogueFallbacks);
 
     public override void Initialize()
     {
@@ -81,11 +98,47 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         if (actor == null)
             return false;
         if (!_prototypes.TryIndex(new ProtoId<NCCityActorArchetypePrototype>(actor.Snapshot.Identity.ArchetypeId),
-                out var archetype) || archetype == null ||
-            !TryResolveNarrativeProfile(actor, archetype, out var narrativeProfile) ||
-            !_prototypes.TryIndex(narrativeProfile.AutonomyPolicy, out var autonomyPolicy) || autonomyPolicy == null ||
-            !autonomyPolicy.AllowedKinds.Contains(kind))
+                out var archetype) || archetype == null)
             return false;
+        NCNeuralPersonaProfilePrototype? personaProfile;
+        NCNeuralAutonomyPolicyPrototype? autonomyPolicy;
+        var narrativeAccess = false;
+        if (TryResolveNarrativeProfile(actor, archetype, out var narrativeProfile))
+        {
+            narrativeAccess = true;
+            if (!_prototypes.TryIndex(narrativeProfile.PersonaProfile, out personaProfile) ||
+                !_prototypes.TryIndex(narrativeProfile.AutonomyPolicy, out autonomyPolicy))
+                return false;
+        }
+        else
+        {
+            // Ordinary residents may use Neural only to answer a direct bounded conversation. They receive no
+            // strategic or incident-escalation access and keep their deterministic BDI for every world action.
+            if (kind != NCNeuralRequestKind.DialogueContinuation ||
+                !_prototypes.TryIndex(DefaultResidentPersona, out personaProfile) ||
+                !_prototypes.TryIndex(OrdinaryDialogueAutonomy, out autonomyPolicy))
+                return false;
+        }
+        if (personaProfile == null || autonomyPolicy == null || !autonomyPolicy.AllowedKinds.Contains(kind))
+            return false;
+        var maximumPerceivedSubjects = narrativeAccess
+            ? policy.MaximumPerceivedSubjects
+            : policy.OrdinaryDialogueMaximumPerceivedSubjects;
+        var maximumKnownLocations = narrativeAccess
+            ? policy.MaximumKnownLocations
+            : policy.OrdinaryDialogueMaximumKnownLocations;
+        var maximumFacts = narrativeAccess
+            ? policy.MaximumFacts
+            : policy.OrdinaryDialogueMaximumFacts;
+        var maximumDialogueInputLength = narrativeAccess
+            ? policy.MaximumDialogueInputLength
+            : policy.OrdinaryDialogueMaximumInputLength;
+        var maximumDialogueHistoryTurns = narrativeAccess
+            ? policy.MaximumDialogueHistoryTurns
+            : policy.OrdinaryDialogueMaximumHistoryTurns;
+        var maximumDialogueSummaryKeys = narrativeAccess
+            ? policy.MaximumDialogueSummaryKeys
+            : policy.OrdinaryDialogueMaximumSummaryKeys;
         EntityUid speakerEntity = EntityUid.Invalid;
         var speakerHandle = string.Empty;
         if (conversation is { } liveConversation &&
@@ -103,7 +156,7 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         var perceivedEvents = Array.Empty<NCNeuralPerceivedEvent>();
         if (_perception.TryGetSnapshot(actorId, now, out var localSubjects, out var localEvents))
         {
-            foreach (var subject in localSubjects.Take(policy.MaximumPerceivedSubjects))
+            foreach (var subject in localSubjects.Take(maximumPerceivedSubjects))
             {
                 perceivedByHandle[subject.SubjectHandle] = new NCNeuralPerceivedSubject(
                     subject.SubjectHandle,
@@ -117,7 +170,7 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                     speakerHandle = subject.SubjectHandle;
             }
             perceivedEvents = localEvents
-                .Take(policy.MaximumPerceivedSubjects)
+                .Take(maximumPerceivedSubjects)
                 .Select(value => new NCNeuralPerceivedEvent(
                     value.Kind.ToString().ToLowerInvariant(),
                     value.ActorHandle,
@@ -160,7 +213,7 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                 .Where(value => value.ExpiresAt > now && value.Subject.IsValid &&
                                 value.Subject.StableId.StartsWith("perceived-", StringComparison.Ordinal))
                 .OrderByDescending(value => value.ObservedAt.Ticks)
-                .Take(policy.MaximumPerceivedSubjects)
+                .Take(maximumPerceivedSubjects)
                 .ToArray();
             foreach (var value in physicalFacts.GroupBy(value => value.Subject.StableId, StringComparer.Ordinal)
                          .Select(group => group.First()))
@@ -178,15 +231,18 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                     NCMemoryPrivacy.Public.ToString()));
             }
         }
-        var perceived = perceivedByHandle.Values.Take(policy.MaximumPerceivedSubjects).ToArray();
-        var knownLocations = BuildKnownLocations(actor, policy.MaximumKnownLocations);
+        var perceived = perceivedByHandle.Values.Take(maximumPerceivedSubjects).ToArray();
+        var knownLocations = BuildKnownLocations(actor, maximumKnownLocations);
         var socialProfileTask = _socialProfiles.GetAsync(actorId);
         var factionMembershipTask = _factionMemberships.GetAsync(actorId);
-        await Task.WhenAll(socialProfileTask, factionMembershipTask);
+        var livelihoodTask = _livelihoods.GetAsync(actorId);
+        await Task.WhenAll(socialProfileTask, factionMembershipTask, livelihoodTask);
         var socialProfile = await socialProfileTask;
         var factionMembership = await factionMembershipTask;
-        AddRoleFacts(actorId, factionMembership, context.EffectiveMaximumPrivacy, context.ForbiddenTopics, facts);
-        var persona = BuildPersona(actor, socialProfile, narrativeProfile);
+        var livelihood = await livelihoodTask;
+        AddRoleFacts(actorId, livelihood, factionMembership, context.EffectiveMaximumPrivacy,
+            context.ForbiddenTopics, facts);
+        var persona = BuildPersona(actor, socialProfile, livelihood, personaProfile);
         if (persona == null)
             return false;
         var autonomy = new NCNeuralAutonomyContext(
@@ -200,16 +256,16 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         NCNeuralDialogueInput? dialogueInput = null;
         if (kind == NCNeuralRequestKind.DialogueContinuation)
         {
-            var utterance = NormalizeDialogueText(transientUtterance, policy.MaximumDialogueInputLength);
+            var utterance = NormalizeDialogueText(transientUtterance, maximumDialogueInputLength);
             var actorName = NormalizeDialogueText(actor.Snapshot.Identity.FullName, 128);
             if (utterance.Length == 0 || actorName.Length == 0)
                 return false;
             var history = conversation is { } transcriptSession
-                ? _conversations.GetTranscript(transcriptSession, policy.MaximumDialogueHistoryTurns + 1).SkipLast(1)
+                ? _conversations.GetTranscript(transcriptSession, maximumDialogueHistoryTurns + 1).SkipLast(1)
                     .Select(value => new NCNeuralDialogueTurn(
                         value.Speaker == NCPartyRef.ForActor(actorId) ? "self" : "interlocutor",
                         value.Act.ToString().ToLowerInvariant(),
-                        NormalizeDialogueText(value.Utterance, policy.MaximumDialogueInputLength),
+                        NormalizeDialogueText(value.Utterance, maximumDialogueInputLength),
                         value.At.Ticks))
                     .ToArray()
                 : [];
@@ -219,20 +275,23 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                 .Where(value => value.SummaryKey.Length > 0)
                 .Select(value => value.SummaryKey)
                 .Distinct(StringComparer.Ordinal)
-                .Take(policy.MaximumDialogueSummaryKeys)
+                .Take(maximumDialogueSummaryKeys)
                 .ToArray();
             var earlierSummary = earlierTurnCount > 0 || summaryKeys.Length > 0 ||
                 conversationSnapshot?.CurrentTopicKeys.Count > 0
                 ? new NCNeuralDialogueSummary(
                     earlierTurnCount,
-                    conversationSnapshot?.CurrentTopicKeys.Take(policy.MaximumDialogueSummaryKeys).ToArray() ?? [],
+                    conversationSnapshot?.CurrentTopicKeys.Take(maximumDialogueSummaryKeys).ToArray() ?? [],
                     summaryKeys)
                 : null;
             dialogueInput = new NCNeuralDialogueInput(actorName, utterance, speakerHandle, history, earlierSummary);
         }
         var effectiveCapabilities = allowedCapabilities
+            .Where(value => narrativeAccess || value == DialogueCapability)
             .Where(value => value != ApproachPersonCapability || speakerHandle.Length > 0)
-            .Concat(kind == NCNeuralRequestKind.DialogueContinuation ? [AcceptDirectiveCapability] : [])
+            .Concat(narrativeAccess && kind == NCNeuralRequestKind.DialogueContinuation
+                ? [AcceptDirectiveCapability]
+                : [])
             .Distinct()
             .Take(policy.MaximumCapabilities)
             .ToArray();
@@ -247,7 +306,7 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                 .Order(StringComparer.Ordinal)
                 .ToArray()
             : [];
-        var packetFacts = BuildFactPacket(facts, policy.MaximumFacts);
+        var packetFacts = BuildFactPacket(facts, maximumFacts);
         var disclosure = new NCNeuralDisclosureContext(
             disclosureMaximum.ToString(),
             packetFacts.Select(value => value.Handle).ToArray(),
@@ -260,7 +319,12 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             actor.AggregateVersion, now.Advance(policy.RequestLifetime), DefaultPrompt,
             packetFacts,
             effectiveCapabilities, conversationSnapshot?.CurrentTopicKeys ?? [], "ru-RU", persona, autonomy,
-            perceived, perceivedEvents, knownLocations, dialogueInput, directiveActions, disclosure);
+            perceived, perceivedEvents, knownLocations, dialogueInput, directiveActions, disclosure)
+        {
+            MaximumOutputTokens = narrativeAccess
+                ? policy.MaximumRequestOutputTokens
+                : policy.OrdinaryDialogueMaximumOutputTokens,
+        };
         var trackedDialogue = kind == NCNeuralRequestKind.DialogueContinuation && conversationSnapshot != null;
         if (trackedDialogue && !_suggestions.TryTrackDialogue(
                 request.RequestId,
@@ -268,7 +332,16 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                 conversationSnapshot.ConversationVersion))
             return false;
         if (_client.Submit(request))
+        {
+            if (kind == NCNeuralRequestKind.DialogueContinuation)
+            {
+                if (narrativeAccess)
+                    Interlocked.Increment(ref _narrativeDialogueSubmissions);
+                else
+                    Interlocked.Increment(ref _ordinaryDialogueSubmissions);
+            }
             return true;
+        }
         if (trackedDialogue)
             _suggestions.ForgetDialogue(request.RequestId);
         return false;
@@ -290,9 +363,42 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
 
         // Dialogue may propose only the generic social approach capability. The proposal still passes through
         // perception validation, BDI selection and ordinary NPC steering before any movement occurs.
-        _ = SubmitAsync(actorId, NCNeuralRequestKind.DialogueContinuation, NCNeuralPriority.P1,
-            [DialogueCapability, ApproachPersonCapability, AcceptDirectiveCapability], session.SessionId,
-            args.TransientUtterance);
+        _ = ContinueDialogueAsync(actorId, session.SessionId, args.TransientUtterance ?? string.Empty);
+    }
+
+    private async Task ContinueDialogueAsync(
+        NCActorId actorId,
+        NCConversationSessionId sessionId,
+        string transientUtterance)
+    {
+        if (await SubmitAsync(actorId, NCNeuralRequestKind.DialogueContinuation, NCNeuralPriority.P1,
+                [DialogueCapability, ApproachPersonCapability, AcceptDirectiveCapability], sessionId,
+                transientUtterance))
+            return;
+
+        // A disabled provider or exhausted budget must not make a resident mute. This reply is deliberately narrow:
+        // it acknowledges only the live utterance and never fabricates world facts or executes an action.
+        if (!_runtime.TryGetEntity(actorId, out var entity) || !Exists(entity))
+            return;
+        var profile = await _socialProfiles.GetAsync(actorId);
+        var personality = profile?.Snapshot.Personality;
+        var isQuestion = transientUtterance.TrimEnd().EndsWith('?');
+        var locId = personality switch
+        {
+            { Aggression: >= 700 } => isQuestion
+                ? "nc-human-dialogue-question-aggressive"
+                : "nc-human-dialogue-statement-aggressive",
+            { AuthorityRespect: >= 700 } => isQuestion
+                ? "nc-human-dialogue-question-professional"
+                : "nc-human-dialogue-statement-professional",
+            { Empathy: >= 700 } => isQuestion
+                ? "nc-human-dialogue-question-empathetic"
+                : "nc-human-dialogue-statement-empathetic",
+            _ => isQuestion ? "nc-human-dialogue-question-neutral" : "nc-human-dialogue-statement-neutral",
+        };
+        Interlocked.Increment(ref _localDialogueFallbacks);
+        _chat.TrySendInGameICMessage(entity, Loc.GetString(locId), InGameICChatType.Speak,
+            hideChat: false, checkRadioPrefix: false);
     }
 
     private NCNeuralKnownLocation[] BuildKnownLocations(NCCityActorRecord actor, int maximum)
@@ -354,6 +460,9 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
     private void ClearCooldowns()
     {
         _nextIncidentEscalation.Clear();
+        Interlocked.Exchange(ref _ordinaryDialogueSubmissions, 0);
+        Interlocked.Exchange(ref _narrativeDialogueSubmissions, 0);
+        Interlocked.Exchange(ref _localDialogueFallbacks, 0);
     }
 
     private bool TryResolveNarrativeProfile(
@@ -396,10 +505,9 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
     private NCNeuralPersonaContext? BuildPersona(
         NCCityActorRecord actor,
         NCSocialProfileRecord? socialProfile,
-        NCNarrativeActorProfilePrototype narrativeProfile)
+        NCLivelihoodRecord? livelihood,
+        NCNeuralPersonaProfilePrototype persona)
     {
-        if (!_prototypes.TryIndex(narrativeProfile.PersonaProfile, out var persona) || persona == null)
-            return null;
         if (!StableKey(persona.StableKey) || !StableKey(persona.RoleKey) ||
             !StableKey(persona.OrganizationKey))
             return null;
@@ -414,6 +522,14 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             organizationKey = organizationId.Id;
             if (_prototypes.TryIndex(jobId, out JobPrototype? job) && job != null)
                 biography = $"{biography} Current occupation: {job.LocalizedName}.".Trim();
+        }
+        else if (livelihood != null &&
+                 _prototypes.TryIndex(new ProtoId<NCLivelihoodProfilePrototype>(livelihood.Snapshot.ProfileId),
+                     out var livelihoodProfile) && livelihoodProfile != null)
+        {
+            roleKey = livelihood.Snapshot.ProfileId;
+            organizationKey = "independent";
+            biography = $"{biography} Current livelihood: {livelihoodProfile.DisplayName}.".Trim();
         }
         // Hidden faction membership is never inferred into the provider-facing persona. Authored persona data is the
         // public identity; private affiliations travel only through the purpose-bounded fact packet below.
@@ -438,6 +554,7 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
 
     private void AddRoleFacts(
         NCActorId actorId,
+        NCLivelihoodRecord? livelihood,
         NCFactionMembershipRecord? affiliation,
         NCMemoryPrivacy maximumPrivacy,
         IReadOnlyList<string> forbiddenTopics,
@@ -455,6 +572,16 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                     TryAddFact(facts, forbiddenTopics, maximumPrivacy, "Jobs", "employment.skill",
                         skill, NCMemoryPrivacy.Personal);
             }
+        }
+        else if (livelihood != null &&
+                 _prototypes.TryIndex(new ProtoId<NCLivelihoodProfilePrototype>(livelihood.Snapshot.ProfileId),
+                     out var livelihoodProfile) && livelihoodProfile != null)
+        {
+            TryAddFact(facts, forbiddenTopics, maximumPrivacy, "Jobs", "livelihood.profile",
+                livelihood.Snapshot.ProfileId, NCMemoryPrivacy.Public);
+            foreach (var capability in livelihoodProfile.Capabilities.Where(StableKey).Distinct(StringComparer.Ordinal))
+                TryAddFact(facts, forbiddenTopics, maximumPrivacy, "Jobs", "livelihood.capability",
+                    capability, NCMemoryPrivacy.Personal);
         }
 
         if (!TryGetActiveFaction(affiliation, out var membership, out var faction))

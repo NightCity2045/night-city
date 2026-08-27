@@ -29,7 +29,7 @@ public sealed partial class NCCityPhysicalNavigationProfilePrototype : IPrototyp
 }
 
 /// <summary>
-/// Bounded active-round policy for physical intent loading, waypoint execution and safe fallback behavior.
+/// Active-round throughput policy for physical intent loading, waypoint execution and safe fallback behavior.
 /// </summary>
 [Prototype("ncCityPhysicalExecutionPolicy")]
 public sealed partial class NCCityPhysicalExecutionPolicyPrototype : IPrototype
@@ -37,9 +37,9 @@ public sealed partial class NCCityPhysicalExecutionPolicyPrototype : IPrototype
     [IdDataField]
     public string ID { get; private set; } = default!;
 
-    [DataField(required: true)]
-    public int MaximumTrackedActors { get; private set; }
-
+    /// <summary>
+    /// Diagnostic pressure threshold only. Reaching it never rejects an actor or drops an intent.
+    /// </summary>
     [DataField(required: true)]
     public int MaximumQueuedIntentLoads { get; private set; }
 

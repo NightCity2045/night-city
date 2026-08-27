@@ -144,7 +144,10 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-pipeline", "materialization-queued", _materialization.PendingRequestCount);
         fields.Add("observer-pipeline", "dematerialization-queued", _dematerialization.PendingRequestCount);
         fields.Add("observer-pipeline", "player-clusters", _relevance.ClusterCount);
-        fields.Add("observer-pipeline", "automatic-physical-budget", _relevance.AutomaticMaterializedBudget);
+        fields.Add("observer-pipeline", "required-physical", _relevance.RequiredPhysicalActors);
+        fields.Add("observer-pipeline", "waiting-physical", _relevance.WaitingPhysicalActors);
+        fields.Add("observer-pipeline", "materialization-requests-submitted",
+            _relevance.MaterializationRequestsSubmitted);
         fields.Add("observer-pipeline", "traveling-candidates-skipped", _relevance.TravelingCandidatesSkipped);
         fields.Add("observer-handoff", "retained-by-observer", _relevance.ObserverRetainedActors);
         fields.Add("observer-handoff", "retained-by-grace", _relevance.GraceRetainedActors);

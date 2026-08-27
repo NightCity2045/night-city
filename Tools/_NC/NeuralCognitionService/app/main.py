@@ -177,6 +177,7 @@ class Request(BaseModel):
         default_factory=list, alias="knownLocations", max_length=512)
     dialogue_input: DialogueInput | None = Field(default=None, alias="dialogueInput")
     disclosure: DisclosureContext
+    maximum_output_tokens: int = Field(default=2048, alias="maximumOutputTokens", ge=64, le=8192)
 
     @field_validator("allowed_capability_ids", "allowed_directive_action_ids", "topic_keys")
     @classmethod
@@ -228,7 +229,7 @@ async def cognition(request: Request, authorization: str | None = Header(default
         response = await provider_client.responses.create(
                 model=default_model,
                 reasoning={"effort": reasoning_effort},
-                max_output_tokens=maximum_output_tokens,
+                max_output_tokens=min(maximum_output_tokens, request.maximum_output_tokens),
                 instructions=("You are the bounded deliberative layer of one persistent Night City 2045 resident. "
                               "Stay consistent with persona, current cognition facts, personally perceived subjects, "
                               "and perceivedEvents. An event actorHandle identifies who performed the act and its "

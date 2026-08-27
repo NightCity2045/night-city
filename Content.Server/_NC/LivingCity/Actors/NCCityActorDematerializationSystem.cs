@@ -801,9 +801,6 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
                float.IsFinite(policy.ClusterSplitRadius) && policy.ClusterSplitRadius > policy.ClusterMergeRadius &&
                float.IsFinite(policy.DematerializationRadius) && policy.DematerializationRadius > 0f &&
                policy.MaterializationCooldown >= TimeSpan.Zero &&
-               policy.GlobalSoftMaterializedBudget > 0 &&
-               policy.GlobalHardMaterializedBudget >= policy.GlobalSoftMaterializedBudget &&
-               policy.ClusterSoftMaterializedBudget > 0 &&
                policy.MaximumAnchors > 0 && policy.CatalogPageSize > 0 &&
                policy.MaximumCandidateInspectionsPerCluster > 0 &&
                policy.MaximumMaterializationRequestsPerEvaluation > 0 &&

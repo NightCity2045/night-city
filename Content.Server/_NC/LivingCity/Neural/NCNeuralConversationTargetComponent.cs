@@ -12,6 +12,10 @@ namespace Content.Server._NC.LivingCity.Neural;
 [RegisterComponent]
 public sealed partial class NCNeuralConversationTargetComponent : Component
 {
+    /// <summary>True only for explicitly authored important Actors; ordinary residents remain dialogue-only.</summary>
+    [DataField]
+    public bool NarrativeActor;
+
     [DataField]
     public float InteractionRange = 2.5f;
 
@@ -32,7 +36,7 @@ public sealed partial class NCNeuralConversationTargetComponent : Component
 
     /// <summary>Allows rare round-local conversations to start without player input.</summary>
     [DataField]
-    public bool InitiateAmbientConversations = true;
+    public bool InitiateAmbientConversations;
 
     [DataField]
     public TimeSpan MinimumAmbientConversationInterval = TimeSpan.FromMinutes(8);

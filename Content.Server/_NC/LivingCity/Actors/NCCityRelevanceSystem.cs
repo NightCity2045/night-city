@@ -65,7 +65,9 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
     private NCActiveWorldTime _nextEvaluation;
     private int _generation;
     private int _dematerializationCursor;
-    private int _automaticMaterializedBudget;
+    private int _requiredPhysicalActors;
+    private int _waitingPhysicalActors;
+    private int _materializationRequestsSubmitted;
     private int _travelingCandidatesSkipped;
     private int _observerRetainedActors;
     private int _graceRetainedActors;
@@ -80,7 +82,9 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
     public int CatalogActorCount => _catalog.Count;
     public int ClusterCount => _clusters.Count;
     public IReadOnlyList<NCCityPlayerCluster> Clusters => _clusters;
-    public int AutomaticMaterializedBudget => _automaticMaterializedBudget;
+    public int RequiredPhysicalActors => _requiredPhysicalActors;
+    public int WaitingPhysicalActors => _waitingPhysicalActors;
+    public int MaterializationRequestsSubmitted => _materializationRequestsSubmitted;
     public int TravelingCandidatesSkipped => _travelingCandidatesSkipped;
     public int ObserverRetainedActors => _observerRetainedActors;
     public int GraceRetainedActors => _graceRetainedActors;
@@ -277,8 +281,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                 anchorIds,
                 localZones,
                 group.Count(static anchor => anchor.PlayerAttached),
-                materialized,
-                _loadGovernor.ScaleSoftBudget(_policy.ClusterSoftMaterializedBudget)));
+                materialized));
         }
 
         _linkedAnchorPairs.Clear();
@@ -367,37 +370,24 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
     private void EvaluateMaterialization()
     {
         _travelingCandidatesSkipped = 0;
+        _requiredPhysicalActors = 0;
+        _waitingPhysicalActors = 0;
+        _materializationRequestsSubmitted = 0;
         if (_policy == null || !_catalogRecovered || !_groupPhysicalization.CatalogRecovered)
         {
             return;
         }
 
-        var globalSoftBudget = _loadGovernor.GetEffectiveSoftMaterializedBudget(
-            _policy.GlobalSoftMaterializedBudget);
-        var clusterBudget = _clusters.Sum(static cluster => cluster.SoftMaterializedBudget);
-        _automaticMaterializedBudget = Math.Min(globalSoftBudget, clusterBudget);
-        var remainingGlobal = _automaticMaterializedBudget - _runtime.MaterializedActorCount -
-            _loadGovernor.ReservedMaterializationCount;
-        if (remainingGlobal <= 0)
-            return;
         var maximumRequests = _loadGovernor.TakeAutomaticMaterializationRequests(
             _policy.MaximumMaterializationRequestsPerEvaluation);
         var requestedOperations = 0;
         var inspected = new HashSet<NCActorId>();
         foreach (var cluster in _clusters.OrderByDescending(static cluster => cluster.AttachedPlayerCount))
         {
-            if (remainingGlobal <= 0 || requestedOperations >= maximumRequests)
-                break;
-            var clusterRemaining = Math.Max(0, cluster.SoftMaterializedBudget - cluster.MaterializedActorCount);
-            if (clusterRemaining == 0)
-                continue;
-
             var inspections = 0;
             foreach (var zoneId in cluster.ActiveZoneIds)
             {
-                if (remainingGlobal <= 0 || clusterRemaining <= 0 ||
-                    requestedOperations >= maximumRequests ||
-                    inspections >= _policy.MaximumCandidateInspectionsPerCluster)
+                if (inspections >= _policy.MaximumCandidateInspectionsPerCluster)
                 {
                     break;
                 }
@@ -409,8 +399,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                 {
                     inspections++;
                     if (!inspected.Add(actorId) || !_catalog.TryGetValue(actorId, out var actor) ||
-                        actor.Frozen || actor.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived ||
-                        _runtime.TryGetEntity(actorId, out _) || _materializationRequests.ContainsKey(actorId))
+                        actor.Frozen || actor.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived)
                     {
                         continue;
                     }
@@ -425,15 +414,29 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                         (NCCityActorPresenceMode.AbstractHome or NCCityActorPresenceMode.AbstractCustody))
                         continue;
 
+                    _requiredPhysicalActors++;
+                    if (_runtime.TryGetEntity(actorId, out _))
+                        continue;
+                    if (_materializationRequests.ContainsKey(actorId))
+                    {
+                        _waitingPhysicalActors++;
+                        continue;
+                    }
+                    if (requestedOperations >= maximumRequests)
+                    {
+                        _waitingPhysicalActors++;
+                        continue;
+                    }
+
                     if (_groupPhysicalization.TryGetMaterializeTogetherGroup(
                             actorId,
                             out var groupId,
-                            out var groupMemberCount))
+                            out _))
                     {
-                        if (groupMemberCount > remainingGlobal || groupMemberCount > clusterRemaining ||
-                            _groupMaterializationRequests.ContainsKey(groupId) ||
+                        if (_groupMaterializationRequests.ContainsKey(groupId) ||
                             _groupPhysicalization.HasActiveRequest(groupId))
                         {
+                            _waitingPhysicalActors++;
                             continue;
                         }
 
@@ -451,9 +454,10 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                         {
                             _groupMaterializationRequests[groupId] = groupRequestId;
                             requestedOperations++;
-                            remainingGlobal -= groupMemberCount;
-                            clusterRemaining -= groupMemberCount;
+                            _materializationRequestsSubmitted++;
                         }
+                        else
+                            _waitingPhysicalActors++;
                         continue;
                     }
 
@@ -472,12 +476,10 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                     {
                         _materializationRequests[actorId] = requestId;
                         requestedOperations++;
-                        remainingGlobal--;
-                        clusterRemaining--;
+                        _materializationRequestsSubmitted++;
                     }
-                    if (remainingGlobal <= 0 || clusterRemaining <= 0 ||
-                        requestedOperations >= maximumRequests)
-                        break;
+                    else
+                        _waitingPhysicalActors++;
                 }
             }
         }
@@ -538,7 +540,6 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                 continue;
             }
 
-            var pressure = _bindingBuffer.Count > _automaticMaterializedBudget;
             if (_groupPhysicalization.TryGetMaterializeTogetherGroup(
                     binding.ActorId,
                     out var groupId,
@@ -556,9 +557,8 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                     groupRequestId,
                     groupId,
                     NCCityGroupPhysicalizationDirection.Dematerialize,
-                    pressure ? NCCityGroupPhysicalizationReason.BudgetPressure :
-                        NCCityGroupPhysicalizationReason.PlayerRelevance,
-                    pressure ? 750 : 500,
+                    NCCityGroupPhysicalizationReason.PlayerRelevance,
+                    500,
                     unchecked((uint) groupId.Value.GetHashCode()),
                     null,
                     "living-city.relevance"));
@@ -583,9 +583,8 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                 requestId,
                 binding.ActorId,
                 binding.EntityUid,
-                pressure ? NCCityDematerializationReason.BudgetPressure :
-                    NCCityDematerializationReason.PlayerIrrelevant,
-                pressure ? 750 : 500,
+                NCCityDematerializationReason.PlayerIrrelevant,
+                500,
                 "living-city.relevance"));
             if (state.Status is NCCityDematerializationStatus.Requested or NCCityDematerializationStatus.Loading or
                 NCCityDematerializationStatus.Capturing or NCCityDematerializationStatus.Committing or
@@ -611,6 +610,13 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
         {
             if (cluster.MapId != target.MapId)
                 continue;
+
+            if (_coordinates.TryConvert(target, out var stable) &&
+                HasLocalZoneOverlap(_zones.GetLocationContext(stable), cluster.ActiveZoneIds))
+            {
+                return true;
+            }
+
             foreach (var anchor in cluster.AnchorEntities)
             {
                 if (!Exists(anchor))
@@ -791,7 +797,9 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
         _epoch = default;
         _nextEvaluation = default;
         _dematerializationCursor = 0;
-        _automaticMaterializedBudget = 0;
+        _requiredPhysicalActors = 0;
+        _waitingPhysicalActors = 0;
+        _materializationRequestsSubmitted = 0;
         _travelingCandidatesSkipped = 0;
         _observerRetainedActors = 0;
         _graceRetainedActors = 0;

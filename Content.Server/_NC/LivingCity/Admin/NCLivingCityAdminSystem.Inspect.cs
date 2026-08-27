@@ -588,7 +588,7 @@ public sealed partial class NCLivingCityAdminSystem
             fields.Add(section, "players", cluster.AttachedPlayerCount);
             fields.Add(section, "anchors", cluster.AnchorEntities.Count);
             fields.Add(section, "zones", cluster.ActiveZoneIds.Count);
-            fields.Add(section, "materialized", $"{cluster.MaterializedActorCount}/{cluster.SoftMaterializedBudget}");
+            fields.Add(section, "materialized", cluster.MaterializedActorCount);
         }
         return Ok(fields);
     }

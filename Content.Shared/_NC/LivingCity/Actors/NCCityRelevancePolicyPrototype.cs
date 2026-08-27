@@ -38,15 +38,6 @@ public sealed partial class NCCityRelevancePolicyPrototype : IPrototype
     public TimeSpan OffscreenGracePeriod { get; private set; } = TimeSpan.FromSeconds(8);
 
     [DataField]
-    public int GlobalSoftMaterializedBudget { get; private set; } = 100;
-
-    [DataField]
-    public int GlobalHardMaterializedBudget { get; private set; } = 150;
-
-    [DataField]
-    public int ClusterSoftMaterializedBudget { get; private set; } = 32;
-
-    [DataField]
     public int MaximumAnchors { get; private set; } = 128;
 
     [DataField]

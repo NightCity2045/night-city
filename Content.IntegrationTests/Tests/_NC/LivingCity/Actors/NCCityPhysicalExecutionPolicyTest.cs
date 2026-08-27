@@ -44,7 +44,6 @@ public sealed class NCCityPhysicalExecutionPolicyTest : GameTest
 
         Assert.Multiple(() =>
         {
-            Assert.That(policy.MaximumTrackedActors, Is.EqualTo(160));
             Assert.That(policy.MaximumQueuedIntentLoads, Is.EqualTo(256));
             Assert.That(policy.MaximumExecutionUpdatesPerTick, Is.EqualTo(24));
             Assert.That(policy.MaximumWaypoints, Is.EqualTo(256));
@@ -63,7 +62,6 @@ public sealed class NCCityPhysicalExecutionPolicyTest : GameTest
             Assert.That(perception.Radius, Is.EqualTo(10f));
             Assert.That(perception.MaximumObservedEntities, Is.EqualTo(32));
             Assert.That(NCCityLocalPerceptionSystem.Validate(perception), Is.True);
-            Assert.That(perceptionPolicy.MaximumTrackedActors, Is.EqualTo(160));
             Assert.That(perceptionPolicy.MaximumUpdatesPerTick, Is.EqualTo(16));
         });
     }

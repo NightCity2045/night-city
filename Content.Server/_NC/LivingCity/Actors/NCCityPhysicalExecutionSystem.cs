@@ -91,7 +91,7 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
         _loadGovernor.ReportQueue(
             NCAILoadQueueKind.PhysicalExecution,
             _queuedIntentLoads.Count + _scheduledExecutions.Count,
-            _policy.MaximumQueuedIntentLoads + _policy.MaximumTrackedActors);
+            _policy.MaximumQueuedIntentLoads + Math.Max(1, _tracked.Count));
         _loadGovernor.ReportBacklog(NCAILoadBacklogKind.PhysicalExecution, HasDueExecution(now));
     }
 
@@ -237,7 +237,7 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
         if (!_active || !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
             return;
 
-        // The physical set is hard-capped by policy; no persistent actor or global entity scan occurs here.
+        // This visits only currently materialized actors. It never scans the persistent city catalog.
         foreach (var entityUid in _tracked)
         {
             // The actor that rejected the trunk already owns its configured backoff. Waking it here would erase that
@@ -268,7 +268,7 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
         if (!_active || !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
             return;
 
-        // This visits only the hard-capped materialized execution set, never the city actor catalog.
+        // This visits only the materialized execution set, never the city actor catalog.
         foreach (var entityUid in _tracked)
         {
             if (!TryComp<NCCityPhysicalExecutionComponent>(entityUid, out var component) ||
@@ -290,13 +290,6 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
     {
         if (!_active || _policy == null || !actorId.IsValid || !Exists(entityUid))
             return;
-
-        if (!_tracked.Contains(entityUid) && _tracked.Count >= _policy.MaximumTrackedActors)
-        {
-            // Capacity rejection must not attach an untracked runtime component that no queue owns or cleans up.
-            _failedGoals++;
-            return;
-        }
 
         var component = EnsureComp<NCCityPhysicalExecutionComponent>(entityUid);
         component.ActorId = actorId;
@@ -323,19 +316,7 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
             return;
         }
 
-        if (!_queuedIntentLoads.ContainsKey(actorId) &&
-            _queuedIntentLoads.Count >= _policy.MaximumQueuedIntentLoads)
-        {
-            if (TryComp<NCCityPhysicalExecutionComponent>(entityUid, out var component))
-            {
-                component.State = NCCityPhysicalExecutionState.Failed;
-                component.LastFailure = "physical-intent-load-queue-full";
-                AddTrace(component, dueAt, "intent-load-rejected", component.LastFailure);
-            }
-            _failedGoals++;
-            return;
-        }
-
+        // Queue depth is intentionally not a population cap. The load governor limits dispatch throughput.
         var queued = new QueuedIntentLoad(actorId, entityUid, minimumVersion, dueAt, ++_sequence);
         _queuedIntentLoads[actorId] = queued;
         _intentLoads.Enqueue(queued, new IntentLoadPriority(dueAt.Ticks, queued.Sequence));
@@ -537,8 +518,7 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
     }
 
     private static bool ValidatePolicy(NCCityPhysicalExecutionPolicyPrototype policy) =>
-        policy.MaximumTrackedActors > 0 &&
-        policy.MaximumQueuedIntentLoads >= policy.MaximumTrackedActors &&
+        policy.MaximumQueuedIntentLoads > 0 &&
         policy.MaximumIntentLoadsPerTick > 0 &&
         policy.MaximumConcurrentIntentLoads > 0 &&
         policy.MaximumExecutionUpdatesPerTick > 0 &&

@@ -149,7 +149,11 @@ public sealed record NCNeuralRequestEnvelope(Guid RequestId, NCNeuralRequestKind
     IReadOnlyList<NCNeuralKnownLocation>? KnownLocations = null,
     NCNeuralDialogueInput? DialogueInput = null,
     IReadOnlyList<string>? AllowedDirectiveActionIds = null,
-    NCNeuralDisclosureContext? Disclosure = null);
+    NCNeuralDisclosureContext? Disclosure = null)
+{
+    /// <summary>Per-request ceiling. Ordinary dialogue uses a much smaller budget than narrative Actors.</summary>
+    public int MaximumOutputTokens { get; init; } = 2048;
+}
 public sealed record NCNeuralResponseEnvelope(Guid RequestId, int SchemaVersion, long ContextVersion,
     string SelectedCapabilityId, string SpeechActKey, string RenderedText, string SummaryKey, int Confidence,
     int InputTokens, int CachedInputTokens, int OutputTokens, string ProviderRequestId, string ProviderModel,
@@ -192,6 +196,13 @@ public sealed partial class NCNeuralPolicyPrototype : IPrototype
     [DataField] public Dictionary<NCNeuralRequestKind, int> RequestKindWeeklyLimits { get; private set; } = [];
     [DataField] public int MaximumRequestInputTokens { get; private set; } = 32768;
     [DataField] public int MaximumRequestOutputTokens { get; private set; } = 2048;
+    [DataField] public int OrdinaryDialogueMaximumOutputTokens { get; private set; } = 384;
+    [DataField] public int OrdinaryDialogueMaximumFacts { get; private set; } = 20;
+    [DataField] public int OrdinaryDialogueMaximumPerceivedSubjects { get; private set; } = 12;
+    [DataField] public int OrdinaryDialogueMaximumKnownLocations { get; private set; } = 16;
+    [DataField] public int OrdinaryDialogueMaximumInputLength { get; private set; } = 256;
+    [DataField] public int OrdinaryDialogueMaximumHistoryTurns { get; private set; } = 4;
+    [DataField] public int OrdinaryDialogueMaximumSummaryKeys { get; private set; } = 6;
     [DataField] public int CircuitFailureThreshold { get; private set; } = 5;
     [DataField] public int MinimumSuggestionConfidence { get; private set; } = 400;
     [DataField] public float MaximumUtilityBoost { get; private set; } = 40f;

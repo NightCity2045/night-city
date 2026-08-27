@@ -52,6 +52,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
     [Dependency] private NCCitySpawnCandidateSystem _spawnCandidates = default!;
     [Dependency] private NCAILoadGovernorSystem _loadGovernor = default!;
     [Dependency] private NCEconomicPhysicalizationSystem _physicalization = default!;
+    [Dependency] private NCNeuralConversationSystem _neuralConversations = default!;
 
     private readonly Dictionary<Guid, NCCityMaterializationRequestState> _states = [];
     private readonly Dictionary<Guid, PendingRequest> _pending = [];
@@ -356,7 +357,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
                 pending.Request.SelectionSeed + (uint) pending.Attempts, pending.Request, out var candidate) ||
             !_coordinates.TryResolve(candidate.Target, out var spawnCoordinates))
         {
-            Retry(pending, now, "No hidden, unoccupied spawn candidate is currently available.");
+            Retry(pending, now, "No safe, unoccupied spawn candidate is currently available.");
             return;
         }
 
@@ -373,19 +374,20 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         }
 
         _metadata.SetEntityName(entity, snapshot.Identity.FullName);
-        // Neural access follows the persistent authored identity. Archetype metadata remains only for compatible
-        // loading of older Actor records created before the profile moved into persistent identity.
-        if (!string.IsNullOrWhiteSpace(snapshot.Identity.NarrativeActorProfileId) ||
-            archetype.NarrativeActorProfile != null)
-            EnsureComp<NCNeuralConversationTargetComponent>(entity);
-        else
-            RemComp<NCNeuralConversationTargetComponent>(entity);
+        // Every physical resident can hear local speech. Only explicitly authored narrative Actors may initiate
+        // ambient neural conversations or use the deeper neural autonomy paths.
+        var conversation = EnsureComp<NCNeuralConversationTargetComponent>(entity);
+        conversation.NarrativeActor = !string.IsNullOrWhiteSpace(snapshot.Identity.NarrativeActorProfileId) ||
+                                      archetype.NarrativeActorProfile != null;
+        conversation.InitiateAmbientConversations = conversation.NarrativeActor;
+        conversation.MaximumNpcConversationTurns = conversation.NarrativeActor ? 6 : 3;
         if (!_runtime.TryBind(snapshot.Identity.ActorId, entity))
         {
             QueueDel(entity);
             Retry(pending, now, "The one-to-one persistent actor binding was concurrently claimed.");
             return;
         }
+        _neuralConversations.RefreshTarget(entity);
 
         // The empty-inventory path is still authoritative: install its source revision so a later atomic
         // dematerialization can prove that the physical containment graph has not changed since rehydration.
@@ -440,11 +442,30 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
 
         var count = Math.Min(_candidateBuffer.Count, _policy.MaximumCandidateChecks);
         var start = (int) (seed % (uint) _candidateBuffer.Count);
+        // Prefer an off-screen candidate, but never keep a semantically co-located resident abstract solely because
+        // the current room is visible. The second pass accepts a visible point while preserving collision safety.
+        if (TrySelectCandidate(count, start, request, true, out selected))
+            return true;
+        return TrySelectCandidate(count, start, request, false, out selected);
+    }
+
+    private bool TrySelectCandidate(
+        int count,
+        int start,
+        NCCityMaterializationRequest request,
+        bool requireHidden,
+        out NCCitySpawnCandidateInfo selected)
+    {
+        selected = default;
+        if (_policy == null)
+            return false;
+
         for (var i = 0; i < count; i++)
         {
             var candidate = _candidateBuffer[(start + i) % _candidateBuffer.Count];
             if (!_coordinates.TryResolve(candidate.Target, out var mapCoordinates) ||
-                IsNearPlayerOrAnchor(mapCoordinates, _policy.PlayerVisibilityExclusionRadius) ||
+                requireHidden && IsNearPlayerOrAnchor(mapCoordinates, _policy.PlayerVisibilityExclusionRadius) ||
+                !requireHidden && IsNearPlayerOrAnchor(mapCoordinates, _policy.PlayerSpawnExclusionRadius) ||
                 request.Reason == NCCityMaterializationReason.PlayerRelevance &&
                 !IsNearPlayerOrAnchor(mapCoordinates, _policy.PlayerRelevanceMaximumRadius) ||
                 request.PreferredTarget is { } preferred &&
@@ -670,6 +691,8 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
                policy.MaximumCandidateChecks > 0 && policy.MaximumCompletedRequestHistory > 0 &&
                policy.MaximumPriority > 0 &&
                float.IsFinite(policy.PlayerVisibilityExclusionRadius) && policy.PlayerVisibilityExclusionRadius > 0f &&
+               float.IsFinite(policy.PlayerSpawnExclusionRadius) && policy.PlayerSpawnExclusionRadius > 0f &&
+               policy.PlayerSpawnExclusionRadius < policy.PlayerVisibilityExclusionRadius &&
                float.IsFinite(policy.PlayerRelevanceMaximumRadius) &&
                policy.PlayerRelevanceMaximumRadius > policy.PlayerVisibilityExclusionRadius &&
                float.IsFinite(policy.ActorOccupancyExclusionRadius) && policy.ActorOccupancyExclusionRadius > 0f &&

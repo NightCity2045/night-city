@@ -15,6 +15,7 @@ public enum NCHumanActionExecutorKind : byte
     VanillaInteraction,
     VanillaHands,
     VanillaSpeech,
+    RoutineAdapter,
     ProfessionAdapter,
     MedicalAdapter,
     PoliceAdapter,

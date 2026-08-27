@@ -95,6 +95,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCCognitionRegistrySystem _cognitionRegistry = default!;
     [Dependency] private NCCognitionSystem _cognition = default!;
     [Dependency] private NCHumanActionRouterSystem _humanActions = default!;
+    [Dependency] private NCHumanRoutineActivitySystem _humanRoutines = default!;
     [Dependency] private NCCognitionCapabilityProviderSystem _cognitionProviders = default!;
     [Dependency] private NCCityPopulationImportSystem _population = default!;
     [Dependency] private NCCityResidenceAllocationSystem _residences = default!;
@@ -160,6 +161,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCCityNewsRegistrySystem _cityNews = default!;
     [Dependency] private NCEstateRegistrySystem _estates = default!;
     [Dependency] private NCNeuralCognitionClientSystem _neural = default!;
+    [Dependency] private NCNeuralContextBuilderSystem _neuralContext = default!;
     [Dependency] private NCNeuralSuggestionSystem _neuralSuggestions = default!;
     [Dependency] private NCNeuralConversationSystem _neuralConversations = default!;
     [Dependency] private NCLivingCityObservabilitySystem _observability = default!;
@@ -271,7 +273,10 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("relevance", "catalog-ready", _relevance.CatalogRecovered);
         fields.Add("relevance", "catalog-actors", _relevance.CatalogActorCount);
         fields.Add("relevance", "clusters", _relevance.ClusterCount);
-        fields.Add("relevance", "automatic-physical-budget", _relevance.AutomaticMaterializedBudget);
+        fields.Add("relevance", "required-physical", _relevance.RequiredPhysicalActors);
+        fields.Add("relevance", "waiting-physical", _relevance.WaitingPhysicalActors);
+        fields.Add("relevance", "materialization-requests-submitted",
+            _relevance.MaterializationRequestsSubmitted);
         fields.Add("relevance", "traveling-candidates-skipped", _relevance.TravelingCandidatesSkipped);
         fields.Add("scheduler", "initial-load-complete", _scheduler.InitialLoadComplete);
         fields.Add("scheduler", "queued", _scheduler.QueuedActorCount);
@@ -331,6 +336,17 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("human-actions", "unhandled", routedActions.Unhandled);
         fields.Add("human-actions", "configuration-error", routedActions.ConfigurationError ?? "none");
 
+        var humanRoutines = _humanRoutines.GetCounters();
+        fields.Add("human-routines", "active", humanRoutines.Active);
+        fields.Add("human-routines", "started", humanRoutines.Started);
+        fields.Add("human-routines", "completed", humanRoutines.Completed);
+        fields.Add("human-routines", "failed", humanRoutines.Failed);
+        fields.Add("human-routines", "runtime-unavailable", humanRoutines.RuntimeUnavailable);
+        fields.Add("human-routines", "affordance-unavailable", humanRoutines.AffordanceUnavailable);
+        fields.Add("human-routines", "target-unreachable", humanRoutines.TargetUnreachable);
+        fields.Add("human-routines", "locomotion-busy", humanRoutines.LocomotionBusy);
+        fields.Add("human-routines", "configuration-error", humanRoutines.ConfigurationError ?? "none");
+
         var cognition = _cognition.GetCounters();
         fields.Add("cognition", "active", cognition.Active);
         fields.Add("cognition", "tracked", cognition.TrackedActors);
@@ -384,6 +400,14 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("neural", "consecutive-failures", neural.ConsecutiveFailures);
         fields.Add("neural", "circuit-open-until", neural.CircuitOpenUntil?.Elapsed.ToString() ?? "none");
 
+        fields.Add("dialogue-runtime", "ordinary-residents", _neuralConversations.OrdinaryResidentTargets);
+        fields.Add("dialogue-runtime", "narrative-actors", _neuralConversations.NarrativeActorTargets);
+        fields.Add("dialogue-runtime", "active", _neuralConversations.ActivePhysicalConversations);
+        fields.Add("dialogue-runtime", "scheduled", _neuralConversations.ScheduledAmbientInitiatives);
+        fields.Add("dialogue-runtime", "ordinary-neural-submissions", _neuralContext.OrdinaryDialogueSubmissions);
+        fields.Add("dialogue-runtime", "narrative-neural-submissions", _neuralContext.NarrativeDialogueSubmissions);
+        fields.Add("dialogue-runtime", "local-fallbacks", _neuralContext.LocalDialogueFallbacks);
+
         var load = _loadGovernor.GetSnapshot();
         fields.Add("load-governor", "active", load.Active);
         fields.Add("load-governor", "state", load.State);
@@ -392,8 +416,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("load-governor", "alife-work-ratio", load.AILifeWorkRatio.ToString("P1"));
         fields.Add("load-governor", "materialized", load.MaterializedActors);
         fields.Add("load-governor", "reserved-materializations", load.ReservedMaterializations);
-        fields.Add("load-governor", "effective-soft-limit", load.EffectiveSoftMaterializedBudget);
-        fields.Add("load-governor", "hard-limit", load.HardMaterializedBudget);
+        fields.Add("load-governor", "physical-count-limit", "disabled");
         fields.Add("load-governor", "maximum-queue-ratio", load.MaximumQueueRatio.ToString("P1"));
         fields.Add("load-governor", "backlogged-subsystems", load.BackloggedSubsystems);
         fields.Add("load-governor", "candidate-samples", load.CandidateSamples);

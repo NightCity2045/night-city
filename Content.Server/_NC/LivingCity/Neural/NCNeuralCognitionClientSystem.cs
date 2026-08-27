@@ -864,7 +864,8 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             request.KnownLocations ?? [],
             request.DialogueInput,
             request.AllowedDirectiveActionIds ?? [],
-            request.Disclosure!);
+            request.Disclosure!,
+            request.MaximumOutputTokens);
     }
     private void OnStarted(NCActiveWorldSessionStartedEvent args)
     {
@@ -927,6 +928,8 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             value.RequestKindWeeklyLimits.TryGetValue(kind, out var limit) && limit > 0) &&
         value.MaximumRequestInputTokens is > 0 and <= 262144 &&
         value.MaximumRequestOutputTokens is > 0 and <= 8192 &&
+        value.OrdinaryDialogueMaximumOutputTokens is > 0 &&
+        value.OrdinaryDialogueMaximumOutputTokens <= value.MaximumRequestOutputTokens &&
         value.RequestLifetime >= value.RequestTimeout && value.MinimumSuggestionConfidence is >= 0 and <= 1000 &&
         float.IsFinite(value.MaximumUtilityBoost) && value.MaximumUtilityBoost is >= 0 and <= 1000 &&
         value.MaximumPendingCorrelations is > 0 and <= 16384 && value.SuggestionLifetime > TimeSpan.Zero &&
@@ -937,6 +940,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         value.RequestId != Guid.Empty && value.ActorId.IsValid && value.SessionEpoch.IsValid &&
         value.ContextVersion > 0 && value.ExpiresAt.IsValid && value.Facts.Count <= policy.MaximumFacts &&
         value.AllowedCapabilityIds.Count is > 0 && value.AllowedCapabilityIds.Count <= policy.MaximumCapabilities &&
+        value.MaximumOutputTokens is > 0 && value.MaximumOutputTokens <= policy.MaximumRequestOutputTokens &&
         value.AllowedCapabilityIds.All(Stable) && value.TopicKeys.All(Stable) &&
         value.Facts.Select(fact => fact.Handle).Distinct(StringComparer.Ordinal).Count() == value.Facts.Count &&
         value.Facts.All(fact => Stable(fact.Handle) && Stable(fact.Domain) && Stable(fact.Key) &&
@@ -1108,7 +1112,8 @@ internal sealed record NCNeuralProviderRequest(
     IReadOnlyList<NCNeuralKnownLocation> KnownLocations,
     NCNeuralDialogueInput? DialogueInput,
     IReadOnlyList<string> AllowedDirectiveActionIds,
-    NCNeuralDisclosureContext Disclosure);
+    NCNeuralDisclosureContext Disclosure,
+    int MaximumOutputTokens);
 
 internal sealed record NCNeuralProviderGuid(Guid Value);
 internal sealed record NCNeuralProviderTime(long Ticks);

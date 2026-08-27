@@ -32,6 +32,7 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
 {
     [Dependency] private NCCityActorDomainRegistrySystem _domains = default!;
     [Dependency] private NCEmploymentRegistrySystem _employment = default!;
+    [Dependency] private NCLivelihoodRegistrySystem _livelihoods = default!;
     [Dependency] private NCPartyFinanceAdapterSystem _finance = default!;
     [Dependency] private NCMemoryRegistrySystem _memory = default!;
     [Dependency] private NCSocialProfileRegistrySystem _socialProfiles = default!;
@@ -74,6 +75,8 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
         var inventoryTask = _domains.GetInventoryAsync(actorId);
         var employmentTask = LoadUnlessMissing(missing, MissingCapability.Employment,
             () => _employment.FindCurrentByEmployeeAsync(party));
+        var livelihoodTask = LoadUnlessMissing(missing, MissingCapability.Livelihood,
+            () => _livelihoods.GetAsync(actorId));
         var accountTask = LoadUnlessMissing(missing, MissingCapability.Account,
             () => _finance.GetPrimaryAccountAsync(party));
         var memoryTask = LoadUnlessMissing(missing, MissingCapability.Memory,
@@ -91,8 +94,9 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
             () => _groups.GetMembershipAsync(actorId));
         var factionMembershipTask = LoadUnlessMissing(missing, MissingCapability.FactionMembership,
             () => _factionMemberships.GetAsync(actorId));
-        await Task.WhenAll(healthTask, inventoryTask, employmentTask, accountTask, memoryTask, socialProfileTask,
-            relationshipTask, rumorTask, obligationTask, membershipTask, factionMembershipTask);
+        await Task.WhenAll(healthTask, inventoryTask, employmentTask, livelihoodTask, accountTask, memoryTask,
+            socialProfileTask, relationshipTask, rumorTask, obligationTask, membershipTask,
+            factionMembershipTask);
 
         var sink = new NCCognitionFactSink(maximumFacts);
         var root = actor.Snapshot;
@@ -144,6 +148,16 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
         Add(sink, "employment.active", NCCognitionDomain.Jobs, "employment",
             employment?.AggregateVersion ?? 0,
             NCCognitionValue.FromBoolean(employment?.Snapshot.Status == NCEmploymentStatus.Active), now, lifetime);
+
+        var livelihood = await livelihoodTask;
+        Add(sink, "livelihood.active", NCCognitionDomain.Jobs, "livelihood",
+            livelihood?.AggregateVersion ?? 0, NCCognitionValue.FromBoolean(livelihood != null), now, lifetime);
+        if (livelihood != null)
+        {
+            Add(sink, "livelihood.profile", NCCognitionDomain.Jobs, "livelihood",
+                livelihood.AggregateVersion, NCCognitionValue.FromStableKey(livelihood.Snapshot.ProfileId),
+                now, lifetime);
+        }
 
         var account = await accountTask;
         if (account != null)
@@ -259,6 +273,8 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
         var refreshedMissing = MissingCapability.None;
         if (employment == null)
             refreshedMissing |= MissingCapability.Employment;
+        if (livelihood == null)
+            refreshedMissing |= MissingCapability.Livelihood;
         if (account == null)
             refreshedMissing |= MissingCapability.Account;
         if (memories == null)
@@ -377,6 +393,7 @@ public sealed partial class NCCognitionCapabilityProviderSystem : EntitySystem
         Obligations = 1 << 6,
         GroupMembership = 1 << 7,
         FactionMembership = 1 << 8,
+        Livelihood = 1 << 9,
     }
 
     private readonly record struct MissingCapabilityEntry(

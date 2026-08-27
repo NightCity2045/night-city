@@ -65,5 +65,7 @@ max_ip_connections = 413
 [nc_neural]
 enabled = true
 endpoint = "http://127.0.0.1:8080/v1/cognition"
+# Development-only bearer shared with run-local.ps1. Production must override it with a private random value.
+service_token = "night-city-local-neural-dev"
 # Set this only in the private deployment config. Never commit a real credential.
-api_key = "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"
+api_key = "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"

@@ -256,13 +256,14 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
 
             if (entry.Target == NCCityRoutineTarget.ExplicitZone)
             {
-                if (!entry.ExplicitZone.IsValid || !_zones.TryGetZone(entry.ExplicitZone, out _))
+                if (entry.ExplicitZone is not { IsValid: true } explicitZone ||
+                    !_zones.TryGetZone(explicitZone, out _))
                 {
                     error = $"Entry at {entry.At} references a missing explicit zone.";
                     return false;
                 }
             }
-            else if (entry.ExplicitZone.IsValid)
+            else if (entry.ExplicitZone is { IsValid: true })
             {
                 error = $"Entry at {entry.At} supplies explicitZone for target {entry.Target}.";
                 return false;
@@ -307,7 +308,7 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
         {
             NCCityRoutineTarget.Home => actor.Location.HomeZone,
             NCCityRoutineTarget.Work => actor.Location.WorkZone,
-            NCCityRoutineTarget.ExplicitZone => entry.ExplicitZone,
+            NCCityRoutineTarget.ExplicitZone => entry.ExplicitZone!.Value,
             _ => actor.Location.CurrentZone,
         };
         var travelMode = entry.TravelMode == NCCityTravelMode.None

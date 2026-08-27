@@ -43,13 +43,41 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
     private readonly Dictionary<float, int> _listeningRanges = [];
     private float _maximumListeningRange;
     private readonly HashSet<EntityUid> _targets = [];
+    private readonly Dictionary<EntityUid, bool> _targetNarrativeTiers = [];
     private readonly PriorityQueue<ScheduledInitiative, (long DueTicks, long Sequence)> _initiativeQueue = new();
     private readonly Dictionary<EntityUid, NCActiveWorldTime> _initiativeDue = [];
     private long _initiativeSequence;
     private TimeSpan _nextInitiativeAttempt;
+    private int _ordinaryResidentTargets;
+    private int _narrativeActorTargets;
 
     public int ActivePhysicalConversations => _active.Count;
     public int ScheduledAmbientInitiatives => _initiativeDue.Count;
+    public int OrdinaryResidentTargets => _ordinaryResidentTargets;
+    public int NarrativeActorTargets => _narrativeActorTargets;
+
+    /// <summary>Refreshes the authored tier after a dynamically materialized resident has been fully configured.</summary>
+    public void RefreshTarget(EntityUid target)
+    {
+        if (!_targetNarrativeTiers.TryGetValue(target, out var previous) ||
+            !TryComp<NCNeuralConversationTargetComponent>(target, out var component) ||
+            previous == component.NarrativeActor)
+            return;
+        _targetNarrativeTiers[target] = component.NarrativeActor;
+        if (component.NarrativeActor)
+        {
+            _ordinaryResidentTargets = Math.Max(0, _ordinaryResidentTargets - 1);
+            _narrativeActorTargets++;
+            if (_clock.TryGetCurrentTime(out _, out var now))
+                ScheduleInitiative(target, now);
+        }
+        else
+        {
+            _narrativeActorTargets = Math.Max(0, _narrativeActorTargets - 1);
+            _ordinaryResidentTargets++;
+            _initiativeDue.Remove(target);
+        }
+    }
 
     /// <summary>Resolves only the physical speaker already bound to this in-person conversation.</summary>
     public bool TryGetSpeaker(NCConversationSessionId sessionId, NCActorId listener, out EntityUid speaker)
@@ -121,7 +149,13 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         Entity<NCNeuralConversationTargetComponent> entity,
         ref ComponentStartup args)
     {
-        _targets.Add(entity.Owner);
+        if (!_targets.Add(entity.Owner))
+            return;
+        _targetNarrativeTiers[entity.Owner] = entity.Comp.NarrativeActor;
+        if (entity.Comp.NarrativeActor)
+            _narrativeActorTargets++;
+        else
+            _ordinaryResidentTargets++;
         if (!entity.Comp.ListenToLocalSpeech || !ValidRange(entity.Comp.ListeningRange))
             return;
         _listeningRanges[entity.Comp.ListeningRange] =
@@ -133,7 +167,7 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
 
     private bool TryStartConversation(EntityUid user, Entity<NCNeuralConversationTargetComponent> target)
     {
-        if (!_neural.IsProviderEnabled || !target.Comp.ListenToLocalSpeech ||
+        if (!target.Comp.ListenToLocalSpeech ||
             !ValidRange(target.Comp.ListeningRange) || !Exists(user) || !Exists(target.Owner) ||
             _attention.TryGetValue(target.Owner, out var currentSpeaker) && currentSpeaker != user ||
             user == target.Owner ||
@@ -229,7 +263,16 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         Entity<NCNeuralConversationTargetComponent> entity,
         ref ComponentShutdown args)
     {
-        _targets.Remove(entity.Owner);
+        if (_targets.Remove(entity.Owner))
+        {
+            var narrative = _targetNarrativeTiers.Remove(entity.Owner, out var configuredTier)
+                ? configuredTier
+                : entity.Comp.NarrativeActor;
+            if (narrative)
+                _narrativeActorTargets = Math.Max(0, _narrativeActorTargets - 1);
+            else
+                _ordinaryResidentTargets = Math.Max(0, _ordinaryResidentTargets - 1);
+        }
         _initiativeDue.Remove(entity.Owner);
         if (entity.Comp.ListenToLocalSpeech && ValidRange(entity.Comp.ListeningRange) &&
             _listeningRanges.TryGetValue(entity.Comp.ListeningRange, out var count))

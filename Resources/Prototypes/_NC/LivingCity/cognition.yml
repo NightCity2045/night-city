@@ -253,6 +253,15 @@
   interrupts: [PlanChanged, RoundEnded]
 
 - type: ncHumanAction
+  id: perform-routine-activity
+  executor: RoutineAdapter
+  targetKind: None
+  completion: WorldStateChanged
+  timeout: 5m
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Combat, Conversation, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
   id: prepare-group-role
   executor: Core
   targetKind: None
@@ -713,6 +722,7 @@
   id: NCCognitionFollowRoutine
   domain: Routine
   taskKind: Routine
+  requiresMaterialization: true
   preferredPlanner: StateTree
   fallbackPlanner: DeterministicFallback
   baseUtility: 15
@@ -726,6 +736,9 @@
   procedureSteps:
   - id: follow-schedule
     action: follow-schedule
+  - id: perform-current-activity
+    action: perform-routine-activity
+    dependsOn: [ follow-schedule ]
 
 - type: ncCognitionCapability
   id: NCCognitionGroupDirective
@@ -1060,9 +1073,10 @@
   maximumCachedPlans: 20000
   maximumInvalidationsPerTick: 64
   maximumPlanningMillisecondsPerTick: 3
-  loadRetryDelay: 2s
-  failureRetryDelay: 10s
-  minimumAbstractEvaluationInterval: 1m
+  loadRetryDelay: 30s
+  failureRetryDelay: 1m
+  minimumAbstractEvaluationInterval: 5m
   # Optional domains absent on bootstrap NPCs are rechecked periodically instead of on every decision.
-  missingCapabilityRefreshInterval: 30s
-  initialDecisionStagger: 5s
+  missingCapabilityRefreshInterval: 5m
+  # Spread the 256-resident bootstrap over 25 real seconds at the twelve-times active-world clock.
+  initialDecisionStagger: 5m

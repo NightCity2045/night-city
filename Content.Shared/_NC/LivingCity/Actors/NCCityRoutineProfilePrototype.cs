@@ -26,8 +26,8 @@ public sealed partial class NCCityRoutineProfilePrototype : IPrototype
     /// Amount of active-world time needed to complete one full routine cycle.
     /// This keeps civil time scaling local to schedules instead of accelerating medical or persistence deadlines.
     /// </summary>
-    [DataField(required: true)]
-    public TimeSpan ActiveCycleDuration { get; private set; }
+    [DataField]
+    public TimeSpan ActiveCycleDuration { get; private set; } = TimeSpan.FromHours(24);
 
     /// <summary>
     /// Civil-time phase at active-world time zero. It lets a fresh city session begin during an active part of the day.
@@ -44,8 +44,8 @@ public sealed partial class NCCityRoutineProfilePrototype : IPrototype
     /// <summary>
     /// Largest civil-time jump accepted from one administrative operation.
     /// </summary>
-    [DataField(required: true)]
-    public TimeSpan MaximumManualAdvance { get; private set; }
+    [DataField]
+    public TimeSpan MaximumManualAdvance { get; private set; } = TimeSpan.FromHours(24);
 
     [DataField(required: true)]
     public List<NCCityRoutineEntry> Entries { get; private set; } = [];
@@ -67,7 +67,7 @@ public sealed partial class NCCityRoutineEntry
     public NCCityRoutineTarget Target { get; private set; } = NCCityRoutineTarget.Stay;
 
     [DataField(customTypeSerializer: typeof(NCZoneIdSerializer))]
-    public NCZoneId ExplicitZone { get; private set; }
+    public NCZoneId? ExplicitZone { get; private set; }
 
     [DataField]
     public NCCityActorAvailability Availability { get; private set; } = NCCityActorAvailability.Available;
