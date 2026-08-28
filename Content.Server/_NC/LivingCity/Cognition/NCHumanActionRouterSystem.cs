@@ -22,12 +22,17 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
 {
     private const int MaximumTraceEntries = 16;
     private const int MaximumRetainedResults = 20_000;
+    private const int DurationSampleCapacity = 256;
 
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
 
     private readonly Dictionary<NCActorId, NCHumanActionRuntimeSnapshot> _running = [];
     private readonly Dictionary<NCActorId, NCHumanActionRuntimeSnapshot> _lastResults = [];
+    private readonly long[] _failureReasons = new long[Enum.GetValues<NCHumanActionFailureKind>().Length];
+    private readonly float[] _durationSamples = new float[DurationSampleCapacity];
+    private int _durationSampleCount;
+    private int _durationSampleWriteIndex;
     private long _nextTraceSequence;
     private long _started;
     private long _completed;
@@ -57,16 +62,35 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
         return _lastResults.TryGetValue(actorId, out snapshot!);
     }
 
-    public NCHumanActionRouterCounters GetCounters() => new(
-        _active,
-        _running.Count,
-        _started,
-        _completed,
-        _failed,
-        _interrupted,
-        _timedOut,
-        _unhandled,
-        _configurationError);
+    public NCHumanActionRouterCounters GetCounters()
+    {
+        var (p50, p95, p99) = GetDurationPercentiles();
+        return new NCHumanActionRouterCounters(
+            _active,
+            _running.Count,
+            _started,
+            _completed,
+            _failed,
+            _interrupted,
+            _timedOut,
+            _unhandled,
+            new NCHumanActionFailureCounters(
+                FailureCount(NCHumanActionFailureKind.Configuration),
+                FailureCount(NCHumanActionFailureKind.RuntimeUnavailable),
+                FailureCount(NCHumanActionFailureKind.InvalidRequest),
+                FailureCount(NCHumanActionFailureKind.CapabilityUnavailable),
+                FailureCount(NCHumanActionFailureKind.Blocked),
+                FailureCount(NCHumanActionFailureKind.Unreachable),
+                FailureCount(NCHumanActionFailureKind.Busy),
+                FailureCount(NCHumanActionFailureKind.TimedOut),
+                FailureCount(NCHumanActionFailureKind.ExecutorUnhandled),
+                FailureCount(NCHumanActionFailureKind.DomainRejected),
+                FailureCount(NCHumanActionFailureKind.Unknown)),
+            p50,
+            p95,
+            p99,
+            _configurationError);
+    }
 
     public bool Interrupt(NCActorId actorId, NCHumanActionInterruptKind reason)
     {
@@ -88,26 +112,26 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
         args.Handled = true;
         if (!_active || !_clock.TryGetCurrentTime(out _, out var now))
         {
-            args.Failure = _configurationError ?? "human-action-clock-unavailable";
+            Reject(args, _configurationError ?? "human-action-clock-unavailable");
             return;
         }
         if (!_prototypes.TryIndex(new ProtoId<NCHumanActionPrototype>(args.Step.ActionId),
                 out NCHumanActionPrototype? action) || action == null)
         {
-            args.Failure = $"human-action-not-registered:{args.Step.ActionId}";
+            Reject(args, $"human-action-not-registered:{args.Step.ActionId}");
             return;
         }
 
         var entity = args.EntityUid is { } entityUid && Exists(entityUid) ? entityUid : (EntityUid?) null;
         if (action.RequiresPhysicalEntity && entity == null)
         {
-            args.Failure = "human-action-physical-entity-required";
+            Reject(args, "human-action-physical-entity-required");
             return;
         }
         var target = args.Step.Target.IsValid ? args.Step.Target : args.Intention.Target;
         if (!ValidTarget(action.TargetKind, target))
         {
-            args.Failure = $"human-action-target-invalid:{action.TargetKind}";
+            Reject(args, $"human-action-target-invalid:{action.TargetKind}");
             return;
         }
 
@@ -199,6 +223,7 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
             now,
             now,
             now.Advance(action.Timeout),
+            NCHumanActionFailureKind.None,
             null,
             []);
         runtime = Transition(runtime, NCHumanActionRuntimeState.Pending, now, "action-started", action.ID);
@@ -225,9 +250,11 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
         }
         if (!_clock.TryGetCurrentTime(out _, out var now))
             now = current.UpdatedAt;
-        var terminal = Transition(current with { Failure = failure }, state, now,
+        var failureKind = failed ? ClassifyFailure(failure) : NCHumanActionFailureKind.None;
+        var terminal = Transition(current with { FailureKind = failureKind, Failure = failure }, state, now,
             state == NCHumanActionRuntimeState.Completed ? "action-completed" : "action-ended",
             failure ?? state.ToString());
+        RecordDuration(current.StartedAt, now);
         _running.Remove(current.ActorId);
         Retain(terminal);
         if (state == NCHumanActionRuntimeState.Completed)
@@ -235,7 +262,10 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
         else if (state == NCHumanActionRuntimeState.Interrupted)
             _interrupted++;
         else if (failed)
+        {
             _failed++;
+            RecordFailure(failureKind);
+        }
         if (current.EntityUid is { } entity && Exists(entity) &&
             TryComp<NCHumanActionRuntimeComponent>(entity, out var component) &&
             component.InstanceId == current.InstanceId)
@@ -303,6 +333,95 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
         }
     }
 
+    private void Reject(NCCognitionExecuteStepEvent args, string failure)
+    {
+        args.Failure = failure;
+        _failed++;
+        RecordFailure(ClassifyFailure(failure));
+    }
+
+    private void RecordFailure(NCHumanActionFailureKind kind)
+    {
+        if (kind != NCHumanActionFailureKind.None)
+            _failureReasons[(int) kind]++;
+    }
+
+    private long FailureCount(NCHumanActionFailureKind kind) => _failureReasons[(int) kind];
+
+    private void RecordDuration(NCActiveWorldTime startedAt, NCActiveWorldTime endedAt)
+    {
+        if (!startedAt.IsValid || !endedAt.IsValid || endedAt < startedAt)
+            return;
+
+        _durationSamples[_durationSampleWriteIndex] =
+            Math.Max(0f, (float) (endedAt.Elapsed - startedAt.Elapsed).TotalMilliseconds);
+        _durationSampleWriteIndex = (_durationSampleWriteIndex + 1) % _durationSamples.Length;
+        _durationSampleCount = Math.Min(_durationSamples.Length, _durationSampleCount + 1);
+    }
+
+    private (float P50, float P95, float P99) GetDurationPercentiles()
+    {
+        if (_durationSampleCount == 0)
+            return (0f, 0f, 0f);
+
+        var samples = new float[_durationSampleCount];
+        Array.Copy(_durationSamples, samples, samples.Length);
+        Array.Sort(samples);
+        return (
+            Percentile(samples, 0.50f),
+            Percentile(samples, 0.95f),
+            Percentile(samples, 0.99f));
+    }
+
+    private static float Percentile(float[] sorted, float percentile)
+    {
+        var index = Math.Clamp((int) Math.Ceiling(sorted.Length * percentile) - 1, 0, sorted.Length - 1);
+        return sorted[index];
+    }
+
+    private static NCHumanActionFailureKind ClassifyFailure(string? failure)
+    {
+        if (string.IsNullOrWhiteSpace(failure))
+            return NCHumanActionFailureKind.Unknown;
+
+        if (failure.Contains("timeout", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("timed-out", StringComparison.OrdinalIgnoreCase))
+            return NCHumanActionFailureKind.TimedOut;
+        if (failure.Contains("unhandled", StringComparison.OrdinalIgnoreCase))
+            return NCHumanActionFailureKind.ExecutorUnhandled;
+        if (failure.Contains("configuration", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("catalog", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("not-registered", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("policy-invalid", StringComparison.OrdinalIgnoreCase))
+            return NCHumanActionFailureKind.Configuration;
+        if (failure.Contains("runtime-unavailable", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("clock-unavailable", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("physical-entity-required", StringComparison.OrdinalIgnoreCase))
+            return NCHumanActionFailureKind.RuntimeUnavailable;
+        if (failure.Contains("target-invalid", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("invalid-request", StringComparison.OrdinalIgnoreCase))
+            return NCHumanActionFailureKind.InvalidRequest;
+        if (failure.Contains("unreachable", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("no-path", StringComparison.OrdinalIgnoreCase))
+            return NCHumanActionFailureKind.Unreachable;
+        if (failure.Contains("busy", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("owned", StringComparison.OrdinalIgnoreCase))
+            return NCHumanActionFailureKind.Busy;
+        if (failure.Contains("blocked", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("cooldown", StringComparison.OrdinalIgnoreCase))
+            return NCHumanActionFailureKind.Blocked;
+        if (failure.Contains("unavailable", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("missing", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("not-found", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("not-materialized", StringComparison.OrdinalIgnoreCase))
+            return NCHumanActionFailureKind.CapabilityUnavailable;
+        if (failure.Contains("rejected", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("denied", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("forbidden", StringComparison.OrdinalIgnoreCase))
+            return NCHumanActionFailureKind.DomainRejected;
+        return NCHumanActionFailureKind.Unknown;
+    }
+
     private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
     {
         if (!args.Materialized)
@@ -324,8 +443,12 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
         {
             if (string.IsNullOrWhiteSpace(action.ID) || action.Timeout <= TimeSpan.Zero ||
                 action.Timeout > TimeSpan.FromHours(24) || !float.IsFinite(action.MaximumRange) ||
-                !float.IsFinite(action.CompletionRange) || action.MaximumRange < 0f ||
-                action.CompletionRange < 0f || action.SpeechLocId.Length > 128 ||
+                !float.IsFinite(action.CompletionRange) || !float.IsFinite(action.SteeringRetargetDistance) ||
+                action.MaximumRange < 0f || action.CompletionRange < 0f ||
+                action.SteeringRefreshInterval < TimeSpan.Zero || action.SteeringRetargetDistance < 0f ||
+                action.Operation == NCHumanActionOperationKind.FleeFromTarget &&
+                (action.SteeringRefreshInterval <= TimeSpan.Zero || action.SteeringRetargetDistance <= 0f) ||
+                action.SpeechLocId.Length > 128 ||
                 action.MaximumRange > 0f && action.CompletionRange > action.MaximumRange ||
                 !Enum.IsDefined(action.Executor) || !Enum.IsDefined(action.TargetKind) ||
                 !Enum.IsDefined(action.Completion) || !Enum.IsDefined(action.Operation) ||
@@ -370,6 +493,10 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
         _interrupted = 0;
         _timedOut = 0;
         _unhandled = 0;
+        _durationSampleCount = 0;
+        _durationSampleWriteIndex = 0;
         _configurationError = null;
+        Array.Clear(_failureReasons);
+        Array.Clear(_durationSamples);
     }
 }

@@ -83,6 +83,7 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
         SubscribeLocalEvent<NCHumanActionInterruptedEvent>(OnInterrupted);
         SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
+        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(_ => Reset());
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => Reset());
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => Reset());
     }

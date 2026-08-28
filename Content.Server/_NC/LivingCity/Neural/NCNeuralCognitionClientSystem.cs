@@ -177,6 +177,14 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         if (!_active || !_budgetReady || WeekChanged() || _policy == null || !Valid(request, _policy) ||
             _known.Contains(request.RequestId))
             return false;
+        if (!_clock.TryGetCurrentTime(out var currentEpoch, out var now) || currentEpoch != _epoch ||
+            request.SessionEpoch != _epoch || request.ExpiresAt <= now)
+        {
+            // Reject before reservation or provider dispatch: an async context builder from an older round must
+            // never consume tokens or publish a continuation into the current epoch.
+            _stale++;
+            return false;
+        }
         if (_administrativelyDisabled)
         {
             _known.Add(request.RequestId);

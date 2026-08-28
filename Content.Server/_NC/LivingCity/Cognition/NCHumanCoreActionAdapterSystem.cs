@@ -37,15 +37,23 @@ public sealed partial class NCHumanCoreActionAdapterSystem : EntitySystem
                 return;
             case "follow-schedule":
                 args.Handled = true;
-                args.Completed = TryGetTravelPhase(args.ActorId, out var schedulePhase) &&
-                                 schedulePhase is not (NCCityActorTravelPhase.Planned or
-                                     NCCityActorTravelPhase.InTransit);
+                if (!TryGetTravelPhase(args.ActorId, out var schedulePhase))
+                {
+                    args.Failure = "human-schedule-actor-unavailable";
+                    return;
+                }
+                args.Completed = schedulePhase is not (NCCityActorTravelPhase.Planned or
+                    NCCityActorTravelPhase.InTransit);
                 return;
             case "follow-schedule-travel":
             case "follow-group-route":
                 args.Handled = true;
-                args.Completed = TryGetTravelPhase(args.ActorId, out var travelPhase) &&
-                                 travelPhase is NCCityActorTravelPhase.Stationary or NCCityActorTravelPhase.Arrived;
+                if (!TryGetTravelPhase(args.ActorId, out var travelPhase))
+                {
+                    args.Failure = "human-travel-actor-unavailable";
+                    return;
+                }
+                args.Completed = travelPhase is NCCityActorTravelPhase.Stationary or NCCityActorTravelPhase.Arrived;
                 return;
             case "yield-to-medical-authority":
                 ResolveAuthority(args, NCCityDematerializationBlockerFlags.PlayerTreatment);

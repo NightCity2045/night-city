@@ -301,7 +301,7 @@ public sealed partial class NCActorSpawnCommand : IConsoleCommand
                 null,
                 NCNarrativeActorCommandHelpers.AuditSource(shell, "spawn"),
                 target,
-                policy.PlayerRelevanceMaximumRadius));
+                policy.AdminPreferredSpawnRadius));
         if (state.Status == NCCityMaterializationRequestStatus.Rejected)
         {
             shell.WriteError(Loc.GetString(

@@ -5,6 +5,7 @@
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Cognition;
+using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
 using Content.Server._NC.Medical.Emergency;
 using Content.Server._NC.Medical.Treatment;
@@ -44,6 +45,7 @@ public sealed partial class NCMedicalProfessionalCognitionSystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCCityLocalPerceptionSystem _perception = default!;
+    [Dependency] private NCAILoadGovernorSystem _loadGovernor = default!;
     [Dependency] private NCProfessionProfileSystem _professions = default!;
     [Dependency] private NCTreatmentInteractionSystem _treatment = default!;
     [Dependency] private NCEmergencyCareInteractionSystem _emergency = default!;
@@ -443,6 +445,7 @@ public sealed partial class NCMedicalProfessionalCognitionSystem : EntitySystem
 
     private void OnTreatmentChanged(Entity<NCMedicalBodyComponent> patient, ref NCTreatmentChangedEvent args)
     {
+        using var work = _loadGovernor.MeasureDiagnosticWork(NCAILoadWorkKind.MedicalEvents);
         if (!_resolutionOwners.TryGetValue(args.ResolutionId, out var owner) ||
             owner.ActionId != DefinitiveCareAction ||
             !_treatmentSessions.TryGetValue(owner.ActorId, out var session) ||
@@ -456,6 +459,7 @@ public sealed partial class NCMedicalProfessionalCognitionSystem : EntitySystem
 
     private void OnEmergencyCareChanged(Entity<NCMedicalBodyComponent> patient, ref NCEmergencyCareChangedEvent args)
     {
+        using var work = _loadGovernor.MeasureDiagnosticWork(NCAILoadWorkKind.MedicalEvents);
         if (!_resolutionOwners.TryGetValue(args.ResolutionId, out var owner) ||
             owner.ActionId != CprAction ||
             !_cpr.TryGetValue(owner.ActorId, out var pending) ||

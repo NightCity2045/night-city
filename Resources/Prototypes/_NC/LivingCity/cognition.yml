@@ -95,6 +95,8 @@
   requiresPhysicalEntity: true
   maximumRange: 40
   completionRange: 12
+  steeringRefreshInterval: 1s
+  steeringRetargetDistance: 2
   interrupts: [PlanChanged, Dematerialized, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
@@ -1078,5 +1080,5 @@
   minimumAbstractEvaluationInterval: 5m
   # Optional domains absent on bootstrap NPCs are rechecked periodically instead of on every decision.
   missingCapabilityRefreshInterval: 5m
-  # Spread the 256-resident bootstrap over 25 real seconds at the twelve-times active-world clock.
-  initialDecisionStagger: 5m
+  # Active-world time is monotonic real round time; spread bootstrap directly over 25 real seconds.
+  initialDecisionStagger: 25s

@@ -62,6 +62,8 @@ public sealed partial class NCCityGroupPhysicalizationSystem : EntitySystem
     public int PendingRequestCount => _pending.Count;
     public int InFlightCount => _inFlight;
     public int RetainedResultCount => _states.Count - _pending.Count;
+    public bool CanAcceptRequest => _active && _policy != null && _pending.Count < _policy.MaximumQueuedRequests;
+    public TimeSpan? AutomaticRequestMaximumWait => _policy?.MaximumWait;
 
     public override void Initialize()
     {

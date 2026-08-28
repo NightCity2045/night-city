@@ -79,6 +79,7 @@ public sealed partial class NCCognitionSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
+        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(OnSessionClosing);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
         SubscribeLocalEvent<NCCityActorPersistedEvent>(OnActorPersisted);
@@ -239,6 +240,12 @@ public sealed partial class NCCognitionSystem : EntitySystem
     }
 
     private void OnSessionClosed(NCActiveWorldSessionClosedEvent args)
+    {
+        if (_active && args.Epoch == _epoch)
+            Reset();
+    }
+
+    private void OnSessionClosing(NCActiveWorldSessionClosingEvent args)
     {
         if (_active && args.Epoch == _epoch)
             Reset();

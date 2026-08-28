@@ -28,6 +28,22 @@ public enum NCCityMaterializationRequestStatus : byte
     Expired,
 }
 
+/// <summary>
+/// Monotonic per-round counters for a bounded actor hand-off pipeline.
+/// They let observability calculate recent throughput without retaining individual requests.
+/// </summary>
+public readonly record struct NCCityRequestPipelineCounters(
+    long Submitted,
+    long Accepted,
+    long Completed,
+    long Retained,
+    long Failed,
+    long Expired,
+    long Retried)
+{
+    public long Terminal => Completed + Retained + Failed + Expired;
+}
+
 public sealed record NCCityMaterializationRequest(
     Guid RequestId,
     NCActorId ActorId,

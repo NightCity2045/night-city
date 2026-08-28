@@ -33,10 +33,10 @@ public sealed partial class NCLivingCityAdminClientSystem : EntitySystem
         SubscribeNetworkEvent<NCLivingCityAdminGeographyActionResult>(OnGeographyAction);
     }
 
-    public Guid RequestOverview()
+    public Guid RequestOverview(NCLivingCityAdminOverviewScope scope)
     {
         var requestId = Guid.NewGuid();
-        RaiseNetworkEvent(new NCLivingCityAdminOverviewRequest(requestId));
+        RaiseNetworkEvent(new NCLivingCityAdminOverviewRequest(requestId, scope));
         return requestId;
     }
 

@@ -33,6 +33,7 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
     private readonly PriorityQueue<ScheduledActor, SchedulePriority> _queue = new();
     private readonly Dictionary<NCActorId, NCActiveWorldTime> _scheduled = [];
     private readonly Dictionary<NCActorId, PendingMutation> _pendingMutations = [];
+    private readonly Dictionary<NCActorId, NCActiveWorldTime> _deferredSchedules = [];
     private readonly HashSet<NCActorId> _forceRoutineReevaluation = [];
     private readonly HashSet<NCActorId> _inFlightActors = [];
 
@@ -47,8 +48,10 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
     private bool _pageLoadInFlight;
 
     public int QueuedActorCount => _scheduled.Count;
+    public int DeferredScheduleCount => _deferredSchedules.Count;
     public int InFlightCount => _inFlight;
     public int PendingMutationCount => _pendingMutations.Count;
+    public long MutationRetriesExhausted { get; private set; }
     public bool IsActive => _active;
     public bool InitialLoadComplete { get; private set; }
 
@@ -70,6 +73,7 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
+        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(OnSessionClosing);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
         SubscribeLocalEvent<NCCityActorPersistedEvent>(OnActorPersisted);
@@ -127,16 +131,26 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
     }
 
     /// <summary>
-    /// Requeues the recovered actor catalog after a civil-time jump. Normal scheduler budgets still bound all work.
+    /// Advances civil time and synchronously requeues every recovered actor as one main-thread operation.
+    /// Normal scheduler budgets still bound the resulting evaluation work.
     /// </summary>
-    public bool TryReevaluateAll(out int queuedActors)
+    public bool TryAdvanceCivilTime(
+        TimeSpan advance,
+        out NCCityCivilTimeSnapshot civilTime,
+        out int queuedActors,
+        out string? error)
     {
+        civilTime = default;
         queuedActors = 0;
         if (!_active || _policy == null ||
             !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
         {
+            error = "civil-time-scheduler-inactive";
             return false;
         }
+
+        if (!_routines.TryAdvanceCivilTime(advance, out civilTime, out error))
+            return false;
 
         var candidates = new List<NCActorId>(_scheduled.Keys);
         foreach (var actorId in _inFlightActors)
@@ -152,6 +166,7 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         }
 
         queuedActors = candidates.Count;
+        error = null;
         return true;
     }
 
@@ -172,6 +187,12 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         _active = true;
         _pageRetryAt = args.Time;
         BeginPageLoad(_generation, null);
+    }
+
+    private void OnSessionClosing(NCActiveWorldSessionClosingEvent args)
+    {
+        if (_active && args.Epoch == _epoch)
+            Reset();
     }
 
     private void OnSessionClosed(NCActiveWorldSessionClosedEvent args)
@@ -195,6 +216,7 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
             NCCityActorStatus.Arrested or NCCityActorStatus.Imprisoned)
         {
             _scheduled.Remove(args.ActorId);
+            _deferredSchedules.Remove(args.ActorId);
             _pendingMutations.Remove(args.ActorId);
             _forceRoutineReevaluation.Remove(args.ActorId);
             return;
@@ -204,7 +226,7 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         if (_forceRoutineReevaluation.Contains(args.ActorId) &&
             _clock.TryGetCurrentTime(out var epoch, out var now) && epoch == _epoch)
         {
-            dueAt = now;
+            dueAt = StaggerOverdueEvaluation(args.ActorId, now, now);
         }
         Enqueue(args.ActorId, dueAt);
     }
@@ -265,6 +287,7 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
                 if (forceReevaluation)
                     _forceRoutineReevaluation.Add(actor.Snapshot.Identity.ActorId);
                 var dueAt = forceReevaluation ? currentTime : actor.Snapshot.Schedule.NextUpdateAt;
+                dueAt = StaggerOverdueEvaluation(actor.Snapshot.Identity.ActorId, dueAt, currentTime);
                 Enqueue(actor.Snapshot.Identity.ActorId, dueAt);
             }
         }
@@ -379,12 +402,16 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
             decision.NextUpdateAt,
             Guid.NewGuid(),
             PresenceMode: decision.PresenceMode);
-        _pendingMutations[actorId] = new PendingMutation(request);
+        _pendingMutations[actorId] = new PendingMutation(request, 0);
         BeginMutation(generation, request);
     }
 
     private void BeginMutation(int generation, NCCityActorLocationMutationRequest request)
     {
+        if (!_pendingMutations.TryGetValue(request.ActorId, out var pending) ||
+            pending.Request.CommandId != request.CommandId)
+            return;
+        _pendingMutations[request.ActorId] = pending with { Attempts = pending.Attempts + 1 };
         _ = ObserveMutation(generation, request);
     }
 
@@ -422,6 +449,11 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         if (error != null || result == null)
         {
             Log.Error($"Scheduled actor mutation for {actorId} failed before returning a result: {error}");
+            if (!CanRetryMutation(actorId))
+            {
+                ExhaustMutation(actorId);
+                return;
+            }
             RetryActor(actorId, now, keepPendingMutation: true);
             return;
         }
@@ -430,14 +462,27 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         {
             case NCCityActorMutationStatus.Applied:
             case NCCityActorMutationStatus.Duplicate:
+                var nextUpdateAt = result.Record?.Snapshot.Schedule.NextUpdateAt;
+                if (_pendingMutations.TryGetValue(actorId, out var completedPending) &&
+                    completedPending.Request.NextUpdateAt.IsValid)
+                {
+                    // A pure timer advance is runtime scheduler state, not a durable actor outcome. When the
+                    // registry coalesces it, continue from the requested deadline instead of replaying the old one.
+                    nextUpdateAt = completedPending.Request.NextUpdateAt;
+                }
                 _pendingMutations.Remove(actorId);
                 _forceRoutineReevaluation.Remove(actorId);
-                if (result.Record != null)
-                    Enqueue(actorId, result.Record.Snapshot.Schedule.NextUpdateAt);
+                if (nextUpdateAt is { IsValid: true } dueAt)
+                    Enqueue(actorId, dueAt);
                 Finish(actorId);
                 return;
             case NCCityActorMutationStatus.StorageFailure:
                 // Keep the exact same CommandId: a lost database response must not create a second mutation.
+                if (!CanRetryMutation(actorId))
+                {
+                    ExhaustMutation(actorId);
+                    return;
+                }
                 RetryActor(actorId, now, keepPendingMutation: true);
                 return;
             case NCCityActorMutationStatus.VersionConflict:
@@ -465,11 +510,25 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         Finish(actorId);
     }
 
+    private bool CanRetryMutation(NCActorId actorId) =>
+        _policy != null && _pendingMutations.TryGetValue(actorId, out var pending) &&
+        pending.Attempts < _policy.MaximumMutationAttempts;
+
+    private void ExhaustMutation(NCActorId actorId)
+    {
+        _pendingMutations.Remove(actorId);
+        _forceRoutineReevaluation.Remove(actorId);
+        MutationRetriesExhausted++;
+        Finish(actorId);
+    }
+
     private void Finish(NCActorId actorId, bool unload = true)
     {
         _inFlightActors.Remove(actorId);
         if (_inFlight > 0)
             _inFlight--;
+        if (_deferredSchedules.Remove(actorId, out var deferredDue))
+            Enqueue(actorId, deferredDue);
         if (unload)
             _registry.Unload(actorId);
     }
@@ -479,10 +538,35 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         if (!actorId.IsValid || !dueAt.IsValid)
             return;
 
+        // A persisted-event wake may race an async actor load. Keep one earliest deferred wake instead of
+        // dispatching the same persistent actor concurrently.
+        if (_inFlightActors.Contains(actorId))
+        {
+            if (!_deferredSchedules.TryGetValue(actorId, out var deferred) || dueAt < deferred)
+                _deferredSchedules[actorId] = dueAt;
+            return;
+        }
+
+        if (_scheduled.TryGetValue(actorId, out var existing) && existing <= dueAt)
+            return;
+
         _scheduled[actorId] = dueAt;
         _queue.Enqueue(
             new ScheduledActor(actorId, dueAt),
             new SchedulePriority(dueAt.Ticks, _sequence++));
+    }
+
+    private NCActiveWorldTime StaggerOverdueEvaluation(
+        NCActorId actorId,
+        NCActiveWorldTime dueAt,
+        NCActiveWorldTime now)
+    {
+        if (_policy == null || dueAt > now || _policy.InitialEvaluationStagger <= TimeSpan.Zero)
+            return dueAt;
+
+        var windowTicks = Math.Max(1L, _policy.InitialEvaluationStagger.Ticks);
+        var hash = unchecked((uint) actorId.Value.GetHashCode());
+        return now.Advance(TimeSpan.FromTicks(hash % windowTicks));
     }
 
     private bool TryPeekScheduled(out ScheduledActor scheduled, out SchedulePriority priority)
@@ -513,9 +597,11 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         InitialLoadComplete = false;
         _queue.Clear();
         _scheduled.Clear();
+        _deferredSchedules.Clear();
         _pendingMutations.Clear();
         _forceRoutineReevaluation.Clear();
         _inFlightActors.Clear();
+        MutationRetriesExhausted = 0;
     }
 
     private static bool ValidatePolicy(NCCitySchedulePolicyPrototype policy)
@@ -523,7 +609,10 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         return policy.SnapshotPageSize is >= 1 and <= 500 &&
                policy.MaximumDispatchesPerTick is >= 1 and <= 64 &&
                policy.MaximumConcurrentMutations is >= 1 and <= 128 &&
-               policy.MutationRetryDelay > TimeSpan.Zero;
+               policy.MutationRetryDelay > TimeSpan.Zero &&
+               policy.InitialEvaluationStagger >= TimeSpan.Zero &&
+               policy.InitialEvaluationStagger <= TimeSpan.FromMinutes(5) &&
+               policy.MaximumMutationAttempts is >= 1 and <= 32;
     }
 
     private readonly record struct ScheduledActor(NCActorId ActorId, NCActiveWorldTime DueAt);
@@ -537,5 +626,5 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         }
     }
 
-    private sealed record PendingMutation(NCCityActorLocationMutationRequest Request);
+    private sealed record PendingMutation(NCCityActorLocationMutationRequest Request, int Attempts);
 }

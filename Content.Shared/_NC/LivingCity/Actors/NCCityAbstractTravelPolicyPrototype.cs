@@ -28,6 +28,9 @@ public sealed partial class NCCityAbstractTravelPolicyPrototype : IPrototype
     public TimeSpan RetryDelay { get; private set; } = TimeSpan.FromSeconds(10);
 
     [DataField]
+    public int MaximumMutationAttempts { get; private set; } = 5;
+
+    [DataField]
     public TimeSpan MinimumTravelDuration { get; private set; } = TimeSpan.FromSeconds(1);
 
     [DataField]

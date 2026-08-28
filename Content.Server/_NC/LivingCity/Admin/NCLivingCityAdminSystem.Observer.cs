@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Population;
+using Content.Server._NC.LivingCity.Simulation;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Admin;
 using Content.Shared._NC.LivingCity.Actors;
@@ -76,6 +77,7 @@ public sealed partial class NCLivingCityAdminSystem
     private NCLivingCityAdminField[] BuildObserverSummary(
         IReadOnlyList<NCCityZoneObserverProjection> projections)
     {
+        using var adminWork = _loadGovernor.MeasureWork(NCAILoadWorkKind.AdminSnapshots);
         var fields = new FieldBuilder();
         fields.Add("observer-round", "game-preset", _gameTicker.CurrentPreset?.ID ?? "none");
         fields.Add("observer-round", "night-city-rule", _nightCityRule.IsActive ? "active" : "inactive");
@@ -170,6 +172,7 @@ public sealed partial class NCLivingCityAdminSystem
         string filter,
         out string? error)
     {
+        using var adminWork = _loadGovernor.MeasureWork(NCAILoadWorkKind.AdminSnapshots);
         error = null;
         IEnumerable<NCCityZoneObserverProjection> selected;
         if (filter.Length == 0)

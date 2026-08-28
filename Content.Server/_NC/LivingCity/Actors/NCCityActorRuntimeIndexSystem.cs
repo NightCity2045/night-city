@@ -65,19 +65,38 @@ public sealed partial class NCCityActorRuntimeIndexSystem : EntitySystem
 
     public bool TryGetEntity(NCActorId actorId, out EntityUid entityUid)
     {
-        return _byActor.TryGetValue(actorId, out entityUid);
+        if (!_byActor.TryGetValue(actorId, out entityUid))
+            return false;
+        if (Exists(entityUid))
+            return true;
+
+        RemoveStaleBinding(actorId, entityUid);
+        entityUid = default;
+        return false;
     }
 
     public bool TryGetActor(EntityUid entityUid, out NCActorId actorId)
     {
-        return _byEntity.TryGetValue(entityUid, out actorId);
+        if (!_byEntity.TryGetValue(entityUid, out actorId))
+            return false;
+        if (Exists(entityUid))
+            return true;
+
+        RemoveStaleBinding(actorId, entityUid);
+        actorId = default;
+        return false;
     }
 
     public void GetBindings(List<(NCActorId ActorId, EntityUid EntityUid)> result)
     {
         result.Clear();
-        foreach (var (actorId, entityUid) in _byActor)
-            result.Add((actorId, entityUid));
+        foreach (var (actorId, entityUid) in _byActor.ToArray())
+        {
+            if (Exists(entityUid))
+                result.Add((actorId, entityUid));
+            else
+                RemoveStaleBinding(actorId, entityUid);
+        }
         result.Sort(static (left, right) => left.ActorId.Value.CompareTo(right.ActorId.Value));
     }
 
@@ -108,6 +127,15 @@ public sealed partial class NCCityActorRuntimeIndexSystem : EntitySystem
             return;
         _byActor.Remove(actorId);
         RaiseLocalEvent(new NCCityActorMaterializationChangedEvent(actorId, entity.Owner, false));
+    }
+
+    private void RemoveStaleBinding(NCActorId actorId, EntityUid entityUid)
+    {
+        if (_byActor.TryGetValue(actorId, out var bound) && bound == entityUid)
+            _byActor.Remove(actorId);
+        if (_byEntity.TryGetValue(entityUid, out var reverse) && reverse == actorId)
+            _byEntity.Remove(entityUid);
+        RaiseLocalEvent(new NCCityActorMaterializationChangedEvent(actorId, entityUid, false));
     }
 
     private void OnRunLevelChanged(GameRunLevelChangedEvent args)

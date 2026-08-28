@@ -908,6 +908,18 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
             var next = transform(current, now, eventId);
             if (next == null)
                 return Reject(actorId, NCCityActorMutationStatus.Rejected, "Actor lifecycle rejects this mutation.");
+            if (EquivalentDurableState(current.Snapshot, next))
+            {
+                // Repeated scheduler, travel and admin requests for the same durable state collapse before JSON
+                // serialization and database admission. Runtime-only movement and planner ticks never reach storage.
+                NCPersistenceTelemetry.RecordCoalescedWrite();
+                return new NCCityActorMutationResult(
+                    NCCityActorMutationStatus.Duplicate,
+                    actorId,
+                    current.AggregateVersion,
+                    current,
+                    null);
+            }
 
             return await Persist(
                 actorId,
@@ -972,7 +984,10 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
             causationId,
             epoch,
             time,
-            []));
+            [],
+            eventType == "living-city.actor.location-changed"
+                ? NCPersistenceWriteClass.CoalescedCheckpoint
+                : NCPersistenceWriteClass.DurableOutcome));
 
         if (result.Status is NCPersistentMutationStatus.Applied)
         {
@@ -1477,22 +1492,76 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
                                    new ProtoId<NCCityActorArchetypePrototype>(archetypeId),
                                    out NCCityActorArchetypePrototype? archetype) &&
                                archetype?.NarrativeActorProfile != null;
-        _taskManager.RunOnMainThread(() => RaiseLocalEvent(new NCCityActorPersistedEvent(
-            actorId,
-            record.AggregateVersion,
-            record.SessionEpoch,
-            nextUpdateAt,
-            status,
-            frozen,
-            travelPhase,
-            expectedArrivalAt,
-            currentZone,
-            archetypeId,
-            cognitionTier,
-            availability,
-            presenceMode,
-            hasAbstractResidence,
-            isNarrativeActor)));
+        _taskManager.RunOnMainThread(() =>
+        {
+            // Database completion is advisory until it is back on the simulation thread and still belongs to the
+            // active round and newest actor version. This prevents late callbacks from waking the next round.
+            if (!_clock.TryGetCurrentTime(out var currentEpoch, out _) || currentEpoch != record.SessionEpoch ||
+                !_cache.TryGetValue(actorId, out var cached) ||
+                cached.AggregateVersion != record.AggregateVersion)
+            {
+                NCPersistenceTelemetry.RecordStaleResultRejection();
+                return;
+            }
+
+            RaiseLocalEvent(new NCCityActorPersistedEvent(
+                actorId,
+                record.AggregateVersion,
+                record.SessionEpoch,
+                nextUpdateAt,
+                status,
+                frozen,
+                travelPhase,
+                expectedArrivalAt,
+                currentZone,
+                archetypeId,
+                cognitionTier,
+                availability,
+                presenceMode,
+                hasAbstractResidence,
+                isNarrativeActor));
+        });
+    }
+
+    private static bool EquivalentDurableState(NCCityActorSnapshot left, NCCityActorSnapshot right)
+    {
+        var leftIdentity = left.Identity;
+        var rightIdentity = right.Identity;
+        if (leftIdentity.ActorId != rightIdentity.ActorId ||
+            leftIdentity.FullName != rightIdentity.FullName ||
+            !leftIdentity.Aliases.SequenceEqual(rightIdentity.Aliases) ||
+            leftIdentity.ArchetypeId != rightIdentity.ArchetypeId ||
+            leftIdentity.AppearanceSeed != rightIdentity.AppearanceSeed ||
+            leftIdentity.BiographySeed != rightIdentity.BiographySeed ||
+            leftIdentity.NarrativeActorProfileId != rightIdentity.NarrativeActorProfileId)
+        {
+            return false;
+        }
+
+        var leftLocation = left.Location;
+        var rightLocation = right.Location;
+        if (leftLocation.CurrentZone != rightLocation.CurrentZone ||
+            leftLocation.DestinationZone != rightLocation.DestinationZone ||
+            leftLocation.HomeZone != rightLocation.HomeZone ||
+            leftLocation.WorkZone != rightLocation.WorkZone ||
+            leftLocation.TravelPhase != rightLocation.TravelPhase ||
+            leftLocation.TravelMode != rightLocation.TravelMode ||
+            leftLocation.ExpectedArrivalAt != rightLocation.ExpectedArrivalAt ||
+            leftLocation.Residence != rightLocation.Residence)
+        {
+            return false;
+        }
+
+        var leftSchedule = left.Schedule;
+        var rightSchedule = right.Schedule;
+        return leftSchedule.RoutineProfileId == rightSchedule.RoutineProfileId &&
+               leftSchedule.Commitments.SequenceEqual(rightSchedule.Commitments) &&
+               leftSchedule.CurrentActivity == rightSchedule.CurrentActivity &&
+               leftSchedule.CurrentGoal == rightSchedule.CurrentGoal &&
+               leftSchedule.Availability == rightSchedule.Availability &&
+               leftSchedule.PresenceMode == rightSchedule.PresenceMode &&
+               left.Lifecycle == right.Lifecycle &&
+               left.CognitionTier == right.CognitionTier;
     }
 
     private static (int AppearanceSeed, int BiographySeed) CreatePresentationSeeds(NCActorId actorId)

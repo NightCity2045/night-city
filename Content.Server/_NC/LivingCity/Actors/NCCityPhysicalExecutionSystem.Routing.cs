@@ -11,6 +11,7 @@ using Content.Server._NC.City.Connectivity;
 using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Groups;
+using Content.Server._NC.LivingCity.Simulation;
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Coordinates;
@@ -111,36 +112,12 @@ public sealed partial class NCCityPhysicalExecutionSystem
         }
 
         var seed = StableSelectionSeed(snapshot.Identity.ActorId.Value, location.DestinationZone.Value, actor.AggregateVersion);
-        var compatible = (NCCitySpawnCandidateInfo candidate) =>
-            (candidate.TravelMode & location.TravelMode) == location.TravelMode;
-        var hasDestination = _spawnCandidates.TrySelectCandidate(
-            archetype.SpawnCandidateProfile,
-            location.DestinationZone,
-            seed,
-            out var destination,
-            compatible);
-        if (!hasDestination)
-        {
-            // Broad strategic destinations enter the physical map through a public street when one is authored.
-            hasDestination = _spawnCandidates.TrySelectCandidateInHierarchy(
+        if (!TrySelectDestination(
                 archetype.SpawnCandidateProfile,
                 location.DestinationZone,
+                location.TravelMode,
                 seed,
-                out destination,
-                candidate => compatible(candidate) &&
-                             _zones.TryGetZone(candidate.ZoneId, out var zone) &&
-                             zone.ContextSlot == NCZoneContextSlot.Street);
-        }
-        if (!hasDestination)
-        {
-            hasDestination = _spawnCandidates.TrySelectCandidateInHierarchy(
-                archetype.SpawnCandidateProfile,
-                location.DestinationZone,
-                seed,
-                out destination,
-                compatible);
-        }
-        if (!hasDestination)
+                out var destination))
         {
             FailGoal(entityUid, component, now, "destination-zone-has-no-compatible-navigation-target");
             return;
@@ -151,12 +128,16 @@ public sealed partial class NCCityPhysicalExecutionSystem
         component.DestinationZone = location.DestinationZone;
         component.Destination = destination.Target;
         component.TravelMode = location.TravelMode;
+        component.DestinationIndexVersion = _spawnCandidates.IndexVersion;
         component.Waypoints.Clear();
         component.WaypointIndex = 0;
         component.ReplanAttempts = 0;
         component.RejectedRoomPortals.Clear();
         component.RejectedCityPortals.Clear();
         component.PlanVersion = default;
+        component.LastReplanAt = default;
+        component.LastReplanReason = null;
+        component.LastReplanTopologyVersion = default;
         component.LastFailure = null;
         component.State = NCCityPhysicalExecutionState.Planning;
         component.Trace.Clear();
@@ -164,6 +145,57 @@ public sealed partial class NCCityPhysicalExecutionSystem
         SuppressProceduralAI(entityUid, component);
         AddTrace(component, now, "intent-accepted", $"destination-zone={component.DestinationZone}");
         ScheduleExecution(entityUid, now);
+    }
+
+    private bool TryRefreshDestination(NCCityPhysicalExecutionComponent component)
+    {
+        var seed = StableSelectionSeed(
+            component.ActorId.Value,
+            component.DestinationZone.Value,
+            component.ActorVersion);
+        if (!TrySelectDestination(
+                component.SpawnCandidateProfile,
+                component.DestinationZone,
+                component.TravelMode,
+                seed,
+                out var destination))
+        {
+            return false;
+        }
+        component.Destination = destination.Target;
+        return true;
+    }
+
+    private bool TrySelectDestination(
+        ProtoId<NCCitySpawnCandidateProfilePrototype> profile,
+        NCZoneId destinationZone,
+        NCCityTravelMode travelMode,
+        uint seed,
+        out NCCitySpawnCandidateInfo destination)
+    {
+        var compatible = (NCCitySpawnCandidateInfo candidate) =>
+            (candidate.TravelMode & travelMode) == travelMode;
+        if (_spawnCandidates.TrySelectCandidate(profile, destinationZone, seed, out destination, compatible))
+            return true;
+
+        // Broad strategic destinations enter the physical map through a public street when one is authored.
+        if (_spawnCandidates.TrySelectCandidateInHierarchy(
+                profile,
+                destinationZone,
+                seed,
+                out destination,
+                candidate => compatible(candidate) &&
+                             _zones.TryGetZone(candidate.ZoneId, out var zone) &&
+                             zone.ContextSlot == NCZoneContextSlot.Street))
+        {
+            return true;
+        }
+        return _spawnCandidates.TrySelectCandidateInHierarchy(
+            profile,
+            destinationZone,
+            seed,
+            out destination,
+            compatible);
     }
 
     private void ProcessExecution(EntityUid entityUid, NCActiveWorldTime now)
@@ -469,6 +501,7 @@ public sealed partial class NCCityPhysicalExecutionSystem
             RequestReplan(entityUid, component, now, "portal-controller-unavailable", true);
             return;
         }
+        using var doorWork = _loadGovernor.MeasureDiagnosticWork(NCAILoadWorkKind.DoorInteractions);
         var result = _actionResolution.ResolveActivate(entityUid, waypoint.Controller, true);
         if (result.Outcome != NCCityPhysicalActionOutcome.Succeeded)
         {
@@ -516,8 +549,23 @@ public sealed partial class NCCityPhysicalExecutionSystem
     {
         if (_policy == null)
             return;
+        var normalizedFailure = TrimDiagnostic(failure);
+        var topologyVersion = new NCCityNavigationPlanVersion(_city.GraphVersion, _rooms.GraphVersion);
+        if (component.State == NCCityPhysicalExecutionState.Replanning &&
+            component.LastReplanReason == normalizedFailure &&
+            component.LastReplanTopologyVersion == topologyVersion &&
+            component.DestinationIndexVersion == _spawnCandidates.IndexVersion &&
+            now.TryElapsedSince(component.LastReplanAt, out var sinceLastReplan) &&
+            sinceLastReplan < _policy.MinimumEquivalentReplanInterval)
+        {
+            // Preserve the existing retry window instead of consuming another attempt or asking pathfinding again.
+            component.LastFailure = normalizedFailure;
+            ScheduleExecution(entityUid, component.LastReplanAt.Advance(_policy.MinimumEquivalentReplanInterval));
+            return;
+        }
+
         StopSteering(entityUid, component);
-        component.LastFailure = TrimDiagnostic(failure);
+        component.LastFailure = normalizedFailure;
         if (rejectCurrentPortal)
         {
             RejectCurrentPortal(component, now);
@@ -531,6 +579,9 @@ public sealed partial class NCCityPhysicalExecutionSystem
 
         component.ReplanAttempts++;
         component.State = NCCityPhysicalExecutionState.Replanning;
+        component.LastReplanAt = now;
+        component.LastReplanReason = normalizedFailure;
+        component.LastReplanTopologyVersion = topologyVersion;
         _replans++;
         AddTrace(component, now, "replan-requested", component.LastFailure);
         var delay = TimeSpan.FromTicks(checked(_policy.ReplanBackoff.Ticks * component.ReplanAttempts));
@@ -642,6 +693,10 @@ public sealed partial class NCCityPhysicalExecutionSystem
         component.ReplanAttempts = 0;
         ClearRejectedPortals(component);
         component.PlanVersion = default;
+        component.DestinationIndexVersion = _spawnCandidates.IndexVersion;
+        component.LastReplanAt = default;
+        component.LastReplanReason = null;
+        component.LastReplanTopologyVersion = default;
         component.State = NCCityPhysicalExecutionState.Replanning;
         AddTrace(component, now, "fallback-route-started", reason);
     }
@@ -701,6 +756,10 @@ public sealed partial class NCCityPhysicalExecutionSystem
         component.ReplanAttempts = 0;
         ClearRejectedPortals(component);
         component.PlanVersion = default;
+        component.DestinationIndexVersion = 0;
+        component.LastReplanAt = default;
+        component.LastReplanReason = null;
+        component.LastReplanTopologyVersion = default;
         component.LastFailure = null;
         component.State = NCCityPhysicalExecutionState.Idle;
         AddTrace(component, now, "safe-idle", reason);

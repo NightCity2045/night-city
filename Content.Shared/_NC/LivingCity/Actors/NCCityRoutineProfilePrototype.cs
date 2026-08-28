@@ -10,7 +10,29 @@ using Robust.Shared.Prototypes;
 namespace Content.Shared._NC.LivingCity.Actors;
 
 /// <summary>
-/// Cyclic, active-world-time routine. The cycle advances only while a round is running.
+/// Defines the city-facing clock independently from monotonic active-world time and actor routines.
+/// </summary>
+[Prototype("ncCityCivilClockPolicy")]
+public sealed partial class NCCityCivilClockPolicyPrototype : IPrototype
+{
+    [IdDataField]
+    public string ID { get; private set; } = default!;
+
+    [DataField(required: true)]
+    public TimeSpan CivilDayDuration { get; private set; }
+
+    [DataField(required: true)]
+    public TimeSpan ActiveDayDuration { get; private set; }
+
+    [DataField]
+    public TimeSpan InitialTimeOfDay { get; private set; }
+
+    [DataField]
+    public TimeSpan MaximumManualAdvance { get; private set; } = TimeSpan.FromHours(24);
+}
+
+/// <summary>
+/// Cyclic routine evaluated against the shared civil clock. The cycle advances only while a round is running.
 /// The first entry must start at zero; each entry remains active until the next boundary.
 /// </summary>
 [Prototype("ncCityRoutineProfile")]
@@ -23,29 +45,10 @@ public sealed partial class NCCityRoutineProfilePrototype : IPrototype
     public TimeSpan CycleDuration { get; private set; }
 
     /// <summary>
-    /// Amount of active-world time needed to complete one full routine cycle.
-    /// This keeps civil time scaling local to schedules instead of accelerating medical or persistence deadlines.
-    /// </summary>
-    [DataField]
-    public TimeSpan ActiveCycleDuration { get; private set; } = TimeSpan.FromHours(24);
-
-    /// <summary>
-    /// Civil-time phase at active-world time zero. It lets a fresh city session begin during an active part of the day.
-    /// </summary>
-    [DataField]
-    public TimeSpan CyclePhaseOffset { get; private set; }
-
-    /// <summary>
-    /// Total deterministic phase range distributed around <see cref="CyclePhaseOffset"/> by stable actor identity.
+    /// Total deterministic phase range distributed around civil time by stable actor identity.
     /// </summary>
     [DataField]
     public TimeSpan ActorPhaseSpread { get; private set; }
-
-    /// <summary>
-    /// Largest civil-time jump accepted from one administrative operation.
-    /// </summary>
-    [DataField]
-    public TimeSpan MaximumManualAdvance { get; private set; } = TimeSpan.FromHours(24);
 
     [DataField(required: true)]
     public List<NCCityRoutineEntry> Entries { get; private set; } = [];
@@ -99,6 +102,15 @@ public sealed partial class NCCitySchedulePolicyPrototype : IPrototype
 
     [DataField]
     public TimeSpan MutationRetryDelay { get; private set; } = TimeSpan.FromSeconds(5);
+
+    [DataField]
+    public int MaximumMutationAttempts { get; private set; } = 5;
+
+    /// <summary>
+    /// Deterministically spreads overdue recovery work so a round start never wakes the whole city at once.
+    /// </summary>
+    [DataField]
+    public TimeSpan InitialEvaluationStagger { get; private set; } = TimeSpan.FromSeconds(25);
 
     /// <summary>
     /// Reconciles persisted schedules with the current routine policy at the beginning of every active-world session.

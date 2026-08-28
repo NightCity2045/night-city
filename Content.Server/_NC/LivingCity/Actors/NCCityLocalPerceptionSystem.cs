@@ -51,6 +51,8 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
     private readonly Dictionary<EntityUid, NCActiveWorldTime> _scheduled = [];
     private readonly HashSet<EntityUid> _tracked = [];
     private readonly HashSet<EntityUid> _observedBuffer = [];
+    private readonly List<NCCityLocalObservation> _retainedObservations = [];
+    private readonly Dictionary<EntityUid, string> _previousHandles = [];
     private readonly Dictionary<(EntityUid Actor, EntityUid Target), IncidentCorrelation> _incidentCorrelations = [];
     private readonly PriorityQueue<IncidentCorrelationEntry, long> _incidentCorrelationExpiry = new();
     private NCCityLocalPerceptionPolicyPrototype? _policy;
@@ -140,6 +142,7 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
             return;
         }
 
+        using var work = _governor.MeasureWork(NCAILoadWorkKind.DamageEvents);
         var coordinates = _transform.GetMapCoordinates(victim.Owner);
         var worldEventId = CorrelateIncident(attacker, victim.Owner, now);
         foreach (var observer in _lookup.GetEntitiesInRange<NCCityLocalPerceptionComponent>(
@@ -258,7 +261,7 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         perception.Observations.Insert(0, new NCCityLocalObservation(
             subject,
             string.IsNullOrWhiteSpace(previous.SubjectHandle)
-                ? SubjectHandle(new Dictionary<EntityUid, string>(), subject)
+                ? NewSubjectHandle()
                 : previous.SubjectHandle,
             effectiveKind,
             distanceSquared,
@@ -366,15 +369,20 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
 
         // Handles survive consecutive observations but disappear with the bounded sensory cache. This gives neural
         // decisions a stable short-lived target without leaking EntityUid or accumulating a global target table.
-        var retainedPeopleOfInterest = component.Observations
-            .Where(value => value.Kind is (NCCityLocalObservationKind.Suspect or
-                                NCCityLocalObservationKind.Hostile) &&
-                            value.ExpiresAt > now && Exists(value.EntityUid))
-            .Take(profile.MaximumObservedEntities)
-            .ToArray();
-        var previousHandles = component.Observations
-            .GroupBy(value => value.EntityUid)
-            .ToDictionary(value => value.Key, value => value.First().SubjectHandle);
+        _retainedObservations.Clear();
+        _previousHandles.Clear();
+        foreach (var observation in component.Observations)
+        {
+            _previousHandles.TryAdd(observation.EntityUid, observation.SubjectHandle);
+            if (_retainedObservations.Count >= profile.MaximumObservedEntities ||
+                observation.Kind is not (NCCityLocalObservationKind.Suspect or
+                    NCCityLocalObservationKind.Hostile) ||
+                observation.ExpiresAt <= now || !Exists(observation.EntityUid))
+            {
+                continue;
+            }
+            _retainedObservations.Add(observation);
+        }
         PromoteLethalEvents(entityUid, component, now);
         component.RecentEvents.RemoveAll(value => value.ExpiresAt <= now || !Exists(value.ActorEntity) ||
             !Exists(value.TargetEntity));
@@ -388,7 +396,7 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         var lineOfSightChecks = 0;
         var origin = _transform.GetMapCoordinates(entityUid);
         _observedBuffer.Clear();
-        foreach (var observed in retainedPeopleOfInterest)
+        foreach (var observed in _retainedObservations)
         {
             var retained = RefreshRetainedObservation(entityUid, observed, origin, profile, now,
                 ref lineOfSightChecks);
@@ -429,7 +437,7 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
                 var distanceSquared = System.Numerics.Vector2.DistanceSquared(origin.Position, target.Position);
                 component.Observations.Add(new NCCityLocalObservation(
                     hostile,
-                    SubjectHandle(previousHandles, hostile),
+                    SubjectHandle(_previousHandles, hostile),
                     NCCityLocalObservationKind.Hostile,
                     distanceSquared,
                     Confidence(distanceSquared, profile.Radius),
@@ -462,7 +470,7 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
             var distanceSquared = System.Numerics.Vector2.DistanceSquared(origin.Position, target.Position);
             component.Observations.Add(new NCCityLocalObservation(
                 candidate.Owner,
-                SubjectHandle(previousHandles, candidate.Owner),
+                SubjectHandle(_previousHandles, candidate.Owner),
                 candidate.Comp.CurrentState == MobState.Dead
                     ? NCCityLocalObservationKind.Dead
                     : NCCityLocalObservationKind.Critical,
@@ -648,6 +656,9 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         _tracked.Clear();
         _scheduled.Clear();
         _queue.Clear();
+        _observedBuffer.Clear();
+        _retainedObservations.Clear();
+        _previousHandles.Clear();
         _incidentCorrelations.Clear();
         _incidentCorrelationExpiry.Clear();
         _policy = null;
@@ -673,7 +684,9 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         IReadOnlyDictionary<EntityUid, string> previous,
         EntityUid target) => previous.TryGetValue(target, out var handle)
         ? handle
-        : $"perceived-{Guid.NewGuid():N}";
+        : NewSubjectHandle();
+
+    private static string NewSubjectHandle() => $"perceived-{Guid.NewGuid():N}";
 
     private static float Confidence(float distanceSquared, float radius)
     {

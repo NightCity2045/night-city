@@ -53,6 +53,22 @@ public readonly record struct NCActiveWorldTime(long Ticks) : IComparable<NCActi
         return TimeSpan.FromTicks(Ticks - earlier.Ticks);
     }
 
+    /// <summary>
+    /// Safely compares timestamps loaded from round-local or persisted state without turning stale data into a
+    /// server-fatal exception. Callers must explicitly decide how to invalidate a future timestamp.
+    /// </summary>
+    public bool TryElapsedSince(NCActiveWorldTime earlier, out TimeSpan elapsed)
+    {
+        if (!IsValid || !earlier.IsValid || earlier.Ticks > Ticks)
+        {
+            elapsed = default;
+            return false;
+        }
+
+        elapsed = TimeSpan.FromTicks(Ticks - earlier.Ticks);
+        return true;
+    }
+
     public int CompareTo(NCActiveWorldTime other)
     {
         return Ticks.CompareTo(other.Ticks);

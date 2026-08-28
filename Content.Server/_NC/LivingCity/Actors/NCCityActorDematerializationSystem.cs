@@ -13,6 +13,8 @@ using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Actors.Domains;
 using Content.Server._NC.LivingCity.Economy;
+using Content.Server._NC.LivingCity.Cognition;
+using Content.Server._NC.LivingCity.Cognition.Components;
 using Content.Server._NC.LivingCity.Groups.Components;
 using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
@@ -75,6 +77,13 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
     private int _generation;
     private int _inFlight;
     private long _sequence;
+    private long _submitted;
+    private long _accepted;
+    private long _completed;
+    private long _retained;
+    private long _failed;
+    private long _expired;
+    private long _retried;
     private long _queuedEntityDeletions;
     private EntityUid? _lastQueuedEntityDeletion;
     private GameTick _lastQueuedEntityDeletionTick;
@@ -85,9 +94,35 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
     public int InFlightCount => _inFlight;
     public int RetainedResultCount => _states.Count - _pending.Count;
     public int PreparedDespawnCount => _despawnQueue.Count;
+    public bool CanAcceptRequest => _active && _policy != null &&
+                                    _pending.Count < _policy.MaximumQueuedDematerializations;
     public long QueuedEntityDeletionCount => _queuedEntityDeletions;
     public EntityUid? LastQueuedEntityDeletion => _lastQueuedEntityDeletion;
     public GameTick LastQueuedEntityDeletionTick => _lastQueuedEntityDeletionTick;
+
+    public NCCityRequestPipelineCounters GetPipelineCounters()
+    {
+        return new NCCityRequestPipelineCounters(
+            _submitted,
+            _accepted,
+            _completed,
+            _retained,
+            _failed,
+            _expired,
+            _retried);
+    }
+
+    public bool TryGetOldestPendingAt(out NCActiveWorldTime requestedAt)
+    {
+        requestedAt = default;
+        foreach (var pending in _pending.Values)
+        {
+            if (!requestedAt.IsValid || pending.RequestedAt < requestedAt)
+                requestedAt = pending.RequestedAt;
+        }
+
+        return requestedAt.IsValid;
+    }
 
     public override void Initialize()
     {
@@ -148,11 +183,13 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
     {
         if (_states.TryGetValue(request.RequestId, out var replay))
             return replay;
+        _submitted++;
 
         var now = default(NCActiveWorldTime);
         if (!_active || _policy == null ||
             !_clock.TryGetCurrentTime(out var epoch, out now) || epoch != _epoch)
         {
+            _failed++;
             return RejectedState(request, now, "Dematerialization requires an active A-Life round.");
         }
 
@@ -208,6 +245,7 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
             null);
         _pending.Add(request.RequestId, pending);
         _requestByActor.Add(request.ActorId, request.RequestId);
+        _accepted++;
         SetState(pending, NCCityDematerializationStatus.Requested, null);
         Enqueue(pending);
         return _states[request.RequestId];
@@ -264,7 +302,7 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
 
     public bool IsEligibleForOffscreenHandOff(NCActorId actorId, EntityUid entityUid, out string? error)
     {
-        return IsEligible(actorId, entityUid, false, true, out error);
+        return IsEligible(actorId, entityUid, false, false, out error);
     }
 
     public bool IsEligibleForGroupHandOff(NCActorId actorId, EntityUid entityUid, out string? error)
@@ -274,7 +312,7 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
 
     public bool IsEligibleForOffscreenGroupHandOff(NCActorId actorId, EntityUid entityUid, out string? error)
     {
-        return IsEligible(actorId, entityUid, true, true, out error);
+        return IsEligible(actorId, entityUid, true, false, out error);
     }
 
     private bool IsEligible(
@@ -315,6 +353,29 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
             TryComp<CombatModeComponent>(entityUid, out var combat) && combat.IsInCombatMode)
         {
             error = "The actor is in physical combat mode.";
+            return false;
+        }
+
+        if (TryComp<PullableComponent>(entityUid, out var pullable) && pullable.Puller != null ||
+            TryComp<PullerComponent>(entityUid, out var puller) && puller.Pulling != null)
+        {
+            error = "The actor is participating in a body carry or pull relationship.";
+            return false;
+        }
+
+        if (TryComp<NCHumanActionRuntimeComponent>(entityUid, out var action) &&
+            action.State is NCHumanActionRuntimeState.Pending or NCHumanActionRuntimeState.Running)
+        {
+            error = "The actor has a committed physical action in progress.";
+            return false;
+        }
+
+        if (TryComp<NCCityPhysicalExecutionComponent>(entityUid, out var execution) &&
+            execution.State is NCCityPhysicalExecutionState.LoadingIntent or NCCityPhysicalExecutionState.Planning or
+                NCCityPhysicalExecutionState.Moving or NCCityPhysicalExecutionState.TraversingPortal or
+                NCCityPhysicalExecutionState.Replanning or NCCityPhysicalExecutionState.Committing)
+        {
+            error = "The actor has a committed physical navigation step in progress.";
             return false;
         }
 
@@ -411,14 +472,11 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
             CompleteTerminal(pending, NCCityDematerializationStatus.AlreadyDematerialized, null);
             return;
         }
-        var allowOffscreenCombat = pending.Request.Reason is
-            NCCityDematerializationReason.PlayerIrrelevant or NCCityDematerializationReason.BudgetPressure or
-            NCCityDematerializationReason.GroupHandOff;
         if (!IsEligible(
                 pending.Request.ActorId,
                 entityUid,
                 pending.Request.Reason == NCCityDematerializationReason.GroupHandOff,
-                allowOffscreenCombat,
+                false,
                 out var error))
         {
             _inFlight = Math.Max(0, _inFlight - 1);
@@ -538,14 +596,11 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
 
         var changedDuringCommit = PhysicalStateChangedDuringCommit(pending, entityUid, now);
         string? eligibilityError = null;
-        var allowOffscreenCombat = pending.Request.Reason is
-            NCCityDematerializationReason.PlayerIrrelevant or NCCityDematerializationReason.BudgetPressure or
-            NCCityDematerializationReason.GroupHandOff;
         var remainsEligible = IsEligible(
             pending.Request.ActorId,
             entityUid,
             pending.Request.Reason == NCCityDematerializationReason.GroupHandOff,
-            allowOffscreenCombat,
+            false,
             out eligibilityError);
         if (changedDuringCommit || !remainsEligible)
         {
@@ -722,6 +777,7 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
             CommitCommandId = resetCommand ? Guid.NewGuid() : pending.CommitCommandId,
             Capture = null,
         };
+        _retried++;
         _pending[pending.Request.RequestId] = pending;
         SetState(pending, NCCityDematerializationStatus.Retrying, error);
         Enqueue(pending);
@@ -757,6 +813,7 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
         _pending.Remove(pending.Request.RequestId);
         _requestByActor.Remove(pending.Request.ActorId);
         SetState(pending, status, error);
+        RecordTerminal(status);
         _completedOrder.Enqueue(pending.Request.RequestId);
         TrimCompletedHistory();
     }
@@ -764,8 +821,29 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
     private void RetainTerminal(NCCityDematerializationRequestState state)
     {
         _states[state.RequestId] = state;
+        RecordTerminal(state.Status);
         _completedOrder.Enqueue(state.RequestId);
         TrimCompletedHistory();
+    }
+
+    private void RecordTerminal(NCCityDematerializationStatus status)
+    {
+        switch (status)
+        {
+            case NCCityDematerializationStatus.Dematerialized:
+            case NCCityDematerializationStatus.AlreadyDematerialized:
+                _completed++;
+                break;
+            case NCCityDematerializationStatus.CommittedRetained:
+                _retained++;
+                break;
+            case NCCityDematerializationStatus.Expired:
+                _expired++;
+                break;
+            case NCCityDematerializationStatus.Rejected:
+                _failed++;
+                break;
+        }
     }
 
     private void TrimCompletedHistory()
@@ -885,6 +963,13 @@ public sealed partial class NCCityActorDematerializationSystem : EntitySystem
         _policy = null;
         _epoch = default;
         _inFlight = 0;
+        _submitted = 0;
+        _accepted = 0;
+        _completed = 0;
+        _retained = 0;
+        _failed = 0;
+        _expired = 0;
+        _retried = 0;
         _queuedEntityDeletions = 0;
         _lastQueuedEntityDeletion = null;
         _lastQueuedEntityDeletionTick = default;

@@ -138,19 +138,33 @@ public readonly record struct NCLivingCityAdminField(
     string Value);
 
 [Serializable, NetSerializable]
-public sealed class NCLivingCityAdminOverviewRequest(Guid requestId) : EntityEventArgs
+public enum NCLivingCityAdminOverviewScope : byte
+{
+    Runtime,
+    City,
+    Population,
+    Ncpd,
+}
+
+[Serializable, NetSerializable]
+public sealed class NCLivingCityAdminOverviewRequest(
+    Guid requestId,
+    NCLivingCityAdminOverviewScope scope) : EntityEventArgs
 {
     public Guid RequestId { get; } = requestId;
+    public NCLivingCityAdminOverviewScope Scope { get; } = scope;
 }
 
 [Serializable, NetSerializable]
 public sealed class NCLivingCityAdminOverviewSnapshot(
     Guid requestId,
+    NCLivingCityAdminOverviewScope scope,
     bool authorized,
     NCLivingCityAdminField[] fields,
     string? error) : EntityEventArgs
 {
     public Guid RequestId { get; } = requestId;
+    public NCLivingCityAdminOverviewScope Scope { get; } = scope;
     public bool Authorized { get; } = authorized;
     public NCLivingCityAdminField[] Fields { get; } = fields;
     public string? Error { get; } = error;

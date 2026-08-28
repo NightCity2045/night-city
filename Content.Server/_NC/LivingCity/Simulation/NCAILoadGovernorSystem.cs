@@ -18,6 +18,7 @@ namespace Content.Server._NC.LivingCity.Simulation;
 public sealed partial class NCAILoadGovernorSystem : EntitySystem
 {
     private const int TelemetryFrameCapacity = 256;
+    private const int TransitionHistoryCapacity = 8;
     private const string DefaultPolicyId = "NCDefaultAILoadGovernorPolicy";
 
     [Dependency] private IPrototypeManager _prototypes = default!;
@@ -32,6 +33,8 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
     private readonly double[] _workMillisecondsByKindWindow = new double[Enum.GetValues<NCAILoadWorkKind>().Length];
     private readonly float[] _lastWorkMillisecondsByKind = new float[Enum.GetValues<NCAILoadWorkKind>().Length];
     private readonly float[] _frameTelemetry = new float[TelemetryFrameCapacity];
+    private readonly NCAILoadGovernorTransition[] _transitionHistory =
+        new NCAILoadGovernorTransition[TransitionHistoryCapacity];
 
     private NCAILoadGovernorPolicyPrototype? _policy;
     private NCAILoadGovernorThresholds _thresholds;
@@ -53,6 +56,8 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
     private int _gen2CollectionsSinceLastSample;
     private int _frameTelemetryWriteIndex;
     private int _frameTelemetryCount;
+    private int _transitionHistoryWriteIndex;
+    private int _transitionHistoryCount;
     private float _alifeWorkRatio;
     private float _maximumQueueRatio;
     private int _materializedActors;
@@ -126,6 +131,7 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
             _alifeWorkRatio,
             materializedRatio,
             _thresholds);
+        var previousState = _stateMachine.State;
         var decision = _stateMachine.Step(
             new NCAILoadGovernorSample(
                 _smoothedFrameMilliseconds,
@@ -141,6 +147,7 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         {
             _transitionCount++;
             _lastTransitionAt = now;
+            RecordTransition(previousState, decision.State, decision.Reasons, now);
             Log.Info($"A-Life load governor entered {decision.State}; pressure={decision.Reasons}.");
         }
     }
@@ -173,14 +180,21 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
     /// simulation-frame budget over the current sample window, so unrelated server work is not attributed to A-Life.
     /// </summary>
     public NCAILoadWorkMeasurement MeasureWork(NCAILoadWorkKind kind) =>
-        new(this, kind, _active ? Stopwatch.GetTimestamp() : 0L);
+        new(this, kind, _active ? Stopwatch.GetTimestamp() : 0L, true);
 
-    internal void ReportWork(NCAILoadWorkKind kind, long startedAt)
+    /// <summary>
+    /// Profiles a nested operation without counting its inclusive time twice in the total A-Life work budget.
+    /// </summary>
+    public NCAILoadWorkMeasurement MeasureDiagnosticWork(NCAILoadWorkKind kind) =>
+        new(this, kind, _active ? Stopwatch.GetTimestamp() : 0L, false);
+
+    internal void ReportWork(NCAILoadWorkKind kind, long startedAt, bool includeInTotal)
     {
         if (!_active || startedAt == 0L)
             return;
         var elapsed = Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds;
-        _workMillisecondsWindow += elapsed;
+        if (includeInTotal)
+            _workMillisecondsWindow += elapsed;
         _workMillisecondsByKindWindow[(int) kind] += elapsed;
     }
 
@@ -302,6 +316,21 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         _admissionRejected,
         _configurationError);
 
+    /// <summary>
+    /// Copies the bounded transition ring newest-first only when an administrator requests telemetry.
+    /// </summary>
+    public NCAILoadGovernorTransition[] GetRecentTransitions()
+    {
+        var transitions = new NCAILoadGovernorTransition[_transitionHistoryCount];
+        for (var index = 0; index < transitions.Length; index++)
+        {
+            var source = (_transitionHistoryWriteIndex - 1 - index + _transitionHistory.Length) %
+                _transitionHistory.Length;
+            transitions[index] = _transitionHistory[source];
+        }
+        return transitions;
+    }
+
     public NCAILoadTelemetrySnapshot GetTelemetrySnapshot()
     {
         var samples = new float[_frameTelemetryCount];
@@ -377,6 +406,8 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         _gen2CollectionsSinceLastSample = 0;
         _frameTelemetryWriteIndex = 0;
         _frameTelemetryCount = 0;
+        _transitionHistoryWriteIndex = 0;
+        _transitionHistoryCount = 0;
         _alifeWorkRatio = 0f;
         _maximumQueueRatio = 0f;
         _materializedActors = 0;
@@ -394,7 +425,19 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         Array.Clear(_workMillisecondsByKindWindow);
         Array.Clear(_lastWorkMillisecondsByKind);
         Array.Clear(_frameTelemetry);
+        Array.Clear(_transitionHistory);
         _stateMachine.Reset();
+    }
+
+    private void RecordTransition(
+        NCAILoadState from,
+        NCAILoadState to,
+        NCAILoadPressureReason reasons,
+        NCActiveWorldTime at)
+    {
+        _transitionHistory[_transitionHistoryWriteIndex] = new NCAILoadGovernorTransition(from, to, reasons, at);
+        _transitionHistoryWriteIndex = (_transitionHistoryWriteIndex + 1) % _transitionHistory.Length;
+        _transitionHistoryCount = Math.Min(_transitionHistory.Length, _transitionHistoryCount + 1);
     }
 
     private void CaptureGarbageCollectorTelemetry()
@@ -522,13 +565,19 @@ public readonly struct NCAILoadWorkMeasurement : IDisposable
     private readonly NCAILoadGovernorSystem _governor;
     private readonly NCAILoadWorkKind _kind;
     private readonly long _startedAt;
+    private readonly bool _includeInTotal;
 
-    public NCAILoadWorkMeasurement(NCAILoadGovernorSystem governor, NCAILoadWorkKind kind, long startedAt)
+    public NCAILoadWorkMeasurement(
+        NCAILoadGovernorSystem governor,
+        NCAILoadWorkKind kind,
+        long startedAt,
+        bool includeInTotal)
     {
         _governor = governor;
         _kind = kind;
         _startedAt = startedAt;
+        _includeInTotal = includeInTotal;
     }
 
-    public void Dispose() => _governor.ReportWork(_kind, _startedAt);
+    public void Dispose() => _governor.ReportWork(_kind, _startedAt, _includeInTotal);
 }

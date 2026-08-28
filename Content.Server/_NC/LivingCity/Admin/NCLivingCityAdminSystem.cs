@@ -43,6 +43,7 @@ using Content.Shared._NC.LivingCity.Admin;
 using Content.Shared._NC.LivingCity.Affordances;
 using Content.Shared._NC.LivingCity.Cognition;
 using Content.Shared._NC.City.Zones;
+using Content.Shared._NC.Persistence.Time;
 using Content.Shared.Administration;
 using Content.Shared.Administration.Managers;
 using Content.Shared.Database;
@@ -173,6 +174,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
 
     private readonly Dictionary<NetUserId, TimeSpan> _lastRequestAt = [];
     private readonly Dictionary<NetUserId, TimeSpan> _lastObserverRequestAt = [];
+    private readonly Dictionary<string, CounterRateSample> _counterRateSamples = [];
     private readonly NCLivingCityAdminConfirmationStore _confirmations = new();
     private readonly object _outboxStatusLock = new();
     private NCOutboxStatusData? _cachedOutboxStatus;
@@ -198,6 +200,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     {
         _lastRequestAt.Clear();
         _lastObserverRequestAt.Clear();
+        _counterRateSamples.Clear();
         _confirmations.Clear();
         _cachedGeographyOverview = null;
         lock (_outboxStatusLock)
@@ -211,21 +214,24 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
 
     private void OnOverviewRequest(NCLivingCityAdminOverviewRequest request, EntitySessionEventArgs args)
     {
-        if (request.RequestId == Guid.Empty)
+        if (request.RequestId == Guid.Empty || !Enum.IsDefined(request.Scope))
             return;
         if (!CanRead(args))
         {
-            SendOverview(args, request.RequestId, false, [], "not-authorized");
+            SendOverview(args, request.RequestId, request.Scope, false, [], "not-authorized");
             return;
         }
         if (!AcceptRate(args.SenderSession.UserId))
         {
-            SendOverview(args, request.RequestId, true, [], "rate-limited");
+            SendOverview(args, request.RequestId, request.Scope, true, [], "rate-limited");
             return;
         }
 
-        var fields = new FieldBuilder();
-        if (_clock.TryGetCurrentTime(out var epoch, out var now))
+        using var adminWork = _loadGovernor.MeasureWork(NCAILoadWorkKind.AdminSnapshots);
+        var fields = new FieldBuilder(request.Scope);
+        var hasActiveTime = _clock.TryGetCurrentTime(out var epoch, out var now);
+        var clockRuntime = _clock.GetRuntimeSnapshot();
+        if (hasActiveTime)
         {
             fields.Add("clock", "state", "active");
             fields.Add("clock", "epoch", epoch.ToString());
@@ -234,6 +240,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
             {
                 var scale = (decimal) civilTime.CivilDayDuration.Ticks / civilTime.ActiveDayDuration.Ticks;
                 fields.Add("clock", "city-day", civilTime.Day);
+                fields.Add("clock", "civil-time-revision", civilTime.Revision);
                 fields.Add("clock", "city-time",
                     civilTime.TimeOfDay.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture));
                 fields.Add("clock", "time-scale", $"x{scale.ToString("0.##", CultureInfo.InvariantCulture)}");
@@ -249,6 +256,8 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         {
             fields.Add("clock", "state", "inactive");
         }
+        fields.Add("clock", "monotonic-regressions-clamped", clockRuntime.MonotonicRegressionsClamped);
+        fields.Add("clock", "stale-start-callbacks-rejected", clockRuntime.StaleStartCallbacksRejected);
 
         fields.Add("actors", "cached", _actors.CachedActorCount);
         fields.Add("actors", "materialized", _actorRuntime.MaterializedActorCount);
@@ -261,14 +270,32 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("ambient", "spawn-rejected", ambient.SpawnRejected);
         fields.Add("ambient", "threat-reactions", ambient.ThreatReactions);
         fields.Add("ambient", "configuration-error", ambient.ConfigurationError ?? "none");
-        fields.Add("materialization", "active", _materialization.IsActive);
-        fields.Add("materialization", "queued", _materialization.PendingRequestCount);
-        fields.Add("materialization", "in-flight", _materialization.InFlightCount);
-        fields.Add("materialization", "retained", _materialization.RetainedResultCount);
-        fields.Add("dematerialization", "active", _dematerialization.IsActive);
-        fields.Add("dematerialization", "queued", _dematerialization.PendingRequestCount);
-        fields.Add("dematerialization", "in-flight", _dematerialization.InFlightCount);
-        fields.Add("dematerialization", "retained", _dematerialization.RetainedResultCount);
+        if (fields.Includes("materialization"))
+        {
+            fields.Add("materialization", "active", _materialization.IsActive);
+            fields.Add("materialization", "queued", _materialization.PendingRequestCount);
+            fields.Add("materialization", "in-flight", _materialization.InFlightCount);
+            fields.Add("materialization", "retained", _materialization.RetainedResultCount);
+            var materializationPipeline = _materialization.GetPipelineCounters();
+            AddPipelineFields(fields, "materialization", "materialization", materializationPipeline);
+            fields.Add("materialization", "oldest-pending-age",
+                hasActiveTime && _materialization.TryGetOldestPendingAt(out var oldestMaterialization)
+                    ? Age(now, oldestMaterialization)
+                    : null);
+        }
+        if (fields.Includes("dematerialization"))
+        {
+            fields.Add("dematerialization", "active", _dematerialization.IsActive);
+            fields.Add("dematerialization", "queued", _dematerialization.PendingRequestCount);
+            fields.Add("dematerialization", "in-flight", _dematerialization.InFlightCount);
+            fields.Add("dematerialization", "retained", _dematerialization.RetainedResultCount);
+            var dematerializationPipeline = _dematerialization.GetPipelineCounters();
+            AddPipelineFields(fields, "dematerialization", "dematerialization", dematerializationPipeline);
+            fields.Add("dematerialization", "oldest-pending-age",
+                hasActiveTime && _dematerialization.TryGetOldestPendingAt(out var oldestDematerialization)
+                    ? Age(now, oldestDematerialization)
+                    : null);
+        }
         fields.Add("relevance", "active", _relevance.IsActive);
         fields.Add("relevance", "catalog-ready", _relevance.CatalogRecovered);
         fields.Add("relevance", "catalog-actors", _relevance.CatalogActorCount);
@@ -280,15 +307,26 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("relevance", "traveling-candidates-skipped", _relevance.TravelingCandidatesSkipped);
         fields.Add("scheduler", "initial-load-complete", _scheduler.InitialLoadComplete);
         fields.Add("scheduler", "queued", _scheduler.QueuedActorCount);
+        fields.Add("scheduler", "deferred-wakes", _scheduler.DeferredScheduleCount);
         fields.Add("scheduler", "in-flight", _scheduler.InFlightCount);
         fields.Add("scheduler", "pending-retries", _scheduler.PendingMutationCount);
+        fields.Add("scheduler", "mutation-retries-exhausted", _scheduler.MutationRetriesExhausted);
         var hasScheduleDue = _scheduler.TryGetEarliestDue(out var scheduleDueAt, out var scheduleDueNow);
         fields.Add("scheduler", "earliest-due", hasScheduleDue ? scheduleDueAt.Elapsed : null);
         fields.Add("scheduler", "due-now", hasScheduleDue && scheduleDueNow);
+        fields.Add("scheduler", "overdue-age",
+            hasActiveTime && hasScheduleDue && scheduleDueNow ? Age(now, scheduleDueAt) : null);
         fields.Add("abstract-travel", "initial-load-complete", _travel.InitialLoadComplete);
         fields.Add("abstract-travel", "queued", _travel.QueuedActorCount);
+        fields.Add("abstract-travel", "deferred-wakes", _travel.DeferredScheduleCount);
         fields.Add("abstract-travel", "in-flight", _travel.InFlightCount);
         fields.Add("abstract-travel", "pending-retries", _travel.PendingMutationCount);
+        fields.Add("abstract-travel", "mutation-retries-exhausted", _travel.MutationRetriesExhausted);
+        var hasTravelDue = _travel.TryGetEarliestDue(out var travelDueAt);
+        fields.Add("abstract-travel", "earliest-due", hasTravelDue ? travelDueAt.Elapsed : null);
+        fields.Add("abstract-travel", "due-now", hasActiveTime && hasTravelDue && travelDueAt <= now);
+        fields.Add("abstract-travel", "overdue-age",
+            hasActiveTime && hasTravelDue && travelDueAt <= now ? Age(now, travelDueAt) : null);
 
         var physical = _physicalExecution.GetCounters();
         fields.Add("physical-execution", "active", physical.Active);
@@ -304,6 +342,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("physical-execution", "arrivals", physical.Arrivals);
         fields.Add("physical-execution", "blocked-goals", physical.BlockedGoals);
         fields.Add("physical-execution", "failed-goals", physical.FailedGoals);
+        fields.Add("physical-execution", "mutation-retries-exhausted", physical.MutationRetriesExhausted);
         fields.Add("physical-execution", "configuration-error", physical.ConfigurationError ?? "none");
 
         var stateTree = _physicalStateTree.GetCounters();
@@ -325,51 +364,87 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("physical-actions", "unavailable", actions.Unavailable);
         fields.Add("physical-actions", "unhandled", actions.Unhandled);
 
-        var routedActions = _humanActions.GetCounters();
-        fields.Add("human-actions", "active", routedActions.Active);
-        fields.Add("human-actions", "running", routedActions.Running);
-        fields.Add("human-actions", "started", routedActions.Started);
-        fields.Add("human-actions", "completed", routedActions.Completed);
-        fields.Add("human-actions", "failed", routedActions.Failed);
-        fields.Add("human-actions", "interrupted", routedActions.Interrupted);
-        fields.Add("human-actions", "timed-out", routedActions.TimedOut);
-        fields.Add("human-actions", "unhandled", routedActions.Unhandled);
-        fields.Add("human-actions", "configuration-error", routedActions.ConfigurationError ?? "none");
+        if (fields.Includes("human-actions"))
+        {
+            var routedActions = _humanActions.GetCounters();
+            fields.Add("human-actions", "active", routedActions.Active);
+            fields.Add("human-actions", "running", routedActions.Running);
+            fields.Add("human-actions", "started-total", routedActions.Started);
+            fields.Add("human-actions", "completed-total", routedActions.Completed);
+            fields.Add("human-actions", "failed-total", routedActions.Failed);
+            fields.Add("human-actions", "interrupted-total", routedActions.Interrupted);
+            fields.Add("human-actions", "timed-out-total", routedActions.TimedOut);
+            fields.Add("human-actions", "unhandled-total", routedActions.Unhandled);
+            fields.Add("human-actions", "terminal-throughput-per-minute", FormatRate(SampleRate(
+                "human-actions:terminal",
+                routedActions.Completed + routedActions.Failed + routedActions.Interrupted)));
+            fields.Add("human-actions", "failures-per-minute",
+                FormatRate(SampleRate("human-actions:failed", routedActions.Failed)));
+            fields.Add("human-actions", "duration-p50-ms",
+                routedActions.DurationP50Milliseconds.ToString("0.00", CultureInfo.InvariantCulture));
+            fields.Add("human-actions", "duration-p95-ms",
+                routedActions.DurationP95Milliseconds.ToString("0.00", CultureInfo.InvariantCulture));
+            fields.Add("human-actions", "duration-p99-ms",
+                routedActions.DurationP99Milliseconds.ToString("0.00", CultureInfo.InvariantCulture));
+            fields.Add("human-actions", "configuration-error", routedActions.ConfigurationError ?? "none");
+            var actionFailures = routedActions.FailureReasons;
+            fields.Add("human-action-failures", "failure-configuration", actionFailures.Configuration);
+            fields.Add("human-action-failures", "failure-runtime-unavailable", actionFailures.RuntimeUnavailable);
+            fields.Add("human-action-failures", "failure-invalid-request", actionFailures.InvalidRequest);
+            fields.Add("human-action-failures", "failure-capability-unavailable", actionFailures.CapabilityUnavailable);
+            fields.Add("human-action-failures", "failure-blocked", actionFailures.Blocked);
+            fields.Add("human-action-failures", "failure-unreachable", actionFailures.Unreachable);
+            fields.Add("human-action-failures", "failure-busy", actionFailures.Busy);
+            fields.Add("human-action-failures", "failure-timed-out", actionFailures.TimedOut);
+            fields.Add("human-action-failures", "failure-executor-unhandled", actionFailures.ExecutorUnhandled);
+            fields.Add("human-action-failures", "failure-domain-rejected", actionFailures.DomainRejected);
+            fields.Add("human-action-failures", "failure-unknown", actionFailures.Unknown);
+        }
 
         var humanRoutines = _humanRoutines.GetCounters();
         fields.Add("human-routines", "active", humanRoutines.Active);
-        fields.Add("human-routines", "started", humanRoutines.Started);
-        fields.Add("human-routines", "completed", humanRoutines.Completed);
-        fields.Add("human-routines", "failed", humanRoutines.Failed);
+        fields.Add("human-routines", "started-total", humanRoutines.Started);
+        fields.Add("human-routines", "completed-total", humanRoutines.Completed);
+        fields.Add("human-routines", "failed-total", humanRoutines.Failed);
+        fields.Add("human-routines", "terminal-throughput-per-minute", FormatRate(SampleRate(
+            "human-routines:terminal",
+            humanRoutines.Completed + humanRoutines.Failed)));
+        fields.Add("human-routines", "failures-per-minute",
+            FormatRate(SampleRate("human-routines:failed", humanRoutines.Failed)));
         fields.Add("human-routines", "runtime-unavailable", humanRoutines.RuntimeUnavailable);
         fields.Add("human-routines", "affordance-unavailable", humanRoutines.AffordanceUnavailable);
         fields.Add("human-routines", "target-unreachable", humanRoutines.TargetUnreachable);
         fields.Add("human-routines", "locomotion-busy", humanRoutines.LocomotionBusy);
         fields.Add("human-routines", "configuration-error", humanRoutines.ConfigurationError ?? "none");
 
-        var cognition = _cognition.GetCounters();
-        fields.Add("cognition", "active", cognition.Active);
-        fields.Add("cognition", "tracked", cognition.TrackedActors);
-        fields.Add("cognition", "scheduled", cognition.ScheduledActors);
-        fields.Add("cognition", "loads-in-flight", cognition.LoadsInFlight);
-        fields.Add("cognition", "planning-frontiers", cognition.PlanningFrontiers);
-        fields.Add("cognition", "cached-plans", cognition.CachedPlans);
-        fields.Add("cognition", "pending-invalidations", cognition.PendingInvalidations);
-        fields.Add("cognition", "decisions", cognition.Decisions);
-        fields.Add("cognition", "intention-switches", cognition.IntentionSwitches);
-        fields.Add("cognition", "plans-built", cognition.PlansBuilt);
-        fields.Add("cognition", "plans-invalidated", cognition.PlansInvalidated);
-        fields.Add("cognition", "fallback-plans", cognition.FallbackPlans);
-        fields.Add("cognition", "mcts-nodes-expanded", cognition.MctsNodesExpanded);
-        fields.Add("cognition", "actors-with-missing-optional-records",
-            _cognitionProviders.MissingCapabilityCacheActors);
-        fields.Add("cognition", "suppressed-persistence-reads", _cognitionProviders.SuppressedCapabilityReads);
-        fields.Add("cognition", "configuration-error", cognition.ConfigurationError ?? "none");
-        fields.Add("cognition", "action-catalog",
-            _prototypes.EnumeratePrototypes<NCHumanActionPrototype>().Count());
-        var hasCognitionDue = _cognition.TryGetEarliestDecision(out var cognitionDueAt, out var cognitionDueNow);
-        fields.Add("cognition", "earliest-due", hasCognitionDue ? cognitionDueAt.Elapsed : null);
-        fields.Add("cognition", "due-now", hasCognitionDue && cognitionDueNow);
+        if (fields.Includes("cognition"))
+        {
+            var cognition = _cognition.GetCounters();
+            fields.Add("cognition", "active", cognition.Active);
+            fields.Add("cognition", "tracked", cognition.TrackedActors);
+            fields.Add("cognition", "scheduled", cognition.ScheduledActors);
+            fields.Add("cognition", "loads-in-flight", cognition.LoadsInFlight);
+            fields.Add("cognition", "planning-frontiers", cognition.PlanningFrontiers);
+            fields.Add("cognition", "cached-plans", cognition.CachedPlans);
+            fields.Add("cognition", "pending-invalidations", cognition.PendingInvalidations);
+            fields.Add("cognition", "decisions", cognition.Decisions);
+            fields.Add("cognition", "intention-switches", cognition.IntentionSwitches);
+            fields.Add("cognition", "plans-built", cognition.PlansBuilt);
+            fields.Add("cognition", "plans-invalidated", cognition.PlansInvalidated);
+            fields.Add("cognition", "fallback-plans", cognition.FallbackPlans);
+            fields.Add("cognition", "mcts-nodes-expanded", cognition.MctsNodesExpanded);
+            fields.Add("cognition", "actors-with-missing-optional-records",
+                _cognitionProviders.MissingCapabilityCacheActors);
+            fields.Add("cognition", "suppressed-persistence-reads", _cognitionProviders.SuppressedCapabilityReads);
+            fields.Add("cognition", "configuration-error", cognition.ConfigurationError ?? "none");
+            fields.Add("cognition", "action-catalog",
+                _prototypes.EnumeratePrototypes<NCHumanActionPrototype>().Count());
+            var hasCognitionDue = _cognition.TryGetEarliestDecision(out var cognitionDueAt, out var cognitionDueNow);
+            fields.Add("cognition", "earliest-due", hasCognitionDue ? cognitionDueAt.Elapsed : null);
+            fields.Add("cognition", "due-now", hasCognitionDue && cognitionDueNow);
+            fields.Add("cognition", "overdue-age",
+                hasActiveTime && hasCognitionDue && cognitionDueNow ? Age(now, cognitionDueAt) : null);
+        }
 
         fields.Add("incidents", "cached", _incidents.CachedCount);
         fields.Add("services", "cached", _cityServices.CachedServiceCount);
@@ -427,6 +502,16 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("load-governor", "admissions-accepted", load.AdmissionAccepted);
         fields.Add("load-governor", "admissions-rejected", load.AdmissionRejected);
         fields.Add("load-governor", "configuration-error", load.ConfigurationError ?? "none");
+        if (fields.Includes("load-governor"))
+        {
+            var recentLoadTransitions = _loadGovernor.GetRecentTransitions();
+            for (var index = 0; index < Math.Min(4, recentLoadTransitions.Length); index++)
+            {
+                var transition = recentLoadTransitions[index];
+                fields.Add("load-governor", $"recent-transition-{index + 1}",
+                    transition.At.Elapsed);
+            }
+        }
 
         fields.Add("groups", "cached", _groups.CachedGroupCount);
         fields.Add("groups", "cached-memberships", _groups.CachedMembershipCount);
@@ -636,6 +721,18 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("persistence", "failures", observability.Persistence.Failures);
         fields.Add("persistence", "version-conflicts", observability.Persistence.VersionConflicts);
         fields.Add("persistence", "duplicate-replays", observability.Persistence.DuplicateReplays);
+        fields.Add("persistence", "coalesced-writes", observability.Persistence.CoalescedWrites);
+        fields.Add("persistence", "retry-attempts", observability.Persistence.RetryAttempts);
+        fields.Add("persistence", "backpressure-rejections", observability.Persistence.BackpressureRejections);
+        fields.Add("persistence", "circuit-rejections", observability.Persistence.CircuitRejections);
+        fields.Add("persistence", "stale-results-rejected", observability.Persistence.StaleResultsRejected);
+        fields.Add("persistence", "queued-operations", observability.Persistence.QueuedOperations);
+        fields.Add("persistence", "in-flight-operations", observability.Persistence.InFlightOperations);
+        fields.Add("persistence", "consecutive-failures", observability.Persistence.ConsecutiveFailures);
+        fields.Add("persistence", "circuit-open-until",
+            observability.Persistence.CircuitOpenUntil is { } circuitOpenUntil && circuitOpenUntil > DateTime.UtcNow
+                ? circuitOpenUntil.ToString("O")
+                : "none");
         fields.Add("persistence", "latency-p50-ms", observability.Persistence.LatencyP50Milliseconds.ToString("0.00"));
         fields.Add("persistence", "latency-p95-ms", observability.Persistence.LatencyP95Milliseconds.ToString("0.00"));
         fields.Add("persistence", "latency-p99-ms", observability.Persistence.LatencyP99Milliseconds.ToString("0.00"));
@@ -698,7 +795,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
                 $"value={alert.Value:0.##}; threshold={alert.Threshold:0.##}; occurrences={alert.Occurrences}");
         }
 
-        SendOverview(args, request.RequestId, true, fields.Build(), null);
+        SendOverview(args, request.RequestId, request.Scope, true, fields.Build(), null);
     }
 
     /// <summary>
@@ -707,6 +804,9 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     /// </summary>
     private void AppendGeographyOverview(FieldBuilder fields)
     {
+        if (!fields.Includes("geography"))
+            return;
+
         var cityVersion = _cityConnectivity.GraphVersion;
         var roomVersion = _roomConnectivity.GraphVersion;
         var spawnVersion = _spawnCandidates.IndexVersion;
@@ -788,6 +888,9 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     /// </summary>
     private void AppendOutboxStorageOverview(FieldBuilder fields)
     {
+        if (!fields.Includes("outbox-storage"))
+            return;
+
         var refreshDue = _timing.CurTime >= _nextOutboxStatusRefresh;
         if (refreshDue)
         {
@@ -916,6 +1019,62 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         return true;
     }
 
+    private void AddPipelineFields(
+        FieldBuilder fields,
+        string section,
+        string rateKey,
+        NCCityRequestPipelineCounters counters)
+    {
+        if (!fields.Includes(section))
+            return;
+
+        fields.Add(section, "submitted-total", counters.Submitted);
+        fields.Add(section, "accepted-total", counters.Accepted);
+        fields.Add(section, "completed-total", counters.Completed);
+        fields.Add(section, "retained-total", counters.Retained);
+        fields.Add(section, "failed-total", counters.Failed);
+        fields.Add(section, "expired-total", counters.Expired);
+        fields.Add(section, "retries-total", counters.Retried);
+        fields.Add(section, "terminal-throughput-per-minute",
+            FormatRate(SampleRate($"{rateKey}:terminal", counters.Terminal)));
+        fields.Add(section, "failures-per-minute",
+            FormatRate(SampleRate($"{rateKey}:failed", counters.Failed + counters.Expired)));
+    }
+
+    /// <summary>
+    /// Calculates recent real-time throughput from monotonic per-round counters. Samples are request-driven and
+    /// bounded by a fixed key set, so F7 monitoring never retains individual operations.
+    /// </summary>
+    private double SampleRate(string key, long total)
+    {
+        var now = _timing.RealTime;
+        if (!_counterRateSamples.TryGetValue(key, out var previous) || total < previous.Total)
+        {
+            _counterRateSamples[key] = new CounterRateSample(total, now, 0d);
+            return 0d;
+        }
+
+        var elapsed = now - previous.At;
+        if (elapsed < TimeSpan.FromMilliseconds(500))
+            return previous.PerMinute;
+
+        var perMinute = elapsed <= TimeSpan.Zero
+            ? 0d
+            : Math.Max(0d, total - previous.Total) / elapsed.TotalMinutes;
+        _counterRateSamples[key] = new CounterRateSample(total, now, perMinute);
+        return perMinute;
+    }
+
+    private static string FormatRate(double value) =>
+        value.ToString("0.0", CultureInfo.InvariantCulture);
+
+    private static TimeSpan Age(NCActiveWorldTime now, NCActiveWorldTime earlier)
+    {
+        if (!now.IsValid || !earlier.IsValid || earlier > now)
+            return TimeSpan.Zero;
+        return now.Elapsed - earlier.Elapsed;
+    }
+
     private static bool ValidInspectionRequest(NCLivingCityAdminInspectRequest request) =>
         Enum.IsDefined(request.Kind) && request.Target != null && request.SecondaryTarget != null &&
         request.Target.Length <= MaximumTargetLength && request.SecondaryTarget.Length <= MaximumTargetLength &&
@@ -965,12 +1124,13 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     private void SendOverview(
         EntitySessionEventArgs args,
         Guid requestId,
+        NCLivingCityAdminOverviewScope scope,
         bool authorized,
         NCLivingCityAdminField[] fields,
         string? error)
     {
         NCLivingCityAdminTelemetry.Record(authorized && error == null, error, fields);
-        RaiseNetworkEvent(new NCLivingCityAdminOverviewSnapshot(requestId, authorized, fields, error),
+        RaiseNetworkEvent(new NCLivingCityAdminOverviewSnapshot(requestId, scope, authorized, fields, error),
             args.SenderSession);
     }
 
@@ -1004,13 +1164,26 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         int ValidationErrors,
         int ValidationWarnings);
 
+    private readonly record struct CounterRateSample(long Total, TimeSpan At, double PerMinute);
+
     private sealed class FieldBuilder
     {
         private readonly List<NCLivingCityAdminField> _fields = [];
+        private readonly NCLivingCityAdminOverviewScope? _scope;
+
+        public FieldBuilder()
+        {
+        }
+
+        public FieldBuilder(NCLivingCityAdminOverviewScope scope)
+        {
+            _scope = scope;
+        }
 
         public void Add(string section, string key, object? value)
         {
-            if (_fields.Count >= MaximumFields)
+            if (_fields.Count >= MaximumFields ||
+                _scope != null && ScopeForSection(section) != _scope)
                 return;
             _fields.Add(new NCLivingCityAdminField(
                 Bound(section, MaximumSectionLength),
@@ -1018,7 +1191,29 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
                 Bound(value?.ToString() ?? "none", MaximumValueLength)));
         }
 
+        public bool Includes(string section) =>
+            _scope == null || ScopeForSection(section) == _scope;
+
         public NCLivingCityAdminField[] Build() => _fields.ToArray();
+
+        private static NCLivingCityAdminOverviewScope ScopeForSection(string section)
+        {
+            if (section.StartsWith("ncpd-", StringComparison.Ordinal))
+                return NCLivingCityAdminOverviewScope.Ncpd;
+            if (section is "population-import" or "zone-states")
+                return NCLivingCityAdminOverviewScope.Population;
+            if (section is "actors" or "ambient" or "geography" or "geography-runtime" or
+                "groups" or "group-physicalization" or "group-trunk-routes" or
+                "workforce" or "residences" or "affordances" or "authorities" or "human-mind" or
+                "economic-assets" or "market" or "factions" or "incidents" or "services" or
+                "city-medical" or "medical-persistence" or "medical-snapshots" or
+                "medical-physiology" or "medical-body-functions" or "medical-visible-wounds")
+            {
+                return NCLivingCityAdminOverviewScope.City;
+            }
+
+            return NCLivingCityAdminOverviewScope.Runtime;
+        }
 
         private static string Bound(string value, int maximum)
         {

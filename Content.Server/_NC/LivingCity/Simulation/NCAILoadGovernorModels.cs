@@ -79,6 +79,10 @@ public enum NCAILoadWorkKind : byte
     PhysicalExecution,
     PhysicalPerception,
     Cognition,
+    DamageEvents,
+    MedicalEvents,
+    DoorInteractions,
+    AdminSnapshots,
     Ambient,
 }
 
@@ -103,6 +107,15 @@ public sealed record NCAILoadGovernorSnapshot(
     long AdmissionAccepted,
     long AdmissionRejected,
     string? ConfigurationError);
+
+/// <summary>
+/// One bounded state transition retained for administrator diagnostics.
+/// </summary>
+public readonly record struct NCAILoadGovernorTransition(
+    NCAILoadState From,
+    NCAILoadState To,
+    NCAILoadPressureReason Reasons,
+    NCActiveWorldTime At);
 
 /// <summary>
 /// Bounded runtime telemetry. Percentiles are calculated only when an administrator requests a snapshot.

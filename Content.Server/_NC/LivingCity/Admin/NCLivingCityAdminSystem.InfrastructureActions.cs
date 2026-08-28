@@ -176,16 +176,12 @@ public sealed partial class NCLivingCityAdminSystem
                         error = "civil-time-scheduler-inactive";
                         break;
                     }
-                    if (!_routines.TryAdvanceCivilTime(
+                    if (!_scheduler.TryAdvanceCivilTime(
                             TimeSpan.FromMinutes(gameMinutes),
                             out var civilTime,
+                            out var requeuedActors,
                             out error))
                     {
-                        break;
-                    }
-                    if (!_scheduler.TryReevaluateAll(out var requeuedActors))
-                    {
-                        error = "civil-time-scheduler-inactive";
                         break;
                     }
 
@@ -195,6 +191,7 @@ public sealed partial class NCLivingCityAdminSystem
                     fields.Add("civil-time-advance", "city-time",
                         civilTime.TimeOfDay.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture));
                     fields.Add("civil-time-advance", "manual-civil-advance", civilTime.ManualAdvance);
+                    fields.Add("civil-time-advance", "civil-time-revision", civilTime.Revision);
                     fields.Add("civil-time-advance", "actors-requeued", requeuedActors);
                     fields.Add("civil-time-advance", "active-world-time-unchanged", true);
                     break;

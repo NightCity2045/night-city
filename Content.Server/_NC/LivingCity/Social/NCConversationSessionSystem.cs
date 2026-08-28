@@ -59,6 +59,7 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
+        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(_ => Clear());
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
     }
@@ -82,8 +83,9 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
             {
                 // A corrupt or legacy future timestamp must invalidate only this round-local conversation, never
                 // terminate the server update loop. The authoritative clock separately enforces monotonic output.
-                if (session.StartedAt > now || session.LastActivityAt > now ||
-                    session.StartedAt > session.LastActivityAt)
+                if (session.StartedAt > session.LastActivityAt ||
+                    !now.TryElapsedSince(session.LastActivityAt, out var idleFor) ||
+                    !now.TryElapsedSince(session.StartedAt, out var lifetime))
                 {
                     Log.Warning($"Interrupted conversation {session.SessionId} after a clock discontinuity: " +
                                 $"now={now.Ticks}, started={session.StartedAt.Ticks}, " +
@@ -98,8 +100,8 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
                     continue;
                 }
 
-                var idle = now.ElapsedSince(session.LastActivityAt) >= policy.IdleTimeout;
-                var old = now.ElapsedSince(session.StartedAt) >= policy.MaximumLifetime;
+                var idle = idleFor >= policy.IdleTimeout;
+                var old = lifetime >= policy.MaximumLifetime;
                 if (idle || old)
                     Archive(session with
                     {

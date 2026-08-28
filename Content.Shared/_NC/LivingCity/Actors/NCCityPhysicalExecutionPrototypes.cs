@@ -56,6 +56,9 @@ public sealed partial class NCCityPhysicalExecutionPolicyPrototype : IPrototype
     public int MaximumConcurrentMutations { get; private set; }
 
     [DataField(required: true)]
+    public int MaximumMutationAttempts { get; private set; }
+
+    [DataField(required: true)]
     public int MaximumWaypoints { get; private set; }
 
     [DataField(required: true)]
@@ -84,6 +87,12 @@ public sealed partial class NCCityPhysicalExecutionPolicyPrototype : IPrototype
 
     [DataField(required: true)]
     public TimeSpan ReplanBackoff { get; private set; }
+
+    [DataField(required: true)]
+    public TimeSpan MinimumEquivalentReplanInterval { get; private set; }
+
+    [DataField(required: true)]
+    public TimeSpan TopologyChangeCoalesceDelay { get; private set; }
 
     [DataField(required: true)]
     public TimeSpan BlockedRetryInterval { get; private set; }

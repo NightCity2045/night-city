@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System.Globalization;
 using System.Linq;
 using Content.Client._NC.City.Connectivity;
 using Content.Client.Stylesheets;
@@ -35,6 +36,8 @@ public sealed partial class NCLivingCityAdminTab : Control
     private Guid _observerRequest;
     private Guid _inspectRequest;
     private Guid _geographyInspectRequest;
+    private NCLivingCityAdminOverviewScope _nextOverviewScope;
+    private readonly Dictionary<NCLivingCityAdminOverviewScope, NCLivingCityAdminField[]> _overviewSnapshots = [];
     private bool _monitoringActive;
     private TimeSpan _nextAutoRefresh;
     private NCLivingCityAdminInspectKind _lastGeographyInspectKind =
@@ -209,6 +212,7 @@ public sealed partial class NCLivingCityAdminTab : Control
             _admin.GeographyActionReceived -= OnGeographyAction;
             _connectivityDebug.SnapshotReceived -= OnConnectivitySnapshot;
             _renderedFieldLists.Clear();
+            _overviewSnapshots.Clear();
             _renderedObserverZoneIds = [];
             _renderedObserverZones = [];
         }
@@ -225,7 +229,13 @@ public sealed partial class NCLivingCityAdminTab : Control
             SetStatus(OverviewStatus, Loc.GetString("nc-living-city-admin-loading"), StatusTone.Loading);
             RefreshOverview.Disabled = true;
         }
-        _overviewRequest = _admin.RequestOverview();
+        var scope = Tabs.CurrentTab switch
+        {
+            4 => NCLivingCityAdminOverviewScope.Population,
+            8 => NCLivingCityAdminOverviewScope.Ncpd,
+            _ => TakeNextOverviewScope(),
+        };
+        _overviewRequest = _admin.RequestOverview(scope);
     }
 
     private void RequestObserver(bool automatic = false)
@@ -292,18 +302,31 @@ public sealed partial class NCLivingCityAdminTab : Control
         _overviewRequest = Guid.Empty;
         RefreshOverview.Disabled = false;
         var success = snapshot.Authorized && snapshot.Error == null;
+        if (success)
+            _overviewSnapshots[snapshot.Scope] = snapshot.Fields;
         SetStatus(
             OverviewStatus,
             success
                 ? Loc.GetString("nc-living-city-admin-ready")
                 : snapshot.Error ?? Loc.GetString("nc-living-city-admin-not-authorized"),
             success ? StatusTone.Success : StatusTone.Error);
-        if (Tabs.CurrentTab == 0)
-            RenderFields(OverviewFields, snapshot.Fields);
+        if (Tabs.CurrentTab == 0 && snapshot.Scope is
+                NCLivingCityAdminOverviewScope.Runtime or NCLivingCityAdminOverviewScope.City)
+        {
+            var overviewFields = new[]
+                {
+                    NCLivingCityAdminOverviewScope.Runtime,
+                    NCLivingCityAdminOverviewScope.City,
+                }
+                .Where(_overviewSnapshots.ContainsKey)
+                .SelectMany(scope => _overviewSnapshots[scope])
+                .ToArray();
+            RenderFields(OverviewFields, overviewFields);
+        }
 
         // Population operations are mutations, while these two sections are a read-only live projection.
         // Keeping them in the same panel makes long imports and projection rebuilds observable once per second.
-        if (Tabs.CurrentTab == 4 && success)
+        if (Tabs.CurrentTab == 4 && success && snapshot.Scope == NCLivingCityAdminOverviewScope.Population)
         {
             var populationFields = snapshot.Fields
                 .Where(static field => field.Section is "population-import" or "zone-states")
@@ -311,7 +334,7 @@ public sealed partial class NCLivingCityAdminTab : Control
             RenderFields(PopulationActionFields, populationFields);
         }
 
-        if (Tabs.CurrentTab == 8)
+        if (Tabs.CurrentTab == 8 && snapshot.Scope == NCLivingCityAdminOverviewScope.Ncpd)
         {
             SetStatus(
                 NcpdStatus,
@@ -862,6 +885,15 @@ public sealed partial class NCLivingCityAdminTab : Control
     private void ScheduleAutoRefresh()
     {
         _nextAutoRefresh = _timing.RealTime;
+    }
+
+    private NCLivingCityAdminOverviewScope TakeNextOverviewScope()
+    {
+        var scope = _nextOverviewScope;
+        _nextOverviewScope = scope == NCLivingCityAdminOverviewScope.Runtime
+            ? NCLivingCityAdminOverviewScope.City
+            : NCLivingCityAdminOverviewScope.Runtime;
+        return scope;
     }
 
     /// <summary>
@@ -1554,6 +1586,14 @@ public sealed partial class NCLivingCityAdminTab : Control
     {
         if (field.Value.Equals("elevated", StringComparison.OrdinalIgnoreCase))
             return true;
+        if (field.Key.EndsWith("-total", StringComparison.Ordinal))
+            return false;
+        if (field.Key.EndsWith("-per-minute", StringComparison.Ordinal) &&
+            (field.Key.Contains("failure", StringComparison.Ordinal) ||
+             field.Key.Contains("expired", StringComparison.Ordinal)))
+        {
+            return PositiveRate(field.Value);
+        }
         return (field.Key.Contains("failed", StringComparison.Ordinal) ||
                 field.Key.Contains("rejected", StringComparison.Ordinal) ||
                 field.Key.Contains("exhausted", StringComparison.Ordinal) ||
@@ -1563,6 +1603,9 @@ public sealed partial class NCLivingCityAdminTab : Control
     }
 
     private static bool Positive(string value) => int.TryParse(value, out var number) && number > 0;
+
+    private static bool PositiveRate(string value) =>
+        double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var number) && number > 0d;
 
     private enum StatusTone : byte
     {

@@ -64,6 +64,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
     private NCSessionEpoch _epoch;
     private NCActiveWorldTime _nextEvaluation;
     private int _generation;
+    private int _materializationClusterCursor;
     private int _dematerializationCursor;
     private int _requiredPhysicalActors;
     private int _waitingPhysicalActors;
@@ -156,7 +157,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
             return false;
         }
 
-        if (_activeLocalZones.Contains(actor.CurrentZone))
+        if (IsLocalZoneActive(actor.CurrentZone))
         {
             lod = NCCityActorLod.Local;
             return true;
@@ -176,6 +177,19 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
 
         lod = NCCityActorLod.City;
         return true;
+    }
+
+    private bool IsLocalZoneActive(NCZoneId zoneId)
+    {
+        var current = zoneId;
+        var depth = 0;
+        while (current.IsValid && depth++ < 16 && _zones.TryGetZone(current, out var zone))
+        {
+            if (_activeLocalZones.Contains(current))
+                return true;
+            current = zone.Parent;
+        }
+        return false;
     }
 
     private void RebuildClusters()
@@ -340,19 +354,14 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
         List<NCZoneId> local,
         HashSet<NCZoneId> strategic)
     {
-        var ordered = new[]
-        {
-            context.MissionSlotId.ZoneId,
-            context.ApartmentId.ZoneId,
-            context.BuildingId.ZoneId,
-            context.StreetId.ZoneId,
-        };
-        foreach (var zone in ordered)
-        {
-            if (!zone.IsValid || local.Contains(zone))
-                continue;
-            local.Add(zone);
-        }
+        // Local relevance uses the most-specific authored place. Keeping all parents local would make a player
+        // inside one building materialize every resident currently assigned to the containing street.
+        var localZone = context.MissionSlotId.IsValid ? context.MissionSlotId.ZoneId :
+            context.ApartmentId.IsValid ? context.ApartmentId.ZoneId :
+            context.BuildingId.IsValid ? context.BuildingId.ZoneId :
+            context.StreetId.ZoneId;
+        if (localZone.IsValid && !local.Contains(localZone))
+            local.Add(localZone);
         if (context.SectorId.IsValid)
             strategic.Add(context.SectorId.ZoneId);
         if (context.DistrictId.IsValid)
@@ -382,19 +391,28 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
             _policy.MaximumMaterializationRequestsPerEvaluation);
         var requestedOperations = 0;
         var inspected = new HashSet<NCActorId>();
-        foreach (var cluster in _clusters.OrderByDescending(static cluster => cluster.AttachedPlayerCount))
+        if (_clusters.Count == 0)
+            return;
+
+        // Rotate the first cluster every evaluation. One busy cluster cannot permanently consume the complete
+        // dispatch allowance while another observed district waits for its physical residents.
+        _materializationClusterCursor %= _clusters.Count;
+        for (var clusterOffset = 0; clusterOffset < _clusters.Count; clusterOffset++)
         {
+            var cluster = _clusters[(_materializationClusterCursor + clusterOffset) % _clusters.Count];
             var inspections = 0;
-            foreach (var zoneId in cluster.ActiveZoneIds)
+            for (var zoneIndex = 0; zoneIndex < cluster.ActiveZoneIds.Count; zoneIndex++)
             {
                 if (inspections >= _policy.MaximumCandidateInspectionsPerCluster)
-                {
                     break;
-                }
+                var zoneId = cluster.ActiveZoneIds[zoneIndex];
                 if (!_zoneBuckets.TryGetValue(zoneId, out var bucket))
                     continue;
 
-                var maximum = _policy.MaximumCandidateInspectionsPerCluster - inspections;
+                var remainingZones = cluster.ActiveZoneIds.Count - zoneIndex;
+                var maximum = Math.Max(
+                    1,
+                    (_policy.MaximumCandidateInspectionsPerCluster - inspections) / remainingZones);
                 foreach (var actorId in bucket.TakeRoundRobin(maximum))
                 {
                     inspections++;
@@ -439,6 +457,11 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                             _waitingPhysicalActors++;
                             continue;
                         }
+                        if (!_groupPhysicalization.CanAcceptRequest)
+                        {
+                            _waitingPhysicalActors++;
+                            continue;
+                        }
 
                         var groupRequestId = Guid.NewGuid();
                         var groupState = _groupPhysicalization.Request(new NCCityGroupPhysicalizationRequest(
@@ -448,7 +471,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                             NCCityGroupPhysicalizationReason.PlayerRelevance,
                             _policy.PlayerRelevancePriority,
                             unchecked((uint) groupId.Value.GetHashCode()),
-                            null,
+                            _groupPhysicalization.AutomaticRequestMaximumWait,
                             "living-city.relevance"));
                         if (IsGroupRequestActive(groupState.Status))
                         {
@@ -461,6 +484,12 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                         continue;
                     }
 
+                    if (!_materialization.CanAcceptRequest)
+                    {
+                        _waitingPhysicalActors++;
+                        continue;
+                    }
+
                     var requestId = Guid.NewGuid();
                     var state = _materialization.Request(new NCCityMaterializationRequest(
                         requestId,
@@ -468,7 +497,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                         NCCityMaterializationReason.PlayerRelevance,
                         _policy.PlayerRelevancePriority,
                         unchecked((uint) actorId.Value.GetHashCode()),
-                        null,
+                        _materialization.AutomaticRequestMaximumWait,
                         "living-city.relevance"));
                     if (state.Status is NCCityMaterializationRequestStatus.Queued or
                         NCCityMaterializationRequestStatus.Loading or
@@ -483,6 +512,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                 }
             }
         }
+        _materializationClusterCursor = (_materializationClusterCursor + 1) % _clusters.Count;
     }
 
     private void EvaluateDematerialization(NCActiveWorldTime now)
@@ -547,6 +577,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
             {
                 if (_groupDematerializationRequests.ContainsKey(groupId) ||
                     _groupPhysicalization.HasActiveRequest(groupId) ||
+                    !_groupPhysicalization.CanAcceptRequest ||
                     !_groupPhysicalization.IsEligibleForDematerialization(groupId, out _))
                 {
                     _eligibilityBlockedActors++;
@@ -560,7 +591,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
                     NCCityGroupPhysicalizationReason.PlayerRelevance,
                     500,
                     unchecked((uint) groupId.Value.GetHashCode()),
-                    null,
+                    _groupPhysicalization.AutomaticRequestMaximumWait,
                     "living-city.relevance"));
                 if (IsGroupRequestActive(groupState.Status))
                 {
@@ -574,6 +605,11 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
             }
 
             if (!_dematerialization.IsEligibleForOffscreenHandOff(binding.ActorId, binding.EntityUid, out _))
+            {
+                _eligibilityBlockedActors++;
+                continue;
+            }
+            if (!_dematerialization.CanAcceptRequest)
             {
                 _eligibilityBlockedActors++;
                 continue;
@@ -743,19 +779,42 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
     {
         if (_catalog.TryGetValue(candidate.ActorId, out var current) && current.Version > candidate.Version)
             return;
-        if (_catalog.TryGetValue(candidate.ActorId, out current) && current.CurrentZone != candidate.CurrentZone &&
-            _zoneBuckets.TryGetValue(current.CurrentZone, out var previous))
-        {
-            previous.Remove(candidate.ActorId);
-        }
+        if (_catalog.TryGetValue(candidate.ActorId, out current) && current.CurrentZone != candidate.CurrentZone)
+            IndexActorHierarchy(candidate.ActorId, current.CurrentZone, false);
 
         _catalog[candidate.ActorId] = candidate;
-        if (!_zoneBuckets.TryGetValue(candidate.CurrentZone, out var bucket))
+        IndexActorHierarchy(candidate.ActorId, candidate.CurrentZone, true);
+    }
+
+    /// <summary>
+    /// Indexes an actor under the exact local zone and its local ancestors. A resident in an apartment or mission
+    /// slot can therefore be found from the containing building without scanning all descendants at evaluation time.
+    /// </summary>
+    private void IndexActorHierarchy(NCActorId actorId, NCZoneId zoneId, bool add)
+    {
+        var current = zoneId;
+        var depth = 0;
+        while (current.IsValid && depth++ < 16 && _zones.TryGetZone(current, out var zone))
         {
-            bucket = new ZoneBucket();
-            _zoneBuckets.Add(candidate.CurrentZone, bucket);
+            if (zone.ContextSlot is NCZoneContextSlot.MissionSlot or NCZoneContextSlot.Apartment or
+                NCZoneContextSlot.Building or NCZoneContextSlot.Street)
+            {
+                if (add)
+                {
+                    if (!_zoneBuckets.TryGetValue(current, out var bucket))
+                        _zoneBuckets.Add(current, bucket = new ZoneBucket());
+                    bucket.Add(actorId);
+                }
+                else if (_zoneBuckets.TryGetValue(current, out var bucket))
+                {
+                    bucket.Remove(actorId);
+                    if (bucket.Count == 0)
+                        _zoneBuckets.Remove(current);
+                }
+            }
+
+            current = zone.Parent;
         }
-        bucket.Add(candidate.ActorId);
     }
 
     private void OnSessionStarted(NCActiveWorldSessionStartedEvent args)
@@ -796,6 +855,7 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
         _policy = null;
         _epoch = default;
         _nextEvaluation = default;
+        _materializationClusterCursor = 0;
         _dematerializationCursor = 0;
         _requiredPhysicalActors = 0;
         _waitingPhysicalActors = 0;
@@ -871,6 +931,8 @@ public sealed partial class NCCityRelevanceSystem : EntitySystem
         private readonly List<NCActorId> _actors = [];
         private readonly HashSet<NCActorId> _membership = [];
         private int _cursor;
+
+        public int Count => _actors.Count;
 
         public void Add(NCActorId actorId)
         {

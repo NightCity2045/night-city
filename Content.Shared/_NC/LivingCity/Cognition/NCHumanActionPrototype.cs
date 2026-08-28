@@ -97,6 +97,10 @@ public sealed partial class NCHumanActionPrototype : IPrototype
     [DataField] public bool RequiresPhysicalEntity { get; private set; }
     [DataField] public float MaximumRange { get; private set; }
     [DataField] public float CompletionRange { get; private set; }
+    /// <summary>Minimum cadence for refreshing a moving coordinate goal such as an escape vector.</summary>
+    [DataField] public TimeSpan SteeringRefreshInterval { get; private set; }
+    /// <summary>Minimum map-space displacement before an active coordinate goal may be replaced.</summary>
+    [DataField] public float SteeringRetargetDistance { get; private set; }
     [DataField] public string SpeechLocId { get; private set; } = string.Empty;
     [DataField] public HashSet<NCHumanActionInterruptKind> Interrupts { get; private set; } = [];
 }

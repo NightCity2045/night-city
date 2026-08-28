@@ -315,8 +315,13 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                 .ToArray(),
             context.ForbiddenAssertionKeys,
             context.ForbiddenTopics);
-        var request = new NCNeuralRequestEnvelope(Guid.NewGuid(), kind, priority, actorId, epoch,
-            actor.AggregateVersion, now.Advance(policy.RequestLifetime), DefaultPrompt,
+        // Context assembly spans multiple asynchronous reads. Revalidate the round after the final await so an old
+        // packet cannot enter a newly started Neural queue.
+        if (!_clock.TryGetCurrentTime(out var currentEpoch, out var currentNow) || currentEpoch != epoch)
+            return false;
+
+        var request = new NCNeuralRequestEnvelope(Guid.NewGuid(), kind, priority, actorId, currentEpoch,
+            actor.AggregateVersion, currentNow.Advance(policy.RequestLifetime), DefaultPrompt,
             packetFacts,
             effectiveCapabilities, conversationSnapshot?.CurrentTopicKeys ?? [], "ru-RU", persona, autonomy,
             perceived, perceivedEvents, knownLocations, dialogueInput, directiveActions, disclosure)

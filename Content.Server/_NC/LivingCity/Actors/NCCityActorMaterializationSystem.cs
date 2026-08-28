@@ -18,6 +18,7 @@ using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
+using Content.Shared.Interaction;
 using Robust.Server.Player;
 using Robust.Shared.Asynchronous;
 using Robust.Shared.Map;
@@ -41,6 +42,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
     [Dependency] private ITaskManager _taskManager = default!;
     [Dependency] private IPlayerManager _players = default!;
     [Dependency] private EntityLookupSystem _lookup = default!;
+    [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private MetaDataSystem _metadata = default!;
     [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
@@ -67,12 +69,44 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
     private int _generation;
     private int _inFlight;
     private long _sequence;
+    private long _submitted;
+    private long _accepted;
+    private long _completed;
+    private long _failed;
+    private long _expired;
+    private long _retried;
     private bool _active;
 
     public bool IsActive => _active;
     public int PendingRequestCount => _pending.Count;
     public int InFlightCount => _inFlight;
     public int RetainedResultCount => _states.Count - _pending.Count;
+    public bool CanAcceptRequest => _active && _policy != null && _pending.Count < _policy.MaximumQueuedRequests;
+    public TimeSpan? AutomaticRequestMaximumWait => _policy?.MaximumWait;
+
+    public NCCityRequestPipelineCounters GetPipelineCounters()
+    {
+        return new NCCityRequestPipelineCounters(
+            _submitted,
+            _accepted,
+            _completed,
+            0,
+            _failed,
+            _expired,
+            _retried);
+    }
+
+    public bool TryGetOldestPendingAt(out NCActiveWorldTime requestedAt)
+    {
+        requestedAt = default;
+        foreach (var pending in _pending.Values)
+        {
+            if (!requestedAt.IsValid || pending.RequestedAt < requestedAt)
+                requestedAt = pending.RequestedAt;
+        }
+
+        return requestedAt.IsValid;
+    }
 
     public override void Initialize()
     {
@@ -135,10 +169,12 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
     {
         if (_states.TryGetValue(request.RequestId, out var replay))
             return replay;
+        _submitted++;
         var now = default(NCActiveWorldTime);
         if (!_active || _policy == null ||
             !_clock.TryGetCurrentTime(out var epoch, out now) || epoch != _epoch)
         {
+            _failed++;
             return new NCCityMaterializationRequestState(
                 request.RequestId,
                 request.ActorId,
@@ -252,6 +288,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         var pending = new PendingRequest(request, now, now.Advance(wait), 0, ++_sequence, now);
         _pending.Add(request.RequestId, pending);
         _requestByActor.Add(request.ActorId, request.RequestId);
+        _accepted++;
         SetState(pending, NCCityMaterializationRequestStatus.Queued, null);
         Enqueue(pending);
         return _states[request.RequestId];
@@ -333,6 +370,13 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         {
             CompleteTerminal(pending, NCCityMaterializationRequestStatus.Rejected,
                 "Dead, archived or frozen actors cannot be materialized.");
+            return;
+        }
+        // Persistent reads are asynchronous. Another request may have materialized the actor while this load was
+        // in flight, so re-check the one-to-one index before selecting a point or creating an ECS entity.
+        if (_runtime.TryGetEntity(snapshot.Identity.ActorId, out var existing) && Exists(existing))
+        {
+            CompleteTerminal(pending, NCCityMaterializationRequestStatus.AlreadyMaterialized, null, existing);
             return;
         }
         // An abstract residence has no map coordinates. Reject before spawning so incident requests cannot leave
@@ -442,11 +486,12 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
 
         var count = Math.Min(_candidateBuffer.Count, _policy.MaximumCandidateChecks);
         var start = (int) (seed % (uint) _candidateBuffer.Count);
-        // Prefer an off-screen candidate, but never keep a semantically co-located resident abstract solely because
-        // the current room is visible. The second pass accepts a visible point while preserving collision safety.
+        // Automatic relevance never pops an actor into direct view. Explicit incident/service/admin requests may use
+        // the visible collision-safe fallback because their appearance can be an authored world event.
         if (TrySelectCandidate(count, start, request, true, out selected))
             return true;
-        return TrySelectCandidate(count, start, request, false, out selected);
+        return request.Reason != NCCityMaterializationReason.PlayerRelevance &&
+               TrySelectCandidate(count, start, request, false, out selected);
     }
 
     private bool TrySelectCandidate(
@@ -464,10 +509,12 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         {
             var candidate = _candidateBuffer[(start + i) % _candidateBuffer.Count];
             if (!_coordinates.TryResolve(candidate.Target, out var mapCoordinates) ||
-                requireHidden && IsNearPlayerOrAnchor(mapCoordinates, _policy.PlayerVisibilityExclusionRadius) ||
-                !requireHidden && IsNearPlayerOrAnchor(mapCoordinates, _policy.PlayerSpawnExclusionRadius) ||
-                request.Reason == NCCityMaterializationReason.PlayerRelevance &&
-                !IsNearPlayerOrAnchor(mapCoordinates, _policy.PlayerRelevanceMaximumRadius) ||
+                requireHidden && IsVisibleToPlayerOrAnchor(
+                    mapCoordinates,
+                    _policy.PlayerVisibilityExclusionRadius) ||
+                !requireHidden && IsWithinPlayerOrAnchorRadius(
+                    mapCoordinates,
+                    _policy.PlayerSpawnExclusionRadius) ||
                 request.PreferredTarget is { } preferred &&
                 !IsWithinPreferredTarget(candidate.Target, preferred, request.PreferredRadius!.Value) ||
                 IsOccupiedByActor(mapCoordinates, _policy.ActorOccupancyExclusionRadius))
@@ -482,7 +529,44 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         return false;
     }
 
-    private bool IsNearPlayerOrAnchor(MapCoordinates target, float radius)
+    private bool IsVisibleToPlayerOrAnchor(MapCoordinates target, float radius)
+    {
+        var radiusSquared = radius * radius;
+        foreach (var session in _players.Sessions)
+        {
+            if (session.AttachedEntity is not { } attached || !Exists(attached))
+                continue;
+            var observer = _transform.GetMapCoordinates(attached);
+            if (observer.MapId == target.MapId &&
+                Vector2.DistanceSquared(observer.Position, target.Position) <= radiusSquared &&
+                _interaction.InRangeUnobstructed(observer, target, radius))
+            {
+                return true;
+            }
+        }
+
+        _anchorIndex.GetAnchors(_anchorBuffer);
+        foreach (var anchor in _anchorBuffer)
+        {
+            if (!Exists(anchor) ||
+                !TryComp<NCCityRelevanceAnchorComponent>(anchor, out var component) || !component.Enabled)
+            {
+                continue;
+            }
+
+            var observer = _transform.GetMapCoordinates(anchor);
+            if (observer.MapId == target.MapId &&
+                Vector2.DistanceSquared(observer.Position, target.Position) <= radiusSquared &&
+                _interaction.InRangeUnobstructed(observer, target, radius))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool IsWithinPlayerOrAnchorRadius(MapCoordinates target, float radius)
     {
         var radiusSquared = radius * radius;
         foreach (var session in _players.Sessions)
@@ -546,6 +630,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         }
 
         pending = pending with { DueAt = now.Advance(_policy.RetryDelay), Sequence = ++_sequence };
+        _retried++;
         _pending[pending.Request.RequestId] = pending;
         SetState(pending, NCCityMaterializationRequestStatus.Retrying, error);
         Enqueue(pending);
@@ -591,6 +676,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         _pending.Remove(pending.Request.RequestId);
         _requestByActor.Remove(pending.Request.ActorId);
         SetState(pending, status, error, entityUid);
+        RecordTerminal(status);
         _completedOrder.Enqueue(pending.Request.RequestId);
         TrimCompletedHistory();
     }
@@ -598,8 +684,26 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
     private void RetainTerminal(NCCityMaterializationRequestState state)
     {
         _states[state.RequestId] = state;
+        RecordTerminal(state.Status);
         _completedOrder.Enqueue(state.RequestId);
         TrimCompletedHistory();
+    }
+
+    private void RecordTerminal(NCCityMaterializationRequestStatus status)
+    {
+        switch (status)
+        {
+            case NCCityMaterializationRequestStatus.Materialized:
+            case NCCityMaterializationRequestStatus.AlreadyMaterialized:
+                _completed++;
+                break;
+            case NCCityMaterializationRequestStatus.Expired:
+                _expired++;
+                break;
+            case NCCityMaterializationRequestStatus.Rejected:
+                _failed++;
+                break;
+        }
     }
 
     private void TrimCompletedHistory()
@@ -693,8 +797,8 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
                float.IsFinite(policy.PlayerVisibilityExclusionRadius) && policy.PlayerVisibilityExclusionRadius > 0f &&
                float.IsFinite(policy.PlayerSpawnExclusionRadius) && policy.PlayerSpawnExclusionRadius > 0f &&
                policy.PlayerSpawnExclusionRadius < policy.PlayerVisibilityExclusionRadius &&
-               float.IsFinite(policy.PlayerRelevanceMaximumRadius) &&
-               policy.PlayerRelevanceMaximumRadius > policy.PlayerVisibilityExclusionRadius &&
+               float.IsFinite(policy.AdminPreferredSpawnRadius) && policy.AdminPreferredSpawnRadius > 0f &&
+               policy.AdminPreferredSpawnRadius <= MaximumPreferredRadius &&
                float.IsFinite(policy.ActorOccupancyExclusionRadius) && policy.ActorOccupancyExclusionRadius > 0f &&
                policy.RetryDelay > TimeSpan.Zero && policy.DefaultMaximumWait > TimeSpan.Zero &&
                policy.DefaultMaximumWait <= policy.MaximumWait;
@@ -709,6 +813,12 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         _policy = null;
         _epoch = default;
         _inFlight = 0;
+        _submitted = 0;
+        _accepted = 0;
+        _completed = 0;
+        _failed = 0;
+        _expired = 0;
+        _retried = 0;
         _pending.Clear();
         _requestByActor.Clear();
         _states.Clear();

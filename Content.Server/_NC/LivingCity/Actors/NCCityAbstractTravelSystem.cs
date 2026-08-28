@@ -36,7 +36,9 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
 
     private readonly PriorityQueue<ScheduledTravel, TravelPriority> _queue = new();
     private readonly Dictionary<NCActorId, NCActiveWorldTime> _scheduled = [];
-    private readonly Dictionary<NCActorId, NCCityActorLocationMutationRequest> _pendingMutations = [];
+    private readonly Dictionary<NCActorId, PendingMutation> _pendingMutations = [];
+    private readonly Dictionary<NCActorId, NCActiveWorldTime> _deferredSchedules = [];
+    private readonly HashSet<NCActorId> _inFlightActors = [];
     private readonly List<NCCityRouteStep> _route = [];
 
     private NCCityAbstractTravelPolicyPrototype? _policy;
@@ -50,14 +52,29 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
     private bool _pageLoadInFlight;
 
     public int QueuedActorCount => _scheduled.Count;
+    public int DeferredScheduleCount => _deferredSchedules.Count;
     public int InFlightCount => _inFlight;
     public int PendingMutationCount => _pendingMutations.Count;
+    public long MutationRetriesExhausted { get; private set; }
     public bool InitialLoadComplete { get; private set; }
+
+    public bool TryGetEarliestDue(out NCActiveWorldTime dueAt)
+    {
+        dueAt = default;
+        foreach (var scheduledAt in _scheduled.Values)
+        {
+            if (!dueAt.IsValid || scheduledAt < dueAt)
+                dueAt = scheduledAt;
+        }
+
+        return dueAt.IsValid;
+    }
 
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
+        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(OnSessionClosing);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
         SubscribeLocalEvent<NCCityActorPersistedEvent>(OnActorPersisted);
@@ -84,23 +101,21 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
         var dispatched = 0;
         while (dispatched < dispatchLimit &&
                _inFlight < _policy.MaximumConcurrentMutations &&
-               _queue.TryPeek(out var scheduled, out var priority) &&
+               TryPeekScheduled(out var scheduled, out var priority) &&
                priority.DueTicks <= now.Ticks)
         {
             _queue.Dequeue();
-            if (!_scheduled.TryGetValue(scheduled.ActorId, out var dueAt) || dueAt != scheduled.DueAt)
-                continue;
-
             _scheduled.Remove(scheduled.ActorId);
             _inFlight++;
+            _inFlightActors.Add(scheduled.ActorId);
             dispatched++;
             if (_pendingMutations.TryGetValue(scheduled.ActorId, out var pending))
-                BeginMutation(_generation, pending);
+                BeginMutation(_generation, pending.Request);
             else
                 BeginActorLoad(_generation, scheduled.ActorId);
         }
 
-        var backlogged = _queue.TryPeek(out _, out var remainingPriority) &&
+        var backlogged = TryPeekScheduled(out _, out var remainingPriority) &&
             remainingPriority.DueTicks <= now.Ticks;
         _loadGovernor.ReportBacklog(NCAILoadBacklogKind.AbstractTravel, backlogged);
     }
@@ -130,6 +145,12 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
             Reset();
     }
 
+    private void OnSessionClosing(NCActiveWorldSessionClosingEvent args)
+    {
+        if (_active && args.Epoch == _epoch)
+            Reset();
+    }
+
     private void OnClockFailed(NCActiveWorldClockFailedEvent args)
     {
         if (_active && args.Epoch == _epoch)
@@ -144,6 +165,7 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
             _runtime.TryGetEntity(args.ActorId, out _))
         {
             _scheduled.Remove(args.ActorId);
+            _deferredSchedules.Remove(args.ActorId);
             _pendingMutations.Remove(args.ActorId);
             return;
         }
@@ -158,6 +180,7 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
         if (args.Materialized)
         {
             _scheduled.Remove(args.ActorId);
+            _deferredSchedules.Remove(args.ActorId);
             _pendingMutations.Remove(args.ActorId);
             return;
         }
@@ -455,12 +478,19 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
             Guid.NewGuid(),
             AuditSource: "system:abstract-travel",
             PresenceMode: schedule.PresenceMode);
-        _pendingMutations[request.ActorId] = request;
+        _pendingMutations[request.ActorId] = new PendingMutation(request, 0);
         BeginMutation(_generation, request);
     }
 
     private void BeginMutation(int generation, NCCityActorLocationMutationRequest request)
     {
+        if (!_pendingMutations.TryGetValue(request.ActorId, out var pending) ||
+            pending.Request.CommandId != request.CommandId)
+        {
+            return;
+        }
+
+        _pendingMutations[request.ActorId] = pending with { Attempts = pending.Attempts + 1 };
         _ = ObserveMutation(generation, request);
     }
 
@@ -496,6 +526,11 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
         if (error != null || result == null)
         {
             Log.Error($"Abstract travel mutation for {actorId} failed before returning a result: {error}");
+            if (!CanRetryMutation(actorId))
+            {
+                ExhaustMutation(actorId);
+                return;
+            }
             Retry(actorId, now, keepPending: true);
             return;
         }
@@ -510,6 +545,11 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
                 Finish(actorId, unload: false);
                 return;
             case NCCityActorMutationStatus.StorageFailure:
+                if (!CanRetryMutation(actorId))
+                {
+                    ExhaustMutation(actorId);
+                    return;
+                }
                 Retry(actorId, now, keepPending: true);
                 return;
             case NCCityActorMutationStatus.VersionConflict:
@@ -536,19 +576,57 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
         Finish(actorId, unload: false);
     }
 
+    private bool CanRetryMutation(NCActorId actorId) =>
+        _policy != null && _pendingMutations.TryGetValue(actorId, out var pending) &&
+        pending.Attempts < _policy.MaximumMutationAttempts;
+
+    private void ExhaustMutation(NCActorId actorId)
+    {
+        _pendingMutations.Remove(actorId);
+        MutationRetriesExhausted++;
+        Finish(actorId);
+    }
+
     private void Enqueue(NCActorId actorId, NCActiveWorldTime dueAt)
     {
         if (!actorId.IsValid || !dueAt.IsValid)
+            return;
+
+        if (_inFlightActors.Contains(actorId))
+        {
+            if (!_deferredSchedules.TryGetValue(actorId, out var deferred) || dueAt < deferred)
+                _deferredSchedules[actorId] = dueAt;
+            return;
+        }
+
+        if (_scheduled.TryGetValue(actorId, out var existing) && existing <= dueAt)
             return;
 
         _scheduled[actorId] = dueAt;
         _queue.Enqueue(new ScheduledTravel(actorId, dueAt), new TravelPriority(dueAt.Ticks, _sequence++));
     }
 
+    private bool TryPeekScheduled(out ScheduledTravel scheduled, out TravelPriority priority)
+    {
+        while (_queue.TryPeek(out scheduled, out priority))
+        {
+            if (_scheduled.TryGetValue(scheduled.ActorId, out var dueAt) && dueAt == scheduled.DueAt)
+                return true;
+            _queue.Dequeue();
+        }
+
+        scheduled = default;
+        priority = default;
+        return false;
+    }
+
     private void Finish(NCActorId actorId, bool unload = true)
     {
+        _inFlightActors.Remove(actorId);
         if (_inFlight > 0)
             _inFlight--;
+        if (_deferredSchedules.Remove(actorId, out var deferredDue))
+            Enqueue(actorId, deferredDue);
         if (unload)
             _actors.Unload(actorId);
     }
@@ -567,7 +645,10 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
         InitialLoadComplete = false;
         _queue.Clear();
         _scheduled.Clear();
+        _deferredSchedules.Clear();
+        _inFlightActors.Clear();
         _pendingMutations.Clear();
+        MutationRetriesExhausted = 0;
     }
 
     private static bool ValidatePolicy(NCCityAbstractTravelPolicyPrototype policy)
@@ -576,6 +657,7 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
                policy.MaximumDispatchesPerTick is >= 1 and <= 64 &&
                policy.MaximumConcurrentMutations is >= 1 and <= 128 &&
                policy.RetryDelay > TimeSpan.Zero &&
+               policy.MaximumMutationAttempts is >= 1 and <= 32 &&
                policy.MinimumTravelDuration > TimeSpan.Zero &&
                policy.MaximumTravelDuration >= policy.MinimumTravelDuration &&
                policy.MaximumTravelDuration <= TimeSpan.FromDays(7) &&
@@ -598,4 +680,6 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
             return due != 0 ? due : Sequence.CompareTo(other.Sequence);
         }
     }
+
+    private sealed record PendingMutation(NCCityActorLocationMutationRequest Request, int Attempts);
 }

@@ -27,4 +27,29 @@ public sealed class NCCVars : CVars
     /// <summary>Provider credential forwarded only to the configured cognition endpoint as a bearer.</summary>
     public static readonly CVarDef<string> NeuralApiKey =
         CVarDef.Create("nc_neural.api_key", string.Empty, CVar.SERVERONLY | CVar.CONFIDENTIAL);
+
+    /// <summary>Maximum number of Living City persistence operations executing against storage at once.</summary>
+    public static readonly CVarDef<int> PersistenceMaximumConcurrentOperations =
+        CVarDef.Create("nc_persistence.maximum_concurrent_operations", 16, CVar.SERVERONLY);
+
+    /// <summary>Maximum number of persistence operations waiting for an execution slot.</summary>
+    public static readonly CVarDef<int> PersistenceMaximumQueuedOperations =
+        CVarDef.Create("nc_persistence.maximum_queued_operations", 512, CVar.SERVERONLY);
+
+    /// <summary>Number of bounded retries for transient storage failures.</summary>
+    public static readonly CVarDef<int> PersistenceMaximumRetries =
+        CVarDef.Create("nc_persistence.maximum_retries", 2, CVar.SERVERONLY);
+
+    public static readonly CVarDef<int> PersistenceInitialRetryDelayMilliseconds =
+        CVarDef.Create("nc_persistence.initial_retry_delay_ms", 50, CVar.SERVERONLY);
+
+    public static readonly CVarDef<int> PersistenceMaximumRetryDelayMilliseconds =
+        CVarDef.Create("nc_persistence.maximum_retry_delay_ms", 500, CVar.SERVERONLY);
+
+    /// <summary>Consecutive terminal failures required to temporarily open the persistence circuit.</summary>
+    public static readonly CVarDef<int> PersistenceCircuitFailureThreshold =
+        CVarDef.Create("nc_persistence.circuit_failure_threshold", 5, CVar.SERVERONLY);
+
+    public static readonly CVarDef<int> PersistenceCircuitOpenSeconds =
+        CVarDef.Create("nc_persistence.circuit_open_seconds", 10, CVar.SERVERONLY);
 }

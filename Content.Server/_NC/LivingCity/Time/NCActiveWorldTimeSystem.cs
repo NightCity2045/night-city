@@ -15,6 +15,10 @@ using Robust.Shared.Timing;
 
 namespace Content.Server._NC.LivingCity.Time;
 
+public readonly record struct NCActiveWorldClockRuntimeSnapshot(
+    long MonotonicRegressionsClamped,
+    long StaleStartCallbacksRejected);
+
 /// <summary>
 /// Owns the authoritative city clock. It advances only while the game ticker is in a live round and
 /// persists coalesced checkpoints instead of performing database work from every simulation tick.
@@ -34,12 +38,18 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
     private TaskCompletionSource? _idleCompletion;
     private bool _operationInFlight;
     private TimeSpan _checkpointInterval = TimeSpan.FromSeconds(30);
+    private long _monotonicRegressionsClamped;
+    private long _staleStartCallbacksRejected;
 
     /// <summary>
     /// True only after the current round epoch has been durably activated and no clock conflict occurred.
     /// Persistent A-Life mutation systems must fail closed while this is false.
     /// </summary>
     public bool IsReady => _current is { Active: true, Started: true, Failed: false };
+
+    public NCActiveWorldClockRuntimeSnapshot GetRuntimeSnapshot() => new(
+        _monotonicRegressionsClamped,
+        _staleStartCallbacksRejected);
 
     public override void Initialize()
     {
@@ -91,6 +101,7 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
                 if (!state.RegressionWarningLogged)
                 {
                     state.RegressionWarningLogged = true;
+                    _monotonicRegressionsClamped++;
                     Log.Warning($"Clamped active-world clock regression for epoch {state.Epoch}: " +
                                 $"candidate={candidate.Ticks}, published={state.LastPublishedTime.Ticks}.");
                 }
@@ -267,6 +278,14 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
                     return;
 
                 state.Started = true;
+                if (!state.Active || !ReferenceEquals(_current, state))
+                {
+                    // The durable activation is still required so the queued close can finish, but no runtime
+                    // subsystem may be restarted after its round has already entered closing.
+                    _staleStartCallbacksRejected++;
+                    return;
+                }
+
                 RaiseLocalEvent(new NCActiveWorldSessionStartedEvent(
                     result.SessionEpoch,
                     result.Time));

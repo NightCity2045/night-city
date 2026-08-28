@@ -43,12 +43,9 @@ public sealed partial class NCCityMaterializationPolicyPrototype : IPrototype
     [DataField]
     public float PlayerSpawnExclusionRadius { get; private set; } = 2f;
 
-    /// <summary>
-    /// Automatic player-relevance spawns must remain inside this radius of a player or enabled camera anchor.
-    /// Keeping it at or below the dematerialization radius prevents a spawn/despawn feedback loop.
-    /// </summary>
+    /// <summary>Search radius around an explicit administrator-selected materialization target.</summary>
     [DataField]
-    public float PlayerRelevanceMaximumRadius { get; private set; } = 36f;
+    public float AdminPreferredSpawnRadius { get; private set; } = 28f;
 
     [DataField]
     public float ActorOccupancyExclusionRadius { get; private set; } = 1f;

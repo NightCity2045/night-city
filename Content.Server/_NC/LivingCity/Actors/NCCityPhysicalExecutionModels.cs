@@ -89,6 +89,7 @@ public readonly record struct NCCityPhysicalExecutionCounters(
     long Arrivals,
     long BlockedGoals,
     long FailedGoals,
+    long MutationRetriesExhausted,
     string? ConfigurationError);
 
 internal enum NCCityPhysicalMutationKind : byte

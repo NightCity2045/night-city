@@ -27,6 +27,7 @@ using Content.Shared._NC.LivingCity.Affordances;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Cognition;
 using Content.Shared._NC.Persistence.Identity;
+using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 
@@ -184,12 +185,12 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
         if (inRange)
         {
             // Keep the lease and HTN suspension, but do not path into the followed person's collision body.
-            _steering.Unregister(actor);
+            StopSteeringGoal(actor, state);
             return;
         }
 
         // Entity-relative steering keeps following a moving human and preserves vanilla collision/path checks.
-        _steering.Register(actor, new EntityCoordinates(target, Vector2.Zero));
+        RegisterEntitySteeringGoal(actor, state, target, args.Action.CompletionRange);
     }
 
     private void ExecuteHold(
@@ -217,14 +218,14 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
         if (state.HasTargetCoordinates && IsReached(actor, state.TargetCoordinates, args.Action.CompletionRange))
         {
             // Keep the same bounded steering authority while selecting another catalogued point in this zone.
-            _steering.Unregister(actor);
+            StopSteeringGoal(actor, state);
             state.HasTargetCoordinates = false;
             state.PatrolCycle++;
         }
         if (state.OwnsSteering && TryComp<NPCSteeringComponent>(actor, out var steering) &&
             steering.Status == SteeringStatus.NoPath)
         {
-            _steering.Unregister(actor);
+            StopSteeringGoal(actor, state);
             state.HasTargetCoordinates = false;
             state.PatrolCycle++;
         }
@@ -245,7 +246,7 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
         if (!AcquireMovement(actor, state, InterruptFor(args)) ||
             !TryResolveEntityCoordinates(state.TargetCoordinates, out var destination))
             return;
-        _steering.Register(actor, destination);
+        RegisterCoordinateSteeringGoal(actor, state, destination, args.Action, args.Now);
     }
 
     private void ExecuteFlee(
@@ -285,7 +286,7 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
 
         var direction = distance > 0.001f ? delta / distance : Vector2.UnitX;
         var destination = Transform(actor).Coordinates.Offset(direction * args.Action.CompletionRange);
-        _steering.Register(actor, destination);
+        RegisterCoordinateSteeringGoal(actor, state, destination, args.Action, args.Now);
     }
 
     private void ExecuteCombatAuthority(
@@ -546,6 +547,78 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
         return true;
     }
 
+    /// <summary>
+    /// Entity-relative steering already follows a moving target. Registering the same goal again would submit an
+    /// identical vanilla path request, so it is retained until the target changes or steering reports failure.
+    /// </summary>
+    private void RegisterEntitySteeringGoal(
+        EntityUid actor,
+        NCHumanVanillaActionComponent state,
+        EntityUid target,
+        float completionRange)
+    {
+        if (state.RegisteredSteeringTarget == target && HasUsableSteering(actor, state))
+            return;
+
+        var steering = _steering.Register(actor, new EntityCoordinates(target, Vector2.Zero));
+        steering.Range = completionRange;
+        steering.ArriveOnLineOfSight = false;
+        state.RegisteredSteeringTarget = target;
+        state.HasRegisteredSteeringDestination = false;
+    }
+
+    /// <summary>
+    /// Static patrol goals are registered once. Dynamic flee goals may move, but only after both their authored
+    /// refresh cadence and displacement threshold have been crossed.
+    /// </summary>
+    private void RegisterCoordinateSteeringGoal(
+        EntityUid actor,
+        NCHumanVanillaActionComponent state,
+        EntityCoordinates destination,
+        NCHumanActionPrototype action,
+        NCActiveWorldTime now)
+    {
+        var mapDestination = _transform.ToMapCoordinates(destination);
+        if (state.HasRegisteredSteeringDestination && HasUsableSteering(actor, state) &&
+            state.RegisteredSteeringDestination.MapId == mapDestination.MapId)
+        {
+            var displacement = Vector2.DistanceSquared(
+                state.RegisteredSteeringDestination.Position,
+                mapDestination.Position);
+            var threshold = action.SteeringRetargetDistance * action.SteeringRetargetDistance;
+            var refreshDue = action.SteeringRefreshInterval <= TimeSpan.Zero ||
+                             !now.TryElapsedSince(state.SteeringRegisteredAt, out var elapsed) ||
+                             elapsed >= action.SteeringRefreshInterval;
+            if (displacement <= threshold || !refreshDue)
+                return;
+        }
+
+        var steering = _steering.Register(actor, destination);
+        // Flee completion means separation from the threat, not arrival range around the projected destination.
+        // Preserve the vanilla steering range there so the NPC does not consider a newly projected escape point reached.
+        if (action.Operation != NCHumanActionOperationKind.FleeFromTarget)
+            steering.Range = action.CompletionRange;
+        steering.ArriveOnLineOfSight = false;
+        state.RegisteredSteeringTarget = null;
+        state.RegisteredSteeringDestination = mapDestination;
+        state.HasRegisteredSteeringDestination = true;
+        state.SteeringRegisteredAt = now;
+    }
+
+    private bool HasUsableSteering(EntityUid actor, NCHumanVanillaActionComponent state) =>
+        state.OwnsSteering && TryComp<NPCSteeringComponent>(actor, out var steering) &&
+        steering.Status != SteeringStatus.NoPath;
+
+    private void StopSteeringGoal(EntityUid actor, NCHumanVanillaActionComponent state)
+    {
+        if (state.OwnsSteering && Exists(actor) && HasComp<NPCSteeringComponent>(actor))
+            _steering.Unregister(actor);
+        state.RegisteredSteeringTarget = null;
+        state.RegisteredSteeringDestination = default;
+        state.HasRegisteredSteeringDestination = false;
+        state.SteeringRegisteredAt = default;
+    }
+
     private NCCityPhysicalInterruptFlags InterruptFor(NCHumanActionExecutionEvent args)
     {
         return args.Intention.CapabilityId switch
@@ -703,7 +776,7 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
         {
             if (state.OwnsSteering)
             {
-                _steering.Unregister(actor);
+                StopSteeringGoal(actor, state);
                 _steeringLease.Release(actor, SteeringOwner);
                 state.OwnsSteering = false;
             }

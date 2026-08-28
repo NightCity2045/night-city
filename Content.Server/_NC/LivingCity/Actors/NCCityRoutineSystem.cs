@@ -36,6 +36,7 @@ public readonly record struct NCCityRoutineDecision(
 
 public readonly record struct NCCityCivilTimeSnapshot(
     NCSessionEpoch Epoch,
+    long Revision,
     long Day,
     TimeSpan TimeOfDay,
     TimeSpan CivilDayDuration,
@@ -50,7 +51,7 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
 {
     private const int MaximumRoutineEntries = 64;
     private const int MaximumTextLength = 128;
-    private static readonly ProtoId<NCCityRoutineProfilePrototype> DefaultCivilRoutine = "NCDefaultCivilianRoutine";
+    private static readonly ProtoId<NCCityCivilClockPolicyPrototype> DefaultCivilClock = "NCDefaultCityCivilClock";
 
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCZoneSystem _zones = default!;
@@ -58,12 +59,14 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
 
     private NCSessionEpoch _epoch;
     private long _manualCivilAdvanceTicks;
+    private long _civilRevision;
     private bool _active;
 
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
+        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(OnSessionClosing);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
     }
@@ -77,7 +80,7 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
             return false;
         }
 
-        return TryBuildCivilTime(epoch, now, out snapshot, out error);
+        return TryBuildCivilTime(epoch, now, _manualCivilAdvanceTicks, _civilRevision, out snapshot, out error);
     }
 
     /// <summary>
@@ -96,13 +99,13 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
             return false;
         }
 
-        if (!TryGetDefaultCivilRoutine(out var routine, out error))
+        if (!TryGetCivilClockPolicy(out var clockPolicy, out error))
         {
             snapshot = default;
             return false;
         }
 
-        if (advance <= TimeSpan.Zero || advance > routine.MaximumManualAdvance)
+        if (advance <= TimeSpan.Zero || advance > clockPolicy.MaximumManualAdvance)
         {
             snapshot = default;
             error = "civil-time-advance-out-of-range";
@@ -111,7 +114,24 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
 
         try
         {
-            _manualCivilAdvanceTicks = checked(_manualCivilAdvanceTicks + advance.Ticks);
+            var candidateTicks = checked(_manualCivilAdvanceTicks + advance.Ticks);
+            var candidateRevision = checked(_civilRevision + 1);
+            if (!TryBuildCivilTime(
+                    epoch,
+                    now,
+                    candidateTicks,
+                    candidateRevision,
+                    out snapshot,
+                    out error))
+            {
+                return false;
+            }
+
+            // Commit only after the complete snapshot has been calculated successfully. A failed overflow or
+            // validation therefore cannot leave the civil phase half-advanced.
+            _manualCivilAdvanceTicks = candidateTicks;
+            _civilRevision = candidateRevision;
+            return true;
         }
         catch (OverflowException)
         {
@@ -120,7 +140,6 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
             return false;
         }
 
-        return TryBuildCivilTime(epoch, now, out snapshot, out error);
     }
 
     public bool TryEvaluate(
@@ -156,7 +175,10 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
             return false;
         }
 
-        var routineDecision = EvaluateRoutine(actor.Snapshot, routine, archetype.TravelMode, now);
+        if (!TryGetCivilClockPolicy(out var clockPolicy, out error))
+            return false;
+
+        var routineDecision = EvaluateRoutine(actor.Snapshot, routine, clockPolicy, archetype.TravelMode, now);
         if (!routineDecision.TargetZone.IsValid || !_zones.TryGetZone(routineDecision.TargetZone, out _))
         {
             error = $"Routine {routine.ID} resolves to a missing actor target zone.";
@@ -208,6 +230,8 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
     public bool ValidateAll(List<string> errors)
     {
         errors.Clear();
+        if (!TryGetCivilClockPolicy(out _, out var clockError))
+            errors.Add($"{DefaultCivilClock}: {clockError}");
         foreach (var profile in _prototypes.EnumeratePrototypes<NCCityRoutineProfilePrototype>()
                      .OrderBy(static profile => profile.ID, StringComparer.Ordinal))
         {
@@ -220,17 +244,15 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
 
     public bool ValidateProfile(NCCityRoutineProfilePrototype profile, out string? error)
     {
-        if (profile.CycleDuration <= TimeSpan.Zero || profile.ActiveCycleDuration <= TimeSpan.Zero)
+        if (profile.CycleDuration <= TimeSpan.Zero)
         {
-            error = "Civil and active-world cycle durations must be positive.";
+            error = "The routine cycle duration must be positive.";
             return false;
         }
 
-        if (profile.CyclePhaseOffset < TimeSpan.Zero || profile.CyclePhaseOffset >= profile.CycleDuration ||
-            profile.ActorPhaseSpread < TimeSpan.Zero || profile.ActorPhaseSpread >= profile.CycleDuration ||
-            profile.MaximumManualAdvance <= TimeSpan.Zero || profile.MaximumManualAdvance > profile.CycleDuration)
+        if (profile.ActorPhaseSpread < TimeSpan.Zero || profile.ActorPhaseSpread >= profile.CycleDuration)
         {
-            error = "Cycle phase offset and actor spread must fit the cycle, and the maximum manual advance must be positive and no longer than one cycle.";
+            error = "The actor phase spread must fit the routine cycle.";
             return false;
         }
 
@@ -279,18 +301,20 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
     private NCCityRoutineDecision EvaluateRoutine(
         NCCityActorSnapshot actor,
         NCCityRoutineProfilePrototype routine,
+        NCCityCivilClockPolicyPrototype clockPolicy,
         NCCityTravelMode defaultTravelMode,
         NCActiveWorldTime now)
     {
         var cycleTicks = routine.CycleDuration.Ticks;
-        var activeCycleTicks = routine.ActiveCycleDuration.Ticks;
-        var activePositionTicks = now.Ticks % activeCycleTicks;
-        var scaledPositionTicks = ScaleTicksFloor(activePositionTicks, cycleTicks, activeCycleTicks);
+        var scaledCivilTicks = ScaleTicksFloor(
+            now.Ticks,
+            clockPolicy.CivilDayDuration.Ticks,
+            clockPolicy.ActiveDayDuration.Ticks);
         var actorPhaseOffset = GetActorPhaseOffset(
             actor.Identity.ActorId,
             routine.ActorPhaseSpread.Ticks);
         var positionTicks = PositiveModulo(
-            scaledPositionTicks + routine.CyclePhaseOffset.Ticks + actorPhaseOffset + _manualCivilAdvanceTicks,
+            scaledCivilTicks + clockPolicy.InitialTimeOfDay.Ticks + actorPhaseOffset + _manualCivilAdvanceTicks,
             cycleTicks);
         var activeIndex = 0;
         for (var i = 1; i < routine.Entries.Count; i++)
@@ -320,7 +344,10 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
 
         // Routine entries are authored in civil time. Only their wait to the next boundary is converted back to
         // active-world time; unrelated gameplay deadlines keep their normal duration.
-        var activeTicksUntilNext = ScaleTicksCeiling(ticksUntilNext, activeCycleTicks, cycleTicks);
+        var activeTicksUntilNext = ScaleTicksCeiling(
+            ticksUntilNext,
+            clockPolicy.ActiveDayDuration.Ticks,
+            clockPolicy.CivilDayDuration.Ticks);
         return new NCCityRoutineDecision(
             NCCityRoutineDecisionSource.Routine,
             default,
@@ -376,10 +403,17 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
     {
         _epoch = args.Epoch;
         _manualCivilAdvanceTicks = 0;
+        _civilRevision = 0;
         _active = true;
     }
 
     private void OnSessionClosed(NCActiveWorldSessionClosedEvent args)
+    {
+        if (_active && args.Epoch == _epoch)
+            ResetCivilTime();
+    }
+
+    private void OnSessionClosing(NCActiveWorldSessionClosingEvent args)
     {
         if (_active && args.Epoch == _epoch)
             ResetCivilTime();
@@ -394,10 +428,12 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
     private bool TryBuildCivilTime(
         NCSessionEpoch epoch,
         NCActiveWorldTime now,
+        long manualAdvanceTicks,
+        long revision,
         out NCCityCivilTimeSnapshot snapshot,
         out string? error)
     {
-        if (!TryGetDefaultCivilRoutine(out var routine, out error))
+        if (!TryGetCivilClockPolicy(out var clockPolicy, out error))
         {
             snapshot = default;
             return false;
@@ -407,17 +443,18 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
         {
             var elapsedCivilTicks = ScaleTicksFloor(
                 now.Ticks,
-                routine.CycleDuration.Ticks,
-                routine.ActiveCycleDuration.Ticks);
+                clockPolicy.CivilDayDuration.Ticks,
+                clockPolicy.ActiveDayDuration.Ticks);
             var totalCivilTicks = checked(
-                elapsedCivilTicks + routine.CyclePhaseOffset.Ticks + _manualCivilAdvanceTicks);
+                elapsedCivilTicks + clockPolicy.InitialTimeOfDay.Ticks + manualAdvanceTicks);
             snapshot = new NCCityCivilTimeSnapshot(
                 epoch,
-                totalCivilTicks / routine.CycleDuration.Ticks + 1,
-                TimeSpan.FromTicks(totalCivilTicks % routine.CycleDuration.Ticks),
-                routine.CycleDuration,
-                routine.ActiveCycleDuration,
-                TimeSpan.FromTicks(_manualCivilAdvanceTicks));
+                revision,
+                totalCivilTicks / clockPolicy.CivilDayDuration.Ticks + 1,
+                TimeSpan.FromTicks(totalCivilTicks % clockPolicy.CivilDayDuration.Ticks),
+                clockPolicy.CivilDayDuration,
+                clockPolicy.ActiveDayDuration,
+                TimeSpan.FromTicks(manualAdvanceTicks));
             error = null;
             return true;
         }
@@ -429,11 +466,17 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
         }
     }
 
-    private bool TryGetDefaultCivilRoutine(
-        out NCCityRoutineProfilePrototype routine,
+    private bool TryGetCivilClockPolicy(
+        out NCCityCivilClockPolicyPrototype clockPolicy,
         out string? error)
     {
-        if (!_prototypes.TryIndex(DefaultCivilRoutine, out routine!) || !ValidateProfile(routine, out _))
+        if (!_prototypes.TryIndex(DefaultCivilClock, out clockPolicy!) ||
+            clockPolicy.CivilDayDuration <= TimeSpan.Zero ||
+            clockPolicy.ActiveDayDuration <= TimeSpan.Zero ||
+            clockPolicy.InitialTimeOfDay < TimeSpan.Zero ||
+            clockPolicy.InitialTimeOfDay >= clockPolicy.CivilDayDuration ||
+            clockPolicy.MaximumManualAdvance <= TimeSpan.Zero ||
+            clockPolicy.MaximumManualAdvance > clockPolicy.CivilDayDuration)
         {
             error = "civil-time-profile-invalid";
             return false;
@@ -448,5 +491,6 @@ public sealed partial class NCCityRoutineSystem : EntitySystem
         _active = false;
         _epoch = default;
         _manualCivilAdvanceTicks = 0;
+        _civilRevision = 0;
     }
 }

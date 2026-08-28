@@ -57,6 +57,7 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
     private long _arrivals;
     private long _blockedGoals;
     private long _failedGoals;
+    private long _mutationRetriesExhausted;
     private bool _active;
     private string? _configurationError;
 
@@ -64,6 +65,7 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
+        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(OnSessionClosing);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
         SubscribeLocalEvent<NCCityActorRehydratedEvent>(OnActorRehydrated);
@@ -159,6 +161,7 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
         _arrivals,
         _blockedGoals,
         _failedGoals,
+        _mutationRetriesExhausted,
         _configurationError);
 
     private void OnSessionStarted(NCActiveWorldSessionStartedEvent args)
@@ -180,6 +183,12 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
     }
 
     private void OnSessionClosed(NCActiveWorldSessionClosedEvent args)
+    {
+        if (_active && args.Epoch == _epoch)
+            Reset();
+    }
+
+    private void OnSessionClosing(NCActiveWorldSessionClosingEvent args)
     {
         if (_active && args.Epoch == _epoch)
             Reset();
@@ -224,12 +233,12 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
 
     private void OnCityGraphChanged(ref NCCityConnectivityChangedEvent args)
     {
-        WakeForTopologyChange("city-graph-changed");
+        WakeForNavigationTopologyChange("city-graph-changed");
     }
 
     private void OnRoomGraphChanged(ref NCRoomPortalGraphChangedEvent args)
     {
-        WakeForTopologyChange("room-graph-changed");
+        WakeForNavigationTopologyChange("room-graph-changed");
     }
 
     private void OnGroupTrunkInvalidated(NCCityGroupTrunkRouteInvalidatedEvent args)
@@ -260,14 +269,16 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
 
     private void OnSpawnCandidatesChanged(ref NCCitySpawnCandidateIndexChangedEvent args)
     {
-        WakeForTopologyChange("destination-index-changed");
+        WakeForDestinationIndexChange(args.NewVersion);
     }
 
-    private void WakeForTopologyChange(string reason)
+    private void WakeForNavigationTopologyChange(string reason)
     {
-        if (!_active || !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
+        if (!_active || _policy == null ||
+            !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
             return;
 
+        var topologyVersion = new NCCityNavigationPlanVersion(_city.GraphVersion, _rooms.GraphVersion);
         // This visits only the materialized execution set, never the city actor catalog.
         foreach (var entityUid in _tracked)
         {
@@ -276,14 +287,65 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
             {
                 continue;
             }
-
-            component.ReplanAttempts = 0;
-            component.LastFailure = reason;
-            component.State = NCCityPhysicalExecutionState.Replanning;
-            StopSteering(entityUid, component);
-            AddTrace(component, now, reason, reason);
-            ScheduleExecution(entityUid, now);
+            if (component.PlanVersion == topologyVersion || component.LastReplanTopologyVersion == topologyVersion)
+                continue;
+            WakeForTopologyChange(entityUid, component, now, topologyVersion, reason);
         }
+    }
+
+    private void WakeForDestinationIndexChange(long destinationIndexVersion)
+    {
+        if (!_active || _policy == null ||
+            !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
+            return;
+
+        var topologyVersion = new NCCityNavigationPlanVersion(_city.GraphVersion, _rooms.GraphVersion);
+        foreach (var entityUid in _tracked)
+        {
+            if (!TryComp<NCCityPhysicalExecutionComponent>(entityUid, out var component) ||
+                component.State is NCCityPhysicalExecutionState.Idle or NCCityPhysicalExecutionState.LoadingIntent ||
+                component.DestinationIndexVersion == destinationIndexVersion)
+            {
+                continue;
+            }
+
+            component.DestinationIndexVersion = destinationIndexVersion;
+            if (!TryRefreshDestination(component))
+            {
+                FailGoal(entityUid, component, now, "destination-zone-has-no-compatible-navigation-target");
+                continue;
+            }
+            WakeForTopologyChange(entityUid, component, now, topologyVersion, "destination-index-changed");
+        }
+    }
+
+    /// <summary>
+    /// Coalesces structural graph/index bursts before any actor asks vanilla pathfinding for a replacement route.
+    /// Repeated events for an already observed version cannot reset the same route indefinitely.
+    /// </summary>
+    private void WakeForTopologyChange(
+        EntityUid entityUid,
+        NCCityPhysicalExecutionComponent component,
+        NCActiveWorldTime now,
+        NCCityNavigationPlanVersion topologyVersion,
+        string reason)
+    {
+        if (_policy == null)
+            return;
+        component.ReplanAttempts = 0;
+        component.LastFailure = reason;
+        component.LastReplanAt = now;
+        component.LastReplanReason = reason;
+        component.LastReplanTopologyVersion = topologyVersion;
+        component.State = NCCityPhysicalExecutionState.Replanning;
+        ClearRejectedPortals(component);
+        StopSteering(entityUid, component);
+        AddTrace(component, now, reason, reason);
+
+        // Replace an earlier movement tick with one delayed topology rebuild. Stale priority entries are discarded
+        // by TryDequeueDueExecution because their due time no longer matches this authoritative schedule.
+        _scheduledExecutions.Remove(entityUid);
+        ScheduleExecution(entityUid, now.Advance(_policy.TopologyChangeCoalesceDelay));
     }
 
     private void TrackAndQueueIntent(NCActorId actorId, EntityUid entityUid, long minimumVersion)
@@ -512,6 +574,7 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
         _arrivals = 0;
         _blockedGoals = 0;
         _failedGoals = 0;
+        _mutationRetriesExhausted = 0;
         _configurationError = null;
         _loadGovernor.ReportBacklog(NCAILoadBacklogKind.PhysicalExecution, false);
         _loadGovernor.ReportQueue(NCAILoadQueueKind.PhysicalExecution, 0, 1);
@@ -523,6 +586,7 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
         policy.MaximumConcurrentIntentLoads > 0 &&
         policy.MaximumExecutionUpdatesPerTick > 0 &&
         policy.MaximumConcurrentMutations > 0 &&
+        policy.MaximumMutationAttempts is >= 1 and <= 32 &&
         policy.MaximumWaypoints > 0 &&
         policy.MaximumImmediateWaypointCompletions > 0 &&
         policy.MaximumImmediateWaypointCompletions <= policy.MaximumWaypoints &&
@@ -535,6 +599,8 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
         policy.PortalTraversalTimeout > policy.EvaluationInterval &&
         policy.PortalInteractionRetryInterval > TimeSpan.Zero &&
         policy.ReplanBackoff > TimeSpan.Zero &&
+        policy.MinimumEquivalentReplanInterval >= policy.ReplanBackoff &&
+        policy.TopologyChangeCoalesceDelay >= TimeSpan.Zero &&
         policy.BlockedRetryInterval > TimeSpan.Zero &&
         policy.MutationRetryDelay > TimeSpan.Zero &&
         policy.HtnResumeCooldown >= TimeSpan.Zero &&

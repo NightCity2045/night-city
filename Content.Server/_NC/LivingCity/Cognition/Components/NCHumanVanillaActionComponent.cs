@@ -5,6 +5,8 @@
 using Content.Server._NC.LivingCity.Actors;
 using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.LivingCity.Cognition;
+using Content.Shared._NC.Persistence.Time;
+using Robust.Shared.Map;
 
 namespace Content.Server._NC.LivingCity.Cognition.Components;
 
@@ -21,6 +23,10 @@ public sealed partial class NCHumanVanillaActionComponent : Component
     [ViewVariables(VVAccess.ReadOnly)] public bool HasTargetCoordinates;
     [ViewVariables(VVAccess.ReadOnly)] public uint PatrolCycle;
     [ViewVariables(VVAccess.ReadOnly)] public bool OwnsSteering;
+    [ViewVariables(VVAccess.ReadOnly)] public EntityUid? RegisteredSteeringTarget;
+    [ViewVariables(VVAccess.ReadOnly)] public MapCoordinates RegisteredSteeringDestination;
+    [ViewVariables(VVAccess.ReadOnly)] public bool HasRegisteredSteeringDestination;
+    [ViewVariables(VVAccess.ReadOnly)] public NCActiveWorldTime SteeringRegisteredAt;
     [ViewVariables(VVAccess.ReadOnly)] public bool SuspendedHtn;
     [ViewVariables(VVAccess.ReadOnly)] public bool OwnsCombatBlocker;
     [ViewVariables(VVAccess.ReadOnly)] public NCCityPhysicalInterruptFlags Interrupt;

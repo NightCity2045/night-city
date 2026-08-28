@@ -128,6 +128,7 @@ public sealed partial class NCCityPhysicalExecutionSystem
             request,
             now,
             false,
+            0,
             TrimDiagnostic(failure));
         component.State = NCCityPhysicalExecutionState.Committing;
         AddTrace(component, now, kind == NCCityPhysicalMutationKind.Arrival
@@ -161,7 +162,11 @@ public sealed partial class NCCityPhysicalExecutionSystem
             return;
         }
 
-        pending = pending with { InFlight = true };
+        pending = pending with
+        {
+            InFlight = true,
+            Attempts = pending.Attempts + 1,
+        };
         _pendingMutations[component.ActorId] = pending;
         _mutationsInFlight++;
         _ = ObserveLocationMutation(_generation, pending);
@@ -207,6 +212,11 @@ public sealed partial class NCCityPhysicalExecutionSystem
         if (error != null || result == null)
         {
             component.LastFailure = TrimDiagnostic(error?.Message ?? "location-mutation-returned-no-result");
+            if (!CanRetryLocationMutation(pending))
+            {
+                ExhaustLocationMutation(pending, component, now);
+                return;
+            }
             _pendingMutations[component.ActorId] = pending with
             {
                 NextAttemptAt = now.Advance(_policy.MutationRetryDelay),
@@ -227,6 +237,11 @@ public sealed partial class NCCityPhysicalExecutionSystem
                 return;
             case NCCityActorMutationStatus.StorageFailure:
                 component.LastFailure = TrimDiagnostic(result.Error);
+                if (!CanRetryLocationMutation(pending))
+                {
+                    ExhaustLocationMutation(pending, component, now);
+                    return;
+                }
                 _pendingMutations[component.ActorId] = pending with
                 {
                     NextAttemptAt = now.Advance(_policy.MutationRetryDelay),
@@ -247,6 +262,19 @@ public sealed partial class NCCityPhysicalExecutionSystem
                     $"location-commit-{result.Status}: {result.Error}");
                 return;
         }
+    }
+
+    private bool CanRetryLocationMutation(PendingLocationMutation pending) =>
+        _policy != null && pending.Attempts < _policy.MaximumMutationAttempts;
+
+    private void ExhaustLocationMutation(
+        PendingLocationMutation pending,
+        NCCityPhysicalExecutionComponent component,
+        NCActiveWorldTime now)
+    {
+        _pendingMutations.Remove(component.ActorId);
+        _mutationRetriesExhausted++;
+        FailGoal(pending.EntityUid, component, now, "location-commit-retries-exhausted");
     }
 
     private void CompleteCommittedMutation(
@@ -291,5 +319,6 @@ public sealed partial class NCCityPhysicalExecutionSystem
         NCCityActorLocationMutationRequest Request,
         NCActiveWorldTime NextAttemptAt,
         bool InFlight,
+        int Attempts,
         string Failure);
 }

@@ -5,6 +5,7 @@
 using Content.Server.Preferences.Managers;
 using Content.Server.Chat.Systems;
 using Content.Server._NC.LivingCity.Actors;
+using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Social;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.Social;
@@ -31,6 +32,7 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
+    [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCConversationSessionSystem _conversations = default!;
     [Dependency] private NCNeuralCognitionClientSystem _neural = default!;
@@ -200,6 +202,7 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
             speakerParty,
             target.Comp.ListeningRange);
         _attention[target.Owner] = user;
+        BeginConversationBlockers(user, target.Owner);
         return true;
     }
 
@@ -296,7 +299,25 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
             return;
         if (_attention.TryGetValue(active.Target, out var speaker) && speaker == user)
             _attention.Remove(active.Target);
+        EndConversationBlockers(user, active.Target);
         _conversations.TryTransition(active.SessionId, NCConversationStatus.Ended, reason, out _);
+    }
+
+    private void BeginConversationBlockers(EntityUid speaker, EntityUid target)
+    {
+        // Conversation is a physical commitment for every persistent participant, not merely for the neural target.
+        if (_runtime.TryGetActor(target, out _))
+            _dematerialization.BeginBlocker(target, NCCityDematerializationBlockerFlags.Conversation);
+        if (speaker != target && _runtime.TryGetActor(speaker, out _))
+            _dematerialization.BeginBlocker(speaker, NCCityDematerializationBlockerFlags.Conversation);
+    }
+
+    private void EndConversationBlockers(EntityUid speaker, EntityUid target)
+    {
+        if (_runtime.TryGetActor(target, out _))
+            _dematerialization.EndBlocker(target, NCCityDematerializationBlockerFlags.Conversation);
+        if (speaker != target && _runtime.TryGetActor(speaker, out _))
+            _dematerialization.EndBlocker(speaker, NCCityDematerializationBlockerFlags.Conversation);
     }
 
     private bool TryAcquireAttention(EntityUid speaker)
@@ -330,9 +351,8 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
 
     private void Clear()
     {
-        foreach (var (user, active) in _active.ToArray())
-            _conversations.TryTransition(active.SessionId, NCConversationStatus.Ended, "round-ended", out _);
-        _active.Clear();
+        foreach (var user in _active.Keys.ToArray())
+            EndConversation(user, "round-ended");
         _attention.Clear();
         _nextNpcSpeech.Clear();
         _initiativeDue.Clear();

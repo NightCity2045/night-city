@@ -17,6 +17,39 @@ public enum NCHumanActionRuntimeState : byte
     Interrupted,
 }
 
+/// <summary>
+/// Stable operational classification for action failures. Executor-specific text remains available for exact
+/// diagnosis, while F7 can aggregate failures without parsing every domain message on the client.
+/// </summary>
+public enum NCHumanActionFailureKind : byte
+{
+    None,
+    Configuration,
+    RuntimeUnavailable,
+    InvalidRequest,
+    CapabilityUnavailable,
+    Blocked,
+    Unreachable,
+    Busy,
+    TimedOut,
+    ExecutorUnhandled,
+    DomainRejected,
+    Unknown,
+}
+
+public readonly record struct NCHumanActionFailureCounters(
+    long Configuration,
+    long RuntimeUnavailable,
+    long InvalidRequest,
+    long CapabilityUnavailable,
+    long Blocked,
+    long Unreachable,
+    long Busy,
+    long TimedOut,
+    long ExecutorUnhandled,
+    long DomainRejected,
+    long Unknown);
+
 public readonly record struct NCHumanActionTraceEntry(
     long Sequence,
     NCActiveWorldTime At,
@@ -38,6 +71,7 @@ public sealed record NCHumanActionRuntimeSnapshot(
     NCActiveWorldTime StartedAt,
     NCActiveWorldTime UpdatedAt,
     NCActiveWorldTime TimeoutAt,
+    NCHumanActionFailureKind FailureKind,
     string? Failure,
     NCHumanActionTraceEntry[] Trace);
 
@@ -50,6 +84,10 @@ public readonly record struct NCHumanActionRouterCounters(
     long Interrupted,
     long TimedOut,
     long Unhandled,
+    NCHumanActionFailureCounters FailureReasons,
+    float DurationP50Milliseconds,
+    float DurationP95Milliseconds,
+    float DurationP99Milliseconds,
     string? ConfigurationError);
 
 /// <summary>

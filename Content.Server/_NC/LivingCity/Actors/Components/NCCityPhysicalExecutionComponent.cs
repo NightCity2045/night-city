@@ -51,6 +51,10 @@ public sealed partial class NCCityPhysicalExecutionComponent : Component
     [ViewVariables(VVAccess.ReadOnly)] public HashSet<NCRoomPortalId> RejectedRoomPortals = [];
     [ViewVariables(VVAccess.ReadOnly)] public HashSet<NCCityPortalId> RejectedCityPortals = [];
     [ViewVariables(VVAccess.ReadOnly)] public NCCityNavigationPlanVersion PlanVersion;
+    [ViewVariables(VVAccess.ReadOnly)] public long DestinationIndexVersion;
+    [ViewVariables(VVAccess.ReadOnly)] public NCActiveWorldTime LastReplanAt;
+    [ViewVariables(VVAccess.ReadOnly)] public string? LastReplanReason;
+    [ViewVariables(VVAccess.ReadOnly)] public NCCityNavigationPlanVersion LastReplanTopologyVersion;
     [ViewVariables(VVAccess.ReadOnly)] public NCActiveWorldTime StepStartedAt;
     [ViewVariables(VVAccess.ReadOnly)] public NCActiveWorldTime LastPortalInteractionAt;
     [ViewVariables(VVAccess.ReadOnly)] public string? LastFailure;

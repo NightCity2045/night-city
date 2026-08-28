@@ -23,6 +23,16 @@ public enum NCPersistentMutationStatus : byte
     InProgress,
 }
 
+/// <summary>
+/// Describes why a write is durable. Transient movement, perception and planner state must never cross this boundary.
+/// </summary>
+public enum NCPersistenceWriteClass : byte
+{
+    DurableOutcome,
+    CoalescedCheckpoint,
+    AdministrativeRepair,
+}
+
 public sealed record NCOutboxWrite(
     Guid MessageId,
     string MessageType,
@@ -61,7 +71,8 @@ public sealed record NCPersistentBatchMutationRequest(
     Guid? CausationId,
     NCSessionEpoch SessionEpoch,
     NCActiveWorldTime ActiveWorldTime,
-    IReadOnlyList<NCPersistentBatchOutboxWrite> OutboxMessages);
+    IReadOnlyList<NCPersistentBatchOutboxWrite> OutboxMessages,
+    NCPersistenceWriteClass WriteClass = NCPersistenceWriteClass.DurableOutcome);
 
 public sealed record NCPersistentAggregateMutationData(
     string AggregateType,
@@ -111,7 +122,8 @@ public sealed record NCPersistentMutationRequest(
     Guid? CausationId,
     NCSessionEpoch SessionEpoch,
     NCActiveWorldTime ActiveWorldTime,
-    IReadOnlyList<NCOutboxWrite> OutboxMessages);
+    IReadOnlyList<NCOutboxWrite> OutboxMessages,
+    NCPersistenceWriteClass WriteClass = NCPersistenceWriteClass.DurableOutcome);
 
 public sealed record NCPersistentMutationResult(
     NCPersistentMutationStatus Status,
@@ -201,26 +213,29 @@ public sealed partial class ServerDbManager
     public Task<NCPersistentMutationResult> ApplyNCPersistentMutationAsync(NCPersistentMutationRequest request)
     {
         DbWriteOpsMetric.Inc();
-        return RunNCPersistentDbCommand(true, () => _db.ApplyNCPersistentMutationAsync(request));
+        return RunNCPersistentDbCommand(true, request.WriteClass,
+            () => _db.ApplyNCPersistentMutationAsync(request));
     }
 
     public Task<NCPersistentBatchMutationResult> ApplyNCPersistentBatchMutationAsync(
         NCPersistentBatchMutationRequest request)
     {
         DbWriteOpsMetric.Inc();
-        return RunNCPersistentDbCommand(true, () => _db.ApplyNCPersistentBatchMutationAsync(request));
+        return RunNCPersistentDbCommand(true, request.WriteClass,
+            () => _db.ApplyNCPersistentBatchMutationAsync(request));
     }
 
     public Task<NCAggregateSnapshotData?> GetNCAggregateSnapshotAsync(string aggregateType, string aggregateId)
     {
         DbReadOpsMetric.Inc();
-        return RunNCPersistentDbCommand(false, () => _db.GetNCAggregateSnapshotAsync(aggregateType, aggregateId));
+        return RunNCPersistentDbCommand(false, null,
+            () => _db.GetNCAggregateSnapshotAsync(aggregateType, aggregateId));
     }
 
     public Task<NCPersistentCommandResultData?> GetNCPersistentCommandResultAsync(Guid commandId)
     {
         DbReadOpsMetric.Inc();
-        return RunNCPersistentDbCommand(false, () => _db.GetNCPersistentCommandResultAsync(commandId));
+        return RunNCPersistentDbCommand(false, null, () => _db.GetNCPersistentCommandResultAsync(commandId));
     }
 
     public Task<IReadOnlyList<NCAggregateSnapshotData>> GetNCAggregateSnapshotPageAsync(
@@ -229,7 +244,7 @@ public sealed partial class ServerDbManager
         int limit)
     {
         DbReadOpsMetric.Inc();
-        return RunNCPersistentDbCommand(false,
+        return RunNCPersistentDbCommand(false, null,
             () => _db.GetNCAggregateSnapshotPageAsync(aggregateType, afterAggregateId, limit));
     }
 
@@ -239,7 +254,7 @@ public sealed partial class ServerDbManager
         int limit)
     {
         DbReadOpsMetric.Inc();
-        return RunNCPersistentDbCommand(false, () =>
+        return RunNCPersistentDbCommand(false, null, () =>
             _db.GetNCAggregateSnapshotPageDescendingAsync(aggregateType, beforeAggregateId, limit));
     }
 
@@ -251,7 +266,7 @@ public sealed partial class ServerDbManager
         int limit)
     {
         DbReadOpsMetric.Inc();
-        return RunNCPersistentDbCommand(false, () => _db.GetNCPersistentEventPageAsync(
+        return RunNCPersistentDbCommand(false, null, () => _db.GetNCPersistentEventPageAsync(
             aggregateType,
             aggregateId,
             eventType,
@@ -265,39 +280,41 @@ public sealed partial class ServerDbManager
         int maximumAttempts = int.MaxValue)
     {
         DbReadOpsMetric.Inc();
-        return RunNCPersistentDbCommand(false,
+        return RunNCPersistentDbCommand(false, null,
             () => _db.GetPendingNCOutboxMessagesAsync(availableAt, limit, maximumAttempts));
     }
 
     public Task<NCOutboxMessageData?> GetNCOutboxMessageAsync(Guid messageId)
     {
         DbReadOpsMetric.Inc();
-        return RunNCPersistentDbCommand(false, () => _db.GetNCOutboxMessageAsync(messageId));
+        return RunNCPersistentDbCommand(false, null, () => _db.GetNCOutboxMessageAsync(messageId));
     }
 
     public Task<NCOutboxStatusData> GetNCOutboxStatusAsync(DateTime readyAt, int maximumAttempts)
     {
         DbReadOpsMetric.Inc();
-        return RunNCPersistentDbCommand(false, () => _db.GetNCOutboxStatusAsync(readyAt, maximumAttempts));
+        return RunNCPersistentDbCommand(false, null,
+            () => _db.GetNCOutboxStatusAsync(readyAt, maximumAttempts));
     }
 
     public Task<bool> MarkNCOutboxMessageProcessedAsync(Guid messageId, DateTime processedAt)
     {
         DbWriteOpsMetric.Inc();
-        return RunNCPersistentDbCommand(true, () => _db.MarkNCOutboxMessageProcessedAsync(messageId, processedAt));
+        return RunNCPersistentDbCommand(true, NCPersistenceWriteClass.DurableOutcome,
+            () => _db.MarkNCOutboxMessageProcessedAsync(messageId, processedAt));
     }
 
     public Task<bool> RecordNCOutboxMessageFailureAsync(Guid messageId, string error, DateTime retryAt)
     {
         DbWriteOpsMetric.Inc();
-        return RunNCPersistentDbCommand(true,
+        return RunNCPersistentDbCommand(true, NCPersistenceWriteClass.DurableOutcome,
             () => _db.RecordNCOutboxMessageFailureAsync(messageId, error, retryAt));
     }
 
     public Task<bool> RequeueNCOutboxMessageAsync(Guid messageId, DateTime availableAt, bool resetAttempts)
     {
         DbWriteOpsMetric.Inc();
-        return RunNCPersistentDbCommand(true,
+        return RunNCPersistentDbCommand(true, NCPersistenceWriteClass.AdministrativeRepair,
             () => _db.RequeueNCOutboxMessageAsync(messageId, availableAt, resetAttempts));
     }
 }
@@ -1062,6 +1079,8 @@ public abstract partial class ServerDbBase
             throw new ArgumentException("Correlation ID must be non-empty.", nameof(request));
         if (!request.SessionEpoch.IsValid || !request.ActiveWorldTime.IsValid)
             throw new ArgumentException("A valid active-world timestamp is required.", nameof(request));
+        if (!Enum.IsDefined(request.WriteClass))
+            throw new ArgumentOutOfRangeException(nameof(request), "Persistence write class is invalid.");
         if (request.ExpectedAggregateVersion < 0)
             throw new ArgumentOutOfRangeException(nameof(request), "Expected aggregate version cannot be negative.");
         if (request.SnapshotFormatVersion < 1)
@@ -1096,6 +1115,8 @@ public abstract partial class ServerDbBase
             throw new ArgumentException("Correlation ID must be non-empty.", nameof(request));
         if (!request.SessionEpoch.IsValid || !request.ActiveWorldTime.IsValid)
             throw new ArgumentException("A valid active-world timestamp is required.", nameof(request));
+        if (!Enum.IsDefined(request.WriteClass))
+            throw new ArgumentOutOfRangeException(nameof(request), "Persistence write class is invalid.");
 
         ValidateIdentityPart(request.CommandType, nameof(request.CommandType), 96);
         ValidateIdentityPart(request.ScopeType, nameof(request.ScopeType), 64);

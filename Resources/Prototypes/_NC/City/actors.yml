@@ -19,7 +19,16 @@
   maximumDispatchesPerTick: 4
   maximumConcurrentMutations: 8
   mutationRetryDelay: 5s
+  maximumMutationAttempts: 5
+  initialEvaluationStagger: 25s
   reevaluateOnSessionStart: true
+
+- type: ncCityCivilClockPolicy
+  id: NCDefaultCityCivilClock
+  civilDayDuration: 24h
+  activeDayDuration: 2h
+  initialTimeOfDay: 6h
+  maximumManualAdvance: 24h
 
 - type: ncCityPhysicalNavigationProfile
   id: NCDefaultPedestrianPhysicalNavigation
@@ -125,6 +134,7 @@
   maximumConcurrentIntentLoads: 8
   maximumExecutionUpdatesPerTick: 24
   maximumConcurrentMutations: 8
+  maximumMutationAttempts: 5
   maximumWaypoints: 256
   maximumImmediateWaypointCompletions: 8
   maximumReplans: 4
@@ -135,6 +145,8 @@
   portalTraversalTimeout: 8s
   portalInteractionRetryInterval: 0.5s
   replanBackoff: 1s
+  minimumEquivalentReplanInterval: 2s
+  topologyChangeCoalesceDelay: 0.25s
   blockedRetryInterval: 10s
   mutationRetryDelay: 2s
   htnResumeCooldown: 0.5s
@@ -187,7 +199,7 @@
   maximumPriority: 1000
   playerVisibilityExclusionRadius: 18
   playerSpawnExclusionRadius: 2
-  playerRelevanceMaximumRadius: 28
+  adminPreferredSpawnRadius: 28
   actorOccupancyExclusionRadius: 1
   retryDelay: 2s
   defaultMaximumWait: 30s
@@ -256,6 +268,7 @@
   maximumDispatchesPerTick: 4
   maximumConcurrentMutations: 8
   retryDelay: 10s
+  maximumMutationAttempts: 5
   minimumTravelDuration: 1s
   maximumTravelDuration: 6h
   durationMultiplier: 1
@@ -295,10 +308,7 @@
 - type: ncCityRoutineProfile
   id: NCDefaultCivilianRoutine
   cycleDuration: 24h
-  activeCycleDuration: 2h
-  cyclePhaseOffset: 6h
   actorPhaseSpread: 2h
-  maximumManualAdvance: 24h
   entries:
   - at: 0s
     activity: sleep
