@@ -167,7 +167,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
                 continue;
             }
             _inFlight++;
-            _ = ExecuteAsync(request, _generation, ServiceToken, providerUri, _policy.RequestTimeout,
+            _ = ExecuteAsync(request, _generation, ProviderApiKey, providerUri, _policy.RequestTimeout,
                 cancellation.Token);
         }
     }
@@ -273,7 +273,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     private async Task ExecuteAsync(
         NCNeuralRequestEnvelope request,
         int generation,
-        string serviceToken,
+        string providerApiKey,
         Uri providerUri,
         TimeSpan timeout,
         CancellationToken sessionToken)
@@ -292,7 +292,9 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
                 // Serializing the domain record directly would expose implementation-specific JSON shapes.
                 Content = JsonContent.Create(ToProviderRequest(request)),
             };
-            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", serviceToken);
+            // The configured provider credential is forwarded only to the bounded cognition gateway. It is never
+            // serialized into gameplay payloads, persisted, or included in diagnostics.
+            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", providerApiKey);
             using var response = await _http.SendAsync(message, cancellation.Token);
             if (!response.IsSuccessStatusCode)
             {
@@ -823,8 +825,8 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     private bool ProviderEnabled =>
         !_administrativelyDisabled && _budgetReady &&
         (_policy?.Enabled == true || _configuration.GetCVar(NCCVars.NeuralEnabled)) &&
-        ServiceToken.Length > 0;
-    private string ServiceToken => _configuration.GetCVar(NCCVars.NeuralServiceToken).Trim();
+        ProviderApiKey.Length > 0;
+    private string ProviderApiKey => _configuration.GetCVar(NCCVars.NeuralApiKey).Trim();
     private string ProviderEndpoint
     {
         get

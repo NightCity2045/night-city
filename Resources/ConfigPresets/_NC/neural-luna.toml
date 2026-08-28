@@ -6,5 +6,5 @@
 [nc_neural]
 enabled = true
 endpoint = "http://127.0.0.1:8080/v1/cognition"
-# Development loopback bearer shared with run-local.ps1. Production must override it.
-service_token = "night-city-local-neural-dev"
+# Set this only in the private server configuration used for the run.
+api_key = ""

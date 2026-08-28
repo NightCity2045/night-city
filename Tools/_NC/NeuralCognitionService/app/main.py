@@ -3,7 +3,6 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 import json
-import hmac
 import logging
 import os
 import time
@@ -26,9 +25,6 @@ try:
     maximum_output_tokens = min(8192, max(256, int(os.environ.get("NC_NEURAL_MAX_OUTPUT_TOKENS", "2048"))))
 except ValueError:
     maximum_output_tokens = 2048
-service_token = os.environ.get("NC_NEURAL_SERVICE_TOKEN", "").strip()
-provider_api_key = os.environ.get("OPENAI_API_KEY", "").strip()
-provider_client = AsyncOpenAI(api_key=provider_api_key) if provider_api_key else None
 logger = logging.getLogger("uvicorn.error")
 
 
@@ -210,22 +206,20 @@ async def live():
 
 @app.get("/health/ready")
 async def ready():
-    if not service_token or provider_client is None:
-        raise HTTPException(503, "service authentication or provider credential is missing")
-    return {"status": "ready", "credentialMode": "service-bearer"}
+    # The provider credential arrives per request from the confidential game-server CVar.
+    return {"status": "ready", "credentialMode": "request-bearer"}
 
 
 @app.post("/v1/cognition")
 async def cognition(request: Request, authorization: str | None = Header(default=None)):
     scheme, separator, supplied_token = (authorization or "").partition(" ")
-    if (separator != " " or scheme.lower() != "bearer" or not service_token or
-            not hmac.compare_digest(supplied_token.strip(), service_token)):
-        raise HTTPException(401, "valid service bearer is required")
-    if provider_client is None:
-        raise HTTPException(503, "provider credential is unavailable")
+    provider_api_key = supplied_token.strip()
+    if separator != " " or scheme.lower() != "bearer" or not provider_api_key:
+        raise HTTPException(401, "provider bearer is required")
+    provider_client = AsyncOpenAI(api_key=provider_api_key)
     started = time.monotonic()
     try:
-        # The game authenticates with an internal token; only this isolated process owns the provider credential.
+        # The key is transient request state and is never logged, persisted, or included in provider payloads.
         response = await provider_client.responses.create(
                 model=default_model,
                 reasoning={"effort": reasoning_effort},
@@ -352,4 +346,5 @@ async def cognition(request: Request, authorization: str | None = Header(default
         )
         raise HTTPException(502, f"provider response rejected: {type(error).__name__}") from error
     finally:
+        await provider_client.close()
         latency.labels(request.kind).observe(time.monotonic() - started)

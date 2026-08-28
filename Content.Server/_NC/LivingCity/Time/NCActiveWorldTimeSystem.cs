@@ -82,7 +82,25 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
         try
         {
             epoch = state.Epoch;
-            time = state.PersistedTime.Advance(state.Pending + state.InFlight + unsampled);
+            var candidate = state.PersistedTime.Advance(state.Pending + state.InFlight + unsampled);
+
+            // IGameTiming may discontinuously move during development/runtime transitions. The active-world clock
+            // is a monotonic domain clock, so no caller may observe a timestamp older than one already published.
+            if (candidate < state.LastPublishedTime)
+            {
+                if (!state.RegressionWarningLogged)
+                {
+                    state.RegressionWarningLogged = true;
+                    Log.Warning($"Clamped active-world clock regression for epoch {state.Epoch}: " +
+                                $"candidate={candidate.Ticks}, published={state.LastPublishedTime.Ticks}.");
+                }
+
+                time = state.LastPublishedTime;
+                return true;
+            }
+
+            state.LastPublishedTime = candidate;
+            time = candidate;
             return true;
         }
         catch (OverflowException exception)
@@ -245,8 +263,10 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
                 }
 
                 state.StartQueued = false;
+                if (!TryApplyPersistedState(state, result))
+                    return;
+
                 state.Started = true;
-                ApplyPersistedState(state, result);
                 RaiseLocalEvent(new NCActiveWorldSessionStartedEvent(
                     result.SessionEpoch,
                     result.Time));
@@ -305,7 +325,8 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
 
                 state.InFlight = TimeSpan.Zero;
                 state.CheckpointQueued = false;
-                ApplyPersistedState(state, result);
+                if (!TryApplyPersistedState(state, result))
+                    return;
 
                 if (state.Active)
                 {
@@ -379,9 +400,11 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
                 }
 
                 state.CloseQueued = false;
+                if (!TryApplyPersistedState(state, result))
+                    return;
+
                 state.Closed = true;
                 state.Started = true;
-                ApplyPersistedState(state, result);
                 RaiseLocalEvent(new NCActiveWorldSessionClosedEvent(
                     result.SessionEpoch,
                     result.Time));
@@ -417,10 +440,23 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
         return result ?? await _database.GetNCActiveWorldClockAsync();
     }
 
-    private void ApplyPersistedState(ActiveSessionState state, NCActiveWorldClockData data)
+    private bool TryApplyPersistedState(ActiveSessionState state, NCActiveWorldClockData data)
     {
+        // Persistent storage must never move the cumulative domain clock backwards. Treat that as an authority
+        // failure instead of publishing corrupt time to every A-Life scheduler.
+        if (!data.Time.IsValid || data.Time < state.PersistedTime)
+        {
+            FailState(state,
+                $"database returned regressed active-world time {data.Time.Ticks}; " +
+                $"previous persisted time was {state.PersistedTime.Ticks}");
+            return false;
+        }
+
         state.PersistedTime = data.Time;
         state.Version = data.Version;
+        if (state.LastPublishedTime < data.Time)
+            state.LastPublishedTime = data.Time;
+        return true;
     }
 
     private void FailState(ActiveSessionState state, string reason)
@@ -545,6 +581,7 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
         public readonly NCSessionEpoch Epoch = epoch;
         public TimeSpan LastSample = lastSample;
         public NCActiveWorldTime PersistedTime = NCActiveWorldTime.Zero;
+        public NCActiveWorldTime LastPublishedTime = NCActiveWorldTime.Zero;
         public TimeSpan Pending;
         public TimeSpan InFlight;
         public int Version;
@@ -555,6 +592,7 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
         public bool CloseQueued;
         public bool Closed;
         public bool Failed;
+        public bool RegressionWarningLogged;
     }
 
     private sealed record PersistAttempt(

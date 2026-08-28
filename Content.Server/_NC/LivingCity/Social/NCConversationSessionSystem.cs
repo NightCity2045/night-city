@@ -80,6 +80,24 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
         {
             foreach (var session in _active.Values.ToArray())
             {
+                // A corrupt or legacy future timestamp must invalidate only this round-local conversation, never
+                // terminate the server update loop. The authoritative clock separately enforces monotonic output.
+                if (session.StartedAt > now || session.LastActivityAt > now ||
+                    session.StartedAt > session.LastActivityAt)
+                {
+                    Log.Warning($"Interrupted conversation {session.SessionId} after a clock discontinuity: " +
+                                $"now={now.Ticks}, started={session.StartedAt.Ticks}, " +
+                                $"lastActivity={session.LastActivityAt.Ticks}.");
+                    Archive(session with
+                    {
+                        Status = NCConversationStatus.Interrupted,
+                        EndReason = "clock-discontinuity",
+                        LastActivityAt = now,
+                        ConversationVersion = checked(session.ConversationVersion + 1),
+                    }, policy);
+                    continue;
+                }
+
                 var idle = now.ElapsedSince(session.LastActivityAt) >= policy.IdleTimeout;
                 var old = now.ElapsedSince(session.StartedAt) >= policy.MaximumLifetime;
                 if (idle || old)

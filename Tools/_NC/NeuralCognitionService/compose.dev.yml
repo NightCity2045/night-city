@@ -5,7 +5,5 @@
 services:
   neural-cognition:
     # Development-only loopback exposure for a game server running directly on the host.
-    environment:
-      NC_NEURAL_SERVICE_TOKEN: ${NC_NEURAL_SERVICE_TOKEN:-night-city-local-neural-dev}
     ports:
     - "127.0.0.1:8080:8080"
