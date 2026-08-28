@@ -138,12 +138,26 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("neural", "requests-memory-summary", value.MemorySummaryRequests);
         fields.Add("neural", "requests-narrative-render", value.NarrativeRenderRequests);
         fields.Add("neural", "accepted", value.Accepted); fields.Add("neural", "fallbacks", value.Fallbacks);
+        fields.Add("neural", "coalesced", value.CoalescedRequests);
+        fields.Add("neural", "pending-coalesced-followers", value.PendingCoalescedFollowers);
         fields.Add("neural", "stale", value.Stale); fields.Add("neural", "invalid", value.Invalid);
         fields.Add("neural", "provider-failures", value.ProviderFailures);
         fields.Add("neural", "timeouts", value.Timeouts); fields.Add("neural", "rejects", value.ValidationRejects);
         fields.Add("neural", "failures", value.ConsecutiveFailures); fields.Add("neural", "circuit-until", value.CircuitOpenUntil?.Elapsed);
         fields.Add("neural", "last-failure-kind", value.LastFailureKind);
         fields.Add("neural", "last-failure-reason", value.LastFailureReason);
+        foreach (var (kind, runtime) in value.KindRuntime)
+        {
+            var section = NeuralKindSection(kind);
+            fields.Add(section, "submitted", runtime.Submitted);
+            fields.Add(section, "coalesced", runtime.Coalesced);
+            fields.Add(section, "accepted", runtime.Accepted);
+            fields.Add(section, "fallback", runtime.Fallback);
+            fields.Add(section, "rejected", runtime.Rejected);
+            fields.Add(section, "input-tokens", runtime.InputTokens);
+            fields.Add(section, "output-tokens", runtime.OutputTokens);
+            fields.Add(section, "cost-usd-micros", runtime.CostUsdMicros);
+        }
         return Ok(fields);
     }
 }

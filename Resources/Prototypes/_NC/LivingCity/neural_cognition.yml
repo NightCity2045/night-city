@@ -46,6 +46,15 @@
   ordinaryDialogueMaximumInputLength: 256
   ordinaryDialogueMaximumHistoryTurns: 4
   ordinaryDialogueMaximumSummaryKeys: 6
+  ordinaryResidentSessionTokenHardCap: 12000
+  ordinaryResidentMaximumOutstandingRequests: 1
+  ordinaryResidentReservedInputTokens: 2048
+  ordinaryResidentRequestCooldown: 5s
+  narrativeActorSessionTokenHardCap: 250000
+  narrativeActorMaximumOutstandingRequests: 2
+  narrativeActorReservedInputTokens: 8192
+  narrativeActorRequestCooldown: 1s
+  maximumCoalescedFollowersPerRequest: 16
   circuitFailureThreshold: 5
   minimumSuggestionConfidence: 400
   maximumUtilityBoost: 40

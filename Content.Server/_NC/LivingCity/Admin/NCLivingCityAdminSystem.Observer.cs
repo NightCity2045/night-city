@@ -324,6 +324,9 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-neural", "budget-mode", neuralRuntime.BudgetMode);
         if (neural != null)
         {
+            fields.Add("observer-neural", "access-tier", neural.AccessTier);
+            fields.Add("observer-neural", "outstanding-requests", neural.OutstandingRequests);
+            fields.Add("observer-neural", "session-token-hard-cap", neural.SessionTokenHardCap);
             fields.Add("observer-neural", "input-tokens", neural.InputTokens);
             fields.Add("observer-neural", "cached-input-tokens", neural.CachedInputTokens);
             fields.Add("observer-neural", "output-tokens", neural.OutputTokens);

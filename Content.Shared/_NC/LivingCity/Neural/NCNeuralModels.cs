@@ -15,6 +15,8 @@ public enum NCNeuralRequestKind : byte { SocialCognition, StrategicDecision, Dia
 [Serializable, NetSerializable]
 public enum NCNeuralPriority : byte { P0, P1, P2, P3, P4 }
 [Serializable, NetSerializable]
+public enum NCNeuralAccessTier : byte { OrdinaryResident, NarrativeActor }
+[Serializable, NetSerializable]
 public enum NCNeuralBudgetMode : byte { Normal, Economy, Restricted, FallbackOnly }
 [Serializable, NetSerializable]
 public enum NCNeuralResultStatus : byte { Accepted, Fallback, Expired, Stale, Invalid, Timeout, CircuitOpen, BudgetDenied }
@@ -153,6 +155,9 @@ public sealed record NCNeuralRequestEnvelope(Guid RequestId, NCNeuralRequestKind
 {
     /// <summary>Per-request ceiling. Ordinary dialogue uses a much smaller budget than narrative Actors.</summary>
     public int MaximumOutputTokens { get; init; } = 2048;
+
+    /// <summary>Server-authored tier used only for admission, cooldown and token accounting.</summary>
+    public NCNeuralAccessTier AccessTier { get; init; } = NCNeuralAccessTier.OrdinaryResident;
 }
 public sealed record NCNeuralResponseEnvelope(Guid RequestId, int SchemaVersion, long ContextVersion,
     string SelectedCapabilityId, string SpeechActKey, string RenderedText, string SummaryKey, int Confidence,
@@ -203,6 +208,15 @@ public sealed partial class NCNeuralPolicyPrototype : IPrototype
     [DataField] public int OrdinaryDialogueMaximumInputLength { get; private set; } = 256;
     [DataField] public int OrdinaryDialogueMaximumHistoryTurns { get; private set; } = 4;
     [DataField] public int OrdinaryDialogueMaximumSummaryKeys { get; private set; } = 6;
+    [DataField] public int OrdinaryResidentSessionTokenHardCap { get; private set; } = 12000;
+    [DataField] public int OrdinaryResidentMaximumOutstandingRequests { get; private set; } = 1;
+    [DataField] public int OrdinaryResidentReservedInputTokens { get; private set; } = 2048;
+    [DataField] public TimeSpan OrdinaryResidentRequestCooldown { get; private set; } = TimeSpan.FromSeconds(5);
+    [DataField] public int NarrativeActorSessionTokenHardCap { get; private set; } = 250000;
+    [DataField] public int NarrativeActorMaximumOutstandingRequests { get; private set; } = 2;
+    [DataField] public int NarrativeActorReservedInputTokens { get; private set; } = 8192;
+    [DataField] public TimeSpan NarrativeActorRequestCooldown { get; private set; } = TimeSpan.FromSeconds(1);
+    [DataField] public int MaximumCoalescedFollowersPerRequest { get; private set; } = 16;
     [DataField] public int CircuitFailureThreshold { get; private set; } = 5;
     [DataField] public int MinimumSuggestionConfidence { get; private set; } = 400;
     [DataField] public float MaximumUtilityBoost { get; private set; } = 40f;

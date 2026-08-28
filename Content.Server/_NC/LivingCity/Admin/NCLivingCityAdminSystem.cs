@@ -42,6 +42,7 @@ using Content.Server.GameTicking;
 using Content.Shared._NC.LivingCity.Admin;
 using Content.Shared._NC.LivingCity.Affordances;
 using Content.Shared._NC.LivingCity.Cognition;
+using Content.Shared._NC.LivingCity.Neural;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Persistence.Time;
 using Content.Shared.Administration;
@@ -66,6 +67,16 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     private const int MaximumTargetLength = 160;
     private static readonly TimeSpan RequestInterval = TimeSpan.FromMilliseconds(200);
     private static readonly TimeSpan OutboxStorageRefreshInterval = TimeSpan.FromSeconds(5);
+
+    private static string NeuralKindSection(NCNeuralRequestKind kind) => kind switch
+    {
+        NCNeuralRequestKind.SocialCognition => "neural-social-cognition",
+        NCNeuralRequestKind.StrategicDecision => "neural-strategic-decision",
+        NCNeuralRequestKind.DialogueContinuation => "neural-dialogue-continuation",
+        NCNeuralRequestKind.MemorySummary => "neural-memory-summary",
+        NCNeuralRequestKind.NarrativeRender => "neural-narrative-render",
+        _ => "neural-unknown",
+    };
 
     [Dependency] private ISharedAdminManager _admins = default!;
     [Dependency] private IAdminLogManager _adminLog = default!;
@@ -470,11 +481,12 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("neural", "invalid", neural.Invalid);
         fields.Add("neural", "provider-failures", neural.ProviderFailures);
         fields.Add("neural", "fallbacks", neural.Fallbacks);
+        fields.Add("neural", "coalesced", neural.CoalescedRequests);
+        fields.Add("neural", "pending-coalesced-followers", neural.PendingCoalescedFollowers);
         fields.Add("neural", "validation-rejects", neural.ValidationRejects);
         fields.Add("neural", "timeouts", neural.Timeouts);
         fields.Add("neural", "consecutive-failures", neural.ConsecutiveFailures);
         fields.Add("neural", "circuit-open-until", neural.CircuitOpenUntil?.Elapsed.ToString() ?? "none");
-
         fields.Add("dialogue-runtime", "ordinary-residents", _neuralConversations.OrdinaryResidentTargets);
         fields.Add("dialogue-runtime", "narrative-actors", _neuralConversations.NarrativeActorTargets);
         fields.Add("dialogue-runtime", "active", _neuralConversations.ActivePhysicalConversations);

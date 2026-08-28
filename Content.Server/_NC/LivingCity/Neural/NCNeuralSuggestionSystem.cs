@@ -67,12 +67,17 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         }
     }
 
-    public bool TryTrackDialogue(Guid requestId, NCConversationSessionId sessionId, int conversationVersion)
+    public bool TryTrackDialogue(
+        Guid requestId,
+        NCConversationSessionId sessionId,
+        int conversationVersion,
+        string fallbackMessage)
     {
         if (!_active || _policy == null || requestId == Guid.Empty || !sessionId.IsValid || conversationVersion < 1 ||
+            string.IsNullOrWhiteSpace(fallbackMessage) ||
             _dialogues.Count >= _policy.MaximumPendingCorrelations)
             return false;
-        return _dialogues.TryAdd(requestId, new DialogueCorrelation(sessionId, conversationVersion));
+        return _dialogues.TryAdd(requestId, new DialogueCorrelation(sessionId, conversationVersion, fallbackMessage));
     }
 
     public void ForgetDialogue(Guid requestId) => _dialogues.Remove(requestId);
@@ -198,7 +203,8 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         NCConversationSessionId sessionId,
         int conversationVersion,
         NCNeuralResponseEnvelope response) =>
-        TryDeliverDialogue(actorId, requestId, new DialogueCorrelation(sessionId, conversationVersion), response);
+        TryDeliverDialogue(actorId, requestId,
+            new DialogueCorrelation(sessionId, conversationVersion, "nc-neural-conversation-fallback"), response);
 
     private void OnCollectFacts(NCCognitionCollectFactsEvent args)
     {
@@ -275,11 +281,12 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         if (!_conversations.TryGet(dialogue.SessionId, out var session) ||
             session.ConversationVersion != dialogue.ConversationVersion ||
             session.Channel != NCConversationChannel.InPerson ||
-            !_runtime.TryGetEntity(actorId, out var entityUid) || !Exists(entityUid) ||
-            !TryComp<NCNeuralConversationTargetComponent>(entityUid, out var target))
+            !_runtime.TryGetEntity(actorId, out var entityUid) || !Exists(entityUid))
         {
             return;
         }
+
+        var fallbackText = Loc.GetString(dialogue.FallbackMessage);
 
         if (!_conversations.TryRecordTurn(new NCConversationTurnRequest(
                 session.SessionId,
@@ -287,14 +294,14 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
                 NCSpeechActKind.Statement,
                 "neural.fallback",
                 $"neural:{requestId:N}",
-                requestId), out _, out _, Loc.GetString(target.FallbackMessage)))
+                requestId), out _, out _, fallbackText))
         {
             return;
         }
 
         _chat.TrySendInGameICMessage(
             entityUid,
-            Loc.GetString(target.FallbackMessage),
+            fallbackText,
             InGameICChatType.Speak,
             hideChat: false,
             checkRadioPrefix: false);
@@ -338,7 +345,10 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         NCActiveWorldTime ExpiresAt);
 
     private readonly record struct SuggestionExpiry(NCActorId ActorId, Guid RequestId);
-    private sealed record DialogueCorrelation(NCConversationSessionId SessionId, int ConversationVersion);
+    private sealed record DialogueCorrelation(
+        NCConversationSessionId SessionId,
+        int ConversationVersion,
+        string FallbackMessage);
 }
 
 /// <summary>

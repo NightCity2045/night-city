@@ -329,12 +329,18 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             MaximumOutputTokens = narrativeAccess
                 ? policy.MaximumRequestOutputTokens
                 : policy.OrdinaryDialogueMaximumOutputTokens,
+            AccessTier = narrativeAccess
+                ? NCNeuralAccessTier.NarrativeActor
+                : NCNeuralAccessTier.OrdinaryResident,
         };
         var trackedDialogue = kind == NCNeuralRequestKind.DialogueContinuation && conversationSnapshot != null;
         if (trackedDialogue && !_suggestions.TryTrackDialogue(
                 request.RequestId,
                 conversationSnapshot!.SessionId,
-                conversationSnapshot.ConversationVersion))
+                conversationSnapshot.ConversationVersion,
+                SelectDialogueFallback(
+                    socialProfile?.Snapshot.Personality,
+                    transientUtterance?.TrimEnd().EndsWith('?') == true)))
             return false;
         if (_client.Submit(request))
         {
@@ -386,9 +392,15 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         if (!_runtime.TryGetEntity(actorId, out var entity) || !Exists(entity))
             return;
         var profile = await _socialProfiles.GetAsync(actorId);
-        var personality = profile?.Snapshot.Personality;
-        var isQuestion = transientUtterance.TrimEnd().EndsWith('?');
-        var locId = personality switch
+        var locId = SelectDialogueFallback(
+            profile?.Snapshot.Personality,
+            transientUtterance.TrimEnd().EndsWith('?'));
+        Interlocked.Increment(ref _localDialogueFallbacks);
+        _chat.TrySendInGameICMessage(entity, Loc.GetString(locId), InGameICChatType.Speak,
+            hideChat: false, checkRadioPrefix: false);
+    }
+
+    private static string SelectDialogueFallback(NCPersonalityTraits? personality, bool isQuestion) => personality switch
         {
             { Aggression: >= 700 } => isQuestion
                 ? "nc-human-dialogue-question-aggressive"
@@ -401,10 +413,6 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                 : "nc-human-dialogue-statement-empathetic",
             _ => isQuestion ? "nc-human-dialogue-question-neutral" : "nc-human-dialogue-statement-neutral",
         };
-        Interlocked.Increment(ref _localDialogueFallbacks);
-        _chat.TrySendInGameICMessage(entity, Loc.GetString(locId), InGameICChatType.Speak,
-            hideChat: false, checkRadioPrefix: false);
-    }
 
     private NCNeuralKnownLocation[] BuildKnownLocations(NCCityActorRecord actor, int maximum)
     {
