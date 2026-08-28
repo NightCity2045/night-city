@@ -157,3 +157,5 @@ nc-medical-surgery-access-organ-exposed = Organ exposed
 nc-medical-surgery-access-procedure-in-progress = Procedure in progress
 nc-medical-surgery-access-ready-for-closure = Ready for closure
 nc-medical-surgery-access-closed-post-op = Closed after operation
+nc-medical-freeform-surgery-verb = Open surgical field
+nc-medical-freeform-surgery-empty-hand = empty active hand

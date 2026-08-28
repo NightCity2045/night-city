@@ -110,3 +110,4 @@
   - NCZoneFootLeft
   automaticFallbackZone: NCZoneChest
   targetDoll: NCHumanTargetDoll
+  surgicalField: NCHumanFreeformSurgery

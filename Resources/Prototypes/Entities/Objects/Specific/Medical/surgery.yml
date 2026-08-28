@@ -36,6 +36,9 @@
   - type: NCSurgeryTool
     capabilities:
       NCSurgeryToolDisinfection: 0.8
+      # NC start: expose the vanilla cautery's physical cutting mode to freeform surgery.
+      NCSurgeryToolCautery: 0.9
+      # NC end
       NCSurgeryToolHemostasis: 0.9
       NCSurgeryToolOrganRepair: 0.75
     sterility: 1

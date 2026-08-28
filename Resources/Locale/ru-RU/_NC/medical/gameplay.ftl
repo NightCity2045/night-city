@@ -157,3 +157,5 @@ nc-medical-surgery-access-organ-exposed = Орган обнажён
 nc-medical-surgery-access-procedure-in-progress = Операция выполняется
 nc-medical-surgery-access-ready-for-closure = Готов к закрытию
 nc-medical-surgery-access-closed-post-op = Закрыт после операции
+nc-medical-freeform-surgery-verb = Открыть хирургическое поле
+nc-medical-freeform-surgery-empty-hand = активная рука пуста

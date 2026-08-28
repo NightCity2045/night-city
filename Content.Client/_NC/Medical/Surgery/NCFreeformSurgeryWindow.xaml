@@ -1,0 +1,136 @@
+<!--
+SPDX-FileCopyrightText: 2026 Astro
+SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+-->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                      xmlns:surgery="clr-namespace:Content.Client._NC.Medical.Surgery"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      x:Class="Content.Client._NC.Medical.Surgery.NCFreeformSurgeryWindow"
+                      Title="Surgical field"
+                      SetSize="1260 820"
+                      MinSize="980 640">
+    <PanelContainer HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#04090D" BorderColor="#1C625D" BorderThickness="2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Margin="6" Orientation="Vertical" SeparationOverride="6"
+                      HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
+            <PanelContainer SetHeight="32" HorizontalExpand="True">
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#07191D" BorderColor="#37E2D1" BorderThickness="0 0 0 1" />
+                </PanelContainer.PanelOverride>
+                <BoxContainer Margin="10 4" Orientation="Horizontal">
+                    <Label Text="MEDTECH SURGICAL FIELD" FontColorOverride="#7AFFF2" />
+                    <Label Text=" // LOCAL CLINICAL LINK" FontColorOverride="#4BA49D" />
+                    <Control HorizontalExpand="True" />
+                    <Label Name="ConnectionLabel" Text="● LIVE" FontColorOverride="#67E89A" />
+                </BoxContainer>
+            </PanelContainer>
+
+            <PanelContainer HorizontalExpand="True">
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#08191E" BorderColor="#1D5753" BorderThickness="1" />
+                </PanelContainer.PanelOverride>
+                <BoxContainer Margin="12 8" Orientation="Horizontal" SeparationOverride="18">
+                    <BoxContainer Orientation="Vertical" MinWidth="260">
+                        <Label Text="ACTIVE PATIENT" FontColorOverride="#57B9B1" />
+                        <Label Name="PatientName" StyleClasses="LabelHeadingBigger" FontColorOverride="#E3FAF6" />
+                        <Label Name="PatientState" FontColorOverride="#FFC95C" />
+                    </BoxContainer>
+                    <BoxContainer Orientation="Vertical" HorizontalExpand="True">
+                        <Label Text="LIVE PHYSIOLOGY" FontColorOverride="#57B9B1" />
+                        <Label Name="VitalsLabel" ClipText="True" />
+                        <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                            <Label Text="Patient motion" FontColorOverride="#7DBDB7" />
+                            <ProgressBar Name="MovementBar" MinValue="0" MaxValue="1" HorizontalExpand="True" SetHeight="9" />
+                            <Label Name="MovementValue" MinWidth="48" />
+                        </BoxContainer>
+                    </BoxContainer>
+                </BoxContainer>
+            </PanelContainer>
+
+            <PanelContainer Name="FeedbackPanel" HorizontalExpand="True" Visible="False">
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#2B1909" BorderColor="#EFAF42" BorderThickness="1" />
+                </PanelContainer.PanelOverride>
+                <Label Name="FeedbackLabel" Margin="9 5" FontColorOverride="#FFD46B" ClipText="True" />
+            </PanelContainer>
+
+            <BoxContainer Orientation="Horizontal" SeparationOverride="8"
+                          HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
+                <BoxContainer Orientation="Vertical" SeparationOverride="6" HorizontalExpand="True" VerticalExpand="True">
+                    <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                        <Label Text="1 // PATIENT OPERATIVE FIELD" FontColorOverride="#72F5E7" />
+                        <Label Text="// AUTOMATIC ANATOMICAL HIT-TEST" FontColorOverride="#57B9B1" />
+                        <Control HorizontalExpand="True" />
+                        <Label Name="LayerLabel" FontColorOverride="#7DBDB7" />
+                    </BoxContainer>
+                    <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                        <Label Text="SURFACE" FontColorOverride="#57B9B1" MinWidth="72" />
+                        <Button Name="SurfaceFront" Text="Front" MinWidth="68" />
+                        <Button Name="SurfaceRear" Text="Rear" MinWidth="68" />
+                        <Button Name="SurfaceLeft" Text="Left" MinWidth="68" />
+                        <Button Name="SurfaceRight" Text="Right" MinWidth="68" />
+                        <Control HorizontalExpand="True" />
+                        <Label Text="Operate directly on the tissue under the cursor" FontColorOverride="#839C9D" />
+                    </BoxContainer>
+                    <PanelContainer HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
+                        <PanelContainer.PanelOverride>
+                            <gfx:StyleBoxFlat BackgroundColor="#030B0F" BorderColor="#23877E" BorderThickness="1" />
+                        </PanelContainer.PanelOverride>
+                        <surgery:NCFreeformSurgeryFieldControl Name="SurgicalField" Margin="5" />
+                    </PanelContainer>
+                    <PanelContainer HorizontalExpand="True">
+                        <PanelContainer.PanelOverride>
+                            <gfx:StyleBoxFlat BackgroundColor="#08191E" BorderColor="#1C5551" BorderThickness="1" />
+                        </PanelContainer.PanelOverride>
+                        <BoxContainer Margin="9 6" Orientation="Vertical" SeparationOverride="3">
+                            <BoxContainer Orientation="Horizontal">
+                                <Label Text="Working depth" FontColorOverride="#62BDB6" MinWidth="110" />
+                                <Slider Name="DepthSlider" MinValue="0" MaxValue="100" HorizontalExpand="True" />
+                                <Label Name="DepthLabel" MinWidth="130" HorizontalAlignment="Right" />
+                            </BoxContainer>
+                            <Label Text="LMB: apply held tool · RMB: attach instrument · wheel: working depth"
+                                   FontColorOverride="#829C9E" HorizontalAlignment="Center" />
+                        </BoxContainer>
+                    </PanelContainer>
+                </BoxContainer>
+
+                <PanelContainer MinWidth="292" SetWidth="310" VerticalExpand="True" RectClipContent="True">
+                    <PanelContainer.PanelOverride>
+                        <gfx:StyleBoxFlat BackgroundColor="#071419" BorderColor="#1C5551" BorderThickness="1" />
+                    </PanelContainer.PanelOverride>
+                    <ScrollContainer HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
+                        <BoxContainer Margin="9" Orientation="Vertical" SeparationOverride="8" HorizontalExpand="True">
+                            <Label Text="2 // ACTIVE INSTRUMENT" FontColorOverride="#72F5E7" />
+                            <PanelContainer HorizontalExpand="True">
+                                <PanelContainer.PanelOverride>
+                                    <gfx:StyleBoxFlat BackgroundColor="#091D22" BorderColor="#236861" BorderThickness="1" />
+                                </PanelContainer.PanelOverride>
+                                <BoxContainer Margin="7" Orientation="Horizontal" SeparationOverride="8">
+                                    <EntityPrototypeView Name="ToolSprite" SetSize="54 54" Scale="2 2" />
+                                    <BoxContainer Orientation="Vertical" HorizontalExpand="True">
+                                        <Label Name="ToolName" ClipText="True" />
+                                        <Label Name="SterilityLabel" FontColorOverride="#7DBDB7" />
+                                        <ProgressBar Name="SterilityBar" MinValue="0" MaxValue="1" SetHeight="8" />
+                                    </BoxContainer>
+                                </BoxContainer>
+                            </PanelContainer>
+                            <Label Text="TOOL MODE" FontColorOverride="#57B9B1" />
+                            <BoxContainer Name="CapabilityContainer" Orientation="Vertical" SeparationOverride="4" HorizontalExpand="True" />
+                            <Label Text="SITE TELEMETRY" FontColorOverride="#57B9B1" />
+                            <RichTextLabel Name="SiteStatus" HorizontalExpand="True" />
+                            <Label Text="ATTACHED INSTRUMENTS" FontColorOverride="#57B9B1" />
+                            <BoxContainer Name="AttachmentContainer" Orientation="Vertical" SeparationOverride="4" HorizontalExpand="True" />
+                            <Label Text="Visible geometry is anatomical data. Every change is validated and applied by the server."
+                                   FontColorOverride="#718B8D" />
+                        </BoxContainer>
+                    </ScrollContainer>
+                </PanelContainer>
+            </BoxContainer>
+        </BoxContainer>
+    </PanelContainer>
+</controls:FancyWindow>

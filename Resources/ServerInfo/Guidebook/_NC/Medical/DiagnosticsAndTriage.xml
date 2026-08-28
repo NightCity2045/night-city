@@ -1,48 +1,48 @@
 <Document>
-# Диагностика и триаж
+# Diagnostics and Triage
 
-## Ручной анализатор
+## Handheld analyzer
 
-1. Возьмите [color=#58e6d9]HandheldHealthAnalyzer[/color].
-2. Используйте его на пациенте.
-3. Дождитесь открытия окна диагностики.
+1. Hold the [color=#58e6d9]HandheldHealthAnalyzer[/color].
+2. Use it on the patient.
+3. Read the medical diagnostics window.
 
-Показывает приблизительные диапазоны кислорода, крови и перфузии, давление, ритм, боль, шок, сознание, наружное кровотечение и доступные признаки повреждений областей тела.
+The handheld analyzer reports approximate oxygenation, circulating blood, perfusion, pressure, rhythm, pain, shock, consciousness, external bleeding, and observable regional injury signs.
 
 <Box>
 <GuideEntityEmbed Entity="HandheldHealthAnalyzer"/>
 </Box>
 
-## Полный скан
+## Full body scan
 
-1. Поместите и пристегните пациента в [color=#58e6d9]MedicalScanner[/color].
-2. Откройте расположенную рядом консоль [color=#58e6d9]computerBodyScanner[/color].
-3. Выберите медицинскую диагностику.
+1. Place and buckle the patient into a [color=#58e6d9]MedicalScanner[/color].
+2. Open the nearby [color=#58e6d9]computerBodyScanner[/color] console.
+3. Select medical diagnostics.
 
-Показывает точные раны, внутреннее кровотечение, переломы, структурные повреждения, функцию органов, препараты, киберимпланты и активные операции.
+The scanner reports exact wounds, internal bleeding, fractures, structural damage, organ function, drugs, cyberware, and active surgical sites.
 
 <Box>
-<GuideEntityEmbed Entity="MedicalScanner" Caption="камера сканирования"/>
-<GuideEntityEmbed Entity="computerBodyScanner" Caption="консоль сканера"/>
+<GuideEntityEmbed Entity="MedicalScanner" Caption="scanner chamber"/>
+<GuideEntityEmbed Entity="computerBodyScanner" Caption="scanner console"/>
 </Box>
 
-## Разделы интерфейса
+## Interface sections
 
-- [color=#58e6d9]Priority triage feed[/color] — активные угрозы в порядке приоритета.
-- [color=#58e6d9]Vital telemetry[/color] — кислород, кровь, перфузия, давление, ритм, боль и шок.
-- [color=#58e6d9]Regions[/color] — повреждение и функция областей тела.
-- [color=#58e6d9]Wounds[/color] — тип, тяжесть, кровотечение, загрязнение, инфекция и применённое лечение.
-- [color=#58e6d9]Organs[/color] — целостность и функция внутренних органов.
-- [color=#58e6d9]Cyberware[/color] — целостность, питание, температура, ЭМИ и нейросвязь.
-- [color=#58e6d9]Drugs[/color] — концентрация, терапевтический эффект и токсическая нагрузка препаратов.
+- [color=#58e6d9]Priority triage feed[/color] — active threats ordered by urgency.
+- [color=#58e6d9]Vital telemetry[/color] — oxygenation, blood, perfusion, pressure, rhythm, pain, and shock.
+- [color=#58e6d9]Regions[/color] — injury burden and function of body regions.
+- [color=#58e6d9]Wounds[/color] — type, severity, bleeding, contamination, infection, and applied treatment.
+- [color=#58e6d9]Organs[/color] — internal organ integrity and function.
+- [color=#58e6d9]Cyberware[/color] — integrity, power, heat, EMP state, and neural link.
+- [color=#58e6d9]Drugs[/color] — concentration, therapeutic effects, and toxic burden.
 
-## Приоритет триажа
+## Triage priority
 
-1. Массивное или артериальное наружное кровотечение.
-2. Отсутствие дыхания или кровообращения, критическая гипоксия.
-3. Внутреннее кровотечение, повреждение жизненно важного органа, критический шок.
-4. Открытый перелом, разрыв сухожилия, нерва или сосуда.
-5. Стабильная рана, инфекция, боль и плановая операция.
+1. Massive or arterial external bleeding.
+2. Absent breathing or circulation, or critical hypoxia.
+3. Internal bleeding, vital organ damage, or critical shock.
+4. Open fracture, tendon rupture, nerve damage, or vascular injury.
+5. Stable wounds, infection, pain, and scheduled surgery.
 
-После вмешательства повторите скан и проверьте новую ревизию состояния.
+Repeat the scan after treatment and verify that the medical revision and affected values changed.
 </Document>

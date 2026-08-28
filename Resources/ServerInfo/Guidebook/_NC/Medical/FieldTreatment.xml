@@ -1,45 +1,45 @@
 <Document>
-# Полевая помощь
+# Field Treatment
 
-## Выбор раны
+## Wound selection
 
-1. Выберите область на кукле таргетинга.
-2. Используйте средство на пациенте.
-3. При режиме [color=#58e6d9]Automatic[/color] сервер выберет наиболее опасную подходящую наружную рану.
-4. Проверьте результат анализатором или во вкладке [color=#58e6d9]Wounds[/color].
+1. Select a body zone on the targeting doll.
+2. Use the treatment item on the patient.
+3. In [color=#58e6d9]Automatic[/color] mode, the server selects the most dangerous compatible external wound.
+4. Verify the result with the analyzer or the [color=#58e6d9]Wounds[/color] tab.
 
-## Прямое давление
+## Direct pressure
 
-- Предмет: пустая рука.
-- Применение: нажать на пациента с наружным кровотечением.
-- Результат: временное уменьшение потока выбранной раны.
+- Item: empty hand.
+- Use: click a patient with external bleeding.
+- Effect: temporarily reduces flow from the selected wound.
 
-## Бинт
+## Dressing
 
-- Предмет: [color=#58e6d9]Gauze[/color].
-- Область применения: наружная рана.
-- Результат: контроль капиллярного и венозного потока; уменьшение артериального потока.
-- Состояние: повязка имеет стерильность и запас впитывания, который расходуется кровью.
+- Item: [color=#58e6d9]Gauze[/color].
+- Target: external wound.
+- Effect: controls capillary and venous flow and reduces arterial flow.
+- State: the dressing has sterility and absorption capacity consumed by blood.
 
-## Гемостатическая упаковка
+## Hemostatic packing
 
-- Предмет: [color=#58e6d9]Brutepack[/color].
-- Область применения: глубокая наружная рана.
-- Результат: усиленный локальный гемостаз.
+- Item: [color=#58e6d9]Brutepack[/color].
+- Target: deep external wound.
+- Effect: stronger local hemostasis.
 
-## Жгут
+## Tourniquet
 
-- Предмет: [color=#58e6d9]Tourniquet[/color].
-- Область применения: рука или нога.
-- Результат: перекрытие наружных источников ниже выбранной области.
-- Состояние: хранит время установки, начало ишемии и критической ишемии.
-- Снятие: подготовить бинт, гемостатик и восполнение крови, затем снять контролируемо.
+- Item: [color=#58e6d9]Tourniquet[/color].
+- Target: arm or leg.
+- Effect: occludes external bleeding sources distal to the selected region.
+- State: records installation time, ischemia onset, and critical ischemia.
+- Removal: prepare a dressing, hemostatic packing, and volume replacement, then remove it under control.
 
-## Шина
+## Splint
 
-- Предмет: [color=#58e6d9]NCFieldSplint[/color].
-- Область применения: конечность с переломом.
-- Результат: повышение стабильности кости и снижение вторичного повреждения при движении.
+- Item: [color=#58e6d9]NCFieldSplint[/color].
+- Target: fractured limb.
+- Effect: improves bone stability and reduces secondary movement damage.
 
 <Box>
 <GuideEntityEmbed Entity="Gauze"/>
@@ -48,5 +48,5 @@
 <GuideEntityEmbed Entity="NCFieldSplint"/>
 </Box>
 
-Наружная кровопотеря уменьшает реальный раствор [color=#58e6d9]bloodstream[/color]. После контроля источника проверьте объём крови и перфузию.
+External blood loss removes fluid from the real [color=#58e6d9]bloodstream[/color] solution. After controlling the source, check blood volume and perfusion.
 </Document>

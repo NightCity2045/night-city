@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Shared._NC.Medical.Anatomy;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.Medical.Physiology;
@@ -84,4 +85,33 @@ public sealed partial class NCPhysiologyProfilePrototype : IPrototype
 
     [DataField]
     public TimeSpan StableInjuredUpdateInterval { get; private set; } = TimeSpan.FromSeconds(1);
+
+    [DataField]
+    public TimeSpan CavityDrainUpdateInterval { get; private set; } = TimeSpan.FromSeconds(0.5);
+
+    /// <summary>
+    /// Consequences of pressure and organ compression in each cavity. Values are evaluated from the live
+    /// cavity components, keeping physiology balance in YAML rather than hardcoded by cavity kind.
+    /// </summary>
+    [DataField]
+    public Dictionary<NCBodyCavity, NCCavityPhysiologyDefinition> CavityPhysiology { get; private set; } = new();
+}
+
+[DataDefinition]
+public sealed partial class NCCavityPhysiologyDefinition
+{
+    [DataField]
+    public float CardiacOutputPenaltyAtFullCompression;
+
+    [DataField]
+    public float RespiratoryTransferPenaltyAtFullCompression;
+
+    [DataField]
+    public float BrainFunctionPenaltyAtFullCompression;
+
+    [DataField]
+    public float PainAtFullPressure;
+
+    [DataField]
+    public float ShockAtFullPressure;
 }

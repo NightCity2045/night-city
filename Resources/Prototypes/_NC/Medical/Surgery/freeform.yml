@@ -1,0 +1,238 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncFreeformSurgeryProfile
+  id: NCHumanFreeformSurgery
+  interactionRange: 2
+  refreshInterval: 0.5s
+  minimumInputInterval: 0.04s
+  maximumStrokePoints: 32
+  maximumPersistentIncisions: 64
+  maximumStrokeLength: 4
+  minimumStrokeLength: 0.015
+  movementDisplacement: 0.08
+  unpreparedFieldContamination: 0.12
+  incidentalTendonRuptureThreshold: 0.45
+  incidentalBoneCrackThreshold: 0.75
+  incidentalBoneBreakThreshold: 0.4
+  structures:
+    Skull: { position: "0.5, 0.48", size: "0.72, 0.72", minimumDepth: 0.42, visual: Skull }
+    Brain: { position: "0.5, 0.5", size: "0.5, 0.44", minimumDepth: 0.74, visual: Brain }
+    Eyes: { position: "0.5, 0.38", size: "0.55, 0.18", minimumDepth: 0.44, visual: Eyes }
+    Tongue: { position: "0.5, 0.64", size: "0.28, 0.18", minimumDepth: 0.38, visual: Tongue }
+    Ears: { position: "0.5, 0.5", size: "0.82, 0.22", minimumDepth: 0.42, visual: Ears }
+    RibCage: { position: "0.5, 0.5", size: "0.82, 0.78", minimumDepth: 0.46, visual: RibCage }
+    Lungs: { position: "0.5, 0.46", size: "0.76, 0.56", minimumDepth: 0.7, visual: Lungs }
+    Heart: { position: "0.52, 0.57", size: "0.24, 0.27", minimumDepth: 0.76, visual: Heart }
+    Liver: { position: "0.37, 0.42", size: "0.45, 0.3", minimumDepth: 0.7, visual: Liver }
+    Stomach: { position: "0.62, 0.46", size: "0.3, 0.28", minimumDepth: 0.7, visual: Stomach }
+    Kidneys: { position: "0.5, 0.67", size: "0.58, 0.2", minimumDepth: 0.76, visual: Kidneys }
+    Appendix: { position: "0.67, 0.76", size: "0.14, 0.14", minimumDepth: 0.76, visual: Appendix }
+    PelvisBone: { position: "0.5, 0.55", size: "0.78, 0.56", minimumDepth: 0.48, visual: Pelvis }
+    ArmBoneLeft: { position: "0.5, 0.5", size: "0.2, 0.82", minimumDepth: 0.5, visual: LongBone }
+    ArmBoneRight: { position: "0.5, 0.5", size: "0.2, 0.82", minimumDepth: 0.5, visual: LongBone }
+    LegBoneLeft: { position: "0.5, 0.5", size: "0.22, 0.84", minimumDepth: 0.5, visual: LongBone }
+    LegBoneRight: { position: "0.5, 0.5", size: "0.22, 0.84", minimumDepth: 0.5, visual: LongBone }
+    TendonSetLeftArm: { position: "0.62, 0.5", size: "0.18, 0.76", minimumDepth: 0.42, visual: Tendon }
+    TendonSetRightArm: { position: "0.62, 0.5", size: "0.18, 0.76", minimumDepth: 0.42, visual: Tendon }
+    TendonSetLeftLeg: { position: "0.62, 0.5", size: "0.18, 0.78", minimumDepth: 0.42, visual: Tendon }
+    TendonSetRightLeg: { position: "0.62, 0.5", size: "0.18, 0.78", minimumDepth: 0.42, visual: Tendon }
+  cyberwareSlots:
+    NCSlotNeuralCore: { position: "0.44, 0.48", size: "0.24, 0.22", minimumDepth: 0.74, visual: Cyberware }
+    NCSlotCranialUtility: { position: "0.66, 0.53", size: "0.22, 0.2", minimumDepth: 0.68, visual: Cyberware }
+    NCSlotThoracicSupport: { position: "0.5, 0.57", size: "0.24, 0.26", minimumDepth: 0.72, visual: Cyberware }
+    NCSlotSubdermalThorax: { position: "0.5, 0.34", size: "0.52, 0.16", minimumDepth: 0.52, visual: Cyberware }
+    NCSlotArmUtilityLeft: { position: "0.58, 0.5", size: "0.24, 0.28", minimumDepth: 0.58, visual: Cyberware }
+    NCSlotArmUtilityRight: { position: "0.58, 0.5", size: "0.24, 0.28", minimumDepth: 0.58, visual: Cyberware }
+  tools:
+    NCSurgeryToolDisinfection:
+      action: Disinfect
+      powerPerUnit: 0.7
+      minimumPower: 0.08
+      maximumPower: 0.35
+      radius: 0.2
+    NCSurgeryToolCautery:
+      action: Cauterize
+      minimumDepth: 0.05
+      requiresOpenAccess: true
+      powerPerUnit: 1.1
+      minimumPower: 0.2
+      maximumPower: 0.75
+      radius: 0.14
+    NCSurgeryToolIncision:
+      action: Incise
+      traumaProfile: SlashingImpact
+      powerPerUnit: 14
+      minimumPower: 2
+      maximumPower: 18
+      contaminationPerUnit: 0.08
+      radius: 0.025
+      internalBleedPerPowerAtCavity: 0.3
+      incidentalStructureDamagePerPower: 2.2
+    NCSurgeryToolHemostasis:
+      action: Hemostasis
+      minimumDepth: 0.15
+      requiresOpenAccess: true
+      powerPerUnit: 1.4
+      minimumPower: 0.25
+      maximumPower: 0.85
+      radius: 0.14
+      attachable: true
+    NCSurgeryToolRetraction:
+      action: Retract
+      minimumDepth: 0.1
+      powerPerUnit: 0.8
+      minimumPower: 0.15
+      maximumPower: 0.7
+      radius: 0.16
+      attachable: true
+    NCSurgeryToolSuturing:
+      action: Suture
+      powerPerUnit: 1.1
+      minimumPower: 0.2
+      maximumPower: 0.9
+      contaminationPerUnit: 0.025
+      radius: 0.13
+      consumedUses: 1
+    NCSurgeryToolDebridement:
+      action: Debride
+      minimumDepth: 0.05
+      requiresOpenAccess: true
+      powerPerUnit: 0.8
+      minimumPower: 0.1
+      maximumPower: 0.55
+      radius: 0.12
+    NCSurgeryToolVascularRepair:
+      action: RepairVessel
+      minimumDepth: 0.3
+      requiresOpenAccess: true
+      powerPerUnit: 1.1
+      minimumPower: 0.2
+      maximumPower: 0.8
+      radius: 0.12
+    NCSurgeryToolBoneReduction:
+      action: ReduceBone
+      minimumDepth: 0.45
+      powerPerUnit: 0.7
+      minimumPower: 0.2
+      maximumPower: 0.75
+      radius: 0.16
+    NCSurgeryToolBoneFixation:
+      action: FixBone
+      minimumDepth: 0.45
+      requiresOpenAccess: true
+      powerPerUnit: 0.7
+      minimumPower: 0.2
+      maximumPower: 0.75
+      radius: 0.16
+    NCSurgeryToolOrganRepair:
+      action: RepairOrgan
+      minimumDepth: 0.65
+      requiresOpenAccess: true
+      powerPerUnit: 0.8
+      minimumPower: 0.15
+      maximumPower: 0.65
+      radius: 0.18
+    NCSurgeryToolIrrigation:
+      action: Irrigate
+      requiresOpenAccess: true
+      powerPerUnit: 1
+      minimumPower: 0.12
+      maximumPower: 0.65
+      radius: 0.24
+      consumedUses: 1
+    NCSurgeryToolForeignBodyExtraction:
+      action: ExtractForeignBody
+      minimumDepth: 0.2
+      requiresOpenAccess: true
+      powerPerUnit: 1
+      minimumPower: 0.2
+      maximumPower: 1
+      radius: 0.12
+    NCSurgeryToolTendonRepair:
+      action: RepairTendon
+      minimumDepth: 0.4
+      requiresOpenAccess: true
+      powerPerUnit: 0.8
+      minimumPower: 0.15
+      maximumPower: 0.65
+      radius: 0.14
+    NCSurgeryToolNerveRepair:
+      action: RepairNerve
+      minimumDepth: 0.45
+      requiresOpenAccess: true
+      powerPerUnit: 0.75
+      minimumPower: 0.12
+      maximumPower: 0.6
+      radius: 0.12
+    NCSurgeryToolOrganSeparation:
+      action: Separate
+      minimumDepth: 0.7
+      requiresOpenAccess: true
+      powerPerUnit: 1
+      minimumPower: 0.2
+      maximumPower: 1
+      contaminationPerUnit: 0.08
+      radius: 0.15
+    NCSurgeryToolTransplant:
+      action: Transplant
+      minimumDepth: 0.7
+      requiresOpenAccess: true
+      powerPerUnit: 0.8
+      minimumPower: 0.2
+      maximumPower: 0.8
+      radius: 0.15
+    NCSurgeryToolCranialAccess:
+      action: OpenBone
+      minimumDepth: 0.45
+      requiresOpenAccess: true
+      powerPerUnit: 0.9
+      minimumPower: 0.15
+      maximumPower: 0.8
+      contaminationPerUnit: 0.05
+      radius: 0.1
+    NCSurgeryToolOphthalmicRepair:
+      action: RepairOrgan
+      minimumDepth: 0.4
+      requiresOpenAccess: true
+      powerPerUnit: 0.65
+      minimumPower: 0.12
+      maximumPower: 0.55
+      radius: 0.1
+    NCSurgeryToolAmputation:
+      action: Amputate
+      minimumDepth: 0.7
+      powerPerUnit: 1
+      minimumPower: 0.3
+      maximumPower: 1
+      contaminationPerUnit: 0.12
+      radius: 0.18
+      allowedRegionCategories: [ ArmLeft, ArmRight, HandLeft, HandRight, LegLeft, LegRight, FootLeft, FootRight ]
+    NCSurgeryToolAutopsy:
+      action: Autopsy
+      traumaProfile: SlashingImpact
+      powerPerUnit: 10
+      minimumPower: 1.5
+      maximumPower: 14
+      contaminationPerUnit: 0.05
+      radius: 0.04
+    NCSurgeryToolCyberware:
+      action: Cyberware
+      minimumDepth: 0.55
+      requiresOpenAccess: true
+      powerPerUnit: 0.8
+      minimumPower: 0.2
+      maximumPower: 0.8
+      radius: 0.16
+    NCSurgeryToolCavityDrainage:
+      action: DrainCavity
+      minimumDepth: 0.65
+      requiresOpenAccess: true
+      powerPerUnit: 1
+      minimumPower: 0.25
+      maximumPower: 1
+      radius: 0.18
+      attachable: true
+      immediateDrainVolumePerPower: 80
+      continuousDrainRate: 12

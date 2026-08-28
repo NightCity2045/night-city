@@ -340,16 +340,21 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
             // Patient condition and scanner capability already live in the fixed record header. The overview
             // keeps only actionable transient context so the primary triage and telemetry remain dominant.
             AddSectionHeading(OverviewContainer, Loc.GetString("nc-medical-diagnostics-surgery"));
+            var details = surgery.Procedure is { } procedure && surgery.State is { } state
+                ? Loc.GetString(
+                    "nc-medical-diagnostics-surgery-row",
+                    ("region", OrganName(surgery.Region.Id)),
+                    ("procedure", SurgeryProcedureName(procedure)),
+                    ("step", surgery.StepIndex + 1),
+                    ("state", Value(state)),
+                    ("access", Value(surgery.AccessDepth)))
+                : $"{OrganName(surgery.Region.Id)} · access {Value(surgery.AccessDepth)}";
+            details += $"\nIncisions {surgery.OpenIncisionCount}/{surgery.IncisionCount} · " +
+                       $"contamination {surgery.Contamination:P0} · attached instruments {surgery.AttachedInstrumentCount}";
             AddCard(
                 OverviewContainer,
                 Loc.GetString("nc-medical-diagnostics-surgery"),
-                Loc.GetString(
-                    "nc-medical-diagnostics-surgery-row",
-                    ("region", OrganName(surgery.Region.Id)),
-                    ("procedure", SurgeryProcedureName(surgery.Procedure)),
-                    ("step", surgery.StepIndex + 1),
-                    ("state", Value(surgery.State)),
-                    ("access", Value(surgery.AccessDepth))),
+                details,
                 ModerateColor);
         }
     }

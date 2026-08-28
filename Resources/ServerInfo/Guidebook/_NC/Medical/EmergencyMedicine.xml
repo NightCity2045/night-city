@@ -1,45 +1,45 @@
 <Document>
-# Экстренная медицина
+# Emergency Medicine
 
-## Порядок действий
+## Action order
 
-1. Остановите массивное наружное кровотечение.
-2. Проверьте кислород, кровь, перфузию и сердечный ритм.
-3. Включите кислородную поддержку или вентиляцию.
-4. При отсутствии кровообращения выполняйте СЛР.
-5. При шоковом ритме примените дефибриллятор.
-6. Восполните объём крови.
-7. Устраните источник травмы или системного повреждения.
+1. Stop massive external bleeding.
+2. Check oxygenation, circulating blood, perfusion, and cardiac rhythm.
+3. Provide oxygen support or assisted ventilation.
+4. Perform CPR when circulation is absent.
+5. Use a defibrillator for a shockable rhythm.
+6. Restore circulating volume.
+7. Treat the source of trauma or systemic failure.
 
-## СЛР
+## CPR
 
-- Предмет: пустая рука.
-- Условие: пациент лежит, кровообращение отсутствует.
-- Применение: нажать пустой рукой на пациента.
-- Результат: временная вспомогательная перфузия и замедление повреждения мозга.
+- Item: empty hand.
+- Requirement: patient is lying down and has no circulation.
+- Use: click the patient with an empty hand.
+- Effect: temporary assisted perfusion and slower brain deterioration.
 
-## Вентиляция
+## Ventilation
 
-- Предмет: [color=#58e6d9]NCManualVentilator[/color].
-- Применение: использовать на пациенте с недостаточным дыханием.
-- Результат: временная поддержка вентиляции и оксигенации.
+- Item: [color=#58e6d9]NCManualVentilator[/color].
+- Use: apply it to a patient with inadequate respiration.
+- Effect: temporary ventilation and oxygenation support.
 
-## Кристаллоид
+## Crystalloid
 
-- Предмет: [color=#58e6d9]NCCrystalloidBag[/color].
-- Результат: увеличение эффективного циркулирующего объёма.
+- Item: [color=#58e6d9]NCCrystalloidBag[/color].
+- Effect: increases effective circulating volume.
 
-## Кровь
+## Blood
 
-- Предмет: совместимый [color=#58e6d9]Bloodpack[/color].
-- Результат: добавление крови в раствор bloodstream и восстановление кислородонесущего объёма.
+- Item: a compatible [color=#58e6d9]Bloodpack[/color].
+- Effect: adds blood to the bloodstream solution and restores oxygen-carrying volume.
 
-## Дефибрилляция
+## Defibrillation
 
-- Предмет: [color=#58e6d9]Defibrillator[/color].
-- Условие: ритм [color=#76e69a]Shockable arrest[/color].
-- Результат: попытка восстановить нормальный ритм.
-- После действия: повторно проверить ритм, кислород и перфузию.
+- Item: [color=#58e6d9]Defibrillator[/color].
+- Requirement: [color=#76e69a]Shockable arrest[/color] rhythm.
+- Effect: attempts to restore a normal rhythm.
+- Follow-up: recheck rhythm, oxygenation, and perfusion.
 
 <Box>
 <GuideEntityEmbed Entity="NCManualVentilator"/>
@@ -48,8 +48,8 @@
 <GuideEntityEmbed Entity="Defibrillator"/>
 </Box>
 
-## Состояния остановки
+## Arrest states
 
-- [color=#ffcc66]Clinical arrest[/color] — кровообращение остановлено, мозг ещё может сохранять жизнеспособность.
-- [color=#ff5c5c]Brain dead[/color] — необратимое состояние мозга.
+- [color=#ffcc66]Clinical arrest[/color] — circulation has stopped while the brain can still remain viable.
+- [color=#ff5c5c]Brain dead[/color] — irreversible loss of brain function.
 </Document>

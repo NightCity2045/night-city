@@ -45,6 +45,7 @@ public sealed class NCBloodIntegrationTest : GameTest
     private static readonly EntProtoId HumanMob = "MobHuman";
 
     [SidedDependency(Side.Server)] private NCCirculationBloodSystem _blood = default!;
+    [SidedDependency(Side.Server)] private NCCavityFluidSystem _cavities = default!;
     [SidedDependency(Side.Server)] private NCEmergencyCareSystem _emergency = default!;
     [SidedDependency(Side.Server)] private NCPhysiologySystem _physiology = default!;
     [SidedDependency(Side.Server)] private NCAnatomySystem _anatomy = default!;
@@ -250,7 +251,7 @@ public sealed class NCBloodIntegrationTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
-    public void CavityAndCirculationAreBoundedByConfiguredCapacity()
+    public void CavityOverflowIsConservedAndDrainAdvancesOverSchedulerTime()
     {
         var body = SSpawn(HumanMob);
         var circulation = SComp<NCCirculationComponent>(body);
@@ -269,8 +270,67 @@ public sealed class NCBloodIntegrationTest : GameTest
             Assert.That(application.TotalLost, Is.EqualTo(before).Within(0.01f));
             Assert.That(circulation.BloodVolume, Is.Zero);
             Assert.That(cavity.BloodVolume, Is.EqualTo(cavity.MaximumBloodVolume).Within(0.01f));
+            Assert.That(cavity.OverflowBloodVolume,
+                Is.EqualTo(before - cavity.MaximumBloodVolume).Within(0.01f));
+            Assert.That(NCCavityFluidMath.GetTotalBloodVolume(cavity), Is.EqualTo(before).Within(0.01f));
             Assert.That(cavity.Pressure, Is.InRange(0f, 1f));
             Assert.That(cavity.OrganCompression, Is.InRange(0f, 1f));
+        });
+
+        Assert.That(_cavities.TrySetDrainRate(body, thorax, 100f), Is.True);
+        Assert.That(_cavities.AdvanceBody(body, TimeSpan.FromSeconds(10)), Is.True);
+        Assert.That(NCCavityFluidMath.GetTotalBloodVolume(cavity), Is.EqualTo(before - 1000f).Within(0.01f));
+        Assert.That(_cavities.AdvanceBody(body, TimeSpan.FromMinutes(2)), Is.True);
+        Assert.Multiple(() =>
+        {
+            Assert.That(cavity.BloodVolume, Is.Zero);
+            Assert.That(cavity.OverflowBloodVolume, Is.Zero);
+            Assert.That(cavity.DrainRate, Is.Zero);
+            Assert.That(cavity.Pressure, Is.Zero);
+            Assert.That(cavity.OrganCompression, Is.Zero);
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void UnlocalizedInternalLossRemainsInExplicitBodyLedger()
+    {
+        var body = SSpawn(HumanMob);
+        var bleeding = Server.EntMan.EnsureComponent<NCBleedingComponent>(body);
+        bleeding.Sources.Clear();
+        bleeding.OverflowExternalRate = 0f;
+        bleeding.OverflowInternalRate = 50f;
+        bleeding.OverflowInternalRatesByRegion.Clear();
+
+        var lost = Server.System<NCBleedingSystem>().AdvanceBody(body, TimeSpan.FromSeconds(2));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(lost, Is.EqualTo(100f).Within(0.01f));
+            Assert.That(bleeding.InternalBloodLoss, Is.EqualTo(100f).Within(0.01f));
+            Assert.That(bleeding.UnlocalizedInternalBloodVolume, Is.EqualTo(100f).Within(0.01f));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void ThoracicCompressionReducesRespirationAndCardiacOutput()
+    {
+        var body = SSpawn(HumanMob);
+        Assert.That(_anatomy.TryGetOrgan(body, "Thorax", out var thorax), Is.True);
+        var cavity = SComp<NCCavityFluidComponent>(thorax);
+        Assert.That(_cavities.TryAccumulate(body, thorax, cavity.CompressionFullScaleVolume), Is.True);
+
+        Assert.That(_physiology.EvaluateBody(body, TimeSpan.Zero), Is.True);
+        var circulation = SComp<NCCirculationComponent>(body);
+        var physiology = SComp<NCPhysiologyComponent>(body);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(circulation.CardiacOutput, Is.LessThan(0.7f));
+            Assert.That(physiology.Oxygenation, Is.LessThan(0.4f));
+            Assert.That(physiology.TotalPain, Is.GreaterThan(0f));
+            Assert.That(physiology.Shock, Is.GreaterThan(0f));
         });
     }
 
