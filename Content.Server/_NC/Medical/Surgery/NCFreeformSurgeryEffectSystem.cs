@@ -20,6 +20,7 @@ using Content.Shared.Body;
 using Content.Shared.Damage;
 using Content.Shared.FixedPoint;
 using Content.Shared.Hands.EntitySystems;
+using Content.Shared.Popups;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
@@ -43,6 +44,7 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
     [Dependency] private NCCyberwareSystem _cyberware = default!;
     [Dependency] private NCSurgerySystem _legacy = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
+    [Dependency] private SharedPopupSystem _popup = default!;
 
     public NCFreeformSurgeryEffectResult ApplyStroke(in NCFreeformSurgeryEffectContext context)
     {
@@ -76,18 +78,18 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
             NCFreeformSurgeryAction.Autopsy => ApplyIncision(context, site, medical, resolution, power),
             NCFreeformSurgeryAction.Hemostasis => ApplyHemostasis(context, site, center, power, false),
             NCFreeformSurgeryAction.Cauterize => ApplyHemostasis(context, site, center, power, true),
-            NCFreeformSurgeryAction.Retract => ApplyRetraction(context, site, center, power),
+            NCFreeformSurgeryAction.Retract => ApplyRetraction(context, site, power),
             NCFreeformSurgeryAction.Suture => ApplySuture(context, site, center, power),
             NCFreeformSurgeryAction.Irrigate => ApplyIrrigation(context, site, center, power),
             NCFreeformSurgeryAction.Debride => ApplyDebridement(context, site, center, power),
             NCFreeformSurgeryAction.RepairVessel => ApplyVascularRepair(context, center, power),
             NCFreeformSurgeryAction.RepairOrgan => ApplyOrganRepair(context, power),
-            NCFreeformSurgeryAction.ReduceBone => ApplyBone(context, reduce: true),
-            NCFreeformSurgeryAction.FixBone => ApplyBone(context, reduce: false),
+            NCFreeformSurgeryAction.ReduceBone => ApplyBone(context, site, reduce: true),
+            NCFreeformSurgeryAction.FixBone => ApplyBone(context, site, reduce: false),
             NCFreeformSurgeryAction.RepairTendon => ApplyTendon(context, power),
             NCFreeformSurgeryAction.RepairNerve => ApplyNerve(context, power),
             NCFreeformSurgeryAction.ExtractForeignBody => ApplyExtraction(context, center, resolution),
-            NCFreeformSurgeryAction.OpenBone => ApplyBoneAccess(context, site, power),
+            NCFreeformSurgeryAction.OpenBone => ApplyBoneAccess(context, site),
             NCFreeformSurgeryAction.Separate => ApplySeparation(context),
             NCFreeformSurgeryAction.Amputate => ApplyAmputation(context),
             NCFreeformSurgeryAction.Transplant => ApplyTransplant(context),
@@ -95,6 +97,20 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
             NCFreeformSurgeryAction.DrainCavity => ApplyCavityDrain(context, power),
             _ => false,
         };
+
+        // NC: Physical danger belongs to the held item as well as the chosen capability. A laser scalpel in
+        // debridement mode still cuts live anatomy when no contaminated wound exists under the cursor.
+        var physicalDamage = MathF.Max(
+            context.Definition.MisuseStructureDamagePerPower,
+            context.ToolComponent.PhysicalContactDamagePerPower);
+        if (!applied && physicalDamage > 0f)
+        {
+            applied = ApplyStructureDamage(
+                context,
+                power,
+                physicalDamage,
+                true);
+        }
 
         if (!applied)
             return NCFreeformSurgeryEffectResult.NoTarget;
@@ -177,16 +193,21 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
             }
         }
 
-        var existing = FindIncision(site, context.Zone, context.Surface, center, context.Definition.Radius);
-        if (existing != null && !existing.Sutured)
+        // NC: A body zone and surface own exactly one operative site. Repeated cutting deepens or reopens that
+        // same site; cursor position, patient movement and an earlier closure can never create a second aperture.
+        var existing = FindCanonicalIncision(site, context.Zone, context.Surface);
+        if (existing != null)
         {
             existing.Depth = MathF.Max(existing.Depth, context.Depth);
             existing.Width = MathF.Max(existing.Width, MathF.Max(0.01f, power * 0.004f));
             existing.Contamination = Math.Clamp(existing.Contamination + site.Contamination * 0.1f, 0f, 1f);
             existing.ModifiedAt = _timing.CurTime;
             existing.Polyline = Simplify(context.Points, 32);
-            if (result.WoundId != null)
-                existing.WoundId = result.WoundId;
+            var wasSutured = existing.Sutured;
+            existing.Sutured = false;
+            if (wasSutured)
+                existing.EdgeSeparation = 0f;
+            LinkWound(existing, result.WoundId);
         }
         else
         {
@@ -204,8 +225,7 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
                 CreatedAt = _timing.CurTime,
                 ModifiedAt = _timing.CurTime,
             });
-            while (site.Incisions.Count > context.MaximumIncisions)
-                site.Incisions.RemoveAt(0);
+            // NC: Operative traces persist for the round, but their identity is the canonical zone/surface slot.
         }
 
         if (access > site.AccessDepth)
@@ -216,41 +236,61 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
 
     private void ApplyIncidentalStructureDamage(in NCFreeformSurgeryEffectContext context, float power)
     {
-        if (context.Structure is not { } target || target == context.Region ||
-            context.Definition.IncidentalStructureDamagePerPower <= 0f)
+        ApplyStructureDamage(context, power, context.Definition.IncidentalStructureDamagePerPower);
+    }
+
+    private bool ApplyStructureDamage(
+        in NCFreeformSurgeryEffectContext context,
+        float power,
+        float damagePerPower,
+        bool allowRegionFallback = false)
+    {
+        var target = context.Structure ?? (allowRegionFallback ? context.Region : null);
+        if (target is not { } affectedTarget ||
+            !allowRegionFallback && affectedTarget == context.Region ||
+            damagePerPower <= 0f)
         {
-            return;
+            return false;
         }
 
-        var damage = power * context.Definition.IncidentalStructureDamagePerPower;
+        var damage = power * damagePerPower;
         var fraction = Math.Clamp(damage / 100f, 0f, 1f);
-        if (TryComp<NCOrganIntegrityComponent>(target, out var integrity))
+        var affected = false;
+        if (TryComp<NCOrganIntegrityComponent>(affectedTarget, out var integrity))
         {
             integrity.CurrentIntegrity = MathF.Max(0f, integrity.CurrentIntegrity - damage);
             integrity.FunctionalEfficiency = MathF.Min(
                 integrity.FunctionalEfficiency,
                 integrity.CurrentIntegrity / MathF.Max(1f, integrity.MaxIntegrity));
+            affected = true;
         }
-        if (TryComp<NCOrganFunctionComponent>(target, out var function))
+        if (TryComp<NCOrganFunctionComponent>(affectedTarget, out var function))
+        {
             function.CurrentCapacity = MathF.Max(0f, function.CurrentCapacity - fraction * function.BaseCapacity);
-        if (TryComp<NCTendonComponent>(target, out var tendon))
+            affected = true;
+        }
+        if (TryComp<NCTendonComponent>(affectedTarget, out var tendon))
         {
             tendon.Integrity = MathF.Max(0f, tendon.Integrity - fraction);
             tendon.Ruptured |= tendon.Integrity < context.IncidentalTendonRuptureThreshold;
+            affected = true;
         }
-        if (TryComp<NCNerveComponent>(target, out var nerve))
+        if (TryComp<NCNerveComponent>(affectedTarget, out var nerve))
         {
             nerve.NeuralIntegrity = MathF.Max(0f, nerve.NeuralIntegrity - fraction);
             nerve.MotorFunction = MathF.Min(nerve.MotorFunction, nerve.NeuralIntegrity);
+            affected = true;
         }
-        if (TryComp<NCBoneComponent>(target, out var bone))
+        if (TryComp<NCBoneComponent>(affectedTarget, out var bone))
         {
             bone.Stability = MathF.Max(0f, bone.Stability - fraction);
             if (bone.Stability < context.IncidentalBoneBreakThreshold)
                 bone.State = NCBoneState.BrokenStable;
             else if (bone.Stability < context.IncidentalBoneCrackThreshold && bone.State < NCBoneState.Cracked)
                 bone.State = NCBoneState.Cracked;
+            affected = true;
         }
+        return affected;
     }
 
     private bool ApplyCavityDrain(in NCFreeformSurgeryEffectContext context, float power)
@@ -313,16 +353,21 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
     private bool ApplyRetraction(
         in NCFreeformSurgeryEffectContext context,
         NCSurgicalSiteComponent site,
-        Vector2 point,
         float power)
     {
-        var incision = FindIncision(site, context.Zone, context.Surface, point, context.Definition.Radius);
+        var incision = FindOperativeSite(site, context.Zone, context.Surface);
         if (incision == null || incision.Sutured)
             return false;
 
-        incision.EdgeSeparation = Math.Clamp(MathF.Max(incision.EdgeSeparation, power), 0f, 1f);
+        // NC: Retraction is a discrete interactive transition. A successful click must cross the same
+        // data-driven threshold used by the authoritative renderer; otherwise prediction briefly opens the
+        // aperture and the next server state closes it again despite the accepted tool action.
+        incision.EdgeSeparation = Math.Clamp(
+            MathF.Max(MathF.Max(incision.EdgeSeparation, power), context.MinimumOpenRetraction),
+            0f,
+            1f);
         incision.ModifiedAt = _timing.CurTime;
-        site.TissuesRetracted = incision.EdgeSeparation >= 0.2f;
+        site.TissuesRetracted = incision.EdgeSeparation >= context.MinimumOpenRetraction;
         if (site.TissuesRetracted && site.AccessDepth < NCSurgicalAccessDepth.SoftTissueRetracted)
             site.AccessDepth = NCSurgicalAccessDepth.SoftTissueRetracted;
         return true;
@@ -334,26 +379,56 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         Vector2 point,
         float power)
     {
-        var incision = FindIncision(site, context.Zone, context.Surface, point, context.Definition.Radius);
-        if (incision == null)
+        var incision = FindOperativeSite(site, context.Zone, context.Surface);
+        var hasWound = TryNearestWound(context, point, out var nearestWound);
+        var incisionDistance = incision == null
+            ? float.PositiveInfinity
+            : Vector2.DistanceSquared(point, StrokeCenter(incision.Polyline));
+        var woundDistance = hasWound
+            ? Vector2.DistanceSquared(point, new Vector2(nearestWound.VisualX / 255f, nearestWound.VisualY / 255f))
+            : float.PositiveInfinity;
+
+        // NC: A wound sprite and an operative incision are independent interactive targets. The closest one
+        // wins, so suturing a combat cut never silently closes the zone's surgical aperture instead.
+        var woundBelongsToIncision = incision != null && EnumerateWoundIds(incision).Contains(nearestWound?.WoundId ?? Guid.Empty);
+        if (hasWound && nearestWound != null && !woundBelongsToIncision && woundDistance < incisionDistance)
+        {
+            if (nearestWound.ClosureState is NCWoundClosureState.Healed or NCWoundClosureState.Sealed)
+                return false;
+            nearestWound.ExternalBleedRate = 0f;
+            nearestWound.ClosureState = NCWoundClosureState.Sutured;
+            nearestWound.Stage = NCWoundStage.Treated;
+            nearestWound.ModifiedAt = _timing.CurTime;
+            // Contamination, infection and necrosis deliberately remain: closing a dirty wound traps the
+            // clinical problem instead of making it disappear.
+            _bleeding.SynchronizeWoundSources(context.Patient, nearestWound);
+            return true;
+        }
+
+        // The skin cannot be closed over a surgically opened skull/rib/pelvic casing. Bone fixation closes
+        // that local casing first; ordinary external wounds remain independently suturable above.
+        if (incision == null || incision.BoneCasingOpen)
             return false;
 
         incision.Width = MathF.Max(0f, incision.Width - power * 0.08f);
         incision.EdgeSeparation = MathF.Max(0f, incision.EdgeSeparation - power);
         incision.Sutured = incision.Width <= 0.012f || power >= 0.45f;
         incision.ModifiedAt = _timing.CurTime;
-        if (incision.WoundId is { } woundId &&
-            TryComp<NCWoundContainerComponent>(context.Patient, out var wounds) &&
-            wounds.Wounds.TryGetValue(woundId, out var wound))
+        if (TryComp<NCWoundContainerComponent>(context.Patient, out var wounds))
         {
-            wound.ExternalBleedRate = 0f;
-            wound.ClosureState = NCWoundClosureState.Sutured;
-            wound.Stage = NCWoundStage.Treated;
-            wound.ModifiedAt = _timing.CurTime;
-            _bleeding.SynchronizeWoundSources(context.Patient, wound);
+            foreach (var woundId in EnumerateWoundIds(incision))
+            {
+                if (!wounds.Wounds.TryGetValue(woundId, out var wound))
+                    continue;
+                wound.ExternalBleedRate = 0f;
+                wound.ClosureState = NCWoundClosureState.Sutured;
+                wound.Stage = NCWoundStage.Treated;
+                wound.ModifiedAt = _timing.CurTime;
+                _bleeding.SynchronizeWoundSources(context.Patient, wound);
+            }
         }
 
-        RecalculateAccess(site);
+        RecalculateAccess(site, context.MinimumOpenRetraction);
         return true;
     }
 
@@ -428,7 +503,10 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         return true;
     }
 
-    private bool ApplyBone(in NCFreeformSurgeryEffectContext context, bool reduce)
+    private bool ApplyBone(
+        in NCFreeformSurgeryEffectContext context,
+        NCSurgicalSiteComponent site,
+        bool reduce)
     {
         var target = context.Structure ?? context.Region;
         if (!TryComp<NCBoneComponent>(target, out var bone))
@@ -446,6 +524,13 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
             bone.Stability = MathF.Max(bone.Stability, 0.8f);
             if (bone.State is NCBoneState.BrokenStable or NCBoneState.BrokenDisplaced)
                 bone.State = NCBoneState.Cracked;
+            if (context.StructureBlocksDeeperStructures &&
+                FindOperativeSite(site, context.Zone, context.Surface) is { } incision)
+            {
+                incision.BoneCasingOpen = false;
+                incision.ModifiedAt = _timing.CurTime;
+                site.BoneCasingOpen = site.Incisions.Any(value => !value.Sutured && value.BoneCasingOpen);
+            }
         }
         return true;
     }
@@ -489,20 +574,33 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         wound.EmbeddedObjectId = null;
         wound.EmbeddedObjectEntityPrototype = null;
         wound.ModifiedAt = _timing.CurTime;
-        _hands.TryPickupAnyHand(context.Surgeon, extracted);
+        if (!_hands.TryPickupAnyHand(context.Surgeon, extracted))
+        {
+            _popup.PopupEntity(
+                Loc.GetString("nc-medical-freeform-surgery-extracted-foreign-body-placed"),
+                extracted,
+                context.Surgeon,
+                PopupType.SmallCaution);
+        }
         return true;
     }
 
-    private static bool ApplyBoneAccess(
+    private bool ApplyBoneAccess(
         in NCFreeformSurgeryEffectContext context,
-        NCSurgicalSiteComponent site,
-        float power)
+        NCSurgicalSiteComponent site)
     {
-        var target = context.Structure ?? context.Region;
         if (!context.HasBoneTarget && !context.IsCranialRegion)
             return false;
-        site.BoneCasingOpen = power >= 0.2f;
-        if (site.BoneCasingOpen && site.AccessDepth < NCSurgicalAccessDepth.EncasedStructureOpened)
+        // NC: Capability quality and tool power were already validated by ApplyStroke. An accepted discrete
+        // bone-access click therefore performs the state transition instead of succeeding below a hidden cutoff.
+        var incision = FindOperativeSite(site, context.Zone, context.Surface);
+        if (incision == null || incision.EdgeSeparation < context.MinimumOpenRetraction)
+            return false;
+        incision.BoneCasingOpen = true;
+        incision.ModifiedAt = _timing.CurTime;
+        // Compatibility summary for retained procedure adapters; freeform access always reads the local record.
+        site.BoneCasingOpen = site.Incisions.Any(value => !value.Sutured && value.BoneCasingOpen);
+        if (site.AccessDepth < NCSurgicalAccessDepth.EncasedStructureOpened)
             site.AccessDepth = NCSurgicalAccessDepth.EncasedStructureOpened;
         return true;
     }
@@ -511,7 +609,7 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
     {
         // Organ separation is cursor-specific. Falling back to the selected external region would turn a
         // missed organ click into an accidental limb amputation.
-        if (context.Structure is not { } target)
+        if (!context.StructureDetachableBySeparation || context.Structure is not { } target)
             return false;
         if (!TryComp<OrganComponent>(target, out var organ) || organ.Category is not { } category ||
             !_detachment.TryDetachOrgan(context.Patient, category, out var detached))
@@ -519,7 +617,16 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
             return false;
         }
 
-        _hands.TryPickupAnyHand(context.Surgeon, detached);
+        if (!_hands.TryPickupAnyHand(context.Surgeon, detached))
+        {
+            // NC: Detachment already placed the live entity at the patient's coordinates. Never hide a
+            // successful extraction merely because the surgeon kept every hand occupied.
+            _popup.PopupEntity(
+                Loc.GetString("nc-medical-freeform-surgery-extracted-organ-placed"),
+                detached,
+                context.Surgeon,
+                PopupType.SmallCaution);
+        }
         return true;
     }
 
@@ -611,9 +718,18 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
             return true;
         }
 
-        var incision = FindIncision(site, context.Zone, context.Surface, point, context.Definition.Radius);
-        if (incision != null && !incision.Sutured && incision.Depth + 0.001f >= context.Depth)
-            return true;
+        // NC: Retraction turns the zone into one discrete operative window. Once that window reaches the
+        // requested layer, every visible sprite inside it is physically accessible without drawing another cut.
+        var requiredDepth = context.StructureMinimumDepth ?? context.Depth;
+        foreach (var incision in site.Incisions)
+        {
+            if (incision.TargetZone == context.Zone && incision.Surface == context.Surface &&
+                !incision.Sutured && incision.EdgeSeparation >= context.MinimumOpenRetraction &&
+                (incision.BoneCasingOpen || incision.Depth + 0.001f >= requiredDepth))
+            {
+                return true;
+            }
+        }
 
         // A pre-existing open penetrating wound is also a physical path. Dressings and completed closure do
         // not count, and the wound must expose at least the tissue layer selected by the instrument.
@@ -685,47 +801,46 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         };
     }
 
-    private static NCSurgicalIncisionRecord? FindIncision(
+    private static NCSurgicalIncisionRecord? FindCanonicalIncision(
         NCSurgicalSiteComponent site,
         ProtoId<NCTargetZonePrototype> zone,
-        NCWoundSurface surface,
-        Vector2 point,
-        float radius)
+        NCWoundSurface surface)
     {
-        NCSurgicalIncisionRecord? best = null;
-        var bestDistance = radius * radius;
-        foreach (var incision in site.Incisions)
-        {
-            if (incision.TargetZone != zone || incision.Surface != surface || incision.Polyline.Count == 0)
-                continue;
-            var distance = DistanceSquaredToPolyline(point, incision.Polyline);
-            if (distance > bestDistance)
-                continue;
-            bestDistance = distance;
-            best = incision;
-        }
-        return best;
+        return site.Incisions
+            .Where(incision => incision.TargetZone == zone && incision.Surface == surface)
+            .OrderBy(incision => incision.CreatedAt)
+            .ThenBy(incision => incision.IncisionId)
+            .FirstOrDefault();
     }
 
-    private static float DistanceSquaredToPolyline(Vector2 point, IReadOnlyList<Vector2> polyline)
+    private static NCSurgicalIncisionRecord? FindOperativeSite(
+        NCSurgicalSiteComponent site,
+        ProtoId<NCTargetZonePrototype> zone,
+        NCWoundSurface surface)
     {
-        if (polyline.Count == 0)
-            return float.MaxValue;
-        if (polyline.Count == 1)
-            return Vector2.DistanceSquared(point, polyline[0]);
+        return site.Incisions
+            .Where(incision => incision.TargetZone == zone && incision.Surface == surface && !incision.Sutured)
+            .OrderBy(incision => incision.CreatedAt)
+            .ThenBy(incision => incision.IncisionId)
+            .FirstOrDefault();
+    }
 
-        var best = float.MaxValue;
-        for (var index = 1; index < polyline.Count; index++)
-        {
-            var start = polyline[index - 1];
-            var segment = polyline[index] - start;
-            var lengthSquared = segment.LengthSquared();
-            var fraction = lengthSquared <= 0.000001f
-                ? 0f
-                : Math.Clamp(Vector2.Dot(point - start, segment) / lengthSquared, 0f, 1f);
-            best = MathF.Min(best, Vector2.DistanceSquared(point, start + segment * fraction));
-        }
-        return best;
+    private static void LinkWound(NCSurgicalIncisionRecord incision, Guid? woundId)
+    {
+        if (woundId is not { } linked || incision.WoundId == linked || incision.LinkedWoundIds.Contains(linked))
+            return;
+        if (incision.WoundId == null)
+            incision.WoundId = linked;
+        else
+            incision.LinkedWoundIds.Add(linked);
+    }
+
+    private static IEnumerable<Guid> EnumerateWoundIds(NCSurgicalIncisionRecord incision)
+    {
+        if (incision.WoundId is { } primary)
+            yield return primary;
+        foreach (var linked in incision.LinkedWoundIds)
+            yield return linked;
     }
 
     private static float PathLength(IReadOnlyList<Vector2> points)
@@ -757,7 +872,7 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         return result;
     }
 
-    private static void RecalculateAccess(NCSurgicalSiteComponent site)
+    private static void RecalculateAccess(NCSurgicalSiteComponent site, float minimumOpenRetraction)
     {
         var open = site.Incisions.Where(incision => !incision.Sutured).ToList();
         if (open.Count == 0)
@@ -768,7 +883,8 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
             return;
         }
 
-        site.TissuesRetracted = open.Any(incision => incision.EdgeSeparation >= 0.2f);
+        site.TissuesRetracted = open.Any(incision => incision.EdgeSeparation >= minimumOpenRetraction);
+        site.BoneCasingOpen = open.Any(incision => incision.BoneCasingOpen);
     }
 }
 
@@ -786,13 +902,17 @@ public readonly record struct NCFreeformSurgeryEffectContext(
     float ToolQuality,
     float ToolSterility,
     float UnpreparedContamination,
-    int MaximumIncisions,
+    float MinimumOpenRetraction,
     EntityUid? Structure,
     bool HasBoneTarget,
     bool IsCranialRegion,
     float IncidentalTendonRuptureThreshold,
     float IncidentalBoneCrackThreshold,
-    float IncidentalBoneBreakThreshold);
+    float IncidentalBoneBreakThreshold,
+    Vector2 ContactPosition = default,
+    float? StructureMinimumDepth = null,
+    bool StructureDetachableBySeparation = false,
+    bool StructureBlocksDeeperStructures = false);
 
 public readonly record struct NCFreeformSurgeryEffectResult(bool Accepted, bool Applied, NCFreeformSurgeryFailure? Failure)
 {

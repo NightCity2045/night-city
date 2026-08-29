@@ -159,3 +159,5 @@ nc-medical-surgery-access-ready-for-closure = Готов к закрытию
 nc-medical-surgery-access-closed-post-op = Закрыт после операции
 nc-medical-freeform-surgery-verb = Открыть хирургическое поле
 nc-medical-freeform-surgery-empty-hand = активная рука пуста
+nc-medical-freeform-surgery-extracted-organ-placed = Нет свободной руки; извлечённый орган оставлен рядом с пациентом.
+nc-medical-freeform-surgery-extracted-foreign-body-placed = Нет свободной руки; извлечённое инородное тело оставлено рядом с пациентом.

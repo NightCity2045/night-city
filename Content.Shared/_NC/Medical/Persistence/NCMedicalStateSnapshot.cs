@@ -290,6 +290,7 @@ public sealed partial class NCSurgicalIncisionStateSnapshot
 {
     [DataField] public Guid IncisionId;
     [DataField] public Guid? WoundId;
+    [DataField] public List<Guid> LinkedWoundIds = [];
     [DataField(required: true)] public ProtoId<NCTargetZonePrototype> TargetZone;
     [DataField] public NCWoundSurface Surface;
     [DataField] public List<Vector2> Polyline = [];
@@ -298,6 +299,7 @@ public sealed partial class NCSurgicalIncisionStateSnapshot
     [DataField] public float EdgeSeparation;
     [DataField] public float Contamination;
     [DataField] public bool Sutured;
+    [DataField] public bool BoneCasingOpen;
     [DataField] public NCActionResolutionId SourceResolutionId;
     [DataField] public TimeSpan CreatedAt;
     [DataField] public TimeSpan ModifiedAt;

@@ -33,8 +33,8 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
     private float _depthSendTimer;
     private bool _depthDirty;
     private bool _depthInFlight;
-    private bool _strokePending;
-    private uint _pendingStrokeSequence;
+    private bool _interactionPending;
+    private uint _pendingInteractionSequence;
     private bool _closing;
 
     public override void Initialize()
@@ -83,42 +83,53 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
         if (!state.SessionId.IsValid)
             return;
 
-        // Fatal/session validation replies intentionally contain no anatomical payload. Preserve the last
-        // readable field instead of replacing it with an empty default profile while refresh may recover.
-        if (!state.Accepted && _state != null && string.IsNullOrEmpty(state.AnatomyProfile.Id))
+        // Fatal/session validation replies intentionally contain no anatomical payload. They may also be the
+        // first reply received by a newly opened client, so never pass their empty ProtoId into PrototypeManager.
+        if (!state.Accepted && string.IsNullOrEmpty(state.AnatomyProfile.Id))
         {
+            _sessionId = state.SessionId;
             EnsureWindow();
-            if (_strokePending)
+            if (_interactionPending)
             {
-                _strokePending = false;
-                _pendingStrokeSequence = 0;
-                _window!.ResolvePendingStroke();
+                _interactionPending = false;
+                _pendingInteractionSequence = 0;
+                _window!.ResolvePendingInteraction();
             }
             _window!.ShowFailure(state.Failure);
             _refreshTimer = RefreshInterval;
+            if (!_window.IsOpen)
+            {
+                _ui.ClickSound();
+                _window.OpenCentered();
+            }
             return;
         }
 
-        var resolvePendingStroke = false;
+        // Defense in depth for a malformed accepted packet: retain the last readable field and request a later
+        // refresh instead of allowing a null prototype key to terminate the client game thread.
+        if (string.IsNullOrEmpty(state.AnatomyProfile.Id))
+            return;
+
+        var resolvePendingInteraction = false;
         if (_sessionId != state.SessionId)
         {
-            resolvePendingStroke = _strokePending;
+            resolvePendingInteraction = _interactionPending;
             _sessionId = state.SessionId;
-            _strokePending = false;
-            _pendingStrokeSequence = 0;
+            _interactionPending = false;
+            _pendingInteractionSequence = 0;
             _predictedDepth = state.SelectedDepth;
             _depthDirty = false;
             _depthInFlight = false;
             _depthSendTimer = 0f;
         }
-        else if (_strokePending &&
-                 (state.LastSequence >= _pendingStrokeSequence || !state.Accepted))
+        else if (_interactionPending &&
+                 (state.LastSequence >= _pendingInteractionSequence || !state.Accepted))
         {
             // Accepted refreshes with an older sequence are unrelated telemetry and must not erase prediction.
-            // A matching sequence atomically replaces it with authoritative geometry; a rejection rolls it back.
-            _strokePending = false;
-            _pendingStrokeSequence = 0;
-            resolvePendingStroke = true;
+            // A matching sequence atomically replaces the predicted site state; a rejection rolls it back.
+            _interactionPending = false;
+            _pendingInteractionSequence = 0;
+            resolvePendingInteraction = true;
         }
 
         // A refresh can arrive while the thumb is moving. Only reconcile once the server has acknowledged the
@@ -139,8 +150,8 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
 
         _state = state;
         EnsureWindow();
-        if (resolvePendingStroke)
-            _window!.ResolvePendingStroke();
+        if (resolvePendingInteraction)
+            _window!.ResolvePendingInteraction();
         _window!.SetState(state, _predictedDepth);
         _refreshTimer = RefreshInterval;
         if (!_window.IsOpen)
@@ -159,8 +170,9 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
         _window.SelectionChanged += OnSelectionChanged;
         _window.DepthPredictionChanged += OnDepthPredictionChanged;
         _window.CapabilityChanged += OnCapabilityChanged;
-        _window.StrokeSubmitted += OnStrokeSubmitted;
+        _window.InteractionRequested += OnInteractionRequested;
         _window.AttachRequested += OnAttachRequested;
+        _window.SiteRequested += OnSiteRequested;
         _window.DetachRequested += OnDetachRequested;
         _window.OnClose += OnWindowClosed;
     }
@@ -203,11 +215,11 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
         RaiseNetworkEvent(new NCFreeformSurgeryCapabilityRequest(_sessionId, capability));
     }
 
-    private void OnStrokeSubmitted(
+    private void OnInteractionRequested(
         ProtoId<NCTargetZonePrototype> zone,
-        Vector2[] points)
+        Vector2 position)
     {
-        if (_state == null || !_sessionId.IsValid || _strokePending)
+        if (_state == null || !_sessionId.IsValid || _interactionPending)
             return;
 
         unchecked
@@ -216,18 +228,18 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
             if (_sequence == 0)
                 _sequence++;
         }
-        _strokePending = true;
-        _pendingStrokeSequence = _sequence;
+        _interactionPending = true;
+        _pendingInteractionSequence = _sequence;
         _depthDirty = false;
         _depthInFlight = true;
-        RaiseNetworkEvent(new NCFreeformSurgeryStrokeRequest(
+        RaiseNetworkEvent(new NCInteractiveSurgeryActionRequest(
             _sessionId,
             _sequence,
             zone == _state.SelectedZone ? _state.Revision : 0,
             zone,
             _state.Surface,
             _predictedDepth,
-            points));
+            position));
     }
 
     private void OnAttachRequested(
@@ -248,6 +260,20 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
         if (_state == null || !_sessionId.IsValid)
             return;
         RaiseNetworkEvent(new NCFreeformSurgeryDetachRequest(_sessionId, _state.Revision, handle));
+    }
+
+    private void OnSiteRequested(
+        ProtoId<NCTargetZonePrototype> zone,
+        Guid? incisionId)
+    {
+        if (_state == null || !_sessionId.IsValid)
+            return;
+
+        RaiseNetworkEvent(new NCFreeformSurgerySiteRequest(
+            _sessionId,
+            zone,
+            _state.Surface,
+            incisionId));
     }
 
     private void OnWindowClosed()
@@ -276,8 +302,8 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
         _state = null;
         _sessionId = default;
         _sequence = 0;
-        _strokePending = false;
-        _pendingStrokeSequence = 0;
+        _interactionPending = false;
+        _pendingInteractionSequence = 0;
         _refreshTimer = 0f;
         _predictedDepth = 0f;
         _depthSendTimer = 0f;

@@ -29,6 +29,12 @@ public sealed partial class NCFreeformSurgerySessionComponent : Component
     [DataField]
     public ProtoId<NCTargetZonePrototype> TargetZone;
 
+    /// <summary>
+    /// NC: The real incision currently displayed by the magnified operative view. Null keeps the body overview.
+    /// </summary>
+    [DataField]
+    public Guid? ActiveIncisionId;
+
     [DataField]
     public NCWoundSurface Surface;
 

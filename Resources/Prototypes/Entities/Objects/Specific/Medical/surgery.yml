@@ -152,6 +152,7 @@
       NCSurgeryToolOphthalmicRepair: 0.7
       NCSurgeryToolAutopsy: 0.8
     sterility: 1
+    physicalContactDamagePerPower: 18
   - type: NCSurgeryAuthorizationProvider
     authorizations:
     - NCSurgeryAuthorizationGeneral
@@ -208,6 +209,10 @@
     state: laser
   - type: Item
     heldPrefix: laser
+  # NC start - A laser edge remains physically dangerous in every selected surgical mode.
+  - type: NCSurgeryTool
+    physicalContactDamagePerPower: 24
+  # NC end
 
 # Scissors
 
@@ -288,13 +293,15 @@
     size: Normal
     sprite: Objects/Specific/Medical/Surgery/saw.rsi
     storedRotation: 90
-  # NC start - Reuse the existing surgical saw for controlled separation.
+  # NC start - Reuse the existing surgical saw for controlled separation and bone access.
   - type: NCSurgeryTool
     capabilities:
       NCSurgeryToolAmputation: 1
+      NCSurgeryToolCranialAccess: 0.85
       NCSurgeryToolOrganSeparation: 0.85
       NCSurgeryToolBoneReduction: 0.8
     sterility: 1
+    physicalContactDamagePerPower: 35
   - type: NCSurgeryAuthorizationProvider
     authorizations:
     - NCSurgeryAuthorizationVascular

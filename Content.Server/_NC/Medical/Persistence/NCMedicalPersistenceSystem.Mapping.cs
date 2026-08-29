@@ -26,6 +26,7 @@ public sealed partial class NCMedicalPersistenceSystem
         {
             IncisionId = incision.IncisionId,
             WoundId = incision.WoundId,
+            LinkedWoundIds = [.. incision.LinkedWoundIds],
             TargetZone = incision.TargetZone,
             Surface = incision.Surface,
             Polyline = [.. incision.Polyline],
@@ -34,6 +35,7 @@ public sealed partial class NCMedicalPersistenceSystem
             EdgeSeparation = incision.EdgeSeparation,
             Contamination = incision.Contamination,
             Sutured = incision.Sutured,
+            BoneCasingOpen = incision.BoneCasingOpen,
             SourceResolutionId = incision.SourceResolutionId,
             CreatedAt = incision.CreatedAt,
             ModifiedAt = incision.ModifiedAt,
@@ -46,6 +48,7 @@ public sealed partial class NCMedicalPersistenceSystem
         {
             IncisionId = incision.IncisionId,
             WoundId = incision.WoundId,
+            LinkedWoundIds = [.. incision.LinkedWoundIds],
             TargetZone = incision.TargetZone,
             Surface = incision.Surface,
             Polyline = [.. incision.Polyline],
@@ -54,6 +57,7 @@ public sealed partial class NCMedicalPersistenceSystem
             EdgeSeparation = incision.EdgeSeparation,
             Contamination = incision.Contamination,
             Sutured = incision.Sutured,
+            BoneCasingOpen = incision.BoneCasingOpen,
             SourceResolutionId = incision.SourceResolutionId,
             CreatedAt = incision.CreatedAt,
             ModifiedAt = incision.ModifiedAt,

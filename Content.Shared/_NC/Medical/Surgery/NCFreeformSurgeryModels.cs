@@ -8,14 +8,15 @@ using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Wounds;
+using Content.Shared.DoAfter;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._NC.Medical.Surgery;
 
 /// <summary>
-/// Persistent, bounded geometry of one real incision. Points are normalized to the selected regional atlas.
-/// The legacy access depth is derived from these records and is not the spatial source of truth.
+/// Persistent, server-authored geometry of one real incision. Points are normalized to the selected regional
+/// atlas and are never supplied as a freehand client path. The legacy access depth is derived from these records.
 /// </summary>
 [DataDefinition]
 public sealed partial class NCSurgicalIncisionRecord
@@ -25,6 +26,13 @@ public sealed partial class NCSurgicalIncisionRecord
 
     [DataField]
     public Guid? WoundId;
+
+    /// <summary>
+    /// Additional trauma records produced while the same canonical operative site is deepened or reopened.
+    /// The site remains one interactive incision while every physiological wound stays authoritative.
+    /// </summary>
+    [DataField]
+    public List<Guid> LinkedWoundIds = [];
 
     [DataField]
     public ProtoId<NCTargetZonePrototype> TargetZone;
@@ -49,6 +57,13 @@ public sealed partial class NCSurgicalIncisionRecord
 
     [DataField]
     public bool Sutured;
+
+    /// <summary>
+    /// True only when the protective bone casing belonging to this exact zone/surface site was opened.
+    /// Keeping this on the incision prevents a thoracic saw cut from exposing the skull or another incision.
+    /// </summary>
+    [DataField]
+    public bool BoneCasingOpen;
 
     [DataField]
     public NCActionResolutionId SourceResolutionId;
@@ -126,6 +141,20 @@ public readonly record struct NCFreeformSurgeryLayerSummary(
     float EndDepth,
     bool Exposed);
 
+/// <summary>
+/// Discrete visual state of an authoritative operative site. The client uses this only to choose a sprite;
+/// medical access continues to be owned by the real incision, tissue and bone components.
+/// </summary>
+[Serializable, NetSerializable]
+public enum NCInteractiveSurgerySiteStage : byte
+{
+    Incised,
+    Retracted,
+    StructuralExposed,
+    CavityOpen,
+    Sutured,
+}
+
 [Serializable, NetSerializable]
 public readonly record struct NCFreeformSurgeryIncisionSummary(
     Guid IncisionId,
@@ -135,7 +164,10 @@ public readonly record struct NCFreeformSurgeryIncisionSummary(
     float Width,
     float EdgeSeparation,
     float Contamination,
-    bool Sutured);
+    bool Sutured,
+    bool BoneCasingOpen,
+    NCTissueLayerKind VisibleLayer,
+    NCInteractiveSurgerySiteStage Stage);
 
 [Serializable, NetSerializable]
 public readonly record struct NCFreeformSurgeryWoundSummary(
@@ -146,7 +178,9 @@ public readonly record struct NCFreeformSurgeryWoundSummary(
     NCTissueDepth Depth,
     float ExternalBleedRate,
     float InternalBleedRate,
-    bool EmbeddedObject);
+    bool EmbeddedObject,
+    bool ForeignBodyExposed,
+    NCWoundClosureState ClosureState);
 
 [Serializable, NetSerializable]
 public readonly record struct NCFreeformSurgeryAttachmentSummary(
@@ -190,6 +224,26 @@ public enum NCFreeformSurgeryStructureVisual : byte
     Cyberware,
 }
 
+/// <summary>
+/// Server-authored clinical appearance. The client may tint or overlay a sprite, but never derives health
+/// from hidden components or guesses whether a repair succeeded.
+/// </summary>
+[Serializable, NetSerializable]
+public enum NCFreeformSurgeryDamageVisualStage : byte
+{
+    Healthy,
+    Damaged,
+    Critical,
+    Ruptured,
+    Repaired,
+    Bruised,
+    Cracked,
+    Fractured,
+    Displaced,
+    Shattered,
+    Fixed,
+}
+
 [Serializable, NetSerializable]
 public readonly record struct NCFreeformSurgeryStructureSummary(
     int Handle,
@@ -201,6 +255,8 @@ public readonly record struct NCFreeformSurgeryStructureSummary(
     float MinimumDepth,
     float Integrity,
     float Function,
+    NCFreeformSurgeryDamageVisualStage DamageVisual,
+    bool ProtectiveCasing,
     bool Exposed);
 
 /// <summary>
@@ -217,6 +273,7 @@ public sealed class NCFreeformSurgeryState(
     ProtoId<NCAnatomyProfilePrototype> anatomyProfile,
     NetEntity patient,
     ProtoId<NCTargetZonePrototype> selectedZone,
+    Guid? activeIncisionId,
     NCWoundSurface surface,
     string patientName,
     string toolName,
@@ -247,6 +304,7 @@ public sealed class NCFreeformSurgeryState(
     public ProtoId<NCAnatomyProfilePrototype> AnatomyProfile { get; } = anatomyProfile;
     public NetEntity Patient { get; } = patient;
     public ProtoId<NCTargetZonePrototype> SelectedZone { get; } = selectedZone;
+    public Guid? ActiveIncisionId { get; } = activeIncisionId;
     public NCWoundSurface Surface { get; } = surface;
     public string PatientName { get; } = patientName;
     public string ToolName { get; } = toolName;
@@ -298,15 +356,36 @@ public sealed class NCFreeformSurgeryCapabilityRequest(
     public ProtoId<NCSurgeryToolCapabilityPrototype> Capability { get; } = capability;
 }
 
+/// <summary>
+/// NC: Opens one real incision in the magnified operative view, or returns to the body overview when the
+/// incision id is null. The server resolves the requested zone back to the patient's body before accepting it.
+/// </summary>
 [Serializable, NetSerializable]
-public sealed class NCFreeformSurgeryStrokeRequest(
+public sealed class NCFreeformSurgerySiteRequest(
+    NCActionResolutionId sessionId,
+    ProtoId<NCTargetZonePrototype> zone,
+    NCWoundSurface surface,
+    Guid? incisionId) : EntityEventArgs
+{
+    public NCActionResolutionId SessionId { get; } = sessionId;
+    public ProtoId<NCTargetZonePrototype> Zone { get; } = zone;
+    public NCWoundSurface Surface { get; } = surface;
+    public Guid? IncisionId { get; } = incisionId;
+}
+
+/// <summary>
+/// One Ocular-style interaction with the topmost visible layer under the cursor. The server constructs the
+/// canonical incision/contact geometry from the anatomy profile, so clients cannot submit freehand cuts.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class NCInteractiveSurgeryActionRequest(
     NCActionResolutionId sessionId,
     uint sequence,
     uint expectedRevision,
     ProtoId<NCTargetZonePrototype> zone,
     NCWoundSurface surface,
     float depth,
-    Vector2[] points) : EntityEventArgs
+    Vector2 position) : EntityEventArgs
 {
     public NCActionResolutionId SessionId { get; } = sessionId;
     public uint Sequence { get; } = sequence;
@@ -314,7 +393,65 @@ public sealed class NCFreeformSurgeryStrokeRequest(
     public ProtoId<NCTargetZonePrototype> Zone { get; } = zone;
     public NCWoundSurface Surface { get; } = surface;
     public float Depth { get; } = depth;
-    public Vector2[] Points { get; } = points;
+    public Vector2 Position { get; } = position;
+}
+
+/// <summary>
+/// One timed interactive surgery click. The payload contains only the original client intent; the server
+/// re-resolves the live session, held tool, capability, region, access path and target after the DoAfter ends.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed partial class NCFreeformSurgeryDoAfterEvent : DoAfterEvent
+{
+    [DataField] public NCActionResolutionId SessionId;
+    [DataField] public uint Sequence;
+    [DataField] public uint ExpectedRevision;
+    [DataField] public ProtoId<NCTargetZonePrototype> Zone;
+    [DataField] public NCWoundSurface Surface;
+    [DataField] public float Depth;
+    [DataField] public Vector2 Position;
+    [DataField] public ProtoId<NCSurgeryToolCapabilityPrototype> Capability;
+
+    private NCFreeformSurgeryDoAfterEvent()
+    {
+    }
+
+    public NCFreeformSurgeryDoAfterEvent(
+        NCInteractiveSurgeryActionRequest request,
+        ProtoId<NCSurgeryToolCapabilityPrototype> capability)
+    {
+        SessionId = request.SessionId;
+        Sequence = request.Sequence;
+        ExpectedRevision = request.ExpectedRevision;
+        Zone = request.Zone;
+        Surface = request.Surface;
+        Depth = request.Depth;
+        Position = request.Position;
+        Capability = capability;
+    }
+
+    public NCInteractiveSurgeryActionRequest ToRequest()
+    {
+        return new NCInteractiveSurgeryActionRequest(
+            SessionId,
+            Sequence,
+            ExpectedRevision,
+            Zone,
+            Surface,
+            Depth,
+            Position);
+    }
+
+    public override DoAfterEvent Clone()
+    {
+        return new NCFreeformSurgeryDoAfterEvent(ToRequest(), Capability);
+    }
+
+    public override bool IsDuplicate(DoAfterEvent other)
+    {
+        return other is NCFreeformSurgeryDoAfterEvent surgery &&
+               surgery.SessionId == SessionId && surgery.Sequence == Sequence;
+    }
 }
 
 [Serializable, NetSerializable]
@@ -339,6 +476,90 @@ public sealed class NCFreeformSurgeryDetachRequest(
     public NCActionResolutionId SessionId { get; } = sessionId;
     public uint ExpectedRevision { get; } = expectedRevision;
     public int Handle { get; } = handle;
+}
+
+/// <summary>
+/// Server-owned timed placement of an attachable surgical tool. The held entity remains the directed event
+/// source, which lets normal DoAfter hand, movement and damage cancellation rules apply before attachment.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed partial class NCFreeformSurgeryAttachDoAfterEvent : DoAfterEvent
+{
+    [DataField] public NCActionResolutionId SessionId;
+    [DataField] public uint ExpectedRevision;
+    [DataField] public ProtoId<NCTargetZonePrototype> Zone;
+    [DataField] public Vector2 Position;
+    [DataField] public ProtoId<NCSurgeryToolCapabilityPrototype> Capability;
+
+    private NCFreeformSurgeryAttachDoAfterEvent()
+    {
+    }
+
+    public NCFreeformSurgeryAttachDoAfterEvent(
+        NCFreeformSurgeryAttachRequest request,
+        ProtoId<NCSurgeryToolCapabilityPrototype> capability)
+    {
+        SessionId = request.SessionId;
+        ExpectedRevision = request.ExpectedRevision;
+        Zone = request.Zone;
+        Position = request.Position;
+        Capability = capability;
+    }
+
+    public NCFreeformSurgeryAttachRequest ToRequest()
+    {
+        return new NCFreeformSurgeryAttachRequest(SessionId, ExpectedRevision, Zone, Position);
+    }
+
+    public override DoAfterEvent Clone()
+    {
+        return new NCFreeformSurgeryAttachDoAfterEvent(ToRequest(), Capability);
+    }
+
+    public override bool IsDuplicate(DoAfterEvent other)
+    {
+        return other is NCFreeformSurgeryAttachDoAfterEvent attach &&
+               attach.SessionId == SessionId && attach.Zone == Zone;
+    }
+}
+
+/// <summary>
+/// Timed removal of a real surgical attachment. The attached entity is the directed event source and is
+/// re-resolved through the opaque session handle when the timer completes.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed partial class NCFreeformSurgeryDetachDoAfterEvent : DoAfterEvent
+{
+    [DataField] public NCActionResolutionId SessionId;
+    [DataField] public uint ExpectedRevision;
+    [DataField] public int Handle;
+
+    private NCFreeformSurgeryDetachDoAfterEvent()
+    {
+    }
+
+    public NCFreeformSurgeryDetachDoAfterEvent(NCFreeformSurgeryDetachRequest request)
+    {
+        SessionId = request.SessionId;
+        ExpectedRevision = request.ExpectedRevision;
+        Handle = request.Handle;
+    }
+
+    public NCFreeformSurgeryDetachRequest ToRequest()
+    {
+        return new NCFreeformSurgeryDetachRequest(SessionId, ExpectedRevision, Handle);
+    }
+
+    public override DoAfterEvent Clone()
+    {
+        return new NCFreeformSurgeryDetachDoAfterEvent(ToRequest());
+    }
+
+    public override bool IsDuplicate(DoAfterEvent other)
+    {
+        return other is NCFreeformSurgeryDetachDoAfterEvent detach &&
+               detach.SessionId == SessionId && detach.Handle == Handle;
+    }
 }
 
 [Serializable, NetSerializable]

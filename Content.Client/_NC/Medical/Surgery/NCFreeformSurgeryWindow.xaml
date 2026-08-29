@@ -75,7 +75,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                         <Button Name="SurfaceLeft" Text="Left" MinWidth="68" />
                         <Button Name="SurfaceRight" Text="Right" MinWidth="68" />
                         <Control HorizontalExpand="True" />
-                        <Label Text="Operate directly on the tissue under the cursor" FontColorOverride="#839C9D" />
+                        <Label Text="Click skin to apply the held tool · click exposed sprites to operate internally" FontColorOverride="#839C9D" />
                     </BoxContainer>
                     <PanelContainer HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
                         <PanelContainer.PanelOverride>

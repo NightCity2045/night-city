@@ -4,6 +4,7 @@
 
 using System.Linq;
 using System.Numerics;
+using Content.Client.Clickable;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Surgery;
@@ -12,15 +13,16 @@ using Robust.Client.Graphics;
 using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
+using Robust.Client.Utility;
 using Robust.Shared.Input;
 using Robust.Shared.Prototypes;
 
 namespace Content.Client._NC.Medical.Surgery;
 
 /// <summary>
-/// Presents the real networked patient sprite as the operative doll. A transparent atlas projected over the
-/// sprite resolves anatomical clicks and converts whole-body coordinates into the server's regional coordinates.
-/// Medical mutations remain authoritative; only zone choice, stroke preview and working depth are predicted.
+/// NC sprite-only surgical body. The outer silhouette, incisions, retracted skin, tissue, bones and organs are
+/// composed in one coordinate space. Client clicks provide only a normalized contact point; the server resolves the
+/// real region, structure and medical mutation.
 /// </summary>
 public sealed partial class NCFreeformSurgeryFieldControl : Container
 {
@@ -32,13 +34,14 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
 
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IResourceCache _resources = default!;
+    [Dependency] private IClickMapManager _clickMaps = default!;
 
-    public event Action<ProtoId<NCTargetZonePrototype>, Vector2[]>? StrokeSubmitted;
+    public event Action<ProtoId<NCTargetZonePrototype>, Vector2>? InteractionRequested;
     public event Action<ProtoId<NCTargetZonePrototype>, Vector2>? AttachRequested;
+    public event Action<ProtoId<NCTargetZonePrototype>, Guid?>? SiteRequested;
     public event Action<float>? DepthAdjusted;
 
-    private readonly SpriteView _patientSprite;
-    private readonly SurgicalOverlay _overlay;
+    private readonly SchematicBodyField _body;
     private ProtoId<NCAnatomyProfilePrototype>? _profile;
 
     public NCFreeformSurgeryFieldControl()
@@ -50,63 +53,51 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
         RectClipContent = true;
         MouseFilter = MouseFilterMode.Ignore;
 
-        _patientSprite = new SpriteView
-        {
-            Stretch = SpriteView.StretchMode.Fill,
-            MouseFilter = MouseFilterMode.Ignore,
-            RectClipContent = true,
-        };
-        _overlay = new SurgicalOverlay();
-        _overlay.StrokeSubmitted += (zone, points) => StrokeSubmitted?.Invoke(zone, points);
-        _overlay.AttachRequested += (zone, point) => AttachRequested?.Invoke(zone, point);
-        _overlay.DepthAdjusted += delta => DepthAdjusted?.Invoke(delta);
-        AddChild(_patientSprite);
-        AddChild(_overlay);
+        _body = new SchematicBodyField(_clickMaps);
+        _body.InteractionRequested += (zone, position) => InteractionRequested?.Invoke(zone, position);
+        _body.AttachRequested += (zone, point) => AttachRequested?.Invoke(zone, point);
+        _body.SiteRequested += (zone, incision) => SiteRequested?.Invoke(zone, incision);
+        _body.DepthAdjusted += delta => DepthAdjusted?.Invoke(delta);
+        AddChild(_body);
     }
 
     public void SetState(NCFreeformSurgeryState state, float predictedDepth)
     {
-        if (state.Patient.Valid)
-            _patientSprite.SetEntity(state.Patient);
-        else
-            _patientSprite.SetEntity((EntityUid?) null);
-
         if (_profile != state.AnatomyProfile)
         {
             _profile = state.AnatomyProfile;
             RebuildAtlas(state.AnatomyProfile);
         }
 
-        _patientSprite.OverrideDirection = SurfaceDirection(state.Surface);
-        _overlay.SetState(state, predictedDepth);
+        _body.SetState(state, predictedDepth);
     }
 
     public void SetPredictedDepth(float depth)
     {
-        _overlay.SetPredictedDepth(depth);
+        _body.SetPredictedDepth(depth);
     }
 
-    public void ResolvePendingStroke()
+    public void ResolvePendingInteraction()
     {
-        _overlay.ResolvePendingStroke();
+        _body.ResolvePendingInteraction();
     }
 
     protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
-        foreach (var child in Children)
-            child.Measure(availableSize);
+        _body.Measure(availableSize);
         return MinSize;
     }
 
     protected override Vector2 ArrangeOverride(Vector2 finalSize)
     {
-        // The target atlas and humanoid RSI both use a square 32 px canvas. Keeping both children in the same
-        // centered square prevents wounds and incision geometry from drifting when the window is resized.
-        var side = MathF.Max(64f, MathF.Min(finalSize.X, finalSize.Y) - CanvasPadding * 2f);
-        var position = (finalSize - new Vector2(side)) * 0.5f;
-        var rect = UIBox2.FromDimensions(position, new Vector2(side));
-        _patientSprite.Arrange(rect);
-        _overlay.Arrange(rect);
+        // NC: Preserve the authored pixel aspect ratio. Stretching the silhouette would also distort the
+        // alpha hit map and make an organ appear somewhere other than its authoritative normalized position.
+        var available = Vector2.Max(finalSize - new Vector2(CanvasPadding * 2f), Vector2.One);
+        var canvas = Vector2.Max(_body.CanvasSize, Vector2.One);
+        var scale = MathF.Min(available.X / canvas.X, available.Y / canvas.Y);
+        var size = canvas * MathF.Max(0.01f, scale);
+        var position = (finalSize - size) * 0.5f;
+        _body.Arrange(UIBox2.FromDimensions(position, size));
         return finalSize;
     }
 
@@ -127,115 +118,104 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
 
     private void RebuildAtlas(ProtoId<NCAnatomyProfilePrototype> profileId)
     {
-        if (!_prototypes.TryIndex(profileId, out var anatomy) ||
-            !_prototypes.TryIndex(anatomy.TargetDoll, out NCTargetDollProfilePrototype? doll))
+        if (string.IsNullOrEmpty(profileId.Id) ||
+            !_prototypes.TryIndex(profileId, out var anatomy) ||
+            !_prototypes.TryIndex(anatomy.SurgicalField, out NCFreeformSurgeryProfilePrototype? surgery) ||
+            !_resources.TryGetResource<TextureResource>(surgery.BodySilhouette, out var silhouette) ||
+            !_resources.TryGetResource<TextureResource>(surgery.BodyLayerAtlas, out var bodyLayers) ||
+            !_resources.TryGetResource<TextureResource>(surgery.AnatomyAtlas, out var anatomyTexture) ||
+            !_resources.TryGetResource<TextureResource>(surgery.WoundAtlas, out var woundTexture) ||
+            !_resources.TryGetResource<TextureResource>(surgery.ForeignBodySprite, out var foreignBodyTexture))
         {
-            _overlay.ConfigureAtlas(new Vector2(32f), []);
+            _body.Configure(new Vector2(128f, 192f), [], null);
             return;
         }
 
-        var zones = new List<ZoneProjection>(doll.Zones.Count);
-        foreach (var presentation in doll.Zones)
+        var zones = new List<ZoneProjection>(surgery.BodyZones.Count);
+        foreach (var (zoneId, definition) in surgery.BodyZones)
         {
-            if (!anatomy.TargetZones.Contains(presentation.Zone) ||
-                !_prototypes.TryIndex(presentation.Zone, out NCTargetZonePrototype? zone) ||
-                !_resources.TryGetResource<TextureResource>(presentation.SelectedTexture, out var texture))
+            if (!anatomy.TargetZones.Contains(zoneId) ||
+                !_prototypes.TryIndex(zoneId, out NCTargetZonePrototype? zone))
             {
                 continue;
             }
 
-            var displaySize = presentation.DisplaySize ??
-                              presentation.SelectedRegion?.Size ??
-                              texture.Texture.Size;
-            var projectionPosition = presentation.Position +
-                                     (presentation.WoundRegion?.Position ?? Vector2.Zero);
-            var projectionSize = presentation.WoundRegion?.Size ?? displaySize;
-            var hitPosition = presentation.InteractionRegion != null
-                ? presentation.Position + presentation.InteractionRegion.Position
-                : presentation.Position - presentation.HitboxPadding;
-            var hitSize = presentation.InteractionRegion?.Size ??
-                          displaySize + presentation.HitboxPadding * 2f;
-            var maskRegion = presentation.SelectedRegion is { } selectedRegion
-                ? UIBox2.FromDimensions(selectedRegion.Position, selectedRegion.Size)
-                : UIBox2.FromDimensions(Vector2.Zero, texture.Texture.Size);
             zones.Add(new ZoneProjection(
-                presentation.Zone,
-                UIBox2.FromDimensions(projectionPosition, projectionSize),
-                UIBox2.FromDimensions(hitPosition, hitSize),
-                texture.Texture,
-                maskRegion,
+                zoneId,
+                UIBox2.FromDimensions(definition.Position, definition.Size),
+                definition.OpeningSize,
+                definition.InteractionAnchor,
                 zone.HitPriority));
         }
 
-        _overlay.ConfigureAtlas(
-            doll.CanvasSize,
-            zones.OrderByDescending(value => value.Priority)
-                .ThenBy(value => value.HitBounds.Size.LengthSquared())
-                .ToArray());
+        var visuals = new SurgeryVisuals(
+            surgery,
+            silhouette.Texture,
+            bodyLayers.Texture,
+            anatomyTexture.Texture,
+            woundTexture.Texture,
+            foreignBodyTexture.Texture);
+        _body.Configure(
+            surgery.BodyCanvasSize,
+            zones.OrderByDescending(zone => zone.Priority)
+                .ThenBy(zone => zone.Bounds.Size.LengthSquared())
+                .ToArray(),
+            visuals);
     }
-
-    private static Direction SurfaceDirection(NCWoundSurface surface) => surface switch
-    {
-        NCWoundSurface.Front => Direction.South,
-        NCWoundSurface.Rear => Direction.North,
-        NCWoundSurface.Left => Direction.East,
-        NCWoundSurface.Right => Direction.West,
-        _ => Direction.South,
-    };
 
     private readonly record struct ZoneProjection(
         ProtoId<NCTargetZonePrototype> Zone,
-        UIBox2 ProjectionBounds,
-        UIBox2 HitBounds,
-        Texture MaskTexture,
-        UIBox2 MaskRegion,
+        UIBox2 Bounds,
+        Vector2 OpeningSize,
+        Vector2 InteractionAnchor,
         int Priority);
 
-    /// <summary>
-    /// Input and medical geometry layer above the real SpriteView. It deliberately owns no entities.
-    /// </summary>
-    private sealed class SurgicalOverlay : Control
-    {
-        private static readonly Color Incision = Color.FromHex("#FF5969");
-        private static readonly Color Sutured = Color.FromHex("#8DD9C4");
-        private static readonly Color Wound = Color.FromHex("#FF923D");
-        private static readonly Color Attachment = Color.FromHex("#FFD76A");
-        private static readonly Color Preview = Color.FromHex("#80FFF2");
-        private static readonly Color SkinEdgeLight = Color.FromHex("#F19A8E");
-        private static readonly Color SkinEdgeDark = Color.FromHex("#8E2435");
-        private static readonly Color SurfaceTissue = Color.FromHex("#B84A55");
-        private static readonly Color SoftTissue = Color.FromHex("#D39A48");
-        private static readonly Color MuscleTissue = Color.FromHex("#982D3E");
-        private static readonly Color StructuralTissue = Color.FromHex("#D8C9A4");
-        private static readonly Color CavityTissue = Color.FromHex("#3A0C19");
-        private static readonly Color InternalTissue = Color.FromHex("#671627");
-        private static readonly Color MechanicalTissue = Color.FromHex("#315B66");
-        private static readonly Color DamagedStructure = Color.FromHex("#52121D");
+    private sealed record SurgeryVisuals(
+        NCFreeformSurgeryProfilePrototype Profile,
+        Texture BodySilhouette,
+        Texture BodyLayerAtlas,
+        Texture AnatomyAtlas,
+        Texture WoundAtlas,
+        Texture ForeignBodySprite);
 
-        public event Action<ProtoId<NCTargetZonePrototype>, Vector2[]>? StrokeSubmitted;
+    /// <summary>
+    /// One persistent interactive composition. A scalpel click creates a canonical data-driven incision; every
+    /// later tool click operates at the exact displayed zone or exposed structure coordinate.
+    /// </summary>
+    private sealed class SchematicBodyField : Control
+    {
+        public event Action<ProtoId<NCTargetZonePrototype>, Vector2>? InteractionRequested;
         public event Action<ProtoId<NCTargetZonePrototype>, Vector2>? AttachRequested;
+        public event Action<ProtoId<NCTargetZonePrototype>, Guid?>? SiteRequested;
         public event Action<float>? DepthAdjusted;
 
+        private readonly IClickMapManager _clickMaps;
         private NCFreeformSurgeryState? _state;
-        private Vector2 _atlasSize = new(32f);
+        private SurgeryVisuals? _visuals;
         private ZoneProjection[] _zones = [];
-        private ProtoId<NCTargetZonePrototype> _strokeZone;
+        private Vector2 _canvasSize = new(128f, 192f);
         private float _predictedDepth;
-        private readonly List<Vector2> _stroke = [];
-        private bool _drawing;
-        private bool _awaitingStrokeResult;
+        private bool _awaitingInteractionResult;
+        private ProtoId<NCTargetZonePrototype> _pendingZone;
+        private Vector2? _pendingPosition;
         private NCFreeformSurgeryAction? _pendingAction;
 
-        public SurgicalOverlay()
+        public Vector2 CanvasSize => _canvasSize;
+
+        public SchematicBodyField(IClickMapManager clickMaps)
         {
+            _clickMaps = clickMaps;
             MouseFilter = MouseFilterMode.Stop;
             RectClipContent = true;
+            HorizontalExpand = true;
+            VerticalExpand = true;
         }
 
-        public void ConfigureAtlas(Vector2 canvasSize, ZoneProjection[] zones)
+        public void Configure(Vector2 canvasSize, ZoneProjection[] zones, SurgeryVisuals? visuals)
         {
-            _atlasSize = new Vector2(MathF.Max(1f, canvasSize.X), MathF.Max(1f, canvasSize.Y));
+            _canvasSize = Vector2.Max(canvasSize, Vector2.One);
             _zones = zones;
+            _visuals = visuals;
         }
 
         public void SetState(NCFreeformSurgeryState state, float predictedDepth)
@@ -249,28 +229,31 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             _predictedDepth = Math.Clamp(depth, 0f, 1f);
         }
 
-        public void ResolvePendingStroke()
+        public void ResolvePendingInteraction()
         {
-            _awaitingStrokeResult = false;
+            _awaitingInteractionResult = false;
+            _pendingPosition = null;
             _pendingAction = null;
-            _drawing = false;
-            _stroke.Clear();
         }
 
         protected override void KeyBindDown(GUIBoundKeyEventArgs args)
         {
             base.KeyBindDown(args);
-            if (_state == null ||
-                (args.Function != EngineKeyFunctions.Use && args.Function != EngineKeyFunctions.UseSecondary) ||
-                !TryResolveZone(args.RelativePosition, out var zone, out var localPoint))
+            if (_state == null || _visuals == null ||
+                (args.Function != EngineKeyFunctions.Use && args.Function != EngineKeyFunctions.UseSecondary))
             {
                 return;
             }
 
+            var hitIncision = TryResolveIncisionAtScreen(
+                args.RelativePixelPosition,
+                out var zone,
+                out var local,
+                out var screenIncision);
+            if (!hitIncision && !TryResolvePoint(args.RelativePixelPosition, out zone, out local))
+                return;
 
-            // A submitted physical stroke is immutable until the matching authoritative reply arrives. This
-            // prevents a second gesture from replacing the visual prediction while the first is in flight.
-            if (_awaitingStrokeResult)
+            if (_awaitingInteractionResult)
             {
                 args.Handle();
                 return;
@@ -278,55 +261,42 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
 
             if (args.Function == EngineKeyFunctions.UseSecondary)
             {
-                AttachRequested?.Invoke(zone, localPoint);
+                AttachRequested?.Invoke(zone, local);
                 args.Handle();
                 return;
             }
 
-            // One physical gesture belongs to the body part under its initial pixel. Crossing into a neighbouring
-            // atlas zone cannot silently redirect a scalpel or saw halfway through the stroke.
-            _strokeZone = zone;
-            _drawing = true;
-            _stroke.Clear();
-            AddPoint(localPoint);
+            var action = ResolveSelectedAction();
+            if (action == null)
+            {
+                if (hitIncision)
+                    SiteRequested?.Invoke(zone, screenIncision.IncisionId);
+                else if (TryResolveIncision(zone, local, out var incision))
+                    SiteRequested?.Invoke(zone, incision.IncisionId);
+                args.Handle();
+                return;
+            }
+            if (!TryGetZone(zone, out var projection))
+                return;
+            // NC: The server authors the static cut geometry. Cutting actions still transmit the real cursor
+            // point so a repeated scalpel click can damage the exposed sprite under it.
+            var contact = action == NCFreeformSurgeryAction.Retract ||
+                          action == NCFreeformSurgeryAction.Suture && hitIncision
+                ? Vector2.Clamp(projection.InteractionAnchor, Vector2.Zero, Vector2.One)
+                : local;
+
+            _awaitingInteractionResult = true;
+            _pendingZone = zone;
+            _pendingPosition = contact;
+            _pendingAction = action;
+            InteractionRequested?.Invoke(zone, contact);
             args.Handle();
         }
 
         protected override void MouseMove(GUIMouseMoveEventArgs args)
         {
             base.MouseMove(args);
-            if (!_drawing || _state == null ||
-                !TryResolveZone(args.RelativePosition, out var zone, out var localPoint) || zone != _strokeZone)
-            {
-                return;
-            }
-
-            AddPoint(localPoint);
-            args.Handle();
-        }
-
-        protected override void KeyBindUp(GUIBoundKeyEventArgs args)
-        {
-            base.KeyBindUp(args);
-            if (args.Function != EngineKeyFunctions.Use || !_drawing || _state == null)
-                return;
-
-            _drawing = false;
-            if (TryResolveZone(args.RelativePosition, out var zone, out var localPoint) && zone == _strokeZone)
-                AddPoint(localPoint);
-            if (_stroke.Count == 1)
-                _stroke.Add(Vector2.Clamp(_stroke[0] + new Vector2(0.016f, 0f), Vector2.Zero, Vector2.One));
-            if (_stroke.Count >= 2)
-            {
-                _awaitingStrokeResult = true;
-                _pendingAction = ResolveSelectedAction();
-                StrokeSubmitted?.Invoke(_strokeZone, _stroke.ToArray());
-            }
-            else
-            {
-                _stroke.Clear();
-            }
-            args.Handle();
+            ToolTip = ResolveStructureTooltip(args.RelativePixelPosition);
         }
 
         protected override void MouseWheel(GUIMouseWheelEventArgs args)
@@ -334,7 +304,6 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             base.MouseWheel(args);
             if (MathHelper.CloseTo(args.Delta.Y, 0f))
                 return;
-
             DepthAdjusted?.Invoke(args.Delta.Y * 0.04f);
             args.Handle();
         }
@@ -342,45 +311,308 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
         protected override void Draw(DrawingHandleScreen handle)
         {
             base.Draw(handle);
-            if (_state == null)
+            if (_state == null || _visuals == null)
                 return;
 
-            // Every persistent incision is projected onto its own anatomical atlas region. Changing the active
-            // working area therefore never erases previous operative traces from the patient's body.
-            foreach (var projection in _zones)
-                DrawOperativeField(handle, projection, projection.Zone);
+            DrawCell(handle,
+                _visuals.BodyLayerAtlas,
+                _visuals.Profile.BodyLayerAtlasGrid,
+                _visuals.Profile.BodySkinSprite,
+                PixelSizeBox,
+                Color.White);
 
+            // NC: Open sites replace only their own skin pixels. All other wounds and incisions remain in the
+            // same persistent body composition while the operator changes region, tool or working depth.
             foreach (var incision in _state.Incisions)
             {
-                // An open incision is already represented by its pixel aperture and skin lips. Closed incisions
-                // and cuts which have not yet been retracted retain an explicit readable surface trace.
-                if (incision.Sutured)
-                    DrawPolyline(handle, incision.Zone, incision.Polyline, Sutured);
-                else if (incision.EdgeSeparation < 0.05f)
-                    DrawPolyline(handle, incision.Zone, incision.Polyline, Incision);
+                if (!incision.Sutured && incision.EdgeSeparation >= _visuals.Profile.MinimumOpenRetraction)
+                    DrawOpening(handle, incision);
             }
 
             foreach (var wound in _state.Wounds)
+                DrawWound(handle, wound);
+
+            foreach (var incision in _state.Incisions)
             {
-                var point = LocalToScreen(wound.Zone, wound.Position);
-                var radius = 3f + (float) wound.Severity * 0.7f;
-                handle.DrawLine(point - new Vector2(radius, 0f), point + new Vector2(radius, 0f), Wound);
-                handle.DrawLine(point - new Vector2(0f, radius), point + new Vector2(0f, radius), Wound);
+                if (!incision.Sutured && incision.EdgeSeparation >= _visuals.Profile.MinimumOpenRetraction)
+                    continue;
+                DrawClosedSite(handle, incision);
             }
 
             foreach (var attachment in _state.Attachments)
             {
                 var point = LocalToScreen(_state.SelectedZone, attachment.Position);
-                handle.DrawCircle(point, 6f, Attachment.WithAlpha(0.25f));
-                handle.DrawCircle(point, 3f, Attachment);
+                DrawCell(handle, _visuals.AnatomyAtlas, _visuals.Profile.AnatomyAtlasGrid,
+                    _visuals.Profile.RetractedSiteSprite,
+                    UIBox2.FromDimensions(point - new Vector2(CanvasScale * 2f), new Vector2(CanvasScale * 4f)),
+                    Color.White);
             }
 
-            var predictionColor = _awaitingStrokeResult &&
-                                  _pendingAction is NCFreeformSurgeryAction.Incise or
-                                      NCFreeformSurgeryAction.Autopsy
-                ? Incision
-                : Preview;
-            DrawPolyline(handle, _strokeZone, _stroke, predictionColor);
+            if (_pendingPosition is { } pending)
+                DrawInteractionPrediction(handle, _pendingZone, pending);
+        }
+
+        private void DrawClosedSite(DrawingHandleScreen handle, NCFreeformSurgeryIncisionSummary incision)
+        {
+            if (_visuals == null || !TryClosedSiteRect(incision, out var destination))
+                return;
+            var cell = incision.Sutured
+                ? _visuals.Profile.SutureSprite
+                : _visuals.Profile.IncisionSprite;
+            DrawCell(handle, _visuals.WoundAtlas, _visuals.Profile.WoundAtlasGrid, cell,
+                destination, Color.White);
+        }
+
+        /// <summary>
+        /// NC: Prediction mirrors the next discrete site state without drawing any client-authored incision
+        /// line. The authoritative server reply replaces this stamp or rolls it back.
+        /// </summary>
+        private void DrawInteractionPrediction(
+            DrawingHandleScreen handle,
+            ProtoId<NCTargetZonePrototype> zoneId,
+            Vector2 position)
+        {
+            if (_visuals == null || _pendingAction == null || !TryGetZone(zoneId, out var zone))
+                return;
+
+            var displayPosition = _pendingAction is NCFreeformSurgeryAction.Incise or
+                NCFreeformSurgeryAction.Autopsy or NCFreeformSurgeryAction.Retract
+                ? zone.InteractionAnchor
+                : position;
+            var screenCenter = LocalToScreen(zoneId, displayPosition);
+            var authoredSize = zone.OpeningSize / _canvasSize * PixelSize;
+            var tint = _awaitingInteractionResult
+                ? Color.FromHex("#D8FFFAB8")
+                : Color.White;
+
+            if (_pendingAction == NCFreeformSurgeryAction.Retract &&
+                TryResolveIncision(zoneId, position, out var incision))
+            {
+                DrawOpening(handle, incision);
+                return;
+            }
+
+            if (_pendingAction is not (NCFreeformSurgeryAction.Incise or
+                NCFreeformSurgeryAction.Autopsy or NCFreeformSurgeryAction.Suture))
+            {
+                return;
+            }
+
+            var cell = _pendingAction == NCFreeformSurgeryAction.Suture
+                ? _visuals.Profile.SutureSprite
+                : _visuals.Profile.IncisionSprite;
+            var size = Vector2.Max(authoredSize * 0.58f, new Vector2(CanvasScale * 6f));
+            DrawCell(handle, _visuals.WoundAtlas, _visuals.Profile.WoundAtlasGrid, cell,
+                UIBox2.FromDimensions(screenCenter - size * 0.5f, size), tint);
+        }
+
+        private void DrawOpening(DrawingHandleScreen handle, NCFreeformSurgeryIncisionSummary incision)
+        {
+            if (_state == null || _visuals == null ||
+                !TryOpeningRects(incision, out var site, out var aperture))
+            {
+                return;
+            }
+
+            // NC: The atlas retractor contains opaque wound tissue in its centre. Draw it first, then replace
+            // only the inset aperture with the currently exposed layer and authoritative structures.
+            DrawCell(handle, _visuals.AnatomyAtlas, _visuals.Profile.AnatomyAtlasGrid,
+                _visuals.Profile.RetractedSiteSprite, site, Color.White);
+
+            if (incision.Stage == NCInteractiveSurgerySiteStage.Retracted)
+            {
+                // NC: Retracting skin reveals tissue, not organs. A surface-depth incision uses the first actual
+                // soft-tissue cell so an opened site never looks like intact blue skin or an impossible cavity.
+                var tissue = incision.VisibleLayer == NCTissueLayerKind.Surface
+                    ? NCTissueLayerKind.SoftTissue
+                    : incision.VisibleLayer;
+                if (_visuals.Profile.LayerSprites.TryGetValue(tissue, out var tissueCell))
+                {
+                    DrawCell(handle, _visuals.AnatomyAtlas, _visuals.Profile.AnatomyAtlasGrid,
+                        tissueCell, aperture, Color.White);
+                }
+                return;
+            }
+
+            if (incision.Stage == NCInteractiveSurgerySiteStage.StructuralExposed)
+            {
+                // NC: Use the co-registered full-body skeleton crop that matched the old presentation. Correct
+                // source normalization keeps ribs, skull and long bones pixel-locked to the silhouette.
+                DrawBodyLayerRegion(handle, _visuals.Profile.BodySkeletonSprite, aperture, Color.White);
+                DrawAuthoritativeStructures(handle, incision, aperture, drawOrgans: false);
+                return;
+            }
+
+            if (_visuals.Profile.LayerSprites.TryGetValue(NCTissueLayerKind.Cavity, out var cavityCell))
+            {
+                DrawCell(handle, _visuals.AnatomyAtlas, _visuals.Profile.AnatomyAtlasGrid,
+                    cavityCell, aperture, Color.White);
+            }
+
+            DrawAuthoritativeStructures(handle, incision, aperture, drawOrgans: true);
+            if (incision.BoneCasingOpen)
+                DrawOpenedBoneLayerRegion(handle, aperture);
+        }
+
+        private void DrawAuthoritativeStructures(
+            DrawingHandleScreen handle,
+            NCFreeformSurgeryIncisionSummary incision,
+            UIBox2 aperture,
+            bool drawOrgans)
+        {
+            if (_state == null || _visuals == null || incision.Zone != _state.SelectedZone)
+                return;
+
+            foreach (var structure in _state.Structures
+                         .Where(value => value.Exposed && value.Kind != NCFreeformSurgeryStructureKind.Region)
+                         .Where(value => drawOrgans || value.Kind is
+                             NCFreeformSurgeryStructureKind.Bone or
+                             NCFreeformSurgeryStructureKind.Tendon or
+                             NCFreeformSurgeryStructureKind.Nerve)
+                         // NC: Structural supports sit behind deeper organ sprites. Higher authored depth is
+                         // drawn last, matching the same ordering used by authoritative cursor hit-testing.
+                         .OrderBy(value => value.Kind == NCFreeformSurgeryStructureKind.Bone ? 0 : 1)
+                         .ThenBy(value => value.MinimumDepth)
+                         .ThenBy(value => value.Handle))
+            {
+                // Registered skeleton crops own intact/protective bone presentation. Dynamic bone sprites are
+                // retained only for damage markers and hit-testing, avoiding the compact shifted rib cage.
+                if (structure.Kind == NCFreeformSurgeryStructureKind.Bone)
+                {
+                    DrawStructureDamage(handle, structure, aperture);
+                    continue;
+                }
+                if (!_visuals.Profile.StructureSprites.TryGetValue(structure.Visual, out var cell))
+                    continue;
+
+                var center = aperture.TopLeft + Vector2.Clamp(structure.Position, Vector2.Zero, Vector2.One) *
+                    aperture.Size;
+                var size = Vector2.Clamp(structure.Size, new Vector2(0.04f), Vector2.One) * aperture.Size;
+                var destination = UIBox2.FromDimensions(center - size * 0.5f, size);
+                DrawCell(handle, _visuals.AnatomyAtlas, _visuals.Profile.AnatomyAtlasGrid,
+                    cell, destination, ResolveStructureTint(structure.DamageVisual));
+                DrawStructureDamage(handle, structure, aperture);
+            }
+        }
+
+        private void DrawStructureDamage(
+            DrawingHandleScreen handle,
+            NCFreeformSurgeryStructureSummary structure,
+            UIBox2 aperture)
+        {
+            if (_visuals == null || structure.DamageVisual == NCFreeformSurgeryDamageVisualStage.Healthy)
+                return;
+
+            var cell = structure.DamageVisual switch
+            {
+                NCFreeformSurgeryDamageVisualStage.Fixed or NCFreeformSurgeryDamageVisualStage.Repaired =>
+                    _visuals.Profile.SutureSprite,
+                NCFreeformSurgeryDamageVisualStage.Critical or NCFreeformSurgeryDamageVisualStage.Ruptured or
+                    NCFreeformSurgeryDamageVisualStage.Shattered =>
+                    _visuals.Profile.WoundSprites.GetValueOrDefault(NCWoundType.Blast),
+                _ => _visuals.Profile.WoundSprites.GetValueOrDefault(NCWoundType.Slash),
+            };
+            var center = aperture.TopLeft + Vector2.Clamp(structure.Position, Vector2.Zero, Vector2.One) *
+                aperture.Size;
+            var markerSize = Vector2.Max(
+                Vector2.Clamp(structure.Size, new Vector2(0.04f), Vector2.One) * aperture.Size * 0.38f,
+                new Vector2(CanvasScale * 4f));
+            DrawCell(handle, _visuals.WoundAtlas, _visuals.Profile.WoundAtlasGrid, cell,
+                UIBox2.FromDimensions(center - markerSize * 0.5f, markerSize), Color.White);
+        }
+
+        private static Color ResolveStructureTint(NCFreeformSurgeryDamageVisualStage stage)
+        {
+            return stage switch
+            {
+                NCFreeformSurgeryDamageVisualStage.Damaged or NCFreeformSurgeryDamageVisualStage.Bruised =>
+                    Color.FromHex("#FFD0C8"),
+                NCFreeformSurgeryDamageVisualStage.Critical or NCFreeformSurgeryDamageVisualStage.Ruptured or
+                    NCFreeformSurgeryDamageVisualStage.Shattered => Color.FromHex("#D94A4A"),
+                NCFreeformSurgeryDamageVisualStage.Fixed or NCFreeformSurgeryDamageVisualStage.Repaired =>
+                    Color.FromHex("#B7F4E8"),
+                _ => Color.White,
+            };
+        }
+
+        private void DrawOpenedBoneLayerRegion(DrawingHandleScreen handle, UIBox2 aperture)
+        {
+            if (_visuals == null)
+                return;
+            var gap = aperture.Width * 0.13f;
+            var halfWidth = aperture.Width * 0.5f;
+            var leftSource = UIBox2.FromDimensions(aperture.TopLeft, new Vector2(halfWidth, aperture.Height));
+            var rightSource = UIBox2.FromDimensions(
+                new Vector2(aperture.Left + halfWidth, aperture.Top),
+                new Vector2(halfWidth, aperture.Height));
+            DrawBodyLayerRegion(handle, _visuals.Profile.BodySkeletonSprite,
+                new UIBox2(leftSource.Left - gap, leftSource.Top, leftSource.Right - gap, leftSource.Bottom),
+                Color.White, leftSource);
+            DrawBodyLayerRegion(handle, _visuals.Profile.BodySkeletonSprite,
+                new UIBox2(rightSource.Left + gap, rightSource.Top, rightSource.Right + gap, rightSource.Bottom),
+                Color.White, rightSource);
+        }
+
+        private void DrawBodyLayerRegion(
+            DrawingHandleScreen handle,
+            Vector2 cell,
+            UIBox2 destination,
+            Color color,
+            UIBox2? registeredSource = null)
+        {
+            if (_visuals == null || PixelWidth <= 0f || PixelHeight <= 0f)
+                return;
+
+            var columns = Math.Max(1f, _visuals.Profile.BodyLayerAtlasGrid.X);
+            var rows = Math.Max(1f, _visuals.Profile.BodyLayerAtlasGrid.Y);
+            var cellSize = new Vector2(
+                _visuals.BodyLayerAtlas.Width / columns,
+                _visuals.BodyLayerAtlas.Height / rows);
+            var projection = registeredSource ?? destination;
+            var normalizedTopLeft = projection.TopLeft / PixelSize / _canvasSize;
+            var normalizedSize = projection.Size / PixelSize / _canvasSize;
+            var source = UIBox2.FromDimensions(
+                cell * cellSize + normalizedTopLeft * cellSize,
+                normalizedSize * cellSize);
+            handle.DrawTextureRectRegion(_visuals.BodyLayerAtlas, destination, source, color);
+        }
+
+        private void DrawWound(DrawingHandleScreen handle, NCFreeformSurgeryWoundSummary wound)
+        {
+            if (_visuals == null)
+                return;
+            var cell = wound.ClosureState == NCWoundClosureState.Sutured
+                ? _visuals.Profile.SutureSprite
+                : _visuals.Profile.WoundSprites.GetValueOrDefault(wound.Type);
+            if (wound.ClosureState != NCWoundClosureState.Sutured &&
+                !_visuals.Profile.WoundSprites.TryGetValue(wound.Type, out cell))
+                cell = _visuals.Profile.WoundSprites.GetValueOrDefault(NCWoundType.Ballistic);
+            var point = LocalToScreen(wound.Zone, wound.Position);
+            var size = CanvasScale * (2.4f + (float) wound.Severity * 0.8f);
+            DrawCell(handle, _visuals.WoundAtlas, _visuals.Profile.WoundAtlasGrid, cell,
+                UIBox2.FromDimensions(point - new Vector2(size * 0.5f), new Vector2(size)), Color.White);
+            if (wound.ForeignBodyExposed)
+            {
+                var markerPoint = point;
+                if (_state != null)
+                {
+                    var incision = _state.Incisions
+                        .Where(value => value.Zone == wound.Zone && !value.Sutured &&
+                                        value.EdgeSeparation >= _visuals.Profile.MinimumOpenRetraction)
+                        .OrderByDescending(value => value.IncisionId == _state.ActiveIncisionId)
+                        .FirstOrDefault();
+                    if (incision.IncisionId != Guid.Empty &&
+                        TryOpeningRects(incision, out _, out var aperture))
+                    {
+                        markerPoint = aperture.TopLeft + Vector2.Clamp(wound.Position, Vector2.Zero, Vector2.One) *
+                            aperture.Size;
+                    }
+                }
+                var markerSize = MathF.Max(CanvasScale * 4f, 6f);
+                handle.DrawTextureRect(_visuals.ForeignBodySprite,
+                    UIBox2.FromDimensions(markerPoint - new Vector2(markerSize * 0.5f), new Vector2(markerSize)),
+                    Color.FromHex("#FFF1A8"));
+            }
         }
 
         private NCFreeformSurgeryAction? ResolveSelectedAction()
@@ -395,358 +627,188 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             return null;
         }
 
-        /// <summary>
-        /// Rasterizes the selected body region on the same virtual pixel grid as the humanoid RSI. The incision
-        /// is the only aperture: internal colors and silhouettes can never leak outside the body mask or skin lips.
-        /// </summary>
-        private void DrawOperativeField(
-            DrawingHandleScreen handle,
-            ZoneProjection projection,
-            ProtoId<NCTargetZonePrototype> zone)
-        {
-            if (_state == null || !_state.Incisions.Any(value => value.Zone == zone && !value.Sutured))
-                return;
-
-            var columns = Math.Max(1, (int) MathF.Round(projection.ProjectionBounds.Width));
-            var rows = Math.Max(1, (int) MathF.Round(projection.ProjectionBounds.Height));
-            var rasterScale = Math.Max(columns, rows);
-            for (var y = 0; y < rows; y++)
-            {
-                for (var x = 0; x < columns; x++)
-                {
-                    var local = new Vector2(
-                        (x + 0.5f) / columns,
-                        (y + 0.5f) / rows);
-                    if (!MaskContains(projection, local) ||
-                        !TryResolveAperture(zone, local, rasterScale, out var incision, out var distance, out var halfWidth))
-                    {
-                        continue;
-                    }
-
-                    var accessibleDepth = MathF.Min(_predictedDepth, incision.Depth);
-                    var color = ResolveLayerColor(accessibleDepth);
-                    if (zone == _state.SelectedZone &&
-                        TryResolveStructurePixel(local, accessibleDepth, out var structure))
-                        color = ResolveStructureColor(structure, x, y);
-
-                    // The last raster cell at either side is an irregular skin lip. Alternating light and dark
-                    // pixels keep the wound readable without introducing a smooth vector outline over pixel art.
-                    var edgeThickness = MathF.Min(halfWidth * 0.48f, 0.65f / rasterScale);
-                    if (distance >= halfWidth - edgeThickness)
-                        color = (x + y) % 2 == 0 ? SkinEdgeLight : SkinEdgeDark;
-                    else if (incision.Contamination > 0.01f)
-                        color = Color.InterpolateBetween(
-                            color,
-                            SkinEdgeDark,
-                            Math.Clamp(incision.Contamination, 0f, 1f) * 0.2f);
-
-                    DrawRasterCell(handle, zone, x, y, columns, rows, color);
-                }
-            }
-        }
-
-        private bool MaskContains(ZoneProjection projection, Vector2 local)
-        {
-            if (_state == null)
-                return false;
-
-            var sample = local;
-            if (_state.Surface is NCWoundSurface.Rear or NCWoundSurface.Right)
-                sample.X = 1f - sample.X;
-
-            var source = projection.MaskRegion;
-            var pixelX = (int) MathF.Floor(source.Left + sample.X * source.Width);
-            var pixelY = (int) MathF.Floor(source.Top + sample.Y * source.Height);
-            pixelX = Math.Clamp(pixelX, 0, projection.MaskTexture.Width - 1);
-            pixelY = Math.Clamp(pixelY, 0, projection.MaskTexture.Height - 1);
-            return projection.MaskTexture.GetPixel(pixelX, pixelY).AByte > 16;
-        }
-
-        private bool TryResolveAperture(
+        private bool TryResolveIncision(
             ProtoId<NCTargetZonePrototype> zone,
             Vector2 point,
-            int rasterScale,
-            out NCFreeformSurgeryIncisionSummary incision,
-            out float distance,
-            out float halfWidth)
+            out NCFreeformSurgeryIncisionSummary incision)
         {
             incision = default;
-            distance = float.MaxValue;
-            halfWidth = 0f;
-            if (_state == null)
+            if (_state == null || _visuals == null)
                 return false;
 
-            var bestRatio = float.MaxValue;
+            var best = _visuals.Profile.IncisionSelectionRadius *
+                       _visuals.Profile.IncisionSelectionRadius;
             foreach (var candidate in _state.Incisions)
             {
-                if (candidate.Zone != zone || candidate.Sutured || candidate.Polyline.Length < 2)
+                if (candidate.Zone != zone || !TryGetZone(candidate.Zone, out var projection))
                     continue;
-
-                var candidateDistance = MathF.Sqrt(DistanceSquaredToPolyline(point, candidate.Polyline));
-                var minimumRasterWidth = 0.45f / Math.Max(1, rasterScale);
-                var candidateHalfWidth = Math.Clamp(
-                    MathF.Max(minimumRasterWidth, candidate.Width * 0.5f) + candidate.EdgeSeparation * 0.16f,
-                    minimumRasterWidth,
-                    0.24f);
-                var ratio = candidateDistance / candidateHalfWidth;
-                if (ratio > 1f || ratio >= bestRatio)
+                // NC: An operative site is an interactive sprite, not a drawable line. Selection therefore
+                // resolves against the prototype-owned anchor and can never follow stale stored geometry.
+                var distance = Vector2.DistanceSquared(point, projection.InteractionAnchor);
+                if (distance > best)
                     continue;
-
-                bestRatio = ratio;
+                best = distance;
                 incision = candidate;
-                distance = candidateDistance;
-                halfWidth = candidateHalfWidth;
+            }
+            return incision.IncisionId != Guid.Empty;
+        }
+
+        private string? ResolveStructureTooltip(Vector2 screenPoint)
+        {
+            if (_state == null || !TryResolveOperativePoint(screenPoint, out var zone, out var local) ||
+                zone != _state.SelectedZone)
+            {
+                return null;
             }
 
-            return bestRatio <= 1f;
+            return _state.Structures
+                .Where(structure => structure.Exposed && Contains(structure.Position, structure.Size, local))
+                .OrderByDescending(structure => structure.MinimumDepth)
+                .Select(structure => structure.Name)
+                .FirstOrDefault();
         }
 
-        private Color ResolveLayerColor(float depth)
-        {
-            if (_state == null)
-                return SurfaceTissue;
-
-            var kind = NCTissueLayerKind.Surface;
-            foreach (var layer in _state.Layers)
-            {
-                if (!layer.Exposed || depth + 0.001f < layer.StartDepth || depth > layer.EndDepth + 0.001f)
-                    continue;
-                kind = layer.Kind;
-                break;
-            }
-
-            return kind switch
-            {
-                NCTissueLayerKind.Surface => SurfaceTissue,
-                NCTissueLayerKind.SoftTissue => SoftTissue,
-                NCTissueLayerKind.Vascular => MuscleTissue,
-                NCTissueLayerKind.Structural => StructuralTissue,
-                NCTissueLayerKind.Cavity => CavityTissue,
-                NCTissueLayerKind.InternalOrgan => InternalTissue,
-                NCTissueLayerKind.Mechanical => MechanicalTissue,
-                _ => InternalTissue,
-            };
-        }
-
-        private bool TryResolveStructurePixel(
-            Vector2 point,
-            float accessibleDepth,
-            out NCFreeformSurgeryStructureSummary selected)
-        {
-            selected = default;
-            if (_state == null)
-                return false;
-
-            var selectedDepth = -1f;
-            var selectedArea = float.MaxValue;
-            foreach (var structure in _state.Structures)
-            {
-                if (!structure.Exposed || structure.Kind == NCFreeformSurgeryStructureKind.Region ||
-                    structure.Visual == NCFreeformSurgeryStructureVisual.Region ||
-                    accessibleDepth + 0.001f < structure.MinimumDepth)
-                {
-                    continue;
-                }
-
-                var half = structure.Size * 0.5f;
-                var minimum = structure.Position - half;
-                if (point.X < minimum.X || point.Y < minimum.Y ||
-                    point.X > minimum.X + structure.Size.X || point.Y > minimum.Y + structure.Size.Y)
-                {
-                    continue;
-                }
-
-                var local = (point - minimum) /
-                            new Vector2(MathF.Max(0.001f, structure.Size.X), MathF.Max(0.001f, structure.Size.Y));
-                if (!StructureMaskContains(structure.Visual, local))
-                    continue;
-
-                var area = structure.Size.X * structure.Size.Y;
-                if (structure.MinimumDepth < selectedDepth ||
-                    MathHelper.CloseTo(structure.MinimumDepth, selectedDepth) && area >= selectedArea)
-                {
-                    continue;
-                }
-
-                selected = structure;
-                selectedDepth = structure.MinimumDepth;
-                selectedArea = area;
-            }
-
-            return selectedDepth >= 0f;
-        }
-
-        private static bool StructureMaskContains(NCFreeformSurgeryStructureVisual visual, Vector2 point)
-        {
-            var x = point.X - 0.5f;
-            var y = point.Y - 0.5f;
-            var ellipse = x * x / 0.24f + y * y / 0.24f <= 1f;
-            return visual switch
-            {
-                NCFreeformSurgeryStructureVisual.Region => false,
-                NCFreeformSurgeryStructureVisual.Skull => ellipse,
-                NCFreeformSurgeryStructureVisual.Brain => ellipse &&
-                    ((int) (point.X * 9f) + (int) (point.Y * 7f)) % 4 != 0,
-                NCFreeformSurgeryStructureVisual.Eyes =>
-                    Ellipse(point, new Vector2(0.27f, 0.5f), new Vector2(0.22f, 0.42f)) ||
-                    Ellipse(point, new Vector2(0.73f, 0.5f), new Vector2(0.22f, 0.42f)),
-                NCFreeformSurgeryStructureVisual.Tongue =>
-                    Ellipse(point, new Vector2(0.5f, 0.58f), new Vector2(0.43f, 0.34f)),
-                NCFreeformSurgeryStructureVisual.Ears =>
-                    Ellipse(point, new Vector2(0.16f, 0.5f), new Vector2(0.15f, 0.4f)) ||
-                    Ellipse(point, new Vector2(0.84f, 0.5f), new Vector2(0.15f, 0.4f)),
-                NCFreeformSurgeryStructureVisual.RibCage =>
-                    MathF.Abs(x) < 0.08f ||
-                    MathF.Abs(point.Y * 7f - MathF.Round(point.Y * 7f)) < 0.2f && MathF.Abs(x) < 0.46f,
-                NCFreeformSurgeryStructureVisual.Lungs =>
-                    Ellipse(point, new Vector2(0.29f, 0.48f), new Vector2(0.25f, 0.44f)) ||
-                    Ellipse(point, new Vector2(0.71f, 0.48f), new Vector2(0.25f, 0.44f)),
-                NCFreeformSurgeryStructureVisual.Heart =>
-                    Ellipse(point, new Vector2(0.34f, 0.36f), new Vector2(0.29f, 0.27f)) ||
-                    Ellipse(point, new Vector2(0.66f, 0.36f), new Vector2(0.29f, 0.27f)) ||
-                    point.Y >= 0.32f && point.Y <= 0.92f && MathF.Abs(x) <= (0.92f - point.Y) * 0.72f,
-                NCFreeformSurgeryStructureVisual.Liver =>
-                    Ellipse(point, new Vector2(0.43f, 0.52f), new Vector2(0.46f, 0.38f)) &&
-                    !(point.X > 0.72f && point.Y > 0.55f),
-                NCFreeformSurgeryStructureVisual.Stomach =>
-                    Ellipse(point, new Vector2(0.48f, 0.48f), new Vector2(0.42f, 0.44f)) &&
-                    !(point.X < 0.35f && point.Y < 0.4f),
-                NCFreeformSurgeryStructureVisual.Kidneys =>
-                    Ellipse(point, new Vector2(0.25f, 0.5f), new Vector2(0.2f, 0.42f)) ||
-                    Ellipse(point, new Vector2(0.75f, 0.5f), new Vector2(0.2f, 0.42f)),
-                NCFreeformSurgeryStructureVisual.Appendix =>
-                    Vector2.DistanceSquared(point, new Vector2(0.42f, 0.3f)) < 0.08f ||
-                    MathF.Abs(point.X - point.Y * 0.62f) < 0.13f,
-                NCFreeformSurgeryStructureVisual.Pelvis =>
-                    ellipse && (!Ellipse(point, new Vector2(0.5f, 0.35f), new Vector2(0.24f, 0.25f)) ||
-                                point.Y > 0.62f && MathF.Abs(x) < 0.14f),
-                NCFreeformSurgeryStructureVisual.LongBone =>
-                    MathF.Abs(x) < 0.23f && point.Y is > 0.1f and < 0.9f ||
-                    Vector2.DistanceSquared(point, new Vector2(0.5f, 0.12f)) < 0.065f ||
-                    Vector2.DistanceSquared(point, new Vector2(0.5f, 0.88f)) < 0.065f,
-                NCFreeformSurgeryStructureVisual.Tendon => MathF.Abs(x) < 0.18f,
-                NCFreeformSurgeryStructureVisual.Nerve =>
-                    MathF.Abs(point.X - (0.3f + point.Y * 0.38f)) < 0.11f ||
-                    point.Y > 0.48f && MathF.Abs(point.X - (0.78f - point.Y * 0.35f)) < 0.09f,
-                NCFreeformSurgeryStructureVisual.Cyberware =>
-                    point.X is > 0.08f and < 0.92f && point.Y is > 0.08f and < 0.92f &&
-                    !((int) (point.X * 5f) == 2 && (int) (point.Y * 5f) == 2),
-                _ => ellipse,
-            };
-        }
-
-        private static bool Ellipse(Vector2 point, Vector2 center, Vector2 radii)
-        {
-            var offset = (point - center) /
-                         new Vector2(MathF.Max(0.001f, radii.X), MathF.Max(0.001f, radii.Y));
-            return offset.LengthSquared() <= 1f;
-        }
-
-        private static Color ResolveStructureColor(
-            NCFreeformSurgeryStructureSummary structure,
-            int pixelX,
-            int pixelY)
-        {
-            var healthy = structure.Visual switch
-            {
-                NCFreeformSurgeryStructureVisual.Skull => Color.FromHex("#E3D7B8"),
-                NCFreeformSurgeryStructureVisual.Brain => Color.FromHex("#D584A5"),
-                NCFreeformSurgeryStructureVisual.Eyes => Color.FromHex("#C5E7E5"),
-                NCFreeformSurgeryStructureVisual.Tongue => Color.FromHex("#C34E6A"),
-                NCFreeformSurgeryStructureVisual.Ears => Color.FromHex("#C67975"),
-                NCFreeformSurgeryStructureVisual.RibCage => Color.FromHex("#DDD1AD"),
-                NCFreeformSurgeryStructureVisual.Lungs => Color.FromHex("#C76A7D"),
-                NCFreeformSurgeryStructureVisual.Heart => Color.FromHex("#D83B4B"),
-                NCFreeformSurgeryStructureVisual.Liver => Color.FromHex("#7D2938"),
-                NCFreeformSurgeryStructureVisual.Stomach => Color.FromHex("#B45F78"),
-                NCFreeformSurgeryStructureVisual.Kidneys => Color.FromHex("#84354A"),
-                NCFreeformSurgeryStructureVisual.Appendix => Color.FromHex("#B34E60"),
-                NCFreeformSurgeryStructureVisual.Pelvis => Color.FromHex("#D9CCA9"),
-                NCFreeformSurgeryStructureVisual.LongBone => Color.FromHex("#E1D5B4"),
-                NCFreeformSurgeryStructureVisual.Tendon => Color.FromHex("#DFCFA6"),
-                NCFreeformSurgeryStructureVisual.Nerve => Color.FromHex("#E1B94D"),
-                NCFreeformSurgeryStructureVisual.Cyberware => Color.FromHex("#54D2DC"),
-                _ => Color.FromHex("#B84B60"),
-            };
-            var condition = Math.Clamp(structure.Integrity * 0.75f + structure.Function * 0.25f, 0f, 1f);
-            var result = Color.InterpolateBetween(DamagedStructure, healthy, condition);
-            if ((pixelX + pixelY) % 3 == 0)
-                result = Color.InterpolateBetween(result, CavityTissue, 0.12f);
-            return result;
-        }
-
-        private void DrawRasterCell(
-            DrawingHandleScreen handle,
-            ProtoId<NCTargetZonePrototype> zone,
-            int x,
-            int y,
-            int columns,
-            int rows,
-            Color color)
-        {
-            var localBounds = UIBox2.FromDimensions(
-                new Vector2(x / (float) columns, y / (float) rows),
-                new Vector2(1f / columns, 1f / rows));
-            var screen = LocalToScreen(zone, localBounds);
-            var left = MathF.Round(screen.Left);
-            var top = MathF.Round(screen.Top);
-            var right = MathF.Round(screen.Right);
-            var bottom = MathF.Round(screen.Bottom);
-            var snapped = UIBox2.FromDimensions(
-                new Vector2(left, top),
-                new Vector2(MathF.Max(1f, right - left), MathF.Max(1f, bottom - top)));
-            handle.DrawRect(snapped, color);
-        }
-
-        private static float DistanceSquaredToPolyline(Vector2 point, IReadOnlyList<Vector2> polyline)
-        {
-            var best = float.MaxValue;
-            for (var index = 1; index < polyline.Count; index++)
-            {
-                var start = polyline[index - 1];
-                var segment = polyline[index] - start;
-                var lengthSquared = segment.LengthSquared();
-                var fraction = lengthSquared <= 0.000001f
-                    ? 0f
-                    : Math.Clamp(Vector2.Dot(point - start, segment) / lengthSquared, 0f, 1f);
-                best = MathF.Min(best, Vector2.DistanceSquared(point, start + segment * fraction));
-            }
-            return best;
-        }
-
-        private bool TryResolveZone(
+        private bool TryResolvePoint(
             Vector2 screenPoint,
             out ProtoId<NCTargetZonePrototype> zone,
-            out Vector2 localPoint)
+            out Vector2 local)
         {
-            var atlasPoint = ScreenToAtlas(screenPoint);
-            foreach (var candidate in _zones)
-            {
-                var hitBounds = TransformBounds(candidate.HitBounds, _state?.Surface ?? NCWoundSurface.Front);
-                if (!hitBounds.Contains(atlasPoint))
-                    continue;
+            if (TryResolveOperativePoint(screenPoint, out zone, out local))
+                return true;
+            return TryResolveSkinPoint(screenPoint, out zone, out local);
+        }
 
+        private bool TryResolveIncisionAtScreen(
+            Vector2 screenPoint,
+            out ProtoId<NCTargetZonePrototype> zone,
+            out Vector2 local,
+            out NCFreeformSurgeryIncisionSummary incision)
+        {
+            zone = default;
+            local = default;
+            incision = default;
+            if (_state == null || _visuals == null)
+                return false;
+
+            foreach (var candidate in _state.Incisions
+                         .Where(value => !value.Sutured &&
+                                         value.EdgeSeparation >= _visuals.Profile.MinimumOpenRetraction)
+                         .OrderByDescending(value => value.IncisionId == _state.ActiveIncisionId))
+            {
+                if (!TryOpeningRects(candidate, out _, out var aperture) || !aperture.Contains(screenPoint))
+                    continue;
                 zone = candidate.Zone;
-                return TryMapAtlasToProjection(atlasPoint, candidate, out localPoint);
+                local = Vector2.Clamp((screenPoint - aperture.TopLeft) / aperture.Size,
+                    Vector2.Zero, Vector2.One);
+                incision = candidate;
+                return true;
             }
 
-            zone = default;
-            localPoint = default;
+            foreach (var candidate in _state.Incisions
+                         .Where(value => value.Sutured ||
+                                         value.EdgeSeparation < _visuals.Profile.MinimumOpenRetraction)
+                         .OrderByDescending(value => value.IncisionId == _state.ActiveIncisionId))
+            {
+                if (!TryClosedSiteRect(candidate, out var bounds) || !bounds.Contains(screenPoint) ||
+                    !TryGetZone(candidate.Zone, out var projection))
+                {
+                    continue;
+                }
+                zone = candidate.Zone;
+                local = Vector2.Clamp(projection.InteractionAnchor, Vector2.Zero, Vector2.One);
+                incision = candidate;
+                return true;
+            }
             return false;
         }
 
-        private bool TryMapAtlasToProjection(Vector2 atlasPoint, ZoneProjection projection, out Vector2 localPoint)
+        private bool TryResolveOperativePoint(
+            Vector2 screenPoint,
+            out ProtoId<NCTargetZonePrototype> zone,
+            out Vector2 local)
         {
-            var bounds = TransformBounds(projection.ProjectionBounds, _state?.Surface ?? NCWoundSurface.Front);
-            localPoint = Vector2.Clamp(
-                (atlasPoint - bounds.TopLeft) /
-                new Vector2(MathF.Max(0.001f, bounds.Width), MathF.Max(0.001f, bounds.Height)),
-                Vector2.Zero,
-                Vector2.One);
-            return true;
+            zone = default;
+            local = default;
+            if (_state == null || _visuals == null)
+                return false;
+
+            foreach (var incision in _state.Incisions
+                         .Where(value => !value.Sutured &&
+                                         value.EdgeSeparation >= _visuals.Profile.MinimumOpenRetraction)
+                         .OrderByDescending(value => value.IncisionId == _state.ActiveIncisionId))
+            {
+                if (!TryOpeningRects(incision, out _, out var aperture) || !aperture.Contains(screenPoint))
+                    continue;
+                zone = incision.Zone;
+                local = Vector2.Clamp((screenPoint - aperture.TopLeft) / aperture.Size,
+                    Vector2.Zero, Vector2.One);
+                return true;
+            }
+            return false;
         }
 
-        private bool TryGetProjection(ProtoId<NCTargetZonePrototype> zone, out ZoneProjection projection)
+        private bool TryResolveSkinPoint(
+            Vector2 screenPoint,
+            out ProtoId<NCTargetZonePrototype> zone,
+            out Vector2 local)
+        {
+            zone = default;
+            local = default;
+            if (_state == null || _visuals == null || PixelWidth <= 0f || PixelHeight <= 0f)
+                return false;
+
+            var canvasPoint = screenPoint / PixelSize * _canvasSize;
+            if (canvasPoint.X < 0f || canvasPoint.Y < 0f ||
+                canvasPoint.X >= _canvasSize.X || canvasPoint.Y >= _canvasSize.Y)
+            {
+                return false;
+            }
+
+            var texturePoint = new Vector2i(
+                (int) MathF.Floor(canvasPoint.X / _canvasSize.X * _visuals.BodySilhouette.Width),
+                (int) MathF.Floor(canvasPoint.Y / _canvasSize.Y * _visuals.BodySilhouette.Height));
+            if (texturePoint.X < 0 || texturePoint.Y < 0 ||
+                texturePoint.X >= _visuals.BodySilhouette.Width ||
+                texturePoint.Y >= _visuals.BodySilhouette.Height ||
+                !_clickMaps.IsOpaque(_visuals.BodySilhouette, texturePoint))
+            {
+                return false;
+            }
+
+            canvasPoint = UnmirrorCanvasPoint(canvasPoint);
+            foreach (var candidate in _zones)
+            {
+                if (!candidate.Bounds.Contains(canvasPoint))
+                    continue;
+                zone = candidate.Zone;
+                local = Vector2.Clamp((canvasPoint - candidate.Bounds.TopLeft) / candidate.Bounds.Size,
+                    Vector2.Zero, Vector2.One);
+                return true;
+            }
+            return false;
+        }
+
+        private bool TryOpeningRects(
+            NCFreeformSurgeryIncisionSummary incision,
+            out UIBox2 site,
+            out UIBox2 aperture)
+        {
+            site = default;
+            aperture = default;
+            if (!TryGetZone(incision.Zone, out var zone))
+                return false;
+
+            var screenCenter = LocalToScreen(incision.Zone, zone.InteractionAnchor);
+            var size = zone.OpeningSize / _canvasSize * PixelSize;
+            size = Vector2.Min(Vector2.Max(size, new Vector2(CanvasScale * 8f)), PixelSize);
+            var topLeft = Vector2.Clamp(screenCenter - size * 0.5f, Vector2.Zero, PixelSize - size);
+            site = UIBox2.FromDimensions(topLeft, size);
+            var margin = size * 0.17f;
+            aperture = UIBox2.FromDimensions(topLeft + margin, size - margin * 2f);
+            return aperture.Width > 0f && aperture.Height > 0f;
+        }
+
+        private bool TryGetZone(ProtoId<NCTargetZonePrototype> zone, out ZoneProjection projection)
         {
             foreach (var candidate in _zones)
             {
@@ -755,95 +817,76 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                 projection = candidate;
                 return true;
             }
+
             projection = default;
             return false;
         }
 
-        private UIBox2 TransformBounds(UIBox2 bounds, NCWoundSurface surface)
+        private bool TryClosedSiteRect(
+            NCFreeformSurgeryIncisionSummary incision,
+            out UIBox2 destination)
         {
-            if (surface == NCWoundSurface.Rear)
-            {
-                return UIBox2.FromDimensions(
-                    new Vector2(_atlasSize.X - bounds.Right, bounds.Top),
-                    bounds.Size);
-            }
-
-            if (surface is not (NCWoundSurface.Left or NCWoundSurface.Right))
-                return bounds;
-
-            // Side-facing humanoid layers overlap on the 32 px RSI. Compress horizontal atlas separation while
-            // retaining small offsets so precision zones remain selectable instead of floating beside the body.
-            var sideSign = surface == NCWoundSurface.Left ? -1f : 1f;
-            var centerX = _atlasSize.X * 0.5f +
-                          (bounds.Center.X - _atlasSize.X * 0.5f) * 0.18f + sideSign * 0.35f;
-            var width = MathF.Max(2.5f, bounds.Width * 0.58f);
-            return UIBox2.FromDimensions(
-                new Vector2(centerX - width * 0.5f, bounds.Top),
-                new Vector2(width, bounds.Height));
+            destination = default;
+            if (!TryGetZone(incision.Zone, out var zone))
+                return false;
+            var screenCenter = LocalToScreen(incision.Zone, zone.InteractionAnchor);
+            var authoredSize = zone.OpeningSize / _canvasSize * PixelSize;
+            var scale = incision.Sutured ? 0.52f : 0.58f;
+            var size = Vector2.Max(authoredSize * scale, new Vector2(CanvasScale * 6f));
+            destination = UIBox2.FromDimensions(screenCenter - size * 0.5f, size);
+            return true;
         }
 
-        private Vector2 ScreenToAtlas(Vector2 point)
+        private Vector2 LocalToScreen(ProtoId<NCTargetZonePrototype> zone, Vector2 point)
         {
-            return new Vector2(
-                point.X / MathF.Max(1f, Width) * _atlasSize.X,
-                point.Y / MathF.Max(1f, Height) * _atlasSize.Y);
+            if (!TryGetZone(zone, out var projection))
+                return PixelSize * 0.5f;
+            var canvasPoint = projection.Bounds.TopLeft + Vector2.Clamp(point, Vector2.Zero, Vector2.One) *
+                projection.Bounds.Size;
+            canvasPoint = MirrorCanvasPoint(canvasPoint);
+            return canvasPoint / _canvasSize * PixelSize;
         }
 
-        private UIBox2 AtlasToScreen(UIBox2 bounds)
+        private Vector2 MirrorCanvasPoint(Vector2 point)
         {
-            return UIBox2.FromDimensions(
-                AtlasToScreen(bounds.TopLeft),
-                bounds.Size / _atlasSize * new Vector2(PixelWidth, PixelHeight));
+            if (IsMirrored)
+                point.X = _canvasSize.X - point.X;
+            return point;
         }
 
-        private Vector2 AtlasToScreen(Vector2 point)
+        private Vector2 UnmirrorCanvasPoint(Vector2 point)
         {
-            return point / _atlasSize * new Vector2(PixelWidth, PixelHeight);
+            return MirrorCanvasPoint(point);
         }
 
-        private UIBox2 LocalToScreen(
-            ProtoId<NCTargetZonePrototype> zoneId,
-            UIBox2 localBounds)
+        private bool IsMirrored => _state?.Surface is NCWoundSurface.Rear or NCWoundSurface.Right;
+
+        private float CanvasScale => MathF.Min(
+            PixelWidth / MathF.Max(1f, _canvasSize.X),
+            PixelHeight / MathF.Max(1f, _canvasSize.Y));
+
+        private static bool Contains(Vector2 center, Vector2 size, Vector2 point)
         {
-            if (_state == null || !TryGetProjection(zoneId, out var projection))
-                return default;
-            var zone = TransformBounds(projection.ProjectionBounds, _state.Surface);
-            var atlas = UIBox2.FromDimensions(
-                zone.TopLeft + localBounds.TopLeft * zone.Size,
-                localBounds.Size * zone.Size);
-            return AtlasToScreen(atlas);
+            var half = size * 0.5f;
+            return point.X >= center.X - half.X && point.X <= center.X + half.X &&
+                   point.Y >= center.Y - half.Y && point.Y <= center.Y + half.Y;
         }
 
-        private Vector2 LocalToScreen(
-            ProtoId<NCTargetZonePrototype> zoneId,
-            Vector2 point)
-        {
-            if (_state == null || !TryGetProjection(zoneId, out var projection))
-                return Vector2.Zero;
-            var zone = TransformBounds(projection.ProjectionBounds, _state.Surface);
-            return AtlasToScreen(zone.TopLeft + point * zone.Size);
-        }
-
-        private void AddPoint(Vector2 point)
-        {
-            if (_stroke.Count >= 32)
-                return;
-            if (_stroke.Count != 0 && Vector2.DistanceSquared(_stroke[^1], point) < 0.000025f)
-                return;
-            _stroke.Add(point);
-        }
-
-        private void DrawPolyline(
-            DrawingHandleScreen handle,
-            ProtoId<NCTargetZonePrototype> zone,
-            IReadOnlyList<Vector2> points,
-            Color color)
-        {
-            for (var index = 1; index < points.Count; index++)
-                handle.DrawLine(
-                    LocalToScreen(zone, points[index - 1]),
-                    LocalToScreen(zone, points[index]),
-                    color);
-        }
     }
+
+    private static void DrawCell(
+        DrawingHandleScreen handle,
+        Texture texture,
+        Vector2 grid,
+        Vector2 cell,
+        UIBox2 destination,
+        Color color)
+    {
+        var columns = Math.Max(1f, grid.X);
+        var rows = Math.Max(1f, grid.Y);
+        var size = new Vector2(texture.Width / columns, texture.Height / rows);
+        var source = UIBox2.FromDimensions(new Vector2(cell.X * size.X, cell.Y * size.Y), size);
+        handle.DrawTextureRectRegion(texture, destination, source, color);
+    }
+
 }

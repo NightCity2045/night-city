@@ -27,6 +27,9 @@ public sealed partial class NCMedicalPersistenceSystem
     {
         if (incision == null || incision.IncisionId == Guid.Empty ||
             incision.WoundId is { } woundId && woundId == Guid.Empty ||
+            incision.LinkedWoundIds == null ||
+            incision.LinkedWoundIds.Any(linked => linked == Guid.Empty || linked == incision.WoundId) ||
+            incision.LinkedWoundIds.Distinct().Count() != incision.LinkedWoundIds.Count ||
             !_prototypes.HasIndex(incision.TargetZone) ||
             !Enum.IsDefined(incision.Surface) ||
             incision.Polyline == null || incision.Polyline.Count is < 2 or > MaxIncisionPoints ||
@@ -53,6 +56,7 @@ public sealed partial class NCMedicalPersistenceSystem
         {
             IncisionId = incision.IncisionId,
             WoundId = incision.WoundId,
+            LinkedWoundIds = [.. incision.LinkedWoundIds],
             TargetZone = incision.TargetZone,
             Surface = incision.Surface,
             Polyline = [.. incision.Polyline],
@@ -61,6 +65,7 @@ public sealed partial class NCMedicalPersistenceSystem
             EdgeSeparation = incision.EdgeSeparation,
             Contamination = incision.Contamination,
             Sutured = incision.Sutured,
+            BoneCasingOpen = incision.BoneCasingOpen,
             SourceResolutionId = incision.SourceResolutionId,
             CreatedAt = incision.CreatedAt,
             ModifiedAt = incision.ModifiedAt,

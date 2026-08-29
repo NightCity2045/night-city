@@ -27,8 +27,9 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
     public event Action<NCWoundSurface, float>? SelectionChanged;
     public event Action<float>? DepthPredictionChanged;
     public event Action<ProtoId<NCSurgeryToolCapabilityPrototype>>? CapabilityChanged;
-    public event Action<ProtoId<NCTargetZonePrototype>, Vector2[]>? StrokeSubmitted;
+    public event Action<ProtoId<NCTargetZonePrototype>, Vector2>? InteractionRequested;
     public event Action<ProtoId<NCTargetZonePrototype>, Vector2>? AttachRequested;
+    public event Action<ProtoId<NCTargetZonePrototype>, Guid?>? SiteRequested;
     public event Action<int>? DetachRequested;
 
     private readonly IPrototypeManager _prototypes;
@@ -47,8 +48,9 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
         ConfigureSurfaceButton(SurfaceRight, NCWoundSurface.Right);
 
         DepthSlider.OnValueChanged += _ => OnDepthChanged();
-        SurgicalField.StrokeSubmitted += (zone, points) => StrokeSubmitted?.Invoke(zone, points);
+        SurgicalField.InteractionRequested += (zone, position) => InteractionRequested?.Invoke(zone, position);
         SurgicalField.AttachRequested += (zone, point) => AttachRequested?.Invoke(zone, point);
+        SurgicalField.SiteRequested += (zone, incision) => SiteRequested?.Invoke(zone, incision);
         SurgicalField.DepthAdjusted += delta =>
             DepthSlider.Value = Math.Clamp(DepthSlider.Value + delta * 100f, DepthSlider.MinValue, DepthSlider.MaxValue);
     }
@@ -97,9 +99,9 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
         ConnectionLabel.FontColorOverride = Color.FromHex("#FFD46B");
     }
 
-    public void ResolvePendingStroke()
+    public void ResolvePendingInteraction()
     {
-        SurgicalField.ResolvePendingStroke();
+        SurgicalField.ResolvePendingInteraction();
     }
 
     private void PopulateCapabilities(NCFreeformSurgeryState state)
@@ -162,13 +164,29 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
         var openIncisions = state.Incisions.Count(value => !value.Sutured);
         var activeBleeding = state.Wounds.Count(value => value.ExternalBleedRate > 0f || value.InternalBleedRate > 0f);
         var exposed = state.Structures.Count(value => value.Exposed);
+        var activeSite = state.ActiveIncisionId is { } activeId
+            ? state.Incisions.FirstOrDefault(value => value.IncisionId == activeId)
+            : default;
+        var stage = activeSite.IncisionId == Guid.Empty
+            ? "closed skin"
+            : SiteStageName(activeSite.Stage);
         var text =
-            $"Surface: {SurfaceName(state.Surface)} · working depth: {displayedDepth:P0}\n" +
-            $"Local contamination under cursor: {state.SiteContamination:P0}\n" +
-            $"Visible open incisions: {openIncisions} · bleeding wounds: {activeBleeding}\n" +
+            $"Surface: {SurfaceName(state.Surface)} · active site: {stage}\n" +
+            $"Working depth: {displayedDepth:P0} · contamination: {state.SiteContamination:P0}\n" +
+            $"Persistent operative sites: {openIncisions} · bleeding wounds: {activeBleeding}\n" +
             $"Exposed structures: {exposed} · attached tools: {state.Attachments.Length}";
         SiteStatus.SetMessage(text, Color.FromHex("#C4D4D3"));
     }
+
+    private static string SiteStageName(NCInteractiveSurgerySiteStage stage) => stage switch
+    {
+        NCInteractiveSurgerySiteStage.Incised => "incised skin",
+        NCInteractiveSurgerySiteStage.Retracted => "soft tissue exposed",
+        NCInteractiveSurgerySiteStage.StructuralExposed => "bone exposed",
+        NCInteractiveSurgerySiteStage.CavityOpen => "body cavity open",
+        NCInteractiveSurgerySiteStage.Sutured => "sutured",
+        _ => stage.ToString(),
+    };
 
     private void PopulateAttachments(NCFreeformSurgeryState state)
     {

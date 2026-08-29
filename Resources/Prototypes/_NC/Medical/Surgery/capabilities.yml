@@ -89,7 +89,7 @@
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolCranialAccess
-  name: cranial access
+  name: bone access
   representativeTool: Drill
 
 - type: ncSurgeryToolCapability

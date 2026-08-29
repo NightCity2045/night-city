@@ -18,6 +18,7 @@ using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Surgery;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
+using Content.Shared.DoAfter;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
 using Content.Shared.Verbs;
@@ -29,8 +30,8 @@ using Robust.Shared.Timing;
 namespace Content.Server._NC.Medical.Surgery;
 
 /// <summary>
-/// Server-authoritative player surgery. Clients submit only bounded normalized geometry and opaque session
-/// handles; the server re-reads the held item, body graph, range, revision and resources for every mutation.
+/// Server-authoritative interactive player surgery. Clients submit only one normalized contact point and opaque
+/// session handles; the server authors geometry and re-reads the held item, anatomy and resources per mutation.
 /// </summary>
 public sealed partial class NCFreeformSurgerySystem : EntitySystem
 {
@@ -41,6 +42,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
+    [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private SharedContainerSystem _containers = default!;
     [Dependency] private NCAnatomySystem _anatomy = default!;
@@ -59,9 +61,13 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         SubscribeNetworkEvent<NCFreeformSurgeryRefreshRequest>(OnRefresh);
         SubscribeNetworkEvent<NCFreeformSurgerySelectionRequest>(OnSelection);
         SubscribeNetworkEvent<NCFreeformSurgeryCapabilityRequest>(OnCapability);
-        SubscribeNetworkEvent<NCFreeformSurgeryStrokeRequest>(OnStroke);
+        SubscribeNetworkEvent<NCFreeformSurgerySiteRequest>(OnSite);
+        SubscribeNetworkEvent<NCInteractiveSurgeryActionRequest>(OnInteraction);
+        SubscribeLocalEvent<NCSurgeryToolComponent, NCFreeformSurgeryDoAfterEvent>(OnInteractionDoAfter);
         SubscribeNetworkEvent<NCFreeformSurgeryAttachRequest>(OnAttach);
+        SubscribeLocalEvent<NCSurgeryToolComponent, NCFreeformSurgeryAttachDoAfterEvent>(OnAttachDoAfter);
         SubscribeNetworkEvent<NCFreeformSurgeryDetachRequest>(OnDetach);
+        SubscribeLocalEvent<NCFreeformSurgicalAttachmentComponent, NCFreeformSurgeryDetachDoAfterEvent>(OnDetachDoAfter);
         SubscribeNetworkEvent<NCFreeformSurgeryCloseRequest>(OnClose);
         SubscribeLocalEvent<NCFreeformSurgicalAttachmentComponent, ComponentShutdown>(OnAttachmentShutdown);
     }
@@ -112,6 +118,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         session.Patient = patient;
         session.Region = region;
         session.TargetZone = zone;
+        session.ActiveIncisionId = null;
         session.Surface = NCWoundSurface.Front;
         session.Depth = 0f;
         session.SelectedCapability = null;
@@ -155,10 +162,53 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             return;
         }
 
+        var changedSite = session.TargetZone != request.Zone || session.Region != region || session.Surface != request.Surface;
         session.TargetZone = request.Zone;
         session.Region = region;
         session.Surface = request.Surface;
+        if (changedSite)
+            session.ActiveIncisionId = null;
         session.Depth = Math.Clamp(request.Depth, 0f, 1f);
+        session.StructureHandles.Clear();
+        session.AttachmentHandles.Clear();
+        SendState(surgeon, session, args.SenderSession);
+    }
+
+    /// <summary>
+    /// NC: Binds the magnified view to one server-owned incision. The client can identify a visible incision by
+    /// its opaque id, but cannot redirect the session to an unrelated organ or fabricate an operative opening.
+    /// </summary>
+    private void OnSite(NCFreeformSurgerySiteRequest request, EntitySessionEventArgs args)
+    {
+        if (!TryResolveSession(request.SessionId, args, out var surgeon, out var session, out _, out var failure))
+        {
+            SendFailure(args.SenderSession, request.SessionId, failure);
+            return;
+        }
+
+        if (!Enum.IsDefined(request.Surface) ||
+            !_prototypes.TryIndex(request.Zone, out NCTargetZonePrototype? requested) || !requested.Selectable ||
+            !TryResolveFieldRegion(surgeon, session.Patient, request.Zone, out _, out var region) ||
+            !TryComp<NCSurgicalSiteComponent>(region, out var site))
+        {
+            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.InvalidRegion);
+            return;
+        }
+
+        if (request.IncisionId is { } incisionId)
+        {
+            var incision = FindIncision(site, incisionId);
+            if (incision == null || incision.TargetZone != request.Zone || incision.Surface != request.Surface)
+            {
+                SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.NoApplicableTarget);
+                return;
+            }
+        }
+
+        session.TargetZone = request.Zone;
+        session.Region = region;
+        session.Surface = request.Surface;
+        session.ActiveIncisionId = request.IncisionId;
         session.StructureHandles.Clear();
         session.AttachmentHandles.Clear();
         SendState(surgeon, session, args.SenderSession);
@@ -212,27 +262,93 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         SendState(surgeon, session, args.SenderSession);
     }
 
-    private void OnStroke(NCFreeformSurgeryStrokeRequest request, EntitySessionEventArgs args)
+    private void OnInteraction(NCInteractiveSurgeryActionRequest request, EntitySessionEventArgs args)
     {
         if (!TryResolveSession(request.SessionId, args, out var surgeon, out var session, out var profile, out var failure))
         {
             SendFailure(args.SenderSession, request.SessionId, failure);
             return;
         }
-
-        if (_timing.CurTime - session.LastInputAt < profile.MinimumInputInterval)
+        if (!ValidateInteraction(request) ||
+            !_hands.TryGetActiveItem(surgeon, out var held) || held is not { } tool ||
+            !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool) || surgicalTool.Broken ||
+            !TryResolveCapability(session, profile, surgicalTool, out var capability, out var definition, out _))
         {
-            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.RateLimited);
+            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.ToolUnavailable);
             return;
         }
 
-        if (!ValidateStroke(request, profile) || request.Sequence != session.LastSequence + 1 ||
+        var doAfter = new DoAfterArgs(
+            EntityManager,
+            surgeon,
+            definition.Duration,
+            new NCFreeformSurgeryDoAfterEvent(request, capability),
+            tool,
+            target: session.Patient,
+            used: tool)
+        {
+            NeedHand = true,
+            BreakOnMove = true,
+            BreakOnDamage = true,
+            DistanceThreshold = profile.InteractionRange,
+        };
+        if (!_doAfter.TryStartDoAfter(doAfter))
+        {
+            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.RateLimited);
+        }
+    }
+
+    private void OnInteractionDoAfter(
+        Entity<NCSurgeryToolComponent> tool,
+        ref NCFreeformSurgeryDoAfterEvent args)
+    {
+        if (args.Handled || args.Used != tool.Owner)
+            return;
+        args.Handled = true;
+
+        if (!TryComp<ActorComponent>(args.User, out var actor) ||
+            !TryResolveSession(args.SessionId, args.User, out var session, out var profile, out var failure))
+        {
+            return;
+        }
+        if (args.Cancelled || args.Target != session.Patient ||
+            !_hands.TryGetActiveItem(args.User, out var held) || held != tool.Owner || tool.Comp.Broken ||
+            !TryResolveCapability(session, profile, tool.Comp, out var capability, out _, out _) ||
+            capability != args.Capability)
+        {
+            SendState(args.User, session, actor.PlayerSession, false,
+                args.Cancelled ? NCFreeformSurgeryFailure.NoApplicableTarget : NCFreeformSurgeryFailure.CapabilityUnavailable);
+            return;
+        }
+
+        CompleteInteraction(args.ToRequest(), args.User, actor.PlayerSession);
+    }
+
+    private void CompleteInteraction(
+        NCInteractiveSurgeryActionRequest request,
+        EntityUid surgeon,
+        ICommonSession recipient)
+    {
+        if (!TryResolveSession(request.SessionId, surgeon, out var session, out var profile, out var failure))
+        {
+            SendFailure(recipient, request.SessionId, failure);
+            return;
+        }
+
+        if (_timing.CurTime - session.LastInputAt < profile.MinimumInputInterval)
+        {
+            SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.RateLimited);
+            return;
+        }
+
+        if (!ValidateInteraction(request) || request.Sequence != session.LastSequence + 1 ||
             request.Surface != session.Surface ||
             !_prototypes.TryIndex(request.Zone, out NCTargetZonePrototype? requestedZone) ||
             !requestedZone.Selectable ||
+            !profile.BodyZones.TryGetValue(request.Zone, out var zoneDefinition) ||
             !TryResolveFieldRegion(surgeon, session.Patient, request.Zone, out _, out var requestedRegion))
         {
-            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.InvalidInput);
+            SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.InvalidInput);
             return;
         }
 
@@ -243,6 +359,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         {
             session.TargetZone = request.Zone;
             session.Region = requestedRegion;
+            session.ActiveIncisionId = null;
             session.StructureHandles.Clear();
             session.AttachmentHandles.Clear();
         }
@@ -250,52 +367,76 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         if (!TryComp<NCSurgicalSiteComponent>(session.Region, out var site) ||
             !regionChanged && request.ExpectedRevision != site.SpatialRevision)
         {
-            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.StaleRevision);
+            SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.StaleRevision);
             return;
         }
 
         if (!_hands.TryGetActiveItem(surgeon, out var held) || held is not { } tool ||
             !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool))
         {
-            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.ToolUnavailable);
+            SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.ToolUnavailable);
             return;
         }
         if (surgicalTool.Broken)
         {
-            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.ToolBroken);
+            SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.ToolBroken);
             return;
         }
 
         if (!TryResolveCapability(session, profile, surgicalTool, out var capability, out var definition, out var quality))
         {
-            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.CapabilityUnavailable);
+            SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.CapabilityUnavailable);
             return;
         }
 
         session.SelectedCapability = capability;
-        session.Depth = Math.Clamp(request.Depth, 0f, definition.MaximumDepth);
-        var points = ApplyPatientMotion(request.Points, session, profile, ResolveMovement(session.Patient));
-        var center = StrokeCenter(points);
-        var canContactHiddenStructure = definition.Action is
-            NCFreeformSurgeryAction.Incise or NCFreeformSurgeryAction.Autopsy;
+        // NC: A discrete tool click always reaches at least that tool's authored working layer. The depth slider
+        // may request a deeper layer, but leaving it at zero must not make a retractor or clamp mysteriously fail.
+        session.Depth = Math.Clamp(request.Depth, definition.MinimumDepth, definition.MaximumDepth);
+        // NC: The cursor supplies only a contact point. Canonical geometry comes from the server-loaded body
+        // profile, which makes every incision a discrete interaction and removes client-authored freehand cuts.
+        var points = BuildInteractionPath(request.Position, zoneDefinition, definition.Action, profile);
+        var contact = request.Position;
+        // NC: The incision under a point-tool click becomes the active visual site before structure resolution.
+        // This lets one authoritative click both operate and focus the local cavity without a UI-only target mode.
+        var contactedIncision = FindOperativeSite(site, session);
+        if (contactedIncision != null)
+            session.ActiveIncisionId = contactedIncision.IncisionId;
+        // NC: Surgical geometry is static, but structure interaction remains pixel-specific. Even a scalpel may
+        // contact only a structure the current incision and bone barriers actually expose at the clicked point.
         var structure = session.Depth >= definition.MinimumDepth
-            ? ResolveStructureAt(surgeon, session, profile, site, center, session.Depth, !canContactHiddenStructure)
+            ? ResolveStructureAt(surgeon, session, profile, site, contact, session.Depth, true)
             : null;
         if (definition.Action == NCFreeformSurgeryAction.Cyberware &&
             HasStagedInternalCyberware(surgeon, session) &&
-            (!TryResolveStagedCyberwareTarget(surgeon, session, profile, out var cyberwareTarget, out _) ||
-             session.Depth < cyberwareTarget.MinimumDepth ||
-             !Contains(cyberwareTarget, center) ||
-             !IsExposed(site, session, cyberwareTarget)))
+             (!TryResolveStagedCyberwareTarget(surgeon, session, profile, out var cyberwareTarget, out _) ||
+              session.Depth < cyberwareTarget.MinimumDepth ||
+              !Contains(cyberwareTarget, contact) ||
+             !IsExposed(site, session, cyberwareTarget, profile.MinimumOpenRetraction)))
         {
             session.LastSequence = request.Sequence;
             session.LastInputAt = _timing.CurTime;
-            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.NoApplicableTarget);
+            SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.NoApplicableTarget);
             return;
         }
         var hasBone = structure is { } structureUid && HasComp<NCBoneComponent>(structureUid);
+        float? structureMinimumDepth = null;
+        var structureDetachableBySeparation = false;
+        var structureBlocksDeeperStructures = false;
+        if (structure is { } resolvedStructure &&
+            TryGetStructureDefinition(resolvedStructure, session, profile, false, out var structureDefinition))
+        {
+            structureMinimumDepth = structureDefinition.MinimumDepth;
+            structureDetachableBySeparation = structureDefinition.DetachableBySeparation;
+            structureBlocksDeeperStructures = structureDefinition.BlocksDeeperStructures;
+        }
+        else if (definition.Action == NCFreeformSurgeryAction.Cyberware &&
+                 TryResolveStagedCyberwareTarget(surgeon, session, profile, out var stagedDefinition, out _))
+        {
+            structureMinimumDepth = stagedDefinition.MinimumDepth;
+        }
         var cranial = TryComp<NCVascularRegionComponent>(session.Region, out var vascular) &&
-                      vascular.Cavity == NCBodyCavity.Cranial;
+                       vascular.Cavity == NCBodyCavity.Cranial;
         var result = _effects.ApplyStroke(new NCFreeformSurgeryEffectContext(
             surgeon,
             session.Patient,
@@ -310,25 +451,37 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             quality,
             surgicalTool.Sterility,
             profile.UnpreparedFieldContamination,
-            profile.MaximumPersistentIncisions,
+            profile.MinimumOpenRetraction,
             structure,
             hasBone,
             cranial,
             profile.IncidentalTendonRuptureThreshold,
             profile.IncidentalBoneCrackThreshold,
-            profile.IncidentalBoneBreakThreshold));
+            profile.IncidentalBoneBreakThreshold,
+            contact,
+            structureMinimumDepth,
+            structureDetachableBySeparation,
+            structureBlocksDeeperStructures));
 
         session.LastSequence = request.Sequence;
         session.LastInputAt = _timing.CurTime;
+        if (result.Accepted)
+        {
+            // NC: A newly created cut and every later point-tool interaction keep the same in-body aperture
+            // focused. The server still resolves the region and incision from real medical state.
+            var opened = FindOperativeSite(site, session);
+            if (opened != null)
+                session.ActiveIncisionId = opened.IncisionId;
+        }
         if (result.Accepted && !TryKeepSessionAnchored(surgeon, session))
         {
-            SendFailure(args.SenderSession, session.SessionId, NCFreeformSurgeryFailure.InvalidRegion);
+            SendFailure(recipient, session.SessionId, NCFreeformSurgeryFailure.InvalidRegion);
             return;
         }
         SendState(
             surgeon,
             session,
-            args.SenderSession,
+            recipient,
             result.Accepted,
             result.Failure ?? NCFreeformSurgeryFailure.None);
     }
@@ -343,18 +496,98 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         if (!FiniteNormalized(request.Position) ||
             !_prototypes.TryIndex(request.Zone, out NCTargetZonePrototype? requestedZone) ||
             !requestedZone.Selectable ||
-            !TryResolveFieldRegion(surgeon, session.Patient, request.Zone, out _, out var requestedRegion))
+            !TryResolveFieldRegion(surgeon, session.Patient, request.Zone, out _, out var requestedRegion) ||
+            !TryComp<NCSurgicalSiteComponent>(requestedRegion, out var site) ||
+            request.Zone == session.TargetZone && requestedRegion == session.Region &&
+            request.ExpectedRevision != site.SpatialRevision ||
+            !_hands.TryGetActiveItem(surgeon, out var held) || held is not { } tool ||
+            !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool) || surgicalTool.Broken ||
+            !TryResolveCapability(session, profile, surgicalTool, out var capability, out var definition, out _) ||
+            !definition.Attachable)
         {
             SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
             return;
         }
 
-        // RMB attachment follows the same pixel-derived targeting contract as a normal stroke.
+        var incision = FindOperativeSite(site, request.Zone, session.Surface);
+        if (incision == null || incision.Sutured || incision.Depth + 0.001f < definition.MinimumDepth ||
+            definition.Action == NCFreeformSurgeryAction.DrainCavity &&
+            !HasComp<NCCavityFluidComponent>(requestedRegion))
+        {
+            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
+            return;
+        }
+
+        var doAfter = new DoAfterArgs(
+            EntityManager,
+            surgeon,
+            definition.Duration,
+            new NCFreeformSurgeryAttachDoAfterEvent(request, capability),
+            tool,
+            target: session.Patient,
+            used: tool)
+        {
+            NeedHand = true,
+            BreakOnMove = true,
+            BreakOnDamage = true,
+            DistanceThreshold = profile.InteractionRange,
+        };
+        if (!_doAfter.TryStartDoAfter(doAfter))
+            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.RateLimited);
+    }
+
+    private void OnAttachDoAfter(
+        Entity<NCSurgeryToolComponent> tool,
+        ref NCFreeformSurgeryAttachDoAfterEvent args)
+    {
+        if (args.Handled || args.Used != tool.Owner)
+            return;
+        args.Handled = true;
+
+        if (!TryComp<ActorComponent>(args.User, out var actor) ||
+            !TryResolveSession(args.SessionId, args.User, out var session, out var profile, out _))
+        {
+            return;
+        }
+        if (args.Cancelled || args.Target != session.Patient ||
+            !_hands.TryGetActiveItem(args.User, out var held) || held != tool.Owner || tool.Comp.Broken ||
+            !TryResolveCapability(session, profile, tool.Comp, out var capability, out var definition, out _) ||
+            capability != args.Capability || !definition.Attachable)
+        {
+            SendState(args.User, session, actor.PlayerSession, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
+            return;
+        }
+
+        CompleteAttach(args.ToRequest(), args.Capability, args.User, actor.PlayerSession);
+    }
+
+    private void CompleteAttach(
+        NCFreeformSurgeryAttachRequest request,
+        ProtoId<NCSurgeryToolCapabilityPrototype> expectedCapability,
+        EntityUid surgeon,
+        ICommonSession recipient)
+    {
+        if (!TryResolveSession(request.SessionId, surgeon, out var session, out var profile, out var failure))
+        {
+            SendFailure(recipient, request.SessionId, failure);
+            return;
+        }
+        if (!FiniteNormalized(request.Position) ||
+            !_prototypes.TryIndex(request.Zone, out NCTargetZonePrototype? requestedZone) ||
+            !requestedZone.Selectable ||
+            !TryResolveFieldRegion(surgeon, session.Patient, request.Zone, out _, out var requestedRegion))
+        {
+            SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
+            return;
+        }
+
+        // RMB attachment follows the same server-authored zone and incision targeting contract as other actions.
         var regionChanged = request.Zone != session.TargetZone || requestedRegion != session.Region;
         if (regionChanged)
         {
             session.TargetZone = request.Zone;
             session.Region = requestedRegion;
+            session.ActiveIncisionId = null;
             session.StructureHandles.Clear();
             session.AttachmentHandles.Clear();
         }
@@ -362,20 +595,20 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         if (!TryComp<NCSurgicalSiteComponent>(session.Region, out var site) ||
             !regionChanged && request.ExpectedRevision != site.SpatialRevision ||
             !_hands.TryGetActiveItem(surgeon, out var held) || held is not { } tool ||
-            !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool) ||
-            !TryResolveCapability(session, profile, surgicalTool, out _, out var definition, out var quality) ||
-            !definition.Attachable)
+            !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool) || surgicalTool.Broken ||
+            !TryResolveCapability(session, profile, surgicalTool, out var capability, out var definition, out var quality) ||
+            capability != expectedCapability || !definition.Attachable)
         {
-            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
+            SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
             return;
         }
 
-        var incision = FindIncision(site, session, request.Position, definition.Radius);
+        var incision = FindOperativeSite(site, session);
         if (incision == null || incision.Sutured || incision.Depth + 0.001f < definition.MinimumDepth ||
             definition.Action == NCFreeformSurgeryAction.DrainCavity &&
             !HasComp<NCCavityFluidComponent>(session.Region))
         {
-            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
+            SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
             return;
         }
 
@@ -386,12 +619,12 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
                 existing.Region == session.Region &&
                 existing.Action == NCFreeformSurgeryAction.DrainCavity))
         {
-            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
+            SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
             return;
         }
         if (!_hands.TryDropIntoContainer(surgeon, tool, container))
         {
-            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
+            SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
             return;
         }
 
@@ -416,14 +649,75 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             site.SpatialRevision++;
         }
         MarkSiteChanged(session.Patient);
-        SendState(surgeon, session, args.SenderSession);
+        SendState(surgeon, session, recipient);
     }
 
     private void OnDetach(NCFreeformSurgeryDetachRequest request, EntitySessionEventArgs args)
     {
-        if (!TryResolveSession(request.SessionId, args, out var surgeon, out var session, out _, out var failure))
+        if (!TryResolveSession(request.SessionId, args, out var surgeon, out var session, out var profile, out var failure))
         {
             SendFailure(args.SenderSession, request.SessionId, failure);
+            return;
+        }
+        if (!TryComp<NCSurgicalSiteComponent>(session.Region, out var site) ||
+            request.ExpectedRevision != site.SpatialRevision ||
+            !session.AttachmentHandles.TryGetValue(request.Handle, out var tool) ||
+            !TryComp<NCFreeformSurgicalAttachmentComponent>(tool, out var attachment) ||
+            attachment.Patient != session.Patient || attachment.Region != session.Region)
+        {
+            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
+            return;
+        }
+
+        var doAfter = new DoAfterArgs(
+            EntityManager,
+            surgeon,
+            profile.AttachmentRemovalDuration,
+            new NCFreeformSurgeryDetachDoAfterEvent(request),
+            tool,
+            target: session.Patient,
+            used: tool)
+        {
+            BreakOnMove = true,
+            BreakOnDamage = true,
+            DistanceThreshold = profile.InteractionRange,
+        };
+        if (!_doAfter.TryStartDoAfter(doAfter))
+            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.RateLimited);
+    }
+
+    private void OnDetachDoAfter(
+        Entity<NCFreeformSurgicalAttachmentComponent> tool,
+        ref NCFreeformSurgeryDetachDoAfterEvent args)
+    {
+        if (args.Handled || args.Used != tool.Owner)
+            return;
+        args.Handled = true;
+
+        if (!TryComp<ActorComponent>(args.User, out var actor) ||
+            !TryResolveSession(args.SessionId, args.User, out var session, out _, out _))
+        {
+            return;
+        }
+        if (args.Cancelled || args.Target != session.Patient ||
+            !session.AttachmentHandles.TryGetValue(args.Handle, out var resolvedTool) || resolvedTool != tool.Owner ||
+            tool.Comp.Patient != session.Patient || tool.Comp.Region != session.Region)
+        {
+            SendState(args.User, session, actor.PlayerSession, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
+            return;
+        }
+
+        CompleteDetach(args.ToRequest(), args.User, actor.PlayerSession);
+    }
+
+    private void CompleteDetach(
+        NCFreeformSurgeryDetachRequest request,
+        EntityUid surgeon,
+        ICommonSession recipient)
+    {
+        if (!TryResolveSession(request.SessionId, surgeon, out var session, out var profile, out var failure))
+        {
+            SendFailure(recipient, request.SessionId, failure);
             return;
         }
         if (!TryComp<NCSurgicalSiteComponent>(session.Region, out var site) ||
@@ -434,7 +728,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             !_containers.TryGetContainingContainer((tool, null, null), out var containing) ||
             !_containers.Remove(tool, containing, destination: Transform(session.Patient).Coordinates))
         {
-            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
+            SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.AttachmentUnavailable);
             return;
         }
 
@@ -451,7 +745,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         {
             incision.EdgeSeparation = 0f;
             incision.ModifiedAt = _timing.CurTime;
-            site.TissuesRetracted = site.Incisions.Any(value => !value.Sutured && value.EdgeSeparation >= 0.2f);
+            site.TissuesRetracted = site.Incisions.Any(value =>
+                !value.Sutured && value.EdgeSeparation >= profile.MinimumOpenRetraction);
         }
         RemComp<NCFreeformSurgicalAttachmentComponent>(tool);
         _hands.TryPickupAnyHand(surgeon, tool);
@@ -460,7 +755,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             site.SpatialRevision++;
         }
         MarkSiteChanged(session.Patient);
-        SendState(surgeon, session, args.SenderSession);
+        SendState(surgeon, session, recipient);
     }
 
     private void OnAttachmentShutdown(
@@ -480,7 +775,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         if (attachment.Comp.Action != NCFreeformSurgeryAction.Retract ||
             !TryComp<NCSurgicalSiteComponent>(attachment.Comp.Region, out var site) ||
             FindIncision(site, attachment.Comp.IncisionId) is not { } incision ||
-            incision.EdgeSeparation < 0.2f)
+            !TryResolveSurgeryProfile(attachment.Comp.Patient, out var profile) ||
+            incision.EdgeSeparation < profile.MinimumOpenRetraction)
         {
             return;
         }
@@ -498,7 +794,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
 
         incision.EdgeSeparation = 0f;
         incision.ModifiedAt = _timing.CurTime;
-        site.TissuesRetracted = site.Incisions.Any(value => !value.Sutured && value.EdgeSeparation >= 0.2f);
+        site.TissuesRetracted = site.Incisions.Any(value =>
+            !value.Sutured && value.EdgeSeparation >= profile.MinimumOpenRetraction);
         unchecked
         {
             site.SpatialRevision++;
@@ -564,6 +861,75 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         return true;
     }
 
+    /// <summary>
+    /// Revalidates a timed action without trusting the network session captured when the DoAfter began.
+    /// </summary>
+    private bool TryResolveSession(
+        NCActionResolutionId sessionId,
+        EntityUid surgeon,
+        out NCFreeformSurgerySessionComponent session,
+        out NCFreeformSurgeryProfilePrototype profile,
+        out NCFreeformSurgeryFailure failure)
+    {
+        session = default!;
+        profile = default!;
+        failure = NCFreeformSurgeryFailure.SessionUnavailable;
+        if (!sessionId.IsValid ||
+            !TryComp<NCFreeformSurgerySessionComponent>(surgeon, out var resolvedSession) ||
+            resolvedSession.SessionId != sessionId)
+        {
+            return false;
+        }
+
+        session = resolvedSession;
+        if (!TryComp<NCMedicalBodyComponent>(session.Patient, out var medical) ||
+            TerminatingOrDeleted(session.Patient))
+        {
+            failure = NCFreeformSurgeryFailure.PatientUnavailable;
+            return false;
+        }
+        if (!_interaction.InRangeUnobstructed(surgeon, session.Patient))
+        {
+            failure = NCFreeformSurgeryFailure.OutOfRange;
+            return false;
+        }
+        if (!TryKeepSessionAnchored(surgeon, session))
+        {
+            failure = NCFreeformSurgeryFailure.InvalidRegion;
+            return false;
+        }
+        if (!_prototypes.TryIndex(medical.Profile, out NCAnatomyProfilePrototype? anatomy) ||
+            !_prototypes.TryIndex(anatomy.SurgicalField, out NCFreeformSurgeryProfilePrototype? resolvedProfile))
+        {
+            failure = NCFreeformSurgeryFailure.PatientUnavailable;
+            return false;
+        }
+
+        profile = resolvedProfile;
+        failure = NCFreeformSurgeryFailure.None;
+        return true;
+    }
+
+    /// <summary>
+    /// NC: Resolves the data-driven surgical thresholds for a live medical body. Attachment shutdown does not
+    /// have a surgeon session, so it must derive the same profile directly from the patient.
+    /// </summary>
+    private bool TryResolveSurgeryProfile(
+        EntityUid patient,
+        out NCFreeformSurgeryProfilePrototype profile)
+    {
+        profile = default!;
+        if (!TryComp<NCMedicalBodyComponent>(patient, out var medical) ||
+            !_prototypes.TryIndex(medical.Profile, out NCAnatomyProfilePrototype? anatomy) ||
+            !_prototypes.TryIndex(anatomy.SurgicalField, out NCFreeformSurgeryProfilePrototype? resolvedProfile))
+        {
+            return false;
+        }
+
+        profile = resolvedProfile;
+        return true;
+    }
+
     private bool TryKeepSessionAnchored(EntityUid surgeon, NCFreeformSurgerySessionComponent session)
     {
         if (TryComp<OrganComponent>(session.Region, out var regionOrgan) &&
@@ -586,6 +952,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
 
         session.TargetZone = reboundZone;
         session.Region = reboundRegion;
+        session.ActiveIncisionId = null;
         session.StructureHandles.Clear();
         session.AttachmentHandles.Clear();
         return true;
@@ -607,6 +974,10 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             return;
         }
 
+        // NC: Migrate legacy freehand/motion-shifted records at the patient boundary. This is bounded to the
+        // patient's organ container and makes the network state expose one stable site per zone and surface.
+        NormalizeSurgicalSites(session, profile);
+
         var capabilities = BuildCapabilities(
             surgeon,
             session,
@@ -616,8 +987,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             out var sterility);
         var layers = BuildLayers(session.Region, site, session);
         var structures = BuildStructures(surgeon, session, profile, site);
-        var incisions = BuildIncisions(session);
-        var wounds = BuildWounds(session);
+        var incisions = BuildIncisions(session, profile);
+        var wounds = BuildWounds(session, profile);
         var attachments = BuildAttachments(session);
         TryComp<NCCirculationComponent>(session.Patient, out var circulation);
         TryComp<NCPhysiologyComponent>(session.Patient, out var physiology);
@@ -631,6 +1002,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             medical.Profile,
             GetNetEntity(session.Patient),
             session.TargetZone,
+            session.ActiveIncisionId,
             session.Surface,
             Name(session.Patient),
             toolName,
@@ -720,7 +1092,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             var end = (i + 1) * step;
             var exposed = i == 0 || site.Incisions.Any(incision =>
                 incision.TargetZone == session.TargetZone && incision.Surface == session.Surface &&
-                !incision.Sutured && incision.Depth >= start);
+                !incision.Sutured && (incision.BoneCasingOpen || incision.Depth >= start));
             result[i] = new NCFreeformSurgeryLayerSummary(profile.Layers[i].Kind, start, end, exposed);
         }
         return result;
@@ -737,13 +1109,38 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             .OrderBy(uid => StructureSortKey(uid), StringComparer.Ordinal)
             .ThenBy(uid => uid.Id)
             .ToArray();
+        float? blockingBoneDepth = null;
+        if (!IsBoneCasingOpen(site, session))
+        {
+            foreach (var candidate in candidates)
+            {
+                if (!HasComp<NCBoneComponent>(candidate) ||
+                    !TryGetStructureDefinition(candidate, session, profile, true, out var boneDefinition) ||
+                    !boneDefinition.BlocksDeeperStructures ||
+                    !IsExposed(site, session, boneDefinition, profile.MinimumOpenRetraction))
+                {
+                    continue;
+                }
+
+                blockingBoneDepth = blockingBoneDepth is { } current
+                    ? MathF.Min(current, boneDefinition.MinimumDepth)
+                    : boneDefinition.MinimumDepth;
+            }
+        }
         var result = new List<NCFreeformSurgeryStructureSummary>(candidates.Length);
         var handle = 1;
         foreach (var candidate in candidates)
         {
             if (!TryGetStructureDefinition(candidate, session, profile, true, out var definition))
                 continue;
-            var exposed = candidate == session.Region || IsExposed(site, session, definition);
+            var exposed = candidate == session.Region ||
+                          IsExposed(site, session, definition, profile.MinimumOpenRetraction);
+            if (blockingBoneDepth is { } barrier &&
+                !HasComp<NCBoneComponent>(candidate) &&
+                definition.MinimumDepth > barrier + 0.001f)
+            {
+                exposed = false;
+            }
             if (!exposed)
                 continue;
             session.StructureHandles.Add(handle, candidate);
@@ -753,6 +1150,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             var function = TryComp<NCOrganFunctionComponent>(candidate, out var functionComp)
                 ? functionComp.CurrentCapacity / MathF.Max(0.001f, functionComp.BaseCapacity)
                 : integrity;
+            var normalizedIntegrity = Math.Clamp(integrity, 0f, 1f);
+            var normalizedFunction = Math.Clamp(function, 0f, 1f);
             result.Add(new NCFreeformSurgeryStructureSummary(
                 handle,
                 Name(candidate),
@@ -761,8 +1160,10 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
                 definition.Position,
                 definition.Size,
                 definition.MinimumDepth,
-                Math.Clamp(integrity, 0f, 1f),
-                Math.Clamp(function, 0f, 1f),
+                normalizedIntegrity,
+                normalizedFunction,
+                ResolveDamageVisual(candidate, normalizedIntegrity, normalizedFunction),
+                definition.BlocksDeeperStructures,
                 true));
             handle++;
         }
@@ -770,7 +1171,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         // A staged implant is not yet part of the body graph. Once its host bay is locally exposed, disclose
         // a synthetic atlas target backed by the real host organ so the player has a precise installation area.
         if (TryResolveStagedCyberwareTarget(surgeon, session, profile, out var target, out var targetName) &&
-            IsExposed(site, session, target))
+            IsExposed(site, session, target, profile.MinimumOpenRetraction))
         {
             session.StructureHandles.Add(handle, session.Region);
             result.Add(new NCFreeformSurgeryStructureSummary(
@@ -783,12 +1184,16 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
                 target.MinimumDepth,
                 1f,
                 1f,
+                NCFreeformSurgeryDamageVisualStage.Healthy,
+                false,
                 true));
         }
         return result.ToArray();
     }
 
-    private NCFreeformSurgeryIncisionSummary[] BuildIncisions(NCFreeformSurgerySessionComponent session)
+    private NCFreeformSurgeryIncisionSummary[] BuildIncisions(
+        NCFreeformSurgerySessionComponent session,
+        NCFreeformSurgeryProfilePrototype profile)
     {
         if (!TryComp<BodyComponent>(session.Patient, out var body) || body.Organs == null)
             return [];
@@ -800,10 +1205,24 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         {
             if (!TryComp<NCSurgicalSiteComponent>(region, out var site))
                 continue;
-            foreach (var incision in site.Incisions)
+            foreach (var incision in site.Incisions
+                         .GroupBy(value => (value.TargetZone, value.Surface))
+                         .Select(group => group
+                             .OrderBy(value => value.CreatedAt)
+                             .ThenBy(value => value.IncisionId)
+                             .First()))
             {
                 if (incision.Surface != session.Surface)
                     continue;
+                var visibleLayer = ResolveVisibleLayer(region, incision.Depth);
+                var protectiveBoneDepth = incision.BoneCasingOpen
+                    ? null
+                    : FindProtectiveBoneDepth(session.Patient, region, incision.TargetZone, profile);
+                var stage = ResolveSiteStage(
+                    incision,
+                    visibleLayer,
+                    profile.MinimumOpenRetraction,
+                    protectiveBoneDepth);
                 result.Add((
                     incision.CreatedAt,
                     new NCFreeformSurgeryIncisionSummary(
@@ -814,7 +1233,10 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
                         incision.Width,
                         incision.EdgeSeparation,
                         incision.Contamination,
-                        incision.Sutured)));
+                        incision.Sutured,
+                        incision.BoneCasingOpen,
+                        visibleLayer,
+                        stage)));
             }
         }
 
@@ -825,12 +1247,77 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             .ToArray();
     }
 
-    private NCFreeformSurgeryWoundSummary[] BuildWounds(NCFreeformSurgerySessionComponent session)
+    private NCTissueLayerKind ResolveVisibleLayer(EntityUid region, float depth)
+    {
+        if (!TryComp<NCAnatomicalRegionComponent>(region, out var anatomical) ||
+            !_prototypes.TryIndex(anatomical.TissueProfile, out NCTissueProfilePrototype? tissue) ||
+            tissue.Layers.Count == 0)
+        {
+            return NCTissueLayerKind.Surface;
+        }
+
+        var index = Math.Clamp(
+            (int) MathF.Floor(Math.Clamp(depth, 0f, 0.9999f) * tissue.Layers.Count),
+            0,
+            tissue.Layers.Count - 1);
+        return tissue.Layers[index].Kind;
+    }
+
+    private static NCInteractiveSurgerySiteStage ResolveSiteStage(
+        NCSurgicalIncisionRecord incision,
+        NCTissueLayerKind visibleLayer,
+        float minimumOpenRetraction,
+        float? protectiveBoneDepth)
+    {
+        if (incision.Sutured)
+            return NCInteractiveSurgerySiteStage.Sutured;
+        if (incision.EdgeSeparation < minimumOpenRetraction)
+            return NCInteractiveSurgerySiteStage.Incised;
+        // NC: Deep cuts cannot visually or interactively tunnel through an unopened anatomical casing.
+        if (!incision.BoneCasingOpen && protectiveBoneDepth is { } barrier)
+        {
+            return incision.Depth >= barrier - 0.001f
+                ? NCInteractiveSurgerySiteStage.StructuralExposed
+                : NCInteractiveSurgerySiteStage.Retracted;
+        }
+        if (incision.BoneCasingOpen || visibleLayer is NCTissueLayerKind.Cavity or
+            NCTissueLayerKind.InternalOrgan or NCTissueLayerKind.Mechanical)
+        {
+            return NCInteractiveSurgerySiteStage.CavityOpen;
+        }
+        if (visibleLayer == NCTissueLayerKind.Structural)
+            return NCInteractiveSurgerySiteStage.StructuralExposed;
+        return NCInteractiveSurgerySiteStage.Retracted;
+    }
+
+    private NCFreeformSurgeryWoundSummary[] BuildWounds(
+        NCFreeformSurgerySessionComponent session,
+        NCFreeformSurgeryProfilePrototype profile)
     {
         if (!TryComp<NCWoundContainerComponent>(session.Patient, out var container))
             return [];
+
+        // NC: A surgical incision owns its aperture sprite. Its linked trauma wound remains fully authoritative
+        // but is not drawn a second time as an unrelated combat mark on top of the operative site.
+        var representedByIncision = new HashSet<Guid>();
+        if (TryComp<BodyComponent>(session.Patient, out var body) && body.Organs != null)
+        {
+            foreach (var region in body.Organs.ContainedEntities.Take(MaximumBodyOrgans))
+            {
+                if (!TryComp<NCSurgicalSiteComponent>(region, out var site))
+                    continue;
+                foreach (var incision in site.Incisions)
+                {
+                    if (incision.WoundId is { } woundId)
+                        representedByIncision.Add(woundId);
+                    foreach (var linkedWoundId in incision.LinkedWoundIds)
+                        representedByIncision.Add(linkedWoundId);
+                }
+            }
+        }
+
         return container.Wounds.Values
-            .Where(wound => wound.Surface == session.Surface)
+            .Where(wound => wound.Surface == session.Surface && !representedByIncision.Contains(wound.WoundId))
             .OrderBy(wound => wound.CreatedAt)
             .ThenBy(wound => wound.WoundId)
             .Select(wound => new NCFreeformSurgeryWoundSummary(
@@ -841,7 +1328,9 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
                 wound.TissueDepth,
                 wound.ExternalBleedRate,
                 wound.InternalBleedRate,
-                wound.EmbeddedObjectId != null))
+                wound.EmbeddedObjectId != null,
+                wound.EmbeddedObjectId != null && IsForeignBodyExposed(session, profile, wound),
+                wound.ClosureState))
             .ToArray();
     }
 
@@ -881,18 +1370,41 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
     {
         EntityUid? best = null;
         var bestDepth = -1f;
+        var candidates = CollectStructureCandidates(session, profile, false);
+        float? blockingBoneDepth = null;
+        if (!IsBoneCasingOpen(site, session))
+        {
+            foreach (var candidate in candidates)
+            {
+                if (!HasComp<NCBoneComponent>(candidate) ||
+                    !TryGetStructureDefinition(candidate, session, profile, false, out var bone) ||
+                    !bone.BlocksDeeperStructures ||
+                    depth < bone.MinimumDepth || !Contains(bone, point) ||
+                    requireExposure && !IsExposed(site, session, bone, profile.MinimumOpenRetraction))
+                {
+                    continue;
+                }
+
+                blockingBoneDepth = blockingBoneDepth is { } current
+                    ? MathF.Min(current, bone.MinimumDepth)
+                    : bone.MinimumDepth;
+            }
+        }
         if (TryResolveStagedCyberwareTarget(surgeon, session, profile, out var staged, out _) &&
             depth >= staged.MinimumDepth && Contains(staged, point) &&
-            (!requireExposure || IsExposed(site, session, staged)))
+            (!requireExposure || IsExposed(site, session, staged, profile.MinimumOpenRetraction)) &&
+            (blockingBoneDepth == null || staged.MinimumDepth <= blockingBoneDepth + 0.001f))
         {
             best = session.Region;
             bestDepth = staged.MinimumDepth;
         }
-        foreach (var candidate in CollectStructureCandidates(session, profile, false))
+        foreach (var candidate in candidates)
         {
             if (!TryGetStructureDefinition(candidate, session, profile, false, out var definition) ||
                 depth < definition.MinimumDepth ||
-                requireExposure && !IsExposed(site, session, definition))
+                requireExposure && !IsExposed(site, session, definition, profile.MinimumOpenRetraction) ||
+                blockingBoneDepth is { } barrier && !HasComp<NCBoneComponent>(candidate) &&
+                definition.MinimumDepth > barrier + 0.001f)
             {
                 continue;
             }
@@ -907,6 +1419,35 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             bestDepth = definition.MinimumDepth;
         }
         return best;
+    }
+
+    private float? FindProtectiveBoneDepth(
+        EntityUid patient,
+        EntityUid region,
+        ProtoId<NCTargetZonePrototype> zone,
+        NCFreeformSurgeryProfilePrototype profile)
+    {
+        if (!TryComp<BodyComponent>(patient, out var body) || body.Organs == null)
+            return null;
+
+        float? result = null;
+        foreach (var candidate in body.Organs.ContainedEntities.Take(MaximumBodyOrgans))
+        {
+            if (candidate != region && !IsDescendantOf(candidate, region) ||
+                !HasComp<NCBoneComponent>(candidate) ||
+                !TryComp<OrganComponent>(candidate, out var organ) || organ.Category is not { } category ||
+                !profile.Structures.TryGetValue(category, out var definition) ||
+                definition.Zones.Count > 0 && !definition.Zones.Contains(zone) ||
+                !definition.BlocksDeeperStructures)
+            {
+                continue;
+            }
+
+            result = result is { } current
+                ? MathF.Min(current, definition.MinimumDepth)
+                : definition.MinimumDepth;
+        }
+        return result;
     }
 
     private bool HasStagedInternalCyberware(EntityUid surgeon, NCFreeformSurgerySessionComponent session)
@@ -931,6 +1472,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             selection.Graft is not { } module ||
             !_cyberware.TryFindInstallSlot(session.Patient, session.Region, module, out var slot) ||
             !profile.CyberwareSlots.TryGetValue(slot, out definition!) ||
+            definition.Zones.Count > 0 && !definition.Zones.Contains(session.TargetZone) ||
             !_prototypes.TryIndex(slot, out NCCyberwareSlotPrototype? slotPrototype))
         {
             return false;
@@ -991,12 +1533,12 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         if (TryComp<OrganComponent>(candidate, out var organ) && organ.Category is { } category &&
             profile.Structures.TryGetValue(category, out definition!))
         {
-            return true;
+            return definition.Zones.Count == 0 || definition.Zones.Contains(session.TargetZone);
         }
         if (TryComp<NCCyberwareComponent>(candidate, out var cyberware) &&
             cyberware.InstalledSlot is { } slot && profile.CyberwareSlots.TryGetValue(slot, out definition!))
         {
-            return true;
+            return definition.Zones.Count == 0 || definition.Zones.Contains(session.TargetZone);
         }
         if (allowRegionFallback && candidate == session.Region)
         {
@@ -1026,66 +1568,94 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
     private static bool IsExposed(
         NCSurgicalSiteComponent site,
         NCFreeformSurgerySessionComponent session,
-        NCFreeformSurgeryStructureDefinition structure)
+        NCFreeformSurgeryStructureDefinition structure,
+        float minimumOpenRetraction)
     {
-        var half = structure.Size * 0.5f;
+        // NC: A retracted Ocular-style site exposes the authored contents of the whole operative window.
+        // Structure positions are interactive sprite coordinates, not a requirement to draw a cut through them.
         return site.Incisions.Any(incision =>
             incision.TargetZone == session.TargetZone && incision.Surface == session.Surface &&
-            !incision.Sutured && incision.Depth >= structure.MinimumDepth &&
-            PolylineIntersectsBox(
-                incision.Polyline,
-                structure.Position - half,
-                structure.Position + half));
+            !incision.Sutured && incision.EdgeSeparation >= minimumOpenRetraction &&
+            (incision.BoneCasingOpen || incision.Depth >= structure.MinimumDepth));
     }
 
-    private static bool PolylineIntersectsBox(
-        IReadOnlyList<Vector2> polyline,
-        Vector2 minimum,
-        Vector2 maximum)
+    private static bool IsBoneCasingOpen(
+        NCSurgicalSiteComponent site,
+        NCFreeformSurgerySessionComponent session)
     {
-        if (polyline.Count == 0)
-            return false;
-        for (var index = 0; index < polyline.Count; index++)
+        return site.Incisions.Any(incision =>
+            incision.TargetZone == session.TargetZone && incision.Surface == session.Surface &&
+            !incision.Sutured && incision.BoneCasingOpen);
+    }
+
+    private bool IsForeignBodyExposed(
+        NCFreeformSurgerySessionComponent session,
+        NCFreeformSurgeryProfilePrototype profile,
+        NCWoundRecord wound)
+    {
+        if (wound.TargetZone != session.TargetZone ||
+            !TryComp<NCSurgicalSiteComponent>(session.Region, out var site))
         {
-            var point = polyline[index];
-            if (point.X >= minimum.X && point.X <= maximum.X &&
-                point.Y >= minimum.Y && point.Y <= maximum.Y)
-            {
-                return true;
-            }
-            if (index == 0 || !SegmentIntersectsBox(polyline[index - 1], point, minimum, maximum))
-                continue;
-            return true;
+            return false;
         }
-        return false;
+
+        var requiredDepth = wound.TissueDepth switch
+        {
+            NCTissueDepth.SoftTissue => 0.2f,
+            NCTissueDepth.Vascular => 0.4f,
+            NCTissueDepth.Structural => 0.5f,
+            NCTissueDepth.Cavity => 0.65f,
+            NCTissueDepth.InternalOrgan => 0.75f,
+            _ => 0f,
+        };
+        var protectiveDepth = FindProtectiveBoneDepth(
+            session.Patient,
+            session.Region,
+            session.TargetZone,
+            profile);
+        return site.Incisions.Any(incision =>
+            incision.TargetZone == session.TargetZone && incision.Surface == session.Surface &&
+            !incision.Sutured && incision.EdgeSeparation >= profile.MinimumOpenRetraction &&
+            incision.Depth + 0.001f >= requiredDepth &&
+            (protectiveDepth is not { } barrier || requiredDepth <= barrier + 0.001f || incision.BoneCasingOpen));
     }
 
-    private static bool SegmentIntersectsBox(Vector2 start, Vector2 end, Vector2 minimum, Vector2 maximum)
+    private NCFreeformSurgeryDamageVisualStage ResolveDamageVisual(
+        EntityUid structure,
+        float integrity,
+        float function)
     {
-        var direction = end - start;
-        var enter = 0f;
-        var exit = 1f;
-        return ClipAxis(start.X, direction.X, minimum.X, maximum.X, ref enter, ref exit) &&
-               ClipAxis(start.Y, direction.Y, minimum.Y, maximum.Y, ref enter, ref exit);
-    }
-
-    private static bool ClipAxis(
-        float origin,
-        float direction,
-        float minimum,
-        float maximum,
-        ref float enter,
-        ref float exit)
-    {
-        if (MathF.Abs(direction) <= 0.000001f)
-            return origin >= minimum && origin <= maximum;
-        var first = (minimum - origin) / direction;
-        var second = (maximum - origin) / direction;
-        if (first > second)
-            (first, second) = (second, first);
-        enter = MathF.Max(enter, first);
-        exit = MathF.Min(exit, second);
-        return enter <= exit;
+        if (TryComp<NCBoneComponent>(structure, out var bone))
+        {
+            if (!bone.RequiresFixation && bone.State != NCBoneState.Intact && bone.Stability >= 0.8f)
+                return NCFreeformSurgeryDamageVisualStage.Fixed;
+            return bone.State switch
+            {
+                NCBoneState.Bruised => NCFreeformSurgeryDamageVisualStage.Bruised,
+                NCBoneState.Cracked => NCFreeformSurgeryDamageVisualStage.Cracked,
+                NCBoneState.BrokenStable => NCFreeformSurgeryDamageVisualStage.Fractured,
+                NCBoneState.BrokenDisplaced => NCFreeformSurgeryDamageVisualStage.Displaced,
+                NCBoneState.Shattered => NCFreeformSurgeryDamageVisualStage.Shattered,
+                _ => NCFreeformSurgeryDamageVisualStage.Healthy,
+            };
+        }
+        if (TryComp<NCTendonComponent>(structure, out var tendon))
+            return tendon.Ruptured
+                ? NCFreeformSurgeryDamageVisualStage.Ruptured
+                : tendon.Integrity < 0.85f
+                    ? NCFreeformSurgeryDamageVisualStage.Damaged
+                    : NCFreeformSurgeryDamageVisualStage.Healthy;
+        if (TryComp<NCNerveComponent>(structure, out var nerve))
+            return nerve.NeuralIntegrity < 0.25f
+                ? NCFreeformSurgeryDamageVisualStage.Critical
+                : nerve.NeuralIntegrity < 0.85f
+                    ? NCFreeformSurgeryDamageVisualStage.Damaged
+                    : NCFreeformSurgeryDamageVisualStage.Healthy;
+        if (integrity <= 0.2f || function <= 0.1f)
+            return NCFreeformSurgeryDamageVisualStage.Critical;
+        if (integrity < 0.8f || function < 0.7f)
+            return NCFreeformSurgeryDamageVisualStage.Damaged;
+        return NCFreeformSurgeryDamageVisualStage.Healthy;
     }
 
     private bool IsDescendantOf(EntityUid candidate, EntityUid parent)
@@ -1155,78 +1725,71 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         return Math.Clamp((1f - modifiers.Anesthesia) * modifiers.MotorControlMultiplier, 0f, 1f);
     }
 
-    private static Vector2[] ApplyPatientMotion(
-        Vector2[] source,
-        NCFreeformSurgerySessionComponent session,
-        NCFreeformSurgeryProfilePrototype profile,
-        float movement)
-    {
-        var result = new Vector2[source.Length];
-        var magnitude = Math.Clamp(movement, 0f, 1f) * profile.MovementDisplacement;
-        var angle = (session.LastSequence + 1) * 2.3999632f;
-        var displacement = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * magnitude;
-        for (var i = 0; i < source.Length; i++)
-            result[i] = Vector2.Clamp(source[i] + displacement, Vector2.Zero, Vector2.One);
-        return result;
-    }
-
-    private static bool ValidateStroke(
-        NCFreeformSurgeryStrokeRequest request,
-        NCFreeformSurgeryProfilePrototype profile)
+    private static bool ValidateInteraction(NCInteractiveSurgeryActionRequest request)
     {
         if (!Enum.IsDefined(request.Surface) || !float.IsFinite(request.Depth) ||
-            request.Depth is < 0f or > 1f || request.Points.Length is < 2 ||
-            request.Points.Length > profile.MaximumStrokePoints)
+            request.Depth is < 0f or > 1f || !FiniteNormalized(request.Position))
         {
             return false;
         }
-        var length = 0f;
-        for (var i = 0; i < request.Points.Length; i++)
+        return true;
+    }
+
+    /// <summary>
+    /// Creates a bounded two-point contact path entirely from server-owned prototype data. Cutting tools receive
+    /// the authored incision axis and length; point tools receive the minimum path required by the effect model.
+    /// </summary>
+    private static Vector2[] BuildInteractionPath(
+        Vector2 position,
+        NCFreeformSurgeryBodyZoneDefinition zone,
+        NCFreeformSurgeryAction action,
+        NCFreeformSurgeryProfilePrototype profile)
+    {
+        var contact = action is NCFreeformSurgeryAction.Incise or NCFreeformSurgeryAction.Autopsy or
+            NCFreeformSurgeryAction.Retract
+            ? Vector2.Clamp(zone.InteractionAnchor, Vector2.Zero, Vector2.One)
+            : position;
+        var direction = zone.IncisionDirection;
+        if (direction.LengthSquared() <= 0.000001f)
+            direction = Vector2.UnitY;
+        else
+            direction = Vector2.Normalize(direction);
+
+        var length = action is NCFreeformSurgeryAction.Incise or NCFreeformSurgeryAction.Autopsy
+            ? zone.IncisionLength
+            : profile.MinimumStrokeLength * 1.25f;
+        length = Math.Clamp(length, profile.MinimumStrokeLength, profile.MaximumStrokeLength);
+        var half = direction * length * 0.5f;
+        var start = contact - half;
+        var end = contact + half;
+
+        // NC: Shift both endpoints together so edge interactions preserve canonical power and direction.
+        ShiftInside(ref start.X, ref end.X);
+        ShiftInside(ref start.Y, ref end.Y);
+        return [
+            Vector2.Clamp(start, Vector2.Zero, Vector2.One),
+            Vector2.Clamp(end, Vector2.Zero, Vector2.One),
+        ];
+    }
+
+    private static void ShiftInside(ref float start, ref float end)
+    {
+        if (start < 0f)
         {
-            if (!FiniteNormalized(request.Points[i]))
-                return false;
-            if (i > 0)
-                length += Vector2.Distance(request.Points[i - 1], request.Points[i]);
+            end -= start;
+            start = 0f;
         }
-        return float.IsFinite(length) && length >= profile.MinimumStrokeLength && length <= profile.MaximumStrokeLength;
+        if (end > 1f)
+        {
+            start -= end - 1f;
+            end = 1f;
+        }
     }
 
     private static bool FiniteNormalized(Vector2 point)
     {
         return float.IsFinite(point.X) && float.IsFinite(point.Y) &&
                point.X is >= 0f and <= 1f && point.Y is >= 0f and <= 1f;
-    }
-
-    private static Vector2 StrokeCenter(IReadOnlyList<Vector2> points)
-    {
-        var sum = Vector2.Zero;
-        foreach (var point in points)
-            sum += point;
-        return sum / Math.Max(1, points.Count);
-    }
-
-    private static NCSurgicalIncisionRecord? FindIncision(
-        NCSurgicalSiteComponent site,
-        NCFreeformSurgerySessionComponent session,
-        Vector2 point,
-        float radius)
-    {
-        NCSurgicalIncisionRecord? best = null;
-        var bestDistance = radius * radius;
-        foreach (var incision in site.Incisions)
-        {
-            if (incision.TargetZone != session.TargetZone || incision.Surface != session.Surface ||
-                incision.Polyline.Count == 0)
-            {
-                continue;
-            }
-            var distance = DistanceSquaredToPolyline(point, incision.Polyline);
-            if (distance > bestDistance)
-                continue;
-            bestDistance = distance;
-            best = incision;
-        }
-        return best;
     }
 
     private static NCSurgicalIncisionRecord? FindIncision(NCSurgicalSiteComponent site, Guid incisionId)
@@ -1239,27 +1802,134 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         return null;
     }
 
-    private static float DistanceSquaredToPolyline(Vector2 point, IReadOnlyList<Vector2> polyline)
+    private static NCSurgicalIncisionRecord? FindOperativeSite(
+        NCSurgicalSiteComponent site,
+        NCFreeformSurgerySessionComponent session)
     {
-        if (polyline.Count == 0)
-            return float.MaxValue;
-        if (polyline.Count == 1)
-            return Vector2.DistanceSquared(point, polyline[0]);
+        return FindOperativeSite(site, session.TargetZone, session.Surface);
+    }
 
-        // Incisions are bounded to the profile's small point limit, so exact segment distance is cheap and
-        // prevents long cuts from being interactable only around their arithmetic centre.
-        var best = float.MaxValue;
-        for (var index = 1; index < polyline.Count; index++)
+    private static NCSurgicalIncisionRecord? FindOperativeSite(
+        NCSurgicalSiteComponent site,
+        ProtoId<NCTargetZonePrototype> targetZone,
+        NCWoundSurface surface)
+    {
+        return site.Incisions
+            .Where(incision => incision.TargetZone == targetZone && incision.Surface == surface &&
+                               !incision.Sutured)
+            .OrderBy(incision => incision.CreatedAt)
+            .ThenBy(incision => incision.IncisionId)
+            .FirstOrDefault();
+    }
+
+    /// <summary>
+    /// NC: Collapses pre-slot surgery data into deterministic zone/surface sites and rewrites their presentation
+    /// geometry from prototype anchors. Physiological wound records are retained and linked to the survivor.
+    /// </summary>
+    private void NormalizeSurgicalSites(
+        NCFreeformSurgerySessionComponent session,
+        NCFreeformSurgeryProfilePrototype profile)
+    {
+        if (!TryComp<BodyComponent>(session.Patient, out var body) || body.Organs == null)
+            return;
+
+        var patientChanged = false;
+        foreach (var region in body.Organs.ContainedEntities.Take(MaximumBodyOrgans))
         {
-            var start = polyline[index - 1];
-            var segment = polyline[index] - start;
-            var lengthSquared = segment.LengthSquared();
-            var fraction = lengthSquared <= 0.000001f
-                ? 0f
-                : Math.Clamp(Vector2.Dot(point - start, segment) / lengthSquared, 0f, 1f);
-            best = MathF.Min(best, Vector2.DistanceSquared(point, start + segment * fraction));
+            if (!TryComp<NCSurgicalSiteComponent>(region, out var site) || site.Incisions.Count == 0)
+                continue;
+
+            var siteChanged = false;
+            // NC: One-time migration from the former region-wide flag. The deepest open incision is the only
+            // defensible local owner; later saves persist the explicit per-incision state.
+            if (site.BoneCasingOpen && !site.Incisions.Any(value => value.BoneCasingOpen))
+            {
+                var legacyOwner = site.Incisions
+                    .Where(value => !value.Sutured)
+                    .OrderByDescending(value => value.Depth)
+                    .ThenBy(value => value.CreatedAt)
+                    .FirstOrDefault();
+                if (legacyOwner != null)
+                {
+                    legacyOwner.BoneCasingOpen = true;
+                    siteChanged = true;
+                }
+            }
+            foreach (var group in site.Incisions
+                         .GroupBy(incision => (Zone: incision.TargetZone, incision.Surface))
+                         .ToArray())
+            {
+                var records = group
+                    .OrderBy(incision => incision.CreatedAt)
+                    .ThenBy(incision => incision.IncisionId)
+                    .ToArray();
+                var survivor = records[0];
+
+                foreach (var duplicate in records.Skip(1))
+                {
+                    survivor.Depth = MathF.Max(survivor.Depth, duplicate.Depth);
+                    survivor.Width = MathF.Max(survivor.Width, duplicate.Width);
+                    survivor.EdgeSeparation = MathF.Max(survivor.EdgeSeparation, duplicate.EdgeSeparation);
+                    survivor.Contamination = MathF.Max(survivor.Contamination, duplicate.Contamination);
+                    survivor.Sutured &= duplicate.Sutured;
+                    survivor.BoneCasingOpen |= duplicate.BoneCasingOpen;
+                    if (duplicate.CreatedAt < survivor.CreatedAt)
+                        survivor.CreatedAt = duplicate.CreatedAt;
+                    if (duplicate.ModifiedAt > survivor.ModifiedAt)
+                        survivor.ModifiedAt = duplicate.ModifiedAt;
+                    MergeWoundLinks(survivor, duplicate);
+                    if (session.ActiveIncisionId == duplicate.IncisionId)
+                        session.ActiveIncisionId = survivor.IncisionId;
+                    site.Incisions.Remove(duplicate);
+                    siteChanged = true;
+                }
+
+                if (profile.BodyZones.TryGetValue(group.Key.Zone, out var zoneDefinition))
+                {
+                    var canonical = BuildInteractionPath(
+                        zoneDefinition.InteractionAnchor,
+                        zoneDefinition,
+                        NCFreeformSurgeryAction.Incise,
+                        profile);
+                    if (!survivor.Polyline.SequenceEqual(canonical))
+                    {
+                        survivor.Polyline = canonical.ToList();
+                        siteChanged = true;
+                    }
+                }
+            }
+
+            if (!siteChanged)
+                continue;
+            site.BoneCasingOpen = site.Incisions.Any(value => !value.Sutured && value.BoneCasingOpen);
+            unchecked
+            {
+                site.SpatialRevision++;
+            }
+            patientChanged = true;
         }
-        return best;
+
+        if (patientChanged)
+            MarkSiteChanged(session.Patient);
+    }
+
+    private static void MergeWoundLinks(
+        NCSurgicalIncisionRecord survivor,
+        NCSurgicalIncisionRecord duplicate)
+    {
+        AddWoundLink(survivor, duplicate.WoundId);
+        foreach (var woundId in duplicate.LinkedWoundIds)
+            AddWoundLink(survivor, woundId);
+    }
+
+    private static void AddWoundLink(NCSurgicalIncisionRecord incision, Guid? woundId)
+    {
+        if (woundId is not { } linked || incision.WoundId == linked || incision.LinkedWoundIds.Contains(linked))
+            return;
+        if (incision.WoundId == null)
+            incision.WoundId = linked;
+        else
+            incision.LinkedWoundIds.Add(linked);
     }
 
     private void MarkSiteChanged(EntityUid patient)
@@ -1286,6 +1956,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             default,
             NetEntity.Invalid,
             default,
+            null,
             NCWoundSurface.Front,
             string.Empty,
             string.Empty,

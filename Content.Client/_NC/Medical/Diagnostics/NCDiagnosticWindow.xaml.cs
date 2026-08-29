@@ -255,6 +255,12 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
         }
         BodyDoll.SetStatusLevels(levels);
         BodyDoll.SetWoundMarkers(snapshot.Wounds);
+        var radiographVisible = snapshot.Tier >= NCDiagnosticTier.ScannerInternal;
+        RadiographPanel.Visible = radiographVisible;
+        AnatomyProjection.SetProjection(
+            HumanAnatomy,
+            radiographVisible,
+            Has(snapshot.Disclosures, NCDiagnosticDisclosure.Organs));
         RefreshBodyFilterLabel();
     }
 

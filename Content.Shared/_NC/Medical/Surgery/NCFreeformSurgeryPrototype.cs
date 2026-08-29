@@ -4,9 +4,13 @@
 
 using Content.Shared._NC.Medical.Trauma;
 using Content.Shared._NC.Medical.Cyberware;
+using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Wounds;
+using Content.Shared._NC.Combat.Targeting;
 using Content.Shared.Body;
 using System.Numerics;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Utility;
 
 namespace Content.Shared._NC.Medical.Surgery;
 
@@ -30,17 +34,40 @@ public sealed partial class NCFreeformSurgeryProfilePrototype : IPrototype
     [DataField]
     public TimeSpan MinimumInputInterval = TimeSpan.FromMilliseconds(40);
 
+    /// <summary>
+    /// Physical time required to remove a tool which has been left attached to an operative site.
+    /// </summary>
+    [DataField]
+    public TimeSpan AttachmentRemovalDuration = TimeSpan.FromSeconds(1.5);
+
     [DataField]
     public int MaximumStrokePoints = 32;
 
+    /// <summary>
+    /// NC: Retained for prototype and downstream API compatibility. Incisions are no longer evicted when this
+    /// count is exceeded; overlapping strokes are merged spatially instead.
+    /// </summary>
     [DataField]
     public int MaximumPersistentIncisions = 64;
 
     [DataField]
     public float MaximumStrokeLength = 4f;
 
+    /// <summary>
+    /// NC: Minimum normalized edge separation that exposes the tissue beneath an incision.
+    /// Shared by authority checks and both surgical views so presentation cannot disagree with gameplay.
+    /// </summary>
+    [DataField]
+    public float MinimumOpenRetraction = 0.2f;
+
     [DataField]
     public float MinimumStrokeLength = 0.015f;
+
+    /// <summary>
+    /// Normalized pick radius used to associate a point-tool click with an existing incision.
+    /// </summary>
+    [DataField]
+    public float IncisionSelectionRadius = 0.11f;
 
     [DataField]
     public float MovementDisplacement = 0.08f;
@@ -77,6 +104,126 @@ public sealed partial class NCFreeformSurgeryProfilePrototype : IPrototype
     /// </summary>
     [DataField]
     public Dictionary<ProtoId<NCCyberwareSlotPrototype>, NCFreeformSurgeryStructureDefinition> CyberwareSlots = new();
+
+    /// <summary>
+    /// NC: Client-safe sprite atlases used by both the body overview and the magnified operative site.
+    /// Gameplay never derives anatomy from these textures; server-owned entities remain authoritative.
+    /// </summary>
+    [DataField(required: true)]
+    public ResPath AnatomyAtlas;
+
+    [DataField]
+    public Vector2 AnatomyAtlasGrid = new(5f, 4f);
+
+    /// <summary>
+    /// NC: Co-registered full-body skin, skeleton, organ and radiographic projections. Every cell uses the same
+    /// authored body coordinates so an operative aperture can reveal anatomy without stretching or drifting.
+    /// </summary>
+    [DataField(required: true)]
+    public ResPath BodyLayerAtlas;
+
+    [DataField]
+    public Vector2 BodyLayerAtlasGrid = new(2f, 2f);
+
+    [DataField]
+    public Vector2 BodySkinSprite;
+
+    [DataField]
+    public Vector2 BodySkeletonSprite = new(1f, 0f);
+
+    [DataField]
+    public Vector2 BodyOrganSprite = new(0f, 1f);
+
+    [DataField]
+    public Vector2 BodyRadiographSprite = new(1f, 1f);
+
+    [DataField(required: true)]
+    public ResPath WoundAtlas;
+
+    [DataField]
+    public Vector2 WoundAtlasGrid = new(4f, 3f);
+
+    [DataField]
+    public Dictionary<NCTissueLayerKind, Vector2> LayerSprites = new();
+
+    [DataField]
+    public Dictionary<NCFreeformSurgeryStructureVisual, Vector2> StructureSprites = new();
+
+    [DataField]
+    public Dictionary<NCWoundType, Vector2> WoundSprites = new();
+
+    [DataField]
+    public Vector2 IncisionSprite = new(1f, 1f);
+
+    [DataField]
+    public Vector2 ClosedSiteSprite;
+
+    [DataField]
+    public Vector2 RetractedSiteSprite = new(1f, 0f);
+
+    [DataField]
+    public Vector2 SutureSprite = new(3f, 1f);
+
+    [DataField]
+    public Vector2 ScarSprite = new(3f, 2f);
+
+    /// <summary>
+    /// Standalone pixel sprite used only after an embedded projectile is physically exposed.
+    /// </summary>
+    [DataField(required: true)]
+    public ResPath ForeignBodySprite;
+
+    /// <summary>
+    /// Pixel-perfect closed-skin silhouette used by the interactive surgical field. Its alpha channel is the
+    /// outer hit mask; body-zone rectangles only resolve which authoritative region owns an opaque pixel.
+    /// </summary>
+    [DataField(required: true)]
+    public ResPath BodySilhouette;
+
+    [DataField]
+    public Vector2 BodyCanvasSize = new(128f, 192f);
+
+    /// <summary>
+    /// Client presentation for each anatomical zone on the surgical silhouette. Tool effects remain server-
+    /// authoritative; these values only map a clicked pixel into the zone's normalized surgical coordinates.
+    /// </summary>
+    [DataField(required: true)]
+    public Dictionary<ProtoId<NCTargetZonePrototype>, NCFreeformSurgeryBodyZoneDefinition> BodyZones = new();
+}
+
+/// <summary>
+/// Data-driven projection of one medical zone onto the schematic surgery body.
+/// </summary>
+[DataDefinition]
+public sealed partial class NCFreeformSurgeryBodyZoneDefinition
+{
+    [DataField(required: true)]
+    public Vector2 Position;
+
+    [DataField(required: true)]
+    public Vector2 Size;
+
+    /// <summary>
+    /// Size, in silhouette pixels, of the local retracted operative aperture.
+    /// </summary>
+    [DataField(required: true)]
+    public Vector2 OpeningSize;
+
+    /// <summary>
+    /// Canonical centre of the zone's discrete operative site. Skin incision, retraction and closure clicks
+    /// resolve here regardless of the exact opaque silhouette pixel selected by the player.
+    /// </summary>
+    [DataField]
+    public Vector2 InteractionAnchor = new(0.5f, 0.5f);
+
+    /// <summary>
+    /// Canonical click-incision axis in normalized zone coordinates.
+    /// </summary>
+    [DataField]
+    public Vector2 IncisionDirection = Vector2.UnitY;
+
+    [DataField]
+    public float IncisionLength = 0.28f;
 }
 
 [DataDefinition]
@@ -96,6 +243,28 @@ public sealed partial class NCFreeformSurgeryStructureDefinition
     /// </summary>
     [DataField]
     public NCFreeformSurgeryStructureVisual Visual = NCFreeformSurgeryStructureVisual.GenericOrgan;
+
+    /// <summary>
+    /// External surgical zones in which this internal structure may be disclosed and hit-tested. This prevents
+    /// broad organ-category ancestry (for example Torso) from leaking skull, pelvis or abdominal organs into
+    /// a neighbouring operative window.
+    /// </summary>
+    [DataField]
+    public List<ProtoId<NCTargetZonePrototype>> Zones = [];
+
+    /// <summary>
+    /// When closed, this structure occludes deeper structures under the same cursor point. Intended for real
+    /// anatomical casings such as the skull and rib cage, not every long bone in a limb.
+    /// </summary>
+    [DataField]
+    public bool BlocksDeeperStructures;
+
+    /// <summary>
+    /// Allows the organ-separation capability to detach this exact authored structure. Bone, nerves and
+    /// regional containers stay interactive without accidentally becoming removable organs.
+    /// </summary>
+    [DataField]
+    public bool DetachableBySeparation;
 }
 
 /// <summary>
@@ -107,6 +276,12 @@ public sealed partial class NCFreeformSurgeryToolDefinition
 {
     [DataField(required: true)]
     public NCFreeformSurgeryAction Action;
+
+    /// <summary>
+    /// Physical execution time for every interactive use. Completion is always server-revalidated.
+    /// </summary>
+    [DataField]
+    public TimeSpan Duration = TimeSpan.FromSeconds(1);
 
     [DataField]
     public ProtoId<NCTraumaProfilePrototype>? TraumaProfile;
@@ -150,6 +325,13 @@ public sealed partial class NCFreeformSurgeryToolDefinition
 
     [DataField]
     public float IncidentalStructureDamagePerPower;
+
+    /// <summary>
+    /// Physical damage applied to an exposed structure when the selected operation cannot use this dangerous
+    /// tool as intended. Zero keeps non-destructive instruments on the normal no-target path.
+    /// </summary>
+    [DataField]
+    public float MisuseStructureDamagePerPower;
 
     [DataField]
     public float ImmediateDrainVolumePerPower;
