@@ -30,6 +30,10 @@ public enum NCCityIncidentKind : byte
     CorporateAction,
     LogisticsDisruption,
     PropertyEmergency,
+    Fire,
+    Accident,
+    Disease,
+    Shortage,
 }
 
 [Serializable, NetSerializable]

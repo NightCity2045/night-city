@@ -17,16 +17,32 @@
   maxTacSeverityThreshold: 800
   maxTacCyberpsychosisThreshold: 600
   maximumAdvancesPerTick: 8
+  outcomeMemory: MemoryIncidentOutcome
+  maximumOutcomeMemoryParticipants: 16
+  outcomeDemandLifetime: 12h
+  maximumOutcomeDemandPrice: 100000
+  responsibleFactionInfluenceLossPermille: 100
+  outcomeServiceDemands:
+    Violence: NCEconomicServiceMedicalAftercare
+    MedicalEmergency: NCEconomicServiceMedicalAftercare
+    Cyberpsychosis: NCEconomicServiceMedicalAftercare
+    PropertyEmergency: NCEconomicServicePropertyRepair
+    Fire: NCEconomicServicePropertyRepair
+    Accident: NCEconomicServiceMedicalAftercare
+    Disease: NCEconomicServiceMedicalAftercare
   responseServices:
     Crime: [NCPD]
     Violence: [NCPD]
     MedicalEmergency: [CityMedical]
-    Cyberpsychosis: [NCPD, MaxTac]
+    Cyberpsychosis: [NCPD]
     FactionConflict: [NCPD]
     GangActivity: [NCPD]
     CorporateAction: [NCPD]
     LogisticsDisruption: [NCPD]
     PropertyEmergency: [CityMedical]
+    Fire: [NCPD, CityMedical]
+    Accident: [CityMedical]
+    Disease: [CityMedical]
 
 - type: ncFactionPolicy
   id: Default

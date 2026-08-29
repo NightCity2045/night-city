@@ -162,6 +162,22 @@
   expectedDuration: 15m
   legalStatus: Restricted
 
+- type: ncEconomicService
+  id: NCEconomicServiceMedicalAftercare
+  stableKey: service.medical.aftercare
+  fulfillmentKey: medical.aftercare
+  basePrice: 150
+  expectedDuration: 30m
+  legalStatus: Legal
+
+- type: ncEconomicService
+  id: NCEconomicServicePropertyRepair
+  stableKey: service.property.repair
+  fulfillmentKey: property.repair
+  basePrice: 250
+  expectedDuration: 1h
+  legalStatus: Legal
+
 - type: ncEconomicInformationAccess
   id: NCInformationPharmaceuticalStockAvailability
   stableKey: information.pharmaceutical-stock-availability

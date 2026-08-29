@@ -164,11 +164,13 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCPersistentOutboxDispatcherSystem _outbox = default!;
     [Dependency] private NCAILoadGovernorSystem _loadGovernor = default!;
     [Dependency] private NCCityIncidentRegistrySystem _incidents = default!;
+    [Dependency] private NCCityIncidentConsequenceSystem _incidentConsequences = default!;
     [Dependency] private NCCityServiceSystem _cityServices = default!;
     [Dependency] private NCFactionRegistrySystem _factions = default!;
     [Dependency] private NCFactionBootstrapSystem _factionBootstrap = default!;
     [Dependency] private NCFactionMembershipRegistrySystem _factionMemberships = default!;
     [Dependency] private NCFactionActorProjectionSystem _factionActors = default!;
+    [Dependency] private NCTerritoryProjectionSystem _territories = default!;
     [Dependency] private NCDistrictSafetyProjectionSystem _districtSafety = default!;
     [Dependency] private NCCityNewsRegistrySystem _cityNews = default!;
     [Dependency] private NCEstateRegistrySystem _estates = default!;
@@ -458,6 +460,10 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         }
 
         fields.Add("incidents", "cached", _incidents.CachedCount);
+        fields.Add("incidents", "consequences-in-flight", _incidentConsequences.InFlightCount);
+        fields.Add("incidents", "consequences-completed", _incidentConsequences.CompletedCount);
+        fields.Add("incidents", "consequences-failed", _incidentConsequences.FailedCount);
+        fields.Add("incidents", "last-consequence-error", _incidentConsequences.LastError ?? "none");
         fields.Add("services", "cached", _cityServices.CachedServiceCount);
         fields.Add("services", "contracts", _cityServices.CachedContractCount);
         fields.Add("services", "dispatches", _cityServices.CachedDispatchCount);
@@ -664,6 +670,8 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("factions", "failed", _factionBootstrap.FailedCount);
         fields.Add("factions", "membership-actors-cached", _factionMemberships.CachedActorCount);
         fields.Add("factions", "physical-membership-projections", _factionActors.ProjectedActors);
+        fields.Add("factions", "territory-zones", _territories.ProjectedZoneCount);
+        fields.Add("factions", "controlled-zones", _territories.ControlledZoneCount);
         fields.Add("factions", "configuration-error", _factionBootstrap.ConfigurationError ?? "none");
         fields.Add("residences", "allocation-running", _residences.IsRunning);
         if (_residences.LastReport is { } residences)

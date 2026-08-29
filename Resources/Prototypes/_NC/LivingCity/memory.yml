@@ -136,6 +136,15 @@
   critical: true
 
 - type: ncMemoryEvent
+  id: MemoryIncidentOutcome
+  stableKey: incident-outcome
+  consolidationKey: incident-outcome
+  retention: MemoryRetentionDurable
+  defaultSalience: 700
+  defaultConfidence: 1000
+  defaultPrivacy: Restricted
+
+- type: ncMemoryEvent
   id: MemoryDeathWitnessed
   stableKey: death-witnessed
   consolidationKey: death-witnessed

@@ -158,6 +158,8 @@ public sealed partial class NCFactionBootstrapSystem : EntitySystem
                         break;
                     case NCFactionMutationStatus.Duplicate:
                         ExistingCount++;
+                        if (result.Faction != null)
+                            RaiseLocalEvent(new NCFactionPersistedEvent(result.Faction));
                         break;
                     default:
                         FailedCount++;

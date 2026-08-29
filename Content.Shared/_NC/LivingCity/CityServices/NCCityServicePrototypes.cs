@@ -5,6 +5,8 @@
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.City.Zones.Serialization;
+using Content.Shared._NC.LivingCity.Economy;
+using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.Persistence.Identity;
 using Robust.Shared.Prototypes;
 
@@ -29,6 +31,13 @@ public sealed partial class NCIncidentPolicyPrototype : IPrototype
     [DataField] public int MaximumAdvancesPerTick { get; private set; } = 8;
     [DataField] public Dictionary<NCCityIncidentKind, List<ProtoId<NCCityServicePrototype>>> ResponseServices
         { get; private set; } = [];
+    [DataField] public ProtoId<NCMemoryEventPrototype> OutcomeMemory { get; private set; } = "MemoryIncidentOutcome";
+    [DataField] public int MaximumOutcomeMemoryParticipants { get; private set; } = 16;
+    [DataField] public Dictionary<NCCityIncidentKind, ProtoId<NCEconomicServicePrototype>> OutcomeServiceDemands
+        { get; private set; } = [];
+    [DataField] public TimeSpan OutcomeDemandLifetime { get; private set; } = TimeSpan.FromHours(12);
+    [DataField] public long MaximumOutcomeDemandPrice { get; private set; } = 100_000;
+    [DataField] public int ResponsibleFactionInfluenceLossPermille { get; private set; } = 100;
 }
 
 [Prototype("ncCityServicePolicy")]

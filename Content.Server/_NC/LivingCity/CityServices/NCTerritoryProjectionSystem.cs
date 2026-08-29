@@ -19,6 +19,9 @@ public sealed partial class NCTerritoryProjectionSystem : EntitySystem
         NCFactionPolicy Policy, long Version)>> _stakes = [];
     private readonly Dictionary<NCZoneId, NCTerritoryControlProjection> _control = [];
 
+    public int ProjectedZoneCount => _control.Count;
+    public int ControlledZoneCount => _control.Values.Count(static value => value.Controller != null);
+
     public override void Initialize()
     {
         base.Initialize();
