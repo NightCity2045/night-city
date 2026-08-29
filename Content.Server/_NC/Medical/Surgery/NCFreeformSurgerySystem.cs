@@ -7,6 +7,7 @@ using System.Numerics;
 using Content.Server._NC.Medical.Bleeding;
 using Content.Server._NC.Medical.Cyberware;
 using Content.Server._NC.Medical.Pharmacology;
+using Content.Server._NC.Medical.Wounds;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
@@ -45,7 +46,9 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private SharedContainerSystem _containers = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private NCAnatomySystem _anatomy = default!;
+    [Dependency] private NCWoundSystem _wounds = default!;
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
     [Dependency] private NCMedicalBodySystem _medicalBodies = default!;
     [Dependency] private NCFreeformSurgeryEffectSystem _effects = default!;
@@ -119,7 +122,9 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         session.Region = region;
         session.TargetZone = zone;
         session.ActiveIncisionId = null;
-        session.Surface = NCWoundSurface.Front;
+        // NC: There is no manual front/rear selector. Healthy-skin work starts on the body side physically
+        // facing the surgeon; clicking an existing wound later supplies that wound's immutable impact surface.
+        session.Surface = ResolveAccessibleSurface(surgeon, patient);
         session.Depth = 0f;
         session.SelectedCapability = null;
         session.LastSequence = 0;
@@ -143,6 +148,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         if (_timing.CurTime - session.LastRefreshAt < profile.RefreshInterval)
             return;
         session.LastRefreshAt = _timing.CurTime;
+        if (session.ActiveIncisionId == null)
+            session.Surface = ResolveAccessibleSurface(surgeon, session.Patient);
         SendState(surgeon, session, args.SenderSession);
     }
 
@@ -162,10 +169,11 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             return;
         }
 
-        var changedSite = session.TargetZone != request.Zone || session.Region != region || session.Surface != request.Surface;
+        // NC: Selection packets now carry only slider state. Surface selection is derived from world position or
+        // the authoritative wound/incision hit and cannot be changed by the removed direction buttons.
+        var changedSite = session.TargetZone != request.Zone || session.Region != region;
         session.TargetZone = request.Zone;
         session.Region = region;
-        session.Surface = request.Surface;
         if (changedSite)
             session.ActiveIncisionId = null;
         session.Depth = Math.Clamp(request.Depth, 0f, 1f);
@@ -342,11 +350,11 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         }
 
         if (!ValidateInteraction(request) || request.Sequence != session.LastSequence + 1 ||
-            request.Surface != session.Surface ||
             !_prototypes.TryIndex(request.Zone, out NCTargetZonePrototype? requestedZone) ||
             !requestedZone.Selectable ||
             !profile.BodyZones.TryGetValue(request.Zone, out var zoneDefinition) ||
-            !TryResolveFieldRegion(surgeon, session.Patient, request.Zone, out _, out var requestedRegion))
+            !TryResolveFieldRegion(surgeon, session.Patient, request.Zone, out _, out var requestedRegion) ||
+            !ValidateRequestedWound(session.Patient, request))
         {
             SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.InvalidInput);
             return;
@@ -355,10 +363,12 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         // The zone under the first stroke pixel becomes authoritative as part of the same request. A newly hit
         // region has no client-known revision yet; same-region actions retain the strict stale-state check.
         var regionChanged = request.Zone != session.TargetZone || requestedRegion != session.Region;
-        if (regionChanged)
+        var selectionChanged = regionChanged || request.Surface != session.Surface;
+        if (selectionChanged)
         {
             session.TargetZone = request.Zone;
             session.Region = requestedRegion;
+            session.Surface = request.Surface;
             session.ActiveIncisionId = null;
             session.StructureHandles.Clear();
             session.AttachmentHandles.Clear();
@@ -461,7 +471,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             contact,
             structureMinimumDepth,
             structureDetachableBySeparation,
-            structureBlocksDeeperStructures));
+            structureBlocksDeeperStructures,
+            request.WoundId));
 
         session.LastSequence = request.Sequence;
         session.LastInputAt = _timing.CurTime;
@@ -493,7 +504,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             SendFailure(args.SenderSession, request.SessionId, failure);
             return;
         }
-        if (!FiniteNormalized(request.Position) ||
+        if (!Enum.IsDefined(request.Surface) || !FiniteNormalized(request.Position) ||
             !_prototypes.TryIndex(request.Zone, out NCTargetZonePrototype? requestedZone) ||
             !requestedZone.Selectable ||
             !TryResolveFieldRegion(surgeon, session.Patient, request.Zone, out _, out var requestedRegion) ||
@@ -509,7 +520,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             return;
         }
 
-        var incision = FindOperativeSite(site, request.Zone, session.Surface);
+        var incision = FindOperativeSite(site, request.Zone, request.Surface);
         if (incision == null || incision.Sutured || incision.Depth + 0.001f < definition.MinimumDepth ||
             definition.Action == NCFreeformSurgeryAction.DrainCavity &&
             !HasComp<NCCavityFluidComponent>(requestedRegion))
@@ -572,7 +583,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             SendFailure(recipient, request.SessionId, failure);
             return;
         }
-        if (!FiniteNormalized(request.Position) ||
+        if (!Enum.IsDefined(request.Surface) || !FiniteNormalized(request.Position) ||
             !_prototypes.TryIndex(request.Zone, out NCTargetZonePrototype? requestedZone) ||
             !requestedZone.Selectable ||
             !TryResolveFieldRegion(surgeon, session.Patient, request.Zone, out _, out var requestedRegion))
@@ -583,10 +594,12 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
 
         // RMB attachment follows the same server-authored zone and incision targeting contract as other actions.
         var regionChanged = request.Zone != session.TargetZone || requestedRegion != session.Region;
-        if (regionChanged)
+        var selectionChanged = regionChanged || request.Surface != session.Surface;
+        if (selectionChanged)
         {
             session.TargetZone = request.Zone;
             session.Region = requestedRegion;
+            session.Surface = request.Surface;
             session.ActiveIncisionId = null;
             session.StructureHandles.Clear();
             session.AttachmentHandles.Clear();
@@ -988,7 +1001,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         var layers = BuildLayers(session.Region, site, session);
         var structures = BuildStructures(surgeon, session, profile, site);
         var incisions = BuildIncisions(session, profile);
-        var wounds = BuildWounds(session, profile);
+        var wounds = BuildWounds(surgeon, session, profile);
         var attachments = BuildAttachments(session);
         TryComp<NCCirculationComponent>(session.Patient, out var circulation);
         TryComp<NCPhysiologyComponent>(session.Patient, out var physiology);
@@ -1212,8 +1225,6 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
                              .ThenBy(value => value.IncisionId)
                              .First()))
             {
-                if (incision.Surface != session.Surface)
-                    continue;
                 var visibleLayer = ResolveVisibleLayer(region, incision.Depth);
                 var protectiveBoneDepth = incision.BoneCasingOpen
                     ? null
@@ -1228,6 +1239,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
                     new NCFreeformSurgeryIncisionSummary(
                         incision.IncisionId,
                         incision.TargetZone,
+                        incision.Surface,
                         incision.Polyline.ToArray(),
                         incision.Depth,
                         incision.Width,
@@ -1291,37 +1303,22 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
     }
 
     private NCFreeformSurgeryWoundSummary[] BuildWounds(
+        EntityUid surgeon,
         NCFreeformSurgerySessionComponent session,
         NCFreeformSurgeryProfilePrototype profile)
     {
         if (!TryComp<NCWoundContainerComponent>(session.Patient, out var container))
             return [];
 
-        // NC: A surgical incision owns its aperture sprite. Its linked trauma wound remains fully authoritative
-        // but is not drawn a second time as an unrelated combat mark on top of the operative site.
-        var representedByIncision = new HashSet<Guid>();
-        if (TryComp<BodyComponent>(session.Patient, out var body) && body.Organs != null)
-        {
-            foreach (var region in body.Organs.ContainedEntities.Take(MaximumBodyOrgans))
-            {
-                if (!TryComp<NCSurgicalSiteComponent>(region, out var site))
-                    continue;
-                foreach (var incision in site.Incisions)
-                {
-                    if (incision.WoundId is { } woundId)
-                        representedByIncision.Add(woundId);
-                    foreach (var linkedWoundId in incision.LinkedWoundIds)
-                        representedByIncision.Add(linkedWoundId);
-                }
-            }
-        }
-
+        // NC: The unified body view receives every impact surface. WoundId preserves exact target identity while
+        // Position remains the immutable hit coordinate; neither is replaced by the static incision anchor.
         return container.Wounds.Values
-            .Where(wound => wound.Surface == session.Surface && !representedByIncision.Contains(wound.WoundId))
             .OrderBy(wound => wound.CreatedAt)
             .ThenBy(wound => wound.WoundId)
             .Select(wound => new NCFreeformSurgeryWoundSummary(
+                wound.WoundId,
                 wound.TargetZone,
+                wound.Surface,
                 new Vector2(wound.VisualX / 255f, wound.VisualY / 255f),
                 wound.WoundType,
                 wound.Severity,
@@ -1329,7 +1326,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
                 wound.ExternalBleedRate,
                 wound.InternalBleedRate,
                 wound.EmbeddedObjectId != null,
-                wound.EmbeddedObjectId != null && IsForeignBodyExposed(session, profile, wound),
+                wound.EmbeddedObjectId != null && IsForeignBodyExposed(surgeon, session, profile, wound),
                 wound.ClosureState))
             .ToArray();
     }
@@ -1589,12 +1586,13 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
     }
 
     private bool IsForeignBodyExposed(
+        EntityUid surgeon,
         NCFreeformSurgerySessionComponent session,
         NCFreeformSurgeryProfilePrototype profile,
         NCWoundRecord wound)
     {
-        if (wound.TargetZone != session.TargetZone ||
-            !TryComp<NCSurgicalSiteComponent>(session.Region, out var site))
+        if (!TryResolveFieldRegion(surgeon, session.Patient, wound.TargetZone, out _, out var region) ||
+            !TryComp<NCSurgicalSiteComponent>(region, out var site))
         {
             return false;
         }
@@ -1610,11 +1608,11 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         };
         var protectiveDepth = FindProtectiveBoneDepth(
             session.Patient,
-            session.Region,
-            session.TargetZone,
+            region,
+            wound.TargetZone,
             profile);
         return site.Incisions.Any(incision =>
-            incision.TargetZone == session.TargetZone && incision.Surface == session.Surface &&
+            incision.TargetZone == wound.TargetZone && incision.Surface == wound.Surface &&
             !incision.Sutured && incision.EdgeSeparation >= profile.MinimumOpenRetraction &&
             incision.Depth + 0.001f >= requiredDepth &&
             (protectiveDepth is not { } barrier || requiredDepth <= barrier + 0.001f || incision.BoneCasingOpen));
@@ -1723,6 +1721,29 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         if (consciousness >= NCConsciousnessState.Unconscious)
             return 0f;
         return Math.Clamp((1f - modifiers.Anesthesia) * modifiers.MotorControlMultiplier, 0f, 1f);
+    }
+
+    /// <summary>
+    /// NC: Converts the surgeon-to-patient world vector into the anatomical surface physically facing the tool.
+    /// Existing wound clicks bypass this fallback by carrying their server-issued surface in the request.
+    /// </summary>
+    private NCWoundSurface ResolveAccessibleSurface(EntityUid surgeon, EntityUid patient)
+    {
+        var travel = _transform.GetWorldPosition(patient) - _transform.GetWorldPosition(surgeon);
+        return _wounds.ResolveImpactSurface(patient, travel);
+    }
+
+    /// <summary>
+    /// NC: A WoundId is an opaque stable handle, not permission to redirect an action. It must still belong to
+    /// this patient and to the exact zone/surface shown under the cursor.
+    /// </summary>
+    private bool ValidateRequestedWound(EntityUid patient, NCInteractiveSurgeryActionRequest request)
+    {
+        if (request.WoundId is not { } woundId)
+            return true;
+        return TryComp<NCWoundContainerComponent>(patient, out var container) &&
+               container.Wounds.TryGetValue(woundId, out var wound) &&
+               wound.TargetZone == request.Zone && wound.Surface == request.Surface;
     }
 
     private static bool ValidateInteraction(NCInteractiveSurgeryActionRequest request)

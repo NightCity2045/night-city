@@ -748,6 +748,20 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         if (!TryComp<NCWoundContainerComponent>(context.Patient, out var wounds))
             return false;
 
+        // NC: A visible wound/foreign-body sprite supplies its stable server-issued id. Resolve that record
+        // directly so overlapping wounds can never make the nearest-point heuristic operate on another injury.
+        if (context.WoundId is { } woundId)
+        {
+            if (!wounds.Wounds.TryGetValue(woundId, out var targeted) ||
+                targeted.TargetZone != context.Zone || targeted.Surface != context.Surface)
+            {
+                return false;
+            }
+
+            wound = targeted;
+            return true;
+        }
+
         var bestDistance = context.Definition.Radius * context.Definition.Radius;
         foreach (var candidate in wounds.Wounds.Values)
         {
@@ -912,7 +926,8 @@ public readonly record struct NCFreeformSurgeryEffectContext(
     Vector2 ContactPosition = default,
     float? StructureMinimumDepth = null,
     bool StructureDetachableBySeparation = false,
-    bool StructureBlocksDeeperStructures = false);
+    bool StructureBlocksDeeperStructures = false,
+    Guid? WoundId = null);
 
 public readonly record struct NCFreeformSurgeryEffectResult(bool Accepted, bool Applied, NCFreeformSurgeryFailure? Failure)
 {

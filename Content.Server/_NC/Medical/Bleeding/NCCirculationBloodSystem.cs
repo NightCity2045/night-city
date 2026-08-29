@@ -18,7 +18,7 @@ namespace Content.Server._NC.Medical.Bleeding;
 /// <summary>
 /// Owns the boundary between authoritative NC circulation and the upstream bloodstream solution. The
 /// circulation scalar remains the source of truth; the solution remains the physical carrier for blood,
-/// medicines, toxins and metabolites and is changed through upstream APIs only.
+/// medicines, toxins and metabolites and is changed through the shared solution APIs only.
 /// </summary>
 public sealed partial class NCCirculationBloodSystem : EntitySystem
 {
@@ -30,8 +30,8 @@ public sealed partial class NCCirculationBloodSystem : EntitySystem
     [Dependency] private NCCavityFluidSystem _cavities = default!;
 
     /// <summary>
-    /// Applies one scheduler interval of external and cavity-attributed internal blood loss. External loss
-    /// uses TryBleedOut so upstream creates physical blood; internal loss removes solution without spilling.
+    /// Applies one scheduler interval of external and cavity-attributed internal blood loss. Both paths remove
+    /// the real proportional bloodstream solution; external presentation is handled by bounded NC blood decals.
     /// </summary>
     public bool TryApplyBleedingLoss(
         EntityUid body,
@@ -74,11 +74,9 @@ public sealed partial class NCCirculationBloodSystem : EntitySystem
         if (actualTotal <= 0f)
             return true;
 
-        // Resolve both upstream solutions before the first mutation so a malformed human body fails closed
-        // instead of losing authoritative volume without a matching physical solution mutation.
-        if (!_solutions.ResolveSolution(body, upstream.BloodSolutionName, ref upstream.BloodSolution) ||
-            external > 0f &&
-            !_solutions.ResolveSolution(body, upstream.BloodTemporarySolutionName, ref upstream.TemporarySolution))
+        // Resolve the real bloodstream before the first mutation so a malformed human body fails closed instead
+        // of losing authoritative volume without a matching physical solution mutation.
+        if (!_solutions.ResolveSolution(body, upstream.BloodSolutionName, ref upstream.BloodSolution))
         {
             return false;
         }
@@ -93,12 +91,8 @@ public sealed partial class NCCirculationBloodSystem : EntitySystem
         }
 
         var solutionExternal = ToSolutionVolume(external, profile, upstream);
-        if (solutionExternal > FixedPoint2.Zero &&
-            !_bloodstream.TryBleedOut((body, upstream), solutionExternal))
-        {
-            SynchronizeSolution(body, circulation, profile, upstream);
-            return false;
-        }
+        if (solutionExternal > FixedPoint2.Zero)
+            _solutions.SplitSolution(upstream.BloodSolution.Value, solutionExternal);
 
         var previous = circulation.BloodVolume;
         circulation.BloodVolume = Math.Clamp(previous - actualTotal, 0f, previous);

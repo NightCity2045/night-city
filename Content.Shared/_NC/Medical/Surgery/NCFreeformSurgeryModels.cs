@@ -159,6 +159,7 @@ public enum NCInteractiveSurgerySiteStage : byte
 public readonly record struct NCFreeformSurgeryIncisionSummary(
     Guid IncisionId,
     ProtoId<NCTargetZonePrototype> Zone,
+    NCWoundSurface Surface,
     Vector2[] Polyline,
     float Depth,
     float Width,
@@ -171,7 +172,9 @@ public readonly record struct NCFreeformSurgeryIncisionSummary(
 
 [Serializable, NetSerializable]
 public readonly record struct NCFreeformSurgeryWoundSummary(
+    Guid WoundId,
     ProtoId<NCTargetZonePrototype> Zone,
+    NCWoundSurface Surface,
     Vector2 Position,
     NCWoundType Type,
     NCWoundSeverity Severity,
@@ -385,7 +388,8 @@ public sealed class NCInteractiveSurgeryActionRequest(
     ProtoId<NCTargetZonePrototype> zone,
     NCWoundSurface surface,
     float depth,
-    Vector2 position) : EntityEventArgs
+    Vector2 position,
+    Guid? woundId) : EntityEventArgs
 {
     public NCActionResolutionId SessionId { get; } = sessionId;
     public uint Sequence { get; } = sequence;
@@ -394,6 +398,7 @@ public sealed class NCInteractiveSurgeryActionRequest(
     public NCWoundSurface Surface { get; } = surface;
     public float Depth { get; } = depth;
     public Vector2 Position { get; } = position;
+    public Guid? WoundId { get; } = woundId;
 }
 
 /// <summary>
@@ -410,6 +415,7 @@ public sealed partial class NCFreeformSurgeryDoAfterEvent : DoAfterEvent
     [DataField] public NCWoundSurface Surface;
     [DataField] public float Depth;
     [DataField] public Vector2 Position;
+    [DataField] public Guid? WoundId;
     [DataField] public ProtoId<NCSurgeryToolCapabilityPrototype> Capability;
 
     private NCFreeformSurgeryDoAfterEvent()
@@ -427,6 +433,7 @@ public sealed partial class NCFreeformSurgeryDoAfterEvent : DoAfterEvent
         Surface = request.Surface;
         Depth = request.Depth;
         Position = request.Position;
+        WoundId = request.WoundId;
         Capability = capability;
     }
 
@@ -439,7 +446,8 @@ public sealed partial class NCFreeformSurgeryDoAfterEvent : DoAfterEvent
             Zone,
             Surface,
             Depth,
-            Position);
+            Position,
+            WoundId);
     }
 
     public override DoAfterEvent Clone()
@@ -459,11 +467,13 @@ public sealed class NCFreeformSurgeryAttachRequest(
     NCActionResolutionId sessionId,
     uint expectedRevision,
     ProtoId<NCTargetZonePrototype> zone,
+    NCWoundSurface surface,
     Vector2 position) : EntityEventArgs
 {
     public NCActionResolutionId SessionId { get; } = sessionId;
     public uint ExpectedRevision { get; } = expectedRevision;
     public ProtoId<NCTargetZonePrototype> Zone { get; } = zone;
+    public NCWoundSurface Surface { get; } = surface;
     public Vector2 Position { get; } = position;
 }
 
@@ -488,6 +498,7 @@ public sealed partial class NCFreeformSurgeryAttachDoAfterEvent : DoAfterEvent
     [DataField] public NCActionResolutionId SessionId;
     [DataField] public uint ExpectedRevision;
     [DataField] public ProtoId<NCTargetZonePrototype> Zone;
+    [DataField] public NCWoundSurface Surface;
     [DataField] public Vector2 Position;
     [DataField] public ProtoId<NCSurgeryToolCapabilityPrototype> Capability;
 
@@ -502,13 +513,14 @@ public sealed partial class NCFreeformSurgeryAttachDoAfterEvent : DoAfterEvent
         SessionId = request.SessionId;
         ExpectedRevision = request.ExpectedRevision;
         Zone = request.Zone;
+        Surface = request.Surface;
         Position = request.Position;
         Capability = capability;
     }
 
     public NCFreeformSurgeryAttachRequest ToRequest()
     {
-        return new NCFreeformSurgeryAttachRequest(SessionId, ExpectedRevision, Zone, Position);
+        return new NCFreeformSurgeryAttachRequest(SessionId, ExpectedRevision, Zone, Surface, Position);
     }
 
     public override DoAfterEvent Clone()
@@ -519,7 +531,7 @@ public sealed partial class NCFreeformSurgeryAttachDoAfterEvent : DoAfterEvent
     public override bool IsDuplicate(DoAfterEvent other)
     {
         return other is NCFreeformSurgeryAttachDoAfterEvent attach &&
-               attach.SessionId == SessionId && attach.Zone == Zone;
+               attach.SessionId == SessionId && attach.Zone == Zone && attach.Surface == Surface;
     }
 }
 

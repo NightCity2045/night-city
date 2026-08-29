@@ -24,16 +24,14 @@ namespace Content.Client._NC.Medical.Surgery;
 [GenerateTypedNameReferences]
 public sealed partial class NCFreeformSurgeryWindow : FancyWindow
 {
-    public event Action<NCWoundSurface, float>? SelectionChanged;
     public event Action<float>? DepthPredictionChanged;
     public event Action<ProtoId<NCSurgeryToolCapabilityPrototype>>? CapabilityChanged;
-    public event Action<ProtoId<NCTargetZonePrototype>, Vector2>? InteractionRequested;
-    public event Action<ProtoId<NCTargetZonePrototype>, Vector2>? AttachRequested;
-    public event Action<ProtoId<NCTargetZonePrototype>, Guid?>? SiteRequested;
+    public event Action<ProtoId<NCTargetZonePrototype>, NCWoundSurface, Guid?, Vector2>? InteractionRequested;
+    public event Action<ProtoId<NCTargetZonePrototype>, NCWoundSurface, Vector2>? AttachRequested;
+    public event Action<ProtoId<NCTargetZonePrototype>, NCWoundSurface, Guid?>? SiteRequested;
     public event Action<int>? DetachRequested;
 
     private readonly IPrototypeManager _prototypes;
-    private readonly ButtonGroup _surfaceGroup = new(isNoneSetAllowed: false);
     private NCFreeformSurgeryState? _state;
     private bool _updating;
 
@@ -42,15 +40,13 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
         RobustXamlLoader.Load(this);
         _prototypes = prototypes;
 
-        ConfigureSurfaceButton(SurfaceFront, NCWoundSurface.Front);
-        ConfigureSurfaceButton(SurfaceRear, NCWoundSurface.Rear);
-        ConfigureSurfaceButton(SurfaceLeft, NCWoundSurface.Left);
-        ConfigureSurfaceButton(SurfaceRight, NCWoundSurface.Right);
-
         DepthSlider.OnValueChanged += _ => OnDepthChanged();
-        SurgicalField.InteractionRequested += (zone, position) => InteractionRequested?.Invoke(zone, position);
-        SurgicalField.AttachRequested += (zone, point) => AttachRequested?.Invoke(zone, point);
-        SurgicalField.SiteRequested += (zone, incision) => SiteRequested?.Invoke(zone, incision);
+        SurgicalField.InteractionRequested +=
+            (zone, surface, wound, position) => InteractionRequested?.Invoke(zone, surface, wound, position);
+        SurgicalField.AttachRequested +=
+            (zone, surface, point) => AttachRequested?.Invoke(zone, surface, point);
+        SurgicalField.SiteRequested +=
+            (zone, surface, incision) => SiteRequested?.Invoke(zone, surface, incision);
         SurgicalField.DepthAdjusted += delta =>
             DepthSlider.Value = Math.Clamp(DepthSlider.Value + delta * 100f, DepthSlider.MinValue, DepthSlider.MaxValue);
     }
@@ -67,8 +63,6 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
         MovementBar.Value = Math.Clamp(state.Movement, 0f, 1f);
         MovementValue.Text = $"{state.Movement:P0}";
         MovementValue.FontColorOverride = SeverityColor(state.Movement);
-
-        SetSurface(state.Surface);
 
         var displayedDepth = Math.Clamp(predictedDepth, 0f, 1f);
         DepthSlider.Value = displayedDepth * 100f;
@@ -171,7 +165,7 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
             ? "closed skin"
             : SiteStageName(activeSite.Stage);
         var text =
-            $"Surface: {SurfaceName(state.Surface)} · active site: {stage}\n" +
+            $"Automatic access: {SurfaceName(state.Surface)} · active site: {stage}\n" +
             $"Working depth: {displayedDepth:P0} · contamination: {state.SiteContamination:P0}\n" +
             $"Persistent operative sites: {openIncisions} · bleeding wounds: {activeBleeding}\n" +
             $"Exposed structures: {exposed} · attached tools: {state.Attachments.Length}";
@@ -214,18 +208,6 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
         }
     }
 
-    private void ConfigureSurfaceButton(Button button, NCWoundSurface surface)
-    {
-        button.ToggleMode = true;
-        button.Group = _surfaceGroup;
-        button.OnPressed += _ =>
-        {
-            if (_updating || _state == null)
-                return;
-            SelectionChanged?.Invoke(surface, DepthSlider.Value / 100f);
-        };
-    }
-
     private void OnDepthChanged()
     {
         if (_state == null)
@@ -236,21 +218,6 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
         PopulateSite(_state, depth);
         if (!_updating)
             DepthPredictionChanged?.Invoke(depth);
-    }
-
-    private void SetSurface(NCWoundSurface surface)
-    {
-        // NC: ButtonGroup unsets the previous selection itself. Directly clearing a grouped button throws.
-        var selected = surface switch
-        {
-            NCWoundSurface.Rear => SurfaceRear,
-            NCWoundSurface.Left => SurfaceLeft,
-            NCWoundSurface.Right => SurfaceRight,
-            _ => SurfaceFront,
-        };
-
-        if (!selected.Pressed)
-            selected.Pressed = true;
     }
 
     private static string DepthText(float depth, IReadOnlyList<NCFreeformSurgeryLayerSummary> layers)

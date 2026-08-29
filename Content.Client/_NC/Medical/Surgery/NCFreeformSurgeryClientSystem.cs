@@ -167,7 +167,6 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
             return;
 
         _window = new NCFreeformSurgeryWindow(_prototypes);
-        _window.SelectionChanged += OnSelectionChanged;
         _window.DepthPredictionChanged += OnDepthPredictionChanged;
         _window.CapabilityChanged += OnCapabilityChanged;
         _window.InteractionRequested += OnInteractionRequested;
@@ -175,22 +174,6 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
         _window.SiteRequested += OnSiteRequested;
         _window.DetachRequested += OnDetachRequested;
         _window.OnClose += OnWindowClosed;
-    }
-
-    private void OnSelectionChanged(
-        NCWoundSurface surface,
-        float depth)
-    {
-        if (_state == null || !_sessionId.IsValid)
-            return;
-        _predictedDepth = Math.Clamp(depth, 0f, 1f);
-        _depthDirty = false;
-        _depthInFlight = true;
-        RaiseNetworkEvent(new NCFreeformSurgerySelectionRequest(
-            _sessionId,
-            _state.SelectedZone,
-            surface,
-            depth));
     }
 
     private void OnDepthPredictionChanged(float depth)
@@ -217,6 +200,8 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
 
     private void OnInteractionRequested(
         ProtoId<NCTargetZonePrototype> zone,
+        NCWoundSurface surface,
+        Guid? woundId,
         Vector2 position)
     {
         if (_state == null || !_sessionId.IsValid || _interactionPending)
@@ -237,13 +222,15 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
             _sequence,
             zone == _state.SelectedZone ? _state.Revision : 0,
             zone,
-            _state.Surface,
+            surface,
             _predictedDepth,
-            position));
+            position,
+            woundId));
     }
 
     private void OnAttachRequested(
         ProtoId<NCTargetZonePrototype> zone,
+        NCWoundSurface surface,
         Vector2 position)
     {
         if (_state == null || !_sessionId.IsValid)
@@ -252,6 +239,7 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
             _sessionId,
             zone == _state.SelectedZone ? _state.Revision : 0,
             zone,
+            surface,
             position));
     }
 
@@ -264,6 +252,7 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
 
     private void OnSiteRequested(
         ProtoId<NCTargetZonePrototype> zone,
+        NCWoundSurface surface,
         Guid? incisionId)
     {
         if (_state == null || !_sessionId.IsValid)
@@ -272,7 +261,7 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
         RaiseNetworkEvent(new NCFreeformSurgerySiteRequest(
             _sessionId,
             zone,
-            _state.Surface,
+            surface,
             incisionId));
     }
 

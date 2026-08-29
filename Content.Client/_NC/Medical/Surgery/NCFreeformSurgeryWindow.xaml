@@ -69,13 +69,8 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                         <Label Name="LayerLabel" FontColorOverride="#7DBDB7" />
                     </BoxContainer>
                     <BoxContainer Orientation="Horizontal" SeparationOverride="4">
-                        <Label Text="SURFACE" FontColorOverride="#57B9B1" MinWidth="72" />
-                        <Button Name="SurfaceFront" Text="Front" MinWidth="68" />
-                        <Button Name="SurfaceRear" Text="Rear" MinWidth="68" />
-                        <Button Name="SurfaceLeft" Text="Left" MinWidth="68" />
-                        <Button Name="SurfaceRight" Text="Right" MinWidth="68" />
-                        <Control HorizontalExpand="True" />
-                        <Label Text="Click skin to apply the held tool · click exposed sprites to operate internally" FontColorOverride="#839C9D" />
+                        <Label Text="The operative side is detected automatically · click a wound, incision or exposed structure directly"
+                               FontColorOverride="#839C9D" HorizontalExpand="True" />
                     </BoxContainer>
                     <PanelContainer HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
                         <PanelContainer.PanelOverride>

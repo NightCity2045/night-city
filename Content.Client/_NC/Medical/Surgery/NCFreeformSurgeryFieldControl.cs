@@ -36,9 +36,9 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
     [Dependency] private IResourceCache _resources = default!;
     [Dependency] private IClickMapManager _clickMaps = default!;
 
-    public event Action<ProtoId<NCTargetZonePrototype>, Vector2>? InteractionRequested;
-    public event Action<ProtoId<NCTargetZonePrototype>, Vector2>? AttachRequested;
-    public event Action<ProtoId<NCTargetZonePrototype>, Guid?>? SiteRequested;
+    public event Action<ProtoId<NCTargetZonePrototype>, NCWoundSurface, Guid?, Vector2>? InteractionRequested;
+    public event Action<ProtoId<NCTargetZonePrototype>, NCWoundSurface, Vector2>? AttachRequested;
+    public event Action<ProtoId<NCTargetZonePrototype>, NCWoundSurface, Guid?>? SiteRequested;
     public event Action<float>? DepthAdjusted;
 
     private readonly SchematicBodyField _body;
@@ -54,9 +54,12 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
         MouseFilter = MouseFilterMode.Ignore;
 
         _body = new SchematicBodyField(_clickMaps);
-        _body.InteractionRequested += (zone, position) => InteractionRequested?.Invoke(zone, position);
-        _body.AttachRequested += (zone, point) => AttachRequested?.Invoke(zone, point);
-        _body.SiteRequested += (zone, incision) => SiteRequested?.Invoke(zone, incision);
+        _body.InteractionRequested +=
+            (zone, surface, wound, position) => InteractionRequested?.Invoke(zone, surface, wound, position);
+        _body.AttachRequested +=
+            (zone, surface, point) => AttachRequested?.Invoke(zone, surface, point);
+        _body.SiteRequested +=
+            (zone, surface, incision) => SiteRequested?.Invoke(zone, surface, incision);
         _body.DepthAdjusted += delta => DepthAdjusted?.Invoke(delta);
         AddChild(_body);
     }
@@ -184,9 +187,9 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
     /// </summary>
     private sealed class SchematicBodyField : Control
     {
-        public event Action<ProtoId<NCTargetZonePrototype>, Vector2>? InteractionRequested;
-        public event Action<ProtoId<NCTargetZonePrototype>, Vector2>? AttachRequested;
-        public event Action<ProtoId<NCTargetZonePrototype>, Guid?>? SiteRequested;
+        public event Action<ProtoId<NCTargetZonePrototype>, NCWoundSurface, Guid?, Vector2>? InteractionRequested;
+        public event Action<ProtoId<NCTargetZonePrototype>, NCWoundSurface, Vector2>? AttachRequested;
+        public event Action<ProtoId<NCTargetZonePrototype>, NCWoundSurface, Guid?>? SiteRequested;
         public event Action<float>? DepthAdjusted;
 
         private readonly IClickMapManager _clickMaps;
@@ -197,6 +200,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
         private float _predictedDepth;
         private bool _awaitingInteractionResult;
         private ProtoId<NCTargetZonePrototype> _pendingZone;
+        private NCWoundSurface _pendingSurface;
         private Vector2? _pendingPosition;
         private NCFreeformSurgeryAction? _pendingAction;
 
@@ -245,13 +249,28 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                 return;
             }
 
-            var hitIncision = TryResolveIncisionAtScreen(
+            // NC: Wounds and retained projectiles are resolved before their surrounding aperture. Their stable
+            // ids make overlapping trauma deterministic and automatically select the original impact surface.
+            var hitWound = TryResolveWoundAtScreen(
                 args.RelativePixelPosition,
-                out var zone,
-                out var local,
-                out var screenIncision);
-            if (!hitIncision && !TryResolvePoint(args.RelativePixelPosition, out zone, out local))
+                out var screenWound,
+                out var local);
+            var zone = hitWound ? screenWound.Zone : default;
+            var surface = hitWound ? screenWound.Surface : _state.Surface;
+            Guid? woundId = hitWound ? screenWound.WoundId : null;
+            var screenIncision = default(NCFreeformSurgeryIncisionSummary);
+            var hitIncision = !hitWound && TryResolveIncisionAtScreen(
+                args.RelativePixelPosition,
+                out zone,
+                out local,
+                out screenIncision);
+            if (hitIncision)
+                surface = screenIncision.Surface;
+            if (!hitWound && !hitIncision &&
+                !TryResolvePoint(args.RelativePixelPosition, out zone, out local))
+            {
                 return;
+            }
 
             if (_awaitingInteractionResult)
             {
@@ -261,7 +280,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
 
             if (args.Function == EngineKeyFunctions.UseSecondary)
             {
-                AttachRequested?.Invoke(zone, local);
+                AttachRequested?.Invoke(zone, surface, local);
                 args.Handle();
                 return;
             }
@@ -270,9 +289,9 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             if (action == null)
             {
                 if (hitIncision)
-                    SiteRequested?.Invoke(zone, screenIncision.IncisionId);
-                else if (TryResolveIncision(zone, local, out var incision))
-                    SiteRequested?.Invoke(zone, incision.IncisionId);
+                    SiteRequested?.Invoke(zone, surface, screenIncision.IncisionId);
+                else if (TryResolveIncision(zone, surface, local, out var incision))
+                    SiteRequested?.Invoke(zone, surface, incision.IncisionId);
                 args.Handle();
                 return;
             }
@@ -287,9 +306,10 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
 
             _awaitingInteractionResult = true;
             _pendingZone = zone;
+            _pendingSurface = surface;
             _pendingPosition = contact;
             _pendingAction = action;
-            InteractionRequested?.Invoke(zone, contact);
+            InteractionRequested?.Invoke(zone, surface, woundId, contact);
             args.Handle();
         }
 
@@ -341,7 +361,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
 
             foreach (var attachment in _state.Attachments)
             {
-                var point = LocalToScreen(_state.SelectedZone, attachment.Position);
+                var point = LocalToScreen(_state.SelectedZone, _state.Surface, attachment.Position);
                 DrawCell(handle, _visuals.AnatomyAtlas, _visuals.Profile.AnatomyAtlasGrid,
                     _visuals.Profile.RetractedSiteSprite,
                     UIBox2.FromDimensions(point - new Vector2(CanvasScale * 2f), new Vector2(CanvasScale * 4f)),
@@ -349,7 +369,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             }
 
             if (_pendingPosition is { } pending)
-                DrawInteractionPrediction(handle, _pendingZone, pending);
+                DrawInteractionPrediction(handle, _pendingZone, _pendingSurface, pending);
         }
 
         private void DrawClosedSite(DrawingHandleScreen handle, NCFreeformSurgeryIncisionSummary incision)
@@ -370,6 +390,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
         private void DrawInteractionPrediction(
             DrawingHandleScreen handle,
             ProtoId<NCTargetZonePrototype> zoneId,
+            NCWoundSurface surface,
             Vector2 position)
         {
             if (_visuals == null || _pendingAction == null || !TryGetZone(zoneId, out var zone))
@@ -379,14 +400,14 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                 NCFreeformSurgeryAction.Autopsy or NCFreeformSurgeryAction.Retract
                 ? zone.InteractionAnchor
                 : position;
-            var screenCenter = LocalToScreen(zoneId, displayPosition);
+            var screenCenter = LocalToScreen(zoneId, surface, displayPosition);
             var authoredSize = zone.OpeningSize / _canvasSize * PixelSize;
             var tint = _awaitingInteractionResult
                 ? Color.FromHex("#D8FFFAB8")
                 : Color.White;
 
             if (_pendingAction == NCFreeformSurgeryAction.Retract &&
-                TryResolveIncision(zoneId, position, out var incision))
+                TryResolveIncision(zoneId, surface, position, out var incision))
             {
                 DrawOpening(handle, incision);
                 return;
@@ -460,7 +481,8 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             UIBox2 aperture,
             bool drawOrgans)
         {
-            if (_state == null || _visuals == null || incision.Zone != _state.SelectedZone)
+            if (_state == null || _visuals == null || incision.Zone != _state.SelectedZone ||
+                incision.Surface != _state.Surface)
                 return;
 
             foreach (var structure in _state.Structures
@@ -569,8 +591,11 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                 _visuals.BodyLayerAtlas.Width / columns,
                 _visuals.BodyLayerAtlas.Height / rows);
             var projection = registeredSource ?? destination;
-            var normalizedTopLeft = projection.TopLeft / PixelSize / _canvasSize;
-            var normalizedSize = projection.Size / PixelSize / _canvasSize;
+            // NC: projection is already measured in this control's screen pixels. Dividing by PixelSize yields
+            // the atlas-cell UV directly; dividing by the authored canvas again sampled a tiny transparent corner
+            // and left only the generic retractor visible where ribs or long bones should have been drawn.
+            var normalizedTopLeft = projection.TopLeft / PixelSize;
+            var normalizedSize = projection.Size / PixelSize;
             var source = UIBox2.FromDimensions(
                 cell * cellSize + normalizedTopLeft * cellSize,
                 normalizedSize * cellSize);
@@ -587,32 +612,31 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             if (wound.ClosureState != NCWoundClosureState.Sutured &&
                 !_visuals.Profile.WoundSprites.TryGetValue(wound.Type, out cell))
                 cell = _visuals.Profile.WoundSprites.GetValueOrDefault(NCWoundType.Ballistic);
-            var point = LocalToScreen(wound.Zone, wound.Position);
+            // NC: The entry trauma is immutable and always remains at the original surface coordinate. Opening a
+            // static operative site may reveal the internal channel, but must never relocate or replace this mark.
+            var point = LocalToScreen(wound.Zone, wound.Surface, wound.Position);
             var size = CanvasScale * (2.4f + (float) wound.Severity * 0.8f);
             DrawCell(handle, _visuals.WoundAtlas, _visuals.Profile.WoundAtlasGrid, cell,
                 UIBox2.FromDimensions(point - new Vector2(size * 0.5f), new Vector2(size)), Color.White);
-            if (wound.ForeignBodyExposed)
+            if (!wound.ForeignBodyExposed ||
+                !TryResolveOpenIncision(wound.Zone, wound.Surface, out var incision) ||
+                !TryOpeningRects(incision, out _, out var aperture))
             {
-                var markerPoint = point;
-                if (_state != null)
-                {
-                    var incision = _state.Incisions
-                        .Where(value => value.Zone == wound.Zone && !value.Sutured &&
-                                        value.EdgeSeparation >= _visuals.Profile.MinimumOpenRetraction)
-                        .OrderByDescending(value => value.IncisionId == _state.ActiveIncisionId)
-                        .FirstOrDefault();
-                    if (incision.IncisionId != Guid.Empty &&
-                        TryOpeningRects(incision, out _, out var aperture))
-                    {
-                        markerPoint = aperture.TopLeft + Vector2.Clamp(wound.Position, Vector2.Zero, Vector2.One) *
-                            aperture.Size;
-                    }
-                }
-                var markerSize = MathF.Max(CanvasScale * 4f, 6f);
-                handle.DrawTextureRect(_visuals.ForeignBodySprite,
-                    UIBox2.FromDimensions(markerPoint - new Vector2(markerSize * 0.5f), new Vector2(markerSize)),
-                    Color.FromHex("#FFF1A8"));
+                return;
             }
+
+            // NC: The retained projectile is a second sprite inside the opened cavity, positioned from the same
+            // persistent wound coordinates and addressed by WoundId. It no longer inherits the incision centre.
+            var internalPoint = aperture.TopLeft + Vector2.Clamp(wound.Position, Vector2.Zero, Vector2.One) *
+                aperture.Size;
+            var channelSize = MathF.Max(size * 0.72f, CanvasScale * 2.5f);
+            DrawCell(handle, _visuals.WoundAtlas, _visuals.Profile.WoundAtlasGrid, cell,
+                UIBox2.FromDimensions(internalPoint - new Vector2(channelSize * 0.5f),
+                    new Vector2(channelSize)), Color.White);
+            var markerSize = MathF.Max(CanvasScale * 4f, 6f);
+            handle.DrawTextureRect(_visuals.ForeignBodySprite,
+                UIBox2.FromDimensions(internalPoint - new Vector2(markerSize * 0.5f), new Vector2(markerSize)),
+                Color.FromHex("#FFF1A8"));
         }
 
         private NCFreeformSurgeryAction? ResolveSelectedAction()
@@ -629,6 +653,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
 
         private bool TryResolveIncision(
             ProtoId<NCTargetZonePrototype> zone,
+            NCWoundSurface surface,
             Vector2 point,
             out NCFreeformSurgeryIncisionSummary incision)
         {
@@ -640,7 +665,8 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                        _visuals.Profile.IncisionSelectionRadius;
             foreach (var candidate in _state.Incisions)
             {
-                if (candidate.Zone != zone || !TryGetZone(candidate.Zone, out var projection))
+                if (candidate.Zone != zone || candidate.Surface != surface ||
+                    !TryGetZone(candidate.Zone, out var projection))
                     continue;
                 // NC: An operative site is an interactive sprite, not a drawable line. Selection therefore
                 // resolves against the prototype-owned anchor and can never follow stale stored geometry.
@@ -650,6 +676,23 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                 best = distance;
                 incision = candidate;
             }
+            return incision.IncisionId != Guid.Empty;
+        }
+
+        private bool TryResolveOpenIncision(
+            ProtoId<NCTargetZonePrototype> zone,
+            NCWoundSurface surface,
+            out NCFreeformSurgeryIncisionSummary incision)
+        {
+            incision = default;
+            if (_state == null || _visuals == null)
+                return false;
+            incision = _state.Incisions
+                .Where(value => value.Zone == zone && value.Surface == surface && !value.Sutured &&
+                                value.EdgeSeparation >= _visuals.Profile.MinimumOpenRetraction)
+                .OrderByDescending(value => value.IncisionId == _state.ActiveIncisionId)
+                .ThenBy(value => value.IncisionId)
+                .FirstOrDefault();
             return incision.IncisionId != Guid.Empty;
         }
 
@@ -676,6 +719,57 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             if (TryResolveOperativePoint(screenPoint, out zone, out local))
                 return true;
             return TryResolveSkinPoint(screenPoint, out zone, out local);
+        }
+
+        /// <summary>
+        /// NC: Resolves both the permanent entry mark and an exposed retained-projectile sprite to the same
+        /// authoritative wound. This runs before aperture hit-testing so the surrounding incision cannot steal
+        /// a click intended for a small foreign body.
+        /// </summary>
+        private bool TryResolveWoundAtScreen(
+            Vector2 screenPoint,
+            out NCFreeformSurgeryWoundSummary wound,
+            out Vector2 local)
+        {
+            wound = default;
+            local = default;
+            if (_state == null || _visuals == null)
+                return false;
+
+            var bestDistance = float.MaxValue;
+            var bestWound = default(NCFreeformSurgeryWoundSummary);
+            var bestLocal = Vector2.Zero;
+            foreach (var candidate in _state.Wounds)
+            {
+                var exterior = LocalToScreen(candidate.Zone, candidate.Surface, candidate.Position);
+                var exteriorSize = CanvasScale * (2.4f + (float) candidate.Severity * 0.8f);
+                TrySelect(candidate, exterior, MathF.Max(exteriorSize * 0.75f, 5f));
+
+                if (!candidate.ForeignBodyExposed ||
+                    !TryResolveOpenIncision(candidate.Zone, candidate.Surface, out var incision) ||
+                    !TryOpeningRects(incision, out _, out var aperture))
+                {
+                    continue;
+                }
+
+                var internalPoint = aperture.TopLeft +
+                    Vector2.Clamp(candidate.Position, Vector2.Zero, Vector2.One) * aperture.Size;
+                var markerSize = MathF.Max(CanvasScale * 4f, 6f);
+                TrySelect(candidate, internalPoint, MathF.Max(markerSize * 0.8f, 6f));
+            }
+            wound = bestWound;
+            local = bestLocal;
+            return wound.WoundId != Guid.Empty;
+
+            void TrySelect(NCFreeformSurgeryWoundSummary candidate, Vector2 center, float radius)
+            {
+                var distance = Vector2.DistanceSquared(screenPoint, center);
+                if (distance > radius * radius || distance >= bestDistance)
+                    return;
+                bestDistance = distance;
+                bestWound = candidate;
+                bestLocal = candidate.Position;
+            }
         }
 
         private bool TryResolveIncisionAtScreen(
@@ -798,7 +892,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             if (!TryGetZone(incision.Zone, out var zone))
                 return false;
 
-            var screenCenter = LocalToScreen(incision.Zone, zone.InteractionAnchor);
+            var screenCenter = LocalToScreen(incision.Zone, incision.Surface, zone.InteractionAnchor);
             var size = zone.OpeningSize / _canvasSize * PixelSize;
             size = Vector2.Min(Vector2.Max(size, new Vector2(CanvasScale * 8f)), PixelSize);
             var topLeft = Vector2.Clamp(screenCenter - size * 0.5f, Vector2.Zero, PixelSize - size);
@@ -829,7 +923,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             destination = default;
             if (!TryGetZone(incision.Zone, out var zone))
                 return false;
-            var screenCenter = LocalToScreen(incision.Zone, zone.InteractionAnchor);
+            var screenCenter = LocalToScreen(incision.Zone, incision.Surface, zone.InteractionAnchor);
             var authoredSize = zone.OpeningSize / _canvasSize * PixelSize;
             var scale = incision.Sutured ? 0.52f : 0.58f;
             var size = Vector2.Max(authoredSize * scale, new Vector2(CanvasScale * 6f));
@@ -837,29 +931,30 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             return true;
         }
 
-        private Vector2 LocalToScreen(ProtoId<NCTargetZonePrototype> zone, Vector2 point)
+        private Vector2 LocalToScreen(
+            ProtoId<NCTargetZonePrototype> zone,
+            NCWoundSurface surface,
+            Vector2 point)
         {
             if (!TryGetZone(zone, out var projection))
                 return PixelSize * 0.5f;
             var canvasPoint = projection.Bounds.TopLeft + Vector2.Clamp(point, Vector2.Zero, Vector2.One) *
                 projection.Bounds.Size;
-            canvasPoint = MirrorCanvasPoint(canvasPoint);
+            canvasPoint = MirrorCanvasPoint(canvasPoint, surface);
             return canvasPoint / _canvasSize * PixelSize;
         }
 
-        private Vector2 MirrorCanvasPoint(Vector2 point)
+        private Vector2 MirrorCanvasPoint(Vector2 point, NCWoundSurface surface)
         {
-            if (IsMirrored)
+            if (surface is NCWoundSurface.Rear or NCWoundSurface.Right)
                 point.X = _canvasSize.X - point.X;
             return point;
         }
 
         private Vector2 UnmirrorCanvasPoint(Vector2 point)
         {
-            return MirrorCanvasPoint(point);
+            return MirrorCanvasPoint(point, _state?.Surface ?? NCWoundSurface.Front);
         }
-
-        private bool IsMirrored => _state?.Surface is NCWoundSurface.Rear or NCWoundSurface.Right;
 
         private float CanvasScale => MathF.Min(
             PixelWidth / MathF.Max(1f, _canvasSize.X),

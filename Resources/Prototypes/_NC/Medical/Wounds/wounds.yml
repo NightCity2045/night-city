@@ -256,6 +256,19 @@
   maximumActiveSurfaceEntities: 256
   surfaceStainScale: 0.72
   maximumClientBursts: 64
+  # Ongoing external loss is aggregated into one cleanable mark per tile instead of a spreading solution puddle.
+  poolStages:
+  - minimumVolume: 1
+    decal: NCBloodSplat0
+  - minimumVolume: 10
+    decal: NCBloodSplat2
+  - minimumVolume: 30
+    decal: NCBloodSplat3
+  - minimumVolume: 70
+    decal: NCBloodSplat5
+  maximumPoolVolumePerTile: 90
+  maximumPoolTilesPerGrid: 256
+  poolTileMargin: 0.16
 
 - type: ncWound
   id: NCWoundBallistic
