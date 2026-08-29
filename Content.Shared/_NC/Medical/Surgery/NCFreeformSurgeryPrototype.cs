@@ -152,6 +152,13 @@ public sealed partial class NCFreeformSurgeryProfilePrototype : IPrototype
     [DataField]
     public Dictionary<NCWoundType, Vector2> WoundSprites = new();
 
+    /// <summary>
+    /// Radius of the external ballistic trace in authored body-canvas pixels. Retained projectiles use a filled
+    /// marker while extracted projectiles leave a hollow marker at the immutable impact coordinate.
+    /// </summary>
+    [DataField]
+    public float BallisticMarkerRadius = 1.8f;
+
     [DataField]
     public Vector2 IncisionSprite = new(1f, 1f);
 

@@ -403,6 +403,18 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         // NC: A discrete tool click always reaches at least that tool's authored working layer. The depth slider
         // may request a deeper layer, but leaving it at zero must not make a retractor or clamp mysteriously fail.
         session.Depth = Math.Clamp(request.Depth, definition.MinimumDepth, definition.MaximumDepth);
+        // NC: Cutting can expose, but never tunnel through, an intact skull, rib cage or pelvic casing. Clamp the
+        // authoritative cut to the first data-driven protective structure; a later saw DoAfter opens that barrier.
+        if (definition.Action is NCFreeformSurgeryAction.Incise or NCFreeformSurgeryAction.Autopsy &&
+            !IsBoneCasingOpen(site, session) &&
+            FindProtectiveBoneDepth(
+                session.Patient,
+                session.Region,
+                session.TargetZone,
+                profile) is { } protectiveDepth)
+        {
+            session.Depth = MathF.Min(session.Depth, protectiveDepth);
+        }
         // NC: The cursor supplies only a contact point. Canonical geometry comes from the server-loaded body
         // profile, which makes every incision a discrete interaction and removes client-authored freehand cuts.
         var points = BuildInteractionPath(request.Position, zoneDefinition, definition.Action, profile);
@@ -414,9 +426,24 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             session.ActiveIncisionId = contactedIncision.IncisionId;
         // NC: Surgical geometry is static, but structure interaction remains pixel-specific. Even a scalpel may
         // contact only a structure the current incision and bone barriers actually expose at the clicked point.
+        // NC: A sprite click carries the opaque handle emitted by the preceding authoritative state. Resolve that
+        // same entity after the DoAfter; never fall through to a larger overlapping organ such as a lung when the
+        // player actually clicked the heart. Cyberware staging retains its dedicated target resolver below.
         var structure = session.Depth >= definition.MinimumDepth
-            ? ResolveStructureAt(surgeon, session, profile, site, contact, session.Depth, true)
+            ? request.StructureHandle is { } structureHandle &&
+              definition.Action != NCFreeformSurgeryAction.Cyberware
+                ? ResolveStructureHandleAt(session, profile, site, contact, session.Depth, structureHandle)
+                : ResolveStructureAt(surgeon, session, profile, site, contact, session.Depth, true)
             : null;
+        if (request.StructureHandle != null &&
+            definition.Action != NCFreeformSurgeryAction.Cyberware &&
+            structure == null)
+        {
+            session.LastSequence = request.Sequence;
+            session.LastInputAt = _timing.CurTime;
+            SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.NoApplicableTarget);
+            return;
+        }
         if (definition.Action == NCFreeformSurgeryAction.Cyberware &&
             HasStagedInternalCyberware(surgeon, session) &&
              (!TryResolveStagedCyberwareTarget(surgeon, session, profile, out var cyberwareTarget, out _) ||
@@ -1003,6 +1030,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         var incisions = BuildIncisions(session, profile);
         var wounds = BuildWounds(surgeon, session, profile);
         var attachments = BuildAttachments(session);
+        var missingZones = BuildMissingZones(session.Patient, profile);
         TryComp<NCCirculationComponent>(session.Patient, out var circulation);
         TryComp<NCPhysiologyComponent>(session.Patient, out var physiology);
 
@@ -1017,6 +1045,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             session.TargetZone,
             session.ActiveIncisionId,
             session.Surface,
+            missingZones,
             Name(session.Patient),
             toolName,
             toolPrototype,
@@ -1202,6 +1231,20 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
                 true));
         }
         return result.ToArray();
+    }
+
+    /// <summary>
+    /// NC: The silhouette is a registered atlas, not a second anatomy model. Only the exact materialized zone
+    /// resolver decides whether a limb is still attached; fallback zones must not make an amputated limb visible.
+    /// </summary>
+    private ProtoId<NCTargetZonePrototype>[] BuildMissingZones(
+        EntityUid patient,
+        NCFreeformSurgeryProfilePrototype profile)
+    {
+        return profile.BodyZones.Keys
+            .Where(zone => !_anatomy.TryGetZone((patient, null), zone, out _, out _))
+            .OrderBy(zone => zone.Id, StringComparer.Ordinal)
+            .ToArray();
     }
 
     private NCFreeformSurgeryIncisionSummary[] BuildIncisions(
@@ -1416,6 +1459,48 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             bestDepth = definition.MinimumDepth;
         }
         return best;
+    }
+
+    /// <summary>
+    /// NC: Resolves a server-issued atlas handle back to the exact current body entity and rechecks geometry,
+    /// exposure, depth and protective bone at DoAfter completion. Invalid handles fail instead of retargeting.
+    /// </summary>
+    private EntityUid? ResolveStructureHandleAt(
+        NCFreeformSurgerySessionComponent session,
+        NCFreeformSurgeryProfilePrototype profile,
+        NCSurgicalSiteComponent site,
+        Vector2 point,
+        float depth,
+        int handle)
+    {
+        if (!session.StructureHandles.TryGetValue(handle, out var candidate) || Deleted(candidate) ||
+            candidate != session.Region && !CollectStructureCandidates(session, profile, false).Contains(candidate) ||
+            !TryGetStructureDefinition(candidate, session, profile, false, out var definition) ||
+            depth + 0.001f < definition.MinimumDepth || !Contains(definition, point) ||
+            !IsExposed(site, session, definition, profile.MinimumOpenRetraction))
+        {
+            return null;
+        }
+
+        // An unopened bone casing remains authoritative even if a stale client frame still showed a deeper sprite.
+        if (!HasComp<NCBoneComponent>(candidate) && !IsBoneCasingOpen(site, session))
+        {
+            foreach (var blocker in CollectStructureCandidates(session, profile, false))
+            {
+                if (!HasComp<NCBoneComponent>(blocker) ||
+                    !TryGetStructureDefinition(blocker, session, profile, false, out var bone) ||
+                    !bone.BlocksDeeperStructures || definition.MinimumDepth <= bone.MinimumDepth + 0.001f ||
+                    !Contains(bone, point) ||
+                    !IsExposed(site, session, bone, profile.MinimumOpenRetraction))
+                {
+                    continue;
+                }
+
+                return null;
+            }
+        }
+
+        return candidate;
     }
 
     private float? FindProtectiveBoneDepth(
@@ -1749,7 +1834,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
     private static bool ValidateInteraction(NCInteractiveSurgeryActionRequest request)
     {
         if (!Enum.IsDefined(request.Surface) || !float.IsFinite(request.Depth) ||
-            request.Depth is < 0f or > 1f || !FiniteNormalized(request.Position))
+            request.Depth is < 0f or > 1f || !FiniteNormalized(request.Position) ||
+            request.StructureHandle is <= 0)
         {
             return false;
         }
@@ -1979,6 +2065,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             default,
             null,
             NCWoundSurface.Front,
+            [],
             string.Empty,
             string.Empty,
             string.Empty,

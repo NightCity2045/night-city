@@ -278,6 +278,7 @@ public sealed class NCFreeformSurgeryState(
     ProtoId<NCTargetZonePrototype> selectedZone,
     Guid? activeIncisionId,
     NCWoundSurface surface,
+    ProtoId<NCTargetZonePrototype>[] missingZones,
     string patientName,
     string toolName,
     string toolPrototype,
@@ -309,6 +310,11 @@ public sealed class NCFreeformSurgeryState(
     public ProtoId<NCTargetZonePrototype> SelectedZone { get; } = selectedZone;
     public Guid? ActiveIncisionId { get; } = activeIncisionId;
     public NCWoundSurface Surface { get; } = surface;
+    /// <summary>
+    /// NC: Exact atlas zones which no longer have a live anatomical region on this patient. The client uses this
+    /// server-owned mask to remove amputated limbs from both rendering and hit-testing.
+    /// </summary>
+    public ProtoId<NCTargetZonePrototype>[] MissingZones { get; } = missingZones;
     public string PatientName { get; } = patientName;
     public string ToolName { get; } = toolName;
     public string ToolPrototype { get; } = toolPrototype;
@@ -389,7 +395,8 @@ public sealed class NCInteractiveSurgeryActionRequest(
     NCWoundSurface surface,
     float depth,
     Vector2 position,
-    Guid? woundId) : EntityEventArgs
+    Guid? woundId,
+    int? structureHandle) : EntityEventArgs
 {
     public NCActionResolutionId SessionId { get; } = sessionId;
     public uint Sequence { get; } = sequence;
@@ -399,6 +406,11 @@ public sealed class NCInteractiveSurgeryActionRequest(
     public float Depth { get; } = depth;
     public Vector2 Position { get; } = position;
     public Guid? WoundId { get; } = woundId;
+    /// <summary>
+    /// NC: Opaque handle of the exact exposed sprite clicked by the client. The server revalidates it after the
+    /// DoAfter and never substitutes another overlapping organ.
+    /// </summary>
+    public int? StructureHandle { get; } = structureHandle;
 }
 
 /// <summary>
@@ -416,6 +428,7 @@ public sealed partial class NCFreeformSurgeryDoAfterEvent : DoAfterEvent
     [DataField] public float Depth;
     [DataField] public Vector2 Position;
     [DataField] public Guid? WoundId;
+    [DataField] public int? StructureHandle;
     [DataField] public ProtoId<NCSurgeryToolCapabilityPrototype> Capability;
 
     private NCFreeformSurgeryDoAfterEvent()
@@ -434,6 +447,7 @@ public sealed partial class NCFreeformSurgeryDoAfterEvent : DoAfterEvent
         Depth = request.Depth;
         Position = request.Position;
         WoundId = request.WoundId;
+        StructureHandle = request.StructureHandle;
         Capability = capability;
     }
 
@@ -447,7 +461,8 @@ public sealed partial class NCFreeformSurgeryDoAfterEvent : DoAfterEvent
             Surface,
             Depth,
             Position,
-            WoundId);
+            WoundId,
+            StructureHandle);
     }
 
     public override DoAfterEvent Clone()

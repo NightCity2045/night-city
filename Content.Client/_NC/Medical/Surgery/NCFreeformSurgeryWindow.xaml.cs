@@ -26,7 +26,8 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
 {
     public event Action<float>? DepthPredictionChanged;
     public event Action<ProtoId<NCSurgeryToolCapabilityPrototype>>? CapabilityChanged;
-    public event Action<ProtoId<NCTargetZonePrototype>, NCWoundSurface, Guid?, Vector2>? InteractionRequested;
+    public event Action<ProtoId<NCTargetZonePrototype>, NCWoundSurface, Guid?, int?, float, Vector2>?
+        InteractionRequested;
     public event Action<ProtoId<NCTargetZonePrototype>, NCWoundSurface, Vector2>? AttachRequested;
     public event Action<ProtoId<NCTargetZonePrototype>, NCWoundSurface, Guid?>? SiteRequested;
     public event Action<int>? DetachRequested;
@@ -42,7 +43,8 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
 
         DepthSlider.OnValueChanged += _ => OnDepthChanged();
         SurgicalField.InteractionRequested +=
-            (zone, surface, wound, position) => InteractionRequested?.Invoke(zone, surface, wound, position);
+            (zone, surface, wound, structure, minimumDepth, position) =>
+                InteractionRequested?.Invoke(zone, surface, wound, structure, minimumDepth, position);
         SurgicalField.AttachRequested +=
             (zone, surface, point) => AttachRequested?.Invoke(zone, surface, point);
         SurgicalField.SiteRequested +=

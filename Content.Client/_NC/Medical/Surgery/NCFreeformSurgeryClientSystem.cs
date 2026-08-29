@@ -111,6 +111,7 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
             return;
 
         var resolvePendingInteraction = false;
+        var interactionDepthAcknowledged = false;
         if (_sessionId != state.SessionId)
         {
             resolvePendingInteraction = _interactionPending;
@@ -130,11 +131,19 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
             _interactionPending = false;
             _pendingInteractionSequence = 0;
             resolvePendingInteraction = true;
+            interactionDepthAcknowledged = true;
         }
 
         // A refresh can arrive while the thumb is moving. Only reconcile once the server has acknowledged the
         // latest predicted depth; otherwise the slider would visibly jump between old and local values.
-        if (MathF.Abs(state.SelectedDepth - _predictedDepth) <= 0.001f)
+        if (interactionDepthAcknowledged && !_depthDirty)
+        {
+            // NC: The server may stop a deep requested cut at an intact bone casing. A matching DoAfter reply is
+            // the authoritative depth acknowledgement, so display the rib level instead of leaving a fake 88%.
+            _predictedDepth = state.SelectedDepth;
+            _depthInFlight = false;
+        }
+        else if (MathF.Abs(state.SelectedDepth - _predictedDepth) <= 0.001f)
         {
             _depthDirty = false;
             _depthInFlight = false;
@@ -202,6 +211,8 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
         ProtoId<NCTargetZonePrototype> zone,
         NCWoundSurface surface,
         Guid? woundId,
+        int? structureHandle,
+        float structureMinimumDepth,
         Vector2 position)
     {
         if (_state == null || !_sessionId.IsValid || _interactionPending)
@@ -223,9 +234,12 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
             zone == _state.SelectedZone ? _state.Revision : 0,
             zone,
             surface,
-            _predictedDepth,
+            structureHandle != null
+                ? Math.Clamp(MathF.Max(_predictedDepth, structureMinimumDepth), 0f, 1f)
+                : _predictedDepth,
             position,
-            woundId));
+            woundId,
+            structureHandle));
     }
 
     private void OnAttachRequested(

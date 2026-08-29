@@ -29,6 +29,7 @@
   bodyRadiographSprite: "1, 1"
   woundAtlas: /Textures/_NC/Interface/Surgery/surgical_wound_atlas.png
   woundAtlasGrid: "4, 3"
+  ballisticMarkerRadius: 1.8
   bodySilhouette: /Textures/_NC/Interface/Surgery/surgical_body_silhouette_v1.png
   bodyCanvasSize: "128, 192"
   bodyZones:
