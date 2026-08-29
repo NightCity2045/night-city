@@ -407,6 +407,10 @@ public sealed partial class NCLivingCityAdminSystem
             fields.Add("observer-mind", "beliefs", cognition.Beliefs.Length);
             fields.Add("observer-mind", "desires", cognition.Desires.Length);
             fields.Add("observer-mind", "last-failure", cognition.LastFailure ?? "none");
+            fields.Add("observer-mind", "human-state", cognition.HumanActivity.State);
+            fields.Add("observer-mind", "idle-reason", cognition.HumanActivity.Reason);
+            fields.Add("observer-mind", "fallback-action", cognition.HumanActivity.FallbackAction);
+            fields.Add("observer-mind", "next-wake", cognition.HumanActivity.NextWakeAt.Elapsed);
             AddIntention(fields, "observer-current-intention", cognition.Intention);
             if (cognition.Plan != null)
             {

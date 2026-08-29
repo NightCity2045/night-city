@@ -240,6 +240,7 @@ public sealed partial class NCCognitionSystem
         _mctsFrontiers.Remove(state.ActorId);
         var dependencies = state.Plan?.Dependencies ?? [];
         var version = Math.Max(1, state.BeliefSetVersion);
+        var fallbackAction = SelectRuntimeFallbackAction(failure);
         state.Plan = new NCCognitionPlanSnapshot(
             Content.Server._NC.LivingCity.Identity.NCPersistentIdentity.CognitionPlan(
                 state.Intention.IntentionId, "runtime-fallback", version),
@@ -247,7 +248,7 @@ public sealed partial class NCCognitionSystem
             NCCognitionPlannerKind.DeterministicFallback,
             NCCognitionPlanStatus.Ready,
             dependencies,
-            [new NCCognitionPlanStep("safe-fallback", "remain-available", state.Intention.Target, [], false)],
+            [new NCCognitionPlanStep("safe-fallback", fallbackAction, state.Intention.Target, [], false)],
             0,
             0,
             version,
@@ -259,7 +260,7 @@ public sealed partial class NCCognitionSystem
         _fallbackPlans++;
         AddDependencyConsumers(state.ActorId, state.Plan);
         ScheduleExecution(state.ActorId, now);
-        Trace(state, now, "planner", "fallback-selected", failure);
+        Trace(state, now, "planner", "fallback-selected", $"{fallbackAction}:{failure}");
         CopyToMaterialized(state);
     }
 
@@ -291,7 +292,15 @@ public sealed partial class NCCognitionSystem
         return plan.Planner == NCCognitionPlannerKind.DeterministicFallback &&
                plan.Steps.Length == 1 &&
                step.StepId == "safe-fallback" &&
-               step.ActionId == "remain-available";
+               step.ActionId is "remain-available" or "perform-safe-fallback";
+    }
+
+    private static string SelectRuntimeFallbackAction(string failure)
+    {
+        return failure.StartsWith("human-routine-affordance-unavailable", StringComparison.Ordinal) ||
+               failure is "human-routine-target-unreachable" or "human-routine-locomotion-busy"
+            ? "perform-safe-fallback"
+            : "remain-available";
     }
 
     private void SchedulePlanning(NCActorId actorId)

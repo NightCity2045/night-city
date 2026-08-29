@@ -112,6 +112,7 @@
   arrivalRange: 1.25
   minimumDwellTime: 1m
   maximumDwellTime: 3m
+  maximumFallbackTargetAttempts: 3
   activities:
   - activity: prepare
     affordances: [BuildingExit, RestArea]
@@ -126,6 +127,13 @@
     affordances: [RestArea, PublicEntrance]
   - activity: socialize
     affordances: [RestArea, PublicEntrance]
+  fallbackActivities:
+  - activity: rest
+    affordances: [RestArea]
+  - activity: walk
+    affordances: [BuildingExit, PublicEntrance]
+  - activity: observe
+    affordances: [PublicEntrance, RestArea]
 
 - type: ncCityPhysicalExecutionPolicy
   id: NCDefaultCityPhysicalExecutionPolicy

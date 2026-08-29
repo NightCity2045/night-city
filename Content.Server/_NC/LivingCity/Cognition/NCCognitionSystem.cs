@@ -140,6 +140,7 @@ public sealed partial class NCCognitionSystem : EntitySystem
             return false;
         }
         EntityUid? entityUid = _runtime.TryGetEntity(actorId, out var entity) ? entity : null;
+        var humanActivity = BuildHumanActivitySnapshot(state);
         snapshot = new NCCognitionRuntimeSnapshot(
             actorId,
             entityUid,
@@ -154,8 +155,46 @@ public sealed partial class NCCognitionSystem : EntitySystem
             state.Trace.ToArray(),
             state.LastDecisionAt,
             state.NextDecisionAt,
-            state.LastFailure);
+            state.LastFailure,
+            humanActivity);
         return true;
+    }
+
+    private NCHumanActivityRuntimeSnapshot BuildHumanActivitySnapshot(RuntimeState state)
+    {
+        _actors.TryGetCached(state.ActorId, out var actor);
+        var snapshot = actor?.Snapshot;
+        var activity = snapshot?.Schedule.CurrentActivity ?? state.CurrentActivity;
+        var failure = state.LastFailure ?? string.Empty;
+        var wakeAt = state.NextDecisionAt;
+        if (snapshot != null && (!wakeAt.IsValid || snapshot.Schedule.NextUpdateAt < wakeAt))
+            wakeAt = snapshot.Schedule.NextUpdateAt;
+
+        var fallback = state.Plan?.Steps.FirstOrDefault(step =>
+            !state.CompletedStepIds.Contains(step.StepId))?.ActionId ?? "none";
+        if (snapshot?.Lifecycle.Status is NCCityActorStatus.Resting or NCCityActorStatus.Injured or
+            NCCityActorStatus.Hospitalized or NCCityActorStatus.Unconscious ||
+            activity.Equals("sleep", StringComparison.OrdinalIgnoreCase))
+            return new(NCHumanActivityRuntimeState.Recovering, activity, fallback, wakeAt);
+        if (snapshot != null && !snapshot.Location.WorkZone.IsValid &&
+            activity.Equals("work", StringComparison.OrdinalIgnoreCase))
+            return new(NCHumanActivityRuntimeState.UnemployedFreeTime, "no-work-zone", fallback, wakeAt);
+        if (failure.Contains("affordance", StringComparison.OrdinalIgnoreCase))
+            return new(NCHumanActivityRuntimeState.NoAffordance, failure, fallback, wakeAt);
+        if (failure.Contains("unreachable", StringComparison.OrdinalIgnoreCase) ||
+            failure.Contains("no-path", StringComparison.OrdinalIgnoreCase))
+            return new(NCHumanActivityRuntimeState.BlockedRoute, failure, fallback, wakeAt);
+        if (activity.Equals("socialize", StringComparison.OrdinalIgnoreCase) ||
+            activity.Equals("leisure", StringComparison.OrdinalIgnoreCase))
+            return new(NCHumanActivityRuntimeState.SocialIdle, activity, fallback, wakeAt);
+        if (state.Plan == null || state.Plan.Steps.Length == 0 || state.Plan.Status == NCCognitionPlanStatus.Failed)
+            return new(NCHumanActivityRuntimeState.NoValidPlan,
+                state.Plan?.Failure ?? (string.IsNullOrWhiteSpace(failure) ? "no-plan" : failure), fallback, wakeAt);
+        if (_clock.TryGetCurrentTime(out var epoch, out var now) && epoch == _epoch && wakeAt > now &&
+            state.Plan.Status == NCCognitionPlanStatus.Completed)
+            return new(NCHumanActivityRuntimeState.WaitingUntilDue, "scheduled-wake", fallback, wakeAt);
+        return new(NCHumanActivityRuntimeState.Active,
+            string.IsNullOrWhiteSpace(activity) ? "active" : activity, fallback, wakeAt);
     }
 
     public NCCognitionCounters GetCounters() => new(
@@ -495,9 +534,15 @@ public sealed partial class NCCognitionSystem : EntitySystem
         if (_policy == null || !actorId.IsValid || !dueAt.IsValid ||
             (!_states.ContainsKey(actorId) && _states.Count >= _policy.MaximumTrackedActors))
             return;
-        GetOrCreateState(actorId);
+        var state = GetOrCreateState(actorId);
         if (_scheduledDecisions.TryGetValue(actorId, out var existing) && existing <= dueAt)
+        {
+            state.NextDecisionAt = existing;
             return;
+        }
+        // The runtime snapshot exposes the actual earliest wake, including event-driven retries before the persisted
+        // BDI deadline. This makes every non-active Human state diagnosable without polling the actor.
+        state.NextDecisionAt = dueAt;
         _scheduledDecisions[actorId] = dueAt;
         var item = new ScheduledActor(actorId, dueAt, ++_sequence);
         _decisionQueue.Enqueue(item, new SchedulePriority(dueAt.Ticks, item.Sequence));

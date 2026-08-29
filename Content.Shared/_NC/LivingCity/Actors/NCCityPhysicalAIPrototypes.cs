@@ -154,7 +154,14 @@ public sealed partial class NCHumanRoutineActivityPolicyPrototype : IPrototype
     public TimeSpan MaximumDwellTime { get; private set; }
 
     [DataField(required: true)]
+    public int MaximumFallbackTargetAttempts { get; private set; }
+
+    [DataField(required: true)]
     public List<NCHumanRoutineActivityDefinition> Activities { get; private set; } = [];
+
+    /// <summary>Safe physical activities used after a routine target or route becomes unavailable.</summary>
+    [DataField(required: true)]
+    public List<NCHumanRoutineActivityDefinition> FallbackActivities { get; private set; } = [];
 }
 
 [DataDefinition]

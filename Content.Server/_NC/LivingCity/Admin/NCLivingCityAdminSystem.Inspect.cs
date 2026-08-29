@@ -288,6 +288,10 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("runtime", "fact-count", runtime.Facts.Length);
         fields.Add("runtime", "desire-count", runtime.Desires.Length);
         fields.Add("runtime", "last-failure", runtime.LastFailure ?? "none");
+        fields.Add("runtime", "human-state", runtime.HumanActivity.State);
+        fields.Add("runtime", "idle-reason", runtime.HumanActivity.Reason);
+        fields.Add("runtime", "fallback-action", runtime.HumanActivity.FallbackAction);
+        fields.Add("runtime", "next-wake", runtime.HumanActivity.NextWakeAt.Elapsed);
         AddIntention(fields, "runtime-intention", runtime.Intention);
         if (runtime.EntityUid is { } physical &&
             TryComp<NCNcpdIncidentReportComponent>(physical, out var policeReport))

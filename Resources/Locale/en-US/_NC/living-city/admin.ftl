@@ -372,6 +372,10 @@ nc-living-city-admin-section-outbox-storage = Persistent event queue
 nc-living-city-admin-section-civil-time-advance = City time advance
 
 nc-living-city-admin-field-state = State
+nc-living-city-admin-field-human-state = Human activity state
+nc-living-city-admin-field-idle-reason = Wait or fallback reason
+nc-living-city-admin-field-fallback-action = Safe fallback action
+nc-living-city-admin-field-next-wake = Next wake-up
 nc-living-city-admin-field-epoch = Round epoch
 nc-living-city-admin-field-game-preset = Game mode
 nc-living-city-admin-field-night-city-rule = Night City rule

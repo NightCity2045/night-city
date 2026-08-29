@@ -46,6 +46,24 @@ public readonly record struct NCCognitionTraceEntry(
     string Event,
     string Detail);
 
+public enum NCHumanActivityRuntimeState : byte
+{
+    Active,
+    WaitingUntilDue,
+    NoAffordance,
+    BlockedRoute,
+    Recovering,
+    SocialIdle,
+    UnemployedFreeTime,
+    NoValidPlan,
+}
+
+public readonly record struct NCHumanActivityRuntimeSnapshot(
+    NCHumanActivityRuntimeState State,
+    string Reason,
+    string FallbackAction,
+    NCActiveWorldTime NextWakeAt);
+
 public sealed record NCCognitionRuntimeSnapshot(
     NCActorId ActorId,
     EntityUid? EntityUid,
@@ -60,7 +78,8 @@ public sealed record NCCognitionRuntimeSnapshot(
     NCCognitionTraceEntry[] Trace,
     NCActiveWorldTime LastDecisionAt,
     NCActiveWorldTime NextDecisionAt,
-    string? LastFailure);
+    string? LastFailure,
+    NCHumanActivityRuntimeSnapshot HumanActivity);
 
 public readonly record struct NCCognitionCounters(
     bool Active,

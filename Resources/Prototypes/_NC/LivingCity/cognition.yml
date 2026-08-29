@@ -264,6 +264,15 @@
   interrupts: [PlanChanged, Combat, Conversation, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
+  id: perform-safe-fallback
+  executor: RoutineAdapter
+  targetKind: None
+  completion: WorldStateChanged
+  timeout: 5m
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, Combat, Conversation, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
   id: prepare-group-role
   executor: Core
   targetKind: None

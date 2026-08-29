@@ -44,6 +44,7 @@ public readonly record struct NCHumanRoutineActivityCounters(
 public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
 {
     private const string ActionId = "perform-routine-activity";
+    private const string FallbackActionId = "perform-safe-fallback";
     private const string SteeringOwner = "living-city-human-routine";
     private static readonly ProtoId<NCHumanRoutineActivityPolicyPrototype> DefaultPolicy =
         "NCDefaultHumanRoutineActivityPolicy";
@@ -106,7 +107,8 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
 
     private void OnExecute(NCHumanActionExecutionEvent args)
     {
-        if (args.Action.ID != ActionId)
+        var fallback = args.Action.ID == FallbackActionId;
+        if (args.Action.ID != ActionId && !fallback)
             return;
 
         args.Handled = true;
@@ -121,7 +123,8 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
         }
 
         var activity = actor.Snapshot.Schedule.CurrentActivity;
-        if (!TryGetDefinition(activity, out var definition))
+        NCHumanRoutineActivityDefinition? definition = null;
+        if (!fallback && !TryGetDefinition(activity, out definition))
         {
             // Home-only or deliberately inactive schedule entries need no physical world mutation.
             args.Completed = true;
@@ -129,10 +132,23 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
         }
 
         if (!_active.TryGetValue(human, out var runtime) || runtime.InstanceId != args.InstanceId ||
-            !runtime.Activity.Equals(activity, StringComparison.OrdinalIgnoreCase))
+            runtime.Fallback != fallback || (!fallback &&
+                !runtime.Activity.Equals(activity, StringComparison.OrdinalIgnoreCase)))
         {
             Stop(human);
-            if (!TrySelectTarget(human, args.ActorId, definition, out var target))
+            NCMapCoordinates target;
+            if (fallback)
+            {
+                if (!TrySelectFallbackTarget(human, args.ActorId, 0, out definition, out target))
+                {
+                    args.Failure = "human-routine-safe-fallback-unavailable";
+                    _failed++;
+                    _affordanceUnavailable++;
+                    return;
+                }
+                activity = definition.Activity;
+            }
+            else if (!TrySelectTarget(human, args.ActorId, definition!, 0, out target))
             {
                 args.Failure = $"human-routine-affordance-unavailable:{activity}";
                 _failed++;
@@ -140,7 +156,7 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
                 return;
             }
 
-            runtime = new RoutineActivity(args.InstanceId, activity, target, default, false);
+            runtime = new RoutineActivity(args.InstanceId, activity, target, default, false, fallback, 0);
             _active[human] = runtime;
             _started++;
         }
@@ -169,6 +185,24 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
 
         if (TryComp<NPCSteeringComponent>(human, out var steering) && steering.Status == SteeringStatus.NoPath)
         {
+            if (runtime.Fallback && runtime.TargetAttempt + 1 < _policy.MaximumFallbackTargetAttempts)
+            {
+                var nextAttempt = runtime.TargetAttempt + 1;
+                StopMovement(human, false);
+                if (TrySelectFallbackTarget(human, args.ActorId, nextAttempt, out var nextDefinition,
+                        out var nextTarget))
+                {
+                    runtime = runtime with
+                    {
+                        Activity = nextDefinition.Activity,
+                        Target = nextTarget,
+                        TargetAttempt = nextAttempt,
+                    };
+                    _active[human] = runtime;
+                    if (BeginApproach(human, nextTarget))
+                        return;
+                }
+            }
             args.Failure = "human-routine-target-unreachable";
             _failed++;
             _targetUnreachable++;
@@ -207,6 +241,7 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
         EntityUid human,
         NCActorId actorId,
         NCHumanRoutineActivityDefinition definition,
+        int selectionOffset,
         out NCMapCoordinates target)
     {
         target = default;
@@ -220,17 +255,43 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
         if (definition.PreferLivelihoodAffordance &&
             TryComp<NCCityLivelihoodComponent>(human, out var livelihood) &&
             _prototypes.TryIndex(livelihood.Profile, out var livelihoodProfile) && livelihoodProfile != null &&
-            TrySelectKind(livelihoodProfile.WorkAffordance, context, actorId, human, out target))
+            TrySelectKind(livelihoodProfile.WorkAffordance, context, actorId, human, selectionOffset, out target))
         {
             return true;
         }
 
         foreach (var kind in definition.Affordances)
         {
-            if (TrySelectKind(kind, context, actorId, human, out target))
+            if (TrySelectKind(kind, context, actorId, human, selectionOffset, out target))
                 return true;
         }
 
+        return false;
+    }
+
+    private bool TrySelectFallbackTarget(
+        EntityUid human,
+        NCActorId actorId,
+        int attempt,
+        out NCHumanRoutineActivityDefinition definition,
+        out NCMapCoordinates target)
+    {
+        definition = default!;
+        target = default;
+        if (_policy == null || _policy.FallbackActivities.Count == 0)
+            return false;
+
+        // Rotate the YAML-authored fallbacks per actor and retry so a blocked anchor cannot create permanent Idle.
+        var start = (int) (StableSeed(actorId.Value, _cycles.GetValueOrDefault(human), 0x85ebca6bu) %
+                           (uint) _policy.FallbackActivities.Count);
+        for (var index = 0; index < _policy.FallbackActivities.Count; index++)
+        {
+            var candidate = _policy.FallbackActivities[(start + attempt + index) % _policy.FallbackActivities.Count];
+            if (!TrySelectTarget(human, actorId, candidate, attempt + index, out target))
+                continue;
+            definition = candidate;
+            return true;
+        }
         return false;
     }
 
@@ -239,22 +300,23 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
         NCCityLocationContext context,
         NCActorId actorId,
         EntityUid human,
+        int selectionOffset,
         out NCMapCoordinates target)
     {
         target = default;
         // Residents broaden their search only through the mapper-authored semantic hierarchy. No per-NPC anchors or
         // global scans are introduced when the current building does not offer the required activity.
         if (context.BuildingId.IsValid &&
-            TrySelectWithin(kind, context.BuildingId.ZoneId, actorId, human, out target))
+            TrySelectWithin(kind, context.BuildingId.ZoneId, actorId, human, selectionOffset, out target))
             return true;
         if (context.StreetId.IsValid &&
-            TrySelectWithin(kind, context.StreetId.ZoneId, actorId, human, out target))
+            TrySelectWithin(kind, context.StreetId.ZoneId, actorId, human, selectionOffset, out target))
             return true;
         if (context.DistrictId.IsValid &&
-            TrySelectWithin(kind, context.DistrictId.ZoneId, actorId, human, out target))
+            TrySelectWithin(kind, context.DistrictId.ZoneId, actorId, human, selectionOffset, out target))
             return true;
         return !context.BuildingId.IsValid && !context.StreetId.IsValid && !context.DistrictId.IsValid &&
-               TrySelectWithin(kind, context.MostSpecific, actorId, human, out target);
+               TrySelectWithin(kind, context.MostSpecific, actorId, human, selectionOffset, out target);
     }
 
     private bool TrySelectWithin(
@@ -262,6 +324,7 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
         NCZoneId within,
         NCActorId actorId,
         EntityUid human,
+        int selectionOffset,
         out NCMapCoordinates target)
     {
         target = default;
@@ -270,7 +333,7 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
         if (count == 0)
             return false;
 
-        var seed = StableSeed(actorId.Value, _cycles.GetValueOrDefault(human), (uint) kind);
+        var seed = StableSeed(actorId.Value, _cycles.GetValueOrDefault(human) + (uint) selectionOffset, (uint) kind);
         target = _candidateBuffer[(int) (seed % (uint) count)].Target;
         return _coordinates.TryResolve(target, out _);
     }
@@ -305,7 +368,7 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
 
     private void OnInterrupted(NCHumanActionInterruptedEvent args)
     {
-        if (args.ActionId == ActionId && args.EntityUid is { } human)
+        if ((args.ActionId == ActionId || args.ActionId == FallbackActionId) && args.EntityUid is { } human)
             Stop(human);
     }
 
@@ -360,12 +423,15 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
 
     private static bool Validate(NCHumanRoutineActivityPolicyPrototype policy)
     {
-        if (policy.MaximumCatalogCandidates <= 0 || !float.IsFinite(policy.ArrivalRange) ||
+        if (policy.MaximumCatalogCandidates <= 0 || policy.MaximumFallbackTargetAttempts <= 0 ||
+            !float.IsFinite(policy.ArrivalRange) ||
             policy.ArrivalRange <= 0f || policy.MinimumDwellTime <= TimeSpan.Zero ||
-            policy.MaximumDwellTime < policy.MinimumDwellTime || policy.Activities.Count == 0)
+            policy.MaximumDwellTime < policy.MinimumDwellTime || policy.Activities.Count == 0 ||
+            policy.FallbackActivities.Count == 0)
             return false;
         var activities = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        return policy.Activities.All(value => !string.IsNullOrWhiteSpace(value.Activity) &&
+        return policy.Activities.Concat(policy.FallbackActivities).All(value =>
+            !string.IsNullOrWhiteSpace(value.Activity) &&
             activities.Add(value.Activity) && value.Affordances.Count > 0 &&
             value.Affordances.All(Enum.IsDefined));
     }
@@ -398,5 +464,7 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
         string Activity,
         NCMapCoordinates Target,
         NCActiveWorldTime DwellUntil,
-        bool Dwelling);
+        bool Dwelling,
+        bool Fallback,
+        int TargetAttempt);
 }
