@@ -5,18 +5,31 @@
 # These profiles extend the common human mind. Jobs and rank remain authoritative in the same player-facing
 # DepartmentPrototype/JobPrototype definitions; player-only chiefs are intentionally absent.
 - type: ncProfessionProfile
-  id: NCProfessionNcpd
+  id: NCProfessionNcpdCommand
   organization: NCPD
-  jobs: [NCPDCommander, NCPDLieutenant, NCPDSergeant, NCPDOfficer, NCPDCadet]
+  branchKey: command
+  jobs: [NCPDCommander, NCPDLieutenant]
   capabilityOverlays: [NCNcpdRespondToObservedAssault]
   skillKeys: [law-enforcement, patrol, investigation, restraint, radio-procedure, first-aid]
+  requiresStartingGear: true
+
+- type: ncProfessionProfile
+  id: NCProfessionNcpdPatrol
+  organization: NCPD
+  branchKey: patrol
+  jobs: [NCPDSergeant, NCPDOfficer, NCPDCadet]
+  capabilityOverlays: [NCNcpdRespondToObservedAssault]
+  skillKeys: [law-enforcement, patrol, restraint, radio-procedure, first-aid]
+  requiresStartingGear: true
 
 - type: ncProfessionProfile
   id: NCProfessionNcpdInspector
   organization: NCPD
+  branchKey: investigations
   jobs: [NCPDInspector]
   capabilityOverlays: [NCNcpdRespondToObservedAssault, NCNcpdInvestigateAssignedCase]
   skillKeys: [law-enforcement, investigation, evidence, witness-interview, restraint, radio-procedure]
+  requiresStartingGear: true
 
 - type: ncProfessionProfile
   id: NCProfessionTraumaTeam
@@ -28,17 +41,21 @@
 - type: ncProfessionProfile
   id: NCProfessionCityMedicalClinical
   organization: MedicalNC
+  branchKey: clinical
   jobs: [NCMedicalDoctor, NCMedicalIntern]
   capabilityOverlays: [NCCityMedicalRespondToCritical]
   skillKeys: [medicine, diagnostics, triage, emergency-care, patient-care, medical-records]
+  requiresStartingGear: true
 
 - type: ncProfessionProfile
   id: NCProfessionCityMedicalSupport
   organization: MedicalNC
+  branchKey: support
   jobs: [NCMedicalCoroner, NCMedicalPsychologist, NCMedicalTechnician]
   capabilityOverlays: [NCProfessionalPerformAssignedDuty]
   skillKeys: [medicine, diagnostics, patient-care, medical-records, technical-support]
   workAffordance: Workplace
+  requiresStartingGear: true
 
 - type: ncProfessionProfile
   id: NCProfessionBiotechnicaOperations

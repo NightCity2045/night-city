@@ -23,6 +23,8 @@ public sealed partial class NCProfessionProfileSystem : EntitySystem
     private readonly Dictionary<ProtoId<JobPrototype>, NCProfessionProfilePrototype> _byJob = [];
 
     public int ProfileCount => _byJob.Values.Distinct().Count();
+    public int BranchCount => _byJob.Values.Select(static value => (value.Organization, value.BranchKey))
+        .Distinct().Count();
     public int JobCount => _byJob.Count;
     public string? ConfigurationError { get; private set; }
 
@@ -67,9 +69,10 @@ public sealed partial class NCProfessionProfileSystem : EntitySystem
                      .OrderBy(value => value.ID, StringComparer.Ordinal))
         {
             if (!_prototypes.TryIndex(profile.Organization, out DepartmentPrototype? department) ||
-                department == null || !department.NCSelectable || profile.Jobs.Count == 0)
+                department == null || !department.NCSelectable || profile.Jobs.Count == 0 ||
+                !IsStableKey(profile.BranchKey))
             {
-                Reject($"Profession profile {profile.ID} has no valid Night City organization or jobs.");
+                Reject($"Profession profile {profile.ID} has no valid Night City organization, branch, or jobs.");
                 return;
             }
 
@@ -85,14 +88,21 @@ public sealed partial class NCProfessionProfileSystem : EntitySystem
             foreach (var jobId in profile.Jobs)
             {
                 if (!department.Roles.Contains(jobId) || !_prototypes.TryIndex(jobId, out JobPrototype? job) ||
-                    job == null || !job.NCNpcAllowed || !_byJob.TryAdd(jobId, profile))
+                    job == null || !job.NCNpcAllowed ||
+                    !department.NCPositionRanks.ContainsKey(jobId) ||
+                    profile.RequiresStartingGear && job.StartingGear == null ||
+                    !_byJob.TryAdd(jobId, profile))
                 {
-                    Reject($"Profession profile {profile.ID} references a foreign, player-only, or duplicate job {jobId}.");
+                    Reject($"Profession profile {profile.ID} references a foreign, unranked, unequipped, player-only, or duplicate job {jobId}.");
                     return;
                 }
             }
         }
     }
+
+    private static bool IsStableKey(string value) =>
+        !string.IsNullOrWhiteSpace(value) && value.Length <= 64 && value.All(static character =>
+            char.IsAsciiLetterLower(character) || char.IsAsciiDigit(character) || character == '-');
 
     private void Reject(string error)
     {

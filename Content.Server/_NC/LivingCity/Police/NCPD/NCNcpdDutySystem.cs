@@ -60,7 +60,7 @@ public sealed partial class NCNcpdDutySystem : EntitySystem
         for (var i = 0; i < limit && _pending.TryDequeue(out var actorId); i++)
         {
             _pendingSet.Remove(actorId);
-            Advance(actorId);
+            Advance(actorId, policy);
         }
     }
 
@@ -145,7 +145,7 @@ public sealed partial class NCNcpdDutySystem : EntitySystem
         }
     }
 
-    private void Advance(NCActorId actorId)
+    private void Advance(NCActorId actorId, NCNcpdDutyPolicyPrototype policy)
     {
         if (!_states.TryGetValue(actorId, out var current) ||
             !_officers.TryGetRoleProfile(actorId, out var profileId, out var profile))
@@ -153,7 +153,7 @@ public sealed partial class NCNcpdDutySystem : EntitySystem
             return;
         }
 
-        var desired = GetDesiredTerminal(actorId, profile);
+        var desired = GetDesiredTerminal(actorId, profile, policy);
         var next = NextStatus(current.Status, desired);
         if (profileId != current.RoleProfile || next != current.Status)
         {
@@ -167,13 +167,16 @@ public sealed partial class NCNcpdDutySystem : EntitySystem
             Enqueue(actorId);
     }
 
-    private NCNcpdDutyStatus GetDesiredTerminal(NCActorId actorId, NCNcpdRoleProfilePrototype profile)
+    private NCNcpdDutyStatus GetDesiredTerminal(
+        NCActorId actorId,
+        NCNcpdRoleProfilePrototype profile,
+        NCNcpdDutyPolicyPrototype policy)
     {
         if (!_actors.TryGetCached(actorId, out var actor) || actor.Snapshot.Lifecycle.Frozen ||
             actor.Snapshot.Lifecycle.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived or
                 NCCityActorStatus.Hospitalized or NCCityActorStatus.Arrested or NCCityActorStatus.Imprisoned or
                 NCCityActorStatus.Unconscious ||
-            !string.Equals(actor.Snapshot.Schedule.CurrentActivity, "work", StringComparison.OrdinalIgnoreCase))
+            !policy.DutyActivities.Contains(actor.Snapshot.Schedule.CurrentActivity))
         {
             return NCNcpdDutyStatus.OffDuty;
         }

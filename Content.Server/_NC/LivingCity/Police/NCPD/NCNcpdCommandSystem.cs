@@ -89,6 +89,7 @@ public sealed partial class NCNcpdCommandSystem : EntitySystem
         if (status is NCNcpdCommandStatus.Completed or NCNcpdCommandStatus.Failed)
         {
             _activeByUnit.Remove(command.UnitId);
+            QueueReleaseCommandCommitments(commandId);
             if (_units.TryGetSnapshot(command.UnitId, out var completedUnit))
                 _duty.SetCommandAssignment(completedUnit.Members, false);
             ClearUnitAssignment(command.UnitId);
@@ -121,6 +122,8 @@ public sealed partial class NCNcpdCommandSystem : EntitySystem
         error = string.Empty;
         if (!_clock.TryGetCurrentTime(out _, out var now))
             return Reject("The active round is not ready.", out error);
+        if (!CanProjectCommitments(policy))
+            return Reject("The NCPD command commitment policy is invalid.", out error);
         if (!authority.AllowedCommands.Contains(kind))
             return Reject("Your current position cannot issue this order.", out error);
         if (priority is < 0 || priority > authority.MaximumPriority)
@@ -227,6 +230,8 @@ public sealed partial class NCNcpdCommandSystem : EntitySystem
             return Reject("The active NCPD dispatch board is unavailable.", out error);
         if (!_prototypes.TryIndex(DefaultCommandPolicy, out NCNcpdCommandPolicyPrototype? policy) || policy == null)
             return Reject($"NCPD command policy {DefaultCommandPolicy} is unavailable.", out error);
+        if (!CanProjectCommitments(policy))
+            return Reject("The NCPD command commitment policy is invalid.", out error);
         if (!_units.TryGetSnapshot(unitId, out var unit))
             return Reject("The selected response unit is no longer available.", out error);
         if (_activeByUnit.ContainsKey(unitId))
@@ -282,6 +287,7 @@ public sealed partial class NCNcpdCommandSystem : EntitySystem
         };
         _commands[commandId] = cancelled;
         _activeByUnit.Remove(command.UnitId);
+        QueueReleaseCommandCommitments(commandId);
         if (_units.TryGetSnapshot(command.UnitId, out var unit))
             _duty.SetCommandAssignment(unit.Members, false);
         ClearUnitAssignment(command.UnitId);
@@ -323,6 +329,7 @@ public sealed partial class NCNcpdCommandSystem : EntitySystem
         _history.Add(command.CommandId);
         TrimHistory(policy.RetainedHistory);
         _duty.SetCommandAssignment(unit.Members, true);
+        QueueCommandCommitments(command, unit, policy);
         ApplyToUnit(unit, command);
         RaiseLocalEvent(new NCNcpdCommandChangedEvent(command.CommandId, command.UnitId, command.Status));
     }
@@ -372,6 +379,7 @@ public sealed partial class NCNcpdCommandSystem : EntitySystem
             Note = "Unit dissolved because its duty composition changed.",
         };
         _commands[commandId] = failed;
+        QueueReleaseCommandCommitments(commandId);
         RaiseLocalEvent(new NCNcpdCommandChangedEvent(commandId, args.UnitId, failed.Status));
     }
 
@@ -411,6 +419,7 @@ public sealed partial class NCNcpdCommandSystem : EntitySystem
 
     private void ClearRound()
     {
+        QueueReleaseAllCommandCommitments();
         foreach (var unitId in _activeByUnit.Keys.ToArray())
         {
             if (_units.TryGetSnapshot(unitId, out var unit))

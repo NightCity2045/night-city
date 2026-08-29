@@ -19,11 +19,15 @@ public sealed partial class NCProfessionProfilePrototype : IPrototype
 {
     [IdDataField] public string ID { get; private set; } = default!;
     [DataField(required: true)] public ProtoId<DepartmentPrototype> Organization { get; private set; }
+    /// <summary>Stable organization branch key such as patrol, investigations, clinical, or support.</summary>
+    [DataField] public string BranchKey { get; private set; } = "general";
     [DataField(required: true)] public HashSet<ProtoId<JobPrototype>> Jobs { get; private set; } = [];
     [DataField] public ProtoId<NCCognitionCapabilityPrototype>[] CapabilityOverlays { get; private set; } = [];
     [DataField] public string[] SkillKeys { get; private set; } = [];
     /// <summary>Semantic destination used by the generic physical duty adapter; it is not a mapper marker.</summary>
     [DataField] public NCCityAffordanceKind WorkAffordance { get; private set; } = NCCityAffordanceKind.Workplace;
+    /// <summary>Requires every position to provide its physical equipment through the reused JobPrototype.</summary>
+    [DataField] public bool RequiresStartingGear { get; private set; }
 }
 
 [Prototype("ncGenericProfessionalWorkPolicy")]

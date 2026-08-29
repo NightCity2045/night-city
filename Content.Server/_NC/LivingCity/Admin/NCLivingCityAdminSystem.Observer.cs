@@ -305,6 +305,20 @@ public sealed partial class NCLivingCityAdminSystem
         if (_professions.TryGetProfile(actorId, out var profession))
         {
             fields.Add("observer-profession", "profile", profession.ID);
+            fields.Add("observer-profession", "organization", profession.Organization);
+            fields.Add("observer-profession", "branch", profession.BranchKey);
+            fields.Add("observer-profession", "shift-profile", snapshot.Schedule.RoutineProfileId);
+            fields.Add("observer-profession", "workplace", profession.WorkAffordance);
+            if (_workforce.TryGetAssignment(actorId, out var organization, out var job) &&
+                _prototypes.TryIndex(organization, out Content.Shared.Roles.DepartmentPrototype? department) &&
+                department != null && _prototypes.TryIndex(job, out Content.Shared.Roles.JobPrototype? position) &&
+                position != null)
+            {
+                fields.Add("observer-profession", "position", job);
+                fields.Add("observer-profession", "authority-rank",
+                    department.NCPositionRanks.GetValueOrDefault(job));
+                fields.Add("observer-profession", "equipment", position.StartingGear?.Id ?? "none");
+            }
             fields.Add("observer-profession", "skills", string.Join(", ", profession.SkillKeys));
             fields.Add("observer-profession", "capability-overlays",
                 string.Join(", ", profession.CapabilityOverlays.Select(value => value.Id)));

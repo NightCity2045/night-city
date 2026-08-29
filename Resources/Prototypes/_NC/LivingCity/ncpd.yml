@@ -29,6 +29,11 @@
   maximumPatrolSize: 4
   reserveActors: 2
   maximumTransitionsPerEvent: 32
+  dutyActivities:
+  - work
+  - patrol-location
+  - guard-location
+  - report-to-location
 
 - type: ncNcpdPatrolPolicy
   id: NCDefaultNcpdPatrolPolicy
@@ -99,6 +104,7 @@
   retainedHistory: 100
   maximumVisibleZones: 512
   maximumReasonLength: 512
+  commitmentDuration: 4h
 
 - type: ncNcpdCommandAuthority
   id: NCNcpdChiefCommandAuthority

@@ -59,6 +59,8 @@ public sealed partial class NCNcpdCommandPolicyPrototype : IPrototype
     [DataField] public int RetainedHistory { get; private set; } = 100;
     [DataField] public int MaximumVisibleZones { get; private set; } = 512;
     [DataField] public uint MaximumReasonLength { get; private set; } = 512;
+    /// <summary>Maximum lifetime of the canonical Actor commitment created for an operational order.</summary>
+    [DataField] public TimeSpan CommitmentDuration { get; private set; } = TimeSpan.FromHours(4);
 }
 
 [Prototype("ncNcpdDutyPolicy")]
@@ -71,6 +73,7 @@ public sealed partial class NCNcpdDutyPolicyPrototype : IPrototype
     [DataField] public int MaximumPatrolSize { get; private set; } = 4;
     [DataField] public int ReserveActors { get; private set; } = 2;
     [DataField] public int MaximumTransitionsPerEvent { get; private set; } = 32;
+    [DataField] public HashSet<string> DutyActivities { get; private set; } = ["work"];
 }
 
 [Prototype("ncNcpdPatrolPolicy")]

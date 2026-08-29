@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Economy;
 using Content.Shared._NC.LivingCity.Fixers;
 using Content.Shared._NC.LivingCity.CityServices;
@@ -369,6 +370,16 @@ public static class NCPersistentIdentity
 
         return new NCNcpdUnitId(CreateGuid(
             $"ncpd/unit/{stationZone}/{string.Join('/', ordered.Select(static value => value.ToString("D")))}"));
+    }
+
+    /// <summary>Stable Actor commitment projected from one NCPD UI or city-service order.</summary>
+    public static NCCityCommitmentId NcpdCommandCommitment(NCNcpdCommandId commandId, NCActorId actorId)
+    {
+        if (!commandId.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(commandId));
+        if (!actorId.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(actorId));
+        return new NCCityCommitmentId(CreateGuid($"ncpd/command-commitment/{commandId}/{actorId}"));
     }
 
     private static Guid CreateGuid(string value)

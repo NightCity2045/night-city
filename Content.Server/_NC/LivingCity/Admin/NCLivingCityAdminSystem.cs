@@ -556,6 +556,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("workforce", "last-recovery-error", _workforce.LastRecoveryError ?? "none");
         fields.Add("workforce", "configuration-error", _workforce.ConfigurationError ?? "none");
         fields.Add("workforce", "profession-profiles", _professions.ProfileCount);
+        fields.Add("workforce", "organization-branches", _professions.BranchCount);
         fields.Add("workforce", "profession-jobs", _professions.JobCount);
         fields.Add("workforce", "profession-configuration-error", _professions.ConfigurationError ?? "none");
         fields.Add("workforce", "civilian-livelihoods-cached", _livelihoods.CachedActorCount);
@@ -595,6 +596,12 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("ncpd-units", "cadets-without-supervisor", _ncpdUnits.CadetsWithoutSupervisor);
         fields.Add("ncpd-units", "active-orders", _ncpdCommands.ActiveCommandCount);
         fields.Add("ncpd-units", "dispatch-history", _ncpdCommands.RetainedCommandCount);
+        fields.Add("ncpd-units", "persistent-order-commitments", _ncpdCommands.ActiveCommitmentCount);
+        fields.Add("ncpd-units", "commitment-projections-in-flight",
+            _ncpdCommands.CommitmentProjectionsInFlight);
+        fields.Add("ncpd-units", "commitment-projection-failures",
+            _ncpdCommands.CommitmentProjectionFailures);
+        fields.Add("ncpd-units", "last-commitment-error", _ncpdCommands.LastCommitmentError ?? "none");
         fields.Add("ncpd-service-dispatch", "tracked", _ncpdServiceDispatch.TrackedDispatches);
         fields.Add("ncpd-service-dispatch", "assigned", _ncpdServiceDispatch.AssignedDispatches);
         fields.Add("ncpd-service-dispatch", "awaiting-unit", _ncpdServiceDispatch.AwaitingUnitCount);
