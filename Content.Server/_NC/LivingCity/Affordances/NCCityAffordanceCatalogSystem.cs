@@ -4,10 +4,14 @@
 
 using Content.Server._NC.City.Connectivity;
 using Content.Server._NC.City.Zones;
+using Content.Server.Medical.Components;
+using Content.Shared.Bed.Components;
+using Content.Shared.Buckle.Components;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.City.Zones.Prototypes;
 using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.LivingCity.Affordances;
+using Content.Shared.VendingMachines;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.LivingCity.Affordances;
@@ -22,20 +26,38 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
     [Dependency] private NCCityLocationSystem _locations = default!;
     [Dependency] private NCZoneSystem _zones = default!;
     [Dependency] private NCCitySpawnCandidateSystem _spawnCandidates = default!;
+    [Dependency] private NCRoomPortalGraphSystem _roomGraph = default!;
     [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
 
     private readonly Dictionary<NCCityAffordanceId, NCCityAffordanceInfo> _entries = [];
     private readonly Dictionary<NCCityAffordanceKind, List<NCCityAffordanceId>> _byKind = [];
     private readonly Dictionary<EntityUid, List<NCCityAffordanceId>> _byProvider = [];
-    private readonly HashSet<EntityUid> _providers = [];
+    private readonly HashSet<EntityUid> _explicitProviders = [];
+    private readonly Dictionary<EntityUid, HashSet<NCCityObjectAffordanceSource>> _inferredProviders = [];
+    private readonly Dictionary<NCCityObjectAffordanceSource, HashSet<ProtoId<NCCityAffordancePrototype>>>
+        _objectRules = [];
     private readonly List<NCCitySpawnCandidateInfo> _candidateBuffer = [];
+    private readonly List<NCRoomPortalInfo> _portalBuffer = [];
+    private readonly HashSet<ProtoId<NCCityAffordancePrototype>> _providerAffordanceBuffer = [];
     private long _nextId = 1;
+    private int _physicalEntries;
 
     public long Version { get; private set; }
     public int EntryCount => _entries.Count;
+    public int PhysicalEntryCount => _physicalEntries;
+    public int GeneratedEntryCount => _entries.Count - _physicalEntries;
 
     public int Count(NCCityAffordanceKind kind) =>
         _byKind.TryGetValue(kind, out var entries) ? entries.Count : 0;
+
+    public string? GetConfigurationError()
+    {
+        if (Count(NCCityAffordanceKind.PublicEntrance) == 0 || Count(NCCityAffordanceKind.BuildingExit) == 0)
+            return "affordance-building-boundaries-missing";
+        if (Count(NCCityAffordanceKind.Workplace) == 0 || Count(NCCityAffordanceKind.RestArea) == 0)
+            return "affordance-required-routine-targets-missing";
+        return null;
+    }
 
     public override void Initialize()
     {
@@ -43,9 +65,23 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
         SubscribeLocalEvent<NCCityAffordanceProviderComponent, ComponentStartup>(OnProviderStartup);
         SubscribeLocalEvent<NCCityAffordanceProviderComponent, ComponentShutdown>(OnProviderShutdown);
         SubscribeLocalEvent<NCCityAffordanceProviderComponent, NCZoneChangedEvent>(OnProviderZoneChanged);
+        SubscribeLocalEvent<StrapComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
+        SubscribeLocalEvent<VendingMachineComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
+        SubscribeLocalEvent<StasisBedComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
+        SubscribeLocalEvent<MedicalScannerComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
         SubscribeLocalEvent<NCCitySpawnCandidateIndexChangedEvent>(OnSpawnCandidatesChanged);
         SubscribeLocalEvent<NCZoneIndexRebuiltEvent>(OnZoneIndexRebuilt);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
+        EntityManager.ComponentAdded += OnComponentAdded;
+        EntityManager.ComponentRemoved += OnComponentRemoved;
+        RebuildObjectRules();
+    }
+
+    public override void Shutdown()
+    {
+        EntityManager.ComponentAdded -= OnComponentAdded;
+        EntityManager.ComponentRemoved -= OnComponentRemoved;
+        base.Shutdown();
     }
 
     private void OnZoneIndexRebuilt(ref NCZoneIndexRebuiltEvent args) => RebuildGenerated();
@@ -66,51 +102,162 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
 
     public bool TrySelect(NCCityAffordanceKind kind, NCZoneId withinZone, uint seed, out NCCityAffordanceInfo entry)
     {
-        var entries = new List<NCCityAffordanceInfo>();
-        Get(kind, withinZone, entries);
-        if (entries.Count == 0)
+        if (!_byKind.TryGetValue(kind, out var ids))
         {
             entry = default;
             return false;
         }
-        entry = entries[(int) (seed % (uint) entries.Count)];
-        return true;
+
+        var count = 0;
+        foreach (var id in ids)
+        {
+            if (_entries.TryGetValue(id, out var candidate) &&
+                (!withinZone.IsValid || IsWithin(candidate.ZoneId, withinZone)))
+                count++;
+        }
+        if (count == 0)
+        {
+            entry = default;
+            return false;
+        }
+
+        var selected = (int) (seed % (uint) count);
+        foreach (var id in ids)
+        {
+            if (!_entries.TryGetValue(id, out var candidate) ||
+                withinZone.IsValid && !IsWithin(candidate.ZoneId, withinZone))
+                continue;
+            if (selected-- != 0)
+                continue;
+            entry = candidate;
+            return true;
+        }
+
+        entry = default;
+        return false;
     }
 
     private void OnProviderStartup(Entity<NCCityAffordanceProviderComponent> entity, ref ComponentStartup args)
     {
-        _providers.Add(entity.Owner);
+        _explicitProviders.Add(entity.Owner);
         _locations.EnsureTracked(entity.Owner);
-        ReindexProvider(entity.Owner, entity.Comp);
+        ReindexProvider(entity.Owner);
     }
 
     private void OnProviderShutdown(Entity<NCCityAffordanceProviderComponent> entity, ref ComponentShutdown args)
     {
-        _providers.Remove(entity.Owner);
-        RemoveProvider(entity.Owner);
-        Invalidate();
+        _explicitProviders.Remove(entity.Owner);
+        ReindexOrRemoveProvider(entity.Owner);
     }
 
     private void OnProviderZoneChanged(Entity<NCCityAffordanceProviderComponent> entity, ref NCZoneChangedEvent args) =>
-        ReindexProvider(entity.Owner, entity.Comp);
+        ReindexProvider(entity.Owner);
+
+    private void OnInferredProviderZoneChanged<T>(Entity<T> entity, ref NCZoneChangedEvent args) where T : Component =>
+        ReindexProvider(entity.Owner);
+
+    private void OnComponentAdded(AddedComponentEventArgs args)
+    {
+        // Observe vanilla object components without taking ownership of their exclusive lifecycle events.
+        switch (args.BaseArgs.Component)
+        {
+            case StrapComponent:
+                AddInferredProvider(args.BaseArgs.Owner, NCCityObjectAffordanceSource.Strap);
+                break;
+            case VendingMachineComponent:
+                AddInferredProvider(args.BaseArgs.Owner, NCCityObjectAffordanceSource.VendingMachine);
+                break;
+            case StasisBedComponent:
+            case MedicalScannerComponent:
+                AddInferredProvider(args.BaseArgs.Owner, NCCityObjectAffordanceSource.MedicalTreatment);
+                break;
+        }
+    }
+
+    private void OnComponentRemoved(RemovedComponentEventArgs args)
+    {
+        var provider = args.BaseArgs.Owner;
+        if (!_inferredProviders.ContainsKey(provider))
+            return;
+        if (args.Terminating)
+        {
+            _inferredProviders.Remove(provider);
+            RemoveProvider(provider);
+            Invalidate();
+            return;
+        }
+
+        switch (args.BaseArgs.Component)
+        {
+            case StrapComponent:
+                RemoveInferredProvider(provider, NCCityObjectAffordanceSource.Strap);
+                break;
+            case VendingMachineComponent:
+                RemoveInferredProvider(provider, NCCityObjectAffordanceSource.VendingMachine);
+                break;
+            case StasisBedComponent:
+            case MedicalScannerComponent:
+                RemoveInferredProvider(provider, NCCityObjectAffordanceSource.MedicalTreatment);
+                break;
+        }
+    }
 
     private void OnSpawnCandidatesChanged(ref NCCitySpawnCandidateIndexChangedEvent args) => RebuildGenerated();
 
     private void OnPrototypesReloaded(PrototypesReloadedEventArgs args)
     {
         if (!args.WasModified<NCCityAffordancePrototype>() &&
+            !args.WasModified<NCCityObjectAffordanceRulePrototype>() &&
             !args.WasModified<NCCityZoneAffordanceSourcePrototype>() &&
             !args.WasModified<NCZoneKindPrototype>())
             return;
-        foreach (var provider in _providers.ToArray())
-        {
-            if (TryComp<NCCityAffordanceProviderComponent>(provider, out var component))
-                ReindexProvider(provider, component);
-        }
+        RebuildObjectRules();
+        foreach (var provider in _explicitProviders.Concat(_inferredProviders.Keys).Distinct().ToArray())
+            ReindexProvider(provider);
         RebuildGenerated();
     }
 
-    private void ReindexProvider(EntityUid provider, NCCityAffordanceProviderComponent component)
+    private void AddInferredProvider(EntityUid provider, NCCityObjectAffordanceSource source)
+    {
+        _locations.EnsureTracked(provider);
+        if (!_inferredProviders.TryGetValue(provider, out var sources))
+            _inferredProviders[provider] = sources = [];
+        if (sources.Add(source))
+            ReindexProvider(provider);
+    }
+
+    private void RemoveInferredProvider(EntityUid provider, NCCityObjectAffordanceSource source)
+    {
+        if (!_inferredProviders.TryGetValue(provider, out var sources) || !sources.Remove(source))
+            return;
+        if (sources.Count == 0)
+            _inferredProviders.Remove(provider);
+        ReindexOrRemoveProvider(provider);
+    }
+
+    private void ReindexOrRemoveProvider(EntityUid provider)
+    {
+        if (_explicitProviders.Contains(provider) || _inferredProviders.ContainsKey(provider))
+            ReindexProvider(provider);
+        else
+        {
+            RemoveProvider(provider);
+            Invalidate();
+        }
+    }
+
+    private void RebuildObjectRules()
+    {
+        _objectRules.Clear();
+        foreach (var rule in _prototypes.EnumeratePrototypes<NCCityObjectAffordanceRulePrototype>())
+        {
+            if (!_objectRules.TryGetValue(rule.Source, out var affordances))
+                _objectRules[rule.Source] = affordances = [];
+            affordances.UnionWith(rule.Affordances);
+        }
+    }
+
+    private void ReindexProvider(EntityUid provider)
     {
         RemoveProvider(provider);
         if (!_locations.TryGetContext(provider, out var location) ||
@@ -119,7 +266,20 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
             Invalidate();
             return;
         }
-        foreach (var affordanceId in component.Affordances.Distinct())
+
+        _providerAffordanceBuffer.Clear();
+        if (TryComp<NCCityAffordanceProviderComponent>(provider, out var component))
+            _providerAffordanceBuffer.UnionWith(component.Affordances);
+        if (_inferredProviders.TryGetValue(provider, out var sources))
+        {
+            foreach (var source in sources)
+            {
+                if (_objectRules.TryGetValue(source, out var affordances))
+                    _providerAffordanceBuffer.UnionWith(affordances);
+            }
+        }
+
+        foreach (var affordanceId in _providerAffordanceBuffer)
         {
             if (!_prototypes.TryIndex(affordanceId, out var affordance) || affordance == null)
                 continue;
@@ -133,6 +293,8 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
         foreach (var id in _entries.Where(static pair => !pair.Value.PhysicalProvider)
                      .Select(static pair => pair.Key).ToArray())
             Remove(id);
+
+        _roomGraph.GetPortals(_portalBuffer);
 
         foreach (var source in _prototypes.EnumeratePrototypes<NCCityZoneAffordanceSourcePrototype>()
                      .OrderBy(static value => value.ID, StringComparer.Ordinal))
@@ -158,8 +320,58 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
                 }
                 accepted++;
             }
+
+            AddBoundaryAffordances(source);
         }
         Invalidate();
+    }
+
+    private void AddBoundaryAffordances(NCCityZoneAffordanceSourcePrototype source)
+    {
+        if (source.BoundaryAffordances.Count == 0 || source.RequiredContext == NCZoneContextSlot.None)
+            return;
+
+        foreach (var portal in _portalBuffer)
+        {
+            if (!_roomGraph.TryGetRoomInfo(portal.RoomA, out var roomA) ||
+                !_roomGraph.TryGetRoomInfo(portal.RoomB, out var roomB))
+                continue;
+
+            AddBoundarySide(source, roomA.ZoneId, roomB.ZoneId, portal.TargetA);
+            AddBoundarySide(source, roomB.ZoneId, roomA.ZoneId, portal.TargetB);
+        }
+    }
+
+    private void AddBoundarySide(NCCityZoneAffordanceSourcePrototype source, NCZoneId inside,
+        NCZoneId outside, Content.Shared._NC.Coordinates.NCMapCoordinates target)
+    {
+        if (!TryGetAncestor(inside, source.RequiredContext, out var insideScope) ||
+            TryGetAncestor(outside, source.RequiredContext, out var outsideScope) && outsideScope == insideScope ||
+            source.Zone.IsValid && insideScope != source.Zone)
+            return;
+
+        foreach (var affordanceId in source.BoundaryAffordances.Distinct())
+        {
+            if (_prototypes.TryIndex(affordanceId, out var affordance) && affordance != null &&
+                !affordance.RequiresPhysicalProvider)
+                Add(affordanceId, affordance, EntityUid.Invalid, inside, target, false);
+        }
+    }
+
+    private bool TryGetAncestor(NCZoneId zoneId, NCZoneContextSlot slot, out NCZoneId ancestor)
+    {
+        var current = zoneId;
+        for (var depth = 0; current.IsValid && depth < 16 && _zones.TryGetZone(current, out var zone); depth++)
+        {
+            if (zone.ContextSlot == slot)
+            {
+                ancestor = current;
+                return true;
+            }
+            current = zone.Parent;
+        }
+        ancestor = default;
+        return false;
     }
 
     private void Add(ProtoId<NCCityAffordancePrototype> prototypeId, NCCityAffordancePrototype prototype,
@@ -169,6 +381,8 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
         var entry = new NCCityAffordanceInfo(id, prototypeId, prototype.Kind, prototype.KnowledgeKey,
             prototype.OrganizationKey, provider, zone, target, physical);
         _entries.Add(id, entry);
+        if (physical)
+            _physicalEntries++;
         if (!_byKind.TryGetValue(entry.Kind, out var byKind))
             _byKind[entry.Kind] = byKind = [];
         byKind.Add(id);
@@ -192,6 +406,8 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
     {
         if (!_entries.Remove(id, out var entry) || !_byKind.TryGetValue(entry.Kind, out var ids))
             return;
+        if (entry.PhysicalProvider)
+            _physicalEntries--;
         ids.Remove(id);
         if (ids.Count == 0)
             _byKind.Remove(entry.Kind);

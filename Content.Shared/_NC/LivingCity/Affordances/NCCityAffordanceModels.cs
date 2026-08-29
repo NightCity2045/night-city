@@ -31,6 +31,14 @@ public enum NCCityAffordanceKind : byte
     FoodSource,
 }
 
+/// <summary>Stable adapters from existing vanilla components to data-driven city affordances.</summary>
+public enum NCCityObjectAffordanceSource : byte
+{
+    Strap,
+    VendingMachine,
+    MedicalTreatment,
+}
+
 /// <summary>Data-only declaration placed on a real usable object, never on an invisible mapping marker.</summary>
 [RegisterComponent]
 public sealed partial class NCCityAffordanceProviderComponent : Component
@@ -49,6 +57,18 @@ public sealed partial class NCCityAffordancePrototype : IPrototype
 }
 
 /// <summary>
+/// Maps an existing vanilla object category to semantic capabilities. C# only detects the category; YAML decides
+/// what the object means to A-Life.
+/// </summary>
+[Prototype("ncCityObjectAffordanceRule")]
+public sealed partial class NCCityObjectAffordanceRulePrototype : IPrototype
+{
+    [IdDataField] public string ID { get; private set; } = string.Empty;
+    [DataField(required: true)] public NCCityObjectAffordanceSource Source { get; private set; }
+    [DataField(required: true)] public List<ProtoId<NCCityAffordancePrototype>> Affordances { get; private set; } = [];
+}
+
+/// <summary>
 /// Generates semantic capabilities from authored geography and the existing navigation samples. An empty Zone means
 /// every candidate matching RequiredContext; a concrete Zone restricts generation to that hierarchy.
 /// </summary>
@@ -60,6 +80,8 @@ public sealed partial class NCCityZoneAffordanceSourcePrototype : IPrototype
     [DataField] public NCZoneContextSlot RequiredContext { get; private set; }
     [DataField(required: true)] public ProtoId<NCCitySpawnCandidateProfilePrototype> CandidateProfile { get; private set; }
     [DataField(required: true)] public List<ProtoId<NCCityAffordancePrototype>> Affordances { get; private set; } = [];
+    /// <summary>Capabilities placed only at real Room/Portal boundaries of the selected building hierarchy.</summary>
+    [DataField] public List<ProtoId<NCCityAffordancePrototype>> BoundaryAffordances { get; private set; } = [];
     [DataField] public int MaximumCandidates { get; private set; } = 32;
 }
 

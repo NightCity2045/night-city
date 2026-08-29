@@ -34,6 +34,48 @@
   kind: RestArea
   knowledgeKey: location.city.rest-area
 
+- type: ncCityAffordance
+  id: NCCityShop
+  kind: Shop
+  knowledgeKey: location.city.shop
+
+- type: ncCityAffordance
+  id: NCCityWarehouse
+  kind: Warehouse
+  knowledgeKey: location.city.warehouse
+
+- type: ncCityAffordance
+  id: NCCityConstructionSite
+  kind: ConstructionSite
+  knowledgeKey: location.city.construction-site
+
+- type: ncCityAffordance
+  id: NCCityMedicalTreatment
+  kind: MedicalTreatment
+  knowledgeKey: location.city.medical-treatment
+
+- type: ncCityAffordance
+  id: NCCityFoodSource
+  kind: FoodSource
+  knowledgeKey: location.city.food-source
+
+# Existing vanilla objects are recognized automatically. The rules stay in YAML so their A-Life meaning can be
+# balanced without changing C# or adding mapper anchors to every chair and machine.
+- type: ncCityObjectAffordanceRule
+  id: NCCityStrapObjectAffordances
+  source: Strap
+  affordances: [NCCityRestArea]
+
+- type: ncCityObjectAffordanceRule
+  id: NCCityVendingObjectAffordances
+  source: VendingMachine
+  affordances: [NCCityShop]
+
+- type: ncCityObjectAffordanceRule
+  id: NCCityMedicalObjectAffordances
+  source: MedicalTreatment
+  affordances: [NCCityMedicalTreatment]
+
 # NCPD service functions are derived from the authored station Building and its safe navigation samples. They are
 # semantic capabilities, not mapper entities, so the station remains usable without invisible Booking/Holding anchors.
 - type: ncCityAffordance
@@ -89,7 +131,9 @@
   id: NCCityBuildingAffordances
   requiredContext: Building
   candidateProfile: NCPedestrianSpawnCandidates
-  affordances: [NCCityWorkplace, NCCityPublicEntrance, NCCityBuildingExit, NCCityRestArea]
+  # A navigation sample is only the safe fallback. Real Room/Portal boundaries own entrances and exits.
+  affordances: [NCCityRestArea]
+  boundaryAffordances: [NCCityPublicEntrance, NCCityBuildingExit]
   maximumCandidates: 1024
 
 - type: ncCityZoneAffordanceSource
@@ -104,5 +148,22 @@
   zone: a9c069f8-8558-493c-844b-b7bfe8775521
   requiredContext: Building
   candidateProfile: NCPedestrianSpawnCandidates
-  affordances: [NCNcpdMuster, NCNcpdDispatch, NCNcpdBooking, NCNcpdHolding, NCNcpdEvidenceStorage, NCNcpdArmory, NCNcpdReportDesk]
+  affordances: [NCCityWorkplace, NCNcpdMuster, NCNcpdDispatch, NCNcpdBooking, NCNcpdHolding, NCNcpdEvidenceStorage, NCNcpdArmory, NCNcpdReportDesk]
+  maximumCandidates: 16
+
+# These are building-purpose anchors: they classify an authored CityZone, but do not define routes or spawn points.
+- type: ncCityZoneAffordanceSource
+  id: NCGlenShopAffordances
+  zone: 2f68355a-7155-43d4-bc82-f8a82c111e74
+  requiredContext: Building
+  candidateProfile: NCPedestrianSpawnCandidates
+  affordances: [NCCityWorkplace, NCCityShop, NCCityFoodSource, NCCityRestArea]
+  maximumCandidates: 8
+
+- type: ncCityZoneAffordanceSource
+  id: NCGlenOfficeAffordances
+  zone: 78091418-0030-489d-bffd-264aba8fa7af
+  requiredContext: Building
+  candidateProfile: NCPedestrianSpawnCandidates
+  affordances: [NCCityWorkplace, NCCityRestArea]
   maximumCandidates: 16

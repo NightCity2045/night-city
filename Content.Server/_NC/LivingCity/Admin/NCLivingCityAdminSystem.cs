@@ -637,13 +637,18 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("ncpd-mapping", "patrol-areas", _ncpdMapping.PatrolAreaCount);
         fields.Add("ncpd-mapping", "mapping-errors", _ncpdMapping.MappingErrorCount);
         fields.Add("ncpd-mapping", "first-error", _ncpdMapping.FirstError ?? "none");
+        var affordanceError = _affordances.GetConfigurationError();
+        fields.Add("affordances", "state", affordanceError == null ? "normal" : "critical");
         fields.Add("affordances", "catalog-version", _affordances.Version);
         fields.Add("affordances", "total", _affordances.EntryCount);
+        fields.Add("affordances", "physical-objects", _affordances.PhysicalEntryCount);
+        fields.Add("affordances", "generated", _affordances.GeneratedEntryCount);
         fields.Add("affordances", "workplaces", _affordances.Count(NCCityAffordanceKind.Workplace));
         fields.Add("affordances", "residences", _affordances.Count(NCCityAffordanceKind.Residence));
         fields.Add("affordances", "public-entrances", _affordances.Count(NCCityAffordanceKind.PublicEntrance));
         fields.Add("affordances", "building-exits", _affordances.Count(NCCityAffordanceKind.BuildingExit));
         fields.Add("affordances", "rest-areas", _affordances.Count(NCCityAffordanceKind.RestArea));
+        fields.Add("affordances", "configuration-error", affordanceError ?? "none");
         fields.Add("human-mind", "actors-with-learned-locations", _locationKnowledge.ActorCount);
         fields.Add("factions", "initial-load-complete", _factionBootstrap.InitialLoadComplete);
         fields.Add("factions", "profiles", _factionBootstrap.ProfileCount);
