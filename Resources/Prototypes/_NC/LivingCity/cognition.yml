@@ -667,9 +667,21 @@
   - id: support-circulation
     action: medical-provide-cpr
     dependsOn: [ control-immediate-bleeding ]
-  - id: provide-definitive-field-care
-    action: medical-provide-definitive-trauma-care
+  - id: take-custody-of-patient
+    action: human-start-pulling
     dependsOn: [ support-circulation ]
+  - id: select-clinical-site
+    action: select-medical-service
+    dependsOn: [ take-custody-of-patient ]
+  - id: transport-patient
+    action: follow-schedule-travel
+    dependsOn: [ select-clinical-site ]
+  - id: admit-patient
+    action: human-stop-pulling
+    dependsOn: [ transport-patient ]
+  - id: provide-definitive-clinical-care
+    action: medical-provide-definitive-trauma-care
+    dependsOn: [ admit-patient ]
 
 - type: ncCognitionCapability
   id: NCJanitorialMaintainWorkplace

@@ -42,6 +42,9 @@ public sealed partial class NCHumanMemoryBridgeSystem : EntitySystem
 
     private void OnIncidentObserved(NCCityLocalIncidentObservedEvent args)
     {
+        // Only violence and death are durable episodic memories; ordinary sensory facts stay in the bounded cache.
+        if (args.Kind is not (NCCityLocalPerceivedEventKind.Assault or NCCityLocalPerceivedEventKind.Killing))
+            return;
         if (!_runtime.TryGetActor(args.Observer, out var observer) || !observer.IsValid)
             return;
         var owner = NCPartyRef.ForActor(observer);

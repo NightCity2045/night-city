@@ -32,6 +32,7 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
+    [Dependency] private NCCityLocalPerceptionSystem _perception = default!;
     [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCConversationSessionSystem _conversations = default!;
@@ -259,7 +260,10 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
                 null), out _, out _, utterance))
         {
             EndConversation(speaker, "record-failed");
+            return;
         }
+        if (_clock.TryGetCurrentTime(out _, out var now))
+            _perception.ObserveAddressedSpeech(active.Target, speaker, now);
     }
 
     private void OnTargetShutdown(

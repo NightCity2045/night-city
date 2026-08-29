@@ -6,6 +6,7 @@ using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared.Cuffs;
+using Content.Shared.Atmos.Components;
 using Content.Shared.Interaction;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
@@ -13,6 +14,9 @@ using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs;
 using Content.Shared.NPC.Components;
 using Content.Shared.NPC.Systems;
+using Content.Shared.Weapons.Melee;
+using Content.Shared.Weapons.Ranged.Components;
+using Content.Shared.Weapons.Ranged.Systems;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Time;
 using Content.Shared._NC.Persistence.Identity;
@@ -74,6 +78,7 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
         SubscribeLocalEvent<NCCityLocalPerceptionComponent, ComponentShutdown>(OnShutdown);
         SubscribeLocalEvent<DamageableComponent, DamageDealtEvent>(OnDamageDealt);
+        SubscribeLocalEvent<GunComponent, GunShotEvent>(OnGunShot);
     }
 
     public override void Update(float frameTime)
@@ -159,6 +164,28 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
             }
             ObserveIncident(observer.Owner, NCCityLocalPerceivedEventKind.Assault, attacker, victim.Owner, now,
                 profile.WitnessedEventLifetime, worldEventId: worldEventId);
+        }
+    }
+
+    /// <summary>Records an actually fired gun as an audible event; hearing does not require line of sight.</summary>
+    private void OnGunShot(Entity<GunComponent> gun, ref GunShotEvent args)
+    {
+        if (!_active || _maximumObservationRadius <= 0f || !Exists(args.User) ||
+            !_clock.TryGetCurrentTime(out _, out var now))
+            return;
+
+        var coordinates = _transform.GetMapCoordinates(args.User);
+        foreach (var observer in _lookup.GetEntitiesInRange<NCCityLocalPerceptionComponent>(
+                     coordinates,
+                     _maximumObservationRadius))
+        {
+            if (observer.Owner == args.User ||
+                !_prototypes.TryIndex(observer.Comp.Profile, out var profile) || profile == null ||
+                !_transform.InRange(Transform(observer.Owner).Coordinates, Transform(args.User).Coordinates,
+                    profile.Radius))
+                continue;
+            ObserveIncident(observer.Owner, NCCityLocalPerceivedEventKind.Gunshot, args.User, args.User, now,
+                profile.WitnessedEventLifetime);
         }
     }
 
@@ -284,22 +311,59 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         float confidence = 1f,
         Guid? worldEventId = null)
     {
-        var actorKind = observer == target
-            ? NCCityLocalObservationKind.Hostile
-            : NCCityLocalObservationKind.Suspect;
+        var actorKind = kind switch
+        {
+            NCCityLocalPerceivedEventKind.Assault or NCCityLocalPerceivedEventKind.Killing when observer == target =>
+                NCCityLocalObservationKind.Hostile,
+            NCCityLocalPerceivedEventKind.Assault or NCCityLocalPerceivedEventKind.Killing or
+                NCCityLocalPerceivedEventKind.Gunshot => NCCityLocalObservationKind.Suspect,
+            _ => NCCityLocalObservationKind.Neutral,
+        };
         if (!ObserveSubject(observer, actor, actorKind, now, lifetime, confidence) ||
-            observer != target && !ObserveSubject(observer, target, NCCityLocalObservationKind.Neutral, now, lifetime,
-                confidence) ||
+            actor != target && observer != target &&
+            !ObserveSubject(observer, target, NCCityLocalObservationKind.Neutral, now, lifetime, confidence) ||
             !TryComp<NCCityLocalPerceptionComponent>(observer, out var perception) ||
             !_prototypes.TryIndex(perception.Profile, out var profile) || profile == null)
         {
             return false;
         }
 
-        var actorObservation = perception.Observations.First(value => value.EntityUid == actor);
-        var targetHandle = observer == target
+        return RecordObservedEvent(observer, perception, profile, kind, actor, target, now, lifetime, confidence,
+            worldEventId);
+    }
+
+    /// <summary>Adds the authoritative fact that this actor was the listener selected for local speech.</summary>
+    public bool ObserveAddressedSpeech(EntityUid observer, EntityUid speaker, NCActiveWorldTime now)
+    {
+        if (!TryComp<NCCityLocalPerceptionComponent>(observer, out var perception) ||
+            !_prototypes.TryIndex(perception.Profile, out var profile) || profile == null)
+            return false;
+        return ObserveIncident(observer, NCCityLocalPerceivedEventKind.AddressedSpeech, speaker, observer, now,
+            profile.WitnessedEventLifetime);
+    }
+
+    private bool RecordObservedEvent(
+        EntityUid observer,
+        NCCityLocalPerceptionComponent perception,
+        NCCityLocalPerceptionProfilePrototype profile,
+        NCCityLocalPerceivedEventKind kind,
+        EntityUid actor,
+        EntityUid target,
+        NCActiveWorldTime now,
+        TimeSpan lifetime,
+        float confidence,
+        Guid? worldEventId = null)
+    {
+        var actorObservation = perception.Observations.FirstOrDefault(value => value.EntityUid == actor);
+        if (string.IsNullOrWhiteSpace(actorObservation.SubjectHandle))
+            return false;
+        var targetHandle = actor == target
+            ? actorObservation.SubjectHandle
+            : observer == target
             ? "self"
-            : perception.Observations.First(value => value.EntityUid == target).SubjectHandle;
+            : perception.Observations.FirstOrDefault(value => value.EntityUid == target).SubjectHandle;
+        if (string.IsNullOrWhiteSpace(targetHandle))
+            return false;
         var existing = perception.RecentEvents.FindIndex(value => value.Kind == kind && value.ActorEntity == actor &&
             value.TargetEntity == target);
         if (existing >= 0)
@@ -478,6 +542,12 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
                 Confidence(distanceSquared, profile.Radius),
                 now,
                 now.Advance(profile.EvaluationInterval + profile.EvaluationInterval)));
+            RecordObservedEvent(entityUid, component, profile,
+                candidate.Comp.CurrentState == MobState.Dead
+                    ? NCCityLocalPerceivedEventKind.BodyDiscovered
+                    : NCCityLocalPerceivedEventKind.SevereInjury,
+                candidate.Owner, candidate.Owner, now, profile.WitnessedEventLifetime,
+                Confidence(distanceSquared, profile.Radius));
             if (candidate.Comp.CurrentState == MobState.Critical)
                 component.CriticalCount++;
             if (distanceSquared < nearestCriticalDistance)
@@ -487,6 +557,8 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
             }
         }
 
+        ObserveVisibleHazards(entityUid, component, profile, origin, now, ref lineOfSightChecks);
+
         component.LastEvaluatedAt = now;
         component.Revision++;
         _evaluations++;
@@ -494,6 +566,44 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         var interval = _governor.ScaleEvaluationInterval(profile.EvaluationInterval);
         component.NextEvaluationAt = now.Advance(interval);
         Schedule(entityUid, component.NextEvaluationAt);
+    }
+
+    /// <summary>Checks only nearby indexed component sets and records bounded visible hazards.</summary>
+    private void ObserveVisibleHazards(
+        EntityUid observer,
+        NCCityLocalPerceptionComponent perception,
+        NCCityLocalPerceptionProfilePrototype profile,
+        MapCoordinates origin,
+        NCActiveWorldTime now,
+        ref int lineOfSightChecks)
+    {
+        foreach (var burning in _lookup.GetEntitiesInRange<FlammableComponent>(origin, profile.Radius))
+        {
+            if (!burning.Comp.OnFire || burning.Owner == observer || !HasComp<MobStateComponent>(burning.Owner) ||
+                lineOfSightChecks >= profile.MaximumLineOfSightChecks)
+                continue;
+            lineOfSightChecks++;
+            if (!_interaction.InRangeUnobstructed(observer, burning.Owner, profile.Radius))
+                continue;
+            ObserveIncident(observer, NCCityLocalPerceivedEventKind.Fire, burning.Owner, burning.Owner, now,
+                profile.WitnessedEventLifetime);
+        }
+
+        foreach (var weapon in _lookup.GetEntitiesInRange<GunComponent>(origin, profile.Radius)
+                     .Select(value => value.Owner)
+                     .Concat(_lookup.GetEntitiesInRange<MeleeWeaponComponent>(origin, profile.Radius)
+                         .Select(value => value.Owner)))
+        {
+            var holder = Transform(weapon).ParentUid;
+            if (holder == observer || !Exists(holder) || !HasComp<MobStateComponent>(holder) ||
+                lineOfSightChecks >= profile.MaximumLineOfSightChecks)
+                continue;
+            lineOfSightChecks++;
+            if (!_interaction.InRangeUnobstructed(observer, holder, profile.Radius))
+                continue;
+            ObserveIncident(observer, NCCityLocalPerceivedEventKind.WeaponDisplayed, holder, holder, now,
+                profile.WitnessedEventLifetime);
+        }
     }
 
     /// <summary>

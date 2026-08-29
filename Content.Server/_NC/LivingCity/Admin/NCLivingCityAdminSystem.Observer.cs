@@ -10,6 +10,7 @@ using Content.Server._NC.LivingCity.Simulation;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Admin;
 using Content.Shared._NC.LivingCity.Actors;
+using Content.Shared._NC.LivingCity.Neural;
 using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.Persistence.Identity;
 using Robust.Shared.Prototypes;
@@ -230,6 +231,8 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-actor", "actor-id", actorId);
         fields.Add("observer-actor", "full-name", snapshot.Identity.FullName);
         fields.Add("observer-actor", "archetype", snapshot.Identity.ArchetypeId);
+        fields.Add("observer-actor", "appearance-seed", snapshot.Identity.AppearanceSeed);
+        fields.Add("observer-actor", "biography-seed", snapshot.Identity.BiographySeed);
         if (_prototypes.TryIndex(new ProtoId<NCCityActorArchetypePrototype>(snapshot.Identity.ArchetypeId),
                 out NCCityActorArchetypePrototype? archetype) && archetype != null)
         {
@@ -238,6 +241,14 @@ public sealed partial class NCLivingCityAdminSystem
                 narrativeProfile == null ? "Resident" : "Actor");
             fields.Add("observer-actor", "narrative-profile",
                 narrativeProfile ?? "none");
+            if (narrativeProfile != null &&
+                _prototypes.TryIndex(new ProtoId<NCNarrativeActorProfilePrototype>(narrativeProfile),
+                    out NCNarrativeActorProfilePrototype? narrative) &&
+                _prototypes.TryIndex(narrative.PersonaProfile, out NCNeuralPersonaProfilePrototype? persona))
+            {
+                fields.Add("observer-personality", "biography", BoundObserverText(persona.Biography, 512));
+                fields.Add("observer-personality", "habits", string.Join(", ", persona.HabitKeys));
+            }
         }
         fields.Add("observer-actor", "status", snapshot.Lifecycle.Status);
         fields.Add("observer-actor", "frozen", snapshot.Lifecycle.Frozen);
@@ -306,6 +317,47 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-memory", "episodes", memoryBook?.Snapshot.Episodes.Count ?? 0);
         fields.Add("observer-memory", "summaries", memoryBook?.Snapshot.Summaries.Count ?? 0);
         fields.Add("observer-memory", "total-remembered", memoryBook?.Snapshot.TotalRemembered ?? 0);
+        if (memoryBook?.Snapshot.Episodes.OrderByDescending(value => value.CreatedAt).FirstOrDefault() is { } episode)
+        {
+            fields.Add("observer-memory", "latest-event", episode.EventTypeKey);
+            fields.Add("observer-memory", "latest-at", episode.CreatedAt.Elapsed);
+            fields.Add("observer-memory", "latest-emotions", string.Join(", ", episode.EmotionalTagKeys));
+        }
+
+        var social = await _socialProfiles.GetAsync(actorId);
+        if (social != null)
+        {
+            fields.Add("observer-personality", "temperament", social.Snapshot.Personality.Temperament);
+            fields.Add("observer-personality", "risk", social.Snapshot.Personality.RiskTolerance);
+            fields.Add("observer-personality", "aggression", social.Snapshot.Personality.Aggression);
+            fields.Add("observer-personality", "empathy", social.Snapshot.Personality.Empathy);
+            fields.Add("observer-personality", "speech-register", social.Snapshot.Speech.Register);
+            fields.Add("observer-personality", "speech-vocabulary", social.Snapshot.Speech.Vocabulary);
+            fields.Add("observer-personality", "language", social.Snapshot.Speech.PreferredLanguage);
+        }
+
+        if (_clock.TryGetCurrentTime(out _, out var observerNow) &&
+            _localPerception.TryGetSnapshot(actorId, observerNow, out var observations, out var perceivedEvents))
+        {
+            fields.Add("observer-perception", "subjects", observations.Length);
+            fields.Add("observer-perception", "events", perceivedEvents.Length);
+            fields.Add("observer-perception", "situational-state", InferSituationalState(perceivedEvents));
+            foreach (var observed in observations.Take(8))
+            {
+                var section = $"observer-perception-subject-{observed.SubjectHandle}";
+                fields.Add(section, "kind", observed.Kind);
+                fields.Add(section, "name", BoundObserverText(Name(observed.EntityUid), 128));
+                fields.Add(section, "confidence", observed.Confidence.ToString("0.00"));
+            }
+            foreach (var perceived in perceivedEvents.Take(8))
+            {
+                var section = $"observer-perception-event-{perceived.EventId:N}";
+                fields.Add(section, "kind", perceived.Kind);
+                fields.Add(section, "actor", perceived.ActorHandle);
+                fields.Add(section, "target", perceived.TargetHandle);
+                fields.Add(section, "observed-at", perceived.ObservedAt.Elapsed);
+            }
+        }
         var conversations = _conversations.GetForParticipant(NCPartyRef.ForActor(actorId), 50);
         var activeConversations = conversations.Where(value => value.Status is NCConversationStatus.Starting or
             NCConversationStatus.Active or NCConversationStatus.WaitingForActor or
@@ -485,5 +537,22 @@ public sealed partial class NCLivingCityAdminSystem
     {
         var normalized = value.Replace('\r', ' ').Replace('\n', ' ').Trim();
         return normalized.Length <= maximum ? normalized : normalized[..maximum];
+    }
+
+    private static string InferSituationalState(IEnumerable<NCCityLocalPerceivedEvent> events)
+    {
+        var kinds = events.Select(value => value.Kind).ToHashSet();
+        if (kinds.Contains(NCCityLocalPerceivedEventKind.Killing) ||
+            kinds.Contains(NCCityLocalPerceivedEventKind.BodyDiscovered))
+            return "shocked";
+        if (kinds.Overlaps([
+                NCCityLocalPerceivedEventKind.Assault,
+                NCCityLocalPerceivedEventKind.Gunshot,
+                NCCityLocalPerceivedEventKind.WeaponDisplayed,
+                NCCityLocalPerceivedEventKind.Fire,
+                NCCityLocalPerceivedEventKind.SevereInjury,
+            ]))
+            return "alert";
+        return "baseline";
     }
 }

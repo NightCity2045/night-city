@@ -2,25 +2,37 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System.Threading.Tasks;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Actors.Components;
+using Content.Server._NC.LivingCity.Affordances;
+using Content.Server._NC.LivingCity.Time;
+using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.LivingCity.Actors;
+using Content.Shared._NC.LivingCity.Affordances;
 using Content.Shared._NC.Persistence.Identity;
+using Content.Shared._NC.Persistence.Time;
 
 namespace Content.Server._NC.LivingCity.Cognition;
 
 /// <summary>
 /// Resolves planner bookkeeping and waits for authoritative schedule/travel/gameplay ownership to release. It never
-/// simulates a world mutation: unavailable group and medical-service executors fail explicitly.
+/// simulates a world mutation: unavailable group executors fail explicitly.
 /// </summary>
 public sealed partial class NCHumanCoreActionAdapterSystem : EntitySystem
 {
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
+    [Dependency] private NCCityAffordanceCatalogSystem _affordances = default!;
+    [Dependency] private NCActiveWorldTimeSystem _clock = default!;
+
+    private readonly Dictionary<NCActorId, PendingMedicalSelection> _medicalSelections = [];
 
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<NCHumanActionExecutionEvent>(OnExecute);
+        SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => _medicalSelections.Clear());
+        SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => _medicalSelections.Clear());
     }
 
     private void OnExecute(NCHumanActionExecutionEvent args)
@@ -62,7 +74,7 @@ public sealed partial class NCHumanCoreActionAdapterSystem : EntitySystem
                 ResolveAuthority(args, NCCityDematerializationBlockerFlags.Conversation);
                 return;
             case "select-medical-service":
-                RejectMissing(args, "medical-service-selection-not-implemented");
+                SelectMedicalService(args);
                 return;
             case "prepare-group-role":
             case "acquire-group-resources":
@@ -70,6 +82,68 @@ public sealed partial class NCHumanCoreActionAdapterSystem : EntitySystem
                 RejectMissing(args, $"group-action-executor-not-implemented:{args.Action.ID}");
                 return;
         }
+    }
+
+    /// <summary>Selects a real medical affordance and commits the route through the actor aggregate.</summary>
+    private void SelectMedicalService(NCHumanActionExecutionEvent args)
+    {
+        args.Handled = true;
+        if (_medicalSelections.TryGetValue(args.ActorId, out var pending))
+        {
+            if (pending.IntentionId != args.IntentionId)
+            {
+                _medicalSelections.Remove(args.ActorId);
+                args.Failure = "medical-service-intention-changed";
+                return;
+            }
+            if (!pending.Mutation.IsCompleted)
+                return;
+            _medicalSelections.Remove(args.ActorId);
+            if (pending.Mutation.IsFaulted || pending.Mutation.IsCanceled)
+            {
+                args.Failure = "medical-service-route-failed";
+                return;
+            }
+            var result = pending.Mutation.GetAwaiter().GetResult();
+            if (result.Status is NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate)
+                args.Completed = true;
+            else
+                args.Failure = $"medical-service-route-rejected:{result.Status}";
+            return;
+        }
+
+        if (!_clock.TryGetCurrentTime(out _, out var now) ||
+            !_actors.TryGetCached(args.ActorId, out var actor) ||
+            !_affordances.TrySelect(NCCityAffordanceKind.MedicalTreatment, default,
+                unchecked((uint) actor.Snapshot.Identity.BiographySeed), out var service))
+        {
+            args.Failure = "medical-service-unavailable";
+            return;
+        }
+
+        var location = actor.Snapshot.Location;
+        if (location.CurrentZone == service.ZoneId)
+        {
+            args.Completed = true;
+            return;
+        }
+
+        var mutation = _actors.SetLocationAsync(new NCCityActorLocationMutationRequest(
+            Guid.NewGuid(),
+            args.ActorId,
+            actor.AggregateVersion,
+            location.CurrentZone,
+            service.ZoneId,
+            NCCityActorTravelPhase.Planned,
+            NCCityTravelMode.Pedestrian,
+            null,
+            "seek-medical-care",
+            "reach-medical-service",
+            NCCityActorAvailability.Busy,
+            now.Advance(TimeSpan.FromMinutes(1)),
+            Guid.NewGuid(),
+            AuditSource: "human-medical-service"));
+        _medicalSelections[args.ActorId] = new PendingMedicalSelection(args.IntentionId, mutation);
     }
 
     private bool TryGetTravelPhase(NCActorId actorId, out NCCityActorTravelPhase phase)
@@ -125,4 +199,6 @@ public sealed partial class NCHumanCoreActionAdapterSystem : EntitySystem
         args.Handled = true;
         args.Failure = failure;
     }
+
+    private sealed record PendingMedicalSelection(Guid IntentionId, Task<NCCityActorMutationResult> Mutation);
 }

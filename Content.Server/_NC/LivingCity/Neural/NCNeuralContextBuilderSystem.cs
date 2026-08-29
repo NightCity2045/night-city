@@ -436,7 +436,8 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
 
     private void OnIncidentObserved(NCCityLocalIncidentObservedEvent args)
     {
-        if (!_client.IsProviderEnabled ||
+        if (args.Kind is not (NCCityLocalPerceivedEventKind.Assault or NCCityLocalPerceivedEventKind.Killing) ||
+            !_client.IsProviderEnabled ||
             !TryComp<NCCityActorBindingComponent>(args.Observer, out var binding) ||
             !_clock.TryGetCurrentTime(out _, out var now) ||
             !_prototypes.TryIndex(DefaultPolicy, out NCNeuralPolicyPrototype? policy) ||
