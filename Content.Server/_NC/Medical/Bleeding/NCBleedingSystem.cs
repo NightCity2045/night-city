@@ -112,6 +112,7 @@ public sealed partial class NCBleedingSystem : EntitySystem
         }
 
         bleeding.InternalBloodLoss += application.InternalLost;
+        bleeding.UnlocalizedInternalBloodVolume += application.UnlocalizedInternalLost;
 
         // The scheduler suppresses a body's own due-now requeue while processing, but persistence must
         // still observe every authoritative volume mutation (including aggregate overflow bleeding).
@@ -190,6 +191,7 @@ public sealed partial class NCBleedingSystem : EntitySystem
         bleeding.OverflowInternalRate = 0f;
         bleeding.OverflowInternalRatesByRegion.Clear();
         bleeding.InternalBloodLoss = 0f;
+        bleeding.UnlocalizedInternalBloodVolume = 0f;
         RecalculateRates(bleeding);
     }
 

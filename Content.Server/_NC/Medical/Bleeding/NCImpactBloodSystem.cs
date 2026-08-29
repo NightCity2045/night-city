@@ -37,6 +37,7 @@ public sealed partial class NCImpactBloodSystem : EntitySystem
         // WoundSystem is the sole trauma-request owner and emits this event only after exactly-once acceptance.
         SubscribeLocalEvent<NCMedicalBodyComponent, NCWoundImpactAppliedEvent>(OnWoundImpactApplied);
         InitializeSurfaceStains();
+        InitializeBloodPools();
     }
 
     private void OnWoundImpactApplied(

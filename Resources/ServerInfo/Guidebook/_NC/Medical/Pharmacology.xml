@@ -1,33 +1,33 @@
 <Document>
-# Фармакология
+# Pharmacology
 
-Все препараты вводятся в bloodstream и действуют детерминированно. Эффект зависит от концентрации, состояния печени и почек, взаимодействий и времени выведения.
+All drugs enter the bloodstream and act deterministically. Their effects depend on concentration, liver and kidney function, interactions, and elimination time.
 
-## Порядок применения
+## Administration
 
-1. Просканируйте пациента.
-2. Откройте вкладку [color=#58e6d9]Drugs[/color].
-3. Проверьте активные препараты и токсическую нагрузку.
-4. Введите выбранный препарат.
-5. Повторите скан после обновления состояния.
+1. Scan the patient.
+2. Open the [color=#58e6d9]Drugs[/color] tab.
+3. Check active drugs and toxic burden.
+4. Administer the selected drug.
+5. Repeat the scan after the state updates.
 
-## Препараты
+## Drugs
 
-- [color=#58e6d9]Trauma analgesic[/color] — повышает анальгезию; также даёт слабую седацию. Применение: боль и подготовка к операции.
-- [color=#58e6d9]Surgical anesthetic[/color] — повышает анальгезию, седацию и анестезию; снижает двигательную активность и дыхательный перенос. Применение: глубокая операция.
-- [color=#58e6d9]Sedative[/color] — повышает седацию и снижает двигательную активность. Применение: контроль движения перед вмешательством.
-- [color=#58e6d9]Vasopressor[/color] — повышает сердечный выброс. Применение: низкая перфузия и сосудистый коллапс.
-- [color=#58e6d9]Antiarrhythmic[/color] — повышает стабильность ритма. Применение: электрическая нестабильность сердца.
-- [color=#58e6d9]Respiratory stimulant[/color] — повышает дыхательный перенос и оксигенацию. Применение: сохранённое, но угнетённое дыхание.
-- [color=#58e6d9]Broad antibiotic[/color] — подавляет рост раневой инфекции. Применение: инфицированная или загрязнённая рана.
-- [color=#58e6d9]Antitoxin[/color] — ускоряет выведение системной токсической нагрузки. Применение: отравление.
-- [color=#58e6d9]Procoagulant[/color] — уменьшает фактическую скорость наружного и внутреннего кровотечения. Применение: активная кровопотеря.
-- [color=#58e6d9]Stimulant[/color] — повышает бодрствование, сердечный выброс и дыхательный перенос. Применение: угнетённое сознание при сохранённой физиологии.
-- [color=#58e6d9]Anticoagulant[/color] — увеличивает кровоточивость. Применение: специальное клиническое назначение.
-- [color=#58e6d9]Vasodilator[/color] — снижает сердечный выброс. Применение: специальное клиническое назначение.
-- [color=#58e6d9]Immunosuppressant[/color] — подавляет иммунный ответ и ускоряет инфекционное ухудшение. Применение: поддержка совместимого трансплантата.
-- [color=#58e6d9]Synthetic oxygen carrier[/color] — увеличивает перенос кислорода кровью. Применение: недостаточная кислородная ёмкость циркулирующей крови.
-- [color=#58e6d9]Cyberware coolant agent[/color] — распределяется между совместимыми имплантами и снижает их перегрев. Применение: перегретое кибероборудование.
+- [color=#58e6d9]Trauma analgesic[/color] — raises analgesia and provides mild sedation. Use for pain and surgical preparation.
+- [color=#58e6d9]Surgical anesthetic[/color] — raises analgesia, sedation, and anesthesia while reducing motor activity and respiratory transfer. Use for deep surgery.
+- [color=#58e6d9]Sedative[/color] — raises sedation and reduces motor activity. Use to control movement before an intervention.
+- [color=#58e6d9]Vasopressor[/color] — raises cardiac output. Use for low perfusion and vascular collapse.
+- [color=#58e6d9]Antiarrhythmic[/color] — improves rhythm stability. Use for cardiac electrical instability.
+- [color=#58e6d9]Respiratory stimulant[/color] — raises respiratory transfer and oxygenation. Use when respiration is present but depressed.
+- [color=#58e6d9]Broad antibiotic[/color] — suppresses wound infection growth. Use for infected or contaminated wounds.
+- [color=#58e6d9]Antitoxin[/color] — accelerates elimination of systemic toxic burden. Use for poisoning.
+- [color=#58e6d9]Procoagulant[/color] — reduces actual external and internal bleeding rates. Use during active blood loss.
+- [color=#58e6d9]Stimulant[/color] — raises alertness, cardiac output, and respiratory transfer. Use for depressed consciousness with otherwise viable physiology.
+- [color=#58e6d9]Anticoagulant[/color] — increases bleeding. Use only for a specific clinical indication.
+- [color=#58e6d9]Vasodilator[/color] — lowers cardiac output. Use only for a specific clinical indication.
+- [color=#58e6d9]Immunosuppressant[/color] — suppresses immune response and accelerates infectious deterioration. Use to support a compatible transplant.
+- [color=#58e6d9]Synthetic oxygen carrier[/color] — increases the oxygen-carrying capacity of circulating blood.
+- [color=#58e6d9]Cyberware coolant agent[/color] — distributes between compatible implants and reduces cyberware overheating.
 
 <Box>
 <GuideEntityEmbed Entity="NCSyringeTraumaAnalgesic"/>
@@ -42,13 +42,13 @@
 <GuideEntityEmbed Entity="NCSyringeProcoagulant"/>
 </Box>
 
-## Взаимодействия
+## Interactions
 
-- Sedative + surgical anesthetic: усиленные терапевтический и токсический эффекты.
-- Trauma analgesic + sedative: повышенная токсичность.
-- Stimulant или respiratory stimulant + sedative: ослабленный терапевтический эффект и повышенная токсичность.
-- Vasopressor + vasodilator: взаимное ослабление терапевтического эффекта.
-- Procoagulant + anticoagulant: взаимное ослабление терапевтического эффекта и повышенная токсичность.
+- Sedative + surgical anesthetic: stronger therapeutic and toxic effects.
+- Trauma analgesic + sedative: increased toxicity.
+- Stimulant or respiratory stimulant + sedative: weaker therapeutic effect and increased toxicity.
+- Vasopressor + vasodilator: mutually reduced therapeutic effect.
+- Procoagulant + anticoagulant: mutually reduced therapeutic effect and increased toxicity.
 
-Токсическая нагрузка ухудшает шок, мозговую, сердечную и дыхательную функцию. Повреждение печени и почек замедляет выведение препаратов.
+Toxic burden worsens shock and brain, cardiac, and respiratory function. Liver and kidney damage slows drug elimination.
 </Document>

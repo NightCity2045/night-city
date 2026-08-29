@@ -1,42 +1,44 @@
 <Document>
-# Краткая памятка врача
+# Doctor Quick Reference
 
-## Наружное кровотечение
+## External bleeding
 
-1. Выберите область на таргетинге.
-2. Пустая рука: прямое давление.
-3. Gauze: повязка на выбранную наружную рану.
-4. Brutepack: гемостатик на выбранную наружную рану.
-5. Tourniquet: жгут на каноническую область руки или ноги.
-6. Повторите скан и восполните потерянный объём.
+1. Select the body zone in targeting.
+2. Empty hand: apply direct pressure.
+3. Gauze: dress the selected external wound.
+4. Brutepack: pack the selected deep external wound.
+5. Tourniquet: occlude bleeding from the selected arm or leg.
+6. Repeat the scan and restore lost circulating volume.
 
-## Потеря сознания или остановка кровообращения
+## Unconsciousness or absent circulation
 
-1. Проверьте кислород, циркулирующую кровь, перфузию и ритм.
-2. Остановите наружные источники крови.
-3. Примените кислород или NCManualVentilator.
-4. При отсутствующей перфузии выполняйте СЛР пустой рукой.
-5. При Shockable Arrest примените Defibrillator.
-6. Введите совместимую кровь или кристаллоид.
-7. Повторите скан.
+1. Check oxygenation, circulating blood, perfusion, and rhythm.
+2. Stop external bleeding sources.
+3. Apply oxygen or use an NCManualVentilator.
+4. Perform CPR with an empty hand when perfusion is absent.
+5. Use a Defibrillator for Shockable Arrest.
+6. Administer compatible blood or crystalloid.
+7. Repeat the scan.
 
-## Перелом
+## Fracture
 
-1. Выберите повреждённую область.
-2. Примените NCFieldSplint для временной фиксации.
-3. Подтвердите перелом полным сканером.
-4. Выполните: Cautery → Scalpel → Hemostat → Retractor → Drill → Drill → Drill → MedicatedSuture.
+1. Select the injured region.
+2. Apply an NCFieldSplint for temporary stabilization.
+3. Confirm the fracture with the full body scanner.
+4. Open the Freeform Surgical Field.
+5. Incise and retract over the fracture, reduce displacement, apply fixation, and suture the site.
+6. Repeat the full scan.
 
-## Внутренняя травма
+## Internal trauma
 
-1. Поместите пациента в MedicalScanner.
-2. Откройте computerBodyScanner.
-3. Проверьте Regions, Wounds, Organs, Cyberware и Drugs.
-4. Выберите область тела.
-5. Выполните соответствующую операцию из раздела «Хирургия».
-6. Повторите полный скан.
+1. Place the patient in a MedicalScanner.
+2. Open the computerBodyScanner console.
+3. Check Regions, Wounds, Organs, Cyberware, and Drugs.
+4. Select the affected body zone.
+5. Use the operation sequence listed in the Surgery section.
+6. Repeat the full scan.
 
-## Основной набор
+## Core kit
 
 <Box>
 <GuideEntityEmbed Entity="HandheldHealthAnalyzer"/>
@@ -51,6 +53,6 @@
 <GuideEntityEmbed Entity="NCFieldSplint"/>
 </Box>
 
-[textlink="Полный справочник врача" link="NCDoctor"]
-[textlink="Все хирургические операции" link="NCSurgery"]
+[textlink="Full medical handbook" link="NCDoctor"]
+[textlink="All surgical operations" link="NCSurgery"]
 </Document>

@@ -121,6 +121,14 @@ public sealed partial class NCSurgeryToolComponent : Component
     public bool Broken;
 
     /// <summary>
+    /// Physical tissue damage caused when a dangerous held tool contacts anatomy but its selected surgical
+    /// capability has no valid therapeutic target. Keeping this on the item makes a scalpel remain sharp in
+    /// every mode while YAML variants such as a laser scalpel can be balanced independently.
+    /// </summary>
+    [DataField]
+    public float PhysicalContactDamagePerPower;
+
+    /// <summary>
     /// Negative is reusable; zero is exhausted; positive values are consumed by step prototypes.
     /// </summary>
     [DataField]

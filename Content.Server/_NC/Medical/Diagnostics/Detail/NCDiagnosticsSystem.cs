@@ -995,18 +995,24 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
     {
         foreach (var organ in organs)
         {
-            if (!TryComp<NCSurgerySessionComponent>(organ.Uid, out var session) ||
-                !TryComp<NCSurgicalSiteComponent>(organ.Uid, out var site))
-            {
+            if (!TryComp<NCSurgicalSiteComponent>(organ.Uid, out var site))
                 continue;
-            }
+
+            TryComp<NCSurgerySessionComponent>(organ.Uid, out var session);
+            var openIncisions = site.Incisions.Count(incision => !incision.Sutured);
+            if (session == null && openIncisions == 0 && site.AccessDepth == NCSurgicalAccessDepth.Closed)
+                continue;
 
             return new NCMedicalSurgerySummary(
                 organ.Category,
-                session.Procedure,
-                session.CurrentStepIndex,
-                session.State,
-                site.AccessDepth);
+                session?.Procedure,
+                session?.CurrentStepIndex ?? -1,
+                session?.State,
+                site.AccessDepth,
+                site.Incisions.Count,
+                openIncisions,
+                site.Contamination,
+                site.TemporaryDevices.Count);
         }
 
         return null;

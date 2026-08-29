@@ -14,6 +14,7 @@
   - type: NCSurgeryTool
     capabilities:
       NCSurgeryToolDisinfection: 1
+      NCSurgeryToolCautery: 1
       NCSurgeryToolIncision: 1
       NCSurgeryToolHemostasis: 1
       NCSurgeryToolRetraction: 1
@@ -34,6 +35,7 @@
       NCSurgeryToolAmputation: 1
       NCSurgeryToolAutopsy: 1
       NCSurgeryToolCyberware: 1
+      NCSurgeryToolCavityDrainage: 1
     sterility: 1
     usesRemaining: -1
     startingProcedures:

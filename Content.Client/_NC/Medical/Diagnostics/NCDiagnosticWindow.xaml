@@ -5,6 +5,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
 -->
 <controls:FancyWindow xmlns="https://spacestation14.io"
                       xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      xmlns:diagnostics="clr-namespace:Content.Client._NC.Medical.Diagnostics"
                       xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
                       xmlns:targeting="clr-namespace:Content.Client._NC.Combat.Targeting"
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -118,6 +119,21 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                                     </BoxContainer>
                                 </PanelContainer>
                                 <Label Name="BodyFilterLabel" Align="Center" FontColorOverride="#76ABA7" />
+                                <PanelContainer Name="RadiographPanel" Visible="False"
+                                                HorizontalExpand="True" RectClipContent="True">
+                                    <PanelContainer.PanelOverride>
+                                        <gfx:StyleBoxFlat BackgroundColor="#030B0F" BorderColor="#267B75" BorderThickness="1" />
+                                    </PanelContainer.PanelOverride>
+                                    <BoxContainer Margin="6" Orientation="Vertical" SeparationOverride="4"
+                                                  HorizontalExpand="True">
+                                        <Label Text="{Loc 'nc-medical-diagnostics-radiograph-title'}"
+                                               FontColorOverride="#75FFF2" Align="Center" />
+                                        <diagnostics:NCAnatomyProjectionControl Name="AnatomyProjection" />
+                                        <Label Text="{Loc 'nc-medical-diagnostics-radiograph-caption'}"
+                                               FontColorOverride="#76ABA7"
+                                               Align="Center" ClipText="True" />
+                                    </BoxContainer>
+                                </PanelContainer>
                             </BoxContainer>
 
                             <BoxContainer Orientation="Vertical" SeparationOverride="8" HorizontalExpand="True">

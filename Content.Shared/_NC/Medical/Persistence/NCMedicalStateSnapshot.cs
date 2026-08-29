@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System.Numerics;
+using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Bleeding;
@@ -34,7 +36,9 @@ public static class NCMedicalSnapshotVersions
     public const ushort SystemicSepsis = 6;
     public const ushort TransplantRejection = 7;
     public const ushort WoundVisualization = 8;
-    public const ushort Current = WoundVisualization;
+    public const ushort CavityFluidLedger = 9;
+    public const ushort SpatialSurgery = 10;
+    public const ushort Current = SpatialSurgery;
 }
 
 /// <summary>
@@ -190,6 +194,7 @@ public sealed partial class NCCavityFluidStateSnapshot
 {
     [DataField] public NCBodyCavity Cavity;
     [DataField] public float BloodVolume;
+    [DataField] public float OverflowBloodVolume;
     [DataField] public float MaximumBloodVolume;
     [DataField] public float PressureFullScaleVolume;
     [DataField] public float CompressionFullScaleVolume;
@@ -277,6 +282,27 @@ public sealed partial class NCSurgicalSiteStateSnapshot
     [DataField] public bool TissuesRetracted;
     [DataField] public float Contamination;
     [DataField] public List<string> TemporaryDevices = [];
+    [DataField] public List<NCSurgicalIncisionStateSnapshot> Incisions = [];
+}
+
+[DataDefinition]
+public sealed partial class NCSurgicalIncisionStateSnapshot
+{
+    [DataField] public Guid IncisionId;
+    [DataField] public Guid? WoundId;
+    [DataField] public List<Guid> LinkedWoundIds = [];
+    [DataField(required: true)] public ProtoId<NCTargetZonePrototype> TargetZone;
+    [DataField] public NCWoundSurface Surface;
+    [DataField] public List<Vector2> Polyline = [];
+    [DataField] public float Depth;
+    [DataField] public float Width;
+    [DataField] public float EdgeSeparation;
+    [DataField] public float Contamination;
+    [DataField] public bool Sutured;
+    [DataField] public bool BoneCasingOpen;
+    [DataField] public NCActionResolutionId SourceResolutionId;
+    [DataField] public TimeSpan CreatedAt;
+    [DataField] public TimeSpan ModifiedAt;
 }
 
 [DataDefinition]
@@ -365,6 +391,7 @@ public sealed partial class NCBleedingStateSnapshot
     [DataField] public float OverflowInternalRate;
     [DataField] public Dictionary<ProtoId<OrganCategoryPrototype>, float> OverflowInternalRatesByRegion = new();
     [DataField] public float InternalBloodLoss;
+    [DataField] public float UnlocalizedInternalBloodVolume;
 }
 
 [DataDefinition]

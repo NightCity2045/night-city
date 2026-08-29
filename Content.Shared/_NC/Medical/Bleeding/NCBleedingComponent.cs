@@ -85,6 +85,13 @@ public sealed partial class NCBleedingComponent : Component
     [DataField]
     public float InternalBloodLoss;
 
+    /// <summary>
+    /// Current non-circulating blood whose legacy source cannot be mapped to a live anatomical cavity.
+    /// It remains diagnosable and persistent instead of disappearing from the physical ledger.
+    /// </summary>
+    [DataField]
+    public float UnlocalizedInternalBloodVolume;
+
     [ViewVariables]
     public float ActiveExternalRate;
 

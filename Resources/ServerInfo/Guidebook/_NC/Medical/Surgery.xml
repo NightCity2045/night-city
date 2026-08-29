@@ -1,179 +1,157 @@
 <Document>
-# Хирургия
+# Surgery
 
-## Управление
+## Controls
 
-1. Просканируйте пациента и определите патологию.
-2. Выберите область тела на кукле таргетинга.
-3. Возьмите первый инструмент в активную руку и примените его к пациенту.
-4. Если радиальное меню показывает несколько процедур, выберите нужную.
-5. Дождитесь окончания действия, затем примените следующий инструмент из последовательности.
-6. После закрытия доступа выполните повторный полный скан.
+1. Scan the patient and identify the damaged zone, surface, depth and structure.
+2. Use [color=#58e6d9]Open surgical field[/color] on the patient.
+3. Select the exact zone on the doll, then select Front, Rear, Left or Right.
+4. Set the working depth. The display names the tissue layer under the instrument.
+5. Hold an instrument in the active hand and select its mode in the right panel.
+6. Draw over the required point with LMB. Use RMB to attach a hemostat or retractor to an incision.
 
-[color=#58e6d9]Cautery[/color] — необязательная подготовка поля в процедурах, где первым шагом указана подготовка. Если начать Scalpel, этот шаг пропускается. Если начать Cautery, подготовка выполняется как настоящий первый этап.
+The field refreshes automatically. It shows live physiology, movement, tool sterility, wounds, incision geometry, exposed structures, contamination and attached instruments.
 
-Операционный стол не является обязательным условием запуска. Стол, освещение, стерильность, фиксация, мониторинг, вентиляция, анальгезия, седация и анестезия влияют на детерминированный результат этапа. Недостаточные условия дают скомпрометированный результат: дополнительную боль, загрязнение, кровотечение или осложнение.
+An operating table, authorization, skill, anesthesia and facility are not hard requirements. Surgery can be performed anywhere. Patient movement, unsterile tools and an unprepared field cause displaced contact, contamination, bleeding and infection risk.
 
-## Инструменты
+An incision is local. Opening one point does not expose the whole body zone. Front, rear, left and right are separate surfaces.
+
+## Instruments
 
 <Box>
-<GuideEntityEmbed Entity="Cautery" Caption="подготовка поля и гемостаз"/>
-<GuideEntityEmbed Entity="Scalpel" Caption="разрез, дебридмент, доступ"/>
-<GuideEntityEmbed Entity="Hemostat" Caption="гемостаз и работа с сосудами"/>
-<GuideEntityEmbed Entity="Retractor" Caption="разведение и закрытие тканей"/>
+<GuideEntityEmbed Entity="Cautery" Caption="cautery and bleeding control"/>
+<GuideEntityEmbed Entity="Scalpel" Caption="incision, debridement and forensic dissection"/>
+<GuideEntityEmbed Entity="Hemostat" Caption="hemostasis and foreign-body extraction"/>
+<GuideEntityEmbed Entity="Retractor" Caption="tissue exposure; may remain attached"/>
 </Box>
 <Box>
-<GuideEntityEmbed Entity="Drill" Caption="кость и череп"/>
-<GuideEntityEmbed Entity="Saw" Caption="отделение органа или конечности"/>
-<GuideEntityEmbed Entity="SyringeSaline" Caption="промывание"/>
-<GuideEntityEmbed Entity="MedicatedSuture" Caption="восстановление и закрытие"/>
+<GuideEntityEmbed Entity="Drill" Caption="bone reduction, fixation and cranial access"/>
+<GuideEntityEmbed Entity="Saw" Caption="organ or limb separation"/>
+<GuideEntityEmbed Entity="SyringeSaline" Caption="sterile irrigation"/>
+<GuideEntityEmbed Entity="MedicatedSuture" Caption="vessels, organs, tendons, nerves, grafts and closure"/>
 </Box>
 <Box>
-<GuideEntityEmbed Entity="Multitool" Caption="киберимпланты"/>
-<GuideEntityEmbed Entity="NCSurgeryDebugMultitool" Caption="административная проверка всех этапов"/>
+<GuideEntityEmbed Entity="Multitool" Caption="cyberware installation, repair and calibration"/>
+<GuideEntityEmbed Entity="NCSurgicalDrain" Caption="immediate and continuous cavity drainage"/>
+<GuideEntityEmbed Entity="NCSurgeryDebugMultitool" Caption="test instrument with every surgical capability"/>
 </Box>
 
-Стрелка [color=#58e6d9]→[/color] означает следующий инструмент. Начальный Cautery можно пропустить в последовательностях, где сразу после него указан Scalpel.
+## Opening and closing a site
 
-## Раны и сосуды
+1. Draw a scalpel stroke over the intended site at the required depth.
+2. Control visible bleeding with a hemostat or cautery.
+3. Retract the incision. Attach the retractor when continuous exposure is required.
+4. Increase depth only after the preceding layer is exposed.
+5. Perform the structural operation at the structure shown in the field.
+6. Detach instruments from the right panel.
+7. Irrigate or debride contaminated tissue.
+8. Suture the same incision until it is closed.
+9. Repeat the full scan.
 
-### 1. Обработка глубокой раны
+## Operations
 
-Цель: тяжёлая открытая рана, загрязнение или некроз.
+### External or internal bleeding
 
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture.
+1. Select the wound point and depth.
+2. Apply Hemostasis or Cautery.
+3. For a damaged vessel, expose the vascular layer and apply Vascular repair.
+4. Verify both bleed channels, then close.
 
-### 2. Восстановление сосуда
+### Irrigation and debridement
 
-Цель: сосудистое повреждение или продолжающийся тяжёлый источник крови.
+1. Open access to the contaminated depth.
+2. Apply Sterile irrigation over the wound.
+3. Apply Debridement to infected or necrotic tissue.
+4. Irrigate again and close.
 
-Cautery → Scalpel → Hemostat → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
+### Foreign-body extraction
 
-### 3. Промывание раны
+1. Open access to the depth reported by the scanner.
+2. Select Foreign body extraction on the hemostat and apply it to the wound marker.
+3. The projectile becomes a physical item in a free hand or beside the patient.
+4. Control bleeding, irrigate and close.
 
-Цель: загрязнённая или инфицированная рана.
+### Fracture treatment
 
-Cautery → Scalpel → Hemostat → Retractor → SyringeSaline → Retractor → MedicatedSuture.
+1. Expose the structural layer over the confirmed fracture.
+2. Apply Bone reduction to remove displacement.
+3. Apply Bone fixation to stabilize the bone.
+4. Irrigate an open fracture, then close.
 
-### 4. Извлечение инородного тела
+### Tendon or nerve repair
 
-Цель: рана с отдельным инородным телом.
+1. Expose the displayed tendon or nerve.
+2. Apply Tendon repair or Nerve repair directly to the structure.
+3. Close the incision.
 
-Cautery → Scalpel → Hemostat → Retractor → Hemostat → Retractor → MedicatedSuture.
+### Organ repair
 
-## Кости, сухожилия и нервы
+1. Open the cavity and retract until the organ is visible.
+2. Apply Organ repair inside the organ rectangle.
+3. Control cavity bleeding, irrigate and close.
 
-### 5. Фиксация перелома
+### Cavity drainage
 
-Цель: подтверждённый перелом выбранной области.
+1. Open and retract the thoracic, abdominal, pelvic or cranial cavity.
+2. Apply Cavity drainage with the surgical drain to remove an initial volume.
+3. Attach the same drain to the incision with RMB for continuous evacuation.
+4. Stop the source of internal bleeding before relying on the drain.
+5. Detach the drain from the right panel after a full scan confirms that the cavity is clear.
 
-Cautery → Scalpel → Hemostat → Retractor → Drill → Drill → Drill → MedicatedSuture.
+### Cranial and brain surgery
 
-### 6. Восстановление сухожилия
+1. Select Head and the correct surface.
+2. Incise and retract to the skull.
+3. Apply Cranial access to the skull.
+4. Advance to the brain and perform repair or extraction.
+5. Control bleeding and close.
 
-Цель: разрыв или потеря целостности сухожилия.
+### Eye repair or removal
 
-Cautery → Scalpel → Hemostat → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
+1. Select Eyes, expose the eye structure and apply Ophthalmic repair.
+2. For removal, apply Organ separation to the exposed eye.
+3. Control bleeding and close.
 
-### 7. Восстановление периферического нерва
+### Organ removal
 
-Цель: неврологический дефицит или повреждение нерва.
+1. Expose the organ and control its bleeding.
+2. Apply Organ separation with the saw directly to the organ.
+3. The organ becomes a physical entity.
+4. Repair vessels and close.
 
-Cautery → Scalpel → Hemostat → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
+### Limb amputation
 
-## Органы, мозг и глаза
+1. Select the exact arm, hand, leg or foot.
+2. Incise, retract and control bleeding at the separation line.
+3. Apply Controlled amputation with the saw.
+4. Repair vessels and close the stump.
 
-### 8. Открытие доступа к внутреннему органу
+### Transplantation or limb reattachment
 
-Цель: внутренний орган в выбранной области. Эта операция оставляет доступ открытым для последующего ремонта.
+1. Select the missing zone.
+2. Hold the compatible detached part or prosthesis and click it on the patient. The popup confirms staging.
+3. Prepare the receiving site.
+4. Apply Transplant anastomosis with the suture.
+5. Repair vessels and nerves, then close.
 
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor.
+### Cyberware installation and service
 
-### 9. Восстановление открытого органа
-
-Условие: доступ к органу уже открыт операцией № 8.
-
-Cautery → MedicatedSuture.
-
-### 10. Декомпрессия черепа
-
-Цель: повреждение черепа или внутричерепное осложнение.
-
-Cautery → Scalpel → Hemostat → Retractor → Drill → SyringeSaline → Retractor → MedicatedSuture.
-
-### 11. Восстановление мозга
-
-Цель: повреждение мозга.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
-
-### 12. Восстановление глаза
-
-Цель: повреждённые глаза.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
-
-### 13. Удаление внутреннего органа
-
-Цель: выбранный внутренний орган.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor → Saw → Retractor → MedicatedSuture.
-
-### 14. Удаление глаза
-
-Цель: глаза.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor → Saw → Retractor → MedicatedSuture.
-
-### 15. Трансплантация внутреннего органа
-
-Условие: категория органа свободна; совместимый орган находится в руке или рядом.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
-
-### 16. Трансплантация глаза
-
-Условие: глаза удалены; совместимый трансплантат находится в руке или рядом.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
-
-## Конечности
-
-### 17. Ампутация конечности
-
-Цель: выбранная рука, кисть, нога или стопа.
-
-Cautery → Scalpel → Hemostat → Retractor → Saw → Retractor → MedicatedSuture.
-
-### 18. Повторное присоединение конечности
-
-Условие: категория конечности свободна; совместимая отделённая часть находится в руке или рядом.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
-
-## Судебная медицина
-
-### 19. Региональная аутопсия
-
-Условие: пациент мёртв. Цель: выбранная область тела.
-
-Scalpel → Scalpel → Scalpel → MedicatedSuture.
-
-## Киберимпланты
-
-### 20. Установка внутреннего киберимпланта
-
-Условие: совместимый физический модуль находится в руке или рядом; слот органа-носителя свободен.
-
-Cautery → Scalpel → Hemostat → Retractor → Multitool → Retractor → MedicatedSuture.
-
-### 21. Удаление внутреннего киберимпланта
-
-Условие: в выбранном органе установлен совместимый модуль.
-
-Cautery → Scalpel → Hemostat → Retractor → Multitool → Retractor → MedicatedSuture.
-
-## Трансплантат
-
-Трансплантатом является реальная отделённая часть тела или заводская механическая замена. Категория должна совпадать со свободной категорией пациента. После присоединения часть входит в живой граф органов; механическая замена автоматически калибрует нейроинтерфейс.
+1. Select the host zone.
+2. Hold the physical implant and click it on the patient to stage it.
+3. Expose the compatible host structure.
+4. Apply Cyberware with the multitool. Installation uses a real compatible slot and calibrates the interface.
+5. With no implant staged, applying the same mode directly to an exposed installed module removes that physical module.
+6. Repair, cooling and power service use the module's physical service consumables rather than the surgical installation mode.
+7. Close and verify the Cyberware scanner tab.
+
+### Regional autopsy
+
+1. The patient must be dead.
+2. Select the region and surface.
+3. Use Forensic dissection to expose the required structures.
+4. Record the findings and suture the incision.
+
+## Persistence
+
+Wounds, missing anatomy, cyberware, cavity blood, incision geometry, depth, contamination and closure survive a round transition. Runtime sessions and attached physical instruments do not.
 </Document>

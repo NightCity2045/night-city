@@ -95,6 +95,38 @@ public sealed partial class NCImpactBloodProfilePrototype : IPrototype
 
     [DataField]
     public int MaximumClientBursts { get; private set; } = 64;
+
+    /// <summary>
+    /// Visual stages for blood lost onto one floor tile. The server replaces one cleanable decal as volume grows
+    /// instead of creating solution puddles which can recursively spread across the room.
+    /// </summary>
+    [DataField]
+    public List<NCBloodPoolStage> PoolStages { get; private set; } = new();
+
+    [DataField]
+    public float MaximumPoolVolumePerTile { get; private set; } = 90f;
+
+    [DataField]
+    public int MaximumPoolTilesPerGrid { get; private set; } = 256;
+
+    /// <summary>
+    /// Keeps the authored stain inside its tile even if the bleeding body stands directly on an edge.
+    /// </summary>
+    [DataField]
+    public float PoolTileMargin { get; private set; } = 0.16f;
+}
+
+/// <summary>
+/// One data-driven visual threshold for aggregated ongoing blood loss.
+/// </summary>
+[DataDefinition]
+public sealed partial class NCBloodPoolStage
+{
+    [DataField(required: true)]
+    public float MinimumVolume { get; private set; }
+
+    [DataField(required: true)]
+    public ProtoId<DecalPrototype> Decal { get; private set; }
 }
 
 /// <summary>

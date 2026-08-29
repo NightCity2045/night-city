@@ -222,10 +222,14 @@ public readonly record struct NCMedicalDrugSummary(
 [Serializable, NetSerializable]
 public readonly record struct NCMedicalSurgerySummary(
     ProtoId<OrganCategoryPrototype> Region,
-    ProtoId<NCSurgeryProcedurePrototype> Procedure,
+    ProtoId<NCSurgeryProcedurePrototype>? Procedure,
     int StepIndex,
-    NCSurgerySessionState State,
-    NCSurgicalAccessDepth AccessDepth);
+    NCSurgerySessionState? State,
+    NCSurgicalAccessDepth AccessDepth,
+    int IncisionCount,
+    int OpenIncisionCount,
+    float Contamination,
+    int AttachedInstrumentCount);
 
 [Serializable, NetSerializable]
 public readonly record struct NCMedicalHistorySummary(

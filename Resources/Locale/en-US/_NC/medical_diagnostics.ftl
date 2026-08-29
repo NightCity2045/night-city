@@ -430,3 +430,5 @@ nc-medical-diagnostics-value-blood-transfusion = blood transfusion
 nc-medical-diagnostics-value-defibrillation = defibrillation
 nc-medical-diagnostics-value-success = completed
 nc-medical-diagnostics-value-compromised = completed with complications
+nc-medical-diagnostics-radiograph-title = X-RAY PROJECTION
+nc-medical-diagnostics-radiograph-caption = Bones and disclosed internal structures

@@ -24,3 +24,22 @@
   criticalUpdateInterval: 0.25s
   activeBleedingUpdateInterval: 0.5s
   stableInjuredUpdateInterval: 1s
+  cavityDrainUpdateInterval: 0.5s
+  cavityPhysiology:
+    Cranial:
+      brainFunctionPenaltyAtFullCompression: 0.85
+      painAtFullPressure: 18
+      shockAtFullPressure: 0.12
+    Thoracic:
+      cardiacOutputPenaltyAtFullCompression: 0.45
+      respiratoryTransferPenaltyAtFullCompression: 0.75
+      painAtFullPressure: 16
+      shockAtFullPressure: 0.25
+    Abdominal:
+      cardiacOutputPenaltyAtFullCompression: 0.15
+      painAtFullPressure: 14
+      shockAtFullPressure: 0.2
+    Pelvic:
+      cardiacOutputPenaltyAtFullCompression: 0.2
+      painAtFullPressure: 16
+      shockAtFullPressure: 0.28

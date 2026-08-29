@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Shared._NC.Medical.Surgery;
+
 namespace Content.Shared._NC.Medical.Anatomy;
 
 /// <summary>
@@ -187,6 +189,16 @@ public sealed partial class NCSurgicalSiteComponent : Component
 
     [DataField]
     public HashSet<string> TemporaryDevices = [];
+
+    /// <summary>
+    /// Authoritative local incision geometry. AccessDepth remains a compatibility summary for legacy
+    /// procedures; freeform surgery resolves access from these bounded records.
+    /// </summary>
+    [DataField]
+    public List<NCSurgicalIncisionRecord> Incisions = [];
+
+    [DataField]
+    public uint SpatialRevision;
 }
 
 public enum NCAnatomicalMaterialKind : byte

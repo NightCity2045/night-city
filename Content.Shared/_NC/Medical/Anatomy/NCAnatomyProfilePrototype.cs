@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Shared._NC.Combat.Targeting;
+using Content.Shared._NC.Medical.Surgery;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.Medical.Anatomy;
@@ -34,4 +35,10 @@ public sealed partial class NCAnatomyProfilePrototype : IPrototype
     /// </summary>
     [DataField]
     public ProtoId<NCTargetDollProfilePrototype> TargetDoll { get; private set; }
+
+    /// <summary>
+    /// Spatial surgery rules used by the player-operated freeform field for this anatomy.
+    /// </summary>
+    [DataField]
+    public ProtoId<NCFreeformSurgeryProfilePrototype> SurgicalField { get; private set; }
 }

@@ -5,6 +5,7 @@
 using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
 using Content.Server._NC.Combat.Targeting;
@@ -35,6 +36,18 @@ public sealed class NCSurgerySystemTest : GameTest
     private static readonly EntProtoId HumanMob = "MobHuman";
     private static readonly EntProtoId OperatingTable = "OperatingTable";
     private static readonly EntProtoId DebugMultitool = "NCSurgeryDebugMultitool";
+    private static readonly ProtoId<NCFreeformSurgeryProfilePrototype> HumanFreeformSurgery = "NCHumanFreeformSurgery";
+    private static readonly ProtoId<NCSurgeryToolCapabilityPrototype> DisinfectionCapability = "NCSurgeryToolDisinfection";
+    private static readonly ProtoId<NCSurgeryToolCapabilityPrototype> IncisionCapability = "NCSurgeryToolIncision";
+    private static readonly ProtoId<NCSurgeryToolCapabilityPrototype> AmputationCapability = "NCSurgeryToolAmputation";
+    private static readonly ProtoId<NCSurgeryToolCapabilityPrototype> TransplantCapability = "NCSurgeryToolTransplant";
+    private static readonly ProtoId<NCSurgeryToolCapabilityPrototype> CyberwareCapability = "NCSurgeryToolCyberware";
+    private static readonly ProtoId<NCTargetZonePrototype> ChestZone = "NCZoneChest";
+    private static readonly ProtoId<NCTargetZonePrototype> LeftArmZone = "NCZoneArmLeft";
+    private static readonly ProtoId<NCTargetZonePrototype> HeadZone = "NCZoneHead";
+    private static readonly ProtoId<OrganCategoryPrototype> HeartCategory = "Heart";
+    private static readonly ProtoId<OrganCategoryPrototype> LeftArmCategory = "ArmLeft";
+    private static readonly ProtoId<OrganCategoryPrototype> LeftArmBoneCategory = "ArmBoneLeft";
     private static readonly ProtoId<NCSurgeryProcedurePrototype> VascularRepair = "NCSurgeryVascularRepair";
     private static readonly ProtoId<NCSurgeryProcedurePrototype> DeepWoundTreatment = "NCSurgeryDeepWoundTreatment";
     private static readonly ProtoId<NCSurgeryProcedurePrototype> ForeignBodyExtraction = "NCSurgeryForeignBodyExtraction";
@@ -45,6 +58,7 @@ public sealed class NCSurgerySystemTest : GameTest
     [SidedDependency(Side.Server)] private NCPharmacologySystem _pharmacology = default!;
     [SidedDependency(Side.Server)] private NCSurgerySystem _surgery = default!;
     [SidedDependency(Side.Server)] private NCSurgeryInteractionSystem _surgeryInteraction = default!;
+    [SidedDependency(Side.Server)] private NCFreeformSurgeryEffectSystem _freeformEffects = default!;
     [SidedDependency(Side.Server)] private NCTargetingSelectionSystem _targeting = default!;
     [SidedDependency(Side.Server)] private NCOrganDetachmentSystem _detachment = default!;
 
@@ -154,6 +168,47 @@ public sealed class NCSurgerySystemTest : GameTest
             }
         }
 
+        var field = _prototypes.Index(HumanFreeformSurgery);
+        var configuredActions = field.Tools.Values.Select(definition => definition.Action).ToHashSet();
+        Assert.Multiple(() =>
+        {
+            Assert.That(field.MaximumStrokePoints, Is.InRange(2, 64));
+            Assert.That(field.MaximumPersistentIncisions, Is.InRange(1, 128));
+            Assert.That(field.Tools.Keys, Is.SupersetOf(
+                _prototypes.EnumeratePrototypes<NCSurgeryToolCapabilityPrototype>()
+                    .Select(capability => (ProtoId<NCSurgeryToolCapabilityPrototype>) capability.ID)));
+            Assert.That(configuredActions, Is.SupersetOf(Enum.GetValues<NCFreeformSurgeryAction>()));
+            Assert.That(field.Structures.Keys.Select(category => category.Id),
+                Is.SupersetOf(new[] { "Brain", "Heart", "Lungs", "Skull", "PelvisBone" }));
+            Assert.That(field.CyberwareSlots.Keys,
+                Is.SupersetOf(_prototypes.EnumeratePrototypes<NCCyberwareSlotPrototype>()
+                    .Select(slot => (ProtoId<NCCyberwareSlotPrototype>) slot.ID)),
+                "Every installable internal slot needs deterministic surgical-atlas geometry.");
+        });
+
+        foreach (var definition in field.Tools.Values)
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(definition.MinimumDepth, Is.InRange(0f, 1f));
+                Assert.That(definition.MaximumDepth, Is.InRange(definition.MinimumDepth, 1f));
+                Assert.That(definition.Radius, Is.GreaterThan(0f));
+                Assert.That(definition.PowerPerUnit, Is.GreaterThan(0f));
+            });
+        }
+
+        foreach (var definition in field.CyberwareSlots.Values)
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(definition.Position.X, Is.InRange(0f, 1f));
+                Assert.That(definition.Position.Y, Is.InRange(0f, 1f));
+                Assert.That(definition.Size.X, Is.GreaterThan(0f));
+                Assert.That(definition.Size.Y, Is.GreaterThan(0f));
+                Assert.That(definition.MinimumDepth, Is.InRange(0f, 1f));
+            });
+        }
+
         // The authoritative override is guarded structurally: surgery data cannot regain RED/check fields.
         var forbidden = new[] { "skill", "check", "luck", "difficulty", "dv" };
         foreach (var type in new[]
@@ -182,6 +237,330 @@ public sealed class NCSurgerySystemTest : GameTest
                                                         property.PropertyType == typeof(Guid)),
                 Is.False,
                 "An untrusted direct choice must not carry a patient, tool, live target, graft, or wound identity.");
+        });
+
+        var freeformMessages = new[]
+        {
+            typeof(NCFreeformSurgeryState),
+            typeof(NCFreeformSurgeryRefreshRequest),
+            typeof(NCFreeformSurgerySelectionRequest),
+            typeof(NCFreeformSurgeryCapabilityRequest),
+            typeof(NCInteractiveSurgeryActionRequest),
+            typeof(NCFreeformSurgeryAttachRequest),
+            typeof(NCFreeformSurgeryDetachRequest),
+            typeof(NCFreeformSurgeryCloseRequest),
+        };
+        foreach (var message in freeformMessages)
+        {
+            var properties = message.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            Assert.That(properties.Any(property => property.PropertyType == typeof(EntityUid) ||
+                                                   property.PropertyType == typeof(NetEntity)),
+                Is.False,
+                $"{message.Name} must expose only its private session id, bounded input and opaque handles.");
+        }
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void FreeformFieldDisinfectsAndIncisesAuthoritativePatientState()
+    {
+        var patient = SSpawn(HumanMob);
+        var surgeon = SSpawn(HumanMob);
+        var tool = SSpawn(DebugMultitool);
+        var profile = _prototypes.Index(HumanFreeformSurgery);
+        var toolComponent = SComp<NCSurgeryToolComponent>(tool);
+
+        Assert.That(_anatomy.TryGetZone(patient, ChestZone, out _, out var region), Is.True);
+        Assert.That(_anatomy.TryGetOrgan(patient, HeartCategory, out var heart), Is.True);
+        var site = SComp<NCSurgicalSiteComponent>(region);
+        var heartIntegrity = SComp<NCOrganIntegrityComponent>(heart);
+        var integrityBefore = heartIntegrity.CurrentIntegrity;
+        site.Contamination = 0.8f;
+
+        var preparation = _freeformEffects.ApplyStroke(new NCFreeformSurgeryEffectContext(
+            surgeon,
+            patient,
+            region,
+            tool,
+            toolComponent,
+            ChestZone,
+            NCWoundSurface.Front,
+            0f,
+            new[] { new Vector2(0.25f, 0.5f), new Vector2(0.75f, 0.5f) },
+            profile.Tools[DisinfectionCapability],
+            toolComponent.Capabilities[DisinfectionCapability],
+            toolComponent.Sterility,
+            profile.UnpreparedFieldContamination,
+            profile.MinimumOpenRetraction,
+            null,
+            false,
+            false,
+            profile.IncidentalTendonRuptureThreshold,
+            profile.IncidentalBoneCrackThreshold,
+            profile.IncidentalBoneBreakThreshold));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(preparation.Accepted, Is.True);
+            Assert.That(site.Contamination, Is.LessThan(0.8f));
+            Assert.That(site.Incisions, Is.Empty);
+        });
+
+        var woundCount = SEntMan.EnsureComponent<NCWoundContainerComponent>(patient).Wounds.Count;
+        var incision = _freeformEffects.ApplyStroke(new NCFreeformSurgeryEffectContext(
+            surgeon,
+            patient,
+            region,
+            tool,
+            toolComponent,
+            ChestZone,
+            NCWoundSurface.Front,
+            0.8f,
+            new[] { new Vector2(0.40f, 0.57f), new Vector2(0.64f, 0.57f) },
+            profile.Tools[IncisionCapability],
+            toolComponent.Capabilities[IncisionCapability],
+            toolComponent.Sterility,
+            profile.UnpreparedFieldContamination,
+            profile.MinimumOpenRetraction,
+            heart,
+            false,
+            false,
+            profile.IncidentalTendonRuptureThreshold,
+            profile.IncidentalBoneCrackThreshold,
+            profile.IncidentalBoneBreakThreshold));
+
+        var wounds = SComp<NCWoundContainerComponent>(patient).Wounds.Values.ToArray();
+        Assert.Multiple(() =>
+        {
+            Assert.That(incision.Accepted, Is.True);
+            Assert.That(site.Incisions, Has.Count.EqualTo(1));
+            Assert.That(site.Incisions[0].TargetZone, Is.EqualTo(ChestZone));
+            Assert.That(site.Incisions[0].Depth, Is.EqualTo(0.8f));
+            Assert.That(wounds, Has.Length.EqualTo(woundCount + 1));
+            Assert.That(wounds.Any(wound => wound.InternalBleedRate > 0f), Is.True);
+            Assert.That(heartIntegrity.CurrentIntegrity, Is.LessThan(integrityBefore));
+            Assert.That(site.SpatialRevision, Is.EqualTo(2));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void FreeformAmputationDetachesTheSelectedLimbInsteadOfItsBone()
+    {
+        var patient = SSpawn(HumanMob);
+        var surgeon = SSpawn(HumanMob);
+        var tool = SSpawn(DebugMultitool);
+        var profile = _prototypes.Index(HumanFreeformSurgery);
+        var toolComponent = SComp<NCSurgeryToolComponent>(tool);
+
+        Assert.That(_anatomy.TryGetZone(patient, LeftArmZone, out _, out var arm), Is.True);
+        Assert.That(_anatomy.TryGetOrgan(patient, LeftArmBoneCategory, out var armBone), Is.True);
+
+        var result = _freeformEffects.ApplyStroke(new NCFreeformSurgeryEffectContext(
+            surgeon,
+            patient,
+            arm,
+            tool,
+            toolComponent,
+            LeftArmZone,
+            NCWoundSurface.Front,
+            0.8f,
+            new[] { new Vector2(0.2f, 0.5f), new Vector2(0.8f, 0.5f) },
+            profile.Tools[AmputationCapability],
+            toolComponent.Capabilities[AmputationCapability],
+            toolComponent.Sterility,
+            profile.UnpreparedFieldContamination,
+            profile.MinimumOpenRetraction,
+            armBone,
+            true,
+            false,
+            profile.IncidentalTendonRuptureThreshold,
+            profile.IncidentalBoneCrackThreshold,
+            profile.IncidentalBoneBreakThreshold));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Accepted, Is.True);
+            Assert.That(_anatomy.TryGetOrgan(patient, LeftArmCategory, out _), Is.False);
+            Assert.That(_anatomy.TryGetOrgan(patient, LeftArmBoneCategory, out _), Is.False,
+                "The internal arm bone must leave with the detached limb subtree.");
+            Assert.That(SComp<OrganComponent>(arm).Body, Is.Null);
+            Assert.That(SComp<ChildOrganComponent>(arm).Parent, Is.Null);
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void FreeformTransplantAttachesAStagedProsthesisToTheMissingZone()
+    {
+        var patient = SSpawn(HumanMob);
+        var surgeon = SSpawn(HumanMob);
+        var tool = SSpawn(DebugMultitool);
+        var replacement = SSpawn("NCOrganHumanCyberArmLeft");
+        var profile = _prototypes.Index(HumanFreeformSurgery);
+        var toolComponent = SComp<NCSurgeryToolComponent>(tool);
+
+        Assert.That(_detachment.TryDetachOrgan(patient, LeftArmCategory, out _), Is.True);
+        Assert.That(_anatomy.TryGetOrgan(patient, "Torso", out var torso), Is.True);
+        Assert.That(_targeting.TrySetSelection(
+                surgeon,
+                new NCTargetingState(NCTargetingMode.SelectedZone, LeftArmZone),
+                out _,
+                out _),
+            Is.True);
+        Assert.That(_surgeryInteraction.TryStageCyberware(surgeon, patient, replacement), Is.True);
+
+        var result = _freeformEffects.ApplyStroke(new NCFreeformSurgeryEffectContext(
+            surgeon,
+            patient,
+            torso,
+            tool,
+            toolComponent,
+            LeftArmZone,
+            NCWoundSurface.Front,
+            0.8f,
+            new[] { new Vector2(0.35f, 0.5f), new Vector2(0.65f, 0.5f) },
+            profile.Tools[TransplantCapability],
+            toolComponent.Capabilities[TransplantCapability],
+            toolComponent.Sterility,
+            profile.UnpreparedFieldContamination,
+            profile.MinimumOpenRetraction,
+            null,
+            false,
+            false,
+            profile.IncidentalTendonRuptureThreshold,
+            profile.IncidentalBoneCrackThreshold,
+            profile.IncidentalBoneBreakThreshold));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Accepted, Is.True);
+            Assert.That(_anatomy.TryGetOrgan(patient, LeftArmCategory, out var attached), Is.True);
+            Assert.That(attached, Is.EqualTo(replacement));
+            Assert.That(SComp<ChildOrganComponent>(replacement).Parent, Is.EqualTo(torso));
+            Assert.That(SEntMan.HasComponent<NCSurgeryGameplaySelectionComponent>(surgeon), Is.False);
+        });
+
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void FreeformCyberwareInstallsAStagedInternalImplant()
+    {
+        var patient = SSpawn(HumanMob);
+        var surgeon = SSpawn(HumanMob);
+        var tool = SSpawn(DebugMultitool);
+        var implant = SSpawn("NCImplantNeuralLinkMk1");
+        var profile = _prototypes.Index(HumanFreeformSurgery);
+        var toolComponent = SComp<NCSurgeryToolComponent>(tool);
+
+        Assert.That(_anatomy.TryGetOrgan(patient, "Head", out var head), Is.True);
+        Assert.That(_targeting.TrySetSelection(
+                surgeon,
+                new NCTargetingState(NCTargetingMode.SelectedZone, HeadZone),
+                out _,
+                out _),
+            Is.True);
+        Assert.That(_surgeryInteraction.TryStageCyberware(surgeon, patient, implant), Is.True);
+
+        var blocked = _freeformEffects.ApplyStroke(new NCFreeformSurgeryEffectContext(
+            surgeon,
+            patient,
+            head,
+            tool,
+            toolComponent,
+            HeadZone,
+            NCWoundSurface.Front,
+            0.8f,
+            new[] { new Vector2(0.35f, 0.5f), new Vector2(0.65f, 0.5f) },
+            profile.Tools[CyberwareCapability],
+            toolComponent.Capabilities[CyberwareCapability],
+            toolComponent.Sterility,
+            profile.UnpreparedFieldContamination,
+            profile.MinimumOpenRetraction,
+            null,
+            false,
+            true,
+            profile.IncidentalTendonRuptureThreshold,
+            profile.IncidentalBoneCrackThreshold,
+            profile.IncidentalBoneBreakThreshold));
+        Assert.Multiple(() =>
+        {
+            Assert.That(blocked.Accepted, Is.False);
+            Assert.That(blocked.Failure, Is.EqualTo(NCFreeformSurgeryFailure.SurgicalAccessClosed));
+            Assert.That(SComp<NCCyberwareComponent>(implant).InstalledSlot, Is.Null);
+        });
+
+        var site = SComp<NCSurgicalSiteComponent>(head);
+        site.Incisions.Add(new NCSurgicalIncisionRecord
+        {
+            IncisionId = Guid.NewGuid(),
+            TargetZone = HeadZone,
+            Surface = NCWoundSurface.Front,
+            Polyline = [new Vector2(0.35f, 0.5f), new Vector2(0.65f, 0.5f)],
+            Depth = 0.8f,
+        });
+
+        var result = _freeformEffects.ApplyStroke(new NCFreeformSurgeryEffectContext(
+            surgeon,
+            patient,
+            head,
+            tool,
+            toolComponent,
+            HeadZone,
+            NCWoundSurface.Front,
+            0.8f,
+            new[] { new Vector2(0.35f, 0.5f), new Vector2(0.65f, 0.5f) },
+            profile.Tools[CyberwareCapability],
+            toolComponent.Capabilities[CyberwareCapability],
+            toolComponent.Sterility,
+            profile.UnpreparedFieldContamination,
+            profile.MinimumOpenRetraction,
+            null,
+            false,
+            true,
+            profile.IncidentalTendonRuptureThreshold,
+            profile.IncidentalBoneCrackThreshold,
+            profile.IncidentalBoneBreakThreshold));
+
+        var installed = SComp<NCCyberwareComponent>(implant);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Accepted, Is.True);
+            Assert.That(installed.InstalledSlot?.Id, Is.EqualTo("NCSlotNeuralCore"));
+            Assert.That(SComp<ChildOrganComponent>(implant).Parent, Is.EqualTo(head));
+            Assert.That(installed.Calibrated, Is.True);
+            Assert.That(installed.NeuralState, Is.EqualTo(NCCyberwareNeuralState.Linked));
+            Assert.That(SEntMan.HasComponent<NCSurgeryGameplaySelectionComponent>(surgeon), Is.False);
+        });
+
+        var removal = _freeformEffects.ApplyStroke(new NCFreeformSurgeryEffectContext(
+            surgeon,
+            patient,
+            head,
+            tool,
+            toolComponent,
+            HeadZone,
+            NCWoundSurface.Front,
+            0.8f,
+            new[] { new Vector2(0.35f, 0.5f), new Vector2(0.65f, 0.5f) },
+            profile.Tools[CyberwareCapability],
+            toolComponent.Capabilities[CyberwareCapability],
+            toolComponent.Sterility,
+            profile.UnpreparedFieldContamination,
+            profile.MinimumOpenRetraction,
+            implant,
+            false,
+            true,
+            profile.IncidentalTendonRuptureThreshold,
+            profile.IncidentalBoneCrackThreshold,
+            profile.IncidentalBoneBreakThreshold));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(removal.Accepted, Is.True);
+            Assert.That(installed.InstalledSlot, Is.Null);
+            Assert.That(SComp<ChildOrganComponent>(implant).Parent, Is.Null);
         });
     }
 
