@@ -152,7 +152,16 @@ public sealed partial class NCFixerDealOrchestrationSystem : EntitySystem
             return (await _obligations.GetAsync(obligationId, true))?.Snapshot.Status ==
                 NCSocialObligationStatus.Fulfilled;
         if (leg.Kind == NCFixerDealLegKind.DeadDrop)
-            return _handoffs.TryGetValue((dealId, leg.LegId), out var entities) && entities.Count > 0;
+        {
+            if (!_handoffs.TryGetValue((dealId, leg.LegId), out var entities) || entities.Count == 0 ||
+                !leg.HandoffZone.IsValid || !Guid.TryParse(leg.DefinitionId, out var stockRaw))
+                return false;
+            var stock = await _assets.GetStockNodeAsync(new NCStockNodeId(stockRaw), true);
+            // A physical marker alone is not delivery: the canonical stock must be at this drop and owned by the recipient.
+            return stock?.Snapshot.Owner == leg.To &&
+                   stock.Snapshot.SemanticLocationKey == leg.HandoffZone.ToString() &&
+                   stock.Snapshot.CommodityBatchIds.Count + stock.Snapshot.ItemIds.Count > 0;
+        }
         return leg.Kind is NCFixerDealLegKind.Information or NCFixerDealLegKind.Access;
     }
 

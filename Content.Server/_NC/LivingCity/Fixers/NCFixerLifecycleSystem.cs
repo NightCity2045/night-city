@@ -4,11 +4,14 @@
 
 using Content.Server.Database;
 using Content.Server._NC.City.ZoneTemplates;
+using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.City.ZoneTemplates;
 using Content.Shared._NC.City.ZoneTemplates.Prototypes;
+using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Fixers;
+using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Prototypes;
 
@@ -23,12 +26,14 @@ public sealed partial class NCFixerLifecycleSystem : EntitySystem
     private const int RecoveryPageSize = 100;
     private const int MaximumRecoveredPerType = 10_000;
     private static readonly ProtoId<NCFixerPolicyPrototype> DefaultPolicy = "Default";
+    private static readonly ProtoId<NCNightMarketPolicyPrototype> DefaultNightMarketPolicy = "Default";
 
     [Dependency] private IServerDbManager _database = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCFixerRegistrySystem _fixers = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCZoneTemplateSystem _templates = default!;
+    [Dependency] private NCCityActorRegistrySystem _actors = default!;
 
     private readonly PriorityQueue<DueWork, long> _due = new();
     private readonly HashSet<DueWork> _queued = [];
@@ -40,6 +45,15 @@ public sealed partial class NCFixerLifecycleSystem : EntitySystem
     private readonly Dictionary<NCNightMarketId, NCNightMarketRecord> _runtimeMarkets = [];
     private bool _active;
     private int _generation;
+
+    public bool IsActive => _active;
+    public int QueuedWorkCount => _queued.Count;
+    public int InFlightCount => _inFlight.Count;
+    public int RuntimeNightMarketCount => _runtimeMarkets.Count;
+    public int ActiveDeploymentCount => _deployments.Count;
+    public long AttendanceProjectionFailures { get; private set; }
+    public long ResourceValidationFailures { get; private set; }
+    public string? LastError { get; private set; }
 
     public override void Initialize()
     {
@@ -238,15 +252,39 @@ public sealed partial class NCFixerLifecycleSystem : EntitySystem
             QueueNightMarket(market, now);
             return;
         }
+
+        if (target == NCNightMarketStatus.Open)
+        {
+            var attendance = await PrepareAttendanceForOpeningAsync(market);
+            market = attendance.Market;
+            if (attendance.Error != null)
+            {
+                RecordResourceFailure(id, attendance.Error);
+                await CancelNightMarketAsync(market, "missing-physical-attendance");
+                return;
+            }
+        }
         var worldEvent = NCPersistentIdentity.Command("night-market", "world-event",
             $"{id}.{market.AggregateVersion}.{target}");
         var result = await _fixers.AdvanceNightMarketAsync(id, market.AggregateVersion, target.Value,
             worldEvent, "night-market-lifecycle");
         if (result.NightMarket == null)
+        {
+            if (target is NCNightMarketStatus.Assembling or NCNightMarketStatus.Open && result.Error != null)
+            {
+                RecordResourceFailure(id, result.Error);
+                var current = await _fixers.GetNightMarketAsync(id, true);
+                if (current != null)
+                    await CancelNightMarketAsync(current, "resource-validation-failed");
+            }
             return;
+        }
         _runtimeMarkets[id] = result.NightMarket;
         if (target == NCNightMarketStatus.Assembling)
+        {
+            await ArrangeAttendanceAsync(result.NightMarket);
             EnsureDeployment(result.NightMarket);
+        }
         else if (target == NCNightMarketStatus.Open)
             SetVenueOpen(id, true);
         else if (target == NCNightMarketStatus.Closing)
@@ -262,6 +300,9 @@ public sealed partial class NCFixerLifecycleSystem : EntitySystem
     private void EnsureDeployment(NCNightMarketRecord market)
     {
         if (_deployments.ContainsKey(market.Snapshot.NightMarketId))
+            return;
+        // An empty template uses an already-authored shop or warehouse; no duplicate map package is deployed.
+        if (string.IsNullOrWhiteSpace(market.Snapshot.TemplateId))
             return;
         var templateId = new ProtoId<NCZoneTemplatePrototype>(market.Snapshot.TemplateId);
         if (!_prototypes.HasIndex(templateId))
@@ -338,6 +379,110 @@ public sealed partial class NCFixerLifecycleSystem : EntitySystem
         }
     }
 
+    private async Task ArrangeAttendanceAsync(NCNightMarketRecord market)
+    {
+        if (!_prototypes.TryIndex(DefaultNightMarketPolicy, out var policy))
+            return;
+        var participants = market.Snapshot.Vendors.Select(static value => value.Vendor)
+            .Append(market.Snapshot.Organizer)
+            .Append(market.Snapshot.SecurityProvider)
+            .Distinct()
+            .ToArray();
+        foreach (var participant in participants)
+        {
+            if (!participant.TryGetActor(out var actorId) ||
+                await TryAddAttendanceCommitmentAsync(market, actorId, policy.AttendancePriority))
+                continue;
+            AttendanceProjectionFailures++;
+            LastError = $"Night Market {market.Snapshot.NightMarketId} could not route actor {actorId}.";
+        }
+    }
+
+    private async Task<bool> TryAddAttendanceCommitmentAsync(NCNightMarketRecord market, NCActorId actorId,
+        int priority)
+    {
+        var commitmentId = NCPersistentIdentity.NightMarketCommitment(market.Snapshot.NightMarketId, actorId);
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            var actor = await _actors.GetAsync(actorId, true);
+            if (actor == null)
+                return false;
+            if ((actor.Snapshot.Schedule.Commitments ?? []).Any(value => value.CommitmentId == commitmentId))
+                return true;
+            var stable = $"{market.Snapshot.NightMarketId}.{actorId}.{attempt}";
+            var result = await _actors.AddCommitmentAsync(new NCCityActorAddCommitmentRequest(
+                NCPersistentIdentity.Command("night-market", "add-attendance", stable), actorId,
+                actor.AggregateVersion,
+                new NCCityActorCommitment(commitmentId, "night-market", "attend-night-market",
+                    market.Snapshot.VenueZone, market.Snapshot.AssemblyAt, market.Snapshot.ClosesAt,
+                    NCCityActorAvailability.Busy, priority),
+                NCPersistentIdentity.Correlation("night-market", "attendance", stable),
+                market.Snapshot.LastAppliedEventId, "night-market-attendance"));
+            if (result.Status is NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate)
+                return true;
+            if (result.Status != NCCityActorMutationStatus.VersionConflict)
+                return false;
+        }
+        return false;
+    }
+
+    private async Task<AttendanceResult> PrepareAttendanceForOpeningAsync(NCNightMarketRecord market)
+    {
+        if (!await IsAtVenueAsync(market.Snapshot.Organizer, market.Snapshot.VenueZone) ||
+            !await IsAtVenueAsync(market.Snapshot.SecurityProvider, market.Snapshot.VenueZone))
+            return new AttendanceResult(market, "The organizer or security provider did not reach the venue.");
+
+        var current = market;
+        var arrived = 0;
+        foreach (var vendor in market.Snapshot.Vendors)
+        {
+            if (!await IsAtVenueAsync(vendor.Vendor, market.Snapshot.VenueZone))
+                continue;
+            arrived++;
+            if (vendor.ArrivedAt != null)
+                continue;
+            var result = await _fixers.SetVendorAttendanceAsync(current.Snapshot.NightMarketId,
+                current.AggregateVersion, vendor.Vendor, true);
+            if (result.NightMarket == null)
+                return new AttendanceResult(current, result.Error ?? "Vendor attendance could not persist.");
+            current = result.NightMarket;
+            _runtimeMarkets[current.Snapshot.NightMarketId] = current;
+        }
+        return arrived > 0
+            ? new AttendanceResult(current, null)
+            : new AttendanceResult(current, "No vendor reached the Night Market venue.");
+    }
+
+    private async Task<bool> IsAtVenueAsync(NCPartyRef party, Content.Shared._NC.City.Zones.NCZoneId venue)
+    {
+        if (!party.TryGetActor(out var actorId))
+            return false;
+        var actor = await _actors.GetAsync(actorId, true);
+        return actor?.Snapshot.Location.CurrentZone == venue;
+    }
+
+    private async Task CancelNightMarketAsync(NCNightMarketRecord market, string reason)
+    {
+        if (market.Snapshot.Status is not (NCNightMarketStatus.Scheduled or NCNightMarketStatus.Assembling))
+            return;
+        var worldEvent = NCPersistentIdentity.Command("night-market", "cancel-event",
+            $"{market.Snapshot.NightMarketId}.{market.AggregateVersion}.{reason}");
+        var result = await _fixers.AdvanceNightMarketAsync(market.Snapshot.NightMarketId,
+            market.AggregateVersion, NCNightMarketStatus.Cancelled, worldEvent, $"night-market-{reason}");
+        if (result.NightMarket != null)
+            _runtimeMarkets[market.Snapshot.NightMarketId] = result.NightMarket;
+        if (_deployments.TryGetValue(market.Snapshot.NightMarketId, out var deploymentId) &&
+            !_templates.TryCloseDeployment(deploymentId, out var error))
+            RecordResourceFailure(market.Snapshot.NightMarketId, error ?? "Venue deployment could not close.");
+    }
+
+    private void RecordResourceFailure(NCNightMarketId marketId, string error)
+    {
+        ResourceValidationFailures++;
+        LastError = $"Night Market {marketId}: {error}";
+        Log.Error(LastError);
+    }
+
     private void Enqueue(DueWork work, NCActiveWorldTime dueAt)
     {
         if (_active && _queued.Add(work))
@@ -368,4 +513,5 @@ public sealed partial class NCFixerLifecycleSystem : EntitySystem
 
     private enum DueKind : byte { Deal, NightMarket }
     private readonly record struct DueWork(DueKind Kind, Guid Id);
+    private readonly record struct AttendanceResult(NCNightMarketRecord Market, string? Error);
 }

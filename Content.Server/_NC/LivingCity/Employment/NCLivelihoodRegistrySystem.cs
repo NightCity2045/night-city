@@ -8,6 +8,7 @@ using Content.Server.Database;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Economy;
 using Content.Server._NC.LivingCity.Employment.Components;
+using Content.Server._NC.LivingCity.Fixers;
 using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.Employment;
@@ -24,6 +25,7 @@ public sealed partial class NCLivelihoodRegistrySystem : EntitySystem
 {
     public const string AggregateType = "living-city.actor-livelihood";
     public const int SnapshotFormatVersion = 1;
+    private static readonly ProtoId<NCLivelihoodProfilePrototype> FixerLivelihood = "NCFixer";
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -36,6 +38,7 @@ public sealed partial class NCLivelihoodRegistrySystem : EntitySystem
     [Dependency] private NCPartyResolverSystem _parties = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
     [Dependency] private ITaskManager _taskManager = default!;
+    [Dependency] private NCFixerRegistrySystem _fixers = default!;
 
     private readonly ConcurrentDictionary<NCActorId, NCLivelihoodRecord> _cache = [];
     private readonly SemaphoreSlim[] _gates = Enumerable.Range(0, 64).Select(_ => new SemaphoreSlim(1, 1)).ToArray();
@@ -86,6 +89,8 @@ public sealed partial class NCLivelihoodRegistrySystem : EntitySystem
             var current = await GetAsync(request.ActorId, true);
             if (current != null)
             {
+                if (current.Snapshot.ProfileId == profile.ID && profile.ID == FixerLivelihood.Id)
+                    await EnsureFixerNetworkAsync(request.ActorId, current.Snapshot.LastAppliedEventId);
                 return current.Snapshot.ProfileId == profile.ID
                     ? new(NCLivelihoodMutationStatus.Duplicate, current, null)
                     : new(NCLivelihoodMutationStatus.Conflict, current,
@@ -124,6 +129,8 @@ public sealed partial class NCLivelihoodRegistrySystem : EntitySystem
             }
 
             var loaded = await GetAsync(request.ActorId, true);
+            if (loaded != null && profile.ID == FixerLivelihood.Id)
+                await EnsureFixerNetworkAsync(request.ActorId, request.CausationId);
             return loaded == null
                 ? Reject("The livelihood could not be reloaded.")
                 : new(result.Status == NCPersistentMutationStatus.Applied
@@ -153,12 +160,25 @@ public sealed partial class NCLivelihoodRegistrySystem : EntitySystem
         var record = await GetAsync(actorId);
         if (record == null || !_prototypes.HasIndex<NCLivelihoodProfilePrototype>(record.Snapshot.ProfileId))
             return;
+        if (record.Snapshot.ProfileId == FixerLivelihood.Id)
+            await EnsureFixerNetworkAsync(actorId, record.Snapshot.LastAppliedEventId);
         _taskManager.RunOnMainThread(() =>
         {
             if (!Exists(entityUid) || !_runtime.TryGetActor(entityUid, out var bound) || bound != actorId)
                 return;
             EnsureComp<NCCityLivelihoodComponent>(entityUid).Profile = record.Snapshot.ProfileId;
         });
+    }
+
+    private Task<NCFixerMutationResult> EnsureFixerNetworkAsync(NCActorId actorId, Guid? causationId)
+    {
+        var stable = actorId.ToString();
+        return _fixers.EnsureNetworkAsync(new NCEnsureFixerNetworkRequest(
+            NCPersistentIdentity.Command("fixer", "ensure-network", stable),
+            NCPartyRef.ForActor(actorId),
+            NCPersistentIdentity.Correlation("fixer", "ensure-network", stable),
+            causationId,
+            "livelihood-fixer-bootstrap"));
     }
 
     private static NCLivelihoodRecord? Deserialize(NCAggregateSnapshotData? stored, NCActorId actorId)

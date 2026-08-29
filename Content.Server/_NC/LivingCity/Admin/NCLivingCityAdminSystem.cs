@@ -19,6 +19,7 @@ using Content.Server._NC.LivingCity.Cognition;
 using Content.Server._NC.LivingCity.CityServices;
 using Content.Server._NC.LivingCity.Economy;
 using Content.Server._NC.LivingCity.Employment;
+using Content.Server._NC.LivingCity.Fixers;
 using Content.Server._NC.LivingCity.Groups;
 using Content.Server._NC.LivingCity.Housing;
 using Content.Server._NC.LivingCity.Identity;
@@ -131,6 +132,8 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCProductionSystem _production = default!;
     [Dependency] private NCShipmentSystem _shipments = default!;
     [Dependency] private NCShipmentCargoSystem _shipmentCargo = default!;
+    [Dependency] private NCFixerRegistrySystem _fixers = default!;
+    [Dependency] private NCFixerLifecycleSystem _fixerLifecycle = default!;
     [Dependency] private NCEmploymentRegistrySystem _employment = default!;
     [Dependency] private NCOrganizationWorkforceSystem _workforce = default!;
     [Dependency] private NCProfessionProfileSystem _professions = default!;
@@ -710,6 +713,17 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("market", "shipments-scheduled", _shipments.ScheduledShipmentCount);
         fields.Add("market", "physical-cargo", _shipmentCargo.PhysicalCargoCount);
         fields.Add("market", "handoff-points", _shipmentCargo.HandoffPointCount);
+        fields.Add("fixers", "networks", _fixers.CachedNetworkCount);
+        fields.Add("fixers", "deals", _fixers.CachedDealCount);
+        fields.Add("fixers", "night-markets", _fixers.CachedNightMarketCount);
+        fields.Add("night-market", "lifecycle-active", _fixerLifecycle.IsActive);
+        fields.Add("night-market", "queued-work", _fixerLifecycle.QueuedWorkCount);
+        fields.Add("night-market", "in-flight", _fixerLifecycle.InFlightCount);
+        fields.Add("night-market", "runtime-markets", _fixerLifecycle.RuntimeNightMarketCount);
+        fields.Add("night-market", "active-deployments", _fixerLifecycle.ActiveDeploymentCount);
+        fields.Add("night-market", "attendance-failures", _fixerLifecycle.AttendanceProjectionFailures);
+        fields.Add("night-market", "resource-validation-failures", _fixerLifecycle.ResourceValidationFailures);
+        fields.Add("night-market", "last-error", _fixerLifecycle.LastError ?? "none");
         fields.Add("authorities", "employments", _employment.CachedEmploymentCount);
         fields.Add("authorities", "employment-indexes", _employment.CachedEmployeeIndexCount);
         fields.Add("authorities", "relationships", _relationships.CachedRelationshipCount);
@@ -1237,7 +1251,8 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
             if (section is "actors" or "ambient" or "geography" or "geography-runtime" or
                 "groups" or "group-physicalization" or "group-trunk-routes" or
                 "workforce" or "residences" or "affordances" or "authorities" or "human-mind" or
-                "economic-assets" or "market" or "factions" or "incidents" or "services" or
+                "economic-assets" or "market" or "fixers" or "night-market" or "factions" or
+                "incidents" or "services" or
                 "city-medical" or "medical-persistence" or "medical-snapshots" or
                 "medical-physiology" or "medical-body-functions" or "medical-visible-wounds")
             {

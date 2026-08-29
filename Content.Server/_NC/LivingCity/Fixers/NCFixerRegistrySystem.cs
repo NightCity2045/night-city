@@ -5,11 +5,14 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using Content.Server.Database;
+using Content.Server._NC.LivingCity.Affordances;
 using Content.Server._NC.LivingCity.Economy;
 using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.LivingCity.Social;
 using Content.Server._NC.LivingCity.Time;
+using Content.Shared._NC.City.ZoneTemplates.Prototypes;
 using Content.Shared._NC.LivingCity.Economy;
+using Content.Shared._NC.LivingCity.Affordances;
 using Content.Shared._NC.LivingCity.Fixers;
 using Content.Shared._NC.LivingCity.Market;
 using Content.Shared._NC.LivingCity.Social;
@@ -45,6 +48,8 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
     [Dependency] private NCRelationshipRegistrySystem _relationships = default!;
     [Dependency] private NCReputationRegistrySystem _reputations = default!;
     [Dependency] private NCSocialObligationRegistrySystem _obligations = default!;
+    [Dependency] private NCEconomicAssetRegistrySystem _assets = default!;
+    [Dependency] private NCCityAffordanceCatalogSystem _affordances = default!;
     [Dependency] private ITaskManager _tasks = default!;
 
     private readonly ConcurrentDictionary<NCFixerNetworkId, NCFixerNetworkRecord> _networks = [];
@@ -74,6 +79,41 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
         GetAsync(id, DealAggregateType, _deals, DeserializeDeal, forceReload);
     public Task<NCNightMarketRecord?> GetNightMarketAsync(NCNightMarketId id, bool forceReload = false) =>
         GetAsync(id, NightMarketAggregateType, _nightMarkets, DeserializeNightMarket, forceReload);
+
+    /// <summary>Creates the empty durable contact network owned by a known Fixer without inventing a client.</summary>
+    public async Task<NCFixerMutationResult> EnsureNetworkAsync(NCEnsureFixerNetworkRequest request)
+    {
+        if (!TryPolicy(out _) || request.CommandId == Guid.Empty || !request.Fixer.IsValid ||
+            request.CorrelationId == Guid.Empty || string.IsNullOrWhiteSpace(request.AuditSource) ||
+            request.AuditSource.Length > 128 || !_clock.TryGetCurrentTime(out var epoch, out var now))
+            return Reject(NCFixerMutationStatus.Rejected, "The fixer network request is invalid.");
+        if (!(await _parties.ResolveAsync(request.Fixer, true)).IsResolved)
+            return Reject(NCFixerMutationStatus.Rejected, "The fixer party is unavailable.");
+
+        var networkId = NCPersistentIdentity.FixerNetwork(request.Fixer);
+        var gate = Gate(networkId.Value);
+        await gate.WaitAsync();
+        try
+        {
+            var current = await GetNetworkAsync(networkId, true);
+            if (current != null)
+                return current.Snapshot.Fixer == request.Fixer
+                    ? new(NCFixerMutationStatus.Duplicate, current, null, null, null)
+                    : Reject(NCFixerMutationStatus.Rejected, "The fixer network identity is already occupied.");
+
+            var eventId = Guid.NewGuid();
+            var snapshot = new NCFixerNetworkSnapshot(networkId, request.Fixer, [], [], 1, eventId);
+            var persisted = await Persist(request.CommandId, "living-city.fixer-network.ensure", "fixer-network",
+                networkId.ToString(), [Write(NetworkAggregateType, networkId.ToString(), 0, snapshot, eventId,
+                    "living-city.fixer-network.created", request.AuditSource)], request.CorrelationId,
+                request.CausationId, epoch, now);
+            return await CompleteNetwork(persisted, networkId);
+        }
+        finally
+        {
+            gate.Release();
+        }
+    }
 
     public async Task<bool> HasAccessAsync(NCPartyRef fixer, NCPartyRef client, bool forceReload = false)
     {
@@ -318,15 +358,21 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
     {
         if (!_prototypes.TryIndex(DefaultNightMarketPolicy, out NCNightMarketPolicyPrototype? policy) ||
             request.CommandId == Guid.Empty || !request.NightMarketId.IsValid ||
-            string.IsNullOrWhiteSpace(request.TemplateId) || request.TemplateId.Length > 96 ||
+            request.TemplateId.Length > 96 ||
             !request.VenueZone.IsValid || !request.Organizer.IsValid || !request.SecurityProvider.IsValid ||
             request.Vendors.Count == 0 || request.Vendors.Count > policy.MaximumVendors ||
             request.Vendors.Select(value => value.Vendor).Distinct().Count() != request.Vendors.Count ||
+            request.Vendors.Any(value => !value.Vendor.IsValid || !value.StockNodeId.IsValid ||
+                !value.NetworkId.IsValid) ||
             request.AssemblyAt >= request.OpensAt || request.OpensAt >= request.ClosesAt ||
             request.ClosesAt.Ticks - request.OpensAt.Ticks > policy.MaximumDuration.Ticks ||
             request.CorrelationId == Guid.Empty || !_clock.TryGetCurrentTime(out var epoch, out var now) ||
             request.AssemblyAt.Ticks - now.Ticks < policy.MinimumAssemblyLead.Ticks)
             return Reject(NCFixerMutationStatus.Rejected, "The Night Market schedule is invalid.");
+        var resourceError = await ValidateNightMarketResourcesAsync(request.TemplateId, request.VenueZone,
+            request.Organizer, request.SecurityProvider, request.Vendors, true);
+        if (resourceError != null)
+            return Reject(NCFixerMutationStatus.Rejected, resourceError);
         var gate = Gate(request.NightMarketId.Value);
         await gate.WaitAsync();
         try
@@ -369,6 +415,9 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
                 return Reject(NCFixerMutationStatus.VersionConflict, "The Night Market version changed.");
             if (!Allowed(current.Snapshot.Status, status))
                 return Reject(NCFixerMutationStatus.Rejected, "The Night Market transition is not allowed.");
+            if (status is NCNightMarketStatus.Assembling or NCNightMarketStatus.Open &&
+                await ValidateNightMarketAsync(current.Snapshot, true) is { } resourceError)
+                return Reject(NCFixerMutationStatus.Rejected, resourceError);
             var eventId = Guid.NewGuid();
             var proposed = current.Snapshot with
             {
@@ -425,6 +474,47 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
         };
         return current with { Vendors = vendors, UpdatedAt = now };
     });
+
+    public Task<string?> ValidateNightMarketAsync(NCNightMarketSnapshot market, bool forceReload = false) =>
+        ValidateNightMarketResourcesAsync(market.TemplateId, market.VenueZone, market.Organizer,
+            market.SecurityProvider, market.Vendors, forceReload);
+
+    private async Task<string?> ValidateNightMarketResourcesAsync(string templateId,
+        Content.Shared._NC.City.Zones.NCZoneId venueZone, NCPartyRef organizer, NCPartyRef securityProvider,
+        IReadOnlyList<NCNightMarketVendor> vendors, bool forceReload)
+    {
+        if (!_prototypes.TryIndex(DefaultNightMarketPolicy, out NCNightMarketPolicyPrototype? policy) ||
+            policy.AllowedVenueAffordances.Count == 0 ||
+            !policy.AllowedVenueAffordances.Any(kind => _affordances.TrySelect(kind, venueZone, 0, out _)))
+            return "The Night Market venue is not an authored shop or warehouse building.";
+        if (!string.IsNullOrWhiteSpace(templateId) &&
+            !_prototypes.HasIndex(new ProtoId<NCZoneTemplatePrototype>(templateId.Trim())))
+            return "The requested Night Market venue template is unavailable.";
+        if (!(await _parties.ResolveAsync(organizer, forceReload)).IsResolved ||
+            !(await _parties.ResolveAsync(securityProvider, forceReload)).IsResolved ||
+            !organizer.TryGetActor(out _) || !securityProvider.TryGetActor(out _))
+            return "The Night Market organizer or security provider is not an available persistent actor.";
+        if (await GetNetworkAsync(NCPersistentIdentity.FixerNetwork(organizer), forceReload) is not { } organizerNetwork ||
+            organizerNetwork.Snapshot.Fixer != organizer)
+            return "The Night Market organizer has no Fixer network.";
+
+        foreach (var vendor in vendors)
+        {
+            if (!vendor.Vendor.TryGetActor(out _) ||
+                !(await _parties.ResolveAsync(vendor.Vendor, forceReload)).IsResolved)
+                return $"Night Market vendor {vendor.Vendor} is not an available persistent actor.";
+            var network = await GetNetworkAsync(vendor.NetworkId, forceReload);
+            if (network == null || network.Snapshot.Fixer != vendor.Vendor &&
+                !await HasAccessAsync(network.Snapshot.Fixer, vendor.Vendor, forceReload))
+                return $"Night Market vendor {vendor.Vendor} has no access to the declared Fixer network.";
+            var stock = await _assets.GetStockNodeAsync(vendor.StockNodeId, forceReload);
+            if (stock?.Snapshot.Owner != vendor.Vendor ||
+                stock.Snapshot.CommodityBatchIds.Count + stock.Snapshot.ItemIds.Count == 0)
+                return $"Night Market vendor {vendor.Vendor} has no real stock in the declared stock node.";
+        }
+
+        return null;
+    }
 
     private async Task<NCFixerMutationResult> MutateNightMarketAsync(NCNightMarketId id, long expectedVersion,
         string operation, Func<NCNightMarketSnapshot, NCActiveWorldTime, NCNightMarketPolicyPrototype,

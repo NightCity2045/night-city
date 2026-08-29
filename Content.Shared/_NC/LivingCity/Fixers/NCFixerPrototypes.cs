@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Robust.Shared.Prototypes;
+using Content.Shared._NC.LivingCity.Affordances;
 
 namespace Content.Shared._NC.LivingCity.Fixers;
 
@@ -29,4 +30,8 @@ public sealed partial class NCNightMarketPolicyPrototype : IPrototype
     [DataField] public TimeSpan MinimumAssemblyLead { get; private set; } = TimeSpan.FromMinutes(10);
     [DataField] public TimeSpan MaximumDuration { get; private set; } = TimeSpan.FromHours(8);
     [DataField] public int MaximumIncidents { get; private set; } = 64;
+    /// <summary>Existing authored building purposes where a physical Night Market may assemble.</summary>
+    [DataField] public List<NCCityAffordanceKind> AllowedVenueAffordances { get; private set; } =
+        [NCCityAffordanceKind.Shop, NCCityAffordanceKind.Warehouse];
+    [DataField] public int AttendancePriority { get; private set; } = 700;
 }

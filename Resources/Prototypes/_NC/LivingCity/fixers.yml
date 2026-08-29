@@ -20,6 +20,8 @@
   minimumAssemblyLead: 10m
   maximumDuration: 8h
   maximumIncidents: 64
+  allowedVenueAffordances: [Shop, Warehouse]
+  attendancePriority: 700
 
 - type: entity
   id: NCFixerDeadDrop

@@ -382,6 +382,16 @@ public static class NCPersistentIdentity
         return new NCCityCommitmentId(CreateGuid($"ncpd/command-commitment/{commandId}/{actorId}"));
     }
 
+    /// <summary>Stable A-Life attendance commitment for one actor and one physical Night Market.</summary>
+    public static NCCityCommitmentId NightMarketCommitment(NCNightMarketId marketId, NCActorId actorId)
+    {
+        if (!marketId.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(marketId));
+        if (!actorId.IsValid)
+            throw new ArgumentOutOfRangeException(nameof(actorId));
+        return new NCCityCommitmentId(CreateGuid($"fixer/night-market-commitment/{marketId}/{actorId}"));
+    }
+
     private static Guid CreateGuid(string value)
     {
         Span<byte> scope = stackalloc byte[16];

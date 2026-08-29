@@ -28,6 +28,13 @@ public sealed record NCFixerDealRecord(NCFixerDealSnapshot Snapshot, long Aggreg
 public sealed record NCNightMarketRecord(NCNightMarketSnapshot Snapshot, long AggregateVersion,
     NCSessionEpoch SessionEpoch, NCActiveWorldTime PersistedAt);
 
+public sealed record NCEnsureFixerNetworkRequest(
+    Guid CommandId,
+    NCPartyRef Fixer,
+    Guid CorrelationId,
+    Guid? CausationId = null,
+    string AuditSource = "fixer-network-ensure");
+
 public sealed record NCGrantFixerAccessRequest(
     Guid CommandId,
     NCPartyRef Fixer,
