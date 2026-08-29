@@ -272,6 +272,9 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-intent", "availability", snapshot.Schedule.Availability);
         fields.Add("observer-intent", "next-update", snapshot.Schedule.NextUpdateAt.Elapsed);
         fields.Add("observer-intent", "commitments", snapshot.Schedule.Commitments.Length);
+        fields.Add("observer-intent", "late",
+            snapshot.Schedule.CurrentActivity.Equals("work", StringComparison.OrdinalIgnoreCase) &&
+            snapshot.Location.CurrentZone != snapshot.Location.WorkZone);
         fields.Add("observer-intent", "materialized", _actorRuntime.TryGetEntity(actorId, out var entityUid));
         fields.Add("observer-intent", "entity", entityUid.IsValid() ? entityUid : "abstract");
         fields.Add("observer-intent", "lod", _relevance.TryGetLod(actorId, out var lod) ? lod : "unindexed");

@@ -78,6 +78,7 @@ public enum NCCityRoutineTarget : byte
     Home,
     Work,
     ExplicitZone,
+    Community,
 }
 
 /// <summary>

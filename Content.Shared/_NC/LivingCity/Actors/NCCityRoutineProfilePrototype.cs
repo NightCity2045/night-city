@@ -5,9 +5,21 @@
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.City.Zones.Serialization;
+using Content.Shared.Nutrition.Components;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.LivingCity.Actors;
+
+public enum NCCityWeekday : byte
+{
+    Monday,
+    Tuesday,
+    Wednesday,
+    Thursday,
+    Friday,
+    Saturday,
+    Sunday,
+}
 
 /// <summary>
 /// Defines the city-facing clock independently from monotonic active-world time and actor routines.
@@ -50,8 +62,31 @@ public sealed partial class NCCityRoutineProfilePrototype : IPrototype
     [DataField]
     public TimeSpan ActorPhaseSpread { get; private set; }
 
+    /// <summary>Deterministic shift offsets; one is selected per actor before applying the smaller phase spread.</summary>
+    [DataField]
+    public List<TimeSpan> ShiftOffsets { get; private set; } = [TimeSpan.Zero];
+
     [DataField(required: true)]
     public List<NCCityRoutineEntry> Entries { get; private set; } = [];
+
+    [DataField]
+    public HashSet<NCCityWeekday> RestDays { get; private set; } = [];
+
+    [DataField]
+    public List<NCCityRoutineEntry> RestDayEntries { get; private set; } = [];
+
+    /// <summary>Only materialized Humans are sampled at this active-world interval for vanilla needs.</summary>
+    [DataField]
+    public TimeSpan NeedEvaluationInterval { get; private set; } = TimeSpan.FromMinutes(1);
+
+    [DataField]
+    public TimeSpan RecoveryEvaluationInterval { get; private set; } = TimeSpan.FromMinutes(1);
+
+    [DataField]
+    public HungerThreshold MealThreshold { get; private set; } = HungerThreshold.Peckish;
+
+    [DataField]
+    public float FatigueStaminaRatio { get; private set; } = 0.6f;
 }
 
 [DataDefinition]

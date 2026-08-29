@@ -127,8 +127,14 @@
     affordances: [RestArea, PublicEntrance]
   - activity: socialize
     affordances: [RestArea, PublicEntrance]
-  fallbackActivities:
   - activity: rest
+    affordances: [RestArea, PublicEntrance]
+  - activity: recover
+    affordances: [RestArea, PublicEntrance]
+  - activity: unemployed-free-time
+    affordances: [PublicEntrance, RestArea]
+  fallbackActivities:
+  - activity: safe-rest
     affordances: [RestArea]
   - activity: walk
     affordances: [BuildingExit, PublicEntrance]
@@ -316,7 +322,14 @@
 - type: ncCityRoutineProfile
   id: NCDefaultCivilianRoutine
   cycleDuration: 24h
-  actorPhaseSpread: 2h
+  # Stable actor hashing distributes residents across day, evening and night shifts with up to one hour of jitter.
+  actorPhaseSpread: 1h
+  shiftOffsets: [0h, 8h, 16h]
+  restDays: [Saturday, Sunday]
+  needEvaluationInterval: 1m
+  recoveryEvaluationInterval: 1m
+  mealThreshold: Peckish
+  fatigueStaminaRatio: 0.6
   entries:
   - at: 0s
     activity: sleep
@@ -327,6 +340,11 @@
     activity: prepare
     goal: prepare-for-work
     target: Home
+    availability: Busy
+  - at: 27000s # 07:30.
+    activity: commute
+    goal: reach-workplace
+    target: Work
     availability: Busy
   - at: 8h
     activity: work
@@ -346,16 +364,47 @@
   - at: 17h
     activity: errands
     goal: handle-daily-needs
-    target: Work
+    target: Community
     availability: Available
   - at: 66600s # 18:30.
     activity: leisure
     goal: spend-free-time
-    target: Work
+    target: Community
     availability: Available
   - at: 20h
     activity: return-home
     goal: finish-daily-obligations
+    target: Home
+    availability: Available
+  - at: 23h
+    activity: sleep
+    goal: recover-at-home
+    target: Home
+    availability: Unavailable
+  restDayEntries:
+  - at: 0s
+    activity: sleep
+    goal: recover-at-home
+    target: Home
+    availability: Unavailable
+  - at: 9h
+    activity: leisure
+    goal: spend-rest-day
+    target: Community
+    availability: Available
+  - at: 13h
+    activity: meal
+    goal: eat-and-recover
+    target: Community
+    availability: Available
+  - at: 14h
+    activity: socialize
+    goal: maintain-social-ties
+    target: Community
+    availability: Available
+  - at: 20h
+    activity: return-home
+    goal: finish-rest-day
     target: Home
     availability: Available
   - at: 23h

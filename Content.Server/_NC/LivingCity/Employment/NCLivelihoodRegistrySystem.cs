@@ -42,6 +42,9 @@ public sealed partial class NCLivelihoodRegistrySystem : EntitySystem
 
     public int CachedActorCount => _cache.Count;
 
+    public bool TryGetCached(NCActorId actorId, out NCLivelihoodRecord record) =>
+        _cache.TryGetValue(actorId, out record!);
+
     public override void Initialize()
     {
         base.Initialize();

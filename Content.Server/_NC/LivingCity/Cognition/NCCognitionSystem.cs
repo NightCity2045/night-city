@@ -174,11 +174,19 @@ public sealed partial class NCCognitionSystem : EntitySystem
             !state.CompletedStepIds.Contains(step.StepId))?.ActionId ?? "none";
         if (snapshot?.Lifecycle.Status is NCCityActorStatus.Resting or NCCityActorStatus.Injured or
             NCCityActorStatus.Hospitalized or NCCityActorStatus.Unconscious ||
-            activity.Equals("sleep", StringComparison.OrdinalIgnoreCase))
+            activity.Equals("sleep", StringComparison.OrdinalIgnoreCase) ||
+            activity.Equals("rest", StringComparison.OrdinalIgnoreCase) ||
+            activity.Equals("recover", StringComparison.OrdinalIgnoreCase))
             return new(NCHumanActivityRuntimeState.Recovering, activity, fallback, wakeAt);
-        if (snapshot != null && !snapshot.Location.WorkZone.IsValid &&
+        if (activity.Equals("unemployed-free-time", StringComparison.OrdinalIgnoreCase) ||
+            snapshot != null && !snapshot.Location.WorkZone.IsValid &&
             activity.Equals("work", StringComparison.OrdinalIgnoreCase))
-            return new(NCHumanActivityRuntimeState.UnemployedFreeTime, "no-work-zone", fallback, wakeAt);
+            return new(NCHumanActivityRuntimeState.UnemployedFreeTime,
+                activity.Equals("unemployed-free-time", StringComparison.OrdinalIgnoreCase)
+                    ? "unemployed-schedule"
+                    : "no-work-zone",
+                fallback,
+                wakeAt);
         if (failure.Contains("affordance", StringComparison.OrdinalIgnoreCase))
             return new(NCHumanActivityRuntimeState.NoAffordance, failure, fallback, wakeAt);
         if (failure.Contains("unreachable", StringComparison.OrdinalIgnoreCase) ||

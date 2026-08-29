@@ -77,6 +77,7 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
         SubscribeLocalEvent<NCCityActorPersistedEvent>(OnActorPersisted);
+        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
     }
 
     public override void Update(float frameTime)
@@ -229,6 +230,17 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
             dueAt = StaggerOverdueEvaluation(args.ActorId, now, now);
         }
         Enqueue(args.ActorId, dueAt);
+    }
+
+    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    {
+        if (!_active || !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
+            return;
+
+        // Materialization adds vanilla hunger, stamina and sleep data; hand-off removes it. Re-evaluate through the
+        // bounded persistent scheduler so neither transition needs a per-frame scan or owns routine state directly.
+        _forceRoutineReevaluation.Add(args.ActorId);
+        Enqueue(args.ActorId, now);
     }
 
     private void BeginPageLoad(int generation, NCActorId? afterActorId)
