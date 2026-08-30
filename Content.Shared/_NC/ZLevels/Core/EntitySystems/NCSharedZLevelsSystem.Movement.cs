@@ -352,15 +352,23 @@ public abstract partial class NCSharedZLevelsSystem
         if (TryMoveDown(ent))
             return true;
 
-        //welp, that default Chasm behavior. Not really good, but ok for now.
-        if (HasComp<ChasmFallingComponent>(ent))
-            return false; //Already falling
+        // NC-Edit-Start: the bottom of the Z-stack has no ChasmComponent owner.
+        if (HasComp<NCZLevelTerminalFallComponent>(ent) || HasComp<ChasmFallingComponent>(ent))
+            return false;
 
         var audio = new SoundPathSpecifier("/Audio/Effects/falling.ogg");
         _audio.PlayPredicted(audio, Transform(ent).Coordinates, ent);
+
         var falling = AddComp<ChasmFallingComponent>(ent);
-        falling.NextDeletionTime = _timing.CurTime + falling.DeletionTime;
+        var terminalFall = AddComp<NCZLevelTerminalFallComponent>(ent);
+        terminalFall.DeleteAt = _timing.CurTime + falling.AnimationTime;
+
+        // Keep the shared visual component, but prevent ChasmSystem from completing this fall.
+        // The terminal-fall component deletes the entity first without requiring a fake chasm.
+        falling.NextDeletionTime = terminalFall.DeleteAt + TimeSpan.FromHours(1);
+        Dirty(ent, falling);
         _blocker.UpdateCanMove(ent);
+        // NC-Edit-End
 
         return false;
     }

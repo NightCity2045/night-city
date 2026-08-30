@@ -104,6 +104,8 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
         _menu.OnSetPin += (currentPin, newPin) => SendMessage(new NCAgentSetPinMessage(currentPin, newPin));
         _menu.OnDisablePin += currentPin => SendMessage(new NCAgentDisablePinMessage(currentPin));
         _menu.OnLockAgent += () => SendMessage(new NCAgentLockMessage());
+        _menu.OnCityAction += (action, id, version) =>
+            SendMessage(new NCAgentCityActionMessage(action, id, version));
 
     }
 

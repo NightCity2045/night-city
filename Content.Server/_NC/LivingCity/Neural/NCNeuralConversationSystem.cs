@@ -14,6 +14,7 @@ using Content.Shared._NC.Persistence.Time;
 using Content.Shared.Chat;
 using Content.Shared.Interaction;
 using Robust.Shared.Player;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
 
@@ -26,7 +27,9 @@ namespace Content.Server._NC.LivingCity.Neural;
 public sealed partial class NCNeuralConversationSystem : EntitySystem
 {
     private const string InPersonLocationKey = "in-person";
+    private static readonly ProtoId<NCConversationPolicyPrototype> ConversationPolicy = "Default";
 
+    [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IServerPreferencesManager _preferences = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private EntityLookupSystem _lookup = default!;
@@ -247,9 +250,13 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         var utterance = NormalizeUtterance(args.Message, target.MaximumUtteranceLength);
         if (utterance.Length == 0)
             return;
-        var act = utterance.EndsWith('?')
-            ? NCSpeechActKind.Question
-            : NCSpeechActKind.Statement;
+        var verbalThreat = _prototypes.TryIndex(ConversationPolicy, out NCConversationPolicyPrototype? policy) &&
+                           policy != null && ContainsVerbalThreat(utterance, policy.VerbalThreatMarkers);
+        var act = verbalThreat
+            ? NCSpeechActKind.Threat
+            : utterance.EndsWith('?')
+                ? NCSpeechActKind.Question
+                : NCSpeechActKind.Statement;
         var externalReference = $"chat:{Guid.NewGuid():N}";
         if (!_conversations.TryRecordTurn(new NCConversationTurnRequest(
                 active.SessionId,
@@ -263,7 +270,21 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
             return;
         }
         if (_clock.TryGetCurrentTime(out _, out var now))
+        {
             _perception.ObserveAddressedSpeech(active.Target, speaker, now);
+            if (verbalThreat && policy != null)
+                _perception.ObserveIncident(active.Target, NCCityLocalPerceivedEventKind.VerbalThreat,
+                    speaker, active.Target, now, policy.VerbalThreatLifetime);
+        }
+    }
+
+    /// <summary>Matches authored threat stems only; dialogue meaning remains data-driven and multilingual.</summary>
+    internal static bool ContainsVerbalThreat(string utterance, IReadOnlyList<string> markers)
+    {
+        if (string.IsNullOrWhiteSpace(utterance))
+            return false;
+        return markers.Any(marker => !string.IsNullOrWhiteSpace(marker) &&
+            utterance.Contains(marker.Trim(), StringComparison.OrdinalIgnoreCase));
     }
 
     private void OnTargetShutdown(

@@ -186,6 +186,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     public event Action<string, string>? OnSetPin;
     public event Action<string>? OnDisablePin;
     public event Action? OnLockAgent;
+    public event Action<NCAgentCityAction, string, long>? OnCityAction;
 
     public NCAgentMenu()
     {
@@ -610,26 +611,45 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     {
         if (_cityData == null)
         {
-            BuiltInContent.AddChild(CreateMutedLabel("Loading city services..."));
+            BuiltInContent.AddChild(CreateMutedLabel(Loc.GetString("nc-agent-city-loading")));
             return;
         }
         if (!string.IsNullOrWhiteSpace(_cityData.Notice))
-            BuiltInContent.AddChild(CreateStatusLabel(_cityData.Notice, "#FFD66B"));
+            BuiltInContent.AddChild(CreateStatusLabel(CityText(_cityData.Notice), "#FFD66B"));
         foreach (var area in Enum.GetValues<NCAgentCityArea>())
         {
             var entries = _cityData.Entries.Where(value => value.Area == area).ToArray();
             if (entries.Length == 0) continue;
-            BuiltInContent.AddChild(CreateSectionTitle(area.ToString().ToUpperInvariant()));
+            BuiltInContent.AddChild(CreateSectionTitle(Loc.GetString($"nc-agent-city-area-{area.ToString().ToLowerInvariant()}")));
             foreach (var entry in entries)
             {
                 var content = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical,
                     HorizontalExpand = true, Margin = new Thickness(8, 6) };
-                content.AddChild(CreateStatusLabel(entry.Title, "#D7FFFB"));
-                content.AddChild(CreateMutedLabel(entry.Details));
-                content.AddChild(CreateMutedLabel($"ID {entry.Id} // V{entry.Version}"));
+                content.AddChild(CreateStatusLabel(CityText(entry.Title, entry.TextArguments), "#D7FFFB"));
+                content.AddChild(CreateMutedLabel(CityText(entry.Details, entry.TextArguments)));
+                if (entry.Action != NCAgentCityAction.None)
+                {
+                    var action = CreateActionButton(
+                        Loc.GetString($"nc-agent-city-action-{entry.Action.ToString().ToLowerInvariant()}"),
+                        "#76FF95");
+                    action.OnPressed += _ => OnCityAction?.Invoke(entry.Action, entry.Id, entry.Version);
+                    content.AddChild(action);
+                }
                 BuiltInContent.AddChild(WrapCard(content, "#245C59", "#0C1C22"));
             }
         }
+    }
+
+    private static string CityText(string value, IReadOnlyList<string>? arguments = null)
+    {
+        if (!value.StartsWith("nc-", StringComparison.Ordinal))
+            return value;
+        if (arguments == null || arguments.Count == 0)
+            return Loc.GetString(value);
+        var localizationArguments = arguments
+            .Select((argument, index) => ($"arg{index}", (object) argument))
+            .ToArray();
+        return Loc.GetString(value, localizationArguments);
     }
 
     private void BuildContacts(NCAgentUpdateMessage data)

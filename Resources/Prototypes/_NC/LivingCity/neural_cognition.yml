@@ -13,9 +13,11 @@
   maximumCapabilities: 32
   maximumPerceivedSubjects: 32
   maximumTextLength: 512
-  maximumDialogueInputLength: 512
-  maximumDialogueHistoryTurns: 12
-  maximumDialogueSummaryKeys: 16
+  maximumDialogueInputLength: 2048
+  maximumDialogueHistoryTurns: 64
+  maximumDialogueSummaryKeys: 64
+  maximumDialogueMemorySessions: 12
+  maximumDialogueMemoryTextLength: 768
   sessionTokenTarget: 10000000
   sessionTokenHardCap: 20000000
   economyThreshold: 10000000
@@ -39,21 +41,23 @@
     NarrativeRender: 300
   maximumRequestInputTokens: 32768
   maximumRequestOutputTokens: 2048
-  ordinaryDialogueMaximumOutputTokens: 384
+  # The Responses API counts hidden reasoning and visible structured JSON against the same ceiling.
+  ordinaryDialogueMaximumOutputTokens: 1024
   ordinaryDialogueMaximumFacts: 20
   ordinaryDialogueMaximumPerceivedSubjects: 12
   ordinaryDialogueMaximumKnownLocations: 16
-  ordinaryDialogueMaximumInputLength: 256
-  ordinaryDialogueMaximumHistoryTurns: 4
-  ordinaryDialogueMaximumSummaryKeys: 6
-  ordinaryResidentSessionTokenHardCap: 12000
+  ordinaryDialogueMaximumInputLength: 2048
+  ordinaryDialogueMaximumHistoryTurns: 64
+  ordinaryDialogueMaximumSummaryKeys: 64
+  ordinaryDialogueMaximumMemorySessions: 6
+  ordinaryResidentSessionTokenHardCap: 250000
   ordinaryResidentMaximumOutstandingRequests: 1
-  ordinaryResidentReservedInputTokens: 2048
-  ordinaryResidentRequestCooldown: 5s
+  ordinaryResidentReservedInputTokens: 8192
+  ordinaryResidentRequestCooldown: 0.1s
   narrativeActorSessionTokenHardCap: 250000
   narrativeActorMaximumOutstandingRequests: 2
   narrativeActorReservedInputTokens: 8192
-  narrativeActorRequestCooldown: 1s
+  narrativeActorRequestCooldown: 0.1s
   maximumCoalescedFollowersPerRequest: 16
   circuitFailureThreshold: 5
   minimumSuggestionConfidence: 400
@@ -62,9 +66,11 @@
   maximumAppliedSuggestions: 10000
   maximumTrackedActorDiagnostics: 256
   requestTimeout: 8s
-  requestLifetime: 20s
+  # Active-world time runs twelve times faster than wall time. Two game minutes leave ten real seconds for the
+  # eight-second provider timeout and main-thread delivery without accepting stale dialogue indefinitely.
+  requestLifetime: 2m
   circuitOpenDuration: 2m
-  suggestionLifetime: 20s
+  suggestionLifetime: 2m
   strategicRequestCooldown: 2m
   incidentEscalationCooldown: 30s
 
@@ -98,7 +104,7 @@
   allowedKinds: [DialogueContinuation]
   minimumIntentConfidence: 700
   maximumIntentPriority: 250
-  targetedIntentsAllowed: false
+  targetedIntentsAllowed: true
 
 - type: ncNeuralAutonomyPolicy
   id: NCNcpdNeuralAutonomy

@@ -56,6 +56,15 @@ public enum NCFixerDealStatus : byte
     Arbitrated,
     Cancelled,
     Expired,
+    Breached,
+}
+
+[Serializable, NetSerializable]
+public enum NCFixerBreachReason : byte
+{
+    None,
+    ExecutionDeadlineMissed,
+    RequiredLegFailed,
 }
 
 [Serializable, NetSerializable]
@@ -151,17 +160,31 @@ public sealed record NCFixerDealLeg(
     NCShipmentHandoffKind? HandoffKind,
     NCMarketRequestId? MarketRequestId,
     NCShipmentId? ShipmentId,
+    NCEconomicFulfillmentId? FulfillmentId,
     NCSocialObligationId? ObligationId,
     NCSocialObligationKind? ObligationKind,
     NCFixerDealLegStatus Status,
     Guid? ProofWorldEventId);
+
+/// <summary>
+/// Stable prototype identifiers for the social result of a deal. The persistent contract stores the selected policy;
+/// social systems remain the authority that applies it.
+/// </summary>
+public sealed record NCFixerDealConsequences(
+    string SuccessRelationshipEffectId,
+    string BreachRelationshipEffectId,
+    string SuccessReputationEffectId,
+    string BreachReputationEffectId,
+    string ReputationDomainId);
 
 public sealed record NCFixerDealPlan(
     IReadOnlyList<NCFixerDealLeg> Legs,
     long EscrowAmount,
     int BrokerFeeBasisPoints,
     int RiskBasisPoints,
-    bool RequiresPhysicalHandoff);
+    bool RequiresPhysicalHandoff,
+    TimeSpan ExecutionDuration,
+    NCFixerDealConsequences? Consequences);
 
 public sealed record NCFixerEvidence(
     Guid EvidenceId,
@@ -203,7 +226,10 @@ public sealed record NCFixerDealSnapshot(
     NCActiveWorldTime CreatedAt,
     NCActiveWorldTime UpdatedAt,
     int DataVersion,
-    Guid LastAppliedEventId);
+    Guid LastAppliedEventId,
+    NCActiveWorldTime? ExecutionDeadline = null,
+    NCActiveWorldTime? BreachedAt = null,
+    NCFixerBreachReason BreachReason = NCFixerBreachReason.None);
 
 public sealed record NCNightMarketVendor(
     NCPartyRef Vendor,
@@ -211,7 +237,8 @@ public sealed record NCNightMarketVendor(
     NCFixerNetworkId NetworkId,
     bool Confirmed,
     NCActiveWorldTime? ArrivedAt,
-    NCActiveWorldTime? DepartedAt);
+    NCActiveWorldTime? DepartedAt,
+    NCPartyRef Attendant = default);
 
 public sealed record NCNightMarketSnapshot(
     NCNightMarketId NightMarketId,

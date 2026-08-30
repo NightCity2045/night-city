@@ -43,7 +43,9 @@ public sealed partial class NCEconomicShopWindow : FancyWindow
     {
         _ready = state.Ready;
         _hasAccount = state.HasAccount;
-        ShopNameLabel.Text = state.ShopName;
+        ShopNameLabel.Text = state.ShopName.StartsWith("nc-", StringComparison.Ordinal)
+            ? Loc.GetString(state.ShopName)
+            : state.ShopName;
         BalanceLabel.Text = state.HasAccount
             ? Loc.GetString("nc-economic-shop-credits", ("amount", state.Balance))
             : Loc.GetString("nc-economic-shop-no-account");
@@ -63,8 +65,11 @@ public sealed partial class NCEconomicShopWindow : FancyWindow
             var expiry = listing.ShelfLifeRemaining is { } remaining
                 ? Loc.GetString("nc-economic-shop-expiry", ("hours", Math.Max(0, (int) remaining.TotalHours)))
                 : string.Empty;
+            var displayName = listing.DisplayName.StartsWith("nc-", StringComparison.Ordinal)
+                ? Loc.GetString(listing.DisplayName)
+                : listing.DisplayName;
             var item = ListingList.AddItem(Loc.GetString("nc-economic-shop-listing",
-                ("name", listing.DisplayName),
+                ("name", displayName),
                 ("quantity", listing.AvailableQuantity),
                 ("price", listing.BaseUnitPrice),
                 ("quality", listing.QualityOrCondition),

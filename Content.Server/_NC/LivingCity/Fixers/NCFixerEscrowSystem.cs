@@ -133,10 +133,21 @@ public sealed partial class NCFixerEscrowSystem : EntitySystem
         };
         if (distribution.Buyer > 0)
             legs.Add(new NCLedgerLegRequest(buyer.AccountId, buyer.Account!.AggregateVersion, distribution.Buyer));
-        if (distribution.Seller > 0)
-            legs.Add(new NCLedgerLegRequest(seller.AccountId, seller.Account!.AggregateVersion, distribution.Seller));
-        if (distribution.Fixer > 0)
-            legs.Add(new NCLedgerLegRequest(fixer.AccountId, fixer.Account!.AggregateVersion, distribution.Fixer));
+        if (seller.AccountId == fixer.AccountId)
+        {
+            var combined = checked(distribution.Seller + distribution.Fixer);
+            if (combined > 0)
+                legs.Add(new NCLedgerLegRequest(seller.AccountId, seller.Account!.AggregateVersion, combined));
+        }
+        else
+        {
+            if (distribution.Seller > 0)
+                legs.Add(new NCLedgerLegRequest(seller.AccountId, seller.Account!.AggregateVersion,
+                    distribution.Seller));
+            if (distribution.Fixer > 0)
+                legs.Add(new NCLedgerLegRequest(fixer.AccountId, fixer.Account!.AggregateVersion,
+                    distribution.Fixer));
+        }
         var transactionId = NCPersistentIdentity.Transaction("fixer", "settle-escrow",
             $"{dealId}.{expectedVersion}");
         var eventId = Guid.NewGuid();

@@ -84,6 +84,7 @@ public sealed partial class NCCognitionSystem : EntitySystem
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
         SubscribeLocalEvent<NCCityActorPersistedEvent>(OnActorPersisted);
         SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
+        SubscribeLocalEvent<NCCityLocalIncidentObservedEvent>(OnIncidentObserved);
         SubscribeLocalEvent<NCCognitionRuntimeComponent, ComponentShutdown>(OnRuntimeShutdown);
     }
 
@@ -351,6 +352,16 @@ public sealed partial class NCCognitionSystem : EntitySystem
             ScheduleDecision(args.ActorId, now);
     }
 
+    /// <summary>Danger reactions bypass the civil cadence while retaining the normal bounded decision queue.</summary>
+    private void OnIncidentObserved(NCCityLocalIncidentObservedEvent args)
+    {
+        if (!_active || !IsImmediateDanger(args.Kind) ||
+            !_runtime.TryGetActor(args.Observer, out var actorId) ||
+            !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
+            return;
+        ScheduleDecision(actorId, now);
+    }
+
     private void OnRuntimeShutdown(Entity<NCCognitionRuntimeComponent> entity, ref ComponentShutdown args)
     {
         // Runtime teardown never deletes persistent cognition; the next materialization receives a fresh adapter.
@@ -426,7 +437,7 @@ public sealed partial class NCCognitionSystem : EntitySystem
     {
         if (_policy == null || !_inFlight.Add(actorId))
             return;
-        var perception = CapturePerception(actorId);
+        var perception = CapturePerception(actorId, now);
         _ = ObserveDecision(_generation, actorId, perception, now, _policy.MaximumFacts);
     }
 
@@ -508,22 +519,20 @@ public sealed partial class NCCognitionSystem : EntitySystem
             CompleteDecisionLoad(generation, actorId, actor, cognition, beliefs, facts, requestedAt, error));
     }
 
-    private NCCognitionPerceptionInput CapturePerception(NCActorId actorId)
+    private NCCognitionPerceptionInput CapturePerception(NCActorId actorId, NCActiveWorldTime now)
     {
         if (!_runtime.TryGetEntity(actorId, out var entityUid) || !Exists(entityUid) ||
             !TryComp<NCCityLocalPerceptionComponent>(entityUid, out var perception))
             return default;
         var conversation = TryComp<NCCityPhysicalExecutionComponent>(entityUid, out var execution) &&
                            (execution.Interrupts & NCCityPhysicalInterruptFlags.Conversation) != 0;
-        return new NCCognitionPerceptionInput(
-            perception.Revision,
-            perception.HostileCount > 0,
-            perception.CriticalCount > 0,
-            conversation,
-            perception.Observations
-                .Where(value => value.Kind is NCCityLocalObservationKind.Hostile or
-                    NCCityLocalObservationKind.Suspect or NCCityLocalObservationKind.Critical)
-                .Select(value => new NCCognitionObservedSubject(
+        var dangerEvents = perception.RecentEvents
+            .Where(value => value.ExpiresAt > now && IsImmediateDanger(value.Kind))
+            .ToArray();
+        var observedSubjects = perception.Observations
+            .Where(value => value.ExpiresAt > now && value.Kind is NCCityLocalObservationKind.Hostile or
+                NCCityLocalObservationKind.Suspect or NCCityLocalObservationKind.Critical)
+            .Select(value => new NCCognitionObservedSubject(
                 new NCCognitionSubjectRef(NCCognitionReferenceKind.StableKey, value.SubjectHandle),
                 value.Kind switch
                 {
@@ -534,8 +543,36 @@ public sealed partial class NCCognitionSystem : EntitySystem
                 },
                 value.Confidence,
                 value.ObservedAt,
-                value.ExpiresAt)).ToArray());
+                value.ExpiresAt));
+        var dangerSubjects = dangerEvents.Select(value => new NCCognitionObservedSubject(
+            new NCCognitionSubjectRef(
+                NCCognitionReferenceKind.StableKey,
+                value.Kind is NCCityLocalPerceivedEventKind.BodyDiscovered or NCCityLocalPerceivedEventKind.Fire
+                    ? value.TargetHandle
+                    : value.ActorHandle),
+            "perception.hostile-present",
+            value.Confidence,
+            value.ObservedAt,
+            value.ExpiresAt));
+        var subjects = observedSubjects.Concat(dangerSubjects)
+            .GroupBy(value => (value.Subject.StableId, value.FactKey))
+            .Select(group => group.OrderByDescending(value => value.ObservedAt.Ticks).First())
+            .ToArray();
+        return new NCCognitionPerceptionInput(
+            perception.Revision,
+            perception.HostileCount > 0 || dangerEvents.Length > 0,
+            perception.CriticalCount > 0,
+            conversation,
+            subjects);
     }
+
+    private static bool IsImmediateDanger(NCCityLocalPerceivedEventKind kind) => kind is
+        NCCityLocalPerceivedEventKind.Assault or
+        NCCityLocalPerceivedEventKind.Killing or
+        NCCityLocalPerceivedEventKind.Gunshot or
+        NCCityLocalPerceivedEventKind.BodyDiscovered or
+        NCCityLocalPerceivedEventKind.Fire or
+        NCCityLocalPerceivedEventKind.VerbalThreat;
 
     private void ScheduleDecision(NCActorId actorId, NCActiveWorldTime dueAt)
     {

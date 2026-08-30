@@ -10,6 +10,8 @@ using Content.Shared.Atmos.Components;
 using Content.Shared.Interaction;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
+using Content.Shared.Hands.Components;
+using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs;
 using Content.Shared.NPC.Components;
@@ -47,6 +49,7 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
+    [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private SharedCuffableSystem _cuffable = default!;
     [Dependency] private NpcFactionSystem _factions = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
@@ -141,11 +144,15 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
     private void OnDamageDealt(Entity<DamageableComponent> victim, ref DamageDealtEvent args)
     {
         if (!_active || _maximumObservationRadius <= 0f || !args.Damage.AnyPositive() ||
-            args.Origin is not { } attacker || attacker == victim.Owner || !Exists(attacker) ||
+            args.Origin is not { } origin || !Exists(origin) ||
             !_clock.TryGetCurrentTime(out _, out var now))
         {
             return;
         }
+
+        var attacker = ResolveResponsibleActor(origin);
+        if (attacker == victim.Owner)
+            return;
 
         using var work = _governor.MeasureWork(NCAILoadWorkKind.DamageEvents);
         var coordinates = _transform.GetMapCoordinates(victim.Owner);
@@ -313,10 +320,12 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
     {
         var actorKind = kind switch
         {
-            NCCityLocalPerceivedEventKind.Assault or NCCityLocalPerceivedEventKind.Killing when observer == target =>
+            NCCityLocalPerceivedEventKind.Assault or NCCityLocalPerceivedEventKind.Killing or
+                NCCityLocalPerceivedEventKind.VerbalThreat when observer == target =>
                 NCCityLocalObservationKind.Hostile,
             NCCityLocalPerceivedEventKind.Assault or NCCityLocalPerceivedEventKind.Killing or
-                NCCityLocalPerceivedEventKind.Gunshot => NCCityLocalObservationKind.Suspect,
+                NCCityLocalPerceivedEventKind.Gunshot or NCCityLocalPerceivedEventKind.VerbalThreat =>
+                NCCityLocalObservationKind.Suspect,
             _ => NCCityLocalObservationKind.Neutral,
         };
         if (!ObserveSubject(observer, actor, actorKind, now, lifetime, confidence) ||
@@ -589,21 +598,43 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
                 profile.WitnessedEventLifetime);
         }
 
-        foreach (var weapon in _lookup.GetEntitiesInRange<GunComponent>(origin, profile.Radius)
-                     .Select(value => value.Owner)
-                     .Concat(_lookup.GetEntitiesInRange<MeleeWeaponComponent>(origin, profile.Radius)
-                         .Select(value => value.Owner)))
+        // Query people once, perform one LoS check per holder, then inspect the already-bounded hand contents.
+        // This exposes ordinary held items to dialogue without scanning every item entity in the city.
+        foreach (var holder in _lookup.GetEntitiesInRange<HandsComponent>(origin, profile.Radius))
         {
-            var holder = Transform(weapon).ParentUid;
-            if (holder == observer || !Exists(holder) || !HasComp<MobStateComponent>(holder) ||
+            if (holder.Owner == observer || !HasComp<MobStateComponent>(holder.Owner) ||
                 lineOfSightChecks >= profile.MaximumLineOfSightChecks)
                 continue;
             lineOfSightChecks++;
-            if (!_interaction.InRangeUnobstructed(observer, holder, profile.Radius))
+            if (!_interaction.InRangeUnobstructed(observer, holder.Owner, profile.Radius))
                 continue;
-            ObserveIncident(observer, NCCityLocalPerceivedEventKind.WeaponDisplayed, holder, holder, now,
-                profile.WitnessedEventLifetime);
+
+            foreach (var held in _hands.EnumerateHeld(holder.AsNullable()))
+            {
+                if (!Exists(held))
+                    continue;
+                var kind = HasComp<GunComponent>(held) || HasComp<MeleeWeaponComponent>(held)
+                    ? NCCityLocalPerceivedEventKind.WeaponDisplayed
+                    : NCCityLocalPerceivedEventKind.HeldItemDisplayed;
+                ObserveIncident(observer, kind, holder.Owner, held, now, profile.WitnessedEventLifetime);
+            }
         }
+    }
+
+    /// <summary>Walks only the short containment parent chain of the damage origin to recover a hitscan shooter.</summary>
+    private EntityUid ResolveResponsibleActor(EntityUid origin)
+    {
+        var current = origin;
+        for (var depth = 0; depth < 3 && Exists(current); depth++)
+        {
+            if (HasComp<MobStateComponent>(current))
+                return current;
+            var parent = Transform(current).ParentUid;
+            if (!parent.IsValid() || parent == current)
+                break;
+            current = parent;
+        }
+        return origin;
     }
 
     /// <summary>

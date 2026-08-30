@@ -61,6 +61,14 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
     public int CachedDealCount => _deals.Count;
     public int CachedNightMarketCount => _nightMarkets.Count;
 
+    public IReadOnlyList<NCFixerNetworkRecord> GetCachedNetworks(int limit = 256) =>
+        limit <= 0 ? [] : _networks.Values.OrderBy(value => value.Snapshot.NetworkId.Value)
+            .Take(Math.Min(limit, 4096)).ToArray();
+
+    public IReadOnlyList<NCNightMarketRecord> GetCachedNightMarkets(int limit = 256) =>
+        limit <= 0 ? [] : _nightMarkets.Values.OrderBy(value => value.Snapshot.NightMarketId.Value)
+            .Take(Math.Min(limit, 4096)).ToArray();
+
     public IReadOnlyList<NCFixerDealRecord> GetCachedDealsForParty(NCPartyRef party, int limit,
         bool includeClosed = false)
     {
@@ -206,7 +214,7 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
                 return Reject(NCFixerMutationStatus.NotAuthorized, "The fixer network is unavailable.");
             var eventId = Guid.NewGuid();
             var snapshot = new NCFixerDealSnapshot(request.DealId, request.NetworkId, request.Fixer, request.Buyer,
-                request.Seller, Normalize(request.Plan), NCFixerDealStatus.Offered, request.QuotedAmount, default,
+                request.Seller, Normalize(request.Plan, policy), NCFixerDealStatus.Offered, request.QuotedAmount, default,
                 null, null, FindRequest(request.Plan, service: false), FindRequest(request.Plan, service: true),
                 request.Plan.Legs.Select(value => value.ShipmentId).FirstOrDefault(value => value?.IsValid == true),
                 null, now.Advance(policy.QuoteLifetime), null, now, now, 1, eventId);
@@ -226,6 +234,8 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
     {
         if (!TryPolicy(out var policy) || request.CommandId == Guid.Empty || !request.DealId.IsValid ||
             request.ExpectedVersion <= 0 || !request.Actor.IsValid || request.CorrelationId == Guid.Empty ||
+            (request.Status == NCFixerDealStatus.Breached) !=
+            (request.BreachReason != NCFixerBreachReason.None) ||
             !_clock.TryGetCurrentTime(out var epoch, out var now))
             return Reject(NCFixerMutationStatus.Rejected, "The fixer deal transition request is invalid.");
         var gate = Gate(request.DealId.Value);
@@ -246,6 +256,16 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
                 ReservationExpiresAt = request.Status == NCFixerDealStatus.Reserved
                     ? now.Advance(policy.ReservationLifetime)
                     : current.Snapshot.ReservationExpiresAt,
+                ExecutionDeadline = request.Status == NCFixerDealStatus.InProgress
+                    ? current.Snapshot.ExecutionDeadline ?? now.Advance(
+                        current.Snapshot.Plan.ExecutionDuration > TimeSpan.Zero
+                            ? current.Snapshot.Plan.ExecutionDuration
+                            : policy.DefaultExecutionDuration)
+                    : current.Snapshot.ExecutionDeadline,
+                BreachedAt = request.Status == NCFixerDealStatus.Breached ? now : current.Snapshot.BreachedAt,
+                BreachReason = request.Status == NCFixerDealStatus.Breached
+                    ? request.BreachReason
+                    : current.Snapshot.BreachReason,
                 UpdatedAt = now,
                 DataVersion = checked(current.Snapshot.DataVersion + 1),
                 LastAppliedEventId = eventId,
@@ -289,7 +309,13 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
             var proposed = current.Snapshot with
             {
                 Plan = current.Snapshot.Plan with { Legs = legs },
-                Status = allDelivered ? NCFixerDealStatus.AwaitingHandoff : current.Snapshot.Status,
+                Status = request.Status == NCFixerDealLegStatus.Failed
+                    ? NCFixerDealStatus.Breached
+                    : allDelivered ? NCFixerDealStatus.AwaitingHandoff : current.Snapshot.Status,
+                BreachedAt = request.Status == NCFixerDealLegStatus.Failed ? now : current.Snapshot.BreachedAt,
+                BreachReason = request.Status == NCFixerDealLegStatus.Failed
+                    ? NCFixerBreachReason.RequiredLegFailed
+                    : current.Snapshot.BreachReason,
                 UpdatedAt = now,
                 DataVersion = checked(current.Snapshot.DataVersion + 1),
                 LastAppliedEventId = eventId,
@@ -309,7 +335,9 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
             request.CorrelationId, request.CausationId, request.AuditSource, (current, now, policy) =>
             {
                 if (request.DisputeId == Guid.Empty || string.IsNullOrWhiteSpace(request.ReasonKey) ||
-                    request.ReasonKey.Length > 128 || current.Dispute != null)
+                    request.ReasonKey.Length > 128 || current.Dispute != null ||
+                    current.Status is not (NCFixerDealStatus.EscrowFunded or NCFixerDealStatus.InProgress or
+                        NCFixerDealStatus.AwaitingHandoff or NCFixerDealStatus.Breached))
                     return null;
                 return current with
                 {
@@ -363,7 +391,7 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
             request.Vendors.Count == 0 || request.Vendors.Count > policy.MaximumVendors ||
             request.Vendors.Select(value => value.Vendor).Distinct().Count() != request.Vendors.Count ||
             request.Vendors.Any(value => !value.Vendor.IsValid || !value.StockNodeId.IsValid ||
-                !value.NetworkId.IsValid) ||
+                !value.NetworkId.IsValid || value.Attendant.IsValid && !value.Attendant.TryGetActor(out _)) ||
             request.AssemblyAt >= request.OpensAt || request.OpensAt >= request.ClosesAt ||
             request.ClosesAt.Ticks - request.OpensAt.Ticks > policy.MaximumDuration.Ticks ||
             request.CorrelationId == Guid.Empty || !_clock.TryGetCurrentTime(out var epoch, out var now) ||
@@ -500,13 +528,15 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
 
         foreach (var vendor in vendors)
         {
-            if (!vendor.Vendor.TryGetActor(out _) ||
-                !(await _parties.ResolveAsync(vendor.Vendor, forceReload)).IsResolved)
-                return $"Night Market vendor {vendor.Vendor} is not an available persistent actor.";
+            var attendant = vendor.Attendant.IsValid ? vendor.Attendant : vendor.Vendor;
+            if (!attendant.TryGetActor(out _) ||
+                !(await _parties.ResolveAsync(vendor.Vendor, forceReload)).IsResolved ||
+                !(await _parties.ResolveAsync(attendant, forceReload)).IsResolved)
+                return $"Night Market vendor {vendor.Vendor} has no available persistent actor attendant.";
             var network = await GetNetworkAsync(vendor.NetworkId, forceReload);
-            if (network == null || network.Snapshot.Fixer != vendor.Vendor &&
-                !await HasAccessAsync(network.Snapshot.Fixer, vendor.Vendor, forceReload))
-                return $"Night Market vendor {vendor.Vendor} has no access to the declared Fixer network.";
+            if (network == null || network.Snapshot.Fixer != attendant &&
+                !await HasAccessAsync(network.Snapshot.Fixer, attendant, forceReload))
+                return $"Night Market vendor attendant {attendant} has no access to the declared Fixer network.";
             var stock = await _assets.GetStockNodeAsync(vendor.StockNodeId, forceReload);
             if (stock?.Snapshot.Owner != vendor.Vendor ||
                 stock.Snapshot.CommodityBatchIds.Count + stock.Snapshot.ItemIds.Count == 0)
@@ -714,18 +744,28 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
     private bool TryPolicy(out NCFixerPolicyPrototype policy) => _prototypes.TryIndex(DefaultPolicy, out policy!) &&
         policy.MaximumContacts is > 0 and <= 4096 && policy.MaximumDealLegs is > 0 and <= 24 &&
         policy.MaximumEvidence is > 0 and <= 128 && policy.QuoteLifetime > TimeSpan.Zero &&
-        policy.ReservationLifetime > TimeSpan.Zero && policy.MaximumBrokerFeeBasisPoints is >= 0 and <= 10_000;
+        policy.ReservationLifetime > TimeSpan.Zero && policy.DefaultExecutionDuration > TimeSpan.Zero &&
+        policy.MaximumExecutionDuration >= policy.DefaultExecutionDuration &&
+        policy.MaximumBrokerFeeBasisPoints is >= 0 and <= 10_000 &&
+        policy.DealBoardBrokerFeeBasisPoints is >= 0 and <= 10_000 &&
+        policy.DealBoardListingLifetime > TimeSpan.Zero &&
+        policy.DealBoardServiceOffers.Count <= 32 &&
+        policy.DealBoardServiceOffers.All(value => _prototypes.HasIndex(value)) &&
+        Valid(DefaultConsequences(policy));
 
-    private static bool Valid(NCCreateFixerDealRequest request, NCFixerPolicyPrototype policy) =>
+    private bool Valid(NCCreateFixerDealRequest request, NCFixerPolicyPrototype policy) =>
         request.CommandId != Guid.Empty && request.DealId.IsValid && request.NetworkId.IsValid &&
         request.Fixer.IsValid && request.Buyer.IsValid && request.Seller.IsValid && request.Buyer != request.Seller &&
-        request.Fixer != request.Buyer && request.Fixer != request.Seller &&
+        request.Fixer != request.Buyer &&
         request.QuotedAmount >= 0 && request.CorrelationId != Guid.Empty && request.Plan.Legs.Count is > 0 &&
         request.Plan.Legs.Count <= policy.MaximumDealLegs && ValidEscrowTotal(request.QuotedAmount,
             request.Plan.BrokerFeeBasisPoints, request.Plan.EscrowAmount) &&
         request.Plan.BrokerFeeBasisPoints is >= 0 && request.Plan.BrokerFeeBasisPoints <=
             policy.MaximumBrokerFeeBasisPoints && request.Plan.RiskBasisPoints is >= 0 &&
         request.Plan.RiskBasisPoints <= policy.MaximumRiskBasisPoints &&
+        (request.Plan.ExecutionDuration == TimeSpan.Zero || request.Plan.ExecutionDuration > TimeSpan.Zero &&
+            request.Plan.ExecutionDuration <= policy.MaximumExecutionDuration) &&
+        (request.Plan.Consequences == null || Valid(request.Plan.Consequences)) &&
         request.Plan.Legs.All(Valid);
 
     private static bool Valid(NCFixerDealLeg value) => value.LegId != Guid.Empty && value.From.IsValid &&
@@ -739,7 +779,8 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
     {
         if (quotedAmount < 0 || feeBasisPoints < 0 || escrowAmount < 0)
             return false;
-        var total = (decimal) quotedAmount + (decimal) quotedAmount * feeBasisPoints / 10_000m;
+        var total = decimal.Ceiling((decimal) quotedAmount +
+            (decimal) quotedAmount * feeBasisPoints / 10_000m);
         return total <= long.MaxValue && escrowAmount == (long) total;
     }
 
@@ -747,10 +788,34 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
         value.NetworkId.IsValid && value.Fixer.IsValid && value.Buyer.IsValid && value.Seller.IsValid &&
         value.DataVersion > 0 && value.LastAppliedEventId != Guid.Empty;
 
-    private static NCFixerDealPlan Normalize(NCFixerDealPlan plan) => plan with
+    private static NCFixerDealPlan Normalize(NCFixerDealPlan plan, NCFixerPolicyPrototype policy) => plan with
     {
         Legs = plan.Legs.OrderBy(value => value.LegId).ToArray(),
+        ExecutionDuration = plan.ExecutionDuration > TimeSpan.Zero
+            ? plan.ExecutionDuration
+            : policy.DefaultExecutionDuration,
+        Consequences = plan.Consequences ?? DefaultConsequences(policy),
     };
+
+    private static NCFixerDealConsequences DefaultConsequences(NCFixerPolicyPrototype policy) => new(
+        policy.SuccessRelationshipEffectId,
+        policy.BreachRelationshipEffectId,
+        policy.SuccessReputationEffectId,
+        policy.BreachReputationEffectId,
+        policy.ReputationDomainId);
+
+    private bool Valid(NCFixerDealConsequences value) =>
+        Stable(value.SuccessRelationshipEffectId, 96) && Stable(value.BreachRelationshipEffectId, 96) &&
+        Stable(value.SuccessReputationEffectId, 96) && Stable(value.BreachReputationEffectId, 96) &&
+        Stable(value.ReputationDomainId, 96) &&
+        _prototypes.HasIndex(new ProtoId<NCRelationshipEffectPrototype>(value.SuccessRelationshipEffectId)) &&
+        _prototypes.HasIndex(new ProtoId<NCRelationshipEffectPrototype>(value.BreachRelationshipEffectId)) &&
+        _prototypes.HasIndex(new ProtoId<NCReputationEffectPrototype>(value.SuccessReputationEffectId)) &&
+        _prototypes.HasIndex(new ProtoId<NCReputationEffectPrototype>(value.BreachReputationEffectId)) &&
+               _prototypes.HasIndex(new ProtoId<NCReputationDomainPrototype>(value.ReputationDomainId));
+
+    private static bool Stable(string value, int maximumLength) =>
+        !string.IsNullOrWhiteSpace(value) && value.Length <= maximumLength && value == value.Trim();
 
     private static NCMarketRequestId? FindRequest(NCFixerDealPlan plan, bool service) => plan.Legs
         .Where(value => service ? value.Kind == NCFixerDealLegKind.Service : value.Kind != NCFixerDealLegKind.Service)
@@ -769,6 +834,7 @@ public sealed partial class NCFixerRegistrySystem : EntitySystem
             NCFixerDealStatus.Expired) => true,
         (NCFixerDealStatus.EscrowFunded, NCFixerDealStatus.InProgress or NCFixerDealStatus.Disputed) => true,
         (NCFixerDealStatus.InProgress, NCFixerDealStatus.AwaitingHandoff or NCFixerDealStatus.Disputed) => true,
+        (NCFixerDealStatus.InProgress, NCFixerDealStatus.Breached) => true,
         (NCFixerDealStatus.AwaitingHandoff, NCFixerDealStatus.Fulfilled or NCFixerDealStatus.Disputed) => true,
         (NCFixerDealStatus.Disputed, NCFixerDealStatus.Arbitrated) => true,
         (NCFixerDealStatus.Arbitrated, NCFixerDealStatus.Fulfilled or NCFixerDealStatus.Cancelled) => true,

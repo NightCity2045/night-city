@@ -12,12 +12,13 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._NC.LivingCity.Social;
 
 /// <summary>
-/// Commits one structured interaction memory per Actor and conversation. Raw utterances and provider prose remain
-/// round-local, so a long conversation never becomes a database write per turn.
+/// Commits structured interaction memories without treating raw dialogue as truth. Routine contact is recorded once
+/// per session; explicit hostile speech receives its own durable memory.
 /// </summary>
 public sealed partial class NCHumanConversationMemoryBridgeSystem : EntitySystem
 {
     private static readonly ProtoId<NCMemoryEventPrototype> RoutineInteraction = "MemoryRoutineInteraction";
+    private static readonly ProtoId<NCMemoryEventPrototype> VerbalThreat = "MemoryVerbalThreat";
 
     [Dependency] private NCMemoryRegistrySystem _memories = default!;
 
@@ -34,19 +35,18 @@ public sealed partial class NCHumanConversationMemoryBridgeSystem : EntitySystem
 
     private void OnConversationTurn(NCConversationTurnRecordedEvent args)
     {
+        var turn = args.Session.Turns.Count > 0 ? args.Session.Turns[^1] : null;
         foreach (var participant in args.Session.Participants)
         {
             if (!participant.TryGetActor(out var actorId))
-                continue;
-            var key = new ConversationMemoryKey(args.Session.SessionId, actorId);
-            if (!_recorded.TryAdd(key, 0))
                 continue;
 
             var owner = NCPartyRef.ForActor(actorId);
             var others = args.Session.Participants.Where(value => value != owner).ToArray();
             var stableKey = $"{owner}/{args.Session.SessionId}";
-            var request = new NCRememberWorldEventRequest(
-                NCPersistentIdentity.Command("memory", "conversation", stableKey),
+            QueueMemory(new ConversationMemoryKey(args.Session.SessionId, actorId, "routine", 0),
+                new NCRememberWorldEventRequest(
+                NCPersistentIdentity.Command("memory", "conversation-routine", stableKey),
                 owner,
                 RoutineInteraction,
                 args.Session.SessionId.Value,
@@ -60,9 +60,44 @@ public sealed partial class NCHumanConversationMemoryBridgeSystem : EntitySystem
                 owner,
                 args.Session.SessionId.Value,
                 null,
-                "human-conversation");
-            _ = RememberAsync(key, request);
+                "human-conversation"));
+
+            if (turn is not { Act: NCSpeechActKind.Threat } || turn.Speaker == owner)
+                continue;
+            var threatStableKey = $"{stableKey}/{turn.Sequence}";
+            var threatEventId = NCPersistentIdentity.Correlation(
+                "memory",
+                "conversation-threat",
+                threatStableKey);
+            QueueMemory(new ConversationMemoryKey(
+                    args.Session.SessionId,
+                    actorId,
+                    "threat",
+                    turn.Sequence),
+                new NCRememberWorldEventRequest(
+                    NCPersistentIdentity.Command("memory", "conversation-threat", threatStableKey),
+                    owner,
+                    VerbalThreat,
+                    threatEventId,
+                    [],
+                    others,
+                    new NCMemorySource(NCMemorySourceKind.DirectPerception, default),
+                    [],
+                    null,
+                    null,
+                    null,
+                    owner,
+                    args.Session.SessionId.Value,
+                    null,
+                    "human-conversation-threat"));
         }
+    }
+
+    private void QueueMemory(ConversationMemoryKey key, NCRememberWorldEventRequest request)
+    {
+        if (!_recorded.TryAdd(key, 0))
+            return;
+        _ = RememberAsync(key, request);
     }
 
     private async Task RememberAsync(ConversationMemoryKey key, NCRememberWorldEventRequest request)
@@ -82,5 +117,7 @@ public sealed partial class NCHumanConversationMemoryBridgeSystem : EntitySystem
 
     private readonly record struct ConversationMemoryKey(
         NCConversationSessionId SessionId,
-        NCActorId ActorId);
+        NCActorId ActorId,
+        string Kind,
+        long Sequence);
 }

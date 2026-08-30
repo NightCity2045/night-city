@@ -190,7 +190,8 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
         var recipients = new List<NCActorId> { targetActor };
         if (companionActor is { } companion)
             recipients.Add(companion);
-        if (policy.ApplyToCurrentGroup)
+        // Voluntary consent belongs only to the resident who spoke. Group propagation remains an authority-only path.
+        if (policy.ApplyToCurrentGroup && actionDefinition.RequiresAuthority)
         {
             var membership = await _groups.GetMembershipAsync(targetActor);
             if (membership?.Snapshot.GroupId.IsValid == true)
@@ -207,7 +208,7 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
         foreach (var recipient in recipients)
         {
             if (IsActionAllowed(recipient, actionDefinition) &&
-                await IsAuthorizedAsync(speakerEntity, recipient, policy))
+                (!actionDefinition.RequiresAuthority || await IsAuthorizedAsync(speakerEntity, recipient, policy)))
                 continue;
             _tasks.RunOnMainThread(() => Reject(proposal,
                 "The speaker has no authority for this action over every named recipient."));

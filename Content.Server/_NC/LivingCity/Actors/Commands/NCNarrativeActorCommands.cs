@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Content.Server.Administration;
 using Content.Server._NC.City.Zones;
+using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Neural;
 using Content.Server._NC.LivingCity.Population;
 using Content.Server._NC.LivingCity.Time;
@@ -20,6 +21,7 @@ using Robust.Shared.Asynchronous;
 using Robust.Shared.Console;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 
 namespace Content.Server._NC.LivingCity.Actors.Commands;
 
@@ -104,6 +106,9 @@ public sealed partial class NCActorListCommand : IConsoleCommand
 [AdminCommand(AdminFlags.Admin)]
 public sealed partial class NCActorSpawnCommand : IConsoleCommand
 {
+    private const int CompletionPollMilliseconds = 250;
+    private const int MaximumCompletionPolls = 2400;
+
     private static readonly ProtoId<NCCityMaterializationPolicyPrototype> MaterializationPolicy =
         "NCDefaultCityMaterializationPolicy";
 
@@ -183,19 +188,6 @@ public sealed partial class NCActorSpawnCommand : IConsoleCommand
         }
 
         var systems = _entities.EntitySysManager;
-        var runtime = systems.GetEntitySystem<NCCityActorRuntimeIndexSystem>();
-        if (runtime.TryGetEntity(entry.ActorId, out var existing) && _entities.EntityExists(existing))
-        {
-            shell.WriteLine(Loc.GetString(
-                "cmd-ncactorspawn-already-physical",
-                ("key", entry.Key),
-                ("entity", existing)));
-            NCNarrativeActorCommandHelpers.WriteNeuralStatus(
-                shell,
-                systems.GetEntitySystem<NCNeuralCognitionClientSystem>());
-            return;
-        }
-
         if (target.AttachedEntity is not { } targetEntity || !_entities.EntityExists(targetEntity))
         {
             shell.WriteError(Loc.GetString("cmd-ncactor-error-player-no-entity", ("player", target.Name)));
@@ -227,6 +219,8 @@ public sealed partial class NCActorSpawnCommand : IConsoleCommand
         }
 
         var commandId = Guid.NewGuid();
+        systems.GetEntitySystem<NCCityActorScheduleSchedulerSystem>()
+            .SetAdminRoutineHold(entry.ActorId, true);
         var move = systems.GetEntitySystem<NCCityActorRegistrySystem>().SetLocationAsync(
             new NCCityActorLocationMutationRequest(
                 commandId,
@@ -283,6 +277,8 @@ public sealed partial class NCActorSpawnCommand : IConsoleCommand
         if (result == null || result.Status is not (NCCityActorMutationStatus.Applied or
                 NCCityActorMutationStatus.Duplicate))
         {
+            _entities.EntitySysManager.GetEntitySystem<NCCityActorScheduleSchedulerSystem>()
+                .SetAdminRoutineHold(entry.ActorId, false);
             shell.WriteError(Loc.GetString(
                 "cmd-ncactor-error-relocation",
                 ("key", entry.Key),
@@ -290,20 +286,54 @@ public sealed partial class NCActorSpawnCommand : IConsoleCommand
             return;
         }
 
+        var systems = _entities.EntitySysManager;
+        var materialization = systems.GetEntitySystem<NCCityActorMaterializationSystem>();
+        if (systems.GetEntitySystem<NCCityActorRuntimeIndexSystem>()
+                .TryGetEntity(entry.ActorId, out var existing) && _entities.EntityExists(existing))
+        {
+            if (!materialization.TryRelocateAdminProjection(
+                    existing,
+                    target,
+                    policy.AdminPreferredSpawnRadius,
+                    out var relocationError))
+            {
+                systems.GetEntitySystem<NCCityActorScheduleSchedulerSystem>()
+                    .SetAdminRoutineHold(entry.ActorId, false);
+                shell.WriteError(Loc.GetString(
+                    "cmd-ncactor-error-materialization",
+                    ("key", entry.Key),
+                    ("reason", relocationError ?? Loc.GetString("cmd-ncactor-error-unknown-reason"))));
+                return;
+            }
+
+            if (_entities.TryGetComponent(existing, out NCCityMaterializationLeaseComponent? lease))
+                lease.Reason = NCCityMaterializationReason.Admin;
+            shell.WriteLine(Loc.GetString(
+                "cmd-ncactorspawn-relocated-physical",
+                ("key", entry.Key),
+                ("entity", existing)));
+            NCNarrativeActorCommandHelpers.WriteNeuralStatus(
+                shell,
+                systems.GetEntitySystem<NCNeuralCognitionClientSystem>());
+            return;
+        }
+
         var requestId = Guid.NewGuid();
-        var state = _entities.EntitySysManager.GetEntitySystem<NCCityActorMaterializationSystem>()
+        var state = materialization
             .Request(new NCCityMaterializationRequest(
                 requestId,
                 entry.ActorId,
                 NCCityMaterializationReason.Admin,
                 policy.MaximumPriority,
                 unchecked((uint) entry.ActorId.Value.GetHashCode()),
-                null,
+                policy.MaximumWait,
                 NCNarrativeActorCommandHelpers.AuditSource(shell, "spawn"),
                 target,
                 policy.AdminPreferredSpawnRadius));
         if (state.Status == NCCityMaterializationRequestStatus.Rejected)
         {
+            _entities.EntitySysManager.GetEntitySystem<NCCityActorScheduleSchedulerSystem>()
+                .SetAdminRoutineHold(entry.ActorId, false);
             shell.WriteError(Loc.GetString(
                 "cmd-ncactor-error-materialization",
                 ("key", entry.Key),
@@ -321,6 +351,64 @@ public sealed partial class NCActorSpawnCommand : IConsoleCommand
         NCNarrativeActorCommandHelpers.WriteNeuralStatus(
             shell,
             _entities.EntitySysManager.GetEntitySystem<NCNeuralCognitionClientSystem>());
+        ObserveCompletion(shell, entry, state.RequestId, 0);
+    }
+
+    /// <summary>
+    /// Reports the terminal admin result instead of leaving the initial queued message as the only feedback.
+    /// Timer callbacks run on the simulation synchronization context, so materialization state stays thread-safe.
+    /// </summary>
+    private void ObserveCompletion(
+        IConsoleShell shell,
+        NCNarrativeActorCommandEntry entry,
+        Guid requestId,
+        int polls)
+    {
+        Timer.Spawn(CompletionPollMilliseconds, () =>
+        {
+            var systems = _entities.EntitySysManager;
+            var materialization = systems.GetEntitySystem<NCCityActorMaterializationSystem>();
+            if (!materialization.TryGetRequest(requestId, out var state) || polls >= MaximumCompletionPolls)
+            {
+                systems.GetEntitySystem<NCCityActorScheduleSchedulerSystem>()
+                    .SetAdminRoutineHold(entry.ActorId, false);
+                shell.WriteError(Loc.GetString(
+                    "cmd-ncactorspawn-result-unavailable",
+                    ("key", entry.Key),
+                    ("request", requestId)));
+                return;
+            }
+
+            if (state.Status is NCCityMaterializationRequestStatus.Queued or
+                NCCityMaterializationRequestStatus.Loading or
+                NCCityMaterializationRequestStatus.Retrying)
+            {
+                ObserveCompletion(shell, entry, requestId, polls + 1);
+                return;
+            }
+
+            var status = NCNarrativeActorCommandHelpers.MaterializationStatus(state.Status);
+            if (state.Status is NCCityMaterializationRequestStatus.Materialized or
+                NCCityMaterializationRequestStatus.AlreadyMaterialized)
+            {
+                shell.WriteLine(Loc.GetString(
+                    "cmd-ncactorspawn-completed",
+                    ("key", entry.Key),
+                    ("request", requestId),
+                    ("status", status),
+                    ("entity", state.EntityUid)));
+                return;
+            }
+
+            systems.GetEntitySystem<NCCityActorScheduleSchedulerSystem>()
+                .SetAdminRoutineHold(entry.ActorId, false);
+            shell.WriteError(Loc.GetString(
+                "cmd-ncactorspawn-failed",
+                ("key", entry.Key),
+                ("request", requestId),
+                ("status", status),
+                ("reason", state.Error ?? Loc.GetString("cmd-ncactor-error-unknown-reason"))));
+        });
     }
 
     public CompletionResult GetCompletion(IConsoleShell shell, string[] args) => args.Length switch
@@ -372,6 +460,8 @@ public sealed partial class NCActorDespawnCommand : IConsoleCommand
             return;
         }
 
+        var scheduler = systems.GetEntitySystem<NCCityActorScheduleSchedulerSystem>();
+        scheduler.SetAdminRoutineHold(entry.ActorId, false);
         var state = systems.GetEntitySystem<NCCityActorDematerializationSystem>().Request(
             new NCCityDematerializationRequest(
                 Guid.NewGuid(),
@@ -382,6 +472,7 @@ public sealed partial class NCActorDespawnCommand : IConsoleCommand
                 NCNarrativeActorCommandHelpers.AuditSource(shell, "despawn")));
         if (state.Status == NCCityDematerializationStatus.Rejected)
         {
+            scheduler.SetAdminRoutineHold(entry.ActorId, true);
             shell.WriteError(Loc.GetString(
                 "cmd-ncactor-error-dematerialization",
                 ("key", entry.Key),

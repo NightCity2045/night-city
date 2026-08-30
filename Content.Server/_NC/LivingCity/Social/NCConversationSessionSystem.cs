@@ -15,8 +15,8 @@ using Robust.Shared.Timing;
 namespace Content.Server._NC.LivingCity.Social;
 
 /// <summary>
-/// Server-owned conversation state. Durable snapshots keep semantic acts; a separate bounded round-local transcript
-/// gives dialogue cognition continuity without turning provider prose into persistence authority.
+/// Server-owned live conversation state. Raw speech remains untrusted, but completed sessions are handed to the
+/// durable archive so dialogue continuity survives round and server restarts.
 /// </summary>
 public sealed partial class NCConversationSessionSystem : EntitySystem
 {
@@ -27,6 +27,7 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
 
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
+    [Dependency] private NCConversationArchiveSystem _archive = default!;
     [Dependency] private IGameTiming _timing = default!;
 
     private readonly object _sync = new();
@@ -59,7 +60,7 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
-        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(_ => Clear());
+        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(OnSessionClosing);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
     }
@@ -217,13 +218,13 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
                 if (!_transcripts.TryGetValue(session.SessionId, out var transcript))
                     _transcripts[session.SessionId] = transcript = [];
                 transcript.Add(new NCConversationTranscriptTurn(request.Speaker, request.Act,
-                    NormalizeUtterance(transientUtterance), now));
+                    NormalizeUtterance(transientUtterance, policy.MaximumUtteranceLength), now));
                 while (transcript.Count > policy.MaximumTurns)
                     transcript.RemoveAt(0);
             }
         }
-        // Raw speech is carried only by this round-local event. The durable conversation snapshot keeps semantic
-        // keys and external references, so provider prose never becomes persistence authority.
+        // Subscribers may react immediately to this untrusted utterance. Persistence occurs only once when the
+        // bounded session is archived, never as synchronous database I/O from the chat event.
         RaiseLocalEvent(new NCConversationTurnRecordedEvent(session, transientUtterance));
         return true;
     }
@@ -290,8 +291,9 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
             return [];
         lock (_sync)
         {
+            var maximum = TryGetPolicy(out var policy) ? policy.MaximumTurns : 256;
             return _transcripts.TryGetValue(sessionId, out var transcript)
-                ? transcript.TakeLast(Math.Min(limit, 32)).ToArray()
+                ? transcript.TakeLast(Math.Min(limit, maximum)).ToArray()
                 : [];
         }
     }
@@ -351,11 +353,43 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
         _nextSweep = _timing.CurTime;
     }
 
+    private void OnSessionClosing(NCActiveWorldSessionClosingEvent args)
+    {
+        if (!TryGetPolicy(out var policy))
+        {
+            Clear();
+            return;
+        }
+
+        lock (_sync)
+        {
+            foreach (var session in _active.Values.ToArray())
+            {
+                var terminal = session with
+                {
+                    Status = NCConversationStatus.Interrupted,
+                    EndReason = "round-closing",
+                    LastActivityAt = args.Time,
+                    ConversationVersion = checked(session.ConversationVersion + 1),
+                };
+                args.AddPendingWrite(Archive(terminal, policy, args.Epoch, args.Time));
+            }
+            _roundActive = false;
+        }
+    }
+
     private void OnSessionClosed(NCActiveWorldSessionClosedEvent args) => Clear();
     private void OnClockFailed(NCActiveWorldClockFailedEvent args) => Clear();
 
-    private void Archive(NCConversationSessionSnapshot session, NCConversationPolicyPrototype policy)
+    private Task Archive(
+        NCConversationSessionSnapshot session,
+        NCConversationPolicyPrototype policy,
+        NCSessionEpoch? closingEpoch = null,
+        NCActiveWorldTime? closingTime = null)
     {
+        var transcript = _transcripts.TryGetValue(session.SessionId, out var value)
+            ? value.ToArray()
+            : Array.Empty<NCConversationTranscriptTurn>();
         _active.Remove(session.SessionId);
         foreach (var participant in session.Participants)
         {
@@ -370,6 +404,24 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
         {
             var removed = _recent.Dequeue();
             _transcripts.Remove(removed.SessionId);
+        }
+        var persistence = closingEpoch is { } epoch && closingTime is { } now
+            ? _archive.ArchiveAsync(session, transcript, epoch, now)
+            : _archive.ArchiveAsync(session, transcript);
+        if (closingEpoch == null)
+            _ = ObserveArchiveAsync(session.SessionId, persistence);
+        return persistence;
+    }
+
+    private async Task ObserveArchiveAsync(NCConversationSessionId sessionId, Task persistence)
+    {
+        try
+        {
+            await persistence;
+        }
+        catch (Exception exception)
+        {
+            Log.Error($"Failed to archive conversation {sessionId}: {exception}");
         }
     }
 
@@ -394,6 +446,15 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
         value.MaximumSessionsPerParticipant is > 0 and <= 32 &&
         value.MaximumParticipants is >= 2 and <= 64 && value.MaximumTopics is > 0 and <= 64 &&
         value.MaximumRelevantFacts is > 0 and <= 128 && value.MaximumTurns is > 0 and <= 256 &&
+        value.MaximumUtteranceLength is > 0 and <= 4096 &&
+        value.MaximumArchivedSummaryTurns is > 0 &&
+        value.MaximumArchivedSummaryTurns <= value.MaximumTurns &&
+        value.MaximumArchivedSummaryLength is > 0 and <= 8192 &&
+        value.MaximumCachedArchivesPerPair is > 0 and <= 500 &&
+        value.VerbalThreatMarkers.Count is > 0 and <= 128 &&
+        value.VerbalThreatMarkers.All(marker => marker.Length is > 1 and <= 64 &&
+            marker.All(character => !char.IsControl(character))) &&
+        value.VerbalThreatLifetime > TimeSpan.Zero &&
         value.IdleTimeout > TimeSpan.Zero && value.MaximumLifetime >= value.IdleTimeout &&
         value.ExpirySweepInterval > TimeSpan.Zero;
 
@@ -417,11 +478,11 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
     private static NCInformationSubject Normalize(NCInformationSubject value) =>
         value with { StableId = value.StableId.Trim().ToLowerInvariant() };
     private static string Normalize(string value) => value.Trim().ToLowerInvariant();
-    private static string NormalizeUtterance(string value)
+    private static string NormalizeUtterance(string value, int maximumLength)
     {
         var normalized = string.Join(' ', value.Split((char[]?) null,
             StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
-        return normalized[..Math.Min(normalized.Length, 512)];
+        return normalized[..Math.Min(normalized.Length, maximumLength)];
     }
     private static bool IsStableKey(string value) => !string.IsNullOrWhiteSpace(value) &&
         value.Length <= MaximumStableKeyLength && value == Normalize(value) &&

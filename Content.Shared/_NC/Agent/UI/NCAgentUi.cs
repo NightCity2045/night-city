@@ -24,8 +24,20 @@ public enum NCAgentApp : byte
 public enum NCAgentCityArea : byte { Market, Property, Services, Fixer, Shipments, Business, Obligations, News }
 
 [Serializable, NetSerializable]
+public enum NCAgentCityAction : byte
+{
+    None,
+    RequestFixerAccess,
+    BrokerListing,
+    RequestNightMarketItem,
+    FundDeal,
+    CancelDeal,
+    OpenDispute,
+}
+
+[Serializable, NetSerializable]
 public sealed record NCAgentCityEntry(NCAgentCityArea Area, string Id, string Title, string Details,
-    long Version, bool ActionAvailable);
+    long Version, NCAgentCityAction Action, List<string>? TextArguments = null);
 
 [Serializable, NetSerializable]
 public sealed class NCAgentCityUpdateMessage(List<NCAgentCityEntry> entries, string notice)
@@ -33,6 +45,19 @@ public sealed class NCAgentCityUpdateMessage(List<NCAgentCityEntry> entries, str
 {
     public readonly List<NCAgentCityEntry> Entries = entries;
     public readonly string Notice = notice;
+}
+
+/// <summary>
+/// Requests one server-authoritative city action. The server reloads the aggregate and verifies its version,
+/// ownership, network access, and physical proximity where applicable.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class NCAgentCityActionMessage(NCAgentCityAction action, string id, long expectedVersion)
+    : BoundUserInterfaceMessage
+{
+    public readonly NCAgentCityAction Action = action;
+    public readonly string Id = id;
+    public readonly long ExpectedVersion = expectedVersion;
 }
 
 [Serializable, NetSerializable]

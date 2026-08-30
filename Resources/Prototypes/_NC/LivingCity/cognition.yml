@@ -601,8 +601,8 @@
   interruptsRoutine: true
   requiresMaterialization: true
   procedureSteps:
-  - id: yield-combat
-    action: yield-to-combat-authority
+  - id: flee-danger
+    action: human-flee-from-threat
 
 - type: ncCognitionCapability
   id: NCCognitionSeekMedicalCare

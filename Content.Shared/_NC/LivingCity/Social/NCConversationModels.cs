@@ -49,7 +49,7 @@ public enum NCSpeechActKind : byte
 }
 
 /// <summary>
-/// Structured semantic turn. Text stays in its owning chat/Agent system and is treated as untrusted rendering input.
+/// Structured semantic turn. Raw text is archived separately as untrusted dialogue and never becomes world authority.
 /// </summary>
 public sealed record NCConversationTurn(
     long Sequence,

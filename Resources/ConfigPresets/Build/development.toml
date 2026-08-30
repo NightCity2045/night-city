@@ -66,4 +66,4 @@ max_ip_connections = 413
 enabled = true
 endpoint = "http://127.0.0.1:8080/v1/cognition"
 # Set this only in the private deployment config. Never commit a real credential.
-api_key = "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"
+api_key = "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"

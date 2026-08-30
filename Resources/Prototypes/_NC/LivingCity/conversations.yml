@@ -11,6 +11,22 @@
   maximumTopics: 16
   maximumRelevantFacts: 32
   maximumTurns: 64
+  maximumUtteranceLength: 2048
+  maximumArchivedSummaryTurns: 12
+  maximumArchivedSummaryLength: 2048
+  maximumCachedArchivesPerPair: 64
+  verbalThreatMarkers:
+  - убью
+  - убивать
+  - пристрелю
+  - застрелю
+  - зарежу
+  - убью тебя
+  - kill you
+  - shoot you
+  - stab you
+  - murder you
+  verbalThreatLifetime: 2m
   idleTimeout: 3m
   maximumLifetime: 30m
   expirySweepInterval: 1s

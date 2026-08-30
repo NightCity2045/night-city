@@ -1184,8 +1184,10 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         value.MaximumKnownLocations is > 0 and <= 512 &&
         value.MaximumTextLength is > 0 and <= 4096 &&
         value.MaximumDialogueInputLength is > 0 and <= 4096 &&
-        value.MaximumDialogueHistoryTurns is > 0 and <= 32 &&
+        value.MaximumDialogueHistoryTurns is > 0 and <= 64 &&
         value.MaximumDialogueSummaryKeys is > 0 and <= 64 &&
+        value.MaximumDialogueMemorySessions is > 0 and <= 32 &&
+        value.MaximumDialogueMemoryTextLength is > 0 and <= 2048 &&
         value.EconomyThreshold > 0 && value.RestrictedThreshold >= value.EconomyThreshold &&
         value.SessionTokenHardCap >= value.RestrictedThreshold && value.RequestTimeout > TimeSpan.Zero &&
         Stable(value.ProviderModel) && value.InputPriceUsdMicrosPerMillionTokens > 0 &&
@@ -1204,6 +1206,8 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         value.MaximumRequestOutputTokens is > 0 and <= 8192 &&
         value.OrdinaryDialogueMaximumOutputTokens is > 0 &&
         value.OrdinaryDialogueMaximumOutputTokens <= value.MaximumRequestOutputTokens &&
+        value.OrdinaryDialogueMaximumMemorySessions is > 0 &&
+        value.OrdinaryDialogueMaximumMemorySessions <= value.MaximumDialogueMemorySessions &&
         value.OrdinaryResidentSessionTokenHardCap is > 0 &&
         value.OrdinaryResidentSessionTokenHardCap <= value.SessionTokenHardCap &&
         value.OrdinaryResidentMaximumOutstandingRequests is > 0 and <= 4 &&
@@ -1314,7 +1318,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
                dialogue.Utterance.Length is > 0 && dialogue.Utterance.Length <= policy.MaximumDialogueInputLength &&
                dialogue.History.Count <= policy.MaximumDialogueHistoryTurns &&
                dialogue.History.All(turn =>
-                   turn.Speaker is "self" or "interlocutor" && Stable(turn.SpeechAct) && turn.AtTicks > 0 &&
+                   turn.Speaker is "self" or "interlocutor" && Stable(turn.SpeechAct) && turn.AtTicks >= 0 &&
                    turn.Utterance.Length is > 0 && turn.Utterance.Length <= policy.MaximumDialogueInputLength &&
                    turn.Utterance.All(character => !char.IsControl(character))) &&
                (dialogue.EarlierSummary == null ||
@@ -1322,7 +1326,19 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
                    dialogue.EarlierSummary.TopicKeys.Count <= policy.MaximumDialogueSummaryKeys &&
                    dialogue.EarlierSummary.SemanticSummaryKeys.Count <= policy.MaximumDialogueSummaryKeys &&
                    dialogue.EarlierSummary.TopicKeys.All(Stable) &&
-                   dialogue.EarlierSummary.SemanticSummaryKeys.All(Stable)) &&
+                   dialogue.EarlierSummary.SemanticSummaryKeys.All(Stable) &&
+                   dialogue.EarlierSummary.PersistentMemories.Count <=
+                       (value.AccessTier == NCNeuralAccessTier.NarrativeActor
+                           ? policy.MaximumDialogueMemorySessions
+                           : policy.OrdinaryDialogueMaximumMemorySessions) &&
+                   dialogue.EarlierSummary.PersistentMemories.All(memory =>
+                       memory.LastActivityAtTicks >= 0 &&
+                       memory.TopicKeys.Count <= policy.MaximumDialogueSummaryKeys &&
+                       memory.SemanticSummaryKeys.Count <= policy.MaximumDialogueSummaryKeys &&
+                       memory.TopicKeys.All(Stable) && memory.SemanticSummaryKeys.All(Stable) &&
+                       memory.Summary.Length is > 0 &&
+                       memory.Summary.Length <= policy.MaximumDialogueMemoryTextLength &&
+                       memory.Summary.All(character => !char.IsControl(character)))) &&
                (dialogue.SpeakerHandle.Length == 0 || Stable(dialogue.SpeakerHandle) &&
                    (value.PerceivedSubjects ?? []).Any(subject => subject.Handle == dialogue.SpeakerHandle)) &&
                dialogue.ActorDisplayName.All(character => !char.IsControl(character)) &&

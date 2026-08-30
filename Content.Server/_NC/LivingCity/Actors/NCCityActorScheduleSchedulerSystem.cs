@@ -36,6 +36,7 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
     private readonly Dictionary<NCActorId, NCActiveWorldTime> _deferredSchedules = [];
     private readonly HashSet<NCActorId> _forceRoutineReevaluation = [];
     private readonly HashSet<NCActorId> _inFlightActors = [];
+    private readonly HashSet<NCActorId> _adminRoutineHolds = [];
 
     private NCCitySchedulePolicyPrototype? _policy;
     private NCSessionEpoch _epoch;
@@ -125,9 +126,35 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
 
     public bool ForceSchedule(NCActorId actorId, NCActiveWorldTime dueAt)
     {
-        if (!_active || !actorId.IsValid || !dueAt.IsValid)
+        if (!_active || !actorId.IsValid || !dueAt.IsValid || _adminRoutineHolds.Contains(actorId))
             return false;
         Enqueue(actorId, dueAt);
+        return true;
+    }
+
+    /// <summary>
+    /// Suspends only the abstract civil routine for an administrator-projected actor. Physical cognition, dialogue,
+    /// combat and explicit directives remain active; releasing the hold resumes the ordinary authored schedule.
+    /// </summary>
+    public bool SetAdminRoutineHold(NCActorId actorId, bool held)
+    {
+        if (!actorId.IsValid)
+            return false;
+
+        if (held)
+        {
+            _adminRoutineHolds.Add(actorId);
+            _scheduled.Remove(actorId);
+            _deferredSchedules.Remove(actorId);
+            _pendingMutations.Remove(actorId);
+            _forceRoutineReevaluation.Remove(actorId);
+            return true;
+        }
+
+        if (!_adminRoutineHolds.Remove(actorId))
+            return true;
+        if (_active && _clock.TryGetCurrentTime(out var epoch, out var now) && epoch == _epoch)
+            Enqueue(actorId, now);
         return true;
     }
 
@@ -213,6 +240,15 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         if (!_active || args.SessionEpoch != _epoch)
             return;
 
+        if (_adminRoutineHolds.Contains(args.ActorId))
+        {
+            _scheduled.Remove(args.ActorId);
+            _deferredSchedules.Remove(args.ActorId);
+            _pendingMutations.Remove(args.ActorId);
+            _forceRoutineReevaluation.Remove(args.ActorId);
+            return;
+        }
+
         if (args.Frozen || args.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived or
             NCCityActorStatus.Arrested or NCCityActorStatus.Imprisoned)
         {
@@ -235,6 +271,9 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
     private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
     {
         if (!_active || !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
+            return;
+
+        if (_adminRoutineHolds.Contains(args.ActorId))
             return;
 
         // Materialization adds vanilla hunger, stamina and sleep data; hand-off removes it. Re-evaluate through the
@@ -351,6 +390,15 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
             return;
         }
 
+        if (_adminRoutineHolds.Contains(actorId))
+        {
+            _deferredSchedules.Remove(actorId);
+            _pendingMutations.Remove(actorId);
+            _forceRoutineReevaluation.Remove(actorId);
+            Finish(actorId);
+            return;
+        }
+
         if (error != null)
         {
             Log.Error($"Failed to load scheduled actor {actorId}: {error}");
@@ -454,6 +502,15 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
 
         if (!_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
         {
+            Finish(actorId);
+            return;
+        }
+
+        if (_adminRoutineHolds.Contains(actorId))
+        {
+            _deferredSchedules.Remove(actorId);
+            _pendingMutations.Remove(actorId);
+            _forceRoutineReevaluation.Remove(actorId);
             Finish(actorId);
             return;
         }
@@ -613,6 +670,7 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         _pendingMutations.Clear();
         _forceRoutineReevaluation.Clear();
         _inFlightActors.Clear();
+        _adminRoutineHolds.Clear();
         MutationRetriesExhausted = 0;
     }
 

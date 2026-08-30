@@ -19,6 +19,8 @@ public sealed partial class NCEconomicShopComponent : Component
     [DataField(required: true)] public string SellerOrganizationId = string.Empty;
     [DataField(required: true)] public string SemanticLocationKey = string.Empty;
     [DataField] public int MaximumListings = 100;
+    /// <summary>When true, another authoritative system must bind an existing stock node; bootstrap is skipped.</summary>
+    [DataField] public bool ExternalStock;
     [DataField] public List<NCEconomicShopCommoditySeed> InitialCommodities = [];
     [DataField] public List<NCEconomicShopItemSeed> InitialItems = [];
 }

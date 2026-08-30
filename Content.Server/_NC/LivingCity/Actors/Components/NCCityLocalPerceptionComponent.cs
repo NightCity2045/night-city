@@ -26,10 +26,12 @@ public enum NCCityLocalPerceivedEventKind : byte
     Killing,
     Gunshot,
     WeaponDisplayed,
+    HeldItemDisplayed,
     SevereInjury,
     BodyDiscovered,
     Fire,
     AddressedSpeech,
+    VerbalThreat,
 }
 
 public readonly record struct NCCityLocalObservation(

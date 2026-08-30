@@ -71,7 +71,8 @@ public sealed record NCChangeFixerDealRequest(
     NCPartyRef Actor,
     Guid CorrelationId,
     Guid? CausationId = null,
-    string AuditSource = "fixer-deal-status");
+    string AuditSource = "fixer-deal-status",
+    NCFixerBreachReason BreachReason = NCFixerBreachReason.None);
 
 public sealed record NCAdvanceFixerDealLegRequest(
     Guid CommandId,

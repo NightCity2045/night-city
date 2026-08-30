@@ -16,6 +16,8 @@ using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.LivingCity.Actors;
+using Content.Shared.Maps;
+using Content.Shared.Physics;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 using Content.Shared.Interaction;
@@ -43,7 +45,9 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
     [Dependency] private IPlayerManager _players = default!;
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
+    [Dependency] private SharedMapSystem _maps = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private TurfSystem _turf = default!;
     [Dependency] private MetaDataSystem _metadata = default!;
     [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
@@ -299,6 +303,33 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         return _states.TryGetValue(requestId, out state!);
     }
 
+    /// <summary>
+    /// Moves an existing admin-owned physical projection to a safe floor tile near the requested target.
+    /// This cold-path helper deliberately bypasses authored A-Life candidates without changing automatic spawning.
+    /// </summary>
+    public bool TryRelocateAdminProjection(
+        EntityUid entityUid,
+        NCMapCoordinates preferred,
+        float radius,
+        out string? error)
+    {
+        error = null;
+        if (!Exists(entityUid))
+        {
+            error = "The existing physical projection no longer exists.";
+            return false;
+        }
+
+        if (!TryFindAdminSpawnTarget(preferred, radius, entityUid, out _, out var mapTarget))
+        {
+            error = "No free supported floor tile is available near the selected player.";
+            return false;
+        }
+
+        _transform.SetMapCoordinates(entityUid, mapTarget);
+        return true;
+    }
+
     private async Task ObserveLoad(int generation, PendingRequest pending)
     {
         NCCityActorRecord? actor = null;
@@ -480,6 +511,25 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         out NCCitySpawnCandidateInfo selected)
     {
         selected = default;
+        // Explicit admin summons must work on an otherwise valid mapped floor even when the Room Graph has not yet
+        // produced A-Life spawn candidates. Automatic relevance continues to use only authored candidates below.
+        if (request.Reason == NCCityMaterializationReason.Admin &&
+            request.PreferredTarget is { } preferred &&
+            request.PreferredRadius is { } preferredRadius &&
+            TryFindAdminSpawnTarget(preferred, preferredRadius, null, out var stableTarget, out _))
+        {
+            selected = new NCCitySpawnCandidateInfo(
+                default,
+                archetype.SpawnCandidateProfile,
+                NCCitySpawnCandidateKind.Pedestrian,
+                archetype.TravelMode,
+                default,
+                EntityUid.Invalid,
+                zoneId,
+                stableTarget);
+            return true;
+        }
+
         _spawnCandidates.GetCandidatesInHierarchy(archetype.SpawnCandidateProfile, zoneId, _candidateBuffer);
         if (_candidateBuffer.Count == 0 || _policy == null)
             return false;
@@ -509,6 +559,7 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         {
             var candidate = _candidateBuffer[(start + i) % _candidateBuffer.Count];
             if (!_coordinates.TryResolve(candidate.Target, out var mapCoordinates) ||
+                !HasSafeFloor(mapCoordinates) ||
                 requireHidden && IsVisibleToPlayerOrAnchor(
                     mapCoordinates,
                     _policy.PlayerVisibilityExclusionRadius) ||
@@ -527,6 +578,79 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Searches tile rings around an administrator's physical position on the same grid and Z map. The first result
+    /// has a real, unblocked floor and enough clearance from players and materialized actors.
+    /// </summary>
+    private bool TryFindAdminSpawnTarget(
+        NCMapCoordinates preferred,
+        float radius,
+        EntityUid? ignoredActor,
+        out NCMapCoordinates stableTarget,
+        out MapCoordinates mapTarget)
+    {
+        stableTarget = default;
+        mapTarget = default;
+        if (_policy == null || !float.IsFinite(radius) || radius <= 0f ||
+            !_coordinates.TryResolve(preferred, out var preferredMap) ||
+            !_maps.TryGetMap(preferredMap.MapId, out var mapUid) || mapUid is not { } map ||
+            !_maps.TryFindGridAt(map, preferredMap.Position, out var gridUid, out var grid))
+        {
+            return false;
+        }
+
+        var originTile = _maps.WorldToTile(gridUid, grid, preferredMap.Position);
+        var maximumRing = Math.Max(1, (int) MathF.Ceiling(radius));
+        var radiusSquared = radius * radius;
+        for (var ring = 0; ring <= maximumRing; ring++)
+        {
+            for (var x = -ring; x <= ring; x++)
+            {
+                for (var y = -ring; y <= ring; y++)
+                {
+                    if (Math.Max(Math.Abs(x), Math.Abs(y)) != ring)
+                        continue;
+
+                    var tile = originTile + new Vector2i(x, y);
+                    if (!_maps.TryGetTileRef(gridUid, grid, tile, out var tileRef) ||
+                        tileRef.Tile.IsEmpty || _turf.IsTileBlocked(tileRef, CollisionGroup.Impassable))
+                    {
+                        continue;
+                    }
+
+                    var candidate = _maps.GridTileToWorld(gridUid, grid, tile);
+                    if (Vector2.DistanceSquared(candidate.Position, preferredMap.Position) > radiusSquared ||
+                        IsWithinPlayerOrAnchorRadius(candidate, _policy.PlayerSpawnExclusionRadius) ||
+                        IsOccupiedByActor(candidate, _policy.ActorOccupancyExclusionRadius, ignoredActor) ||
+                        !_coordinates.TryConvert(candidate, out var stable) ||
+                        stable.NetworkId != preferred.NetworkId || stable.Z != preferred.Z)
+                    {
+                        continue;
+                    }
+
+                    stableTarget = stable;
+                    mapTarget = candidate;
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private bool HasSafeFloor(MapCoordinates target)
+    {
+        if (!_maps.TryGetMap(target.MapId, out var mapUid) || mapUid is not { } map ||
+            !_maps.TryFindGridAt(map, target.Position, out var gridUid, out var grid))
+        {
+            return false;
+        }
+
+        var tile = _maps.WorldToTile(gridUid, grid, target.Position);
+        return _maps.TryGetTileRef(gridUid, grid, tile, out var tileRef) &&
+               !tileRef.Tile.IsEmpty && !_turf.IsTileBlocked(tileRef, CollisionGroup.Impassable);
     }
 
     private bool IsVisibleToPlayerOrAnchor(MapCoordinates target, float radius)
@@ -610,11 +734,11 @@ public sealed partial class NCCityActorMaterializationSystem : EntitySystem
                Vector2.DistanceSquared(candidate.Position, preferred.Position) <= radius * radius;
     }
 
-    private bool IsOccupiedByActor(MapCoordinates target, float radius)
+    private bool IsOccupiedByActor(MapCoordinates target, float radius, EntityUid? ignored = null)
     {
         foreach (var entity in _lookup.GetEntitiesInRange(target, radius))
         {
-            if (HasComp<NCCityActorBindingComponent>(entity))
+            if (entity != ignored && HasComp<NCCityActorBindingComponent>(entity))
                 return true;
         }
 

@@ -10,6 +10,12 @@ using Content.Shared._NC.Persistence.Time;
 
 namespace Content.Server._NC.LivingCity.Market;
 
+public sealed class NCMarketAggregateChangedEvent(string aggregateType, string aggregateId) : EntityEventArgs
+{
+    public string AggregateType { get; } = aggregateType;
+    public string AggregateId { get; } = aggregateId;
+}
+
 public enum NCMarketMutationStatus : byte
 {
     Applied,

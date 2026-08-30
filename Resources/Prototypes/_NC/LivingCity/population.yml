@@ -32,6 +32,8 @@
   - type: FactionException
   - type: NPCRetaliation
     attackMemoryLength: 30s
+  - type: NCNeuralConversationTarget
+    maximumUtteranceLength: 2048
 
 - type: ncCityActorArchetype
   id: NCLivingCityUtilityResident

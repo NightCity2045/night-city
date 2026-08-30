@@ -191,6 +191,11 @@ public partial interface IServerDbManager
         string aggregateType,
         string? beforeAggregateId,
         int limit);
+    Task<IReadOnlyList<NCAggregateSnapshotData>> GetNCAggregateSnapshotPrefixPageDescendingAsync(
+        string aggregateType,
+        string aggregateIdPrefix,
+        string? beforeAggregateId,
+        int limit);
     Task<IReadOnlyList<NCPersistentEventData>> GetNCPersistentEventPageAsync(
         string aggregateType,
         string aggregateId,
@@ -256,6 +261,21 @@ public sealed partial class ServerDbManager
         DbReadOpsMetric.Inc();
         return RunNCPersistentDbCommand(false, null, () =>
             _db.GetNCAggregateSnapshotPageDescendingAsync(aggregateType, beforeAggregateId, limit));
+    }
+
+    public Task<IReadOnlyList<NCAggregateSnapshotData>> GetNCAggregateSnapshotPrefixPageDescendingAsync(
+        string aggregateType,
+        string aggregateIdPrefix,
+        string? beforeAggregateId,
+        int limit)
+    {
+        DbReadOpsMetric.Inc();
+        return RunNCPersistentDbCommand(false, null, () =>
+            _db.GetNCAggregateSnapshotPrefixPageDescendingAsync(
+                aggregateType,
+                aggregateIdPrefix,
+                beforeAggregateId,
+                limit));
     }
 
     public Task<IReadOnlyList<NCPersistentEventData>> GetNCPersistentEventPageAsync(
@@ -749,6 +769,46 @@ public abstract partial class ServerDbBase
         var query = db.DbContext.NCAggregateSnapshots
             .AsNoTracking()
             .Where(value => value.AggregateType == aggregateType);
+        if (beforeAggregateId != null)
+            query = query.Where(value => value.AggregateId.CompareTo(beforeAggregateId) < 0);
+
+        return await query
+            .OrderByDescending(value => value.AggregateId)
+            .Take(limit)
+            .Select(value => new NCAggregateSnapshotData(
+                value.AggregateType,
+                value.AggregateId,
+                value.AggregateVersion,
+                value.FormatVersion,
+                new NCSessionEpoch(value.SessionEpoch),
+                new NCActiveWorldTime(value.ActiveWorldTicks),
+                value.Payload,
+                value.CreatedAt))
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// Reads the newest rows inside one aggregate-id prefix. The composite aggregate primary key keeps per-owner
+    /// history lookup bounded without introducing a second persistence schema.
+    /// </summary>
+    public async Task<IReadOnlyList<NCAggregateSnapshotData>> GetNCAggregateSnapshotPrefixPageDescendingAsync(
+        string aggregateType,
+        string aggregateIdPrefix,
+        string? beforeAggregateId,
+        int limit)
+    {
+        ValidateIdentityPart(aggregateType, nameof(aggregateType), 64);
+        ValidateIdentityPart(aggregateIdPrefix, nameof(aggregateIdPrefix), 128);
+        if (beforeAggregateId != null)
+            ValidateIdentityPart(beforeAggregateId, nameof(beforeAggregateId), 128);
+        if (limit is < 1 or > NCPersistenceReadLimit)
+            throw new ArgumentOutOfRangeException(nameof(limit), limit, $"Limit must be 1..{NCPersistenceReadLimit}.");
+
+        await using var db = await GetDb();
+        var query = db.DbContext.NCAggregateSnapshots
+            .AsNoTracking()
+            .Where(value => value.AggregateType == aggregateType &&
+                            value.AggregateId.StartsWith(aggregateIdPrefix));
         if (beforeAggregateId != null)
             query = query.Where(value => value.AggregateId.CompareTo(beforeAggregateId) < 0);
 

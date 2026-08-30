@@ -64,7 +64,7 @@ public sealed partial class NCCityRoutineProfilePrototype : IPrototype
 
     /// <summary>Deterministic shift offsets; one is selected per actor before applying the smaller phase spread.</summary>
     [DataField]
-    public List<TimeSpan> ShiftOffsets { get; private set; } = [TimeSpan.Zero];
+    public List<TimeSpan> ShiftOffsets { get; private set; } = new() { TimeSpan.Zero };
 
     [DataField(required: true)]
     public List<NCCityRoutineEntry> Entries { get; private set; } = [];

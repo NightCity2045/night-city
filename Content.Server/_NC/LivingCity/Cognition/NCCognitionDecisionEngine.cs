@@ -27,11 +27,15 @@ public static class NCCognitionDecisionEngine
         var result = new Dictionary<Guid, NCBeliefSnapshot>();
         foreach (var fact in facts)
         {
+            // Facts are round-time observations. A timestamp from a reset/corrupt clock epoch must not become a
+            // current belief or reach strict elapsed-time arithmetic.
+            if (!fact.ObservedAt.IsValid || fact.ObservedAt > now)
+                continue;
             var beliefId = NCPersistentIdentity.CognitionBelief(
                 actorId, fact.Key, fact.Subject.StableId, fact.Source);
             var old = previous.FirstOrDefault(value => value.BeliefId == beliefId);
             if (old != null && old.SourceVersion == fact.SourceVersion && old.Value == fact.Value &&
-                old.ExpiresAt > now && old.Freshness == NCBeliefFreshness.Current)
+                old.ObservedAt <= now && old.ExpiresAt > now && old.Freshness == NCBeliefFreshness.Current)
             {
                 result[beliefId] = old;
                 continue;
@@ -55,7 +59,10 @@ public static class NCCognitionDecisionEngine
         {
             if (result.ContainsKey(old.BeliefId) || old.ExpiresAt <= now)
                 continue;
-            var age = now.ElapsedSince(old.ObservedAt);
+            // Future observations can survive a development database reset or a legacy clock discontinuity.
+            // Drop only that invalid belief; cognition will persist the repaired set after this decision.
+            if (!now.TryElapsedSince(old.ObservedAt, out var age))
+                continue;
             var freshness = age >= policy.BeliefAgingTime
                 ? NCBeliefFreshness.Stale
                 : NCBeliefFreshness.Aging;

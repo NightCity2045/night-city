@@ -4,10 +4,12 @@
 
 using Content.Server.Preferences.Managers;
 using Content.Server._NC.LivingCity.Identity;
+using Content.Server._NC.LivingCity.Market;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.Identity;
 using Content.Shared._NC.LivingCity.Economy;
 using Content.Shared._NC.LivingCity.Economy.Shop;
+using Content.Shared._NC.LivingCity.Market;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 using Robust.Server.GameObjects;
@@ -30,6 +32,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
     [Dependency] private NCPartyFinanceAdapterSystem _finance = default!;
     [Dependency] private NCPartyDirectorySystem _directory = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
+    [Dependency] private NCMarketRegistrySystem _market = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private ISharedPlayerManager _players = default!;
     [Dependency] private IServerPreferencesManager _preferences = default!;
@@ -55,7 +58,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
 
     private void OnMapInit(Entity<NCEconomicShopComponent> entity, ref MapInitEvent args)
     {
-        if (_clock.IsReady)
+        if (_clock.IsReady && !entity.Comp.ExternalStock)
             Track(BootstrapAsync(entity.Owner, Configuration(entity.Comp)));
     }
 
@@ -74,7 +77,37 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
     {
         var query = EntityQueryEnumerator<NCEconomicShopComponent>();
         while (query.MoveNext(out var uid, out var component))
-            Track(BootstrapAsync(uid, Configuration(component)));
+        {
+            if (!component.ExternalStock)
+                Track(BootstrapAsync(uid, Configuration(component)));
+        }
+    }
+
+    /// <summary>
+    /// Binds a temporary physical storefront to stock already owned by its seller. No stock or seller identity is
+    /// created here, so closing the storefront cannot duplicate inventory.
+    /// </summary>
+    public async Task<bool> BindExternalStockAsync(EntityUid uid, NCPartyRef seller, NCStockNodeId stockNodeId,
+        bool enabled = false)
+    {
+        if (!seller.IsValid || !stockNodeId.IsValid ||
+            !TryComp<NCEconomicShopComponent>(uid, out var component) || !component.ExternalStock)
+            return false;
+        var node = await _assets.GetStockNodeAsync(stockNodeId, true);
+        var account = await _finance.EnsurePrimaryAccountAsync(seller, "economic-shop-external-stock");
+        if (node?.Snapshot.Owner != seller || !account.IsResolved)
+            return false;
+        _shops[uid] = new ShopRuntime(seller, account.AccountId, stockNodeId, enabled, null);
+        return true;
+    }
+
+    public bool SetExternalStockEnabled(EntityUid uid, bool enabled)
+    {
+        if (!_shops.TryGetValue(uid, out var runtime) ||
+            !TryComp<NCEconomicShopComponent>(uid, out var component) || !component.ExternalStock)
+            return false;
+        _shops[uid] = runtime with { Ready = enabled };
+        return true;
     }
 
     private void OnSessionClosing(NCActiveWorldSessionClosingEvent args)
@@ -150,6 +183,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
             return "nc-economic-shop-result-unavailable";
 
         long assetVersion;
+        string? purchasedDefinition = null;
         if (request.Kind == NCEconomicOfferKind.CommodityBatch)
         {
             var batchId = new NCCommodityBatchId(assetGuid);
@@ -168,6 +202,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
             if (item == null || !source.Snapshot.ItemIds.Contains(itemId) || item.Snapshot.ReservationId.HasValue)
                 return "nc-economic-shop-result-unavailable";
             assetVersion = item.AggregateVersion;
+            purchasedDefinition = item.Snapshot.DefinitionId;
         }
 
         var buyerAccount = await _finance.EnsurePrimaryAccountAsync(buyer, AuditSource);
@@ -267,7 +302,34 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
                 ? "nc-economic-shop-result-funds"
                 : "nc-economic-shop-result-settlement";
         }
+        if (purchasedDefinition != null && settlement.Fulfillment != null)
+            await FulfillItemDemandAsync(buyer, purchasedDefinition, settlement.Fulfillment);
         return "nc-economic-shop-result-success";
+    }
+
+    /// <summary>
+    /// Closes the buyer's matching item demand only after the economic fulfillment authority confirms transfer.
+    /// Failure here never rolls back an already-settled purchase; reconciliation can safely retry the request later.
+    /// </summary>
+    private async Task FulfillItemDemandAsync(
+        NCPartyRef buyer,
+        string definitionId,
+        NCEconomicFulfillmentRecord fulfillment)
+    {
+        var request = await _market.FindOpenRequestAsync(buyer, NCMarketRequestKind.UniqueItem, definitionId);
+        if (request == null)
+            return;
+        var stable = $"{fulfillment.Snapshot.FulfillmentId}.{request.Snapshot.RequestId}";
+        await _market.ChangeRequestStatusAsync(new NCChangeMarketRequestStatusRequest(
+            NCPersistentIdentity.Command("economic-shop", "fulfill-item-demand", stable),
+            request.Snapshot.RequestId,
+            request.AggregateVersion,
+            NCMarketRequestStatus.Fulfilled,
+            null,
+            buyer,
+            NCPersistentIdentity.Correlation("economic-shop", "fulfill-item-demand", stable),
+            fulfillment.Snapshot.LastAppliedEventId,
+            "economic-shop-item-demand"));
     }
 
     private async Task<NCStockNodeRecord?> EnsureCharacterStockAsync(NCPartyRef buyer, NCStockNodeId nodeId)
@@ -520,7 +582,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
                         NCEconomicOfferKind.ItemInstance,
                         itemId.ToString(),
                         definition.ID,
-                        definition.StableKey,
+                        definition.DisplayName.Id,
                         1,
                         price,
                         item.Snapshot.Condition,

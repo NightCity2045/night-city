@@ -55,14 +55,16 @@
 - type: ncHumanDirectiveAction
   id: approach-person
   execution: ApproachIssuer
+  requiresAuthority: false
   requiresKnownLocation: false
-  allowsCompanion: true
+  allowsCompanion: false
 
 - type: ncHumanDirectiveAction
   id: follow-person
   execution: FollowIssuer
+  requiresAuthority: false
   requiresKnownLocation: false
-  allowsCompanion: true
+  allowsCompanion: false
 
 - type: ncHumanDirectiveAction
   id: escort-person

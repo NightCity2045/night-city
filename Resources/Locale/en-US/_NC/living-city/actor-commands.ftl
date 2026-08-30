@@ -32,7 +32,11 @@ cmd-ncactor-error-materialization = Could not request materialization for Actor 
 cmd-ncactor-error-dematerialization = Could not request dematerialization for Actor {$key}: {$reason}
 
 cmd-ncactorspawn-already-physical = Actor {$key} is already materialized as entity {$entity}; no duplicate was created.
+cmd-ncactorspawn-relocated-physical = Actor {$key} was already materialized; entity {$entity} was moved to a safe floor tile near the selected player.
 cmd-ncactorspawn-requested = Actor {$key} ({$name}, {$actor}) materialization request {$request}: {$status}.
+cmd-ncactorspawn-completed = Actor {$key} request {$request}: {$status} as entity {$entity}.
+cmd-ncactorspawn-failed = Actor {$key} request {$request} {$status}: {$reason}
+cmd-ncactorspawn-result-unavailable = Actor {$key} request {$request} no longer has an observable result.
 cmd-ncactordespawn-already-abstract = Actor {$key} is already abstract.
 cmd-ncactordespawn-requested = Actor {$key} dematerialization request {$request}: {$status}.
 

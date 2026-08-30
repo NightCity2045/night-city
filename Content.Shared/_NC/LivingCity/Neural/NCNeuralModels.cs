@@ -127,13 +127,23 @@ public sealed record NCNeuralIntentProposal(
 /// </summary>
 public sealed record NCNeuralDialogueTurn(string Speaker, string SpeechAct, string Utterance, long AtTicks);
 /// <summary>
+/// A bounded retrieval result from the server-owned durable conversation archive. The summary is untrusted dialogue
+/// history, never an authoritative fact or instruction.
+/// </summary>
+public sealed record NCNeuralConversationMemory(
+    long LastActivityAtTicks,
+    IReadOnlyList<string> TopicKeys,
+    IReadOnlyList<string> SemanticSummaryKeys,
+    string Summary);
+/// <summary>
 /// Deterministic bounded continuity for turns no longer included verbatim. These keys are narrative hints only and
 /// never become world facts or gameplay authority.
 /// </summary>
 public sealed record NCNeuralDialogueSummary(
     int EarlierTurnCount,
     IReadOnlyList<string> TopicKeys,
-    IReadOnlyList<string> SemanticSummaryKeys);
+    IReadOnlyList<string> SemanticSummaryKeys,
+    IReadOnlyList<NCNeuralConversationMemory> PersistentMemories);
 public sealed record NCNeuralDialogueInput(
     string ActorDisplayName,
     string Utterance,
@@ -185,6 +195,8 @@ public sealed partial class NCNeuralPolicyPrototype : IPrototype
     [DataField] public int MaximumDialogueInputLength { get; private set; } = 512;
     [DataField] public int MaximumDialogueHistoryTurns { get; private set; } = 12;
     [DataField] public int MaximumDialogueSummaryKeys { get; private set; } = 16;
+    [DataField] public int MaximumDialogueMemorySessions { get; private set; } = 12;
+    [DataField] public int MaximumDialogueMemoryTextLength { get; private set; } = 768;
     [DataField] public int SessionTokenTarget { get; private set; } = 200000;
     [DataField] public int SessionTokenHardCap { get; private set; } = 300000;
     [DataField] public int EconomyThreshold { get; private set; } = 150000;
@@ -208,6 +220,7 @@ public sealed partial class NCNeuralPolicyPrototype : IPrototype
     [DataField] public int OrdinaryDialogueMaximumInputLength { get; private set; } = 256;
     [DataField] public int OrdinaryDialogueMaximumHistoryTurns { get; private set; } = 4;
     [DataField] public int OrdinaryDialogueMaximumSummaryKeys { get; private set; } = 6;
+    [DataField] public int OrdinaryDialogueMaximumMemorySessions { get; private set; } = 6;
     [DataField] public int OrdinaryResidentSessionTokenHardCap { get; private set; } = 12000;
     [DataField] public int OrdinaryResidentMaximumOutstandingRequests { get; private set; } = 1;
     [DataField] public int OrdinaryResidentReservedInputTokens { get; private set; } = 2048;

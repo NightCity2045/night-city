@@ -32,7 +32,11 @@ cmd-ncactor-error-materialization = Не удалось запросить ма�
 cmd-ncactor-error-dematerialization = Не удалось запросить дематериализацию актора {$key}: {$reason}
 
 cmd-ncactorspawn-already-physical = Актор {$key} уже материализован как сущность {$entity}; дубликат не создан.
+cmd-ncactorspawn-relocated-physical = Актор {$key} уже был материализован; сущность {$entity} перемещена на безопасный тайл пола рядом с выбранным игроком.
 cmd-ncactorspawn-requested = Запрос {$request} на материализацию актора {$key} ({$name}, {$actor}): {$status}.
+cmd-ncactorspawn-completed = Запрос {$request} актора {$key}: {$status} как сущность {$entity}.
+cmd-ncactorspawn-failed = Запрос {$request} актора {$key} завершился со статусом «{$status}»: {$reason}
+cmd-ncactorspawn-result-unavailable = Результат запроса {$request} актора {$key} больше недоступен для наблюдения.
 cmd-ncactordespawn-already-abstract = Актор {$key} уже находится в абстрактном состоянии.
 cmd-ncactordespawn-requested = Запрос {$request} на дематериализацию актора {$key}: {$status}.
 

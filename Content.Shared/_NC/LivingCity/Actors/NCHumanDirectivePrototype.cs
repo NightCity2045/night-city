@@ -42,6 +42,8 @@ public sealed partial class NCHumanDirectiveActionPrototype : IPrototype
 {
     [IdDataField] public string ID { get; private set; } = string.Empty;
     [DataField(required: true)] public NCHumanDirectiveExecutionKind Execution { get; private set; }
+    /// <summary>False only for bounded voluntary actions which the resident may accept according to their persona.</summary>
+    [DataField] public bool RequiresAuthority { get; private set; } = true;
     [DataField] public bool RequiresKnownLocation { get; private set; } = true;
     [DataField] public bool AllowsCompanion { get; private set; }
     [DataField] public bool RequiresSubject { get; private set; }

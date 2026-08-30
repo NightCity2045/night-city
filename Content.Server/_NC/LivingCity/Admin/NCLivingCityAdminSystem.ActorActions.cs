@@ -219,7 +219,7 @@ public sealed partial class NCLivingCityAdminSystem
             NCCityMaterializationReason.Admin,
             request.Priority,
             unchecked((uint) actorId.Value.GetHashCode()),
-            null,
+            _materialization.AutomaticRequestMaximumWait,
             AdminAuditSource(administrator, request.Reason)));
         var fields = new FieldBuilder();
         fields.Add("request", "request-id", state.RequestId);

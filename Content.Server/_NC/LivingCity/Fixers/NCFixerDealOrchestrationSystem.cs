@@ -25,6 +25,7 @@ public sealed partial class NCFixerDealOrchestrationSystem : EntitySystem
     [Dependency] private NCMarketRegistrySystem _market = default!;
     [Dependency] private NCShipmentSystem _shipments = default!;
     [Dependency] private NCSocialObligationRegistrySystem _obligations = default!;
+    [Dependency] private NCRumorRegistrySystem _rumors = default!;
 
     private readonly Dictionary<(NCFixerDealId DealId, Guid LegId), HashSet<EntityUid>> _handoffs = [];
 
@@ -70,6 +71,36 @@ public sealed partial class NCFixerDealOrchestrationSystem : EntitySystem
                     return Reject(NCFixerMutationStatus.Rejected,
                         $"Deal leg {leg.LegId} references an unavailable shipment.", deal);
             }
+            if (leg.FulfillmentId is { } fulfillmentId)
+            {
+                var fulfillment = await _assets.GetFulfillmentAsync(fulfillmentId, true);
+                var expectedKind = leg.Kind == NCFixerDealLegKind.Service
+                    ? NCEconomicOfferKind.Service
+                    : leg.Kind is NCFixerDealLegKind.Information or NCFixerDealLegKind.Access
+                        ? NCEconomicOfferKind.InformationAccess
+                        : (NCEconomicOfferKind?) null;
+                if (fulfillment == null || expectedKind is not { } kind || fulfillment.Snapshot.OfferKind != kind ||
+                    fulfillment.Snapshot.Provider != leg.From || fulfillment.Snapshot.Recipient != leg.To ||
+                    fulfillment.Snapshot.Status is NCEconomicFulfillmentStatus.Failed or
+                        NCEconomicFulfillmentStatus.Revoked)
+                    return Reject(NCFixerMutationStatus.Rejected,
+                        $"Deal leg {leg.LegId} references an incompatible fulfillment.", deal);
+            }
+            else if (leg.Kind == NCFixerDealLegKind.Information)
+            {
+                if (!Guid.TryParse(leg.DefinitionId, out var informationRaw) ||
+                    (await _rumors.GetAsync(leg.From, true))?.Snapshot.Knowledge.Any(value =>
+                        value.InformationId == new NCInformationId(informationRaw)) != true)
+                    return Reject(NCFixerMutationStatus.Rejected,
+                        $"Deal leg {leg.LegId} references information unknown to its provider.", deal);
+            }
+            else if (leg.Kind == NCFixerDealLegKind.Access)
+            {
+                var network = await _fixers.GetNetworkAsync(NCPersistentIdentity.FixerNetwork(leg.From), true);
+                if (network?.Snapshot.Fixer != leg.From)
+                    return Reject(NCFixerMutationStatus.Rejected,
+                        $"Deal leg {leg.LegId} references no authoritative access provider.", deal);
+            }
             if (leg.Kind == NCFixerDealLegKind.DeadDrop)
             {
                 if (!_handoffs.TryGetValue((dealId, leg.LegId), out var handoffs) || handoffs.Count == 0)
@@ -90,6 +121,19 @@ public sealed partial class NCFixerDealOrchestrationSystem : EntitySystem
                 NCPersistentIdentity.Command("fixer", "ready-leg", stable), dealId, current.AggregateVersion,
                 leg.LegId, NCFixerDealLegStatus.Ready, null, actor,
                 NCPersistentIdentity.Correlation("fixer", "ready-leg", stable),
+                current.Snapshot.LastAppliedEventId, "fixer-deal-activation"));
+            if (advanced.Deal == null || advanced.Status is not (NCFixerMutationStatus.Applied or
+                    NCFixerMutationStatus.Duplicate))
+                return advanced;
+            current = advanced.Deal;
+
+            // Ready means the referenced authorities were validated; InProgress records that execution actually
+            // started. Completion cannot skip this state, which keeps recovery and breach diagnostics meaningful.
+            stable = $"{dealId}.{leg.LegId:D}.{current.AggregateVersion}";
+            advanced = await _fixers.AdvanceLegAsync(new NCAdvanceFixerDealLegRequest(
+                NCPersistentIdentity.Command("fixer", "start-leg", stable), dealId, current.AggregateVersion,
+                leg.LegId, NCFixerDealLegStatus.InProgress, null, actor,
+                NCPersistentIdentity.Correlation("fixer", "start-leg", stable),
                 current.Snapshot.LastAppliedEventId, "fixer-deal-activation"));
             if (advanced.Deal == null || advanced.Status is not (NCFixerMutationStatus.Applied or
                     NCFixerMutationStatus.Duplicate))
@@ -118,7 +162,7 @@ public sealed partial class NCFixerDealOrchestrationSystem : EntitySystem
         var leg = deal.Snapshot.Plan.Legs.FirstOrDefault(value => value.LegId == legId);
         if (leg == null || actor != leg.From && actor != deal.Snapshot.Fixer || proofWorldEventId == Guid.Empty)
             return Reject(NCFixerMutationStatus.NotAuthorized, "The deal leg completion is not authorized.", deal);
-        if (!await IsDeliveredByAuthorityAsync(dealId, leg))
+        if (!await IsDeliveredByAuthorityAsync(deal.Snapshot, leg))
             return Reject(NCFixerMutationStatus.Rejected,
                 "The authoritative shipment, asset, request, obligation, or handoff is not complete.", deal);
         var stable = $"{dealId}.{legId:D}.{expectedVersion}";
@@ -129,10 +173,10 @@ public sealed partial class NCFixerDealOrchestrationSystem : EntitySystem
             deal.Snapshot.LastAppliedEventId, "fixer-authoritative-leg-completion"));
     }
 
-    private async Task<bool> IsDeliveredByAuthorityAsync(NCFixerDealId dealId, NCFixerDealLeg leg)
+    private async Task<bool> IsDeliveredByAuthorityAsync(NCFixerDealSnapshot deal, NCFixerDealLeg leg)
     {
         if (leg.Kind == NCFixerDealLegKind.Money)
-            return true;
+            return deal.FundingTransactionId is { IsValid: true };
         if (leg.Kind == NCFixerDealLegKind.Commodity && Guid.TryParse(leg.DefinitionId, out var commodityRaw))
         {
             var batch = await _assets.GetCommodityBatchAsync(new NCCommodityBatchId(commodityRaw), true);
@@ -151,9 +195,17 @@ public sealed partial class NCFixerDealOrchestrationSystem : EntitySystem
         if (leg.ObligationId is { } obligationId)
             return (await _obligations.GetAsync(obligationId, true))?.Snapshot.Status ==
                 NCSocialObligationStatus.Fulfilled;
+        if (leg.FulfillmentId is { } fulfillmentId)
+        {
+            var fulfillment = await _assets.GetFulfillmentAsync(fulfillmentId, true);
+            return leg.Kind == NCFixerDealLegKind.Service
+                ? fulfillment?.Snapshot.Status == NCEconomicFulfillmentStatus.Completed
+                : leg.Kind is NCFixerDealLegKind.Information or NCFixerDealLegKind.Access &&
+                  fulfillment?.Snapshot.Status == NCEconomicFulfillmentStatus.Granted;
+        }
         if (leg.Kind == NCFixerDealLegKind.DeadDrop)
         {
-            if (!_handoffs.TryGetValue((dealId, leg.LegId), out var entities) || entities.Count == 0 ||
+            if (!_handoffs.TryGetValue((deal.DealId, leg.LegId), out var entities) || entities.Count == 0 ||
                 !leg.HandoffZone.IsValid || !Guid.TryParse(leg.DefinitionId, out var stockRaw))
                 return false;
             var stock = await _assets.GetStockNodeAsync(new NCStockNodeId(stockRaw), true);
@@ -162,7 +214,15 @@ public sealed partial class NCFixerDealOrchestrationSystem : EntitySystem
                    stock.Snapshot.SemanticLocationKey == leg.HandoffZone.ToString() &&
                    stock.Snapshot.CommodityBatchIds.Count + stock.Snapshot.ItemIds.Count > 0;
         }
-        return leg.Kind is NCFixerDealLegKind.Information or NCFixerDealLegKind.Access;
+        if (leg.Kind == NCFixerDealLegKind.Information && Guid.TryParse(leg.DefinitionId, out var informationRaw))
+        {
+            var book = await _rumors.GetAsync(leg.To, true);
+            return book?.Snapshot.Knowledge.Any(value =>
+                value.InformationId == new NCInformationId(informationRaw)) == true;
+        }
+        if (leg.Kind == NCFixerDealLegKind.Access)
+            return await _fixers.HasAccessAsync(leg.From, leg.To, true);
+        return false;
     }
 
     private async Task<bool> EnsureObligationAsync(NCFixerDealSnapshot deal, NCFixerDealLeg leg)

@@ -12,6 +12,7 @@ using Content.Shared._NC.LivingCity.Economy;
 using Content.Shared._NC.LivingCity.Market;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
+using Robust.Shared.Asynchronous;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.LivingCity.Market;
@@ -38,6 +39,7 @@ public sealed partial class NCMarketRegistrySystem : EntitySystem
     [Dependency] private NCPartyResolverSystem _parties = default!;
     [Dependency] private NCEconomicAssetRegistrySystem _assets = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private ITaskManager _tasks = default!;
 
     private readonly ConcurrentDictionary<NCMarketListingId, NCMarketListingRecord> _listings = [];
     private readonly ConcurrentDictionary<NCMarketRequestId, NCMarketRequestRecord> _requests = [];
@@ -79,17 +81,56 @@ public sealed partial class NCMarketRegistrySystem : EntitySystem
         string definitionId)
     {
         if (!requester.IsValid || string.IsNullOrWhiteSpace(definitionId) ||
-            !_clock.TryGetCurrentTime(out _, out var now))
+            !_clock.TryGetCurrentTime(out var epoch, out var now))
             return null;
         var index = await GetIndexAsync(requester);
         foreach (var id in index.RequestIds)
         {
             var request = await GetRequestAsync(id, true);
-            if (request?.Snapshot.Status == NCMarketRequestStatus.Open && request.Snapshot.ExpiresAt > now &&
+            if (request?.SessionEpoch == epoch && request.Snapshot.Status == NCMarketRequestStatus.Open &&
+                request.Snapshot.ExpiresAt > now &&
                 request.Snapshot.Kind == kind && request.Snapshot.DefinitionId == definitionId.Trim())
                 return request;
         }
         return null;
+    }
+
+    /// <summary>
+    /// Returns a bounded page of live persistent demand for server-side planners. Old round epochs and expired
+    /// requests are excluded so offline state cannot create an event in an unrelated round.
+    /// </summary>
+    public async Task<IReadOnlyList<NCMarketRequestRecord>> GetOpenRequestsAsync(int limit)
+    {
+        if (!TryPolicy(out var policy) || limit <= 0 || limit > policy.MaximumDiscoveryResults ||
+            !_clock.TryGetCurrentTime(out var epoch, out var now))
+            return [];
+
+        var result = new List<NCMarketRequestRecord>(limit);
+        var maximumScanned = Math.Min(policy.MaximumDiscoveryResults, Math.Max(limit * 4, limit));
+        var scanned = 0;
+        string? after = null;
+        while (result.Count < limit && scanned < maximumScanned)
+        {
+            var pageSize = Math.Min(64, maximumScanned - scanned);
+            var page = await _database.GetNCAggregateSnapshotPageAsync(RequestAggregateType, after, pageSize);
+            if (page.Count == 0)
+                break;
+            scanned += page.Count;
+            after = page[^1].AggregateId;
+            foreach (var stored in page)
+            {
+                if (result.Count >= limit || !Guid.TryParse(stored.AggregateId, out var raw))
+                    continue;
+                var request = await GetRequestAsync(new NCMarketRequestId(raw), true);
+                if (request?.SessionEpoch != epoch || request.Snapshot.Status != NCMarketRequestStatus.Open ||
+                    request.Snapshot.ExpiresAt <= now)
+                    continue;
+                result.Add(request);
+            }
+            if (page.Count < pageSize)
+                break;
+        }
+        return result;
     }
 
     public async Task<NCMarketListingMutationResult> CreateListingAsync(NCCreateMarketListingRequest request)
@@ -255,11 +296,13 @@ public sealed partial class NCMarketRegistrySystem : EntitySystem
                 NCPersistentMutationStatus.DuplicateCompleted))
                 return RejectRequest(Map(result.Status), result.Error ?? "The request was not committed.");
             var loaded = await GetRequestAsync(request.RequestId, true);
-            return loaded == null
-                ? RejectRequest(NCMarketMutationStatus.StorageFailure, "The committed request could not be reloaded.")
-                : new(result.Status == NCPersistentMutationStatus.Applied
-                    ? NCMarketMutationStatus.Applied
-                    : NCMarketMutationStatus.Duplicate, loaded, null);
+            if (loaded == null)
+                return RejectRequest(NCMarketMutationStatus.StorageFailure,
+                    "The committed request could not be reloaded.");
+            Publish(new NCMarketAggregateChangedEvent(RequestAggregateType, request.RequestId.ToString()));
+            return new(result.Status == NCPersistentMutationStatus.Applied
+                ? NCMarketMutationStatus.Applied
+                : NCMarketMutationStatus.Duplicate, loaded, null);
         }
         catch (Exception exception)
         {
@@ -374,9 +417,17 @@ public sealed partial class NCMarketRegistrySystem : EntitySystem
                 return RejectRequest(NCMarketMutationStatus.NotFound, "The market request does not exist.");
             if (current.AggregateVersion != request.ExpectedVersion)
                 return RejectRequest(NCMarketMutationStatus.VersionConflict, "The market request version changed.");
-            if (request.Initiator != current.Snapshot.Requester ||
+            var matchedListing = current.Snapshot.MatchedListingId is { } matchedId
+                ? await GetListingAsync(matchedId, true)
+                : null;
+            var providerCompleting = request.Status == NCMarketRequestStatus.Fulfilled &&
+                                     matchedListing?.Snapshot.Seller == request.Initiator;
+            if (request.Initiator != current.Snapshot.Requester && !providerCompleting ||
                 !CanTransition(current.Snapshot.Status, request.Status) ||
-                request.Status is NCMarketRequestStatus.Matched or NCMarketRequestStatus.Fulfilled &&
+                request.Status == NCMarketRequestStatus.Matched &&
+                request.MatchedListingId is not { IsValid: true } ||
+                request.Status == NCMarketRequestStatus.Fulfilled &&
+                current.Snapshot.Status == NCMarketRequestStatus.Matched &&
                 request.MatchedListingId is not { IsValid: true } ||
                 request.Status == NCMarketRequestStatus.Expired && now < current.Snapshot.ExpiresAt)
                 return RejectRequest(NCMarketMutationStatus.Rejected, "The market request transition is not allowed.");
@@ -401,11 +452,13 @@ public sealed partial class NCMarketRegistrySystem : EntitySystem
                 NCPersistentMutationStatus.DuplicateCompleted))
                 return RejectRequest(Map(persisted.Status), persisted.Error ?? "The request status was not committed.");
             var loaded = await GetRequestAsync(request.RequestId, true);
-            return loaded == null
-                ? RejectRequest(NCMarketMutationStatus.StorageFailure, "The request status could not be reloaded.")
-                : new(persisted.Status == NCPersistentMutationStatus.Applied
-                    ? NCMarketMutationStatus.Applied
-                    : NCMarketMutationStatus.Duplicate, loaded, null);
+            if (loaded == null)
+                return RejectRequest(NCMarketMutationStatus.StorageFailure,
+                    "The request status could not be reloaded.");
+            Publish(new NCMarketAggregateChangedEvent(RequestAggregateType, request.RequestId.ToString()));
+            return new(persisted.Status == NCPersistentMutationStatus.Applied
+                ? NCMarketMutationStatus.Applied
+                : NCMarketMutationStatus.Duplicate, loaded, null);
         }
         finally
         {
@@ -717,6 +770,9 @@ public sealed partial class NCMarketRegistrySystem : EntitySystem
             return null;
         }
     }
+
+    private void Publish(NCMarketAggregateChangedEvent args) =>
+        _tasks.RunOnMainThread(() => RaiseLocalEvent(args));
 
     private SemaphoreSlim Gate(Guid id) => _gates[(id.GetHashCode() & int.MaxValue) % _gates.Length];
     private static bool Stable(string value, int max) => !string.IsNullOrWhiteSpace(value) &&

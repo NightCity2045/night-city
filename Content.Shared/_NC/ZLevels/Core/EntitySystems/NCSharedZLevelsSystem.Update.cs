@@ -22,6 +22,10 @@ public abstract partial class NCSharedZLevelsSystem
         if (_net.IsClient && !_clientSimulation)
             return;
 
+        // NC-Edit-Start: terminal Z-level falls are not owned by the vanilla chasm system.
+        UpdateTerminalFalls();
+        // NC-Edit-End
+
         _accumulatedTime += TimeSpan.FromSeconds(frameTime);
 
         var steps = 0;
@@ -33,6 +37,20 @@ public abstract partial class NCSharedZLevelsSystem
             steps++;
         }
     }
+
+    // NC-Edit-Start: delete bottom-level fallers after their visual animation finishes.
+    private void UpdateTerminalFalls()
+    {
+        var query = EntityQueryEnumerator<NCZLevelTerminalFallComponent>();
+        while (query.MoveNext(out var uid, out var terminalFall))
+        {
+            if (_timing.CurTime < terminalFall.DeleteAt)
+                continue;
+
+            PredictedQueueDel(uid);
+        }
+    }
+    // NC-Edit-End
 
     private void UpdateZPhysics(float frameTime)
     {

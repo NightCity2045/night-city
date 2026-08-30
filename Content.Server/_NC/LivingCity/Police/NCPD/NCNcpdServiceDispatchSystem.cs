@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Server._NC.LivingCity.Actors;
+using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.City.ZoneTemplates;
 using Content.Server._NC.LivingCity.CityServices;
 using Content.Server._NC.LivingCity.Identity;
@@ -34,6 +35,7 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
     [Dependency] private NCCityActorMaterializationSystem _materialization = default!;
+    [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
     [Dependency] private NCCityServiceSystem _services = default!;
     [Dependency] private NCCityIncidentRegistrySystem _incidents = default!;
     [Dependency] private NCNcpdUnitSystem _units = default!;
@@ -44,6 +46,7 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
     private readonly Dictionary<NCServiceDispatchId, DispatchWork> _work = [];
     private readonly Dictionary<NCServiceDispatchId, NCActiveWorldTime> _scheduled = [];
     private readonly Dictionary<(NCServiceDispatchId, NCActorId), Guid> _materializationRequests = [];
+    private readonly HashSet<(NCServiceDispatchId DispatchId, NCActorId ActorId)> _physicalDispatchActors = [];
     private readonly HashSet<NCCityIncidentId> _investigationIncidents = [];
     private readonly HashSet<NCCityIncidentId> _recoveredIncidents = [];
     private readonly HashSet<NCCityIncidentId> _incidentRecoveries = [];
@@ -74,6 +77,7 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => Clear());
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => Clear());
         SubscribeLocalEvent<NCServiceDispatchPersistedEvent>(OnServiceDispatch);
+        SubscribeLocalEvent<NCCityActorRehydratedEvent>(OnActorRehydrated);
         SubscribeLocalEvent<NCServiceDispatchArrivalAttemptEvent>(OnArrivalAttempt);
         SubscribeLocalEvent<NCCityIncidentPersistedEvent>(OnIncidentPersisted);
         SubscribeLocalEvent<NCNcpdDutyChangedEvent>(_ => ScheduleWaiting());
@@ -616,7 +620,10 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
     {
         var key = (dispatch.DispatchId, actorId);
         if (_runtime.TryGetEntity(actorId, out var entity) && Exists(entity))
+        {
+            RetainPhysicalDispatchActor(dispatch.DispatchId, actorId, entity);
             return;
+        }
         if (_materializationRequests.TryGetValue(key, out var existing) &&
             _materialization.TryGetRequest(existing, out var request) && request.Status is
                 (NCCityMaterializationRequestStatus.Queued or NCCityMaterializationRequestStatus.Loading or
@@ -636,6 +643,44 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
             "ncpd-service-dispatch"));
     }
 
+    /// <summary>Keeps an on-scene officer physical until the persistent service dispatch reaches a terminal state.</summary>
+    private void OnActorRehydrated(NCCityActorRehydratedEvent args)
+    {
+        foreach (var (key, requestId) in _materializationRequests)
+        {
+            if (requestId != args.RequestId || key.Item2 != args.ActorId)
+                continue;
+            RetainPhysicalDispatchActor(key.Item1, args.ActorId, args.EntityUid);
+            return;
+        }
+    }
+
+    private void RetainPhysicalDispatchActor(
+        NCServiceDispatchId dispatchId,
+        NCActorId actorId,
+        EntityUid entityUid)
+    {
+        if (!_physicalDispatchActors.Add((dispatchId, actorId)))
+            return;
+        _dematerialization.BeginBlocker(entityUid, NCCityDematerializationBlockerFlags.Scripted);
+    }
+
+    private void ReleasePhysicalDispatchActors(NCServiceDispatchId dispatchId)
+    {
+        var actors = _physicalDispatchActors
+            .Where(value => value.DispatchId == dispatchId)
+            .Select(value => value.ActorId)
+            .ToArray();
+        foreach (var actorId in actors)
+        {
+            _physicalDispatchActors.Remove((dispatchId, actorId));
+            if (_physicalDispatchActors.Any(value => value.ActorId == actorId) ||
+                !_runtime.TryGetEntity(actorId, out var entity) || !Exists(entity))
+                continue;
+            _dematerialization.EndBlocker(entity, NCCityDematerializationBlockerFlags.Scripted);
+        }
+    }
+
     private async Task CompleteServiceDispatchAsync(NCServiceDispatchId dispatchId)
     {
         var record = await _services.GetDispatchAsync(dispatchId, true);
@@ -648,6 +693,7 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
     private void FinishTerminal(NCServiceDispatchId dispatchId, NCServiceDispatchStatus status)
     {
         _scheduled.Remove(dispatchId);
+        ReleasePhysicalDispatchActors(dispatchId);
         if (_work.Remove(dispatchId, out var work) && work.CommandId.IsValid &&
             status == NCServiceDispatchStatus.Completed)
             _commands.TryAdvanceExecution(work.CommandId, NCNcpdCommandStatus.Completed,
@@ -701,6 +747,8 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
     {
         _active = false;
         _generation++;
+        foreach (var dispatchId in _physicalDispatchActors.Select(value => value.DispatchId).Distinct().ToArray())
+            ReleasePhysicalDispatchActors(dispatchId);
         _work.Clear();
         _scheduled.Clear();
         _materializationRequests.Clear();

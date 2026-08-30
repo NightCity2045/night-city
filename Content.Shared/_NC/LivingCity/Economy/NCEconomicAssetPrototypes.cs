@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Robust.Shared.Prototypes;
+using Robust.Shared.Localization;
 using Content.Shared.Chemistry.Reagent;
 
 namespace Content.Shared._NC.LivingCity.Economy;
@@ -32,6 +33,7 @@ public sealed partial class NCCommodityPrototype : IPrototype
 public sealed partial class NCItemDefinitionPrototype : IPrototype
 {
     [IdDataField] public string ID { get; private set; } = default!;
+    [DataField(required: true)] public LocId DisplayName { get; private set; } = default!;
     [DataField(required: true)] public string StableKey { get; private set; } = string.Empty;
     [DataField] public NCEconomicAssetDomain Domain { get; private set; }
     [DataField] public string DomainPrototypeId { get; private set; } = string.Empty;
@@ -83,6 +85,7 @@ public sealed partial class NCEconomicPricingPolicyPrototype : IPrototype
 public sealed partial class NCEconomicServicePrototype : IPrototype
 {
     [IdDataField] public string ID { get; private set; } = default!;
+    [DataField(required: true)] public LocId DisplayName { get; private set; } = default!;
     [DataField(required: true)] public string StableKey { get; private set; } = string.Empty;
     [DataField(required: true)] public string FulfillmentKey { get; private set; } = string.Empty;
     [DataField] public long? BasePrice { get; private set; }

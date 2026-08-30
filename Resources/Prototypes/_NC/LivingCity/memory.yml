@@ -83,6 +83,16 @@
   defaultPrivacy: Personal
 
 - type: ncMemoryEvent
+  id: MemoryVerbalThreat
+  stableKey: verbal-threat
+  consolidationKey: verbal-threats
+  retention: MemoryRetentionDurable
+  emotionalTags: [MemoryEmotionFear, MemoryEmotionAnger]
+  defaultSalience: 850
+  defaultConfidence: 1000
+  defaultPrivacy: Restricted
+
+- type: ncMemoryEvent
   id: MemoryDirectiveAccepted
   stableKey: directive-accepted
   consolidationKey: accepted-directives

@@ -18,6 +18,7 @@ public sealed partial class NCFixerCognitionSystem : EntitySystem
     [Dependency] private NCFixerRegistrySystem _fixers = default!;
     [Dependency] private NCFixerDealOrchestrationSystem _orchestration = default!;
     [Dependency] private NCFixerEscrowSystem _escrow = default!;
+    [Dependency] private NCFixerDealBoardSystem _dealBoard = default!;
     private readonly Dictionary<Guid, Task<FixerActionResult>> _pending = [];
 
     public override void Initialize()
@@ -34,8 +35,7 @@ public sealed partial class NCFixerCognitionSystem : EntitySystem
         var deals = _fixers.GetCachedDealsForParty(party, 16);
         foreach (var deal in deals)
         {
-            var actionable = deal.Snapshot.Fixer == party && deal.Snapshot.Status is
-                NCFixerDealStatus.EscrowFunded or NCFixerDealStatus.AwaitingHandoff;
+            var actionable = IsActionable(deal.Snapshot, party);
             var subject = new NCCognitionSubjectRef(NCCognitionReferenceKind.StableKey,
                 deal.Snapshot.DealId.ToString());
             args.Sink.Add(new NCCognitionFact("fixer.deal-active", subject, NCCognitionDomain.Economy,
@@ -68,7 +68,7 @@ public sealed partial class NCFixerCognitionSystem : EntitySystem
         }
         if (!_pending.TryGetValue(args.InstanceId, out var operation))
         {
-            if (deal.Snapshot.Status is not (NCFixerDealStatus.EscrowFunded or NCFixerDealStatus.AwaitingHandoff))
+            if (!IsActionable(deal.Snapshot, party))
             {
                 args.Failure = "fixer-deal-not-actionable";
                 return;
@@ -99,6 +99,12 @@ public sealed partial class NCFixerCognitionSystem : EntitySystem
                 status = result.Status;
                 error = result.Error;
             }
+            else if (deal.Snapshot.Status == NCFixerDealStatus.InProgress)
+            {
+                var result = await _dealBoard.ProgressServiceDealAsync(deal, party);
+                status = result.Deal == null ? NCFixerMutationStatus.Rejected : NCFixerMutationStatus.Applied;
+                error = result.Error;
+            }
             else
             {
                 var result = await _escrow.SettleAsync(deal.Snapshot.DealId, deal.AggregateVersion, party);
@@ -119,6 +125,13 @@ public sealed partial class NCFixerCognitionSystem : EntitySystem
         if (args.ActionId == "manage-fixer-deal")
             _pending.Remove(args.InstanceId);
     }
+
+    private static bool IsActionable(NCFixerDealSnapshot deal, NCPartyRef party) =>
+        deal.Fixer == party &&
+        (deal.Status is NCFixerDealStatus.EscrowFunded or NCFixerDealStatus.AwaitingHandoff ||
+         deal.Status == NCFixerDealStatus.InProgress && deal.Seller == party &&
+         deal.Plan.Legs.Any(value => value.Kind == NCFixerDealLegKind.Service &&
+             value.MarketRequestId.HasValue));
 
     private readonly record struct FixerActionResult(bool Success, string? Error);
 }

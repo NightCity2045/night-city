@@ -120,6 +120,7 @@
 # The medical profile remains the gameplay authority; this definition owns only trade identity and provenance.
 - type: ncItemDefinition
   id: NCItemCyberwareNeuralLinkMk1
+  displayName: nc-economic-item-neural-link-mk1
   stableKey: cyberware.neural-link-mk1
   domain: Cyberware
   domainPrototypeId: NCNeuralLinkMk1
@@ -132,6 +133,7 @@
 
 - type: ncItemDefinition
   id: NCItemWeaponBudgetPistolMk1
+  displayName: nc-economic-item-budget-pistol-mk1
   stableKey: weapon.budget-pistol-mk1
   domain: WeaponAssembly
   domainPrototypeId: WeaponPistolMk58
@@ -145,6 +147,7 @@
 
 - type: ncItemDefinition
   id: NCItemWeaponPartBudgetOptic
+  displayName: nc-economic-item-budget-optic
   stableKey: weapon-part.budget-optic
   domain: WeaponAssembly
   domainPrototypeId: budget-optic
@@ -156,6 +159,7 @@
 
 - type: ncEconomicService
   id: NCEconomicServiceCyberwareStreetMaintenance
+  displayName: nc-economic-service-cyberware-street-maintenance
   stableKey: service.cyberware.street-maintenance
   fulfillmentKey: cyberware.street-maintenance
   basePrice: 100
@@ -164,6 +168,7 @@
 
 - type: ncEconomicService
   id: NCEconomicServiceMedicalAftercare
+  displayName: nc-economic-service-medical-aftercare
   stableKey: service.medical.aftercare
   fulfillmentKey: medical.aftercare
   basePrice: 150
@@ -172,6 +177,7 @@
 
 - type: ncEconomicService
   id: NCEconomicServicePropertyRepair
+  displayName: nc-economic-service-property-repair
   stableKey: service.property.repair
   fulfillmentKey: property.repair
   basePrice: 250

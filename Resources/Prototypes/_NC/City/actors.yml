@@ -99,7 +99,7 @@
   maximumLineOfSightChecks: 8
   # Active-world time runs twelve times faster than real time: 12s is one real second.
   evaluationInterval: 12s
-  witnessedEventLifetime: 30s
+  witnessedEventLifetime: 5m
 
 - type: ncCityLocalPerceptionPolicy
   id: NCDefaultLocalPerceptionPolicy
@@ -226,7 +226,9 @@
   clusterSplitRadius: 52
   dematerializationRadius: 40
   materializationCooldown: 15s
-  offscreenGracePeriod: 8s
+  # Five game minutes equal twenty-five real seconds. This absorbs portal/zone-index transitions without pinning
+  # actors whose semantic location is genuinely no longer observed.
+  offscreenGracePeriod: 5m
   maximumAnchors: 128
   catalogPageSize: 250
   maximumCandidateInspectionsPerCluster: 128
