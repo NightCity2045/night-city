@@ -1,0 +1,420 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Palette from the Night City lighting reference.
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubePaleCyan
+  suffix: NC, Pale Cyan
+  components:
+  - type: LightBulb
+    color: "#C3FFFF"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubePowderBlue
+  suffix: NC, Powder Blue
+  components:
+  - type: LightBulb
+    color: "#9BC9EC"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeSlateBlue
+  suffix: NC, Slate Blue
+  components:
+  - type: LightBulb
+    color: "#5578C4"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeCream
+  suffix: NC, Cream
+  components:
+  - type: LightBulb
+    color: "#FFE09F"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubePeach
+  suffix: NC, Peach
+  components:
+  - type: LightBulb
+    color: "#FFBC86"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeTerracotta
+  suffix: NC, Terracotta
+  components:
+  - type: LightBulb
+    color: "#CA7B53"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeDay
+  suffix: NC, Day
+  components:
+  - type: LightBulb
+    color: "#F7B2A4"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeMorning
+  suffix: NC, Morning
+  components:
+  - type: LightBulb
+    color: "#736689"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeEvening
+  suffix: NC, Evening
+  components:
+  - type: LightBulb
+    color: "#99627B"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeNight
+  suffix: NC, Night
+  components:
+  - type: LightBulb
+    color: "#2F3854"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeLightViolet
+  suffix: NC, Light Violet
+  components:
+  - type: LightBulb
+    color: "#FF82EE"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeViolet
+  suffix: NC, Violet
+  components:
+  - type: LightBulb
+    color: "#EB3CFF"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeDeepViolet
+  suffix: NC, Deep Violet
+  components:
+  - type: LightBulb
+    color: "#AA0FDF"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeLemon
+  suffix: NC, Lemon
+  components:
+  - type: LightBulb
+    color: "#FBFF88"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeElectricYellow
+  suffix: NC, Electric Yellow
+  components:
+  - type: LightBulb
+    color: "#FFF142"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeGold
+  suffix: NC, Gold
+  components:
+  - type: LightBulb
+    color: "#FFCD47"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeCoral
+  suffix: NC, Coral
+  components:
+  - type: LightBulb
+    color: "#FF8C67"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeVermilion
+  suffix: NC, Vermilion
+  components:
+  - type: LightBulb
+    color: "#FF6339"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeDeepRed
+  suffix: NC, Deep Red
+  components:
+  - type: LightBulb
+    color: "#D61910"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeCornflowerBlue
+  suffix: NC, Cornflower Blue
+  components:
+  - type: LightBulb
+    color: "#578DFF"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeRoyalBlue
+  suffix: NC, Royal Blue
+  components:
+  - type: LightBulb
+    color: "#2262EC"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeDeepBlue
+  suffix: NC, Deep Blue
+  components:
+  - type: LightBulb
+    color: "#002ECD"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeAqua
+  suffix: NC, Aqua
+  components:
+  - type: LightBulb
+    color: "#8BFFF6"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeCyan
+  suffix: NC, Cyan
+  components:
+  - type: LightBulb
+    color: "#5BEDFF"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeAzure
+  suffix: NC, Azure
+  components:
+  - type: LightBulb
+    color: "#27D6FF"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeLime
+  suffix: NC, Lime
+  components:
+  - type: LightBulb
+    color: "#B3FF6E"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeGreen
+  suffix: NC, Green
+  components:
+  - type: LightBulb
+    color: "#74E747"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeDeepGreen
+  suffix: NC, Deep Green
+  components:
+  - type: LightBulb
+    color: "#34CD15"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeLightPink
+  suffix: NC, Light Pink
+  components:
+  - type: LightBulb
+    color: "#FF60CF"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeHotPink
+  suffix: NC, Hot Pink
+  components:
+  - type: LightBulb
+    color: "#FF3BA2"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeDeepPink
+  suffix: NC, Deep Pink
+  components:
+  - type: LightBulb
+    color: "#DC1E7F"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeIceWhite
+  suffix: NC, Ice White
+  components:
+  - type: LightBulb
+    color: "#E3FAFF"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeBlueGray
+  suffix: NC, Blue Gray
+  components:
+  - type: LightBulb
+    color: "#D3E2E7"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeSteelGray
+  suffix: NC, Steel Gray
+  components:
+  - type: LightBulb
+    color: "#B6C3CA"
+
+
+# Additional Night City 2045 and 2077 lighting colors.
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeSodium
+  suffix: NC, Sodium
+  components:
+  - type: LightBulb
+    color: "#FF9A2E"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeOldTungsten
+  suffix: NC, Old Tungsten
+  components:
+  - type: LightBulb
+    color: "#FFD0A0"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeRustRed
+  suffix: NC, Rust Red
+  components:
+  - type: LightBulb
+    color: "#B54835"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeToxicFluorescent
+  suffix: NC, Toxic Fluorescent
+  components:
+  - type: LightBulb
+    color: "#B8FF70"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeTerminalGreen
+  suffix: NC, Terminal Green
+  components:
+  - type: LightBulb
+    color: "#39FF88"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeIndustrialTeal
+  suffix: NC, Industrial Teal
+  components:
+  - type: LightBulb
+    color: "#208C8C"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeCyberYellow
+  suffix: NC, Cyber Yellow
+  components:
+  - type: LightBulb
+    color: "#FCEE0A"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeNeonCyan
+  suffix: NC, Neon Cyan
+  components:
+  - type: LightBulb
+    color: "#00F0FF"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeLaserMagenta
+  suffix: NC, Laser Magenta
+  components:
+  - type: LightBulb
+    color: "#FF2A6D"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeUltraviolet
+  suffix: NC, Ultraviolet
+  components:
+  - type: LightBulb
+    color: "#8A2BE2"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeAcidLime
+  suffix: NC, Acid Lime
+  components:
+  - type: LightBulb
+    color: "#B6FF00"
+
+
+- type: entity
+  parent: LightTube
+  id: NCLightTubeCorporateRed
+  suffix: NC, Corporate Red
+  components:
+  - type: LightBulb
+    color: "#FF1744"

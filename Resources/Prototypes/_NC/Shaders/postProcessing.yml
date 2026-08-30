@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Adapted from the NightCity2045/night-city-2045 dev post-processing prototypes.
+- type: shader
+  id: NCThreshold
+  kind: source
+  path: "/Textures/_NC/Shaders/threshold.swsl"
+
+- type: shader
+  id: NCPostProcess
+  kind: source
+  path: "/Textures/_NC/Shaders/post_process.swsl"

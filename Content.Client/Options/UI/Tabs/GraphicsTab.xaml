@@ -17,6 +17,15 @@
                 <CheckBox Name="AmbientOcclusionCheckBox" Text="{Loc 'ui-options-ambient-occlusion'}" />
                 <ui:OptionSlider Name="SharpnessSlider" Title="{Loc 'ui-options-sharpness'}" />
 
+                <!-- NC-Edit-Start -->
+                <Label Text="{Loc 'ui-options-nc-post-processing-label'}" StyleClasses="LabelKeyText"/>
+                <CheckBox Name="NCBloomCheckBox" Text="{Loc 'ui-options-nc-bloom'}" />
+                <ui:OptionSlider Name="NCBloomIntensitySlider" Title="{Loc 'ui-options-nc-bloom-intensity'}" />
+                <CheckBox Name="NCVignetteCheckBox" Text="{Loc 'ui-options-nc-vignette'}" />
+                <CheckBox Name="NCFilmGrainCheckBox" Text="{Loc 'ui-options-nc-film-grain'}" />
+                <ui:OptionSlider Name="NCFilmGrainStrengthSlider" Title="{Loc 'ui-options-nc-film-grain-strength'}" />
+                <!-- NC-Edit-End -->
+
                 <!-- Interface -->
                 <Label Text="{Loc 'ui-options-interface-label'}" StyleClasses="LabelKeyText"/>
                 <ui:OptionDropDown Name="DropDownUIScale" Title="{Loc 'ui-options-scale-label'}" />

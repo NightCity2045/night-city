@@ -1,0 +1,420 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Palette from the Night City lighting reference.
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightPaleCyan
+  suffix: NC, Pale Cyan
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubePaleCyan
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightPowderBlue
+  suffix: NC, Powder Blue
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubePowderBlue
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightSlateBlue
+  suffix: NC, Slate Blue
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeSlateBlue
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightCream
+  suffix: NC, Cream
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeCream
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightPeach
+  suffix: NC, Peach
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubePeach
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightTerracotta
+  suffix: NC, Terracotta
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeTerracotta
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightDay
+  suffix: NC, Day
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeDay
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightMorning
+  suffix: NC, Morning
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeMorning
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightEvening
+  suffix: NC, Evening
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeEvening
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightNight
+  suffix: NC, Night
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeNight
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightLightViolet
+  suffix: NC, Light Violet
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeLightViolet
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightViolet
+  suffix: NC, Violet
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeViolet
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightDeepViolet
+  suffix: NC, Deep Violet
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeDeepViolet
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightLemon
+  suffix: NC, Lemon
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeLemon
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightElectricYellow
+  suffix: NC, Electric Yellow
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeElectricYellow
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightGold
+  suffix: NC, Gold
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeGold
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightCoral
+  suffix: NC, Coral
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeCoral
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightVermilion
+  suffix: NC, Vermilion
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeVermilion
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightDeepRed
+  suffix: NC, Deep Red
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeDeepRed
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightCornflowerBlue
+  suffix: NC, Cornflower Blue
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeCornflowerBlue
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightRoyalBlue
+  suffix: NC, Royal Blue
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeRoyalBlue
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightDeepBlue
+  suffix: NC, Deep Blue
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeDeepBlue
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightAqua
+  suffix: NC, Aqua
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeAqua
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightCyan
+  suffix: NC, Cyan
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeCyan
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightAzure
+  suffix: NC, Azure
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeAzure
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightLime
+  suffix: NC, Lime
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeLime
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightGreen
+  suffix: NC, Green
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeGreen
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightDeepGreen
+  suffix: NC, Deep Green
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeDeepGreen
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightLightPink
+  suffix: NC, Light Pink
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeLightPink
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightHotPink
+  suffix: NC, Hot Pink
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeHotPink
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightDeepPink
+  suffix: NC, Deep Pink
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeDeepPink
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightIceWhite
+  suffix: NC, Ice White
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeIceWhite
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightBlueGray
+  suffix: NC, Blue Gray
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeBlueGray
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightSteelGray
+  suffix: NC, Steel Gray
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeSteelGray
+
+
+# Additional Night City 2045 and 2077 lighting colors.
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightSodium
+  suffix: NC, Sodium
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeSodium
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightOldTungsten
+  suffix: NC, Old Tungsten
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeOldTungsten
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightRustRed
+  suffix: NC, Rust Red
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeRustRed
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightToxicFluorescent
+  suffix: NC, Toxic Fluorescent
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeToxicFluorescent
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightTerminalGreen
+  suffix: NC, Terminal Green
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeTerminalGreen
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightIndustrialTeal
+  suffix: NC, Industrial Teal
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeIndustrialTeal
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightCyberYellow
+  suffix: NC, Cyber Yellow
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeCyberYellow
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightNeonCyan
+  suffix: NC, Neon Cyan
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeNeonCyan
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightLaserMagenta
+  suffix: NC, Laser Magenta
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeLaserMagenta
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightUltraviolet
+  suffix: NC, Ultraviolet
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeUltraviolet
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightAcidLime
+  suffix: NC, Acid Lime
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeAcidLime
+
+
+- type: entity
+  parent: Poweredlight
+  id: NCPoweredlightCorporateRed
+  suffix: NC, Corporate Red
+  components:
+  - type: PoweredLight
+    hasLampOnSpawn: NCLightTubeCorporateRed
