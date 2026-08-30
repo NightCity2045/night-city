@@ -123,8 +123,8 @@ public sealed class NCPostProcessOverlay : Overlay
         if (_bloomEnabled && resources.BloomTarget != null)
         {
             _postProcessShader.SetParameter("BLOOM_TEXTURE", resources.BloomTarget.Texture);
-            // The shader converts this documented 0-200 percentage range to a 0-2 multiplier.
-            _postProcessShader.SetParameter("bloomIntensity", (float) _bloomIntensity);
+            // Preserve the original Night City 2045 bloom scaling.
+            _postProcessShader.SetParameter("bloomIntensity", _bloomIntensity / 100f);
         }
 
         _postProcessShader.SetParameter("vignetteEnabled", _vignetteEnabled);
