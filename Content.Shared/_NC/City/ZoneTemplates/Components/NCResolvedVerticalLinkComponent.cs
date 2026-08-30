@@ -12,6 +12,12 @@ namespace Content.Shared._NC.City.ZoneTemplates.Components;
 [RegisterComponent]
 public sealed partial class NCResolvedVerticalLinkComponent : Component
 {
+    /// <summary>
+    /// Stable scope of this explicit link. Deployment links use their NCZoneDeploymentId value.
+    /// </summary>
+    [DataField] public Guid ScopeId;
+    [DataField] public string LinkId = string.Empty;
+    [DataField] public string TargetLinkId = string.Empty;
     [DataField(required: true)] public NCMapCoordinates Target;
     [DataField(required: true)] public NCVerticalLinkType LinkType;
 }

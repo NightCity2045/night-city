@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Z-level stairs use the entity rotation as their uphill direction.
+- type: entity
+  id: NCStairsUp
+  parent: Stairs
+  name: stairs up
+  description: Stairs leading to the Z-level above.
+  components:
+  - type: NCZLevelHighGround
+    heightCurve:
+    - 0
+    - 1
+    stick: true
+
+- type: entity
+  id: NCStairsDown
+  parent: Stairs
+  name: stairs down
+  description: Stairs leading to the Z-level below.
+  components:
+  - type: NCZLevelHighGround
+    heightCurve:
+    - 1
+    - 0
+    stick: true

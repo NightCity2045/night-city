@@ -7,7 +7,7 @@ using Content.Shared._NC.Medical.Persistence;
 namespace Content.Server._NC.Medical.Persistence;
 
 /// <summary>
-/// Server-only binding between a materialized body and the player character selected in preferences.
+/// Server-only binding between a materialized body and its stable player-character or persistent-actor owner.
 /// </summary>
 [RegisterComponent]
 public sealed partial class NCMedicalPersistenceOwnerComponent : Component

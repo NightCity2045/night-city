@@ -5,10 +5,12 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Content.Server.Database;
+using Content.Server._NC.LivingCity.Social;
 using Content.Shared._NC.Agent;
 using Content.Shared._NC.Agent.Components;
 using Content.Shared._NC.Agent.UI;
 using Content.Shared._NC.Identity;
+using Content.Shared._NC.LivingCity.Social;
 using Content.Shared.PDA;
 using Robust.Shared.Player;
 
@@ -137,7 +139,17 @@ public sealed partial class NCAgentSystem
             {
                 case NCAgentNotificationKind.ContactRequest when pending.Peer is { } peer:
                     if (!await _database.AreNCAgentProfilesBlockedAsync(owner, peer))
-                        await _database.AddNCAgentMutualContactsAsync(owner, peer, DateTime.UtcNow);
+                    {
+                        if (await _database.AddNCAgentMutualContactsAsync(owner, peer, DateTime.UtcNow))
+                        {
+                            _conversationSessions.RecordAgentActivity(
+                                NCConversationChannel.AgentContactExchange,
+                                owner,
+                                [peer],
+                                $"agent-contact:{message.NotificationId:D}",
+                                NCSpeechActKind.Acceptance);
+                        }
+                    }
                     break;
                 case NCAgentNotificationKind.GroupInvite when pending.GroupId is { } groupId:
                     await _database.RespondNCAgentGroupInviteAsync(
@@ -380,6 +392,12 @@ public sealed partial class NCAgentSystem
 
             view.Notice = "GROUP MESSAGE SENT";
             var recipients = await _database.GetNCAgentGroupRecipientIdsAsync(args.GroupId, view.Owner);
+            _conversationSessions.RecordAgentActivity(
+                NCConversationChannel.AgentGroupMessage,
+                view.Owner,
+                recipients,
+                $"agent-group-message:{message.MessageId}",
+                NCSpeechActKind.Statement);
             foreach (var recipient in recipients)
             {
                 await SendAgentNotificationAsync(

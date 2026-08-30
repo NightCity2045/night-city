@@ -14,6 +14,15 @@ namespace Content.Server._NC.Medical.Wounds;
 /// </summary>
 public sealed partial class NCVisibleWoundSystem : EntitySystem
 {
+    private long _rebuilds;
+    private long _unchangedRebuilds;
+    private long _publishedRebuilds;
+
+    public NCVisibleWoundProjectionCounters GetRuntimeCounters() => new(
+        _rebuilds,
+        _unchangedRebuilds,
+        _publishedRebuilds);
+
     public override void Initialize()
     {
         base.Initialize();
@@ -44,8 +53,7 @@ public sealed partial class NCVisibleWoundSystem : EntitySystem
         ref NCMedicalBodyChangedEvent args)
     {
         if ((args.Domains & (NCMedicalDirtyDomains.Anatomy |
-                             NCMedicalDirtyDomains.Wounds |
-                             NCMedicalDirtyDomains.Diagnostics)) == 0)
+                             NCMedicalDirtyDomains.Wounds)) == 0)
         {
             return;
         }
@@ -74,6 +82,7 @@ public sealed partial class NCVisibleWoundSystem : EntitySystem
     /// </summary>
     public void Rebuild(Entity<NCVisibleWoundComponent> entity)
     {
+        _rebuilds++;
         var markers = new List<NCVisibleWoundMarker>();
         if (TryComp<NCWoundContainerComponent>(entity.Owner, out var wounds))
         {
@@ -108,10 +117,14 @@ public sealed partial class NCVisibleWoundSystem : EntitySystem
         }
 
         if (MarkersEqual(entity.Comp.Markers, markers))
+        {
+            _unchangedRebuilds++;
             return;
+        }
 
         entity.Comp.Markers = markers;
         Dirty(entity, entity.Comp);
+        _publishedRebuilds++;
     }
 
     private static int CompareMarkers(NCVisibleWoundMarker left, NCVisibleWoundMarker right)
@@ -153,3 +166,8 @@ public sealed partial class NCVisibleWoundSystem : EntitySystem
         return true;
     }
 }
+
+public readonly record struct NCVisibleWoundProjectionCounters(
+    long Rebuilds,
+    long UnchangedRebuilds,
+    long PublishedRebuilds);

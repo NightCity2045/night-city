@@ -1,0 +1,95 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncMarketPolicy
+  id: Default
+  maximumListingsPerParty: 256
+  maximumRequestsPerParty: 128
+  maximumDiscoveryResults: 100
+  maximumListingLifetime: 168h
+  maximumRequestLifetime: 168h
+  maximumShipmentAssets: 32
+  maximumProductionInputs: 16
+  maximumProductionOutputs: 16
+  maximumRouteLegs: 128
+  minimumShipmentDuration: 1m
+  maximumShipmentDuration: 24h
+  shipmentDurationBasisPoints: 10000
+  threatCostToRiskBasisPoints: 100
+
+- type: ncAggregateDemandPolicy
+  id: Default
+  interval: 30m
+  maximumBusinessesPerRun: 100
+  maximumRequestsPerRun: 32
+  commodityDemands:
+  - commodity: NCCommodityTraumaAnalgesic
+    targetQuantity: 200
+    requestQuantity: 200
+    maximumUnitPrice: 5
+    minimumQuality: 700
+    useOutputStock: true
+    businessKinds: [ Clinic, Pharmacy, Retailer ]
+  - commodity: NCCommoditySyntheticOxygenCarrier
+    targetQuantity: 100
+    requestQuantity: 100
+    maximumUnitPrice: 10
+    minimumQuality: 750
+    useOutputStock: true
+    businessKinds: [ Clinic, Pharmacy ]
+  - commodity: NCCommodityIndustrialSteel
+    targetQuantity: 100
+    requestQuantity: 100
+    maximumUnitPrice: 8
+    minimumQuality: 500
+    useOutputStock: false
+    businessKinds: [ Workshop, Manufacturer ]
+
+- type: ncProductionRecipe
+  id: NCRecipeTraumaAnalgesicBatch
+  stableKey: recipe.pharmaceutical.trauma-analgesic
+  duration: 30m
+  allowedBusinessKinds: [ BiotechLab, Pharmacy ]
+  allowsAggregatedDemand: true
+  commodityInputs:
+  - commodity: NCCommodityPharmaceuticalPrecursor
+    quantity: 20
+    minimumQuality: 700
+  commodityOutputs:
+  - commodity: NCCommodityTraumaAnalgesic
+    quantity: 10
+    quality: 950
+
+- type: ncProductionRecipe
+  id: NCRecipeSyntheticOxygenCarrierBatch
+  stableKey: recipe.biotech.synthetic-oxygen-carrier
+  duration: 45m
+  allowedBusinessKinds: [ BiotechLab, Clinic ]
+  allowsAggregatedDemand: true
+  commodityInputs:
+  - commodity: NCCommodityBiotechCulture
+    quantity: 15
+    minimumQuality: 750
+  commodityOutputs:
+  - commodity: NCCommoditySyntheticOxygenCarrier
+    quantity: 10
+    quality: 950
+
+- type: ncProductionRecipe
+  id: NCRecipeBudgetPistolMk1
+  stableKey: recipe.weapon.budget-pistol-mk1
+  duration: 2h
+  allowedBusinessKinds: [ Workshop, Manufacturer ]
+  allowsAggregatedDemand: false
+  commodityInputs:
+  - commodity: NCCommodityIndustrialSteel
+    quantity: 4
+    minimumQuality: 600
+  - commodity: NCCommodityIndustrialPolymer
+    quantity: 2
+    minimumQuality: 600
+  itemOutputs:
+  - definition: NCItemWeaponBudgetPistolMk1
+    quantity: 1
+    condition: 1000

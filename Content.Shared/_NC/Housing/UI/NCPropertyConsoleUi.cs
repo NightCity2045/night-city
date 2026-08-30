@@ -33,7 +33,7 @@ public sealed record NCPropertyConsoleListingSummary(
     int RentAmount,
     long BillingIntervalSeconds,
     long GracePeriodSeconds,
-    long? NextRentDueUnixSeconds,
+    long? NextRentDueInSeconds,
     bool IsTenant,
     bool CanRent,
     bool CanEndLease,
@@ -52,7 +52,7 @@ public sealed class NCPropertyConsoleUpdateMessage(
     int pageIndex,
     int pageCount,
     int totalCount,
-    int balance,
+    long balance,
     bool hasBankAccount,
     string notice) : BoundUserInterfaceMessage
 {
@@ -61,7 +61,7 @@ public sealed class NCPropertyConsoleUpdateMessage(
     public readonly int PageIndex = pageIndex;
     public readonly int PageCount = pageCount;
     public readonly int TotalCount = totalCount;
-    public readonly int Balance = balance;
+    public readonly long Balance = balance;
     public readonly bool HasBankAccount = hasBankAccount;
     public readonly string Notice = notice;
 }

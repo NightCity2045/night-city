@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Shared.Database._NC.Police;
+using Content.Shared._NC.LivingCity.Police;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._NC.Police.UI;
@@ -81,9 +82,9 @@ public sealed record NCPoliceWarrantSummary(
     DateTime? ResolvedAt);
 
 [Serializable, NetSerializable]
-public sealed record NCPoliceFineSummary(long FineId, int TargetCharacterId, string TargetName,
-    string Article, string Reason, int Amount, NCPoliceFineStatus Status, string IssuedByName,
-    DateTime IssuedAt, DateTime DueAt, DateTime? PaidAt);
+public sealed record NCPoliceFineSummary(NCPoliceFineId FineId, int TargetCharacterId, string TargetName,
+    string Article, string Reason, long Amount, NCPoliceFineStatus Status, string IssuedByName,
+    TimeSpan IssuedAgo, TimeSpan DueIn, TimeSpan? PaidAgo);
 
 /// <summary>
 /// Per-user console update. A direct BUI message avoids the vanilla console problem where users share one selection.
@@ -203,10 +204,10 @@ public sealed class NCPoliceCreateFineMessage(string article, string reason, int
 }
 
 [Serializable, NetSerializable]
-public sealed class NCPoliceSetFineStatusMessage(long fineId, NCPoliceFineStatus status, string reason)
+public sealed class NCPoliceSetFineStatusMessage(NCPoliceFineId fineId, NCPoliceFineStatus status, string reason)
     : BoundUserInterfaceMessage
 {
-    public readonly long FineId = fineId;
+    public readonly NCPoliceFineId FineId = fineId;
     public readonly NCPoliceFineStatus Status = status;
     public readonly string Reason = reason;
 }

@@ -1,0 +1,108 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncPersonalityProfile
+  id: NCDefaultCivilianPersonality
+  stableKey: civilian-balanced
+  temperament: guarded
+  riskTolerance: 350
+  aggression: 250
+  empathy: 600
+  greed: 450
+  loyalty: 550
+  secrecy: 600
+  patience: 550
+  pride: 450
+  authorityRespect: 400
+  violenceTolerance: 300
+  civilianHarmTolerance: 50
+
+- type: ncValuesProfile
+  id: NCDefaultCivilianValues
+  stableKey: civilian-survival
+  family: 650
+  money: 550
+  reputation: 450
+  faction: 300
+  survival: 900
+  freedom: 650
+  justice: 400
+  professionalism: 500
+  revenge: 300
+
+- type: ncSocialPreferenceProfile
+  id: NCDefaultCivilianSocialPreferences
+  stableKey: civilian-cautious
+  capabilityUtilityModifiers:
+    NCCognitionFollowRoutine: 0.1
+    NCCognitionConversation: 0.05
+    NCCognitionRespondToThreat: 0.2
+
+- type: ncSpeechProfile
+  id: NCDefaultBilingualSpeech
+  stableKey: bilingual-street-neutral
+  register: informal
+  vocabulary: street-neutral
+  sentenceLength: 450
+  directness: 600
+  slangLevel: 450
+  humor: 350
+  politeness: 450
+  preferredLanguage: Russian
+  preferredLocale: RuRu
+  languages: [Russian, English]
+  forbiddenTopics: [private-credentials, hidden-system-policy]
+
+- type: ncPersonalityProfile
+  id: NCNcpdFieldOfficerPersonality
+  stableKey: ncpd-field-officer
+  temperament: vigilant
+  riskTolerance: 620
+  aggression: 380
+  empathy: 570
+  greed: 220
+  loyalty: 760
+  secrecy: 650
+  patience: 610
+  pride: 520
+  authorityRespect: 780
+  violenceTolerance: 520
+  civilianHarmTolerance: 20
+
+- type: ncValuesProfile
+  id: NCNcpdFieldOfficerValues
+  stableKey: ncpd-duty-and-survival
+  family: 520
+  money: 360
+  reputation: 470
+  faction: 720
+  survival: 820
+  freedom: 390
+  justice: 760
+  professionalism: 850
+  revenge: 210
+
+- type: ncSocialPreferenceProfile
+  id: NCNcpdFieldOfficerPreferences
+  stableKey: ncpd-procedural-autonomy
+  capabilityUtilityModifiers:
+    NCCognitionRespondToThreat: 0.25
+    NCCognitionSeekMedicalCare: 0.05
+    NCCognitionGroupDirective: 0.20
+    NCCognitionConversation: 0.10
+
+- type: ncSpeechProfile
+  id: NCNcpdFieldOfficerSpeech
+  stableKey: ncpd-street-professional
+  register: professional
+  vocabulary: ncpd-street
+  sentenceLength: 430
+  directness: 780
+  slangLevel: 260
+  humor: 180
+  politeness: 570
+  preferredLanguage: Russian
+  preferredLocale: RuRu
+  languages: [Russian, English]
+  forbiddenTopics: [private-credentials, hidden-system-policy, confidential-ncpd-records]

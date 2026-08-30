@@ -9,65 +9,53 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Content.Server.Database;
 
-public sealed record NCBankAccountData(
+public sealed record NCBankCredentialData(
     NCCharacterId CharacterId,
     string AccountNumber,
-    string Pin,
-    int Balance);
+    string Pin);
 
 public partial interface IServerDbManager
 {
-    Task<NCBankAccountData?> GetOrCreateNCBankAccountAsync(
+    Task<NCBankCredentialData?> GetOrCreateNCBankCredentialAsync(
         NCCharacterId characterId,
-        int startingBalance,
         string accountPrefix,
         int pinDigits);
 
-    Task<NCBankAccountData?> GetNCBankAccountAsync(NCCharacterId characterId);
-    Task<NCBankAccountData?> AuthenticateNCBankAccountAsync(string accountNumber, string pin);
-    Task<NCBankAccountData?> TryAdjustNCBankBalanceAsync(NCCharacterId characterId, int delta);
+    Task<NCBankCredentialData?> GetNCBankCredentialAsync(NCCharacterId characterId);
+    Task<NCBankCredentialData?> AuthenticateNCBankCredentialAsync(string accountNumber, string pin);
 }
 
 public sealed partial class ServerDbManager
 {
-    public Task<NCBankAccountData?> GetOrCreateNCBankAccountAsync(
+    public Task<NCBankCredentialData?> GetOrCreateNCBankCredentialAsync(
         NCCharacterId characterId,
-        int startingBalance,
         string accountPrefix,
         int pinDigits)
     {
         DbWriteOpsMetric.Inc();
-        return RunDbCommand(() => _db.GetOrCreateNCBankAccountAsync(
+        return RunDbCommand(() => _db.GetOrCreateNCBankCredentialAsync(
             characterId,
-            startingBalance,
             accountPrefix,
             pinDigits));
     }
 
-    public Task<NCBankAccountData?> GetNCBankAccountAsync(NCCharacterId characterId)
+    public Task<NCBankCredentialData?> GetNCBankCredentialAsync(NCCharacterId characterId)
     {
         DbReadOpsMetric.Inc();
-        return RunDbCommand(() => _db.GetNCBankAccountAsync(characterId));
+        return RunDbCommand(() => _db.GetNCBankCredentialAsync(characterId));
     }
 
-    public Task<NCBankAccountData?> AuthenticateNCBankAccountAsync(string accountNumber, string pin)
+    public Task<NCBankCredentialData?> AuthenticateNCBankCredentialAsync(string accountNumber, string pin)
     {
         DbReadOpsMetric.Inc();
-        return RunDbCommand(() => _db.AuthenticateNCBankAccountAsync(accountNumber, pin));
-    }
-
-    public Task<NCBankAccountData?> TryAdjustNCBankBalanceAsync(NCCharacterId characterId, int delta)
-    {
-        DbWriteOpsMetric.Inc();
-        return RunDbCommand(() => _db.TryAdjustNCBankBalanceAsync(characterId, delta));
+        return RunDbCommand(() => _db.AuthenticateNCBankCredentialAsync(accountNumber, pin));
     }
 }
 
 public abstract partial class ServerDbBase
 {
-    public async Task<NCBankAccountData?> GetOrCreateNCBankAccountAsync(
+    public async Task<NCBankCredentialData?> GetOrCreateNCBankCredentialAsync(
         NCCharacterId characterId,
-        int startingBalance,
         string accountPrefix,
         int pinDigits)
     {
@@ -102,7 +90,8 @@ public abstract partial class ServerDbBase
             ProfileId = characterId.Value,
             AccountNumber = accountNumber.ToUpperInvariant(),
             Pin = RandomNumberGenerator.GetInt32(pinUpperBound / 10, pinUpperBound).ToString(),
-            Balance = Math.Max(0, startingBalance),
+            // NC: This historical column is deliberately inert. Financial authority lives in the common ledger.
+            Balance = 0,
             UpdatedAt = DateTime.UtcNow,
         };
 
@@ -111,7 +100,7 @@ public abstract partial class ServerDbBase
         return ToData(account);
     }
 
-    public async Task<NCBankAccountData?> GetNCBankAccountAsync(NCCharacterId characterId)
+    public async Task<NCBankCredentialData?> GetNCBankCredentialAsync(NCCharacterId characterId)
     {
         if (!characterId.IsValid)
             return null;
@@ -123,7 +112,7 @@ public abstract partial class ServerDbBase
         return account == null ? null : ToData(account);
     }
 
-    public async Task<NCBankAccountData?> AuthenticateNCBankAccountAsync(string accountNumber, string pin)
+    public async Task<NCBankCredentialData?> AuthenticateNCBankCredentialAsync(string accountNumber, string pin)
     {
         var normalizedAccount = accountNumber.Trim().ToUpperInvariant();
         var normalizedPin = pin.Trim();
@@ -139,33 +128,11 @@ public abstract partial class ServerDbBase
         return account == null ? null : ToData(account);
     }
 
-    public async Task<NCBankAccountData?> TryAdjustNCBankBalanceAsync(NCCharacterId characterId, int delta)
+    private static NCBankCredentialData ToData(NCCharacterBankAccount account)
     {
-        if (!characterId.IsValid || delta == 0)
-            return null;
-
-        await using var db = await GetDb();
-        var account = await db.DbContext.NCCharacterBankAccounts
-            .SingleOrDefaultAsync(value => value.ProfileId == characterId.Value);
-        if (account == null)
-            return null;
-
-        var newBalance = (long) account.Balance + delta;
-        if (newBalance < 0 || newBalance > int.MaxValue)
-            return null;
-
-        account.Balance = (int) newBalance;
-        account.UpdatedAt = DateTime.UtcNow;
-        await db.DbContext.SaveChangesAsync();
-        return ToData(account);
-    }
-
-    private static NCBankAccountData ToData(NCCharacterBankAccount account)
-    {
-        return new NCBankAccountData(
+        return new NCBankCredentialData(
             new NCCharacterId(account.ProfileId),
             account.AccountNumber,
-            account.Pin,
-            account.Balance);
+            account.Pin);
     }
 }

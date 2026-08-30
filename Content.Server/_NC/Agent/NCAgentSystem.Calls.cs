@@ -5,10 +5,13 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Content.Server._NC.Agent.Components;
+using Content.Server._NC.LivingCity.Social;
 using Content.Shared._NC.Agent;
 using Content.Shared._NC.Agent.Components;
 using Content.Shared._NC.Agent.UI;
 using Content.Shared._NC.Identity;
+using Content.Shared._NC.LivingCity.Social;
+using Content.Shared._NC.Persistence.Identity;
 using Content.Shared.Chat;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Inventory;
@@ -21,6 +24,7 @@ public sealed partial class NCAgentSystem
 {
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private IGameTiming _gameTiming = default!;
+    [Dependency] private NCConversationSessionSystem _conversationSessions = default!;
 
     private readonly Dictionary<NCCharacterId, AgentCall> _calls = [];
     private TimeSpan _nextCallTimeoutCheck;
@@ -159,6 +163,21 @@ public sealed partial class NCAgentSystem
         call.AnsweredAt = DateTime.UtcNow;
         call.CallerHolder = callerHolder;
         call.TargetHolder = user;
+        var conversationId = NCConversationSessionId.New();
+        if (_conversationSessions.TryStart(new NCConversationStartRequest(
+                conversationId,
+                [NCPartyRef.ForCharacter(call.Caller), NCPartyRef.ForCharacter(call.Target)],
+                NCConversationChannel.AgentCall,
+                new NCInformationSubject(NCInformationSubjectKind.StableKey, "agent-network"),
+                ["agent-call"],
+                [],
+                NCMemoryPrivacy.Restricted,
+                NCLanguage.Russian,
+                NCLocale.RuRu), out _, out _))
+        {
+            call.ConversationSessionId = conversationId;
+            _conversationSessions.TryTransition(conversationId, NCConversationStatus.Active, string.Empty, out _);
+        }
         AttachCallRelay(callerHolder, call.Caller, call.CallerAgent);
         AttachCallRelay(user, call.Target, call.TargetAgent);
         NotifyCallHolder(callerHolder, $"Connected to {call.TargetName}.");
@@ -322,6 +341,17 @@ public sealed partial class NCAgentSystem
     {
         _calls.Remove(call.Caller);
         _calls.Remove(call.Target);
+        if (call.ConversationSessionId is { IsValid: true } conversationId)
+        {
+            var status = outcome == NCAgentCallOutcome.Completed
+                ? NCConversationStatus.Ended
+                : NCConversationStatus.Interrupted;
+            _conversationSessions.TryTransition(
+                conversationId,
+                status,
+                outcome.ToString().ToLowerInvariant(),
+                out _);
+        }
         RemoveCallRelay(call.CallerHolder, call.CallerAgent);
         RemoveCallRelay(call.TargetHolder, call.TargetAgent);
 
@@ -451,6 +481,7 @@ public sealed partial class NCAgentSystem
         public readonly DateTime StartedAt = startedAt;
         public readonly TimeSpan Deadline = deadline;
         public EntityUid? CallerHolder;
+        public NCConversationSessionId? ConversationSessionId;
         public EntityUid? TargetHolder;
         public bool Connected;
         public DateTime? AnsweredAt;

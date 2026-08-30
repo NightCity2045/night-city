@@ -980,6 +980,43 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("job", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCActiveWorldClockRecord", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("smallint")
+                        .HasColumnName("id");
+
+                    b.Property<long>("ActiveWorldTicks")
+                        .HasColumnType("bigint")
+                        .HasColumnName("active_world_ticks");
+
+                    b.Property<bool>("RoundActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("round_active");
+
+                    b.Property<Guid>("SessionEpoch")
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_epoch");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_active_world_clock");
+
+                    b.ToTable("nc_active_world_clock", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_nc_active_world_clock_singleton", "id = 1");
+
+                            t.HasCheckConstraint("CK_nc_active_world_clock_ticks", "active_world_ticks >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCAgentBlock", b =>
                 {
                     b.Property<int>("OwnerProfileId")
@@ -1349,6 +1386,49 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("nc_agent_profile", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCAggregateSnapshot", b =>
+                {
+                    b.Property<string>("AggregateType")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("aggregate_type");
+
+                    b.Property<string>("AggregateId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("aggregate_id");
+
+                    b.Property<long>("ActiveWorldTicks")
+                        .HasColumnType("bigint")
+                        .HasColumnName("active_world_ticks");
+
+                    b.Property<long>("AggregateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("aggregate_version");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("FormatVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("format_version");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payload");
+
+                    b.Property<Guid>("SessionEpoch")
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_epoch");
+
+                    b.HasKey("AggregateType", "AggregateId")
+                        .HasName("PK_nc_aggregate_snapshot");
+
+                    b.ToTable("nc_aggregate_snapshot", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCCharacterBankAccount", b =>
                 {
                     b.Property<int>("ProfileId")
@@ -1383,47 +1463,6 @@ namespace Content.Server.Database.Migrations.Postgres
 
                     b.ToTable("nc_character_bank_account", (string)null);
                 });
-
-            // NC start - Persistent bounded medical state owned by a Night City character profile.
-            modelBuilder.Entity("Content.Server.Database.NCMedicalCharacterSnapshot", b =>
-                {
-                    b.Property<int>("ProfileId")
-                        .HasColumnType("integer")
-                        .HasColumnName("profile_id");
-
-                    b.Property<DateTime>("CapturedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("captured_at");
-
-                    b.Property<string>("Payload")
-                        .IsRequired()
-                        .HasMaxLength(524288)
-                        .HasColumnType("character varying(524288)")
-                        .HasColumnName("payload");
-
-                    b.Property<long>("Revision")
-                        .HasColumnType("bigint")
-                        .HasColumnName("revision");
-
-                    b.Property<int>("SnapshotVersion")
-                        .HasColumnType("integer")
-                        .HasColumnName("snapshot_version");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("ProfileId")
-                        .HasName("PK_nc_medical_character_snapshot");
-
-                    b.ToTable("nc_medical_character_snapshot", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_nc_medical_snapshot_payload_length", "length(payload) <= 524288");
-                            t.HasCheckConstraint("CK_nc_medical_snapshot_revision", "revision > 0");
-                            t.HasCheckConstraint("CK_nc_medical_snapshot_version", "snapshot_version > 0");
-                        });
-                });
-            // NC end
 
             modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
                 {
@@ -1550,6 +1589,74 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasDatabaseName("IX_nc_citinet_reaction_profile_id");
 
                     b.ToTable("nc_citinet_reaction", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCCommandReceipt", b =>
+                {
+                    b.Property<Guid>("CommandId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("command_id");
+
+                    b.Property<string>("CommandType")
+                        .IsRequired()
+                        .HasMaxLength(96)
+                        .HasColumnType("character varying(96)")
+                        .HasColumnName("command_type");
+
+                    b.Property<long?>("CompletedAtWorldTicks")
+                        .HasColumnType("bigint")
+                        .HasColumnName("completed_at_world_ticks");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)")
+                        .HasColumnName("error");
+
+                    b.Property<string>("ResultPayload")
+                        .HasColumnType("text")
+                        .HasColumnName("result_payload");
+
+                    b.Property<string>("ScopeId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("scope_id");
+
+                    b.Property<string>("ScopeType")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("scope_type");
+
+                    b.Property<Guid>("SessionEpoch")
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_epoch");
+
+                    b.Property<long>("StartedAtWorldTicks")
+                        .HasColumnType("bigint")
+                        .HasColumnName("started_at_world_ticks");
+
+                    b.Property<byte>("State")
+                        .HasColumnType("smallint")
+                        .HasColumnName("state");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("CommandId")
+                        .HasName("PK_nc_command_receipt");
+
+                    b.HasIndex("State", "UpdatedAt");
+
+                    b.HasIndex("ScopeType", "ScopeId", "CreatedAt");
+
+                    b.ToTable("nc_command_receipt", (string)null);
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCDungeonExtractedItemRecord", b =>
@@ -1761,6 +1868,120 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("nc_employment_event", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCEventJournalEntry", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("event_id");
+
+                    b.Property<long>("ActiveWorldTicks")
+                        .HasColumnType("bigint")
+                        .HasColumnName("active_world_ticks");
+
+                    b.Property<string>("AggregateId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("aggregate_id");
+
+                    b.Property<string>("AggregateType")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("aggregate_type");
+
+                    b.Property<long>("AggregateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("aggregate_version");
+
+                    b.Property<DateTime?>("AppliedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("applied_at");
+
+                    b.Property<Guid?>("CausationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("causation_id");
+
+                    b.Property<Guid>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(96)
+                        .HasColumnType("character varying(96)")
+                        .HasColumnName("event_type");
+
+                    b.Property<long>("ExpectedVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("expected_version");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payload");
+
+                    b.Property<Guid>("SessionEpoch")
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_epoch");
+
+                    b.HasKey("EventId")
+                        .HasName("PK_nc_event_journal");
+
+                    b.HasIndex("CorrelationId", "CreatedAt");
+
+                    b.HasIndex("AggregateType", "AggregateId", "AggregateVersion")
+                        .IsUnique();
+
+                    b.ToTable("nc_event_journal", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCMedicalCharacterSnapshot", b =>
+                {
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("integer")
+                        .HasColumnName("profile_id");
+
+                    b.Property<DateTime>("CapturedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("captured_at");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasMaxLength(524288)
+                        .HasColumnType("character varying(524288)")
+                        .HasColumnName("payload");
+
+                    b.Property<long>("Revision")
+                        .HasColumnType("bigint")
+                        .HasColumnName("revision");
+
+                    b.Property<int>("SnapshotVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("snapshot_version");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("ProfileId")
+                        .HasName("PK_nc_medical_character_snapshot");
+
+                    b.ToTable("nc_medical_character_snapshot", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_nc_medical_snapshot_payload_length", "length(payload) <= 524288");
+
+                            t.HasCheckConstraint("CK_nc_medical_snapshot_revision", "revision > 0");
+
+                            t.HasCheckConstraint("CK_nc_medical_snapshot_version", "snapshot_version > 0");
+                        });
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCOrganizationBankAccount", b =>
                 {
                     b.Property<string>("OrganizationPrototypeId")
@@ -1835,6 +2056,59 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.HasIndex("OrganizationPrototypeId", "CreatedAt");
 
                     b.ToTable("nc_organization_bank_transaction", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCOutboxMessage", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("message_id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
+                    b.Property<DateTime>("AvailableAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("available_at");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("event_id");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("last_error");
+
+                    b.Property<string>("MessageType")
+                        .IsRequired()
+                        .HasMaxLength(96)
+                        .HasColumnType("character varying(96)")
+                        .HasColumnName("message_type");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payload");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("processed_at");
+
+                    b.HasKey("MessageId")
+                        .HasName("PK_nc_outbox_message");
+
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("ProcessedAt", "AvailableAt");
+
+                    b.ToTable("nc_outbox_message", (string)null);
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCPoliceCase", b =>
@@ -3784,20 +4058,6 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasConstraintName("FK_nc_character_bank_account_profile_profile_id");
                 });
 
-            // NC start - Medical snapshot/profile ownership relation.
-            modelBuilder.Entity("Content.Server.Database.NCMedicalCharacterSnapshot", b =>
-                {
-                    b.HasOne("Content.Server.Database.Profile", "Profile")
-                        .WithOne()
-                        .HasForeignKey("Content.Server.Database.NCMedicalCharacterSnapshot", "ProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_nc_medical_character_snapshot_profile_profile_id");
-
-                    b.Navigation("Profile");
-                });
-            // NC end
-
             modelBuilder.Entity("Content.Server.Database.NCCharacterEmployment", b =>
                 {
                     b.HasOne("Content.Server.Database.Profile", "Profile")
@@ -3925,6 +4185,18 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.Navigation("Employment");
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCMedicalCharacterSnapshot", b =>
+                {
+                    b.HasOne("Content.Server.Database.Profile", "Profile")
+                        .WithOne()
+                        .HasForeignKey("Content.Server.Database.NCMedicalCharacterSnapshot", "ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_medical_character_snapshot_profile_profile_id");
+
+                    b.Navigation("Profile");
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCOrganizationBankTransaction", b =>
                 {
                     b.HasOne("Content.Server.Database.NCOrganizationBankAccount", "Organization")
@@ -3935,6 +4207,16 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasConstraintName("FK_nc_organization_bank_transaction_nc_organization_bank_accou~");
 
                     b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCOutboxMessage", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCEventJournalEntry", null)
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_outbox_message_nc_event_journal_ncevent_journal_entry_ev~");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCPoliceCaseEntry", b =>

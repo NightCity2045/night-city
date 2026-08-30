@@ -3,6 +3,8 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Linq;
+using Content.Server._NC.LivingCity.Actors;
+using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.Medical.Treatment;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Medical.Anatomy;
@@ -35,6 +37,7 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
     [Dependency] private StandingStateSystem _standing = default!;
     [Dependency] private NCEmergencyCareSystem _emergency = default!;
     [Dependency] private NCTreatmentInteractionSystem _treatment = default!;
+    [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
 
     public override void Initialize()
     {
@@ -137,24 +140,45 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
             return;
 
         args.Handled = true;
+        if (!TryStartCpr(args.User, patient.Owner, out _, out _))
+            _popup.PopupEntity(Loc.GetString("nc-medical-interaction-invalidated"), patient.Owner, args.User);
+    }
+
+    /// <summary>
+    /// Starts the shared physical CPR interaction used by players and autonomous clinicians. The emergency
+    /// resolver remains authoritative and revalidates the patient, free hand, range and physiology on completion.
+    /// </summary>
+    public bool TryStartCpr(
+        EntityUid user,
+        EntityUid patient,
+        out NCActionResolutionId resolutionId,
+        out TimeSpan duration)
+    {
+        resolutionId = default;
+        duration = TimeSpan.Zero;
         var profile = _prototypes.EnumeratePrototypes<NCEmergencyCareProfilePrototype>()
             .Where(candidate => candidate.DefaultForHumans)
             .OrderBy(candidate => candidate.ID, StringComparer.Ordinal)
             .FirstOrDefault();
-        if (profile == null || profile.CprApplicationDuration <= TimeSpan.Zero ||
-            !_interaction.InRangeUnobstructed(args.User, patient.Owner, profile.CprInteractionRange))
+        if (user == patient || Deleted(user) || Deleted(patient) ||
+            !HasComp<NCMedicalBodyComponent>(patient) ||
+            !_standing.IsDown(patient) ||
+            _hands.TryGetActiveItem(user, out _) ||
+            profile == null || profile.CprApplicationDuration <= TimeSpan.Zero ||
+            !_interaction.InRangeUnobstructed(user, patient, profile.CprInteractionRange))
         {
-            _popup.PopupEntity(Loc.GetString("nc-medical-interaction-invalidated"), patient.Owner, args.User);
-            return;
+            return false;
         }
 
+        resolutionId = NCActionResolutionId.New();
+        duration = profile.CprApplicationDuration;
         var doAfter = new DoAfterArgs(
             EntityManager,
-            args.User,
+            user,
             profile.CprApplicationDuration,
-            new NCCprDoAfterEvent(NCActionResolutionId.New()),
-            patient.Owner,
-            target: patient.Owner)
+            new NCCprDoAfterEvent(resolutionId),
+            patient,
+            target: patient)
         {
             NeedHand = true,
             NeedFreeHand = true,
@@ -164,11 +188,20 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
         };
 
         if (_doAfter.TryStartDoAfter(doAfter))
-            _popup.PopupEntity(Loc.GetString("nc-medical-cpr-started"), patient.Owner, args.User);
+        {
+            _dematerialization.BeginBlocker(patient, NCCityDematerializationBlockerFlags.PlayerTreatment);
+            _popup.PopupEntity(Loc.GetString("nc-medical-cpr-started"), patient, user);
+            return true;
+        }
+
+        resolutionId = default;
+        duration = TimeSpan.Zero;
+        return false;
     }
 
     private void OnCprDoAfter(Entity<NCMedicalBodyComponent> patient, ref NCCprDoAfterEvent args)
     {
+        _dematerialization.EndBlocker(patient.Owner, NCCityDematerializationBlockerFlags.PlayerTreatment);
         if (args.Handled || args.Cancelled || args.Target != patient.Owner)
             return;
 

@@ -2,11 +2,6 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-ent-NCComputerNCPDPersonnel = кадровая консоль NCPD
-    .desc = Защищённый терминал для постоянных кадровых решений NCPD.
-ent-NCNCPDPersonnelComputerCircuitboard = плата кадровой консоли NCPD
-    .desc = Компьютерная плата кадровой консоли NCPD.
-
 nc-personnel-title = Управление персоналом
 nc-personnel-department-line = Организация: {$department}
 nc-personnel-read-only = Текущая должность не даёт вам кадровых полномочий.

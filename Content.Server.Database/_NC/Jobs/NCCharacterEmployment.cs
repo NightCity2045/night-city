@@ -88,6 +88,7 @@ public abstract partial class ServerDbContext
 
     partial void ConfigureNCModels(ModelBuilder modelBuilder)
     {
+        ConfigureNCPersistenceModels(modelBuilder);
         ConfigureNCBankModels(modelBuilder);
         ConfigureNCHousingModels(modelBuilder);
         ConfigureNCDungeonModels(modelBuilder);

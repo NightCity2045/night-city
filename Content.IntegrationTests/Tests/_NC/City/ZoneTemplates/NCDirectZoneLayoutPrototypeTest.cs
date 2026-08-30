@@ -9,9 +9,12 @@ using System.Numerics;
 using System.Threading;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
+using Content.Server.GameTicking;
 using Content.Server._NC.City.ZoneTemplates;
 using Content.Server._NC.Housing;
 using Content.Server._NC.Housing.Components;
+using Content.Server._NC.LivingCity.Housing;
+using Content.Server._NC.LivingCity.Time;
 using Content.Server._NC.Missions;
 using Content.Server._NC.ZLevels.Core;
 using Content.Server.Database;
@@ -25,6 +28,7 @@ using Content.Shared._NC.Missions.Prototypes;
 using Content.Shared._NC.Housing.Components;
 using Content.Shared._NC.Housing.Prototypes;
 using Content.Shared._NC.Identity;
+using Content.Shared._NC.LivingCity.Housing;
 using Content.Shared._NC.Missions;
 using Content.Shared.Maps;
 using Content.Shared.CCVar;
@@ -56,6 +60,65 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
           maximumParticipants: 1
           runDuration: 2s
           evacuationTime: 1s
+        - type: ncZoneSet
+          id: NCZoneTemplateIntegrationZones
+          networkId: 4da240d7-48ad-4f95-ae96-aeb7b58b855d
+          zones:
+          - id: 33ec6662-1362-4a4d-a24e-3377dfaf0e80
+            kind: District
+            name: Template Test District
+            geometry:
+            - kind: Volume
+              global: true
+              vertices:
+              - -10,10
+              - 10,10
+              - 10,32
+              - -10,32
+          - id: 85b1e2e2-6bea-4203-9621-106fd901d814
+            kind: Building
+            parent: 33ec6662-1362-4a4d-a24e-3377dfaf0e80
+            name: Template Test Building
+            geometry:
+            - kind: Volume
+              minZ: 0
+              maxZ: 1
+              vertices:
+              - -6,16
+              - 6,16
+              - 6,28
+              - -6,28
+          - id: 67566dd3-93b9-4ec6-a823-772e5fc376fd
+            kind: Apartment
+            parent: 85b1e2e2-6bea-4203-9621-106fd901d814
+            name: Template Test Apartment
+            geometry:
+            - kind: Polygon
+              z: 0
+              vertices:
+              - -4,21
+              - 1,21
+              - 1,26
+              - -4,26
+          - id: 8d7b2c44-9a31-4f67-b8e2-6c5d4a3f1808
+            kind: MissionSlot
+            parent: 85b1e2e2-6bea-4203-9621-106fd901d814
+            name: Template Test Mission Slot
+            geometry:
+            - kind: Polygon
+              z: 0
+              vertices:
+              - -4,18
+              - 4,18
+              - 4,26
+              - -4,26
+            - kind: Polygon
+              z: 1
+              vertices:
+              - -4,18
+              - 4,18
+              - 4,26
+              - -4,26
         """;
 
     private static readonly ProtoId<NCZoneTemplatePrototype> ApartmentLayout = "NCApartmentLayout5x5";
@@ -65,7 +128,9 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
         "NCMissionExpiryIntegration";
     private static readonly ProtoId<NCPropertyListingPrototype> ApartmentListing = "NCGlen1Apartment01";
     private static readonly NCZNetworkId CityNetworkId =
-        new(Guid.Parse("f7466602-81be-4ad9-9338-9c181a31e552"));
+        new(Guid.Parse("4da240d7-48ad-4f95-ae96-aeb7b58b855d"));
+    private static readonly NCBuildingId ApartmentBuildingId =
+        new(new NCZoneId(Guid.Parse("85b1e2e2-6bea-4203-9621-106fd901d814")));
     private static readonly NCZoneId ApartmentZoneId =
         new(Guid.Parse("67566dd3-93b9-4ec6-a823-772e5fc376fd"));
     private static readonly NCZoneId MissionZoneId =
@@ -106,7 +171,7 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
             Assert.That(listing.Interiors[0].RentPolicy.Id, Is.EqualTo("StandardApartment"));
             Assert.That(prototypes.TryIndex(listing.Interiors[0].RentPolicy, out NCRentPolicyPrototype rentPolicy),
                 Is.True);
-            Assert.That(rentPolicy!.RentAmount, Is.Zero);
+            Assert.That(rentPolicy!.RentAmount, Is.EqualTo(500));
 
             Assert.That(prototypes.TryIndex(MissionLayout, out var mission), Is.True);
             Assert.That(mission!.TargetZoneId, Is.EqualTo(MissionZoneId));
@@ -535,12 +600,15 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
     {
         var server = Pair.Server;
         var entities = server.ResolveDependency<IEntityManager>();
-        var database = server.ResolveDependency<IServerDbManager>();
         var tiles = server.ResolveDependency<ITileDefinitionManager>();
         var maps = entities.System<MapSystem>();
         var zLevels = entities.System<NCZLevelsSystem>();
         var templates = entities.System<NCZoneTemplateSystem>();
         var snapshots = entities.System<NCPropertySnapshotSystem>();
+        var contents = entities.System<NCPropertyContentSnapshotSystem>();
+        var clock = entities.System<NCActiveWorldTimeSystem>();
+        var housing = entities.System<NCHousingServiceSystem>();
+        var properties = entities.System<NCPropertyRegistrySystem>();
 
         EntityUid gridUid = default;
         EntityUid residentUid = default;
@@ -575,37 +643,62 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
         });
         await WaitForState(server, templates, deploymentId, NCZoneDeploymentState.Active);
 
+        await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(
+            EventSource.Local,
+            new GameRunLevelChangedEvent(GameRunLevel.PreRoundLobby, GameRunLevel.InRound)));
+        await WaitUntil(server, () => clock.IsReady, "The active-world clock did not start.");
+        Assert.That(await housing.EnsureReadyAsync("property-content-integration-test"), Is.True);
+
         var propertyId = new NCApartmentId(ApartmentZoneId);
-        var property = await database.EnsureNCPropertyAsync(new NCPropertySeedData(
+        var registration = await properties.RegisterAsync(new NCRegisterPropertyRequest(
+            NCHousingIdentity.Command("register-property", propertyId),
             propertyId,
-            new NCBuildingId(new NCZoneId(Guid.NewGuid())),
+            ApartmentBuildingId,
             [ApartmentZoneId],
+            ApartmentListing.Id,
+            housing.Party,
             0,
-            "TestRentPolicy",
-            "TestAccessPolicy"));
-        Assert.That(property, Is.Not.Null);
-        property = await database.SetNCPropertyInteriorAsync(
-            propertyId,
-            deploymentId,
-            ApartmentLayout.Id,
-            1,
-            "active",
-            property!.Version);
-        Assert.That(property, Is.Not.Null);
+            "StandardApartment",
+            new NCPropertyStorageBudget(128, 128, 256, 512),
+            "integration-blueprint",
+            NCHousingIdentity.Correlation("register-property", propertyId),
+            AuditSource: "housing-round-initialization"));
+        Assert.That(registration.Status,
+            Is.AnyOf(NCPropertyAggregateMutationStatus.Applied, NCPropertyAggregateMutationStatus.Duplicate));
+        var property = registration.Property!;
+        var interior = await properties.UpdateAsync(new NCUpdatePropertyRequest(
+            Guid.NewGuid(),
+            property.AggregateVersion,
+            property.Snapshot with
+            {
+                ActiveDeploymentId = deploymentId,
+                CurrentTemplateId = ApartmentLayout.Id,
+                CurrentTemplateRevision = 1,
+                InteriorState = "active",
+            },
+            "living-city.property.interior-activated",
+            housing.Party,
+            Guid.NewGuid(),
+            AuditSource: "property-content-integration-test"));
+        Assert.That(interior.Status, Is.EqualTo(NCPropertyAggregateMutationStatus.Applied));
+        property = interior.Property!;
 
         await server.WaitAssertion(() =>
         {
             residentUid = entities.SpawnEntity(null, new EntityCoordinates(gridUid, new Vector2(-2.5f, 23.5f)));
-            snapshots.CaptureRoundSnapshots([new NCPropertySnapshotCapture(property!, deploymentId)]);
+            snapshots.CaptureRoundSnapshots([new NCPropertySnapshotCapture(property.Snapshot, deploymentId)]);
             Assert.That(entities.HasComponent<NCPropertyResidentItemComponent>(residentUid), Is.True);
         });
-        await snapshots.WaitForPendingSaveAsync();
+        var saveTask = snapshots.WaitForPendingSaveAsync();
+        await WaitUntil(server, () => saveTask.IsCompleted,
+            "Persistent apartment contents were not committed on the server main thread.");
+        await saveTask;
 
-        var stored = (await database.GetNCPropertySnapshotsAsync())
-            .Single(value => value.PropertyId == propertyId);
+        var stored = (await contents.GetAsync(propertyId, true))?.Snapshot;
+        Assert.That(stored, Is.Not.Null);
         Assert.Multiple(() =>
         {
-            Assert.That(stored.TemplateId, Is.EqualTo(ApartmentLayout.Id));
+            Assert.That(stored!.TemplateId, Is.EqualTo(ApartmentLayout.Id));
             Assert.That(stored.TemplateRevision, Is.EqualTo(1));
             Assert.That(stored.EntityCount, Is.GreaterThan(0));
             Assert.That(stored.ResidentEntityCount, Is.EqualTo(1));
@@ -617,7 +710,10 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
         await WaitForState(server, templates, deploymentId, NCZoneDeploymentState.Completed);
         await server.WaitAssertion(() => entities.DeleteEntity(residentUid));
 
-        await snapshots.LoadPreparedSnapshotsAsync([property!]);
+        var loadTask = snapshots.LoadPreparedSnapshotsAsync([property]);
+        await WaitUntil(server, () => loadTask.IsCompleted,
+            "Persistent apartment contents were not applied on the server main thread.");
+        await loadTask;
         NCZoneDeploymentId restoredDeployment = default;
         await server.WaitAssertion(() =>
             Assert.That(templates.TryRequestDeployment(new NCZoneDeploymentRequest(
@@ -643,7 +739,7 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
                 Is.Approximately(new Vector2(-2.5f, 23.5f)));
         });
 
-        await server.WaitAssertion(() => snapshots.ConfiscateLiveContents(property!));
+        await server.WaitAssertion(() => snapshots.ConfiscateLiveContents(property.Snapshot));
         await server.WaitRunTicks(1);
         await server.WaitAssertion(() =>
         {
@@ -662,6 +758,9 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
             Assert.That(templates.TryCloseDeployment(restoredDeployment, out var error), Is.True, error));
         await WaitForState(server, templates, restoredDeployment, NCZoneDeploymentState.Completed);
         await server.WaitAssertion(() => zLevels.DeleteMapNetwork(network));
+        await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(
+            EventSource.Local,
+            new GameRunLevelChangedEvent(GameRunLevel.InRound, GameRunLevel.PostRound)));
     }
 
     private static async Task WaitForState(
@@ -686,6 +785,25 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
 
         Assert.Fail($"Deployment {deploymentId} did not reach {expected} within 120 ticks.");
     }
+
+    private static async Task WaitUntil(
+        RobustIntegrationTest.ServerIntegrationInstance server,
+        Func<bool> predicate,
+        string failure,
+        int attempts = 180)
+    {
+        for (var i = 0; i < attempts; i++)
+        {
+            await server.WaitRunTicks(1);
+            var complete = false;
+            await server.WaitPost(() => complete = predicate());
+            if (complete)
+                return;
+        }
+
+        Assert.Fail(failure);
+    }
+
 
     private static async Task WaitForMissionState(
         RobustIntegrationTest.ServerIntegrationInstance server,

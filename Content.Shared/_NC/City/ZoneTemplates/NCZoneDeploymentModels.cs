@@ -21,6 +21,7 @@ public enum NCZoneDeploymentPurpose : byte
 {
     ApartmentInterior,
     MissionRun,
+    NightMarket,
     Administrative,
 }
 

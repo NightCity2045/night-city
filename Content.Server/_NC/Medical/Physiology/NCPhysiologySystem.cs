@@ -607,7 +607,10 @@ public sealed partial class NCPhysiologySystem : EntitySystem
             profile.DazedThreshold > 1f ||
             profile.CriticalUpdateInterval <= TimeSpan.Zero ||
             profile.ActiveBleedingUpdateInterval <= TimeSpan.Zero ||
-            profile.StableInjuredUpdateInterval <= TimeSpan.Zero)
+            profile.StableInjuredUpdateInterval <= TimeSpan.Zero ||
+            profile.MaximumScheduledBodiesPerTick <= 0 ||
+            profile.MaximumSchedulerWorkTime <= TimeSpan.Zero ||
+            profile.SchedulingPhaseWindow < TimeSpan.Zero)
         {
             throw new InvalidOperationException($"NC physiology profile {profile.ID} has invalid thresholds.");
         }

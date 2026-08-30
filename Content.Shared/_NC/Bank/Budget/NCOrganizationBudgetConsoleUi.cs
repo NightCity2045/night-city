@@ -16,8 +16,8 @@ public enum NCOrganizationBudgetConsoleUiKey : byte
 public sealed record NCOrganizationBudgetTransactionSummary(
     long Id,
     string Type,
-    int Amount,
-    int BalanceAfter,
+    long Amount,
+    long BalanceAfter,
     string ActorName,
     string Reason,
     DateTime CreatedAt);
@@ -25,13 +25,13 @@ public sealed record NCOrganizationBudgetTransactionSummary(
 [Serializable, NetSerializable]
 public sealed class NCOrganizationBudgetConsoleState(
     string organizationName,
-    int balance,
+    long balance,
     int insertedCash,
     bool canManage,
     List<NCOrganizationBudgetTransactionSummary> transactions) : BoundUserInterfaceState
 {
     public readonly string OrganizationName = organizationName;
-    public readonly int Balance = balance;
+    public readonly long Balance = balance;
     public readonly int InsertedCash = insertedCash;
     public readonly bool CanManage = canManage;
     public readonly List<NCOrganizationBudgetTransactionSummary> Transactions = transactions;

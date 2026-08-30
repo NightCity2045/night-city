@@ -13,6 +13,10 @@ public enum NCPropertyStatus : byte
     Rented,
     Delinquent,
     EvictionPending,
+    ResaleListed,
+    LegalHold,
+    Condemned,
+    Destroyed,
 }
 
 [Flags]
@@ -23,15 +27,33 @@ public enum NCPropertyPermission : ushort
     ManageCards = 1 << 1,
     ManageTenants = 1 << 2,
     OrderInterior = 1 << 3,
-    // Legacy database/card bit retained for compatibility; player rental flows never grant it.
-    Sell = 1 << 4,
-    All = Enter | ManageCards | ManageTenants | OrderInterior,
+    StoreItems = 1 << 4,
+    Renovate = 1 << 5,
+    Transfer = 1 << 6,
+    All = Enter | ManageCards | ManageTenants | OrderInterior | StoreItems | Renovate | Transfer,
 }
 
 public enum NCPropertyOccupancyKind : byte
 {
     Ownership,
     Tenancy,
+    Resident,
+    Guest,
+}
+
+public enum NCPropertyLegalState : byte
+{
+    Clear,
+    Hold,
+    Condemned,
+    Destroyed,
+}
+
+public enum NCPropertyAssetClass : byte
+{
+    Fixture,
+    IncludedAsset,
+    PersonalProperty,
 }
 
 public enum NCPropertyReleaseReason : byte
@@ -41,4 +63,17 @@ public enum NCPropertyReleaseReason : byte
     Eviction,
     LegalEvent,
     Administrative,
+}
+
+public enum NCPropertyMutationResult : byte
+{
+    Success,
+    NotFound,
+    CharacterNotFound,
+    BankAccountNotFound,
+    InsufficientFunds,
+    NotAvailable,
+    NotAuthorized,
+    Conflict,
+    InvalidRequest,
 }

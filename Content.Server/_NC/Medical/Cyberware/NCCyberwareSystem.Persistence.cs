@@ -14,6 +14,38 @@ namespace Content.Server._NC.Medical.Cyberware;
 public sealed partial class NCCyberwareSystem
 {
     /// <summary>
+    /// Returns only slot-installed modules owned by one body. This is a bounded local body-graph query used by the
+    /// Living City inventory adapter; it never performs a global entity scan.
+    /// </summary>
+    public IReadOnlyList<EntityUid> GetInstalledModuleEntities(EntityUid body, int maximum)
+    {
+        if (maximum <= 0 || !HasComp<NCMedicalBodyComponent>(body))
+            return [];
+        return CollectCyberware(body)
+            .Where(uid => TryComp<NCCyberwareComponent>(uid, out var module) && module.InstalledSlot != null)
+            .OrderBy(uid => Comp<NCCyberwareComponent>(uid).StableInstanceId)
+            .Take(maximum)
+            .ToArray();
+    }
+
+    public bool TryGetInstalledModuleEntity(EntityUid body, Guid stableInstanceId, out EntityUid module)
+    {
+        module = default;
+        if (stableInstanceId == Guid.Empty || !HasComp<NCMedicalBodyComponent>(body))
+            return false;
+        foreach (var candidate in CollectCyberware(body))
+        {
+            if (TryComp<NCCyberwareComponent>(candidate, out var state) && state.InstalledSlot != null &&
+                state.StableInstanceId == stableInstanceId)
+            {
+                module = candidate;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
     /// Captures installed slot modules in a stable semantic order. Anatomical replacements are captured by
     /// their category-keyed organ record instead and therefore cannot be duplicated here.
     /// </summary>

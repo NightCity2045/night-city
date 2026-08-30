@@ -12,7 +12,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Content.Server._NC.City.ZoneTemplates;
 using Content.Server._NC.Housing.Components;
-using Content.Server.Database;
+using Content.Server._NC.LivingCity.Housing;
 using Content.Shared._NC.City.ZoneTemplates;
 using Content.Shared._NC.City.ZoneTemplates.Components;
 using Content.Shared._NC.City.ZoneTemplates.Prototypes;
@@ -21,10 +21,13 @@ using Content.Shared._NC.City.Zones.Prototypes;
 using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.Housing.Prototypes;
+using Content.Shared._NC.Housing;
+using Content.Shared._NC.LivingCity.Housing;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Tag;
 using Robust.Server.GameObjects;
+using Robust.Shared.Asynchronous;
 using Robust.Shared.EntitySerialization;
 using Robust.Shared.EntitySerialization.Systems;
 using Robust.Shared.Map;
@@ -46,7 +49,7 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
     private static readonly ProtoId<TagPrototype> WallTag = "Wall";
 
     [Dependency] private IPrototypeManager _prototypes = default!;
-    [Dependency] private IServerDbManager _database = default!;
+    [Dependency] private NCPropertyContentSnapshotSystem _content = default!;
     [Dependency] private NCZoneTemplateSystem _templates = default!;
     [Dependency] private City.Zones.NCZoneSystem _zones = default!;
     [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
@@ -55,8 +58,9 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private TagSystem _tags = default!;
+    [Dependency] private ITaskManager _taskManager = default!;
 
-    private readonly Dictionary<NCApartmentId, NCPropertySnapshotData> _snapshots = [];
+    private readonly Dictionary<NCApartmentId, NCPropertyContentSnapshot> _snapshots = [];
     private readonly List<NCZoneGeometryInfo> _geometry = [];
     private readonly HashSet<EntityUid> _candidates = [];
     private readonly HashSet<EntityUid> _roots = [];
@@ -95,51 +99,67 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
     /// <summary>
     /// Loads durable snapshots after any previous round's writes have completed and decorates prepared templates.
     /// </summary>
-    public async Task LoadPreparedSnapshotsAsync(IReadOnlyCollection<NCPropertyData> properties)
+    public async Task LoadPreparedSnapshotsAsync(IReadOnlyCollection<NCPropertyAggregateRecord> properties)
     {
-        IsReady = false;
         try
         {
             await _pendingSave;
-            var rows = await _database.GetNCPropertySnapshotsAsync();
-            _snapshots.Clear();
-            foreach (var row in rows)
-                _snapshots[row.PropertyId] = row;
-
-            var prepared = new Dictionary<ProtoId<NCZoneTemplatePrototype>, NCZoneTemplateEntitySnapshot>();
+            var loaded = new Dictionary<NCApartmentId, NCPropertyContentSnapshot>();
             foreach (var property in properties)
             {
-                if (property.CurrentTemplateId is not { } templateId ||
-                    property.CurrentTemplateRevision is not { } revision ||
-                    !_snapshots.TryGetValue(property.PropertyId, out var snapshot) ||
-                    snapshot.FormatVersion != SnapshotFormatVersion ||
-                    snapshot.TemplateId != templateId ||
-                    snapshot.TemplateRevision != revision ||
-                    !_prototypes.TryIndex<NCZoneTemplatePrototype>(templateId, out var template) ||
-                    template.TargetZoneId != property.PropertyId.ZoneId ||
-                    !TryReadDocument(snapshot.Payload, out var document))
-                {
-                    continue;
-                }
-
-                var floors = document.Floors.ToDictionary(
-                    floor => floor.RelativeZ,
-                    floor => new NCZoneTemplateEntitySnapshotFloor(
-                        floor.RelativeZ,
-                        floor.SavedLocalOriginX,
-                        floor.SavedLocalOriginY,
-                        floor.EntityYaml));
-                prepared[new ProtoId<NCZoneTemplatePrototype>(templateId)] =
-                    new NCZoneTemplateEntitySnapshot(revision, floors);
+                var content = await _content.GetAsync(property.Snapshot.PropertyId, true);
+                if (content?.Snapshot.Present == true)
+                    loaded[property.Snapshot.PropertyId] = content.Snapshot;
             }
 
-            _templates.ReplacePreparedEntitySnapshots(prepared);
-            IsReady = true;
+            // Database continuations run on worker threads. Cache/entity changes must be applied on the Robust main
+            // thread because rebuilding a prepared template can delete and create ECS entities.
+            await RunOnMainThreadAsync(() => ApplyPreparedSnapshots(properties, loaded));
         }
         catch (Exception exception)
         {
             Log.Error($"Failed to prepare persistent apartment snapshots: {exception}");
         }
+    }
+
+    private void ApplyPreparedSnapshots(
+        IReadOnlyCollection<NCPropertyAggregateRecord> properties,
+        IReadOnlyDictionary<NCApartmentId, NCPropertyContentSnapshot> loaded)
+    {
+        _snapshots.Clear();
+        foreach (var (propertyId, snapshot) in loaded)
+            _snapshots[propertyId] = snapshot;
+
+        var prepared = new Dictionary<ProtoId<NCZoneTemplatePrototype>, NCZoneTemplateEntitySnapshot>();
+        foreach (var record in properties)
+        {
+            var property = record.Snapshot;
+            if (property.CurrentTemplateId is not { } templateId ||
+                property.CurrentTemplateRevision is not { } revision ||
+                !loaded.TryGetValue(property.PropertyId, out var snapshot) ||
+                snapshot.FormatVersion != SnapshotFormatVersion ||
+                snapshot.TemplateId != templateId ||
+                snapshot.TemplateRevision != revision ||
+                !_prototypes.TryIndex<NCZoneTemplatePrototype>(templateId, out var template) ||
+                template.TargetZoneId != property.PropertyId.ZoneId ||
+                !TryReadDocument(snapshot.Payload, out var document))
+            {
+                continue;
+            }
+
+            var floors = document.Floors.ToDictionary(
+                floor => floor.RelativeZ,
+                floor => new NCZoneTemplateEntitySnapshotFloor(
+                    floor.RelativeZ,
+                    floor.SavedLocalOriginX,
+                    floor.SavedLocalOriginY,
+                    floor.EntityYaml));
+            prepared[new ProtoId<NCZoneTemplatePrototype>(templateId)] =
+                new NCZoneTemplateEntitySnapshot(revision, floors);
+        }
+
+        _templates.ReplacePreparedEntitySnapshots(prepared);
+        IsReady = true;
     }
 
     /// <summary>
@@ -148,7 +168,7 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
     /// </summary>
     public void CaptureRoundSnapshots(IEnumerable<NCPropertySnapshotCapture> captures)
     {
-        var snapshots = new List<NCPropertySnapshotData>();
+        var snapshots = new List<NCPropertyContentSnapshot>();
         foreach (var capture in captures)
         {
             var property = capture.Property;
@@ -165,7 +185,27 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
         _pendingSave = PersistCapturesAsync(snapshots);
     }
 
-    public bool HasResidentItems(NCPropertyData property)
+    /// <summary>
+    /// Captures one live property before a mid-round legal unload or renovation. The bounded zone query runs on the
+    /// main thread; only the immutable payload is persisted asynchronously.
+    /// </summary>
+    public async Task<bool> CapturePropertySnapshotAsync(NCPropertyAggregateSnapshot property)
+    {
+        if (!TryCapture(property, out var snapshot, out var error))
+        {
+            Log.Error($"Property {property.PropertyId} snapshot was not captured: {error}");
+            return false;
+        }
+        if (!await _content.UpsertAsync(snapshot, "housing-live-content-capture"))
+            return false;
+        var persisted = await _content.GetAsync(property.PropertyId, true);
+        if (persisted?.Snapshot.Present != true)
+            return false;
+        _snapshots[property.PropertyId] = persisted.Snapshot;
+        return true;
+    }
+
+    public bool HasResidentItems(NCPropertyAggregateSnapshot property)
     {
         if (IsActiveDeployment(property.ActiveDeploymentId))
         {
@@ -179,18 +219,25 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
                snapshot.ResidentEntityCount > 0;
     }
 
-    public void ForgetSnapshot(NCPropertyData property)
+    public void ForgetSnapshot(NCPropertyAggregateSnapshot property)
     {
         _snapshots.Remove(property.PropertyId);
         if (property.CurrentTemplateId is { } templateId)
             _templates.RemovePreparedEntitySnapshot(new ProtoId<NCZoneTemplatePrototype>(templateId));
     }
 
+    public async Task DeleteSnapshotAsync(NCPropertyAggregateSnapshot property)
+    {
+        ForgetSnapshot(property);
+        if (!await _content.DeleteAsync(property.PropertyId, "housing-content-delete"))
+            Log.Error($"Canonical content snapshot for property {property.PropertyId} could not be deleted.");
+    }
+
     /// <summary>
     /// Deletes renter-owned contents from a live apartment after a completed non-payment eviction.
     /// The bounded zone lookup preserves the permanent shell, mapper deployment and all living actors/mobs.
     /// </summary>
-    public void ConfiscateLiveContents(NCPropertyData property)
+    public void ConfiscateLiveContents(NCPropertyAggregateSnapshot property)
     {
         if (property.CurrentTemplateId is not { } templateId ||
             !_prototypes.TryIndex<NCZoneTemplatePrototype>(templateId, out var template) ||
@@ -212,28 +259,72 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
         }
     }
 
-    private async Task PersistCapturesAsync(IReadOnlyCollection<NCPropertySnapshotData> captures)
+    private async Task PersistCapturesAsync(IReadOnlyCollection<NCPropertyContentSnapshot> captures)
     {
+        var failed = false;
+        var committed = new List<NCPropertyContentSnapshot>(captures.Count);
         foreach (var snapshot in captures)
         {
             try
             {
-                if (!await _database.UpsertNCPropertySnapshotAsync(snapshot))
+                if (!await _content.UpsertAsync(snapshot, "housing-round-content-capture"))
                 {
                     Log.Error($"Database rejected property {snapshot.PropertyId} snapshot; previous row was retained.");
+                    failed = true;
                     continue;
                 }
 
-                _snapshots[snapshot.PropertyId] = snapshot;
+                var persisted = await _content.GetAsync(snapshot.PropertyId, true);
+                if (persisted?.Snapshot.Present != true)
+                {
+                    Log.Error($"Property {snapshot.PropertyId} snapshot committed but could not be verified.");
+                    failed = true;
+                    continue;
+                }
+                committed.Add(persisted.Snapshot);
             }
             catch (Exception exception)
             {
                 Log.Error($"Failed to persist property {snapshot.PropertyId} snapshot: {exception}");
+                failed = true;
             }
         }
+
+        if (committed.Count != 0)
+        {
+            await RunOnMainThreadAsync(() =>
+            {
+                foreach (var snapshot in committed)
+                    _snapshots[snapshot.PropertyId] = snapshot;
+            });
+        }
+
+        if (failed)
+            throw new InvalidOperationException("At least one final property content snapshot was not durable.");
     }
 
-    private bool TryCapture(NCPropertyData property, out NCPropertySnapshotData snapshot, out string error)
+    private Task RunOnMainThreadAsync(Action action)
+    {
+        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _taskManager.RunOnMainThread(() =>
+        {
+            try
+            {
+                action();
+                completion.TrySetResult();
+            }
+            catch (Exception exception)
+            {
+                completion.TrySetException(exception);
+            }
+        });
+        return completion.Task;
+    }
+
+    private bool TryCapture(
+        NCPropertyAggregateSnapshot property,
+        out NCPropertyContentSnapshot snapshot,
+        out string error)
     {
         snapshot = default!;
         error = string.Empty;
@@ -254,6 +345,9 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
         var rootCount = 0;
         var entityCount = 0;
         var residentCount = 0;
+        var fixtureCount = 0;
+        var includedCount = 0;
+        var personalCount = 0;
         _capturing = true;
         try
         {
@@ -269,7 +363,8 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
 
                 _graph.Clear();
                 foreach (var root in _roots)
-                    CollectSerializableTree(root, property.PropertyId, _graph, ref residentCount);
+                    CollectSerializableTree(root, property.PropertyId, _graph, ref residentCount,
+                        ref fixtureCount, ref includedCount, ref personalCount);
                 entityCount += _graph.Count;
                 if (entityCount > policy.MaxTotalEntities)
                 {
@@ -314,19 +409,25 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
             return false;
         }
 
-        snapshot = new NCPropertySnapshotData(
+        snapshot = new NCPropertyContentSnapshot(
             property.PropertyId,
+            true,
             templateId,
             revision,
             SnapshotFormatVersion,
             payload,
             entityCount,
             residentCount,
-            DateTime.UtcNow);
+            fixtureCount,
+            includedCount,
+            personalCount,
+            default,
+            0,
+            Guid.Empty);
         return true;
     }
 
-    private bool TryFindLiveResidentItems(NCPropertyData property, out bool found)
+    private bool TryFindLiveResidentItems(NCPropertyAggregateSnapshot property, out bool found)
     {
         found = false;
         if (property.CurrentTemplateId is not { } templateId ||
@@ -358,7 +459,9 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
         {
             if (!Exists(uid) || IsExcludedSubtree(uid))
                 continue;
-            if (HasComp<NCPropertyResidentItemComponent>(uid) || !HasComp<NCZoneDeploymentComponent>(uid))
+            if ((TryComp<NCPropertyResidentItemComponent>(uid, out var resident) &&
+                 resident.AssetClass == NCPropertyAssetClass.PersonalProperty) ||
+                !HasComp<NCZoneDeploymentComponent>(uid))
                 return true;
 
             var children = Transform(uid).ChildEnumerator;
@@ -376,7 +479,8 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
         if (!Exists(uid) || IsExcludedSubtree(uid))
             return;
 
-        var residentContent = HasComp<NCPropertyResidentItemComponent>(uid) ||
+        var residentContent = (TryComp<NCPropertyResidentItemComponent>(uid, out var resident) &&
+                               resident.AssetClass == NCPropertyAssetClass.PersonalProperty) ||
                               !HasComp<NCZoneDeploymentComponent>(uid);
         if (residentContent && !ancestorConfiscated)
         {
@@ -393,7 +497,10 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
         EntityUid root,
         NCApartmentId propertyId,
         HashSet<EntityUid> result,
-        ref int residentCount)
+        ref int residentCount,
+        ref int fixtureCount,
+        ref int includedCount,
+        ref int personalCount)
     {
         if (!Exists(root) || IsExcludedSubtree(root))
             return;
@@ -405,11 +512,21 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
             resident.PropertyId = propertyId.ZoneId;
         }
         if (HasComp<NCPropertyResidentItemComponent>(root))
+        {
             residentCount++;
+            var classification = Comp<NCPropertyResidentItemComponent>(root).AssetClass;
+            if (classification == NCPropertyAssetClass.IncludedAsset)
+                includedCount++;
+            else
+                personalCount++;
+        }
+        else
+            fixtureCount++;
 
         var children = Transform(root).ChildEnumerator;
         while (children.MoveNext(out var child))
-            CollectSerializableTree(child, propertyId, result, ref residentCount);
+            CollectSerializableTree(child, propertyId, result, ref residentCount, ref fixtureCount,
+                ref includedCount, ref personalCount);
     }
 
     private void CollectFloorRoots(NCApartmentId propertyId, FloorContext floor, bool markResidents)
@@ -649,5 +766,5 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
 /// Couples persistent property metadata with the live round deployment that actually owns its materialized interior.
 /// </summary>
 public readonly record struct NCPropertySnapshotCapture(
-    NCPropertyData Property,
+    NCPropertyAggregateSnapshot Property,
     NCZoneDeploymentId DeploymentId);

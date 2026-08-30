@@ -57,6 +57,32 @@ public sealed partial class NCZoneOccupancySystem : EntitySystem
     }
 
     /// <summary>
+    /// Reports whether a real player observes the zone. Persistent NPC mobs must not keep an incident in the
+    /// expensive physical simulation or prevent its off-screen continuation after every player has left.
+    /// </summary>
+    public bool IsPlayerObserved(NCZoneId zoneId, out EntityUid observer)
+    {
+        observer = EntityUid.Invalid;
+        if (!TryCollectCandidates(zoneId))
+            return true;
+
+        foreach (var uid in _candidates)
+        {
+            if (!HasComp<ActorComponent>(uid) ||
+                !_coordinates.TryGetCoordinates(uid, out var coordinates) ||
+                !_zones.Contains(zoneId, coordinates))
+            {
+                continue;
+            }
+
+            observer = uid;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Collects actors and mobs that came from the persistent world rather than the active deployment.
     /// The caller supplies the result set so no internal spatial-query buffer escapes this system.
     /// </summary>

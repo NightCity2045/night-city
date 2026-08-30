@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncRumorPolicy
+  id: Default
+  maximumKnowledgePerOwner: 128
+  targetKnowledgeAfterPrune: 96
+  maximumSourceEvents: 8
+  maximumQueryCount: 32
+  maximumHopCount: 8
+  confidenceRetentionPermille: 850
+  distortionPerHop: 100
+  minimumPropagationConfidence: 100
+
+- type: ncRumorTopic
+  id: NCRumorRoutineEvent
+  stableKey: routine-event
+  defaultConfidence: 750
+  defaultPrivacy: Personal
+  lifetime: 72h
+
+- type: ncRumorTopic
+  id: NCRumorViolentIncident
+  stableKey: violent-incident
+  defaultConfidence: 850
+  defaultPrivacy: Restricted
+  lifetime: 720h
+
+- type: ncRumorTopic
+  id: NCRumorBetrayal
+  stableKey: betrayal
+  defaultConfidence: 900
+  defaultPrivacy: Secret
+  lifetime: 0s
+  critical: true
+
+- type: ncRumorTopic
+  id: NCRumorContractOutcome
+  stableKey: contract-outcome
+  defaultConfidence: 900
+  defaultPrivacy: Restricted
+  lifetime: 0s
+  critical: true
+

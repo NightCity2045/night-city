@@ -124,6 +124,17 @@
                                     </BoxContainer>
                                 </PanelContainer>
                             </ContainerButton>
+                            <ContainerButton Name="CityButton" MinHeight="86" Margin="4">
+                                <PanelContainer>
+                                    <PanelContainer.PanelOverride>
+                                        <gfx:StyleBoxFlat BackgroundColor="#201C18" BorderColor="#F0C75E" BorderThickness="0 0 0 2" />
+                                    </PanelContainer.PanelOverride>
+                                    <BoxContainer Orientation="Vertical" Margin="10 8">
+                                        <Label Text="CITY SERVICES" FontColorOverride="#FFE28D" />
+                                        <Label Text="market, property, news" FontColorOverride="#8B805F" />
+                                    </BoxContainer>
+                                </PanelContainer>
+                            </ContainerButton>
                         </GridContainer>
                     </BoxContainer>
                 </ScrollContainer>

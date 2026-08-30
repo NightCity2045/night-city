@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "seed": 2045,
+  "durationMinutes": 2880,
+  "stepMinutes": 5,
+  "maximumMaterialized": 100,
+  "foodVendorAccount": "vendor.food",
+  "accounts": {
+    "corp.workshop": 100000,
+    "vendor.food": 5000,
+    "actor.iris": 120,
+    "actor.vesper": 80
+  },
+  "actors": [
+    {
+      "id": "iris",
+      "account": "actor.iris",
+      "employerAccount": "corp.workshop",
+      "homeZone": "apartment.little-china.iris",
+      "workZone": "workshop.little-china",
+      "workStartMinute": 480,
+      "workEndMinute": 1020,
+      "travelMinutes": 30,
+      "wage": 80,
+      "mealMinute": 1140,
+      "mealCost": 10
+    },
+    {
+      "id": "vesper",
+      "account": "actor.vesper",
+      "employerAccount": "corp.workshop",
+      "homeZone": "apartment.japantown.vesper",
+      "workZone": "workshop.little-china",
+      "workStartMinute": 540,
+      "workEndMinute": 1080,
+      "travelMinutes": 45,
+      "wage": 95,
+      "mealMinute": 1200,
+      "mealCost": 12
+    }
+  ],
+  "playerFocus": [
+    {"atMinute": 0, "zone": "apartment.little-china.iris"},
+    {"atMinute": 480, "zone": "workshop.little-china"},
+    {"atMinute": 1080, "zone": "apartment.japantown.vesper"},
+    {"atMinute": 1920, "zone": "workshop.little-china"}
+  ],
+  "incidents": [
+    {"id": "street-fire", "atMinute": 600, "durationMinutes": 90, "zone": "street.little-china", "severity": 40},
+    {"id": "gang-clash", "atMinute": 2100, "durationMinutes": 120, "zone": "street.japantown", "severity": 75}
+  ]
+}

@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: BaseComputerAiAccess
+  id: NCComputerNCPDOperations
+  name: NCPD operations and dispatch console
+  description: A secured stationary terminal for assigning NCPD units and monitoring operational orders.
+  components:
+  - type: UserInterface
+    interfaces:
+      enum.NCNcpdOperationsUiKey.Key:
+        type: NCNcpdOperationsConsoleBoundUserInterface
+      enum.WiresUiKey.Key:
+        type: WiresBoundUserInterface
+  - type: ActivatableUI
+    key: enum.NCNcpdOperationsUiKey.Key
+  - type: NCNcpdOperationsConsole
+    policy: NCDefaultNcpdCommandPolicy
+  - type: Sprite
+    layers:
+    - map: ["computerLayerBody"]
+      state: computer
+    - map: ["computerLayerKeyboard"]
+      state: generic_keyboard
+    - map: ["computerLayerScreen"]
+      state: security
+    - map: ["computerLayerKeys"]
+      state: security_key
+    - map: ["enum.WiresVisualLayers.MaintenancePanel"]
+      state: generic_panel_open
+  - type: PointLight
+    radius: 1.5
+    energy: 4.0
+    color: "#4777C8"
+  - type: Computer
+    board: NCNCPDOperationsComputerCircuitboard
+  # Physical access only opens the terminal; the server still verifies persistent employment and exact rank.
+  - type: AccessReader
+    access: [[NCPDBasic]]
+
+- type: entity
+  parent: BaseComputerCircuitboard
+  id: NCNCPDOperationsComputerCircuitboard
+  name: NCPD operations and dispatch console board
+  description: A computer board for an NCPD operations and dispatch console.
+  components:
+  - type: Sprite
+    state: cpu_command
+  - type: ComputerBoard
+    prototype: NCComputerNCPDOperations

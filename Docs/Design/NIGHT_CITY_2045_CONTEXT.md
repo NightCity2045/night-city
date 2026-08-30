@@ -61,21 +61,19 @@ Important experiential goals:
 - Client prediction is for responsive interactions, never authority over money, items, health, contracts, AI, materialization, or persistent outcomes.
 - Optional AI or translation services must time out safely and degrade to deterministic behavior without blocking the server.
 
-## Persistent world and session lifecycle
+## Persistent world and round lifecycle
 
-The intended lifecycle is session-driven:
+The city is persistent but advances only while a round is active. Stopping the round freezes the authoritative world clock and every A-Life-dependent timer:
 
 ```text
 validated snapshot and journal recovery
--> controlled downtime
--> session preparation and entry
+-> restore the last active-world-time state
 -> active physical and abstract simulation
--> soft close of critical scenes
 -> transaction/event flush, snapshot, and invariant checks
--> controlled downtime
+-> frozen state with no wall-clock catch-up
 ```
 
-Downtime may advance routine payments, production, deliveries, recovery, sentences, travel, and scheduled operations. It should not silently resolve major interactive conflicts that are meant to become player-facing content.
+Offline real time never advances payments, production, deliveries, recovery, sentences, travel, relationships, incidents, or scheduled operations. A later round resumes them from the same logical point and remaining duration. Crash recovery restores committed state; it does not simulate the outage interval.
 
 Entry and exit should respect persistent state: hospitalization, imprisonment, work, home, travel, combat, custody, medical care, important inventory, and visibility. A character should not simply appear or disappear in an impossible scene.
 
@@ -107,12 +105,12 @@ The A-Life reference describes a layered, budgeted architecture rather than one 
 
 ```text
 world facts and events
--> deterministic rules and permitted capabilities
+-> permitted capabilities
 -> beliefs, desires, and utility
 -> stable BDI intention
 -> cheapest suitable planner/executor
--> server action resolution
--> ECS execution
+-> authoritative domain executor
+-> ECS or persistent-domain execution
 -> event journal, memory, and new world state
 ```
 
@@ -142,7 +140,7 @@ The first viable A-Life implementation does not depend on an LLM. The current de
 - **Economy and property:** authoritative, idempotent transactions; real accounts, debts, escrow, commodity batches, unique item identities, ownership, persistent storage, businesses, suppliers, and transport.
 - **Fixers and contracts:** contacts, credentials, clients, executors, meeting places, escrow, inventory, risk, and reputation emerge from actual relationships and resources.
 - **Crime and services:** crimes, witnesses, evidence, cases, jurisdiction, dispatch, staff, vehicles, routes, contracts, and threat thresholds are explicit. NCPD, Trauma Team, and MaxTac responses are not free spawns.
-- **Combat and medicine:** one authoritative action-resolution result feeds physical projectiles/reach, actual body region, armor layers, local trauma, wounds, bleeding, physiology, treatment, and persistent consequences. Do not create a second body graph or treat global root HP as the intended final truth.
+- **Combat and medicine:** their existing authoritative gameplay systems resolve physical projectiles/reach, actual body region, armor layers, local trauma, wounds, bleeding, physiology, treatment, and persistent consequences. A-Life may request permitted capabilities but does not introduce a central dice or rules engine. Do not create a second body graph or treat global root HP as the intended final truth.
 - **Cyberware:** participates in anatomy, integrity, diagnostics, power/EMP/maintenance, treatment, equipment, economy, and persistence; exact humanity/psychosis mechanics still require task-specific design decisions.
 - **Netrunning:** intended as real server-authoritative gameplay against located networks, credentials, nodes, and connected devices. Its action math, programs, ICE, combat integration, and UI remain design work.
 - **Agent/CitiNet:** a character-facing shell for communication, contacts, banking, work, contracts, documents, map, services, news, and rumors. Publications and notifications should trace back to real world state.
@@ -152,7 +150,7 @@ The first viable A-Life implementation does not depend on an LLM. The current de
 
 Do not treat the following as settled merely because adjacent architecture exists:
 
-- the general action-resolution algorithm, randomness, difficulty, opposed actions, critical outcomes, retries, assistance, and audit fields;
+- domain-specific action details such as combat randomness, difficulty, opposed actions, critical outcomes, retries, assistance, and audit fields; there is no central Action Resolution engine;
 - the character capability/proficiency/development model, progression, training, certification, active-time interpretation, and respec;
 - exact session timing, in-world time scale, logout/late-join edge cases, character-slot count, spectator policy, and handling of bodies/funerals;
 - economy numbers and policies such as starting capital, wage cadence, rent, taxes, credit, bankruptcy, inheritance, licensing, and prices;
@@ -164,12 +162,12 @@ Do not treat the following as settled merely because adjacent architecture exist
 
 ## Delivery approach
 
-Prefer a narrow vertical slice and gates over simultaneous construction of the end state:
+The accepted target is a semi-release, feature-complete implementation of the connected systems rather than an MVP or a sequence of product vertical slices. Engineering phases still follow dependency order, but no intermediate phase is presented as a reduced product:
 
-1. Inspect existing Robust/SS14 and `_NC` foundations.
-2. Define the smallest domain model and authority boundary needed by the current slice.
-3. Include persistence, audit, recovery, localization, UI, tests, and performance implications in the design rather than retrofitting them silently.
-4. Build one end-to-end behavior, profile and validate it, then expand.
-5. Keep future models behind neutral contracts so unresolved character progression or action resolution does not force premature coupling.
+1. Lock shared authority, identity, persistence, time, and geography contracts.
+2. Build the persistent city platform and migration path before dependent domain systems.
+3. Develop the A-Life, socioeconomic, city-operations, UI, and optional-neural tracks against the shared contracts.
+4. Include audit, recovery, localization, tests, content validation, and performance work in every phase.
+5. Merge all tracks before semi-release integration, migration rehearsal, and 24-hour soak testing.
 
-The broad reference sequence starts with repository/persistence/geography and a map vertical slice, then resolves action mechanics before systems that depend heavily on them, and adds full A-Life only after the city has real actors, resources, routes, contracts, and persistent consequences. This ordering is guidance and may be revised for the actual repository state and current development priority.
+The canonical dependency plan is maintained in `.rules/A-life/Night_City_2045_A-Life_Full_Development_Plan.md`.

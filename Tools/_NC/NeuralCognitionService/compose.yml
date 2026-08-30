@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+services:
+  neural-cognition:
+    build: .
+    restart: unless-stopped
+    environment:
+      NC_NEURAL_MODEL: ${NC_NEURAL_MODEL:-gpt-5.6-luna}
+      NC_NEURAL_REASONING_EFFORT: ${NC_NEURAL_REASONING_EFFORT:-low}
+      NC_NEURAL_MAX_OUTPUT_TOKENS: ${NC_NEURAL_MAX_OUTPUT_TOKENS:-2048}
+    networks: [night-city-private]
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+networks:
+  night-city-private:
+    # No host port is published here, but the service still needs outbound access to the OpenAI API.
+    internal: false

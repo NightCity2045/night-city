@@ -685,21 +685,40 @@ public sealed partial class NCZoneTemplateSystem
             }
 
             if (source.Marker.Direction is NCVerticalLinkDirection.Bidirectional or NCVerticalLinkDirection.SourceToTarget)
-                ConfigureVerticalEndpoint(source.Uid, source.Marker.LinkType, targetCoordinates);
+            {
+                ConfigureVerticalEndpoint(
+                    job.Id,
+                    source.Uid,
+                    source.Marker,
+                    target.Marker.LinkId,
+                    targetCoordinates);
+            }
             if (source.Marker.Direction is NCVerticalLinkDirection.Bidirectional or NCVerticalLinkDirection.TargetToSource)
-                ConfigureVerticalEndpoint(target.Uid, target.Marker.LinkType, sourceCoordinates);
+            {
+                ConfigureVerticalEndpoint(
+                    job.Id,
+                    target.Uid,
+                    target.Marker,
+                    source.Marker.LinkId,
+                    sourceCoordinates);
+            }
         }
 
         return true;
     }
 
     private void ConfigureVerticalEndpoint(
+        NCZoneDeploymentId deploymentId,
         EntityUid uid,
-        NCVerticalLinkType linkType,
+        NCTemplateVerticalLinkMarkerComponent marker,
+        string targetLinkId,
         NCMapCoordinates target)
     {
         var resolved = EnsureComp<NCResolvedVerticalLinkComponent>(uid);
-        resolved.LinkType = linkType;
+        resolved.ScopeId = deploymentId.Value;
+        resolved.LinkId = marker.LinkId;
+        resolved.TargetLinkId = targetLinkId;
+        resolved.LinkType = marker.LinkType;
         resolved.Target = target;
     }
 

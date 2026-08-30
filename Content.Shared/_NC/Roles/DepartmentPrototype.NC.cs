@@ -42,7 +42,8 @@ public sealed partial class DepartmentPrototype
     public List<ProtoId<JobPrototype>> NCPersonnelManagers { get; private set; } = new();
 
     /// <summary>
-    /// Persistent position limits. Missing jobs are not available through a personnel console.
+    /// Player-character position limits. Persistent A-Life employees are counted by the Living City workforce
+    /// projection and never consume these slots. Missing jobs are not available through a personnel console.
     /// </summary>
     [DataField("ncPositionLimits")]
     public Dictionary<ProtoId<JobPrototype>, int> NCPositionLimits { get; private set; } = new();

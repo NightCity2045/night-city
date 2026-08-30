@@ -33,4 +33,11 @@ public sealed partial class NCBankConfigurationPrototype : IPrototype
 
     [DataField]
     public ProtoId<StackPrototype> CurrencyStack = "Credit";
+
+    /// <summary>
+    /// Canonical ledger currency associated with the physical currency stack.
+    /// </summary>
+    [DataField]
+    public string CurrencyId = "EB";
+
 }

@@ -21,7 +21,7 @@ public sealed partial class NCPropertyConsoleWindow : FancyWindow
 
     private NCPropertyConsoleListingSummary? _selected;
     private int _pageIndex;
-    private int _balance;
+    private long _balance;
     private bool _hasBankAccount;
     private bool _updating;
 
@@ -157,10 +157,10 @@ public sealed partial class NCPropertyConsoleWindow : FancyWindow
         RentButton.Visible = selected.Status == NCPropertyStatus.Available;
         EndLeaseButton.Visible = selected.IsTenant;
         InvokeInteriorButton.Visible = selected.IsTenant && selected.CurrentInterior != null;
-        NextRentDueLabel.Visible = selected.IsTenant && selected.NextRentDueUnixSeconds != null;
-        NextRentDueLabel.Text = selected.NextRentDueUnixSeconds is { } due
+        NextRentDueLabel.Visible = selected.IsTenant && selected.NextRentDueInSeconds != null;
+        NextRentDueLabel.Text = selected.NextRentDueInSeconds is { } due
             ? Loc.GetString("nc-property-console-next-rent",
-                ("date", DateTimeOffset.FromUnixTimeSeconds(due).LocalDateTime.ToString("g")))
+                ("date", TimeSpan.FromSeconds(Math.Max(0, due)).ToString("g")))
             : string.Empty;
         UpdateRentDetails();
         UpdateButtons();

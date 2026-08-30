@@ -1,0 +1,193 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncEconomicAssetPolicy
+  id: Default
+  maximumBatchesPerStockNode: 512
+  maximumItemsPerStockNode: 512
+  maximumSourceEvents: 16
+  maximumStableKeyLength: 128
+  maximumSerialLength: 128
+  maximumQueryCount: 100
+
+- type: ncEconomicPricingPolicy
+  id: Default
+  currencyId: eb
+  maximumQuoteLifetime: 10m
+  maximumReservationLifetime: 5m
+  minimumMultiplierBasisPoints: 2500
+  maximumMultiplierBasisPoints: 40000
+  scarcityWeightBasisPoints: 4000
+  demandWeightBasisPoints: 2500
+  dangerWeightBasisPoints: 1500
+  relationshipWeightBasisPoints: -2000
+  legalityWeightBasisPoints: 2000
+  urgencyWeightBasisPoints: 2000
+  feeBasisPoints: 0
+  taxBasisPoints: 0
+  feeReceiverServiceId: ""
+  taxReceiverServiceId: ""
+  maximumQuoteTotal: 1000000000
+
+# Initial server-authored balance values; clients never submit these amounts.
+- type: ncCommodity
+  id: NCCommodityTraumaAnalgesic
+  stableKey: pharmaceutical.trauma-analgesic
+  unit: Milliliter
+  domain: Pharmaceutical
+  divisible: true
+  maximumBatchQuantity: 100000
+  defaultQuality: 1000
+  shelfLife: 72h
+  baseUnitPrice: 2
+  legalStatus: Restricted
+  allowsAggregatedDemand: true
+  materializedPrototype: NCSyringeTraumaAnalgesic
+  materializedUnitsPerEntity: 10
+  materializedSolutionId: injector
+  materializedReagent: NCTraumaAnalgesic
+
+- type: ncCommodity
+  id: NCCommoditySyntheticOxygenCarrier
+  stableKey: biotech.synthetic-oxygen-carrier
+  unit: Milliliter
+  domain: Biotech
+  divisible: true
+  maximumBatchQuantity: 100000
+  defaultQuality: 1000
+  shelfLife: 48h
+  baseUnitPrice: 5
+  legalStatus: Restricted
+  allowsAggregatedDemand: true
+  materializedPrototype: NCSyringeSyntheticOxygenCarrier
+  materializedUnitsPerEntity: 10
+  materializedSolutionId: injector
+  materializedReagent: NCSyntheticOxygenCarrier
+
+- type: ncCommodity
+  id: NCCommodityPharmaceuticalPrecursor
+  stableKey: pharmaceutical.precursor-compound
+  unit: Milliliter
+  domain: Pharmaceutical
+  divisible: true
+  maximumBatchQuantity: 1000000
+  defaultQuality: 900
+  shelfLife: 168h
+  baseUnitPrice: 1
+  legalStatus: Restricted
+  allowsAggregatedDemand: true
+
+- type: ncCommodity
+  id: NCCommodityBiotechCulture
+  stableKey: biotech.synthetic-culture
+  unit: Milliliter
+  domain: Biotech
+  divisible: true
+  maximumBatchQuantity: 1000000
+  defaultQuality: 900
+  shelfLife: 24h
+  baseUnitPrice: 3
+  legalStatus: Restricted
+  allowsAggregatedDemand: true
+
+- type: ncCommodity
+  id: NCCommodityIndustrialSteel
+  stableKey: industrial.steel
+  unit: Gram
+  domain: Generic
+  divisible: true
+  maximumBatchQuantity: 1000000
+  defaultQuality: 850
+  baseUnitPrice: 4
+  allowsAggregatedDemand: true
+  materializedPrototype: SheetSteel1
+  materializedUnitsPerEntity: 1
+
+- type: ncCommodity
+  id: NCCommodityIndustrialPolymer
+  stableKey: industrial.polymer
+  unit: Gram
+  domain: Generic
+  divisible: true
+  maximumBatchQuantity: 1000000
+  defaultQuality: 850
+  baseUnitPrice: 3
+  allowsAggregatedDemand: true
+  materializedPrototype: SheetPlastic1
+  materializedUnitsPerEntity: 1
+
+# The medical profile remains the gameplay authority; this definition owns only trade identity and provenance.
+- type: ncItemDefinition
+  id: NCItemCyberwareNeuralLinkMk1
+  displayName: nc-economic-item-neural-link-mk1
+  stableKey: cyberware.neural-link-mk1
+  domain: Cyberware
+  domainPrototypeId: NCNeuralLinkMk1
+  materializedPrototype: NCImplantNeuralLinkMk1
+  basePrice: 500
+  defaultCondition: 1000
+  legalStatus: Restricted
+  serialRequired: true
+  maximumInstalledParts: 0
+
+- type: ncItemDefinition
+  id: NCItemWeaponBudgetPistolMk1
+  displayName: nc-economic-item-budget-pistol-mk1
+  stableKey: weapon.budget-pistol-mk1
+  domain: WeaponAssembly
+  domainPrototypeId: WeaponPistolMk58
+  materializedPrototype: WeaponPistolMk58
+  basePrice: 100
+  defaultCondition: 1000
+  legalStatus: Restricted
+  serialRequired: true
+  maximumInstalledParts: 1
+  allowedInstalledPartDefinitions: [ NCItemWeaponPartBudgetOptic ]
+
+- type: ncItemDefinition
+  id: NCItemWeaponPartBudgetOptic
+  displayName: nc-economic-item-budget-optic
+  stableKey: weapon-part.budget-optic
+  domain: WeaponAssembly
+  domainPrototypeId: budget-optic
+  basePrice: 25
+  defaultCondition: 1000
+  legalStatus: Legal
+  serialRequired: true
+  maximumInstalledParts: 0
+
+- type: ncEconomicService
+  id: NCEconomicServiceCyberwareStreetMaintenance
+  displayName: nc-economic-service-cyberware-street-maintenance
+  stableKey: service.cyberware.street-maintenance
+  fulfillmentKey: cyberware.street-maintenance
+  basePrice: 100
+  expectedDuration: 15m
+  legalStatus: Restricted
+
+- type: ncEconomicService
+  id: NCEconomicServiceMedicalAftercare
+  displayName: nc-economic-service-medical-aftercare
+  stableKey: service.medical.aftercare
+  fulfillmentKey: medical.aftercare
+  basePrice: 150
+  expectedDuration: 30m
+  legalStatus: Legal
+
+- type: ncEconomicService
+  id: NCEconomicServicePropertyRepair
+  displayName: nc-economic-service-property-repair
+  stableKey: service.property.repair
+  fulfillmentKey: property.repair
+  basePrice: 250
+  expectedDuration: 1h
+  legalStatus: Legal
+
+- type: ncEconomicInformationAccess
+  id: NCInformationPharmaceuticalStockAvailability
+  stableKey: information.pharmaceutical-stock-availability
+  grantKey: information.pharmaceutical-stock-availability
+  basePrice: 25
+  reusable: false
+  legalStatus: Legal

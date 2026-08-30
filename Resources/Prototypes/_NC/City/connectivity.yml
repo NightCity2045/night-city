@@ -1,0 +1,113 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncCityTraversalProfile
+  id: NCTraversalStairs
+  travelModes: Pedestrian, Patrol, Emergency
+  baseTravelSeconds: 8
+  capacityPerMinute: 90
+
+- type: ncCityTraversalProfile
+  id: NCTraversalLadder
+  travelModes: Pedestrian, Patrol, Emergency
+  baseTravelSeconds: 14
+  capacityPerMinute: 30
+
+- type: ncCityTraversalProfile
+  id: NCTraversalElevator
+  travelModes: Pedestrian, Patrol, Emergency
+  baseTravelSeconds: 18
+  capacityPerMinute: 45
+
+- type: ncCityTraversalProfile
+  id: NCTraversalShaft
+  travelModes: Emergency
+  baseTravelSeconds: 25
+  capacityPerMinute: 10
+  threatCost: 15
+
+- type: ncCityTraversalProfile
+  id: NCTraversalPortal
+  travelModes: Pedestrian, Patrol, Emergency
+  baseTravelSeconds: 2
+  capacityPerMinute: 120
+
+- type: ncCityTraversalProfile
+  id: NCTraversalDoor
+  travelModes: Pedestrian, Patrol, Emergency
+  baseTravelSeconds: 2
+  capacityPerMinute: 90
+
+- type: ncCityTraversalProfile
+  id: NCTraversalOpenBoundary
+  travelModes: Pedestrian, Patrol, Emergency
+  baseTravelSeconds: 1
+  capacityPerMinute: 180
+
+- type: ncCityConnectivityRules
+  id: NCDefaultCityConnectivity
+  verticalProfiles:
+    Stairs: NCTraversalStairs
+    Ladder: NCTraversalLadder
+    Elevator: NCTraversalElevator
+    Shaft: NCTraversalShaft
+    Portal: NCTraversalPortal
+  doorProfile: NCTraversalDoor
+  openBoundaryProfile: NCTraversalOpenBoundary
+  doorDetectionRadius: 0.85
+  # Mapper brush strokes are coalesced, while paused mapping grids remain deferred until gameplay resumes.
+  structuralRebuildDebounce: 1.5s
+  pausedGridPollInterval: 1s
+  maximumRebuildsPerUpdate: 1
+
+- type: ncCitySpawnCandidateProfile
+  id: NCPedestrianSpawnCandidates
+  kind: Pedestrian
+  travelMode: Pedestrian
+  allowedZoneContexts: [Street, Building, Apartment, MissionSlot]
+  minimumSpacing: 2
+  minimumClearance: 0.35
+  portalExclusionRadius: 1
+  maximumPerRoom: 32
+
+- type: ncCitySpawnCandidateProfile
+  id: NCVehicleSpawnCandidates
+  kind: Vehicle
+  travelMode: Vehicle
+  allowedZoneContexts: [Street]
+  minimumSpacing: 8
+  minimumClearance: 1.5
+  portalExclusionRadius: 3
+  maximumPerRoom: 8
+
+- type: ncCitySpawnCandidateProfile
+  id: NCPatrolSpawnCandidates
+  kind: Patrol
+  travelMode: Patrol
+  allowedZoneContexts: [Street, Building]
+  minimumSpacing: 4
+  minimumClearance: 0.5
+  portalExclusionRadius: 1.5
+  maximumPerRoom: 16
+
+- type: ncCitySpawnCandidateProfile
+  id: NCIncidentSpawnCandidates
+  kind: Incident
+  travelMode: Emergency
+  allowedZoneContexts: [Street, Building, MissionSlot]
+  minimumSpacing: 3
+  minimumClearance: 0.75
+  portalExclusionRadius: 2
+  maximumPerRoom: 16
+
+- type: ncCityConnectivityValidation
+  id: NCDefaultCityConnectivityValidation
+  requiresNavigationRoom: [Street, Building, Apartment, MissionSlot]
+  requiresTraversableExit: [Street, Building, Apartment, MissionSlot]
+  requiresStreetReachability: [Building, Apartment, MissionSlot]
+  requiredSpawnProfiles:
+    Street: [NCPedestrianSpawnCandidates, NCPatrolSpawnCandidates, NCIncidentSpawnCandidates]
+    Building: [NCPedestrianSpawnCandidates]
+    Apartment: [NCPedestrianSpawnCandidates]
+    MissionSlot: [NCPedestrianSpawnCandidates, NCIncidentSpawnCandidates]

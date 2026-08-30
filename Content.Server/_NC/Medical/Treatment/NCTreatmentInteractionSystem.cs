@@ -4,6 +4,8 @@
 
 using System.Linq;
 using Content.Server._NC.Combat.Targeting;
+using Content.Server._NC.LivingCity.Actors;
+using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
@@ -41,6 +43,7 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
     [Dependency] private SharedChargesSystem _charges = default!;
     [Dependency] private NCTargetingSelectionSystem _targeting = default!;
     [Dependency] private NCTreatmentSystem _treatment = default!;
+    [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
 
     public override void Initialize()
     {
@@ -83,6 +86,9 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
 
         if (_doAfter.TryStartDoAfter(doAfter))
         {
+            _dematerialization.BeginBlocker(
+                patient,
+                NCCityDematerializationBlockerFlags.PlayerTreatment);
             _popup.PopupEntity(Loc.GetString("nc-medical-treatment-started"), patient, user);
             return true;
         }
@@ -92,6 +98,9 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
 
     private void OnManualPressureDoAfter(Entity<NCMedicalBodyComponent> patient, ref NCTreatmentDoAfterEvent args)
     {
+        _dematerialization.EndBlocker(
+            patient.Owner,
+            NCCityDematerializationBlockerFlags.PlayerTreatment);
         if (args.Handled || args.Cancelled || args.Target != patient.Owner ||
             !_prototypes.TryIndex(args.Capability, out NCTreatmentCapabilityPrototype? capability) ||
             capability.Kind != NCTreatmentKind.Pressure)
@@ -129,22 +138,78 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
             return;
 
         args.Handled = true;
-        if (!TryValidate(item, args.User, patient, item.Comp.Capability, out var capability, true) ||
-            !TrySelectWound(args.User, patient, capability.Kind, out var woundId))
+        if (!TryStartItemTreatment(
+                args.User,
+                item.Owner,
+                patient,
+                out _,
+                out _,
+                out _,
+                out _))
         {
             _popup.PopupEntity(Loc.GetString("nc-medical-treatment-no-target"), patient, args.User);
-            return;
+        }
+    }
+
+    /// <summary>
+    /// Checks a real treatment item before an NPC moves it from worn storage into a hand. This is a bounded
+    /// inventory-planning query; the authoritative action still revalidates held state when it starts and ends.
+    /// </summary>
+    public bool CanUseItemTreatment(
+        EntityUid user,
+        EntityUid item,
+        EntityUid patient,
+        out NCTreatmentKind kind,
+        out Guid woundId)
+    {
+        kind = default;
+        woundId = default;
+        if (!TryComp<NCTreatmentItemComponent>(item, out var itemComponent) ||
+            !TryValidate((item, itemComponent), user, patient, itemComponent.Capability, out var capability, true, false) ||
+            !TrySelectWound(user, patient, capability.Kind, out woundId, capability))
+        {
+            return false;
         }
 
-        var resolutionId = NCActionResolutionId.New();
+        kind = capability.Kind;
+        return true;
+    }
+
+    /// <summary>
+    /// Starts the same item-backed treatment path for players and autonomous medical workers. No caller may
+    /// bypass held-item, range, resource, wound-selection, DoAfter or authoritative treatment validation.
+    /// </summary>
+    public bool TryStartItemTreatment(
+        EntityUid user,
+        EntityUid item,
+        EntityUid patient,
+        out NCActionResolutionId resolutionId,
+        out Guid woundId,
+        out NCTreatmentKind kind,
+        out TimeSpan duration)
+    {
+        resolutionId = default;
+        woundId = default;
+        kind = default;
+        duration = TimeSpan.Zero;
+        if (!TryComp<NCTreatmentItemComponent>(item, out var itemComponent) ||
+            !TryValidate((item, itemComponent), user, patient, itemComponent.Capability, out var capability, true, true) ||
+            !TrySelectWound(user, patient, capability.Kind, out woundId, capability))
+        {
+            return false;
+        }
+
+        resolutionId = NCActionResolutionId.New();
+        kind = capability.Kind;
+        duration = capability.ApplicationDuration;
         var doAfter = new DoAfterArgs(
             EntityManager,
-            args.User,
+            user,
             capability.ApplicationDuration,
-            new NCTreatmentDoAfterEvent(resolutionId, woundId, item.Comp.Capability),
-            item.Owner,
+            new NCTreatmentDoAfterEvent(resolutionId, woundId, itemComponent.Capability),
+            item,
             target: patient,
-            used: item.Owner)
+            used: item)
         {
             NeedHand = true,
             BreakOnMove = true,
@@ -153,16 +218,31 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
         };
 
         if (_doAfter.TryStartDoAfter(doAfter))
-            _popup.PopupEntity(Loc.GetString("nc-medical-treatment-started"), patient, args.User);
+        {
+            _dematerialization.BeginBlocker(
+                patient,
+                NCCityDematerializationBlockerFlags.PlayerTreatment);
+            _popup.PopupEntity(Loc.GetString("nc-medical-treatment-started"), patient, user);
+            return true;
+        }
+
+        resolutionId = default;
+        return false;
     }
 
     private void OnDoAfter(Entity<NCTreatmentItemComponent> item, ref NCTreatmentDoAfterEvent args)
     {
+        if (args.Target is { } blockerTarget)
+        {
+            _dematerialization.EndBlocker(
+                blockerTarget,
+                NCCityDematerializationBlockerFlags.PlayerTreatment);
+        }
         if (args.Handled || args.Cancelled || args.Target is not { } patient || args.Used != item.Owner)
             return;
 
         args.Handled = true;
-        if (!TryValidate(item, args.User, patient, args.Capability, out var capability, true))
+        if (!TryValidate(item, args.User, patient, args.Capability, out var capability, true, true))
         {
             _popup.PopupEntity(Loc.GetString("nc-medical-interaction-invalidated"), patient, args.User);
             return;
@@ -206,7 +286,8 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
         EntityUid user,
         EntityUid patient,
         NCTreatmentKind kind,
-        out Guid woundId)
+        out Guid woundId,
+        NCTreatmentCapabilityPrototype? itemCapability = null)
     {
         woundId = default;
         if (!TryComp<NCWoundContainerComponent>(patient, out var wounds))
@@ -221,6 +302,15 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
         {
             if (!CanReceive(wound, kind))
                 continue;
+
+            // A tourniquet item can only target zones declared by its treatment profile. Filtering here avoids
+            // choosing an un-treatable torso wound while a valid limb wound exists on the same patient.
+            if (kind == NCTreatmentKind.Tourniquet && itemCapability != null &&
+                (!_prototypes.TryIndex(itemCapability.Profile, out NCTreatmentProfilePrototype? treatmentProfile) ||
+                 !treatmentProfile.TourniquetZoneRoots.ContainsKey(wound.TargetZone)))
+            {
+                continue;
+            }
 
             if (kind == NCTreatmentKind.Splint)
             {
@@ -288,7 +378,8 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
         EntityUid patient,
         ProtoId<NCTreatmentCapabilityPrototype> expectedCapability,
         out NCTreatmentCapabilityPrototype capability,
-        bool requireResource)
+        bool requireResource,
+        bool requireHeld)
     {
         capability = default!;
         return !Deleted(user) &&
@@ -298,7 +389,7 @@ public sealed partial class NCTreatmentInteractionSystem : EntitySystem
                _prototypes.TryIndex(item.Comp.Capability, out capability!) &&
                capability.ApplicationDuration > TimeSpan.Zero &&
                capability.InteractionRange > 0f &&
-               _hands.IsHolding(user, item.Owner) &&
+               (!requireHeld || _hands.IsHolding(user, item.Owner)) &&
                _interaction.InRangeUnobstructed(user, patient, capability.InteractionRange) &&
                (!requireResource || HasResource(item.Owner, capability));
     }

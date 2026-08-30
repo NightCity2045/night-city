@@ -4,6 +4,7 @@
 
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.City.Zones.Serialization;
+using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.GameStates;
 
 namespace Content.Shared._NC.Housing.Components;
@@ -32,5 +33,5 @@ public sealed partial class NCPropertyKeyCardComponent : Component
 
     [DataField]
     [AutoNetworkedField]
-    public DateTime? ValidUntil;
+    public NCActiveWorldTime? ValidUntil;
 }

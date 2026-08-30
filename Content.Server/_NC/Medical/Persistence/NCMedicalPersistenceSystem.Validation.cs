@@ -666,6 +666,8 @@ public sealed partial class NCMedicalPersistenceSystem
             NCMedicalStableOwnerKind.Unassigned => key.Length == 0,
             NCMedicalStableOwnerKind.PlayerCharacter =>
                 int.TryParse(key, out var profileId) && profileId > 0,
+            NCMedicalStableOwnerKind.PersistentActor =>
+                Guid.TryParse(key, out var actorId) && actorId != Guid.Empty,
             _ => false,
         };
     }

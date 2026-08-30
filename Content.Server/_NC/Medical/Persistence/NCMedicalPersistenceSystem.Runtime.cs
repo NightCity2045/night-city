@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Globalization;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,6 +28,7 @@ namespace Content.Server._NC.Medical.Persistence;
 public sealed partial class NCMedicalPersistenceSystem
 {
     private static readonly TimeSpan SaveDebounce = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan SaveMaximumDeferral = TimeSpan.FromSeconds(10);
     private static readonly TimeSpan SaveRetryDelay = TimeSpan.FromSeconds(5);
 
     [Dependency] private IServerDbManager _database = default!;
@@ -37,9 +39,15 @@ public sealed partial class NCMedicalPersistenceSystem
     private readonly Dictionary<NCCharacterId, EntityUid> _boundCharacters = [];
     private readonly Dictionary<NCCharacterId, OwnerSaveState> _saveStates = [];
     private readonly Dictionary<EntityUid, TimeSpan> _saveDue = [];
+    private readonly Dictionary<EntityUid, TimeSpan> _saveDirtySince = [];
     private readonly Dictionary<NCCharacterId, TimeSpan> _retryDue = [];
     private readonly HashSet<EntityUid> _loadingBodies = [];
     private readonly HashSet<EntityUid> _suppressPersistenceEvents = [];
+    private readonly List<EntityUid> _duePlayerWrites = [];
+    private readonly List<NCCharacterId> _dueRetries = [];
+    private long _capturedPlayerWrites;
+    private double _lastCaptureMilliseconds;
+    private double _maximumCaptureMilliseconds;
 
     public override void Initialize()
     {
@@ -58,19 +66,28 @@ public sealed partial class NCMedicalPersistenceSystem
     {
         base.Update(frameTime);
         var now = _timing.CurTime;
-        foreach (var body in _saveDue
-                     .Where(entry => entry.Value <= now)
-                     .Select(entry => entry.Key)
-                     .ToArray())
+        // Reuse bounded scratch lists. Damage schedules a save, so allocating two LINQ pipelines on every
+        // server tick while that save is pending creates avoidable GC pressure exactly during combat.
+        _duePlayerWrites.Clear();
+        foreach (var (body, due) in _saveDue)
+        {
+            if (due <= now)
+                _duePlayerWrites.Add(body);
+        }
+        foreach (var body in _duePlayerWrites)
         {
             _saveDue.Remove(body);
+            _saveDirtySince.Remove(body);
             CapturePlayerWrite(body, allowTerminating: false);
         }
 
-        foreach (var characterId in _retryDue
-                     .Where(entry => entry.Value <= now)
-                     .Select(entry => entry.Key)
-                     .ToArray())
+        _dueRetries.Clear();
+        foreach (var (characterId, due) in _retryDue)
+        {
+            if (due <= now)
+                _dueRetries.Add(characterId);
+        }
+        foreach (var characterId in _dueRetries)
         {
             _retryDue.Remove(characterId);
             if (_saveStates.TryGetValue(characterId, out var state))
@@ -173,17 +190,22 @@ public sealed partial class NCMedicalPersistenceSystem
             return;
         }
 
-        var due = _timing.CurTime + SaveDebounce;
-        QueueDebouncedSave(body, due);
+        QueueDebouncedSave(body, _timing.CurTime);
     }
 
-    private void QueueDebouncedSave(EntityUid body, TimeSpan due)
+    private void QueueDebouncedSave(EntityUid body, TimeSpan now)
     {
-        // Coalesce a burst at its earliest deadline. Long-running healing/pharmacology events must not keep
-        // postponing persistence forever by repeatedly moving a trailing-edge debounce into the future.
-        if (!_saveDue.TryGetValue(body, out var existingDue) || due < existingDue)
-            _saveDue[body] = due;
+        // Combat damage is a burst, not a request to serialize the complete medical graph every two seconds.
+        // Use a trailing edge while retaining a maximum durability bound for long-running bleeding or treatment.
+        if (!_saveDirtySince.TryGetValue(body, out var dirtySince))
+        {
+            dirtySince = now;
+            _saveDirtySince[body] = dirtySince;
+        }
+        _saveDue[body] = Min(now + SaveDebounce, dirtySince + SaveMaximumDeferral);
     }
+
+    private static TimeSpan Min(TimeSpan left, TimeSpan right) => left <= right ? left : right;
 
     private void OnMedicalBodyTerminating(
         Entity<NCMedicalBodyComponent> entity,
@@ -237,6 +259,7 @@ public sealed partial class NCMedicalPersistenceSystem
         bool invalidIsError = true)
     {
         _saveDue.Remove(body);
+        _saveDirtySince.Remove(body);
         CapturePlayerWrite(body, allowTerminating, invalidIsError);
     }
 
@@ -252,8 +275,15 @@ public sealed partial class NCMedicalPersistenceSystem
             return;
         }
 
+        var captureStarted = Stopwatch.GetTimestamp();
         var snapshot = SerializeMedicalState(body, allowTerminating);
-        if (snapshot == null || !TryEncodeSnapshot(snapshot, out var payload))
+        var payload = string.Empty;
+        var encoded = snapshot != null && TryEncodeSnapshot(snapshot, out payload);
+        var captureMilliseconds = Stopwatch.GetElapsedTime(captureStarted).TotalMilliseconds;
+        _capturedPlayerWrites++;
+        _lastCaptureMilliseconds = captureMilliseconds;
+        _maximumCaptureMilliseconds = Math.Max(_maximumCaptureMilliseconds, captureMilliseconds);
+        if (!encoded || snapshot == null)
         {
             var message = $"Refused to persist invalid medical state for character {binding.CharacterId.Value}.";
             if (invalidIsError)
@@ -269,6 +299,31 @@ public sealed partial class NCMedicalPersistenceSystem
             payload,
             capturedUtc);
         StartNextWrite(binding.CharacterId, binding.State);
+    }
+
+    /// <summary>
+    /// Exposes cheap counters to the F7 monitor without serializing another medical graph.
+    /// </summary>
+    public NCMedicalPersistenceRuntimeCounters GetRuntimeCounters()
+    {
+        var queuedWrites = 0;
+        var inFlightWrites = 0;
+        foreach (var state in _saveStates.Values)
+        {
+            if (state.Queued != null)
+                queuedWrites++;
+            if (state.InFlight)
+                inFlightWrites++;
+        }
+
+        return new NCMedicalPersistenceRuntimeCounters(
+            _playerBindings.Count,
+            _saveDue.Count,
+            queuedWrites,
+            inFlightWrites,
+            _capturedPlayerWrites,
+            _lastCaptureMilliseconds,
+            _maximumCaptureMilliseconds);
     }
 
     private void StartNextWrite(NCCharacterId characterId, OwnerSaveState state)
@@ -356,6 +411,7 @@ public sealed partial class NCMedicalPersistenceSystem
     {
         _loadingBodies.Remove(body);
         _saveDue.Remove(body);
+        _saveDirtySince.Remove(body);
         _playerBindings.Remove(body);
         if (_boundCharacters.GetValueOrDefault(binding.CharacterId) == body)
             _boundCharacters.Remove(binding.CharacterId);
@@ -635,3 +691,12 @@ public sealed partial class NCMedicalPersistenceSystem
         string Payload,
         DateTime CapturedUtc);
 }
+
+public readonly record struct NCMedicalPersistenceRuntimeCounters(
+    int BoundPlayers,
+    int DebouncedWrites,
+    int QueuedWrites,
+    int InFlightWrites,
+    long CapturedWrites,
+    double LastCaptureMilliseconds,
+    double MaximumCaptureMilliseconds);

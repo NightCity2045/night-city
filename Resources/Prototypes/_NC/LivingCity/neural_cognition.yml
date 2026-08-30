@@ -1,0 +1,115 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncNeuralPolicy
+  id: Default
+  enabled: false
+  endpoint: http://neural-cognition:8080/v1/cognition
+  maximumQueued: 512
+  maximumConcurrent: 4
+  maximumCompletionsPerTick: 16
+  maximumFacts: 64
+  maximumCapabilities: 32
+  maximumPerceivedSubjects: 32
+  maximumTextLength: 512
+  maximumDialogueInputLength: 2048
+  maximumDialogueHistoryTurns: 64
+  maximumDialogueSummaryKeys: 64
+  maximumDialogueMemorySessions: 12
+  maximumDialogueMemoryTextLength: 768
+  sessionTokenTarget: 10000000
+  sessionTokenHardCap: 20000000
+  economyThreshold: 10000000
+  restrictedThreshold: 16000000
+  # GPT-5.6 Luna list prices in million-token units; keep them data-driven so pricing changes need no code patch.
+  providerModel: gpt-5.6-luna
+  inputPriceUsdMicrosPerMillionTokens: 200000
+  cachedInputPriceUsdMicrosPerMillionTokens: 20000
+  outputPriceUsdMicrosPerMillionTokens: 1200000
+  economyCostThresholdUsdMicros: 7500000
+  restrictedCostThresholdUsdMicros: 12000000
+  sessionCostHardCapUsdMicros: 15000000
+  # Real provider spend is capped across server restarts by an ISO-week ledger.
+  weeklyCostHardCapUsdMicros: 18000000
+  actorWeeklyCostHardCapUsdMicros: 2000000
+  requestKindWeeklyLimits:
+    SocialCognition: 600
+    StrategicDecision: 150
+    DialogueContinuation: 2000
+    MemorySummary: 300
+    NarrativeRender: 300
+  maximumRequestInputTokens: 32768
+  maximumRequestOutputTokens: 2048
+  # The Responses API counts hidden reasoning and visible structured JSON against the same ceiling.
+  ordinaryDialogueMaximumOutputTokens: 1024
+  ordinaryDialogueMaximumFacts: 20
+  ordinaryDialogueMaximumPerceivedSubjects: 12
+  ordinaryDialogueMaximumKnownLocations: 16
+  ordinaryDialogueMaximumInputLength: 2048
+  ordinaryDialogueMaximumHistoryTurns: 64
+  ordinaryDialogueMaximumSummaryKeys: 64
+  ordinaryDialogueMaximumMemorySessions: 6
+  ordinaryResidentSessionTokenHardCap: 250000
+  ordinaryResidentMaximumOutstandingRequests: 1
+  ordinaryResidentReservedInputTokens: 8192
+  ordinaryResidentRequestCooldown: 0.1s
+  narrativeActorSessionTokenHardCap: 250000
+  narrativeActorMaximumOutstandingRequests: 2
+  narrativeActorReservedInputTokens: 8192
+  narrativeActorRequestCooldown: 0.1s
+  maximumCoalescedFollowersPerRequest: 16
+  circuitFailureThreshold: 5
+  minimumSuggestionConfidence: 400
+  maximumUtilityBoost: 40
+  maximumPendingCorrelations: 1024
+  maximumAppliedSuggestions: 10000
+  maximumTrackedActorDiagnostics: 256
+  requestTimeout: 8s
+  # Active-world time runs twelve times faster than wall time. Two game minutes leave ten real seconds for the
+  # eight-second provider timeout and main-thread delivery without accepting stale dialogue indefinitely.
+  requestLifetime: 2m
+  circuitOpenDuration: 2m
+  suggestionLifetime: 2m
+  strategicRequestCooldown: 2m
+  incidentEscalationCooldown: 30s
+
+- type: ncNeuralPromptProfile
+  id: NCLivingCityDefault
+  stableKey: living-city-default
+  version: 1
+  model: gpt-5.6-luna
+  allowedKinds: [SocialCognition, StrategicDecision, DialogueContinuation, MemorySummary, NarrativeRender]
+
+- type: ncNeuralPersonaProfile
+  id: NCDefaultResidentPersona
+  stableKey: night-city-resident
+  roleKey: city-resident
+  organizationKey: independent
+  biography: A persistent resident of Night City in 2045 with a home, work, relationships, incomplete knowledge and a personal history. This person experiences the city as reality and never describes it as a game or simulation.
+  principleKeys: [survive, remember-debts, protect-close-people, respect-lived-experience]
+  habitKeys: [observe-surroundings, speak-from-known-facts, avoid-impossible-promises]
+
+- type: ncNeuralAutonomyPolicy
+  id: NCDefaultNeuralAutonomy
+  stableKey: resident-deliberative
+  allowedKinds: [SocialCognition, StrategicDecision, DialogueContinuation, MemorySummary, NarrativeRender]
+  minimumIntentConfidence: 500
+  maximumIntentPriority: 700
+  targetedIntentsAllowed: true
+
+- type: ncNeuralAutonomyPolicy
+  id: NCOrdinaryResidentDialogueAutonomy
+  stableKey: resident-dialogue-only
+  allowedKinds: [DialogueContinuation]
+  minimumIntentConfidence: 700
+  maximumIntentPriority: 250
+  targetedIntentsAllowed: true
+
+- type: ncNeuralAutonomyPolicy
+  id: NCNcpdNeuralAutonomy
+  stableKey: ncpd-field-officer
+  allowedKinds: [SocialCognition, StrategicDecision, DialogueContinuation, MemorySummary]
+  minimumIntentConfidence: 400
+  maximumIntentPriority: 900
+  targetedIntentsAllowed: true

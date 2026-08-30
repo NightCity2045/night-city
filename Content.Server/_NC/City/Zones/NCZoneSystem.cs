@@ -118,6 +118,19 @@ public sealed partial class NCZoneSystem : EntitySystem
     }
 
     /// <summary>
+    /// Copies every semantic zone for explicit connectivity-index rebuilds.
+    /// This is event-driven and must not be called from a per-tick loop.
+    /// </summary>
+    public void GetZones(List<NCZoneInfo> result)
+    {
+        result.Clear();
+        foreach (var zone in _zonesById.Values)
+            result.Add(ToInfo(zone));
+
+        result.Sort(static (left, right) => left.Id.Value.CompareTo(right.Id.Value));
+    }
+
+    /// <summary>
     /// Resolves a generic zone identity as a district and rejects identities belonging to another city level.
     /// </summary>
     public bool TryGetDistrictId(NCZoneId zoneId, out NCDistrictId districtId)

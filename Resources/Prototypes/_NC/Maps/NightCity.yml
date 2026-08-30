@@ -2,6 +2,11 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+- type: gameMapPool
+  id: NCNightCityMapPool
+  maps:
+  - NCALifeTest
+
 - type: gameMap
   id: NCALifeTest
   mapName: NC ALife Test
@@ -19,10 +24,10 @@
       - type: NCStationZLevels
         networkId: f7466602-81be-4ad9-9338-9c181a31e552
         mapsAbove:
-          - /Maps/_NC/NightCity/NightCity4.yml
-          - /Maps/_NC/NightCity/NightCity3.yml
-          - /Maps/_NC/NightCity/NightCity2.yml
           - /Maps/_NC/NightCity/NightCity1.yml
+          - /Maps/_NC/NightCity/NightCity2.yml
+          - /Maps/_NC/NightCity/NightCity3.yml
+          - /Maps/_NC/NightCity/NightCity4.yml
         mapsBelow:
           - /Maps/_NC/NightCity/NightCity-1.yml
           - /Maps/_NC/NightCity/NightCity-2.yml
