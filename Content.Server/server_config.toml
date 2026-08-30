@@ -23,9 +23,6 @@ max_connections = 256
 [game]
 # Name of the server. This is what will be displayed in the server list and lobby.
 hostname = "MyServer"
-# NC start - Run the persistent Night City simulation unless an administrator explicitly selects another preset.
-defaultpreset = "NightCity"
-# NC end
 # Description of the server. This is what will be displayed in the server list.
 desc = "Just another server, don't mind me!"
 # The maximum number of players that can connect to the server. (Exluding admins)
