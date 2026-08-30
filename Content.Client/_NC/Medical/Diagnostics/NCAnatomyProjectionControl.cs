@@ -18,10 +18,10 @@ namespace Content.Client._NC.Medical.Diagnostics;
 /// Draws the data-driven radiographic body projection disclosed by an internal scanner. The control owns no
 /// medical state and never infers a diagnosis from pixels; visibility is decided from the server-filtered snapshot.
 /// </summary>
-public sealed class NCAnatomyProjectionControl : Control
+public sealed partial class NCAnatomyProjectionControl : Control
 {
-    [Dependency] private readonly IPrototypeManager _prototypes = default!;
-    [Dependency] private readonly IResourceCache _resources = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private IResourceCache _resources = default!;
 
     private Texture? _atlas;
     private Vector2 _grid = new(2f, 2f);

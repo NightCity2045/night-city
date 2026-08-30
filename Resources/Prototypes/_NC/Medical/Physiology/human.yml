@@ -24,6 +24,9 @@
   criticalUpdateInterval: 0.25s
   activeBleedingUpdateInterval: 0.5s
   stableInjuredUpdateInterval: 1s
+  maximumScheduledBodiesPerTick: 4
+  maximumSchedulerWorkTime: 0.003s
+  schedulingPhaseWindow: 0.1s
   cavityDrainUpdateInterval: 0.5s
   cavityPhysiology:
     Cranial:
