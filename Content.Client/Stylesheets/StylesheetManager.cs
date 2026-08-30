@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Content.Client.Stylesheets.Stylesheets;
+using Content.Client._NC.NCUI.Styles; // NC
 using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Shared.Reflection;
@@ -20,6 +21,10 @@ namespace Content.Client.Stylesheets
 
         public Stylesheet SheetNanotrasen { get; private set; } = default!;
         public Stylesheet SheetSystem { get; private set; } = default!;
+
+        // NC-Edit-Start
+        public Stylesheet SheetNightCity { get; private set; } = default!;
+        // NC-Edit-End
 
         [Obsolete("Update to use SheetNanotrasen instead")]
         public Stylesheet SheetNano { get; private set; } = default!;
@@ -49,6 +54,9 @@ namespace Content.Client.Stylesheets
             Stylesheets = new Dictionary<string, Stylesheet>();
             SheetNanotrasen = Init(new NanotrasenStylesheet(new BaseStylesheet.NoConfig(), this));
             SheetSystem = Init(new SystemStylesheet(new BaseStylesheet.NoConfig(), this));
+            // NC-Edit-Start
+            SheetNightCity = Init(new NightCityStylesheet(new BaseStylesheet.NoConfig(), this));
+            // NC-Edit-End
             SheetNano = new StyleNano(_resCache).Stylesheet; // TODO: REMOVE (obsolete)
             SheetSpace = new StyleSpace(_resCache).Stylesheet; // TODO: REMOVE (obsolete)
 

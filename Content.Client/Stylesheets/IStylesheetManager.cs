@@ -13,6 +13,11 @@ public interface IStylesheetManager
     ///
     Stylesheet SheetSystem { get; }
 
+    // NC-Edit-Start
+    /// Night City interactive UI style. NCUI windows opt into it explicitly.
+    Stylesheet SheetNightCity { get; }
+    // NC-Edit-End
+
 
     [Obsolete("Update to use SheetNanotrasen instead")]
     Stylesheet SheetNano { get; }
