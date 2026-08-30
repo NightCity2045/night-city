@@ -1,40 +1,42 @@
 <Document>
-# Doctor's Quick Reference
+# Doctor Quick Reference
 
 ## External bleeding
 
-1. Select the area on the targeting UI.
-2. Empty hand: direct pressure.
-3. Gauze: bandage the selected external wound.
-4. Brutepack: apply a hemostatic to the selected external wound.
-5. Tourniquet: apply to the canonical arm or leg region.
-6. Re-scan and restore the lost volume.
+1. Select the body zone in targeting.
+2. Empty hand: apply direct pressure.
+3. Gauze: dress the selected external wound.
+4. Brutepack: pack the selected deep external wound.
+5. Tourniquet: occlude bleeding from the selected arm or leg.
+6. Repeat the scan and restore lost circulating volume.
 
-## Loss of consciousness or circulation
+## Unconsciousness or absent circulation
 
-1. Check oxygen, circulating blood, perfusion, and rhythm.
-2. Stop external blood sources.
-3. Apply oxygen or NCManualVentilator.
-4. If perfusion is absent, perform CPR with an empty hand.
-5. If Shockable Arrest is present, use Defibrillator.
+1. Check oxygenation, circulating blood, perfusion, and rhythm.
+2. Stop external bleeding sources.
+3. Apply oxygen or use an NCManualVentilator.
+4. Perform CPR with an empty hand when perfusion is absent.
+5. Use a Defibrillator for Shockable Arrest.
 6. Administer compatible blood or crystalloid.
-7. Re-scan.
+7. Repeat the scan.
 
 ## Fracture
 
-1. Select the damaged area.
-2. Apply NCFieldSplint for temporary stabilization.
-3. Confirm the fracture with a full scanner.
-4. Perform: Cautery → Scalpel → Hemostat → Retractor → Drill → Drill → Drill → MedicatedSuture.
+1. Select the injured region.
+2. Apply an NCFieldSplint for temporary stabilization.
+3. Confirm the fracture with the full body scanner.
+4. Open the Freeform Surgical Field.
+5. Incise and retract over the fracture, reduce displacement, apply fixation, and suture the site.
+6. Repeat the full scan.
 
-## Internal injury
+## Internal trauma
 
-1. Place the patient in MedicalScanner.
-2. Open computerBodyScanner.
+1. Place the patient in a MedicalScanner.
+2. Open the computerBodyScanner console.
 3. Check Regions, Wounds, Organs, Cyberware, and Drugs.
-4. Select a body region.
-5. Perform the corresponding operation from the Surgery section.
-6. Re-scan fully.
+4. Select the affected body zone.
+5. Use the operation sequence listed in the Surgery section.
+6. Repeat the full scan.
 
 ## Core kit
 
@@ -51,6 +53,6 @@
 <GuideEntityEmbed Entity="NCFieldSplint"/>
 </Box>
 
-[textlink="Full Doctor Guidebook" link="NCDoctor"]
-[textlink="All Surgical Operations" link="NCSurgery"]
+[textlink="Full medical handbook" link="NCDoctor"]
+[textlink="All surgical operations" link="NCSurgery"]
 </Document>

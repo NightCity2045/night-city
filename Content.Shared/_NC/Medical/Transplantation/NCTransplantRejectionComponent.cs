@@ -17,9 +17,8 @@ public sealed partial class NCTransplantRejectionComponent : Component
     [DataField]
     public ProtoId<NCTransplantRejectionProfilePrototype> Profile;
 
-    [DataField]
-    // This is the initialized state of the rejection model, distinct from the ECS component lifecycle.
-    public new bool Initialized;
+    [DataField("initialized")]
+    public bool StateInitialized;
 
     [DataField]
     public NCMedicalStableOwnerKind DonorKind;

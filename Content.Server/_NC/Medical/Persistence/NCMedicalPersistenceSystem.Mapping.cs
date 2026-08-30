@@ -10,6 +10,7 @@ using Content.Shared._NC.Medical.Emergency;
 using Content.Shared._NC.Medical.Persistence;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Systemic;
+using Content.Shared._NC.Medical.Surgery;
 using Content.Shared._NC.Medical.Treatment;
 using Content.Shared._NC.Medical.Transplantation;
 using Content.Shared._NC.Medical.Wounds;
@@ -19,6 +20,50 @@ namespace Content.Server._NC.Medical.Persistence;
 
 public sealed partial class NCMedicalPersistenceSystem
 {
+    private static NCSurgicalIncisionStateSnapshot CaptureIncision(NCSurgicalIncisionRecord incision)
+    {
+        return new NCSurgicalIncisionStateSnapshot
+        {
+            IncisionId = incision.IncisionId,
+            WoundId = incision.WoundId,
+            LinkedWoundIds = [.. incision.LinkedWoundIds],
+            TargetZone = incision.TargetZone,
+            Surface = incision.Surface,
+            Polyline = [.. incision.Polyline],
+            Depth = incision.Depth,
+            Width = incision.Width,
+            EdgeSeparation = incision.EdgeSeparation,
+            Contamination = incision.Contamination,
+            Sutured = incision.Sutured,
+            BoneCasingOpen = incision.BoneCasingOpen,
+            SourceResolutionId = incision.SourceResolutionId,
+            CreatedAt = incision.CreatedAt,
+            ModifiedAt = incision.ModifiedAt,
+        };
+    }
+
+    private static NCSurgicalIncisionRecord RestoreIncision(NCSurgicalIncisionStateSnapshot incision)
+    {
+        return new NCSurgicalIncisionRecord
+        {
+            IncisionId = incision.IncisionId,
+            WoundId = incision.WoundId,
+            LinkedWoundIds = [.. incision.LinkedWoundIds],
+            TargetZone = incision.TargetZone,
+            Surface = incision.Surface,
+            Polyline = [.. incision.Polyline],
+            Depth = incision.Depth,
+            Width = incision.Width,
+            EdgeSeparation = incision.EdgeSeparation,
+            Contamination = incision.Contamination,
+            Sutured = incision.Sutured,
+            BoneCasingOpen = incision.BoneCasingOpen,
+            SourceResolutionId = incision.SourceResolutionId,
+            CreatedAt = incision.CreatedAt,
+            ModifiedAt = incision.ModifiedAt,
+        };
+    }
+
     private NCOrganMedicalStateSnapshot CaptureOrgan(EntityUid character, EntityUid organ)
     {
         var entityPrototype = MetaData(organ).EntityPrototype?.ID;
@@ -136,8 +181,13 @@ public sealed partial class NCMedicalPersistenceSystem
                 BoneCasingOpen = surgicalSite.BoneCasingOpen,
                 TissuesRetracted = surgicalSite.TissuesRetracted,
                 Contamination = surgicalSite.Contamination,
-                TemporaryDevices = surgicalSite.TemporaryDevices
-                    .OrderBy(device => device, StringComparer.Ordinal)
+                // Temporary instruments are physical round entities and are never reconstructed from a
+                // character snapshot. Only the incision and its clinical aftermath are persistent.
+                TemporaryDevices = [],
+                Incisions = surgicalSite.Incisions
+                    .OrderBy(incision => incision.CreatedAt)
+                    .ThenBy(incision => incision.IncisionId)
+                    .Select(CaptureIncision)
                     .ToList(),
             };
         }
@@ -148,10 +198,13 @@ public sealed partial class NCMedicalPersistenceSystem
             {
                 Cavity = cavity.Cavity,
                 BloodVolume = cavity.BloodVolume,
+                OverflowBloodVolume = cavity.OverflowBloodVolume,
                 MaximumBloodVolume = cavity.MaximumBloodVolume,
                 PressureFullScaleVolume = cavity.PressureFullScaleVolume,
                 CompressionFullScaleVolume = cavity.CompressionFullScaleVolume,
-                DrainRate = cavity.DrainRate,
+                // A drain is a physical runtime attachment, not a character injury. Retained blood persists;
+                // the device's active pumping state does not cross rounds.
+                DrainRate = 0f,
             };
         }
 
@@ -166,7 +219,7 @@ public sealed partial class NCMedicalPersistenceSystem
             result.Rejection = new NCTransplantRejectionStateSnapshot
             {
                 Profile = rejection.Profile,
-                Initialized = rejection.Initialized,
+                Initialized = rejection.StateInitialized,
                 DonorKind = rejection.DonorKind,
                 DonorKey = rejection.DonorKey,
                 RecipientKind = rejection.RecipientKind,
@@ -279,6 +332,7 @@ public sealed partial class NCMedicalPersistenceSystem
             OverflowInternalRatesByRegion = new Dictionary<Robust.Shared.Prototypes.ProtoId<OrganCategoryPrototype>, float>(
                 bleeding.OverflowInternalRatesByRegion),
             InternalBloodLoss = bleeding.InternalBloodLoss,
+            UnlocalizedInternalBloodVolume = bleeding.UnlocalizedInternalBloodVolume,
         };
     }
 
@@ -385,7 +439,7 @@ public sealed partial class NCMedicalPersistenceSystem
         return new NCCirculationStateSnapshot
         {
             Profile = circulation.Profile,
-            Initialized = circulation.Initialized,
+            Initialized = circulation.StateInitialized,
             BloodVolume = circulation.BloodVolume,
             EffectiveCirculatingVolume = circulation.EffectiveCirculatingVolume,
             CardiacOutput = circulation.CardiacOutput,
@@ -444,13 +498,15 @@ public sealed partial class NCMedicalPersistenceSystem
             {
                 cavity.Cavity = cavityState.Cavity;
                 cavity.BloodVolume = cavityState.BloodVolume;
+                cavity.OverflowBloodVolume = cavityState.OverflowBloodVolume;
                 cavity.MaximumBloodVolume = cavityState.MaximumBloodVolume;
                 cavity.PressureFullScaleVolume = cavityState.PressureFullScaleVolume;
                 cavity.CompressionFullScaleVolume = cavityState.CompressionFullScaleVolume;
-                cavity.DrainRate = cavityState.DrainRate;
-                cavity.Pressure = Math.Clamp(cavity.BloodVolume / cavity.PressureFullScaleVolume, 0f, 1f);
+                cavity.DrainRate = 0f;
+                var totalBloodVolume = NCCavityFluidMath.GetTotalBloodVolume(cavity);
+                cavity.Pressure = Math.Clamp(totalBloodVolume / cavity.PressureFullScaleVolume, 0f, 1f);
                 cavity.OrganCompression = Math.Clamp(
-                    cavity.BloodVolume / cavity.CompressionFullScaleVolume,
+                    totalBloodVolume / cavity.CompressionFullScaleVolume,
                     0f,
                     1f);
             }
@@ -515,7 +571,9 @@ public sealed partial class NCMedicalPersistenceSystem
                 site.TissuesRetracted = siteState.TissuesRetracted;
                 site.Contamination = siteState.Contamination;
                 site.ActiveProcedure = null;
-                site.TemporaryDevices = [.. siteState.TemporaryDevices];
+                site.TemporaryDevices.Clear();
+                site.Incisions = siteState.Incisions.Select(RestoreIncision).ToList();
+                site.SpatialRevision = 0;
             }
 
             if (state.Cyberware is { } cyberwareState &&
@@ -528,7 +586,7 @@ public sealed partial class NCMedicalPersistenceSystem
             {
                 var rejection = EnsureComp<NCTransplantRejectionComponent>(organ);
                 rejection.Profile = rejectionState.Profile;
-                rejection.Initialized = rejectionState.Initialized;
+                rejection.StateInitialized = rejectionState.Initialized;
                 rejection.DonorKind = rejectionState.DonorKind;
                 rejection.DonorKey = rejectionState.DonorKey;
                 rejection.RecipientKind = rejectionState.RecipientKind;
@@ -653,6 +711,7 @@ public sealed partial class NCMedicalPersistenceSystem
         bleeding.OverflowInternalRatesByRegion = new Dictionary<Robust.Shared.Prototypes.ProtoId<OrganCategoryPrototype>, float>(
             snapshot.OverflowInternalRatesByRegion);
         bleeding.InternalBloodLoss = snapshot.InternalBloodLoss;
+        bleeding.UnlocalizedInternalBloodVolume = snapshot.UnlocalizedInternalBloodVolume;
 
         // Derived aggregate rates are rebuilt from the persistent channels, never trusted from storage.
         bleeding.ActiveExternalRate = MathF.Max(0f, bleeding.OverflowExternalRate);
@@ -779,7 +838,7 @@ public sealed partial class NCMedicalPersistenceSystem
     {
         var circulation = EnsureComp<NCCirculationComponent>(character);
         circulation.Profile = state.Profile;
-        circulation.Initialized = state.Initialized;
+        circulation.StateInitialized = state.Initialized;
         circulation.BloodVolume = state.BloodVolume;
         circulation.EffectiveCirculatingVolume = state.EffectiveCirculatingVolume;
         circulation.CardiacOutput = state.CardiacOutput;

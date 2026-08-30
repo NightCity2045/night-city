@@ -16,9 +16,8 @@ public sealed partial class NCCirculationComponent : Component
     [DataField]
     public ProtoId<NCPhysiologyProfilePrototype> Profile;
 
-    [DataField]
-    // This is the initialized state of the circulation model, distinct from the ECS component lifecycle.
-    public new bool Initialized;
+    [DataField("initialized")]
+    public bool StateInitialized;
 
     [DataField]
     public float BloodVolume;

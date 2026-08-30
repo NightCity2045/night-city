@@ -23,3 +23,16 @@ public readonly record struct NCCavityFluidChangedEvent(
     NCBodyCavity Cavity,
     float PreviousBloodVolume,
     float BloodVolume);
+
+/// <summary>
+/// Bounded aggregate consumed by physiology after inspecting the body's live cavity regions.
+/// </summary>
+public readonly record struct NCCavityPhysiologyEffects(
+    float CardiacOutputMultiplier,
+    float RespiratoryTransferMultiplier,
+    float BrainFunctionMultiplier,
+    float Pain,
+    float Shock)
+{
+    public static readonly NCCavityPhysiologyEffects None = new(1f, 1f, 1f, 0f, 0f);
+}

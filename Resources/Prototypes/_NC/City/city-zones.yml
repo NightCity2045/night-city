@@ -1834,3 +1834,52 @@
       - -173,35
       - -173,34
       - -152,34
+  - id: 7b559196-93fd-4e17-90af-998ed0cffa62
+    kind: Apartment
+    parent: 4faa965b-1cdb-4ff4-811f-0974640d4784
+    name: "G 241-1"
+    geometry:
+    - kind: Polygon
+      z: 0
+      vertices:
+      - 12,-39
+      - 12,-34
+      - 22,-34
+      - 22,-40
+      - 12,-40
+  - id: 9a8d206c-a63e-426a-8e65-05162a583cea
+    kind: Apartment
+    parent: 4faa965b-1cdb-4ff4-811f-0974640d4784
+    name: "G 241-2"
+    geometry:
+    - kind: Polygon
+      z: 1
+      vertices:
+      - 12,-40
+      - 12,-34
+      - 22,-34
+      - 22,-40
+  - id: 94373a6b-0560-478e-ad0b-64b3437df3d1
+    kind: Apartment
+    parent: 4faa965b-1cdb-4ff4-811f-0974640d4784
+    name: "G 241-3"
+    geometry:
+    - kind: Polygon
+      z: 2
+      vertices:
+      - 12,-40
+      - 12,-34
+      - 22,-34
+      - 22,-40
+  - id: ea639634-ef4a-45d4-a7cb-ffbe0a19e802
+    kind: Apartment
+    parent: 4faa965b-1cdb-4ff4-811f-0974640d4784
+    name: "G 241-4"
+    geometry:
+    - kind: Polygon
+      z: 3
+      vertices:
+      - 12,-40
+      - 12,-34
+      - 19,-34
+      - 19,-40

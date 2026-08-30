@@ -45,43 +45,7 @@ public sealed partial class NCWorldWoundOverlaySystem : EntitySystem
     {
         return TryComp(uid, out MetaDataComponent? meta) &&
                TryComp(uid, out TransformComponent? xform) &&
-               HasStableWorldTransform(uid, meta, xform) &&
                !_containers.IsEntityOrParentInContainer(uid, meta, xform);
-    }
-
-    /// <summary>
-    /// PVS can apply the visible-wound state before the complete parent chain is available. Skipping that single
-    /// presentation frame prevents the overlay from querying a half-applied transform without changing wound data.
-    /// </summary>
-    private bool HasStableWorldTransform(
-        EntityUid uid,
-        MetaDataComponent meta,
-        TransformComponent xform)
-    {
-        if (meta.EntityLifeStage < EntityLifeStage.MapInitialized ||
-            meta.EntityLifeStage >= EntityLifeStage.Terminating ||
-            xform.MapUid is not { Valid: true } map ||
-            !Exists(map))
-        {
-            return false;
-        }
-
-        var current = uid;
-        var currentTransform = xform;
-        for (var depth = 0; depth < 64 && current != map; depth++)
-        {
-            var parent = currentTransform.ParentUid;
-            if (!parent.Valid || !Exists(parent))
-                return false;
-            if (parent == map)
-                return true;
-            if (!TryComp(parent, out TransformComponent? parentTransform))
-                return false;
-            currentTransform = parentTransform;
-            current = parent;
-        }
-
-        return current == map;
     }
 
     public override void Initialize()

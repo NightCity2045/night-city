@@ -111,21 +111,12 @@ public sealed class NCWoundProgressionSystemTest : GameTest
 
         Assert.That(_pharmacology.ApplyDose(treated, "NCDrugBroadAntibiotic", 5f).Accepted, Is.True);
         Assert.That(_pharmacology.ApplyDose(immunosuppressed, "NCDrugImmunosuppressant", 5f).Accepted, Is.True);
-        // Compare normalized infection while every branch is below the 1.0 saturation boundary. A one-hour step
-        // intentionally drives both untreated branches to sepsis and cannot express their different growth rates.
-        var comparisonInterval = TimeSpan.FromMinutes(10);
-        var untreatedResult = _progression.AdvanceBody(
-            untreated,
-            comparisonInterval,
-            comparisonInterval);
-        var treatedResult = _progression.AdvanceBody(
-            treated,
-            comparisonInterval,
-            comparisonInterval);
-        var immunosuppressedResult = _progression.AdvanceBody(
-            immunosuppressed,
-            comparisonInterval,
-            comparisonInterval);
+        // NC: The semi-release balance reaches localized infection on a round-scale timer. Keep this
+        // comparison below saturation so antibiotic and immunosuppression effects remain observable.
+        var elapsed = TimeSpan.FromMinutes(5);
+        var untreatedResult = _progression.AdvanceBody(untreated, elapsed, elapsed);
+        var treatedResult = _progression.AdvanceBody(treated, elapsed, elapsed);
+        var immunosuppressedResult = _progression.AdvanceBody(immunosuppressed, elapsed, elapsed);
         var untreatedWound = SComp<NCWoundContainerComponent>(untreated).Wounds[untreatedId];
         var treatedWound = SComp<NCWoundContainerComponent>(treated).Wounds[treatedId];
         var immunosuppressedWound = SComp<NCWoundContainerComponent>(immunosuppressed)
@@ -307,9 +298,9 @@ public sealed class NCWoundProgressionSystemTest : GameTest
 
         Assert.Multiple(() =>
         {
-            // Applying the tourniquet is a later treatment transition, so it deliberately replaces
-            // Reopened with Treated while preserving the open closure and retained healing loss.
-            Assert.That(closed.Stage, Is.EqualTo(NCWoundStage.Treated));
+            // NC: Infection may legitimately supersede the broad Treated stage during the 100-minute
+            // ischemia interval. The treatment flag is the authoritative proof that the tourniquet remains.
+            Assert.That(closed.TreatmentFlags.HasFlag(NCWoundTreatmentFlags.Tourniqueted), Is.True);
             Assert.That(ischemiaResult.IschemicRegions, Is.GreaterThan(0));
             Assert.That(SComp<NCOrganIntegrityComponent>(arm).CurrentIntegrity,
                 Is.LessThan(integrityBeforeIschemia));

@@ -18,7 +18,7 @@ namespace Content.Server._NC.Medical.Bleeding;
 /// <summary>
 /// Owns the boundary between authoritative NC circulation and the upstream bloodstream solution. The
 /// circulation scalar remains the source of truth; the solution remains the physical carrier for blood,
-/// medicines, toxins and metabolites and is changed through upstream APIs only.
+/// medicines, toxins and metabolites and is changed through the shared solution APIs only.
 /// </summary>
 public sealed partial class NCCirculationBloodSystem : EntitySystem
 {
@@ -27,10 +27,11 @@ public sealed partial class NCCirculationBloodSystem : EntitySystem
     [Dependency] private SharedSolutionContainerSystem _solutions = default!;
     [Dependency] private NCAnatomySystem _anatomy = default!;
     [Dependency] private NCMedicalBodySystem _medicalBodies = default!;
+    [Dependency] private NCCavityFluidSystem _cavities = default!;
 
     /// <summary>
-    /// Applies one scheduler interval of external and cavity-attributed internal blood loss. External loss
-    /// uses TryBleedOut so upstream creates physical blood; internal loss removes solution without spilling.
+    /// Applies one scheduler interval of external and cavity-attributed internal blood loss. Both paths remove
+    /// the real proportional bloodstream solution; external presentation is handled by bounded NC blood decals.
     /// </summary>
     public bool TryApplyBleedingLoss(
         EntityUid body,
@@ -73,28 +74,25 @@ public sealed partial class NCCirculationBloodSystem : EntitySystem
         if (actualTotal <= 0f)
             return true;
 
-        // Resolve both upstream solutions before the first mutation so a malformed human body fails closed
-        // instead of losing authoritative volume without a matching physical solution mutation.
-        if (!_solutions.ResolveSolution(body, upstream.BloodSolutionName, ref upstream.BloodSolution) ||
-            external > 0f &&
-            !_solutions.ResolveSolution(body, upstream.BloodTemporarySolutionName, ref upstream.TemporarySolution))
+        // Resolve the real bloodstream before the first mutation so a malformed human body fails closed instead
+        // of losing authoritative volume without a matching physical solution mutation.
+        if (!_solutions.ResolveSolution(body, upstream.BloodSolutionName, ref upstream.BloodSolution))
         {
             return false;
         }
 
-        var solutionExternal = ToSolutionVolume(external, profile, upstream);
         var solutionInternal = ToSolutionVolume(internalAmount, profile, upstream);
-        if (solutionExternal > FixedPoint2.Zero &&
-            !_bloodstream.TryBleedOut((body, upstream), solutionExternal))
-        {
-            return false;
-        }
-
+        // Commit the non-spilling leg first. If the following external spill unexpectedly fails, restoring
+        // the authoritative pre-transaction scalar also restores the blood solution before any state is published.
         if (solutionInternal > FixedPoint2.Zero &&
             !_bloodstream.TryModifyBloodLevel((body, upstream), -solutionInternal))
         {
             return false;
         }
+
+        var solutionExternal = ToSolutionVolume(external, profile, upstream);
+        if (solutionExternal > FixedPoint2.Zero)
+            _solutions.SplitSolution(upstream.BloodSolution.Value, solutionExternal);
 
         var previous = circulation.BloodVolume;
         circulation.BloodVolume = Math.Clamp(previous - actualTotal, 0f, previous);
@@ -107,15 +105,20 @@ public sealed partial class NCCirculationBloodSystem : EntitySystem
         if (!SynchronizeSolution(body, circulation, profile, upstream))
             return false;
 
+        var localizedInternal = 0f;
         foreach (var (cavityUid, requested) in cavityRequests)
-            AccumulateCavity(cavityUid, requested * scale);
+        {
+            var amount = requested * scale;
+            if (_cavities.TryAccumulate(body, cavityUid, amount))
+                localizedInternal += amount;
+        }
 
-        // Legacy snapshots can contain aggregate internal overflow without region attribution. Keep it
-        // physical and authoritative, but never invent a cavity assignment for unknown historical data.
+        // Legacy or malformed sources that cannot resolve to a live cavity remain an explicit body ledger.
         result = new NCBloodLossApplication(
             previous - circulation.BloodVolume,
             external,
-            internalAmount);
+            internalAmount,
+            MathF.Max(0f, internalAmount - localizedInternal));
         return true;
     }
 
@@ -217,25 +220,7 @@ public sealed partial class NCCirculationBloodSystem : EntitySystem
     /// </summary>
     public void ResetCavities(EntityUid body)
     {
-        if (!TryComp<BodyComponent>(body, out var bodyComponent) || bodyComponent.Organs == null)
-            return;
-
-        foreach (var organ in bodyComponent.Organs.ContainedEntities)
-        {
-            if (!TryComp<NCCavityFluidComponent>(organ, out var cavity))
-                continue;
-
-            var previous = cavity.BloodVolume;
-            cavity.BloodVolume = 0f;
-            cavity.DrainRate = 0f;
-            cavity.Pressure = 0f;
-            cavity.OrganCompression = 0f;
-            if (previous <= 0f)
-                continue;
-
-            var changed = new NCCavityFluidChangedEvent(cavity.Cavity, previous, 0f);
-            RaiseLocalEvent(organ, ref changed);
-        }
+        _cavities.ResetBody(body);
     }
 
     private bool TryGetContext(
@@ -249,7 +234,7 @@ public sealed partial class NCCirculationBloodSystem : EntitySystem
         upstream = default!;
         if (!HasComp<NCMedicalBodyComponent>(body) ||
             !TryComp<NCCirculationComponent>(body, out var resolvedCirculation) ||
-            !resolvedCirculation.Initialized ||
+            !resolvedCirculation.StateInitialized ||
             !_prototypes.TryIndex(resolvedCirculation.Profile, out var resolvedProfile) ||
             resolvedProfile.NominalBloodVolume <= 0f ||
             !float.IsFinite(resolvedProfile.NominalBloodVolume) ||
@@ -283,22 +268,6 @@ public sealed partial class NCCirculationBloodSystem : EntitySystem
 
         cavityUid = region;
         return true;
-    }
-
-    private void AccumulateCavity(EntityUid cavityUid, float amount)
-    {
-        if (amount <= 0f || !TryComp<NCCavityFluidComponent>(cavityUid, out var cavity))
-            return;
-
-        var previous = Math.Clamp(cavity.BloodVolume, 0f, cavity.MaximumBloodVolume);
-        cavity.BloodVolume = Math.Clamp(previous + amount, 0f, cavity.MaximumBloodVolume);
-        cavity.Pressure = Math.Clamp(cavity.BloodVolume / cavity.PressureFullScaleVolume, 0f, 1f);
-        cavity.OrganCompression = Math.Clamp(cavity.BloodVolume / cavity.CompressionFullScaleVolume, 0f, 1f);
-        if (cavity.BloodVolume == previous)
-            return;
-
-        var changed = new NCCavityFluidChangedEvent(cavity.Cavity, previous, cavity.BloodVolume);
-        RaiseLocalEvent(cavityUid, ref changed);
     }
 
     private bool SynchronizeSolution(
@@ -345,7 +314,8 @@ public sealed partial class NCCirculationBloodSystem : EntitySystem
 public readonly record struct NCBloodLossApplication(
     float TotalLost,
     float ExternalLost,
-    float InternalLost);
+    float InternalLost,
+    float UnlocalizedInternalLost);
 
 public enum NCBloodTransfusionOutcome : byte
 {

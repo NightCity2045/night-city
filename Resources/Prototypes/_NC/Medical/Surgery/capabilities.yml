@@ -8,6 +8,11 @@
   representativeTool: Cautery
 
 - type: ncSurgeryToolCapability
+  id: NCSurgeryToolCautery
+  name: tissue cautery
+  representativeTool: Cautery
+
+- type: ncSurgeryToolCapability
   id: NCSurgeryToolIncision
   name: controlled incision
   representativeTool: Scalpel
@@ -84,7 +89,7 @@
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolCranialAccess
-  name: cranial access
+  name: bone access
   representativeTool: Drill
 
 - type: ncSurgeryToolCapability
@@ -106,6 +111,11 @@
   id: NCSurgeryToolCyberware
   name: cyberware interface and calibration
   representativeTool: Multitool
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolCavityDrainage
+  name: cavity drainage
+  representativeTool: NCSurgicalDrain
 
 - type: ncSurgeryFacilityCapability
   id: NCSurgeryFacilityStableSurface

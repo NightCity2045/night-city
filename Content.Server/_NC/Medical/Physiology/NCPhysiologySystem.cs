@@ -4,6 +4,7 @@
 
 using System.Linq;
 using Content.Server._NC.Medical.Emergency;
+using Content.Server._NC.Medical.Bleeding;
 using Content.Server._NC.Medical.Pharmacology;
 using Content.Server._NC.Medical.Systemic;
 using Content.Shared._NC.Medical.Anatomy;
@@ -32,6 +33,7 @@ public sealed partial class NCPhysiologySystem : EntitySystem
     [Dependency] private NCEmergencyCareSystem _emergencyCare = default!;
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
     [Dependency] private NCSystemicSystem _systemic = default!;
+    [Dependency] private NCCavityFluidSystem _cavityFluid = default!;
     [Dependency] private MobStateSystem _mobState = default!;
 
     public override void Initialize()
@@ -64,7 +66,7 @@ public sealed partial class NCPhysiologySystem : EntitySystem
     {
         var circulation = EnsureComp<NCCirculationComponent>(body);
         var physiology = EnsureComp<NCPhysiologyComponent>(body);
-        if (circulation.Initialized && !string.IsNullOrWhiteSpace(circulation.Profile.Id))
+        if (circulation.StateInitialized && !string.IsNullOrWhiteSpace(circulation.Profile.Id))
         {
             // Older authoritative snapshots predate the compatibility token. Migrate the empty value from
             // the same physiology profile instead of inventing a code-side blood type.
@@ -79,7 +81,7 @@ public sealed partial class NCPhysiologySystem : EntitySystem
         var profile = GetDefaultProfile();
         ValidateProfile(profile);
         circulation.Profile = profile.ID;
-        circulation.Initialized = true;
+        circulation.StateInitialized = true;
         circulation.BloodVolume = profile.NominalBloodVolume;
         circulation.EffectiveCirculatingVolume = profile.NominalBloodVolume;
         circulation.CardiacOutput = 1f;
@@ -106,7 +108,7 @@ public sealed partial class NCPhysiologySystem : EntitySystem
         ValidateProfile(profile);
         var circulation = EnsureComp<NCCirculationComponent>(body);
         circulation.Profile = profile.ID;
-        circulation.Initialized = true;
+        circulation.StateInitialized = true;
         circulation.BloodVolume = profile.NominalBloodVolume;
         circulation.EffectiveCirculatingVolume = profile.NominalBloodVolume;
         circulation.CardiacOutput = 1f;
@@ -205,13 +207,15 @@ public sealed partial class NCPhysiologySystem : EntitySystem
             var vitalFunctions = GetVitalFunctions(body);
             var systemic = _systemic.GetPhysiologyEffects(body);
             var pharmacology = _pharmacology.GetModifiers(body);
+            var cavity = _cavityFluid.GetPhysiologyEffects(body, profile);
             var volumeCardiacOutput = effectiveVolumeFraction <= profile.ArrestPerfusionThreshold
                 ? 0f
                 : Math.Clamp(effectiveVolumeFraction / profile.CriticalPerfusionThreshold, 0f, 1f);
             circulation.CardiacOutput = volumeCardiacOutput *
                                          vitalFunctions.Circulation *
                                          systemic.CardiacOutputMultiplier *
-                                         pharmacology.CardiacOutputMultiplier;
+                                         pharmacology.CardiacOutputMultiplier *
+                                         cavity.CardiacOutputMultiplier;
             if (systemic.ShockableArrest && vitalFunctions.Circulation > 0f)
                 circulation.CardiacOutput = 0f;
             var naturalPerfusion = circulation.CardiacOutput <= 0f
@@ -229,7 +233,7 @@ public sealed partial class NCPhysiologySystem : EntitySystem
                 Math.Clamp(
                     vitalFunctions.Respiration * pharmacology.RespiratoryTransferMultiplier,
                     0f,
-                    1f),
+                    1f) * cavity.RespiratoryTransferMultiplier,
                 emergencySupport.RespiratorySupport);
             var oxygenCarrierFraction = circulation.EffectiveCirculatingVolume > 0f
                 ? Math.Clamp(
@@ -255,7 +259,7 @@ public sealed partial class NCPhysiologySystem : EntitySystem
                 pharmacology.RhythmStability,
                 vitalFunctions.Circulation > 0f);
 
-            physiology.TotalPain = CalculateTotalPain(body) * (1f - pharmacology.Analgesia);
+            physiology.TotalPain = (CalculateTotalPain(body) + cavity.Pain) * (1f - pharmacology.Analgesia);
             physiology.PainLevel = ResolvePain(physiology.TotalPain, profile.PainThresholds);
             var painShock = profile.PainThresholds.Count > 0
                 ? Math.Clamp(physiology.TotalPain / profile.PainThresholds[^1], 0f, 1f) *
@@ -264,7 +268,7 @@ public sealed partial class NCPhysiologySystem : EntitySystem
             // Crystalloid can support vascular filling and therefore hypovolemic shock, but oxygen carrying
             // capacity above remains tied exclusively to real blood volume.
             physiology.Shock = Math.Clamp(
-                1f - effectiveVolumeFraction + painShock + systemic.ShockContribution +
+                1f - effectiveVolumeFraction + painShock + systemic.ShockContribution + cavity.Shock +
                 pharmacology.ShockContribution,
                 0f,
                 1f);
@@ -275,7 +279,8 @@ public sealed partial class NCPhysiologySystem : EntitySystem
                 MathF.Min(circulation.Perfusion, physiology.Oxygenation),
                 MathF.Min(
                     vitalFunctions.Brain,
-                    MathF.Min(systemic.BrainFunctionMultiplier, pharmacology.BrainFunctionMultiplier)),
+                    MathF.Min(systemic.BrainFunctionMultiplier, pharmacology.BrainFunctionMultiplier)) *
+                cavity.BrainFunctionMultiplier,
                 elapsed,
                 emergencySupport.BrainInjuryRateMultiplier,
                 profile);
@@ -609,6 +614,23 @@ public sealed partial class NCPhysiologySystem : EntitySystem
         {
             throw new InvalidOperationException($"NC physiology profile {profile.ID} has invalid thresholds.");
         }
+
+        if (profile.CavityDrainUpdateInterval <= TimeSpan.Zero ||
+            profile.CavityPhysiology.Any(pair =>
+                pair.Key == NCBodyCavity.None ||
+                !ValidUnitPenalty(pair.Value.CardiacOutputPenaltyAtFullCompression) ||
+                !ValidUnitPenalty(pair.Value.RespiratoryTransferPenaltyAtFullCompression) ||
+                !ValidUnitPenalty(pair.Value.BrainFunctionPenaltyAtFullCompression) ||
+                !float.IsFinite(pair.Value.PainAtFullPressure) || pair.Value.PainAtFullPressure < 0f ||
+                !float.IsFinite(pair.Value.ShockAtFullPressure) || pair.Value.ShockAtFullPressure < 0f))
+        {
+            throw new InvalidOperationException($"NC physiology profile {profile.ID} has invalid cavity settings.");
+        }
+    }
+
+    private static bool ValidUnitPenalty(float value)
+    {
+        return float.IsFinite(value) && value is >= 0f and <= 1f;
     }
 
     private static bool IsStrictlyAscending(IReadOnlyList<float> values)

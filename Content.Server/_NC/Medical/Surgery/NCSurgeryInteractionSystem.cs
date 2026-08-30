@@ -43,6 +43,7 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
     [Dependency] private NCAnatomySystem _anatomy = default!;
     [Dependency] private NCTargetingSelectionSystem _targeting = default!;
     [Dependency] private NCSurgerySystem _surgery = default!;
+    [Dependency] private NCFreeformSurgerySystem _freeform = default!;
 
     public override void Initialize()
     {
@@ -50,8 +51,39 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
 
         SubscribeLocalEvent<NCSurgeryToolComponent, AfterInteractEvent>(OnAfterInteract);
         SubscribeLocalEvent<NCCyberwareComponent, AfterInteractEvent>(OnCyberwareAfterInteract);
+        SubscribeLocalEvent<NCDetachedOrganMedicalDataComponent, AfterInteractEvent>(OnDetachedGraftAfterInteract);
         SubscribeLocalEvent<NCSurgeryToolComponent, NCSurgeryStepDoAfterEvent>(OnDoAfter);
         SubscribeNetworkEvent<NCSurgeryDirectChoiceRequest>(OnDirectChoice);
+    }
+
+    /// <summary>
+    /// Detached organic grafts use the same physical click staging contract as cyberware and prostheses.
+    /// </summary>
+    private void OnDetachedGraftAfterInteract(
+        Entity<NCDetachedOrganMedicalDataComponent> graft,
+        ref AfterInteractEvent args)
+    {
+        if (args.Handled ||
+            args.Target is not { Valid: true } patient ||
+            !args.CanReach ||
+            !HasComp<NCMedicalBodyComponent>(patient) ||
+            !_hands.IsHolding(args.User, graft.Owner))
+        {
+            return;
+        }
+
+        args.Handled = true;
+        var staged = HasComp<NCCyberwareComponent>(graft.Owner)
+            ? TryStageCyberware(args.User, patient, graft.Owner)
+            : TryStageGraft(args.User, patient, graft.Owner);
+        _popup.PopupEntity(
+            Loc.GetString(staged
+                ? "nc-medical-surgery-graft-staged"
+                : "nc-medical-surgery-graft-incompatible"),
+            patient,
+            args.User);
+        if (staged)
+            _freeform.TryOpenSession(args.User, patient);
     }
 
     /// <summary>
@@ -79,6 +111,7 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
         }
 
         _popup.PopupEntity(Loc.GetString("nc-medical-surgery-graft-staged"), patient, args.User);
+        _freeform.TryOpenSession(args.User, patient);
     }
 
     /// <summary>
@@ -118,7 +151,7 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
                 continue;
             }
 
-            BindStagedProcedure(user, patient, procedure.ID, targetRegion, module);
+            BindStagedProcedure(user, patient, procedure.ID, selectedZone, targetRegion, module);
             return true;
         }
 
@@ -131,8 +164,10 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
     /// </summary>
     public bool TryStageGraft(EntityUid user, EntityUid patient, EntityUid graft)
     {
+        var targeting = _targeting.GetSelection(user);
         if (Deleted(user) || Deleted(patient) || Deleted(graft) ||
             !HasComp<NCMedicalBodyComponent>(patient) ||
+            targeting.Mode != NCTargetingMode.SelectedZone || targeting.SelectedZone is not { } selectedZone ||
             !TryResolveMissingGraftSite(user, patient, [graft], out var parent, out _, out var matched) ||
             matched != graft ||
             !_surgery.TryPrepareProcedureTarget(
@@ -146,7 +181,7 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
             return false;
         }
 
-        BindStagedProcedure(user, patient, "NCSurgeryLimbReattachment", parent, graft);
+        BindStagedProcedure(user, patient, "NCSurgeryLimbReattachment", selectedZone, parent, graft);
         return true;
     }
 
@@ -154,6 +189,7 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
         EntityUid user,
         EntityUid patient,
         ProtoId<NCSurgeryProcedurePrototype> procedure,
+        ProtoId<NCTargetZonePrototype> targetZone,
         EntityUid targetRegion,
         EntityUid graft)
     {
@@ -161,6 +197,7 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
         var selection = EnsureComp<NCSurgeryGameplaySelectionComponent>(user);
         selection.Patient = patient;
         selection.Procedure = procedure;
+        selection.TargetZone = targetZone;
         selection.TargetRegion = targetRegion;
         selection.Facility = Comp<NCSurgeryPatientStateComponent>(patient).CurrentFacility;
         selection.Graft = graft;
@@ -172,8 +209,8 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
     }
 
     /// <summary>
-    /// Aurora-style entrypoint: select a body zone, hold an instrument and use it on the patient. An existing
-    /// procedure advances immediately; a new ambiguous operation produces a private prototype-only radial.
+    /// Player-operated surgery opens the freeform surgical field from a physical tool click. The retained
+    /// deterministic procedure resolver below remains available only to actor-less NPC and automation adapters.
     /// </summary>
     private void OnAfterInteract(Entity<NCSurgeryToolComponent> tool, ref AfterInteractEvent args)
     {
@@ -183,6 +220,14 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
             !HasComp<NCMedicalBodyComponent>(patient) ||
             !ValidateHeldAndRange(tool, args.User, patient))
         {
+            return;
+        }
+
+        if (HasComp<ActorComponent>(args.User))
+        {
+            args.Handled = true;
+            if (!_freeform.TryOpenSession(args.User, patient))
+                PopupStartFailure(patient, args.User, NCSurgeryInteractionNotice.NoCompatibleProcedure);
             return;
         }
 
@@ -464,6 +509,7 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
         var selection = EnsureComp<NCSurgeryGameplaySelectionComponent>(user);
         selection.Patient = patient;
         selection.Procedure = candidate.Procedure;
+        selection.TargetZone = _targeting.GetSelection(user).SelectedZone ?? default;
         selection.TargetRegion = candidate.TargetRegion;
         selection.Facility = facility;
         selection.Graft = candidate.Graft;

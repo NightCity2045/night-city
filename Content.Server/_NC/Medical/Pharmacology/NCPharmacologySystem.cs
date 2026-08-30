@@ -253,7 +253,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         var captured = new NCPharmacologyStateSnapshot
         {
             Profile = state.Profile,
-            Initialized = state.Initialized,
+            Initialized = state.StateInitialized,
             OverdoseBurden = state.OverdoseBurden,
         };
         foreach (var (drugId, exposure) in state.ActiveDrugs.OrderBy(
@@ -307,7 +307,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
 
         var state = EnsureComp<NCPharmacologyComponent>(body);
         state.Profile = snapshot.Profile;
-        state.Initialized = snapshot.Initialized;
+        state.StateInitialized = snapshot.Initialized;
         state.OverdoseBurden = snapshot.OverdoseBurden;
         state.ActiveDrugs.Clear();
         foreach (var exposure in snapshot.ActiveDrugs)
@@ -381,7 +381,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         out NCPharmacologyProfilePrototype profile)
     {
         state = EnsureComp<NCPharmacologyComponent>(body);
-        if (state.Initialized &&
+        if (state.StateInitialized &&
             _prototypes.TryIndex(state.Profile, out NCPharmacologyProfilePrototype? resolvedProfile) &&
             ValidateProfile(resolvedProfile))
         {
@@ -401,7 +401,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
 
         profile = defaults[0];
         state.Profile = profile.ID;
-        state.Initialized = true;
+        state.StateInitialized = true;
         state.LastEvaluation = _timing.CurTime;
         state.CachedModifiers = NCPharmacologyModifiers.Neutral;
         return true;

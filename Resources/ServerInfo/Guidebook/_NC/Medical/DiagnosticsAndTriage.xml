@@ -3,23 +3,23 @@
 
 ## Handheld analyzer
 
-1. Take [color=#58e6d9]HandheldHealthAnalyzer[/color].
+1. Hold the [color=#58e6d9]HandheldHealthAnalyzer[/color].
 2. Use it on the patient.
-3. Wait for the diagnostics window to open.
+3. Read the medical diagnostics window.
 
-Shows approximate ranges for oxygen, blood, and perfusion, plus pressure, rhythm, pain, shock, consciousness, external bleeding, and available signs of damage to body regions.
+The handheld analyzer reports approximate oxygenation, circulating blood, perfusion, pressure, rhythm, pain, shock, consciousness, external bleeding, and observable regional injury signs.
 
 <Box>
 <GuideEntityEmbed Entity="HandheldHealthAnalyzer"/>
 </Box>
 
-## Full scan
+## Full body scan
 
-1. Place and buckle the patient into [color=#58e6d9]MedicalScanner[/color].
+1. Place and buckle the patient into a [color=#58e6d9]MedicalScanner[/color].
 2. Open the nearby [color=#58e6d9]computerBodyScanner[/color] console.
 3. Select medical diagnostics.
 
-Shows exact wounds, internal bleeding, fractures, structural damage, organ function, drugs, cyberware, and active operations.
+The scanner reports exact wounds, internal bleeding, fractures, structural damage, organ function, drugs, cyberware, and active surgical sites.
 
 <Box>
 <GuideEntityEmbed Entity="MedicalScanner" Caption="scanner chamber"/>
@@ -28,21 +28,21 @@ Shows exact wounds, internal bleeding, fractures, structural damage, organ funct
 
 ## Interface sections
 
-- [color=#58e6d9]Priority triage feed[/color] — active threats in priority order.
-- [color=#58e6d9]Vital telemetry[/color] — oxygen, blood, perfusion, pressure, rhythm, pain, and shock.
-- [color=#58e6d9]Regions[/color] — body region damage and function.
+- [color=#58e6d9]Priority triage feed[/color] — active threats ordered by urgency.
+- [color=#58e6d9]Vital telemetry[/color] — oxygenation, blood, perfusion, pressure, rhythm, pain, and shock.
+- [color=#58e6d9]Regions[/color] — injury burden and function of body regions.
 - [color=#58e6d9]Wounds[/color] — type, severity, bleeding, contamination, infection, and applied treatment.
-- [color=#58e6d9]Organs[/color] — integrity and function of internal organs.
-- [color=#58e6d9]Cyberware[/color] — integrity, power, temperature, EMP, and neural link.
-- [color=#58e6d9]Drugs[/color] — concentration, therapeutic effect, and toxic load of drugs.
+- [color=#58e6d9]Organs[/color] — internal organ integrity and function.
+- [color=#58e6d9]Cyberware[/color] — integrity, power, heat, EMP state, and neural link.
+- [color=#58e6d9]Drugs[/color] — concentration, therapeutic effects, and toxic burden.
 
 ## Triage priority
 
 1. Massive or arterial external bleeding.
-2. No breathing or circulation, critical hypoxia.
-3. Internal bleeding, vital organ damage, critical shock.
-4. Open fracture, tendon rupture, nerve damage, or vessel damage.
-5. Stable wound, infection, pain, and planned surgery.
+2. Absent breathing or circulation, or critical hypoxia.
+3. Internal bleeding, vital organ damage, or critical shock.
+4. Open fracture, tendon rupture, nerve damage, or vascular injury.
+5. Stable wounds, infection, pain, and scheduled surgery.
 
-After an intervention, repeat the scan and check the new state revision.
+Repeat the scan after treatment and verify that the medical revision and affected values changed.
 </Document>

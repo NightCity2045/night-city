@@ -1,70 +1,66 @@
 <Document>
-# Cyberware
+# Cyberware medicine
 
-## Diagnostics
+## Diagnosis
 
-1. Place the patient in [color=#58e6d9]MedicalScanner[/color].
-2. Open [color=#58e6d9]computerBodyScanner[/color].
-3. Open the [color=#58e6d9]Cyberware[/color] tab.
-4. Check the slot, integrity, power, heat, EMP lockout, neural link, and functionality.
+1. Place the patient on an operating table connected to [color=#58e6d9]computerBodyScanner[/color].
+2. Open the console and select the Cyberware tab.
+3. Read the host slot, integrity, function, power, heat, EMP state and neural connection.
+
+The table is required only for the scanner console. It is not required to perform surgery.
 
 <Box>
-<GuideEntityEmbed Entity="MedicalScanner"/>
+<GuideEntityEmbed Entity="OperatingTable"/>
 <GuideEntityEmbed Entity="computerBodyScanner"/>
 <GuideEntityEmbed Entity="NCSyringeCyberwareCoolantAgent"/>
 </Box>
 
 ## Internal modules
 
-- [color=#58e6d9]Neural link Mk.1[/color]: physical item NCImplantNeuralLinkMk1; target Head; slot NCSlotNeuralCore.
-- [color=#58e6d9]Circulatory assist pump Mk.1[/color]: physical item NCImplantCirculatoryAssistMk1; target Chest; slot NCSlotThoracicSupport.
+- Neural link Mk.1: item [color=#58e6d9]NCImplantNeuralLinkMk1[/color], Head, neural-core slot.
+- Circulatory assist pump Mk.1: item [color=#58e6d9]NCImplantCirculatoryAssistMk1[/color], Chest, thoracic-support slot.
 
-### Installing an internal module
+### Installation
 
-1. Take the module in the off hand or place it nearby.
-2. Select Head for the neural link or Chest for the circulatory assist pump.
-3. Perform: Cautery → Scalpel → Hemostat → Retractor → Multitool → Retractor → MedicatedSuture.
-4. Confirm the module in the Cyberware tab of the full scanner.
+1. Select the module's host zone on the target doll.
+2. Hold the physical module and click it on the patient. A confirmation popup means it is staged.
+3. Open the surgical field, incise and retract until the compatible host structure appears.
+4. Hold the multitool, select Cyberware, and apply it inside the host structure.
+5. Control bleeding, irrigate and suture the incision.
+6. Confirm the installed module in the scanner.
 
-### Removing an internal module
+### Repair
 
-1. Select Head or Chest with an installed module.
-2. Perform: Cautery → Scalpel → Hemostat → Retractor → Multitool → Retractor → MedicatedSuture.
-3. The removed module becomes a physical item.
+Cyberware repair, cooling and power service use the physical service item compatible with the module profile. The surgical Cyberware mode is not a repair shortcut.
+
+### Removal
+
+1. Select the module's host zone.
+2. Open a local incision to the module depth. The installed module appears in the operative field only after it is exposed.
+3. With no new module staged, hold the multitool, select Cyberware, and apply it directly to the module rectangle.
+4. The removed module becomes a physical item in a free hand or beside the patient.
+5. Control bleeding, irrigate, close and scan again.
 
 ## Mechanical replacements
 
-- [color=#58e6d9]Industrial cyberarm[/color]: NCOrganHumanCyberArmLeft or NCOrganHumanCyberArmRight; replaces the matching arm.
-- [color=#58e6d9]Cyberoptics Mk.1[/color]: NCOrganHumanCyberEyes; replaces the eyes.
-- [color=#58e6d9]Cyberheart Mk.1[/color]: NCOrganHumanCyberHeart; replaces the heart.
+- Industrial cyberarm: [color=#58e6d9]NCOrganHumanCyberArmLeft[/color] or [color=#58e6d9]NCOrganHumanCyberArmRight[/color].
+- Cyberoptics Mk.1: [color=#58e6d9]NCOrganHumanCyberEyes[/color].
+- Cyberheart Mk.1: [color=#58e6d9]NCOrganHumanCyberHeart[/color].
 
-### Installing a cyberarm
+### Replacement procedure
 
-1. Select the matching arm.
-2. Remove the old limb using the [color=#58e6d9]Limb amputation[/color] operation.
-3. Take the matching left or right cyberarm, or place it nearby.
-4. On the empty category, perform [color=#58e6d9]Limb reattachment[/color]: Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
+1. Select and surgically separate the damaged organic part.
+2. Select the now-missing zone.
+3. Hold the matching prosthesis and click it on the patient to stage it.
+4. Prepare the receiving site and apply Transplant anastomosis with the suture.
+5. Repair vessels and nerves as required, close, then scan.
 
-### Installing cyberoptics
+The installed replacement becomes part of the live organ graph. Side and category must match; a left cyberarm cannot replace a right arm.
 
-1. Select Head.
-2. Perform [color=#58e6d9]Eye removal[/color].
-3. Place NCOrganHumanCyberEyes in hand or nearby.
-4. Perform [color=#58e6d9]Eye transplantation[/color]: Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
+## Service
 
-### Installing a cyberheart
-
-1. Select Chest.
-2. Perform [color=#58e6d9]Internal organ removal — heart[/color].
-3. Place NCOrganHumanCyberHeart in hand or nearby.
-4. Perform [color=#58e6d9]Internal organ transplantation — heart[/color]: Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
-
-After attachment, the mechanical part occupies the normal category in the living organ graph and receives the linked neural calibration.
-
-## Maintenance
-
-- Cyberware coolant agent distributes across compatible modules with cooling deficits and reduces heat.
-- Service repair restores only the parameters defined by the repair item profile.
-- Mechanical trauma reduces cyber-part integrity and function without creating an organic wound.
-- EMP temporarily disables the module and can damage the neural interface.
+- Cyberware coolant agent reduces heat in compatible modules that have a cooling deficit.
+- Surgical service restores only the integrity and function allowed by the module profile.
+- Mechanical trauma damages cyberware without creating an organic wound in the module.
+- EMP temporarily disables a module and can damage its neural interface.
 </Document>

@@ -22,6 +22,7 @@ using Content.Shared._NC.Medical.Emergency;
 using Content.Shared._NC.Medical.Persistence;
 using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Physiology;
+using Content.Shared._NC.Medical.Surgery;
 using Content.Shared._NC.Medical.Trauma;
 using Content.Shared._NC.Medical.Treatment;
 using Content.Shared._NC.Medical.Wounds;
@@ -66,6 +67,23 @@ public sealed class NCMedicalPersistenceSystemTest : GameTest
         sourceSite.TemporaryDevices.Add("field-drain");
 
         var woundId = CreateWound(source, "NCZoneArmLeft", "ArmLeft", "SlashingImpact", 6f);
+        var incisionResolution = NCActionResolutionId.New();
+        var incisionId = Guid.NewGuid();
+        sourceSite.Incisions.Add(new NCSurgicalIncisionRecord
+        {
+            IncisionId = incisionId,
+            WoundId = woundId,
+            TargetZone = "NCZoneArmLeft",
+            Surface = NCWoundSurface.Rear,
+            Polyline = [new Vector2(0.25f, 0.4f), new Vector2(0.72f, 0.58f)],
+            Depth = 0.55f,
+            Width = 0.04f,
+            EdgeSeparation = 0.35f,
+            Contamination = 0.2f,
+            SourceResolutionId = incisionResolution,
+            CreatedAt = TimeSpan.Zero,
+            ModifiedAt = TimeSpan.FromSeconds(1),
+        });
         var sourceWounds = SComp<NCWoundContainerComponent>(source);
         var sourceWound = sourceWounds.Wounds[woundId];
         sourceWound.Stage = NCWoundStage.Infected;
@@ -157,7 +175,17 @@ public sealed class NCMedicalPersistenceSystemTest : GameTest
             Assert.That(targetSite.AccessDepth, Is.EqualTo(NCSurgicalAccessDepth.SoftTissueRetracted));
             Assert.That(targetSite.Contamination, Is.EqualTo(0.2f));
             Assert.That(targetSite.ActiveProcedure, Is.Null);
-            Assert.That(targetSite.TemporaryDevices, Does.Contain("field-drain"));
+            Assert.That(targetSite.TemporaryDevices, Is.Empty);
+            Assert.That(targetSite.Incisions, Has.Count.EqualTo(1));
+            Assert.That(targetSite.Incisions[0].IncisionId, Is.EqualTo(incisionId));
+            Assert.That(targetSite.Incisions[0].WoundId, Is.EqualTo(woundId));
+            Assert.That(targetSite.Incisions[0].TargetZone.Id, Is.EqualTo("NCZoneArmLeft"));
+            Assert.That(targetSite.Incisions[0].Surface, Is.EqualTo(NCWoundSurface.Rear));
+            Assert.That(targetSite.Incisions[0].Polyline,
+                Is.EqualTo(new[] { new Vector2(0.25f, 0.4f), new Vector2(0.72f, 0.58f) }));
+            Assert.That(targetSite.Incisions[0].Depth, Is.EqualTo(0.55f));
+            Assert.That(targetSite.Incisions[0].EdgeSeparation, Is.EqualTo(0.35f));
+            Assert.That(targetSite.Incisions[0].SourceResolutionId, Is.EqualTo(incisionResolution));
             Assert.That(secondWounds.Records.Keys, Is.EquivalentTo(first.Wounds!.Records.Keys));
             Assert.That(secondWounds.Records[woundId].Infection, Is.EqualTo(0.2f));
             Assert.That(secondWounds.Records[woundId].InfectionStage, Is.EqualTo(NCInfectionStage.Localized));

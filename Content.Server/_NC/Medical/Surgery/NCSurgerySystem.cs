@@ -5,6 +5,7 @@
 using System.Linq;
 using Content.Shared._NC.ActionResolution;
 using Content.Server._NC.Medical.Anatomy.Detachment;
+using Content.Server._NC.Medical.Bleeding;
 using Content.Server._NC.Medical.Cyberware;
 using Content.Server._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Anatomy;
@@ -36,6 +37,7 @@ public sealed partial class NCSurgerySystem : EntitySystem
     [Dependency] private NCOrganDetachmentSystem _detachment = default!;
     [Dependency] private NCCyberwareSystem _cyberware = default!;
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
+    [Dependency] private NCCavityFluidSystem _cavityFluid = default!;
     [Dependency] private SharedStackSystem _stacks = default!;
     [Dependency] private SharedSolutionContainerSystem _solutions = default!;
 
@@ -894,6 +896,24 @@ public sealed partial class NCSurgerySystem : EntitySystem
             tool.UsesRemaining -= amount;
     }
 
+    /// <summary>
+    /// Shared physical-resource boundary used by both the legacy procedure resolver and the freeform field.
+    /// Stack, solution and explicit-use authorities remain mutually exclusive and are checked atomically.
+    /// </summary>
+    public bool TryConsumeToolResource(EntityUid uid, NCSurgeryToolComponent tool, int amount)
+    {
+        if (!HasToolResource(uid, tool, amount))
+            return false;
+
+        ConsumeToolResource(uid, tool, amount);
+        return true;
+    }
+
+    public bool CanConsumeToolResource(EntityUid uid, NCSurgeryToolComponent tool, int amount)
+    {
+        return HasToolResource(uid, tool, amount);
+    }
+
     private NCSurgeryConditionSnapshot BuildConditionSnapshot(
         NCSurgerySessionComponent session,
         NCSurgicalSiteComponent site,
@@ -1624,17 +1644,14 @@ public sealed partial class NCSurgerySystem : EntitySystem
                     break;
                 case NCSurgeryEffectKind.AdjustCavityBloodVolume:
                 {
-                    var cavity = Comp<NCCavityFluidComponent>(target);
-                    cavity.BloodVolume = Math.Clamp(
-                        cavity.BloodVolume + effect.Amount,
-                        0f,
-                        MathF.Max(0f, cavity.MaximumBloodVolume));
+                    if (!_cavityFluid.TryAdjustVolume(session.Patient, target, effect.Amount))
+                        return false;
                     break;
                 }
                 case NCSurgeryEffectKind.SetCavityDrainRate:
                 {
-                    var cavity = Comp<NCCavityFluidComponent>(target);
-                    cavity.DrainRate = Math.Clamp(effect.Amount, 0f, MathF.Max(0f, cavity.MaximumBloodVolume));
+                    if (!_cavityFluid.TrySetDrainRate(session.Patient, target, MathF.Max(0f, effect.Amount)))
+                        return false;
                     break;
                 }
                 case NCSurgeryEffectKind.DetachTargetOrgan:

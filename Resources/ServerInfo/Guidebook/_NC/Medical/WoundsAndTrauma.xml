@@ -3,42 +3,42 @@
 
 ## Trauma types
 
-- [color=#ff5c5c]Ballistic[/color] — deep wound, external or internal bleeding, possible damage to an organ, bone, nerve, and tendon.
-- [color=#ff5c5c]Piercing[/color] — narrow deep wound with a high chance of vessel or organ damage.
-- [color=#ff5c5c]Cutting[/color] — open wound with vessel, tendon, and nerve damage.
-- [color=#ffcc66]Blunt[/color] — bruise, fracture, and internal structure damage.
-- [color=#ffcc66]Blast[/color] — multiple local injuries and a systemic effect.
+- [color=#ff5c5c]Ballistic[/color] — deep wound, external or internal bleeding, and possible organ, bone, nerve, or tendon damage.
+- [color=#ff5c5c]Puncture[/color] — narrow deep wound with a high chance of vascular or organ damage.
+- [color=#ff5c5c]Slash[/color] — open wound that can damage vessels, tendons, and nerves.
+- [color=#ffcc66]Blunt[/color] — bruising, fractures, and internal structural damage.
+- [color=#ffcc66]Explosive[/color] — multiple localized injuries and systemic trauma.
 - [color=#ffcc66]Thermal[/color] — burn or cold injury to tissue.
-- [color=#ffcc66]Electrical[/color] — local trauma and strain on heart rhythm.
-- [color=#ffcc66]Chemical[/color] — tissue damage and systemic toxic load.
-- [color=#ffcc66]Barotrauma[/color] — pressure damage.
+- [color=#ffcc66]Electrical[/color] — local injury and cardiac rhythm stress.
+- [color=#ffcc66]Chemical[/color] — tissue damage and systemic toxic burden.
+- [color=#ffcc66]Barotrauma[/color] — injury caused by pressure change.
 
-## Wound parameters
+## Wound data
 
-- body region;
+- body zone and surface;
 - depth and severity;
-- open or closed state;
-- capillary, venous, arterial, or internal blood source;
+- open, treated, or healed state;
+- capillary, venous, arterial, or internal bleeding source;
 - contamination, infection stage, and necrosis;
-- bandage, hemostatic, pressure, and tourniquet;
-- healing progress and scar;
-- foreign body and exit wound.
+- dressing, packing, pressure, and tourniquet treatment;
+- healing progress and scar state;
+- embedded foreign body and exit wound.
 
-## Structural damage
+## Structural injuries
 
-- [color=#58e6d9]Bone[/color] — fracture state, stability, displacement, and need for splinting.
+- [color=#58e6d9]Bone[/color] — fracture state, stability, displacement, and fixation requirement.
 - [color=#58e6d9]Joint[/color] — stability, dislocation, and movement restriction.
 - [color=#58e6d9]Tendon[/color] — integrity, movement, and grip.
-- [color=#58e6d9]Nerve[/color] — sensitivity, motor function, and neural interface.
+- [color=#58e6d9]Nerve[/color] — sensation, motor function, and neural interface.
 - [color=#58e6d9]Organ[/color] — structural integrity and functional capacity.
 
 ## Wound progression
 
-1. Contamination increases infection load.
-2. Infection progresses through the stages: contamination, local, deep, organ, systemic, and sepsis.
-3. Deep infection creates necrosis.
+1. Contamination increases infection burden.
+2. Infection progresses through contaminated, local, deep, organ, systemic, and sepsis stages.
+3. Deep infection produces necrosis.
 4. Movement and repeated trauma can reopen a wound.
-5. A healed severe wound forms a scar.
+5. A healed severe wound can leave a scar.
 
-For treatment selection, use the [color=#58e6d9]Wounds[/color], [color=#58e6d9]Regions[/color], and [color=#58e6d9]Organs[/color] tabs.
+Use the [color=#58e6d9]Wounds[/color], [color=#58e6d9]Regions[/color], and [color=#58e6d9]Organs[/color] tabs to select treatment.
 </Document>

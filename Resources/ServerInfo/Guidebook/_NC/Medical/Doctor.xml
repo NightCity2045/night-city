@@ -1,28 +1,28 @@
 <Document>
-# Medical Guidebook
+# Medical Handbook
 
-## Order of Care
+## Order of care
 
-1. Select a body region on the targeting doll.
+1. Select a body zone on the targeting doll.
 2. Stop external bleeding.
-3. Check oxygen, circulating blood, perfusion, and heart rhythm.
-4. Perform a handheld analysis or a full scan.
+3. Check oxygenation, circulating blood, perfusion, and heart rhythm.
+4. Perform a handheld analysis or a full body scan.
 5. Stabilize breathing and circulation.
-6. Treat wounds and splint fractures.
-7. Perform the required surgery.
-8. Re-scan.
+6. Treat wounds and immobilize fractures.
+7. Perform the required surgical intervention.
+8. Repeat diagnostics.
 
-## Core Items
+## Core equipment
 
-- [color=#58e6d9]HandheldHealthAnalyzer[/color] — approximate diagnostics for vital signs and external injuries.
-- [color=#58e6d9]MedicalScanner + computerBodyScanner[/color] — full list of wounds, organs, fractures, drugs, and cyberware.
-- [color=#58e6d9]Gauze[/color] — bandage for external capillary and venous bleeding.
-- [color=#58e6d9]Brutepack[/color] — hemostatic pack for a deep external wound.
-- [color=#58e6d9]Tourniquet[/color] — blocks external bleeding on a limb.
-- [color=#58e6d9]NCFieldSplint[/color] — limb fracture stabilization.
-- [color=#58e6d9]NCManualVentilator[/color] — temporary artificial ventilation.
-- [color=#58e6d9]Bloodpack[/color] — restores blood in the bloodstream.
-- [color=#58e6d9]Defibrillator[/color] — restores a shockable cardiac rhythm.
+- [color=#58e6d9]HandheldHealthAnalyzer[/color] — approximate vital signs and visible external injuries.
+- [color=#58e6d9]MedicalScanner + computerBodyScanner[/color] — complete wound, organ, fracture, drug, and cyberware diagnostics.
+- [color=#58e6d9]Gauze[/color] — dressing for external capillary and venous bleeding.
+- [color=#58e6d9]Brutepack[/color] — hemostatic packing for a deep external wound.
+- [color=#58e6d9]Tourniquet[/color] — control of external bleeding from a limb.
+- [color=#58e6d9]NCFieldSplint[/color] — temporary stabilization of a limb fracture.
+- [color=#58e6d9]NCManualVentilator[/color] — temporary assisted ventilation.
+- [color=#58e6d9]Bloodpack[/color] — restores blood in the bloodstream solution.
+- [color=#58e6d9]Defibrillator[/color] — treats a shockable cardiac arrest rhythm.
 
 <Box>
 <GuideEntityEmbed Entity="HandheldHealthAnalyzer"/>
@@ -39,12 +39,12 @@
 
 ## Sections
 
-- [textlink="Diagnostics and Triage" link="NCDiagnosticsAndTriage"] — devices and reading the medical interface.
-- [textlink="Wounds and Trauma" link="NCWoundsAndTrauma"] — trauma mechanisms and structural damage.
-- [textlink="Field Treatment" link="NCFieldTreatment"] — bandages, hemostatic, tourniquet, and splint.
-- [textlink="Emergency Medicine" link="NCEmergencyMedicine"] — CPR, ventilation, blood, and defibrillation.
-- [textlink="Pharmacology" link="NCPharmacology"] — drug administration.
-- [textlink="Surgery" link="NCSurgery"] — all operations and tool order.
-- [textlink="Cyberware Medicine" link="NCCyberwareMedicine"] — installation, removal, and maintenance.
-- [textlink="Quick Reference" link="NCDoctorQuickReference"] — emergency sequences.
+- [textlink="Diagnostics and triage" link="NCDiagnosticsAndTriage"] — diagnostic equipment and medical interface readings.
+- [textlink="Wounds and trauma" link="NCWoundsAndTrauma"] — trauma mechanisms and structural injuries.
+- [textlink="Field treatment" link="NCFieldTreatment"] — pressure, dressings, hemostatic packing, tourniquets, and splints.
+- [textlink="Emergency medicine" link="NCEmergencyMedicine"] — CPR, ventilation, transfusion, and defibrillation.
+- [textlink="Pharmacology" link="NCPharmacology"] — drug purposes and interactions.
+- [textlink="Surgery" link="NCSurgery"] — freeform surgery, instruments, and operations.
+- [textlink="Cyberware medicine" link="NCCyberwareMedicine"] — installation, removal, and maintenance.
+- [textlink="Quick reference" link="NCDoctorQuickReference"] — emergency action sequences.
 </Document>

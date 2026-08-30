@@ -12,7 +12,7 @@ namespace Content.Server._NC.Medical.Surgery;
 /// <summary>
 /// One bounded, server-owned procedure intent for a surgeon. It is runtime interaction state only.
 /// </summary>
-[RegisterComponent, UnsavedComponent, Access(typeof(NCSurgeryInteractionSystem))]
+[RegisterComponent, UnsavedComponent, Access(typeof(NCSurgeryInteractionSystem), typeof(NCFreeformSurgeryEffectSystem), typeof(NCFreeformSurgerySystem))]
 public sealed partial class NCSurgeryGameplaySelectionComponent : Component
 {
     [DataField]
@@ -27,6 +27,13 @@ public sealed partial class NCSurgeryGameplaySelectionComponent : Component
     /// </summary>
     [DataField]
     public EntityUid TargetRegion;
+
+    /// <summary>
+    /// Selected doll zone retained even when its organ is currently absent and TargetRegion is the live
+    /// receiving parent. This keeps prosthesis and graft installation bound to the intended stump.
+    /// </summary>
+    [DataField]
+    public ProtoId<Content.Shared._NC.Combat.Targeting.NCTargetZonePrototype> TargetZone;
 
     [DataField]
     public EntityUid? Facility;

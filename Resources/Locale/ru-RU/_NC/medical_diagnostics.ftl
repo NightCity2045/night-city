@@ -432,3 +432,5 @@ nc-medical-diagnostics-value-blood-transfusion = переливание кров
 nc-medical-diagnostics-value-defibrillation = дефибрилляция
 nc-medical-diagnostics-value-success = завершено
 nc-medical-diagnostics-value-compromised = завершено с осложнениями
+nc-medical-diagnostics-radiograph-title = РЕНТГЕНОВСКАЯ ПРОЕКЦИЯ
+nc-medical-diagnostics-radiograph-caption = Кости и доступные сканеру внутренние структуры

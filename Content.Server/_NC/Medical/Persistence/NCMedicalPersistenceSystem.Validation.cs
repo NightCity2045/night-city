@@ -23,6 +23,55 @@ namespace Content.Server._NC.Medical.Persistence;
 
 public sealed partial class NCMedicalPersistenceSystem
 {
+    private bool ValidateIncision(NCSurgicalIncisionStateSnapshot incision)
+    {
+        if (incision == null || incision.IncisionId == Guid.Empty ||
+            incision.WoundId is { } woundId && woundId == Guid.Empty ||
+            incision.LinkedWoundIds == null ||
+            incision.LinkedWoundIds.Any(linked => linked == Guid.Empty || linked == incision.WoundId) ||
+            incision.LinkedWoundIds.Distinct().Count() != incision.LinkedWoundIds.Count ||
+            !_prototypes.HasIndex(incision.TargetZone) ||
+            !Enum.IsDefined(incision.Surface) ||
+            incision.Polyline == null || incision.Polyline.Count is < 2 or > MaxIncisionPoints ||
+            incision.Polyline.Any(point =>
+                !float.IsFinite(point.X) || !float.IsFinite(point.Y) ||
+                point.X is < 0f or > 1f || point.Y is < 0f or > 1f) ||
+            !Finite(incision.Depth, 0f, 1f) ||
+            !Finite(incision.Width, 0f, 1f) ||
+            !Finite(incision.EdgeSeparation, 0f, 1f) ||
+            !Finite(incision.Contamination, 0f, 1f) ||
+            !incision.SourceResolutionId.IsValid ||
+            !ValidTime(incision.CreatedAt) || !ValidTime(incision.ModifiedAt) ||
+            incision.ModifiedAt < incision.CreatedAt)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static NCSurgicalIncisionStateSnapshot CloneIncision(NCSurgicalIncisionStateSnapshot incision)
+    {
+        return new NCSurgicalIncisionStateSnapshot
+        {
+            IncisionId = incision.IncisionId,
+            WoundId = incision.WoundId,
+            LinkedWoundIds = [.. incision.LinkedWoundIds],
+            TargetZone = incision.TargetZone,
+            Surface = incision.Surface,
+            Polyline = [.. incision.Polyline],
+            Depth = incision.Depth,
+            Width = incision.Width,
+            EdgeSeparation = incision.EdgeSeparation,
+            Contamination = incision.Contamination,
+            Sutured = incision.Sutured,
+            BoneCasingOpen = incision.BoneCasingOpen,
+            SourceResolutionId = incision.SourceResolutionId,
+            CreatedAt = incision.CreatedAt,
+            ModifiedAt = incision.ModifiedAt,
+        };
+    }
+
     /// <summary>
     /// Rejects corrupt deserialized object graphs before migration dereferences any required collection.
     /// This is deliberately separate from semantic validation so malformed storage is a normal false
@@ -38,7 +87,8 @@ public sealed partial class NCMedicalPersistenceSystem
             snapshot.Circulation.TransfusionCompatibility == null ||
             snapshot.CyberwareModules.Any(module => module == null) ||
             snapshot.Organs.Values.Any(organ => organ == null ||
-                organ.SurgicalSite is { TemporaryDevices: null }))
+                organ.SurgicalSite is { TemporaryDevices: null } or { Incisions: null } ||
+                organ.SurgicalSite?.Incisions.Any(incision => incision == null || incision.Polyline == null) == true))
         {
             return false;
         }
@@ -255,7 +305,10 @@ public sealed partial class NCMedicalPersistenceSystem
              site.TemporaryDevices.Count > MaxTemporaryDevicesPerSite ||
              site.TemporaryDevices.Any(device =>
                  string.IsNullOrWhiteSpace(device) || device.Length > MaxPersistentStringLength) ||
-             site.TemporaryDevices.Distinct(StringComparer.Ordinal).Count() != site.TemporaryDevices.Count))
+             site.TemporaryDevices.Distinct(StringComparer.Ordinal).Count() != site.TemporaryDevices.Count ||
+             site.Incisions.Count > MaxIncisionsPerSite ||
+             site.Incisions.Any(incision => !ValidateIncision(incision)) ||
+             site.Incisions.Select(incision => incision.IncisionId).Distinct().Count() != site.Incisions.Count))
         {
             return false;
         }
@@ -265,6 +318,7 @@ public sealed partial class NCMedicalPersistenceSystem
              cavity.Cavity == NCBodyCavity.None ||
              !Finite(cavity.MaximumBloodVolume, float.Epsilon, 1_000_000f) ||
              !Finite(cavity.BloodVolume, 0f, cavity.MaximumBloodVolume) ||
+             !Finite(cavity.OverflowBloodVolume, 0f, 1_000_000_000f) ||
              !Finite(cavity.PressureFullScaleVolume, float.Epsilon, 1_000_000f) ||
              !Finite(cavity.CompressionFullScaleVolume, float.Epsilon, 1_000_000f) ||
              !Finite(cavity.DrainRate, 0f, 1_000_000f)))
@@ -437,7 +491,8 @@ public sealed partial class NCMedicalPersistenceSystem
             bleeding.OverflowInternalRatesByRegion.Count > MaxOrganRecords ||
             !Finite(bleeding.OverflowExternalRate, 0f, 1_000_000f) ||
             !Finite(bleeding.OverflowInternalRate, 0f, 1_000_000f) ||
-            !Finite(bleeding.InternalBloodLoss, 0f, 1_000_000_000f))
+            !Finite(bleeding.InternalBloodLoss, 0f, 1_000_000_000f) ||
+            !Finite(bleeding.UnlocalizedInternalBloodVolume, 0f, 1_000_000_000f))
         {
             return false;
         }
@@ -807,6 +862,7 @@ public sealed partial class NCMedicalPersistenceSystem
                     TissuesRetracted = site.TissuesRetracted,
                     Contamination = site.Contamination,
                     TemporaryDevices = [.. site.TemporaryDevices],
+                    Incisions = site.Incisions.Select(CloneIncision).ToList(),
                 }
                 : null,
             Cavity = source.Cavity is { } cavity
@@ -814,6 +870,7 @@ public sealed partial class NCMedicalPersistenceSystem
                 {
                     Cavity = cavity.Cavity,
                     BloodVolume = cavity.BloodVolume,
+                    OverflowBloodVolume = cavity.OverflowBloodVolume,
                     MaximumBloodVolume = cavity.MaximumBloodVolume,
                     PressureFullScaleVolume = cavity.PressureFullScaleVolume,
                     CompressionFullScaleVolume = cavity.CompressionFullScaleVolume,
@@ -963,6 +1020,7 @@ public sealed partial class NCMedicalPersistenceSystem
             OverflowInternalRatesByRegion = new Dictionary<ProtoId<OrganCategoryPrototype>, float>(
                 source.OverflowInternalRatesByRegion),
             InternalBloodLoss = source.InternalBloodLoss,
+            UnlocalizedInternalBloodVolume = source.UnlocalizedInternalBloodVolume,
         };
     }
 

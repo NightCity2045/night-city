@@ -1,48 +1,48 @@
 <Document>
 # Aftercare
 
-## Monitored indicators
+## Monitor
 
-- oxygen, circulating blood, and perfusion;
-- pressure, heart rhythm, shock, and consciousness;
+- oxygenation, circulating blood, and perfusion;
+- pressure, cardiac rhythm, shock, and consciousness;
 - external and internal bleeding;
-- bandage saturation and contamination;
+- dressing saturation and contamination;
 - infection, necrosis, and scar state;
 - organ, bone, tendon, nerve, and joint function;
-- active drugs and toxic load;
-- power, heat, EMP, and cyberware neural link.
+- active drugs and toxic burden;
+- cyberware power, heat, EMP state, and neural link.
 
-## After a bandage or hemostatic
+## After a dressing or hemostatic packing
 
-1. Re-scan.
-2. Check the change in external bleeding rate.
-3. Monitor bandage saturation.
-4. Once saturated, replace the item or perform vascular repair.
+1. Repeat analysis.
+2. Check the new external bleeding rate.
+3. Monitor dressing saturation.
+4. Replace a saturated item or perform vascular repair.
 
 ## After a tourniquet
 
-1. Record the in-character application time.
+1. Record the installation time in character.
 2. Monitor limb ischemia.
-3. Before removal, prepare wound control and blood.
+3. Prepare wound control equipment and blood before removal.
 4. Remove the tourniquet.
-5. Check for bleeding return and the condition of distal areas.
+5. Check for recurrent bleeding and distal region function.
 
 ## After transfusion
 
-1. Re-scan blood and perfusion.
+1. Repeat the blood and perfusion scan.
 2. Check the compatibility response.
-3. Make sure the active blood source is controlled.
+3. Confirm that active bleeding is controlled.
 
 ## After surgery
 
-1. Verify surgical access is closed.
+1. Check every surgical incision and open access path.
 2. Check external and internal bleeding.
-3. Check the function of the operated organ or limb.
+3. Check function of the operated organ or limb.
 4. Check infection, contamination, and necrosis.
-5. Check active drugs and toxic load.
-6. Repeat a full scan after the state changes.
+5. Check active drugs and toxic burden.
+6. Repeat a full scan after the state updates.
 
-## IC patient handoff
+## Patient handoff
 
-Provide: injury mechanism and time, affected areas, active blood sources, tourniquet time, administered drugs, transfusions, completed surgical steps, installed graft or cyberware, and remaining restrictions.
+Report the trauma mechanism and time, affected regions, active bleeding sources, tourniquet time, administered drugs, transfusions, performed interventions, installed transplant or cyberware, and remaining restrictions.
 </Document>

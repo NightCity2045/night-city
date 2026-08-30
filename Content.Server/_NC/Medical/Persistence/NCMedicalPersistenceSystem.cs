@@ -40,6 +40,8 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
     public const int MaxBleedingSources = 128;
     public const int MaxTourniquets = 16;
     public const int MaxTemporaryDevicesPerSite = 16;
+    public const int MaxIncisionsPerSite = 64;
+    public const int MaxIncisionPoints = 32;
     public const int MaxPersistentStringLength = 64;
     public const int MaxPersistentPrototypeIdLength = 128;
     public const int MaxStableOwnerKeyLength = 128;
@@ -214,6 +216,11 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
             case NCMedicalSnapshotVersions.TransplantRejection:
                 migrated = CloneSnapshot(snapshot);
                 InitializeLegacyWoundVisualization(migrated);
+                migrated.Version = NCMedicalSnapshotVersions.Current;
+                return true;
+            case NCMedicalSnapshotVersions.WoundVisualization:
+            case NCMedicalSnapshotVersions.CavityFluidLedger:
+                migrated = CloneSnapshot(snapshot);
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
             case NCMedicalSnapshotVersions.Current:

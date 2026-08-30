@@ -1,33 +1,33 @@
 <Document>
 # Pharmacology
 
-All drugs are administered into the bloodstream and act deterministically. The effect depends on concentration, liver and kidney state, interactions, and elimination time.
+All drugs enter the bloodstream and act deterministically. Their effects depend on concentration, liver and kidney function, interactions, and elimination time.
 
-## Application order
+## Administration
 
 1. Scan the patient.
 2. Open the [color=#58e6d9]Drugs[/color] tab.
-3. Check active drugs and toxic load.
+3. Check active drugs and toxic burden.
 4. Administer the selected drug.
-5. Re-scan after the state updates.
+5. Repeat the scan after the state updates.
 
 ## Drugs
 
-- [color=#58e6d9]Trauma analgesic[/color] — increases analgesia; also provides mild sedation. Use: pain and preparation for surgery.
-- [color=#58e6d9]Surgical anesthetic[/color] — increases analgesia, sedation, and anesthesia; reduces motor activity and respiratory transfer. Use: deep surgery.
-- [color=#58e6d9]Sedative[/color] — increases sedation and reduces motor activity. Use: movement control before intervention.
-- [color=#58e6d9]Vasopressor[/color] — increases cardiac output. Use: low perfusion and vascular collapse.
-- [color=#58e6d9]Antiarrhythmic[/color] — increases rhythm stability. Use: electrical cardiac instability.
-- [color=#58e6d9]Respiratory stimulant[/color] — increases respiratory transfer and oxygenation. Use: breathing is preserved but suppressed.
-- [color=#58e6d9]Broad antibiotic[/color] — suppresses wound infection growth. Use: infected or contaminated wound.
-- [color=#58e6d9]Antitoxin[/color] — accelerates removal of systemic toxic load. Use: poisoning.
-- [color=#58e6d9]Procoagulant[/color] — reduces the actual rate of external and internal bleeding. Use: active blood loss.
-- [color=#58e6d9]Stimulant[/color] — increases alertness, cardiac output, and respiratory transfer. Use: depressed consciousness with preserved physiology.
-- [color=#58e6d9]Anticoagulant[/color] — increases bleeding. Use: special clinical indication.
-- [color=#58e6d9]Vasodilator[/color] — reduces cardiac output. Use: special clinical indication.
-- [color=#58e6d9]Immunosuppressant[/color] — suppresses the immune response and accelerates infectious deterioration. Use: support for a compatible transplant.
-- [color=#58e6d9]Synthetic oxygen carrier[/color] — increases oxygen transfer by the blood. Use: insufficient oxygen-carrying capacity of circulating blood.
-- [color=#58e6d9]Cyberware coolant agent[/color] — distributes among compatible implants and reduces overheating. Use: overheated cyberware.
+- [color=#58e6d9]Trauma analgesic[/color] — raises analgesia and provides mild sedation. Use for pain and surgical preparation.
+- [color=#58e6d9]Surgical anesthetic[/color] — raises analgesia, sedation, and anesthesia while reducing motor activity and respiratory transfer. Use for deep surgery.
+- [color=#58e6d9]Sedative[/color] — raises sedation and reduces motor activity. Use to control movement before an intervention.
+- [color=#58e6d9]Vasopressor[/color] — raises cardiac output. Use for low perfusion and vascular collapse.
+- [color=#58e6d9]Antiarrhythmic[/color] — improves rhythm stability. Use for cardiac electrical instability.
+- [color=#58e6d9]Respiratory stimulant[/color] — raises respiratory transfer and oxygenation. Use when respiration is present but depressed.
+- [color=#58e6d9]Broad antibiotic[/color] — suppresses wound infection growth. Use for infected or contaminated wounds.
+- [color=#58e6d9]Antitoxin[/color] — accelerates elimination of systemic toxic burden. Use for poisoning.
+- [color=#58e6d9]Procoagulant[/color] — reduces actual external and internal bleeding rates. Use during active blood loss.
+- [color=#58e6d9]Stimulant[/color] — raises alertness, cardiac output, and respiratory transfer. Use for depressed consciousness with otherwise viable physiology.
+- [color=#58e6d9]Anticoagulant[/color] — increases bleeding. Use only for a specific clinical indication.
+- [color=#58e6d9]Vasodilator[/color] — lowers cardiac output. Use only for a specific clinical indication.
+- [color=#58e6d9]Immunosuppressant[/color] — suppresses immune response and accelerates infectious deterioration. Use to support a compatible transplant.
+- [color=#58e6d9]Synthetic oxygen carrier[/color] — increases the oxygen-carrying capacity of circulating blood.
+- [color=#58e6d9]Cyberware coolant agent[/color] — distributes between compatible implants and reduces cyberware overheating.
 
 <Box>
 <GuideEntityEmbed Entity="NCSyringeTraumaAnalgesic"/>
@@ -45,10 +45,10 @@ All drugs are administered into the bloodstream and act deterministically. The e
 ## Interactions
 
 - Sedative + surgical anesthetic: stronger therapeutic and toxic effects.
-- Trauma analgesic + sedative: higher toxicity.
-- Stimulant or respiratory stimulant + sedative: weaker therapeutic effect and higher toxicity.
-- Vasopressor + vasodilator: mutual weakening of therapeutic effect.
-- Procoagulant + anticoagulant: mutual weakening of therapeutic effect and higher toxicity.
+- Trauma analgesic + sedative: increased toxicity.
+- Stimulant or respiratory stimulant + sedative: weaker therapeutic effect and increased toxicity.
+- Vasopressor + vasodilator: mutually reduced therapeutic effect.
+- Procoagulant + anticoagulant: mutually reduced therapeutic effect and increased toxicity.
 
-Toxic load worsens shock, brain, heart, and respiratory function. Liver and kidney damage slow drug elimination.
+Toxic burden worsens shock and brain, cardiac, and respiratory function. Liver and kidney damage slows drug elimination.
 </Document>

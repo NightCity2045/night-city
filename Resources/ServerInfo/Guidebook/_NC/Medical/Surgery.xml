@@ -1,179 +1,157 @@
 <Document>
 # Surgery
 
-## Overview
+## Controls
 
-1. Scan the patient and identify the pathology.
-2. Select the body region on the targeting doll.
-3. Take the first tool in your active hand and apply it to the patient.
-4. If the radial menu shows multiple procedures, choose the correct one.
-5. Wait for the action to finish, then apply the next tool in the sequence.
-6. After closing the access, perform a full rescan.
+1. Scan the patient and identify the damaged zone, surface, depth and structure.
+2. Use [color=#58e6d9]Open surgical field[/color] on the patient.
+3. Select the exact zone on the doll, then select Front, Rear, Left or Right.
+4. Set the working depth. The display names the tissue layer under the instrument.
+5. Hold an instrument in the active hand and select its mode in the right panel.
+6. Draw over the required point with LMB. Use RMB to attach a hemostat or retractor to an incision.
 
-[color=#58e6d9]Cautery[/color] is an optional field-prep step in procedures where preparation is listed first. If you begin with Scalpel, that step is skipped. If you begin with Cautery, preparation is performed as the real first stage.
+The field refreshes automatically. It shows live physiology, movement, tool sterility, wounds, incision geometry, exposed structures, contamination and attached instruments.
 
-The operating table is not a hard requirement to start. The table, lighting, sterility, restraint, monitoring, ventilation, analgesia, sedation, and anesthesia all affect the deterministic result of the step. Insufficient conditions produce a compromised result: extra pain, contamination, bleeding, or a complication.
+An operating table, authorization, skill, anesthesia and facility are not hard requirements. Surgery can be performed anywhere. Patient movement, unsterile tools and an unprepared field cause displaced contact, contamination, bleeding and infection risk.
 
-## Tools
+An incision is local. Opening one point does not expose the whole body zone. Front, rear, left and right are separate surfaces.
+
+## Instruments
 
 <Box>
-<GuideEntityEmbed Entity="Cautery" Caption="field prep and hemostasis"/>
-<GuideEntityEmbed Entity="Scalpel" Caption="incision, debridement, access"/>
-<GuideEntityEmbed Entity="Hemostat" Caption="hemostasis and vessel work"/>
-<GuideEntityEmbed Entity="Retractor" Caption="tissue separation and closure"/>
+<GuideEntityEmbed Entity="Cautery" Caption="cautery and bleeding control"/>
+<GuideEntityEmbed Entity="Scalpel" Caption="incision, debridement and forensic dissection"/>
+<GuideEntityEmbed Entity="Hemostat" Caption="hemostasis and foreign-body extraction"/>
+<GuideEntityEmbed Entity="Retractor" Caption="tissue exposure; may remain attached"/>
 </Box>
 <Box>
-<GuideEntityEmbed Entity="Drill" Caption="bone and skull"/>
+<GuideEntityEmbed Entity="Drill" Caption="bone reduction, fixation and cranial access"/>
 <GuideEntityEmbed Entity="Saw" Caption="organ or limb separation"/>
-<GuideEntityEmbed Entity="SyringeSaline" Caption="irrigation"/>
-<GuideEntityEmbed Entity="MedicatedSuture" Caption="repair and closure"/>
+<GuideEntityEmbed Entity="SyringeSaline" Caption="sterile irrigation"/>
+<GuideEntityEmbed Entity="MedicatedSuture" Caption="vessels, organs, tendons, nerves, grafts and closure"/>
 </Box>
 <Box>
-<GuideEntityEmbed Entity="Multitool" Caption="cyberware"/>
-<GuideEntityEmbed Entity="NCSurgeryDebugMultitool" Caption="admin check for every stage"/>
+<GuideEntityEmbed Entity="Multitool" Caption="cyberware installation, repair and calibration"/>
+<GuideEntityEmbed Entity="NCSurgicalDrain" Caption="immediate and continuous cavity drainage"/>
+<GuideEntityEmbed Entity="NCSurgeryDebugMultitool" Caption="test instrument with every surgical capability"/>
 </Box>
 
-The [color=#58e6d9]→[/color] arrow means the next tool. The opening Cautery can be skipped in sequences where Scalpel is listed immediately after it.
+## Opening and closing a site
 
-## Wounds and vessels
+1. Draw a scalpel stroke over the intended site at the required depth.
+2. Control visible bleeding with a hemostat or cautery.
+3. Retract the incision. Attach the retractor when continuous exposure is required.
+4. Increase depth only after the preceding layer is exposed.
+5. Perform the structural operation at the structure shown in the field.
+6. Detach instruments from the right panel.
+7. Irrigate or debride contaminated tissue.
+8. Suture the same incision until it is closed.
+9. Repeat the full scan.
 
-### 1. Deep wound treatment
+## Operations
 
-Target: severe open wound, contamination, or necrosis.
+### External or internal bleeding
 
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture.
+1. Select the wound point and depth.
+2. Apply Hemostasis or Cautery.
+3. For a damaged vessel, expose the vascular layer and apply Vascular repair.
+4. Verify both bleed channels, then close.
 
-### 2. Vessel repair
+### Irrigation and debridement
 
-Target: vascular damage or an ongoing heavy blood source.
+1. Open access to the contaminated depth.
+2. Apply Sterile irrigation over the wound.
+3. Apply Debridement to infected or necrotic tissue.
+4. Irrigate again and close.
 
-Cautery → Scalpel → Hemostat → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
+### Foreign-body extraction
 
-### 3. Wound irrigation
+1. Open access to the depth reported by the scanner.
+2. Select Foreign body extraction on the hemostat and apply it to the wound marker.
+3. The projectile becomes a physical item in a free hand or beside the patient.
+4. Control bleeding, irrigate and close.
 
-Target: contaminated or infected wound.
+### Fracture treatment
 
-Cautery → Scalpel → Hemostat → Retractor → SyringeSaline → Retractor → MedicatedSuture.
+1. Expose the structural layer over the confirmed fracture.
+2. Apply Bone reduction to remove displacement.
+3. Apply Bone fixation to stabilize the bone.
+4. Irrigate an open fracture, then close.
 
-### 4. Foreign body removal
+### Tendon or nerve repair
 
-Target: a wound with a separate foreign body.
+1. Expose the displayed tendon or nerve.
+2. Apply Tendon repair or Nerve repair directly to the structure.
+3. Close the incision.
 
-Cautery → Scalpel → Hemostat → Retractor → Hemostat → Retractor → MedicatedSuture.
+### Organ repair
 
-## Bones, tendons, and nerves
+1. Open the cavity and retract until the organ is visible.
+2. Apply Organ repair inside the organ rectangle.
+3. Control cavity bleeding, irrigate and close.
 
-### 5. Fracture fixation
+### Cavity drainage
 
-Target: confirmed fracture in the selected area.
+1. Open and retract the thoracic, abdominal, pelvic or cranial cavity.
+2. Apply Cavity drainage with the surgical drain to remove an initial volume.
+3. Attach the same drain to the incision with RMB for continuous evacuation.
+4. Stop the source of internal bleeding before relying on the drain.
+5. Detach the drain from the right panel after a full scan confirms that the cavity is clear.
 
-Cautery → Scalpel → Hemostat → Retractor → Drill → Drill → Drill → MedicatedSuture.
+### Cranial and brain surgery
 
-### 6. Tendon repair
+1. Select Head and the correct surface.
+2. Incise and retract to the skull.
+3. Apply Cranial access to the skull.
+4. Advance to the brain and perform repair or extraction.
+5. Control bleeding and close.
 
-Target: tendon rupture or loss of integrity.
+### Eye repair or removal
 
-Cautery → Scalpel → Hemostat → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
+1. Select Eyes, expose the eye structure and apply Ophthalmic repair.
+2. For removal, apply Organ separation to the exposed eye.
+3. Control bleeding and close.
 
-### 7. Peripheral nerve repair
+### Organ removal
 
-Target: neurological deficit or nerve damage.
+1. Expose the organ and control its bleeding.
+2. Apply Organ separation with the saw directly to the organ.
+3. The organ becomes a physical entity.
+4. Repair vessels and close.
 
-Cautery → Scalpel → Hemostat → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
+### Limb amputation
 
-## Organs, brain, and eyes
+1. Select the exact arm, hand, leg or foot.
+2. Incise, retract and control bleeding at the separation line.
+3. Apply Controlled amputation with the saw.
+4. Repair vessels and close the stump.
 
-### 8. Open internal organ access
+### Transplantation or limb reattachment
 
-Target: an internal organ in the selected area. This operation leaves the access open for later repair.
+1. Select the missing zone.
+2. Hold the compatible detached part or prosthesis and click it on the patient. The popup confirms staging.
+3. Prepare the receiving site.
+4. Apply Transplant anastomosis with the suture.
+5. Repair vessels and nerves, then close.
 
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor.
+### Cyberware installation and service
 
-### 9. Repair open organ
-
-Requirement: organ access is already open from operation #8.
-
-Cautery → MedicatedSuture.
-
-### 10. Skull decompression
-
-Target: skull damage or an intracranial complication.
-
-Cautery → Scalpel → Hemostat → Retractor → Drill → SyringeSaline → Retractor → MedicatedSuture.
-
-### 11. Brain repair
-
-Target: brain damage.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
-
-### 12. Eye repair
-
-Target: damaged eyes.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor → MedicatedSuture → Retractor → MedicatedSuture.
-
-### 13. Internal organ removal
-
-Target: the selected internal organ.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor → Saw → Retractor → MedicatedSuture.
-
-### 14. Eye removal
-
-Target: the eyes.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → Retractor → Saw → Retractor → MedicatedSuture.
-
-### 15. Internal organ transplantation
-
-Requirement: the organ category is free; a compatible organ is in hand or nearby.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
-
-### 16. Eye transplantation
-
-Requirement: the eyes are removed; a compatible graft is in hand or nearby.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
-
-## Limbs
-
-### 17. Limb amputation
-
-Target: the selected arm, hand, leg, or foot.
-
-Cautery → Scalpel → Hemostat → Retractor → Saw → Retractor → MedicatedSuture.
-
-### 18. Limb reattachment
-
-Requirement: the limb category is free; a compatible detached part is in hand or nearby.
-
-Cautery → Scalpel → Hemostat → Retractor → Scalpel → MedicatedSuture → Retractor → MedicatedSuture → MedicatedSuture.
-
-## Forensics
-
-### 19. Regional autopsy
-
-Requirement: the patient is dead. Target: the selected body region.
-
-Scalpel → Scalpel → Scalpel → MedicatedSuture.
-
-## Cyberware
-
-### 20. Internal cyberware installation
-
-Requirement: a compatible physical module is in hand or nearby; the host organ slot is free.
-
-Cautery → Scalpel → Hemostat → Retractor → Multitool → Retractor → MedicatedSuture.
-
-### 21. Internal cyberware removal
-
-Requirement: a compatible module is installed in the selected organ.
-
-Cautery → Scalpel → Hemostat → Retractor → Multitool → Retractor → MedicatedSuture.
-
-## Grafts
-
-A graft is either a real detached body part or a factory-made mechanical replacement. The category must match a free category on the patient. After attachment, the part enters the living organ graph; a mechanical replacement automatically calibrates the neural interface.
+1. Select the host zone.
+2. Hold the physical implant and click it on the patient to stage it.
+3. Expose the compatible host structure.
+4. Apply Cyberware with the multitool. Installation uses a real compatible slot and calibrates the interface.
+5. With no implant staged, applying the same mode directly to an exposed installed module removes that physical module.
+6. Repair, cooling and power service use the module's physical service consumables rather than the surgical installation mode.
+7. Close and verify the Cyberware scanner tab.
+
+### Regional autopsy
+
+1. The patient must be dead.
+2. Select the region and surface.
+3. Use Forensic dissection to expose the required structures.
+4. Record the findings and suture the incision.
+
+## Persistence
+
+Wounds, missing anatomy, cyberware, cavity blood, incision geometry, depth, contamination and closure survive a round transition. Runtime sessions and attached physical instruments do not.
 </Document>

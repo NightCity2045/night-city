@@ -1,45 +1,45 @@
 <Document>
 # Emergency Medicine
 
-## Procedure
+## Action order
 
 1. Stop massive external bleeding.
-2. Check oxygen, blood, perfusion, and heart rhythm.
-3. Enable oxygen support or ventilation.
-4. If circulation is absent, perform CPR.
-5. If the rhythm is shockable, use the defibrillator.
-6. Restore blood volume.
-7. Address the trauma source or systemic damage.
+2. Check oxygenation, circulating blood, perfusion, and cardiac rhythm.
+3. Provide oxygen support or assisted ventilation.
+4. Perform CPR when circulation is absent.
+5. Use a defibrillator for a shockable rhythm.
+6. Restore circulating volume.
+7. Treat the source of trauma or systemic failure.
 
 ## CPR
 
 - Item: empty hand.
-- Condition: the patient is lying down and has no circulation.
+- Requirement: patient is lying down and has no circulation.
 - Use: click the patient with an empty hand.
-- Result: temporary assistive perfusion and slower brain damage.
+- Effect: temporary assisted perfusion and slower brain deterioration.
 
 ## Ventilation
 
 - Item: [color=#58e6d9]NCManualVentilator[/color].
-- Use: use it on a patient with insufficient breathing.
-- Result: temporary support for ventilation and oxygenation.
+- Use: apply it to a patient with inadequate respiration.
+- Effect: temporary ventilation and oxygenation support.
 
 ## Crystalloid
 
 - Item: [color=#58e6d9]NCCrystalloidBag[/color].
-- Result: increases effective circulating volume.
+- Effect: increases effective circulating volume.
 
 ## Blood
 
-- Item: compatible [color=#58e6d9]Bloodpack[/color].
-- Result: adds blood to the bloodstream solution and restores oxygen-carrying volume.
+- Item: a compatible [color=#58e6d9]Bloodpack[/color].
+- Effect: adds blood to the bloodstream solution and restores oxygen-carrying volume.
 
 ## Defibrillation
 
 - Item: [color=#58e6d9]Defibrillator[/color].
-- Condition: [color=#76e69a]Shockable arrest[/color] rhythm.
-- Result: attempt to restore a normal rhythm.
-- After the action: re-check rhythm, oxygen, and perfusion.
+- Requirement: [color=#76e69a]Shockable arrest[/color] rhythm.
+- Effect: attempts to restore a normal rhythm.
+- Follow-up: recheck rhythm, oxygenation, and perfusion.
 
 <Box>
 <GuideEntityEmbed Entity="NCManualVentilator"/>
@@ -50,6 +50,6 @@
 
 ## Arrest states
 
-- [color=#ffcc66]Clinical arrest[/color] — circulation has stopped, but the brain may still be viable.
-- [color=#ff5c5c]Brain dead[/color] — irreversible brain state.
+- [color=#ffcc66]Clinical arrest[/color] — circulation has stopped while the brain can still remain viable.
+- [color=#ff5c5c]Brain dead[/color] — irreversible loss of brain function.
 </Document>
