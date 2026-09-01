@@ -63,9 +63,9 @@ public sealed partial class NCHumanDirectiveSystem
             directive.ExpiresAt));
     }
 
-    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
-        if (args.Materialized && _directives.TryGetValue(args.ActorId, out var directive))
+        if (args.Bound && _directives.TryGetValue(args.ActorId, out var directive))
             MirrorDirective(directive);
     }
 
@@ -323,7 +323,7 @@ public sealed partial class NCHumanDirectiveSystem
                 SpeechActKey = "acceptance",
                 RenderedText = Loc.GetString("nc-human-directive-partial-acknowledgement",
                     ("applied", pending.AppliedRecipients), ("requested", pending.RequestedRecipients)),
-                Intent = null,
+                Commands = [],
             };
         }
         _suggestions.TryDeliverDeferredDialogue(pending.ActorId, pending.Request.RequestId,
@@ -385,7 +385,7 @@ public sealed partial class NCHumanDirectiveSystem
             HasComp<NCHumanDirectiveComponent>(entity))
             RemCompDeferred<NCHumanDirectiveComponent>(entity);
         if (_clock.TryGetCurrentTime(out _, out var now))
-            _cognition.ForceSchedule(actorId, now);
+            _brain.RequestDecision(actorId);
         _ = RemoveCommitmentAsync(actorId, directive.CommitmentId, requestId);
 
         if (!_pendingDialogues.Remove(requestId, out var pending) || failureLocId == null)
@@ -394,7 +394,7 @@ public sealed partial class NCHumanDirectiveSystem
         {
             SpeechActKey = "refusal",
             RenderedText = Loc.GetString(failureLocId),
-            Intent = null,
+            Commands = [],
         };
         _suggestions.TryDeliverDeferredDialogue(pending.ActorId, pending.Request.RequestId,
             pending.SessionId, pending.ConversationVersion, response);

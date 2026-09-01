@@ -55,7 +55,7 @@ public sealed class NCLivingCityBootstrapPopulationTest : GameTest
             Assert.That(second.Requested, Is.EqualTo(256));
             Assert.That(second.Existing, Is.EqualTo(256));
             Assert.That(second.Failed, Is.Zero);
-            Assert.That(runtime.MaterializedActorCount, Is.Zero);
+            Assert.That(runtime.PhysicalActorCount, Is.Zero);
         });
 
         await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(

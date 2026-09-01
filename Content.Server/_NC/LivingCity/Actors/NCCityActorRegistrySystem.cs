@@ -645,6 +645,32 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
         }
     }
 
+    /// <summary>
+    /// Persists a physical NPC snapshot without changing its lifetime or ECS binding. The existing atomic persistence
+    /// transaction is reused until its storage event names are migrated independently.
+    /// </summary>
+    public async Task<NCPhysicalActorCheckpointResult> CommitPhysicalCheckpointAsync(
+        NCPhysicalActorCheckpointRequest request)
+    {
+        var result = await CommitDematerializationAsync(new NCCityActorDematerializationCommitRequest(
+            request.CommandId,
+            request.ActorId,
+            request.ExpectedActorVersion,
+            request.CurrentZone,
+            request.Domains,
+            request.CorrelationId,
+            request.CausationId,
+            request.AuditSource,
+            request.ParticipantWrites));
+        return new NCPhysicalActorCheckpointResult(
+            result.Status,
+            result.ActorId,
+            result.Actor,
+            result.Health,
+            result.Inventory,
+            result.Error);
+    }
+
     public async Task<NCCityActorMutationResult> SetStatusAsync(NCCityActorStatusMutationRequest request)
     {
         if (!TryValidateMutationMetadata(

@@ -15,8 +15,8 @@ using Content.Shared._NC.Persistence.Identity;
 namespace Content.Server._NC.LivingCity.CityServices;
 
 /// <summary>
-/// Assigns an authored persistent group to a service dispatch. It advances the group and each member through the same
-/// strategic location records consumed by ordinary A-Life physicalization; no parallel responder NPC model exists.
+/// Persists service assignments and route context for an authored group of already-physical actors.
+/// It never spawns, despawns, or creates a parallel responder NPC model.
 /// </summary>
 public sealed partial class NCCityServiceGroupAdapterSystem : EntitySystem
 {
@@ -24,7 +24,6 @@ public sealed partial class NCCityServiceGroupAdapterSystem : EntitySystem
     [Dependency] private NCCityServiceSystem _services = default!;
     [Dependency] private NCCityGroupRegistrySystem _groups = default!;
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
-    [Dependency] private NCCityGroupPhysicalizationSystem _physicalization = default!;
 
     public override void Initialize()
     {
@@ -119,10 +118,5 @@ public sealed partial class NCCityServiceGroupAdapterSystem : EntitySystem
             dispatch.Snapshot.DestinationZone, default, NCCityTravelMode.None, null, NCCityGroupStatus.Engaged,
             NCPersistentIdentity.Correlation("service-group", "arrive-route", stable),
             dispatch.Snapshot.LastAppliedEventId, "service-group-adapter"));
-        _physicalization.Request(new NCCityGroupPhysicalizationRequest(
-            NCPersistentIdentity.Command("service-group", "physicalize", stable), groupId,
-            NCCityGroupPhysicalizationDirection.Materialize, NCCityGroupPhysicalizationReason.ServiceResponse,
-            Math.Clamp(dispatch.Snapshot.ThreatBasisPoints / 100, 0, 100),
-            unchecked((uint) dispatch.Snapshot.DispatchId.Value.GetHashCode()), null, "service-group-adapter"));
     }
 }

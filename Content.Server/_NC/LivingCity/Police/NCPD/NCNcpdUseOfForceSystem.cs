@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Server._NC.LivingCity.Cognition;
+using Content.Server._NC.LivingCity.Neural;
 using Content.Server._NC.LivingCity.Time;
 using Content.Server.NPC.Components;
 using Content.Shared._NC.LivingCity.Police.NCPD;
@@ -27,7 +28,7 @@ public sealed partial class NCNcpdUseOfForceSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
-    [Dependency] private NCCognitionSystem _cognition = default!;
+    [Dependency] private NCPhysicalActorBrainSystem _brain = default!;
     [Dependency] private NpcFactionSystem _factions = default!;
     [Dependency] private SharedCuffableSystem _cuffable = default!;
     [Dependency] private SharedCombatModeSystem _combatMode = default!;
@@ -107,7 +108,7 @@ public sealed partial class NCNcpdUseOfForceSystem : EntitySystem
 
         if (wasHostile || removedCombat)
             _forceStopped++;
-        _cognition.ForceSchedule(officerComponent.ActorId, now);
+        _brain.RequestDecision(officerComponent.ActorId);
         return wasHostile || removedCombat;
     }
 

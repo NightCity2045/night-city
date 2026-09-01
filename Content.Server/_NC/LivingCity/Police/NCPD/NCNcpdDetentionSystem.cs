@@ -64,7 +64,6 @@ public sealed partial class NCNcpdDetentionSystem : EntitySystem
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private NCCityNpcSteeringLeaseSystem _steeringLease = default!;
     [Dependency] private NCCityPhysicalExecutionSystem _physical = default!;
-    [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
     [Dependency] private NPCSteeringSystem _steering = default!;
     [Dependency] private HTNSystem _htn = default!;
     [Dependency] private SharedCuffableSystem _cuffable = default!;
@@ -102,7 +101,6 @@ public sealed partial class NCNcpdDetentionSystem : EntitySystem
             return;
         }
 
-        var firstCustodyProjection = !HasComp<NCNcpdCustodyComponent>(args.Suspect);
         var custody = EnsureComp<NCNcpdCustodyComponent>(args.Suspect);
         custody.BookingId = Guid.Empty;
         custody.IncidentId = args.IncidentId;
@@ -111,8 +109,6 @@ public sealed partial class NCNcpdDetentionSystem : EntitySystem
         custody.Status = NCNcpdCustodyStatus.Escorting;
         custody.UpdatedAt = args.StartedAt;
         custody.Failure = string.Empty;
-        if (firstCustodyProjection)
-            _dematerialization.BeginBlocker(args.Suspect, NCCityDematerializationBlockerFlags.Detained);
     }
 
     private void OnExecute(NCHumanActionExecutionEvent args)
@@ -318,7 +314,6 @@ public sealed partial class NCNcpdDetentionSystem : EntitySystem
         custody.Status = NCNcpdCustodyStatus.Held;
         custody.UpdatedAt = now;
         custody.Failure = string.Empty;
-        _dematerialization.EndBlocker(suspect, NCCityDematerializationBlockerFlags.Detained);
         args.Completed = true;
     }
 
@@ -519,7 +514,6 @@ public sealed partial class NCNcpdDetentionSystem : EntitySystem
     private void OnCustodyShutdown(Entity<NCNcpdCustodyComponent> entity, ref ComponentShutdown args)
     {
         ActiveCustodyCount = Math.Max(0, ActiveCustodyCount - 1);
-        _dematerialization.EndBlocker(entity.Owner, NCCityDematerializationBlockerFlags.Detained);
     }
 
     private void Clear()

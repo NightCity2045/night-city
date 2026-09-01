@@ -114,8 +114,6 @@ public sealed partial class NCLivingCityAdminTab : Control
         BindActorAction(MoveActor, NCLivingCityAdminActorAction.Move);
         BindActorAction(CaptureActorDomains, NCLivingCityAdminActorAction.CaptureDomains);
         BindActorAction(RestoreActorHealth, NCLivingCityAdminActorAction.RestoreHealth);
-        BindActorAction(MaterializeActor, NCLivingCityAdminActorAction.Materialize);
-        BindActorAction(DematerializeActor, NCLivingCityAdminActorAction.Dematerialize);
 
         BindGroupAction(CreateGroup, NCLivingCityAdminGroupAction.Create);
         BindGroupAction(AddGroupMember, NCLivingCityAdminGroupAction.AddMember);
@@ -123,8 +121,6 @@ public sealed partial class NCLivingCityAdminTab : Control
         BindGroupAction(TransferGroupMember, NCLivingCityAdminGroupAction.TransferMember);
         BindGroupAction(SetGroupLeader, NCLivingCityAdminGroupAction.SetLeader);
         BindGroupAction(SetGroupDirective, NCLivingCityAdminGroupAction.SetDirective);
-        BindGroupAction(MaterializeGroup, NCLivingCityAdminGroupAction.Materialize);
-        BindGroupAction(DematerializeGroup, NCLivingCityAdminGroupAction.Dematerialize);
 
         ValidatePopulationProfile.OnPressed += _ =>
             SendPopulationAction(NCLivingCityAdminPopulationAction.ValidateProfile, Guid.Empty);
@@ -1266,7 +1262,6 @@ public sealed partial class NCLivingCityAdminTab : Control
     {
         NCLivingCityAdminInspectKind.Actor or
         NCLivingCityAdminInspectKind.Cognition or
-        NCLivingCityAdminInspectKind.ActorRelevance or
         NCLivingCityAdminInspectKind.GroupMembership => "nc-living-city-admin-placeholder-actor-id",
         NCLivingCityAdminInspectKind.Group or
         NCLivingCityAdminInspectKind.GroupFormation => "nc-living-city-admin-placeholder-group-id",
@@ -1285,13 +1280,9 @@ public sealed partial class NCLivingCityAdminTab : Control
     private static string InspectionHint(NCLivingCityAdminInspectKind kind) => kind switch
     {
         NCLivingCityAdminInspectKind.Actor or
-        NCLivingCityAdminInspectKind.Cognition or
-        NCLivingCityAdminInspectKind.ActorMaterializationRequest or
-        NCLivingCityAdminInspectKind.ActorDematerializationRequest or
-        NCLivingCityAdminInspectKind.ActorRelevance => "nc-living-city-admin-hint-actors",
+        NCLivingCityAdminInspectKind.Cognition => "nc-living-city-admin-hint-actors",
         NCLivingCityAdminInspectKind.Group or
         NCLivingCityAdminInspectKind.GroupMembership or
-        NCLivingCityAdminInspectKind.GroupPhysicalizationRequest or
         NCLivingCityAdminInspectKind.GroupFormation => "nc-living-city-admin-hint-groups",
         NCLivingCityAdminInspectKind.Relationship or
         NCLivingCityAdminInspectKind.Reputation or
@@ -1620,15 +1611,8 @@ public sealed partial class NCLivingCityAdminTab : Control
     {
         NCLivingCityAdminInspectKind.Actor => Loc.GetString("nc-living-city-admin-kind-actor"),
         NCLivingCityAdminInspectKind.Cognition => Loc.GetString("nc-living-city-admin-kind-cognition"),
-        NCLivingCityAdminInspectKind.ActorMaterializationRequest =>
-            Loc.GetString("nc-living-city-admin-kind-actor-materialization"),
-        NCLivingCityAdminInspectKind.ActorDematerializationRequest =>
-            Loc.GetString("nc-living-city-admin-kind-actor-dematerialization"),
-        NCLivingCityAdminInspectKind.ActorRelevance => Loc.GetString("nc-living-city-admin-kind-actor-relevance"),
         NCLivingCityAdminInspectKind.Group => Loc.GetString("nc-living-city-admin-kind-group"),
         NCLivingCityAdminInspectKind.GroupMembership => Loc.GetString("nc-living-city-admin-kind-group-membership"),
-        NCLivingCityAdminInspectKind.GroupPhysicalizationRequest =>
-            Loc.GetString("nc-living-city-admin-kind-group-physicalization"),
         NCLivingCityAdminInspectKind.GroupFormation => Loc.GetString("nc-living-city-admin-kind-group-formation"),
         NCLivingCityAdminInspectKind.ZoneState => Loc.GetString("nc-living-city-admin-kind-zone-state"),
         NCLivingCityAdminInspectKind.Party => Loc.GetString("nc-living-city-admin-kind-party"),

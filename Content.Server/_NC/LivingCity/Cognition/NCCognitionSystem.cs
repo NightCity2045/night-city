@@ -83,7 +83,7 @@ public sealed partial class NCCognitionSystem : EntitySystem
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
         SubscribeLocalEvent<NCCityActorPersistedEvent>(OnActorPersisted);
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
         SubscribeLocalEvent<NCCityLocalIncidentObservedEvent>(OnIncidentObserved);
         SubscribeLocalEvent<NCCognitionRuntimeComponent, ComponentShutdown>(OnRuntimeShutdown);
     }
@@ -272,19 +272,7 @@ public sealed partial class NCCognitionSystem : EntitySystem
     private void OnSessionStarted(NCActiveWorldSessionStartedEvent args)
     {
         Reset();
-        string? error = null;
-        if (!_prototypes.TryIndex(new ProtoId<NCCognitionRuntimePolicyPrototype>(DefaultPolicyId), out var policy) ||
-            policy == null || !ValidateConfiguration(policy, out error))
-        {
-            _configurationError = error ?? $"Cognition policy {DefaultPolicyId} is missing or invalid.";
-            Log.Error(_configurationError);
-            return;
-        }
-        _policy = policy;
-        _epoch = args.Epoch;
-        _pageRetryAt = args.Time;
-        _active = true;
-        BeginPageLoad(_generation, null);
+        // Superseded by the per-actor GPT scheduler and direct typed action execution.
     }
 
     private void OnSessionClosed(NCActiveWorldSessionClosedEvent args)
@@ -324,11 +312,11 @@ public sealed partial class NCCognitionSystem : EntitySystem
         ScheduleDecision(args.ActorId, dueAt);
     }
 
-    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
         if (!_active)
             return;
-        if (args.Materialized && Exists(args.EntityUid))
+        if (args.Bound && Exists(args.EntityUid))
         {
             var component = EnsureComp<NCCognitionRuntimeComponent>(args.EntityUid);
             component.ActorId = args.ActorId;

@@ -83,8 +83,6 @@ public sealed partial class NCLivingCityAdminSystem
             NCLivingCityAdminActorAction.Move => await MoveActorAsync(request, administrator),
             NCLivingCityAdminActorAction.CaptureDomains => await CaptureActorDomainsAsync(request, administrator),
             NCLivingCityAdminActorAction.RestoreHealth => await RestoreActorHealthAsync(request),
-            NCLivingCityAdminActorAction.Materialize => MaterializeActor(request, administrator),
-            NCLivingCityAdminActorAction.Dematerialize => DematerializeActor(request, administrator),
             _ => new ActorActionExecution(NCLivingCityAdminMutationStatus.Rejected, [],
                 "unsupported-actor-action"),
         };
@@ -205,59 +203,6 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("result", "actor-id", actorId);
         fields.Add("result", "health-version", health.AggregateVersion);
         return new ActorActionExecution(NCLivingCityAdminMutationStatus.Applied, fields.Build(), null);
-    }
-
-    private ActorActionExecution MaterializeActor(
-        NCLivingCityAdminActorActionRequest request,
-        Robust.Shared.Network.NetUserId administrator)
-    {
-        if (!TryActor(request.ActorId, out var actorId))
-            return RejectActor("invalid-actor-id");
-        var state = _materialization.Request(new NCCityMaterializationRequest(
-            request.RequestId,
-            actorId,
-            NCCityMaterializationReason.Admin,
-            request.Priority,
-            unchecked((uint) actorId.Value.GetHashCode()),
-            _materialization.AutomaticRequestMaximumWait,
-            AdminAuditSource(administrator, request.Reason)));
-        var fields = new FieldBuilder();
-        fields.Add("request", "request-id", state.RequestId);
-        fields.Add("request", "actor-id", state.ActorId);
-        fields.Add("request", "status", state.Status);
-        fields.Add("request", "attempts", state.Attempts);
-        fields.Add("request", "error", state.Error);
-        return new ActorActionExecution(
-            state.Status == NCCityMaterializationRequestStatus.Rejected
-                ? NCLivingCityAdminMutationStatus.Rejected
-                : NCLivingCityAdminMutationStatus.Applied,
-            fields.Build(), state.Error);
-    }
-
-    private ActorActionExecution DematerializeActor(
-        NCLivingCityAdminActorActionRequest request,
-        Robust.Shared.Network.NetUserId administrator)
-    {
-        if (!TryActor(request.ActorId, out var actorId) || !_actorRuntime.TryGetEntity(actorId, out var entity))
-            return RejectActor("actor-not-materialized");
-        var state = _dematerialization.Request(new NCCityDematerializationRequest(
-            request.RequestId,
-            actorId,
-            entity,
-            NCCityDematerializationReason.Admin,
-            request.Priority,
-            AdminAuditSource(administrator, request.Reason)));
-        var fields = new FieldBuilder();
-        fields.Add("request", "request-id", state.RequestId);
-        fields.Add("request", "actor-id", state.ActorId);
-        fields.Add("request", "status", state.Status);
-        fields.Add("request", "attempts", state.Attempts);
-        fields.Add("request", "error", state.Error);
-        return new ActorActionExecution(
-            state.Status == NCCityDematerializationStatus.Rejected
-                ? NCLivingCityAdminMutationStatus.Rejected
-                : NCLivingCityAdminMutationStatus.Applied,
-            fields.Build(), state.Error);
     }
 
     private static ActorActionExecution ActorMutation(NCCityActorMutationResult result)

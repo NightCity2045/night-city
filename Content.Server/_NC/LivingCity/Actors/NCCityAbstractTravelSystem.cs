@@ -78,7 +78,7 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
         SubscribeLocalEvent<NCCityActorPersistedEvent>(OnActorPersisted);
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
         SubscribeLocalEvent<NCCityConnectivityChangedEvent>(OnConnectivityChanged);
     }
 
@@ -123,20 +123,7 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
     private void OnSessionStarted(NCActiveWorldSessionStartedEvent args)
     {
         Reset();
-        if (!_prototypes.TryIndex(
-                new ProtoId<NCCityAbstractTravelPolicyPrototype>(DefaultPolicyId),
-                out NCCityAbstractTravelPolicyPrototype? policy) ||
-            policy == null || !ValidatePolicy(policy))
-        {
-            Log.Error($"Abstract actor travel cannot start: policy {DefaultPolicyId} is missing or invalid.");
-            return;
-        }
-
-        _policy = policy;
-        _epoch = args.Epoch;
-        _active = true;
-        _pageRetryAt = args.Time;
-        BeginPageLoad(_generation, null);
+        // Physical GPT A-Life moves only through the physical navigation stack.
     }
 
     private void OnSessionClosed(NCActiveWorldSessionClosedEvent args)
@@ -173,11 +160,11 @@ public sealed partial class NCCityAbstractTravelSystem : EntitySystem
         ScheduleFromEvent(args);
     }
 
-    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
         if (!_active)
             return;
-        if (args.Materialized)
+        if (args.Bound)
         {
             _scheduled.Remove(args.ActorId);
             _deferredSchedules.Remove(args.ActorId);

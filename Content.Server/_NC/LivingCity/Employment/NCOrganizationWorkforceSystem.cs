@@ -61,7 +61,7 @@ public sealed partial class NCOrganizationWorkforceSystem : EntitySystem
     {
         base.Initialize();
         BuildOrganizationIndex();
-        SubscribeLocalEvent<NCCityActorRehydratedEvent>(OnActorRehydrated);
+        SubscribeLocalEvent<NCPhysicalActorSpawnedEvent>(OnActorRehydrated);
         SubscribeLocalEvent<NCEmploymentPersistedEvent>(OnEmploymentPersisted);
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => StopRecovery());
@@ -523,7 +523,7 @@ public sealed partial class NCOrganizationWorkforceSystem : EntitySystem
         RecoveryComplete = false;
     }
 
-    private void OnActorRehydrated(NCCityActorRehydratedEvent args)
+    private void OnActorRehydrated(NCPhysicalActorSpawnedEvent args)
     {
         _ = ResolvePhysicalEmploymentAsync(args.ActorId, args.EntityUid);
     }

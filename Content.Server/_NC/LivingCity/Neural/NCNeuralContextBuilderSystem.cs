@@ -22,8 +22,6 @@ using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Prototypes;
 using Content.Shared.Roles;
-using Content.Server.Chat.Systems;
-using Content.Shared.Chat;
 using System.Threading;
 
 namespace Content.Server._NC.LivingCity.Neural;
@@ -35,8 +33,8 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
     private static readonly ProtoId<NCNeuralPromptProfilePrototype> DefaultPrompt = "NCLivingCityDefault";
     private static readonly ProtoId<NCNeuralPersonaProfilePrototype> DefaultResidentPersona =
         "NCDefaultResidentPersona";
-    private static readonly ProtoId<NCNeuralAutonomyPolicyPrototype> OrdinaryDialogueAutonomy =
-        "NCOrdinaryResidentDialogueAutonomy";
+    private static readonly ProtoId<NCNeuralAutonomyPolicyPrototype> DefaultResidentAutonomy =
+        "NCDefaultNeuralAutonomy";
     private const string DialogueCapability = "social.dialogue.reply";
     private const string ApproachPersonCapability = "NCCognitionApproachPerson";
     private const string AcceptDirectiveCapability = "NCCognitionAcceptDirective";
@@ -49,7 +47,6 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
     [Dependency] private NCCityLocalPerceptionSystem _perception = default!;
     [Dependency] private NCLocationKnowledgeSystem _locationKnowledge = default!;
     [Dependency] private NCZoneSystem _zones = default!;
-    [Dependency] private NCCognitionSystem _cognition = default!;
     [Dependency] private NCSocialContextRedactionSystem _redaction = default!;
     [Dependency] private NCSocialProfileRegistrySystem _socialProfiles = default!;
     [Dependency] private NCConversationArchiveSystem _conversationArchive = default!;
@@ -60,15 +57,12 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
     [Dependency] private NCNeuralCognitionClientSystem _client = default!;
     [Dependency] private NCNeuralSuggestionSystem _suggestions = default!;
     [Dependency] private NCNeuralConversationSystem _neuralConversations = default!;
-    [Dependency] private ChatSystem _chat = default!;
     private readonly Dictionary<NCActorId, NCActiveWorldTime> _nextIncidentEscalation = [];
     private long _ordinaryDialogueSubmissions;
     private long _narrativeDialogueSubmissions;
-    private long _localDialogueFallbacks;
 
     public long OrdinaryDialogueSubmissions => Interlocked.Read(ref _ordinaryDialogueSubmissions);
     public long NarrativeDialogueSubmissions => Interlocked.Read(ref _narrativeDialogueSubmissions);
-    public long LocalDialogueFallbacks => Interlocked.Read(ref _localDialogueFallbacks);
 
     public override void Initialize()
     {
@@ -86,6 +80,29 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
     {
         return await SubmitCoreAsync(actorId, kind, priority, allowedCapabilities, conversation,
             transientUtterance);
+    }
+
+    /// <summary>Submits one independent physical actor decision using its authored capability allowlist.</summary>
+    public async Task<bool> SubmitAutonomousAsync(NCActorId actorId, NCNeuralPriority priority)
+    {
+        var actor = await _actors.GetAsync(actorId, true);
+        if (actor == null ||
+            !_prototypes.TryIndex(new ProtoId<NCCityActorArchetypePrototype>(actor.Snapshot.Identity.ArchetypeId),
+                out var archetype) || archetype == null ||
+            !_prototypes.TryIndex(archetype.CognitionCapabilityProfile,
+                out NCCognitionCapabilityProfilePrototype? profile) || profile == null)
+            return false;
+
+        var capabilities = profile.Capabilities.ToList();
+        _professions.AddCapabilityOverlays(actorId, capabilities);
+        var allowed = capabilities.Select(value => value.Id).Distinct(StringComparer.Ordinal).ToArray();
+        return allowed.Length > 0 && await SubmitCoreAsync(
+            actorId,
+            NCNeuralRequestKind.StrategicDecision,
+            priority,
+            allowed,
+            null,
+            null);
     }
 
     private async Task<bool> SubmitCoreAsync(NCActorId actorId, NCNeuralRequestKind kind,
@@ -114,11 +131,8 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         }
         else
         {
-            // Ordinary residents may use Neural only to answer a direct bounded conversation. They receive no
-            // strategic or incident-escalation access and keep their deterministic BDI for every world action.
-            if (kind != NCNeuralRequestKind.DialogueContinuation ||
-                !_prototypes.TryIndex(DefaultResidentPersona, out personaProfile) ||
-                !_prototypes.TryIndex(OrdinaryDialogueAutonomy, out autonomyPolicy))
+            if (!_prototypes.TryIndex(DefaultResidentPersona, out personaProfile) ||
+                !_prototypes.TryIndex(DefaultResidentAutonomy, out autonomyPolicy))
                 return false;
         }
         if (personaProfile == null || autonomyPolicy == null || !autonomyPolicy.AllowedKinds.Contains(kind))
@@ -212,30 +226,6 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         var facts = context.Facts.Where(value => !context.ForbiddenTopics.Contains(value.FactKey))
             .Select(value => new NCNeuralFact(value.Domain, value.FactKey, StableSubject(value.SubjectKey),
                 value.Confidence, value.Privacy.ToString())).ToList();
-        if (_cognition.TryGetSnapshot(actorId, out var cognition))
-        {
-            var physicalFacts = cognition.Facts
-                .Where(value => value.ExpiresAt > now && value.Subject.IsValid &&
-                                value.Subject.StableId.StartsWith("perceived-", StringComparison.Ordinal))
-                .OrderByDescending(value => value.ObservedAt.Ticks)
-                .Take(maximumPerceivedSubjects)
-                .ToArray();
-            foreach (var value in physicalFacts.GroupBy(value => value.Subject.StableId, StringComparer.Ordinal)
-                         .Select(group => group.First()))
-            {
-                perceivedByHandle.TryAdd(value.Subject.StableId, new NCNeuralPerceivedSubject(
-                    value.Subject.StableId, "Unknown person", value.Key, 1f, value.ExpiresAt.Ticks));
-            }
-            facts.AddRange(physicalFacts.Select(value => new NCNeuralFact(
-                value.Domain.ToString(), value.Key, value.Subject.StableId, 1f,
-                NCMemoryPrivacy.Public.ToString())));
-            if (cognition.Intention is { } intention)
-            {
-                facts.Add(new NCNeuralFact(
-                    "Core", "cognition.current-intention", StableSubject(intention.CapabilityId), 1f,
-                    NCMemoryPrivacy.Public.ToString()));
-            }
-        }
         var perceived = perceivedByHandle.Values.Take(maximumPerceivedSubjects).ToArray();
         var knownLocations = BuildKnownLocations(actor, maximumKnownLocations);
         var socialProfileTask = _socialProfiles.GetAsync(actorId);
@@ -308,10 +298,6 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             dialogueInput = new NCNeuralDialogueInput(actorName, utterance, speakerHandle, history, earlierSummary);
         }
         var effectiveCapabilities = allowedCapabilities
-            // Ordinary residents may propose only bounded dialogue or a server-validated voluntary directive.
-            // The provider still cannot mutate the world or bypass action, target and authority validation.
-            .Where(value => narrativeAccess || value is DialogueCapability or AcceptDirectiveCapability or
-                RespondToThreatCapability)
             .Where(value => value != ApproachPersonCapability || speakerHandle.Length > 0)
             .Concat(narrativeAccess && kind == NCNeuralRequestKind.DialogueContinuation
                 ? [AcceptDirectiveCapability]
@@ -361,11 +347,7 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         if (trackedDialogue && !_suggestions.TryTrackDialogue(
                 request.RequestId,
                 conversationSnapshot!.SessionId,
-                conversationSnapshot.ConversationVersion,
-                SelectDialogueFallback(
-                    socialProfile?.Snapshot.Personality,
-                    transientUtterance?.TrimEnd().EndsWith('?') == true,
-                    conversationSnapshot.Turns.LastOrDefault()?.Act == NCSpeechActKind.Threat)))
+                conversationSnapshot.ConversationVersion))
             return false;
         if (_client.Submit(request))
         {
@@ -399,55 +381,18 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
 
         // Dialogue may propose only the generic social approach capability. The proposal still passes through
         // perception validation, BDI selection and ordinary NPC steering before any movement occurs.
-        _ = ContinueDialogueAsync(actorId, session.SessionId, args.TransientUtterance ?? string.Empty,
-            session.Turns[^1].Act == NCSpeechActKind.Threat);
+        _ = ContinueDialogueAsync(actorId, session.SessionId, args.TransientUtterance ?? string.Empty);
     }
 
     private async Task ContinueDialogueAsync(
         NCActorId actorId,
         NCConversationSessionId sessionId,
-        string transientUtterance,
-        bool isThreat)
+        string transientUtterance)
     {
-        if (await SubmitAsync(actorId, NCNeuralRequestKind.DialogueContinuation, NCNeuralPriority.P1,
-                [DialogueCapability, ApproachPersonCapability, AcceptDirectiveCapability, RespondToThreatCapability], sessionId,
-                transientUtterance))
-            return;
-
-        // A disabled provider or exhausted budget must not make a resident mute. This reply is deliberately narrow:
-        // it acknowledges only the live utterance and never fabricates world facts or executes an action.
-        if (!_runtime.TryGetEntity(actorId, out var entity) || !Exists(entity))
-            return;
-        var profile = await _socialProfiles.GetAsync(actorId);
-        var locId = SelectDialogueFallback(
-            profile?.Snapshot.Personality,
-            transientUtterance.TrimEnd().EndsWith('?'),
-            isThreat);
-        Interlocked.Increment(ref _localDialogueFallbacks);
-        _chat.TrySendInGameICMessage(entity, Loc.GetString(locId), InGameICChatType.Speak,
-            hideChat: false, checkRadioPrefix: false);
+        await SubmitAsync(actorId, NCNeuralRequestKind.DialogueContinuation, NCNeuralPriority.P1,
+            [DialogueCapability, ApproachPersonCapability, AcceptDirectiveCapability, RespondToThreatCapability], sessionId,
+            transientUtterance);
     }
-
-    private static string SelectDialogueFallback(
-        NCPersonalityTraits? personality,
-        bool isQuestion,
-        bool isThreat) => isThreat
-        ? personality is { Aggression: >= 700 }
-            ? "nc-human-dialogue-threat-aggressive"
-            : "nc-human-dialogue-threat"
-        : personality switch
-        {
-            { Aggression: >= 700 } => isQuestion
-                ? "nc-human-dialogue-question-aggressive"
-                : "nc-human-dialogue-statement-aggressive",
-            { AuthorityRespect: >= 700 } => isQuestion
-                ? "nc-human-dialogue-question-professional"
-                : "nc-human-dialogue-statement-professional",
-            { Empathy: >= 700 } => isQuestion
-                ? "nc-human-dialogue-question-empathetic"
-                : "nc-human-dialogue-statement-empathetic",
-            _ => isQuestion ? "nc-human-dialogue-question-neutral" : "nc-human-dialogue-statement-neutral",
-        };
 
     private NCNeuralKnownLocation[] BuildKnownLocations(NCCityActorRecord actor, int maximum)
     {
@@ -471,7 +416,15 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
 
     private void OnIncidentObserved(NCCityLocalIncidentObservedEvent args)
     {
-        if (args.Kind is not (NCCityLocalPerceivedEventKind.Assault or NCCityLocalPerceivedEventKind.Killing) ||
+        if (args.Kind is not (
+                NCCityLocalPerceivedEventKind.Assault or
+                NCCityLocalPerceivedEventKind.Killing or
+                NCCityLocalPerceivedEventKind.Gunshot or
+                NCCityLocalPerceivedEventKind.WeaponDisplayed or
+                NCCityLocalPerceivedEventKind.VerbalThreat or
+                NCCityLocalPerceivedEventKind.BodyDiscovered or
+                NCCityLocalPerceivedEventKind.SevereInjury or
+                NCCityLocalPerceivedEventKind.Fire) ||
             !_client.IsProviderEnabled ||
             !TryComp<NCCityActorBindingComponent>(args.Observer, out var binding) ||
             !_clock.TryGetCurrentTime(out _, out var now) ||
@@ -485,25 +438,12 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
 
     private async Task SubmitIncidentEscalationAsync(NCActorId actorId, NCCityLocalPerceivedEventKind kind)
     {
-        var actor = await _actors.GetAsync(actorId, true);
-        if (actor == null ||
-            !_prototypes.TryIndex(new ProtoId<NCCityActorArchetypePrototype>(actor.Snapshot.Identity.ArchetypeId),
-                out var archetype) || archetype == null ||
-            !TryResolveNarrativeProfile(actor, archetype, out var narrativeProfile) ||
-            !narrativeProfile.IncidentEscalationEnabled ||
-            !_prototypes.TryIndex(archetype.CognitionCapabilityProfile, out NCCognitionCapabilityProfilePrototype? profile) ||
-            profile == null)
-            return;
-
-        // Only explicitly authored narrative Actors may escalate an incident to Neural Cognition.
-        var capabilities = profile.Capabilities.ToList();
-        _professions.AddCapabilityOverlays(actorId, capabilities);
-        var allowed = capabilities.Select(value => value.Id).Distinct(StringComparer.Ordinal).ToArray();
-        if (allowed.Length == 0)
-            return;
-        await SubmitCoreAsync(actorId, NCNeuralRequestKind.StrategicDecision,
-            kind == NCCityLocalPerceivedEventKind.Killing ? NCNeuralPriority.P1 : NCNeuralPriority.P2,
-            allowed, null, null);
+        var priority = kind is NCCityLocalPerceivedEventKind.Killing or
+            NCCityLocalPerceivedEventKind.Assault or
+            NCCityLocalPerceivedEventKind.Fire
+            ? NCNeuralPriority.P1
+            : NCNeuralPriority.P2;
+        await SubmitAutonomousAsync(actorId, priority);
     }
 
     private void ClearCooldowns()
@@ -511,7 +451,6 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         _nextIncidentEscalation.Clear();
         Interlocked.Exchange(ref _ordinaryDialogueSubmissions, 0);
         Interlocked.Exchange(ref _narrativeDialogueSubmissions, 0);
-        Interlocked.Exchange(ref _localDialogueFallbacks, 0);
     }
 
     private bool TryResolveNarrativeProfile(

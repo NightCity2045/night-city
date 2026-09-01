@@ -11,12 +11,8 @@ public enum NCLivingCityAdminInspectKind : byte
 {
     Actor,
     Cognition,
-    ActorMaterializationRequest,
-    ActorDematerializationRequest,
-    ActorRelevance,
     Group,
     GroupMembership,
-    GroupPhysicalizationRequest,
     GroupFormation,
     ZoneState,
     Party,
@@ -70,8 +66,6 @@ public enum NCLivingCityAdminActorAction : byte
     Move,
     CaptureDomains,
     RestoreHealth,
-    Materialize,
-    Dematerialize,
 }
 
 [Serializable, NetSerializable]
@@ -83,8 +77,6 @@ public enum NCLivingCityAdminGroupAction : byte
     TransferMember,
     SetLeader,
     SetDirective,
-    Materialize,
-    Dematerialize,
 }
 
 [Serializable, NetSerializable]

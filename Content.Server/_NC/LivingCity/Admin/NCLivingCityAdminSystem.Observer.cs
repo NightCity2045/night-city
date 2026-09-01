@@ -101,7 +101,7 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-presence", "district-actors", districtActors);
         fields.Add("observer-presence", "residents", _zoneStates.ResidentCount);
         fields.Add("observer-presence", "narrative-actors", _zoneStates.NarrativeActorCount);
-        fields.Add("observer-presence", "materialized", _actorRuntime.MaterializedActorCount);
+        fields.Add("observer-presence", "materialized", _actorRuntime.PhysicalActorCount);
         fields.Add("observer-presence", "public", publicActors);
         fields.Add("observer-presence", "abstract-home", abstractHomeActors);
         fields.Add("observer-presence", "working", _zoneStates.WorkingActorCount);
@@ -142,29 +142,17 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-pipeline", "projection-ready", _zoneStates.InitialLoadComplete);
         fields.Add("observer-pipeline", "projected-scopes", _zoneStates.ScopeCount);
         fields.Add("observer-pipeline", "dirty-scopes", _zoneStates.PendingScopeCount);
-        fields.Add("observer-pipeline", "schedule-queued", _scheduler.QueuedActorCount);
-        fields.Add("observer-pipeline", "travel-queued", _travel.QueuedActorCount);
-        fields.Add("observer-pipeline", "materialization-queued", _materialization.PendingRequestCount);
-        fields.Add("observer-pipeline", "dematerialization-queued", _dematerialization.PendingRequestCount);
-        fields.Add("observer-pipeline", "player-clusters", _relevance.ClusterCount);
-        fields.Add("observer-pipeline", "required-physical", _relevance.RequiredPhysicalActors);
-        fields.Add("observer-pipeline", "waiting-physical", _relevance.WaitingPhysicalActors);
-        fields.Add("observer-pipeline", "materialization-requests-submitted",
-            _relevance.MaterializationRequestsSubmitted);
-        fields.Add("observer-pipeline", "traveling-candidates-skipped", _relevance.TravelingCandidatesSkipped);
-        fields.Add("observer-handoff", "retained-by-observer", _relevance.ObserverRetainedActors);
-        fields.Add("observer-handoff", "retained-by-grace", _relevance.GraceRetainedActors);
-        fields.Add("observer-handoff", "retained-by-admin", _relevance.AdminRetainedActors);
-        fields.Add("observer-handoff", "blocked", _relevance.EligibilityBlockedActors);
-        fields.Add("observer-handoff", "requests", _relevance.OffscreenRequests);
-        fields.Add("observer-handoff", "prepared-despawns", _dematerialization.PreparedDespawnCount);
-        fields.Add("observer-handoff", "queued-entity-deletions", _dematerialization.QueuedEntityDeletionCount);
-        fields.Add("observer-handoff", "last-queued-entity",
-            _dematerialization.LastQueuedEntityDeletion?.ToString() ?? "none");
-        fields.Add("observer-handoff", "last-queued-tick",
-            _dematerialization.LastQueuedEntityDeletion == null
-                ? "none"
-                : _dematerialization.LastQueuedEntityDeletionTick.ToString());
+        fields.Add("observer-physical-lifecycle", "active", _physicalLifecycle.IsActive);
+        fields.Add("observer-physical-lifecycle", "physical", _actorRuntime.PhysicalActorCount);
+        fields.Add("observer-physical-lifecycle", "queued", _physicalLifecycle.QueuedCount);
+        fields.Add("observer-physical-lifecycle", "loads-in-flight", _physicalLifecycle.LoadsInFlight);
+        fields.Add("observer-gpt-brain", "scheduled", _physicalBrain.ScheduledActors);
+        fields.Add("observer-gpt-brain", "in-flight", _physicalBrain.SubmissionsInFlight);
+        fields.Add("observer-gpt-brain", "submitted", _physicalBrain.DecisionsSubmitted);
+        fields.Add("observer-gpt-brain", "retries", _physicalBrain.SubmissionRetries);
+        fields.Add("observer-gpt-actions", "running", _neuralExecution.RunningCount);
+        fields.Add("observer-gpt-actions", "completed", _neuralExecution.CompletedCount);
+        fields.Add("observer-gpt-actions", "failed", _neuralExecution.FailedCount);
         return fields.Build();
     }
 
@@ -286,9 +274,8 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("observer-intent", "late",
             snapshot.Schedule.CurrentActivity.Equals("work", StringComparison.OrdinalIgnoreCase) &&
             snapshot.Location.CurrentZone != snapshot.Location.WorkZone);
-        fields.Add("observer-intent", "materialized", _actorRuntime.TryGetEntity(actorId, out var entityUid));
-        fields.Add("observer-intent", "entity", entityUid.IsValid() ? entityUid : "abstract");
-        fields.Add("observer-intent", "lod", _relevance.TryGetLod(actorId, out var lod) ? lod : "unindexed");
+        fields.Add("observer-intent", "physical", _actorRuntime.TryGetEntity(actorId, out var entityUid));
+        fields.Add("observer-intent", "entity", entityUid.IsValid() ? entityUid : "recovery-pending");
 
         var employment = await _employment.FindCurrentByEmployeeAsync(NCPartyRef.ForActor(actorId));
         if (employment != null)
@@ -437,70 +424,23 @@ public sealed partial class NCLivingCityAdminSystem
                 fields.Add(section, "status", membership.Status);
             }
         }
-        if (entityUid.IsValid() &&
-            TryComp<NCCityMaterializationLeaseComponent>(entityUid, out var lease))
+        if (_neuralSuggestions.TryGetSuggestionSnapshot(actorId, out var suggestion))
         {
-            fields.Add("observer-physical-lease", "reason", lease.Reason);
-            fields.Add("observer-physical-lease", "materialized-at", lease.MaterializedAt.Elapsed);
-            fields.Add("observer-physical-lease", "last-relevant-at", lease.LastRelevantAt.Elapsed);
-            fields.Add("observer-physical-lease", "offscreen-eligible",
-                _dematerialization.IsEligibleForOffscreenHandOff(actorId, entityUid, out var handoffError));
-            fields.Add("observer-physical-lease", "retention-reason", handoffError ?? "none");
+            fields.Add("observer-gpt-decision", "request", suggestion.RequestId);
+            fields.Add("observer-gpt-decision", "capability", suggestion.CapabilityId);
+            fields.Add("observer-gpt-decision", "goal", suggestion.GoalKey);
+            fields.Add("observer-gpt-decision", "target", suggestion.TargetHandle);
+            fields.Add("observer-gpt-decision", "confidence", suggestion.Confidence);
+            fields.Add("observer-gpt-decision", "accepted-at", suggestion.AcceptedAt.Elapsed);
+            fields.Add("observer-gpt-decision", "expires-at", suggestion.ExpiresAt.Elapsed);
         }
 
-        if (_physicalExecution.TryGetSnapshot(actorId, out var physical))
+        if (_neuralExecution.TryGetSnapshot(actorId, out var plan))
         {
-            fields.Add("observer-physical-plan", "state", physical.State);
-            fields.Add("observer-physical-plan", "mode", physical.Mode);
-            fields.Add("observer-physical-plan", "behavior-owner", physical.BehaviorOwner);
-            fields.Add("observer-physical-plan", "destination-zone", physical.DestinationZone);
-            fields.Add("observer-physical-plan", "waypoint", $"{physical.WaypointIndex}/{physical.WaypointCount}");
-            fields.Add("observer-physical-plan", "replans", physical.ReplanAttempts);
-            fields.Add("observer-physical-plan", "last-failure", physical.LastFailure ?? "none");
-            foreach (var trace in physical.Trace.TakeLast(8))
-            {
-                var section = $"observer-physical-trace-{trace.Sequence}";
-                fields.Add(section, "at", trace.At.Elapsed);
-                fields.Add(section, "state", trace.State);
-                fields.Add(section, "event", trace.Event);
-                fields.Add(section, "detail", trace.Detail);
-            }
-        }
-
-        if (_cognition.TryGetSnapshot(actorId, out var cognition))
-        {
-            fields.Add("observer-mind", "runtime", true);
-            fields.Add("observer-mind", "last-decision", cognition.LastDecisionAt.Elapsed);
-            fields.Add("observer-mind", "next-decision", cognition.NextDecisionAt.Elapsed);
-            fields.Add("observer-mind", "facts", cognition.Facts.Length);
-            fields.Add("observer-mind", "beliefs", cognition.Beliefs.Length);
-            fields.Add("observer-mind", "desires", cognition.Desires.Length);
-            fields.Add("observer-mind", "last-failure", cognition.LastFailure ?? "none");
-            fields.Add("observer-mind", "human-state", cognition.HumanActivity.State);
-            fields.Add("observer-mind", "idle-reason", cognition.HumanActivity.Reason);
-            fields.Add("observer-mind", "fallback-action", cognition.HumanActivity.FallbackAction);
-            fields.Add("observer-mind", "next-wake", cognition.HumanActivity.NextWakeAt.Elapsed);
-            AddIntention(fields, "observer-current-intention", cognition.Intention);
-            if (cognition.Plan != null)
-            {
-                fields.Add("observer-cognition-plan", "planner", cognition.Plan.Planner);
-                fields.Add("observer-cognition-plan", "status", cognition.Plan.Status);
-                fields.Add("observer-cognition-plan", "step",
-                    $"{cognition.Plan.CurrentStep}/{cognition.Plan.Steps.Length}");
-                fields.Add("observer-cognition-plan", "failure", cognition.Plan.Failure ?? "none");
-            }
-            foreach (var trace in cognition.Trace.TakeLast(12))
-            {
-                var section = $"observer-cognition-trace-{trace.Sequence}";
-                fields.Add(section, "at", trace.At.Elapsed);
-                fields.Add(section, "stage", trace.Stage);
-                fields.Add(section, "event", trace.Event);
-                fields.Add(section, "detail", trace.Detail);
-            }
-        }
-        else
-        {
-            fields.Add("observer-mind", "runtime", false);
+            fields.Add("observer-gpt-plan", "id", plan.PlanId);
+            fields.Add("observer-gpt-plan", "capability", plan.CapabilityId);
+            fields.Add("observer-gpt-plan", "step", $"{plan.CurrentStep}/{plan.StepCount}");
+            fields.Add("observer-gpt-plan", "expires-at", plan.ExpiresAt.Elapsed);
         }
 
         if (_humanActions.TryGetSnapshot(actorId, out var action))

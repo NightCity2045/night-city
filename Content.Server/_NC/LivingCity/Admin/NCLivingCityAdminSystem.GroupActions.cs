@@ -87,8 +87,6 @@ public sealed partial class NCLivingCityAdminSystem
             NCLivingCityAdminGroupAction.TransferMember => await TransferGroupMemberAsync(request, administrator),
             NCLivingCityAdminGroupAction.SetLeader => await SetGroupLeaderAsync(request, administrator),
             NCLivingCityAdminGroupAction.SetDirective => await SetGroupDirectiveAsync(request, administrator),
-            NCLivingCityAdminGroupAction.Materialize => PhysicalizeGroup(request, administrator, true),
-            NCLivingCityAdminGroupAction.Dematerialize => PhysicalizeGroup(request, administrator, false),
             _ => RejectGroup("unsupported-group-action"),
         };
     }
@@ -237,35 +235,6 @@ public sealed partial class NCLivingCityAdminSystem
             AuditSource: AdminAuditSource(administrator, request.Reason))));
     }
 
-    private GroupActionExecution PhysicalizeGroup(
-        NCLivingCityAdminGroupActionRequest request,
-        NetUserId administrator,
-        bool materialize)
-    {
-        if (!TryGroup(request.GroupId, out var groupId))
-            return RejectGroup("invalid-group-id");
-        var state = _groupPhysicalization.Request(new NCCityGroupPhysicalizationRequest(
-            request.RequestId,
-            groupId,
-            materialize
-                ? NCCityGroupPhysicalizationDirection.Materialize
-                : NCCityGroupPhysicalizationDirection.Dematerialize,
-            NCCityGroupPhysicalizationReason.Admin,
-            request.Priority,
-            unchecked((uint) groupId.Value.GetHashCode()),
-            null,
-            AdminAuditSource(administrator, request.Reason)));
-        var fields = new FieldBuilder();
-        fields.Add("request", "request-id", state.RequestId);
-        fields.Add("request", "group-id", state.GroupId);
-        fields.Add("request", "direction", state.Direction);
-        fields.Add("request", "status", state.Status);
-        fields.Add("request", "attempts", state.Attempts);
-        fields.Add("request", "members", $"{state.CompletedMembers}/{state.TotalMembers}");
-        fields.Add("request", "error", state.Error);
-        return new GroupActionExecution(MapPhysicalizationStatus(state.Status), fields.Build(), state.Error);
-    }
-
     private static GroupActionExecution GroupMutation(NCCityGroupMutationResult result)
     {
         var fields = new FieldBuilder();
@@ -294,16 +263,6 @@ public sealed partial class NCLivingCityAdminSystem
         NCCityGroupMutationStatus.Duplicate => NCLivingCityAdminMutationStatus.Duplicate,
         NCCityGroupMutationStatus.StorageFailure => NCLivingCityAdminMutationStatus.Failed,
         _ => NCLivingCityAdminMutationStatus.Rejected,
-    };
-
-    private static NCLivingCityAdminMutationStatus MapPhysicalizationStatus(
-        NCCityGroupPhysicalizationStatus status) => status switch
-    {
-        NCCityGroupPhysicalizationStatus.Rejected or
-        NCCityGroupPhysicalizationStatus.Expired or
-        NCCityGroupPhysicalizationStatus.FailedRolledBack or
-        NCCityGroupPhysicalizationStatus.PartialFailure => NCLivingCityAdminMutationStatus.Rejected,
-        _ => NCLivingCityAdminMutationStatus.Applied,
     };
 
     private static bool ValidGroupActionRequest(NCLivingCityAdminGroupActionRequest request)

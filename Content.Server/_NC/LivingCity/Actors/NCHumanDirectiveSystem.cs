@@ -51,7 +51,7 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
     [Dependency] private NCFactionMembershipRegistrySystem _factions = default!;
     [Dependency] private NCZoneSystem _zones = default!;
     [Dependency] private NCMemoryRegistrySystem _memories = default!;
-    [Dependency] private NCCognitionSystem _cognition = default!;
+    [Dependency] private NCPhysicalActorBrainSystem _brain = default!;
     [Dependency] private NCNeuralSuggestionSystem _suggestions = default!;
 
     private readonly HashSet<Guid> _pending = [];
@@ -69,7 +69,7 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
         SubscribeLocalEvent<NCNeuralDialogueDirectiveProposedEvent>(OnIntent);
         SubscribeLocalEvent<NCHumanActionExecutionEvent>(OnExecuteStep);
         SubscribeLocalEvent<NCCognitionCollectFactsEvent>(OnCollectFacts);
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => Reset());
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => Reset());
     }
@@ -100,8 +100,8 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
 
     private void OnIntent(NCNeuralDialogueDirectiveProposedEvent args)
     {
-        var intent = args.Response.Intent;
-        if (args.Response.SelectedCapabilityId != Capability || intent == null ||
+        var intent = args.Response.Commands.FirstOrDefault(command => command.CapabilityId == Capability);
+        if (intent == null ||
             !_clock.TryGetCurrentTime(out _, out var now) ||
             !_prototypes.TryIndex(DefaultPolicy, out NCHumanDirectivePolicyPrototype? policy) || policy == null ||
             !_runtime.TryGetEntity(args.ActorId, out var targetEntity) || !Exists(targetEntity) ||
@@ -287,7 +287,7 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
                 _directives[projection.ActorId] = directive;
                 _expiries.Enqueue(new DirectiveExpiry(projection.ActorId, requestId), directive.ExpiresAt.Ticks);
                 MirrorDirective(directive);
-                _cognition.ForceSchedule(projection.ActorId, now);
+                _brain.RequestDecision(projection.ActorId);
             }
 
             _pendingDialogues[requestId] = new PendingDirectiveDialogue(
@@ -417,7 +417,7 @@ public sealed partial class NCHumanDirectiveSystem : EntitySystem
         {
             SpeechActKey = "refusal",
             RenderedText = Loc.GetString("nc-human-directive-refused"),
-            Intent = null,
+            Commands = [],
         };
         _suggestions.TryDeliverDeferredDialogue(
             proposal.ActorId,

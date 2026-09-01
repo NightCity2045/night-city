@@ -35,8 +35,8 @@ public sealed partial class NCNcpdWorkforceProjectionSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<NCWorkforceAssignmentChangedEvent>(OnWorkforceAssignmentChanged);
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
-        SubscribeLocalEvent<NCCityActorRehydratedEvent>(OnActorRehydrated);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
+        SubscribeLocalEvent<NCPhysicalActorSpawnedEvent>(OnActorRehydrated);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
         RebuildProfiles();
         ReconcileWorkforce();
@@ -77,13 +77,13 @@ public sealed partial class NCNcpdWorkforceProjectionSystem : EntitySystem
         Project(args.ActorId, profile);
     }
 
-    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
-        if (args.Materialized && _profileByActor.TryGetValue(args.ActorId, out var profile))
+        if (args.Bound && _profileByActor.TryGetValue(args.ActorId, out var profile))
             ApplyPhysicalProjection(args.ActorId, args.EntityUid, profile);
     }
 
-    private void OnActorRehydrated(NCCityActorRehydratedEvent args)
+    private void OnActorRehydrated(NCPhysicalActorSpawnedEvent args)
     {
         if (_profileByActor.TryGetValue(args.ActorId, out var profile))
             ApplyPhysicalProjection(args.ActorId, args.EntityUid, profile);

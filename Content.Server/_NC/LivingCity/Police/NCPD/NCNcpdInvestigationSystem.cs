@@ -7,6 +7,7 @@ using Content.Server._NC.LivingCity.CityServices;
 using Content.Server._NC.LivingCity.Cognition;
 using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.LivingCity.Police;
+using Content.Server._NC.LivingCity.Neural;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.CityServices;
@@ -40,7 +41,7 @@ public sealed partial class NCNcpdInvestigationSystem : EntitySystem
     [Dependency] private NCNcpdUnitSystem _units = default!;
     [Dependency] private NCNcpdWorkforceProjectionSystem _workforce = default!;
     [Dependency] private NCNcpdAssignmentExecutionSystem _assignments = default!;
-    [Dependency] private NCCognitionSystem _cognition = default!;
+    [Dependency] private NCPhysicalActorBrainSystem _brain = default!;
 
     private readonly Dictionary<NCCityIncidentId, NCCityIncidentRecord> _activeCases = [];
     private readonly Dictionary<NCCityIncidentId, EntityUid> _assigned = [];
@@ -62,7 +63,7 @@ public sealed partial class NCNcpdInvestigationSystem : EntitySystem
         SubscribeLocalEvent<NCCityIncidentPersistedEvent>(OnIncidentPersisted);
         SubscribeLocalEvent<NCPoliceWantedPersistedEvent>(OnWantedPersisted);
         SubscribeLocalEvent<NCNcpdInvestigationUnitAssignedEvent>(OnUnitAssigned);
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
         SubscribeLocalEvent<NCCognitionCollectFactsEvent>(OnCollectFacts);
         SubscribeLocalEvent<NCHumanActionExecutionEvent>(OnExecute);
         SubscribeLocalEvent<NCHumanActionInterruptedEvent>(OnInterrupted);
@@ -160,9 +161,9 @@ public sealed partial class NCNcpdInvestigationSystem : EntitySystem
 
     private void OnUnitAssigned(NCNcpdInvestigationUnitAssignedEvent args) => TryAssign(args.IncidentId, args.UnitId);
 
-    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
-        if (!args.Materialized)
+        if (!args.Bound)
         {
             foreach (var incidentId in _assigned
                          .Where(value => value.Value == args.EntityUid)
@@ -210,7 +211,7 @@ public sealed partial class NCNcpdInvestigationSystem : EntitySystem
             projection.UpdatedAt = now;
             projection.Failure = string.Empty;
             _assigned[incidentId] = entity;
-            _cognition.ForceSchedule(unit.LeaderActorId, now);
+            _brain.RequestDecision(unit.LeaderActorId);
             return;
         }
     }

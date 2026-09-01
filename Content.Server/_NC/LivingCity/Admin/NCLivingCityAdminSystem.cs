@@ -13,7 +13,6 @@ using Content.Server._NC.City.Zones;
 using Content.Server._NC.GameRules;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Actors.Domains;
-using Content.Server._NC.LivingCity.Ambient;
 using Content.Server._NC.LivingCity.Affordances;
 using Content.Server._NC.LivingCity.Cognition;
 using Content.Server._NC.LivingCity.CityServices;
@@ -96,10 +95,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
     [Dependency] private NCCityActorDomainRegistrySystem _actorDomains = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _actorRuntime = default!;
-    [Dependency] private NCCityActorMaterializationSystem _materialization = default!;
-    [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
-    [Dependency] private NCCityRelevanceSystem _relevance = default!;
-    [Dependency] private NCAmbientCrowdSystem _ambient = default!;
+    [Dependency] private NCPhysicalActorLifecycleSystem _physicalLifecycle = default!;
     [Dependency] private NCCityAffordanceCatalogSystem _affordances = default!;
     [Dependency] private NCCityActorScheduleSchedulerSystem _scheduler = default!;
     [Dependency] private NCCityRoutineSystem _routines = default!;
@@ -115,7 +111,6 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCCityZoneStateRegistrySystem _zoneStateRegistry = default!;
     [Dependency] private NCCityZoneStateProjectionSystem _zoneStates = default!;
     [Dependency] private NCCityGroupRegistrySystem _groups = default!;
-    [Dependency] private NCCityGroupPhysicalizationSystem _groupPhysicalization = default!;
     [Dependency] private NCCityGroupRuntimeFormationSystem _groupFormations = default!;
     [Dependency] private NCCityGroupTrunkRouteSystem _groupRoutes = default!;
     [Dependency] private NCCityLocalPerceptionSystem _localPerception = default!;
@@ -181,6 +176,8 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
     [Dependency] private NCCityNewsRegistrySystem _cityNews = default!;
     [Dependency] private NCEstateRegistrySystem _estates = default!;
     [Dependency] private NCNeuralCognitionClientSystem _neural = default!;
+    [Dependency] private NCPhysicalActorBrainSystem _physicalBrain = default!;
+    [Dependency] private NCNeuralActionExecutionSystem _neuralExecution = default!;
     [Dependency] private NCNeuralContextBuilderSystem _neuralContext = default!;
     [Dependency] private NCNeuralSuggestionSystem _neuralSuggestions = default!;
     [Dependency] private NCNeuralConversationSystem _neuralConversations = default!;
@@ -279,90 +276,19 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("clock", "stale-start-callbacks-rejected", clockRuntime.StaleStartCallbacksRejected);
 
         fields.Add("actors", "cached", _actors.CachedActorCount);
-        fields.Add("actors", "materialized", _actorRuntime.MaterializedActorCount);
-        var ambient = _ambient.GetCounters();
-        fields.Add("ambient", "active", ambient.Active);
-        fields.Add("ambient", "interactive", ambient.InteractiveEntities);
-        fields.Add("ambient", "decorative", ambient.DecorativeVisuals);
-        fields.Add("ambient", "spawned", ambient.Spawned);
-        fields.Add("ambient", "despawned", ambient.Despawned);
-        fields.Add("ambient", "spawn-rejected", ambient.SpawnRejected);
-        fields.Add("ambient", "threat-reactions", ambient.ThreatReactions);
-        fields.Add("ambient", "configuration-error", ambient.ConfigurationError ?? "none");
-        if (fields.Includes("materialization"))
-        {
-            fields.Add("materialization", "active", _materialization.IsActive);
-            fields.Add("materialization", "queued", _materialization.PendingRequestCount);
-            fields.Add("materialization", "in-flight", _materialization.InFlightCount);
-            fields.Add("materialization", "retained", _materialization.RetainedResultCount);
-            var materializationPipeline = _materialization.GetPipelineCounters();
-            AddPipelineFields(fields, "materialization", "materialization", materializationPipeline);
-            fields.Add("materialization", "oldest-pending-age",
-                hasActiveTime && _materialization.TryGetOldestPendingAt(out var oldestMaterialization)
-                    ? Age(now, oldestMaterialization)
-                    : null);
-        }
-        if (fields.Includes("dematerialization"))
-        {
-            fields.Add("dematerialization", "active", _dematerialization.IsActive);
-            fields.Add("dematerialization", "queued", _dematerialization.PendingRequestCount);
-            fields.Add("dematerialization", "in-flight", _dematerialization.InFlightCount);
-            fields.Add("dematerialization", "retained", _dematerialization.RetainedResultCount);
-            var dematerializationPipeline = _dematerialization.GetPipelineCounters();
-            AddPipelineFields(fields, "dematerialization", "dematerialization", dematerializationPipeline);
-            fields.Add("dematerialization", "oldest-pending-age",
-                hasActiveTime && _dematerialization.TryGetOldestPendingAt(out var oldestDematerialization)
-                    ? Age(now, oldestDematerialization)
-                    : null);
-        }
-        fields.Add("relevance", "active", _relevance.IsActive);
-        fields.Add("relevance", "catalog-ready", _relevance.CatalogRecovered);
-        fields.Add("relevance", "catalog-actors", _relevance.CatalogActorCount);
-        fields.Add("relevance", "clusters", _relevance.ClusterCount);
-        fields.Add("relevance", "required-physical", _relevance.RequiredPhysicalActors);
-        fields.Add("relevance", "waiting-physical", _relevance.WaitingPhysicalActors);
-        fields.Add("relevance", "materialization-requests-submitted",
-            _relevance.MaterializationRequestsSubmitted);
-        fields.Add("relevance", "traveling-candidates-skipped", _relevance.TravelingCandidatesSkipped);
-        fields.Add("scheduler", "initial-load-complete", _scheduler.InitialLoadComplete);
-        fields.Add("scheduler", "queued", _scheduler.QueuedActorCount);
-        fields.Add("scheduler", "deferred-wakes", _scheduler.DeferredScheduleCount);
-        fields.Add("scheduler", "in-flight", _scheduler.InFlightCount);
-        fields.Add("scheduler", "pending-retries", _scheduler.PendingMutationCount);
-        fields.Add("scheduler", "mutation-retries-exhausted", _scheduler.MutationRetriesExhausted);
-        var hasScheduleDue = _scheduler.TryGetEarliestDue(out var scheduleDueAt, out var scheduleDueNow);
-        fields.Add("scheduler", "earliest-due", hasScheduleDue ? scheduleDueAt.Elapsed : null);
-        fields.Add("scheduler", "due-now", hasScheduleDue && scheduleDueNow);
-        fields.Add("scheduler", "overdue-age",
-            hasActiveTime && hasScheduleDue && scheduleDueNow ? Age(now, scheduleDueAt) : null);
-        fields.Add("abstract-travel", "initial-load-complete", _travel.InitialLoadComplete);
-        fields.Add("abstract-travel", "queued", _travel.QueuedActorCount);
-        fields.Add("abstract-travel", "deferred-wakes", _travel.DeferredScheduleCount);
-        fields.Add("abstract-travel", "in-flight", _travel.InFlightCount);
-        fields.Add("abstract-travel", "pending-retries", _travel.PendingMutationCount);
-        fields.Add("abstract-travel", "mutation-retries-exhausted", _travel.MutationRetriesExhausted);
-        var hasTravelDue = _travel.TryGetEarliestDue(out var travelDueAt);
-        fields.Add("abstract-travel", "earliest-due", hasTravelDue ? travelDueAt.Elapsed : null);
-        fields.Add("abstract-travel", "due-now", hasActiveTime && hasTravelDue && travelDueAt <= now);
-        fields.Add("abstract-travel", "overdue-age",
-            hasActiveTime && hasTravelDue && travelDueAt <= now ? Age(now, travelDueAt) : null);
-
-        var physical = _physicalExecution.GetCounters();
-        fields.Add("physical-execution", "active", physical.Active);
-        fields.Add("physical-execution", "tracked", physical.TrackedActors);
-        fields.Add("physical-execution", "scheduled", physical.ScheduledExecutions);
-        fields.Add("physical-execution", "intent-loads-queued", physical.QueuedIntentLoads);
-        fields.Add("physical-execution", "intent-loads-in-flight", physical.IntentLoadsInFlight);
-        fields.Add("physical-execution", "mutations-in-flight", physical.MutationsInFlight);
-        fields.Add("physical-execution", "plans-built", physical.PlansBuilt);
-        fields.Add("physical-execution", "waypoints-completed", physical.WaypointsCompleted);
-        fields.Add("physical-execution", "replans", physical.Replans);
-        fields.Add("physical-execution", "portal-traversals", physical.PortalTraversals);
-        fields.Add("physical-execution", "arrivals", physical.Arrivals);
-        fields.Add("physical-execution", "blocked-goals", physical.BlockedGoals);
-        fields.Add("physical-execution", "failed-goals", physical.FailedGoals);
-        fields.Add("physical-execution", "mutation-retries-exhausted", physical.MutationRetriesExhausted);
-        fields.Add("physical-execution", "configuration-error", physical.ConfigurationError ?? "none");
+        fields.Add("actors", "physical", _actorRuntime.PhysicalActorCount);
+        fields.Add("physical-lifecycle", "active", _physicalLifecycle.IsActive);
+        fields.Add("physical-lifecycle", "queued", _physicalLifecycle.QueuedCount);
+        fields.Add("physical-lifecycle", "loads-in-flight", _physicalLifecycle.LoadsInFlight);
+        fields.Add("gpt-brain", "scheduled-actors", _physicalBrain.ScheduledActors);
+        fields.Add("gpt-brain", "submissions-in-flight", _physicalBrain.SubmissionsInFlight);
+        fields.Add("gpt-brain", "decisions-submitted", _physicalBrain.DecisionsSubmitted);
+        fields.Add("gpt-brain", "submission-retries", _physicalBrain.SubmissionRetries);
+        fields.Add("gpt-actions", "running", _neuralExecution.RunningCount);
+        fields.Add("gpt-actions", "accepted", _neuralExecution.AcceptedCount);
+        fields.Add("gpt-actions", "rejected", _neuralExecution.RejectedCount);
+        fields.Add("gpt-actions", "completed", _neuralExecution.CompletedCount);
+        fields.Add("gpt-actions", "failed", _neuralExecution.FailedCount);
 
         var stateTree = _physicalStateTree.GetCounters();
         fields.Add("physical-state-tree", "evaluations", stateTree.Evaluations);
@@ -436,34 +362,8 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("human-routines", "locomotion-busy", humanRoutines.LocomotionBusy);
         fields.Add("human-routines", "configuration-error", humanRoutines.ConfigurationError ?? "none");
 
-        if (fields.Includes("cognition"))
-        {
-            var cognition = _cognition.GetCounters();
-            fields.Add("cognition", "active", cognition.Active);
-            fields.Add("cognition", "tracked", cognition.TrackedActors);
-            fields.Add("cognition", "scheduled", cognition.ScheduledActors);
-            fields.Add("cognition", "loads-in-flight", cognition.LoadsInFlight);
-            fields.Add("cognition", "planning-frontiers", cognition.PlanningFrontiers);
-            fields.Add("cognition", "cached-plans", cognition.CachedPlans);
-            fields.Add("cognition", "pending-invalidations", cognition.PendingInvalidations);
-            fields.Add("cognition", "decisions", cognition.Decisions);
-            fields.Add("cognition", "intention-switches", cognition.IntentionSwitches);
-            fields.Add("cognition", "plans-built", cognition.PlansBuilt);
-            fields.Add("cognition", "plans-invalidated", cognition.PlansInvalidated);
-            fields.Add("cognition", "fallback-plans", cognition.FallbackPlans);
-            fields.Add("cognition", "mcts-nodes-expanded", cognition.MctsNodesExpanded);
-            fields.Add("cognition", "actors-with-missing-optional-records",
-                _cognitionProviders.MissingCapabilityCacheActors);
-            fields.Add("cognition", "suppressed-persistence-reads", _cognitionProviders.SuppressedCapabilityReads);
-            fields.Add("cognition", "configuration-error", cognition.ConfigurationError ?? "none");
-            fields.Add("cognition", "action-catalog",
-                _prototypes.EnumeratePrototypes<NCHumanActionPrototype>().Count());
-            var hasCognitionDue = _cognition.TryGetEarliestDecision(out var cognitionDueAt, out var cognitionDueNow);
-            fields.Add("cognition", "earliest-due", hasCognitionDue ? cognitionDueAt.Elapsed : null);
-            fields.Add("cognition", "due-now", hasCognitionDue && cognitionDueNow);
-            fields.Add("cognition", "overdue-age",
-                hasActiveTime && hasCognitionDue && cognitionDueNow ? Age(now, cognitionDueAt) : null);
-        }
+        fields.Add("gpt-actions", "action-catalog",
+            _prototypes.EnumeratePrototypes<NCHumanActionPrototype>().Count());
 
         fields.Add("incidents", "cached", _incidents.CachedCount);
         fields.Add("incidents", "consequences-in-flight", _incidentConsequences.InFlightCount);
@@ -493,8 +393,6 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("neural", "invalid", neural.Invalid);
         fields.Add("neural", "provider-failures", neural.ProviderFailures);
         fields.Add("neural", "fallbacks", neural.Fallbacks);
-        fields.Add("neural", "coalesced", neural.CoalescedRequests);
-        fields.Add("neural", "pending-coalesced-followers", neural.PendingCoalescedFollowers);
         fields.Add("neural", "validation-rejects", neural.ValidationRejects);
         fields.Add("neural", "timeouts", neural.Timeouts);
         fields.Add("neural", "consecutive-failures", neural.ConsecutiveFailures);
@@ -505,7 +403,6 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
         fields.Add("dialogue-runtime", "scheduled", _neuralConversations.ScheduledAmbientInitiatives);
         fields.Add("dialogue-runtime", "ordinary-neural-submissions", _neuralContext.OrdinaryDialogueSubmissions);
         fields.Add("dialogue-runtime", "narrative-neural-submissions", _neuralContext.NarrativeDialogueSubmissions);
-        fields.Add("dialogue-runtime", "local-fallbacks", _neuralContext.LocalDialogueFallbacks);
 
         var load = _loadGovernor.GetSnapshot();
         fields.Add("load-governor", "active", load.Active);
@@ -539,13 +436,7 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
 
         fields.Add("groups", "cached", _groups.CachedGroupCount);
         fields.Add("groups", "cached-memberships", _groups.CachedMembershipCount);
-        fields.Add("group-physicalization", "active", _groupPhysicalization.IsActive);
-        fields.Add("group-physicalization", "catalog-ready", _groupPhysicalization.CatalogRecovered);
-        fields.Add("group-physicalization", "catalog-groups", _groupPhysicalization.CatalogGroupCount);
-        fields.Add("group-physicalization", "materialized-groups", _groupFormations.MaterializedGroupCount);
-        fields.Add("group-physicalization", "queued", _groupPhysicalization.PendingRequestCount);
-        fields.Add("group-physicalization", "in-flight", _groupPhysicalization.InFlightCount);
-        fields.Add("group-physicalization", "retained", _groupPhysicalization.RetainedResultCount);
+        fields.Add("groups", "active-formations", _groupFormations.MaterializedGroupCount);
         var trunks = _groupRoutes.GetCounters();
         fields.Add("group-trunk-routes", "cached", trunks.CachedRoutes);
         fields.Add("group-trunk-routes", "published", trunks.PublishedRoutes);
@@ -1082,28 +973,6 @@ public sealed partial class NCLivingCityAdminSystem : EntitySystem
             _lastObserverRequestAt.Clear();
         _lastObserverRequestAt[userId] = now;
         return true;
-    }
-
-    private void AddPipelineFields(
-        FieldBuilder fields,
-        string section,
-        string rateKey,
-        NCCityRequestPipelineCounters counters)
-    {
-        if (!fields.Includes(section))
-            return;
-
-        fields.Add(section, "submitted-total", counters.Submitted);
-        fields.Add(section, "accepted-total", counters.Accepted);
-        fields.Add(section, "completed-total", counters.Completed);
-        fields.Add(section, "retained-total", counters.Retained);
-        fields.Add(section, "failed-total", counters.Failed);
-        fields.Add(section, "expired-total", counters.Expired);
-        fields.Add(section, "retries-total", counters.Retried);
-        fields.Add(section, "terminal-throughput-per-minute",
-            FormatRate(SampleRate($"{rateKey}:terminal", counters.Terminal)));
-        fields.Add(section, "failures-per-minute",
-            FormatRate(SampleRate($"{rateKey}:failed", counters.Failed + counters.Expired)));
     }
 
     /// <summary>

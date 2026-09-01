@@ -9,6 +9,7 @@ using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.CityServices;
 using Content.Server._NC.LivingCity.Cognition;
 using Content.Server._NC.LivingCity.Identity;
+using Content.Server._NC.LivingCity.Neural;
 using Content.Server._NC.LivingCity.Time;
 using Content.Server.Chat.Systems;
 using Content.Server.NPC.HTN;
@@ -58,9 +59,8 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
     [Dependency] private NCCityIncidentRegistrySystem _incidents = default!;
     [Dependency] private NCEntityPartyResolverSystem _entityParties = default!;
     [Dependency] private NCCityLocationSystem _locations = default!;
-    [Dependency] private NCCognitionSystem _cognition = default!;
+    [Dependency] private NCPhysicalActorBrainSystem _brain = default!;
     [Dependency] private NCCityNpcSteeringLeaseSystem _steeringLease = default!;
-    [Dependency] private NCCityPhysicalExecutionSystem _physicalExecution = default!;
     [Dependency] private HTNSystem _htn = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
@@ -155,7 +155,7 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
             if (immediateThreat)
                 _useOfForce.Begin(args.Observer, args.Actor, forceLevel);
             // A witnessed incident is immediate and must not wait for the routine cognition cadence.
-            _cognition.ForceSchedule(officer.ActorId, args.ObservedAt);
+            _brain.RequestDecision(officer.ActorId);
         }
     }
 
@@ -308,7 +308,6 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
     {
         StopPoliceSteering(officer);
         SuspendHumanHtn(officer);
-        _physicalExecution.SetInterrupt(officer, NCCityPhysicalInterruptFlags.Police, true);
         if (!TryComp<NCNcpdSuspectClaimComponent>(officer, out var claim) || claim.Suspect != suspect ||
             claim.SuspectHandle != args.Intention.Target.StableId || claim.ResponseDeadline is not { } deadline)
         {
@@ -397,14 +396,12 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
         // Profession code temporarily owns locomotion, but the actor keeps the same universal human HTN. Pausing
         // that root avoids two NPCSteering writers until this concrete police step has reached its target.
         SuspendHumanHtn(officer);
-        _physicalExecution.SetInterrupt(officer, NCCityPhysicalInterruptFlags.Police, true);
         // Entity-relative coordinates follow a moving suspect while vanilla steering performs collision/path checks.
         if (_policeSteering.Contains(officer))
             return false;
         if (!_steeringLease.Acquire(officer, "ncpd-physical-action"))
         {
             ResumeHumanHtn(officer);
-            _physicalExecution.SetInterrupt(officer, NCCityPhysicalInterruptFlags.Police, false);
             return false;
         }
         _policeSteering.Add(officer);
@@ -680,7 +677,6 @@ public sealed partial class NCNcpdCognitionSystem : EntitySystem
         }
         if (!restoreHumanHtn)
             return;
-        _physicalExecution.SetInterrupt(officer, NCCityPhysicalInterruptFlags.Police, false);
         ResumeHumanHtn(officer);
     }
 

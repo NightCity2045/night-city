@@ -12,7 +12,7 @@ namespace Content.Server._NC.LivingCity.Neural;
 [RegisterComponent]
 public sealed partial class NCNeuralConversationTargetComponent : Component
 {
-    /// <summary>True only for explicitly authored important Actors; ordinary residents remain dialogue-only.</summary>
+    /// <summary>True for an authored persona that receives the larger narrative context budget.</summary>
     [DataField]
     public bool NarrativeActor;
 
@@ -27,7 +27,7 @@ public sealed partial class NCNeuralConversationTargetComponent : Component
     [DataField]
     public bool SpeakWithNpcListeners = true;
 
-    /// <summary>Prevents ambient replies from turning into an unbounded neural conversation cascade.</summary>
+    /// <summary>Prevents NPC-to-NPC replies from turning into an unbounded neural conversation cascade.</summary>
     [DataField]
     public TimeSpan NpcConversationCooldown = TimeSpan.FromSeconds(30);
 
@@ -74,6 +74,4 @@ public sealed partial class NCNeuralConversationTargetComponent : Component
     [DataField]
     public NCLocale Locale = NCLocale.RuRu;
 
-    [DataField]
-    public string FallbackMessage = "nc-neural-conversation-fallback";
 }

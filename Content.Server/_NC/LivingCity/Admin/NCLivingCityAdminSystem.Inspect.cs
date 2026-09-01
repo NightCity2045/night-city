@@ -25,15 +25,8 @@ public sealed partial class NCLivingCityAdminSystem
     {
         NCLivingCityAdminInspectKind.Actor => InspectActorAsync(request.Target),
         NCLivingCityAdminInspectKind.Cognition => InspectCognitionAsync(request.Target),
-        NCLivingCityAdminInspectKind.ActorMaterializationRequest =>
-            Task.FromResult(InspectMaterializationRequest(request.Target)),
-        NCLivingCityAdminInspectKind.ActorDematerializationRequest =>
-            Task.FromResult(InspectDematerializationRequest(request.Target)),
-        NCLivingCityAdminInspectKind.ActorRelevance => Task.FromResult(InspectRelevance(request.Target)),
         NCLivingCityAdminInspectKind.Group => InspectGroupAsync(request.Target),
         NCLivingCityAdminInspectKind.GroupMembership => InspectMembershipAsync(request.Target),
-        NCLivingCityAdminInspectKind.GroupPhysicalizationRequest =>
-            Task.FromResult(InspectGroupPhysicalizationRequest(request.Target)),
         NCLivingCityAdminInspectKind.GroupFormation => Task.FromResult(InspectGroupFormation(request.Target)),
         NCLivingCityAdminInspectKind.ZoneState => InspectZoneStateAsync(request.Target),
         NCLivingCityAdminInspectKind.Party => InspectPartyAsync(request.Target),
@@ -541,62 +534,6 @@ public sealed partial class NCLivingCityAdminSystem
         _ => "unknown",
     };
 
-    private InspectionResult InspectMaterializationRequest(string target)
-    {
-        if (!TryGuid(target, out var requestId) || !_materialization.TryGetRequest(requestId, out var state))
-            return Fail("materialization-request-not-found");
-        var fields = new FieldBuilder();
-        fields.Add("request", "request-id", state.RequestId);
-        fields.Add("request", "actor-id", state.ActorId);
-        fields.Add("request", "reason", state.Reason);
-        fields.Add("request", "status", state.Status);
-        fields.Add("request", "priority", state.Priority);
-        fields.Add("request", "attempts", state.Attempts);
-        fields.Add("window", "requested-at", state.RequestedAt.Elapsed);
-        fields.Add("window", "expires-at", state.ExpiresAt.Elapsed);
-        fields.Add("window", "error", state.Error);
-        return Ok(fields);
-    }
-
-    private InspectionResult InspectDematerializationRequest(string target)
-    {
-        if (!TryGuid(target, out var requestId) || !_dematerialization.TryGetRequest(requestId, out var state))
-            return Fail("dematerialization-request-not-found");
-        var fields = new FieldBuilder();
-        fields.Add("request", "request-id", state.RequestId);
-        fields.Add("request", "actor-id", state.ActorId);
-        fields.Add("request", "reason", state.Reason);
-        fields.Add("request", "status", state.Status);
-        fields.Add("request", "attempts", state.Attempts);
-        fields.Add("window", "requested-at", state.RequestedAt.Elapsed);
-        fields.Add("window", "expires-at", state.ExpiresAt.Elapsed);
-        fields.Add("window", "error", state.Error);
-        return Ok(fields);
-    }
-
-    private InspectionResult InspectRelevance(string target)
-    {
-        if (!TryGuid(target, out var raw) || !_relevance.TryGetLod(new NCActorId(raw), out var lod))
-            return Fail("actor-absent-from-relevance-catalog");
-        var fields = new FieldBuilder();
-        fields.Add("actor", "actor-id", raw.ToString("D"));
-        fields.Add("actor", "lod", lod);
-        fields.Add("catalog", "active", _relevance.IsActive);
-        fields.Add("catalog", "recovered", _relevance.CatalogRecovered);
-        fields.Add("catalog", "actors", _relevance.CatalogActorCount);
-        fields.Add("catalog", "clusters", _relevance.ClusterCount);
-        foreach (var cluster in _relevance.Clusters.Take(32))
-        {
-            var section = $"cluster-{cluster.ClusterId:D}";
-            fields.Add(section, "map", cluster.MapId);
-            fields.Add(section, "players", cluster.AttachedPlayerCount);
-            fields.Add(section, "anchors", cluster.AnchorEntities.Count);
-            fields.Add(section, "zones", cluster.ActiveZoneIds.Count);
-            fields.Add(section, "materialized", cluster.MaterializedActorCount);
-        }
-        return Ok(fields);
-    }
-
     private async Task<InspectionResult> InspectGroupAsync(string target)
     {
         if (!TryGuid(target, out var raw))
@@ -654,25 +591,6 @@ public sealed partial class NCLivingCityAdminSystem
         fields.Add("membership", "joined-at", membership.Snapshot.JoinedAt?.Elapsed);
         fields.Add("membership", "changed-at", membership.Snapshot.ChangedAt.Elapsed);
         fields.Add("membership", "aggregate-version", membership.AggregateVersion);
-        return Ok(fields);
-    }
-
-    private InspectionResult InspectGroupPhysicalizationRequest(string target)
-    {
-        if (!TryGuid(target, out var requestId) || !_groupPhysicalization.TryGetRequest(requestId, out var state))
-            return Fail("group-physicalization-request-not-found");
-        var fields = new FieldBuilder();
-        fields.Add("request", "request-id", state.RequestId);
-        fields.Add("request", "group-id", state.GroupId);
-        fields.Add("request", "direction", state.Direction);
-        fields.Add("request", "reason", state.Reason);
-        fields.Add("request", "status", state.Status);
-        fields.Add("request", "priority", state.Priority);
-        fields.Add("request", "attempts", state.Attempts);
-        fields.Add("progress", "members", $"{state.CompletedMembers}/{state.TotalMembers}");
-        fields.Add("window", "requested-at", state.RequestedAt.Elapsed);
-        fields.Add("window", "expires-at", state.ExpiresAt.Elapsed);
-        fields.Add("window", "error", state.Error);
         return Ok(fields);
     }
 

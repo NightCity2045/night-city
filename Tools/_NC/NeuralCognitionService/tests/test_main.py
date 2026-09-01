@@ -17,20 +17,19 @@ class _FakeResponses:
 
     async def create(self, **_kwargs):
         answer = {
-            "selected_capability_id": self._selected_capability,
-            "speech_act_key": "statement",
-            "rendered_text": "Я выбираю безопасный вариант.",
-            "summary_key": "safe-option",
-            "confidence": 800,
-            "intent": {
+            "commands": [{
+                "capabilityId": self._selected_capability,
                 "goalKey": "safe-option",
                 "targetHandle": "",
-                "requestedCapabilityIds": [self._selected_capability],
                 "priority": 500,
                 "expectedOutcomeKey": "safe-option-selected",
                 "informationGapKeys": [],
                 "arguments": [],
-            },
+            }],
+            "speech_act_key": "statement",
+            "rendered_text": "Я выбираю безопасный вариант.",
+            "summary_key": "safe-option",
+            "confidence": 800,
             "disclosed_fact_handles": [],
             "withheld_fact_handles": [],
         }
@@ -172,7 +171,7 @@ class NeuralCognitionServiceTest(unittest.IsolatedAsyncioTestCase):
         finally:
             main.AsyncOpenAI = old_factory
 
-        self.assertEqual(result["selectedCapabilityId"], "NCCognitionStrategicFallback")
+        self.assertEqual(result["commands"][0]["capabilityId"], "NCCognitionStrategicFallback")
         self.assertEqual(result["speechActKey"], "statement")
         self.assertEqual(result["inputTokens"], 40)
         self.assertEqual(result["providerRequestId"], "fake-provider-request")

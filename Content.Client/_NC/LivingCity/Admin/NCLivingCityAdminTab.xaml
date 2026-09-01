@@ -108,8 +108,6 @@
                                     <controls:ConfirmButton Name="MoveActor" Access="Public" Text="{Loc nc-living-city-admin-move-actor}" ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
                                     <controls:ConfirmButton Name="CaptureActorDomains" Access="Public" Text="{Loc nc-living-city-admin-capture-domains}" ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
                                     <controls:ConfirmButton Name="RestoreActorHealth" Access="Public" Text="{Loc nc-living-city-admin-restore-health}" ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
-                                    <controls:ConfirmButton Name="MaterializeActor" Access="Public" Text="{Loc nc-living-city-admin-materialize-actor}" ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
-                                    <controls:ConfirmButton Name="DematerializeActor" Access="Public" Text="{Loc nc-living-city-admin-dematerialize-actor}" ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
                                 </GridContainer>
                             </BoxContainer>
                         </PanelContainer>
@@ -161,8 +159,6 @@
                                     <controls:ConfirmButton Name="TransferGroupMember" Access="Public" Text="{Loc nc-living-city-admin-transfer-group-member}" ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
                                     <controls:ConfirmButton Name="SetGroupLeader" Access="Public" Text="{Loc nc-living-city-admin-set-group-leader}" ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
                                     <controls:ConfirmButton Name="SetGroupDirective" Access="Public" Text="{Loc nc-living-city-admin-set-group-directive}" ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
-                                    <controls:ConfirmButton Name="MaterializeGroup" Access="Public" Text="{Loc nc-living-city-admin-materialize-group}" ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
-                                    <controls:ConfirmButton Name="DematerializeGroup" Access="Public" Text="{Loc nc-living-city-admin-dematerialize-group}" ConfirmationText="{Loc nc-living-city-admin-confirm-exact-action}" />
                                 </GridContainer>
                             </BoxContainer>
                         </PanelContainer>

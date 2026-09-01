@@ -45,7 +45,6 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
     [Dependency] private NCCityLocalPerceptionSystem _perception = default!;
     [Dependency] private NCCityNpcSteeringLeaseSystem _steeringLease = default!;
     [Dependency] private NCCityPhysicalExecutionSystem _physical = default!;
-    [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
     [Dependency] private NCCityAffordanceCatalogSystem _affordances = default!;
     [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
     [Dependency] private SharedMapSystem _maps = default!;
@@ -315,12 +314,6 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
             _physical.SetInterrupt(actor, NCCityPhysicalInterruptFlags.Combat, true);
             state.Interrupt = NCCityPhysicalInterruptFlags.Combat;
         }
-        if (!state.OwnsCombatBlocker &&
-            _dematerialization.BeginBlocker(actor, NCCityDematerializationBlockerFlags.Combat))
-        {
-            state.OwnsCombatBlocker = true;
-        }
-
         // The authored NCLivingHumanCompound selects vanilla ranged/melee/juke branches; this adapter never attacks.
         if (TryComp<HTNComponent>(actor, out var htn) && !htn.Enabled)
             _htn.SetHTNEnabled((actor, htn), true, htn.PlanCooldown);
@@ -784,11 +777,6 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
             {
                 _physical.SetInterrupt(actor, state.Interrupt, false);
                 state.Interrupt = NCCityPhysicalInterruptFlags.None;
-            }
-            if (state.OwnsCombatBlocker)
-            {
-                _dematerialization.EndBlocker(actor, NCCityDematerializationBlockerFlags.Combat);
-                state.OwnsCombatBlocker = false;
             }
             if (state.SuspendedHtn && TryComp<HTNComponent>(actor, out var htn))
             {

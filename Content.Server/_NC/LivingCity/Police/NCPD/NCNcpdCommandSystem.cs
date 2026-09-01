@@ -40,7 +40,7 @@ public sealed partial class NCNcpdCommandSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
         SubscribeLocalEvent<NCNcpdUnitMembershipAppliedEvent>(OnUnitMembershipApplied);
         SubscribeLocalEvent<NCNcpdUnitRemovedEvent>(OnUnitRemoved);
         // A new active-world session must never inherit round-local orders from a failed or interrupted clock.
@@ -354,9 +354,9 @@ public sealed partial class NCNcpdCommandSystem : EntitySystem
         RaiseLocalEvent(new NCNcpdAssignmentAppliedEvent(entityUid, command.CommandId));
     }
 
-    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
-        if (!args.Materialized || !TryComp<NCNcpdUnitMemberComponent>(args.EntityUid, out var member) ||
+        if (!args.Bound || !TryComp<NCNcpdUnitMemberComponent>(args.EntityUid, out var member) ||
             !TryGetActive(member.UnitId, out var command))
             return;
         ApplyPhysical(args.EntityUid, command);

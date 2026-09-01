@@ -154,7 +154,7 @@ public sealed class NCCityPersistentScaleGateTest : GameTest
             Assert.That(report.Conflicts, Is.Zero);
             Assert.That(report.Failed, Is.Zero);
             Assert.That(report.Failures, Is.Empty);
-            Assert.That(runtime.MaterializedActorCount, Is.Zero);
+            Assert.That(runtime.PhysicalActorCount, Is.Zero);
         });
 
         var expectedActors = Enumerable.Range(0, ActorCount)
@@ -238,7 +238,7 @@ public sealed class NCCityPersistentScaleGateTest : GameTest
             Assert.That(actors.CachedActorCount, Is.Zero);
             Assert.That(groups.CachedGroupCount, Is.Zero);
             Assert.That(groups.CachedMembershipCount, Is.Zero);
-            Assert.That(runtime.MaterializedActorCount, Is.Zero);
+            Assert.That(runtime.PhysicalActorCount, Is.Zero);
         });
 
         var reloadedActor = await actors.GetAsync(expectedActors[^1], true);
@@ -247,7 +247,7 @@ public sealed class NCCityPersistentScaleGateTest : GameTest
         {
             Assert.That(reloadedActor?.Snapshot.Identity.ActorId, Is.EqualTo(expectedActors[^1]));
             Assert.That(reloadedGroup?.Snapshot.GroupId, Is.EqualTo(expectedGroups[^1]));
-            Assert.That(runtime.MaterializedActorCount, Is.Zero);
+            Assert.That(runtime.PhysicalActorCount, Is.Zero);
         });
 
         await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(

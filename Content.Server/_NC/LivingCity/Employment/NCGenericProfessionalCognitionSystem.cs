@@ -54,7 +54,7 @@ public sealed partial class NCGenericProfessionalCognitionSystem : EntitySystem
         base.Initialize();
         SubscribeLocalEvent<NCProfessionalWorkRequestedEvent>(OnProfessionalWork);
         SubscribeLocalEvent<NCHumanActionInterruptedEvent>(OnInterrupted);
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
     }
 
     private void OnProfessionalWork(NCProfessionalWorkRequestedEvent args)
@@ -156,9 +156,9 @@ public sealed partial class NCGenericProfessionalCognitionSystem : EntitySystem
             Stop(worker);
     }
 
-    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
-        if (args.Materialized)
+        if (args.Bound)
             return;
 
         Stop(args.EntityUid, false);

@@ -20,8 +20,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._NC.LivingCity.Police.NCPD;
 
 /// <summary>
-/// Bridges a persisted NCPD city-service dispatch to one real round-local patrol. Abstract officers travel through
-/// the actor registry, while already materialized officers retain ordinary physical locomotion and perception.
+/// Bridges a persisted NCPD city-service dispatch to an always-physical patrol.
 /// </summary>
 public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
 {
@@ -34,8 +33,7 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
-    [Dependency] private NCCityActorMaterializationSystem _materialization = default!;
-    [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
+    [Dependency] private NCPhysicalActorLifecycleSystem _physicalActors = default!;
     [Dependency] private NCCityServiceSystem _services = default!;
     [Dependency] private NCCityIncidentRegistrySystem _incidents = default!;
     [Dependency] private NCNcpdUnitSystem _units = default!;
@@ -77,7 +75,7 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => Clear());
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => Clear());
         SubscribeLocalEvent<NCServiceDispatchPersistedEvent>(OnServiceDispatch);
-        SubscribeLocalEvent<NCCityActorRehydratedEvent>(OnActorRehydrated);
+        SubscribeLocalEvent<NCPhysicalActorSpawnedEvent>(OnActorRehydrated);
         SubscribeLocalEvent<NCServiceDispatchArrivalAttemptEvent>(OnArrivalAttempt);
         SubscribeLocalEvent<NCCityIncidentPersistedEvent>(OnIncidentPersisted);
         SubscribeLocalEvent<NCNcpdDutyChangedEvent>(_ => ScheduleWaiting());
@@ -625,26 +623,20 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
             return;
         }
         if (_materializationRequests.TryGetValue(key, out var existing) &&
-            _materialization.TryGetRequest(existing, out var request) && request.Status is
-                (NCCityMaterializationRequestStatus.Queued or NCCityMaterializationRequestStatus.Loading or
-                    NCCityMaterializationRequestStatus.Retrying or NCCityMaterializationRequestStatus.Materialized or
-                    NCCityMaterializationRequestStatus.AlreadyMaterialized))
+            _physicalActors.TryGetRequest(existing, out var request) && request.Status is not
+                NCPhysicalActorSpawnStatus.Rejected)
             return;
 
         var requestId = Guid.NewGuid();
         _materializationRequests[key] = requestId;
-        _materialization.Request(new NCCityMaterializationRequest(
+        _physicalActors.Request(new NCPhysicalActorSpawnRequest(
             requestId,
             actorId,
-            NCCityMaterializationReason.ServiceResponse,
-            Math.Clamp(dispatch.ThreatBasisPoints / 10, 0, 1000),
-            unchecked((uint) HashCode.Combine(dispatch.DispatchId.Value, actorId.Value)),
-            policy.MaterializationMaximumWait,
+            NCPhysicalActorSpawnReason.ServiceDispatch,
             "ncpd-service-dispatch"));
     }
 
-    /// <summary>Keeps an on-scene officer physical until the persistent service dispatch reaches a terminal state.</summary>
-    private void OnActorRehydrated(NCCityActorRehydratedEvent args)
+    private void OnActorRehydrated(NCPhysicalActorSpawnedEvent args)
     {
         foreach (var (key, requestId) in _materializationRequests)
         {
@@ -662,7 +654,6 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
     {
         if (!_physicalDispatchActors.Add((dispatchId, actorId)))
             return;
-        _dematerialization.BeginBlocker(entityUid, NCCityDematerializationBlockerFlags.Scripted);
     }
 
     private void ReleasePhysicalDispatchActors(NCServiceDispatchId dispatchId)
@@ -674,10 +665,7 @@ public sealed partial class NCNcpdServiceDispatchSystem : EntitySystem
         foreach (var actorId in actors)
         {
             _physicalDispatchActors.Remove((dispatchId, actorId));
-            if (_physicalDispatchActors.Any(value => value.ActorId == actorId) ||
-                !_runtime.TryGetEntity(actorId, out var entity) || !Exists(entity))
-                continue;
-            _dematerialization.EndBlocker(entity, NCCityDematerializationBlockerFlags.Scripted);
+            // The officer remains physical after the dispatch; only dispatch ownership is released.
         }
     }
 

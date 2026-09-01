@@ -58,7 +58,7 @@ public sealed partial class NCNcpdAssignmentExecutionSystem : EntitySystem
         base.Initialize();
         SubscribeLocalEvent<NCNcpdAssignmentAppliedEvent>(OnAssignmentApplied);
         SubscribeLocalEvent<NCNcpdAssignmentComponent, ComponentShutdown>(OnAssignmentShutdown);
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => Clear());
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => Clear());
     }
@@ -309,9 +309,9 @@ public sealed partial class NCNcpdAssignmentExecutionSystem : EntitySystem
     private void OnAssignmentShutdown(Entity<NCNcpdAssignmentComponent> entity, ref ComponentShutdown args) =>
         Stop(entity.Owner);
 
-    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
-        if (!args.Materialized)
+        if (!args.Bound)
             Stop(args.EntityUid, false);
     }
 

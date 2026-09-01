@@ -41,7 +41,7 @@ public sealed partial class NCNcpdUnitSystem : EntitySystem
         base.Initialize();
         SubscribeLocalEvent<NCNcpdDutyChangedEvent>(OnDutyChanged);
         SubscribeLocalEvent<NCNcpdOfficerProjectedEvent>(OnOfficerProjected);
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(_ => Reconcile());
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => ClearUnits());
@@ -83,9 +83,9 @@ public sealed partial class NCNcpdUnitSystem : EntitySystem
     private void OnDutyChanged(NCNcpdDutyChangedEvent args) => Reconcile();
     private void OnOfficerProjected(NCNcpdOfficerProjectedEvent args) => Reconcile();
 
-    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
-        if (args.Materialized)
+        if (args.Bound)
             ApplyPhysical(args.ActorId, args.EntityUid);
     }
 

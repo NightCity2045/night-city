@@ -37,7 +37,7 @@ public enum NCNeuralFailureKind : byte
 
 public static class NCNeuralContract
 {
-    public const int SchemaVersion = 4;
+    public const int SchemaVersion = 5;
 }
 
 /// <summary>
@@ -112,15 +112,16 @@ public sealed record NCNeuralKnownLocation(
 /// <summary>Bounded structured data attached to an intent. Values remain untrusted until a domain adapter validates them.</summary>
 public sealed record NCNeuralIntentArgument(string Key, string Value);
 
-/// <summary>A provider proposal. It has no authority until the server validates and projects it into BDI facts.</summary>
-public sealed record NCNeuralIntentProposal(
+/// <summary>One bounded provider command. The server still resolves its capability and executes typed actions.</summary>
+public sealed record NCNeuralCommandProposal(
+    string CapabilityId,
     string GoalKey,
     string TargetHandle,
-    IReadOnlyList<string> RequestedCapabilityIds,
     int Priority,
     string ExpectedOutcomeKey,
     IReadOnlyList<string> InformationGapKeys,
     IReadOnlyList<NCNeuralIntentArgument> Arguments);
+
 /// <summary>
 /// Ephemeral, provider-bound dialogue data. It is never written to the Living City persistence layer and remains
 /// untrusted prose; the server still owns every gameplay mutation.
@@ -170,9 +171,9 @@ public sealed record NCNeuralRequestEnvelope(Guid RequestId, NCNeuralRequestKind
     public NCNeuralAccessTier AccessTier { get; init; } = NCNeuralAccessTier.OrdinaryResident;
 }
 public sealed record NCNeuralResponseEnvelope(Guid RequestId, int SchemaVersion, long ContextVersion,
-    string SelectedCapabilityId, string SpeechActKey, string RenderedText, string SummaryKey, int Confidence,
+    IReadOnlyList<NCNeuralCommandProposal> Commands, string SpeechActKey, string RenderedText, string SummaryKey,
+    int Confidence,
     int InputTokens, int CachedInputTokens, int OutputTokens, string ProviderRequestId, string ProviderModel,
-    NCNeuralIntentProposal? Intent = null,
     IReadOnlyList<string>? DisclosedFactHandles = null,
     IReadOnlyList<string>? WithheldFactHandles = null);
 public sealed record NCNeuralResult(NCNeuralResultStatus Status, NCNeuralRequestEnvelope Request,
@@ -229,7 +230,6 @@ public sealed partial class NCNeuralPolicyPrototype : IPrototype
     [DataField] public int NarrativeActorMaximumOutstandingRequests { get; private set; } = 2;
     [DataField] public int NarrativeActorReservedInputTokens { get; private set; } = 8192;
     [DataField] public TimeSpan NarrativeActorRequestCooldown { get; private set; } = TimeSpan.FromSeconds(1);
-    [DataField] public int MaximumCoalescedFollowersPerRequest { get; private set; } = 16;
     [DataField] public int CircuitFailureThreshold { get; private set; } = 5;
     [DataField] public int MinimumSuggestionConfidence { get; private set; } = 400;
     [DataField] public float MaximumUtilityBoost { get; private set; } = 40f;

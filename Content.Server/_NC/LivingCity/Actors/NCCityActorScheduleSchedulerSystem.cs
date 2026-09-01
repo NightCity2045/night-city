@@ -78,7 +78,7 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
         SubscribeLocalEvent<NCCityActorPersistedEvent>(OnActorPersisted);
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
     }
 
     public override void Update(float frameTime)
@@ -201,20 +201,7 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
     private void OnSessionStarted(NCActiveWorldSessionStartedEvent args)
     {
         Reset();
-        if (!_prototypes.TryIndex(
-                new ProtoId<NCCitySchedulePolicyPrototype>(DefaultPolicyId),
-                out NCCitySchedulePolicyPrototype? policy) ||
-            policy == null || !ValidatePolicy(policy))
-        {
-            Log.Error($"Persistent actor scheduler cannot start: policy {DefaultPolicyId} is missing or invalid.");
-            return;
-        }
-
-        _policy = policy;
-        _epoch = args.Epoch;
-        _active = true;
-        _pageRetryAt = args.Time;
-        BeginPageLoad(_generation, null);
+        // Physical GPT actors choose and execute their own next actions; no abstract routine scheduler runs.
     }
 
     private void OnSessionClosing(NCActiveWorldSessionClosingEvent args)
@@ -268,7 +255,7 @@ public sealed partial class NCCityActorScheduleSchedulerSystem : EntitySystem
         Enqueue(args.ActorId, dueAt);
     }
 
-    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
         if (!_active || !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
             return;

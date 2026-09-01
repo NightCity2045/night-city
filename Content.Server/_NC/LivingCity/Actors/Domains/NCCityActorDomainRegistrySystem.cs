@@ -55,6 +55,23 @@ public sealed partial class NCCityActorDomainRegistrySystem : EntitySystem
         return _healthCache.TryRemove(actorId, out _) | _inventoryCache.TryRemove(actorId, out _);
     }
 
+    public bool TryGetCached(
+        NCActorId actorId,
+        out NCCityActorHealthRecord health,
+        out NCCityActorInventoryRecord inventory)
+    {
+        health = default!;
+        inventory = default!;
+        if (!_healthCache.TryGetValue(actorId, out var cachedHealth) || cachedHealth == null ||
+            !_inventoryCache.TryGetValue(actorId, out var cachedInventory) || cachedInventory == null)
+        {
+            return false;
+        }
+        health = cachedHealth;
+        inventory = cachedInventory;
+        return true;
+    }
+
     public async Task<NCCityActorHealthRecord?> GetHealthAsync(NCActorId actorId, bool forceReload = false)
     {
         if (!actorId.IsValid)

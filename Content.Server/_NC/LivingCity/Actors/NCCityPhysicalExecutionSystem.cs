@@ -68,9 +68,9 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
         SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(OnSessionClosing);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
-        SubscribeLocalEvent<NCCityActorRehydratedEvent>(OnActorRehydrated);
+        SubscribeLocalEvent<NCPhysicalActorSpawnedEvent>(OnActorRehydrated);
         SubscribeLocalEvent<NCCityActorPersistedEvent>(OnActorPersisted);
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
         SubscribeLocalEvent<NCCityPhysicalExecutionComponent, ComponentShutdown>(OnExecutionShutdown);
         SubscribeLocalEvent<NCCityConnectivityChangedEvent>(OnCityGraphChanged);
         SubscribeLocalEvent<NCRoomPortalGraphChangedEvent>(OnRoomGraphChanged);
@@ -167,19 +167,7 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
     private void OnSessionStarted(NCActiveWorldSessionStartedEvent args)
     {
         Reset();
-        if (!_prototypes.TryIndex(
-                new ProtoId<NCCityPhysicalExecutionPolicyPrototype>(DefaultPolicyId),
-                out NCCityPhysicalExecutionPolicyPrototype? policy) ||
-            policy == null || !ValidatePolicy(policy))
-        {
-            _configurationError = $"Physical execution policy {DefaultPolicyId} is missing or invalid.";
-            Log.Error(_configurationError);
-            return;
-        }
-
-        _policy = policy;
-        _epoch = args.Epoch;
-        _active = true;
+        // Superseded by NCNeuralActionExecutionSystem; the old registry-intent runner stays inactive.
     }
 
     private void OnSessionClosed(NCActiveWorldSessionClosedEvent args)
@@ -200,7 +188,7 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
             Reset();
     }
 
-    private void OnActorRehydrated(NCCityActorRehydratedEvent args)
+    private void OnActorRehydrated(NCPhysicalActorSpawnedEvent args)
     {
         if (!_active || _policy == null || !Exists(args.EntityUid))
             return;
@@ -218,9 +206,9 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
         TrackAndQueueIntent(args.ActorId, entityUid, args.AggregateVersion);
     }
 
-    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
-        if (!args.Materialized)
+        if (!args.Bound)
             CleanupEntity(args.EntityUid, true);
     }
 

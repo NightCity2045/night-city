@@ -51,7 +51,7 @@ public sealed partial class NCLivelihoodRegistrySystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<NCCityActorRehydratedEvent>(OnActorRehydrated);
+        SubscribeLocalEvent<NCPhysicalActorSpawnedEvent>(OnActorRehydrated);
     }
 
     public async Task<NCLivelihoodRecord?> GetAsync(NCActorId actorId, bool forceReload = false)
@@ -150,7 +150,7 @@ public sealed partial class NCLivelihoodRegistrySystem : EntitySystem
         }
     }
 
-    private void OnActorRehydrated(NCCityActorRehydratedEvent args)
+    private void OnActorRehydrated(NCPhysicalActorSpawnedEvent args)
     {
         _ = ApplyToPhysicalActorAsync(args.ActorId, args.EntityUid);
     }

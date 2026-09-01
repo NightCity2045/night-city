@@ -18,18 +18,16 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._NC.LivingCity.Neural;
 
 /// <summary>
-/// Converts a validated neural answer into a short-lived BDI utility hint. The hint remains ordinary Blackboard
-/// input; safety priorities, planner routing and every gameplay mutation authority remain deterministic.
+/// Validates neural results, retains short diagnostics and forwards accepted choices to the typed action authority.
 /// </summary>
 public sealed partial class NCNeuralSuggestionSystem : EntitySystem
 {
     private static readonly ProtoId<NCNeuralPolicyPrototype> DefaultPolicy = "Default";
-    private const string SuggestionSource = "neural-suggestion";
     private const string DirectiveCapability = "NCCognitionAcceptDirective";
 
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
-    [Dependency] private NCCognitionSystem _cognition = default!;
+    [Dependency] private NCNeuralActionExecutionSystem _execution = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
     [Dependency] private NCCityLocalPerceptionSystem _perception = default!;
     [Dependency] private NCConversationSessionSystem _conversations = default!;
@@ -49,7 +47,6 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => Clear());
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => Clear());
         SubscribeLocalEvent<NCNeuralResultEvent>(OnResult);
-        SubscribeLocalEvent<NCCognitionCollectFactsEvent>(OnCollectFacts);
     }
 
     public override void Update(float frameTime)
@@ -70,14 +67,12 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
     public bool TryTrackDialogue(
         Guid requestId,
         NCConversationSessionId sessionId,
-        int conversationVersion,
-        string fallbackMessage)
+        int conversationVersion)
     {
         if (!_active || _policy == null || requestId == Guid.Empty || !sessionId.IsValid || conversationVersion < 1 ||
-            string.IsNullOrWhiteSpace(fallbackMessage) ||
             _dialogues.Count >= _policy.MaximumPendingCorrelations)
             return false;
-        return _dialogues.TryAdd(requestId, new DialogueCorrelation(sessionId, conversationVersion, fallbackMessage));
+        return _dialogues.TryAdd(requestId, new DialogueCorrelation(sessionId, conversationVersion));
     }
 
     public void ForgetDialogue(Guid requestId) => _dialogues.Remove(requestId);
@@ -115,20 +110,22 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         // its conversation correlation, speech-act allowlist and ordinary ChatSystem checks.
         var meetsConfidence = result.Request.Kind == NCNeuralRequestKind.DialogueContinuation ||
             response?.Confidence >= policy?.MinimumSuggestionConfidence;
+        var commands = response?.Commands ?? [];
         var accepted = _active && policy != null && response != null && hasCurrentTime &&
             result.Status == NCNeuralResultStatus.Accepted &&
             response.ContextVersion == result.Request.ContextVersion &&
             meetsConfidence &&
-            result.Request.AllowedCapabilityIds.Contains(response.SelectedCapabilityId) &&
-            (response.Intent?.TargetHandle.Length is not > 0 ||
-             _perception.TryResolveSubjectHandle(result.Request.ActorId, response.Intent.TargetHandle, now, out _)) &&
+            commands.Count is >= 1 and <= 8 && commands.All(command =>
+                result.Request.AllowedCapabilityIds.Contains(command.CapabilityId) &&
+                (command.TargetHandle.Length == 0 ||
+                 _perception.TryResolveSubjectHandle(result.Request.ActorId, command.TargetHandle, now, out _))) &&
             epoch == result.Request.SessionEpoch && result.Request.ExpiresAt > now;
 
         if (result.Request.Kind == NCNeuralRequestKind.DialogueContinuation && dialogue != null)
         {
             if (accepted && policy != null && result.Response is { } dialogueResponse)
             {
-                if (dialogueResponse.SelectedCapabilityId == DirectiveCapability && dialogueResponse.Intent != null)
+                if (dialogueResponse.Commands.Any(command => command.CapabilityId == DirectiveCapability))
                 {
                     // Natural orders are deferred: the domain authority must validate and commit them before the NPC
                     // may acknowledge anything. The handler later releases both the BDI hint and the spoken response.
@@ -139,17 +136,13 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
                         result.Request,
                         dialogueResponse);
                     RaiseLocalEvent(proposed);
-                    if (!proposed.Handled)
-                        TryDeliverDialogueFallback(result.Request.ActorId, result.Request.RequestId, dialogue);
                     return;
                 }
-                if (dialogueResponse.Intent != null)
+                if (dialogueResponse.Commands.Any(command => command.CapabilityId != "social.dialogue.reply"))
                     ApplySuggestion(result.Request, dialogueResponse, policy, now);
                 // Non-directive dialogue intents retain their ordinary immediate cognition path.
                 TryDeliverDialogue(result.Request.ActorId, result.Request.RequestId, dialogue, dialogueResponse);
             }
-            else
-                TryDeliverDialogueFallback(result.Request.ActorId, result.Request.RequestId, dialogue);
             return;
         }
 
@@ -160,40 +153,40 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
 
     }
 
-    private void ApplySuggestion(
+    private bool ApplySuggestion(
         NCNeuralRequestEnvelope request,
         NCNeuralResponseEnvelope response,
         NCNeuralPolicyPrototype policy,
         NCActiveWorldTime now)
     {
-        if (response.Intent == null ||
+        if (response.Commands.Count == 0 ||
             _suggestions.Count >= policy.MaximumAppliedSuggestions && !_suggestions.ContainsKey(request.ActorId))
         {
-            return;
+            return false;
         }
+        var primary = response.Commands[0];
         var expiresAt = now.Advance(policy.SuggestionLifetime);
         var suggestion = new AppliedSuggestion(
             request.RequestId,
-            response.SelectedCapabilityId,
+            primary.CapabilityId,
             request.ContextVersion,
             response.Confidence,
-            response.Intent.TargetHandle,
-            response.Intent.GoalKey,
+            primary.TargetHandle,
+            primary.GoalKey,
             now,
             expiresAt);
         _suggestions[request.ActorId] = suggestion;
         _expiries.Enqueue(new SuggestionExpiry(request.ActorId, suggestion.RequestId), expiresAt.Ticks);
-        _cognition.ForceSchedule(request.ActorId, now);
+        return _execution.TryAccept(request, response, now, out _);
     }
 
     /// <summary>Releases a directive suggestion only after its server-owned authority committed the order.</summary>
     public bool TryApplyDeferredSuggestion(NCNeuralRequestEnvelope request, NCNeuralResponseEnvelope response)
     {
         if (!_active || _policy == null || !_clock.TryGetCurrentTime(out var epoch, out var now) ||
-            epoch != request.SessionEpoch || request.ExpiresAt <= now || response.Intent == null)
+            epoch != request.SessionEpoch || request.ExpiresAt <= now || response.Commands.Count == 0)
             return false;
-        ApplySuggestion(request, response, _policy, now);
-        return true;
+        return ApplySuggestion(request, response, _policy, now);
     }
 
     /// <summary>Speaks a deferred order response after the executor has observed that the order actually started.</summary>
@@ -204,39 +197,7 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         int conversationVersion,
         NCNeuralResponseEnvelope response) =>
         TryDeliverDialogue(actorId, requestId,
-            new DialogueCorrelation(sessionId, conversationVersion, "nc-neural-conversation-fallback"), response);
-
-    private void OnCollectFacts(NCCognitionCollectFactsEvent args)
-    {
-        if (!_active || _policy == null || !_suggestions.TryGetValue(args.ActorId, out var suggestion) ||
-            suggestion.ExpiresAt <= args.Now || suggestion.TargetHandle.Length > 0 &&
-            !_perception.TryResolveSubjectHandle(args.ActorId, suggestion.TargetHandle, args.Now, out _))
-            return;
-
-        var confidence = suggestion.Confidence / 1000f;
-        var subject = new NCCognitionSubjectRef(NCCognitionReferenceKind.Actor, args.ActorId.ToString());
-        args.Sink.Add(new NCCognitionFact(
-            $"social.utility-modifier.{suggestion.CapabilityId}",
-            subject,
-            NCCognitionDomain.Social,
-            SuggestionSource,
-            suggestion.ContextVersion,
-            NCCognitionValue.FromNumber(_policy.MaximumUtilityBoost * confidence),
-            suggestion.AcceptedAt,
-            suggestion.ExpiresAt));
-        if (suggestion.TargetHandle.Length > 0)
-        {
-            args.Sink.Add(new NCCognitionFact(
-                $"neural.target.{suggestion.CapabilityId}",
-                new NCCognitionSubjectRef(NCCognitionReferenceKind.StableKey, suggestion.TargetHandle),
-                NCCognitionDomain.Core,
-                SuggestionSource,
-                suggestion.ContextVersion,
-                NCCognitionValue.FromStableKey(suggestion.GoalKey),
-                suggestion.AcceptedAt,
-                suggestion.ExpiresAt));
-        }
-    }
+            new DialogueCorrelation(sessionId, conversationVersion), response);
 
     private bool TryDeliverDialogue(
         NCActorId actorId,
@@ -271,40 +232,6 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
             hideChat: false,
             checkRadioPrefix: false);
         return true;
-    }
-
-    private void TryDeliverDialogueFallback(
-        NCActorId actorId,
-        Guid requestId,
-        DialogueCorrelation dialogue)
-    {
-        if (!_conversations.TryGet(dialogue.SessionId, out var session) ||
-            session.ConversationVersion != dialogue.ConversationVersion ||
-            session.Channel != NCConversationChannel.InPerson ||
-            !_runtime.TryGetEntity(actorId, out var entityUid) || !Exists(entityUid))
-        {
-            return;
-        }
-
-        var fallbackText = Loc.GetString(dialogue.FallbackMessage);
-
-        if (!_conversations.TryRecordTurn(new NCConversationTurnRequest(
-                session.SessionId,
-                NCPartyRef.ForActor(actorId),
-                NCSpeechActKind.Statement,
-                "neural.fallback",
-                $"neural:{requestId:N}",
-                requestId), out _, out _, fallbackText))
-        {
-            return;
-        }
-
-        _chat.TrySendInGameICMessage(
-            entityUid,
-            fallbackText,
-            InGameICChatType.Speak,
-            hideChat: false,
-            checkRadioPrefix: false);
     }
 
     private static bool TryMapSpeechAct(string value, out NCSpeechActKind act)
@@ -347,8 +274,7 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
     private readonly record struct SuggestionExpiry(NCActorId ActorId, Guid RequestId);
     private sealed record DialogueCorrelation(
         NCConversationSessionId SessionId,
-        int ConversationVersion,
-        string FallbackMessage);
+        int ConversationVersion);
 }
 
 /// <summary>

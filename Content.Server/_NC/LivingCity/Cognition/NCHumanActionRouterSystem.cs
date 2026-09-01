@@ -48,7 +48,7 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
         base.Initialize();
         SubscribeLocalEvent<NCCognitionExecuteStepEvent>(OnExecuteStep);
         SubscribeLocalEvent<NCCognitionDecisionAppliedEvent>(OnDecisionApplied);
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
         SubscribeLocalEvent<NCHumanActionRuntimeComponent, ComponentShutdown>(OnRuntimeShutdown);
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => EndRound());
@@ -422,9 +422,9 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
         return NCHumanActionFailureKind.Unknown;
     }
 
-    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
-        if (!args.Materialized)
+        if (!args.Bound)
             Interrupt(args.ActorId, NCHumanActionInterruptKind.Dematerialized);
     }
 

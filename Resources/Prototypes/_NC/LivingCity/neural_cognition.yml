@@ -4,7 +4,7 @@
 
 - type: ncNeuralPolicy
   id: Default
-  enabled: false
+  enabled: true
   endpoint: http://neural-cognition:8080/v1/cognition
   maximumQueued: 512
   maximumConcurrent: 4
@@ -58,7 +58,6 @@
   narrativeActorMaximumOutstandingRequests: 2
   narrativeActorReservedInputTokens: 8192
   narrativeActorRequestCooldown: 0.1s
-  maximumCoalescedFollowersPerRequest: 16
   circuitFailureThreshold: 5
   minimumSuggestionConfidence: 400
   maximumUtilityBoost: 40
@@ -73,6 +72,19 @@
   suggestionLifetime: 2m
   strategicRequestCooldown: 2m
   incidentEscalationCooldown: 30s
+
+- type: ncPhysicalActorBrainPolicy
+  id: NCDefaultPhysicalActorBrain
+  # One response may contain up to eight commands, so calm actors need no rapid polling. Reactive perception,
+  # dialogue and incidents still submit immediately through their dedicated event paths.
+  decisionInterval: 30m
+  retryInterval: 2m
+  initialStagger: 30m
+  maximumDispatchesPerTick: 4
+  maximumExecutionPulsesPerTick: 32
+  executionPulseInterval: 1s
+  # A response must arrive quickly, but an accepted multi-step physical plan may run much longer.
+  actionPlanLifetime: 30m
 
 - type: ncNeuralPromptProfile
   id: NCLivingCityDefault
@@ -96,14 +108,6 @@
   allowedKinds: [SocialCognition, StrategicDecision, DialogueContinuation, MemorySummary, NarrativeRender]
   minimumIntentConfidence: 500
   maximumIntentPriority: 700
-  targetedIntentsAllowed: true
-
-- type: ncNeuralAutonomyPolicy
-  id: NCOrdinaryResidentDialogueAutonomy
-  stableKey: resident-dialogue-only
-  allowedKinds: [DialogueContinuation]
-  minimumIntentConfidence: 700
-  maximumIntentPriority: 250
   targetedIntentsAllowed: true
 
 - type: ncNeuralAutonomyPolicy

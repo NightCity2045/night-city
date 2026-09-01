@@ -82,7 +82,7 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
         base.Initialize();
         SubscribeLocalEvent<NCHumanActionExecutionEvent>(OnExecute);
         SubscribeLocalEvent<NCHumanActionInterruptedEvent>(OnInterrupted);
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
         SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(_ => Reset());
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => Reset());
@@ -372,9 +372,9 @@ public sealed partial class NCHumanRoutineActivitySystem : EntitySystem
             Stop(human);
     }
 
-    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
-        if (!args.Materialized)
+        if (!args.Bound)
         {
             Stop(args.EntityUid, false);
             _cycles.Remove(args.EntityUid);

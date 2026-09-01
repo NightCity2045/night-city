@@ -7,7 +7,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading;
 using Content.Server._NC.LivingCity.Actors;
@@ -36,7 +35,6 @@ public sealed record NCNeuralRuntimeSnapshot(bool Active, bool AdministrativelyD
     long SocialCognitionRequests, long StrategicDecisionRequests, long DialogueContinuationRequests,
     long MemorySummaryRequests, long NarrativeRenderRequests,
     long Accepted, long Stale, long Invalid, long ProviderFailures, long Fallbacks,
-    long CoalescedRequests, int PendingCoalescedFollowers,
     long Timeouts, long ValidationRejects, int ConsecutiveFailures, NCActiveWorldTime? CircuitOpenUntil,
     NCNeuralFailureKind LastFailureKind, string LastFailureReason,
     IReadOnlyDictionary<NCNeuralRequestKind, NCNeuralKindRuntimeSnapshot> KindRuntime);
@@ -44,7 +42,6 @@ public sealed record NCNeuralRuntimeSnapshot(bool Active, bool AdministrativelyD
 /// <summary>Bounded aggregate telemetry for one request kind. Payloads and credentials are never retained.</summary>
 public sealed record NCNeuralKindRuntimeSnapshot(
     long Submitted,
-    long Coalesced,
     long Accepted,
     long Fallback,
     long Rejected,
@@ -76,8 +73,8 @@ public sealed record NCNeuralActorRuntimeSnapshot(
     string LastProviderModel);
 
 /// <summary>
-/// Bounded optional neural queue. Responses are suggestions only and are published as events after session, version,
-/// capability and schema validation; this system has no dependency on gameplay mutation authorities.
+/// Bounded neural transport queue. Validated responses are published to the physical action authority; this client
+/// never mutates gameplay state itself.
 /// </summary>
 public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeuralCognitionClient
 {
@@ -88,7 +85,6 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     private readonly ConcurrentQueue<UsageCompletion> _usageCompletions = new();
     private readonly ConcurrentQueue<BudgetLoadCompletion> _budgetLoadCompletions = new();
     private readonly HashSet<Guid> _known = [];
-    private readonly Dictionary<(NCActorId Actor, NCNeuralRequestKind Kind), NCNeuralResponseEnvelope> _cache = [];
     private readonly Dictionary<NCActorId, ActorRuntimeState> _actorRuntime = [];
     private readonly Dictionary<Guid, BudgetReservation> _budgetReservations = [];
     private readonly Dictionary<NCActorId, int> _actorOutstandingRequests = [];
@@ -97,8 +93,6 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     private readonly Dictionary<NCActorId, int> _actorSessionTokens = [];
     private readonly Dictionary<NCNeuralRequestKind, int> _kindReservations = [];
     private readonly Dictionary<(NCActorId Actor, NCNeuralRequestKind Kind), NCActiveWorldTime> _nextRequestAt = [];
-    private readonly Dictionary<CoalescingKey, CoalescedRequestGroup> _coalescedByKey = [];
-    private readonly Dictionary<Guid, CoalescingKey> _coalescingByPrimary = [];
     private readonly Dictionary<NCNeuralRequestKind, KindRuntimeState> _kindRuntime = [];
     private readonly Dictionary<NCActorId, long> _weeklyActorCosts = [];
     private readonly Dictionary<NCNeuralRequestKind, long> _weeklyKindRequests = [];
@@ -126,7 +120,6 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     private long _invalid;
     private long _providerFailures;
     private long _fallbacks;
-    private long _coalescedRequests;
     private long _timeouts;
     private long _rejects;
     private NCNeuralFailureKind _lastFailureKind;
@@ -231,22 +224,6 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             return true;
         }
 
-        var coalescingKey = CreateCoalescingKey(request);
-        if (_coalescedByKey.TryGetValue(coalescingKey, out var coalesced))
-        {
-            _known.Add(request.RequestId);
-            if (coalesced.Followers.Count >= _policy.MaximumCoalescedFollowersPerRequest)
-            {
-                Publish(Fallback(request, NCNeuralResultStatus.Fallback, "coalescing-capacity"));
-                return true;
-            }
-
-            coalesced.Followers.Add(request);
-            _coalescedRequests++;
-            GetKindRuntimeState(request.Kind).Coalesced++;
-            return true;
-        }
-
         if (_queue.Count >= _policy.MaximumQueued)
         {
             _known.Add(request.RequestId);
@@ -261,8 +238,6 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         }
         _known.Add(request.RequestId);
         ReserveBudget(request, now);
-        _coalescedByKey[coalescingKey] = new CoalescedRequestGroup();
-        _coalescingByPrimary[request.RequestId] = coalescingKey;
         _queue.Enqueue(request, ((byte) request.Priority, _sequence++));
         return true;
     }
@@ -276,7 +251,6 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         _weeklyKindRequests.GetValueOrDefault(NCNeuralRequestKind.MemorySummary),
         _weeklyKindRequests.GetValueOrDefault(NCNeuralRequestKind.NarrativeRender),
         _accepted, _stale, _invalid, _providerFailures, _fallbacks,
-        _coalescedRequests, _coalescedByKey.Values.Sum(value => value.Followers.Count),
         _timeouts, _rejects, _failures, _circuitOpenUntil, _lastFailureKind, _lastFailureReason,
         Enum.GetValues<NCNeuralRequestKind>().ToDictionary(
             kind => kind,
@@ -322,7 +296,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     }
 
     /// <summary>
-    /// Cancels provider work for the current round without stopping deterministic cognition or A-Life. The normal
+    /// Cancels provider work for the current round without removing physical actors. The normal
     /// session reset clears this administrative latch for the next round.
     /// </summary>
     public bool TryDisableProviderForRound()
@@ -490,8 +464,8 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         if (!completion.Persisted)
         {
             RecordFailure(NCNeuralFailureKind.Persistence, completion.Reason);
-            // Provider spend without a durable receipt must fail closed. Deterministic AI remains active, while
-            // further Neural calls are denied until the next round instead of accumulating untracked cost.
+            // Provider spend without a durable receipt must fail closed. Physical safety reflexes remain active,
+            // while further Neural calls are denied until the next round instead of accumulating untracked cost.
             TryDisableProviderForRound();
             Publish(Fallback(request, NCNeuralResultStatus.Fallback, completion.Reason,
                 NCNeuralFailureKind.Persistence));
@@ -504,10 +478,6 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             _lastFailureKind = NCNeuralFailureKind.None;
             _lastFailureReason = string.Empty;
             _accepted++;
-            // A previous answer is never a safe fallback for a new utterance, even when the Actor aggregate itself
-            // did not change between turns. Strategic results retain strict context-version caching.
-            if (request.Kind != NCNeuralRequestKind.DialogueContinuation)
-                _cache[(request.ActorId, request.Kind)] = completion.Result.Response!;
         }
         Publish(completion.Result);
     }
@@ -696,15 +666,15 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             response.InputTokens > _policy!.MaximumRequestInputTokens ||
             response.OutputTokens > _policy.MaximumRequestOutputTokens ||
             response.ProviderModel != _policy.ProviderModel || !Stable(response.ProviderRequestId) ||
-            !request.AllowedCapabilityIds.Contains(response.SelectedCapabilityId) ||
-            response.Intent != null &&
-            !response.Intent.RequestedCapabilityIds.Contains(response.SelectedCapabilityId) ||
+            response.Commands.Count is < 1 or > 8 ||
+            response.Commands.Any(command => !request.AllowedCapabilityIds.Contains(command.CapabilityId) ||
+                !ValidCommand(request, command)) ||
             response.SpeechActKey.Length > 96 || !Stable(response.SummaryKey) ||
             response.RenderedText.Length > _policy.MaximumTextLength ||
             request.Kind != NCNeuralRequestKind.DialogueContinuation &&
             response.Confidence < (request.Autonomy?.MinimumIntentConfidence ?? int.MaxValue) ||
             request.Kind == NCNeuralRequestKind.DialogueContinuation &&
-            string.IsNullOrWhiteSpace(response.RenderedText) || !ValidIntent(request, response.Intent) ||
+            string.IsNullOrWhiteSpace(response.RenderedText) ||
             !ValidDisclosureResponse(request, response))
             return new(NCNeuralResultStatus.Invalid, request, null, "schema-or-capability",
                 NCNeuralFailureKind.Schema);
@@ -718,17 +688,9 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         NCNeuralFailureKind failure = NCNeuralFailureKind.None)
     {
         _fallbacks++;
-        if (request.Kind != NCNeuralRequestKind.DialogueContinuation &&
-            _cache.TryGetValue((request.ActorId, request.Kind), out var cached) &&
-            cached.ContextVersion == request.ContextVersion && request.AllowedCapabilityIds.Contains(
-                cached.SelectedCapabilityId))
-        {
-            return new(NCNeuralResultStatus.Fallback, request, cached, $"cached:{reason}", failure);
-        }
-        var capability = request.AllowedCapabilityIds.FirstOrDefault() ?? string.Empty;
         return new(status, request, new NCNeuralResponseEnvelope(request.RequestId, NCNeuralContract.SchemaVersion,
             request.ContextVersion,
-            capability, "safe-default", string.Empty, "safe-default", 0, 0, 0, 0, string.Empty,
+            [], "safe-default", string.Empty, "safe-default", 0, 0, 0, 0, string.Empty,
             _policy?.ProviderModel ?? string.Empty), reason, failure);
     }
 
@@ -748,42 +710,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     private void Publish(NCNeuralResult result)
     {
         ReleaseBudget(result.Request);
-        if (!_coalescingByPrimary.Remove(result.Request.RequestId, out var key) ||
-            !_coalescedByKey.Remove(key, out var group))
-        {
-            PublishSingle(result);
-            return;
-        }
-
         PublishSingle(result);
-        var now = CurrentTime();
-        foreach (var follower in group.Followers)
-        {
-            if (follower.ExpiresAt <= now)
-            {
-                PublishSingle(new NCNeuralResult(
-                    NCNeuralResultStatus.Expired,
-                    follower,
-                    null,
-                    "coalesced:expired",
-                    result.FailureKind));
-                continue;
-            }
-
-            var response = result.Response == null
-                ? null
-                : result.Response with
-                {
-                    RequestId = follower.RequestId,
-                    ContextVersion = follower.ContextVersion,
-                };
-            PublishSingle(result with
-            {
-                Request = follower,
-                Response = response,
-                Reason = BoundDiagnostic($"coalesced:{result.Reason}"),
-            });
-        }
     }
 
     private void PublishSingle(NCNeuralResult result)
@@ -824,7 +751,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             LastStatus = result.Status,
             LastFailureKind = result.FailureKind,
             LastReason = BoundDiagnostic(result.Reason),
-            LastCapabilityId = response?.SelectedCapabilityId ?? string.Empty,
+            LastCapabilityId = response?.Commands.FirstOrDefault()?.CapabilityId ?? string.Empty,
             LastSummaryKey = response?.SummaryKey ?? string.Empty,
             LastProviderModel = response?.ProviderModel ?? string.Empty,
             UpdatedSequence = ++_actorRuntimeSequence,
@@ -1111,25 +1038,6 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             request.MaximumOutputTokens);
     }
 
-    private static CoalescingKey CreateCoalescingKey(NCNeuralRequestEnvelope request)
-    {
-        // Request identity and expiry do not change the provider answer. Hashing the primitive transport packet keeps
-        // prompts out of retained server state while identical concurrent work shares one provider call.
-        var providerRequest = ToProviderRequest(request) with
-        {
-            RequestId = Guid.Empty,
-            ExpiresAt = new NCNeuralProviderTime(0),
-        };
-        var payload = JsonSerializer.SerializeToUtf8Bytes(providerRequest);
-        var hash = SHA256.HashData(payload);
-        return new CoalescingKey(
-            request.ActorId,
-            request.Kind,
-            request.AccessTier,
-            request.ContextVersion,
-            new Guid(hash.AsSpan(0, 16)));
-    }
-
     private KindRuntimeState GetKindRuntimeState(NCNeuralRequestKind kind)
     {
         if (_kindRuntime.TryGetValue(kind, out var state))
@@ -1164,11 +1072,11 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         Deactivate();
         _sessionCancellation?.Dispose();
         _sessionCancellation = null;
-        _known.Clear(); _cache.Clear(); _actorRuntime.Clear(); _actorRuntimeSequence = 0; _inputTokens = 0;
+        _known.Clear(); _actorRuntime.Clear(); _actorRuntimeSequence = 0; _inputTokens = 0;
         _outputTokens = 0; _costUsdMicros = 0; _weeklyCostUsdMicros = 0; _weeklyPeriodKey = string.Empty;
         _weeklyActorCosts.Clear(); _weeklyKindRequests.Clear(); ClearBudgetReservations();
         _actorSessionTokens.Clear();
-        _coalescedByKey.Clear(); _coalescingByPrimary.Clear(); _kindRuntime.Clear(); _coalescedRequests = 0;
+        _kindRuntime.Clear();
         _accepted = 0; _stale = 0; _invalid = 0; _providerFailures = 0; _fallbacks = 0;
         _timeouts = 0; _rejects = 0;
         _failures = 0; _circuitOpenUntil = null;
@@ -1220,7 +1128,6 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         value.NarrativeActorReservedInputTokens >= value.OrdinaryResidentReservedInputTokens &&
         value.NarrativeActorReservedInputTokens <= value.MaximumRequestInputTokens &&
         value.NarrativeActorRequestCooldown > TimeSpan.Zero &&
-        value.MaximumCoalescedFollowersPerRequest is > 0 and <= 128 &&
         value.RequestLifetime >= value.RequestTimeout && value.MinimumSuggestionConfidence is >= 0 and <= 1000 &&
         float.IsFinite(value.MaximumUtilityBoost) && value.MaximumUtilityBoost is >= 0 and <= 1000 &&
         value.MaximumPendingCorrelations is > 0 and <= 16384 && value.SuggestionLifetime > TimeSpan.Zero &&
@@ -1291,23 +1198,20 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             disclosed.IsSubsetOf(allowed) && withheld.IsSubsetOf(known) && !disclosed.Overlaps(withheld);
     }
 
-    private static bool ValidIntent(NCNeuralRequestEnvelope request, NCNeuralIntentProposal? intent)
+    private static bool ValidCommand(NCNeuralRequestEnvelope request, NCNeuralCommandProposal command)
     {
-        if (intent == null)
-            return request.Kind == NCNeuralRequestKind.DialogueContinuation;
         var autonomy = request.Autonomy;
-        if (autonomy == null || !Stable(intent.GoalKey) || !Stable(intent.ExpectedOutcomeKey) ||
-            intent.Priority < 0 || intent.Priority > autonomy.MaximumIntentPriority ||
-            intent.RequestedCapabilityIds.Count is < 1 or > 16 ||
-            intent.RequestedCapabilityIds.Any(value => !request.AllowedCapabilityIds.Contains(value)) ||
-            intent.InformationGapKeys.Count > 16 || intent.InformationGapKeys.Any(value => !Stable(value)) ||
-            intent.Arguments.Count > 16 || intent.Arguments.Any(value =>
+        if (autonomy == null || !Stable(command.CapabilityId) || !Stable(command.GoalKey) ||
+            !Stable(command.ExpectedOutcomeKey) ||
+            command.Priority < 0 || command.Priority > autonomy.MaximumIntentPriority ||
+            command.InformationGapKeys.Count > 16 || command.InformationGapKeys.Any(value => !Stable(value)) ||
+            command.Arguments.Count > 16 || command.Arguments.Any(value =>
                 !Stable(value.Key) || value.Value.Length > 256 || value.Value.Any(char.IsControl)))
             return false;
-        if (intent.TargetHandle.Length == 0)
+        if (command.TargetHandle.Length == 0)
             return true;
-        return autonomy.TargetedIntentsAllowed && Stable(intent.TargetHandle) && (request.PerceivedSubjects ?? [])
-            .Any(value => value.Handle == intent.TargetHandle);
+        return autonomy.TargetedIntentsAllowed && Stable(command.TargetHandle) && (request.PerceivedSubjects ?? [])
+            .Any(value => value.Handle == command.TargetHandle);
     }
     private static bool ValidDialogue(NCNeuralRequestEnvelope value, NCNeuralPolicyPrototype policy)
     {
@@ -1376,22 +1280,9 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         int Tokens,
         long CostUsdMicros);
 
-    private readonly record struct CoalescingKey(
-        NCActorId ActorId,
-        NCNeuralRequestKind Kind,
-        NCNeuralAccessTier AccessTier,
-        long ContextVersion,
-        Guid PayloadHash);
-
-    private sealed class CoalescedRequestGroup
-    {
-        public List<NCNeuralRequestEnvelope> Followers { get; } = [];
-    }
-
     private sealed class KindRuntimeState
     {
         public long Submitted;
-        public long Coalesced;
         public long Accepted;
         public long Fallback;
         public long Rejected;
@@ -1401,7 +1292,6 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
 
         public NCNeuralKindRuntimeSnapshot Snapshot() => new(
             Submitted,
-            Coalesced,
             Accepted,
             Fallback,
             Rejected,

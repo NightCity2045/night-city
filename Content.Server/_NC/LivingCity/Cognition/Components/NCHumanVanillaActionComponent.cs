@@ -28,7 +28,6 @@ public sealed partial class NCHumanVanillaActionComponent : Component
     [ViewVariables(VVAccess.ReadOnly)] public bool HasRegisteredSteeringDestination;
     [ViewVariables(VVAccess.ReadOnly)] public NCActiveWorldTime SteeringRegisteredAt;
     [ViewVariables(VVAccess.ReadOnly)] public bool SuspendedHtn;
-    [ViewVariables(VVAccess.ReadOnly)] public bool OwnsCombatBlocker;
     [ViewVariables(VVAccess.ReadOnly)] public NCCityPhysicalInterruptFlags Interrupt;
     [ViewVariables(VVAccess.ReadOnly)] public string InventorySlot = string.Empty;
     [ViewVariables(VVAccess.ReadOnly)] public string ExpectedSpeech = string.Empty;

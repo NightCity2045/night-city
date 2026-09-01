@@ -173,6 +173,18 @@
   storageRetryCount: 3
   storageRetryDelay: 1s
 
+# Startup work is bounded, physical population is not. Every living ActorId remains an ECS entity for the round.
+- type: ncPhysicalActorLifecyclePolicy
+  id: NCDefaultPhysicalActorLifecycle
+  snapshotPageSize: 128
+  maximumDispatchesPerTick: 4
+  maximumConcurrentLoads: 8
+  maximumCandidateChecks: 128
+  maximumCompletedRequestHistory: 2048
+  actorOccupancyExclusionRadius: 0.6
+  adminPreferredSpawnRadius: 28
+  retryDelay: 2s
+
 - type: ncCityZoneStatePolicy
   id: NCDefaultCityZoneStatePolicy
   snapshotPageSize: 250
@@ -202,46 +214,6 @@
     Busy: 0.8
     OnCall: 0.6
     Unavailable: 0
-
-- type: ncCityMaterializationPolicy
-  id: NCDefaultCityMaterializationPolicy
-  maximumQueuedRequests: 1024
-  maximumDispatchesPerTick: 2
-  maximumConcurrentLoads: 4
-  maximumCandidateChecks: 32
-  maximumCompletedRequestHistory: 2048
-  maximumPriority: 1000
-  playerVisibilityExclusionRadius: 18
-  playerSpawnExclusionRadius: 2
-  adminPreferredSpawnRadius: 28
-  actorOccupancyExclusionRadius: 1
-  retryDelay: 2s
-  defaultMaximumWait: 30s
-  maximumWait: 5m
-
-- type: ncCityRelevancePolicy
-  id: NCDefaultCityRelevancePolicy
-  evaluationInterval: 1s
-  clusterMergeRadius: 40
-  clusterSplitRadius: 52
-  dematerializationRadius: 40
-  materializationCooldown: 15s
-  # Five game minutes equal twenty-five real seconds. This absorbs portal/zone-index transitions without pinning
-  # actors whose semantic location is genuinely no longer observed.
-  offscreenGracePeriod: 5m
-  maximumAnchors: 128
-  catalogPageSize: 250
-  maximumCandidateInspectionsPerCluster: 128
-  maximumMaterializationRequestsPerEvaluation: 4
-  maximumDematerializationInspectionsPerEvaluation: 64
-  maximumDematerializationRequestsPerEvaluation: 2
-  playerRelevancePriority: 500
-  maximumQueuedDematerializations: 256
-  maximumDematerializationDispatchesPerTick: 2
-  maximumConcurrentDematerializations: 4
-  maximumCompletedDematerializationHistory: 1024
-  dematerializationRetryDelay: 2s
-  dematerializationMaximumWait: 2m
 
 - type: ncAILoadGovernorPolicy
   id: NCDefaultAILoadGovernorPolicy

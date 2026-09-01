@@ -66,6 +66,26 @@ public sealed record NCCityActorDematerializationCommitResult(
     NCCityActorInventoryRecord? Inventory,
     string? Error);
 
+/// <summary>Atomic physical actor checkpoint; capturing state never removes or virtualizes the ECS entity.</summary>
+public sealed record NCPhysicalActorCheckpointRequest(
+    Guid CommandId,
+    NCActorId ActorId,
+    long ExpectedActorVersion,
+    NCZoneId CurrentZone,
+    NCCityActorDomainCapture Domains,
+    Guid CorrelationId,
+    Guid? CausationId = null,
+    string AuditSource = "system",
+    IReadOnlyList<NCPersistentAggregateWrite>? ParticipantWrites = null);
+
+public sealed record NCPhysicalActorCheckpointResult(
+    NCCityActorMutationStatus Status,
+    NCActorId ActorId,
+    NCCityActorRecord? Actor,
+    NCCityActorHealthRecord? Health,
+    NCCityActorInventoryRecord? Inventory,
+    string? Error);
+
 public sealed record NCCityActorCreateRequest(
     Guid CommandId,
     Guid PopulationScopeId,
@@ -197,14 +217,14 @@ public sealed class NCCityActorPersistedEvent(
 }
 
 /// <summary>
-/// Round-local notification used to hand travel ownership between abstract simulation and a physical NPC entity.
+/// Round-local notification that a persistent actor gained or lost its physical ECS entity.
 /// </summary>
-public sealed class NCCityActorMaterializationChangedEvent(
+public sealed class NCCityActorBindingChangedEvent(
     NCActorId actorId,
     EntityUid entityUid,
-    bool materialized) : EntityEventArgs
+    bool bound) : EntityEventArgs
 {
     public NCActorId ActorId { get; } = actorId;
     public EntityUid EntityUid { get; } = entityUid;
-    public bool Materialized { get; } = materialized;
+    public bool Bound { get; } = bound;
 }

@@ -42,7 +42,7 @@ public sealed partial class NCNcpdDutySystem : EntitySystem
         base.Initialize();
         SubscribeLocalEvent<NCNcpdOfficerProjectedEvent>(OnOfficerProjected);
         SubscribeLocalEvent<NCCityActorPersistedEvent>(OnActorPersisted);
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(_ => BootstrapOfficers());
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => ClearRound());
@@ -116,11 +116,11 @@ public sealed partial class NCNcpdDutySystem : EntitySystem
             Enqueue(args.ActorId);
     }
 
-    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
         if (!_states.TryGetValue(args.ActorId, out var state))
             return;
-        if (args.Materialized)
+        if (args.Bound)
             ApplyPhysical(args.ActorId, state);
     }
 

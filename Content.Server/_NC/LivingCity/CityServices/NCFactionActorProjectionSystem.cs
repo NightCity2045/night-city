@@ -30,13 +30,13 @@ public sealed partial class NCFactionActorProjectionSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<NCCityActorRehydratedEvent>(OnRehydrated);
+        SubscribeLocalEvent<NCPhysicalActorSpawnedEvent>(OnRehydrated);
         SubscribeLocalEvent<NCFactionActorComponent, ComponentShutdown>(OnProjectionShutdown);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
         RebuildProfiles();
     }
 
-    private void OnRehydrated(NCCityActorRehydratedEvent args) =>
+    private void OnRehydrated(NCPhysicalActorSpawnedEvent args) =>
         _ = ProjectAsync(args.ActorId, args.EntityUid);
 
     private void OnProjectionShutdown(Entity<NCFactionActorComponent> entity, ref ComponentShutdown args) =>

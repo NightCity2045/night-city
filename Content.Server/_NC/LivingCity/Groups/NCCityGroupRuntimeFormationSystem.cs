@@ -27,7 +27,7 @@ public sealed partial class NCCityGroupRuntimeFormationSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnActorMaterializationChanged);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnActorBindingChanged);
         SubscribeLocalEvent<NCCityGroupPersistedEvent>(OnGroupPersisted);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
@@ -140,9 +140,9 @@ public sealed partial class NCCityGroupRuntimeFormationSystem : EntitySystem
         return true;
     }
 
-    private void OnActorMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnActorBindingChanged(NCCityActorBindingChangedEvent args)
     {
-        if (!args.Materialized && _groupByActor.TryGetValue(args.ActorId, out var groupId))
+        if (!args.Bound && _groupByActor.TryGetValue(args.ActorId, out var groupId))
             ClearGroup(groupId);
     }
 

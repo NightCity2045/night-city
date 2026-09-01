@@ -37,7 +37,6 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
     [Dependency] private StandingStateSystem _standing = default!;
     [Dependency] private NCEmergencyCareSystem _emergency = default!;
     [Dependency] private NCTreatmentInteractionSystem _treatment = default!;
-    [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
 
     public override void Initialize()
     {
@@ -189,7 +188,6 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
 
         if (_doAfter.TryStartDoAfter(doAfter))
         {
-            _dematerialization.BeginBlocker(patient, NCCityDematerializationBlockerFlags.PlayerTreatment);
             _popup.PopupEntity(Loc.GetString("nc-medical-cpr-started"), patient, user);
             return true;
         }
@@ -201,7 +199,6 @@ public sealed partial class NCEmergencyCareInteractionSystem : EntitySystem
 
     private void OnCprDoAfter(Entity<NCMedicalBodyComponent> patient, ref NCCprDoAfterEvent args)
     {
-        _dematerialization.EndBlocker(patient.Owner, NCCityDematerializationBlockerFlags.PlayerTreatment);
         if (args.Handled || args.Cancelled || args.Target != patient.Owner)
             return;
 

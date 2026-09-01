@@ -605,6 +605,21 @@
     action: human-flee-from-threat
 
 - type: ncCognitionCapability
+  id: NCCognitionDefendAgainstThreat
+  domain: Safety
+  taskKind: ImmediateReaction
+  preferredPlanner: Reactive
+  fallbackPlanner: DeterministicFallback
+  baseUtility: 65
+  priority: 960
+  requiredBeliefs: [ perception.hostile-present ]
+  interruptsRoutine: true
+  requiresMaterialization: true
+  procedureSteps:
+  - id: yield-combat
+    action: yield-to-combat-authority
+
+- type: ncCognitionCapability
   id: NCCognitionSeekMedicalCare
   domain: Medical
   taskKind: KnownProcedure
@@ -993,6 +1008,7 @@
   capabilities:
   - NCCognitionIncapacitated
   - NCCognitionRespondToThreat
+  - NCCognitionDefendAgainstThreat
   - NCCognitionSeekMedicalCare
   - NCCognitionFulfilEmployment
   - NCCognitionFollowRoutine
