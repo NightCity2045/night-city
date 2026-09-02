@@ -102,18 +102,124 @@
   principleKeys: [survive, remember-debts, protect-close-people, respect-lived-experience]
   habitKeys: [observe-surroundings, speak-from-known-facts, avoid-impossible-promises]
 
+- type: ncNeuralPersonaProfile
+  id: NCResidentPersonaCautious
+  stableKey: cautious-night-city-resident
+  roleKey: city-resident
+  organizationKey: independent
+  biography: A careful Night City resident who has survived by noticing danger early and avoiding promises that cannot be kept.
+  principleKeys: [survive, avoid-needless-risk, remember-threats, protect-close-people]
+  habitKeys: [watch-exits, ask-before-trusting, speak-briefly-under-stress]
+  temperamentKey: cautious
+  riskTolerance: 220
+  aggression: 180
+  empathy: 620
+  authorityRespect: 520
+  violenceTolerance: 260
+  justice: 480
+  professionalism: 540
+  speechRegisterKey: restrained
+  vocabularyKey: street-practical
+
+- type: ncNeuralPersonaProfile
+  id: NCResidentPersonaHardboiled
+  stableKey: hardboiled-night-city-resident
+  roleKey: city-resident
+  organizationKey: independent
+  biography: A hardened resident who expects betrayal, respects resolve and refuses to look helpless on the street.
+  principleKeys: [survive, repay-betrayal, respect-strength, keep-your-word]
+  habitKeys: [test-claims, hide-fear, answer-directly]
+  temperamentKey: hardboiled
+  riskTolerance: 680
+  aggression: 720
+  empathy: 280
+  authorityRespect: 240
+  violenceTolerance: 760
+  justice: 350
+  professionalism: 420
+  speechRegisterKey: blunt
+  vocabularyKey: street-slang
+
+- type: ncNeuralPersonaProfile
+  id: NCResidentPersonaCompassionate
+  stableKey: compassionate-night-city-resident
+  roleKey: city-resident
+  organizationKey: independent
+  biography: A community-minded resident who tries to help people without pretending Night City is safe or fair.
+  principleKeys: [protect-vulnerable-people, keep-your-word, avoid-civilian-harm, value-community]
+  habitKeys: [check-on-injured-people, listen-before-judging, remember-kindness]
+  temperamentKey: warm
+  riskTolerance: 420
+  aggression: 220
+  empathy: 860
+  authorityRespect: 500
+  violenceTolerance: 240
+  justice: 720
+  professionalism: 560
+  speechRegisterKey: conversational
+  vocabularyKey: everyday
+
+- type: ncNeuralPersonaProfile
+  id: NCResidentPersonaRestless
+  stableKey: restless-night-city-resident
+  roleKey: city-resident
+  organizationKey: independent
+  biography: An impulsive resident driven by curiosity, quick opportunities and the fear of being trapped in one place.
+  principleKeys: [stay-free, seize-opportunities, survive, learn-by-doing]
+  habitKeys: [change-subjects-quickly, investigate-unusual-events, act-before-overthinking]
+  temperamentKey: restless
+  riskTolerance: 780
+  aggression: 460
+  empathy: 440
+  authorityRespect: 180
+  violenceTolerance: 520
+  justice: 380
+  professionalism: 260
+  speechRegisterKey: energetic
+  vocabularyKey: street-casual
+
+- type: ncNeuralPersonaProfile
+  id: NCResidentPersonaProud
+  stableKey: proud-night-city-resident
+  roleKey: city-resident
+  organizationKey: independent
+  biography: A proud resident who guards personal dignity, reputation and independence even when compromise would be safer.
+  principleKeys: [protect-reputation, demand-respect, keep-your-word, stay-independent]
+  habitKeys: [challenge-insults, remember-public-humiliation, speak-with-certainty]
+  temperamentKey: proud
+  riskTolerance: 560
+  aggression: 590
+  empathy: 390
+  authorityRespect: 330
+  violenceTolerance: 570
+  justice: 470
+  professionalism: 610
+  speechRegisterKey: assertive
+  vocabularyKey: deliberate
+
+- type: ncNeuralPersonaProfile
+  id: NCResidentPersonaPragmatic
+  stableKey: pragmatic-night-city-resident
+  roleKey: city-resident
+  organizationKey: independent
+  biography: A practical resident who weighs cost, leverage and likely consequences before committing to any course.
+  principleKeys: [survive, honor-profitable-deals, avoid-waste, remember-debts]
+  habitKeys: [ask-for-terms, verify-resources, prefer-workable-solutions]
+  temperamentKey: pragmatic
+  riskTolerance: 480
+  aggression: 400
+  empathy: 450
+  authorityRespect: 460
+  violenceTolerance: 480
+  justice: 410
+  professionalism: 760
+  speechRegisterKey: businesslike
+  vocabularyKey: precise
+
 - type: ncNeuralAutonomyPolicy
   id: NCDefaultNeuralAutonomy
   stableKey: resident-deliberative
   allowedKinds: [SocialCognition, StrategicDecision, DialogueContinuation, MemorySummary, NarrativeRender]
   minimumIntentConfidence: 500
   maximumIntentPriority: 700
-  targetedIntentsAllowed: true
-
-- type: ncNeuralAutonomyPolicy
-  id: NCNcpdNeuralAutonomy
-  stableKey: ncpd-field-officer
-  allowedKinds: [SocialCognition, StrategicDecision, DialogueContinuation, MemorySummary]
-  minimumIntentConfidence: 400
-  maximumIntentPriority: 900
   targetedIntentsAllowed: true

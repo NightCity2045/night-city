@@ -184,7 +184,7 @@ public sealed partial class NCNeuralActionExecutionSystem : EntitySystem
         }
 
         var step = state.Steps[state.CurrentStep];
-        var execution = new NCCognitionExecuteStepEvent(
+        var execution = new NCNeuralActionStepEvent(
             state.ActorId,
             entity,
             state.PlanId,
@@ -238,7 +238,7 @@ public sealed partial class NCNeuralActionExecutionSystem : EntitySystem
         if (!args.Bound)
         {
             _executions.Remove(args.ActorId);
-            _router.Interrupt(args.ActorId, NCHumanActionInterruptKind.Dematerialized);
+            _router.Interrupt(args.ActorId, NCHumanActionInterruptKind.EntityUnbound);
         }
     }
 

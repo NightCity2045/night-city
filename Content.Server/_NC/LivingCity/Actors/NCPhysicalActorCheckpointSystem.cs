@@ -6,6 +6,7 @@ using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors.Domains;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.Coordinates.Systems;
+using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Identity;
 
 namespace Content.Server._NC.LivingCity.Actors;
@@ -59,6 +60,12 @@ public sealed partial class NCPhysicalActorCheckpointSystem : EntitySystem
             }
 
             var commandId = Guid.NewGuid();
+            var recovery = new NCCityActorPhysicalRecoveryState(
+                coordinates.NetworkId,
+                coordinates.Position.X,
+                coordinates.Position.Y,
+                coordinates.Z,
+                currentZone);
             args.AddPendingWrite(CommitAsync(new NCPhysicalActorCheckpointRequest(
                 commandId,
                 actorId,
@@ -67,7 +74,9 @@ public sealed partial class NCPhysicalActorCheckpointSystem : EntitySystem
                 capture,
                 commandId,
                 null,
-                "physical-actor-round-checkpoint")));
+                "physical-actor-round-checkpoint",
+                null,
+                recovery)));
         }
     }
 

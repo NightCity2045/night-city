@@ -4,14 +4,6 @@
 
 # Closed execution inventory. These entries point at existing ECS/vanilla authorities; they contain no gameplay
 # formulas and do not implement a second item, combat, movement or medical system.
-- type: ncHumanAction
-  id: yield-to-medical-authority
-  executor: MedicalAdapter
-  targetKind: None
-  completion: AuthorityReleased
-  timeout: 10m
-  requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, RoundEnded]
 
 - type: ncHumanAction
   id: yield-to-combat-authority
@@ -21,23 +13,7 @@
   completion: AuthorityReleased
   timeout: 2m
   requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Incapacitated, Detained, RoundEnded]
-
-- type: ncHumanAction
-  id: select-medical-service
-  executor: MedicalAdapter
-  targetKind: None
-  completion: DomainMutationConfirmed
-  timeout: 5s
-  interrupts: [PlanChanged, RoundEnded]
-
-- type: ncHumanAction
-  id: follow-schedule-travel
-  executor: VanillaMovement
-  targetKind: None
-  completion: ArrivalConfirmed
-  timeout: 10m
-  interrupts: [PlanChanged, Combat, Incapacitated, Detained, RoundEnded]
+  interrupts: [PlanChanged, EntityUnbound, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
   id: human-approach-person
@@ -49,9 +25,10 @@
   requiresPhysicalEntity: true
   maximumRange: 40
   completionRange: 2
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
-# Universal vanilla capabilities. Profession and directive layers compose these actions instead of replacing them.
+# Physical actions available to validated GPT command procedures.
+
 - type: ncHumanAction
   id: human-follow-person
   executor: VanillaMovement
@@ -62,7 +39,7 @@
   requiresPhysicalEntity: true
   maximumRange: 40
   completionRange: 2
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
   id: human-hold-position
@@ -72,7 +49,7 @@
   completion: AuthorityReleased
   timeout: 4h
   requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
   id: human-patrol-zone
@@ -83,7 +60,7 @@
   timeout: 4h
   requiresPhysicalEntity: true
   completionRange: 1.25
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
   id: human-flee-from-threat
@@ -97,7 +74,7 @@
   completionRange: 12
   steeringRefreshInterval: 1s
   steeringRetargetDistance: 2
-  interrupts: [PlanChanged, Dematerialized, Incapacitated, Detained, RoundEnded]
+  interrupts: [PlanChanged, EntityUnbound, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
   id: human-activate-target
@@ -108,7 +85,7 @@
   timeout: 10s
   requiresPhysicalEntity: true
   maximumRange: 2
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
   id: human-alt-interact-target
@@ -119,7 +96,7 @@
   timeout: 10s
   requiresPhysicalEntity: true
   maximumRange: 2
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
   id: human-pickup-item
@@ -130,7 +107,7 @@
   timeout: 10s
   requiresPhysicalEntity: true
   maximumRange: 2
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
   id: human-drop-item
@@ -140,7 +117,7 @@
   completion: WorldStateChanged
   timeout: 10s
   requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
   id: human-equip-item
@@ -151,7 +128,7 @@
   timeout: 30s
   requiresPhysicalEntity: true
   maximumRange: 2
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
   id: human-unequip-item
@@ -161,7 +138,7 @@
   completion: WorldStateChanged
   timeout: 30s
   requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
   id: human-use-held-item
@@ -171,7 +148,7 @@
   completion: InteractionConfirmed
   timeout: 10s
   requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
   id: human-speak-acknowledgement
@@ -182,7 +159,7 @@
   timeout: 10s
   requiresPhysicalEntity: true
   speechLocId: nc-human-action-speak-acknowledgement
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
   id: human-start-pulling
@@ -193,7 +170,7 @@
   timeout: 15s
   requiresPhysicalEntity: true
   maximumRange: 2
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
   id: human-stop-pulling
@@ -203,403 +180,12 @@
   completion: WorldStateChanged
   timeout: 10s
   requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
-
-- type: ncHumanAction
-  id: medical-provide-manual-pressure
-  executor: MedicalAdapter
-  targetKind: Person
-  completion: WorldStateChanged
-  timeout: 1m
-  requiresPhysicalEntity: true
-  maximumRange: 8
-  completionRange: 1.5
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
-
-- type: ncHumanAction
-  id: medical-provide-cpr
-  executor: MedicalAdapter
-  targetKind: Person
-  completion: WorldStateChanged
-  timeout: 1m
-  requiresPhysicalEntity: true
-  maximumRange: 8
-  completionRange: 1.5
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
-
-- type: ncHumanAction
-  id: medical-provide-definitive-trauma-care
-  executor: MedicalAdapter
-  targetKind: Person
-  completion: WorldStateChanged
-  timeout: 2m
-  requiresPhysicalEntity: true
-  maximumRange: 8
-  completionRange: 1.5
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
-
-- type: ncHumanAction
-  id: perform-authoritative-work
-  executor: ProfessionAdapter
-  targetKind: None
-  completion: WorldStateChanged
-  timeout: 2m
-  interrupts: [PlanChanged, Combat, Conversation, Incapacitated, Detained, RoundEnded]
-
-- type: ncHumanAction
-  id: follow-schedule
-  executor: Core
-  targetKind: None
-  completion: PlannerConfirmed
-  timeout: 2m
-  interrupts: [PlanChanged, RoundEnded]
-
-- type: ncHumanAction
-  id: perform-routine-activity
-  executor: RoutineAdapter
-  targetKind: None
-  completion: WorldStateChanged
-  timeout: 5m
-  requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Combat, Conversation, Incapacitated, Detained, RoundEnded]
-
-- type: ncHumanAction
-  id: perform-safe-fallback
-  executor: RoutineAdapter
-  targetKind: None
-  completion: WorldStateChanged
-  timeout: 5m
-  requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Combat, Conversation, Incapacitated, Detained, RoundEnded]
-
-- type: ncHumanAction
-  id: prepare-group-role
-  executor: Core
-  targetKind: None
-  completion: DomainMutationConfirmed
-  timeout: 10s
-  interrupts: [PlanChanged, RoundEnded]
-
-- type: ncHumanAction
-  id: acquire-group-resources
-  executor: Core
-  targetKind: None
-  completion: WorldStateChanged
-  timeout: 30s
-  interrupts: [PlanChanged, Combat, Incapacitated, Detained, RoundEnded]
-
-- type: ncHumanAction
-  id: follow-group-route
-  executor: VanillaMovement
-  targetKind: None
-  completion: ArrivalConfirmed
-  timeout: 10m
-  interrupts: [PlanChanged, Combat, Incapacitated, Detained, RoundEnded]
-
-- type: ncHumanAction
-  id: execute-group-directive
-  executor: Core
-  targetKind: None
-  completion: DomainMutationConfirmed
-  timeout: 2m
-  interrupts: [PlanChanged, Combat, Incapacitated, Detained, RoundEnded]
-
-- type: ncHumanAction
-  id: evaluate-safe-option
-  executor: Core
-  targetKind: None
-  completion: PlannerConfirmed
-  timeout: 1s
-  interrupts: [PlanChanged, RoundEnded]
-
-- type: ncHumanAction
-  id: remain-available
-  executor: Core
-  targetKind: None
-  completion: PlannerConfirmed
-  timeout: 1s
-  interrupts: [PlanChanged, RoundEnded]
-
-- type: ncHumanAction
-  id: yield-to-conversation-authority
-  executor: SocialAdapter
-  targetKind: Person
-  completion: AuthorityReleased
-  timeout: 5m
-  requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
-
-- type: ncHumanAction
-  id: human-accept-authorized-directive
-  executor: SocialAdapter
-  targetKind: Person
-  completion: DomainMutationConfirmed
-  timeout: 15s
-  requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
-
-- type: ncHumanAction
-  id: human-execute-zone-directive
-  executor: SocialAdapter
-  targetKind: Zone
-  completion: DomainMutationConfirmed
-  timeout: 4h
-  interrupts: [PlanChanged, Combat, Incapacitated, Detained, RoundEnded]
-
-- type: ncHumanAction
-  id: human-execute-person-directive
-  executor: SocialAdapter
-  targetKind: Person
-  completion: DomainMutationConfirmed
-  timeout: 4h
-  requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, Detained, RoundEnded]
-
-- type: ncHumanAction
-  id: manage-fixer-deal
-  executor: FixerAdapter
-  targetKind: DomainRecord
-  completion: DomainMutationConfirmed
-  timeout: 1m
-  interrupts: [PlanChanged, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-assess-scene
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: PlannerConfirmed
-  timeout: 15s
-  requiresPhysicalEntity: true
-  maximumRange: 20
-  interrupts: [PlanChanged, Dematerialized, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-report-incident
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: DomainMutationConfirmed
-  timeout: 15s
-  requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-issue-lawful-order
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: InteractionConfirmed
-  timeout: 15s
-  requiresPhysicalEntity: true
-  maximumRange: 8
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-pursue-suspect
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: RangeConfirmed
-  timeout: 2m
-  requiresPhysicalEntity: true
-  maximumRange: 40
-  completionRange: 6
-  interrupts: [PlanChanged, Dematerialized, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-await-compliance
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: WorldStateChanged
-  timeout: 15s
-  requiresPhysicalEntity: true
-  maximumRange: 10
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-restrain-suspect
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: WorldStateChanged
-  timeout: 45s
-  requiresPhysicalEntity: true
-  maximumRange: 8
-  completionRange: 1.5
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-begin-escort
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: WorldStateChanged
-  timeout: 15s
-  requiresPhysicalEntity: true
-  maximumRange: 4
-  completionRange: 1.5
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-search-restrained-suspect
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: WorldStateChanged
-  timeout: 30s
-  requiresPhysicalEntity: true
-  maximumRange: 4
-  completionRange: 1.5
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-seize-dangerous-items
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: DomainMutationConfirmed
-  timeout: 2m
-  requiresPhysicalEntity: true
-  maximumRange: 4
-  completionRange: 1.5
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-deliver-to-booking
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: ArrivalConfirmed
-  timeout: 5m
-  requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-book-detainee
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: DomainMutationConfirmed
-  timeout: 30s
-  requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-place-in-holding
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: DomainMutationConfirmed
-  timeout: 5m
-  requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-deliver-evidence-storage
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: ArrivalConfirmed
-  timeout: 5m
-  requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-submit-evidence
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: WorldStateChanged
-  timeout: 1m
-  requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-interview-witnesses
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: DomainMutationConfirmed
-  timeout: 30s
-  requiresPhysicalEntity: true
-  maximumRange: 8
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-create-wanted-record
-  executor: PoliceAdapter
-  targetKind: Person
-  completion: DomainMutationConfirmed
-  timeout: 30s
-  requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-review-case-file
-  executor: PoliceAdapter
-  targetKind: DomainRecord
-  completion: DomainMutationConfirmed
-  timeout: 30s
-  requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-interview-assigned-witnesses
-  executor: PoliceAdapter
-  targetKind: DomainRecord
-  completion: DomainMutationConfirmed
-  timeout: 30s
-  requiresPhysicalEntity: true
-  maximumRange: 8
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
-
-- type: ncHumanAction
-  id: ncpd-conclude-investigation
-  executor: PoliceAdapter
-  targetKind: DomainRecord
-  completion: DomainMutationConfirmed
-  timeout: 1m
-  requiresPhysicalEntity: true
-  interrupts: [PlanChanged, Dematerialized, Combat, Incapacitated, RoundEnded]
-
-- type: ncCognitionUtilityCurve
-  id: NCUtilityBoolean
-  kind: Step
-  minimumInput: 0
-  maximumInput: 1
-  minimumOutput: 0
-  maximumOutput: 1
-  threshold: 0.5
-
-- type: ncCognitionUtilityCurve
-  id: NCUtilityLinear
-  kind: Linear
-  minimumInput: 0
-  maximumInput: 1
-  minimumOutput: 0
-  maximumOutput: 1
-
-- type: ncCognitionUtilityCurve
-  id: NCUtilityInverseLinear
-  kind: InverseLinear
-  minimumInput: 0
-  maximumInput: 1
-  minimumOutput: 0
-  maximumOutput: 1
-
-- type: ncCognitionCapability
-  id: NCCognitionIncapacitated
-  domain: Medical
-  taskKind: ImmediateReaction
-  preferredPlanner: Reactive
-  fallbackPlanner: DeterministicFallback
-  baseUtility: 100
-  priority: 1000
-  requiredBeliefs: [ actor.incapacitated ]
-  interruptsRoutine: true
-  requiresMaterialization: true
-  procedureSteps:
-  - id: yield-control
-    action: yield-to-medical-authority
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncCognitionCapability
   id: NCCognitionRespondToThreat
   domain: Safety
   taskKind: ImmediateReaction
-  preferredPlanner: Reactive
-  fallbackPlanner: DeterministicFallback
-  baseUtility: 80
-  priority: 975
-  requiredBeliefs: [ perception.hostile-present ]
-  interruptsRoutine: true
-  requiresMaterialization: true
   procedureSteps:
   - id: flee-danger
     action: human-flee-from-threat
@@ -608,514 +194,30 @@
   id: NCCognitionDefendAgainstThreat
   domain: Safety
   taskKind: ImmediateReaction
-  preferredPlanner: Reactive
-  fallbackPlanner: DeterministicFallback
-  baseUtility: 65
-  priority: 960
-  requiredBeliefs: [ perception.hostile-present ]
-  interruptsRoutine: true
-  requiresMaterialization: true
   procedureSteps:
   - id: yield-combat
     action: yield-to-combat-authority
 
 - type: ncCognitionCapability
-  id: NCCognitionSeekMedicalCare
-  domain: Medical
-  taskKind: KnownProcedure
-  preferredPlanner: Htn
-  fallbackPlanner: StateTree
-  baseUtility: 25
-  priority: 700
-  requiredBeliefs: [ medical.needs-care ]
-  requiresMaterialization: true
-  considerations:
-  - beliefKey: medical.severity
-    curve: NCUtilityLinear
-    weight: 50
-    missingInput: 0
-  procedureSteps:
-  - id: select-service
-    action: select-medical-service
-  - id: reach-service
-    action: follow-schedule-travel
-    dependsOn: [ select-service ]
-  - id: yield-treatment
-    action: yield-to-medical-authority
-    dependsOn: [ reach-service ]
-
-- type: ncCognitionCapability
-  id: NCMedicalRespondToCritical
-  domain: Medical
-  taskKind: KnownProcedure
-  preferredPlanner: Htn
-  fallbackPlanner: StateTree
-  baseUtility: 65
-  priority: 850
-  requiredBeliefs: [ perception.critical-person-present ]
-  interruptsRoutine: true
-  requiresMaterialization: true
-  procedureSteps:
-  - id: approach-patient
-    action: human-approach-person
-  - id: control-bleeding
-    action: medical-provide-manual-pressure
-    dependsOn: [ approach-patient ]
-
-- type: ncCognitionCapability
-  id: NCCityMedicalRespondToCritical
-  domain: Medical
-  taskKind: KnownProcedure
-  preferredPlanner: Htn
-  fallbackPlanner: StateTree
-  baseUtility: 70
-  priority: 875
-  requiredBeliefs: [ perception.critical-person-present ]
-  interruptsRoutine: true
-  requiresMaterialization: true
-  procedureSteps:
-  - id: approach-patient
-    action: human-approach-person
-  - id: control-immediate-bleeding
-    action: medical-provide-manual-pressure
-    dependsOn: [ approach-patient ]
-  - id: support-circulation
-    action: medical-provide-cpr
-    dependsOn: [ control-immediate-bleeding ]
-  - id: take-custody-of-patient
-    action: human-start-pulling
-    dependsOn: [ support-circulation ]
-  - id: select-clinical-site
-    action: select-medical-service
-    dependsOn: [ take-custody-of-patient ]
-  - id: transport-patient
-    action: follow-schedule-travel
-    dependsOn: [ select-clinical-site ]
-  - id: admit-patient
-    action: human-stop-pulling
-    dependsOn: [ transport-patient ]
-  - id: provide-definitive-clinical-care
-    action: medical-provide-definitive-trauma-care
-    dependsOn: [ admit-patient ]
-
-- type: ncCognitionCapability
-  id: NCJanitorialMaintainWorkplace
-  domain: Jobs
-  taskKind: KnownProcedure
-  preferredPlanner: Htn
-  fallbackPlanner: StateTree
-  baseUtility: 40
-  priority: 510
-  requiredBeliefs: [ employment.active, routine.work-due ]
-  requiresMaterialization: true
-  procedureSteps:
-  - id: clean-local-area
-    action: perform-authoritative-work
-
-- type: ncCognitionCapability
-  id: NCMaintenanceRepairInfrastructure
-  domain: Jobs
-  taskKind: KnownProcedure
-  preferredPlanner: Htn
-  fallbackPlanner: StateTree
-  baseUtility: 40
-  priority: 510
-  requiredBeliefs: [ employment.active, routine.work-due ]
-  requiresMaterialization: true
-  procedureSteps:
-  - id: repair-local-infrastructure
-    action: perform-authoritative-work
-
-- type: ncCognitionCapability
-  id: NCProfessionalPerformAssignedDuty
-  domain: Jobs
-  taskKind: KnownProcedure
-  preferredPlanner: Htn
-  fallbackPlanner: StateTree
-  baseUtility: 38
-  priority: 505
-  requiredBeliefs: [ employment.active, routine.work-due ]
-  requiresMaterialization: true
-  procedureSteps:
-  - id: inspect-assigned-area
-    action: perform-authoritative-work
-
-- type: ncCognitionCapability
-  id: NCCognitionFulfilEmployment
-  domain: Jobs
-  taskKind: KnownProcedure
-  preferredPlanner: Htn
-  fallbackPlanner: StateTree
-  baseUtility: 35
-  priority: 500
-  requiredBeliefs: [ employment.active, routine.work-due ]
-  procedureSteps:
-  - id: follow-work-travel
-    action: follow-schedule-travel
-  - id: perform-work
-    action: perform-authoritative-work
-    dependsOn: [ follow-work-travel ]
-
-- type: ncCognitionCapability
-  id: NCCognitionFollowRoutine
-  domain: Routine
-  taskKind: Routine
-  requiresMaterialization: true
-  preferredPlanner: StateTree
-  fallbackPlanner: DeterministicFallback
-  baseUtility: 15
-  priority: 100
-  requiredBeliefs: [ actor.can-act ]
-  considerations:
-  - beliefKey: routine.due
-    curve: NCUtilityBoolean
-    weight: 20
-    missingInput: 0
-  procedureSteps:
-  - id: follow-schedule
-    action: follow-schedule
-  - id: perform-current-activity
-    action: perform-routine-activity
-    dependsOn: [ follow-schedule ]
-
-- type: ncCognitionCapability
-  id: NCCognitionGroupDirective
-  domain: Faction
-  taskKind: GroupOperation
-  preferredPlanner: PartialOrder
-  fallbackPlanner: Htn
-  baseUtility: 30
-  priority: 550
-  requiredBeliefs: [ group.has-directive ]
-  procedureSteps:
-  - id: prepare
-    action: prepare-group-role
-  - id: acquire-resources
-    action: acquire-group-resources
-  - id: rendezvous
-    action: follow-group-route
-    dependsOn: [ prepare, acquire-resources ]
-  - id: execute
-    action: execute-group-directive
-    dependsOn: [ rendezvous ]
-
-- type: ncCognitionCapability
-  id: NCCognitionStrategicFallback
-  domain: Services
-  taskKind: StrategicChoice
-  preferredPlanner: Mcts
-  fallbackPlanner: Htn
-  baseUtility: 5
-  priority: 20
-  requiredBeliefs: [ actor.can-act ]
-  procedureSteps:
-  - id: evaluate-safe-option
-    action: evaluate-safe-option
-  - id: remain-available
-    action: remain-available
-    dependsOn: [ evaluate-safe-option ]
-  strategicOptions:
-  - id: cautious-availability
-    minimumOutcome: 0.45
-    maximumOutcome: 0.75
-    procedureSteps:
-    - id: evaluate-safe-option
-      action: evaluate-safe-option
-    - id: remain-available
-      action: remain-available
-      dependsOn: [ evaluate-safe-option ]
-  - id: resume-routine
-    minimumOutcome: 0.30
-    maximumOutcome: 0.90
-    procedureSteps:
-    - id: evaluate-routine-option
-      action: evaluate-safe-option
-    - id: follow-schedule
-      action: follow-schedule
-      dependsOn: [ evaluate-routine-option ]
-
-- type: ncCognitionCapability
-  id: NCCognitionConversation
-  domain: Social
-  taskKind: SocialConversation
-  preferredPlanner: ConversationStateTree
-  fallbackPlanner: StateTree
-  baseUtility: 20
-  priority: 400
-  requiredBeliefs: [ social.conversation-requested ]
-  requiresMaterialization: true
-  procedureSteps:
-  - id: yield-conversation
-    action: yield-to-conversation-authority
-
-- type: ncCognitionCapability
   id: NCCognitionApproachPerson
   domain: Social
   taskKind: SocialConversation
-  preferredPlanner: ConversationStateTree
-  fallbackPlanner: StateTree
-  baseUtility: 45
-  priority: 425
-  requiredBeliefs: [neural.target.NCCognitionApproachPerson]
-  requiresMaterialization: true
   procedureSteps:
   - id: approach-person
     action: human-approach-person
 
 - type: ncCognitionCapability
-  id: NCCognitionAcceptDirective
-  domain: Faction
-  taskKind: GroupOperation
-  preferredPlanner: PartialOrder
-  fallbackPlanner: StateTree
-  baseUtility: 55
-  priority: 650
-  requiresMaterialization: true
-  procedureSteps:
-  - id: accept-authorized-directive
-    action: human-accept-authorized-directive
-
-- type: ncCognitionCapability
-  id: NCCognitionExecuteZoneDirective
-  domain: Faction
-  taskKind: GroupOperation
-  preferredPlanner: StateTree
-  fallbackPlanner: DeterministicFallback
-  baseUtility: 80
-  priority: 875
-  requiredBeliefs: [human.directive.zone-active]
-  interruptsRoutine: true
-  procedureSteps:
-  - id: execute-zone-directive
-    action: human-execute-zone-directive
-
-- type: ncCognitionCapability
-  id: NCCognitionExecutePersonDirective
-  domain: Faction
-  taskKind: GroupOperation
-  preferredPlanner: StateTree
-  fallbackPlanner: DeterministicFallback
-  baseUtility: 85
-  priority: 900
-  requiredBeliefs: [human.directive.person-active]
-  interruptsRoutine: true
-  requiresMaterialization: true
-  procedureSteps:
-  - id: execute-person-directive
-    action: human-execute-person-directive
-
-- type: ncCognitionCapability
-  id: NCCognitionManageFixerDeal
-  domain: Economy
+  id: NCCognitionFollowPerson
+  domain: Social
   taskKind: KnownProcedure
-  preferredPlanner: Htn
-  fallbackPlanner: StateTree
-  baseUtility: 45
-  priority: 600
-  requiredBeliefs: [ fixer.deal-actionable ]
   procedureSteps:
-  - id: progress-deal
-    action: manage-fixer-deal
-
-- type: ncCognitionCapability
-  id: NCNcpdRespondToObservedAssault
-  domain: Crime
-  taskKind: KnownProcedure
-  preferredPlanner: Htn
-  fallbackPlanner: StateTree
-  baseUtility: 90
-  priority: 950
-  requiredBeliefs: [ncpd.on-duty, ncpd.suspect-observed]
-  interruptsRoutine: true
-  requiresMaterialization: true
-  procedureSteps:
-  - id: assess-scene
-    action: ncpd-assess-scene
-  - id: report-incident
-    action: ncpd-report-incident
-    dependsOn: [assess-scene]
-  - id: issue-order
-    action: ncpd-issue-lawful-order
-    dependsOn: [assess-scene]
-  - id: await-compliance
-    action: ncpd-await-compliance
-    dependsOn: [issue-order]
-  - id: pursue
-    action: ncpd-pursue-suspect
-    dependsOn: [report-incident, await-compliance]
-  - id: wanted-after-pursuit
-    action: ncpd-create-wanted-record
-    dependsOn: [pursue]
-  - id: restrain
-    action: ncpd-restrain-suspect
-    dependsOn: [wanted-after-pursuit]
-  - id: wanted-after-restraint
-    action: ncpd-create-wanted-record
-    dependsOn: [restrain]
-  - id: search-restrained
-    action: ncpd-search-restrained-suspect
-    dependsOn: [wanted-after-restraint]
-  - id: seize-dangerous-items
-    action: ncpd-seize-dangerous-items
-    dependsOn: [search-restrained]
-  - id: interview-witnesses
-    action: ncpd-interview-witnesses
-    dependsOn: [seize-dangerous-items]
-    optional: true
-  - id: escort
-    action: ncpd-begin-escort
-    dependsOn: [seize-dangerous-items]
-  - id: deliver-booking
-    action: ncpd-deliver-to-booking
-    dependsOn: [escort]
-  - id: book-detainee
-    action: ncpd-book-detainee
-    dependsOn: [deliver-booking]
-  - id: place-holding
-    action: ncpd-place-in-holding
-    dependsOn: [book-detainee]
-  - id: deliver-evidence
-    action: ncpd-deliver-evidence-storage
-    dependsOn: [place-holding]
-  - id: submit-evidence
-    action: ncpd-submit-evidence
-    dependsOn: [deliver-evidence]
-
-- type: ncCognitionCapability
-  id: NCNcpdInvestigateAssignedCase
-  domain: Crime
-  taskKind: KnownProcedure
-  preferredPlanner: Htn
-  fallbackPlanner: StateTree
-  baseUtility: 70
-  priority: 800
-  requiredBeliefs: [ncpd.on-duty, ncpd.investigation-assigned]
-  interruptsRoutine: true
-  requiresMaterialization: true
-  procedureSteps:
-  - id: review-case
-    action: ncpd-review-case-file
-  - id: interview-witnesses
-    action: ncpd-interview-assigned-witnesses
-    dependsOn: [review-case]
-    optional: true
-  - id: conclude-case
-    action: ncpd-conclude-investigation
-    dependsOn: [review-case, interview-witnesses]
+  - id: follow-person
+    action: human-follow-person
 
 - type: ncCognitionCapabilityProfile
   id: NCDefaultCivilianCapabilities
   capabilities:
-  - NCCognitionIncapacitated
   - NCCognitionRespondToThreat
   - NCCognitionDefendAgainstThreat
-  - NCCognitionSeekMedicalCare
-  - NCCognitionFulfilEmployment
-  - NCCognitionFollowRoutine
-  - NCCognitionGroupDirective
-  - NCCognitionStrategicFallback
-  - NCCognitionConversation
   - NCCognitionApproachPerson
-  - NCCognitionAcceptDirective
-  - NCCognitionExecuteZoneDirective
-  - NCCognitionExecutePersonDirective
-  - NCCognitionManageFixerDeal
-
-- type: ncCognitionCapabilityProfile
-  id: NCNcpdFieldOfficerCapabilities
-  capabilities:
-  - NCCognitionIncapacitated
-  - NCNcpdRespondToObservedAssault
-  - NCCognitionSeekMedicalCare
-  - NCCognitionFulfilEmployment
-  - NCCognitionFollowRoutine
-  - NCCognitionGroupDirective
-  - NCCognitionStrategicFallback
-  - NCCognitionConversation
-  - NCCognitionApproachPerson
-  - NCCognitionAcceptDirective
-  - NCCognitionExecuteZoneDirective
-  - NCCognitionExecutePersonDirective
-
-- type: ncCognitionDecisionPolicy
-  id: NCDefaultCognitionDecisionPolicy
-  evaluationInterval: 5s
-  minimumCommitment: 15s
-  intentionLifetime: 2m
-  beliefLifetime: 5m
-  beliefAgingTime: 1m
-  agingConfidenceMultiplier: 0.8
-  staleConfidenceMultiplier: 0.5
-  switchUtilityDelta: 12
-  switchCost: 5
-  minimumBeliefConfidence: 0.35
-  maximumBeliefs: 128
-  maximumDesires: 16
-
-- type: ncCognitionRoutingProfile
-  id: NCDefaultCognitionRouting
-  routes:
-    Routine: StateTree
-    ImmediateReaction: Reactive
-    KnownProcedure: Htn
-    GroupOperation: PartialOrder
-    StrategicChoice: Mcts
-    SocialConversation: ConversationStateTree
-  budgets:
-  - planner: StateTree
-    maximumNodesPerTick: 8
-    maximumTotalNodes: 32
-    maximumMillisecondsPerTick: 0.25
-    explorationConstant: 0
-  - planner: Reactive
-    maximumNodesPerTick: 4
-    maximumTotalNodes: 8
-    maximumMillisecondsPerTick: 0.25
-    explorationConstant: 0
-  - planner: Htn
-    maximumNodesPerTick: 16
-    maximumTotalNodes: 128
-    maximumMillisecondsPerTick: 0.5
-    explorationConstant: 0
-  - planner: PartialOrder
-    maximumNodesPerTick: 16
-    maximumTotalNodes: 256
-    maximumMillisecondsPerTick: 0.75
-    explorationConstant: 0
-  - planner: Mcts
-    maximumNodesPerTick: 32
-    maximumTotalNodes: 512
-    maximumMillisecondsPerTick: 1.5
-    explorationConstant: 1.4142135
-  - planner: ConversationStateTree
-    maximumNodesPerTick: 8
-    maximumTotalNodes: 32
-    maximumMillisecondsPerTick: 0.25
-    explorationConstant: 0
-  - planner: DeterministicFallback
-    maximumNodesPerTick: 2
-    maximumTotalNodes: 8
-    maximumMillisecondsPerTick: 0.1
-    explorationConstant: 0
-
-- type: ncCognitionRuntimePolicy
-  id: NCDefaultCognitionRuntimePolicy
-  maximumTrackedActors: 10000
-  maximumQueuedActors: 50000
-  maximumDispatchesPerTick: 4
-  maximumConcurrentLoads: 8
-  maximumFacts: 128
-  maximumCapabilities: 32
-  maximumPlanSteps: 128
-  maximumTraceEntries: 64
-  maximumAbstractTraceEntries: 8
-  maximumCachedPlans: 20000
-  maximumInvalidationsPerTick: 64
-  maximumPlanningMillisecondsPerTick: 3
-  loadRetryDelay: 30s
-  failureRetryDelay: 1m
-  minimumAbstractEvaluationInterval: 5m
-  # Optional domains absent on bootstrap NPCs are rechecked periodically instead of on every decision.
-  missingCapabilityRefreshInterval: 5m
-  # Active-world time is monotonic real round time; spread bootstrap directly over 25 real seconds.
-  initialDecisionStagger: 25s
+  - NCCognitionFollowPerson

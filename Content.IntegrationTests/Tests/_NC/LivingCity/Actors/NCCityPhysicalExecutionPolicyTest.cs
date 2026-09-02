@@ -9,7 +9,6 @@ using Content.IntegrationTests.Fixtures;
 using Content.Server._NC.City.Connectivity;
 using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Actors.Components;
-using Content.Server._NC.LivingCity.Groups;
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.LivingCity.Actors;
@@ -85,11 +84,8 @@ public sealed class NCCityPhysicalExecutionPolicyTest : GameTest
         NCCityPhysicalBehaviorAdapterSystem.AddInterruptConditions(
             NCCityPhysicalInterruptFlags.Combat |
             NCCityPhysicalInterruptFlags.Medical |
-            NCCityPhysicalInterruptFlags.Police,
-            conditions);
-        NCCityPhysicalBehaviorAdapterSystem.AddBlockerConditions(
-            NCCityDematerializationBlockerFlags.PlayerTreatment |
-            NCCityDematerializationBlockerFlags.Conversation,
+            NCCityPhysicalInterruptFlags.Police |
+            NCCityPhysicalInterruptFlags.Conversation,
             conditions);
         Assert.Multiple(() =>
         {
@@ -97,32 +93,6 @@ public sealed class NCCityPhysicalExecutionPolicyTest : GameTest
             Assert.That(conditions, Does.Contain(NCCityPhysicalCondition.MedicalClaim));
             Assert.That(conditions, Does.Contain(NCCityPhysicalCondition.PoliceClaim));
             Assert.That(conditions, Does.Contain(NCCityPhysicalCondition.ConversationClaim));
-        });
-    }
-
-    [Test]
-    public void FormationOffsetAffectsOnlyFinalDestination()
-    {
-        var network = new NCZNetworkId(Guid.Parse("aaaaaaaa-1111-2222-3333-bbbbbbbbbbbb"));
-        var target = new NCMapCoordinates(network, new System.Numerics.Vector2(10f, 20f), 2);
-        var destination = new NCCityNavigationWaypoint(
-            NCCityNavigationWaypointKind.Destination,
-            target,
-            EntityUid.Invalid,
-            default,
-            default);
-        var portal = destination with { Kind = NCCityNavigationWaypointKind.RoomPortalEntry };
-        var offset = new System.Numerics.Vector2(2f, -3f);
-
-        var shifted = NCCityGroupTrunkRouteSystem.ApplyFormationOffset(destination, offset);
-        var exactPortal = NCCityGroupTrunkRouteSystem.ApplyFormationOffset(portal, offset);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(shifted.Target.Position, Is.EqualTo(target.Position + offset));
-            Assert.That(shifted.Target.NetworkId, Is.EqualTo(target.NetworkId));
-            Assert.That(shifted.Target.Z, Is.EqualTo(target.Z));
-            Assert.That(exactPortal.Target, Is.EqualTo(target));
         });
     }
 

@@ -10,7 +10,6 @@ using Content.Server.NPC.Systems;
 using Content.Server._NC.City.Connectivity;
 using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors.Components;
-using Content.Server._NC.LivingCity.Groups;
 using Content.Server._NC.LivingCity.Simulation;
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.City.Zones;
@@ -34,7 +33,6 @@ public sealed partial class NCCityPhysicalExecutionSystem
     [Dependency] private NCZoneSystem _zones = default!;
     [Dependency] private NPCSteeringSystem _steering = default!;
     [Dependency] private HTNSystem _htn = default!;
-    [Dependency] private NCCityGroupTrunkRouteSystem _groupRoutes = default!;
     [Dependency] private NCCityPhysicalStateTreeSystem _stateTree = default!;
     [Dependency] private NCCityPhysicalBehaviorAdapterSystem _behaviorAdapters = default!;
     [Dependency] private NCCityLocalPerceptionSystem _perception = default!;
@@ -56,11 +54,6 @@ public sealed partial class NCCityPhysicalExecutionSystem
         var location = snapshot.Location;
         component.ActorVersion = actor.AggregateVersion;
         component.CurrentZone = location.CurrentZone;
-        component.Activity = snapshot.Schedule.CurrentActivity;
-        component.Goal = snapshot.Schedule.CurrentGoal;
-        component.Availability = snapshot.Schedule.Availability;
-        component.PresenceMode = snapshot.Schedule.PresenceMode;
-        component.NextScheduleUpdateAt = snapshot.Schedule.NextUpdateAt;
 
         if (!_prototypes.TryIndex(
                 new ProtoId<NCCityActorArchetypePrototype>(snapshot.Identity.ArchetypeId),
@@ -303,35 +296,14 @@ public sealed partial class NCCityPhysicalExecutionSystem
         component.Waypoints.Clear();
         component.WaypointIndex = 0;
         var currentVersion = new NCCityNavigationPlanVersion(_city.GraphVersion, _rooms.GraphVersion);
-        var hasPlan = _groupRoutes.TryCopyForMember(
-                entityUid,
-                component.DestinationZone,
-                component.TravelMode,
-                currentVersion,
-                component.Waypoints);
-        if (!hasPlan && _navigation.TryPlan(
+        var hasPlan = _navigation.TryPlan(
                 entityUid,
                 component.Destination,
                 component.TravelMode,
                 component.Waypoints,
-                out var version,
+                out _,
                 portal => !component.RejectedCityPortals.Contains(portal.Id),
-                portal => !component.RejectedRoomPortals.Contains(portal.Id)))
-        {
-            // Reject an oversized route before it can enter the shared group cache.
-            if (component.Waypoints.Count <= _policy.MaximumWaypoints)
-            {
-                var freshlyPlanned = new NCCityNavigationWaypoint[component.Waypoints.Count];
-                component.Waypoints.CopyTo(freshlyPlanned);
-                hasPlan = _groupRoutes.PublishAndCopyForMember(
-                    entityUid,
-                    component.DestinationZone,
-                    component.TravelMode,
-                    version,
-                    freshlyPlanned,
-                    component.Waypoints);
-            }
-        }
+                portal => !component.RejectedRoomPortals.Contains(portal.Id));
         if (!hasPlan || component.Waypoints.Count == 0 || component.Waypoints.Count > _policy.MaximumWaypoints)
         {
             RequestReplan(entityUid, component, now, "hierarchical-route-unavailable-or-too-large");
@@ -569,7 +541,6 @@ public sealed partial class NCCityPhysicalExecutionSystem
         if (rejectCurrentPortal)
         {
             RejectCurrentPortal(component, now);
-            _groupRoutes.InvalidateForActor(entityUid, component.LastFailure);
         }
         if (component.ReplanAttempts >= _policy.MaximumReplans)
         {

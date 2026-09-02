@@ -37,7 +37,7 @@ public static class NCLivingCityAdminTelemetry
 
         long bytes = error?.Length ?? 0;
         foreach (var field in fields)
-            bytes += field.Section.Length + field.Key.Length + field.Value.Length;
+            bytes += field.Key.Length + field.Value.Length;
         Interlocked.Add(ref _payloadBytes, bytes * sizeof(char));
     }
 

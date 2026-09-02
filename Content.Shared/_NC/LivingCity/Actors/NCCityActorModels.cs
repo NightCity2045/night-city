@@ -4,6 +4,7 @@
 
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.City.Zones;
+using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Serialization;
@@ -29,15 +30,6 @@ public enum NCCityActorStatus : byte
 }
 
 [Serializable, NetSerializable]
-public enum NCCityActorCognitionTier : byte
-{
-    Scripted,
-    Utility,
-    Planner,
-    NeuralEligible,
-}
-
-[Serializable, NetSerializable]
 public enum NCCityActorTravelPhase : byte
 {
     Stationary,
@@ -46,65 +38,6 @@ public enum NCCityActorTravelPhase : byte
     Blocked,
     Arrived,
 }
-
-[Serializable, NetSerializable]
-public enum NCCityActorAvailability : byte
-{
-    Available,
-    Busy,
-    OnCall,
-    Unavailable,
-}
-
-/// <summary>
-/// Distinguishes an actor's semantic activity from whether that activity has a physical place on the loaded map.
-/// AbstractHome deliberately has no coordinates and therefore must never create an ECS entity.
-/// </summary>
-[Serializable, NetSerializable]
-public enum NCCityActorPresenceMode : byte
-{
-    // Reserved migration value for snapshots written before explicit presence existed.
-    Unknown,
-    Public,
-    AbstractHome,
-    PhysicalHome,
-    AbstractCustody,
-}
-
-[Serializable, NetSerializable]
-public enum NCCityRoutineTarget : byte
-{
-    Stay,
-    Home,
-    Work,
-    ExplicitZone,
-    Community,
-}
-
-/// <summary>
-/// Stable identity for an appointment or other actor-specific schedule override.
-/// </summary>
-[Serializable, NetSerializable]
-public readonly record struct NCCityCommitmentId(Guid Value)
-{
-    public bool IsValid => Value != Guid.Empty;
-    public static NCCityCommitmentId New() => new(Guid.NewGuid());
-    public override string ToString() => Value.ToString("D");
-}
-
-/// <summary>
-/// Bounded actor-specific schedule override. Completed and cancelled entries leave the root snapshot;
-/// their immutable history remains in the event journal.
-/// </summary>
-public sealed record NCCityActorCommitment(
-    NCCityCommitmentId CommitmentId,
-    string Activity,
-    string Goal,
-    NCZoneId TargetZone,
-    NCActiveWorldTime StartsAt,
-    NCActiveWorldTime EndsAt,
-    NCCityActorAvailability Availability,
-    int Priority);
 
 /// <summary>
 /// Stable presentation identity. Appearance and biography are reproducible from seeds, not runtime EntityUid.
@@ -120,7 +53,27 @@ public sealed record NCCityActorIdentity(
 {
     // Optional so version-one resident snapshots remain readable. Only explicitly authored people receive it.
     public string? NarrativeActorProfileId { get; init; }
+
+    /// <summary>
+    /// Stable data-driven GPT persona selected when this person is created.
+    /// </summary>
+    public string? NeuralPersonaProfileId { get; init; }
+
+    /// <summary>
+    /// Server-serialized humanoid profile. It preserves the exact generated body instead of rerolling on MapInit.
+    /// </summary>
+    public string? HumanoidProfilePayload { get; init; }
 }
+
+/// <summary>
+/// Persistent physical recovery point. It contains no runtime map or entity identity.
+/// </summary>
+public sealed record NCCityActorPhysicalRecoveryState(
+    NCZNetworkId NetworkId,
+    float X,
+    float Y,
+    int Z,
+    NCZoneId LocationContextId);
 
 /// <summary>
 /// Semantic position and travel intent. It never persists room IDs, portal IDs, map IDs or EntityUid values.
@@ -128,31 +81,10 @@ public sealed record NCCityActorIdentity(
 public sealed record NCCityActorLocation(
     NCZoneId CurrentZone,
     NCZoneId DestinationZone,
-    NCZoneId HomeZone,
-    NCZoneId WorkZone,
     NCCityActorTravelPhase TravelPhase,
     NCCityTravelMode TravelMode,
     NCActiveWorldTime? ExpectedArrivalAt,
-    NCActiveWorldTime LastKnownLocationAt)
-{
-    // Optional so snapshots written before canonical abstract residences remain readable and migratable.
-    public NCCityAbstractResidence? Residence { get; init; }
-}
-
-/// <summary>
-/// Scheduler-facing durable intent summary. Blackboard and local physical plan nodes remain runtime-only.
-/// </summary>
-public sealed record NCCityActorScheduleSummary(
-    string RoutineProfileId,
-    NCCityActorCommitment[] Commitments,
-    string CurrentActivity,
-    string CurrentGoal,
-    NCCityActorAvailability Availability,
-    NCActiveWorldTime NextUpdateAt)
-{
-    // An init-only trailing member keeps version-one JSON snapshots readable; absent data defaults to Public.
-    public NCCityActorPresenceMode PresenceMode { get; init; } = NCCityActorPresenceMode.Unknown;
-}
+    NCActiveWorldTime LastKnownLocationAt);
 
 /// <summary>
 /// Lifecycle invariants shared by every actor subdomain. Dead is irreversible through normal domain commands.
@@ -165,12 +97,13 @@ public sealed record NCCityActorLifecycle(
 
 /// <summary>
 /// Actor root snapshot. Health, finances, inventory, social state and cognition keep their own authoritative
-/// aggregates; this root stores only identity, semantic presence and scheduler/lifecycle coordination.
+/// aggregates; this root stores only identity, physical recovery, semantic location and lifecycle coordination.
 /// </summary>
 public sealed record NCCityActorSnapshot(
     NCCityActorIdentity Identity,
     NCCityActorLocation Location,
-    NCCityActorScheduleSummary Schedule,
     NCCityActorLifecycle Lifecycle,
-    NCCityActorCognitionTier CognitionTier,
-    Guid LastAppliedEventId);
+    Guid LastAppliedEventId)
+{
+    public NCCityActorPhysicalRecoveryState? PhysicalRecovery { get; init; }
+}

@@ -13,23 +13,6 @@
   maximumContainerDepth: 8
   maximumCommodityBundles: 128
 
-- type: ncCitySchedulePolicy
-  id: NCDefaultCitySchedulePolicy
-  snapshotPageSize: 250
-  maximumDispatchesPerTick: 4
-  maximumConcurrentMutations: 8
-  mutationRetryDelay: 5s
-  maximumMutationAttempts: 5
-  initialEvaluationStagger: 25s
-  reevaluateOnSessionStart: true
-
-- type: ncCityCivilClockPolicy
-  id: NCDefaultCityCivilClock
-  civilDayDuration: 24h
-  activeDayDuration: 2h
-  initialTimeOfDay: 6h
-  maximumManualAdvance: 24h
-
 - type: ncCityPhysicalNavigationProfile
   id: NCDefaultPedestrianPhysicalNavigation
   interactWithDoors: true
@@ -106,41 +89,6 @@
   maximumUpdatesPerTick: 4
   maximumIncidentCorrelations: 1024
 
-- type: ncHumanRoutineActivityPolicy
-  id: NCDefaultHumanRoutineActivityPolicy
-  maximumCatalogCandidates: 48
-  arrivalRange: 1.25
-  minimumDwellTime: 1m
-  maximumDwellTime: 3m
-  maximumFallbackTargetAttempts: 3
-  activities:
-  - activity: prepare
-    affordances: [BuildingExit, RestArea]
-  - activity: work
-    affordances: [Workplace, PublicEntrance]
-    preferLivelihoodAffordance: true
-  - activity: meal
-    affordances: [RestArea, PublicEntrance]
-  - activity: errands
-    affordances: [PublicEntrance, RestArea]
-  - activity: leisure
-    affordances: [RestArea, PublicEntrance]
-  - activity: socialize
-    affordances: [RestArea, PublicEntrance]
-  - activity: rest
-    affordances: [RestArea, PublicEntrance]
-  - activity: recover
-    affordances: [RestArea, PublicEntrance]
-  - activity: unemployed-free-time
-    affordances: [PublicEntrance, RestArea]
-  fallbackActivities:
-  - activity: safe-rest
-    affordances: [RestArea]
-  - activity: walk
-    affordances: [BuildingExit, PublicEntrance]
-  - activity: observe
-    affordances: [PublicEntrance, RestArea]
-
 - type: ncCityPhysicalExecutionPolicy
   id: NCDefaultCityPhysicalExecutionPolicy
   maximumQueuedIntentLoads: 256
@@ -166,14 +114,6 @@
   htnResumeCooldown: 0.5s
   waypointReachRange: 0.4
 
-- type: ncCityPopulationImportPolicy
-  id: NCDefaultPopulationImportPolicy
-  maximumActorsPerProfile: 10000
-  maximumConcurrentCreates: 8
-  storageRetryCount: 3
-  storageRetryDelay: 1s
-
-# Startup work is bounded, physical population is not. Every living ActorId remains an ECS entity for the round.
 - type: ncPhysicalActorLifecyclePolicy
   id: NCDefaultPhysicalActorLifecycle
   snapshotPageSize: 128
@@ -184,36 +124,6 @@
   actorOccupancyExclusionRadius: 0.6
   adminPreferredSpawnRadius: 28
   retryDelay: 2s
-
-- type: ncCityZoneStatePolicy
-  id: NCDefaultCityZoneStatePolicy
-  snapshotPageSize: 250
-  maximumWritesPerTick: 2
-  maximumConcurrentWrites: 4
-  coalesceDelay: 1s
-  storageRetryDelay: 5s
-  maximumArchetypesPerScope: 256
-  archetypeOverflowBucketId: other
-  districtActivitySaturation: 1000
-  sectorActivitySaturation: 250
-  activityStatusWeights:
-    Active: 1
-    Working: 1
-    Traveling: 0.8
-    Resting: 0.1
-    Hiding: 0.25
-    Injured: 0.2
-    Hospitalized: 0.05
-    Arrested: 0.05
-    Imprisoned: 0.05
-    Unconscious: 0
-    Missing: 0
-    Dead: 0
-  activityAvailabilityWeights:
-    Available: 1
-    Busy: 0.8
-    OnCall: 0.6
-    Unavailable: 0
 
 - type: ncAILoadGovernorPolicy
   id: NCDefaultAILoadGovernorPolicy
@@ -234,10 +144,6 @@
   elevatedExitQueueRatio: 0.35
   criticalEnterQueueRatio: 0.85
   criticalExitQueueRatio: 0.6
-  elevatedEnterMaterializedRatio: 0.75
-  elevatedExitMaterializedRatio: 0.65
-  criticalEnterMaterializedRatio: 0.95
-  criticalExitMaterializedRatio: 0.82
   elevatedBacklogCount: 2
   criticalBacklogCount: 3
   criticalExitBacklogCount: 2
@@ -245,144 +151,3 @@
   criticalEvaluationIntervalMultiplier: 4
   elevatedDispatchMultiplier: 0.5
   criticalDispatchMultiplier: 0.25
-  elevatedSoftMaterializedBudgetMultiplier: 0.8
-  criticalSoftMaterializedBudgetMultiplier: 0.6
-  elevatedProtectedMaterializationPriority: 600
-  criticalProtectedMaterializationPriority: 800
-
-- type: ncCityAbstractTravelPolicy
-  id: NCDefaultAbstractTravelPolicy
-  snapshotPageSize: 250
-  maximumDispatchesPerTick: 4
-  maximumConcurrentMutations: 8
-  retryDelay: 10s
-  maximumMutationAttempts: 5
-  minimumTravelDuration: 1s
-  maximumTravelDuration: 6h
-  durationMultiplier: 1
-
-- type: ncCityGroupProfile
-  id: NCDefaultStreetGroup
-  maximumMembers: 16
-  maximumSnapshotHistory: 128
-  allowSplit: true
-  allowMerge: true
-  materializeTogether: true
-  formationPolicy: Loose
-  initialTransportCapacity: 0
-  initialCargoUnits: 0
-  initialSupplyUnits: 0
-  initialMorale: 0.5
-
-- type: ncCityGroupPhysicalizationPolicy
-  id: NCDefaultCityGroupPhysicalizationPolicy
-  catalogPageSize: 100
-  maximumQueuedRequests: 128
-  maximumDispatchesPerTick: 1
-  maximumConcurrentLoads: 2
-  maximumActiveRequestPollsPerTick: 8
-  maximumMembersPerRequest: 32
-  maximumCompletedRequestHistory: 512
-  maximumPriority: 1000
-  retryDelay: 2s
-  defaultMaximumWait: 2m
-  maximumWait: 5m
-  rollbackMaximumWait: 2m
-  looseSpacing: 2.25
-  columnSpacing: 1.5
-  wedgeSpacing: 1.75
-  defensiveSpacing: 2
-
-- type: ncCityRoutineProfile
-  id: NCDefaultCivilianRoutine
-  cycleDuration: 24h
-  # Stable actor hashing distributes residents across day, evening and night shifts with up to one hour of jitter.
-  actorPhaseSpread: 1h
-  shiftOffsets: [0h, 8h, 16h]
-  restDays: [Saturday, Sunday]
-  needEvaluationInterval: 1m
-  recoveryEvaluationInterval: 1m
-  mealThreshold: Peckish
-  fatigueStaminaRatio: 0.6
-  entries:
-  - at: 0s
-    activity: sleep
-    goal: recover-at-home
-    target: Home
-    availability: Unavailable
-  - at: 7h
-    activity: prepare
-    goal: prepare-for-work
-    target: Home
-    availability: Busy
-  - at: 27000s # 07:30.
-    activity: commute
-    goal: reach-workplace
-    target: Work
-    availability: Busy
-  - at: 8h
-    activity: work
-    goal: complete-work-shift
-    target: Work
-    availability: Busy
-  - at: 12h
-    activity: meal
-    goal: eat-and-recover
-    target: Work
-    availability: Available
-  - at: 13h
-    activity: work
-    goal: complete-work-shift
-    target: Work
-    availability: Busy
-  - at: 17h
-    activity: errands
-    goal: handle-daily-needs
-    target: Community
-    availability: Available
-  - at: 66600s # 18:30.
-    activity: leisure
-    goal: spend-free-time
-    target: Community
-    availability: Available
-  - at: 20h
-    activity: return-home
-    goal: finish-daily-obligations
-    target: Home
-    availability: Available
-  - at: 23h
-    activity: sleep
-    goal: recover-at-home
-    target: Home
-    availability: Unavailable
-  restDayEntries:
-  - at: 0s
-    activity: sleep
-    goal: recover-at-home
-    target: Home
-    availability: Unavailable
-  - at: 9h
-    activity: leisure
-    goal: spend-rest-day
-    target: Community
-    availability: Available
-  - at: 13h
-    activity: meal
-    goal: eat-and-recover
-    target: Community
-    availability: Available
-  - at: 14h
-    activity: socialize
-    goal: maintain-social-ties
-    target: Community
-    availability: Available
-  - at: 20h
-    activity: return-home
-    goal: finish-rest-day
-    target: Home
-    availability: Available
-  - at: 23h
-    activity: sleep
-    goal: recover-at-home
-    target: Home
-    availability: Unavailable

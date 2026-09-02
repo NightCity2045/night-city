@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using Content.Server.GameTicking;
 using Content.Server._NC.City.Connectivity;
 using Content.Server._NC.LivingCity.Actors.Components;
-using Content.Server._NC.LivingCity.Groups;
-using Content.Server._NC.LivingCity.Groups.Components;
 using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.Actors;
@@ -75,7 +73,6 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
         SubscribeLocalEvent<NCCityConnectivityChangedEvent>(OnCityGraphChanged);
         SubscribeLocalEvent<NCRoomPortalGraphChangedEvent>(OnRoomGraphChanged);
         SubscribeLocalEvent<NCCitySpawnCandidateIndexChangedEvent>(OnSpawnCandidatesChanged);
-        SubscribeLocalEvent<NCCityGroupTrunkRouteInvalidatedEvent>(OnGroupTrunkInvalidated);
     }
 
     public override void Update(float frameTime)
@@ -227,32 +224,6 @@ public sealed partial class NCCityPhysicalExecutionSystem : EntitySystem
     private void OnRoomGraphChanged(ref NCRoomPortalGraphChangedEvent args)
     {
         WakeForNavigationTopologyChange("room-graph-changed");
-    }
-
-    private void OnGroupTrunkInvalidated(NCCityGroupTrunkRouteInvalidatedEvent args)
-    {
-        if (!_active || !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
-            return;
-
-        // This visits only currently materialized actors. It never scans the persistent city catalog.
-        foreach (var entityUid in _tracked)
-        {
-            // The actor that rejected the trunk already owns its configured backoff. Waking it here would erase that
-            // delay, while the remaining members must stop following the now-invalid shared route immediately.
-            if (entityUid == args.SourceActor ||
-                !TryComp<NCCityGroupFormationComponent>(entityUid, out var formation) ||
-                formation.GroupId != args.GroupId ||
-                !TryComp<NCCityPhysicalExecutionComponent>(entityUid, out var execution) ||
-                execution.State is NCCityPhysicalExecutionState.Idle or NCCityPhysicalExecutionState.LoadingIntent)
-            {
-                continue;
-            }
-
-            StopSteering(entityUid, execution);
-            execution.State = NCCityPhysicalExecutionState.Replanning;
-            AddTrace(execution, now, "group-trunk-invalidated", args.Reason);
-            ScheduleExecution(entityUid, now);
-        }
     }
 
     private void OnSpawnCandidatesChanged(ref NCCitySpawnCandidateIndexChangedEvent args)

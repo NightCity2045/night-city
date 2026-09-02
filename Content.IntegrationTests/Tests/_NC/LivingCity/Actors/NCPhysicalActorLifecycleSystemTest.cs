@@ -13,13 +13,16 @@ using Content.Server._NC.ZLevels.Core;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.LivingCity.Actors;
+using Content.Shared._NC.LivingCity.Neural;
 using Content.Shared._NC.Persistence.Identity;
+using Content.Shared.Preferences;
 using Content.Shared._NC.ZLevels.Core.Components;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Maths;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Serialization.Manager;
 using Robust.UnitTesting;
 
 namespace Content.IntegrationTests.Tests._NC.LivingCity.Actors;
@@ -59,25 +62,11 @@ public sealed class NCPhysicalActorLifecycleSystemTest : GameTest
               - 8,8
               - 0,8
 
-        - type: ncCityRoutineProfile
-          id: NCPhysicalActorLifecycleIntegrationRoutine
-          cycleDuration: 24h
-          entries:
-          - at: 0s
-            activity: present
-            goal: remain-physical
-            target: Home
-            availability: Available
-
         - type: ncCityActorArchetype
           id: NCPhysicalActorLifecycleIntegrationCivilian
           entityPrototype: MobHuman
           spawnCandidateProfile: NCPedestrianSpawnCandidates
           travelMode: Pedestrian
-          cognitionTier: Utility
-          allowedHomeContexts: [Building]
-          allowedWorkContexts: [Building]
-          routineProfile: NCPhysicalActorLifecycleIntegrationRoutine
         """;
 
     private static readonly NCZNetworkId NetworkId =
@@ -86,6 +75,8 @@ public sealed class NCPhysicalActorLifecycleSystemTest : GameTest
         new(Guid.Parse("28a2ef85-4254-4d6c-84f9-086db4f69e86"));
     private static readonly ProtoId<NCCityActorArchetypePrototype> Archetype =
         new("NCPhysicalActorLifecycleIntegrationCivilian");
+    private static readonly ProtoId<NCNeuralPersonaProfilePrototype> Persona =
+        new("NCDefaultResidentPersona");
 
     public override PoolSettings PoolSettings => new() { Connected = false };
 
@@ -128,16 +119,19 @@ public sealed class NCPhysicalActorLifecycleSystemTest : GameTest
         });
         await server.WaitRunTicks(45);
 
-        var create = await actors.CreateAsync(new NCCityActorCreateRequest(
-            Guid.NewGuid(),
-            Guid.Parse("5148d738-0492-46da-9abf-0bd2b7b2dabb"),
-            "resident.001",
+        var serialization = server.ResolveDependency<ISerializationManager>();
+        var profile = HumanoidCharacterProfile.Random();
+        var commandId = Guid.NewGuid();
+        var create = await actors.CreateResidentAsync(new NCCityResidentCreateRequest(
+            commandId,
+            new NCActorId(Guid.Parse("5148d738-0492-46da-9abf-0bd2b7b2dabb")),
             "Mara Velez",
-            ["Switch"],
             Archetype,
+            Persona,
+            NCHumanoidProfilePayload.Serialize(serialization, profile),
             HomeZone,
-            HomeZone,
-            Guid.NewGuid(),
+            new NCCityActorPhysicalRecoveryState(NetworkId, 1f, 1f, 0, HomeZone),
+            commandId,
             AuditSource: "integration.physical-lifecycle"));
         Assert.That(create.Status, Is.EqualTo(NCCityActorMutationStatus.Applied), create.Error);
 

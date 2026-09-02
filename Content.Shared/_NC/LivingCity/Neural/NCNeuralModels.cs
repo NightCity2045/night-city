@@ -254,6 +254,16 @@ public sealed partial class NCNeuralPersonaProfilePrototype : IPrototype
     [DataField] public string Biography { get; private set; } = string.Empty;
     [DataField] public string[] PrincipleKeys { get; private set; } = [];
     [DataField] public string[] HabitKeys { get; private set; } = [];
+    [DataField] public string? TemperamentKey { get; private set; }
+    [DataField] public int? RiskTolerance { get; private set; }
+    [DataField] public int? Aggression { get; private set; }
+    [DataField] public int? Empathy { get; private set; }
+    [DataField] public int? AuthorityRespect { get; private set; }
+    [DataField] public int? ViolenceTolerance { get; private set; }
+    [DataField] public int? Justice { get; private set; }
+    [DataField] public int? Professionalism { get; private set; }
+    [DataField] public string? SpeechRegisterKey { get; private set; }
+    [DataField] public string? VocabularyKey { get; private set; }
 }
 
 [Prototype("ncNeuralAutonomyPolicy")]

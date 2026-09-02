@@ -91,6 +91,27 @@ public readonly record struct NCHumanActionRouterCounters(
     string? ConfigurationError);
 
 /// <summary>
+/// One server-owned step from a validated neural command batch. The router resolves its action prototype and then
+/// delegates the actual world mutation to the matching gameplay adapter.
+/// </summary>
+public sealed class NCNeuralActionStepEvent(
+    NCActorId actorId,
+    EntityUid? entityUid,
+    Guid batchId,
+    NCCognitionIntentionSnapshot intention,
+    NCCognitionPlanStep step) : EntityEventArgs
+{
+    public NCActorId ActorId { get; } = actorId;
+    public EntityUid? EntityUid { get; } = entityUid;
+    public Guid BatchId { get; } = batchId;
+    public NCCognitionIntentionSnapshot Intention { get; } = intention;
+    public NCCognitionPlanStep Step { get; } = step;
+    public bool Handled { get; set; }
+    public bool Completed { get; set; }
+    public string? Failure { get; set; }
+}
+
+/// <summary>
 /// One bounded execution pulse. A domain subscriber may claim only action IDs it owns and must report a real result.
 /// Leaving both Completed and Failure empty keeps the action running until the next scheduled cognition pulse.
 /// </summary>

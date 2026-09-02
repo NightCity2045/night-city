@@ -115,13 +115,8 @@ public sealed partial class NCCityPhysicalExecutionSystem
             phase,
             destinationZone.IsValid ? component.TravelMode : NCCityTravelMode.None,
             null,
-            component.Activity,
-            component.Goal,
-            component.Availability,
-            component.NextScheduleUpdateAt,
             component.GoalId == Guid.Empty ? Guid.NewGuid() : component.GoalId,
-            AuditSource: "system:physical-execution",
-            PresenceMode: component.PresenceMode);
+            AuditSource: "system:physical-execution");
         _pendingMutations[component.ActorId] = new PendingLocationMutation(
             entityUid,
             kind,

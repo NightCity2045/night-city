@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-using Content.Shared._NC.LivingCity.Affordances;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.LivingCity.Actors;
@@ -18,7 +17,6 @@ public enum NCCityPhysicalMode : byte
     Scripted,
     Incapacitated,
 }
-
 public enum NCCityPhysicalCondition : byte
 {
     TravelIntent,
@@ -130,50 +128,4 @@ public sealed partial class NCCityLocalPerceptionPolicyPrototype : IPrototype
 
     [DataField]
     public int MaximumIncidentCorrelations { get; private set; } = 1024;
-}
-
-/// <summary>
-/// Data-driven local activity policy shared by every physical Human. Values limit work per actor, never population.
-/// </summary>
-[Prototype("ncHumanRoutineActivityPolicy")]
-public sealed partial class NCHumanRoutineActivityPolicyPrototype : IPrototype
-{
-    [IdDataField]
-    public string ID { get; private set; } = default!;
-
-    [DataField(required: true)]
-    public int MaximumCatalogCandidates { get; private set; }
-
-    [DataField(required: true)]
-    public float ArrivalRange { get; private set; }
-
-    [DataField(required: true)]
-    public TimeSpan MinimumDwellTime { get; private set; }
-
-    [DataField(required: true)]
-    public TimeSpan MaximumDwellTime { get; private set; }
-
-    [DataField(required: true)]
-    public int MaximumFallbackTargetAttempts { get; private set; }
-
-    [DataField(required: true)]
-    public List<NCHumanRoutineActivityDefinition> Activities { get; private set; } = [];
-
-    /// <summary>Safe physical activities used after a routine target or route becomes unavailable.</summary>
-    [DataField(required: true)]
-    public List<NCHumanRoutineActivityDefinition> FallbackActivities { get; private set; } = [];
-}
-
-[DataDefinition]
-public sealed partial class NCHumanRoutineActivityDefinition
-{
-    [DataField(required: true)]
-    public string Activity { get; private set; } = string.Empty;
-
-    [DataField(required: true)]
-    public List<NCCityAffordanceKind> Affordances { get; private set; } = [];
-
-    /// <summary>For work, prefer the affordance authored by the resident livelihood profile.</summary>
-    [DataField]
-    public bool PreferLivelihoodAffordance { get; private set; }
 }

@@ -33,9 +33,6 @@ public sealed partial class NCCityPhysicalExecutionComponent : Component
     [ViewVariables(VVAccess.ReadOnly)] public NCCityTravelMode TravelMode;
     [ViewVariables(VVAccess.ReadOnly)] public string Activity = string.Empty;
     [ViewVariables(VVAccess.ReadOnly)] public string Goal = string.Empty;
-    [ViewVariables(VVAccess.ReadOnly)] public NCCityActorAvailability Availability;
-    [ViewVariables(VVAccess.ReadOnly)] public NCCityActorPresenceMode PresenceMode;
-    [ViewVariables(VVAccess.ReadOnly)] public NCActiveWorldTime NextScheduleUpdateAt;
     [ViewVariables(VVAccess.ReadOnly)] public ProtoId<NCCityPhysicalNavigationProfilePrototype> NavigationProfile;
     [ViewVariables(VVAccess.ReadOnly)] public ProtoId<NCCitySpawnCandidateProfilePrototype> SpawnCandidateProfile;
     [ViewVariables(VVAccess.ReadOnly)] public ProtoId<NCCityPhysicalStateTreePrototype> StateTreeProfile;

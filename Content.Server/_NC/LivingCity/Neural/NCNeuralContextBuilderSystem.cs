@@ -7,21 +7,18 @@ using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Cognition;
 using Content.Server._NC.LivingCity.CityServices;
-using Content.Server._NC.LivingCity.Employment;
 using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.LivingCity.Social;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Cognition;
 using Content.Shared._NC.LivingCity.CityServices;
-using Content.Shared._NC.LivingCity.Employment;
 using Content.Shared._NC.LivingCity.Neural;
 using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Prototypes;
-using Content.Shared.Roles;
 using System.Threading;
 
 namespace Content.Server._NC.LivingCity.Neural;
@@ -37,7 +34,6 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         "NCDefaultNeuralAutonomy";
     private const string DialogueCapability = "social.dialogue.reply";
     private const string ApproachPersonCapability = "NCCognitionApproachPerson";
-    private const string AcceptDirectiveCapability = "NCCognitionAcceptDirective";
     private const string RespondToThreatCapability = "NCCognitionRespondToThreat";
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
@@ -50,10 +46,6 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
     [Dependency] private NCSocialContextRedactionSystem _redaction = default!;
     [Dependency] private NCSocialProfileRegistrySystem _socialProfiles = default!;
     [Dependency] private NCConversationArchiveSystem _conversationArchive = default!;
-    [Dependency] private NCOrganizationWorkforceSystem _workforce = default!;
-    [Dependency] private NCLivelihoodRegistrySystem _livelihoods = default!;
-    [Dependency] private NCProfessionProfileSystem _professions = default!;
-    [Dependency] private NCFactionMembershipRegistrySystem _factionMemberships = default!;
     [Dependency] private NCNeuralCognitionClientSystem _client = default!;
     [Dependency] private NCNeuralSuggestionSystem _suggestions = default!;
     [Dependency] private NCNeuralConversationSystem _neuralConversations = default!;
@@ -93,9 +85,7 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                 out NCCognitionCapabilityProfilePrototype? profile) || profile == null)
             return false;
 
-        var capabilities = profile.Capabilities.ToList();
-        _professions.AddCapabilityOverlays(actorId, capabilities);
-        var allowed = capabilities.Select(value => value.Id).Distinct(StringComparer.Ordinal).ToArray();
+        var allowed = profile.Capabilities.Select(value => value.Id).Distinct(StringComparer.Ordinal).ToArray();
         return allowed.Length > 0 && await SubmitCoreAsync(
             actorId,
             NCNeuralRequestKind.StrategicDecision,
@@ -131,7 +121,10 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         }
         else
         {
-            if (!_prototypes.TryIndex(DefaultResidentPersona, out personaProfile) ||
+            var residentPersona = string.IsNullOrWhiteSpace(actor.Snapshot.Identity.NeuralPersonaProfileId)
+                ? DefaultResidentPersona
+                : new ProtoId<NCNeuralPersonaProfilePrototype>(actor.Snapshot.Identity.NeuralPersonaProfileId);
+            if (!_prototypes.TryIndex(residentPersona, out personaProfile) ||
                 !_prototypes.TryIndex(DefaultResidentAutonomy, out autonomyPolicy))
                 return false;
         }
@@ -228,16 +221,8 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                 value.Confidence, value.Privacy.ToString())).ToList();
         var perceived = perceivedByHandle.Values.Take(maximumPerceivedSubjects).ToArray();
         var knownLocations = BuildKnownLocations(actor, maximumKnownLocations);
-        var socialProfileTask = _socialProfiles.GetAsync(actorId);
-        var factionMembershipTask = _factionMemberships.GetAsync(actorId);
-        var livelihoodTask = _livelihoods.GetAsync(actorId);
-        await Task.WhenAll(socialProfileTask, factionMembershipTask, livelihoodTask);
-        var socialProfile = await socialProfileTask;
-        var factionMembership = await factionMembershipTask;
-        var livelihood = await livelihoodTask;
-        AddRoleFacts(actorId, livelihood, factionMembership, context.EffectiveMaximumPrivacy,
-            context.ForbiddenTopics, facts);
-        var persona = BuildPersona(actor, socialProfile, livelihood, personaProfile);
+        var socialProfile = await _socialProfiles.GetAsync(actorId);
+        var persona = BuildPersona(actor, socialProfile, personaProfile);
         if (persona == null)
             return false;
         var autonomy = new NCNeuralAutonomyContext(
@@ -299,23 +284,11 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         }
         var effectiveCapabilities = allowedCapabilities
             .Where(value => value != ApproachPersonCapability || speakerHandle.Length > 0)
-            .Concat(narrativeAccess && kind == NCNeuralRequestKind.DialogueContinuation
-                ? [AcceptDirectiveCapability]
-                : [])
             .Distinct()
             .Take(policy.MaximumCapabilities)
             .ToArray();
         if (effectiveCapabilities.Length == 0)
             return false;
-        var hasOrganization = _workforce.TryGetAssignment(actorId, out var actorOrganization, out _);
-        var directiveActions = effectiveCapabilities.Contains(AcceptDirectiveCapability)
-            ? _prototypes.EnumeratePrototypes<NCHumanDirectiveActionPrototype>()
-                .Where(value => value.AllowedOrganizations.Count == 0 ||
-                    hasOrganization && value.AllowedOrganizations.Contains(actorOrganization))
-                .Select(value => value.ID)
-                .Order(StringComparer.Ordinal)
-                .ToArray()
-            : [];
         var packetFacts = BuildFactPacket(facts, maximumFacts);
         var disclosure = new NCNeuralDisclosureContext(
             disclosureMaximum.ToString(),
@@ -334,7 +307,7 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             actor.AggregateVersion, currentNow.Advance(policy.RequestLifetime), DefaultPrompt,
             packetFacts,
             effectiveCapabilities, conversationSnapshot?.CurrentTopicKeys ?? [], "ru-RU", persona, autonomy,
-            perceived, perceivedEvents, knownLocations, dialogueInput, directiveActions, disclosure)
+            perceived, perceivedEvents, knownLocations, dialogueInput, [], disclosure)
         {
             MaximumOutputTokens = narrativeAccess
                 ? policy.MaximumRequestOutputTokens
@@ -390,7 +363,7 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         string transientUtterance)
     {
         await SubmitAsync(actorId, NCNeuralRequestKind.DialogueContinuation, NCNeuralPriority.P1,
-            [DialogueCapability, ApproachPersonCapability, AcceptDirectiveCapability, RespondToThreatCapability], sessionId,
+            [DialogueCapability, ApproachPersonCapability, RespondToThreatCapability], sessionId,
             transientUtterance);
     }
 
@@ -493,7 +466,6 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
     private NCNeuralPersonaContext? BuildPersona(
         NCCityActorRecord actor,
         NCSocialProfileRecord? socialProfile,
-        NCLivelihoodRecord? livelihood,
         NCNeuralPersonaProfilePrototype persona)
     {
         if (!StableKey(persona.StableKey) || !StableKey(persona.RoleKey) ||
@@ -504,23 +476,7 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         var organizationKey = persona.OrganizationKey;
         var biography = persona.Biography;
         var principles = persona.PrincipleKeys.Where(StableKey).Take(32).ToList();
-        if (_workforce.TryGetAssignment(actor.Snapshot.Identity.ActorId, out var organizationId, out var jobId))
-        {
-            roleKey = jobId.Id;
-            organizationKey = organizationId.Id;
-            if (_prototypes.TryIndex(jobId, out JobPrototype? job) && job != null)
-                biography = $"{biography} Current occupation: {job.LocalizedName}.".Trim();
-        }
-        else if (livelihood != null &&
-                 _prototypes.TryIndex(new ProtoId<NCLivelihoodProfilePrototype>(livelihood.Snapshot.ProfileId),
-                     out var livelihoodProfile) && livelihoodProfile != null)
-        {
-            roleKey = livelihood.Snapshot.ProfileId;
-            organizationKey = "independent";
-            biography = $"{biography} Current livelihood: {livelihoodProfile.DisplayName}.".Trim();
-        }
-        // Hidden faction membership is never inferred into the provider-facing persona. Authored persona data is the
-        // public identity; private affiliations travel only through the purpose-bounded fact packet below.
+        // Residents have no automatic profession or faction overlays. Their authored persona is the complete role.
         return new NCNeuralPersonaContext(
             persona.StableKey,
             roleKey,
@@ -528,56 +484,16 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             NormalizeDialogueText(biography, 1024),
             principles.Distinct(StringComparer.Ordinal).Take(32).ToArray(),
             persona.HabitKeys.Where(StableKey).Take(32).ToArray(),
-            StableOrUnknown(social?.Personality.Temperament),
-            social?.Personality.RiskTolerance ?? 500,
-            social?.Personality.Aggression ?? 500,
-            social?.Personality.Empathy ?? 500,
-            social?.Personality.AuthorityRespect ?? 500,
-            social?.Personality.ViolenceTolerance ?? 500,
-            social?.Values.Justice ?? 500,
-            social?.Values.Professionalism ?? 500,
-            StableOrUnknown(social?.Speech.Register),
-            StableOrUnknown(social?.Speech.Vocabulary));
-    }
-
-    private void AddRoleFacts(
-        NCActorId actorId,
-        NCLivelihoodRecord? livelihood,
-        NCFactionMembershipRecord? affiliation,
-        NCMemoryPrivacy maximumPrivacy,
-        IReadOnlyList<string> forbiddenTopics,
-        List<NCNeuralFact> facts)
-    {
-        if (_workforce.TryGetAssignment(actorId, out var organization, out var job))
-        {
-            TryAddFact(facts, forbiddenTopics, maximumPrivacy, "Jobs", "employment.organization",
-                organization.Id, NCMemoryPrivacy.Public);
-            TryAddFact(facts, forbiddenTopics, maximumPrivacy, "Jobs", "employment.position",
-                job.Id, NCMemoryPrivacy.Public);
-            if (_professions.TryGetProfile(actorId, out var profession))
-            {
-                foreach (var skill in profession.SkillKeys.Where(StableKey).Distinct(StringComparer.Ordinal))
-                    TryAddFact(facts, forbiddenTopics, maximumPrivacy, "Jobs", "employment.skill",
-                        skill, NCMemoryPrivacy.Personal);
-            }
-        }
-        else if (livelihood != null &&
-                 _prototypes.TryIndex(new ProtoId<NCLivelihoodProfilePrototype>(livelihood.Snapshot.ProfileId),
-                     out var livelihoodProfile) && livelihoodProfile != null)
-        {
-            TryAddFact(facts, forbiddenTopics, maximumPrivacy, "Jobs", "livelihood.profile",
-                livelihood.Snapshot.ProfileId, NCMemoryPrivacy.Public);
-            foreach (var capability in livelihoodProfile.Capabilities.Where(StableKey).Distinct(StringComparer.Ordinal))
-                TryAddFact(facts, forbiddenTopics, maximumPrivacy, "Jobs", "livelihood.capability",
-                    capability, NCMemoryPrivacy.Personal);
-        }
-
-        if (!TryGetActiveFaction(affiliation, out var membership, out var faction))
-            return;
-        TryAddFact(facts, forbiddenTopics, maximumPrivacy, "Faction", "faction.membership",
-            faction.StableKey, NCMemoryPrivacy.Secret);
-        TryAddFact(facts, forbiddenTopics, maximumPrivacy, "Faction", "faction.role",
-            membership.Role, NCMemoryPrivacy.Secret);
+            StableOrUnknown(persona.TemperamentKey ?? social?.Personality.Temperament),
+            persona.RiskTolerance ?? social?.Personality.RiskTolerance ?? 500,
+            persona.Aggression ?? social?.Personality.Aggression ?? 500,
+            persona.Empathy ?? social?.Personality.Empathy ?? 500,
+            persona.AuthorityRespect ?? social?.Personality.AuthorityRespect ?? 500,
+            persona.ViolenceTolerance ?? social?.Personality.ViolenceTolerance ?? 500,
+            persona.Justice ?? social?.Values.Justice ?? 500,
+            persona.Professionalism ?? social?.Values.Professionalism ?? 500,
+            StableOrUnknown(persona.SpeechRegisterKey ?? social?.Speech.Register),
+            StableOrUnknown(persona.VocabularyKey ?? social?.Speech.Vocabulary));
     }
 
     private static void TryAddFact(

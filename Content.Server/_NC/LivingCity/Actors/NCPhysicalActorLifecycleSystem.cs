@@ -15,11 +15,15 @@ using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
+using Content.Shared.Body;
+using Content.Shared.Humanoid;
 using Content.Shared.Maps;
 using Content.Shared.Physics;
+using Content.Shared.Preferences;
 using Robust.Shared.Asynchronous;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Serialization.Manager;
 
 namespace Content.Server._NC.LivingCity.Actors;
 
@@ -39,6 +43,9 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private TurfSystem _turf = default!;
     [Dependency] private MetaDataSystem _metadata = default!;
+    [Dependency] private HumanoidProfileSystem _humanoidProfile = default!;
+    [Dependency] private SharedVisualBodySystem _visualBody = default!;
+    [Dependency] private ISerializationManager _serialization = default!;
     [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
@@ -86,12 +93,12 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
             return;
         }
 
-        using var work = _loadGovernor.MeasureWork(NCAILoadWorkKind.ActorMaterialization);
-        _loadGovernor.ReportMaterializedActors(_runtime.PhysicalActorCount);
-        _loadGovernor.ReportQueue(NCAILoadQueueKind.Materialization, _pending.Count,
+        using var work = _loadGovernor.MeasureWork(NCAILoadWorkKind.ActorSpawn);
+        _loadGovernor.ReportPhysicalActors(_runtime.PhysicalActorCount);
+        _loadGovernor.ReportQueue(NCAILoadQueueKind.ActorSpawn, _pending.Count,
             Math.Max(1, _runtime.PhysicalActorCount + _pending.Count));
         var limit = _loadGovernor.TakeDispatchLimit(
-            NCAILoadDispatchKind.ActorMaterialization,
+            NCAILoadDispatchKind.ActorSpawn,
             _policy.MaximumDispatchesPerTick);
         // A permanent zero would violate the physical-population invariant. The governor may reduce cold-start work,
         // but one bounded load is always allowed to make progress.
@@ -364,6 +371,18 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
             return;
         }
 
+        if (actor.Snapshot.Identity.HumanoidProfilePayload is { } profilePayload)
+        {
+            if (!NCHumanoidProfilePayload.TryDeserialize(_serialization, profilePayload, out var profile))
+            {
+                QueueDel(entity);
+                Retry(pending, now, "The persistent humanoid appearance payload is invalid.");
+                return;
+            }
+
+            _visualBody.ApplyProfileTo(entity, profile);
+            _humanoidProfile.ApplyProfileTo(entity, profile);
+        }
         _metadata.SetEntityName(entity, actor.Snapshot.Identity.FullName);
         var conversation = EnsureComp<NCNeuralConversationTargetComponent>(entity);
         conversation.NarrativeActor = !string.IsNullOrWhiteSpace(actor.Snapshot.Identity.NarrativeActorProfileId) ||
@@ -421,6 +440,9 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
                 out coordinates);
         }
 
+        if (actor.PhysicalRecovery is { } recovery && TryResolveRecovery(recovery, out coordinates))
+            return true;
+
         _spawnCandidates.GetCandidatesInHierarchy(
             archetype.SpawnCandidateProfile,
             actor.Location.CurrentZone,
@@ -452,6 +474,29 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
             return false;
         coordinates = fallback;
         return true;
+    }
+
+    private bool TryResolveRecovery(NCCityActorPhysicalRecoveryState recovery, out MapCoordinates target)
+    {
+        target = default;
+        if (_policy == null || !recovery.NetworkId.IsValid || !float.IsFinite(recovery.X) ||
+            !float.IsFinite(recovery.Y))
+        {
+            return false;
+        }
+
+        var stable = new NCMapCoordinates(
+            recovery.NetworkId,
+            new Vector2(recovery.X, recovery.Y),
+            recovery.Z);
+        if (_coordinates.TryResolve(stable, out var exact) && HasSafeFloor(exact) &&
+            !IsOccupiedByActor(exact, _policy.ActorOccupancyExclusionRadius, null))
+        {
+            target = exact;
+            return true;
+        }
+
+        return TryFindSafeAdminTarget(stable, _policy.AdminPreferredSpawnRadius, null, out target);
     }
 
     private bool TryFindSafeAdminTarget(

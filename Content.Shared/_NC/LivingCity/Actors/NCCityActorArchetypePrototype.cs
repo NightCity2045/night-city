@@ -3,7 +3,6 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Shared._NC.City.Connectivity;
-using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Cognition;
 using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.LivingCity.Neural;
@@ -12,7 +11,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Shared._NC.LivingCity.Actors;
 
 /// <summary>
-/// Data-driven materialization and scheduling defaults for one persistent-actor archetype.
+/// Data-driven body, navigation, perception and GPT defaults for one persistent physical actor archetype.
 /// </summary>
 [Prototype("ncCityActorArchetype")]
 public sealed partial class NCCityActorArchetypePrototype : IPrototype
@@ -28,18 +27,6 @@ public sealed partial class NCCityActorArchetypePrototype : IPrototype
 
     [DataField(required: true)]
     public NCCityTravelMode TravelMode { get; private set; }
-
-    [DataField(required: true)]
-    public NCCityActorCognitionTier CognitionTier { get; private set; }
-
-    [DataField(required: true)]
-    public HashSet<NCZoneContextSlot> AllowedHomeContexts { get; private set; } = [];
-
-    [DataField(required: true)]
-    public HashSet<NCZoneContextSlot> AllowedWorkContexts { get; private set; } = [];
-
-    [DataField(required: true)]
-    public ProtoId<NCCityRoutineProfilePrototype> RoutineProfile { get; private set; }
 
     /// <summary>
     /// Physical traversal capabilities are separate from cognition and the semantic travel mode.
@@ -57,19 +44,11 @@ public sealed partial class NCCityActorArchetypePrototype : IPrototype
         new("NCDefaultLocalPerception");
 
     /// <summary>
-    /// Persistent BDI policy and the capability allowlist for this archetype. Gameplay weights remain in prototypes.
+    /// Typed command allowlist available to the GPT brain. Gameplay authority remains in ECS systems.
     /// </summary>
-    [DataField]
-    public ProtoId<NCCognitionDecisionPolicyPrototype> CognitionDecisionPolicy { get; private set; } =
-        new("NCDefaultCognitionDecisionPolicy");
-
     [DataField]
     public ProtoId<NCCognitionCapabilityProfilePrototype> CognitionCapabilityProfile { get; private set; } =
         new("NCDefaultCivilianCapabilities");
-
-    [DataField]
-    public ProtoId<NCCognitionRoutingProfilePrototype> CognitionRoutingProfile { get; private set; } =
-        new("NCDefaultCognitionRouting");
 
     [DataField]
     public ProtoId<NCPersonalityProfilePrototype> PersonalityProfile { get; private set; } =
@@ -88,7 +67,7 @@ public sealed partial class NCCityActorArchetypePrototype : IPrototype
         new("NCDefaultBilingualSpeech");
 
     /// <summary>
-    /// Optional authored profile for an important narrative actor. Ordinary residents never receive Neural access.
+    /// Optional richer profile for a future authored actor. Ordinary residents still use GPT through their persona.
     /// </summary>
     [DataField]
     public ProtoId<NCNarrativeActorProfilePrototype>? NarrativeActorProfile { get; private set; }
