@@ -12,6 +12,8 @@ using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Hands.Components;
 using Content.Shared.Hands.EntitySystems;
+using Content.Shared.Inventory;
+using Content.Shared.Item;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs;
 using Content.Shared.NPC.Components;
@@ -23,6 +25,7 @@ using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Time;
 using Content.Shared._NC.Persistence.Identity;
 using Robust.Shared.Map;
+using Robust.Shared.Map.Components;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.LivingCity.Actors;
@@ -50,6 +53,7 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
+    [Dependency] private InventorySystem _inventory = default!;
     [Dependency] private SharedCuffableSystem _cuffable = default!;
     [Dependency] private NpcFactionSystem _factions = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
@@ -567,6 +571,7 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
         }
 
         ObserveVisibleHazards(entityUid, component, profile, origin, now, ref lineOfSightChecks);
+        ObserveAvailableActionTargets(entityUid, component, profile, origin, now, ref lineOfSightChecks);
 
         component.LastEvaluatedAt = now;
         component.Revision++;
@@ -619,6 +624,103 @@ public sealed partial class NCCityLocalPerceptionSystem : EntitySystem
                 ObserveIncident(observer, kind, holder.Owner, held, now, profile.WitnessedEventLifetime);
             }
         }
+    }
+
+    /// <summary>
+    /// Adds only nearby visible people and loose items, plus the actor's own inventory. This makes typed GPT actions
+    /// targetable without exposing a global entity list or anything hidden inside another entity's containers.
+    /// </summary>
+    private void ObserveAvailableActionTargets(
+        EntityUid observer,
+        NCCityLocalPerceptionComponent perception,
+        NCCityLocalPerceptionProfilePrototype profile,
+        MapCoordinates origin,
+        NCActiveWorldTime now,
+        ref int lineOfSightChecks)
+    {
+        foreach (var observation in perception.Observations)
+            _observedBuffer.Add(observation.EntityUid);
+
+        if (TryComp<HandsComponent>(observer, out var hands))
+        {
+            foreach (var held in _hands.EnumerateHeld((observer, hands)))
+                AddKnownActionTarget(perception, profile, held, NCCityLocalObservationKind.HeldItem, now);
+        }
+        var slots = _inventory.GetSlotEnumerator(observer);
+        while (slots.NextItem(out var equipped, out _))
+            AddKnownActionTarget(perception, profile, equipped, NCCityLocalObservationKind.EquippedItem, now);
+
+        foreach (var candidate in _lookup.GetEntitiesInRange<MobStateComponent>(origin, profile.Radius))
+        {
+            if (perception.Observations.Count >= profile.MaximumObservedEntities ||
+                lineOfSightChecks >= profile.MaximumLineOfSightChecks)
+                break;
+            if (candidate.Owner == observer || candidate.Comp.CurrentState != MobState.Alive ||
+                !_observedBuffer.Add(candidate.Owner))
+                continue;
+            lineOfSightChecks++;
+            if (!_interaction.InRangeUnobstructed(observer, candidate.Owner, profile.Radius))
+                continue;
+            AddVisibleActionTarget(perception, profile, origin, candidate.Owner,
+                NCCityLocalObservationKind.Neutral, now);
+        }
+
+        foreach (var candidate in _lookup.GetEntitiesInRange<ItemComponent>(origin, profile.Radius))
+        {
+            if (perception.Observations.Count >= profile.MaximumObservedEntities ||
+                lineOfSightChecks >= profile.MaximumLineOfSightChecks)
+                break;
+            if (!_observedBuffer.Add(candidate.Owner))
+                continue;
+            var parent = Transform(candidate.Owner).ParentUid;
+            if (!HasComp<MapGridComponent>(parent) && !HasComp<MapComponent>(parent))
+                continue;
+            lineOfSightChecks++;
+            if (!_interaction.InRangeUnobstructed(observer, candidate.Owner, profile.Radius))
+                continue;
+            AddVisibleActionTarget(perception, profile, origin, candidate.Owner,
+                NCCityLocalObservationKind.Item, now);
+        }
+    }
+
+    private void AddKnownActionTarget(
+        NCCityLocalPerceptionComponent perception,
+        NCCityLocalPerceptionProfilePrototype profile,
+        EntityUid target,
+        NCCityLocalObservationKind kind,
+        NCActiveWorldTime now)
+    {
+        if (!Exists(target) || perception.Observations.Count >= profile.MaximumObservedEntities ||
+            !_observedBuffer.Add(target))
+            return;
+        perception.Observations.Add(new NCCityLocalObservation(
+            target,
+            SubjectHandle(_previousHandles, target),
+            kind,
+            0f,
+            1f,
+            now,
+            now.Advance(profile.EvaluationInterval + profile.EvaluationInterval)));
+    }
+
+    private void AddVisibleActionTarget(
+        NCCityLocalPerceptionComponent perception,
+        NCCityLocalPerceptionProfilePrototype profile,
+        MapCoordinates origin,
+        EntityUid target,
+        NCCityLocalObservationKind kind,
+        NCActiveWorldTime now)
+    {
+        var targetCoordinates = _transform.GetMapCoordinates(target);
+        var distanceSquared = System.Numerics.Vector2.DistanceSquared(origin.Position, targetCoordinates.Position);
+        perception.Observations.Add(new NCCityLocalObservation(
+            target,
+            SubjectHandle(_previousHandles, target),
+            kind,
+            distanceSquared,
+            Confidence(distanceSquared, profile.Radius),
+            now,
+            now.Advance(profile.EvaluationInterval + profile.EvaluationInterval)));
     }
 
     /// <summary>Walks only the short containment parent chain of the damage origin to recover a hitscan shooter.</summary>

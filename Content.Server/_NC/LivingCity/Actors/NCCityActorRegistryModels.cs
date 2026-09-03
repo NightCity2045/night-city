@@ -52,7 +52,7 @@ public sealed record NCCityResidentCreateRequest(
     ProtoId<NCNeuralPersonaProfilePrototype> Persona,
     string HumanoidProfilePayload,
     NCZoneId CurrentZone,
-    NCCityActorPhysicalRecoveryState PhysicalRecovery,
+    NCCityActorPhysicalRecoveryState? PhysicalRecovery,
     Guid CorrelationId,
     Guid? CausationId = null,
     string AuditSource = "system");

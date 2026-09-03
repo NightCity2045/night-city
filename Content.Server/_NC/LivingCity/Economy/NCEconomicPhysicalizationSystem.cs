@@ -74,7 +74,9 @@ public sealed partial class NCEconomicPhysicalizationSystem : EntitySystem
 
         var owner = NCPartyRef.ForActor(actorId);
         var nodeId = NCEconomicAssetRegistrySystem.ActorInventoryStockNode(actorId);
-        var node = await _assets.GetStockNodeAsync(nodeId, true);
+        var node = await _assets.EnsureActorInventoryStockNodeAsync(
+            actorId,
+            "physical-actor-inventory-repair");
         if (node == null || node.Snapshot.Owner != owner || node.Snapshot.Kind != NCStockNodeKind.ActorInventory)
             return new(null, "The actor inventory stock authority is missing or incompatible.");
 

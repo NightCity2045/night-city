@@ -15,6 +15,9 @@ public enum NCCityLocalObservationKind : byte
     Hostile,
     Critical,
     Dead,
+    Item,
+    HeldItem,
+    EquippedItem,
     /// <summary>An entity tied to a directly observed, still-current police incident.</summary>
     Suspect,
 }

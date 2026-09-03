@@ -33,8 +33,6 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
     private static readonly ProtoId<NCNeuralAutonomyPolicyPrototype> DefaultResidentAutonomy =
         "NCDefaultNeuralAutonomy";
     private const string DialogueCapability = "social.dialogue.reply";
-    private const string ApproachPersonCapability = "NCCognitionApproachPerson";
-    private const string RespondToThreatCapability = "NCCognitionRespondToThreat";
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
@@ -71,7 +69,7 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         string? transientUtterance = null)
     {
         return await SubmitCoreAsync(actorId, kind, priority, allowedCapabilities, conversation,
-            transientUtterance);
+            transientUtterance, null);
     }
 
     /// <summary>Submits one independent physical actor decision using its authored capability allowlist.</summary>
@@ -92,12 +90,13 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             priority,
             allowed,
             null,
+            null,
             null);
     }
 
     private async Task<bool> SubmitCoreAsync(NCActorId actorId, NCNeuralRequestKind kind,
         NCNeuralPriority priority, IReadOnlyList<string> allowedCapabilities,
-        NCConversationSessionId? conversation, string? transientUtterance)
+        NCConversationSessionId? conversation, string? transientUtterance, DialogueTrigger? dialogueTrigger)
     {
         if (!_client.IsProviderEnabled || !_clock.TryGetCurrentTime(out var epoch, out var now) ||
             !_prototypes.TryIndex(DefaultPolicy, out NCNeuralPolicyPrototype? policy) ||
@@ -109,6 +108,17 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         if (!_prototypes.TryIndex(new ProtoId<NCCityActorArchetypePrototype>(actor.Snapshot.Identity.ArchetypeId),
                 out var archetype) || archetype == null)
             return false;
+        if (!_prototypes.TryIndex(archetype.CognitionCapabilityProfile,
+                out NCCognitionCapabilityProfilePrototype? capabilityProfile) || capabilityProfile == null)
+            return false;
+
+        // Dialogue is another neural wake for the same physical person, not a reduced social-only brain. Give GPT
+        // every capability authored for this actor while keeping the action router as the mutation authority.
+        var requestedCapabilities = kind == NCNeuralRequestKind.DialogueContinuation
+            ? allowedCapabilities
+                .Concat(capabilityProfile.Capabilities.Select(value => value.Id))
+                .Distinct(StringComparer.Ordinal)
+            : allowedCapabilities;
         NCNeuralPersonaProfilePrototype? personaProfile;
         NCNeuralAutonomyPolicyPrototype? autonomyPolicy;
         var narrativeAccess = false;
@@ -151,10 +161,15 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         var maximumDialogueMemorySessions = narrativeAccess
             ? policy.MaximumDialogueMemorySessions
             : policy.OrdinaryDialogueMaximumMemorySessions;
-        EntityUid speakerEntity = EntityUid.Invalid;
+        var actorDisplayName = NormalizeDialogueText(actor.Snapshot.Identity.FullName, 128);
+        var speakerEntity = dialogueTrigger?.SpeakerEntity ?? EntityUid.Invalid;
+        var addressScope = dialogueTrigger?.AddressScope ?? "direct";
+        var audienceSize = dialogueTrigger?.AudienceSize ?? 1;
         var speakerHandle = string.Empty;
-        if (conversation is { } liveConversation &&
-            _neuralConversations.TryGetSpeaker(liveConversation, actorId, out speakerEntity) &&
+        if (conversation is { } liveConversation && !speakerEntity.IsValid())
+            _neuralConversations.TryGetDialogueContext(liveConversation, actorId, out speakerEntity,
+                out addressScope, out audienceSize);
+        if (speakerEntity.IsValid() && Exists(speakerEntity) &&
             _runtime.TryGetEntity(actorId, out var actorEntity))
         {
             // A spoken turn receives a fresh bounded scan rather than waiting for the background BDI cadence.
@@ -163,12 +178,24 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                 policy.RequestLifetime);
         }
 
-        var perceivedByHandle = new Dictionary<string, NCNeuralPerceivedSubject>(StringComparer.Ordinal);
+        var perceivedByHandle = new Dictionary<string, NCNeuralPerceivedSubject>(StringComparer.Ordinal)
+        {
+            // "self" is an explicit subjective handle, so assault.targetHandle=self cannot be mistaken for a rumor
+            // about an unknown third party.
+            ["self"] = new NCNeuralPerceivedSubject(
+                "self",
+                actorDisplayName,
+                "self",
+                1f,
+                now.Advance(policy.RequestLifetime).Ticks),
+        };
         var participantAliases = new Dictionary<NCPartyRef, string>();
         var perceivedEvents = Array.Empty<NCNeuralPerceivedEvent>();
         if (_perception.TryGetSnapshot(actorId, now, out var localSubjects, out var localEvents))
         {
-            foreach (var subject in localSubjects.Take(maximumPerceivedSubjects))
+            foreach (var subject in localSubjects
+                         .OrderByDescending(value => value.EntityUid == speakerEntity)
+                         .Take(Math.Max(0, maximumPerceivedSubjects - 1)))
             {
                 perceivedByHandle[subject.SubjectHandle] = new NCNeuralPerceivedSubject(
                     subject.SubjectHandle,
@@ -230,18 +257,21 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             autonomyPolicy.MinimumIntentConfidence,
             autonomyPolicy.MaximumIntentPriority,
             autonomyPolicy.TargetedIntentsAllowed);
-        NCConversationSessionSnapshot? conversationSnapshot = null;
-        if (conversation is { } sessionId && !_conversations.TryGet(sessionId, out conversationSnapshot!))
+        NCConversationSessionSnapshot? conversationSnapshot = dialogueTrigger?.Session;
+        if (conversationSnapshot == null && conversation is { } sessionId &&
+            !_conversations.TryGet(sessionId, out conversationSnapshot!))
             return false;
         NCNeuralDialogueInput? dialogueInput = null;
         if (kind == NCNeuralRequestKind.DialogueContinuation)
         {
             var utterance = NormalizeDialogueText(transientUtterance, maximumDialogueInputLength);
-            var actorName = NormalizeDialogueText(actor.Snapshot.Identity.FullName, 128);
-            if (utterance.Length == 0 || actorName.Length == 0)
+            if (utterance.Length == 0 || actorDisplayName.Length == 0)
                 return false;
-            var history = conversation is { } transcriptSession
-                ? _conversations.GetTranscript(transcriptSession, maximumDialogueHistoryTurns + 1).SkipLast(1)
+            var transcript = dialogueTrigger?.Transcript ?? (conversation is { } transcriptSession
+                ? _conversations.GetTranscript(transcriptSession, maximumDialogueHistoryTurns + 1)
+                : []);
+            var history = transcript.Count > 0
+                ? transcript.TakeLast(maximumDialogueHistoryTurns + 1).SkipLast(1)
                     .Select(value => new NCNeuralDialogueTurn(
                         value.Speaker == NCPartyRef.ForActor(actorId) ? "self" : "interlocutor",
                         value.Act.ToString().ToLowerInvariant(),
@@ -257,12 +287,16 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                 .Distinct(StringComparer.Ordinal)
                 .Take(maximumDialogueSummaryKeys)
                 .ToArray();
-            var archivedMemories = conversationSnapshot == null
+            var memoryParticipants = conversationSnapshot != null && addressScope == "group" &&
+                                     conversationSnapshot.Turns.Count > 0
+                ? new[] { owner, conversationSnapshot.Turns[^1].Speaker }
+                : conversationSnapshot?.Participants;
+            var archivedMemories = memoryParticipants == null
                 ? Array.Empty<NCConversationMemoryContext>()
                 : await _conversationArchive.GetRelevantAsync(
                     actorId,
-                    conversationSnapshot.Participants,
-                    conversationSnapshot.CurrentTopicKeys,
+                    memoryParticipants,
+                    conversationSnapshot!.CurrentTopicKeys,
                     maximumDialogueMemorySessions);
             var persistentMemories = archivedMemories
                 .Select(value => new NCNeuralConversationMemory(
@@ -280,10 +314,10 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
                     summaryKeys,
                     persistentMemories)
                 : null;
-            dialogueInput = new NCNeuralDialogueInput(actorName, utterance, speakerHandle, history, earlierSummary);
+            dialogueInput = new NCNeuralDialogueInput(actorDisplayName, utterance, speakerHandle, history,
+                earlierSummary, addressScope, audienceSize);
         }
-        var effectiveCapabilities = allowedCapabilities
-            .Where(value => value != ApproachPersonCapability || speakerHandle.Length > 0)
+        var effectiveCapabilities = requestedCapabilities
             .Distinct()
             .Take(policy.MaximumCapabilities)
             .ToArray();
@@ -320,7 +354,10 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         if (trackedDialogue && !_suggestions.TryTrackDialogue(
                 request.RequestId,
                 conversationSnapshot!.SessionId,
-                conversationSnapshot.ConversationVersion))
+                conversationSnapshot.ConversationVersion,
+                conversationSnapshot.Turns[^1].Sequence,
+                conversationSnapshot.Turns[^1].Speaker,
+                addressScope == "group"))
             return false;
         if (_client.Submit(request))
         {
@@ -345,30 +382,37 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         if (session.Turns.Count == 0)
             return;
         var speaker = session.Turns[^1].Speaker;
-        if (speaker.TryGetActor(out _) &&
+        if (speaker.TryGetActor(out _) && session.Participants.Count == 2 &&
             !_neuralConversations.CanContinueNpcConversation(session.SessionId, session.Turns.Count))
             return;
-        var actor = session.Participants.FirstOrDefault(value => value.TryGetActor(out _) && value != speaker);
-        if (!actor.TryGetActor(out var actorId))
+        var listeners = new List<NCActorId>();
+        _neuralConversations.GetDialogueListeners(session.SessionId, speaker, listeners);
+        if (listeners.Count == 0)
             return;
-
-        // Dialogue may propose only the generic social approach capability. The proposal still passes through
-        // perception validation, BDI selection and ordinary NPC steering before any movement occurs.
-        _ = ContinueDialogueAsync(actorId, session.SessionId, args.TransientUtterance ?? string.Empty);
+        var transcript = _conversations.GetTranscript(session.SessionId, session.Turns.Count);
+        foreach (var actorId in listeners.Distinct())
+        {
+            if (!_neuralConversations.TryGetDialogueContext(session.SessionId, actorId, out var speakerEntity,
+                    out var addressScope, out var audienceSize))
+                continue;
+            var trigger = new DialogueTrigger(session, transcript, args.TransientUtterance ?? string.Empty,
+                speakerEntity, addressScope, audienceSize);
+            _ = ContinueDialogueAsync(actorId, trigger);
+        }
     }
 
-    private async Task ContinueDialogueAsync(
-        NCActorId actorId,
-        NCConversationSessionId sessionId,
-        string transientUtterance)
+    private async Task ContinueDialogueAsync(NCActorId actorId, DialogueTrigger trigger)
     {
-        await SubmitAsync(actorId, NCNeuralRequestKind.DialogueContinuation, NCNeuralPriority.P1,
-            [DialogueCapability, ApproachPersonCapability, RespondToThreatCapability], sessionId,
-            transientUtterance);
+        await SubmitCoreAsync(actorId, NCNeuralRequestKind.DialogueContinuation, NCNeuralPriority.P1,
+            [DialogueCapability], trigger.Session.SessionId, trigger.Utterance, trigger);
     }
 
     private NCNeuralKnownLocation[] BuildKnownLocations(NCCityActorRecord actor, int maximum)
     {
+        // Ordinary SS14 maps have no CityGraph geography; do not inject unrelated authored city districts.
+        if (!actor.Snapshot.Location.CurrentZone.IsValid)
+            return [];
+
         _locationKnowledge.Seed(actor);
         var knownZones = new HashSet<NCZoneId>();
         _locationKnowledge.GetKnown(actor.Snapshot.Identity.ActorId, knownZones);
@@ -406,12 +450,20 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
             return;
 
         _nextIncidentEscalation[binding.ActorId] = now.Advance(policy.IncidentEscalationCooldown);
-        _ = SubmitIncidentEscalationAsync(binding.ActorId, args.Kind);
+        _ = SubmitIncidentEscalationAsync(
+            binding.ActorId,
+            args.Kind,
+            args.Kind == NCCityLocalPerceivedEventKind.Assault && args.Observer == args.Target);
     }
 
-    private async Task SubmitIncidentEscalationAsync(NCActorId actorId, NCCityLocalPerceivedEventKind kind)
+    private async Task SubmitIncidentEscalationAsync(
+        NCActorId actorId,
+        NCCityLocalPerceivedEventKind kind,
+        bool directlyAttacked)
     {
-        var priority = kind is NCCityLocalPerceivedEventKind.Killing or
+        var priority = directlyAttacked
+            ? NCNeuralPriority.P0
+            : kind is NCCityLocalPerceivedEventKind.Killing or
             NCCityLocalPerceivedEventKind.Assault or
             NCCityLocalPerceivedEventKind.Fire
             ? NCNeuralPriority.P1
@@ -556,4 +608,12 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         char.IsAsciiLetterOrDigit(character) || character is '-' or '_' or '.' or ':');
 
     private static string StableOrUnknown(string? value) => value != null && StableKey(value) ? value : "unknown";
+
+    private sealed record DialogueTrigger(
+        NCConversationSessionSnapshot Session,
+        IReadOnlyList<NCConversationTranscriptTurn> Transcript,
+        string Utterance,
+        EntityUid SpeakerEntity,
+        string AddressScope,
+        int AudienceSize);
 }

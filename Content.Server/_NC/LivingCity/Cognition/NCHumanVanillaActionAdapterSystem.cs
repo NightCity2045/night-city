@@ -13,13 +13,15 @@ using Content.Server.NPC.Components;
 using Content.Server.NPC.HTN;
 using Content.Server.NPC.Systems;
 using Content.Shared.Chat;
-using Content.Shared.CombatMode;
 using Content.Shared.Hands.Components;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
 using Content.Shared.Inventory;
 using Content.Shared.Movement.Pulling.Components;
 using Content.Shared.Movement.Pulling.Systems;
+using Content.Shared.Mobs;
+using Content.Shared.Mobs.Components;
+using Content.Shared.NPC.Systems;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.Coordinates.Systems;
@@ -51,6 +53,7 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private NPCSteeringSystem _steering = default!;
     [Dependency] private HTNSystem _htn = default!;
+    [Dependency] private NpcFactionSystem _factions = default!;
     [Dependency] private SharedInteractionSystem _interaction = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private InventorySystem _inventory = default!;
@@ -293,21 +296,24 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
         NCHumanVanillaActionComponent state,
         NCHumanActionExecutionEvent args)
     {
-        if (!TryComp<NCCityLocalPerceptionComponent>(actor, out var perception))
+        var target = state.Target.IsValid() && Exists(state.Target)
+            ? state.Target
+            : EntityUid.Invalid;
+        if ((!target.IsValid() && !TryResolveVisibleTarget(args, out target)) || target == actor ||
+            !TryComp<MobStateComponent>(target, out var targetMob))
         {
-            Fail(actor, args, "vanilla-combat-perception-unavailable");
+            Fail(actor, args, "vanilla-combat-target-unavailable");
             return;
         }
-
-        var combatRunning = perception.HostileCount > 0 ||
-                            HasComp<NPCMeleeCombatComponent>(actor) ||
-                            HasComp<NPCRangedCombatComponent>(actor) ||
-                            TryComp<CombatModeComponent>(actor, out var combatMode) && combatMode.IsInCombatMode;
-        if (!combatRunning)
+        state.Target = target;
+        if (targetMob.CurrentState != MobState.Alive)
         {
+            _factions.DeAggroEntity(actor, target);
             Complete(actor, args);
             return;
         }
+        // GPT chooses fight rather than flight; vanilla faction targeting and HTN remain combat authority.
+        _factions.AggroEntity(actor, target);
 
         if (state.Interrupt == NCCityPhysicalInterruptFlags.None)
         {
@@ -783,6 +789,8 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
                 _htn.SetHTNEnabled((actor, htn), true, htn.PlanCooldown);
                 state.SuspendedHtn = false;
             }
+            if (state.Operation == NCHumanActionOperationKind.CombatAuthority && state.Target.IsValid())
+                _factions.DeAggroEntity(actor, state.Target);
             if (remove && HasComp<NCHumanVanillaActionComponent>(actor))
                 RemComp<NCHumanVanillaActionComponent>(actor);
         }

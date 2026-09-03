@@ -674,7 +674,8 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             request.Kind != NCNeuralRequestKind.DialogueContinuation &&
             response.Confidence < (request.Autonomy?.MinimumIntentConfidence ?? int.MaxValue) ||
             request.Kind == NCNeuralRequestKind.DialogueContinuation &&
-            string.IsNullOrWhiteSpace(response.RenderedText) ||
+            (response.ShouldSpeak && string.IsNullOrWhiteSpace(response.RenderedText) ||
+             request.DialogueInput?.AddressScope == "direct" && !response.ShouldSpeak) ||
             !ValidDisclosureResponse(request, response))
             return new(NCNeuralResultStatus.Invalid, request, null, "schema-or-capability",
                 NCNeuralFailureKind.Schema);
@@ -690,7 +691,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         _fallbacks++;
         return new(status, request, new NCNeuralResponseEnvelope(request.RequestId, NCNeuralContract.SchemaVersion,
             request.ContextVersion,
-            [], "safe-default", string.Empty, "safe-default", 0, 0, 0, 0, string.Empty,
+            [], "safe-default", string.Empty, false, "safe-default", 0, 0, 0, 0, string.Empty,
             _policy?.ProviderModel ?? string.Empty), reason, failure);
     }
 
@@ -821,13 +822,18 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             return false;
         }
 
-        if (_actorOutstandingRequests.GetValueOrDefault(request.ActorId) >= MaximumOutstandingRequests(request.AccessTier))
+        // A direct physical emergency may occupy one extra actor slot so an ordinary dialogue request cannot make
+        // the victim miss the fact that they were just attacked.
+        var maximumOutstanding = MaximumOutstandingRequests(request.AccessTier) +
+                                 (request.Priority == NCNeuralPriority.P0 ? 1 : 0);
+        if (_actorOutstandingRequests.GetValueOrDefault(request.ActorId) >= maximumOutstanding)
         {
             deniedStatus = NCNeuralResultStatus.Fallback;
             reason = "actor-concurrency-limit";
             return false;
         }
-        if (_nextRequestAt.TryGetValue((request.ActorId, request.Kind), out var nextRequestAt) && nextRequestAt > now)
+        if (request.Priority != NCNeuralPriority.P0 &&
+            _nextRequestAt.TryGetValue((request.ActorId, request.Kind), out var nextRequestAt) && nextRequestAt > now)
         {
             deniedStatus = NCNeuralResultStatus.Fallback;
             reason = "actor-request-cooldown";
@@ -1210,8 +1216,9 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             return false;
         if (command.TargetHandle.Length == 0)
             return true;
-        return autonomy.TargetedIntentsAllowed && Stable(command.TargetHandle) && (request.PerceivedSubjects ?? [])
-            .Any(value => value.Handle == command.TargetHandle);
+        return autonomy.TargetedIntentsAllowed && Stable(command.TargetHandle) &&
+            ((request.PerceivedSubjects ?? []).Any(value => value.Handle == command.TargetHandle) ||
+             (request.KnownLocations ?? []).Any(value => value.Handle == command.TargetHandle));
     }
     private static bool ValidDialogue(NCNeuralRequestEnvelope value, NCNeuralPolicyPrototype policy)
     {
@@ -1219,6 +1226,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             return value.DialogueInput == null;
         return value.DialogueInput is { } dialogue &&
                dialogue.ActorDisplayName.Length is > 0 and <= 128 &&
+               dialogue.AddressScope is "direct" or "group" && dialogue.AudienceSize is > 0 and <= 256 &&
                dialogue.Utterance.Length is > 0 && dialogue.Utterance.Length <= policy.MaximumDialogueInputLength &&
                dialogue.History.Count <= policy.MaximumDialogueHistoryTurns &&
                dialogue.History.All(turn =>

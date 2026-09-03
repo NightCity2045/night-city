@@ -444,7 +444,7 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
         value.MaximumActiveSessions is > 0 and <= AbsoluteMaximumSessions &&
         value.MaximumRecentSessions is > 0 and <= AbsoluteMaximumSessions &&
         value.MaximumSessionsPerParticipant is > 0 and <= 32 &&
-        value.MaximumParticipants is >= 2 and <= 64 && value.MaximumTopics is > 0 and <= 64 &&
+        value.MaximumParticipants is >= 2 and <= 256 && value.MaximumTopics is > 0 and <= 64 &&
         value.MaximumRelevantFacts is > 0 and <= 128 && value.MaximumTurns is > 0 and <= 256 &&
         value.MaximumUtteranceLength is > 0 and <= 4096 &&
         value.MaximumArchivedSummaryTurns is > 0 &&
@@ -454,7 +454,7 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
         value.VerbalThreatMarkers.Count is > 0 and <= 128 &&
         value.VerbalThreatMarkers.All(marker => marker.Length is > 1 and <= 64 &&
             marker.All(character => !char.IsControl(character))) &&
-        value.VerbalThreatLifetime > TimeSpan.Zero &&
+        value.VerbalThreatLifetime > TimeSpan.Zero && value.PointedAddressLifetime > TimeSpan.Zero &&
         value.IdleTimeout > TimeSpan.Zero && value.MaximumLifetime >= value.IdleTimeout &&
         value.ExpirySweepInterval > TimeSpan.Zero;
 

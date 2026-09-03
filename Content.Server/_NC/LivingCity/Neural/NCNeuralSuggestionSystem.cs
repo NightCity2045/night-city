@@ -65,12 +65,21 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
     public bool TryTrackDialogue(
         Guid requestId,
         NCConversationSessionId sessionId,
-        int conversationVersion)
+        int conversationVersion,
+        long triggerTurnSequence,
+        NCPartyRef triggerSpeaker,
+        bool parallelReplies)
     {
         if (!_active || _policy == null || requestId == Guid.Empty || !sessionId.IsValid || conversationVersion < 1 ||
+            triggerTurnSequence < 1 || !triggerSpeaker.IsValid ||
             _dialogues.Count >= _policy.MaximumPendingCorrelations)
             return false;
-        return _dialogues.TryAdd(requestId, new DialogueCorrelation(sessionId, conversationVersion));
+        return _dialogues.TryAdd(requestId, new DialogueCorrelation(
+            sessionId,
+            conversationVersion,
+            triggerTurnSequence,
+            triggerSpeaker,
+            parallelReplies));
     }
 
     public void ForgetDialogue(Guid requestId) => _dialogues.Remove(requestId);
@@ -116,17 +125,21 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
             commands.Count is >= 1 and <= 8 && commands.All(command =>
                 result.Request.AllowedCapabilityIds.Contains(command.CapabilityId) &&
                 (command.TargetHandle.Length == 0 ||
-                 _perception.TryResolveSubjectHandle(result.Request.ActorId, command.TargetHandle, now, out _))) &&
+                 _perception.TryResolveSubjectHandle(result.Request.ActorId, command.TargetHandle, now, out _) ||
+                 (result.Request.KnownLocations ?? [])
+                     .Any(location => location.Handle == command.TargetHandle))) &&
             epoch == result.Request.SessionEpoch && result.Request.ExpiresAt > now;
 
         if (result.Request.Kind == NCNeuralRequestKind.DialogueContinuation && dialogue != null)
         {
-            if (accepted && policy != null && result.Response is { } dialogueResponse)
+            if (accepted && policy != null && result.Response is { } dialogueResponse &&
+                TryGetCurrentDialogue(dialogue, out var currentSession))
             {
                 if (dialogueResponse.Commands.Any(command => command.CapabilityId != "social.dialogue.reply"))
                     ApplySuggestion(result.Request, dialogueResponse, policy, now);
                 // Dialogue may propose physical commands, but the typed executor remains their authority.
-                TryDeliverDialogue(result.Request.ActorId, result.Request.RequestId, dialogue, dialogueResponse);
+                TryDeliverDialogue(result.Request.ActorId, result.Request.RequestId, currentSession,
+                    dialogueResponse);
             }
             return;
         }
@@ -135,7 +148,19 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
             return;
 
         ApplySuggestion(result.Request, response, policy, now);
+        if (result.Request.Kind == NCNeuralRequestKind.StrategicDecision && response.ShouldSpeak)
+            TryDeliverAutonomousSpeech(result.Request.ActorId, response);
 
+    }
+
+    private bool TryDeliverAutonomousSpeech(NCActorId actorId, NCNeuralResponseEnvelope response)
+    {
+        if (string.IsNullOrWhiteSpace(response.RenderedText) ||
+            !_runtime.TryGetEntity(actorId, out var entityUid) || !Exists(entityUid))
+            return false;
+        _chat.TrySendInGameICMessage(entityUid, response.RenderedText.Trim(), InGameICChatType.Speak,
+            hideChat: false, checkRadioPrefix: false);
+        return true;
     }
 
     private bool ApplySuggestion(
@@ -144,12 +169,16 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         NCNeuralPolicyPrototype policy,
         NCActiveWorldTime now)
     {
-        if (response.Commands.Count == 0 ||
+        // Rendered dialogue is delivered by ChatSystem. Only typed physical capabilities belong in the action router.
+        var physicalCommands = response.Commands
+            .Where(command => command.CapabilityId != "social.dialogue.reply")
+            .ToArray();
+        if (physicalCommands.Length == 0 ||
             _suggestions.Count >= policy.MaximumAppliedSuggestions && !_suggestions.ContainsKey(request.ActorId))
         {
             return false;
         }
-        var primary = response.Commands[0];
+        var primary = physicalCommands[0];
         var expiresAt = now.Advance(policy.SuggestionLifetime);
         var suggestion = new AppliedSuggestion(
             request.RequestId,
@@ -162,21 +191,23 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
             expiresAt);
         _suggestions[request.ActorId] = suggestion;
         _expiries.Enqueue(new SuggestionExpiry(request.ActorId, suggestion.RequestId), expiresAt.Ticks);
-        return _execution.TryAccept(request, response, now, out _);
+        return _execution.TryAccept(request, response with { Commands = physicalCommands }, now, out _);
     }
 
     private bool TryDeliverDialogue(
         NCActorId actorId,
         Guid requestId,
-        DialogueCorrelation dialogue,
+        NCConversationSessionSnapshot session,
         NCNeuralResponseEnvelope response)
     {
-        if (string.IsNullOrWhiteSpace(response.RenderedText) || !TryMapSpeechAct(response.SpeechActKey, out var act) ||
-            !_conversations.TryGet(dialogue.SessionId, out var session) ||
-            session.ConversationVersion != dialogue.ConversationVersion ||
-            session.Channel != NCConversationChannel.InPerson ||
+        if (session.Channel != NCConversationChannel.InPerson ||
             !session.Participants.Contains(NCPartyRef.ForActor(actorId)) ||
             !_runtime.TryGetEntity(actorId, out var entityUid) || !Exists(entityUid))
+            return false;
+        if (!response.ShouldSpeak)
+            return true;
+        if (string.IsNullOrWhiteSpace(response.RenderedText) ||
+            !TryMapSpeechAct(response.SpeechActKey, out var act))
             return false;
 
         var recorded = _conversations.TryRecordTurn(new NCConversationTurnRequest(
@@ -198,6 +229,21 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
             hideChat: false,
             checkRadioPrefix: false);
         return true;
+    }
+
+    private bool TryGetCurrentDialogue(DialogueCorrelation dialogue, out NCConversationSessionSnapshot session)
+    {
+        if (!_conversations.TryGet(dialogue.SessionId, out session!) ||
+            session.ConversationVersion < dialogue.ConversationVersion)
+            return false;
+        if (!dialogue.ParallelReplies)
+            return session.ConversationVersion == dialogue.ConversationVersion;
+        var trigger = session.Turns.FirstOrDefault(turn => turn.Sequence == dialogue.TriggerTurnSequence);
+        if (trigger == null || trigger.Speaker != dialogue.TriggerSpeaker)
+            return false;
+        // Multiple NPCs may answer one crowd address, but a newer player/NPC-originating group turn supersedes it.
+        return session.Turns.All(turn => turn.Sequence <= dialogue.TriggerTurnSequence ||
+            turn.Speaker.TryGetActor(out _));
     }
 
     private static bool TryMapSpeechAct(string value, out NCSpeechActKind act)
@@ -240,7 +286,10 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
     private readonly record struct SuggestionExpiry(NCActorId ActorId, Guid RequestId);
     private sealed record DialogueCorrelation(
         NCConversationSessionId SessionId,
-        int ConversationVersion);
+        int ConversationVersion,
+        long TriggerTurnSequence,
+        NCPartyRef TriggerSpeaker,
+        bool ParallelReplies);
 }
 
 public sealed record NCNeuralSuggestionSnapshot(

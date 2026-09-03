@@ -37,7 +37,7 @@ public enum NCNeuralFailureKind : byte
 
 public static class NCNeuralContract
 {
-    public const int SchemaVersion = 5;
+    public const int SchemaVersion = 7;
 }
 
 /// <summary>
@@ -150,7 +150,9 @@ public sealed record NCNeuralDialogueInput(
     string Utterance,
     string SpeakerHandle,
     IReadOnlyList<NCNeuralDialogueTurn> History,
-    NCNeuralDialogueSummary? EarlierSummary = null);
+    NCNeuralDialogueSummary? EarlierSummary = null,
+    string AddressScope = "direct",
+    int AudienceSize = 1);
 public sealed record NCNeuralRequestEnvelope(Guid RequestId, NCNeuralRequestKind Kind, NCNeuralPriority Priority,
     NCActorId ActorId, NCSessionEpoch SessionEpoch, long ContextVersion, NCActiveWorldTime ExpiresAt,
     ProtoId<NCNeuralPromptProfilePrototype> PromptProfile, IReadOnlyList<NCNeuralFact> Facts,
@@ -171,7 +173,8 @@ public sealed record NCNeuralRequestEnvelope(Guid RequestId, NCNeuralRequestKind
     public NCNeuralAccessTier AccessTier { get; init; } = NCNeuralAccessTier.OrdinaryResident;
 }
 public sealed record NCNeuralResponseEnvelope(Guid RequestId, int SchemaVersion, long ContextVersion,
-    IReadOnlyList<NCNeuralCommandProposal> Commands, string SpeechActKey, string RenderedText, string SummaryKey,
+    IReadOnlyList<NCNeuralCommandProposal> Commands, string SpeechActKey, string RenderedText, bool ShouldSpeak,
+    string SummaryKey,
     int Confidence,
     int InputTokens, int CachedInputTokens, int OutputTokens, string ProviderRequestId, string ProviderModel,
     IReadOnlyList<string>? DisclosedFactHandles = null,

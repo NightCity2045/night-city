@@ -234,6 +234,7 @@ nc-living-city-admin-field-persistence-status = Сохранение
 nc-living-city-admin-field-spawn-status = Физический спавн
 nc-living-city-admin-error-administrator-has-no-attached-entity = Сначала войдите в игру, затем создавайте NPC.
 nc-living-city-admin-error-administrator-has-no-stable-world-position = У вашей сущности нет устойчивой позиции в городе.
+nc-living-city-admin-error-administrator-has-no-world-position = Ваша сущность не находится на активной игровой карте.
 nc-living-city-admin-error-administrator-is-outside-authored-city-geography = Встаньте внутри размеченной городской зоны перед созданием NPC.
 nc-living-city-admin-error-random-resident-generation-profile-is-invalid = Профиль генерации случайного жителя настроен неверно.
 nc-living-city-admin-groups-help = Состав, руководство и физическое присутствие постоянных групп.

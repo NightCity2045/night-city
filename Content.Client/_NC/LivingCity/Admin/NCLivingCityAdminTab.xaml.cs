@@ -14,6 +14,7 @@ namespace Content.Client._NC.LivingCity.Admin;
 public sealed partial class NCLivingCityAdminTab : Control
 {
     [Dependency] private IEntitySystemManager _systems = default!;
+    [Dependency] private ILocalizationManager _loc = default!;
 
     private readonly NCLivingCityAdminClientSystem _admin;
     private Guid _pendingRequest;
@@ -57,7 +58,18 @@ public sealed partial class NCLivingCityAdminTab : Control
         CreateRandomResident.Disabled = false;
         Status.Text = result.Status == NCLivingCityAdminMutationStatus.Applied
             ? Loc.GetString("nc-living-city-admin-action-complete")
-            : result.Error ?? result.Status.ToString();
+            : LocalizeError(result.Error, result.Status);
         Result.Text = string.Join('\n', result.Fields.Select(field => $"{field.Key}: {field.Value}"));
+    }
+
+    private string LocalizeError(string? error, NCLivingCityAdminMutationStatus status)
+    {
+        if (!string.IsNullOrWhiteSpace(error) &&
+            _loc.TryGetString($"nc-living-city-admin-error-{error}", out var localized))
+        {
+            return localized;
+        }
+
+        return error ?? status.ToString();
     }
 }

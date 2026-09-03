@@ -234,6 +234,7 @@ nc-living-city-admin-field-persistence-status = Persistence
 nc-living-city-admin-field-spawn-status = Physical spawn
 nc-living-city-admin-error-administrator-has-no-attached-entity = Enter the game before creating an NPC.
 nc-living-city-admin-error-administrator-has-no-stable-world-position = Your entity has no stable city position.
+nc-living-city-admin-error-administrator-has-no-world-position = Your entity is not positioned on an active game map.
 nc-living-city-admin-error-administrator-is-outside-authored-city-geography = Stand inside an authored city zone before creating an NPC.
 nc-living-city-admin-error-random-resident-generation-profile-is-invalid = The random resident generation profile is invalid.
 nc-living-city-admin-groups-help = Membership, leadership, and physical presence of persistent groups.

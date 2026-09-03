@@ -3,12 +3,14 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Server._NC.City.Zones;
+using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Neural;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared.Preferences;
+using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Serialization.Manager;
@@ -26,7 +28,7 @@ public sealed record NCRandomResidentCreationResult(
 
 /// <summary>
 /// Server-authoritative one-click resident factory. It creates persistent identity first, then queues that same Actor
-/// for physical spawning near the administrator on the current Z-level.
+/// for physical spawning near the administrator on the current map.
 /// </summary>
 public sealed partial class NCRandomResidentFactorySystem : EntitySystem
 {
@@ -36,6 +38,7 @@ public sealed partial class NCRandomResidentFactorySystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private ISerializationManager _serialization = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
     [Dependency] private NCZoneSystem _zones = default!;
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
@@ -43,12 +46,33 @@ public sealed partial class NCRandomResidentFactorySystem : EntitySystem
 
     public async Task<NCRandomResidentCreationResult> CreateAtAsync(EntityUid source, string auditSource)
     {
-        if (!Exists(source) || !_coordinates.TryGetCoordinates(source, out var target))
-            return Rejected("administrator-has-no-stable-world-position");
+        if (!Exists(source))
+            return Rejected("administrator-has-no-attached-entity");
+        var target = _transform.GetMapCoordinates(source);
+        if (target.MapId == MapId.Nullspace || !float.IsFinite(target.Position.X) ||
+            !float.IsFinite(target.Position.Y))
+        {
+            return Rejected("administrator-has-no-world-position");
+        }
 
-        var location = _zones.GetLocationContext(target).MostSpecific;
-        if (location is not { IsValid: true } currentZone)
-            return Rejected("administrator-is-outside-authored-city-geography");
+        // City geography enriches persistence when present. Ordinary SS14 maps intentionally remain valid:
+        // their runtime MapId is used only for this spawn and is never written to durable actor state.
+        var currentZone = default(NCZoneId);
+        NCCityActorPhysicalRecoveryState? recovery = null;
+        if (_coordinates.TryConvert(target, out var stable))
+        {
+            var location = _zones.GetLocationContext(stable).MostSpecific;
+            if (location.IsValid)
+            {
+                currentZone = location;
+                recovery = new NCCityActorPhysicalRecoveryState(
+                    stable.NetworkId,
+                    stable.Position.X,
+                    stable.Position.Y,
+                    stable.Z,
+                    currentZone);
+            }
+        }
 
         if (!_prototypes.TryIndex(DefaultProfile, out NCRandomResidentGenerationProfilePrototype? generation) ||
             generation == null || generation.Personas.Length == 0 ||
@@ -63,12 +87,6 @@ public sealed partial class NCRandomResidentFactorySystem : EntitySystem
         var payload = NCHumanoidProfilePayload.Serialize(_serialization, humanoid);
         var actorId = NCActorId.New();
         var commandId = Guid.NewGuid();
-        var recovery = new NCCityActorPhysicalRecoveryState(
-            target.NetworkId,
-            target.Position.X,
-            target.Position.Y,
-            target.Z,
-            currentZone);
         var persisted = await _actors.CreateResidentAsync(new NCCityResidentCreateRequest(
             commandId,
             actorId,
@@ -92,7 +110,7 @@ public sealed partial class NCRandomResidentFactorySystem : EntitySystem
                 persisted.Error ?? "persistent-resident-create-failed");
         }
 
-        var spawn = _physicalActors.RequestAdmin(
+        var spawn = await _physicalActors.RequestAdminAsync(
             Guid.NewGuid(),
             actorId,
             target,

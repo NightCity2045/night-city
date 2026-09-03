@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
+using Robust.Shared.Map;
 
 namespace Content.Server._NC.LivingCity.Actors;
 
@@ -31,7 +31,7 @@ public sealed record NCPhysicalActorSpawnRequest(
     NCActorId ActorId,
     NCPhysicalActorSpawnReason Reason,
     string Source,
-    NCMapCoordinates? PreferredTarget = null,
+    MapCoordinates? PreferredTarget = null,
     float? PreferredRadius = null);
 
 public sealed record NCPhysicalActorSpawnState(

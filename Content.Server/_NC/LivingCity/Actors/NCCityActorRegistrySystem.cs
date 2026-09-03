@@ -8,9 +8,11 @@ using System.Threading;
 using Content.Server.Database;
 using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors.Domains;
+using Content.Server._NC.LivingCity.Economy;
 using Content.Server._NC.LivingCity.Social;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.City.Connectivity;
+using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Neural;
 using Content.Shared._NC.Persistence.Identity;
@@ -306,7 +308,11 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
                     CurrentZone = request.CurrentZone,
                     LastKnownLocationAt = now,
                 },
-                PhysicalRecovery = request.PhysicalRecovery ?? current.Snapshot.PhysicalRecovery,
+                // Runtime map coordinates are deliberately not durable. An unzoned checkpoint also clears any stale
+                // city recovery point so the next round uses a normal SS14 spawn point.
+                PhysicalRecovery = request.CurrentZone.IsValid
+                    ? request.PhysicalRecovery ?? current.Snapshot.PhysicalRecovery
+                    : null,
                 LastAppliedEventId = eventId,
             };
             if (!TryNormalizeSnapshot(next, request.ActorId, out next))
@@ -381,6 +387,11 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
         };
         writes.AddRange(_domains.BuildInitialWrites(request.ActorId, now, request.AuditSource));
         writes.Add(_socialProfiles.BuildInitialWrite(request.ActorId, archetype, now, request.AuditSource));
+        // The empty stock node is the durable authority for the physical inventory even for a plain resident.
+        writes.Add(NCEconomicAssetRegistrySystem.BuildInitialActorStockNodeWrite(
+            request.ActorId,
+            now,
+            request.AuditSource));
 
         var receipt = new NCCityActorReceipt(snapshot, 1, epoch, now);
         var result = await _database.ApplyNCPersistentBatchMutationAsync(new NCPersistentBatchMutationRequest(
@@ -512,8 +523,7 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
             string.IsNullOrWhiteSpace(request.AuditSource) || request.AuditSource.Length > MaximumAuditSourceLength ||
             string.IsNullOrWhiteSpace(request.HumanoidProfilePayload) ||
             request.HumanoidProfilePayload.Length > MaximumHumanoidProfilePayloadLength ||
-            !_zones.TryGetZone(request.CurrentZone, out _) ||
-            !ValidRecovery(request.PhysicalRecovery, request.CurrentZone) ||
+            !ValidCreateLocation(request.CurrentZone, request.PhysicalRecovery) ||
             !_prototypes.HasIndex(request.Persona) ||
             !_prototypes.TryIndex(request.Archetype, out NCCityActorArchetypePrototype? loaded) || loaded == null)
         {
@@ -551,8 +561,8 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
                 request.CorrelationId, request.AuditSource, out error) ||
             request.Domains.ActorId != request.ActorId || request.Domains.ExpectedHealthVersion < 1 ||
             request.Domains.ExpectedInventoryVersion < 1 || request.Domains.Health.ActorId != request.ActorId ||
-            request.Domains.Inventory.ActorId != request.ActorId || !_zones.TryGetZone(request.CurrentZone, out _) ||
-            request.PhysicalRecovery is { } recovery && !ValidRecovery(recovery, request.CurrentZone) ||
+            request.Domains.Inventory.ActorId != request.ActorId ||
+            !ValidCheckpointLocation(request.CurrentZone, request.PhysicalRecovery) ||
             !ValidParticipantWrites(request.ParticipantWrites))
         {
             error ??= "Physical checkpoint metadata or domain capture is invalid.";
@@ -591,12 +601,11 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
             snapshot.Identity.Aliases == null || snapshot.Identity.Aliases.Length > MaximumAliasCount ||
             snapshot.Identity.Aliases.Any(alias => string.IsNullOrWhiteSpace(alias) || alias.Length > MaximumNameLength) ||
             string.IsNullOrWhiteSpace(snapshot.Identity.ArchetypeId) || snapshot.Identity.DataVersion < 1 ||
-            snapshot.LastAppliedEventId == Guid.Empty || !snapshot.Location.CurrentZone.IsValid ||
+            snapshot.LastAppliedEventId == Guid.Empty || !ValidSnapshotLocation(snapshot) ||
             !snapshot.Location.LastKnownLocationAt.IsValid || !Enum.IsDefined(snapshot.Location.TravelPhase) ||
             !Enum.IsDefined(snapshot.Lifecycle.Status) ||
             snapshot.Location.ExpectedArrivalAt is { IsValid: false } ||
-            snapshot.Identity.HumanoidProfilePayload?.Length > MaximumHumanoidProfilePayloadLength ||
-            snapshot.PhysicalRecovery is { } recovery && !ValidRecovery(recovery, recovery.LocationContextId))
+            snapshot.Identity.HumanoidProfilePayload?.Length > MaximumHumanoidProfilePayloadLength)
         {
             return false;
         }
@@ -621,7 +630,30 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
         return true;
     }
 
-    private static bool ValidRecovery(NCCityActorPhysicalRecoveryState recovery, Content.Shared._NC.City.Zones.NCZoneId zone) =>
+    private bool ValidCreateLocation(NCZoneId zone, NCCityActorPhysicalRecoveryState? recovery) =>
+        zone.IsValid
+            ? _zones.TryGetZone(zone, out _) && recovery is { } cityRecovery && ValidRecovery(cityRecovery, zone)
+            : recovery == null;
+
+    private bool ValidCheckpointLocation(NCZoneId zone, NCCityActorPhysicalRecoveryState? recovery) =>
+        zone.IsValid
+            ? _zones.TryGetZone(zone, out _) &&
+              (recovery == null || ValidRecovery(recovery, zone))
+            : recovery == null;
+
+    private static bool ValidSnapshotLocation(NCCityActorSnapshot snapshot)
+    {
+        var zone = snapshot.Location.CurrentZone;
+        if (zone.IsValid)
+            return snapshot.PhysicalRecovery is not { } recovery || ValidRecovery(recovery, zone);
+
+        // A resident without CityGraph geography has no durable travel destination or physical map coordinates.
+        return snapshot.PhysicalRecovery == null && !snapshot.Location.DestinationZone.IsValid &&
+               snapshot.Location.TravelPhase == NCCityActorTravelPhase.Stationary &&
+               snapshot.Location.ExpectedArrivalAt == null;
+    }
+
+    private static bool ValidRecovery(NCCityActorPhysicalRecoveryState recovery, NCZoneId zone) =>
         recovery.NetworkId.IsValid && float.IsFinite(recovery.X) && float.IsFinite(recovery.Y) &&
         recovery.LocationContextId == zone;
 

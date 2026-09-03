@@ -28,10 +28,12 @@
   - type: NpcFactionMember
     factions: [Passive]
   - type: FactionException
-  - type: NPCRetaliation
-    attackMemoryLength: 30s
   - type: NCNeuralConversationTarget
     maximumUtteranceLength: 2048
+    initiateAmbientConversations: true
+    # The active world runs twelve times faster than wall time: roughly one attempt every 10-20 real minutes.
+    minimumAmbientConversationInterval: 2h
+    maximumAmbientConversationInterval: 4h
 
 - type: ncCityActorArchetype
   id: NCLivingCityResident

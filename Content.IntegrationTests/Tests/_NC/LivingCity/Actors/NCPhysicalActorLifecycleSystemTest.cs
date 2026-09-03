@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading.Tasks;
 using Content.IntegrationTests.Fixtures;
 using Content.Server.GameTicking;
@@ -186,6 +187,73 @@ public sealed class NCPhysicalActorLifecycleSystemTest : GameTest
             EventSource.Local,
             new GameRunLevelChangedEvent(GameRunLevel.InRound, GameRunLevel.PostRound)));
         await server.WaitPost(() => zLevels.DeleteMapNetwork(network));
+    }
+
+    [Test]
+    public async Task AdminSpawnWorksWithoutCityGraph()
+    {
+        var server = Pair.Server;
+        var maps = server.System<SharedMapSystem>();
+        var entities = server.ResolveDependency<IEntityManager>();
+        var clock = server.System<NCActiveWorldTimeSystem>();
+        var actors = server.System<NCCityActorRegistrySystem>();
+        var lifecycle = server.System<NCPhysicalActorLifecycleSystem>();
+        MapId mapId = default;
+
+        await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(
+            EventSource.Local,
+            new GameRunLevelChangedEvent(GameRunLevel.PreRoundLobby, GameRunLevel.InRound)));
+        await WaitUntil(server, () => clock.IsReady && lifecycle.IsActive,
+            "The physical actor lifecycle did not start.");
+
+        await server.WaitAssertion(() =>
+        {
+            maps.CreateMap(out mapId);
+            var grid = maps.CreateGridEntity(mapId);
+            var tiles = new List<(Vector2i, Tile)>();
+            for (var x = 0; x < 8; x++)
+            {
+                for (var y = 0; y < 8; y++)
+                    tiles.Add((new Vector2i(x, y), new Tile(1)));
+            }
+            maps.SetTiles(grid, tiles);
+        });
+
+        var serialization = server.ResolveDependency<ISerializationManager>();
+        var commandId = Guid.NewGuid();
+        var create = await actors.CreateResidentAsync(new NCCityResidentCreateRequest(
+            commandId,
+            new NCActorId(Guid.Parse("12e723b4-39a7-46d4-96c4-412c44d1b340")),
+            "Inez Ward",
+            Archetype,
+            Persona,
+            NCHumanoidProfilePayload.Serialize(serialization, HumanoidCharacterProfile.Random()),
+            default,
+            null,
+            commandId,
+            AuditSource: "integration.physical-lifecycle.no-city-graph"));
+        Assert.That(create.Status, Is.EqualTo(NCCityActorMutationStatus.Applied), create.Error);
+
+        Task<NCPhysicalActorSpawnState> completion = null!;
+        await server.WaitPost(() => completion = lifecycle.RequestAdminAsync(
+            Guid.NewGuid(),
+            create.ActorId,
+            new MapCoordinates(new Vector2(3.5f, 3.5f), mapId),
+            "integration.physical-lifecycle.no-city-graph"));
+        await WaitUntil(server, () => completion.IsCompleted,
+            "The administrator spawn did not complete without CityGraph.", 240);
+        var completed = await completion;
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(completed.Status, Is.EqualTo(NCPhysicalActorSpawnStatus.Spawned), completed.Error);
+            Assert.That(completed.EntityUid.HasValue, Is.True);
+            Assert.That(entities.EntityExists(completed.EntityUid!.Value), Is.True);
+        });
+
+        await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(
+            EventSource.Local,
+            new GameRunLevelChangedEvent(GameRunLevel.InRound, GameRunLevel.PostRound)));
     }
 
     private static async Task WaitUntil(

@@ -112,9 +112,7 @@ public sealed partial class NCNeuralActionExecutionSystem : EntitySystem
                 return false;
             }
             primaryCapability ??= capability;
-            var target = string.IsNullOrWhiteSpace(command.TargetHandle)
-                ? default
-                : new NCCognitionSubjectRef(NCCognitionReferenceKind.StableKey, command.TargetHandle);
+            var target = ResolveTarget(request, command.TargetHandle);
             if (commandIndex == 0)
                 primaryTarget = target;
             var authoredSteps = capability.ProcedureSteps;
@@ -166,6 +164,20 @@ public sealed partial class NCNeuralActionExecutionSystem : EntitySystem
         Enqueue(state, now);
         AcceptedCount++;
         return true;
+    }
+
+    /// <summary>Converts only handles already carried by this validated request into typed cognition references.</summary>
+    private static NCCognitionSubjectRef ResolveTarget(NCNeuralRequestEnvelope request, string handle)
+    {
+        if (string.IsNullOrWhiteSpace(handle))
+            return default;
+        if ((request.KnownLocations ?? []).Any(location => location.Handle == handle) &&
+            handle.StartsWith("zone:", StringComparison.Ordinal) &&
+            Guid.TryParse(handle["zone:".Length..], out var zoneId))
+        {
+            return new NCCognitionSubjectRef(NCCognitionReferenceKind.Zone, zoneId.ToString("D"));
+        }
+        return new NCCognitionSubjectRef(NCCognitionReferenceKind.StableKey, handle);
     }
 
     private void Pulse(ExecutionState state, NCActiveWorldTime now)

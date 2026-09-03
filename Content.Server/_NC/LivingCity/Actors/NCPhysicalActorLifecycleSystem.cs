@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Numerics;
+using Content.Server.Spawners.Components;
 using Content.Server._NC.City.Connectivity;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Actors.Domains;
@@ -62,6 +63,8 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
     private readonly PriorityQueue<ScheduledSpawn, (long DueTicks, long Sequence)> _urgentQueue = new();
     private readonly PriorityQueue<ScheduledSpawn, (long DueTicks, long Sequence)> _queue = new();
     private readonly List<NCCitySpawnCandidateInfo> _candidates = [];
+    private readonly List<MapCoordinates> _fallbackSpawnPoints = [];
+    private readonly Dictionary<Guid, TaskCompletionSource<NCPhysicalActorSpawnState>> _completionWaiters = [];
 
     private NCPhysicalActorLifecyclePolicyPrototype? _policy;
     private NCSessionEpoch _epoch;
@@ -141,6 +144,7 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
             request.RequestId == Guid.Empty || !request.ActorId.IsValid || string.IsNullOrWhiteSpace(request.Source) ||
             request.Source.Length > 128 ||
             request.PreferredRadius is { } radius && (!float.IsFinite(radius) || radius <= 0f) ||
+            request.PreferredTarget is { } target && !ValidMapTarget(target) ||
             request.PreferredTarget.HasValue != request.PreferredRadius.HasValue)
         {
             return Retain(new NCPhysicalActorSpawnState(
@@ -202,7 +206,7 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
     public NCPhysicalActorSpawnState RequestAdmin(
         Guid requestId,
         NCActorId actorId,
-        NCMapCoordinates preferredTarget,
+        MapCoordinates preferredTarget,
         string source)
     {
         var radius = _policy?.AdminPreferredSpawnRadius;
@@ -215,13 +219,41 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
             radius));
     }
 
+    /// <summary>Queues one administrator spawn and completes only after the body exists or a final error is known.</summary>
+    public async Task<NCPhysicalActorSpawnState> RequestAdminAsync(
+        Guid requestId,
+        NCActorId actorId,
+        MapCoordinates preferredTarget,
+        string source)
+    {
+        var state = RequestAdmin(requestId, actorId, preferredTarget, source);
+        if (IsTerminal(state.Status))
+            return state;
+
+        if (!_completionWaiters.TryGetValue(requestId, out var completion))
+        {
+            completion = new TaskCompletionSource<NCPhysicalActorSpawnState>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+            _completionWaiters.Add(requestId, completion);
+        }
+
+        // All lifecycle state changes run on the main thread, but retain the recheck so callers replaying a request
+        // can never miss a completion that happened before the waiter was registered.
+        if (_states.TryGetValue(requestId, out state) && IsTerminal(state.Status))
+        {
+            _completionWaiters.Remove(requestId);
+            completion.TrySetResult(state);
+        }
+        return await completion.Task;
+    }
+
     public bool TryGetRequest(Guid requestId, out NCPhysicalActorSpawnState state) =>
         _states.TryGetValue(requestId, out state!);
 
-    public bool TryRelocate(EntityUid actor, NCMapCoordinates preferred, float radius, out string? error)
+    public bool TryRelocate(EntityUid actor, MapCoordinates preferred, float radius, out string? error)
     {
         error = null;
-        if (!Exists(actor) || !TryFindSafeAdminTarget(preferred, radius, actor, out var target))
+        if (!Exists(actor) || !TryFindSafeMapTarget(preferred, radius, actor, out var target))
         {
             error = "No free supported floor tile is available on the selected Z-level.";
             return false;
@@ -387,7 +419,6 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         var conversation = EnsureComp<NCNeuralConversationTargetComponent>(entity);
         conversation.NarrativeActor = !string.IsNullOrWhiteSpace(actor.Snapshot.Identity.NarrativeActorProfileId) ||
                                       archetype.NarrativeActorProfile != null;
-        conversation.InitiateAmbientConversations = false;
         conversation.MaximumNpcConversationTurns = conversation.NarrativeActor ? 8 : 4;
         if (!_runtime.TryBind(actorId, entity))
         {
@@ -433,7 +464,7 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         coordinates = default;
         if (pending.Request.PreferredTarget is { } preferred)
         {
-            return TryFindSafeAdminTarget(
+            return TryFindSafeMapTarget(
                 preferred,
                 pending.Request.PreferredRadius!.Value,
                 null,
@@ -442,6 +473,9 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
 
         if (actor.PhysicalRecovery is { } recovery && TryResolveRecovery(recovery, out coordinates))
             return true;
+
+        if (!actor.Location.CurrentZone.IsValid)
+            return TryFindFallbackSpawnTarget(actor.Identity.ActorId, pending.Attempts, out coordinates);
 
         _spawnCandidates.GetCandidatesInHierarchy(
             archetype.SpawnCandidateProfile,
@@ -489,32 +523,33 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
             recovery.NetworkId,
             new Vector2(recovery.X, recovery.Y),
             recovery.Z);
-        if (_coordinates.TryResolve(stable, out var exact) && HasSafeFloor(exact) &&
-            !IsOccupiedByActor(exact, _policy.ActorOccupancyExclusionRadius, null))
+        if (!_coordinates.TryResolve(stable, out var exact))
+            return false;
+        if (HasSafeFloor(exact) && !IsOccupiedByActor(exact, _policy.ActorOccupancyExclusionRadius, null))
         {
             target = exact;
             return true;
         }
 
-        return TryFindSafeAdminTarget(stable, _policy.AdminPreferredSpawnRadius, null, out target);
+        return TryFindSafeMapTarget(exact, _policy.AdminPreferredSpawnRadius, null, out target);
     }
 
-    private bool TryFindSafeAdminTarget(
-        NCMapCoordinates preferred,
+    private bool TryFindSafeMapTarget(
+        MapCoordinates preferred,
         float radius,
         EntityUid? ignoredActor,
         out MapCoordinates target)
     {
         target = default;
         if (_policy == null || !float.IsFinite(radius) || radius <= 0f ||
-            !_coordinates.TryResolve(preferred, out var preferredMap) ||
-            !_maps.TryGetMap(preferredMap.MapId, out var mapUid) || mapUid is not { } map ||
-            !_maps.TryFindGridAt(map, preferredMap.Position, out var gridUid, out var grid))
+            !ValidMapTarget(preferred) ||
+            !_maps.TryGetMap(preferred.MapId, out var mapUid) || mapUid is not { } map ||
+            !_maps.TryFindGridAt(map, preferred.Position, out var gridUid, out var grid))
         {
             return false;
         }
 
-        var origin = _maps.WorldToTile(gridUid, grid, preferredMap.Position);
+        var origin = _maps.WorldToTile(gridUid, grid, preferred.Position);
         var maximumRing = Math.Max(1, (int) MathF.Ceiling(radius));
         var radiusSquared = radius * radius;
         for (var ring = 1; ring <= maximumRing; ring++)
@@ -533,10 +568,8 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
                     }
 
                     var candidate = _maps.GridTileToWorld(gridUid, grid, tile);
-                    if (Vector2.DistanceSquared(candidate.Position, preferredMap.Position) > radiusSquared ||
-                        IsOccupiedByActor(candidate, _policy.ActorOccupancyExclusionRadius, ignoredActor) ||
-                        !_coordinates.TryConvert(candidate, out var stable) ||
-                        stable.NetworkId != preferred.NetworkId || stable.Z != preferred.Z)
+                    if (Vector2.DistanceSquared(candidate.Position, preferred.Position) > radiusSquared ||
+                        IsOccupiedByActor(candidate, _policy.ActorOccupancyExclusionRadius, ignoredActor))
                     {
                         continue;
                     }
@@ -546,6 +579,49 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
             }
         }
         return false;
+    }
+
+    private bool TryFindFallbackSpawnTarget(NCActorId actorId, int attempts, out MapCoordinates target)
+    {
+        target = default;
+        if (_policy == null)
+            return false;
+
+        CollectFallbackSpawnPoints(true);
+        if (_fallbackSpawnPoints.Count == 0)
+            CollectFallbackSpawnPoints(false);
+        if (_fallbackSpawnPoints.Count == 0)
+            return false;
+
+        var raw = actorId.Value.ToByteArray();
+        var start = (int) ((BitConverter.ToUInt32(raw, 0) + (uint) attempts) %
+                           (uint) _fallbackSpawnPoints.Count);
+        var checks = Math.Min(_fallbackSpawnPoints.Count, _policy.MaximumCandidateChecks);
+        for (var index = 0; index < checks; index++)
+        {
+            var candidate = _fallbackSpawnPoints[(start + index) % _fallbackSpawnPoints.Count];
+            if (TryFindSafeMapTarget(candidate, _policy.AdminPreferredSpawnRadius, null, out target))
+                return true;
+        }
+        return false;
+    }
+
+    private void CollectFallbackSpawnPoints(bool lateJoinOnly)
+    {
+        _fallbackSpawnPoints.Clear();
+        var query = EntityQueryEnumerator<SpawnPointComponent, TransformComponent>();
+        while (query.MoveNext(out var uid, out var spawnPoint, out var transform))
+        {
+            if (transform.MapID == MapId.Nullspace || spawnPoint.SpawnType == SpawnPointType.Observer ||
+                lateJoinOnly && spawnPoint.SpawnType != SpawnPointType.LateJoin)
+            {
+                continue;
+            }
+
+            var coordinates = _transform.GetMapCoordinates(uid, transform);
+            if (ValidMapTarget(coordinates))
+                _fallbackSpawnPoints.Add(coordinates);
+        }
     }
 
     private bool HasSafeFloor(MapCoordinates target)
@@ -603,6 +679,11 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
     {
         if (_policy == null)
             return;
+        if (pending.Request.Reason == NCPhysicalActorSpawnReason.Admin)
+        {
+            Complete(pending, NCPhysicalActorSpawnStatus.Rejected, null, error);
+            return;
+        }
         pending = pending with { DueAt = now.Advance(_policy.RetryDelay), Sequence = ++_sequence };
         _pending[pending.Request.ActorId] = pending;
         SetState(pending, NCPhysicalActorSpawnStatus.Retrying, error);
@@ -652,6 +733,8 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         if (state.RequestId == Guid.Empty)
             return state;
         _states[state.RequestId] = state;
+        if (IsTerminal(state.Status) && _completionWaiters.Remove(state.RequestId, out var completion))
+            completion.TrySetResult(state);
         _completedOrder.Enqueue(state.RequestId);
         while (_policy != null && _completedOrder.Count > _policy.MaximumCompletedRequestHistory)
             _states.Remove(_completedOrder.Dequeue());
@@ -737,6 +820,19 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
 
     private void Reset()
     {
+        foreach (var (requestId, completion) in _completionWaiters)
+        {
+            if (_states.TryGetValue(requestId, out var state))
+            {
+                completion.TrySetResult(state with
+                {
+                    Status = NCPhysicalActorSpawnStatus.Rejected,
+                    Error = "Physical actor spawning stopped with the active-world session.",
+                });
+            }
+            else
+                completion.TrySetCanceled();
+        }
         _active = false;
         _policy = null;
         _epoch = default;
@@ -749,7 +845,17 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         _urgentQueue.Clear();
         _queue.Clear();
         _candidates.Clear();
+        _fallbackSpawnPoints.Clear();
+        _completionWaiters.Clear();
     }
+
+    private static bool IsTerminal(NCPhysicalActorSpawnStatus status) => status is
+        NCPhysicalActorSpawnStatus.Spawned or
+        NCPhysicalActorSpawnStatus.AlreadyPhysical or
+        NCPhysicalActorSpawnStatus.Rejected;
+
+    private static bool ValidMapTarget(MapCoordinates target) =>
+        target.MapId != MapId.Nullspace && float.IsFinite(target.Position.X) && float.IsFinite(target.Position.Y);
 
     private static bool ValidatePolicy(NCPhysicalActorLifecyclePolicyPrototype policy) =>
         policy.SnapshotPageSize is > 0 and <= 1000 &&

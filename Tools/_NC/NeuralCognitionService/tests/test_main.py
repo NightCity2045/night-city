@@ -12,15 +12,17 @@ from app import main
 
 
 class _FakeResponses:
-    def __init__(self, selected_capability: str):
+    def __init__(self, selected_capability: str, target_handle: str = "", should_speak: bool = True):
         self._selected_capability = selected_capability
+        self._target_handle = target_handle
+        self._should_speak = should_speak
 
     async def create(self, **_kwargs):
         answer = {
             "commands": [{
                 "capabilityId": self._selected_capability,
                 "goalKey": "safe-option",
-                "targetHandle": "",
+                "targetHandle": self._target_handle,
                 "priority": 500,
                 "expectedOutcomeKey": "safe-option-selected",
                 "informationGapKeys": [],
@@ -28,6 +30,7 @@ class _FakeResponses:
             }],
             "speech_act_key": "statement",
             "rendered_text": "Я выбираю безопасный вариант.",
+            "should_speak": self._should_speak,
             "summary_key": "safe-option",
             "confidence": 800,
             "disclosed_fact_handles": [],
@@ -45,21 +48,23 @@ class _FakeResponses:
 
 
 class _FakeClient:
-    def __init__(self, selected_capability: str):
-        self.responses = _FakeResponses(selected_capability)
+    def __init__(self, selected_capability: str, target_handle: str = "", should_speak: bool = True):
+        self.responses = _FakeResponses(selected_capability, target_handle, should_speak)
 
     async def close(self):
         pass
 
 
 class _FakeClientFactory:
-    def __init__(self, selected_capability: str):
+    def __init__(self, selected_capability: str, target_handle: str = "", should_speak: bool = True):
         self._selected_capability = selected_capability
+        self._target_handle = target_handle
+        self._should_speak = should_speak
 
     def __call__(self, *, api_key: str):
         if api_key != "test-key":
             raise AssertionError("unexpected provider credential")
-        return _FakeClient(self._selected_capability)
+        return _FakeClient(self._selected_capability, self._target_handle, self._should_speak)
 
 
 class NeuralCognitionServiceTest(unittest.IsolatedAsyncioTestCase):
@@ -108,6 +113,8 @@ class NeuralCognitionServiceTest(unittest.IsolatedAsyncioTestCase):
                 "actorDisplayName": "Aoi Chen",
                 "utterance": "Первый вариант: ты идёшь за мной.",
                 "speakerHandle": "perceived-player",
+                "addressScope": "group",
+                "audienceSize": 5,
                 "history": [{
                     "speaker": "interlocutor",
                     "speechAct": "statement",
@@ -139,6 +146,8 @@ class NeuralCognitionServiceTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(parsed.dialogue_input.earlier_summary.persistent_memories[0].summary,
                          "The player previously introduced himself.")
+        self.assertEqual(parsed.dialogue_input.address_scope, "group")
+        self.assertEqual(parsed.dialogue_input.audience_size, 5)
 
     def test_incomplete_provider_response_reports_token_limit(self):
         response = SimpleNamespace(
@@ -173,6 +182,7 @@ class NeuralCognitionServiceTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(result["commands"][0]["capabilityId"], "NCCognitionStrategicFallback")
         self.assertEqual(result["speechActKey"], "statement")
+        self.assertTrue(result["shouldSpeak"])
         self.assertEqual(result["inputTokens"], 40)
         self.assertEqual(result["providerRequestId"], "fake-provider-request")
 
@@ -186,6 +196,92 @@ class NeuralCognitionServiceTest(unittest.IsolatedAsyncioTestCase):
             main.AsyncOpenAI = old_factory
 
         self.assertEqual(raised.exception.status_code, 502)
+
+    async def test_dialogue_action_may_target_another_perceived_person(self):
+        request = self.request().model_dump(by_alias=True)
+        request.update({
+            "kind": "DialogueContinuation",
+            "allowedCapabilityIds": ["social.dialogue.reply", "NCCognitionApproachPerson"],
+            "dialogueInput": {
+                "actorDisplayName": "James Magor",
+                "utterance": "Подойди к Авериллу.",
+                "speakerHandle": "perceived-player",
+                "addressScope": "direct",
+                "audienceSize": 1,
+                "history": [],
+            },
+            "perceivedSubjects": [{
+                "handle": "perceived-player",
+                "displayName": "Urist McHands",
+                "kind": "neutral",
+                "confidence": 1,
+                "expiresAtTicks": 100,
+            }, {
+                "handle": "perceived-body",
+                "displayName": "Averill Shaw",
+                "kind": "dead",
+                "confidence": 1,
+                "expiresAtTicks": 100,
+            }],
+        })
+        old_factory = main.AsyncOpenAI
+        main.AsyncOpenAI = _FakeClientFactory("NCCognitionApproachPerson", "perceived-body")
+        try:
+            result = await main.cognition(main.Request.model_validate(request), authorization="Bearer test-key")
+        finally:
+            main.AsyncOpenAI = old_factory
+
+        self.assertEqual(result["commands"][0]["targetHandle"], "perceived-body")
+
+    async def test_action_may_target_a_server_supplied_known_location(self):
+        request = self.request().model_dump(by_alias=True)
+        request.update({
+            "allowedCapabilityIds": ["NCCognitionPatrolKnownZone"],
+            "knownLocations": [{
+                "handle": "zone:59e721a026ef4976a735ca683c28584b",
+                "displayName": "Watson",
+                "kind": "district",
+            }],
+        })
+        target = "zone:59e721a026ef4976a735ca683c28584b"
+        old_factory = main.AsyncOpenAI
+        main.AsyncOpenAI = _FakeClientFactory("NCCognitionPatrolKnownZone", target)
+        try:
+            result = await main.cognition(main.Request.model_validate(request), authorization="Bearer test-key")
+        finally:
+            main.AsyncOpenAI = old_factory
+
+        self.assertEqual(result["commands"][0]["targetHandle"], target)
+
+    async def test_group_listener_may_choose_silence(self):
+        request = self.request().model_dump(by_alias=True)
+        request.update({
+            "kind": "DialogueContinuation",
+            "allowedCapabilityIds": ["social.dialogue.reply"],
+            "dialogueInput": {
+                "actorDisplayName": "Aoi Chen",
+                "utterance": "Эй, народ.",
+                "speakerHandle": "perceived-player",
+                "addressScope": "group",
+                "audienceSize": 6,
+                "history": [],
+            },
+            "perceivedSubjects": [{
+                "handle": "perceived-player",
+                "displayName": "Raymond Feuer",
+                "kind": "neutral",
+                "confidence": 1,
+                "expiresAtTicks": 100,
+            }],
+        })
+        old_factory = main.AsyncOpenAI
+        main.AsyncOpenAI = _FakeClientFactory("social.dialogue.reply", should_speak=False)
+        try:
+            result = await main.cognition(main.Request.model_validate(request), authorization="Bearer test-key")
+        finally:
+            main.AsyncOpenAI = old_factory
+
+        self.assertFalse(result["shouldSpeak"])
 
     async def test_missing_bearer_credential_is_rejected(self):
         with self.assertRaises(HTTPException) as raised:

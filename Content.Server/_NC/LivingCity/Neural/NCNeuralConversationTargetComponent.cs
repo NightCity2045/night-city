@@ -19,7 +19,7 @@ public sealed partial class NCNeuralConversationTargetComponent : Component
     [DataField]
     public float InteractionRange = 2.5f;
 
-    /// <summary>The NPC may acquire the nearest unobstructed local speaker without a special interaction verb.</summary>
+    /// <summary>The NPC may hear an unobstructed local speaker without a special interaction verb.</summary>
     [DataField]
     public bool ListenToLocalSpeech = true;
 

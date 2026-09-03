@@ -76,7 +76,8 @@ public sealed record NCCityActorPhysicalRecoveryState(
     NCZoneId LocationContextId);
 
 /// <summary>
-/// Semantic position and travel intent. It never persists room IDs, portal IDs, map IDs or EntityUid values.
+/// Semantic position and travel intent. CurrentZone is empty on maps without authored city geography. The record
+/// never persists room IDs, portal IDs, runtime map IDs or EntityUid values.
 /// </summary>
 public sealed record NCCityActorLocation(
     NCZoneId CurrentZone,

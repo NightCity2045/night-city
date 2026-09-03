@@ -5,6 +5,7 @@
 using Content.Server._NC.City.Zones;
 using Content.Server._NC.LivingCity.Actors.Domains;
 using Content.Server._NC.LivingCity.Time;
+using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Identity;
@@ -43,8 +44,6 @@ public sealed partial class NCPhysicalActorCheckpointSystem : EntitySystem
             string? error = null;
             if (!_actors.TryGetCached(actorId, out var actor) ||
                 !_domains.TryGetCached(actorId, out var health, out var inventory) ||
-                !_coordinates.TryGetCoordinates(entityUid, out var coordinates) ||
-                _zones.GetLocationContext(coordinates).MostSpecific is not { IsValid: true } currentZone ||
                 !_domains.TryCaptureMaterialized(
                     actorId,
                     entityUid,
@@ -60,12 +59,22 @@ public sealed partial class NCPhysicalActorCheckpointSystem : EntitySystem
             }
 
             var commandId = Guid.NewGuid();
-            var recovery = new NCCityActorPhysicalRecoveryState(
-                coordinates.NetworkId,
-                coordinates.Position.X,
-                coordinates.Position.Y,
-                coordinates.Z,
-                currentZone);
+            var currentZone = default(NCZoneId);
+            NCCityActorPhysicalRecoveryState? recovery = null;
+            if (_coordinates.TryGetCoordinates(entityUid, out var coordinates) &&
+                _zones.GetLocationContext(coordinates).MostSpecific is { IsValid: true } stableZone)
+            {
+                currentZone = stableZone;
+                recovery = new NCCityActorPhysicalRecoveryState(
+                    coordinates.NetworkId,
+                    coordinates.Position.X,
+                    coordinates.Position.Y,
+                    coordinates.Z,
+                    currentZone);
+            }
+
+            // Ordinary maps have no durable CityGraph coordinate. Their actor body and domains are still saved, but
+            // the next round deliberately chooses a normal SS14 spawn point instead of persisting a runtime MapId.
             args.AddPendingWrite(CommitAsync(new NCPhysicalActorCheckpointRequest(
                 commandId,
                 actorId,

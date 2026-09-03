@@ -214,6 +214,95 @@
   - id: follow-person
     action: human-follow-person
 
+- type: ncCognitionCapability
+  id: NCCognitionHoldPosition
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: hold-position
+    action: human-hold-position
+
+- type: ncCognitionCapability
+  id: NCCognitionPatrolKnownZone
+  domain: Routine
+  taskKind: Routine
+  procedureSteps:
+  - id: patrol-zone
+    action: human-patrol-zone
+
+- type: ncCognitionCapability
+  id: NCCognitionActivateTarget
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: activate-target
+    action: human-activate-target
+
+- type: ncCognitionCapability
+  id: NCCognitionAltInteractTarget
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: alt-interact-target
+    action: human-alt-interact-target
+
+- type: ncCognitionCapability
+  id: NCCognitionPickupItem
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: pickup-item
+    action: human-pickup-item
+
+- type: ncCognitionCapability
+  id: NCCognitionDropItem
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: drop-item
+    action: human-drop-item
+
+- type: ncCognitionCapability
+  id: NCCognitionEquipItem
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: equip-item
+    action: human-equip-item
+
+- type: ncCognitionCapability
+  id: NCCognitionUnequipItem
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: unequip-item
+    action: human-unequip-item
+
+- type: ncCognitionCapability
+  id: NCCognitionUseHeldItem
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: use-held-item
+    action: human-use-held-item
+
+- type: ncCognitionCapability
+  id: NCCognitionStartPullingPerson
+  domain: Social
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: start-pulling
+    action: human-start-pulling
+
+- type: ncCognitionCapability
+  id: NCCognitionStopPulling
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: stop-pulling
+    action: human-stop-pulling
+
+# Neural renderedText already speaks through ChatSystem; the fixed acknowledgement action is intentionally excluded.
 - type: ncCognitionCapabilityProfile
   id: NCDefaultCivilianCapabilities
   capabilities:
@@ -221,3 +310,14 @@
   - NCCognitionDefendAgainstThreat
   - NCCognitionApproachPerson
   - NCCognitionFollowPerson
+  - NCCognitionHoldPosition
+  - NCCognitionPatrolKnownZone
+  - NCCognitionActivateTarget
+  - NCCognitionAltInteractTarget
+  - NCCognitionPickupItem
+  - NCCognitionDropItem
+  - NCCognitionEquipItem
+  - NCCognitionUnequipItem
+  - NCCognitionUseHeldItem
+  - NCCognitionStartPullingPerson
+  - NCCognitionStopPulling
