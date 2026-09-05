@@ -35,7 +35,7 @@ def main() -> int:
                 current_type = None
     required = ["LivingCity/cognition.yml", "LivingCity/economic_assets.yml", "LivingCity/market.yml",
                 "LivingCity/fixers.yml", "LivingCity/city_services.yml", "LivingCity/neural_cognition.yml",
-                "LivingCity/observability.yml"]
+                "LivingCity/ambient_crowd.yml", "LivingCity/observability.yml"]
     for relative in required:
         if not (prototype_root / relative).is_file():
             errors.append(f"missing required prototype file: {relative}")

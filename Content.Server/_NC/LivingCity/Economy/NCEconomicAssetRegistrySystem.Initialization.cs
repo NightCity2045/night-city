@@ -59,40 +59,4 @@ public sealed partial class NCEconomicAssetRegistrySystem
             JsonSerializer.Serialize(snapshot, JsonOptions),
             JsonSerializer.Serialize(new AssetEvent(stockNodeId.Value.ToString("D"), auditSource.Trim()), JsonOptions));
     }
-
-    /// <summary>Repairs residents created before the inventory authority was restored to actor creation.</summary>
-    public async Task<NCStockNodeRecord?> EnsureActorInventoryStockNodeAsync(
-        NCActorId actorId,
-        string auditSource)
-    {
-        if (!actorId.IsValid || string.IsNullOrWhiteSpace(auditSource))
-            return null;
-
-        var owner = NCPartyRef.ForActor(actorId);
-        var nodeId = ActorInventoryStockNode(actorId);
-        var existing = await GetStockNodeAsync(nodeId, true);
-        if (existing != null)
-        {
-            return existing.Snapshot.Owner == owner && existing.Snapshot.Kind == NCStockNodeKind.ActorInventory
-                ? existing
-                : null;
-        }
-
-        var stable = actorId.Value.ToString("D");
-        var created = await CreateStockNodeAsync(new NCCreateStockNodeRequest(
-            NCPersistentIdentity.Command("living-city-actor", "repair-inventory-stock", stable),
-            nodeId,
-            "actor-inventory",
-            NCStockNodeKind.ActorInventory,
-            owner,
-            $"actor.{stable}.inventory",
-            true,
-            true,
-            owner,
-            NCPersistentIdentity.Correlation("living-city-actor", "repair-inventory-stock", stable),
-            AuditSource: auditSource));
-        return created.Status is NCEconomicAssetMutationStatus.Applied or NCEconomicAssetMutationStatus.Duplicate
-            ? created.StockNode
-            : null;
-    }
 }

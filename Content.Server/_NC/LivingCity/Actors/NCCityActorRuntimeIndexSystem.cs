@@ -11,8 +11,8 @@ using Content.Shared._NC.Persistence.Identity;
 namespace Content.Server._NC.LivingCity.Actors;
 
 /// <summary>
-/// Enforces the current-epoch one-to-one ActorId/EntityUid physical binding invariant.
-/// Every active persistent NPC owns one binding for the duration of the round.
+/// Enforces the current-epoch one-to-one ActorId/EntityUid materialization invariant.
+/// The index is bounded by materialized actors and is cleared whenever the live round ends.
 /// </summary>
 public sealed partial class NCCityActorRuntimeIndexSystem : EntitySystem
 {
@@ -21,7 +21,7 @@ public sealed partial class NCCityActorRuntimeIndexSystem : EntitySystem
     private readonly Dictionary<NCActorId, EntityUid> _byActor = [];
     private readonly Dictionary<EntityUid, NCActorId> _byEntity = [];
 
-    public int PhysicalActorCount => _byActor.Count;
+    public int MaterializedActorCount => _byActor.Count;
 
     public override void Initialize()
     {
@@ -48,7 +48,7 @@ public sealed partial class NCCityActorRuntimeIndexSystem : EntitySystem
         component.ActorId = actorId;
         _byActor.Add(actorId, entityUid);
         _byEntity.Add(entityUid, actorId);
-        RaiseLocalEvent(new NCCityActorBindingChangedEvent(actorId, entityUid, true));
+        RaiseLocalEvent(new NCCityActorMaterializationChangedEvent(actorId, entityUid, true));
         return true;
     }
 
@@ -59,7 +59,7 @@ public sealed partial class NCCityActorRuntimeIndexSystem : EntitySystem
 
         _byActor.Remove(actorId);
         RemComp<NCCityActorBindingComponent>(entityUid);
-        RaiseLocalEvent(new NCCityActorBindingChangedEvent(actorId, entityUid, false));
+        RaiseLocalEvent(new NCCityActorMaterializationChangedEvent(actorId, entityUid, false));
         return true;
     }
 
@@ -116,7 +116,7 @@ public sealed partial class NCCityActorRuntimeIndexSystem : EntitySystem
 
         _byActor.Add(actorId, entity.Owner);
         _byEntity.Add(entity.Owner, actorId);
-        RaiseLocalEvent(new NCCityActorBindingChangedEvent(actorId, entity.Owner, true));
+        RaiseLocalEvent(new NCCityActorMaterializationChangedEvent(actorId, entity.Owner, true));
     }
 
     private void OnBindingShutdown(
@@ -126,7 +126,7 @@ public sealed partial class NCCityActorRuntimeIndexSystem : EntitySystem
         if (!_byEntity.Remove(entity.Owner, out var actorId))
             return;
         _byActor.Remove(actorId);
-        RaiseLocalEvent(new NCCityActorBindingChangedEvent(actorId, entity.Owner, false));
+        RaiseLocalEvent(new NCCityActorMaterializationChangedEvent(actorId, entity.Owner, false));
     }
 
     private void RemoveStaleBinding(NCActorId actorId, EntityUid entityUid)
@@ -135,7 +135,7 @@ public sealed partial class NCCityActorRuntimeIndexSystem : EntitySystem
             _byActor.Remove(actorId);
         if (_byEntity.TryGetValue(entityUid, out var reverse) && reverse == actorId)
             _byEntity.Remove(entityUid);
-        RaiseLocalEvent(new NCCityActorBindingChangedEvent(actorId, entityUid, false));
+        RaiseLocalEvent(new NCCityActorMaterializationChangedEvent(actorId, entityUid, false));
     }
 
     private void OnRunLevelChanged(GameRunLevelChangedEvent args)
@@ -143,7 +143,7 @@ public sealed partial class NCCityActorRuntimeIndexSystem : EntitySystem
         if (args.Old != GameRunLevel.InRound || args.New == GameRunLevel.InRound)
             return;
 
-        // Bindings are round-local; persistent actor records remain authoritative across round cleanup.
+        // Only currently materialized bindings are visited; persistent actors without entities are untouched.
         foreach (var entityUid in _byEntity.Keys.ToArray())
         {
             if (Exists(entityUid))

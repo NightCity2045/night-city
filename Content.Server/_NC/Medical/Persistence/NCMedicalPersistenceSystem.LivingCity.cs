@@ -20,8 +20,7 @@ public sealed partial class NCMedicalPersistenceSystem
         NCActorId actorId,
         long revision,
         out NCMedicalStateSnapshot snapshot,
-        out string payload,
-        bool allowTerminating = false)
+        out string payload)
     {
         snapshot = default!;
         payload = string.Empty;
@@ -31,11 +30,8 @@ public sealed partial class NCMedicalPersistenceSystem
             return false;
         }
 
-        // EntityTerminating forbids adding components. The actor aggregate already supplies the stable owner key,
-        // so a final immutable capture may safely serialize without creating or mutating the runtime marker.
-        if (CanMutateActorCaptureIdentity(allowTerminating, TerminatingOrDeleted(body)))
-            BindOwner(body, NCMedicalStableOwnerKind.PersistentActor, actorId.Value.ToString("D"), revision);
-        var captured = SerializeMedicalState(body, allowTerminating);
+        BindOwner(body, NCMedicalStableOwnerKind.PersistentActor, actorId.Value.ToString("D"), revision);
+        var captured = SerializeMedicalState(body);
         if (captured == null || !TryEncodeSnapshot(captured, out payload))
             return false;
 
@@ -112,7 +108,4 @@ public sealed partial class NCMedicalPersistenceSystem
         return owner.Kind == NCMedicalStableOwnerKind.PersistentActor &&
                Guid.TryParse(owner.Key, out var ownerId) && ownerId == actorId.Value;
     }
-
-    internal static bool CanMutateActorCaptureIdentity(bool allowTerminating, bool terminatingOrDeleted) =>
-        !allowTerminating && !terminatingOrDeleted;
 }

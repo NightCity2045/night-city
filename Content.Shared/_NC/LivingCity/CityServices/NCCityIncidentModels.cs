@@ -78,7 +78,6 @@ public enum NCIncidentEvidenceKind : byte
 [Serializable, NetSerializable]
 public enum NCIncidentMaterializationPolicy : byte
 {
-    // Retained for stored/API compatibility. In v3 none of these values permits an off-screen outcome.
     AbstractUnlessObserved,
     MaterializeForResponse,
     AlwaysPhysical,

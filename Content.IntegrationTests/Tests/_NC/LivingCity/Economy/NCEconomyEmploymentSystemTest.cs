@@ -15,17 +15,13 @@ using Content.Server._NC.LivingCity.Employment;
 using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.City.Zones;
-using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.Bank;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Economy;
 using Content.Shared._NC.LivingCity.Employment;
-using Content.Shared._NC.LivingCity.Neural;
 using Content.Shared._NC.Persistence.Identity;
-using Content.Shared.Preferences;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
-using Robust.Shared.Serialization.Manager;
 using Robust.UnitTesting;
 
 namespace Content.IntegrationTests.Tests._NC.LivingCity.Economy;
@@ -89,21 +85,33 @@ public sealed class NCEconomyEmploymentSystemTest : GameTest
               - 4,4
               - 2,4
 
+        - type: ncCityRoutineProfile
+          id: NCEconomyEmploymentIntegrationRoutine
+          cycleDuration: 10s
+          entries:
+          - at: 0s
+            activity: at-home
+            goal: recover
+            target: Home
+            availability: Available
+
         - type: ncCityActorArchetype
           id: NCEconomyEmploymentIntegrationActor
           entityPrototype: MobHuman
           spawnCandidateProfile: NCPedestrianSpawnCandidates
           travelMode: Pedestrian
+          cognitionTier: Utility
+          allowedHomeContexts: [Apartment]
+          allowedWorkContexts: [Building]
+          routineProfile: NCEconomyEmploymentIntegrationRoutine
         """;
 
     private static readonly NCZoneId HomeZone =
         new(Guid.Parse("62186c66-cc01-444b-a04b-aa8b7081c3ea"));
+    private static readonly NCZoneId WorkZone =
+        new(Guid.Parse("6a8f1971-e7ee-472a-b985-bf3557b8c13e"));
     private static readonly ProtoId<NCCityActorArchetypePrototype> Archetype =
         new("NCEconomyEmploymentIntegrationActor");
-    private static readonly ProtoId<NCNeuralPersonaProfilePrototype> Persona =
-        new("NCDefaultResidentPersona");
-    private static readonly NCZNetworkId NetworkId =
-        new(Guid.Parse("3c91661d-68a9-47b6-917a-8cdac7885fd1"));
 
     [Test]
     public async Task FinanceAdapterReloadsCurrentVersionsAndPagesImmutableHistory()
@@ -251,18 +259,16 @@ public sealed class NCEconomyEmploymentSystemTest : GameTest
             new GameRunLevelChangedEvent(GameRunLevel.PreRoundLobby, GameRunLevel.InRound)));
         await WaitUntil(server, () => clock.IsReady, "The active-world clock did not start.");
 
-        var serialization = server.ResolveDependency<ISerializationManager>();
-        var commandId = Guid.NewGuid();
-        var actor = await actors.CreateResidentAsync(new NCCityResidentCreateRequest(
-            commandId,
-            NCActorId.New(),
+        var actor = await actors.CreateAsync(new NCCityActorCreateRequest(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            "economy-worker",
             "Mina Ortiz",
+            [],
             Archetype,
-            Persona,
-            NCHumanoidProfilePayload.Serialize(serialization, HumanoidCharacterProfile.Random()),
             HomeZone,
-            new NCCityActorPhysicalRecoveryState(NetworkId, 5f, 5f, 0, HomeZone),
-            commandId,
+            WorkZone,
+            Guid.NewGuid(),
             AuditSource: "integration-test"));
         Assert.That(actor.Status, Is.EqualTo(NCCityActorMutationStatus.Applied));
         var employeeParty = NCPartyRef.ForActor(actor.ActorId);

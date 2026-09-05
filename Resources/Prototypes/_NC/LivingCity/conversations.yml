@@ -7,7 +7,7 @@
   maximumActiveSessions: 512
   maximumRecentSessions: 256
   maximumSessionsPerParticipant: 4
-  maximumParticipants: 256
+  maximumParticipants: 16
   maximumTopics: 16
   maximumRelevantFacts: 32
   maximumTurns: 64
@@ -27,7 +27,6 @@
   - stab you
   - murder you
   verbalThreatLifetime: 2m
-  pointedAddressLifetime: 8s
   idleTimeout: 3m
   maximumLifetime: 30m
   expirySweepInterval: 1s

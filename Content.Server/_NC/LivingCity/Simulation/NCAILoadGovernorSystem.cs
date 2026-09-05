@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using Content.Server._NC.LivingCity.Time;
+using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Simulation;
 using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Prototypes;
@@ -11,8 +12,8 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._NC.LivingCity.Simulation;
 
 /// <summary>
-/// Active-round-only adaptive governor for physical GPT-NPC work. Producers report bounded queue state in O(1);
-/// this system never scans the resident registry or removes physical NPCs to recover load.
+/// Active-round-only adaptive governor for A-Life detail and background throughput. Producers report their bounded
+/// queue state in O(1); this system never scans the actor catalog or ECS population.
 /// </summary>
 public sealed partial class NCAILoadGovernorSystem : EntitySystem
 {
@@ -26,6 +27,7 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
 
     private readonly Dictionary<NCAILoadQueueKind, float> _queueRatios = [];
     private readonly HashSet<NCAILoadBacklogKind> _backlogs = [];
+    private readonly Dictionary<Guid, int> _materializationReservations = [];
     private readonly Dictionary<NCAILoadDispatchKind, float> _dispatchCredits = [];
     private readonly NCAILoadGovernorStateMachine _stateMachine = new();
     private readonly double[] _workMillisecondsByKindWindow = new double[Enum.GetValues<NCAILoadWorkKind>().Length];
@@ -58,9 +60,12 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
     private int _transitionHistoryCount;
     private float _alifeWorkRatio;
     private float _maximumQueueRatio;
-    private int _physicalActors;
+    private int _materializedActors;
+    private int _reservedMaterializations;
     private int _backloggedSubsystems;
     private long _transitionCount;
+    private long _admissionAccepted;
+    private long _admissionRejected;
     private bool _active;
     private bool _hasFrameSample;
     private string? _configurationError;
@@ -68,6 +73,8 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
     public bool IsActive => _active;
 
     public NCAILoadState State => _stateMachine.State;
+
+    public int ReservedMaterializationCount => _reservedMaterializations;
 
     public override void Initialize()
     {
@@ -116,9 +123,13 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         }
         CaptureGarbageCollectorTelemetry();
 
+        // Physical population has no count cap. Load degradation is driven by measured frame/work pressure and
+        // bounded queues; it slows admissions but never refuses a resident required by local semantic relevance.
+        const float materializedRatio = 0f;
         _reasons = BuildReasons(
             _smoothedFrameMilliseconds,
             _alifeWorkRatio,
+            materializedRatio,
             _thresholds);
         var previousState = _stateMachine.State;
         var decision = _stateMachine.Step(
@@ -126,6 +137,7 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
                 _smoothedFrameMilliseconds,
                 _alifeWorkRatio,
                 _maximumQueueRatio,
+                materializedRatio,
                 _backloggedSubsystems),
             _reasons,
             _thresholds);
@@ -140,10 +152,10 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         }
     }
 
-    public void ReportPhysicalActors(int count)
+    public void ReportMaterializedActors(int count)
     {
         if (_active)
-            _physicalActors = Math.Max(0, count);
+            _materializedActors = Math.Max(0, count);
     }
 
     public void ReportQueue(NCAILoadQueueKind kind, int queued, int capacity)
@@ -184,6 +196,45 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         if (includeInTotal)
             _workMillisecondsWindow += elapsed;
         _workMillisecondsByKindWindow[(int) kind] += elapsed;
+    }
+
+    /// <summary>
+    /// Tracks asynchronous materialization reservations. Count-based admission caps are intentionally absent: local
+    /// semantic relevance is authoritative, while dispatch throughput remains governed separately.
+    /// </summary>
+    public bool TryReserveMaterialization(
+        Guid requestId,
+        int actorCount,
+        int priority,
+        bool protectedRequest,
+        out string? error)
+    {
+        error = null;
+        if (!_active || _policy == null)
+        {
+            if (_configurationError == null)
+                return true;
+            _admissionRejected++;
+            error = _configurationError;
+            return false;
+        }
+        if (requestId == Guid.Empty)
+            return true;
+        if (_materializationReservations.ContainsKey(requestId))
+            return true;
+
+        actorCount = Math.Max(1, actorCount);
+        _materializationReservations.Add(requestId, actorCount);
+        _reservedMaterializations += actorCount;
+        _admissionAccepted++;
+        return true;
+    }
+
+    public void ReleaseMaterialization(Guid requestId)
+    {
+        if (!_materializationReservations.Remove(requestId, out var actorCount))
+            return;
+        _reservedMaterializations = Math.Max(0, _reservedMaterializations - actorCount);
     }
 
     public TimeSpan ScaleEvaluationInterval(TimeSpan baseline)
@@ -236,18 +287,33 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         return (dispatches, credit - dispatches);
     }
 
+    public int TakeAutomaticMaterializationRequests(int baseline) =>
+        TakeDispatchLimit(NCAILoadDispatchKind.RelevanceMaterialization, baseline);
+
+    public int ProtectedMaterializationPriority => State switch
+    {
+        NCAILoadState.Elevated => _policy?.ElevatedProtectedMaterializationPriority ?? 0,
+        NCAILoadState.Critical => _policy?.CriticalProtectedMaterializationPriority ?? 0,
+        _ => 0,
+    };
+
     public NCAILoadGovernorSnapshot GetSnapshot() => new(
         _active,
         State,
         _reasons,
         _smoothedFrameMilliseconds,
         _alifeWorkRatio,
-        _physicalActors,
+        _materializedActors,
+        _reservedMaterializations,
+        0,
+        0,
         _maximumQueueRatio,
         _backloggedSubsystems,
         _stateMachine.CandidateSamples,
         _transitionCount,
         _lastTransitionAt,
+        _admissionAccepted,
+        _admissionRejected,
         _configurationError);
 
     /// <summary>
@@ -344,13 +410,17 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         _transitionHistoryCount = 0;
         _alifeWorkRatio = 0f;
         _maximumQueueRatio = 0f;
-        _physicalActors = 0;
+        _materializedActors = 0;
+        _reservedMaterializations = 0;
         _backloggedSubsystems = 0;
         _transitionCount = 0;
+        _admissionAccepted = 0;
+        _admissionRejected = 0;
         _hasFrameSample = false;
         _configurationError = null;
         _queueRatios.Clear();
         _backlogs.Clear();
+        _materializationReservations.Clear();
         _dispatchCredits.Clear();
         Array.Clear(_workMillisecondsByKindWindow);
         Array.Clear(_lastWorkMillisecondsByKind);
@@ -397,6 +467,7 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
     private NCAILoadPressureReason BuildReasons(
         float frameMilliseconds,
         float workRatio,
+        float materializedRatio,
         NCAILoadGovernorThresholds thresholds)
     {
         var reasons = NCAILoadPressureReason.None;
@@ -404,14 +475,36 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
             reasons |= NCAILoadPressureReason.FrameTime;
         if (workRatio >= thresholds.ElevatedEnterWorkRatio)
             reasons |= NCAILoadPressureReason.WorkBudget;
-        if (_queueRatios.GetValueOrDefault(NCAILoadQueueKind.ActorSpawn) >=
+        if (materializedRatio >= thresholds.ElevatedEnterMaterializedRatio)
+            reasons |= NCAILoadPressureReason.MaterializedActors;
+        if (_queueRatios.GetValueOrDefault(NCAILoadQueueKind.Materialization) >=
             thresholds.ElevatedEnterQueueRatio)
-            reasons |= NCAILoadPressureReason.ActorSpawnQueue;
+            reasons |= NCAILoadPressureReason.MaterializationQueue;
+        if (_queueRatios.GetValueOrDefault(NCAILoadQueueKind.Dematerialization) >=
+            thresholds.ElevatedEnterQueueRatio)
+            reasons |= NCAILoadPressureReason.DematerializationQueue;
+        if (_queueRatios.GetValueOrDefault(NCAILoadQueueKind.GroupPhysicalization) >=
+            thresholds.ElevatedEnterQueueRatio)
+            reasons |= NCAILoadPressureReason.GroupPhysicalizationQueue;
+        if (_queueRatios.GetValueOrDefault(NCAILoadQueueKind.PhysicalExecution) >=
+            thresholds.ElevatedEnterQueueRatio)
+            reasons |= NCAILoadPressureReason.PhysicalExecutionQueue;
         if (_queueRatios.GetValueOrDefault(NCAILoadQueueKind.PhysicalPerception) >=
             thresholds.ElevatedEnterQueueRatio)
             reasons |= NCAILoadPressureReason.PhysicalPerceptionQueue;
+        if (_queueRatios.GetValueOrDefault(NCAILoadQueueKind.Cognition) >=
+            thresholds.ElevatedEnterQueueRatio)
+            reasons |= NCAILoadPressureReason.CognitionQueue;
+        if (_backlogs.Contains(NCAILoadBacklogKind.Schedule))
+            reasons |= NCAILoadPressureReason.ScheduleBacklog;
+        if (_backlogs.Contains(NCAILoadBacklogKind.AbstractTravel))
+            reasons |= NCAILoadPressureReason.AbstractTravelBacklog;
+        if (_backlogs.Contains(NCAILoadBacklogKind.PhysicalExecution))
+            reasons |= NCAILoadPressureReason.PhysicalExecutionBacklog;
         if (_backlogs.Contains(NCAILoadBacklogKind.PhysicalPerception))
             reasons |= NCAILoadPressureReason.PhysicalPerceptionBacklog;
+        if (_backlogs.Contains(NCAILoadBacklogKind.Cognition))
+            reasons |= NCAILoadPressureReason.CognitionBacklog;
         return reasons;
     }
 
@@ -433,6 +526,9 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         ExitEnterRatio(policy.ElevatedExitQueueRatio, policy.ElevatedEnterQueueRatio) &&
         ExitEnterRatio(policy.CriticalExitQueueRatio, policy.CriticalEnterQueueRatio) &&
         policy.ElevatedEnterQueueRatio < policy.CriticalEnterQueueRatio &&
+        ExitEnterRatio(policy.ElevatedExitMaterializedRatio, policy.ElevatedEnterMaterializedRatio) &&
+        ExitEnterRatio(policy.CriticalExitMaterializedRatio, policy.CriticalEnterMaterializedRatio) &&
+        policy.ElevatedEnterMaterializedRatio < policy.CriticalEnterMaterializedRatio &&
         policy.ElevatedBacklogCount > 0 &&
         policy.CriticalExitBacklogCount >= policy.ElevatedBacklogCount &&
         policy.CriticalBacklogCount > policy.CriticalExitBacklogCount &&
@@ -440,7 +536,13 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         FiniteAtLeastOne(policy.CriticalEvaluationIntervalMultiplier) &&
         policy.CriticalEvaluationIntervalMultiplier >= policy.ElevatedEvaluationIntervalMultiplier &&
         FiniteUnit(policy.ElevatedDispatchMultiplier) && FiniteUnit(policy.CriticalDispatchMultiplier) &&
-        policy.CriticalDispatchMultiplier <= policy.ElevatedDispatchMultiplier;
+        policy.CriticalDispatchMultiplier <= policy.ElevatedDispatchMultiplier &&
+        FiniteUnit(policy.ElevatedSoftMaterializedBudgetMultiplier) &&
+        FiniteUnit(policy.CriticalSoftMaterializedBudgetMultiplier) &&
+        policy.CriticalSoftMaterializedBudgetMultiplier <= policy.ElevatedSoftMaterializedBudgetMultiplier &&
+        policy.ElevatedProtectedMaterializationPriority is >= 0 and <= 1000 &&
+        policy.CriticalProtectedMaterializationPriority is >= 0 and <= 1000 &&
+        policy.CriticalProtectedMaterializationPriority >= policy.ElevatedProtectedMaterializationPriority;
 
     private static bool PositiveFinite(float value) => float.IsFinite(value) && value > 0f;
 

@@ -19,34 +19,71 @@ public enum NCAILoadPressureReason : ushort
 {
     None = 0,
     FrameTime = 1 << 0,
-    WorkBudget = 1 << 1,
-    ActorSpawnQueue = 1 << 2,
-    PhysicalPerceptionQueue = 1 << 5,
-    PhysicalPerceptionBacklog = 1 << 6,
+    MaterializedActors = 1 << 1,
+    MaterializationQueue = 1 << 2,
+    DematerializationQueue = 1 << 3,
+    GroupPhysicalizationQueue = 1 << 4,
+    ScheduleBacklog = 1 << 5,
+    AbstractTravelBacklog = 1 << 6,
+    WorkBudget = 1 << 7,
+    PhysicalExecutionQueue = 1 << 8,
+    PhysicalExecutionBacklog = 1 << 9,
+    PhysicalPerceptionQueue = 1 << 10,
+    PhysicalPerceptionBacklog = 1 << 11,
+    CognitionQueue = 1 << 12,
+    CognitionBacklog = 1 << 13,
 }
 
 public enum NCAILoadQueueKind : byte
 {
-    ActorSpawn,
+    Materialization,
+    Dematerialization,
+    GroupPhysicalization,
+    PhysicalExecution,
     PhysicalPerception,
+    Cognition,
 }
 
 public enum NCAILoadBacklogKind : byte
 {
+    Schedule,
+    AbstractTravel,
+    PhysicalExecution,
     PhysicalPerception,
+    Cognition,
 }
 
 public enum NCAILoadDispatchKind : byte
 {
-    ActorSpawn,
+    RelevanceMaterialization,
+    ActorMaterialization,
+    GroupPhysicalization,
+    Schedule,
+    AbstractTravel,
+    PhysicalIntentLoad,
+    PhysicalExecutionUpdate,
     PhysicalPerception,
+    CognitionDecision,
+    CognitionPlanning,
+    CognitionExecution,
 }
 
 public enum NCAILoadWorkKind : byte
 {
-    ActorSpawn,
+    Relevance,
+    ActorMaterialization,
+    ActorDematerialization,
+    GroupPhysicalization,
+    Schedule,
+    AbstractTravel,
+    PhysicalExecution,
     PhysicalPerception,
+    Cognition,
     DamageEvents,
+    MedicalEvents,
+    DoorInteractions,
+    AdminSnapshots,
+    Ambient,
 }
 
 /// <summary>
@@ -58,12 +95,17 @@ public sealed record NCAILoadGovernorSnapshot(
     NCAILoadPressureReason Reasons,
     float SmoothedFrameMilliseconds,
     float AILifeWorkRatio,
-    int PhysicalActors,
+    int MaterializedActors,
+    int ReservedMaterializations,
+    int EffectiveSoftMaterializedBudget,
+    int HardMaterializedBudget,
     float MaximumQueueRatio,
     int BackloggedSubsystems,
     int CandidateSamples,
     long TransitionCount,
     NCActiveWorldTime LastTransitionAt,
+    long AdmissionAccepted,
+    long AdmissionRejected,
     string? ConfigurationError);
 
 /// <summary>
@@ -105,6 +147,10 @@ internal readonly record struct NCAILoadGovernorThresholds(
     float ElevatedExitQueueRatio,
     float CriticalEnterQueueRatio,
     float CriticalExitQueueRatio,
+    float ElevatedEnterMaterializedRatio,
+    float ElevatedExitMaterializedRatio,
+    float CriticalEnterMaterializedRatio,
+    float CriticalExitMaterializedRatio,
     int ElevatedBacklogCount,
     int CriticalBacklogCount,
     int CriticalExitBacklogCount)
@@ -124,6 +170,10 @@ internal readonly record struct NCAILoadGovernorThresholds(
         policy.ElevatedExitQueueRatio,
         policy.CriticalEnterQueueRatio,
         policy.CriticalExitQueueRatio,
+        policy.ElevatedEnterMaterializedRatio,
+        policy.ElevatedExitMaterializedRatio,
+        policy.CriticalEnterMaterializedRatio,
+        policy.CriticalExitMaterializedRatio,
         policy.ElevatedBacklogCount,
         policy.CriticalBacklogCount,
         policy.CriticalExitBacklogCount);
@@ -133,6 +183,7 @@ internal readonly record struct NCAILoadGovernorSample(
     float FrameMilliseconds,
     float WorkRatio,
     float QueueRatio,
+    float MaterializedRatio,
     int BacklogCount);
 
 internal readonly record struct NCAILoadGovernorDecision(
@@ -206,6 +257,7 @@ internal sealed class NCAILoadGovernorStateMachine
         if (sample.FrameMilliseconds >= thresholds.CriticalEnterFrameMilliseconds ||
             sample.WorkRatio >= thresholds.CriticalEnterWorkRatio ||
             sample.QueueRatio >= thresholds.CriticalEnterQueueRatio ||
+            sample.MaterializedRatio >= thresholds.CriticalEnterMaterializedRatio ||
             sample.BacklogCount >= thresholds.CriticalBacklogCount)
         {
             return NCAILoadState.Critical;
@@ -214,6 +266,7 @@ internal sealed class NCAILoadGovernorStateMachine
         if (sample.FrameMilliseconds >= thresholds.ElevatedEnterFrameMilliseconds ||
             sample.WorkRatio >= thresholds.ElevatedEnterWorkRatio ||
             sample.QueueRatio >= thresholds.ElevatedEnterQueueRatio ||
+            sample.MaterializedRatio >= thresholds.ElevatedEnterMaterializedRatio ||
             sample.BacklogCount >= thresholds.ElevatedBacklogCount)
         {
             return NCAILoadState.Elevated;
@@ -228,6 +281,7 @@ internal sealed class NCAILoadGovernorStateMachine
         sample.FrameMilliseconds <= thresholds.ElevatedExitFrameMilliseconds &&
         sample.WorkRatio <= thresholds.ElevatedExitWorkRatio &&
         sample.QueueRatio <= thresholds.ElevatedExitQueueRatio &&
+        sample.MaterializedRatio <= thresholds.ElevatedExitMaterializedRatio &&
         sample.BacklogCount < thresholds.ElevatedBacklogCount;
 
     private static bool RecoveredFromCritical(
@@ -236,5 +290,6 @@ internal sealed class NCAILoadGovernorStateMachine
         sample.FrameMilliseconds <= thresholds.CriticalExitFrameMilliseconds &&
         sample.WorkRatio <= thresholds.CriticalExitWorkRatio &&
         sample.QueueRatio <= thresholds.CriticalExitQueueRatio &&
+        sample.MaterializedRatio <= thresholds.CriticalExitMaterializedRatio &&
         sample.BacklogCount < thresholds.CriticalExitBacklogCount;
 }

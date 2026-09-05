@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-# One physical body prototype for the initial Living City population. Residents have no authored profession,
-# organization, home, work location, or abstract population slot.
+# This is the single physical foundation for every persistent human NPC. Jobs add capabilities and equipment;
+# they do not replace this HTN root with profession-specific brains.
+# Persistent Living City actors deliberately do not receive the station's NanoTrasen NPC faction.
 - type: entity
   id: NCLivingCityCivilian
   name: city resident
@@ -13,8 +14,6 @@
   - type: InputMover
   - type: MobMover
   - type: HTN
-    # GPT owns ordinary intent selection. HTN is enabled only as a bounded combat/reflex executor.
-    enabled: false
     rootTask:
       task: NCLivingHumanCompound
     planCooldown: 1
@@ -25,83 +24,433 @@
         3
       MaximumIdleTime: !type:Single
         8
+  - type: RandomHumanoidAppearance
   - type: Loadout
     prototypes: [LimitedPassengerGear]
   - type: NpcFactionMember
     factions: [Passive]
   - type: FactionException
+  - type: NPCRetaliation
+    attackMemoryLength: 30s
   - type: NCNeuralConversationTarget
     maximumUtteranceLength: 2048
-    maximumNpcConversationTurns: 16
 
 - type: ncCityActorArchetype
-  id: NCLivingCityResident
+  id: NCLivingCityUtilityResident
   entityPrototype: NCLivingCityCivilian
   spawnCandidateProfile: NCPedestrianSpawnCandidates
   travelMode: Pedestrian
+  cognitionTier: Utility
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
 
-- type: ncRandomResidentGenerationProfile
-  id: NCDefaultRandomResidentGeneration
-  archetype: NCLivingCityResident
-  species: Human
-  personas:
-  - NCResidentPersonaCautious
-  - NCResidentPersonaHardboiled
-  - NCResidentPersonaCompassionate
-  - NCResidentPersonaRestless
-  - NCResidentPersonaProud
-  - NCResidentPersonaPragmatic
-  backgroundKeys:
-  - raised-by-neighbors
-  - former-street-vendor
-  - displaced-after-fire
-  - learned-to-survive-alone
-  - supports-distant-family
-  - grew-up-around-gangs
-  - lost-a-small-business
-  - new-to-this-district
-  pressureKeys:
-  - short-on-cash
-  - owes-a-personal-favor
-  - worried-about-someone-close
-  - needs-stable-work
-  - hiding-a-recent-mistake
-  - trying-to-rebuild-reputation
-  - exhausted-and-overworked
-  - looking-for-a-safe-place
-  fearKeys:
-  - abandonment
-  - public-humiliation
-  - police-attention
-  - helplessness
-  - betrayal
-  - losing-control
-  - debt-collectors
-  - being-trapped
-  goalKeys:
-  - earn-enough-to-feel-secure
-  - protect-someone-close
-  - make-a-useful-connection
-  - find-steady-work
-  - regain-respect
-  - leave-a-bad-situation
-  - learn-who-can-be-trusted
-  - get-through-today-unhurt
-  socialHabitKeys:
-  - watches-before-speaking
-  - helps-before-asking-payment
-  - trades-favors
-  - keeps-personal-distance
-  - challenges-disrespect
-  - jokes-when-nervous
-  - avoids-crowds
-  - remembers-small-kindnesses
-  speechQuirkKeys:
-  - clipped-sentences
-  - dry-humor
-  - nervous-pauses
-  - blunt-questions
-  - quiet-understatement
-  - street-metaphors
-  - avoids-formal-words
-  - changes-tone-under-pressure
+- type: ncCityActorArchetype
+  id: NCLivingCityPlannerResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCLivingCityNeuralResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+# These stable street-scoped IDs may already exist in persistent actor records. They now resolve to
+# ordinary civilians and no longer provide factions, combat equipment, or Street War behavior.
+- type: ncCityActorArchetype
+  id: NCE22UtilityResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Utility
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCE22PlannerResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCE22NeuralResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NC23UtilityResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Utility
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NC23PlannerResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NC23NeuralResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NC24UtilityResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Utility
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NC24PlannerResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NC24NeuralResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCProspectUtilityResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Utility
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCProspectPlannerResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCProspectNeuralResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCPotomacUtilityResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Utility
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCPotomacPlannerResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityActorArchetype
+  id: NCPotomacNeuralResident
+  entityPrototype: NCLivingCityCivilian
+  spawnCandidateProfile: NCPedestrianSpawnCandidates
+  travelMode: Pedestrian
+  cognitionTier: Planner
+  allowedHomeContexts: [District, Sector, Street, Building, Apartment]
+  allowedWorkContexts: [District, Sector, Street, Building, Apartment, MissionSlot]
+  routineProfile: NCDefaultCivilianRoutine
+
+- type: ncCityIdentityPool
+  id: NCNightCityResidentNames
+  givenNames:
+  - Alex
+  - Aoi
+  - Camila
+  - Dante
+  - Diego
+  - Emi
+  - Evelyn
+  - Hana
+  - Imani
+  - Jackie
+  - Jae
+  - Juno
+  - Kei
+  - Lena
+  - Mateo
+  - Mina
+  - Niko
+  - Priya
+  - Ren
+  - Rosa
+  - Santiago
+  - Sasha
+  - Takeshi
+  - Yuri
+  familyNames:
+  - Alvarez
+  - Arasaka
+  - Brooks
+  - Chen
+  - Costa
+  - Cruz
+  - Diaz
+  - Flores
+  - Garcia
+  - Ito
+  - Johnson
+  - Kim
+  - Kovacs
+  - Martinez
+  - Nakamura
+  - Okafor
+  - Park
+  - Patel
+  - Reyes
+  - Sato
+  - Silva
+  - Singh
+  - Tanaka
+  - Welles
+
+# Coordinate-free housing profiles. They describe persistent social/economic circumstances only and never map to a
+# room, marker, entity, or mapper-authored apartment.
+- type: ncAbstractResidenceProfile
+  id: NCSquatResidence
+  kind: Squat
+  quality: Precarious
+  weeklyCost: 0
+  selectionWeight: 15
+
+- type: ncAbstractResidenceProfile
+  id: NCCubeResidence
+  kind: Cube
+  quality: Basic
+  weeklyCost: 200
+  selectionWeight: 35
+
+- type: ncAbstractResidenceProfile
+  id: NCSharedApartmentResidence
+  kind: SharedApartment
+  quality: Basic
+  weeklyCost: 350
+  selectionWeight: 35
+
+- type: ncAbstractResidenceProfile
+  id: NCRentedApartmentResidence
+  kind: Apartment
+  quality: Standard
+  weeklyCost: 600
+  selectionWeight: 15
+
+# Canonical initialization and legacy migration policy. All homes remain coordinate-free.
+- type: ncCityResidenceAllocationPolicy
+  id: NCDefaultResidenceAllocationPolicy
+  snapshotPageSize: 250
+  maximumActorsPerRun: 20000
+  maximumConcurrentMutations: 8
+  residenceProfiles:
+  - NCSquatResidence
+  - NCCubeResidence
+  - NCSharedApartmentResidence
+  - NCRentedApartmentResidence
+  storageRetryCount: 3
+  storageRetryDelay: 1s
+
+- type: ncCityPopulationProfile
+  id: NCLivingCityDistrictBootstrapPopulation
+  scopeId: 7b379e0d-506c-4b7a-b9ba-1d191e6aaef4
+  cohorts:
+  - { id: e22-utility, count: 7, identityPool: NCNightCityResidentNames, archetype: NCE22UtilityResident, homeZone: 8acce8f0-9929-484f-9daa-95b3f37a82f6, workZone: 8acce8f0-9929-484f-9daa-95b3f37a82f6, livelihood: NCCourier }
+  - { id: e22-planner, count: 2, identityPool: NCNightCityResidentNames, archetype: NCE22PlannerResident, homeZone: 8acce8f0-9929-484f-9daa-95b3f37a82f6, workZone: 8acce8f0-9929-484f-9daa-95b3f37a82f6, faction: NCWengFangTong, factionRole: associate }
+  - { id: e22-neural, count: 1, identityPool: NCNightCityResidentNames, archetype: NCE22NeuralResident, homeZone: 8acce8f0-9929-484f-9daa-95b3f37a82f6, workZone: 8acce8f0-9929-484f-9daa-95b3f37a82f6, faction: NCReckoners, factionRole: member }
+  - { id: street-23-utility, count: 7, identityPool: NCNightCityResidentNames, archetype: NC23UtilityResident, homeZone: e1acb51c-9b2b-4b05-af52-011bcef55ebe, workZone: e1acb51c-9b2b-4b05-af52-011bcef55ebe, livelihood: NCServiceWorker }
+  - { id: street-23-planner, count: 2, identityPool: NCNightCityResidentNames, archetype: NC23PlannerResident, homeZone: e1acb51c-9b2b-4b05-af52-011bcef55ebe, workZone: e1acb51c-9b2b-4b05-af52-011bcef55ebe, faction: NCKillKrashers, factionRole: associate }
+  - { id: street-23-neural, count: 1, identityPool: NCNightCityResidentNames, archetype: NC23NeuralResident, homeZone: e1acb51c-9b2b-4b05-af52-011bcef55ebe, workZone: e1acb51c-9b2b-4b05-af52-011bcef55ebe, faction: NCDeadWoods, factionRole: contact }
+  - { id: street-24-utility, count: 8, identityPool: NCNightCityResidentNames, archetype: NC24UtilityResident, homeZone: 624ada25-1e0d-4240-a6c2-0884d28abcf5, workZone: 624ada25-1e0d-4240-a6c2-0884d28abcf5, livelihood: NCWarehouseWorker }
+  - { id: street-24-planner, count: 1, identityPool: NCNightCityResidentNames, archetype: NC24PlannerResident, homeZone: 624ada25-1e0d-4240-a6c2-0884d28abcf5, workZone: 624ada25-1e0d-4240-a6c2-0884d28abcf5, faction: NCWengFangTong, factionRole: lookout }
+  - { id: street-24-neural, count: 1, identityPool: NCNightCityResidentNames, archetype: NC24NeuralResident, homeZone: 624ada25-1e0d-4240-a6c2-0884d28abcf5, workZone: 624ada25-1e0d-4240-a6c2-0884d28abcf5, faction: NCReckoners, factionRole: member }
+  - { id: prospect-utility, count: 8, identityPool: NCNightCityResidentNames, archetype: NCProspectUtilityResident, homeZone: ddd0d6b9-f239-4ecb-b704-bda14df210b1, workZone: ddd0d6b9-f239-4ecb-b704-bda14df210b1, livelihood: NCScavenger }
+  - { id: prospect-planner, count: 2, identityPool: NCNightCityResidentNames, archetype: NCProspectPlannerResident, homeZone: ddd0d6b9-f239-4ecb-b704-bda14df210b1, workZone: ddd0d6b9-f239-4ecb-b704-bda14df210b1, faction: NCDeadWoods, factionRole: contact }
+  - { id: potomac-utility, count: 8, identityPool: NCNightCityResidentNames, archetype: NCPotomacUtilityResident, homeZone: 4f59226c-9e3f-4300-b981-7b1951a9f7c1, workZone: 4f59226c-9e3f-4300-b981-7b1951a9f7c1, livelihood: NCStreetVendor }
+  - { id: potomac-planner, count: 2, identityPool: NCNightCityResidentNames, archetype: NCPotomacPlannerResident, homeZone: 4f59226c-9e3f-4300-b981-7b1951a9f7c1, workZone: 4f59226c-9e3f-4300-b981-7b1951a9f7c1, faction: NCKillKrashers, factionRole: associate }
+
+  # District residents. Most remain unaffiliated; small authored cohorts seed every 2045 faction.
+  - { id: little-china-free, count: 4, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, livelihood: NCStreetVendor }
+  - { id: little-china-gold-dragons, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, faction: NCGoldDragons, factionRole: member }
+  - { id: little-china-red-chrome, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, faction: NCRedChromeLegion, factionRole: member }
+  - { id: little-china-weng-fang, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, faction: NCWengFangTong, factionRole: associate }
+  - { id: old-japantown-free, count: 4, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: e2e35b70-5277-4359-91a6-0792e01fb477, workZone: e2e35b70-5277-4359-91a6-0792e01fb477, livelihood: NCRetailWorker }
+  - { id: old-japantown-iron-sights, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: e2e35b70-5277-4359-91a6-0792e01fb477, workZone: e2e35b70-5277-4359-91a6-0792e01fb477, faction: NCIronSights, factionRole: member }
+  - { id: old-japantown-tyger-claws, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: e2e35b70-5277-4359-91a6-0792e01fb477, workZone: e2e35b70-5277-4359-91a6-0792e01fb477, faction: NCTygerClaws, factionRole: associate }
+  - { id: old-japantown-shroomers, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: e2e35b70-5277-4359-91a6-0792e01fb477, workZone: e2e35b70-5277-4359-91a6-0792e01fb477, faction: NCShroomers, factionRole: resident }
+  - { id: old-combat-zone-free, count: 4, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: 0122fb70-1fcc-46c7-968a-0245372d8484, workZone: 0122fb70-1fcc-46c7-968a-0245372d8484, livelihood: NCScavenger }
+  - { id: old-combat-zone-edgerunners, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: 0122fb70-1fcc-46c7-968a-0245372d8484, workZone: 0122fb70-1fcc-46c7-968a-0245372d8484, faction: NCEdgerunnersInc, factionRole: contractor }
+  - { id: old-combat-zone-faded, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: 0122fb70-1fcc-46c7-968a-0245372d8484, workZone: 0122fb70-1fcc-46c7-968a-0245372d8484, faction: NCFaded, factionRole: resident }
+  - { id: old-combat-zone-generation-red, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: 0122fb70-1fcc-46c7-968a-0245372d8484, workZone: 0122fb70-1fcc-46c7-968a-0245372d8484, faction: NCGenerationRed, factionRole: member }
+  - { id: reclamation-free, count: 8, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: a54f1778-e26b-4dc9-af62-267003c660c7, workZone: a54f1778-e26b-4dc9-af62-267003c660c7, livelihood: NCFreelanceTech }
+  - { id: reclamation-tombstone, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: a54f1778-e26b-4dc9-af62-267003c660c7, workZone: a54f1778-e26b-4dc9-af62-267003c660c7, faction: NCTombstonePreservers, factionRole: custodian }
+  - { id: port-free, count: 6, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: 504dd7a0-4f25-43df-a96c-3f4069ea6de5, workZone: 504dd7a0-4f25-43df-a96c-3f4069ea6de5, livelihood: NCWarehouseWorker }
+  - { id: port-consortium, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: 504dd7a0-4f25-43df-a96c-3f4069ea6de5, workZone: 504dd7a0-4f25-43df-a96c-3f4069ea6de5, faction: NCConsortium, factionRole: associate }
+  - { id: port-deadwoods, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: 504dd7a0-4f25-43df-a96c-3f4069ea6de5, workZone: 504dd7a0-4f25-43df-a96c-3f4069ea6de5, faction: NCDeadWoods, factionRole: contact }
+  - { id: south-bozos, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: 88684957-b4da-4f20-862d-b67b4b030882, workZone: 88684957-b4da-4f20-862d-b67b4b030882, faction: NCBozos, factionRole: member }
+  - { id: south-enhanced, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: 88684957-b4da-4f20-862d-b67b4b030882, workZone: 88684957-b4da-4f20-862d-b67b4b030882, faction: NCEnhanced, factionRole: member }
+  - { id: south-kanzaki, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: 88684957-b4da-4f20-862d-b67b4b030882, workZone: 88684957-b4da-4f20-862d-b67b4b030882, faction: NCKanzakiFamily, factionRole: associate }
+  - { id: south-sinful-adams, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: 88684957-b4da-4f20-862d-b67b4b030882, workZone: 88684957-b4da-4f20-862d-b67b4b030882, faction: NCSinfulAdams, factionRole: member }
+  - { id: south-zoners, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: 88684957-b4da-4f20-862d-b67b4b030882, workZone: 88684957-b4da-4f20-862d-b67b4b030882, faction: NCZoners, factionRole: organizer }
+  - { id: university-free, count: 6, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: c4f78018-c60c-4e1f-b114-0ce90b7424c5, workZone: c4f78018-c60c-4e1f-b114-0ce90b7424c5, livelihood: NCServiceWorker }
+  - { id: university-vampyres, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: c4f78018-c60c-4e1f-b114-0ce90b7424c5, workZone: c4f78018-c60c-4e1f-b114-0ce90b7424c5, faction: NCPhilharmonicVampyres, factionRole: performer }
+  - { id: university-princesses, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: c4f78018-c60c-4e1f-b114-0ce90b7424c5, workZone: c4f78018-c60c-4e1f-b114-0ce90b7424c5, faction: NCPrincessesOfJustice, factionRole: member }
+  - { id: downtown-free, count: 6, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, workZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, livelihood: NCCourier }
+  - { id: downtown-eastern-tigers, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, workZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, faction: NCEasternTigersTriad, factionRole: associate }
+  - { id: downtown-skiv-family, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, workZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, faction: NCSkivFamily, factionRole: associate }
+  - { id: little-europe-free, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, workZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, livelihood: NCRetailWorker }
+  - { id: little-europe-sixth-street, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, workZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, faction: NC6thStreet, factionRole: member }
+  - { id: little-europe-eurotrashers, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, workZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, faction: NCEurotrashers, factionRole: associate }
+  - { id: little-europe-maelstrom, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, workZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, faction: NCMaelstrom, factionRole: member }
+  - { id: little-europe-undertow, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, workZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, faction: NCUndertow, factionRole: contact }
+  - { id: hot-zone-free, count: 6, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: dab954b5-52a7-4551-a874-d6101d1f1429, workZone: dab954b5-52a7-4551-a874-d6101d1f1429, livelihood: NCScavenger }
+  - { id: hot-zone-lightning-cats, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: dab954b5-52a7-4551-a874-d6101d1f1429, workZone: dab954b5-52a7-4551-a874-d6101d1f1429, faction: NCLightningCats, factionRole: member }
+  - { id: hot-zone-scavvers, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: dab954b5-52a7-4551-a874-d6101d1f1429, workZone: dab954b5-52a7-4551-a874-d6101d1f1429, faction: NCScavvers, factionRole: scavenger }
+  - { id: upper-marina-free, count: 6, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: e49d1531-7134-4212-bb1f-44fc76f325ec, workZone: e49d1531-7134-4212-bb1f-44fc76f325ec, livelihood: NCFreelanceTech }
+  - { id: upper-marina-prime-time, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: e49d1531-7134-4212-bb1f-44fc76f325ec, workZone: e49d1531-7134-4212-bb1f-44fc76f325ec, faction: NCPrimeTimePlayers, factionRole: associate }
+  - { id: upper-marina-street-queens, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: e49d1531-7134-4212-bb1f-44fc76f325ec, workZone: e49d1531-7134-4212-bb1f-44fc76f325ec, faction: NCStreetQueens, factionRole: member }
+
+  # Formal workforce: existing player jobs, independent NPC counts, and no NPC chiefs.
+  - { id: ncpd-commander, count: 1, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, workZone: a9c069f8-8558-493c-844b-b7bfe8775521, job: NCPDCommander }
+  - { id: ncpd-lieutenant, count: 1, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: c20733c2-faa0-4d43-aaf6-37c3f6bd886b, workZone: a9c069f8-8558-493c-844b-b7bfe8775521, job: NCPDLieutenant }
+  - { id: ncpd-inspector, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: e2e35b70-5277-4359-91a6-0792e01fb477, workZone: a9c069f8-8558-493c-844b-b7bfe8775521, job: NCPDInspector }
+  - { id: ncpd-sergeant, count: 3, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, workZone: a9c069f8-8558-493c-844b-b7bfe8775521, job: NCPDSergeant }
+  - { id: ncpd-officer, count: 8, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: c20733c2-faa0-4d43-aaf6-37c3f6bd886b, workZone: a9c069f8-8558-493c-844b-b7bfe8775521, job: NCPDOfficer }
+  - { id: ncpd-cadet, count: 5, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, workZone: a9c069f8-8558-493c-844b-b7bfe8775521, job: NCPDCadet }
+  - { id: medical-coroner, count: 1, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: dab954b5-52a7-4551-a874-d6101d1f1429, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, job: NCMedicalCoroner }
+  - { id: medical-psychologist, count: 1, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: c4f78018-c60c-4e1f-b114-0ce90b7424c5, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, job: NCMedicalPsychologist }
+  - { id: medical-doctor, count: 5, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: e49d1531-7134-4212-bb1f-44fc76f325ec, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, job: NCMedicalDoctor }
+  - { id: medical-technician, count: 3, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: c20733c2-faa0-4d43-aaf6-37c3f6bd886b, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, job: NCMedicalTechnician }
+  - { id: medical-intern, count: 6, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, job: NCMedicalIntern }
+  - { id: trauma-operative, count: 4, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: e49d1531-7134-4212-bb1f-44fc76f325ec, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, job: TraumaTeamOperative }
+  - { id: trauma-paramedic, count: 6, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: c20733c2-faa0-4d43-aaf6-37c3f6bd886b, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, job: TraumaTeamParamedic }
+  - { id: biotechnica-lead, count: 1, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, workZone: e49d1531-7134-4212-bb1f-44fc76f325ec, job: BiotechnicaOperativeLead }
+  - { id: biotechnica-operative, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: e2e35b70-5277-4359-91a6-0792e01fb477, workZone: e49d1531-7134-4212-bb1f-44fc76f325ec, job: BiotechnicaOperative }
+  - { id: biotechnica-netrunner, count: 1, identityPool: NCNightCityResidentNames, archetype: NCLivingCityNeuralResident, homeZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, workZone: e49d1531-7134-4212-bb1f-44fc76f325ec, job: BiotechnicaNetrunner }
+  - { id: biotechnica-rigger, count: 1, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: c20733c2-faa0-4d43-aaf6-37c3f6bd886b, workZone: e49d1531-7134-4212-bb1f-44fc76f325ec, job: BiotechnicaRigger }
+  - { id: biotechnica-medtech, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, workZone: e49d1531-7134-4212-bb1f-44fc76f325ec, job: BiotechnicaMedTech }
+  - { id: biotechnica-paramedic, count: 1, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: 88684957-b4da-4f20-862d-b67b4b030882, workZone: e49d1531-7134-4212-bb1f-44fc76f325ec, job: BiotechnicaParamedic }
+  - { id: biotechnica-tech, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: c4f78018-c60c-4e1f-b114-0ce90b7424c5, workZone: e49d1531-7134-4212-bb1f-44fc76f325ec, job: BiotechnicaTech }
+  - { id: biotechnica-botanist, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: a54f1778-e26b-4dc9-af62-267003c660c7, workZone: e49d1531-7134-4212-bb1f-44fc76f325ec, job: BiotechnicaBotanist }
+  - { id: militech-lead, count: 1, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: e49d1531-7134-4212-bb1f-44fc76f325ec, workZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, job: MilitechOperativeLead }
+  - { id: militech-security, count: 3, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: c20733c2-faa0-4d43-aaf6-37c3f6bd886b, workZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, job: MilitechSecuritySpecialist }
+  - { id: militech-operative, count: 3, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: e2e35b70-5277-4359-91a6-0792e01fb477, workZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, job: MilitechOperative }
+  - { id: militech-netrunner, count: 1, identityPool: NCNightCityResidentNames, archetype: NCLivingCityNeuralResident, homeZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, workZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, job: MilitechNetrunner }
+  - { id: militech-rigger, count: 1, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: 504dd7a0-4f25-43df-a96c-3f4069ea6de5, workZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, job: MilitechRigger }
+  - { id: militech-combat-medic, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, workZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, job: MilitechCombatMedic }
+  - { id: militech-tech, count: 2, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: 88684957-b4da-4f20-862d-b67b4b030882, workZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, job: MilitechTech }
+  - { id: militech-quartermaster, count: 1, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: dab954b5-52a7-4551-a874-d6101d1f1429, workZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, job: MilitechQuartermaster }
+  - { id: zhirafa-engineer, count: 10, identityPool: NCNightCityResidentNames, archetype: NCLivingCityPlannerResident, homeZone: 88684957-b4da-4f20-862d-b67b4b030882, workZone: c20733c2-faa0-4d43-aaf6-37c3f6bd886b, job: ZhirafaEngineer }
+  - { id: zhirafa-janitor, count: 14, identityPool: NCNightCityResidentNames, archetype: NCLivingCityUtilityResident, homeZone: c20733c2-faa0-4d43-aaf6-37c3f6bd886b, workZone: c20733c2-faa0-4d43-aaf6-37c3f6bd886b, job: ZhirafaJanitor }
+
+  # Named narrative Actors replace deterministic cohort slots, preserving the 256-person population and upgrading
+  # an already imported development database without duplicating residents.
+  actors:
+  # Organizations: recognizable specialists, never player-facing organization heads.
+  - { stableLocalId: maya-torres, fullName: Maya Torres, aliases: [Maya], archetype: NCLivingCityPlannerResident, homeZone: c20733c2-faa0-4d43-aaf6-37c3f6bd886b, workZone: a9c069f8-8558-493c-844b-b7bfe8775521, job: NCPDOfficer, narrativeActorProfile: NCNarrativeMayaTorres, replacesCohortId: ncpd-officer, replacesCohortIndex: 7 }
+  - { stableLocalId: elena-sato, fullName: Elena Sato, aliases: [Doctor Sato], archetype: NCLivingCityPlannerResident, homeZone: e49d1531-7134-4212-bb1f-44fc76f325ec, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, job: NCMedicalDoctor, narrativeActorProfile: NCNarrativeElenaSato, replacesCohortId: medical-doctor, replacesCohortIndex: 4 }
+  - { stableLocalId: marcus-vale, fullName: Marcus Vale, aliases: [Vale], archetype: NCLivingCityPlannerResident, homeZone: e2e35b70-5277-4359-91a6-0792e01fb477, workZone: e49d1531-7134-4212-bb1f-44fc76f325ec, job: BiotechnicaOperative, narrativeActorProfile: NCNarrativeMarcusVale, replacesCohortId: biotechnica-operative, replacesCohortIndex: 1 }
+  - { stableLocalId: sarah-ward, fullName: Sarah Ward, aliases: [Ward], archetype: NCLivingCityPlannerResident, homeZone: e2e35b70-5277-4359-91a6-0792e01fb477, workZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, job: MilitechOperative, narrativeActorProfile: NCNarrativeSarahWard, replacesCohortId: militech-operative, replacesCohortIndex: 2 }
+  - { stableLocalId: ilya-koval, fullName: Ilya Koval, aliases: [Koval], archetype: NCLivingCityPlannerResident, homeZone: 88684957-b4da-4f20-862d-b67b4b030882, workZone: c20733c2-faa0-4d43-aaf6-37c3f6bd886b, job: ZhirafaEngineer, narrativeActorProfile: NCNarrativeIlyaKoval, replacesCohortId: zhirafa-engineer, replacesCohortIndex: 9 }
+  - { stableLocalId: naomi-brooks, fullName: Naomi Brooks, aliases: [Brooks], archetype: NCLivingCityPlannerResident, homeZone: e49d1531-7134-4212-bb1f-44fc76f325ec, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, job: TraumaTeamOperative, narrativeActorProfile: NCNarrativeNaomiBrooks, replacesCohortId: trauma-operative, replacesCohortIndex: 3 }
+
+  # Independent Fixers.
+  - { stableLocalId: mira-switch-volkov, fullName: Mira Volkov, aliases: [Switch], archetype: NCLivingCityPlannerResident, homeZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, workZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, livelihood: NCFixer, narrativeActorProfile: NCNarrativeMiraSwitchVolkov, replacesCohortId: downtown-free, replacesCohortIndex: 5 }
+  - { stableLocalId: rafael-ledger-ortega, fullName: Rafael Ortega, aliases: [Ledger], archetype: NCLivingCityPlannerResident, homeZone: 504dd7a0-4f25-43df-a96c-3f4069ea6de5, workZone: 504dd7a0-4f25-43df-a96c-3f4069ea6de5, livelihood: NCFixer, narrativeActorProfile: NCNarrativeRafaelLedgerOrtega, replacesCohortId: port-free, replacesCohortIndex: 5 }
+  - { stableLocalId: keiko-moth-tanaka, fullName: Keiko Tanaka, aliases: [Moth], archetype: NCLivingCityPlannerResident, homeZone: e49d1531-7134-4212-bb1f-44fc76f325ec, workZone: e49d1531-7134-4212-bb1f-44fc76f325ec, livelihood: NCFixer, narrativeActorProfile: NCNarrativeKeikoMothTanaka, replacesCohortId: upper-marina-free, replacesCohortIndex: 5 }
+
+  # Faction contacts. Their role is local and does not reserve a player leadership position.
+  - { stableLocalId: cole-bulwark-mercer, fullName: Cole Mercer, aliases: [Bulwark], archetype: NCLivingCityPlannerResident, homeZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, workZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, faction: NC6thStreet, factionRole: quartermaster, narrativeActorProfile: NCNarrativeColeBulwarkMercer, replacesCohortId: little-europe-sixth-street, replacesCohortIndex: 1 }
+  - { stableLocalId: luc-velvet-moreau, fullName: Luc Moreau, aliases: [Velvet], archetype: NCLivingCityPlannerResident, homeZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, workZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, faction: NCEurotrashers, factionRole: promoter, narrativeActorProfile: NCNarrativeLucVelvetMoreau, replacesCohortId: little-europe-eurotrashers, replacesCohortIndex: 1 }
+  - { stableLocalId: ingrid-hexwire-voss, fullName: Ingrid Voss, aliases: [Hexwire], archetype: NCLivingCityPlannerResident, homeZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, workZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, faction: NCMaelstrom, factionRole: chrome-broker, narrativeActorProfile: NCNarrativeIngridHexwireVoss, replacesCohortId: little-europe-maelstrom, replacesCohortIndex: 1 }
+  - { stableLocalId: mara-brine-okafor, fullName: Mara Okafor, aliases: [Brine], archetype: NCLivingCityPlannerResident, homeZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, workZone: 4d6250ae-c5c9-4aa1-8fbe-93a378b96da2, faction: NCUndertow, factionRole: route-keeper, narrativeActorProfile: NCNarrativeMaraBrineOkafor, replacesCohortId: little-europe-undertow, replacesCohortIndex: 1 }
+  - { stableLocalId: darius-replay-king, fullName: Darius King, aliases: [Replay], archetype: NCLivingCityPlannerResident, homeZone: e49d1531-7134-4212-bb1f-44fc76f325ec, workZone: e49d1531-7134-4212-bb1f-44fc76f325ec, faction: NCPrimeTimePlayers, factionRole: talent-broker, narrativeActorProfile: NCNarrativeDariusReplayKing, replacesCohortId: upper-marina-prime-time, replacesCohortIndex: 1 }
+  - { stableLocalId: sofia-crown-alvarez, fullName: Sofia Alvarez, aliases: [Crown], archetype: NCLivingCityPlannerResident, homeZone: e49d1531-7134-4212-bb1f-44fc76f325ec, workZone: e49d1531-7134-4212-bb1f-44fc76f325ec, faction: NCStreetQueens, factionRole: neighborhood-envoy, narrativeActorProfile: NCNarrativeSofiaCrownAlvarez, replacesCohortId: upper-marina-street-queens, replacesCohortIndex: 1 }
+  - { stableLocalId: wei-abacus-shen, fullName: Wei Shen, aliases: [Abacus], archetype: NCLivingCityPlannerResident, homeZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, workZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, faction: NCEasternTigersTriad, factionRole: envoy, narrativeActorProfile: NCNarrativeWeiAbacusShen, replacesCohortId: downtown-eastern-tigers, replacesCohortIndex: 1 }
+  - { stableLocalId: pavel-patch-skiv, fullName: Pavel Skiv, aliases: [Patch], archetype: NCLivingCityPlannerResident, homeZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, workZone: eca1baef-2094-4278-95dc-88ac7e2c6a40, faction: NCSkivFamily, factionRole: mediator, narrativeActorProfile: NCNarrativePavelPatchSkiv, replacesCohortId: downtown-skiv-family, replacesCohortIndex: 1 }
+  - { stableLocalId: rina-spark-okada, fullName: Rina Okada, aliases: [Spark], archetype: NCLivingCityPlannerResident, homeZone: dab954b5-52a7-4551-a874-d6101d1f1429, workZone: dab954b5-52a7-4551-a874-d6101d1f1429, faction: NCLightningCats, factionRole: scout, narrativeActorProfile: NCNarrativeRinaSparkOkada, replacesCohortId: hot-zone-lightning-cats, replacesCohortIndex: 1 }
+  - { stableLocalId: elias-ash-rourke, fullName: Elias Rourke, aliases: [Ash], archetype: NCLivingCityPlannerResident, homeZone: 8acce8f0-9929-484f-9daa-95b3f37a82f6, workZone: 8acce8f0-9929-484f-9daa-95b3f37a82f6, faction: NCReckoners, factionRole: preacher, narrativeActorProfile: NCNarrativeEliasAshRourke, replacesCohortId: e22-neural, replacesCohortIndex: 0 }
+  - { stableLocalId: tomas-latch-velasquez, fullName: Tomas Velasquez, aliases: [Latch], archetype: NCLivingCityPlannerResident, homeZone: dab954b5-52a7-4551-a874-d6101d1f1429, workZone: dab954b5-52a7-4551-a874-d6101d1f1429, faction: NCScavvers, factionRole: salvage-broker, narrativeActorProfile: NCNarrativeTomasLatchVelasquez, replacesCohortId: hot-zone-scavvers, replacesCohortIndex: 1 }
+  - { stableLocalId: minh-lantern-tran, fullName: Minh Tran, aliases: [Lantern], archetype: NCLivingCityPlannerResident, homeZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, faction: NCGoldDragons, factionRole: community-guard, narrativeActorProfile: NCNarrativeMinhLanternTran, replacesCohortId: little-china-gold-dragons, replacesCohortIndex: 1 }
+  - { stableLocalId: viktor-rivet-brandt, fullName: Viktor Brandt, aliases: [Rivet], archetype: NCLivingCityPlannerResident, homeZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, faction: NCRedChromeLegion, factionRole: recruiter, narrativeActorProfile: NCNarrativeViktorRivetBrandt, replacesCohortId: little-china-red-chrome, replacesCohortIndex: 1 }
+  - { stableLocalId: lin-jade-fang, fullName: Lin Fang, aliases: [Jade], archetype: NCLivingCityPlannerResident, homeZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, workZone: ff8d2122-6fb3-42cf-b3b4-02e83d9f908f, faction: NCWengFangTong, factionRole: broker, narrativeActorProfile: NCNarrativeLinJadeFang, replacesCohortId: little-china-weng-fang, replacesCohortIndex: 1 }
+  - { stableLocalId: celeste-nocturne-bell, fullName: Celeste Bell, aliases: [Nocturne], archetype: NCLivingCityPlannerResident, homeZone: c4f78018-c60c-4e1f-b114-0ce90b7424c5, workZone: c4f78018-c60c-4e1f-b114-0ce90b7424c5, faction: NCPhilharmonicVampyres, factionRole: performer, narrativeActorProfile: NCNarrativeCelesteNocturneBell, replacesCohortId: university-vampyres, replacesCohortIndex: 1 }
+  - { stableLocalId: amina-radiant-cole, fullName: Amina Cole, aliases: [Radiant], archetype: NCLivingCityPlannerResident, homeZone: c4f78018-c60c-4e1f-b114-0ce90b7424c5, workZone: c4f78018-c60c-4e1f-b114-0ce90b7424c5, faction: NCPrincessesOfJustice, factionRole: advocate, narrativeActorProfile: NCNarrativeAminaRadiantCole, replacesCohortId: university-princesses, replacesCohortIndex: 1 }
+  - { stableLocalId: ruth-axle-morgan, fullName: Ruth Morgan, aliases: [Axle], archetype: NCLivingCityPlannerResident, homeZone: 504dd7a0-4f25-43df-a96c-3f4069ea6de5, workZone: 504dd7a0-4f25-43df-a96c-3f4069ea6de5, faction: NCDeadWoods, factionRole: convoy-coordinator, narrativeActorProfile: NCNarrativeRuthAxleMorgan, replacesCohortId: port-deadwoods, replacesCohortIndex: 1 }
+  - { stableLocalId: jax-redline-harlow, fullName: Jax Harlow, aliases: [Redline], archetype: NCLivingCityPlannerResident, homeZone: e1acb51c-9b2b-4b05-af52-011bcef55ebe, workZone: e1acb51c-9b2b-4b05-af52-011bcef55ebe, faction: NCKillKrashers, factionRole: raid-captain, narrativeActorProfile: NCNarrativeJaxRedlineHarlow, replacesCohortId: street-23-planner, replacesCohortIndex: 1 }
+  - { stableLocalId: mason-breach-crowe, fullName: Mason Crowe, aliases: [Breach], archetype: NCLivingCityPlannerResident, homeZone: e2e35b70-5277-4359-91a6-0792e01fb477, workZone: e2e35b70-5277-4359-91a6-0792e01fb477, faction: NCIronSights, factionRole: arms-broker, narrativeActorProfile: NCNarrativeMasonBreachCrowe, replacesCohortId: old-japantown-iron-sights, replacesCohortIndex: 1 }
+  - { stableLocalId: nia-spore-adeyemi, fullName: Nia Adeyemi, aliases: [Spore], archetype: NCLivingCityPlannerResident, homeZone: e2e35b70-5277-4359-91a6-0792e01fb477, workZone: e2e35b70-5277-4359-91a6-0792e01fb477, faction: NCShroomers, factionRole: community-medic, narrativeActorProfile: NCNarrativeNiaSporeAdeyemi, replacesCohortId: old-japantown-shroomers, replacesCohortIndex: 1 }
+  - { stableLocalId: kenji-kite-sakamoto, fullName: Kenji Sakamoto, aliases: [Kite], archetype: NCLivingCityPlannerResident, homeZone: e2e35b70-5277-4359-91a6-0792e01fb477, workZone: e2e35b70-5277-4359-91a6-0792e01fb477, faction: NCTygerClaws, factionRole: local-envoy, narrativeActorProfile: NCNarrativeKenjiKiteSakamoto, replacesCohortId: old-japantown-tyger-claws, replacesCohortIndex: 1 }
+  - { stableLocalId: milo-grin-vane, fullName: Milo Vane, aliases: [Grin], archetype: NCLivingCityPlannerResident, homeZone: 88684957-b4da-4f20-862d-b67b4b030882, workZone: 88684957-b4da-4f20-862d-b67b4b030882, faction: NCBozos, factionRole: stage-manager, narrativeActorProfile: NCNarrativeMiloGrinVane, replacesCohortId: south-bozos, replacesCohortIndex: 1 }
+  - { stableLocalId: iris-chromeheart-bell, fullName: Iris Bell, aliases: [Chromeheart], archetype: NCLivingCityPlannerResident, homeZone: 88684957-b4da-4f20-862d-b67b4b030882, workZone: 88684957-b4da-4f20-862d-b67b4b030882, faction: NCEnhanced, factionRole: augmentation-advocate, narrativeActorProfile: NCNarrativeIrisChromeheartBell, replacesCohortId: south-enhanced, replacesCohortIndex: 1 }
+  - { stableLocalId: emi-paper-crane-kanzaki, fullName: Emi Kanzaki, aliases: [Paper Crane], archetype: NCLivingCityPlannerResident, homeZone: 88684957-b4da-4f20-862d-b67b4b030882, workZone: 88684957-b4da-4f20-862d-b67b4b030882, faction: NCKanzakiFamily, factionRole: family-envoy, narrativeActorProfile: NCNarrativeEmiPaperCraneKanzaki, replacesCohortId: south-kanzaki, replacesCohortIndex: 1 }
+  - { stableLocalId: jonah-saint-adams, fullName: Jonah Adams, aliases: [Saint], archetype: NCLivingCityPlannerResident, homeZone: 88684957-b4da-4f20-862d-b67b4b030882, workZone: 88684957-b4da-4f20-862d-b67b4b030882, faction: NCSinfulAdams, factionRole: enforcer, narrativeActorProfile: NCNarrativeJonahSaintAdams, replacesCohortId: south-sinful-adams, replacesCohortIndex: 1 }
+  - { stableLocalId: delia-block-reyes, fullName: Delia Reyes, aliases: [Block], archetype: NCLivingCityPlannerResident, homeZone: 88684957-b4da-4f20-862d-b67b4b030882, workZone: 88684957-b4da-4f20-862d-b67b4b030882, faction: NCZoners, factionRole: community-organizer, narrativeActorProfile: NCNarrativeDeliaBlockReyes, replacesCohortId: south-zoners, replacesCohortIndex: 1 }
+  - { stableLocalId: adrian-harbor-kessler, fullName: Adrian Kessler, aliases: [Harbor], archetype: NCLivingCityPlannerResident, homeZone: 504dd7a0-4f25-43df-a96c-3f4069ea6de5, workZone: 504dd7a0-4f25-43df-a96c-3f4069ea6de5, faction: NCConsortium, factionRole: shipping-broker, narrativeActorProfile: NCNarrativeAdrianHarborKessler, replacesCohortId: port-consortium, replacesCohortIndex: 1 }
+  - { stableLocalId: evelyn-archive-price, fullName: Evelyn Price, aliases: [Archive], archetype: NCLivingCityPlannerResident, homeZone: a54f1778-e26b-4dc9-af62-267003c660c7, workZone: a54f1778-e26b-4dc9-af62-267003c660c7, faction: NCTombstonePreservers, factionRole: custodian, narrativeActorProfile: NCNarrativeEvelynArchivePrice, replacesCohortId: reclamation-tombstone, replacesCohortIndex: 1 }
+  - { stableLocalId: niko-warranty-duran, fullName: Niko Duran, aliases: [Warranty], archetype: NCLivingCityPlannerResident, homeZone: 0122fb70-1fcc-46c7-968a-0245372d8484, workZone: 0122fb70-1fcc-46c7-968a-0245372d8484, faction: NCEdgerunnersInc, factionRole: contract-coordinator, narrativeActorProfile: NCNarrativeNikoWarrantyDuran, replacesCohortId: old-combat-zone-edgerunners, replacesCohortIndex: 1 }
+  - { stableLocalId: rosa-dust-navarro, fullName: Rosa Navarro, aliases: [Dust], archetype: NCLivingCityPlannerResident, homeZone: 0122fb70-1fcc-46c7-968a-0245372d8484, workZone: 0122fb70-1fcc-46c7-968a-0245372d8484, faction: NCFaded, factionRole: neighborhood-scout, narrativeActorProfile: NCNarrativeRosaDustNavarro, replacesCohortId: old-combat-zone-faded, replacesCohortIndex: 1 }
+  - { stableLocalId: juno-patch-morales, fullName: Juno Morales, aliases: [Patch], archetype: NCLivingCityPlannerResident, homeZone: 0122fb70-1fcc-46c7-968a-0245372d8484, workZone: 0122fb70-1fcc-46c7-968a-0245372d8484, faction: NCGenerationRed, factionRole: youth-organizer, narrativeActorProfile: NCNarrativeJunoPatchMorales, replacesCohortId: old-combat-zone-generation-red, replacesCohortIndex: 1 }

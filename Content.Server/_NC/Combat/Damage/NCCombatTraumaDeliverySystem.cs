@@ -76,16 +76,6 @@ public sealed record NCCombatTraumaDeliveryResult(
     bool CanOverpenetrateBody);
 
 /// <summary>
-/// Confirms that the authoritative NC medical pipeline accepted one real physical impact. Entity references are
-/// round-local and the event is raised on the target only after medicine handles the non-cancelled contact.
-/// </summary>
-[ByRefEvent]
-public readonly record struct NCCombatImpactConfirmedEvent(
-    NCActionResolutionId ResolutionId,
-    EntityUid Instigator,
-    EntityUid Target);
-
-/// <summary>
 /// The single armor-to-medical delivery path for every NC physical damage adapter.
 /// </summary>
 public sealed partial class NCCombatTraumaDeliverySystem : EntitySystem
@@ -209,16 +199,6 @@ public sealed partial class NCCombatTraumaDeliverySystem : EntitySystem
             traumaEvent.Applied,
             traumaEvent.Cancelled,
             damageProfile.CanOverpenetrateBody && projectileDisposition == NCTraumaProjectileDisposition.Exit);
-
-        if (traumaEvent.Handled && !traumaEvent.Cancelled &&
-            impact.Instigator is { } instigator && Exists(instigator) &&
-            instigator != impact.Target)
-        {
-            // A fully armor-stopped hit is still a confirmed assault. Consumers observe that fact only; they never
-            // replay damage or participate in combat resolution.
-            var confirmedEvent = new NCCombatImpactConfirmedEvent(impact.ResolutionId, instigator, impact.Target);
-            RaiseLocalEvent(impact.Target, ref confirmedEvent);
-        }
 
         var source = impact.Projectile ?? impact.Weapon ?? impact.Instigator;
         var sourceDescription = source is { } sourceUid && Exists(sourceUid)

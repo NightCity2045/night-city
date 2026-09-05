@@ -12,14 +12,14 @@ namespace Content.Server._NC.LivingCity.Neural;
 [RegisterComponent]
 public sealed partial class NCNeuralConversationTargetComponent : Component
 {
-    /// <summary>True for an authored persona that receives the larger narrative context budget.</summary>
+    /// <summary>True only for explicitly authored important Actors; ordinary residents remain dialogue-only.</summary>
     [DataField]
     public bool NarrativeActor;
 
     [DataField]
     public float InteractionRange = 2.5f;
 
-    /// <summary>The NPC may hear an unobstructed local speaker without a special interaction verb.</summary>
+    /// <summary>The NPC may acquire the nearest unobstructed local speaker without a special interaction verb.</summary>
     [DataField]
     public bool ListenToLocalSpeech = true;
 
@@ -27,12 +27,34 @@ public sealed partial class NCNeuralConversationTargetComponent : Component
     [DataField]
     public bool SpeakWithNpcListeners = true;
 
-    /// <summary>Prevents NPC-to-NPC replies from turning into an unbounded neural conversation cascade.</summary>
+    /// <summary>Prevents ambient replies from turning into an unbounded neural conversation cascade.</summary>
     [DataField]
     public TimeSpan NpcConversationCooldown = TimeSpan.FromSeconds(30);
 
     [DataField]
     public int MaximumNpcConversationTurns = 6;
+
+    /// <summary>Allows rare round-local conversations to start without player input.</summary>
+    [DataField]
+    public bool InitiateAmbientConversations;
+
+    [DataField]
+    public TimeSpan MinimumAmbientConversationInterval = TimeSpan.FromMinutes(8);
+
+    [DataField]
+    public TimeSpan MaximumAmbientConversationInterval = TimeSpan.FromMinutes(15);
+
+    [DataField]
+    public int MaximumAmbientCandidates = 12;
+
+    [DataField]
+    public List<string> AmbientOpeners =
+    [
+        "Слышал, что сегодня происходит?",
+        "Как у тебя смена проходит?",
+        "Есть что нового в районе?",
+        "Ты как, держишься?",
+    ];
 
     [DataField]
     public float ListeningRange = 4f;
@@ -52,4 +74,6 @@ public sealed partial class NCNeuralConversationTargetComponent : Component
     [DataField]
     public NCLocale Locale = NCLocale.RuRu;
 
+    [DataField]
+    public string FallbackMessage = "nc-neural-conversation-fallback";
 }

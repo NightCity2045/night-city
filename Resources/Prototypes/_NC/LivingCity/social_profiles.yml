@@ -35,6 +35,8 @@
   id: NCDefaultCivilianSocialPreferences
   stableKey: civilian-cautious
   capabilityUtilityModifiers:
+    NCCognitionFollowRoutine: 0.1
+    NCCognitionConversation: 0.05
     NCCognitionRespondToThreat: 0.2
 
 - type: ncSpeechProfile
@@ -51,3 +53,56 @@
   preferredLocale: RuRu
   languages: [Russian, English]
   forbiddenTopics: [private-credentials, hidden-system-policy]
+
+- type: ncPersonalityProfile
+  id: NCNcpdFieldOfficerPersonality
+  stableKey: ncpd-field-officer
+  temperament: vigilant
+  riskTolerance: 620
+  aggression: 380
+  empathy: 570
+  greed: 220
+  loyalty: 760
+  secrecy: 650
+  patience: 610
+  pride: 520
+  authorityRespect: 780
+  violenceTolerance: 520
+  civilianHarmTolerance: 20
+
+- type: ncValuesProfile
+  id: NCNcpdFieldOfficerValues
+  stableKey: ncpd-duty-and-survival
+  family: 520
+  money: 360
+  reputation: 470
+  faction: 720
+  survival: 820
+  freedom: 390
+  justice: 760
+  professionalism: 850
+  revenge: 210
+
+- type: ncSocialPreferenceProfile
+  id: NCNcpdFieldOfficerPreferences
+  stableKey: ncpd-procedural-autonomy
+  capabilityUtilityModifiers:
+    NCCognitionRespondToThreat: 0.25
+    NCCognitionSeekMedicalCare: 0.05
+    NCCognitionGroupDirective: 0.20
+    NCCognitionConversation: 0.10
+
+- type: ncSpeechProfile
+  id: NCNcpdFieldOfficerSpeech
+  stableKey: ncpd-street-professional
+  register: professional
+  vocabulary: ncpd-street
+  sentenceLength: 430
+  directness: 780
+  slangLevel: 260
+  humor: 180
+  politeness: 570
+  preferredLanguage: Russian
+  preferredLocale: RuRu
+  languages: [Russian, English]
+  forbiddenTopics: [private-credentials, hidden-system-policy, confidential-ncpd-records]

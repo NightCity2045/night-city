@@ -211,24 +211,6 @@ public sealed partial class NCCityIncidentRegistrySystem : EntitySystem
                 ? current with { EscalatesAt = nextEscalationAt }
                 : null, "living-city.incident.escalation-scheduled");
 
-    /// <summary>
-    /// Removes a legacy automatic-resolution deadline. An active v3 incident remains open until authoritative
-    /// physical gameplay or a domain executor submits an explicit outcome.
-    /// </summary>
-    internal Task<NCIncidentMutationResult> HoldForAuthoritativeOutcomeAsync(
-        NCCityIncidentId incidentId,
-        long expectedVersion,
-        NCPartyRef actor,
-        string stableReason) =>
-        MutateAsync(NCPersistentIdentity.Command("incident", "hold-for-outcome", $"{incidentId}.{stableReason}"),
-            incidentId, expectedVersion, actor,
-            NCPersistentIdentity.Correlation("incident", "hold-for-outcome", $"{incidentId}.{stableReason}"), null,
-            "incident-lifecycle", (current, _, _) =>
-                current.Stage == NCCityIncidentStage.Active && current.EscalatesAt != null
-                    ? current with { EscalatesAt = null }
-                    : null,
-            "living-city.incident.awaiting-authoritative-outcome");
-
     private async Task<NCIncidentMutationResult> MutateAsync(Guid commandId, NCCityIncidentId incidentId,
         long expectedVersion, NCPartyRef actor, Guid correlationId, Guid? causationId, string auditSource,
         Func<NCCityIncidentSnapshot, NCIncidentPolicyPrototype, NCActiveWorldTime, NCCityIncidentSnapshot?> mutate,

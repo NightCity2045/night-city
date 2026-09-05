@@ -457,19 +457,14 @@ public sealed partial class NCCityServiceSystem : EntitySystem
                 Enqueue(id, future);
                 return;
             }
-            var service = await GetServiceAsync(dispatch.Snapshot.ServiceId, true);
-            if (service == null || !TryPolicy(service.Snapshot.Kind, out var policy))
-                return;
-
-            // ETA is only a wake-up hint. A physical/domain adapter must positively confirm the factual arrival.
+            // NC: a physical service adapter may require a factual arrival instead of accepting ETA as proof.
             var arrivalAttempt = new NCServiceDispatchArrivalAttemptEvent(dispatch, now);
             RaiseLocalEvent(arrivalAttempt);
-            if (!arrivalAttempt.Confirmed)
+            if (arrivalAttempt.Deferred)
             {
-                Enqueue(id, now.Advance(GetArrivalRetryDelay(
-                    arrivalAttempt.RetryAfter,
-                    policy.MinimumEta,
-                    policy.MaximumEta)));
+                Enqueue(id, now.Advance(arrivalAttempt.RetryAfter > TimeSpan.Zero
+                    ? arrivalAttempt.RetryAfter
+                    : TimeSpan.FromSeconds(1)));
                 return;
             }
             var eventId = Guid.NewGuid();
@@ -577,15 +572,6 @@ public sealed partial class NCCityServiceSystem : EntitySystem
         return TimeSpan.FromSeconds(Math.Clamp(seconds, policy.MinimumEta.TotalSeconds,
             policy.MaximumEta.TotalSeconds));
     }
-
-    /// <summary>
-    /// Keeps failed arrival probes off the hot path while honoring the existing data-driven service policy bounds.
-    /// </summary>
-    internal static TimeSpan GetArrivalRetryDelay(TimeSpan requested, TimeSpan minimum, TimeSpan maximum)
-    {
-        var delay = requested > TimeSpan.Zero ? requested : minimum;
-        return TimeSpan.FromTicks(Math.Clamp(delay.Ticks, minimum.Ticks, maximum.Ticks));
-    }
     private static NCZoneId[] RouteZones(NCZoneId origin, IReadOnlyList<NCCityRouteStep> route) =>
         route.Aggregate(new List<NCZoneId> { origin }, (list, step) => { list.Add(step.ToZone); return list; })
             .ToArray();
@@ -690,8 +676,8 @@ public sealed class NCServiceDispatchPersistedEvent(NCServiceDispatchRecord disp
 }
 
 /// <summary>
-/// Allows a physical or domain responder authority to confirm factual arrival. The default is fail-closed: ETA alone
-/// never proves that a responder is on scene.
+/// Allows a physical responder adapter to defer the ETA transition until its real unit has arrived. Deferral is
+/// round-local and bounded by the adapter retry policy; no persistence write occurs for a failed arrival probe.
 /// </summary>
 public sealed class NCServiceDispatchArrivalAttemptEvent(
     NCServiceDispatchRecord dispatch,
@@ -699,7 +685,7 @@ public sealed class NCServiceDispatchArrivalAttemptEvent(
 {
     public NCServiceDispatchRecord Dispatch { get; } = dispatch;
     public NCActiveWorldTime AttemptedAt { get; } = attemptedAt;
-    public bool Confirmed { get; set; }
-    public TimeSpan RetryAfter { get; set; }
+    public bool Deferred { get; set; }
+    public TimeSpan RetryAfter { get; set; } = TimeSpan.FromSeconds(1);
     public string Reason { get; set; } = string.Empty;
 }

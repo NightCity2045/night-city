@@ -16,7 +16,7 @@ public sealed record NCFixerEscrowResult(NCFixerMutationStatus Status, NCFixerDe
 
 /// <summary>
 /// Funds and releases deal escrow through real ledger accounts. The deal status and money movement are one database
-/// transaction, so neither a player disconnect nor a round restart can lose the obligation.
+/// transaction, so neither a player disconnect nor an NPC dematerialization can lose the obligation.
 /// </summary>
 public sealed partial class NCFixerEscrowSystem : EntitySystem
 {

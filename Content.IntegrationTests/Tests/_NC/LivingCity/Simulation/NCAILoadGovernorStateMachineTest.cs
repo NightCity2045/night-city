@@ -26,6 +26,10 @@ public sealed class NCAILoadGovernorStateMachineTest
         ElevatedExitQueueRatio: 0.35f,
         CriticalEnterQueueRatio: 0.85f,
         CriticalExitQueueRatio: 0.6f,
+        ElevatedEnterMaterializedRatio: 0.75f,
+        ElevatedExitMaterializedRatio: 0.65f,
+        CriticalEnterMaterializedRatio: 0.95f,
+        CriticalExitMaterializedRatio: 0.82f,
         ElevatedBacklogCount: 1,
         CriticalBacklogCount: 3,
         CriticalExitBacklogCount: 2);
@@ -34,8 +38,8 @@ public sealed class NCAILoadGovernorStateMachineTest
     public void TransientPressureDoesNotDegrade()
     {
         var state = new NCAILoadGovernorStateMachine();
-        var high = new NCAILoadGovernorSample(30f, 0f, 0f, 0);
-        var normal = new NCAILoadGovernorSample(16f, 0f, 0f, 0);
+        var high = new NCAILoadGovernorSample(30f, 0f, 0f, 0f, 0);
+        var normal = new NCAILoadGovernorSample(16f, 0f, 0f, 0f, 0);
 
         Assert.That(state.Step(high, NCAILoadPressureReason.FrameTime, Thresholds).State,
             Is.EqualTo(NCAILoadState.Normal));
@@ -47,8 +51,8 @@ public sealed class NCAILoadGovernorStateMachineTest
     public void SustainedPressureDegradesAndRecoversOneLevelAtATime()
     {
         var state = new NCAILoadGovernorStateMachine();
-        var critical = new NCAILoadGovernorSample(50f, 0.2f, 0.9f, 3);
-        var normal = new NCAILoadGovernorSample(16f, 0.05f, 0.1f, 0);
+        var critical = new NCAILoadGovernorSample(50f, 0.2f, 0.9f, 0.98f, 3);
+        var normal = new NCAILoadGovernorSample(16f, 0.05f, 0.1f, 0.5f, 0);
 
         for (var i = 0; i < 3; i++)
             state.Step(critical, NCAILoadPressureReason.FrameTime, Thresholds);
@@ -67,8 +71,8 @@ public sealed class NCAILoadGovernorStateMachineTest
     public void ElevatedStateEscalatesOnlyAfterHysteresis()
     {
         var state = new NCAILoadGovernorStateMachine();
-        var elevated = new NCAILoadGovernorSample(30f, 0f, 0f, 0);
-        var critical = new NCAILoadGovernorSample(50f, 0f, 0f, 0);
+        var elevated = new NCAILoadGovernorSample(30f, 0f, 0f, 0f, 0);
+        var critical = new NCAILoadGovernorSample(50f, 0f, 0f, 0f, 0);
 
         for (var i = 0; i < 3; i++)
             state.Step(elevated, NCAILoadPressureReason.FrameTime, Thresholds);
