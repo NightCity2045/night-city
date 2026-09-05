@@ -4,7 +4,6 @@
 
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.City.Zones;
-using Content.Shared._NC.City.Zones.Serialization;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.LivingCity.Affordances;
@@ -29,6 +28,10 @@ public enum NCCityAffordanceKind : byte
     ConstructionSite,
     RestArea,
     FoodSource,
+    Passage,
+    Storage,
+    Workstation,
+    Weapon,
 }
 
 /// <summary>Stable adapters from existing vanilla components to data-driven city affordances.</summary>
@@ -37,6 +40,15 @@ public enum NCCityObjectAffordanceSource : byte
     Strap,
     VendingMachine,
     MedicalTreatment,
+    Door,
+    Storage,
+    Edible,
+    Weapon,
+    Computer,
+    ReagentDispenser,
+    Microwave,
+    PlantHolder,
+    Puddle,
 }
 
 /// <summary>Data-only declaration placed on a real usable object, never on an invisible mapping marker.</summary>
@@ -76,7 +88,7 @@ public sealed partial class NCCityObjectAffordanceRulePrototype : IPrototype
 public sealed partial class NCCityZoneAffordanceSourcePrototype : IPrototype
 {
     [IdDataField] public string ID { get; private set; } = string.Empty;
-    [DataField(customTypeSerializer: typeof(NCZoneIdSerializer))] public NCZoneId Zone { get; private set; }
+    [DataField] public Guid? Zone { get; private set; }
     [DataField] public NCZoneContextSlot RequiredContext { get; private set; }
     [DataField(required: true)] public ProtoId<NCCitySpawnCandidateProfilePrototype> CandidateProfile { get; private set; }
     [DataField(required: true)] public List<ProtoId<NCCityAffordancePrototype>> Affordances { get; private set; } = [];

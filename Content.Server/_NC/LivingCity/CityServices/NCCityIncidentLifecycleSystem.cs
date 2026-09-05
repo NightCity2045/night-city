@@ -3,7 +3,6 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Server.Database;
-using Content.Server._NC.City.ZoneTemplates;
 using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.CityServices;
@@ -14,8 +13,8 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._NC.LivingCity.CityServices;
 
 /// <summary>
-/// Advances incident deadlines only against the active-world clock. Observed physical scenes are never resolved by
-/// the abstract simulator; they remain authoritative gameplay until a responder or another domain reports outcome.
+/// Advances incident deadlines only against the active-world clock. Physical scenes are never resolved from elapsed
+/// time or player observation; they remain authoritative gameplay until a responder or another domain reports outcome.
 /// </summary>
 public sealed partial class NCCityIncidentLifecycleSystem : EntitySystem
 {
@@ -27,7 +26,6 @@ public sealed partial class NCCityIncidentLifecycleSystem : EntitySystem
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCCityIncidentRegistrySystem _incidents = default!;
     [Dependency] private NCCityServiceSystem _services = default!;
-    [Dependency] private NCZoneOccupancySystem _occupancy = default!;
 
     private readonly PriorityQueue<NCCityIncidentId, long> _due = new();
     private readonly HashSet<NCCityIncidentId> _queued = [];
@@ -42,7 +40,6 @@ public sealed partial class NCCityIncidentLifecycleSystem : EntitySystem
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => Clear());
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => Clear());
         SubscribeLocalEvent<NCCityIncidentPersistedEvent>(OnIncidentPersisted);
-        SubscribeLocalEvent<NCServiceDispatchPersistedEvent>(OnDispatchPersisted);
     }
 
     public override void Update(float frameTime)
@@ -77,25 +74,6 @@ public sealed partial class NCCityIncidentLifecycleSystem : EntitySystem
         if (snapshot.EscalatesAt is { } due && snapshot.Stage is not
             (NCCityIncidentStage.Closed or NCCityIncidentStage.Cancelled))
             Enqueue(snapshot.IncidentId, due);
-    }
-
-    private void OnDispatchPersisted(NCServiceDispatchPersistedEvent args)
-    {
-        if (args.Dispatch.Snapshot.Status == NCServiceDispatchStatus.OnScene)
-            _ = ArmOnSceneResolutionAsync(args.Dispatch);
-    }
-
-    private async Task ArmOnSceneResolutionAsync(NCServiceDispatchRecord dispatch)
-    {
-        if (!_active || !_clock.TryGetCurrentTime(out _, out var now) ||
-            !_prototypes.TryIndex(DefaultPolicy, out NCIncidentPolicyPrototype? policy))
-            return;
-        var incident = await _incidents.GetAsync(dispatch.Snapshot.IncidentId, true);
-        if (incident?.Snapshot.Stage != NCCityIncidentStage.Active || incident.Snapshot.EscalatesAt != null)
-            return;
-        await _incidents.ScheduleEscalationAsync(incident.Snapshot.IncidentId, incident.AggregateVersion,
-            now.Advance(policy.AbstractResolutionDelay), LifecycleActor(incident.Snapshot),
-            $"response-scene.{dispatch.Snapshot.DispatchId}.{incident.AggregateVersion}");
     }
 
     private async Task RecoverAsync()
@@ -156,7 +134,10 @@ public sealed partial class NCCityIncidentLifecycleSystem : EntitySystem
                         now.Advance(policy.DispatchRetryDelay), actor, $"dispatch-wait.{incident.AggregateVersion}");
                     break;
                 case NCCityIncidentStage.Active:
-                    await ResolveAbstractAsync(incident, policy, now, actor);
+                    // Legacy records may still carry an old abstract-resolution deadline. Clear it once; only an
+                    // explicit physical/domain result is allowed to resolve an active incident in v3.
+                    await _incidents.HoldForAuthoritativeOutcomeAsync(incidentId, incident.AggregateVersion, actor,
+                        $"physical-outcome.{incident.AggregateVersion}");
                     break;
                 case NCCityIncidentStage.Resolved:
                     await ChangeStage(incident, NCCityIncidentStage.Closed, null, actor, "close");
@@ -175,8 +156,7 @@ public sealed partial class NCCityIncidentLifecycleSystem : EntitySystem
         if (!policy.ResponseServices.TryGetValue(incident.Snapshot.Kind, out var responseServices) ||
             responseServices.Count == 0)
         {
-            await ChangeStage(incident, NCCityIncidentStage.Active,
-                now.Advance(policy.AbstractResolutionDelay), requester, "activate-without-service");
+            await ChangeStage(incident, NCCityIncidentStage.Active, null, requester, "activate-without-service");
             return;
         }
 
@@ -210,33 +190,6 @@ public sealed partial class NCCityIncidentLifecycleSystem : EntitySystem
         else
             await _incidents.ScheduleEscalationAsync(current.Snapshot.IncidentId, current.AggregateVersion,
                 now.Advance(policy.DispatchRetryDelay), requester, $"dispatch-retry.{current.AggregateVersion}");
-    }
-
-    private async Task ResolveAbstractAsync(NCCityIncidentRecord incident, NCIncidentPolicyPrototype policy,
-        NCActiveWorldTime now, NCPartyRef actor)
-    {
-        if (incident.Snapshot.MaterializationPolicy != NCIncidentMaterializationPolicy.AbstractUnlessObserved ||
-            _occupancy.IsPlayerObserved(incident.Snapshot.LocationZone, out _))
-        {
-            await _incidents.ScheduleEscalationAsync(incident.Snapshot.IncidentId, incident.AggregateVersion,
-                now.Advance(policy.DispatchRetryDelay), actor, $"observed.{incident.AggregateVersion}");
-            return;
-        }
-
-        var responsible = incident.Snapshot.Participants
-            .Where(value => value.Role is NCIncidentParticipantRole.Suspect or
-                NCIncidentParticipantRole.ResponsibleFaction)
-            .Select(value => value.Party).Distinct().ToArray();
-        var outcome = new NCIncidentOutcome("abstract-contained", responsible, [],
-            incident.Snapshot.Severity >= 900 ? 1 : 0, checked((long) incident.Snapshot.Severity * 100));
-        var result = await _incidents.ResolveAsync(new NCResolveIncidentRequest(
-            NCPersistentIdentity.Command("incident", "abstract-resolve", incident.Snapshot.IncidentId.ToString()),
-            incident.Snapshot.IncidentId, incident.AggregateVersion, outcome, actor,
-            NCPersistentIdentity.Correlation("incident", "abstract-resolve", incident.Snapshot.IncidentId.ToString()),
-            incident.Snapshot.LastAppliedEventId, "incident-lifecycle"));
-        if (result.Incident is { } resolved)
-            await _incidents.ScheduleEscalationAsync(resolved.Snapshot.IncidentId, resolved.AggregateVersion,
-                now.Advance(policy.ClosureDelay), actor, $"close.{resolved.AggregateVersion}");
     }
 
     private Task<NCIncidentMutationResult> ChangeStage(NCCityIncidentRecord incident, NCCityIncidentStage stage,

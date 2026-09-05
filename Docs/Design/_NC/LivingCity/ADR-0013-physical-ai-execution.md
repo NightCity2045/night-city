@@ -1,7 +1,10 @@
 # ADR-0013: Physical AI execution and unchanged local pathfinding
 
-Status: Accepted  
+Status: Superseded by Physical GPT A-Life v3
 Date: 2026-08-21
+
+This ADR is retained as history only. Its materialization, registry-intent executor and StateTree ownership model must
+not be restored; v3 uses one persistent physical body and GPT-issued typed commands executed by gameplay authorities.
 
 ## Decision
 

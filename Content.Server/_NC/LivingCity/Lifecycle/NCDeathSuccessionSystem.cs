@@ -6,44 +6,98 @@ using Content.Server._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Economy;
 using Content.Server._NC.LivingCity.Identity;
+using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Economy;
 using Content.Shared._NC.LivingCity.Lifecycle;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Identity;
-using Content.Shared.Mobs;
 
 namespace Content.Server._NC.LivingCity.Lifecycle;
 
 /// <summary>Creates exactly one estate after permanent actor death and moves electronic funds into probate.</summary>
 public sealed partial class NCDeathSuccessionSystem : EntitySystem
 {
+    private const int MaximumStatusConflictRetries = 4;
+
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
     [Dependency] private NCEstateRegistrySystem _estates = default!;
     [Dependency] private NCPartyFinanceAdapterSystem _finance = default!;
     private readonly HashSet<NCActorId> _processing = [];
+    private readonly Dictionary<NCActorId, Task<bool>> _deathConfirmations = [];
 
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<NCCityActorPersistedEvent>(OnActor);
-        SubscribeLocalEvent<NCCityActorBindingComponent, MobStateChangedEvent>(OnPhysicalStateChanged);
+        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(OnSessionClosing);
+        SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
+        SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
     }
-    private void OnPhysicalStateChanged(Entity<NCCityActorBindingComponent> entity, ref MobStateChangedEvent args)
+    /// <summary>Persists one physical death after the lifecycle event owner observes death or gibbing.</summary>
+    public void ObservePhysicalDeath(NCActorId actorId) => QueuePhysicalDeath(actorId);
+
+    private void QueuePhysicalDeath(NCActorId actorId)
     {
-        if (args.NewMobState == MobState.Dead)
-            _ = ConfirmPhysicalDeathAsync(entity.Comp.ActorId);
+        if (!_deathConfirmations.ContainsKey(actorId))
+            _deathConfirmations.Add(actorId, ConfirmPhysicalDeathAsync(actorId));
     }
-    private async Task ConfirmPhysicalDeathAsync(NCActorId actorId)
+
+    private async Task<bool> ConfirmPhysicalDeathAsync(NCActorId actorId)
     {
-        var actor = await _actors.GetAsync(actorId, true);
-        if (actor == null || actor.Snapshot.Lifecycle.Status == NCCityActorStatus.Dead) return;
-        var stable = $"{actorId}.{actor.AggregateVersion}";
-        await _actors.SetStatusAsync(new NCCityActorStatusMutationRequest(
-            NCPersistentIdentity.Command("death", "confirm", stable), actorId, actor.AggregateVersion,
-            NCCityActorStatus.Dead, NCPersistentIdentity.Correlation("death", "confirm", stable),
-            actor.Snapshot.LastAppliedEventId, "authoritative-physical-death"));
+        try
+        {
+            for (var attempt = 0; attempt < MaximumStatusConflictRetries; attempt++)
+            {
+                var actor = await _actors.GetAsync(actorId, true);
+                if (actor == null)
+                    return false;
+                if (actor.Snapshot.Lifecycle.Status == NCCityActorStatus.Dead)
+                    return true;
+                if (actor.Snapshot.Lifecycle.Status == NCCityActorStatus.Archived)
+                    return false;
+
+                var stable = $"{actorId}.{actor.AggregateVersion}";
+                var result = await _actors.SetStatusAsync(new NCCityActorStatusMutationRequest(
+                    NCPersistentIdentity.Command("death", "confirm", stable), actorId, actor.AggregateVersion,
+                    NCCityActorStatus.Dead, NCPersistentIdentity.Correlation("death", "confirm", stable),
+                    actor.Snapshot.LastAppliedEventId, "authoritative-physical-death"));
+                if (result.Status is NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate)
+                    return true;
+                if (result.Status != NCCityActorMutationStatus.VersionConflict)
+                {
+                    Log.Error($"Failed to persist physical death for actor {actorId}: " +
+                              $"{result.Error ?? result.Status.ToString()}.");
+                    return false;
+                }
+            }
+        }
+        catch (Exception exception)
+        {
+            Log.Error($"Failed to persist physical death for actor {actorId}: {exception}");
+            return false;
+        }
+
+        Log.Error($"Failed to persist physical death for actor {actorId}: actor state kept changing.");
+        return false;
     }
+
+    private void OnSessionClosing(NCActiveWorldSessionClosingEvent args)
+    {
+        foreach (var (actorId, confirmation) in _deathConfirmations)
+            args.AddPendingWrite(RequireConfirmedDeathAsync(actorId, confirmation));
+    }
+
+    private static async Task RequireConfirmedDeathAsync(NCActorId actorId, Task<bool> confirmation)
+    {
+        if (!await confirmation)
+            throw new InvalidOperationException($"Physical death for actor {actorId} was not persisted.");
+    }
+
+    private void OnSessionClosed(NCActiveWorldSessionClosedEvent args) => _deathConfirmations.Clear();
+
+    private void OnClockFailed(NCActiveWorldClockFailedEvent args) => _deathConfirmations.Clear();
+
     private void OnActor(NCCityActorPersistedEvent args)
     {
         if (args.Status == NCCityActorStatus.Dead && _processing.Add(args.ActorId))

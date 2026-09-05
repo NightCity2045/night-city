@@ -15,7 +15,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._NC.LivingCity.Cognition;
 
 /// <summary>
-/// Single authoritative boundary between plans and existing gameplay executors. It owns lifecycle, timeout and
+/// Single authoritative boundary between validated neural commands and existing gameplay executors. It owns lifecycle, timeout and
 /// cleanup, but delegates every world mutation to a typed ECS subscriber.
 /// </summary>
 public sealed partial class NCHumanActionRouterSystem : EntitySystem
@@ -46,9 +46,8 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<NCCognitionExecuteStepEvent>(OnExecuteStep);
-        SubscribeLocalEvent<NCCognitionDecisionAppliedEvent>(OnDecisionApplied);
-        SubscribeLocalEvent<NCCityActorMaterializationChangedEvent>(OnMaterializationChanged);
+        SubscribeLocalEvent<NCNeuralActionStepEvent>(OnExecuteStep);
+        SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
         SubscribeLocalEvent<NCHumanActionRuntimeComponent, ComponentShutdown>(OnRuntimeShutdown);
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => EndRound());
@@ -107,7 +106,7 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
         _active = _configurationError == null;
     }
 
-    private void OnExecuteStep(NCCognitionExecuteStepEvent args)
+    private void OnExecuteStep(NCNeuralActionStepEvent args)
     {
         args.Handled = true;
         if (!_active || !_clock.TryGetCurrentTime(out _, out var now))
@@ -135,7 +134,7 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
             return;
         }
 
-        var instanceId = NCPersistentIdentity.CognitionAction(args.PlanId, args.Step.StepId);
+        var instanceId = NCPersistentIdentity.NeuralCommandAction(args.BatchId, args.Step.StepId);
         NCHumanActionRuntimeSnapshot? current = null;
         if (_running.TryGetValue(args.ActorId, out current) && current.InstanceId != instanceId)
         {
@@ -165,11 +164,12 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
             args.ActorId,
             entity,
             args.Intention.IntentionId,
-            args.PlanId,
+            args.BatchId,
             args.Intention,
             args.Step,
             target,
             action,
+            args.Command,
             current.StartedAt,
             now);
         RaiseLocalEvent(execution);
@@ -201,7 +201,7 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
     }
 
     private NCHumanActionRuntimeSnapshot Start(
-        NCCognitionExecuteStepEvent args,
+        NCNeuralActionStepEvent args,
         NCHumanActionPrototype action,
         NCCognitionSubjectRef target,
         EntityUid? entity,
@@ -214,9 +214,11 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
             args.ActorId,
             entity,
             args.Intention.IntentionId,
-            args.PlanId,
+            args.BatchId,
             args.Step.StepId,
             action.ID,
+            args.Command.CapabilityId,
+            args.Command.OriginalIndex,
             action.Executor,
             target,
             NCHumanActionRuntimeState.Pending,
@@ -322,18 +324,7 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
         };
     }
 
-    private void OnDecisionApplied(NCCognitionDecisionAppliedEvent args)
-    {
-        if (_running.TryGetValue(args.ActorId, out var current) &&
-            (args.Intention == null || args.Intention.IntentionId != current.IntentionId))
-        {
-            // A differing action will also be caught by its plan ID on the next execution pulse. This early release
-            // prevents steering and DoAfter ownership from surviving a cancelled intention.
-            Interrupt(args.ActorId, NCHumanActionInterruptKind.PlanChanged);
-        }
-    }
-
-    private void Reject(NCCognitionExecuteStepEvent args, string failure)
+    private void Reject(NCNeuralActionStepEvent args, string failure)
     {
         args.Failure = failure;
         _failed++;
@@ -422,16 +413,16 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
         return NCHumanActionFailureKind.Unknown;
     }
 
-    private void OnMaterializationChanged(NCCityActorMaterializationChangedEvent args)
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
     {
-        if (!args.Materialized)
-            Interrupt(args.ActorId, NCHumanActionInterruptKind.Dematerialized);
+        if (!args.Bound)
+            Interrupt(args.ActorId, NCHumanActionInterruptKind.EntityUnbound);
     }
 
     private void OnRuntimeShutdown(Entity<NCHumanActionRuntimeComponent> entity, ref ComponentShutdown args)
     {
         if (_running.TryGetValue(entity.Comp.ActorId, out var current) && current.EntityUid == entity.Owner)
-            Interrupt(entity.Comp.ActorId, NCHumanActionInterruptKind.Dematerialized);
+            Interrupt(entity.Comp.ActorId, NCHumanActionInterruptKind.EntityUnbound);
     }
 
     private string? ValidateCatalog()

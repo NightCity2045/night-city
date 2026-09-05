@@ -405,6 +405,10 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
             var removed = _recent.Dequeue();
             _transcripts.Remove(removed.SessionId);
         }
+        // Physical conversation owners release their local attention immediately on every terminal path, including
+        // idle expiry. The archive write may complete later and must not keep an NPC permanently reserved.
+        RaiseLocalEvent(new NCConversationSessionTerminatedEvent(session.SessionId, session.Status,
+            session.EndReason));
         var persistence = closingEpoch is { } epoch && closingTime is { } now
             ? _archive.ArchiveAsync(session, transcript, epoch, now)
             : _archive.ArchiveAsync(session, transcript);
@@ -444,7 +448,7 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
         value.MaximumActiveSessions is > 0 and <= AbsoluteMaximumSessions &&
         value.MaximumRecentSessions is > 0 and <= AbsoluteMaximumSessions &&
         value.MaximumSessionsPerParticipant is > 0 and <= 32 &&
-        value.MaximumParticipants is >= 2 and <= 64 && value.MaximumTopics is > 0 and <= 64 &&
+        value.MaximumParticipants is >= 2 and <= 256 && value.MaximumTopics is > 0 and <= 64 &&
         value.MaximumRelevantFacts is > 0 and <= 128 && value.MaximumTurns is > 0 and <= 256 &&
         value.MaximumUtteranceLength is > 0 and <= 4096 &&
         value.MaximumArchivedSummaryTurns is > 0 &&
@@ -454,7 +458,7 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
         value.VerbalThreatMarkers.Count is > 0 and <= 128 &&
         value.VerbalThreatMarkers.All(marker => marker.Length is > 1 and <= 64 &&
             marker.All(character => !char.IsControl(character))) &&
-        value.VerbalThreatLifetime > TimeSpan.Zero &&
+        value.VerbalThreatLifetime > TimeSpan.Zero && value.PointedAddressLifetime > TimeSpan.Zero &&
         value.IdleTimeout > TimeSpan.Zero && value.MaximumLifetime >= value.IdleTimeout &&
         value.ExpirySweepInterval > TimeSpan.Zero;
 
@@ -501,4 +505,15 @@ public sealed class NCConversationTurnRecordedEvent(
 {
     public NCConversationSessionSnapshot Session { get; } = session;
     public string? TransientUtterance { get; } = transientUtterance;
+}
+
+/// <summary>Signals that an in-memory conversation became terminal; persistence may still finish asynchronously.</summary>
+public sealed class NCConversationSessionTerminatedEvent(
+    NCConversationSessionId sessionId,
+    NCConversationStatus status,
+    string? reason) : EntityEventArgs
+{
+    public NCConversationSessionId SessionId { get; } = sessionId;
+    public NCConversationStatus Status { get; } = status;
+    public string? Reason { get; } = reason;
 }

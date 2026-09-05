@@ -8,7 +8,7 @@ using Robust.Shared.GameStates;
 namespace Content.Server._NC.LivingCity.Actors.Components;
 
 /// <summary>
-/// Round-local data marker for a materialized persistent actor. This component is never persisted as actor state.
+/// Round-local marker binding a physical NPC entity to its persistent actor identity.
 /// </summary>
 [RegisterComponent]
 public sealed partial class NCCityActorBindingComponent : Component

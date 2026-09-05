@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: gamePreset
+  id: NCReachNpcTest
+  alias:
+  - reach-npc-test
+  - reachgpt
+  name: nc-reach-npc-test-title
+  description: nc-reach-npc-test-description
+  showInVote: false
+  supportedMaps: NCReachNpcTestMapPool
+  rules:
+  - NCReachNpcTestRule
+
+- type: entity
+  id: NCReachNpcTestRule
+  parent: BaseGameRule
+  categories: [ GameRules ]
+  components:
+  - type: NCReachNpcTestRule
+    generationProfile: NCReachNpcTestGeneration
+    npcCount: 30
+    spawnRadius: 2
+    roster:
+      Captain: 1
+      HeadOfSecurity: 1
+      Bartender: 1
+      Botanist: 1
+      Chef: 1
+      Janitor: 1
+      AtmosphericTechnician: 1
+      StationEngineer: 3
+      Chemist: 1
+      MedicalDoctor: 3
+      Scientist: 3
+      SecurityOfficer: 3
+      CargoTechnician: 2
+      SalvageSpecialist: 2
+      Passenger: 3
+      Clown: 1
+      Mime: 1
+      Musician: 1

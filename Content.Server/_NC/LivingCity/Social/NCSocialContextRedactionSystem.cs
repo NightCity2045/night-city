@@ -23,6 +23,7 @@ public sealed partial class NCSocialContextRedactionSystem : EntitySystem
     [Dependency] private NCMemoryRegistrySystem _memories = default!;
     [Dependency] private NCRumorRegistrySystem _rumors = default!;
     [Dependency] private NCSocialObligationRegistrySystem _obligations = default!;
+    [Dependency] private NCRelationshipRegistrySystem _relationships = default!;
     [Dependency] private NCSocialProfileRegistrySystem _profiles = default!;
     [Dependency] private NCConversationSessionSystem _conversations = default!;
 
@@ -43,13 +44,15 @@ public sealed partial class NCSocialContextRedactionSystem : EntitySystem
             new NCMemoryQuery([], [], [], maximum, policy.MaximumItemsPerDomain));
         var rumorBookTask = _rumors.GetAsync(owner);
         var rumorsTask = _rumors.GetKnownAsync(owner, maximum, policy.MaximumItemsPerDomain);
-        var obligationsTask = _obligations.GetForPartyAsync(owner, policy.MaximumItemsPerDomain, true);
+        var obligationsTask = _obligations.GetForPartyAsync(owner, policy.MaximumItemsPerDomain, false);
+        var relationshipsTask = _relationships.GetForObserverAsync(owner, policy.MaximumItemsPerDomain);
         NCSocialProfileRecord? profile = null;
         if (owner.TryGetActor(out var actorId))
             profile = await _profiles.GetAsync(actorId);
-        await Task.WhenAll(memoryBookTask, memoriesTask, rumorBookTask, rumorsTask, obligationsTask);
+        await Task.WhenAll(memoryBookTask, memoriesTask, rumorBookTask, rumorsTask, obligationsTask,
+            relationshipsTask);
 
-        var facts = new List<NCRedactedSocialFact>(policy.MaximumItemsPerDomain * 3);
+        var facts = new List<NCRedactedSocialFact>(policy.MaximumItemsPerDomain * 4);
         var opaqueParties = new Dictionary<NCPartyRef, string>();
         var memoryFacts = 0;
         foreach (var item in await memoriesTask)
@@ -69,7 +72,8 @@ public sealed partial class NCSocialContextRedactionSystem : EntitySystem
                         index == 0 ? episode.EventTypeKey : $"{episode.EventTypeKey}.target",
                         SafePartySubject(episode.Participants[index], participantAliases, opaqueParties),
                         episode.Confidence / 1000f,
-                        episode.Privacy));
+                        episode.Privacy,
+                        episode.CreatedAt.Ticks));
                     memoryFacts++;
                 }
                 if (episode.Participants.Count == 0 && memoryFacts < policy.MaximumItemsPerDomain)
@@ -79,7 +83,8 @@ public sealed partial class NCSocialContextRedactionSystem : EntitySystem
                         episode.EventTypeKey,
                         "unknown-person",
                         episode.Confidence / 1000f,
-                        episode.Privacy));
+                        episode.Privacy,
+                        episode.CreatedAt.Ticks));
                     memoryFacts++;
                 }
             }
@@ -90,7 +95,8 @@ public sealed partial class NCSocialContextRedactionSystem : EntitySystem
                     summary.ConsolidationKey,
                     SafePartySubject(summary.Participants.FirstOrDefault(), participantAliases, opaqueParties),
                     summary.MinimumConfidence / 1000f,
-                    summary.Privacy));
+                    summary.Privacy,
+                    summary.LastOccurredAt.Ticks));
                 memoryFacts++;
             }
         }
@@ -99,9 +105,10 @@ public sealed partial class NCSocialContextRedactionSystem : EntitySystem
             facts.Add(new NCRedactedSocialFact(
                 "rumor",
                 rumor.TopicKey,
-                rumor.Subject.StableId,
+                SafeInformationSubject(rumor.Subject, participantAliases, opaqueParties),
                 rumor.Confidence / 1000f,
-                rumor.Privacy));
+                rumor.Privacy,
+                rumor.LearnedAt.Ticks));
         }
         var obligations = await obligationsTask;
         foreach (var obligation in obligations.Where(value => value.Snapshot.Privacy <= maximum))
@@ -113,7 +120,28 @@ public sealed partial class NCSocialContextRedactionSystem : EntitySystem
                 snapshot.Terms.PurposeKey,
                 SafePartySubject(counterparty, participantAliases, opaqueParties),
                 1f,
-                snapshot.Privacy));
+                snapshot.Privacy,
+                snapshot.CreatedAt.Ticks));
+        }
+        foreach (var relationship in await relationshipsTask)
+        {
+            var snapshot = relationship.Snapshot;
+            var salience = new[]
+            {
+                Math.Abs(snapshot.Trust),
+                Math.Abs(snapshot.Fear),
+                Math.Abs(snapshot.Respect),
+                Math.Abs(snapshot.Affection),
+                Math.Abs(snapshot.Hostility),
+                Math.Abs(snapshot.Obligation),
+            }.Max();
+            facts.Add(new NCRedactedSocialFact(
+                "relationship",
+                StableKey(snapshot.LastEffectId) ? snapshot.LastEffectId : "known-relationship",
+                SafePartySubject(snapshot.Subject, participantAliases, opaqueParties),
+                Math.Clamp(salience / 1000f, 0f, 1f),
+                NCMemoryPrivacy.Personal,
+                snapshot.UpdatedAt.Ticks));
         }
 
         var memoryBook = await memoryBookTask;
@@ -210,5 +238,19 @@ public sealed partial class NCSocialContextRedactionSystem : EntitySystem
         var handle = $"known-person-{opaqueParties.Count + 1}";
         opaqueParties.Add(party, handle);
         return handle;
+    }
+
+    private static string SafeInformationSubject(
+        NCInformationSubject subject,
+        IReadOnlyDictionary<NCPartyRef, string>? aliases,
+        Dictionary<NCPartyRef, string> opaqueParties)
+    {
+        if (subject.Kind == NCInformationSubjectKind.Party &&
+            NCPartyRef.TryParse(subject.StableId, out var party))
+        {
+            return SafePartySubject(party, aliases, opaqueParties);
+        }
+
+        return StableKey(subject.StableId) ? subject.StableId : "unknown-subject";
     }
 }

@@ -115,16 +115,16 @@ If the task touches database models, EF Core contexts, migrations, persistence s
 If the task touches NPCs, HTN, pathfinding, steering, mob AI, AI debug overlays, or NPC prototypes:
 
 - `ss14-npc-ai`
-- `ss14-standard-optimizations` for A-Life scheduling, materialization, perception, or other high-frequency city simulation
+- `ss14-standard-optimizations` for A-Life scheduling, perception, neural wake queues, or other high-frequency city simulation
 - `ss14-transform-physics` when physical movement, city navigation, portals, maps, grids, or Z-levels are involved
 
-If the task touches Living City, population, materialization, abstract travel, residents, Actors, organizations, gangs, or Neural Cognition:
+If the task touches Living City, physical population, residents, Actors, organizations, gangs, or Neural Cognition:
 
 - `ss14-gameplay-feature`
 - `ss14-npc-ai`
 - `ss14-standard-optimizations`
 - `ss14-databases-migrations` when authoritative persistence or schema compatibility is involved
-- Read `.rules/A-life/plan.md` and the relevant section of `.rules/A-life/Night_City_2045_Living_Night_City_AI_A-Life_GDD_v2.1_Hybrid_AI.md` before changing architecture.
+- Read `.rules/A-life/plan.md` and the linked Physical GPT A-Life v3 specification before changing architecture. The local v2.1 GDD is historical and must not override v3.
 
 If the task touches NCPD behavior, ranks, assignments, patrols, investigations, detention, custody, or the NCPD operations console:
 
@@ -194,12 +194,14 @@ This repository is a large RobustToolbox/SS14-based Night City 2045 overhaul wit
 
 - `city-zones.yml` and the City Zone/Connectivity systems are the semantic geography authority for districts, streets, buildings, rooms, apartments, dungeons, entrances, floors, and traversal links.
 - CityGraph and Room/Portal Graph augment physical pathfinding; they do not replace local movement or make mappers author per-NPC routes.
-- Living City residents keep authoritative identity, home, work, relationships, inventory summaries, and current abstract state independent of whether a physical entity exists.
-- Ordinary residents use deterministic/gameplay AI without GPT. Neural Cognition is reserved for configured Narrative Actors and produces intentions or structured plans, never direct world mutations.
-- Physical actions must use the same authoritative gameplay systems and constraints available to players. Abstract outcomes must be explicit domain transitions, not simulated physical combat or hidden teleports.
-- All residents live in abstract apartments. Physical apartments are optional materialization destinations, not a requirement for population existence.
+- Every living persistent NPC has one physical ECS entity for the entire active-world session. Runtime materialization, dematerialization, player-relevance presence, abstract travel, and physical-actor count caps are forbidden.
+- GPT is the primary individual decision source for every Living City NPC. Requests and command batches are per ActorId; crowd or group coalescing must never make one model decision for multiple people.
+- GPT receives bounded subjective sensorium, retrieved memory, personality, commitments, and an allowed action catalog. It returns structured intentions and commands, never direct world mutations.
+- Physical actions use the same authoritative gameplay systems and constraints available to players. HTN, StateTree, and Utility may execute procedures, schedule work, prioritize queues, or provide safe reflexes, but must not become a second normal NPC brain.
+- PVS controls only what clients receive. It never changes whether an NPC physically exists on the server.
+- Semantic home, work, organization, and building-type anchors are persistent context and navigation data. They never replace the NPC body or authorize hidden outcomes.
 - The A-Life simulation advances only while the round/server world is active. Do not invent offline progression.
-- Treat `.rules/A-life/plan.md` as the current implementation architecture and the A-Life GDD as the product intent. If they conflict, stop and surface the conflict instead of silently choosing a third design.
+- Treat `.rules/A-life/plan.md` and its linked v3 specification as the current authority. Older A-Life documents are historical only.
 
 ## ECS Rules
 

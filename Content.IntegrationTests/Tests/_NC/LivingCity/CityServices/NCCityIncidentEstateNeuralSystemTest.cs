@@ -37,7 +37,7 @@ namespace Content.IntegrationTests.Tests._NC.LivingCity.CityServices;
 public sealed class NCCityIncidentEstateNeuralSystemTest : GameTest
 {
     [Test]
-    public async Task IncidentServiceEstateAndNeuralFallbackAreRoundBoundAndReplaySafe()
+    public async Task IncidentServiceEstateAndNeuralAdmissionAreRoundBoundAndReplaySafe()
     {
         var server = Pair.Server;
         var database = server.ResolveDependency<IServerDbManager>();
@@ -97,6 +97,36 @@ public sealed class NCCityIncidentEstateNeuralSystemTest : GameTest
         await WaitUntilAsync(server, async () => (await news.GetPageAsync(null, 10)).Count >= 1,
             "Resolution news was not published.");
 
+        // A legacy active incident may still carry an old abstract-resolution deadline in durable data. Reaching
+        // that deadline must only clear it; no timer is allowed to fabricate casualties, loss, or an outcome.
+        var heldIncidentId = new NCCityIncidentId(Guid.NewGuid());
+        var heldCreated = await incidents.CreateAsync(createIncident with
+        {
+            CommandId = Guid.NewGuid(),
+            IncidentId = heldIncidentId,
+            Cause = createIncident.Cause with { SourceWorldEventId = Guid.NewGuid(), ReferenceId = "patient-2" },
+            CorrelationId = Guid.NewGuid(),
+        });
+        Assert.That(heldCreated.Status, Is.EqualTo(NCIncidentMutationStatus.Applied));
+        var heldVerified = await incidents.ChangeStageAsync(new NCChangeIncidentStageRequest(
+            Guid.NewGuid(), heldIncidentId, heldCreated.Incident!.AggregateVersion, NCCityIncidentStage.Verified,
+            reporter, now.Advance(TimeSpan.FromHours(1)), Guid.NewGuid(), AuditSource: "phase-thirteen-test"));
+        Assert.That(heldVerified.Status, Is.EqualTo(NCIncidentMutationStatus.Applied));
+        var heldActive = await incidents.ChangeStageAsync(new NCChangeIncidentStageRequest(
+            Guid.NewGuid(), heldIncidentId, heldVerified.Incident!.AggregateVersion, NCCityIncidentStage.Active,
+            reporter, now, Guid.NewGuid(), AuditSource: "phase-thirteen-test"));
+        Assert.That(heldActive.Status, Is.EqualTo(NCIncidentMutationStatus.Applied));
+        await WaitUntilAsync(server, async () =>
+        {
+            var current = await incidents.GetAsync(heldIncidentId, true);
+            return current?.Snapshot is
+            {
+                Stage: NCCityIncidentStage.Active,
+                EscalatesAt: null,
+                Outcome: null,
+            };
+        }, "The incident lifecycle did not remove the legacy automatic-resolution deadline.");
+
         var deathEvent = Guid.NewGuid();
         var estate = await estates.OpenAsync(reporter, beneficiary, deathEvent, "Reporter estate");
         Assert.That(estate, Is.Not.Null);
@@ -119,17 +149,27 @@ public sealed class NCCityIncidentEstateNeuralSystemTest : GameTest
         var request = new NCNeuralRequestEnvelope(Guid.NewGuid(), NCNeuralRequestKind.StrategicDecision,
             NCNeuralPriority.P1, NCActorId.New(), epoch, 1, now.Advance(TimeSpan.FromMinutes(1)),
             new ProtoId<NCNeuralPromptProfilePrototype>("NCLivingCityDefault"),
-            [new NCNeuralFact("incident", "resolved", incidentId.ToString(), 1f, "public")],
-            ["safe-default"], ["medical"], "en-US");
+            "living-city-default", 1, "physical-gpt-alife-v3",
+            [new NCNeuralFact("incident", "resolved", incidentId.ToString(), 1f, "public", "incident-resolved")],
+            ["physical.wait"], ["medical"], "en-US",
+            Autonomy: new NCNeuralAutonomyContext("ordinary", 0, 1000, false),
+            Disclosure: new NCNeuralDisclosureContext(
+                "public",
+                ["incident-resolved"],
+                ["incident-resolved"],
+                [],
+                []));
         Assert.That(neural.Submit(request), Is.True);
         Assert.That(neural.Submit(request), Is.False, "A neural request id must be idempotent.");
         Assert.Multiple(() =>
         {
             var runtime = neural.GetRuntimeSnapshot();
             Assert.That(runtime.Active, Is.True);
-            Assert.That(runtime.BudgetMode, Is.EqualTo(NCNeuralBudgetMode.FallbackOnly));
-            Assert.That(runtime.Fallbacks, Is.EqualTo(1));
-            Assert.That(runtime.Queued, Is.Zero);
+            Assert.That(runtime.ProviderConfigured, Is.False);
+            Assert.That(runtime.Fallbacks, Is.Zero,
+                "Missing provider configuration must not masquerade as a token quota rejection.");
+            Assert.That(runtime.Queued, Is.EqualTo(1),
+                "Admitted work stays pending until the provider becomes available or the round closes.");
         });
 
         await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(EventSource.Local,

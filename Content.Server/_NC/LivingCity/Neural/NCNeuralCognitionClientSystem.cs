@@ -7,7 +7,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading;
 using Content.Server._NC.LivingCity.Actors;
@@ -28,15 +27,15 @@ public interface INCNeuralCognitionClient
     bool TryGetActorRuntimeSnapshot(NCActorId actorId, out NCNeuralActorRuntimeSnapshot snapshot);
 }
 
-public sealed record NCNeuralRuntimeSnapshot(bool Active, bool AdministrativelyDisabled, bool BudgetReady,
-    NCNeuralBudgetMode BudgetMode,
+public sealed record NCNeuralRuntimeSnapshot(bool Active, bool AdministrativelyDisabled, bool ProviderConfigured,
+    bool UsagePersistenceHealthy,
     int Queued, int InFlight,
     int SessionInputTokens, int SessionOutputTokens, long SessionCostUsdMicros,
     string WeeklyPeriodKey, long WeeklyCostUsdMicros,
     long SocialCognitionRequests, long StrategicDecisionRequests, long DialogueContinuationRequests,
     long MemorySummaryRequests, long NarrativeRenderRequests,
-    long Accepted, long Stale, long Invalid, long ProviderFailures, long Fallbacks,
-    long CoalescedRequests, int PendingCoalescedFollowers,
+    long Accepted, long Stale, long Invalid, long ProviderFailures, long Fallbacks, long Coalesced,
+    long UsagePersistenceFailures,
     long Timeouts, long ValidationRejects, int ConsecutiveFailures, NCActiveWorldTime? CircuitOpenUntil,
     NCNeuralFailureKind LastFailureKind, string LastFailureReason,
     IReadOnlyDictionary<NCNeuralRequestKind, NCNeuralKindRuntimeSnapshot> KindRuntime);
@@ -44,7 +43,6 @@ public sealed record NCNeuralRuntimeSnapshot(bool Active, bool AdministrativelyD
 /// <summary>Bounded aggregate telemetry for one request kind. Payloads and credentials are never retained.</summary>
 public sealed record NCNeuralKindRuntimeSnapshot(
     long Submitted,
-    long Coalesced,
     long Accepted,
     long Fallback,
     long Rejected,
@@ -59,7 +57,7 @@ public sealed record NCNeuralKindRuntimeSnapshot(
 public sealed record NCNeuralActorRuntimeSnapshot(
     NCNeuralAccessTier AccessTier,
     int OutstandingRequests,
-    int SessionTokenHardCap,
+    bool HasPendingRequest,
     int InputTokens,
     int CachedInputTokens,
     int OutputTokens,
@@ -73,34 +71,32 @@ public sealed record NCNeuralActorRuntimeSnapshot(
     string LastReason,
     string LastCapabilityId,
     string LastSummaryKey,
-    string LastProviderModel);
+    string LastProviderModel,
+    string LastPromptStableKey,
+    int LastPromptVersion,
+    string LastEvaluationProfile,
+    int LastSchemaVersion);
 
 /// <summary>
-/// Bounded optional neural queue. Responses are suggestions only and are published as events after session, version,
-/// capability and schema validation; this system has no dependency on gameplay mutation authorities.
+/// Bounded neural transport queue. Validated responses are published to the physical action authority; this client
+/// never mutates gameplay state itself.
 /// </summary>
 public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeuralCognitionClient
 {
     private static readonly ProtoId<NCNeuralPolicyPrototype> DefaultPolicy = "Default";
     private readonly HttpClient _http = new();
-    private readonly PriorityQueue<NCNeuralRequestEnvelope, (byte Priority, long Sequence)> _queue = new();
+    private readonly NCNeuralPendingRequestQueue _queue = new();
     private readonly ConcurrentQueue<TransportCompletion> _transportCompletions = new();
     private readonly ConcurrentQueue<UsageCompletion> _usageCompletions = new();
-    private readonly ConcurrentQueue<BudgetLoadCompletion> _budgetLoadCompletions = new();
     private readonly HashSet<Guid> _known = [];
-    private readonly Dictionary<(NCActorId Actor, NCNeuralRequestKind Kind), NCNeuralResponseEnvelope> _cache = [];
+    private readonly Dictionary<NCActorId, long> _newestWakeRevisions = [];
+    private readonly Dictionary<NCActorId, long> _actorDecisionRevisions = [];
+    private readonly HashSet<NCActorId> _inFlightActors = [];
+    private readonly Dictionary<NCActorId, NCNeuralRequestEnvelope> _inFlightRequests = [];
+    private readonly HashSet<Guid> _supersededRequests = [];
+    private readonly HashSet<NCActorId> _unblockedActors = [];
     private readonly Dictionary<NCActorId, ActorRuntimeState> _actorRuntime = [];
-    private readonly Dictionary<Guid, BudgetReservation> _budgetReservations = [];
-    private readonly Dictionary<NCActorId, int> _actorOutstandingRequests = [];
-    private readonly Dictionary<NCActorId, int> _actorReservedTokens = [];
-    private readonly Dictionary<NCActorId, long> _actorReservedCosts = [];
-    private readonly Dictionary<NCActorId, int> _actorSessionTokens = [];
-    private readonly Dictionary<NCNeuralRequestKind, int> _kindReservations = [];
-    private readonly Dictionary<(NCActorId Actor, NCNeuralRequestKind Kind), NCActiveWorldTime> _nextRequestAt = [];
-    private readonly Dictionary<CoalescingKey, CoalescedRequestGroup> _coalescedByKey = [];
-    private readonly Dictionary<Guid, CoalescingKey> _coalescingByPrimary = [];
     private readonly Dictionary<NCNeuralRequestKind, KindRuntimeState> _kindRuntime = [];
-    private readonly Dictionary<NCActorId, long> _weeklyActorCosts = [];
     private readonly Dictionary<NCNeuralRequestKind, long> _weeklyKindRequests = [];
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IConfigurationManager _configuration = default!;
@@ -110,14 +106,11 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     private NCNeuralPolicyPrototype? _policy;
     private NCSessionEpoch _epoch;
     private NCActiveWorldTime? _circuitOpenUntil;
-    private long _sequence;
     private long _actorRuntimeSequence;
     private int _inFlight;
     private int _inputTokens;
     private int _outputTokens;
     private long _costUsdMicros;
-    private int _reservedTokens;
-    private long _reservedCostUsdMicros;
     private long _weeklyCostUsdMicros;
     private string _weeklyPeriodKey = string.Empty;
     private int _failures;
@@ -126,19 +119,20 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     private long _invalid;
     private long _providerFailures;
     private long _fallbacks;
-    private long _coalescedRequests;
+    private long _coalesced;
+    private long _usagePersistenceFailures;
     private long _timeouts;
     private long _rejects;
     private NCNeuralFailureKind _lastFailureKind;
     private string _lastFailureReason = string.Empty;
     private bool _active;
     private bool _administrativelyDisabled;
-    private bool _budgetReady;
+    private bool _usagePersistenceHealthy;
     private int _generation;
     private CancellationTokenSource? _sessionCancellation;
 
-    /// <summary>True only when the current round may spend provider tokens.</summary>
-    public bool IsProviderEnabled => _active && ProviderEnabled;
+    /// <summary>True when transport is configured. Spend authority remains entirely with the provider.</summary>
+    public bool IsProviderEnabled => _active && ProviderConfigured;
 
     public override void Initialize()
     {
@@ -163,45 +157,53 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         DrainCompletions(_policy?.MaximumCompletionsPerTick ?? 16);
         if (!_active || _policy == null)
             return;
-        if (_budgetReady && WeekChanged() && _inFlight == 0 && _queue.Count == 0)
-        {
-            _budgetReady = false;
-            _ = LoadBudgetAsync(_generation, _epoch);
-            return;
-        }
         if (_administrativelyDisabled)
         {
             DrainDisabledQueue(_policy.MaximumCompletionsPerTick);
             return;
         }
-        while (_inFlight < _policy.MaximumConcurrent && _queue.TryDequeue(out var request, out _))
+
+        var now = CurrentTime();
+        if (_circuitOpenUntil is { } open)
         {
-            var now = CurrentTime();
+            if (open > now)
+                return;
+            _circuitOpenUntil = null;
+        }
+
+        if (!ProviderConfigured || !TryGetProviderUri(out var providerUri) || _sessionCancellation == null)
+            return;
+
+        var providerApiKey = ProviderApiKey;
+        while (_inFlight < _policy.MaximumConcurrent && _queue.TryDequeue(_inFlightActors, out var request))
+        {
+            now = CurrentTime();
             if (request.ExpiresAt <= now)
             {
                 Publish(Fallback(request, NCNeuralResultStatus.Expired, "expired"));
                 continue;
             }
-            if (_circuitOpenUntil is { } open && open > now)
+            if (!IsFreshForDispatch(request))
             {
-                Publish(Fallback(request, NCNeuralResultStatus.CircuitOpen, "circuit-open"));
+                Publish(new NCNeuralResult(
+                    NCNeuralResultStatus.Stale,
+                    request,
+                    null,
+                    "stale-before-dispatch"));
                 continue;
             }
-            var cancellation = _sessionCancellation;
-            if (cancellation == null || !TryGetProviderUri(out var providerUri))
-            {
-                Publish(Fallback(request, NCNeuralResultStatus.Fallback, "provider-endpoint-insecure"));
-                continue;
-            }
+
             _inFlight++;
-            _ = ExecuteAsync(request, _generation, ProviderApiKey, providerUri, _policy.RequestTimeout,
-                cancellation.Token);
+            _inFlightActors.Add(request.ActorId);
+            _inFlightRequests[request.ActorId] = request;
+            _ = ExecuteAsync(request, _generation, providerApiKey, providerUri, _policy.RequestTimeout,
+                _sessionCancellation.Token);
         }
     }
 
     public bool Submit(NCNeuralRequestEnvelope request)
     {
-        if (!_active || !_budgetReady || WeekChanged() || _policy == null || !Valid(request, _policy) ||
+        if (!_active || _policy == null || !Valid(request, _policy) || !MatchesCurrentPrompt(request, _policy) ||
             _known.Contains(request.RequestId))
             return false;
         if (!_clock.TryGetCurrentTime(out var currentEpoch, out var now) || currentEpoch != _epoch ||
@@ -217,66 +219,53 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         if (_administrativelyDisabled)
         {
             _known.Add(request.RequestId);
-            Publish(Fallback(request, NCNeuralResultStatus.BudgetDenied, "administratively-disabled"));
-            return true;
-        }
-        var mode = Mode();
-        if (!ProviderEnabled || mode == NCNeuralBudgetMode.FallbackOnly ||
-            mode == NCNeuralBudgetMode.Restricted && request.Priority != NCNeuralPriority.P0 ||
-            mode == NCNeuralBudgetMode.Economy && request.Priority > NCNeuralPriority.P2)
-        {
-            _known.Add(request.RequestId);
-            Publish(Fallback(request, mode == NCNeuralBudgetMode.FallbackOnly
-                ? NCNeuralResultStatus.BudgetDenied : NCNeuralResultStatus.Fallback, mode.ToString()));
+            Publish(Fallback(request, NCNeuralResultStatus.Fallback, "administratively-disabled"));
             return true;
         }
 
-        var coalescingKey = CreateCoalescingKey(request);
-        if (_coalescedByKey.TryGetValue(coalescingKey, out var coalesced))
-        {
-            _known.Add(request.RequestId);
-            if (coalesced.Followers.Count >= _policy.MaximumCoalescedFollowersPerRequest)
-            {
-                Publish(Fallback(request, NCNeuralResultStatus.Fallback, "coalescing-capacity"));
-                return true;
-            }
-
-            coalesced.Followers.Add(request);
-            _coalescedRequests++;
-            GetKindRuntimeState(request.Kind).Coalesced++;
-            return true;
-        }
-
-        if (_queue.Count >= _policy.MaximumQueued)
-        {
-            _known.Add(request.RequestId);
-            Publish(Fallback(request, NCNeuralResultStatus.Fallback, "queue-full"));
-            return true;
-        }
-        if (!CanReserveBudget(request, now, out var deniedStatus, out var budgetReason))
-        {
-            _known.Add(request.RequestId);
-            Publish(Fallback(request, deniedStatus, budgetReason));
-            return true;
-        }
         _known.Add(request.RequestId);
-        ReserveBudget(request, now);
-        _coalescedByKey[coalescingKey] = new CoalescedRequestGroup();
-        _coalescingByPrimary[request.RequestId] = coalescingKey;
-        _queue.Enqueue(request, ((byte) request.Priority, _sequence++));
+        if (_newestWakeRevisions.TryGetValue(request.ActorId, out var latestWakeRevision) &&
+            request.WakeRevision < latestWakeRevision)
+        {
+            // A slower context build completed after a newer wake had already reached this queue.
+            Publish(new NCNeuralResult(NCNeuralResultStatus.Stale, request, null, "older-async-build"));
+            return true;
+        }
+        if (request.WakeRevision > latestWakeRevision)
+            _newestWakeRevisions[request.ActorId] = request.WakeRevision;
+        // A fresh urgent observation must supersede an older answer still being composed for the same body. We do
+        // not cancel the HTTP request because usage still has to be accounted, but its result may no longer act.
+        if (_inFlightRequests.TryGetValue(request.ActorId, out var inFlight) &&
+            ShouldSupersedeInFlight(inFlight, request))
+        {
+            _supersededRequests.Add(inFlight.RequestId);
+        }
+        var outcome = _queue.Enqueue(request, out var coalesced);
+        if (outcome != NCNeuralPendingEnqueueOutcome.Added && coalesced != null)
+        {
+            _coalesced++;
+            Publish(new NCNeuralResult(
+                NCNeuralResultStatus.Stale,
+                coalesced,
+                null,
+                outcome == NCNeuralPendingEnqueueOutcome.RetainedExisting
+                    ? "coalesced-by-dominant-wake"
+                    : "coalesced-by-newer-wake"));
+        }
         return true;
     }
 
-    public NCNeuralRuntimeSnapshot GetRuntimeSnapshot() => new(_active, _administrativelyDisabled, _budgetReady,
-        Mode(), _queue.Count, _inFlight, _inputTokens, _outputTokens, _costUsdMicros,
+    public NCNeuralRuntimeSnapshot GetRuntimeSnapshot() => new(_active, _administrativelyDisabled,
+        ProviderConfigured, _usagePersistenceHealthy, _queue.Count, _inFlight,
+        _inputTokens, _outputTokens, _costUsdMicros,
         _weeklyPeriodKey, _weeklyCostUsdMicros,
         _weeklyKindRequests.GetValueOrDefault(NCNeuralRequestKind.SocialCognition),
         _weeklyKindRequests.GetValueOrDefault(NCNeuralRequestKind.StrategicDecision),
         _weeklyKindRequests.GetValueOrDefault(NCNeuralRequestKind.DialogueContinuation),
         _weeklyKindRequests.GetValueOrDefault(NCNeuralRequestKind.MemorySummary),
         _weeklyKindRequests.GetValueOrDefault(NCNeuralRequestKind.NarrativeRender),
-        _accepted, _stale, _invalid, _providerFailures, _fallbacks,
-        _coalescedRequests, _coalescedByKey.Values.Sum(value => value.Followers.Count),
+        _accepted, _stale, _invalid, _providerFailures, _fallbacks, _coalesced,
+        _usagePersistenceFailures,
         _timeouts, _rejects, _failures, _circuitOpenUntil, _lastFailureKind, _lastFailureReason,
         Enum.GetValues<NCNeuralRequestKind>().ToDictionary(
             kind => kind,
@@ -292,8 +281,8 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
 
         snapshot = new NCNeuralActorRuntimeSnapshot(
             state.AccessTier,
-            _actorOutstandingRequests.GetValueOrDefault(actorId),
-            SessionTokenHardCap(state.AccessTier),
+            (_inFlightActors.Contains(actorId) ? 1 : 0) + (_queue.Contains(actorId) ? 1 : 0),
+            _queue.Contains(actorId),
             state.InputTokens,
             state.CachedInputTokens,
             state.OutputTokens,
@@ -307,11 +296,15 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             state.LastReason,
             state.LastCapabilityId,
             state.LastSummaryKey,
-            state.LastProviderModel);
+            state.LastProviderModel,
+            state.LastPromptStableKey,
+            state.LastPromptVersion,
+            state.LastEvaluationProfile,
+            state.LastSchemaVersion);
         return true;
     }
 
-    /// <summary>Clears only transient failure state; token budgets, queues and accepted gameplay state are untouched.</summary>
+    /// <summary>Clears only transient provider failure state; usage telemetry and queued gameplay work are untouched.</summary>
     public bool ResetCircuitBreaker()
     {
         if (!_active)
@@ -322,7 +315,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     }
 
     /// <summary>
-    /// Cancels provider work for the current round without stopping deterministic cognition or A-Life. The normal
+    /// Cancels provider work for the current round without removing physical actors. The normal
     /// session reset clears this administrative latch for the next round.
     /// </summary>
     public bool TryDisableProviderForRound()
@@ -417,6 +410,14 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         if (completion.Generation != _generation || !_active || request.SessionEpoch != _epoch)
             return;
         _inFlight = Math.Max(0, _inFlight - 1);
+        _inFlightActors.Remove(request.ActorId);
+        if (_inFlightRequests.TryGetValue(request.ActorId, out var inFlight) &&
+            inFlight.RequestId == request.RequestId)
+        {
+            _inFlightRequests.Remove(request.ActorId);
+        }
+        var superseded = _supersededRequests.Remove(request.RequestId);
+        var decisionRevisionFresh = IsDecisionRevisionFresh(request);
         if (completion.Failure != NCNeuralFailureKind.None)
         {
             if (completion.Failure == NCNeuralFailureKind.Timeout)
@@ -425,18 +426,37 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
                 _rejects++;
             RecordFailure(completion.Failure, completion.Reason);
             FailCircuit(completion.Failure);
-            Publish(Fallback(
-                request,
-                completion.Failure == NCNeuralFailureKind.Timeout
-                    ? NCNeuralResultStatus.Timeout
-                    : NCNeuralResultStatus.Fallback,
-                completion.Reason,
-                completion.Failure));
+            Publish(superseded
+                ? new NCNeuralResult(
+                    NCNeuralResultStatus.Stale,
+                    request,
+                    null,
+                    "superseded-by-newer-wake",
+                    completion.Failure)
+                : Fallback(
+                    request,
+                    completion.Failure == NCNeuralFailureKind.Timeout
+                        ? NCNeuralResultStatus.Timeout
+                        : NCNeuralResultStatus.Fallback,
+                    completion.Reason,
+                    completion.Failure));
             return;
         }
 
         var now = CurrentTime();
-        var result = Validate(request, completion.Response, completion.Actor, now);
+        var latestActor = completion.Actor;
+        if (_actors.TryGetCached(request.ActorId, out var cachedActor) &&
+            (latestActor == null || cachedActor.AggregateVersion >= latestActor.AggregateVersion))
+        {
+            latestActor = cachedActor;
+        }
+        var result = superseded
+            ? new NCNeuralResult(
+                NCNeuralResultStatus.Stale,
+                request,
+                null,
+                "superseded-by-newer-wake")
+            : ValidateSafely(request, completion.Response, latestActor, decisionRevisionFresh, now);
         if (result.Status == NCNeuralResultStatus.Invalid)
         {
             _rejects++;
@@ -444,11 +464,11 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             FailCircuit(NCNeuralFailureKind.Schema);
         }
 
-        // A syntactically valid provider usage receipt is billable even when the gameplay answer is stale or
-        // rejected. Persist it before publishing the result so budgets cannot be bypassed with invalid responses.
+        // Usage persistence is telemetry only. A database outage must not hold or discard a valid gameplay result.
         if (completion.Response is { } response && CanAccountUsage(request, response, _policy!))
         {
             AccountUsage(request, response);
+            Publish(result);
             _ = PersistUsageAsync(completion.Generation, result, response, _policy!, now);
             return;
         }
@@ -467,7 +487,6 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             var persisted = await _usageLedger.RecordAsync(result.Request, response, policy, now);
             _usageCompletions.Enqueue(new UsageCompletion(
                 generation,
-                result,
                 persisted != null,
                 persisted == null ? "usage-ledger-rejected" : string.Empty));
         }
@@ -475,7 +494,6 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         {
             _usageCompletions.Enqueue(new UsageCompletion(
                 generation,
-                result,
                 false,
                 exception.GetType().Name));
         }
@@ -483,45 +501,23 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
 
     private void CompleteUsage(UsageCompletion completion)
     {
-        var request = completion.Result.Request;
-        if (completion.Generation != _generation || !_active || request.SessionEpoch != _epoch)
+        if (completion.Generation != _generation || !_active)
             return;
 
         if (!completion.Persisted)
         {
+            _usagePersistenceHealthy = false;
+            _usagePersistenceFailures++;
             RecordFailure(NCNeuralFailureKind.Persistence, completion.Reason);
-            // Provider spend without a durable receipt must fail closed. Deterministic AI remains active, while
-            // further Neural calls are denied until the next round instead of accumulating untracked cost.
-            TryDisableProviderForRound();
-            Publish(Fallback(request, NCNeuralResultStatus.Fallback, completion.Reason,
-                NCNeuralFailureKind.Persistence));
             return;
         }
-
-        if (completion.Result.Status == NCNeuralResultStatus.Accepted)
-        {
-            _failures = 0;
-            _lastFailureKind = NCNeuralFailureKind.None;
-            _lastFailureReason = string.Empty;
-            _accepted++;
-            // A previous answer is never a safe fallback for a new utterance, even when the Actor aggregate itself
-            // did not change between turns. Strategic results retain strict context-version caching.
-            if (request.Kind != NCNeuralRequestKind.DialogueContinuation)
-                _cache[(request.ActorId, request.Kind)] = completion.Result.Response!;
-        }
-        Publish(completion.Result);
+        _usagePersistenceHealthy = true;
     }
 
     private void DrainCompletions(int maximum)
     {
         for (var processed = 0; processed < maximum; processed++)
         {
-            if (_budgetLoadCompletions.TryDequeue(out var budget))
-            {
-                CompleteBudgetLoad(budget);
-                continue;
-            }
-
             if (_usageCompletions.TryDequeue(out var usage))
             {
                 CompleteUsage(usage);
@@ -540,78 +536,17 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
 
     private void DrainDisabledQueue(int maximum)
     {
-        for (var processed = 0; processed < maximum && _queue.TryDequeue(out var request, out _); processed++)
+        for (var processed = 0;
+             processed < maximum && _queue.TryDequeue(_unblockedActors, out var request);
+             processed++)
         {
-            Publish(Fallback(request, NCNeuralResultStatus.BudgetDenied, "administratively-disabled"));
+            Publish(Fallback(request, NCNeuralResultStatus.Fallback, "administratively-disabled"));
         }
-    }
-
-    private async Task LoadBudgetAsync(int generation, NCSessionEpoch sessionEpoch)
-    {
-        try
-        {
-            var periodKey = NCNeuralUsageLedgerSystem.CurrentWeekKey(DateTimeOffset.UtcNow);
-            var session = await _usageLedger.GetSessionAsync(sessionEpoch);
-            var week = await _usageLedger.GetWeekAsync(periodKey);
-            _budgetLoadCompletions.Enqueue(new BudgetLoadCompletion(
-                generation,
-                sessionEpoch,
-                true,
-                session,
-                periodKey,
-                week,
-                string.Empty));
-        }
-        catch (Exception exception)
-        {
-            _budgetLoadCompletions.Enqueue(new BudgetLoadCompletion(
-                generation,
-                sessionEpoch,
-                false,
-                null,
-                string.Empty,
-                null,
-                exception.GetType().Name));
-        }
-    }
-
-    private void CompleteBudgetLoad(BudgetLoadCompletion completion)
-    {
-        if (completion.Generation != _generation || !_active || completion.SessionEpoch != _epoch)
-            return;
-
-        if (!completion.Succeeded)
-        {
-            RecordFailure(NCNeuralFailureKind.Persistence, completion.Reason);
-            return;
-        }
-
-        var snapshot = completion.Session?.Snapshot;
-        _inputTokens = snapshot?.InputTokens ?? 0;
-        _outputTokens = snapshot?.OutputTokens ?? 0;
-        _costUsdMicros = snapshot?.TotalCostUsdMicros ?? 0;
-        _weeklyPeriodKey = completion.PeriodKey;
-        _weeklyCostUsdMicros = completion.Week?.Snapshot.TotalCostUsdMicros ?? 0;
-        _weeklyActorCosts.Clear();
-        _weeklyKindRequests.Clear();
-        if (completion.Week?.Snapshot is { } week)
-        {
-            foreach (var (key, cost) in week.ActorCostUsdMicros)
-            {
-                if (Guid.TryParse(key, out var actorId))
-                    _weeklyActorCosts[new NCActorId(actorId)] = cost;
-            }
-            foreach (var (key, count) in week.KindRecordedRequests)
-            {
-                if (Enum.TryParse<NCNeuralRequestKind>(key, out var kind))
-                    _weeklyKindRequests[kind] = count;
-            }
-        }
-        _budgetReady = true;
     }
 
     private void AccountUsage(NCNeuralRequestEnvelope request, NCNeuralResponseEnvelope response)
     {
+        RefreshUsagePeriod();
         _inputTokens = checked(_inputTokens + response.InputTokens);
         _outputTokens = checked(_outputTokens + response.OutputTokens);
         var uncachedInput = response.InputTokens - response.CachedInputTokens;
@@ -627,10 +562,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         var totalCost = checked(inputCost + cachedCost + outputCost);
         _costUsdMicros = checked(_costUsdMicros + totalCost);
         _weeklyCostUsdMicros = checked(_weeklyCostUsdMicros + totalCost);
-        _weeklyActorCosts[request.ActorId] = checked(_weeklyActorCosts.GetValueOrDefault(request.ActorId) + totalCost);
         _weeklyKindRequests[request.Kind] = checked(_weeklyKindRequests.GetValueOrDefault(request.Kind) + 1);
-        _actorSessionTokens[request.ActorId] = checked(
-            _actorSessionTokens.GetValueOrDefault(request.ActorId) + response.InputTokens + response.OutputTokens);
 
         var kindState = GetKindRuntimeState(request.Kind);
         kindState.InputTokens = checked(kindState.InputTokens + response.InputTokens);
@@ -655,7 +587,27 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         NCNeuralPolicyPrototype policy) =>
         response.RequestId == request.RequestId && response.InputTokens >= 0 && response.OutputTokens >= 0 &&
         response.CachedInputTokens >= 0 && response.CachedInputTokens <= response.InputTokens &&
-        response.ProviderModel == policy.ProviderModel && Stable(response.ProviderRequestId);
+        response.ProviderModel == policy.ProviderModel && Stable(response.ProviderRequestId) &&
+        Stable(response.PromptStableKey) && response.PromptVersion > 0 && Stable(response.EvaluationProfile);
+
+    internal static bool ShouldSupersedeInFlight(
+        NCNeuralRequestEnvelope inFlight,
+        NCNeuralRequestEnvelope incoming) =>
+        inFlight.ActorId == incoming.ActorId && incoming.WakeRevision > inFlight.WakeRevision &&
+        incoming.Priority <= inFlight.Priority;
+
+    internal long GetActorDecisionRevision(NCActorId actorId) =>
+        _actorDecisionRevisions.GetValueOrDefault(actorId);
+
+    private bool IsDecisionRevisionFresh(NCNeuralRequestEnvelope request) =>
+        IsDecisionRevisionFresh(request, GetActorDecisionRevision(request.ActorId));
+
+    internal static bool IsDecisionRevisionFresh(NCNeuralRequestEnvelope request, long currentRevision) =>
+        request.DecisionRevision == currentRevision;
+
+    private bool IsFreshForDispatch(NCNeuralRequestEnvelope request) =>
+        IsDecisionRevisionFresh(request) && _actors.TryGetCached(request.ActorId, out var actor) &&
+        IsActorVersionFresh(request, null, actor.AggregateVersion);
 
     private void RecordFailure(NCNeuralFailureKind kind, string reason)
     {
@@ -663,7 +615,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         _lastFailureReason = reason.Length <= 96 ? reason : reason[..96];
     }
 
-    private static NCNeuralFailureKind ClassifyStatus(HttpStatusCode status) => status switch
+    internal static NCNeuralFailureKind ClassifyStatus(HttpStatusCode status) => status switch
     {
         HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden => NCNeuralFailureKind.Authentication,
         HttpStatusCode.TooManyRequests => NCNeuralFailureKind.RateLimited,
@@ -678,15 +630,13 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         NCNeuralRequestEnvelope request,
         NCNeuralResponseEnvelope? response,
         NCCityActorRecord? actor,
+        bool decisionRevisionFresh,
         NCActiveWorldTime now)
     {
         if (request.ExpiresAt <= now)
             return new(NCNeuralResultStatus.Expired, request, null, "expiry");
-        // Dialogue is correlated against the authoritative conversation version at delivery time. Unrelated routine
-        // or location persistence may advance the actor aggregate while the provider is composing a harmless line.
-        // Strategic suggestions retain strict optimistic concurrency because they can influence later planning.
         if (actor == null || request.Kind != NCNeuralRequestKind.DialogueContinuation &&
-            actor.AggregateVersion != request.ContextVersion)
+            (!decisionRevisionFresh || actor.AggregateVersion != request.ContextVersion))
             return new(NCNeuralResultStatus.Stale, request, null, "context-version");
         if (response == null || response.RequestId != request.RequestId ||
             response.SchemaVersion != NCNeuralContract.SchemaVersion ||
@@ -696,20 +646,189 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             response.InputTokens > _policy!.MaximumRequestInputTokens ||
             response.OutputTokens > _policy.MaximumRequestOutputTokens ||
             response.ProviderModel != _policy.ProviderModel || !Stable(response.ProviderRequestId) ||
-            !request.AllowedCapabilityIds.Contains(response.SelectedCapabilityId) ||
-            response.Intent != null &&
-            !response.Intent.RequestedCapabilityIds.Contains(response.SelectedCapabilityId) ||
-            response.SpeechActKey.Length > 96 || !Stable(response.SummaryKey) ||
-            response.RenderedText.Length > _policy.MaximumTextLength ||
-            request.Kind != NCNeuralRequestKind.DialogueContinuation &&
-            response.Confidence < (request.Autonomy?.MinimumIntentConfidence ?? int.MaxValue) ||
+            !PromptIdentityMatches(request, response) ||
+            response.SpeechActKey == null || response.SpeechActKey.Length > 96 || !Stable(response.SummaryKey) ||
+            response.RenderedText == null || response.RenderedText.Length > _policy.MaximumTextLength ||
             request.Kind == NCNeuralRequestKind.DialogueContinuation &&
-            string.IsNullOrWhiteSpace(response.RenderedText) || !ValidIntent(request, response.Intent) ||
-            !ValidDisclosureResponse(request, response))
+            response.ShouldSpeak && string.IsNullOrWhiteSpace(response.RenderedText) ||
+            !ValidDisclosureResponse(request, response) || !ValidResponseShape(request, response))
             return new(NCNeuralResultStatus.Invalid, request, null, "schema-or-capability",
                 NCNeuralFailureKind.Schema);
-        return new(NCNeuralResultStatus.Accepted, request, response, string.Empty);
+
+        // Physical proposals are one ordered transaction. A malformed member rejects the complete physical batch;
+        // compacting it could change dependencies while making command-result indices dishonest.
+        var commands = SelectValidCommands(request, response.Commands ?? []);
+
+        // An act response must retain at least one command after the server filters untrusted proposals. Treating
+        // a fully rejected batch as accepted would leave the physical actor idle without a command-result wake.
+        if (response.DecisionMode == "act" && commands.Length == 0)
+        {
+            return new NCNeuralResult(
+                NCNeuralResultStatus.Invalid,
+                request,
+                null,
+                "all-commands-rejected",
+                NCNeuralFailureKind.Schema);
+        }
+
+        // A conversation can remain meaningful after an unrelated aggregate mutation, but its old commands cannot.
+        // Preserve only a structurally valid spoken reply and remove stale intent/physical work atomically.
+        if (request.Kind == NCNeuralRequestKind.DialogueContinuation && commands.Length > 0 &&
+            (!decisionRevisionFresh || actor.AggregateVersion != request.ContextVersion))
+        {
+            if (!TryKeepStaleDialogueSpeech(request, response, out var speechOnly))
+                return new(NCNeuralResultStatus.Stale, request, null, "context-version");
+            return new(NCNeuralResultStatus.Accepted, request, speechOnly, "stale-commands-removed");
+        }
+
+        return new(NCNeuralResultStatus.Accepted, request, response with { Commands = commands }, string.Empty);
     }
+
+    internal static bool IsActorVersionFresh(
+        NCNeuralRequestEnvelope request,
+        NCNeuralResponseEnvelope? response,
+        long latestActorVersion) =>
+        (request.Kind == NCNeuralRequestKind.DialogueContinuation && (response?.Commands?.Count ?? 0) == 0) ||
+        latestActorVersion == request.ContextVersion;
+
+    internal static bool TryKeepStaleDialogueSpeech(
+        NCNeuralRequestEnvelope request,
+        NCNeuralResponseEnvelope response,
+        out NCNeuralResponseEnvelope speechOnly)
+    {
+        speechOnly = response with
+        {
+            Commands = [],
+            DecisionMode = "speak",
+            Intent = null,
+        };
+        return request.Kind == NCNeuralRequestKind.DialogueContinuation && response.ShouldSpeak &&
+               response.SpeechActs.Count > 0 && ValidResponseShape(request, speechOnly);
+    }
+
+    /// <summary>Responses must identify the exact version-controlled prompt configuration that produced them.</summary>
+    internal static bool PromptIdentityMatches(
+        NCNeuralRequestEnvelope request,
+        NCNeuralResponseEnvelope response) =>
+        response.PromptStableKey == request.PromptStableKey &&
+        response.PromptVersion == request.PromptVersion &&
+        response.EvaluationProfile == request.EvaluationProfile;
+
+    internal static NCNeuralCommandProposal[] SelectValidCommands(
+        NCNeuralRequestEnvelope request,
+        IReadOnlyList<NCNeuralCommandProposal> commands)
+    {
+        if (commands.Count > 8 || commands.Any(command => !ValidCommandShape(request, command)))
+            return [];
+
+        return commands
+            .Select((command, index) => command with { OriginalIndex = index })
+            .ToArray();
+    }
+
+    /// <summary>Contains every untrusted-response dereference behind null-safe structural checks.</summary>
+    private NCNeuralResult ValidateSafely(
+        NCNeuralRequestEnvelope request,
+        NCNeuralResponseEnvelope? response,
+        NCCityActorRecord? actor,
+        bool decisionRevisionFresh,
+        NCActiveWorldTime now)
+    {
+        try
+        {
+            return Validate(request, response, actor, decisionRevisionFresh, now);
+        }
+        catch (Exception exception)
+        {
+            // Provider JSON is an untrusted boundary. A malformed nested value must reject one response, never
+            // terminate the server simulation. Payload data is deliberately omitted from this diagnostic.
+            Log.Warning($"Neural response validator rejected an unsafe payload shape: {exception.GetType().Name}");
+            return new NCNeuralResult(
+                NCNeuralResultStatus.Invalid,
+                request,
+                null,
+                "validator-exception",
+                NCNeuralFailureKind.Schema);
+        }
+    }
+
+    internal static bool ValidResponseShape(
+        NCNeuralRequestEnvelope request,
+        NCNeuralResponseEnvelope response)
+    {
+        if (response.Commands == null ||
+            response.DecisionMode is not ("act" or "speak" or "sense" or "wait") ||
+            response.SenseRequests == null || response.SenseRequests.Count > 2 ||
+            response.SpeechActs == null || response.SpeechActs.Count > 2 ||
+            response.MemorySuggestions == null || response.MemorySuggestions.Count > 16 ||
+            response.ReasonTags == null || response.ReasonTags.Count > 16 ||
+            response.ReasonTags.Any(value => !Stable(value)) ||
+            response.Intent is { } intent &&
+            (!Stable(intent.Key) || intent.Priority is < 0 or > 1000 || intent.TargetHandle == null ||
+             intent.TargetHandle.Length > 0 && !KnownTarget(request, intent.TargetHandle)) ||
+            response.SpeechActs.Any(value => value == null || !ValidSpeechAct(value.ActKey) ||
+                string.IsNullOrWhiteSpace(value.Text) || value.Text.Length > 512 || value.Text.Any(char.IsControl)) ||
+            response.MemorySuggestions.Any(value => value == null || !Stable(value.Key) ||
+                value.Importance is < 0 or > 1000 || value.SubjectHandle == null ||
+                value.SubjectHandle.Length > 0 && !KnownTarget(request, value.SubjectHandle)) ||
+            response.SenseRequests.Any(value => !ValidSenseRequest(request, value)) ||
+            response.Wake is { } wake && (wake.On == null || wake.AfterSeconds is < 0 or > 86400 || wake.On.Count > 1 ||
+                wake.On.Any(value => value != "command-result")))
+        {
+            return false;
+        }
+
+        if (response.SpeechActs.Count > 0 &&
+            (!response.ShouldSpeak || response.SpeechActs[0].ActKey != response.SpeechActKey ||
+             response.SpeechActs[0].Text != response.RenderedText))
+        {
+            return false;
+        }
+
+        return response.DecisionMode switch
+        {
+            "act" => response.Commands.Count is >= 1 and <= 8 && response.SenseRequests.Count == 0,
+            "speak" => response.ShouldSpeak && response.SpeechActs.Count > 0 &&
+                       response.Commands.Count == 0 && response.SenseRequests.Count == 0,
+            "sense" => request.SenseDepth < 2 && response.Commands.Count == 0 &&
+                       response.SenseRequests.Count is >= 1 and <= 2 && !response.ShouldSpeak,
+            "wait" => !response.ShouldSpeak && response.SpeechActs.Count == 0 &&
+                      response.Commands.Count == 0 && response.SenseRequests.Count == 0,
+            _ => false,
+        };
+    }
+
+    private static bool ValidSenseRequest(NCNeuralRequestEnvelope request, NCNeuralSenseRequest? value)
+    {
+        if (value == null || value.Kind is not (
+                "look-around" or "inspect-subject" or "inspect-object" or "check-inventory" or "check-body" or
+                "query-nearby-affordances" or "query-known-locations" or "recall-memories" or "examine-route") ||
+            value.TargetHandle == null)
+        {
+            return false;
+        }
+
+        return value.Kind switch
+        {
+            // Active inspection may only refine a currently perceived physical subject. A remembered zone is a
+            // navigation target, not something the actor can inspect through the neural boundary.
+            "inspect-subject" or "inspect-object" =>
+                (request.PerceivedSubjects ?? []).Any(subject => subject.Handle == value.TargetHandle),
+            "recall-memories" => KnownTarget(request, value.TargetHandle) ||
+                request.Facts.Any(fact => fact.Subject == value.TargetHandle),
+            "examine-route" =>
+                (request.KnownLocations ?? []).Any(location => location.Handle == value.TargetHandle),
+            _ => value.TargetHandle.Length == 0,
+        };
+    }
+
+    private static bool KnownTarget(NCNeuralRequestEnvelope request, string handle) =>
+        (request.PerceivedSubjects ?? []).Any(value => value.Handle == handle) ||
+        (request.KnownLocations ?? []).Any(value => value.Handle == handle);
+
+    private static bool ValidSpeechAct(string value) => value is
+        "greeting" or "statement" or "question" or "answer" or "offer" or
+        "acceptance" or "refusal" or "threat" or "farewell";
 
     private NCNeuralResult Fallback(
         NCNeuralRequestEnvelope request,
@@ -718,72 +837,36 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         NCNeuralFailureKind failure = NCNeuralFailureKind.None)
     {
         _fallbacks++;
-        if (request.Kind != NCNeuralRequestKind.DialogueContinuation &&
-            _cache.TryGetValue((request.ActorId, request.Kind), out var cached) &&
-            cached.ContextVersion == request.ContextVersion && request.AllowedCapabilityIds.Contains(
-                cached.SelectedCapabilityId))
-        {
-            return new(NCNeuralResultStatus.Fallback, request, cached, $"cached:{reason}", failure);
-        }
-        var capability = request.AllowedCapabilityIds.FirstOrDefault() ?? string.Empty;
         return new(status, request, new NCNeuralResponseEnvelope(request.RequestId, NCNeuralContract.SchemaVersion,
             request.ContextVersion,
-            capability, "safe-default", string.Empty, "safe-default", 0, 0, 0, 0, string.Empty,
-            _policy?.ProviderModel ?? string.Empty), reason, failure);
+            [], "safe-default", string.Empty, false, "safe-default", 0, 0, 0, 0, string.Empty,
+            _policy?.ProviderModel ?? string.Empty, request.PromptStableKey, request.PromptVersion,
+            request.EvaluationProfile), reason, failure);
     }
 
     private void FailCircuit(NCNeuralFailureKind failure)
     {
-        if (failure == NCNeuralFailureKind.SessionCancelled)
+        if (!CountsTowardCircuit(failure))
             return;
 
-        // Authentication, schema and provider-contract failures cannot heal through immediate retries.
-        var failFast = failure is NCNeuralFailureKind.Authentication or NCNeuralFailureKind.ProviderRejected or
-            NCNeuralFailureKind.Schema;
+        // Authentication is a shared configuration fault. Malformed or rejected individual requests are isolated
+        // above and must never disable cognition for every other actor.
+        var failFast = failure == NCNeuralFailureKind.Authentication;
         _failures = failFast ? _policy!.CircuitFailureThreshold : checked(_failures + 1);
         if (_failures >= _policy!.CircuitFailureThreshold)
             _circuitOpenUntil = CurrentTime().Advance(_policy.CircuitOpenDuration);
     }
 
+    internal static bool CountsTowardCircuit(NCNeuralFailureKind failure) => failure is
+        NCNeuralFailureKind.Timeout or
+        NCNeuralFailureKind.Authentication or
+        NCNeuralFailureKind.ServiceUnavailable or
+        NCNeuralFailureKind.RateLimited or
+        NCNeuralFailureKind.Transport;
+
     private void Publish(NCNeuralResult result)
     {
-        ReleaseBudget(result.Request);
-        if (!_coalescingByPrimary.Remove(result.Request.RequestId, out var key) ||
-            !_coalescedByKey.Remove(key, out var group))
-        {
-            PublishSingle(result);
-            return;
-        }
-
         PublishSingle(result);
-        var now = CurrentTime();
-        foreach (var follower in group.Followers)
-        {
-            if (follower.ExpiresAt <= now)
-            {
-                PublishSingle(new NCNeuralResult(
-                    NCNeuralResultStatus.Expired,
-                    follower,
-                    null,
-                    "coalesced:expired",
-                    result.FailureKind));
-                continue;
-            }
-
-            var response = result.Response == null
-                ? null
-                : result.Response with
-                {
-                    RequestId = follower.RequestId,
-                    ContextVersion = follower.ContextVersion,
-                };
-            PublishSingle(result with
-            {
-                Request = follower,
-                Response = response,
-                Reason = BoundDiagnostic($"coalesced:{result.Reason}"),
-            });
-        }
     }
 
     private void PublishSingle(NCNeuralResult result)
@@ -804,7 +887,6 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             case NCNeuralResultStatus.Fallback:
             case NCNeuralResultStatus.Timeout:
             case NCNeuralResultStatus.CircuitOpen:
-            case NCNeuralResultStatus.BudgetDenied:
                 kindState.Fallback++;
                 break;
             default:
@@ -824,11 +906,25 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             LastStatus = result.Status,
             LastFailureKind = result.FailureKind,
             LastReason = BoundDiagnostic(result.Reason),
-            LastCapabilityId = response?.SelectedCapabilityId ?? string.Empty,
+            LastCapabilityId = response?.Commands.FirstOrDefault()?.CapabilityId ?? string.Empty,
             LastSummaryKey = response?.SummaryKey ?? string.Empty,
             LastProviderModel = response?.ProviderModel ?? string.Empty,
+            LastPromptStableKey = response?.PromptStableKey ?? result.Request.PromptStableKey,
+            LastPromptVersion = response?.PromptVersion ?? result.Request.PromptVersion,
+            LastEvaluationProfile = response?.EvaluationProfile ?? result.Request.EvaluationProfile,
+            LastSchemaVersion = response?.SchemaVersion ?? NCNeuralContract.SchemaVersion,
             UpdatedSequence = ++_actorRuntimeSequence,
         };
+        _known.Remove(result.Request.RequestId);
+        if (result.Status == NCNeuralResultStatus.Accepted)
+        {
+            _accepted++;
+            _failures = 0;
+            _lastFailureKind = NCNeuralFailureKind.None;
+            _lastFailureReason = string.Empty;
+            _actorDecisionRevisions[result.Request.ActorId] = checked(
+                GetActorDecisionRevision(result.Request.ActorId) + 1);
+        }
         RaiseLocalEvent(new NCNeuralResultEvent(result));
     }
 
@@ -867,206 +963,22 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         NCNeuralFailureKind.ProviderRejected or
         NCNeuralFailureKind.Transport;
 
-    private bool CanReserveBudget(
-        NCNeuralRequestEnvelope request,
-        NCActiveWorldTime now,
-        out NCNeuralResultStatus deniedStatus,
-        out string reason)
+    private void RefreshUsagePeriod()
     {
-        var reservation = CreateBudgetReservation(request);
-        var alreadyReserved = ReservedCost();
-        if (_inputTokens + _outputTokens + _reservedTokens + reservation.Tokens > _policy!.SessionTokenHardCap)
-        {
-            deniedStatus = NCNeuralResultStatus.BudgetDenied;
-            reason = "session-token-hard-cap";
-            return false;
-        }
-        if (_costUsdMicros + alreadyReserved + reservation.CostUsdMicros > _policy.SessionCostHardCapUsdMicros)
-        {
-            deniedStatus = NCNeuralResultStatus.BudgetDenied;
-            reason = "session-cost-hard-cap";
-            return false;
-        }
-        if (_weeklyCostUsdMicros + alreadyReserved + reservation.CostUsdMicros > _policy.WeeklyCostHardCapUsdMicros)
-        {
-            deniedStatus = NCNeuralResultStatus.BudgetDenied;
-            reason = "weekly-cost-hard-cap";
-            return false;
-        }
-
-        if (_actorOutstandingRequests.GetValueOrDefault(request.ActorId) >= MaximumOutstandingRequests(request.AccessTier))
-        {
-            deniedStatus = NCNeuralResultStatus.Fallback;
-            reason = "actor-concurrency-limit";
-            return false;
-        }
-        if (_nextRequestAt.TryGetValue((request.ActorId, request.Kind), out var nextRequestAt) && nextRequestAt > now)
-        {
-            deniedStatus = NCNeuralResultStatus.Fallback;
-            reason = "actor-request-cooldown";
-            return false;
-        }
-
-        if (_actorSessionTokens.GetValueOrDefault(request.ActorId) +
-            _actorReservedTokens.GetValueOrDefault(request.ActorId) + reservation.Tokens >
-            SessionTokenHardCap(request.AccessTier))
-        {
-            deniedStatus = NCNeuralResultStatus.BudgetDenied;
-            reason = "actor-session-token-hard-cap";
-            return false;
-        }
-
-        if (_weeklyActorCosts.GetValueOrDefault(request.ActorId) +
-            _actorReservedCosts.GetValueOrDefault(request.ActorId) + reservation.CostUsdMicros >
-            _policy.ActorWeeklyCostHardCapUsdMicros)
-        {
-            deniedStatus = NCNeuralResultStatus.BudgetDenied;
-            reason = "actor-weekly-cost-hard-cap";
-            return false;
-        }
-
-        var kindReserved = _kindReservations.GetValueOrDefault(request.Kind);
-        if (!_policy.RequestKindWeeklyLimits.TryGetValue(request.Kind, out var kindLimit) ||
-            _weeklyKindRequests.GetValueOrDefault(request.Kind) + kindReserved >= kindLimit)
-        {
-            deniedStatus = NCNeuralResultStatus.BudgetDenied;
-            reason = "request-kind-weekly-limit";
-            return false;
-        }
-
-        deniedStatus = NCNeuralResultStatus.Accepted;
-        reason = string.Empty;
-        return true;
-    }
-
-    private void ReserveBudget(NCNeuralRequestEnvelope request, NCActiveWorldTime now)
-    {
-        var reservation = CreateBudgetReservation(request);
-        _budgetReservations.Add(request.RequestId, reservation);
-        _reservedTokens = checked(_reservedTokens + reservation.Tokens);
-        _reservedCostUsdMicros = checked(_reservedCostUsdMicros + reservation.CostUsdMicros);
-        _actorOutstandingRequests[request.ActorId] = checked(
-            _actorOutstandingRequests.GetValueOrDefault(request.ActorId) + 1);
-        _actorReservedTokens[request.ActorId] = checked(
-            _actorReservedTokens.GetValueOrDefault(request.ActorId) + reservation.Tokens);
-        _actorReservedCosts[request.ActorId] = checked(
-            _actorReservedCosts.GetValueOrDefault(request.ActorId) + reservation.CostUsdMicros);
-        _kindReservations[request.Kind] = checked(_kindReservations.GetValueOrDefault(request.Kind) + 1);
-        _nextRequestAt[(request.ActorId, request.Kind)] = now.Advance(RequestCooldown(request.AccessTier));
-
-        var state = GetActorRuntimeState(request.ActorId);
-        _actorRuntime[request.ActorId] = state with
-        {
-            AccessTier = request.AccessTier,
-            UpdatedSequence = ++_actorRuntimeSequence,
-        };
-    }
-
-    private void ReleaseBudget(NCNeuralRequestEnvelope request)
-    {
-        if (!_budgetReservations.Remove(request.RequestId, out var reservation))
+        var periodKey = NCNeuralUsageLedgerSystem.CurrentWeekKey(DateTimeOffset.UtcNow);
+        if (_weeklyPeriodKey == periodKey)
             return;
 
-        _reservedTokens = Math.Max(0, _reservedTokens - reservation.Tokens);
-        _reservedCostUsdMicros = Math.Max(0, _reservedCostUsdMicros - reservation.CostUsdMicros);
-        DecrementReservation(_actorOutstandingRequests, reservation.ActorId);
-        DecrementReservation(_actorReservedTokens, reservation.ActorId, reservation.Tokens);
-        DecrementReservation(_actorReservedCosts, reservation.ActorId, reservation.CostUsdMicros);
-        DecrementReservation(_kindReservations, reservation.Kind);
+        _weeklyPeriodKey = periodKey;
+        _weeklyCostUsdMicros = 0;
+        _weeklyKindRequests.Clear();
     }
 
-    private static void DecrementReservation<TKey>(Dictionary<TKey, int> reservations, TKey key)
-        where TKey : notnull
-    {
-        if (!reservations.TryGetValue(key, out var count) || count <= 1)
-            reservations.Remove(key);
-        else
-            reservations[key] = count - 1;
-    }
-
-    private static void DecrementReservation<TKey>(Dictionary<TKey, int> reservations, TKey key, int amount)
-        where TKey : notnull
-    {
-        if (!reservations.TryGetValue(key, out var value) || value <= amount)
-            reservations.Remove(key);
-        else
-            reservations[key] = value - amount;
-    }
-
-    private static void DecrementReservation<TKey>(Dictionary<TKey, long> reservations, TKey key, long amount)
-        where TKey : notnull
-    {
-        if (!reservations.TryGetValue(key, out var value) || value <= amount)
-            reservations.Remove(key);
-        else
-            reservations[key] = value - amount;
-    }
-
-    private long ReservedCost() => _reservedCostUsdMicros;
-
-    private int SessionTokenHardCap(NCNeuralAccessTier tier) => tier == NCNeuralAccessTier.NarrativeActor
-        ? _policy?.NarrativeActorSessionTokenHardCap ?? 0
-        : _policy?.OrdinaryResidentSessionTokenHardCap ?? 0;
-
-    private int MaximumOutstandingRequests(NCNeuralAccessTier tier) => tier == NCNeuralAccessTier.NarrativeActor
-        ? _policy!.NarrativeActorMaximumOutstandingRequests
-        : _policy!.OrdinaryResidentMaximumOutstandingRequests;
-
-    private TimeSpan RequestCooldown(NCNeuralAccessTier tier) => tier == NCNeuralAccessTier.NarrativeActor
-        ? _policy!.NarrativeActorRequestCooldown
-        : _policy!.OrdinaryResidentRequestCooldown;
-
-    private bool WeekChanged() => _weeklyPeriodKey.Length > 0 &&
-        _weeklyPeriodKey != NCNeuralUsageLedgerSystem.CurrentWeekKey(DateTimeOffset.UtcNow);
-
-    private BudgetReservation CreateBudgetReservation(NCNeuralRequestEnvelope request)
-    {
-        var inputTokens = request.AccessTier == NCNeuralAccessTier.NarrativeActor
-            ? _policy!.NarrativeActorReservedInputTokens
-            : _policy!.OrdinaryResidentReservedInputTokens;
-        var tokens = checked(inputTokens + request.MaximumOutputTokens);
-        var cost = checked(
-            NCNeuralUsageLedgerSystem.CalculateCost(
-                inputTokens,
-                _policy.InputPriceUsdMicrosPerMillionTokens) +
-            NCNeuralUsageLedgerSystem.CalculateCost(
-                request.MaximumOutputTokens,
-                _policy.OutputPriceUsdMicrosPerMillionTokens));
-        return new BudgetReservation(request.ActorId, request.Kind, tokens, cost);
-    }
-
-    private void ClearBudgetReservations()
-    {
-        _budgetReservations.Clear();
-        _reservedTokens = 0;
-        _reservedCostUsdMicros = 0;
-        _actorOutstandingRequests.Clear();
-        _actorReservedTokens.Clear();
-        _actorReservedCosts.Clear();
-        _kindReservations.Clear();
-        _nextRequestAt.Clear();
-    }
-
-    private NCNeuralBudgetMode Mode()
-    {
-        var reservedCost = ReservedCost();
-        if (_policy == null || !ProviderEnabled ||
-            _inputTokens + _outputTokens + _reservedTokens >= _policy.SessionTokenHardCap ||
-            _costUsdMicros + reservedCost >= _policy.SessionCostHardCapUsdMicros ||
-            _weeklyCostUsdMicros + reservedCost >= _policy.WeeklyCostHardCapUsdMicros)
-            return NCNeuralBudgetMode.FallbackOnly;
-        var used = _inputTokens + _outputTokens;
-        return used >= _policy.RestrictedThreshold || _costUsdMicros >= _policy.RestrictedCostThresholdUsdMicros
-            ? NCNeuralBudgetMode.Restricted
-            : used >= _policy.EconomyThreshold || _costUsdMicros >= _policy.EconomyCostThresholdUsdMicros
-                ? NCNeuralBudgetMode.Economy
-                : NCNeuralBudgetMode.Normal;
-    }
     private NCActiveWorldTime CurrentTime() => _clock.TryGetCurrentTime(out _, out var now) ? now : default;
-    private bool ProviderEnabled =>
-        !_administrativelyDisabled && _budgetReady &&
+    private bool ProviderConfigured =>
+        _policy != null && !_administrativelyDisabled &&
         (_policy?.Enabled == true || _configuration.GetCVar(NCCVars.NeuralEnabled)) &&
-        ProviderApiKey.Length > 0;
+        ProviderApiKey.Length > 0 && TryGetProviderUri(out _);
     private string ProviderApiKey => _configuration.GetCVar(NCCVars.NeuralApiKey).Trim();
     private string ProviderEndpoint
     {
@@ -1088,6 +1000,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     private static NCNeuralProviderRequest ToProviderRequest(NCNeuralRequestEnvelope request)
     {
         return new NCNeuralProviderRequest(
+            NCNeuralContract.SchemaVersion,
             request.RequestId,
             request.Kind.ToString(),
             request.Priority.ToString(),
@@ -1096,6 +1009,9 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             request.ContextVersion,
             new NCNeuralProviderTime(request.ExpiresAt.Ticks),
             request.PromptProfile.Id,
+            request.PromptStableKey,
+            request.PromptVersion,
+            request.EvaluationProfile,
             request.Facts,
             request.AllowedCapabilityIds,
             request.TopicKeys,
@@ -1104,30 +1020,19 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             request.Autonomy,
             request.PerceivedSubjects ?? [],
             request.PerceivedEvents ?? [],
+            request.PerceptionDeltas,
             request.KnownLocations ?? [],
             request.DialogueInput,
             request.AllowedDirectiveActionIds ?? [],
             request.Disclosure!,
+            request.Body,
+            request.CurrentIntent,
+            request.RecentCommandResults,
+            request.WorldOpportunities,
+            request.AvailableActions,
+            request.SenseResults,
+            request.SenseDepth,
             request.MaximumOutputTokens);
-    }
-
-    private static CoalescingKey CreateCoalescingKey(NCNeuralRequestEnvelope request)
-    {
-        // Request identity and expiry do not change the provider answer. Hashing the primitive transport packet keeps
-        // prompts out of retained server state while identical concurrent work shares one provider call.
-        var providerRequest = ToProviderRequest(request) with
-        {
-            RequestId = Guid.Empty,
-            ExpiresAt = new NCNeuralProviderTime(0),
-        };
-        var payload = JsonSerializer.SerializeToUtf8Bytes(providerRequest);
-        var hash = SHA256.HashData(payload);
-        return new CoalescingKey(
-            request.ActorId,
-            request.Kind,
-            request.AccessTier,
-            request.ContextVersion,
-            new Guid(hash.AsSpan(0, 16)));
     }
 
     private KindRuntimeState GetKindRuntimeState(NCNeuralRequestKind kind)
@@ -1147,8 +1052,9 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             _policy = policy;
             _epoch = args.Epoch;
             _sessionCancellation = new CancellationTokenSource();
+            _usagePersistenceHealthy = true;
+            RefreshUsagePeriod();
             _active = true;
-            _ = LoadBudgetAsync(_generation, _epoch);
         }
     }
     private void Deactivate()
@@ -1157,6 +1063,9 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         _generation++;
         _sessionCancellation?.Cancel();
         _queue.Clear();
+        _inFlightActors.Clear();
+        _inFlightRequests.Clear();
+        _supersededRequests.Clear();
         _inFlight = 0;
     }
     private void Reset()
@@ -1164,20 +1073,21 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         Deactivate();
         _sessionCancellation?.Dispose();
         _sessionCancellation = null;
-        _known.Clear(); _cache.Clear(); _actorRuntime.Clear(); _actorRuntimeSequence = 0; _inputTokens = 0;
+        _known.Clear(); _newestWakeRevisions.Clear(); _actorDecisionRevisions.Clear();
+        _actorRuntime.Clear(); _actorRuntimeSequence = 0; _inputTokens = 0;
         _outputTokens = 0; _costUsdMicros = 0; _weeklyCostUsdMicros = 0; _weeklyPeriodKey = string.Empty;
-        _weeklyActorCosts.Clear(); _weeklyKindRequests.Clear(); ClearBudgetReservations();
-        _actorSessionTokens.Clear();
-        _coalescedByKey.Clear(); _coalescingByPrimary.Clear(); _kindRuntime.Clear(); _coalescedRequests = 0;
+        _weeklyKindRequests.Clear();
+        _kindRuntime.Clear();
         _accepted = 0; _stale = 0; _invalid = 0; _providerFailures = 0; _fallbacks = 0;
+        _coalesced = 0; _usagePersistenceFailures = 0;
         _timeouts = 0; _rejects = 0;
         _failures = 0; _circuitOpenUntil = null;
         _lastFailureKind = NCNeuralFailureKind.None; _lastFailureReason = string.Empty;
         _administrativelyDisabled = false;
-        _budgetReady = false;
+        _usagePersistenceHealthy = true;
         _policy = null;
     }
-    private static bool Valid(NCNeuralPolicyPrototype value) => value.MaximumQueued is > 0 and <= 4096 &&
+    private static bool Valid(NCNeuralPolicyPrototype value) =>
         value.MaximumConcurrent is > 0 and <= 32 && value.MaximumCompletionsPerTick is > 0 and <= 256 &&
         value.MaximumFacts is > 0 and <= 256 &&
         value.MaximumCapabilities is > 0 and <= 128 && value.MaximumPerceivedSubjects is > 0 and <= 128 &&
@@ -1187,49 +1097,25 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         value.MaximumDialogueHistoryTurns is > 0 and <= 64 &&
         value.MaximumDialogueSummaryKeys is > 0 and <= 64 &&
         value.MaximumDialogueMemorySessions is > 0 and <= 32 &&
-        value.MaximumDialogueMemoryTextLength is > 0 and <= 2048 &&
-        value.EconomyThreshold > 0 && value.RestrictedThreshold >= value.EconomyThreshold &&
-        value.SessionTokenHardCap >= value.RestrictedThreshold && value.RequestTimeout > TimeSpan.Zero &&
-        Stable(value.ProviderModel) && value.InputPriceUsdMicrosPerMillionTokens > 0 &&
-        value.CachedInputPriceUsdMicrosPerMillionTokens > 0 &&
-        value.CachedInputPriceUsdMicrosPerMillionTokens <= value.InputPriceUsdMicrosPerMillionTokens &&
-        value.OutputPriceUsdMicrosPerMillionTokens > 0 && value.EconomyCostThresholdUsdMicros > 0 &&
-        value.RestrictedCostThresholdUsdMicros >= value.EconomyCostThresholdUsdMicros &&
-        value.SessionCostHardCapUsdMicros >= value.RestrictedCostThresholdUsdMicros &&
-        value.WeeklyCostHardCapUsdMicros >= value.SessionCostHardCapUsdMicros &&
-        value.ActorWeeklyCostHardCapUsdMicros is > 0 &&
-        value.ActorWeeklyCostHardCapUsdMicros <= value.WeeklyCostHardCapUsdMicros &&
-        value.RequestKindWeeklyLimits.Count == Enum.GetValues<NCNeuralRequestKind>().Length &&
-        Enum.GetValues<NCNeuralRequestKind>().All(kind =>
-            value.RequestKindWeeklyLimits.TryGetValue(kind, out var limit) && limit > 0) &&
+        value.MaximumDialogueMemoryTextLength is > 0 and <= 2048 && value.RequestTimeout > TimeSpan.Zero &&
+        Stable(value.ProviderModel) &&
         value.MaximumRequestInputTokens is > 0 and <= 262144 &&
         value.MaximumRequestOutputTokens is > 0 and <= 8192 &&
         value.OrdinaryDialogueMaximumOutputTokens is > 0 &&
         value.OrdinaryDialogueMaximumOutputTokens <= value.MaximumRequestOutputTokens &&
         value.OrdinaryDialogueMaximumMemorySessions is > 0 &&
         value.OrdinaryDialogueMaximumMemorySessions <= value.MaximumDialogueMemorySessions &&
-        value.OrdinaryResidentSessionTokenHardCap is > 0 &&
-        value.OrdinaryResidentSessionTokenHardCap <= value.SessionTokenHardCap &&
-        value.OrdinaryResidentMaximumOutstandingRequests is > 0 and <= 4 &&
-        value.OrdinaryResidentReservedInputTokens is > 0 &&
-        value.OrdinaryResidentReservedInputTokens <= value.MaximumRequestInputTokens &&
-        value.OrdinaryResidentRequestCooldown > TimeSpan.Zero &&
-        value.NarrativeActorSessionTokenHardCap >= value.OrdinaryResidentSessionTokenHardCap &&
-        value.NarrativeActorSessionTokenHardCap <= value.SessionTokenHardCap &&
-        value.NarrativeActorMaximumOutstandingRequests is > 0 and <= 8 &&
-        value.NarrativeActorReservedInputTokens >= value.OrdinaryResidentReservedInputTokens &&
-        value.NarrativeActorReservedInputTokens <= value.MaximumRequestInputTokens &&
-        value.NarrativeActorRequestCooldown > TimeSpan.Zero &&
-        value.MaximumCoalescedFollowersPerRequest is > 0 and <= 128 &&
-        value.RequestLifetime >= value.RequestTimeout && value.MinimumSuggestionConfidence is >= 0 and <= 1000 &&
-        float.IsFinite(value.MaximumUtilityBoost) && value.MaximumUtilityBoost is >= 0 and <= 1000 &&
+        value.RequestLifetime >= value.RequestTimeout &&
         value.MaximumPendingCorrelations is > 0 and <= 16384 && value.SuggestionLifetime > TimeSpan.Zero &&
-        value.MaximumAppliedSuggestions is > 0 and <= 100000 &&
-        value.MaximumTrackedActorDiagnostics is > 0 and <= 4096 && value.StrategicRequestCooldown > TimeSpan.Zero &&
+        value.MaximumTrackedActorDiagnostics is > 0 and <= 4096 &&
+        float.IsFinite(value.DefensiveReflexRetreatDistance) &&
+        value.DefensiveReflexRetreatDistance is > 0f and <= 16f &&
         Uri.TryCreate(value.Endpoint, UriKind.Absolute, out _);
     private static bool Valid(NCNeuralRequestEnvelope value, NCNeuralPolicyPrototype policy) =>
         value.RequestId != Guid.Empty && value.ActorId.IsValid && value.SessionEpoch.IsValid &&
-        value.ContextVersion > 0 && value.ExpiresAt.IsValid && value.Facts.Count <= policy.MaximumFacts &&
+        value.ContextVersion > 0 && value.WakeRevision > 0 && value.DecisionRevision >= 0 && value.ExpiresAt.IsValid &&
+        Stable(value.PromptStableKey) && value.PromptVersion > 0 && Stable(value.EvaluationProfile) &&
+        value.Facts.Count <= policy.MaximumFacts &&
         value.AllowedCapabilityIds.Count is > 0 && value.AllowedCapabilityIds.Count <= policy.MaximumCapabilities &&
         value.MaximumOutputTokens is > 0 && value.MaximumOutputTokens <= policy.MaximumRequestOutputTokens &&
         value.AllowedCapabilityIds.All(Stable) && value.TopicKeys.All(Stable) &&
@@ -1238,26 +1124,186 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             Stable(fact.Subject) && float.IsFinite(fact.Confidence) &&
             fact.Confidence is >= 0 and <= 1 && Stable(fact.Privacy)) &&
         (value.PerceivedSubjects?.Count ?? 0) <= policy.MaximumPerceivedSubjects &&
+        (value.PerceivedSubjects ?? []).Select(subject => subject.Handle).Distinct(StringComparer.Ordinal).Count() ==
+            (value.PerceivedSubjects?.Count ?? 0) &&
         (value.PerceivedSubjects ?? []).All(subject => Stable(subject.Handle) && Stable(subject.Kind) &&
             subject.DisplayName.Length is > 0 and <= 128 &&
             subject.DisplayName.All(character => !char.IsControl(character)) &&
-            float.IsFinite(subject.Confidence) && subject.Confidence is >= 0 and <= 1 && subject.ExpiresAtTicks > 0) &&
+            float.IsFinite(subject.Confidence) && subject.Confidence is >= 0 and <= 1 && subject.ExpiresAtTicks > 0 &&
+            (!subject.IdentityKnown || IsPersonSubjectKind(subject.Kind))) &&
         (value.PerceivedEvents?.Count ?? 0) <= policy.MaximumPerceivedSubjects &&
         (value.PerceivedEvents ?? []).All(perceivedEvent => Stable(perceivedEvent.Kind) &&
             Stable(perceivedEvent.ActorHandle) && Stable(perceivedEvent.TargetHandle) &&
             float.IsFinite(perceivedEvent.Confidence) && perceivedEvent.Confidence is >= 0 and <= 1 &&
             perceivedEvent.ObservedAtTicks > 0 && perceivedEvent.ExpiresAtTicks > perceivedEvent.ObservedAtTicks) &&
+        value.PerceptionDeltas.Count <= policy.MaximumPerceivedSubjects &&
+        value.PerceptionDeltas.All(delta => ValidPerceptionDelta(value, delta)) &&
         (value.KnownLocations?.Count ?? 0) <= policy.MaximumKnownLocations &&
         (value.KnownLocations ?? []).All(location => Stable(location.Handle) && Stable(location.Kind) &&
             location.DisplayName.Length is > 0 and <= 128 &&
             location.DisplayName.All(character => !char.IsControl(character))) &&
         (value.AllowedDirectiveActionIds?.Count ?? 0) <= 64 &&
         (value.AllowedDirectiveActionIds ?? []).All(Stable) &&
+        value.SenseDepth is >= 0 and <= 2 &&
+        (value.SenseDepth == 0 ? value.SenseResults.Count == 0 : value.SenseResults.Count is >= 1 and <= 2) &&
+        value.SenseResults.All(result => ValidSenseResult(value, result)) &&
+        (value.Body == null || Stable(value.Body.LifeState) && Stable(value.Body.HungerState) &&
+            Stable(value.Body.ThirstState) && Stable(value.Body.MobilityState) && Stable(value.Body.PainState)) &&
+        (value.CurrentIntent == null || Stable(value.CurrentIntent.CapabilityId) &&
+            value.CurrentIntent.CurrentStep >= 0 &&
+            value.CurrentIntent.StepCount >= value.CurrentIntent.CurrentStep &&
+            value.CurrentIntent.ExpiresAtTicks > 0) &&
+        value.RecentCommandResults.Count <= 8 && value.RecentCommandResults.All(ValidCommandResult) &&
+        value.WorldOpportunities.Count <= policy.MaximumPerceivedSubjects &&
+        value.WorldOpportunities.Select(opportunity => opportunity?.OpportunityId ?? string.Empty)
+            .Distinct(StringComparer.Ordinal).Count() == value.WorldOpportunities.Count &&
+        value.WorldOpportunities.All(opportunity => ValidWorldOpportunity(value, opportunity)) &&
+        value.AvailableActions.Count == value.AllowedCapabilityIds.Count &&
+        value.AvailableActions.Select(action => action.CapabilityId).Distinct(StringComparer.Ordinal).Count() ==
+            value.AvailableActions.Count &&
+        value.AvailableActions.Select(action => action.CapabilityId).ToHashSet(StringComparer.Ordinal)
+            .SetEquals(value.AllowedCapabilityIds) &&
+        value.AvailableActions.All(action => action != null && Stable(action.CapabilityId) &&
+            Stable(action.DomainKey) && Stable(action.TaskKindKey) &&
+            action.GoalKeys.Count is > 0 and <= 16 && action.GoalKeys.All(Stable) &&
+            action.ActionIds.Count is > 0 and <= 32 && action.ActionIds.All(Stable) &&
+            action.OperationKeys.Count is > 0 and <= 32 && action.OperationKeys.All(Stable) &&
+            action.TargetKinds.Count is > 0 and <= 8 && action.TargetKinds.All(Stable)) &&
         value.Autonomy is { } autonomy && Stable(autonomy.PolicyKey) &&
         autonomy.MinimumIntentConfidence is >= 0 and <= 1000 &&
         autonomy.MaximumIntentPriority is >= 0 and <= 1000 &&
         ValidDisclosure(value) &&
         ValidDialogue(value, policy);
+
+    private static bool ValidWorldOpportunity(
+        NCNeuralRequestEnvelope request,
+        NCNeuralWorldOpportunity? opportunity)
+    {
+        if (opportunity == null || opportunity.AffordanceKeys == null ||
+            opportunity.RequiredCapabilityIds == null ||
+            !Guid.TryParseExact(opportunity.OpportunityId, "D", out var opportunityId) ||
+            opportunityId == Guid.Empty || !Guid.TryParseExact(opportunity.CorrelationId, "D", out var correlation) ||
+            correlation == Guid.Empty || !Stable(opportunity.Kind) || !Stable(opportunity.SourceKey) ||
+            opportunity.TargetKind is not ("subject" or "location") || !Stable(opportunity.TargetHandle) ||
+            opportunity.AffordanceKeys.Count is < 1 or > 32 ||
+            opportunity.AffordanceKeys.Distinct(StringComparer.Ordinal).Count() != opportunity.AffordanceKeys.Count ||
+            opportunity.AffordanceKeys.Any(value => !Stable(value)) ||
+            opportunity.RequiredCapabilityIds.Count > 32 ||
+            opportunity.RequiredCapabilityIds.Distinct(StringComparer.Ordinal).Count() !=
+                opportunity.RequiredCapabilityIds.Count ||
+            opportunity.RequiredCapabilityIds.Any(value => !request.AllowedCapabilityIds.Contains(value) ||
+                !Stable(value)) ||
+            opportunity.Reward is < 0 or > 1000 || opportunity.Urgency is < 0 or > 1000 ||
+            opportunity.Risk is < 0 or > 1000 || opportunity.CreatedAtTicks < 0 ||
+            opportunity.ExpiresAtTicks <= opportunity.CreatedAtTicks || !opportunity.Available ||
+            opportunity.UnavailableReason.Length != 0)
+        {
+            return false;
+        }
+
+        return opportunity.TargetKind == "subject"
+            ? (request.PerceivedSubjects ?? []).Any(value => value.Handle == opportunity.TargetHandle)
+            : (request.KnownLocations ?? []).Any(value => value.Handle == opportunity.TargetHandle);
+    }
+
+    internal static bool ValidPerceptionDelta(
+        NCNeuralRequestEnvelope request,
+        NCNeuralPerceptionDelta? delta)
+    {
+        if (delta == null || delta.Kind is not (
+                "person-entered" or "person-left" or "item-appeared" or "item-disappeared" or
+                "subject-state-changed" or "held-item-added" or "held-item-removed") ||
+            !Stable(delta.SubjectHandle) || !StableOrEmpty(delta.RelatedHandle) ||
+            !StableOrEmpty(delta.PreviousKind) || !StableOrEmpty(delta.CurrentKind) ||
+            delta.ObservedAtTicks < 0 || delta.ExpiresAtTicks <= delta.ObservedAtTicks)
+        {
+            return false;
+        }
+
+        var perceived = (request.PerceivedSubjects ?? [])
+            .Select(value => value.Handle)
+            .ToHashSet(StringComparer.Ordinal);
+        return delta.SubjectTargetable == perceived.Contains(delta.SubjectHandle) &&
+               delta.RelatedTargetable == (delta.RelatedHandle.Length > 0 && perceived.Contains(delta.RelatedHandle));
+    }
+
+    internal static bool ValidSenseResult(NCNeuralRequestEnvelope request, NCNeuralSenseResult result)
+    {
+        if (result == null || result.Kind is not (
+                "look-around" or "inspect-subject" or "inspect-object" or "check-inventory" or "check-body" or
+                "query-nearby-affordances" or "query-known-locations" or "recall-memories" or "examine-route") ||
+            result.Status is not ("completed" or "not-visible" or "wrong-target-kind" or "unavailable") ||
+            !StableOrEmpty(result.TargetHandle) || result.ObservedHandles == null || result.FactHandles == null ||
+            result.LocationHandles == null || result.OpportunityTargetHandles == null || result.DetailKeys == null ||
+            result.ObservedHandles.Count > 32 || result.FactHandles.Count > 32 || result.LocationHandles.Count > 32 ||
+            result.OpportunityTargetHandles.Count > 32 || result.DetailKeys.Count > 16 ||
+            result.ObservedHandles.Distinct(StringComparer.Ordinal).Count() != result.ObservedHandles.Count ||
+            result.FactHandles.Distinct(StringComparer.Ordinal).Count() != result.FactHandles.Count ||
+            result.LocationHandles.Distinct(StringComparer.Ordinal).Count() != result.LocationHandles.Count ||
+            result.OpportunityTargetHandles.Distinct(StringComparer.Ordinal).Count() !=
+                result.OpportunityTargetHandles.Count ||
+            result.ObservedHandles.Any(handle => !Stable(handle) ||
+                !(request.PerceivedSubjects ?? []).Any(subject => subject.Handle == handle)) ||
+            result.FactHandles.Any(handle => !Stable(handle) ||
+                !request.Facts.Any(fact => fact.Handle == handle)) ||
+            result.LocationHandles.Any(handle => !Stable(handle) ||
+                !(request.KnownLocations ?? []).Any(location => location.Handle == handle)) ||
+            result.OpportunityTargetHandles.Any(handle => !Stable(handle) ||
+                !request.WorldOpportunities.Any(opportunity => opportunity.TargetHandle == handle)) ||
+            result.DetailKeys.Any(value => !Stable(value)))
+        {
+            return false;
+        }
+
+        return result.Kind switch
+        {
+            "look-around" => result.Status == "completed" && result.TargetHandle.Length == 0 &&
+                result.Body == null && result.FactHandles.Count == 0 && result.LocationHandles.Count == 0 &&
+                result.DetailKeys.Count == 0,
+            "check-inventory" => result.Status == "completed" && result.TargetHandle.Length == 0 &&
+                result.Body == null && EmptySenseMetadata(result),
+            "inspect-subject" or "inspect-object" => result.TargetHandle.Length > 0 && result.Body == null &&
+                result.FactHandles.Count == 0 && result.LocationHandles.Count == 0 &&
+                result.OpportunityTargetHandles.Count == 0 &&
+                result.Status is "completed" or "not-visible" or "wrong-target-kind" &&
+                (result.Status == "not-visible" ||
+                 (request.PerceivedSubjects ?? []).Any(subject => subject.Handle == result.TargetHandle)),
+            "check-body" => result.TargetHandle.Length == 0 && result.ObservedHandles.Count == 0 &&
+                EmptySenseMetadata(result) &&
+                (result.Status == "completed" ? result.Body != null && result.Body == request.Body :
+                    result.Status == "unavailable" && result.Body == null),
+            "query-nearby-affordances" => result.Status == "completed" && result.TargetHandle.Length == 0 &&
+                result.Body == null && result.ObservedHandles.Count == 0 && result.FactHandles.Count == 0 &&
+                result.LocationHandles.Count == 0 && result.DetailKeys.Count == 0,
+            "query-known-locations" => result.Status == "completed" && result.TargetHandle.Length == 0 &&
+                result.Body == null && result.ObservedHandles.Count == 0 && result.FactHandles.Count == 0 &&
+                result.OpportunityTargetHandles.Count == 0 && result.DetailKeys.Count == 0,
+            "recall-memories" => result.Status == "completed" && result.TargetHandle.Length > 0 &&
+                result.Body == null && result.ObservedHandles.Count == 0 && result.LocationHandles.Count == 0 &&
+                result.OpportunityTargetHandles.Count == 0 && result.DetailKeys.Count == 0,
+            "examine-route" => result.TargetHandle.Length > 0 && result.Body == null &&
+                result.ObservedHandles.Count == 0 && result.FactHandles.Count == 0 &&
+                result.OpportunityTargetHandles.Count == 0 && result.DetailKeys.Count == 1 &&
+                (result.Status == "completed" && result.LocationHandles.Count == 1 &&
+                     result.LocationHandles[0] == result.TargetHandle && result.DetailKeys[0] == "route.resolvable" ||
+                 result.Status == "unavailable" && result.LocationHandles.Count is 0 or 1 &&
+                     (result.LocationHandles.Count == 0 || result.LocationHandles[0] == result.TargetHandle) &&
+                     result.DetailKeys[0] == "route.unavailable"),
+            _ => false,
+        };
+    }
+
+    private static bool EmptySenseMetadata(NCNeuralSenseResult result) =>
+        result.FactHandles.Count == 0 && result.LocationHandles.Count == 0 &&
+        result.OpportunityTargetHandles.Count == 0 && result.DetailKeys.Count == 0;
+
+    internal static bool ValidCommandResult(NCNeuralCommandResult? result) =>
+        result != null && result.RequestId != Guid.Empty && Stable(result.CapabilityId) &&
+        Stable(result.ActionId) &&
+        result.State is "accepted" or "completed" or "failed" or "interrupted" or "skipped" &&
+        Stable(result.FailureKind) && StableOrEmpty(result.FailureReason) && result.UpdatedAtTicks > 0 &&
+        result.CommandIndex is >= 0 and < 8 && StableOrEmpty(result.GoalKey) &&
+        StableOrEmpty(result.ExpectedOutcomeKey);
 
     private static bool ValidDisclosure(NCNeuralRequestEnvelope request)
     {
@@ -1291,23 +1337,25 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             disclosed.IsSubsetOf(allowed) && withheld.IsSubsetOf(known) && !disclosed.Overlaps(withheld);
     }
 
-    private static bool ValidIntent(NCNeuralRequestEnvelope request, NCNeuralIntentProposal? intent)
+    private static bool ValidCommandShape(NCNeuralRequestEnvelope request, NCNeuralCommandProposal? command)
     {
-        if (intent == null)
-            return request.Kind == NCNeuralRequestKind.DialogueContinuation;
         var autonomy = request.Autonomy;
-        if (autonomy == null || !Stable(intent.GoalKey) || !Stable(intent.ExpectedOutcomeKey) ||
-            intent.Priority < 0 || intent.Priority > autonomy.MaximumIntentPriority ||
-            intent.RequestedCapabilityIds.Count is < 1 or > 16 ||
-            intent.RequestedCapabilityIds.Any(value => !request.AllowedCapabilityIds.Contains(value)) ||
-            intent.InformationGapKeys.Count > 16 || intent.InformationGapKeys.Any(value => !Stable(value)) ||
-            intent.Arguments.Count > 16 || intent.Arguments.Any(value =>
-                !Stable(value.Key) || value.Value.Length > 256 || value.Value.Any(char.IsControl)))
+        var action = request.AvailableActions.FirstOrDefault(value => value.CapabilityId == command?.CapabilityId);
+        if (command == null || autonomy == null || action == null || !action.GoalKeys.Contains(command.GoalKey) ||
+            !Stable(command.CapabilityId) || !Stable(command.GoalKey) ||
+            !Stable(command.ExpectedOutcomeKey) ||
+            command.Priority < 0 || command.Priority > autonomy.MaximumIntentPriority ||
+            command.InformationGapKeys == null || command.InformationGapKeys.Count > 16 ||
+            command.InformationGapKeys.Any(value => !Stable(value)) ||
+            command.Arguments == null || command.Arguments.Count > 16 || command.Arguments.Any(value =>
+                value == null || !Stable(value.Key) || value.Value == null ||
+                value.Value.Length > 256 || value.Value.Any(char.IsControl)))
             return false;
-        if (intent.TargetHandle.Length == 0)
+        if (command.TargetHandle == string.Empty)
             return true;
-        return autonomy.TargetedIntentsAllowed && Stable(intent.TargetHandle) && (request.PerceivedSubjects ?? [])
-            .Any(value => value.Handle == intent.TargetHandle);
+        // Capability authorization and ephemeral target freshness are gameplay-policy checks. The suggestion layer
+        // validates them again against the current world and rejects the physical batch atomically.
+        return Stable(command.TargetHandle);
     }
     private static bool ValidDialogue(NCNeuralRequestEnvelope value, NCNeuralPolicyPrototype policy)
     {
@@ -1315,6 +1363,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             return value.DialogueInput == null;
         return value.DialogueInput is { } dialogue &&
                dialogue.ActorDisplayName.Length is > 0 and <= 128 &&
+               dialogue.AddressScope is "direct" or "group" && dialogue.AudienceSize is > 0 and <= 256 &&
                dialogue.Utterance.Length is > 0 && dialogue.Utterance.Length <= policy.MaximumDialogueInputLength &&
                dialogue.History.Count <= policy.MaximumDialogueHistoryTurns &&
                dialogue.History.All(turn =>
@@ -1344,8 +1393,19 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
                dialogue.ActorDisplayName.All(character => !char.IsControl(character)) &&
                dialogue.Utterance.All(character => !char.IsControl(character));
     }
-    private static bool Stable(string value) => value.Length is > 0 and <= 128 && value.All(character =>
+    private static bool Stable(string? value) => value is { Length: > 0 and <= 128 } && value.All(character =>
         char.IsAsciiLetterOrDigit(character) || character is '-' or '_' or '.' or ':');
+
+    private static bool StableOrEmpty(string? value) => string.IsNullOrEmpty(value) || Stable(value);
+
+    private static bool IsPersonSubjectKind(string kind) => kind is
+        "self" or "neutral" or "friendly" or "hostile" or "critical" or "dead" or "suspect";
+
+    private bool MatchesCurrentPrompt(NCNeuralRequestEnvelope request, NCNeuralPolicyPrototype policy) =>
+        _prototypes.TryIndex(request.PromptProfile, out NCNeuralPromptProfilePrototype? prompt) &&
+        prompt.StableKey == request.PromptStableKey && prompt.Version == request.PromptVersion &&
+        prompt.EvaluationProfile == request.EvaluationProfile && prompt.Model == policy.ProviderModel &&
+        prompt.AllowedKinds.Contains(request.Kind);
 
     private sealed record TransportCompletion(
         int Generation,
@@ -1357,41 +1417,12 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
 
     private sealed record UsageCompletion(
         int Generation,
-        NCNeuralResult Result,
         bool Persisted,
         string Reason);
-
-    private sealed record BudgetLoadCompletion(
-        int Generation,
-        NCSessionEpoch SessionEpoch,
-        bool Succeeded,
-        NCNeuralUsageSessionRecord? Session,
-        string PeriodKey,
-        NCNeuralUsageWeekRecord? Week,
-        string Reason);
-
-    private sealed record BudgetReservation(
-        NCActorId ActorId,
-        NCNeuralRequestKind Kind,
-        int Tokens,
-        long CostUsdMicros);
-
-    private readonly record struct CoalescingKey(
-        NCActorId ActorId,
-        NCNeuralRequestKind Kind,
-        NCNeuralAccessTier AccessTier,
-        long ContextVersion,
-        Guid PayloadHash);
-
-    private sealed class CoalescedRequestGroup
-    {
-        public List<NCNeuralRequestEnvelope> Followers { get; } = [];
-    }
 
     private sealed class KindRuntimeState
     {
         public long Submitted;
-        public long Coalesced;
         public long Accepted;
         public long Fallback;
         public long Rejected;
@@ -1401,7 +1432,6 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
 
         public NCNeuralKindRuntimeSnapshot Snapshot() => new(
             Submitted,
-            Coalesced,
             Accepted,
             Fallback,
             Rejected,
@@ -1426,6 +1456,10 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         string LastCapabilityId = "",
         string LastSummaryKey = "",
         string LastProviderModel = "",
+        string LastPromptStableKey = "",
+        int LastPromptVersion = 0,
+        string LastEvaluationProfile = "",
+        int LastSchemaVersion = 0,
         long UpdatedSequence = 0);
 }
 
@@ -1437,6 +1471,7 @@ public sealed class NCNeuralResultEvent(NCNeuralResult result) : EntityEventArgs
 /// becoming part of the external Neural Cognition Service protocol.
 /// </summary>
 internal sealed record NCNeuralProviderRequest(
+    int SchemaVersion,
     Guid RequestId,
     string Kind,
     string Priority,
@@ -1445,6 +1480,9 @@ internal sealed record NCNeuralProviderRequest(
     long ContextVersion,
     NCNeuralProviderTime ExpiresAt,
     string PromptProfile,
+    string PromptStableKey,
+    int PromptVersion,
+    string EvaluationProfile,
     IReadOnlyList<NCNeuralFact> Facts,
     IReadOnlyList<string> AllowedCapabilityIds,
     IReadOnlyList<string> TopicKeys,
@@ -1453,10 +1491,18 @@ internal sealed record NCNeuralProviderRequest(
     NCNeuralAutonomyContext? Autonomy,
     IReadOnlyList<NCNeuralPerceivedSubject> PerceivedSubjects,
     IReadOnlyList<NCNeuralPerceivedEvent> PerceivedEvents,
+    IReadOnlyList<NCNeuralPerceptionDelta> PerceptionDeltas,
     IReadOnlyList<NCNeuralKnownLocation> KnownLocations,
     NCNeuralDialogueInput? DialogueInput,
     IReadOnlyList<string> AllowedDirectiveActionIds,
     NCNeuralDisclosureContext Disclosure,
+    NCNeuralBodyContext? Body,
+    NCNeuralCurrentIntent? CurrentIntent,
+    IReadOnlyList<NCNeuralCommandResult> RecentCommandResults,
+    IReadOnlyList<NCNeuralWorldOpportunity> WorldOpportunities,
+    IReadOnlyList<NCNeuralAvailableAction> AvailableActions,
+    IReadOnlyList<NCNeuralSenseResult> SenseResults,
+    int SenseDepth,
     int MaximumOutputTokens);
 
 internal sealed record NCNeuralProviderGuid(Guid Value);

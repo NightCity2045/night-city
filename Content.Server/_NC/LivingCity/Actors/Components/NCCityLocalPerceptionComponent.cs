@@ -15,6 +15,13 @@ public enum NCCityLocalObservationKind : byte
     Hostile,
     Critical,
     Dead,
+    Item,
+    HeldItem,
+    EquippedItem,
+    Affordance,
+    Seat,
+    VendingMachine,
+    MedicalDevice,
     /// <summary>An entity tied to a directly observed, still-current police incident.</summary>
     Suspect,
 }
@@ -54,6 +61,53 @@ public readonly record struct NCCityLocalPerceivedEvent(
     NCActiveWorldTime ObservedAt,
     NCActiveWorldTime ExpiresAt);
 
+/// <summary>Ordinary change between two bounded subjective snapshots.</summary>
+public enum NCCityLocalPerceptionDeltaKind : byte
+{
+    PersonEntered,
+    PersonLeft,
+    ItemAppeared,
+    ItemDisappeared,
+    SubjectStateChanged,
+    HeldItemAdded,
+    HeldItemRemoved,
+}
+
+/// <summary>
+/// A short-lived subjective change. Handles may outlive visibility only inside this bounded history; command target
+/// resolution still accepts exclusively the current observation set.
+/// </summary>
+public readonly record struct NCCityLocalPerceptionDelta(
+    NCCityLocalPerceptionDeltaKind Kind,
+    string SubjectHandle,
+    string RelatedHandle,
+    string PreviousKind,
+    string CurrentKind,
+    NCActiveWorldTime ObservedAt,
+    NCActiveWorldTime ExpiresAt);
+
+/// <summary>Round-local relation used only to detect a visible holder changing held items.</summary>
+public readonly record struct NCCityLocalHeldItemObservation(
+    EntityUid Holder,
+    string HolderHandle,
+    EntityUid Item,
+    string ItemHandle);
+
+/// <summary>
+/// Raised once per configured coalescing interval when one actor's ordinary subjective sensorium changes.
+/// </summary>
+public sealed class NCCityLocalPerceptionDeltaObservedEvent(
+    EntityUid observer,
+    long revision,
+    int deltaCount,
+    NCActiveWorldTime observedAt) : EntityEventArgs
+{
+    public EntityUid Observer { get; } = observer;
+    public long Revision { get; } = revision;
+    public int DeltaCount { get; } = deltaCount;
+    public NCActiveWorldTime ObservedAt { get; } = observedAt;
+}
+
 /// <summary>
 /// Raised on the observing human after universal perception records a real incident. Profession systems consume
 /// this fact instead of subscribing to the original damage event and repeating the spatial visibility query.
@@ -89,6 +143,12 @@ public sealed partial class NCCityLocalPerceptionComponent : Component
     [ViewVariables(VVAccess.ReadOnly)] public int CriticalCount;
     [ViewVariables(VVAccess.ReadOnly)] public EntityUid NearestHostile = EntityUid.Invalid;
     [ViewVariables(VVAccess.ReadOnly)] public EntityUid NearestCritical = EntityUid.Invalid;
+    [ViewVariables(VVAccess.ReadOnly)] public bool HasPerceptionBaseline;
+    [ViewVariables(VVAccess.ReadOnly)] public bool PerceptionDeltaWakePending;
+    [ViewVariables(VVAccess.ReadOnly)] public NCActiveWorldTime NextPerceptionDeltaWakeAt;
     [ViewVariables(VVAccess.ReadOnly)] public List<NCCityLocalObservation> Observations = [];
     [ViewVariables(VVAccess.ReadOnly)] public List<NCCityLocalPerceivedEvent> RecentEvents = [];
+    [ViewVariables(VVAccess.ReadOnly)] public List<NCCityLocalPerceptionDelta> PerceptionDeltas = [];
+    [ViewVariables(VVAccess.ReadOnly)] public List<NCCityLocalHeldItemObservation> VisibleHeldItems = [];
+    [ViewVariables(VVAccess.ReadOnly)] public HashSet<EntityUid> CurrentTargets = [];
 }

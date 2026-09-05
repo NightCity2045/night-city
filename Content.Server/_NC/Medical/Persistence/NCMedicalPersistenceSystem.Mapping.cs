@@ -64,25 +64,49 @@ public sealed partial class NCMedicalPersistenceSystem
         };
     }
 
-    private NCOrganMedicalStateSnapshot CaptureOrgan(EntityUid character, EntityUid organ)
+    private bool TryCaptureOrgan(
+        EntityUid character,
+        EntityUid organ,
+        bool allowIdentityMutation,
+        out NCOrganMedicalStateSnapshot result)
     {
+        result = default!;
         var entityPrototype = MetaData(organ).EntityPrototype?.ID;
-        var identity = EnsureComp<NCOrganPersistenceIdentityComponent>(organ);
-        if (identity.StableOrganId == Guid.Empty)
-            identity.StableOrganId = Guid.NewGuid();
-        if (identity.DonorKind == NCMedicalStableOwnerKind.Unassigned &&
-            TryComp<NCMedicalPersistenceOwnerComponent>(character, out var owner))
+        var canMutateIdentity = allowIdentityMutation && !TerminatingOrDeleted(organ);
+        if (!TryComp<NCOrganPersistenceIdentityComponent>(organ, out var identity))
         {
-            identity.DonorKind = owner.Kind;
-            identity.DonorKey = owner.Key;
+            if (!canMutateIdentity)
+                return false;
+            identity = EnsureComp<NCOrganPersistenceIdentityComponent>(organ);
         }
 
-        var result = new NCOrganMedicalStateSnapshot
+        if (identity.StableOrganId == Guid.Empty)
+        {
+            if (!canMutateIdentity)
+                return false;
+            identity.StableOrganId = Guid.NewGuid();
+        }
+
+        var donorKind = identity.DonorKind;
+        var donorKey = identity.DonorKey;
+        if (donorKind == NCMedicalStableOwnerKind.Unassigned &&
+            TryComp<NCMedicalPersistenceOwnerComponent>(character, out var owner))
+        {
+            donorKind = owner.Kind;
+            donorKey = owner.Key;
+            if (canMutateIdentity)
+            {
+                identity.DonorKind = donorKind;
+                identity.DonorKey = donorKey;
+            }
+        }
+
+        result = new NCOrganMedicalStateSnapshot
         {
             EntityPrototype = entityPrototype ?? string.Empty,
             StableOrganId = identity.StableOrganId,
-            DonorKind = identity.DonorKind,
-            DonorKey = identity.DonorKey,
+            DonorKind = donorKind,
+            DonorKey = donorKey,
             CyberwareIdentity = identity.CyberwareIdentity,
         };
         if (TryComp<NCOrganIntegrityComponent>(organ, out var integrity))
@@ -101,7 +125,8 @@ public sealed partial class NCMedicalPersistenceSystem
                 string.IsNullOrWhiteSpace(result.CyberwareIdentity))
             {
                 result.CyberwareIdentity = result.EntityPrototype;
-                identity.CyberwareIdentity = result.CyberwareIdentity;
+                if (canMutateIdentity)
+                    identity.CyberwareIdentity = result.CyberwareIdentity;
             }
         }
 
@@ -229,7 +254,7 @@ public sealed partial class NCMedicalPersistenceSystem
             };
         }
 
-        return result;
+        return true;
     }
 
     private NCWoundStateSnapshot? CaptureWounds(EntityUid character)

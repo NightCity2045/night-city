@@ -125,14 +125,20 @@ public sealed partial class NCConversationArchiveSystem : EntitySystem
                     archivedTurns.Length), JsonOptions)),
         };
         var indexEntries = new List<(ConversationPairKey Pair, NCConversationArchiveIndexSnapshot Snapshot)>();
+        var originSpeaker = transcript.Count > 0 ? transcript[0].Speaker : default;
         foreach (var participant in session.Participants)
         {
             if (!participant.TryGetActor(out var ownerActorId))
                 continue;
-            foreach (var counterpart in session.Participants)
+            // Crowd archives remain actor-relative: listeners index the originating speaker, while an NPC originator
+            // indexes only people who actually answered. This avoids quadratic bystander-to-bystander relationships.
+            IEnumerable<NCPartyRef> counterparts = participant == originSpeaker
+                ? transcript.Select(turn => turn.Speaker).Where(value => value != participant).Distinct()
+                : originSpeaker.IsValid
+                    ? [originSpeaker]
+                    : [];
+            foreach (var counterpart in counterparts)
             {
-                if (counterpart == participant)
-                    continue;
                 var pair = new ConversationPairKey(ownerActorId, counterpart);
                 var indexEventId = StableId("index-event",
                     $"{ownerActorId}/{counterpart}/{session.SessionId}");

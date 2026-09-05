@@ -425,6 +425,11 @@ public sealed partial class NCMedicalPersistenceSystem
         string key,
         long revision)
     {
+        // Component composition is immutable once EntityTerminating starts. Final checkpoints may read an
+        // existing owner marker, but must never create or rewrite one while teardown is in progress.
+        if (TerminatingOrDeleted(body))
+            return;
+
         var owner = EnsureComp<NCMedicalPersistenceOwnerComponent>(body);
         owner.Kind = kind;
         owner.Key = key;
