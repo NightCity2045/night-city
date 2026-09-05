@@ -33,6 +33,7 @@
   maximumDuration: 8h
   maximumIncidents: 64
   allowedVenueAffordances: [Shop, Warehouse]
+  attendancePriority: 700
   automaticSchedulingEnabled: true
   automaticOpenDelay: 1h
   automaticDuration: 4h

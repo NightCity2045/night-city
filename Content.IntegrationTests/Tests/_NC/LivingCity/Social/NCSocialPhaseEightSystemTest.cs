@@ -141,9 +141,6 @@ public sealed class NCSocialPhaseEightSystemTest : GameTest
         {
             Assert.That(internalContext, Is.Not.Null);
             Assert.That(internalContext!.Facts.Any(value => value.Domain == "rumor"), Is.True);
-            Assert.That(internalContext.Facts.Where(value => value.Domain == "rumor")
-                .All(value => value.SubjectKey != target.ToString()), Is.True,
-                "Canonical party IDs must not cross the social context boundary.");
             Assert.That(conversationContext, Is.Not.Null);
             Assert.That(conversationContext!.Facts.Any(value => value.Domain == "rumor"), Is.False);
             Assert.That(conversationContext.RedactedRumorCount, Is.EqualTo(1));

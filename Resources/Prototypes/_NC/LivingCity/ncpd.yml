@@ -1,0 +1,248 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncNcpdUseOfForcePolicy
+  id: NCDefaultNcpdUseOfForce
+  verbalOrderThreat: 50
+  restraintThreat: 150
+  nonLethalThreat: 350
+  lethalThreat: 800
+  stopForceOnSurrender: true
+  stopForceOnIncapacitation: true
+  incidentObservationRadius: 8
+  suspectObservationLifetime: 45s
+  verbalOrderRange: 6
+  complianceWindow: 4s
+  complianceMovementTolerance: 1
+  flightDistance: 2.5
+  restraintRange: 1.25
+  restraintRetryDelay: 4s
+  verbalOrderLocKey: nc-ncpd-ai-lawful-order
+  observedAssaultSeverity: 450
+  observedKillingSeverity: 900
+
+- type: ncNcpdDutyPolicy
+  id: NCDefaultNcpdDutyPolicy
+  stationZone: a9c069f8-8558-493c-844b-b7bfe8775521
+  preferredPatrolSize: 2
+  maximumPatrolSize: 4
+  reserveActors: 2
+  maximumTransitionsPerEvent: 32
+  dutyActivities:
+  - work
+  - patrol-location
+  - guard-location
+  - report-to-location
+
+- type: ncNcpdPatrolPolicy
+  id: NCDefaultNcpdPatrolPolicy
+  maximumStreetZones: 8
+  minimumStreetDwell: 2m
+  maximumStreetDwell: 6m
+  maximumReplans: 3
+  replanBackoff: 5s
+  followSpacing: 1.5
+  arrivalRange: 1.25
+  evaluationInterval: 0.5s
+  maximumUpdatesPerTick: 8
+
+- type: ncNcpdDispatchPolicy
+  id: NCDefaultNcpdDispatchPolicy
+  maximumAssignmentsPerEvaluation: 8
+  maximumTrackedDispatches: 64
+  cadetMaximumSeverity: 300
+  inspectorMinimumSeverity: 500
+  assignmentTimeout: 2m
+  retryDelay: 5s
+  materializationMaximumWait: 2m
+
+- type: ncNcpdDetentionPolicy
+  id: NCDefaultNcpdDetentionPolicy
+  requirePoliceBasis: true
+  requireRestraintsForEscort: true
+  confiscateDangerousWeapons: true
+  bookingTimeout: 5m
+  arrivalRange: 1.25
+  maximumRouteReplans: 3
+  routeRetryDelay: 3s
+  searchRange: 1.5
+  maximumSearchItems: 32
+  maximumSearchDepth: 1
+  maximumSeizedItems: 8
+  searchInteractionRetryDelay: 8s
+  seizeGuns: true
+  seizeMeleeWeapons: true
+  seizeContraband: true
+  physicalEvidenceReliability: 900
+  physicalEvidenceAdmissible: true
+  evidenceStorageSearchRadius: 3
+  evidenceStorageReceivers: [LockerEvidence]
+  abstractCustodyReviewInterval: 1h
+
+- type: ncNcpdInvestigationPolicy
+  id: NCDefaultNcpdInvestigationPolicy
+  maximumEvidencePerIncident: 128
+  maximumWitnessesPerIncident: 64
+  unresolvedCaseRetention: 24h
+  witnessInterviewRadius: 6
+  maximumWitnessCandidates: 24
+  maximumWitnessesPerInterview: 3
+  minimumWitnessConfidence: 0.5
+  memoryAvailabilityWait: 10s
+  maximumPersistenceRetries: 3
+  minimumCorroboratingRecords: 1
+  minimumEvidenceReliability: 500
+  maximumActiveInvestigations: 16
+  witnessQuestionLocKey: nc-ncpd-ai-witness-question
+  witnessAssaultLocKey: nc-ncpd-ai-witness-assault
+  witnessKillingLocKey: nc-ncpd-ai-witness-killing
+
+- type: ncNcpdCommandPolicy
+  id: NCDefaultNcpdCommandPolicy
+  maximumActiveCommands: 64
+  retainedHistory: 100
+  maximumVisibleZones: 512
+  maximumReasonLength: 512
+  commitmentDuration: 4h
+
+- type: ncNcpdCommandAuthority
+  id: NCNcpdChiefCommandAuthority
+  job: NCPDChief
+  allowedCommands: [PatrolZone, CoverZone, HoldZone, RespondToIncident, SearchZone, InvestigateZone, ReturnToStation, StandDown]
+  allowedZoneSlots: [District, Sector, Street, Building]
+  maximumPriority: 1000
+  canCommandAllUnits: true
+  canCommandEqualRank: true
+  canCancelOthers: true
+
+- type: ncNcpdCommandAuthority
+  id: NCNcpdCommanderCommandAuthority
+  job: NCPDCommander
+  allowedCommands: [PatrolZone, CoverZone, HoldZone, RespondToIncident, SearchZone, InvestigateZone, ReturnToStation, StandDown]
+  allowedZoneSlots: [District, Sector, Street, Building]
+  maximumPriority: 1000
+  canCommandAllUnits: true
+  canCommandEqualRank: true
+  canCancelOthers: true
+
+- type: ncNcpdCommandAuthority
+  id: NCNcpdLieutenantCommandAuthority
+  job: NCPDLieutenant
+  allowedCommands: [PatrolZone, CoverZone, HoldZone, RespondToIncident, SearchZone, InvestigateZone, ReturnToStation, StandDown]
+  allowedZoneSlots: [District, Sector, Street, Building]
+  maximumPriority: 900
+  canCommandAllUnits: true
+  canCommandEqualRank: true
+  canCancelOthers: true
+
+- type: ncNcpdCommandAuthority
+  id: NCNcpdInspectorCommandAuthority
+  job: NCPDInspector
+  allowedCommands: [RespondToIncident, SearchZone, InvestigateZone, ReturnToStation, StandDown]
+  allowedZoneSlots: [District, Sector, Street, Building]
+  maximumPriority: 800
+  canCommandEqualRank: true
+
+- type: ncNcpdCommandAuthority
+  id: NCNcpdSergeantCommandAuthority
+  job: NCPDSergeant
+  allowedCommands: [PatrolZone, CoverZone, HoldZone, RespondToIncident, ReturnToStation, StandDown]
+  allowedZoneSlots: [District, Sector, Street, Building]
+  maximumPriority: 700
+  canCommandEqualRank: true
+
+- type: ncNcpdRoleProfile
+  id: NCNcpdCommanderRole
+  job: NCPDCommander
+  officerRole: Command
+  canLead: true
+  mayWorkAlone: true
+  minimumGroupSize: 1
+  maximumGroupSize: 8
+  maximumIncidentSeverity: 1000
+  allowedAssignments: [StationCommand, Dispatch, Response, Reserve]
+  travelModes: [Pedestrian, Vehicle, Emergency]
+  canDetain: true
+  canInvestigate: true
+  workZone: a9c069f8-8558-493c-844b-b7bfe8775521
+  forcePolicy: NCDefaultNcpdUseOfForce
+
+- type: ncNcpdRoleProfile
+  id: NCNcpdLieutenantRole
+  job: NCPDLieutenant
+  officerRole: Dispatch
+  canLead: true
+  mayWorkAlone: true
+  minimumGroupSize: 1
+  maximumGroupSize: 8
+  maximumIncidentSeverity: 1000
+  allowedAssignments: [StationCommand, Dispatch, Response, Reserve]
+  travelModes: [Pedestrian, Vehicle, Emergency]
+  canDetain: true
+  canInvestigate: true
+  workZone: a9c069f8-8558-493c-844b-b7bfe8775521
+  forcePolicy: NCDefaultNcpdUseOfForce
+
+- type: ncNcpdRoleProfile
+  id: NCNcpdInspectorRole
+  job: NCPDInspector
+  officerRole: Investigator
+  canLead: true
+  mayWorkAlone: true
+  minimumGroupSize: 1
+  maximumGroupSize: 4
+  maximumIncidentSeverity: 1000
+  allowedAssignments: [Investigation, Evidence, Response]
+  travelModes: [Pedestrian, Vehicle]
+  canDetain: true
+  canInvestigate: true
+  workZone: a9c069f8-8558-493c-844b-b7bfe8775521
+  forcePolicy: NCDefaultNcpdUseOfForce
+
+- type: ncNcpdRoleProfile
+  id: NCNcpdSergeantRole
+  job: NCPDSergeant
+  officerRole: Supervisor
+  canLead: true
+  minimumGroupSize: 2
+  maximumGroupSize: 4
+  maximumIncidentSeverity: 900
+  allowedAssignments: [Patrol, Response, Detention, Reserve]
+  travelModes: [Pedestrian, Vehicle, Patrol, Emergency]
+  canDetain: true
+  canInvestigate: true
+  workZone: a9c069f8-8558-493c-844b-b7bfe8775521
+  forcePolicy: NCDefaultNcpdUseOfForce
+
+- type: ncNcpdRoleProfile
+  id: NCNcpdOfficerRole
+  job: NCPDOfficer
+  officerRole: PatrolOfficer
+  canLead: true
+  minimumGroupSize: 2
+  maximumGroupSize: 4
+  maximumIncidentSeverity: 700
+  allowedAssignments: [Patrol, Response, Detention, Evidence]
+  travelModes: [Pedestrian, Vehicle, Patrol, Emergency]
+  canDetain: true
+  canInvestigate: false
+  workZone: a9c069f8-8558-493c-844b-b7bfe8775521
+  forcePolicy: NCDefaultNcpdUseOfForce
+
+- type: ncNcpdRoleProfile
+  id: NCNcpdCadetRole
+  job: NCPDCadet
+  officerRole: Cadet
+  canLead: false
+  mayWorkAlone: false
+  requiresSupervisor: true
+  minimumGroupSize: 2
+  maximumGroupSize: 4
+  maximumIncidentSeverity: 300
+  allowedAssignments: [Patrol, Response, Detention]
+  travelModes: [Pedestrian, Vehicle, Patrol]
+  canDetain: true
+  canInvestigate: false
+  workZone: a9c069f8-8558-493c-844b-b7bfe8775521
+  forcePolicy: NCDefaultNcpdUseOfForce

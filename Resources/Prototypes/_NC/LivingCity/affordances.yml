@@ -59,60 +59,6 @@
   kind: FoodSource
   knowledgeKey: location.city.food-source
 
-- type: ncCityAffordance
-  id: NCCityPassage
-  kind: Passage
-  knowledgeKey: object.passage
-  requiresPhysicalProvider: true
-
-- type: ncCityAffordance
-  id: NCCityStorage
-  kind: Storage
-  knowledgeKey: object.storage
-  requiresPhysicalProvider: true
-
-- type: ncCityAffordance
-  id: NCCityEdible
-  kind: FoodSource
-  knowledgeKey: object.edible
-  requiresPhysicalProvider: true
-
-- type: ncCityAffordance
-  id: NCCityWeapon
-  kind: Weapon
-  knowledgeKey: object.weapon
-  requiresPhysicalProvider: true
-
-- type: ncCityAffordance
-  id: NCCityWorkstation
-  kind: Workstation
-  knowledgeKey: object.workstation
-  requiresPhysicalProvider: true
-
-- type: ncCityAffordance
-  id: NCStationReagentDispenser
-  kind: Workstation
-  knowledgeKey: object.reagent-dispenser
-  requiresPhysicalProvider: true
-
-- type: ncCityAffordance
-  id: NCStationMicrowave
-  kind: Workstation
-  knowledgeKey: object.microwave
-  requiresPhysicalProvider: true
-
-- type: ncCityAffordance
-  id: NCStationHydroponicsTray
-  kind: Workstation
-  knowledgeKey: object.hydroponics-tray
-  requiresPhysicalProvider: true
-
-- type: ncCityAffordance
-  id: NCStationDirtyPuddle
-  kind: Workstation
-  knowledgeKey: object.dirty-puddle
-  requiresPhysicalProvider: true
-
 # Existing vanilla objects are recognized automatically. The rules stay in YAML so their A-Life meaning can be
 # balanced without changing C# or adding mapper anchors to every chair and machine.
 - type: ncCityObjectAffordanceRule
@@ -129,51 +75,6 @@
   id: NCCityMedicalObjectAffordances
   source: MedicalTreatment
   affordances: [NCCityMedicalTreatment]
-
-- type: ncCityObjectAffordanceRule
-  id: NCCityDoorObjectAffordances
-  source: Door
-  affordances: [NCCityPassage]
-
-- type: ncCityObjectAffordanceRule
-  id: NCCityStorageObjectAffordances
-  source: Storage
-  affordances: [NCCityStorage]
-
-- type: ncCityObjectAffordanceRule
-  id: NCCityEdibleObjectAffordances
-  source: Edible
-  affordances: [NCCityEdible]
-
-- type: ncCityObjectAffordanceRule
-  id: NCCityWeaponObjectAffordances
-  source: Weapon
-  affordances: [NCCityWeapon]
-
-- type: ncCityObjectAffordanceRule
-  id: NCCityComputerObjectAffordances
-  source: Computer
-  affordances: [NCCityWorkstation]
-
-- type: ncCityObjectAffordanceRule
-  id: NCStationReagentDispenserAffordances
-  source: ReagentDispenser
-  affordances: [NCStationReagentDispenser]
-
-- type: ncCityObjectAffordanceRule
-  id: NCStationMicrowaveAffordances
-  source: Microwave
-  affordances: [NCStationMicrowave]
-
-- type: ncCityObjectAffordanceRule
-  id: NCStationPlantHolderAffordances
-  source: PlantHolder
-  affordances: [NCStationHydroponicsTray]
-
-- type: ncCityObjectAffordanceRule
-  id: NCStationPuddleAffordances
-  source: Puddle
-  affordances: [NCStationDirtyPuddle]
 
 # NCPD service functions are derived from the authored station Building and its safe navigation samples. They are
 # semantic capabilities, not mapper entities, so the station remains usable without invisible Booking/Holding anchors.

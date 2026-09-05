@@ -4,12 +4,13 @@
 
 - type: ncNeuralPolicy
   id: Default
-  enabled: true
+  enabled: false
   endpoint: http://neural-cognition:8080/v1/cognition
-  maximumConcurrent: 8
+  maximumQueued: 512
+  maximumConcurrent: 4
   maximumCompletionsPerTick: 16
   maximumFacts: 64
-  maximumCapabilities: 48
+  maximumCapabilities: 32
   maximumPerceivedSubjects: 32
   maximumTextLength: 512
   maximumDialogueInputLength: 2048
@@ -17,11 +18,27 @@
   maximumDialogueSummaryKeys: 64
   maximumDialogueMemorySessions: 12
   maximumDialogueMemoryTextLength: 768
-  # Pricing is telemetry only. Provider availability and account balance are the sole spending authority.
+  sessionTokenTarget: 10000000
+  sessionTokenHardCap: 20000000
+  economyThreshold: 10000000
+  restrictedThreshold: 16000000
+  # GPT-5.6 Luna list prices in million-token units; keep them data-driven so pricing changes need no code patch.
   providerModel: gpt-5.6-luna
   inputPriceUsdMicrosPerMillionTokens: 200000
   cachedInputPriceUsdMicrosPerMillionTokens: 20000
   outputPriceUsdMicrosPerMillionTokens: 1200000
+  economyCostThresholdUsdMicros: 7500000
+  restrictedCostThresholdUsdMicros: 12000000
+  sessionCostHardCapUsdMicros: 15000000
+  # Real provider spend is capped across server restarts by an ISO-week ledger.
+  weeklyCostHardCapUsdMicros: 18000000
+  actorWeeklyCostHardCapUsdMicros: 2000000
+  requestKindWeeklyLimits:
+    SocialCognition: 600
+    StrategicDecision: 150
+    DialogueContinuation: 2000
+    MemorySummary: 300
+    NarrativeRender: 300
   maximumRequestInputTokens: 32768
   maximumRequestOutputTokens: 2048
   # The Responses API counts hidden reasoning and visible structured JSON against the same ceiling.
@@ -33,188 +50,34 @@
   ordinaryDialogueMaximumHistoryTurns: 64
   ordinaryDialogueMaximumSummaryKeys: 64
   ordinaryDialogueMaximumMemorySessions: 6
+  ordinaryResidentSessionTokenHardCap: 250000
+  ordinaryResidentMaximumOutstandingRequests: 1
+  ordinaryResidentReservedInputTokens: 8192
+  ordinaryResidentRequestCooldown: 0.1s
+  narrativeActorSessionTokenHardCap: 250000
+  narrativeActorMaximumOutstandingRequests: 2
+  narrativeActorReservedInputTokens: 8192
+  narrativeActorRequestCooldown: 0.1s
+  maximumCoalescedFollowersPerRequest: 16
   circuitFailureThreshold: 5
+  minimumSuggestionConfidence: 400
+  maximumUtilityBoost: 40
   maximumPendingCorrelations: 1024
+  maximumAppliedSuggestions: 10000
   maximumTrackedActorDiagnostics: 256
   requestTimeout: 8s
-  # Active-world time runs twelve times faster than wall time. Twenty game minutes keep a 30-NPC burst alive for
-  # eight worst-case four-slot provider waves, while the wake/actor revision guards reject obsolete work.
-  requestLifetime: 20m
+  # Active-world time runs twelve times faster than wall time. Two game minutes leave ten real seconds for the
+  # eight-second provider timeout and main-thread delivery without accepting stale dialogue indefinitely.
+  requestLifetime: 2m
   circuitOpenDuration: 2m
   suggestionLifetime: 2m
+  strategicRequestCooldown: 2m
   incidentEscalationCooldown: 30s
-  defensiveReflexRetreatDistance: 2
-
-- type: ncPhysicalActorBrainPolicy
-  id: NCDefaultPhysicalActorBrain
-  # One response may contain up to eight commands, so calm actors need no rapid polling. Reactive perception,
-  # dialogue and incidents still submit immediately through their dedicated event paths.
-  decisionInterval: 30m
-  retryInterval: 2m
-  # Avoid a simultaneous 30-actor provider burst without leaving most of a fresh cohort visibly idle.
-  initialStagger: 30s
-  maximumDispatchesPerTick: 4
-  maximumExecutionPulsesPerTick: 32
-  executionPulseInterval: 1s
-  # A response must arrive quickly, but an accepted multi-step physical plan may run much longer.
-  actionPlanLifetime: 30m
-
-- type: ncWorldOpportunityPolicy
-  id: NCDefaultWorldOpportunities
-  maximumTotal: 8192
-  maximumPerActor: 64
-  maximumPerQuery: 32
-  maximumAffordanceKeys: 16
-  rewardWeight: 4
-  urgencyWeight: 6
-  riskWeight: 2
-  urgentEventReward: 800
-  urgentEventUrgency: 1000
-  urgentEventRisk: 900
-  jobObligationReward: 700
-  jobObligationUrgency: 500
-  jobObligationRisk: 100
-  nearbyAffordanceReward: 350
-  nearbyAffordanceUrgency: 200
-  nearbyAffordanceRisk: 100
-  urgentEventLifetime: 2m
-  jobObligationLifetime: 30m
-  nearbyAffordanceLifetime: 2m
-  urgentEventCapabilities: [NCCognitionRespondToThreat]
-  jobObligationCapabilities: [NCCognitionMoveToStationDestination]
-  jobActivityCapabilities: [NCCognitionInspectAssignedWorkplace]
-
-- type: ncObservedEventOpportunityRule
-  id: NCMedicalDoctorTreatSevereInjury
-  stableKey: medical-doctor-treat-severe-injury
-  job: MedicalDoctor
-  observedEvent: SevereInjury
-  opportunityKind: task.treat-visible-patient
-  affordanceKeys: [medical.treat-visible-patient]
-  requiredCapabilities: [NCCognitionApproachPerson, NCCognitionUseHeldOnPerson]
-  completionCapabilities: [NCCognitionUseHeldOnPerson]
-  reward: 850
-  urgency: 950
-  risk: 200
-  lifetime: 2m
-
-- type: ncStationWorkOpportunityRule
-  id: NCStationCargoProcessOrder
-  stableKey: cargo-process-order
-  jobs: [CargoTechnician, SalvageSpecialist]
-  source: PendingCargoOrder
-  opportunityKind: task.process-cargo-order
-  affordanceKeys: [cargo.process-pending-order]
-  requiredCapabilities: [NCCognitionApproachEntity, NCCognitionProcessCargoOrder]
-  completionCapabilities: [NCCognitionProcessCargoOrder]
-  reward: 850
-  urgency: 750
-  risk: 100
-  lifetime: 2m
-
-- type: ncStationWorkOpportunityRule
-  id: NCStationBartenderPrepareDrink
-  stableKey: bartender-prepare-drink
-  jobs: [Bartender]
-  source: ReagentDispenser
-  opportunityKind: task.prepare-cocktail
-  affordanceKeys: [service.prepare-cocktail]
-  requiredCapabilities: [NCCognitionApproachEntity, NCCognitionUseHeldOnTarget, NCCognitionPrepareDispensedMixture]
-  completionCapabilities: [NCCognitionPrepareDispensedMixture]
-  reward: 700
-  urgency: 450
-  risk: 50
-  lifetime: 5m
-
-- type: ncStationWorkOpportunityRule
-  id: NCStationChemistPrepareMixture
-  stableKey: chemist-prepare-mixture
-  jobs: [Chemist]
-  source: ReagentDispenser
-  opportunityKind: task.prepare-chemical-mixture
-  affordanceKeys: [medical.prepare-chemical-mixture]
-  requiredCapabilities: [NCCognitionApproachEntity, NCCognitionUseHeldOnTarget, NCCognitionPrepareDispensedMixture]
-  completionCapabilities: [NCCognitionPrepareDispensedMixture]
-  reward: 700
-  urgency: 500
-  risk: 100
-  lifetime: 5m
-
-- type: ncStationWorkOpportunityRule
-  id: NCStationChefCookFood
-  stableKey: chef-cook-food
-  jobs: [Chef]
-  source: Microwave
-  opportunityKind: task.cook-food
-  affordanceKeys: [service.cook-food]
-  requiredCapabilities: [NCCognitionApproachEntity, NCCognitionUseHeldOnTarget, NCCognitionCookMicrowaveContents]
-  completionCapabilities: [NCCognitionCookMicrowaveContents]
-  reward: 700
-  urgency: 450
-  risk: 100
-  lifetime: 5m
-
-- type: ncStationWorkOpportunityRule
-  id: NCStationBotanistHarvestPlant
-  stableKey: botanist-harvest-plant
-  jobs: [Botanist]
-  source: HarvestablePlant
-  opportunityKind: task.harvest-ready-plant
-  affordanceKeys: [service.harvest-ready-plant]
-  requiredCapabilities: [NCCognitionApproachEntity, NCCognitionHarvestPlant]
-  completionCapabilities: [NCCognitionHarvestPlant]
-  reward: 800
-  urgency: 600
-  risk: 50
-  lifetime: 2m
-
-- type: ncStationWorkOpportunityRule
-  id: NCStationScientistUnlockResearch
-  stableKey: scientist-unlock-research
-  jobs: [Scientist]
-  source: UnlockableResearch
-  opportunityKind: task.unlock-research-technology
-  affordanceKeys: [science.unlock-available-technology]
-  requiredCapabilities: [NCCognitionApproachEntity, NCCognitionUnlockResearchTechnology]
-  completionCapabilities: [NCCognitionUnlockResearchTechnology]
-  reward: 850
-  urgency: 650
-  risk: 50
-  lifetime: 2m
-
-- type: ncStationWorkOpportunityRule
-  id: NCStationJanitorCleanPuddle
-  stableKey: janitor-clean-puddle
-  jobs: [Janitor]
-  source: DirtyPuddle
-  opportunityKind: task.clean-visible-puddle
-  affordanceKeys: [service.clean-visible-puddle]
-  requiredCapabilities: [NCCognitionApproachEntity, NCCognitionCleanPuddle]
-  completionCapabilities: [NCCognitionCleanPuddle]
-  reward: 800
-  urgency: 650
-  risk: 50
-  lifetime: 2m
-
-- type: ncStationWorkOpportunityRule
-  id: NCStationEngineeringRepairDamage
-  stableKey: engineering-repair-damage
-  jobs: [StationEngineer, AtmosphericTechnician]
-  source: DamagedEntity
-  opportunityKind: task.repair-visible-damage
-  affordanceKeys: [engineering.repair-visible-damage]
-  requiredCapabilities: [NCCognitionApproachEntity, NCCognitionRepairDamage]
-  completionCapabilities: [NCCognitionRepairDamage]
-  reward: 850
-  urgency: 800
-  risk: 250
-  lifetime: 2m
 
 - type: ncNeuralPromptProfile
   id: NCLivingCityDefault
   stableKey: living-city-default
-  version: 4
-  evaluationProfile: physical-gpt-alife-v3
+  version: 1
   model: gpt-5.6-luna
   allowedKinds: [SocialCognition, StrategicDecision, DialogueContinuation, MemorySummary, NarrativeRender]
 
@@ -223,128 +86,30 @@
   stableKey: night-city-resident
   roleKey: city-resident
   organizationKey: independent
-  biography: A persistent resident of Night City in 2045 with relationships, incomplete knowledge and a personal history. This person experiences the city as reality and never describes it as a game or simulation.
+  biography: A persistent resident of Night City in 2045 with a home, work, relationships, incomplete knowledge and a personal history. This person experiences the city as reality and never describes it as a game or simulation.
   principleKeys: [survive, remember-debts, protect-close-people, respect-lived-experience]
   habitKeys: [observe-surroundings, speak-from-known-facts, avoid-impossible-promises]
-
-- type: ncNeuralPersonaProfile
-  id: NCResidentPersonaCautious
-  stableKey: cautious-night-city-resident
-  roleKey: city-resident
-  organizationKey: independent
-  biography: A careful Night City resident who has survived by noticing danger early and avoiding promises that cannot be kept.
-  principleKeys: [survive, avoid-needless-risk, remember-threats, protect-close-people]
-  habitKeys: [watch-exits, ask-before-trusting, speak-briefly-under-stress]
-  temperamentKey: cautious
-  riskTolerance: 220
-  aggression: 180
-  empathy: 620
-  authorityRespect: 520
-  violenceTolerance: 260
-  justice: 480
-  professionalism: 540
-  speechRegisterKey: restrained
-  vocabularyKey: street-practical
-
-- type: ncNeuralPersonaProfile
-  id: NCResidentPersonaHardboiled
-  stableKey: hardboiled-night-city-resident
-  roleKey: city-resident
-  organizationKey: independent
-  biography: A hardened resident who expects betrayal, respects resolve and refuses to look helpless on the street.
-  principleKeys: [survive, repay-betrayal, respect-strength, keep-your-word]
-  habitKeys: [test-claims, hide-fear, answer-directly]
-  temperamentKey: hardboiled
-  riskTolerance: 680
-  aggression: 720
-  empathy: 280
-  authorityRespect: 240
-  violenceTolerance: 760
-  justice: 350
-  professionalism: 420
-  speechRegisterKey: blunt
-  vocabularyKey: street-slang
-
-- type: ncNeuralPersonaProfile
-  id: NCResidentPersonaCompassionate
-  stableKey: compassionate-night-city-resident
-  roleKey: city-resident
-  organizationKey: independent
-  biography: A community-minded resident who tries to help people without pretending Night City is safe or fair.
-  principleKeys: [protect-vulnerable-people, keep-your-word, avoid-civilian-harm, value-community]
-  habitKeys: [check-on-injured-people, listen-before-judging, remember-kindness]
-  temperamentKey: warm
-  riskTolerance: 420
-  aggression: 220
-  empathy: 860
-  authorityRespect: 500
-  violenceTolerance: 240
-  justice: 720
-  professionalism: 560
-  speechRegisterKey: conversational
-  vocabularyKey: everyday
-
-- type: ncNeuralPersonaProfile
-  id: NCResidentPersonaRestless
-  stableKey: restless-night-city-resident
-  roleKey: city-resident
-  organizationKey: independent
-  biography: An impulsive resident driven by curiosity, quick opportunities and the fear of being trapped in one place.
-  principleKeys: [stay-free, seize-opportunities, survive, learn-by-doing]
-  habitKeys: [change-subjects-quickly, investigate-unusual-events, act-before-overthinking]
-  temperamentKey: restless
-  riskTolerance: 780
-  aggression: 460
-  empathy: 440
-  authorityRespect: 180
-  violenceTolerance: 520
-  justice: 380
-  professionalism: 260
-  speechRegisterKey: energetic
-  vocabularyKey: street-casual
-
-- type: ncNeuralPersonaProfile
-  id: NCResidentPersonaProud
-  stableKey: proud-night-city-resident
-  roleKey: city-resident
-  organizationKey: independent
-  biography: A proud resident who guards personal dignity, reputation and independence even when compromise would be safer.
-  principleKeys: [protect-reputation, demand-respect, keep-your-word, stay-independent]
-  habitKeys: [challenge-insults, remember-public-humiliation, speak-with-certainty]
-  temperamentKey: proud
-  riskTolerance: 560
-  aggression: 590
-  empathy: 390
-  authorityRespect: 330
-  violenceTolerance: 570
-  justice: 470
-  professionalism: 610
-  speechRegisterKey: assertive
-  vocabularyKey: deliberate
-
-- type: ncNeuralPersonaProfile
-  id: NCResidentPersonaPragmatic
-  stableKey: pragmatic-night-city-resident
-  roleKey: city-resident
-  organizationKey: independent
-  biography: A practical resident who weighs cost, leverage and likely consequences before committing to any course.
-  principleKeys: [survive, honor-profitable-deals, avoid-waste, remember-debts]
-  habitKeys: [ask-for-terms, verify-resources, prefer-workable-solutions]
-  temperamentKey: pragmatic
-  riskTolerance: 480
-  aggression: 400
-  empathy: 450
-  authorityRespect: 460
-  violenceTolerance: 480
-  justice: 410
-  professionalism: 760
-  speechRegisterKey: businesslike
-  vocabularyKey: precise
 
 - type: ncNeuralAutonomyPolicy
   id: NCDefaultNeuralAutonomy
   stableKey: resident-deliberative
   allowedKinds: [SocialCognition, StrategicDecision, DialogueContinuation, MemorySummary, NarrativeRender]
-  minimumIntentConfidence: 0
-  maximumIntentPriority: 1000
+  minimumIntentConfidence: 500
+  maximumIntentPriority: 700
+  targetedIntentsAllowed: true
+
+- type: ncNeuralAutonomyPolicy
+  id: NCOrdinaryResidentDialogueAutonomy
+  stableKey: resident-dialogue-only
+  allowedKinds: [DialogueContinuation]
+  minimumIntentConfidence: 700
+  maximumIntentPriority: 250
+  targetedIntentsAllowed: true
+
+- type: ncNeuralAutonomyPolicy
+  id: NCNcpdNeuralAutonomy
+  stableKey: ncpd-field-officer
+  allowedKinds: [SocialCognition, StrategicDecision, DialogueContinuation, MemorySummary]
+  minimumIntentConfidence: 400
+  maximumIntentPriority: 900
   targetedIntentsAllowed: true

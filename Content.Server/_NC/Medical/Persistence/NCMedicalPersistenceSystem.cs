@@ -60,7 +60,7 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
 
     /// <summary>
     /// Captures one body's semantic medical state. Null means the body or its live organ graph is invalid
-    /// for the current persistence version. The first non-terminating capture may assign missing stable organ provenance;
+    /// for the current persistence version. The first capture may assign missing stable organ provenance;
     /// no physiological state is changed.
     /// </summary>
     public NCMedicalStateSnapshot? SerializeMedicalState(EntityUid character, bool allowTerminating = false)
@@ -97,13 +97,7 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
         };
 
         foreach (var (category, organ) in organs.OrderBy(entry => entry.Key.Id, StringComparer.Ordinal))
-        {
-            // Entity termination is a read-only checkpoint boundary. Never add or mutate identity
-            // components there; a body without already-established organ identity is skipped safely.
-            if (!TryCaptureOrgan(character, organ, !allowTerminating, out var organState))
-                return null;
-            snapshot.Organs.Add(category, organState);
-        }
+            snapshot.Organs.Add(category, CaptureOrgan(character, organ));
 
         return ValidateCurrentSnapshot(character, snapshot) ? snapshot : null;
     }

@@ -9,12 +9,18 @@ namespace Content.Shared._NC.LivingCity.Cognition;
 /// <summary>Names an existing authority. The router never reimplements the gameplay system behind it.</summary>
 public enum NCHumanActionExecutorKind : byte
 {
+    Core,
     VanillaMovement,
     VanillaCombat,
     VanillaInteraction,
     VanillaHands,
     VanillaSpeech,
-    VanillaStationWork,
+    RoutineAdapter,
+    ProfessionAdapter,
+    MedicalAdapter,
+    PoliceAdapter,
+    SocialAdapter,
+    FixerAdapter,
 }
 
 /// <summary>
@@ -36,25 +42,9 @@ public enum NCHumanActionOperationKind : byte
     EquipTarget,
     UnequipTarget,
     UseHeldTarget,
-    UseHeldOnTarget,
-    BuckleSelfToTarget,
-    UnbuckleSelf,
-    StoreHeldInTarget,
-    RetrieveTargetFromStorage,
-    ConsumeHeldTarget,
-    FireHeldGunAtTarget,
-    ReloadHeldGunWithTarget,
     Speak,
     StartPullingTarget,
     StopPulling,
-    MoveToStationDestination,
-    UseHeldOnInjuredPerson,
-    InspectStationWorkplace,
-    ProcessCargoOrder,
-    UnlockResearchTechnology,
-    PrepareDispensedMixture,
-    StartMicrowave,
-    HarvestPlant,
 }
 
 public enum NCHumanActionTargetKind : byte
@@ -82,7 +72,7 @@ public enum NCHumanActionCompletionKind : byte
 public enum NCHumanActionInterruptKind : byte
 {
     PlanChanged,
-    EntityUnbound,
+    Dematerialized,
     Combat,
     Conversation,
     Incapacitated,
@@ -93,7 +83,7 @@ public enum NCHumanActionInterruptKind : byte
 }
 
 /// <summary>
-/// Closed physical action inventory used by GPT command batches and the authoritative action router.
+/// Closed data-driven inventory shared by BDI, narrative Actors and the authoritative action router.
 /// </summary>
 [Prototype("ncHumanAction")]
 public sealed partial class NCHumanActionPrototype : IPrototype

@@ -74,9 +74,7 @@ public sealed partial class NCEconomicPhysicalizationSystem : EntitySystem
 
         var owner = NCPartyRef.ForActor(actorId);
         var nodeId = NCEconomicAssetRegistrySystem.ActorInventoryStockNode(actorId);
-        var node = await _assets.EnsureActorInventoryStockNodeAsync(
-            actorId,
-            "physical-actor-inventory-repair");
+        var node = await _assets.GetStockNodeAsync(nodeId, true);
         if (node == null || node.Snapshot.Owner != owner || node.Snapshot.Kind != NCStockNodeKind.ActorInventory)
             return new(null, "The actor inventory stock authority is missing or incompatible.");
 
@@ -289,6 +287,83 @@ public sealed partial class NCEconomicPhysicalizationSystem : EntitySystem
         return true;
     }
 
+    public bool TryBuildDematerializationWrites(
+        NCActorId actorId,
+        NCCityActorInventorySummary captured,
+        NCActiveWorldTime now,
+        string auditSource,
+        out IReadOnlyList<Content.Server.Database.NCPersistentAggregateWrite> writes,
+        out string? error)
+    {
+        writes = [];
+        error = null;
+        if (!_leases.TryGetValue(actorId, out var lease) || captured == null)
+        {
+            error = "The actor has no matching economic materialization lease.";
+            return false;
+        }
+
+        var capturedItems = captured.UniqueItems.ToHashSet();
+        var destroyedItems = new HashSet<NCItemId>();
+        foreach (var (itemId, entity) in lease.ItemEntities)
+        {
+            if (capturedItems.Contains(itemId))
+                continue;
+            if (Exists(entity))
+            {
+                error = $"Persistent item {itemId} still exists outside the actor inventory.";
+                return false;
+            }
+            destroyedItems.Add(itemId);
+        }
+
+        var capturedCommodities = captured.Commodities.ToDictionary(bundle => bundle.BatchId, bundle => bundle.Units);
+        foreach (var commodityPlan in lease.Plan.Commodities)
+        {
+            long physicalUnits = 0;
+            foreach (var entity in lease.CommodityEntities[commodityPlan.Batch.Snapshot.BatchId])
+            {
+                if (!Exists(entity))
+                    continue;
+                if (!TryMeasureCommodityEntity(entity, commodityPlan, out var units, out error))
+                    return false;
+                physicalUnits = checked(physicalUnits + units);
+            }
+            if (physicalUnits != capturedCommodities.GetValueOrDefault(commodityPlan.Batch.Snapshot.BatchId))
+            {
+                error = $"Commodity batch {commodityPlan.Batch.Snapshot.BatchId} still has a live physical entity " +
+                        "outside the actor inventory.";
+                return false;
+            }
+        }
+
+        return _assets.TryBuildActorDematerializationWrites(
+            lease.Plan,
+            captured,
+            destroyedItems,
+            now,
+            auditSource,
+            out writes,
+            out error);
+    }
+
+    public bool TryRelease(NCActorId actorId, EntityUid actorEntity)
+    {
+        if (!_leases.TryGetValue(actorId, out var lease) || lease.ActorEntity != actorEntity)
+            return false;
+        _assets.Unload(lease.StockNodeId);
+        foreach (var item in lease.Plan.Items)
+        {
+            _assets.Unload(item.Item.Snapshot.ItemId);
+            foreach (var part in item.InstalledParts)
+                _assets.Unload(part.Snapshot.ItemId);
+        }
+        foreach (var commodity in lease.Plan.Commodities)
+            _assets.Unload(commodity.Batch.Snapshot.BatchId);
+        _leases.Remove(actorId);
+        return _leaseIndex.TryRelease(actorId, actorEntity);
+    }
+
     private bool TryApplyCommodityContents(
         EntityUid entity,
         NCEconomicPhysicalCommodityPlan plan,
@@ -314,6 +389,39 @@ public sealed partial class NCEconomicPhysicalizationSystem : EntitySystem
             error = "The materialized commodity contents exceed the physical solution capacity.";
             return false;
         }
+        return true;
+    }
+
+    private bool TryMeasureCommodityEntity(
+        EntityUid entity,
+        NCEconomicPhysicalCommodityPlan plan,
+        out long units,
+        out string? error)
+    {
+        units = 0;
+        error = null;
+        if (plan.ReagentId == null)
+        {
+            if (!TryComp<NCCityPersistentItemAdapterComponent>(entity, out var adapter) || adapter.CommodityUnits <= 0)
+            {
+                error = "A materialized commodity entity lost its persistent adapter.";
+                return false;
+            }
+            units = adapter.CommodityUnits;
+            return true;
+        }
+        if (!_solutions.TryGetSolution(entity, plan.SolutionId, out _, out var solution))
+        {
+            error = "A materialized commodity entity lost its authored solution.";
+            return false;
+        }
+        var quantity = solution.GetTotalPrototypeQuantity(new ProtoId<ReagentPrototype>(plan.ReagentId));
+        if (quantity != FixedPoint2.New(quantity.Int()) || quantity.Int() < 0 || solution.Volume != quantity)
+        {
+            error = "A materialized commodity solution is fractional or contaminated.";
+            return false;
+        }
+        units = quantity.Int();
         return true;
     }
 

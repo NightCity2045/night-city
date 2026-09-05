@@ -58,8 +58,8 @@ Important experiential goals:
 - Significant state changes must be auditable, idempotent where relevant, and recoverable. The Bible favors append-only events, versioned aggregates, snapshots, asynchronous writes, and an explicit end-of-session flush.
 - Never perform synchronous persistence or external-service I/O in the game tick.
 - Avoid one `Update()`/timer/planner per persistent actor, full-entity scans, and unbounded work. Use event wakeups, centralized schedulers, spatial indexes, queues, budgets, and batching.
-- Client prediction is for responsive interactions, never authority over money, items, health, contracts, AI decisions, or persistent outcomes.
-- Neural and translation services must time out safely without blocking the server. A neural outage may finish an already accepted safe command or use a bounded physical safety reflex; it must not substitute a second deterministic social brain.
+- Client prediction is for responsive interactions, never authority over money, items, health, contracts, AI, materialization, or persistent outcomes.
+- Optional AI or translation services must time out safely and degrade to deterministic behavior without blocking the server.
 
 ## Persistent world and round lifecycle
 
@@ -68,8 +68,7 @@ The city is persistent but advances only while a round is active. Stopping the r
 ```text
 validated snapshot and journal recovery
 -> restore the last active-world-time state
--> restore one physical entity for every living persistent NPC
--> event-driven physical GPT simulation
+-> active physical and abstract simulation
 -> transaction/event flush, snapshot, and invariant checks
 -> frozen state with no wall-clock catch-up
 ```
@@ -78,7 +77,7 @@ Offline real time never advances payments, production, deliveries, recovery, sen
 
 Entry and exit should respect persistent state: hospitalization, imprisonment, work, home, travel, combat, custody, medical care, important inventory, and visibility. A character should not simply appear or disappear in an impossible scene.
 
-## Geography and physical population
+## Geography and materialization
 
 All city systems should share a Z-aware location model and stable semantic geography:
 
@@ -86,13 +85,13 @@ All city systems should share a Z-aware location model and stable semantic geogr
 City -> District -> Sector -> Street/Block -> Building -> Floor -> Room
 ```
 
-The `City Graph` and room/portal graph provide semantic long-range routing; local physical execution narrows to ordinary tile pathfinding. They augment physical movement and never replace an NPC body. A location may simultaneously carry district, ownership, jurisdiction, access, threat, faction, visibility, density, and event-zone context.
+The long-range simulation uses a `City Graph`; local physical execution narrows through room/portal routing to tile pathfinding. A location may simultaneously carry district, ownership, jurisdiction, access, threat, faction, visibility, density, and event-zone context.
 
-Mappers describe the semantics and topology of space. They should not author routes or per-NPC activity anchors. Item prototypes, building types, rooms, access, and connectivity expose reusable affordances from which a physical NPC can choose and execute a route.
+Mappers describe the semantics and topology of space. They should not place gang/police/civilian/fixer spawners as the source of city life. Materialization selects valid candidates from geometry, access, capacity, route, current logical position, and visibility.
 
-Every living persistent NPC owns exactly one physical server entity for the complete active-world session, including when no player is nearby. PVS only controls client visibility. Runtime materialization, dematerialization, abstract travel, relevance presence, interactive human stand-ins, and physical-population caps are forbidden.
+Persistent actors exist without requiring live entities. Materialize them near relevant player clusters, meetings, incidents, missions, deliveries, or service responses; dematerialize only when the physical scene is safely resumable. Never spawn or remove an important actor visibly or while combat, custody, treatment, pursuit, conversation, or a critical physical object still requires the entity.
 
-Purely decorative client visuals may remain non-persistent, but every interactive human belongs to the physical persistent population.
+Decorative ambient, interactive ambient, and persistent actors are separate population layers. Ambient population does not automatically acquire persistent identity.
 
 ### Zone templates, apartments, and dungeons
 
@@ -102,16 +101,17 @@ The durable ideas are stable typed zone/run/deployment identities, server-side c
 
 ## A-Life direction
 
-Physical GPT A-Life v3 uses one isolated neural decision stream per persistent NPC:
+The A-Life reference describes a layered, budgeted architecture rather than one universal AI brain:
 
 ```text
-physical body and subjective sensorium
--> event-driven neural wake
--> per-ActorId GPT decision
--> validated typed command batch
--> ordinary SS14 and NC action authorities
--> verified command results
--> memory, persistence, and next wake
+world facts and events
+-> permitted capabilities
+-> beliefs, desires, and utility
+-> stable BDI intention
+-> cheapest suitable planner/executor
+-> authoritative domain executor
+-> ECS or persistent-domain execution
+-> event journal, memory, and new world state
 ```
 
 Key distinctions:
@@ -119,20 +119,20 @@ Key distinctions:
 - Objective facts are separate from an actor's beliefs, memories, rumors, and narrative summaries.
 - NPC knowledge needs a plausible source. NCPD, factions, and individuals do not gain global knowledge magically.
 - Relationships are directional facts, obligations, memories, and social states rather than a universal public reputation number.
-- A centralized scheduler wakes physical actors by event or a provider-selected follow-up time; it never groups several people into one decision.
-- GPT selects ordinary intentions. HTN/StateTree may execute an accepted procedure and Utility may select a bounded safety reflex, but none of them is a second normal NPC brain.
-- The command coordinator validates schema, knowledge, target freshness, authority, and staleness before normal gameplay systems may mutate the world.
-- Load control throttles neural and scheduled work. It never deletes, hides, abstracts, or caps physical NPC bodies.
+- A centralized scheduler wakes distant actors/groups by event or `NextUpdateAt`; remote actors do not keep blackboards, behavior trees, tile routes, or active physical plans.
+- StateTree/HFSM handles routine modes; reactive/behavior-tree layers handle local physical reactions; HTN is for known procedures; partial-order planning is for bounded group operations; strategic search is rare and optional.
+- A plan router should choose the cheapest adequate mechanism. Every advanced planner needs validation, version/staleness checks, a work budget, and a deterministic fallback.
+- When overloaded, reduce ambient density, distant detail, optional planning, narrative work, and neural work before harming player-critical scenes or tick stability.
 
 The numerical A-Life population, frequency, and time budgets in Notion are profiling targets, not immutable constants.
 
 ## AI and neural dialogue
 
-GPT is the primary individual decision source for every Living City NPC. It receives bounded subjective perception, retrieved memory, personality, commitments, current physical state, opportunities, and an exact server-provided action catalog. It may choose speech, sensory requests, intentions, and typed physical commands, but it never determines world truth or action success.
+Neural cognition is optional. It may render speech or choose among server-provided social capabilities for selected important NPCs, but it must not determine world truth, action success, movement, combat, damage, treatment, money, inventory, guilt, service dispatch, or materialization.
 
-AI context must be narrow, structured, versioned, and limited to information the actor may know. Player text and world-authored text are untrusted input. Responses require schema, capability, knowledge, resource, authority, safety, and staleness validation. Provider failure leaves the NPC physically present and waiting after any bounded safety reflex or already accepted safe command finishes.
+AI context must be narrow, structured, versioned, and limited to information the actor may know. Player text and world-authored text are untrusted input. Responses require schema, capability, knowledge, resource, authority, safety, and staleness validation. Failure falls back to cached valid output, utility/BDI, authored personality templates, or a safe default.
 
-Inference runs outside the Robust process through the bounded cognition service; the authoritative server retains all physical execution and persistence.
+The first viable A-Life implementation does not depend on an LLM. The current design assumes the game server has no GPU and should not host heavy inference in the Robust process.
 
 ## Systems that share one causal model
 
@@ -155,7 +155,7 @@ Do not treat the following as settled merely because adjacent architecture exist
 - exact session timing, in-world time scale, logout/late-join edge cases, character-slot count, spectator policy, and handling of bodies/funerals;
 - economy numbers and policies such as starting capital, wage cadence, rent, taxes, credit, bankruptcy, inheritance, licensing, and prices;
 - detailed netrunning rules and content;
-- full neural-provider policy, launch scope, privacy, usage telemetry, and outage UX;
+- full neural-provider policy, launch scope, privacy, budgets, and outage UX;
 - launch districts, organizations, staffing, production content, equipment catalogs, and other scope choices;
 - the exact contents of roadmap blocks that the Bible itself labels as undefined, including `META`;
 - any proposed data record or system/class name that has not been reconciled with the current codebase.

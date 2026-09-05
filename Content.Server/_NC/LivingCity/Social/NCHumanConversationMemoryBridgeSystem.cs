@@ -42,11 +42,7 @@ public sealed partial class NCHumanConversationMemoryBridgeSystem : EntitySystem
                 continue;
 
             var owner = NCPartyRef.ForActor(actorId);
-            // A crowd address remains one personal memory of the actual speaker, not a synthetic relationship with
-            // every bystander in the same hearing radius.
-            var others = turn != null && turn.Speaker != owner
-                ? new[] { turn.Speaker }
-                : args.Session.Participants.Where(value => value != owner).Take(1).ToArray();
+            var others = args.Session.Participants.Where(value => value != owner).ToArray();
             var stableKey = $"{owner}/{args.Session.SessionId}";
             QueueMemory(new ConversationMemoryKey(args.Session.SessionId, actorId, "routine", 0),
                 new NCRememberWorldEventRequest(

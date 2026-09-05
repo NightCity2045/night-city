@@ -7,8 +7,8 @@ using Robust.Shared.Prototypes;
 namespace Content.Shared._NC.LivingCity.Simulation;
 
 /// <summary>
-/// Data-driven thresholds and degradation profiles for the physical GPT-NPC load governor.
-/// The governor changes update cadence and queue throughput; it never removes NPC bodies or rejects spawns.
+/// Data-driven thresholds and degradation profiles for the active-round A-Life load governor.
+/// The governor changes simulation detail and queue throughput; it never changes game-rule outcomes.
 /// </summary>
 [Prototype("ncAILoadGovernorPolicy")]
 public sealed partial class NCAILoadGovernorPolicyPrototype : IPrototype
@@ -65,6 +65,18 @@ public sealed partial class NCAILoadGovernorPolicyPrototype : IPrototype
     public float CriticalExitQueueRatio { get; private set; } = 0.60f;
 
     [DataField]
+    public float ElevatedEnterMaterializedRatio { get; private set; } = 0.75f;
+
+    [DataField]
+    public float ElevatedExitMaterializedRatio { get; private set; } = 0.65f;
+
+    [DataField]
+    public float CriticalEnterMaterializedRatio { get; private set; } = 0.95f;
+
+    [DataField]
+    public float CriticalExitMaterializedRatio { get; private set; } = 0.82f;
+
+    [DataField]
     public int ElevatedBacklogCount { get; private set; } = 2;
 
     [DataField]
@@ -85,4 +97,15 @@ public sealed partial class NCAILoadGovernorPolicyPrototype : IPrototype
     [DataField]
     public float CriticalDispatchMultiplier { get; private set; } = 0.25f;
 
+    [DataField]
+    public float ElevatedSoftMaterializedBudgetMultiplier { get; private set; } = 0.8f;
+
+    [DataField]
+    public float CriticalSoftMaterializedBudgetMultiplier { get; private set; } = 0.6f;
+
+    [DataField]
+    public int ElevatedProtectedMaterializationPriority { get; private set; } = 600;
+
+    [DataField]
+    public int CriticalProtectedMaterializationPriority { get; private set; } = 800;
 }

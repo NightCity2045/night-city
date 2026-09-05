@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-using Content.Server.Database;
-using Content.Server._NC.LivingCity.Actors.Domains;
 using Content.Shared._NC.City.Connectivity;
 using Content.Shared._NC.City.Zones;
+using Content.Server._NC.LivingCity.Actors.Domains;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Neural;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
+using Content.Server.Database;
+using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.LivingCity.Actors;
@@ -43,22 +44,42 @@ public sealed record NCCityActorMutationResult(
     NCCityActorRecord? Record,
     string? Error);
 
-/// <summary>Creates one persistent physical GPT resident without population, housing, job or faction records.</summary>
-public sealed record NCCityResidentCreateRequest(
+/// <summary>
+/// Atomic physical-to-strategic hand-off. Domain snapshots must have been captured on the simulation thread.
+/// </summary>
+public sealed record NCCityActorDematerializationCommitRequest(
     Guid CommandId,
     NCActorId ActorId,
-    string FullName,
-    ProtoId<NCCityActorArchetypePrototype> Archetype,
-    ProtoId<NCNeuralPersonaProfilePrototype> Persona,
-    string HumanoidProfilePayload,
+    long ExpectedActorVersion,
     NCZoneId CurrentZone,
-    NCCityActorPhysicalRecoveryState? PhysicalRecovery,
+    NCCityActorDomainCapture Domains,
     Guid CorrelationId,
     Guid? CausationId = null,
     string AuditSource = "system",
-    NCGeneratedPersonaDetails? GeneratedPersona = null);
+    IReadOnlyList<NCPersistentAggregateWrite>? ParticipantWrites = null);
 
-/// <summary>Persists a real physical route intent or its observed completion.</summary>
+public sealed record NCCityActorDematerializationCommitResult(
+    NCCityActorMutationStatus Status,
+    NCActorId ActorId,
+    NCCityActorRecord? Actor,
+    NCCityActorHealthRecord? Health,
+    NCCityActorInventoryRecord? Inventory,
+    string? Error);
+
+public sealed record NCCityActorCreateRequest(
+    Guid CommandId,
+    Guid PopulationScopeId,
+    string StableLocalId,
+    string FullName,
+    string[] Aliases,
+    ProtoId<NCCityActorArchetypePrototype> Archetype,
+    NCZoneId HomeZone,
+    NCZoneId WorkZone,
+    Guid CorrelationId,
+    Guid? CausationId = null,
+    string AuditSource = "system",
+    ProtoId<NCNarrativeActorProfilePrototype>? NarrativeActorProfile = null);
+
 public sealed record NCCityActorLocationMutationRequest(
     Guid CommandId,
     NCActorId ActorId,
@@ -68,6 +89,35 @@ public sealed record NCCityActorLocationMutationRequest(
     NCCityActorTravelPhase TravelPhase,
     NCCityTravelMode TravelMode,
     NCActiveWorldTime? ExpectedArrivalAt,
+    string CurrentActivity,
+    string CurrentGoal,
+    NCCityActorAvailability Availability,
+    NCActiveWorldTime NextUpdateAt,
+    Guid CorrelationId,
+    Guid? CausationId = null,
+    string AuditSource = "system",
+    NCCityActorPresenceMode PresenceMode = NCCityActorPresenceMode.Public);
+
+/// <summary>
+/// Changes only the durable residence reference. The scheduler decides when and how the actor travels there.
+/// </summary>
+public sealed record NCCityActorResidenceMutationRequest(
+    Guid CommandId,
+    NCActorId ActorId,
+    long ExpectedVersion,
+    NCZoneId HomeZone,
+    Guid CorrelationId,
+    Guid? CausationId = null,
+    string AuditSource = "system");
+
+/// <summary>Promotes an existing deterministic population slot to an authored identity without replacing the person.</summary>
+public sealed record NCCityActorIdentityMutationRequest(
+    Guid CommandId,
+    NCActorId ActorId,
+    long ExpectedVersion,
+    string FullName,
+    string[] Aliases,
+    ProtoId<NCNarrativeActorProfilePrototype>? NarrativeActorProfile,
     Guid CorrelationId,
     Guid? CausationId = null,
     string AuditSource = "system");
@@ -90,61 +140,71 @@ public sealed record NCCityActorFreezeMutationRequest(
     Guid? CausationId = null,
     string AuditSource = "system");
 
-/// <summary>Atomic checkpoint of one still-existing physical NPC and its durable body/inventory domains.</summary>
-public sealed record NCPhysicalActorCheckpointRequest(
+public sealed record NCCityActorAddCommitmentRequest(
     Guid CommandId,
     NCActorId ActorId,
-    long ExpectedActorVersion,
-    NCZoneId CurrentZone,
-    NCCityActorDomainCapture Domains,
+    long ExpectedVersion,
+    NCCityActorCommitment Commitment,
     Guid CorrelationId,
     Guid? CausationId = null,
-    string AuditSource = "system",
-    IReadOnlyList<NCPersistentAggregateWrite>? ParticipantWrites = null,
-    NCCityActorPhysicalRecoveryState? PhysicalRecovery = null);
+    string AuditSource = "system");
 
-public sealed record NCPhysicalActorCheckpointResult(
-    NCCityActorMutationStatus Status,
+public sealed record NCCityActorRemoveCommitmentRequest(
+    Guid CommandId,
     NCActorId ActorId,
-    NCCityActorRecord? Actor,
-    NCCityActorHealthRecord? Health,
-    NCCityActorInventoryRecord? Inventory,
-    string? Error);
+    long ExpectedVersion,
+    NCCityCommitmentId CommitmentId,
+    Guid CorrelationId,
+    Guid? CausationId = null,
+    string AuditSource = "system");
 
-/// <summary>Main-thread notification after the durable root of one physical actor changes.</summary>
+/// <summary>
+/// Main-thread notification published after a committed actor snapshot changes.
+/// It lets bounded schedulers update their queues without scanning the registry.
+/// </summary>
 public sealed class NCCityActorPersistedEvent(
     NCActorId actorId,
     long aggregateVersion,
     NCSessionEpoch sessionEpoch,
+    NCActiveWorldTime nextUpdateAt,
     NCCityActorStatus status,
     bool frozen,
     NCCityActorTravelPhase travelPhase,
     NCActiveWorldTime? expectedArrivalAt,
     NCZoneId currentZone,
-    NCZoneId destinationZone,
     string archetypeId,
+    NCCityActorCognitionTier cognitionTier,
+    NCCityActorAvailability availability,
+    NCCityActorPresenceMode presenceMode,
+    bool hasAbstractResidence,
     bool isNarrativeActor) : EntityEventArgs
 {
     public NCActorId ActorId { get; } = actorId;
     public long AggregateVersion { get; } = aggregateVersion;
     public NCSessionEpoch SessionEpoch { get; } = sessionEpoch;
+    public NCActiveWorldTime NextUpdateAt { get; } = nextUpdateAt;
     public NCCityActorStatus Status { get; } = status;
     public bool Frozen { get; } = frozen;
     public NCCityActorTravelPhase TravelPhase { get; } = travelPhase;
     public NCActiveWorldTime? ExpectedArrivalAt { get; } = expectedArrivalAt;
     public NCZoneId CurrentZone { get; } = currentZone;
-    public NCZoneId DestinationZone { get; } = destinationZone;
     public string ArchetypeId { get; } = archetypeId;
+    public NCCityActorCognitionTier CognitionTier { get; } = cognitionTier;
+    public NCCityActorAvailability Availability { get; } = availability;
+    public NCCityActorPresenceMode PresenceMode { get; } = presenceMode;
+    public bool HasAbstractResidence { get; } = hasAbstractResidence;
     public bool IsNarrativeActor { get; } = isNarrativeActor;
 }
 
-/// <summary>Round-local notification that a persistent actor gained or lost its physical ECS entity.</summary>
-public sealed class NCCityActorBindingChangedEvent(
+/// <summary>
+/// Round-local notification used to hand travel ownership between abstract simulation and a physical NPC entity.
+/// </summary>
+public sealed class NCCityActorMaterializationChangedEvent(
     NCActorId actorId,
     EntityUid entityUid,
-    bool bound) : EntityEventArgs
+    bool materialized) : EntityEventArgs
 {
     public NCActorId ActorId { get; } = actorId;
     public EntityUid EntityUid { get; } = entityUid;
-    public bool Bound { get; } = bound;
+    public bool Materialized { get; } = materialized;
 }

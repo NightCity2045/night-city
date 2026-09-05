@@ -1,10 +1,7 @@
 # ADR-0014: Hybrid cognition, BDI commitment and plan routing
 
-Status: Superseded by Physical GPT A-Life v3
+Status: Accepted  
 Date: 2026-08-21
-
-This ADR is retained as history only. Utility/BDI/Planner may not choose ordinary NPC intentions in v3; GPT is the
-primary per-ActorId decision source and server systems validate and execute its typed commands.
 
 ## Decision
 

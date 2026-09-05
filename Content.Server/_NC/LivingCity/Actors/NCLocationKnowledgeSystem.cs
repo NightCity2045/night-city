@@ -11,7 +11,9 @@ using Content.Shared._NC.Persistence.Identity;
 namespace Content.Server._NC.LivingCity.Actors;
 
 /// <summary>
-/// Round-scoped semantic place knowledge learned from the actor's real physical history.
+/// Round-scoped semantic place knowledge. Residents know district names publicly, while streets, buildings and rooms
+/// enter this catalog only through home/work assignment or actual travel. No mapper-authored NPC knowledge anchors
+/// are required.
 /// </summary>
 public sealed partial class NCLocationKnowledgeSystem : EntitySystem
 {
@@ -35,6 +37,8 @@ public sealed partial class NCLocationKnowledgeSystem : EntitySystem
 
     public void Seed(NCCityActorRecord actor)
     {
+        Learn(actor.Snapshot.Identity.ActorId, actor.Snapshot.Location.HomeZone);
+        Learn(actor.Snapshot.Identity.ActorId, actor.Snapshot.Location.WorkZone);
         Learn(actor.Snapshot.Identity.ActorId, actor.Snapshot.Location.CurrentZone);
     }
 
