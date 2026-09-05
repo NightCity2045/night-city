@@ -25,4 +25,11 @@ public sealed partial class NCRandomResidentGenerationProfilePrototype : IProtot
 
     [DataField(required: true)]
     public ProtoId<NCNeuralPersonaProfilePrototype>[] Personas { get; private set; } = [];
+
+    [DataField(required: true)] public string[] BackgroundKeys { get; private set; } = [];
+    [DataField(required: true)] public string[] PressureKeys { get; private set; } = [];
+    [DataField(required: true)] public string[] FearKeys { get; private set; } = [];
+    [DataField(required: true)] public string[] GoalKeys { get; private set; } = [];
+    [DataField(required: true)] public string[] SocialHabitKeys { get; private set; } = [];
+    [DataField(required: true)] public string[] SpeechQuirkKeys { get; private set; } = [];
 }

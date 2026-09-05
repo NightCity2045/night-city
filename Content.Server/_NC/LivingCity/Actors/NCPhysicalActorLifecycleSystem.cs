@@ -8,6 +8,7 @@ using Content.Server._NC.City.Connectivity;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Actors.Domains;
 using Content.Server._NC.LivingCity.Economy;
+using Content.Server._NC.LivingCity.Lifecycle;
 using Content.Server._NC.LivingCity.Neural;
 using Content.Server._NC.LivingCity.Simulation;
 using Content.Server._NC.LivingCity.Time;
@@ -17,8 +18,10 @@ using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 using Content.Shared.Body;
+using Content.Shared.Gibbing;
 using Content.Shared.Humanoid;
 using Content.Shared.Maps;
+using Content.Shared.Mobs;
 using Content.Shared.Physics;
 using Content.Shared.Preferences;
 using Robust.Shared.Asynchronous;
@@ -36,6 +39,7 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
 {
     private static readonly ProtoId<NCPhysicalActorLifecyclePolicyPrototype> DefaultPolicy =
         new("NCDefaultPhysicalActorLifecycle");
+    private const string BindingRecoverySource = "physical-actor-binding-recovery";
 
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private ITaskManager _taskManager = default!;
@@ -51,6 +55,8 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
     [Dependency] private NCCityActorDomainRegistrySystem _domains = default!;
+    [Dependency] private NCPhysicalActorCheckpointSystem _checkpoints = default!;
+    [Dependency] private NCDeathSuccessionSystem _deathSuccession = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
     [Dependency] private NCCitySpawnCandidateSystem _spawnCandidates = default!;
     [Dependency] private NCEconomicPhysicalizationSystem _physicalization = default!;
@@ -65,12 +71,17 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
     private readonly List<NCCitySpawnCandidateInfo> _candidates = [];
     private readonly List<MapCoordinates> _fallbackSpawnPoints = [];
     private readonly Dictionary<Guid, TaskCompletionSource<NCPhysicalActorSpawnState>> _completionWaiters = [];
+    private readonly HashSet<NCActorId> _terminalActors = [];
 
     private NCPhysicalActorLifecyclePolicyPrototype? _policy;
     private NCSessionEpoch _epoch;
     private long _sequence;
     private int _generation;
     private int _loadsInFlight;
+    private NCActorId? _catalogContinuation;
+    private NCActiveWorldTime _catalogDueAt;
+    private bool _catalogScanPending;
+    private bool _catalogScanInFlight;
     private bool _active;
 
     public bool IsActive => _active;
@@ -84,7 +95,10 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(OnSessionClosed);
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(OnClockFailed);
         SubscribeLocalEvent<NCCitySpawnCandidateIndexChangedEvent>(OnSpawnCandidateIndexChanged);
+        SubscribeLocalEvent<NCCityActorPersistedEvent>(OnActorPersisted);
         SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
+        SubscribeLocalEvent<NCCityActorBindingComponent, MobStateChangedEvent>(OnPhysicalActorStateChanged);
+        SubscribeLocalEvent<NCCityActorBindingComponent, BeingGibbedEvent>(OnPhysicalActorGibbed);
     }
 
     public override void Update(float frameTime)
@@ -100,6 +114,7 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         _loadGovernor.ReportPhysicalActors(_runtime.PhysicalActorCount);
         _loadGovernor.ReportQueue(NCAILoadQueueKind.ActorSpawn, _pending.Count,
             Math.Max(1, _runtime.PhysicalActorCount + _pending.Count));
+        TryDispatchCatalogPage(now);
         var limit = _loadGovernor.TakeDispatchLimit(
             NCAILoadDispatchKind.ActorSpawn,
             _policy.MaximumDispatchesPerTick);
@@ -110,6 +125,13 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         while (dispatched < limit && _loadsInFlight < _policy.MaximumConcurrentLoads &&
                TryDequeue(now, out var pending))
         {
+            if (_terminalActors.Contains(pending.Request.ActorId))
+            {
+                Complete(pending, NCPhysicalActorSpawnStatus.Rejected, null,
+                    "Dead or gibbed actors are not recovered.");
+                continue;
+            }
+
             if (_runtime.TryGetEntity(pending.Request.ActorId, out var existing) && Exists(existing))
             {
                 if (pending.Request.Reason == NCPhysicalActorSpawnReason.Admin &&
@@ -128,7 +150,7 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
             SetState(pending, NCPhysicalActorSpawnStatus.Loading, null);
             _loadsInFlight++;
             dispatched++;
-            _ = ObserveLoadAsync(_generation, pending);
+            _ = ObserveLoadAsync(_generation, _epoch, pending);
         }
     }
 
@@ -158,6 +180,19 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
                 "Physical actor spawning requires a valid active-round request."));
         }
 
+        if (_terminalActors.Contains(request.ActorId))
+        {
+            return Retain(new NCPhysicalActorSpawnState(
+                request.RequestId,
+                request.ActorId,
+                request.Reason,
+                NCPhysicalActorSpawnStatus.Rejected,
+                0,
+                now,
+                null,
+                "Dead or gibbed actors are not recovered."));
+        }
+
         if (_runtime.TryGetEntity(request.ActorId, out var existing) && Exists(existing))
         {
             string? relocationError = null;
@@ -176,9 +211,13 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
 
         if (_pending.TryGetValue(request.ActorId, out var joined))
         {
-            if (request.Reason != NCPhysicalActorSpawnReason.Admin || request.PreferredTarget == null)
+            var canAdoptAuthoredTarget = joined.Request.PreferredTarget == null && request.PreferredTarget != null;
+            var canOverrideAuthoredTarget = request.Reason == NCPhysicalActorSpawnReason.Admin &&
+                                            request.PreferredTarget != null;
+            if (!canAdoptAuthoredTarget && !canOverrideAuthoredTarget)
                 return _states[joined.Request.RequestId];
 
+            var joinedStatus = _states[joined.Request.RequestId].Status;
             Retain(new NCPhysicalActorSpawnState(
                 joined.Request.RequestId,
                 joined.Request.ActorId,
@@ -187,15 +226,29 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
                 joined.Attempts,
                 joined.RequestedAt,
                 null,
-                "Superseded by an explicit administrator relocation request."));
-            joined = joined with { Request = request, DueAt = now, Sequence = ++_sequence };
+                "Superseded by a more specific authored physical target."));
+            joined = joined with
+            {
+                Request = request,
+                RequiresRecoveryBarrier = joined.RequiresRecoveryBarrier || IsBindingRecovery(request),
+            };
+            if (joinedStatus == NCPhysicalActorSpawnStatus.Loading)
+            {
+                // The in-flight load resolves the current pending value by ActorId before placement, so adopting the
+                // authored target does not require a second concurrent load.
+                _pending[request.ActorId] = joined;
+                SetState(joined, NCPhysicalActorSpawnStatus.Loading, null);
+                return _states[request.RequestId];
+            }
+
+            joined = joined with { DueAt = now, Sequence = ++_sequence };
             _pending[request.ActorId] = joined;
             SetState(joined, NCPhysicalActorSpawnStatus.Queued, null);
             Enqueue(joined);
             return _states[request.RequestId];
         }
 
-        var pending = new PendingSpawn(request, now, now, 0, ++_sequence);
+        var pending = new PendingSpawn(request, now, now, 0, ++_sequence, IsBindingRecovery(request));
         _pending.Add(request.ActorId, pending);
         SetState(pending, NCPhysicalActorSpawnStatus.Queued, null);
         Enqueue(pending);
@@ -263,25 +316,81 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         return true;
     }
 
-    private async Task ScanActorsAsync(int generation)
+    private void TryDispatchCatalogPage(NCActiveWorldTime now)
     {
-        NCActorId? continuation = null;
+        if (!_catalogScanPending || _catalogScanInFlight || _policy == null || _catalogDueAt > now)
+            return;
+
+        _catalogScanInFlight = true;
+        _ = ObserveCatalogPageAsync(
+            _generation,
+            _epoch,
+            _catalogContinuation,
+            _policy.SnapshotPageSize);
+    }
+
+    private async Task ObserveCatalogPageAsync(
+        int generation,
+        NCSessionEpoch epoch,
+        NCActorId? continuation,
+        int pageSize)
+    {
+        NCCityActorPage? page = null;
+        Exception? error = null;
         try
         {
-            while (generation == _generation && _active && _policy != null)
-            {
-                var page = await _actors.GetPageResultAsync(continuation, _policy.SnapshotPageSize, true);
-                var records = page.Records.ToArray();
-                _taskManager.RunOnMainThread(() => QueuePage(generation, records));
-                if (!page.HasMore || page.ContinuationActorId is not { IsValid: true } next || next == continuation)
-                    break;
-                continuation = next;
-            }
+            page = await _actors.GetPageResultAsync(continuation, pageSize, true);
         }
         catch (Exception exception)
         {
-            Log.Error($"Physical actor catalog scan failed: {exception}");
+            error = exception;
         }
+
+        _taskManager.RunOnMainThread(() => CompleteCatalogPage(generation, epoch, continuation, page, error));
+    }
+
+    private void CompleteCatalogPage(
+        int generation,
+        NCSessionEpoch epoch,
+        NCActorId? continuation,
+        NCCityActorPage? page,
+        Exception? error)
+    {
+        if (generation != _generation || epoch != _epoch || !_active || !_catalogScanInFlight ||
+            continuation != _catalogContinuation)
+        {
+            return;
+        }
+
+        _catalogScanInFlight = false;
+        if (!_clock.TryGetCurrentTime(out var currentEpoch, out var now) || currentEpoch != epoch || _policy == null)
+            return;
+
+        if (error != null || page == null)
+        {
+            // Database outages must not silently strand every later actor. Retry on active-world time so a stopped
+            // round neither burns retries nor resumes stale work in a different epoch.
+            _catalogDueAt = now.Advance(_policy.RetryDelay);
+            Log.Warning($"Physical actor catalog page load failed; retrying: {error?.Message ?? "empty result"}.");
+            return;
+        }
+
+        QueuePage(generation, page.Records);
+        if (!page.HasMore)
+        {
+            _catalogScanPending = false;
+            return;
+        }
+
+        if (page.ContinuationActorId is not { IsValid: true } next || next == continuation)
+        {
+            _catalogScanPending = false;
+            Log.Error("Physical actor catalog returned a non-advancing continuation; scan stopped fail-closed.");
+            return;
+        }
+
+        _catalogContinuation = next;
+        _catalogDueAt = now;
     }
 
     private void QueuePage(int generation, IReadOnlyList<NCCityActorRecord> records)
@@ -292,6 +401,14 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         {
             if (record.Snapshot.Lifecycle.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived)
                 continue;
+
+            var bootstrap = new NCPhysicalActorCatalogBootstrapAttemptEvent(
+                record.Snapshot.Identity.ActorId,
+                new ProtoId<NCCityActorArchetypePrototype>(record.Snapshot.Identity.ArchetypeId));
+            RaiseLocalEvent(bootstrap);
+            if (bootstrap.Cancelled)
+                continue;
+
             Request(new NCPhysicalActorSpawnRequest(
                 Guid.NewGuid(),
                 record.Snapshot.Identity.ActorId,
@@ -300,7 +417,7 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         }
     }
 
-    private async Task ObserveLoadAsync(int generation, PendingSpawn pending)
+    private async Task ObserveLoadAsync(int generation, NCSessionEpoch epoch, PendingSpawn pending)
     {
         NCCityActorRecord? actor = null;
         NCCityActorHealthRecord? health = null;
@@ -309,6 +426,13 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         Exception? error = null;
         try
         {
+            if (pending.RequiresRecoveryBarrier)
+            {
+                // Termination captures one immutable checkpoint before unbinding. A failed barrier is retried by the
+                // normal due queue, but never bypassed: restoring the previous snapshot could resurrect lost damage.
+                await _checkpoints.GetRecoveryBarrier(pending.Request.ActorId);
+            }
+
             var actorTask = _actors.GetAsync(pending.Request.ActorId, true);
             var healthTask = _domains.GetHealthAsync(pending.Request.ActorId, true);
             var inventoryTask = _domains.GetInventoryAsync(pending.Request.ActorId, true);
@@ -333,6 +457,7 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
 
         _taskManager.RunOnMainThread(() => CompleteLoad(
             generation,
+            epoch,
             pending.Request.ActorId,
             actor,
             health,
@@ -343,6 +468,7 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
 
     private void CompleteLoad(
         int generation,
+        NCSessionEpoch epoch,
         NCActorId actorId,
         NCCityActorRecord? actor,
         NCCityActorHealthRecord? health,
@@ -350,12 +476,20 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         NCActorInventoryMaterializationPlan? inventoryPlan,
         Exception? loadError)
     {
-        if (generation != _generation || !_active || _policy == null || !_pending.TryGetValue(actorId, out var pending) ||
-            !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
+        if (generation != _generation || epoch != _epoch || !_active || _policy == null ||
+            !_pending.TryGetValue(actorId, out var pending) ||
+            !_clock.TryGetCurrentTime(out var currentEpoch, out var now) || currentEpoch != epoch)
         {
             return;
         }
         _loadsInFlight = Math.Max(0, _loadsInFlight - 1);
+
+        if (_terminalActors.Contains(actorId))
+        {
+            Complete(pending, NCPhysicalActorSpawnStatus.Rejected, null,
+                "Dead or gibbed actors are not recovered.");
+            return;
+        }
 
         if (loadError != null)
         {
@@ -419,7 +553,6 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         var conversation = EnsureComp<NCNeuralConversationTargetComponent>(entity);
         conversation.NarrativeActor = !string.IsNullOrWhiteSpace(actor.Snapshot.Identity.NarrativeActorProfileId) ||
                                       archetype.NarrativeActorProfile != null;
-        conversation.MaximumNpcConversationTurns = conversation.NarrativeActor ? 8 : 4;
         if (!_runtime.TryBind(actorId, entity))
         {
             QueueDel(entity);
@@ -483,31 +616,40 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
             _candidates);
         if (_candidates.Count == 0)
             _spawnCandidates.GetCandidates(archetype.SpawnCandidateProfile, default, _candidates);
-        if (_candidates.Count == 0 || _policy == null)
+        if (_policy == null)
             return false;
 
-        var raw = actor.Identity.ActorId.Value.ToByteArray();
-        var start = (int) ((BitConverter.ToUInt32(raw, 0) + (uint) pending.Attempts) % (uint) _candidates.Count);
-        var checks = Math.Min(_candidates.Count, _policy.MaximumCandidateChecks);
         MapCoordinates? occupiedFallback = null;
-        for (var index = 0; index < checks; index++)
+        if (_candidates.Count > 0)
         {
-            var candidate = _candidates[(start + index) % _candidates.Count];
-            if (!_coordinates.TryResolve(candidate.Target, out var resolved) || !HasSafeFloor(resolved))
-                continue;
-            occupiedFallback ??= resolved;
-            if (IsOccupiedByActor(resolved, _policy.ActorOccupancyExclusionRadius, null))
-                continue;
-            coordinates = resolved;
-            return true;
+            var raw = actor.Identity.ActorId.Value.ToByteArray();
+            var start = (int) ((BitConverter.ToUInt32(raw, 0) + (uint) pending.Attempts) %
+                               (uint) _candidates.Count);
+            var checks = Math.Min(_candidates.Count, _policy.MaximumCandidateChecks);
+            for (var index = 0; index < checks; index++)
+            {
+                var candidate = _candidates[(start + index) % _candidates.Count];
+                if (!_coordinates.TryResolve(candidate.Target, out var resolved) || !HasSafeFloor(resolved))
+                    continue;
+                occupiedFallback ??= resolved;
+                if (IsOccupiedByActor(resolved, _policy.ActorOccupancyExclusionRadius, null))
+                    continue;
+                coordinates = resolved;
+                return true;
+            }
         }
 
         // Actor count is never capped. If all authored samples are occupied, Robust physics separates the cold-start
         // overlap while normal steering takes over; leaving the actor virtual would violate the v3 invariant.
-        if (occupiedFallback is not { } fallback)
-            return false;
-        coordinates = fallback;
-        return true;
+        if (!RequiresStationFallbackAfterCitySearch(_candidates.Count, occupiedFallback.HasValue))
+        {
+            coordinates = occupiedFallback!.Value;
+            return true;
+        }
+
+        // A persisted city zone may not exist on the currently loaded station map. CityGraph stays preferred, but
+        // failure to resolve any authored candidate must not leave this physical actor in the retry queue forever.
+        return TryFindFallbackSpawnTarget(actor.Identity.ActorId, pending.Attempts, out coordinates);
     }
 
     private bool TryResolveRecovery(NCCityActorPhysicalRecoveryState recovery, out MapCoordinates target)
@@ -752,8 +894,10 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         }
         _policy = policy;
         _epoch = args.Epoch;
+        _catalogContinuation = null;
+        _catalogDueAt = args.Time;
+        _catalogScanPending = true;
         _active = true;
-        _ = ScanActorsAsync(_generation);
     }
 
     private void OnSessionClosed(NCActiveWorldSessionClosedEvent args)
@@ -782,40 +926,72 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         }
     }
 
-    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
+    private void OnActorPersisted(NCCityActorPersistedEvent args)
     {
-        if (args.Bound || !_active)
+        if (!_active || args.SessionEpoch != _epoch)
             return;
-        _ = ObserveBindingLossAsync(_generation, args.ActorId);
+        if (args.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived)
+        {
+            _terminalActors.Add(args.ActorId);
+            return;
+        }
+        if (_runtime.TryGetEntity(args.ActorId, out _) || _pending.ContainsKey(args.ActorId))
+        {
+            return;
+        }
+
+        // Creation through any durable authority must uphold the one-body invariant. Specialized modes may cancel
+        // this generic bootstrap and immediately submit a request with an authored physical target instead.
+        var bootstrap = new NCPhysicalActorCatalogBootstrapAttemptEvent(
+            args.ActorId,
+            new ProtoId<NCCityActorArchetypePrototype>(args.ArchetypeId));
+        RaiseLocalEvent(bootstrap);
+        if (bootstrap.Cancelled)
+            return;
+
+        Request(new NCPhysicalActorSpawnRequest(
+            Guid.NewGuid(),
+            args.ActorId,
+            NCPhysicalActorSpawnReason.Recovery,
+            "physical-actor-persisted-bootstrap"));
     }
 
-    private async Task ObserveBindingLossAsync(int generation, NCActorId actorId)
+    private void OnPhysicalActorStateChanged(
+        Entity<NCCityActorBindingComponent> entity,
+        ref MobStateChangedEvent args)
     {
-        NCCityActorRecord? actor = null;
-        try
-        {
-            actor = await _actors.GetAsync(actorId, true);
-        }
-        catch (Exception exception)
-        {
-            Log.Warning($"Physical actor recovery lookup failed for {actorId}: {exception.Message}");
-        }
+        if (args.NewMobState != MobState.Dead)
+            return;
 
-        _taskManager.RunOnMainThread(() =>
-        {
-            if (generation != _generation || !_active || actor == null ||
-                actor.Snapshot.Lifecycle.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived ||
-                _runtime.TryGetEntity(actorId, out _))
-            {
-                return;
-            }
+        // Robust component events have one subscriber. Lifecycle owns that subscription and explicitly fans the
+        // authoritative death out to durability and succession instead of registering conflicting handlers.
+        _terminalActors.Add(entity.Comp.ActorId);
+        _checkpoints.ObserveTerminalState(entity.Comp.ActorId);
+        _deathSuccession.ObservePhysicalDeath(entity.Comp.ActorId);
+    }
 
-            Request(new NCPhysicalActorSpawnRequest(
-                Guid.NewGuid(),
-                actorId,
-                NCPhysicalActorSpawnReason.Recovery,
-                "physical-actor-binding-recovery"));
-        });
+    private void OnPhysicalActorGibbed(
+        Entity<NCCityActorBindingComponent> entity,
+        ref BeingGibbedEvent args)
+    {
+        _terminalActors.Add(entity.Comp.ActorId);
+        _checkpoints.ObserveTerminalState(entity.Comp.ActorId);
+        _deathSuccession.ObservePhysicalDeath(entity.Comp.ActorId);
+    }
+
+    private void OnBindingChanged(NCCityActorBindingChangedEvent args)
+    {
+        if (args.Bound || !_active || _terminalActors.Contains(args.ActorId) ||
+            _pending.ContainsKey(args.ActorId))
+            return;
+
+        // Recovery enters the same bounded retry queue as bootstrap. Barrier and reload failures therefore remain
+        // visible and retryable instead of being swallowed by a detached one-shot lookup.
+        Request(new NCPhysicalActorSpawnRequest(
+            Guid.NewGuid(),
+            args.ActorId,
+            NCPhysicalActorSpawnReason.Recovery,
+            BindingRecoverySource));
     }
 
     private void Reset()
@@ -839,6 +1015,10 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         _generation++;
         _loadsInFlight = 0;
         _sequence = 0;
+        _catalogContinuation = null;
+        _catalogDueAt = default;
+        _catalogScanPending = false;
+        _catalogScanInFlight = false;
         _states.Clear();
         _pending.Clear();
         _completedOrder.Clear();
@@ -847,6 +1027,7 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         _candidates.Clear();
         _fallbackSpawnPoints.Clear();
         _completionWaiters.Clear();
+        _terminalActors.Clear();
     }
 
     private static bool IsTerminal(NCPhysicalActorSpawnStatus status) => status is
@@ -857,12 +1038,24 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
     private static bool ValidMapTarget(MapCoordinates target) =>
         target.MapId != MapId.Nullspace && float.IsFinite(target.Position.X) && float.IsFinite(target.Position.Y);
 
+    internal static bool RequiresStationFallbackAfterCitySearch(
+        int cityCandidateCount,
+        bool hasResolvedCityCandidate) =>
+        cityCandidateCount == 0 || !hasResolvedCityCandidate;
+
+    private static bool IsBindingRecovery(NCPhysicalActorSpawnRequest request) =>
+        request.Reason == NCPhysicalActorSpawnReason.Recovery && request.Source == BindingRecoverySource;
+
     private static bool ValidatePolicy(NCPhysicalActorLifecyclePolicyPrototype policy) =>
         policy.SnapshotPageSize is > 0 and <= 1000 &&
         policy.MaximumDispatchesPerTick is > 0 and <= 128 &&
         policy.MaximumConcurrentLoads is > 0 and <= 128 &&
         policy.MaximumCandidateChecks is > 0 and <= 4096 &&
         policy.MaximumCompletedRequestHistory is > 0 and <= 100000 &&
+        policy.MaximumCheckpointDispatchesPerTick is > 0 and <= 128 &&
+        policy.CheckpointDebounce > TimeSpan.Zero &&
+        policy.CheckpointMaximumDeferral >= policy.CheckpointDebounce &&
+        policy.CheckpointRetryDelay > TimeSpan.Zero &&
         float.IsFinite(policy.ActorOccupancyExclusionRadius) && policy.ActorOccupancyExclusionRadius >= 0f &&
         float.IsFinite(policy.AdminPreferredSpawnRadius) && policy.AdminPreferredSpawnRadius > 0f &&
         policy.RetryDelay > TimeSpan.Zero;
@@ -872,7 +1065,8 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
         NCActiveWorldTime RequestedAt,
         NCActiveWorldTime DueAt,
         int Attempts,
-        long Sequence);
+        long Sequence,
+        bool RequiresRecoveryBarrier);
 
     private readonly record struct ScheduledSpawn(NCActorId ActorId, long Sequence);
 }

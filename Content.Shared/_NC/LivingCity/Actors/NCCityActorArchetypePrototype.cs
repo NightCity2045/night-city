@@ -11,7 +11,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Shared._NC.LivingCity.Actors;
 
 /// <summary>
-/// Data-driven body, navigation, perception and GPT defaults for one persistent physical actor archetype.
+/// Data-driven body, perception and GPT defaults for one persistent physical actor archetype.
 /// </summary>
 [Prototype("ncCityActorArchetype")]
 public sealed partial class NCCityActorArchetypePrototype : IPrototype
@@ -27,17 +27,6 @@ public sealed partial class NCCityActorArchetypePrototype : IPrototype
 
     [DataField(required: true)]
     public NCCityTravelMode TravelMode { get; private set; }
-
-    /// <summary>
-    /// Physical traversal capabilities are separate from cognition and the semantic travel mode.
-    /// </summary>
-    [DataField]
-    public ProtoId<NCCityPhysicalNavigationProfilePrototype> PhysicalNavigationProfile { get; private set; } =
-        new("NCDefaultPedestrianPhysicalNavigation");
-
-    [DataField]
-    public ProtoId<NCCityPhysicalStateTreePrototype> PhysicalStateTree { get; private set; } =
-        new("NCDefaultPhysicalStateTree");
 
     [DataField]
     public ProtoId<NCCityLocalPerceptionProfilePrototype> LocalPerceptionProfile { get; private set; } =

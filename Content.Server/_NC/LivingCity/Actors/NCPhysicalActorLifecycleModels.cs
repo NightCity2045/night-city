@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Map;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.LivingCity.Actors;
 
@@ -43,6 +45,18 @@ public sealed record NCPhysicalActorSpawnState(
     NCActiveWorldTime RequestedAt,
     EntityUid? EntityUid,
     string? Error);
+
+/// <summary>
+/// Allows a game mode to filter only the automatic persistent-catalog bootstrap. Explicit spawn requests are
+/// unaffected, so no mode can accidentally suppress administrator or recovery actions.
+/// </summary>
+public sealed class NCPhysicalActorCatalogBootstrapAttemptEvent(
+    NCActorId actorId,
+    ProtoId<NCCityActorArchetypePrototype> archetype) : CancellableEntityEventArgs
+{
+    public NCActorId ActorId { get; } = actorId;
+    public ProtoId<NCCityActorArchetypePrototype> Archetype { get; } = archetype;
+}
 
 public sealed class NCPhysicalActorSpawnedEvent(
     Guid requestId,

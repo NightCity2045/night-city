@@ -13,68 +13,6 @@
   maximumContainerDepth: 8
   maximumCommodityBundles: 128
 
-- type: ncCityPhysicalNavigationProfile
-  id: NCDefaultPedestrianPhysicalNavigation
-  interactWithDoors: true
-  canClimb: false
-  canPry: false
-  canSmash: false
-
-- type: ncCityPhysicalStateTree
-  id: NCDefaultPhysicalStateTree
-  maximumRules: 10
-  blockedFallback: ReturnToPublicZone
-  rules:
-  - mode: Incapacitated
-    priority: 900
-    requiredAll: [ Incapacitated ]
-    owner: None
-    evaluationInterval: 1s
-  - mode: Police
-    priority: 800
-    requiredAll: [ Detained ]
-    owner: ExternalSystem
-    evaluationInterval: 0.5s
-  - mode: Scripted
-    priority: 700
-    requiredAll: [ ScriptedClaim ]
-    owner: ExternalSystem
-    evaluationInterval: 0.25s
-  - mode: Medical
-    priority: 600
-    requiredAll: [ MedicalClaim ]
-    owner: ExistingNpc
-    evaluationInterval: 0.25s
-  - mode: Police
-    priority: 550
-    requiredAll: [ PoliceClaim ]
-    owner: ExistingNpc
-    evaluationInterval: 0.25s
-  - mode: Conversation
-    priority: 500
-    requiredAll: [ ConversationClaim ]
-    owner: ExternalSystem
-    evaluationInterval: 0.25s
-  - mode: Combat
-    priority: 450
-    requiredAll: [ CombatActive ]
-    owner: ExistingNpc
-    evaluationInterval: 0.1s
-  - mode: Combat
-    priority: 400
-    requiredAll: [ ThreatObserved ]
-    owner: ExistingNpc
-    evaluationInterval: 0.25s
-  - mode: Traveling
-    priority: 200
-    requiredAll: [ TravelIntent ]
-    owner: RouteExecutor
-    evaluationInterval: 0.1s
-  - mode: SafeIdle
-    priority: 0
-    owner: ExistingNpc
-    evaluationInterval: 2s
-
 - type: ncCityLocalPerceptionProfile
   id: NCDefaultLocalPerception
   radius: 10
@@ -83,36 +21,16 @@
   # Active-world time runs twelve times faster than real time: 12s is one real second.
   evaluationInterval: 12s
   witnessedEventLifetime: 5m
+  repeatedIncidentWakeInterval: 12s
+  maximumPerceptionDeltas: 16
+  perceptionDeltaLifetime: 2m
+  # Ordinary changes coalesce for five real seconds at the default 12x active-world clock rate.
+  perceptionDeltaWakeCooldown: 1m
 
 - type: ncCityLocalPerceptionPolicy
   id: NCDefaultLocalPerceptionPolicy
   maximumUpdatesPerTick: 4
   maximumIncidentCorrelations: 1024
-
-- type: ncCityPhysicalExecutionPolicy
-  id: NCDefaultCityPhysicalExecutionPolicy
-  maximumQueuedIntentLoads: 256
-  maximumIntentLoadsPerTick: 4
-  maximumConcurrentIntentLoads: 8
-  maximumExecutionUpdatesPerTick: 24
-  maximumConcurrentMutations: 8
-  maximumMutationAttempts: 5
-  maximumWaypoints: 256
-  maximumImmediateWaypointCompletions: 8
-  maximumReplans: 4
-  maximumTraceEntries: 64
-  evaluationInterval: 0.1s
-  intentLoadRetryDelay: 2s
-  waypointTimeout: 20s
-  portalTraversalTimeout: 8s
-  portalInteractionRetryInterval: 0.5s
-  replanBackoff: 1s
-  minimumEquivalentReplanInterval: 2s
-  topologyChangeCoalesceDelay: 0.25s
-  blockedRetryInterval: 10s
-  mutationRetryDelay: 2s
-  htnResumeCooldown: 0.5s
-  waypointReachRange: 0.4
 
 - type: ncPhysicalActorLifecyclePolicy
   id: NCDefaultPhysicalActorLifecycle
@@ -124,6 +42,10 @@
   actorOccupancyExclusionRadius: 0.6
   adminPreferredSpawnRadius: 28
   retryDelay: 2s
+  checkpointDebounce: 2s
+  checkpointMaximumDeferral: 10s
+  checkpointRetryDelay: 5s
+  maximumCheckpointDispatchesPerTick: 4
 
 - type: ncAILoadGovernorPolicy
   id: NCDefaultAILoadGovernorPolicy

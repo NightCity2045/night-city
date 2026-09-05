@@ -6,92 +6,6 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.LivingCity.Actors;
 
-public enum NCCityPhysicalMode : byte
-{
-    SafeIdle,
-    Traveling,
-    Combat,
-    Medical,
-    Police,
-    Conversation,
-    Scripted,
-    Incapacitated,
-}
-public enum NCCityPhysicalCondition : byte
-{
-    TravelIntent,
-    CombatActive,
-    ThreatObserved,
-    MedicalClaim,
-    PoliceClaim,
-    ConversationClaim,
-    ScriptedClaim,
-    Detained,
-    Incapacitated,
-}
-
-public enum NCCityPhysicalBehaviorOwner : byte
-{
-    None,
-    RouteExecutor,
-    ExistingNpc,
-    ExternalSystem,
-}
-
-public enum NCCityPhysicalFallback : byte
-{
-    SafeIdle,
-    Replan,
-    Retreat,
-    ReturnToPublicZone,
-    AbortPlan,
-}
-
-/// <summary>
-/// One prioritized physical state rule. Conditions are objective ECS facts supplied by adapters, never skill checks.
-/// </summary>
-[DataDefinition]
-public sealed partial class NCCityPhysicalStateRule
-{
-    [DataField(required: true)]
-    public NCCityPhysicalMode Mode { get; private set; }
-
-    [DataField(required: true)]
-    public int Priority { get; private set; }
-
-    [DataField]
-    public HashSet<NCCityPhysicalCondition> RequiredAll { get; private set; } = [];
-
-    [DataField]
-    public HashSet<NCCityPhysicalCondition> Forbidden { get; private set; } = [];
-
-    [DataField(required: true)]
-    public NCCityPhysicalBehaviorOwner Owner { get; private set; }
-
-    [DataField(required: true)]
-    public TimeSpan EvaluationInterval { get; private set; }
-
-}
-
-/// <summary>
-/// Cheap event/scheduler-driven HFSM definition for materialized actors.
-/// </summary>
-[Prototype("ncCityPhysicalStateTree")]
-public sealed partial class NCCityPhysicalStateTreePrototype : IPrototype
-{
-    [IdDataField]
-    public string ID { get; private set; } = default!;
-
-    [DataField(required: true)]
-    public int MaximumRules { get; private set; }
-
-    [DataField(required: true)]
-    public List<NCCityPhysicalStateRule> Rules { get; private set; } = [];
-
-    [DataField(required: true)]
-    public NCCityPhysicalFallback BlockedFallback { get; private set; }
-}
-
 /// <summary>
 /// Local observation throughput policy. It is separate from cognition and never creates persistent beliefs directly.
 /// </summary>
@@ -115,6 +29,28 @@ public sealed partial class NCCityLocalPerceptionProfilePrototype : IPrototype
 
     [DataField(required: true)]
     public TimeSpan WitnessedEventLifetime { get; private set; }
+
+    /// <summary>
+    /// Minimum cadence at which a continuing assault may wake the same victim again. The event remains one
+    /// correlated memory, while fresh damage still gets a bounded chance to interrupt cognition.
+    /// </summary>
+    [DataField(required: true)]
+    public TimeSpan RepeatedIncidentWakeInterval { get; private set; }
+
+    /// <summary>Maximum bounded history of ordinary perception changes retained for one physical actor.</summary>
+    [DataField(required: true)]
+    public int MaximumPerceptionDeltas { get; private set; }
+
+    /// <summary>Active-world lifetime of an ordinary perception change supplied to GPT.</summary>
+    [DataField(required: true)]
+    public TimeSpan PerceptionDeltaLifetime { get; private set; }
+
+    /// <summary>
+    /// Minimum active-world interval between ordinary sensorium wakes. Changes inside the interval are coalesced
+    /// into the next actor-scoped wake instead of producing one provider request per evaluation.
+    /// </summary>
+    [DataField(required: true)]
+    public TimeSpan PerceptionDeltaWakeCooldown { get; private set; }
 }
 
 [Prototype("ncCityLocalPerceptionPolicy")]

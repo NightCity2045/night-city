@@ -29,13 +29,6 @@ cmd-ncactorspawn-completed = Actor {$key} request {$request}: {$status} as entit
 cmd-ncactorspawn-failed = Actor {$key} request {$request} {$status}: {$reason}
 cmd-ncactorspawn-result-unavailable = Actor {$key} request {$request} no longer has an observable result.
 
-cmd-ncactor-neural-ready = Neural Cognition provider is available; current budget mode: {$mode}. The Actor's personality, memory, perception, autonomy, and GPT allowlist are active.
-cmd-ncactor-neural-fallback = The Actor remains physical, but GPT cannot currently spend tokens; provider retry and local safety reflexes remain active. Budget mode: {$mode}.
-cmd-ncactor-neural-mode-normal = normal
-cmd-ncactor-neural-mode-economy = economy
-cmd-ncactor-neural-mode-restricted = restricted
-cmd-ncactor-neural-mode-fallback = fallback only
-
 cmd-ncactor-spawn-status-queued = queued
 cmd-ncactor-spawn-status-loading = loading persistent state
 cmd-ncactor-spawn-status-retrying = waiting for a safe floor

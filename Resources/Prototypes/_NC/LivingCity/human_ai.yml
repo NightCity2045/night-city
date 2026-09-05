@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-# Every physical resident retains only safe reflex procedures. GPT supplies individual intentions through the typed
-# command executor; HTN handles combat and idle execution rather than acting as a second normal brain.
+# Every physical resident retains only safe combat procedures. GPT supplies individual intentions through the typed
+# command executor; HTN never selects an ordinary idle, routine or life goal.
 - type: htnCompound
   id: NCLivingHumanCompound
   branches:
@@ -13,6 +13,3 @@
   - tasks:
     - !type:HTNCompoundTask
       task: MeleeCombatCompound
-  - tasks:
-    - !type:HTNCompoundTask
-      task: IdleCompound

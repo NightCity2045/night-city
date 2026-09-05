@@ -1,5 +1,8 @@
 # Living City operations and recovery
 
+> Partially historical. Physical GPT A-Life v3 supersedes all materialization and legacy cognition operations below;
+> the active-world clock, durable aggregate, journal, backup and versioned recovery rules remain current.
+
 All gameplay deadlines use `NCActiveWorldTime`. Round shutdown freezes the clock; startup restores queues from durable
 snapshots without wall-clock catch-up. The F7 **Living City** tab is the supported monitoring and corrective boundary;
 direct database edits and console-command administration are unsupported.

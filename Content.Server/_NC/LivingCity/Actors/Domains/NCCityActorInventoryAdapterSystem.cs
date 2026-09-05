@@ -57,6 +57,8 @@ public sealed partial class NCCityActorInventoryAdapterSystem : EntitySystem
         }
 
         var policy = _prototypes.Index(DefaultPolicy);
+        var ignoreUntracked = TryComp<NCNpcJobComponent>(actorEntity, out var npcJob) &&
+                              npcJob.IgnoreUntrackedInventory;
         var pending = new Stack<(EntityUid Entity, int Depth)>();
         var installedCyberwareEntities = _cyberware.GetInstalledModuleEntities(
             actorEntity,
@@ -97,8 +99,19 @@ public sealed partial class NCCityActorInventoryAdapterSystem : EntitySystem
                 return false;
             }
 
-            if (!TryComp<NCCityPersistentItemAdapterComponent>(entry.Entity, out var adapter) ||
-                !TryReadAdapter(entry.Entity, adapter, stableItems, unique, weapons, documents, credentials,
+            if (!TryComp<NCCityPersistentItemAdapterComponent>(entry.Entity, out var adapter))
+            {
+                if (ignoreUntracked)
+                {
+                    PushContainedItems(entry.Entity, entry.Depth, pending);
+                    continue;
+                }
+
+                error = $"Materialized inventory item {ToPrettyString(entry.Entity)} has no persistent adapter.";
+                return false;
+            }
+
+            if (!TryReadAdapter(entry.Entity, adapter, stableItems, unique, weapons, documents, credentials,
                     commodities, policy, out error))
             {
                 error ??= $"Materialized inventory item {ToPrettyString(entry.Entity)} has no valid persistent adapter.";
@@ -107,14 +120,7 @@ public sealed partial class NCCityActorInventoryAdapterSystem : EntitySystem
             if (installedCyberwareEntities.Contains(entry.Entity))
                 installedCyberware.Add(adapter.ItemId);
 
-            if (!TryComp<ContainerManagerComponent>(entry.Entity, out var containerManager))
-                continue;
-
-            foreach (var container in _containers.GetAllContainers(entry.Entity, containerManager))
-            {
-                foreach (var contained in container.ContainedEntities)
-                    pending.Push((contained, entry.Depth + 1));
-            }
+            PushContainedItems(entry.Entity, entry.Depth, pending);
         }
 
         var summary = new NCCityActorInventorySummary(
@@ -138,6 +144,18 @@ public sealed partial class NCCityActorInventoryAdapterSystem : EntitySystem
             1,
             eventId);
         return true;
+    }
+
+    private void PushContainedItems(EntityUid entity, int depth, Stack<(EntityUid Entity, int Depth)> pending)
+    {
+        if (!TryComp<ContainerManagerComponent>(entity, out var containerManager))
+            return;
+
+        foreach (var container in _containers.GetAllContainers(entity, containerManager))
+        {
+            foreach (var contained in container.ContainedEntities)
+                pending.Push((contained, depth + 1));
+        }
     }
 
     private bool TryReadAdapter(

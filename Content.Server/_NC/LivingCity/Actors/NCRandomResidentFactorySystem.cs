@@ -74,10 +74,42 @@ public sealed partial class NCRandomResidentFactorySystem : EntitySystem
             }
         }
 
-        if (!_prototypes.TryIndex(DefaultProfile, out NCRandomResidentGenerationProfilePrototype? generation) ||
-            generation == null || generation.Personas.Length == 0 ||
-            !_prototypes.HasIndex(generation.Archetype) || !_prototypes.HasIndex(generation.Species) ||
-            generation.Personas.Any(persona => !_prototypes.HasIndex(persona)))
+        var created = await CreatePersistentAsync(DefaultProfile, null, auditSource, currentZone, recovery);
+        if (!created.Success)
+            return created;
+
+        var spawn = await _physicalActors.RequestAdminAsync(
+            Guid.NewGuid(),
+            created.ActorId,
+            target,
+            "f7-random-resident");
+        return created with
+        {
+            Success = spawn.Status != NCPhysicalActorSpawnStatus.Rejected,
+            Spawn = spawn,
+            Error = spawn.Error,
+        };
+    }
+
+    /// <summary>
+    /// Creates the same durable random person used by the F7 factory without choosing a map spawn. Test rules and
+    /// future population sources use this API so appearance and persona generation have one authority.
+    /// </summary>
+    public Task<NCRandomResidentCreationResult> CreatePersistentAsync(
+        ProtoId<NCRandomResidentGenerationProfilePrototype> profile,
+        NCActorId? actorId,
+        string auditSource) =>
+        CreatePersistentAsync(profile, actorId, auditSource, default, null);
+
+    private async Task<NCRandomResidentCreationResult> CreatePersistentAsync(
+        ProtoId<NCRandomResidentGenerationProfilePrototype> profile,
+        NCActorId? requestedActorId,
+        string auditSource,
+        NCZoneId currentZone,
+        NCCityActorPhysicalRecoveryState? recovery)
+    {
+        if (!_prototypes.TryIndex(profile, out NCRandomResidentGenerationProfilePrototype? generation) ||
+            generation == null || !Valid(generation))
         {
             return Rejected("random-resident-generation-profile-is-invalid");
         }
@@ -85,11 +117,18 @@ public sealed partial class NCRandomResidentFactorySystem : EntitySystem
         var persona = _random.Pick(generation.Personas);
         var humanoid = HumanoidCharacterProfile.RandomWithSpecies(generation.Species.Id);
         var payload = NCHumanoidProfilePayload.Serialize(_serialization, humanoid);
-        var actorId = NCActorId.New();
+        var stableActorId = requestedActorId is { IsValid: true } selected ? selected : NCActorId.New();
+        var details = new NCGeneratedPersonaDetails(
+            _random.Pick(generation.BackgroundKeys),
+            _random.Pick(generation.PressureKeys),
+            _random.Pick(generation.FearKeys),
+            _random.Pick(generation.GoalKeys),
+            _random.Pick(generation.SocialHabitKeys),
+            _random.Pick(generation.SpeechQuirkKeys));
         var commandId = Guid.NewGuid();
         var persisted = await _actors.CreateResidentAsync(new NCCityResidentCreateRequest(
             commandId,
-            actorId,
+            stableActorId,
             humanoid.Name,
             generation.Archetype,
             persona,
@@ -97,33 +136,32 @@ public sealed partial class NCRandomResidentFactorySystem : EntitySystem
             currentZone,
             recovery,
             commandId,
-            AuditSource: auditSource));
-        if (persisted.Status is not (NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate))
-        {
-            return new NCRandomResidentCreationResult(
-                false,
-                actorId,
-                humanoid.Name,
-                persona.Id,
-                persisted.Status,
-                null,
-                persisted.Error ?? "persistent-resident-create-failed");
-        }
-
-        var spawn = await _physicalActors.RequestAdminAsync(
-            Guid.NewGuid(),
-            actorId,
-            target,
-            "f7-random-resident");
+            AuditSource: auditSource,
+            GeneratedPersona: details));
+        var success = persisted.Status is NCCityActorMutationStatus.Applied or NCCityActorMutationStatus.Duplicate;
         return new NCRandomResidentCreationResult(
-            spawn.Status != NCPhysicalActorSpawnStatus.Rejected,
-            actorId,
+            success,
+            stableActorId,
             humanoid.Name,
             persona.Id,
             persisted.Status,
-            spawn,
-            spawn.Error);
+            null,
+            success ? null : persisted.Error ?? "persistent-resident-create-failed");
     }
+
+    private bool Valid(NCRandomResidentGenerationProfilePrototype generation)
+    {
+        return generation.Personas.Length > 0 &&
+               _prototypes.HasIndex(generation.Archetype) && _prototypes.HasIndex(generation.Species) &&
+               generation.Personas.All(persona => _prototypes.HasIndex(persona)) &&
+               ValidKeys(generation.BackgroundKeys) && ValidKeys(generation.PressureKeys) &&
+               ValidKeys(generation.FearKeys) && ValidKeys(generation.GoalKeys) &&
+               ValidKeys(generation.SocialHabitKeys) && ValidKeys(generation.SpeechQuirkKeys);
+    }
+
+    private static bool ValidKeys(string[] values) => values.Length > 0 && values.All(value =>
+        value.Length is > 0 and <= 96 &&
+        value.All(character => char.IsAsciiLetterOrDigit(character) || character is '-' or '_' or '.'));
 
     private static NCRandomResidentCreationResult Rejected(string error) =>
         new(false, default, string.Empty, string.Empty, NCCityActorMutationStatus.Rejected, null, error);

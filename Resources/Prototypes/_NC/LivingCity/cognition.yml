@@ -27,6 +27,18 @@
   completionRange: 2
   interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
+- type: ncHumanAction
+  id: human-approach-entity
+  executor: VanillaMovement
+  operation: ApproachTarget
+  targetKind: Entity
+  completion: RangeConfirmed
+  timeout: 1m
+  requiresPhysicalEntity: true
+  maximumRange: 40
+  completionRange: 2
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
 # Physical actions available to validated GPT command procedures.
 
 - type: ncHumanAction
@@ -61,6 +73,29 @@
   requiresPhysicalEntity: true
   completionRange: 1.25
   interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-move-to-station-destination
+  executor: VanillaMovement
+  operation: MoveToStationDestination
+  targetKind: DomainRecord
+  completion: RangeConfirmed
+  timeout: 10m
+  requiresPhysicalEntity: true
+  completionRange: 1.25
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-inspect-station-workplace
+  executor: VanillaMovement
+  operation: InspectStationWorkplace
+  targetKind: DomainRecord
+  completion: ArrivalConfirmed
+  timeout: 2m
+  requiresPhysicalEntity: true
+  maximumRange: 5
+  completionRange: 1.25
+  interrupts: [PlanChanged, EntityUnbound, Combat, Conversation, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
   id: human-flee-from-threat
@@ -151,6 +186,102 @@
   interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
 - type: ncHumanAction
+  id: human-use-held-on-target
+  executor: VanillaInteraction
+  operation: UseHeldOnTarget
+  targetKind: Entity
+  completion: InteractionConfirmed
+  timeout: 15s
+  requiresPhysicalEntity: true
+  maximumRange: 2
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-use-held-on-person
+  executor: VanillaInteraction
+  operation: UseHeldOnInjuredPerson
+  targetKind: Person
+  completion: WorldStateChanged
+  timeout: 30s
+  requiresPhysicalEntity: true
+  maximumRange: 2
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-buckle-to-seat
+  executor: VanillaInteraction
+  operation: BuckleSelfToTarget
+  targetKind: Entity
+  completion: WorldStateChanged
+  timeout: 15s
+  requiresPhysicalEntity: true
+  maximumRange: 2
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-unbuckle-self
+  executor: VanillaInteraction
+  operation: UnbuckleSelf
+  targetKind: None
+  completion: WorldStateChanged
+  timeout: 15s
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-store-held-item
+  executor: VanillaHands
+  operation: StoreHeldInTarget
+  targetKind: Entity
+  completion: WorldStateChanged
+  timeout: 15s
+  requiresPhysicalEntity: true
+  maximumRange: 2
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-retrieve-stored-item
+  executor: VanillaHands
+  operation: RetrieveTargetFromStorage
+  targetKind: Item
+  completion: WorldStateChanged
+  timeout: 15s
+  requiresPhysicalEntity: true
+  maximumRange: 2
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-consume-held-item
+  executor: VanillaHands
+  operation: ConsumeHeldTarget
+  targetKind: Item
+  completion: WorldStateChanged
+  timeout: 30s
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-fire-held-gun
+  executor: VanillaCombat
+  operation: FireHeldGunAtTarget
+  targetKind: Person
+  completion: InteractionConfirmed
+  timeout: 10s
+  requiresPhysicalEntity: true
+  maximumRange: 30
+  interrupts: [PlanChanged, EntityUnbound, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-reload-held-gun
+  executor: VanillaCombat
+  operation: ReloadHeldGunWithTarget
+  targetKind: Item
+  completion: WorldStateChanged
+  timeout: 15s
+  requiresPhysicalEntity: true
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
   id: human-speak-acknowledgement
   executor: VanillaSpeech
   operation: Speak
@@ -182,6 +313,61 @@
   requiresPhysicalEntity: true
   interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
 
+- type: ncHumanAction
+  id: human-process-cargo-order
+  executor: VanillaStationWork
+  operation: ProcessCargoOrder
+  targetKind: Entity
+  completion: DomainMutationConfirmed
+  timeout: 15s
+  requiresPhysicalEntity: true
+  maximumRange: 2
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-unlock-research-technology
+  executor: VanillaStationWork
+  operation: UnlockResearchTechnology
+  targetKind: Entity
+  completion: DomainMutationConfirmed
+  timeout: 15s
+  requiresPhysicalEntity: true
+  maximumRange: 2
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-prepare-dispensed-mixture
+  executor: VanillaStationWork
+  operation: PrepareDispensedMixture
+  targetKind: Entity
+  completion: WorldStateChanged
+  timeout: 15s
+  requiresPhysicalEntity: true
+  maximumRange: 2
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-start-microwave
+  executor: VanillaStationWork
+  operation: StartMicrowave
+  targetKind: Entity
+  completion: WorldStateChanged
+  timeout: 15s
+  requiresPhysicalEntity: true
+  maximumRange: 2
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
+- type: ncHumanAction
+  id: human-harvest-plant
+  executor: VanillaStationWork
+  operation: HarvestPlant
+  targetKind: Entity
+  completion: WorldStateChanged
+  timeout: 15s
+  requiresPhysicalEntity: true
+  maximumRange: 2
+  interrupts: [PlanChanged, EntityUnbound, Combat, Incapacitated, Detained, RoundEnded]
+
 - type: ncCognitionCapability
   id: NCCognitionRespondToThreat
   domain: Safety
@@ -207,6 +393,14 @@
     action: human-approach-person
 
 - type: ncCognitionCapability
+  id: NCCognitionApproachEntity
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: approach-entity
+    action: human-approach-entity
+
+- type: ncCognitionCapability
   id: NCCognitionFollowPerson
   domain: Social
   taskKind: KnownProcedure
@@ -229,6 +423,22 @@
   procedureSteps:
   - id: patrol-zone
     action: human-patrol-zone
+
+- type: ncCognitionCapability
+  id: NCCognitionMoveToStationDestination
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: move-to-station-destination
+    action: human-move-to-station-destination
+
+- type: ncCognitionCapability
+  id: NCCognitionInspectAssignedWorkplace
+  domain: Routine
+  taskKind: Routine
+  procedureSteps:
+  - id: inspect-assigned-workplace
+    action: human-inspect-station-workplace
 
 - type: ncCognitionCapability
   id: NCCognitionActivateTarget
@@ -287,6 +497,78 @@
     action: human-use-held-item
 
 - type: ncCognitionCapability
+  id: NCCognitionUseHeldOnTarget
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: use-held-on-target
+    action: human-use-held-on-target
+
+- type: ncCognitionCapability
+  id: NCCognitionUseHeldOnPerson
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: use-held-on-person
+    action: human-use-held-on-person
+
+- type: ncCognitionCapability
+  id: NCCognitionBuckleToSeat
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: buckle-to-seat
+    action: human-buckle-to-seat
+
+- type: ncCognitionCapability
+  id: NCCognitionUnbuckleSelf
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: unbuckle-self
+    action: human-unbuckle-self
+
+- type: ncCognitionCapability
+  id: NCCognitionStoreHeldItem
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: store-held-item
+    action: human-store-held-item
+
+- type: ncCognitionCapability
+  id: NCCognitionRetrieveStoredItem
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: retrieve-stored-item
+    action: human-retrieve-stored-item
+
+- type: ncCognitionCapability
+  id: NCCognitionConsumeHeldItem
+  domain: Core
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: consume-held-item
+    action: human-consume-held-item
+
+- type: ncCognitionCapability
+  id: NCCognitionFireHeldGun
+  domain: Safety
+  taskKind: ImmediateReaction
+  procedureSteps:
+  - id: fire-held-gun
+    action: human-fire-held-gun
+
+- type: ncCognitionCapability
+  id: NCCognitionReloadHeldGun
+  domain: Safety
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: reload-held-gun
+    action: human-reload-held-gun
+
+- type: ncCognitionCapability
   id: NCCognitionStartPullingPerson
   domain: Social
   taskKind: KnownProcedure
@@ -302,6 +584,82 @@
   - id: stop-pulling
     action: human-stop-pulling
 
+- type: ncCognitionCapability
+  id: NCCognitionProcessCargoOrder
+  domain: Jobs
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: approach-cargo-console
+    action: human-approach-entity
+  - id: process-cargo-order
+    action: human-process-cargo-order
+
+- type: ncCognitionCapability
+  id: NCCognitionUnlockResearchTechnology
+  domain: Jobs
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: approach-research-console
+    action: human-approach-entity
+  - id: unlock-research-technology
+    action: human-unlock-research-technology
+
+- type: ncCognitionCapability
+  id: NCCognitionPrepareDispensedMixture
+  domain: Jobs
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: approach-reagent-dispenser
+    action: human-approach-entity
+  - id: insert-held-container
+    action: human-use-held-on-target
+    optional: true
+  - id: prepare-dispensed-mixture
+    action: human-prepare-dispensed-mixture
+
+- type: ncCognitionCapability
+  id: NCCognitionCookMicrowaveContents
+  domain: Jobs
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: approach-microwave
+    action: human-approach-entity
+  - id: insert-held-ingredient
+    action: human-use-held-on-target
+    optional: true
+  - id: start-microwave
+    action: human-start-microwave
+
+- type: ncCognitionCapability
+  id: NCCognitionHarvestPlant
+  domain: Jobs
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: approach-hydroponics
+    action: human-approach-entity
+  - id: harvest-plant
+    action: human-harvest-plant
+
+- type: ncCognitionCapability
+  id: NCCognitionCleanPuddle
+  domain: Jobs
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: approach-puddle
+    action: human-approach-entity
+  - id: clean-puddle
+    action: human-use-held-on-target
+
+- type: ncCognitionCapability
+  id: NCCognitionRepairDamage
+  domain: Jobs
+  taskKind: KnownProcedure
+  procedureSteps:
+  - id: approach-damage
+    action: human-approach-entity
+  - id: repair-damage
+    action: human-use-held-on-target
+
 # Neural renderedText already speaks through ChatSystem; the fixed acknowledgement action is intentionally excluded.
 - type: ncCognitionCapabilityProfile
   id: NCDefaultCivilianCapabilities
@@ -309,9 +667,12 @@
   - NCCognitionRespondToThreat
   - NCCognitionDefendAgainstThreat
   - NCCognitionApproachPerson
+  - NCCognitionApproachEntity
   - NCCognitionFollowPerson
   - NCCognitionHoldPosition
   - NCCognitionPatrolKnownZone
+  - NCCognitionMoveToStationDestination
+  - NCCognitionInspectAssignedWorkplace
   - NCCognitionActivateTarget
   - NCCognitionAltInteractTarget
   - NCCognitionPickupItem
@@ -319,5 +680,21 @@
   - NCCognitionEquipItem
   - NCCognitionUnequipItem
   - NCCognitionUseHeldItem
+  - NCCognitionUseHeldOnTarget
+  - NCCognitionUseHeldOnPerson
+  - NCCognitionBuckleToSeat
+  - NCCognitionUnbuckleSelf
+  - NCCognitionStoreHeldItem
+  - NCCognitionRetrieveStoredItem
+  - NCCognitionConsumeHeldItem
+  - NCCognitionFireHeldGun
+  - NCCognitionReloadHeldGun
   - NCCognitionStartPullingPerson
   - NCCognitionStopPulling
+  - NCCognitionProcessCargoOrder
+  - NCCognitionUnlockResearchTechnology
+  - NCCognitionPrepareDispensedMixture
+  - NCCognitionCookMicrowaveContents
+  - NCCognitionHarvestPlant
+  - NCCognitionCleanPuddle
+  - NCCognitionRepairDamage

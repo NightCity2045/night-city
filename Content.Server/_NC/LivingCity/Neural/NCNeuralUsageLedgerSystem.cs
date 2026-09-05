@@ -29,7 +29,11 @@ public sealed record NCNeuralUsageSnapshot(
     long TotalCostUsdMicros,
     NCActiveWorldTime RecordedAt,
     int DataVersion,
-    Guid LastAppliedEventId);
+    Guid LastAppliedEventId,
+    int SchemaVersion = 0,
+    string PromptStableKey = "",
+    int PromptVersion = 0,
+    string EvaluationProfile = "");
 
 public sealed record NCNeuralUsageRecord(
     NCNeuralUsageSnapshot Snapshot,
@@ -69,8 +73,9 @@ public sealed record NCNeuralUsageWeekRecord(
     NCActiveWorldTime PersistedAt);
 
 /// <summary>
-/// Immutable external-provider usage ledger. One request owns one aggregate, making retries idempotent without a
-/// mutable global counter. No prompt, dialogue, memory, or provider credential is written to persistence.
+/// Immutable external-provider usage telemetry. It never authorizes or denies cognition: provider availability and
+/// balance remain the spending authority. One request owns one aggregate, making accounting retries idempotent.
+/// No prompt, dialogue, memory, or provider credential is written to persistence.
 /// </summary>
 public sealed partial class NCNeuralUsageLedgerSystem : EntitySystem
 {
@@ -160,8 +165,12 @@ public sealed partial class NCNeuralUsageLedgerSystem : EntitySystem
                 outputCost,
                 totalCost,
                 now,
-                1,
-                eventId);
+                2,
+                eventId,
+                response.SchemaVersion,
+                response.PromptStableKey,
+                response.PromptVersion,
+                response.EvaluationProfile);
             var current = currentSession?.Snapshot;
             var sessionSnapshot = new NCNeuralUsageSessionSnapshot(
                 request.SessionEpoch,
@@ -220,6 +229,10 @@ public sealed partial class NCNeuralUsageLedgerSystem : EntitySystem
                             request.RequestId,
                             request.ActorId,
                             response.ProviderModel,
+                            response.SchemaVersion,
+                            response.PromptStableKey,
+                            response.PromptVersion,
+                            response.EvaluationProfile,
                             totalCost), JsonOptions)),
                     new NCPersistentAggregateWrite(
                         sessionEventId,
@@ -344,7 +357,9 @@ public sealed partial class NCNeuralUsageLedgerSystem : EntitySystem
         request.RequestId != Guid.Empty && request.ActorId.IsValid && request.SessionEpoch.IsValid && now.IsValid &&
         response.RequestId == request.RequestId && response.InputTokens >= 0 && response.OutputTokens >= 0 &&
         response.CachedInputTokens >= 0 && response.CachedInputTokens <= response.InputTokens &&
-        response.ProviderModel == policy.ProviderModel && response.ProviderRequestId.Length is > 0 and <= 128;
+        response.ProviderModel == policy.ProviderModel && response.ProviderRequestId.Length is > 0 and <= 128 &&
+        response.SchemaVersion > 0 && Stable(response.PromptStableKey) && response.PromptVersion > 0 &&
+        Stable(response.EvaluationProfile);
 
     private static bool Valid(NCNeuralUsageSnapshot value) =>
         value.RequestId != Guid.Empty && value.ActorId.IsValid && value.SessionEpoch.IsValid &&
@@ -353,7 +368,11 @@ public sealed partial class NCNeuralUsageLedgerSystem : EntitySystem
         value.InputCostUsdMicros >= 0 && value.CachedInputCostUsdMicros >= 0 && value.OutputCostUsdMicros >= 0 &&
         value.TotalCostUsdMicros == value.InputCostUsdMicros + value.CachedInputCostUsdMicros +
             value.OutputCostUsdMicros &&
-        value.DataVersion == 1 && value.LastAppliedEventId != Guid.Empty;
+        value.LastAppliedEventId != Guid.Empty &&
+        (value.DataVersion == 1 && value.SchemaVersion == 0 && string.IsNullOrEmpty(value.PromptStableKey) &&
+         value.PromptVersion == 0 && string.IsNullOrEmpty(value.EvaluationProfile) ||
+         value.DataVersion == 2 && value.SchemaVersion > 0 && Stable(value.PromptStableKey) &&
+         value.PromptVersion > 0 && Stable(value.EvaluationProfile));
 
     private static bool Valid(NCNeuralUsageSessionSnapshot value) =>
         value.SessionEpoch.IsValid && value.InputTokens >= 0 && value.CachedInputTokens >= 0 &&
@@ -384,10 +403,17 @@ public sealed partial class NCNeuralUsageLedgerSystem : EntitySystem
         int.TryParse(value.AsSpan(6, 2), NumberStyles.None, CultureInfo.InvariantCulture, out var week) &&
         year is >= 2000 and <= 9999 && week is >= 1 and <= 53;
 
+    private static bool Stable(string? value) => value is { Length: > 0 and <= 128 } && value.All(character =>
+        char.IsAsciiLetterOrDigit(character) || character is '-' or '_' or '.' or ':');
+
     private sealed record UsageRecordedEvent(
         Guid RequestId,
         NCActorId ActorId,
         string ProviderModel,
+        int SchemaVersion,
+        string PromptStableKey,
+        int PromptVersion,
+        string EvaluationProfile,
         long TotalCostUsdMicros);
 
     private sealed record UsageSessionUpdatedEvent(

@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Shared._NC.LivingCity.Cognition;
+using Content.Shared._NC.LivingCity.Neural;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
 
@@ -65,6 +66,8 @@ public sealed record NCHumanActionRuntimeSnapshot(
     Guid PlanId,
     string StepId,
     string ActionId,
+    string CapabilityId,
+    int CommandIndex,
     NCHumanActionExecutorKind Executor,
     NCCognitionSubjectRef Target,
     NCHumanActionRuntimeState State,
@@ -99,13 +102,15 @@ public sealed class NCNeuralActionStepEvent(
     EntityUid? entityUid,
     Guid batchId,
     NCCognitionIntentionSnapshot intention,
-    NCCognitionPlanStep step) : EntityEventArgs
+    NCCognitionPlanStep step,
+    NCNeuralCommandProposal command) : EntityEventArgs
 {
     public NCActorId ActorId { get; } = actorId;
     public EntityUid? EntityUid { get; } = entityUid;
     public Guid BatchId { get; } = batchId;
     public NCCognitionIntentionSnapshot Intention { get; } = intention;
     public NCCognitionPlanStep Step { get; } = step;
+    public NCNeuralCommandProposal Command { get; } = command;
     public bool Handled { get; set; }
     public bool Completed { get; set; }
     public string? Failure { get; set; }
@@ -125,6 +130,7 @@ public sealed class NCHumanActionExecutionEvent(
     NCCognitionPlanStep step,
     NCCognitionSubjectRef target,
     NCHumanActionPrototype action,
+    NCNeuralCommandProposal command,
     NCActiveWorldTime startedAt,
     NCActiveWorldTime now) : EntityEventArgs
 {
@@ -137,6 +143,7 @@ public sealed class NCHumanActionExecutionEvent(
     public NCCognitionPlanStep Step { get; } = step;
     public NCCognitionSubjectRef Target { get; } = target;
     public NCHumanActionPrototype Action { get; } = action;
+    public NCNeuralCommandProposal Command { get; } = command;
     public NCActiveWorldTime StartedAt { get; } = startedAt;
     public NCActiveWorldTime Now { get; } = now;
     public bool Handled { get; set; }

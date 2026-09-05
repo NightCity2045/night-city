@@ -5,8 +5,18 @@
 using Content.Server._NC.City.Connectivity;
 using Content.Server._NC.City.Zones;
 using Content.Server.Medical.Components;
+using Content.Server.Construction.Components;
+using Content.Server.Botany.Components;
+using Content.Server.Chemistry.Components;
+using Content.Server.Kitchen.Components;
 using Content.Shared.Bed.Components;
 using Content.Shared.Buckle.Components;
+using Content.Shared.Doors.Components;
+using Content.Shared.Nutrition.Components;
+using Content.Shared.Fluids.Components;
+using Content.Shared.Storage;
+using Content.Shared.Weapons.Melee;
+using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.City.Zones.Prototypes;
 using Content.Shared._NC.Coordinates.Systems;
@@ -69,6 +79,16 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
         SubscribeLocalEvent<VendingMachineComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
         SubscribeLocalEvent<StasisBedComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
         SubscribeLocalEvent<MedicalScannerComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
+        SubscribeLocalEvent<DoorComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
+        SubscribeLocalEvent<StorageComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
+        SubscribeLocalEvent<EdibleComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
+        SubscribeLocalEvent<GunComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
+        SubscribeLocalEvent<MeleeWeaponComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
+        SubscribeLocalEvent<ComputerComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
+        SubscribeLocalEvent<ReagentDispenserComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
+        SubscribeLocalEvent<MicrowaveComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
+        SubscribeLocalEvent<PlantHolderComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
+        SubscribeLocalEvent<PuddleComponent, NCZoneChangedEvent>(OnInferredProviderZoneChanged);
         SubscribeLocalEvent<NCCitySpawnCandidateIndexChangedEvent>(OnSpawnCandidatesChanged);
         SubscribeLocalEvent<NCZoneIndexRebuiltEvent>(OnZoneIndexRebuilt);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
@@ -137,6 +157,20 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
         return false;
     }
 
+    /// <summary>Copies the semantic actions provided by one already-perceived physical entity.</summary>
+    public void GetForProvider(EntityUid provider, List<NCCityAffordanceInfo> result)
+    {
+        result.Clear();
+        if (!_byProvider.TryGetValue(provider, out var ids))
+            return;
+        foreach (var id in ids)
+        {
+            if (_entries.TryGetValue(id, out var entry))
+                result.Add(entry);
+        }
+        result.Sort(static (left, right) => left.Id.Value.CompareTo(right.Id.Value));
+    }
+
     private void OnProviderStartup(Entity<NCCityAffordanceProviderComponent> entity, ref ComponentStartup args)
     {
         _explicitProviders.Add(entity.Owner);
@@ -171,6 +205,34 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
             case MedicalScannerComponent:
                 AddInferredProvider(args.BaseArgs.Owner, NCCityObjectAffordanceSource.MedicalTreatment);
                 break;
+            case DoorComponent:
+                AddInferredProvider(args.BaseArgs.Owner, NCCityObjectAffordanceSource.Door);
+                break;
+            case StorageComponent:
+                AddInferredProvider(args.BaseArgs.Owner, NCCityObjectAffordanceSource.Storage);
+                break;
+            case EdibleComponent:
+                AddInferredProvider(args.BaseArgs.Owner, NCCityObjectAffordanceSource.Edible);
+                break;
+            case GunComponent:
+            case MeleeWeaponComponent:
+                AddInferredProvider(args.BaseArgs.Owner, NCCityObjectAffordanceSource.Weapon);
+                break;
+            case ComputerComponent:
+                AddInferredProvider(args.BaseArgs.Owner, NCCityObjectAffordanceSource.Computer);
+                break;
+            case ReagentDispenserComponent:
+                AddInferredProvider(args.BaseArgs.Owner, NCCityObjectAffordanceSource.ReagentDispenser);
+                break;
+            case MicrowaveComponent:
+                AddInferredProvider(args.BaseArgs.Owner, NCCityObjectAffordanceSource.Microwave);
+                break;
+            case PlantHolderComponent:
+                AddInferredProvider(args.BaseArgs.Owner, NCCityObjectAffordanceSource.PlantHolder);
+                break;
+            case PuddleComponent:
+                AddInferredProvider(args.BaseArgs.Owner, NCCityObjectAffordanceSource.Puddle);
+                break;
         }
     }
 
@@ -198,6 +260,34 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
             case StasisBedComponent:
             case MedicalScannerComponent:
                 RemoveInferredProvider(provider, NCCityObjectAffordanceSource.MedicalTreatment);
+                break;
+            case DoorComponent:
+                RemoveInferredProvider(provider, NCCityObjectAffordanceSource.Door);
+                break;
+            case StorageComponent:
+                RemoveInferredProvider(provider, NCCityObjectAffordanceSource.Storage);
+                break;
+            case EdibleComponent:
+                RemoveInferredProvider(provider, NCCityObjectAffordanceSource.Edible);
+                break;
+            case GunComponent:
+            case MeleeWeaponComponent:
+                RemoveInferredProvider(provider, NCCityObjectAffordanceSource.Weapon);
+                break;
+            case ComputerComponent:
+                RemoveInferredProvider(provider, NCCityObjectAffordanceSource.Computer);
+                break;
+            case ReagentDispenserComponent:
+                RemoveInferredProvider(provider, NCCityObjectAffordanceSource.ReagentDispenser);
+                break;
+            case MicrowaveComponent:
+                RemoveInferredProvider(provider, NCCityObjectAffordanceSource.Microwave);
+                break;
+            case PlantHolderComponent:
+                RemoveInferredProvider(provider, NCCityObjectAffordanceSource.PlantHolder);
+                break;
+            case PuddleComponent:
+                RemoveInferredProvider(provider, NCCityObjectAffordanceSource.Puddle);
                 break;
         }
     }
@@ -260,12 +350,14 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
     private void ReindexProvider(EntityUid provider)
     {
         RemoveProvider(provider);
-        if (!_locations.TryGetContext(provider, out var location) ||
-            !_coordinates.TryGetCoordinates(provider, out var target))
-        {
-            Invalidate();
-            return;
-        }
+        _coordinates.TryGetCoordinates(provider, out var target);
+
+        // Ordinary SS14 maps intentionally have no CityGraph. A physical provider is still a real nearby
+        // opportunity there; it simply has no stable NC coordinate or semantic city-zone parent. Callers that need
+        // long-range routing reject that empty coordinate, while local neural actions target the provider entity.
+        var zone = _locations.TryGetContext(provider, out var location)
+            ? location.MostSpecific
+            : default;
 
         _providerAffordanceBuffer.Clear();
         if (TryComp<NCCityAffordanceProviderComponent>(provider, out var component))
@@ -283,7 +375,7 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
         {
             if (!_prototypes.TryIndex(affordanceId, out var affordance) || affordance == null)
                 continue;
-            Add(affordanceId, affordance, provider, location.MostSpecific, target, true);
+            Add(affordanceId, affordance, provider, zone, target, true);
         }
         Invalidate();
     }
@@ -299,10 +391,11 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
         foreach (var source in _prototypes.EnumeratePrototypes<NCCityZoneAffordanceSourcePrototype>()
                      .OrderBy(static value => value.ID, StringComparer.Ordinal))
         {
-            if (source.MaximumCandidates <= 0)
+            if (source.MaximumCandidates <= 0 || source.Zone == Guid.Empty)
                 continue;
-            if (source.Zone.IsValid)
-                _spawnCandidates.GetCandidatesInHierarchy(source.CandidateProfile, source.Zone, _candidateBuffer);
+            NCZoneId? restrictedZone = source.Zone is { } zoneGuid ? new NCZoneId(zoneGuid) : null;
+            if (restrictedZone is { IsValid: true } concreteZone)
+                _spawnCandidates.GetCandidatesInHierarchy(source.CandidateProfile, concreteZone, _candidateBuffer);
             else
                 _spawnCandidates.GetCandidates(source.CandidateProfile, default, _candidateBuffer);
 
@@ -321,12 +414,14 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
                 accepted++;
             }
 
-            AddBoundaryAffordances(source);
+            AddBoundaryAffordances(source, restrictedZone);
         }
         Invalidate();
     }
 
-    private void AddBoundaryAffordances(NCCityZoneAffordanceSourcePrototype source)
+    private void AddBoundaryAffordances(
+        NCCityZoneAffordanceSourcePrototype source,
+        NCZoneId? restrictedZone)
     {
         if (source.BoundaryAffordances.Count == 0 || source.RequiredContext == NCZoneContextSlot.None)
             return;
@@ -337,17 +432,18 @@ public sealed partial class NCCityAffordanceCatalogSystem : EntitySystem
                 !_roomGraph.TryGetRoomInfo(portal.RoomB, out var roomB))
                 continue;
 
-            AddBoundarySide(source, roomA.ZoneId, roomB.ZoneId, portal.TargetA);
-            AddBoundarySide(source, roomB.ZoneId, roomA.ZoneId, portal.TargetB);
+            AddBoundarySide(source, restrictedZone, roomA.ZoneId, roomB.ZoneId, portal.TargetA);
+            AddBoundarySide(source, restrictedZone, roomB.ZoneId, roomA.ZoneId, portal.TargetB);
         }
     }
 
-    private void AddBoundarySide(NCCityZoneAffordanceSourcePrototype source, NCZoneId inside,
+    private void AddBoundarySide(NCCityZoneAffordanceSourcePrototype source, NCZoneId? restrictedZone,
+        NCZoneId inside,
         NCZoneId outside, Content.Shared._NC.Coordinates.NCMapCoordinates target)
     {
         if (!TryGetAncestor(inside, source.RequiredContext, out var insideScope) ||
             TryGetAncestor(outside, source.RequiredContext, out var outsideScope) && outsideScope == insideScope ||
-            source.Zone.IsValid && insideScope != source.Zone)
+            restrictedZone is { IsValid: true } concreteZone && insideScope != concreteZone)
             return;
 
         foreach (var affordanceId in source.BoundaryAffordances.Distinct())

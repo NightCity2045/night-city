@@ -14,6 +14,7 @@ public enum NCHumanActionExecutorKind : byte
     VanillaInteraction,
     VanillaHands,
     VanillaSpeech,
+    VanillaStationWork,
 }
 
 /// <summary>
@@ -35,9 +36,25 @@ public enum NCHumanActionOperationKind : byte
     EquipTarget,
     UnequipTarget,
     UseHeldTarget,
+    UseHeldOnTarget,
+    BuckleSelfToTarget,
+    UnbuckleSelf,
+    StoreHeldInTarget,
+    RetrieveTargetFromStorage,
+    ConsumeHeldTarget,
+    FireHeldGunAtTarget,
+    ReloadHeldGunWithTarget,
     Speak,
     StartPullingTarget,
     StopPulling,
+    MoveToStationDestination,
+    UseHeldOnInjuredPerson,
+    InspectStationWorkplace,
+    ProcessCargoOrder,
+    UnlockResearchTechnology,
+    PrepareDispensedMixture,
+    StartMicrowave,
+    HarvestPlant,
 }
 
 public enum NCHumanActionTargetKind : byte

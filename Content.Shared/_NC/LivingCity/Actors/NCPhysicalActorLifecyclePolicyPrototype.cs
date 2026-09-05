@@ -38,4 +38,16 @@ public sealed partial class NCPhysicalActorLifecyclePolicyPrototype : IPrototype
 
     [DataField]
     public TimeSpan RetryDelay { get; private set; } = TimeSpan.FromSeconds(2);
+
+    [DataField]
+    public TimeSpan CheckpointDebounce { get; private set; } = TimeSpan.FromSeconds(2);
+
+    [DataField]
+    public TimeSpan CheckpointMaximumDeferral { get; private set; } = TimeSpan.FromSeconds(10);
+
+    [DataField]
+    public TimeSpan CheckpointRetryDelay { get; private set; } = TimeSpan.FromSeconds(5);
+
+    [DataField]
+    public int MaximumCheckpointDispatchesPerTick { get; private set; } = 4;
 }

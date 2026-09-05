@@ -55,7 +55,8 @@ public sealed record NCCityResidentCreateRequest(
     NCCityActorPhysicalRecoveryState? PhysicalRecovery,
     Guid CorrelationId,
     Guid? CausationId = null,
-    string AuditSource = "system");
+    string AuditSource = "system",
+    NCGeneratedPersonaDetails? GeneratedPersona = null);
 
 /// <summary>Persists a real physical route intent or its observed completion.</summary>
 public sealed record NCCityActorLocationMutationRequest(

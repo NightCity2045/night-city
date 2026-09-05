@@ -13,6 +13,8 @@
   - type: InputMover
   - type: MobMover
   - type: HTN
+    # GPT owns ordinary intent selection. HTN is enabled only as a bounded combat/reflex executor.
+    enabled: false
     rootTask:
       task: NCLivingHumanCompound
     planCooldown: 1
@@ -30,10 +32,7 @@
   - type: FactionException
   - type: NCNeuralConversationTarget
     maximumUtteranceLength: 2048
-    initiateAmbientConversations: true
-    # The active world runs twelve times faster than wall time: roughly one attempt every 10-20 real minutes.
-    minimumAmbientConversationInterval: 2h
-    maximumAmbientConversationInterval: 4h
+    maximumNpcConversationTurns: 16
 
 - type: ncCityActorArchetype
   id: NCLivingCityResident
@@ -52,3 +51,57 @@
   - NCResidentPersonaRestless
   - NCResidentPersonaProud
   - NCResidentPersonaPragmatic
+  backgroundKeys:
+  - raised-by-neighbors
+  - former-street-vendor
+  - displaced-after-fire
+  - learned-to-survive-alone
+  - supports-distant-family
+  - grew-up-around-gangs
+  - lost-a-small-business
+  - new-to-this-district
+  pressureKeys:
+  - short-on-cash
+  - owes-a-personal-favor
+  - worried-about-someone-close
+  - needs-stable-work
+  - hiding-a-recent-mistake
+  - trying-to-rebuild-reputation
+  - exhausted-and-overworked
+  - looking-for-a-safe-place
+  fearKeys:
+  - abandonment
+  - public-humiliation
+  - police-attention
+  - helplessness
+  - betrayal
+  - losing-control
+  - debt-collectors
+  - being-trapped
+  goalKeys:
+  - earn-enough-to-feel-secure
+  - protect-someone-close
+  - make-a-useful-connection
+  - find-steady-work
+  - regain-respect
+  - leave-a-bad-situation
+  - learn-who-can-be-trusted
+  - get-through-today-unhurt
+  socialHabitKeys:
+  - watches-before-speaking
+  - helps-before-asking-payment
+  - trades-favors
+  - keeps-personal-distance
+  - challenges-disrespect
+  - jokes-when-nervous
+  - avoids-crowds
+  - remembers-small-kindnesses
+  speechQuirkKeys:
+  - clipped-sentences
+  - dry-humor
+  - nervous-pauses
+  - blunt-questions
+  - quiet-understatement
+  - street-metaphors
+  - avoids-formal-words
+  - changes-tone-under-pressure

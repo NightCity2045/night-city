@@ -31,6 +31,7 @@ public sealed partial class NCPhysicalActorBrainSystem : EntitySystem
     private readonly HashSet<NCActorId> _inFlight = [];
     private readonly HashSet<NCActorId> _requestedAgain = [];
     private readonly HashSet<NCActorId> _retryRequested = [];
+    private readonly Dictionary<NCActorId, PendingWakeConditions> _wakeConditions = [];
     private readonly PriorityQueue<QueuedDecision, (long DueTicks, long Sequence)> _queue = new();
     private NCPhysicalActorBrainPolicyPrototype? _policy;
     private NCSessionEpoch _epoch;
@@ -66,6 +67,9 @@ public sealed partial class NCPhysicalActorBrainSystem : EntitySystem
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => Reset());
         SubscribeLocalEvent<NCCityActorBindingChangedEvent>(OnBindingChanged);
         SubscribeLocalEvent<NCNeuralResultEvent>(OnNeuralResult);
+        SubscribeLocalEvent<NCNeuralWakeScheduledEvent>(OnWakeScheduled);
+        SubscribeLocalEvent<NCNeuralCommandResultEvent>(OnCommandResult);
+        SubscribeLocalEvent<NCNeuralActionExecutionCompletedEvent>(OnActionExecutionCompleted);
     }
 
     public override void Update(float frameTime)
@@ -114,6 +118,7 @@ public sealed partial class NCPhysicalActorBrainSystem : EntitySystem
             _scheduled.Remove(args.ActorId);
             _requestedAgain.Remove(args.ActorId);
             _retryRequested.Remove(args.ActorId);
+            _wakeConditions.Remove(args.ActorId);
             return;
         }
         if (!_active || _policy == null || !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
@@ -142,6 +147,53 @@ public sealed partial class NCPhysicalActorBrainSystem : EntitySystem
         else
             Schedule(result.Request.ActorId, now.Advance(_policy.RetryInterval));
     }
+
+    private void OnWakeScheduled(NCNeuralWakeScheduledEvent args)
+    {
+        if (!_active || args.AfterSeconds is < 0 or > 86400 || args.Request.SessionEpoch != _epoch ||
+            !_runtime.TryGetEntity(args.Request.ActorId, out var entity) || !Exists(entity) ||
+            !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
+        {
+            return;
+        }
+
+        if (args.On.Count > 0)
+        {
+            _wakeConditions[args.Request.ActorId] = new PendingWakeConditions(
+                args.Request.RequestId,
+                args.On.ToHashSet(StringComparer.Ordinal));
+        }
+        else
+            _wakeConditions.Remove(args.Request.ActorId);
+
+        // A provider wake can shorten the normal cadence, but it cannot postpone an earlier event-driven wake.
+        Schedule(args.Request.ActorId, now.Advance(TimeSpan.FromSeconds(args.AfterSeconds)));
+    }
+
+    private void OnCommandResult(NCNeuralCommandResultEvent args)
+    {
+        var requestedByWake = false;
+        if (_wakeConditions.TryGetValue(args.ActorId, out var pending) &&
+            pending.RequestId == args.Result.RequestId &&
+            pending.Conditions.Remove("command-result"))
+        {
+            requestedByWake = true;
+            if (pending.Conditions.Count == 0)
+                _wakeConditions.Remove(args.ActorId);
+        }
+
+        // A result inside a multi-command batch wakes cognition only when the provider explicitly requested it.
+        // Ordinary autonomy advances from the batch-completed event after every accepted command has terminated.
+        if (ShouldWakeForCommandResult(requestedByWake))
+            RequestDecision(args.ActorId);
+    }
+
+    private void OnActionExecutionCompleted(NCNeuralActionExecutionCompletedEvent args)
+    {
+        RequestDecision(args.ActorId);
+    }
+
+    internal static bool ShouldWakeForCommandResult(bool requestedByWake) => requestedByWake;
 
     private async Task ObserveSubmissionAsync(int generation, NCActorId actorId)
     {
@@ -186,6 +238,9 @@ public sealed partial class NCPhysicalActorBrainSystem : EntitySystem
 
     private void Schedule(NCActorId actorId, NCActiveWorldTime due)
     {
+        if (_scheduled.TryGetValue(actorId, out var current) && current.Due <= due)
+            return;
+
         var scheduled = new ScheduledDecision(due, ++_sequence);
         _scheduled[actorId] = scheduled;
         _queue.Enqueue(new QueuedDecision(actorId, scheduled.Sequence), (due.Ticks, scheduled.Sequence));
@@ -202,6 +257,7 @@ public sealed partial class NCPhysicalActorBrainSystem : EntitySystem
         _inFlight.Clear();
         _requestedAgain.Clear();
         _retryRequested.Clear();
+        _wakeConditions.Clear();
         _queue.Clear();
         DecisionsSubmitted = 0;
         SubmissionRetries = 0;
@@ -209,4 +265,5 @@ public sealed partial class NCPhysicalActorBrainSystem : EntitySystem
 
     private readonly record struct ScheduledDecision(NCActiveWorldTime Due, long Sequence);
     private readonly record struct QueuedDecision(NCActorId ActorId, long Sequence);
+    private sealed record PendingWakeConditions(Guid RequestId, HashSet<string> Conditions);
 }

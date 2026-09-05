@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using Content.Server._NC.LivingCity.Time;
-using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Simulation;
 using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Prototypes;
@@ -408,14 +407,9 @@ public sealed partial class NCAILoadGovernorSystem : EntitySystem
         if (_queueRatios.GetValueOrDefault(NCAILoadQueueKind.ActorSpawn) >=
             thresholds.ElevatedEnterQueueRatio)
             reasons |= NCAILoadPressureReason.ActorSpawnQueue;
-        if (_queueRatios.GetValueOrDefault(NCAILoadQueueKind.PhysicalExecution) >=
-            thresholds.ElevatedEnterQueueRatio)
-            reasons |= NCAILoadPressureReason.PhysicalExecutionQueue;
         if (_queueRatios.GetValueOrDefault(NCAILoadQueueKind.PhysicalPerception) >=
             thresholds.ElevatedEnterQueueRatio)
             reasons |= NCAILoadPressureReason.PhysicalPerceptionQueue;
-        if (_backlogs.Contains(NCAILoadBacklogKind.PhysicalExecution))
-            reasons |= NCAILoadPressureReason.PhysicalExecutionBacklog;
         if (_backlogs.Contains(NCAILoadBacklogKind.PhysicalPerception))
             reasons |= NCAILoadPressureReason.PhysicalPerceptionBacklog;
         return reasons;

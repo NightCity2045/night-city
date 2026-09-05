@@ -169,6 +169,7 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
             args.Step,
             target,
             action,
+            args.Command,
             current.StartedAt,
             now);
         RaiseLocalEvent(execution);
@@ -216,6 +217,8 @@ public sealed partial class NCHumanActionRouterSystem : EntitySystem
             args.BatchId,
             args.Step.StepId,
             action.ID,
+            args.Command.CapabilityId,
+            args.Command.OriginalIndex,
             action.Executor,
             target,
             NCHumanActionRuntimeState.Pending,

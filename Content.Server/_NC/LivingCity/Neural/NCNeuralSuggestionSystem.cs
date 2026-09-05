@@ -32,6 +32,7 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
     [Dependency] private ChatSystem _chat = default!;
 
     private readonly Dictionary<NCActorId, AppliedSuggestion> _suggestions = [];
+    private readonly Dictionary<NCActorId, AppliedIntent> _intents = [];
     private readonly PriorityQueue<SuggestionExpiry, long> _expiries = new();
     private readonly Dictionary<Guid, DialogueCorrelation> _dialogues = [];
     private NCNeuralPolicyPrototype? _policy;
@@ -59,6 +60,8 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
             _expiries.Dequeue();
             if (_suggestions.TryGetValue(expiry.ActorId, out var current) && current.RequestId == expiry.RequestId)
                 _suggestions.Remove(expiry.ActorId);
+            if (_intents.TryGetValue(expiry.ActorId, out var intent) && intent.RequestId == expiry.RequestId)
+                _intents.Remove(expiry.ActorId);
         }
     }
 
@@ -83,6 +86,23 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
     }
 
     public void ForgetDialogue(Guid requestId) => _dialogues.Remove(requestId);
+
+    public bool TryGetIntentSnapshot(NCActorId actorId, out NCNeuralIntentSnapshot snapshot)
+    {
+        if (!_intents.TryGetValue(actorId, out var value))
+        {
+            snapshot = default!;
+            return false;
+        }
+        snapshot = new NCNeuralIntentSnapshot(
+            value.RequestId,
+            value.Key,
+            value.TargetHandle,
+            value.Priority,
+            value.AcceptedAt,
+            value.ExpiresAt);
+        return true;
+    }
 
     public bool TryGetSuggestionSnapshot(NCActorId actorId, out NCNeuralSuggestionSnapshot snapshot)
     {
@@ -113,21 +133,9 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         var policy = _policy;
         var response = result.Response;
         var hasCurrentTime = _clock.TryGetCurrentTime(out var epoch, out var now);
-        // Confidence gates planning influence. A dialogue line has no mutation authority and is instead guarded by
-        // its conversation correlation, speech-act allowlist and ordinary ChatSystem checks.
-        var meetsConfidence = result.Request.Kind == NCNeuralRequestKind.DialogueContinuation ||
-            response?.Confidence >= policy?.MinimumSuggestionConfidence;
-        var commands = response?.Commands ?? [];
         var accepted = _active && policy != null && response != null && hasCurrentTime &&
             result.Status == NCNeuralResultStatus.Accepted &&
             response.ContextVersion == result.Request.ContextVersion &&
-            meetsConfidence &&
-            commands.Count is >= 1 and <= 8 && commands.All(command =>
-                result.Request.AllowedCapabilityIds.Contains(command.CapabilityId) &&
-                (command.TargetHandle.Length == 0 ||
-                 _perception.TryResolveSubjectHandle(result.Request.ActorId, command.TargetHandle, now, out _) ||
-                 (result.Request.KnownLocations ?? [])
-                     .Any(location => location.Handle == command.TargetHandle))) &&
             epoch == result.Request.SessionEpoch && result.Request.ExpiresAt > now;
 
         if (result.Request.Kind == NCNeuralRequestKind.DialogueContinuation && dialogue != null)
@@ -135,11 +143,23 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
             if (accepted && policy != null && result.Response is { } dialogueResponse &&
                 TryGetCurrentDialogue(dialogue, out var currentSession))
             {
-                if (dialogueResponse.Commands.Any(command => command.CapabilityId != "social.dialogue.reply"))
-                    ApplySuggestion(result.Request, dialogueResponse, policy, now);
+                if (TrySelectPhysicalCommands(result.Request, dialogueResponse, now,
+                        out var physicalCommands, out var dialogueCommandFailure))
+                {
+                    if (physicalCommands.Length == 0 ||
+                        ApplySuggestion(result.Request, dialogueResponse, physicalCommands, policy, now))
+                    {
+                        TrackIntent(result.Request, dialogueResponse, policy, now);
+                    }
+                }
+                else if (dialogueCommandFailure != null)
+                {
+                    ReportBatchRejection(result.Request, dialogueCommandFailure, now);
+                }
                 // Dialogue may propose physical commands, but the typed executor remains their authority.
                 TryDeliverDialogue(result.Request.ActorId, result.Request.RequestId, currentSession,
                     dialogueResponse);
+                RaiseDeliberationDirectives(result.Request, dialogueResponse, currentSession.SessionId);
             }
             return;
         }
@@ -147,10 +167,41 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         if (!accepted || response == null || policy == null)
             return;
 
-        ApplySuggestion(result.Request, response, policy, now);
-        if (result.Request.Kind == NCNeuralRequestKind.StrategicDecision && response.ShouldSpeak)
+        if (TrySelectPhysicalCommands(result.Request, response, now,
+                out var acceptedPhysicalCommands, out var commandFailure))
+        {
+            if (acceptedPhysicalCommands.Length == 0 ||
+                ApplySuggestion(result.Request, response, acceptedPhysicalCommands, policy, now))
+            {
+                TrackIntent(result.Request, response, policy, now);
+            }
+        }
+        else if (commandFailure != null)
+        {
+            ReportBatchRejection(result.Request, commandFailure, now);
+        }
+        if (result.Request.Kind == NCNeuralRequestKind.StrategicDecision &&
+            (response.ShouldSpeak || IsDirectAssault(result.Request)))
             TryDeliverAutonomousSpeech(result.Request.ActorId, response);
+        RaiseDeliberationDirectives(result.Request, response, null);
 
+    }
+
+    private void RaiseDeliberationDirectives(
+        NCNeuralRequestEnvelope request,
+        NCNeuralResponseEnvelope response,
+        NCConversationSessionId? conversationSessionId)
+    {
+        if (response.DecisionMode == "sense" && response.SenseRequests.Count > 0 && request.SenseDepth < 2)
+        {
+            RaiseLocalEvent(new NCNeuralSenseRequestedEvent(
+                request,
+                response.SenseRequests.Take(2).ToArray(),
+                conversationSessionId));
+        }
+
+        if (response.Wake is { AfterSeconds: >= 0 and <= 86400 } wake)
+            RaiseLocalEvent(new NCNeuralWakeScheduledEvent(request, wake.On, wake.AfterSeconds));
     }
 
     private bool TryDeliverAutonomousSpeech(NCActorId actorId, NCNeuralResponseEnvelope response)
@@ -166,18 +217,12 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
     private bool ApplySuggestion(
         NCNeuralRequestEnvelope request,
         NCNeuralResponseEnvelope response,
+        IReadOnlyList<NCNeuralCommandProposal> physicalCommands,
         NCNeuralPolicyPrototype policy,
         NCActiveWorldTime now)
     {
-        // Rendered dialogue is delivered by ChatSystem. Only typed physical capabilities belong in the action router.
-        var physicalCommands = response.Commands
-            .Where(command => command.CapabilityId != "social.dialogue.reply")
-            .ToArray();
-        if (physicalCommands.Length == 0 ||
-            _suggestions.Count >= policy.MaximumAppliedSuggestions && !_suggestions.ContainsKey(request.ActorId))
-        {
+        if (physicalCommands.Count == 0)
             return false;
-        }
         var primary = physicalCommands[0];
         var expiresAt = now.Advance(policy.SuggestionLifetime);
         var suggestion = new AppliedSuggestion(
@@ -189,10 +234,99 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
             primary.GoalKey,
             now,
             expiresAt);
+        if (!_execution.TryAccept(request, response with { Commands = physicalCommands }, now, out var failure))
+        {
+            ReportBatchRejection(request, failure ?? "neural-command-batch-rejected", now);
+            return false;
+        }
         _suggestions[request.ActorId] = suggestion;
         _expiries.Enqueue(new SuggestionExpiry(request.ActorId, suggestion.RequestId), expiresAt.Ticks);
-        return _execution.TryAccept(request, response with { Commands = physicalCommands }, now, out _);
+        return true;
     }
+
+    private void TrackIntent(
+        NCNeuralRequestEnvelope request,
+        NCNeuralResponseEnvelope response,
+        NCNeuralPolicyPrototype policy,
+        NCActiveWorldTime now)
+    {
+        _intents.Remove(request.ActorId);
+        if (response.Intent is not { } intent ||
+            !ValidCurrentTarget(request, intent.TargetHandle, now))
+        {
+            return;
+        }
+
+        var expiresAt = now.Advance(policy.SuggestionLifetime);
+        _intents[request.ActorId] = new AppliedIntent(
+            request.RequestId,
+            intent.Key,
+            intent.TargetHandle,
+            intent.Priority,
+            now,
+            expiresAt);
+        _expiries.Enqueue(new SuggestionExpiry(request.ActorId, request.RequestId), expiresAt.Ticks);
+    }
+
+    /// <summary>
+    /// Validates the complete physical batch before execution. Speech remains independently deliverable, but one
+    /// stale target or unauthorized command rejects every physical command so dependent intent is never truncated.
+    /// </summary>
+    private bool TrySelectPhysicalCommands(
+        NCNeuralRequestEnvelope request,
+        NCNeuralResponseEnvelope response,
+        NCActiveWorldTime now,
+        out NCNeuralCommandProposal[] commands,
+        out string? failure)
+    {
+        commands = [];
+        failure = null;
+        if (response.Commands.Count == 0)
+            return true;
+
+        foreach (var command in response.Commands)
+        {
+            if (!request.AllowedCapabilityIds.Contains(command.CapabilityId) ||
+                !_prototypes.TryIndex(new ProtoId<NCCognitionCapabilityPrototype>(command.CapabilityId),
+                    out var capability) || capability == null ||
+                capability.StrategicOptions.Length == 0 && command.GoalKey != "execute" ||
+                capability.StrategicOptions.Length > 0 &&
+                !capability.StrategicOptions.Any(option => option.Id == command.GoalKey) ||
+                capability.ProcedureSteps.Length == 0 &&
+                !capability.StrategicOptions.Any(option => option.Id == command.GoalKey) ||
+                !ValidCurrentTarget(request, command.TargetHandle, now))
+            {
+                failure = "neural-command-batch-rejected";
+                return false;
+            }
+        }
+
+        commands = response.Commands.ToArray();
+        return true;
+    }
+
+    private void ReportBatchRejection(
+        NCNeuralRequestEnvelope request,
+        string failure,
+        NCActiveWorldTime now)
+    {
+        // Reuse the bounded action-failure wake path; this makes rejection observable without exposing prompt data.
+        RaiseLocalEvent(new NCNeuralActionExecutionFailedEvent(
+            request.ActorId,
+            request.RequestId,
+            request.Priority,
+            failure,
+            now));
+    }
+
+    private bool ValidCurrentTarget(NCNeuralRequestEnvelope request, string handle, NCActiveWorldTime now) =>
+        string.IsNullOrWhiteSpace(handle) ||
+        _perception.TryResolveSubjectHandle(request.ActorId, handle, now, out _) ||
+        (request.KnownLocations ?? []).Any(location => location.Handle == handle);
+
+    private static bool IsDirectAssault(NCNeuralRequestEnvelope request) =>
+        (request.PerceivedEvents ?? []).Any(value =>
+            value.Kind == "assault" && value.TargetHandle == "self" && value.ExpiresAtTicks > 0);
 
     private bool TryDeliverDialogue(
         NCActorId actorId,
@@ -269,6 +403,7 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         _active = false;
         _policy = null;
         _suggestions.Clear();
+        _intents.Clear();
         _expiries.Clear();
         _dialogues.Clear();
     }
@@ -284,6 +419,13 @@ public sealed partial class NCNeuralSuggestionSystem : EntitySystem
         NCActiveWorldTime ExpiresAt);
 
     private readonly record struct SuggestionExpiry(NCActorId ActorId, Guid RequestId);
+    private sealed record AppliedIntent(
+        Guid RequestId,
+        string Key,
+        string TargetHandle,
+        int Priority,
+        NCActiveWorldTime AcceptedAt,
+        NCActiveWorldTime ExpiresAt);
     private sealed record DialogueCorrelation(
         NCConversationSessionId SessionId,
         int ConversationVersion,
@@ -298,5 +440,13 @@ public sealed record NCNeuralSuggestionSnapshot(
     string GoalKey,
     string TargetHandle,
     int Confidence,
+    NCActiveWorldTime AcceptedAt,
+    NCActiveWorldTime ExpiresAt);
+
+public sealed record NCNeuralIntentSnapshot(
+    Guid RequestId,
+    string Key,
+    string TargetHandle,
+    int Priority,
     NCActiveWorldTime AcceptedAt,
     NCActiveWorldTime ExpiresAt);

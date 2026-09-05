@@ -34,28 +34,6 @@ public sealed partial class NCNeuralConversationTargetComponent : Component
     [DataField]
     public int MaximumNpcConversationTurns = 6;
 
-    /// <summary>Allows rare round-local conversations to start without player input.</summary>
-    [DataField]
-    public bool InitiateAmbientConversations;
-
-    [DataField]
-    public TimeSpan MinimumAmbientConversationInterval = TimeSpan.FromMinutes(8);
-
-    [DataField]
-    public TimeSpan MaximumAmbientConversationInterval = TimeSpan.FromMinutes(15);
-
-    [DataField]
-    public int MaximumAmbientCandidates = 12;
-
-    [DataField]
-    public List<string> AmbientOpeners =
-    [
-        "Слышал, что сегодня происходит?",
-        "Как у тебя смена проходит?",
-        "Есть что нового в районе?",
-        "Ты как, держишься?",
-    ];
-
     [DataField]
     public float ListeningRange = 4f;
 

@@ -9,13 +9,18 @@ using System.Threading.Tasks;
 using Content.IntegrationTests.Fixtures;
 using Content.Server.GameTicking;
 using Content.Server._NC.LivingCity.Actors;
+using Content.Server._NC.LivingCity.Actors.Domains;
 using Content.Server._NC.LivingCity.Time;
+using Content.Server._NC.Medical.Persistence;
 using Content.Server._NC.ZLevels.Core;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Coordinates;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Neural;
+using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Persistence.Identity;
+using Content.Shared.Mobs;
+using Content.Shared.Mobs.Systems;
 using Content.Shared.Preferences;
 using Content.Shared._NC.ZLevels.Core.Components;
 using Robust.Shared.GameObjects;
@@ -90,8 +95,11 @@ public sealed class NCPhysicalActorLifecycleSystemTest : GameTest
         var zLevels = server.System<NCZLevelsSystem>();
         var clock = server.System<NCActiveWorldTimeSystem>();
         var actors = server.System<NCCityActorRegistrySystem>();
+        var domains = server.System<NCCityActorDomainRegistrySystem>();
         var lifecycle = server.System<NCPhysicalActorLifecycleSystem>();
         var runtime = server.System<NCCityActorRuntimeIndexSystem>();
+        var medicalBodies = server.System<NCMedicalBodySystem>();
+        var mobStates = server.System<MobStateSystem>();
         Entity<NCZMapNetworkComponent> network = default;
 
         await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(
@@ -121,7 +129,8 @@ public sealed class NCPhysicalActorLifecycleSystemTest : GameTest
         await server.WaitRunTicks(45);
 
         var serialization = server.ResolveDependency<ISerializationManager>();
-        var profile = HumanoidCharacterProfile.Random();
+        HumanoidCharacterProfile profile = null!;
+        await server.WaitPost(() => profile = HumanoidCharacterProfile.Random());
         var commandId = Guid.NewGuid();
         var create = await actors.CreateResidentAsync(new NCCityResidentCreateRequest(
             commandId,
@@ -136,34 +145,15 @@ public sealed class NCPhysicalActorLifecycleSystemTest : GameTest
             AuditSource: "integration.physical-lifecycle"));
         Assert.That(create.Status, Is.EqualTo(NCCityActorMutationStatus.Applied), create.Error);
 
-        var requestId = Guid.NewGuid();
-        NCPhysicalActorSpawnState submitted = null!;
-        await server.WaitPost(() => submitted = lifecycle.Request(new NCPhysicalActorSpawnRequest(
-            requestId,
-            create.ActorId,
-            NCPhysicalActorSpawnReason.ServiceDispatch,
-            "integration.physical-lifecycle")));
-        Assert.That(submitted.Status, Is.EqualTo(NCPhysicalActorSpawnStatus.Queued));
-
-        NCPhysicalActorSpawnState completed = null!;
+        EntityUid firstEntity = default;
         await WaitUntil(server, () =>
         {
-            if (!lifecycle.TryGetRequest(requestId, out var state) ||
-                state.Status is NCPhysicalActorSpawnStatus.Queued or
-                    NCPhysicalActorSpawnStatus.Loading or
-                    NCPhysicalActorSpawnStatus.Retrying)
-            {
-                return false;
-            }
-            completed = state;
-            return true;
+            return runtime.TryGetEntity(create.ActorId, out firstEntity) && entities.EntityExists(firstEntity);
         }, "The persistent actor did not become physical.", 240);
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(completed.Status, Is.EqualTo(NCPhysicalActorSpawnStatus.Spawned), completed.Error);
-            Assert.That(completed.EntityUid.HasValue, Is.True);
-            Assert.That(entities.EntityExists(completed.EntityUid!.Value), Is.True);
+            Assert.That(entities.EntityExists(firstEntity), Is.True);
             Assert.That(runtime.PhysicalActorCount, Is.EqualTo(1));
 
             var duplicate = lifecycle.Request(new NCPhysicalActorSpawnRequest(
@@ -172,15 +162,118 @@ public sealed class NCPhysicalActorLifecycleSystemTest : GameTest
                 NCPhysicalActorSpawnReason.ServiceDispatch,
                 "integration.physical-lifecycle.duplicate"));
             Assert.That(duplicate.Status, Is.EqualTo(NCPhysicalActorSpawnStatus.AlreadyPhysical));
-            Assert.That(duplicate.EntityUid, Is.EqualTo(completed.EntityUid));
+            Assert.That(duplicate.EntityUid, Is.EqualTo(firstEntity));
             Assert.That(runtime.PhysicalActorCount, Is.EqualTo(1));
         });
 
         await server.WaitRunTicks(30);
+        long initialHealthVersion = 0;
+        long initialInventoryVersion = 0;
         await server.WaitAssertion(() =>
         {
             Assert.That(runtime.TryGetEntity(create.ActorId, out var entity), Is.True);
             Assert.That(entities.EntityExists(entity), Is.True);
+            Assert.That(domains.TryGetCached(create.ActorId, out var health, out var inventory), Is.True);
+            initialHealthVersion = health.AggregateVersion;
+            initialInventoryVersion = inventory.AggregateVersion;
+            Assert.That(medicalBodies.TryMarkDirty(entity, NCMedicalDirtyDomains.Wounds), Is.True);
+            Assert.That(medicalBodies.TryMarkDirty(entity, NCMedicalDirtyDomains.Vascular), Is.True);
+            Assert.That(medicalBodies.TryMarkDirty(entity, NCMedicalDirtyDomains.Pain), Is.True);
+        });
+
+        await server.WaitRunTicks(1);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(domains.TryGetCached(create.ActorId, out var health, out var inventory), Is.True);
+            Assert.That(health.AggregateVersion, Is.EqualTo(initialHealthVersion),
+                "The debounce window must not persist every medical event separately.");
+            Assert.That(inventory.AggregateVersion, Is.EqualTo(initialInventoryVersion));
+        });
+        await WaitUntil(server, () =>
+        {
+            return domains.TryGetCached(create.ActorId, out var health, out _) &&
+                   health.AggregateVersion > initialHealthVersion;
+        }, "Coalesced medical changes were not checkpointed.", 300);
+
+        long versionBeforeRecovery = 0;
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(domains.TryGetCached(create.ActorId, out var health, out _), Is.True);
+            versionBeforeRecovery = health.AggregateVersion;
+            Assert.That(medicalBodies.TryMarkDirty(firstEntity, NCMedicalDirtyDomains.Wounds), Is.True);
+            // Regression: the final checkpoint must remain read-only when a terminating actor has no
+            // runtime persistence-owner marker; adding it from EntityTerminating used to crash teardown.
+            entities.RemoveComponent<NCMedicalPersistenceOwnerComponent>(firstEntity);
+            entities.DeleteEntity(firstEntity);
+            Assert.That(lifecycle.QueuedCount, Is.EqualTo(1),
+                "A live unbind must enter the bounded lifecycle queue immediately.");
+        });
+
+        EntityUid recoveredEntity = default;
+        await WaitUntil(server, () =>
+        {
+            return runtime.TryGetEntity(create.ActorId, out recoveredEntity) &&
+                   recoveredEntity != firstEntity && entities.EntityExists(recoveredEntity);
+        }, "The actor was not recovered after its final checkpoint completed.", 360);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(domains.TryGetCached(create.ActorId, out var health, out _), Is.True);
+            Assert.That(health.AggregateVersion, Is.GreaterThan(versionBeforeRecovery),
+                "Recovery started from a stale pre-termination snapshot.");
+        });
+
+        NCCityActorDomainCapture staleCapture = null!;
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(actors.TryGetCached(create.ActorId, out _), Is.True);
+            Assert.That(domains.TryGetCached(create.ActorId, out var health, out var inventory), Is.True);
+            Assert.That(clock.TryGetCurrentTime(out _, out var now), Is.True);
+            Assert.That(domains.TryCaptureMaterialized(
+                create.ActorId,
+                recoveredEntity,
+                health.AggregateVersion,
+                inventory.AggregateVersion,
+                now,
+                out staleCapture,
+                out var error), Is.True, error);
+            mobStates.ChangeMobState(recoveredEntity, MobState.Dead);
+            entities.DeleteEntity(recoveredEntity);
+        });
+
+        await WaitUntil(server, () =>
+        {
+            return actors.TryGetCached(create.ActorId, out var actor) &&
+                   actor.Snapshot.Lifecycle.Status == NCCityActorStatus.Dead &&
+                   !runtime.TryGetEntity(create.ActorId, out _);
+        }, "The terminal actor state was not durably confirmed.", 360);
+
+        var terminalActor = await actors.GetAsync(create.ActorId, true);
+        Assert.That(terminalActor, Is.Not.Null);
+        var staleCommandId = Guid.NewGuid();
+        var staleResult = await actors.CommitPhysicalCheckpointAsync(new NCPhysicalActorCheckpointRequest(
+            staleCommandId,
+            create.ActorId,
+            terminalActor!.AggregateVersion,
+            default,
+            staleCapture,
+            staleCommandId,
+            AuditSource: "integration.physical-lifecycle.stale-terminal"));
+        Assert.That(staleResult.Status, Is.EqualTo(NCCityActorMutationStatus.Rejected));
+
+        NCPhysicalActorSpawnState terminalRecovery = null!;
+        await server.WaitPost(() => terminalRecovery = lifecycle.Request(new NCPhysicalActorSpawnRequest(
+            Guid.NewGuid(),
+            create.ActorId,
+            NCPhysicalActorSpawnReason.Recovery,
+            "integration.physical-lifecycle.terminal-recovery")));
+        Assert.That(terminalRecovery.Status, Is.EqualTo(NCPhysicalActorSpawnStatus.Rejected));
+
+        await server.WaitRunTicks(30);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(runtime.TryGetEntity(create.ActorId, out _), Is.False,
+                "A terminal actor must not be recovered from an older physical snapshot.");
+            Assert.That(lifecycle.QueuedCount, Is.Zero);
         });
 
         await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(
@@ -220,6 +313,8 @@ public sealed class NCPhysicalActorLifecycleSystemTest : GameTest
         });
 
         var serialization = server.ResolveDependency<ISerializationManager>();
+        HumanoidCharacterProfile profile = null!;
+        await server.WaitPost(() => profile = HumanoidCharacterProfile.Random());
         var commandId = Guid.NewGuid();
         var create = await actors.CreateResidentAsync(new NCCityResidentCreateRequest(
             commandId,
@@ -227,7 +322,7 @@ public sealed class NCPhysicalActorLifecycleSystemTest : GameTest
             "Inez Ward",
             Archetype,
             Persona,
-            NCHumanoidProfilePayload.Serialize(serialization, HumanoidCharacterProfile.Random()),
+            NCHumanoidProfilePayload.Serialize(serialization, profile),
             default,
             null,
             commandId,

@@ -133,6 +133,7 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
                 {
                     NeuralPersonaProfileId = request.Persona.Id,
                     HumanoidProfilePayload = request.HumanoidProfilePayload,
+                    GeneratedPersona = request.GeneratedPersona,
                 },
                 new NCCityActorLocation(
                     request.CurrentZone,
@@ -293,6 +294,11 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
             var current = await GetAsync(request.ActorId, true);
             if (current == null)
                 return RejectCheckpoint(request.ActorId, NCCityActorMutationStatus.NotFound, "Actor not found.");
+            if (current.Snapshot.Lifecycle.Status is NCCityActorStatus.Dead or NCCityActorStatus.Archived)
+            {
+                return RejectCheckpoint(request.ActorId, NCCityActorMutationStatus.Rejected,
+                    "Terminal actors cannot accept physical checkpoints.");
+            }
             if (current.AggregateVersion != request.ExpectedActorVersion)
             {
                 return RejectCheckpoint(request.ActorId, NCCityActorMutationStatus.VersionConflict,
@@ -523,6 +529,7 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
             string.IsNullOrWhiteSpace(request.AuditSource) || request.AuditSource.Length > MaximumAuditSourceLength ||
             string.IsNullOrWhiteSpace(request.HumanoidProfilePayload) ||
             request.HumanoidProfilePayload.Length > MaximumHumanoidProfilePayloadLength ||
+            !ValidGeneratedPersona(request.GeneratedPersona) ||
             !ValidCreateLocation(request.CurrentZone, request.PhysicalRecovery) ||
             !_prototypes.HasIndex(request.Persona) ||
             !_prototypes.TryIndex(request.Archetype, out NCCityActorArchetypePrototype? loaded) || loaded == null)
@@ -605,7 +612,8 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
             !snapshot.Location.LastKnownLocationAt.IsValid || !Enum.IsDefined(snapshot.Location.TravelPhase) ||
             !Enum.IsDefined(snapshot.Lifecycle.Status) ||
             snapshot.Location.ExpectedArrivalAt is { IsValid: false } ||
-            snapshot.Identity.HumanoidProfilePayload?.Length > MaximumHumanoidProfilePayloadLength)
+            snapshot.Identity.HumanoidProfilePayload?.Length > MaximumHumanoidProfilePayloadLength ||
+            !ValidGeneratedPersona(snapshot.Identity.GeneratedPersona))
         {
             return false;
         }
@@ -629,6 +637,18 @@ public sealed partial class NCCityActorRegistrySystem : EntitySystem
         };
         return true;
     }
+
+    private static bool ValidGeneratedPersona(NCGeneratedPersonaDetails? persona)
+    {
+        if (persona == null)
+            return true;
+        return StablePersonaKey(persona.BackgroundKey) && StablePersonaKey(persona.PressureKey) &&
+               StablePersonaKey(persona.FearKey) && StablePersonaKey(persona.GoalKey) &&
+               StablePersonaKey(persona.SocialHabitKey) && StablePersonaKey(persona.SpeechQuirkKey);
+    }
+
+    private static bool StablePersonaKey(string value) => value.Length is > 0 and <= 96 &&
+        value.All(character => char.IsAsciiLetterOrDigit(character) || character is '-' or '_' or '.');
 
     private bool ValidCreateLocation(NCZoneId zone, NCCityActorPhysicalRecoveryState? recovery) =>
         zone.IsValid

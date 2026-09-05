@@ -10,7 +10,6 @@ using Content.Server._NC.LivingCity.Social;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.Persistence.Identity;
-using Content.Shared._NC.Persistence.Time;
 using Content.Shared.Chat;
 using Content.Shared.Interaction;
 using Content.Shared.Pointing;
@@ -40,7 +39,6 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
     [Dependency] private NCCityLocalPerceptionSystem _perception = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCConversationSessionSystem _conversations = default!;
-    [Dependency] private NCNeuralCognitionClientSystem _neural = default!;
     [Dependency] private ChatSystem _chat = default!;
     [Dependency] private IGameTiming _timing = default!;
 
@@ -52,15 +50,10 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
     private float _maximumListeningRange;
     private readonly HashSet<EntityUid> _targets = [];
     private readonly Dictionary<EntityUid, bool> _targetNarrativeTiers = [];
-    private readonly PriorityQueue<ScheduledInitiative, (long DueTicks, long Sequence)> _initiativeQueue = new();
-    private readonly Dictionary<EntityUid, NCActiveWorldTime> _initiativeDue = [];
-    private long _initiativeSequence;
-    private TimeSpan _nextInitiativeAttempt;
     private int _ordinaryResidentTargets;
     private int _narrativeActorTargets;
 
     public int ActivePhysicalConversations => _active.Count;
-    public int ScheduledAmbientInitiatives => _initiativeDue.Count;
     public int OrdinaryResidentTargets => _ordinaryResidentTargets;
     public int NarrativeActorTargets => _narrativeActorTargets;
 
@@ -76,14 +69,11 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         {
             _ordinaryResidentTargets = Math.Max(0, _ordinaryResidentTargets - 1);
             _narrativeActorTargets++;
-            if (_clock.TryGetCurrentTime(out _, out var now))
-                ScheduleInitiative(target, now);
         }
         else
         {
             _narrativeActorTargets = Math.Max(0, _narrativeActorTargets - 1);
             _ordinaryResidentTargets++;
-            _initiativeDue.Remove(target);
         }
     }
 
@@ -171,28 +161,9 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         SubscribeLocalEvent<ActorComponent, NCNeuralLocalEmoteEvent>(OnPlayerEmoted);
         SubscribeLocalEvent<NCNeuralConversationTargetComponent, NCNeuralLocalEmoteEvent>(OnNpcEmoted);
         SubscribeLocalEvent<ActorComponent, AfterPointedAtEvent>(OnPlayerPointed);
+        SubscribeLocalEvent<NCConversationSessionTerminatedEvent>(OnConversationTerminated);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => Clear());
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => Clear());
-        SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(_ => ScheduleAllInitiatives());
-    }
-
-    public override void Update(float frameTime)
-    {
-        base.Update(frameTime);
-        if (!_neural.IsProviderEnabled || _timing.CurTime < _nextInitiativeAttempt ||
-            !_clock.TryGetCurrentTime(out _, out var now))
-            return;
-        _nextInitiativeAttempt = _timing.CurTime + TimeSpan.FromSeconds(1);
-        while (_initiativeQueue.TryPeek(out var item, out var priority) && priority.DueTicks <= now.Ticks)
-        {
-            _initiativeQueue.Dequeue();
-            if (!_initiativeDue.TryGetValue(item.Actor, out var due) || due.Ticks != priority.DueTicks)
-                continue;
-            _initiativeDue.Remove(item.Actor);
-            TryInitiateAmbientConversation(item.Actor);
-            ScheduleInitiative(item.Actor, now);
-            break;
-        }
     }
 
     private void OnTargetStartup(
@@ -211,8 +182,6 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         _listeningRanges[entity.Comp.ListeningRange] =
             _listeningRanges.GetValueOrDefault(entity.Comp.ListeningRange) + 1;
         _maximumListeningRange = Math.Max(_maximumListeningRange, entity.Comp.ListeningRange);
-        if (_clock.TryGetCurrentTime(out _, out var now))
-            ScheduleInitiative(entity.Owner, now);
     }
 
     private bool TryStartConversation(
@@ -318,7 +287,9 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
 
     private void HandleLocalExpression(EntityUid speaker, string message, bool emote)
     {
-        if (_active.TryGetValue(speaker, out var active) && active.GroupAddress &&
+        // A fresh point or an unambiguous spoken name is an explicit change of addressee. Direct conversations
+        // must not pin the speaker to the first NPC forever; reusing the same addressee still preserves the session.
+        if (_active.TryGetValue(speaker, out var active) &&
             TryAcquireAttention(speaker, message, out var direct, true))
         {
             active = direct;
@@ -437,7 +408,6 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
             else
                 _ordinaryResidentTargets = Math.Max(0, _ordinaryResidentTargets - 1);
         }
-        _initiativeDue.Remove(entity.Owner);
         if (entity.Comp.ListenToLocalSpeech && ValidRange(entity.Comp.ListeningRange) &&
             _listeningRanges.TryGetValue(entity.Comp.ListeningRange, out var count))
         {
@@ -481,6 +451,37 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         _conversations.TryTransition(active.SessionId, NCConversationStatus.Ended, reason, out _);
     }
 
+    /// <summary>Ends the physical conversation that owns this durable session, if it is still active.</summary>
+    public bool TryEndConversation(NCConversationSessionId sessionId, string reason)
+    {
+        foreach (var (speaker, active) in _active)
+        {
+            if (active.SessionId != sessionId)
+                continue;
+            EndConversation(speaker, reason);
+            return true;
+        }
+        return false;
+    }
+
+    private void OnConversationTerminated(NCConversationSessionTerminatedEvent args)
+    {
+        foreach (var speaker in _active
+                     .Where(pair => pair.Value.SessionId == args.SessionId)
+                     .Select(pair => pair.Key)
+                     .ToArray())
+        {
+            // The durable owner already archived the session, so only release physical attention here.
+            if (!_active.Remove(speaker, out var active))
+                continue;
+            foreach (var member in active.Audience)
+            {
+                if (_attention.TryGetValue(member.Entity, out var currentSpeaker) && currentSpeaker == speaker)
+                    _attention.Remove(member.Entity);
+            }
+        }
+    }
+
     private bool TryAcquireAttention(
         EntityUid speaker,
         string message,
@@ -498,7 +499,6 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         {
             if (!candidate.Comp.ListenToLocalSpeech || !ValidRange(candidate.Comp.ListeningRange) ||
                 candidate.Owner == speaker ||
-                _attention.TryGetValue(candidate.Owner, out var currentSpeaker) && currentSpeaker != speaker ||
                 !_runtime.TryGetActor(candidate.Owner, out _) ||
                 !_interaction.InRangeUnobstructed(speaker, candidate.Owner, candidate.Comp.ListeningRange))
             {
@@ -514,9 +514,29 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         var direct = FindPointedListener(speaker, candidates) ?? FindNamedListener(message, candidates);
         if (direct == null && explicitOnly)
             return false;
+        if (direct is { } explicitlyAddressed)
+        {
+            // A name or a fresh point is stronger than passive conversation attention. Release the old ordinary
+            // session first so a player can deliberately address another NPC in a crowd or interrupt NPC chatter.
+            if (_attention.TryGetValue(explicitlyAddressed.Owner, out var previousSpeaker) &&
+                previousSpeaker != speaker)
+            {
+                EndConversation(previousSpeaker, "attention-redirected");
+            }
+            if (explicitlyAddressed.Owner != speaker && _active.ContainsKey(explicitlyAddressed.Owner))
+                EndConversation(explicitlyAddressed.Owner, "attention-redirected");
+        }
+        if (direct is { } addressed && _active.TryGetValue(speaker, out var existing) &&
+            existing.Audience.Count == 1 && existing.Audience[0].Entity == addressed.Owner)
+        {
+            active = existing;
+            return true;
+        }
         IReadOnlyList<Entity<NCNeuralConversationTargetComponent>> selected = direct is { } target
             ? [target]
-            : candidates;
+            : candidates.Where(candidate =>
+                !_attention.TryGetValue(candidate.Owner, out var currentSpeaker) || currentSpeaker == speaker)
+                .ToArray();
         if (!TryStartConversation(speaker, selected, direct == null) ||
             !_active.TryGetValue(speaker, out var startedConversation))
             return false;
@@ -597,74 +617,6 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         _attention.Clear();
         _pointedAddresses.Clear();
         _nextNpcSpeech.Clear();
-        _initiativeDue.Clear();
-        _initiativeQueue.Clear();
-        _initiativeSequence = 0;
-    }
-
-    private void ScheduleAllInitiatives()
-    {
-        _initiativeDue.Clear();
-        _initiativeQueue.Clear();
-        if (!_clock.TryGetCurrentTime(out _, out var now))
-            return;
-        // This is a round-boundary rebuild, never a per-frame entity scan.
-        foreach (var target in _targets)
-            ScheduleInitiative(target, now);
-    }
-
-    private void ScheduleInitiative(EntityUid actor, NCActiveWorldTime now)
-    {
-        if (!TryComp<NCNeuralConversationTargetComponent>(actor, out var component) ||
-            !component.InitiateAmbientConversations || component.AmbientOpeners.Count == 0 ||
-            component.MinimumAmbientConversationInterval < TimeSpan.Zero ||
-            component.MaximumAmbientConversationInterval < component.MinimumAmbientConversationInterval)
-            return;
-        var range = component.MaximumAmbientConversationInterval - component.MinimumAmbientConversationInterval;
-        var seed = unchecked((uint) actor.Id * 2654435761u + (uint) _initiativeSequence);
-        var fraction = (seed & 0x00ffffff) / (float) 0x01000000;
-        var delay = component.MinimumAmbientConversationInterval + range * fraction;
-        var due = now.Advance(delay);
-        _initiativeDue[actor] = due;
-        var scheduled = new ScheduledInitiative(actor, ++_initiativeSequence);
-        _initiativeQueue.Enqueue(scheduled, (due.Ticks, scheduled.Sequence));
-    }
-
-    private void TryInitiateAmbientConversation(EntityUid speaker)
-    {
-        if (!TryComp<NCNeuralConversationTargetComponent>(speaker, out var component) ||
-            !Exists(speaker) || _active.ContainsKey(speaker) || _attention.ContainsKey(speaker) ||
-            !_runtime.TryGetActor(speaker, out _))
-            return;
-        var origin = _transform.GetMapCoordinates(speaker);
-        Entity<NCNeuralConversationTargetComponent>? selected = null;
-        var selectedDistance = float.MaxValue;
-        var checkedCandidates = 0;
-        foreach (var candidate in _lookup.GetEntitiesInRange<NCNeuralConversationTargetComponent>(
-                     origin, component.ListeningRange))
-        {
-            if (++checkedCandidates > component.MaximumAmbientCandidates)
-                break;
-            if (candidate.Owner == speaker || _active.ContainsKey(candidate.Owner) ||
-                _attention.ContainsKey(candidate.Owner) || !_runtime.TryGetActor(candidate.Owner, out _) ||
-                !_interaction.InRangeUnobstructed(speaker, candidate.Owner, component.ListeningRange))
-                continue;
-            var candidateCoordinates = _transform.GetMapCoordinates(candidate.Owner);
-            var distance = System.Numerics.Vector2.DistanceSquared(origin.Position, candidateCoordinates.Position);
-            if (distance >= selectedDistance)
-                continue;
-            selected = candidate;
-            selectedDistance = distance;
-        }
-        if (selected is not { } target || !TryStartConversation(speaker, [target], false) ||
-            !_active.TryGetValue(speaker, out var active))
-            return;
-        var index = (int) (unchecked((uint) HashCode.Combine(speaker.Id, _initiativeSequence)) %
-                           (uint) component.AmbientOpeners.Count);
-        var opener = NormalizeUtterance(component.AmbientOpeners[index], component.MaximumUtteranceLength);
-        if (opener.Length > 0 && TryRecordLocalExpression(speaker, active, opener, false))
-            _chat.TrySendInGameICMessage(speaker, opener, InGameICChatType.Speak, hideChat: false,
-                checkRadioPrefix: false);
     }
 
     private bool TryResolveSpeakerParty(EntityUid speaker, out NCPartyRef party)
@@ -705,5 +657,4 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
     private readonly record struct AudienceMember(EntityUid Entity, NCActorId ActorId, float ListeningRange);
     private readonly record struct PointedAddress(EntityUid Target, TimeSpan ExpiresAt);
 
-    private readonly record struct ScheduledInitiative(EntityUid Actor, long Sequence);
 }

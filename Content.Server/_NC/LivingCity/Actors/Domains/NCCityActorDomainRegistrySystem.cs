@@ -160,7 +160,8 @@ public sealed partial class NCCityActorDomainRegistrySystem : EntitySystem
         long expectedInventoryVersion,
         NCActiveWorldTime now,
         out NCCityActorDomainCapture capture,
-        out string? error)
+        out string? error,
+        bool allowTerminating = false)
     {
         capture = default!;
         error = null;
@@ -181,7 +182,8 @@ public sealed partial class NCCityActorDomainRegistrySystem : EntitySystem
                 now,
                 healthEventId,
                 out var health,
-                out error) ||
+                out error,
+                allowTerminating) ||
             !_inventoryAdapter.TryCapture(
                 actorEntity,
                 actorId,

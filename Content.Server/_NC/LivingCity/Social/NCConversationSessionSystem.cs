@@ -405,6 +405,10 @@ public sealed partial class NCConversationSessionSystem : EntitySystem
             var removed = _recent.Dequeue();
             _transcripts.Remove(removed.SessionId);
         }
+        // Physical conversation owners release their local attention immediately on every terminal path, including
+        // idle expiry. The archive write may complete later and must not keep an NPC permanently reserved.
+        RaiseLocalEvent(new NCConversationSessionTerminatedEvent(session.SessionId, session.Status,
+            session.EndReason));
         var persistence = closingEpoch is { } epoch && closingTime is { } now
             ? _archive.ArchiveAsync(session, transcript, epoch, now)
             : _archive.ArchiveAsync(session, transcript);
@@ -501,4 +505,15 @@ public sealed class NCConversationTurnRecordedEvent(
 {
     public NCConversationSessionSnapshot Session { get; } = session;
     public string? TransientUtterance { get; } = transientUtterance;
+}
+
+/// <summary>Signals that an in-memory conversation became terminal; persistence may still finish asynchronously.</summary>
+public sealed class NCConversationSessionTerminatedEvent(
+    NCConversationSessionId sessionId,
+    NCConversationStatus status,
+    string? reason) : EntityEventArgs
+{
+    public NCConversationSessionId SessionId { get; } = sessionId;
+    public NCConversationStatus Status { get; } = status;
+    public string? Reason { get; } = reason;
 }

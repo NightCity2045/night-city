@@ -21,8 +21,6 @@ public enum NCAILoadPressureReason : ushort
     FrameTime = 1 << 0,
     WorkBudget = 1 << 1,
     ActorSpawnQueue = 1 << 2,
-    PhysicalExecutionQueue = 1 << 3,
-    PhysicalExecutionBacklog = 1 << 4,
     PhysicalPerceptionQueue = 1 << 5,
     PhysicalPerceptionBacklog = 1 << 6,
 }
@@ -30,31 +28,25 @@ public enum NCAILoadPressureReason : ushort
 public enum NCAILoadQueueKind : byte
 {
     ActorSpawn,
-    PhysicalExecution,
     PhysicalPerception,
 }
 
 public enum NCAILoadBacklogKind : byte
 {
-    PhysicalExecution,
     PhysicalPerception,
 }
 
 public enum NCAILoadDispatchKind : byte
 {
     ActorSpawn,
-    PhysicalIntentLoad,
-    PhysicalExecutionUpdate,
     PhysicalPerception,
 }
 
 public enum NCAILoadWorkKind : byte
 {
     ActorSpawn,
-    PhysicalExecution,
     PhysicalPerception,
     DamageEvents,
-    DoorInteractions,
 }
 
 /// <summary>

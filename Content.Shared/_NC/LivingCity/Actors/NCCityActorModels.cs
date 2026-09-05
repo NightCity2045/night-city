@@ -63,7 +63,21 @@ public sealed record NCCityActorIdentity(
     /// Server-serialized humanoid profile. It preserves the exact generated body instead of rerolling on MapInit.
     /// </summary>
     public string? HumanoidProfilePayload { get; init; }
+
+    /// <summary>
+    /// Procedurally selected, durable life details that distinguish otherwise similar generated residents. They are
+    /// subjective character context, not claims about current world state.
+    /// </summary>
+    public NCGeneratedPersonaDetails? GeneratedPersona { get; init; }
 }
+
+public sealed record NCGeneratedPersonaDetails(
+    string BackgroundKey,
+    string PressureKey,
+    string FearKey,
+    string GoalKey,
+    string SocialHabitKey,
+    string SpeechQuirkKey);
 
 /// <summary>
 /// Persistent physical recovery point. It contains no runtime map or entity identity.

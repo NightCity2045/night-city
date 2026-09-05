@@ -29,13 +29,6 @@ cmd-ncactorspawn-completed = Запрос {$request} актора {$key}: {$stat
 cmd-ncactorspawn-failed = Запрос {$request} актора {$key} завершился со статусом «{$status}»: {$reason}
 cmd-ncactorspawn-result-unavailable = Результат запроса {$request} актора {$key} больше недоступен для наблюдения.
 
-cmd-ncactor-neural-ready = Neural Cognition доступен; текущий бюджетный режим: {$mode}. Личность, память, восприятие, автономия и GPT-allowlist актора активны.
-cmd-ncactor-neural-fallback = Актор остаётся физическим, но GPT сейчас не может расходовать токены; активны повтор подключения и локальные реакции самосохранения. Бюджетный режим: {$mode}.
-cmd-ncactor-neural-mode-normal = нормальный
-cmd-ncactor-neural-mode-economy = экономный
-cmd-ncactor-neural-mode-restricted = ограниченный
-cmd-ncactor-neural-mode-fallback = только резервная логика
-
 cmd-ncactor-spawn-status-queued = поставлен в очередь
 cmd-ncactor-spawn-status-loading = загружается постоянное состояние
 cmd-ncactor-spawn-status-retrying = ожидается безопасный пол
