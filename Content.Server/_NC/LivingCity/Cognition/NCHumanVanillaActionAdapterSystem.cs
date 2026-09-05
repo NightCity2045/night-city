@@ -231,7 +231,10 @@ public sealed partial class NCHumanVanillaActionAdapterSystem : EntitySystem
 
     private void OnExecute(NCHumanActionExecutionEvent args)
     {
-        if (args.Action.Operation == NCHumanActionOperationKind.None)
+        // Station-work and other adapters subscribe to this same event. Never reject or create execution state
+        // for an operation belonging to another executor.
+        if (args.Action.Executor == NCHumanActionExecutorKind.VanillaStationWork ||
+            args.Action.Operation == NCHumanActionOperationKind.None)
             return;
 
         args.Handled = true;

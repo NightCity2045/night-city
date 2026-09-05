@@ -3,6 +3,8 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 import json
+import asyncio
+import hashlib
 import logging
 import os
 import time
@@ -11,11 +13,13 @@ from typing import Literal
 from fastapi import FastAPI, Header, HTTPException, Request as FastAPIRequest
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, APITimeoutError, APIConnectionError
+from app.request_cache import RequestCache
 from prometheus_client import Counter, Histogram, make_asgi_app
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
 app = FastAPI(title="Night City Neural Cognition Service", version="1")
+request_cache = RequestCache()
 app.mount("/metrics", make_asgi_app())
 requests_total = Counter("nc_neural_requests_total", "Neural requests", ["kind", "result"])
 latency = Histogram("nc_neural_latency_seconds", "Provider latency", ["kind"])
@@ -575,6 +579,21 @@ def _retry_after_invalid_answer(answer: ProviderAnswer, diagnostic: str) -> Prov
     return answer
 
 
+def _normalize_wait_decision(answer: ProviderAnswer) -> ProviderAnswer:
+    """Repair only the mode label, never invent commands or bypass their subsequent authorization."""
+    if answer.decision_mode != "wait":
+        return answer
+    if answer.sense_requests and (answer.commands or answer.speech_acts):
+        return _retry_after_invalid_answer(answer, "wait-decision-conflict")
+    if answer.commands:
+        answer.decision_mode = "act"
+    elif answer.speech_acts:
+        answer.decision_mode = "speak"
+    elif answer.sense_requests:
+        answer.decision_mode = "sense"
+    return answer
+
+
 def _provider_response_failure(response) -> str | None:
     """Classify provider terminal states without logging private generated text."""
     status = getattr(response, "status", None)
@@ -609,12 +628,30 @@ async def ready():
 
 
 @app.post("/v1/cognition")
-async def cognition(request: Request, authorization: str | None = Header(default=None)):
+async def cognition(request: Request, authorization: str | None = Header(default=None),
+                    provider_timeout_seconds: float = Header(default=35, gt=0, le=600,
+                        alias="X-NC-Provider-Timeout-Seconds")):
     scheme, separator, supplied_token = (authorization or "").partition(" ")
     provider_api_key = supplied_token.strip()
     if separator != " " or scheme.lower() != "bearer" or not provider_api_key:
         raise HTTPException(401, "provider bearer is required")
-    provider_client = AsyncOpenAI(api_key=provider_api_key)
+    # Direct unit-test calls do not resolve FastAPI Header defaults.
+    timeout = provider_timeout_seconds if isinstance(provider_timeout_seconds, (int, float)) else 35
+    credential_hash = hashlib.sha256(provider_api_key.encode()).digest()
+    fingerprint = hashlib.sha256(request.model_dump_json(by_alias=True).encode()).digest()
+
+    async def execute():
+        try:
+            async with asyncio.timeout(timeout):
+                return await _perform_cognition(request, provider_api_key, timeout)
+        except TimeoutError as error:
+            raise HTTPException(504, "provider deadline exceeded") from error
+
+    return await request_cache.get((credential_hash, request.request_id), fingerprint, execute)
+
+
+async def _perform_cognition(request: Request, provider_api_key: str, timeout: float):
+    provider_client = AsyncOpenAI(api_key=provider_api_key, timeout=timeout, max_retries=0)
     started = time.monotonic()
     try:
         # The key is transient request state and is never logged, persisted, or included in provider payloads.
@@ -728,6 +765,7 @@ async def cognition(request: Request, authorization: str | None = Header(default
         if request.kind == "DialogueContinuation":
             if request.dialogue_input is None:
                 raise ValueError("dialogue continuation is missing dialogueInput")
+        answer = _normalize_wait_decision(answer)
         should_speak = len(answer.speech_acts) > 0
         if answer.decision_mode == "act":
             if not answer.commands or answer.sense_requests:
@@ -863,7 +901,16 @@ async def cognition(request: Request, authorization: str | None = Header(default
             getattr(error, "request_id", "n/a"),
             detail,
         )
-        raise HTTPException(502, f"provider response rejected: {type(error).__name__}") from error
+        status = getattr(error, "status_code", None)
+        if isinstance(error, (APITimeoutError, TimeoutError)):
+            status = 504
+        elif isinstance(error, APIConnectionError):
+            status = 503
+        elif isinstance(error, (ValidationError, ValueError)):
+            status = 422
+        elif status not in {400, 401, 403, 408, 409, 422, 429, 500, 502, 503, 504}:
+            status = 502
+        raise HTTPException(status, f"provider response rejected: {type(error).__name__}") from error
     finally:
         await provider_client.close()
         latency.labels(request.kind).observe(time.monotonic() - started)

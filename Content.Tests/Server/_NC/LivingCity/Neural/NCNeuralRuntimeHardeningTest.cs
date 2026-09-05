@@ -20,6 +20,28 @@ namespace Content.Tests.Server._NC.LivingCity.Neural;
 public sealed class NCNeuralRuntimeHardeningTest
 {
     [Test]
+    public void VanillaAdapterDoesNotRejectStationWorkOwnedByAnotherSubscriber()
+    {
+        var action = new NCHumanActionPrototype();
+        typeof(NCHumanActionPrototype).GetProperty(nameof(action.Executor))!
+            .SetValue(action, NCHumanActionExecutorKind.VanillaStationWork);
+        typeof(NCHumanActionPrototype).GetProperty(nameof(action.Operation))!
+            .SetValue(action, NCHumanActionOperationKind.ProcessCargoOrder);
+        var args = new NCHumanActionExecutionEvent(Guid.NewGuid(), NCActorId.New(), null,
+            Guid.NewGuid(), Guid.NewGuid(), null!, null!, default, action, null!, default, default);
+        var adapter = new NCHumanVanillaActionAdapterSystem();
+        typeof(NCHumanVanillaActionAdapterSystem)
+            .GetMethod("OnExecute", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!
+            .Invoke(adapter, new object[] { args });
+        Assert.Multiple(() =>
+        {
+            Assert.That(args.Handled, Is.False);
+            Assert.That(args.Failure, Is.Null);
+            Assert.That(args.Completed, Is.False);
+        });
+    }
+
+    [Test]
     public void MalformedNestedProviderValuesRejectWithoutThrowing()
     {
         var request = Request();
@@ -318,7 +340,7 @@ public sealed class NCNeuralRuntimeHardeningTest
             Assert.That(NCNeuralCognitionClientSystem.CountsTowardCircuit(
                 NCNeuralFailureKind.SessionCancelled), Is.False);
             Assert.That(NCNeuralCognitionClientSystem.CountsTowardCircuit(
-                NCNeuralFailureKind.Authentication), Is.True);
+                NCNeuralFailureKind.Authentication), Is.False);
             Assert.That(NCNeuralCognitionClientSystem.CountsTowardCircuit(NCNeuralFailureKind.Timeout), Is.True);
             Assert.That(NCNeuralCognitionClientSystem.CountsTowardCircuit(
                 NCNeuralFailureKind.ServiceUnavailable), Is.True);

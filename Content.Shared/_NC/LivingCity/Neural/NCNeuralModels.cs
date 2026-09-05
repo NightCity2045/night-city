@@ -276,7 +276,8 @@ public sealed partial class NCNeuralPolicyPrototype : IPrototype
     [IdDataField] public string ID { get; private set; } = default!;
     [DataField] public bool Enabled { get; private set; }
     [DataField] public string Endpoint { get; private set; } = "http://neural-cognition:8080/v1/cognition";
-    [DataField] public int MaximumConcurrent { get; private set; } = 4;
+    [DataField] public int MaximumTransportRetries { get; private set; } = 2;
+    [DataField] public TimeSpan TransportRetryDelay { get; private set; } = TimeSpan.FromSeconds(30);
     [DataField] public int MaximumCompletionsPerTick { get; private set; } = 16;
     [DataField] public int MaximumFacts { get; private set; } = 64;
     [DataField] public int MaximumCapabilities { get; private set; } = 32;
@@ -306,6 +307,7 @@ public sealed partial class NCNeuralPolicyPrototype : IPrototype
     [DataField] public int MaximumPendingCorrelations { get; private set; } = 1024;
     [DataField] public int MaximumTrackedActorDiagnostics { get; private set; } = 256;
     [DataField] public TimeSpan RequestTimeout { get; private set; } = TimeSpan.FromSeconds(8);
+    [DataField] public TimeSpan ProviderTimeout { get; private set; } = TimeSpan.FromSeconds(6);
     [DataField] public TimeSpan RequestLifetime { get; private set; } = TimeSpan.FromSeconds(20);
     [DataField] public TimeSpan CircuitOpenDuration { get; private set; } = TimeSpan.FromMinutes(2);
     [DataField] public TimeSpan SuggestionLifetime { get; private set; } = TimeSpan.FromSeconds(20);

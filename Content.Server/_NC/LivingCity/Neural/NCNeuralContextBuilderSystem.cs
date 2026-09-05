@@ -145,7 +145,7 @@ public sealed partial class NCNeuralContextBuilderSystem : EntitySystem
         var wakeRevision = Interlocked.Increment(ref _wakeRevision);
         var decisionRevision = _client.GetActorDecisionRevision(actorId);
         var actor = await _actors.GetAsync(actorId, true);
-        if (actor == null)
+        if (actor == null || !_client.CanUseGpt(actorId))
             return false;
         if (!_prototypes.TryIndex(new ProtoId<NCCityActorArchetypePrototype>(actor.Snapshot.Identity.ArchetypeId),
                 out var archetype) || archetype == null)

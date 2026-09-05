@@ -25,6 +25,7 @@ public sealed partial class NCPhysicalActorBrainSystem : EntitySystem
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
     [Dependency] private NCNeuralContextBuilderSystem _context = default!;
+    [Dependency] private NCNeuralCognitionClientSystem _client = default!;
     [Dependency] private ITaskManager _taskManager = default!;
 
     private readonly Dictionary<NCActorId, ScheduledDecision> _scheduled = [];
@@ -47,7 +48,7 @@ public sealed partial class NCPhysicalActorBrainSystem : EntitySystem
     /// <summary>Requests an immediate fresh GPT decision for a physical actor after a reactive world event.</summary>
     public bool RequestDecision(NCActorId actorId)
     {
-        if (!_active || !_runtime.TryGetEntity(actorId, out var entity) || !Exists(entity) ||
+        if (!_active || !_client.CanUseGpt(actorId) || !_runtime.TryGetEntity(actorId, out var entity) || !Exists(entity) ||
             !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
         {
             return false;
@@ -88,6 +89,16 @@ public sealed partial class NCPhysicalActorBrainSystem : EntitySystem
                 continue;
 
             _scheduled.Remove(queued.ActorId);
+            if (!_client.CanUseGpt(queued.ActorId))
+                continue;
+            // A slow provider is still thinking. Refreshing its background request now would mark every answer
+            // obsolete; reactive speech and perception have independent event-driven submissions.
+            if (_client.HasOutstandingRequest(queued.ActorId))
+            {
+                Schedule(queued.ActorId, now.Advance(_policy.RetryInterval));
+                dispatched++;
+                continue;
+            }
             if (!_inFlight.Add(queued.ActorId))
                 continue;
             _ = ObserveSubmissionAsync(_generation, queued.ActorId);
@@ -121,7 +132,8 @@ public sealed partial class NCPhysicalActorBrainSystem : EntitySystem
             _wakeConditions.Remove(args.ActorId);
             return;
         }
-        if (!_active || _policy == null || !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
+        if (!_active || _policy == null || !_client.CanUseGpt(args.ActorId) ||
+            !_clock.TryGetCurrentTime(out var epoch, out var now) || epoch != _epoch)
             return;
 
         var raw = args.ActorId.Value.ToByteArray();

@@ -28,7 +28,8 @@
   - murder you
   verbalThreatLifetime: 2m
   pointedAddressLifetime: 8s
-  idleTimeout: 3m
+  # Allow three 45-second attempts and delayed retries before an unanswered conversation expires.
+  idleTimeout: 5m
   maximumLifetime: 30m
   expirySweepInterval: 1s
 

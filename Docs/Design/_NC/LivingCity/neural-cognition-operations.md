@@ -2,6 +2,16 @@
 
 Status: Current for Physical GPT A-Life v3.
 
+Transport recovery (2026-09-05): each actor retains separate pending dialogue and autonomous requests, with one
+HTTP request at a time per body. There is no cross-actor concurrency cap or reserved-slot pool. Background polling does not
+supersede an outstanding response. The timeout is 45 wall-clock seconds; up to two delayed transport retries preserve
+the original dialogue correlation. Failures never open a global dispatch circuit. Retry delays and conversation
+expiry use active-world time (unscaled elapsed simulation time). The five-minute idle window covers three
+45-second attempts plus the 30/60-second retry delays, excluding any additional queue backlog.
+
+These fixes do not certify autonomous departmental shifts. Existing station adapters expose individual operations;
+complete supply, preparation, delivery and patient-care workflows still require implementation and live verification.
+
 The game remains authoritative while the service is disabled or unavailable. Physical NPCs stay in the world, but
 they do not receive a substitute deterministic social or life-planning brain. They may finish an already accepted
 safe command or use a bounded safety reflex, then wait for the provider. The game server reads the confidential
@@ -57,7 +67,6 @@ Run the server normally without a provider to verify physical persistence, boots
 safe failure behavior. This does not validate autonomous decisions: GPT is the primary ordinary decision source and
 no local BDI/Utility planner replaces it.
 
-For the isolated station exercise, select game preset `NCReachNpcTest` (`reach-npc-test` / `reachgpt`). It loads Reach
-and creates exactly 30 persistent physical NPCs at authored job spawn points. The same bodies, neural coordinator,
-sensorium and action authorities are used on maps with or without CityGraph; station destinations are inferred from
-job spawn points, departments and navigation beacons.
+The Reach NPC test presets and their antagonist scenario have been removed. The Reach map itself remains.
+GPT is now opt-in through an existing NarrativeActorProfile; ordinary residents cannot submit provider requests.
+Local ordinary-NPC life/work behavior remains incomplete; disabling GPT is not a completed local AI implementation.

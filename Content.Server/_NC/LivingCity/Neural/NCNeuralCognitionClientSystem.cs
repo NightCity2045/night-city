@@ -10,6 +10,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
 using Content.Server._NC.LivingCity.Actors;
+using Content.Shared._NC.LivingCity.Actors;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.Configuration;
 using Content.Shared._NC.LivingCity.Neural;
@@ -89,6 +90,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     private readonly ConcurrentQueue<TransportCompletion> _transportCompletions = new();
     private readonly ConcurrentQueue<UsageCompletion> _usageCompletions = new();
     private readonly HashSet<Guid> _known = [];
+    private readonly Dictionary<Guid, int> _transportRetries = [];
     private readonly Dictionary<NCActorId, long> _newestWakeRevisions = [];
     private readonly Dictionary<NCActorId, long> _actorDecisionRevisions = [];
     private readonly HashSet<NCActorId> _inFlightActors = [];
@@ -134,6 +136,23 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     /// <summary>True when transport is configured. Spend authority remains entirely with the provider.</summary>
     public bool IsProviderEnabled => _active && ProviderConfigured;
 
+    /// <summary>Only explicitly authored important characters may spend provider tokens. Missing data fails closed.</summary>
+    public bool CanUseGpt(NCActorId actorId)
+    {
+        if (!_actors.TryGetCached(actorId, out var actor) || actor == null ||
+            !_prototypes.TryIndex(new ProtoId<NCCityActorArchetypePrototype>(actor.Snapshot.Identity.ArchetypeId),
+                out var archetype))
+            return false;
+        var profile = !string.IsNullOrWhiteSpace(actor.Snapshot.Identity.NarrativeActorProfileId)
+            ? new ProtoId<NCNarrativeActorProfilePrototype>(actor.Snapshot.Identity.NarrativeActorProfileId)
+            : archetype.NarrativeActorProfile;
+        return profile is { } selected && _prototypes.HasIndex(selected);
+    }
+
+    /// <summary>Background polling must not repeatedly supersede an answer still being generated for this body.</summary>
+    public bool HasOutstandingRequest(NCActorId actorId) =>
+        _inFlightActors.Contains(actorId) || _queue.Contains(actorId);
+
     public override void Initialize()
     {
         base.Initialize();
@@ -164,19 +183,18 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         }
 
         var now = CurrentTime();
-        if (_circuitOpenUntil is { } open)
-        {
-            if (open > now)
-                return;
-            _circuitOpenUntil = null;
-        }
-
         if (!ProviderConfigured || !TryGetProviderUri(out var providerUri) || _sessionCancellation == null)
             return;
 
         var providerApiKey = ProviderApiKey;
-        while (_inFlight < _policy.MaximumConcurrent && _queue.TryDequeue(_inFlightActors, out var request))
+        // Bodies dispatch independently; only another outstanding request for the same actor blocks dispatch.
+        while (_queue.TryDequeue(_inFlightActors, out var request, now: now.Ticks))
         {
+            if (!CanUseGpt(request.ActorId))
+            {
+                Publish(Fallback(request, NCNeuralResultStatus.Stale, "ordinary-npc-gpt-disabled"));
+                continue;
+            }
             now = CurrentTime();
             if (request.ExpiresAt <= now)
             {
@@ -196,13 +214,15 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             _inFlight++;
             _inFlightActors.Add(request.ActorId);
             _inFlightRequests[request.ActorId] = request;
-            _ = ExecuteAsync(request, _generation, providerApiKey, providerUri, _policy.RequestTimeout,
+            _ = ExecuteAsync(request, _generation, providerApiKey, providerUri, _policy.RequestTimeout, _policy.ProviderTimeout,
                 _sessionCancellation.Token);
         }
     }
 
     public bool Submit(NCNeuralRequestEnvelope request)
     {
+        if (request.AccessTier != NCNeuralAccessTier.NarrativeActor || !CanUseGpt(request.ActorId))
+            return false;
         if (!_active || _policy == null || !Valid(request, _policy) || !MatchesCurrentPrompt(request, _policy) ||
             _known.Contains(request.RequestId))
             return false;
@@ -224,14 +244,15 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         }
 
         _known.Add(request.RequestId);
-        if (_newestWakeRevisions.TryGetValue(request.ActorId, out var latestWakeRevision) &&
+        if (request.Kind != NCNeuralRequestKind.DialogueContinuation &&
+            _newestWakeRevisions.TryGetValue(request.ActorId, out var latestWakeRevision) &&
             request.WakeRevision < latestWakeRevision)
         {
             // A slower context build completed after a newer wake had already reached this queue.
             Publish(new NCNeuralResult(NCNeuralResultStatus.Stale, request, null, "older-async-build"));
             return true;
         }
-        if (request.WakeRevision > latestWakeRevision)
+        if (request.WakeRevision > _newestWakeRevisions.GetValueOrDefault(request.ActorId))
             _newestWakeRevisions[request.ActorId] = request.WakeRevision;
         // A fresh urgent observation must supersede an older answer still being composed for the same body. We do
         // not cancel the HTTP request because usage still has to be accounted, but its result may no longer act.
@@ -281,7 +302,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
 
         snapshot = new NCNeuralActorRuntimeSnapshot(
             state.AccessTier,
-            (_inFlightActors.Contains(actorId) ? 1 : 0) + (_queue.Contains(actorId) ? 1 : 0),
+            (_inFlightActors.Contains(actorId) ? 1 : 0) + _queue.CountFor(actorId),
             _queue.Contains(actorId),
             state.InputTokens,
             state.CachedInputTokens,
@@ -336,6 +357,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         string providerApiKey,
         Uri providerUri,
         TimeSpan timeout,
+        TimeSpan providerTimeout,
         CancellationToken sessionToken)
     {
         NCNeuralResponseEnvelope? responseValue = null;
@@ -355,6 +377,8 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             // The configured provider credential is forwarded only to the bounded cognition gateway. It is never
             // serialized into gameplay payloads, persisted, or included in diagnostics.
             message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", providerApiKey);
+            message.Headers.Add("X-NC-Provider-Timeout-Seconds",
+                providerTimeout.TotalSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture));
             using var response = await _http.SendAsync(message, cancellation.Token);
             if (!response.IsSuccessStatusCode)
             {
@@ -364,7 +388,9 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
             else
             {
                 responseValue = await response.Content.ReadFromJsonAsync<NCNeuralResponseEnvelope>(cancellation.Token);
-                actor = await _actors.GetAsync(request.ActorId, true);
+                // Stop waiting even if the underlying persistence operation cannot itself be cancelled.
+                // Its eventual result cannot publish a second transport completion or keep the actor occupied.
+                actor = await _actors.GetAsync(request.ActorId, true).WaitAsync(cancellation.Token);
             }
         }
         catch (OperationCanceledException)
@@ -426,6 +452,19 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
                 _rejects++;
             RecordFailure(completion.Failure, completion.Reason);
             FailCircuit(completion.Failure);
+            // Preserve the original dialogue correlation across transient failures. A delayed retry frees its
+            // HTTP slot, and a newer wake in the same lane can still replace it normally.
+            var retries = _transportRetries.GetValueOrDefault(request.RequestId);
+            if (!superseded && CountsTowardCircuit(completion.Failure) &&
+                retries < _policy!.MaximumTransportRetries && request.ExpiresAt > CurrentTime())
+            {
+                _transportRetries[request.RequestId] = retries + 1;
+                var due = CurrentTime().Advance(_policy.TransportRetryDelay * (retries + 1));
+                var outcome = _queue.Enqueue(request, out var displaced, due.Ticks);
+                if (outcome != NCNeuralPendingEnqueueOutcome.Added && displaced != null)
+                    Publish(new NCNeuralResult(NCNeuralResultStatus.Stale, displaced, null, "retry-superseded"));
+                return;
+            }
             Publish(superseded
                 ? new NCNeuralResult(
                     NCNeuralResultStatus.Stale,
@@ -594,6 +633,8 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         NCNeuralRequestEnvelope inFlight,
         NCNeuralRequestEnvelope incoming) =>
         inFlight.ActorId == incoming.ActorId && incoming.WakeRevision > inFlight.WakeRevision &&
+        (inFlight.Kind != NCNeuralRequestKind.DialogueContinuation ||
+         incoming.Kind == NCNeuralRequestKind.DialogueContinuation) &&
         incoming.Priority <= inFlight.Priority;
 
     internal long GetActorDecisionRevision(NCActorId actorId) =>
@@ -619,9 +660,10 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
     {
         HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden => NCNeuralFailureKind.Authentication,
         HttpStatusCode.TooManyRequests => NCNeuralFailureKind.RateLimited,
-        HttpStatusCode.BadGateway or HttpStatusCode.ServiceUnavailable or HttpStatusCode.GatewayTimeout =>
+        HttpStatusCode.GatewayTimeout => NCNeuralFailureKind.Timeout,
+        HttpStatusCode.BadGateway or HttpStatusCode.ServiceUnavailable =>
             NCNeuralFailureKind.ServiceUnavailable,
-        HttpStatusCode.UnprocessableEntity or HttpStatusCode.BadRequest =>
+        HttpStatusCode.UnprocessableEntity or HttpStatusCode.BadRequest or HttpStatusCode.Conflict =>
             NCNeuralFailureKind.ProviderRejected,
         _ => NCNeuralFailureKind.Transport,
     };
@@ -849,23 +891,20 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         if (!CountsTowardCircuit(failure))
             return;
 
-        // Authentication is a shared configuration fault. Malformed or rejected individual requests are isolated
-        // above and must never disable cognition for every other actor.
-        var failFast = failure == NCNeuralFailureKind.Authentication;
-        _failures = failFast ? _policy!.CircuitFailureThreshold : checked(_failures + 1);
-        if (_failures >= _policy!.CircuitFailureThreshold)
-            _circuitOpenUntil = CurrentTime().Advance(_policy.CircuitOpenDuration);
+        // Failures remain observable, but never stop dispatch for unrelated actors.
+        // Each failed strategic request is rescheduled by the brain's bounded retry cadence.
+        _failures = _failures == int.MaxValue ? int.MaxValue : _failures + 1;
     }
 
     internal static bool CountsTowardCircuit(NCNeuralFailureKind failure) => failure is
         NCNeuralFailureKind.Timeout or
-        NCNeuralFailureKind.Authentication or
         NCNeuralFailureKind.ServiceUnavailable or
         NCNeuralFailureKind.RateLimited or
         NCNeuralFailureKind.Transport;
 
     private void Publish(NCNeuralResult result)
     {
+        _transportRetries.Remove(result.Request.RequestId);
         PublishSingle(result);
     }
 
@@ -1063,6 +1102,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         _generation++;
         _sessionCancellation?.Cancel();
         _queue.Clear();
+        _transportRetries.Clear();
         _inFlightActors.Clear();
         _inFlightRequests.Clear();
         _supersededRequests.Clear();
@@ -1088,7 +1128,8 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         _policy = null;
     }
     private static bool Valid(NCNeuralPolicyPrototype value) =>
-        value.MaximumConcurrent is > 0 and <= 32 && value.MaximumCompletionsPerTick is > 0 and <= 256 &&
+        value.MaximumCompletionsPerTick is > 0 and <= 256 &&
+        value.MaximumTransportRetries is >= 0 and <= 8 && value.TransportRetryDelay > TimeSpan.Zero &&
         value.MaximumFacts is > 0 and <= 256 &&
         value.MaximumCapabilities is > 0 and <= 128 && value.MaximumPerceivedSubjects is > 0 and <= 128 &&
         value.MaximumKnownLocations is > 0 and <= 512 &&
@@ -1106,6 +1147,7 @@ public sealed partial class NCNeuralCognitionClientSystem : EntitySystem, INCNeu
         value.OrdinaryDialogueMaximumMemorySessions is > 0 &&
         value.OrdinaryDialogueMaximumMemorySessions <= value.MaximumDialogueMemorySessions &&
         value.RequestLifetime >= value.RequestTimeout &&
+        value.ProviderTimeout > TimeSpan.Zero && value.ProviderTimeout < value.RequestTimeout &&
         value.MaximumPendingCorrelations is > 0 and <= 16384 && value.SuggestionLifetime > TimeSpan.Zero &&
         value.MaximumTrackedActorDiagnostics is > 0 and <= 4096 &&
         float.IsFinite(value.DefensiveReflexRetreatDistance) &&

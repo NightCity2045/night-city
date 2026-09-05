@@ -4,6 +4,7 @@
 
 import json
 import unittest
+from unittest.mock import patch
 from types import SimpleNamespace
 
 from fastapi import HTTPException
@@ -85,7 +86,9 @@ class _FakeClientFactory:
         self._confidence = confidence
         self._intent_target_handle = intent_target_handle
 
-    def __call__(self, *, api_key: str):
+    def __call__(self, *, api_key: str, timeout: float, max_retries: int):
+        if timeout <= 0 or max_retries != 0:
+            raise AssertionError("provider retries or deadline are unsafe")
         if api_key != "test-key":
             raise AssertionError("unexpected provider credential")
         return _FakeClient(
@@ -97,6 +100,39 @@ class _FakeClientFactory:
 
 
 class NeuralCognitionServiceTest(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        main.request_cache = main.RequestCache()
+
+    async def test_wait_label_repair_keeps_authorization_and_handles_conflicts(self):
+        original = _FakeResponses.create
+        for shape, expected in [("act", "act"), ("speak", "speak"), ("sense", "sense"),
+                                ("mixed", "wait"), ("forbidden", "wait"), ("empty", "wait")]:
+            with self.subTest(shape=shape):
+                main.request_cache = main.RequestCache()
+                async def mislabeled(client, **kwargs):
+                    response = await original(client, **kwargs)
+                    answer = json.loads(response.output_text)
+                    answer["decision_mode"] = "wait"
+                    if shape in {"speak", "sense", "empty"}:
+                        answer["commands"] = []
+                        answer["intent"] = None
+                    if shape in {"sense", "empty"}:
+                        answer["speech_acts"] = []
+                    if shape in {"sense", "mixed"}:
+                        answer["sense_requests"] = [{"kind": "look-around", "targetHandle": ""}]
+                    response.output_text = json.dumps(answer)
+                    return response
+
+                capability = "not-authorized" if shape == "forbidden" else "NCCognitionStrategicFallback"
+                with patch.object(_FakeResponses, "create", mislabeled), \
+                        patch.object(main, "AsyncOpenAI", _FakeClientFactory(capability)):
+                    result = await main.cognition(self.request(), authorization="Bearer test-key")
+                self.assertEqual(result["decisionMode"], expected)
+                if shape in {"mixed", "forbidden"}:
+                    self.assertEqual(result["commands"], [])
+                    self.assertEqual(result["speechActs"], [])
+                    self.assertEqual(result["wake"]["afterSeconds"], 1)
+
     @staticmethod
     def action(capability_id: str, operation: str = "holdposition", target: str = "none") -> dict:
         return {

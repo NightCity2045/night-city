@@ -6,7 +6,8 @@
   id: Default
   enabled: true
   endpoint: http://neural-cognition:8080/v1/cognition
-  maximumConcurrent: 8
+  maximumTransportRetries: 2
+  transportRetryDelay: 30s
   maximumCompletionsPerTick: 16
   maximumFacts: 64
   maximumCapabilities: 48
@@ -36,9 +37,9 @@
   circuitFailureThreshold: 5
   maximumPendingCorrelations: 1024
   maximumTrackedActorDiagnostics: 256
-  requestTimeout: 8s
-  # Active-world time runs twelve times faster than wall time. Twenty game minutes keep a 30-NPC burst alive for
-  # eight worst-case four-slot provider waves, while the wake/actor revision guards reject obsolete work.
+  requestTimeout: 45s
+  providerTimeout: 35s
+  # Revision and live-target checks still reject obsolete physical commands while requests wait in the queue.
   requestLifetime: 20m
   circuitOpenDuration: 2m
   suggestionLifetime: 2m
@@ -49,7 +50,7 @@
   id: NCDefaultPhysicalActorBrain
   # One response may contain up to eight commands, so calm actors need no rapid polling. Reactive perception,
   # dialogue and incidents still submit immediately through their dedicated event paths.
-  decisionInterval: 30m
+  decisionInterval: 2m
   retryInterval: 2m
   # Avoid a simultaneous 30-actor provider burst without leaving most of a fresh cohort visibly idle.
   initialStagger: 30s
