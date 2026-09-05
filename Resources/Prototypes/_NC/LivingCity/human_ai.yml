@@ -2,77 +2,8 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-# Every physical Living City human starts from this root. The compounds below are reusable physical abilities;
-# employment, personality, BDI and Neural cognition choose goals without replacing the actor's base brain.
-- type: ncHumanDirectivePolicy
-  id: NCDefaultHumanDirectivePolicy
-  defaultDuration: 4h
-  maximumPriority: 900
-  maximumOrderLength: 128
-  allowEqualRank: false
-  # Named recipients are exact. A spoken order must never silently absorb an actor's whole persistent group.
-  applyToCurrentGroup: false
-  factionRoleRanks:
-    leader: 100
-    organizer: 80
-    custodian: 60
-    operative: 60
-    lookout: 40
-    member: 30
-    scavenger: 30
-    performer: 30
-    contractor: 25
-    resident: 20
-    associate: 15
-    contact: 5
-
-# Natural orders are deliberately closed and route through ordinary commitments and profession systems.
-- type: ncHumanDirectiveAction
-  id: go-to-location
-  execution: GoToZone
-
-- type: ncHumanDirectiveAction
-  id: patrol-location
-  execution: PatrolZone
-  allowsCompanion: true
-  allowedOrganizations: [NCPD]
-
-- type: ncHumanDirectiveAction
-  id: guard-location
-  execution: GuardZone
-  allowsCompanion: true
-  allowedOrganizations: [NCPD]
-
-- type: ncHumanDirectiveAction
-  id: wait-at-location
-  execution: WaitAtZone
-  allowsCompanion: true
-
-- type: ncHumanDirectiveAction
-  id: report-to-location
-  execution: ReportToZone
-
-- type: ncHumanDirectiveAction
-  id: approach-person
-  execution: ApproachIssuer
-  requiresAuthority: false
-  requiresKnownLocation: false
-  allowsCompanion: false
-
-- type: ncHumanDirectiveAction
-  id: follow-person
-  execution: FollowIssuer
-  requiresAuthority: false
-  requiresKnownLocation: false
-  allowsCompanion: false
-
-- type: ncHumanDirectiveAction
-  id: escort-person
-  execution: EscortSubjectToZone
-  requiresSubject: true
-  requiresRestrainedSubject: true
-  allowedOrganizations: [NCPD]
-
+# Every physical resident retains only safe combat procedures. GPT supplies individual intentions through the typed
+# command executor; HTN never selects an ordinary idle, routine or life goal.
 - type: htnCompound
   id: NCLivingHumanCompound
   branches:
@@ -82,6 +13,3 @@
   - tasks:
     - !type:HTNCompoundTask
       task: MeleeCombatCompound
-  - tasks:
-    - !type:HTNCompoundTask
-      task: IdleCompound

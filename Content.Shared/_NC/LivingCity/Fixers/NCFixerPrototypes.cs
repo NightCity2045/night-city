@@ -44,7 +44,6 @@ public sealed partial class NCNightMarketPolicyPrototype : IPrototype
     /// <summary>Existing authored building purposes where a physical Night Market may assemble.</summary>
     [DataField] public List<NCCityAffordanceKind> AllowedVenueAffordances { get; private set; } =
         new() { NCCityAffordanceKind.Shop, NCCityAffordanceKind.Warehouse };
-    [DataField] public int AttendancePriority { get; private set; } = 700;
     [DataField] public bool AutomaticSchedulingEnabled { get; private set; } = true;
     [DataField] public TimeSpan AutomaticOpenDelay { get; private set; } = TimeSpan.FromHours(1);
     [DataField] public TimeSpan AutomaticDuration { get; private set; } = TimeSpan.FromHours(4);

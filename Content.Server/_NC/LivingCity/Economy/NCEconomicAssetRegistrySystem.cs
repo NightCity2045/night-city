@@ -891,6 +891,9 @@ public sealed partial class NCEconomicAssetRegistrySystem : EntitySystem
     private static string Key(NCCommodityBatchId id) => id.Value.ToString("D");
     private static string Key(NCItemId id) => id.Value.ToString("D");
 
+    private static NCEconomicAssetLocation TerminalLocation(NCEconomicAssetLocationKind kind) =>
+        new(kind, kind == NCEconomicAssetLocationKind.Consumed ? "consumed" : "destroyed");
+
     private static NCEconomicAssetMutationResult Reject(NCEconomicAssetMutationStatus status, string error) =>
         new(status, null, null, null, error);
 

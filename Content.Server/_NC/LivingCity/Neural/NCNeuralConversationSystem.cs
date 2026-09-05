@@ -10,9 +10,10 @@ using Content.Server._NC.LivingCity.Social;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.Persistence.Identity;
-using Content.Shared._NC.Persistence.Time;
 using Content.Shared.Chat;
 using Content.Shared.Interaction;
+using Content.Shared.Pointing;
+using Robust.Shared.Map;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
@@ -21,8 +22,8 @@ using Robust.Shared.Utility;
 namespace Content.Server._NC.LivingCity.Neural;
 
 /// <summary>
-/// Gives neural actors ordinary local hearing. The nearest available NPC may focus on one unobstructed speaker;
-/// raw utterances exist solely in transient request events rather than persistent conversation snapshots.
+/// Gives neural actors ordinary local hearing. A pointed or uniquely named NPC receives direct speech; otherwise
+/// every unobstructed nearby actor considers the same group address through an isolated ActorId request.
 /// </summary>
 public sealed partial class NCNeuralConversationSystem : EntitySystem
 {
@@ -36,29 +37,23 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private NCCityActorRuntimeIndexSystem _runtime = default!;
     [Dependency] private NCCityLocalPerceptionSystem _perception = default!;
-    [Dependency] private NCCityActorDematerializationSystem _dematerialization = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCConversationSessionSystem _conversations = default!;
-    [Dependency] private NCNeuralCognitionClientSystem _neural = default!;
     [Dependency] private ChatSystem _chat = default!;
     [Dependency] private IGameTiming _timing = default!;
 
     private readonly Dictionary<EntityUid, ActiveConversation> _active = [];
     private readonly Dictionary<EntityUid, EntityUid> _attention = [];
+    private readonly Dictionary<EntityUid, PointedAddress> _pointedAddresses = [];
     private readonly Dictionary<EntityUid, Content.Shared._NC.Persistence.Time.NCActiveWorldTime> _nextNpcSpeech = [];
     private readonly Dictionary<float, int> _listeningRanges = [];
     private float _maximumListeningRange;
     private readonly HashSet<EntityUid> _targets = [];
     private readonly Dictionary<EntityUid, bool> _targetNarrativeTiers = [];
-    private readonly PriorityQueue<ScheduledInitiative, (long DueTicks, long Sequence)> _initiativeQueue = new();
-    private readonly Dictionary<EntityUid, NCActiveWorldTime> _initiativeDue = [];
-    private long _initiativeSequence;
-    private TimeSpan _nextInitiativeAttempt;
     private int _ordinaryResidentTargets;
     private int _narrativeActorTargets;
 
     public int ActivePhysicalConversations => _active.Count;
-    public int ScheduledAmbientInitiatives => _initiativeDue.Count;
     public int OrdinaryResidentTargets => _ordinaryResidentTargets;
     public int NarrativeActorTargets => _narrativeActorTargets;
 
@@ -74,38 +69,73 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         {
             _ordinaryResidentTargets = Math.Max(0, _ordinaryResidentTargets - 1);
             _narrativeActorTargets++;
-            if (_clock.TryGetCurrentTime(out _, out var now))
-                ScheduleInitiative(target, now);
         }
         else
         {
             _narrativeActorTargets = Math.Max(0, _narrativeActorTargets - 1);
             _ordinaryResidentTargets++;
-            _initiativeDue.Remove(target);
         }
     }
 
-    /// <summary>Resolves only the physical speaker already bound to this in-person conversation.</summary>
-    public bool TryGetSpeaker(NCConversationSessionId sessionId, NCActorId listener, out EntityUid speaker)
+    /// <summary>Resolves the physical speaker and address shape captured by this active local conversation.</summary>
+    public bool TryGetDialogueContext(
+        NCConversationSessionId sessionId,
+        NCActorId listener,
+        out EntityUid speaker,
+        out string addressScope,
+        out int audienceSize)
     {
-        foreach (var (entityUid, active) in _active)
+        foreach (var (source, active) in _active)
         {
-            if (active.SessionId != sessionId || !Exists(entityUid))
+            if (active.SessionId != sessionId || !Exists(source))
                 continue;
-            if (_runtime.TryGetActor(active.Target, out var targetActor) && targetActor == listener)
+            foreach (var audience in active.Audience)
             {
-                speaker = entityUid;
+                if (audience.ActorId != listener)
+                    continue;
+                speaker = source;
+                addressScope = active.GroupAddress ? "group" : "direct";
+                audienceSize = active.Audience.Count;
                 return true;
             }
             if (active.SpeakerParty.TryGetActor(out var speakerActor) && speakerActor == listener &&
-                Exists(active.Target))
+                active.Audience.Count == 1 && Exists(active.Audience[0].Entity))
             {
-                speaker = active.Target;
+                speaker = active.Audience[0].Entity;
+                addressScope = "direct";
+                audienceSize = 1;
                 return true;
             }
         }
         speaker = EntityUid.Invalid;
+        addressScope = string.Empty;
+        audienceSize = 0;
         return false;
+    }
+
+    /// <summary>Returns only actors who should independently consider replying to this physical turn.</summary>
+    public void GetDialogueListeners(
+        NCConversationSessionId sessionId,
+        NCPartyRef turnSpeaker,
+        ICollection<NCActorId> listeners)
+    {
+        foreach (var active in _active.Values)
+        {
+            if (active.SessionId != sessionId)
+                continue;
+            if (turnSpeaker == active.SpeakerParty)
+            {
+                foreach (var audience in active.Audience)
+                    listeners.Add(audience.ActorId);
+            }
+            else if (!active.GroupAddress && active.Audience.Count == 1 &&
+                     turnSpeaker == NCPartyRef.ForActor(active.Audience[0].ActorId) &&
+                     active.SpeakerParty.TryGetActor(out var sourceActor))
+            {
+                listeners.Add(sourceActor);
+            }
+            return;
+        }
     }
 
     public bool CanContinueNpcConversation(NCConversationSessionId sessionId, int currentTurns)
@@ -113,7 +143,8 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         foreach (var active in _active.Values)
         {
             if (active.SessionId != sessionId || !active.SpeakerParty.TryGetActor(out _) ||
-                !TryComp<NCNeuralConversationTargetComponent>(active.Target, out var target))
+                active.Audience.Count != 1 ||
+                !TryComp<NCNeuralConversationTargetComponent>(active.Audience[0].Entity, out var target))
                 continue;
             return target.MaximumNpcConversationTurns > 0 && currentTurns < target.MaximumNpcConversationTurns;
         }
@@ -127,28 +158,12 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         SubscribeLocalEvent<NCNeuralConversationTargetComponent, ComponentShutdown>(OnTargetShutdown);
         SubscribeLocalEvent<ActorComponent, EntitySpokeEvent>(OnPlayerSpoke);
         SubscribeLocalEvent<NCNeuralConversationTargetComponent, EntitySpokeEvent>(OnNpcSpoke);
+        SubscribeLocalEvent<ActorComponent, NCNeuralLocalEmoteEvent>(OnPlayerEmoted);
+        SubscribeLocalEvent<NCNeuralConversationTargetComponent, NCNeuralLocalEmoteEvent>(OnNpcEmoted);
+        SubscribeLocalEvent<ActorComponent, AfterPointedAtEvent>(OnPlayerPointed);
+        SubscribeLocalEvent<NCConversationSessionTerminatedEvent>(OnConversationTerminated);
         SubscribeLocalEvent<NCActiveWorldSessionClosedEvent>(_ => Clear());
         SubscribeLocalEvent<NCActiveWorldClockFailedEvent>(_ => Clear());
-        SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(_ => ScheduleAllInitiatives());
-    }
-
-    public override void Update(float frameTime)
-    {
-        base.Update(frameTime);
-        if (!_neural.IsProviderEnabled || _timing.CurTime < _nextInitiativeAttempt ||
-            !_clock.TryGetCurrentTime(out _, out var now))
-            return;
-        _nextInitiativeAttempt = _timing.CurTime + TimeSpan.FromSeconds(1);
-        while (_initiativeQueue.TryPeek(out var item, out var priority) && priority.DueTicks <= now.Ticks)
-        {
-            _initiativeQueue.Dequeue();
-            if (!_initiativeDue.TryGetValue(item.Actor, out var due) || due.Ticks != priority.DueTicks)
-                continue;
-            _initiativeDue.Remove(item.Actor);
-            TryInitiateAmbientConversation(item.Actor);
-            ScheduleInitiative(item.Actor, now);
-            break;
-        }
     }
 
     private void OnTargetStartup(
@@ -167,46 +182,58 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         _listeningRanges[entity.Comp.ListeningRange] =
             _listeningRanges.GetValueOrDefault(entity.Comp.ListeningRange) + 1;
         _maximumListeningRange = Math.Max(_maximumListeningRange, entity.Comp.ListeningRange);
-        if (_clock.TryGetCurrentTime(out _, out var now))
-            ScheduleInitiative(entity.Owner, now);
     }
 
-    private bool TryStartConversation(EntityUid user, Entity<NCNeuralConversationTargetComponent> target)
+    private bool TryStartConversation(
+        EntityUid user,
+        IReadOnlyList<Entity<NCNeuralConversationTargetComponent>> targets,
+        bool groupAddress)
     {
-        if (!target.Comp.ListenToLocalSpeech ||
-            !ValidRange(target.Comp.ListeningRange) || !Exists(user) || !Exists(target.Owner) ||
-            _attention.TryGetValue(target.Owner, out var currentSpeaker) && currentSpeaker != user ||
-            user == target.Owner ||
-            !_interaction.InRangeUnobstructed(user, target.Owner, target.Comp.ListeningRange) ||
-            !TryResolveSpeakerParty(user, out var speakerParty) ||
-            !_runtime.TryGetActor(target.Owner, out var actorId))
-        {
+        if (targets.Count == 0 || !Exists(user) || !TryResolveSpeakerParty(user, out var speakerParty) ||
+            !_prototypes.TryIndex(ConversationPolicy, out NCConversationPolicyPrototype? policy) || policy == null)
             return false;
+
+        var audience = new List<AudienceMember>(Math.Min(targets.Count, policy.MaximumParticipants - 1));
+        foreach (var target in targets.Take(policy.MaximumParticipants - 1))
+        {
+            if (!target.Comp.ListenToLocalSpeech || !ValidRange(target.Comp.ListeningRange) ||
+                !Exists(target.Owner) || target.Owner == user ||
+                _attention.TryGetValue(target.Owner, out var currentSpeaker) && currentSpeaker != user ||
+                !_interaction.InRangeUnobstructed(user, target.Owner, target.Comp.ListeningRange) ||
+                !_runtime.TryGetActor(target.Owner, out var actorId))
+                continue;
+            audience.Add(new AudienceMember(target.Owner, actorId, target.Comp.ListeningRange));
         }
+        if (audience.Count == 0)
+            return false;
+
+        var configured = targets.Where(target => audience.Any(value => value.Entity == target.Owner)).ToArray();
+        var first = configured[0].Comp;
+        var topics = configured.SelectMany(value => value.Comp.TopicKeys)
+            .Distinct(StringComparer.Ordinal)
+            .Take(policy.MaximumTopics)
+            .ToArray();
+        var maximumDisclosure = (NCMemoryPrivacy) configured.Min(value => (int) value.Comp.MaximumDisclosure);
 
         EndConversation(user, "replaced");
         var sessionId = NCConversationSessionId.New();
         var request = new NCConversationStartRequest(
             sessionId,
-            [speakerParty, NCPartyRef.ForActor(actorId)],
+            [speakerParty, .. audience.Select(value => NCPartyRef.ForActor(value.ActorId))],
             NCConversationChannel.InPerson,
             new NCInformationSubject(NCInformationSubjectKind.StableKey, InPersonLocationKey),
-            target.Comp.TopicKeys,
+            topics,
             [],
-            target.Comp.MaximumDisclosure,
-            target.Comp.Language,
-            target.Comp.Locale);
+            maximumDisclosure,
+            first.Language,
+            first.Locale);
         if (!_conversations.TryStart(request, out _, out _))
             return false;
 
-        _active[user] = new ActiveConversation(
-            sessionId,
-            target.Owner,
-            actorId,
-            speakerParty,
-            target.Comp.ListeningRange);
-        _attention[target.Owner] = user;
-        BeginConversationBlockers(user, target.Owner);
+        _active[user] = new ActiveConversation(sessionId, speakerParty, audience,
+            groupAddress && audience.Count > 1);
+        foreach (var member in audience)
+            _attention[member.Entity] = user;
         return true;
     }
 
@@ -215,10 +242,21 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         HandleSpoke(entity.Owner, args);
     }
 
+    private void OnPlayerPointed(Entity<ActorComponent> entity, ref AfterPointedAtEvent args)
+    {
+        if (!HasComp<NCNeuralConversationTargetComponent>(args.Pointed) ||
+            !_prototypes.TryIndex(ConversationPolicy, out NCConversationPolicyPrototype? policy) || policy == null)
+            return;
+        _pointedAddresses[entity.Owner] = new PointedAddress(
+            args.Pointed,
+            _timing.CurTime + policy.PointedAddressLifetime);
+    }
+
     private void OnNpcSpoke(Entity<NCNeuralConversationTargetComponent> entity, ref EntitySpokeEvent args)
     {
         if (!entity.Comp.SpeakWithNpcListeners || entity.Comp.NpcConversationCooldown < TimeSpan.Zero ||
-            _attention.ContainsKey(entity.Owner) || !_clock.TryGetCurrentTime(out _, out var now) ||
+            _active.ContainsKey(entity.Owner) || _attention.ContainsKey(entity.Owner) ||
+            !_clock.TryGetCurrentTime(out _, out var now) ||
             _nextNpcSpeech.TryGetValue(entity.Owner, out var next) && next > now)
             return;
         _nextNpcSpeech[entity.Owner] = now.Advance(entity.Comp.NpcConversationCooldown);
@@ -230,52 +268,121 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         // Radio and obfuscated speech are excluded: neural actors only hear ordinary local speech through the map.
         if (args.Channel != null || args.ObfuscatedMessage != null)
             return;
-        if (!_active.TryGetValue(speaker, out var active))
+        HandleLocalExpression(speaker, args.Message, false);
+    }
+
+    private void OnPlayerEmoted(Entity<ActorComponent> entity, ref NCNeuralLocalEmoteEvent args) =>
+        HandleLocalExpression(entity.Owner, args.Message, true);
+
+    private void OnNpcEmoted(Entity<NCNeuralConversationTargetComponent> entity, ref NCNeuralLocalEmoteEvent args)
+    {
+        if (!entity.Comp.SpeakWithNpcListeners || entity.Comp.NpcConversationCooldown < TimeSpan.Zero ||
+            _active.ContainsKey(entity.Owner) || _attention.ContainsKey(entity.Owner) ||
+            !_clock.TryGetCurrentTime(out _, out var now) ||
+            _nextNpcSpeech.TryGetValue(entity.Owner, out var next) && next > now)
+            return;
+        _nextNpcSpeech[entity.Owner] = now.Advance(entity.Comp.NpcConversationCooldown);
+        HandleLocalExpression(entity.Owner, args.Message, true);
+    }
+
+    private void HandleLocalExpression(EntityUid speaker, string message, bool emote)
+    {
+        // A fresh point or an unambiguous spoken name is an explicit change of addressee. Direct conversations
+        // must not pin the speaker to the first NPC forever; reusing the same addressee still preserves the session.
+        if (_active.TryGetValue(speaker, out var active) &&
+            TryAcquireAttention(speaker, message, out var direct, true))
         {
-            if (!TryAcquireAttention(speaker) || !_active.TryGetValue(speaker, out active))
+            active = direct;
+        }
+        else if (!_active.TryGetValue(speaker, out active))
+        {
+            if (!TryAcquireAttention(speaker, message, out active))
                 return;
         }
-        if (!Exists(active.Target) ||
-            !_runtime.TryGetActor(active.Target, out var boundActor) || boundActor != active.ActorId ||
-            !TryComp<NCNeuralConversationTargetComponent>(active.Target, out var target) ||
-            !_interaction.InRangeUnobstructed(speaker, active.Target, active.ListeningRange) ||
-            !_conversations.TryGet(active.SessionId, out var session) ||
+        TryRecordLocalExpression(speaker, active, message, emote);
+    }
+
+    private bool TryRecordLocalExpression(
+        EntityUid speaker,
+        ActiveConversation active,
+        string message,
+        bool emote)
+    {
+        if (!_conversations.TryGet(active.SessionId, out var session) ||
             session.Status is NCConversationStatus.Ended or NCConversationStatus.Expired or
                 NCConversationStatus.Interrupted)
         {
             EndConversation(speaker, "invalidated");
-            return;
+            return false;
         }
 
-        var utterance = NormalizeUtterance(args.Message, target.MaximumUtteranceLength);
+        var validAudience = new List<AudienceMember>(active.Audience.Count);
+        var maximumUtteranceLength = int.MaxValue;
+        foreach (var member in active.Audience)
+        {
+            if (!Exists(member.Entity) ||
+                !_runtime.TryGetActor(member.Entity, out var boundActor) || boundActor != member.ActorId ||
+                !TryComp<NCNeuralConversationTargetComponent>(member.Entity, out var target) ||
+                !_interaction.InRangeUnobstructed(speaker, member.Entity, member.ListeningRange))
+            {
+                if (_attention.TryGetValue(member.Entity, out var current) && current == speaker)
+                    _attention.Remove(member.Entity);
+                continue;
+            }
+            validAudience.Add(member);
+            maximumUtteranceLength = Math.Min(maximumUtteranceLength, target.MaximumUtteranceLength);
+        }
+        if (validAudience.Count == 0)
+        {
+            EndConversation(speaker, "out-of-range");
+            return false;
+        }
+        if (validAudience.Count != active.Audience.Count)
+        {
+            active = active with
+            {
+                Audience = validAudience,
+                GroupAddress = active.GroupAddress && validAudience.Count > 1,
+            };
+            _active[speaker] = active;
+        }
+
+        var utterance = NormalizeUtterance(message, maximumUtteranceLength);
         if (utterance.Length == 0)
-            return;
-        var verbalThreat = _prototypes.TryIndex(ConversationPolicy, out NCConversationPolicyPrototype? policy) &&
+            return false;
+        if (emote)
+            utterance = $"*{utterance}*";
+        NCConversationPolicyPrototype? policy = null;
+        var verbalThreat = !emote && _prototypes.TryIndex(ConversationPolicy, out policy) &&
                            policy != null && ContainsVerbalThreat(utterance, policy.VerbalThreatMarkers);
         var act = verbalThreat
             ? NCSpeechActKind.Threat
             : utterance.EndsWith('?')
                 ? NCSpeechActKind.Question
                 : NCSpeechActKind.Statement;
-        var externalReference = $"chat:{Guid.NewGuid():N}";
+        var externalReference = $"{(emote ? "emote" : "chat")}:{Guid.NewGuid():N}";
         if (!_conversations.TryRecordTurn(new NCConversationTurnRequest(
                 active.SessionId,
                 active.SpeakerParty,
                 act,
-                "player.utterance",
+                emote ? "local.emote" : "local.utterance",
                 externalReference,
                 null), out _, out _, utterance))
         {
             EndConversation(speaker, "record-failed");
-            return;
+            return false;
         }
         if (_clock.TryGetCurrentTime(out _, out var now))
         {
-            _perception.ObserveAddressedSpeech(active.Target, speaker, now);
-            if (verbalThreat && policy != null)
-                _perception.ObserveIncident(active.Target, NCCityLocalPerceivedEventKind.VerbalThreat,
-                    speaker, active.Target, now, policy.VerbalThreatLifetime);
+            foreach (var member in validAudience)
+            {
+                _perception.ObserveAddressedSpeech(member.Entity, speaker, now);
+                if (verbalThreat && policy != null)
+                    _perception.ObserveIncident(member.Entity, NCCityLocalPerceivedEventKind.VerbalThreat,
+                        speaker, member.Entity, now, policy.VerbalThreatLifetime);
+            }
         }
+        return true;
     }
 
     /// <summary>Matches authored threat stems only; dialogue meaning remains data-driven and multilingual.</summary>
@@ -301,7 +408,6 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
             else
                 _ordinaryResidentTargets = Math.Max(0, _ordinaryResidentTargets - 1);
         }
-        _initiativeDue.Remove(entity.Owner);
         if (entity.Comp.ListenToLocalSpeech && ValidRange(entity.Comp.ListeningRange) &&
             _listeningRanges.TryGetValue(entity.Comp.ListeningRange, out var count))
         {
@@ -311,67 +417,197 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
                 _listeningRanges[entity.Comp.ListeningRange] = count - 1;
             _maximumListeningRange = _listeningRanges.Count == 0 ? 0f : _listeningRanges.Keys.Max();
         }
-        foreach (var user in _active.Where(value => value.Value.Target == entity.Owner)
+        if (_active.ContainsKey(entity.Owner))
+            EndConversation(entity.Owner, "speaker-removed");
+        foreach (var user in _active.Where(value => value.Value.Audience.Any(member => member.Entity == entity.Owner))
                      .Select(value => value.Key).ToArray())
         {
-            EndConversation(user, "target-removed");
+            var active = _active[user];
+            var audience = active.Audience.Where(member => member.Entity != entity.Owner).ToArray();
+            _attention.Remove(entity.Owner);
+            if (audience.Length == 0)
+                EndConversation(user, "target-removed");
+            else
+                _active[user] = active with
+                {
+                    Audience = audience,
+                    GroupAddress = active.GroupAddress && audience.Length > 1,
+                };
         }
+        foreach (var pointer in _pointedAddresses.Where(value => value.Value.Target == entity.Owner)
+                     .Select(value => value.Key).ToArray())
+            _pointedAddresses.Remove(pointer);
     }
 
     private void EndConversation(EntityUid user, string reason)
     {
         if (!_active.Remove(user, out var active))
             return;
-        if (_attention.TryGetValue(active.Target, out var speaker) && speaker == user)
-            _attention.Remove(active.Target);
-        EndConversationBlockers(user, active.Target);
+        foreach (var member in active.Audience)
+        {
+            if (_attention.TryGetValue(member.Entity, out var speaker) && speaker == user)
+                _attention.Remove(member.Entity);
+        }
         _conversations.TryTransition(active.SessionId, NCConversationStatus.Ended, reason, out _);
     }
 
-    private void BeginConversationBlockers(EntityUid speaker, EntityUid target)
+    /// <summary>Ends the physical conversation that owns this durable session, if it is still active.</summary>
+    public bool TryEndConversation(NCConversationSessionId sessionId, string reason)
     {
-        // Conversation is a physical commitment for every persistent participant, not merely for the neural target.
-        if (_runtime.TryGetActor(target, out _))
-            _dematerialization.BeginBlocker(target, NCCityDematerializationBlockerFlags.Conversation);
-        if (speaker != target && _runtime.TryGetActor(speaker, out _))
-            _dematerialization.BeginBlocker(speaker, NCCityDematerializationBlockerFlags.Conversation);
+        foreach (var (speaker, active) in _active)
+        {
+            if (active.SessionId != sessionId)
+                continue;
+            EndConversation(speaker, reason);
+            return true;
+        }
+        return false;
     }
 
-    private void EndConversationBlockers(EntityUid speaker, EntityUid target)
+    private void OnConversationTerminated(NCConversationSessionTerminatedEvent args)
     {
-        if (_runtime.TryGetActor(target, out _))
-            _dematerialization.EndBlocker(target, NCCityDematerializationBlockerFlags.Conversation);
-        if (speaker != target && _runtime.TryGetActor(speaker, out _))
-            _dematerialization.EndBlocker(speaker, NCCityDematerializationBlockerFlags.Conversation);
+        foreach (var speaker in _active
+                     .Where(pair => pair.Value.SessionId == args.SessionId)
+                     .Select(pair => pair.Key)
+                     .ToArray())
+        {
+            // The durable owner already archived the session, so only release physical attention here.
+            if (!_active.Remove(speaker, out var active))
+                continue;
+            foreach (var member in active.Audience)
+            {
+                if (_attention.TryGetValue(member.Entity, out var currentSpeaker) && currentSpeaker == speaker)
+                    _attention.Remove(member.Entity);
+            }
+        }
     }
 
-    private bool TryAcquireAttention(EntityUid speaker)
+    private bool TryAcquireAttention(
+        EntityUid speaker,
+        string message,
+        out ActiveConversation active,
+        bool explicitOnly = false)
     {
+        active = default!;
         if (_maximumListeningRange <= 0f || !Exists(speaker))
             return false;
         var origin = _transform.GetMapCoordinates(speaker);
-        Entity<NCNeuralConversationTargetComponent>? selected = null;
-        var selectedDistance = float.MaxValue;
+        var candidates = new List<Entity<NCNeuralConversationTargetComponent>>();
         foreach (var candidate in _lookup.GetEntitiesInRange<NCNeuralConversationTargetComponent>(
                      origin,
                      _maximumListeningRange))
         {
             if (!candidate.Comp.ListenToLocalSpeech || !ValidRange(candidate.Comp.ListeningRange) ||
                 candidate.Owner == speaker ||
-                _attention.ContainsKey(candidate.Owner) || !_runtime.TryGetActor(candidate.Owner, out _) ||
+                !_runtime.TryGetActor(candidate.Owner, out _) ||
                 !_interaction.InRangeUnobstructed(speaker, candidate.Owner, candidate.Comp.ListeningRange))
             {
                 continue;
             }
-            var targetCoordinates = _transform.GetMapCoordinates(candidate.Owner);
-            var distance = System.Numerics.Vector2.DistanceSquared(origin.Position, targetCoordinates.Position);
-            if (distance >= selectedDistance)
-                continue;
-            selected = candidate;
-            selectedDistance = distance;
+            candidates.Add(candidate);
         }
+        if (candidates.Count == 0)
+            return false;
+        candidates.Sort((left, right) => DistanceSquared(origin, left.Owner).CompareTo(
+            DistanceSquared(origin, right.Owner)));
 
-        return selected is { } target && TryStartConversation(speaker, target);
+        var direct = FindPointedListener(speaker, candidates) ?? FindNamedListener(message, candidates);
+        if (direct == null && explicitOnly)
+            return false;
+        if (direct is { } explicitlyAddressed)
+        {
+            // A name or a fresh point is stronger than passive conversation attention. Release the old ordinary
+            // session first so a player can deliberately address another NPC in a crowd or interrupt NPC chatter.
+            if (_attention.TryGetValue(explicitlyAddressed.Owner, out var previousSpeaker) &&
+                previousSpeaker != speaker)
+            {
+                EndConversation(previousSpeaker, "attention-redirected");
+            }
+            if (explicitlyAddressed.Owner != speaker && _active.ContainsKey(explicitlyAddressed.Owner))
+                EndConversation(explicitlyAddressed.Owner, "attention-redirected");
+        }
+        if (direct is { } addressed && _active.TryGetValue(speaker, out var existing) &&
+            existing.Audience.Count == 1 && existing.Audience[0].Entity == addressed.Owner)
+        {
+            active = existing;
+            return true;
+        }
+        IReadOnlyList<Entity<NCNeuralConversationTargetComponent>> selected = direct is { } target
+            ? [target]
+            : candidates.Where(candidate =>
+                !_attention.TryGetValue(candidate.Owner, out var currentSpeaker) || currentSpeaker == speaker)
+                .ToArray();
+        if (!TryStartConversation(speaker, selected, direct == null) ||
+            !_active.TryGetValue(speaker, out var startedConversation))
+            return false;
+        active = startedConversation;
+        return true;
+    }
+
+    private Entity<NCNeuralConversationTargetComponent>? FindPointedListener(
+        EntityUid speaker,
+        IReadOnlyList<Entity<NCNeuralConversationTargetComponent>> candidates)
+    {
+        if (!_pointedAddresses.TryGetValue(speaker, out var pointed))
+            return null;
+        if (pointed.ExpiresAt <= _timing.CurTime)
+        {
+            _pointedAddresses.Remove(speaker);
+            return null;
+        }
+        foreach (var candidate in candidates)
+        {
+            if (candidate.Owner == pointed.Target)
+                return candidate;
+        }
+        return null;
+    }
+
+    private Entity<NCNeuralConversationTargetComponent>? FindNamedListener(
+        string message,
+        IReadOnlyList<Entity<NCNeuralConversationTargetComponent>> candidates)
+    {
+        Entity<NCNeuralConversationTargetComponent>? match = null;
+        foreach (var candidate in candidates)
+        {
+            if (!NameMentioned(message, Name(candidate.Owner)))
+                continue;
+            if (match != null)
+                return null;
+            match = candidate;
+        }
+        return match;
+    }
+
+    private static bool NameMentioned(string utterance, string displayName)
+    {
+        var spoken = NormalizeNameSearch(utterance);
+        var name = NormalizeNameSearch(displayName);
+        if (spoken.Length == 0 || name.Length == 0)
+            return false;
+        if ($" {spoken} ".Contains($" {name} ", StringComparison.Ordinal))
+            return true;
+        var spokenWords = spoken.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet(StringComparer.Ordinal);
+        return name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Any(word => word.Length >= 3 && spokenWords.Contains(word));
+    }
+
+    private static string NormalizeNameSearch(string value)
+    {
+        var cleaned = new string(FormattedMessage.RemoveMarkupPermissive(value)
+            .ToLowerInvariant()
+            .Select(character => char.IsLetterOrDigit(character) ? character : ' ')
+            .ToArray());
+        return string.Join(' ', cleaned.Split((char[]?) null,
+            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+    }
+
+    private float DistanceSquared(MapCoordinates origin, EntityUid target)
+    {
+        var coordinates = _transform.GetMapCoordinates(target);
+        return origin.MapId == coordinates.MapId
+            ? System.Numerics.Vector2.DistanceSquared(origin.Position, coordinates.Position)
+            : float.MaxValue;
     }
 
     private void Clear()
@@ -379,74 +615,8 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
         foreach (var user in _active.Keys.ToArray())
             EndConversation(user, "round-ended");
         _attention.Clear();
+        _pointedAddresses.Clear();
         _nextNpcSpeech.Clear();
-        _initiativeDue.Clear();
-        _initiativeQueue.Clear();
-        _initiativeSequence = 0;
-    }
-
-    private void ScheduleAllInitiatives()
-    {
-        _initiativeDue.Clear();
-        _initiativeQueue.Clear();
-        if (!_clock.TryGetCurrentTime(out _, out var now))
-            return;
-        // This is a round-boundary rebuild, never a per-frame entity scan.
-        foreach (var target in _targets)
-            ScheduleInitiative(target, now);
-    }
-
-    private void ScheduleInitiative(EntityUid actor, NCActiveWorldTime now)
-    {
-        if (!TryComp<NCNeuralConversationTargetComponent>(actor, out var component) ||
-            !component.InitiateAmbientConversations || component.AmbientOpeners.Count == 0 ||
-            component.MinimumAmbientConversationInterval < TimeSpan.Zero ||
-            component.MaximumAmbientConversationInterval < component.MinimumAmbientConversationInterval)
-            return;
-        var range = component.MaximumAmbientConversationInterval - component.MinimumAmbientConversationInterval;
-        var seed = unchecked((uint) actor.Id * 2654435761u + (uint) _initiativeSequence);
-        var fraction = (seed & 0x00ffffff) / (float) 0x01000000;
-        var delay = component.MinimumAmbientConversationInterval + range * fraction;
-        var due = now.Advance(delay);
-        _initiativeDue[actor] = due;
-        var scheduled = new ScheduledInitiative(actor, ++_initiativeSequence);
-        _initiativeQueue.Enqueue(scheduled, (due.Ticks, scheduled.Sequence));
-    }
-
-    private void TryInitiateAmbientConversation(EntityUid speaker)
-    {
-        if (!TryComp<NCNeuralConversationTargetComponent>(speaker, out var component) ||
-            !Exists(speaker) || _active.ContainsKey(speaker) || _attention.ContainsKey(speaker) ||
-            !_runtime.TryGetActor(speaker, out _))
-            return;
-        var origin = _transform.GetMapCoordinates(speaker);
-        Entity<NCNeuralConversationTargetComponent>? selected = null;
-        var selectedDistance = float.MaxValue;
-        var checkedCandidates = 0;
-        foreach (var candidate in _lookup.GetEntitiesInRange<NCNeuralConversationTargetComponent>(
-                     origin, component.ListeningRange))
-        {
-            if (++checkedCandidates > component.MaximumAmbientCandidates)
-                break;
-            if (candidate.Owner == speaker || _active.ContainsKey(candidate.Owner) ||
-                _attention.ContainsKey(candidate.Owner) || !_runtime.TryGetActor(candidate.Owner, out _) ||
-                !_interaction.InRangeUnobstructed(speaker, candidate.Owner, component.ListeningRange))
-                continue;
-            var candidateCoordinates = _transform.GetMapCoordinates(candidate.Owner);
-            var distance = System.Numerics.Vector2.DistanceSquared(origin.Position, candidateCoordinates.Position);
-            if (distance >= selectedDistance)
-                continue;
-            selected = candidate;
-            selectedDistance = distance;
-        }
-        if (selected is not { } target || !TryStartConversation(speaker, target))
-            return;
-        var index = (int) (unchecked((uint) HashCode.Combine(speaker.Id, _initiativeSequence)) %
-                           (uint) component.AmbientOpeners.Count);
-        var opener = NormalizeUtterance(component.AmbientOpeners[index], component.MaximumUtteranceLength);
-        if (opener.Length > 0)
-            _chat.TrySendInGameICMessage(speaker, opener, InGameICChatType.Speak, hideChat: false,
-                checkRadioPrefix: false);
     }
 
     private bool TryResolveSpeakerParty(EntityUid speaker, out NCPartyRef party)
@@ -480,10 +650,11 @@ public sealed partial class NCNeuralConversationSystem : EntitySystem
 
     private sealed record ActiveConversation(
         NCConversationSessionId SessionId,
-        EntityUid Target,
-        NCActorId ActorId,
         NCPartyRef SpeakerParty,
-        float ListeningRange);
+        IReadOnlyList<AudienceMember> Audience,
+        bool GroupAddress);
 
-    private readonly record struct ScheduledInitiative(EntityUid Actor, long Sequence);
+    private readonly record struct AudienceMember(EntityUid Entity, NCActorId ActorId, float ListeningRange);
+    private readonly record struct PointedAddress(EntityUid Target, TimeSpan ExpiresAt);
+
 }

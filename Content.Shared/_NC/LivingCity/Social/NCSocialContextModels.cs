@@ -19,7 +19,8 @@ public sealed record NCRedactedSocialFact(
     string FactKey,
     string SubjectKey,
     float Confidence,
-    NCMemoryPrivacy Privacy);
+    NCMemoryPrivacy Privacy,
+    long ObservedAtTicks = 0);
 
 /// <summary>
 /// Neural-safe structured context. It contains no prose, account IDs, command payloads, EntityUid, or hidden facts

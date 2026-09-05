@@ -1,16 +1,28 @@
 # Neural Cognition Service operations
 
-The game remains authoritative and fully functional while the service is disabled or unavailable. The default
-configuration is deterministic: `nc_neural.enabled` is false. The game server reads the confidential
+Status: Current for Physical GPT A-Life v3.
+
+Transport recovery (2026-09-05): each actor retains separate pending dialogue and autonomous requests, with one
+HTTP request at a time per body. There is no cross-actor concurrency cap or reserved-slot pool. Background polling does not
+supersede an outstanding response. The timeout is 45 wall-clock seconds; up to two delayed transport retries preserve
+the original dialogue correlation. Failures never open a global dispatch circuit. Retry delays and conversation
+expiry use active-world time (unscaled elapsed simulation time). The five-minute idle window covers three
+45-second attempts plus the 30/60-second retry delays, excluding any additional queue backlog.
+
+These fixes do not certify autonomous departmental shifts. Existing station adapters expose individual operations;
+complete supply, preparation, delivery and patient-care workflows still require implementation and live verification.
+
+The game remains authoritative while the service is disabled or unavailable. Physical NPCs stay in the world, but
+they do not receive a substitute deterministic social or life-planning brain. They may finish an already accepted
+safe command or use a bounded safety reflex, then wait for the provider. The game server reads the confidential
 `nc_neural.api_key` CVar and forwards it only as the bearer of a bounded cognition request. The credential is never
 included in gameplay payloads, diagnostics, prototypes, or logs. Plain HTTP is accepted only for a loopback endpoint;
 a remote cognition endpoint must use HTTPS.
 
 The service accepts structured facts and capability allowlists. It cannot call game APIs. The server rejects expired,
-wrong-epoch, stale-version, malformed, over-budget, or non-allowlisted results and falls back deterministically.
-An accepted result is still only a short-lived utility hint. BDI priorities and planner routing select the intention,
-and the normal domain systems execute it. An in-person generated reply is recorded by the conversation authority and
-spoken through the regular SS14 chat authority. Actor-to-actor turns do not recursively trigger neural replies.
+wrong-epoch, stale-version, or malformed envelopes; each proposed physical command is authorized independently before
+normal gameplay systems execute it. Local token, session, weekly, request-kind, and per-ActorId spending quotas do not
+disable GPT. Provider availability and account balance are the spending authority. Usage persistence is telemetry only.
 
 Health endpoints are `/health/live` and `/health/ready`; Prometheus metrics are exposed at `/metrics`. Rotate the API
 key outside the repository. During an incident, disable the policy first, then inspect the F7 neural counters and
@@ -46,16 +58,15 @@ Then run the game server with that configuration. The repository Luna preset int
 dotnet run --project Content.Server -- --config-file Resources/ConfigPresets/_NC/neural-luna.toml
 ```
 
-Use the F7 Living City page to monitor the neural budget mode, queue, accepted results, timeouts, validation rejects,
-and circuit state. Do not use the Luna preset for an ordinary deterministic test.
+Use the F7 Living City page to monitor provider configuration, pending/coalesced requests, accepted results, usage
+telemetry persistence, timeouts, validation rejects, and temporary circuit state.
 
-## Deterministic test without a provider
+## Test without a provider
 
-Run the server normally, without the neural preset and without the service. Utility, StateTree, Reactive, HTN,
-Partial-Order, MCTS and Conversation-StateTree planning continue to operate; neural-eligible actors simply receive no
-external suggestion. The district bootstrap population can be imported idempotently from F7 with profile
-`NCLivingCityDistrictBootstrapPopulation`.
+Run the server normally without a provider to verify physical persistence, bootstrap, sensorium, queue telemetry and
+safe failure behavior. This does not validate autonomous decisions: GPT is the primary ordinary decision source and
+no local BDI/Utility planner replaces it.
 
-The current authored geography contains only district zones. Imported residents therefore participate in abstract
-A-Life immediately, but physical materialization intentionally waits for mapper-authored street, building or apartment
-zones with valid pedestrian spawn candidates.
+The Reach NPC test presets and their antagonist scenario have been removed. The Reach map itself remains.
+GPT is now opt-in through an existing NarrativeActorProfile; ordinary residents cannot submit provider requests.
+Local ordinary-NPC life/work behavior remains incomplete; disabling GPT is not a completed local AI implementation.

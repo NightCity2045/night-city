@@ -12,7 +12,6 @@ using Content.Shared._NC.LivingCity.Fixers;
 using Content.Shared._NC.LivingCity.CityServices;
 using Content.Shared._NC.LivingCity.Market;
 using Content.Shared._NC.LivingCity.Housing;
-using Content.Shared._NC.LivingCity.Police.NCPD;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.LivingCity.Social;
 using Content.Shared._NC.Persistence.Identity;
@@ -47,10 +46,7 @@ public static class NCPersistentIdentity
     public static NCAccountId SystemAccount(string stableAccountId) =>
         new(CreateGuid($"account/system/{Normalize(stableAccountId)}"));
 
-    /// <summary>
-    /// Stable identity for an authored initial employment. Later dismiss/re-hire operations may deliberately use a
-    /// new identity, while population bootstrap retries always converge on this one relation.
-    /// </summary>
+    /// <summary>Stable identity for an authored initial employment relation.</summary>
     public static NCEmploymentId Employment(NCPartyRef employee, NCPartyRef employer, string positionId)
     {
         if (!employee.IsValid || !employer.IsValid || string.IsNullOrWhiteSpace(positionId))
@@ -319,77 +315,11 @@ public static class NCPersistentIdentity
         return CreateGuid($"social-obligation-consequence/{obligationId}/{version}");
     }
 
-    public static Guid CognitionBelief(NCActorId actorId, string key, string subject, string source)
+    public static Guid NeuralCommandAction(Guid batchId, string stepId)
     {
-        if (!actorId.IsValid)
-            throw new ArgumentOutOfRangeException(nameof(actorId));
-        return CreateGuid($"cognition/belief/{actorId}/{Normalize(key)}/{NormalizeOptional(subject)}/{Normalize(source)}");
-    }
-
-    public static Guid CognitionDesire(NCActorId actorId, string capabilityId)
-    {
-        if (!actorId.IsValid)
-            throw new ArgumentOutOfRangeException(nameof(actorId));
-        return CreateGuid($"cognition/desire/{actorId}/{Normalize(capabilityId)}");
-    }
-
-    public static Guid CognitionIntention(NCActorId actorId, string capabilityId, long revision)
-    {
-        if (!actorId.IsValid || revision < 1)
-            throw new ArgumentOutOfRangeException(nameof(actorId));
-        return CreateGuid($"cognition/intention/{actorId}/{Normalize(capabilityId)}/{revision}");
-    }
-
-    public static Guid CognitionPlan(Guid intentionId, string planner, long dependencyVersion)
-    {
-        if (intentionId == Guid.Empty || dependencyVersion < 1)
-            throw new ArgumentOutOfRangeException(nameof(intentionId));
-        return CreateGuid($"cognition/plan/{intentionId:D}/{Normalize(planner)}/{dependencyVersion}");
-    }
-
-    public static Guid CognitionAction(Guid planId, string stepId)
-    {
-        if (planId == Guid.Empty || string.IsNullOrWhiteSpace(stepId))
-            throw new ArgumentOutOfRangeException(nameof(planId));
-        return CreateGuid($"cognition/action/{planId:D}/{Normalize(stepId)}");
-    }
-
-    public static NCNcpdUnitId NcpdUnit(NCZoneId stationZone, IEnumerable<NCActorId> members)
-    {
-        if (!stationZone.IsValid)
-            throw new ArgumentOutOfRangeException(nameof(stationZone));
-
-        var ordered = members
-            .Where(static actor => actor.IsValid)
-            .Select(static actor => actor.Value)
-            .Distinct()
-            .Order()
-            .ToArray();
-        if (ordered.Length == 0)
-            throw new ArgumentOutOfRangeException(nameof(members));
-
-        return new NCNcpdUnitId(CreateGuid(
-            $"ncpd/unit/{stationZone}/{string.Join('/', ordered.Select(static value => value.ToString("D")))}"));
-    }
-
-    /// <summary>Stable Actor commitment projected from one NCPD UI or city-service order.</summary>
-    public static NCCityCommitmentId NcpdCommandCommitment(NCNcpdCommandId commandId, NCActorId actorId)
-    {
-        if (!commandId.IsValid)
-            throw new ArgumentOutOfRangeException(nameof(commandId));
-        if (!actorId.IsValid)
-            throw new ArgumentOutOfRangeException(nameof(actorId));
-        return new NCCityCommitmentId(CreateGuid($"ncpd/command-commitment/{commandId}/{actorId}"));
-    }
-
-    /// <summary>Stable A-Life attendance commitment for one actor and one physical Night Market.</summary>
-    public static NCCityCommitmentId NightMarketCommitment(NCNightMarketId marketId, NCActorId actorId)
-    {
-        if (!marketId.IsValid)
-            throw new ArgumentOutOfRangeException(nameof(marketId));
-        if (!actorId.IsValid)
-            throw new ArgumentOutOfRangeException(nameof(actorId));
-        return new NCCityCommitmentId(CreateGuid($"fixer/night-market-commitment/{marketId}/{actorId}"));
+        if (batchId == Guid.Empty || string.IsNullOrWhiteSpace(stepId))
+            throw new ArgumentOutOfRangeException(nameof(batchId));
+        return CreateGuid($"neural-command/action/{batchId:D}/{Normalize(stepId)}");
     }
 
     private static Guid CreateGuid(string value)

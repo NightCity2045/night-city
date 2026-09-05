@@ -5,7 +5,6 @@
 using Content.IntegrationTests.Fixtures;
 using Content.Server.Database;
 using Content.Server.GameTicking;
-using Content.Server._NC.LivingCity.Ambient;
 using Content.Server._NC.LivingCity.Neural;
 using Content.Server._NC.LivingCity.Observability;
 using Content.Server._NC.LivingCity.Simulation;
@@ -15,17 +14,15 @@ namespace Content.IntegrationTests.Tests._NC.LivingCity.Hardening;
 
 [TestFixture]
 [NonParallelizable]
-[TestOf(typeof(NCAmbientCrowdSystem))]
 [TestOf(typeof(NCLivingCityObservabilitySystem))]
 public sealed class NCLivingCityHardeningRuntimeTest : GameTest
 {
     public override PoolSettings PoolSettings => new() { Connected = false };
 
     [Test]
-    public async Task RoundLifecycleOwnsAmbientObservabilityAndTransientNeuralRecovery()
+    public async Task RoundLifecycleOwnsObservabilityAndTransientNeuralRecovery()
     {
         var server = Pair.Server;
-        var ambient = server.System<NCAmbientCrowdSystem>();
         var observability = server.System<NCLivingCityObservabilitySystem>();
         var neural = server.System<NCNeuralCognitionClientSystem>();
 
@@ -35,9 +32,6 @@ public sealed class NCLivingCityHardeningRuntimeTest : GameTest
 
         Assert.Multiple(() =>
         {
-            Assert.That(ambient.GetCounters().Active, Is.True);
-            Assert.That(ambient.GetCounters().InteractiveEntities, Is.Zero,
-                "A disconnected test round has no player relevance cluster and must not spawn ambient entities.");
             Assert.That(observability.GetSnapshot().Active, Is.True);
             Assert.That(observability.GetSnapshot().ConfigurationError, Is.Null);
             Assert.That(neural.ResetCircuitBreaker(), Is.True);
@@ -58,7 +52,6 @@ public sealed class NCLivingCityHardeningRuntimeTest : GameTest
         await server.WaitRunTicks(2);
         Assert.Multiple(() =>
         {
-            Assert.That(ambient.GetCounters().Active, Is.False);
             Assert.That(observability.GetSnapshot().Active, Is.False);
             Assert.That(neural.ResetCircuitBreaker(), Is.False);
         });

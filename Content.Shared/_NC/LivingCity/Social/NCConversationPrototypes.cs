@@ -23,6 +23,7 @@ public sealed partial class NCConversationPolicyPrototype : IPrototype
     [DataField] public int MaximumCachedArchivesPerPair { get; private set; } = 64;
     [DataField] public List<string> VerbalThreatMarkers { get; private set; } = [];
     [DataField] public TimeSpan VerbalThreatLifetime { get; private set; } = TimeSpan.FromMinutes(2);
+    [DataField] public TimeSpan PointedAddressLifetime { get; private set; } = TimeSpan.FromSeconds(8);
     [DataField] public TimeSpan IdleTimeout { get; private set; } = TimeSpan.FromMinutes(3);
     [DataField] public TimeSpan MaximumLifetime { get; private set; } = TimeSpan.FromMinutes(30);
     [DataField] public TimeSpan ExpirySweepInterval { get; private set; } = TimeSpan.FromSeconds(1);

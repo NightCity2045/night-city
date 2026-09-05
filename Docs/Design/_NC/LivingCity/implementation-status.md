@@ -2,6 +2,10 @@
 
 Updated: 2026-08-22
 
+> Historical v2 implementation inventory. It does not describe the current Physical GPT A-Life v3 NPC runtime;
+> `.rules/A-life/plan.md` and its linked specification are authoritative. Player/economy/domain foundations listed
+> below remain independent and are not deprecated by this marker.
+
 This file tracks implemented foundations against the full dependency plan. It is not an MVP or vertical-slice scope.
 
 ## Semi-release phase completion

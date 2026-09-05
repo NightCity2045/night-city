@@ -20,25 +20,9 @@ public sealed record NCCityActorInventoryRecord(
     NCSessionEpoch SessionEpoch,
     NCActiveWorldTime PersistedAt);
 
-public sealed record NCCityActorDomainCaptureRequest(
-    Guid CommandId,
-    NCActorId ActorId,
-    long ExpectedHealthVersion,
-    long ExpectedInventoryVersion,
-    Guid CorrelationId,
-    Guid? CausationId = null,
-    string AuditSource = "system");
-
-public sealed record NCCityActorDomainCaptureResult(
-    NCCityActorMutationStatus Status,
-    NCActorId ActorId,
-    NCCityActorHealthRecord? Health,
-    NCCityActorInventoryRecord? Inventory,
-    string? Error);
-
 /// <summary>
-/// Immutable main-thread capture used by the three-aggregate dematerialization hand-off.
-/// Expected versions belong to the snapshots that were loaded before the physical entity was inspected.
+/// Immutable main-thread capture used by the atomic round-checkpoint write.
+/// Expected versions belong to the snapshots loaded before the physical entity was inspected.
 /// </summary>
 public sealed record NCCityActorDomainCapture(
     NCActorId ActorId,

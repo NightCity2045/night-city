@@ -36,7 +36,8 @@ public sealed partial class NCCityActorHealthAdapterSystem : EntitySystem
         NCActiveWorldTime now,
         Guid eventId,
         out NCCityActorHealthSnapshot result,
-        out string? error)
+        out string? error,
+        bool allowTerminating = false)
     {
         result = default!;
         error = null;
@@ -52,7 +53,8 @@ public sealed partial class NCCityActorHealthAdapterSystem : EntitySystem
                 actorId,
                 sourceRevision,
                 out var medical,
-                out var payload))
+                out var payload,
+                allowTerminating))
         {
             error = "The authoritative NC medical graph could not be captured for this actor.";
             return false;
