@@ -135,7 +135,17 @@
                                     </BoxContainer>
                                 </PanelContainer>
                             </ContainerButton>
-                            <Button Name="ContractsButton" Text="{Loc 'nc-contract-app'}" MinHeight="86" Margin="4" />
+                            <ContainerButton Name="ContractsButton" MinHeight="86" Margin="4">
+                                <PanelContainer>
+                                    <PanelContainer.PanelOverride>
+                                        <gfx:StyleBoxFlat BackgroundColor="#0B2528" BorderColor="#24E0D0" BorderThickness="0 0 0 2" />
+                                    </PanelContainer.PanelOverride>
+                                    <BoxContainer Orientation="Vertical" Margin="10 8">
+                                        <Label Text="{Loc 'nc-contract-app'}" FontColorOverride="#77FFF2" />
+                                        <Label Text="{Loc 'nc-contract-board'}" FontColorOverride="#568783" />
+                                    </BoxContainer>
+                                </PanelContainer>
+                            </ContainerButton>
                             <ContainerButton Name="MissionsButton" MinHeight="86" Margin="4">
                                 <PanelContainer>
                                     <PanelContainer.PanelOverride>
