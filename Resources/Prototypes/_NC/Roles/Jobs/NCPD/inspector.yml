@@ -26,7 +26,6 @@
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesForensic
     id: NCPDInspectorPDA
-    ears: ClothingHeadsetSecurity
     belt: ClothingBeltHolsterFilled
   storage:
     back:

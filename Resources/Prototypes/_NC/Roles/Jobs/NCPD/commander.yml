@@ -26,7 +26,6 @@
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
     id: NCPDCommanderPDA
-    ears: ClothingHeadsetAltSecurity
     belt: ClothingBeltSecurityFilled
     outerClothing: ClothingOuterArmorBasic
   storage:

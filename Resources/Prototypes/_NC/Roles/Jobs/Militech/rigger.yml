@@ -26,7 +26,6 @@
     eyes: ClothingEyesGlassesMeson
     gloves: ClothingHandsGlovesColorYellow
     id: EngineerPDA
-    ears: ClothingHeadsetEngineering
     belt: ClothingBeltUtilityFilled
   storage:
     back:

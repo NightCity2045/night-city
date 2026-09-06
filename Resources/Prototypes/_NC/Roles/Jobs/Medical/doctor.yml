@@ -25,7 +25,6 @@
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesLatex
     id: MedicalPDA
-    ears: ClothingHeadsetMedical
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatLab
   storage:

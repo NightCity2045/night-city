@@ -25,7 +25,6 @@
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesLatex
     id: MedicalInternPDA
-    ears: ClothingHeadsetMedical
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatLab
     pocket2: BookMedicalReferenceBook
