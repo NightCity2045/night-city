@@ -1,0 +1,19 @@
+<!-- SPDX-FileCopyrightText: 2026 Astro
+SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md. -->
+<agent:NCAgentWindow xmlns="https://spacestation14.io"
+    xmlns:agent="clr-namespace:Content.Client._NC.Agent"
+    xmlns:missions="clr-namespace:Content.Client._NC.Missions"
+    xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Content.Client._NC.Missions.NCFixerMissionWindow">
+    <PanelContainer HorizontalExpand="True" VerticalExpand="True">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#071015" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="10 8">
+            <Label Text="{Loc 'nc-fixer-window-title'}" FontColorOverride="#77FFF2" Margin="0 4" />
+            <missions:NCFixerMissionControl Name="MissionControl" />
+        </BoxContainer>
+    </PanelContainer>
+</agent:NCAgentWindow>

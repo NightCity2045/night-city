@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-nc-agent-missions-title = Contracts
-nc-agent-missions-subtitle = Combat jobs
+nc-agent-missions-title = Assignments
+nc-agent-missions-subtitle = Work and crew
 nc-agent-missions-refresh = Refresh
 nc-agent-missions-start = Accept and start
 nc-agent-missions-cancel = Abort operation

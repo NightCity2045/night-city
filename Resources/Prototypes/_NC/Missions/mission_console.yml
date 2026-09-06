@@ -8,6 +8,9 @@
   name: public mission terminal
   description: Deploys a timed physical mission directly into the shared Night City world.
   components:
+  - type: NCFixerContactAnchor
+    contact: NCStreetMissionFixer
+    spawnRadius: 2
   - type: NCMissionConsole
     definition: NCMission8x8
     slotId: 8d7b2c44-9a31-4f67-b8e2-6c5d4a3f1808

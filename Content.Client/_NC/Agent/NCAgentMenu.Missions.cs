@@ -2,34 +2,40 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Client._NC.Missions;
 using Content.Shared._NC.Agent.UI;
+using Content.Shared._NC.Missions.UI;
 
 namespace Content.Client._NC.Agent;
 
 public sealed partial class NCAgentMenu
 {
-    private NCAgentMissionsUpdateMessage? _missionData;
-    private string? _selectedMission;
+    private NCFixerMissionUpdateMessage? _missionData;
     private TimeSpan _missionReceivedAt;
-    public event Action<string>? OnStartMission;
-    public event Action<Guid>? OnFinishMission;
+    private NCFixerMissionControl? _fixerWorkPanel;
+    public event Action<BoundUserInterfaceMessage>? OnFixerWorkRequest;
 
-    public void UpdateMissionData(NCAgentMissionsUpdateMessage update)
+    public void UpdateMissionData(NCFixerMissionUpdateMessage update)
     {
         _missionData = update;
         _missionReceivedAt = _gameTiming.RealTime;
         if (_currentView == BuiltInAppView && _agentData?.ActiveApp == NCAgentApp.Missions)
-            RenderAgentApp(NCAgentApp.Missions);
+            _fixerWorkPanel?.SetData(update);
     }
 
     private void BuildMissions()
     {
-        var panel = new NCAgentMissionsControl();
-        panel.OnRefresh += () => OnOpenAgentApp?.Invoke(NCAgentApp.Missions);
-        panel.OnSelect += id => _selectedMission = id;
-        panel.OnStart += id => OnStartMission?.Invoke(id);
-        panel.OnFinish += id => OnFinishMission?.Invoke(id);
-        panel.SetData(_missionData, _selectedMission, _missionReceivedAt);
-        BuiltInContent.AddChild(panel);
+        _fixerWorkPanel ??= CreateFixerWorkPanel();
+        _fixerWorkPanel.SetContacts(_agentData?.Contacts ?? []);
+        _fixerWorkPanel.SetData(_missionData, _missionReceivedAt);
+        _fixerWorkPanel.Orphan();
+        BuiltInContent.AddChild(_fixerWorkPanel);
+    }
+
+    private NCFixerMissionControl CreateFixerWorkPanel()
+    {
+        var panel = new NCFixerMissionControl();
+        panel.OnRequest += message => OnFixerWorkRequest?.Invoke(message);
+        return panel;
     }
 }

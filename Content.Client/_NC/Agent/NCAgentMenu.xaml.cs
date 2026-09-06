@@ -216,6 +216,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         MapButton.OnPressed += _ => OpenAgentApp(NCAgentApp.Map, "CITY MAP");
         CityButton.OnPressed += _ => OpenAgentApp(NCAgentApp.City, "CITY SERVICES");
         MissionsButton.OnPressed += _ => OpenAgentApp(NCAgentApp.Missions, Loc.GetString("nc-agent-missions-title"));
+        ContractsButton.OnPressed += _ => OpenAgentApp(NCAgentApp.Contracts, Loc.GetString("nc-contract-app"));
         ShardsButton.OnPressed += _ => ToProgramList();
         EjectShardButton.OnPressed += _ =>
         {
@@ -258,6 +259,12 @@ public sealed partial class NCAgentMenu : NCAgentWindow
 
         if (update.Locked)
         {
+            _contractData = null;
+            _contractPanel?.Orphan();
+            _contractPanel = null;
+            _missionData = null;
+            _fixerWorkPanel?.Orphan();
+            _fixerWorkPanel = null;
             var subtitle = !string.IsNullOrWhiteSpace(update.Notice)
                 ? update.Notice
                 : "ENTER PIN TO ACCESS CITYNET";
@@ -604,6 +611,9 @@ public sealed partial class NCAgentMenu : NCAgentWindow
                 break;
             case NCAgentApp.Missions:
                 BuildMissions();
+                break;
+            case NCAgentApp.Contracts:
+                BuildContracts();
                 break;
             default:
                 BuiltInContent.AddChild(CreateStatusLabel("SELECT AN APPLICATION", "#77FFF2"));
@@ -1663,6 +1673,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             NCAgentApp.Map => "CITY MAP",
             NCAgentApp.City => "CITY SERVICES",
             NCAgentApp.Missions => Loc.GetString("nc-agent-missions-title"),
+            NCAgentApp.Contracts => Loc.GetString("nc-contract-app"),
             _ => "AGENT",
         };
     }

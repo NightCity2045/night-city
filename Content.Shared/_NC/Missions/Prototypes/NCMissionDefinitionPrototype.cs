@@ -21,13 +21,14 @@ public sealed partial class NCMissionDefinitionPrototype : IPrototype
     [DataField(required: true)]
     public ProtoId<NCZoneTemplatePrototype> Template { get; private set; }
 
-    /// <summary>Only explicitly published recipes appear in the Agent contract catalog.</summary>
+    /// <summary>Legacy serialized publication flag. Contact prototypes now control all player-facing offers.</summary>
     [DataField] public bool AgentAvailable { get; private set; }
     [DataField] public LocId? Name { get; private set; }
     [DataField] public LocId? Description { get; private set; }
     [DataField] public LocId? RewardDescription { get; private set; }
     [DataField] public ProtoId<NCMissionDifficultyPrototype>? Difficulty { get; private set; }
     [DataField] public int RecommendedPlayers { get; private set; } = 1;
+    [DataField] public EntProtoId? DeliveryObjective { get; private set; }
 
     [DataField]
     public int MaximumParticipants { get; private set; } = 8;
