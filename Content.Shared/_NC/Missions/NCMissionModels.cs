@@ -66,6 +66,9 @@ public readonly record struct NCMissionRunStatus(
     DateTime WarningAt,
     DateTime? CompletedAt,
     NCMissionRunResult Result,
-    string? Error);
+    string? Error)
+{
+    public string DefinitionId { get; init; } = string.Empty;
+}
 
 public readonly record struct NCMissionStartResult(bool Success, NCMissionRunId RunId, string Error);

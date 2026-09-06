@@ -18,6 +18,7 @@ public enum NCAgentApp : byte
     CitiNet,
     Map,
     City,
+    Missions,
 }
 
 [Serializable, NetSerializable]

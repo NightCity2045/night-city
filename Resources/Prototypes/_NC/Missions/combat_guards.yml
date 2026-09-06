@@ -1,0 +1,94 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: MobSyndicateFootsoldier
+  id: NCMissionGuardEasy
+  name: contract guard
+  suffix: NC, Easy
+  components:
+  - type: Loadout
+    prototypes: [NCMissionGuardEasyGear]
+
+- type: startingGear
+  id: NCMissionGuardEasyGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+  inhand:
+  - WeaponPistolMk58
+
+- type: entity
+  parent: MobSyndicateFootsoldier
+  id: NCMissionGuardMedium
+  name: contract guard
+  suffix: NC, Medium
+  components:
+  - type: Loadout
+    prototypes: [NCMissionGuardMediumGear]
+
+- type: startingGear
+  id: NCMissionGuardMediumGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    outerClothing: ClothingOuterArmorBasic
+  inhand:
+  - WeaponPistolMk58
+
+- type: entity
+  parent: MobSyndicateFootsoldier
+  id: NCMissionGuardHard
+  name: contract guard
+  suffix: NC, Hard
+  components:
+  - type: Loadout
+    prototypes: [NCMissionGuardHardGear]
+
+- type: startingGear
+  id: NCMissionGuardHardGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    outerClothing: ClothingOuterArmorBasic
+  inhand:
+  - WeaponSubMachineGunDrozd
+
+- type: entity
+  parent: MobSyndicateFootsoldier
+  id: NCMissionGuardVeryHard
+  name: contract guard
+  suffix: NC, VeryHard
+  components:
+  - type: Loadout
+    prototypes: [NCMissionGuardVeryHardGear]
+
+- type: startingGear
+  id: NCMissionGuardVeryHardGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    outerClothing: ClothingOuterArmorBasic
+    head: ClothingHeadHelmetSwatSyndicate
+  inhand:
+  - WeaponRifleLecter
+
+- type: entity
+  parent: MobSyndicateFootsoldier
+  id: NCMissionGuardExtreme
+  name: contract guard
+  suffix: NC, Extreme
+  components:
+  - type: Loadout
+    prototypes: [NCMissionGuardExtremeGear]
+
+- type: startingGear
+  id: NCMissionGuardExtremeGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitSecGrey
+    shoes: ClothingShoesBootsJack
+    outerClothing: ClothingOuterArmorBulletproof
+    head: ClothingHeadHelmetSwatSyndicate
+  inhand:
+  - WeaponRifleLecter

@@ -1,0 +1,118 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncMissionDifficulty
+  id: Easy
+  name: nc-mission-difficulty-1
+  order: 1
+
+- type: ncMissionDefinition
+  id: NCAgentCombatEasy
+  template: NCMissionLayout8x8
+  agentAvailable: true
+  name: nc-mission-combat-1-name
+  description: nc-mission-combat-1-description
+  rewardDescription: nc-mission-combat-1-reward
+  difficulty: Easy
+  recommendedPlayers: 1
+  maximumParticipants: 4
+  runDuration: 15m
+  evacuationTime: 2m
+  dynamicSpawnPools:
+    Guards:
+    - NCMissionGuardEasy
+    Loot:
+    - WeaponPistolMk58
+
+- type: ncMissionDifficulty
+  id: Medium
+  name: nc-mission-difficulty-2
+  order: 2
+
+- type: ncMissionDefinition
+  id: NCAgentCombatMedium
+  template: NCMissionLayout8x8
+  agentAvailable: true
+  name: nc-mission-combat-2-name
+  description: nc-mission-combat-2-description
+  rewardDescription: nc-mission-combat-2-reward
+  difficulty: Medium
+  recommendedPlayers: 2
+  maximumParticipants: 4
+  runDuration: 15m
+  evacuationTime: 2m
+  dynamicSpawnPools:
+    Guards:
+    - NCMissionGuardMedium
+    Loot:
+    - WeaponPistolMk58
+
+- type: ncMissionDifficulty
+  id: Hard
+  name: nc-mission-difficulty-3
+  order: 3
+
+- type: ncMissionDefinition
+  id: NCAgentCombatHard
+  template: NCMissionLayout8x8
+  agentAvailable: true
+  name: nc-mission-combat-3-name
+  description: nc-mission-combat-3-description
+  rewardDescription: nc-mission-combat-3-reward
+  difficulty: Hard
+  recommendedPlayers: 3
+  maximumParticipants: 4
+  runDuration: 15m
+  evacuationTime: 2m
+  dynamicSpawnPools:
+    Guards:
+    - NCMissionGuardHard
+    Loot:
+    - WeaponSubMachineGunDrozd
+
+- type: ncMissionDifficulty
+  id: VeryHard
+  name: nc-mission-difficulty-4
+  order: 4
+
+- type: ncMissionDefinition
+  id: NCAgentCombatVeryHard
+  template: NCMissionLayout8x8
+  agentAvailable: true
+  name: nc-mission-combat-4-name
+  description: nc-mission-combat-4-description
+  rewardDescription: nc-mission-combat-4-reward
+  difficulty: VeryHard
+  recommendedPlayers: 4
+  maximumParticipants: 4
+  runDuration: 15m
+  evacuationTime: 2m
+  dynamicSpawnPools:
+    Guards:
+    - NCMissionGuardVeryHard
+    Loot:
+    - WeaponRifleLecter
+
+- type: ncMissionDifficulty
+  id: Extreme
+  name: nc-mission-difficulty-5
+  order: 5
+
+- type: ncMissionDefinition
+  id: NCAgentCombatExtreme
+  template: NCMissionLayout8x8
+  agentAvailable: true
+  name: nc-mission-combat-5-name
+  description: nc-mission-combat-5-description
+  rewardDescription: nc-mission-combat-5-reward
+  difficulty: Extreme
+  recommendedPlayers: 4
+  maximumParticipants: 4
+  runDuration: 15m
+  evacuationTime: 2m
+  dynamicSpawnPools:
+    Guards:
+    - NCMissionGuardExtreme
+    Loot:
+    - WeaponRifleLecter

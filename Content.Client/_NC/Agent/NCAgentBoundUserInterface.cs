@@ -64,6 +64,8 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
             SendPredictedMessage(new ItemSlotButtonPressedEvent(CartridgeLoaderComponent.CartridgeSlotId));
         _menu.ProgramCloseButton.OnPressed += _ => DeactivateActiveCartridge();
         _menu.OnOpenAgentApp += app => SendMessage(new NCAgentOpenAppMessage(app));
+        _menu.OnStartMission += id => SendMessage(new NCAgentMissionStartMessage(id));
+        _menu.OnFinishMission += id => SendMessage(new NCAgentMissionFinishMessage(id));
         _menu.OnDirectorySearch += query => SendMessage(new NCAgentDirectorySearchMessage(query));
         _menu.OnSetAlias += alias => SendMessage(new NCAgentSetAliasMessage(alias));
         _menu.OnSetPresence += presence => SendMessage(new NCAgentSetPresenceMessage(presence));
@@ -133,6 +135,9 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
 
         switch (message)
         {
+            case NCAgentMissionsUpdateMessage missions:
+                _menu.UpdateMissionData(missions);
+                break;
             case NCAgentLockUpdateMessage lockUpdate:
                 _menu.UpdateLockState(lockUpdate);
                 break;

@@ -215,6 +215,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         CitiNetButton.OnPressed += _ => OpenAgentApp(NCAgentApp.CitiNet, "CITINET");
         MapButton.OnPressed += _ => OpenAgentApp(NCAgentApp.Map, "CITY MAP");
         CityButton.OnPressed += _ => OpenAgentApp(NCAgentApp.City, "CITY SERVICES");
+        MissionsButton.OnPressed += _ => OpenAgentApp(NCAgentApp.Missions, Loc.GetString("nc-agent-missions-title"));
         ShardsButton.OnPressed += _ => ToProgramList();
         EjectShardButton.OnPressed += _ =>
         {
@@ -600,6 +601,9 @@ public sealed partial class NCAgentMenu : NCAgentWindow
                 break;
             case NCAgentApp.City:
                 BuildCity();
+                break;
+            case NCAgentApp.Missions:
+                BuildMissions();
                 break;
             default:
                 BuiltInContent.AddChild(CreateStatusLabel("SELECT AN APPLICATION", "#77FFF2"));
@@ -1658,6 +1662,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             NCAgentApp.CitiNet => "CITINET",
             NCAgentApp.Map => "CITY MAP",
             NCAgentApp.City => "CITY SERVICES",
+            NCAgentApp.Missions => Loc.GetString("nc-agent-missions-title"),
             _ => "AGENT",
         };
     }

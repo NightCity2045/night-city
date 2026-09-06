@@ -225,7 +225,7 @@ public sealed partial class NCMissionSystem : EntitySystem
             run.WarningAt,
             run.CompletedAt,
             run.Result,
-            run.Error);
+            run.Error) { DefinitionId = run.DefinitionId.Id };
         return true;
     }
 
