@@ -13,6 +13,6 @@ namespace Content.Shared._NC.City.Zones.Components;
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class NCCityLocationComponent : Component
 {
-    [DataField, AutoNetworkedField]
+    [AutoNetworkedField]
     public NCCityLocationContext Context;
 }
