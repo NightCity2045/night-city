@@ -1,0 +1,60 @@
+<!-- SPDX-FileCopyrightText: 2026 Astro
+SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md. -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+    xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+    xmlns:workshop="clr-namespace:Content.Client._NC.Vehicle.Workshop"
+    xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Content.Client._NC.Vehicle.NCVehicleServiceWindow"
+    Title="{Loc 'nc-workshop-title'}" SetSize="1050 650" MinSize="760 520">
+    <PanelContainer HorizontalExpand="True" VerticalExpand="True">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#10191D" BorderColor="#53716D" BorderThickness="1" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="10" SeparationOverride="8">
+            <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                <Label Text="{Loc 'nc-workshop-title'}" StyleClasses="LabelHeadingBigger" FontColorOverride="#EDBC63" />
+                <Control HorizontalExpand="True" />
+                <Label Name="Status" />
+            </BoxContainer>
+            <BoxContainer Orientation="Horizontal" SeparationOverride="6">
+                <OptionButton Name="Views" HorizontalExpand="True" />
+                <Button Name="Hood" Text="{Loc 'nc-vehicle-service-hood'}" />
+                <Button Name="Lift" Text="{Loc 'nc-vehicle-service-lift'}" />
+                <Button Name="Right" Text="{Loc 'nc-vehicle-service-right'}" />
+            </BoxContainer>
+            <PanelContainer>
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#29342E" BorderColor="#687C53" BorderThickness="0 0 0 1" />
+                </PanelContainer.PanelOverride>
+                <RichTextLabel Name="Feedback" Margin="8 5" />
+            </PanelContainer>
+            <BoxContainer Orientation="Horizontal" SeparationOverride="10" HorizontalExpand="True" VerticalExpand="True">
+                <workshop:NCVehicleWorkshopField Name="Field" />
+                <ScrollContainer HScrollEnabled="False" MinWidth="240" SetWidth="250" VerticalExpand="True">
+                    <BoxContainer Orientation="Vertical" SeparationOverride="10" Margin="5">
+                        <Label Text="{Loc 'nc-workshop-held-tool'}" FontColorOverride="#EDBC63" />
+                        <EntityPrototypeView Name="ToolSprite" SetSize="64 64" Scale="2 2" />
+                        <BoxContainer Name="TorqueControls" Orientation="Vertical" SeparationOverride="4" Visible="False">
+                            <Label Text="{Loc 'nc-workshop-torque-tool'}" FontColorOverride="#EDBC63" />
+                            <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                                <Button Name="TorqueDown" Text="−" MinWidth="38" />
+                                <Label Name="TorqueValue" HorizontalExpand="True" HorizontalAlignment="Center" />
+                                <Button Name="TorqueUp" Text="+" MinWidth="38" />
+                            </BoxContainer>
+                        </BoxContainer>
+                        <Label Text="{Loc 'nc-workshop-mode'}" />
+                        <OptionButton Name="Mode" />
+                        <Label Text="{Loc 'nc-workshop-selected'}" FontColorOverride="#EDBC63" />
+                        <RichTextLabel Name="SelectionInfo" />
+                        <RichTextLabel Name="Instructions" MaxWidth="230" />
+                        <Label Text="{Loc 'nc-workshop-calibration'}" FontColorOverride="#EDBC63" />
+                        <OptionButton Name="Calibration" />
+                        <Button Name="Tune" Text="{Loc 'nc-vehicle-calibrate'}" />
+                    </BoxContainer>
+                </ScrollContainer>
+            </BoxContainer>
+        </BoxContainer>
+    </PanelContainer>
+</controls:FancyWindow>

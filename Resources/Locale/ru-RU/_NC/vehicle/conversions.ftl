@@ -1,0 +1,9 @@
+ent-NCVehicleAutomaticGearboxItem = автоматическая коробка передач
+ent-NCVehicleFrontDifferentialItem = передний дифференциал
+nc-vehicle-module-front-differential = передний дифференциал
+ent-NCVehicleFrontLeftShaftItem = передняя левая полуось
+nc-vehicle-module-front-left-shaft = передняя левая полуось
+ent-NCVehicleFrontRightShaftItem = передняя правая полуось
+nc-vehicle-module-front-right-shaft = передняя правая полуось
+ent-NCVehicleTransferCaseItem = раздаточная коробка AWD
+nc-vehicle-module-transfer-case = раздаточная коробка AWD

@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncVehicleHandling
+  parent: NCBaseSupraHandling
+  id: NCSupraManualRwd
+
+- type: ncVehicleHandling
+  parent: NCBaseSupraHandling
+  id: NCSupraAutomaticRwd
+  automatic: true
+  gearRatios: [0, 2.8, 1.53, 1, 0.71, -2.39]
+  manualPattern: [1, 2, 3, 4, 0, 0]
+  antiLockBrakes: true
+
+- type: ncVehicleHandling
+  parent: NCBaseSupraHandling
+  id: NCSupraAwdConversion
+  centerDifferentialCoupling: 10
+  centerDifferentialTorqueLimit: 150
+  stabilityControl: true
+  differentialCoupling: 20
+  differentialTorqueLimit: 300
+  tractionControl: true
+  antiLockBrakes: true
+  wheels:
+  - position: -0.64, 1.1
+    radius: 0.31
+    inertia: 1.4
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.64, 1.1
+    radius: 0.31
+    inertia: 1.4
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.64, -1.1
+    axle: 1
+    radius: 0.31
+    inertia: 1.4
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+
+  - position: 0.64, -1.1
+    axle: 1
+    radius: 0.31
+    inertia: 1.4
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+
+- type: ncVehicleHandling
+  parent: NCSupraAwdConversion
+  id: NCSupraAutomaticAwdConversion
+  automatic: true
+  gearRatios: [0, 2.8, 1.53, 1, 0.71, -2.39]
+  manualPattern: [1, 2, 3, 4, 0, 0]

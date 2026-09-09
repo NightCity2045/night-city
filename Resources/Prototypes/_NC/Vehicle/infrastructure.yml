@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: NCBaseVehicleInfrastructure
+  id: NCVehicleParkingBay
+  name: parking bay terminal
+  description: Marks a physical parking space. Park your stopped car beside it and reserve the bay from the dashboard.
+  components:
+  - type: NCVehicleParking
+    radius: 3
+
+- type: entity
+  parent: NCBaseVehicleInfrastructure
+  id: NCVehicleGarageEntrance
+  name: garage entrance terminal
+  description: Stop the engine and use the garage passage on your dashboard. The car and its contents move together.
+  components:
+  - type: NCVehicleGate
+    gateId: garage-street
+    destination: garage-interior
+    arrivalOffset: 0, -3
+    radius: 5
+
+- type: entity
+  parent: NCVehicleGarageEntrance
+  id: NCVehicleGarageExit
+  name: garage exit terminal
+  components:
+  - type: NCVehicleGate
+    gateId: garage-interior
+    destination: garage-street

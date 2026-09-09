@@ -651,3 +651,35 @@ binds:
   type: State
   key: MouseRight
   canFocus: true
+# NC-Edit-Start
+- function: NCVehicleThrottle
+  type: State
+  key: Q
+- function: NCVehicleBrake
+  type: State
+  key: E
+- function: NCVehicleClutch
+  type: State
+  key: Shift
+- function: NCVehicleHandbrake
+  type: State
+  key: Space
+- function: NCVehicleGearUp
+  type: State
+  key: W
+- function: NCVehicleGearDown
+  type: State
+  key: S
+- function: NCVehicleSteerLeft
+  type: State
+  key: Left
+- function: NCVehicleSteerRight
+  type: State
+  key: Right
+- function: NCVehicleGearLeft
+  type: State
+  key: A
+- function: NCVehicleGearRight
+  type: State
+  key: D
+# NC-Edit-End

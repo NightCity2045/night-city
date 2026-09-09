@@ -1,0 +1,13 @@
+nc-vehicle-zone-front-left = front left
+nc-vehicle-zone-front-center = front center
+nc-vehicle-zone-front-right = front right
+nc-vehicle-zone-left-side = left side
+nc-vehicle-zone-right-side = right side
+nc-vehicle-zone-rear-left = rear left
+nc-vehicle-zone-rear-center = rear center
+nc-vehicle-zone-rear-right = rear right
+nc-vehicle-zone-roof = roof
+nc-vehicle-zone-underbody = underbody
+nc-vehicle-zone-cabin = cabin
+nc-vehicle-zone-cargo = cargo area
+nc-vehicle-body-damaged-zone = Visible deformation: { $zone }.

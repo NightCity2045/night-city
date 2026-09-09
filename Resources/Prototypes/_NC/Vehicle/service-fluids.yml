@@ -1,0 +1,114 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: reagent
+  parent: Water
+  id: NCVehicleTransmissionFluid
+  name: reagent-name-nc-vehicle-transmission
+  desc: reagent-desc-nc-vehicle-transmission
+  color: "#7899a8"
+
+- type: entity
+  parent: Solution
+  id: NCVehicleTransmissionReservoir
+  categories: [HideSpawnMenu]
+  components:
+  - type: Solution
+    id: transmission
+    solution:
+      maxVol: 2500
+      canReact: false
+      reagents:
+      - ReagentId: NCVehicleTransmissionFluid
+        Quantity: 2500
+
+- type: entity
+  parent: NCVehicleOilBottle
+  id: NCVehicleTransmissionBottle
+  name: transmission oil bottle
+  components:
+  - type: NCVehicleFluidBottle
+    circuit: Transmission
+    transferVolume: 1000
+  - type: Solution
+    id: tank
+    solution:
+      maxVol: 1000
+      reagents:
+      - ReagentId: NCVehicleTransmissionFluid
+        Quantity: 1000
+
+- type: reagent
+  parent: Water
+  id: NCVehicleSteeringFluid
+  name: reagent-name-nc-vehicle-steering
+  desc: reagent-desc-nc-vehicle-steering
+  color: "#7899a8"
+
+- type: entity
+  parent: Solution
+  id: NCVehicleSteeringReservoir
+  categories: [HideSpawnMenu]
+  components:
+  - type: Solution
+    id: steering
+    solution:
+      maxVol: 1200
+      canReact: false
+      reagents:
+      - ReagentId: NCVehicleSteeringFluid
+        Quantity: 1200
+
+- type: entity
+  parent: NCVehicleOilBottle
+  id: NCVehicleSteeringBottle
+  name: power steering fluid bottle
+  components:
+  - type: NCVehicleFluidBottle
+    circuit: Steering
+    transferVolume: 1000
+  - type: Solution
+    id: tank
+    solution:
+      maxVol: 1000
+      reagents:
+      - ReagentId: NCVehicleSteeringFluid
+        Quantity: 1000
+
+- type: reagent
+  parent: Water
+  id: NCVehicleWasherFluid
+  name: reagent-name-nc-vehicle-washer
+  desc: reagent-desc-nc-vehicle-washer
+  color: "#7899a8"
+
+- type: entity
+  parent: Solution
+  id: NCVehicleWasherReservoir
+  categories: [HideSpawnMenu]
+  components:
+  - type: Solution
+    id: washer
+    solution:
+      maxVol: 3000
+      canReact: false
+      reagents:
+      - ReagentId: NCVehicleWasherFluid
+        Quantity: 3000
+
+- type: entity
+  parent: NCVehicleOilBottle
+  id: NCVehicleWasherBottle
+  name: windshield washer fluid bottle
+  components:
+  - type: NCVehicleFluidBottle
+    circuit: Washer
+    transferVolume: 1000
+  - type: Solution
+    id: tank
+    solution:
+      maxVol: 1000
+      reagents:
+      - ReagentId: NCVehicleWasherFluid
+        Quantity: 1000

@@ -1,0 +1,15 @@
+{
+    "version": 1,
+    "license": "CC0-1.0",
+    "copyright": "AI-generated using OpenAI ImageGen for Astro's player vehicle implementation, 2026. Original fictional recovery truck, pixel-size export with cleaned alpha. No third-party source image.",
+    "size": {
+        "x": 256,
+        "y": 256
+    },
+    "states": [
+        {
+            "name": "body",
+            "directions": 4
+        }
+    ]
+}

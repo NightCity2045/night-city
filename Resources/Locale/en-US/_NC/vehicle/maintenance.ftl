@@ -1,0 +1,12 @@
+reagent-name-nc-vehicle-oil = engine oil
+reagent-desc-nc-vehicle-oil = Lubricant for vehicle engines.
+reagent-name-nc-vehicle-coolant = engine coolant
+reagent-desc-nc-vehicle-coolant = Fluid for the vehicle cooling circuit.
+reagent-name-nc-vehicle-brakes = brake fluid
+reagent-desc-nc-vehicle-brakes = Hydraulic fluid for vehicle brakes.
+ent-NCVehicleOilBottle = engine oil bottle
+ent-NCVehicleCoolantBottle = coolant bottle
+ent-NCVehicleBrakeBottle = brake fluid bottle
+nc-vehicle-condition = Engine: { $engine } °C | Brakes: { $brakes } °C | Battery: { $battery } Ah
+nc-vehicle-selector = Automatic selector: { $position } (P–R–N–D–L)
+nc-vehicle-fluids = Oil: { $oil }% | Coolant: { $coolant }% | Brake fluid: { $fluid }%

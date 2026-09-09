@@ -1,0 +1,12 @@
+reagent-name-nc-vehicle-oil = моторное масло
+reagent-desc-nc-vehicle-oil = Смазка для автомобильных двигателей.
+reagent-name-nc-vehicle-coolant = охлаждающая жидкость
+reagent-desc-nc-vehicle-coolant = Жидкость для системы охлаждения автомобиля.
+reagent-name-nc-vehicle-brakes = тормозная жидкость
+reagent-desc-nc-vehicle-brakes = Гидравлическая жидкость для автомобильных тормозов.
+ent-NCVehicleOilBottle = бутылка моторного масла
+ent-NCVehicleCoolantBottle = бутылка охлаждающей жидкости
+ent-NCVehicleBrakeBottle = бутылка тормозной жидкости
+nc-vehicle-condition = Двигатель: { $engine } °C | Тормоза: { $brakes } °C | АКБ: { $battery } А·ч
+nc-vehicle-selector = Селектор АКПП: { $position } (P–R–N–D–L)
+nc-vehicle-fluids = Масло: { $oil }% | Охлаждение: { $coolant }% | Тормозная жидкость: { $fluid }%

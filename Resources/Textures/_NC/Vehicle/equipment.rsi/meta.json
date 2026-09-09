@@ -1,0 +1,23 @@
+{
+    "version": 1,
+    "license": "CC-BY-4.0",
+    "copyright": "AI-assisted original artwork directed and integrated by Astro, 2026. See Docs/Design/NC_VEHICLE_ART.md.",
+    "size": {
+        "x": 64,
+        "y": 64
+    },
+    "states": [
+        {
+            "name": "lift"
+        },
+        {
+            "name": "hoist"
+        },
+        {
+            "name": "bench"
+        },
+        {
+            "name": "tyrechanger"
+        }
+    ]
+}

@@ -1,0 +1,15 @@
+ent-NCVehicleParkingBay = parking bay terminal
+    .desc = Marks a physical parking space. Park your stopped car beside it and reserve the bay from the dashboard.
+ent-NCVehicleGarageEntrance = garage entrance terminal
+    .desc = Stop the engine and use the garage passage on your dashboard. The car and its contents move together.
+ent-NCVehicleGarageExit = garage exit terminal
+nc-vehicle-park = Reserve parking bay
+nc-vehicle-travel = Use garage passage
+nc-vehicle-parking-release = Release parking reservation
+nc-vehicle-parking-free = This parking bay is available.
+nc-vehicle-parking-reserved = This parking bay is reserved for the current round.
+nc-vehicle-infrastructure-unavailable = Stop the engine beside an available terminal. The passage exit must be clear; parking requires your car key.
+nc-vehicle-calibrate = Calibrate at workbench
+nc-vehicle-calibration-street = Street: standard settings
+nc-vehicle-calibration-economy = Economy: lower power, fuel use and heat
+nc-vehicle-calibration-sport = Sport: more power, fuel use and heat

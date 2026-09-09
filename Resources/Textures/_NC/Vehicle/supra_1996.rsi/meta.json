@@ -1,0 +1,15 @@
+{
+    "version": 1,
+    "license": "CC0-1.0",
+    "copyright": "AI-generated using OpenAI ImageGen at Astro's request, 2026. Original generated sprite of a 1996 Toyota Supra A80; no third-party image was used as an input.",
+    "size": {
+        "x": 128,
+        "y": 128
+    },
+    "states": [
+        {
+            "name": "body",
+            "directions": 4
+        }
+    ]
+}

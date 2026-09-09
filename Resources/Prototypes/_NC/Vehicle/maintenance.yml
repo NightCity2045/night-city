@@ -1,0 +1,166 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: reagent
+  parent: Water
+  id: NCEngineOil
+  name: reagent-name-nc-vehicle-oil
+  desc: reagent-desc-nc-vehicle-oil
+  color: "#879969"
+
+- type: entity
+  parent: Solution
+  id: NCVehicleOilReservoir
+  categories: [HideSpawnMenu]
+  components:
+  - type: Solution
+    id: oil
+    solution:
+      maxVol: 5000
+      canReact: false
+      reagents:
+      - ReagentId: NCEngineOil
+        Quantity: 5000
+
+- type: entity
+  parent: BaseItem
+  id: NCVehicleOilBottle
+  name: vehicle engine oil bottle
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/stock_parts.rsi
+    state: micro_mani
+  - type: NCVehicleFluidBottle
+    circuit: Oil
+    transferVolume: 1000
+  - type: Solution
+    id: tank
+    solution:
+      maxVol: 1000
+      reagents:
+      - ReagentId: NCEngineOil
+        Quantity: 1000
+  - type: DrainableSolution
+    solution: tank
+  - type: RefillableSolution
+    solution: tank
+  - type: ExaminableSolution
+    solution: tank
+
+- type: entity
+  parent: BaseItem
+  id: NCVehicleFluidDrainPan
+  name: nc-vehicle-fluid-drain-pan-name
+  description: nc-vehicle-fluid-drain-pan-desc
+  components:
+  - type: Sprite
+    sprite: _NC/Vehicle/tools.rsi
+    state: drainpan
+  - type: NCVehicleFluidDrainPan
+    transferVolume: 1000
+  - type: Solution
+    id: tank
+    solution:
+      maxVol: 12000
+  - type: DrainableSolution
+    solution: tank
+  - type: RefillableSolution
+    solution: tank
+  - type: SolutionTransfer
+    transferAmount: 1000
+    maxTransferAmount: 12000
+  - type: ExaminableSolution
+    solution: tank
+
+- type: reagent
+  parent: Water
+  id: NCCoolant
+  name: reagent-name-nc-vehicle-coolant
+  desc: reagent-desc-nc-vehicle-coolant
+  color: "#879969"
+
+- type: entity
+  parent: Solution
+  id: NCVehicleCoolantReservoir
+  categories: [HideSpawnMenu]
+  components:
+  - type: Solution
+    id: coolant
+    solution:
+      maxVol: 8000
+      canReact: false
+      reagents:
+      - ReagentId: NCCoolant
+        Quantity: 8000
+
+- type: entity
+  parent: BaseItem
+  id: NCVehicleCoolantBottle
+  name: vehicle coolant bottle
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/stock_parts.rsi
+    state: micro_mani
+  - type: NCVehicleFluidBottle
+    circuit: Coolant
+    transferVolume: 1000
+  - type: Solution
+    id: tank
+    solution:
+      maxVol: 1000
+      reagents:
+      - ReagentId: NCCoolant
+        Quantity: 1000
+  - type: DrainableSolution
+    solution: tank
+  - type: RefillableSolution
+    solution: tank
+  - type: ExaminableSolution
+    solution: tank
+
+- type: reagent
+  parent: Water
+  id: NCBrakeFluid
+  name: reagent-name-nc-vehicle-brakes
+  desc: reagent-desc-nc-vehicle-brakes
+  color: "#879969"
+
+- type: entity
+  parent: Solution
+  id: NCVehicleBrakeReservoir
+  categories: [HideSpawnMenu]
+  components:
+  - type: Solution
+    id: brakes
+    solution:
+      maxVol: 1000
+      canReact: false
+      reagents:
+      - ReagentId: NCBrakeFluid
+        Quantity: 1000
+
+- type: entity
+  parent: BaseItem
+  id: NCVehicleBrakeBottle
+  name: vehicle brake fluid bottle
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/stock_parts.rsi
+    state: micro_mani
+  - type: NCVehicleFluidBottle
+    circuit: Brakes
+    transferVolume: 1000
+  - type: Solution
+    id: tank
+    solution:
+      maxVol: 1000
+      reagents:
+      - ReagentId: NCBrakeFluid
+        Quantity: 1000
+  - type: DrainableSolution
+    solution: tank
+  - type: RefillableSolution
+    solution: tank
+  - type: ExaminableSolution
+    solution: tank

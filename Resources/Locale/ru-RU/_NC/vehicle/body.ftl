@@ -1,0 +1,13 @@
+nc-vehicle-zone-front-left = передняя левая часть
+nc-vehicle-zone-front-center = передняя центральная часть
+nc-vehicle-zone-front-right = передняя правая часть
+nc-vehicle-zone-left-side = левый борт
+nc-vehicle-zone-right-side = правый борт
+nc-vehicle-zone-rear-left = задняя левая часть
+nc-vehicle-zone-rear-center = задняя центральная часть
+nc-vehicle-zone-rear-right = задняя правая часть
+nc-vehicle-zone-roof = крыша
+nc-vehicle-zone-underbody = днище
+nc-vehicle-zone-cabin = салон
+nc-vehicle-zone-cargo = багажное отделение
+nc-vehicle-body-damaged-zone = Заметна деформация: { $zone }.

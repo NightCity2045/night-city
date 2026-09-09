@@ -1,0 +1,10 @@
+reagent-name-nc-vehicle-transmission = transmission oil
+nc-vehicle-service-fluids = Transmission: { $transmission }% | Steering: { $steering }% | Washer: { $washer }% | Oil: { $pressure } kPa
+reagent-desc-nc-vehicle-transmission = A service fluid for a vehicle's transmission circuit.
+ent-NCVehicleTransmissionBottle = transmission oil bottle
+reagent-name-nc-vehicle-steering = power steering fluid
+reagent-desc-nc-vehicle-steering = A service fluid for a vehicle's steering circuit.
+ent-NCVehicleSteeringBottle = power steering fluid bottle
+reagent-name-nc-vehicle-washer = windshield washer fluid
+reagent-desc-nc-vehicle-washer = A service fluid for a vehicle's washer circuit.
+ent-NCVehicleWasherBottle = windshield washer fluid bottle
