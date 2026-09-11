@@ -91,7 +91,11 @@ public sealed partial class NCVehicleConditionSystem : EntitySystem
             state.BatteryCharge = Math.Clamp(state.BatteryCharge +
                 (state.AlternatorAmps * NCVehiclePerformanceCompiler.Get(drive.AssemblyFunctions, NCVehicleFunction.Charging) -
                  state.IgnitionAmps) * dt / 3600, 0, state.BatteryCapacity);
-            state.EngineWear += dt * (state.NormalWear * (1 + drive.Throttle) +
+            var highRpmWear = _prototypes.TryIndex(drive.Handling, out var handling)
+                ? handling.HighRpmWearPerSecond * NCVehicleDriveMath.HighRpmWearMultiplier(drive.EngineRpm,
+                    handling.RedlineRpm, handling.HighRpmWearStart, handling.MaximumHighRpmWearMultiplier)
+                : 0;
+            state.EngineWear += dt * (state.NormalWear * (1 + drive.Throttle) + highRpmWear +
                 state.DryWear * Math.Clamp(1 - state.OilFraction *
                     NCVehiclePerformanceCompiler.Get(drive.AssemblyFunctions, NCVehicleFunction.Lubrication) / state.MinimumOil, 0, 1) +
                 state.HotWear * (1 - state.EnginePower));

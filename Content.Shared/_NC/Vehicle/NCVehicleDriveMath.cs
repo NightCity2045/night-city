@@ -34,6 +34,15 @@ public static class NCVehicleDriveMath
     public static float Approach(float current, float target, float maximumDelta) =>
         current + Math.Clamp(target - current, -maximumDelta, maximumDelta);
 
+    /// <summary>High RPM causes progressive quadratic wear; invalid tuning safely disables it.</summary>
+    public static float HighRpmWearMultiplier(float rpm, float redline, float startFraction, float maximum)
+    {
+        if (!Positive(redline) || !float.IsFinite(rpm) || startFraction is < 0 or >= 1 || !Nonnegative(maximum))
+            return 0;
+        var excess = Math.Max(0, rpm / redline - startFraction) / (1 - startFraction);
+        return Math.Min(maximum, excess * excess);
+    }
+
     public static float Curve(IReadOnlyList<Vector2> points, float rpm)
     {
         if (points.Count == 0)

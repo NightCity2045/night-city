@@ -56,6 +56,11 @@ public sealed partial class NCVehicleHandlingPrototype : IPrototype, IInheriting
     [DataField] public float StarterTimeout = 3;
     [DataField] public float StartingRpm = 350;
     [DataField(required: true)] public float RedlineRpm;
+    /// <summary>Fraction of redline where sustained high-RPM wear begins.</summary>
+    [DataField] public float HighRpmWearStart = 0.9f;
+    /// <summary>Engine condition lost per second at redline before part-specific wear sharing.</summary>
+    [DataField] public float HighRpmWearPerSecond = 0.00025f;
+    [DataField] public float MaximumHighRpmWearMultiplier = 12;
     [DataField(required: true)] public float StallRpm;
     /// <summary>Time below stall RPM before the running engine stops.</summary>
     [DataField] public float StallGraceSeconds = 1;

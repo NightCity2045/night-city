@@ -171,9 +171,10 @@
     engineHeatCapacity: 120000
     brakeHeatCapacity: 18000
     idleHeat: 3000
-    loadHeat: 75000
+    # A healthy cooling circuit survives ordinary full-load driving; abuse still accumulates mechanical wear.
+    loadHeat: 40000
     passiveCooling: 20
-    radiatorCooling: 400
+    radiatorCooling: 500
     airCooling: 40
     brakeCooling: 120
     overheatTemperature: 388.15

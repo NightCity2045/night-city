@@ -75,7 +75,8 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
             _window.EngineStatusText = Loc.GetString(reason ?? "nc-vehicle-engine-stopped");
         }
         else
-            _window.EngineStatusText = Loc.GetString(drive.HandbrakeHeld ? "nc-vehicle-launch-handbrake" :
+            _window.EngineStatusText = Loc.GetString(drive.EngineRpm >= tuning.RedlineRpm * tuning.HighRpmWearStart
+                ? "nc-vehicle-engine-high-rpm" : drive.HandbrakeHeld ? "nc-vehicle-launch-handbrake" :
                 !tuning.Automatic && drive.Gear != 0 && drive.ClutchHeld ? "nc-vehicle-launch-release-clutch" :
                 "nc-vehicle-engine-running");
         _window.PedalsText = Loc.GetString("nc-vehicle-pedals", ("gas", MathF.Round(drive.Throttle * 100)),
@@ -116,6 +117,7 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
             ("row", Loc.GetString(drive.LeverRow == 0 ? "nc-vehicle-gear-n" :
                 drive.LeverRow < 0 ? "nc-vehicle-gear-up" : "nc-vehicle-gear-down")),
             ("reverse", Loc.GetString(drive.ReverseArmed ? "nc-vehicle-reverse-armed" : "nc-vehicle-reverse-locked")));
+        _window.SetShifter(tuning.Automatic, drive.LeverColumn, drive.LeverRow, drive.Selector, drive.ReverseArmed);
         _nextInput = _timing.RealTime + TimeSpan.FromSeconds(tuning.InputInterval);
         // Typing in chat must not hold the accelerator or operate the gearbox.
         var focused = _clyde.IsFocused && _ui.KeyboardFocused is not LineEdit && _ui.KeyboardFocused is not TextEdit;

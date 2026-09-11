@@ -19,6 +19,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
         <Label Text="{Loc 'nc-vehicle-steering-grip'}" />
         <vehicle:NCVehicleSteeringWheel Name="Steering" MinHeight="160" MinWidth="160" HorizontalAlignment="Center" />
         <Label Name="GearGate" />
+        <vehicle:NCVehicleGearGate Name="Shifter" MinHeight="130" MinWidth="250" HorizontalAlignment="Center" />
         <BoxContainer Orientation="Horizontal">
             <Button Name="Ignition" Text="{Loc 'nc-vehicle-ignition'}" />
             <Button Name="Neutral" Text="{Loc 'nc-vehicle-neutral'}" />

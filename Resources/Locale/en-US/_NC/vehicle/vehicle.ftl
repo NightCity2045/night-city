@@ -33,6 +33,7 @@ nc-vehicle-ignition-stop = Stop engine
 nc-vehicle-engine-stopped = Engine stopped. Select Neutral and press Start engine.
 nc-vehicle-engine-cranking = Starter turning. Wait for the engine to start; pressing again cancels starting.
 nc-vehicle-engine-running = Engine running.
+nc-vehicle-engine-high-rpm = High RPM: shift up. The limiter cuts power and sustained running gradually wears the engine.
 nc-vehicle-launch-release-clutch = Engine running, clutch pressed: hold Q and release Shift to move.
 nc-vehicle-launch-handbrake = Handbrake applied: release Space to move.
 nc-vehicle-start-driver = Starting blocked: the driver must be conscious and seated.

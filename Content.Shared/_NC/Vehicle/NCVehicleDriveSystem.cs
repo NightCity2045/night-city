@@ -352,6 +352,8 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             !NCVehicleDriveMath.Nonnegative(value.TyreWearPerJoule) ||
             !NCVehicleDriveMath.Nonnegative(value.SuspensionWearPerMeter) ||
             !NCVehicleDriveMath.Nonnegative(value.DamagedBodyDrag) ||
+            !NCVehicleDriveMath.Nonnegative(value.HighRpmWearPerSecond) ||
+            !NCVehicleDriveMath.Nonnegative(value.MaximumHighRpmWearMultiplier) ||
             !NCVehicleDriveMath.Nonnegative(value.StallRpm) ||
             !NCVehicleDriveMath.Nonnegative(value.StallGraceSeconds) ||
             !NCVehicleDriveMath.Nonnegative(value.EngineDrag) ||
@@ -386,7 +388,7 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             !NCVehicleDriveMath.Nonnegative(value.TractionSlip) ||
             !NCVehicleDriveMath.Nonnegative(value.AntiLockSlip))
             return false;
-        if (value.AntiLockSlip >= 1 || (value.Automatic && value.Sequential) || value.AutomaticUpshiftRpm <= value.AutomaticDownshiftRpm ||
+        if (value.AntiLockSlip >= 1 || value.HighRpmWearStart is < 0 or >= 1 || (value.Automatic && value.Sequential) || value.AutomaticUpshiftRpm <= value.AutomaticDownshiftRpm ||
             value.ConverterStallRatio < 1 || value.ManualPattern.Length < 2 || value.ManualPattern.Length % 2 != 0 || value.ShiftClutchThreshold > 1 ||
             value.Wheels.Count is 0 or > MaximumWheelCount || value.MaximumSubsteps is <= 0 or > 64 || value.TorqueCurve.Count == 0 ||
             value.GearRatios.Length < 3 || value.GearRatios[0] != 0 || value.GearRatios[^1] >= 0 ||

@@ -61,6 +61,10 @@
   driveEfficiency: 0.88
   idleRpm: 850
   redlineRpm: 7000
+  # Sustained limiter driving takes tens of minutes to destroy a healthy engine; over-revving accelerates it.
+  highRpmWearStart: 0.9
+  highRpmWearPerSecond: 0.00025
+  maximumHighRpmWearMultiplier: 12
   stallRpm: 300
   stallGraceSeconds: 1.25
   engineInertia: 0.35

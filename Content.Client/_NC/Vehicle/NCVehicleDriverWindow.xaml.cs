@@ -27,6 +27,8 @@ public sealed partial class NCVehicleDriverWindow : FancyWindow
     public string FluidsText { set => Fluids.Text = value; }
     public string AccessoriesText { set => Accessories.Text = value; }
     public string GearText { set => GearGate.Text = value; }
+    public void SetShifter(bool automatic, int column, int row, NCVehicleSelector selector, bool reverseArmed) =>
+        Shifter.SetState(automatic, column, row, selector, reverseArmed);
     public float SteeringValue { get => Steering.Value; set => Steering.Value = value; }
     public bool SteeringHeld => Steering.Held;
     public float SteeringMaximumAngle { set => Steering.MaximumAngle = value; }

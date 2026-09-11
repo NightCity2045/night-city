@@ -105,4 +105,13 @@ public sealed class NCVehicleDriveMathTest
         Assert.That(NCVehicleControlSystem.Newer(0, uint.MaxValue), Is.True);
         Assert.That(NCVehicleControlSystem.Newer(uint.MaxValue, 0), Is.False);
     }
+
+    [Test]
+    public void HighRpmWearStartsGraduallyAndIsCapped()
+    {
+        Assert.That(NCVehicleDriveMath.HighRpmWearMultiplier(6000, 7000, 0.9f, 12), Is.Zero);
+        Assert.That(NCVehicleDriveMath.HighRpmWearMultiplier(6650, 7000, 0.9f, 12), Is.EqualTo(0.25f).Within(0.001f));
+        Assert.That(NCVehicleDriveMath.HighRpmWearMultiplier(7000, 7000, 0.9f, 12), Is.EqualTo(1).Within(0.001f));
+        Assert.That(NCVehicleDriveMath.HighRpmWearMultiplier(14000, 7000, 0.9f, 12), Is.EqualTo(12));
+    }
 }
