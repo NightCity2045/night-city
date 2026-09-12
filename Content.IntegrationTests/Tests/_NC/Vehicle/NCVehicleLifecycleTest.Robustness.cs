@@ -17,6 +17,7 @@ using Content.Shared.Atmos.Components;
 using Robust.Shared.Containers;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
+using Robust.Shared.Maths;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Physics.Systems;
 using Robust.Shared.Timing;
@@ -25,6 +26,47 @@ namespace Content.IntegrationTests.Tests._NC.Vehicle;
 
 public sealed partial class NCVehicleLifecycleTest
 {
+    [Test]
+    public async Task DriveForceRotatesWithThePhysicalChassis()
+    {
+        var cars = new EntityUid[2];
+        var rotations = new[] { Angle.Zero, Angle.FromDegrees(90) };
+        await Server.WaitAssertion(() =>
+        {
+            Server.CfgMan.SetCVar(Robust.Shared.CVars.NetTickrate, 30);
+            Server.System<SharedMapSystem>().CreateMap(out var map);
+            var transform = Server.System<SharedTransformSystem>();
+            for (var i = 0; i < cars.Length; i++)
+            {
+                var car = SEntMan.SpawnEntity("NCToyotaSupra1996",
+                    new MapCoordinates(new Vector2(i * 10, 0), map));
+                cars[i] = car;
+                transform.SetWorldRotation(car, rotations[i]);
+                var drive = SEntMan.GetComponent<NCVehicleDriveComponent>(car);
+                drive.Driver = SEntMan.SpawnEntity(null, new MapCoordinates(new Vector2(i * 10, 0), map));
+                drive.EngineRunning = true;
+                drive.EngineRpm = 4000;
+                drive.Gear = 1;
+                drive.GasHeld = true;
+                drive.Throttle = 1;
+                drive.LastInputTime = Server.ResolveDependency<IGameTiming>().CurTime + TimeSpan.FromSeconds(10);
+            }
+        });
+        await Server.WaitRunTicks(45);
+        await Server.WaitAssertion(() =>
+        {
+            for (var i = 0; i < cars.Length; i++)
+            {
+                var velocity = SEntMan.GetComponent<PhysicsComponent>(cars[i]).LinearVelocity;
+                var forward = rotations[i].RotateVec(Vector2.UnitY);
+                var right = rotations[i].RotateVec(Vector2.UnitX);
+                Assert.That(Vector2.Dot(velocity, forward), Is.GreaterThan(0.5f));
+                Assert.That(Math.Abs(Vector2.Dot(velocity, right)), Is.LessThan(0.25f),
+                    "Drive force must follow chassis rotation instead of the global north axis.");
+            }
+        });
+    }
+
     [Test]
     public async Task LowGripSurfaceProducesALongerPhysicalBrakingDistance()
     {

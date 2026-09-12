@@ -163,7 +163,9 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
         var calibration = drive.Calibration is { } configured && _prototypes.TryIndex(configured, out var selected) &&
             NCVehicleCalibrationValidator.IsValid(selected) ? selected : null;
         var engineOmega = drive.EngineRpm * MathF.Tau / 60;
-        var shaftOmega = wheelOmega * ratio * tuning.FinalDrive;
+        // A virtual reduction lets content lower map-scale road speed while preserving each model's torque character.
+        var effectiveRatio = ratio / tuning.RoadSpeedScale;
+        var shaftOmega = wheelOmega * effectiveRatio * tuning.FinalDrive;
         var clutchTorque = ratio == 0 ? 0 : Math.Clamp((engineOmega - shaftOmega) * tuning.ClutchCoupling,
             -tuning.ClutchTorque, tuning.ClutchTorque) * (1 - drive.Clutch);
         if (tuning.Automatic)
@@ -212,7 +214,7 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
         else
             drive.StallElapsed = 0;
 
-        var wheelTorque = clutchTorque * ratio * tuning.FinalDrive * tuning.DriveEfficiency;
+        var wheelTorque = clutchTorque * effectiveRatio * tuning.FinalDrive * tuning.DriveEfficiency * tuning.RoadSpeedScale;
         if (tuning.Automatic && engineOmega > 0)
             wheelTorque *= 1 + (tuning.ConverterStallRatio - 1) * (1 - Math.Clamp(shaftOmega / engineOmega, 0, 1));
         var centroid = Vector2.Zero;
@@ -386,6 +388,7 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             !NCVehicleDriveMath.Nonnegative(value.ShiftClutchThreshold) ||
             !NCVehicleDriveMath.Nonnegative(value.ShiftRpmTolerance) ||
             !NCVehicleDriveMath.Nonnegative(value.MisshiftWear) ||
+            !NCVehicleDriveMath.Positive(value.RoadSpeedScale) ||
             !NCVehicleDriveMath.Nonnegative(value.CenterOfGravityHeight) ||
             !NCVehicleDriveMath.Nonnegative(value.AutomaticUpshiftRpm) ||
             !NCVehicleDriveMath.Nonnegative(value.AutomaticDownshiftRpm) ||

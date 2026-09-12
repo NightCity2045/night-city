@@ -2,19 +2,128 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-- type: ncVehicleSoundProfile
-  id: NCRayfieldCaliburnSound
-  startup: { path: /Audio/_NC/Vehicle/rayfield_caliburn/startup.wav }
-  shutdown: { path: /Audio/_NC/Vehicle/rayfield_caliburn/shutdown.wav }
-  lowLoop: { path: /Audio/_NC/Vehicle/rayfield_caliburn/engine_low_loop.wav }
-  midLoop: { path: /Audio/_NC/Vehicle/rayfield_caliburn/engine_mid_loop.wav }
-  highLoop: { path: /Audio/_NC/Vehicle/rayfield_caliburn/engine_high_loop.wav }
-  forcedInductionLoop: { path: /Audio/_NC/Vehicle/rayfield_caliburn/turbo_loop.wav }
-  throttleRelease: { path: /Audio/_NC/Vehicle/rayfield_caliburn/turbo_flutter.wav }
-  backfire: { path: /Audio/_NC/Vehicle/rayfield_caliburn/backfire.wav }
-  shift: { path: /Audio/_NC/Vehicle/rayfield_caliburn/shift.wav }
-  tyreSlipLoop: { path: /Audio/_NC/Vehicle/rayfield_caliburn/tyre_skid_loop.wav }
-  horn: { path: /Audio/_NC/Vehicle/rayfield_caliburn/horn.wav }
+- type: ncVehicleHandling
+  parent: NCBaseSupraHandling
+  id: NCRayfieldCaliburnManualRwd
+  wheels:
+  - position: -0.72, 1.28
+    radius: 0.34
+    inertia: 2
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.72, 1.28
+    radius: 0.34
+    inertia: 2
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.72, -1.28
+    axle: 1
+    radius: 0.34
+    inertia: 2
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.72, -1.28
+    axle: 1
+    radius: 0.34
+    inertia: 2
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  torqueCurve:
+  - 0, 200
+  - 750, 400
+  - 2200, 780
+  - 5000, 980
+  - 8000, 0
+  gearRatios: [0, 3.4, 2.25, 1.62, 1.24, 0.98, 0.78, -3]
+  finalDrive: 3.55
+  idleRpm: 750
+  redlineRpm: 8000
+  engineInertia: 0.55
+  clutchTorque: 1200
+  steeringRate: 6
+  steeringAngle: 0.5
+  keyboardSteeringRate: 4.5
+  wheelbase: 2.56
+  centerOfGravityHeight: 0.33
+  friction: 1.12
+  brakeTorque: 5200
+  handbrakeTorque: 3000
+  aerodynamicDrag: 0.24
+  rollingResistance: 13
+  fuelCapacity: 95
+  antiLockBrakes: true
+  tractionControl: true
+  stabilityControl: true
+
+- type: ncVehicleHandling
+  parent: NCRayfieldCaliburnManualRwd
+  id: NCRayfieldCaliburnAutomaticRwd
+  automatic: true
+  automaticUpshiftRpm: 6500
+  automaticDownshiftRpm: 2000
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleHandling
+  parent: NCRayfieldCaliburnManualRwd
+  id: NCRayfieldCaliburnManualAwd
+  centerDifferentialCoupling: 10
+  centerDifferentialTorqueLimit: 180
+  differentialCoupling: 20
+  differentialTorqueLimit: 350
+  tractionControl: true
+  antiLockBrakes: true
+  stabilityControl: true
+  wheels:
+  - position: -0.72, 1.28
+    radius: 0.34
+    inertia: 2
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.72, 1.28
+    radius: 0.34
+    inertia: 2
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.72, -1.28
+    axle: 1
+    radius: 0.34
+    inertia: 2
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.72, -1.28
+    axle: 1
+    radius: 0.34
+    inertia: 2
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+
+- type: ncVehicleHandling
+  parent: NCRayfieldCaliburnManualAwd
+  id: NCRayfieldCaliburnAutomaticAwd
+  automatic: true
+  automaticUpshiftRpm: 6500
+  automaticDownshiftRpm: 2000
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleChassis
+  parent: NCVehicleDevelopmentSedan
+  id: NCRayfieldCaliburnChassis
+  manualHandling: NCRayfieldCaliburnManualRwd
+  automaticHandling: NCRayfieldCaliburnAutomaticRwd
+  allWheelHandling: NCRayfieldCaliburnManualAwd
+  automaticAllWheelHandling: NCRayfieldCaliburnAutomaticAwd
+  mass: 1300
+  inertia: 2200
+  frontTowPoint: 0, 1.55
+  rearTowPoint: 0, -1.55
 
 - type: entity
   parent: NCToyotaSupra1996
@@ -22,7 +131,22 @@
   name: Rayfield Caliburn
   description: An uncompromising hypercar whose dark composite body signals impossible wealth.
   components:
-  - type: NCVehicleAccessories
-    soundProfile: NCRayfieldCaliburnSound
+  - type: NCVehicle
+    chassis: NCRayfieldCaliburnChassis
+  - type: NCVehicleDrive
+    handling: NCRayfieldCaliburnManualRwd
+    fuel: 58
   - type: Sprite
     sprite: _NC/Vehicle/rayfield_caliburn_2045.rsi
+  - type: Fixtures
+    fixtures:
+      chassis:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.75,-1.55,0.75,1.55"
+        density: 201
+        restitution: 0.05
+        mask:
+        - MobMask
+        layer:
+        - LargeMobLayer

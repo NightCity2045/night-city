@@ -49,6 +49,8 @@ public sealed partial class NCVehicleHandlingPrototype : IPrototype, IInheriting
     [DataField(required: true)] public float ShiftRpmTolerance;
     [DataField(required: true)] public float MisshiftWear;
     [DataField(required: true)] public float FinalDrive;
+    /// <summary>Scales road speed at a given engine RPM without changing launch wheel torque.</summary>
+    [DataField] public float RoadSpeedScale = 1;
     [DataField(required: true)] public float DriveEfficiency;
     [DataField(required: true)] public float IdleRpm;
     [DataField] public float StarterTorque = 80;

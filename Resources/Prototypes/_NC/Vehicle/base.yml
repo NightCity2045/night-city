@@ -58,6 +58,8 @@
   shiftRpmTolerance: 120
   misshiftWear: 0.002
   finalDrive: 3.27
+  # Night City maps are compact: retain drivetrain torque while halving map-scale road speed.
+  roadSpeedScale: 0.5
   driveEfficiency: 0.88
   idleRpm: 850
   redlineRpm: 7000
@@ -99,7 +101,7 @@
   shiftAdviceUpFraction: 0.78
   shiftAdviceDownRpmFactor: 1.4
   slipWarning: 0.35
-  exitSpeed: 1
+  exitSpeed: 2.5
   exitOffset: 1.2, 0
   exitClearance: 0.35
   maximumStep: 0.005

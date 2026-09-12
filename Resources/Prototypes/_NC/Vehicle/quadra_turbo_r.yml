@@ -2,19 +2,128 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-- type: ncVehicleSoundProfile
-  id: NCQuadraTurboRSound
-  startup: { path: /Audio/_NC/Vehicle/quadra_turbo_r/startup.wav }
-  shutdown: { path: /Audio/_NC/Vehicle/quadra_turbo_r/shutdown.wav }
-  lowLoop: { path: /Audio/_NC/Vehicle/quadra_turbo_r/engine_low_loop.wav }
-  midLoop: { path: /Audio/_NC/Vehicle/quadra_turbo_r/engine_mid_loop.wav }
-  highLoop: { path: /Audio/_NC/Vehicle/quadra_turbo_r/engine_high_loop.wav }
-  forcedInductionLoop: { path: /Audio/_NC/Vehicle/quadra_turbo_r/turbo_loop.wav }
-  throttleRelease: { path: /Audio/_NC/Vehicle/quadra_turbo_r/turbo_flutter.wav }
-  backfire: { path: /Audio/_NC/Vehicle/quadra_turbo_r/backfire.wav }
-  shift: { path: /Audio/_NC/Vehicle/quadra_turbo_r/shift.wav }
-  tyreSlipLoop: { path: /Audio/_NC/Vehicle/quadra_turbo_r/tyre_skid_loop.wav }
-  horn: { path: /Audio/_NC/Vehicle/quadra_turbo_r/horn.wav }
+- type: ncVehicleHandling
+  parent: NCBaseSupraHandling
+  id: NCQuadraTurboRManualRwd
+  wheels:
+  - position: -0.68, 1.15
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.68, 1.15
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.68, -1.15
+    axle: 1
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.68, -1.15
+    axle: 1
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  torqueCurve:
+  - 0, 120
+  - 700, 230
+  - 2200, 480
+  - 4500, 610
+  - 6500, 0
+  gearRatios: [0, 3.5, 2.2, 1.55, 1.2, 0.95, 0.76, -3.1]
+  finalDrive: 3.45
+  idleRpm: 700
+  redlineRpm: 6500
+  engineInertia: 0.5
+  clutchTorque: 760
+  steeringRate: 5.2
+  steeringAngle: 0.52
+  keyboardSteeringRate: 4.5
+  wheelbase: 2.3
+  centerOfGravityHeight: 0.4
+  friction: 1
+  brakeTorque: 3200
+  handbrakeTorque: 2100
+  aerodynamicDrag: 0.44
+  rollingResistance: 14
+  fuelCapacity: 75
+  antiLockBrakes: true
+  tractionControl: true
+  stabilityControl: false
+
+- type: ncVehicleHandling
+  parent: NCQuadraTurboRManualRwd
+  id: NCQuadraTurboRAutomaticRwd
+  automatic: true
+  automaticUpshiftRpm: 5000
+  automaticDownshiftRpm: 1600
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleHandling
+  parent: NCQuadraTurboRManualRwd
+  id: NCQuadraTurboRManualAwd
+  centerDifferentialCoupling: 10
+  centerDifferentialTorqueLimit: 180
+  differentialCoupling: 20
+  differentialTorqueLimit: 350
+  tractionControl: true
+  antiLockBrakes: true
+  stabilityControl: true
+  wheels:
+  - position: -0.68, 1.15
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.68, 1.15
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.68, -1.15
+    axle: 1
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.68, -1.15
+    axle: 1
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+
+- type: ncVehicleHandling
+  parent: NCQuadraTurboRManualAwd
+  id: NCQuadraTurboRAutomaticAwd
+  automatic: true
+  automaticUpshiftRpm: 5000
+  automaticDownshiftRpm: 1600
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleChassis
+  parent: NCVehicleDevelopmentSedan
+  id: NCQuadraTurboRChassis
+  manualHandling: NCQuadraTurboRManualRwd
+  automaticHandling: NCQuadraTurboRAutomaticRwd
+  allWheelHandling: NCQuadraTurboRManualAwd
+  automaticAllWheelHandling: NCQuadraTurboRAutomaticAwd
+  mass: 980
+  inertia: 1400
+  frontTowPoint: 0, 1.9
+  rearTowPoint: 0, -1.9
 
 - type: entity
   parent: NCToyotaSupra1996
@@ -22,7 +131,22 @@
   name: Quadra Turbo-R
   description: A low, aggressive sports coupe rebuilt for the streets of Night City.
   components:
-  - type: NCVehicleAccessories
-    soundProfile: NCQuadraTurboRSound
+  - type: NCVehicle
+    chassis: NCQuadraTurboRChassis
+  - type: NCVehicleDrive
+    handling: NCQuadraTurboRManualRwd
+    fuel: 45
   - type: Sprite
     sprite: _NC/Vehicle/quadra_turbo_r_2045.rsi
+  - type: Fixtures
+    fixtures:
+      chassis:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.8,-1.9,0.8,1.9"
+        density: 201
+        restitution: 0.05
+        mask:
+        - MobMask
+        layer:
+        - LargeMobLayer

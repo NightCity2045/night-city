@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-using Content.Shared._NC.Vehicle.Prototypes;
+using Robust.Shared.Audio;
 using Robust.Shared.GameStates;
-using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.Vehicle.Components;
 
@@ -15,7 +14,9 @@ public sealed partial class NCVehicleAccessoriesComponent : Component
     [AutoNetworkedField] public bool Headlights;
     [AutoNetworkedField] public TimeSpan NextHorn;
     [AutoNetworkedField] public float WindshieldDirt;
-    [DataField(required: true)] public ProtoId<NCVehicleSoundProfilePrototype> SoundProfile;
+    [DataField] public SoundSpecifier? StartupSound;
+    [DataField] public SoundSpecifier? IdleSound;
+    [DataField] public SoundSpecifier? HornSound;
     [DataField] public float HornCooldown = 1;
     [DataField] public float HeadlightAmps = 10;
     [DataField] public float WasherVolume = 30;

@@ -8,44 +8,34 @@
     },
     "states": [
         {
-            "name": "shadow",
-            "directions": 8
+            "name": "shadow"
         },
         {
-            "name": "body",
-            "directions": 8
+            "name": "body"
         },
         {
-            "name": "damage-light",
-            "directions": 8
+            "name": "damage-light"
         },
         {
-            "name": "damage-heavy",
-            "directions": 8
+            "name": "damage-heavy"
         },
         {
-            "name": "headlights",
-            "directions": 8
+            "name": "headlights"
         },
         {
-            "name": "brakes",
-            "directions": 8
+            "name": "brakes"
         },
         {
-            "name": "reverse",
-            "directions": 8
+            "name": "reverse"
         },
         {
-            "name": "hood-open",
-            "directions": 8
+            "name": "hood-open"
         },
         {
-            "name": "wheel-damage",
-            "directions": 8
+            "name": "wheel-damage"
         },
         {
-            "name": "tuning-street",
-            "directions": 8
+            "name": "tuning-street"
         },
         {
             "name": "smoke",

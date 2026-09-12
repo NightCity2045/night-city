@@ -2,26 +2,151 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-- type: ncVehicleSoundProfile
-  id: NCThortonColbySound
-  startup: { path: /Audio/_NC/Vehicle/thorton_colby/startup.wav }
-  shutdown: { path: /Audio/_NC/Vehicle/thorton_colby/shutdown.wav }
-  lowLoop: { path: /Audio/_NC/Vehicle/thorton_colby/engine_low_loop.wav }
-  midLoop: { path: /Audio/_NC/Vehicle/thorton_colby/engine_mid_loop.wav }
-  highLoop: { path: /Audio/_NC/Vehicle/thorton_colby/engine_high_loop.wav }
-  forcedInductionLoop: { path: /Audio/_NC/Vehicle/thorton_colby/turbo_loop.wav }
-  throttleRelease: { path: /Audio/_NC/Vehicle/thorton_colby/turbo_flutter.wav }
-  shift: { path: /Audio/_NC/Vehicle/thorton_colby/shift.wav }
-  tyreSlipLoop: { path: /Audio/_NC/Vehicle/thorton_colby/tyre_skid_loop.wav }
-  horn: { path: /Audio/_NC/Vehicle/thorton_colby/horn.wav }
+- type: ncVehicleHandling
+  parent: NCBaseSupraHandling
+  id: NCThortonColbyManualRwd
+  wheels:
+  - position: -0.73, 1.25
+    radius: 0.36
+    inertia: 2.076923076923077
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.73, 1.25
+    radius: 0.36
+    inertia: 2.076923076923077
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.73, -1.2
+    axle: 1
+    radius: 0.36
+    inertia: 2.076923076923077
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.73, -1.2
+    axle: 1
+    radius: 0.36
+    inertia: 2.076923076923077
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  torqueCurve:
+  - 0, 160
+  - 650, 300
+  - 1600, 560
+  - 3500, 380
+  - 4800, 0
+  gearRatios: [0, 4.1, 2.5, 1.65, 1.2, 0.92, 0.72, -3.8]
+  finalDrive: 4.5
+  idleRpm: 650
+  redlineRpm: 4800
+  engineInertia: 0.7
+  clutchTorque: 850
+  steeringRate: 5
+  steeringAngle: 0.58
+  keyboardSteeringRate: 4.5
+  wheelbase: 2.45
+  centerOfGravityHeight: 0.62
+  friction: 0.9
+  brakeTorque: 4600
+  handbrakeTorque: 3000
+  aerodynamicDrag: 0.65
+  rollingResistance: 22
+  fuelCapacity: 100
+  antiLockBrakes: true
+  tractionControl: true
+  stabilityControl: false
+
+- type: ncVehicleHandling
+  parent: NCThortonColbyManualRwd
+  id: NCThortonColbyAutomaticRwd
+  automatic: true
+  automaticUpshiftRpm: 3600
+  automaticDownshiftRpm: 1200
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleHandling
+  parent: NCThortonColbyManualRwd
+  id: NCThortonColbyManualAwd
+  centerDifferentialCoupling: 10
+  centerDifferentialTorqueLimit: 180
+  differentialCoupling: 20
+  differentialTorqueLimit: 350
+  tractionControl: true
+  antiLockBrakes: true
+  stabilityControl: true
+  wheels:
+  - position: -0.73, 1.25
+    radius: 0.36
+    inertia: 2.076923076923077
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.73, 1.25
+    radius: 0.36
+    inertia: 2.076923076923077
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.73, -1.2
+    axle: 1
+    radius: 0.36
+    inertia: 2.076923076923077
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.73, -1.2
+    axle: 1
+    radius: 0.36
+    inertia: 2.076923076923077
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+
+- type: ncVehicleHandling
+  parent: NCThortonColbyManualAwd
+  id: NCThortonColbyAutomaticAwd
+  automatic: true
+  automaticUpshiftRpm: 3600
+  automaticDownshiftRpm: 1200
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleChassis
+  parent: NCVehicleDevelopmentSedan
+  id: NCThortonColbyChassis
+  manualHandling: NCThortonColbyManualRwd
+  automaticHandling: NCThortonColbyAutomaticRwd
+  allWheelHandling: NCThortonColbyManualAwd
+  automaticAllWheelHandling: NCThortonColbyAutomaticAwd
+  mass: 1350
+  inertia: 2300
+  frontTowPoint: 0, 2
+  rearTowPoint: 0, -2
 
 - type: entity
   parent: NCToyotaSupra1996
   id: NCVehicleThortonColby2045
   name: Thorton Colby
-  description: A rugged utility wagon assembled for cargo, dust and broken pavement.
+  description: A rugged utility pickup with slow responses, strong traction and hauling mass.
   components:
-  - type: NCVehicleAccessories
-    soundProfile: NCThortonColbySound
+  - type: NCVehicle
+    chassis: NCThortonColbyChassis
+  - type: NCVehicleDrive
+    handling: NCThortonColbyManualRwd
+    fuel: 60
   - type: Sprite
     sprite: _NC/Vehicle/thorton_colby_2045.rsi
+  - type: Fixtures
+    fixtures:
+      chassis:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.9,-2,0.9,2"
+        density: 201
+        restitution: 0.05
+        mask:
+        - MobMask
+        layer:
+        - LargeMobLayer

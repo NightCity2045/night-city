@@ -2,24 +2,151 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-- type: ncVehicleSoundProfile
-  id: NCMakigaiMaiMaiSound
-  startup: { path: /Audio/_NC/Vehicle/makigai_maimai/startup.wav }
-  shutdown: { path: /Audio/_NC/Vehicle/makigai_maimai/shutdown.wav }
-  lowLoop: { path: /Audio/_NC/Vehicle/makigai_maimai/engine_low_loop.wav }
-  midLoop: { path: /Audio/_NC/Vehicle/makigai_maimai/engine_mid_loop.wav }
-  highLoop: { path: /Audio/_NC/Vehicle/makigai_maimai/engine_high_loop.wav }
-  shift: { path: /Audio/_NC/Vehicle/makigai_maimai/shift.wav }
-  tyreSlipLoop: { path: /Audio/_NC/Vehicle/makigai_maimai/tyre_skid_loop.wav }
-  horn: { path: /Audio/_NC/Vehicle/makigai_maimai/horn.wav }
+- type: ncVehicleHandling
+  parent: NCBaseSupraHandling
+  id: NCMakigaiMaiMaiManualRwd
+  wheels:
+  - position: -0.5, 0.7
+    radius: 0.25
+    inertia: 0.8
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.5, 0.7
+    radius: 0.25
+    inertia: 0.8
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.5, -0.7
+    axle: 1
+    radius: 0.25
+    inertia: 0.8
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.5, -0.7
+    axle: 1
+    radius: 0.25
+    inertia: 0.8
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  torqueCurve:
+  - 0, 55
+  - 1000, 90
+  - 3000, 150
+  - 5500, 110
+  - 6800, 0
+  gearRatios: [0, 4.2, 2.55, 1.65, 1.2, 0.9, 0.7, -3.8]
+  finalDrive: 4.7
+  idleRpm: 1000
+  redlineRpm: 6800
+  engineInertia: 0.18
+  clutchTorque: 240
+  steeringRate: 8
+  steeringAngle: 0.72
+  keyboardSteeringRate: 4.5
+  wheelbase: 1.4
+  centerOfGravityHeight: 0.38
+  friction: 0.86
+  brakeTorque: 1600
+  handbrakeTorque: 1000
+  aerodynamicDrag: 0.42
+  rollingResistance: 7
+  fuelCapacity: 35
+  antiLockBrakes: false
+  tractionControl: false
+  stabilityControl: false
+
+- type: ncVehicleHandling
+  parent: NCMakigaiMaiMaiManualRwd
+  id: NCMakigaiMaiMaiAutomaticRwd
+  automatic: true
+  automaticUpshiftRpm: 5000
+  automaticDownshiftRpm: 1700
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleHandling
+  parent: NCMakigaiMaiMaiManualRwd
+  id: NCMakigaiMaiMaiManualAwd
+  centerDifferentialCoupling: 10
+  centerDifferentialTorqueLimit: 180
+  differentialCoupling: 20
+  differentialTorqueLimit: 350
+  tractionControl: true
+  antiLockBrakes: true
+  stabilityControl: true
+  wheels:
+  - position: -0.5, 0.7
+    radius: 0.25
+    inertia: 0.8
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.5, 0.7
+    radius: 0.25
+    inertia: 0.8
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.5, -0.7
+    axle: 1
+    radius: 0.25
+    inertia: 0.8
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.5, -0.7
+    axle: 1
+    radius: 0.25
+    inertia: 0.8
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+
+- type: ncVehicleHandling
+  parent: NCMakigaiMaiMaiManualAwd
+  id: NCMakigaiMaiMaiAutomaticAwd
+  automatic: true
+  automaticUpshiftRpm: 5000
+  automaticDownshiftRpm: 1700
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleChassis
+  parent: NCVehicleDevelopmentSedan
+  id: NCMakigaiMaiMaiChassis
+  manualHandling: NCMakigaiMaiMaiManualRwd
+  automaticHandling: NCMakigaiMaiMaiAutomaticRwd
+  allWheelHandling: NCMakigaiMaiMaiManualAwd
+  automaticAllWheelHandling: NCMakigaiMaiMaiAutomaticAwd
+  mass: 480
+  inertia: 320
+  frontTowPoint: 0, 1.2
+  rearTowPoint: 0, -1.2
 
 - type: entity
   parent: NCToyotaSupra1996
   id: NCVehicleMakigaiMaiMai2045
   name: Makigai MaiMai
-  description: A tiny city car built to squeeze through crowded Night City streets.
+  description: A tiny city car with modest power, immediate steering and very little inertia.
   components:
-  - type: NCVehicleAccessories
-    soundProfile: NCMakigaiMaiMaiSound
+  - type: NCVehicle
+    chassis: NCMakigaiMaiMaiChassis
+  - type: NCVehicleDrive
+    handling: NCMakigaiMaiMaiManualRwd
+    fuel: 22
   - type: Sprite
     sprite: _NC/Vehicle/makigai_maimai_2045.rsi
+  - type: Fixtures
+    fixtures:
+      chassis:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.625,-1.2,0.625,1.2"
+        density: 201
+        restitution: 0.05
+        mask:
+        - MobMask
+        layer:
+        - LargeMobLayer

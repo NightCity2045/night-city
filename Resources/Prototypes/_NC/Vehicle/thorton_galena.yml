@@ -2,16 +2,128 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-- type: ncVehicleSoundProfile
-  id: NCThortonGalenaSound
-  startup: { path: /Audio/_NC/Vehicle/thorton_galena/startup.wav }
-  shutdown: { path: /Audio/_NC/Vehicle/thorton_galena/shutdown.wav }
-  lowLoop: { path: /Audio/_NC/Vehicle/thorton_galena/engine_low_loop.wav }
-  midLoop: { path: /Audio/_NC/Vehicle/thorton_galena/engine_mid_loop.wav }
-  highLoop: { path: /Audio/_NC/Vehicle/thorton_galena/engine_high_loop.wav }
-  shift: { path: /Audio/_NC/Vehicle/thorton_galena/shift.wav }
-  tyreSlipLoop: { path: /Audio/_NC/Vehicle/thorton_galena/tyre_skid_loop.wav }
-  horn: { path: /Audio/_NC/Vehicle/thorton_galena/horn.wav }
+- type: ncVehicleHandling
+  parent: NCBaseSupraHandling
+  id: NCThortonGalenaManualRwd
+  wheels:
+  - position: -0.58, 0.9
+    radius: 0.28
+    inertia: 1.1076923076923078
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.58, 0.9
+    radius: 0.28
+    inertia: 1.1076923076923078
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.58, -0.9
+    axle: 1
+    radius: 0.28
+    inertia: 1.1076923076923078
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.58, -0.9
+    axle: 1
+    radius: 0.28
+    inertia: 1.1076923076923078
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  torqueCurve:
+  - 0, 80
+  - 900, 130
+  - 2500, 220
+  - 4500, 170
+  - 5600, 0
+  gearRatios: [0, 3.9, 2.4, 1.55, 1.1, 0.84, 0.68, -3.5]
+  finalDrive: 4.15
+  idleRpm: 900
+  redlineRpm: 5600
+  engineInertia: 0.25
+  clutchTorque: 330
+  steeringRate: 6.2
+  steeringAngle: 0.62
+  keyboardSteeringRate: 4.5
+  wheelbase: 1.8
+  centerOfGravityHeight: 0.48
+  friction: 0.82
+  brakeTorque: 2200
+  handbrakeTorque: 1500
+  aerodynamicDrag: 0.46
+  rollingResistance: 10
+  fuelCapacity: 45
+  antiLockBrakes: false
+  tractionControl: false
+  stabilityControl: false
+
+- type: ncVehicleHandling
+  parent: NCThortonGalenaManualRwd
+  id: NCThortonGalenaAutomaticRwd
+  automatic: true
+  automaticUpshiftRpm: 4200
+  automaticDownshiftRpm: 1400
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleHandling
+  parent: NCThortonGalenaManualRwd
+  id: NCThortonGalenaManualAwd
+  centerDifferentialCoupling: 10
+  centerDifferentialTorqueLimit: 180
+  differentialCoupling: 20
+  differentialTorqueLimit: 350
+  tractionControl: true
+  antiLockBrakes: true
+  stabilityControl: true
+  wheels:
+  - position: -0.58, 0.9
+    radius: 0.28
+    inertia: 1.1076923076923078
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.58, 0.9
+    radius: 0.28
+    inertia: 1.1076923076923078
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.58, -0.9
+    axle: 1
+    radius: 0.28
+    inertia: 1.1076923076923078
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.58, -0.9
+    axle: 1
+    radius: 0.28
+    inertia: 1.1076923076923078
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+
+- type: ncVehicleHandling
+  parent: NCThortonGalenaManualAwd
+  id: NCThortonGalenaAutomaticAwd
+  automatic: true
+  automaticUpshiftRpm: 4200
+  automaticDownshiftRpm: 1400
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleChassis
+  parent: NCVehicleDevelopmentSedan
+  id: NCThortonGalenaChassis
+  manualHandling: NCThortonGalenaManualRwd
+  automaticHandling: NCThortonGalenaAutomaticRwd
+  allWheelHandling: NCThortonGalenaManualAwd
+  automaticAllWheelHandling: NCThortonGalenaAutomaticAwd
+  mass: 720
+  inertia: 700
+  frontTowPoint: 0, 1.45
+  rearTowPoint: 0, -1.45
 
 - type: entity
   parent: NCToyotaSupra1996
@@ -19,7 +131,22 @@
   name: Thorton Galena
   description: A compact utility car whose patched body has survived decades of scarcity.
   components:
-  - type: NCVehicleAccessories
-    soundProfile: NCThortonGalenaSound
+  - type: NCVehicle
+    chassis: NCThortonGalenaChassis
+  - type: NCVehicleDrive
+    handling: NCThortonGalenaManualRwd
+    fuel: 28
   - type: Sprite
     sprite: _NC/Vehicle/thorton_galena_2045.rsi
+  - type: Fixtures
+    fixtures:
+      chassis:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.725,-1.45,0.725,1.45"
+        density: 201
+        restitution: 0.05
+        mask:
+        - MobMask
+        layer:
+        - LargeMobLayer

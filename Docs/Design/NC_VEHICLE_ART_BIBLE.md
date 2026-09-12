@@ -1,17 +1,20 @@
 # Night City vehicle art guide
 
-## Camera and scale
+## Camera, orientation and scale
 
-World vehicles use a high 3/4 camera with eight authored directions. This keeps the roof, hood, trunk or cargo deck visible while preserving the footprint needed for driving and collision judgement. Every frame is 128×128 pixels. Passenger cars normally occupy about 102 pixels along their longest axis; larger vehicles retain the same pixel density and use prototype scale to match their physical chassis.
+World vehicles use one true orthographic top-down body frame. The vehicle nose points up in the source image, matching the local physics forward vector at zero rotation. RobustToolbox rotates that frame continuously with the entity transform, so steering no longer selects discrete directional artwork and left/right cannot be swapped by RSI frame order.
 
-RobustToolbox reads directional frames in this order: south, north, east, west, southeast, southwest, northeast, northwest. Source sheets are converted by `Tools/_NC/VehicleArt/build_vehicle_rsi.py`; artists should not reorder production PNGs by hand.
+Every production frame is 128 by 128 pixels with transparent background. Passenger cars occupy 76 to 112 pixels along their longest axis according to their class; the recovery truck occupies up to 116 pixels. This keeps a common pixel density while preserving visible size differences. Collision geometry remains prototype data and must be calibrated separately from the painted silhouette.
+
+Production frames are downsampled once from approved high-resolution sources with Lanczos filtering and restrained sharpening. Do not enlarge an already reduced production PNG or blur it a second time. Each model has one source PNG under `Docs/Design/SourceArt/VehicleTopDown/`.
 
 ## Visual language
 
-- Shapes should have clear silhouettes at normal gameplay zoom: reinforced arches, exposed utility hardware, armored bumpers, ducting and repaired panels.
-- Palette values stay compressed and slightly dirty. Warm sodium orange, warning red and cold cyan provide small emissive accents against dark metal.
-- Surface wear belongs in the base body only when it is permanent character. Fresh collision damage belongs in damage layers so gameplay state stays readable.
-- Lighting is painted for the common high-angle view. Avoid photographic reflections and thin antialiased details that disappear after pixel reduction.
+- Use a readable roof, hood, cabin and rear silhouette at normal gameplay zoom.
+- Keep the palette dark and worn, with small sodium orange, warning red and cold cyan accents.
+- Put permanent wear in `body`; put fresh collision damage in the damage layers.
+- Avoid perspective side panels, visible horizon, floor shadows and photographic backgrounds.
+- Keep lamps and important body seams at least one final pixel wide.
 
 ## Required RSI states
 
@@ -30,32 +33,29 @@ RobustToolbox reads directional frames in this order: south, north, east, west, 
 | `smoke` | Overheated or heavily worn engine | Condition system |
 | `fire` | Source art for vehicle fire effects | Existing SS14 fire visual remains authoritative |
 
-The client visual system reacts to replicated component states and caches the resulting layer mask. It does not scan vehicles every frame.
+All states except `smoke` and `fire` contain exactly one 128 by 128 frame. Smoke and fire contain four animation frames and rotate together with the vehicle sprite. The client visual system reacts to replicated component state and caches the resulting layer mask.
 
 ## Fleet assets
 
-The production library currently contains the Toyota Supra A80, a recovery truck, and fan-art interpretations of Quadra Turbo-R, Thorton Galena, Archer Quartz, Quadra Type-66, Mizutani Shion, Thorton Colby, Villefort Alvarado, Makigai MaiMai and Rayfield Caliburn. Each RSI has the same twelve states and eight directional frames where direction applies.
+The production library contains the Toyota Supra A80, a recovery truck, Quadra Turbo-R, Thorton Galena, Archer Quartz, Quadra Type-66, Mizutani Shion, Thorton Colby, Villefort Alvarado, Makigai MaiMai and Rayfield Caliburn. Each vehicle keeps its own source PNG and RSI directory.
 
-The Cyberpunk vehicle designs are original AI-assisted fan-art renditions. No texture from a CD PROJEKT RED game was copied. Their RSI metadata records `LicenseRef-CDPR-Fan-Content`; use and distribution must follow the [CD PROJEKT RED Fan Content Guidelines](https://www.cdprojektred.com/en/fan-content). Source sheets are retained under `Docs/Design/SourceArt/Vehicle/` so production frames can be rebuilt consistently.
+The Cyberpunk vehicle designs are original AI-assisted fan-art renditions. No texture from a CD PROJEKT RED game was copied. Their RSI metadata records `LicenseRef-CDPR-Fan-Content`; use and distribution must follow the [CD PROJEKT RED Fan Content Guidelines](https://www.cdprojektred.com/en/fan-content).
 
 ## Build and validation
 
-Build one RSI from an approved transparent 4×2 source sheet with:
+Build one RSI from a transparent top-down source with its nose pointing up:
 
 ```text
-python Tools/_NC/VehicleArt/build_vehicle_rsi.py SOURCE.png OUTPUT.rsi --copyright "..."
+python Tools/_NC/VehicleArt/build_vehicle_rsi.py SOURCE.png OUTPUT.rsi --extent 100 --copyright "..."
 ```
 
-Run the repository RSI validator when its Python dependencies are installed. The dependency-free project check for this fleet (apart from Pillow, already used by the builder) is:
+Validate the fleet with:
 
 ```text
 python Tools/_NC/VehicleArt/validate_vehicle_rsi.py Resources/Textures/_NC/Vehicle/NAME.rsi
+python RobustToolbox/Schemas/validate_rsis.py Resources/
 ```
 
-## Reactive vehicle audio
+## Vehicle audio
 
-Every playable model owns an `ncVehicleSoundProfile` beside its entity prototype. Three seamless engine loops represent low, middle and high RPM; the server crossfades their volume using the authoritative engine speed and throttle. Turbo and tyre loops exist only while their thresholds are exceeded. Gear changes, startup, shutdown and throttle release use PVS-scoped one-shot sounds, while the driver's startup and horn feedback remains predicted.
-
-Supra uses two distinct release events. `backfire.wav` is the fast exhaust anti-lag sequence (the repeated “ratatata”); `turbo_flutter.wav` is a descending, twin-resonance compressor flutter (the “stututu”). They trigger together only after a sharp release from meaningful throttle at sufficient RPM. Other vehicles use the same reactive framework with model-specific cylinder cadence, frequency range, roughness, horn and forced-induction behavior.
-
-All current audio is deterministic original synthesis generated by `Tools/_NC/VehicleAudio/generate_vehicle_audio.py`. Production WAV files are mono 16-bit PCM at 22.05 kHz, which RobustToolbox loads natively. Per-folder `attributions.yml` files record the CC-BY-NC-SA-4.0 license.
+Vehicles use the original two-sound setup from the base SS14 content: `vehiclestartup.ogg` plays when the engine starts and `vehicleengineidle.ogg` loops while it is running. Throttle changes only the loop volume. `carhorn.ogg` remains the separate horn action. Vehicle-specific RPM bands, turbo layers and generated audio assets are not part of this setup.

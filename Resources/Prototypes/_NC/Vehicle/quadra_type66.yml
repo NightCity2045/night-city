@@ -2,25 +2,151 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-- type: ncVehicleSoundProfile
-  id: NCQuadraType66Sound
-  startup: { path: /Audio/_NC/Vehicle/quadra_type66/startup.wav }
-  shutdown: { path: /Audio/_NC/Vehicle/quadra_type66/shutdown.wav }
-  lowLoop: { path: /Audio/_NC/Vehicle/quadra_type66/engine_low_loop.wav }
-  midLoop: { path: /Audio/_NC/Vehicle/quadra_type66/engine_mid_loop.wav }
-  highLoop: { path: /Audio/_NC/Vehicle/quadra_type66/engine_high_loop.wav }
-  backfire: { path: /Audio/_NC/Vehicle/quadra_type66/backfire.wav }
-  shift: { path: /Audio/_NC/Vehicle/quadra_type66/shift.wav }
-  tyreSlipLoop: { path: /Audio/_NC/Vehicle/quadra_type66/tyre_skid_loop.wav }
-  horn: { path: /Audio/_NC/Vehicle/quadra_type66/horn.wav }
+- type: ncVehicleHandling
+  parent: NCBaseSupraHandling
+  id: NCQuadraType66ManualRwd
+  wheels:
+  - position: -0.72, 1.28
+    radius: 0.34
+    inertia: 1.9230769230769231
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.72, 1.28
+    radius: 0.34
+    inertia: 1.9230769230769231
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.72, -1.28
+    axle: 1
+    radius: 0.34
+    inertia: 1.9230769230769231
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.72, -1.28
+    axle: 1
+    radius: 0.34
+    inertia: 1.9230769230769231
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  torqueCurve:
+  - 0, 180
+  - 650, 320
+  - 2200, 650
+  - 4500, 520
+  - 6000, 0
+  gearRatios: [0, 3.1, 2, 1.4, 1.08, 0.86, 0.7, -2.9]
+  finalDrive: 3.1
+  idleRpm: 650
+  redlineRpm: 6000
+  engineInertia: 0.65
+  clutchTorque: 900
+  steeringRate: 4.5
+  steeringAngle: 0.48
+  keyboardSteeringRate: 4.5
+  wheelbase: 2.56
+  centerOfGravityHeight: 0.52
+  friction: 0.92
+  brakeTorque: 3900
+  handbrakeTorque: 2800
+  aerodynamicDrag: 0.55
+  rollingResistance: 18
+  fuelCapacity: 90
+  antiLockBrakes: true
+  tractionControl: false
+  stabilityControl: false
+
+- type: ncVehicleHandling
+  parent: NCQuadraType66ManualRwd
+  id: NCQuadraType66AutomaticRwd
+  automatic: true
+  automaticUpshiftRpm: 4600
+  automaticDownshiftRpm: 1400
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleHandling
+  parent: NCQuadraType66ManualRwd
+  id: NCQuadraType66ManualAwd
+  centerDifferentialCoupling: 10
+  centerDifferentialTorqueLimit: 180
+  differentialCoupling: 20
+  differentialTorqueLimit: 350
+  tractionControl: true
+  antiLockBrakes: true
+  stabilityControl: true
+  wheels:
+  - position: -0.72, 1.28
+    radius: 0.34
+    inertia: 1.9230769230769231
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.72, 1.28
+    radius: 0.34
+    inertia: 1.9230769230769231
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.72, -1.28
+    axle: 1
+    radius: 0.34
+    inertia: 1.9230769230769231
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.72, -1.28
+    axle: 1
+    radius: 0.34
+    inertia: 1.9230769230769231
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+
+- type: ncVehicleHandling
+  parent: NCQuadraType66ManualAwd
+  id: NCQuadraType66AutomaticAwd
+  automatic: true
+  automaticUpshiftRpm: 4600
+  automaticDownshiftRpm: 1400
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleChassis
+  parent: NCVehicleDevelopmentSedan
+  id: NCQuadraType66Chassis
+  manualHandling: NCQuadraType66ManualRwd
+  automaticHandling: NCQuadraType66AutomaticRwd
+  allWheelHandling: NCQuadraType66ManualAwd
+  automaticAllWheelHandling: NCQuadraType66AutomaticAwd
+  mass: 1250
+  inertia: 2100
+  frontTowPoint: 0, 2.05
+  rearTowPoint: 0, -2.05
 
 - type: entity
   parent: NCToyotaSupra1996
   id: NCVehicleQuadraType662045
   name: Quadra Type-66
-  description: Heavy American muscle wrapped in angular armor and exposed cooling hardware.
+  description: A heavy muscle car built around brutal low-end torque and long slides.
   components:
-  - type: NCVehicleAccessories
-    soundProfile: NCQuadraType66Sound
+  - type: NCVehicle
+    chassis: NCQuadraType66Chassis
+  - type: NCVehicleDrive
+    handling: NCQuadraType66ManualRwd
+    fuel: 55
   - type: Sprite
     sprite: _NC/Vehicle/quadra_type66_2045.rsi
+  - type: Fixtures
+    fixtures:
+      chassis:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.875,-2.05,0.875,2.05"
+        density: 201
+        restitution: 0.05
+        mask:
+        - MobMask
+        layer:
+        - LargeMobLayer

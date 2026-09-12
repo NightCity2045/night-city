@@ -124,7 +124,7 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
             return false;
         // The fallback also evacuates a legacy seat while a component is being removed.
         var hasLink = TryComp<NCVehicleOccupantComponent>(user, out var occupant) && occupant.Vehicle == uid;
-        if ((!hasLink && drive.Driver != user) || (!force && hasLink && occupant!.Belted) ||
+        if ((!hasLink && drive.Driver != user) ||
             !_containers.TryGetContainer(uid, hasLink ? "nc-vehicle-" + occupant!.Seat : DriverContainer, out var seat))
             return false;
         // A removed/hot-reloaded prototype must never prevent emergency evacuation on deletion.
@@ -139,20 +139,13 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
         if (hasLink && TryGetChassis(uid, out var chassis) && chassis!.Seats.TryGetValue(occupant!.Seat, out var definition))
             exitOffset = definition.Exit;
         var exit = _transform.ToMapCoordinates(new EntityCoordinates(uid, exitOffset));
-        if (!force)
+        if (!force && !CanUseExit(uid, user, exit, tuning!.ExitClearance))
         {
-            // Query only the intended exit area, never all entities on the map.
-            var radius = new Vector2(tuning!.ExitClearance);
-            var bounds = new Box2(exit.Position - radius, exit.Position + radius);
-            foreach (var candidate in _lookup.GetEntitiesIntersecting(exit.MapId, bounds))
-            {
-                if (candidate == uid || candidate == user || !TryComp<PhysicsComponent>(candidate, out var obstacle) ||
-                    !obstacle.CanCollide || !TryComp<FixturesComponent>(candidate, out var fixtures))
-                    continue;
-                foreach (var fixture in fixtures.Fixtures.Values)
-                    if (fixture.Hard && fixture.CollisionLayer != 0)
-                        return false;
-            }
+            // If a wall blocks the assigned door, try the matching door on the other side.
+            var mirrored = new Vector2(-exitOffset.X, exitOffset.Y);
+            exit = _transform.ToMapCoordinates(new EntityCoordinates(uid, mirrored));
+            if (!CanUseExit(uid, user, exit, tuning.ExitClearance))
+                return false;
         }
         var destination = _transform.ToCoordinates(xform.ParentUid, exit);
         if (!seat.Contains(user))
@@ -171,6 +164,24 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
             return false;
         if (!TerminatingOrDeleted(user))
             _transform.SetCoordinates(user, destination);
+        return true;
+    }
+
+    private bool CanUseExit(EntityUid vehicle, EntityUid user, MapCoordinates exit, float clearance)
+    {
+        // Query only the two door-sized areas, never all entities on the map.
+        var radius = new Vector2(clearance);
+        var bounds = new Box2(exit.Position - radius, exit.Position + radius);
+        foreach (var candidate in _lookup.GetEntitiesIntersecting(exit.MapId, bounds))
+        {
+            if (candidate == vehicle || candidate == user || !TryComp<PhysicsComponent>(candidate, out var obstacle) ||
+                !obstacle.CanCollide || !TryComp<FixturesComponent>(candidate, out var fixtures))
+                continue;
+            foreach (var fixture in fixtures.Fixtures.Values)
+                if (fixture.Hard && fixture.CollisionLayer != 0)
+                    return false;
+        }
+
         return true;
     }
 

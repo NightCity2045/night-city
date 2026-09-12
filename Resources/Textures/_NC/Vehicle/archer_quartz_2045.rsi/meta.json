@@ -1,51 +1,41 @@
 {
     "version": 1,
     "license": "LicenseRef-CDPR-Fan-Content",
-    "copyright": "Unofficial AI-assisted fan art by Astro, 2026. No game texture was copied. Underlying Cyberpunk vehicle design and IP are owned by CD PROJEKT S.A.; created under the CD PROJEKT RED Fan Content Guidelines.",
+    "copyright": "Original AI-assisted fan artwork by Astro, 2026. No third-party texture was copied; vehicle design trademarks remain with their respective owners.",
     "size": {
         "x": 128,
         "y": 128
     },
     "states": [
         {
-            "name": "shadow",
-            "directions": 8
+            "name": "shadow"
         },
         {
-            "name": "body",
-            "directions": 8
+            "name": "body"
         },
         {
-            "name": "damage-light",
-            "directions": 8
+            "name": "damage-light"
         },
         {
-            "name": "damage-heavy",
-            "directions": 8
+            "name": "damage-heavy"
         },
         {
-            "name": "headlights",
-            "directions": 8
+            "name": "headlights"
         },
         {
-            "name": "brakes",
-            "directions": 8
+            "name": "brakes"
         },
         {
-            "name": "reverse",
-            "directions": 8
+            "name": "reverse"
         },
         {
-            "name": "hood-open",
-            "directions": 8
+            "name": "hood-open"
         },
         {
-            "name": "wheel-damage",
-            "directions": 8
+            "name": "wheel-damage"
         },
         {
-            "name": "tuning-street",
-            "directions": 8
+            "name": "tuning-street"
         },
         {
             "name": "smoke",

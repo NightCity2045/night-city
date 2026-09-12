@@ -13,7 +13,7 @@ from pathlib import Path
 from PIL import Image
 
 
-EXPECTED_DIRECTIONS = 8
+EXPECTED_DIRECTIONS = 1
 EXPECTED_SIZE = (128, 128)
 EXPECTED_STATES = {
     "shadow",
@@ -58,6 +58,8 @@ def validate(rsi: Path) -> list[str]:
                 errors.append(f"{path.name} dimensions {image.size} cannot hold {frames} frames")
             if name not in {"smoke", "fire"} and directions != EXPECTED_DIRECTIONS:
                 errors.append(f"{name} has {directions} directions, expected {EXPECTED_DIRECTIONS}")
+            if name not in {"smoke", "fire"} and image.size != EXPECTED_SIZE:
+                errors.append(f"{path.name} is {image.size}, expected one {EXPECTED_SIZE} frame")
             if image.getchannel("A").getbbox() is None:
                 errors.append(f"{path.name} is fully transparent")
 

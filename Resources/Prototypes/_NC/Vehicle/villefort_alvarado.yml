@@ -2,24 +2,151 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-- type: ncVehicleSoundProfile
-  id: NCVillefortAlvaradoSound
-  startup: { path: /Audio/_NC/Vehicle/villefort_alvarado/startup.wav }
-  shutdown: { path: /Audio/_NC/Vehicle/villefort_alvarado/shutdown.wav }
-  lowLoop: { path: /Audio/_NC/Vehicle/villefort_alvarado/engine_low_loop.wav }
-  midLoop: { path: /Audio/_NC/Vehicle/villefort_alvarado/engine_mid_loop.wav }
-  highLoop: { path: /Audio/_NC/Vehicle/villefort_alvarado/engine_high_loop.wav }
-  shift: { path: /Audio/_NC/Vehicle/villefort_alvarado/shift.wav }
-  tyreSlipLoop: { path: /Audio/_NC/Vehicle/villefort_alvarado/tyre_skid_loop.wav }
-  horn: { path: /Audio/_NC/Vehicle/villefort_alvarado/horn.wav }
+- type: ncVehicleHandling
+  parent: NCBaseSupraHandling
+  id: NCVillefortAlvaradoManualRwd
+  wheels:
+  - position: -0.72, 1.55
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.72, 1.55
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.72, -1.5
+    axle: 1
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.72, -1.5
+    axle: 1
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  torqueCurve:
+  - 0, 180
+  - 600, 340
+  - 1800, 520
+  - 3800, 400
+  - 5000, 0
+  gearRatios: [0, 3.2, 2.05, 1.45, 1.1, 0.86, 0.68, -3]
+  finalDrive: 3.25
+  idleRpm: 600
+  redlineRpm: 5000
+  engineInertia: 0.9
+  clutchTorque: 820
+  steeringRate: 3.8
+  steeringAngle: 0.42
+  keyboardSteeringRate: 3.8
+  wheelbase: 3.05
+  centerOfGravityHeight: 0.5
+  friction: 0.88
+  brakeTorque: 5000
+  handbrakeTorque: 3200
+  aerodynamicDrag: 0.62
+  rollingResistance: 24
+  fuelCapacity: 110
+  antiLockBrakes: true
+  tractionControl: true
+  stabilityControl: true
+
+- type: ncVehicleHandling
+  parent: NCVillefortAlvaradoManualRwd
+  id: NCVillefortAlvaradoAutomaticRwd
+  automatic: true
+  automaticUpshiftRpm: 3800
+  automaticDownshiftRpm: 1250
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleHandling
+  parent: NCVillefortAlvaradoManualRwd
+  id: NCVillefortAlvaradoManualAwd
+  centerDifferentialCoupling: 10
+  centerDifferentialTorqueLimit: 180
+  differentialCoupling: 20
+  differentialTorqueLimit: 350
+  tractionControl: true
+  antiLockBrakes: true
+  stabilityControl: true
+  wheels:
+  - position: -0.72, 1.55
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.72, 1.55
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.72, -1.5
+    axle: 1
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.72, -1.5
+    axle: 1
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+
+- type: ncVehicleHandling
+  parent: NCVillefortAlvaradoManualAwd
+  id: NCVillefortAlvaradoAutomaticAwd
+  automatic: true
+  automaticUpshiftRpm: 3800
+  automaticDownshiftRpm: 1250
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleChassis
+  parent: NCVehicleDevelopmentSedan
+  id: NCVillefortAlvaradoChassis
+  manualHandling: NCVillefortAlvaradoManualRwd
+  automaticHandling: NCVillefortAlvaradoAutomaticRwd
+  allWheelHandling: NCVillefortAlvaradoManualAwd
+  automaticAllWheelHandling: NCVillefortAlvaradoAutomaticAwd
+  mass: 1650
+  inertia: 3500
+  frontTowPoint: 0, 2.4
+  rearTowPoint: 0, -2.4
 
 - type: entity
   parent: NCToyotaSupra1996
   id: NCVehicleVillefortAlvarado2045
   name: Villefort Alvarado
-  description: A long luxury sedan with imposing chrome and armored proportions.
+  description: A long, imposing luxury sedan that trades agility for stability and momentum.
   components:
-  - type: NCVehicleAccessories
-    soundProfile: NCVillefortAlvaradoSound
+  - type: NCVehicle
+    chassis: NCVillefortAlvaradoChassis
+  - type: NCVehicleDrive
+    handling: NCVillefortAlvaradoManualRwd
+    fuel: 70
   - type: Sprite
     sprite: _NC/Vehicle/villefort_alvarado_2045.rsi
+  - type: Fixtures
+    fixtures:
+      chassis:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.9,-2.4,0.9,2.4"
+        density: 201
+        restitution: 0.05
+        mask:
+        - MobMask
+        layer:
+        - LargeMobLayer

@@ -180,8 +180,6 @@ public sealed class NCVehicleClientInteractionTest : InteractionTest
         {
             var occupants = Server.System<NCVehicleOccupantSystem>();
             Assert.That(occupants.TryToggleBelt(car, SPlayer), Is.True);
-            Assert.That(occupants.TryExit(car, SPlayer), Is.False);
-            Assert.That(occupants.TryToggleBelt(car, SPlayer), Is.True);
             var drive = SEntMan.GetComponent<NCVehicleDriveComponent>(car);
             drive.PendingShift = NCVehicleDriverAction.GearUp;
             drive.ShiftStatus = NCVehicleShiftStatus.WaitingForClutch;
@@ -189,6 +187,8 @@ public sealed class NCVehicleClientInteractionTest : InteractionTest
             Assert.That(drive.PendingShift, Is.Null, "A subsequent driver must not inherit a queued shift.");
         });
         await RunTicks(5);
+        await Server.WaitAssertion(() => Assert.That(SEntMan.HasComponent<NCVehicleOccupantComponent>(SPlayer), Is.False,
+            "A stationary driver must be able to leave in one action even while belted."));
         await Client.WaitAssertion(() =>
         {
             Assert.That(CEntMan.GetComponent<NCVehicleDriveComponent>(clientCar).Driver, Is.Null);
