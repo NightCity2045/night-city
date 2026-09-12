@@ -114,4 +114,13 @@ public sealed class NCVehicleDriveMathTest
         Assert.That(NCVehicleDriveMath.HighRpmWearMultiplier(7000, 7000, 0.9f, 12), Is.EqualTo(1).Within(0.001f));
         Assert.That(NCVehicleDriveMath.HighRpmWearMultiplier(14000, 7000, 0.9f, 12), Is.EqualTo(12));
     }
+
+    [Test]
+    public void CrashDamageIsProgressiveBelowCatastrophicSpeed()
+    {
+        Assert.That(NCVehicleDamageMath.ModuleConditionLoss(100000, 10000, 1, 10, 15, 0.45f), Is.EqualTo(0.45f));
+        Assert.That(NCVehicleDamageMath.ModuleConditionLoss(100000, 10000, 1, 16, 15, 0.45f), Is.EqualTo(10));
+        Assert.That(NCVehicleDamageMath.OccupantTrauma(10, 1, 3, 2.5f, 60), Is.EqualTo(17.5f));
+        Assert.That(NCVehicleDamageMath.OccupantTrauma(10, 0.55f * 0.75f, 3, 2.5f, 60), Is.EqualTo(2.8125f));
+    }
 }

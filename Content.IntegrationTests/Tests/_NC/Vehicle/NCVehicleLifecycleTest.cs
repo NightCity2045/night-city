@@ -630,9 +630,12 @@ public sealed partial class NCVehicleLifecycleTest : GameTest
         Assert.That(damage.TryImpact(car, new Vector2(0, 1.75f), Vector2.UnitY, 2000, 0), Is.True);
         Assert.That(assembly.Installed["engine"].Condition, Is.EqualTo(1));
         var shell = SEntMan.GetComponent<NCVehicleBodyComponent>(car);
-        Assert.That(shell.Deformation["front-center"], Is.EqualTo(0.1f).Within(0.001));
+        Assert.That(shell.Deformation["front-center"], Is.EqualTo(0.02f).Within(0.001));
         Assert.That(shell.Deformation.ContainsKey("rear-center"), Is.False);
         Assert.That(damage.TryImpact(car, new Vector2(0, 1.75f), Vector2.UnitY, 100000, 0), Is.True);
+        Assert.That(assembly.Installed["engine"].Condition, Is.LessThan(1).And.GreaterThan(0.9f));
+        Assert.That(SEntMan.GetComponent<NCVehicleDriveComponent>(car).AssemblyReady, Is.True);
+        Assert.That(damage.TryImpact(car, new Vector2(0, 1.75f), Vector2.UnitY, 400000, 20), Is.True);
         Assert.That(assembly.Installed["engine"].Condition, Is.Zero);
         Assert.That(assembly.Installed["gearbox"].Condition, Is.EqualTo(1));
         Assert.That(SEntMan.GetComponent<PhysicsComponent>(car).Mass, Is.EqualTo(mass).Within(0.01));

@@ -1,15 +1,73 @@
 {
     "version": 1,
-    "license": "CC0-1.0",
-    "copyright": "AI-generated using OpenAI ImageGen at Astro's request, 2026. Original generated sprite of a 1996 Toyota Supra A80; no third-party image was used as an input.",
+    "license": "CC-BY-NC-SA-4.0",
+    "copyright": "Original AI-assisted pixel artwork by Astro, 2026, based on the 1996 Toyota Supra A80 silhouette. No third-party texture was copied; Toyota trademarks remain with their owner.",
     "size": {
         "x": 128,
         "y": 128
     },
     "states": [
         {
+            "name": "shadow",
+            "directions": 8
+        },
+        {
             "name": "body",
-            "directions": 4
+            "directions": 8
+        },
+        {
+            "name": "damage-light",
+            "directions": 8
+        },
+        {
+            "name": "damage-heavy",
+            "directions": 8
+        },
+        {
+            "name": "headlights",
+            "directions": 8
+        },
+        {
+            "name": "brakes",
+            "directions": 8
+        },
+        {
+            "name": "reverse",
+            "directions": 8
+        },
+        {
+            "name": "hood-open",
+            "directions": 8
+        },
+        {
+            "name": "wheel-damage",
+            "directions": 8
+        },
+        {
+            "name": "tuning-street",
+            "directions": 8
+        },
+        {
+            "name": "smoke",
+            "delays": [
+                [
+                    0.18,
+                    0.18,
+                    0.18,
+                    0.18
+                ]
+            ]
+        },
+        {
+            "name": "fire",
+            "delays": [
+                [
+                    0.12,
+                    0.12,
+                    0.12,
+                    0.12
+                ]
+            ]
         }
     ]
 }

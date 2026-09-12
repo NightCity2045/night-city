@@ -92,6 +92,12 @@ public sealed partial class NCVehicleHandlingPrototype : IPrototype, IInheriting
     [DataField(required: true)] public float ExitClearance;
     [DataField(required: true)] public float InputInterval;
     [DataField(required: true)] public float KeyboardSteeringRate;
+    [DataField] public float CameraLookAheadStartSpeed = 4;
+    [DataField] public float CameraLookAheadMaximumSpeed = 18;
+    [DataField] public float CameraLookAheadMaximum = 2.5f;
+    [DataField] public float ShiftAdviceUpFraction = 0.78f;
+    [DataField] public float ShiftAdviceDownRpmFactor = 1.4f;
+    [DataField] public float SlipWarning = 0.35f;
     [DataField(required: true)] public float MaximumStep;
     [DataField(required: true)] public int MaximumSubsteps;
 }

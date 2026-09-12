@@ -50,6 +50,8 @@ public sealed partial class NCVehicleDriveComponent : Component
     [AutoNetworkedField] public float AssemblyPower = 1;
     [AutoNetworkedField] public float[] AssemblyFunctions = [];
     [AutoNetworkedField] public float[] WheelWear = [];
+    [AutoNetworkedField] public float LongitudinalSlip;
+    [AutoNetworkedField] public float LateralSlip;
     [AutoNetworkedField] public Vector2 AssemblyCenter;
     [AutoNetworkedField] public float AssemblyInertia;
     [AutoNetworkedField] public Vector2 PreviousVelocity;

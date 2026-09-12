@@ -92,6 +92,9 @@ public sealed partial class NCVehicleServiceSystem : EntitySystem
             if (!_access.CanOpen(uid))
                 return false;
             assembly.HoodOpen = !assembly.HoodOpen;
+            // Hood position is externally observable even though the detailed assembly stays private.
+            vehicle.HoodOpen = assembly.HoodOpen;
+            Dirty(uid, vehicle);
             Refresh(uid);
             return true;
         }

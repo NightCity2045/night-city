@@ -9,10 +9,14 @@ using Robust.Shared.Prototypes;
 namespace Content.Shared._NC.Vehicle.Components;
 
 /// <summary>Public vehicle identity within the round. Private assembly state is not broadcast to observers.</summary>
-[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(raiseAfterAutoHandleState: true)]
 public sealed partial class NCVehicleComponent : Component
 {
     [DataField(required: true), AutoNetworkedField]
     public ProtoId<NCVehicleChassisPrototype> Chassis;
     [DataField] public float InfrastructureSearchRange = 6;
+    [DataField] public float LightDamageVisualThreshold = 0.12f;
+    [DataField] public float HeavyDamageVisualThreshold = 0.55f;
+    [DataField, AutoNetworkedField] public bool HoodOpen;
+    [DataField, AutoNetworkedField] public bool StreetTuning;
 }

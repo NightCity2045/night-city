@@ -15,6 +15,12 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
         <Label Name="Condition" />
         <Label Name="Fluids" />
         <Label Name="Accessories" />
+        <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+            <Label Name="Safety" VerticalAlignment="Center" />
+            <Button Name="Seatbelt" Text="{Loc 'nc-vehicle-seatbelt-fasten'}" />
+        </BoxContainer>
+        <Label Name="DrivingHint" />
+        <Label Name="GripStatus" />
         <Label Text="{Loc 'nc-vehicle-steering'}" />
         <Label Text="{Loc 'nc-vehicle-steering-grip'}" />
         <vehicle:NCVehicleSteeringWheel Name="Steering" MinHeight="160" MinWidth="160" HorizontalAlignment="Center" />

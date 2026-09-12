@@ -25,6 +25,7 @@ public sealed partial class NCVehicleClientSystem : EntitySystem
     [Dependency] private SharedPhysicsSystem _physics = default!;
     [Dependency] private IOverlayManager _overlays = default!;
     [Dependency] private SpriteSystem _sprites = default!;
+    [Dependency] private NCVehicleVisualSystem _vehicleVisuals = default!;
 
     public override void Initialize()
     {
@@ -67,6 +68,7 @@ public sealed partial class NCVehicleClientSystem : EntitySystem
     private void OnState(Entity<NCVehicleDriveComponent> ent, ref AfterAutoHandleStateEvent args)
     {
         _physics.UpdateIsPredicted(ent);
+        _vehicleVisuals.Refresh(ent);
     }
 
     private void OnAppearance(Entity<NCVehicleBodyComponent> ent, ref AppearanceChangeEvent args)

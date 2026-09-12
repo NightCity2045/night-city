@@ -59,11 +59,17 @@
       types:
         Heat: 1
     minimumImpactSpeed: 1
-    beltTransfer: 0.35
+    airbagDeltaV: 6
+    airbagTransfer: 0.75
+    moderateImpactDeltaV: 8
+    severeImpactDeltaV: 15
+    catastrophicDeltaV: 15
+    maximumModuleDamagePerImpact: 0.45
+    beltTransfer: 0.55
     unbeltedTransfer: 1
-    injuryThreshold: 2
-    traumaPerDeltaV: 4
-    maximumTrauma: 80
+    injuryThreshold: 3
+    traumaPerDeltaV: 2.5
+    maximumTrauma: 60
     traumaProfile: BluntImpact
     injuryZone: NCZoneChest
     injuryRegion: Thorax
@@ -71,8 +77,8 @@
       front-left:
         name: nc-vehicle-zone-front-left
         position: -0.65, 1.6
-        energyCapacity: 20000
-        moduleEnergyCapacity: 10000
+        energyCapacity: 80000
+        moduleEnergyCapacity: 45000
         exterior: true
         protectedSlots: [engine, fl-tyre, fl-hub, fl-brake]
         cabinDamageTransfer: 0.1
@@ -80,8 +86,8 @@
       front-center:
         name: nc-vehicle-zone-front-center
         position: 0, 1.75
-        energyCapacity: 20000
-        moduleEnergyCapacity: 10000
+        energyCapacity: 100000
+        moduleEnergyCapacity: 45000
         exterior: true
         protectedSlots: [engine, radiator, front-bumper, hood, fuel-pump, headlamps]
         cabinDamageTransfer: 0.15
@@ -89,8 +95,8 @@
       front-right:
         name: nc-vehicle-zone-front-right
         position: 0.65, 1.6
-        energyCapacity: 20000
-        moduleEnergyCapacity: 10000
+        energyCapacity: 80000
+        moduleEnergyCapacity: 45000
         exterior: true
         protectedSlots: [engine, fr-tyre, fr-hub, fr-brake]
         cabinDamageTransfer: 0.1
@@ -98,7 +104,7 @@
       left-side:
         name: nc-vehicle-zone-left-side
         position: -0.725, 0
-        energyCapacity: 20000
+        energyCapacity: 60000
         moduleEnergyCapacity: 40000
         exterior: true
         protectedSlots: [gearbox]
@@ -107,7 +113,7 @@
       right-side:
         name: nc-vehicle-zone-right-side
         position: 0.725, 0
-        energyCapacity: 20000
+        energyCapacity: 60000
         moduleEnergyCapacity: 40000
         exterior: true
         protectedSlots: [gearbox]
@@ -116,22 +122,22 @@
       rear-left:
         name: nc-vehicle-zone-rear-left
         position: -0.65, -1.6
-        energyCapacity: 20000
-        moduleEnergyCapacity: 40000
+        energyCapacity: 70000
+        moduleEnergyCapacity: 50000
         exterior: true
         protectedSlots: [rl-tyre, rl-hub, rl-brake, fuel-tank]
       rear-center:
         name: nc-vehicle-zone-rear-center
         position: 0, -1.75
-        energyCapacity: 20000
-        moduleEnergyCapacity: 40000
+        energyCapacity: 70000
+        moduleEnergyCapacity: 50000
         exterior: true
         protectedSlots: [rear-bumper, rear-differential, fuel-tank]
       rear-right:
         name: nc-vehicle-zone-rear-right
         position: 0.65, -1.6
-        energyCapacity: 20000
-        moduleEnergyCapacity: 40000
+        energyCapacity: 70000
+        moduleEnergyCapacity: 50000
         exterior: true
         protectedSlots: [rr-tyre, rr-hub, rr-brake, fuel-tank]
       roof:
@@ -253,7 +259,41 @@
     noRot: false
   - type: Sprite
     sprite: _NC/Vehicle/supra_1996.rsi
-    state: body
+    layers:
+    - state: shadow
+      map: ["enum.NCVehicleVisualLayers.Shadow"]
+    - state: body
+      map: ["enum.NCVehicleVisualLayers.Body"]
+    - state: damage-light
+      map: ["enum.NCVehicleVisualLayers.DamageLight"]
+      visible: false
+    - state: damage-heavy
+      map: ["enum.NCVehicleVisualLayers.DamageHeavy"]
+      visible: false
+    - state: tuning-street
+      map: ["enum.NCVehicleVisualLayers.Tuning"]
+      visible: false
+    - state: hood-open
+      map: ["enum.NCVehicleVisualLayers.Hood"]
+      visible: false
+    - state: wheel-damage
+      map: ["enum.NCVehicleVisualLayers.Wheels"]
+      visible: false
+    - state: headlights
+      map: ["enum.NCVehicleVisualLayers.Headlights"]
+      visible: false
+      shader: unshaded
+    - state: brakes
+      map: ["enum.NCVehicleVisualLayers.Brakes"]
+      visible: false
+      shader: unshaded
+    - state: reverse
+      map: ["enum.NCVehicleVisualLayers.Reverse"]
+      visible: false
+      shader: unshaded
+    - state: smoke
+      map: ["enum.NCVehicleVisualLayers.Smoke"]
+      visible: false
     # RSI uses south as zero; the chassis is authored with its front on local +Y.
     rotation: 180
     noRot: false

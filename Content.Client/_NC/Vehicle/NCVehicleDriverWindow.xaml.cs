@@ -16,6 +16,7 @@ public sealed partial class NCVehicleDriverWindow : FancyWindow
     public event Action<NCVehicleDriverAction>? DriverAction;
     public event Action? Tick;
     public event Action<bool>? InfrastructureAction;
+    public event Action? BeltRequested;
 
     public string TelemetryText { set => Telemetry.Text = value; }
     public string EngineStatusText { set => EngineStatus.SetMessage(value); }
@@ -26,6 +27,15 @@ public sealed partial class NCVehicleDriverWindow : FancyWindow
     public string ConditionText { set => Condition.Text = value; }
     public string FluidsText { set => Fluids.Text = value; }
     public string AccessoriesText { set => Accessories.Text = value; }
+    public string SafetyText { set => Safety.Text = value; }
+    public string SeatbeltText { set => Seatbelt.Text = value; }
+    public string DrivingHintText { set => DrivingHint.Text = value; }
+    public string GripStatusText { set => GripStatus.Text = value; }
+    public void SetSafetyVisual(bool fastened)
+    {
+        Safety.FontColorOverride = fastened ? Color.FromHex("#85d46e") : Color.FromHex("#ff765f");
+        Seatbelt.ModulateSelfOverride = fastened ? null : Color.FromHex("#ffb45f");
+    }
     public string GearText { set => GearGate.Text = value; }
     public void SetShifter(bool automatic, int column, int row, NCVehicleSelector selector, bool reverseArmed) =>
         Shifter.SetState(automatic, column, row, selector, reverseArmed);
@@ -42,6 +52,7 @@ public sealed partial class NCVehicleDriverWindow : FancyWindow
         Lights.OnPressed += _ => DriverAction?.Invoke(NCVehicleDriverAction.Lights);
         Horn.OnPressed += _ => DriverAction?.Invoke(NCVehicleDriverAction.Horn);
         Wash.OnPressed += _ => DriverAction?.Invoke(NCVehicleDriverAction.Wash);
+        Seatbelt.OnPressed += _ => BeltRequested?.Invoke();
         Neutral.OnPressed += _ => DriverAction?.Invoke(NCVehicleDriverAction.Neutral);
         Reverse.OnPressed += _ => DriverAction?.Invoke(NCVehicleDriverAction.Reverse);
         LowerGear.OnPressed += _ => DriverAction?.Invoke(NCVehicleDriverAction.GearDown);

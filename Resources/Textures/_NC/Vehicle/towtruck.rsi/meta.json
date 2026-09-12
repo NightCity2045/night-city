@@ -1,15 +1,73 @@
 {
     "version": 1,
     "license": "CC0-1.0",
-    "copyright": "AI-generated using OpenAI ImageGen for Astro's player vehicle implementation, 2026. Original fictional recovery truck, pixel-size export with cleaned alpha. No third-party source image.",
+    "copyright": "Original fictional Night City recovery truck, AI-assisted pixel artwork by Astro, 2026. No third-party texture was copied.",
     "size": {
-        "x": 256,
-        "y": 256
+        "x": 128,
+        "y": 128
     },
     "states": [
         {
+            "name": "shadow",
+            "directions": 8
+        },
+        {
             "name": "body",
-            "directions": 4
+            "directions": 8
+        },
+        {
+            "name": "damage-light",
+            "directions": 8
+        },
+        {
+            "name": "damage-heavy",
+            "directions": 8
+        },
+        {
+            "name": "headlights",
+            "directions": 8
+        },
+        {
+            "name": "brakes",
+            "directions": 8
+        },
+        {
+            "name": "reverse",
+            "directions": 8
+        },
+        {
+            "name": "hood-open",
+            "directions": 8
+        },
+        {
+            "name": "wheel-damage",
+            "directions": 8
+        },
+        {
+            "name": "tuning-street",
+            "directions": 8
+        },
+        {
+            "name": "smoke",
+            "delays": [
+                [
+                    0.18,
+                    0.18,
+                    0.18,
+                    0.18
+                ]
+            ]
+        },
+        {
+            "name": "fire",
+            "delays": [
+                [
+                    0.12,
+                    0.12,
+                    0.12,
+                    0.12
+                ]
+            ]
         }
     ]
 }

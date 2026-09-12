@@ -40,6 +40,7 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
             return;
         _window = this.CreateWindow<NCVehicleDriverWindow>();
         _window.DriverAction += SendAction;
+        _window.BeltRequested += SendBelt;
         _window.InfrastructureAction += travel =>
         {
             if (EntMan.TryGetComponent<NCVehicleDriveComponent>(Owner, out var drive))
@@ -88,6 +89,18 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
             _ => drive.Gear == 0 ? "nc-vehicle-shift-neutral" : "nc-vehicle-shift-engaged",
         });
         _window.LaunchText = Loc.GetString(tuning.Automatic ? "nc-vehicle-launch-automatic" : "nc-vehicle-launch-manual");
+        var belted = drive.Driver is { } seated && EntMan.TryGetComponent<NCVehicleOccupantComponent>(seated, out var occupant) && occupant.Belted;
+        _window.SafetyText = Loc.GetString(belted ? "nc-vehicle-seatbelt-fastened" : "nc-vehicle-seatbelt-unfastened");
+        _window.SeatbeltText = Loc.GetString(belted ? "nc-vehicle-seatbelt-unfasten" : "nc-vehicle-seatbelt-fasten");
+        _window.SetSafetyVisual(belted);
+        _window.DrivingHintText = Loc.GetString(!drive.EngineRunning || drive.Gear <= 0 || tuning.Automatic
+            ? "nc-vehicle-shift-advice-none"
+            : drive.EngineRpm >= tuning.RedlineRpm * tuning.ShiftAdviceUpFraction && drive.Gear < tuning.GearRatios.Length - 2
+                ? "nc-vehicle-shift-advice-up"
+                : drive.EngineRpm < tuning.IdleRpm * tuning.ShiftAdviceDownRpmFactor && drive.Gear > 1
+                    ? "nc-vehicle-shift-advice-down" : "nc-vehicle-shift-advice-ready");
+        _window.GripStatusText = Loc.GetString(drive.LateralSlip >= tuning.SlipWarning ? "nc-vehicle-grip-sliding" :
+            drive.LongitudinalSlip >= tuning.SlipWarning ? "nc-vehicle-grip-wheelspin" : "nc-vehicle-grip-stable");
         if (EntMan.TryGetComponent<NCVehicleAccessoriesComponent>(Owner, out var accessories))
             _window.AccessoriesText = Loc.GetString("nc-vehicle-accessories",
                 ("cranking", Loc.GetString(drive.Cranking ? "nc-vehicle-switch-on" : "nc-vehicle-switch-off")),
@@ -180,6 +193,12 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
             else
                 SendPredictedMessage(new NCVehicleDriverActionMessage(drive.Authority, action));
         }
+    }
+
+    private void SendBelt()
+    {
+        if (EntMan.TryGetComponent<NCVehicleDriveComponent>(Owner, out var drive))
+            SendMessage(new NCVehicleBeltMessage(drive.Authority));
     }
 
     protected override void Dispose(bool disposing)

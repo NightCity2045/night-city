@@ -8,7 +8,7 @@ using Robust.Shared.GameStates;
 namespace Content.Shared._NC.Vehicle.Components;
 
 /// <summary>Replayable switches and windshield condition; sound entities remain server-owned.</summary>
-[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(raiseAfterAutoHandleState: true)]
 public sealed partial class NCVehicleAccessoriesComponent : Component
 {
     [AutoNetworkedField] public bool Headlights;

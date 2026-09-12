@@ -38,6 +38,7 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
         SubscribeLocalEvent<NCVehicleDriveComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<NCVehicleDriveComponent, GetVerbsEvent<AlternativeVerb>>(OnVerbs);
         SubscribeLocalEvent<NCVehicleDriveComponent, NCVehicleExitMessage>(OnExit);
+        SubscribeLocalEvent<NCVehicleDriveComponent, NCVehicleBeltMessage>(OnBelt);
         SubscribeLocalEvent<NCVehicleDriveComponent, EntRemovedFromContainerMessage>(OnRemoved);
         SubscribeLocalEvent<NCVehicleDriveComponent, EntityTerminatingEvent>(OnTerminating);
         SubscribeLocalEvent<NCVehicleDriveComponent, NCVehicleDriveShutdownEvent>(OnShutdown);
@@ -177,6 +178,12 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
     {
         if (args.Authority == ent.Comp.Authority)
             TryExit(ent, args.Actor);
+    }
+
+    private void OnBelt(Entity<NCVehicleDriveComponent> ent, ref NCVehicleBeltMessage args)
+    {
+        if (args.Authority == ent.Comp.Authority && ent.Comp.Driver == args.Actor)
+            TryToggleBelt(ent, args.Actor);
     }
 
     private void OnRemoved(Entity<NCVehicleDriveComponent> ent, ref EntRemovedFromContainerMessage args)

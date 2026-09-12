@@ -2232,7 +2232,45 @@
     offset: 0, 3.5
   - type: Sprite
     sprite: _NC/Vehicle/towtruck.rsi
-    scale: 1, 1
+    layers:
+    - state: shadow
+      map: ["enum.NCVehicleVisualLayers.Shadow"]
+    - state: body
+      map: ["enum.NCVehicleVisualLayers.Body"]
+    - state: damage-light
+      map: ["enum.NCVehicleVisualLayers.DamageLight"]
+      visible: false
+    - state: damage-heavy
+      map: ["enum.NCVehicleVisualLayers.DamageHeavy"]
+      visible: false
+    - state: tuning-street
+      map: ["enum.NCVehicleVisualLayers.Tuning"]
+      visible: false
+    - state: hood-open
+      map: ["enum.NCVehicleVisualLayers.Hood"]
+      visible: false
+    - state: wheel-damage
+      map: ["enum.NCVehicleVisualLayers.Wheels"]
+      visible: false
+    - state: headlights
+      map: ["enum.NCVehicleVisualLayers.Headlights"]
+      visible: false
+      shader: unshaded
+    - state: brakes
+      map: ["enum.NCVehicleVisualLayers.Brakes"]
+      visible: false
+      shader: unshaded
+    - state: reverse
+      map: ["enum.NCVehicleVisualLayers.Reverse"]
+      visible: false
+      shader: unshaded
+    - state: smoke
+      map: ["enum.NCVehicleVisualLayers.Smoke"]
+      visible: false
+    # The shared 128px art density is doubled for the eight-metre recovery chassis.
+    rotation: 180
+    noRot: false
+    scale: 2, 2
   - type: Fixtures
     fixtures:
       chassis:

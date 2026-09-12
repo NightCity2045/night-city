@@ -93,6 +93,12 @@
   inputTimeout: 0.5
   inputInterval: 0.05
   keyboardSteeringRate: 2
+  cameraLookAheadStartSpeed: 4
+  cameraLookAheadMaximumSpeed: 18
+  cameraLookAheadMaximum: 2.5
+  shiftAdviceUpFraction: 0.78
+  shiftAdviceDownRpmFactor: 1.4
+  slipWarning: 0.35
   exitSpeed: 1
   exitOffset: 1.2, 0
   exitClearance: 0.35

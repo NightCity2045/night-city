@@ -127,6 +127,8 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             for (var i = 0; i < tuning.Wheels.Count; i++)
                 surfaces[i] = SurfaceFriction(uid, tuning.Wheels[i].Position, body);
             var fuelBeforeStep = drive.Fuel;
+            drive.LongitudinalSlip = 0;
+            drive.LateralSlip = 0;
             var acceleration = (-rotation).RotateVec((body.LinearVelocity - drive.PreviousVelocity) / dt);
             var rollover = new NCVehicleRolloverRiskEvent(acceleration.X, body.LinearVelocity.Length());
             RaiseLocalEvent(uid, ref rollover);
@@ -294,6 +296,9 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             var coupledOmega = NCVehicleDriveMath.WheelSpeed(previousOmega, longitudinal,
                 wheel.Radius, wheel.Inertia, torque, braking, tuning.LongitudinalStiffness, tuning.LowSpeed, dt);
             var slip = (coupledOmega * wheel.Radius - longitudinal) / Math.Max(Math.Abs(longitudinal), tuning.LowSpeed);
+            drive.LongitudinalSlip = Math.Max(drive.LongitudinalSlip, Math.Abs(slip));
+            drive.LateralSlip = Math.Max(drive.LateralSlip,
+                Math.Abs(lateral) / Math.Max(Math.Abs(longitudinal), tuning.LowSpeed));
             var force = NCVehicleDriveMath.LimitGrip(new Vector2(
                 -lateral * tuning.LateralStiffness,
                 slip * tuning.LongitudinalStiffness), grip);
@@ -372,6 +377,12 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             !NCVehicleDriveMath.Nonnegative(value.FuelLoadRate) ||
             !NCVehicleDriveMath.Nonnegative(value.ExitSpeed) ||
             !NCVehicleDriveMath.Nonnegative(value.KeyboardSteeringRate) ||
+            !NCVehicleDriveMath.Nonnegative(value.CameraLookAheadStartSpeed) ||
+            !NCVehicleDriveMath.Nonnegative(value.CameraLookAheadMaximumSpeed) ||
+            !NCVehicleDriveMath.Nonnegative(value.CameraLookAheadMaximum) ||
+            !NCVehicleDriveMath.Nonnegative(value.ShiftAdviceUpFraction) ||
+            !NCVehicleDriveMath.Nonnegative(value.ShiftAdviceDownRpmFactor) ||
+            !NCVehicleDriveMath.Nonnegative(value.SlipWarning) ||
             !NCVehicleDriveMath.Nonnegative(value.ShiftClutchThreshold) ||
             !NCVehicleDriveMath.Nonnegative(value.ShiftRpmTolerance) ||
             !NCVehicleDriveMath.Nonnegative(value.MisshiftWear) ||
@@ -388,7 +399,9 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             !NCVehicleDriveMath.Nonnegative(value.TractionSlip) ||
             !NCVehicleDriveMath.Nonnegative(value.AntiLockSlip))
             return false;
-        if (value.AntiLockSlip >= 1 || value.HighRpmWearStart is < 0 or >= 1 || (value.Automatic && value.Sequential) || value.AutomaticUpshiftRpm <= value.AutomaticDownshiftRpm ||
+        if (value.AntiLockSlip >= 1 || value.HighRpmWearStart is < 0 or >= 1 || value.ShiftAdviceUpFraction > 1 ||
+            value.CameraLookAheadMaximumSpeed <= value.CameraLookAheadStartSpeed ||
+            (value.Automatic && value.Sequential) || value.AutomaticUpshiftRpm <= value.AutomaticDownshiftRpm ||
             value.ConverterStallRatio < 1 || value.ManualPattern.Length < 2 || value.ManualPattern.Length % 2 != 0 || value.ShiftClutchThreshold > 1 ||
             value.Wheels.Count is 0 or > MaximumWheelCount || value.MaximumSubsteps is <= 0 or > 64 || value.TorqueCurve.Count == 0 ||
             value.GearRatios.Length < 3 || value.GearRatios[0] != 0 || value.GearRatios[^1] >= 0 ||

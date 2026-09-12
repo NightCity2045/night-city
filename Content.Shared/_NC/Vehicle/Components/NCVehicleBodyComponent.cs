@@ -14,7 +14,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Shared._NC.Vehicle.Components;
 
 /// <summary>Independent crumple zones; there is deliberately no combined vehicle hit-point pool.</summary>
-[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(raiseAfterAutoHandleState: true)]
 public sealed partial class NCVehicleBodyComponent : Component
 {
     [DataField(required: true)] public Dictionary<string, NCVehicleBodyZone> Zones = new();
@@ -25,6 +25,10 @@ public sealed partial class NCVehicleBodyComponent : Component
     [DataField] public float PedestrianTransfer = 1;
     [DataField] public float AirbagDeltaV = 7;
     [DataField] public float AirbagTransfer = 0.65f;
+    [DataField] public float ModerateImpactDeltaV = 8;
+    [DataField] public float SevereImpactDeltaV = 15;
+    [DataField] public float CatastrophicDeltaV = 15;
+    [DataField] public float MaximumModuleDamagePerImpact = 0.45f;
     [DataField] public float RolloverAcceleration = 14;
     [DataField] public float RolloverMinimumSpeed = 5;
     [DataField] public float FireIgnitionTemperature = 423.15f;

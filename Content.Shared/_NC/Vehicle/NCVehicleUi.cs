@@ -46,6 +46,12 @@ public sealed class NCVehicleExitMessage(uint authority) : BoundUserInterfaceMes
     public readonly uint Authority = authority;
 }
 
+[Serializable, NetSerializable]
+public sealed class NCVehicleBeltMessage(uint authority) : BoundUserInterfaceMessage
+{
+    public readonly uint Authority = authority;
+}
+
 /// <summary>Shared lifecycle notification lets the authoritative seat owner evacuate before removal.</summary>
 [ByRefEvent]
 public readonly record struct NCVehicleDriveShutdownEvent;

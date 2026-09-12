@@ -16,6 +16,7 @@ using Content.Server.Atmos.EntitySystems;
 using Content.Shared.Damage;
 using Content.Shared.FixedPoint;
 using Content.Shared.Examine;
+using Content.Shared.Popups;
 using Robust.Shared.Containers;
 using Robust.Shared.Physics.Events;
 using Robust.Shared.Timing;
@@ -32,6 +33,7 @@ public sealed partial class NCVehicleDamageSystem : EntitySystem
     [Dependency] private FlammableSystem _flammable = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCVehicleFootprintSystem _footprint = default!;
+    [Dependency] private SharedPopupSystem _popup = default!;
 
     public override void Initialize()
     {
@@ -208,8 +210,11 @@ public sealed partial class NCVehicleDamageSystem : EntitySystem
             var count = definition.ProtectedSlots.Count;
             foreach (var slot in definition.ProtectedSlots)
                 if (assembly.Installed.TryGetValue(slot, out var part))
-                    _assembly.TrySetPart(uid, slot, part with
-                    { Condition = Math.Max(0, part.Condition - residual / definition.ModuleEnergyCapacity / Math.Max(1, count)) });
+                {
+                    var loss = NCVehicleDamageMath.ModuleConditionLoss(residual, definition.ModuleEnergyCapacity,
+                        Math.Max(1, count), deltaV, body.CatastrophicDeltaV, body.MaximumModuleDamagePerImpact);
+                    _assembly.TrySetPart(uid, slot, part with { Condition = Math.Max(0, part.Condition - loss) });
+                }
         }
         if (TryComp<ContainerManagerComponent>(uid, out var seats))
         {
@@ -230,8 +235,14 @@ public sealed partial class NCVehicleDamageSystem : EntitySystem
             foreach (var container in seats.Containers.Values)
                 foreach (var occupant in container.ContainedEntities)
                     if (TryComp<NCVehicleOccupantComponent>(occupant, out var seat) && seat.Vehicle == uid)
+                    {
+                        if (deltaV > 0)
+                            _popup.PopupEntity(Loc.GetString(deltaV >= body.SevereImpactDeltaV
+                                ? "nc-vehicle-impact-severe" : deltaV >= body.ModerateImpactDeltaV
+                                    ? "nc-vehicle-impact-moderate" : "nc-vehicle-impact-light"), uid, occupant);
                         ApplyInjury(occupant, body, seat.Belted, deltaV * (airbag && seat.Belted ? body.AirbagTransfer : 1),
                             direction, resolution, ++sequence);
+                    }
         }
         Dirty(uid, body);
         return true;
@@ -249,10 +260,11 @@ public sealed partial class NCVehicleDamageSystem : EntitySystem
     private void ApplyInjury(EntityUid occupant, NCVehicleBodyComponent body, bool belted, float deltaV,
         Vector2 direction, NCActionResolutionId resolution, uint sequence)
     {
-        var value = Math.Max(0, deltaV * (belted ? body.BeltTransfer : body.UnbeltedTransfer) - body.InjuryThreshold) * body.TraumaPerDeltaV;
+        var value = NCVehicleDamageMath.OccupantTrauma(deltaV, belted ? body.BeltTransfer : body.UnbeltedTransfer,
+            body.InjuryThreshold, body.TraumaPerDeltaV, body.MaximumTrauma);
         if (!float.IsFinite(value) || value <= 0 || !float.IsFinite(body.MaximumTrauma) || body.MaximumTrauma <= 0)
             return;
-        var trauma = FixedPoint2.New(Math.Min(value, body.MaximumTrauma));
+        var trauma = FixedPoint2.New(value);
         var request = new NCCombatTraumaRequest(resolution, 0, sequence, occupant, null, null, null,
             body.InjuryZone, body.InjuryRegion, body.TraumaProfile, new DamageSpecifier(), trauma,
             FixedPoint2.Zero, trauma, FixedPoint2.Zero, Vector2.Zero, direction, NCTraumaFlags.None, 0, _timing.CurTime);

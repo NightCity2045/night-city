@@ -1,0 +1,53 @@
+# Night City vehicle art guide
+
+## Camera and scale
+
+World vehicles use a high 3/4 camera with eight authored directions. This keeps the roof, hood, trunk or cargo deck visible while preserving the footprint needed for driving and collision judgement. Every frame is 128×128 pixels. Passenger cars normally occupy about 102 pixels along their longest axis; larger vehicles retain the same pixel density and use prototype scale to match their physical chassis.
+
+RobustToolbox reads directional frames in this order: south, north, east, west, southeast, southwest, northeast, northwest. Source sheets are converted by `Tools/_NC/VehicleArt/build_vehicle_rsi.py`; artists should not reorder production PNGs by hand.
+
+## Visual language
+
+- Shapes should have clear silhouettes at normal gameplay zoom: reinforced arches, exposed utility hardware, armored bumpers, ducting and repaired panels.
+- Palette values stay compressed and slightly dirty. Warm sodium orange, warning red and cold cyan provide small emissive accents against dark metal.
+- Surface wear belongs in the base body only when it is permanent character. Fresh collision damage belongs in damage layers so gameplay state stays readable.
+- Lighting is painted for the common high-angle view. Avoid photographic reflections and thin antialiased details that disappear after pixel reduction.
+
+## Required RSI states
+
+| State | Purpose | Runtime source |
+| --- | --- | --- |
+| `shadow` | Ground contact and readable footprint | Always visible |
+| `body` | Undamaged base vehicle | Always visible |
+| `damage-light` | Scratches and minor dents | Body deformation threshold |
+| `damage-heavy` | Crushed and exposed panels | Body deformation threshold |
+| `headlights` | Front lamps | Headlight switch and battery |
+| `brakes` | Rear brake lamps | Brake input and battery |
+| `reverse` | White reversing lamps | Reverse gear and battery |
+| `hood-open` | Open service bay | Workshop hood state |
+| `wheel-damage` | Failed or badly worn wheel set | Grip function and wheel wear |
+| `tuning-street` | Visible street tuning package | Vehicle tuning state |
+| `smoke` | Overheated or heavily worn engine | Condition system |
+| `fire` | Source art for vehicle fire effects | Existing SS14 fire visual remains authoritative |
+
+The client visual system reacts to replicated component states and caches the resulting layer mask. It does not scan vehicles every frame.
+
+## Fleet assets
+
+The production library currently contains the Toyota Supra A80, a recovery truck, and fan-art interpretations of Quadra Turbo-R, Thorton Galena, Archer Quartz, Quadra Type-66, Mizutani Shion, Thorton Colby, Villefort Alvarado, Makigai MaiMai and Rayfield Caliburn. Each RSI has the same twelve states and eight directional frames where direction applies.
+
+The Cyberpunk vehicle designs are original AI-assisted fan-art renditions. No texture from a CD PROJEKT RED game was copied. Their RSI metadata records `LicenseRef-CDPR-Fan-Content`; use and distribution must follow the [CD PROJEKT RED Fan Content Guidelines](https://www.cdprojektred.com/en/fan-content). Source sheets are retained under `Docs/Design/SourceArt/Vehicle/` so production frames can be rebuilt consistently.
+
+## Build and validation
+
+Build one RSI from an approved transparent 4×2 source sheet with:
+
+```text
+python Tools/_NC/VehicleArt/build_vehicle_rsi.py SOURCE.png OUTPUT.rsi --copyright "..."
+```
+
+Run the repository RSI validator when its Python dependencies are installed. The dependency-free project check for this fleet (apart from Pillow, already used by the builder) is:
+
+```text
+python Tools/_NC/VehicleArt/validate_vehicle_rsi.py Resources/Textures/_NC/Vehicle/NAME.rsi
+```

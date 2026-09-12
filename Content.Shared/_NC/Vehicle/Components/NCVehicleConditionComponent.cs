@@ -7,7 +7,7 @@ using Robust.Shared.GameStates;
 namespace Content.Shared._NC.Vehicle.Components;
 
 /// <summary>Thermal reservoirs and electrical storage; all rates are prototype calibration.</summary>
-[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(raiseAfterAutoHandleState: true)]
 public sealed partial class NCVehicleConditionComponent : Component
 {
     [DataField, AutoNetworkedField] public float EngineTemperature;
