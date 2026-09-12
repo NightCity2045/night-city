@@ -2,11 +2,27 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+- type: ncVehicleSoundProfile
+  id: NCMizutaniShionSound
+  startup: { path: /Audio/_NC/Vehicle/mizutani_shion/startup.wav }
+  shutdown: { path: /Audio/_NC/Vehicle/mizutani_shion/shutdown.wav }
+  lowLoop: { path: /Audio/_NC/Vehicle/mizutani_shion/engine_low_loop.wav }
+  midLoop: { path: /Audio/_NC/Vehicle/mizutani_shion/engine_mid_loop.wav }
+  highLoop: { path: /Audio/_NC/Vehicle/mizutani_shion/engine_high_loop.wav }
+  forcedInductionLoop: { path: /Audio/_NC/Vehicle/mizutani_shion/turbo_loop.wav }
+  throttleRelease: { path: /Audio/_NC/Vehicle/mizutani_shion/turbo_flutter.wav }
+  backfire: { path: /Audio/_NC/Vehicle/mizutani_shion/backfire.wav }
+  shift: { path: /Audio/_NC/Vehicle/mizutani_shion/shift.wav }
+  tyreSlipLoop: { path: /Audio/_NC/Vehicle/mizutani_shion/tyre_skid_loop.wav }
+  horn: { path: /Audio/_NC/Vehicle/mizutani_shion/horn.wav }
+
 - type: entity
   parent: NCToyotaSupra1996
   id: NCVehicleMizutaniShion2045
   name: Mizutani Shion
   description: A sharp Japanese sports coupe tuned for fast city roads.
   components:
+  - type: NCVehicleAccessories
+    soundProfile: NCMizutaniShionSound
   - type: Sprite
     sprite: _NC/Vehicle/mizutani_shion_2045.rsi

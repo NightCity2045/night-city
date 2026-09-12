@@ -2,11 +2,24 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+- type: ncVehicleSoundProfile
+  id: NCThortonGalenaSound
+  startup: { path: /Audio/_NC/Vehicle/thorton_galena/startup.wav }
+  shutdown: { path: /Audio/_NC/Vehicle/thorton_galena/shutdown.wav }
+  lowLoop: { path: /Audio/_NC/Vehicle/thorton_galena/engine_low_loop.wav }
+  midLoop: { path: /Audio/_NC/Vehicle/thorton_galena/engine_mid_loop.wav }
+  highLoop: { path: /Audio/_NC/Vehicle/thorton_galena/engine_high_loop.wav }
+  shift: { path: /Audio/_NC/Vehicle/thorton_galena/shift.wav }
+  tyreSlipLoop: { path: /Audio/_NC/Vehicle/thorton_galena/tyre_skid_loop.wav }
+  horn: { path: /Audio/_NC/Vehicle/thorton_galena/horn.wav }
+
 - type: entity
   parent: NCToyotaSupra1996
   id: NCVehicleThortonGalena2045
   name: Thorton Galena
   description: A compact utility car whose patched body has survived decades of scarcity.
   components:
+  - type: NCVehicleAccessories
+    soundProfile: NCThortonGalenaSound
   - type: Sprite
     sprite: _NC/Vehicle/thorton_galena_2045.rsi

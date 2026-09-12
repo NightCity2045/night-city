@@ -7,6 +7,7 @@ using Content.Shared._NC.Vehicle.Components;
 using Content.Shared.ActionBlocker;
 using Content.Shared.Light;
 using Robust.Shared.Audio.Systems;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
 namespace Content.Shared._NC.Vehicle;
@@ -18,6 +19,7 @@ public sealed partial class NCVehicleAccessorySystem : EntitySystem
     [Dependency] private SharedPointLightSystem _lights = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private ActionBlockerSystem _blocker = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
 
     public override void Initialize()
     {
@@ -45,7 +47,8 @@ public sealed partial class NCVehicleAccessorySystem : EntitySystem
                     NCVehiclePerformanceCompiler.Get(drive.AssemblyFunctions, NCVehicleFunction.Horn) <= 0)
                     return false;
                 state.NextHorn = _timing.CurTime + TimeSpan.FromSeconds(state.HornCooldown);
-                _audio.PlayPredicted(state.HornSound, uid, user);
+                if (_prototypes.TryIndex(state.SoundProfile, out var hornProfile))
+                    _audio.PlayPredicted(hornProfile.Horn, uid, user);
                 break;
             case NCVehicleDriverAction.Wash:
                 if (state.WasherCapacity <= 0 || state.WasherVolume <= 0 ||
@@ -67,8 +70,9 @@ public sealed partial class NCVehicleAccessorySystem : EntitySystem
 
     public void PlayStartup(EntityUid uid, EntityUid user)
     {
-        if (TryComp<NCVehicleAccessoriesComponent>(uid, out var state))
-            _audio.PlayPredicted(state.StartupSound, uid, user);
+        if (TryComp<NCVehicleAccessoriesComponent>(uid, out var state) &&
+            _prototypes.TryIndex(state.SoundProfile, out var profile))
+            _audio.PlayPredicted(profile.Startup, uid, user);
     }
 
     private void OnMaintenance(Entity<NCVehicleAccessoriesComponent> ent, ref NCVehicleMaintenanceEvent args)

@@ -2,11 +2,27 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+- type: ncVehicleSoundProfile
+  id: NCQuadraTurboRSound
+  startup: { path: /Audio/_NC/Vehicle/quadra_turbo_r/startup.wav }
+  shutdown: { path: /Audio/_NC/Vehicle/quadra_turbo_r/shutdown.wav }
+  lowLoop: { path: /Audio/_NC/Vehicle/quadra_turbo_r/engine_low_loop.wav }
+  midLoop: { path: /Audio/_NC/Vehicle/quadra_turbo_r/engine_mid_loop.wav }
+  highLoop: { path: /Audio/_NC/Vehicle/quadra_turbo_r/engine_high_loop.wav }
+  forcedInductionLoop: { path: /Audio/_NC/Vehicle/quadra_turbo_r/turbo_loop.wav }
+  throttleRelease: { path: /Audio/_NC/Vehicle/quadra_turbo_r/turbo_flutter.wav }
+  backfire: { path: /Audio/_NC/Vehicle/quadra_turbo_r/backfire.wav }
+  shift: { path: /Audio/_NC/Vehicle/quadra_turbo_r/shift.wav }
+  tyreSlipLoop: { path: /Audio/_NC/Vehicle/quadra_turbo_r/tyre_skid_loop.wav }
+  horn: { path: /Audio/_NC/Vehicle/quadra_turbo_r/horn.wav }
+
 - type: entity
   parent: NCToyotaSupra1996
   id: NCVehicleQuadraTurboR2045
   name: Quadra Turbo-R
   description: A low, aggressive sports coupe rebuilt for the streets of Night City.
   components:
+  - type: NCVehicleAccessories
+    soundProfile: NCQuadraTurboRSound
   - type: Sprite
     sprite: _NC/Vehicle/quadra_turbo_r_2045.rsi

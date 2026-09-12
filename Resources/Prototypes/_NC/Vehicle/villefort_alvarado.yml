@@ -2,11 +2,24 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+- type: ncVehicleSoundProfile
+  id: NCVillefortAlvaradoSound
+  startup: { path: /Audio/_NC/Vehicle/villefort_alvarado/startup.wav }
+  shutdown: { path: /Audio/_NC/Vehicle/villefort_alvarado/shutdown.wav }
+  lowLoop: { path: /Audio/_NC/Vehicle/villefort_alvarado/engine_low_loop.wav }
+  midLoop: { path: /Audio/_NC/Vehicle/villefort_alvarado/engine_mid_loop.wav }
+  highLoop: { path: /Audio/_NC/Vehicle/villefort_alvarado/engine_high_loop.wav }
+  shift: { path: /Audio/_NC/Vehicle/villefort_alvarado/shift.wav }
+  tyreSlipLoop: { path: /Audio/_NC/Vehicle/villefort_alvarado/tyre_skid_loop.wav }
+  horn: { path: /Audio/_NC/Vehicle/villefort_alvarado/horn.wav }
+
 - type: entity
   parent: NCToyotaSupra1996
   id: NCVehicleVillefortAlvarado2045
   name: Villefort Alvarado
   description: A long luxury sedan with imposing chrome and armored proportions.
   components:
+  - type: NCVehicleAccessories
+    soundProfile: NCVillefortAlvaradoSound
   - type: Sprite
     sprite: _NC/Vehicle/villefort_alvarado_2045.rsi

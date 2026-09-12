@@ -2,11 +2,24 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+- type: ncVehicleSoundProfile
+  id: NCMakigaiMaiMaiSound
+  startup: { path: /Audio/_NC/Vehicle/makigai_maimai/startup.wav }
+  shutdown: { path: /Audio/_NC/Vehicle/makigai_maimai/shutdown.wav }
+  lowLoop: { path: /Audio/_NC/Vehicle/makigai_maimai/engine_low_loop.wav }
+  midLoop: { path: /Audio/_NC/Vehicle/makigai_maimai/engine_mid_loop.wav }
+  highLoop: { path: /Audio/_NC/Vehicle/makigai_maimai/engine_high_loop.wav }
+  shift: { path: /Audio/_NC/Vehicle/makigai_maimai/shift.wav }
+  tyreSlipLoop: { path: /Audio/_NC/Vehicle/makigai_maimai/tyre_skid_loop.wav }
+  horn: { path: /Audio/_NC/Vehicle/makigai_maimai/horn.wav }
+
 - type: entity
   parent: NCToyotaSupra1996
   id: NCVehicleMakigaiMaiMai2045
   name: Makigai MaiMai
   description: A tiny city car built to squeeze through crowded Night City streets.
   components:
+  - type: NCVehicleAccessories
+    soundProfile: NCMakigaiMaiMaiSound
   - type: Sprite
     sprite: _NC/Vehicle/makigai_maimai_2045.rsi

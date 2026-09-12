@@ -2,11 +2,25 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+- type: ncVehicleSoundProfile
+  id: NCQuadraType66Sound
+  startup: { path: /Audio/_NC/Vehicle/quadra_type66/startup.wav }
+  shutdown: { path: /Audio/_NC/Vehicle/quadra_type66/shutdown.wav }
+  lowLoop: { path: /Audio/_NC/Vehicle/quadra_type66/engine_low_loop.wav }
+  midLoop: { path: /Audio/_NC/Vehicle/quadra_type66/engine_mid_loop.wav }
+  highLoop: { path: /Audio/_NC/Vehicle/quadra_type66/engine_high_loop.wav }
+  backfire: { path: /Audio/_NC/Vehicle/quadra_type66/backfire.wav }
+  shift: { path: /Audio/_NC/Vehicle/quadra_type66/shift.wav }
+  tyreSlipLoop: { path: /Audio/_NC/Vehicle/quadra_type66/tyre_skid_loop.wav }
+  horn: { path: /Audio/_NC/Vehicle/quadra_type66/horn.wav }
+
 - type: entity
   parent: NCToyotaSupra1996
   id: NCVehicleQuadraType662045
   name: Quadra Type-66
   description: Heavy American muscle wrapped in angular armor and exposed cooling hardware.
   components:
+  - type: NCVehicleAccessories
+    soundProfile: NCQuadraType66Sound
   - type: Sprite
     sprite: _NC/Vehicle/quadra_type66_2045.rsi
