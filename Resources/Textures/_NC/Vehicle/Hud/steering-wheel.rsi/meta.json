@@ -1,0 +1,35 @@
+{
+    "version": 1,
+    "license": "CC-BY-NC-SA-4.0",
+    "copyright": "Original AI-assisted HUD artwork commissioned by Astro, 2026.",
+    "size": {
+        "x": 360,
+        "y": 360
+    },
+    "states": [
+        {
+            "name": "wheel",
+            "delays": [
+                [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ]
+            ]
+        }
+    ]
+}

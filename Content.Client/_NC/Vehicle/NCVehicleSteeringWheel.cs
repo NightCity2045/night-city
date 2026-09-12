@@ -5,19 +5,32 @@
 using System.Numerics;
 using Content.Shared._NC.Vehicle;
 using Robust.Client.Graphics;
+using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Input;
+using Robust.Shared.Graphics.RSI;
+using Robust.Shared.IoC;
 
 namespace Content.Client._NC.Vehicle;
 
-/// <summary>Circular UI drag supports multiple turns within the panel, using only public Robust UI APIs.</summary>
+/// <summary>Circular mouse steering with a rendered wheel that follows the actual steering angle.</summary>
 public sealed class NCVehicleSteeringWheel : BaseButton
 {
+    private const int WheelFrames = 17;
+    private readonly RSI.State _wheel;
+    private Vector2? _lastDirection;
+
     public float Value { get; set; }
     public float MaximumAngle { get; set; } = MathF.Tau;
     public bool Held { get; private set; }
-    private Vector2? _lastDirection;
+
+    public NCVehicleSteeringWheel()
+    {
+        var cache = IoCManager.Resolve<IResourceCache>();
+        var rsi = cache.GetResource<RSIResource>("/Textures/_NC/Vehicle/Hud/steering-wheel.rsi").RSI;
+        _wheel = rsi["wheel"];
+    }
 
     protected override void KeyBindDown(GUIBoundKeyEventArgs args)
     {
@@ -26,9 +39,11 @@ public sealed class NCVehicleSteeringWheel : BaseButton
             ReleaseGrip();
             return;
         }
+
         base.KeyBindDown(args);
         if (args.Function != EngineKeyFunctions.UIClick)
             return;
+
         Held = true;
         _lastDirection = Direction(args.RelativePosition);
         args.Handle();
@@ -61,10 +76,12 @@ public sealed class NCVehicleSteeringWheel : BaseButton
         base.MouseMove(args);
         if (!Held)
             return;
+
         var next = Direction(args.RelativePosition);
         if (_lastDirection is { } previous && next is { } direction && MaximumAngle > 0)
             Value = Math.Clamp(Value - NCVehicleDriveMath.WheelDragAngle(previous, direction) / MaximumAngle, -1, 1);
-        // Passing through the hub releases the angular reference; it must not cause a half-turn jump.
+
+        // Crossing the hub releases the angular reference and avoids a half-turn jump.
         _lastDirection = next;
         args.Handle();
     }
@@ -77,17 +94,28 @@ public sealed class NCVehicleSteeringWheel : BaseButton
 
     protected override void Draw(DrawingHandleScreen handle)
     {
-        var center = (Vector2) PixelSize / 2;
-        var radius = Math.Min(PixelSize.X, PixelSize.Y) * 0.43f;
-        handle.DrawCircle(center, radius, Held ? Color.FromHex("#ddad55") : Color.FromHex("#8796a2"));
-        handle.DrawCircle(center, radius - 7 * UIScale, Color.FromHex("#172027"));
+        var size = (Vector2) PixelSize;
+        var side = Math.Min(size.X, size.Y);
+        var origin = (size - new Vector2(side)) / 2;
+        var frame = Math.Clamp((int) MathF.Round((Value + 1) * 0.5f * (WheelFrames - 1)), 0, WheelFrames - 1);
+        handle.DrawTextureRect(_wheel.GetFrame(RsiDirection.South, frame),
+            UIBox2.FromDimensions(origin, new Vector2(side)), Held ? Color.FromHex("#fff0c7") : Color.White);
+
+        var center = size / 2;
+        var radius = side * 0.31f;
         var angle = -Value * MaximumAngle;
+        var spokeColor = Held ? Color.FromHex("#e9b958") : Color.FromHex("#7f8f98");
         for (var i = 0; i < 3; i++)
         {
             var spoke = angle + i * MathF.Tau / 3 - MathF.PI / 2;
-            handle.DrawLine(center, center + new Vector2(MathF.Cos(spoke), MathF.Sin(spoke)) * radius,
-                i == 0 ? Color.FromHex("#f3c66b") : Color.FromHex("#8796a2"));
+            var direction = new Vector2(MathF.Cos(spoke), MathF.Sin(spoke));
+            var perpendicular = new Vector2(-direction.Y, direction.X) * 2.5f * UIScale;
+            var end = center + direction * radius;
+            handle.DrawLine(center - perpendicular, end - perpendicular, Color.FromHex("#172027"));
+            handle.DrawLine(center + perpendicular, end + perpendicular, Color.FromHex("#172027"));
+            handle.DrawLine(center, end, spokeColor);
         }
-        handle.DrawCircle(center, 12 * UIScale, Color.FromHex("#394c5c"));
+        handle.DrawCircle(center, side * 0.09f, Color.FromHex("#12191d"));
+        handle.DrawCircle(center, side * 0.055f, Color.FromHex("#15bfca"));
     }
 }

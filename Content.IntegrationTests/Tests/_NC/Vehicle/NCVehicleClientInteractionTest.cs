@@ -56,7 +56,7 @@ public sealed class NCVehicleClientInteractionTest : InteractionTest
             await RunTicks(5);
             if (registered)
             {
-                await ClickControl<NCVehicleDriverWindow>("Ignition");
+                await ClickControl(GetControlFromField<Button>("Ignition", GetDriverHud()));
                 await RunSeconds(1);
                 await Server.WaitAssertion(() =>
                 {
@@ -66,13 +66,13 @@ public sealed class NCVehicleClientInteractionTest : InteractionTest
                     Assert.That(reason, Is.EqualTo((LocId) "nc-vehicle-start-key"));
                 });
                 await Client.WaitAssertion(() => Assert.That(
-                    GetControlFromField<RichTextLabel>("EngineStatus", GetWindow<NCVehicleDriverWindow>()).Text,
+                    GetControlFromField<RichTextLabel>("EngineStatus", GetDriverHud()).Text,
                     Is.EqualTo(Client.ResolveDependency<ILocalizationManager>().GetString("nc-vehicle-start-key"))));
                 await Server.WaitAssertion(() => Assert.That(Server.System<SharedHandsSystem>().TryPickupAnyHand(SPlayer, key), Is.True));
                 await RunTicks(5);
             }
             // Exercise the actual button and predicted BUI delivery, rather than invoking the control system.
-            await ClickControl<NCVehicleDriverWindow>("Ignition");
+            await ClickControl(GetControlFromField<Button>("Ignition", GetDriverHud()));
             await RunSeconds(2);
             await Server.WaitAssertion(() =>
             {
@@ -166,8 +166,7 @@ public sealed class NCVehicleClientInteractionTest : InteractionTest
             Assert.That(CEntMan.GetComponent<PhysicsComponent>(clientCar).Predict, Is.True);
             Assert.That(CUiSys.IsUiOpen(clientCar, NCVehicleUiKey.Driver), Is.True);
         });
-        var window = GetWindow<NCVehicleDriverWindow>();
-        var wheel = GetControlFromField<NCVehicleSteeringWheel>("Steering", window);
+        var wheel = GetControlFromField<NCVehicleSteeringWheel>("Steering", GetDriverHud());
         var point = wheel.Size / 2 + new Vector2(40, 0);
         var screen = new ScreenCoordinates(wheel.GlobalPixelPosition + point * wheel.UIScale, wheel.Window!.Id);
         await Client.DoGuiEvent(wheel, new GUIBoundKeyEventArgs(EngineKeyFunctions.UIClick, BoundKeyState.Down,
@@ -194,5 +193,11 @@ public sealed class NCVehicleClientInteractionTest : InteractionTest
             Assert.That(CEntMan.GetComponent<NCVehicleDriveComponent>(clientCar).Driver, Is.Null);
             Assert.That(CUiSys.IsUiOpen(clientCar, NCVehicleUiKey.Driver), Is.False);
         });
+    }
+
+    private NCVehicleDriverHud GetDriverHud()
+    {
+        var root = Client.ResolveDependency<IUserInterfaceManager>().StateRoot;
+        return GetControlFromChildren<NCVehicleDriverHud>(root, true);
     }
 }
