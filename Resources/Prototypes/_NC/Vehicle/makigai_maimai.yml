@@ -116,6 +116,7 @@
 - type: ncVehicleChassis
   parent: NCVehicleDevelopmentSedan
   id: NCMakigaiMaiMaiChassis
+  workshop: NCMakigaiMaiMaiWorkshop
   manualHandling: NCMakigaiMaiMaiManualRwd
   automaticHandling: NCMakigaiMaiMaiAutomaticRwd
   allWheelHandling: NCMakigaiMaiMaiManualAwd
@@ -150,3 +151,79 @@
         - MobMask
         layer:
         - LargeMobLayer
+
+- type: ncVehicleWorkshop
+  parent: NCSupraWorkshop
+  id: NCMakigaiMaiMaiWorkshop
+  viewLayouts:
+    engine-bay:
+      scale: 0.78, 0.72
+      offset: 0.11, 0.14
+      accessPosition: 0, 1.05
+      accessRange: 2.6
+    cooling:
+      scale: 0.78, 0.72
+      offset: 0.11, 0.14
+      accessPosition: 0, 1.05
+      accessRange: 2.6
+    lubrication:
+      scale: 0.78, 0.72
+      offset: 0.11, 0.14
+      accessPosition: 0, 1.05
+      accessRange: 2.6
+    steering:
+      scale: 0.78, 0.72
+      offset: 0.11, 0.14
+      accessPosition: 0, 1.05
+      accessRange: 2.6
+    body:
+      scale: 0.78, 0.72
+      offset: 0.11, 0.14
+      accessPosition: 0, 1.05
+      accessRange: 2.6
+    fuel:
+      scale: 0.78, 0.72
+      offset: 0.11, 0.14
+      accessPosition: 0, -1.05
+      accessRange: 2.6
+    underbody:
+      scale: 0.78, 0.72
+      offset: 0.11, 0.14
+      accessPosition: -1.05, 0
+      accessRange: 2.6
+    cabin:
+      scale: 0.78, 0.72
+      offset: 0.11, 0.14
+      accessPosition: -1.05, 0
+      accessRange: 2.6
+    fl:
+      scale: 0.82, 0.82
+      offset: 0.09, 0.09
+      accessPosition: -1.05, 0.72
+      accessRange: 1.8
+    fr:
+      scale: 0.82, 0.82
+      offset: 0.09, 0.09
+      accessPosition: 1.05, 0.72
+      accessRange: 1.8
+    rl:
+      scale: 0.82, 0.82
+      offset: 0.09, 0.09
+      accessPosition: -1.05, -0.72
+      accessRange: 1.8
+    rr:
+      scale: 0.82, 0.82
+      offset: 0.09, 0.09
+      accessPosition: 1.05, -0.72
+      accessRange: 1.8
+  nodeLayouts:
+    battery:
+      offset: 0.48, 0.08
+    ecu:
+      offset: -0.5, 0.1
+    engine:
+      offset: 0.04, 0.04
+    radiator:
+      offset: 0, 0.08
+    fuel-tank:
+      offset: 0, -0.04

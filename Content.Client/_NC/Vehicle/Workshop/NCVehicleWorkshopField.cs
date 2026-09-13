@@ -102,10 +102,11 @@ public sealed partial class NCVehicleWorkshopField : Control
             return;
         var min = new Vector2(float.MaxValue);
         var max = new Vector2(float.MinValue);
-        foreach (var (_, node) in _nodes)
+        foreach (var (id, node) in _nodes)
         {
-            min = Vector2.Min(min, node.Position);
-            max = Vector2.Max(max, node.Position + node.Size);
+            var layout = NCVehicleWorkshopGeometry.Layout(_profile!, id, node);
+            min = Vector2.Min(min, layout.Position);
+            max = Vector2.Max(max, layout.Position + layout.Size);
         }
         var side = Math.Clamp(Math.Max(max.X - min.X, max.Y - min.Y) + 0.12f, 0.2f, 1f);
         var center = (min + max) / 2;
@@ -123,11 +124,12 @@ public sealed partial class NCVehicleWorkshopField : Control
         return UIBox2.FromDimensions((PixelSize - new Vector2(size)) / 2 + _pan, new Vector2(size));
     }
 
-    private UIBox2 NodeBox(NCVehicleWorkshopNode node)
+    private UIBox2 NodeBox(string id, NCVehicleWorkshopNode node)
     {
         var canvas = Canvas();
-        return UIBox2.FromDimensions(canvas.TopLeft + (node.Position - _focusOrigin) / _focusSize * canvas.Size,
-            node.Size / _focusSize * canvas.Size);
+        var layout = NCVehicleWorkshopGeometry.Layout(_profile!, id, node);
+        return UIBox2.FromDimensions(canvas.TopLeft + (layout.Position - _focusOrigin) / _focusSize * canvas.Size,
+            layout.Size / _focusSize * canvas.Size);
     }
 
     private (string Node, string Point)? Pick(Vector2 pixel, out Vector2 normalized)
@@ -140,11 +142,11 @@ public sealed partial class NCVehicleWorkshopField : Control
         for (var i = _nodes.Length - 1; i >= 0; i--)
         {
             var (id, node) = _nodes[i];
-            if (!NCVehicleWorkshopGeometry.Contains(node, normalized))
+            if (!NCVehicleWorkshopGeometry.Contains(_profile!, id, node, normalized))
                 continue;
             if (Installed(node.Slot))
             {
-                var local = (normalized - node.Position) / node.Size;
+                var local = NCVehicleWorkshopGeometry.LocalPoint(_profile!, id, node, normalized);
                 foreach (var (pointId, point) in _chassis.Slots[node.Slot].WorkPoints)
                     if (Vector2.DistanceSquared(local, point.Position) <= point.Radius * point.Radius)
                         return (id, pointId);
@@ -153,7 +155,8 @@ public sealed partial class NCVehicleWorkshopField : Control
         }
         // Empty sockets are targets only where no installed foreground part obscures the cursor.
         for (var i = _nodes.Length - 1; i >= 0; i--)
-            if (Exposed(_nodes[i].Value) && NCVehicleWorkshopGeometry.Contains(_nodes[i].Value, normalized))
+            if (Exposed(_nodes[i].Value) &&
+                NCVehicleWorkshopGeometry.Contains(_profile!, _nodes[i].Key, _nodes[i].Value, normalized))
                 return (_nodes[i].Key, string.Empty);
         return null;
     }
@@ -238,7 +241,7 @@ public sealed partial class NCVehicleWorkshopField : Control
             if (!_textures.TryGetValue(id, out var texture) || !_parts.TryGetValue(node.Slot, out var part) ||
                 !part.Installed && !Exposed(node))
                 continue;
-            var box = NodeBox(node);
+            var box = NodeBox(id, node);
             var color = part.Installed ? Color.White : Color.FromHex("#63849340");
             handle.DrawTextureRect(texture, box, color);
             if (id == _hover || id == _selected)

@@ -40,4 +40,32 @@ public sealed class NCVehicleWorkshopGeometryTest
         chassis.Slots["b"].ExtractWith.Add("a");
         Assert.That(NCVehicleWorkshopGeometry.Valid(profile, chassis), Is.False);
     }
+
+    [Test]
+    public void ModelLayoutUsesTheSameCoordinatesForPickingAndWorkPoints()
+    {
+        var profile = new NCVehicleWorkshopPrototype();
+        profile.ViewLayouts["engine-bay"] = new()
+        {
+            Scale = new(.5f, .75f),
+            Offset = new(.2f, .1f),
+            AccessPosition = new(0, 2),
+        };
+        profile.NodeLayouts["engine"] = new() { Offset = new(.1f, 0), Scale = new(.5f, 1) };
+        var node = new NCVehicleWorkshopNode
+        {
+            View = "engine-bay",
+            Position = new(.2f, .2f),
+            Size = new(.4f, .4f),
+        };
+
+        var layout = NCVehicleWorkshopGeometry.Layout(profile, "engine", node);
+        Assert.That(layout.Position, Is.EqualTo(new Vector2(.4f, .25f)));
+        Assert.That(layout.Size, Is.EqualTo(new Vector2(.1f, .3f)));
+        Assert.That(NCVehicleWorkshopGeometry.Contains(profile, "engine", node, new(.45f, .4f)), Is.True);
+        Assert.That(NCVehicleWorkshopGeometry.LocalPoint(profile, "engine", node, new(.45f, .4f)),
+            Is.EqualTo(new Vector2(.5f, .5f)).Using<Vector2>((a, b) => (a - b).Length() < .0001f));
+        Assert.That(NCVehicleWorkshopGeometry.AccessPosition(profile, "engine-bay", new()),
+            Is.EqualTo(new Vector2(0, 2)));
+    }
 }

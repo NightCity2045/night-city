@@ -5,14 +5,19 @@
 using System.Numerics;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
+using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype.Array;
 using Robust.Shared.Utility;
 
 namespace Content.Shared._NC.Vehicle.Workshop;
 
 /// <summary>Authored workshop geometry; normalized coordinates are identical on client and authority.</summary>
 [Prototype("ncVehicleWorkshop")]
-public sealed partial class NCVehicleWorkshopPrototype : IPrototype
+public sealed partial class NCVehicleWorkshopPrototype : IPrototype, IInheritingPrototype
 {
+    [ParentDataField(typeof(AbstractPrototypeIdArraySerializer<NCVehicleWorkshopPrototype>))]
+    public string[]? Parents { get; private set; }
+    [AbstractDataField, NeverPushInheritance]
+    public bool Abstract { get; private set; }
     [IdDataField] public string ID { get; private set; } = default!;
     [DataField(required: true)] public Dictionary<string, NCVehicleWorkshopView> Views = new();
     [DataField(required: true)] public Dictionary<string, NCVehicleWorkshopNode> Nodes = new();
@@ -22,6 +27,26 @@ public sealed partial class NCVehicleWorkshopPrototype : IPrototype
     [DataField] public float TransferSeconds = 3;
     [DataField] public float InspectSeconds = 2;
     [DataField] public float RefreshSeconds = 0.5f;
+    /// <summary>Per-view body proportions and physical access points for a specific chassis.</summary>
+    [DataField] public Dictionary<string, NCVehicleWorkshopViewLayout> ViewLayouts = new();
+    /// <summary>Small model-specific corrections applied after the containing view layout.</summary>
+    [DataField] public Dictionary<string, NCVehicleWorkshopNodeLayout> NodeLayouts = new();
+}
+
+[DataDefinition]
+public sealed partial class NCVehicleWorkshopViewLayout
+{
+    [DataField] public Vector2 Scale = Vector2.One;
+    [DataField] public Vector2 Offset;
+    [DataField] public Vector2? AccessPosition;
+    [DataField] public float? AccessRange;
+}
+
+[DataDefinition]
+public sealed partial class NCVehicleWorkshopNodeLayout
+{
+    [DataField] public Vector2 Scale = Vector2.One;
+    [DataField] public Vector2 Offset;
 }
 
 [DataDefinition]

@@ -116,6 +116,7 @@
 - type: ncVehicleChassis
   parent: NCVehicleDevelopmentSedan
   id: NCThortonColbyChassis
+  workshop: NCThortonColbyWorkshop
   manualHandling: NCThortonColbyManualRwd
   automaticHandling: NCThortonColbyAutomaticRwd
   allWheelHandling: NCThortonColbyManualAwd
@@ -150,3 +151,79 @@
         - MobMask
         layer:
         - LargeMobLayer
+
+- type: ncVehicleWorkshop
+  parent: NCSupraWorkshop
+  id: NCThortonColbyWorkshop
+  viewLayouts:
+    engine-bay:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, 1.85
+      accessRange: 2.6
+    cooling:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, 1.85
+      accessRange: 2.6
+    lubrication:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, 1.85
+      accessRange: 2.6
+    steering:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, 1.85
+      accessRange: 2.6
+    body:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, 1.85
+      accessRange: 2.6
+    fuel:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, -1.85
+      accessRange: 2.6
+    underbody:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: -1.6, 0
+      accessRange: 2.6
+    cabin:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: -1.6, 0
+      accessRange: 2.6
+    fl:
+      scale: 0.96, 0.96
+      offset: 0.02, 0.02
+      accessPosition: -1.6, 1.35
+      accessRange: 1.8
+    fr:
+      scale: 0.96, 0.96
+      offset: 0.02, 0.02
+      accessPosition: 1.6, 1.35
+      accessRange: 1.8
+    rl:
+      scale: 0.96, 0.96
+      offset: 0.02, 0.02
+      accessPosition: -1.6, -1.35
+      accessRange: 1.8
+    rr:
+      scale: 0.96, 0.96
+      offset: 0.02, 0.02
+      accessPosition: 1.6, -1.35
+      accessRange: 1.8
+  nodeLayouts:
+    battery:
+      offset: 0.5, 0.02
+    ecu:
+      offset: -0.52, 0.1
+    wiring:
+      offset: 0.36, -0.08
+    starter:
+      offset: -0.4, 0.08
+    radiator:
+      offset: 0, -0.04

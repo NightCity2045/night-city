@@ -240,8 +240,10 @@ public sealed partial class NCVehicleWorkshopSystem : EntitySystem
             !TryComp<NCVehicleDriveComponent>(uid, out var drive) || drive.EngineRunning || drive.Cranking ||
             !TryComp<PhysicsComponent>(uid, out var body) || body.LinearVelocity.Length() > chassis.ServiceMaxSpeed)
             return false;
-        var access = _transform.ToMapCoordinates(new EntityCoordinates(uid, view.AccessPosition));
-        if (Vector2.DistanceSquared(_transform.GetWorldPosition(user), access.Position) > view.AccessRange * view.AccessRange)
+        var accessPosition = NCVehicleWorkshopGeometry.AccessPosition(profile, request.View, view);
+        var accessRange = NCVehicleWorkshopGeometry.AccessRange(profile, request.View, view);
+        var access = _transform.ToMapCoordinates(new EntityCoordinates(uid, accessPosition));
+        if (Vector2.DistanceSquared(_transform.GetWorldPosition(user), access.Position) > accessRange * accessRange)
         { failure = "nc-workshop-side"; return false; }
         if ((view.RequiresHood || slot.RequiresOpenHood) && !assembly.HoodOpen)
         { failure = "nc-workshop-hood"; return false; }
@@ -256,13 +258,13 @@ public sealed partial class NCVehicleWorkshopSystem : EntitySystem
         foreach (var id in TransferSlots(uid, node.Slot, request.Action))
             if (assembly.ReservedSlots.TryGetValue(id, out var owner) && owner != user)
             { failure = "nc-workshop-busy"; return false; }
-        if (!NCVehicleWorkshopGeometry.Contains(node, request.Position))
+        if (!NCVehicleWorkshopGeometry.Contains(profile, request.Node, node, request.Position))
         { failure = "nc-workshop-target"; return false; }
         // Same authored draw order and exposed geometry as the client; a forged lower node cannot bypass a cover.
         foreach (var (otherId, other) in profile.Nodes)
             if (!other.DetachedOnly && other.View == node.View && (other.Layer > node.Layer ||
                     other.Layer == node.Layer && string.CompareOrdinal(otherId, request.Node) > 0) && assembly.Installed.ContainsKey(other.Slot) &&
-                NCVehicleWorkshopGeometry.Contains(other, request.Position))
+                NCVehicleWorkshopGeometry.Contains(profile, otherId, other, request.Position))
             { failure = "nc-workshop-covered"; return false; }
         var held = _hands.GetActiveItem(user);
         var occupied = assembly.Installed.TryGetValue(node.Slot, out var part);
@@ -311,7 +313,7 @@ public sealed partial class NCVehicleWorkshopSystem : EntitySystem
         }
         if (request.Action != NCVehicleWorkshopAction.Work || !slot.WorkPoints.TryGetValue(request.Point, out var point))
         { failure = "nc-workshop-target"; return false; }
-        var local = (request.Position - node.Position) / node.Size;
+        var local = NCVehicleWorkshopGeometry.LocalPoint(profile, request.Node, node, request.Position);
         if (Vector2.DistanceSquared(local, point.Position) > point.Radius * point.Radius)
         { failure = "nc-workshop-target"; return false; }
         if (held == null || !_tools.HasQuality(held.Value, point.ToolQuality))

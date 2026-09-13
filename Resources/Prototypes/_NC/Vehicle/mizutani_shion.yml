@@ -116,6 +116,7 @@
 - type: ncVehicleChassis
   parent: NCVehicleDevelopmentSedan
   id: NCMizutaniShionChassis
+  workshop: NCMizutaniShionWorkshop
   manualHandling: NCMizutaniShionManualRwd
   automaticHandling: NCMizutaniShionAutomaticRwd
   allWheelHandling: NCMizutaniShionManualAwd
@@ -150,3 +151,79 @@
         - MobMask
         layer:
         - LargeMobLayer
+
+- type: ncVehicleWorkshop
+  parent: NCSupraWorkshop
+  id: NCMizutaniShionWorkshop
+  viewLayouts:
+    engine-bay:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: 0, 1.8
+      accessRange: 2.6
+    cooling:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: 0, 1.8
+      accessRange: 2.6
+    lubrication:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: 0, 1.8
+      accessRange: 2.6
+    steering:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: 0, 1.8
+      accessRange: 2.6
+    body:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: 0, 1.8
+      accessRange: 2.6
+    fuel:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: 0, -1.8
+      accessRange: 2.6
+    underbody:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: -1.45, 0
+      accessRange: 2.6
+    cabin:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: -1.45, 0
+      accessRange: 2.6
+    fl:
+      scale: 0.96, 0.96
+      offset: 0.02, 0.02
+      accessPosition: -1.45, 1.28
+      accessRange: 1.8
+    fr:
+      scale: 0.96, 0.96
+      offset: 0.02, 0.02
+      accessPosition: 1.45, 1.28
+      accessRange: 1.8
+    rl:
+      scale: 0.96, 0.96
+      offset: 0.02, 0.02
+      accessPosition: -1.45, -1.28
+      accessRange: 1.8
+    rr:
+      scale: 0.96, 0.96
+      offset: 0.02, 0.02
+      accessPosition: 1.45, -1.28
+      accessRange: 1.8
+  nodeLayouts:
+    battery:
+      offset: 0.55, 0
+    ecu:
+      offset: -0.57, 0.04
+    coil:
+      offset: -0.18, 0.12
+    alternator:
+      offset: -0.05, 0.02
+    gearbox:
+      offset: 0.04, 0.03

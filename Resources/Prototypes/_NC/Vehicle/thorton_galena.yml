@@ -116,6 +116,7 @@
 - type: ncVehicleChassis
   parent: NCVehicleDevelopmentSedan
   id: NCThortonGalenaChassis
+  workshop: NCThortonGalenaWorkshop
   manualHandling: NCThortonGalenaManualRwd
   automaticHandling: NCThortonGalenaAutomaticRwd
   allWheelHandling: NCThortonGalenaManualAwd
@@ -150,3 +151,79 @@
         - MobMask
         layer:
         - LargeMobLayer
+
+- type: ncVehicleWorkshop
+  parent: NCSupraWorkshop
+  id: NCThortonGalenaWorkshop
+  viewLayouts:
+    engine-bay:
+      scale: 0.88, 0.84
+      offset: 0.06, 0.08
+      accessPosition: 0, 1.3
+      accessRange: 2.6
+    cooling:
+      scale: 0.88, 0.84
+      offset: 0.06, 0.08
+      accessPosition: 0, 1.3
+      accessRange: 2.6
+    lubrication:
+      scale: 0.88, 0.84
+      offset: 0.06, 0.08
+      accessPosition: 0, 1.3
+      accessRange: 2.6
+    steering:
+      scale: 0.88, 0.84
+      offset: 0.06, 0.08
+      accessPosition: 0, 1.3
+      accessRange: 2.6
+    body:
+      scale: 0.88, 0.84
+      offset: 0.06, 0.08
+      accessPosition: 0, 1.3
+      accessRange: 2.6
+    fuel:
+      scale: 0.88, 0.84
+      offset: 0.06, 0.08
+      accessPosition: 0, -1.3
+      accessRange: 2.6
+    underbody:
+      scale: 0.88, 0.84
+      offset: 0.06, 0.08
+      accessPosition: -1.2, 0
+      accessRange: 2.6
+    cabin:
+      scale: 0.88, 0.84
+      offset: 0.06, 0.08
+      accessPosition: -1.2, 0
+      accessRange: 2.6
+    fl:
+      scale: 0.88, 0.88
+      offset: 0.06, 0.06
+      accessPosition: -1.2, 0.92
+      accessRange: 1.8
+    fr:
+      scale: 0.88, 0.88
+      offset: 0.06, 0.06
+      accessPosition: 1.2, 0.92
+      accessRange: 1.8
+    rl:
+      scale: 0.88, 0.88
+      offset: 0.06, 0.06
+      accessPosition: -1.2, -0.92
+      accessRange: 1.8
+    rr:
+      scale: 0.88, 0.88
+      offset: 0.06, 0.06
+      accessPosition: 1.2, -0.92
+      accessRange: 1.8
+  nodeLayouts:
+    battery:
+      offset: 0.5, 0.06
+    ecu:
+      offset: -0.52, 0.08
+    engine:
+      offset: 0.03, 0.04
+    alternator:
+      offset: -0.05, 0.1
+    fuel-tank:
+      offset: 0, -0.06

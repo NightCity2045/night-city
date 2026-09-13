@@ -231,7 +231,7 @@ public sealed partial class NCVehicleWorkbenchSystem : EntitySystem
             chassis.Workshop is not { } workshop || !_prototypes.TryIndex(workshop, out profile!) ||
             !profile.Nodes.TryGetValue(request.Node, out node!) ||
             !CollectTree(chassis, bundle.RootSlot).Contains(node.Slot) ||
-            !NCVehicleWorkshopGeometry.Contains(node, request.Position) || request.Revision != bundle.Revision)
+            !NCVehicleWorkshopGeometry.Contains(profile, request.Node, node, request.Position) || request.Revision != bundle.Revision)
             return false;
         item = target;
 

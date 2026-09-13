@@ -116,6 +116,7 @@
 - type: ncVehicleChassis
   parent: NCVehicleDevelopmentSedan
   id: NCQuadraTurboRChassis
+  workshop: NCQuadraTurboRWorkshop
   manualHandling: NCQuadraTurboRManualRwd
   automaticHandling: NCQuadraTurboRAutomaticRwd
   allWheelHandling: NCQuadraTurboRManualAwd
@@ -150,3 +151,79 @@
         - MobMask
         layer:
         - LargeMobLayer
+
+- type: ncVehicleWorkshop
+  parent: NCSupraWorkshop
+  id: NCQuadraTurboRWorkshop
+  viewLayouts:
+    engine-bay:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: 0, 1.75
+      accessRange: 2.6
+    cooling:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: 0, 1.75
+      accessRange: 2.6
+    lubrication:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: 0, 1.75
+      accessRange: 2.6
+    steering:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: 0, 1.75
+      accessRange: 2.6
+    body:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: 0, 1.75
+      accessRange: 2.6
+    fuel:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: 0, -1.75
+      accessRange: 2.6
+    underbody:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: -1.45, 0
+      accessRange: 2.6
+    cabin:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: -1.45, 0
+      accessRange: 2.6
+    fl:
+      scale: 0.98, 0.98
+      offset: 0.01, 0.01
+      accessPosition: -1.45, 1.25
+      accessRange: 1.8
+    fr:
+      scale: 0.98, 0.98
+      offset: 0.01, 0.01
+      accessPosition: 1.45, 1.25
+      accessRange: 1.8
+    rl:
+      scale: 0.98, 0.98
+      offset: 0.01, 0.01
+      accessPosition: -1.45, -1.25
+      accessRange: 1.8
+    rr:
+      scale: 0.98, 0.98
+      offset: 0.01, 0.01
+      accessPosition: 1.45, -1.25
+      accessRange: 1.8
+  nodeLayouts:
+    battery:
+      offset: 0.54, 0.04
+    ecu:
+      offset: -0.56, 0.02
+    starter:
+      offset: -0.42, -0.08
+    alternator:
+      offset: 0.02, 0.1
+    engine:
+      offset: 0.02, 0

@@ -11,11 +11,56 @@ namespace Content.Shared._NC.Vehicle.Workshop;
 /// <summary>Canonical picking and occlusion, usable without GPU resources on the server.</summary>
 public static class NCVehicleWorkshopGeometry
 {
-    public static bool Contains(NCVehicleWorkshopNode node, Vector2 position)
+    public static (Vector2 Position, Vector2 Size) Layout(NCVehicleWorkshopPrototype profile, string id,
+        NCVehicleWorkshopNode node)
     {
-        if (!float.IsFinite(position.X) || !float.IsFinite(position.Y) || node.Size.X <= 0 || node.Size.Y <= 0)
+        var position = node.Position;
+        var size = node.Size;
+        if (profile.ViewLayouts.TryGetValue(node.View, out var view))
+        {
+            position = view.Offset + position * view.Scale;
+            size *= view.Scale;
+        }
+        if (profile.NodeLayouts.TryGetValue(id, out var correction))
+        {
+            position += correction.Offset;
+            size *= correction.Scale;
+        }
+        return (position, size);
+    }
+
+    public static Vector2 AccessPosition(NCVehicleWorkshopPrototype profile, string id, NCVehicleWorkshopView view)
+        => profile.ViewLayouts.TryGetValue(id, out var layout) && layout.AccessPosition is { } position
+            ? position
+            : view.AccessPosition;
+
+    public static float AccessRange(NCVehicleWorkshopPrototype profile, string id, NCVehicleWorkshopView view)
+        => profile.ViewLayouts.TryGetValue(id, out var layout) && layout.AccessRange is { } range
+            ? range
+            : view.AccessRange;
+
+    public static Vector2 LocalPoint(NCVehicleWorkshopPrototype profile, string id, NCVehicleWorkshopNode node,
+        Vector2 position)
+    {
+        var layout = Layout(profile, id, node);
+        return (position - layout.Position) / layout.Size;
+    }
+
+    public static bool Contains(NCVehicleWorkshopPrototype profile, string id, NCVehicleWorkshopNode node,
+        Vector2 position)
+    {
+        var layout = Layout(profile, id, node);
+        return Contains(node, layout.Position, layout.Size, position);
+    }
+
+    public static bool Contains(NCVehicleWorkshopNode node, Vector2 position)
+        => Contains(node, node.Position, node.Size, position);
+
+    private static bool Contains(NCVehicleWorkshopNode node, Vector2 nodePosition, Vector2 nodeSize, Vector2 position)
+    {
+        if (!float.IsFinite(position.X) || !float.IsFinite(position.Y) || nodeSize.X <= 0 || nodeSize.Y <= 0)
             return false;
-        var local = (position - node.Position) / node.Size;
+        var local = (position - nodePosition) / nodeSize;
         if (local.X is < 0 or > 1 || local.Y is < 0 or > 1 ||
             node.Ellipse && (local - new Vector2(0.5f)).LengthSquared() > 0.25f)
             return false;
@@ -38,14 +83,31 @@ public static class NCVehicleWorkshopGeometry
             !NCVehicleDriveMath.Positive(profile.PointSeconds) || !NCVehicleDriveMath.Positive(profile.TransferSeconds) ||
             !NCVehicleDriveMath.Positive(profile.InspectSeconds) || !NCVehicleDriveMath.Positive(profile.RefreshSeconds))
             return false;
-        foreach (var view in profile.Views.Values)
-            if (!NCVehicleDriveMath.Positive(view.AccessRange) || !float.IsFinite(view.AccessPosition.X) || !float.IsFinite(view.AccessPosition.Y))
+        foreach (var (id, view) in profile.Views)
+        {
+            var accessPosition = AccessPosition(profile, id, view);
+            if (!NCVehicleDriveMath.Positive(AccessRange(profile, id, view)) ||
+                !float.IsFinite(accessPosition.X) || !float.IsFinite(accessPosition.Y))
                 return false;
-        foreach (var node in profile.Nodes.Values)
+        }
+        foreach (var (id, node) in profile.Nodes)
+        {
+            var layout = Layout(profile, id, node);
             if (!profile.Views.ContainsKey(node.View) || !chassis.Slots.ContainsKey(node.Slot) ||
-                !NCVehicleDriveMath.Positive(node.Size.X) || !NCVehicleDriveMath.Positive(node.Size.Y) ||
-                !float.IsFinite(node.Position.X) || !float.IsFinite(node.Position.Y) ||
-                node.Position.X < 0 || node.Position.Y < 0 || node.Position.X + node.Size.X > 1.001f || node.Position.Y + node.Size.Y > 1.001f)
+                !NCVehicleDriveMath.Positive(layout.Size.X) || !NCVehicleDriveMath.Positive(layout.Size.Y) ||
+                !float.IsFinite(layout.Position.X) || !float.IsFinite(layout.Position.Y) ||
+                layout.Position.X < 0 || layout.Position.Y < 0 || layout.Position.X + layout.Size.X > 1.001f ||
+                layout.Position.Y + layout.Size.Y > 1.001f)
+                return false;
+        }
+        foreach (var layout in profile.ViewLayouts.Values)
+            if (!NCVehicleDriveMath.Positive(layout.Scale.X) || !NCVehicleDriveMath.Positive(layout.Scale.Y) ||
+                !float.IsFinite(layout.Offset.X) || !float.IsFinite(layout.Offset.Y) ||
+                layout.AccessRange is { } range && !NCVehicleDriveMath.Positive(range))
+                return false;
+        foreach (var layout in profile.NodeLayouts.Values)
+            if (!NCVehicleDriveMath.Positive(layout.Scale.X) || !NCVehicleDriveMath.Positive(layout.Scale.Y) ||
+                !float.IsFinite(layout.Offset.X) || !float.IsFinite(layout.Offset.Y))
                 return false;
         foreach (var (id, slot) in chassis.Slots)
         {

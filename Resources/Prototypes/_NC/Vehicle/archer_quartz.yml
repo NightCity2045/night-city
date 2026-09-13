@@ -116,6 +116,7 @@
 - type: ncVehicleChassis
   parent: NCVehicleDevelopmentSedan
   id: NCArcherQuartzChassis
+  workshop: NCArcherQuartzWorkshop
   manualHandling: NCArcherQuartzManualRwd
   automaticHandling: NCArcherQuartzAutomaticRwd
   allWheelHandling: NCArcherQuartzManualAwd
@@ -150,3 +151,79 @@
         - MobMask
         layer:
         - LargeMobLayer
+
+- type: ncVehicleWorkshop
+  parent: NCSupraWorkshop
+  id: NCArcherQuartzWorkshop
+  viewLayouts:
+    engine-bay:
+      scale: 0.92, 0.9
+      offset: 0.04, 0.05
+      accessPosition: 0, 1.45
+      accessRange: 2.6
+    cooling:
+      scale: 0.92, 0.9
+      offset: 0.04, 0.05
+      accessPosition: 0, 1.45
+      accessRange: 2.6
+    lubrication:
+      scale: 0.92, 0.9
+      offset: 0.04, 0.05
+      accessPosition: 0, 1.45
+      accessRange: 2.6
+    steering:
+      scale: 0.92, 0.9
+      offset: 0.04, 0.05
+      accessPosition: 0, 1.45
+      accessRange: 2.6
+    body:
+      scale: 0.92, 0.9
+      offset: 0.04, 0.05
+      accessPosition: 0, 1.45
+      accessRange: 2.6
+    fuel:
+      scale: 0.92, 0.9
+      offset: 0.04, 0.05
+      accessPosition: 0, -1.45
+      accessRange: 2.6
+    underbody:
+      scale: 0.92, 0.9
+      offset: 0.04, 0.05
+      accessPosition: -1.35, 0
+      accessRange: 2.6
+    cabin:
+      scale: 0.92, 0.9
+      offset: 0.04, 0.05
+      accessPosition: -1.35, 0
+      accessRange: 2.6
+    fl:
+      scale: 0.94, 0.94
+      offset: 0.03, 0.03
+      accessPosition: -1.35, 1
+      accessRange: 1.8
+    fr:
+      scale: 0.94, 0.94
+      offset: 0.03, 0.03
+      accessPosition: 1.35, 1
+      accessRange: 1.8
+    rl:
+      scale: 0.94, 0.94
+      offset: 0.03, 0.03
+      accessPosition: -1.35, -1
+      accessRange: 1.8
+    rr:
+      scale: 0.94, 0.94
+      offset: 0.03, 0.03
+      accessPosition: 1.35, -1
+      accessRange: 1.8
+  nodeLayouts:
+    battery:
+      offset: 0.52, 0
+    ecu:
+      offset: -0.54, 0.03
+    alternator:
+      offset: -0.04, 0.08
+    starter:
+      offset: 0.02, -0.1
+    fuel-tank:
+      offset: 0, -0.05

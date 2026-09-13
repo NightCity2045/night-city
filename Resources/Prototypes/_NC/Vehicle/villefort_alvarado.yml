@@ -116,6 +116,8 @@
 - type: ncVehicleChassis
   parent: NCVehicleDevelopmentSedan
   id: NCVillefortAlvaradoChassis
+  workshop: NCVillefortAlvaradoWorkshop
+  serviceRange: 2.6
   manualHandling: NCVillefortAlvaradoManualRwd
   automaticHandling: NCVillefortAlvaradoAutomaticRwd
   allWheelHandling: NCVillefortAlvaradoManualAwd
@@ -150,3 +152,81 @@
         - MobMask
         layer:
         - LargeMobLayer
+
+- type: ncVehicleWorkshop
+  parent: NCSupraWorkshop
+  id: NCVillefortAlvaradoWorkshop
+  viewLayouts:
+    engine-bay:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, 2.2
+      accessRange: 2.6
+    cooling:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, 2.2
+      accessRange: 2.6
+    lubrication:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, 2.2
+      accessRange: 2.6
+    steering:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, 2.2
+      accessRange: 2.6
+    body:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, 2.2
+      accessRange: 2.6
+    fuel:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, -2.2
+      accessRange: 2.6
+    underbody:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: -1.65, 0
+      accessRange: 2.6
+    cabin:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: -1.65, 0
+      accessRange: 2.6
+    fl:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: -1.65, 1.55
+      accessRange: 1.8
+    fr:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 1.65, 1.55
+      accessRange: 1.8
+    rl:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: -1.65, -1.55
+      accessRange: 1.8
+    rr:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 1.65, -1.55
+      accessRange: 1.8
+  nodeLayouts:
+    battery:
+      offset: 0.48, 0.14
+    ecu:
+      offset: -0.5, 0.12
+    starter:
+      offset: -0.38, -0.1
+    alternator:
+      offset: -0.36, 0.18
+    engine:
+      offset: 0.02, 0.02
+    fuel-tank:
+      offset: 0, -0.1
