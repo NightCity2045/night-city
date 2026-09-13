@@ -1,0 +1,94 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncVehicleHandling
+  parent: NCQuadraType66AutomaticAwd
+  id: NCMilitechApcAutomaticAwd
+  torqueCurve:
+  - 0, 260
+  - 700, 520
+  - 2200, 900
+  - 4000, 760
+  - 5200, 0
+  gearRatios: [0, 3.9, 2.45, 1.62, 1.15, 0.84, -3.5]
+  finalDrive: 4.6
+  idleRpm: 700
+  redlineRpm: 5200
+  engineInertia: 0.85
+  clutchTorque: 1500
+  steeringRate: 3.8
+  keyboardSteeringRate: 3.5
+  steeringAngle: 0.46
+  wheelbase: 2.9
+  centerOfGravityHeight: 0.7
+  friction: 1.08
+  brakeTorque: 9000
+  handbrakeTorque: 8500
+  aerodynamicDrag: 0.65
+  rollingResistance: 19
+  fuelCapacity: 120
+
+- type: ncVehicleChassis
+  parent: NCQuadraType66Chassis
+  id: NCMilitechApcChassis
+  automaticAllWheelHandling: NCMilitechApcAutomaticAwd
+  mass: 4200
+  inertia: 9200
+  frontTowPoint: 0, 1.9
+  rearTowPoint: 0, -1.9
+  stockPartOverrides:
+    gearbox: NCVehicleAutomaticGearbox
+    front-differential: NCVehicleFrontDifferential
+    front-left-shaft: NCVehicleFrontLeftShaft
+    front-right-shaft: NCVehicleFrontRightShaft
+    transfer-case: NCVehicleTransferCase
+  seats:
+    rear-left:
+      name: nc-vehicle-seat-passenger
+      position: -0.45, -0.25
+      exit: -1.35, -0.25
+    rear-right:
+      name: nc-vehicle-seat-passenger
+      position: 0.45, -0.25
+      exit: 1.35, -0.25
+    squad-left:
+      name: nc-vehicle-seat-passenger
+      position: -0.45, -0.8
+      exit: -1.35, -0.8
+    squad-right:
+      name: nc-vehicle-seat-passenger
+      position: 0.45, -0.8
+      exit: 1.35, -0.8
+
+- type: entity
+  parent: NCToyotaSupra1996
+  id: NCVehicleMilitechApc2045
+  name: Militech armored personnel carrier
+  description: A heavy corporate carrier for a six-person team and mission cargo.
+  components:
+  - type: NCVehicle
+    chassis: NCMilitechApcChassis
+  - type: NCVehicleDrive
+    handling: NCMilitechApcAutomaticAwd
+    fuel: 100
+  - type: Storage
+    grid:
+    - 0,0,17,8
+  - type: EntityStorage
+    maxSize: 1.6
+    capacity: 8
+    enteringOffset: 0, -1.9
+  - type: Sprite
+    sprite: _NC/Vehicle/militech_apc_2045.rsi
+  - type: Fixtures
+    fixtures:
+      chassis:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-1.02,-1.92,1.02,1.92"
+        density: 201
+        restitution: 0.03
+        mask: [MobMask]
+        layer: [LargeMobLayer]
+

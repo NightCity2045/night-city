@@ -64,8 +64,9 @@ public sealed partial class NCVehicleDriverHud : LayoutContainer
         Instruments.BeltWarning = !fastened;
     }
 
-    public void SetShifter(bool automatic, int column, int row, NCVehicleSelector selector, bool reverseArmed) =>
-        Shifter.SetState(automatic, column, row, selector, reverseArmed);
+    public void SetShifter(bool automatic, bool sequential, int gear, int forwardGears,
+        int column, int row, NCVehicleSelector selector, bool reverseArmed) =>
+        Shifter.SetState(automatic, sequential, gear, forwardGears, column, row, selector, reverseArmed);
 
     public void SetInstruments(float speed, float rpm, float redline, float fuelFraction, float temperature,
         string gear, bool engineWarning, bool oilWarning, bool batteryWarning, bool handbrakeWarning, bool gripWarning)
@@ -83,11 +84,12 @@ public sealed partial class NCVehicleDriverHud : LayoutContainer
         Instruments.GripWarning = gripWarning;
     }
 
-    public void SetPedals(float throttle, float brake, float clutch)
+    public void SetPedals(float throttle, float brake, float clutch, bool automatic)
     {
         Pedals.Throttle = throttle;
         Pedals.Brake = brake;
         Pedals.Clutch = clutch;
+        Pedals.Automatic = automatic;
     }
 
     public void ReleaseSteeringGrip() => Steering.ReleaseGrip();

@@ -126,6 +126,8 @@
   inertia: 320
   frontTowPoint: 0, 1.2
   rearTowPoint: 0, -1.2
+  stockPartOverrides:
+    gearbox: NCVehicleAutomaticGearbox
 
 - type: entity
   parent: NCToyotaSupra1996
@@ -136,8 +138,15 @@
   - type: NCVehicle
     chassis: NCMakigaiMaiMaiChassis
   - type: NCVehicleDrive
-    handling: NCMakigaiMaiMaiManualRwd
+    handling: NCMakigaiMaiMaiAutomaticRwd
     fuel: 22
+  - type: Storage
+    grid:
+    - 0,0,4,3
+  - type: EntityStorage
+    maxSize: 0.75
+    capacity: 1
+    enteringOffset: 0, -1.05
   - type: Sprite
     sprite: _NC/Vehicle/makigai_maimai_2045.rsi
   - type: Fixtures

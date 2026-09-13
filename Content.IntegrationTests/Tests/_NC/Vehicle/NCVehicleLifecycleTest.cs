@@ -27,6 +27,10 @@ using System.Linq;
 using Content.Shared.Lock;
 using Content.Shared.Stacks;
 using Content.Shared.Storage;
+using Content.Shared.Storage.Components;
+using Content.Shared.Storage.EntitySystems;
+using Content.Shared.Mobs;
+using Content.Shared.Mobs.Systems;
 using Content.Server.Stack;
 using Robust.Shared.Player;
 
@@ -36,6 +40,66 @@ namespace Content.IntegrationTests.Tests._NC.Vehicle;
 public sealed partial class NCVehicleLifecycleTest : GameTest
 {
     public override PoolSettings PoolSettings => new() { Connected = false, Dirty = true };
+
+    [TestCase("NCToyotaSupra1996", "NCSupraManualRwd", 2, 1.1f)]
+    [TestCase("NCVehicleArcherQuartz2045", "NCArcherQuartzManualRwd", 2, 1.05f)]
+    [TestCase("NCVehicleQuadraTurboR2045", "NCQuadraTurboRManualRwd", 1, 1f)]
+    [TestCase("NCVehicleQuadraType662045", "NCQuadraType66ManualRwd", 2, 1.15f)]
+    [TestCase("NCVehicleMakigaiMaiMai2045", "NCMakigaiMaiMaiAutomaticRwd", 1, 0.75f)]
+    [TestCase("NCVehicleThortonGalena2045", "NCThortonGalenaManualRwd", 2, 1.1f)]
+    [TestCase("NCVehicleThortonColby2045", "NCThortonColbyManualRwd", 6, 1.5f)]
+    [TestCase("NCVehicleVillefortAlvarado2045", "NCVillefortAlvaradoAutomaticRwd", 3, 1.25f)]
+    [TestCase("NCVehicleRayfieldCaliburn2045", "NCRayfieldCaliburnAutomaticAwd", 1, 0.8f)]
+    [TestCase("NCVehicleMizutaniShion2045", "NCMizutaniShionSequentialRwd", 1, 0.9f)]
+    [TestCase("NCVehicleRecoveryTruck", "NCRecoveryTruckAutomaticHandling", 6, 1.5f)]
+    [TestCase("NCVehicleNcpdPatrol2045", "NCNcpdPatrolAutomaticRwd", 2, 1.05f)]
+    [TestCase("NCVehicleNcpdResponse2045", "NCNcpdResponseAutomaticAwd", 4, 1.3f)]
+    [TestCase("NCVehicleMilitechApc2045", "NCMilitechApcAutomaticAwd", 8, 1.6f)]
+    [TestCase("NCVehicleMilitechCommand2045", "NCMilitechCommandAutomaticAwd", 4, 1.35f)]
+    [TestCase("NCVehicleBiotechnicaField2045", "NCBiotechnicaFieldAutomaticAwd", 5, 1.4f)]
+    [TestCase("NCVehicleBiotechnicaLabVan2045", "NCBiotechnicaLabVanAutomaticRwd", 7, 1.55f)]
+    [RunOnSide(Side.Server)]
+    public void StockVehiclesCompileTheirTransmissionAndTrunk(string prototype, string handling,
+        int capacity, float maximumSize)
+    {
+        Server.System<SharedMapSystem>().CreateMap(out var mapId);
+        var vehicle = SEntMan.SpawnEntity(prototype, new MapCoordinates(Vector2.Zero, mapId));
+        var drive = SEntMan.GetComponent<NCVehicleDriveComponent>(vehicle);
+        var trunk = SEntMan.GetComponent<EntityStorageComponent>(vehicle);
+
+        Assert.That(drive.Handling.Id, Is.EqualTo(handling));
+        Assert.That(trunk.Capacity, Is.EqualTo(capacity));
+        Assert.That(trunk.MaxSize, Is.EqualTo(maximumSize).Within(0.001f));
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void TrunkRejectsInteriorOperationAndLivingBystanders()
+    {
+        Server.System<SharedMapSystem>().CreateMap(out var mapId);
+        var coordinates = new MapCoordinates(Vector2.Zero, mapId);
+        var vehicle = SEntMan.SpawnEntity("NCToyotaSupra1996", coordinates);
+        var user = SEntMan.SpawnEntity("MobHuman", coordinates);
+        var containers = Server.System<SharedContainerSystem>();
+        Assert.That(containers.TryGetContainer(vehicle, "nc-vehicle-driver", out var seat), Is.True);
+        Assert.That(containers.Insert(user, seat!), Is.True);
+
+        var trunkSystem = Server.System<NCVehicleTrunkSystem>();
+        var trunkRules = SEntMan.GetComponent<NCVehicleTrunkComponent>(vehicle);
+        Assert.That(trunkSystem.CanOperate((vehicle, trunkRules), user, out _), Is.False);
+
+        var physicalTrunk = SEntMan.GetComponent<EntityStorageComponent>(vehicle);
+        var attempt = new EntityStorageInsertedIntoAttemptEvent(physicalTrunk.Contents, user);
+        SEntMan.EventBus.RaiseLocalEvent(vehicle, ref attempt);
+        Assert.That(attempt.Cancelled, Is.True);
+
+        var crate = SEntMan.SpawnEntity("CrateGenericSteel", coordinates);
+        var body = SEntMan.SpawnEntity("MobHuman", coordinates);
+        Server.System<MobStateSystem>().ChangeMobState(body, MobState.Dead);
+        var entityStorage = Server.System<SharedEntityStorageSystem>();
+        Assert.That(entityStorage.CanInsert(crate, vehicle, physicalTrunk), Is.True);
+        Assert.That(entityStorage.CanInsert(body, vehicle, physicalTrunk), Is.True);
+    }
 
     [Test]
     [RunOnSide(Side.Server)]

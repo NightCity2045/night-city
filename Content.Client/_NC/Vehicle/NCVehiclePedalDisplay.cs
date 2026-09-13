@@ -19,6 +19,7 @@ public sealed class NCVehiclePedalDisplay : Control
     public float Clutch { get; set; }
     public float Brake { get; set; }
     public float Throttle { get; set; }
+    public bool Automatic { get; set; }
 
     public NCVehiclePedalDisplay()
     {
@@ -31,10 +32,26 @@ public sealed class NCVehiclePedalDisplay : Control
     protected override void Draw(DrawingHandleScreen handle)
     {
         var size = (Vector2) PixelSize;
+        if (Automatic)
+        {
+            // Crop away the clutch pedal while retaining the authored brake/throttle artwork.
+            var textureSize = (Vector2) _pedals.Size;
+            var source = new UIBox2(textureSize.X * 0.32f, 0, textureSize.X, textureSize.Y);
+            handle.DrawTextureRectRegion(_pedals, UIBox2.FromDimensions(Vector2.Zero, size), source);
+            DrawPressure(handle, new UIBox2(size.X * 0.08f, size.Y * 0.08f, size.X * 0.46f, size.Y * 0.94f), Brake,
+                Color.FromHex("#ff5a45"));
+            DrawPressure(handle, new UIBox2(size.X * 0.6f, size.Y * 0.08f, size.X * 0.94f, size.Y * 0.94f), Throttle,
+                Color.FromHex("#efb75b"));
+            return;
+        }
+
         handle.DrawTextureRect(_pedals, UIBox2.FromDimensions(Vector2.Zero, size));
-        DrawPressure(handle, new UIBox2(size.X * 0.05f, size.Y * 0.08f, size.X * 0.31f, size.Y * 0.94f), Clutch, Color.FromHex("#17d4dd"));
-        DrawPressure(handle, new UIBox2(size.X * 0.37f, size.Y * 0.08f, size.X * 0.63f, size.Y * 0.94f), Brake, Color.FromHex("#ff5a45"));
-        DrawPressure(handle, new UIBox2(size.X * 0.72f, size.Y * 0.08f, size.X * 0.94f, size.Y * 0.94f), Throttle, Color.FromHex("#efb75b"));
+        DrawPressure(handle, new UIBox2(size.X * 0.05f, size.Y * 0.08f, size.X * 0.31f, size.Y * 0.94f), Clutch,
+            Color.FromHex("#17d4dd"));
+        DrawPressure(handle, new UIBox2(size.X * 0.37f, size.Y * 0.08f, size.X * 0.63f, size.Y * 0.94f), Brake,
+            Color.FromHex("#ff5a45"));
+        DrawPressure(handle, new UIBox2(size.X * 0.72f, size.Y * 0.08f, size.X * 0.94f, size.Y * 0.94f), Throttle,
+            Color.FromHex("#efb75b"));
     }
 
     private static void DrawPressure(DrawingHandleScreen handle, UIBox2 box, float value, Color color)

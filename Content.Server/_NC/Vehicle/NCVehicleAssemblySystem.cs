@@ -63,8 +63,11 @@ public sealed partial class NCVehicleAssemblySystem : EntitySystem
             candidate = new Dictionary<string, NCVehicleInstalledPart>();
             foreach (var (slotId, slot) in chassis.Slots)
             {
-                if (slot.DefaultPart is { } part)
-                    candidate.Add(slotId, new NCVehicleInstalledPart(part, 1));
+                var part = slot.DefaultPart;
+                if (chassis.StockPartOverrides.TryGetValue(slotId, out var stockPart))
+                    part = stockPart;
+                if (part is { } installedPart)
+                    candidate.Add(slotId, new NCVehicleInstalledPart(installedPart, 1));
             }
         }
 

@@ -37,8 +37,9 @@ public sealed partial class NCVehicleDriverWindow : FancyWindow
         Seatbelt.ModulateSelfOverride = fastened ? null : Color.FromHex("#ffb45f");
     }
     public string GearText { set => GearGate.Text = value; }
-    public void SetShifter(bool automatic, int column, int row, NCVehicleSelector selector, bool reverseArmed) =>
-        Shifter.SetState(automatic, column, row, selector, reverseArmed);
+    public void SetShifter(bool automatic, bool sequential, int gear, int forwardGears,
+        int column, int row, NCVehicleSelector selector, bool reverseArmed) =>
+        Shifter.SetState(automatic, sequential, gear, forwardGears, column, row, selector, reverseArmed);
     public float SteeringValue { get => Steering.Value; set => Steering.Value = value; }
     public bool SteeringHeld => Steering.Held;
     public float SteeringMaximumAngle { set => Steering.MaximumAngle = value; }

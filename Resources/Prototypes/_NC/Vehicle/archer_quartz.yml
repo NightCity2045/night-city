@@ -138,6 +138,13 @@
   - type: NCVehicleDrive
     handling: NCArcherQuartzManualRwd
     fuel: 32
+  - type: Storage
+    grid:
+    - 0,0,8,4
+  - type: EntityStorage
+    maxSize: 1.05
+    capacity: 2
+    enteringOffset: 0, -1.4
   - type: Sprite
     sprite: _NC/Vehicle/archer_quartz_2045.rsi
   - type: Fixtures

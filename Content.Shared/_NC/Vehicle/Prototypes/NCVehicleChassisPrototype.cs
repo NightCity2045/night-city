@@ -26,6 +26,8 @@ public sealed partial class NCVehicleChassisPrototype : IPrototype, IInheritingP
     [DataField(required: true)] public float Inertia;
     [DataField] public Vector2 CenterOfMass;
     [DataField(required: true)] public Dictionary<string, NCVehicleSlotDefinition> Slots = new();
+    /// <summary>Stock parts that replace a parent's slot default without duplicating its service geometry.</summary>
+    [DataField] public Dictionary<string, ProtoId<NCVehiclePartPrototype>> StockPartOverrides = new();
     [DataField] public Dictionary<string, NCVehicleSeatDefinition> Seats = new();
     [DataField] public float ServiceRange = 2;
     [DataField] public float ServiceMaxSpeed = 0.1f;

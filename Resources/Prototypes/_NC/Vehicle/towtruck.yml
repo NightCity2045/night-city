@@ -114,8 +114,8 @@
       exit: 1.6, 2.8
   cargoMass:
     storagebase: 0, 2
+    entity_storage: 0, 2
     nc-vehicle-flatbed: 0, -1
-
   slots:
     headlamps:
       name: nc-vehicle-module-headlamps
@@ -459,7 +459,7 @@
       mount: NCVehicleLongitudinalGearboxMount
       position: 0, 2
       required: true
-      defaultPart: NCVehicleDevelopmentGearbox
+      defaultPart: NCVehicleAutomaticGearbox
       requires: [engine]
       requiresOpenHood: false
       requiresLift: true
@@ -2124,7 +2124,14 @@
   - type: NCVehicle
     chassis: NCRecoveryTruckChassis
   - type: NCVehicleDrive
-    handling: NCRecoveryTruckHandling
+    handling: NCRecoveryTruckAutomaticHandling
+  - type: Storage
+    grid:
+    - 0,0,15,7
+  - type: EntityStorage
+    maxSize: 1.5
+    capacity: 6
+    enteringOffset: 0, 2
   - type: NCVehicleRecovery
     maximumLoad: 2400
     deckPosition: 0, -1

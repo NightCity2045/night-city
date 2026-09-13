@@ -23,8 +23,11 @@ public sealed class NCVehicleGearGate : BaseButton
     private Vector2 _target;
     private bool _initialized;
     private bool _automatic;
+    private bool _sequential;
     private bool _reverseArmed;
     private int _selector;
+    private int _gear;
+    private int _forwardGears;
     private int _column;
     private int _row;
     private bool _dragging;
@@ -42,15 +45,20 @@ public sealed class NCVehicleGearGate : BaseButton
         SetSize = new Vector2(150, 150);
     }
 
-    public void SetState(bool automatic, int column, int row, NCVehicleSelector selector, bool reverseArmed)
+    public void SetState(bool automatic, bool sequential, int gear, int forwardGears,
+        int column, int row, NCVehicleSelector selector, bool reverseArmed)
     {
         _automatic = automatic;
+        _sequential = sequential;
         _selector = (int) selector;
+        _gear = gear;
+        _forwardGears = Math.Max(1, forwardGears);
         _reverseArmed = reverseArmed;
         _column = Math.Clamp(column, 0, 2);
         _row = Math.Clamp(row, -1, 1);
         _target = automatic
             ? new Vector2(0, Math.Clamp(_selector, 0, 4) / 4f * 2 - 1)
+            : sequential ? Vector2.Zero
             : new Vector2(_column - 1, _row);
         if (_initialized)
             return;
@@ -125,6 +133,17 @@ public sealed class NCVehicleGearGate : BaseButton
             return;
         }
 
+        if (_sequential)
+        {
+            var sequentialRow = position.Y < Size.Y * 0.34f ? -1 : position.Y > Size.Y * 0.66f ? 1 : 0;
+            if (sequentialRow == _commandRow)
+                return;
+            DriverAction?.Invoke(sequentialRow < 0 ? NCVehicleDriverAction.GearUp :
+                sequentialRow > 0 ? NCVehicleDriverAction.GearDown : NCVehicleDriverAction.Neutral);
+            _commandRow = sequentialRow;
+            return;
+        }
+
         var targetColumn = Math.Clamp((int) MathF.Round(position.X / Size.X * 2), 0, 2);
         var targetRow = position.Y < Size.Y * 0.38f ? -1 : position.Y > Size.Y * 0.62f ? 1 : 0;
         if (targetColumn == _commandColumn && targetRow == _commandRow)
@@ -155,6 +174,8 @@ public sealed class NCVehicleGearGate : BaseButton
         var size = (Vector2) PixelSize;
         if (_automatic)
             DrawAutomatic(handle, size);
+        else if (_sequential)
+            DrawSequential(handle, size);
         else
             DrawManual(handle, size);
     }
@@ -196,6 +217,21 @@ public sealed class NCVehicleGearGate : BaseButton
                 i == _selector ? Color.FromHex("#efb75b") : Color.White);
         }
         DrawKnob(handle, new Vector2(x, top + (_display.Y + 1) / 2 * (bottom - top)));
+    }
+
+    private void DrawSequential(DrawingHandleScreen handle, Vector2 size)
+    {
+        handle.DrawRect(new UIBox2(Vector2.Zero, size), Color.FromHex("#11171b"));
+        var x = size.X * 0.62f;
+        var top = size.Y * 0.17f;
+        var middle = size.Y * 0.5f;
+        var bottom = size.Y * 0.83f;
+        handle.DrawRect(new UIBox2(x - 7 * UIScale, top, x + 7 * UIScale, bottom), Color.FromHex("#050708"));
+        DrawCentered(handle, new Vector2(size.X * 0.25f, top - 8 * UIScale), "+", Color.FromHex("#efb75b"));
+        DrawCentered(handle, new Vector2(size.X * 0.25f, middle - 8 * UIScale),
+            _gear == 0 ? "N" : Math.Min(_gear, _forwardGears).ToString(), Color.White);
+        DrawCentered(handle, new Vector2(size.X * 0.25f, bottom - 8 * UIScale), "-", Color.FromHex("#efb75b"));
+        DrawKnob(handle, new Vector2(x, middle));
     }
 
     private void DrawKnob(DrawingHandleScreen handle, Vector2 position)

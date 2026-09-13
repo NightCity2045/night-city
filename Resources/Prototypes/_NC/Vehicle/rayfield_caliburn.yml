@@ -126,6 +126,12 @@
   inertia: 2200
   frontTowPoint: 0, 1.55
   rearTowPoint: 0, -1.55
+  stockPartOverrides:
+    gearbox: NCVehicleAutomaticGearbox
+    front-differential: NCVehicleFrontDifferential
+    front-left-shaft: NCVehicleFrontLeftShaft
+    front-right-shaft: NCVehicleFrontRightShaft
+    transfer-case: NCVehicleTransferCase
 
 - type: entity
   parent: NCToyotaSupra1996
@@ -136,8 +142,15 @@
   - type: NCVehicle
     chassis: NCRayfieldCaliburnChassis
   - type: NCVehicleDrive
-    handling: NCRayfieldCaliburnManualRwd
+    handling: NCRayfieldCaliburnAutomaticAwd
     fuel: 58
+  - type: Storage
+    grid:
+    - 0,0,4,2
+  - type: EntityStorage
+    maxSize: 0.8
+    capacity: 1
+    enteringOffset: 0, -1.4
   - type: Sprite
     sprite: _NC/Vehicle/rayfield_caliburn_2045.rsi
   - type: Fixtures

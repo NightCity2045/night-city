@@ -70,8 +70,7 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
         if (_timing.RealTime < _nextInput)
             return;
         var speed = EntMan.TryGetComponent<PhysicsComponent>(Owner, out var body) ? body.LinearVelocity.Length() : 0;
-        var gear = drive.Gear == 0 ? Loc.GetString("nc-vehicle-gear-n") :
-            drive.Gear == tuning.GearRatios.Length - 1 ? Loc.GetString("nc-vehicle-gear-r") : drive.Gear.ToString();
+        var gear = GetGearLabel(drive, tuning);
         _hud.TelemetryText = Loc.GetString("nc-vehicle-telemetry", ("speed", MathF.Round(speed * 3.6f)),
             ("rpm", MathF.Round(drive.EngineRpm)), ("gear", gear), ("fuel", MathF.Round(drive.Fuel, 1)));
         _hud.IgnitionText = Loc.GetString(drive.EngineRunning || drive.Cranking
@@ -91,9 +90,12 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
                 ? "nc-vehicle-engine-high-rpm" : drive.HandbrakeHeld ? "nc-vehicle-launch-handbrake" :
                 !tuning.Automatic && drive.Gear != 0 && drive.ClutchHeld ? "nc-vehicle-launch-release-clutch" :
                 "nc-vehicle-engine-running");
-        _hud.PedalsText = Loc.GetString("nc-vehicle-pedals", ("gas", MathF.Round(drive.Throttle * 100)),
-            ("brake", MathF.Round(drive.Brake * 100)), ("clutch", MathF.Round(drive.Clutch * 100)));
-        _hud.SetPedals(drive.Throttle, drive.Brake, drive.Clutch);
+        _hud.PedalsText = tuning.Automatic
+            ? Loc.GetString("nc-vehicle-pedals-automatic", ("gas", MathF.Round(drive.Throttle * 100)),
+                ("brake", MathF.Round(drive.Brake * 100)))
+            : Loc.GetString("nc-vehicle-pedals", ("gas", MathF.Round(drive.Throttle * 100)),
+                ("brake", MathF.Round(drive.Brake * 100)), ("clutch", MathF.Round(drive.Clutch * 100)));
+        _hud.SetPedals(drive.Throttle, drive.Brake, drive.Clutch, tuning.Automatic);
         _hud.ShiftStatusText = Loc.GetString(drive.ShiftStatus switch
         {
             NCVehicleShiftStatus.ClutchRequired => "nc-vehicle-shift-clutch-required",
@@ -131,18 +133,14 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
                     ("steering", MathF.Round(condition.SteeringFluidFraction * 100)), ("washer", MathF.Round(condition.WasherFraction * 100)),
                     ("pressure", MathF.Round(condition.OilPressure)));
         }
-        _hud.GearText = tuning.Automatic ? Loc.GetString("nc-vehicle-selector", ("position", drive.Selector switch
-        {
-            NCVehicleSelector.Park => "P",
-            NCVehicleSelector.Reverse => "R",
-            NCVehicleSelector.Drive => "D",
-            NCVehicleSelector.Low => "L",
-            _ => "N",
-        })) : Loc.GetString("nc-vehicle-lever-state", ("column", drive.LeverColumn + 1),
-            ("row", Loc.GetString(drive.LeverRow == 0 ? "nc-vehicle-gear-n" :
-                drive.LeverRow < 0 ? "nc-vehicle-gear-up" : "nc-vehicle-gear-down")),
-            ("reverse", Loc.GetString(drive.ReverseArmed ? "nc-vehicle-reverse-armed" : "nc-vehicle-reverse-locked")));
-        _hud.SetShifter(tuning.Automatic, drive.LeverColumn, drive.LeverRow, drive.Selector, drive.ReverseArmed);
+        _hud.GearText = tuning.Automatic ? Loc.GetString("nc-vehicle-selector", ("position", gear)) :
+            tuning.Sequential ? Loc.GetString("nc-vehicle-sequential-state", ("gear", gear)) :
+            Loc.GetString("nc-vehicle-lever-state", ("column", drive.LeverColumn + 1),
+                ("row", Loc.GetString(drive.LeverRow == 0 ? "nc-vehicle-gear-n" :
+                    drive.LeverRow < 0 ? "nc-vehicle-gear-up" : "nc-vehicle-gear-down")),
+                ("reverse", Loc.GetString(drive.ReverseArmed ? "nc-vehicle-reverse-armed" : "nc-vehicle-reverse-locked")));
+        _hud.SetShifter(tuning.Automatic, tuning.Sequential, drive.Gear, tuning.GearRatios.Length - 2,
+            drive.LeverColumn, drive.LeverRow, drive.Selector, drive.ReverseArmed);
         var temperature = 20f;
         var engineWarning = !drive.EngineRunning && !drive.Cranking;
         var oilWarning = false;
@@ -165,7 +163,7 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
             ReleaseSteering();
         var gas = focused && Held(NCVehicleKeyFunctions.Throttle);
         var brake = focused && Held(NCVehicleKeyFunctions.Brake);
-        var clutch = focused && Held(NCVehicleKeyFunctions.Clutch);
+        var clutch = !tuning.Automatic && focused && Held(NCVehicleKeyFunctions.Clutch);
         var handbrake = focused && Held(NCVehicleKeyFunctions.Handbrake);
         _hud.SteeringMaximumAngle = tuning.SteeringWheelTravel;
         var steering = _hud.SteeringHeld ? _hud.SteeringValue : drive.Steering;
@@ -202,6 +200,25 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
             if (binding.State == BoundKeyState.Down)
                 return true;
         return false;
+    }
+
+    private static string GetGearLabel(NCVehicleDriveComponent drive, NCVehicleHandlingPrototype tuning)
+    {
+        if (!tuning.Automatic)
+        {
+            return drive.Gear == 0 ? Loc.GetString("nc-vehicle-gear-n") :
+                drive.Gear == tuning.GearRatios.Length - 1 ? Loc.GetString("nc-vehicle-gear-r") :
+                drive.Gear.ToString();
+        }
+
+        return drive.Selector switch
+        {
+            NCVehicleSelector.Park => "P",
+            NCVehicleSelector.Reverse => "R",
+            NCVehicleSelector.Drive => $"D{Math.Max(1, drive.Gear)}",
+            NCVehicleSelector.Low => $"L{Math.Max(1, drive.Gear)}",
+            _ => "N",
+        };
     }
 
     private void ReleaseSteering() => _hud?.ReleaseSteeringGrip();

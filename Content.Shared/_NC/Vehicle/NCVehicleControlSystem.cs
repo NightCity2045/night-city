@@ -106,7 +106,24 @@ public sealed partial class NCVehicleControlSystem : EntitySystem
             case NCVehicleDriverAction.Reverse:
                 ent.Comp.PendingShift = null;
                 ent.Comp.ShiftStatus = NCVehicleShiftStatus.None;
-                ent.Comp.ReverseArmed = !ent.Comp.ReverseArmed;
+                if (tuning.Sequential)
+                {
+                    if (TryComp<PhysicsComponent>(uid, out var body) &&
+                        body.LinearVelocity.Length() > tuning.SelectorMaximumSpeed)
+                    {
+                        return false;
+                    }
+
+                    if (ent.Comp.Clutch < tuning.ShiftClutchThreshold)
+                        return TryQueueShift(uid, ent.Comp, action);
+                    ent.Comp.Gear = tuning.GearRatios.Length - 1;
+                    ent.Comp.LeverRow = 1;
+                    ent.Comp.ReverseArmed = false;
+                }
+                else
+                {
+                    ent.Comp.ReverseArmed = !ent.Comp.ReverseArmed;
+                }
                 break;
             default:
                 return false;

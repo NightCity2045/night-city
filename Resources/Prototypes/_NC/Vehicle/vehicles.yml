@@ -23,9 +23,31 @@
     grid:
     - 0,0,9,5
     maxItemSize: Huge
+    openOnActivate: false
+    clickInsert: false
+  - type: NCVehicleTrunk
+  - type: EntityStorage
+    maxSize: 1.1
+    capacity: 2
+    isCollidableWhenOpen: true
+    openOnMove: false
+    enteringOffset: 0, -1.65
+    enteringRange: 0.85
+    showContents: true
+    airtight: false
+    whitelist:
+      components:
+      - Item
+      - MobState
+      - EntityStorage
+    blacklist:
+      components:
+      - NCVehicle
   - type: ContainerContainer
     containers:
       storagebase: !type:Container
+        ents: []
+      entity_storage: !type:Container
         ents: []
   - type: NCVehicleDrive
     handling: NCSupraManualRwd

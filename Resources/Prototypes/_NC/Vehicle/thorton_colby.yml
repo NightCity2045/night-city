@@ -138,6 +138,13 @@
   - type: NCVehicleDrive
     handling: NCThortonColbyManualRwd
     fuel: 60
+  - type: Storage
+    grid:
+    - 0,0,15,7
+  - type: EntityStorage
+    maxSize: 1.5
+    capacity: 6
+    enteringOffset: 0, -1.75
   - type: Sprite
     sprite: _NC/Vehicle/thorton_colby_2045.rsi
   - type: Fixtures

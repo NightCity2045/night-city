@@ -127,6 +127,8 @@
   inertia: 3500
   frontTowPoint: 0, 2.4
   rearTowPoint: 0, -2.4
+  stockPartOverrides:
+    gearbox: NCVehicleAutomaticGearbox
 
 - type: entity
   parent: NCToyotaSupra1996
@@ -137,8 +139,15 @@
   - type: NCVehicle
     chassis: NCVillefortAlvaradoChassis
   - type: NCVehicleDrive
-    handling: NCVillefortAlvaradoManualRwd
+    handling: NCVillefortAlvaradoAutomaticRwd
     fuel: 70
+  - type: Storage
+    grid:
+    - 0,0,11,5
+  - type: EntityStorage
+    maxSize: 1.25
+    capacity: 3
+    enteringOffset: 0, -2.2
   - type: Sprite
     sprite: _NC/Vehicle/villefort_alvarado_2045.rsi
   - type: Fixtures

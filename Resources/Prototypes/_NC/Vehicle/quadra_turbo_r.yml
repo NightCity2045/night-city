@@ -138,6 +138,13 @@
   - type: NCVehicleDrive
     handling: NCQuadraTurboRManualRwd
     fuel: 45
+  - type: Storage
+    grid:
+    - 0,0,6,3
+  - type: EntityStorage
+    maxSize: 1
+    capacity: 1
+    enteringOffset: 0, -1.7
   - type: Sprite
     sprite: _NC/Vehicle/quadra_turbo_r_2045.rsi
   - type: Fixtures

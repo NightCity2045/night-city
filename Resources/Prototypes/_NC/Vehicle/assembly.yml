@@ -40,6 +40,7 @@
   calibrations: [NCVehicleStreetCalibration, NCVehicleEconomyCalibration, NCVehicleSportCalibration]
   cargoMass:
     storagebase: 0, -1.2
+    entity_storage: 0, -1.45
   fluidMass:
     transmission:
       kilogramsPerUnit: 0.00086

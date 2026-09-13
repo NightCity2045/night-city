@@ -138,6 +138,13 @@
   - type: NCVehicleDrive
     handling: NCQuadraType66ManualRwd
     fuel: 55
+  - type: Storage
+    grid:
+    - 0,0,9,5
+  - type: EntityStorage
+    maxSize: 1.15
+    capacity: 2
+    enteringOffset: 0, -1.85
   - type: Sprite
     sprite: _NC/Vehicle/quadra_type66_2045.rsi
   - type: Fixtures

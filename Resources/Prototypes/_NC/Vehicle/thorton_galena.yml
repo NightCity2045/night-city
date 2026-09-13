@@ -138,6 +138,13 @@
   - type: NCVehicleDrive
     handling: NCThortonGalenaManualRwd
     fuel: 28
+  - type: Storage
+    grid:
+    - 0,0,8,5
+  - type: EntityStorage
+    maxSize: 1.1
+    capacity: 2
+    enteringOffset: 0, -1.25
   - type: Sprite
     sprite: _NC/Vehicle/thorton_galena_2045.rsi
   - type: Fixtures
