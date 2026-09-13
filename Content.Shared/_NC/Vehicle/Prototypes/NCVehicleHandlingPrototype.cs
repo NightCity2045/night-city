@@ -83,6 +83,10 @@ public sealed partial class NCVehicleHandlingPrototype : IPrototype, IInheriting
     [DataField(required: true)] public float LowSpeed;
     [DataField(required: true)] public float BrakeTorque;
     [DataField(required: true)] public float HandbrakeTorque;
+    /// <summary>Remaining lateral grip on handbraked wheels at full application.</summary>
+    [DataField] public float HandbrakeLateralGrip = 0.35f;
+    [DataField] public float HandbrakeEngageRate = 12;
+    [DataField] public float HandbrakeReleaseRate = 4;
     [DataField(required: true)] public float AerodynamicDrag;
     [DataField(required: true)] public float RollingResistance;
     [DataField(required: true)] public float FuelCapacity;

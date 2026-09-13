@@ -15,15 +15,15 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
         </PanelContainer>
         <BoxContainer Orientation="Horizontal" HorizontalAlignment="Center" SeparationOverride="2">
             <PanelContainer StyleClasses="AngleRect" SetSize="150 150">
-                <vehicle:NCVehicleGearGate Name="Shifter" SetSize="150 150"
-                    ToolTip="{Loc 'nc-vehicle-hud-shifter-tooltip'}" />
+                <vehicle:NCVehicleSteeringWheel Name="Steering" SetSize="150 150" MouseFilter="Ignore"
+                    ToolTip="{Loc 'nc-vehicle-steering-grip'}" />
             </PanelContainer>
             <PanelContainer StyleClasses="AngleRect" SetSize="340 150">
                 <vehicle:NCVehicleInstrumentCluster Name="Instruments" SetSize="340 150" />
             </PanelContainer>
             <PanelContainer StyleClasses="AngleRect" SetSize="150 150">
-                <vehicle:NCVehicleSteeringWheel Name="Steering" SetSize="150 150"
-                    ToolTip="{Loc 'nc-vehicle-steering-grip'}" />
+                <vehicle:NCVehicleGearGate Name="Shifter" SetSize="150 150"
+                    ToolTip="{Loc 'nc-vehicle-hud-shifter-tooltip'}" />
             </PanelContainer>
         </BoxContainer>
         <BoxContainer Orientation="Horizontal" HorizontalAlignment="Center" SeparationOverride="3">

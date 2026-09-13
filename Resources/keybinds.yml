@@ -654,10 +654,10 @@ binds:
 # NC-Edit-Start
 - function: NCVehicleThrottle
   type: State
-  key: Q
+  key: W
 - function: NCVehicleBrake
   type: State
-  key: E
+  key: S
 - function: NCVehicleClutch
   type: State
   key: Shift
@@ -666,20 +666,20 @@ binds:
   key: Space
 - function: NCVehicleGearUp
   type: State
-  key: W
+  key: Up
 - function: NCVehicleGearDown
   type: State
-  key: S
-- function: NCVehicleSteerLeft
-  type: State
-  key: Left
-- function: NCVehicleSteerRight
-  type: State
-  key: Right
+  key: Down
 - function: NCVehicleGearLeft
   type: State
-  key: A
+  key: Left
 - function: NCVehicleGearRight
+  type: State
+  key: Right
+- function: NCVehicleSteerLeft
+  type: State
+  key: A
+- function: NCVehicleSteerRight
   type: State
   key: D
 # NC-Edit-End

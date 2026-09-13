@@ -74,11 +74,11 @@
   clutchTorque: 550
   clutchCoupling: 3
   pedalRate: 3
-  # Full lock in 1/6 second; fast countersteering must keep up with the mouse.
+  # Full lock in 1/6 second so A/D countersteering can catch a developing slide.
   steeringRate: 6
   steeringAngle: 0.55
   steeringReturn: 0.3
-  # A quarter-circle mouse gesture reaches full lock instead of 1.25 turns.
+  # The HUD wheel displays a quarter-turn from center to full lock.
   steeringWheelTravel: 1.5707963
   gravity: 9.81
   friction: 0.95
@@ -86,7 +86,10 @@
   lateralStiffness: 2000
   lowSpeed: 2
   brakeTorque: 2600
-  handbrakeTorque: 1800
+  handbrakeTorque: 4800
+  handbrakeLateralGrip: 0.3
+  handbrakeEngageRate: 14
+  handbrakeReleaseRate: 5
   aerodynamicDrag: 0.38
   rollingResistance: 12
   fuelCapacity: 70

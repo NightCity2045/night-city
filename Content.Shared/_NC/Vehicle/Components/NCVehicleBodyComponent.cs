@@ -31,6 +31,8 @@ public sealed partial class NCVehicleBodyComponent : Component
     [DataField] public float MaximumModuleDamagePerImpact = 0.45f;
     [DataField] public float RolloverAcceleration = 14;
     [DataField] public float RolloverMinimumSpeed = 5;
+    [DataField] public float RolloverGraceSeconds = 0.35f;
+    [DataField] public float RolloverHandbrakeThreshold = 0.1f;
     [DataField] public float FireIgnitionTemperature = 423.15f;
     [DataField] public float FirePartWearPerSecond = 0.005f;
     [DataField] public HashSet<string> FireDamageSlots = new();

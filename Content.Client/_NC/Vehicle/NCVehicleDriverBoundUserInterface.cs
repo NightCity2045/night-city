@@ -27,10 +27,10 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
     private NCVehicleDriverHud? _hud;
     private TimeSpan _nextInput;
     private uint _sequence;
-    private bool _up;
-    private bool _down;
-    private bool _left;
-    private bool _right;
+    private bool _gearUp;
+    private bool _gearDown;
+    private bool _gearLeft;
+    private bool _gearRight;
 
     protected override void Open()
     {
@@ -159,7 +159,7 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
             drive.Fuel / Math.Max(0.1f, tuning.FuelCapacity), temperature, gear, engineWarning, oilWarning,
             batteryWarning, drive.HandbrakeHeld, Math.Max(drive.LongitudinalSlip, drive.LateralSlip) >= tuning.SlipWarning);
         _nextInput = _timing.RealTime + TimeSpan.FromSeconds(tuning.InputInterval);
-        // Typing in chat must not hold the accelerator or operate the gearbox.
+        // Typing in chat must not hold the pedals or steering keys.
         var focused = _clyde.IsFocused && _ui.KeyboardFocused is not LineEdit && _ui.KeyboardFocused is not TextEdit;
         if (!focused || Held(EngineKeyFunctions.CloseModals) || Held(EngineKeyFunctions.EscapeMenu))
             ReleaseSteering();
@@ -181,23 +181,19 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
         SendPredictedMessage(new NCVehicleInputMessage(drive.Authority, _sequence, focused ? steering : 0,
             gas, brake, clutch, handbrake, _hud.SteeringHeld ||
             (focused && (Held(NCVehicleKeyFunctions.SteerLeft) || Held(NCVehicleKeyFunctions.SteerRight)))));
-        // Choose the neutral gate before engaging it when A/W arrive in the same input frame.
-        var left = focused && Held(NCVehicleKeyFunctions.GearLeft);
-        var right = focused && Held(NCVehicleKeyFunctions.GearRight);
-        if (left && !_left)
-            SendAction(NCVehicleDriverAction.GearLeft);
-        if (right && !_right)
-            SendAction(NCVehicleDriverAction.GearRight);
-        _left = left;
-        _right = right;
-        var up = focused && Held(NCVehicleKeyFunctions.GearUp);
-        var down = focused && Held(NCVehicleKeyFunctions.GearDown);
-        if (up && !_up)
-            SendAction(NCVehicleDriverAction.GearUp);
-        if (down && !_down)
-            SendAction(NCVehicleDriverAction.GearDown);
-        _up = up;
-        _down = down;
+        // Arrow keys move the physical selector by one detent per press; drag remains available on the HUD.
+        UpdateGearKey(NCVehicleKeyFunctions.GearUp, NCVehicleDriverAction.GearUp, focused, ref _gearUp);
+        UpdateGearKey(NCVehicleKeyFunctions.GearDown, NCVehicleDriverAction.GearDown, focused, ref _gearDown);
+        UpdateGearKey(NCVehicleKeyFunctions.GearLeft, NCVehicleDriverAction.GearLeft, focused, ref _gearLeft);
+        UpdateGearKey(NCVehicleKeyFunctions.GearRight, NCVehicleDriverAction.GearRight, focused, ref _gearRight);
+    }
+
+    private void UpdateGearKey(BoundKeyFunction function, NCVehicleDriverAction action, bool focused, ref bool previous)
+    {
+        var pressed = focused && Held(function);
+        if (pressed && !previous)
+            SendAction(action);
+        previous = pressed;
     }
 
     private bool Held(BoundKeyFunction function)

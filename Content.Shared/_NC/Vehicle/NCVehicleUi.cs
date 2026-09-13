@@ -60,7 +60,7 @@ public readonly record struct NCVehicleDriveShutdownEvent;
 public readonly record struct NCVehicleFuelConsumedEvent(float Litres);
 
 [ByRefEvent]
-public readonly record struct NCVehicleRolloverRiskEvent(float LateralAcceleration, float Speed);
+public readonly record struct NCVehicleOverturnedEvent;
 
 [Serializable, NetSerializable]
 public sealed class NCVehicleInfrastructureMessage(uint authority, bool travel) : BoundUserInterfaceMessage

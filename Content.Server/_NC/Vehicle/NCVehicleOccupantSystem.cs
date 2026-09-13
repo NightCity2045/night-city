@@ -217,6 +217,18 @@ public sealed partial class NCVehicleOccupantSystem : EntitySystem
         ent.Comp.GasHeld = false;
         ent.Comp.BrakeHeld = false;
         ent.Comp.ClutchHeld = false;
+        ent.Comp.HandbrakeHeld = false;
+        ent.Comp.HandbrakeApplication = 1;
+        ent.Comp.Throttle = 0;
+        ent.Comp.Brake = 0;
+        ent.Comp.Clutch = 0;
+        ent.Comp.SteeringHeld = false;
+        ent.Comp.SteeringTarget = 0;
+        ent.Comp.ReverseArmed = false;
+        if (_prototypes.TryIndex(ent.Comp.Handling, out var tuning) && tuning.Automatic)
+            ent.Comp.Selector = NCVehicleSelector.Park;
+        ent.Comp.Gear = 0;
+        ent.Comp.LeverRow = 0;
         _ui.CloseUi(ent.Owner, NCVehicleUiKey.Driver, user);
         Dirty(ent);
     }

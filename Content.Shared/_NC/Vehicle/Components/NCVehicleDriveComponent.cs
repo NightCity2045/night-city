@@ -26,12 +26,14 @@ public sealed partial class NCVehicleDriveComponent : Component
     [AutoNetworkedField] public bool BrakeHeld;
     [AutoNetworkedField] public bool ClutchHeld;
     [AutoNetworkedField] public bool HandbrakeHeld;
+    [AutoNetworkedField] public float HandbrakeApplication;
     [AutoNetworkedField] public float Throttle;
     [AutoNetworkedField] public float Brake;
     [AutoNetworkedField] public float Clutch;
     [AutoNetworkedField] public bool EngineRunning;
     [AutoNetworkedField] public bool Cranking;
     [AutoNetworkedField] public bool Overturned;
+    [AutoNetworkedField] public float RolloverElapsed;
     [AutoNetworkedField] public float CrankElapsed;
     [AutoNetworkedField] public float EngineRpm;
     [AutoNetworkedField] public float StallElapsed;

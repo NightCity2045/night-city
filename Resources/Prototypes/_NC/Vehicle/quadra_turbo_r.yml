@@ -51,7 +51,8 @@
   centerOfGravityHeight: 0.4
   friction: 1
   brakeTorque: 3200
-  handbrakeTorque: 2100
+  handbrakeTorque: 6000
+  handbrakeLateralGrip: 0.27
   aerodynamicDrag: 0.44
   rollingResistance: 14
   fuelCapacity: 75

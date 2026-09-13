@@ -88,6 +88,15 @@ public sealed class NCVehicleDriveMathTest
     }
 
     [Test]
+    public void HandbrakeGripEllipseReducesLateralForceAndPreservesLongitudinalLimit()
+    {
+        var lateral = NCVehicleDriveMath.LimitGripEllipse(new Vector2(2000, 0), 1000, 0.3f);
+        var longitudinal = NCVehicleDriveMath.LimitGripEllipse(new Vector2(0, 2000), 1000, 0.3f);
+        Assert.That(lateral.X, Is.EqualTo(300).Within(0.001f));
+        Assert.That(longitudinal.Y, Is.EqualTo(1000).Within(0.001f));
+    }
+
+    [Test]
     public void TorqueCurveInterpolatesAndClampsEndpoints()
     {
         Vector2[] points = [new(0, 100), new(1000, 200), new(2000, 0)];
@@ -95,6 +104,14 @@ public sealed class NCVehicleDriveMathTest
         Assert.That(NCVehicleDriveMath.Curve(points, 1500), Is.EqualTo(100));
         Assert.That(NCVehicleDriveMath.Curve(points, -1), Is.EqualTo(100));
         Assert.That(NCVehicleDriveMath.Curve(points, 3000), Is.Zero);
+    }
+
+    [Test]
+    public void RolloverRiskRequiresSpeedAndIgnoresHandbrakeDrift()
+    {
+        Assert.That(NCVehicleDriveMath.IsRolloverRisk(15, 8, 5, 14, 0, 0.1f), Is.True);
+        Assert.That(NCVehicleDriveMath.IsRolloverRisk(15, 4, 5, 14, 0, 0.1f), Is.False);
+        Assert.That(NCVehicleDriveMath.IsRolloverRisk(15, 8, 5, 14, 0.5f, 0.1f), Is.False);
     }
 
     [Test]

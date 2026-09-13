@@ -28,6 +28,7 @@ public sealed partial class NCVehicleDamageSystem : EntitySystem
 {
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private NCVehicleAssemblySystem _assembly = default!;
+    [Dependency] private NCVehicleDriveSystem _drive = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private DamageableSystem _damageable = default!;
     [Dependency] private FlammableSystem _flammable = default!;
@@ -42,7 +43,7 @@ public sealed partial class NCVehicleDamageSystem : EntitySystem
         SubscribeLocalEvent<NCVehicleBodyComponent, ExaminedEvent>(OnExamined);
         SubscribeLocalEvent<NCVehicleBodyComponent, DamageDealtEvent>(OnWeaponDamage);
         SubscribeLocalEvent<NCVehicleBodyComponent, NCVehicleMaintenanceEvent>(OnMaintenance);
-        SubscribeLocalEvent<NCVehicleBodyComponent, NCVehicleRolloverRiskEvent>(OnRolloverRisk);
+        SubscribeLocalEvent<NCVehicleBodyComponent, NCVehicleOverturnedEvent>(OnOverturned);
         InitializeRepair();
     }
 
@@ -85,31 +86,18 @@ public sealed partial class NCVehicleDamageSystem : EntitySystem
                     _damageable.ChangeDamage(occupant, penetrating);
     }
 
-    private void OnRolloverRisk(Entity<NCVehicleBodyComponent> ent, ref NCVehicleRolloverRiskEvent args)
-    {
-        if (float.IsFinite(args.LateralAcceleration) && args.Speed >= ent.Comp.RolloverMinimumSpeed &&
-            Math.Abs(args.LateralAcceleration) > ent.Comp.RolloverAcceleration)
-            TryOverturn(ent);
-    }
+    private void OnOverturned(Entity<NCVehicleBodyComponent> ent, ref NCVehicleOverturnedEvent args)
+        => _assembly.TryRebuild(ent);
 
     public bool TryOverturn(EntityUid uid)
-    {
-        if (!TryComp<NCVehicleDriveComponent>(uid, out var drive) || drive.Overturned)
-            return false;
-        drive.Overturned = true;
-        drive.EngineRunning = false;
-        drive.Cranking = false;
-        drive.Gear = 0;
-        _assembly.TryRebuild(uid);
-        Dirty(uid, drive);
-        return true;
-    }
+        => _drive.TryOverturn(uid);
 
     public bool TryRight(EntityUid uid)
     {
         if (!TryComp<NCVehicleDriveComponent>(uid, out var drive) || !drive.Overturned)
             return false;
         drive.Overturned = false;
+        drive.RolloverElapsed = 0;
         _assembly.TryRebuild(uid);
         Dirty(uid, drive);
         return true;

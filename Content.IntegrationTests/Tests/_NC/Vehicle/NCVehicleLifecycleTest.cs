@@ -620,6 +620,40 @@ public sealed partial class NCVehicleLifecycleTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
+    public void ExitingVehicleSecuresTheUnattendedPowertrain()
+    {
+        Server.System<SharedMapSystem>().CreateMap(out var mapId);
+        var coordinates = new MapCoordinates(Vector2.Zero, mapId);
+        var car = SEntMan.SpawnEntity("NCToyotaSupra1996", coordinates);
+        var driver = SEntMan.SpawnEntity("MobHuman", coordinates);
+        var containers = Server.System<SharedContainerSystem>();
+        Assert.That(containers.TryGetContainer(car, "nc-vehicle-driver", out var seat), Is.True);
+        Assert.That(containers.Insert(driver, seat!), Is.True);
+        var occupant = SEntMan.AddComponent<NCVehicleOccupantComponent>(driver);
+        occupant.Vehicle = car;
+        occupant.Seat = "driver";
+        var drive = SEntMan.GetComponent<NCVehicleDriveComponent>(car);
+        drive.Driver = driver;
+        drive.EngineRunning = true;
+        drive.Gear = 1;
+        drive.LeverRow = -1;
+        drive.GasHeld = true;
+        drive.Throttle = 1;
+
+        Assert.That(Server.System<NCVehicleOccupantSystem>().TryExit(car, driver, true), Is.True);
+        Assert.Multiple(() =>
+        {
+            Assert.That(drive.Driver, Is.Null);
+            Assert.That(drive.EngineRunning, Is.True, "An idling engine may remain on after the driver exits.");
+            Assert.That(drive.Gear, Is.Zero);
+            Assert.That(drive.LeverRow, Is.Zero);
+            Assert.That(drive.Throttle, Is.Zero);
+            Assert.That(drive.HandbrakeApplication, Is.EqualTo(1));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
     public void CrumpleZoneAbsorbsSmallImpactBeforeInstalledEngineTakesDamage()
     {
         Server.System<SharedMapSystem>().CreateMap(out var mapId);

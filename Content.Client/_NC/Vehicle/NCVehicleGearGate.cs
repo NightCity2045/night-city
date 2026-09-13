@@ -14,7 +14,7 @@ using Robust.Shared.Timing;
 
 namespace Content.Client._NC.Vehicle;
 
-/// <summary>Clickable gated shifter whose lever smoothly follows authoritative transmission state.</summary>
+/// <summary>Drag-operated gated shifter whose lever smoothly follows authoritative transmission state.</summary>
 public sealed class NCVehicleGearGate : BaseButton
 {
     private readonly Font _font;
@@ -27,6 +27,10 @@ public sealed class NCVehicleGearGate : BaseButton
     private int _selector;
     private int _column;
     private int _row;
+    private bool _dragging;
+    private int _commandColumn;
+    private int _commandRow;
+    private int _commandSelector;
 
     public event Action<NCVehicleDriverAction>? DriverAction;
 
@@ -56,15 +60,57 @@ public sealed class NCVehicleGearGate : BaseButton
 
     protected override void KeyBindDown(GUIBoundKeyEventArgs args)
     {
+        if (args.Function == EngineKeyFunctions.CloseModals || args.Function == EngineKeyFunctions.EscapeMenu)
+        {
+            ReleaseLever();
+            return;
+        }
+
         base.KeyBindDown(args);
         if (args.Function != EngineKeyFunctions.UIClick)
             return;
 
-        TrySelect(args.RelativePosition);
+        _dragging = true;
+        _commandColumn = _column;
+        _commandRow = _row;
+        _commandSelector = _selector;
         args.Handle();
     }
 
-    private void TrySelect(Vector2 position)
+    protected override void KeyBindUp(GUIBoundKeyEventArgs args)
+    {
+        base.KeyBindUp(args);
+        if (args.Function != EngineKeyFunctions.UIClick)
+            return;
+
+        ReleaseLever();
+        args.Handle();
+    }
+
+    protected override void ControlFocusExited()
+    {
+        base.ControlFocusExited();
+        _dragging = false;
+    }
+
+    protected override void MouseMove(GUIMouseMoveEventArgs args)
+    {
+        base.MouseMove(args);
+        if (!_dragging)
+            return;
+
+        TryDrag(args.RelativePosition);
+        args.Handle();
+    }
+
+    private void ReleaseLever()
+    {
+        _dragging = false;
+        if (UserInterfaceManager.ControlFocused == this)
+            UserInterfaceManager.ControlFocused = null;
+    }
+
+    private void TryDrag(Vector2 position)
     {
         if (Size.X <= 0 || Size.Y <= 0)
             return;
@@ -72,23 +118,27 @@ public sealed class NCVehicleGearGate : BaseButton
         if (_automatic)
         {
             var target = Math.Clamp((int) MathF.Round(position.Y / Size.Y * 4), 0, 4);
-            var action = target < _selector ? NCVehicleDriverAction.GearUp : NCVehicleDriverAction.GearDown;
-            for (var i = 0; i < Math.Abs(target - _selector); i++)
+            var action = target < _commandSelector ? NCVehicleDriverAction.GearUp : NCVehicleDriverAction.GearDown;
+            for (var i = 0; i < Math.Abs(target - _commandSelector); i++)
                 DriverAction?.Invoke(action);
+            _commandSelector = target;
             return;
         }
 
         var targetColumn = Math.Clamp((int) MathF.Round(position.X / Size.X * 2), 0, 2);
         var targetRow = position.Y < Size.Y * 0.38f ? -1 : position.Y > Size.Y * 0.62f ? 1 : 0;
-        if (targetColumn == _column && targetRow == _row)
+        if (targetColumn == _commandColumn && targetRow == _commandRow)
             return;
-        if (_row != 0)
-            DriverAction?.Invoke(_row < 0 ? NCVehicleDriverAction.GearDown : NCVehicleDriverAction.GearUp);
-        var horizontal = targetColumn < _column ? NCVehicleDriverAction.GearLeft : NCVehicleDriverAction.GearRight;
-        for (var i = 0; i < Math.Abs(targetColumn - _column); i++)
+        // Every H-pattern move passes through neutral before crossing to another gate.
+        if (_commandRow != 0)
+            DriverAction?.Invoke(_commandRow < 0 ? NCVehicleDriverAction.GearDown : NCVehicleDriverAction.GearUp);
+        var horizontal = targetColumn < _commandColumn ? NCVehicleDriverAction.GearLeft : NCVehicleDriverAction.GearRight;
+        for (var i = 0; i < Math.Abs(targetColumn - _commandColumn); i++)
             DriverAction?.Invoke(horizontal);
         if (targetRow != 0)
             DriverAction?.Invoke(targetRow < 0 ? NCVehicleDriverAction.GearUp : NCVehicleDriverAction.GearDown);
+        _commandColumn = targetColumn;
+        _commandRow = targetRow;
     }
 
     protected override void FrameUpdate(FrameEventArgs args)

@@ -77,11 +77,13 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             if (!Valid(tuning) || drive.WheelSpeeds.Length != tuning.Wheels.Count)
                 continue;
 
-            if (_timing.CurTime - drive.LastInputTime > TimeSpan.FromSeconds(tuning.InputTimeout) || drive.Driver == null)
+            var unattended = drive.Driver == null;
+            if (_timing.CurTime - drive.LastInputTime > TimeSpan.FromSeconds(tuning.InputTimeout) || unattended)
             {
                 drive.GasHeld = false;
                 drive.BrakeHeld = false;
                 drive.ClutchHeld = false;
+                drive.HandbrakeHeld = false;
                 drive.SteeringHeld = false;
             }
 
@@ -91,7 +93,7 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             _condition.Advance(uid, body.LinearVelocity.Length(), dt);
             if (!body.Awake && !drive.EngineRunning && !drive.Cranking && drive.Driver == null && drive.PendingShift == null)
                 continue;
-            if (tuning.Automatic && drive.Selector == NCVehicleSelector.Drive && _timing.CurTime >= drive.NextAutomaticShift)
+            if (!unattended && tuning.Automatic && drive.Selector == NCVehicleSelector.Drive && _timing.CurTime >= drive.NextAutomaticShift)
             {
                 var previous = drive.Gear;
                 if (drive.EngineRpm > tuning.AutomaticUpshiftRpm)
@@ -110,6 +112,13 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             drive.Throttle = NCVehicleDriveMath.Approach(drive.Throttle, drive.GasHeld ? 1 : 0, tuning.PedalRate * dt);
             drive.Brake = NCVehicleDriveMath.Approach(drive.Brake, drive.BrakeHeld ? 1 : 0, tuning.PedalRate * dt);
             drive.Clutch = NCVehicleDriveMath.Approach(drive.Clutch, drive.ClutchHeld ? 1 : 0, tuning.PedalRate * dt);
+            // An empty car keeps its mechanical parking brake applied. It remains a dynamic body for towing and impacts.
+            var handbrakeTarget = unattended || drive.HandbrakeHeld ? 1 : 0;
+            var handbrakeRate = handbrakeTarget > drive.HandbrakeApplication
+                ? tuning.HandbrakeEngageRate
+                : tuning.HandbrakeReleaseRate;
+            drive.HandbrakeApplication = NCVehicleDriveMath.Approach(drive.HandbrakeApplication,
+                handbrakeTarget, handbrakeRate * dt);
             _controls.TryCompleteShift(uid);
             // An unheld rack returns with road speed; it does not snap to center at a stop.
             if (!drive.SteeringHeld)
@@ -130,8 +139,7 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             drive.LongitudinalSlip = 0;
             drive.LateralSlip = 0;
             var acceleration = (-rotation).RotateVec((body.LinearVelocity - drive.PreviousVelocity) / dt);
-            var rollover = new NCVehicleRolloverRiskEvent(acceleration.X, body.LinearVelocity.Length());
-            RaiseLocalEvent(uid, ref rollover);
+            UpdateRollover(uid, drive, body, acceleration.X, dt);
             drive.PreviousVelocity = body.LinearVelocity;
             for (var substep = 0; substep < steps; substep++)
                 Step(uid, drive, body, tuning, rotation, acceleration, surfaces, step, 1f / steps);
@@ -144,12 +152,47 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
         }
     }
 
+    private void UpdateRollover(EntityUid uid, NCVehicleDriveComponent drive, PhysicsComponent physics,
+        float lateralAcceleration, float dt)
+    {
+        if (drive.Overturned || !TryComp<NCVehicleBodyComponent>(uid, out var body))
+            return;
+
+        // A handbrake turn sheds rear lateral grip by design. Only sustained cornering grip can roll the chassis;
+        // one-frame contact and reconciliation impulses must not be interpreted as a mechanical failure.
+        var risk = drive.Driver != null && NCVehicleDriveMath.IsRolloverRisk(lateralAcceleration,
+            physics.LinearVelocity.Length(), body.RolloverMinimumSpeed, body.RolloverAcceleration,
+            drive.HandbrakeApplication, body.RolloverHandbrakeThreshold);
+        drive.RolloverElapsed = risk ? drive.RolloverElapsed + dt : 0;
+        if (drive.RolloverElapsed >= body.RolloverGraceSeconds)
+            TryOverturn((uid, drive));
+    }
+
+    /// <summary>Predicts the abrupt driving-state transition before server-only consequences are rebuilt.</summary>
+    public bool TryOverturn(Entity<NCVehicleDriveComponent?> ent)
+    {
+        if (!Resolve(ent, ref ent.Comp, false) || ent.Comp.Overturned)
+            return false;
+
+        ent.Comp.Overturned = true;
+        ent.Comp.RolloverElapsed = 0;
+        ent.Comp.EngineRunning = false;
+        ent.Comp.Cranking = false;
+        Dirty(ent);
+        var overturned = new NCVehicleOverturnedEvent();
+        RaiseLocalEvent(ent.Owner, ref overturned);
+        return true;
+    }
+
     private void Step(EntityUid uid, NCVehicleDriveComponent drive, PhysicsComponent body,
         NCVehicleHandlingPrototype tuning, Angle rotation, Vector2 acceleration, float[] surfaces, float dt, float forceWeight)
     {
         var initialWheelSpeeds = _initialWheelSpeeds;
         Array.Copy(drive.WheelSpeeds, initialWheelSpeeds, drive.WheelSpeeds.Length);
-        var ratio = drive.Gear >= 0 && drive.Gear < tuning.GearRatios.Length ? tuning.GearRatios[drive.Gear] : 0;
+        // No occupant can deliver driveline torque, even while a stale gear selection is reconciling.
+        var ratio = drive.Driver != null && drive.Gear >= 0 && drive.Gear < tuning.GearRatios.Length
+            ? tuning.GearRatios[drive.Gear]
+            : 0;
         var driveWeight = 0f;
         var wheelOmega = 0f;
         for (var i = 0; i < tuning.Wheels.Count; i++)
@@ -276,7 +319,8 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
                 NCVehiclePerformanceCompiler.Get(drive.AssemblyFunctions, NCVehicleFunction.Electronics) > 0;
             var tyreSpeed = Math.Abs(previousOmega * wheel.Radius);
             var roadSpeed = Math.Abs(longitudinal);
-            if (electronics && tuning.StabilityControl && roadSpeed > tuning.LowSpeed)
+            // Pulling the mechanical handbrake suspends ESC so it cannot cancel the driver's requested rotation.
+            if (electronics && tuning.StabilityControl && drive.HandbrakeApplication < 0.1f && roadSpeed > tuning.LowSpeed)
             {
                 // ESC requests selective tyre braking; available grip still bounds its yaw correction.
                 var targetYaw = longitudinal * MathF.Tan(drive.Steering * tuning.SteeringAngle * (calibration?.SteeringMultiplier ?? 1)) / tuning.Wheelbase;
@@ -291,8 +335,9 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             if (electronics && tuning.AntiLockBrakes && roadSpeed > tuning.LowSpeed && drive.Brake > 0)
                 braking *= Math.Clamp(tyreSpeed / (roadSpeed * (1 - tuning.AntiLockSlip)), 0, 1);
             // ABS releases hydraulic pressure only; the mechanical handbrake and parking pawl remain engaged.
-            if (wheel.Handbrake && drive.HandbrakeHeld)
-                braking += tuning.HandbrakeTorque * NCVehiclePerformanceCompiler.Get(drive.AssemblyFunctions, NCVehicleFunction.Braking, i);
+            if (wheel.Handbrake && drive.HandbrakeApplication > 0)
+                braking += tuning.HandbrakeTorque * drive.HandbrakeApplication *
+                    NCVehiclePerformanceCompiler.Get(drive.AssemblyFunctions, NCVehicleFunction.Braking, i);
             if (tuning.Automatic && drive.Selector == NCVehicleSelector.Park && wheel.DriveWeight > 0)
                 braking += tuning.ParkingTorque;
             var coupledOmega = NCVehicleDriveMath.WheelSpeed(previousOmega, longitudinal,
@@ -301,9 +346,12 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             drive.LongitudinalSlip = Math.Max(drive.LongitudinalSlip, Math.Abs(slip));
             drive.LateralSlip = Math.Max(drive.LateralSlip,
                 Math.Abs(lateral) / Math.Max(Math.Abs(longitudinal), tuning.LowSpeed));
-            var force = NCVehicleDriveMath.LimitGrip(new Vector2(
+            var lateralGrip = wheel.Handbrake
+                ? 1 - drive.HandbrakeApplication * (1 - tuning.HandbrakeLateralGrip)
+                : 1;
+            var force = NCVehicleDriveMath.LimitGripEllipse(new Vector2(
                 -lateral * tuning.LateralStiffness,
-                slip * tuning.LongitudinalStiffness), grip);
+                slip * tuning.LongitudinalStiffness), grip, lateralGrip);
             if (condition != null && braking > 0)
                 condition.BrakeHeat += Math.Abs(braking * coupledOmega) * dt;
             if (i < drive.WheelWear.Length)
@@ -373,6 +421,9 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             !NCVehicleDriveMath.Nonnegative(value.LateralStiffness) ||
             !NCVehicleDriveMath.Nonnegative(value.BrakeTorque) ||
             !NCVehicleDriveMath.Nonnegative(value.HandbrakeTorque) ||
+            !NCVehicleDriveMath.Positive(value.HandbrakeLateralGrip) || value.HandbrakeLateralGrip > 1 ||
+            !NCVehicleDriveMath.Positive(value.HandbrakeEngageRate) ||
+            !NCVehicleDriveMath.Positive(value.HandbrakeReleaseRate) ||
             !NCVehicleDriveMath.Nonnegative(value.AerodynamicDrag) ||
             !NCVehicleDriveMath.Nonnegative(value.RollingResistance) ||
             !NCVehicleDriveMath.Nonnegative(value.FuelIdleRate) ||

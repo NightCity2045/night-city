@@ -43,6 +43,13 @@ public static class NCVehicleDriveMath
         return Math.Min(maximum, excess * excess);
     }
 
+    /// <summary>Rejects transient and handbrake-induced lateral impulses from the rollover timer.</summary>
+    public static bool IsRolloverRisk(float lateralAcceleration, float speed, float minimumSpeed,
+        float accelerationThreshold, float handbrakeApplication, float handbrakeThreshold) =>
+        float.IsFinite(lateralAcceleration) && float.IsFinite(speed) &&
+        speed >= minimumSpeed && Math.Abs(lateralAcceleration) > accelerationThreshold &&
+        handbrakeApplication < handbrakeThreshold;
+
     public static float Curve(IReadOnlyList<Vector2> points, float rpm)
     {
         if (points.Count == 0)
@@ -65,6 +72,16 @@ public static class NCVehicleDriveMath
     {
         var length = force.Length();
         return length > maximum && length > 0 ? force * (maximum / length) : force;
+    }
+
+    /// <summary>Limits combined tyre force while allowing a locked wheel to retain less lateral than longitudinal grip.</summary>
+    public static Vector2 LimitGripEllipse(Vector2 force, float maximum, float lateralScale)
+    {
+        if (!Positive(lateralScale))
+            return Vector2.Zero;
+        var normalized = new Vector2(force.X / lateralScale, force.Y);
+        var limited = LimitGrip(normalized, maximum);
+        return new Vector2(limited.X * lateralScale, limited.Y);
     }
 
     /// <summary>Support-plane load distribution balances weight and longitudinal/lateral moments.</summary>
