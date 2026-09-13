@@ -23,6 +23,8 @@ public sealed partial class NCVehicleBodyComponent : Component
     [AutoNetworkedField] public bool Burning;
     [DataField] public float WeaponEnergyPerDamage = 2000;
     [DataField] public float PedestrianTransfer = 1;
+    /// <summary>Minimum chassis point speed that can count as the vehicle striking a pedestrian.</summary>
+    [DataField] public float MinimumPedestrianImpactSpeed = 2.5f;
     [DataField] public float AirbagDeltaV = 7;
     [DataField] public float AirbagTransfer = 0.65f;
     [DataField] public float ModerateImpactDeltaV = 8;

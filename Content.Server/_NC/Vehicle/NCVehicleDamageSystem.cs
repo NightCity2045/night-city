@@ -144,8 +144,9 @@ public sealed partial class NCVehicleDamageSystem : EntitySystem
         // Linear velocity belongs to the center of mass, which can move when parts are replaced.
         var ours = point - ourPosition - _transform.GetWorldRotation(ent).RotateVec(args.OurBody.LocalCenter);
         var theirs = point - theirPosition - _transform.GetWorldRotation(args.OtherEntity).RotateVec(args.OtherBody.LocalCenter);
-        var relative = args.OurBody.LinearVelocity + new Vector2(-ours.Y, ours.X) * args.OurBody.AngularVelocity -
-            args.OtherBody.LinearVelocity - new Vector2(-theirs.Y, theirs.X) * args.OtherBody.AngularVelocity;
+        var ourPointVelocity = args.OurBody.LinearVelocity + new Vector2(-ours.Y, ours.X) * args.OurBody.AngularVelocity;
+        var theirPointVelocity = args.OtherBody.LinearVelocity + new Vector2(-theirs.Y, theirs.X) * args.OtherBody.AngularVelocity;
+        var relative = ourPointVelocity - theirPointVelocity;
         var closingSpeed = Vector2.Dot(relative, normal);
         var inverseMass = args.OurBody.InvMass + args.OtherBody.InvMass;
         if (closingSpeed <= ent.Comp.MinimumImpactSpeed || inverseMass <= 0)
@@ -156,8 +157,11 @@ public sealed partial class NCVehicleDamageSystem : EntitySystem
             energy *= 0.5f;
         var local = (-_transform.GetWorldRotation(ent)).RotateVec(point - ourPosition);
         var deltaV = closingSpeed * args.OurBody.InvMass / inverseMass;
-        if (!HasComp<NCVehicleBodyComponent>(args.OtherEntity))
-            ApplyInjury(args.OtherEntity, ent.Comp, false, closingSpeed * ent.Comp.PedestrianTransfer,
+        var chassisClosingSpeed = Vector2.Dot(ourPointVelocity, normal);
+        var pedestrianImpact = NCVehicleDamageMath.PedestrianImpact(chassisClosingSpeed,
+            ent.Comp.MinimumPedestrianImpactSpeed, ent.Comp.PedestrianTransfer);
+        if (!HasComp<NCVehicleBodyComponent>(args.OtherEntity) && pedestrianImpact > 0)
+            ApplyInjury(args.OtherEntity, ent.Comp, false, pedestrianImpact,
                 normal, NCActionResolutionId.New(), 1);
         TryImpact(ent, local, normal, energy, deltaV);
     }

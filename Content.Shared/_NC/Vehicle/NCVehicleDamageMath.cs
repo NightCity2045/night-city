@@ -7,6 +7,15 @@ namespace Content.Shared._NC.Vehicle;
 /// <summary>Pure crash-response math shared with content tests.</summary>
 public static class NCVehicleDamageMath
 {
+    /// <summary>Returns injury delta-V only when the chassis itself moves into the pedestrian.</summary>
+    public static float PedestrianImpact(float chassisClosingSpeed, float minimumSpeed, float transfer)
+    {
+        if (!float.IsFinite(chassisClosingSpeed) || !float.IsFinite(minimumSpeed) || !float.IsFinite(transfer) ||
+            chassisClosingSpeed <= minimumSpeed || minimumSpeed < 0 || transfer < 0)
+            return 0;
+        return chassisClosingSpeed * transfer;
+    }
+
     public static float OccupantTrauma(float deltaV, float transfer, float threshold, float traumaPerDeltaV, float maximum)
     {
         if (!float.IsFinite(deltaV) || !float.IsFinite(transfer) || !float.IsFinite(threshold) ||

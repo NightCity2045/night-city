@@ -90,6 +90,10 @@
   handbrakeLateralGrip: 0.3
   handbrakeEngageRate: 14
   handbrakeReleaseRate: 5
+  # Parked tyres resist a walking character, while tow forces and real impacts can still move the chassis.
+  parkingLinearDamping: 12
+  parkingAngularDamping: 24
+  parkingDampingMaximumSpeed: 2
   aerodynamicDrag: 0.38
   rollingResistance: 12
   fuelCapacity: 70

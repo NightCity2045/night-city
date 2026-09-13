@@ -14,6 +14,14 @@ namespace Content.Tests.Shared._NC.Vehicle;
 public sealed class NCVehicleDriveMathTest
 {
     [Test]
+    public void PedestrianImpactRequiresMovingChassis()
+    {
+        Assert.That(NCVehicleDamageMath.PedestrianImpact(0, 2.5f, 1), Is.Zero);
+        Assert.That(NCVehicleDamageMath.PedestrianImpact(2.5f, 2.5f, 1), Is.Zero);
+        Assert.That(NCVehicleDamageMath.PedestrianImpact(4, 2.5f, 0.75f), Is.EqualTo(3));
+    }
+
+    [Test]
     public void CircularSteeringCrossesTheAngleSeamAndCanAccumulateSeveralTurns()
     {
         var total = 0f;

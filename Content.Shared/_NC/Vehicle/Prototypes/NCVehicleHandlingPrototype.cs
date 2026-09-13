@@ -29,6 +29,12 @@ public sealed partial class NCVehicleHandlingPrototype : IPrototype, IInheriting
     [DataField] public float ConverterStallRatio = 1.8f;
     [DataField] public float ConverterCoupling = 1.5f;
     [DataField] public float ParkingTorque = 5000;
+    /// <summary>Linear damping applied to an unattended vehicle after it has nearly stopped.</summary>
+    [DataField] public float ParkingLinearDamping = 12;
+    /// <summary>Angular damping that represents tyre scrub while an unattended vehicle is parked.</summary>
+    [DataField] public float ParkingAngularDamping = 24;
+    /// <summary>Parking stabilization yields to towing and high-energy impacts above this speed.</summary>
+    [DataField] public float ParkingDampingMaximumSpeed = 2;
     [DataField] public float DifferentialCoupling;
     [DataField] public float DifferentialTorqueLimit = 300;
     [DataField] public float CenterDifferentialCoupling;

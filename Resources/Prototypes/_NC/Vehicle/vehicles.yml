@@ -59,6 +59,7 @@
       types:
         Heat: 1
     minimumImpactSpeed: 1
+    minimumPedestrianImpactSpeed: 2.5
     airbagDeltaV: 6
     airbagTransfer: 0.75
     moderateImpactDeltaV: 8

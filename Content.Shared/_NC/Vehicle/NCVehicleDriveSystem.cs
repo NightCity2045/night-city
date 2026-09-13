@@ -375,6 +375,17 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             NCVehiclePerformanceCompiler.Get(drive.AssemblyFunctions, NCVehicleFunction.Aerodynamics), 0, 1));
         var drag = body.LinearVelocity * (tuning.AerodynamicDrag * bodyDrag * speed + tuning.RollingResistance);
         _physics.ApplyForce(uid, -drag * forceWeight, body: body);
+
+        if (drive.Driver == null && drive.HandbrakeApplication >= 0.99f &&
+            speed <= tuning.ParkingDampingMaximumSpeed)
+        {
+            // Kinematic characters otherwise rotate even a tonne-scale body by walking into its bumper.
+            // Exponential damping is stable across substep sizes and still yields to towing or a real impact.
+            var linearRetention = MathF.Exp(-tuning.ParkingLinearDamping * dt);
+            var angularRetention = MathF.Exp(-tuning.ParkingAngularDamping * dt);
+            _physics.SetLinearVelocity(uid, body.LinearVelocity * linearRetention, body: body);
+            _physics.SetAngularVelocity(uid, body.AngularVelocity * angularRetention, body: body);
+        }
     }
 
     public static bool Valid(NCVehicleHandlingPrototype value)
@@ -448,6 +459,9 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             !NCVehicleDriveMath.Nonnegative(value.ConverterStallRatio) ||
             !NCVehicleDriveMath.Nonnegative(value.ConverterCoupling) ||
             !NCVehicleDriveMath.Nonnegative(value.ParkingTorque) ||
+            !NCVehicleDriveMath.Nonnegative(value.ParkingLinearDamping) ||
+            !NCVehicleDriveMath.Nonnegative(value.ParkingAngularDamping) ||
+            !NCVehicleDriveMath.Nonnegative(value.ParkingDampingMaximumSpeed) ||
             !NCVehicleDriveMath.Nonnegative(value.DifferentialCoupling) ||
             !NCVehicleDriveMath.Nonnegative(value.DifferentialTorqueLimit) ||
             !NCVehicleDriveMath.Nonnegative(value.TractionSlip) ||
