@@ -155,6 +155,10 @@ public sealed partial class NCAgentSystem
             SendMapSnapshot(uid, user);
         if (args.App == NCAgentApp.City)
             _ = SendCitySnapshotAsync(uid, user, view.Owner);
+        if (args.App == NCAgentApp.Missions)
+            SendMissionSnapshot(uid, user);
+        if (args.App == NCAgentApp.Contracts)
+            _ = SendContractsAsync(uid, user);
         await SendViewAsync(uid, user);
     }
 

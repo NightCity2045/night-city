@@ -1,0 +1,15 @@
+ent-NCVehicleParkingBay = терминал парковочного места
+    .desc = Отмечает физическое парковочное место. Остановись рядом и зарезервируй его с панели машины.
+ent-NCVehicleGarageEntrance = терминал въезда в гараж
+    .desc = Заглуши двигатель и выбери переход в гараж на панели. Машина перемещается вместе с содержимым.
+ent-NCVehicleGarageExit = терминал выезда из гаража
+nc-vehicle-park = Занять парковочное место
+nc-vehicle-travel = Проехать через гараж
+nc-vehicle-parking-release = Освободить парковочное место
+nc-vehicle-parking-free = Это парковочное место свободно.
+nc-vehicle-parking-reserved = Это парковочное место зарезервировано на текущий раунд.
+nc-vehicle-infrastructure-unavailable = Заглуши двигатель рядом с доступным терминалом. Выезд должен быть свободен; для парковки нужен ключ от своей машины.
+nc-vehicle-calibrate = Настроить у верстака
+nc-vehicle-calibration-street = Улица: штатные настройки
+nc-vehicle-calibration-economy = Экономия: меньше мощность, расход и нагрев
+nc-vehicle-calibration-sport = Спорт: больше мощность, расход и нагрев

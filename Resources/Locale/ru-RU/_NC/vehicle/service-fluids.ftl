@@ -1,0 +1,10 @@
+reagent-name-nc-vehicle-transmission = трансмиссионное масло
+nc-vehicle-service-fluids = КПП: { $transmission }% | ГУР: { $steering }% | Омыватель: { $washer }% | Масло: { $pressure } кПа
+reagent-desc-nc-vehicle-transmission = Техническая жидкость для соответствующего контура автомобиля.
+ent-NCVehicleTransmissionBottle = трансмиссионное масло: бутылка
+reagent-name-nc-vehicle-steering = жидкость гидроусилителя
+reagent-desc-nc-vehicle-steering = Техническая жидкость для соответствующего контура автомобиля.
+ent-NCVehicleSteeringBottle = жидкость гидроусилителя: бутылка
+reagent-name-nc-vehicle-washer = омывающая жидкость
+reagent-desc-nc-vehicle-washer = Техническая жидкость для соответствующего контура автомобиля.
+ent-NCVehicleWasherBottle = омывающая жидкость: бутылка

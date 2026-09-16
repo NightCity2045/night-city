@@ -1,0 +1,551 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncVehiclePart
+  id: NCVehicleStarter
+  repairCategory: Electrical
+  minimumRepairCondition: 0.1
+  item: NCVehicleStarterItem
+  mount: NCVehicleStarterMount
+  mass: 4
+  inertia: 0.2
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleBattery
+  batteryCapacity: 60
+  initialCharge: 45
+  repairCategory: Electrical
+  minimumRepairCondition: 0.1
+  item: NCVehicleBatteryItem
+  mount: NCVehicleBatteryMount
+  mass: 18
+  inertia: 0.9
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleAlternator
+  repairCategory: Electrical
+  minimumRepairCondition: 0.1
+  item: NCVehicleAlternatorItem
+  mount: NCVehicleAlternatorMount
+  mass: 6
+  inertia: 0.3
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleWiring
+  repairCategory: Electrical
+  minimumRepairCondition: 0.1
+  item: NCVehicleWiringItem
+  mount: NCVehicleWiringMount
+  mass: 4
+  inertia: 0.2
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleEcu
+  repairCategory: Electrical
+  minimumRepairCondition: 0.1
+  item: NCVehicleEcuItem
+  mount: NCVehicleEcuMount
+  mass: 2
+  inertia: 0.1
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleCoil
+  repairCategory: Electrical
+  minimumRepairCondition: 0.1
+  item: NCVehicleCoilItem
+  mount: NCVehicleCoilMount
+  mass: 2
+  inertia: 0.1
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleFuelPump
+  repairCategory: Electrical
+  minimumRepairCondition: 0.1
+  item: NCVehicleFuelPumpItem
+  mount: NCVehicleFuelPumpMount
+  mass: 2
+  inertia: 0.1
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleFuelFilter
+  item: NCVehicleFuelFilterItem
+  mount: NCVehicleFuelFilterMount
+  mass: 1
+  inertia: 0.05
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleRadiator
+  item: NCVehicleRadiatorItem
+  mount: NCVehicleRadiatorMount
+  mass: 9
+  inertia: 0.45
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleWaterPump
+  item: NCVehicleWaterPumpItem
+  mount: NCVehicleWaterPumpMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleFan
+  repairCategory: Electrical
+  minimumRepairCondition: 0.1
+  item: NCVehicleFanItem
+  mount: NCVehicleFanMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleThermostat
+  item: NCVehicleThermostatItem
+  mount: NCVehicleThermostatMount
+  mass: 1
+  inertia: 0.05
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleCoolantHose
+  item: NCVehicleCoolantHoseItem
+  mount: NCVehicleCoolantHoseMount
+  mass: 2
+  inertia: 0.1
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleOilPump
+  item: NCVehicleOilPumpItem
+  mount: NCVehicleOilPumpMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleOilFilter
+  item: NCVehicleOilFilterItem
+  mount: NCVehicleOilFilterMount
+  mass: 1
+  inertia: 0.05
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleSteeringRack
+  item: NCVehicleSteeringRackItem
+  mount: NCVehicleSteeringRackMount
+  mass: 9
+  inertia: 0.45
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleMasterCylinder
+  item: NCVehicleMasterCylinderItem
+  mount: NCVehicleMasterCylinderMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleBrakeLines
+  item: NCVehicleBrakeLinesItem
+  mount: NCVehicleBrakeLinesMount
+  mass: 2
+  inertia: 0.1
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleClutch
+  item: NCVehicleClutchItem
+  mount: NCVehicleClutchMount
+  mass: 12
+  inertia: 0.6
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehiclePropShaft
+  item: NCVehiclePropShaftItem
+  mount: NCVehiclePropShaftMount
+  mass: 10
+  inertia: 0.5
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleRearDifferential
+  item: NCVehicleRearDifferentialItem
+  mount: NCVehicleRearDifferentialMount
+  mass: 30
+  inertia: 1.5
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleHood
+  repairCategory: Bodywork
+  minimumRepairCondition: 0.15
+  item: NCVehicleHoodItem
+  mount: NCVehicleHoodMount
+  mass: 18
+  inertia: 0.9
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleFrontBumper
+  repairCategory: Bodywork
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontBumperItem
+  mount: NCVehicleFrontBumperMount
+  mass: 8
+  inertia: 0.4
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleRearBumper
+  repairCategory: Bodywork
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearBumperItem
+  mount: NCVehicleRearBumperMount
+  mass: 8
+  inertia: 0.4
+  conditionFloor: 0
+  wheelWearShare: 0
+
+- type: ncVehiclePart
+  id: NCVehicleFrontLeftArm
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontLeftArmItem
+  mount: NCVehicleFrontLeftArmMount
+  mass: 5
+  inertia: 0.25
+  conditionFloor: 0
+  wheelWearShare: 0.1
+
+- type: ncVehiclePart
+  id: NCVehicleFrontLeftSpring
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontLeftSpringItem
+  mount: NCVehicleFrontLeftSpringMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0.15
+  wheelWearShare: 0.1
+
+- type: ncVehiclePart
+  id: NCVehicleFrontLeftDamper
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontLeftDamperItem
+  mount: NCVehicleFrontLeftDamperMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0.35
+  wheelWearShare: 0.2
+
+- type: ncVehiclePart
+  id: NCVehicleFrontLeftHub
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontLeftHubItem
+  mount: NCVehicleFrontLeftHubMount
+  mass: 4
+  inertia: 0.2
+  conditionFloor: 0
+  wheelWearShare: 0.2
+
+- type: ncVehiclePart
+  id: NCVehicleFrontLeftRim
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontLeftRimItem
+  mount: NCVehicleFrontLeftRimMount
+  mass: 8
+  inertia: 0.4
+  conditionFloor: 0
+  wheelWearShare: 0.1
+
+- type: ncVehiclePart
+  id: NCVehicleFrontLeftTyre
+  repairCategory: Rubber
+  minimumRepairCondition: 0.3
+  item: NCVehicleFrontLeftTyreItem
+  mount: NCVehicleFrontLeftTyreMount
+  mass: 9
+  inertia: 0.45
+  conditionFloor: 0.08
+  wheelWearShare: 1
+
+- type: ncVehiclePart
+  id: NCVehicleFrontLeftBrake
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontLeftBrakeItem
+  mount: NCVehicleFrontLeftBrakeMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0
+  wheelWearShare: 0.05
+
+- type: ncVehiclePart
+  id: NCVehicleFrontRightArm
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontRightArmItem
+  mount: NCVehicleFrontRightArmMount
+  mass: 5
+  inertia: 0.25
+  conditionFloor: 0
+  wheelWearShare: 0.1
+
+- type: ncVehiclePart
+  id: NCVehicleFrontRightSpring
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontRightSpringItem
+  mount: NCVehicleFrontRightSpringMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0.15
+  wheelWearShare: 0.1
+
+- type: ncVehiclePart
+  id: NCVehicleFrontRightDamper
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontRightDamperItem
+  mount: NCVehicleFrontRightDamperMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0.35
+  wheelWearShare: 0.2
+
+- type: ncVehiclePart
+  id: NCVehicleFrontRightHub
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontRightHubItem
+  mount: NCVehicleFrontRightHubMount
+  mass: 4
+  inertia: 0.2
+  conditionFloor: 0
+  wheelWearShare: 0.2
+
+- type: ncVehiclePart
+  id: NCVehicleFrontRightRim
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontRightRimItem
+  mount: NCVehicleFrontRightRimMount
+  mass: 8
+  inertia: 0.4
+  conditionFloor: 0
+  wheelWearShare: 0.1
+
+- type: ncVehiclePart
+  id: NCVehicleFrontRightTyre
+  repairCategory: Rubber
+  minimumRepairCondition: 0.3
+  item: NCVehicleFrontRightTyreItem
+  mount: NCVehicleFrontRightTyreMount
+  mass: 9
+  inertia: 0.45
+  conditionFloor: 0.08
+  wheelWearShare: 1
+
+- type: ncVehiclePart
+  id: NCVehicleFrontRightBrake
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontRightBrakeItem
+  mount: NCVehicleFrontRightBrakeMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0
+  wheelWearShare: 0.05
+
+- type: ncVehiclePart
+  id: NCVehicleRearLeftArm
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearLeftArmItem
+  mount: NCVehicleRearLeftArmMount
+  mass: 5
+  inertia: 0.25
+  conditionFloor: 0
+  wheelWearShare: 0.1
+
+- type: ncVehiclePart
+  id: NCVehicleRearLeftSpring
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearLeftSpringItem
+  mount: NCVehicleRearLeftSpringMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0.15
+  wheelWearShare: 0.1
+
+- type: ncVehiclePart
+  id: NCVehicleRearLeftDamper
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearLeftDamperItem
+  mount: NCVehicleRearLeftDamperMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0.35
+  wheelWearShare: 0.2
+
+- type: ncVehiclePart
+  id: NCVehicleRearLeftHub
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearLeftHubItem
+  mount: NCVehicleRearLeftHubMount
+  mass: 4
+  inertia: 0.2
+  conditionFloor: 0
+  wheelWearShare: 0.2
+
+- type: ncVehiclePart
+  id: NCVehicleRearLeftRim
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearLeftRimItem
+  mount: NCVehicleRearLeftRimMount
+  mass: 8
+  inertia: 0.4
+  conditionFloor: 0
+  wheelWearShare: 0.1
+
+- type: ncVehiclePart
+  id: NCVehicleRearLeftTyre
+  repairCategory: Rubber
+  minimumRepairCondition: 0.3
+  item: NCVehicleRearLeftTyreItem
+  mount: NCVehicleRearLeftTyreMount
+  mass: 9
+  inertia: 0.45
+  conditionFloor: 0.08
+  wheelWearShare: 1
+
+- type: ncVehiclePart
+  id: NCVehicleRearLeftBrake
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearLeftBrakeItem
+  mount: NCVehicleRearLeftBrakeMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0
+  wheelWearShare: 0.05
+
+- type: ncVehiclePart
+  id: NCVehicleRearRightArm
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearRightArmItem
+  mount: NCVehicleRearRightArmMount
+  mass: 5
+  inertia: 0.25
+  conditionFloor: 0
+  wheelWearShare: 0.1
+
+- type: ncVehiclePart
+  id: NCVehicleRearRightSpring
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearRightSpringItem
+  mount: NCVehicleRearRightSpringMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0.15
+  wheelWearShare: 0.1
+
+- type: ncVehiclePart
+  id: NCVehicleRearRightDamper
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearRightDamperItem
+  mount: NCVehicleRearRightDamperMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0.35
+  wheelWearShare: 0.2
+
+- type: ncVehiclePart
+  id: NCVehicleRearRightHub
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearRightHubItem
+  mount: NCVehicleRearRightHubMount
+  mass: 4
+  inertia: 0.2
+  conditionFloor: 0
+  wheelWearShare: 0.2
+
+- type: ncVehiclePart
+  id: NCVehicleRearRightRim
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearRightRimItem
+  mount: NCVehicleRearRightRimMount
+  mass: 8
+  inertia: 0.4
+  conditionFloor: 0
+  wheelWearShare: 0.1
+
+- type: ncVehiclePart
+  id: NCVehicleRearRightTyre
+  repairCategory: Rubber
+  minimumRepairCondition: 0.3
+  item: NCVehicleRearRightTyreItem
+  mount: NCVehicleRearRightTyreMount
+  mass: 9
+  inertia: 0.45
+  conditionFloor: 0.08
+  wheelWearShare: 1
+
+- type: ncVehiclePart
+  id: NCVehicleRearRightBrake
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearRightBrakeItem
+  mount: NCVehicleRearRightBrakeMount
+  mass: 3
+  inertia: 0.15
+  conditionFloor: 0
+  wheelWearShare: 0.05

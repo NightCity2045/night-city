@@ -102,12 +102,15 @@ public sealed partial class NCMissionSystem : EntitySystem
         ProtoId<NCMissionDefinitionPrototype> definitionId,
         IReadOnlyCollection<NCCharacterId> participants,
         NCMissionSlotId? requestedSlot = null,
-        int? seed = null)
+        int? seed = null,
+        NCMissionRunId? requestedRunId = null)
     {
         await _startGate.WaitAsync();
         try
         {
-            return await TryStartRunLockedAsync(definitionId, participants, requestedSlot, seed);
+            if (requestedRunId is { } existingId && _runs.TryGetValue(existingId, out var existing))
+                return new(existing.DefinitionId == definitionId && existing.Participants.SetEquals(participants), existingId, string.Empty);
+            return await TryStartRunLockedAsync(definitionId, participants, requestedSlot, seed, requestedRunId);
         }
         finally
         {
@@ -119,7 +122,8 @@ public sealed partial class NCMissionSystem : EntitySystem
         ProtoId<NCMissionDefinitionPrototype> definitionId,
         IReadOnlyCollection<NCCharacterId> participants,
         NCMissionSlotId? requestedSlot,
-        int? seed)
+        int? seed,
+        NCMissionRunId? requestedRunId)
     {
         if (!_prototypes.TryIndex(definitionId, out var definition) ||
             !_prototypes.TryIndex(definition.Template, out NCZoneTemplatePrototype? template))
@@ -136,7 +140,7 @@ public sealed partial class NCMissionSystem : EntitySystem
         if (_occupancy.IsOccupied(slot.ZoneId, out var blocker))
             return new(false, default, $"Mission slot is occupied by {ToPrettyString(blocker)}.");
 
-        var runId = NCMissionRunId.New();
+        var runId = requestedRunId ?? NCMissionRunId.New();
         var deploymentId = NCZoneDeploymentId.New();
         var run = new MissionRun(
             runId,
@@ -225,7 +229,7 @@ public sealed partial class NCMissionSystem : EntitySystem
             run.WarningAt,
             run.CompletedAt,
             run.Result,
-            run.Error);
+            run.Error) { DefinitionId = run.DefinitionId.Id };
         return true;
     }
 
@@ -334,6 +338,7 @@ public sealed partial class NCMissionSystem : EntitySystem
             return;
 
         var random = new Random(run.Seed);
+        var objectiveSpawned = false;
         foreach (var point in points.OrderBy(uid => uid.Id))
         {
             if (!TryComp(point, out NCMissionDynamicPointComponent? marker) ||
@@ -355,6 +360,28 @@ public sealed partial class NCMissionSystem : EntitySystem
                 DeploymentId = run.DeploymentId.Value,
                 ExtractionPolicy = marker.ExtractionPolicy,
             });
+            // One run-bound delivery target shares the existing extraction/cleanup rules for ordinary loot.
+            if (!objectiveSpawned && definition.DeliveryObjective is { } objective &&
+                marker.ExtractionPolicy == NCMissionExtractionPolicy.CanBeExtracted)
+            {
+                var target = Spawn(objective, Transform(point).Coordinates);
+                EnsureComp<NCFixerMissionObjectiveComponent>(target);
+                AddComp(target, new NCZoneDeploymentComponent
+                {
+                    DeploymentId = run.DeploymentId.Value,
+                    TargetZoneId = run.SlotId.ZoneId,
+                    TemplateId = run.TemplateId,
+                    TemplateRevision = _prototypes.Index(run.TemplateId).Revision,
+                    CleanupPolicy = NCZoneTemplateCleanupPolicy.DeleteDeploymentEntities,
+                });
+                AddComp(target, new NCMissionRunEntityComponent
+                {
+                    RunId = run.Id.Value,
+                    DeploymentId = run.DeploymentId.Value,
+                    ExtractionPolicy = NCMissionExtractionPolicy.CanBeExtracted,
+                });
+                objectiveSpawned = true;
+            }
         }
     }
 

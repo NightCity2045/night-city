@@ -1,0 +1,2294 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncVehicleHandling
+  parent: NCBaseSupraHandling
+  id: NCRecoveryTruckHandling
+  finalDrive: 5.5
+  wheelbase: 4.6
+  exitOffset: -1.5, 2.5
+  brakeTorque: 16000
+  handbrakeTorque: 9000
+  handbrakeLateralGrip: 0.65
+  wheels:
+  - position: -0.9, 2.4
+    radius: 0.4
+    inertia: 4
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.9, 2.4
+    radius: 0.4
+    inertia: 4
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.9, -2.2
+    axle: 1
+    radius: 0.4
+    inertia: 8
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.9, -2.2
+    axle: 1
+    radius: 0.4
+    inertia: 8
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+
+- type: ncVehicleHandling
+  parent: NCRecoveryTruckHandling
+  id: NCRecoveryTruckAutomaticHandling
+  automatic: true
+  gearRatios: [0, 2.8, 1.53, 1, 0.71, -2.39]
+  manualPattern: [1, 2, 3, 4, 0, 0]
+
+- type: ncVehicleHandling
+  parent: NCRecoveryTruckHandling
+  id: NCRecoveryTruckAwdHandling
+  centerDifferentialCoupling: 10
+  centerDifferentialTorqueLimit: 150
+  stabilityControl: true
+  tractionControl: true
+  antiLockBrakes: true
+  wheels:
+  - position: -0.9, 2.4
+    radius: 0.4
+    inertia: 4
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.9, 2.4
+    radius: 0.4
+    inertia: 4
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.9, -2.2
+    axle: 1
+    radius: 0.4
+    inertia: 8
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.9, -2.2
+    axle: 1
+    radius: 0.4
+    inertia: 8
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+
+- type: ncVehicleHandling
+  parent: NCRecoveryTruckAwdHandling
+  id: NCRecoveryTruckAutomaticAwdHandling
+  automatic: true
+  gearRatios: [0, 2.8, 1.53, 1, 0.71, -2.39]
+  manualPattern: [1, 2, 3, 4, 0, 0]
+
+- type: ncVehicleChassis
+  parent: NCVehicleDevelopmentSedan
+  id: NCRecoveryTruckChassis
+  workshop: NCRecoveryTruckWorkshop
+  mass: 2500
+  inertia: 15000
+  manualHandling: NCRecoveryTruckHandling
+  automaticHandling: NCRecoveryTruckAutomaticHandling
+  allWheelHandling: NCRecoveryTruckAwdHandling
+  automaticAllWheelHandling: NCRecoveryTruckAutomaticAwdHandling
+  serviceRange: 4.5
+  frontTowPoint: 0, 3.9
+  rearTowPoint: 0, -3.9
+  seats:
+    driver:
+      name: nc-vehicle-seat-driver
+      driver: true
+      position: -0.45, 2.8
+      exit: -1.6, 2.8
+    passenger:
+      name: nc-vehicle-seat-passenger
+      position: 0.45, 2.8
+      exit: 1.6, 2.8
+  cargoMass:
+    storagebase: 0, 2
+    entity_storage: 0, 2
+    nc-vehicle-flatbed: 0, -1
+  slots:
+    headlamps:
+      name: nc-vehicle-module-headlamps
+      mount: NCVehicleHeadlampsMount
+      defaultPart: NCVehicleHeadlamps
+      position: 0, 2.9
+      functions: [Lights]
+      serviceSeconds: 30
+      requiresOpenHood: false
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    horn:
+      name: nc-vehicle-module-horn
+      mount: NCVehicleHornMount
+      defaultPart: NCVehicleHorn
+      position: 0, 2.9
+      functions: [Horn]
+      serviceSeconds: 30
+      requiresOpenHood: false
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    washer-pump:
+      name: nc-vehicle-module-washer-pump
+      mount: NCVehicleWasherPumpMount
+      defaultPart: NCVehicleWasherPump
+      position: 0, 2.9
+      functions: [Washer]
+      serviceSeconds: 30
+      requiresOpenHood: false
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    wiper-motor:
+      name: nc-vehicle-module-wiper-motor
+      mount: NCVehicleWiperMotorMount
+      defaultPart: NCVehicleWiperMotor
+      position: 0, 2.9
+      functions: [Washer]
+      serviceSeconds: 30
+      requiresOpenHood: false
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    airbag:
+      name: nc-vehicle-module-airbag
+      mount: NCVehicleAirbagMount
+      defaultPart: NCVehicleAirbag
+      position: 0, 2.9
+      functions: [Airbags]
+      serviceSeconds: 30
+      requiresOpenHood: false
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+    steering-pump:
+      name: nc-vehicle-module-steering-pump
+      mount: NCVehicleSteeringPumpMount
+      defaultPart: NCVehicleSteeringPump
+      position: 0, 2.9
+      functions: [SteeringAssist]
+      serviceSeconds: 30
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    fuel-tank:
+      name: nc-vehicle-module-fuel-tank
+      mount: NCVehicleFuelTankMount
+      defaultPart: NCVehicleFuelTank
+      position: 0, -2.4
+      functions: [Ignition]
+      serviceSeconds: 30
+      requiresOpenHood: false
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    front-differential:
+      name: nc-vehicle-module-front-differential
+      mount: NCVehicleFrontDifferentialMount
+      position: 0, 2.1
+      serviceSeconds: 60
+      optionalFunctions: true
+      wheelIndex: -1
+      functions: [Transmission]
+      requiresOpenHood: false
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    front-left-shaft:
+      name: nc-vehicle-module-front-left-shaft
+      mount: NCVehicleFrontLeftShaftMount
+      position: 0, 2.1
+      serviceSeconds: 60
+      optionalFunctions: true
+      wheelIndex: 0
+      functions: [Drive]
+      requiresOpenHood: false
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+    front-right-shaft:
+      name: nc-vehicle-module-front-right-shaft
+      mount: NCVehicleFrontRightShaftMount
+      position: 0, 2.1
+      serviceSeconds: 60
+      optionalFunctions: true
+      wheelIndex: 1
+      functions: [Drive]
+      requiresOpenHood: false
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+    transfer-case:
+      name: nc-vehicle-module-transfer-case
+      mount: NCVehicleTransferCaseMount
+      position: 0, 2.1
+      serviceSeconds: 60
+      optionalFunctions: true
+      wheelIndex: -1
+      functions: [Transmission]
+      requires: [front-differential, front-left-shaft, front-right-shaft]
+      requiresOpenHood: false
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    engine:
+      name: nc-vehicle-module-engine
+      requiresHoist: true
+      serviceSeconds: 90
+      mount: NCVehicleInlineEngineMount
+      position: 0, 2.8
+      required: true
+      defaultPart: NCVehicleDevelopmentEngine
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.2, 0.2
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.8, 0.2
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-3:
+          position: 0.2, 0.8
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-4:
+          position: 0.8, 0.8
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    gearbox:
+      name: nc-vehicle-module-gearbox
+      serviceSeconds: 60
+      mount: NCVehicleLongitudinalGearboxMount
+      position: 0, 2
+      required: true
+      defaultPart: NCVehicleAutomaticGearbox
+      requires: [engine]
+      requiresOpenHood: false
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.2, 0.2
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.8, 0.2
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-3:
+          position: 0.2, 0.8
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-4:
+          position: 0.8, 0.8
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    starter:
+      name: nc-vehicle-module-starter
+      mount: NCVehicleStarterMount
+      position: 0, 2.5
+      defaultPart: NCVehicleStarter
+      functions: [Starting]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    battery:
+      name: nc-vehicle-module-battery
+      mount: NCVehicleBatteryMount
+      position: 0, 2.5
+      defaultPart: NCVehicleBattery
+      functions: [Starting, Electronics, Charging, Ignition]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.18, 0.35
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-positive
+        negative:
+          position: 0.82, 0.35
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-negative
+    alternator:
+      name: nc-vehicle-module-alternator
+      mount: NCVehicleAlternatorMount
+      position: 0, 2.5
+      defaultPart: NCVehicleAlternator
+      functions: [Charging]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    wiring:
+      name: nc-vehicle-module-wiring
+      mount: NCVehicleWiringMount
+      position: 0, 2.5
+      defaultPart: NCVehicleWiring
+      functions: [Ignition, Charging]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    ecu:
+      name: nc-vehicle-module-ecu
+      mount: NCVehicleEcuMount
+      position: 0, 2.5
+      defaultPart: NCVehicleEcu
+      functions: [Ignition, Electronics]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    coil:
+      name: nc-vehicle-module-coil
+      mount: NCVehicleCoilMount
+      position: 0, 2.5
+      defaultPart: NCVehicleCoil
+      functions: [Ignition]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    fuel-pump:
+      name: nc-vehicle-module-fuel-pump
+      mount: NCVehicleFuelPumpMount
+      position: 0, 2.5
+      defaultPart: NCVehicleFuelPump
+      functions: [Ignition]
+      serviceSeconds: 40
+      requiresOpenHood: false
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    fuel-filter:
+      name: nc-vehicle-module-fuel-filter
+      mount: NCVehicleFuelFilterMount
+      position: 0, 2.5
+      defaultPart: NCVehicleFuelFilter
+      functions: [Ignition]
+      serviceSeconds: 40
+      requiresOpenHood: false
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    radiator:
+      name: nc-vehicle-module-radiator
+      mount: NCVehicleRadiatorMount
+      position: 0, 2.5
+      defaultPart: NCVehicleRadiator
+      functions: [Cooling]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    water-pump:
+      name: nc-vehicle-module-water-pump
+      mount: NCVehicleWaterPumpMount
+      position: 0, 2.5
+      defaultPart: NCVehicleWaterPump
+      functions: [Cooling]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    fan:
+      name: nc-vehicle-module-fan
+      mount: NCVehicleFanMount
+      position: 0, 2.5
+      defaultPart: NCVehicleFan
+      functions: [Cooling]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    thermostat:
+      name: nc-vehicle-module-thermostat
+      mount: NCVehicleThermostatMount
+      position: 0, 2.5
+      defaultPart: NCVehicleThermostat
+      functions: [Cooling]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    coolant-hose:
+      name: nc-vehicle-module-coolant-hose
+      mount: NCVehicleCoolantHoseMount
+      position: 0, 2.5
+      defaultPart: NCVehicleCoolantHose
+      functions: [Cooling]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    oil-pump:
+      name: nc-vehicle-module-oil-pump
+      mount: NCVehicleOilPumpMount
+      position: 0, 2.5
+      defaultPart: NCVehicleOilPump
+      functions: [Lubrication]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    oil-filter:
+      name: nc-vehicle-module-oil-filter
+      mount: NCVehicleOilFilterMount
+      position: 0, 2.5
+      defaultPart: NCVehicleOilFilter
+      functions: [Lubrication]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+    steering-rack:
+      name: nc-vehicle-module-steering-rack
+      mount: NCVehicleSteeringRackMount
+      position: 0, 2.5
+      defaultPart: NCVehicleSteeringRack
+      functions: [Steering]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    master-cylinder:
+      name: nc-vehicle-module-master-cylinder
+      mount: NCVehicleMasterCylinderMount
+      position: 0, 2.5
+      defaultPart: NCVehicleMasterCylinder
+      functions: [Hydraulics]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    brake-lines:
+      name: nc-vehicle-module-brake-lines
+      mount: NCVehicleBrakeLinesMount
+      position: 0, 2.5
+      defaultPart: NCVehicleBrakeLines
+      functions: [Hydraulics]
+      serviceSeconds: 40
+      requiresOpenHood: true
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        connection:
+          position: 0.5, 0.85
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-connector
+    clutch:
+      name: nc-vehicle-module-clutch
+      mount: NCVehicleClutchMount
+      position: 0, 2.5
+      defaultPart: NCVehicleClutch
+      functions: [Transmission]
+      serviceSeconds: 40
+      requiresOpenHood: false
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+    prop-shaft:
+      name: nc-vehicle-module-prop-shaft
+      mount: NCVehiclePropShaftMount
+      position: 0, 2.5
+      defaultPart: NCVehiclePropShaft
+      functions: [Transmission]
+      serviceSeconds: 40
+      requiresOpenHood: false
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+    rear-differential:
+      name: nc-vehicle-module-rear-differential
+      mount: NCVehicleRearDifferentialMount
+      position: 0, 2.5
+      defaultPart: NCVehicleRearDifferential
+      functions: [Transmission]
+      serviceSeconds: 40
+      requiresOpenHood: false
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+    hood:
+      name: nc-vehicle-module-hood
+      mount: NCVehicleHoodMount
+      position: 0, 2.5
+      defaultPart: NCVehicleHood
+      functions: [Aerodynamics]
+      serviceSeconds: 40
+      requiresOpenHood: false
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.2, 0.2
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.8, 0.2
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-3:
+          position: 0.2, 0.8
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-4:
+          position: 0.8, 0.8
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+    front-bumper:
+      name: nc-vehicle-module-front-bumper
+      mount: NCVehicleFrontBumperMount
+      position: 0, 2.5
+      defaultPart: NCVehicleFrontBumper
+      functions: [Aerodynamics]
+      serviceSeconds: 40
+      requiresOpenHood: false
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+    rear-bumper:
+      name: nc-vehicle-module-rear-bumper
+      mount: NCVehicleRearBumperMount
+      position: 0, 2.5
+      defaultPart: NCVehicleRearBumper
+      functions: [Aerodynamics]
+      serviceSeconds: 40
+      requiresOpenHood: false
+      requiresLift: false
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+    fl-arm:
+      name: nc-vehicle-module-fl-arm
+      mount: NCVehicleFrontLeftArmMount
+      position: -0.9, 2.4
+      defaultPart: NCVehicleFrontLeftArm
+      functions: [Suspension]
+      serviceSeconds: 25
+      wheelIndex: 0
+      toolQuality: Anchoring
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - fl-rim
+    fl-spring:
+      name: nc-vehicle-module-fl-spring
+      mount: NCVehicleFrontLeftSpringMount
+      position: -0.9, 2.4
+      defaultPart: NCVehicleFrontLeftSpring
+      functions: [Suspension]
+      serviceSeconds: 25
+      wheelIndex: 0
+      toolQuality: Anchoring
+      requires: [fl-arm]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - fl-rim
+    fl-damper:
+      name: nc-vehicle-module-fl-damper
+      mount: NCVehicleFrontLeftDamperMount
+      position: -0.9, 2.4
+      defaultPart: NCVehicleFrontLeftDamper
+      functions: [Suspension]
+      serviceSeconds: 25
+      wheelIndex: 0
+      toolQuality: Anchoring
+      requires: [fl-arm]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - fl-rim
+    fl-hub:
+      name: nc-vehicle-module-fl-hub
+      mount: NCVehicleFrontLeftHubMount
+      position: -0.9, 2.4
+      defaultPart: NCVehicleFrontLeftHub
+      functions: [Grip, Drive]
+      serviceSeconds: 25
+      wheelIndex: 0
+      toolQuality: Anchoring
+      requires: [fl-arm]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - fl-rim
+      - fl-disc
+      - fl-brake
+    fl-rim:
+      name: nc-vehicle-module-fl-rim
+      mount: NCVehicleFrontLeftRimMount
+      fastenerTorque: 160
+      position: -0.9, 2.4
+      defaultPart: NCVehicleFrontLeftRim
+      functions: [Grip]
+      serviceSeconds: 25
+      wheelIndex: 0
+      toolQuality: Anchoring
+      requires: [fl-hub]
+      requiresLift: true
+      workPoints:
+        nut-1:
+          position: 0.5, 0.3
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-2:
+          position: 0.690211, 0.438197
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-3:
+          position: 0.617557, 0.661803
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-4:
+          position: 0.382443, 0.661803
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-5:
+          position: 0.309789, 0.438197
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+      extractWith:
+      - fl-tyre
+    fl-tyre:
+      name: nc-vehicle-module-fl-tyre
+      mount: NCVehicleFrontLeftTyreMount
+      position: -0.9, 2.4
+      defaultPart: NCVehicleFrontLeftTyre
+      functions: [Grip]
+      serviceSeconds: 25
+      wheelIndex: 0
+      toolQuality: Anchoring
+      requires: [fl-rim]
+      requiresLift: true
+    fl-brake:
+      name: nc-vehicle-module-fl-brake
+      mount: NCVehicleFrontLeftBrakeMount
+      position: -0.9, 2.4
+      defaultPart: NCVehicleFrontLeftBrake
+      functions: [Braking]
+      serviceSeconds: 25
+      wheelIndex: 0
+      toolQuality: Anchoring
+      requires: [fl-hub]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        brake-line:
+          position: 0.5, 0.25
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-brake-line
+      blockedBy:
+      - fl-rim
+    fr-arm:
+      name: nc-vehicle-module-fr-arm
+      mount: NCVehicleFrontRightArmMount
+      position: 0.9, 2.4
+      defaultPart: NCVehicleFrontRightArm
+      functions: [Suspension]
+      serviceSeconds: 25
+      wheelIndex: 1
+      toolQuality: Anchoring
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - fr-rim
+    fr-spring:
+      name: nc-vehicle-module-fr-spring
+      mount: NCVehicleFrontRightSpringMount
+      position: 0.9, 2.4
+      defaultPart: NCVehicleFrontRightSpring
+      functions: [Suspension]
+      serviceSeconds: 25
+      wheelIndex: 1
+      toolQuality: Anchoring
+      requires: [fr-arm]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - fr-rim
+    fr-damper:
+      name: nc-vehicle-module-fr-damper
+      mount: NCVehicleFrontRightDamperMount
+      position: 0.9, 2.4
+      defaultPart: NCVehicleFrontRightDamper
+      functions: [Suspension]
+      serviceSeconds: 25
+      wheelIndex: 1
+      toolQuality: Anchoring
+      requires: [fr-arm]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - fr-rim
+    fr-hub:
+      name: nc-vehicle-module-fr-hub
+      mount: NCVehicleFrontRightHubMount
+      position: 0.9, 2.4
+      defaultPart: NCVehicleFrontRightHub
+      functions: [Grip, Drive]
+      serviceSeconds: 25
+      wheelIndex: 1
+      toolQuality: Anchoring
+      requires: [fr-arm]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - fr-rim
+      - fr-disc
+      - fr-brake
+    fr-rim:
+      name: nc-vehicle-module-fr-rim
+      mount: NCVehicleFrontRightRimMount
+      fastenerTorque: 160
+      position: 0.9, 2.4
+      defaultPart: NCVehicleFrontRightRim
+      functions: [Grip]
+      serviceSeconds: 25
+      wheelIndex: 1
+      toolQuality: Anchoring
+      requires: [fr-hub]
+      requiresLift: true
+      workPoints:
+        nut-1:
+          position: 0.5, 0.3
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-2:
+          position: 0.690211, 0.438197
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-3:
+          position: 0.617557, 0.661803
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-4:
+          position: 0.382443, 0.661803
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-5:
+          position: 0.309789, 0.438197
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+      extractWith:
+      - fr-tyre
+    fr-tyre:
+      name: nc-vehicle-module-fr-tyre
+      mount: NCVehicleFrontRightTyreMount
+      position: 0.9, 2.4
+      defaultPart: NCVehicleFrontRightTyre
+      functions: [Grip]
+      serviceSeconds: 25
+      wheelIndex: 1
+      toolQuality: Anchoring
+      requires: [fr-rim]
+      requiresLift: true
+    fr-brake:
+      name: nc-vehicle-module-fr-brake
+      mount: NCVehicleFrontRightBrakeMount
+      position: 0.9, 2.4
+      defaultPart: NCVehicleFrontRightBrake
+      functions: [Braking]
+      serviceSeconds: 25
+      wheelIndex: 1
+      toolQuality: Anchoring
+      requires: [fr-hub]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        brake-line:
+          position: 0.5, 0.25
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-brake-line
+      blockedBy:
+      - fr-rim
+    rl-arm:
+      name: nc-vehicle-module-rl-arm
+      mount: NCVehicleRearLeftArmMount
+      position: -0.9, -2.2
+      defaultPart: NCVehicleRearLeftArm
+      functions: [Suspension]
+      serviceSeconds: 25
+      wheelIndex: 2
+      toolQuality: Anchoring
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - rl-rim
+    rl-spring:
+      name: nc-vehicle-module-rl-spring
+      mount: NCVehicleRearLeftSpringMount
+      position: -0.9, -2.2
+      defaultPart: NCVehicleRearLeftSpring
+      functions: [Suspension]
+      serviceSeconds: 25
+      wheelIndex: 2
+      toolQuality: Anchoring
+      requires: [rl-arm]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - rl-rim
+    rl-damper:
+      name: nc-vehicle-module-rl-damper
+      mount: NCVehicleRearLeftDamperMount
+      position: -0.9, -2.2
+      defaultPart: NCVehicleRearLeftDamper
+      functions: [Suspension]
+      serviceSeconds: 25
+      wheelIndex: 2
+      toolQuality: Anchoring
+      requires: [rl-arm]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - rl-rim
+    rl-hub:
+      name: nc-vehicle-module-rl-hub
+      mount: NCVehicleRearLeftHubMount
+      position: -0.9, -2.2
+      defaultPart: NCVehicleRearLeftHub
+      functions: [Grip, Drive]
+      serviceSeconds: 25
+      wheelIndex: 2
+      toolQuality: Anchoring
+      requires: [rl-arm]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - rl-rim
+      - rl-disc
+      - rl-brake
+    rl-rim:
+      name: nc-vehicle-module-rl-rim
+      mount: NCVehicleRearLeftRimMount
+      fastenerTorque: 160
+      position: -0.9, -2.2
+      defaultPart: NCVehicleRearLeftRim
+      functions: [Grip]
+      serviceSeconds: 25
+      wheelIndex: 2
+      toolQuality: Anchoring
+      requires: [rl-hub]
+      requiresLift: true
+      workPoints:
+        nut-1:
+          position: 0.5, 0.3
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-2:
+          position: 0.690211, 0.438197
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-3:
+          position: 0.617557, 0.661803
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-4:
+          position: 0.382443, 0.661803
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-5:
+          position: 0.309789, 0.438197
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+      extractWith:
+      - rl-tyre
+    rl-tyre:
+      name: nc-vehicle-module-rl-tyre
+      mount: NCVehicleRearLeftTyreMount
+      position: -0.9, -2.2
+      defaultPart: NCVehicleRearLeftTyre
+      functions: [Grip]
+      serviceSeconds: 25
+      wheelIndex: 2
+      toolQuality: Anchoring
+      requires: [rl-rim]
+      requiresLift: true
+    rl-brake:
+      name: nc-vehicle-module-rl-brake
+      mount: NCVehicleRearLeftBrakeMount
+      position: -0.9, -2.2
+      defaultPart: NCVehicleRearLeftBrake
+      functions: [Braking]
+      serviceSeconds: 25
+      wheelIndex: 2
+      toolQuality: Anchoring
+      requires: [rl-hub]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        brake-line:
+          position: 0.5, 0.25
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-brake-line
+      blockedBy:
+      - rl-rim
+    rr-arm:
+      name: nc-vehicle-module-rr-arm
+      mount: NCVehicleRearRightArmMount
+      position: 0.9, -2.2
+      defaultPart: NCVehicleRearRightArm
+      functions: [Suspension]
+      serviceSeconds: 25
+      wheelIndex: 3
+      toolQuality: Anchoring
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - rr-rim
+    rr-spring:
+      name: nc-vehicle-module-rr-spring
+      mount: NCVehicleRearRightSpringMount
+      position: 0.9, -2.2
+      defaultPart: NCVehicleRearRightSpring
+      functions: [Suspension]
+      serviceSeconds: 25
+      wheelIndex: 3
+      toolQuality: Anchoring
+      requires: [rr-arm]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - rr-rim
+    rr-damper:
+      name: nc-vehicle-module-rr-damper
+      mount: NCVehicleRearRightDamperMount
+      position: 0.9, -2.2
+      defaultPart: NCVehicleRearRightDamper
+      functions: [Suspension]
+      serviceSeconds: 25
+      wheelIndex: 3
+      toolQuality: Anchoring
+      requires: [rr-arm]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - rr-rim
+    rr-hub:
+      name: nc-vehicle-module-rr-hub
+      mount: NCVehicleRearRightHubMount
+      position: 0.9, -2.2
+      defaultPart: NCVehicleRearRightHub
+      functions: [Grip, Drive]
+      serviceSeconds: 25
+      wheelIndex: 3
+      toolQuality: Anchoring
+      requires: [rr-arm]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - rr-rim
+      - rr-disc
+      - rr-brake
+    rr-rim:
+      name: nc-vehicle-module-rr-rim
+      mount: NCVehicleRearRightRimMount
+      fastenerTorque: 160
+      position: 0.9, -2.2
+      defaultPart: NCVehicleRearRightRim
+      functions: [Grip]
+      serviceSeconds: 25
+      wheelIndex: 3
+      toolQuality: Anchoring
+      requires: [rr-hub]
+      requiresLift: true
+      workPoints:
+        nut-1:
+          position: 0.5, 0.3
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-2:
+          position: 0.690211, 0.438197
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-3:
+          position: 0.617557, 0.661803
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-4:
+          position: 0.382443, 0.661803
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+        nut-5:
+          position: 0.309789, 0.438197
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-wheel-nut
+      extractWith:
+      - rr-tyre
+    rr-tyre:
+      name: nc-vehicle-module-rr-tyre
+      mount: NCVehicleRearRightTyreMount
+      position: 0.9, -2.2
+      defaultPart: NCVehicleRearRightTyre
+      functions: [Grip]
+      serviceSeconds: 25
+      wheelIndex: 3
+      toolQuality: Anchoring
+      requires: [rr-rim]
+      requiresLift: true
+    rr-brake:
+      name: nc-vehicle-module-rr-brake
+      mount: NCVehicleRearRightBrakeMount
+      position: 0.9, -2.2
+      defaultPart: NCVehicleRearRightBrake
+      functions: [Braking]
+      serviceSeconds: 25
+      wheelIndex: 3
+      toolQuality: Anchoring
+      requires: [rr-hub]
+      requiresLift: true
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        brake-line:
+          position: 0.5, 0.25
+          radius: 0.085
+          kind: Connector
+          toolQuality: Screwing
+          name: nc-workshop-brake-line
+      blockedBy:
+      - rr-rim
+    fl-disc:
+      name: nc-workshop-disc
+      mount: NCVehicleFrontLeftDiscMount
+      defaultPart: NCVehicleFrontLeftDisc
+      position: -0.9, 2.4
+      requires:
+      - fl-hub
+      functions:
+      - Braking
+      wheelIndex: 0
+      requiresLift: true
+      toolQuality: Anchoring
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - fl-rim
+      - fl-brake
+      - fl-pads
+    fl-pads:
+      name: nc-workshop-pads
+      mount: NCVehicleFrontLeftPadsMount
+      defaultPart: NCVehicleFrontLeftPads
+      position: -0.9, 2.4
+      requires:
+      - fl-hub
+      functions:
+      - Braking
+      wheelIndex: 0
+      requiresLift: true
+      toolQuality: Anchoring
+      workPoints:
+        retaining-pin:
+          position: 0.5, 0.5
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Prying
+          name: nc-workshop-retaining-pin
+      blockedBy:
+      - fl-rim
+    fr-disc:
+      name: nc-workshop-disc
+      mount: NCVehicleFrontRightDiscMount
+      defaultPart: NCVehicleFrontRightDisc
+      position: 0.9, 2.4
+      requires:
+      - fr-hub
+      functions:
+      - Braking
+      wheelIndex: 1
+      requiresLift: true
+      toolQuality: Anchoring
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - fr-rim
+      - fr-brake
+      - fr-pads
+    fr-pads:
+      name: nc-workshop-pads
+      mount: NCVehicleFrontRightPadsMount
+      defaultPart: NCVehicleFrontRightPads
+      position: 0.9, 2.4
+      requires:
+      - fr-hub
+      functions:
+      - Braking
+      wheelIndex: 1
+      requiresLift: true
+      toolQuality: Anchoring
+      workPoints:
+        retaining-pin:
+          position: 0.5, 0.5
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Prying
+          name: nc-workshop-retaining-pin
+      blockedBy:
+      - fr-rim
+    rl-disc:
+      name: nc-workshop-disc
+      mount: NCVehicleRearLeftDiscMount
+      defaultPart: NCVehicleRearLeftDisc
+      position: -0.9, -2.2
+      requires:
+      - rl-hub
+      functions:
+      - Braking
+      wheelIndex: 2
+      requiresLift: true
+      toolQuality: Anchoring
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - rl-rim
+      - rl-brake
+      - rl-pads
+    rl-pads:
+      name: nc-workshop-pads
+      mount: NCVehicleRearLeftPadsMount
+      defaultPart: NCVehicleRearLeftPads
+      position: -0.9, -2.2
+      requires:
+      - rl-hub
+      functions:
+      - Braking
+      wheelIndex: 2
+      requiresLift: true
+      toolQuality: Anchoring
+      workPoints:
+        retaining-pin:
+          position: 0.5, 0.5
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Prying
+          name: nc-workshop-retaining-pin
+      blockedBy:
+      - rl-rim
+    rr-disc:
+      name: nc-workshop-disc
+      mount: NCVehicleRearRightDiscMount
+      defaultPart: NCVehicleRearRightDisc
+      position: 0.9, -2.2
+      requires:
+      - rr-hub
+      functions:
+      - Braking
+      wheelIndex: 3
+      requiresLift: true
+      toolQuality: Anchoring
+      workPoints:
+        bolt-1:
+          position: 0.25, 0.25
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+        bolt-2:
+          position: 0.75, 0.75
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Anchoring
+          name: nc-workshop-fastener
+      blockedBy:
+      - rr-rim
+      - rr-brake
+      - rr-pads
+    rr-pads:
+      name: nc-workshop-pads
+      mount: NCVehicleRearRightPadsMount
+      defaultPart: NCVehicleRearRightPads
+      position: 0.9, -2.2
+      requires:
+      - rr-hub
+      functions:
+      - Braking
+      wheelIndex: 3
+      requiresLift: true
+      toolQuality: Anchoring
+      workPoints:
+        retaining-pin:
+          position: 0.5, 0.5
+          radius: 0.085
+          kind: Fastener
+          toolQuality: Prying
+          name: nc-workshop-retaining-pin
+      blockedBy:
+      - rr-rim
+
+- type: entity
+  parent: NCToyotaSupra1996
+  id: NCVehicleRecoveryTruck
+  name: recovery truck
+  description: A working flatbed with a cable winch and reusable tie-down straps. The crew does the recovery.
+  components:
+  - type: NCVehicle
+    chassis: NCRecoveryTruckChassis
+  - type: NCVehicleDrive
+    handling: NCRecoveryTruckAutomaticHandling
+  - type: Storage
+    grid:
+    - 0,0,15,7
+  - type: EntityStorage
+    maxSize: 1.5
+    capacity: 6
+    enteringOffset: 0, 2
+  - type: NCVehicleRecovery
+    maximumLoad: 2400
+    deckPosition: 0, -1
+    unloadPosition: 0, -6.5
+    cargoHalfExtents: 1, 2.2
+    loadingSeconds: 20
+    securingSeconds: 15
+    loadGap: 1
+    winchRate: 0.3
+  - type: NCVehicleBody
+    zones:
+      front-left:
+        name: nc-vehicle-zone-front-left
+        position: -1, 3.8
+        energyCapacity: 20000
+        moduleEnergyCapacity: 10000
+        exterior: true
+        protectedSlots: [engine, fl-tyre, fl-hub, fl-brake]
+        cabinDamageTransfer: 0.1
+        exposedSeats: [driver]
+      front-center:
+        name: nc-vehicle-zone-front-center
+        position: 0, 3.95
+        energyCapacity: 20000
+        moduleEnergyCapacity: 10000
+        exterior: true
+        protectedSlots: [engine, radiator, front-bumper, hood, fuel-pump, headlamps]
+        cabinDamageTransfer: 0.15
+        exposedSeats: [driver, passenger]
+      front-right:
+        name: nc-vehicle-zone-front-right
+        position: 1, 3.8
+        energyCapacity: 20000
+        moduleEnergyCapacity: 10000
+        exterior: true
+        protectedSlots: [engine, fr-tyre, fr-hub, fr-brake]
+        cabinDamageTransfer: 0.1
+        exposedSeats: [passenger]
+      left-side:
+        name: nc-vehicle-zone-left-side
+        position: -1.1, 2.8
+        energyCapacity: 20000
+        moduleEnergyCapacity: 40000
+        exterior: true
+        protectedSlots: [gearbox]
+        cabinDamageTransfer: 0.35
+        exposedSeats: [driver]
+      right-side:
+        name: nc-vehicle-zone-right-side
+        position: 1.1, 2.8
+        energyCapacity: 20000
+        moduleEnergyCapacity: 40000
+        exterior: true
+        protectedSlots: [gearbox]
+        cabinDamageTransfer: 0.35
+        exposedSeats: [passenger]
+      rear-left:
+        name: nc-vehicle-zone-rear-left
+        position: -1, -3.8
+        energyCapacity: 20000
+        moduleEnergyCapacity: 40000
+        exterior: true
+        protectedSlots: [rl-tyre, rl-hub, rl-brake, fuel-tank]
+      rear-center:
+        name: nc-vehicle-zone-rear-center
+        position: 0, -3.95
+        energyCapacity: 20000
+        moduleEnergyCapacity: 40000
+        exterior: true
+        protectedSlots: [rear-bumper, rear-differential, fuel-tank]
+      rear-right:
+        name: nc-vehicle-zone-rear-right
+        position: 1, -3.8
+        energyCapacity: 20000
+        moduleEnergyCapacity: 40000
+        exterior: true
+        protectedSlots: [rr-tyre, rr-hub, rr-brake, fuel-tank]
+      roof:
+        name: nc-vehicle-zone-roof
+        position: 0, 2.8
+        energyCapacity: 10000
+        moduleEnergyCapacity: 40000
+        exterior: false
+        protectedSlots: []
+      underbody:
+        name: nc-vehicle-zone-underbody
+        position: 0, 0
+        energyCapacity: 10000
+        moduleEnergyCapacity: 40000
+        exterior: false
+        protectedSlots: [gearbox]
+      cabin:
+        name: nc-vehicle-zone-cabin
+        position: 0, 2.8
+        energyCapacity: 10000
+        moduleEnergyCapacity: 40000
+        exterior: false
+        protectedSlots: []
+      cargo:
+        name: nc-vehicle-zone-cargo
+        position: 0, -1
+        energyCapacity: 10000
+        moduleEnergyCapacity: 40000
+        exterior: false
+        protectedSlots: []
+  - type: PointLight
+    offset: 0, 3.5
+  - type: Sprite
+    sprite: _NC/Vehicle/towtruck.rsi
+    layers:
+    - state: shadow
+      map: ["enum.NCVehicleVisualLayers.Shadow"]
+    - state: body
+      map: ["enum.NCVehicleVisualLayers.Body"]
+    - state: damage-light
+      map: ["enum.NCVehicleVisualLayers.DamageLight"]
+      visible: false
+    - state: damage-heavy
+      map: ["enum.NCVehicleVisualLayers.DamageHeavy"]
+      visible: false
+    - state: tuning-street
+      map: ["enum.NCVehicleVisualLayers.Tuning"]
+      visible: false
+    - state: hood-open
+      map: ["enum.NCVehicleVisualLayers.Hood"]
+      visible: false
+    - state: wheel-damage
+      map: ["enum.NCVehicleVisualLayers.Wheels"]
+      visible: false
+    - state: headlights
+      map: ["enum.NCVehicleVisualLayers.Headlights"]
+      visible: false
+      shader: unshaded
+    - state: brakes
+      map: ["enum.NCVehicleVisualLayers.Brakes"]
+      visible: false
+      shader: unshaded
+    - state: reverse
+      map: ["enum.NCVehicleVisualLayers.Reverse"]
+      visible: false
+      shader: unshaded
+    - state: smoke
+      map: ["enum.NCVehicleVisualLayers.Smoke"]
+      visible: false
+    # The shared 128px art density is doubled for the eight-metre recovery chassis.
+    rotation: 180
+    noRot: false
+    scale: 2, 2
+  - type: Fixtures
+    fixtures:
+      chassis:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-1.1,-3.95,1.1,3.95"
+        density: 201
+        restitution: 0.05
+        mask:
+        - MobMask
+        layer:
+        - LargeMobLayer

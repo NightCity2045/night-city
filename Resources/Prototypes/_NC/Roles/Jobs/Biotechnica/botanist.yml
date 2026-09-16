@@ -23,5 +23,4 @@
     back: ClothingBackpack
     shoes: ClothingShoesColorBrown
     id: BotanistPDA
-    ears: ClothingHeadsetService
     belt: ClothingBeltPlantFilled

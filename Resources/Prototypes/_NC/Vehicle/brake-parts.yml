@@ -1,0 +1,164 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncVehiclePart
+  id: NCVehicleFrontLeftDisc
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontLeftDiscItem
+  mount: NCVehicleFrontLeftDiscMount
+  mass: 2
+  inertia: 0.1
+  conditionFloor: 0
+  wheelWearShare: 0.15
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontLeftDiscItem
+  name: fl brake disc
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontLeftDisc
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: disc
+- type: ncVehiclePart
+  id: NCVehicleFrontLeftPads
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontLeftPadsItem
+  mount: NCVehicleFrontLeftPadsMount
+  mass: 1
+  inertia: 0.05
+  conditionFloor: 0
+  wheelWearShare: 0.3
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontLeftPadsItem
+  name: fl brake pads
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontLeftPads
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: pads
+- type: ncVehiclePart
+  id: NCVehicleFrontRightDisc
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontRightDiscItem
+  mount: NCVehicleFrontRightDiscMount
+  mass: 2
+  inertia: 0.1
+  conditionFloor: 0
+  wheelWearShare: 0.15
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontRightDiscItem
+  name: fr brake disc
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontRightDisc
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: disc
+- type: ncVehiclePart
+  id: NCVehicleFrontRightPads
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleFrontRightPadsItem
+  mount: NCVehicleFrontRightPadsMount
+  mass: 1
+  inertia: 0.05
+  conditionFloor: 0
+  wheelWearShare: 0.3
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontRightPadsItem
+  name: fr brake pads
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontRightPads
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: pads
+- type: ncVehiclePart
+  id: NCVehicleRearLeftDisc
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearLeftDiscItem
+  mount: NCVehicleRearLeftDiscMount
+  mass: 2
+  inertia: 0.1
+  conditionFloor: 0
+  wheelWearShare: 0.15
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearLeftDiscItem
+  name: rl brake disc
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearLeftDisc
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: disc
+- type: ncVehiclePart
+  id: NCVehicleRearLeftPads
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearLeftPadsItem
+  mount: NCVehicleRearLeftPadsMount
+  mass: 1
+  inertia: 0.05
+  conditionFloor: 0
+  wheelWearShare: 0.3
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearLeftPadsItem
+  name: rl brake pads
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearLeftPads
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: pads
+- type: ncVehiclePart
+  id: NCVehicleRearRightDisc
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearRightDiscItem
+  mount: NCVehicleRearRightDiscMount
+  mass: 2
+  inertia: 0.1
+  conditionFloor: 0
+  wheelWearShare: 0.15
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearRightDiscItem
+  name: rr brake disc
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearRightDisc
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: disc
+- type: ncVehiclePart
+  id: NCVehicleRearRightPads
+  repairCategory: RunningGear
+  minimumRepairCondition: 0.15
+  item: NCVehicleRearRightPadsItem
+  mount: NCVehicleRearRightPadsMount
+  mass: 1
+  inertia: 0.05
+  conditionFloor: 0
+  wheelWearShare: 0.3
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearRightPadsItem
+  name: rr brake pads
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearRightPads
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: pads

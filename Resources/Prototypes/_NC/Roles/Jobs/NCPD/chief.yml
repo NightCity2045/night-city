@@ -27,7 +27,6 @@
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
     id: NCPDChiefPDA
-    ears: ClothingHeadsetAltSecurity
     belt: ClothingBeltSecurityFilled
     outerClothing: ClothingOuterCoatHoSTrench
   storage:

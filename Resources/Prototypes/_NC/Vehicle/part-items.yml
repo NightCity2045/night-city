@@ -1,0 +1,576 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleStarterItem
+  name: starter motor
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleStarter
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: starter
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleBatteryItem
+  name: starter battery
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleBattery
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: battery
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleAlternatorItem
+  name: alternator
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleAlternator
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: alternator
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleWiringItem
+  name: engine wiring harness
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleWiring
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: connector
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleEcuItem
+  name: engine control unit
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleEcu
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: ecu
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleCoilItem
+  name: ignition coil pack
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleCoil
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: coil
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFuelPumpItem
+  name: fuel pump
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFuelPump
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: fuelpump
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFuelFilterItem
+  name: fuel filter
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFuelFilter
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: fuelfilter
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRadiatorItem
+  name: radiator
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRadiator
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: radiator
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleWaterPumpItem
+  name: coolant pump
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleWaterPump
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: waterpump
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFanItem
+  name: radiator fan
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFan
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: fan
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleThermostatItem
+  name: thermostat
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleThermostat
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: thermostat
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleCoolantHoseItem
+  name: coolant hoses
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleCoolantHose
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: hose
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleOilPumpItem
+  name: oil pump
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleOilPump
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: oilpump
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleOilFilterItem
+  name: oil filter
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleOilFilter
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: oilfilter
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleSteeringRackItem
+  name: steering rack
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleSteeringRack
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: steeringrack
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleMasterCylinderItem
+  name: brake master cylinder
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleMasterCylinder
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: mastercylinder
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleBrakeLinesItem
+  name: brake lines
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleBrakeLines
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: brakelines
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleClutchItem
+  name: clutch assembly
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleClutch
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: clutch
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehiclePropShaftItem
+  name: propeller shaft
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehiclePropShaft
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: propshaft
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearDifferentialItem
+  name: rear differential
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearDifferential
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: differential
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleHoodItem
+  name: hood
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleHood
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: hood
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontBumperItem
+  name: front bumper
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontBumper
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: frontbumper
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearBumperItem
+  name: rear bumper
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearBumper
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: rearbumper
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontLeftArmItem
+  name: front left control arm
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontLeftArm
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: arm
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontLeftSpringItem
+  name: front left spring
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontLeftSpring
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: spring
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontLeftDamperItem
+  name: front left damper
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontLeftDamper
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: damper
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontLeftHubItem
+  name: front left wheel hub
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontLeftHub
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: hub
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontLeftRimItem
+  name: front left rim
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontLeftRim
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: wheel
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontLeftTyreItem
+  name: front left tyre
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontLeftTyre
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: tyre
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontLeftBrakeItem
+  name: front left brake assembly
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontLeftBrake
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: caliper
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontRightArmItem
+  name: front right control arm
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontRightArm
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: arm
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontRightSpringItem
+  name: front right spring
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontRightSpring
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: spring
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontRightDamperItem
+  name: front right damper
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontRightDamper
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: damper
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontRightHubItem
+  name: front right wheel hub
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontRightHub
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: hub
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontRightRimItem
+  name: front right rim
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontRightRim
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: wheel
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontRightTyreItem
+  name: front right tyre
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontRightTyre
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: tyre
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontRightBrakeItem
+  name: front right brake assembly
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontRightBrake
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: caliper
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearLeftArmItem
+  name: rear left control arm
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearLeftArm
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: arm
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearLeftSpringItem
+  name: rear left spring
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearLeftSpring
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: spring
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearLeftDamperItem
+  name: rear left damper
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearLeftDamper
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: damper
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearLeftHubItem
+  name: rear left wheel hub
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearLeftHub
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: hub
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearLeftRimItem
+  name: rear left rim
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearLeftRim
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: wheel
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearLeftTyreItem
+  name: rear left tyre
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearLeftTyre
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: tyre
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearLeftBrakeItem
+  name: rear left brake assembly
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearLeftBrake
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: caliper
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearRightArmItem
+  name: rear right control arm
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearRightArm
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: arm
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearRightSpringItem
+  name: rear right spring
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearRightSpring
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: spring
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearRightDamperItem
+  name: rear right damper
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearRightDamper
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: damper
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearRightHubItem
+  name: rear right wheel hub
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearRightHub
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: hub
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearRightRimItem
+  name: rear right rim
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearRightRim
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: wheel
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearRightTyreItem
+  name: rear right tyre
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearRightTyre
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: tyre
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleRearRightBrakeItem
+  name: rear right brake assembly
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleRearRightBrake
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: caliper
+

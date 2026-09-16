@@ -1,0 +1,247 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncVehicleHandling
+  parent: NCBaseSupraHandling
+  id: NCMizutaniShionManualRwd
+  wheels:
+  - position: -0.68, 1.2
+    radius: 0.32
+    inertia: 1.6153846153846154
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.68, 1.2
+    radius: 0.32
+    inertia: 1.6153846153846154
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.68, -1.2
+    axle: 1
+    radius: 0.32
+    inertia: 1.6153846153846154
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.68, -1.2
+    axle: 1
+    radius: 0.32
+    inertia: 1.6153846153846154
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  torqueCurve:
+  - 0, 100
+  - 900, 210
+  - 3000, 430
+  - 6000, 390
+  - 7800, 0
+  gearRatios: [0, 3.6, 2.25, 1.55, 1.18, 0.93, 0.74, -3.2]
+  finalDrive: 3.75
+  idleRpm: 900
+  redlineRpm: 7800
+  engineInertia: 0.32
+  clutchTorque: 650
+  steeringRate: 6.5
+  steeringAngle: 0.55
+  keyboardSteeringRate: 4.5
+  wheelbase: 2.4
+  centerOfGravityHeight: 0.36
+  friction: 1.05
+  brakeTorque: 3400
+  handbrakeTorque: 5200
+  handbrakeLateralGrip: 0.29
+  aerodynamicDrag: 0.3
+  rollingResistance: 11
+  fuelCapacity: 70
+  antiLockBrakes: true
+  tractionControl: true
+  stabilityControl: false
+
+- type: ncVehicleHandling
+  parent: NCMizutaniShionManualRwd
+  id: NCMizutaniShionSequentialRwd
+  sequential: true
+
+- type: ncVehicleHandling
+  parent: NCMizutaniShionManualRwd
+  id: NCMizutaniShionAutomaticRwd
+  automatic: true
+  automaticUpshiftRpm: 6100
+  automaticDownshiftRpm: 1900
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleHandling
+  parent: NCMizutaniShionManualRwd
+  id: NCMizutaniShionManualAwd
+  centerDifferentialCoupling: 10
+  centerDifferentialTorqueLimit: 180
+  differentialCoupling: 20
+  differentialTorqueLimit: 350
+  tractionControl: true
+  antiLockBrakes: true
+  stabilityControl: true
+  wheels:
+  - position: -0.68, 1.2
+    radius: 0.32
+    inertia: 1.6153846153846154
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.68, 1.2
+    radius: 0.32
+    inertia: 1.6153846153846154
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.68, -1.2
+    axle: 1
+    radius: 0.32
+    inertia: 1.6153846153846154
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.68, -1.2
+    axle: 1
+    radius: 0.32
+    inertia: 1.6153846153846154
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+
+- type: ncVehicleHandling
+  parent: NCMizutaniShionManualAwd
+  id: NCMizutaniShionSequentialAwd
+  sequential: true
+
+- type: ncVehicleHandling
+  parent: NCMizutaniShionManualAwd
+  id: NCMizutaniShionAutomaticAwd
+  automatic: true
+  automaticUpshiftRpm: 6100
+  automaticDownshiftRpm: 1900
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleChassis
+  parent: NCVehicleDevelopmentSedan
+  id: NCMizutaniShionChassis
+  workshop: NCMizutaniShionWorkshop
+  manualHandling: NCMizutaniShionSequentialRwd
+  automaticHandling: NCMizutaniShionAutomaticRwd
+  allWheelHandling: NCMizutaniShionSequentialAwd
+  automaticAllWheelHandling: NCMizutaniShionAutomaticAwd
+  mass: 1050
+  inertia: 1600
+  frontTowPoint: 0, 1.95
+  rearTowPoint: 0, -1.95
+
+- type: entity
+  parent: NCToyotaSupra1996
+  id: NCVehicleMizutaniShion2045
+  name: Mizutani Shion
+  description: A high-revving sports car with sharp turn-in and strong mechanical grip.
+  components:
+  - type: NCVehicle
+    chassis: NCMizutaniShionChassis
+  - type: NCVehicleDrive
+    handling: NCMizutaniShionSequentialRwd
+    fuel: 42
+  - type: Storage
+    grid:
+    - 0,0,5,3
+  - type: EntityStorage
+    maxSize: 0.9
+    capacity: 1
+    enteringOffset: 0, -1.75
+  - type: Sprite
+    sprite: _NC/Vehicle/mizutani_shion_2045.rsi
+  - type: Fixtures
+    fixtures:
+      chassis:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.825,-1.95,0.825,1.95"
+        density: 201
+        restitution: 0.05
+        mask:
+        - MobMask
+        layer:
+        - LargeMobLayer
+
+- type: ncVehicleWorkshop
+  parent: NCSupraWorkshop
+  id: NCMizutaniShionWorkshop
+  viewLayouts:
+    engine-bay:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: 0, 1.8
+      accessRange: 2.6
+    cooling:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: 0, 1.8
+      accessRange: 2.6
+    lubrication:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: 0, 1.8
+      accessRange: 2.6
+    steering:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: 0, 1.8
+      accessRange: 2.6
+    body:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: 0, 1.8
+      accessRange: 2.6
+    fuel:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: 0, -1.8
+      accessRange: 2.6
+    underbody:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: -1.45, 0
+      accessRange: 2.6
+    cabin:
+      scale: 0.96, 0.98
+      offset: 0.02, 0.01
+      accessPosition: -1.45, 0
+      accessRange: 2.6
+    fl:
+      scale: 0.96, 0.96
+      offset: 0.02, 0.02
+      accessPosition: -1.45, 1.28
+      accessRange: 1.8
+    fr:
+      scale: 0.96, 0.96
+      offset: 0.02, 0.02
+      accessPosition: 1.45, 1.28
+      accessRange: 1.8
+    rl:
+      scale: 0.96, 0.96
+      offset: 0.02, 0.02
+      accessPosition: -1.45, -1.28
+      accessRange: 1.8
+    rr:
+      scale: 0.96, 0.96
+      offset: 0.02, 0.02
+      accessPosition: 1.45, -1.28
+      accessRange: 1.8
+  nodeLayouts:
+    battery:
+      offset: 0.55, 0
+    ecu:
+      offset: -0.57, 0.04
+    coil:
+      offset: -0.18, 0.12
+    alternator:
+      offset: -0.05, 0.02
+    gearbox:
+      offset: 0.04, 0.03

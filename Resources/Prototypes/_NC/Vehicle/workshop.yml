@@ -1,0 +1,183 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleEngineItem
+  name: inline engine module
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleDevelopmentEngine
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: engine
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleGearboxItem
+  name: manual gearbox module
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleDevelopmentGearbox
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: gearbox
+
+- type: entity
+  parent: Wrench
+  id: NCVehicleMechanicTool
+  components:
+  - type: NCVehicleDiagnosticTool
+    level: 1
+  - type: Tool
+    qualities:
+    - Screwing
+    - Anchoring
+  - type: Sprite
+    sprite: _NC/Vehicle/tools.rsi
+    layers:
+    - state: socketset
+
+- type: entity
+  parent: Wrench
+  id: NCVehicleTorqueWrench
+  components:
+  - type: NCVehicleTorqueTool
+    torque: 105
+    minimum: 20
+    maximum: 220
+    step: 5
+  - type: Tool
+    qualities:
+    - Anchoring
+  - type: Sprite
+    sprite: _NC/Vehicle/tools.rsi
+    layers:
+    - state: torquewrench
+
+- type: entity
+  parent: BaseStructure
+  id: NCVehicleWorkshopLift
+  name: vehicle service lift
+  components:
+  - type: Anchorable
+  - type: NCVehicleWorkshopEquipment
+    lift: true
+    range: 3
+  - type: Sprite
+    sprite: _NC/Vehicle/equipment.rsi
+    layers:
+    - state: lift
+
+- type: entity
+  parent: BaseStructure
+  id: NCVehicleEngineHoist
+  name: engine hoist
+  components:
+  - type: Anchorable
+  - type: NCVehicleWorkshopEquipment
+    hoist: true
+    range: 3
+  - type: Sprite
+    sprite: _NC/Vehicle/equipment.rsi
+    layers:
+    - state: hoist
+
+- type: entity
+  parent: BaseStructure
+  id: NCVehicleRepairBench
+  name: vehicle repair workbench
+  components:
+  - type: Anchorable
+  - type: NCVehicleWorkshopEquipment
+    workbench: true
+    assembly: true
+    range: 3
+  - type: ItemSlots
+    slots:
+      assembly:
+        name: nc-workbench-slot
+        whitelist:
+          components:
+          - NCVehiclePartItem
+        swap: false
+  - type: ContainerContainer
+    containers:
+      assembly: !type:ContainerSlot
+  - type: ActivatableUI
+    key: enum.NCVehicleUiKey.Workbench
+    singleUser: true
+  - type: ActivatableUIRequiresAnchor
+  - type: UserInterface
+    interfaces:
+      enum.NCVehicleUiKey.Workbench:
+        type: NCVehicleWorkbenchBoundUserInterface
+        interactionRange: 3
+  - type: Sprite
+    sprite: _NC/Vehicle/equipment.rsi
+    layers:
+    - state: bench
+
+- type: entity
+  parent: BaseStructure
+  id: NCVehicleTyreChanger
+  name: vehicle tyre changer
+  components:
+  - type: Anchorable
+  - type: NCVehicleWorkshopEquipment
+    workbench: true
+    assembly: true
+    range: 3
+  - type: ItemSlots
+    slots:
+      assembly:
+        name: nc-workbench-slot
+        whitelist:
+          components:
+          - NCVehiclePartItem
+        swap: false
+  - type: ContainerContainer
+    containers:
+      assembly: !type:ContainerSlot
+  - type: ActivatableUI
+    key: enum.NCVehicleUiKey.Workbench
+    singleUser: true
+  - type: ActivatableUIRequiresAnchor
+  - type: UserInterface
+    interfaces:
+      enum.NCVehicleUiKey.Workbench:
+        type: NCVehicleWorkbenchBoundUserInterface
+        interactionRange: 3
+  - type: Sprite
+    sprite: _NC/Vehicle/equipment.rsi
+    layers:
+    - state: tyrechanger
+
+- type: entity
+  parent: BaseItem
+  id: NCVehicleRepairKit
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/stock_parts.rsi
+    state: micro_mani
+  - type: NCVehicleRepairKit
+    restoreAmount: 0.5
+    maximumCondition: 0.85
+    seconds: 60
+    uses: 1
+
+- type: entity
+  parent: BaseItem
+  id: NCVehicleTyreRepairKit
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/stock_parts.rsi
+    state: micro_mani
+    color: "#d7aa45"
+  - type: NCVehicleRepairKit
+    category: Rubber
+    restoreAmount: 0.35
+    maximumCondition: 0.9
+    seconds: 45
+    uses: 1

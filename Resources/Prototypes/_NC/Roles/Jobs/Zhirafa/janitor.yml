@@ -22,7 +22,6 @@
     back: ClothingBackpack
     shoes: ClothingShoesGaloshes
     id: JanitorPDA
-    ears: ClothingHeadsetService
     belt: ClothingBeltJanitorFilled
     outerClothing: ClothingOuterWinterJani
   # NC: A physical worker must carry the same real tool a player uses. The professional adapter never invents one.

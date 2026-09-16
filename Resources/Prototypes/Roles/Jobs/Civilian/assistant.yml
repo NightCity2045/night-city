@@ -7,13 +7,13 @@
   icon: "JobIconPassenger"
   supervisors: job-supervisors-everyone
   access:
-  - Maintenance
+  - NCGeneral # NC
 
 - type: startingGear
   id: PassengerGear
   equipment:
     id: PassengerPDA
-    ears: ClothingHeadsetGrey
+    # NC: Residents start without a radio headset.
   #storage:
     #back:
     #- Stuff

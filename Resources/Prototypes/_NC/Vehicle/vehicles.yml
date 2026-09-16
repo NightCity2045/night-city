@@ -1,0 +1,338 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  id: NCToyotaSupra1996
+  name: Toyota Supra (1996)
+  description: A red A80 coupe preserved through decades of repairs.
+  components:
+  - type: NCVehicle
+    chassis: NCVehicleDevelopmentSedan
+  - type: NCVehicleAccess
+    keyPrototype: NCVehicleKey
+    currency: Credit
+    breakLockSeconds: 30
+    hotwireSeconds: 45
+  - type: Lock
+    locked: false
+    unlockOnClick: false
+    breakOnAccessBreaker: false
+  - type: LockedStorage
+  - type: Storage
+    grid:
+    - 0,0,9,5
+    maxItemSize: Huge
+    openOnActivate: false
+    clickInsert: false
+  - type: NCVehicleTrunk
+  - type: EntityStorage
+    maxSize: 1.1
+    capacity: 2
+    isCollidableWhenOpen: true
+    openOnMove: false
+    enteringOffset: 0, -1.65
+    enteringRange: 0.85
+    showContents: true
+    airtight: false
+    whitelist:
+      components:
+      - Item
+      - MobState
+      - EntityStorage
+    blacklist:
+      components:
+      - NCVehicle
+  - type: ContainerContainer
+    containers:
+      storagebase: !type:Container
+        ents: []
+      entity_storage: !type:Container
+        ents: []
+  - type: NCVehicleDrive
+    handling: NCSupraManualRwd
+    fuel: 35
+  - type: NCVehicleFuel
+    reagent: NCCHOOH2
+  - type: NCVehicleAccessories
+    startupSound:
+      path: /Audio/Effects/Vehicle/vehiclestartup.ogg
+    idleSound:
+      path: /Audio/Effects/Vehicle/vehicleengineidle.ogg
+    hornSound:
+      path: /Audio/Effects/Vehicle/carhorn.ogg
+  - type: PointLight
+    enabled: false
+    radius: 7
+    energy: 2
+    offset: 0, 1.4
+  - type: Damageable
+  - type: Flammable
+    alwaysCombustible: true
+    damage: {}
+    fireSpread: true
+  - type: Appearance
+  - type: FireVisuals
+    sprite: Mobs/Effects/onfire.rsi
+    normalState: Generic_mob_burning
+  - type: NCVehicleBody
+    fireDamageSlots: [engine, wiring, fuel-pump, fuel-tank, coolant-hose]
+    cabinFireDamage:
+      types:
+        Heat: 1
+    minimumImpactSpeed: 1
+    minimumPedestrianImpactSpeed: 2.5
+    airbagDeltaV: 6
+    airbagTransfer: 0.75
+    moderateImpactDeltaV: 8
+    severeImpactDeltaV: 15
+    catastrophicDeltaV: 15
+    maximumModuleDamagePerImpact: 0.45
+    beltTransfer: 0.55
+    unbeltedTransfer: 1
+    injuryThreshold: 3
+    traumaPerDeltaV: 2.5
+    maximumTrauma: 60
+    traumaProfile: BluntImpact
+    injuryZone: NCZoneChest
+    injuryRegion: Thorax
+    zones:
+      front-left:
+        name: nc-vehicle-zone-front-left
+        position: -0.65, 1.6
+        energyCapacity: 80000
+        moduleEnergyCapacity: 45000
+        exterior: true
+        protectedSlots: [engine, fl-tyre, fl-hub, fl-brake]
+        cabinDamageTransfer: 0.1
+        exposedSeats: [driver]
+      front-center:
+        name: nc-vehicle-zone-front-center
+        position: 0, 1.75
+        energyCapacity: 100000
+        moduleEnergyCapacity: 45000
+        exterior: true
+        protectedSlots: [engine, radiator, front-bumper, hood, fuel-pump, headlamps]
+        cabinDamageTransfer: 0.15
+        exposedSeats: [driver, passenger]
+      front-right:
+        name: nc-vehicle-zone-front-right
+        position: 0.65, 1.6
+        energyCapacity: 80000
+        moduleEnergyCapacity: 45000
+        exterior: true
+        protectedSlots: [engine, fr-tyre, fr-hub, fr-brake]
+        cabinDamageTransfer: 0.1
+        exposedSeats: [passenger]
+      left-side:
+        name: nc-vehicle-zone-left-side
+        position: -0.725, 0
+        energyCapacity: 60000
+        moduleEnergyCapacity: 40000
+        exterior: true
+        protectedSlots: [gearbox]
+        cabinDamageTransfer: 0.35
+        exposedSeats: [driver]
+      right-side:
+        name: nc-vehicle-zone-right-side
+        position: 0.725, 0
+        energyCapacity: 60000
+        moduleEnergyCapacity: 40000
+        exterior: true
+        protectedSlots: [gearbox]
+        cabinDamageTransfer: 0.35
+        exposedSeats: [passenger]
+      rear-left:
+        name: nc-vehicle-zone-rear-left
+        position: -0.65, -1.6
+        energyCapacity: 70000
+        moduleEnergyCapacity: 50000
+        exterior: true
+        protectedSlots: [rl-tyre, rl-hub, rl-brake, fuel-tank]
+      rear-center:
+        name: nc-vehicle-zone-rear-center
+        position: 0, -1.75
+        energyCapacity: 70000
+        moduleEnergyCapacity: 50000
+        exterior: true
+        protectedSlots: [rear-bumper, rear-differential, fuel-tank]
+      rear-right:
+        name: nc-vehicle-zone-rear-right
+        position: 0.65, -1.6
+        energyCapacity: 70000
+        moduleEnergyCapacity: 50000
+        exterior: true
+        protectedSlots: [rr-tyre, rr-hub, rr-brake, fuel-tank]
+      roof:
+        name: nc-vehicle-zone-roof
+        position: 0, 0
+        energyCapacity: 10000
+        moduleEnergyCapacity: 40000
+        exterior: false
+        protectedSlots: []
+      underbody:
+        name: nc-vehicle-zone-underbody
+        position: 0, 0
+        energyCapacity: 10000
+        moduleEnergyCapacity: 40000
+        exterior: false
+        protectedSlots: [gearbox]
+      cabin:
+        name: nc-vehicle-zone-cabin
+        position: 0, 0
+        energyCapacity: 10000
+        moduleEnergyCapacity: 40000
+        exterior: false
+        protectedSlots: []
+      cargo:
+        name: nc-vehicle-zone-cargo
+        position: 0, -1
+        energyCapacity: 10000
+        moduleEnergyCapacity: 40000
+        exterior: false
+        protectedSlots: []
+  - type: NCVehicleCondition
+    interval: 0.5
+    engineTemperature: 293.15
+    brakeTemperature: 293.15
+    batteryCharge: 45
+    ambientTemperature: 293.15
+    engineHeatCapacity: 120000
+    brakeHeatCapacity: 18000
+    idleHeat: 3000
+    # A healthy cooling circuit survives ordinary full-load driving; abuse still accumulates mechanical wear.
+    loadHeat: 40000
+    passiveCooling: 20
+    radiatorCooling: 500
+    airCooling: 40
+    brakeCooling: 120
+    overheatTemperature: 388.15
+    shutdownTemperature: 423.15
+    brakeFadeTemperature: 673.15
+    brakeFailureTemperature: 1073.15
+    minimumOil: 0.5
+    normalWear: 0.000001
+    dryWear: 0.003
+    hotWear: 0.001
+    wearInterval: 1
+    batteryCapacity: 60
+    starterCharge: 0.05
+    ignitionAmps: 12
+    alternatorAmps: 50
+  - type: NCVehicleFluids
+    circuits:
+      Oil:
+        solution: oil
+        reagent: NCEngineOil
+        workingVolume: 5000
+        sealSlots: [oil-pump, oil-filter]
+        maximumLeakPerSecond: 20
+      Coolant:
+        solution: coolant
+        reagent: NCCoolant
+        workingVolume: 8000
+        sealSlots: [radiator, coolant-hose, water-pump]
+        maximumLeakPerSecond: 40
+      Brakes:
+        solution: brakes
+        reagent: NCBrakeFluid
+        workingVolume: 1000
+        sealSlots: [brake-lines, master-cylinder]
+        maximumLeakPerSecond: 5
+      Transmission:
+        solution: transmission
+        reagent: NCVehicleTransmissionFluid
+        workingVolume: 2500
+        sealSlots: [gearbox]
+        maximumLeakPerSecond: 10
+      Steering:
+        solution: steering
+        reagent: NCVehicleSteeringFluid
+        workingVolume: 1200
+        sealSlots: [steering-rack]
+        maximumLeakPerSecond: 5
+      Washer:
+        solution: washer
+        reagent: NCVehicleWasherFluid
+        workingVolume: 3000
+      Fuel:
+        solution: fuel
+        reagent: NCCHOOH2
+        workingVolume: 70000
+        sealSlots: [fuel-pump, fuel-filter, fuel-tank]
+        maximumLeakPerSecond: 30
+  - type: SolutionManager
+    solutions: [NCVehicleFuelReservoir, NCVehicleOilReservoir, NCVehicleCoolantReservoir, NCVehicleBrakeReservoir, NCVehicleTransmissionReservoir, NCVehicleSteeringReservoir, NCVehicleWasherReservoir]
+  - type: RefillableSolution
+    solution: fuel
+  - type: DrainableSolution
+    solution: fuel
+  - type: UserInterface
+    interfaces:
+      enum.NCVehicleUiKey.Driver:
+        type: NCVehicleDriverBoundUserInterface
+      enum.NCVehicleUiKey.Service:
+        type: NCVehicleServiceBoundUserInterface
+        interactionRange: 4.5
+      enum.NCVehicleUiKey.Ownership:
+        type: NCVehicleOwnershipBoundUserInterface
+      enum.StorageUiKey.Key:
+        type: StorageBoundUserInterface
+  - type: Transform
+    noRot: false
+  - type: Sprite
+    sprite: _NC/Vehicle/supra_1996.rsi
+    layers:
+    - state: shadow
+      map: ["enum.NCVehicleVisualLayers.Shadow"]
+    - state: body
+      map: ["enum.NCVehicleVisualLayers.Body"]
+    - state: damage-light
+      map: ["enum.NCVehicleVisualLayers.DamageLight"]
+      visible: false
+    - state: damage-heavy
+      map: ["enum.NCVehicleVisualLayers.DamageHeavy"]
+      visible: false
+    - state: tuning-street
+      map: ["enum.NCVehicleVisualLayers.Tuning"]
+      visible: false
+    - state: hood-open
+      map: ["enum.NCVehicleVisualLayers.Hood"]
+      visible: false
+    - state: wheel-damage
+      map: ["enum.NCVehicleVisualLayers.Wheels"]
+      visible: false
+    - state: headlights
+      map: ["enum.NCVehicleVisualLayers.Headlights"]
+      visible: false
+      shader: unshaded
+    - state: brakes
+      map: ["enum.NCVehicleVisualLayers.Brakes"]
+      visible: false
+      shader: unshaded
+    - state: reverse
+      map: ["enum.NCVehicleVisualLayers.Reverse"]
+      visible: false
+      shader: unshaded
+    - state: smoke
+      map: ["enum.NCVehicleVisualLayers.Smoke"]
+      visible: false
+    noRot: false
+    scale: 1, 1
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Physics
+    bodyType: Dynamic
+    fixedRotation: false
+  - type: Fixtures
+    fixtures:
+      chassis:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.725,-1.75,0.725,1.75"
+        density: 201
+        restitution: 0.05
+        mask:
+        - MobMask
+        layer:
+        - LargeMobLayer

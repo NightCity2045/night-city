@@ -135,6 +135,28 @@
                                     </BoxContainer>
                                 </PanelContainer>
                             </ContainerButton>
+                            <ContainerButton Name="ContractsButton" MinHeight="86" Margin="4">
+                                <PanelContainer>
+                                    <PanelContainer.PanelOverride>
+                                        <gfx:StyleBoxFlat BackgroundColor="#0B2528" BorderColor="#24E0D0" BorderThickness="0 0 0 2" />
+                                    </PanelContainer.PanelOverride>
+                                    <BoxContainer Orientation="Vertical" Margin="10 8">
+                                        <Label Text="{Loc 'nc-contract-app'}" FontColorOverride="#77FFF2" />
+                                        <Label Text="{Loc 'nc-contract-board'}" FontColorOverride="#568783" />
+                                    </BoxContainer>
+                                </PanelContainer>
+                            </ContainerButton>
+                            <ContainerButton Name="MissionsButton" MinHeight="86" Margin="4">
+                                <PanelContainer>
+                                    <PanelContainer.PanelOverride>
+                                        <gfx:StyleBoxFlat BackgroundColor="#201C18" BorderColor="#F0C75E" BorderThickness="0 0 0 2" />
+                                    </PanelContainer.PanelOverride>
+                                    <BoxContainer Orientation="Vertical" Margin="10 8">
+                                        <Label Text="{Loc 'nc-agent-missions-title'}" FontColorOverride="#FFE28D" />
+                                        <Label Text="{Loc 'nc-agent-missions-subtitle'}" FontColorOverride="#8B805F" />
+                                    </BoxContainer>
+                                </PanelContainer>
+                            </ContainerButton>
                         </GridContainer>
                     </BoxContainer>
                 </ScrollContainer>

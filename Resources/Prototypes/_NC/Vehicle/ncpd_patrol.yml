@@ -1,0 +1,60 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncVehicleHandling
+  parent: NCArcherQuartzAutomaticRwd
+  id: NCNcpdPatrolAutomaticRwd
+  torqueCurve:
+  - 0, 90
+  - 900, 165
+  - 3200, 290
+  - 6200, 230
+  - 7200, 0
+  brakeTorque: 3400
+  handbrakeTorque: 4300
+  friction: 1.02
+  antiLockBrakes: true
+  tractionControl: true
+  stabilityControl: true
+
+- type: ncVehicleChassis
+  parent: NCArcherQuartzChassis
+  id: NCNcpdPatrolChassis
+  automaticHandling: NCNcpdPatrolAutomaticRwd
+  mass: 1120
+  inertia: 1450
+  stockPartOverrides:
+    gearbox: NCVehicleAutomaticGearbox
+
+- type: entity
+  parent: NCToyotaSupra1996
+  id: NCVehicleNcpdPatrol2045
+  name: NCPD patrol cruiser
+  description: A responsive patrol sedan built for crowded Night City streets.
+  components:
+  - type: NCVehicle
+    chassis: NCNcpdPatrolChassis
+  - type: NCVehicleDrive
+    handling: NCNcpdPatrolAutomaticRwd
+    fuel: 48
+  - type: Storage
+    grid:
+    - 0,0,9,4
+  - type: EntityStorage
+    maxSize: 1.05
+    capacity: 2
+    enteringOffset: 0, -1.45
+  - type: Sprite
+    sprite: _NC/Vehicle/ncpd_patrol_2045.rsi
+  - type: Fixtures
+    fixtures:
+      chassis:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.78,-1.65,0.78,1.65"
+        density: 201
+        restitution: 0.05
+        mask: [MobMask]
+        layer: [LargeMobLayer]
+

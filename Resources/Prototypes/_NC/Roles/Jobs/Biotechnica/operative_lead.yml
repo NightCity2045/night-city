@@ -26,6 +26,5 @@
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
     id: WardenPDA
-    ears: ClothingHeadsetSecurity
     belt: ClothingBeltSecurityFilled
     outerClothing: ClothingOuterArmorBasic

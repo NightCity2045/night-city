@@ -1,0 +1,9 @@
+ent-NCVehicleAutomaticGearboxItem = automatic gearbox
+ent-NCVehicleFrontDifferentialItem = front differential
+nc-vehicle-module-front-differential = front differential
+ent-NCVehicleFrontLeftShaftItem = front left half shaft
+nc-vehicle-module-front-left-shaft = front left half shaft
+ent-NCVehicleFrontRightShaftItem = front right half shaft
+nc-vehicle-module-front-right-shaft = front right half shaft
+ent-NCVehicleTransferCaseItem = AWD transfer case
+nc-vehicle-module-transfer-case = AWD transfer case

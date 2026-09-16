@@ -6,6 +6,7 @@ using Content.Client.CartridgeLoader;
 using Content.Client._NC.Agent.Shards;
 using Content.Client.PDA;
 using Content.Shared._NC.Agent.UI;
+using Content.Shared._NC.Missions.UI;
 using Content.Shared._NC.Agent.Shards;
 using Content.Shared.CartridgeLoader;
 using Content.Shared.Containers.ItemSlots;
@@ -64,6 +65,8 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
             SendPredictedMessage(new ItemSlotButtonPressedEvent(CartridgeLoaderComponent.CartridgeSlotId));
         _menu.ProgramCloseButton.OnPressed += _ => DeactivateActiveCartridge();
         _menu.OnOpenAgentApp += app => SendMessage(new NCAgentOpenAppMessage(app));
+        _menu.OnFixerWorkRequest += SendMessage;
+        _menu.OnContractRequest += SendMessage;
         _menu.OnDirectorySearch += query => SendMessage(new NCAgentDirectorySearchMessage(query));
         _menu.OnSetAlias += alias => SendMessage(new NCAgentSetAliasMessage(alias));
         _menu.OnSetPresence += presence => SendMessage(new NCAgentSetPresenceMessage(presence));
@@ -133,6 +136,12 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
 
         switch (message)
         {
+            case NCAgentContractsUpdateMessage contracts:
+                _menu.UpdateContractData(contracts);
+                break;
+            case NCFixerMissionUpdateMessage missions:
+                _menu.UpdateMissionData(missions);
+                break;
             case NCAgentLockUpdateMessage lockUpdate:
                 _menu.UpdateLockState(lockUpdate);
                 break;

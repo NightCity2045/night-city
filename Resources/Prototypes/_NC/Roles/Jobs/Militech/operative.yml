@@ -24,6 +24,5 @@
     shoes: ClothingShoesBootsJack
     eyes: ClothingEyesGlassesSecurity
     id: SecurityPDA
-    ears: ClothingHeadsetSecurity
     belt: ClothingBeltSecurityFilled
     outerClothing: ClothingOuterArmorBasic

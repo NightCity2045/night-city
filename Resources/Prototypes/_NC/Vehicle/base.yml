@@ -1,0 +1,127 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Game handling calibration, not a claim of manufacturer-accurate measured data.
+- type: entity
+  abstract: true
+  id: NCBaseVehicleInfrastructure
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/computers.rsi
+    layers:
+    - state: computer
+    - state: generic
+  - type: Clickable
+  - type: InteractionOutline
+
+- type: ncVehicleHandling
+  abstract: true
+  id: NCBaseSupraHandling
+  wheels:
+  - position: -0.64, 1.1
+    radius: 0.31
+    inertia: 1.4
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.64, 1.1
+    radius: 0.31
+    inertia: 1.4
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.64, -1.1
+    axle: 1
+    radius: 0.31
+    inertia: 1.4
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.64, -1.1
+    axle: 1
+    radius: 0.31
+    inertia: 1.4
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  torqueCurve:
+  - 0, 100
+  - 850, 180
+  - 2000, 280
+  - 4000, 430
+  - 6000, 330
+  - 7200, 0
+  gearRatios: [0, 3.82, 2.36, 1.68, 1.31, 1, 0.79, -3.28]
+  manualPattern: [1, 2, 3, 4, 5, 6]
+  shiftClutchThreshold: 0.9
+  shiftRpmTolerance: 120
+  misshiftWear: 0.002
+  finalDrive: 3.27
+  # Night City maps are compact: retain drivetrain torque while halving map-scale road speed.
+  roadSpeedScale: 0.5
+  driveEfficiency: 0.88
+  idleRpm: 850
+  redlineRpm: 7000
+  # Sustained limiter driving takes tens of minutes to destroy a healthy engine; over-revving accelerates it.
+  highRpmWearStart: 0.9
+  highRpmWearPerSecond: 0.00025
+  maximumHighRpmWearMultiplier: 12
+  stallRpm: 300
+  stallGraceSeconds: 1.25
+  engineInertia: 0.35
+  engineDrag: 0.15
+  clutchTorque: 550
+  clutchCoupling: 3
+  pedalRate: 3
+  # Full lock in 1/6 second so A/D countersteering can catch a developing slide.
+  steeringRate: 6
+  steeringAngle: 0.55
+  steeringReturn: 0.3
+  # The HUD wheel displays a quarter-turn from center to full lock.
+  steeringWheelTravel: 1.5707963
+  gravity: 9.81
+  friction: 0.95
+  longitudinalStiffness: 5500
+  lateralStiffness: 2000
+  lowSpeed: 2
+  brakeTorque: 2600
+  handbrakeTorque: 4800
+  handbrakeLateralGrip: 0.3
+  handbrakeEngageRate: 14
+  handbrakeReleaseRate: 5
+  # Parked tyres resist a walking character, while tow forces and real impacts can still move the chassis.
+  parkingLinearDamping: 12
+  parkingAngularDamping: 24
+  parkingDampingMaximumSpeed: 2
+  aerodynamicDrag: 0.38
+  rollingResistance: 12
+  fuelCapacity: 70
+  fuelIdleRate: 0.0003
+  fuelLoadRate: 0.004
+  inputTimeout: 0.5
+  inputInterval: 0.05
+  keyboardSteeringRate: 2
+  cameraLookAheadStartSpeed: 4
+  cameraLookAheadMaximumSpeed: 18
+  cameraLookAheadMaximum: 2.5
+  shiftAdviceUpFraction: 0.78
+  shiftAdviceDownRpmFactor: 1.4
+  slipWarning: 0.35
+  exitSpeed: 2.5
+  exitOffset: 1.2, 0
+  exitClearance: 0.35
+  maximumStep: 0.005
+  maximumSubsteps: 16
+
+- type: entity
+  abstract: true
+  parent: BaseItem
+  id: NCBaseVehiclePartItem
+  name: vehicle module
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/stock_parts.rsi
+    state: micro_mani
+  - type: Item
+    size: Huge

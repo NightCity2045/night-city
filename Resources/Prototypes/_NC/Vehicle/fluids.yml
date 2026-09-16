@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: reagent
+  parent: Ethanol
+  id: NCCHOOH2
+  name: reagent-name-nc-chooh2
+  desc: reagent-desc-nc-chooh2
+  color: "#d9b566"
+
+- type: entity
+  parent: Solution
+  id: NCVehicleFuelReservoir
+  categories: [HideSpawnMenu]
+  components:
+  - type: Solution
+    id: fuel
+    solution:
+      maxVol: 70000
+      canReact: false
+      reagents:
+      - ReagentId: NCCHOOH2
+        Quantity: 35000
+
+- type: entity
+  parent: BaseItem
+  id: NCCHOOH2Canister
+  name: CHOOH2 fuel canister
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/stock_parts.rsi
+    state: micro_mani
+  - type: Solution
+    id: tank
+    solution:
+      maxVol: 20000
+      reagents:
+      - ReagentId: NCCHOOH2
+        Quantity: 20000
+  - type: DrainableSolution
+    solution: tank
+  - type: RefillableSolution
+    solution: tank
+  - type: SolutionTransfer
+    transferAmount: 1000
+    maxTransferAmount: 20000
+  - type: NCVehicleFluidBottle
+    circuit: Fuel
+    transferVolume: 1000
+  - type: ExaminableSolution
+    solution: tank

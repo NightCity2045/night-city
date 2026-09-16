@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: BaseItem
+  id: NCVehicleTowCable
+  name: vehicle towing cable
+  components:
+  - type: Sprite
+    sprite: Objects/Tools/cable-coils.rsi
+    state: coil-30
+  - type: NCVehicleTowCable
+    maximumLength: 6
+    minimumLength: 0.5
+    stiffness: 0
+    breakpoint: 100000
+    attachSpeed: 0.25
+    ropeSprite:
+      sprite: Objects/Weapons/Guns/Launchers/grappling_gun.rsi
+      state: rope
+
+- type: entity
+  parent: NCVehicleTowCable
+  id: NCVehicleWinchCable
+  name: recovery winch cable
+  components:
+  - type: NCVehicleTowCable
+    maximumLength: 12
+    minimumLength: 0.5

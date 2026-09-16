@@ -11,7 +11,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubePaleCyan
-
+  - type: PointLight
+    color: "#C3FFFF"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#C3FFFF"
 
 - type: entity
   parent: Poweredlight
@@ -20,7 +29,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubePowderBlue
-
+  - type: PointLight
+    color: "#9BC9EC"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#9BC9EC"
 
 - type: entity
   parent: Poweredlight
@@ -29,7 +47,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeSlateBlue
-
+  - type: PointLight
+    color: "#5578C4"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#5578C4"
 
 - type: entity
   parent: Poweredlight
@@ -38,7 +65,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeCream
-
+  - type: PointLight
+    color: "#FFE09F"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#FFE09F"
 
 - type: entity
   parent: Poweredlight
@@ -47,7 +83,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubePeach
-
+  - type: PointLight
+    color: "#FFBC86"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#FFBC86"
 
 - type: entity
   parent: Poweredlight
@@ -56,7 +101,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeTerracotta
-
+  - type: PointLight
+    color: "#CA7B53"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#CA7B53"
 
 - type: entity
   parent: Poweredlight
@@ -65,7 +119,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeDay
-
+  - type: PointLight
+    color: "#F7B2A4"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#F7B2A4"
 
 - type: entity
   parent: Poweredlight
@@ -74,7 +137,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeMorning
-
+  - type: PointLight
+    color: "#736689"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#736689"
 
 - type: entity
   parent: Poweredlight
@@ -83,7 +155,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeEvening
-
+  - type: PointLight
+    color: "#99627B"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#99627B"
 
 - type: entity
   parent: Poweredlight
@@ -92,7 +173,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeNight
-
+  - type: PointLight
+    color: "#2F3854"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#2F3854"
 
 - type: entity
   parent: Poweredlight
@@ -101,7 +191,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeLightViolet
-
+  - type: PointLight
+    color: "#FF82EE"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#FF82EE"
 
 - type: entity
   parent: Poweredlight
@@ -110,7 +209,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeViolet
-
+  - type: PointLight
+    color: "#EB3CFF"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#EB3CFF"
 
 - type: entity
   parent: Poweredlight
@@ -119,7 +227,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeDeepViolet
-
+  - type: PointLight
+    color: "#AA0FDF"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#AA0FDF"
 
 - type: entity
   parent: Poweredlight
@@ -128,7 +245,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeLemon
-
+  - type: PointLight
+    color: "#FBFF88"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#FBFF88"
 
 - type: entity
   parent: Poweredlight
@@ -137,7 +263,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeElectricYellow
-
+  - type: PointLight
+    color: "#FFF142"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#FFF142"
 
 - type: entity
   parent: Poweredlight
@@ -146,7 +281,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeGold
-
+  - type: PointLight
+    color: "#FFCD47"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#FFCD47"
 
 - type: entity
   parent: Poweredlight
@@ -155,7 +299,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeCoral
-
+  - type: PointLight
+    color: "#FF8C67"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#FF8C67"
 
 - type: entity
   parent: Poweredlight
@@ -164,7 +317,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeVermilion
-
+  - type: PointLight
+    color: "#FF6339"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#FF6339"
 
 - type: entity
   parent: Poweredlight
@@ -173,7 +335,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeDeepRed
-
+  - type: PointLight
+    color: "#D61910"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#D61910"
 
 - type: entity
   parent: Poweredlight
@@ -182,7 +353,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeCornflowerBlue
-
+  - type: PointLight
+    color: "#578DFF"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#578DFF"
 
 - type: entity
   parent: Poweredlight
@@ -191,7 +371,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeRoyalBlue
-
+  - type: PointLight
+    color: "#2262EC"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#2262EC"
 
 - type: entity
   parent: Poweredlight
@@ -200,7 +389,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeDeepBlue
-
+  - type: PointLight
+    color: "#002ECD"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#002ECD"
 
 - type: entity
   parent: Poweredlight
@@ -209,7 +407,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeAqua
-
+  - type: PointLight
+    color: "#8BFFF6"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#8BFFF6"
 
 - type: entity
   parent: Poweredlight
@@ -218,7 +425,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeCyan
-
+  - type: PointLight
+    color: "#5BEDFF"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#5BEDFF"
 
 - type: entity
   parent: Poweredlight
@@ -227,7 +443,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeAzure
-
+  - type: PointLight
+    color: "#27D6FF"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#27D6FF"
 
 - type: entity
   parent: Poweredlight
@@ -236,7 +461,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeLime
-
+  - type: PointLight
+    color: "#B3FF6E"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#B3FF6E"
 
 - type: entity
   parent: Poweredlight
@@ -245,7 +479,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeGreen
-
+  - type: PointLight
+    color: "#74E747"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#74E747"
 
 - type: entity
   parent: Poweredlight
@@ -254,7 +497,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeDeepGreen
-
+  - type: PointLight
+    color: "#34CD15"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#34CD15"
 
 - type: entity
   parent: Poweredlight
@@ -263,7 +515,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeLightPink
-
+  - type: PointLight
+    color: "#FF60CF"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#FF60CF"
 
 - type: entity
   parent: Poweredlight
@@ -272,7 +533,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeHotPink
-
+  - type: PointLight
+    color: "#FF3BA2"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#FF3BA2"
 
 - type: entity
   parent: Poweredlight
@@ -281,7 +551,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeDeepPink
-
+  - type: PointLight
+    color: "#DC1E7F"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#DC1E7F"
 
 - type: entity
   parent: Poweredlight
@@ -290,7 +569,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeIceWhite
-
+  - type: PointLight
+    color: "#E3FAFF"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#E3FAFF"
 
 - type: entity
   parent: Poweredlight
@@ -299,7 +587,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeBlueGray
-
+  - type: PointLight
+    color: "#D3E2E7"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#D3E2E7"
 
 - type: entity
   parent: Poweredlight
@@ -308,7 +605,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeSteelGray
-
+  - type: PointLight
+    color: "#B6C3CA"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#B6C3CA"
 
 # Additional Night City 2045 and 2077 lighting colors.
 
@@ -319,7 +625,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeSodium
-
+  - type: PointLight
+    color: "#FF9A2E"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#FF9A2E"
 
 - type: entity
   parent: Poweredlight
@@ -328,7 +643,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeOldTungsten
-
+  - type: PointLight
+    color: "#FFD0A0"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#FFD0A0"
 
 - type: entity
   parent: Poweredlight
@@ -337,7 +661,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeRustRed
-
+  - type: PointLight
+    color: "#B54835"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#B54835"
 
 - type: entity
   parent: Poweredlight
@@ -346,7 +679,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeToxicFluorescent
-
+  - type: PointLight
+    color: "#B8FF70"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#B8FF70"
 
 - type: entity
   parent: Poweredlight
@@ -355,7 +697,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeTerminalGreen
-
+  - type: PointLight
+    color: "#39FF88"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#39FF88"
 
 - type: entity
   parent: Poweredlight
@@ -364,7 +715,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeIndustrialTeal
-
+  - type: PointLight
+    color: "#208C8C"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#208C8C"
 
 - type: entity
   parent: Poweredlight
@@ -373,7 +733,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeCyberYellow
-
+  - type: PointLight
+    color: "#FCEE0A"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#FCEE0A"
 
 - type: entity
   parent: Poweredlight
@@ -382,7 +751,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeNeonCyan
-
+  - type: PointLight
+    color: "#00F0FF"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#00F0FF"
 
 - type: entity
   parent: Poweredlight
@@ -391,7 +769,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeLaserMagenta
-
+  - type: PointLight
+    color: "#FF2A6D"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#FF2A6D"
 
 - type: entity
   parent: Poweredlight
@@ -400,7 +787,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeUltraviolet
-
+  - type: PointLight
+    color: "#8A2BE2"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#8A2BE2"
 
 - type: entity
   parent: Poweredlight
@@ -409,7 +805,16 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeAcidLime
-
+  - type: PointLight
+    color: "#B6FF00"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#B6FF00"
 
 - type: entity
   parent: Poweredlight
@@ -418,3 +823,13 @@
   components:
   - type: PoweredLight
     hasLampOnSpawn: NCLightTubeCorporateRed
+  - type: PointLight
+    color: "#FF1744"
+  - type: Sprite
+    layers:
+    - map: ["enum.PoweredLightLayers.Base"]
+      state: base
+    - map: ["enum.PoweredLightLayers.Glow"]
+      state: glow
+      shader: unshaded
+      color: "#FF1744"

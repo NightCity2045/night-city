@@ -1,0 +1,98 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncVehiclePart
+  id: NCVehicleAutomaticGearbox
+  item: NCVehicleAutomaticGearboxItem
+  mount: NCVehicleLongitudinalGearboxMount
+  mass: 68
+  inertia: 3
+  automaticTransmission: true
+  powerDependsOnCondition: true
+  gearboxWearShare: 1
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleAutomaticGearboxItem
+  name: automatic gearbox
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleAutomaticGearbox
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: gearbox
+
+- type: ncVehiclePart
+  id: NCVehicleFrontDifferential
+  item: NCVehicleFrontDifferentialItem
+  mount: NCVehicleFrontDifferentialMount
+  mass: 25
+  inertia: 3
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontDifferentialItem
+  name: front differential
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontDifferential
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: differential
+
+- type: ncVehiclePart
+  id: NCVehicleFrontLeftShaft
+  item: NCVehicleFrontLeftShaftItem
+  mount: NCVehicleFrontLeftShaftMount
+  mass: 6
+  inertia: 3
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontLeftShaftItem
+  name: front left half shaft
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontLeftShaft
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: propshaft
+
+- type: ncVehiclePart
+  id: NCVehicleFrontRightShaft
+  item: NCVehicleFrontRightShaftItem
+  mount: NCVehicleFrontRightShaftMount
+  mass: 6
+  inertia: 3
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFrontRightShaftItem
+  name: front right half shaft
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFrontRightShaft
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: propshaft
+
+- type: ncVehiclePart
+  id: NCVehicleTransferCase
+  item: NCVehicleTransferCaseItem
+  mount: NCVehicleTransferCaseMount
+  mass: 24
+  inertia: 3
+  allWheelDrive: true
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleTransferCaseItem
+  name: AWD transfer case
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleTransferCase
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: transfercase
+

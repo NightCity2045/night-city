@@ -26,7 +26,6 @@
     mask: ClothingMaskSterile
     gloves: ClothingHandsGlovesNitrile
     id: MedicalPDA
-    ears: ClothingHeadsetMedical
     belt: ClothingBeltMedicalFilled
     outerClothing: ClothingOuterCoatLab
   storage:

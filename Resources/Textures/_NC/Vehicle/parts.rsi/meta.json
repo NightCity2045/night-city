@@ -1,0 +1,155 @@
+{
+    "version": 1,
+    "license": "CC-BY-4.0",
+    "copyright": "Original AI-assisted artwork generated with OpenAI image generation, directed and integrated by Astro, 2026. See Docs/Design/NC_VEHICLE_ART.md.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "wheel"
+        },
+        {
+            "name": "disc"
+        },
+        {
+            "name": "caliper"
+        },
+        {
+            "name": "hub"
+        },
+        {
+            "name": "pads"
+        },
+        {
+            "name": "arm"
+        },
+        {
+            "name": "coilover"
+        },
+        {
+            "name": "tierod"
+        },
+        {
+            "name": "engine"
+        },
+        {
+            "name": "gearbox"
+        },
+        {
+            "name": "battery"
+        },
+        {
+            "name": "radiator"
+        },
+        {
+            "name": "hose"
+        },
+        {
+            "name": "connector"
+        },
+        {
+            "name": "nut"
+        },
+        {
+            "name": "fender"
+        },
+        {
+            "name": "starter"
+        },
+        {
+            "name": "alternator"
+        },
+        {
+            "name": "ecu"
+        },
+        {
+            "name": "coil"
+        },
+        {
+            "name": "fuelpump"
+        },
+        {
+            "name": "fuelfilter"
+        },
+        {
+            "name": "waterpump"
+        },
+        {
+            "name": "fan"
+        },
+        {
+            "name": "thermostat"
+        },
+        {
+            "name": "oilpump"
+        },
+        {
+            "name": "oilfilter"
+        },
+        {
+            "name": "steeringrack"
+        },
+        {
+            "name": "mastercylinder"
+        },
+        {
+            "name": "brakelines"
+        },
+        {
+            "name": "clutch"
+        },
+        {
+            "name": "propshaft"
+        },
+        {
+            "name": "differential"
+        },
+        {
+            "name": "hood"
+        },
+        {
+            "name": "frontbumper"
+        },
+        {
+            "name": "rearbumper"
+        },
+        {
+            "name": "headlamps"
+        },
+        {
+            "name": "horn"
+        },
+        {
+            "name": "washerpump"
+        },
+        {
+            "name": "wipermotor"
+        },
+        {
+            "name": "airbag"
+        },
+        {
+            "name": "steeringpump"
+        },
+        {
+            "name": "fueltank"
+        },
+        {
+            "name": "transfercase"
+        },
+        {
+            "name": "rim"
+        },
+        {
+            "name": "tyre"
+        },
+        {
+            "name": "spring"
+        },
+        {
+            "name": "damper"
+        }
+    ]
+}

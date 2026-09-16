@@ -1,0 +1,242 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncVehicleHandling
+  parent: NCBaseSupraHandling
+  id: NCVillefortAlvaradoManualRwd
+  wheels:
+  - position: -0.72, 1.55
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.72, 1.55
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.72, -1.5
+    axle: 1
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.72, -1.5
+    axle: 1
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  torqueCurve:
+  - 0, 180
+  - 600, 340
+  - 1800, 520
+  - 3800, 400
+  - 5000, 0
+  gearRatios: [0, 3.2, 2.05, 1.45, 1.1, 0.86, 0.68, -3]
+  finalDrive: 3.25
+  idleRpm: 600
+  redlineRpm: 5000
+  engineInertia: 0.9
+  clutchTorque: 820
+  steeringRate: 3.8
+  steeringAngle: 0.42
+  keyboardSteeringRate: 3.8
+  wheelbase: 3.05
+  centerOfGravityHeight: 0.5
+  friction: 0.88
+  brakeTorque: 5000
+  handbrakeTorque: 5600
+  handbrakeLateralGrip: 0.5
+  aerodynamicDrag: 0.62
+  rollingResistance: 24
+  fuelCapacity: 110
+  antiLockBrakes: true
+  tractionControl: true
+  stabilityControl: true
+
+- type: ncVehicleHandling
+  parent: NCVillefortAlvaradoManualRwd
+  id: NCVillefortAlvaradoAutomaticRwd
+  automatic: true
+  automaticUpshiftRpm: 3800
+  automaticDownshiftRpm: 1250
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleHandling
+  parent: NCVillefortAlvaradoManualRwd
+  id: NCVillefortAlvaradoManualAwd
+  centerDifferentialCoupling: 10
+  centerDifferentialTorqueLimit: 180
+  differentialCoupling: 20
+  differentialTorqueLimit: 350
+  tractionControl: true
+  antiLockBrakes: true
+  stabilityControl: true
+  wheels:
+  - position: -0.72, 1.55
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.72, 1.55
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.72, -1.5
+    axle: 1
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.72, -1.5
+    axle: 1
+    radius: 0.35
+    inertia: 2.5384615384615383
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+
+- type: ncVehicleHandling
+  parent: NCVillefortAlvaradoManualAwd
+  id: NCVillefortAlvaradoAutomaticAwd
+  automatic: true
+  automaticUpshiftRpm: 3800
+  automaticDownshiftRpm: 1250
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleChassis
+  parent: NCVehicleDevelopmentSedan
+  id: NCVillefortAlvaradoChassis
+  workshop: NCVillefortAlvaradoWorkshop
+  serviceRange: 2.6
+  manualHandling: NCVillefortAlvaradoManualRwd
+  automaticHandling: NCVillefortAlvaradoAutomaticRwd
+  allWheelHandling: NCVillefortAlvaradoManualAwd
+  automaticAllWheelHandling: NCVillefortAlvaradoAutomaticAwd
+  mass: 1650
+  inertia: 3500
+  frontTowPoint: 0, 2.4
+  rearTowPoint: 0, -2.4
+  stockPartOverrides:
+    gearbox: NCVehicleAutomaticGearbox
+
+- type: entity
+  parent: NCToyotaSupra1996
+  id: NCVehicleVillefortAlvarado2045
+  name: Villefort Alvarado
+  description: A long, imposing luxury sedan that trades agility for stability and momentum.
+  components:
+  - type: NCVehicle
+    chassis: NCVillefortAlvaradoChassis
+  - type: NCVehicleDrive
+    handling: NCVillefortAlvaradoAutomaticRwd
+    fuel: 70
+  - type: Storage
+    grid:
+    - 0,0,11,5
+  - type: EntityStorage
+    maxSize: 1.25
+    capacity: 3
+    enteringOffset: 0, -2.2
+  - type: Sprite
+    sprite: _NC/Vehicle/villefort_alvarado_2045.rsi
+  - type: Fixtures
+    fixtures:
+      chassis:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.9,-2.4,0.9,2.4"
+        density: 201
+        restitution: 0.05
+        mask:
+        - MobMask
+        layer:
+        - LargeMobLayer
+
+- type: ncVehicleWorkshop
+  parent: NCSupraWorkshop
+  id: NCVillefortAlvaradoWorkshop
+  viewLayouts:
+    engine-bay:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, 2.2
+      accessRange: 2.6
+    cooling:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, 2.2
+      accessRange: 2.6
+    lubrication:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, 2.2
+      accessRange: 2.6
+    steering:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, 2.2
+      accessRange: 2.6
+    body:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, 2.2
+      accessRange: 2.6
+    fuel:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 0, -2.2
+      accessRange: 2.6
+    underbody:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: -1.65, 0
+      accessRange: 2.6
+    cabin:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: -1.65, 0
+      accessRange: 2.6
+    fl:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: -1.65, 1.55
+      accessRange: 1.8
+    fr:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 1.65, 1.55
+      accessRange: 1.8
+    rl:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: -1.65, -1.55
+      accessRange: 1.8
+    rr:
+      scale: 1, 1
+      offset: 0, 0
+      accessPosition: 1.65, -1.55
+      accessRange: 1.8
+  nodeLayouts:
+    battery:
+      offset: 0.48, 0.14
+    ecu:
+      offset: -0.5, 0.12
+    starter:
+      offset: -0.38, -0.1
+    alternator:
+      offset: -0.36, 0.18
+    engine:
+      offset: 0.02, 0.02
+    fuel-tank:
+      offset: 0, -0.1

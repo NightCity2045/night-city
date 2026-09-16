@@ -1,0 +1,63 @@
+{
+    "version": 1,
+    "license": "CC0-1.0",
+    "copyright": "Original fictional Night City recovery truck, AI-assisted pixel artwork by Astro, 2026. No third-party texture was copied.",
+    "size": {
+        "x": 128,
+        "y": 128
+    },
+    "states": [
+        {
+            "name": "shadow"
+        },
+        {
+            "name": "body"
+        },
+        {
+            "name": "damage-light"
+        },
+        {
+            "name": "damage-heavy"
+        },
+        {
+            "name": "headlights"
+        },
+        {
+            "name": "brakes"
+        },
+        {
+            "name": "reverse"
+        },
+        {
+            "name": "hood-open"
+        },
+        {
+            "name": "wheel-damage"
+        },
+        {
+            "name": "tuning-street"
+        },
+        {
+            "name": "smoke",
+            "delays": [
+                [
+                    0.18,
+                    0.18,
+                    0.18,
+                    0.18
+                ]
+            ]
+        },
+        {
+            "name": "fire",
+            "delays": [
+                [
+                    0.12,
+                    0.12,
+                    0.12,
+                    0.12
+                ]
+            ]
+        }
+    ]
+}

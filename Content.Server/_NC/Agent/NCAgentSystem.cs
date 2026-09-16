@@ -28,6 +28,8 @@ public sealed partial class NCAgentSystem : EntitySystem
         InitializeCommunication();
         InitializeLocks();
         InitializeCity();
+        InitializeMissions();
+        InitializeContracts();
     }
 
     public override void Update(float frameTime)

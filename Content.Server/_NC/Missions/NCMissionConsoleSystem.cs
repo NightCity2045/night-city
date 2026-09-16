@@ -11,6 +11,8 @@ using Content.Shared._NC.Missions.Components;
 using Content.Shared._NC.Missions.Prototypes;
 using Content.Shared._NC.Missions.UI;
 using Content.Shared._NC.Identity;
+using Content.Shared.Administration;
+using Content.Shared.Administration.Managers;
 using Robust.Server.GameObjects;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
@@ -29,6 +31,7 @@ public sealed partial class NCMissionConsoleSystem : EntitySystem
     [Dependency] private City.Zones.NCZoneSystem _zones = default!;
     [Dependency] private NCMissionSystem _missions = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;
+    [Dependency] private ISharedAdminManager _admins = default!;
 
     private readonly Dictionary<(EntityUid Console, EntityUid User), MissionView> _views = [];
     private readonly HashSet<(EntityUid Console, EntityUid User)> _processing = [];
@@ -67,6 +70,7 @@ public sealed partial class NCMissionConsoleSystem : EntitySystem
         NCMissionConsoleStartMessage args)
     {
         if (!TryGetOpenView(uid, args.Actor, out var user, out var view) ||
+            !CanUseLegacyConsole(user) ||
             !_processing.Add((uid, user)))
             return;
 
@@ -110,6 +114,7 @@ public sealed partial class NCMissionConsoleSystem : EntitySystem
         NCMissionConsoleFinishMessage args)
     {
         if (!TryGetOpenView(uid, args.Actor, out var user, out var view) ||
+            !CanUseLegacyConsole(user) ||
             !_processing.Add((uid, user)))
             return;
 
@@ -157,9 +162,9 @@ public sealed partial class NCMissionConsoleSystem : EntitySystem
 
         var hasCharacter = TryGetCharacterId(user, out var characterId);
         var hasRun = _missions.TryGetRunForSlot(component.SlotId, out var run);
-        var canFinish = hasCharacter && hasRun && run.State == NCMissionRunState.Active &&
+        var canFinish = CanUseLegacyConsole(user) && hasCharacter && hasRun && run.State == NCMissionRunState.Active &&
                         run.Participants.Contains(characterId);
-        var canStart = hasCharacter && !hasRun && IsConfigurationValid(component) &&
+        var canStart = CanUseLegacyConsole(user) && hasCharacter && !hasRun && IsConfigurationValid(component) &&
                        !_processing.Contains((console, user));
         var now = DateTime.UtcNow;
         var remainingSeconds = hasRun ? RemainingSeconds(run.ExpiresAt, now) : (int?) null;
@@ -191,6 +196,10 @@ public sealed partial class NCMissionConsoleSystem : EntitySystem
                template.TargetZoneId == component.SlotId.ZoneId &&
                template.CompatibleZoneKinds.Contains(slot.Kind);
     }
+
+    // Preserve the old deployment diagnostic surface; ordinary work is now issued by physical fixers.
+    private bool CanUseLegacyConsole(EntityUid user) => _players.TryGetSessionByEntity(user, out var session) &&
+        (_admins.HasAdminFlag(session, AdminFlags.Mapping) || _admins.HasAdminFlag(session, AdminFlags.Server));
 
     private bool TryGetOpenView(
         EntityUid console,

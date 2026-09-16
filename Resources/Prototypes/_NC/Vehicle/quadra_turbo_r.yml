@@ -1,0 +1,237 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncVehicleHandling
+  parent: NCBaseSupraHandling
+  id: NCQuadraTurboRManualRwd
+  wheels:
+  - position: -0.68, 1.15
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.68, 1.15
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.68, -1.15
+    axle: 1
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.68, -1.15
+    axle: 1
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0.5
+    brakeWeight: 0.4
+    handbrake: true
+  torqueCurve:
+  - 0, 120
+  - 700, 230
+  - 2200, 480
+  - 4500, 610
+  - 6500, 0
+  gearRatios: [0, 3.5, 2.2, 1.55, 1.2, 0.95, 0.76, -3.1]
+  finalDrive: 3.45
+  idleRpm: 700
+  redlineRpm: 6500
+  engineInertia: 0.5
+  clutchTorque: 760
+  steeringRate: 5.2
+  steeringAngle: 0.52
+  keyboardSteeringRate: 4.5
+  wheelbase: 2.3
+  centerOfGravityHeight: 0.4
+  friction: 1
+  brakeTorque: 3200
+  handbrakeTorque: 6000
+  handbrakeLateralGrip: 0.27
+  aerodynamicDrag: 0.44
+  rollingResistance: 14
+  fuelCapacity: 75
+  antiLockBrakes: true
+  tractionControl: true
+  stabilityControl: false
+
+- type: ncVehicleHandling
+  parent: NCQuadraTurboRManualRwd
+  id: NCQuadraTurboRAutomaticRwd
+  automatic: true
+  automaticUpshiftRpm: 5000
+  automaticDownshiftRpm: 1600
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleHandling
+  parent: NCQuadraTurboRManualRwd
+  id: NCQuadraTurboRManualAwd
+  centerDifferentialCoupling: 10
+  centerDifferentialTorqueLimit: 180
+  differentialCoupling: 20
+  differentialTorqueLimit: 350
+  tractionControl: true
+  antiLockBrakes: true
+  stabilityControl: true
+  wheels:
+  - position: -0.68, 1.15
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: 0.68, 1.15
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0.2
+    brakeWeight: 0.6
+    steered: true
+  - position: -0.68, -1.15
+    axle: 1
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+  - position: 0.68, -1.15
+    axle: 1
+    radius: 0.32
+    inertia: 1.5076923076923077
+    driveWeight: 0.3
+    brakeWeight: 0.4
+    handbrake: true
+
+- type: ncVehicleHandling
+  parent: NCQuadraTurboRManualAwd
+  id: NCQuadraTurboRAutomaticAwd
+  automatic: true
+  automaticUpshiftRpm: 5000
+  automaticDownshiftRpm: 1600
+  automaticShiftSeconds: 0.32
+
+- type: ncVehicleChassis
+  parent: NCVehicleDevelopmentSedan
+  id: NCQuadraTurboRChassis
+  workshop: NCQuadraTurboRWorkshop
+  manualHandling: NCQuadraTurboRManualRwd
+  automaticHandling: NCQuadraTurboRAutomaticRwd
+  allWheelHandling: NCQuadraTurboRManualAwd
+  automaticAllWheelHandling: NCQuadraTurboRAutomaticAwd
+  mass: 980
+  inertia: 1400
+  frontTowPoint: 0, 1.9
+  rearTowPoint: 0, -1.9
+
+- type: entity
+  parent: NCToyotaSupra1996
+  id: NCVehicleQuadraTurboR2045
+  name: Quadra Turbo-R
+  description: A low, aggressive sports coupe rebuilt for the streets of Night City.
+  components:
+  - type: NCVehicle
+    chassis: NCQuadraTurboRChassis
+  - type: NCVehicleDrive
+    handling: NCQuadraTurboRManualRwd
+    fuel: 45
+  - type: Storage
+    grid:
+    - 0,0,6,3
+  - type: EntityStorage
+    maxSize: 1
+    capacity: 1
+    enteringOffset: 0, -1.7
+  - type: Sprite
+    sprite: _NC/Vehicle/quadra_turbo_r_2045.rsi
+  - type: Fixtures
+    fixtures:
+      chassis:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.8,-1.9,0.8,1.9"
+        density: 201
+        restitution: 0.05
+        mask:
+        - MobMask
+        layer:
+        - LargeMobLayer
+
+- type: ncVehicleWorkshop
+  parent: NCSupraWorkshop
+  id: NCQuadraTurboRWorkshop
+  viewLayouts:
+    engine-bay:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: 0, 1.75
+      accessRange: 2.6
+    cooling:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: 0, 1.75
+      accessRange: 2.6
+    lubrication:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: 0, 1.75
+      accessRange: 2.6
+    steering:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: 0, 1.75
+      accessRange: 2.6
+    body:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: 0, 1.75
+      accessRange: 2.6
+    fuel:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: 0, -1.75
+      accessRange: 2.6
+    underbody:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: -1.45, 0
+      accessRange: 2.6
+    cabin:
+      scale: 0.95, 0.98
+      offset: 0.025, 0.01
+      accessPosition: -1.45, 0
+      accessRange: 2.6
+    fl:
+      scale: 0.98, 0.98
+      offset: 0.01, 0.01
+      accessPosition: -1.45, 1.25
+      accessRange: 1.8
+    fr:
+      scale: 0.98, 0.98
+      offset: 0.01, 0.01
+      accessPosition: 1.45, 1.25
+      accessRange: 1.8
+    rl:
+      scale: 0.98, 0.98
+      offset: 0.01, 0.01
+      accessPosition: -1.45, -1.25
+      accessRange: 1.8
+    rr:
+      scale: 0.98, 0.98
+      offset: 0.01, 0.01
+      accessPosition: 1.45, -1.25
+      accessRange: 1.8
+  nodeLayouts:
+    battery:
+      offset: 0.54, 0.04
+    ecu:
+      offset: -0.56, 0.02
+    starter:
+      offset: -0.42, -0.08
+    alternator:
+      offset: 0.02, 0.1
+    engine:
+      offset: 0.02, 0

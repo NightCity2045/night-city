@@ -1,0 +1,144 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncVehiclePart
+  id: NCVehicleHeadlamps
+  mount: NCVehicleHeadlampsMount
+  item: NCVehicleHeadlampsItem
+  mass: 4
+  inertia: 1
+  repairCategory: Electrical
+  minimumRepairCondition: 0.1
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleHeadlampsItem
+  name: headlamp assembly
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleHeadlamps
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: headlamps
+
+- type: ncVehiclePart
+  id: NCVehicleHorn
+  mount: NCVehicleHornMount
+  item: NCVehicleHornItem
+  mass: 1
+  inertia: 1
+  repairCategory: Electrical
+  minimumRepairCondition: 0.1
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleHornItem
+  name: vehicle horn
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleHorn
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: horn
+
+- type: ncVehiclePart
+  id: NCVehicleWasherPump
+  mount: NCVehicleWasherPumpMount
+  item: NCVehicleWasherPumpItem
+  mass: 1
+  inertia: 1
+  repairCategory: Electrical
+  minimumRepairCondition: 0.1
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleWasherPumpItem
+  name: washer pump
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleWasherPump
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: washerpump
+
+- type: ncVehiclePart
+  id: NCVehicleWiperMotor
+  mount: NCVehicleWiperMotorMount
+  item: NCVehicleWiperMotorItem
+  mass: 2
+  inertia: 1
+  repairCategory: Electrical
+  minimumRepairCondition: 0.1
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleWiperMotorItem
+  name: wiper motor
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleWiperMotor
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: wipermotor
+
+- type: ncVehiclePart
+  id: NCVehicleAirbag
+  mount: NCVehicleAirbagMount
+  item: NCVehicleAirbagItem
+  mass: 3
+  inertia: 1
+  repairCategory: Electrical
+  minimumRepairCondition: 0.1
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleAirbagItem
+  name: airbag and impact sensor module
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleAirbag
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: airbag
+
+- type: ncVehiclePart
+  id: NCVehicleSteeringPump
+  mount: NCVehicleSteeringPumpMount
+  item: NCVehicleSteeringPumpItem
+  mass: 3
+  inertia: 1
+  repairCategory: Mechanical
+  minimumRepairCondition: 0.1
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleSteeringPumpItem
+  name: power steering pump
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleSteeringPump
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: steeringpump
+
+- type: ncVehiclePart
+  id: NCVehicleFuelTank
+  mount: NCVehicleFuelTankMount
+  item: NCVehicleFuelTankItem
+  mass: 18
+  inertia: 1
+  repairCategory: Mechanical
+  minimumRepairCondition: 0.1
+
+- type: entity
+  parent: NCBaseVehiclePartItem
+  id: NCVehicleFuelTankItem
+  name: fuel tank
+  components:
+  - type: NCVehiclePartItem
+    part: NCVehicleFuelTank
+  - type: Sprite
+    sprite: _NC/Vehicle/parts.rsi
+    state: fueltank
+

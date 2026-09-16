@@ -23,7 +23,6 @@
     shoes: ClothingShoesBootsJack
     eyes: ClothingEyesGlassesSecurity
     id: NCPDOfficerPDA
-    ears: ClothingHeadsetSecurity
     belt: ClothingBeltSecurityFilled
     outerClothing: ClothingOuterArmorBasic
   storage:
