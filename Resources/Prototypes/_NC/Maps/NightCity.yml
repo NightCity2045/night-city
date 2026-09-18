@@ -10,7 +10,7 @@
 - type: gameMap
   id: NCALifeTest
   mapName: NC ALife Test
-  mapPath: Maps/_NC/NightCity/NightCity0.yml
+  mapPath: /Maps/_NC/NightCity/NightCity0.yml
   minPlayers: 0
   stations:
     Empty:

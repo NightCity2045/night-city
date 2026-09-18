@@ -6,7 +6,7 @@
 - type: gameMap
   id: NCGameTest
   mapName: Game Testing Map
-  mapPath: Maps/_NC/GameTestingMap/GameTestingMap0.yml
+  mapPath: /Maps/_NC/GameTestingMap/GameTestingMap0.yml
   minPlayers: 0
   stations:
     Empty:
