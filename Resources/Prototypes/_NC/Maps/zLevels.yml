@@ -24,6 +24,17 @@
         mapsAbove:
         - /Maps/Test/empty.yml
         zLevelsComponentOverrides:
+        - type: MapAtmosphere
+          space: false
+          mixture:
+            volume: 2500
+            immutable: true
+            temperature: 293.15
+            moles:
+              Oxygen: 21.824879
+              Nitrogen: 82.10312
+        - type: NCUniformAir
+        - type: MapLight
         - type: NCZLevelRoof
         - type: Gravity
           enabled: true
@@ -37,7 +48,19 @@
   - /Maps/Test/empty.yml
   - /Maps/Test/empty.yml
   components:
+  - type: MapAtmosphere
+    space: false
+    mixture:
+      volume: 2500
+      immutable: true
+      temperature: 293.15
+      moles:
+        Oxygen: 21.824879
+        Nitrogen: 82.10312
+  - type: NCUniformAir
+  - type: MapLight
   - type: NCZLevelRoof
   - type: Gravity
     enabled: true
   - type: NCAutoGridGravity
+

@@ -45,6 +45,7 @@
               Oxygen: 21.824879
               Nitrogen: 82.10312
         - type: NCUniformAir
+        - type: MapLight
         - type: NCZLevelRoof
         - type: Gravity
           enabled: true
