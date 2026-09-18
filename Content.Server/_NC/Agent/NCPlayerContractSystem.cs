@@ -18,7 +18,7 @@ namespace Content.Server._NC.Agent;
 /// Durable player promises. This domain deliberately has no bank, escrow, item or reputation dependency.
 /// Party projections and the authoritative record commit together, so history survives reconnects and restarts.
 /// </summary>
-public sealed class NCPlayerContractSystem : EntitySystem
+public sealed partial class NCPlayerContractSystem : EntitySystem
 {
     private const string Aggregate = "agent.player-contract";
     private const string PartyAggregate = "agent.player-contract-party";

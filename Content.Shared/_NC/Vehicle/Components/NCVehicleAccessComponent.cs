@@ -14,7 +14,7 @@ namespace Content.Shared._NC.Vehicle.Components;
 public sealed partial class NCVehicleAccessComponent : Component
 {
     [DataField, AutoNetworkedField] public bool Registered;
-    [DataField, AutoNetworkedField] public EntityUid? Owner;
+    [DataField, AutoNetworkedField] public new EntityUid? Owner;
     [DataField, AutoNetworkedField] public uint KeyGeneration;
     [DataField, AutoNetworkedField] public bool Hotwired;
     [DataField, AutoNetworkedField] public int SalePrice = -1;

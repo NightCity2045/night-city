@@ -15,7 +15,7 @@ public sealed partial class NCVehicleAssemblyComponent : Component
     [ViewVariables] public NCVehicleAssemblyProfile LoadedProfile;
     [ViewVariables] public TimeSpan NextMassRefresh;
     [ViewVariables] public NCVehicleAssemblyFailure Failure;
-    [ViewVariables] public bool Initialized;
+    [ViewVariables] public new bool Initialized;
     [ViewVariables] public bool ProfileValid;
     [ViewVariables] public uint Revision;
     [ViewVariables] public Dictionary<string, uint> SlotRevisions = new();

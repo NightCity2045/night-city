@@ -26,6 +26,7 @@ using Robust.Shared.Physics.Components;
 
 namespace Content.IntegrationTests.Tests._NC.Vehicle;
 
+#pragma warning disable RA0033 // Integration test uses literal prototype IDs for test chassis
 [TestFixture]
 public sealed class NCVehicleVisualWorkshopTest : InteractionTest
 {

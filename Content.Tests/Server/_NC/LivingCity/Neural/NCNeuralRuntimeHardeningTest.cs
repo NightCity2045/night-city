@@ -16,6 +16,7 @@ using NUnit.Framework;
 
 namespace Content.Tests.Server._NC.LivingCity.Neural;
 
+#pragma warning disable RA0039 // Unit test instantiates test prototypes directly
 [TestFixture]
 public sealed class NCNeuralRuntimeHardeningTest
 {

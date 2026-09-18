@@ -23,7 +23,7 @@ public sealed partial class NCVehicleGateComponent : Component
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class NCVehicleParkingComponent : Component
 {
-    [AutoNetworkedField] public EntityUid? Owner;
+    [AutoNetworkedField] public new EntityUid? Owner;
     [AutoNetworkedField] public EntityUid? Vehicle;
     [DataField] public float Radius = 3;
     [DataField] public float MaximumSpeed = 0.1f;

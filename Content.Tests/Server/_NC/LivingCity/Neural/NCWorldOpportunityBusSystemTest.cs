@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+#nullable enable
+
 using Content.Server._NC.LivingCity.Neural;
 using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Cognition;

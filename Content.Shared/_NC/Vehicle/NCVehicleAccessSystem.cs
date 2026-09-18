@@ -11,7 +11,7 @@ using Robust.Shared.Physics.Components;
 namespace Content.Shared._NC.Vehicle;
 
 /// <summary>Shared authorization keeps predicted ignition consistent with physical locks and keys.</summary>
-public sealed class NCVehicleAccessSystem : EntitySystem
+public sealed partial class NCVehicleAccessSystem : EntitySystem
 {
     [Dependency] private SharedHandsSystem _hands = default!;
 
