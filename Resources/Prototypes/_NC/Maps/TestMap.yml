@@ -8,8 +8,8 @@
   - NCALifeTest
 
 - type: gameMap
-  id: NCALifeTest
-  mapName: NC ALife Test
+  id: NCGameTest
+  mapName: Game Testing Map
   mapPath: Maps/_NC/GameTestingMap/GameTestingMap0.yml
   minPlayers: 0
   stations:
