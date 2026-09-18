@@ -102,6 +102,8 @@ entities:
     - type: GridTree
     - type: Broadphase
     - type: OccluderTree
+    - type: BecomesStation
+      id: Empty
     - type: MapGrid
       chunks:
         -3,0:
