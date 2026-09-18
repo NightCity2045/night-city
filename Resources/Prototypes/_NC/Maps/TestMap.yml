@@ -10,7 +10,7 @@
   minPlayers: 0
   stations:
     Empty:
-      stationProto: StandardNanotrasenStation
+      stationProto: StandardStationArena
       components:
       - type: StationNameSetup
         mapNameTemplate: "Game Testing Map"
@@ -42,6 +42,7 @@
               Nitrogen: 82.10312
         - type: NCUniformAir
         - type: MapLight
+          ambientLightColor: "#D8B059FF"
         - type: NCZLevelRoof
         - type: Gravity
           enabled: true
