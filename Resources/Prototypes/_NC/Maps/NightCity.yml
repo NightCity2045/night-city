@@ -29,10 +29,10 @@
           - /Maps/_NC/NightCity/NightCity3.yml
           - /Maps/_NC/NightCity/NightCity4.yml
         mapsBelow:
-          - /Maps/_NC/NightCity/NightCity-1.yml
-          - /Maps/_NC/NightCity/NightCity-2.yml
-          - /Maps/_NC/NightCity/NightCity-3.yml
           - /Maps/_NC/NightCity/NightCity-4.yml
+          - /Maps/_NC/NightCity/NightCity-3.yml
+          - /Maps/_NC/NightCity/NightCity-2.yml
+          - /Maps/_NC/NightCity/NightCity-1.yml
         zLevelsComponentOverrides:
         # All nine Night City levels share infinite breathable air without pressure or gas simulation.
         - type: MapAtmosphere

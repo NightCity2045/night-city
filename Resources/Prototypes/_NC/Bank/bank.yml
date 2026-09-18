@@ -4,7 +4,7 @@
 
 - type: ncBankConfiguration
   id: Default
-  startingBalance: 500
+  startingBalance: 5000
   accountPrefix: NC
   pinDigits: 4
   paydayIntervalSeconds: 1800
@@ -17,7 +17,7 @@
   parent: BaseComputer
   components:
   - type: NCAtm
-    taxRate: 0.1
+    taxRate: 0.35
     maximumTransaction: 100000
   - type: ActivatableUI
     key: enum.NCAtmUiKey.Key

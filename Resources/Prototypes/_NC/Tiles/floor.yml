@@ -1175,3 +1175,92 @@
     collection: FootstepTile
   heatCapacity: 10000
   weather: true
+
+- type: tile
+  id: NCfloorlinial1
+  name: плитка линия лево 1
+  sprite: /Textures/_NC/Tiles/tileslinia/l1.png
+  baseTurf: FloorDirt
+  isSubfloor: false
+  footstepSounds:
+    collection: FootstepTile
+  heatCapacity: 10000
+  weather: true
+
+- type: tile
+  id: NCfloorlinial2
+  name: плитка линия лево 2
+  sprite: /Textures/_NC/Tiles/tileslinia/l2.png
+  baseTurf: FloorDirt
+  isSubfloor: false
+  footstepSounds:
+    collection: FootstepTile
+  heatCapacity: 10000
+  weather: true
+
+- type: tile
+  id: NCfloorlinial3
+  name: плитка линия лево 3
+  sprite: /Textures/_NC/Tiles/tileslinia/l3.png
+  baseTurf: FloorDirt
+  isSubfloor: false
+  footstepSounds:
+    collection: FootstepTile
+  heatCapacity: 10000
+  weather: true
+
+- type: tile
+  id: NCfloorlinial4
+  name: плитка линия лево 4
+  sprite: /Textures/_NC/Tiles/tileslinia/l4.png
+  baseTurf: FloorDirt
+  isSubfloor: false
+  footstepSounds:
+    collection: FootstepTile
+  heatCapacity: 10000
+  weather: true
+
+- type: tile
+  id: NCfloorliniar1
+  name: плитка линия право 1
+  sprite: /Textures/_NC/Tiles/tileslinia/r1.png
+  baseTurf: FloorDirt
+  isSubfloor: false
+  footstepSounds:
+    collection: FootstepTile
+  heatCapacity: 10000
+  weather: true
+
+- type: tile
+  id: NCfloorliniar2
+  name: плитка линия право 2
+  sprite: /Textures/_NC/Tiles/tileslinia/r2.png
+  baseTurf: FloorDirt
+  isSubfloor: false
+  footstepSounds:
+    collection: FootstepTile
+  heatCapacity: 10000
+  weather: true
+
+- type: tile
+  id: NCfloorliniar3
+  name: плитка линия право 3
+  sprite: /Textures/_NC/Tiles/tileslinia/r3.png
+  baseTurf: FloorDirt
+  isSubfloor: false
+  footstepSounds:
+    collection: FootstepTile
+  heatCapacity: 10000
+  weather: true
+
+- type: tile
+  id: NCfloorliniar4
+  name: плитка линия право 4
+  sprite: /Textures/_NC/Tiles/tileslinia/r4.png
+  baseTurf: FloorDirt
+  isSubfloor: false
+  footstepSounds:
+    collection: FootstepTile
+  heatCapacity: 10000
+  weather: true
+
