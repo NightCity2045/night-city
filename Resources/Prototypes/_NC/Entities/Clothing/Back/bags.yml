@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: ClothingBackpack
+  id: ClothingBackpackBiotechnica
+  name: BioTechnica backpack
+  description: A high-capacity durable backpack manufactured by BioTechnica.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Back/Backpacks/biotechnica.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/Back/Backpacks/biotechnica.rsi
+
+- type: entity
+  parent: ClothingBackpackDuffel
+  id: ClothingBackpackDuffelBiotechnica
+  name: BioTechnica duffel bag
+  description: A spacious duffel bag branded with BioTechnica logos.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Back/Duffels/biotechnica.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/Back/Duffels/biotechnica.rsi
+
+- type: entity
+  parent: ClothingBackpackSatchel
+  id: ClothingBackpackSatchelBiotechnica
+  name: BioTechnica satchel
+  description: A sleek satchel bag issued to BioTechnica personnel.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Back/Satchels/biotechnica.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/Back/Satchels/biotechnica.rsi

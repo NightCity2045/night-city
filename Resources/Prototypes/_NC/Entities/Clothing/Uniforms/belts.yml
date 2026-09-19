@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: ClothingBeltStorageBase
+  id: ClothingBeltBiotechnicaBotany
+  name: BioTechnica botany belt
+  description: A botanical tool belt outfitted for BioTechnica agricultural specialists.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Uniforms/Belts/Biotechnica/botany.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/Uniforms/Belts/Biotechnica/botany.rsi
+  - type: Storage
+    whitelist:
+      tags:
+      - PlantSampleTaker
+      - BotanyShovel
+      - BotanyHoe
+      - BotanyHatchet
+      - PlantBGone
+      - Bottle
+      - Syringe
+      - CigPack
+      - Dropper
+      components:
+      - Seed
+      - Smokable
+      - HandLabeler

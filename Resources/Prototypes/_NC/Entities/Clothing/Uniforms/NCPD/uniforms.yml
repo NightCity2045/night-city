@@ -34,3 +34,15 @@
     sprite: _NC/Clothing/Uniforms/Jumpsuits/nspd_cool_white.rsi
   - type: Clothing
     sprite: _NC/Clothing/Uniforms/Jumpsuits/nspd_cool_white.rsi
+
+- type: entity
+  parent: [ ClothingUniformBase, ClothingUniformFoldableBase, BaseRestrictedContraband ]
+  id: ClothingUniformNCPDTactical
+  name: NCPD tactical uniform
+  description: A black tactical uniform worn by NCPD tactical response officers.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Uniforms/Jumpsuits/nspd_normis_black.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/Uniforms/Jumpsuits/nspd_normis_black.rsi
+

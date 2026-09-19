@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: ClothingOuterHardsuitBase
+  id: ClothingOuterHardsuitMilitech
+  name: Militech combat hardsuit
+  description: A high-grade tactical EVA suit engineered by Militech for extreme environments and fireteams.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Hardsuits/militech_hardsuit.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Hardsuits/militech_hardsuit.rsi
+  - type: NCArmor
+    profile: NCArmorPlateCarrier
+
+- type: entity
+  parent: ClothingOuterHardsuitBase
+  id: ClothingOuterHardsuitTraumaArmored
+  name: Trauma Team armored hardsuit
+  description: A heavy medical response suit designed to protect Trauma Team command officers under direct fire.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Hardsuits/trauma_armored_hardsuit.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Hardsuits/trauma_armored_hardsuit.rsi
+  - type: NCArmor
+    profile: NCArmorPlateCarrier
+
+- type: entity
+  parent: ClothingOuterHardsuitBase
+  id: ClothingOuterHardsuitTrauma
+  name: Trauma Team hardsuit
+  description: Standard armored response suit worn by Trauma Team emergency medical personnel.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Hardsuits/trauma_hardsuit.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Hardsuits/trauma_hardsuit.rsi
+  - type: NCArmor
+    profile: NCArmorLightArmorjack
+
+- type: entity
+  parent: ClothingOuterHardsuitBase
+  id: ClothingOuterHardsuitTraumaMed
+  name: Trauma Team medical hardsuit
+  description: A specialized emergency triage suit with advanced life support housing for Trauma Team field doctors.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Hardsuits/trauma_med_hardsuit.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Hardsuits/trauma_med_hardsuit.rsi
+  - type: NCArmor
+    profile: NCArmorLightArmorjack

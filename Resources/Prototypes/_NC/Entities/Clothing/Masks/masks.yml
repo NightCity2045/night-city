@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: ClothingMaskPullableBase
+  id: ClothingMaskBiotechnicaBotany
+  name: BioTechnica botany mask
+  description: A specialized face mask used by BioTechnica botanical technicians.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Mask/Biotechnica/botany.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/Mask/Biotechnica/botany.rsi
+  - type: BreathMask
+
+- type: entity
+  parent: ClothingMaskPullableBase
+  id: ClothingMaskBiotechnicaMedtech
+  name: BioTechnica medtech mask
+  description: A sterile medical mask issued to BioTechnica laboratory and medical staff.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Mask/Biotechnica/medtech.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/Mask/Biotechnica/medtech.rsi
+  - type: BreathMask

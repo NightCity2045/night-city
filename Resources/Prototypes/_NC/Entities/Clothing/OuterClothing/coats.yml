@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: ClothingOuterStorageBase
+  id: ClothingOuterApronBiotechnica
+  name: BioTechnica apron
+  description: A heavy utility apron worn by BioTechnica research staff.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Biotechnica/apron.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Biotechnica/apron.rsi
+
+- type: entity
+  parent: ClothingOuterStorageBase
+  id: ClothingOuterApronBiotechnicaBotany
+  name: BioTechnica botany apron
+  description: A durable apron tailored for BioTechnica botanical researchers.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Biotechnica/Botany/apron.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Biotechnica/Botany/apron.rsi
+
+- type: entity
+  parent: ClothingOuterStorageFoldableBase
+  id: ClothingOuterCoatBiotechnicaMedtech
+  name: BioTechnica medtech coat
+  description: A laboratory coat designed for BioTechnica medical technicians.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Biotechnica/MedTech/coat.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Biotechnica/MedTech/coat.rsi
+
+- type: entity
+  parent: ClothingOuterStorageFoldableBase
+  id: ClothingOuterCoatBiotechnicaMedtechAdvanced
+  name: BioTechnica advanced medtech coat
+  description: An advanced laboratory coat with reinforced weaves for senior BioTechnica medical personnel.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Biotechnica/MedTech/coat_advanced.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Biotechnica/MedTech/coat_advanced.rsi
+
+- type: entity
+  parent: ClothingOuterStorageFoldableBase
+  id: ClothingOuterCoatBiotechnicaMedtechRadiation
+  name: BioTechnica radiation coat
+  description: A lead-lined protective coat used when handling radioactive materials at BioTechnica.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Biotechnica/MedTech/coat_radiation.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Biotechnica/MedTech/coat_radiation.rsi

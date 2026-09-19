@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: ClothingEyesBase
+  id: ClothingEyesGogglesBotany
+  name: botany goggles
+  description: Protective goggles worn when handling volatile flora and fertilizers.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Eyes/Goggles/botany.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/Eyes/Goggles/botany.rsi
+  - type: EyeProtection
+
+- type: entity
+  parent: ClothingEyesBase
+  id: ClothingEyesGogglesBiotechnicaBotany
+  name: BioTechnica botany goggles
+  description: Specialized protective goggles designed for BioTechnica agricultural researchers.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Eyes/Goggles/Biotechnica/botany.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/Eyes/Goggles/Biotechnica/botany.rsi
+  - type: EyeProtection
+
+- type: entity
+  parent: ClothingEyesBase
+  id: ClothingEyesGogglesBiotechnicaTech
+  name: BioTechnica tech goggles
+  description: High-precision tech goggles equipped for laboratory and field telemetry.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Eyes/Goggles/Biotechnica/tech.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/Eyes/Goggles/Biotechnica/tech.rsi
+  - type: EyeProtection

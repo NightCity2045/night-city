@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: ClothingOuterArmorBase
+  id: ClothingOuterArmorBiotechBulletproof
+  name: BioTechnica bulletproof vest
+  description: A bulletproof armored vest customized for BioTechnica tactical security units.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Armor/biotech_bulletproof.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Armor/biotech_bulletproof.rsi
+  - type: NCArmor
+    profile: NCArmorPlateCarrier
+
+- type: entity
+  parent: ClothingOuterArmorBase
+  id: ClothingOuterArmorMilitechBulletproof
+  name: Militech bulletproof vest
+  description: High-grade ballistic body armor issued to Militech security officers.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Armor/militech_bulletproof.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Armor/militech_bulletproof.rsi
+  - type: NCArmor
+    profile: NCArmorPlateCarrier
+
+- type: entity
+  parent: ClothingOuterArmorBase
+  id: ClothingOuterArmorNWN
+  name: NWN armor vest
+  description: A specialized composite armor vest manufactured for NWN field operatives.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Armor/nwn-armorvest.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Armor/nwn-armorvest.rsi
+  - type: NCArmor
+    profile: NCArmorPlateCarrier
