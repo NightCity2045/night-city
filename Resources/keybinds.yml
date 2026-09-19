@@ -66,6 +66,14 @@ binds:
 - function: ShuttleBrake
   type: State
   key: Space
+# NC-Edit-Start: AV vertical controls.
+- function: NCAVAscend
+  type: State
+  key: PageUp
+- function: NCAVDescend
+  type: State
+  key: PageDown
+# NC-Edit-End
 # Camera
 - function: CameraRotateLeft
   type: State

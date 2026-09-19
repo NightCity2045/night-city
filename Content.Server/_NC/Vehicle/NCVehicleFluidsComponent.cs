@@ -12,6 +12,12 @@ namespace Content.Server._NC.Vehicle;
 public sealed partial class NCVehicleFluidsComponent : Component
 {
     [DataField(required: true)] public Dictionary<NCVehicleFluidCircuit, NCVehicleFluidDefinition> Circuits = new();
+
+    /// <summary>
+    /// Converts reservoir millilitres into chemistry units when a leak reaches the floor.
+    /// Reservoir loss remains expressed in millilitres so vehicle consumption and mass stay coherent.
+    /// </summary>
+    [DataField] public float WorldSpillScale = 0.001f;
 }
 
 [DataDefinition]

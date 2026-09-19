@@ -1,5 +1,5 @@
 nc-workshop-title = Vehicle workshop
-nc-workshop-held-tool = IN YOUR HAND
+nc-workshop-held-tool = TOOL / STATIONARY DIAGNOSTICS
 nc-workshop-mode = Operation
 nc-workshop-mode-work = Work on a point
 nc-workshop-mode-inspect = Measure / diagnose
@@ -9,7 +9,7 @@ nc-workshop-mode-fill = Fill selected circuit
 nc-workshop-mode-drain = Drain selected circuit
 nc-workshop-selected = SELECTED PART
 nc-workshop-calibration = BENCH CALIBRATION
-nc-workshop-controls = Hold the required tool, then click a fastener or connector. Scroll to zoom; drag with RMB to move the view. To transfer a part, choose Remove or Install and click its image or empty mount.
+nc-workshop-controls = Hold the required tool, then click a fastener or connector. Diagnosis can use a handheld instrument or an anchored console nearby. Scroll to zoom; drag with RMB to move the view. To transfer a part, choose Remove or Install and click its image or empty mount.
 nc-workshop-ready = Choose an accessible view and a tool. The car must be stationary with its engine off.
 nc-workshop-select = Select a part in the work area.
 nc-workshop-selection = {$part}
@@ -113,3 +113,17 @@ nc-workshop-torque-tool = Torque wrench
 nc-workshop-torque-value = {$value} Nm
 nc-workshop-torque-set = Torque wrench setting changed.
 nc-workshop-torque-tool-needed = Hold an adjustable torque wrench to tighten this fastener.
+nc-workshop-equipment-lift-name = vehicle service lift
+nc-workshop-equipment-lift-desc = Raises the nearest vehicle for access to its underside, wheels and suspension.
+nc-workshop-equipment-hoist-name = engine hoist
+nc-workshop-equipment-hoist-desc = Supports heavy assemblies during removal and installation.
+nc-workshop-equipment-workbench-name = vehicle component workbench
+nc-workshop-equipment-workbench-desc = Disassembles, assembles and repairs removed vehicle assemblies.
+nc-workshop-equipment-diagnostics-name = vehicle diagnostic console
+nc-workshop-equipment-diagnostics-desc = Opens the nearest vehicle's interactive diagram and provides precise component measurements.
+nc-workshop-equipment-operate-lift = Raise / lower nearest vehicle
+nc-workshop-equipment-open-diagnostics = Diagnose nearest vehicle
+nc-workshop-equipment-lift-help = [color=#72D9C5]Anchor the lift, park a vehicle within {$range} m, then use “Raise / lower nearest vehicle”.[/color]
+nc-workshop-equipment-hoist-help = [color=#72D9C5]Anchor the hoist within {$range} m of the vehicle. Remove or install a heavy assembly through the vehicle workshop UI; the hoist is used automatically.[/color]
+nc-workshop-equipment-diagnostics-help = [color=#72D9C5]Anchor the console within {$range} m of a vehicle and open it through its context action. Select “Measure / diagnose”, then click a component in the diagram.[/color]
+nc-workshop-equipment-workbench-help = [color=#72D9C5]Anchor the machine. Use a detached assembly on it, then activate the machine. Inspection needs a diagnostic tool; repair needs the matching kit.[/color]

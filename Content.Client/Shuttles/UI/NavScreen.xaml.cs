@@ -42,6 +42,19 @@ public sealed partial class NavScreen : BoxContainer
         NavRadar.SetConsole(console);
     }
 
+    // NC-Edit-Start
+    /// <summary>Removes docking presentation from the navigation display used by an AV.</summary>
+    public void SetAVMode(bool enabled)
+    {
+        DockToggle.Visible = !enabled;
+        if (!enabled)
+            return;
+
+        NavRadar.ShowDocks = false;
+        DockToggle.Pressed = false;
+    }
+    // NC-Edit-End
+
     private void OnIFFTogglePressed(BaseButton.ButtonEventArgs args)
     {
         NavRadar.ShowIFF ^= true;

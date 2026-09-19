@@ -27,6 +27,10 @@ public sealed partial class NCZLevelsSystem
 
     private readonly TimeSpan _zLevelViewerUpdateRate = TimeSpan.FromSeconds(1f);
     private TimeSpan _nextZLevelViewerUpdate = TimeSpan.Zero;
+    // NC-Edit-Start: defer view-eye recreation until transform map recursion has finished.
+    private readonly HashSet<EntityUid> _pendingViewerUpdates = [];
+    private readonly List<EntityUid> _pendingViewerScratch = [];
+    // NC-Edit-End
 
     private void InitView()
     {
@@ -42,6 +46,18 @@ public sealed partial class NCZLevelsSystem
 
     private void UpdateView(float frameTime)
     {
+        // NC-Edit-Start
+        _pendingViewerScratch.Clear();
+        _pendingViewerScratch.AddRange(_pendingViewerUpdates);
+        _pendingViewerUpdates.Clear();
+
+        foreach (var uid in _pendingViewerScratch)
+        {
+            if (TryComp<NCZLevelViewerComponent>(uid, out var viewer))
+                UpdateViewer((uid, viewer));
+        }
+        // NC-Edit-End
+
         if (_timing.CurTime < _nextZLevelViewerUpdate)
             return;
         _nextZLevelViewerUpdate = _timing.CurTime + _zLevelViewerUpdateRate;
@@ -64,6 +80,7 @@ public sealed partial class NCZLevelsSystem
 
     private void OnCompRemove(Entity<NCZLevelViewerComponent> ent, ref ComponentRemove args)
     {
+        _pendingViewerUpdates.Remove(ent); // NC
         _actions.RemoveAction(ent.Comp.ActionEntity);
         _meta.RemoveFlag(ent, MetaDataFlags.ExtraTransformEvents);
 
@@ -86,7 +103,10 @@ public sealed partial class NCZLevelsSystem
 
     private void OnViewerMapUidChanged(Entity<NCZLevelViewerComponent> ent, ref MapUidChangedEvent args)
     {
-        UpdateViewer(ent);
+        // NC-Edit-Start: spawning and deleting view eyes here can mutate a grid's transform children while
+        // SharedTransformSystem is recursively changing their map IDs.
+        _pendingViewerUpdates.Add(ent);
+        // NC-Edit-End
     }
 
     private void UpdateViewer(Entity<NCZLevelViewerComponent> ent)

@@ -24,6 +24,10 @@ namespace Content.Client.Shuttles.Systems
             shuttle.AddFunction(ContentKeyFunctions.ShuttleRotateLeft);
             shuttle.AddFunction(ContentKeyFunctions.ShuttleRotateRight);
             shuttle.AddFunction(ContentKeyFunctions.ShuttleBrake);
+            // NC-Edit-Start
+            shuttle.AddFunction(ContentKeyFunctions.NCAVAscend);
+            shuttle.AddFunction(ContentKeyFunctions.NCAVDescend);
+            // NC-Edit-End
         }
 
         public override void Shutdown()

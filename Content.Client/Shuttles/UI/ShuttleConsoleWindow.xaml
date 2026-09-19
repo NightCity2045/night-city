@@ -1,6 +1,7 @@
 <controls:FancyWindow xmlns="https://spacestation14.io"
                       xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
                       xmlns:ui="clr-namespace:Content.Client.Shuttles.UI"
+                      xmlns:ncav="clr-namespace:Content.Client._NC.Vehicle.AV.UI"
                       Title="{Loc 'shuttle-console-window-title'}"
                       SetSize="960 762"
                       MinSize="960 762">
@@ -30,6 +31,9 @@
                     Text="DOCK"
                     Margin="5"/>
         </BoxContainer>
+        <!-- NC-Edit-Start -->
+        <ncav:NCAVFlightPanel Name="AVFlightPanel" Visible="False" Margin="10 0 10 5" />
+        <!-- NC-Edit-End -->
         <!-- Contents box -->
         <BoxContainer Name="Contents"
                       HorizontalAlignment="Stretch"

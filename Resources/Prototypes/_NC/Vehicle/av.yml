@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: BaseMachinePowered
+  id: NCAVLifter
+  name: AV lift fan
+  description: A high-output ducted fan that keeps an AV in the air.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: NCAVLifter
+    lift: 300000
+  - type: ApcPowerReceiver
+    powerLoad: 10000
+  - type: Sprite
+    sprite: Structures/Shuttles/gyroscope.rsi
+    snapCardinals: true
+    state: base
+  - type: Transform
+    anchored: true
+  - type: Rotatable
+    rotateWhileAnchored: true
+  - type: StaticPrice
+    price: 2500
+
+- type: entity
+  parent: NCAVLifter
+  id: NCAVLifterDebug
+  suffix: DEBUG
+  components:
+  - type: NCAVLifter
+    lift: 1000000
+  - type: ApcPowerReceiver
+    needsPower: false

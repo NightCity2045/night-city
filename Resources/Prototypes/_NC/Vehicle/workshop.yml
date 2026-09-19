@@ -59,7 +59,8 @@
 - type: entity
   parent: BaseStructure
   id: NCVehicleWorkshopLift
-  name: vehicle service lift
+  name: nc-workshop-equipment-lift-name
+  description: nc-workshop-equipment-lift-desc
   components:
   - type: Anchorable
   - type: NCVehicleWorkshopEquipment
@@ -73,7 +74,8 @@
 - type: entity
   parent: BaseStructure
   id: NCVehicleEngineHoist
-  name: engine hoist
+  name: nc-workshop-equipment-hoist-name
+  description: nc-workshop-equipment-hoist-desc
   components:
   - type: Anchorable
   - type: NCVehicleWorkshopEquipment
@@ -87,7 +89,8 @@
 - type: entity
   parent: BaseStructure
   id: NCVehicleRepairBench
-  name: vehicle repair workbench
+  name: nc-workshop-equipment-workbench-name
+  description: nc-workshop-equipment-workbench-desc
   components:
   - type: Anchorable
   - type: NCVehicleWorkshopEquipment
@@ -118,6 +121,26 @@
     sprite: _NC/Vehicle/equipment.rsi
     layers:
     - state: bench
+
+- type: entity
+  parent: BaseStructure
+  id: NCVehicleDiagnosticConsole
+  name: nc-workshop-equipment-diagnostics-name
+  description: nc-workshop-equipment-diagnostics-desc
+  components:
+  - type: Anchorable
+  - type: NCVehicleWorkshopEquipment
+    diagnosticLevel: 2
+    range: 3
+  - type: Sprite
+    sprite: Structures/Machines/computers.rsi
+    layers:
+    - state: computer
+    - state: generic_keyboard
+    - state: generic
+      shader: unshaded
+    - state: generic_keys
+      shader: unshaded
 
 - type: entity
   parent: BaseStructure

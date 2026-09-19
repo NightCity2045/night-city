@@ -1,0 +1,63 @@
+<!--
+SPDX-FileCopyrightText: 2026 Astro
+SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+-->
+<ncav:NCAVFlightPanel xmlns="https://spacestation14.io"
+                     xmlns:ncav="clr-namespace:Content.Client._NC.Vehicle.AV.UI"
+                     xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                     Orientation="Vertical"
+                     HorizontalExpand="True">
+    <PanelContainer HorizontalExpand="True">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#061219" BorderColor="#2AD9D0" BorderThickness="1 1 1 2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Margin="10 6" Orientation="Vertical" SeparationOverride="6">
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                <Label Text="{Loc 'nc-av-console-header'}" FontColorOverride="#79FFF5" HorizontalExpand="True" />
+                <Label Text="{Loc 'nc-av-console-channel'}" FontColorOverride="#517E84" Margin="0 0 10 0" />
+                <Label Name="StatusLabel" FontColorOverride="#F3BA58" />
+            </BoxContainer>
+
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True" SeparationOverride="7">
+                <PanelContainer HorizontalExpand="True" SizeFlagsStretchRatio="1">
+                    <PanelContainer.PanelOverride>
+                        <gfx:StyleBoxFlat BackgroundColor="#0A2027" BorderColor="#245E62" BorderThickness="1" />
+                    </PanelContainer.PanelOverride>
+                    <BoxContainer Margin="8 5" Orientation="Vertical">
+                        <Label Text="{Loc 'nc-av-console-altitude'}" FontColorOverride="#5FA9AA" />
+                        <Label Name="AltitudeValue" StyleClasses="LabelHeading" FontColorOverride="#D8FFFB" />
+                    </BoxContainer>
+                </PanelContainer>
+
+                <PanelContainer HorizontalExpand="True" SizeFlagsStretchRatio="1">
+                    <PanelContainer.PanelOverride>
+                        <gfx:StyleBoxFlat BackgroundColor="#0A2027" BorderColor="#245E62" BorderThickness="1" />
+                    </PanelContainer.PanelOverride>
+                    <BoxContainer Margin="8 5" Orientation="Vertical">
+                        <Label Text="{Loc 'nc-av-console-vertical-speed'}" FontColorOverride="#5FA9AA" />
+                        <Label Name="VerticalSpeedValue" StyleClasses="LabelHeading" FontColorOverride="#D8FFFB" />
+                    </BoxContainer>
+                </PanelContainer>
+
+                <PanelContainer HorizontalExpand="True" SizeFlagsStretchRatio="1.35">
+                    <PanelContainer.PanelOverride>
+                        <gfx:StyleBoxFlat BackgroundColor="#20190D" BorderColor="#B37B31" BorderThickness="1" />
+                    </PanelContainer.PanelOverride>
+                    <BoxContainer Margin="8 5" Orientation="Vertical">
+                        <BoxContainer Orientation="Horizontal">
+                            <Label Text="{Loc 'nc-av-console-lift'}" FontColorOverride="#D69D49" HorizontalExpand="True" />
+                            <Label Name="LiftValue" FontColorOverride="#FFE0A0" />
+                        </BoxContainer>
+                        <ProgressBar Name="LiftBar" MinValue="0" MaxValue="1" Value="0" SetHeight="8" Margin="0 4 0 0" />
+                    </BoxContainer>
+                </PanelContainer>
+            </BoxContainer>
+
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                <Label Name="WarningLabel" Visible="False" FontColorOverride="#FF657D" HorizontalExpand="True" />
+                <Label Text="{Loc 'nc-av-console-controls'}" FontColorOverride="#729297" />
+            </BoxContainer>
+        </BoxContainer>
+    </PanelContainer>
+</ncav:NCAVFlightPanel>
