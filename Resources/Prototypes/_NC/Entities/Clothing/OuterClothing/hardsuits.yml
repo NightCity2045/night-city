@@ -12,6 +12,8 @@
     sprite: _NC/Clothing/OuterClothing/Hardsuits/militech_hardsuit.rsi
   - type: Clothing
     sprite: _NC/Clothing/OuterClothing/Hardsuits/militech_hardsuit.rsi
+  - type: ToggleableClothing
+    clothingPrototype: ClothingHeadHatMilitechCap
   - type: NCArmor
     profile: NCArmorPlateCarrier
 
@@ -25,6 +27,8 @@
     sprite: _NC/Clothing/OuterClothing/Hardsuits/trauma_armored_hardsuit.rsi
   - type: Clothing
     sprite: _NC/Clothing/OuterClothing/Hardsuits/trauma_armored_hardsuit.rsi
+  - type: ToggleableClothing
+    clothingPrototype: ClothingHeadHelmetHardsuitTraumaArmored
   - type: NCArmor
     profile: NCArmorPlateCarrier
 
@@ -38,6 +42,8 @@
     sprite: _NC/Clothing/OuterClothing/Hardsuits/trauma_hardsuit.rsi
   - type: Clothing
     sprite: _NC/Clothing/OuterClothing/Hardsuits/trauma_hardsuit.rsi
+  - type: ToggleableClothing
+    clothingPrototype: ClothingHeadHelmetHardsuitTrauma
   - type: NCArmor
     profile: NCArmorLightArmorjack
 
@@ -51,5 +57,7 @@
     sprite: _NC/Clothing/OuterClothing/Hardsuits/trauma_med_hardsuit.rsi
   - type: Clothing
     sprite: _NC/Clothing/OuterClothing/Hardsuits/trauma_med_hardsuit.rsi
+  - type: ToggleableClothing
+    clothingPrototype: ClothingHeadHelmetHardsuitTraumaMed
   - type: NCArmor
     profile: NCArmorLightArmorjack

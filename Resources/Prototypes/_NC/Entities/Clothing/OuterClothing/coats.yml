@@ -56,3 +56,26 @@
     sprite: _NC/Clothing/OuterClothing/Biotechnica/MedTech/coat_radiation.rsi
   - type: Clothing
     sprite: _NC/Clothing/OuterClothing/Biotechnica/MedTech/coat_radiation.rsi
+
+- type: entity
+  parent: ClothingOuterStorageBase
+  id: ClothingOuterCoatCloakBlack
+  name: black cloak
+  description: A sleek, dark cloak designed for stealth, protection, and distinctive style.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Cloack/black-cloack.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Cloack/black-cloack.rsi
+
+- type: entity
+  parent: ClothingOuterStorageBase
+  id: ClothingOuterCoatCloakWhite
+  name: white cloak
+  description: An elegant white cloak that offers distinction and protection against elements.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Cloack/white-cloack.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Cloack/white-cloack.rsi
+

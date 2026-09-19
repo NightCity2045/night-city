@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "license": "Put your license here",
+  "copyright": "Made by Carikeric",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+    "states": [
+        {
+            "name": "icon"
+        }
+    ]
+}

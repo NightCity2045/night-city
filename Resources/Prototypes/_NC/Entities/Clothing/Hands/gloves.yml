@@ -13,3 +13,16 @@
   - type: Clothing
     sprite: _NC/Clothing/Hands/Gloves/Biotechnica/mitts.rsi
   - type: FingerprintMask
+
+- type: entity
+  parent: ClothingHandsBase
+  id: ClothingHandsGlovesEdgeRunners
+  name: edgerunner gloves
+  description: Cybernetically reinforced tactical gloves designed for high-risk street solos.
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Hands/Gloves/EdgeRunnersGloves.rsi
+  - type: Clothing
+    sprite: _NC/Clothing/Hands/Gloves/EdgeRunnersGloves.rsi
+  - type: FingerprintMask
+
