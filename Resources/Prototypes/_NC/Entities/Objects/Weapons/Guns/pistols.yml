@@ -4,7 +4,7 @@
 
 - type: entity
   parent: BaseWeaponRevolver
-  id: WeaponPistolBurya
+  id: NCWeaponPistolBurya
   name: Tech Burya pistol
   description: A high-caliber Tech revolver pistol capable of firing charged, high-velocity rounds.
   components:
