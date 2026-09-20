@@ -21,6 +21,7 @@ nc-medical-surgery-step-failed = Этап операции не выполнен
 nc-stack-pressure-dressing = давящая повязка
 nc-stack-field-bandage = полевой бинт
 nc-stack-hemostatic-gauze = гемостатическая марля
+nc-stack-field-splint = полевая шина
 nc-stack-field-tourniquet = полевой жгут
 nc-medical-surgery-console-title = Операционная
 nc-medical-surgery-console-private = Хирургическая рабочая станция

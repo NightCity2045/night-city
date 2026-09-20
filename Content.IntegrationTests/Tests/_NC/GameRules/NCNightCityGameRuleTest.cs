@@ -19,7 +19,7 @@ namespace Content.IntegrationTests.Tests._NC.GameRules;
 [TestOf(typeof(NCNightCityRuleSystem))]
 public sealed class NCNightCityGameRuleTest : GameTest
 {
-    private static readonly ProtoId<GamePresetPrototype> NightCityPreset = "NightCity";
+    private const string NightCityPreset = "NightCity";
     private const string NightCityRule = "NCNightCityRule";
 
     public override PoolSettings PoolSettings => new()
@@ -36,7 +36,7 @@ public sealed class NCNightCityGameRuleTest : GameTest
         var system = Server.System<NCNightCityRuleSystem>();
         var prototypes = Server.ResolveDependency<IPrototypeManager>();
         var componentFactory = Server.ResolveDependency<IComponentFactory>();
-        var preset = prototypes.Index(NightCityPreset);
+        var preset = prototypes.Index<GamePresetPrototype>(NightCityPreset);
 
         Assert.Multiple(() =>
         {

@@ -33,10 +33,10 @@
   degradedAllowsCalls: false
   degradedAllowsMessages: true
   degradedAllowsCitiNet: true
-  citinetPostRetention: 720h
-  citinetPostCooldown: 10s
-  citinetCommentCooldown: 3s
-  citinetReactionCooldown: 1s
+  citiNetPostRetention: 720h
+  citiNetPostCooldown: 10s
+  citiNetCommentCooldown: 3s
+  citiNetReactionCooldown: 1s
   maximumMentionsPerEntry: 10
   feedPostLimit: 20
   feedCommentLimit: 200

@@ -124,8 +124,7 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
     private static readonly ProtoId<NCZoneTemplatePrototype> ApartmentLayout = "NCApartmentLayout5x5";
     private static readonly ProtoId<NCZoneTemplatePrototype> MissionLayout = "NCMissionLayout8x8";
     private static readonly ProtoId<NCMissionDefinitionPrototype> MissionDefinition = "NCMission8x8";
-    private static readonly ProtoId<NCMissionDefinitionPrototype> ExpiringMissionDefinition =
-        "NCMissionExpiryIntegration";
+    private const string ExpiringMissionDefinition = "NCMissionExpiryIntegration";
     private static readonly ProtoId<NCPropertyListingPrototype> ApartmentListing = "NCGlen1Apartment01";
     private static readonly NCZNetworkId CityNetworkId =
         new(Guid.Parse("4da240d7-48ad-4f95-ae96-aeb7b58b855d"));

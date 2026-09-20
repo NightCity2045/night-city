@@ -5,9 +5,9 @@
   components:
   - type: Action
     checkCanInteract: false
-    icon:
-      sprite: _NC/Actions/zLevels.rsi
-      state: up
+  - type: Sprite
+    sprite: _NC/Actions/zLevels.rsi
+    state: up
   - type: InstantAction
     event: !type:NCZLevelActionUp
 
@@ -18,9 +18,9 @@
   components:
   - type: Action
     checkCanInteract: false
-    icon:
-      sprite: _NC/Actions/zLevels.rsi
-      state: down
+  - type: Sprite
+    sprite: _NC/Actions/zLevels.rsi
+    state: down
   - type: InstantAction
     event: !type:NCZLevelActionDown
 
@@ -31,9 +31,9 @@
   components:
   - type: Action
     checkCanInteract: false
-    icon:
-      sprite: _NC/Actions/zLevels.rsi
-      state: eye
+  - type: Sprite
+    sprite: _NC/Actions/zLevels.rsi
+    state: eye
   - type: InstantAction
     event: !type:NCToggleZLevelLookUpAction
 
@@ -47,9 +47,9 @@
   components:
   - type: Action
     checkCanInteract: false
-    icon:
-      sprite: _NC/Actions/zLevels.rsi
-      state: up
+  - type: Sprite
+    sprite: _NC/Actions/zLevels.rsi
+    state: up
   - type: InstantAction
     event: !type:NCZFlightActionUp
 
@@ -60,9 +60,9 @@
   components:
   - type: Action
     checkCanInteract: false
-    icon:
-      sprite: _NC/Actions/zLevels.rsi
-      state: down
+  - type: Sprite
+    sprite: _NC/Actions/zLevels.rsi
+    state: down
   - type: InstantAction
     event: !type:NCZFlightActionDown
 
@@ -73,8 +73,8 @@
   components:
   - type: Action
     checkCanInteract: false
-    icon:
-      sprite: _NC/Actions/zLevels.rsi
-      state: eye
+  - type: Sprite
+    sprite: _NC/Actions/zLevels.rsi
+    state: eye
   - type: InstantAction
     event: !type:ToggleActionEvent

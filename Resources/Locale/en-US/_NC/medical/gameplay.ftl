@@ -21,6 +21,7 @@ nc-medical-surgery-step-failed = Surgery step failed: {$reason}.
 nc-stack-pressure-dressing = pressure dressing
 nc-stack-field-bandage = field bandage
 nc-stack-hemostatic-gauze = hemostatic gauze
+nc-stack-field-splint = field splint
 nc-stack-field-tourniquet = field tourniquet
 nc-medical-surgery-console-title = Operating theatre
 nc-medical-surgery-console-private = Live surgical workstation

@@ -335,6 +335,7 @@
   - type: NCDetachedOrganMedicalData
     sourceBodyProfile: Human
     requiredParentCategory: Torso
+    treatmentProfile: NCHumanFieldTreatment
 
 - type: entity
   id: NCOrganHumanCyberArmRight
@@ -361,6 +362,7 @@
   - type: NCDetachedOrganMedicalData
     sourceBodyProfile: Human
     requiredParentCategory: Torso
+    treatmentProfile: NCHumanFieldTreatment
 
 - type: entity
   id: NCOrganHumanCyberEyes
@@ -386,6 +388,7 @@
   - type: NCDetachedOrganMedicalData
     sourceBodyProfile: Human
     requiredParentCategory: Head
+    treatmentProfile: NCHumanFieldTreatment
 
 - type: entity
   id: NCOrganHumanCyberHeart
@@ -413,3 +416,4 @@
   - type: NCDetachedOrganMedicalData
     sourceBodyProfile: Human
     requiredParentCategory: Thorax
+    treatmentProfile: NCHumanFieldTreatment
