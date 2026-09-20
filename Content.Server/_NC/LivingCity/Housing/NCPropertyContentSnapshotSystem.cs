@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Content.Server.Database;
 using Content.Server._NC.LivingCity.Time;
+using Content.Server._NC.Persistence.RoundSnapshot;
 using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Persistence.Time;
 
@@ -43,6 +44,8 @@ public sealed record NCPropertyContentRecord(
 public sealed partial class NCPropertyContentSnapshotSystem : EntitySystem
 {
     public const string AggregateType = "living-city.property-content";
+    public const string RoundSnapshotSectionType = "property-content";
+    public const string RoundSnapshotOwnerType = "property";
     private const int SnapshotFormatVersion = 1;
     private const int MutationGateStripeCount = 32;
 
@@ -71,6 +74,39 @@ public sealed partial class NCPropertyContentSnapshotSystem : EntitySystem
         if (record != null)
             _cache[propertyId] = record;
         return record;
+    }
+
+    /// <summary>
+    /// Loads the apartment payload from the last atomically committed round snapshot.
+    /// Legacy aggregate storage remains a migration fallback for worlds saved before the coordinator existed.
+    /// </summary>
+    public async Task<NCPropertyContentRecord?> GetLatestRoundSnapshotAsync(NCApartmentId propertyId)
+    {
+        if (!propertyId.IsValid)
+            return null;
+
+        var sections = await _database.GetLatestNCRoundSnapshotSectionsAsync(
+            RoundSnapshotSectionType,
+            RoundSnapshotOwnerType,
+            Key(propertyId));
+        if (sections is not [{ ChunkIndex: 0 }] || sections[0].FormatVersion != SnapshotFormatVersion)
+            return await GetAsync(propertyId, true);
+
+        try
+        {
+            var snapshot = NormalizeLegacy(JsonSerializer.Deserialize<NCPropertyContentSnapshot>(
+                sections[0].Payload,
+                JsonOptions));
+            if (snapshot == null || snapshot.PropertyId != propertyId || !Valid(snapshot))
+                return null;
+            var record = new NCPropertyContentRecord(snapshot, snapshot.DataVersion, default, snapshot.CapturedAt);
+            _cache[propertyId] = record;
+            return record;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
     }
 
     public Task<bool> UpsertAsync(NCPropertyContentSnapshot snapshot, string auditSource)

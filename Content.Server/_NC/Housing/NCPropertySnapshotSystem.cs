@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Content.Server._NC.City.ZoneTemplates;
 using Content.Server._NC.Housing.Components;
 using Content.Server._NC.LivingCity.Housing;
+using Content.Server._NC.Persistence.RoundSnapshot;
 using Content.Shared._NC.City.ZoneTemplates;
 using Content.Shared._NC.City.ZoneTemplates.Components;
 using Content.Shared._NC.City.ZoneTemplates.Prototypes;
@@ -66,7 +67,6 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
     private readonly HashSet<EntityUid> _roots = [];
     private readonly HashSet<EntityUid> _graph = [];
 
-    private Task _pendingSave = Task.CompletedTask;
     private bool _capturing;
 
     public bool IsReady { get; private set; }
@@ -89,25 +89,16 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
     }
 
     /// <summary>
-    /// Allows round flow and integration tests to wait until the latest immutable capture reaches the database.
-    /// </summary>
-    public Task WaitForPendingSaveAsync()
-    {
-        return _pendingSave;
-    }
-
-    /// <summary>
     /// Loads durable snapshots after any previous round's writes have completed and decorates prepared templates.
     /// </summary>
     public async Task LoadPreparedSnapshotsAsync(IReadOnlyCollection<NCPropertyAggregateRecord> properties)
     {
         try
         {
-            await _pendingSave;
             var loaded = new Dictionary<NCApartmentId, NCPropertyContentSnapshot>();
             foreach (var property in properties)
             {
-                var content = await _content.GetAsync(property.Snapshot.PropertyId, true);
+                var content = await _content.GetLatestRoundSnapshotAsync(property.Snapshot.PropertyId);
                 if (content?.Snapshot.Present == true)
                     loaded[property.Snapshot.PropertyId] = content.Snapshot;
             }
@@ -163,26 +154,41 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
     }
 
     /// <summary>
-    /// Serializes immutable payload strings before round entities are flushed, then persists them in the background.
-    /// The next round explicitly awaits this task before reading snapshot rows.
+    /// Adds apartment graphs to the common round snapshot without issuing per-property database commands.
     /// </summary>
-    public void CaptureRoundSnapshots(IEnumerable<NCPropertySnapshotCapture> captures)
+    public void CaptureRoundSnapshotSections(
+        IEnumerable<NCPropertySnapshotCapture> captures,
+        NCRoundSnapshotCaptureEvent collector)
     {
-        var snapshots = new List<NCPropertyContentSnapshot>();
         foreach (var capture in captures)
         {
             var property = capture.Property;
             if (property.CurrentTemplateId == null || property.CurrentTemplateRevision == null ||
                 !IsActiveDeployment(capture.DeploymentId))
+            {
                 continue;
+            }
 
-            if (TryCapture(property, out var snapshot, out var error))
-                snapshots.Add(snapshot);
-            else
-                Log.Error($"Property {property.PropertyId} snapshot was not replaced: {error}");
+            if (!TryCapture(property, out var captured, out var error))
+            {
+                collector.Fail($"Property {property.PropertyId} snapshot failed: {error}");
+                continue;
+            }
+
+            var snapshot = captured with
+            {
+                CapturedAt = collector.ActiveWorldTime,
+                DataVersion = 1,
+                LastAppliedEventId = collector.SnapshotId,
+            };
+            collector.TryAddSection(
+                NCPropertyContentSnapshotSystem.RoundSnapshotSectionType,
+                NCPropertyContentSnapshotSystem.RoundSnapshotOwnerType,
+                property.PropertyId.Value.ToString("D"),
+                SnapshotFormatVersion,
+                snapshot.EntityCount,
+                JsonSerializer.Serialize(snapshot));
         }
-
-        _pendingSave = PersistCapturesAsync(snapshots);
     }
 
     /// <summary>
@@ -257,50 +263,6 @@ public sealed partial class NCPropertySnapshotSystem : EntitySystem
             if (Exists(uid))
                 Del(uid);
         }
-    }
-
-    private async Task PersistCapturesAsync(IReadOnlyCollection<NCPropertyContentSnapshot> captures)
-    {
-        var failed = false;
-        var committed = new List<NCPropertyContentSnapshot>(captures.Count);
-        foreach (var snapshot in captures)
-        {
-            try
-            {
-                if (!await _content.UpsertAsync(snapshot, "housing-round-content-capture"))
-                {
-                    Log.Error($"Database rejected property {snapshot.PropertyId} snapshot; previous row was retained.");
-                    failed = true;
-                    continue;
-                }
-
-                var persisted = await _content.GetAsync(snapshot.PropertyId, true);
-                if (persisted?.Snapshot.Present != true)
-                {
-                    Log.Error($"Property {snapshot.PropertyId} snapshot committed but could not be verified.");
-                    failed = true;
-                    continue;
-                }
-                committed.Add(persisted.Snapshot);
-            }
-            catch (Exception exception)
-            {
-                Log.Error($"Failed to persist property {snapshot.PropertyId} snapshot: {exception}");
-                failed = true;
-            }
-        }
-
-        if (committed.Count != 0)
-        {
-            await RunOnMainThreadAsync(() =>
-            {
-                foreach (var snapshot in committed)
-                    _snapshots[snapshot.PropertyId] = snapshot;
-            });
-        }
-
-        if (failed)
-            throw new InvalidOperationException("At least one final property content snapshot was not durable.");
     }
 
     private Task RunOnMainThreadAsync(Action action)

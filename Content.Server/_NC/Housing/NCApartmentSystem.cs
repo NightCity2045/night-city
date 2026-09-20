@@ -10,8 +10,7 @@ using Content.Server._NC.City.ZoneTemplates;
 using Content.Server._NC.LivingCity.Housing;
 using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.LivingCity.Time;
-using Content.Server.GameTicking;
-using Content.Server.Gibbing.Systems;
+using Content.Server._NC.Persistence.RoundSnapshot;
 using Content.Server.Preferences.Managers;
 using Content.Shared._NC.City.ZoneTemplates;
 using Content.Shared._NC.City.ZoneTemplates.Prototypes;
@@ -61,7 +60,6 @@ public sealed partial class NCApartmentSystem : EntitySystem
     private readonly PriorityQueue<RentDueEntry, long> _rentQueue = new();
 
     private int _rentOperationsInFlight;
-    private bool _roundSnapshotsCaptured;
     private bool _initializing;
 
     private NCPropertyRuntimeConfigurationPrototype RuntimeConfiguration =>
@@ -71,8 +69,7 @@ public sealed partial class NCApartmentSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnSessionStarted);
-        SubscribeLocalEvent<NCActiveWorldSessionClosingEvent>(OnSessionClosing);
-        SubscribeLocalEvent<RoundEndMessageEvent>(OnRoundEnd, before: [typeof(GibOnRoundEndSystem)]);
+        SubscribeLocalEvent<NCRoundSnapshotCaptureEvent>(OnRoundSnapshotCapture);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart, before: [typeof(NCZoneTemplateSystem)]);
         SubscribeLocalEvent<PlayerAttachedEvent>(OnPlayerAttached);
         SubscribeLocalEvent<NCPropertyLockComponent, ComponentStartup>(OnLockStartup);
@@ -110,7 +107,6 @@ public sealed partial class NCApartmentSystem : EntitySystem
 
     private void OnSessionStarted(NCActiveWorldSessionStartedEvent args)
     {
-        _roundSnapshotsCaptured = false;
         _ = InitializePropertiesAsync();
     }
 
@@ -193,7 +189,6 @@ public sealed partial class NCApartmentSystem : EntitySystem
 
     private void OnRoundRestart(RoundRestartCleanupEvent ev)
     {
-        CaptureActiveRoundSnapshots();
         _snapshots.BeginRoundLoad();
         _properties.Clear();
         _locks.Clear();
@@ -359,33 +354,15 @@ public sealed partial class NCApartmentSystem : EntitySystem
             Cache(delinquent.Property);
     }
 
-    private void OnRoundEnd(RoundEndMessageEvent ev)
+    private void OnRoundSnapshotCapture(NCRoundSnapshotCaptureEvent ev)
     {
-        CaptureActiveRoundSnapshots();
-    }
-
-    private void OnSessionClosing(NCActiveWorldSessionClosingEvent ev)
-    {
-        // RoundEndMessage normally captures first. This fallback makes the durability contract independent from
-        // game-ticker event ordering and registers the already-running write with the active-world close barrier.
-        CaptureActiveRoundSnapshots();
-        ev.AddPendingWrite(_snapshots.WaitForPendingSaveAsync());
-    }
-
-    private void CaptureActiveRoundSnapshots()
-    {
-        if (_roundSnapshotsCaptured)
-            return;
-
         var active = new List<NCPropertySnapshotCapture>();
         foreach (var (propertyId, deploymentId) in _runtimeInteriors)
         {
             if (_properties.TryGetValue(propertyId, out var property))
                 active.Add(new NCPropertySnapshotCapture(property.Snapshot, deploymentId));
         }
-
-        _snapshots.CaptureRoundSnapshots(active);
-        _roundSnapshotsCaptured = true;
+        _snapshots.CaptureRoundSnapshotSections(active, ev);
     }
 
     public bool TryGetProperty(NCApartmentId propertyId, out NCPropertyAggregateRecord property) =>
