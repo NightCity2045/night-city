@@ -64,7 +64,12 @@ public sealed partial class NCAgentShardItem : ContainerButton
             ? "PERM // NONE"
             : $"PERM // {string.Join(" + ", data.Permissions.Select(PermissionText))}";
 
-        if (data.RequiredAccess.Count == 0)
+        if (data.ServerAuthorized)
+        {
+            ShardPermissions.Text += $" // {Loc.GetString("nc-agent-shard-server-authorized",
+                ("access", data.AccessLabel.ToUpperInvariant()))}";
+        }
+        else if (data.RequiredAccess.Count == 0)
         {
             ShardPermissions.Text += " // ACCESS PUBLIC";
         }
@@ -176,6 +181,7 @@ public sealed record NCAgentShardDisplayData(
     NCAgentShardCategory Category,
     IReadOnlyList<NCAgentShardPermission> Permissions,
     IReadOnlyList<ProtoId<AccessLevelPrototype>> RequiredAccess,
+    bool ServerAuthorized,
     string AccessLabel,
     bool Authorized,
     InstallationStatus Status,

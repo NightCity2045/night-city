@@ -6,6 +6,7 @@ using Content.Client.CartridgeLoader;
 using Content.Client._NC.Agent.Shards;
 using Content.Client.PDA;
 using Content.Shared._NC.Agent.UI;
+using Content.Shared._NC.Agent.TraumaTeam;
 using Content.Shared._NC.Missions.UI;
 using Content.Shared._NC.Agent.Shards;
 using Content.Shared.CartridgeLoader;
@@ -67,6 +68,7 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
         _menu.OnOpenAgentApp += app => SendMessage(new NCAgentOpenAppMessage(app));
         _menu.OnFixerWorkRequest += SendMessage;
         _menu.OnContractRequest += SendMessage;
+        _menu.OnTraumaTeamRequest += SendMessage;
         _menu.OnDirectorySearch += query => SendMessage(new NCAgentDirectorySearchMessage(query));
         _menu.OnSetAlias += alias => SendMessage(new NCAgentSetAliasMessage(alias));
         _menu.OnSetPresence += presence => SendMessage(new NCAgentSetPresenceMessage(presence));
@@ -139,6 +141,9 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
             case NCAgentContractsUpdateMessage contracts:
                 _menu.UpdateContractData(contracts);
                 break;
+            case NCAgentTraumaTeamUpdateMessage traumaTeam:
+                _menu.UpdateTraumaTeamData(traumaTeam);
+                break;
             case NCFixerMissionUpdateMessage missions:
                 _menu.UpdateMissionData(missions);
                 break;
@@ -152,6 +157,11 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
                 if (EntMan.TryGetComponent<TransformComponent>(Owner, out var transform))
                     _menu.SetMapSource(transform.GridUid);
                 _menu.UpdateMapData(mapUpdate);
+                break;
+            case NCAgentMapTrackingUpdateMessage trackingUpdate:
+                if (EntMan.TryGetComponent<TransformComponent>(Owner, out var trackingTransform))
+                    _menu.SetMapSource(trackingTransform.GridUid);
+                _menu.UpdateMapTrackingData(trackingUpdate);
                 break;
             case NCAgentCityUpdateMessage cityUpdate:
                 _menu.UpdateCityData(cityUpdate);
@@ -197,6 +207,7 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
                 shard?.Category ?? NCAgentShardCategory.Legacy,
                 shard?.Permissions ?? [],
                 shard?.RequiredAccess ?? [],
+                shard?.ServerAuthorized ?? false,
                 shard?.AccessLabel ?? "PUBLIC",
                 _shardSystem.IsAuthorized(Owner, uid),
                 cartridge.InstallationStatus,

@@ -14,7 +14,7 @@
   startingGear: TraumaTeamOperativeGear
   icon: JobIconSecurityOfficer
   accessGroups: [ TraumaBasic ]
-  access: [ Trauma_Command, Trauma_Operative ]
+  access: [ Trauma_Operative ]
 
 - type: startingGear
   id: TraumaTeamOperativeGear
@@ -27,3 +27,6 @@
     id: SecurityPDA
     belt: ClothingBeltSecurityFilled
     outerClothing: ClothingOuterArmorBasic
+  storage:
+    back:
+    - NCTraumaResponseCartridge

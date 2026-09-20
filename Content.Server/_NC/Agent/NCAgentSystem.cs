@@ -30,6 +30,7 @@ public sealed partial class NCAgentSystem : EntitySystem
         InitializeCity();
         InitializeMissions();
         InitializeContracts();
+        InitializeTraumaTeam();
     }
 
     public override void Update(float frameTime)
@@ -39,6 +40,7 @@ public sealed partial class NCAgentSystem : EntitySystem
         UpdateCallTimeouts();
         UpdateCommunicationTimeouts();
         UpdateAgentLocks();
+        UpdateMapTracking();
     }
 
     private void OnMapInit(Entity<NCAgentComponent> ent, ref MapInitEvent args)

@@ -121,6 +121,9 @@ public sealed partial class NCAgentConfigurationPrototype : IPrototype
     public int FeedCommentLimit = 200;
 
     [DataField]
+    public TimeSpan MapTrackingUpdateInterval = TimeSpan.FromSeconds(0.5);
+
+    [DataField]
     public int MinimumPinLength = 4;
 
     [DataField]

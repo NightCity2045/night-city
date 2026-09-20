@@ -40,6 +40,7 @@
   maximumMentionsPerEntry: 10
   feedPostLimit: 20
   feedCommentLimit: 200
+  mapTrackingUpdateInterval: 0.5s
   minimumPinLength: 4
   maximumPinLength: 8
   # Hash work stays modest because online attempt lockouts provide the primary defense.

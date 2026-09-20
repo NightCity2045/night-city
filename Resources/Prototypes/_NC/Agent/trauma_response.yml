@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncTraumaResponseConfiguration
+  id: Default
+  maximumDescriptionLength: 160
+  requestCooldown: 30s
+  requestLifetime: 10m
+  recentCallLimit: 10
+  responseJobs:
+  - TraumaTeamParamedic
+  - TraumaTeamOperative
+
+- type: entity
+  parent: BasePDACartridge
+  id: NCTraumaResponseCartridge
+  name: Trauma Response shard
+  description: An encrypted Trauma Team dispatch and field coordination program.
+  components:
+  - type: Sprite
+    state: cart-med
+  - type: Icon
+    sprite: Objects/Devices/cartridge.rsi
+    state: cart-med
+  - type: Cartridge
+    programName: nc-trauma-response-program-name
+    icon:
+      sprite: Objects/Specific/Medical/healthanalyzer.rsi
+      state: icon
+  - type: UIFragment
+    ui: !type:NCAgentTraumaResponseUi
+  - type: NCAgentTraumaResponse
+  - type: NCAgentShard
+    displayName: TRAUMA RESPONSE
+    description: Trauma Team dispatch queue and client tracking control.
+    size: 4
+    category: Medical
+    accessLabel: TRAUMA TEAM
+    serverAuthorized: true
+    permissions:
+    - NetworkRead
+    - LocationRead
+    - VinRead
+    - LocalStorage

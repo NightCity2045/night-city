@@ -157,6 +157,17 @@
                                     </BoxContainer>
                                 </PanelContainer>
                             </ContainerButton>
+                            <ContainerButton Name="TraumaTeamButton" MinHeight="86" Margin="4">
+                                <PanelContainer>
+                                    <PanelContainer.PanelOverride>
+                                        <gfx:StyleBoxFlat BackgroundColor="#10252C" BorderColor="#72F4FF" BorderThickness="0 0 0 2" />
+                                    </PanelContainer.PanelOverride>
+                                    <BoxContainer Orientation="Vertical" Margin="10 8">
+                                        <Label Text="{Loc 'nc-trauma-team-app'}" FontColorOverride="#B5FAFF" />
+                                        <Label Text="{Loc 'nc-trauma-team-tagline'}" FontColorOverride="#668B92" />
+                                    </BoxContainer>
+                                </PanelContainer>
+                            </ContainerButton>
                         </GridContainer>
                     </BoxContainer>
                 </ScrollContainer>

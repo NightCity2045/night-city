@@ -17,6 +17,8 @@ namespace Content.Client._NC.Agent;
 [GenerateTypedNameReferences]
 public partial class NCAgentWindow : BaseWindow
 {
+    private const float TitleBarHeight = 38f;
+
     public NCAgentWindow()
     {
         RobustXamlLoader.Load(this);
@@ -26,6 +28,8 @@ public partial class NCAgentWindow : BaseWindow
 
     protected override DragMode GetDragModeFor(Vector2 relativeMousePos)
     {
-        return DragMode.Move;
+        // Only the hardware header drags the window. Treating the whole Agent as a drag surface
+        // steals click releases from application controls, especially buttons inside shard lists.
+        return relativeMousePos.Y <= TitleBarHeight ? DragMode.Move : DragMode.None;
     }
 }

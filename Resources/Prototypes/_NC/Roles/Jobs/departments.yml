@@ -41,7 +41,7 @@
   ncSelectable: true
   ncEntryJob: TraumaTeamOperative
   ncIcon: NCDepartmentIconTraumaTeam
-  ncPersonnelManagers: [ TraumaTeamOperative ]
+  ncPersonnelManagers: []
   ncPositionLimits:
     TraumaTeamOperative: 10
     TraumaTeamParamedic: 20

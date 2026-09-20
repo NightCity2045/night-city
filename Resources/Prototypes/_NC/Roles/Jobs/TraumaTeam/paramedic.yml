@@ -32,3 +32,5 @@
   storage:
     back:
     - MedTekCartridge
+    - NCTraumaResponseCartridge
+    - NCTraumaTrackingImplanter

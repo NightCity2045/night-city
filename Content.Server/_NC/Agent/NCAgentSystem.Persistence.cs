@@ -50,6 +50,7 @@ public sealed partial class NCAgentSystem
     private readonly Dictionary<(EntityUid Agent, EntityUid User), AgentView> _views = [];
     private readonly Dictionary<NCCharacterId, EntityUid> _boundAgents = [];
     private readonly HashSet<(EntityUid Agent, EntityUid User)> _processing = [];
+    private TimeSpan _nextMapTrackingUpdate;
 
     private NCAgentConfigurationPrototype Configuration => _prototypes.Index(DefaultConfiguration);
 
@@ -159,6 +160,8 @@ public sealed partial class NCAgentSystem
             SendMissionSnapshot(uid, user);
         if (args.App == NCAgentApp.Contracts)
             _ = SendContractsAsync(uid, user);
+        if (args.App == NCAgentApp.TraumaTeam)
+            _ = SendTraumaTeamSnapshotAsync(uid, user);
         await SendViewAsync(uid, user);
     }
 
@@ -174,6 +177,7 @@ public sealed partial class NCAgentSystem
                 string.Empty,
                 0,
                 default,
+                [],
                 [],
                 "CITY GRID SIGNAL UNAVAILABLE"), user);
             return;
@@ -239,7 +243,34 @@ public sealed partial class NCAgentSystem
             coordinates.Z,
             coordinates.Position,
             features,
+            BuildMapMarkers(user),
             features.Count == 0 ? "SEMANTIC CARTOGRAPHY UNAVAILABLE // GRID ONLY" : string.Empty), user);
+    }
+
+    private List<NCAgentMapMarker> BuildMapMarkers(EntityUid user)
+    {
+        var markers = new List<NCAgentMapMarker>(1);
+        if (TryGetCharacterId(user, out var responder) && _traumaResponse.TryGetMapMarker(responder, out var marker))
+            markers.Add(marker);
+        return markers;
+    }
+
+    private void UpdateMapTracking()
+    {
+        if (_gameTiming.CurTime < _nextMapTrackingUpdate)
+            return;
+
+        _nextMapTrackingUpdate = _gameTiming.CurTime + Configuration.MapTrackingUpdateInterval;
+        foreach (var (key, view) in _views.ToArray())
+        {
+            if (view.ActiveApp != NCAgentApp.Map || Deleted(key.Agent) || Deleted(key.User) ||
+                !IsViewAuthenticated(key.Agent, key.User, view) ||
+                !_mapCoordinates.TryGetCoordinates(key.User, out var coordinates))
+                continue;
+
+            _ui.ServerSendUiMessage(key.Agent, PdaUiKey.Key, new NCAgentMapTrackingUpdateMessage(
+                coordinates.NetworkId.ToString(), coordinates.Z, coordinates.Position, BuildMapMarkers(key.User)), key.User);
+        }
     }
 
     private static bool TryGetPublicMapKind(NCZoneContextSlot contextSlot, out NCAgentMapFeatureKind kind)

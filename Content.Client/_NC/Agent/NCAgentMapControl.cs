@@ -35,6 +35,8 @@ public sealed partial class NCAgentMapControl : LayoutContainer
     private static readonly Color FineGridColor = Color.FromHex("#15323A22");
     private static readonly Color BorderColor = Color.FromHex("#2AC9BEA0");
     private static readonly Color SignalColor = Color.FromHex("#62FFF1");
+    private static readonly Color TraumaLiveColor = Color.FromHex("#FF5A72");
+    private static readonly Color TraumaLastKnownColor = Color.FromHex("#FFCF66");
     private static readonly Color ScanColor = Color.FromHex("#42E9DC20");
     private static readonly Color DistrictFill = Color.FromHex("#123C4538");
     private static readonly Color DistrictLine = Color.FromHex("#38B9B0A0");
@@ -64,6 +66,7 @@ public sealed partial class NCAgentMapControl : LayoutContainer
     private readonly Label _noticeLabel;
     private readonly Button _labelsButton;
     private readonly List<MapFeature> _features = [];
+    private readonly List<NCAgentMapMarker> _markers = [];
     private readonly HashSet<string> _drawnLabels = [];
     private readonly List<UIBox2> _labelRects = [];
     private readonly List<ArchitectureChunk> _architecture = [];
@@ -72,6 +75,8 @@ public sealed partial class NCAgentMapControl : LayoutContainer
     private int _navMapSignature = int.MinValue;
     private float _architectureSignatureTimer;
     private Vector2 _userPosition;
+    private string _networkId = string.Empty;
+    private int _z;
     private Vector2 _architectureBoundsMin;
     private Vector2 _architectureBoundsMax;
     private Vector2 _boundsMin;
@@ -146,8 +151,12 @@ public sealed partial class NCAgentMapControl : LayoutContainer
     public void SetMapData(NCAgentMapUpdateMessage update)
     {
         _features.Clear();
+        _markers.Clear();
         _userPosition = update.UserPosition;
+        _networkId = update.NetworkId;
+        _z = update.Z;
         _serverNotice = update.Notice;
+        _markers.AddRange(update.Markers);
 
         foreach (var source in update.Features)
         {
@@ -168,6 +177,24 @@ public sealed partial class NCAgentMapControl : LayoutContainer
             : $"CITY GRID // {network} // Z {update.Z:+0;-0;0}";
         _coordinateLabel.Text = $"X {_userPosition.X:0.0} // Y {_userPosition.Y:0.0} // Z {update.Z:+0;-0;0}";
         RefreshNotice();
+    }
+
+    /// <summary>
+    /// Updates moving markers without rebuilding static city geometry or resetting zoom and pan.
+    /// </summary>
+    public void SetTrackingData(NCAgentMapTrackingUpdateMessage update)
+    {
+        _userPosition = update.UserPosition;
+        _networkId = update.NetworkId;
+        _z = update.Z;
+        _markers.Clear();
+        _markers.AddRange(update.Markers);
+
+        var network = update.NetworkId.Length > 8 ? update.NetworkId[..8].ToUpperInvariant() : update.NetworkId.ToUpperInvariant();
+        _networkLabel.Text = string.IsNullOrEmpty(network)
+            ? "CITY GRID // OFFLINE"
+            : $"CITY GRID // {network} // Z {_z:+0;-0;0}";
+        _coordinateLabel.Text = $"X {_userPosition.X:0.0} // Y {_userPosition.Y:0.0} // Z {_z:+0;-0;0}";
     }
 
     protected override void KeyBindDown(GUIBoundKeyEventArgs args)
@@ -262,6 +289,7 @@ public sealed partial class NCAgentMapControl : LayoutContainer
             DrawLabels(handle, lod);
 
         DrawUserMarker(handle);
+        DrawOperationalMarkers(handle);
         DrawSignalOverlay(handle);
     }
 
@@ -893,6 +921,27 @@ public sealed partial class NCAgentMapControl : LayoutContainer
         handle.DrawLine(marker + new Vector2(7f, 0f), marker + new Vector2(13f, 0f), SignalColor.WithAlpha(0.7f));
         handle.DrawLine(marker - new Vector2(0f, 13f), marker - new Vector2(0f, 7f), SignalColor.WithAlpha(0.7f));
         handle.DrawLine(marker + new Vector2(0f, 7f), marker + new Vector2(0f, 13f), SignalColor.WithAlpha(0.7f));
+    }
+
+    private void DrawOperationalMarkers(DrawingHandleScreen handle)
+    {
+        foreach (var tracked in _markers)
+        {
+            if (tracked.Z != _z || !string.Equals(tracked.NetworkId, _networkId, StringComparison.Ordinal))
+                continue;
+
+            var marker = MapToScreen(tracked.Position);
+            if (!IsInCanvas(marker))
+                continue;
+
+            var color = tracked.Live ? TraumaLiveColor : TraumaLastKnownColor;
+            var pulse = (float) (_timing.RealTime.TotalSeconds % 1.2d / 1.2d);
+            handle.DrawCircle(marker, 8f + pulse * 10f, color.WithAlpha((1f - pulse) * 0.18f));
+            handle.DrawCircle(marker, 6f, color.WithAlpha(0.35f));
+            handle.DrawCircle(marker, 3f, color);
+            var suffix = tracked.Live ? " // LIVE" : " // LAST KNOWN";
+            handle.DrawString(_smallFont, marker + new Vector2(9f, -7f), tracked.Label.ToUpperInvariant() + suffix, color);
+        }
     }
 
     private void DrawSignalOverlay(DrawingHandleScreen handle)

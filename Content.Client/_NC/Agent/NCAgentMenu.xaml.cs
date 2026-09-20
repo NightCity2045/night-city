@@ -137,6 +137,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     private int _currentView;
     private NCAgentUpdateMessage? _agentData;
     private NCAgentMapUpdateMessage? _mapData;
+    private NCAgentMapControl? _mapControl;
     private NCAgentCityUpdateMessage? _cityData;
     private EntityUid? _mapGridUid;
     private int _shardUsedMemory;
@@ -217,6 +218,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         CityButton.OnPressed += _ => OpenAgentApp(NCAgentApp.City, "CITY SERVICES");
         MissionsButton.OnPressed += _ => OpenAgentApp(NCAgentApp.Missions, Loc.GetString("nc-agent-missions-title"));
         ContractsButton.OnPressed += _ => OpenAgentApp(NCAgentApp.Contracts, Loc.GetString("nc-contract-app"));
+        TraumaTeamButton.OnPressed += _ => OpenAgentApp(NCAgentApp.TraumaTeam, Loc.GetString("nc-trauma-team-app"));
         ShardsButton.OnPressed += _ => ToProgramList();
         EjectShardButton.OnPressed += _ =>
         {
@@ -563,6 +565,17 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             RenderAgentApp(NCAgentApp.Map);
     }
 
+    public void UpdateMapTrackingData(NCAgentMapTrackingUpdateMessage update)
+    {
+        if (_mapData is { } mapData)
+        {
+            _mapData = new NCAgentMapUpdateMessage(update.NetworkId, update.Z, update.UserPosition,
+                mapData.Features, update.Markers, mapData.Notice);
+        }
+
+        _mapControl?.SetTrackingData(update);
+    }
+
     public void UpdateCityData(NCAgentCityUpdateMessage update)
     {
         _cityData = update;
@@ -576,6 +589,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     public void SetMapSource(EntityUid? gridUid)
     {
         _mapGridUid = gridUid;
+        _mapControl?.SetMapSource(gridUid);
     }
 
     private void RenderAgentApp(NCAgentApp app)
@@ -584,6 +598,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             return;
 
         BuiltInContent.RemoveAllChildren();
+        _mapControl = null;
         BuiltInTitle.Text = AppTitle(app);
 
         if (!string.IsNullOrWhiteSpace(data.Notice))
@@ -614,6 +629,9 @@ public sealed partial class NCAgentMenu : NCAgentWindow
                 break;
             case NCAgentApp.Contracts:
                 BuildContracts();
+                break;
+            case NCAgentApp.TraumaTeam:
+                BuildTraumaTeam();
                 break;
             default:
                 BuiltInContent.AddChild(CreateStatusLabel("SELECT AN APPLICATION", "#77FFF2"));
@@ -1191,14 +1209,14 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             return;
         }
 
-        var map = new NCAgentMapControl
+        _mapControl = new NCAgentMapControl
         {
             HorizontalExpand = true,
             VerticalExpand = true,
         };
-        map.SetMapSource(_mapGridUid);
-        map.SetMapData(_mapData);
-        BuiltInContent.AddChild(map);
+        _mapControl.SetMapSource(_mapGridUid);
+        _mapControl.SetMapData(_mapData);
+        BuiltInContent.AddChild(_mapControl);
     }
 
     /// <summary>
@@ -1674,6 +1692,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             NCAgentApp.City => "CITY SERVICES",
             NCAgentApp.Missions => Loc.GetString("nc-agent-missions-title"),
             NCAgentApp.Contracts => Loc.GetString("nc-contract-app"),
+            NCAgentApp.TraumaTeam => Loc.GetString("nc-trauma-team-app"),
             _ => "AGENT",
         };
     }
