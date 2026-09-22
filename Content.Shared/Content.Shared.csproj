@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Content.Shared.Database\Content.Shared.Database.csproj" />
+    <ProjectReference Include="../AstraGraph/AstraGraph.Robust.Shared/AstraGraph.Robust.Shared.csproj" />
   </ItemGroup>
 
   <Import Project="..\RobustToolbox\MSBuild\Robust.Properties.targets" />
