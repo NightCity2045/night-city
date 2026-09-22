@@ -2,3 +2,7 @@
 	path = RobustToolbox
 	url = https://github.com/space-wizards/RobustToolbox.git
 	branch = master
+[submodule "AstraGraph"]
+	path = AstraGraph
+	url = https://github.com/AstroNRE/AstraGraph.git
+	branch = main
