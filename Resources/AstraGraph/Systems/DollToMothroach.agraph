@@ -1,0 +1,49 @@
+{
+  "formatVersion": "1.0",
+  "id": "d0110000-0000-4000-8000-000000000001",
+  "name": "DollToMothroach",
+  "kind": "System",
+  "side": "Server",
+  "nodes": [
+    {
+      "id": "d0110000-0000-4000-8000-000000000002",
+      "name": "OnInteract",
+      "nodeType": "Event.Interact",
+      "pins": [
+        {
+          "id": "d0110000-0000-4000-8000-000000000003",
+          "name": "Out",
+          "direction": "Output",
+          "kind": "Execution",
+          "dataType": ""
+        }
+      ],
+      "properties": {
+        "eventType": "Content.Shared.Interaction.InteractHandEvent"
+      }
+    },
+    {
+      "id": "d0110000-0000-4000-8000-000000000004",
+      "name": "Wait",
+      "nodeType": "Flow.DoAfter",
+      "pins": [
+        {
+          "id": "d0110000-0000-4000-8000-000000000005",
+          "name": "In",
+          "direction": "Input",
+          "kind": "Execution",
+          "dataType": ""
+        }
+      ],
+      "properties": {}
+    }
+  ],
+  "connections": [
+    {
+      "fromNode": "d0110000-0000-4000-8000-000000000002",
+      "fromPin": "d0110000-0000-4000-8000-000000000003",
+      "toNode": "d0110000-0000-4000-8000-000000000004",
+      "toPin": "d0110000-0000-4000-8000-000000000005"
+    }
+  ]
+}

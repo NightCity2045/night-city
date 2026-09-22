@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Content.Shared\Content.Shared.csproj" />
     <ProjectReference Include="../AstraGraph/AstraGraph.Robust.Client/AstraGraph.Robust.Client.csproj" />
+    <ProjectReference Include="../AstraGraph/AstraGraph.Editor.Protocol/AstraGraph.Editor.Protocol.csproj" />
   </ItemGroup>
   <Import Project="..\RobustToolbox\MSBuild\Robust.Properties.targets" />
   <Import Project="..\RobustToolbox\MSBuild\XamlIL.targets" />

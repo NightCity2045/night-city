@@ -1,3 +1,4 @@
+using AstraGraph.Robust.Client;
 using Content.Client.Administration.Managers;
 using Content.Client.Changelog;
 using Content.Client.Chat.Managers;
@@ -25,6 +26,7 @@ using Content.Client.Stylesheets;
 using Content.Client.UserInterface;
 using Content.Client.Viewport;
 using Content.Client.Voting;
+using Content.Shared._NC.AstraGraph;
 using Content.Shared.Ame.Components;
 using Content.Shared.FeedbackSystem;
 using Content.Shared.Gravity;
@@ -96,6 +98,13 @@ namespace Content.Client.Entry
         {
             Dependencies.BuildGraph();
             Dependencies.InjectDependencies(this);
+
+            // NC-Edit-Start
+            AstraGraphAssemblyLoad.Load(
+                Dependencies,
+                typeof(ClientAstraGraphSystem).Assembly,
+                typeof(ClientAstraGraphSystem).BaseType?.Assembly);
+            // NC-Edit-End
 
             _contentLoc.Initialize();
             _componentFactory.DoAutoRegistrations();

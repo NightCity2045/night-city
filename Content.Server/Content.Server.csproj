@@ -21,6 +21,10 @@
     <ProjectReference Include="..\Content.Shared.Database\Content.Shared.Database.csproj" />
     <ProjectReference Include="..\Content.Shared\Content.Shared.csproj" />
     <ProjectReference Include="../AstraGraph/AstraGraph.Robust.Server/AstraGraph.Robust.Server.csproj" />
+    <ProjectReference Include="../AstraGraph/AstraGraph.HotReload/AstraGraph.HotReload.csproj" />
+    <ProjectReference Include="../AstraGraph/AstraGraph.Persistence/AstraGraph.Persistence.csproj" />
+    <ProjectReference Include="../AstraGraph/AstraGraph.Runtime/AstraGraph.Runtime.csproj" />
+    <ProjectReference Include="../AstraGraph/AstraGraph.Editor.Protocol/AstraGraph.Editor.Protocol.csproj" />
     <Content Include="server_config.toml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

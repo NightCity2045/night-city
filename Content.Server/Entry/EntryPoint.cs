@@ -1,3 +1,4 @@
+using AstraGraph.Robust.Server;
 using Content.Server.Acz;
 using Content.Server.Administration;
 using Content.Server.Administration.Logs;
@@ -23,6 +24,7 @@ using Content.Server.Preferences.Managers;
 using Content.Server.ServerInfo;
 using Content.Server.ServerUpdates;
 using Content.Server.Voting.Managers;
+using Content.Shared._NC.AstraGraph;
 using Content.Shared.CCVar;
 using Content.Shared.Localizations;
 using Robust.Server;
@@ -96,6 +98,13 @@ namespace Content.Server.Entry
             base.Init();
             Dependencies.BuildGraph();
             Dependencies.InjectDependencies(this);
+
+            // NC-Edit-Start
+            AstraGraphAssemblyLoad.Load(
+                Dependencies,
+                typeof(ServerAstraGraphSystem).Assembly,
+                typeof(ServerAstraGraphSystem).BaseType?.Assembly);
+            // NC-Edit-End
 
             LoadConfigPresets(_cfg, _res, _log.GetSawmill("configpreset"));
 
