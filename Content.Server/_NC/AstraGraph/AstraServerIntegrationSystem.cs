@@ -4,14 +4,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
-using AstraGraph.Editor.Protocol;
-using AstraGraph.Robust.Server;
 using Content.Server.Administration;
 using Content.Server.Administration.Managers;
 using Content.Shared._NC.AstraGraph;
-using Content.Shared._NC.AstraGraph.Bindings;
 using Robust.Server.Player;
 using Robust.Shared.Asynchronous;
 using Robust.Shared.Network;
@@ -27,7 +23,6 @@ public sealed partial class AstraServerIntegrationSystem : EntitySystem
     [Dependency] private IPlayerManager _players = default!;
     [Dependency] private IServerNetManager _net = default!;
     [Dependency] private ITaskManager _tasks = default!;
-    [Dependency] private ServerAstraGraphSystem _astra = default!;
 
     private readonly Dictionary<NetUserId, INetChannel> _studioChannels = new();
 
@@ -37,8 +32,8 @@ public sealed partial class AstraServerIntegrationSystem : EntitySystem
         _net.RegisterNetMessage<MsgAstraStudioLaunch>(OnStudioLaunch);
         _net.RegisterNetMessage<MsgAstraAuthoring>(OnAuthoring);
         _admins.OnPermsChanged += OnPermsChanged;
-        IndexContentBindings();
-        ReportStartup();
+        AstraServerRuntime.IndexContentBindings();
+        Log.Info(AstraServerRuntime.StartupReport());
     }
 
     public override void Shutdown()
@@ -49,7 +44,7 @@ public sealed partial class AstraServerIntegrationSystem : EntitySystem
 
     private void OnPermsChanged(AdminPermsChangedEventArgs args)
     {
-        _astra.PermissionProvider.InvalidateSession(args.Player);
+        AstraServerRuntime.InvalidateSession(args.Player);
         if (args.Flags == null || (args.Flags.Value & Content.Shared.Administration.AdminFlags.AstraGraph) == 0)
             _studioChannels.Remove(args.Player.UserId);
     }
@@ -61,7 +56,7 @@ public sealed partial class AstraServerIntegrationSystem : EntitySystem
 
         var channel = message.MsgChannel;
         var session = _players.GetSessionByChannel(channel);
-        var token = _astra.AuthoringService.IssueLaunchToken(session);
+        var token = AstraServerRuntime.IssueLaunchToken(session);
         if (token != null)
             _studioChannels[session.UserId] = channel;
 
@@ -70,7 +65,7 @@ public sealed partial class AstraServerIntegrationSystem : EntitySystem
             RequestId = message.RequestId,
             IsResponse = true,
             Granted = token != null,
-            Token = token?.Token ?? string.Empty
+            Token = token ?? string.Empty
         }, channel);
     }
 
@@ -90,40 +85,24 @@ public sealed partial class AstraServerIntegrationSystem : EntitySystem
     {
         try
         {
-            var incoming = AstraAuthoringCodec.Deserialize(kind, payload);
-            if (incoming == null)
-            {
-                SendAuthoring(channel, requestId, new ErrorMsg
-                {
-                    Code = "unsupported_message",
-                    Detail = $"Message kind '{kind}' is not supported."
-                });
-                return;
-            }
-
-            var response = await _astra.AuthoringService.MessageHandler.HandleAsync(incoming, CancellationToken.None);
-            if (response != null)
-                SendAuthoring(channel, requestId, response);
+            var reply = await AstraServerRuntime.HandleAsync(kind, payload);
+            if (reply != null)
+                SendAuthoring(channel, requestId, reply.Value);
         }
         catch (Exception ex)
         {
             Log.Error($"AstraGraph authoring request failed: {ex.Message}");
-            SendAuthoring(channel, requestId, new ErrorMsg
-            {
-                Code = "internal_error",
-                Detail = "AstraGraph authoring request failed."
-            });
         }
     }
 
-    private void SendAuthoring(INetChannel channel, int requestId, AuthoringMessage message)
+    private void SendAuthoring(INetChannel channel, int requestId, AstraWireReply reply)
     {
         var outgoing = new MsgAstraAuthoring
         {
             RequestId = requestId,
             IsResponse = true,
-            Kind = message.Kind,
-            Payload = AstraAuthoringCodec.Serialize(message)
+            Kind = reply.Kind,
+            Payload = reply.Payload
         };
         _tasks.RunOnMainThread(() => _net.ServerSendMessage(outgoing, channel));
     }
@@ -137,33 +116,5 @@ public sealed partial class AstraServerIntegrationSystem : EntitySystem
         }
 
         return false;
-    }
-
-    private void IndexContentBindings()
-    {
-        _astra.Facade.Catalog.IndexAssembly(typeof(AstraContentBindings).Assembly, AstraContentBindings.IsIndexedType);
-    }
-
-    private void ReportStartup()
-    {
-        var discovered = _astra.BootstrapLoader.DiscoverAll();
-        var active = 0;
-        foreach (var graph in discovered)
-        {
-            if (_astra.Host.GetProgram(graph.Id) != null)
-                active++;
-        }
-
-        var bindings = 0;
-        foreach (var _ in _astra.Facade.Catalog.Search(string.Empty))
-            bindings++;
-
-        Log.Info(
-            "AstraGraph Night City host\n" +
-            $"Graphs discovered: {discovered.Count}\n" +
-            $"Graphs active: {active}\n" +
-            "Authoring: enabled\n" +
-            "DevHost: off\n" +
-            $"Binding catalog methods: {bindings}");
     }
 }

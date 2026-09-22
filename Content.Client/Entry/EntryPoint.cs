@@ -1,4 +1,4 @@
-using AstraGraph.Robust.Client;
+using Content.Client._NC.AstraGraph;
 using Content.Client.Administration.Managers;
 using Content.Client.Changelog;
 using Content.Client.Chat.Managers;
@@ -26,7 +26,6 @@ using Content.Client.Stylesheets;
 using Content.Client.UserInterface;
 using Content.Client.Viewport;
 using Content.Client.Voting;
-using Content.Shared._NC.AstraGraph;
 using Content.Shared.Ame.Components;
 using Content.Shared.FeedbackSystem;
 using Content.Shared.Gravity;
@@ -100,10 +99,7 @@ namespace Content.Client.Entry
             Dependencies.InjectDependencies(this);
 
             // NC-Edit-Start
-            AstraGraphAssemblyLoad.Load(
-                Dependencies,
-                typeof(ClientAstraGraphSystem).Assembly,
-                typeof(ClientAstraGraphSystem).BaseType?.Assembly);
+            AstraContentEntry.Load(Dependencies);
             // NC-Edit-End
 
             _contentLoc.Initialize();
@@ -140,6 +136,7 @@ namespace Content.Client.Entry
             _prototypeManager.RegisterIgnore("codewordGenerator");
             _prototypeManager.RegisterIgnore("codewordFaction");
 
+            AstraContentEntry.InstallSchemas(_componentFactory, Dependencies);
             _componentFactory.GenerateNetIds();
             _adminManager.Initialize();
             _screenshotHook.Initialize();

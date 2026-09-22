@@ -1,4 +1,3 @@
-using AstraGraph.HotReload;
 using Content.Server._NC.AstraGraph;
 using Content.Server.Administration;
 using Content.Server.Administration.Logs;
@@ -83,6 +82,7 @@ internal static class ServerContentIoC
         deps.Register<DiscordChatLink>();
         deps.Register<ServerFeedbackManager>();
         deps.Register<ISharedFeedbackManager, ServerFeedbackManager>();
-        deps.Register<IAstraServerHostConfiguration, NightCityAstraServerHostConfiguration>(); // NC
+        deps.Register<INightCityAdminFacts, NightCityAstraAdminDirectory>(); // NC
+        AstraContentEntry.Register(deps); // NC
     }
 }

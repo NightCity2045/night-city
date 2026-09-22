@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>NightCity.AstraHost.Server</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RobustToolbox\Robust.Shared\Robust.Shared.csproj" />
+    <ProjectReference Include="..\NightCity.AstraHost.Shared\NightCity.AstraHost.Shared.csproj" />
+    <ProjectReference Include="..\AstraGraph\AstraGraph.Robust.Server\AstraGraph.Robust.Server.csproj" />
+    <ProjectReference Include="..\AstraGraph\AstraGraph.Editor.Protocol\AstraGraph.Editor.Protocol.csproj" />
+  </ItemGroup>
+</Project>

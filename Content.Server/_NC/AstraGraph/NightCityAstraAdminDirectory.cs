@@ -3,7 +3,6 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System;
-using AstraGraph.Runtime.Security;
 using Content.Server.Administration.Managers;
 using Content.Shared._NC.AstraGraph;
 using Content.Shared.Administration;
@@ -15,7 +14,7 @@ namespace Content.Server._NC.AstraGraph;
 /// <summary>
 /// Reads admin flags from <see cref="IAdminManager"/>. AstraGraph does not reflect over the session.
 /// </summary>
-public sealed class NightCityAstraAdminDirectory : IAstraAdminDirectory
+public sealed class NightCityAstraAdminDirectory : INightCityAdminFacts
 {
     private readonly IAdminManager _admins;
     private readonly ISharedPlayerManager _players;

@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-using System;
-using System.Collections.Generic;
 using System.Reflection;
 using Robust.Shared.IoC;
 using Robust.Shared.Reflection;
@@ -24,7 +22,7 @@ public static class AstraGraphAssemblyLoad
         var pending = new List<Assembly>();
         foreach (var assembly in assemblies)
         {
-            if (assembly == null || !loaded.Add(assembly))
+            if (assembly is null || !loaded.Add(assembly))
                 continue;
 
             pending.Add(assembly);

@@ -16,7 +16,8 @@ public static class AstraContentBindings
 
     public static bool IsIndexedType(Type type)
     {
-        ArgumentNullException.ThrowIfNull(type);
+        if (type is null)
+            throw new ArgumentException("Type is required.", nameof(type));
         return type.Namespace != null
                && (type.Namespace == IndexedNamespace
                    || type.Namespace.StartsWith(IndexedNamespace + ".", StringComparison.Ordinal));

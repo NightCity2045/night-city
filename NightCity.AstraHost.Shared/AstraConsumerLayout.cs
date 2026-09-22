@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace Content.Shared._NC.AstraGraph;
@@ -20,7 +18,7 @@ public static class AstraConsumerLayout
 
     public static bool TryLocate(out string consumerRoot)
     {
-        return TryLocate(new[] { Directory.GetCurrentDirectory(), AppContext.BaseDirectory }, out consumerRoot);
+        return TryLocate([Directory.GetCurrentDirectory(), AppContext.BaseDirectory], out consumerRoot);
     }
 
     public static bool TryLocate(IEnumerable<string> startPaths, out string consumerRoot)

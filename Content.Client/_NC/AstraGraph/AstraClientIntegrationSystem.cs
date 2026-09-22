@@ -6,8 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using AstraGraph.Editor.Protocol;
-using AstraGraph.Robust.Client;
 using Content.Client.Administration.Managers;
 using Content.Shared._NC.AstraGraph;
 using Content.Shared.Administration;
@@ -22,7 +20,7 @@ namespace Content.Client._NC.AstraGraph;
 /// <summary>
 /// Opens Astra Studio through the local browser bridge and forwards authoring to the server.
 /// </summary>
-public sealed partial class AstraClientIntegrationSystem : EntitySystem
+public sealed partial class AstraClientIntegrationSystem : EntitySystem, IAstraAuthoringTransport
 {
     private static readonly TimeSpan AuthoringTimeout = TimeSpan.FromSeconds(30);
 
@@ -30,11 +28,9 @@ public sealed partial class AstraClientIntegrationSystem : EntitySystem
     [Dependency] private IClientAdminManager _admin = default!;
     [Dependency] private IPlayerManager _players = default!;
     [Dependency] private ITaskManager _tasks = default!;
-    [Dependency] private ClientAstraGraphSystem _astra = default!;
 
     private readonly Dictionary<int, PendingLaunch> _launches = new();
     private readonly Dictionary<int, TaskCompletionSource<MsgAstraAuthoring>> _authoring = new();
-    private AstraStudioServerProxy? _proxy;
     private int _nextRequest = 1;
 
     public override void Initialize()
@@ -65,17 +61,18 @@ public sealed partial class AstraClientIntegrationSystem : EntitySystem
         return true;
     }
 
-    public Task<AuthoringMessage?> SendAuthoringAsync(AuthoringMessage message, CancellationToken cancellation)
+    public Task<AstraWireReply?> SendAsync(string kind, byte[] payload, CancellationToken cancellation)
     {
-        var done = new TaskCompletionSource<AuthoringMessage?>(TaskCreationOptions.RunContinuationsAsynchronously);
-        _tasks.RunOnMainThread(() => _ = SendOnMainThreadAsync(message, cancellation, done));
+        var done = new TaskCompletionSource<AstraWireReply?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _tasks.RunOnMainThread(() => _ = SendOnMainThreadAsync(kind, payload, cancellation, done));
         return done.Task;
     }
 
     private async Task SendOnMainThreadAsync(
-        AuthoringMessage message,
+        string kind,
+        byte[] payload,
         CancellationToken cancellation,
-        TaskCompletionSource<AuthoringMessage?> done)
+        TaskCompletionSource<AstraWireReply?> done)
     {
         var requestId = _nextRequest++;
         var pending = new TaskCompletionSource<MsgAstraAuthoring>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -83,8 +80,8 @@ public sealed partial class AstraClientIntegrationSystem : EntitySystem
         _net.ClientSendMessage(new MsgAstraAuthoring
         {
             RequestId = requestId,
-            Kind = message.Kind,
-            Payload = AstraAuthoringCodec.Serialize(message)
+            Kind = kind,
+            Payload = payload
         });
 
         using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
@@ -93,7 +90,7 @@ public sealed partial class AstraClientIntegrationSystem : EntitySystem
         try
         {
             var response = await pending.Task;
-            done.TrySetResult(AstraAuthoringCodec.Deserialize(response.Kind, response.Payload));
+            done.TrySetResult(new AstraWireReply(response.Kind, response.Payload));
         }
         catch (OperationCanceledException)
         {
@@ -120,22 +117,14 @@ public sealed partial class AstraClientIntegrationSystem : EntitySystem
             return;
         }
 
-        _proxy ??= new AstraStudioServerProxy(this);
-        _proxy.Token = message.Token;
-        _ = OpenStudioAsync(pending.Shell);
+        _ = OpenStudioAsync(pending.Shell, message.Token);
     }
 
-    private async Task OpenStudioAsync(IConsoleShell shell)
+    private async Task OpenStudioAsync(IConsoleShell shell, string token)
     {
         try
         {
-            if (_proxy == null)
-            {
-                shell.WriteError(Loc.GetString("nc-astra-studio-unavailable"));
-                return;
-            }
-
-            await _astra.LaunchStudioAsync(_proxy);
+            await AstraStudioBridge.OpenAsync(token, this);
             shell.WriteLine(Loc.GetString("nc-astra-studio-opened"));
         }
         catch (Exception ex)
@@ -161,38 +150,5 @@ public sealed partial class AstraClientIntegrationSystem : EntitySystem
         }
 
         public IConsoleShell Shell { get; }
-    }
-}
-
-/// <summary>
-/// Local bridge handler. The Studio page does not receive the server token in its launch URL,
-/// so an empty handshake token is replaced with the token the server just issued.
-/// </summary>
-public sealed class AstraStudioServerProxy : IAuthoringMessageHandler
-{
-    private readonly AstraClientIntegrationSystem _client;
-
-    public AstraStudioServerProxy(AstraClientIntegrationSystem client)
-    {
-        _client = client;
-    }
-
-    public string Token { get; set; } = string.Empty;
-
-    public Task<AuthoringMessage?> HandleAsync(AuthoringMessage message, CancellationToken cancellation)
-    {
-        if (message is AuthHandshakeRequestMsg handshake && string.IsNullOrEmpty(handshake.AuthorToken))
-        {
-            message = new AuthHandshakeRequestMsg
-            {
-                MessageId = handshake.MessageId,
-                Timestamp = handshake.Timestamp,
-                ClientVersion = handshake.ClientVersion,
-                AuthorName = handshake.AuthorName,
-                AuthorToken = Token
-            };
-        }
-
-        return _client.SendAuthoringAsync(message, cancellation);
     }
 }
