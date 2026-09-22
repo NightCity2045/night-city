@@ -63,7 +63,7 @@ public sealed partial class AstraClientIntegrationSystem : EntitySystem, IAstraA
 
     public Task<AstraWireReply?> SendAsync(string kind, byte[] payload, CancellationToken cancellation)
     {
-        var done = new TaskCompletionSource<AstraWireReply?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var done = new TaskCompletionSource<AstraWireReply?>();
         _tasks.RunOnMainThread(() => _ = SendOnMainThreadAsync(kind, payload, cancellation, done));
         return done.Task;
     }
@@ -75,7 +75,7 @@ public sealed partial class AstraClientIntegrationSystem : EntitySystem, IAstraA
         TaskCompletionSource<AstraWireReply?> done)
     {
         var requestId = _nextRequest++;
-        var pending = new TaskCompletionSource<MsgAstraAuthoring>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var pending = new TaskCompletionSource<MsgAstraAuthoring>();
         _authoring[requestId] = pending;
         _net.ClientSendMessage(new MsgAstraAuthoring
         {

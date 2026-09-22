@@ -32,6 +32,11 @@ public sealed partial class AstraServerIntegrationSystem : EntitySystem
         _net.RegisterNetMessage<MsgAstraStudioLaunch>(OnStudioLaunch);
         _net.RegisterNetMessage<MsgAstraAuthoring>(OnAuthoring);
         _admins.OnPermsChanged += OnPermsChanged;
+        AstraServerRuntime.WhenHostReady(FinishStartup);
+    }
+
+    private void FinishStartup()
+    {
         AstraServerRuntime.IndexContentBindings();
         Log.Info(AstraServerRuntime.StartupReport());
     }

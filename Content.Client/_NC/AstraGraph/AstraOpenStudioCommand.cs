@@ -6,7 +6,7 @@ using Robust.Shared.Console;
 
 namespace Content.Client._NC.AstraGraph;
 
-public sealed partial class AstraOpenStudioCommand : LocalizedCommands
+public sealed partial class AstraOpenStudioCommand : LocalizedEntityCommands
 {
     [Dependency] private AstraClientIntegrationSystem _astra = default!;
 

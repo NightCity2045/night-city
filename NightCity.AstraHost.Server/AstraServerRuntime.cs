@@ -53,13 +53,36 @@ public static class AstraServerRuntime
         }
     }
 
+    public static void WhenHostReady(Action ready)
+    {
+        var manager = IoCManager.Resolve<IEntitySystemManager>();
+        if (TryGetReady(out _))
+        {
+            ready();
+            return;
+        }
+
+        void OnLoaded(object? sender, SystemChangedArgs args)
+        {
+            if (args.System is not ServerAstraGraphSystem)
+                return;
+
+            manager.SystemLoaded -= OnLoaded;
+            ready();
+        }
+
+        manager.SystemLoaded += OnLoaded;
+    }
+
     public static void IndexContentBindings()
     {
+        if (!TryGetReady(out var system))
+            return;
+
         var shared = FindAssembly("Content.Shared");
         if (shared == null)
             return;
 
-        var system = IoCManager.Resolve<IEntitySystemManager>().GetEntitySystem<ServerAstraGraphSystem>();
         system.Facade.Catalog.IndexAssembly(shared, IsBindingsType);
     }
 
@@ -98,6 +121,18 @@ public static class AstraServerRuntime
         return type.Namespace != null
                && (type.Namespace == BindingsNamespace
                    || type.Namespace.StartsWith(BindingsNamespace + ".", StringComparison.Ordinal));
+    }
+
+    private static bool TryGetReady(out ServerAstraGraphSystem system)
+    {
+        if (!IoCManager.Resolve<IEntitySystemManager>().TryGetEntitySystem(out system!)
+            || system.Facade == null)
+        {
+            system = null!;
+            return false;
+        }
+
+        return true;
     }
 
     private static Assembly? FindAssembly(string name)
