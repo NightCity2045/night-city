@@ -33,13 +33,6 @@ public sealed partial class AstraClientIntegrationSystem : EntitySystem, IAstraA
     private readonly Dictionary<int, TaskCompletionSource<MsgAstraAuthoring>> _authoring = new();
     private int _nextRequest = 1;
 
-    public override void Initialize()
-    {
-        base.Initialize();
-        _net.RegisterNetMessage<MsgAstraStudioLaunch>(OnStudioLaunch);
-        _net.RegisterNetMessage<MsgAstraAuthoring>(OnAuthoring);
-    }
-
     public bool TryOpenStudio(IConsoleShell shell)
     {
         if (!_admin.HasFlag(AdminFlags.AstraGraph))
@@ -106,7 +99,7 @@ public sealed partial class AstraClientIntegrationSystem : EntitySystem, IAstraA
         }
     }
 
-    private void OnStudioLaunch(MsgAstraStudioLaunch message)
+    internal void OnStudioLaunch(MsgAstraStudioLaunch message)
     {
         if (!message.IsResponse || !_launches.Remove(message.RequestId, out var pending))
             return;
@@ -133,7 +126,7 @@ public sealed partial class AstraClientIntegrationSystem : EntitySystem, IAstraA
         }
     }
 
-    private void OnAuthoring(MsgAstraAuthoring message)
+    internal void OnAuthoring(MsgAstraAuthoring message)
     {
         if (!message.IsResponse)
             return;

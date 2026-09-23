@@ -3,10 +3,10 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 - type: entity
-  parent: KitchenKnife
+  parent: BaseBallBat
   id: WeaponMothroach
-  name: mothroach knife
-  description: A knife that replaces whatever it hits with mothroaches.
+  name: mothroach bat
+  description: A bat that deals its normal hit and also spawns mothroaches on the target.
   components:
   - type: MothroachStrike
     spawn: MobMothroach

@@ -81,6 +81,7 @@ namespace Content.Client.Entry
         [Dependency] private IEntitySystemManager _entitySystemManager = default!;
         [Dependency] private ClientsidePlaytimeTrackingManager _clientsidePlaytimeManager = default!;
         [Dependency] private ClientFeedbackManager _feedbackManager = null!;
+        [Dependency] private AstraClientNet _astraNet = default!;
 
         public override void PreInit()
         {
@@ -180,6 +181,7 @@ namespace Content.Client.Entry
             _documentParsingManager.Initialize();
             _titleWindowManager.Initialize();
             _feedbackManager.Initialize();
+            _astraNet.Initialize();
 
             _baseClient.RunLevelChanged += (_, args) =>
             {
