@@ -9,5 +9,5 @@
   description: A bat that deals its normal hit and also spawns mothroaches on the target.
   components:
   - type: MothroachStrike
-    spawn: MobMothroach
-    count: 3
+    # spawn and count come from the WeaponMothroach graph defaults.
+    # Write them here to override the graph for this entity.

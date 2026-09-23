@@ -168,7 +168,7 @@
           "id": "54c43d21-c6ae-41bc-bc99-93d5180e6f4e",
           "name": "count",
           "typeName": "int32",
-          "defaultValue": "1"
+          "defaultValue": "3"
         }
       ],
       "isComponent": true
