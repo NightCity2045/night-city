@@ -164,7 +164,24 @@ public sealed class AstraHtmlGameWindow
 
     private static string Prepare(string html) => html
         .Replace("astra-bui://action", ActionPrefix, StringComparison.Ordinal)
-        .Replace("astra-ui://texture", TexturePrefix, StringComparison.Ordinal);
+        .Replace("astra-ui://texture", TexturePrefix, StringComparison.Ordinal)
+        .Replace("</head>", ButtonFeedback + "</head>", StringComparison.Ordinal);
+
+    private const string ButtonFeedback =
+        "<style>" +
+        "button{cursor:pointer}" +
+        "button:hover{background:#556070;border-color:#d7deea}" +
+        "button:active,button.is-pressed{background:#243044;border-color:#edbc63}" +
+        "button:disabled,button:disabled:hover{background:#3d4454;border-color:#6d7690;cursor:default}" +
+        "</style>" +
+        "<script>" +
+        "document.addEventListener(\"click\",function(event){" +
+        "var node=event.target&&event.target.closest?event.target.closest(\"button[data-astra-action]\"):null;" +
+        "if(!node)return;" +
+        "node.classList.add(\"is-pressed\");" +
+        "window.setTimeout(function(){node.classList.remove(\"is-pressed\")},280);" +
+        "},true);" +
+        "</script>";
 
     private static void RunOnUi(Action action)
     {

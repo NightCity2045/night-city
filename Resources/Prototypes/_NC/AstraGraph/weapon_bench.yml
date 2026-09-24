@@ -75,6 +75,10 @@
     - 0,0,7,3
     maxItemSize: Normal
     openOnActivate: false
+    clickInsert: false
+    blacklist:
+      components:
+      - WeaponAssembly
   - type: ContainerContainer
     containers:
       gun: !type:ContainerSlot
