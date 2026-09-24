@@ -51,6 +51,37 @@ public sealed class AstraGraphHostTests
     }
 
     [Test]
+    public void HtmlDocumentPath_UsesTheDocumentName()
+    {
+        Assert.That(AstraHtmlDocumentPaths.FileName("Vehicle Maintenance"), Is.EqualTo("Vehicle Maintenance"));
+        Assert.That(AstraHtmlDocumentPaths.FileName("../secret"), Is.Not.EqualTo("../secret"));
+        Assert.That(AstraHtmlDocumentPaths.ResourcePath("Panel"), Is.EqualTo("/AstraGraph/Ui/Panel.json"));
+    }
+
+    [Test]
+    public void AuthoringCodec_RoundtripsUiPreview()
+    {
+        var request = new UiPreviewRequestMsg
+        {
+            SessionId = "studio",
+            Document = new UiDocumentDto(
+                "ui-1",
+                "Panel",
+                400,
+                300,
+                new UiNodeDto("root", "Window", "Panel", "Panel", []))
+        };
+
+        var bytes = AstraAuthoringCodec.Serialize(request);
+        var message = AstraAuthoringCodec.Deserialize("ui.preview.request", bytes);
+
+        Assert.That(message, Is.InstanceOf<UiPreviewRequestMsg>());
+        var preview = (UiPreviewRequestMsg)message!;
+        Assert.That(preview.Document?.Name, Is.EqualTo("Panel"));
+        Assert.That(preview.Document?.Root.Id, Is.EqualTo("root"));
+    }
+
+    [Test]
     public void GitCommit_FollowsSubmoduleGitdir()
     {
         var root = Path.Combine(Path.GetTempPath(), "astra-git-" + Guid.NewGuid().ToString("N"));

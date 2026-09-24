@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Reflection;
+using System.Text.Json;
 using AstraGraph.Editor.Protocol;
 using AstraGraph.Robust.Server;
 using Content.Shared._NC.AstraGraph;
@@ -44,6 +45,7 @@ public static class AstraServerRuntime
             if (response == null)
                 return null;
 
+            StoreUiDocument(incoming, response);
             return new AstraWireReply(response.Kind, AstraAuthoringCodec.Serialize(response));
         }
         catch (Exception ex)
@@ -108,6 +110,33 @@ public static class AstraServerRuntime
             "Authoring: enabled\n" +
             "DevHost: off\n" +
             $"Binding catalog methods: {bindings}";
+    }
+
+    private static void StoreUiDocument(AuthoringMessage incoming, AuthoringMessage response)
+    {
+        UiDocumentDto? document = incoming switch
+        {
+            UiSaveRequestMsg save when response is UiSaveResponseMsg saved && saved.Status == AuthoringStatusCode.Success => save.Document,
+            UiPreviewRequestMsg preview when response is UiPreviewResponseMsg opened && opened.Status == AuthoringStatusCode.Success => preview.Document,
+            _ => null
+        };
+        if (document == null || string.IsNullOrWhiteSpace(document.Name))
+            return;
+
+        var path = AstraHtmlDocumentPaths.File(document.Name);
+        if (path == null)
+            return;
+
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            var json = JsonSerializer.Serialize(document, new JsonSerializerOptions(AuthoringJsonContext.Default) { WriteIndented = true });
+            File.WriteAllText(path, json);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Logger.GetSawmill("astra").Error($"Astra UI document '{document.Name}' was not written: {ex.Message}");
+        }
     }
 
     private static AstraWireReply Error(string code, string detail)

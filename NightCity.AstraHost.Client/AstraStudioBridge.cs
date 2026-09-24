@@ -41,6 +41,9 @@ public static class AstraStudioBridge
 
         public async Task<AuthoringMessage?> HandleAsync(AuthoringMessage message, CancellationToken cancellation)
         {
+            if (message is UiPreviewRequestMsg preview)
+                AstraHtmlGameWindow.Apply(preview);
+
             if (message is AuthHandshakeRequestMsg handshake && string.IsNullOrEmpty(handshake.AuthorToken))
             {
                 message = new AuthHandshakeRequestMsg
