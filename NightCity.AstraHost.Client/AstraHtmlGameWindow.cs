@@ -78,7 +78,9 @@ public sealed class AstraHtmlGameWindow
         if (_view == null)
             return;
 
-        _view.ExecuteJavaScript("if (window.astraApplyState) astraApplyState(" + _stateJson + ");");
+        _view.ExecuteJavaScript(
+            "if (window.astraApplyState) astraApplyState(" + _stateJson + ");" +
+            "else window.__astraPending = " + _stateJson + ";");
     }
 
     public void Close()
@@ -123,14 +125,11 @@ public sealed class AstraHtmlGameWindow
 
         if (context.Url.StartsWith(ActionPrefix, StringComparison.OrdinalIgnoreCase))
         {
-            if (context.IsNavigation)
-            {
-                context.DoCancel();
-                return;
-            }
-
             DispatchAction(context.Url);
-            context.DoRespondStream(new MemoryStream([]), "text/plain");
+            if (context.IsNavigation)
+                context.DoCancel();
+            else
+                context.DoRespondStream(new MemoryStream("ok"u8.ToArray()), "text/plain");
             return;
         }
 
@@ -144,8 +143,17 @@ public sealed class AstraHtmlGameWindow
         context.DoCancel();
     }
 
+    private string? _lastActionUrl;
+    private long _lastActionAt;
+
     private void DispatchAction(string url)
     {
+        var now = Environment.TickCount64;
+        if (string.Equals(url, _lastActionUrl, StringComparison.Ordinal) && now - _lastActionAt < 300)
+            return;
+
+        _lastActionUrl = url;
+        _lastActionAt = now;
         var original = "astra-bui://action" + url[ActionPrefix.Length..];
         if (!UiHtmlPage.TryReadAction(original, out var name, out var payload))
             return;
@@ -165,7 +173,8 @@ public sealed class AstraHtmlGameWindow
     private static string Prepare(string html) => html
         .Replace("astra-bui://action", ActionPrefix, StringComparison.Ordinal)
         .Replace("astra-ui://texture", TexturePrefix, StringComparison.Ordinal)
-        .Replace("</head>", ButtonFeedback + "</head>", StringComparison.Ordinal);
+        .Replace("</head>", ButtonFeedback + "</head>", StringComparison.Ordinal)
+        .Replace("</body>", ButtonScript + "</body>", StringComparison.Ordinal);
 
     private const string ButtonFeedback =
         "<style>" +
@@ -173,14 +182,29 @@ public sealed class AstraHtmlGameWindow
         "button:hover{background:#556070;border-color:#d7deea}" +
         "button:active,button.is-pressed{background:#243044;border-color:#edbc63}" +
         "button:disabled,button:disabled:hover{background:#3d4454;border-color:#6d7690;cursor:default}" +
-        "</style>" +
+        "</style>";
+
+    private const string ButtonScript =
         "<script>" +
-        "document.addEventListener(\"click\",function(event){" +
-        "var node=event.target&&event.target.closest?event.target.closest(\"button[data-astra-action]\"):null;" +
-        "if(!node)return;" +
-        "node.classList.add(\"is-pressed\");" +
-        "window.setTimeout(function(){node.classList.remove(\"is-pressed\")},280);" +
-        "},true);" +
+        "(function(){" +
+        "var send=window.astraSend;" +
+        "if(typeof send!==\"function\"||send.__astraPatched)return;" +
+        "function patched(name,payload){" +
+        "payload=payload||{};" +
+        "if(!payload.id){" +
+        "var selected=document.querySelector(\".astra-list-row.is-selected\");" +
+        "if(selected&&selected.dataset.id)payload=Object.assign({},payload,{id:selected.dataset.id});" +
+        "}" +
+        "if(!payload.id){" +
+        "var label=document.querySelector(\"label.astra-label\");" +
+        "if(label)label.textContent=\"Select a barrel in the list\";" +
+        "}" +
+        "return send(name,payload);" +
+        "}" +
+        "patched.__astraPatched=true;" +
+        "window.astraSend=patched;" +
+        "if(window.__astraPending&&window.astraApplyState)window.astraApplyState(window.__astraPending);" +
+        "})();" +
         "</script>";
 
     private static void RunOnUi(Action action)
