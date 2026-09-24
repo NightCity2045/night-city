@@ -1,0 +1,97 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: BaseWeaponPistol
+  id: WeaponAstraPistol
+  name: astra pistol
+  description: A pistol whose rate of fire and shot speed come from the barrel stored on it.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+  - type: WeaponAssembly
+    Barrel: ""
+    FireRate: 6
+    ProjectileSpeed: 40
+  - type: ContainerContainer
+    containers:
+      gun_magazine: !type:ContainerSlot
+      gun_chamber: !type:ContainerSlot
+      barrel: !type:ContainerSlot
+
+- type: entity
+  parent: BaseItem
+  id: WeaponBarrelLight
+  name: light barrel
+  description: A short barrel. It fires faster and the shot travels slower.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+    state: base
+  - type: WeaponPart
+    Prototype: WeaponBarrelLight
+    Slot: barrel
+    Label: Light barrel
+    FireRate: 8
+    ProjectileSpeed: 25
+
+- type: entity
+  parent: BaseItem
+  id: WeaponBarrelHeavy
+  name: heavy barrel
+  description: A long barrel. It fires slower and the shot travels faster.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+    state: base
+  - type: WeaponPart
+    Prototype: WeaponBarrelHeavy
+    Slot: barrel
+    Label: Heavy barrel
+    FireRate: 2
+    ProjectileSpeed: 55
+
+- type: entity
+  parent: BaseStructure
+  id: WeaponBench
+  name: weapon bench
+  description: Put the pistol in the gun slot. Barrels sit in the bench storage. The bench installs only a barrel the server accepts.
+  components:
+  - type: Sprite
+    sprite: Structures/Furniture/Tables/generic.rsi
+    state: full
+  - type: Anchorable
+  - type: ItemSlots
+    slots:
+      gun:
+        name: Gun
+        whitelist:
+          components:
+          - WeaponAssembly
+        swap: false
+  - type: Storage
+    grid:
+    - 0,0,7,3
+    maxItemSize: Normal
+    openOnActivate: false
+  - type: ContainerContainer
+    containers:
+      gun: !type:ContainerSlot
+      storagebase: !type:Container
+  - type: ContainerFill
+    containers:
+      storagebase:
+      - WeaponBarrelLight
+      - WeaponBarrelHeavy
+  - type: AstraHtmlUi
+    document: WeaponBench
+  - type: ActivatableUI
+    key: enum.AstraHtmlUiKey.Key
+  - type: ActivatableUIRequiresAnchor
+  - type: UserInterface
+    interfaces:
+      enum.AstraHtmlUiKey.Key:
+        type: AstraHtmlBoundUserInterface
+      enum.StorageUiKey.Key:
+        type: StorageBoundUserInterface

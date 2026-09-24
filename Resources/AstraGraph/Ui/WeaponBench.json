@@ -1,0 +1,68 @@
+{
+  "id": "d1000000-0000-4000-8000-0000000000d1",
+  "name": "WeaponBench",
+  "width": 360,
+  "height": 420,
+  "documentKind": "UI",
+  "root": {
+    "id": "root",
+    "elementType": "BoxContainer",
+    "name": "Window",
+    "text": null,
+    "children": [
+      {
+        "id": "parts",
+        "elementType": "ItemList",
+        "name": "Parts",
+        "text": null,
+        "children": [],
+        "controlTypeId": "Robust.Client.UserInterface.Controls.ItemList"
+      },
+      {
+        "id": "reason",
+        "elementType": "Label",
+        "name": "Reason",
+        "text": "Choose a barrel",
+        "children": []
+      },
+      {
+        "id": "install",
+        "elementType": "Button",
+        "name": "Install",
+        "text": "Install",
+        "children": [],
+        "properties": { "Selection": "parts" }
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "bindingId": "parts",
+      "elementId": "parts",
+      "targetProperty": "Items",
+      "stateVariable": "Parts",
+      "direction": "OneWay"
+    },
+    {
+      "bindingId": "reason",
+      "elementId": "reason",
+      "targetProperty": "Text",
+      "stateVariable": "Reason",
+      "direction": "OneWay"
+    }
+  ],
+  "events": [
+    {
+      "subscriptionId": "select",
+      "elementId": "parts",
+      "eventName": "OnItemSelected",
+      "targetAction": "SelectPart"
+    },
+    {
+      "subscriptionId": "install",
+      "elementId": "install",
+      "eventName": "OnPressed",
+      "targetAction": "InstallPart"
+    }
+  ]
+}

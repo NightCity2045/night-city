@@ -1,0 +1,2994 @@
+{
+  "formatVersion": "1.0",
+  "id": "c1000000-0000-4000-8000-0000000000c1",
+  "name": "WeaponBench",
+  "kind": "system",
+  "side": "server",
+  "metadata": {
+    "author": "",
+    "description": "Bench lists parts and installs a barrel the server accepts. The client only sends the part id.",
+    "version": "1.0.0",
+    "createdAt": "2026-09-24T17:13:58.7256301+00:00",
+    "modifiedAt": "2026-09-24T17:13:58.7256303+00:00",
+    "tags": [],
+    "customAttributes": {}
+  },
+  "variables": [
+    {
+      "id": "39336844-26f9-403b-a029-af2815f731c1",
+      "name": "Rows",
+      "typeName": "List\u003CPartRow\u003E",
+      "isPersistent": false,
+      "isReplicated": false,
+      "isParameter": false
+    }
+  ],
+  "nodes": [
+    {
+      "id": "9a2a2a60-20a1-4027-b4b6-6e544619d4c0",
+      "name": "Open",
+      "nodeType": "Event.Open",
+      "pins": [
+        {
+          "id": "17fd9324-014d-4648-ba65-cbc596c4cc6a",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "924d8a46-34bc-4519-91f9-3d57ff6b0e05",
+          "name": "Entity",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "2455ea2c-af5d-4105-b367-43ff274db5d6",
+          "name": "Event",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "eventType": "BoundUIOpenedEvent",
+        "componentType": "AstraHtmlUiComponent"
+      }
+    },
+    {
+      "id": "35dff089-01b3-4a3f-aab6-4b019743e0b8",
+      "name": "Message",
+      "nodeType": "Event.Message",
+      "pins": [
+        {
+          "id": "1dd89dc2-0bc7-47db-b0c4-ff064141538c",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "be586be4-a81d-49d5-bad5-76dd37dc4de9",
+          "name": "Entity",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "18302a17-e415-413b-9374-4caadcb2a000",
+          "name": "Event",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "eventType": "AstraBuiUiMessage",
+        "componentType": "AstraHtmlUiComponent"
+      }
+    },
+    {
+      "id": "01243453-b208-435c-8577-882afd39d911",
+      "name": "Action",
+      "nodeType": "Native.GetMember",
+      "pins": [
+        {
+          "id": "176632af-fc66-47dd-b34b-6c0d314a1db4",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "c6f71eed-e390-4692-a612-f2c6b0c3353b",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {
+        "Member": "Action"
+      }
+    },
+    {
+      "id": "f40a4f7f-1b8b-4243-9f97-1b9d05095be6",
+      "name": "IsInstall",
+      "nodeType": "cmp.equal",
+      "pins": [
+        {
+          "id": "f96c1ce3-f1a3-4030-a6ab-5493eec4e244",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "241c619f-0274-4862-8113-06fd5f1d262a",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "InstallPart"
+        },
+        {
+          "id": "670df4e8-2473-40cd-8e9a-6ad990dd4db0",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "32466708-0d49-4e9b-aa7a-ca0654aa3458",
+      "name": "Install?",
+      "nodeType": "Core.Branch",
+      "pins": [
+        {
+          "id": "86c38490-ee94-4fec-89a3-6f53de092d2b",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "7ae0b75c-2c2d-441f-af71-8f36b129d910",
+          "name": "True",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "8bfd5340-2aff-479c-9183-c3e383fd0bf4",
+          "name": "False",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "94a41164-8e44-44c7-83af-52f35fb099e2",
+          "name": "Condition",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "87a86a91-7769-4465-af69-d22214c7416c",
+      "name": "PartId",
+      "nodeType": "Bui.Field",
+      "pins": [
+        {
+          "id": "658194bf-4d02-4887-92e0-833d204f6c2d",
+          "name": "Payload",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "1e68582f-914d-42e0-9774-06c2434b3045",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "id"
+        },
+        {
+          "id": "656fdf85-fbb5-4d3b-b1ed-ad3abac384ff",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "54bbbd62-8dfd-49ce-a54b-751994cdacf7",
+      "name": "Part",
+      "nodeType": "Inventory.Find",
+      "pins": [
+        {
+          "id": "3ff37777-9b91-4329-b534-f4f7f4468a92",
+          "name": "Owner",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "a6447a97-9038-4135-9ffd-8443ff6dc4c1",
+          "name": "Prototype",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "3e32a791-afc9-4d9f-9a85-9b422f043820",
+          "name": "Item",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "int64"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "f0e8d14d-7d1e-4ef4-8723-2d5cd8d3afef",
+      "name": "HasPart",
+      "nodeType": "cmp.notequal",
+      "pins": [
+        {
+          "id": "4faa91e0-1a72-415c-a361-15b882bf13e4",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "int64"
+        },
+        {
+          "id": "1b2839c7-bb36-42ce-a41b-facf6acfb8f6",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "int64",
+          "defaultValue": "0"
+        },
+        {
+          "id": "a8e9a0f8-7edc-4b97-bc45-86cfc05df16b",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "a4430ad4-7aec-4443-b9a3-316e469eacec",
+      "name": "Part?",
+      "nodeType": "Core.Branch",
+      "pins": [
+        {
+          "id": "ea367c15-8d5f-4db6-b63b-10ba60d07699",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "29479603-470f-48ff-8ee9-fd1b89425fa9",
+          "name": "True",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "326ddf5d-91aa-4904-9480-d12344121bf5",
+          "name": "False",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "d99c5b78-520a-4cdd-98fc-814d18d048ac",
+          "name": "Condition",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "45f0e6b4-d856-47cd-8dbe-cd97a0b43459",
+      "name": "Gun",
+      "nodeType": "Entity.GetHeldItem",
+      "pins": [
+        {
+          "id": "84551584-8715-4b0d-881a-01f98531371a",
+          "name": "Holder",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "18f84efb-8129-499c-be69-81d11154e4f3",
+          "name": "Container",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "gun"
+        },
+        {
+          "id": "be931b5b-b179-46c9-ad38-286da5cbfeda",
+          "name": "Item",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "int64"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "7fbbbcca-e706-455e-bd05-7f8ae07ec0d5",
+      "name": "HasGun",
+      "nodeType": "cmp.notequal",
+      "pins": [
+        {
+          "id": "6d1e8f64-796a-4ae4-868c-09b669df732b",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "int64"
+        },
+        {
+          "id": "56ee37e2-eabd-414b-88af-2540aa536011",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "int64",
+          "defaultValue": "0"
+        },
+        {
+          "id": "68c3e8fe-3167-4cf3-9952-04e142afe752",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "8e8c1b2d-760d-4be3-b17a-9238d4d4f3ab",
+      "name": "Gun?",
+      "nodeType": "Core.Branch",
+      "pins": [
+        {
+          "id": "8b4d7a75-6ed0-4636-a59e-3c8c231ff553",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "74ac7c81-0ea8-48d0-9cee-03d1d8e339b0",
+          "name": "True",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "834ea74e-dbbf-40da-ad15-151fc3bfce2d",
+          "name": "False",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "ad209e8f-caa6-4bd4-8ebd-098d9f9c7682",
+          "name": "Condition",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "8f883136-8f95-4c79-ae01-c0481589af0f",
+      "name": "PartData",
+      "nodeType": "Entity.TryGetComponent",
+      "pins": [
+        {
+          "id": "1796161c-a7d6-4efa-9485-73cbfa1fbcc4",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "int64"
+        },
+        {
+          "id": "2f140a67-c84c-4b4a-a61f-2328e2c94c88",
+          "name": "Found",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        },
+        {
+          "id": "daa518c7-da23-4bf6-a43b-39ad20d2c17d",
+          "name": "Component",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "component"
+        }
+      ],
+      "properties": {
+        "ComponentType": "WeaponPart"
+      }
+    },
+    {
+      "id": "a71d1dd5-b54d-4259-aec2-724c2bc52efb",
+      "name": "PartData?",
+      "nodeType": "Core.Branch",
+      "pins": [
+        {
+          "id": "319248c9-8203-430d-8c67-d0a1f962527c",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "818b6065-105e-4910-a4fd-62aefc4faaa5",
+          "name": "True",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "bcb65380-6a70-4eb9-a25b-043f2b6280e7",
+          "name": "False",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "275fb03e-2ea6-489e-89a6-91a6536fd89a",
+          "name": "Condition",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "d5784ab6-61a5-4c28-bcbc-37097bc5b042",
+      "name": "Slot",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "08c68e0f-b703-4737-ada4-931d0910c4d6",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "c6b928fb-e786-41a9-ba42-080ec0c923c1",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponPart",
+        "Field": "Slot"
+      }
+    },
+    {
+      "id": "d17ae30a-8426-4a36-a00e-9dc6254a84b2",
+      "name": "IsBarrel",
+      "nodeType": "cmp.equal",
+      "pins": [
+        {
+          "id": "3aefe4b0-d70b-4699-89ec-8b422e86b246",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "8b04c40c-08f5-4c3d-90d3-6ecad975eae7",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "barrel"
+        },
+        {
+          "id": "e0578372-a681-4296-9e0f-d1ef26b86f4f",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "81fc8106-a278-4449-b961-f54a0adf5f09",
+      "name": "Barrel?",
+      "nodeType": "Core.Branch",
+      "pins": [
+        {
+          "id": "709dacba-55cc-4751-913c-e3158968b3a7",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "543f88d0-1f75-4f59-94aa-dda0db681e9e",
+          "name": "True",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "401f1096-edb3-4a80-bdad-b7a8bdae31bc",
+          "name": "False",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "eb4595da-e6a1-49cf-9460-4f7fceb51d10",
+          "name": "Condition",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "4d62bcf3-00de-44a4-94cc-e0a41800ca9d",
+      "name": "Assembly",
+      "nodeType": "Entity.TryGetComponent",
+      "pins": [
+        {
+          "id": "f0fb9872-8d06-48ea-ad52-712754cbaa00",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "int64"
+        },
+        {
+          "id": "9b707a52-5e7b-4ae3-b5c5-595cdabb9a77",
+          "name": "Found",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        },
+        {
+          "id": "56e443b8-1c45-42ad-9de9-db0fe4016d5f",
+          "name": "Component",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "component"
+        }
+      ],
+      "properties": {
+        "ComponentType": "WeaponAssembly"
+      }
+    },
+    {
+      "id": "353e687b-18a6-43f0-8bf5-e38ae876d892",
+      "name": "Assembly?",
+      "nodeType": "Core.Branch",
+      "pins": [
+        {
+          "id": "ba04659b-581f-4600-bdcb-165295f39714",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "eac6248c-f0ed-45c5-a5d7-b22c16934693",
+          "name": "True",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "83b5545f-9217-44f7-b365-3954798bb099",
+          "name": "False",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "3171760e-a281-4db8-9d51-57562fa2c278",
+          "name": "Condition",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "288bdc94-db47-453a-92b9-9a3e9de043c7",
+      "name": "Prototype",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "252c7471-db23-45e5-902c-31edea46c35d",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "d120bb89-98e1-42e5-99a4-c107c1e507a2",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponPart",
+        "Field": "Prototype"
+      }
+    },
+    {
+      "id": "ab27dc72-dac7-4c82-83be-8d16deaf1286",
+      "name": "Rate",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "7b396bdc-6e24-43c7-85d3-2e424365556e",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "42f04869-1c66-48f4-bac2-ba2bb6ccf8cc",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponPart",
+        "Field": "FireRate"
+      }
+    },
+    {
+      "id": "24d5bce0-bdba-4dc5-a058-52f3b2645b09",
+      "name": "Speed",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "3a530e5d-a1e4-4f44-a523-b58d2ec4982d",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "3f2e5ea4-e81a-4192-819c-740ef16920d0",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponPart",
+        "Field": "ProjectileSpeed"
+      }
+    },
+    {
+      "id": "e03a4bac-bf00-4364-8339-e9ead4ec7079",
+      "name": "SetBarrel",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "68e80933-0717-41c9-98eb-c3c6f5966497",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "f0c29d7d-3154-44f8-b36f-228968de6fac",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "532a3ec3-bfb8-4e0a-8608-3bcd25aa8ffc",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "bea434c6-e7a3-482c-9aa9-4da8d96afd3f",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "26b8584a-7c9c-4444-94d7-41c2cfb4cb37",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Barrel"
+      }
+    },
+    {
+      "id": "76926db0-a495-4a7b-bbcc-deab5655336c",
+      "name": "SetRate",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "ba13d214-5c8a-4b73-ae2e-714bda0955d4",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "ef0f58fb-82d0-4785-b8b3-18a3f2fc68b2",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "f475ce2d-ce15-4357-bce3-b5f2b6468abe",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "60324438-5e69-4ca9-8644-6a2b28202568",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "b92cd19f-d7b6-4433-9cea-7cd1e3aa29b3",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "FireRate"
+      }
+    },
+    {
+      "id": "2761297b-3636-4746-9ea6-b9323991e015",
+      "name": "SetSpeed",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "524a8426-33c3-4737-a0e5-da9f14fe4cb0",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "e67b7a18-8794-4c34-a25a-f2cbde26e25d",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "ea6211cc-e5bb-424c-8251-5de593860477",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "53ff543c-14b3-4e4e-96b9-5686ad72e2e4",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "ba2c8221-4bbe-484e-9442-4ef31dcdca9c",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "ProjectileSpeed"
+      }
+    },
+    {
+      "id": "988c3823-16da-4d99-b157-e2be310b6c62",
+      "name": "Insert",
+      "nodeType": "Container.Insert",
+      "pins": [
+        {
+          "id": "0312e549-8f1e-4e6f-a320-032fb4f04f80",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "5fb744dc-6234-413a-ab4a-b465d7ff57e2",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "3124da7c-f9ef-4a02-be8f-1e753ca756fa",
+          "name": "Owner",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "int64"
+        },
+        {
+          "id": "f5beee39-3876-4802-bf89-929ee7607f40",
+          "name": "Container",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "barrel"
+        },
+        {
+          "id": "39088ec0-cf6e-4bba-802a-ddfa6efea743",
+          "name": "Item",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "int64"
+        },
+        {
+          "id": "a80c4072-8730-4aa5-a9f7-ab563bfb2fd8",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "ecd38d40-b05c-4e8b-9959-1bbdcf9b2544",
+      "name": "DoneEmpty",
+      "nodeType": "List.Create",
+      "pins": [
+        {
+          "id": "caa97305-4f52-4435-b998-8e4233137b55",
+          "name": "List",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "30e2cafa-15e3-4f89-9abf-31b28c62925a",
+      "name": "DoneClear",
+      "nodeType": "Core.VariableAssign",
+      "pins": [
+        {
+          "id": "11229a48-1165-478a-820f-e41ec2a5c7f2",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "844d5959-dffe-45f2-996c-4cef5e1e9e94",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "0b4c84eb-f2dc-4ce5-bcb9-ebc17ff8e9e2",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        }
+      ],
+      "properties": {
+        "VariableName": "Rows"
+      }
+    },
+    {
+      "id": "eb0938e7-46ae-455b-a815-62f7d96e9757",
+      "name": "DoneContents",
+      "nodeType": "Container.Contents",
+      "pins": [
+        {
+          "id": "71c4e4e5-1ac5-4828-a9aa-6b3b97b0098f",
+          "name": "Owner",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "cc55671d-c935-4e2c-bf52-974f0ce8c443",
+          "name": "Container",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "storagebase"
+        },
+        {
+          "id": "349a5754-736d-49b3-9c86-6287abfabafc",
+          "name": "Contents",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "List\u003CEntityUid\u003E"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "6baf22fc-d971-475f-8bbf-eed04eb2978e",
+      "name": "DoneEach",
+      "nodeType": "Flow.ForEach",
+      "pins": [
+        {
+          "id": "2fbdecd9-b428-488f-90db-bb94495e46d6",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "cd98acdc-469f-4cca-b9ae-f2fa71060c08",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "750961d8-01cc-405c-9a40-d639a3a5a83e",
+          "name": "Body",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "91a71f8f-ad09-4564-9354-989d519dcde2",
+          "name": "Collection",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "List\u003CEntityUid\u003E"
+        },
+        {
+          "id": "8eb13e20-9990-44cb-aaf3-4f5917ee0d4b",
+          "name": "Current",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "EntityUid"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "4e4aeabc-1c88-4cc9-9779-2758be4ecdb9",
+      "name": "DoneRow",
+      "nodeType": "Entity.TryGetComponent",
+      "pins": [
+        {
+          "id": "635593ce-4096-4ae5-8560-6084906fd9b5",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "58787bea-dc2e-4865-b72c-ff44060f5f97",
+          "name": "Found",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        },
+        {
+          "id": "c8c3f70c-4d65-459f-b6ad-4a0857a62caf",
+          "name": "Component",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "component"
+        }
+      ],
+      "properties": {
+        "ComponentType": "WeaponPart"
+      }
+    },
+    {
+      "id": "ec76de4b-dd91-4633-8c12-4155e90023c3",
+      "name": "DoneRow?",
+      "nodeType": "Core.Branch",
+      "pins": [
+        {
+          "id": "44b14f7f-5b61-493c-ac8a-57ea4e87f506",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "4fd755c4-b070-4fa4-af0c-bcce720bd278",
+          "name": "True",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "60724e87-c74b-4d2f-97a9-f6866313d9cb",
+          "name": "False",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "a5edd63a-cf2c-4785-b425-72ce509d73ec",
+          "name": "Condition",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "f812c86b-7b4b-42aa-9e77-fcc82bae0d42",
+      "name": "DoneMake",
+      "nodeType": "Schema.Make",
+      "pins": [
+        {
+          "id": "539e257e-67c3-4d3b-b4d3-5910c80709a0",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "PartRow"
+        }
+      ],
+      "properties": {
+        "Schema": "PartRow"
+      }
+    },
+    {
+      "id": "b46473c1-fcd7-4206-90d3-dbb96f1ea108",
+      "name": "DoneId",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "424e1565-29f8-4de0-921d-da03620b1f4f",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "ef55de8c-2362-447e-871f-bceab1736d25",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "077f07cb-181b-4b2a-91f7-be83a35ce01e",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "a0cf61d6-1678-417c-962e-a78354cd7354",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "0ad5cab3-4f90-4565-992b-db6c171de22f",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "PartRow",
+        "Field": "Id"
+      }
+    },
+    {
+      "id": "c229d616-bf09-48f4-b814-3214fd56df18",
+      "name": "DonePrototype",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "74faf30c-c7e4-4449-9262-3cf29c46f88a",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "e67dddf1-be37-419e-aff4-b22d3403744d",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponPart",
+        "Field": "Prototype"
+      }
+    },
+    {
+      "id": "b371b536-de97-4ecb-8307-96640c58ee22",
+      "name": "DoneText",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "ced24bd9-0dae-4d05-965f-dc6ac7aafd3a",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "13e625d4-061d-42f0-9799-55955e5a0031",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "a10f5d4f-4fd6-4e2f-babd-89ce27dda555",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "a81f2101-84c3-4db2-ba8d-d35f00c8f569",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "e13a1aab-c1d5-4924-822d-cd7b42311726",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "PartRow",
+        "Field": "Text"
+      }
+    },
+    {
+      "id": "d5760dc9-7a37-4eb1-98c4-1f0057b9ec4b",
+      "name": "DoneLabel",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "fc70d99b-2e05-4baa-b2b1-fb6c01acd57a",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "557b654d-5aa9-4dca-a474-be00e5d889fe",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponPart",
+        "Field": "Label"
+      }
+    },
+    {
+      "id": "bf39f47c-9282-4d82-8377-8732df9f4740",
+      "name": "DoneOff",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "d4c075d8-82bf-4ccc-a0dc-372b233e23d6",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "3d62a828-4f91-4a4a-80ec-bcfc68f5b516",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "baf57cec-50de-4acc-a933-66a9d3b9000a",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "6c7eccad-1dd6-4c7d-96a8-b517e7e28e46",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object",
+          "defaultValue": "false"
+        },
+        {
+          "id": "a3f33532-b2f5-4109-941b-5329ff814d5f",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "PartRow",
+        "Field": "Disabled"
+      }
+    },
+    {
+      "id": "c117ec0b-b0f1-4e97-a0c0-42f46e78841f",
+      "name": "DoneRead",
+      "nodeType": "Core.VariableRead",
+      "pins": [
+        {
+          "id": "25cd5766-0940-4e7d-8777-84400d1960c9",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        }
+      ],
+      "properties": {
+        "VariableName": "Rows"
+      }
+    },
+    {
+      "id": "c47ef9bd-593e-4638-9e44-d5dd6c5b447a",
+      "name": "DoneAdd",
+      "nodeType": "List.Add",
+      "pins": [
+        {
+          "id": "3b8e1413-3985-482f-b556-2629675fd5f1",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "980e72b1-4471-4a45-9b21-c44e98bf15d8",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "8032d3c2-5fb8-4a5d-a087-90fa6ac17da5",
+          "name": "List",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        },
+        {
+          "id": "8b52bc9c-48d9-4bbb-af23-609bdbe04614",
+          "name": "Item",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "PartRow"
+        },
+        {
+          "id": "dfbe4efc-ee2f-4c00-b582-12c79cb71bba",
+          "name": "List",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "9ee8f15f-530f-4b57-bb71-17fd21c1c321",
+      "name": "DoneStore",
+      "nodeType": "Core.VariableAssign",
+      "pins": [
+        {
+          "id": "5d7c9df2-1563-440a-8dae-1462a5164d73",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "507bd3d4-2e19-4479-a9fb-ea25a3e3cdf0",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "40358bc0-640b-41c2-b0b7-7de760580c8b",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        }
+      ],
+      "properties": {
+        "VariableName": "Rows"
+      }
+    },
+    {
+      "id": "65a489f0-bbdd-4026-91d4-005dd7237428",
+      "name": "DoneBuilt",
+      "nodeType": "Core.VariableRead",
+      "pins": [
+        {
+          "id": "2f2852ba-65b0-4b94-9227-1921cd8f9b9e",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        }
+      ],
+      "properties": {
+        "VariableName": "Rows"
+      }
+    },
+    {
+      "id": "8a89185d-0b0b-4ad0-b830-b42eb72343d2",
+      "name": "DoneJson",
+      "nodeType": "Ui.Rows",
+      "pins": [
+        {
+          "id": "d321c116-b8de-4153-b470-785d50838445",
+          "name": "List",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        },
+        {
+          "id": "ddccd160-2e7a-4cc4-bc82-173a299a8427",
+          "name": "IdField",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Id"
+        },
+        {
+          "id": "1b675035-b8ff-4f15-9536-ecb9b61f3d51",
+          "name": "TextField",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Text"
+        },
+        {
+          "id": "1735c656-d98e-457d-97ad-f4855d791379",
+          "name": "DisabledField",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Disabled"
+        },
+        {
+          "id": "3074ba3c-be32-4383-9b6b-96a79f142086",
+          "name": "Rows",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "465157fa-4083-463b-9ed5-f2f6af01c83a",
+      "name": "DonePublish",
+      "nodeType": "Bui.Set",
+      "pins": [
+        {
+          "id": "1188cfec-1e35-4170-b724-62fa5ed21a4e",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "3c1c42e1-4d9c-4f01-8b12-f60aa4c002ec",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "91363b2e-d163-4f62-adbe-14c41e06b644",
+          "name": "Owner",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "d4775bbe-9e07-417a-b629-166291d4f275",
+          "name": "Name",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Parts"
+        },
+        {
+          "id": "67c38343-3382-4eb9-acf9-c5cdb228d3b7",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "9a62b97e-943a-41f4-8965-a3b1e52f251b",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "811dc41c-12ac-4309-8a1e-c3991bba7a2e",
+      "name": "OpenEmpty",
+      "nodeType": "List.Create",
+      "pins": [
+        {
+          "id": "b7d3174c-f86a-4ab7-8450-0ce10bcb6d3c",
+          "name": "List",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "81c58ada-6d86-4d74-85c5-6024e12a4300",
+      "name": "OpenClear",
+      "nodeType": "Core.VariableAssign",
+      "pins": [
+        {
+          "id": "0a48db02-4908-41f5-988f-517139f44d9e",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "00b2e927-fca6-4afd-ab63-d4d6abd45c9e",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "0405f19f-1831-4d4d-a361-68ab79814bd9",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        }
+      ],
+      "properties": {
+        "VariableName": "Rows"
+      }
+    },
+    {
+      "id": "45508c8b-e73f-49f5-8294-0ff1af3f3f65",
+      "name": "OpenContents",
+      "nodeType": "Container.Contents",
+      "pins": [
+        {
+          "id": "a140314a-16e4-44f1-b209-86d8977c0d92",
+          "name": "Owner",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "885659f7-3d6a-42ba-a9fd-6c46534bfa36",
+          "name": "Container",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "storagebase"
+        },
+        {
+          "id": "838454c7-11d3-4fc5-8a04-099e0fb05625",
+          "name": "Contents",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "List\u003CEntityUid\u003E"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "2581216a-0b25-44bc-a43c-d93d955cd714",
+      "name": "OpenEach",
+      "nodeType": "Flow.ForEach",
+      "pins": [
+        {
+          "id": "63eda3e3-6aa3-4db7-afd7-16558e8622ea",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "097cfb6b-1ed3-41c4-b30b-d6f2bd573f43",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "e15e75df-2eb2-44c5-9ae4-369a6bee596d",
+          "name": "Body",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "d8918cbf-9209-413c-be46-f2c4857db2a5",
+          "name": "Collection",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "List\u003CEntityUid\u003E"
+        },
+        {
+          "id": "630cc9ed-2ce0-4c4a-833e-1ec23e86b7f2",
+          "name": "Current",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "EntityUid"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "1c919f88-6add-4cf7-9649-33215229b7ab",
+      "name": "OpenRow",
+      "nodeType": "Entity.TryGetComponent",
+      "pins": [
+        {
+          "id": "e2eb68f7-68ed-423e-8be3-9bb0426dfbc7",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "c7e9e994-7ec5-4d2e-8d19-d28875385cd2",
+          "name": "Found",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        },
+        {
+          "id": "dfe58bc3-6bf4-405b-8c41-403b46a7a244",
+          "name": "Component",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "component"
+        }
+      ],
+      "properties": {
+        "ComponentType": "WeaponPart"
+      }
+    },
+    {
+      "id": "5174464f-819d-4db2-9911-27d69b15b31b",
+      "name": "OpenRow?",
+      "nodeType": "Core.Branch",
+      "pins": [
+        {
+          "id": "de5dd27b-d6bb-48f1-bcec-fe798b7e9a6b",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "55f59f76-8058-479e-98df-0062eb557e64",
+          "name": "True",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "8a16b54d-8648-4bf2-8425-540690dfb320",
+          "name": "False",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "02e1aede-e41a-4f0f-8d10-d3f04ef6a075",
+          "name": "Condition",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "18b8c81f-5c30-416d-b37a-21449a6ae558",
+      "name": "OpenMake",
+      "nodeType": "Schema.Make",
+      "pins": [
+        {
+          "id": "92277f4d-10cc-4eaf-a54c-69247d28c0b2",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "PartRow"
+        }
+      ],
+      "properties": {
+        "Schema": "PartRow"
+      }
+    },
+    {
+      "id": "a93755ee-2c93-4eb6-b9b2-afc9b411e928",
+      "name": "OpenId",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "9aba5745-3a0c-4dfd-82d5-df0b90e30a94",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "888850bf-2042-4de7-a14d-60ed2bb532c0",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "ff63eff3-96e1-454e-826a-573d305ae262",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "bb47ffbd-7490-4f8c-be60-02e13a90c9cc",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "27948857-dc0d-4230-8102-bc5b79686022",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "PartRow",
+        "Field": "Id"
+      }
+    },
+    {
+      "id": "1e6da4f9-0cf1-414a-bd49-dfdc9437733a",
+      "name": "OpenPrototype",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "f6b70fd8-857b-484d-a0e3-47e43afda967",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "906d1b57-8512-4ee0-9aa2-292cca38f7cb",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponPart",
+        "Field": "Prototype"
+      }
+    },
+    {
+      "id": "6e1b403e-f5c1-473e-996a-30946a211b2f",
+      "name": "OpenText",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "0d6ff987-c18a-461b-8d73-f8f934771a61",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "83cda90a-e0b5-4ef3-9633-9fe6edab28ee",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "16257fa6-0634-468d-b35d-88aaed37f8e0",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "ff774b79-b9df-46bd-8806-9a7db244b19e",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "84d56e6c-f357-40c1-bc74-8a7f7df0a8a8",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "PartRow",
+        "Field": "Text"
+      }
+    },
+    {
+      "id": "29bd3206-811d-4894-bc55-3aa964ea6f8e",
+      "name": "OpenLabel",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "e37dd847-ce2a-4c28-8dde-4ce35ca9dd53",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "cb5be6be-0966-496d-9ea5-f210ced4d9bd",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponPart",
+        "Field": "Label"
+      }
+    },
+    {
+      "id": "ffaf7404-d78a-4a4b-8d5e-b7713ead6deb",
+      "name": "OpenOff",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "288417a1-092e-4727-8e0e-f0407aa00bf6",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "862ad92f-aa98-4961-aae6-7840c124a250",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "c2a68a29-ca7c-4365-af1d-65219ea26d50",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "79699e39-2192-4d3d-9822-7c451aa3ca20",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object",
+          "defaultValue": "false"
+        },
+        {
+          "id": "e4be226b-de13-4928-85df-a35e9f7078c5",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "PartRow",
+        "Field": "Disabled"
+      }
+    },
+    {
+      "id": "022a64ea-503e-48a2-a6e3-c4e4f11c9fe2",
+      "name": "OpenRead",
+      "nodeType": "Core.VariableRead",
+      "pins": [
+        {
+          "id": "840eb7f2-5553-4348-bf57-e5c5f6636595",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        }
+      ],
+      "properties": {
+        "VariableName": "Rows"
+      }
+    },
+    {
+      "id": "1873d5d1-a5b4-4d06-b6c3-96fbb155a52d",
+      "name": "OpenAdd",
+      "nodeType": "List.Add",
+      "pins": [
+        {
+          "id": "4deb100c-ca25-4296-be7e-25fd2670bd01",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "6830cb30-32f7-4b18-8361-4be30e9fb616",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "b13d3775-c970-4333-a180-1129e1dab36c",
+          "name": "List",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        },
+        {
+          "id": "d96f202d-3235-4213-ab58-13da400fe2c5",
+          "name": "Item",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "PartRow"
+        },
+        {
+          "id": "3e0a9f12-1a4b-4a90-aad0-2de3eff5c75a",
+          "name": "List",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "1842582c-08bd-43ed-a302-d210a6e7cbea",
+      "name": "OpenStore",
+      "nodeType": "Core.VariableAssign",
+      "pins": [
+        {
+          "id": "8efc45bd-19a5-4b24-8649-eb791f1d3543",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "e6d99151-c7fb-43cf-95cb-755b468fefa2",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "278f2828-58df-4f24-bb12-11f4840a2aac",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        }
+      ],
+      "properties": {
+        "VariableName": "Rows"
+      }
+    },
+    {
+      "id": "991e99f9-e595-48bb-ab00-df8409ac1ed2",
+      "name": "OpenBuilt",
+      "nodeType": "Core.VariableRead",
+      "pins": [
+        {
+          "id": "0a65be72-d843-4259-80c2-b6cc5f0c6688",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        }
+      ],
+      "properties": {
+        "VariableName": "Rows"
+      }
+    },
+    {
+      "id": "027d18c3-e279-443d-847a-92a0008afb28",
+      "name": "OpenJson",
+      "nodeType": "Ui.Rows",
+      "pins": [
+        {
+          "id": "5af95df0-2b52-4967-b713-6856bf0ae760",
+          "name": "List",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "List\u003CPartRow\u003E"
+        },
+        {
+          "id": "6f91234b-5f3e-493b-ae32-53a338a5a267",
+          "name": "IdField",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Id"
+        },
+        {
+          "id": "df2e68aa-89d0-4dcb-95b9-1f6a00eb2557",
+          "name": "TextField",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Text"
+        },
+        {
+          "id": "de4f5d19-89f1-4b46-8335-a707aaec5136",
+          "name": "DisabledField",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Disabled"
+        },
+        {
+          "id": "6dfb6ead-96d6-4576-acce-616d9f0db8e7",
+          "name": "Rows",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "046da2be-5079-4ba1-aeed-fbbb1dedd296",
+      "name": "OpenPublish",
+      "nodeType": "Bui.Set",
+      "pins": [
+        {
+          "id": "15c79479-70d2-4ce0-9411-e2f831623146",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "303af898-d2d3-4c43-9869-bcdcd2d1b06e",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "7852dae7-bb16-43fb-afc5-33a0bb3c6867",
+          "name": "Owner",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "13c88010-677d-4c4b-bc39-4ac353dd90fc",
+          "name": "Name",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Parts"
+        },
+        {
+          "id": "361d7ff3-048e-4f89-ac9b-d77a853959ec",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "6cc09579-233f-4d93-8882-ba6f46138044",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    }
+  ],
+  "connections": [
+    {
+      "fromNode": "30e2cafa-15e3-4f89-9abf-31b28c62925a",
+      "fromPin": "844d5959-dffe-45f2-996c-4cef5e1e9e94",
+      "toNode": "6baf22fc-d971-475f-8bbf-eed04eb2978e",
+      "toPin": "2fbdecd9-b428-488f-90db-bb94495e46d6"
+    },
+    {
+      "fromNode": "6baf22fc-d971-475f-8bbf-eed04eb2978e",
+      "fromPin": "750961d8-01cc-405c-9a40-d639a3a5a83e",
+      "toNode": "ec76de4b-dd91-4633-8c12-4155e90023c3",
+      "toPin": "44b14f7f-5b61-493c-ac8a-57ea4e87f506"
+    },
+    {
+      "fromNode": "ec76de4b-dd91-4633-8c12-4155e90023c3",
+      "fromPin": "4fd755c4-b070-4fa4-af0c-bcce720bd278",
+      "toNode": "b46473c1-fcd7-4206-90d3-dbb96f1ea108",
+      "toPin": "424e1565-29f8-4de0-921d-da03620b1f4f"
+    },
+    {
+      "fromNode": "b46473c1-fcd7-4206-90d3-dbb96f1ea108",
+      "fromPin": "ef55de8c-2362-447e-871f-bceab1736d25",
+      "toNode": "b371b536-de97-4ecb-8307-96640c58ee22",
+      "toPin": "ced24bd9-0dae-4d05-965f-dc6ac7aafd3a"
+    },
+    {
+      "fromNode": "b371b536-de97-4ecb-8307-96640c58ee22",
+      "fromPin": "13e625d4-061d-42f0-9799-55955e5a0031",
+      "toNode": "bf39f47c-9282-4d82-8377-8732df9f4740",
+      "toPin": "d4c075d8-82bf-4ccc-a0dc-372b233e23d6"
+    },
+    {
+      "fromNode": "bf39f47c-9282-4d82-8377-8732df9f4740",
+      "fromPin": "3d62a828-4f91-4a4a-80ec-bcfc68f5b516",
+      "toNode": "c47ef9bd-593e-4638-9e44-d5dd6c5b447a",
+      "toPin": "3b8e1413-3985-482f-b556-2629675fd5f1"
+    },
+    {
+      "fromNode": "c47ef9bd-593e-4638-9e44-d5dd6c5b447a",
+      "fromPin": "980e72b1-4471-4a45-9b21-c44e98bf15d8",
+      "toNode": "9ee8f15f-530f-4b57-bb71-17fd21c1c321",
+      "toPin": "5d7c9df2-1563-440a-8dae-1462a5164d73"
+    },
+    {
+      "fromNode": "6baf22fc-d971-475f-8bbf-eed04eb2978e",
+      "fromPin": "cd98acdc-469f-4cca-b9ae-f2fa71060c08",
+      "toNode": "465157fa-4083-463b-9ed5-f2f6af01c83a",
+      "toPin": "1188cfec-1e35-4170-b724-62fa5ed21a4e"
+    },
+    {
+      "fromNode": "ecd38d40-b05c-4e8b-9959-1bbdcf9b2544",
+      "fromPin": "caa97305-4f52-4435-b998-8e4233137b55",
+      "toNode": "30e2cafa-15e3-4f89-9abf-31b28c62925a",
+      "toPin": "0b4c84eb-f2dc-4ce5-bcb9-ebc17ff8e9e2"
+    },
+    {
+      "fromNode": "eb0938e7-46ae-455b-a815-62f7d96e9757",
+      "fromPin": "349a5754-736d-49b3-9c86-6287abfabafc",
+      "toNode": "6baf22fc-d971-475f-8bbf-eed04eb2978e",
+      "toPin": "91a71f8f-ad09-4564-9354-989d519dcde2"
+    },
+    {
+      "fromNode": "6baf22fc-d971-475f-8bbf-eed04eb2978e",
+      "fromPin": "8eb13e20-9990-44cb-aaf3-4f5917ee0d4b",
+      "toNode": "4e4aeabc-1c88-4cc9-9779-2758be4ecdb9",
+      "toPin": "635593ce-4096-4ae5-8560-6084906fd9b5"
+    },
+    {
+      "fromNode": "4e4aeabc-1c88-4cc9-9779-2758be4ecdb9",
+      "fromPin": "58787bea-dc2e-4865-b72c-ff44060f5f97",
+      "toNode": "ec76de4b-dd91-4633-8c12-4155e90023c3",
+      "toPin": "a5edd63a-cf2c-4785-b425-72ce509d73ec"
+    },
+    {
+      "fromNode": "4e4aeabc-1c88-4cc9-9779-2758be4ecdb9",
+      "fromPin": "c8c3f70c-4d65-459f-b6ad-4a0857a62caf",
+      "toNode": "d5760dc9-7a37-4eb1-98c4-1f0057b9ec4b",
+      "toPin": "fc70d99b-2e05-4baa-b2b1-fb6c01acd57a"
+    },
+    {
+      "fromNode": "4e4aeabc-1c88-4cc9-9779-2758be4ecdb9",
+      "fromPin": "c8c3f70c-4d65-459f-b6ad-4a0857a62caf",
+      "toNode": "c229d616-bf09-48f4-b814-3214fd56df18",
+      "toPin": "74faf30c-c7e4-4449-9262-3cf29c46f88a"
+    },
+    {
+      "fromNode": "f812c86b-7b4b-42aa-9e77-fcc82bae0d42",
+      "fromPin": "539e257e-67c3-4d3b-b4d3-5910c80709a0",
+      "toNode": "b46473c1-fcd7-4206-90d3-dbb96f1ea108",
+      "toPin": "077f07cb-181b-4b2a-91f7-be83a35ce01e"
+    },
+    {
+      "fromNode": "c229d616-bf09-48f4-b814-3214fd56df18",
+      "fromPin": "e67dddf1-be37-419e-aff4-b22d3403744d",
+      "toNode": "b46473c1-fcd7-4206-90d3-dbb96f1ea108",
+      "toPin": "a0cf61d6-1678-417c-962e-a78354cd7354"
+    },
+    {
+      "fromNode": "b46473c1-fcd7-4206-90d3-dbb96f1ea108",
+      "fromPin": "0ad5cab3-4f90-4565-992b-db6c171de22f",
+      "toNode": "b371b536-de97-4ecb-8307-96640c58ee22",
+      "toPin": "a10f5d4f-4fd6-4e2f-babd-89ce27dda555"
+    },
+    {
+      "fromNode": "d5760dc9-7a37-4eb1-98c4-1f0057b9ec4b",
+      "fromPin": "557b654d-5aa9-4dca-a474-be00e5d889fe",
+      "toNode": "b371b536-de97-4ecb-8307-96640c58ee22",
+      "toPin": "a81f2101-84c3-4db2-ba8d-d35f00c8f569"
+    },
+    {
+      "fromNode": "b371b536-de97-4ecb-8307-96640c58ee22",
+      "fromPin": "e13a1aab-c1d5-4924-822d-cd7b42311726",
+      "toNode": "bf39f47c-9282-4d82-8377-8732df9f4740",
+      "toPin": "baf57cec-50de-4acc-a933-66a9d3b9000a"
+    },
+    {
+      "fromNode": "c117ec0b-b0f1-4e97-a0c0-42f46e78841f",
+      "fromPin": "25cd5766-0940-4e7d-8777-84400d1960c9",
+      "toNode": "c47ef9bd-593e-4638-9e44-d5dd6c5b447a",
+      "toPin": "8032d3c2-5fb8-4a5d-a087-90fa6ac17da5"
+    },
+    {
+      "fromNode": "bf39f47c-9282-4d82-8377-8732df9f4740",
+      "fromPin": "a3f33532-b2f5-4109-941b-5329ff814d5f",
+      "toNode": "c47ef9bd-593e-4638-9e44-d5dd6c5b447a",
+      "toPin": "8b52bc9c-48d9-4bbb-af23-609bdbe04614"
+    },
+    {
+      "fromNode": "c47ef9bd-593e-4638-9e44-d5dd6c5b447a",
+      "fromPin": "dfbe4efc-ee2f-4c00-b582-12c79cb71bba",
+      "toNode": "9ee8f15f-530f-4b57-bb71-17fd21c1c321",
+      "toPin": "40358bc0-640b-41c2-b0b7-7de760580c8b"
+    },
+    {
+      "fromNode": "65a489f0-bbdd-4026-91d4-005dd7237428",
+      "fromPin": "2f2852ba-65b0-4b94-9227-1921cd8f9b9e",
+      "toNode": "8a89185d-0b0b-4ad0-b830-b42eb72343d2",
+      "toPin": "d321c116-b8de-4153-b470-785d50838445"
+    },
+    {
+      "fromNode": "8a89185d-0b0b-4ad0-b830-b42eb72343d2",
+      "fromPin": "3074ba3c-be32-4383-9b6b-96a79f142086",
+      "toNode": "465157fa-4083-463b-9ed5-f2f6af01c83a",
+      "toPin": "67c38343-3382-4eb9-acf9-c5cdb228d3b7"
+    },
+    {
+      "fromNode": "81c58ada-6d86-4d74-85c5-6024e12a4300",
+      "fromPin": "00b2e927-fca6-4afd-ab63-d4d6abd45c9e",
+      "toNode": "2581216a-0b25-44bc-a43c-d93d955cd714",
+      "toPin": "63eda3e3-6aa3-4db7-afd7-16558e8622ea"
+    },
+    {
+      "fromNode": "2581216a-0b25-44bc-a43c-d93d955cd714",
+      "fromPin": "e15e75df-2eb2-44c5-9ae4-369a6bee596d",
+      "toNode": "5174464f-819d-4db2-9911-27d69b15b31b",
+      "toPin": "de5dd27b-d6bb-48f1-bcec-fe798b7e9a6b"
+    },
+    {
+      "fromNode": "5174464f-819d-4db2-9911-27d69b15b31b",
+      "fromPin": "55f59f76-8058-479e-98df-0062eb557e64",
+      "toNode": "a93755ee-2c93-4eb6-b9b2-afc9b411e928",
+      "toPin": "9aba5745-3a0c-4dfd-82d5-df0b90e30a94"
+    },
+    {
+      "fromNode": "a93755ee-2c93-4eb6-b9b2-afc9b411e928",
+      "fromPin": "888850bf-2042-4de7-a14d-60ed2bb532c0",
+      "toNode": "6e1b403e-f5c1-473e-996a-30946a211b2f",
+      "toPin": "0d6ff987-c18a-461b-8d73-f8f934771a61"
+    },
+    {
+      "fromNode": "6e1b403e-f5c1-473e-996a-30946a211b2f",
+      "fromPin": "83cda90a-e0b5-4ef3-9633-9fe6edab28ee",
+      "toNode": "ffaf7404-d78a-4a4b-8d5e-b7713ead6deb",
+      "toPin": "288417a1-092e-4727-8e0e-f0407aa00bf6"
+    },
+    {
+      "fromNode": "ffaf7404-d78a-4a4b-8d5e-b7713ead6deb",
+      "fromPin": "862ad92f-aa98-4961-aae6-7840c124a250",
+      "toNode": "1873d5d1-a5b4-4d06-b6c3-96fbb155a52d",
+      "toPin": "4deb100c-ca25-4296-be7e-25fd2670bd01"
+    },
+    {
+      "fromNode": "1873d5d1-a5b4-4d06-b6c3-96fbb155a52d",
+      "fromPin": "6830cb30-32f7-4b18-8361-4be30e9fb616",
+      "toNode": "1842582c-08bd-43ed-a302-d210a6e7cbea",
+      "toPin": "8efc45bd-19a5-4b24-8649-eb791f1d3543"
+    },
+    {
+      "fromNode": "2581216a-0b25-44bc-a43c-d93d955cd714",
+      "fromPin": "097cfb6b-1ed3-41c4-b30b-d6f2bd573f43",
+      "toNode": "046da2be-5079-4ba1-aeed-fbbb1dedd296",
+      "toPin": "15c79479-70d2-4ce0-9411-e2f831623146"
+    },
+    {
+      "fromNode": "811dc41c-12ac-4309-8a1e-c3991bba7a2e",
+      "fromPin": "b7d3174c-f86a-4ab7-8450-0ce10bcb6d3c",
+      "toNode": "81c58ada-6d86-4d74-85c5-6024e12a4300",
+      "toPin": "0405f19f-1831-4d4d-a361-68ab79814bd9"
+    },
+    {
+      "fromNode": "45508c8b-e73f-49f5-8294-0ff1af3f3f65",
+      "fromPin": "838454c7-11d3-4fc5-8a04-099e0fb05625",
+      "toNode": "2581216a-0b25-44bc-a43c-d93d955cd714",
+      "toPin": "d8918cbf-9209-413c-be46-f2c4857db2a5"
+    },
+    {
+      "fromNode": "2581216a-0b25-44bc-a43c-d93d955cd714",
+      "fromPin": "630cc9ed-2ce0-4c4a-833e-1ec23e86b7f2",
+      "toNode": "1c919f88-6add-4cf7-9649-33215229b7ab",
+      "toPin": "e2eb68f7-68ed-423e-8be3-9bb0426dfbc7"
+    },
+    {
+      "fromNode": "1c919f88-6add-4cf7-9649-33215229b7ab",
+      "fromPin": "c7e9e994-7ec5-4d2e-8d19-d28875385cd2",
+      "toNode": "5174464f-819d-4db2-9911-27d69b15b31b",
+      "toPin": "02e1aede-e41a-4f0f-8d10-d3f04ef6a075"
+    },
+    {
+      "fromNode": "1c919f88-6add-4cf7-9649-33215229b7ab",
+      "fromPin": "dfe58bc3-6bf4-405b-8c41-403b46a7a244",
+      "toNode": "29bd3206-811d-4894-bc55-3aa964ea6f8e",
+      "toPin": "e37dd847-ce2a-4c28-8dde-4ce35ca9dd53"
+    },
+    {
+      "fromNode": "1c919f88-6add-4cf7-9649-33215229b7ab",
+      "fromPin": "dfe58bc3-6bf4-405b-8c41-403b46a7a244",
+      "toNode": "1e6da4f9-0cf1-414a-bd49-dfdc9437733a",
+      "toPin": "f6b70fd8-857b-484d-a0e3-47e43afda967"
+    },
+    {
+      "fromNode": "18b8c81f-5c30-416d-b37a-21449a6ae558",
+      "fromPin": "92277f4d-10cc-4eaf-a54c-69247d28c0b2",
+      "toNode": "a93755ee-2c93-4eb6-b9b2-afc9b411e928",
+      "toPin": "ff63eff3-96e1-454e-826a-573d305ae262"
+    },
+    {
+      "fromNode": "1e6da4f9-0cf1-414a-bd49-dfdc9437733a",
+      "fromPin": "906d1b57-8512-4ee0-9aa2-292cca38f7cb",
+      "toNode": "a93755ee-2c93-4eb6-b9b2-afc9b411e928",
+      "toPin": "bb47ffbd-7490-4f8c-be60-02e13a90c9cc"
+    },
+    {
+      "fromNode": "a93755ee-2c93-4eb6-b9b2-afc9b411e928",
+      "fromPin": "27948857-dc0d-4230-8102-bc5b79686022",
+      "toNode": "6e1b403e-f5c1-473e-996a-30946a211b2f",
+      "toPin": "16257fa6-0634-468d-b35d-88aaed37f8e0"
+    },
+    {
+      "fromNode": "29bd3206-811d-4894-bc55-3aa964ea6f8e",
+      "fromPin": "cb5be6be-0966-496d-9ea5-f210ced4d9bd",
+      "toNode": "6e1b403e-f5c1-473e-996a-30946a211b2f",
+      "toPin": "ff774b79-b9df-46bd-8806-9a7db244b19e"
+    },
+    {
+      "fromNode": "6e1b403e-f5c1-473e-996a-30946a211b2f",
+      "fromPin": "84d56e6c-f357-40c1-bc74-8a7f7df0a8a8",
+      "toNode": "ffaf7404-d78a-4a4b-8d5e-b7713ead6deb",
+      "toPin": "c2a68a29-ca7c-4365-af1d-65219ea26d50"
+    },
+    {
+      "fromNode": "022a64ea-503e-48a2-a6e3-c4e4f11c9fe2",
+      "fromPin": "840eb7f2-5553-4348-bf57-e5c5f6636595",
+      "toNode": "1873d5d1-a5b4-4d06-b6c3-96fbb155a52d",
+      "toPin": "b13d3775-c970-4333-a180-1129e1dab36c"
+    },
+    {
+      "fromNode": "ffaf7404-d78a-4a4b-8d5e-b7713ead6deb",
+      "fromPin": "e4be226b-de13-4928-85df-a35e9f7078c5",
+      "toNode": "1873d5d1-a5b4-4d06-b6c3-96fbb155a52d",
+      "toPin": "d96f202d-3235-4213-ab58-13da400fe2c5"
+    },
+    {
+      "fromNode": "1873d5d1-a5b4-4d06-b6c3-96fbb155a52d",
+      "fromPin": "3e0a9f12-1a4b-4a90-aad0-2de3eff5c75a",
+      "toNode": "1842582c-08bd-43ed-a302-d210a6e7cbea",
+      "toPin": "278f2828-58df-4f24-bb12-11f4840a2aac"
+    },
+    {
+      "fromNode": "991e99f9-e595-48bb-ab00-df8409ac1ed2",
+      "fromPin": "0a65be72-d843-4259-80c2-b6cc5f0c6688",
+      "toNode": "027d18c3-e279-443d-847a-92a0008afb28",
+      "toPin": "5af95df0-2b52-4967-b713-6856bf0ae760"
+    },
+    {
+      "fromNode": "027d18c3-e279-443d-847a-92a0008afb28",
+      "fromPin": "6dfb6ead-96d6-4576-acce-616d9f0db8e7",
+      "toNode": "046da2be-5079-4ba1-aeed-fbbb1dedd296",
+      "toPin": "361d7ff3-048e-4f89-ac9b-d77a853959ec"
+    },
+    {
+      "fromNode": "35dff089-01b3-4a3f-aab6-4b019743e0b8",
+      "fromPin": "1dd89dc2-0bc7-47db-b0c4-ff064141538c",
+      "toNode": "32466708-0d49-4e9b-aa7a-ca0654aa3458",
+      "toPin": "86c38490-ee94-4fec-89a3-6f53de092d2b"
+    },
+    {
+      "fromNode": "32466708-0d49-4e9b-aa7a-ca0654aa3458",
+      "fromPin": "7ae0b75c-2c2d-441f-af71-8f36b129d910",
+      "toNode": "a4430ad4-7aec-4443-b9a3-316e469eacec",
+      "toPin": "ea367c15-8d5f-4db6-b63b-10ba60d07699"
+    },
+    {
+      "fromNode": "a4430ad4-7aec-4443-b9a3-316e469eacec",
+      "fromPin": "29479603-470f-48ff-8ee9-fd1b89425fa9",
+      "toNode": "8e8c1b2d-760d-4be3-b17a-9238d4d4f3ab",
+      "toPin": "8b4d7a75-6ed0-4636-a59e-3c8c231ff553"
+    },
+    {
+      "fromNode": "8e8c1b2d-760d-4be3-b17a-9238d4d4f3ab",
+      "fromPin": "74ac7c81-0ea8-48d0-9cee-03d1d8e339b0",
+      "toNode": "a71d1dd5-b54d-4259-aec2-724c2bc52efb",
+      "toPin": "319248c9-8203-430d-8c67-d0a1f962527c"
+    },
+    {
+      "fromNode": "a71d1dd5-b54d-4259-aec2-724c2bc52efb",
+      "fromPin": "818b6065-105e-4910-a4fd-62aefc4faaa5",
+      "toNode": "81fc8106-a278-4449-b961-f54a0adf5f09",
+      "toPin": "709dacba-55cc-4751-913c-e3158968b3a7"
+    },
+    {
+      "fromNode": "81fc8106-a278-4449-b961-f54a0adf5f09",
+      "fromPin": "543f88d0-1f75-4f59-94aa-dda0db681e9e",
+      "toNode": "353e687b-18a6-43f0-8bf5-e38ae876d892",
+      "toPin": "ba04659b-581f-4600-bdcb-165295f39714"
+    },
+    {
+      "fromNode": "353e687b-18a6-43f0-8bf5-e38ae876d892",
+      "fromPin": "eac6248c-f0ed-45c5-a5d7-b22c16934693",
+      "toNode": "e03a4bac-bf00-4364-8339-e9ead4ec7079",
+      "toPin": "68e80933-0717-41c9-98eb-c3c6f5966497"
+    },
+    {
+      "fromNode": "e03a4bac-bf00-4364-8339-e9ead4ec7079",
+      "fromPin": "f0c29d7d-3154-44f8-b36f-228968de6fac",
+      "toNode": "76926db0-a495-4a7b-bbcc-deab5655336c",
+      "toPin": "ba13d214-5c8a-4b73-ae2e-714bda0955d4"
+    },
+    {
+      "fromNode": "76926db0-a495-4a7b-bbcc-deab5655336c",
+      "fromPin": "ef0f58fb-82d0-4785-b8b3-18a3f2fc68b2",
+      "toNode": "2761297b-3636-4746-9ea6-b9323991e015",
+      "toPin": "524a8426-33c3-4737-a0e5-da9f14fe4cb0"
+    },
+    {
+      "fromNode": "2761297b-3636-4746-9ea6-b9323991e015",
+      "fromPin": "e67b7a18-8794-4c34-a25a-f2cbde26e25d",
+      "toNode": "988c3823-16da-4d99-b157-e2be310b6c62",
+      "toPin": "0312e549-8f1e-4e6f-a320-032fb4f04f80"
+    },
+    {
+      "fromNode": "988c3823-16da-4d99-b157-e2be310b6c62",
+      "fromPin": "5fb744dc-6234-413a-ab4a-b465d7ff57e2",
+      "toNode": "30e2cafa-15e3-4f89-9abf-31b28c62925a",
+      "toPin": "11229a48-1165-478a-820f-e41ec2a5c7f2"
+    },
+    {
+      "fromNode": "9a2a2a60-20a1-4027-b4b6-6e544619d4c0",
+      "fromPin": "17fd9324-014d-4648-ba65-cbc596c4cc6a",
+      "toNode": "81c58ada-6d86-4d74-85c5-6024e12a4300",
+      "toPin": "0a48db02-4908-41f5-988f-517139f44d9e"
+    },
+    {
+      "fromNode": "35dff089-01b3-4a3f-aab6-4b019743e0b8",
+      "fromPin": "18302a17-e415-413b-9374-4caadcb2a000",
+      "toNode": "01243453-b208-435c-8577-882afd39d911",
+      "toPin": "176632af-fc66-47dd-b34b-6c0d314a1db4"
+    },
+    {
+      "fromNode": "01243453-b208-435c-8577-882afd39d911",
+      "fromPin": "c6f71eed-e390-4692-a612-f2c6b0c3353b",
+      "toNode": "f40a4f7f-1b8b-4243-9f97-1b9d05095be6",
+      "toPin": "f96c1ce3-f1a3-4030-a6ab-5493eec4e244"
+    },
+    {
+      "fromNode": "f40a4f7f-1b8b-4243-9f97-1b9d05095be6",
+      "fromPin": "670df4e8-2473-40cd-8e9a-6ad990dd4db0",
+      "toNode": "32466708-0d49-4e9b-aa7a-ca0654aa3458",
+      "toPin": "94a41164-8e44-44c7-83af-52f35fb099e2"
+    },
+    {
+      "fromNode": "35dff089-01b3-4a3f-aab6-4b019743e0b8",
+      "fromPin": "18302a17-e415-413b-9374-4caadcb2a000",
+      "toNode": "87a86a91-7769-4465-af69-d22214c7416c",
+      "toPin": "658194bf-4d02-4887-92e0-833d204f6c2d"
+    },
+    {
+      "fromNode": "35dff089-01b3-4a3f-aab6-4b019743e0b8",
+      "fromPin": "be586be4-a81d-49d5-bad5-76dd37dc4de9",
+      "toNode": "54bbbd62-8dfd-49ce-a54b-751994cdacf7",
+      "toPin": "3ff37777-9b91-4329-b534-f4f7f4468a92"
+    },
+    {
+      "fromNode": "87a86a91-7769-4465-af69-d22214c7416c",
+      "fromPin": "656fdf85-fbb5-4d3b-b1ed-ad3abac384ff",
+      "toNode": "54bbbd62-8dfd-49ce-a54b-751994cdacf7",
+      "toPin": "a6447a97-9038-4135-9ffd-8443ff6dc4c1"
+    },
+    {
+      "fromNode": "54bbbd62-8dfd-49ce-a54b-751994cdacf7",
+      "fromPin": "3e32a791-afc9-4d9f-9a85-9b422f043820",
+      "toNode": "f0e8d14d-7d1e-4ef4-8723-2d5cd8d3afef",
+      "toPin": "4faa91e0-1a72-415c-a361-15b882bf13e4"
+    },
+    {
+      "fromNode": "f0e8d14d-7d1e-4ef4-8723-2d5cd8d3afef",
+      "fromPin": "a8e9a0f8-7edc-4b97-bc45-86cfc05df16b",
+      "toNode": "a4430ad4-7aec-4443-b9a3-316e469eacec",
+      "toPin": "d99c5b78-520a-4cdd-98fc-814d18d048ac"
+    },
+    {
+      "fromNode": "35dff089-01b3-4a3f-aab6-4b019743e0b8",
+      "fromPin": "be586be4-a81d-49d5-bad5-76dd37dc4de9",
+      "toNode": "45f0e6b4-d856-47cd-8dbe-cd97a0b43459",
+      "toPin": "84551584-8715-4b0d-881a-01f98531371a"
+    },
+    {
+      "fromNode": "45f0e6b4-d856-47cd-8dbe-cd97a0b43459",
+      "fromPin": "be931b5b-b179-46c9-ad38-286da5cbfeda",
+      "toNode": "7fbbbcca-e706-455e-bd05-7f8ae07ec0d5",
+      "toPin": "6d1e8f64-796a-4ae4-868c-09b669df732b"
+    },
+    {
+      "fromNode": "7fbbbcca-e706-455e-bd05-7f8ae07ec0d5",
+      "fromPin": "68c3e8fe-3167-4cf3-9952-04e142afe752",
+      "toNode": "8e8c1b2d-760d-4be3-b17a-9238d4d4f3ab",
+      "toPin": "ad209e8f-caa6-4bd4-8ebd-098d9f9c7682"
+    },
+    {
+      "fromNode": "54bbbd62-8dfd-49ce-a54b-751994cdacf7",
+      "fromPin": "3e32a791-afc9-4d9f-9a85-9b422f043820",
+      "toNode": "8f883136-8f95-4c79-ae01-c0481589af0f",
+      "toPin": "1796161c-a7d6-4efa-9485-73cbfa1fbcc4"
+    },
+    {
+      "fromNode": "8f883136-8f95-4c79-ae01-c0481589af0f",
+      "fromPin": "2f140a67-c84c-4b4a-a61f-2328e2c94c88",
+      "toNode": "a71d1dd5-b54d-4259-aec2-724c2bc52efb",
+      "toPin": "275fb03e-2ea6-489e-89a6-91a6536fd89a"
+    },
+    {
+      "fromNode": "8f883136-8f95-4c79-ae01-c0481589af0f",
+      "fromPin": "daa518c7-da23-4bf6-a43b-39ad20d2c17d",
+      "toNode": "d5784ab6-61a5-4c28-bcbc-37097bc5b042",
+      "toPin": "08c68e0f-b703-4737-ada4-931d0910c4d6"
+    },
+    {
+      "fromNode": "d5784ab6-61a5-4c28-bcbc-37097bc5b042",
+      "fromPin": "c6b928fb-e786-41a9-ba42-080ec0c923c1",
+      "toNode": "d17ae30a-8426-4a36-a00e-9dc6254a84b2",
+      "toPin": "3aefe4b0-d70b-4699-89ec-8b422e86b246"
+    },
+    {
+      "fromNode": "d17ae30a-8426-4a36-a00e-9dc6254a84b2",
+      "fromPin": "e0578372-a681-4296-9e0f-d1ef26b86f4f",
+      "toNode": "81fc8106-a278-4449-b961-f54a0adf5f09",
+      "toPin": "eb4595da-e6a1-49cf-9460-4f7fceb51d10"
+    },
+    {
+      "fromNode": "45f0e6b4-d856-47cd-8dbe-cd97a0b43459",
+      "fromPin": "be931b5b-b179-46c9-ad38-286da5cbfeda",
+      "toNode": "4d62bcf3-00de-44a4-94cc-e0a41800ca9d",
+      "toPin": "f0fb9872-8d06-48ea-ad52-712754cbaa00"
+    },
+    {
+      "fromNode": "4d62bcf3-00de-44a4-94cc-e0a41800ca9d",
+      "fromPin": "9b707a52-5e7b-4ae3-b5c5-595cdabb9a77",
+      "toNode": "353e687b-18a6-43f0-8bf5-e38ae876d892",
+      "toPin": "3171760e-a281-4db8-9d51-57562fa2c278"
+    },
+    {
+      "fromNode": "8f883136-8f95-4c79-ae01-c0481589af0f",
+      "fromPin": "daa518c7-da23-4bf6-a43b-39ad20d2c17d",
+      "toNode": "288bdc94-db47-453a-92b9-9a3e9de043c7",
+      "toPin": "252c7471-db23-45e5-902c-31edea46c35d"
+    },
+    {
+      "fromNode": "8f883136-8f95-4c79-ae01-c0481589af0f",
+      "fromPin": "daa518c7-da23-4bf6-a43b-39ad20d2c17d",
+      "toNode": "ab27dc72-dac7-4c82-83be-8d16deaf1286",
+      "toPin": "7b396bdc-6e24-43c7-85d3-2e424365556e"
+    },
+    {
+      "fromNode": "8f883136-8f95-4c79-ae01-c0481589af0f",
+      "fromPin": "daa518c7-da23-4bf6-a43b-39ad20d2c17d",
+      "toNode": "24d5bce0-bdba-4dc5-a058-52f3b2645b09",
+      "toPin": "3a530e5d-a1e4-4f44-a523-b58d2ec4982d"
+    },
+    {
+      "fromNode": "4d62bcf3-00de-44a4-94cc-e0a41800ca9d",
+      "fromPin": "56e443b8-1c45-42ad-9de9-db0fe4016d5f",
+      "toNode": "e03a4bac-bf00-4364-8339-e9ead4ec7079",
+      "toPin": "532a3ec3-bfb8-4e0a-8608-3bcd25aa8ffc"
+    },
+    {
+      "fromNode": "288bdc94-db47-453a-92b9-9a3e9de043c7",
+      "fromPin": "d120bb89-98e1-42e5-99a4-c107c1e507a2",
+      "toNode": "e03a4bac-bf00-4364-8339-e9ead4ec7079",
+      "toPin": "bea434c6-e7a3-482c-9aa9-4da8d96afd3f"
+    },
+    {
+      "fromNode": "e03a4bac-bf00-4364-8339-e9ead4ec7079",
+      "fromPin": "26b8584a-7c9c-4444-94d7-41c2cfb4cb37",
+      "toNode": "76926db0-a495-4a7b-bbcc-deab5655336c",
+      "toPin": "f475ce2d-ce15-4357-bce3-b5f2b6468abe"
+    },
+    {
+      "fromNode": "ab27dc72-dac7-4c82-83be-8d16deaf1286",
+      "fromPin": "42f04869-1c66-48f4-bac2-ba2bb6ccf8cc",
+      "toNode": "76926db0-a495-4a7b-bbcc-deab5655336c",
+      "toPin": "60324438-5e69-4ca9-8644-6a2b28202568"
+    },
+    {
+      "fromNode": "76926db0-a495-4a7b-bbcc-deab5655336c",
+      "fromPin": "b92cd19f-d7b6-4433-9cea-7cd1e3aa29b3",
+      "toNode": "2761297b-3636-4746-9ea6-b9323991e015",
+      "toPin": "ea6211cc-e5bb-424c-8251-5de593860477"
+    },
+    {
+      "fromNode": "24d5bce0-bdba-4dc5-a058-52f3b2645b09",
+      "fromPin": "3f2e5ea4-e81a-4192-819c-740ef16920d0",
+      "toNode": "2761297b-3636-4746-9ea6-b9323991e015",
+      "toPin": "53ff543c-14b3-4e4e-96b9-5686ad72e2e4"
+    },
+    {
+      "fromNode": "45f0e6b4-d856-47cd-8dbe-cd97a0b43459",
+      "fromPin": "be931b5b-b179-46c9-ad38-286da5cbfeda",
+      "toNode": "988c3823-16da-4d99-b157-e2be310b6c62",
+      "toPin": "3124da7c-f9ef-4a02-be8f-1e753ca756fa"
+    },
+    {
+      "fromNode": "54bbbd62-8dfd-49ce-a54b-751994cdacf7",
+      "fromPin": "3e32a791-afc9-4d9f-9a85-9b422f043820",
+      "toNode": "988c3823-16da-4d99-b157-e2be310b6c62",
+      "toPin": "39088ec0-cf6e-4bba-802a-ddfa6efea743"
+    },
+    {
+      "fromNode": "9a2a2a60-20a1-4027-b4b6-6e544619d4c0",
+      "fromPin": "924d8a46-34bc-4519-91f9-3d57ff6b0e05",
+      "toNode": "eb0938e7-46ae-455b-a815-62f7d96e9757",
+      "toPin": "71c4e4e5-1ac5-4828-a9aa-6b3b97b0098f"
+    },
+    {
+      "fromNode": "9a2a2a60-20a1-4027-b4b6-6e544619d4c0",
+      "fromPin": "924d8a46-34bc-4519-91f9-3d57ff6b0e05",
+      "toNode": "465157fa-4083-463b-9ed5-f2f6af01c83a",
+      "toPin": "91363b2e-d163-4f62-adbe-14c41e06b644"
+    },
+    {
+      "fromNode": "9a2a2a60-20a1-4027-b4b6-6e544619d4c0",
+      "fromPin": "924d8a46-34bc-4519-91f9-3d57ff6b0e05",
+      "toNode": "45508c8b-e73f-49f5-8294-0ff1af3f3f65",
+      "toPin": "a140314a-16e4-44f1-b209-86d8977c0d92"
+    },
+    {
+      "fromNode": "9a2a2a60-20a1-4027-b4b6-6e544619d4c0",
+      "fromPin": "924d8a46-34bc-4519-91f9-3d57ff6b0e05",
+      "toNode": "046da2be-5079-4ba1-aeed-fbbb1dedd296",
+      "toPin": "7852dae7-bb16-43fb-afc5-33a0bb3c6867"
+    }
+  ],
+  "editorLayout": {
+    "nodePositions": {
+      "9a2a2a60-20a1-4027-b4b6-6e544619d4c0": {
+        "x": 40,
+        "y": 640
+      },
+      "35dff089-01b3-4a3f-aab6-4b019743e0b8": {
+        "x": 40,
+        "y": 80
+      },
+      "01243453-b208-435c-8577-882afd39d911": {
+        "x": 360,
+        "y": 300
+      },
+      "f40a4f7f-1b8b-4243-9f97-1b9d05095be6": {
+        "x": 520,
+        "y": 300
+      },
+      "32466708-0d49-4e9b-aa7a-ca0654aa3458": {
+        "x": 680,
+        "y": 80
+      },
+      "87a86a91-7769-4465-af69-d22214c7416c": {
+        "x": 820,
+        "y": 300
+      },
+      "54bbbd62-8dfd-49ce-a54b-751994cdacf7": {
+        "x": 1040,
+        "y": 300
+      },
+      "f0e8d14d-7d1e-4ef4-8723-2d5cd8d3afef": {
+        "x": 1240,
+        "y": 300
+      },
+      "a4430ad4-7aec-4443-b9a3-316e469eacec": {
+        "x": 1240,
+        "y": 80
+      },
+      "45f0e6b4-d856-47cd-8dbe-cd97a0b43459": {
+        "x": 1520,
+        "y": 300
+      },
+      "7fbbbcca-e706-455e-bd05-7f8ae07ec0d5": {
+        "x": 1800,
+        "y": 300
+      },
+      "8e8c1b2d-760d-4be3-b17a-9238d4d4f3ab": {
+        "x": 1800,
+        "y": 80
+      },
+      "8f883136-8f95-4c79-ae01-c0481589af0f": {
+        "x": 2080,
+        "y": 300
+      },
+      "a71d1dd5-b54d-4259-aec2-724c2bc52efb": {
+        "x": 2080,
+        "y": 80
+      },
+      "d5784ab6-61a5-4c28-bcbc-37097bc5b042": {
+        "x": 2220,
+        "y": 300
+      },
+      "d17ae30a-8426-4a36-a00e-9dc6254a84b2": {
+        "x": 2460,
+        "y": 300
+      },
+      "81fc8106-a278-4449-b961-f54a0adf5f09": {
+        "x": 2640,
+        "y": 80
+      },
+      "4d62bcf3-00de-44a4-94cc-e0a41800ca9d": {
+        "x": 2920,
+        "y": 300
+      },
+      "353e687b-18a6-43f0-8bf5-e38ae876d892": {
+        "x": 2920,
+        "y": 80
+      },
+      "288bdc94-db47-453a-92b9-9a3e9de043c7": {
+        "x": 3200,
+        "y": 300
+      },
+      "ab27dc72-dac7-4c82-83be-8d16deaf1286": {
+        "x": 3480,
+        "y": 300
+      },
+      "24d5bce0-bdba-4dc5-a058-52f3b2645b09": {
+        "x": 3760,
+        "y": 300
+      },
+      "e03a4bac-bf00-4364-8339-e9ead4ec7079": {
+        "x": 3200,
+        "y": 80
+      },
+      "76926db0-a495-4a7b-bbcc-deab5655336c": {
+        "x": 3480,
+        "y": 80
+      },
+      "2761297b-3636-4746-9ea6-b9323991e015": {
+        "x": 3760,
+        "y": 80
+      },
+      "988c3823-16da-4d99-b157-e2be310b6c62": {
+        "x": 4040,
+        "y": 80
+      },
+      "ecd38d40-b05c-4e8b-9959-1bbdcf9b2544": {
+        "x": 4320,
+        "y": 300
+      },
+      "30e2cafa-15e3-4f89-9abf-31b28c62925a": {
+        "x": 4320,
+        "y": 80
+      },
+      "eb0938e7-46ae-455b-a815-62f7d96e9757": {
+        "x": 4600,
+        "y": 300
+      },
+      "6baf22fc-d971-475f-8bbf-eed04eb2978e": {
+        "x": 4600,
+        "y": 80
+      },
+      "4e4aeabc-1c88-4cc9-9779-2758be4ecdb9": {
+        "x": 4880,
+        "y": 300
+      },
+      "ec76de4b-dd91-4633-8c12-4155e90023c3": {
+        "x": 4880,
+        "y": 80
+      },
+      "f812c86b-7b4b-42aa-9e77-fcc82bae0d42": {
+        "x": 5160,
+        "y": 300
+      },
+      "b46473c1-fcd7-4206-90d3-dbb96f1ea108": {
+        "x": 5160,
+        "y": 80
+      },
+      "c229d616-bf09-48f4-b814-3214fd56df18": {
+        "x": 5440,
+        "y": 300
+      },
+      "b371b536-de97-4ecb-8307-96640c58ee22": {
+        "x": 5440,
+        "y": 80
+      },
+      "d5760dc9-7a37-4eb1-98c4-1f0057b9ec4b": {
+        "x": 5720,
+        "y": 300
+      },
+      "bf39f47c-9282-4d82-8377-8732df9f4740": {
+        "x": 5720,
+        "y": 80
+      },
+      "c117ec0b-b0f1-4e97-a0c0-42f46e78841f": {
+        "x": 6000,
+        "y": 300
+      },
+      "c47ef9bd-593e-4638-9e44-d5dd6c5b447a": {
+        "x": 6000,
+        "y": 80
+      },
+      "9ee8f15f-530f-4b57-bb71-17fd21c1c321": {
+        "x": 6280,
+        "y": 80
+      },
+      "65a489f0-bbdd-4026-91d4-005dd7237428": {
+        "x": 6420,
+        "y": 300
+      },
+      "8a89185d-0b0b-4ad0-b830-b42eb72343d2": {
+        "x": 6700,
+        "y": 300
+      },
+      "465157fa-4083-463b-9ed5-f2f6af01c83a": {
+        "x": 6840,
+        "y": 80
+      },
+      "811dc41c-12ac-4309-8a1e-c3991bba7a2e": {
+        "x": 360,
+        "y": 860
+      },
+      "81c58ada-6d86-4d74-85c5-6024e12a4300": {
+        "x": 360,
+        "y": 640
+      },
+      "45508c8b-e73f-49f5-8294-0ff1af3f3f65": {
+        "x": 640,
+        "y": 860
+      },
+      "2581216a-0b25-44bc-a43c-d93d955cd714": {
+        "x": 640,
+        "y": 640
+      },
+      "1c919f88-6add-4cf7-9649-33215229b7ab": {
+        "x": 920,
+        "y": 860
+      },
+      "5174464f-819d-4db2-9911-27d69b15b31b": {
+        "x": 920,
+        "y": 640
+      },
+      "18b8c81f-5c30-416d-b37a-21449a6ae558": {
+        "x": 1200,
+        "y": 860
+      },
+      "a93755ee-2c93-4eb6-b9b2-afc9b411e928": {
+        "x": 1200,
+        "y": 640
+      },
+      "1e6da4f9-0cf1-414a-bd49-dfdc9437733a": {
+        "x": 1480,
+        "y": 860
+      },
+      "6e1b403e-f5c1-473e-996a-30946a211b2f": {
+        "x": 1480,
+        "y": 640
+      },
+      "29bd3206-811d-4894-bc55-3aa964ea6f8e": {
+        "x": 1760,
+        "y": 860
+      },
+      "ffaf7404-d78a-4a4b-8d5e-b7713ead6deb": {
+        "x": 1760,
+        "y": 640
+      },
+      "022a64ea-503e-48a2-a6e3-c4e4f11c9fe2": {
+        "x": 2040,
+        "y": 860
+      },
+      "1873d5d1-a5b4-4d06-b6c3-96fbb155a52d": {
+        "x": 2040,
+        "y": 640
+      },
+      "1842582c-08bd-43ed-a302-d210a6e7cbea": {
+        "x": 2320,
+        "y": 640
+      },
+      "991e99f9-e595-48bb-ab00-df8409ac1ed2": {
+        "x": 2460,
+        "y": 860
+      },
+      "027d18c3-e279-443d-847a-92a0008afb28": {
+        "x": 2740,
+        "y": 860
+      },
+      "046da2be-5079-4ba1-aeed-fbbb1dedd296": {
+        "x": 2880,
+        "y": 640
+      }
+    },
+    "comments": [],
+    "viewportX": 0,
+    "viewportY": 0,
+    "zoom": 1
+  },
+  "schemas": [
+    {
+      "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11aa",
+      "name": "WeaponAssembly",
+      "kind": "Component",
+      "fields": [
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11ab",
+          "name": "Barrel",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11ac",
+          "name": "FireRate",
+          "typeName": "float32",
+          "defaultValue": "6"
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11ad",
+          "name": "ProjectileSpeed",
+          "typeName": "float32",
+          "defaultValue": "40"
+        }
+      ],
+      "isComponent": true
+    },
+    {
+      "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22bb",
+      "name": "WeaponPart",
+      "kind": "Component",
+      "fields": [
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22b1",
+          "name": "Prototype",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22b2",
+          "name": "Slot",
+          "typeName": "string",
+          "defaultValue": "barrel"
+        },
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22b3",
+          "name": "Label",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22b4",
+          "name": "FireRate",
+          "typeName": "float32",
+          "defaultValue": "6"
+        },
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22b5",
+          "name": "ProjectileSpeed",
+          "typeName": "float32",
+          "defaultValue": "40"
+        }
+      ],
+      "isComponent": true
+    },
+    {
+      "id": "33cc33cc-33cc-43cc-83cc-33cc33cc33cc",
+      "name": "PartRow",
+      "kind": "Struct",
+      "fields": [
+        {
+          "id": "33cc33cc-33cc-43cc-83cc-33cc33cc33c1",
+          "name": "Id",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "33cc33cc-33cc-43cc-83cc-33cc33cc33c2",
+          "name": "Text",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "33cc33cc-33cc-43cc-83cc-33cc33cc33c3",
+          "name": "Disabled",
+          "typeName": "bool",
+          "defaultValue": "false"
+        }
+      ],
+      "isComponent": false
+    }
+  ]
+}
