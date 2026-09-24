@@ -16,6 +16,8 @@
             <cc:CommandButton Command="adminlogs" Text="{Loc admin-player-actions-window-admin-logs}"/>
             <cc:CommandButton Command="faxui" Text="{Loc admin-player-actions-window-admin-fax}"/>
             <cc:CommandButton Command="achatwindow" Text="{Loc admin-player-actions-window-admin-chat}"/>
+            <!-- NC: Astra Studio is visible only with AdminFlags.AstraGraph. -->
+            <cc:CommandButton Command="astra" Text="{Loc nc-astra-open-studio}"/>
         </GridContainer>
     </BoxContainer>
 </Control>

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <!-- The module loader typechecks every DLL whose name starts with Content. This assembly must not. -->
+    <AssemblyName>NightCity.AstraHost.Shared</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RobustToolbox\Robust.Shared\Robust.Shared.csproj" />
+    <ProjectReference Include="..\AstraGraph\AstraGraph.Robust.Shared\AstraGraph.Robust.Shared.csproj" />
+    <ProjectReference Include="..\AstraGraph\AstraGraph.Editor.Protocol\AstraGraph.Editor.Protocol.csproj" />
+  </ItemGroup>
+</Project>

@@ -20,6 +20,8 @@
     <ProjectReference Include="..\Content.Server.Database\Content.Server.Database.csproj" />
     <ProjectReference Include="..\Content.Shared.Database\Content.Shared.Database.csproj" />
     <ProjectReference Include="..\Content.Shared\Content.Shared.csproj" />
+    <ProjectReference Include="..\NightCity.AstraHost.Shared\NightCity.AstraHost.Shared.csproj" />
+    <ProjectReference Include="..\NightCity.AstraHost.Server\NightCity.AstraHost.Server.csproj" />
     <Content Include="server_config.toml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

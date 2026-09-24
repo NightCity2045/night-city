@@ -17,9 +17,12 @@
   <Import Project="..\RobustToolbox\Imports\Lidgren.props" />
   <Import Project="..\RobustToolbox\Imports\Client.props" />
   <Import Project="..\RobustToolbox\Imports\Shared.props" />
+  <Import Project="..\RobustToolbox\Imports\WebView.props" />
 
   <ItemGroup>
     <ProjectReference Include="..\Content.Shared\Content.Shared.csproj" />
+    <ProjectReference Include="..\NightCity.AstraHost.Shared\NightCity.AstraHost.Shared.csproj" />
+    <ProjectReference Include="..\NightCity.AstraHost.Client\NightCity.AstraHost.Client.csproj" />
   </ItemGroup>
   <Import Project="..\RobustToolbox\MSBuild\Robust.Properties.targets" />
   <Import Project="..\RobustToolbox\MSBuild\XamlIL.targets" />

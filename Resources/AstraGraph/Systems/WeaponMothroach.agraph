@@ -1,0 +1,177 @@
+{
+  "formatVersion": "1.0",
+  "id": "b40ab513-b7e0-4a27-9665-f3554862af1a",
+  "name": "WeaponMothroach",
+  "kind": "system",
+  "side": "server",
+  "metadata": {
+    "author": "",
+    "description": "On a melee hit, spawn count mothroaches at the target. Damage still applies.",
+    "version": "1.0.0",
+    "createdAt": "2026-09-22T19:11:45.8604322+00:00",
+    "modifiedAt": "2026-09-23T16:30:00.0000000+00:00",
+    "tags": [],
+    "customAttributes": {}
+  },
+  "variables": [],
+  "nodes": [
+    {
+      "id": "ae29ec02-6d78-4767-8b3c-5e120c4b4f91",
+      "name": "Melee",
+      "nodeType": "Event.MeleeHit",
+      "pins": [
+        { "id": "829b87c1-e2d1-42c7-aa40-c5f4764d2d0f", "name": "Out", "direction": "output", "kind": "execution", "dataType": "" },
+        { "id": "8d395b71-406f-494e-be3d-4f62072b848a", "name": "Entity", "direction": "output", "kind": "data", "dataType": "EntityUid" },
+        { "id": "805d4f89-7e9d-4b9f-a09a-971a3697ab78", "name": "Event", "direction": "output", "kind": "data", "dataType": "object" }
+      ],
+      "properties": {
+        "eventType": "MeleeHitEvent",
+        "componentType": "MeleeWeaponComponent"
+      }
+    },
+    {
+      "id": "0f2bbe45-f6e1-4d0f-a426-7b0cdbe7182d",
+      "name": "HitEntities",
+      "nodeType": "Native.GetMember",
+      "pins": [
+        { "id": "51d7003a-555d-4743-ae27-eb9c7cc2db61", "name": "Target", "direction": "input", "kind": "data", "dataType": "object" },
+        { "id": "49cbb5ec-1a05-4c07-b9a8-c8812817c7f6", "name": "Value", "direction": "output", "kind": "data", "dataType": "List<EntityUid>" }
+      ],
+      "properties": { "Member": "HitEntities" }
+    },
+    {
+      "id": "9742d938-f332-454f-9e6f-5c1007473ced",
+      "name": "EachHit",
+      "nodeType": "Flow.ForEach",
+      "pins": [
+        { "id": "c094e060-25ce-44de-869e-e29d2b28f37e", "name": "In", "direction": "input", "kind": "execution", "dataType": "" },
+        { "id": "eef6a168-c19a-4386-8435-69f1415f37d8", "name": "Body", "direction": "output", "kind": "execution", "dataType": "" },
+        { "id": "46f7b81d-1f11-4cdc-aa33-d21582aee44b", "name": "Collection", "direction": "input", "kind": "data", "dataType": "List<EntityUid>" },
+        { "id": "b8b94447-e72d-42f5-880c-dccd24fd48e7", "name": "Current", "direction": "output", "kind": "data", "dataType": "EntityUid" }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "a2d20b94-6a4a-4279-adc0-69929b08bca2",
+      "name": "Strike",
+      "nodeType": "Entity.TryGetComponent",
+      "pins": [
+        { "id": "ef952bd4-6434-4691-9341-006a7085616a", "name": "Entity", "direction": "input", "kind": "data", "dataType": "EntityUid" },
+        { "id": "9903bea5-b770-4983-98a4-059fec7b6c7c", "name": "Found", "direction": "output", "kind": "data", "dataType": "bool" },
+        { "id": "dc73beee-dd66-44ab-93c7-a0e25ab74ce6", "name": "Component", "direction": "output", "kind": "data", "dataType": "component" }
+      ],
+      "properties": { "ComponentType": "MothroachStrike" }
+    },
+    {
+      "id": "296ffc6f-27a4-42f6-8ab4-aeb13d05e7ad",
+      "name": "HasStrike",
+      "nodeType": "Core.Branch",
+      "pins": [
+        { "id": "f1ba6125-2606-4a3c-9e1d-b0678244b197", "name": "In", "direction": "input", "kind": "execution", "dataType": "" },
+        { "id": "2e95253f-df66-4ea3-a445-091557312022", "name": "True", "direction": "output", "kind": "execution", "dataType": "" },
+        { "id": "8c1a0e2b-1111-4aaa-9bbb-ccccccccccc1", "name": "False", "direction": "output", "kind": "execution", "dataType": "" },
+        { "id": "214f7ea3-65d2-4120-aa46-e7ad69bee659", "name": "Condition", "direction": "input", "kind": "data", "dataType": "bool" }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "060d9588-e53d-4a4f-9484-f1d40e2d856e",
+      "name": "SpawnProto",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        { "id": "045f569b-091f-4b84-808b-ae097476bd48", "name": "Component", "direction": "input", "kind": "data", "dataType": "component" },
+        { "id": "fcd5c3c0-c8d6-4c91-b717-d6b02101e616", "name": "Value", "direction": "output", "kind": "data", "dataType": "EntProtoId" }
+      ],
+      "properties": { "Schema": "MothroachStrike", "Field": "spawn" }
+    },
+    {
+      "id": "4a2cec51-baf6-4df0-94a3-859a81fd51c7",
+      "name": "SpawnCount",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        { "id": "6f760510-79ca-49e6-92db-f35020ff832b", "name": "Component", "direction": "input", "kind": "data", "dataType": "component" },
+        { "id": "901a9bcf-876a-4c5a-bdb0-52d4df0a9560", "name": "Value", "direction": "output", "kind": "data", "dataType": "int32" }
+      ],
+      "properties": { "Schema": "MothroachStrike", "Field": "count" }
+    },
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "name": "TargetCoords",
+      "nodeType": "Native.Call",
+      "pins": [
+        { "id": "11111111-1111-4111-8111-111111111112", "name": "Entity", "direction": "input", "kind": "data", "dataType": "EntityUid" },
+        { "id": "11111111-1111-4111-8111-111111111113", "name": "Value", "direction": "output", "kind": "data", "dataType": "object" }
+      ],
+      "properties": { "Method": "Entity.GetCoordinates" }
+    },
+    {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "name": "SpawnLoop",
+      "nodeType": "Flow.For",
+      "pins": [
+        { "id": "22222222-2222-4222-8222-222222222223", "name": "In", "direction": "input", "kind": "execution", "dataType": "" },
+        { "id": "22222222-2222-4222-8222-222222222224", "name": "Out", "direction": "output", "kind": "execution", "dataType": "" },
+        { "id": "22222222-2222-4222-8222-222222222225", "name": "Body", "direction": "output", "kind": "execution", "dataType": "" },
+        { "id": "22222222-2222-4222-8222-222222222226", "name": "Start", "direction": "input", "kind": "data", "dataType": "int32", "defaultValue": "0" },
+        { "id": "22222222-2222-4222-8222-222222222227", "name": "Count", "direction": "input", "kind": "data", "dataType": "int32" }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "name": "Spawn",
+      "nodeType": "Native.Call",
+      "pins": [
+        { "id": "33333333-3333-4333-8333-333333333334", "name": "In", "direction": "input", "kind": "execution", "dataType": "" },
+        { "id": "33333333-3333-4333-8333-333333333335", "name": "Prototype", "direction": "input", "kind": "data", "dataType": "EntProtoId" },
+        { "id": "33333333-3333-4333-8333-333333333336", "name": "Coordinates", "direction": "input", "kind": "data", "dataType": "object" }
+      ],
+      "properties": { "Method": "Entity.SpawnAt" }
+    }
+  ],
+  "connections": [
+    { "fromNode": "ae29ec02-6d78-4767-8b3c-5e120c4b4f91", "fromPin": "829b87c1-e2d1-42c7-aa40-c5f4764d2d0f", "toNode": "9742d938-f332-454f-9e6f-5c1007473ced", "toPin": "c094e060-25ce-44de-869e-e29d2b28f37e" },
+    { "fromNode": "ae29ec02-6d78-4767-8b3c-5e120c4b4f91", "fromPin": "805d4f89-7e9d-4b9f-a09a-971a3697ab78", "toNode": "0f2bbe45-f6e1-4d0f-a426-7b0cdbe7182d", "toPin": "51d7003a-555d-4743-ae27-eb9c7cc2db61" },
+    { "fromNode": "0f2bbe45-f6e1-4d0f-a426-7b0cdbe7182d", "fromPin": "49cbb5ec-1a05-4c07-b9a8-c8812817c7f6", "toNode": "9742d938-f332-454f-9e6f-5c1007473ced", "toPin": "46f7b81d-1f11-4cdc-aa33-d21582aee44b" },
+    { "fromNode": "9742d938-f332-454f-9e6f-5c1007473ced", "fromPin": "eef6a168-c19a-4386-8435-69f1415f37d8", "toNode": "296ffc6f-27a4-42f6-8ab4-aeb13d05e7ad", "toPin": "f1ba6125-2606-4a3c-9e1d-b0678244b197" },
+    { "fromNode": "ae29ec02-6d78-4767-8b3c-5e120c4b4f91", "fromPin": "8d395b71-406f-494e-be3d-4f62072b848a", "toNode": "a2d20b94-6a4a-4279-adc0-69929b08bca2", "toPin": "ef952bd4-6434-4691-9341-006a7085616a" },
+    { "fromNode": "a2d20b94-6a4a-4279-adc0-69929b08bca2", "fromPin": "9903bea5-b770-4983-98a4-059fec7b6c7c", "toNode": "296ffc6f-27a4-42f6-8ab4-aeb13d05e7ad", "toPin": "214f7ea3-65d2-4120-aa46-e7ad69bee659" },
+    { "fromNode": "296ffc6f-27a4-42f6-8ab4-aeb13d05e7ad", "fromPin": "2e95253f-df66-4ea3-a445-091557312022", "toNode": "22222222-2222-4222-8222-222222222222", "toPin": "22222222-2222-4222-8222-222222222223" },
+    { "fromNode": "a2d20b94-6a4a-4279-adc0-69929b08bca2", "fromPin": "dc73beee-dd66-44ab-93c7-a0e25ab74ce6", "toNode": "060d9588-e53d-4a4f-9484-f1d40e2d856e", "toPin": "045f569b-091f-4b84-808b-ae097476bd48" },
+    { "fromNode": "a2d20b94-6a4a-4279-adc0-69929b08bca2", "fromPin": "dc73beee-dd66-44ab-93c7-a0e25ab74ce6", "toNode": "4a2cec51-baf6-4df0-94a3-859a81fd51c7", "toPin": "6f760510-79ca-49e6-92db-f35020ff832b" },
+    { "fromNode": "4a2cec51-baf6-4df0-94a3-859a81fd51c7", "fromPin": "901a9bcf-876a-4c5a-bdb0-52d4df0a9560", "toNode": "22222222-2222-4222-8222-222222222222", "toPin": "22222222-2222-4222-8222-222222222227" },
+    { "fromNode": "9742d938-f332-454f-9e6f-5c1007473ced", "fromPin": "b8b94447-e72d-42f5-880c-dccd24fd48e7", "toNode": "11111111-1111-4111-8111-111111111111", "toPin": "11111111-1111-4111-8111-111111111112" },
+    { "fromNode": "22222222-2222-4222-8222-222222222222", "fromPin": "22222222-2222-4222-8222-222222222225", "toNode": "33333333-3333-4333-8333-333333333333", "toPin": "33333333-3333-4333-8333-333333333334" },
+    { "fromNode": "060d9588-e53d-4a4f-9484-f1d40e2d856e", "fromPin": "fcd5c3c0-c8d6-4c91-b717-d6b02101e616", "toNode": "33333333-3333-4333-8333-333333333333", "toPin": "33333333-3333-4333-8333-333333333335" },
+    { "fromNode": "11111111-1111-4111-8111-111111111111", "fromPin": "11111111-1111-4111-8111-111111111113", "toNode": "33333333-3333-4333-8333-333333333333", "toPin": "33333333-3333-4333-8333-333333333336" }
+  ],
+  "editorLayout": {
+    "nodePositions": {},
+    "comments": [],
+    "viewportX": 0,
+    "viewportY": 0,
+    "zoom": 1
+  },
+  "schemas": [
+    {
+      "id": "785ae153-da2a-4f91-8675-4ea6b4ded74e",
+      "name": "MothroachStrike",
+      "kind": "Component",
+      "fields": [
+        {
+          "id": "6babb6d5-a300-4487-9d73-4df3e65660f0",
+          "name": "spawn",
+          "typeName": "EntProtoId<EntityPrototype>",
+          "defaultValue": "MobMothroach"
+        },
+        {
+          "id": "54c43d21-c6ae-41bc-bc99-93d5180e6f4e",
+          "name": "count",
+          "typeName": "int32",
+          "defaultValue": "3"
+        }
+      ],
+      "isComponent": true
+    }
+  ]
+}

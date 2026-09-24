@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Content.Shared.Database\Content.Shared.Database.csproj" />
+    <ProjectReference Include="..\NightCity.AstraHost.Shared\NightCity.AstraHost.Shared.csproj" />
   </ItemGroup>
 
   <Import Project="..\RobustToolbox\MSBuild\Robust.Properties.targets" />
