@@ -23,7 +23,7 @@ public static class AstraHtmlDocuments
         height = 300;
         if (!TryRead(documentName, out var json))
         {
-            Logger.GetSawmill("astra.html").Error($"Astra UI document '{documentName}' is not in the build.");
+            Logger.GetSawmill("astra.html").Error($"Astra UI document '{documentName}' was not found in the server data directory.");
             return false;
         }
 
@@ -41,20 +41,20 @@ public static class AstraHtmlDocuments
     private static bool TryRead(string documentName, out string json)
     {
         json = "";
-        var resources = IoCManager.Resolve<IResourceManager>();
-        if (resources.TryContentFileRead(AstraHtmlDocumentPaths.ResourcePath(documentName), out var stream))
+        var path = AstraHtmlDocumentPaths.File(documentName);
+        if (path != null && File.Exists(path))
         {
-            using var reader = new StreamReader(stream);
-            json = reader.ReadToEnd();
+            json = File.ReadAllText(path);
             if (json.Length > 0)
                 return true;
         }
 
-        var path = AstraHtmlDocumentPaths.File(documentName);
-        if (path == null || !File.Exists(path))
+        var resources = IoCManager.Resolve<IResourceManager>();
+        if (!resources.TryContentFileRead(AstraHtmlDocumentPaths.ResourcePath(documentName), out var stream))
             return false;
 
-        json = File.ReadAllText(path);
+        using var reader = new StreamReader(stream);
+        json = reader.ReadToEnd();
         return json.Length > 0;
     }
 }

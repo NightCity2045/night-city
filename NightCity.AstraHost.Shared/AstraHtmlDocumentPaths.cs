@@ -5,7 +5,8 @@
 namespace Content.Shared._NC.AstraGraph;
 
 /// <summary>
-/// Studio UI documents live in the game content, next to the other AstraGraph files.
+/// Studio UI documents are written beside savemap, under the AstraGraph data directory.
+/// <see cref="ResourcePath"/> is the place a maintainer copies a finished document into the build.
 /// </summary>
 public static class AstraHtmlDocumentPaths
 {
@@ -15,7 +16,7 @@ public static class AstraHtmlDocumentPaths
             return null;
 
         var safe = FileName(documentName);
-        return Path.Combine(root, "Resources", "AstraGraph", "Ui", safe + ".json");
+        return Path.Combine(root, AstraConsumerLayout.DataRelativePath, "Ui", safe + ".json");
     }
 
     public static string ResourcePath(string documentName) => "/AstraGraph/Ui/" + FileName(documentName) + ".json";

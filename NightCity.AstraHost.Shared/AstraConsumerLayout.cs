@@ -14,7 +14,12 @@ public static class AstraConsumerLayout
 {
     public const string ManifestFileName = "Compatibility.json";
     public const string ProjectRelativePath = "Resources/AstraGraph";
-    public const string DataRelativePath = "data/AstraGraph";
+
+    /// <summary>
+    /// Working copies live next to savemap, in the server user-data directory.
+    /// A maintainer copies a finished file into <see cref="ProjectRelativePath"/> when it should ship.
+    /// </summary>
+    public const string DataRelativePath = "bin/Content.Server/data/AstraGraph";
 
     public static bool TryLocate(out string consumerRoot)
     {

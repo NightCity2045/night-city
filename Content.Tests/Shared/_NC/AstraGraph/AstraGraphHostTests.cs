@@ -56,6 +56,9 @@ public sealed class AstraGraphHostTests
         Assert.That(AstraHtmlDocumentPaths.FileName("Vehicle Maintenance"), Is.EqualTo("Vehicle Maintenance"));
         Assert.That(AstraHtmlDocumentPaths.FileName("../secret"), Is.Not.EqualTo("../secret"));
         Assert.That(AstraHtmlDocumentPaths.ResourcePath("Panel"), Is.EqualTo("/AstraGraph/Ui/Panel.json"));
+        Assert.That(AstraConsumerLayout.TryLocate(out var root), Is.True);
+        var file = AstraHtmlDocumentPaths.File("Panel");
+        Assert.That(file, Is.EqualTo(Path.Combine(root, "bin", "Content.Server", "data", "AstraGraph", "Ui", "Panel.json")));
     }
 
     [Test]
