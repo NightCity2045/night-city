@@ -32,7 +32,6 @@ public sealed class AstraHtmlGameWindow
     private WebViewControl? _view;
     private string _html = "";
     private string? _stateJson;
-    private bool _stateSent;
     private int _revision;
     private Action<string, string?>? _onAction;
 
@@ -61,7 +60,6 @@ public sealed class AstraHtmlGameWindow
     {
         _html = Prepare(html);
         _onAction = onAction;
-        _stateSent = false;
         _revision++;
         EnsureWindow(title, width, height);
         if (_window == null || _view == null)
@@ -79,14 +77,6 @@ public sealed class AstraHtmlGameWindow
         _stateJson = JsonSerializer.Serialize(values);
         if (_view == null)
             return;
-
-        if (!_stateSent)
-        {
-            _stateSent = true;
-            _revision++;
-            _view.Url = PagePrefix + "?rev=" + _revision.ToString();
-            return;
-        }
 
         _view.ExecuteJavaScript("if (window.astraApplyState) astraApplyState(" + _stateJson + ");");
     }
@@ -117,7 +107,6 @@ public sealed class AstraHtmlGameWindow
         {
             _view = null;
             _window = null;
-            _stateSent = false;
         };
     }
 
@@ -132,16 +121,36 @@ public sealed class AstraHtmlGameWindow
             return;
         }
 
-        if (!context.Url.StartsWith(TexturePrefix, StringComparison.OrdinalIgnoreCase))
-            return;
-
-        if (!TryReadTexture(context.Url, out var bytes, out var mime))
+        if (context.Url.StartsWith(ActionPrefix, StringComparison.OrdinalIgnoreCase))
         {
-            context.DoCancel();
+            if (context.IsNavigation)
+            {
+                context.DoCancel();
+                return;
+            }
+
+            DispatchAction(context.Url);
+            context.DoRespondStream(new MemoryStream([]), "text/plain");
             return;
         }
 
-        context.DoRespondStream(new MemoryStream(bytes), mime);
+        if (context.Url.StartsWith(TexturePrefix, StringComparison.OrdinalIgnoreCase) &&
+            TryReadTexture(context.Url, out var bytes, out var mime))
+        {
+            context.DoRespondStream(new MemoryStream(bytes), mime);
+            return;
+        }
+
+        context.DoCancel();
+    }
+
+    private void DispatchAction(string url)
+    {
+        var original = "astra-bui://action" + url[ActionPrefix.Length..];
+        if (!UiHtmlPage.TryReadAction(original, out var name, out var payload))
+            return;
+
+        _onAction?.Invoke(name, JsonSerializer.Serialize(payload));
     }
 
     private void OnBrowse(IBeforeBrowseContext context)
@@ -150,11 +159,7 @@ public sealed class AstraHtmlGameWindow
             return;
 
         context.DoCancel();
-        var original = "astra-bui://action" + context.Url[ActionPrefix.Length..];
-        if (!UiHtmlPage.TryReadAction(original, out var name, out var payload))
-            return;
-
-        _onAction?.Invoke(name, JsonSerializer.Serialize(payload));
+        DispatchAction(context.Url);
     }
 
     private static string Prepare(string html) => html

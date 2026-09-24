@@ -89,6 +89,10 @@ namespace Content.Server.Entry
             }
 
             Dependencies.Resolve<IRobustSerializer>().FloatFlags = SerializerFloatFlags.RemoveReadNan;
+
+            // The net serializer snapshots types immediately after PreInit. Astra BUI messages
+            // live in the library, so the assembly has to be visible before that snapshot.
+            AstraContentEntry.Load(Dependencies);
         }
 
         /// <inheritdoc />
@@ -97,10 +101,6 @@ namespace Content.Server.Entry
             base.Init();
             Dependencies.BuildGraph();
             Dependencies.InjectDependencies(this);
-
-            // NC-Edit-Start
-            AstraContentEntry.Load(Dependencies);
-            // NC-Edit-End
 
             LoadConfigPresets(_cfg, _res, _log.GetSawmill("configpreset"));
 
