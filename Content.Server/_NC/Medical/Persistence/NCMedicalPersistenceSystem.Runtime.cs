@@ -3,13 +3,13 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Globalization;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Content.Server.Database;
-using Content.Server.Gibbing.Systems;
 using Content.Server.Preferences.Managers;
+using Content.Server._NC.LivingCity.Time;
+using Content.Server._NC.Persistence.RoundSnapshot;
 using Content.Shared._NC.Identity;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Persistence;
@@ -20,6 +20,7 @@ using Content.Shared.GameTicking;
 using Content.Shared.Mind;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Player;
+using Robust.Shared.Asynchronous;
 using Robust.Shared.Serialization.Manager;
 using Robust.Shared.Serialization.Markdown;
 
@@ -27,27 +28,19 @@ namespace Content.Server._NC.Medical.Persistence;
 
 public sealed partial class NCMedicalPersistenceSystem
 {
-    private static readonly TimeSpan SaveDebounce = TimeSpan.FromSeconds(2);
-    private static readonly TimeSpan SaveMaximumDeferral = TimeSpan.FromSeconds(10);
-    private static readonly TimeSpan SaveRetryDelay = TimeSpan.FromSeconds(5);
-
+    private const string RoundSnapshotSectionType = "player-medical";
+    private const string RoundSnapshotOwnerType = "character";
     [Dependency] private IServerDbManager _database = default!;
     [Dependency] private IServerPreferencesManager _preferences = default!;
     [Dependency] private ISerializationManager _serialization = default!;
+    [Dependency] private ITaskManager _taskManager = default!;
 
     private readonly Dictionary<EntityUid, PlayerBinding> _playerBindings = [];
     private readonly Dictionary<NCCharacterId, EntityUid> _boundCharacters = [];
     private readonly Dictionary<NCCharacterId, OwnerSaveState> _saveStates = [];
-    private readonly Dictionary<EntityUid, TimeSpan> _saveDue = [];
-    private readonly Dictionary<EntityUid, TimeSpan> _saveDirtySince = [];
-    private readonly Dictionary<NCCharacterId, TimeSpan> _retryDue = [];
     private readonly HashSet<EntityUid> _loadingBodies = [];
     private readonly HashSet<EntityUid> _suppressPersistenceEvents = [];
-    private readonly List<EntityUid> _duePlayerWrites = [];
-    private readonly List<NCCharacterId> _dueRetries = [];
-    private long _capturedPlayerWrites;
-    private double _lastCaptureMilliseconds;
-    private double _maximumCaptureMilliseconds;
+    private readonly Dictionary<NCCharacterId, PendingWrite> _roundSnapshots = [];
 
     public override void Initialize()
     {
@@ -58,41 +51,14 @@ public sealed partial class NCMedicalPersistenceSystem
         SubscribeLocalEvent<NCMedicalBodyComponent, NCMedicalBodyChangedEvent>(OnMedicalBodyChanged);
         SubscribeLocalEvent<NCMedicalBodyComponent, EntityTerminatingEvent>(OnMedicalBodyTerminating);
         SubscribeLocalEvent<MapComponent, EntityTerminatingEvent>(OnMapTerminating);
-        SubscribeLocalEvent<RoundEndMessageEvent>(OnRoundEnd, before: [typeof(GibOnRoundEndSystem)]);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart, before: [typeof(SharedMindSystem)]);
+        SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(OnActiveWorldSessionStarted);
+        SubscribeLocalEvent<NCRoundSnapshotCaptureEvent>(OnRoundSnapshotCapture);
     }
 
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
-        var now = _timing.CurTime;
-        // Reuse bounded scratch lists. Damage schedules a save, so allocating two LINQ pipelines on every
-        // server tick while that save is pending creates avoidable GC pressure exactly during combat.
-        _duePlayerWrites.Clear();
-        foreach (var (body, due) in _saveDue)
-        {
-            if (due <= now)
-                _duePlayerWrites.Add(body);
-        }
-        foreach (var body in _duePlayerWrites)
-        {
-            _saveDue.Remove(body);
-            _saveDirtySince.Remove(body);
-            CapturePlayerWrite(body, allowTerminating: false);
-        }
-
-        _dueRetries.Clear();
-        foreach (var (characterId, due) in _retryDue)
-        {
-            if (due <= now)
-                _dueRetries.Add(characterId);
-        }
-        foreach (var characterId in _dueRetries)
-        {
-            _retryDue.Remove(characterId);
-            if (_saveStates.TryGetValue(characterId, out var state))
-                StartNextWrite(characterId, state);
-        }
     }
 
     private async void OnPlayerSpawnComplete(PlayerSpawnCompleteEvent args)
@@ -125,15 +91,39 @@ public sealed partial class NCMedicalPersistenceSystem
         NCMedicalStoredSnapshotData? stored;
         try
         {
-            stored = await _database.GetNCMedicalSnapshotAsync(characterId);
+            var ownerId = characterId.Value.ToString(CultureInfo.InvariantCulture);
+            var sections = await _database.GetLatestNCRoundSnapshotSectionsAsync(
+                RoundSnapshotSectionType,
+                RoundSnapshotOwnerType,
+                ownerId);
+            var section = sections is [{ ChunkIndex: 0 }] ? sections[0] : null;
+            stored = section == null
+                ? await _database.GetNCMedicalSnapshotAsync(characterId)
+                : new NCMedicalStoredSnapshotData(
+                    characterId,
+                    (ushort) section.FormatVersion,
+                    1,
+                    section.Payload,
+                    DateTime.UtcNow,
+                    DateTime.UtcNow);
         }
         catch (Exception exception)
         {
-            FailClosed(body, binding, $"database read failed: {exception}");
+            _taskManager.RunOnMainThread(() =>
+                FailClosed(body, binding, $"database read failed: {exception}"));
             return;
         }
 
-        if (!IsCurrentPlayerBinding(body, args.Player, binding))
+        _taskManager.RunOnMainThread(() => RestorePlayerMedical(body, args.Player, binding, stored));
+    }
+
+    private void RestorePlayerMedical(
+        EntityUid body,
+        ICommonSession session,
+        PlayerBinding binding,
+        NCMedicalStoredSnapshotData? stored)
+    {
+        if (!IsCurrentPlayerBinding(body, session, binding))
         {
             ReleasePlayerBinding(body, binding);
             return;
@@ -142,11 +132,10 @@ public sealed partial class NCMedicalPersistenceSystem
         if (stored == null)
         {
             _loadingBodies.Remove(body);
-            CapturePlayerWrite(body, allowTerminating: false);
             return;
         }
 
-        state.ExpectedRevision = stored.Revision;
+        binding.State.ExpectedRevision = stored.Revision;
         SetOwnerRevision(body, stored.Revision);
         var restored = TryRestoreStoredMedicalState(body, stored);
         _loadingBodies.Remove(body);
@@ -165,7 +154,7 @@ public sealed partial class NCMedicalPersistenceSystem
         // A test/admin may also detach after deliberately dismantling the graph outside the NC API; keep
         // the last valid persisted revision in that case and report a warning instead of poisoning the
         // shared test/runtime log with an unrecoverable write attempt.
-        ForceCapturePlayerWrite(
+        CapturePlayerMemory(
             args.Entity,
             allowTerminating: TerminatingOrDeleted(args.Entity),
             invalidIsError: false);
@@ -183,35 +172,14 @@ public sealed partial class NCMedicalPersistenceSystem
             return;
         }
 
-        // Anatomy transitions include detach/reattach/transplant boundaries and must not sit in debounce.
-        if ((args.Domains & NCMedicalDirtyDomains.Anatomy) != 0)
-        {
-            ForceCapturePlayerWrite(body, allowTerminating: false);
-            return;
-        }
-
-        QueueDebouncedSave(body, _timing.CurTime);
+        // Medical state remains authoritative in ECS until the coordinator captures one end-of-round snapshot.
     }
-
-    private void QueueDebouncedSave(EntityUid body, TimeSpan now)
-    {
-        // Combat damage is a burst, not a request to serialize the complete medical graph every two seconds.
-        // Use a trailing edge while retaining a maximum durability bound for long-running bleeding or treatment.
-        if (!_saveDirtySince.TryGetValue(body, out var dirtySince))
-        {
-            dirtySince = now;
-            _saveDirtySince[body] = dirtySince;
-        }
-        _saveDue[body] = Min(now + SaveDebounce, dirtySince + SaveMaximumDeferral);
-    }
-
-    private static TimeSpan Min(TimeSpan left, TimeSpan right) => left <= right ? left : right;
 
     private void OnMedicalBodyTerminating(
         Entity<NCMedicalBodyComponent> entity,
         ref EntityTerminatingEvent args)
     {
-        ForceCapturePlayerWrite(entity.Owner, allowTerminating: true);
+        CapturePlayerMemory(entity.Owner, allowTerminating: true);
         if (_playerBindings.TryGetValue(entity.Owner, out var binding))
             ReleasePlayerBinding(entity.Owner, binding, keepSaveState: true);
     }
@@ -226,14 +194,9 @@ public sealed partial class NCMedicalPersistenceSystem
             if (!Exists(body) || Transform(body).MapUid != map.Owner)
                 continue;
 
-            ForceCapturePlayerWrite(body, allowTerminating: TerminatingOrDeleted(body));
+            CapturePlayerMemory(body, allowTerminating: TerminatingOrDeleted(body));
             ReleasePlayerBinding(body, binding, keepSaveState: true);
         }
-    }
-
-    private void OnRoundEnd(RoundEndMessageEvent args)
-    {
-        ForceCaptureAllPlayers();
     }
 
     private void OnRoundRestart(RoundRestartCleanupEvent args)
@@ -242,50 +205,49 @@ public sealed partial class NCMedicalPersistenceSystem
         // the normal round-end message, so this is the last guaranteed complete graph boundary.
         foreach (var (body, binding) in _playerBindings.ToArray())
         {
-            ForceCapturePlayerWrite(body, allowTerminating: false);
+            CapturePlayerMemory(body, allowTerminating: false);
             ReleasePlayerBinding(body, binding, keepSaveState: true);
         }
+        _roundSnapshots.Clear();
     }
 
-    private void ForceCaptureAllPlayers()
+    private void OnActiveWorldSessionStarted(NCActiveWorldSessionStartedEvent args)
+    {
+        _roundSnapshots.Clear();
+    }
+
+    private void OnRoundSnapshotCapture(NCRoundSnapshotCaptureEvent args)
     {
         foreach (var body in _playerBindings.Keys.ToArray())
-            ForceCapturePlayerWrite(body, allowTerminating: TerminatingOrDeleted(body));
-    }
+            CapturePlayerMemory(body, allowTerminating: TerminatingOrDeleted(body));
 
-    private void ForceCapturePlayerWrite(
-        EntityUid body,
-        bool allowTerminating,
-        bool invalidIsError = true)
-    {
-        _saveDue.Remove(body);
-        _saveDirtySince.Remove(body);
-        CapturePlayerWrite(body, allowTerminating, invalidIsError);
-    }
-
-    private void CapturePlayerWrite(
-        EntityUid body,
-        bool allowTerminating,
-        bool invalidIsError = true)
-    {
-        if (_loadingBodies.Contains(body) ||
-            !_playerBindings.TryGetValue(body, out var binding) ||
-            binding.State.Blocked)
+        foreach (var (characterId, pending) in _roundSnapshots.OrderBy(value => value.Key.Value))
         {
-            return;
+            if (!args.TryAddSection(
+                    RoundSnapshotSectionType,
+                    RoundSnapshotOwnerType,
+                    characterId.Value.ToString(CultureInfo.InvariantCulture),
+                    pending.SnapshotVersion,
+                    1,
+                    pending.Payload))
+            {
+                return;
+            }
         }
+    }
 
-        var captureStarted = Stopwatch.GetTimestamp();
+    private void CapturePlayerMemory(
+        EntityUid body,
+        bool allowTerminating,
+        bool invalidIsError = true)
+    {
+        if (_loadingBodies.Contains(body) || !_playerBindings.TryGetValue(body, out var binding))
+            return;
+
         var snapshot = SerializeMedicalState(body, allowTerminating);
-        var payload = string.Empty;
-        var encoded = snapshot != null && TryEncodeSnapshot(snapshot, out payload);
-        var captureMilliseconds = Stopwatch.GetElapsedTime(captureStarted).TotalMilliseconds;
-        _capturedPlayerWrites++;
-        _lastCaptureMilliseconds = captureMilliseconds;
-        _maximumCaptureMilliseconds = Math.Max(_maximumCaptureMilliseconds, captureMilliseconds);
-        if (!encoded || snapshot == null)
+        if (snapshot == null || !TryEncodeSnapshot(snapshot, out var payload))
         {
-            var message = $"Refused to persist invalid medical state for character {binding.CharacterId.Value}.";
+            var message = $"Refused to capture invalid medical state for character {binding.CharacterId.Value}.";
             if (invalidIsError)
                 Log.Error(message);
             else
@@ -293,12 +255,7 @@ public sealed partial class NCMedicalPersistenceSystem
             return;
         }
 
-        var capturedUtc = DateTime.UtcNow;
-        binding.State.Queued = new PendingWrite(
-            snapshot.Version,
-            payload,
-            capturedUtc);
-        StartNextWrite(binding.CharacterId, binding.State);
+        _roundSnapshots[binding.CharacterId] = new PendingWrite(snapshot.Version, payload, DateTime.UtcNow);
     }
 
     /// <summary>
@@ -306,87 +263,14 @@ public sealed partial class NCMedicalPersistenceSystem
     /// </summary>
     public NCMedicalPersistenceRuntimeCounters GetRuntimeCounters()
     {
-        var queuedWrites = 0;
-        var inFlightWrites = 0;
-        foreach (var state in _saveStates.Values)
-        {
-            if (state.Queued != null)
-                queuedWrites++;
-            if (state.InFlight)
-                inFlightWrites++;
-        }
-
         return new NCMedicalPersistenceRuntimeCounters(
             _playerBindings.Count,
-            _saveDue.Count,
-            queuedWrites,
-            inFlightWrites,
-            _capturedPlayerWrites,
-            _lastCaptureMilliseconds,
-            _maximumCaptureMilliseconds);
-    }
-
-    private void StartNextWrite(NCCharacterId characterId, OwnerSaveState state)
-    {
-        if (state.InFlight || state.Blocked || state.Queued is not { } pending)
-            return;
-
-        state.Queued = null;
-        state.InFlight = true;
-        _ = PersistPlayerWriteAsync(characterId, state, pending);
-    }
-
-    private async Task PersistPlayerWriteAsync(
-        NCCharacterId characterId,
-        OwnerSaveState state,
-        PendingWrite pending)
-    {
-        try
-        {
-            var expectedRevision = state.ExpectedRevision;
-            var result = await _database.TrySaveNCMedicalSnapshotAsync(
-                new NCMedicalStoredSnapshotData(
-                    characterId,
-                    pending.SnapshotVersion,
-                    expectedRevision,
-                    pending.Payload,
-                    pending.CapturedUtc,
-                    pending.CapturedUtc),
-                expectedRevision);
-            if (result.Status == NCMedicalSnapshotWriteStatus.Saved)
-            {
-                state.ExpectedRevision = result.Revision;
-                if (_boundCharacters.TryGetValue(characterId, out var body) && Exists(body))
-                    SetOwnerRevision(body, result.Revision);
-            }
-            else
-            {
-                state.Blocked = true;
-                if (_boundCharacters.TryGetValue(characterId, out var body) && Exists(body))
-                    SetOwnerBlocked(body);
-                Log.Error($"Medical save for character {characterId.Value} failed closed: " +
-                          $"{result.Status}, current revision {result.Revision}.");
-            }
-        }
-        catch (Exception exception)
-        {
-            // Keep the newest captured write and retry without re-reading an entity that may be terminating.
-            state.Queued ??= pending;
-            _retryDue[characterId] = _timing.CurTime + SaveRetryDelay;
-            Log.Error($"Medical save for character {characterId.Value} will retry: {exception}");
-        }
-        finally
-        {
-            state.InFlight = false;
-        }
-
-        if (!_retryDue.ContainsKey(characterId))
-            StartNextWrite(characterId, state);
-        if (!state.InFlight && state.Queued == null && !_boundCharacters.ContainsKey(characterId))
-        {
-            _retryDue.Remove(characterId);
-            _saveStates.Remove(characterId);
-        }
+            0,
+            _roundSnapshots.Count,
+            0,
+            _roundSnapshots.Count,
+            0,
+            0);
     }
 
     private bool IsCurrentPlayerBinding(EntityUid body, ICommonSession session, PlayerBinding binding)
@@ -410,12 +294,10 @@ public sealed partial class NCMedicalPersistenceSystem
     private void ReleasePlayerBinding(EntityUid body, PlayerBinding binding, bool keepSaveState = false)
     {
         _loadingBodies.Remove(body);
-        _saveDue.Remove(body);
-        _saveDirtySince.Remove(body);
         _playerBindings.Remove(body);
         if (_boundCharacters.GetValueOrDefault(binding.CharacterId) == body)
             _boundCharacters.Remove(binding.CharacterId);
-        if (!keepSaveState && !binding.State.InFlight && binding.State.Queued == null)
+        if (!keepSaveState)
             _saveStates.Remove(binding.CharacterId);
     }
 
@@ -686,9 +568,7 @@ public sealed partial class NCMedicalPersistenceSystem
     private sealed class OwnerSaveState
     {
         public long ExpectedRevision;
-        public bool InFlight;
         public bool Blocked;
-        public PendingWrite? Queued;
     }
 
     private sealed record PendingWrite(

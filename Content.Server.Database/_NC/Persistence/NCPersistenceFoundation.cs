@@ -114,6 +114,54 @@ public sealed class NCActiveWorldClockRecord
     public DateTime UpdatedAt { get; set; }
 }
 
+public enum NCRoundSnapshotStatus : byte
+{
+    Staging,
+    Committed,
+    Failed,
+}
+
+/// <summary>
+/// Atomically published manifest for one end-of-round world snapshot.
+/// </summary>
+[Table("nc_round_snapshot")]
+public sealed class NCRoundSnapshot
+{
+    [Key]
+    public Guid SnapshotId { get; set; }
+
+    public Guid SessionEpoch { get; set; }
+    public long ActiveWorldTicks { get; set; }
+    public int SchemaVersion { get; set; }
+    [MaxLength(128)] public string MapId { get; set; } = string.Empty;
+    public int MapRevision { get; set; }
+    [MaxLength(64)] public string MapHash { get; set; } = string.Empty;
+    public NCRoundSnapshotStatus Status { get; set; }
+    public int SectionCount { get; set; }
+    public long PayloadBytes { get; set; }
+    [MaxLength(64)] public string Checksum { get; set; } = string.Empty;
+    [MaxLength(2048)] public string? Error { get; set; }
+    public DateTime CapturedAt { get; set; }
+    public DateTime? CommittedAt { get; set; }
+}
+
+/// <summary>
+/// One bounded, versioned chunk owned by a subsystem inside a round snapshot.
+/// </summary>
+[Table("nc_round_snapshot_section")]
+public sealed class NCRoundSnapshotSection
+{
+    public Guid SnapshotId { get; set; }
+    [MaxLength(64)] public string SectionType { get; set; } = string.Empty;
+    [MaxLength(64)] public string OwnerType { get; set; } = string.Empty;
+    [MaxLength(128)] public string OwnerId { get; set; } = string.Empty;
+    public int ChunkIndex { get; set; }
+    public int FormatVersion { get; set; }
+    public int EntityCount { get; set; }
+    public string Payload { get; set; } = string.Empty;
+    [MaxLength(64)] public string Checksum { get; set; } = string.Empty;
+}
+
 public abstract partial class ServerDbContext
 {
     public DbSet<NCEventJournalEntry> NCEventJournal => Set<NCEventJournalEntry>();
@@ -121,6 +169,8 @@ public abstract partial class ServerDbContext
     public DbSet<NCAggregateSnapshot> NCAggregateSnapshots => Set<NCAggregateSnapshot>();
     public DbSet<NCOutboxMessage> NCOutboxMessages => Set<NCOutboxMessage>();
     public DbSet<NCActiveWorldClockRecord> NCActiveWorldClocks => Set<NCActiveWorldClockRecord>();
+    public DbSet<NCRoundSnapshot> NCRoundSnapshots => Set<NCRoundSnapshot>();
+    public DbSet<NCRoundSnapshotSection> NCRoundSnapshotSections => Set<NCRoundSnapshotSection>();
 
     private static void ConfigureNCPersistenceModels(ModelBuilder modelBuilder)
     {
@@ -154,5 +204,28 @@ public abstract partial class ServerDbContext
             .ToTable(table => table.HasCheckConstraint(
                 "CK_nc_active_world_clock_ticks",
                 "active_world_ticks >= 0"));
+
+        modelBuilder.Entity<NCRoundSnapshot>()
+            .HasIndex(value => new { value.Status, value.CommittedAt });
+        modelBuilder.Entity<NCRoundSnapshot>()
+            .HasIndex(value => value.SessionEpoch)
+            .IsUnique();
+
+        modelBuilder.Entity<NCRoundSnapshotSection>()
+            .HasKey(value => new
+            {
+                value.SnapshotId,
+                value.SectionType,
+                value.OwnerType,
+                value.OwnerId,
+                value.ChunkIndex,
+            });
+        modelBuilder.Entity<NCRoundSnapshotSection>()
+            .HasOne<NCRoundSnapshot>()
+            .WithMany()
+            .HasForeignKey(value => value.SnapshotId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NCRoundSnapshotSection>()
+            .HasIndex(value => new { value.SectionType, value.OwnerType, value.OwnerId });
     }
 }

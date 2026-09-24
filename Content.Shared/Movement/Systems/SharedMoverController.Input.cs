@@ -51,6 +51,10 @@ namespace Content.Shared.Movement.Systems
                 .Bind(ContentKeyFunctions.ShuttleRotateLeft, new ShuttleInputCmdHandler(this, ShuttleButtons.RotateLeft))
                 .Bind(ContentKeyFunctions.ShuttleRotateRight, new ShuttleInputCmdHandler(this, ShuttleButtons.RotateRight))
                 .Bind(ContentKeyFunctions.ShuttleBrake, new ShuttleInputCmdHandler(this, ShuttleButtons.Brake))
+                // NC-Edit-Start: AVs use separate vertical controls without expanding the shuttle input mask.
+                .Bind(ContentKeyFunctions.NCAVAscend, new NCAVInputCmdHandler(this, NCAVButtons.Ascend))
+                .Bind(ContentKeyFunctions.NCAVDescend, new NCAVInputCmdHandler(this, NCAVButtons.Descend))
+                // NC-Edit-End
                 .Register<SharedMoverController>();
 
             SubscribeLocalEvent<InputMoverComponent, ComponentInit>(OnInputInit);

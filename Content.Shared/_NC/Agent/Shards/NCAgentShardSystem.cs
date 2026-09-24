@@ -47,7 +47,8 @@ public sealed partial class NCAgentShardSystem : EntitySystem
     /// </summary>
     public bool IsAuthorized(EntityUid loader, EntityUid program)
     {
-        if (!TryComp<NCAgentShardComponent>(program, out var shard) || shard.RequiredAccess.Count == 0)
+        if (!TryComp<NCAgentShardComponent>(program, out var shard) || shard.ServerAuthorized ||
+            shard.RequiredAccess.Count == 0)
             return true;
 
         if (!TryComp<PdaComponent>(loader, out var pda) ||

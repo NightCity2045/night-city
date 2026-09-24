@@ -124,8 +124,7 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
     private static readonly ProtoId<NCZoneTemplatePrototype> ApartmentLayout = "NCApartmentLayout5x5";
     private static readonly ProtoId<NCZoneTemplatePrototype> MissionLayout = "NCMissionLayout8x8";
     private static readonly ProtoId<NCMissionDefinitionPrototype> MissionDefinition = "NCMission8x8";
-    private static readonly ProtoId<NCMissionDefinitionPrototype> ExpiringMissionDefinition =
-        "NCMissionExpiryIntegration";
+    private const string ExpiringMissionDefinition = "NCMissionExpiryIntegration";
     private static readonly ProtoId<NCPropertyListingPrototype> ApartmentListing = "NCGlen1Apartment01";
     private static readonly NCZNetworkId CityNetworkId =
         new(Guid.Parse("4da240d7-48ad-4f95-ae96-aeb7b58b855d"));
@@ -612,6 +611,7 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
 
         EntityUid gridUid = default;
         EntityUid residentUid = default;
+        Task<bool> saveTask = Task.FromResult(false);
         Entity<Content.Shared._NC.ZLevels.Core.Components.NCZMapNetworkComponent> network = default;
         NCZoneDeploymentId deploymentId = default;
         await server.WaitAssertion(() =>
@@ -686,13 +686,12 @@ public sealed class NCDirectZoneLayoutPrototypeTest : GameTest
         await server.WaitAssertion(() =>
         {
             residentUid = entities.SpawnEntity(null, new EntityCoordinates(gridUid, new Vector2(-2.5f, 23.5f)));
-            snapshots.CaptureRoundSnapshots([new NCPropertySnapshotCapture(property.Snapshot, deploymentId)]);
+            saveTask = snapshots.CapturePropertySnapshotAsync(property.Snapshot);
             Assert.That(entities.HasComponent<NCPropertyResidentItemComponent>(residentUid), Is.True);
         });
-        var saveTask = snapshots.WaitForPendingSaveAsync();
         await WaitUntil(server, () => saveTask.IsCompleted,
             "Persistent apartment contents were not committed on the server main thread.");
-        await saveTask;
+        Assert.That(await saveTask, Is.True);
 
         var stored = (await contents.GetAsync(propertyId, true))?.Snapshot;
         Assert.That(stored, Is.Not.Null);

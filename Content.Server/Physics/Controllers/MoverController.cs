@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using Content.Shared._NC.Vehicle.AV.Components; // NC
 using Content.Server.Shuttles.Components;
 using Content.Server.Shuttles.Systems;
 using Content.Shared.Movement.Components;
@@ -386,7 +387,8 @@ public sealed partial class MoverController : SharedMoverController
             // This tries to see if the grid is a shuttle and if the console should work.
             if (!MapGridQuery.HasComp(gridId) ||
                 !_shuttleQuery.TryGetComponent(gridId, out var shuttleComponent) ||
-                !shuttleComponent.Enabled)
+                !shuttleComponent.Enabled ||
+                HasComp<NCAVComponent>(gridId.Value)) // NC - AVs use vectored lift instead of directional thrusters.
                 continue;
 
             if (!newPilots.TryGetValue(gridId.Value, out var pilots))

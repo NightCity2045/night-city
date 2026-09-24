@@ -41,7 +41,7 @@
   ncSelectable: true
   ncEntryJob: TraumaTeamOperative
   ncIcon: NCDepartmentIconTraumaTeam
-  ncPersonnelManagers: [ TraumaTeamOperative ]
+  ncPersonnelManagers: []
   ncPositionLimits:
     TraumaTeamOperative: 10
     TraumaTeamParamedic: 20
@@ -151,14 +151,11 @@
   startingBudget: 5000
   ncSelectable: true
   ncEntryJob: ZhirafaJanitor
-  ncPersonnelManagers: [ ZhirafaEngineer ]
   ncPositionLimits:
-    ZhirafaEngineer: 12
     ZhirafaJanitor: 12
   ncPositionRanks:
-    ZhirafaEngineer: 100
     ZhirafaJanitor: 10
-  roles: [ ZhirafaJanitor, ZhirafaEngineer ]
+  roles: [ ZhirafaJanitor ]
 
 # Department selection icons are independent from entry-job icons.
 - type: jobIcon

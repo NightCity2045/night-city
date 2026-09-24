@@ -282,8 +282,8 @@ public sealed partial class NCVehicleWorkshopSystem : EntitySystem
         if (request.Action == NCVehicleWorkshopAction.Inspect)
         {
             failure = "nc-workshop-diagnostic-tool";
-            return occupied && TryComp<NCVehicleDiagnosticToolComponent>(held, out var instrument) && instrument.Level > 0 &&
-                _prototypes.TryIndex(part.Prototype, out var module) && (instrument.Categories.Count == 0 || instrument.Categories.Contains(module.RepairCategory));
+            return occupied && _prototypes.TryIndex(part.Prototype, out var module) &&
+                TryGetDiagnosticLevel(uid, held, module.RepairCategory, out _);
         }
         if (request.Action == NCVehicleWorkshopAction.Install)
         {
@@ -351,6 +351,29 @@ public sealed partial class NCVehicleWorkshopSystem : EntitySystem
         return null;
     }
 
+    private bool TryGetDiagnosticLevel(EntityUid uid, EntityUid? held, string category, out int level)
+    {
+        level = 0;
+        if (held is { } tool && TryComp<NCVehicleDiagnosticToolComponent>(tool, out var instrument) &&
+            instrument.Level > 0 && (instrument.Categories.Count == 0 || instrument.Categories.Contains(category)))
+        {
+            level = instrument.Level;
+            return true;
+        }
+        if (!TryProfile(uid, out var chassis, out _))
+            return false;
+        foreach (var equipment in _lookup.GetEntitiesInRange<NCVehicleWorkshopEquipmentComponent>(
+                     Transform(uid).Coordinates, chassis.WorkshopSearchRange))
+        {
+            if (equipment.Comp.DiagnosticLevel <= level || !Transform(equipment).Anchored ||
+                equipment.Comp.DiagnosticCategories.Count != 0 && !equipment.Comp.DiagnosticCategories.Contains(category) ||
+                !_interaction.InRangeUnobstructed(uid, equipment.Owner, range: equipment.Comp.Range))
+                continue;
+            level = equipment.Comp.DiagnosticLevel;
+        }
+        return level > 0;
+    }
+
     private HashSet<string> TransferSlots(EntityUid uid, string root, NCVehicleWorkshopAction action)
     {
         var result = new HashSet<string> { root };
@@ -405,9 +428,11 @@ public sealed partial class NCVehicleWorkshopSystem : EntitySystem
         }
         session.Feedback = "nc-workshop-done";
         var part = assembly.Installed.GetValueOrDefault(node.Slot);
-        if (args.Action == NCVehicleWorkshopAction.Inspect && args.Used is { } gauge)
+        if (args.Action == NCVehicleWorkshopAction.Inspect &&
+            _prototypes.TryIndex(part.Prototype, out var inspectedPart) &&
+            TryGetDiagnosticLevel(ent, args.Used, inspectedPart.RepairCategory, out var diagnosticLevel))
         {
-            var exact = Comp<NCVehicleDiagnosticToolComponent>(gauge).Level >= 2;
+            var exact = diagnosticLevel >= 2;
             session.Measurements[node.Slot] = new(exact ? part.Condition : MathF.Round(part.Condition * 4) / 4, exact, args.Revision);
         }
         else if (args.Action == NCVehicleWorkshopAction.Work)

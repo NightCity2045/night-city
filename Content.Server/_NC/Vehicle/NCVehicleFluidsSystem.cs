@@ -53,7 +53,17 @@ public sealed partial class NCVehicleFluidsSystem : EntitySystem
             // Split the actual mixture, preserving contamination and notifying fuel and mass observers.
             var leaked = _solutions.SplitSolution(reservoir.Value,
                 FixedPoint2.New((1 - seal) * circuit.MaximumLeakPerSecond * args.Seconds));
-            _puddles.TrySpillAt(Transform(ent).Coordinates, leaked, out _, sound: false);
+            // Vehicle reservoirs use millilitres while floor chemistry uses much larger gameplay units.
+            // Spilling the raw reservoir number made a small hose leak flood dozens of tiles.
+            var spillScale = float.IsFinite(ent.Comp.WorldSpillScale)
+                ? Math.Clamp(ent.Comp.WorldSpillScale, 0, 1)
+                : 0;
+            var worldVolume = leaked.Volume * spillScale;
+            if (worldVolume > FixedPoint2.Zero)
+            {
+                var worldSpill = leaked.SplitSolution(worldVolume);
+                _puddles.TrySpillAt(Transform(ent).Coordinates, worldSpill, out _, sound: false);
+            }
         }
     }
 

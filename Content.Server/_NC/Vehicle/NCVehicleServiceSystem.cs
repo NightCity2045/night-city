@@ -11,6 +11,7 @@ using Content.Shared._NC.Vehicle.Components;
 using Content.Shared._NC.Vehicle.Prototypes;
 using Content.Shared.ActionBlocker;
 using Content.Shared.DoAfter;
+using Content.Shared.Examine;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Interaction;
 using Content.Shared.Tools.Systems;
@@ -53,6 +54,8 @@ public sealed partial class NCVehicleServiceSystem : EntitySystem
         SubscribeLocalEvent<NCVehicleWorkshopEquipmentComponent, EntityTerminatingEvent>(OnEquipmentDeleted);
         SubscribeLocalEvent<NCVehicleWorkshopEquipmentComponent, AnchorStateChangedEvent>(OnEquipmentAnchored);
         SubscribeLocalEvent<NCVehicleComponent, EntityTerminatingEvent>(OnVehicleDeleted);
+        SubscribeLocalEvent<NCVehicleWorkshopEquipmentComponent, GetVerbsEvent<InteractionVerb>>(OnEquipmentVerbs);
+        SubscribeLocalEvent<NCVehicleWorkshopEquipmentComponent, ExaminedEvent>(OnEquipmentExamined);
     }
 
     private void OnVerbs(Entity<NCVehicleComponent> ent, ref GetVerbsEvent<InteractionVerb> args)
@@ -61,6 +64,75 @@ public sealed partial class NCVehicleServiceSystem : EntitySystem
             return;
         var user = args.User;
         args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-vehicle-service"), Act = () => TryOpen(ent, user) });
+    }
+
+    private void OnEquipmentVerbs(Entity<NCVehicleWorkshopEquipmentComponent> ent, ref GetVerbsEvent<InteractionVerb> args)
+    {
+        if (!args.CanAccess || !args.CanInteract || !Transform(ent).Anchored)
+            return;
+        var user = args.User;
+
+        if (ent.Comp.Lift)
+            args.Verbs.Add(new InteractionVerb
+            {
+                Text = Loc.GetString("nc-workshop-equipment-operate-lift"),
+                Act = () => TryOperateLift(ent, user),
+            });
+
+        if (ent.Comp.DiagnosticLevel > 0)
+            args.Verbs.Add(new InteractionVerb
+            {
+                Text = Loc.GetString("nc-workshop-equipment-open-diagnostics"),
+                Act = () => TryOpenNearestVehicle(ent, user),
+            });
+    }
+
+    private void OnEquipmentExamined(Entity<NCVehicleWorkshopEquipmentComponent> ent, ref ExaminedEvent args)
+    {
+        var key = ent.Comp.Lift ? "nc-workshop-equipment-lift-help" :
+            ent.Comp.Hoist ? "nc-workshop-equipment-hoist-help" :
+            ent.Comp.DiagnosticLevel > 0 ? "nc-workshop-equipment-diagnostics-help" :
+            ent.Comp.Assembly ? "nc-workshop-equipment-workbench-help" : null;
+        if (key != null)
+            args.PushMarkup(Loc.GetString(key, ("range", ent.Comp.Range)));
+    }
+
+    private bool TryOperateLift(Entity<NCVehicleWorkshopEquipmentComponent> equipment, EntityUid user)
+    {
+        if (!Transform(equipment).Anchored || !_blocker.CanConsciouslyPerformAction(user))
+            return false;
+        var vehicle = FindNearestVehicle(equipment, user, requireLiftedByEquipment: true) ??
+            FindNearestVehicle(equipment, user, requireLiftedByEquipment: false);
+        return vehicle is { } uid && TryStart(uid, user, string.Empty, NCVehicleServiceAction.Lift);
+    }
+
+    private bool TryOpenNearestVehicle(Entity<NCVehicleWorkshopEquipmentComponent> equipment, EntityUid user)
+    {
+        if (!Transform(equipment).Anchored || !_blocker.CanConsciouslyPerformAction(user))
+            return false;
+        return FindNearestVehicle(equipment, user, requireLiftedByEquipment: false) is { } uid && TryOpen(uid, user);
+    }
+
+    private EntityUid? FindNearestVehicle(Entity<NCVehicleWorkshopEquipmentComponent> equipment, EntityUid user,
+        bool requireLiftedByEquipment)
+    {
+        EntityUid? nearest = null;
+        var nearestDistance = float.MaxValue;
+        var equipmentPosition = _transform.GetWorldPosition(equipment);
+        foreach (var vehicle in _lookup.GetEntitiesInRange<NCVehicleComponent>(Transform(equipment).Coordinates, equipment.Comp.Range))
+        {
+            if (requireLiftedByEquipment &&
+                (!TryComp<NCVehicleAssemblyComponent>(vehicle, out var assembly) || assembly.Lift != equipment.Owner))
+                continue;
+            if (!_interaction.InRangeUnobstructed(user, vehicle.Owner, range: equipment.Comp.Range))
+                continue;
+            var distance = Vector2.DistanceSquared(equipmentPosition, _transform.GetWorldPosition(vehicle));
+            if (distance >= nearestDistance)
+                continue;
+            nearest = vehicle;
+            nearestDistance = distance;
+        }
+        return nearest;
     }
 
     public bool TryOpen(EntityUid uid, EntityUid user)

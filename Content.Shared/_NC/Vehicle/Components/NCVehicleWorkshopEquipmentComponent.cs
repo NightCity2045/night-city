@@ -11,6 +11,10 @@ public sealed partial class NCVehicleWorkshopEquipmentComponent : Component
     [DataField] public bool Lift;
     [DataField] public bool Hoist;
     [DataField] public bool Workbench;
+    /// <summary>Diagnostic precision supplied by an anchored console. Zero means this equipment cannot diagnose.</summary>
+    [DataField] public int DiagnosticLevel;
+    /// <summary>Empty means that the console can diagnose every repair category.</summary>
+    [DataField] public HashSet<string> DiagnosticCategories = new();
     /// <summary>Allows a carrier and its extracted children to be separated or assembled in the equipment slot.</summary>
     [DataField] public bool Assembly;
     [DataField] public float Range = 3;

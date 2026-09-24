@@ -81,6 +81,8 @@ namespace Content.Shared.Input
         public static readonly BoundKeyFunction ShuttleRotateLeft = "ShuttleRotateLeft";
         public static readonly BoundKeyFunction ShuttleRotateRight = "ShuttleRotateRight";
         public static readonly BoundKeyFunction ShuttleBrake = "ShuttleBrake";
+        public static readonly BoundKeyFunction NCAVAscend = "NCAVAscend"; // NC
+        public static readonly BoundKeyFunction NCAVDescend = "NCAVDescend"; // NC
 
         public static readonly BoundKeyFunction Hotbar0 = "Hotbar0";
         public static readonly BoundKeyFunction Hotbar1 = "Hotbar1";

@@ -1,0 +1,43 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncTraumaTeamSubscriptionPlan
+  id: Bronze
+  name: nc-trauma-team-plan-bronze
+  description: nc-trauma-team-plan-bronze-desc
+  pricePerDay: 500
+  dispatchPriority: 1
+  treatmentCoverageBasisPoints: 2500
+  maximumThreatBasisPoints: 2500
+  color: "#B97850"
+
+- type: ncTraumaTeamSubscriptionPlan
+  id: Silver
+  name: nc-trauma-team-plan-silver
+  description: nc-trauma-team-plan-silver-desc
+  pricePerDay: 1000
+  dispatchPriority: 2
+  treatmentCoverageBasisPoints: 5000
+  maximumThreatBasisPoints: 5000
+  color: "#AFC7D2"
+
+- type: ncTraumaTeamSubscriptionPlan
+  id: Gold
+  name: nc-trauma-team-plan-gold
+  description: nc-trauma-team-plan-gold-desc
+  pricePerDay: 2000
+  dispatchPriority: 3
+  treatmentCoverageBasisPoints: 7500
+  maximumThreatBasisPoints: 7500
+  color: "#F0C75E"
+
+- type: ncTraumaTeamSubscriptionPlan
+  id: Platinum
+  name: nc-trauma-team-plan-platinum
+  description: nc-trauma-team-plan-platinum-desc
+  pricePerDay: 5000
+  dispatchPriority: 4
+  treatmentCoverageBasisPoints: 10000
+  maximumThreatBasisPoints: 10000
+  color: "#72F4FF"

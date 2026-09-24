@@ -22,7 +22,7 @@ namespace Content.IntegrationTests.Tests._NC.Atmos;
 [TestOf(typeof(NCUniformAirSystem))]
 public sealed class NCUniformAirTest : GameTest
 {
-    private static readonly ProtoId<GameMapPrototype> ALifeMap = "NCALifeTest";
+    private const string ALifeMap = "NCALifeTest";
 
     public override PoolSettings PoolSettings => new()
     {
@@ -38,7 +38,7 @@ public sealed class NCUniformAirTest : GameTest
 
         await server.WaitAssertion(() =>
         {
-            Assert.That(prototypes.TryIndex(ALifeMap, out var gameMap), Is.True);
+            Assert.That(prototypes.TryIndex<GameMapPrototype>(ALifeMap, out var gameMap), Is.True);
             Assert.That(gameMap!.Stations.TryGetValue("Empty", out var station), Is.True);
             Assert.That(station!.StationComponentOverrides.TryGetComponent<NCStationZLevelsComponent>(
                 components,

@@ -20,6 +20,7 @@ public enum NCAgentApp : byte
     City,
     Missions,
     Contracts,
+    TraumaTeam,
 }
 
 [Serializable, NetSerializable]
@@ -114,6 +115,17 @@ public sealed record NCAgentMapFeature(
     string Name,
     List<Vector2> Vertices,
     List<NCAgentMapTileChunk> Chunks);
+
+/// <summary>
+/// A short-lived operational marker rendered over the static CitiMap geometry.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed record NCAgentMapMarker(
+    string Label,
+    string NetworkId,
+    int Z,
+    Vector2 Position,
+    bool Live);
 
 [Serializable, NetSerializable]
 public sealed record NCAgentDirectoryEntry(
@@ -353,13 +365,31 @@ public sealed class NCAgentMapUpdateMessage(
     int z,
     Vector2 userPosition,
     List<NCAgentMapFeature> features,
+    List<NCAgentMapMarker> markers,
     string notice) : BoundUserInterfaceMessage
 {
     public readonly string NetworkId = networkId;
     public readonly int Z = z;
     public readonly Vector2 UserPosition = userPosition;
     public readonly List<NCAgentMapFeature> Features = features;
+    public readonly List<NCAgentMapMarker> Markers = markers;
     public readonly string Notice = notice;
+}
+
+/// <summary>
+/// Lightweight live positions sent while CitiMap is open; static geometry stays client-side.
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class NCAgentMapTrackingUpdateMessage(
+    string networkId,
+    int z,
+    Vector2 userPosition,
+    List<NCAgentMapMarker> markers) : BoundUserInterfaceMessage
+{
+    public readonly string NetworkId = networkId;
+    public readonly int Z = z;
+    public readonly Vector2 UserPosition = userPosition;
+    public readonly List<NCAgentMapMarker> Markers = markers;
 }
 
 [Serializable, NetSerializable]

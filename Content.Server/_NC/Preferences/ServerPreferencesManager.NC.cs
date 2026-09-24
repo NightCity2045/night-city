@@ -9,6 +9,7 @@ using Content.Shared.Preferences;
 using Content.Shared.Roles;
 using Robust.Shared.Network;
 using Robust.Shared.Prototypes;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Content.Server.Preferences.Managers;
@@ -112,6 +113,30 @@ public sealed partial class ServerPreferencesManager
     public Task RefreshNCEmploymentAsync(NetUserId userId)
     {
         return RefreshNCCharacterData(userId);
+    }
+
+    /// <summary>
+    /// Reloads the profile cache after the round snapshot transaction deletes a dead character.
+    /// If the account lost its final profile, the normal creation path assigns a fresh one.
+    /// </summary>
+    public async Task ReloadNCPersistentCharactersAsync(NetUserId userId)
+    {
+        var stored = await GetOrCreatePreferencesAsync(userId, CancellationToken.None);
+        CacheNCCharacterData(userId, stored);
+
+        if (!_cachedPlayerPrefs.TryGetValue(userId, out var cached))
+            return;
+
+        cached.Prefs = ConvertPreferences(stored);
+        cached.PrefsLoaded = true;
+        if (!_playerManager.TryGetSessionById(userId, out var session))
+            return;
+
+        _netManager.ServerSendMessage(new MsgPreferencesAndSettings
+        {
+            Preferences = cached.Prefs,
+            Settings = new GameSettings { MaxCharacterSlots = MaxCharacterSlots },
+        }, session.Channel);
     }
 
     private void SendNCEmploymentSnapshot(NetUserId userId)

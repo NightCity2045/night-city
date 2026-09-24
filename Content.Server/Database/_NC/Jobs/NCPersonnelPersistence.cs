@@ -40,6 +40,8 @@ public partial interface IServerDbManager
     Task<string?> GetNCActiveJobAsync(NCCharacterId characterId);
     Task<NCPersonnelChangeData> HireNCCharacterAsync(NCCharacterId target, string jobId, int positionLimit,
         NCCharacterId actor, string actorName, string reason);
+    Task<NCPersonnelChangeData> SelfHireNCCharacterAsync(NCCharacterId target, string jobId, int positionLimit,
+        string actorName, string reason);
     Task<NCPersonnelChangeData> TerminateNCCharacterAsync(NCCharacterId target,
         IReadOnlyCollection<string> organizationJobs, NCCharacterId actor, string actorName, string reason);
     Task<NCPersonnelChangeData> ChangeNCCharacterPositionAsync(NCCharacterId target, string newJobId,
@@ -84,6 +86,13 @@ public sealed partial class ServerDbManager
     {
         DbWriteOpsMetric.Inc();
         return RunDbCommand(() => _db.HireNCCharacterAsync(target, jobId, positionLimit, actor, actorName, reason));
+    }
+
+    public Task<NCPersonnelChangeData> SelfHireNCCharacterAsync(NCCharacterId target, string jobId, int positionLimit,
+        string actorName, string reason)
+    {
+        DbWriteOpsMetric.Inc();
+        return RunDbCommand(() => _db.SelfHireNCCharacterAsync(target, jobId, positionLimit, actorName, reason));
     }
 
     public Task<NCPersonnelChangeData> TerminateNCCharacterAsync(NCCharacterId target,
@@ -182,9 +191,22 @@ public abstract partial class ServerDbBase
     public async Task<NCPersonnelChangeData> HireNCCharacterAsync(NCCharacterId target, string jobId,
         int positionLimit, NCCharacterId actor, string actorName, string reason)
     {
+        return await HireNCCharacterInternalAsync(target, jobId, positionLimit, actor, actorName, reason, false);
+    }
+
+    public async Task<NCPersonnelChangeData> SelfHireNCCharacterAsync(NCCharacterId target, string jobId,
+        int positionLimit, string actorName, string reason)
+    {
+        return await HireNCCharacterInternalAsync(target, jobId, positionLimit, target, actorName, reason, true);
+    }
+
+    private async Task<NCPersonnelChangeData> HireNCCharacterInternalAsync(NCCharacterId target, string jobId,
+        int positionLimit, NCCharacterId actor, string actorName, string reason, bool allowSelfHire)
+    {
         actorName = actorName.Trim();
         reason = reason.Trim();
-        if (!target.IsValid || !actor.IsValid || target == actor || positionLimit < 1 || jobId.Length is < 1 or > 64 ||
+        if (!target.IsValid || !actor.IsValid || (!allowSelfHire && target == actor) || positionLimit < 1 ||
+            jobId.Length is < 1 or > 64 ||
             actorName.Length is < 1 or > 128 || reason.Length is < 1 or > 512)
             return new(NCPersonnelChangeResult.InvalidEmployment, null);
 

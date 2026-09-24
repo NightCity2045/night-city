@@ -2802,6 +2802,135 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("nc_property_tenant", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.NCRoundSnapshot", b =>
+                {
+                    b.Property<Guid>("SnapshotId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("snapshot_id");
+
+                    b.Property<long>("ActiveWorldTicks")
+                        .HasColumnType("bigint")
+                        .HasColumnName("active_world_ticks");
+
+                    b.Property<DateTime>("CapturedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("captured_at");
+
+                    b.Property<string>("Checksum")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("checksum");
+
+                    b.Property<DateTime?>("CommittedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("committed_at");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("error");
+
+                    b.Property<string>("MapHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("map_hash");
+
+                    b.Property<string>("MapId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("map_id");
+
+                    b.Property<int>("MapRevision")
+                        .HasColumnType("integer")
+                        .HasColumnName("map_revision");
+
+                    b.Property<long>("PayloadBytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("payload_bytes");
+
+                    b.Property<int>("SchemaVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("schema_version");
+
+                    b.Property<int>("SectionCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("section_count");
+
+                    b.Property<Guid>("SessionEpoch")
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_epoch");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
+
+                    b.HasKey("SnapshotId")
+                        .HasName("PK_nc_round_snapshot");
+
+                    b.HasIndex("SessionEpoch")
+                        .IsUnique();
+
+                    b.HasIndex("Status", "CommittedAt");
+
+                    b.ToTable("nc_round_snapshot", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCRoundSnapshotSection", b =>
+                {
+                    b.Property<Guid>("SnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("snapshot_id");
+
+                    b.Property<string>("SectionType")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("section_type");
+
+                    b.Property<string>("OwnerType")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("owner_type");
+
+                    b.Property<string>("OwnerId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("owner_id");
+
+                    b.Property<int>("ChunkIndex")
+                        .HasColumnType("integer")
+                        .HasColumnName("chunk_index");
+
+                    b.Property<string>("Checksum")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("checksum");
+
+                    b.Property<int>("EntityCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("entity_count");
+
+                    b.Property<int>("FormatVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("format_version");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payload");
+
+                    b.HasKey("SnapshotId", "SectionType", "OwnerType", "OwnerId", "ChunkIndex")
+                        .HasName("PK_nc_round_snapshot_section");
+
+                    b.HasIndex("SectionType", "OwnerType", "OwnerId");
+
+                    b.ToTable("nc_round_snapshot_section", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.NCZoneDeploymentJournal", b =>
                 {
                     b.Property<Guid>("DeploymentId")
@@ -4367,6 +4496,16 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasConstraintName("FK_nc_property_tenant_nc_property_record_property_id");
 
                     b.Navigation("Property");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCRoundSnapshotSection", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCRoundSnapshot", null)
+                        .WithMany()
+                        .HasForeignKey("SnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_round_snapshot_section_nc_round_snapshot_snapshot_id");
                 });
 
             modelBuilder.Entity("Content.Server.Database.Player", b =>

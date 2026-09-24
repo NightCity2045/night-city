@@ -1,0 +1,36 @@
+<!-- SPDX-FileCopyrightText: 2026 Astro
+SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md. -->
+<agent:NCAgentTraumaTeamControl xmlns="https://spacestation14.io" xmlns:agent="clr-namespace:Content.Client._NC.Agent"
+    Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+    <PanelContainer Margin="0 0 0 6">
+        <BoxContainer Orientation="Vertical" Margin="10 8">
+            <Label Text="TRAUMA TEAM // RAPID RESPONSE" FontColorOverride="#72F4FF" />
+            <Label Text="{Loc 'nc-trauma-team-tagline'}" FontColorOverride="#7898A0" />
+        </BoxContainer>
+    </PanelContainer>
+    <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+        <Button Name="CareerButton" Text="{Loc 'nc-trauma-team-career'}" HorizontalExpand="True" />
+        <Button Name="CoverageButton" Text="{Loc 'nc-trauma-team-coverage'}" HorizontalExpand="True" />
+        <Button Name="RefreshButton" Text="↻" />
+    </BoxContainer>
+    <RichTextLabel Name="StatusLabel" Margin="0 7" />
+    <ScrollContainer VerticalExpand="True" HorizontalExpand="True" HScrollEnabled="False">
+        <BoxContainer Name="Entries" Orientation="Vertical" HorizontalExpand="True" />
+    </ScrollContainer>
+    <BoxContainer Name="PurchaseBar" Orientation="Horizontal" SeparationOverride="4" Margin="0 6 0 0">
+        <LineEdit Name="DaysEdit" Text="1" HorizontalExpand="True" />
+        <Button Name="PurchaseButton" Text="{Loc 'nc-trauma-team-purchase'}" />
+    </BoxContainer>
+    <BoxContainer Name="ResponseBar" Orientation="Vertical" SeparationOverride="4" Margin="0 8 0 0">
+        <Label Text="{Loc 'nc-trauma-team-response-title'}" FontColorOverride="#72F4FF" />
+        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+            <Button Name="WoundedButton" Text="{Loc 'nc-trauma-team-urgency-wounded'}" HorizontalExpand="True" />
+            <Button Name="CriticalButton" Text="{Loc 'nc-trauma-team-urgency-critical'}" HorizontalExpand="True" />
+            <Button Name="UnderFireButton" Text="{Loc 'nc-trauma-team-urgency-under-fire'}" HorizontalExpand="True" />
+        </BoxContainer>
+        <LineEdit Name="ResponseDescription" PlaceHolder="{Loc 'nc-trauma-team-response-description'}" />
+        <Button Name="RequestResponseButton" Text="{Loc 'nc-trauma-team-response-request'}" />
+        <Button Name="CancelResponseButton" Text="{Loc 'nc-trauma-team-response-cancel'}" Visible="False" />
+    </BoxContainer>
+</agent:NCAgentTraumaTeamControl>

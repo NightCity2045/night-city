@@ -1,0 +1,32 @@
+<!-- SPDX-FileCopyrightText: 2026 Astro
+SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md. -->
+<response:NCAgentTraumaResponseFragment xmlns="https://spacestation14.io"
+    xmlns:response="clr-namespace:Content.Client._NC.Agent.Shards.TraumaResponse"
+    xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+    Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+    <PanelContainer HorizontalExpand="True" Margin="0 0 0 6">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#07191D" BorderColor="#72F4FF" BorderThickness="1 1 1 2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="10 7">
+            <BoxContainer Orientation="Horizontal" HorizontalExpand="True">
+                <Label Text="{Loc 'nc-trauma-response-header'}" FontColorOverride="#72F4FF" HorizontalExpand="True" />
+                <Label Name="DutyStatus" FontColorOverride="#FFCF66" />
+            </BoxContainer>
+            <Label Name="NoticeLabel" FontColorOverride="#7898A0" />
+        </BoxContainer>
+    </PanelContainer>
+    <ScrollContainer VerticalExpand="True" HorizontalExpand="True" HScrollEnabled="False">
+        <BoxContainer Orientation="Vertical" HorizontalExpand="True">
+            <Label Text="{Loc 'nc-trauma-response-active-heading'}" FontColorOverride="#FFCF66" Margin="0 3 0 4" />
+            <BoxContainer Name="ActiveContainer" Orientation="Vertical" HorizontalExpand="True" />
+            <Label Text="{Loc 'nc-trauma-response-queue-heading'}" FontColorOverride="#FFCF66" Margin="0 8 0 4" />
+            <BoxContainer Name="QueueContainer" Orientation="Vertical" HorizontalExpand="True" />
+            <Label Text="{Loc 'nc-trauma-response-roster-heading'}" FontColorOverride="#FFCF66" Margin="0 8 0 4" />
+            <BoxContainer Name="RosterContainer" Orientation="Vertical" HorizontalExpand="True" />
+            <Label Text="{Loc 'nc-trauma-response-recent-heading'}" FontColorOverride="#FFCF66" Margin="0 8 0 4" />
+            <BoxContainer Name="RecentContainer" Orientation="Vertical" HorizontalExpand="True" />
+        </BoxContainer>
+    </ScrollContainer>
+</response:NCAgentTraumaResponseFragment>

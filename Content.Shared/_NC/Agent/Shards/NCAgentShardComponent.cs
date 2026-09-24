@@ -38,6 +38,13 @@ public sealed partial class NCAgentShardComponent : Component
     public List<ProtoId<AccessLevelPrototype>> RequiredAccess = [];
 
     /// <summary>
+    /// Allows the program to open so its server system can validate persistent employment or another authoritative
+    /// policy that cannot be predicted from the inserted VIN card.
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public bool ServerAuthorized;
+
+    /// <summary>
     /// Short presentation-only name for the authorization policy shown in SHARDS.
     /// </summary>
     [DataField, AutoNetworkedField]

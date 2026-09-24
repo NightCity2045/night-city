@@ -16,4 +16,5 @@ public partial interface IServerPreferencesManager
     bool TryGetSelectedNCEmployment(NetUserId userId, out ProtoId<JobPrototype> job);
     Task<bool> SetSelectedNCEmploymentAsync(NetUserId userId, ProtoId<JobPrototype>? job);
     Task RefreshNCEmploymentAsync(NetUserId userId);
+    Task ReloadNCPersistentCharactersAsync(NetUserId userId);
 }
