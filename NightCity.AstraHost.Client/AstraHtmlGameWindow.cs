@@ -100,7 +100,7 @@ public sealed class AstraHtmlGameWindow
         {
             HorizontalExpand = true,
             VerticalExpand = true,
-            AlwaysActive = true
+            AlwaysActive = false
         };
         _view.AddResourceRequestHandler(OnRequest);
         _view.AddBeforeBrowseHandler(OnBrowse);
