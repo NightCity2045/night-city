@@ -85,8 +85,21 @@ public sealed class AstraHtmlGameWindow
 
     public void Close()
     {
-        if (_window?.IsOpen == true)
+        if (_window?.IsOpen != true)
+            return;
+
+        try
+        {
             _window.Close();
+        }
+        catch (Exception ex) when (ex is DebugAssertException or NullReferenceException)
+        {
+            // Client exit shuts CEF down before this window leaves the tree.
+            // Closing it then asks for a browser that is already gone.
+            Logger.GetSawmill("astra.html").Debug("Web view was already closed.");
+            _view = null;
+            _window = null;
+        }
     }
 
     private void EnsureWindow(string title, int width, int height)
