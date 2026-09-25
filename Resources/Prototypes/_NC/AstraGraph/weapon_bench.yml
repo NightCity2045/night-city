@@ -6,19 +6,66 @@
   parent: BaseWeaponPistol
   id: WeaponAstraPistol
   name: astra pistol
-  description: A pistol whose rate of fire and shot speed come from the barrel stored on it.
+  description: A pistol whose rate of fire and shot speed come from the parts fitted on it.
   components:
   - type: Sprite
     sprite: Objects/Weapons/Guns/Pistols/viper.rsi
   - type: WeaponAssembly
     Barrel: ""
+    Bolt: ""
+    Magazine: ""
+    Optic: ""
+    Muzzle: ""
     FireRate: 6
     ProjectileSpeed: 40
+    BarrelAccepts: pistol-barrel
+    BoltAccepts: pistol-bolt
+    FeedAccepts: pistol-feed
+    OpticAccepts: pistol-optic
+    MuzzleAccepts: pistol-muzzle
+  - type: ItemSlots
+    slots:
+      gun_magazine:
+        name: Magazine
+        startingItem: MagazinePistol
+        insertSound: /Audio/Weapons/Guns/MagIn/pistol_magin.ogg
+        ejectSound: /Audio/Weapons/Guns/MagOut/pistol_magout.ogg
+        priority: 2
+        whitelist:
+          tags:
+          - MagazinePistol
+          - MagazinePistolHighCapacity
+        whitelistFailPopup: gun-magazine-whitelist-fail
+      gun_chamber:
+        name: Chamber
+        priority: 1
+        whitelist:
+          tags:
+          - CartridgePistol
+      barrel:
+        name: Barrel
+        swap: false
+      bolt:
+        name: Bolt
+        swap: false
+      magazine:
+        name: Modular magazine
+        swap: false
+      optic:
+        name: Optic
+        swap: false
+      muzzle:
+        name: Muzzle
+        swap: false
   - type: ContainerContainer
     containers:
       gun_magazine: !type:ContainerSlot
       gun_chamber: !type:ContainerSlot
       barrel: !type:ContainerSlot
+      bolt: !type:ContainerSlot
+      magazine: !type:ContainerSlot
+      optic: !type:ContainerSlot
+      muzzle: !type:ContainerSlot
 
 - type: entity
   parent: BaseItem
@@ -35,6 +82,10 @@
     Label: Light barrel
     FireRate: 8
     ProjectileSpeed: 25
+    RateDelta: 2
+    SpeedDelta: -15
+    Interface: pistol-barrel
+    Offer: direct
 
 - type: entity
   parent: BaseItem
@@ -51,12 +102,165 @@
     Label: Heavy barrel
     FireRate: 2
     ProjectileSpeed: 55
+    RateDelta: -4
+    SpeedDelta: 15
+    Interface: pistol-barrel
+    Offer: direct
+
+- type: entity
+  parent: BaseItem
+  id: WeaponBoltFast
+  name: fast bolt
+  description: A light bolt group. It cycles faster.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+    state: base
+  - type: WeaponPart
+    Prototype: WeaponBoltFast
+    Slot: bolt
+    Label: Fast bolt
+    RateDelta: 2
+    Interface: pistol-bolt
+    Offer: direct
+
+- type: entity
+  parent: BaseItem
+  id: WeaponBoltHeavy
+  name: heavy bolt
+  description: A heavy bolt group. It cycles slower.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+    state: base
+  - type: WeaponPart
+    Prototype: WeaponBoltHeavy
+    Slot: bolt
+    Label: Heavy bolt
+    RateDelta: -1
+    Interface: pistol-bolt
+    Offer: direct
+
+- type: entity
+  parent: BaseItem
+  id: WeaponMagazineStick
+  name: stick magazine
+  description: A short magazine. It does not change the cycle.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+    state: base
+  - type: WeaponPart
+    Prototype: WeaponMagazineStick
+    Slot: magazine
+    Label: Stick magazine
+    Interface: pistol-feed
+    Offer: direct
+
+- type: entity
+  parent: BaseItem
+  id: WeaponMagazineDrum
+  name: drum magazine
+  description: A heavy magazine. It slows the cycle.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+    state: base
+  - type: WeaponPart
+    Prototype: WeaponMagazineDrum
+    Slot: magazine
+    Label: Drum magazine
+    RateDelta: -1
+    Interface: pistol-feed
+    Offer: direct
+
+- type: entity
+  parent: BaseItem
+  id: WeaponOpticPistol
+  name: pistol optic
+  description: A compact optic. The shot is a little faster.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+    state: base
+  - type: WeaponPart
+    Prototype: WeaponOpticPistol
+    Slot: optic
+    Label: Pistol optic
+    SpeedDelta: 5
+    Interface: pistol-optic
+    Offer: direct
+
+- type: entity
+  parent: BaseItem
+  id: WeaponSuppressorPistol
+  name: pistol suppressor
+  description: A muzzle suppressor. The shot travels slower.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+    state: base
+  - type: WeaponPart
+    Prototype: WeaponSuppressorPistol
+    Slot: muzzle
+    Label: Suppressor
+    SpeedDelta: -8
+    Interface: pistol-muzzle
+    Offer: direct
+
+- type: entity
+  parent: BaseItem
+  id: WeaponBarrelRifle
+  name: rifle barrel
+  description: A rifle barrel. This pistol cannot mount it.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+    state: base
+  - type: WeaponPart
+    Prototype: WeaponBarrelRifle
+    Slot: barrel
+    Label: Rifle barrel
+    Interface: rifle-barrel
+    Offer: direct
+
+- type: entity
+  parent: BaseItem
+  id: WeaponMuzzleCollar
+  name: muzzle collar
+  description: A collar that reaches the pistol muzzle only through an adapter.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+    state: base
+  - type: WeaponPart
+    Prototype: WeaponMuzzleCollar
+    Slot: muzzle
+    Label: Muzzle collar
+    Interface: pistol-muzzle
+    Offer: adapter
+
+- type: entity
+  parent: BaseItem
+  id: WeaponBoltBlank
+  name: bolt blank
+  description: A bolt blank. It needs machining before it can cycle this pistol.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+    state: base
+  - type: WeaponPart
+    Prototype: WeaponBoltBlank
+    Slot: bolt
+    Label: Bolt blank
+    Interface: pistol-bolt
+    Offer: machining
 
 - type: entity
   parent: BaseStructure
   id: WeaponBench
   name: weapon bench
-  description: Put the pistol in the gun slot. Barrels sit in the bench storage. The bench installs only a barrel the server accepts.
+  description: Put the pistol in the gun slot. Parts sit in the bench storage. The bench installs a part only when its interface is on the pistol.
   components:
   - type: Sprite
     sprite: Structures/Furniture/Tables/generic.rsi
@@ -72,7 +276,7 @@
         swap: false
   - type: Storage
     grid:
-    - 0,0,7,3
+    - 0,0,13,4
     maxItemSize: Normal
     openOnActivate: false
     clickInsert: false
@@ -88,6 +292,15 @@
       storagebase:
       - WeaponBarrelLight
       - WeaponBarrelHeavy
+      - WeaponBoltFast
+      - WeaponBoltHeavy
+      - WeaponMagazineStick
+      - WeaponMagazineDrum
+      - WeaponOpticPistol
+      - WeaponSuppressorPistol
+      - WeaponBarrelRifle
+      - WeaponMuzzleCollar
+      - WeaponBoltBlank
   - type: AstraHtmlUi
     document: WeaponBench
   - type: ActivatableUI

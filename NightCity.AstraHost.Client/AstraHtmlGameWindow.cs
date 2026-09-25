@@ -210,7 +210,7 @@ public sealed class AstraHtmlGameWindow
         "}" +
         "if(!payload.id){" +
         "var label=document.querySelector(\"label.astra-label\");" +
-        "if(label)label.textContent=\"Select a barrel in the list\";" +
+        "if(label)label.textContent=\"Select a part in the list\";" +
         "}" +
         "return send(name,payload);" +
         "}" +

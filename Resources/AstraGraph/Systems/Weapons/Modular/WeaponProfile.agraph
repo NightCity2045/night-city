@@ -130,7 +130,16 @@
       "fields": [
         { "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11ab", "name": "Barrel", "typeName": "string", "defaultValue": "" },
         { "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11ac", "name": "FireRate", "typeName": "float32", "defaultValue": "6" },
-        { "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11ad", "name": "ProjectileSpeed", "typeName": "float32", "defaultValue": "40" }
+        { "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11ad", "name": "ProjectileSpeed", "typeName": "float32", "defaultValue": "40" },
+        { "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11ae", "name": "Bolt", "typeName": "string", "defaultValue": "" },
+        { "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11af", "name": "Magazine", "typeName": "string", "defaultValue": "" },
+        { "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b0", "name": "Optic", "typeName": "string", "defaultValue": "" },
+        { "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b1", "name": "Muzzle", "typeName": "string", "defaultValue": "" },
+        { "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b3", "name": "BarrelAccepts", "typeName": "string", "defaultValue": "" },
+        { "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b4", "name": "BoltAccepts", "typeName": "string", "defaultValue": "" },
+        { "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b5", "name": "FeedAccepts", "typeName": "string", "defaultValue": "" },
+        { "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b6", "name": "OpticAccepts", "typeName": "string", "defaultValue": "" },
+        { "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b7", "name": "MuzzleAccepts", "typeName": "string", "defaultValue": "" }
       ]
     }
   ]
