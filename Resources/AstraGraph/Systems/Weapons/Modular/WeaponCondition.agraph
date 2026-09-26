@@ -6,17 +6,33 @@
   "side": "server",
   "metadata": {
     "author": "",
-    "description": "Each shot adds heat, fouling, and wear. The gun keeps the part fire rate.",
+    "description": "Each shot adds heat, fouling, and wear, then may jam. A clear gun keeps the part fire rate.",
     "version": "1.0.0",
-    "createdAt": "2026-09-26T09:31:33.3730031+00:00",
-    "modifiedAt": "2026-09-26T09:31:33.3730032+00:00",
+    "createdAt": "2026-09-26T11:22:27.1906326+00:00",
+    "modifiedAt": "2026-09-26T11:22:27.1906327+00:00",
     "tags": [],
     "customAttributes": {}
   },
   "variables": [
     {
-      "id": "4ef00c14-1c0c-494c-a646-e1723b8b2f35",
+      "id": "7391cf89-3057-4026-8267-e36e1162d907",
       "name": "HeatNow",
+      "typeName": "float32",
+      "isPersistent": false,
+      "isReplicated": false,
+      "isParameter": false
+    },
+    {
+      "id": "4c8f97a4-4827-4785-8a85-c7a80f43f90e",
+      "name": "SeedNow",
+      "typeName": "float32",
+      "isPersistent": false,
+      "isReplicated": false,
+      "isParameter": false
+    },
+    {
+      "id": "392fde57-8ad9-4071-a6ff-a3cafa1884bb",
+      "name": "RiskNow",
       "typeName": "float32",
       "isPersistent": false,
       "isReplicated": false,
@@ -25,26 +41,26 @@
   ],
   "nodes": [
     {
-      "id": "ae601c95-09ee-4ef6-ac4e-e5adba433101",
+      "id": "16954b87-3817-4799-b4b0-68e9b76199d0",
       "name": "Shot",
       "nodeType": "Event.Shot",
       "pins": [
         {
-          "id": "f9cac3a3-44f3-435c-bbe1-2c5a01136803",
+          "id": "ad5147b3-ffcc-40af-a24a-9136aa6f1cc7",
           "name": "Out",
           "direction": "output",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "dd218743-0086-4561-a175-6bea22302686",
+          "id": "97b03e90-a995-444a-a8f2-9a9350d405b7",
           "name": "Entity",
           "direction": "output",
           "kind": "data",
           "dataType": "EntityUid"
         },
         {
-          "id": "9da006fc-1d10-49e6-b652-0826d21162a2",
+          "id": "157d7b9f-99c5-4bfb-90a6-ea75e9ae621b",
           "name": "Event",
           "direction": "output",
           "kind": "data",
@@ -57,26 +73,26 @@
       }
     },
     {
-      "id": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
+      "id": "cad91374-de91-4bfb-a222-5ce0f86575ce",
       "name": "Assembly",
       "nodeType": "Entity.TryGetComponent",
       "pins": [
         {
-          "id": "eb941bc9-4132-4f4c-8b38-1dbb7fd8b5ff",
+          "id": "0f1aca8b-7caa-4d76-9dcb-c96702e10929",
           "name": "Entity",
           "direction": "input",
           "kind": "data",
           "dataType": "EntityUid"
         },
         {
-          "id": "b3bee172-d92d-4e91-a0d6-da2c89828f98",
+          "id": "dcece79c-0804-49cd-b8bf-51f40cd28467",
           "name": "Found",
           "direction": "output",
           "kind": "data",
           "dataType": "bool"
         },
         {
-          "id": "76450668-ee1a-4d04-baa3-7b58b902368b",
+          "id": "77cd0472-df25-41eb-a168-841c0cd60c8b",
           "name": "Component",
           "direction": "output",
           "kind": "data",
@@ -88,33 +104,33 @@
       }
     },
     {
-      "id": "4e9435bf-d0a2-45e1-a7ac-531ae778cc6a",
+      "id": "5028371e-6e2c-4182-a1f2-2999727ae3ff",
       "name": "Assembly?",
       "nodeType": "Core.Branch",
       "pins": [
         {
-          "id": "b29c925d-9a12-4975-9512-0ecd5a954acc",
+          "id": "5b9e6a6a-f91a-4f38-86a1-526d97d5796f",
           "name": "In",
           "direction": "input",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "9b8c11ee-78e9-47fa-b7ba-c91bc9d03a5f",
+          "id": "f7f37f96-5cfc-4cce-8e92-4e9c16375df9",
           "name": "True",
           "direction": "output",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "a4189caa-608d-4c08-a831-00d039d0f431",
+          "id": "5d3273fc-a3a1-422e-ba36-d54968c7240e",
           "name": "False",
           "direction": "output",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "97a74286-598e-4e06-936a-a4b9f564bc55",
+          "id": "5417412d-2e4f-4bc4-94b5-c38ee4c70f7d",
           "name": "Condition",
           "direction": "input",
           "kind": "data",
@@ -124,19 +140,19 @@
       "properties": {}
     },
     {
-      "id": "768ffee0-0420-48eb-bcd8-3ecb6a39b95f",
+      "id": "053f7a07-0d85-4114-a78c-4ee7fcec912a",
       "name": "Heat",
       "nodeType": "Schema.GetField",
       "pins": [
         {
-          "id": "6718fc4b-7da2-41b8-a21b-684595edde81",
+          "id": "984f0145-1abe-4633-ab3f-7430d5b7f9f3",
           "name": "Component",
           "direction": "input",
           "kind": "data",
           "dataType": "component"
         },
         {
-          "id": "5e6956d0-dcad-4188-918e-511cfaf18e80",
+          "id": "8a7f8f36-d42f-468b-85a9-ad9208cd845f",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -149,12 +165,12 @@
       }
     },
     {
-      "id": "ae38852c-80be-4f2a-a4e9-7a13d7d3e882",
+      "id": "5465bdb0-f570-4578-9bac-24ca401d0996",
       "name": "HeatStep",
       "nodeType": "Core.Literal",
       "pins": [
         {
-          "id": "2a2ac8e4-eedc-449d-85f5-ec7df25ee914",
+          "id": "80d39a19-f589-4497-9bac-d8cc28ffda9d",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -167,26 +183,26 @@
       }
     },
     {
-      "id": "3e122963-7ec1-4cd8-83bb-5d90e8e03729",
+      "id": "2772dc29-5ed4-487a-a20a-2ab250b6822f",
       "name": "HeatSum",
       "nodeType": "math.add",
       "pins": [
         {
-          "id": "0f0b468f-ff65-4639-92a2-8c9a607f66fb",
+          "id": "c25b83c1-d96c-416e-b37d-f452a4667fb3",
           "name": "A",
           "direction": "input",
           "kind": "data",
           "dataType": "float32"
         },
         {
-          "id": "6d839bd6-b227-4d6c-8afa-22c88a6a852f",
+          "id": "c14a76ec-9c67-4ada-83ee-3d13c4601be1",
           "name": "B",
           "direction": "input",
           "kind": "data",
           "dataType": "float32"
         },
         {
-          "id": "26babe3e-e20e-4ef6-a48c-acc46d3ee840",
+          "id": "ff4f663e-3695-48a3-821b-169ae14d6724",
           "name": "Result",
           "direction": "output",
           "kind": "data",
@@ -196,26 +212,26 @@
       "properties": {}
     },
     {
-      "id": "061661ed-183b-4302-bbf0-4ede8109d1db",
+      "id": "08c482e9-e91b-4778-9aa5-1643c1832b34",
       "name": "StoreHeat",
       "nodeType": "Core.VariableAssign",
       "pins": [
         {
-          "id": "6a250f09-93f9-44cb-ba66-c0a3532e8d70",
+          "id": "356e82bd-cdb8-42f1-b7da-9b5f027a39e8",
           "name": "In",
           "direction": "input",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "1ae9e98c-5dd9-4f6b-83d0-d89e8efb2e7c",
+          "id": "781b3d36-eab7-40df-9100-c17a3024e622",
           "name": "Out",
           "direction": "output",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "1acf2332-6404-473f-9c10-a898c53626b9",
+          "id": "943e6523-f966-452e-9aae-35f3ca5d4b25",
           "name": "Value",
           "direction": "input",
           "kind": "data",
@@ -227,12 +243,12 @@
       }
     },
     {
-      "id": "7d3342bd-cc38-48db-a42e-5d48af94346c",
+      "id": "05ebb3d7-a12e-4d05-9fb3-0f1fbcb589fd",
       "name": "StoredHeat",
       "nodeType": "Core.VariableRead",
       "pins": [
         {
-          "id": "eb9904bb-c3bc-429e-b4ec-ab760e714075",
+          "id": "2adf0121-d63b-41c0-a511-ad8bec3aea84",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -244,40 +260,40 @@
       }
     },
     {
-      "id": "652ef672-ae50-4d05-924f-e0a7f248c878",
+      "id": "8ce9921a-b6f8-40a4-badf-fbcbca0b3462",
       "name": "SetHeat",
       "nodeType": "Schema.SetField",
       "pins": [
         {
-          "id": "f02a3b4a-6a18-44f1-9094-ec6e70f7b2a8",
+          "id": "84d11291-7cd4-4349-9979-255a02c66661",
           "name": "In",
           "direction": "input",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "0ae518e0-9dd1-4070-aa9c-79ad3a08c6a6",
+          "id": "ee203887-d8ec-48e6-9232-42fd1ae1f7db",
           "name": "Out",
           "direction": "output",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "2f8bbda7-1d1c-4919-b2b1-b60adbe0779c",
+          "id": "e604f311-e882-40bc-8058-d17552a8f242",
           "name": "Target",
           "direction": "input",
           "kind": "data",
           "dataType": "object"
         },
         {
-          "id": "3b58bd65-3ae0-4aa7-b61d-70fcd15d3eb1",
+          "id": "89ac77f2-6ef2-4ab6-a48f-66009dbd6ab1",
           "name": "Value",
           "direction": "input",
           "kind": "data",
           "dataType": "float32"
         },
         {
-          "id": "32ddc386-868e-484a-bfb6-50788dfb119a",
+          "id": "c77d9b4d-c613-46ed-a118-a33fcad88e4f",
           "name": "Result",
           "direction": "output",
           "kind": "data",
@@ -290,19 +306,19 @@
       }
     },
     {
-      "id": "599b5973-c7f6-4a26-b29d-96e622f4d535",
+      "id": "56d8296e-c5d5-4cad-83c0-c4b2791572e9",
       "name": "Fouling",
       "nodeType": "Schema.GetField",
       "pins": [
         {
-          "id": "de5eaf0d-d327-49a6-ac31-dd0b65569817",
+          "id": "295c1775-f31a-464a-b71c-12c2185b05d6",
           "name": "Component",
           "direction": "input",
           "kind": "data",
           "dataType": "component"
         },
         {
-          "id": "cf10eaa7-e1e0-4b48-b946-fe10e7b02716",
+          "id": "3ddcb576-59c7-4390-ab8a-f3d871dc7067",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -315,12 +331,12 @@
       }
     },
     {
-      "id": "a827097f-79c2-4397-a34c-0c7f49e23d3d",
+      "id": "b7b5df7b-f692-410d-95ea-cd6ac5971bdc",
       "name": "FoulingStep",
       "nodeType": "Core.Literal",
       "pins": [
         {
-          "id": "a7e5c573-c8bb-445e-803c-7d77be5bf01f",
+          "id": "0455ff31-c8d9-42bc-95bb-75fd61c7455c",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -333,26 +349,26 @@
       }
     },
     {
-      "id": "88928f53-55b7-469f-9f2b-60c0445dab06",
+      "id": "e3bff290-c8ae-45ed-a45f-4f8df3b8c724",
       "name": "FoulingSum",
       "nodeType": "math.add",
       "pins": [
         {
-          "id": "f5412781-154b-4f87-95f9-9f9f8dd07cd0",
+          "id": "cae62935-8ee7-47fa-982b-24b9cf318329",
           "name": "A",
           "direction": "input",
           "kind": "data",
           "dataType": "float32"
         },
         {
-          "id": "674bf7e4-12cb-478d-8bc6-eb261c2b5d3c",
+          "id": "e90e0d83-9557-4539-abfe-a1c4f8c01832",
           "name": "B",
           "direction": "input",
           "kind": "data",
           "dataType": "float32"
         },
         {
-          "id": "9bd95aaa-ae13-4f1d-b83e-949e42adf7a4",
+          "id": "e5775c62-40e0-4ade-aef6-a3dde4791dff",
           "name": "Result",
           "direction": "output",
           "kind": "data",
@@ -362,40 +378,40 @@
       "properties": {}
     },
     {
-      "id": "33a0740d-70d4-4d95-a617-8339484afab5",
+      "id": "dc04348f-9460-470b-b82a-73fd8e130946",
       "name": "SetFouling",
       "nodeType": "Schema.SetField",
       "pins": [
         {
-          "id": "bcffe1ca-249a-44e4-8bfe-9fcb4aa43df8",
+          "id": "84c81538-a565-48b3-940f-499cb19d7d47",
           "name": "In",
           "direction": "input",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "0e477d92-9010-478d-9f67-913c1a3be4b8",
+          "id": "9475043a-e92b-4506-bfa3-968462d8a939",
           "name": "Out",
           "direction": "output",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "e2e43116-5091-4bc2-8681-333bbe8a14d3",
+          "id": "28f3f542-23d7-4631-ab28-47721e93378e",
           "name": "Target",
           "direction": "input",
           "kind": "data",
           "dataType": "object"
         },
         {
-          "id": "5c4f9cc9-678b-416d-ac3c-b19f7256b01f",
+          "id": "19b563bf-05d3-4e2c-8adc-9f657e35890b",
           "name": "Value",
           "direction": "input",
           "kind": "data",
           "dataType": "float32"
         },
         {
-          "id": "4c96f40d-e65a-43a0-9591-552d57044b51",
+          "id": "3a83358b-12c7-42d3-9bbc-acc2704747fd",
           "name": "Result",
           "direction": "output",
           "kind": "data",
@@ -408,19 +424,19 @@
       }
     },
     {
-      "id": "f0fec9f7-91ca-434d-a57b-300c24423aba",
+      "id": "87d7a28b-a057-4fff-91f8-368e1d9e7e25",
       "name": "Wear",
       "nodeType": "Schema.GetField",
       "pins": [
         {
-          "id": "17fc5215-e1c1-413c-b5c4-515ed0dc7d30",
+          "id": "f2b3dfaf-fa64-421e-beb8-b3808c18b8f2",
           "name": "Component",
           "direction": "input",
           "kind": "data",
           "dataType": "component"
         },
         {
-          "id": "0da97cb4-bfcf-450d-8d97-5cddbe0040fb",
+          "id": "70fc9780-bf3f-46a6-9a54-4c381a8725a0",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -433,12 +449,12 @@
       }
     },
     {
-      "id": "c3495df0-18e5-4b61-8425-955f78103109",
+      "id": "94d3f065-3ae7-4012-b041-bf0f69890363",
       "name": "WearStep",
       "nodeType": "Core.Literal",
       "pins": [
         {
-          "id": "c2135e22-9776-48ca-af8b-80d6da216dcf",
+          "id": "8388ad74-fc31-4fd9-aa8a-d306d52abbea",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -451,26 +467,26 @@
       }
     },
     {
-      "id": "d236bab7-0725-436d-8cff-273275096cdc",
+      "id": "b353b45b-125b-4b4f-a6b0-cd07cd714b32",
       "name": "WearSum",
       "nodeType": "math.add",
       "pins": [
         {
-          "id": "cbc63ee6-c287-484a-b105-9758c1f3ea59",
+          "id": "831cae48-644a-439e-a7ad-9de15e23ceb3",
           "name": "A",
           "direction": "input",
           "kind": "data",
           "dataType": "float32"
         },
         {
-          "id": "b41af851-e7f2-44c1-9d87-ff47bd48ad10",
+          "id": "6a241a0f-9256-493f-bdb4-3dd9013cca22",
           "name": "B",
           "direction": "input",
           "kind": "data",
           "dataType": "float32"
         },
         {
-          "id": "8bd4420c-d03b-4339-b2a6-6f47f01a649a",
+          "id": "7066408c-3dc1-42df-b6de-fd83ba5d337f",
           "name": "Result",
           "direction": "output",
           "kind": "data",
@@ -480,40 +496,40 @@
       "properties": {}
     },
     {
-      "id": "b8cc063b-c684-43a3-b5df-8d45739df8ac",
+      "id": "ae5ae464-7cbc-4fe6-96c6-abaa97e9f5ec",
       "name": "SetWear",
       "nodeType": "Schema.SetField",
       "pins": [
         {
-          "id": "ce892c51-3e35-4bad-9571-759d0d8e2854",
+          "id": "e3651ee3-b9ea-4896-8925-e9c361b540dd",
           "name": "In",
           "direction": "input",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "57f7abb4-63b2-4772-81f9-59d9e1847d01",
+          "id": "594fbd43-3b6e-4ce5-a72b-4e939389d6f5",
           "name": "Out",
           "direction": "output",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "5772a387-9613-4172-aa7a-32546eaec754",
+          "id": "4f0123a0-8867-4a45-9428-24a22610efdf",
           "name": "Target",
           "direction": "input",
           "kind": "data",
           "dataType": "object"
         },
         {
-          "id": "b3586326-d257-4831-92fe-21ccab1ef607",
+          "id": "cce00997-4e34-4016-9787-1e03d7a873f4",
           "name": "Value",
           "direction": "input",
           "kind": "data",
           "dataType": "float32"
         },
         {
-          "id": "35ddf52c-3847-4019-add5-192563e872fd",
+          "id": "376dd6b3-bd33-43b2-9ab5-25254726864c",
           "name": "Result",
           "direction": "output",
           "kind": "data",
@@ -526,19 +542,19 @@
       }
     },
     {
-      "id": "404f51d8-ec0b-4bfe-8dad-84a5c0ec3b3d",
+      "id": "636ce759-7d54-4e8b-a2b3-4dea51af021a",
       "name": "Rate",
       "nodeType": "Schema.GetField",
       "pins": [
         {
-          "id": "216e3e75-29d5-4335-a9d0-5c623bdd79a2",
+          "id": "aa30c78f-d211-4b4f-b268-022e8f112ec9",
           "name": "Component",
           "direction": "input",
           "kind": "data",
           "dataType": "component"
         },
         {
-          "id": "6ef8b776-383a-4ead-a087-677ddf01587e",
+          "id": "f27e40f4-e52b-4cd8-8fba-0bccc3f7a151",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -551,130 +567,12 @@
       }
     },
     {
-      "id": "a90096a9-5dd0-42c0-9fdd-108c42c45250",
-      "name": "WriteRate",
-      "nodeType": "Component.SetField",
-      "pins": [
-        {
-          "id": "e8ea9c15-40b1-4d67-86c8-7522794113f2",
-          "name": "In",
-          "direction": "input",
-          "kind": "execution",
-          "dataType": ""
-        },
-        {
-          "id": "d5dc25b4-698b-4612-9af4-ebaa9273b506",
-          "name": "Out",
-          "direction": "output",
-          "kind": "execution",
-          "dataType": ""
-        },
-        {
-          "id": "3445d847-5bca-4881-994d-6ce879528273",
-          "name": "Entity",
-          "direction": "input",
-          "kind": "data",
-          "dataType": "EntityUid"
-        },
-        {
-          "id": "7df749c6-4606-4cfd-85ae-9f3e55cbd5e7",
-          "name": "Component",
-          "direction": "input",
-          "kind": "data",
-          "dataType": "string",
-          "defaultValue": "GunComponent"
-        },
-        {
-          "id": "557c5608-68c2-40d7-830e-33afb77ef75b",
-          "name": "Field",
-          "direction": "input",
-          "kind": "data",
-          "dataType": "string",
-          "defaultValue": "FireRate"
-        },
-        {
-          "id": "408695e2-ddfe-4e04-b6f9-4c94d90243cf",
-          "name": "Value",
-          "direction": "input",
-          "kind": "data",
-          "dataType": "float64"
-        },
-        {
-          "id": "a32b1b8b-e302-46aa-9e64-56c53cda1b47",
-          "name": "Success",
-          "direction": "output",
-          "kind": "data",
-          "dataType": "bool"
-        }
-      ],
-      "properties": {}
-    },
-    {
-      "id": "558d39d5-963e-4309-b086-f211d2493446",
-      "name": "WriteModified",
-      "nodeType": "Component.SetField",
-      "pins": [
-        {
-          "id": "3d5f2042-9ab7-458d-ba8a-8042657a2736",
-          "name": "In",
-          "direction": "input",
-          "kind": "execution",
-          "dataType": ""
-        },
-        {
-          "id": "e310d9a5-8cce-4d96-b750-8413cd3e96d3",
-          "name": "Out",
-          "direction": "output",
-          "kind": "execution",
-          "dataType": ""
-        },
-        {
-          "id": "338ee2ab-a174-4d5a-9fc7-88931663798b",
-          "name": "Entity",
-          "direction": "input",
-          "kind": "data",
-          "dataType": "EntityUid"
-        },
-        {
-          "id": "55feb543-02f6-4e92-8125-71a52bf91032",
-          "name": "Component",
-          "direction": "input",
-          "kind": "data",
-          "dataType": "string",
-          "defaultValue": "GunComponent"
-        },
-        {
-          "id": "c5332eb2-64b3-43f6-ac35-d6a9e113d67b",
-          "name": "Field",
-          "direction": "input",
-          "kind": "data",
-          "dataType": "string",
-          "defaultValue": "FireRateModified"
-        },
-        {
-          "id": "ecfb1406-cdc3-4514-a193-ef6bfc2a25c7",
-          "name": "Value",
-          "direction": "input",
-          "kind": "data",
-          "dataType": "float64"
-        },
-        {
-          "id": "6914dd69-816d-4dd7-8c3c-b5407657ae4e",
-          "name": "Success",
-          "direction": "output",
-          "kind": "data",
-          "dataType": "bool"
-        }
-      ],
-      "properties": {}
-    },
-    {
-      "id": "7d63e5e9-14fb-407c-a04a-b3c34c9482c6",
+      "id": "98a0ea5f-9f71-475b-8d95-8951b73d0e21",
       "name": "RateText",
       "nodeType": "Text.WithNumber",
       "pins": [
         {
-          "id": "3e9c42bf-ed6b-45ec-900a-aaf02bf8eb80",
+          "id": "f2a4e825-e246-4463-87db-61bd37014de6",
           "name": "Label",
           "direction": "input",
           "kind": "data",
@@ -682,14 +580,14 @@
           "defaultValue": "Fire rate"
         },
         {
-          "id": "362171bf-2e76-4108-8d4c-f615798ee7f9",
+          "id": "9a58d96e-09bc-4195-8688-12c8bc8506c2",
           "name": "Number",
           "direction": "input",
           "kind": "data",
           "dataType": "float64"
         },
         {
-          "id": "2c817d21-45b4-4086-b2cc-c8279b606694",
+          "id": "c0a06f0f-075f-4f9d-b8a6-9f7a4260eb54",
           "name": "Text",
           "direction": "output",
           "kind": "data",
@@ -699,12 +597,12 @@
       "properties": {}
     },
     {
-      "id": "33c2f552-3376-4410-b024-865010e82223",
+      "id": "8957c907-a155-4ac2-8a6e-847f652b654a",
       "name": "HeatTextSep",
       "nodeType": "Core.Literal",
       "pins": [
         {
-          "id": "126fc739-b7f7-4438-9eec-98b209f6b014",
+          "id": "b78aff41-9885-44bd-895c-0354bbb9b51f",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -717,19 +615,19 @@
       }
     },
     {
-      "id": "9d195ada-feee-48bf-8963-18538a7074d2",
+      "id": "10febc56-d2b7-4a2a-89ad-4574f535d81d",
       "name": "HeatTextField",
       "nodeType": "Schema.GetField",
       "pins": [
         {
-          "id": "69db9e48-2140-46a3-b0d5-5b4ba9e28546",
+          "id": "ea02994e-954e-4e70-a753-deeb6c488227",
           "name": "Component",
           "direction": "input",
           "kind": "data",
           "dataType": "component"
         },
         {
-          "id": "dbb1f220-1a0b-42d2-82d9-d73b9425204c",
+          "id": "edc3b74e-5c43-4ff7-beae-9f548cf3285a",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -742,12 +640,12 @@
       }
     },
     {
-      "id": "f155ef89-791d-48cb-baeb-caa16fe9b136",
+      "id": "34dec557-af0c-4850-b3ba-7eeba1e9f54b",
       "name": "HeatTextLine",
       "nodeType": "Text.WithNumber",
       "pins": [
         {
-          "id": "07503cba-13e3-426a-8278-b8d77bdf8ea0",
+          "id": "b7562565-f0f8-41fe-96ca-b0f41be235e9",
           "name": "Label",
           "direction": "input",
           "kind": "data",
@@ -755,14 +653,14 @@
           "defaultValue": "Heat"
         },
         {
-          "id": "aefdb0c2-92f3-4755-934f-f86a9615c1f0",
+          "id": "82accd41-91e7-45ab-82e5-7970ba2dd50c",
           "name": "Number",
           "direction": "input",
           "kind": "data",
           "dataType": "float64"
         },
         {
-          "id": "80614927-44fe-493d-afee-953c8cb96336",
+          "id": "a06c4699-130b-4d67-85d0-87fde90f15fd",
           "name": "Text",
           "direction": "output",
           "kind": "data",
@@ -772,26 +670,26 @@
       "properties": {}
     },
     {
-      "id": "04f441ef-8216-424f-a5a2-4678fb4882d8",
+      "id": "84cac600-ebeb-4b84-ac29-4fbfed26c665",
       "name": "HeatTextSepd",
       "nodeType": "math.add",
       "pins": [
         {
-          "id": "a97f02fd-88a8-4f96-af59-867788eae70e",
+          "id": "724cef66-8943-4eac-a67d-affd9290d5b3",
           "name": "A",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "36de6b3a-8461-4aa0-aa5e-7c31930d5299",
+          "id": "8ea0df22-4e0e-4c41-a003-357cb5eef91f",
           "name": "B",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "04f6ae98-a8ce-47d4-84ce-a20fdc6d6dd2",
+          "id": "fa7dc7ed-bdf5-4d40-8e4a-4d00e94966fe",
           "name": "Result",
           "direction": "output",
           "kind": "data",
@@ -801,26 +699,26 @@
       "properties": {}
     },
     {
-      "id": "9c0f3f60-efb0-48f0-93de-cb7562ecd3b2",
+      "id": "23021b3b-f65e-4ed0-9b19-0a6e3880c642",
       "name": "HeatTextJoined",
       "nodeType": "math.add",
       "pins": [
         {
-          "id": "c0abff37-17c8-40fb-8635-3e0b0d038adc",
+          "id": "395e87bb-98f1-4fea-b209-35367d6fbfd8",
           "name": "A",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "1a5783de-0c57-484a-9595-4d0d6f8ae47e",
+          "id": "9cce1168-4433-4eed-a840-a6367f644dab",
           "name": "B",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "b79dfba8-deb6-476e-8c3d-6f26a26cb057",
+          "id": "8793c536-830b-49e7-9af8-5dff200993b4",
           "name": "Result",
           "direction": "output",
           "kind": "data",
@@ -830,12 +728,12 @@
       "properties": {}
     },
     {
-      "id": "ca60e051-ffc4-4589-9448-8cb268fca920",
+      "id": "e7319cc5-680a-45ac-a403-a9dfd2b4e90a",
       "name": "FoulingTextSep",
       "nodeType": "Core.Literal",
       "pins": [
         {
-          "id": "af78f05c-937c-4585-bc8e-e6e5fef8166f",
+          "id": "f3aef4f1-d56c-4ee8-831b-3c30f779d795",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -848,19 +746,19 @@
       }
     },
     {
-      "id": "9ec47a5a-59c9-45c4-8628-f9a4c4fdc6a0",
+      "id": "5450fcac-a7ac-4979-839f-d1bee71eebe8",
       "name": "FoulingTextField",
       "nodeType": "Schema.GetField",
       "pins": [
         {
-          "id": "1646fb7a-e9d9-4520-9147-b83488e2f468",
+          "id": "5d5c26f5-1d77-43f7-8a86-6cbfa96fa2af",
           "name": "Component",
           "direction": "input",
           "kind": "data",
           "dataType": "component"
         },
         {
-          "id": "5694fdca-6631-4daf-8ca2-f1874a8f1235",
+          "id": "895db5ad-a77a-419c-94c3-ec845183930c",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -873,12 +771,12 @@
       }
     },
     {
-      "id": "f8f63f91-19bc-4c5a-a264-e914b4ff84c4",
+      "id": "1d3924a3-a408-41cb-9549-6940b2c6c094",
       "name": "FoulingTextLine",
       "nodeType": "Text.WithNumber",
       "pins": [
         {
-          "id": "bb26cc9f-7066-4ad0-833b-b9f767763c13",
+          "id": "4be1aefa-8837-43d4-8b59-65d425df1a3c",
           "name": "Label",
           "direction": "input",
           "kind": "data",
@@ -886,14 +784,14 @@
           "defaultValue": "Fouling"
         },
         {
-          "id": "cb90745d-d825-440f-b5ad-6213b8092ea6",
+          "id": "75ac3674-4a5e-45cd-83d1-79faeb7d620f",
           "name": "Number",
           "direction": "input",
           "kind": "data",
           "dataType": "float64"
         },
         {
-          "id": "7ccc6988-3c3b-4285-bb32-66145a786a48",
+          "id": "2ffd779e-621d-4e10-9f5a-1c77341ccccc",
           "name": "Text",
           "direction": "output",
           "kind": "data",
@@ -903,26 +801,26 @@
       "properties": {}
     },
     {
-      "id": "f16753ed-0a7c-4261-8465-547c2c3e4fa6",
+      "id": "61ab4265-824a-467c-900e-7b0c5a6d1c7c",
       "name": "FoulingTextSepd",
       "nodeType": "math.add",
       "pins": [
         {
-          "id": "114c4102-4043-4054-906b-3b9bc68b1d75",
+          "id": "2d79765b-70ad-4e1e-9b38-474c14b77be3",
           "name": "A",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "25990ffa-6bfd-4976-8584-168898f51cd1",
+          "id": "ed20582b-66a3-4be2-9485-ebfb92eec024",
           "name": "B",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "1508a42b-ccc1-48cc-bcac-e67531327fe7",
+          "id": "a1867554-2865-4d5f-8b5f-6d9a2b2ed7df",
           "name": "Result",
           "direction": "output",
           "kind": "data",
@@ -932,26 +830,26 @@
       "properties": {}
     },
     {
-      "id": "0b099dc0-a4bf-41da-9477-d223d4b13f2b",
+      "id": "6b36fe1f-34df-438a-8a88-e60c24fb6b8b",
       "name": "FoulingTextJoined",
       "nodeType": "math.add",
       "pins": [
         {
-          "id": "83d0d850-07d1-4439-bd95-2b4f783790f3",
+          "id": "9d0ac98e-e56e-4d13-87f2-3787d8ce85fc",
           "name": "A",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "a1baa326-fc56-424a-818b-9cc92e1bdb3b",
+          "id": "095ef802-def9-49ff-b47d-fcf282950be8",
           "name": "B",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "67689fc1-4831-49a6-ae1c-4535ed614057",
+          "id": "290db6a9-9df0-4850-8650-d94b807d1e77",
           "name": "Result",
           "direction": "output",
           "kind": "data",
@@ -961,12 +859,12 @@
       "properties": {}
     },
     {
-      "id": "f05a3ae6-f347-4f0d-ac8f-160bb79bb6e4",
+      "id": "19832563-d780-4fc8-a005-e029bbe4e8c3",
       "name": "WearTextSep",
       "nodeType": "Core.Literal",
       "pins": [
         {
-          "id": "95da83e7-40a2-445f-b86e-ca2f3bee9999",
+          "id": "2a2730d7-1d01-46dd-b7e3-ae214c8d551d",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -979,19 +877,19 @@
       }
     },
     {
-      "id": "54acde50-7204-453d-bb0e-bafc45bda8a6",
+      "id": "b1a77d03-2ef4-42f4-b82d-615792deebcd",
       "name": "WearTextField",
       "nodeType": "Schema.GetField",
       "pins": [
         {
-          "id": "05e904a0-0c8a-4a61-8101-1966d34a34cd",
+          "id": "f46bc1d1-9300-4927-9fd4-489361864c81",
           "name": "Component",
           "direction": "input",
           "kind": "data",
           "dataType": "component"
         },
         {
-          "id": "e4f098c8-a19f-4f56-8a8d-287b6322b7c2",
+          "id": "47118fa5-2cf4-4fad-a602-afdeede0ad21",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -1004,12 +902,12 @@
       }
     },
     {
-      "id": "9a691f6e-aa94-4fed-94fe-fbd67936eeac",
+      "id": "da0f085c-9c33-44cd-ad8b-fd5689e1d12d",
       "name": "WearTextLine",
       "nodeType": "Text.WithNumber",
       "pins": [
         {
-          "id": "c388a30a-200f-43bb-9276-0b4d1c6590a6",
+          "id": "7f209c8e-6ce2-477f-ad3f-32d2b66522d3",
           "name": "Label",
           "direction": "input",
           "kind": "data",
@@ -1017,14 +915,14 @@
           "defaultValue": "Wear"
         },
         {
-          "id": "11cf3576-a624-497c-9e33-71e6f93ab2a6",
+          "id": "1c51d30d-c2c3-413f-83f2-5950db119669",
           "name": "Number",
           "direction": "input",
           "kind": "data",
           "dataType": "float64"
         },
         {
-          "id": "9789ea13-46f0-41e7-ad96-fac1793107ab",
+          "id": "36c68a9c-2a42-4e17-9d27-93afed445b00",
           "name": "Text",
           "direction": "output",
           "kind": "data",
@@ -1034,26 +932,26 @@
       "properties": {}
     },
     {
-      "id": "86f3d95d-c8d0-4fa0-92f9-91b206feb88d",
+      "id": "8626a676-4077-460f-9a38-1c4858006eaf",
       "name": "WearTextSepd",
       "nodeType": "math.add",
       "pins": [
         {
-          "id": "90dc2cb6-c658-49d9-8654-8873e74c7cc1",
+          "id": "effc9b73-0dbb-428b-8f56-128e3895050d",
           "name": "A",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "9a81783e-6178-4f41-9e89-ad62c4714c09",
+          "id": "c8be7b97-9a86-44e9-8b81-ece70016fc4a",
           "name": "B",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "b7ec1ca1-daff-4a09-b4d8-fc7f7c9f5ab6",
+          "id": "489929eb-c993-408c-8d1e-b01ffe580155",
           "name": "Result",
           "direction": "output",
           "kind": "data",
@@ -1063,26 +961,26 @@
       "properties": {}
     },
     {
-      "id": "e1ca34e0-af13-4ddb-a333-e171f18ff2e7",
+      "id": "4bc90be3-3cc6-4b83-9d6d-ef21d06a645b",
       "name": "WearTextJoined",
       "nodeType": "math.add",
       "pins": [
         {
-          "id": "5fb4e8a7-0afe-4095-8f1f-7d5b3e9a935d",
+          "id": "2c3007b3-4673-4a1f-af75-7de8255830ed",
           "name": "A",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "11eecf92-ce7d-48df-987e-b361309083a5",
+          "id": "9a7e71ae-26b8-4efd-aa46-5f28759189e0",
           "name": "B",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "43ad23e4-bfc2-43d8-8dc5-1aaa517e199b",
+          "id": "ea67a668-ac89-4c22-ae90-a9c4bb21e571",
           "name": "Result",
           "direction": "output",
           "kind": "data",
@@ -1092,12 +990,12 @@
       "properties": {}
     },
     {
-      "id": "f21bf0a4-494e-401c-8e12-2914c3b7dec4",
+      "id": "a1df9538-37ca-4c89-bc2b-fa29c5a3095e",
       "name": "CalibrationTextSep",
       "nodeType": "Core.Literal",
       "pins": [
         {
-          "id": "95401d36-aa56-4e36-ac9b-a5fc43937c8e",
+          "id": "2eb33858-b283-48a4-b698-bc15bf96c46b",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -1110,19 +1008,19 @@
       }
     },
     {
-      "id": "0ee784a3-0929-4868-a4d3-c1fe176dc3d2",
+      "id": "e4238885-72de-4a37-9f85-287f8aa3873e",
       "name": "CalibrationTextField",
       "nodeType": "Schema.GetField",
       "pins": [
         {
-          "id": "87f84f5c-e047-4efc-890c-44a876be2480",
+          "id": "dba0cc21-edc7-4669-ba10-36f308e7edb1",
           "name": "Component",
           "direction": "input",
           "kind": "data",
           "dataType": "component"
         },
         {
-          "id": "3c8505ba-f800-4ce6-b4b3-49456bec969b",
+          "id": "a6254a93-76b6-402d-aa63-7f2e6a2d5925",
           "name": "Value",
           "direction": "output",
           "kind": "data",
@@ -1135,12 +1033,12 @@
       }
     },
     {
-      "id": "27b0d344-c7e8-47af-b134-c82d9c01df9b",
+      "id": "664340ee-c5e5-41ed-8166-0994c8f6bb84",
       "name": "CalibrationTextLine",
       "nodeType": "Text.WithNumber",
       "pins": [
         {
-          "id": "e803b610-5137-4d2a-97a7-8c01b5ca8708",
+          "id": "346004f2-258c-456d-998f-bbd6f4205f96",
           "name": "Label",
           "direction": "input",
           "kind": "data",
@@ -1148,14 +1046,14 @@
           "defaultValue": "Calibration"
         },
         {
-          "id": "a3c4c75d-cac3-4be5-898b-debe74f94992",
+          "id": "c4254d92-0518-4bc0-9cb4-ad6deafc25dd",
           "name": "Number",
           "direction": "input",
           "kind": "data",
           "dataType": "float64"
         },
         {
-          "id": "71fb2087-6c51-435a-8ae8-807599b47831",
+          "id": "d4de123f-7e3a-49bd-b964-390e24453c69",
           "name": "Text",
           "direction": "output",
           "kind": "data",
@@ -1165,26 +1063,26 @@
       "properties": {}
     },
     {
-      "id": "82734a8b-2bc4-464c-addc-4bce99d7cedf",
+      "id": "e4df42ad-1b46-44e5-814b-9c749b36003c",
       "name": "CalibrationTextSepd",
       "nodeType": "math.add",
       "pins": [
         {
-          "id": "48af98c6-966e-4794-a5b8-8b48f0ccfa79",
+          "id": "0c622543-0a54-4ba6-86a5-9dd0fff3dd0e",
           "name": "A",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "aef7e57c-de05-46bc-9ab6-cf9d6294f544",
+          "id": "3e598f88-7c4a-42bb-94f8-a5189031ac4a",
           "name": "B",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "3961e484-407b-45e8-a7be-d18a4560d019",
+          "id": "8f4fbc14-ff07-4b48-862a-7f2cf2a450c6",
           "name": "Result",
           "direction": "output",
           "kind": "data",
@@ -1194,26 +1092,26 @@
       "properties": {}
     },
     {
-      "id": "2327c8a4-c662-4772-8bce-f7e184ff6c50",
+      "id": "0a5f8df1-5044-4638-99a7-56391c04101b",
       "name": "CalibrationTextJoined",
       "nodeType": "math.add",
       "pins": [
         {
-          "id": "df3b461e-baea-4e3b-a223-a3a07818b3e8",
+          "id": "bdae6a74-6f65-4a41-b9a4-e93f572aad23",
           "name": "A",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "5e5ab92c-dee7-47bf-8712-43d36845d91a",
+          "id": "5a5351a9-1e50-42a5-b704-72cfad63fa74",
           "name": "B",
           "direction": "input",
           "kind": "data",
           "dataType": "string"
         },
         {
-          "id": "b54b940b-3a71-4fe1-bb01-3df1c328809e",
+          "id": "3d84575b-eeb1-4f43-b813-a36bf769dea5",
           "name": "Result",
           "direction": "output",
           "kind": "data",
@@ -1223,40 +1121,1346 @@
       "properties": {}
     },
     {
-      "id": "ca2d54b8-81b6-44a5-ab81-4bcd57871e02",
-      "name": "Describe",
-      "nodeType": "Meta.SetDescription",
+      "id": "fcd0ecf8-b97e-4163-9674-f0aa545f432e",
+      "name": "FaultTextSep",
+      "nodeType": "Core.Literal",
       "pins": [
         {
-          "id": "2d50236b-9979-4e2b-a59c-9315e510a8ad",
+          "id": "1abe772e-44d3-4d1d-98e9-ec11dd9926dd",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {
+        "Value": " \u00B7 ",
+        "Type": "string"
+      }
+    },
+    {
+      "id": "cbe65bba-728c-4d6d-8707-a4dbe5cfa097",
+      "name": "FaultTextLabel",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "a2227e44-3a7a-434d-807d-c392f56b107c",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {
+        "Value": "Malfunction: ",
+        "Type": "string"
+      }
+    },
+    {
+      "id": "01000267-eaa9-4a72-a9a4-3fc556886a64",
+      "name": "FaultTextField",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "3f9ef886-3580-424a-bd40-64e97463bc03",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "67b87290-39e3-4dad-82fa-aeb118951f2d",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Malfunction"
+      }
+    },
+    {
+      "id": "2429188a-889c-43c0-9ed1-53fb6336115e",
+      "name": "FaultTextLabeled",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "37458769-7429-4bd8-a52a-aab774ec5b13",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "ce4f5e5a-3c29-4035-8690-f1fe3b4b4b73",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "efdf7ebe-490a-4731-990f-765194519c9f",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "8d899c8b-a9b4-4e58-8276-6c6e2426bbaf",
+      "name": "FaultTextSepd",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "0352990d-9ad9-4906-9653-dbc597bd8bf3",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "a429ecbc-ffdf-4eee-a45a-5cb3e35d1208",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "627805f7-e638-42d1-8e0e-306973bb65de",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "7101dd0d-5754-4390-ac6a-caa1b258e7fc",
+      "name": "FaultTextJoined",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "810a65ce-122a-40ce-b5e7-e7b622f1ecdb",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "9a14a938-b32f-4745-bee6-6637800cbab8",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "86e5fbea-26bc-4041-a0c0-c782566ceacf",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "42c6c780-67e0-417f-a4b2-6d7849163f46",
+      "name": "Fault",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "7d2a2ce1-f1fc-437e-acb0-33021fcf97cd",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "f5d2f80a-6a6f-4470-b9d5-5f0e80bc64d5",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Malfunction"
+      }
+    },
+    {
+      "id": "c4ff020a-83a1-48ab-a129-db2e6103cf8e",
+      "name": "Already",
+      "nodeType": "cmp.notequal",
+      "pins": [
+        {
+          "id": "eaf6d2b2-8f87-41ee-9dc4-bcd242f5fb3f",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "30e423e7-2465-4322-a1fb-e77905427258",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Clear"
+        },
+        {
+          "id": "2521b50a-68f7-44b6-b495-4441906a4864",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "bf31b4a7-07e8-4bc0-9466-52bc31be810a",
+      "name": "Already?",
+      "nodeType": "Core.Branch",
+      "pins": [
+        {
+          "id": "a201bdff-cc4a-4ed1-9116-4ef4c345780e",
           "name": "In",
           "direction": "input",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "82d4548a-b1b2-4c7b-8ba6-e05a1220c1a3",
+          "id": "422e8c24-5c4b-4e0a-8a16-cf1770133ce8",
+          "name": "True",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "1ca1dc61-6eb1-4d33-96d2-92680b55d9b8",
+          "name": "False",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "78a2a319-51d3-4732-a778-8eb0a2aa9a47",
+          "name": "Condition",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "fb41d9ac-e791-48d9-8d0e-7d06fc2fdb36",
+      "name": "Seed",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "21a47308-3773-4c8d-a406-9af186e74388",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "07ac8c8a-8079-4d78-9d57-a248599b59ce",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Seed"
+      }
+    },
+    {
+      "id": "ef138478-d8ab-4918-94fb-866e7f2de253",
+      "name": "Half",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "b9234ec7-86a9-4127-9c28-0362a3e80922",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Value": "0.5",
+        "Type": "float32"
+      }
+    },
+    {
+      "id": "7c543673-a5b3-4ed5-bf77-b5b960e64c3e",
+      "name": "SeedHalf",
+      "nodeType": "math.multiply",
+      "pins": [
+        {
+          "id": "7ffb6efd-edcc-43b2-b677-456d857c9133",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "a8dee121-8299-4c0e-aa41-59669bd18b21",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "5af5c412-7762-48b5-9401-c2e13612f65d",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "5c72de52-68ae-48f9-bed6-748092a66f71",
+      "name": "Bump",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "1612d6b0-adbd-4335-bed0-cff7984b353e",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Value": "0.31",
+        "Type": "float32"
+      }
+    },
+    {
+      "id": "4427aa07-84fd-45c5-b2ca-69b40f62f711",
+      "name": "SeedNext",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "f2c65a44-252e-4bd9-ab89-ecdef652a964",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "4e30f600-c28d-4812-aaca-c6ddb7dac05f",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "3cda7395-6ce9-4794-87c0-3f4782de9e86",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "bc24d052-3357-4645-a886-27ab932e857a",
+      "name": "StoreSeed",
+      "nodeType": "Core.VariableAssign",
+      "pins": [
+        {
+          "id": "75b2a661-9a3e-42f0-aa86-8ecefd4b17c7",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "30c551b2-ac1f-4f88-9fbe-729d37748f31",
           "name": "Out",
           "direction": "output",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "8fb166b3-ed6b-4617-a3ec-765acc076c0d",
+          "id": "d709e1f3-65c4-4987-93c0-394758fd9577",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "VariableName": "SeedNow"
+      }
+    },
+    {
+      "id": "add6bf18-805b-474f-a9ab-a198981f1fa8",
+      "name": "StoredSeed",
+      "nodeType": "Core.VariableRead",
+      "pins": [
+        {
+          "id": "cdc1ac4c-b734-46ab-b704-7d8df7f5af22",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "VariableName": "SeedNow"
+      }
+    },
+    {
+      "id": "7381828f-14e9-46a3-9758-a51a8a4707ab",
+      "name": "SetSeed",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "f4bb81e9-9394-46b1-81af-d5e6ca49c255",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "4cf30207-adc0-4fb9-87bf-cedbba80bfd1",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "7213a4e8-2bdf-4bb8-9276-9e21adcf098c",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "b0a663dd-dbba-41cf-be5d-4ea9ac140c46",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "2085880e-22c1-4ea3-810b-25c33b4a0991",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Seed"
+      }
+    },
+    {
+      "id": "844bdbdd-33cf-4a66-aaa4-6204d7d1fe1d",
+      "name": "HeatScale",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "ad4d7007-d5d0-4e03-b621-d1a2d400ac90",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Value": "0.005",
+        "Type": "float32"
+      }
+    },
+    {
+      "id": "c1b08954-7594-4f8a-b0a8-64395c872e24",
+      "name": "HeatRisk",
+      "nodeType": "math.multiply",
+      "pins": [
+        {
+          "id": "463c0a0f-6020-4942-8cfd-48d5dec98caf",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "bcc0e6e8-26e6-4346-a475-d5b0470db684",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "0d1268f4-2ea0-4aeb-aa75-d7380b7591f6",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "cc8a90d0-7e54-4fcb-a418-1dbd260a6fe5",
+      "name": "FoulScale",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "84c27272-1320-4956-b681-714554d17ba8",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Value": "0.04",
+        "Type": "float32"
+      }
+    },
+    {
+      "id": "0e3100a1-7d62-482d-8cae-49ec5d3f2130",
+      "name": "FoulRisk",
+      "nodeType": "math.multiply",
+      "pins": [
+        {
+          "id": "afe66746-ebc3-42d8-82fd-7762d0aeb365",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "9a783977-c76b-4767-8a09-256ffcddd638",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "d421f10a-210f-4979-a404-28b01a05877b",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "537fe228-2933-49ad-81eb-955bd243fc20",
+      "name": "WearScale",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "8807fce9-1918-4f9f-98f7-d5221767288a",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Value": "0.05",
+        "Type": "float32"
+      }
+    },
+    {
+      "id": "66f10b93-7194-4a63-b427-cd1a2f0d5d4e",
+      "name": "WearRisk",
+      "nodeType": "math.multiply",
+      "pins": [
+        {
+          "id": "6c7091f0-86f6-4754-bbcc-1aeffead6c61",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "f71c5cd9-cff7-4b86-9e3c-8e46be0997d3",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "3d958efc-eca2-4d02-9487-0adbeeec365e",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "891fc6f2-7994-456f-8179-3cdfef19448d",
+      "name": "One",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "acf819b2-d71a-44df-9b65-620a6a1a4bf0",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Value": "1",
+        "Type": "float32"
+      }
+    },
+    {
+      "id": "25b9b68a-4b66-4bb1-8bd2-f8eea4a03c52",
+      "name": "Calibration",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "77dd2c9a-bc71-4004-9a03-eca3c7cdc17d",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "840ac762-fd6d-4c90-bdec-c599048bd7c1",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Calibration"
+      }
+    },
+    {
+      "id": "d8620fd0-7485-45e6-ab02-16d9d77c337f",
+      "name": "CalGap",
+      "nodeType": "math.subtract",
+      "pins": [
+        {
+          "id": "f08c6977-7c88-4993-b2e1-4cf056460d48",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "44608198-ceb5-4714-b941-de219cbb32f0",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "f1e39900-558b-450a-a0b9-1edc03ec8e25",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "48589cb9-7178-4ed9-87f7-2fbf994df713",
+      "name": "CalScale",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "509d55a2-efa8-4f70-af12-c20abf563e51",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Value": "0.3",
+        "Type": "float32"
+      }
+    },
+    {
+      "id": "285c68a5-cbbb-4441-afd1-ac6692cb54dc",
+      "name": "CalRisk",
+      "nodeType": "math.multiply",
+      "pins": [
+        {
+          "id": "dccd120c-fd6b-4150-9bed-08eb5ad91fd7",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "ee8dea56-b33d-4f22-a0a8-8b7d1b0790fb",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "cefea1eb-a20d-4d57-a462-48d189b3e62c",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "09f3b89a-0a3e-45bc-ab91-088c62477ae5",
+      "name": "RiskHeatFoul",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "772f8b1a-ee77-4703-a237-2614d0b1f898",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "558a874d-7ef5-4977-90f4-32fa59a8f9ef",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "6e2df83f-a512-4e72-86c1-a613e55f2c6a",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "3a33f70f-59cd-4398-aedd-966133261227",
+      "name": "RiskWear",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "0f1cc7c6-9297-4b11-ba27-ed047a08324c",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "49f59e64-5816-4a89-a4e1-43f7de9f2d88",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "b74f82aa-86da-4953-adde-5037ccd5c888",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "e21c80a0-1e32-42c8-b058-25327f21e461",
+      "name": "RiskSum",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "84cc2331-75a2-4ab1-bc3e-733e1d4b9ef4",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "cf18aea4-91eb-49dc-a572-9efefbc0fd82",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "1948139c-fd4b-4101-8369-9ee97b435d90",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "15a81a61-248a-444d-94f1-968a82c5ee93",
+      "name": "StoreRisk",
+      "nodeType": "Core.VariableAssign",
+      "pins": [
+        {
+          "id": "f532441a-34fb-4f4b-93d2-53492c0f26f3",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "6dc85c8f-87eb-42e7-90e1-0db52dfb2544",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "55c4ac16-44c8-4bf1-b481-259e3e2660ff",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "VariableName": "RiskNow"
+      }
+    },
+    {
+      "id": "5a66552a-50bc-4d06-b870-c417117b77fe",
+      "name": "StoredRisk",
+      "nodeType": "Core.VariableRead",
+      "pins": [
+        {
+          "id": "8d76ff30-56f8-419a-83ab-fcc1b6665a18",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "VariableName": "RiskNow"
+      }
+    },
+    {
+      "id": "c71b300c-5b49-49c7-9d93-ae7a17945ba5",
+      "name": "SetRisk",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "a917a6fd-7c67-4ac7-b8c6-e595026fb109",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "3068cd38-9fa1-444e-a200-9a13141ee32f",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "a4a53895-b275-43d0-8c59-ff02333da42c",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "8859cb60-07ce-4ce0-8379-8a1372973ee1",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "54dd3f8d-e404-4d7f-bfff-040f62aaa68d",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Risk"
+      }
+    },
+    {
+      "id": "da6ca391-dbf8-4897-9b95-0a1c2cb3cb63",
+      "name": "Roll",
+      "nodeType": "cmp.lessthan",
+      "pins": [
+        {
+          "id": "0e5eebba-f496-42c3-9cc2-32e209741801",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "e1b61302-c2d0-4188-93fd-f853ec22b770",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "957979fa-a127-4c6f-a63b-990c0af90daa",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "beddecf8-56ce-4a83-98a7-33df430ac1a8",
+      "name": "Roll?",
+      "nodeType": "Core.Branch",
+      "pins": [
+        {
+          "id": "1dc2e5e7-4c33-475b-a3e6-e604366ce7a9",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "980db789-35f4-41cf-82af-b2d41180b4b9",
+          "name": "True",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "ec64f8c0-7653-42c7-ac54-f93d1e9aba4a",
+          "name": "False",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "3030609c-f483-4f32-b701-3d626bef8662",
+          "name": "Condition",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "5f8d3c85-afcc-471a-93ad-44f861267784",
+      "name": "FoulLimit",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "89e548e5-b542-4de6-8fa1-28cadf63e3d1",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Value": "6",
+        "Type": "float32"
+      }
+    },
+    {
+      "id": "21276c68-5428-4630-9200-0462a7d232e2",
+      "name": "FoulHot",
+      "nodeType": "cmp.greaterthan",
+      "pins": [
+        {
+          "id": "f9aa5cff-d5de-4f56-91c7-4fc27a7069d7",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "915d706a-03e4-422e-ab30-ba799324f932",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "c686d13b-991f-44ae-a7a8-60bd91193f81",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "be37cc84-8dd5-413a-be62-8f1efa3f2788",
+      "name": "Foul?",
+      "nodeType": "Core.Branch",
+      "pins": [
+        {
+          "id": "b1284417-0dd3-4bc5-8eed-310cff1239b2",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "3387a4f9-1240-4c7a-b6e9-12db07480cb2",
+          "name": "True",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "4f14268b-6e0b-4670-bff0-e1e12b8494a0",
+          "name": "False",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "7611dd9b-3b50-44b8-b459-ce9492671b85",
+          "name": "Condition",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "4143704b-9fcd-4dc4-ba12-112c0352f170",
+      "name": "HeatLimit",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "e47d7ed5-4e8c-481e-8c63-2a2d72b3ed8f",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Value": "30",
+        "Type": "float32"
+      }
+    },
+    {
+      "id": "8d8ae404-db1a-4918-8427-a7bbda9987c3",
+      "name": "HeatHot",
+      "nodeType": "cmp.greaterthan",
+      "pins": [
+        {
+          "id": "980e259c-4e82-4898-93e3-aa0a1b7a9114",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "5f7073be-b485-4fdc-b5d3-624895916bc4",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "4cc80038-7119-4dc5-947b-cfaab709caf6",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "c8cedbd9-27ca-4b2e-a076-ca8c059e69a8",
+      "name": "Heat?",
+      "nodeType": "Core.Branch",
+      "pins": [
+        {
+          "id": "d1645c45-fbeb-4033-a96a-d4213cfa5ad6",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "cafdd750-2af9-4ef6-a8f9-eb95b92c3675",
+          "name": "True",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "fa536880-c936-4213-8374-9fbacb993725",
+          "name": "False",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "4c197922-f60f-4d49-8cee-f21198eac2c6",
+          "name": "Condition",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "d381e3ef-1b51-44bf-bb78-bf6ba1e5cfce",
+      "name": "WearLimit",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "c9cad719-eccf-42dc-bb54-34b6c48fa421",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Value": "2",
+        "Type": "float32"
+      }
+    },
+    {
+      "id": "8d83b179-1581-4554-87e4-7a4ebbc3f2ec",
+      "name": "WearHot",
+      "nodeType": "cmp.greaterthan",
+      "pins": [
+        {
+          "id": "94da6ef6-ae8c-4573-84b4-08eb4ee76eca",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "dc7488b0-5561-4498-bc81-22db22ba0584",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "6defe307-d5c0-4527-9c1c-4c7957d5cfa7",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "a6ed5c82-4b89-45fc-8b43-6baf58fecb46",
+      "name": "Wear?",
+      "nodeType": "Core.Branch",
+      "pins": [
+        {
+          "id": "e5dc4641-fbad-4081-b2fa-7ab86bb7bbca",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "d7a03b86-20ff-4068-bf30-18d3f97b8468",
+          "name": "True",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "3e279981-eb6e-43af-9b24-4a1a32a61e10",
+          "name": "False",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "a1c50259-b1a3-4962-af85-193f97f95585",
+          "name": "Condition",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "deb2202d-2b00-4824-b4a2-409178d35277",
+      "name": "CalLimit",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "d0e1c594-bac3-4cef-9e6a-5fc5582432f9",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Value": "1",
+        "Type": "float32"
+      }
+    },
+    {
+      "id": "75911abb-d41e-46ff-bcc8-1c895df47e9f",
+      "name": "CalOff",
+      "nodeType": "cmp.lessthan",
+      "pins": [
+        {
+          "id": "add73f16-5171-47a0-a381-359848e2c01f",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "1545e497-a39d-4ca2-9489-a42dedb7cc3c",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "ffa63049-c399-40cf-9e06-c72262bd2507",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "e88b24d2-64a8-4682-8214-3156408348f1",
+      "name": "Cal?",
+      "nodeType": "Core.Branch",
+      "pins": [
+        {
+          "id": "cb5d607e-cbc3-46bb-8a7a-76cd9ba9052c",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "a5489876-345c-46e1-a477-f1a4daf2fd31",
+          "name": "True",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "106b17ff-b83f-4610-897a-b17be0c341c0",
+          "name": "False",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "47597cfe-392f-4562-872c-bfb47d316311",
+          "name": "Condition",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "03694101-a267-4281-98c6-a9b1a632d0e9",
+      "name": "WriteRate",
+      "nodeType": "Component.SetField",
+      "pins": [
+        {
+          "id": "9e910e6d-bea6-43e5-89b0-c57421980b0f",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "bb78a272-15a2-4111-b3d2-1483fd70b6ea",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "109d4c1f-821d-4b2d-9c36-92b1566901fd",
           "name": "Entity",
           "direction": "input",
           "kind": "data",
           "dataType": "EntityUid"
         },
         {
-          "id": "97a222a0-1332-4b90-a970-b040a32ca284",
-          "name": "Text",
+          "id": "d896c5fd-7756-460a-9589-c55c1dbaa396",
+          "name": "Component",
           "direction": "input",
           "kind": "data",
-          "dataType": "string"
+          "dataType": "string",
+          "defaultValue": "GunComponent"
         },
         {
-          "id": "de0e0a61-2aff-41bc-abad-a74097c47fa9",
+          "id": "ae9a898e-6a5c-44a3-bd8b-eaca952d170f",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRate"
+        },
+        {
+          "id": "82bd13c8-645d-4707-9640-77909fc60b1f",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64"
+        },
+        {
+          "id": "beb8ca9a-561e-46cb-928d-a0252cb11ed0",
           "name": "Success",
           "direction": "output",
           "kind": "data",
@@ -1266,26 +2470,128 @@
       "properties": {}
     },
     {
-      "id": "942dbed5-a163-475b-b8f9-7c388b63b1ab",
-      "name": "Refresh",
-      "nodeType": "System.Invoke",
+      "id": "0ace2ee1-83ba-452f-8ef4-134591319944",
+      "name": "WriteModified",
+      "nodeType": "Component.SetField",
       "pins": [
         {
-          "id": "8e3d9edc-96c0-4a6b-a098-9898971e2127",
+          "id": "3df2a38e-0f8a-4afa-8aa0-2666f627658a",
           "name": "In",
           "direction": "input",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "80913718-917a-4121-9dee-3d1b69f8cdc2",
+          "id": "4611beda-22b0-42a6-8623-967a5771f974",
           "name": "Out",
           "direction": "output",
           "kind": "execution",
           "dataType": ""
         },
         {
-          "id": "4c35603c-fe85-4eec-8f41-a7dec2d4d1ad",
+          "id": "6ab7b5de-3751-4c68-b276-a61c95350792",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "c3cc728e-c4e0-4d56-96bf-af771bebeb61",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "GunComponent"
+        },
+        {
+          "id": "97c536a0-30e5-4ece-888c-6bf7a7e13b8d",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRateModified"
+        },
+        {
+          "id": "1df27f35-73ae-4875-9f34-8646ae616929",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64"
+        },
+        {
+          "id": "e72df1ce-6e34-415c-958e-ae08df4f5ebe",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "40580369-0116-4e6c-8259-30bbd39f8373",
+      "name": "Describe",
+      "nodeType": "Meta.SetDescription",
+      "pins": [
+        {
+          "id": "eaa87b2f-213d-461a-996d-23f402428570",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "32fcfd24-110b-4840-8098-c5e73ce75445",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "7eb9d718-762d-4aa8-89ed-a126a0ee79e3",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "1c525a93-64a3-4286-bb19-b660dce9c3d0",
+          "name": "Text",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "8a7133f6-830a-4a6e-a416-66df2b86ac0c",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "33aff72d-d314-40a4-bf8f-8ee5bfd278e1",
+      "name": "Refresh",
+      "nodeType": "System.Invoke",
+      "pins": [
+        {
+          "id": "1c701fcf-6774-4eef-837f-91d2960f9ba2",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "bfa65fc6-d37c-4991-bb49-fcd08c998291",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "4ba82cac-fefe-441a-bfaa-d33cbd09bf0d",
           "name": "System",
           "direction": "input",
           "kind": "data",
@@ -1293,7 +2599,7 @@
           "defaultValue": "SharedGunSystem"
         },
         {
-          "id": "49200589-2792-440e-bbd6-d151c8974f9a",
+          "id": "1c56c6f0-a9fb-482e-8d30-33582520c535",
           "name": "Method",
           "direction": "input",
           "kind": "data",
@@ -1301,14 +2607,1539 @@
           "defaultValue": "RefreshModifiers"
         },
         {
-          "id": "ca7f5ac6-ba1e-410c-ba3d-0d3c61a4e6af",
+          "id": "1dbc078c-afe5-4697-be7c-88b59395c51c",
           "name": "Entity",
           "direction": "input",
           "kind": "data",
           "dataType": "EntityUid"
         },
         {
-          "id": "24670daf-f94d-46c9-8e34-3d774b049224",
+          "id": "50b30c0d-217a-4371-8951-c74d62b708c0",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "b278f21f-ae1c-49a9-b840-59f28d149995",
+      "name": "StayRate",
+      "nodeType": "Component.SetField",
+      "pins": [
+        {
+          "id": "adec97bd-463b-45c4-9d88-73f9632a445d",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "99708b1c-b599-42c8-b784-a7194e7df3a6",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "94493ef3-d9d1-466b-b247-49fc409c971b",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "ade78e5d-3644-4a8b-ba01-730b68552016",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "GunComponent"
+        },
+        {
+          "id": "f11ae387-f637-4d20-88c7-0d05cc977289",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRate"
+        },
+        {
+          "id": "c4946164-a990-4054-8502-8135f6cd77af",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64",
+          "defaultValue": "0"
+        },
+        {
+          "id": "e7bdcd15-aed6-4fc6-81b9-cd66f38eaffb",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "1d82de65-149e-4326-bb47-9df956597736",
+      "name": "StayModified",
+      "nodeType": "Component.SetField",
+      "pins": [
+        {
+          "id": "38a75852-527e-4d88-9db6-2d9c4d5af876",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "65755361-0e3e-4326-847b-25215f9b10a8",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "76fe0dcb-1076-437a-bff5-3e645a3400b0",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "cdedc643-fd60-410f-b4ad-007311185719",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "GunComponent"
+        },
+        {
+          "id": "1a356766-f822-48d5-b807-ef620a2d805d",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRateModified"
+        },
+        {
+          "id": "21345f36-47ec-41fe-87ad-487f4d9a6be1",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64",
+          "defaultValue": "0"
+        },
+        {
+          "id": "5434c185-87a5-4bc8-8949-e51968f4d4a7",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "eb632892-dee9-4e64-9246-b31051db42ef",
+      "name": "StayDescribe",
+      "nodeType": "Meta.SetDescription",
+      "pins": [
+        {
+          "id": "9cce9530-bed5-499f-93d6-b8a00c024eeb",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "ad617d81-ded5-4cd5-b3e4-e5d9695f0e6b",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "0668f7d2-c274-41c6-ac55-5973087f5e52",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "c17b1b16-b0fb-4c6a-b14b-0d0392a8361a",
+          "name": "Text",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "c7910c02-34ad-4b0b-84ee-85e21d71850b",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "f51e6760-0d1f-4b5c-b490-d12a5f28ef43",
+      "name": "StayRefresh",
+      "nodeType": "System.Invoke",
+      "pins": [
+        {
+          "id": "38fde6e8-0e73-4699-bf90-51f495ea89f6",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "744a603f-8bfe-40c9-93e5-b457c6bd31a4",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "68a39e03-e6d7-4b58-834f-5ef5f3ab3ac9",
+          "name": "System",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "SharedGunSystem"
+        },
+        {
+          "id": "abec2a9f-4c25-435f-84ff-ec348891462c",
+          "name": "Method",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "RefreshModifiers"
+        },
+        {
+          "id": "41bf8eac-3e87-432a-ad4c-8f4bc2111b38",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "12c3ff76-12fb-42d2-9a38-b2ca7bba2f18",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "cff26c58-d721-4677-b80c-e880b5ee42a9",
+      "name": "Fouling",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "e034faf2-32f3-4859-96d1-1966ebf46669",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "8bcb7520-9778-4b81-9bf6-2f31f1a0bc49",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "1d902ed5-8890-43f8-be01-4bdf4d0d8293",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "ba17e7a7-ece9-456c-b46c-9ae695c6195f",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Fouling in the feed"
+        },
+        {
+          "id": "5f167cda-f766-47fa-84c0-9a23565a560f",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Malfunction"
+      }
+    },
+    {
+      "id": "c8619223-8fc5-4229-acc7-61c86331b391",
+      "name": "FoulingStopRate",
+      "nodeType": "Component.SetField",
+      "pins": [
+        {
+          "id": "bb5e8d05-6292-46a3-9b51-a44ce8dcf6a8",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "84892644-c955-4840-b13a-de9ff1da0d99",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "0fd4ae0a-703a-437a-af34-01425f5e78a5",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "fb6afcff-6582-4dea-8ce6-dfcd1d46dc27",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "GunComponent"
+        },
+        {
+          "id": "4afc0574-843c-4ac3-895e-315c56149ea7",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRate"
+        },
+        {
+          "id": "c0252dae-17aa-490f-bee6-715791e5b4a9",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64",
+          "defaultValue": "0"
+        },
+        {
+          "id": "2d1c6fbd-39cd-4fd3-b353-ac5f50a0988a",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "703eca83-70d4-49d9-927b-32a33c039638",
+      "name": "FoulingStopModified",
+      "nodeType": "Component.SetField",
+      "pins": [
+        {
+          "id": "ce24e2e8-0324-4d8f-a186-3a5fec7bc1fa",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "91e152fe-436b-43bc-84ef-e539c4d85a45",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "950b3776-111f-441c-8b0a-69625a5da022",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "24ccc25b-d453-4aca-b897-be1d66324d1a",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "GunComponent"
+        },
+        {
+          "id": "42b52954-d65c-40f0-9a3c-e5bf2f6b4e93",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRateModified"
+        },
+        {
+          "id": "7bba74ce-dbaa-4584-9361-b9e1796a2d4a",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64",
+          "defaultValue": "0"
+        },
+        {
+          "id": "0127e36a-b786-43a8-b1db-767b3da5527e",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "1eb7233f-1b08-4f0c-b017-245706f945f6",
+      "name": "FoulingStopDescribe",
+      "nodeType": "Meta.SetDescription",
+      "pins": [
+        {
+          "id": "ecd1939c-7b29-424d-8a2d-d8f5fdffd12e",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "9ced5cf9-0f5e-4e41-a1d6-8f57239fd6cb",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "1dcf451e-54b5-41ae-b4d3-58e2808a9c9e",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "bc449c6a-acb2-4b6d-bce8-728093f197f9",
+          "name": "Text",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "f99c2066-8b8d-41f8-a5f7-3ed4e3cbbfc6",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "877ea4af-c534-4a65-aa5d-51eb12cfe1b3",
+      "name": "FoulingStopRefresh",
+      "nodeType": "System.Invoke",
+      "pins": [
+        {
+          "id": "8a877488-abd7-436d-9482-5d01b1304abc",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "cc578820-331b-4628-924f-10aeb376ae61",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "1ecf4098-7dbb-4c5d-869c-475940accc16",
+          "name": "System",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "SharedGunSystem"
+        },
+        {
+          "id": "bd794ac0-43f0-49cd-9548-1f9488990103",
+          "name": "Method",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "RefreshModifiers"
+        },
+        {
+          "id": "a81da4bc-0129-4b8c-96d2-1359c4077a10",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "35b5510a-c21c-42a7-9df2-f838bcf82362",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "a5ceaf09-36a1-4afc-8d9b-4105d8201cf3",
+      "name": "Overheat",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "4ee1a322-0871-4f55-b7d5-b309e1e0ce4b",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "8e07730f-0bd8-433d-bec0-7541f58c1389",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "1324562f-6380-44c8-9156-5ae384ebe53c",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "898ff641-6ba7-48b8-b175-86022c15ba2d",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Overheated bolt"
+        },
+        {
+          "id": "ba80ce6b-b303-4a95-824c-6b35467b8873",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Malfunction"
+      }
+    },
+    {
+      "id": "fdb610ea-90f1-4473-9275-85d0f63fc7f1",
+      "name": "OverheatStopRate",
+      "nodeType": "Component.SetField",
+      "pins": [
+        {
+          "id": "2e1960d6-6221-4cfe-9a5d-8985f41e6658",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "8205e7d5-762c-4c57-a815-35dd4dde27ea",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "d64a6e69-a1d8-49f9-812d-79808181bfcf",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "0b8bd8b1-de11-418f-b445-a0c82b647abf",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "GunComponent"
+        },
+        {
+          "id": "69e26b88-8b4c-413d-9f2a-b85170ce15ed",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRate"
+        },
+        {
+          "id": "cd3c8806-f1f6-4dac-ac54-e9c9e43775a1",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64",
+          "defaultValue": "0"
+        },
+        {
+          "id": "cf7640a0-5abf-434f-941a-7ce16dea36a2",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "9eb0599f-3e2f-4444-9d52-76f6c8fa01e5",
+      "name": "OverheatStopModified",
+      "nodeType": "Component.SetField",
+      "pins": [
+        {
+          "id": "59bf2b49-3b97-4961-9f48-6182082c9cc5",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "9809920e-9cba-4b9f-899e-22bc5f559161",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "fff8620a-05c4-42dd-b711-32f68bf131db",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "eb443785-69cc-47d9-8bc5-a9f19060bc4c",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "GunComponent"
+        },
+        {
+          "id": "f9d482f4-1d5b-4748-88ac-09ad7970d4f2",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRateModified"
+        },
+        {
+          "id": "a7940188-b57c-40e4-9253-5b4094ac1f51",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64",
+          "defaultValue": "0"
+        },
+        {
+          "id": "faefe8d6-6b49-4eda-a309-dffc82fd87fd",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "068e699c-d037-4022-bc39-cca5c8ba1014",
+      "name": "OverheatStopDescribe",
+      "nodeType": "Meta.SetDescription",
+      "pins": [
+        {
+          "id": "992c48e2-6abe-4d3b-94f3-cffecdd105ac",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "81ec7d41-7d31-44b4-a67a-658c80eff87d",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "d747884d-9d2d-4a2f-988d-4b5e5b94b8cc",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "c148fbd7-54f1-4600-827b-cc17050dc956",
+          "name": "Text",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "8dd75d1b-90a8-4315-b710-316655eba738",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "d8b5bca4-5769-4548-9b6a-b2a24e7be912",
+      "name": "OverheatStopRefresh",
+      "nodeType": "System.Invoke",
+      "pins": [
+        {
+          "id": "64ba86ef-ddcc-4b7e-b1d4-ec731a97bbf2",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "250dd299-8445-4dc3-8296-1f70c8b39eeb",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "4fd71f9d-d27d-4fcc-95d1-88ecec8f7c1e",
+          "name": "System",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "SharedGunSystem"
+        },
+        {
+          "id": "caaa9730-e179-4dc6-9c3a-5552ece7dae0",
+          "name": "Method",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "RefreshModifiers"
+        },
+        {
+          "id": "0ae53b3f-398b-4720-a6ec-de62e5ae61a1",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "425b7d6d-ffec-4183-964c-3bf150c24480",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "b3f5ad11-0b2b-4c4c-85a9-0d1b28417f75",
+      "name": "Wear",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "4d977f12-6efe-4e38-8bd2-8467ea56add0",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "3a516c16-f4a6-4fda-b2da-49d80f8133ba",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "97a8fe2e-8703-4bc7-8815-d3c1fe85f8ec",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "88ba4d53-c358-4ccd-ae3d-8a61906dc8d3",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Worn mechanism"
+        },
+        {
+          "id": "d4105495-f856-44ed-9872-0d2300f6e464",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Malfunction"
+      }
+    },
+    {
+      "id": "5a248778-eb07-4994-adfd-f09ee6dbd002",
+      "name": "WearStopRate",
+      "nodeType": "Component.SetField",
+      "pins": [
+        {
+          "id": "a10071f1-6d7a-42e3-a563-0cd75a1e3b9a",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "05bce39a-c7d7-4765-94f8-c821f46029da",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "93683d3e-0809-45ed-9db7-58da7388ed7a",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "ac3f5825-1977-458e-910a-17cfc4b4d09c",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "GunComponent"
+        },
+        {
+          "id": "c78b7fa3-11cd-4612-a091-aaef6008146f",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRate"
+        },
+        {
+          "id": "1e7fd27f-1806-4059-9619-19b3437773ed",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64",
+          "defaultValue": "0"
+        },
+        {
+          "id": "367d5047-f1fb-40ae-bb35-41bab864bfa4",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "907b9de2-c8db-44fb-b65e-f6d6df79ead0",
+      "name": "WearStopModified",
+      "nodeType": "Component.SetField",
+      "pins": [
+        {
+          "id": "c5504c6e-74a6-4282-9685-5ba3aeeaf521",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "e6fd59b1-719b-4b8a-9554-7b44f71906cf",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "24e22c5f-5c79-4e11-a743-43e43455d317",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "6069845b-40be-4179-94c7-35733522a44f",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "GunComponent"
+        },
+        {
+          "id": "2f105190-ec4f-4a6c-8732-547eac646223",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRateModified"
+        },
+        {
+          "id": "d57e03ca-da83-4413-8f00-f6569a741f66",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64",
+          "defaultValue": "0"
+        },
+        {
+          "id": "4044c5e2-7196-4e6c-99a8-a29b02188287",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "680cdb4a-4fa6-43e3-b07f-460db9e4c322",
+      "name": "WearStopDescribe",
+      "nodeType": "Meta.SetDescription",
+      "pins": [
+        {
+          "id": "d85f1a84-860f-41d5-b7e5-905f86254d3d",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "738eff67-34d5-4809-9bf7-510131eb5ec0",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "bdc68ee1-1c4b-47dc-b048-6400b6062bde",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "8c53d711-538d-48a5-94c2-9357ba656abd",
+          "name": "Text",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "4dba8350-de0f-40cc-aa48-5b5186fef604",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "2276eb49-ed44-427d-9df3-cf779225d320",
+      "name": "WearStopRefresh",
+      "nodeType": "System.Invoke",
+      "pins": [
+        {
+          "id": "e329690b-a562-46f3-8bce-d606e136acd4",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "529f88f5-b8b3-4315-b018-0f9d745b3928",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "2a507b21-4b14-4b08-b988-916089fdf990",
+          "name": "System",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "SharedGunSystem"
+        },
+        {
+          "id": "928e466b-a8aa-4c07-bdc8-ccd0de7833eb",
+          "name": "Method",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "RefreshModifiers"
+        },
+        {
+          "id": "c5efc072-13a3-4acd-93df-0ea87f93f1c0",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "6bb92212-52b6-486a-ab15-205dea88adc7",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "09d574c5-9382-45fa-b9b6-8dbe1170aea2",
+      "name": "Zero",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "749dfd7c-6bc3-4733-8847-09bf00c94697",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "e7717f91-ca0b-479d-964e-ebc108c5b904",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "95ce3848-3ac2-4cac-ad65-7eb2d773a327",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "a10cc00e-f3af-437d-9068-9817005e27a0",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Unzeroed optic"
+        },
+        {
+          "id": "30f39949-8dc8-4080-a905-ffa82667759f",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Malfunction"
+      }
+    },
+    {
+      "id": "4153a4df-edc9-42ac-95cb-a5e09b077553",
+      "name": "ZeroStopRate",
+      "nodeType": "Component.SetField",
+      "pins": [
+        {
+          "id": "60c5393a-c75e-462f-865e-58f06fe80a3f",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "9e360dad-afe4-4772-ad51-60f05c044331",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "acca86fe-1f74-46d2-9980-693ea5ddfd72",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "e431530b-9f6d-45cb-a841-425072870db6",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "GunComponent"
+        },
+        {
+          "id": "48b0c212-cdc2-4688-b6c6-5ca557f4a748",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRate"
+        },
+        {
+          "id": "d321878b-262b-4ebd-84b6-9d2ae06bae2d",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64",
+          "defaultValue": "0"
+        },
+        {
+          "id": "5f79cb5d-b9bc-4ba7-8a45-058634dc0949",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "72cfa624-f53a-46c1-8f3c-eb608d680ce1",
+      "name": "ZeroStopModified",
+      "nodeType": "Component.SetField",
+      "pins": [
+        {
+          "id": "d3a25583-4191-421b-a94b-aa8c569c083e",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "98f0bed9-a81a-4b64-a98a-f17d02596696",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "061445df-69a1-42e9-b34b-3a6ef11626a6",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "0423b4c2-ea8a-4885-a2fa-70dbf45b3673",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "GunComponent"
+        },
+        {
+          "id": "1985e8d5-5537-4f8c-ac6f-b1b61ad9dcd6",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRateModified"
+        },
+        {
+          "id": "f5d5b247-b1df-4d8e-b402-215bcf4b99d8",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64",
+          "defaultValue": "0"
+        },
+        {
+          "id": "5731935a-e21b-45e4-a734-a7fe777ac08b",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "3949472f-5e0b-4eb0-bbc9-2db7946717d2",
+      "name": "ZeroStopDescribe",
+      "nodeType": "Meta.SetDescription",
+      "pins": [
+        {
+          "id": "340bbdad-b3ac-40e2-93a4-0a1f98d86680",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "3b9e243e-2afb-4ed9-9f36-dbab3c6805ef",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "af12b3df-aeb0-432c-8e28-8f20fea2cb4d",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "75619696-e87d-452f-be5e-4f7f65371639",
+          "name": "Text",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "a28e8560-ed28-44e2-afd8-009e3f692ddc",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "c9352b95-7231-4c5e-9d23-23662204ee18",
+      "name": "ZeroStopRefresh",
+      "nodeType": "System.Invoke",
+      "pins": [
+        {
+          "id": "c12b28ef-035a-4519-a158-e21afbd11b48",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "ebe9d2a9-a47e-4361-9c5e-52aa6f649c49",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "71f70c29-739b-4a09-9d21-d94062b26c4b",
+          "name": "System",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "SharedGunSystem"
+        },
+        {
+          "id": "9ae048bc-25d2-4de6-b00a-e7ecc865cd48",
+          "name": "Method",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "RefreshModifiers"
+        },
+        {
+          "id": "f6e4e721-4fb7-4677-91f6-77c0ed03b721",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "7aa192ce-b65f-4842-b4d6-5ebc42e03e2e",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "bb5a35ab-ca56-4cee-a6e6-e9c7550647f4",
+      "name": "Feed",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "8655107d-c2ca-4473-9235-b92d6483ead5",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "ae63cde2-dcba-42a7-a8e5-521fe51cf7d8",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "439e75f8-aa56-4437-9367-08f63c559591",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "6bcac19e-9d11-406a-890f-a0b916d0bc96",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Failure to feed"
+        },
+        {
+          "id": "f44c4578-5adb-4f45-b492-e8c71a917814",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Malfunction"
+      }
+    },
+    {
+      "id": "9c5d4e8a-09e8-4381-86d4-e4313e8ecae3",
+      "name": "FeedStopRate",
+      "nodeType": "Component.SetField",
+      "pins": [
+        {
+          "id": "4b2f42eb-645b-43d5-b32b-e252af6570f1",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "aef5c92a-634d-4df7-a08c-e004b1b95fdb",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "968d4099-04a2-4f55-a887-1e9b6c0991e7",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "4b46b8cb-4f42-4b25-ad5f-9684eacd05ce",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "GunComponent"
+        },
+        {
+          "id": "d4fc3ee9-5642-4fb6-b864-c035cf1f6863",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRate"
+        },
+        {
+          "id": "7ffa5c09-e162-46cd-a8ae-c81bcd7993d6",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64",
+          "defaultValue": "0"
+        },
+        {
+          "id": "63cf1210-4ee5-4ced-a64b-35d314e2ea64",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "78cdcf02-0579-452b-b9b6-eab1f22537e8",
+      "name": "FeedStopModified",
+      "nodeType": "Component.SetField",
+      "pins": [
+        {
+          "id": "ef35fbb7-f967-407f-af97-755fb2b38bf3",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "866475db-87df-4328-a0bc-6622a9ed17d9",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "e89886d4-f945-495b-81fd-60092cdbefcd",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "0e157957-b1f0-40ff-b9e8-4a911a9d2581",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "GunComponent"
+        },
+        {
+          "id": "ac5d586b-21e6-4e1d-ab5b-88f55c3f5dfa",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRateModified"
+        },
+        {
+          "id": "7f6413fa-9b54-4040-bfad-3adee9b009ee",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64",
+          "defaultValue": "0"
+        },
+        {
+          "id": "c3061872-5592-470e-8b2b-e20660d21abd",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "8c15f9e3-93a1-47af-a032-95d1be59ea7b",
+      "name": "FeedStopDescribe",
+      "nodeType": "Meta.SetDescription",
+      "pins": [
+        {
+          "id": "a2024b3e-c66f-4a1a-b5fa-146ee1076805",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "8658d168-46c9-4906-838b-eb8fadb77ea1",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "6b095257-9f47-45e1-af43-a15ceb5f7775",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "7ed293ff-2f88-4fe1-9a9f-fb5db1d17c8e",
+          "name": "Text",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "755cc79e-80bd-4b2b-beee-0a54474dcc90",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "1134b566-2c59-40fa-941a-25ad389aac26",
+      "name": "FeedStopRefresh",
+      "nodeType": "System.Invoke",
+      "pins": [
+        {
+          "id": "f65377a8-c7c5-419e-be10-a7a8aa601750",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "5016dcde-7fe0-4998-a73d-253335663b1a",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "ef327190-3bf1-448f-a4ab-d67bf21ba15d",
+          "name": "System",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "SharedGunSystem"
+        },
+        {
+          "id": "7bd1bf3f-6ce2-45f8-9115-f7b38b5333e4",
+          "name": "Method",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "RefreshModifiers"
+        },
+        {
+          "id": "4c7c3161-af8e-40f1-afa8-70b4aaf7fec4",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "904ce32d-950a-4799-b286-442b3413dcf5",
           "name": "Success",
           "direction": "output",
           "kind": "data",
@@ -1320,539 +4151,1609 @@
   ],
   "connections": [
     {
-      "fromNode": "7d63e5e9-14fb-407c-a04a-b3c34c9482c6",
-      "fromPin": "2c817d21-45b4-4086-b2cc-c8279b606694",
-      "toNode": "04f441ef-8216-424f-a5a2-4678fb4882d8",
-      "toPin": "a97f02fd-88a8-4f96-af59-867788eae70e"
+      "fromNode": "98a0ea5f-9f71-475b-8d95-8951b73d0e21",
+      "fromPin": "c0a06f0f-075f-4f9d-b8a6-9f7a4260eb54",
+      "toNode": "84cac600-ebeb-4b84-ac29-4fbfed26c665",
+      "toPin": "724cef66-8943-4eac-a67d-affd9290d5b3"
     },
     {
-      "fromNode": "33c2f552-3376-4410-b024-865010e82223",
-      "fromPin": "126fc739-b7f7-4438-9eec-98b209f6b014",
-      "toNode": "04f441ef-8216-424f-a5a2-4678fb4882d8",
-      "toPin": "36de6b3a-8461-4aa0-aa5e-7c31930d5299"
+      "fromNode": "8957c907-a155-4ac2-8a6e-847f652b654a",
+      "fromPin": "b78aff41-9885-44bd-895c-0354bbb9b51f",
+      "toNode": "84cac600-ebeb-4b84-ac29-4fbfed26c665",
+      "toPin": "8ea0df22-4e0e-4c41-a003-357cb5eef91f"
     },
     {
-      "fromNode": "04f441ef-8216-424f-a5a2-4678fb4882d8",
-      "fromPin": "04f6ae98-a8ce-47d4-84ce-a20fdc6d6dd2",
-      "toNode": "9c0f3f60-efb0-48f0-93de-cb7562ecd3b2",
-      "toPin": "c0abff37-17c8-40fb-8635-3e0b0d038adc"
+      "fromNode": "84cac600-ebeb-4b84-ac29-4fbfed26c665",
+      "fromPin": "fa7dc7ed-bdf5-4d40-8e4a-4d00e94966fe",
+      "toNode": "23021b3b-f65e-4ed0-9b19-0a6e3880c642",
+      "toPin": "395e87bb-98f1-4fea-b209-35367d6fbfd8"
     },
     {
-      "fromNode": "f155ef89-791d-48cb-baeb-caa16fe9b136",
-      "fromPin": "80614927-44fe-493d-afee-953c8cb96336",
-      "toNode": "9c0f3f60-efb0-48f0-93de-cb7562ecd3b2",
-      "toPin": "1a5783de-0c57-484a-9595-4d0d6f8ae47e"
+      "fromNode": "34dec557-af0c-4850-b3ba-7eeba1e9f54b",
+      "fromPin": "a06c4699-130b-4d67-85d0-87fde90f15fd",
+      "toNode": "23021b3b-f65e-4ed0-9b19-0a6e3880c642",
+      "toPin": "9cce1168-4433-4eed-a840-a6367f644dab"
     },
     {
-      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
-      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
-      "toNode": "9d195ada-feee-48bf-8963-18538a7074d2",
-      "toPin": "69db9e48-2140-46a3-b0d5-5b4ba9e28546"
+      "fromNode": "cad91374-de91-4bfb-a222-5ce0f86575ce",
+      "fromPin": "77cd0472-df25-41eb-a168-841c0cd60c8b",
+      "toNode": "10febc56-d2b7-4a2a-89ad-4574f535d81d",
+      "toPin": "ea02994e-954e-4e70-a753-deeb6c488227"
     },
     {
-      "fromNode": "9d195ada-feee-48bf-8963-18538a7074d2",
-      "fromPin": "dbb1f220-1a0b-42d2-82d9-d73b9425204c",
-      "toNode": "f155ef89-791d-48cb-baeb-caa16fe9b136",
-      "toPin": "aefdb0c2-92f3-4755-934f-f86a9615c1f0"
+      "fromNode": "10febc56-d2b7-4a2a-89ad-4574f535d81d",
+      "fromPin": "edc3b74e-5c43-4ff7-beae-9f548cf3285a",
+      "toNode": "34dec557-af0c-4850-b3ba-7eeba1e9f54b",
+      "toPin": "82accd41-91e7-45ab-82e5-7970ba2dd50c"
     },
     {
-      "fromNode": "9c0f3f60-efb0-48f0-93de-cb7562ecd3b2",
-      "fromPin": "b79dfba8-deb6-476e-8c3d-6f26a26cb057",
-      "toNode": "f16753ed-0a7c-4261-8465-547c2c3e4fa6",
-      "toPin": "114c4102-4043-4054-906b-3b9bc68b1d75"
+      "fromNode": "23021b3b-f65e-4ed0-9b19-0a6e3880c642",
+      "fromPin": "8793c536-830b-49e7-9af8-5dff200993b4",
+      "toNode": "61ab4265-824a-467c-900e-7b0c5a6d1c7c",
+      "toPin": "2d79765b-70ad-4e1e-9b38-474c14b77be3"
     },
     {
-      "fromNode": "ca60e051-ffc4-4589-9448-8cb268fca920",
-      "fromPin": "af78f05c-937c-4585-bc8e-e6e5fef8166f",
-      "toNode": "f16753ed-0a7c-4261-8465-547c2c3e4fa6",
-      "toPin": "25990ffa-6bfd-4976-8584-168898f51cd1"
+      "fromNode": "e7319cc5-680a-45ac-a403-a9dfd2b4e90a",
+      "fromPin": "f3aef4f1-d56c-4ee8-831b-3c30f779d795",
+      "toNode": "61ab4265-824a-467c-900e-7b0c5a6d1c7c",
+      "toPin": "ed20582b-66a3-4be2-9485-ebfb92eec024"
     },
     {
-      "fromNode": "f16753ed-0a7c-4261-8465-547c2c3e4fa6",
-      "fromPin": "1508a42b-ccc1-48cc-bcac-e67531327fe7",
-      "toNode": "0b099dc0-a4bf-41da-9477-d223d4b13f2b",
-      "toPin": "83d0d850-07d1-4439-bd95-2b4f783790f3"
+      "fromNode": "61ab4265-824a-467c-900e-7b0c5a6d1c7c",
+      "fromPin": "a1867554-2865-4d5f-8b5f-6d9a2b2ed7df",
+      "toNode": "6b36fe1f-34df-438a-8a88-e60c24fb6b8b",
+      "toPin": "9d0ac98e-e56e-4d13-87f2-3787d8ce85fc"
     },
     {
-      "fromNode": "f8f63f91-19bc-4c5a-a264-e914b4ff84c4",
-      "fromPin": "7ccc6988-3c3b-4285-bb32-66145a786a48",
-      "toNode": "0b099dc0-a4bf-41da-9477-d223d4b13f2b",
-      "toPin": "a1baa326-fc56-424a-818b-9cc92e1bdb3b"
+      "fromNode": "1d3924a3-a408-41cb-9549-6940b2c6c094",
+      "fromPin": "2ffd779e-621d-4e10-9f5a-1c77341ccccc",
+      "toNode": "6b36fe1f-34df-438a-8a88-e60c24fb6b8b",
+      "toPin": "095ef802-def9-49ff-b47d-fcf282950be8"
     },
     {
-      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
-      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
-      "toNode": "9ec47a5a-59c9-45c4-8628-f9a4c4fdc6a0",
-      "toPin": "1646fb7a-e9d9-4520-9147-b83488e2f468"
+      "fromNode": "cad91374-de91-4bfb-a222-5ce0f86575ce",
+      "fromPin": "77cd0472-df25-41eb-a168-841c0cd60c8b",
+      "toNode": "5450fcac-a7ac-4979-839f-d1bee71eebe8",
+      "toPin": "5d5c26f5-1d77-43f7-8a86-6cbfa96fa2af"
     },
     {
-      "fromNode": "9ec47a5a-59c9-45c4-8628-f9a4c4fdc6a0",
-      "fromPin": "5694fdca-6631-4daf-8ca2-f1874a8f1235",
-      "toNode": "f8f63f91-19bc-4c5a-a264-e914b4ff84c4",
-      "toPin": "cb90745d-d825-440f-b5ad-6213b8092ea6"
+      "fromNode": "5450fcac-a7ac-4979-839f-d1bee71eebe8",
+      "fromPin": "895db5ad-a77a-419c-94c3-ec845183930c",
+      "toNode": "1d3924a3-a408-41cb-9549-6940b2c6c094",
+      "toPin": "75ac3674-4a5e-45cd-83d1-79faeb7d620f"
     },
     {
-      "fromNode": "0b099dc0-a4bf-41da-9477-d223d4b13f2b",
-      "fromPin": "67689fc1-4831-49a6-ae1c-4535ed614057",
-      "toNode": "86f3d95d-c8d0-4fa0-92f9-91b206feb88d",
-      "toPin": "90dc2cb6-c658-49d9-8654-8873e74c7cc1"
+      "fromNode": "6b36fe1f-34df-438a-8a88-e60c24fb6b8b",
+      "fromPin": "290db6a9-9df0-4850-8650-d94b807d1e77",
+      "toNode": "8626a676-4077-460f-9a38-1c4858006eaf",
+      "toPin": "effc9b73-0dbb-428b-8f56-128e3895050d"
     },
     {
-      "fromNode": "f05a3ae6-f347-4f0d-ac8f-160bb79bb6e4",
-      "fromPin": "95da83e7-40a2-445f-b86e-ca2f3bee9999",
-      "toNode": "86f3d95d-c8d0-4fa0-92f9-91b206feb88d",
-      "toPin": "9a81783e-6178-4f41-9e89-ad62c4714c09"
+      "fromNode": "19832563-d780-4fc8-a005-e029bbe4e8c3",
+      "fromPin": "2a2730d7-1d01-46dd-b7e3-ae214c8d551d",
+      "toNode": "8626a676-4077-460f-9a38-1c4858006eaf",
+      "toPin": "c8be7b97-9a86-44e9-8b81-ece70016fc4a"
     },
     {
-      "fromNode": "86f3d95d-c8d0-4fa0-92f9-91b206feb88d",
-      "fromPin": "b7ec1ca1-daff-4a09-b4d8-fc7f7c9f5ab6",
-      "toNode": "e1ca34e0-af13-4ddb-a333-e171f18ff2e7",
-      "toPin": "5fb4e8a7-0afe-4095-8f1f-7d5b3e9a935d"
+      "fromNode": "8626a676-4077-460f-9a38-1c4858006eaf",
+      "fromPin": "489929eb-c993-408c-8d1e-b01ffe580155",
+      "toNode": "4bc90be3-3cc6-4b83-9d6d-ef21d06a645b",
+      "toPin": "2c3007b3-4673-4a1f-af75-7de8255830ed"
     },
     {
-      "fromNode": "9a691f6e-aa94-4fed-94fe-fbd67936eeac",
-      "fromPin": "9789ea13-46f0-41e7-ad96-fac1793107ab",
-      "toNode": "e1ca34e0-af13-4ddb-a333-e171f18ff2e7",
-      "toPin": "11eecf92-ce7d-48df-987e-b361309083a5"
+      "fromNode": "da0f085c-9c33-44cd-ad8b-fd5689e1d12d",
+      "fromPin": "36c68a9c-2a42-4e17-9d27-93afed445b00",
+      "toNode": "4bc90be3-3cc6-4b83-9d6d-ef21d06a645b",
+      "toPin": "9a7e71ae-26b8-4efd-aa46-5f28759189e0"
     },
     {
-      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
-      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
-      "toNode": "54acde50-7204-453d-bb0e-bafc45bda8a6",
-      "toPin": "05e904a0-0c8a-4a61-8101-1966d34a34cd"
+      "fromNode": "cad91374-de91-4bfb-a222-5ce0f86575ce",
+      "fromPin": "77cd0472-df25-41eb-a168-841c0cd60c8b",
+      "toNode": "b1a77d03-2ef4-42f4-b82d-615792deebcd",
+      "toPin": "f46bc1d1-9300-4927-9fd4-489361864c81"
     },
     {
-      "fromNode": "54acde50-7204-453d-bb0e-bafc45bda8a6",
-      "fromPin": "e4f098c8-a19f-4f56-8a8d-287b6322b7c2",
-      "toNode": "9a691f6e-aa94-4fed-94fe-fbd67936eeac",
-      "toPin": "11cf3576-a624-497c-9e33-71e6f93ab2a6"
+      "fromNode": "b1a77d03-2ef4-42f4-b82d-615792deebcd",
+      "fromPin": "47118fa5-2cf4-4fad-a602-afdeede0ad21",
+      "toNode": "da0f085c-9c33-44cd-ad8b-fd5689e1d12d",
+      "toPin": "1c51d30d-c2c3-413f-83f2-5950db119669"
     },
     {
-      "fromNode": "e1ca34e0-af13-4ddb-a333-e171f18ff2e7",
-      "fromPin": "43ad23e4-bfc2-43d8-8dc5-1aaa517e199b",
-      "toNode": "82734a8b-2bc4-464c-addc-4bce99d7cedf",
-      "toPin": "48af98c6-966e-4794-a5b8-8b48f0ccfa79"
+      "fromNode": "4bc90be3-3cc6-4b83-9d6d-ef21d06a645b",
+      "fromPin": "ea67a668-ac89-4c22-ae90-a9c4bb21e571",
+      "toNode": "e4df42ad-1b46-44e5-814b-9c749b36003c",
+      "toPin": "0c622543-0a54-4ba6-86a5-9dd0fff3dd0e"
     },
     {
-      "fromNode": "f21bf0a4-494e-401c-8e12-2914c3b7dec4",
-      "fromPin": "95401d36-aa56-4e36-ac9b-a5fc43937c8e",
-      "toNode": "82734a8b-2bc4-464c-addc-4bce99d7cedf",
-      "toPin": "aef7e57c-de05-46bc-9ab6-cf9d6294f544"
+      "fromNode": "a1df9538-37ca-4c89-bc2b-fa29c5a3095e",
+      "fromPin": "2eb33858-b283-48a4-b698-bc15bf96c46b",
+      "toNode": "e4df42ad-1b46-44e5-814b-9c749b36003c",
+      "toPin": "3e598f88-7c4a-42bb-94f8-a5189031ac4a"
     },
     {
-      "fromNode": "82734a8b-2bc4-464c-addc-4bce99d7cedf",
-      "fromPin": "3961e484-407b-45e8-a7be-d18a4560d019",
-      "toNode": "2327c8a4-c662-4772-8bce-f7e184ff6c50",
-      "toPin": "df3b461e-baea-4e3b-a223-a3a07818b3e8"
+      "fromNode": "e4df42ad-1b46-44e5-814b-9c749b36003c",
+      "fromPin": "8f4fbc14-ff07-4b48-862a-7f2cf2a450c6",
+      "toNode": "0a5f8df1-5044-4638-99a7-56391c04101b",
+      "toPin": "bdae6a74-6f65-4a41-b9a4-e93f572aad23"
     },
     {
-      "fromNode": "27b0d344-c7e8-47af-b134-c82d9c01df9b",
-      "fromPin": "71fb2087-6c51-435a-8ae8-807599b47831",
-      "toNode": "2327c8a4-c662-4772-8bce-f7e184ff6c50",
-      "toPin": "5e5ab92c-dee7-47bf-8712-43d36845d91a"
+      "fromNode": "664340ee-c5e5-41ed-8166-0994c8f6bb84",
+      "fromPin": "d4de123f-7e3a-49bd-b964-390e24453c69",
+      "toNode": "0a5f8df1-5044-4638-99a7-56391c04101b",
+      "toPin": "5a5351a9-1e50-42a5-b704-72cfad63fa74"
     },
     {
-      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
-      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
-      "toNode": "0ee784a3-0929-4868-a4d3-c1fe176dc3d2",
-      "toPin": "87f84f5c-e047-4efc-890c-44a876be2480"
+      "fromNode": "cad91374-de91-4bfb-a222-5ce0f86575ce",
+      "fromPin": "77cd0472-df25-41eb-a168-841c0cd60c8b",
+      "toNode": "e4238885-72de-4a37-9f85-287f8aa3873e",
+      "toPin": "dba0cc21-edc7-4669-ba10-36f308e7edb1"
     },
     {
-      "fromNode": "0ee784a3-0929-4868-a4d3-c1fe176dc3d2",
-      "fromPin": "3c8505ba-f800-4ce6-b4b3-49456bec969b",
-      "toNode": "27b0d344-c7e8-47af-b134-c82d9c01df9b",
-      "toPin": "a3c4c75d-cac3-4be5-898b-debe74f94992"
+      "fromNode": "e4238885-72de-4a37-9f85-287f8aa3873e",
+      "fromPin": "a6254a93-76b6-402d-aa63-7f2e6a2d5925",
+      "toNode": "664340ee-c5e5-41ed-8166-0994c8f6bb84",
+      "toPin": "c4254d92-0518-4bc0-9cb4-ad6deafc25dd"
     },
     {
-      "fromNode": "ae601c95-09ee-4ef6-ac4e-e5adba433101",
-      "fromPin": "f9cac3a3-44f3-435c-bbe1-2c5a01136803",
-      "toNode": "4e9435bf-d0a2-45e1-a7ac-531ae778cc6a",
-      "toPin": "b29c925d-9a12-4975-9512-0ecd5a954acc"
+      "fromNode": "cbe65bba-728c-4d6d-8707-a4dbe5cfa097",
+      "fromPin": "a2227e44-3a7a-434d-807d-c392f56b107c",
+      "toNode": "2429188a-889c-43c0-9ed1-53fb6336115e",
+      "toPin": "37458769-7429-4bd8-a52a-aab774ec5b13"
     },
     {
-      "fromNode": "4e9435bf-d0a2-45e1-a7ac-531ae778cc6a",
-      "fromPin": "9b8c11ee-78e9-47fa-b7ba-c91bc9d03a5f",
-      "toNode": "061661ed-183b-4302-bbf0-4ede8109d1db",
-      "toPin": "6a250f09-93f9-44cb-ba66-c0a3532e8d70"
+      "fromNode": "01000267-eaa9-4a72-a9a4-3fc556886a64",
+      "fromPin": "67b87290-39e3-4dad-82fa-aeb118951f2d",
+      "toNode": "2429188a-889c-43c0-9ed1-53fb6336115e",
+      "toPin": "ce4f5e5a-3c29-4035-8690-f1fe3b4b4b73"
     },
     {
-      "fromNode": "061661ed-183b-4302-bbf0-4ede8109d1db",
-      "fromPin": "1ae9e98c-5dd9-4f6b-83d0-d89e8efb2e7c",
-      "toNode": "652ef672-ae50-4d05-924f-e0a7f248c878",
-      "toPin": "f02a3b4a-6a18-44f1-9094-ec6e70f7b2a8"
+      "fromNode": "0a5f8df1-5044-4638-99a7-56391c04101b",
+      "fromPin": "3d84575b-eeb1-4f43-b813-a36bf769dea5",
+      "toNode": "8d899c8b-a9b4-4e58-8276-6c6e2426bbaf",
+      "toPin": "0352990d-9ad9-4906-9653-dbc597bd8bf3"
     },
     {
-      "fromNode": "652ef672-ae50-4d05-924f-e0a7f248c878",
-      "fromPin": "0ae518e0-9dd1-4070-aa9c-79ad3a08c6a6",
-      "toNode": "33a0740d-70d4-4d95-a617-8339484afab5",
-      "toPin": "bcffe1ca-249a-44e4-8bfe-9fcb4aa43df8"
+      "fromNode": "fcd0ecf8-b97e-4163-9674-f0aa545f432e",
+      "fromPin": "1abe772e-44d3-4d1d-98e9-ec11dd9926dd",
+      "toNode": "8d899c8b-a9b4-4e58-8276-6c6e2426bbaf",
+      "toPin": "a429ecbc-ffdf-4eee-a45a-5cb3e35d1208"
     },
     {
-      "fromNode": "33a0740d-70d4-4d95-a617-8339484afab5",
-      "fromPin": "0e477d92-9010-478d-9f67-913c1a3be4b8",
-      "toNode": "b8cc063b-c684-43a3-b5df-8d45739df8ac",
-      "toPin": "ce892c51-3e35-4bad-9571-759d0d8e2854"
+      "fromNode": "8d899c8b-a9b4-4e58-8276-6c6e2426bbaf",
+      "fromPin": "627805f7-e638-42d1-8e0e-306973bb65de",
+      "toNode": "7101dd0d-5754-4390-ac6a-caa1b258e7fc",
+      "toPin": "810a65ce-122a-40ce-b5e7-e7b622f1ecdb"
     },
     {
-      "fromNode": "b8cc063b-c684-43a3-b5df-8d45739df8ac",
-      "fromPin": "57f7abb4-63b2-4772-81f9-59d9e1847d01",
-      "toNode": "a90096a9-5dd0-42c0-9fdd-108c42c45250",
-      "toPin": "e8ea9c15-40b1-4d67-86c8-7522794113f2"
+      "fromNode": "2429188a-889c-43c0-9ed1-53fb6336115e",
+      "fromPin": "efdf7ebe-490a-4731-990f-765194519c9f",
+      "toNode": "7101dd0d-5754-4390-ac6a-caa1b258e7fc",
+      "toPin": "9a14a938-b32f-4745-bee6-6637800cbab8"
     },
     {
-      "fromNode": "a90096a9-5dd0-42c0-9fdd-108c42c45250",
-      "fromPin": "d5dc25b4-698b-4612-9af4-ebaa9273b506",
-      "toNode": "558d39d5-963e-4309-b086-f211d2493446",
-      "toPin": "3d5f2042-9ab7-458d-ba8a-8042657a2736"
+      "fromNode": "cad91374-de91-4bfb-a222-5ce0f86575ce",
+      "fromPin": "77cd0472-df25-41eb-a168-841c0cd60c8b",
+      "toNode": "01000267-eaa9-4a72-a9a4-3fc556886a64",
+      "toPin": "3f9ef886-3580-424a-bd40-64e97463bc03"
     },
     {
-      "fromNode": "558d39d5-963e-4309-b086-f211d2493446",
-      "fromPin": "e310d9a5-8cce-4d96-b750-8413cd3e96d3",
-      "toNode": "ca2d54b8-81b6-44a5-ab81-4bcd57871e02",
-      "toPin": "2d50236b-9979-4e2b-a59c-9315e510a8ad"
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "ad5147b3-ffcc-40af-a24a-9136aa6f1cc7",
+      "toNode": "5028371e-6e2c-4182-a1f2-2999727ae3ff",
+      "toPin": "5b9e6a6a-f91a-4f38-86a1-526d97d5796f"
     },
     {
-      "fromNode": "ca2d54b8-81b6-44a5-ab81-4bcd57871e02",
-      "fromPin": "82d4548a-b1b2-4c7b-8ba6-e05a1220c1a3",
-      "toNode": "942dbed5-a163-475b-b8f9-7c388b63b1ab",
-      "toPin": "8e3d9edc-96c0-4a6b-a098-9898971e2127"
+      "fromNode": "5028371e-6e2c-4182-a1f2-2999727ae3ff",
+      "fromPin": "f7f37f96-5cfc-4cce-8e92-4e9c16375df9",
+      "toNode": "08c482e9-e91b-4778-9aa5-1643c1832b34",
+      "toPin": "356e82bd-cdb8-42f1-b7da-9b5f027a39e8"
     },
     {
-      "fromNode": "ae601c95-09ee-4ef6-ac4e-e5adba433101",
-      "fromPin": "dd218743-0086-4561-a175-6bea22302686",
-      "toNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
-      "toPin": "eb941bc9-4132-4f4c-8b38-1dbb7fd8b5ff"
+      "fromNode": "08c482e9-e91b-4778-9aa5-1643c1832b34",
+      "fromPin": "781b3d36-eab7-40df-9100-c17a3024e622",
+      "toNode": "8ce9921a-b6f8-40a4-badf-fbcbca0b3462",
+      "toPin": "84d11291-7cd4-4349-9979-255a02c66661"
     },
     {
-      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
-      "fromPin": "b3bee172-d92d-4e91-a0d6-da2c89828f98",
-      "toNode": "4e9435bf-d0a2-45e1-a7ac-531ae778cc6a",
-      "toPin": "97a74286-598e-4e06-936a-a4b9f564bc55"
+      "fromNode": "8ce9921a-b6f8-40a4-badf-fbcbca0b3462",
+      "fromPin": "ee203887-d8ec-48e6-9232-42fd1ae1f7db",
+      "toNode": "dc04348f-9460-470b-b82a-73fd8e130946",
+      "toPin": "84c81538-a565-48b3-940f-499cb19d7d47"
     },
     {
-      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
-      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
-      "toNode": "768ffee0-0420-48eb-bcd8-3ecb6a39b95f",
-      "toPin": "6718fc4b-7da2-41b8-a21b-684595edde81"
+      "fromNode": "dc04348f-9460-470b-b82a-73fd8e130946",
+      "fromPin": "9475043a-e92b-4506-bfa3-968462d8a939",
+      "toNode": "ae5ae464-7cbc-4fe6-96c6-abaa97e9f5ec",
+      "toPin": "e3651ee3-b9ea-4896-8925-e9c361b540dd"
     },
     {
-      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
-      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
-      "toNode": "599b5973-c7f6-4a26-b29d-96e622f4d535",
-      "toPin": "de5eaf0d-d327-49a6-ac31-dd0b65569817"
+      "fromNode": "ae5ae464-7cbc-4fe6-96c6-abaa97e9f5ec",
+      "fromPin": "594fbd43-3b6e-4ce5-a72b-4e939389d6f5",
+      "toNode": "bf31b4a7-07e8-4bc0-9466-52bc31be810a",
+      "toPin": "a201bdff-cc4a-4ed1-9116-4ef4c345780e"
     },
     {
-      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
-      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
-      "toNode": "f0fec9f7-91ca-434d-a57b-300c24423aba",
-      "toPin": "17fc5215-e1c1-413c-b5c4-515ed0dc7d30"
+      "fromNode": "b278f21f-ae1c-49a9-b840-59f28d149995",
+      "fromPin": "99708b1c-b599-42c8-b784-a7194e7df3a6",
+      "toNode": "1d82de65-149e-4326-bb47-9df956597736",
+      "toPin": "38a75852-527e-4d88-9db6-2d9c4d5af876"
     },
     {
-      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
-      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
-      "toNode": "404f51d8-ec0b-4bfe-8dad-84a5c0ec3b3d",
-      "toPin": "216e3e75-29d5-4335-a9d0-5c623bdd79a2"
+      "fromNode": "1d82de65-149e-4326-bb47-9df956597736",
+      "fromPin": "65755361-0e3e-4326-847b-25215f9b10a8",
+      "toNode": "eb632892-dee9-4e64-9246-b31051db42ef",
+      "toPin": "9cce9530-bed5-499f-93d6-b8a00c024eeb"
     },
     {
-      "fromNode": "ae601c95-09ee-4ef6-ac4e-e5adba433101",
-      "fromPin": "dd218743-0086-4561-a175-6bea22302686",
-      "toNode": "a90096a9-5dd0-42c0-9fdd-108c42c45250",
-      "toPin": "3445d847-5bca-4881-994d-6ce879528273"
+      "fromNode": "eb632892-dee9-4e64-9246-b31051db42ef",
+      "fromPin": "ad617d81-ded5-4cd5-b3e4-e5d9695f0e6b",
+      "toNode": "f51e6760-0d1f-4b5c-b490-d12a5f28ef43",
+      "toPin": "38fde6e8-0e73-4699-bf90-51f495ea89f6"
     },
     {
-      "fromNode": "404f51d8-ec0b-4bfe-8dad-84a5c0ec3b3d",
-      "fromPin": "6ef8b776-383a-4ead-a087-677ddf01587e",
-      "toNode": "a90096a9-5dd0-42c0-9fdd-108c42c45250",
-      "toPin": "408695e2-ddfe-4e04-b6f9-4c94d90243cf"
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "b278f21f-ae1c-49a9-b840-59f28d149995",
+      "toPin": "94493ef3-d9d1-466b-b247-49fc409c971b"
     },
     {
-      "fromNode": "ae601c95-09ee-4ef6-ac4e-e5adba433101",
-      "fromPin": "dd218743-0086-4561-a175-6bea22302686",
-      "toNode": "558d39d5-963e-4309-b086-f211d2493446",
-      "toPin": "338ee2ab-a174-4d5a-9fc7-88931663798b"
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "1d82de65-149e-4326-bb47-9df956597736",
+      "toPin": "76fe0dcb-1076-437a-bff5-3e645a3400b0"
     },
     {
-      "fromNode": "404f51d8-ec0b-4bfe-8dad-84a5c0ec3b3d",
-      "fromPin": "6ef8b776-383a-4ead-a087-677ddf01587e",
-      "toNode": "558d39d5-963e-4309-b086-f211d2493446",
-      "toPin": "ecfb1406-cdc3-4514-a193-ef6bfc2a25c7"
+      "fromNode": "7101dd0d-5754-4390-ac6a-caa1b258e7fc",
+      "fromPin": "86e5fbea-26bc-4041-a0c0-c782566ceacf",
+      "toNode": "eb632892-dee9-4e64-9246-b31051db42ef",
+      "toPin": "c17b1b16-b0fb-4c6a-b14b-0d0392a8361a"
     },
     {
-      "fromNode": "404f51d8-ec0b-4bfe-8dad-84a5c0ec3b3d",
-      "fromPin": "6ef8b776-383a-4ead-a087-677ddf01587e",
-      "toNode": "7d63e5e9-14fb-407c-a04a-b3c34c9482c6",
-      "toPin": "362171bf-2e76-4108-8d4c-f615798ee7f9"
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "eb632892-dee9-4e64-9246-b31051db42ef",
+      "toPin": "0668f7d2-c274-41c6-ac55-5973087f5e52"
     },
     {
-      "fromNode": "2327c8a4-c662-4772-8bce-f7e184ff6c50",
-      "fromPin": "b54b940b-3a71-4fe1-bb01-3df1c328809e",
-      "toNode": "ca2d54b8-81b6-44a5-ab81-4bcd57871e02",
-      "toPin": "97a222a0-1332-4b90-a970-b040a32ca284"
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "f51e6760-0d1f-4b5c-b490-d12a5f28ef43",
+      "toPin": "41bf8eac-3e87-432a-ad4c-8f4bc2111b38"
     },
     {
-      "fromNode": "ae601c95-09ee-4ef6-ac4e-e5adba433101",
-      "fromPin": "dd218743-0086-4561-a175-6bea22302686",
-      "toNode": "ca2d54b8-81b6-44a5-ab81-4bcd57871e02",
-      "toPin": "8fb166b3-ed6b-4617-a3ec-765acc076c0d"
+      "fromNode": "bf31b4a7-07e8-4bc0-9466-52bc31be810a",
+      "fromPin": "422e8c24-5c4b-4e0a-8a16-cf1770133ce8",
+      "toNode": "b278f21f-ae1c-49a9-b840-59f28d149995",
+      "toPin": "adec97bd-463b-45c4-9d88-73f9632a445d"
     },
     {
-      "fromNode": "ae601c95-09ee-4ef6-ac4e-e5adba433101",
-      "fromPin": "dd218743-0086-4561-a175-6bea22302686",
-      "toNode": "942dbed5-a163-475b-b8f9-7c388b63b1ab",
-      "toPin": "ca7f5ac6-ba1e-410c-ba3d-0d3c61a4e6af"
+      "fromNode": "bf31b4a7-07e8-4bc0-9466-52bc31be810a",
+      "fromPin": "1ca1dc61-6eb1-4d33-96d2-92680b55d9b8",
+      "toNode": "bc24d052-3357-4645-a886-27ab932e857a",
+      "toPin": "75b2a661-9a3e-42f0-aa86-8ecefd4b17c7"
     },
     {
-      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
-      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
-      "toNode": "652ef672-ae50-4d05-924f-e0a7f248c878",
-      "toPin": "2f8bbda7-1d1c-4919-b2b1-b60adbe0779c"
+      "fromNode": "bc24d052-3357-4645-a886-27ab932e857a",
+      "fromPin": "30c551b2-ac1f-4f88-9fbe-729d37748f31",
+      "toNode": "7381828f-14e9-46a3-9758-a51a8a4707ab",
+      "toPin": "f4bb81e9-9394-46b1-81af-d5e6ca49c255"
     },
     {
-      "fromNode": "768ffee0-0420-48eb-bcd8-3ecb6a39b95f",
-      "fromPin": "5e6956d0-dcad-4188-918e-511cfaf18e80",
-      "toNode": "3e122963-7ec1-4cd8-83bb-5d90e8e03729",
-      "toPin": "0f0b468f-ff65-4639-92a2-8c9a607f66fb"
+      "fromNode": "7381828f-14e9-46a3-9758-a51a8a4707ab",
+      "fromPin": "4cf30207-adc0-4fb9-87bf-cedbba80bfd1",
+      "toNode": "15a81a61-248a-444d-94f1-968a82c5ee93",
+      "toPin": "f532441a-34fb-4f4b-93d2-53492c0f26f3"
     },
     {
-      "fromNode": "ae38852c-80be-4f2a-a4e9-7a13d7d3e882",
-      "fromPin": "2a2ac8e4-eedc-449d-85f5-ec7df25ee914",
-      "toNode": "3e122963-7ec1-4cd8-83bb-5d90e8e03729",
-      "toPin": "6d839bd6-b227-4d6c-8afa-22c88a6a852f"
+      "fromNode": "15a81a61-248a-444d-94f1-968a82c5ee93",
+      "fromPin": "6dc85c8f-87eb-42e7-90e1-0db52dfb2544",
+      "toNode": "c71b300c-5b49-49c7-9d93-ae7a17945ba5",
+      "toPin": "a917a6fd-7c67-4ac7-b8c6-e595026fb109"
     },
     {
-      "fromNode": "3e122963-7ec1-4cd8-83bb-5d90e8e03729",
-      "fromPin": "26babe3e-e20e-4ef6-a48c-acc46d3ee840",
-      "toNode": "061661ed-183b-4302-bbf0-4ede8109d1db",
-      "toPin": "1acf2332-6404-473f-9c10-a898c53626b9"
+      "fromNode": "c71b300c-5b49-49c7-9d93-ae7a17945ba5",
+      "fromPin": "3068cd38-9fa1-444e-a200-9a13141ee32f",
+      "toNode": "beddecf8-56ce-4a83-98a7-33df430ac1a8",
+      "toPin": "1dc2e5e7-4c33-475b-a3e6-e604366ce7a9"
     },
     {
-      "fromNode": "7d3342bd-cc38-48db-a42e-5d48af94346c",
-      "fromPin": "eb9904bb-c3bc-429e-b4ec-ab760e714075",
-      "toNode": "652ef672-ae50-4d05-924f-e0a7f248c878",
-      "toPin": "3b58bd65-3ae0-4aa7-b61d-70fcd15d3eb1"
+      "fromNode": "beddecf8-56ce-4a83-98a7-33df430ac1a8",
+      "fromPin": "ec64f8c0-7653-42c7-ac54-f93d1e9aba4a",
+      "toNode": "03694101-a267-4281-98c6-a9b1a632d0e9",
+      "toPin": "9e910e6d-bea6-43e5-89b0-c57421980b0f"
     },
     {
-      "fromNode": "652ef672-ae50-4d05-924f-e0a7f248c878",
-      "fromPin": "32ddc386-868e-484a-bfb6-50788dfb119a",
-      "toNode": "33a0740d-70d4-4d95-a617-8339484afab5",
-      "toPin": "e2e43116-5091-4bc2-8681-333bbe8a14d3"
+      "fromNode": "03694101-a267-4281-98c6-a9b1a632d0e9",
+      "fromPin": "bb78a272-15a2-4111-b3d2-1483fd70b6ea",
+      "toNode": "0ace2ee1-83ba-452f-8ef4-134591319944",
+      "toPin": "3df2a38e-0f8a-4afa-8aa0-2666f627658a"
     },
     {
-      "fromNode": "599b5973-c7f6-4a26-b29d-96e622f4d535",
-      "fromPin": "cf10eaa7-e1e0-4b48-b946-fe10e7b02716",
-      "toNode": "88928f53-55b7-469f-9f2b-60c0445dab06",
-      "toPin": "f5412781-154b-4f87-95f9-9f9f8dd07cd0"
+      "fromNode": "0ace2ee1-83ba-452f-8ef4-134591319944",
+      "fromPin": "4611beda-22b0-42a6-8623-967a5771f974",
+      "toNode": "40580369-0116-4e6c-8259-30bbd39f8373",
+      "toPin": "eaa87b2f-213d-461a-996d-23f402428570"
     },
     {
-      "fromNode": "a827097f-79c2-4397-a34c-0c7f49e23d3d",
-      "fromPin": "a7e5c573-c8bb-445e-803c-7d77be5bf01f",
-      "toNode": "88928f53-55b7-469f-9f2b-60c0445dab06",
-      "toPin": "674bf7e4-12cb-478d-8bc6-eb261c2b5d3c"
+      "fromNode": "40580369-0116-4e6c-8259-30bbd39f8373",
+      "fromPin": "32fcfd24-110b-4840-8098-c5e73ce75445",
+      "toNode": "33aff72d-d314-40a4-bf8f-8ee5bfd278e1",
+      "toPin": "1c701fcf-6774-4eef-837f-91d2960f9ba2"
     },
     {
-      "fromNode": "88928f53-55b7-469f-9f2b-60c0445dab06",
-      "fromPin": "9bd95aaa-ae13-4f1d-b83e-949e42adf7a4",
-      "toNode": "33a0740d-70d4-4d95-a617-8339484afab5",
-      "toPin": "5c4f9cc9-678b-416d-ac3c-b19f7256b01f"
+      "fromNode": "beddecf8-56ce-4a83-98a7-33df430ac1a8",
+      "fromPin": "980db789-35f4-41cf-82af-b2d41180b4b9",
+      "toNode": "be37cc84-8dd5-413a-be62-8f1efa3f2788",
+      "toPin": "b1284417-0dd3-4bc5-8eed-310cff1239b2"
     },
     {
-      "fromNode": "33a0740d-70d4-4d95-a617-8339484afab5",
-      "fromPin": "4c96f40d-e65a-43a0-9591-552d57044b51",
-      "toNode": "b8cc063b-c684-43a3-b5df-8d45739df8ac",
-      "toPin": "5772a387-9613-4172-aa7a-32546eaec754"
+      "fromNode": "c71b300c-5b49-49c7-9d93-ae7a17945ba5",
+      "fromPin": "54dd3f8d-e404-4d7f-bfff-040f62aaa68d",
+      "toNode": "cff26c58-d721-4677-b80c-e880b5ee42a9",
+      "toPin": "1d902ed5-8890-43f8-be01-4bdf4d0d8293"
     },
     {
-      "fromNode": "f0fec9f7-91ca-434d-a57b-300c24423aba",
-      "fromPin": "0da97cb4-bfcf-450d-8d97-5cddbe0040fb",
-      "toNode": "d236bab7-0725-436d-8cff-273275096cdc",
-      "toPin": "cbc63ee6-c287-484a-b105-9758c1f3ea59"
+      "fromNode": "c8619223-8fc5-4229-acc7-61c86331b391",
+      "fromPin": "84892644-c955-4840-b13a-de9ff1da0d99",
+      "toNode": "703eca83-70d4-49d9-927b-32a33c039638",
+      "toPin": "ce24e2e8-0324-4d8f-a186-3a5fec7bc1fa"
     },
     {
-      "fromNode": "c3495df0-18e5-4b61-8425-955f78103109",
-      "fromPin": "c2135e22-9776-48ca-af8b-80d6da216dcf",
-      "toNode": "d236bab7-0725-436d-8cff-273275096cdc",
-      "toPin": "b41af851-e7f2-44c1-9d87-ff47bd48ad10"
+      "fromNode": "703eca83-70d4-49d9-927b-32a33c039638",
+      "fromPin": "91e152fe-436b-43bc-84ef-e539c4d85a45",
+      "toNode": "1eb7233f-1b08-4f0c-b017-245706f945f6",
+      "toPin": "ecd1939c-7b29-424d-8a2d-d8f5fdffd12e"
     },
     {
-      "fromNode": "d236bab7-0725-436d-8cff-273275096cdc",
-      "fromPin": "8bd4420c-d03b-4339-b2a6-6f47f01a649a",
-      "toNode": "b8cc063b-c684-43a3-b5df-8d45739df8ac",
-      "toPin": "b3586326-d257-4831-92fe-21ccab1ef607"
+      "fromNode": "1eb7233f-1b08-4f0c-b017-245706f945f6",
+      "fromPin": "9ced5cf9-0f5e-4e41-a1d6-8f57239fd6cb",
+      "toNode": "877ea4af-c534-4a65-aa5d-51eb12cfe1b3",
+      "toPin": "8a877488-abd7-436d-9482-5d01b1304abc"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "c8619223-8fc5-4229-acc7-61c86331b391",
+      "toPin": "0fd4ae0a-703a-437a-af34-01425f5e78a5"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "703eca83-70d4-49d9-927b-32a33c039638",
+      "toPin": "950b3776-111f-441c-8b0a-69625a5da022"
+    },
+    {
+      "fromNode": "7101dd0d-5754-4390-ac6a-caa1b258e7fc",
+      "fromPin": "86e5fbea-26bc-4041-a0c0-c782566ceacf",
+      "toNode": "1eb7233f-1b08-4f0c-b017-245706f945f6",
+      "toPin": "bc449c6a-acb2-4b6d-bce8-728093f197f9"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "1eb7233f-1b08-4f0c-b017-245706f945f6",
+      "toPin": "1dcf451e-54b5-41ae-b4d3-58e2808a9c9e"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "877ea4af-c534-4a65-aa5d-51eb12cfe1b3",
+      "toPin": "a81da4bc-0129-4b8c-96d2-1359c4077a10"
+    },
+    {
+      "fromNode": "cff26c58-d721-4677-b80c-e880b5ee42a9",
+      "fromPin": "8bcb7520-9778-4b81-9bf6-2f31f1a0bc49",
+      "toNode": "c8619223-8fc5-4229-acc7-61c86331b391",
+      "toPin": "bb5e8d05-6292-46a3-9b51-a44ce8dcf6a8"
+    },
+    {
+      "fromNode": "be37cc84-8dd5-413a-be62-8f1efa3f2788",
+      "fromPin": "3387a4f9-1240-4c7a-b6e9-12db07480cb2",
+      "toNode": "cff26c58-d721-4677-b80c-e880b5ee42a9",
+      "toPin": "e034faf2-32f3-4859-96d1-1966ebf46669"
+    },
+    {
+      "fromNode": "be37cc84-8dd5-413a-be62-8f1efa3f2788",
+      "fromPin": "4f14268b-6e0b-4670-bff0-e1e12b8494a0",
+      "toNode": "c8cedbd9-27ca-4b2e-a076-ca8c059e69a8",
+      "toPin": "d1645c45-fbeb-4033-a96a-d4213cfa5ad6"
+    },
+    {
+      "fromNode": "c71b300c-5b49-49c7-9d93-ae7a17945ba5",
+      "fromPin": "54dd3f8d-e404-4d7f-bfff-040f62aaa68d",
+      "toNode": "a5ceaf09-36a1-4afc-8d9b-4105d8201cf3",
+      "toPin": "1324562f-6380-44c8-9156-5ae384ebe53c"
+    },
+    {
+      "fromNode": "fdb610ea-90f1-4473-9275-85d0f63fc7f1",
+      "fromPin": "8205e7d5-762c-4c57-a815-35dd4dde27ea",
+      "toNode": "9eb0599f-3e2f-4444-9d52-76f6c8fa01e5",
+      "toPin": "59bf2b49-3b97-4961-9f48-6182082c9cc5"
+    },
+    {
+      "fromNode": "9eb0599f-3e2f-4444-9d52-76f6c8fa01e5",
+      "fromPin": "9809920e-9cba-4b9f-899e-22bc5f559161",
+      "toNode": "068e699c-d037-4022-bc39-cca5c8ba1014",
+      "toPin": "992c48e2-6abe-4d3b-94f3-cffecdd105ac"
+    },
+    {
+      "fromNode": "068e699c-d037-4022-bc39-cca5c8ba1014",
+      "fromPin": "81ec7d41-7d31-44b4-a67a-658c80eff87d",
+      "toNode": "d8b5bca4-5769-4548-9b6a-b2a24e7be912",
+      "toPin": "64ba86ef-ddcc-4b7e-b1d4-ec731a97bbf2"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "fdb610ea-90f1-4473-9275-85d0f63fc7f1",
+      "toPin": "d64a6e69-a1d8-49f9-812d-79808181bfcf"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "9eb0599f-3e2f-4444-9d52-76f6c8fa01e5",
+      "toPin": "fff8620a-05c4-42dd-b711-32f68bf131db"
+    },
+    {
+      "fromNode": "7101dd0d-5754-4390-ac6a-caa1b258e7fc",
+      "fromPin": "86e5fbea-26bc-4041-a0c0-c782566ceacf",
+      "toNode": "068e699c-d037-4022-bc39-cca5c8ba1014",
+      "toPin": "c148fbd7-54f1-4600-827b-cc17050dc956"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "068e699c-d037-4022-bc39-cca5c8ba1014",
+      "toPin": "d747884d-9d2d-4a2f-988d-4b5e5b94b8cc"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "d8b5bca4-5769-4548-9b6a-b2a24e7be912",
+      "toPin": "0ae53b3f-398b-4720-a6ec-de62e5ae61a1"
+    },
+    {
+      "fromNode": "a5ceaf09-36a1-4afc-8d9b-4105d8201cf3",
+      "fromPin": "8e07730f-0bd8-433d-bec0-7541f58c1389",
+      "toNode": "fdb610ea-90f1-4473-9275-85d0f63fc7f1",
+      "toPin": "2e1960d6-6221-4cfe-9a5d-8985f41e6658"
+    },
+    {
+      "fromNode": "c8cedbd9-27ca-4b2e-a076-ca8c059e69a8",
+      "fromPin": "cafdd750-2af9-4ef6-a8f9-eb95b92c3675",
+      "toNode": "a5ceaf09-36a1-4afc-8d9b-4105d8201cf3",
+      "toPin": "4ee1a322-0871-4f55-b7d5-b309e1e0ce4b"
+    },
+    {
+      "fromNode": "c8cedbd9-27ca-4b2e-a076-ca8c059e69a8",
+      "fromPin": "fa536880-c936-4213-8374-9fbacb993725",
+      "toNode": "a6ed5c82-4b89-45fc-8b43-6baf58fecb46",
+      "toPin": "e5dc4641-fbad-4081-b2fa-7ab86bb7bbca"
+    },
+    {
+      "fromNode": "c71b300c-5b49-49c7-9d93-ae7a17945ba5",
+      "fromPin": "54dd3f8d-e404-4d7f-bfff-040f62aaa68d",
+      "toNode": "b3f5ad11-0b2b-4c4c-85a9-0d1b28417f75",
+      "toPin": "97a8fe2e-8703-4bc7-8815-d3c1fe85f8ec"
+    },
+    {
+      "fromNode": "5a248778-eb07-4994-adfd-f09ee6dbd002",
+      "fromPin": "05bce39a-c7d7-4765-94f8-c821f46029da",
+      "toNode": "907b9de2-c8db-44fb-b65e-f6d6df79ead0",
+      "toPin": "c5504c6e-74a6-4282-9685-5ba3aeeaf521"
+    },
+    {
+      "fromNode": "907b9de2-c8db-44fb-b65e-f6d6df79ead0",
+      "fromPin": "e6fd59b1-719b-4b8a-9554-7b44f71906cf",
+      "toNode": "680cdb4a-4fa6-43e3-b07f-460db9e4c322",
+      "toPin": "d85f1a84-860f-41d5-b7e5-905f86254d3d"
+    },
+    {
+      "fromNode": "680cdb4a-4fa6-43e3-b07f-460db9e4c322",
+      "fromPin": "738eff67-34d5-4809-9bf7-510131eb5ec0",
+      "toNode": "2276eb49-ed44-427d-9df3-cf779225d320",
+      "toPin": "e329690b-a562-46f3-8bce-d606e136acd4"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "5a248778-eb07-4994-adfd-f09ee6dbd002",
+      "toPin": "93683d3e-0809-45ed-9db7-58da7388ed7a"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "907b9de2-c8db-44fb-b65e-f6d6df79ead0",
+      "toPin": "24e22c5f-5c79-4e11-a743-43e43455d317"
+    },
+    {
+      "fromNode": "7101dd0d-5754-4390-ac6a-caa1b258e7fc",
+      "fromPin": "86e5fbea-26bc-4041-a0c0-c782566ceacf",
+      "toNode": "680cdb4a-4fa6-43e3-b07f-460db9e4c322",
+      "toPin": "8c53d711-538d-48a5-94c2-9357ba656abd"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "680cdb4a-4fa6-43e3-b07f-460db9e4c322",
+      "toPin": "bdc68ee1-1c4b-47dc-b048-6400b6062bde"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "2276eb49-ed44-427d-9df3-cf779225d320",
+      "toPin": "c5efc072-13a3-4acd-93df-0ea87f93f1c0"
+    },
+    {
+      "fromNode": "b3f5ad11-0b2b-4c4c-85a9-0d1b28417f75",
+      "fromPin": "3a516c16-f4a6-4fda-b2da-49d80f8133ba",
+      "toNode": "5a248778-eb07-4994-adfd-f09ee6dbd002",
+      "toPin": "a10071f1-6d7a-42e3-a563-0cd75a1e3b9a"
+    },
+    {
+      "fromNode": "a6ed5c82-4b89-45fc-8b43-6baf58fecb46",
+      "fromPin": "d7a03b86-20ff-4068-bf30-18d3f97b8468",
+      "toNode": "b3f5ad11-0b2b-4c4c-85a9-0d1b28417f75",
+      "toPin": "4d977f12-6efe-4e38-8bd2-8467ea56add0"
+    },
+    {
+      "fromNode": "a6ed5c82-4b89-45fc-8b43-6baf58fecb46",
+      "fromPin": "3e279981-eb6e-43af-9b24-4a1a32a61e10",
+      "toNode": "e88b24d2-64a8-4682-8214-3156408348f1",
+      "toPin": "cb5d607e-cbc3-46bb-8a7a-76cd9ba9052c"
+    },
+    {
+      "fromNode": "c71b300c-5b49-49c7-9d93-ae7a17945ba5",
+      "fromPin": "54dd3f8d-e404-4d7f-bfff-040f62aaa68d",
+      "toNode": "09d574c5-9382-45fa-b9b6-8dbe1170aea2",
+      "toPin": "95ce3848-3ac2-4cac-ad65-7eb2d773a327"
+    },
+    {
+      "fromNode": "4153a4df-edc9-42ac-95cb-a5e09b077553",
+      "fromPin": "9e360dad-afe4-4772-ad51-60f05c044331",
+      "toNode": "72cfa624-f53a-46c1-8f3c-eb608d680ce1",
+      "toPin": "d3a25583-4191-421b-a94b-aa8c569c083e"
+    },
+    {
+      "fromNode": "72cfa624-f53a-46c1-8f3c-eb608d680ce1",
+      "fromPin": "98f0bed9-a81a-4b64-a98a-f17d02596696",
+      "toNode": "3949472f-5e0b-4eb0-bbc9-2db7946717d2",
+      "toPin": "340bbdad-b3ac-40e2-93a4-0a1f98d86680"
+    },
+    {
+      "fromNode": "3949472f-5e0b-4eb0-bbc9-2db7946717d2",
+      "fromPin": "3b9e243e-2afb-4ed9-9f36-dbab3c6805ef",
+      "toNode": "c9352b95-7231-4c5e-9d23-23662204ee18",
+      "toPin": "c12b28ef-035a-4519-a158-e21afbd11b48"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "4153a4df-edc9-42ac-95cb-a5e09b077553",
+      "toPin": "acca86fe-1f74-46d2-9980-693ea5ddfd72"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "72cfa624-f53a-46c1-8f3c-eb608d680ce1",
+      "toPin": "061445df-69a1-42e9-b34b-3a6ef11626a6"
+    },
+    {
+      "fromNode": "7101dd0d-5754-4390-ac6a-caa1b258e7fc",
+      "fromPin": "86e5fbea-26bc-4041-a0c0-c782566ceacf",
+      "toNode": "3949472f-5e0b-4eb0-bbc9-2db7946717d2",
+      "toPin": "75619696-e87d-452f-be5e-4f7f65371639"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "3949472f-5e0b-4eb0-bbc9-2db7946717d2",
+      "toPin": "af12b3df-aeb0-432c-8e28-8f20fea2cb4d"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "c9352b95-7231-4c5e-9d23-23662204ee18",
+      "toPin": "f6e4e721-4fb7-4677-91f6-77c0ed03b721"
+    },
+    {
+      "fromNode": "09d574c5-9382-45fa-b9b6-8dbe1170aea2",
+      "fromPin": "e7717f91-ca0b-479d-964e-ebc108c5b904",
+      "toNode": "4153a4df-edc9-42ac-95cb-a5e09b077553",
+      "toPin": "60c5393a-c75e-462f-865e-58f06fe80a3f"
+    },
+    {
+      "fromNode": "e88b24d2-64a8-4682-8214-3156408348f1",
+      "fromPin": "a5489876-345c-46e1-a477-f1a4daf2fd31",
+      "toNode": "09d574c5-9382-45fa-b9b6-8dbe1170aea2",
+      "toPin": "749dfd7c-6bc3-4733-8847-09bf00c94697"
+    },
+    {
+      "fromNode": "c71b300c-5b49-49c7-9d93-ae7a17945ba5",
+      "fromPin": "54dd3f8d-e404-4d7f-bfff-040f62aaa68d",
+      "toNode": "bb5a35ab-ca56-4cee-a6e6-e9c7550647f4",
+      "toPin": "439e75f8-aa56-4437-9367-08f63c559591"
+    },
+    {
+      "fromNode": "9c5d4e8a-09e8-4381-86d4-e4313e8ecae3",
+      "fromPin": "aef5c92a-634d-4df7-a08c-e004b1b95fdb",
+      "toNode": "78cdcf02-0579-452b-b9b6-eab1f22537e8",
+      "toPin": "ef35fbb7-f967-407f-af97-755fb2b38bf3"
+    },
+    {
+      "fromNode": "78cdcf02-0579-452b-b9b6-eab1f22537e8",
+      "fromPin": "866475db-87df-4328-a0bc-6622a9ed17d9",
+      "toNode": "8c15f9e3-93a1-47af-a032-95d1be59ea7b",
+      "toPin": "a2024b3e-c66f-4a1a-b5fa-146ee1076805"
+    },
+    {
+      "fromNode": "8c15f9e3-93a1-47af-a032-95d1be59ea7b",
+      "fromPin": "8658d168-46c9-4906-838b-eb8fadb77ea1",
+      "toNode": "1134b566-2c59-40fa-941a-25ad389aac26",
+      "toPin": "f65377a8-c7c5-419e-be10-a7a8aa601750"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "9c5d4e8a-09e8-4381-86d4-e4313e8ecae3",
+      "toPin": "968d4099-04a2-4f55-a887-1e9b6c0991e7"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "78cdcf02-0579-452b-b9b6-eab1f22537e8",
+      "toPin": "e89886d4-f945-495b-81fd-60092cdbefcd"
+    },
+    {
+      "fromNode": "7101dd0d-5754-4390-ac6a-caa1b258e7fc",
+      "fromPin": "86e5fbea-26bc-4041-a0c0-c782566ceacf",
+      "toNode": "8c15f9e3-93a1-47af-a032-95d1be59ea7b",
+      "toPin": "7ed293ff-2f88-4fe1-9a9f-fb5db1d17c8e"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "8c15f9e3-93a1-47af-a032-95d1be59ea7b",
+      "toPin": "6b095257-9f47-45e1-af43-a15ceb5f7775"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "1134b566-2c59-40fa-941a-25ad389aac26",
+      "toPin": "4c7c3161-af8e-40f1-afa8-70b4aaf7fec4"
+    },
+    {
+      "fromNode": "bb5a35ab-ca56-4cee-a6e6-e9c7550647f4",
+      "fromPin": "ae63cde2-dcba-42a7-a8e5-521fe51cf7d8",
+      "toNode": "9c5d4e8a-09e8-4381-86d4-e4313e8ecae3",
+      "toPin": "4b2f42eb-645b-43d5-b32b-e252af6570f1"
+    },
+    {
+      "fromNode": "e88b24d2-64a8-4682-8214-3156408348f1",
+      "fromPin": "106b17ff-b83f-4610-897a-b17be0c341c0",
+      "toNode": "bb5a35ab-ca56-4cee-a6e6-e9c7550647f4",
+      "toPin": "8655107d-c2ca-4473-9235-b92d6483ead5"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "cad91374-de91-4bfb-a222-5ce0f86575ce",
+      "toPin": "0f1aca8b-7caa-4d76-9dcb-c96702e10929"
+    },
+    {
+      "fromNode": "cad91374-de91-4bfb-a222-5ce0f86575ce",
+      "fromPin": "dcece79c-0804-49cd-b8bf-51f40cd28467",
+      "toNode": "5028371e-6e2c-4182-a1f2-2999727ae3ff",
+      "toPin": "5417412d-2e4f-4bc4-94b5-c38ee4c70f7d"
+    },
+    {
+      "fromNode": "cad91374-de91-4bfb-a222-5ce0f86575ce",
+      "fromPin": "77cd0472-df25-41eb-a168-841c0cd60c8b",
+      "toNode": "053f7a07-0d85-4114-a78c-4ee7fcec912a",
+      "toPin": "984f0145-1abe-4633-ab3f-7430d5b7f9f3"
+    },
+    {
+      "fromNode": "cad91374-de91-4bfb-a222-5ce0f86575ce",
+      "fromPin": "77cd0472-df25-41eb-a168-841c0cd60c8b",
+      "toNode": "56d8296e-c5d5-4cad-83c0-c4b2791572e9",
+      "toPin": "295c1775-f31a-464a-b71c-12c2185b05d6"
+    },
+    {
+      "fromNode": "cad91374-de91-4bfb-a222-5ce0f86575ce",
+      "fromPin": "77cd0472-df25-41eb-a168-841c0cd60c8b",
+      "toNode": "87d7a28b-a057-4fff-91f8-368e1d9e7e25",
+      "toPin": "f2b3dfaf-fa64-421e-beb8-b3808c18b8f2"
+    },
+    {
+      "fromNode": "cad91374-de91-4bfb-a222-5ce0f86575ce",
+      "fromPin": "77cd0472-df25-41eb-a168-841c0cd60c8b",
+      "toNode": "636ce759-7d54-4e8b-a2b3-4dea51af021a",
+      "toPin": "aa30c78f-d211-4b4f-b268-022e8f112ec9"
+    },
+    {
+      "fromNode": "cad91374-de91-4bfb-a222-5ce0f86575ce",
+      "fromPin": "77cd0472-df25-41eb-a168-841c0cd60c8b",
+      "toNode": "42c6c780-67e0-417f-a4b2-6d7849163f46",
+      "toPin": "7d2a2ce1-f1fc-437e-acb0-33021fcf97cd"
+    },
+    {
+      "fromNode": "42c6c780-67e0-417f-a4b2-6d7849163f46",
+      "fromPin": "f5d2f80a-6a6f-4470-b9d5-5f0e80bc64d5",
+      "toNode": "c4ff020a-83a1-48ab-a129-db2e6103cf8e",
+      "toPin": "eaf6d2b2-8f87-41ee-9dc4-bcd242f5fb3f"
+    },
+    {
+      "fromNode": "c4ff020a-83a1-48ab-a129-db2e6103cf8e",
+      "fromPin": "2521b50a-68f7-44b6-b495-4441906a4864",
+      "toNode": "bf31b4a7-07e8-4bc0-9466-52bc31be810a",
+      "toPin": "78a2a319-51d3-4732-a778-8eb0a2aa9a47"
+    },
+    {
+      "fromNode": "cad91374-de91-4bfb-a222-5ce0f86575ce",
+      "fromPin": "77cd0472-df25-41eb-a168-841c0cd60c8b",
+      "toNode": "fb41d9ac-e791-48d9-8d0e-7d06fc2fdb36",
+      "toPin": "21a47308-3773-4c8d-a406-9af186e74388"
+    },
+    {
+      "fromNode": "fb41d9ac-e791-48d9-8d0e-7d06fc2fdb36",
+      "fromPin": "07ac8c8a-8079-4d78-9d57-a248599b59ce",
+      "toNode": "7c543673-a5b3-4ed5-bf77-b5b960e64c3e",
+      "toPin": "7ffb6efd-edcc-43b2-b677-456d857c9133"
+    },
+    {
+      "fromNode": "ef138478-d8ab-4918-94fb-866e7f2de253",
+      "fromPin": "b9234ec7-86a9-4127-9c28-0362a3e80922",
+      "toNode": "7c543673-a5b3-4ed5-bf77-b5b960e64c3e",
+      "toPin": "a8dee121-8299-4c0e-aa41-59669bd18b21"
+    },
+    {
+      "fromNode": "7c543673-a5b3-4ed5-bf77-b5b960e64c3e",
+      "fromPin": "5af5c412-7762-48b5-9401-c2e13612f65d",
+      "toNode": "4427aa07-84fd-45c5-b2ca-69b40f62f711",
+      "toPin": "f2c65a44-252e-4bd9-ab89-ecdef652a964"
+    },
+    {
+      "fromNode": "5c72de52-68ae-48f9-bed6-748092a66f71",
+      "fromPin": "1612d6b0-adbd-4335-bed0-cff7984b353e",
+      "toNode": "4427aa07-84fd-45c5-b2ca-69b40f62f711",
+      "toPin": "4e30f600-c28d-4812-aaca-c6ddb7dac05f"
+    },
+    {
+      "fromNode": "4427aa07-84fd-45c5-b2ca-69b40f62f711",
+      "fromPin": "3cda7395-6ce9-4794-87c0-3f4782de9e86",
+      "toNode": "bc24d052-3357-4645-a886-27ab932e857a",
+      "toPin": "d709e1f3-65c4-4987-93c0-394758fd9577"
+    },
+    {
+      "fromNode": "add6bf18-805b-474f-a9ab-a198981f1fa8",
+      "fromPin": "cdc1ac4c-b734-46ab-b704-7d8df7f5af22",
+      "toNode": "7381828f-14e9-46a3-9758-a51a8a4707ab",
+      "toPin": "b0a663dd-dbba-41cf-be5d-4ea9ac140c46"
+    },
+    {
+      "fromNode": "ae5ae464-7cbc-4fe6-96c6-abaa97e9f5ec",
+      "fromPin": "376dd6b3-bd33-43b2-9ab5-25254726864c",
+      "toNode": "7381828f-14e9-46a3-9758-a51a8a4707ab",
+      "toPin": "7213a4e8-2bdf-4bb8-9276-9e21adcf098c"
+    },
+    {
+      "fromNode": "053f7a07-0d85-4114-a78c-4ee7fcec912a",
+      "fromPin": "8a7f8f36-d42f-468b-85a9-ad9208cd845f",
+      "toNode": "c1b08954-7594-4f8a-b0a8-64395c872e24",
+      "toPin": "463c0a0f-6020-4942-8cfd-48d5dec98caf"
+    },
+    {
+      "fromNode": "844bdbdd-33cf-4a66-aaa4-6204d7d1fe1d",
+      "fromPin": "ad4d7007-d5d0-4e03-b621-d1a2d400ac90",
+      "toNode": "c1b08954-7594-4f8a-b0a8-64395c872e24",
+      "toPin": "bcc0e6e8-26e6-4346-a475-d5b0470db684"
+    },
+    {
+      "fromNode": "56d8296e-c5d5-4cad-83c0-c4b2791572e9",
+      "fromPin": "3ddcb576-59c7-4390-ab8a-f3d871dc7067",
+      "toNode": "0e3100a1-7d62-482d-8cae-49ec5d3f2130",
+      "toPin": "afe66746-ebc3-42d8-82fd-7762d0aeb365"
+    },
+    {
+      "fromNode": "cc8a90d0-7e54-4fcb-a418-1dbd260a6fe5",
+      "fromPin": "84c27272-1320-4956-b681-714554d17ba8",
+      "toNode": "0e3100a1-7d62-482d-8cae-49ec5d3f2130",
+      "toPin": "9a783977-c76b-4767-8a09-256ffcddd638"
+    },
+    {
+      "fromNode": "87d7a28b-a057-4fff-91f8-368e1d9e7e25",
+      "fromPin": "70fc9780-bf3f-46a6-9a54-4c381a8725a0",
+      "toNode": "66f10b93-7194-4a63-b427-cd1a2f0d5d4e",
+      "toPin": "6c7091f0-86f6-4754-bbcc-1aeffead6c61"
+    },
+    {
+      "fromNode": "537fe228-2933-49ad-81eb-955bd243fc20",
+      "fromPin": "8807fce9-1918-4f9f-98f7-d5221767288a",
+      "toNode": "66f10b93-7194-4a63-b427-cd1a2f0d5d4e",
+      "toPin": "f71c5cd9-cff7-4b86-9e3c-8e46be0997d3"
+    },
+    {
+      "fromNode": "891fc6f2-7994-456f-8179-3cdfef19448d",
+      "fromPin": "acf819b2-d71a-44df-9b65-620a6a1a4bf0",
+      "toNode": "d8620fd0-7485-45e6-ab02-16d9d77c337f",
+      "toPin": "f08c6977-7c88-4993-b2e1-4cf056460d48"
+    },
+    {
+      "fromNode": "25b9b68a-4b66-4bb1-8bd2-f8eea4a03c52",
+      "fromPin": "840ac762-fd6d-4c90-bdec-c599048bd7c1",
+      "toNode": "d8620fd0-7485-45e6-ab02-16d9d77c337f",
+      "toPin": "44608198-ceb5-4714-b941-de219cbb32f0"
+    },
+    {
+      "fromNode": "cad91374-de91-4bfb-a222-5ce0f86575ce",
+      "fromPin": "77cd0472-df25-41eb-a168-841c0cd60c8b",
+      "toNode": "25b9b68a-4b66-4bb1-8bd2-f8eea4a03c52",
+      "toPin": "77dd2c9a-bc71-4004-9a03-eca3c7cdc17d"
+    },
+    {
+      "fromNode": "d8620fd0-7485-45e6-ab02-16d9d77c337f",
+      "fromPin": "f1e39900-558b-450a-a0b9-1edc03ec8e25",
+      "toNode": "285c68a5-cbbb-4441-afd1-ac6692cb54dc",
+      "toPin": "dccd120c-fd6b-4150-9bed-08eb5ad91fd7"
+    },
+    {
+      "fromNode": "48589cb9-7178-4ed9-87f7-2fbf994df713",
+      "fromPin": "509d55a2-efa8-4f70-af12-c20abf563e51",
+      "toNode": "285c68a5-cbbb-4441-afd1-ac6692cb54dc",
+      "toPin": "ee8dea56-b33d-4f22-a0a8-8b7d1b0790fb"
+    },
+    {
+      "fromNode": "c1b08954-7594-4f8a-b0a8-64395c872e24",
+      "fromPin": "0d1268f4-2ea0-4aeb-aa75-d7380b7591f6",
+      "toNode": "09f3b89a-0a3e-45bc-ab91-088c62477ae5",
+      "toPin": "772f8b1a-ee77-4703-a237-2614d0b1f898"
+    },
+    {
+      "fromNode": "0e3100a1-7d62-482d-8cae-49ec5d3f2130",
+      "fromPin": "d421f10a-210f-4979-a404-28b01a05877b",
+      "toNode": "09f3b89a-0a3e-45bc-ab91-088c62477ae5",
+      "toPin": "558a874d-7ef5-4977-90f4-32fa59a8f9ef"
+    },
+    {
+      "fromNode": "09f3b89a-0a3e-45bc-ab91-088c62477ae5",
+      "fromPin": "6e2df83f-a512-4e72-86c1-a613e55f2c6a",
+      "toNode": "3a33f70f-59cd-4398-aedd-966133261227",
+      "toPin": "0f1cc7c6-9297-4b11-ba27-ed047a08324c"
+    },
+    {
+      "fromNode": "66f10b93-7194-4a63-b427-cd1a2f0d5d4e",
+      "fromPin": "3d958efc-eca2-4d02-9487-0adbeeec365e",
+      "toNode": "3a33f70f-59cd-4398-aedd-966133261227",
+      "toPin": "49f59e64-5816-4a89-a4e1-43f7de9f2d88"
+    },
+    {
+      "fromNode": "3a33f70f-59cd-4398-aedd-966133261227",
+      "fromPin": "b74f82aa-86da-4953-adde-5037ccd5c888",
+      "toNode": "e21c80a0-1e32-42c8-b058-25327f21e461",
+      "toPin": "84cc2331-75a2-4ab1-bc3e-733e1d4b9ef4"
+    },
+    {
+      "fromNode": "285c68a5-cbbb-4441-afd1-ac6692cb54dc",
+      "fromPin": "cefea1eb-a20d-4d57-a462-48d189b3e62c",
+      "toNode": "e21c80a0-1e32-42c8-b058-25327f21e461",
+      "toPin": "cf18aea4-91eb-49dc-a572-9efefbc0fd82"
+    },
+    {
+      "fromNode": "e21c80a0-1e32-42c8-b058-25327f21e461",
+      "fromPin": "1948139c-fd4b-4101-8369-9ee97b435d90",
+      "toNode": "15a81a61-248a-444d-94f1-968a82c5ee93",
+      "toPin": "55c4ac16-44c8-4bf1-b481-259e3e2660ff"
+    },
+    {
+      "fromNode": "5a66552a-50bc-4d06-b870-c417117b77fe",
+      "fromPin": "8d76ff30-56f8-419a-83ab-fcc1b6665a18",
+      "toNode": "c71b300c-5b49-49c7-9d93-ae7a17945ba5",
+      "toPin": "8859cb60-07ce-4ce0-8379-8a1372973ee1"
+    },
+    {
+      "fromNode": "7381828f-14e9-46a3-9758-a51a8a4707ab",
+      "fromPin": "2085880e-22c1-4ea3-810b-25c33b4a0991",
+      "toNode": "c71b300c-5b49-49c7-9d93-ae7a17945ba5",
+      "toPin": "a4a53895-b275-43d0-8c59-ff02333da42c"
+    },
+    {
+      "fromNode": "add6bf18-805b-474f-a9ab-a198981f1fa8",
+      "fromPin": "cdc1ac4c-b734-46ab-b704-7d8df7f5af22",
+      "toNode": "da6ca391-dbf8-4897-9b95-0a1c2cb3cb63",
+      "toPin": "0e5eebba-f496-42c3-9cc2-32e209741801"
+    },
+    {
+      "fromNode": "5a66552a-50bc-4d06-b870-c417117b77fe",
+      "fromPin": "8d76ff30-56f8-419a-83ab-fcc1b6665a18",
+      "toNode": "da6ca391-dbf8-4897-9b95-0a1c2cb3cb63",
+      "toPin": "e1b61302-c2d0-4188-93fd-f853ec22b770"
+    },
+    {
+      "fromNode": "da6ca391-dbf8-4897-9b95-0a1c2cb3cb63",
+      "fromPin": "957979fa-a127-4c6f-a63b-990c0af90daa",
+      "toNode": "beddecf8-56ce-4a83-98a7-33df430ac1a8",
+      "toPin": "3030609c-f483-4f32-b701-3d626bef8662"
+    },
+    {
+      "fromNode": "56d8296e-c5d5-4cad-83c0-c4b2791572e9",
+      "fromPin": "3ddcb576-59c7-4390-ab8a-f3d871dc7067",
+      "toNode": "21276c68-5428-4630-9200-0462a7d232e2",
+      "toPin": "f9aa5cff-d5de-4f56-91c7-4fc27a7069d7"
+    },
+    {
+      "fromNode": "5f8d3c85-afcc-471a-93ad-44f861267784",
+      "fromPin": "89e548e5-b542-4de6-8fa1-28cadf63e3d1",
+      "toNode": "21276c68-5428-4630-9200-0462a7d232e2",
+      "toPin": "915d706a-03e4-422e-ab30-ba799324f932"
+    },
+    {
+      "fromNode": "21276c68-5428-4630-9200-0462a7d232e2",
+      "fromPin": "c686d13b-991f-44ae-a7a8-60bd91193f81",
+      "toNode": "be37cc84-8dd5-413a-be62-8f1efa3f2788",
+      "toPin": "7611dd9b-3b50-44b8-b459-ce9492671b85"
+    },
+    {
+      "fromNode": "053f7a07-0d85-4114-a78c-4ee7fcec912a",
+      "fromPin": "8a7f8f36-d42f-468b-85a9-ad9208cd845f",
+      "toNode": "8d8ae404-db1a-4918-8427-a7bbda9987c3",
+      "toPin": "980e259c-4e82-4898-93e3-aa0a1b7a9114"
+    },
+    {
+      "fromNode": "4143704b-9fcd-4dc4-ba12-112c0352f170",
+      "fromPin": "e47d7ed5-4e8c-481e-8c63-2a2d72b3ed8f",
+      "toNode": "8d8ae404-db1a-4918-8427-a7bbda9987c3",
+      "toPin": "5f7073be-b485-4fdc-b5d3-624895916bc4"
+    },
+    {
+      "fromNode": "8d8ae404-db1a-4918-8427-a7bbda9987c3",
+      "fromPin": "4cc80038-7119-4dc5-947b-cfaab709caf6",
+      "toNode": "c8cedbd9-27ca-4b2e-a076-ca8c059e69a8",
+      "toPin": "4c197922-f60f-4d49-8cee-f21198eac2c6"
+    },
+    {
+      "fromNode": "87d7a28b-a057-4fff-91f8-368e1d9e7e25",
+      "fromPin": "70fc9780-bf3f-46a6-9a54-4c381a8725a0",
+      "toNode": "8d83b179-1581-4554-87e4-7a4ebbc3f2ec",
+      "toPin": "94da6ef6-ae8c-4573-84b4-08eb4ee76eca"
+    },
+    {
+      "fromNode": "d381e3ef-1b51-44bf-bb78-bf6ba1e5cfce",
+      "fromPin": "c9cad719-eccf-42dc-bb54-34b6c48fa421",
+      "toNode": "8d83b179-1581-4554-87e4-7a4ebbc3f2ec",
+      "toPin": "dc7488b0-5561-4498-bc81-22db22ba0584"
+    },
+    {
+      "fromNode": "8d83b179-1581-4554-87e4-7a4ebbc3f2ec",
+      "fromPin": "6defe307-d5c0-4527-9c1c-4c7957d5cfa7",
+      "toNode": "a6ed5c82-4b89-45fc-8b43-6baf58fecb46",
+      "toPin": "a1c50259-b1a3-4962-af85-193f97f95585"
+    },
+    {
+      "fromNode": "25b9b68a-4b66-4bb1-8bd2-f8eea4a03c52",
+      "fromPin": "840ac762-fd6d-4c90-bdec-c599048bd7c1",
+      "toNode": "75911abb-d41e-46ff-bcc8-1c895df47e9f",
+      "toPin": "add73f16-5171-47a0-a381-359848e2c01f"
+    },
+    {
+      "fromNode": "deb2202d-2b00-4824-b4a2-409178d35277",
+      "fromPin": "d0e1c594-bac3-4cef-9e6a-5fc5582432f9",
+      "toNode": "75911abb-d41e-46ff-bcc8-1c895df47e9f",
+      "toPin": "1545e497-a39d-4ca2-9489-a42dedb7cc3c"
+    },
+    {
+      "fromNode": "75911abb-d41e-46ff-bcc8-1c895df47e9f",
+      "fromPin": "ffa63049-c399-40cf-9e06-c72262bd2507",
+      "toNode": "e88b24d2-64a8-4682-8214-3156408348f1",
+      "toPin": "47597cfe-392f-4562-872c-bfb47d316311"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "03694101-a267-4281-98c6-a9b1a632d0e9",
+      "toPin": "109d4c1f-821d-4b2d-9c36-92b1566901fd"
+    },
+    {
+      "fromNode": "636ce759-7d54-4e8b-a2b3-4dea51af021a",
+      "fromPin": "f27e40f4-e52b-4cd8-8fba-0bccc3f7a151",
+      "toNode": "03694101-a267-4281-98c6-a9b1a632d0e9",
+      "toPin": "82bd13c8-645d-4707-9640-77909fc60b1f"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "0ace2ee1-83ba-452f-8ef4-134591319944",
+      "toPin": "6ab7b5de-3751-4c68-b276-a61c95350792"
+    },
+    {
+      "fromNode": "636ce759-7d54-4e8b-a2b3-4dea51af021a",
+      "fromPin": "f27e40f4-e52b-4cd8-8fba-0bccc3f7a151",
+      "toNode": "0ace2ee1-83ba-452f-8ef4-134591319944",
+      "toPin": "1df27f35-73ae-4875-9f34-8646ae616929"
+    },
+    {
+      "fromNode": "636ce759-7d54-4e8b-a2b3-4dea51af021a",
+      "fromPin": "f27e40f4-e52b-4cd8-8fba-0bccc3f7a151",
+      "toNode": "98a0ea5f-9f71-475b-8d95-8951b73d0e21",
+      "toPin": "9a58d96e-09bc-4195-8688-12c8bc8506c2"
+    },
+    {
+      "fromNode": "7101dd0d-5754-4390-ac6a-caa1b258e7fc",
+      "fromPin": "86e5fbea-26bc-4041-a0c0-c782566ceacf",
+      "toNode": "40580369-0116-4e6c-8259-30bbd39f8373",
+      "toPin": "1c525a93-64a3-4286-bb19-b660dce9c3d0"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "40580369-0116-4e6c-8259-30bbd39f8373",
+      "toPin": "7eb9d718-762d-4aa8-89ed-a126a0ee79e3"
+    },
+    {
+      "fromNode": "16954b87-3817-4799-b4b0-68e9b76199d0",
+      "fromPin": "97b03e90-a995-444a-a8f2-9a9350d405b7",
+      "toNode": "33aff72d-d314-40a4-bf8f-8ee5bfd278e1",
+      "toPin": "1dbc078c-afe5-4697-be7c-88b59395c51c"
+    },
+    {
+      "fromNode": "cad91374-de91-4bfb-a222-5ce0f86575ce",
+      "fromPin": "77cd0472-df25-41eb-a168-841c0cd60c8b",
+      "toNode": "8ce9921a-b6f8-40a4-badf-fbcbca0b3462",
+      "toPin": "e604f311-e882-40bc-8058-d17552a8f242"
+    },
+    {
+      "fromNode": "053f7a07-0d85-4114-a78c-4ee7fcec912a",
+      "fromPin": "8a7f8f36-d42f-468b-85a9-ad9208cd845f",
+      "toNode": "2772dc29-5ed4-487a-a20a-2ab250b6822f",
+      "toPin": "c25b83c1-d96c-416e-b37d-f452a4667fb3"
+    },
+    {
+      "fromNode": "5465bdb0-f570-4578-9bac-24ca401d0996",
+      "fromPin": "80d39a19-f589-4497-9bac-d8cc28ffda9d",
+      "toNode": "2772dc29-5ed4-487a-a20a-2ab250b6822f",
+      "toPin": "c14a76ec-9c67-4ada-83ee-3d13c4601be1"
+    },
+    {
+      "fromNode": "2772dc29-5ed4-487a-a20a-2ab250b6822f",
+      "fromPin": "ff4f663e-3695-48a3-821b-169ae14d6724",
+      "toNode": "08c482e9-e91b-4778-9aa5-1643c1832b34",
+      "toPin": "943e6523-f966-452e-9aae-35f3ca5d4b25"
+    },
+    {
+      "fromNode": "05ebb3d7-a12e-4d05-9fb3-0f1fbcb589fd",
+      "fromPin": "2adf0121-d63b-41c0-a511-ad8bec3aea84",
+      "toNode": "8ce9921a-b6f8-40a4-badf-fbcbca0b3462",
+      "toPin": "89ac77f2-6ef2-4ab6-a48f-66009dbd6ab1"
+    },
+    {
+      "fromNode": "8ce9921a-b6f8-40a4-badf-fbcbca0b3462",
+      "fromPin": "c77d9b4d-c613-46ed-a118-a33fcad88e4f",
+      "toNode": "dc04348f-9460-470b-b82a-73fd8e130946",
+      "toPin": "28f3f542-23d7-4631-ab28-47721e93378e"
+    },
+    {
+      "fromNode": "56d8296e-c5d5-4cad-83c0-c4b2791572e9",
+      "fromPin": "3ddcb576-59c7-4390-ab8a-f3d871dc7067",
+      "toNode": "e3bff290-c8ae-45ed-a45f-4f8df3b8c724",
+      "toPin": "cae62935-8ee7-47fa-982b-24b9cf318329"
+    },
+    {
+      "fromNode": "b7b5df7b-f692-410d-95ea-cd6ac5971bdc",
+      "fromPin": "0455ff31-c8d9-42bc-95bb-75fd61c7455c",
+      "toNode": "e3bff290-c8ae-45ed-a45f-4f8df3b8c724",
+      "toPin": "e90e0d83-9557-4539-abfe-a1c4f8c01832"
+    },
+    {
+      "fromNode": "e3bff290-c8ae-45ed-a45f-4f8df3b8c724",
+      "fromPin": "e5775c62-40e0-4ade-aef6-a3dde4791dff",
+      "toNode": "dc04348f-9460-470b-b82a-73fd8e130946",
+      "toPin": "19b563bf-05d3-4e2c-8adc-9f657e35890b"
+    },
+    {
+      "fromNode": "dc04348f-9460-470b-b82a-73fd8e130946",
+      "fromPin": "3a83358b-12c7-42d3-9bbc-acc2704747fd",
+      "toNode": "ae5ae464-7cbc-4fe6-96c6-abaa97e9f5ec",
+      "toPin": "4f0123a0-8867-4a45-9428-24a22610efdf"
+    },
+    {
+      "fromNode": "87d7a28b-a057-4fff-91f8-368e1d9e7e25",
+      "fromPin": "70fc9780-bf3f-46a6-9a54-4c381a8725a0",
+      "toNode": "b353b45b-125b-4b4f-a6b0-cd07cd714b32",
+      "toPin": "831cae48-644a-439e-a7ad-9de15e23ceb3"
+    },
+    {
+      "fromNode": "94d3f065-3ae7-4012-b041-bf0f69890363",
+      "fromPin": "8388ad74-fc31-4fd9-aa8a-d306d52abbea",
+      "toNode": "b353b45b-125b-4b4f-a6b0-cd07cd714b32",
+      "toPin": "6a241a0f-9256-493f-bdb4-3dd9013cca22"
+    },
+    {
+      "fromNode": "b353b45b-125b-4b4f-a6b0-cd07cd714b32",
+      "fromPin": "7066408c-3dc1-42df-b6de-fd83ba5d337f",
+      "toNode": "ae5ae464-7cbc-4fe6-96c6-abaa97e9f5ec",
+      "toPin": "cce00997-4e34-4016-9787-1e03d7a873f4"
     }
   ],
   "editorLayout": {
     "nodePositions": {
-      "ae601c95-09ee-4ef6-ac4e-e5adba433101": {
+      "16954b87-3817-4799-b4b0-68e9b76199d0": {
         "x": 40,
         "y": 80
       },
-      "93de7e6f-8fdd-42a7-8bec-f34edb9c0793": {
+      "cad91374-de91-4bfb-a222-5ce0f86575ce": {
         "x": 360,
         "y": 300
       },
-      "4e9435bf-d0a2-45e1-a7ac-531ae778cc6a": {
+      "5028371e-6e2c-4182-a1f2-2999727ae3ff": {
         "x": 680,
         "y": 80
       },
-      "768ffee0-0420-48eb-bcd8-3ecb6a39b95f": {
+      "053f7a07-0d85-4114-a78c-4ee7fcec912a": {
         "x": 1000,
         "y": 300
       },
-      "ae38852c-80be-4f2a-a4e9-7a13d7d3e882": {
+      "5465bdb0-f570-4578-9bac-24ca401d0996": {
         "x": 1220,
         "y": 300
       },
-      "3e122963-7ec1-4cd8-83bb-5d90e8e03729": {
+      "2772dc29-5ed4-487a-a20a-2ab250b6822f": {
         "x": 1440,
         "y": 300
       },
-      "061661ed-183b-4302-bbf0-4ede8109d1db": {
+      "08c482e9-e91b-4778-9aa5-1643c1832b34": {
         "x": 1660,
         "y": 80
       },
-      "7d3342bd-cc38-48db-a42e-5d48af94346c": {
+      "05ebb3d7-a12e-4d05-9fb3-0f1fbcb589fd": {
         "x": 1880,
         "y": 300
       },
-      "652ef672-ae50-4d05-924f-e0a7f248c878": {
+      "8ce9921a-b6f8-40a4-badf-fbcbca0b3462": {
         "x": 2100,
         "y": 80
       },
-      "599b5973-c7f6-4a26-b29d-96e622f4d535": {
+      "56d8296e-c5d5-4cad-83c0-c4b2791572e9": {
         "x": 1880,
         "y": 520
       },
-      "a827097f-79c2-4397-a34c-0c7f49e23d3d": {
+      "b7b5df7b-f692-410d-95ea-cd6ac5971bdc": {
         "x": 2100,
         "y": 300
       },
-      "88928f53-55b7-469f-9f2b-60c0445dab06": {
+      "e3bff290-c8ae-45ed-a45f-4f8df3b8c724": {
         "x": 2320,
         "y": 300
       },
-      "33a0740d-70d4-4d95-a617-8339484afab5": {
+      "dc04348f-9460-470b-b82a-73fd8e130946": {
         "x": 2540,
         "y": 80
       },
-      "f0fec9f7-91ca-434d-a57b-300c24423aba": {
+      "87d7a28b-a057-4fff-91f8-368e1d9e7e25": {
         "x": 2760,
         "y": 300
       },
-      "c3495df0-18e5-4b61-8425-955f78103109": {
+      "94d3f065-3ae7-4012-b041-bf0f69890363": {
         "x": 2980,
         "y": 300
       },
-      "d236bab7-0725-436d-8cff-273275096cdc": {
+      "b353b45b-125b-4b4f-a6b0-cd07cd714b32": {
         "x": 3200,
         "y": 300
       },
-      "b8cc063b-c684-43a3-b5df-8d45739df8ac": {
+      "ae5ae464-7cbc-4fe6-96c6-abaa97e9f5ec": {
         "x": 3420,
         "y": 80
       },
-      "404f51d8-ec0b-4bfe-8dad-84a5c0ec3b3d": {
+      "636ce759-7d54-4e8b-a2b3-4dea51af021a": {
+        "x": 16000,
+        "y": 300
+      },
+      "98a0ea5f-9f71-475b-8d95-8951b73d0e21": {
+        "x": 16220,
+        "y": 300
+      },
+      "8957c907-a155-4ac2-8a6e-847f652b654a": {
+        "x": 16440,
+        "y": 300
+      },
+      "10febc56-d2b7-4a2a-89ad-4574f535d81d": {
+        "x": 16660,
+        "y": 300
+      },
+      "34dec557-af0c-4850-b3ba-7eeba1e9f54b": {
+        "x": 16880,
+        "y": 300
+      },
+      "84cac600-ebeb-4b84-ac29-4fbfed26c665": {
+        "x": 17100,
+        "y": 300
+      },
+      "23021b3b-f65e-4ed0-9b19-0a6e3880c642": {
+        "x": 17320,
+        "y": 300
+      },
+      "e7319cc5-680a-45ac-a403-a9dfd2b4e90a": {
+        "x": 17640,
+        "y": 300
+      },
+      "5450fcac-a7ac-4979-839f-d1bee71eebe8": {
+        "x": 17860,
+        "y": 300
+      },
+      "1d3924a3-a408-41cb-9549-6940b2c6c094": {
+        "x": 18080,
+        "y": 300
+      },
+      "61ab4265-824a-467c-900e-7b0c5a6d1c7c": {
+        "x": 18300,
+        "y": 300
+      },
+      "6b36fe1f-34df-438a-8a88-e60c24fb6b8b": {
+        "x": 18520,
+        "y": 300
+      },
+      "19832563-d780-4fc8-a005-e029bbe4e8c3": {
+        "x": 18840,
+        "y": 300
+      },
+      "b1a77d03-2ef4-42f4-b82d-615792deebcd": {
+        "x": 19060,
+        "y": 300
+      },
+      "da0f085c-9c33-44cd-ad8b-fd5689e1d12d": {
+        "x": 19280,
+        "y": 300
+      },
+      "8626a676-4077-460f-9a38-1c4858006eaf": {
+        "x": 19500,
+        "y": 300
+      },
+      "4bc90be3-3cc6-4b83-9d6d-ef21d06a645b": {
+        "x": 19720,
+        "y": 300
+      },
+      "a1df9538-37ca-4c89-bc2b-fa29c5a3095e": {
+        "x": 20040,
+        "y": 300
+      },
+      "e4238885-72de-4a37-9f85-287f8aa3873e": {
+        "x": 20260,
+        "y": 300
+      },
+      "664340ee-c5e5-41ed-8166-0994c8f6bb84": {
+        "x": 20480,
+        "y": 300
+      },
+      "e4df42ad-1b46-44e5-814b-9c749b36003c": {
+        "x": 20700,
+        "y": 300
+      },
+      "0a5f8df1-5044-4638-99a7-56391c04101b": {
+        "x": 20920,
+        "y": 300
+      },
+      "fcd0ecf8-b97e-4163-9674-f0aa545f432e": {
+        "x": 21240,
+        "y": 300
+      },
+      "cbe65bba-728c-4d6d-8707-a4dbe5cfa097": {
+        "x": 21460,
+        "y": 300
+      },
+      "01000267-eaa9-4a72-a9a4-3fc556886a64": {
+        "x": 21680,
+        "y": 300
+      },
+      "2429188a-889c-43c0-9ed1-53fb6336115e": {
+        "x": 21900,
+        "y": 300
+      },
+      "8d899c8b-a9b4-4e58-8276-6c6e2426bbaf": {
+        "x": 22120,
+        "y": 300
+      },
+      "7101dd0d-5754-4390-ac6a-caa1b258e7fc": {
+        "x": 22340,
+        "y": 300
+      },
+      "42c6c780-67e0-417f-a4b2-6d7849163f46": {
         "x": 3640,
         "y": 300
       },
-      "a90096a9-5dd0-42c0-9fdd-108c42c45250": {
+      "c4ff020a-83a1-48ab-a129-db2e6103cf8e": {
         "x": 3860,
-        "y": 80
+        "y": 300
       },
-      "558d39d5-963e-4309-b086-f211d2493446": {
+      "bf31b4a7-07e8-4bc0-9466-52bc31be810a": {
         "x": 4080,
         "y": 80
       },
-      "7d63e5e9-14fb-407c-a04a-b3c34c9482c6": {
+      "fb41d9ac-e791-48d9-8d0e-7d06fc2fdb36": {
         "x": 4300,
         "y": 300
       },
-      "33c2f552-3376-4410-b024-865010e82223": {
+      "ef138478-d8ab-4918-94fb-866e7f2de253": {
         "x": 4520,
         "y": 300
       },
-      "9d195ada-feee-48bf-8963-18538a7074d2": {
+      "7c543673-a5b3-4ed5-bf77-b5b960e64c3e": {
         "x": 4740,
         "y": 300
       },
-      "f155ef89-791d-48cb-baeb-caa16fe9b136": {
+      "5c72de52-68ae-48f9-bed6-748092a66f71": {
         "x": 4960,
         "y": 300
       },
-      "04f441ef-8216-424f-a5a2-4678fb4882d8": {
+      "4427aa07-84fd-45c5-b2ca-69b40f62f711": {
         "x": 5180,
         "y": 300
       },
-      "9c0f3f60-efb0-48f0-93de-cb7562ecd3b2": {
+      "bc24d052-3357-4645-a886-27ab932e857a": {
         "x": 5400,
-        "y": 300
-      },
-      "ca60e051-ffc4-4589-9448-8cb268fca920": {
-        "x": 5520,
-        "y": 300
-      },
-      "9ec47a5a-59c9-45c4-8628-f9a4c4fdc6a0": {
-        "x": 5740,
-        "y": 300
-      },
-      "f8f63f91-19bc-4c5a-a264-e914b4ff84c4": {
-        "x": 5960,
-        "y": 300
-      },
-      "f16753ed-0a7c-4261-8465-547c2c3e4fa6": {
-        "x": 6180,
-        "y": 300
-      },
-      "0b099dc0-a4bf-41da-9477-d223d4b13f2b": {
-        "x": 6400,
-        "y": 300
-      },
-      "f05a3ae6-f347-4f0d-ac8f-160bb79bb6e4": {
-        "x": 6520,
-        "y": 300
-      },
-      "54acde50-7204-453d-bb0e-bafc45bda8a6": {
-        "x": 6740,
-        "y": 300
-      },
-      "9a691f6e-aa94-4fed-94fe-fbd67936eeac": {
-        "x": 6960,
-        "y": 300
-      },
-      "86f3d95d-c8d0-4fa0-92f9-91b206feb88d": {
-        "x": 7180,
-        "y": 300
-      },
-      "e1ca34e0-af13-4ddb-a333-e171f18ff2e7": {
-        "x": 7400,
-        "y": 300
-      },
-      "f21bf0a4-494e-401c-8e12-2914c3b7dec4": {
-        "x": 7520,
-        "y": 300
-      },
-      "0ee784a3-0929-4868-a4d3-c1fe176dc3d2": {
-        "x": 7740,
-        "y": 300
-      },
-      "27b0d344-c7e8-47af-b134-c82d9c01df9b": {
-        "x": 7960,
-        "y": 300
-      },
-      "82734a8b-2bc4-464c-addc-4bce99d7cedf": {
-        "x": 8180,
-        "y": 300
-      },
-      "2327c8a4-c662-4772-8bce-f7e184ff6c50": {
-        "x": 8400,
-        "y": 300
-      },
-      "ca2d54b8-81b6-44a5-ab81-4bcd57871e02": {
-        "x": 8520,
         "y": 80
       },
-      "942dbed5-a163-475b-b8f9-7c388b63b1ab": {
-        "x": 8740,
+      "add6bf18-805b-474f-a9ab-a198981f1fa8": {
+        "x": 5620,
+        "y": 300
+      },
+      "7381828f-14e9-46a3-9758-a51a8a4707ab": {
+        "x": 5840,
         "y": 80
+      },
+      "844bdbdd-33cf-4a66-aaa4-6204d7d1fe1d": {
+        "x": 6060,
+        "y": 300
+      },
+      "c1b08954-7594-4f8a-b0a8-64395c872e24": {
+        "x": 6280,
+        "y": 300
+      },
+      "cc8a90d0-7e54-4fcb-a418-1dbd260a6fe5": {
+        "x": 6500,
+        "y": 300
+      },
+      "0e3100a1-7d62-482d-8cae-49ec5d3f2130": {
+        "x": 6720,
+        "y": 300
+      },
+      "537fe228-2933-49ad-81eb-955bd243fc20": {
+        "x": 6940,
+        "y": 300
+      },
+      "66f10b93-7194-4a63-b427-cd1a2f0d5d4e": {
+        "x": 7160,
+        "y": 300
+      },
+      "891fc6f2-7994-456f-8179-3cdfef19448d": {
+        "x": 7380,
+        "y": 300
+      },
+      "25b9b68a-4b66-4bb1-8bd2-f8eea4a03c52": {
+        "x": 7600,
+        "y": 300
+      },
+      "d8620fd0-7485-45e6-ab02-16d9d77c337f": {
+        "x": 7820,
+        "y": 300
+      },
+      "48589cb9-7178-4ed9-87f7-2fbf994df713": {
+        "x": 8040,
+        "y": 300
+      },
+      "285c68a5-cbbb-4441-afd1-ac6692cb54dc": {
+        "x": 8260,
+        "y": 300
+      },
+      "09f3b89a-0a3e-45bc-ab91-088c62477ae5": {
+        "x": 8480,
+        "y": 300
+      },
+      "3a33f70f-59cd-4398-aedd-966133261227": {
+        "x": 8700,
+        "y": 300
+      },
+      "e21c80a0-1e32-42c8-b058-25327f21e461": {
+        "x": 8920,
+        "y": 300
+      },
+      "15a81a61-248a-444d-94f1-968a82c5ee93": {
+        "x": 9140,
+        "y": 80
+      },
+      "5a66552a-50bc-4d06-b870-c417117b77fe": {
+        "x": 9360,
+        "y": 300
+      },
+      "c71b300c-5b49-49c7-9d93-ae7a17945ba5": {
+        "x": 9580,
+        "y": 80
+      },
+      "da6ca391-dbf8-4897-9b95-0a1c2cb3cb63": {
+        "x": 9800,
+        "y": 300
+      },
+      "beddecf8-56ce-4a83-98a7-33df430ac1a8": {
+        "x": 10020,
+        "y": 80
+      },
+      "5f8d3c85-afcc-471a-93ad-44f861267784": {
+        "x": 10240,
+        "y": 300
+      },
+      "21276c68-5428-4630-9200-0462a7d232e2": {
+        "x": 10460,
+        "y": 300
+      },
+      "be37cc84-8dd5-413a-be62-8f1efa3f2788": {
+        "x": 10680,
+        "y": 80
+      },
+      "4143704b-9fcd-4dc4-ba12-112c0352f170": {
+        "x": 10900,
+        "y": 300
+      },
+      "8d8ae404-db1a-4918-8427-a7bbda9987c3": {
+        "x": 11120,
+        "y": 300
+      },
+      "c8cedbd9-27ca-4b2e-a076-ca8c059e69a8": {
+        "x": 11340,
+        "y": 80
+      },
+      "d381e3ef-1b51-44bf-bb78-bf6ba1e5cfce": {
+        "x": 11560,
+        "y": 300
+      },
+      "8d83b179-1581-4554-87e4-7a4ebbc3f2ec": {
+        "x": 11780,
+        "y": 300
+      },
+      "a6ed5c82-4b89-45fc-8b43-6baf58fecb46": {
+        "x": 12000,
+        "y": 80
+      },
+      "deb2202d-2b00-4824-b4a2-409178d35277": {
+        "x": 12220,
+        "y": 300
+      },
+      "75911abb-d41e-46ff-bcc8-1c895df47e9f": {
+        "x": 12440,
+        "y": 300
+      },
+      "e88b24d2-64a8-4682-8214-3156408348f1": {
+        "x": 12660,
+        "y": 80
+      },
+      "03694101-a267-4281-98c6-a9b1a632d0e9": {
+        "x": 12880,
+        "y": 80
+      },
+      "0ace2ee1-83ba-452f-8ef4-134591319944": {
+        "x": 13100,
+        "y": 80
+      },
+      "40580369-0116-4e6c-8259-30bbd39f8373": {
+        "x": 13320,
+        "y": 80
+      },
+      "33aff72d-d314-40a4-bf8f-8ee5bfd278e1": {
+        "x": 13540,
+        "y": 80
+      },
+      "b278f21f-ae1c-49a9-b840-59f28d149995": {
+        "x": 4300,
+        "y": 840
+      },
+      "1d82de65-149e-4326-bb47-9df956597736": {
+        "x": 4520,
+        "y": 840
+      },
+      "eb632892-dee9-4e64-9246-b31051db42ef": {
+        "x": 4740,
+        "y": 840
+      },
+      "f51e6760-0d1f-4b5c-b490-d12a5f28ef43": {
+        "x": 4960,
+        "y": 840
+      },
+      "cff26c58-d721-4677-b80c-e880b5ee42a9": {
+        "x": 10900,
+        "y": 840
+      },
+      "c8619223-8fc5-4229-acc7-61c86331b391": {
+        "x": 11120,
+        "y": 840
+      },
+      "703eca83-70d4-49d9-927b-32a33c039638": {
+        "x": 11340,
+        "y": 840
+      },
+      "1eb7233f-1b08-4f0c-b017-245706f945f6": {
+        "x": 11560,
+        "y": 840
+      },
+      "877ea4af-c534-4a65-aa5d-51eb12cfe1b3": {
+        "x": 11780,
+        "y": 840
+      },
+      "a5ceaf09-36a1-4afc-8d9b-4105d8201cf3": {
+        "x": 11560,
+        "y": 1060
+      },
+      "fdb610ea-90f1-4473-9275-85d0f63fc7f1": {
+        "x": 11780,
+        "y": 1060
+      },
+      "9eb0599f-3e2f-4444-9d52-76f6c8fa01e5": {
+        "x": 12000,
+        "y": 840
+      },
+      "068e699c-d037-4022-bc39-cca5c8ba1014": {
+        "x": 12220,
+        "y": 840
+      },
+      "d8b5bca4-5769-4548-9b6a-b2a24e7be912": {
+        "x": 12440,
+        "y": 840
+      },
+      "b3f5ad11-0b2b-4c4c-85a9-0d1b28417f75": {
+        "x": 12220,
+        "y": 1060
+      },
+      "5a248778-eb07-4994-adfd-f09ee6dbd002": {
+        "x": 12440,
+        "y": 1060
+      },
+      "907b9de2-c8db-44fb-b65e-f6d6df79ead0": {
+        "x": 12660,
+        "y": 840
+      },
+      "680cdb4a-4fa6-43e3-b07f-460db9e4c322": {
+        "x": 12880,
+        "y": 840
+      },
+      "2276eb49-ed44-427d-9df3-cf779225d320": {
+        "x": 13100,
+        "y": 840
+      },
+      "09d574c5-9382-45fa-b9b6-8dbe1170aea2": {
+        "x": 12880,
+        "y": 1060
+      },
+      "4153a4df-edc9-42ac-95cb-a5e09b077553": {
+        "x": 13100,
+        "y": 1060
+      },
+      "72cfa624-f53a-46c1-8f3c-eb608d680ce1": {
+        "x": 13320,
+        "y": 840
+      },
+      "3949472f-5e0b-4eb0-bbc9-2db7946717d2": {
+        "x": 13540,
+        "y": 840
+      },
+      "c9352b95-7231-4c5e-9d23-23662204ee18": {
+        "x": 13760,
+        "y": 840
+      },
+      "bb5a35ab-ca56-4cee-a6e6-e9c7550647f4": {
+        "x": 13540,
+        "y": 1060
+      },
+      "9c5d4e8a-09e8-4381-86d4-e4313e8ecae3": {
+        "x": 13760,
+        "y": 1060
+      },
+      "78cdcf02-0579-452b-b9b6-eab1f22537e8": {
+        "x": 13980,
+        "y": 840
+      },
+      "8c15f9e3-93a1-47af-a032-95d1be59ea7b": {
+        "x": 14200,
+        "y": 840
+      },
+      "1134b566-2c59-40fa-941a-25ad389aac26": {
+        "x": 14420,
+        "y": 840
       }
     },
     "comments": [],
@@ -1961,6 +5862,24 @@
           "name": "Calibration",
           "typeName": "float32",
           "defaultValue": "1"
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11bc",
+          "name": "Malfunction",
+          "typeName": "string",
+          "defaultValue": "Clear"
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11bd",
+          "name": "Seed",
+          "typeName": "float32",
+          "defaultValue": "0.4"
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11be",
+          "name": "Risk",
+          "typeName": "float32",
+          "defaultValue": "0"
         }
       ],
       "isComponent": true
@@ -2023,6 +5942,90 @@
           "name": "Offer",
           "typeName": "string",
           "defaultValue": "direct"
+        },
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22bf",
+          "name": "Quality",
+          "typeName": "float32",
+          "defaultValue": "1"
+        },
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22c0",
+          "name": "Lot",
+          "typeName": "string",
+          "defaultValue": ""
+        }
+      ],
+      "isComponent": true
+    },
+    {
+      "id": "44aa44aa-44aa-44aa-84aa-44aa44aa44aa",
+      "name": "WeaponBlueprint",
+      "kind": "Component",
+      "fields": [
+        {
+          "id": "44aa44aa-44aa-44aa-84aa-44aa44aa44a1",
+          "name": "Output",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "44aa44aa-44aa-44aa-84aa-44aa44aa44a2",
+          "name": "Label",
+          "typeName": "string",
+          "defaultValue": ""
+        }
+      ],
+      "isComponent": true
+    },
+    {
+      "id": "55aa55aa-55aa-45aa-85aa-55aa55aa55aa",
+      "name": "WeaponMaterial",
+      "kind": "Component",
+      "fields": [
+        {
+          "id": "55aa55aa-55aa-45aa-85aa-55aa55aa55a1",
+          "name": "Grade",
+          "typeName": "float32",
+          "defaultValue": "1"
+        },
+        {
+          "id": "55aa55aa-55aa-45aa-85aa-55aa55aa55a2",
+          "name": "Label",
+          "typeName": "string",
+          "defaultValue": ""
+        }
+      ],
+      "isComponent": true
+    },
+    {
+      "id": "66aa66aa-66aa-46aa-86aa-66aa66aa66aa",
+      "name": "WeaponMachine",
+      "kind": "Component",
+      "fields": [
+        {
+          "id": "66aa66aa-66aa-46aa-86aa-66aa66aa66a1",
+          "name": "Passed",
+          "typeName": "float32",
+          "defaultValue": "0"
+        },
+        {
+          "id": "66aa66aa-66aa-46aa-86aa-66aa66aa66a2",
+          "name": "Rejected",
+          "typeName": "float32",
+          "defaultValue": "0"
+        },
+        {
+          "id": "66aa66aa-66aa-46aa-86aa-66aa66aa66a3",
+          "name": "NextLot",
+          "typeName": "float32",
+          "defaultValue": "1"
+        },
+        {
+          "id": "66aa66aa-66aa-46aa-86aa-66aa66aa66a4",
+          "name": "Calibration",
+          "typeName": "float32",
+          "defaultValue": "1"
         }
       ],
       "isComponent": true

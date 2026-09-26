@@ -257,6 +257,45 @@
     Offer: machining
 
 - type: entity
+  parent: BaseItem
+  id: WeaponBlueprintLightBarrel
+  name: light barrel blueprint
+  description: A blueprint for a light pistol barrel. The bench machines it from a blank.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+    state: base
+  - type: WeaponBlueprint
+    Output: WeaponBarrelLight
+    Label: Light barrel
+
+- type: entity
+  parent: BaseItem
+  id: WeaponStockSteel
+  name: steel blank
+  description: A steel blank. The bench turns it into a part when a blueprint is present.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+    state: base
+  - type: WeaponMaterial
+    Grade: 1
+    Label: Steel blank
+
+- type: entity
+  parent: BaseItem
+  id: WeaponStockScrap
+  name: scrap blank
+  description: A scrap blank. The bench rejects it at quality control.
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Guns/Pistols/viper.rsi
+    state: base
+  - type: WeaponMaterial
+    Grade: 0.4
+    Label: Scrap blank
+
+- type: entity
   parent: BaseStructure
   id: WeaponBench
   name: weapon bench
@@ -301,6 +340,14 @@
       - WeaponBarrelRifle
       - WeaponMuzzleCollar
       - WeaponBoltBlank
+      - WeaponBlueprintLightBarrel
+      - WeaponStockSteel
+      - WeaponStockScrap
+  - type: WeaponMachine
+    Passed: 0
+    Rejected: 0
+    NextLot: 1
+    Calibration: 1
   - type: AstraHtmlUi
     document: WeaponBench
   - type: ActivatableUI
