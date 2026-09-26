@@ -1,0 +1,2057 @@
+{
+  "formatVersion": "1.0",
+  "id": "e1000000-0000-4000-8000-0000000000e1",
+  "name": "WeaponCondition",
+  "kind": "system",
+  "side": "server",
+  "metadata": {
+    "author": "",
+    "description": "Each shot adds heat, fouling, and wear. The gun keeps the part fire rate.",
+    "version": "1.0.0",
+    "createdAt": "2026-09-26T09:31:33.3730031+00:00",
+    "modifiedAt": "2026-09-26T09:31:33.3730032+00:00",
+    "tags": [],
+    "customAttributes": {}
+  },
+  "variables": [
+    {
+      "id": "4ef00c14-1c0c-494c-a646-e1723b8b2f35",
+      "name": "HeatNow",
+      "typeName": "float32",
+      "isPersistent": false,
+      "isReplicated": false,
+      "isParameter": false
+    }
+  ],
+  "nodes": [
+    {
+      "id": "ae601c95-09ee-4ef6-ac4e-e5adba433101",
+      "name": "Shot",
+      "nodeType": "Event.Shot",
+      "pins": [
+        {
+          "id": "f9cac3a3-44f3-435c-bbe1-2c5a01136803",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "dd218743-0086-4561-a175-6bea22302686",
+          "name": "Entity",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "9da006fc-1d10-49e6-b652-0826d21162a2",
+          "name": "Event",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "eventType": "GunShotEvent",
+        "componentType": "ChamberMagazineAmmoProviderComponent"
+      }
+    },
+    {
+      "id": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
+      "name": "Assembly",
+      "nodeType": "Entity.TryGetComponent",
+      "pins": [
+        {
+          "id": "eb941bc9-4132-4f4c-8b38-1dbb7fd8b5ff",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "b3bee172-d92d-4e91-a0d6-da2c89828f98",
+          "name": "Found",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        },
+        {
+          "id": "76450668-ee1a-4d04-baa3-7b58b902368b",
+          "name": "Component",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "component"
+        }
+      ],
+      "properties": {
+        "ComponentType": "WeaponAssembly"
+      }
+    },
+    {
+      "id": "4e9435bf-d0a2-45e1-a7ac-531ae778cc6a",
+      "name": "Assembly?",
+      "nodeType": "Core.Branch",
+      "pins": [
+        {
+          "id": "b29c925d-9a12-4975-9512-0ecd5a954acc",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "9b8c11ee-78e9-47fa-b7ba-c91bc9d03a5f",
+          "name": "True",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "a4189caa-608d-4c08-a831-00d039d0f431",
+          "name": "False",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "97a74286-598e-4e06-936a-a4b9f564bc55",
+          "name": "Condition",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "768ffee0-0420-48eb-bcd8-3ecb6a39b95f",
+      "name": "Heat",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "6718fc4b-7da2-41b8-a21b-684595edde81",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "5e6956d0-dcad-4188-918e-511cfaf18e80",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Heat"
+      }
+    },
+    {
+      "id": "ae38852c-80be-4f2a-a4e9-7a13d7d3e882",
+      "name": "HeatStep",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "2a2ac8e4-eedc-449d-85f5-ec7df25ee914",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Value": "4",
+        "Type": "float32"
+      }
+    },
+    {
+      "id": "3e122963-7ec1-4cd8-83bb-5d90e8e03729",
+      "name": "HeatSum",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "0f0b468f-ff65-4639-92a2-8c9a607f66fb",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "6d839bd6-b227-4d6c-8afa-22c88a6a852f",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "26babe3e-e20e-4ef6-a48c-acc46d3ee840",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "061661ed-183b-4302-bbf0-4ede8109d1db",
+      "name": "StoreHeat",
+      "nodeType": "Core.VariableAssign",
+      "pins": [
+        {
+          "id": "6a250f09-93f9-44cb-ba66-c0a3532e8d70",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "1ae9e98c-5dd9-4f6b-83d0-d89e8efb2e7c",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "1acf2332-6404-473f-9c10-a898c53626b9",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "VariableName": "HeatNow"
+      }
+    },
+    {
+      "id": "7d3342bd-cc38-48db-a42e-5d48af94346c",
+      "name": "StoredHeat",
+      "nodeType": "Core.VariableRead",
+      "pins": [
+        {
+          "id": "eb9904bb-c3bc-429e-b4ec-ab760e714075",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "VariableName": "HeatNow"
+      }
+    },
+    {
+      "id": "652ef672-ae50-4d05-924f-e0a7f248c878",
+      "name": "SetHeat",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "f02a3b4a-6a18-44f1-9094-ec6e70f7b2a8",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "0ae518e0-9dd1-4070-aa9c-79ad3a08c6a6",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "2f8bbda7-1d1c-4919-b2b1-b60adbe0779c",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "3b58bd65-3ae0-4aa7-b61d-70fcd15d3eb1",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "32ddc386-868e-484a-bfb6-50788dfb119a",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Heat"
+      }
+    },
+    {
+      "id": "599b5973-c7f6-4a26-b29d-96e622f4d535",
+      "name": "Fouling",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "de5eaf0d-d327-49a6-ac31-dd0b65569817",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "cf10eaa7-e1e0-4b48-b946-fe10e7b02716",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Fouling"
+      }
+    },
+    {
+      "id": "a827097f-79c2-4397-a34c-0c7f49e23d3d",
+      "name": "FoulingStep",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "a7e5c573-c8bb-445e-803c-7d77be5bf01f",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Value": "1",
+        "Type": "float32"
+      }
+    },
+    {
+      "id": "88928f53-55b7-469f-9f2b-60c0445dab06",
+      "name": "FoulingSum",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "f5412781-154b-4f87-95f9-9f9f8dd07cd0",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "674bf7e4-12cb-478d-8bc6-eb261c2b5d3c",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "9bd95aaa-ae13-4f1d-b83e-949e42adf7a4",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "33a0740d-70d4-4d95-a617-8339484afab5",
+      "name": "SetFouling",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "bcffe1ca-249a-44e4-8bfe-9fcb4aa43df8",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "0e477d92-9010-478d-9f67-913c1a3be4b8",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "e2e43116-5091-4bc2-8681-333bbe8a14d3",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "5c4f9cc9-678b-416d-ac3c-b19f7256b01f",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "4c96f40d-e65a-43a0-9591-552d57044b51",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Fouling"
+      }
+    },
+    {
+      "id": "f0fec9f7-91ca-434d-a57b-300c24423aba",
+      "name": "Wear",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "17fc5215-e1c1-413c-b5c4-515ed0dc7d30",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "0da97cb4-bfcf-450d-8d97-5cddbe0040fb",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Wear"
+      }
+    },
+    {
+      "id": "c3495df0-18e5-4b61-8425-955f78103109",
+      "name": "WearStep",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "c2135e22-9776-48ca-af8b-80d6da216dcf",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Value": "0.2",
+        "Type": "float32"
+      }
+    },
+    {
+      "id": "d236bab7-0725-436d-8cff-273275096cdc",
+      "name": "WearSum",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "cbc63ee6-c287-484a-b105-9758c1f3ea59",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "b41af851-e7f2-44c1-9d87-ff47bd48ad10",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "8bd4420c-d03b-4339-b2a6-6f47f01a649a",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "b8cc063b-c684-43a3-b5df-8d45739df8ac",
+      "name": "SetWear",
+      "nodeType": "Schema.SetField",
+      "pins": [
+        {
+          "id": "ce892c51-3e35-4bad-9571-759d0d8e2854",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "57f7abb4-63b2-4772-81f9-59d9e1847d01",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "5772a387-9613-4172-aa7a-32546eaec754",
+          "name": "Target",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "object"
+        },
+        {
+          "id": "b3586326-d257-4831-92fe-21ccab1ef607",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float32"
+        },
+        {
+          "id": "35ddf52c-3847-4019-add5-192563e872fd",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "object"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Wear"
+      }
+    },
+    {
+      "id": "404f51d8-ec0b-4bfe-8dad-84a5c0ec3b3d",
+      "name": "Rate",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "216e3e75-29d5-4335-a9d0-5c623bdd79a2",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "6ef8b776-383a-4ead-a087-677ddf01587e",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "FireRate"
+      }
+    },
+    {
+      "id": "a90096a9-5dd0-42c0-9fdd-108c42c45250",
+      "name": "WriteRate",
+      "nodeType": "Component.SetField",
+      "pins": [
+        {
+          "id": "e8ea9c15-40b1-4d67-86c8-7522794113f2",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "d5dc25b4-698b-4612-9af4-ebaa9273b506",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "3445d847-5bca-4881-994d-6ce879528273",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "7df749c6-4606-4cfd-85ae-9f3e55cbd5e7",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "GunComponent"
+        },
+        {
+          "id": "557c5608-68c2-40d7-830e-33afb77ef75b",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRate"
+        },
+        {
+          "id": "408695e2-ddfe-4e04-b6f9-4c94d90243cf",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64"
+        },
+        {
+          "id": "a32b1b8b-e302-46aa-9e64-56c53cda1b47",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "558d39d5-963e-4309-b086-f211d2493446",
+      "name": "WriteModified",
+      "nodeType": "Component.SetField",
+      "pins": [
+        {
+          "id": "3d5f2042-9ab7-458d-ba8a-8042657a2736",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "e310d9a5-8cce-4d96-b750-8413cd3e96d3",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "338ee2ab-a174-4d5a-9fc7-88931663798b",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "55feb543-02f6-4e92-8125-71a52bf91032",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "GunComponent"
+        },
+        {
+          "id": "c5332eb2-64b3-43f6-ac35-d6a9e113d67b",
+          "name": "Field",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "FireRateModified"
+        },
+        {
+          "id": "ecfb1406-cdc3-4514-a193-ef6bfc2a25c7",
+          "name": "Value",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64"
+        },
+        {
+          "id": "6914dd69-816d-4dd7-8c3c-b5407657ae4e",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "7d63e5e9-14fb-407c-a04a-b3c34c9482c6",
+      "name": "RateText",
+      "nodeType": "Text.WithNumber",
+      "pins": [
+        {
+          "id": "3e9c42bf-ed6b-45ec-900a-aaf02bf8eb80",
+          "name": "Label",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Fire rate"
+        },
+        {
+          "id": "362171bf-2e76-4108-8d4c-f615798ee7f9",
+          "name": "Number",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64"
+        },
+        {
+          "id": "2c817d21-45b4-4086-b2cc-c8279b606694",
+          "name": "Text",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "33c2f552-3376-4410-b024-865010e82223",
+      "name": "HeatTextSep",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "126fc739-b7f7-4438-9eec-98b209f6b014",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {
+        "Value": " \u00B7 ",
+        "Type": "string"
+      }
+    },
+    {
+      "id": "9d195ada-feee-48bf-8963-18538a7074d2",
+      "name": "HeatTextField",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "69db9e48-2140-46a3-b0d5-5b4ba9e28546",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "dbb1f220-1a0b-42d2-82d9-d73b9425204c",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Heat"
+      }
+    },
+    {
+      "id": "f155ef89-791d-48cb-baeb-caa16fe9b136",
+      "name": "HeatTextLine",
+      "nodeType": "Text.WithNumber",
+      "pins": [
+        {
+          "id": "07503cba-13e3-426a-8278-b8d77bdf8ea0",
+          "name": "Label",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Heat"
+        },
+        {
+          "id": "aefdb0c2-92f3-4755-934f-f86a9615c1f0",
+          "name": "Number",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64"
+        },
+        {
+          "id": "80614927-44fe-493d-afee-953c8cb96336",
+          "name": "Text",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "04f441ef-8216-424f-a5a2-4678fb4882d8",
+      "name": "HeatTextSepd",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "a97f02fd-88a8-4f96-af59-867788eae70e",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "36de6b3a-8461-4aa0-aa5e-7c31930d5299",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "04f6ae98-a8ce-47d4-84ce-a20fdc6d6dd2",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "9c0f3f60-efb0-48f0-93de-cb7562ecd3b2",
+      "name": "HeatTextJoined",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "c0abff37-17c8-40fb-8635-3e0b0d038adc",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "1a5783de-0c57-484a-9595-4d0d6f8ae47e",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "b79dfba8-deb6-476e-8c3d-6f26a26cb057",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "ca60e051-ffc4-4589-9448-8cb268fca920",
+      "name": "FoulingTextSep",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "af78f05c-937c-4585-bc8e-e6e5fef8166f",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {
+        "Value": " \u00B7 ",
+        "Type": "string"
+      }
+    },
+    {
+      "id": "9ec47a5a-59c9-45c4-8628-f9a4c4fdc6a0",
+      "name": "FoulingTextField",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "1646fb7a-e9d9-4520-9147-b83488e2f468",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "5694fdca-6631-4daf-8ca2-f1874a8f1235",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Fouling"
+      }
+    },
+    {
+      "id": "f8f63f91-19bc-4c5a-a264-e914b4ff84c4",
+      "name": "FoulingTextLine",
+      "nodeType": "Text.WithNumber",
+      "pins": [
+        {
+          "id": "bb26cc9f-7066-4ad0-833b-b9f767763c13",
+          "name": "Label",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Fouling"
+        },
+        {
+          "id": "cb90745d-d825-440f-b5ad-6213b8092ea6",
+          "name": "Number",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64"
+        },
+        {
+          "id": "7ccc6988-3c3b-4285-bb32-66145a786a48",
+          "name": "Text",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "f16753ed-0a7c-4261-8465-547c2c3e4fa6",
+      "name": "FoulingTextSepd",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "114c4102-4043-4054-906b-3b9bc68b1d75",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "25990ffa-6bfd-4976-8584-168898f51cd1",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "1508a42b-ccc1-48cc-bcac-e67531327fe7",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "0b099dc0-a4bf-41da-9477-d223d4b13f2b",
+      "name": "FoulingTextJoined",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "83d0d850-07d1-4439-bd95-2b4f783790f3",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "a1baa326-fc56-424a-818b-9cc92e1bdb3b",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "67689fc1-4831-49a6-ae1c-4535ed614057",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "f05a3ae6-f347-4f0d-ac8f-160bb79bb6e4",
+      "name": "WearTextSep",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "95da83e7-40a2-445f-b86e-ca2f3bee9999",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {
+        "Value": " \u00B7 ",
+        "Type": "string"
+      }
+    },
+    {
+      "id": "54acde50-7204-453d-bb0e-bafc45bda8a6",
+      "name": "WearTextField",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "05e904a0-0c8a-4a61-8101-1966d34a34cd",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "e4f098c8-a19f-4f56-8a8d-287b6322b7c2",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Wear"
+      }
+    },
+    {
+      "id": "9a691f6e-aa94-4fed-94fe-fbd67936eeac",
+      "name": "WearTextLine",
+      "nodeType": "Text.WithNumber",
+      "pins": [
+        {
+          "id": "c388a30a-200f-43bb-9276-0b4d1c6590a6",
+          "name": "Label",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Wear"
+        },
+        {
+          "id": "11cf3576-a624-497c-9e33-71e6f93ab2a6",
+          "name": "Number",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64"
+        },
+        {
+          "id": "9789ea13-46f0-41e7-ad96-fac1793107ab",
+          "name": "Text",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "86f3d95d-c8d0-4fa0-92f9-91b206feb88d",
+      "name": "WearTextSepd",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "90dc2cb6-c658-49d9-8654-8873e74c7cc1",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "9a81783e-6178-4f41-9e89-ad62c4714c09",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "b7ec1ca1-daff-4a09-b4d8-fc7f7c9f5ab6",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "e1ca34e0-af13-4ddb-a333-e171f18ff2e7",
+      "name": "WearTextJoined",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "5fb4e8a7-0afe-4095-8f1f-7d5b3e9a935d",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "11eecf92-ce7d-48df-987e-b361309083a5",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "43ad23e4-bfc2-43d8-8dc5-1aaa517e199b",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "f21bf0a4-494e-401c-8e12-2914c3b7dec4",
+      "name": "CalibrationTextSep",
+      "nodeType": "Core.Literal",
+      "pins": [
+        {
+          "id": "95401d36-aa56-4e36-ac9b-a5fc43937c8e",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {
+        "Value": " \u00B7 ",
+        "Type": "string"
+      }
+    },
+    {
+      "id": "0ee784a3-0929-4868-a4d3-c1fe176dc3d2",
+      "name": "CalibrationTextField",
+      "nodeType": "Schema.GetField",
+      "pins": [
+        {
+          "id": "87f84f5c-e047-4efc-890c-44a876be2480",
+          "name": "Component",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "component"
+        },
+        {
+          "id": "3c8505ba-f800-4ce6-b4b3-49456bec969b",
+          "name": "Value",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "float32"
+        }
+      ],
+      "properties": {
+        "Schema": "WeaponAssembly",
+        "Field": "Calibration"
+      }
+    },
+    {
+      "id": "27b0d344-c7e8-47af-b134-c82d9c01df9b",
+      "name": "CalibrationTextLine",
+      "nodeType": "Text.WithNumber",
+      "pins": [
+        {
+          "id": "e803b610-5137-4d2a-97a7-8c01b5ca8708",
+          "name": "Label",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "Calibration"
+        },
+        {
+          "id": "a3c4c75d-cac3-4be5-898b-debe74f94992",
+          "name": "Number",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "float64"
+        },
+        {
+          "id": "71fb2087-6c51-435a-8ae8-807599b47831",
+          "name": "Text",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "82734a8b-2bc4-464c-addc-4bce99d7cedf",
+      "name": "CalibrationTextSepd",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "48af98c6-966e-4794-a5b8-8b48f0ccfa79",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "aef7e57c-de05-46bc-9ab6-cf9d6294f544",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "3961e484-407b-45e8-a7be-d18a4560d019",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "2327c8a4-c662-4772-8bce-f7e184ff6c50",
+      "name": "CalibrationTextJoined",
+      "nodeType": "math.add",
+      "pins": [
+        {
+          "id": "df3b461e-baea-4e3b-a223-a3a07818b3e8",
+          "name": "A",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "5e5ab92c-dee7-47bf-8712-43d36845d91a",
+          "name": "B",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "b54b940b-3a71-4fe1-bb01-3df1c328809e",
+          "name": "Result",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "string"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "ca2d54b8-81b6-44a5-ab81-4bcd57871e02",
+      "name": "Describe",
+      "nodeType": "Meta.SetDescription",
+      "pins": [
+        {
+          "id": "2d50236b-9979-4e2b-a59c-9315e510a8ad",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "82d4548a-b1b2-4c7b-8ba6-e05a1220c1a3",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "8fb166b3-ed6b-4617-a3ec-765acc076c0d",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "97a222a0-1332-4b90-a970-b040a32ca284",
+          "name": "Text",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string"
+        },
+        {
+          "id": "de0e0a61-2aff-41bc-abad-a74097c47fa9",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    },
+    {
+      "id": "942dbed5-a163-475b-b8f9-7c388b63b1ab",
+      "name": "Refresh",
+      "nodeType": "System.Invoke",
+      "pins": [
+        {
+          "id": "8e3d9edc-96c0-4a6b-a098-9898971e2127",
+          "name": "In",
+          "direction": "input",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "80913718-917a-4121-9dee-3d1b69f8cdc2",
+          "name": "Out",
+          "direction": "output",
+          "kind": "execution",
+          "dataType": ""
+        },
+        {
+          "id": "4c35603c-fe85-4eec-8f41-a7dec2d4d1ad",
+          "name": "System",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "SharedGunSystem"
+        },
+        {
+          "id": "49200589-2792-440e-bbd6-d151c8974f9a",
+          "name": "Method",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "string",
+          "defaultValue": "RefreshModifiers"
+        },
+        {
+          "id": "ca7f5ac6-ba1e-410c-ba3d-0d3c61a4e6af",
+          "name": "Entity",
+          "direction": "input",
+          "kind": "data",
+          "dataType": "EntityUid"
+        },
+        {
+          "id": "24670daf-f94d-46c9-8e34-3d774b049224",
+          "name": "Success",
+          "direction": "output",
+          "kind": "data",
+          "dataType": "bool"
+        }
+      ],
+      "properties": {}
+    }
+  ],
+  "connections": [
+    {
+      "fromNode": "7d63e5e9-14fb-407c-a04a-b3c34c9482c6",
+      "fromPin": "2c817d21-45b4-4086-b2cc-c8279b606694",
+      "toNode": "04f441ef-8216-424f-a5a2-4678fb4882d8",
+      "toPin": "a97f02fd-88a8-4f96-af59-867788eae70e"
+    },
+    {
+      "fromNode": "33c2f552-3376-4410-b024-865010e82223",
+      "fromPin": "126fc739-b7f7-4438-9eec-98b209f6b014",
+      "toNode": "04f441ef-8216-424f-a5a2-4678fb4882d8",
+      "toPin": "36de6b3a-8461-4aa0-aa5e-7c31930d5299"
+    },
+    {
+      "fromNode": "04f441ef-8216-424f-a5a2-4678fb4882d8",
+      "fromPin": "04f6ae98-a8ce-47d4-84ce-a20fdc6d6dd2",
+      "toNode": "9c0f3f60-efb0-48f0-93de-cb7562ecd3b2",
+      "toPin": "c0abff37-17c8-40fb-8635-3e0b0d038adc"
+    },
+    {
+      "fromNode": "f155ef89-791d-48cb-baeb-caa16fe9b136",
+      "fromPin": "80614927-44fe-493d-afee-953c8cb96336",
+      "toNode": "9c0f3f60-efb0-48f0-93de-cb7562ecd3b2",
+      "toPin": "1a5783de-0c57-484a-9595-4d0d6f8ae47e"
+    },
+    {
+      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
+      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
+      "toNode": "9d195ada-feee-48bf-8963-18538a7074d2",
+      "toPin": "69db9e48-2140-46a3-b0d5-5b4ba9e28546"
+    },
+    {
+      "fromNode": "9d195ada-feee-48bf-8963-18538a7074d2",
+      "fromPin": "dbb1f220-1a0b-42d2-82d9-d73b9425204c",
+      "toNode": "f155ef89-791d-48cb-baeb-caa16fe9b136",
+      "toPin": "aefdb0c2-92f3-4755-934f-f86a9615c1f0"
+    },
+    {
+      "fromNode": "9c0f3f60-efb0-48f0-93de-cb7562ecd3b2",
+      "fromPin": "b79dfba8-deb6-476e-8c3d-6f26a26cb057",
+      "toNode": "f16753ed-0a7c-4261-8465-547c2c3e4fa6",
+      "toPin": "114c4102-4043-4054-906b-3b9bc68b1d75"
+    },
+    {
+      "fromNode": "ca60e051-ffc4-4589-9448-8cb268fca920",
+      "fromPin": "af78f05c-937c-4585-bc8e-e6e5fef8166f",
+      "toNode": "f16753ed-0a7c-4261-8465-547c2c3e4fa6",
+      "toPin": "25990ffa-6bfd-4976-8584-168898f51cd1"
+    },
+    {
+      "fromNode": "f16753ed-0a7c-4261-8465-547c2c3e4fa6",
+      "fromPin": "1508a42b-ccc1-48cc-bcac-e67531327fe7",
+      "toNode": "0b099dc0-a4bf-41da-9477-d223d4b13f2b",
+      "toPin": "83d0d850-07d1-4439-bd95-2b4f783790f3"
+    },
+    {
+      "fromNode": "f8f63f91-19bc-4c5a-a264-e914b4ff84c4",
+      "fromPin": "7ccc6988-3c3b-4285-bb32-66145a786a48",
+      "toNode": "0b099dc0-a4bf-41da-9477-d223d4b13f2b",
+      "toPin": "a1baa326-fc56-424a-818b-9cc92e1bdb3b"
+    },
+    {
+      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
+      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
+      "toNode": "9ec47a5a-59c9-45c4-8628-f9a4c4fdc6a0",
+      "toPin": "1646fb7a-e9d9-4520-9147-b83488e2f468"
+    },
+    {
+      "fromNode": "9ec47a5a-59c9-45c4-8628-f9a4c4fdc6a0",
+      "fromPin": "5694fdca-6631-4daf-8ca2-f1874a8f1235",
+      "toNode": "f8f63f91-19bc-4c5a-a264-e914b4ff84c4",
+      "toPin": "cb90745d-d825-440f-b5ad-6213b8092ea6"
+    },
+    {
+      "fromNode": "0b099dc0-a4bf-41da-9477-d223d4b13f2b",
+      "fromPin": "67689fc1-4831-49a6-ae1c-4535ed614057",
+      "toNode": "86f3d95d-c8d0-4fa0-92f9-91b206feb88d",
+      "toPin": "90dc2cb6-c658-49d9-8654-8873e74c7cc1"
+    },
+    {
+      "fromNode": "f05a3ae6-f347-4f0d-ac8f-160bb79bb6e4",
+      "fromPin": "95da83e7-40a2-445f-b86e-ca2f3bee9999",
+      "toNode": "86f3d95d-c8d0-4fa0-92f9-91b206feb88d",
+      "toPin": "9a81783e-6178-4f41-9e89-ad62c4714c09"
+    },
+    {
+      "fromNode": "86f3d95d-c8d0-4fa0-92f9-91b206feb88d",
+      "fromPin": "b7ec1ca1-daff-4a09-b4d8-fc7f7c9f5ab6",
+      "toNode": "e1ca34e0-af13-4ddb-a333-e171f18ff2e7",
+      "toPin": "5fb4e8a7-0afe-4095-8f1f-7d5b3e9a935d"
+    },
+    {
+      "fromNode": "9a691f6e-aa94-4fed-94fe-fbd67936eeac",
+      "fromPin": "9789ea13-46f0-41e7-ad96-fac1793107ab",
+      "toNode": "e1ca34e0-af13-4ddb-a333-e171f18ff2e7",
+      "toPin": "11eecf92-ce7d-48df-987e-b361309083a5"
+    },
+    {
+      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
+      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
+      "toNode": "54acde50-7204-453d-bb0e-bafc45bda8a6",
+      "toPin": "05e904a0-0c8a-4a61-8101-1966d34a34cd"
+    },
+    {
+      "fromNode": "54acde50-7204-453d-bb0e-bafc45bda8a6",
+      "fromPin": "e4f098c8-a19f-4f56-8a8d-287b6322b7c2",
+      "toNode": "9a691f6e-aa94-4fed-94fe-fbd67936eeac",
+      "toPin": "11cf3576-a624-497c-9e33-71e6f93ab2a6"
+    },
+    {
+      "fromNode": "e1ca34e0-af13-4ddb-a333-e171f18ff2e7",
+      "fromPin": "43ad23e4-bfc2-43d8-8dc5-1aaa517e199b",
+      "toNode": "82734a8b-2bc4-464c-addc-4bce99d7cedf",
+      "toPin": "48af98c6-966e-4794-a5b8-8b48f0ccfa79"
+    },
+    {
+      "fromNode": "f21bf0a4-494e-401c-8e12-2914c3b7dec4",
+      "fromPin": "95401d36-aa56-4e36-ac9b-a5fc43937c8e",
+      "toNode": "82734a8b-2bc4-464c-addc-4bce99d7cedf",
+      "toPin": "aef7e57c-de05-46bc-9ab6-cf9d6294f544"
+    },
+    {
+      "fromNode": "82734a8b-2bc4-464c-addc-4bce99d7cedf",
+      "fromPin": "3961e484-407b-45e8-a7be-d18a4560d019",
+      "toNode": "2327c8a4-c662-4772-8bce-f7e184ff6c50",
+      "toPin": "df3b461e-baea-4e3b-a223-a3a07818b3e8"
+    },
+    {
+      "fromNode": "27b0d344-c7e8-47af-b134-c82d9c01df9b",
+      "fromPin": "71fb2087-6c51-435a-8ae8-807599b47831",
+      "toNode": "2327c8a4-c662-4772-8bce-f7e184ff6c50",
+      "toPin": "5e5ab92c-dee7-47bf-8712-43d36845d91a"
+    },
+    {
+      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
+      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
+      "toNode": "0ee784a3-0929-4868-a4d3-c1fe176dc3d2",
+      "toPin": "87f84f5c-e047-4efc-890c-44a876be2480"
+    },
+    {
+      "fromNode": "0ee784a3-0929-4868-a4d3-c1fe176dc3d2",
+      "fromPin": "3c8505ba-f800-4ce6-b4b3-49456bec969b",
+      "toNode": "27b0d344-c7e8-47af-b134-c82d9c01df9b",
+      "toPin": "a3c4c75d-cac3-4be5-898b-debe74f94992"
+    },
+    {
+      "fromNode": "ae601c95-09ee-4ef6-ac4e-e5adba433101",
+      "fromPin": "f9cac3a3-44f3-435c-bbe1-2c5a01136803",
+      "toNode": "4e9435bf-d0a2-45e1-a7ac-531ae778cc6a",
+      "toPin": "b29c925d-9a12-4975-9512-0ecd5a954acc"
+    },
+    {
+      "fromNode": "4e9435bf-d0a2-45e1-a7ac-531ae778cc6a",
+      "fromPin": "9b8c11ee-78e9-47fa-b7ba-c91bc9d03a5f",
+      "toNode": "061661ed-183b-4302-bbf0-4ede8109d1db",
+      "toPin": "6a250f09-93f9-44cb-ba66-c0a3532e8d70"
+    },
+    {
+      "fromNode": "061661ed-183b-4302-bbf0-4ede8109d1db",
+      "fromPin": "1ae9e98c-5dd9-4f6b-83d0-d89e8efb2e7c",
+      "toNode": "652ef672-ae50-4d05-924f-e0a7f248c878",
+      "toPin": "f02a3b4a-6a18-44f1-9094-ec6e70f7b2a8"
+    },
+    {
+      "fromNode": "652ef672-ae50-4d05-924f-e0a7f248c878",
+      "fromPin": "0ae518e0-9dd1-4070-aa9c-79ad3a08c6a6",
+      "toNode": "33a0740d-70d4-4d95-a617-8339484afab5",
+      "toPin": "bcffe1ca-249a-44e4-8bfe-9fcb4aa43df8"
+    },
+    {
+      "fromNode": "33a0740d-70d4-4d95-a617-8339484afab5",
+      "fromPin": "0e477d92-9010-478d-9f67-913c1a3be4b8",
+      "toNode": "b8cc063b-c684-43a3-b5df-8d45739df8ac",
+      "toPin": "ce892c51-3e35-4bad-9571-759d0d8e2854"
+    },
+    {
+      "fromNode": "b8cc063b-c684-43a3-b5df-8d45739df8ac",
+      "fromPin": "57f7abb4-63b2-4772-81f9-59d9e1847d01",
+      "toNode": "a90096a9-5dd0-42c0-9fdd-108c42c45250",
+      "toPin": "e8ea9c15-40b1-4d67-86c8-7522794113f2"
+    },
+    {
+      "fromNode": "a90096a9-5dd0-42c0-9fdd-108c42c45250",
+      "fromPin": "d5dc25b4-698b-4612-9af4-ebaa9273b506",
+      "toNode": "558d39d5-963e-4309-b086-f211d2493446",
+      "toPin": "3d5f2042-9ab7-458d-ba8a-8042657a2736"
+    },
+    {
+      "fromNode": "558d39d5-963e-4309-b086-f211d2493446",
+      "fromPin": "e310d9a5-8cce-4d96-b750-8413cd3e96d3",
+      "toNode": "ca2d54b8-81b6-44a5-ab81-4bcd57871e02",
+      "toPin": "2d50236b-9979-4e2b-a59c-9315e510a8ad"
+    },
+    {
+      "fromNode": "ca2d54b8-81b6-44a5-ab81-4bcd57871e02",
+      "fromPin": "82d4548a-b1b2-4c7b-8ba6-e05a1220c1a3",
+      "toNode": "942dbed5-a163-475b-b8f9-7c388b63b1ab",
+      "toPin": "8e3d9edc-96c0-4a6b-a098-9898971e2127"
+    },
+    {
+      "fromNode": "ae601c95-09ee-4ef6-ac4e-e5adba433101",
+      "fromPin": "dd218743-0086-4561-a175-6bea22302686",
+      "toNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
+      "toPin": "eb941bc9-4132-4f4c-8b38-1dbb7fd8b5ff"
+    },
+    {
+      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
+      "fromPin": "b3bee172-d92d-4e91-a0d6-da2c89828f98",
+      "toNode": "4e9435bf-d0a2-45e1-a7ac-531ae778cc6a",
+      "toPin": "97a74286-598e-4e06-936a-a4b9f564bc55"
+    },
+    {
+      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
+      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
+      "toNode": "768ffee0-0420-48eb-bcd8-3ecb6a39b95f",
+      "toPin": "6718fc4b-7da2-41b8-a21b-684595edde81"
+    },
+    {
+      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
+      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
+      "toNode": "599b5973-c7f6-4a26-b29d-96e622f4d535",
+      "toPin": "de5eaf0d-d327-49a6-ac31-dd0b65569817"
+    },
+    {
+      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
+      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
+      "toNode": "f0fec9f7-91ca-434d-a57b-300c24423aba",
+      "toPin": "17fc5215-e1c1-413c-b5c4-515ed0dc7d30"
+    },
+    {
+      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
+      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
+      "toNode": "404f51d8-ec0b-4bfe-8dad-84a5c0ec3b3d",
+      "toPin": "216e3e75-29d5-4335-a9d0-5c623bdd79a2"
+    },
+    {
+      "fromNode": "ae601c95-09ee-4ef6-ac4e-e5adba433101",
+      "fromPin": "dd218743-0086-4561-a175-6bea22302686",
+      "toNode": "a90096a9-5dd0-42c0-9fdd-108c42c45250",
+      "toPin": "3445d847-5bca-4881-994d-6ce879528273"
+    },
+    {
+      "fromNode": "404f51d8-ec0b-4bfe-8dad-84a5c0ec3b3d",
+      "fromPin": "6ef8b776-383a-4ead-a087-677ddf01587e",
+      "toNode": "a90096a9-5dd0-42c0-9fdd-108c42c45250",
+      "toPin": "408695e2-ddfe-4e04-b6f9-4c94d90243cf"
+    },
+    {
+      "fromNode": "ae601c95-09ee-4ef6-ac4e-e5adba433101",
+      "fromPin": "dd218743-0086-4561-a175-6bea22302686",
+      "toNode": "558d39d5-963e-4309-b086-f211d2493446",
+      "toPin": "338ee2ab-a174-4d5a-9fc7-88931663798b"
+    },
+    {
+      "fromNode": "404f51d8-ec0b-4bfe-8dad-84a5c0ec3b3d",
+      "fromPin": "6ef8b776-383a-4ead-a087-677ddf01587e",
+      "toNode": "558d39d5-963e-4309-b086-f211d2493446",
+      "toPin": "ecfb1406-cdc3-4514-a193-ef6bfc2a25c7"
+    },
+    {
+      "fromNode": "404f51d8-ec0b-4bfe-8dad-84a5c0ec3b3d",
+      "fromPin": "6ef8b776-383a-4ead-a087-677ddf01587e",
+      "toNode": "7d63e5e9-14fb-407c-a04a-b3c34c9482c6",
+      "toPin": "362171bf-2e76-4108-8d4c-f615798ee7f9"
+    },
+    {
+      "fromNode": "2327c8a4-c662-4772-8bce-f7e184ff6c50",
+      "fromPin": "b54b940b-3a71-4fe1-bb01-3df1c328809e",
+      "toNode": "ca2d54b8-81b6-44a5-ab81-4bcd57871e02",
+      "toPin": "97a222a0-1332-4b90-a970-b040a32ca284"
+    },
+    {
+      "fromNode": "ae601c95-09ee-4ef6-ac4e-e5adba433101",
+      "fromPin": "dd218743-0086-4561-a175-6bea22302686",
+      "toNode": "ca2d54b8-81b6-44a5-ab81-4bcd57871e02",
+      "toPin": "8fb166b3-ed6b-4617-a3ec-765acc076c0d"
+    },
+    {
+      "fromNode": "ae601c95-09ee-4ef6-ac4e-e5adba433101",
+      "fromPin": "dd218743-0086-4561-a175-6bea22302686",
+      "toNode": "942dbed5-a163-475b-b8f9-7c388b63b1ab",
+      "toPin": "ca7f5ac6-ba1e-410c-ba3d-0d3c61a4e6af"
+    },
+    {
+      "fromNode": "93de7e6f-8fdd-42a7-8bec-f34edb9c0793",
+      "fromPin": "76450668-ee1a-4d04-baa3-7b58b902368b",
+      "toNode": "652ef672-ae50-4d05-924f-e0a7f248c878",
+      "toPin": "2f8bbda7-1d1c-4919-b2b1-b60adbe0779c"
+    },
+    {
+      "fromNode": "768ffee0-0420-48eb-bcd8-3ecb6a39b95f",
+      "fromPin": "5e6956d0-dcad-4188-918e-511cfaf18e80",
+      "toNode": "3e122963-7ec1-4cd8-83bb-5d90e8e03729",
+      "toPin": "0f0b468f-ff65-4639-92a2-8c9a607f66fb"
+    },
+    {
+      "fromNode": "ae38852c-80be-4f2a-a4e9-7a13d7d3e882",
+      "fromPin": "2a2ac8e4-eedc-449d-85f5-ec7df25ee914",
+      "toNode": "3e122963-7ec1-4cd8-83bb-5d90e8e03729",
+      "toPin": "6d839bd6-b227-4d6c-8afa-22c88a6a852f"
+    },
+    {
+      "fromNode": "3e122963-7ec1-4cd8-83bb-5d90e8e03729",
+      "fromPin": "26babe3e-e20e-4ef6-a48c-acc46d3ee840",
+      "toNode": "061661ed-183b-4302-bbf0-4ede8109d1db",
+      "toPin": "1acf2332-6404-473f-9c10-a898c53626b9"
+    },
+    {
+      "fromNode": "7d3342bd-cc38-48db-a42e-5d48af94346c",
+      "fromPin": "eb9904bb-c3bc-429e-b4ec-ab760e714075",
+      "toNode": "652ef672-ae50-4d05-924f-e0a7f248c878",
+      "toPin": "3b58bd65-3ae0-4aa7-b61d-70fcd15d3eb1"
+    },
+    {
+      "fromNode": "652ef672-ae50-4d05-924f-e0a7f248c878",
+      "fromPin": "32ddc386-868e-484a-bfb6-50788dfb119a",
+      "toNode": "33a0740d-70d4-4d95-a617-8339484afab5",
+      "toPin": "e2e43116-5091-4bc2-8681-333bbe8a14d3"
+    },
+    {
+      "fromNode": "599b5973-c7f6-4a26-b29d-96e622f4d535",
+      "fromPin": "cf10eaa7-e1e0-4b48-b946-fe10e7b02716",
+      "toNode": "88928f53-55b7-469f-9f2b-60c0445dab06",
+      "toPin": "f5412781-154b-4f87-95f9-9f9f8dd07cd0"
+    },
+    {
+      "fromNode": "a827097f-79c2-4397-a34c-0c7f49e23d3d",
+      "fromPin": "a7e5c573-c8bb-445e-803c-7d77be5bf01f",
+      "toNode": "88928f53-55b7-469f-9f2b-60c0445dab06",
+      "toPin": "674bf7e4-12cb-478d-8bc6-eb261c2b5d3c"
+    },
+    {
+      "fromNode": "88928f53-55b7-469f-9f2b-60c0445dab06",
+      "fromPin": "9bd95aaa-ae13-4f1d-b83e-949e42adf7a4",
+      "toNode": "33a0740d-70d4-4d95-a617-8339484afab5",
+      "toPin": "5c4f9cc9-678b-416d-ac3c-b19f7256b01f"
+    },
+    {
+      "fromNode": "33a0740d-70d4-4d95-a617-8339484afab5",
+      "fromPin": "4c96f40d-e65a-43a0-9591-552d57044b51",
+      "toNode": "b8cc063b-c684-43a3-b5df-8d45739df8ac",
+      "toPin": "5772a387-9613-4172-aa7a-32546eaec754"
+    },
+    {
+      "fromNode": "f0fec9f7-91ca-434d-a57b-300c24423aba",
+      "fromPin": "0da97cb4-bfcf-450d-8d97-5cddbe0040fb",
+      "toNode": "d236bab7-0725-436d-8cff-273275096cdc",
+      "toPin": "cbc63ee6-c287-484a-b105-9758c1f3ea59"
+    },
+    {
+      "fromNode": "c3495df0-18e5-4b61-8425-955f78103109",
+      "fromPin": "c2135e22-9776-48ca-af8b-80d6da216dcf",
+      "toNode": "d236bab7-0725-436d-8cff-273275096cdc",
+      "toPin": "b41af851-e7f2-44c1-9d87-ff47bd48ad10"
+    },
+    {
+      "fromNode": "d236bab7-0725-436d-8cff-273275096cdc",
+      "fromPin": "8bd4420c-d03b-4339-b2a6-6f47f01a649a",
+      "toNode": "b8cc063b-c684-43a3-b5df-8d45739df8ac",
+      "toPin": "b3586326-d257-4831-92fe-21ccab1ef607"
+    }
+  ],
+  "editorLayout": {
+    "nodePositions": {
+      "ae601c95-09ee-4ef6-ac4e-e5adba433101": {
+        "x": 40,
+        "y": 80
+      },
+      "93de7e6f-8fdd-42a7-8bec-f34edb9c0793": {
+        "x": 360,
+        "y": 300
+      },
+      "4e9435bf-d0a2-45e1-a7ac-531ae778cc6a": {
+        "x": 680,
+        "y": 80
+      },
+      "768ffee0-0420-48eb-bcd8-3ecb6a39b95f": {
+        "x": 1000,
+        "y": 300
+      },
+      "ae38852c-80be-4f2a-a4e9-7a13d7d3e882": {
+        "x": 1220,
+        "y": 300
+      },
+      "3e122963-7ec1-4cd8-83bb-5d90e8e03729": {
+        "x": 1440,
+        "y": 300
+      },
+      "061661ed-183b-4302-bbf0-4ede8109d1db": {
+        "x": 1660,
+        "y": 80
+      },
+      "7d3342bd-cc38-48db-a42e-5d48af94346c": {
+        "x": 1880,
+        "y": 300
+      },
+      "652ef672-ae50-4d05-924f-e0a7f248c878": {
+        "x": 2100,
+        "y": 80
+      },
+      "599b5973-c7f6-4a26-b29d-96e622f4d535": {
+        "x": 1880,
+        "y": 520
+      },
+      "a827097f-79c2-4397-a34c-0c7f49e23d3d": {
+        "x": 2100,
+        "y": 300
+      },
+      "88928f53-55b7-469f-9f2b-60c0445dab06": {
+        "x": 2320,
+        "y": 300
+      },
+      "33a0740d-70d4-4d95-a617-8339484afab5": {
+        "x": 2540,
+        "y": 80
+      },
+      "f0fec9f7-91ca-434d-a57b-300c24423aba": {
+        "x": 2760,
+        "y": 300
+      },
+      "c3495df0-18e5-4b61-8425-955f78103109": {
+        "x": 2980,
+        "y": 300
+      },
+      "d236bab7-0725-436d-8cff-273275096cdc": {
+        "x": 3200,
+        "y": 300
+      },
+      "b8cc063b-c684-43a3-b5df-8d45739df8ac": {
+        "x": 3420,
+        "y": 80
+      },
+      "404f51d8-ec0b-4bfe-8dad-84a5c0ec3b3d": {
+        "x": 3640,
+        "y": 300
+      },
+      "a90096a9-5dd0-42c0-9fdd-108c42c45250": {
+        "x": 3860,
+        "y": 80
+      },
+      "558d39d5-963e-4309-b086-f211d2493446": {
+        "x": 4080,
+        "y": 80
+      },
+      "7d63e5e9-14fb-407c-a04a-b3c34c9482c6": {
+        "x": 4300,
+        "y": 300
+      },
+      "33c2f552-3376-4410-b024-865010e82223": {
+        "x": 4520,
+        "y": 300
+      },
+      "9d195ada-feee-48bf-8963-18538a7074d2": {
+        "x": 4740,
+        "y": 300
+      },
+      "f155ef89-791d-48cb-baeb-caa16fe9b136": {
+        "x": 4960,
+        "y": 300
+      },
+      "04f441ef-8216-424f-a5a2-4678fb4882d8": {
+        "x": 5180,
+        "y": 300
+      },
+      "9c0f3f60-efb0-48f0-93de-cb7562ecd3b2": {
+        "x": 5400,
+        "y": 300
+      },
+      "ca60e051-ffc4-4589-9448-8cb268fca920": {
+        "x": 5520,
+        "y": 300
+      },
+      "9ec47a5a-59c9-45c4-8628-f9a4c4fdc6a0": {
+        "x": 5740,
+        "y": 300
+      },
+      "f8f63f91-19bc-4c5a-a264-e914b4ff84c4": {
+        "x": 5960,
+        "y": 300
+      },
+      "f16753ed-0a7c-4261-8465-547c2c3e4fa6": {
+        "x": 6180,
+        "y": 300
+      },
+      "0b099dc0-a4bf-41da-9477-d223d4b13f2b": {
+        "x": 6400,
+        "y": 300
+      },
+      "f05a3ae6-f347-4f0d-ac8f-160bb79bb6e4": {
+        "x": 6520,
+        "y": 300
+      },
+      "54acde50-7204-453d-bb0e-bafc45bda8a6": {
+        "x": 6740,
+        "y": 300
+      },
+      "9a691f6e-aa94-4fed-94fe-fbd67936eeac": {
+        "x": 6960,
+        "y": 300
+      },
+      "86f3d95d-c8d0-4fa0-92f9-91b206feb88d": {
+        "x": 7180,
+        "y": 300
+      },
+      "e1ca34e0-af13-4ddb-a333-e171f18ff2e7": {
+        "x": 7400,
+        "y": 300
+      },
+      "f21bf0a4-494e-401c-8e12-2914c3b7dec4": {
+        "x": 7520,
+        "y": 300
+      },
+      "0ee784a3-0929-4868-a4d3-c1fe176dc3d2": {
+        "x": 7740,
+        "y": 300
+      },
+      "27b0d344-c7e8-47af-b134-c82d9c01df9b": {
+        "x": 7960,
+        "y": 300
+      },
+      "82734a8b-2bc4-464c-addc-4bce99d7cedf": {
+        "x": 8180,
+        "y": 300
+      },
+      "2327c8a4-c662-4772-8bce-f7e184ff6c50": {
+        "x": 8400,
+        "y": 300
+      },
+      "ca2d54b8-81b6-44a5-ab81-4bcd57871e02": {
+        "x": 8520,
+        "y": 80
+      },
+      "942dbed5-a163-475b-b8f9-7c388b63b1ab": {
+        "x": 8740,
+        "y": 80
+      }
+    },
+    "comments": [],
+    "viewportX": 0,
+    "viewportY": 0,
+    "zoom": 1
+  },
+  "schemas": [
+    {
+      "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11aa",
+      "name": "WeaponAssembly",
+      "kind": "Component",
+      "fields": [
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11ab",
+          "name": "Barrel",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11ac",
+          "name": "FireRate",
+          "typeName": "float32",
+          "defaultValue": "6"
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11ad",
+          "name": "ProjectileSpeed",
+          "typeName": "float32",
+          "defaultValue": "40"
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11ae",
+          "name": "Bolt",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11af",
+          "name": "Magazine",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b0",
+          "name": "Optic",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b1",
+          "name": "Muzzle",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b3",
+          "name": "BarrelAccepts",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b4",
+          "name": "BoltAccepts",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b5",
+          "name": "FeedAccepts",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b6",
+          "name": "OpticAccepts",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b7",
+          "name": "MuzzleAccepts",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b8",
+          "name": "Heat",
+          "typeName": "float32",
+          "defaultValue": "0"
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11b9",
+          "name": "Fouling",
+          "typeName": "float32",
+          "defaultValue": "0"
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11ba",
+          "name": "Wear",
+          "typeName": "float32",
+          "defaultValue": "0"
+        },
+        {
+          "id": "11aa11aa-11aa-41aa-81aa-11aa11aa11bb",
+          "name": "Calibration",
+          "typeName": "float32",
+          "defaultValue": "1"
+        }
+      ],
+      "isComponent": true
+    },
+    {
+      "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22bb",
+      "name": "WeaponPart",
+      "kind": "Component",
+      "fields": [
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22b1",
+          "name": "Prototype",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22b2",
+          "name": "Slot",
+          "typeName": "string",
+          "defaultValue": "barrel"
+        },
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22b3",
+          "name": "Label",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22b4",
+          "name": "FireRate",
+          "typeName": "float32",
+          "defaultValue": "6"
+        },
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22b5",
+          "name": "ProjectileSpeed",
+          "typeName": "float32",
+          "defaultValue": "40"
+        },
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22b9",
+          "name": "RateDelta",
+          "typeName": "float32",
+          "defaultValue": "0"
+        },
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22ba",
+          "name": "SpeedDelta",
+          "typeName": "float32",
+          "defaultValue": "0"
+        },
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22bd",
+          "name": "Interface",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "22bb22bb-22bb-42bb-82bb-22bb22bb22be",
+          "name": "Offer",
+          "typeName": "string",
+          "defaultValue": "direct"
+        }
+      ],
+      "isComponent": true
+    },
+    {
+      "id": "33cc33cc-33cc-43cc-83cc-33cc33cc33cc",
+      "name": "PartRow",
+      "kind": "Struct",
+      "fields": [
+        {
+          "id": "33cc33cc-33cc-43cc-83cc-33cc33cc33c1",
+          "name": "Id",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "33cc33cc-33cc-43cc-83cc-33cc33cc33c2",
+          "name": "Text",
+          "typeName": "string",
+          "defaultValue": ""
+        },
+        {
+          "id": "33cc33cc-33cc-43cc-83cc-33cc33cc33c3",
+          "name": "Disabled",
+          "typeName": "bool",
+          "defaultValue": "false"
+        }
+      ],
+      "isComponent": false
+    }
+  ]
+}
