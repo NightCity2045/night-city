@@ -1,0 +1,77 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  abstract: true
+  id: NCBaseWeaponSMG9x19
+  parent: [ BaseWeaponSubMachineGun, BaseGunWieldable ]
+  components:
+  - type: ItemSlots
+    slots:
+      gun_magazine:
+        name: Magazine
+        startingItem: NCMagazine9x19SMG
+        insertSound: /Audio/Weapons/Guns/MagIn/smg_magin.ogg
+        ejectSound: /Audio/Weapons/Guns/MagOut/smg_magout.ogg
+        priority: 2
+        whitelist:
+          tags: [ NCMagazine9x19SMG ]
+        whitelistFailPopup: gun-magazine-whitelist-fail
+      gun_chamber:
+        name: Chamber
+        priority: 1
+        whitelist:
+          tags: [ NCCartridge9x19 ]
+
+- type: entity
+  abstract: true
+  id: NCBaseWeaponSMG11mm
+  parent: [ BaseWeaponSubMachineGun, BaseGunWieldable ]
+  components:
+  - type: Gun
+    fireRate: 7
+    cameraRecoilScalar: 1.4
+    angleIncrease: 4
+  - type: ItemSlots
+    slots:
+      gun_magazine:
+        name: Magazine
+        startingItem: NCMagazine11mmSMG
+        insertSound: /Audio/Weapons/Guns/MagIn/smg_magin.ogg
+        ejectSound: /Audio/Weapons/Guns/MagOut/smg_magout.ogg
+        priority: 2
+        whitelist:
+          tags: [ NCMagazine11mmSMG ]
+        whitelistFailPopup: gun-magazine-whitelist-fail
+      gun_chamber:
+        name: Chamber
+        priority: 1
+        whitelist:
+          tags: [ NCCartridge11mm ]
+
+- type: entity
+  id: NCWeaponSMGSaratoga
+  parent: NCBaseWeaponSMG9x19
+  name: Militech M221 Saratoga
+  description: A compact 9x19 submachine gun optimized for close quarters.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/SMG/Militech_M221_Saratoga.rsi
+  - type: Item
+    sprite: _NC/Objects/Weapons/Guns/SMG/Militech_M221_Saratoga.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/SMG/Militech_M221_Saratoga.rsi
+
+- type: entity
+  id: NCWeaponSMGShingen
+  parent: NCBaseWeaponSMG11mm
+  name: Arasaka TKI-20 Shingen
+  description: A hard-hitting 11mm Arasaka submachine gun prepared for later smartgun integration.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/SMG/Arasaka_TKI20_Shingen.rsi
+  - type: Item
+    sprite: _NC/Objects/Weapons/Guns/SMG/Arasaka_TKI20_Shingen.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/SMG/Arasaka_TKI20_Shingen.rsi

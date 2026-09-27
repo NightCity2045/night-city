@@ -53,6 +53,12 @@ public abstract partial class NCSharedZLevelsSystem : EntitySystem
 
         _config.OnValueChanged(CCVars.ZLevelsPhysicsClientSimulation, i => _clientSimulation = i, true);
         _config.OnValueChanged(CCVars.ZLevelsPhysicsTickRate, i => _fixedTimestep = TimeSpan.FromSeconds(1d / i), true);
+        // NC start: one replicated budget now drives client render passes, server PVS eyes, and Z-aware filters.
+        _config.OnValueChanged(
+            CCVars.NCZLevelsRenderingMaxZLevelsBelowRendering,
+            value => MaxZLevelsBelowRendering = Math.Max(0, value),
+            true);
+        // NC end
 
         InitializeActivation();
         InitializeCacheHooks();

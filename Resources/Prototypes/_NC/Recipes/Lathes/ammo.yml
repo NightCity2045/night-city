@@ -1,0 +1,120 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Finished magazines remain more material-efficient than loose boxes, while high-energy ammunition costs more.
+- type: latheRecipe
+  parent: BaseAmmoRecipe
+  id: NCMagazine9x19Pistol
+  result: NCMagazine9x19Pistol
+  materials:
+    Steel: 150
+
+- type: latheRecipe
+  parent: BaseAmmoRecipe
+  id: NCMagazine9x19SMG
+  result: NCMagazine9x19SMG
+  materials:
+    Steel: 320
+
+- type: latheRecipe
+  parent: BaseAmmoRecipe
+  id: NCMagazine11mmPistol
+  result: NCMagazine11mmPistol
+  materials:
+    Steel: 180
+
+- type: latheRecipe
+  parent: BaseAmmoRecipe
+  id: NCMagazine11mmSMG
+  result: NCMagazine11mmSMG
+  materials:
+    Steel: 430
+
+- type: latheRecipe
+  parent: BaseAmmoRecipe
+  id: NCMagazine12mmPistol
+  result: NCMagazine12mmPistol
+  materials:
+    Steel: 220
+
+- type: latheRecipe
+  parent: BaseAmmoRecipe
+  id: NCMagazine12mmMallorian
+  result: NCMagazine12mmMallorian
+  materials:
+    Steel: 260
+    Plastic: 40
+
+- type: latheRecipe
+  parent: BaseAmmoRecipe
+  id: NCMagazine556Rifle
+  result: NCMagazine556Rifle
+  materials:
+    Steel: 520
+
+- type: latheRecipe
+  parent: BaseAmmoRecipe
+  id: NCMagazine762Sniper
+  result: NCMagazine762Sniper
+  materials:
+    Steel: 280
+
+- type: latheRecipe
+  parent: BaseAmmoRecipe
+  id: NCMagazine12GaugeCrusher
+  result: NCMagazine12GaugeCrusher
+  materials:
+    Steel: 260
+    Plastic: 80
+
+- type: latheRecipe
+  parent: BaseAmmoBoxRecipe
+  id: NCBox9x19
+  result: NCBox9x19
+  materials:
+    Steel: 650
+
+- type: latheRecipe
+  parent: BaseAmmoBoxRecipe
+  id: NCBox11mm
+  result: NCBox11mm
+  materials:
+    Steel: 850
+
+- type: latheRecipe
+  parent: BaseAmmoBoxRecipe
+  id: NCBox12mm
+  result: NCBox12mm
+  materials:
+    Steel: 950
+
+- type: latheRecipe
+  parent: BaseAmmoBoxRecipe
+  id: NCBox14mmBurya
+  result: NCBox14mmBurya
+  materials:
+    Steel: 900
+    Plastic: 300
+
+- type: latheRecipe
+  parent: BaseAmmoBoxRecipe
+  id: NCBox556
+  result: NCBox556
+  materials:
+    Steel: 1100
+
+- type: latheRecipe
+  parent: BaseAmmoBoxRecipe
+  id: NCBox762
+  result: NCBox762
+  materials:
+    Steel: 1250
+
+- type: latheRecipe
+  parent: BaseAmmoBoxRecipe
+  id: NCBox12Gauge
+  result: NCBox12Gauge
+  materials:
+    Steel: 520
+    Plastic: 180

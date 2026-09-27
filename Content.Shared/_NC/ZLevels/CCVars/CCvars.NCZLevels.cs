@@ -48,5 +48,7 @@ public sealed partial class CCVars
      */
 
     public static readonly CVarDef<int>
-        NCZLevelsRenderingMaxZLevelsBelowRendering = CVarDef.Create("ce.zlevels.rendering.max_zLevels_below_rendering", 1, CVar.SERVER | CVar.REPLICATED);
+        // NC start: all five Night City floors must be visible from Z=4 when openings permit it.
+        NCZLevelsRenderingMaxZLevelsBelowRendering = CVarDef.Create("ce.zlevels.rendering.max_zLevels_below_rendering", 4, CVar.SERVER | CVar.REPLICATED);
+        // NC end
 }

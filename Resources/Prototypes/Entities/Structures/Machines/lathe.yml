@@ -439,6 +439,9 @@
       unlitRunningState: unlit-building
       staticPacks:
       - SecurityAmmoStatic
+      # NC start: Night City ammunition replaces the station-era caliber catalog.
+      - NCAmmoStatic
+      # NC end
     - type: EmagLatheRecipes
       emagStaticPacks:
       - SyndicateAmmoStatic

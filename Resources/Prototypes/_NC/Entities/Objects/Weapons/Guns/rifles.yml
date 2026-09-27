@@ -1,0 +1,153 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  abstract: true
+  id: NCBaseWeaponRifle556
+  parent: BaseWeaponRifle
+  components:
+  - type: GunRequiresWield
+  - type: ItemSlots
+    slots:
+      gun_magazine:
+        name: Magazine
+        startingItem: NCMagazine556Rifle
+        insertSound: /Audio/Weapons/Guns/MagIn/ltrifle_magin.ogg
+        ejectSound: /Audio/Weapons/Guns/MagOut/ltrifle_magout.ogg
+        priority: 2
+        whitelist:
+          tags: [ NCMagazine556Rifle ]
+        whitelistFailPopup: gun-magazine-whitelist-fail
+      gun_chamber:
+        name: Chamber
+        priority: 1
+        whitelist:
+          tags: [ NCCartridge556 ]
+  - type: MagazineVisuals
+    magState: mag
+    steps: 1
+    zeroVisible: true
+  - type: Appearance
+
+- type: entity
+  id: NCWeaponRifleNowaki
+  parent: NCBaseWeaponRifle556
+  name: Arasaka Nowaki
+  description: A controlled-burst 5.56mm corporate assault rifle.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Rifles/ArasakaNOWAKI/big.rsi
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-0
+      map: [ "enum.GunVisualLayers.Mag" ]
+  - type: Item
+    sprite: _NC/Objects/Weapons/Guns/Rifles/ArasakaNOWAKI/tiny.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Rifles/ArasakaNOWAKI/tiny.rsi
+  - type: Gun
+    fireRate: 6
+    burstFireRate: 9
+    shotsPerBurst: 3
+    selectedMode: Burst
+    availableModes: [ SemiAuto, Burst ]
+    cameraRecoilScalar: 1.5
+
+- type: entity
+  id: NCWeaponRifleArasakaPrototype
+  parent: NCBaseWeaponRifle556
+  name: Arasaka prototype assault rifle
+  description: An experimental high-cyclic 5.56mm Arasaka platform.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Rifles/ArasakaPrototypeAssaultRifle/big.rsi
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-0
+      map: [ "enum.GunVisualLayers.Mag" ]
+  - type: Item
+    sprite: _NC/Objects/Weapons/Guns/Rifles/ArasakaPrototypeAssaultRifle/tiny.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Rifles/ArasakaPrototypeAssaultRifle/tiny.rsi
+  - type: Gun
+    fireRate: 9
+    selectedMode: FullAuto
+    availableModes: [ SemiAuto, FullAuto ]
+    angleIncrease: 2.5
+    cameraRecoilScalar: 1.7
+
+- type: entity
+  id: NCWeaponRifleCopperhead
+  parent: NCBaseWeaponRifle556
+  name: Nokota D5 Copperhead
+  description: A reliable 5.56mm assault rifle assembled for the mass market.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Rifles/NokotaD5Copperhead/big.rsi
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-0
+      map: [ "enum.GunVisualLayers.Mag" ]
+  - type: Item
+    sprite: _NC/Objects/Weapons/Guns/Rifles/NokotaD5Copperhead/tiny.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Rifles/NokotaD5Copperhead/tiny.rsi
+  - type: Gun
+    fireRate: 7
+    selectedMode: FullAuto
+    availableModes: [ SemiAuto, FullAuto ]
+
+- type: entity
+  id: NCWeaponRifleNomadSniper
+  parent: BaseWeaponRifle
+  name: Nomad sniper rifle
+  description: A long-range 7.62mm rifle rebuilt to survive the open road.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Rifles/NomadSniperRifle/big.rsi
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-0
+      map: [ "enum.GunVisualLayers.Mag" ]
+  - type: Item
+    sprite: _NC/Objects/Weapons/Guns/Rifles/NomadSniperRifle/tiny.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Rifles/NomadSniperRifle/tiny.rsi
+  - type: GunRequiresWield
+  - type: Gun
+    fireRate: 0.65
+    selectedMode: SemiAuto
+    availableModes: [ SemiAuto ]
+    minAngle: 0.1
+    maxAngle: 2
+    angleIncrease: 3
+    angleDecay: 5
+    cameraRecoilScalar: 3
+    soundGunshot:
+      path: /Audio/Weapons/Guns/Gunshots/sniper.ogg
+  - type: ItemSlots
+    slots:
+      gun_magazine:
+        name: Magazine
+        startingItem: NCMagazine762Sniper
+        insertSound: /Audio/Weapons/Guns/MagIn/ltrifle_magin.ogg
+        ejectSound: /Audio/Weapons/Guns/MagOut/ltrifle_magout.ogg
+        priority: 2
+        whitelist:
+          tags: [ NCMagazine762Sniper ]
+        whitelistFailPopup: gun-magazine-whitelist-fail
+      gun_chamber:
+        name: Chamber
+        priority: 1
+        whitelist:
+          tags: [ NCCartridge762 ]
+  - type: MagazineVisuals
+    magState: mag
+    steps: 1
+    zeroVisible: true
+  - type: Appearance

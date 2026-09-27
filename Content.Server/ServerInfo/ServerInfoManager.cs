@@ -14,6 +14,7 @@ public sealed partial class ServerInfoManager
     {
         // @formatter:off
         (CCVars.InfoLinksDiscord,  "discord",  "info-link-discord"),
+        (CCVars.InfoLinksDiscordSecond, "discord", "info-link-discord-second"),
         (CCVars.InfoLinksForum,    "forum",    "info-link-forum"),
         (CCVars.InfoLinksGithub,   "github",   "info-link-github"),
         (CCVars.InfoLinksWebsite,  "web",      "info-link-website"),

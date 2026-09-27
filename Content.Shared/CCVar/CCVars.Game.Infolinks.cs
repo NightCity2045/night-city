@@ -11,6 +11,12 @@ public sealed partial class CCVars
         CVarDef.Create("infolinks.discord", "", CVar.SERVER | CVar.REPLICATED);
 
     /// <summary>
+    ///     Link to second Discord server to show in the launcher.
+    /// </summary>
+    public static readonly CVarDef<string> InfoLinksDiscordSecond =
+        CVarDef.Create("infolinks.discord_second", "", CVar.SERVER | CVar.REPLICATED);
+
+    /// <summary>
     ///     Link to website to show in the launcher.
     /// </summary>
     public static readonly CVarDef<string> InfoLinksForum =

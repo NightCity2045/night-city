@@ -5,9 +5,14 @@
 using System.Collections.Generic;
 using Content.IntegrationTests.Fixtures;
 using Content.Server._NC.ZLevels.Core;
+using Content.Server._NC.ZLevels.Lighting;
 using Content.Shared._NC.ZLevels.Core.Components;
+using Content.Shared._NC.ZLevels.Core.EntitySystems;
+using Content.Shared.Light.Components;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
+using Robust.Shared.Map.Components;
+using Robust.Shared.Maths;
 
 namespace Content.IntegrationTests.Tests._NC.ZLevels;
 
@@ -163,6 +168,117 @@ public sealed class NCZLevelNetworkTest : GameTest
         {
             Pair.ServerLogHandler.FailureLevel = failureLevel;
         }
+
+        await server.WaitPost(() => zLevels.DeleteMapNetwork(network));
+        await server.WaitRunTicks(1);
+    }
+
+    [Test]
+    public async Task FiveLevelNetworkCoversFullDownwardRenderBudget()
+    {
+        var server = Pair.Server;
+        var mapSystem = server.System<SharedMapSystem>();
+        var zLevels = server.System<NCZLevelsSystem>();
+
+        var maps = new EntityUid[5];
+        Entity<NCZMapNetworkComponent> network = default;
+
+        await server.WaitAssertion(() =>
+        {
+            for (var depth = 0; depth < maps.Length; depth++)
+            {
+                mapSystem.CreateMap(out var mapId);
+                maps[depth] = mapSystem.GetMap(mapId);
+            }
+
+            network = zLevels.CreateMapNetwork();
+            Assert.That(zLevels.TryAddMapsIntoNetwork(network, new Dictionary<EntityUid, int>
+            {
+                [maps[0]] = 0,
+                [maps[1]] = 1,
+                [maps[2]] = 2,
+                [maps[3]] = 3,
+                [maps[4]] = 4,
+            }), Is.True);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(NCSharedZLevelsSystem.MaxZLevelsBelowRendering, Is.EqualTo(4));
+                Assert.That(zLevels.TryMapOffset(maps[4], -4, out var bottom), Is.True);
+                Assert.That(bottom.Owner, Is.EqualTo(maps[0]));
+            });
+        });
+
+        await server.WaitPost(() => zLevels.DeleteMapNetwork(network));
+        await server.WaitRunTicks(1);
+    }
+
+    [Test]
+    public async Task DayNightCycleIsSynchronizedAboveGround()
+    {
+        var server = Pair.Server;
+        var entities = server.EntMan;
+        var mapSystem = server.System<SharedMapSystem>();
+        var zLevels = server.System<NCZLevelsSystem>();
+
+        EntityUid underground = default;
+        EntityUid ground = default;
+        EntityUid upper = default;
+        Entity<NCZMapNetworkComponent> network = default;
+
+        await server.WaitAssertion(() =>
+        {
+            mapSystem.CreateMap(out var undergroundId);
+            mapSystem.CreateMap(out var groundId);
+            mapSystem.CreateMap(out var upperId);
+            underground = mapSystem.GetMap(undergroundId);
+            ground = mapSystem.GetMap(groundId);
+            upper = mapSystem.GetMap(upperId);
+            network = zLevels.CreateMapNetwork();
+
+            foreach (var map in new[] { underground, ground, upper })
+                entities.EnsureComponent<MapLightComponent>(map).AmbientLightColor = Color.FromHex("#D8B059FF");
+
+            Assert.That(zLevels.TryAddMapsIntoNetwork(network, new Dictionary<EntityUid, int>
+            {
+                [underground] = -1,
+                [ground] = 0,
+                [upper] = 1,
+            }), Is.True);
+
+            // Shared map overrides are applied after NCZMapComponent has its final depth.
+            foreach (var map in new[] { underground, ground, upper })
+            {
+                entities.AddComponent(map, new NCDayNightCycleComponent
+                {
+                    MinimumDepth = 0,
+                    RoundStartHour = 8f,
+                    Duration = TimeSpan.FromMinutes(60),
+                    MinLightLevel = 0.3f,
+                    MaxLightLevel = 3f,
+                    ClipLight = 1.25f,
+                    ClipLevel = Color.White,
+                    MinLevel = Color.FromHex("#1A2680"),
+                    MaxLevel = Color.White,
+                });
+            }
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(entities.HasComponent<LightCycleComponent>(underground), Is.False);
+                Assert.That(entities.HasComponent<SunShadowCycleComponent>(underground), Is.False);
+                Assert.That(entities.HasComponent<SunShadowComponent>(underground), Is.False);
+
+                Assert.That(entities.TryGetComponent<LightCycleComponent>(ground, out var groundCycle), Is.True);
+                Assert.That(entities.TryGetComponent<LightCycleComponent>(upper, out var upperCycle), Is.True);
+                Assert.That(groundCycle!.Duration, Is.EqualTo(TimeSpan.FromMinutes(60)));
+                Assert.That(groundCycle.Offset, Is.EqualTo(TimeSpan.FromMinutes(20)));
+                Assert.That(upperCycle!.Duration, Is.EqualTo(groundCycle.Duration));
+                Assert.That(upperCycle.Offset, Is.EqualTo(groundCycle.Offset));
+                Assert.That(entities.HasComponent<SunShadowComponent>(ground), Is.True);
+                Assert.That(entities.HasComponent<SunShadowCycleComponent>(upper), Is.True);
+            });
+        });
 
         await server.WaitPost(() => zLevels.DeleteMapNetwork(network));
         await server.WaitRunTicks(1);

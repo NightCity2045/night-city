@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# NC ammunition families are deliberately incompatible. Weapon category and special firing technology are
+# separate from caliber; smart and tech behavior can therefore be added later without duplicating cartridges.
+- type: Tag
+  id: NCCartridge9x19
+
+- type: Tag
+  id: NCCartridge11mm
+
+- type: Tag
+  id: NCCartridge12mm
+
+- type: Tag
+  id: NCCartridge14mmBurya
+
+- type: Tag
+  id: NCCartridge556
+
+- type: Tag
+  id: NCCartridge762
+
+- type: Tag
+  id: NCShell12Gauge
+
+- type: Tag
+  id: NCMagazine9x19Pistol
+
+- type: Tag
+  id: NCMagazine9x19SMG
+
+- type: Tag
+  id: NCMagazine11mmPistol
+
+- type: Tag
+  id: NCMagazine11mmSMG
+
+- type: Tag
+  id: NCMagazine12mmPistol
+
+- type: Tag
+  id: NCMagazine556Rifle
+
+- type: Tag
+  id: NCMagazine762Sniper
+
+- type: Tag
+  id: NCMagazine12GaugeCrusher

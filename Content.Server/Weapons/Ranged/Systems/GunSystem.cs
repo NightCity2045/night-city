@@ -3,6 +3,9 @@ using Content.Server.Cargo.Systems;
 // NC start - authoritative physical projectile context adapter.
 using Content.Server._NC.Combat.Projectiles;
 // NC end
+// NC start - Mallorian multi-projectile volley context.
+using Content.Shared._NC.Weapons.Mallorian;
+// NC end
 using Content.Server.Weapons.Ranged.Components;
 using Content.Shared.Cargo;
 using Content.Shared.Damage;
@@ -38,6 +41,24 @@ public sealed partial class GunSystem : SharedGunSystem
         base.Initialize();
         SubscribeLocalEvent<BallisticAmmoProviderComponent, PriceCalculationEvent>(OnBallisticPrice);
     }
+
+    // NC start - narrow authoritative adapter for the Mallorian targeted volley.
+    /// <summary>
+    /// Applies target and cooldown state for an NC shot resolved outside the regular input request path.
+    /// Keeping these writes here preserves <see cref="GunComponent"/> access restrictions.
+    /// </summary>
+    public void NCPrepareTargetedShot(
+        Entity<GunComponent> gun,
+        EntityCoordinates target,
+        EntityUid? targetEntity,
+        TimeSpan nextFire)
+    {
+        gun.Comp.ShootCoordinates = target;
+        gun.Comp.Target = targetEntity;
+        gun.Comp.NextFire = nextFire;
+        Dirty(gun);
+    }
+    // NC end
 
     private void OnBallisticPrice(Entity<BallisticAmmoProviderComponent> ent, ref PriceCalculationEvent args)
     {
@@ -81,6 +102,21 @@ public sealed partial class GunSystem : SharedGunSystem
         var mapAngle = mapDirection.ToAngle();
         var angle = GetRecoilAngle(Timing.CurTime, gun, mapDirection.ToAngle());
 
+        // NC start - distribute one consumed cartridge per trajectory for the Mallorian's synchronous volley.
+        var ncVolley = CompOrNull<NCMallorianAltFireComponent>(gun);
+        var ncVolleyActive = ncVolley?.VolleyActive == true;
+        Angle[]? ncVolleyAngles = null;
+        if (ncVolleyActive && ammo.Count > 1)
+        {
+            ncVolleyAngles = LinearSpread(
+                angle - ncVolley!.Spread / 2,
+                angle + ncVolley.Spread / 2,
+                ammo.Count);
+        }
+
+        var ncVolleyIndex = 0;
+        // NC end
+
         // If applicable, this ensures the projectile is parented to grid on spawn, instead of the map.
         var fromEnt = Maps.TryFindGridAt(fromMap, out var gridUid, out _)
             ? TransformSystem.WithEntityId(fromCoordinates, gridUid)
@@ -97,10 +133,18 @@ public sealed partial class GunSystem : SharedGunSystem
 
         foreach (var (ent, shootable) in ammo)
         {
+            // NC start - only the first projectile owns audiovisual effects; all rounds retain normal ammo handling.
+            var ncShotDirection = ncVolleyAngles == null
+                ? mapDirection
+                : ncVolleyAngles[ncVolleyIndex].ToVec() * mapDirection.Length();
+            var ncPlayShotEffects = !ncVolleyActive || ncVolleyIndex == 0;
+            ncVolleyIndex++;
+            // NC end
+
             // pneumatic cannon doesn't shoot bullets it just throws them, ignore ammo handling
             if (throwItems && ent != null)
             {
-                ShootOrThrow(ent.Value, mapDirection, gunVelocity, gun, user);
+                ShootOrThrow(ent.Value, ncShotDirection, gunVelocity, gun, user);
                 continue;
             }
 
@@ -112,7 +156,7 @@ public sealed partial class GunSystem : SharedGunSystem
                     if (!cartridge.Spent)
                     {
                         var uid = Spawn(cartridge.Prototype, fromEnt);
-                        CreateAndFireProjectiles(uid, cartridge);
+                        CreateAndFireProjectiles(uid, cartridge, ncShotDirection, ncPlayShotEffects);
 
                         RaiseLocalEvent(ent!.Value, new AmmoShotEvent()
                         {
@@ -140,7 +184,7 @@ public sealed partial class GunSystem : SharedGunSystem
                 case AmmoComponent newAmmo:
                     if (ent == null)
                         break;
-                    CreateAndFireProjectiles(ent.Value, newAmmo);
+                    CreateAndFireProjectiles(ent.Value, newAmmo, ncShotDirection, ncPlayShotEffects);
 
                     break;
                 case HitscanAmmoComponent:
@@ -171,7 +215,7 @@ public sealed partial class GunSystem : SharedGunSystem
             FiredProjectiles = shotProjectiles,
         });
 
-        void CreateAndFireProjectiles(EntityUid ammoEnt, AmmoComponent ammoComp)
+        void CreateAndFireProjectiles(EntityUid ammoEnt, AmmoComponent ammoComp, Vector2 shotDirection, bool playShotEffects)
         {
             if (TryComp<ProjectileSpreadComponent>(ammoEnt, out var ammoSpreadComp))
             {
@@ -193,12 +237,15 @@ public sealed partial class GunSystem : SharedGunSystem
             }
             else
             {
-                ShootOrThrow(ammoEnt, mapDirection, gunVelocity, gun, user);
+                ShootOrThrow(ammoEnt, shotDirection, gunVelocity, gun, user);
                 shotProjectiles.Add(ammoEnt);
             }
 
-            MuzzleFlash(gun, ammoComp, mapDirection.ToAngle(), user);
-            Audio.PlayPredicted(gun.Comp.SoundGunshotModified, gun, user);
+            if (!playShotEffects)
+                return;
+
+            MuzzleFlash(gun, ammoComp, shotDirection.ToAngle(), user);
+            Audio.PlayPredicted(ncVolleyActive ? ncVolley!.VolleySound : gun.Comp.SoundGunshotModified, gun, user);
         }
     }
 

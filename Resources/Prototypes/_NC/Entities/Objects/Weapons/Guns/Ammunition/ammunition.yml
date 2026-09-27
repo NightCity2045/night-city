@@ -1,0 +1,456 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Projectile damage is centralized here so lethality can be balanced without touching weapon prototypes.
+- type: entity
+  id: NCBullet9x19
+  parent: BaseBullet
+  categories: [ HideSpawnMenu ]
+  name: bullet (9x19mm)
+  components:
+  - type: Projectile
+    damage:
+      types:
+        Piercing: 14
+  - type: NCProjectileDamageProfile
+    profile: NCBallisticStandard
+
+- type: entity
+  id: NCBullet11mm
+  parent: BaseBullet
+  categories: [ HideSpawnMenu ]
+  name: bullet (11mm)
+  components:
+  - type: Projectile
+    damage:
+      types:
+        Piercing: 21
+  - type: NCProjectileDamageProfile
+    profile: NCBallisticStandard
+
+- type: entity
+  id: NCBullet12mm
+  parent: BaseBullet
+  categories: [ HideSpawnMenu ]
+  name: bullet (12mm)
+  components:
+  - type: Projectile
+    damage:
+      types:
+        Piercing: 28
+  - type: NCProjectileDamageProfile
+    profile: NCBallisticStandard
+
+- type: entity
+  id: NCBullet14mmBurya
+  parent: BaseBullet
+  categories: [ HideSpawnMenu ]
+  name: armor-piercing bullet (14mm Burya)
+  components:
+  - type: Projectile
+    damage:
+      types:
+        Piercing: 48
+        Structural: 12
+  - type: NCProjectileDamageProfile
+    profile: NCBallisticArmorPiercing
+
+- type: entity
+  id: NCBullet556
+  parent: BaseBullet
+  categories: [ HideSpawnMenu ]
+  name: bullet (5.56mm)
+  components:
+  - type: Projectile
+    damage:
+      types:
+        Piercing: 25
+  - type: NCProjectileDamageProfile
+    profile: NCBallisticStandard
+
+- type: entity
+  id: NCBullet762
+  parent: BaseBullet
+  categories: [ HideSpawnMenu ]
+  name: bullet (7.62mm)
+  components:
+  - type: Projectile
+    damage:
+      types:
+        Piercing: 38
+        Structural: 8
+  - type: NCProjectileDamageProfile
+    profile: NCBallisticArmorPiercing
+
+- type: entity
+  id: NCPellet12Gauge
+  parent: BaseBullet
+  categories: [ HideSpawnMenu ]
+  name: pellet (12 gauge)
+  components:
+  - type: Projectile
+    damage:
+      types:
+        Piercing: 8
+        Structural: 3
+  - type: NCProjectileDamageProfile
+    profile: NCBallisticStandard
+
+- type: entity
+  id: NCPellet12GaugeSpread
+  parent: NCPellet12Gauge
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: ProjectileSpread
+    proto: NCPellet12Gauge
+    count: 6
+    spread: 14
+
+# Cartridge bodies inherit stock casing behavior and art, but replace their compatibility tags and projectile.
+- type: entity
+  id: NCCartridge9x19
+  parent: BaseCartridgePistol
+  name: cartridge (9x19mm)
+  components:
+  - type: Tag
+    tags: [ NCCartridge9x19 ]
+  - type: CartridgeAmmo
+    proto: NCBullet9x19
+
+- type: entity
+  id: NCCartridge11mm
+  parent: BaseCartridgePistol
+  name: cartridge (11mm)
+  components:
+  - type: Tag
+    tags: [ NCCartridge11mm ]
+  - type: CartridgeAmmo
+    proto: NCBullet11mm
+
+- type: entity
+  id: NCCartridge12mm
+  parent: BaseCartridgeMagnum
+  name: cartridge (12mm)
+  components:
+  - type: Tag
+    tags: [ NCCartridge12mm ]
+  - type: CartridgeAmmo
+    proto: NCBullet12mm
+
+- type: entity
+  id: NCCartridge12mmMallorian
+  parent: BaseCartridgeMagnum
+  name: Mallorian cartridge (12mm)
+  description: A premium 12mm cartridge packaged for Mallorian Arms magazines.
+  components:
+  - type: Tag
+    tags: [ NCCartridge12mm ]
+  - type: CartridgeAmmo
+    proto: NCBullet12mm
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Mallorian_Arms/round.rsi
+    layers:
+    - state: round
+      map: [ "enum.AmmoVisualLayers.Base" ]
+  - type: SpentAmmoVisuals
+    state: round
+
+- type: entity
+  id: NCCartridge14mmBurya
+  parent: BaseCartridgeMagnum
+  name: armor-piercing cartridge (14mm Burya)
+  description: A proprietary high-pressure penetrator. Firing it from anything lighter than a Burya would be suicidal.
+  components:
+  - type: Tag
+    tags: [ NCCartridge14mmBurya ]
+  - type: CartridgeAmmo
+    proto: NCBullet14mmBurya
+
+- type: entity
+  id: NCCartridge556
+  parent: BaseCartridgeLightRifle
+  name: cartridge (5.56mm)
+  components:
+  - type: Tag
+    tags: [ NCCartridge556 ]
+  - type: CartridgeAmmo
+    proto: NCBullet556
+
+- type: entity
+  id: NCCartridge762
+  parent: BaseCartridgeRifle
+  name: cartridge (7.62mm)
+  components:
+  - type: Tag
+    tags: [ NCCartridge762 ]
+  - type: CartridgeAmmo
+    proto: NCBullet762
+
+- type: entity
+  id: NCShell12Gauge
+  parent: BaseShellShotgun
+  name: shell (12 gauge buckshot)
+  components:
+  - type: Tag
+    tags: [ NCShell12Gauge ]
+  - type: CartridgeAmmo
+    proto: NCPellet12GaugeSpread
+
+# Pistol magazines.
+- type: entity
+  id: NCMagazine9x19Pistol
+  parent: BaseMagazinePistol
+  name: pistol magazine (9x19mm)
+  components:
+  - type: Tag
+    tags: [ NCMagazine9x19Pistol ]
+  - type: BallisticAmmoProvider
+    proto: NCCartridge9x19
+    capacity: 12
+    whitelist:
+      tags: [ NCCartridge9x19 ]
+
+- type: entity
+  id: NCMagazine11mmPistol
+  parent: BaseMagazinePistol
+  name: heavy pistol magazine (11mm)
+  components:
+  - type: Tag
+    tags: [ NCMagazine11mmPistol ]
+  - type: BallisticAmmoProvider
+    proto: NCCartridge11mm
+    capacity: 8
+    whitelist:
+      tags: [ NCCartridge11mm ]
+
+- type: entity
+  id: NCMagazine12mmPistol
+  parent: BaseMagazinePistol
+  name: very heavy pistol magazine (12mm)
+  components:
+  - type: Tag
+    tags: [ NCMagazine12mmPistol ]
+  - type: BallisticAmmoProvider
+    proto: NCCartridge12mm
+    capacity: 6
+    whitelist:
+      tags: [ NCCartridge12mm ]
+
+- type: entity
+  id: NCMagazine12mmMallorian
+  parent: BaseMagazinePistol
+  name: Mallorian magazine (12mm)
+  description: A six-round proprietary Mallorian magazine using the standard NC 12mm cartridge family.
+  components:
+  - type: Tag
+    tags: [ NCMagazine12mmPistol ]
+  - type: BallisticAmmoProvider
+    proto: NCCartridge12mmMallorian
+    capacity: 6
+    whitelist:
+      tags: [ NCCartridge12mm ]
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Mallorian_Arms/mag.rsi
+    layers:
+    - state: mag-3
+      map: [ "enum.GunVisualLayers.Mag" ]
+  - type: MagazineVisuals
+    magState: mag
+    steps: 4
+    zeroVisible: true
+
+# SMG magazines.
+- type: entity
+  id: NCMagazine9x19SMG
+  parent: BaseMagazinePistolSubMachineGun
+  name: SMG magazine (9x19mm)
+  components:
+  - type: Tag
+    tags: [ NCMagazine9x19SMG ]
+  - type: BallisticAmmoProvider
+    proto: NCCartridge9x19
+    capacity: 30
+    whitelist:
+      tags: [ NCCartridge9x19 ]
+
+- type: entity
+  id: NCMagazine11mmSMG
+  parent: BaseMagazinePistolSubMachineGun
+  name: heavy SMG magazine (11mm)
+  components:
+  - type: Tag
+    tags: [ NCMagazine11mmSMG ]
+  - type: BallisticAmmoProvider
+    proto: NCCartridge11mm
+    capacity: 25
+    whitelist:
+      tags: [ NCCartridge11mm ]
+
+# Rifle, sniper and shotgun magazines.
+- type: entity
+  id: NCMagazine556Rifle
+  parent: BaseMagazineLightRifle
+  name: rifle magazine (5.56mm)
+  components:
+  - type: Tag
+    tags: [ NCMagazine556Rifle ]
+  - type: BallisticAmmoProvider
+    proto: NCCartridge556
+    capacity: 25
+    whitelist:
+      tags: [ NCCartridge556 ]
+
+- type: entity
+  id: NCMagazine762Sniper
+  parent: BaseMagazineRifle
+  name: sniper magazine (7.62mm)
+  components:
+  - type: Tag
+    tags: [ NCMagazine762Sniper ]
+  - type: BallisticAmmoProvider
+    proto: NCCartridge762
+    capacity: 5
+    whitelist:
+      tags: [ NCCartridge762 ]
+
+- type: entity
+  id: NCMagazine12GaugeCrusher
+  parent: BaseMagazineShotgun
+  name: Crusher magazine (12 gauge)
+  components:
+  - type: Tag
+    tags: [ NCMagazine12GaugeCrusher ]
+  - type: BallisticAmmoProvider
+    proto: NCShell12Gauge
+    capacity: 6
+    whitelist:
+      tags: [ NCShell12Gauge ]
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Shotguns/Militech_Crusher/mag.rsi
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-1
+      map: [ "enum.GunVisualLayers.Mag" ]
+
+# Loose-ammunition boxes provide caliber-level logistics independently of any one magazine pattern.
+- type: entity
+  id: NCBox9x19
+  parent: BaseMagazineBoxPistol
+  name: ammunition box (9x19mm)
+  description: A cardboard box containing 60 standard 9x19mm cartridges.
+  components:
+  - type: BallisticAmmoProvider
+    proto: NCCartridge9x19
+    capacity: 60
+    whitelist:
+      tags: [ NCCartridge9x19 ]
+  - type: Sprite
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-1
+      map: [ "enum.GunVisualLayers.Mag" ]
+
+- type: entity
+  id: NCBox11mm
+  parent: BaseMagazineBoxPistol
+  name: ammunition box (11mm)
+  description: A reinforced box containing 48 standard 11mm cartridges.
+  components:
+  - type: BallisticAmmoProvider
+    proto: NCCartridge11mm
+    capacity: 48
+    whitelist:
+      tags: [ NCCartridge11mm ]
+  - type: Sprite
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-1
+      map: [ "enum.GunVisualLayers.Mag" ]
+
+- type: entity
+  id: NCBox12mm
+  parent: BaseMagazineBoxPistol
+  name: ammunition box (12mm)
+  description: A reinforced box containing 36 very-heavy 12mm cartridges.
+  components:
+  - type: BallisticAmmoProvider
+    proto: NCCartridge12mm
+    capacity: 36
+    whitelist:
+      tags: [ NCCartridge12mm ]
+  - type: Sprite
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-1
+      map: [ "enum.GunVisualLayers.Mag" ]
+
+- type: entity
+  id: NCBox14mmBurya
+  parent: BaseMagazineBoxMagnum
+  name: ammunition box (14mm Burya)
+  description: A shock-resistant case containing 12 proprietary Burya penetrators.
+  components:
+  - type: BallisticAmmoProvider
+    proto: NCCartridge14mmBurya
+    capacity: 12
+    whitelist:
+      tags: [ NCCartridge14mmBurya ]
+
+- type: entity
+  id: NCBox556
+  parent: BaseMagazineBoxLightRifle
+  name: ammunition box (5.56mm)
+  description: A cardboard box containing 60 standard 5.56mm cartridges.
+  components:
+  - type: BallisticAmmoProvider
+    proto: NCCartridge556
+    capacity: 60
+    whitelist:
+      tags: [ NCCartridge556 ]
+  - type: Sprite
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-1
+      map: [ "enum.GunVisualLayers.Mag" ]
+
+- type: entity
+  id: NCBox762
+  parent: BaseMagazineBoxRifle
+  name: ammunition box (7.62mm)
+  description: A reinforced box containing 30 armor-piercing 7.62mm cartridges.
+  components:
+  - type: BallisticAmmoProvider
+    proto: NCCartridge762
+    capacity: 30
+    whitelist:
+      tags: [ NCCartridge762 ]
+  - type: Sprite
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-1
+      map: [ "enum.GunVisualLayers.Mag" ]
+
+- type: entity
+  id: NCBox12Gauge
+  parent: AmmoProviderShotgunShell
+  name: ammunition box (12 gauge)
+  description: A cardboard box containing 16 12 gauge buckshot shells.
+  components:
+  - type: BallisticAmmoProvider
+    proto: NCShell12Gauge
+    capacity: 16
+    whitelist:
+      tags: [ NCShell12Gauge ]
+  - type: Sprite
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-1
+      map: [ "enum.GunVisualLayers.Mag" ]

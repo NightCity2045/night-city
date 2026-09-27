@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  id: NCActionMallorianAltFire
+  name: nc-action-mallorian-alt-fire-name
+  description: nc-action-mallorian-alt-fire-description
+  components:
+  - type: Action
+    useDelay: 2.5
+    priority: 10
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Mallorian_Arms/big.rsi
+    state: icon
+  - type: TargetAction
+    checkCanAccess: false
+    range: 0
+  - type: WorldTargetAction
+    event: !type:NCMallorianAltFireActionEvent
