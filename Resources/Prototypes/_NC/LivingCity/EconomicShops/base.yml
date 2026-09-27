@@ -1,0 +1,128 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Catalog parents keep the large retail assortment data-driven without repeating economy policy fields.
+
+- type: ncEconomicShopCatalog
+  id: NCShopCatalogGun
+
+- type: ncEconomicShopCatalog
+  id: NCShopCatalogClothing
+
+- type: ncEconomicShopCatalog
+  id: NCShopCatalogFurniture
+
+- type: ncEconomicShopCatalog
+  id: NCShopCatalogConstruction
+
+- type: ncEconomicShopCatalog
+  id: NCShopCatalogPharmacy
+
+- type: ncEconomicShopCatalog
+  id: NCShopCatalogAuto
+
+# Add a product by inheriting the matching base below. Keep its entity, basePrice and any
+# shopInitialQuantity override in the same block; the storefront discovers it automatically.
+
+- type: ncItemDefinition
+  abstract: true
+  id: NCShopWeaponDefinitionBase
+  domain: WeaponAssembly
+  defaultCondition: 1000
+  legalStatus: Restricted
+  serialRequired: true
+  shopCatalog: NCShopCatalogGun
+  shopInitialQuantity: 8
+  catalogCategory: nc-economic-shop-category-weapons
+  catalogDescription: nc-economic-shop-description-generic
+
+- type: ncItemDefinition
+  abstract: true
+  id: NCShopAmmoDefinitionBase
+  domain: WeaponAssembly
+  defaultCondition: 1000
+  legalStatus: Restricted
+  shopCatalog: NCShopCatalogGun
+  shopInitialQuantity: 8
+  catalogCategory: nc-economic-shop-category-ammunition
+  catalogDescription: nc-economic-shop-description-pistol-magazine
+
+- type: ncItemDefinition
+  abstract: true
+  id: NCShopArmorDefinitionBase
+  domain: Generic
+  defaultCondition: 1000
+  legalStatus: Restricted
+  shopCatalog: NCShopCatalogGun
+  shopInitialQuantity: 8
+  catalogCategory: nc-economic-shop-category-armor
+  catalogDescription: nc-economic-shop-description-light-armor
+
+- type: ncItemDefinition
+  abstract: true
+  id: NCShopClothingDefinitionBase
+  domain: Generic
+  basePrice: 35
+  defaultCondition: 1000
+  shopCatalog: NCShopCatalogClothing
+  shopInitialQuantity: 2
+  catalogCategory: nc-economic-shop-category-clothing
+  catalogDescription: nc-economic-shop-description-everyday-clothing
+
+- type: ncItemDefinition
+  abstract: true
+  id: NCShopFurnitureDefinitionBase
+  domain: Generic
+  basePrice: 75
+  defaultCondition: 1000
+  materializedPrototype: BaseFlatpack
+  shopCatalog: NCShopCatalogFurniture
+  shopInitialQuantity: 1
+  catalogCategory: nc-economic-shop-category-furniture
+  catalogDescription: nc-economic-shop-description-flatpack
+
+- type: ncItemDefinition
+  abstract: true
+  id: NCShopConstructionDefinitionBase
+  domain: Generic
+  defaultCondition: 1000
+  shopCatalog: NCShopCatalogConstruction
+  shopInitialQuantity: 10
+  catalogCategory: nc-economic-shop-category-construction
+  catalogDescription: nc-economic-shop-description-construction-stack
+
+- type: ncItemDefinition
+  abstract: true
+  id: NCShopMedicineDefinitionBase
+  domain: Pharmaceutical
+  defaultCondition: 1000
+  legalStatus: Restricted
+  shopCatalog: NCShopCatalogPharmacy
+  shopInitialQuantity: 8
+  catalogCategory: nc-economic-shop-category-medicine
+  catalogDescription: nc-economic-shop-description-generic
+
+- type: ncItemDefinition
+  abstract: true
+  id: NCShopVehicleDefinitionBase
+  domain: Generic
+  defaultCondition: 1000
+  serialRequired: true
+  shopCatalog: NCShopCatalogAuto
+  shopInitialQuantity: 2
+  catalogCategory: nc-economic-shop-category-vehicles
+  catalogDescription: nc-economic-shop-description-generic
+  delivery: VehicleZone
+
+- type: ncItemDefinition
+  abstract: true
+  id: NCShopVehiclePartDefinitionBase
+  domain: Generic
+  basePrice: 150
+  defaultCondition: 1000
+  shopCatalog: NCShopCatalogAuto
+  shopInitialQuantity: 3
+  catalogCategory: nc-economic-shop-category-vehicle-parts
+  catalogDescription: nc-economic-shop-description-vehicle-part
+

@@ -1,0 +1,41 @@
+<!--
+SPDX-FileCopyrightText: 2026 Astro
+SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+-->
+<ContainerButton xmlns="https://spacestation14.io"
+                 xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
+                 HorizontalExpand="True" MinSize="250 118" RectClipContent="True">
+    <PanelContainer Name="CardPanel" HorizontalExpand="True" VerticalExpand="True">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#0B171D" BorderColor="#25505A" BorderThickness="1 1 1 2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="9 8" SeparationOverride="5">
+            <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                <PanelContainer MinSize="58 58">
+                    <PanelContainer.PanelOverride>
+                        <gfx:StyleBoxFlat BackgroundColor="#050C10" BorderColor="#1E414A" BorderThickness="1" />
+                    </PanelContainer.PanelOverride>
+                    <EntityPrototypeView Name="Preview" SetSize="52 52" HorizontalAlignment="Center"
+                                         VerticalAlignment="Center" />
+                </PanelContainer>
+                <BoxContainer Orientation="Vertical" HorizontalExpand="True">
+                    <Label Name="ProductName" FontColorOverride="#E7F4F6" HorizontalExpand="True"
+                           ClipText="True" />
+                    <Label Name="CategoryLabel" FontColorOverride="#72F4FF" HorizontalExpand="True"
+                           ClipText="True" />
+                </BoxContainer>
+                <Label Name="PriceLabel" FontColorOverride="#FFCF66" HorizontalAlignment="Right" />
+            </BoxContainer>
+            <PanelContainer HorizontalExpand="True">
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#0E2228" />
+                </PanelContainer.PanelOverride>
+                <BoxContainer Orientation="Horizontal" Margin="6 3">
+                    <Label Name="StockLabel" FontColorOverride="#7FA1A8" HorizontalExpand="True" />
+                    <Label Name="QualityLabel" FontColorOverride="#607E85" />
+                </BoxContainer>
+            </PanelContainer>
+        </BoxContainer>
+    </PanelContainer>
+</ContainerButton>

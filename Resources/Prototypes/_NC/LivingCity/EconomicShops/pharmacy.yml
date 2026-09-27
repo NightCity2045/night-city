@@ -1,0 +1,131 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Medicine for the expanded Night City medical system.
+- type: ncItemDefinition
+  parent: NCShopMedicineDefinitionBase
+  id: NCItemMedicineNCSyringeSurgicalAnesthetic
+  displayName: nc-reagent-name-surgical-anesthetic
+  stableKey: medicine.nc-syringe-surgical-anesthetic
+  domainPrototypeId: NCSyringeSurgicalAnesthetic
+  materializedPrototype: NCSyringeSurgicalAnesthetic
+  basePrice: 80
+
+- type: ncItemDefinition
+  parent: NCShopMedicineDefinitionBase
+  id: NCItemMedicineNCSyringeSedative
+  displayName: nc-reagent-name-sedative
+  stableKey: medicine.nc-syringe-sedative
+  domainPrototypeId: NCSyringeSedative
+  materializedPrototype: NCSyringeSedative
+  basePrice: 55
+
+- type: ncItemDefinition
+  parent: NCShopMedicineDefinitionBase
+  id: NCItemMedicineNCSyringeVasopressor
+  displayName: nc-reagent-name-vasopressor
+  stableKey: medicine.nc-syringe-vasopressor
+  domainPrototypeId: NCSyringeVasopressor
+  materializedPrototype: NCSyringeVasopressor
+  basePrice: 70
+
+- type: ncItemDefinition
+  parent: NCShopMedicineDefinitionBase
+  id: NCItemMedicineNCSyringeAntiarrhythmic
+  displayName: nc-reagent-name-antiarrhythmic
+  stableKey: medicine.nc-syringe-antiarrhythmic
+  domainPrototypeId: NCSyringeAntiarrhythmic
+  materializedPrototype: NCSyringeAntiarrhythmic
+  basePrice: 75
+
+- type: ncItemDefinition
+  parent: NCShopMedicineDefinitionBase
+  id: NCItemMedicineNCSyringeRespiratoryStimulant
+  displayName: nc-reagent-name-respiratory-stimulant
+  stableKey: medicine.nc-syringe-respiratory-stimulant
+  domainPrototypeId: NCSyringeRespiratoryStimulant
+  materializedPrototype: NCSyringeRespiratoryStimulant
+  basePrice: 65
+
+- type: ncItemDefinition
+  parent: NCShopMedicineDefinitionBase
+  id: NCItemMedicineNCSyringeAntitoxin
+  displayName: nc-reagent-name-antitoxin
+  stableKey: medicine.nc-syringe-antitoxin
+  domainPrototypeId: NCSyringeAntitoxin
+  materializedPrototype: NCSyringeAntitoxin
+  basePrice: 70
+
+- type: ncItemDefinition
+  parent: NCShopMedicineDefinitionBase
+  id: NCItemMedicineNCSyringeImmunosuppressant
+  displayName: nc-reagent-name-immunosuppressant
+  stableKey: medicine.nc-syringe-immunosuppressant
+  domainPrototypeId: NCSyringeImmunosuppressant
+  materializedPrototype: NCSyringeImmunosuppressant
+  basePrice: 85
+
+- type: ncItemDefinition
+  parent: NCShopMedicineDefinitionBase
+  id: NCItemMedicineNCSyringeProcoagulant
+  displayName: nc-reagent-name-procoagulant
+  stableKey: medicine.nc-syringe-procoagulant
+  domainPrototypeId: NCSyringeProcoagulant
+  materializedPrototype: NCSyringeProcoagulant
+  basePrice: 60
+
+- type: ncItemDefinition
+  parent: NCShopMedicineDefinitionBase
+  id: NCItemMedicineNCSyringeStimulant
+  displayName: nc-reagent-name-stimulant
+  stableKey: medicine.nc-syringe-stimulant
+  domainPrototypeId: NCSyringeStimulant
+  materializedPrototype: NCSyringeStimulant
+  basePrice: 70
+
+- type: ncItemDefinition
+  parent: NCShopMedicineDefinitionBase
+  id: NCItemMedicineNCSyringeAnticoagulant
+  displayName: nc-reagent-name-anticoagulant
+  stableKey: medicine.nc-syringe-anticoagulant
+  domainPrototypeId: NCSyringeAnticoagulant
+  materializedPrototype: NCSyringeAnticoagulant
+  basePrice: 65
+
+- type: ncItemDefinition
+  parent: NCShopMedicineDefinitionBase
+  id: NCItemMedicineNCSyringeVasodilator
+  displayName: nc-reagent-name-vasodilator
+  stableKey: medicine.nc-syringe-vasodilator
+  domainPrototypeId: NCSyringeVasodilator
+  materializedPrototype: NCSyringeVasodilator
+  basePrice: 60
+
+- type: ncItemDefinition
+  parent: NCShopMedicineDefinitionBase
+  id: NCItemMedicineNCSyringeCyberwareCoolantAgent
+  displayName: nc-reagent-name-cyberware-coolant-agent
+  stableKey: medicine.nc-syringe-cyberware-coolant-agent
+  domainPrototypeId: NCSyringeCyberwareCoolantAgent
+  materializedPrototype: NCSyringeCyberwareCoolantAgent
+  basePrice: 95
+
+- type: ncItemDefinition
+  parent: NCShopMedicineDefinitionBase
+  id: NCItemMedicineGauze
+  displayName: ent-Gauze
+  stableKey: medicine.gauze
+  domainPrototypeId: Gauze
+  materializedPrototype: Gauze
+  basePrice: 20
+
+- type: ncItemDefinition
+  parent: NCShopMedicineDefinitionBase
+  id: NCItemMedicineBrutepack
+  displayName: ent-Brutepack
+  stableKey: medicine.brutepack
+  domainPrototypeId: Brutepack
+  materializedPrototype: Brutepack
+  basePrice: 35
+

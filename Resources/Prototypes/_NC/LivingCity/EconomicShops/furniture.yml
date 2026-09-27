@@ -1,0 +1,614 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Furniture delivered as configurable flatpacks.
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureChairGreyscaleFlatpack
+  displayName: ent-ChairGreyscale
+  stableKey: furniture.chair-greyscale-flatpack
+  flatpackTarget: ChairGreyscale
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureStoolFlatpack
+  displayName: ent-Stool
+  stableKey: furniture.stool-flatpack
+  flatpackTarget: Stool
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureStoolBarFlatpack
+  displayName: ent-StoolBar
+  stableKey: furniture.stool-bar-flatpack
+  flatpackTarget: StoolBar
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureChairBrassFlatpack
+  displayName: ent-ChairBrass
+  stableKey: furniture.chair-brass-flatpack
+  flatpackTarget: ChairBrass
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureChairOfficeLightFlatpack
+  displayName: ent-ChairOfficeLight
+  stableKey: furniture.chair-office-light-flatpack
+  flatpackTarget: ChairOfficeLight
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureComfyChairFlatpack
+  displayName: ent-ComfyChair
+  stableKey: furniture.comfy-chair-flatpack
+  flatpackTarget: ComfyChair
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureChairPilotSeatFlatpack
+  displayName: ent-ChairPilotSeat
+  stableKey: furniture.chair-pilot-seat-flatpack
+  flatpackTarget: ChairPilotSeat
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureChairWoodFlatpack
+  displayName: ent-ChairWood
+  stableKey: furniture.chair-wood-flatpack
+  flatpackTarget: ChairWood
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureChairFoldingFlatpack
+  displayName: ent-ChairFolding
+  stableKey: furniture.chair-folding-flatpack
+  flatpackTarget: ChairFolding
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureSteelBenchFlatpack
+  displayName: ent-SteelBench
+  stableKey: furniture.steel-bench-flatpack
+  flatpackTarget: SteelBench
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureWoodenBenchFlatpack
+  displayName: ent-WoodenBench
+  stableKey: furniture.wooden-bench-flatpack
+  flatpackTarget: WoodenBench
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureMedicalBedFlatpack
+  displayName: ent-MedicalBed
+  stableKey: furniture.medical-bed-flatpack
+  flatpackTarget: MedicalBed
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureDogBedFlatpack
+  displayName: ent-DogBed
+  stableKey: furniture.dog-bed-flatpack
+  flatpackTarget: DogBed
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureMattressFlatpack
+  displayName: ent-Mattress
+  stableKey: furniture.mattress-flatpack
+  flatpackTarget: Mattress
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePsychBedFlatpack
+  displayName: ent-PsychBed
+  stableKey: furniture.psych-bed-flatpack
+  flatpackTarget: PsychBed
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureBenchComfyFlatpack
+  displayName: ent-BenchComfy
+  stableKey: furniture.bench-comfy-flatpack
+  flatpackTarget: BenchComfy
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureBenchColorfulComfyFlatpack
+  displayName: ent-BenchColorfulComfy
+  stableKey: furniture.bench-colorful-comfy-flatpack
+  flatpackTarget: BenchColorfulComfy
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureBenchRedComfyFlatpack
+  displayName: ent-BenchRedComfy
+  stableKey: furniture.bench-red-comfy-flatpack
+  flatpackTarget: BenchRedComfy
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureBenchBlueComfyFlatpack
+  displayName: ent-BenchBlueComfy
+  stableKey: furniture.bench-blue-comfy-flatpack
+  flatpackTarget: BenchBlueComfy
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureDresserFlatpack
+  displayName: ent-Dresser
+  stableKey: furniture.dresser-flatpack
+  flatpackTarget: Dresser
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureCarpetFlatpack
+  displayName: ent-Carpet
+  stableKey: furniture.carpet-flatpack
+  flatpackTarget: Carpet
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureCarpetBlackFlatpack
+  displayName: ent-CarpetBlack
+  stableKey: furniture.carpet-black-flatpack
+  flatpackTarget: CarpetBlack
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureCarpetPinkFlatpack
+  displayName: ent-CarpetPink
+  stableKey: furniture.carpet-pink-flatpack
+  flatpackTarget: CarpetPink
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureCarpetBlueFlatpack
+  displayName: ent-CarpetBlue
+  stableKey: furniture.carpet-blue-flatpack
+  flatpackTarget: CarpetBlue
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureCarpetGreenFlatpack
+  displayName: ent-CarpetGreen
+  stableKey: furniture.carpet-green-flatpack
+  flatpackTarget: CarpetGreen
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureCarpetOrangeFlatpack
+  displayName: ent-CarpetOrange
+  stableKey: furniture.carpet-orange-flatpack
+  flatpackTarget: CarpetOrange
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureCarpetSBlueFlatpack
+  displayName: ent-CarpetSBlue
+  stableKey: furniture.carpet-s-blue-flatpack
+  flatpackTarget: CarpetSBlue
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureCarpetPurpleFlatpack
+  displayName: ent-CarpetPurple
+  stableKey: furniture.carpet-purple-flatpack
+  flatpackTarget: CarpetPurple
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureCarpetCyanFlatpack
+  displayName: ent-CarpetCyan
+  stableKey: furniture.carpet-cyan-flatpack
+  flatpackTarget: CarpetCyan
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureCarpetWhiteFlatpack
+  displayName: ent-CarpetWhite
+  stableKey: furniture.carpet-white-flatpack
+  flatpackTarget: CarpetWhite
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant0Flatpack
+  displayName: ent-PottedPlant0
+  stableKey: furniture.potted-plant0-flatpack
+  flatpackTarget: PottedPlant0
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant1Flatpack
+  displayName: ent-PottedPlant1
+  stableKey: furniture.potted-plant1-flatpack
+  flatpackTarget: PottedPlant1
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant2Flatpack
+  displayName: ent-PottedPlant2
+  stableKey: furniture.potted-plant2-flatpack
+  flatpackTarget: PottedPlant2
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant3Flatpack
+  displayName: ent-PottedPlant3
+  stableKey: furniture.potted-plant3-flatpack
+  flatpackTarget: PottedPlant3
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant4Flatpack
+  displayName: ent-PottedPlant4
+  stableKey: furniture.potted-plant4-flatpack
+  flatpackTarget: PottedPlant4
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant5Flatpack
+  displayName: ent-PottedPlant5
+  stableKey: furniture.potted-plant5-flatpack
+  flatpackTarget: PottedPlant5
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant6Flatpack
+  displayName: ent-PottedPlant6
+  stableKey: furniture.potted-plant6-flatpack
+  flatpackTarget: PottedPlant6
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant7Flatpack
+  displayName: ent-PottedPlant7
+  stableKey: furniture.potted-plant7-flatpack
+  flatpackTarget: PottedPlant7
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant8Flatpack
+  displayName: ent-PottedPlant8
+  stableKey: furniture.potted-plant8-flatpack
+  flatpackTarget: PottedPlant8
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlantBioluminscentFlatpack
+  displayName: ent-PottedPlantBioluminscent
+  stableKey: furniture.potted-plant-bioluminscent-flatpack
+  flatpackTarget: PottedPlantBioluminscent
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant10Flatpack
+  displayName: ent-PottedPlant10
+  stableKey: furniture.potted-plant10-flatpack
+  flatpackTarget: PottedPlant10
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant11Flatpack
+  displayName: ent-PottedPlant11
+  stableKey: furniture.potted-plant11-flatpack
+  flatpackTarget: PottedPlant11
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant12Flatpack
+  displayName: ent-PottedPlant12
+  stableKey: furniture.potted-plant12-flatpack
+  flatpackTarget: PottedPlant12
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant13Flatpack
+  displayName: ent-PottedPlant13
+  stableKey: furniture.potted-plant13-flatpack
+  flatpackTarget: PottedPlant13
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant14Flatpack
+  displayName: ent-PottedPlant14
+  stableKey: furniture.potted-plant14-flatpack
+  flatpackTarget: PottedPlant14
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant15Flatpack
+  displayName: ent-PottedPlant15
+  stableKey: furniture.potted-plant15-flatpack
+  flatpackTarget: PottedPlant15
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant16Flatpack
+  displayName: ent-PottedPlant16
+  stableKey: furniture.potted-plant16-flatpack
+  flatpackTarget: PottedPlant16
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant17Flatpack
+  displayName: ent-PottedPlant17
+  stableKey: furniture.potted-plant17-flatpack
+  flatpackTarget: PottedPlant17
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant18Flatpack
+  displayName: ent-PottedPlant18
+  stableKey: furniture.potted-plant18-flatpack
+  flatpackTarget: PottedPlant18
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant19Flatpack
+  displayName: ent-PottedPlant19
+  stableKey: furniture.potted-plant19-flatpack
+  flatpackTarget: PottedPlant19
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant20Flatpack
+  displayName: ent-PottedPlant20
+  stableKey: furniture.potted-plant20-flatpack
+  flatpackTarget: PottedPlant20
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant21Flatpack
+  displayName: ent-PottedPlant21
+  stableKey: furniture.potted-plant21-flatpack
+  flatpackTarget: PottedPlant21
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant22Flatpack
+  displayName: ent-PottedPlant22
+  stableKey: furniture.potted-plant22-flatpack
+  flatpackTarget: PottedPlant22
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant23Flatpack
+  displayName: ent-PottedPlant23
+  stableKey: furniture.potted-plant23-flatpack
+  flatpackTarget: PottedPlant23
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant24Flatpack
+  displayName: ent-PottedPlant24
+  stableKey: furniture.potted-plant24-flatpack
+  flatpackTarget: PottedPlant24
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlantRDFlatpack
+  displayName: ent-PottedPlantRD
+  stableKey: furniture.potted-plant-rd-flatpack
+  flatpackTarget: PottedPlantRD
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant26Flatpack
+  displayName: ent-PottedPlant26
+  stableKey: furniture.potted-plant26-flatpack
+  flatpackTarget: PottedPlant26
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant27Flatpack
+  displayName: ent-PottedPlant27
+  stableKey: furniture.potted-plant27-flatpack
+  flatpackTarget: PottedPlant27
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant28Flatpack
+  displayName: ent-PottedPlant28
+  stableKey: furniture.potted-plant28-flatpack
+  flatpackTarget: PottedPlant28
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant29Flatpack
+  displayName: ent-PottedPlant29
+  stableKey: furniture.potted-plant29-flatpack
+  flatpackTarget: PottedPlant29
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurniturePottedPlant30Flatpack
+  displayName: ent-PottedPlant30
+  stableKey: furniture.potted-plant30-flatpack
+  flatpackTarget: PottedPlant30
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableReinforcedFlatpack
+  displayName: ent-TableReinforced
+  stableKey: furniture.table-reinforced-flatpack
+  flatpackTarget: TableReinforced
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableGlassFlatpack
+  displayName: ent-TableGlass
+  stableKey: furniture.table-glass-flatpack
+  flatpackTarget: TableGlass
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableCardFlatpack
+  displayName: ent-TableCard
+  stableKey: furniture.table-card-flatpack
+  flatpackTarget: TableCard
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableReinforcedGlassFlatpack
+  displayName: ent-TableReinforcedGlass
+  stableKey: furniture.table-reinforced-glass-flatpack
+  flatpackTarget: TableReinforcedGlass
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTablePlasmaGlassFlatpack
+  displayName: ent-TablePlasmaGlass
+  stableKey: furniture.table-plasma-glass-flatpack
+  flatpackTarget: TablePlasmaGlass
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableBrassFlatpack
+  displayName: ent-TableBrass
+  stableKey: furniture.table-brass-flatpack
+  flatpackTarget: TableBrass
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableWoodFlatpack
+  displayName: ent-TableWood
+  stableKey: furniture.table-wood-flatpack
+  flatpackTarget: TableWood
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableCarpetFlatpack
+  displayName: ent-TableCarpet
+  stableKey: furniture.table-carpet-flatpack
+  flatpackTarget: TableCarpet
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableStoneFlatpack
+  displayName: ent-TableStone
+  stableKey: furniture.table-stone-flatpack
+  flatpackTarget: TableStone
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableFancyBlueFlatpack
+  displayName: ent-TableFancyBlue
+  stableKey: furniture.table-fancy-blue-flatpack
+  flatpackTarget: TableFancyBlue
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableFancySkyBlueFlatpack
+  displayName: ent-TableFancySkyBlue
+  stableKey: furniture.table-fancy-sky-blue-flatpack
+  flatpackTarget: TableFancySkyBlue
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableFancyCyanFlatpack
+  displayName: ent-TableFancyCyan
+  stableKey: furniture.table-fancy-cyan-flatpack
+  flatpackTarget: TableFancyCyan
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableFancyBlackFlatpack
+  displayName: ent-TableFancyBlack
+  stableKey: furniture.table-fancy-black-flatpack
+  flatpackTarget: TableFancyBlack
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableFancyRedFlatpack
+  displayName: ent-TableFancyRed
+  stableKey: furniture.table-fancy-red-flatpack
+  flatpackTarget: TableFancyRed
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableFancyPurpleFlatpack
+  displayName: ent-TableFancyPurple
+  stableKey: furniture.table-fancy-purple-flatpack
+  flatpackTarget: TableFancyPurple
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableFancyPinkFlatpack
+  displayName: ent-TableFancyPink
+  stableKey: furniture.table-fancy-pink-flatpack
+  flatpackTarget: TableFancyPink
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableFancyGreenFlatpack
+  displayName: ent-TableFancyGreen
+  stableKey: furniture.table-fancy-green-flatpack
+  flatpackTarget: TableFancyGreen
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableFancyOrangeFlatpack
+  displayName: ent-TableFancyOrange
+  stableKey: furniture.table-fancy-orange-flatpack
+  flatpackTarget: TableFancyOrange
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableFancyWhiteFlatpack
+  displayName: ent-TableFancyWhite
+  stableKey: furniture.table-fancy-white-flatpack
+  flatpackTarget: TableFancyWhite
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableCounterWoodFlatpack
+  displayName: ent-TableCounterWood
+  stableKey: furniture.table-counter-wood-flatpack
+  flatpackTarget: TableCounterWood
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureTableCounterMetalFlatpack
+  displayName: ent-TableCounterMetal
+  stableKey: furniture.table-counter-metal-flatpack
+  flatpackTarget: TableCounterMetal
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureSinkFlatpack
+  displayName: ent-Sink
+  stableKey: furniture.sink-flatpack
+  flatpackTarget: Sink
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureSinkWideFlatpack
+  displayName: ent-SinkWide
+  stableKey: furniture.sink-wide-flatpack
+  flatpackTarget: SinkWide
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureSinkStemlessFlatpack
+  displayName: ent-SinkStemless
+  stableKey: furniture.sink-stemless-flatpack
+  flatpackTarget: SinkStemless
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureConstructedToiletFlatpack
+  displayName: ent-ConstructedToilet
+  stableKey: furniture.constructed-toilet-flatpack
+  flatpackTarget: ConstructedToilet
+
+- type: ncItemDefinition
+  parent: NCShopFurnitureDefinitionBase
+  id: NCItemFurnitureToiletGoldenEmptyFlatpack
+  displayName: ent-ToiletGoldenEmpty
+  stableKey: furniture.toilet-golden-empty-flatpack
+  flatpackTarget: ToiletGoldenEmpty
+

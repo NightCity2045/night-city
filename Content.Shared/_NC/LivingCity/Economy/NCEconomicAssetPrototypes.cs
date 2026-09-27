@@ -4,7 +4,10 @@
 
 using Robust.Shared.Prototypes;
 using Robust.Shared.Localization;
+using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype.Array;
+using Robust.Shared.Utility;
 using Content.Shared.Chemistry.Reagent;
+using Content.Shared._NC.LivingCity.Economy.Shop;
 
 namespace Content.Shared._NC.LivingCity.Economy;
 
@@ -27,13 +30,19 @@ public sealed partial class NCCommodityPrototype : IPrototype
     [DataField] public int MaterializedUnitsPerEntity { get; private set; } = 1;
     [DataField] public string MaterializedSolutionId { get; private set; } = string.Empty;
     [DataField] public ProtoId<ReagentPrototype>? MaterializedReagent { get; private set; }
+    [DataField] public LocId? CatalogCategory { get; private set; }
+    [DataField] public LocId? CatalogDescription { get; private set; }
 }
 
 [Prototype("ncItemDefinition")]
-public sealed partial class NCItemDefinitionPrototype : IPrototype
+public sealed partial class NCItemDefinitionPrototype : IPrototype, IInheritingPrototype
 {
+    [ParentDataField(typeof(AbstractPrototypeIdArraySerializer<NCItemDefinitionPrototype>))]
+    public string[]? Parents { get; private set; }
+    [AbstractDataField, NeverPushInheritance]
+    public bool Abstract { get; private set; }
     [IdDataField] public string ID { get; private set; } = default!;
-    [DataField(required: true)] public LocId DisplayName { get; private set; } = default!;
+    [DataField(required: true)] public string DisplayName { get; private set; } = string.Empty;
     [DataField(required: true)] public string StableKey { get; private set; } = string.Empty;
     [DataField] public NCEconomicAssetDomain Domain { get; private set; }
     [DataField] public string DomainPrototypeId { get; private set; } = string.Empty;
@@ -45,6 +54,24 @@ public sealed partial class NCItemDefinitionPrototype : IPrototype
     [DataField] public bool SerialRequired { get; private set; }
     [DataField] public int MaximumInstalledParts { get; private set; } = 18;
     [DataField] public List<ProtoId<NCItemDefinitionPrototype>> AllowedInstalledPartDefinitions { get; private set; } = [];
+    [DataField] public LocId? CatalogCategory { get; private set; }
+    [DataField] public LocId? CatalogDescription { get; private set; }
+    [DataField] public NCEconomicDeliveryKind Delivery { get; private set; }
+    /// <summary>Optional furniture prototype configured onto a delivered generic flatpack.</summary>
+    [DataField] public EntProtoId? FlatpackTarget { get; private set; }
+    /// <summary>Optional storefront catalog that automatically includes this definition.</summary>
+    [DataField] public ProtoId<NCEconomicShopCatalogPrototype>? ShopCatalog { get; private set; }
+    /// <summary>Finite stock created for the linked storefront catalog when it is bootstrapped.</summary>
+    [DataField] public int ShopInitialQuantity { get; private set; }
+}
+
+/// <summary>
+/// Selects the authoritative physical fulfillment path after an economic settlement succeeds.
+/// </summary>
+public enum NCEconomicDeliveryKind : byte
+{
+    Counter,
+    VehicleZone,
 }
 
 [Prototype("ncEconomicAssetPolicy")]

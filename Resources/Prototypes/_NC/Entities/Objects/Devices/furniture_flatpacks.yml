@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureChairFlatpack
+  name: chair flatpack
+  description: A compact package containing a basic chair.
+  components:
+  - type: Flatpack
+    entity: Chair
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureOfficeChairFlatpack
+  name: office chair flatpack
+  description: A compact package containing a dark office chair.
+  components:
+  - type: Flatpack
+    entity: ChairOfficeDark
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureTableFlatpack
+  name: table flatpack
+  description: A compact package containing a metal table.
+  components:
+  - type: Flatpack
+    entity: Table
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureBedFlatpack
+  name: bed flatpack
+  description: A compact package containing a standard bed.
+  components:
+  - type: Flatpack
+    entity: Bed
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureBookshelfFlatpack
+  name: bookshelf flatpack
+  description: A compact package containing an empty bookshelf.
+  components:
+  - type: Flatpack
+    entity: Bookshelf
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCFurnitureRackFlatpack
+  name: rack flatpack
+  description: A compact package containing an industrial storage rack.
+  components:
+  - type: Flatpack
+    entity: Rack

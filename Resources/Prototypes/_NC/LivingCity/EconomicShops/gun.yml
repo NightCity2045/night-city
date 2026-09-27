@@ -1,0 +1,139 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Pistols, compatible ammunition and light armor.
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponCobraPistol
+  displayName: ent-WeaponPistolCobra
+  stableKey: weapon.weapon-pistol-cobra
+  domainPrototypeId: WeaponPistolCobra
+  materializedPrototype: WeaponPistolCobra
+  basePrice: 950
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponN1984Pistol
+  displayName: ent-WeaponPistolN1984
+  stableKey: weapon.weapon-pistol-n1984
+  domainPrototypeId: WeaponPistolN1984
+  materializedPrototype: WeaponPistolN1984
+  basePrice: 1250
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponFlintlockPistol
+  displayName: ent-WeaponPistolFlintlock
+  stableKey: weapon.weapon-pistol-flintlock
+  domainPrototypeId: WeaponPistolFlintlock
+  materializedPrototype: WeaponPistolFlintlock
+  basePrice: 600
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoMagazinePistolIncendiary
+  displayName: ent-MagazinePistolIncendiary
+  stableKey: ammunition.magazine-pistol-incendiary
+  domainPrototypeId: MagazinePistolIncendiary
+  materializedPrototype: MagazinePistolIncendiary
+  basePrice: 55
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoMagazinePistolPractice
+  displayName: ent-MagazinePistolPractice
+  stableKey: ammunition.magazine-pistol-practice
+  domainPrototypeId: MagazinePistolPractice
+  materializedPrototype: MagazinePistolPractice
+  basePrice: 18
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoMagazinePistolUranium
+  displayName: ent-MagazinePistolUranium
+  stableKey: ammunition.magazine-pistol-uranium
+  domainPrototypeId: MagazinePistolUranium
+  materializedPrototype: MagazinePistolUranium
+  basePrice: 75
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoMagazinePistolHighCapacity
+  displayName: ent-MagazinePistolHighCapacity
+  stableKey: ammunition.magazine-pistol-high-capacity
+  domainPrototypeId: MagazinePistolHighCapacity
+  materializedPrototype: MagazinePistolHighCapacity
+  basePrice: 45
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoMagazinePistolHighCapacityPractice
+  displayName: ent-MagazinePistolHighCapacityPractice
+  stableKey: ammunition.magazine-pistol-high-capacity-practice
+  domainPrototypeId: MagazinePistolHighCapacityPractice
+  materializedPrototype: MagazinePistolHighCapacityPractice
+  basePrice: 24
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoMagazinePistolCaselessRifle
+  displayName: ent-MagazinePistolCaselessRifle
+  stableKey: ammunition.magazine-pistol-caseless-rifle
+  domainPrototypeId: MagazinePistolCaselessRifle
+  materializedPrototype: MagazinePistolCaselessRifle
+  basePrice: 50
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoMagazinePistolCaselessRiflePractice
+  displayName: ent-MagazinePistolCaselessRiflePractice
+  stableKey: ammunition.magazine-pistol-caseless-rifle-practice
+  domainPrototypeId: MagazinePistolCaselessRiflePractice
+  materializedPrototype: MagazinePistolCaselessRiflePractice
+  basePrice: 24
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoMagazineMagnum
+  displayName: ent-MagazineMagnum
+  stableKey: ammunition.magazine-magnum
+  domainPrototypeId: MagazineMagnum
+  materializedPrototype: MagazineMagnum
+  basePrice: 50
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoMagazineMagnumPractice
+  displayName: ent-MagazineMagnumPractice
+  stableKey: ammunition.magazine-magnum-practice
+  domainPrototypeId: MagazineMagnumPractice
+  materializedPrototype: MagazineMagnumPractice
+  basePrice: 25
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoMagazineMagnumUranium
+  displayName: ent-MagazineMagnumUranium
+  stableKey: ammunition.magazine-magnum-uranium
+  domainPrototypeId: MagazineMagnumUranium
+  materializedPrototype: MagazineMagnumUranium
+  basePrice: 90
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoMagazineMagnumAP
+  displayName: ent-MagazineMagnumAP
+  stableKey: ammunition.magazine-magnum-ap
+  domainPrototypeId: MagazineMagnumAP
+  materializedPrototype: MagazineMagnumAP
+  basePrice: 110
+
+- type: ncItemDefinition
+  parent: NCShopArmorDefinitionBase
+  id: NCItemArmorClothingOuterArmorBasicSlim
+  displayName: ent-ClothingOuterArmorBasicSlim
+  stableKey: armor.clothing-outer-armor-basic-slim
+  materializedPrototype: ClothingOuterArmorBasicSlim
+  basePrice: 240
+
