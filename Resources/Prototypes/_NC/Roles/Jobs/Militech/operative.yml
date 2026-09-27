@@ -25,4 +25,4 @@
     eyes: ClothingEyesGlassesSecurity
     id: SecurityPDA
     belt: ClothingBeltSecurityFilled
-    outerClothing: ClothingOuterArmorBasic
+    armor: ClothingOuterArmorBasic

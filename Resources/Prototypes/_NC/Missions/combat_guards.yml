@@ -33,7 +33,7 @@
   equipment:
     jumpsuit: ClothingUniformJumpsuitSecGrey
     shoes: ClothingShoesBootsJack
-    outerClothing: ClothingOuterArmorBasic
+    armor: ClothingOuterArmorBasic
   inhand:
   - WeaponPistolMk58
 
@@ -51,7 +51,7 @@
   equipment:
     jumpsuit: ClothingUniformJumpsuitSecGrey
     shoes: ClothingShoesBootsJack
-    outerClothing: ClothingOuterArmorBasic
+    armor: ClothingOuterArmorBasic
   inhand:
   - WeaponSubMachineGunDrozd
 
@@ -69,7 +69,7 @@
   equipment:
     jumpsuit: ClothingUniformJumpsuitSecGrey
     shoes: ClothingShoesBootsJack
-    outerClothing: ClothingOuterArmorBasic
+    armor: ClothingOuterArmorBasic
     head: ClothingHeadHelmetSwatSyndicate
   inhand:
   - WeaponRifleLecter
@@ -88,7 +88,7 @@
   equipment:
     jumpsuit: ClothingUniformJumpsuitSecGrey
     shoes: ClothingShoesBootsJack
-    outerClothing: ClothingOuterArmorBulletproof
+    armor: ClothingOuterArmorBulletproof
     head: ClothingHeadHelmetSwatSyndicate
   inhand:
   - WeaponRifleLecter

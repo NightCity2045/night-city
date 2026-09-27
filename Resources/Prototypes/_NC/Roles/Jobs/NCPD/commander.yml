@@ -27,7 +27,7 @@
     gloves: ClothingHandsGlovesCombat
     id: NCPDCommanderPDA
     belt: ClothingBeltSecurityFilled
-    outerClothing: ClothingOuterArmorBasic
+    armor: ClothingOuterArmorBasic
   storage:
     back:
     - WantedListCartridge

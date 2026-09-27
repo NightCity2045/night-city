@@ -34,6 +34,10 @@ public sealed partial class ClientClothingSystem : ClothingSystem
         {"ears", "EARS"},
         {"mask", "MASK"},
         {"outerClothing", "OUTERCLOTHING"},
+        // NC-Edit-Start: New inventory layers reuse established RSI state names.
+        {"armor", "OUTERCLOTHING"},
+        {"pants", "LEGS"},
+        // NC-Edit-End
         {Jumpsuit, "INNERCLOTHING"},
         {"neck", "NECK"},
         {"back", "BACKPACK"},

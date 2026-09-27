@@ -26,7 +26,7 @@
     eyes: ClothingEyesGlassesSecurity
     id: NCPDLieutenantPDA
     belt: ClothingBeltSecurityFilled
-    outerClothing: ClothingOuterArmorBasic
+    armor: ClothingOuterArmorBasic
   storage:
     back:
     - WantedListCartridge

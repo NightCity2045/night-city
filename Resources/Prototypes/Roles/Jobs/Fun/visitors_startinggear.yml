@@ -15,7 +15,7 @@
     belt: WeaponDisabler
     back: ClothingBackpackCaptain
     ears: ClothingHeadsetAltCommand
-    outerClothing: ClothingOuterArmorCaptainCarapace
+    armor: ClothingOuterArmorCaptainCarapace # NC
     pocket1: WeaponDisabler
 
 - type: startingGear
@@ -31,7 +31,7 @@
     belt: WeaponDisabler
     back: ClothingBackpackSatchelCaptain
     ears: ClothingHeadsetAltCommand
-    outerClothing: ClothingOuterArmorCaptainCarapace
+    armor: ClothingOuterArmorCaptainCarapace # NC
     pocket1: WeaponDisabler
 
 - type: startingGear
@@ -226,7 +226,7 @@
     back: ClothingBackpackSecurity
     ears: ClothingHeadsetSecurity
     eyes: ClothingEyesGlassesSecurity
-    outerClothing: ClothingOuterArmorBasic
+    armor: ClothingOuterArmorBasic # NC
     pocket1: WeaponPistolMk58
     pocket2: MagazinePistol
   inhand:
@@ -244,7 +244,7 @@
     back: ClothingBackpackSatchelSecurity
     ears: ClothingHeadsetSecurity
     eyes: ClothingEyesGlassesSecurity
-    outerClothing: ClothingOuterArmorBasicSlim
+    armor: ClothingOuterArmorBasicSlim # NC
     pocket1: WeaponPistolMk58
     pocket2: MagazinePistol
   inhand:
@@ -261,7 +261,7 @@
     back: ClothingBackpackSecurity
     ears: ClothingHeadsetSecurity
     eyes: ClothingEyesGlassesSecurity
-    outerClothing: ClothingOuterArmorBasic
+    armor: ClothingOuterArmorBasic # NC
     pocket1: WeaponPistolMk58
     pocket2: MagazinePistol
   inhand:
@@ -279,7 +279,7 @@
     back: ClothingBackpackSatchelSecurity
     ears: ClothingHeadsetSecurity
     eyes: ClothingEyesGlassesSecurity
-    outerClothing: ClothingOuterArmorBasicSlim
+    armor: ClothingOuterArmorBasicSlim # NC
     pocket1: WeaponPistolMk58
     pocket2: MagazinePistol
   inhand:
@@ -315,7 +315,7 @@
     back: ClothingBackpackSatchelSecurity
     ears: ClothingHeadsetSecurity
     eyes: ClothingEyesGlassesSecurity
-    outerClothing: ClothingOuterVestDetective
+    armor: ClothingOuterVestDetective # NC
     pocket1: ForensicScanner
     pocket2: ForensicPad
   inhand:
@@ -935,7 +935,7 @@
     suitstorage: WeaponShotgunDoubleBarreledRubber
     ears: ClothingHeadsetService
     eyes: ClothingEyesGlassesSunglasses
-    outerClothing: ClothingOuterArmorBasicSlim
+    armor: ClothingOuterArmorBasicSlim # NC
     pocket1: DrinkVodkaBottleFull
     pocket2: BarSpoon
 
@@ -1874,7 +1874,7 @@
     head: ClothingHeadHatPirate
     ears: ClothingHeadsetAltFreelancer
     neck: ClothingNeckCloakPirateCap
-    outerClothing: ClothingOuterVestWeb
+    armor: ClothingOuterVestWeb # NC
     pocket1: WeaponRevolverPirate
 
 ### Other
@@ -1889,7 +1889,7 @@
     back: ClothingBackpackMerc
     belt: ClothingBeltMercWebbing
     ears: ClothingHeadsetGrey
-    outerClothing: ClothingOuterVestWebMerc
+    armor: ClothingOuterVestWebMerc # NC
     pocket1: WeaponLaserSvalinn
     pocket2: RadioHandheld
 

@@ -1,0 +1,788 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Dedicated electronics keep access requirements intact when an airlock is built, serviced, or reconstructed.
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsNCGeneral
+  suffix: Night City General, Locked
+  components:
+  - type: AccessReader
+    access: [[NCGeneral]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsNCPDPatrol
+  suffix: NCPD Patrol, Locked
+  components:
+  - type: AccessReader
+    access: [[NCPD_Patrol]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsNCPDArmory
+  suffix: NCPD Armory, Locked
+  components:
+  - type: AccessReader
+    access: [[NCPD_Armory]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsNCPDInvestigations
+  suffix: NCPD Investigations, Locked
+  components:
+  - type: AccessReader
+    access: [[NCPD_Investigations]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsNCPDCommand
+  suffix: NCPD Command, Locked
+  components:
+  - type: AccessReader
+    access: [[NCPD_Command]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsTraumaMedical
+  suffix: Trauma Team Medical, Locked
+  components:
+  - type: AccessReader
+    access: [[Trauma_Medical]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsTraumaMorgue
+  suffix: Trauma Team Morgue, Locked
+  components:
+  - type: AccessReader
+    access: [[Trauma_Morgue]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsTraumaHangar
+  suffix: Trauma Team Hangar, Locked
+  components:
+  - type: AccessReader
+    access: [[Trauma_Hangar]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsTraumaCommand
+  suffix: Trauma Team Command, Locked
+  components:
+  - type: AccessReader
+    access: [[Trauma_Command]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsTraumaOperative
+  suffix: Trauma Team Operations, Locked
+  components:
+  - type: AccessReader
+    access: [[Trauma_Operative]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsMedicalGeneral
+  suffix: Medical General, Locked
+  components:
+  - type: AccessReader
+    access: [[Medical_General]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsMedicalMorgue
+  suffix: Medical Morgue, Locked
+  components:
+  - type: AccessReader
+    access: [[Medical_Morgue]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsMedicalCommand
+  suffix: Medical Command, Locked
+  components:
+  - type: AccessReader
+    access: [[Medical_Command]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsBiotechDirector
+  suffix: Biotechnica Director, Locked
+  components:
+  - type: AccessReader
+    access: [[Biotech_Director]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsBiotechHeadOfDepartment
+  suffix: Biotechnica Department Head, Locked
+  components:
+  - type: AccessReader
+    access: [[Biotech_HeadOfDepartment]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsBiotechBotany
+  suffix: Biotechnica Botany, Locked
+  components:
+  - type: AccessReader
+    access: [[Biotech_Botany]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsBiotechMedTech
+  suffix: Biotechnica Medical, Locked
+  components:
+  - type: AccessReader
+    access: [[Biotech_MedTech]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsBiotechTech
+  suffix: Biotechnica Technical, Locked
+  components:
+  - type: AccessReader
+    access: [[Biotech_Tech]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsBiotechOperative
+  suffix: Biotechnica Operations, Locked
+  components:
+  - type: AccessReader
+    access: [[Biotech_Operative]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsBiotechStaff
+  suffix: Biotechnica Staff, Locked
+  components:
+  - type: AccessReader
+    access: [[Biotech_Staff]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsBiotechGeneral
+  suffix: Biotechnica General, Locked
+  components:
+  - type: AccessReader
+    access: [[Biotech_General]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsMilitechCommand
+  suffix: Militech Command, Locked
+  components:
+  - type: AccessReader
+    access: [[Militech_Command]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsMilitechOperative
+  suffix: Militech Operations, Locked
+  components:
+  - type: AccessReader
+    access: [[Militech_Operative]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsMilitechArmory
+  suffix: Militech Armory, Locked
+  components:
+  - type: AccessReader
+    access: [[Militech_Armory]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsMilitechTech
+  suffix: Militech Technical, Locked
+  components:
+  - type: AccessReader
+    access: [[Militech_Tech]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsMilitechMedical
+  suffix: Militech Medical, Locked
+  components:
+  - type: AccessReader
+    access: [[Militech_Medical]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsMilitechStaff
+  suffix: Militech Staff, Locked
+  components:
+  - type: AccessReader
+    access: [[Militech_Staff]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsMilitechGeneral
+  suffix: Militech General, Locked
+  components:
+  - type: AccessReader
+    access: [[Militech_General]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsZhirafaGeneral
+  suffix: Zhirafa General, Locked
+  components:
+  - type: AccessReader
+    access: [[Zhirafa_General]]
+
+- type: entity
+  parent: DoorElectronics
+  id: NCDoorElectronicsZhirafaCommand
+  suffix: Zhirafa Management, Locked
+  components:
+  - type: AccessReader
+    access: [[Zhirafa_Command]]
+
+# Map-placeable solid and glass variants for every Night City access level.
+
+- type: entity
+  parent: Airlock
+  id: NCAirlockNCGeneralLocked
+  suffix: Night City General, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsNCGeneral ]
+
+- type: entity
+  parent: AirlockStandardGlass
+  id: NCAirlockNCGeneralGlassLocked
+  suffix: Night City General, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsNCGeneral ]
+
+- type: entity
+  parent: AirlockSecurity
+  id: NCAirlockNCPDPatrolLocked
+  suffix: NCPD Patrol, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsNCPDPatrol ]
+
+- type: entity
+  parent: AirlockSecurityGlass
+  id: NCAirlockNCPDPatrolGlassLocked
+  suffix: NCPD Patrol, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsNCPDPatrol ]
+
+- type: entity
+  parent: AirlockSecurity
+  id: NCAirlockNCPDArmoryLocked
+  suffix: NCPD Armory, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsNCPDArmory ]
+
+- type: entity
+  parent: AirlockSecurityGlass
+  id: NCAirlockNCPDArmoryGlassLocked
+  suffix: NCPD Armory, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsNCPDArmory ]
+
+- type: entity
+  parent: AirlockSecurity
+  id: NCAirlockNCPDInvestigationsLocked
+  suffix: NCPD Investigations, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsNCPDInvestigations ]
+
+- type: entity
+  parent: AirlockSecurityGlass
+  id: NCAirlockNCPDInvestigationsGlassLocked
+  suffix: NCPD Investigations, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsNCPDInvestigations ]
+
+- type: entity
+  parent: AirlockSecurity
+  id: NCAirlockNCPDCommandLocked
+  suffix: NCPD Command, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsNCPDCommand ]
+
+- type: entity
+  parent: AirlockSecurityGlass
+  id: NCAirlockNCPDCommandGlassLocked
+  suffix: NCPD Command, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsNCPDCommand ]
+
+- type: entity
+  parent: AirlockMedical
+  id: NCAirlockTraumaMedicalLocked
+  suffix: Trauma Team Medical, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsTraumaMedical ]
+
+- type: entity
+  parent: AirlockMedicalGlass
+  id: NCAirlockTraumaMedicalGlassLocked
+  suffix: Trauma Team Medical, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsTraumaMedical ]
+
+- type: entity
+  parent: AirlockMedical
+  id: NCAirlockTraumaMorgueLocked
+  suffix: Trauma Team Morgue, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsTraumaMorgue ]
+
+- type: entity
+  parent: AirlockMedicalGlass
+  id: NCAirlockTraumaMorgueGlassLocked
+  suffix: Trauma Team Morgue, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsTraumaMorgue ]
+
+- type: entity
+  parent: AirlockMedical
+  id: NCAirlockTraumaHangarLocked
+  suffix: Trauma Team Hangar, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsTraumaHangar ]
+
+- type: entity
+  parent: AirlockMedicalGlass
+  id: NCAirlockTraumaHangarGlassLocked
+  suffix: Trauma Team Hangar, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsTraumaHangar ]
+
+- type: entity
+  parent: AirlockMedical
+  id: NCAirlockTraumaCommandLocked
+  suffix: Trauma Team Command, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsTraumaCommand ]
+
+- type: entity
+  parent: AirlockMedicalGlass
+  id: NCAirlockTraumaCommandGlassLocked
+  suffix: Trauma Team Command, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsTraumaCommand ]
+
+- type: entity
+  parent: AirlockMedical
+  id: NCAirlockTraumaOperativeLocked
+  suffix: Trauma Team Operations, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsTraumaOperative ]
+
+- type: entity
+  parent: AirlockMedicalGlass
+  id: NCAirlockTraumaOperativeGlassLocked
+  suffix: Trauma Team Operations, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsTraumaOperative ]
+
+- type: entity
+  parent: AirlockMedical
+  id: NCAirlockMedicalGeneralLocked
+  suffix: Medical General, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMedicalGeneral ]
+
+- type: entity
+  parent: AirlockMedicalGlass
+  id: NCAirlockMedicalGeneralGlassLocked
+  suffix: Medical General, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMedicalGeneral ]
+
+- type: entity
+  parent: AirlockMedical
+  id: NCAirlockMedicalMorgueLocked
+  suffix: Medical Morgue, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMedicalMorgue ]
+
+- type: entity
+  parent: AirlockMedicalGlass
+  id: NCAirlockMedicalMorgueGlassLocked
+  suffix: Medical Morgue, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMedicalMorgue ]
+
+- type: entity
+  parent: AirlockMedical
+  id: NCAirlockMedicalCommandLocked
+  suffix: Medical Command, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMedicalCommand ]
+
+- type: entity
+  parent: AirlockMedicalGlass
+  id: NCAirlockMedicalCommandGlassLocked
+  suffix: Medical Command, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMedicalCommand ]
+
+- type: entity
+  parent: AirlockScience
+  id: NCAirlockBiotechDirectorLocked
+  suffix: Biotechnica Director, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechDirector ]
+
+- type: entity
+  parent: AirlockScienceGlass
+  id: NCAirlockBiotechDirectorGlassLocked
+  suffix: Biotechnica Director, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechDirector ]
+
+- type: entity
+  parent: AirlockScience
+  id: NCAirlockBiotechHeadOfDepartmentLocked
+  suffix: Biotechnica Department Head, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechHeadOfDepartment ]
+
+- type: entity
+  parent: AirlockScienceGlass
+  id: NCAirlockBiotechHeadOfDepartmentGlassLocked
+  suffix: Biotechnica Department Head, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechHeadOfDepartment ]
+
+- type: entity
+  parent: AirlockScience
+  id: NCAirlockBiotechBotanyLocked
+  suffix: Biotechnica Botany, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechBotany ]
+
+- type: entity
+  parent: AirlockScienceGlass
+  id: NCAirlockBiotechBotanyGlassLocked
+  suffix: Biotechnica Botany, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechBotany ]
+
+- type: entity
+  parent: AirlockScience
+  id: NCAirlockBiotechMedTechLocked
+  suffix: Biotechnica Medical, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechMedTech ]
+
+- type: entity
+  parent: AirlockScienceGlass
+  id: NCAirlockBiotechMedTechGlassLocked
+  suffix: Biotechnica Medical, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechMedTech ]
+
+- type: entity
+  parent: AirlockScience
+  id: NCAirlockBiotechTechLocked
+  suffix: Biotechnica Technical, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechTech ]
+
+- type: entity
+  parent: AirlockScienceGlass
+  id: NCAirlockBiotechTechGlassLocked
+  suffix: Biotechnica Technical, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechTech ]
+
+- type: entity
+  parent: AirlockScience
+  id: NCAirlockBiotechOperativeLocked
+  suffix: Biotechnica Operations, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechOperative ]
+
+- type: entity
+  parent: AirlockScienceGlass
+  id: NCAirlockBiotechOperativeGlassLocked
+  suffix: Biotechnica Operations, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechOperative ]
+
+- type: entity
+  parent: AirlockScience
+  id: NCAirlockBiotechStaffLocked
+  suffix: Biotechnica Staff, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechStaff ]
+
+- type: entity
+  parent: AirlockScienceGlass
+  id: NCAirlockBiotechStaffGlassLocked
+  suffix: Biotechnica Staff, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechStaff ]
+
+- type: entity
+  parent: AirlockScience
+  id: NCAirlockBiotechGeneralLocked
+  suffix: Biotechnica General, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechGeneral ]
+
+- type: entity
+  parent: AirlockScienceGlass
+  id: NCAirlockBiotechGeneralGlassLocked
+  suffix: Biotechnica General, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsBiotechGeneral ]
+
+- type: entity
+  parent: AirlockSecurity
+  id: NCAirlockMilitechCommandLocked
+  suffix: Militech Command, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMilitechCommand ]
+
+- type: entity
+  parent: AirlockSecurityGlass
+  id: NCAirlockMilitechCommandGlassLocked
+  suffix: Militech Command, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMilitechCommand ]
+
+- type: entity
+  parent: AirlockSecurity
+  id: NCAirlockMilitechOperativeLocked
+  suffix: Militech Operations, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMilitechOperative ]
+
+- type: entity
+  parent: AirlockSecurityGlass
+  id: NCAirlockMilitechOperativeGlassLocked
+  suffix: Militech Operations, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMilitechOperative ]
+
+- type: entity
+  parent: AirlockSecurity
+  id: NCAirlockMilitechArmoryLocked
+  suffix: Militech Armory, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMilitechArmory ]
+
+- type: entity
+  parent: AirlockSecurityGlass
+  id: NCAirlockMilitechArmoryGlassLocked
+  suffix: Militech Armory, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMilitechArmory ]
+
+- type: entity
+  parent: AirlockSecurity
+  id: NCAirlockMilitechTechLocked
+  suffix: Militech Technical, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMilitechTech ]
+
+- type: entity
+  parent: AirlockSecurityGlass
+  id: NCAirlockMilitechTechGlassLocked
+  suffix: Militech Technical, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMilitechTech ]
+
+- type: entity
+  parent: AirlockSecurity
+  id: NCAirlockMilitechMedicalLocked
+  suffix: Militech Medical, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMilitechMedical ]
+
+- type: entity
+  parent: AirlockSecurityGlass
+  id: NCAirlockMilitechMedicalGlassLocked
+  suffix: Militech Medical, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMilitechMedical ]
+
+- type: entity
+  parent: AirlockSecurity
+  id: NCAirlockMilitechStaffLocked
+  suffix: Militech Staff, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMilitechStaff ]
+
+- type: entity
+  parent: AirlockSecurityGlass
+  id: NCAirlockMilitechStaffGlassLocked
+  suffix: Militech Staff, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMilitechStaff ]
+
+- type: entity
+  parent: AirlockSecurity
+  id: NCAirlockMilitechGeneralLocked
+  suffix: Militech General, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMilitechGeneral ]
+
+- type: entity
+  parent: AirlockSecurityGlass
+  id: NCAirlockMilitechGeneralGlassLocked
+  suffix: Militech General, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsMilitechGeneral ]
+
+- type: entity
+  parent: Airlock
+  id: NCAirlockZhirafaGeneralLocked
+  suffix: Zhirafa General, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsZhirafaGeneral ]
+
+- type: entity
+  parent: AirlockStandardGlass
+  id: NCAirlockZhirafaGeneralGlassLocked
+  suffix: Zhirafa General, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsZhirafaGeneral ]
+
+- type: entity
+  parent: Airlock
+  id: NCAirlockZhirafaCommandLocked
+  suffix: Zhirafa Management, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsZhirafaCommand ]
+
+- type: entity
+  parent: AirlockStandardGlass
+  id: NCAirlockZhirafaCommandGlassLocked
+  suffix: Zhirafa Management, Glass, Locked
+  components:
+  - type: ContainerFill
+    containers:
+      board: [ NCDoorElectronicsZhirafaCommand ]
+

@@ -14,6 +14,9 @@
     sprite: Clothing/OuterClothing/Armor/security.rsi
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/security.rsi
+    # NC-Edit-Start: Vests occupy the dedicated armor layer, not the jacket layer.
+    slots: [ armor ]
+    # NC-Edit-End
   - type: Armor #Based on /tg/ but slightly compensated to fit the fact that armor stacks in SS14.
     modifiers:
       coefficients:
@@ -26,7 +29,9 @@
 
 #Standard armor vest, allowed for security only
 - type: entity
-  parent: [ BaseSecurityContraband, ClothingOuterArmorBase ]
+  # NC-Edit-Start: Ballistic vests use the dedicated armor layer instead of blocking jackets.
+  parent: [ BaseSecurityContraband, ClothingOuterArmorBase, NCClothingArmorSlotBase ]
+  # NC-Edit-End
   id: ClothingOuterArmorBasic
   components:
   # NC start - authoritative human trauma uses zonal SP; legacy Armor remains for non-NC entities only.
@@ -49,6 +54,9 @@
     sprite: Clothing/OuterClothing/Armor/security_slim.rsi
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/security_slim.rsi
+    # NC-Edit-Start: Preserve the armor slot when this prototype replaces Clothing sprite data.
+    slots: [ armor ]
+    # NC-Edit-End
 
 - type: entity
   parent: ClothingOuterArmorBasic
@@ -64,6 +72,14 @@
     sprite: Clothing/OuterClothing/Armor/bulletproof.rsi
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/bulletproof.rsi
+    # NC-Edit-Start: Preserve the armor slot when this prototype replaces Clothing sprite data.
+    slots: [ armor ]
+    # NC-Edit-End
+  # NC-Edit-Start: Plate carriers trade mobility for ballistic protection.
+  - type: ClothingSpeedModifier
+    walkModifier: 0.90
+    sprintModifier: 0.80
+  # NC-Edit-End
   - type: Armor
     modifiers:
       coefficients:
@@ -84,6 +100,9 @@
     sprite: Clothing/OuterClothing/Armor/armor_reflec.rsi
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/armor_reflec.rsi
+    # NC-Edit-Start: Reflective body armor remains compatible with the dedicated armor layer.
+    slots: [ armor ]
+    # NC-Edit-End
   - type: Armor
     modifiers:
       coefficients:
@@ -108,12 +127,22 @@
     sprite: Clothing/OuterClothing/Vests/detvest.rsi
   - type: Clothing
     sprite: Clothing/OuterClothing/Vests/detvest.rsi
+    # NC-Edit-Start: The detective vest is body armor rather than a jacket.
+    slots: [ armor ]
+    # NC-Edit-End
 
 - type: entity
-  parent: [ ClothingOuterBaseMedium, AllowSuitStorageClothing ]
+  # NC-Edit-Start: Rigid chestpieces use the dedicated armor layer.
+  parent: [ ClothingOuterBaseMedium, AllowSuitStorageClothing, NCClothingArmorSlotBase ]
+  # NC-Edit-End
   id: ClothingOuterArmorBaseCarapace
   abstract: true
   components:
+  # NC-Edit-Start: Rigid carapaces use the heavy armor mobility profile.
+  - type: ClothingSpeedModifier
+    walkModifier: 0.90
+    sprintModifier: 0.80
+  # NC-Edit-End
   - type: Armor
     modifiers:
       coefficients:
@@ -134,6 +163,9 @@
     sprite: Clothing/OuterClothing/Armor/captain_carapace.rsi
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/captain_carapace.rsi
+    # NC-Edit-Start: Rigid carapaces occupy the dedicated armor layer.
+    slots: [ armor ]
+    # NC-Edit-End
   - type: Tag
     tags:
     - WhitelistChameleon
@@ -148,10 +180,15 @@
     sprite: Clothing/OuterClothing/Armor/centcomm_carapace.rsi
   - type: Clothing
     sprite: Clothing/OuterClothing/Armor/centcomm_carapace.rsi
+    # NC-Edit-Start: Rigid carapaces occupy the dedicated armor layer.
+    slots: [ armor ]
+    # NC-Edit-End
 
 #Web vest
 - type: entity
-  parent: [ClothingOuterArmorBase, ClothingOuterStorageBase, BaseSyndicateContraband]
+  # NC-Edit-Start: Web armor is a vest even though it also provides storage.
+  parent: [ClothingOuterArmorBase, ClothingOuterStorageBase, BaseSyndicateContraband, NCClothingArmorSlotBase]
+  # NC-Edit-End
   id: ClothingOuterVestWeb
   name: web vest
   description: A synthetic armor vest. This one has added webbing and ballistic plates.
@@ -160,6 +197,14 @@
     sprite: Clothing/OuterClothing/Vests/webvest.rsi
   - type: Clothing
     sprite: Clothing/OuterClothing/Vests/webvest.rsi
+    # NC-Edit-Start: Web armor is a vest even though it provides storage.
+    slots: [ armor ]
+    # NC-Edit-End
+  # NC-Edit-Start: Ballistic plates and carried ammunition impose the heavy armor penalty.
+  - type: ClothingSpeedModifier
+    walkModifier: 0.90
+    sprintModifier: 0.80
+  # NC-Edit-End
   - type: Armor
     modifiers:
       coefficients:
@@ -172,7 +217,9 @@
 
 #Elite web vest
 - type: entity
-  parent: [ClothingOuterArmorBase, TemperatureProtection, ClothingOuterStorageBase, BaseSyndicateContraband]
+  # NC-Edit-Start: Elite web armor shares the dedicated vest layer.
+  parent: [ClothingOuterArmorBase, TemperatureProtection, ClothingOuterStorageBase, BaseSyndicateContraband, NCClothingArmorSlotBase]
+  # NC-Edit-End
   id: ClothingOuterVestWebElite
   name: elite web vest
   description: A synthetic armor vest. This one has added webbing and heat resistant fibers.
@@ -181,6 +228,14 @@
     sprite: Clothing/OuterClothing/Vests/elitevest.rsi
   - type: Clothing
     sprite: Clothing/OuterClothing/Vests/elitevest.rsi
+    # NC-Edit-Start: Elite web armor uses the dedicated armor layer.
+    slots: [ armor ]
+    # NC-Edit-End
+  # NC-Edit-Start: Elite web armor retains the heavy armor mobility penalty.
+  - type: ClothingSpeedModifier
+    walkModifier: 0.90
+    sprintModifier: 0.80
+  # NC-Edit-End
   - type: Armor
     modifiers:
       coefficients:
@@ -206,6 +261,9 @@
     sprite: Clothing/OuterClothing/Vests/mercwebvest.rsi
   - type: Clothing
     sprite: Clothing/OuterClothing/Vests/mercwebvest.rsi
+    # NC-Edit-Start: Mercenary web armor uses the dedicated armor layer.
+    slots: [ armor ]
+    # NC-Edit-End
   - type: Armor
     modifiers:
       coefficients:

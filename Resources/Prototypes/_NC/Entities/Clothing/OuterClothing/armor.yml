@@ -3,7 +3,7 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 - type: entity
-  parent: ClothingOuterArmorBase
+  parent: [ ClothingOuterArmorBase, NCClothingArmorSlotBase ]
   id: ClothingOuterArmorBiotechBulletproof
   name: BioTechnica bulletproof vest
   description: A bulletproof armored vest customized for BioTechnica tactical security units.
@@ -12,11 +12,15 @@
     sprite: _NC/Clothing/OuterClothing/Armor/biotech_bulletproof.rsi
   - type: Clothing
     sprite: _NC/Clothing/OuterClothing/Armor/biotech_bulletproof.rsi
+    slots: [ armor ]
+  - type: ClothingSpeedModifier
+    walkModifier: 0.90
+    sprintModifier: 0.80
   - type: NCArmor
     profile: NCArmorPlateCarrier
 
 - type: entity
-  parent: ClothingOuterArmorBase
+  parent: [ ClothingOuterArmorBase, NCClothingArmorSlotBase ]
   id: ClothingOuterArmorMilitechBulletproof
   name: Militech bulletproof vest
   description: High-grade ballistic body armor issued to Militech security officers.
@@ -25,11 +29,15 @@
     sprite: _NC/Clothing/OuterClothing/Armor/militech_bulletproof.rsi
   - type: Clothing
     sprite: _NC/Clothing/OuterClothing/Armor/militech_bulletproof.rsi
+    slots: [ armor ]
+  - type: ClothingSpeedModifier
+    walkModifier: 0.90
+    sprintModifier: 0.80
   - type: NCArmor
     profile: NCArmorPlateCarrier
 
 - type: entity
-  parent: ClothingOuterArmorBase
+  parent: [ ClothingOuterArmorBase, NCClothingArmorSlotBase ]
   id: ClothingOuterArmorNWN
   name: NWN armor vest
   description: A specialized composite armor vest manufactured for NWN field operatives.
@@ -38,5 +46,9 @@
     sprite: _NC/Clothing/OuterClothing/Armor/nwn-armorvest.rsi
   - type: Clothing
     sprite: _NC/Clothing/OuterClothing/Armor/nwn-armorvest.rsi
+    slots: [ armor ]
+  - type: ClothingSpeedModifier
+    walkModifier: 0.90
+    sprintModifier: 0.80
   - type: NCArmor
     profile: NCArmorPlateCarrier

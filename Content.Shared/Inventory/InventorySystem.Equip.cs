@@ -112,7 +112,9 @@ public abstract partial class InventorySystem
         // before we drop the item, check that it can be equipped in the first place.
         if (!CanEquip(actor, held.Value, ev.Slot, out var reason))
         {
-            _popup.PopupCursor(Loc.GetString(reason), actor);
+            // NC-Edit-Start: Show the localized predicted rejection only once on the initiating client.
+            NCShowPredictedEquipFailure(reason, actor);
+            // NC-Edit-End
             return;
         }
 

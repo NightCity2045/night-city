@@ -2277,7 +2277,6 @@
       map: ["enum.NCVehicleVisualLayers.Smoke"]
       visible: false
     # The shared 128px art density is doubled for the eight-metre recovery chassis.
-    rotation: 180
     noRot: false
     scale: 2, 2
   - type: Fixtures

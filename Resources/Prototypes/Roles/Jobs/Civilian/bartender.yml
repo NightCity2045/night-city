@@ -36,6 +36,6 @@
     eyes: ClothingEyesGlassesSunglasses
     mask: ClothingMaskBreath
     neck: ClothingNeckScarfStripedBlack
-    outerClothing: ClothingOuterArmorBasicSlim
+    armor: ClothingOuterArmorBasicSlim # NC
     gloves: ClothingHandsGlovesColorBlack
 

@@ -27,7 +27,7 @@
     gloves: ClothingHandsGlovesNitrile
     id: ParamedicPDA
     belt: ClothingBeltMedicalFilled
-    outerClothing: ClothingOuterArmorBasic
+    armor: ClothingOuterArmorBasic
   storage:
     back:
     - MedTekCartridge

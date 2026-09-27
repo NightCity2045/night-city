@@ -24,7 +24,7 @@
     eyes: ClothingEyesGlassesSecurity
     id: NCPDCadetPDA
     belt: ClothingBeltSecurityFilled
-    outerClothing: ClothingOuterArmorBasic
+    armor: ClothingOuterArmorBasic
     pocket2: BookSecurity
   storage:
     back:
