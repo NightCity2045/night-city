@@ -263,6 +263,11 @@
     availableModes: [ SemiAuto ]
     soundGunshot:
       path: /Audio/Weapons/Guns/Gunshots/sniper.ogg
+  - type: GunWieldBonus
+    minAngle: -0.5
+    maxAngle: -3
+    angleIncrease: -2
+    angleDecay: 2
   - type: UseDelay
     delay: 2.5
   - type: RevolverAmmoProvider
