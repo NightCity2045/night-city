@@ -144,7 +144,6 @@ public sealed partial class NCEconomicShopWindow : FancyWindow
         ProductCategoryLabel.Text = Loc.GetString(listing.Category);
         DescriptionLabel.SetMessage(Loc.GetString(listing.Description), Color.FromHex("#91A9AF"));
         StockValueLabel.Text = listing.AvailableQuantity.ToString();
-        QualityValueLabel.Text = listing.QualityOrCondition.ToString();
         PriceValueLabel.Text = Loc.GetString("nc-economic-shop-credits", ("amount", listing.BaseUnitPrice));
         if (!string.IsNullOrWhiteSpace(listing.PreviewPrototype))
         {
@@ -156,7 +155,10 @@ public sealed partial class NCEconomicShopWindow : FancyWindow
             SelectedPreview.Visible = false;
         }
 
-        if (listing.Kind == NCEconomicOfferKind.ItemInstance)
+        var supportsQuantity = listing.Kind == NCEconomicOfferKind.CommodityBatch;
+        QuantityLabel.Visible = supportsQuantity;
+        QuantityEdit.Visible = supportsQuantity;
+        if (!supportsQuantity)
             QuantityEdit.Text = "1";
         UpdateOrderControls();
     }
@@ -173,8 +175,9 @@ public sealed partial class NCEconomicShopWindow : FancyWindow
             Loc.GetString("nc-economic-shop-select-item-description"),
             Color.FromHex("#91A9AF"));
         StockValueLabel.Text = "--";
-        QualityValueLabel.Text = "--";
         PriceValueLabel.Text = "--";
+        QuantityLabel.Visible = false;
+        QuantityEdit.Visible = false;
         OrderTotalLabel.Text = "--";
         UpdateOrderControls();
     }

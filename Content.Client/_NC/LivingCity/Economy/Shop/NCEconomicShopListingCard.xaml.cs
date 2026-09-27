@@ -31,7 +31,6 @@ public sealed partial class NCEconomicShopListingCard : ContainerButton
         CategoryLabel.Text = Loc.GetString(listing.Category);
         PriceLabel.Text = Loc.GetString("nc-economic-shop-card-price", ("price", listing.BaseUnitPrice));
         StockLabel.Text = Loc.GetString("nc-economic-shop-card-stock", ("quantity", listing.AvailableQuantity));
-        QualityLabel.Text = Loc.GetString("nc-economic-shop-card-quality", ("quality", listing.QualityOrCondition));
 
         if (!string.IsNullOrWhiteSpace(listing.PreviewPrototype))
             Preview.SetPrototype(new EntProtoId(listing.PreviewPrototype));

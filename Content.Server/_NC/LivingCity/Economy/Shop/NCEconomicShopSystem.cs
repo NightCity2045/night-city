@@ -605,17 +605,27 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
 
     private async Task SeedAsync(ShopConfiguration config, NCPartyRef seller, NCStockNodeId nodeId)
     {
+        var initialNode = await _assets.GetStockNodeAsync(nodeId, true);
+        if (initialNode == null)
+            throw new InvalidOperationException("Shop stock disappeared before seeding.");
+
+        var existingBatches = initialNode.Snapshot.CommodityBatchIds.ToHashSet();
+        var existingItems = initialNode.Snapshot.ItemIds.ToHashSet();
         foreach (var seed in config.Commodities.OrderBy(seed => seed.Commodity.Id))
         {
             var source = NCPersistentIdentity.Command(
                 "economic-shop", "initial-commodity-source", $"{config.ShopId}.{seed.Commodity.Id}");
+            var batchId = NCPersistentIdentity.CommodityBatch(seed.Commodity.Id, source, "initial");
+            if (existingBatches.Contains(batchId))
+                continue;
+
             var node = await _assets.GetStockNodeAsync(nodeId, true);
             if (node == null)
                 throw new InvalidOperationException("Shop stock disappeared during commodity seeding.");
             await _assets.CreateCommodityBatchAsync(new NCCreateCommodityBatchRequest(
                 NCPersistentIdentity.Command(
                     "economic-shop", "initial-commodity", $"{config.ShopId}.{seed.Commodity.Id}"),
-                NCPersistentIdentity.CommodityBatch(seed.Commodity.Id, source, "initial"),
+                batchId,
                 seed.Commodity,
                 seed.Quantity,
                 seed.Quality,
@@ -629,6 +639,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
                 NCPersistentIdentity.Correlation(
                     "economic-shop", "initial-commodity", $"{config.ShopId}.{seed.Commodity.Id}"),
                 AuditSource: AuditSource));
+            existingBatches.Add(batchId);
         }
 
         foreach (var seed in config.Items.OrderBy(seed => seed.Definition.Id))
@@ -636,13 +647,17 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
             for (var index = 0; index < seed.Quantity; index++)
             {
                 var key = $"{config.ShopId}.{seed.Definition.Id}.{index}";
+                var itemId = SeededItemId(config.ShopId, seed.Definition, index);
+                if (existingItems.Contains(itemId))
+                    continue;
+
                 var source = NCPersistentIdentity.Command("economic-shop", "initial-item-source", key);
                 var node = await _assets.GetStockNodeAsync(nodeId, true);
                 if (node == null)
                     throw new InvalidOperationException("Shop stock disappeared during item seeding.");
                 await _assets.CreateItemInstanceAsync(new NCCreateItemInstanceRequest(
                     NCPersistentIdentity.Command("economic-shop", "initial-item", key),
-                    new NCItemId(NCPersistentIdentity.Command("economic-shop", "item-identity", key)),
+                    itemId,
                     seed.Definition,
                     $"{config.ShopId}-{seed.Definition.Id}-{index + 1:D3}",
                     seed.Condition,
@@ -655,6 +670,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
                     seller,
                     NCPersistentIdentity.Correlation("economic-shop", "initial-item", key),
                     AuditSource: AuditSource));
+                existingItems.Add(itemId);
             }
         }
     }
@@ -663,6 +679,8 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
     {
         if (!_views.TryGetValue((uid, user), out var view))
             return;
+        // Account and stock reads are independent; do not make the balance wait behind catalog construction.
+        var balanceTask = GetBalanceAsync(user);
         var listings = new List<NCEconomicShopListingSummary>();
         var now = default(NCActiveWorldTime);
         var ready = _shops.TryGetValue(uid, out var runtime) && runtime.Ready &&
@@ -676,7 +694,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
                 {
                     if (listings.Count >= component.MaximumListings)
                         break;
-                    var batch = await _assets.GetCommodityBatchAsync(batchId, true);
+                    var batch = await _assets.GetCommodityBatchAsync(batchId);
                     if (batch == null || batch.Snapshot.Lifecycle != NCEconomicAssetLifecycle.Active ||
                         batch.Snapshot.ExpiresAt is { } expiry && now >= expiry ||
                         !_prototypes.TryIndex(new ProtoId<NCCommodityPrototype>(batch.Snapshot.CommodityId),
@@ -702,9 +720,36 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
                 }
                 var groupedItems = new Dictionary<(string Definition, int Condition),
                     (NCItemDefinitionPrototype Definition, NCItemId First, int Condition, long Count)>();
-                foreach (var itemId in node.Snapshot.ItemIds.OrderBy(id => id.Value))
+                var availableItemIds = node.Snapshot.ItemIds.ToHashSet();
+                var catalogItemIds = new HashSet<NCItemId>();
+
+                // Regular storefront stock has deterministic identities. Count it directly from the stock-node index
+                // instead of issuing one database read for every physical item on every UI refresh.
+                foreach (var seed in Configuration(component).Items.OrderBy(seed => seed.Definition.Id))
                 {
-                    var item = await _assets.GetItemAsync(itemId, true);
+                    if (!_prototypes.TryIndex(seed.Definition, out NCItemDefinitionPrototype? definition) ||
+                        definition.BasePrice == null)
+                        continue;
+                    var condition = seed.Condition ?? definition.DefaultCondition;
+                    for (var index = 0; index < seed.Quantity; index++)
+                    {
+                        var itemId = SeededItemId(component.ShopId.Trim().ToLowerInvariant(), seed.Definition, index);
+                        catalogItemIds.Add(itemId);
+                        if (!availableItemIds.Contains(itemId))
+                            continue;
+                        var key = (definition.ID, condition);
+                        if (groupedItems.TryGetValue(key, out var group))
+                            groupedItems[key] = (group.Definition, group.First, group.Condition, group.Count + 1);
+                        else
+                            groupedItems[key] = (definition, itemId, condition, 1);
+                    }
+                }
+
+                // Preserve compatibility with stock inserted by other economy systems; only unknown identities need a
+                // record lookup, and the registry cache avoids repeated database reads for them.
+                foreach (var itemId in availableItemIds.Except(catalogItemIds).OrderBy(id => id.Value))
+                {
+                    var item = await _assets.GetItemAsync(itemId);
                     if (item == null || item.Snapshot.Lifecycle != NCEconomicAssetLifecycle.Active ||
                         item.Snapshot.ReservationId.HasValue ||
                         !_prototypes.TryIndex(new ProtoId<NCItemDefinitionPrototype>(item.Snapshot.DefinitionId),
@@ -743,17 +788,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
             }
         }
 
-        long balance = 0;
-        var hasAccount = false;
-        if (TryGetCharacter(user, out var characterId))
-        {
-            var account = await _finance.GetPrimaryAccountAsync(NCPartyRef.ForCharacter(characterId), true);
-            if (account != null)
-            {
-                balance = account.Snapshot.Balance;
-                hasAccount = true;
-            }
-        }
+        var (balance, hasAccount) = await balanceTask;
         _ui.SetUiState(uid, NCEconomicShopUiKey.Key, new NCEconomicShopState(
             component.DisplayName,
             balance,
@@ -761,6 +796,27 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
             ready,
             view.Notice,
             listings));
+    }
+
+    private async Task<(long Balance, bool HasAccount)> GetBalanceAsync(EntityUid user)
+    {
+        if (TryGetCharacter(user, out var characterId))
+        {
+            var account = await _finance.GetPrimaryAccountAsync(NCPartyRef.ForCharacter(characterId), true);
+            if (account != null)
+                return (account.Snapshot.Balance, true);
+        }
+
+        return (0, false);
+    }
+
+    private static NCItemId SeededItemId(
+        string shopId,
+        ProtoId<NCItemDefinitionPrototype> definition,
+        int index)
+    {
+        var key = $"{shopId}.{definition.Id}.{index}";
+        return new NCItemId(NCPersistentIdentity.Command("economic-shop", "item-identity", key));
     }
 
     /// <summary>

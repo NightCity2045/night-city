@@ -33,7 +33,6 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                 </PanelContainer.PanelOverride>
                 <BoxContainer Orientation="Horizontal" Margin="6 3">
                     <Label Name="StockLabel" FontColorOverride="#7FA1A8" HorizontalExpand="True" />
-                    <Label Name="QualityLabel" FontColorOverride="#607E85" />
                 </BoxContainer>
             </PanelContainer>
         </BoxContainer>

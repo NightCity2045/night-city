@@ -104,20 +104,19 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                                        FontColorOverride="#F4F7F8" />
                                 <Label Name="ProductCategoryLabel" FontColorOverride="#72F4FF" />
                                 <RichTextLabel Name="DescriptionLabel" MaxWidth="292" HorizontalExpand="True" />
-                                <PanelContainer MinHeight="92" HorizontalExpand="True">
+                                <PanelContainer MinHeight="66" HorizontalExpand="True">
                                     <PanelContainer.PanelOverride>
                                         <gfx:StyleBoxFlat BackgroundColor="#08151A" BorderColor="#1D353C" BorderThickness="1" />
                                     </PanelContainer.PanelOverride>
                                     <GridContainer Columns="2" Margin="8 8" HSeparationOverride="12" VSeparationOverride="7">
                                         <Label Text="{Loc 'nc-economic-shop-stock-label'}" FontColorOverride="#587982" />
                                         <Label Name="StockValueLabel" HorizontalAlignment="Right" FontColorOverride="#D5E7EA" />
-                                        <Label Text="{Loc 'nc-economic-shop-quality-label'}" FontColorOverride="#587982" />
-                                        <Label Name="QualityValueLabel" HorizontalAlignment="Right" FontColorOverride="#D5E7EA" />
                                         <Label Text="{Loc 'nc-economic-shop-unit-price-label'}" FontColorOverride="#587982" />
                                         <Label Name="PriceValueLabel" HorizontalAlignment="Right" FontColorOverride="#FFCF66" />
                                     </GridContainer>
                                 </PanelContainer>
-                                <Label Text="{Loc 'nc-economic-shop-quantity'}" FontColorOverride="#668A92" />
+                                <Label Name="QuantityLabel" Text="{Loc 'nc-economic-shop-quantity'}"
+                                       FontColorOverride="#668A92" />
                                 <LineEdit Name="QuantityEdit" Text="1" />
                                 <BoxContainer Orientation="Horizontal">
                                     <Label Text="{Loc 'nc-economic-shop-total-label'}" FontColorOverride="#668A92"
