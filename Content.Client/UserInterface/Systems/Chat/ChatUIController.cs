@@ -182,6 +182,7 @@ public sealed partial class ChatUIController : UIController
         _player.LocalPlayerDetached += OnAttachedChanged;
         _state.OnStateChanged += StateChanged;
         _net.RegisterNetMessage<MsgChatMessage>(OnChatMessage);
+        _net.RegisterNetMessage<MsgUpdateChatMessage>(OnUpdateChatMessage); // NC
         _net.RegisterNetMessage<MsgDeleteChatMessagesBy>(OnDeleteChatMessagesBy);
         SubscribeNetworkEvent<DamageForceSayEvent>(OnDamageForceSay);
         _config.OnValueChanged(CCVars.ChatEnableColorName, (value) => { _chatNameColorsEnabled = value; });
@@ -818,34 +819,66 @@ public sealed partial class ChatUIController : UIController
         }
     }
 
-    public void ProcessChatMessage(ChatMessage msg, bool speechBubble = true)
+    // NC-Edit-Start
+    private void OnUpdateChatMessage(MsgUpdateChatMessage message)
     {
-        // color the name unless it's something like "the old man"
+        var replacement = message.Message;
+        if (replacement.ServerMessageId is not { } messageId)
+            return;
+
+        for (var i = History.Count - 1; i >= 0; i--)
+        {
+            var current = History[i].Msg;
+            if (current.ServerMessageId != messageId)
+                continue;
+
+            // Preserve the read flag so a late translation never replays notification audio.
+            replacement.Read = current.Read;
+            DecorateChatMessage(replacement);
+            History[i] = (History[i].Tick, replacement);
+            Repopulate();
+            return;
+        }
+    }
+
+    private void DecorateChatMessage(ChatMessage msg)
+    {
         if ((msg.Channel == ChatChannel.Local || msg.Channel == ChatChannel.Whisper) && _chatNameColorsEnabled)
         {
             var grammar = _ent.GetComponentOrNull<GrammarComponent>(_ent.GetEntity(msg.SenderEntity));
-            if (grammar != null && grammar.ProperNoun == true)
-                msg.WrappedMessage = SharedChatSystem.InjectTagInsideTag(msg, "Name", "color", GetNameColor(SharedChatSystem.GetStringInsideTag(msg, "Name")));
-        }
-
-        // Color any words chosen by the client.
-        foreach (var highlight in _highlights)
-        {
-            msg.WrappedMessage = SharedChatSystem.InjectTagAroundString(msg, highlight, "color", _highlightsColor);
-        }
-
-        // Color any codewords for minds that have roles that use them
-        if (_player.LocalUser != null && _mindSystem != null && _roleCodewordSystem != null)
-        {
-            if (_mindSystem.TryGetMind(_player.LocalUser.Value, out var mindId) && _ent.TryGetComponent(mindId, out RoleCodewordComponent? codewordComp))
+            if (grammar?.ProperNoun == true)
             {
-                foreach (var (_, codewordData) in codewordComp.RoleCodewords)
-                {
-                    foreach (string codeword in codewordData.Codewords)
-                        msg.WrappedMessage = SharedChatSystem.InjectTagAroundString(msg, codeword, "color", codewordData.Color.ToHex());
-                }
+                msg.WrappedMessage = SharedChatSystem.InjectTagInsideTag(
+                    msg,
+                    "Name",
+                    "color",
+                    GetNameColor(SharedChatSystem.GetStringInsideTag(msg, "Name")));
             }
         }
+
+        foreach (var highlight in _highlights)
+            msg.WrappedMessage = SharedChatSystem.InjectTagAroundString(msg, highlight, "color", _highlightsColor);
+
+        if (_player.LocalUser == null || _mindSystem == null || _roleCodewordSystem == null)
+            return;
+
+        if (!_mindSystem.TryGetMind(_player.LocalUser.Value, out var mindId) ||
+            !_ent.TryGetComponent(mindId, out RoleCodewordComponent? codewordComp))
+        {
+            return;
+        }
+
+        foreach (var (_, codewordData) in codewordComp.RoleCodewords)
+        {
+            foreach (var codeword in codewordData.Codewords)
+                msg.WrappedMessage = SharedChatSystem.InjectTagAroundString(msg, codeword, "color", codewordData.Color.ToHex());
+        }
+    }
+    // NC-Edit-End
+
+    public void ProcessChatMessage(ChatMessage msg, bool speechBubble = true)
+    {
+        DecorateChatMessage(msg); // NC
 
         // Log all incoming chat to repopulate when filter is un-toggled
         if (!msg.HideChat)

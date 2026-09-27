@@ -652,19 +652,28 @@ namespace Content.Server.Administration.Systems
             bool forAdmin,
             AdminData? senderAdmin,
             ICommonSession senderSession,
-            BwoinkTextMessage input)
+            BwoinkTextMessage input,
+            ICommonSession recipient,
+            Content.Server._NC.Chat.Translation.NCChatTranslationPayload? translation) // NC
         {
             var senderAHelpAdmin = senderAdmin?.HasFlag(AdminFlags.Adminhelp) ?? false;
             string messageText;
 
+            // NC-Edit-Start
+            var visibleText = ResolveNCAHelpVisibleText(recipient, input.Text, translation, out var languageTag);
+
             if (forAdmin)
             {
-                messageText = await GenerateNameLinks(input.Text);
+                messageText = await GenerateNameLinks(visibleText);
             }
             else
             {
-                messageText = FormattedMessage.EscapeText(input.Text);
+                messageText = FormattedMessage.EscapeText(visibleText);
             }
+
+            if (languageTag != null)
+                messageText = $"{languageTag} {messageText}";
+            // NC-Edit-End
 
             var adminPrefix = "";
             if (_config.GetCVar(CCVars.AhelpAdminPrefix) && senderAdmin?.Title != null)
@@ -721,11 +730,24 @@ namespace Content.Server.Administration.Systems
             var playSound = (!senderAHelpAdmin || message.PlaySound) && !message.AdminOnly;
 
             var admins = GetTargetAdmins();
-            var adminMsg = await FormatFullMessageForRecipient(forAdmin: true, senderAdmin, senderSession, message);
+            // NC-Edit-Start
+            var translation = _ncAHelpTranslation.IsConfiguredForAHelp()
+                ? await _ncAHelpTranslation.TranslateAHelpAsync(message.Text)
+                : null;
 
             // Notify all admins
             foreach (var channel in admins)
             {
+                if (!_playerManager.TryGetSessionById(channel.UserId, out var adminSession))
+                    continue;
+
+                var adminMsg = await FormatFullMessageForRecipient(
+                    forAdmin: true,
+                    senderAdmin,
+                    senderSession,
+                    message,
+                    adminSession,
+                    translation);
                 RaiseNetworkEvent(adminMsg, channel);
             }
 
@@ -734,10 +756,17 @@ namespace Content.Server.Administration.Systems
             {
                 if (!admins.Contains(session.Channel))
                 {
-                    var playerMsg = await FormatFullMessageForRecipient(forAdmin: false, senderAdmin, senderSession, message);
+                    var playerMsg = await FormatFullMessageForRecipient(
+                        forAdmin: false,
+                        senderAdmin,
+                        senderSession,
+                        message,
+                        session,
+                        translation);
                     RaiseNetworkEvent(playerMsg, session.Channel);
                 }
             }
+            // NC-Edit-End
 
             var sendsWebhook = _webhookUrl != string.Empty;
             if (sendsWebhook)

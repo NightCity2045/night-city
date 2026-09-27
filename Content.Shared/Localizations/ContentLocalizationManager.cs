@@ -8,9 +8,35 @@ namespace Content.Shared.Localizations
     public sealed partial class ContentLocalizationManager
     {
         [Dependency] private ILocalizationManager _loc = default!;
+        private readonly HashSet<string> _preparedCultures = new(); // NC
+
+        // NC-Edit-Start
+        public const string DefaultCultureName = "en-US";
+        public const string FallbackCultureName = "en-US";
+        public static readonly string[] SupportedCultures = ["en-US", "ru-RU"];
+
+        public static string? ValidateCultureName(string? cultureName)
+        {
+            if (string.IsNullOrWhiteSpace(cultureName))
+                return null;
+
+            foreach (var supported in SupportedCultures)
+            {
+                if (string.Equals(cultureName, supported, StringComparison.OrdinalIgnoreCase))
+                    return supported;
+            }
+
+            if (cultureName.StartsWith("ru", StringComparison.OrdinalIgnoreCase))
+                return "ru-RU";
+            if (cultureName.StartsWith("en", StringComparison.OrdinalIgnoreCase))
+                return "en-US";
+
+            return null;
+        }
+        // NC-Edit-End
 
         // If you want to change your codebase's language, do it here.
-        private const string Culture = "en-US";
+        private const string Culture = DefaultCultureName; // NC
 
         /// <summary>
         /// Custom format strings used for parsing and displaying minutes:seconds timespans.
@@ -25,9 +51,22 @@ namespace Content.Shared.Localizations
 
         public void Initialize()
         {
+            // NC-Edit-Start
             var culture = new CultureInfo(Culture);
+            foreach (var supported in SupportedCultures)
+                EnsureCulturePrepared(new CultureInfo(supported));
+            _loc.SetFallbackCluture(new CultureInfo(FallbackCultureName));
+        }
 
-            _loc.LoadCulture(culture);
+        public void EnsureCulturePrepared(CultureInfo culture)
+        {
+            if (!_loc.HasCulture(culture))
+                _loc.LoadCulture(culture);
+
+            if (!_preparedCultures.Add(culture.Name))
+                return;
+            // NC-Edit-End
+
             _loc.AddFunction(culture, "PRESSURE", FormatPressure);
             _loc.AddFunction(culture, "POWERWATTS", FormatPowerWatts);
             _loc.AddFunction(culture, "POWERJOULES", FormatPowerJoules);
@@ -36,8 +75,8 @@ namespace Content.Shared.Localizations
             _loc.AddFunction(culture, "UNITS", FormatUnits);
             _loc.AddFunction(culture, "TOSTRING", args => FormatToString(culture, args));
             _loc.AddFunction(culture, "LOC", FormatLoc);
-            _loc.AddFunction(culture, "NATURALFIXED", FormatNaturalFixed);
-            _loc.AddFunction(culture, "NATURALPERCENT", FormatNaturalPercent);
+            _loc.AddFunction(culture, "NATURALFIXED", args => FormatNaturalFixed(culture, args)); // NC
+            _loc.AddFunction(culture, "NATURALPERCENT", args => FormatNaturalPercent(culture, args)); // NC
             _loc.AddFunction(culture, "PLAYTIME", FormatPlaytime);
 
 
@@ -46,10 +85,13 @@ namespace Content.Shared.Localizations
              * localization you should NOT modify these, instead add new functions specific to your language/culture.
              * This ensures the english translations continue to work as expected when fallbacks are needed.
              */
-            var cultureEn = new CultureInfo("en-US");
-
-            _loc.AddFunction(cultureEn, "MAKEPLURAL", FormatMakePlural);
-            _loc.AddFunction(cultureEn, "MANY", FormatMany);
+            // NC-Edit-Start
+            if (string.Equals(culture.Name, "en-US", StringComparison.OrdinalIgnoreCase))
+            {
+                _loc.AddFunction(culture, "MAKEPLURAL", FormatMakePlural);
+                _loc.AddFunction(culture, "MANY", FormatMany);
+            }
+            // NC-Edit-End
         }
 
         private ILocValue FormatMany(LocArgs args)
@@ -66,20 +108,20 @@ namespace Content.Shared.Localizations
             }
         }
 
-        private ILocValue FormatNaturalPercent(LocArgs args)
+        private static ILocValue FormatNaturalPercent(CultureInfo culture, LocArgs args) // NC
         {
             var number = ((LocValueNumber) args.Args[0]).Value * 100;
             var maxDecimals = (int)Math.Floor(((LocValueNumber) args.Args[1]).Value);
-            var formatter = (NumberFormatInfo)NumberFormatInfo.GetInstance(CultureInfo.GetCultureInfo(Culture)).Clone();
+            var formatter = (NumberFormatInfo)NumberFormatInfo.GetInstance(culture).Clone(); // NC
             formatter.NumberDecimalDigits = maxDecimals;
             return new LocValueString(string.Format(formatter, "{0:N}", number).TrimEnd('0').TrimEnd(char.Parse(formatter.NumberDecimalSeparator)) + "%");
         }
 
-        private ILocValue FormatNaturalFixed(LocArgs args)
+        private static ILocValue FormatNaturalFixed(CultureInfo culture, LocArgs args) // NC
         {
             var number = ((LocValueNumber) args.Args[0]).Value;
             var maxDecimals = (int)Math.Floor(((LocValueNumber) args.Args[1]).Value);
-            var formatter = (NumberFormatInfo)NumberFormatInfo.GetInstance(CultureInfo.GetCultureInfo(Culture)).Clone();
+            var formatter = (NumberFormatInfo)NumberFormatInfo.GetInstance(culture).Clone(); // NC
             formatter.NumberDecimalDigits = maxDecimals;
             return new LocValueString(string.Format(formatter, "{0:N}", number).TrimEnd('0').TrimEnd(char.Parse(formatter.NumberDecimalSeparator)));
         }

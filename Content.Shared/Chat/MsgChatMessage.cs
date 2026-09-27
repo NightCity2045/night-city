@@ -38,10 +38,17 @@ namespace Content.Shared.Chat
         public string? AudioPath;
         public float AudioVolume;
 
+        // NC-Edit-Start
+        /// <summary>
+        /// Transient server id used to replace an original line when a delayed translation arrives.
+        /// </summary>
+        public uint? ServerMessageId;
+        // NC-Edit-End
+
         [NonSerialized]
         public bool Read;
 
-        public ChatMessage(ChatChannel channel, string message, string wrappedMessage, NetEntity source, int? senderKey, bool hideChat = false, Color? colorOverride = null, string? audioPath = null, float audioVolume = 0)
+        public ChatMessage(ChatChannel channel, string message, string wrappedMessage, NetEntity source, int? senderKey, bool hideChat = false, Color? colorOverride = null, string? audioPath = null, float audioVolume = 0, uint? serverMessageId = null) // NC
         {
             Channel = channel;
             Message = message;
@@ -52,6 +59,7 @@ namespace Content.Shared.Chat
             MessageColorOverride = colorOverride;
             AudioPath = audioPath;
             AudioVolume = audioVolume;
+            ServerMessageId = serverMessageId; // NC
         }
 
         public ChatMessage(ChatMessage copyFrom)
@@ -65,6 +73,7 @@ namespace Content.Shared.Chat
             MessageColorOverride = copyFrom.MessageColorOverride;
             AudioPath = copyFrom.AudioPath;
             AudioVolume = copyFrom.AudioVolume;
+            ServerMessageId = copyFrom.ServerMessageId; // NC
             Read = copyFrom.Read;
         }
     }
@@ -95,4 +104,33 @@ namespace Content.Shared.Chat
             buffer.Write(stream.AsSpan());
         }
     }
+
+    // NC-Edit-Start
+    /// <summary>
+    /// Replaces a previously delivered chat line without producing a duplicate notification.
+    /// </summary>
+    [UsedImplicitly]
+    public sealed class MsgUpdateChatMessage : NetMessage
+    {
+        public override MsgGroups MsgGroup => MsgGroups.Command;
+
+        public ChatMessage Message = default!;
+
+        public override void ReadFromBuffer(NetIncomingMessage buffer, IRobustSerializer serializer)
+        {
+            var length = buffer.ReadVariableInt32();
+            using var stream = new MemoryStream(length);
+            buffer.ReadAlignedMemory(stream, length);
+            serializer.DeserializeDirect(stream, out Message);
+        }
+
+        public override void WriteToBuffer(NetOutgoingMessage buffer, IRobustSerializer serializer)
+        {
+            using var stream = new MemoryStream();
+            serializer.SerializeDirect(stream, Message);
+            buffer.WriteVariableInt32((int) stream.Length);
+            buffer.Write(stream.AsSpan());
+        }
+    }
+    // NC-Edit-End
 }

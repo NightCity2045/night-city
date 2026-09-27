@@ -1,4 +1,5 @@
 using Content.Server._NC.AstraGraph;
+using Content.Server._NC.Chat.Translation; // NC
 using Content.Server.Administration;
 using Content.Server.Administration.Logs;
 using Content.Server.Administration.Managers;
@@ -41,6 +42,7 @@ internal static class ServerContentIoC
         SharedContentIoC.Register(deps);
         deps.Register<IChatManager, ChatManager>();
         deps.Register<ISharedChatManager, ChatManager>();
+        deps.Register<INCChatTranslationService, NCChatTranslationService>(); // NC
         deps.Register<IChatSanitizationManager, ChatSanitizationManager>();
         deps.Register<IServerPreferencesManager, ServerPreferencesManager>();
         deps.Register<IServerDbManager, ServerDbManager>();
