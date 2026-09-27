@@ -19,10 +19,17 @@
 - type: startingGear
   id: BiotechnicaOperativeGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitSecGrey
-    back: ClothingBackpackSecurity
+    jumpsuit: ClothingUniformBiotech
+    back: ClothingBackpackBiotechnica
     shoes: ClothingShoesBootsJack
+    head: ClothingHeadHatBiotechCap
     eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesBiotechnica
     id: SecurityPDA
-    belt: ClothingBeltSecurityFilled
-    armor: ClothingOuterArmorBasic
+    belt: ClothingBeltSecurity
+    armor: ClothingOuterArmorBiotechBulletproof
+  storage:
+    belt:
+    - Handcuffs
+    - HoloprojectorSecurity
+    - RadioHandheldSecurity

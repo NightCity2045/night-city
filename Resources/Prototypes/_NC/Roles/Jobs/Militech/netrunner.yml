@@ -19,9 +19,10 @@
 - type: startingGear
   id: MilitechNetrunnerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitScientist
+    jumpsuit: ClothingUniformMilitech
     back: ClothingBackpackScience
     shoes: ClothingShoesColorBlack
+    head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlasses
     id: SciencePDA
   storage:

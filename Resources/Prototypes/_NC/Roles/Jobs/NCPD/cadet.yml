@@ -23,12 +23,15 @@
     shoes: ClothingShoesBootsJack
     eyes: ClothingEyesGlassesSecurity
     id: NCPDCadetPDA
-    belt: ClothingBeltSecurityFilled
-    armor: ClothingOuterArmorBasic
+    belt: ClothingBeltSecurity
+    armor: ClothingOuterArmorBasicSlim
     pocket2: BookSecurity
   storage:
     back:
     - WantedListCartridge
+    belt:
+    - Handcuffs
+    - RadioHandheldSecurity
 
 - type: jobIcon
   parent: JobIcon

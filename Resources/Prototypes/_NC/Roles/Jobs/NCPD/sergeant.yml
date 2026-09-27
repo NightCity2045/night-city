@@ -25,11 +25,16 @@
     head: ClothingHeadHatBeretSecurity
     eyes: ClothingEyesGlassesSecurity
     id: NCPDSergeantPDA
-    belt: ClothingBeltSecurityFilled
-    armor: ClothingOuterArmorBasic
+    belt: ClothingBeltSecurity
+    armor: ClothingOuterArmorBulletproof
   storage:
     back:
     - WantedListCartridge
+    belt:
+    - Handcuffs
+    - Handcuffs
+    - HoloprojectorSecurity
+    - RadioHandheldSecurity
 
 - type: jobIcon
   parent: JobIcon

@@ -26,13 +26,19 @@
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesForensic
     id: NCPDInspectorPDA
-    belt: ClothingBeltHolsterFilled
+    belt: ClothingBeltSecurity
+    armor: ClothingOuterVestDetective
   storage:
     back:
     - ForensicPad
     - ForensicScanner
     - WantedListCartridge
     - LogProbeCartridge
+    belt:
+    - Handcuffs
+    - Handcuffs
+    - HoloprojectorSecurity
+    - RadioHandheldSecurity
 
 - type: jobIcon
   parent: JobIcon

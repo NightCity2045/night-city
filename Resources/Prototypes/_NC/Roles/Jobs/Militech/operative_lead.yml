@@ -19,12 +19,18 @@
 - type: startingGear
   id: MilitechOperativeLeadGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitWarden
+    jumpsuit: ClothingUniformMilitech
     back: ClothingBackpackSecurity
     shoes: ClothingShoesBootsJack
-    head: ClothingHeadHatWarden
+    head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
     id: WardenPDA
-    belt: ClothingBeltSecurityFilled
-    armor: ClothingOuterArmorBasic
+    belt: ClothingBeltSecurity
+    armor: ClothingOuterArmorMilitechBulletproof
+  storage:
+    belt:
+    - Handcuffs
+    - Handcuffs
+    - HoloprojectorSecurity
+    - RadioHandheldSecurity

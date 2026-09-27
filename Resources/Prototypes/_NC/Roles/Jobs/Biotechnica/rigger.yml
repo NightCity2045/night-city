@@ -19,12 +19,12 @@
 - type: startingGear
   id: BiotechnicaRiggerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitEngineering
-    back: ClothingBackpackEngineering
-    shoes: ClothingShoesBootsWork
-    head: ClothingHeadHatHardhatYellow
-    eyes: ClothingEyesGlassesMeson
-    gloves: ClothingHandsGlovesColorYellow
+    jumpsuit: ClothingUniformBiotech
+    back: ClothingBackpackDuffelBiotechnica
+    shoes: ClothingShoesBiotechnica
+    head: ClothingHeadEnvirohelmBiotechnica
+    eyes: ClothingEyesGogglesBiotechnicaTech
+    gloves: ClothingHandsGlovesBiotechnica
     id: EngineerPDA
     belt: ClothingBeltUtilityFilled
   storage:

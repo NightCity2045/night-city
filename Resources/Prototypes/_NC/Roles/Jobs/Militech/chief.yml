@@ -20,12 +20,19 @@
 - type: startingGear
   id: MilitechChiefGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitHoS
+    jumpsuit: ClothingUniformMilitech
     back: ClothingBackpackSecurity
     shoes: ClothingShoesBootsJack
-    head: ClothingHeadHatBeretHoS
+    head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
     id: HoSPDA
-    belt: ClothingBeltSecurityFilled
+    belt: ClothingBeltSecurity
+    armor: ClothingOuterArmorMilitechBulletproof
     outerClothing: ClothingOuterCoatHoSTrench
+  storage:
+    belt:
+    - Handcuffs
+    - Handcuffs
+    - HoloprojectorSecurity
+    - RadioHandheldSecurity
