@@ -210,6 +210,8 @@
     sprite: _NC/Objects/Weapons/Guns/Pistol/Mallorian_Arms/tiny.rsi
   - type: Clothing
     sprite: _NC/Objects/Weapons/Guns/Pistol/Mallorian_Arms/tiny.rsi
+  - type: ChamberMagazineAmmoProvider
+    boltClosed: null
   - type: NCMallorianAltFire
     spread: 20
     volleySound:

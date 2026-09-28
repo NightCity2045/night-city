@@ -58,10 +58,20 @@
   components:
   - type: Sprite
     sprite: _NC/Objects/Weapons/Guns/SMG/Militech_M221_Saratoga.rsi
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-0
+      map: [ "enum.GunVisualLayers.Mag" ]
   - type: Item
     sprite: _NC/Objects/Weapons/Guns/SMG/Militech_M221_Saratoga.rsi
   - type: Clothing
     sprite: _NC/Objects/Weapons/Guns/SMG/Militech_M221_Saratoga.rsi
+  - type: MagazineVisuals
+    magState: mag
+    steps: 1
+    zeroVisible: true
+  - type: Appearance
 
 - type: entity
   id: NCWeaponSMGShingen
@@ -71,7 +81,17 @@
   components:
   - type: Sprite
     sprite: _NC/Objects/Weapons/Guns/SMG/Arasaka_TKI20_Shingen.rsi
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-0
+      map: [ "enum.GunVisualLayers.Mag" ]
   - type: Item
     sprite: _NC/Objects/Weapons/Guns/SMG/Arasaka_TKI20_Shingen.rsi
   - type: Clothing
     sprite: _NC/Objects/Weapons/Guns/SMG/Arasaka_TKI20_Shingen.rsi
+  - type: MagazineVisuals
+    magState: mag
+    steps: 1
+    zeroVisible: true
+  - type: Appearance

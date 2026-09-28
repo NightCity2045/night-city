@@ -3,6 +3,7 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 - type: entity
+  parent: BaseAction
   id: NCActionMallorianAltFire
   name: nc-action-mallorian-alt-fire-name
   description: nc-action-mallorian-alt-fire-description
@@ -12,7 +13,9 @@
     priority: 10
   - type: Sprite
     sprite: _NC/Objects/Weapons/Guns/Pistol/Mallorian_Arms/big.rsi
-    state: icon
+    layers:
+    - state: icon
+      map: [ "enum.ActionVisuals.Icon" ]
   - type: TargetAction
     checkCanAccess: false
     range: 0
