@@ -51,8 +51,8 @@
   - type: Projectile
     damage:
       types:
-        Piercing: 48
-        Structural: 12
+        Piercing: 65
+        Structural: 20
   - type: NCProjectileDamageProfile
     profile: NCBallisticArmorPiercing
 

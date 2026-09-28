@@ -243,7 +243,7 @@
   id: NCWeaponPistolBurya
   parent: [ BaseWeaponRevolver, BaseGunWieldable ]
   name: Techtronika Burya
-  description: A four-shot 14mm Tech revolver. Its armor-piercing discharge is slow, deafening and capable of breaking the shooter's hands.
+  description: A three-shot 14mm Tech revolver. Its armor-piercing discharge is slow, deafening and capable of breaking the shooter's hands.
   components:
   - type: Sprite
     sprite: _NC/Objects/Weapons/Guns/Pistol/BT_Burya.rsi
@@ -276,9 +276,9 @@
     whitelist:
       tags: [ NCCartridge14mmBurya ]
     proto: NCCartridge14mmBurya
-    capacity: 4
-    chambers: [ true, true, true, true ]
-    ammoSlots: [ null, null, null, null ]
+    capacity: 3
+    chambers: [ true, true, true ]
+    ammoSlots: [ null, null, null ]
   - type: NCHeavyWeaponRecoil
     additionalImpulse: 110
     wieldedHandDamage:
