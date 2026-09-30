@@ -39,7 +39,7 @@ public sealed class NCPhysiologySystemTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
-    public void BloodLossDrivesCriticalArrestAndIrreversibleDeathWithoutHp()
+    public void BloodLossClinicalDeathRemainsRevivableForConfiguredWindow()
     {
         var body = SSpawn(HumanMob);
         var circulation = SComp<NCCirculationComponent>(body);
@@ -70,10 +70,43 @@ public sealed class NCPhysiologySystemTest : GameTest
         {
             Assert.That(physiology.Condition, Is.EqualTo(NCPhysiologicalCondition.ClinicalArrest));
             Assert.That(physiology.Consciousness, Is.EqualTo(NCConsciousnessState.Comatose));
-            Assert.That(mobState.CurrentState, Is.EqualTo(MobState.Critical));
+            Assert.That(physiology.Irreversible, Is.False);
+            Assert.That(mobState.CurrentState, Is.EqualTo(MobState.Dead));
         });
 
-        Assert.That(_scheduler.ProcessNow(body, profile.BrainDeathDelay), Is.True);
+        Assert.That(_scheduler.ProcessNow(body, profile.RevivableDeathDuration - TimeSpan.FromSeconds(2)), Is.True);
+        Assert.Multiple(() =>
+        {
+            Assert.That(physiology.Condition, Is.EqualTo(NCPhysiologicalCondition.ClinicalArrest));
+            Assert.That(physiology.Irreversible, Is.False);
+            Assert.That(mobState.CurrentState, Is.EqualTo(MobState.Dead));
+        });
+
+        circulation.BloodVolume = profile.NominalBloodVolume;
+        Assert.That(_scheduler.ProcessNow(body, TimeSpan.FromSeconds(1)), Is.True);
+        Assert.Multiple(() =>
+        {
+            Assert.That(physiology.Condition, Is.Not.EqualTo(NCPhysiologicalCondition.Dead));
+            Assert.That(physiology.Condition, Is.Not.EqualTo(NCPhysiologicalCondition.ClinicalArrest));
+            Assert.That(physiology.TimeInClinicalDeath, Is.EqualTo(TimeSpan.Zero));
+            Assert.That(physiology.Irreversible, Is.False);
+            Assert.That(mobState.CurrentState, Is.EqualTo(MobState.Critical));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void ClinicalDeathBecomesIrreversibleAfterConfiguredWindow()
+    {
+        var body = SSpawn(HumanMob);
+        var circulation = SComp<NCCirculationComponent>(body);
+        var physiology = SComp<NCPhysiologyComponent>(body);
+        var mobState = SComp<MobStateComponent>(body);
+        var profile = _physiology.GetProfile(body);
+
+        circulation.BloodVolume = profile.NominalBloodVolume * profile.ArrestPerfusionThreshold * 0.5f;
+        Assert.That(_scheduler.ProcessNow(body, profile.RevivableDeathDuration), Is.True);
+
         Assert.Multiple(() =>
         {
             Assert.That(physiology.Condition, Is.EqualTo(NCPhysiologicalCondition.Dead));
@@ -84,10 +117,23 @@ public sealed class NCPhysiologySystemTest : GameTest
 
         circulation.BloodVolume = profile.NominalBloodVolume;
         Assert.That(_scheduler.ProcessNow(body, TimeSpan.FromSeconds(1)), Is.True);
+        Assert.That(physiology.Condition, Is.EqualTo(NCPhysiologicalCondition.Dead));
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void ExplicitDeathBoundaryCannotBeRevived()
+    {
+        var body = SSpawn(HumanMob);
+
+        Assert.That(_physiology.ForceIrreversibleDeath(body), Is.True);
+        Assert.That(_scheduler.ProcessNow(body, TimeSpan.Zero), Is.True);
+
         Assert.Multiple(() =>
         {
-            Assert.That(physiology.Condition, Is.EqualTo(NCPhysiologicalCondition.Dead));
-            Assert.That(mobState.CurrentState, Is.EqualTo(MobState.Dead));
+            Assert.That(SComp<NCPhysiologyComponent>(body).Irreversible, Is.True);
+            Assert.That(SComp<NCPhysiologyComponent>(body).Condition, Is.EqualTo(NCPhysiologicalCondition.Dead));
+            Assert.That(SComp<MobStateComponent>(body).CurrentState, Is.EqualTo(MobState.Dead));
         });
     }
 

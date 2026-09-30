@@ -463,19 +463,10 @@ namespace Content.Server.Administration.Systems
                 args.Verbs.Add(verb);
             }
 
-            // Rejuvenate verb
-            if (_toolshed.ActivePermissionController?.CheckInvokable(new CommandSpec(_toolshed.DefaultEnvironment.GetCommand("rejuvenate"), null), player, out _) ?? false)
-            {
-                Verb verb = new()
-                {
-                    Text = Loc.GetString("rejuvenate-verb-get-data-text"),
-                    Category = VerbCategory.Debug,
-                    Icon = new SpriteSpecifier.Texture(new ("/Textures/Interface/VerbIcons/rejuvenate.svg.192dpi.png")),
-                    Act = () => _rejuvenate.PerformRejuvenate(args.Target),
-                    Impact = LogImpact.Medium
-                };
-                args.Verbs.Add(verb);
-            }
+            // NC-Edit-Start
+            // Rejuvenate is already exposed by AddTricksVerbs. Keeping the legacy debug verb produced two
+            // equivalent context-menu entries regardless of the active locale.
+            // NC-Edit-End
 
             // Control mob verb
             if (_toolshed.ActivePermissionController?.CheckInvokable(new CommandSpec(_toolshed.DefaultEnvironment.GetCommand("mind"), "control"), player, out _) ?? false &&

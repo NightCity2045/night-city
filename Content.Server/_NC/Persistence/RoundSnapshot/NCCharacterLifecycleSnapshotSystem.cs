@@ -4,6 +4,7 @@
 
 using System.Globalization;
 using System.Text.Json;
+using Content.Server._NC.LivingCity.Lifecycle;
 using Content.Server.Preferences.Managers;
 using Content.Shared._NC.Identity;
 using Content.Shared._NC.Medical.Physiology;
@@ -24,16 +25,19 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
     private const int FormatVersion = 1;
 
     [Dependency] private IServerPreferencesManager _preferences = default!;
+    [Dependency] private NCDeathSuccessionSystem _deathSuccession = default!;
 
     private readonly Dictionary<EntityUid, CharacterBinding> _bindings = [];
     private readonly Dictionary<NCCharacterId, NetUserId> _owners = [];
     private readonly HashSet<NCCharacterId> _irreversiblyDead = [];
+    private readonly Dictionary<NCCharacterId, EstatePreparation> _estatePreparations = [];
 
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawnComplete);
         SubscribeLocalEvent<PlayerDetachedEvent>(OnPlayerDetached);
+        SubscribeLocalEvent<NCPhysiologyComponent, NCPhysiologyChangedEvent>(OnPhysiologyChanged);
         SubscribeLocalEvent<NCPhysiologyComponent, EntityTerminatingEvent>(OnBodyTerminating);
         SubscribeLocalEvent<NCRoundSnapshotCaptureEvent>(OnRoundSnapshotCapture);
         SubscribeLocalEvent<NCRoundSnapshotCommittedEvent>(OnRoundSnapshotCommitted);
@@ -61,7 +65,13 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
     private void OnBodyTerminating(Entity<NCPhysiologyComponent> entity, ref EntityTerminatingEvent args)
     {
         if (_bindings.TryGetValue(entity.Owner, out var binding) && entity.Comp.Irreversible)
-            _irreversiblyDead.Add(binding.CharacterId);
+            RememberDeath(entity.Owner, binding.CharacterId);
+    }
+
+    private void OnPhysiologyChanged(Entity<NCPhysiologyComponent> entity, ref NCPhysiologyChangedEvent args)
+    {
+        if (entity.Comp.Irreversible && _bindings.TryGetValue(entity.Owner, out var binding))
+            RememberDeath(entity.Owner, binding.CharacterId);
     }
 
     private void OnRoundSnapshotCapture(NCRoundSnapshotCaptureEvent args)
@@ -81,7 +91,17 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
                 1,
                 payload);
             if (deleted)
+            {
+                if (!_estatePreparations.TryGetValue(characterId, out var preparation) ||
+                    !preparation.Task.IsCompletedSuccessfully ||
+                    preparation.Task.GetAwaiter().GetResult() == null)
+                {
+                    args.Fail($"Character {characterId.Value} estate was not prepared before profile deletion.");
+                    continue;
+                }
+
                 args.DeleteCharacter(characterId.Value);
+            }
         }
     }
 
@@ -106,7 +126,23 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
     private void RememberDeath(EntityUid body, NCCharacterId characterId)
     {
         if (TryComp<NCPhysiologyComponent>(body, out var physiology) && physiology.Irreversible)
+        {
             _irreversiblyDead.Add(characterId);
+            EnsureEstatePreparation(characterId);
+        }
+    }
+
+    private void EnsureEstatePreparation(NCCharacterId characterId)
+    {
+        if (_estatePreparations.ContainsKey(characterId))
+            return;
+
+        // The generated event id remains stable for every retry/read during this round, keeping estate opening
+        // and account collection idempotent without depending on the abandoned physical A-Life lifecycle.
+        var deathEventId = Guid.NewGuid();
+        _estatePreparations.Add(characterId, new EstatePreparation(
+            deathEventId,
+            _deathSuccession.OpenCharacterEstateAsync(characterId, deathEventId)));
     }
 
     private void OnRoundRestart(RoundRestartCleanupEvent args)
@@ -114,8 +150,10 @@ public sealed partial class NCCharacterLifecycleSnapshotSystem : EntitySystem
         _bindings.Clear();
         _owners.Clear();
         _irreversiblyDead.Clear();
+        _estatePreparations.Clear();
     }
 
     private readonly record struct CharacterBinding(NCCharacterId CharacterId, NetUserId UserId);
+    private readonly record struct EstatePreparation(Guid DeathEventId, Task<NCEstateRecord?> Task);
     private sealed record CharacterLifecycleDocument(bool IrreversiblyDead);
 }

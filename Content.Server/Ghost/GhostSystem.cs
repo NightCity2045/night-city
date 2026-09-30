@@ -3,6 +3,10 @@ using System.Numerics;
 using Content.Server.Administration.Logs;
 using Content.Server.Chat.Managers;
 using Content.Server.GameTicking;
+// NC-Edit-Start
+using Content.Server._NC.Medical.Physiology;
+using Content.Shared._NC.Medical.Anatomy;
+// NC-Edit-End
 using Content.Server.Mind;
 using Content.Server.Roles.Jobs;
 using Content.Shared.Actions;
@@ -67,6 +71,9 @@ namespace Content.Server.Ghost
         [Dependency] private TagSystem _tag = default!;
         [Dependency] private NameModifierSystem _nameMod = default!;
         [Dependency] private GhostSpriteStateSystem _ghostState = default!;
+        // NC-Edit-Start
+        [Dependency] private NCPhysiologySystem _ncPhysiology = default!;
+        // NC-Edit-End
 
         [Dependency] private EntityQuery<GhostComponent> _ghostQuery = default!;
         [Dependency] private EntityQuery<FollowerComponent> _followerQuery = default!;
@@ -620,7 +627,15 @@ namespace Content.Server.Ghost
             //   (If the mob survives, that's a bug. Ghosting is kept regardless.)
             var canReturn = canReturnGlobal && _mind.IsCharacterDeadPhysically(mind);
 
-            if (_configurationManager.GetCVar(CCVars.GhostKillCrit) &&
+            // NC-Edit-Start
+            // Leaving an NC body voluntarily is the explicit point of no return. The NC physiology model,
+            // not compatibility HP damage, owns the permanent-death transition.
+            if (!forced && playerEntity is { } ncBody && HasComp<NCMedicalBodyComponent>(ncBody))
+            {
+                _ncPhysiology.ForceIrreversibleDeath(ncBody);
+                canReturn = false;
+            }
+            else if (_configurationManager.GetCVar(CCVars.GhostKillCrit) &&
                 canReturnGlobal &&
                 TryComp(playerEntity, out MobStateComponent? mobState))
             {
@@ -646,6 +661,7 @@ namespace Content.Server.Ghost
                     _damageable.ChangeDamage(playerEntity.Value, damage, true);
                 }
             }
+            // NC-Edit-End
 
             if (playerEntity != null)
                 _adminLog.Add(LogType.Mind, $"{ToPrettyString(playerEntity.Value):player} ghosted{(!canReturn ? " (non-returnable)" : "")}");

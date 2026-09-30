@@ -491,6 +491,7 @@ public sealed partial class NCMedicalPersistenceSystem
             Condition = physiology.Condition,
             BrainFunction = physiology.BrainFunction,
             TimeBelowCriticalPerfusion = physiology.TimeBelowCriticalPerfusion,
+            TimeInClinicalDeath = physiology.TimeInClinicalDeath,
             Irreversible = physiology.Irreversible,
         };
     }
@@ -887,6 +888,7 @@ public sealed partial class NCMedicalPersistenceSystem
         physiology.Condition = state.Condition;
         physiology.BrainFunction = state.BrainFunction;
         physiology.TimeBelowCriticalPerfusion = state.TimeBelowCriticalPerfusion;
+        physiology.TimeInClinicalDeath = state.TimeInClinicalDeath;
         physiology.Irreversible = state.Irreversible;
     }
 }
