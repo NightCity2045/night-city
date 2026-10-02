@@ -26,11 +26,16 @@
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
     id: NCPDCommanderPDA
-    belt: ClothingBeltSecurityFilled
-    outerClothing: ClothingOuterArmorBasic
+    belt: ClothingBeltSecurity
+    armor: ClothingOuterArmorBulletproof
   storage:
     back:
     - WantedListCartridge
+    belt:
+    - Handcuffs
+    - Handcuffs
+    - HoloprojectorSecurity
+    - RadioHandheldSecurity
 
 - type: jobIcon
   parent: JobIcon

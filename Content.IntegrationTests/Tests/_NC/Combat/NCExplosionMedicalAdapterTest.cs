@@ -90,7 +90,7 @@ public sealed class NCExplosionMedicalAdapterTest : GameTest
         var body = SSpawn("MobHuman");
         var source = SSpawn(null);
         var armor = SSpawn("NCArmorTestLightArmorjack");
-        Assert.That(_inventory.TryEquip(body, armor, "outerClothing"), Is.True);
+        Assert.That(_inventory.TryEquip(body, armor, "armor"), Is.True);
 
         var resolutionId = FindResolutionForCoveredPrimary(body);
         Assert.That(_adapter.TryHandleExplosionDamage(

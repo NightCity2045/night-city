@@ -43,6 +43,16 @@
         - type: NCUniformAir
         - type: MapLight
           ambientLightColor: "#D8B059FF"
+        - type: NCDayNightCycle
+          minimumDepth: 0
+          roundStartHour: 8
+          duration: 60m
+          minLightLevel: 0.3
+          maxLightLevel: 3
+          clipLight: 1.25
+          clipLevel: "#FFFFFF"
+          minLevel: "#1A2680"
+          maxLevel: "#FFFFFF"
         - type: NCZLevelRoof
         - type: Gravity
           enabled: true

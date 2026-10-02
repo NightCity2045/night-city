@@ -21,6 +21,9 @@
     # Underwear & clothing
     - map: [ "enum.HumanoidVisualLayers.UndergarmentBottom" ]
     - map: [ "enum.HumanoidVisualLayers.UndergarmentTop" ]
+    # NC-Edit-Start: Pants render below compatible legacy tops.
+    - map: ["pants"]
+    # NC-Edit-End
     - map: ["jumpsuit"]
 
     # Extremities
@@ -39,6 +42,9 @@
     - map: [ "eyes" ]
     - map: [ "belt" ]
     - map: [ "id" ]
+    # NC-Edit-Start: Ballistic vests render over clothes and below coats.
+    - map: [ "armor" ]
+    # NC-Edit-End
     - map: [ "outerClothing" ]
     - map: [ "back" ]
     - map: [ "neck" ]

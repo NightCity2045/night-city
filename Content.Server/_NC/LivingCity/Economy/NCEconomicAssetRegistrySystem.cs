@@ -607,7 +607,8 @@ public sealed partial class NCEconomicAssetRegistrySystem : EntitySystem
     {
         if (!IsStableKey(value.StableKey, 128) || !Enum.IsDefined(value.Domain) || value.BasePrice is < 0 ||
             value.DefaultCondition is < 0 or > 1_000 || !Enum.IsDefined(value.LegalStatus) ||
-            !Enum.IsDefined(value.TradeStatus) || value.MaximumInstalledParts is < 0 or > 18 ||
+            !Enum.IsDefined(value.TradeStatus) || !Enum.IsDefined(value.Delivery) ||
+            value.MaximumInstalledParts is < 0 or > 18 ||
             value.AllowedInstalledPartDefinitions.Count > value.MaximumInstalledParts ||
             value.AllowedInstalledPartDefinitions.Distinct().Count() !=
             value.AllowedInstalledPartDefinitions.Count ||

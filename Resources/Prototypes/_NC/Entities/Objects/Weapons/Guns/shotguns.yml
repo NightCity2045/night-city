@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  id: NCWeaponShotgunCrusher
+  parent: WeaponShotgunBulldog
+  name: Militech Crusher
+  description: A compact magazine-fed 12 gauge shotgun with punishing close-range firepower.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Shotguns/Militech_Crusher/big.rsi
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-0
+      map: [ "enum.GunVisualLayers.Mag" ]
+  - type: Item
+    sprite: _NC/Objects/Weapons/Guns/Shotguns/Militech_Crusher/tiny.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Shotguns/Militech_Crusher/tiny.rsi
+  - type: Gun
+    fireRate: 1.5
+    selectedMode: SemiAuto
+    availableModes: [ SemiAuto ]
+    cameraRecoilScalar: 2.5
+    angleIncrease: 4
+  - type: ItemSlots
+    slots:
+      gun_magazine:
+        name: Magazine
+        startingItem: NCMagazine12GaugeCrusher
+        priority: 2
+        whitelist:
+          tags: [ NCMagazine12GaugeCrusher ]
+        whitelistFailPopup: gun-magazine-whitelist-fail
+        insertSound: /Audio/Weapons/Guns/MagIn/smg_magin.ogg
+        ejectSound: /Audio/Weapons/Guns/MagOut/smg_magout.ogg

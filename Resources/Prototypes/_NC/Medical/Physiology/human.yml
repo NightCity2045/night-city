@@ -11,6 +11,7 @@
   arrestPerfusionThreshold: 0.2
   brainInjuryPerfusionThreshold: 0.3
   brainDeathDelay: 180s
+  revivableDeathDuration: 600s
   brainRecoveryRate: 0.25
   dazedThreshold: 0.8
   confusedThreshold: 0.65

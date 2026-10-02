@@ -1,0 +1,338 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Pistols, compatible ammunition and light armor.
+# NC firearms use physical caliber families. Smart, Power and Tech remain weapon mechanics rather than
+# incompatible pseudo-calibers, with the Burya's proprietary 14mm load as the intentional exception.
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponStreetmaster
+  displayName: ent-NCWeaponPistolStreetmaster
+  stableKey: weapon.nc-streetmaster
+  domainPrototypeId: NCWeaponPistolStreetmaster
+  materializedPrototype: NCWeaponPistolStreetmaster
+  basePrice: 300
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponCheesemaker
+  displayName: ent-NCWeaponPistolCheesemaker
+  stableKey: weapon.nc-cheesemaker
+  domainPrototypeId: NCWeaponPistolCheesemaker
+  materializedPrototype: NCWeaponPistolCheesemaker
+  basePrice: 350
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponHelloCutie
+  displayName: ent-NCWeaponPistolHelloCutie
+  stableKey: weapon.nc-hello-cutie
+  domainPrototypeId: NCWeaponPistolHelloCutie
+  materializedPrototype: NCWeaponPistolHelloCutie
+  basePrice: 600
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponP35
+  displayName: ent-NCWeaponPistolP35
+  stableKey: weapon.nc-p35
+  domainPrototypeId: NCWeaponPistolP35
+  materializedPrototype: NCWeaponPistolP35
+  basePrice: 700
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponFederalX9
+  displayName: ent-NCWeaponPistolFederalX9
+  stableKey: weapon.nc-federal-x9
+  domainPrototypeId: NCWeaponPistolFederalX9
+  materializedPrototype: NCWeaponPistolFederalX9
+  basePrice: 900
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponAvenger
+  displayName: ent-NCWeaponPistolAvenger
+  stableKey: weapon.nc-avenger
+  domainPrototypeId: NCWeaponPistolAvenger
+  materializedPrototype: NCWeaponPistolAvenger
+  basePrice: 1100
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponMarkIII
+  displayName: ent-NCWeaponPistolMarkIII
+  stableKey: weapon.nc-mark-iii
+  domainPrototypeId: NCWeaponPistolMarkIII
+  materializedPrototype: NCWeaponPistolMarkIII
+  basePrice: 1250
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponStukach
+  displayName: ent-NCWeaponPistolStukach
+  stableKey: weapon.nc-stukach
+  domainPrototypeId: NCWeaponPistolStukach
+  materializedPrototype: NCWeaponPistolStukach
+  basePrice: 850
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponOverlord
+  displayName: ent-NCWeaponPistolOverlord
+  stableKey: weapon.nc-overlord
+  domainPrototypeId: NCWeaponPistolOverlord
+  materializedPrototype: NCWeaponPistolOverlord
+  basePrice: 1700
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponBoomerBuster
+  displayName: ent-NCWeaponPistolBoomerBuster
+  stableKey: weapon.nc-boomer-buster
+  domainPrototypeId: NCWeaponPistolBoomerBuster
+  materializedPrototype: NCWeaponPistolBoomerBuster
+  basePrice: 2100
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponMallorian
+  displayName: ent-NCWeaponPistolMallorian
+  stableKey: weapon.nc-mallorian
+  domainPrototypeId: NCWeaponPistolMallorian
+  materializedPrototype: NCWeaponPistolMallorian
+  basePrice: 5000
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponBurya
+  displayName: ent-NCWeaponPistolBurya
+  stableKey: weapon.nc-burya
+  domainPrototypeId: NCWeaponPistolBurya
+  materializedPrototype: NCWeaponPistolBurya
+  basePrice: 6500
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponSaratoga
+  displayName: ent-NCWeaponSMGSaratoga
+  stableKey: weapon.nc-saratoga
+  domainPrototypeId: NCWeaponSMGSaratoga
+  materializedPrototype: NCWeaponSMGSaratoga
+  basePrice: 1800
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponShingen
+  displayName: ent-NCWeaponSMGShingen
+  stableKey: weapon.nc-shingen
+  domainPrototypeId: NCWeaponSMGShingen
+  materializedPrototype: NCWeaponSMGShingen
+  basePrice: 3200
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponNowaki
+  displayName: ent-NCWeaponRifleNowaki
+  stableKey: weapon.nc-nowaki
+  domainPrototypeId: NCWeaponRifleNowaki
+  materializedPrototype: NCWeaponRifleNowaki
+  basePrice: 3800
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponArasakaPrototype
+  displayName: ent-NCWeaponRifleArasakaPrototype
+  stableKey: weapon.nc-arasaka-prototype
+  domainPrototypeId: NCWeaponRifleArasakaPrototype
+  materializedPrototype: NCWeaponRifleArasakaPrototype
+  basePrice: 7000
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponCopperhead
+  displayName: ent-NCWeaponRifleCopperhead
+  stableKey: weapon.nc-copperhead
+  domainPrototypeId: NCWeaponRifleCopperhead
+  materializedPrototype: NCWeaponRifleCopperhead
+  basePrice: 3000
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponNomadSniper
+  displayName: ent-NCWeaponRifleNomadSniper
+  stableKey: weapon.nc-nomad-sniper
+  domainPrototypeId: NCWeaponRifleNomadSniper
+  materializedPrototype: NCWeaponRifleNomadSniper
+  basePrice: 5200
+
+- type: ncItemDefinition
+  parent: NCShopWeaponDefinitionBase
+  id: NCItemWeaponCrusher
+  displayName: ent-NCWeaponShotgunCrusher
+  stableKey: weapon.nc-crusher
+  domainPrototypeId: NCWeaponShotgunCrusher
+  materializedPrototype: NCWeaponShotgunCrusher
+  basePrice: 3600
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmo9x19Pistol
+  displayName: ent-NCMagazine9x19Pistol
+  stableKey: ammunition.nc-9x19-pistol
+  domainPrototypeId: NCMagazine9x19Pistol
+  materializedPrototype: NCMagazine9x19Pistol
+  basePrice: 35
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmo11mmPistol
+  displayName: ent-NCMagazine11mmPistol
+  stableKey: ammunition.nc-11mm-pistol
+  domainPrototypeId: NCMagazine11mmPistol
+  materializedPrototype: NCMagazine11mmPistol
+  basePrice: 55
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmo12mmPistol
+  displayName: ent-NCMagazine12mmPistol
+  stableKey: ammunition.nc-12mm-pistol
+  domainPrototypeId: NCMagazine12mmPistol
+  materializedPrototype: NCMagazine12mmPistol
+  basePrice: 80
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmo14mmBurya
+  displayName: ent-NCCartridge14mmBurya
+  stableKey: ammunition.nc-14mm-burya
+  domainPrototypeId: NCCartridge14mmBurya
+  materializedPrototype: NCCartridge14mmBurya
+  basePrice: 120
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmo9x19SMG
+  displayName: ent-NCMagazine9x19SMG
+  stableKey: ammunition.nc-9x19-smg
+  domainPrototypeId: NCMagazine9x19SMG
+  materializedPrototype: NCMagazine9x19SMG
+  basePrice: 70
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmo11mmSMG
+  displayName: ent-NCMagazine11mmSMG
+  stableKey: ammunition.nc-11mm-smg
+  domainPrototypeId: NCMagazine11mmSMG
+  materializedPrototype: NCMagazine11mmSMG
+  basePrice: 110
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmo556Rifle
+  displayName: ent-NCMagazine556Rifle
+  stableKey: ammunition.nc-556-rifle
+  domainPrototypeId: NCMagazine556Rifle
+  materializedPrototype: NCMagazine556Rifle
+  basePrice: 140
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmo762Sniper
+  displayName: ent-NCMagazine762Sniper
+  stableKey: ammunition.nc-762-sniper
+  domainPrototypeId: NCMagazine762Sniper
+  materializedPrototype: NCMagazine762Sniper
+  basePrice: 180
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmo12GaugeCrusher
+  displayName: ent-NCMagazine12GaugeCrusher
+  stableKey: ammunition.nc-12-gauge-crusher
+  domainPrototypeId: NCMagazine12GaugeCrusher
+  materializedPrototype: NCMagazine12GaugeCrusher
+  basePrice: 130
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmo12mmMallorian
+  displayName: ent-NCMagazine12mmMallorian
+  stableKey: ammunition.nc-12mm-mallorian
+  domainPrototypeId: NCMagazine12mmMallorian
+  materializedPrototype: NCMagazine12mmMallorian
+  basePrice: 100
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoBox9x19
+  displayName: ent-NCBox9x19
+  stableKey: ammunition.nc-box-9x19
+  domainPrototypeId: NCBox9x19
+  materializedPrototype: NCBox9x19
+  basePrice: 150
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoBox11mm
+  displayName: ent-NCBox11mm
+  stableKey: ammunition.nc-box-11mm
+  domainPrototypeId: NCBox11mm
+  materializedPrototype: NCBox11mm
+  basePrice: 240
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoBox12mm
+  displayName: ent-NCBox12mm
+  stableKey: ammunition.nc-box-12mm
+  domainPrototypeId: NCBox12mm
+  materializedPrototype: NCBox12mm
+  basePrice: 360
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoBox14mmBurya
+  displayName: ent-NCBox14mmBurya
+  stableKey: ammunition.nc-box-14mm-burya
+  domainPrototypeId: NCBox14mmBurya
+  materializedPrototype: NCBox14mmBurya
+  basePrice: 1200
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoBox556
+  displayName: ent-NCBox556
+  stableKey: ammunition.nc-box-556
+  domainPrototypeId: NCBox556
+  materializedPrototype: NCBox556
+  basePrice: 420
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoBox762
+  displayName: ent-NCBox762
+  stableKey: ammunition.nc-box-762
+  domainPrototypeId: NCBox762
+  materializedPrototype: NCBox762
+  basePrice: 650
+
+- type: ncItemDefinition
+  parent: NCShopAmmoDefinitionBase
+  id: NCItemAmmoBox12Gauge
+  displayName: ent-NCBox12Gauge
+  stableKey: ammunition.nc-box-12-gauge
+  domainPrototypeId: NCBox12Gauge
+  materializedPrototype: NCBox12Gauge
+  basePrice: 280
+
+- type: ncItemDefinition
+  parent: NCShopArmorDefinitionBase
+  id: NCItemArmorClothingOuterArmorBasicSlim
+  displayName: ent-ClothingOuterArmorBasicSlim
+  stableKey: armor.clothing-outer-armor-basic-slim
+  materializedPrototype: ClothingOuterArmorBasicSlim
+  basePrice: 240

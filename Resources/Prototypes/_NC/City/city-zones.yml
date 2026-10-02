@@ -1576,7 +1576,11 @@
       vertices:
       - 25,-44
       - 4,-44
-      - 4,-59
+      - 4,-78
+      - 21,-78
+      - 21,-68
+      - 14,-68
+      - 14,-59
       - 25,-59
   - id: 27360cd5-2439-5f82-b1da-afa229e5d552
     kind: Building
@@ -1616,18 +1620,6 @@
       - -13,-77
       - -5,-77
       - -5,-65
-  - id: ab5ea231-6f41-5dee-aafe-9c91a96f0179
-    kind: Building
-    parent: d678368a-9680-476d-91b1-5a400f5fb795
-    name: "RZ 30rd Street Building 07"
-    geometry:
-    - kind: Polygon
-      global: true
-      vertices:
-      - 21,-68
-      - 4,-68
-      - 4,-78
-      - 21,-78
   - id: 334f6f04-d7bc-5749-b523-1bf6801a14a8
     kind: Building
     parent: 42e9e0b7-b7e5-4947-9cee-31ed01f38406
@@ -1834,52 +1826,125 @@
       - -173,35
       - -173,34
       - -152,34
-  - id: 7b559196-93fd-4e17-90af-998ed0cffa62
-    kind: Apartment
-    parent: 4faa965b-1cdb-4ff4-811f-0974640d4784
-    name: "G 241-1"
-    geometry:
-    - kind: Polygon
-      z: 0
-      vertices:
-      - 12,-39
-      - 12,-34
-      - 22,-34
-      - 22,-40
-      - 12,-40
-  - id: 9a8d206c-a63e-426a-8e65-05162a583cea
-    kind: Apartment
-    parent: 4faa965b-1cdb-4ff4-811f-0974640d4784
-    name: "G 241-2"
+  - id: 2e8c8b5f-7835-4072-b8e5-de3d395f3117
+    kind: MissionSlot
+    parent: 3e64cbc4-0fdb-4553-a6d7-3d06a91a5e92
+    name: "G101 Mission T2"
     geometry:
     - kind: Polygon
       z: 1
       vertices:
-      - 12,-40
-      - 12,-34
-      - 22,-34
-      - 22,-40
-  - id: 94373a6b-0560-478e-ad0b-64b3437df3d1
-    kind: Apartment
-    parent: 4faa965b-1cdb-4ff4-811f-0974640d4784
-    name: "G 241-3"
-    geometry:
-    - kind: Polygon
-      z: 2
-      vertices:
-      - 12,-40
-      - 12,-34
-      - 22,-34
-      - 22,-40
-  - id: ea639634-ef4a-45d4-a7cb-ffbe0a19e802
-    kind: Apartment
-    parent: 4faa965b-1cdb-4ff4-811f-0974640d4784
-    name: "G 241-4"
+      - -13,-22
+      - -14,-22
+      - -14,-23
+      - -17,-23
+      - -17,-32
+      - -12,-32
+      - -12,-23
+      - -13,-23
+  - id: 52c128d2-a92b-441f-b89b-8629a3bd205e
+    kind: MissionSlot
+    parent: 8965b6de-e3cc-5c0f-ad21-105737e74a7c
+    name: "RZ30 01 Mission T3"
     geometry:
     - kind: Polygon
       z: 3
       vertices:
-      - 12,-40
-      - 12,-34
-      - 19,-34
-      - 19,-40
+      - -36,-59
+      - -37,-59
+      - -37,-58
+      - -38,-58
+      - -38,-51
+      - -34,-51
+      - -34,-52
+      - -33,-52
+      - -33,-51
+      - -29,-51
+      - -29,-58
+      - -31,-58
+      - -31,-59
+      - -32,-59
+      - -32,-58
+      - -33,-58
+      - -33,-53
+      - -34,-53
+      - -34,-58
+      - -36,-58
+  - id: e87e3b98-427b-49e3-9b93-58377b531546
+    kind: MissionSlot
+    parent: cbc8ee73-e97a-4996-9abc-3bc03aecc5ad
+    name: "G103 Mission T3"
+    geometry:
+    - kind: Polygon
+      z: 0
+      vertices:
+      - -36,-19
+      - -36,-22
+      - -35,-22
+      - -35,-24
+      - -38,-24
+      - -38,-26
+      - -39,-26
+      - -39,-27
+      - -38,-27
+      - -38,-29
+      - -26,-29
+      - -26,-18
+      - -35,-18
+      - -35,-19
+  - id: c53c9932-873b-43dc-985d-b11ddcd1bc64
+    kind: MissionSlot
+    parent: 411864e5-0241-5b96-a6e5-79cd498ccca7
+    name: "RZ30 03 Mission T4"
+    geometry:
+    - kind: Polygon
+      z: 2
+      vertices:
+      - 7,-60
+      - 7,-61
+      - 8,-61
+      - 8,-68
+      - 10,-68
+      - 10,-69
+      - 8,-69
+      - 8,-71
+      - 17,-71
+      - 17,-72
+      - 15,-72
+      - 15,-75
+      - 14,-75
+      - 14,-72
+      - 5,-72
+      - 5,-77
+      - 9,-77
+      - 9,-73
+      - 10,-73
+      - 10,-77
+      - 14,-77
+      - 14,-76
+      - 15,-76
+      - 15,-77
+      - 20,-77
+      - 20,-72
+      - 18,-72
+      - 18,-71
+      - 20,-71
+      - 20,-69
+      - 11,-69
+      - 11,-68
+      - 13,-68
+      - 13,-59
+      - 8,-59
+      - 8,-60
+  - id: eb0c0da8-bc1a-429a-8c9e-4cf9e609cb1f
+    kind: MissionSlot
+    parent: 24a86fd6-2eb7-5c31-85b9-576893c093e1
+    name: "Mission: The Slammer"
+    geometry:
+    - kind: Polygon
+      z: 0
+      vertices:
+      - -47,-56
+      - -47,-72
+      - -77,-72
+      - -77,-56

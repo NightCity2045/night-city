@@ -19,11 +19,13 @@
 - type: startingGear
   id: BiotechnicaNetrunnerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitScientist
-    back: ClothingBackpackScience
+    jumpsuit: ClothingUniformBiotech
+    back: ClothingBackpackSatchelBiotechnica
     shoes: ClothingShoesColorBlack
+    head: ClothingHeadHatBiotechCap
     eyes: ClothingEyesGlasses
     id: SciencePDA
+    outerClothing: ClothingOuterCoatBiotechnicaMedtechRadiation
   storage:
     back:
     - NetProbeCartridge

@@ -83,6 +83,18 @@ public sealed partial class NCVehicleOwnershipSystem : EntitySystem
         return TryChangeOwner(uid, user);
     }
 
+    /// <summary>
+    /// Registers a freshly delivered dealership vehicle without requiring the buyer to stand inside the delivery bay.
+    /// The caller must own the authoritative purchase and pass a newly spawned, empty vehicle.
+    /// </summary>
+    public bool TryRegisterPurchasedVehicle(EntityUid uid, EntityUid user)
+    {
+        if (TerminatingOrDeleted(uid) || TerminatingOrDeleted(user) || !HasComp<ActorComponent>(user) ||
+            !IsEmpty(uid) || !TryComp<NCVehicleAccessComponent>(uid, out var access) || access.Registered)
+            return false;
+        return TryChangeOwner(uid, user);
+    }
+
     private bool TryChangeOwner(EntityUid uid, EntityUid user)
     {
         var access = Comp<NCVehicleAccessComponent>(uid);

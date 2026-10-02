@@ -38,6 +38,12 @@ public sealed partial class NCPhysiologyComponent : Component
     [DataField]
     public TimeSpan TimeBelowCriticalPerfusion;
 
+    /// <summary>
+    /// Continuous time without spontaneous circulation. It resets when the body leaves clinical arrest.
+    /// </summary>
+    [DataField]
+    public TimeSpan TimeInClinicalDeath;
+
     [DataField]
     public bool Irreversible;
 }

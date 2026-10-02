@@ -41,6 +41,12 @@ public sealed partial class NCPhysiologyProfilePrototype : IPrototype
     [DataField(required: true)]
     public TimeSpan BrainDeathDelay { get; private set; }
 
+    /// <summary>
+    /// Maximum time spent in clinical death during which circulation may still be restored.
+    /// </summary>
+    [DataField(required: true)]
+    public TimeSpan RevivableDeathDuration { get; private set; }
+
     [DataField]
     public float BrainRecoveryRate { get; private set; } = 0.25f;
 

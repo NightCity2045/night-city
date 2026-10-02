@@ -27,7 +27,7 @@
   id: SecurityCadetGear
   equipment:
     shoes: ClothingShoesBootsJackFilled
-    outerClothing: ClothingOuterArmorBasic
+    armor: ClothingOuterArmorBasic # NC
     id: SecurityCadetPDA
     ears: ClothingHeadsetSecurity
     belt: ClothingBeltSecurityFilled

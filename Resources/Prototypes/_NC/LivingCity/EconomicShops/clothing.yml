@@ -1,0 +1,1167 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Ordinary clothing available from the street clothing store.
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpsuitColorWhite
+  displayName: ent-ClothingUniformJumpsuitColorWhite
+  stableKey: clothing.clothing-uniform-jumpsuit-color-white
+  materializedPrototype: ClothingUniformJumpsuitColorWhite
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpsuitColorGrey
+  displayName: ent-ClothingUniformJumpsuitColorGrey
+  stableKey: clothing.clothing-uniform-jumpsuit-color-grey
+  materializedPrototype: ClothingUniformJumpsuitColorGrey
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpsuitColorDarkBlue
+  displayName: ent-ClothingUniformJumpsuitColorDarkBlue
+  stableKey: clothing.clothing-uniform-jumpsuit-color-dark-blue
+  materializedPrototype: ClothingUniformJumpsuitColorDarkBlue
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpsuitColorTeal
+  displayName: ent-ClothingUniformJumpsuitColorTeal
+  stableKey: clothing.clothing-uniform-jumpsuit-color-teal
+  materializedPrototype: ClothingUniformJumpsuitColorTeal
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpsuitColorGreen
+  displayName: ent-ClothingUniformJumpsuitColorGreen
+  stableKey: clothing.clothing-uniform-jumpsuit-color-green
+  materializedPrototype: ClothingUniformJumpsuitColorGreen
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpsuitColorDarkGreen
+  displayName: ent-ClothingUniformJumpsuitColorDarkGreen
+  stableKey: clothing.clothing-uniform-jumpsuit-color-dark-green
+  materializedPrototype: ClothingUniformJumpsuitColorDarkGreen
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpsuitColorOrange
+  displayName: ent-ClothingUniformJumpsuitColorOrange
+  stableKey: clothing.clothing-uniform-jumpsuit-color-orange
+  materializedPrototype: ClothingUniformJumpsuitColorOrange
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpsuitColorPink
+  displayName: ent-ClothingUniformJumpsuitColorPink
+  stableKey: clothing.clothing-uniform-jumpsuit-color-pink
+  materializedPrototype: ClothingUniformJumpsuitColorPink
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpsuitColorRed
+  displayName: ent-ClothingUniformJumpsuitColorRed
+  stableKey: clothing.clothing-uniform-jumpsuit-color-red
+  materializedPrototype: ClothingUniformJumpsuitColorRed
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpsuitColorYellow
+  displayName: ent-ClothingUniformJumpsuitColorYellow
+  stableKey: clothing.clothing-uniform-jumpsuit-color-yellow
+  materializedPrototype: ClothingUniformJumpsuitColorYellow
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpsuitColorPurple
+  displayName: ent-ClothingUniformJumpsuitColorPurple
+  stableKey: clothing.clothing-uniform-jumpsuit-color-purple
+  materializedPrototype: ClothingUniformJumpsuitColorPurple
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpsuitColorLightBrown
+  displayName: ent-ClothingUniformJumpsuitColorLightBrown
+  stableKey: clothing.clothing-uniform-jumpsuit-color-light-brown
+  materializedPrototype: ClothingUniformJumpsuitColorLightBrown
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpsuitColorBrown
+  displayName: ent-ClothingUniformJumpsuitColorBrown
+  stableKey: clothing.clothing-uniform-jumpsuit-color-brown
+  materializedPrototype: ClothingUniformJumpsuitColorBrown
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpsuitColorMaroon
+  displayName: ent-ClothingUniformJumpsuitColorMaroon
+  stableKey: clothing.clothing-uniform-jumpsuit-color-maroon
+  materializedPrototype: ClothingUniformJumpsuitColorMaroon
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformColorRainbow
+  displayName: ent-ClothingUniformColorRainbow
+  stableKey: clothing.clothing-uniform-color-rainbow
+  materializedPrototype: ClothingUniformColorRainbow
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorWhite
+  displayName: ent-ClothingUniformJumpskirtColorWhite
+  stableKey: clothing.clothing-uniform-jumpskirt-color-white
+  materializedPrototype: ClothingUniformJumpskirtColorWhite
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorGrey
+  displayName: ent-ClothingUniformJumpskirtColorGrey
+  stableKey: clothing.clothing-uniform-jumpskirt-color-grey
+  materializedPrototype: ClothingUniformJumpskirtColorGrey
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorBlack
+  displayName: ent-ClothingUniformJumpskirtColorBlack
+  stableKey: clothing.clothing-uniform-jumpskirt-color-black
+  materializedPrototype: ClothingUniformJumpskirtColorBlack
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorBlue
+  displayName: ent-ClothingUniformJumpskirtColorBlue
+  stableKey: clothing.clothing-uniform-jumpskirt-color-blue
+  materializedPrototype: ClothingUniformJumpskirtColorBlue
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorDarkBlue
+  displayName: ent-ClothingUniformJumpskirtColorDarkBlue
+  stableKey: clothing.clothing-uniform-jumpskirt-color-dark-blue
+  materializedPrototype: ClothingUniformJumpskirtColorDarkBlue
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorTeal
+  displayName: ent-ClothingUniformJumpskirtColorTeal
+  stableKey: clothing.clothing-uniform-jumpskirt-color-teal
+  materializedPrototype: ClothingUniformJumpskirtColorTeal
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorGreen
+  displayName: ent-ClothingUniformJumpskirtColorGreen
+  stableKey: clothing.clothing-uniform-jumpskirt-color-green
+  materializedPrototype: ClothingUniformJumpskirtColorGreen
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorDarkGreen
+  displayName: ent-ClothingUniformJumpskirtColorDarkGreen
+  stableKey: clothing.clothing-uniform-jumpskirt-color-dark-green
+  materializedPrototype: ClothingUniformJumpskirtColorDarkGreen
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorOrange
+  displayName: ent-ClothingUniformJumpskirtColorOrange
+  stableKey: clothing.clothing-uniform-jumpskirt-color-orange
+  materializedPrototype: ClothingUniformJumpskirtColorOrange
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorPink
+  displayName: ent-ClothingUniformJumpskirtColorPink
+  stableKey: clothing.clothing-uniform-jumpskirt-color-pink
+  materializedPrototype: ClothingUniformJumpskirtColorPink
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorRed
+  displayName: ent-ClothingUniformJumpskirtColorRed
+  stableKey: clothing.clothing-uniform-jumpskirt-color-red
+  materializedPrototype: ClothingUniformJumpskirtColorRed
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorYellow
+  displayName: ent-ClothingUniformJumpskirtColorYellow
+  stableKey: clothing.clothing-uniform-jumpskirt-color-yellow
+  materializedPrototype: ClothingUniformJumpskirtColorYellow
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorPurple
+  displayName: ent-ClothingUniformJumpskirtColorPurple
+  stableKey: clothing.clothing-uniform-jumpskirt-color-purple
+  materializedPrototype: ClothingUniformJumpskirtColorPurple
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorLightBrown
+  displayName: ent-ClothingUniformJumpskirtColorLightBrown
+  stableKey: clothing.clothing-uniform-jumpskirt-color-light-brown
+  materializedPrototype: ClothingUniformJumpskirtColorLightBrown
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorBrown
+  displayName: ent-ClothingUniformJumpskirtColorBrown
+  stableKey: clothing.clothing-uniform-jumpskirt-color-brown
+  materializedPrototype: ClothingUniformJumpskirtColorBrown
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorMaroon
+  displayName: ent-ClothingUniformJumpskirtColorMaroon
+  stableKey: clothing.clothing-uniform-jumpskirt-color-maroon
+  materializedPrototype: ClothingUniformJumpskirtColorMaroon
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtColorRainbow
+  displayName: ent-ClothingUniformJumpskirtColorRainbow
+  stableKey: clothing.clothing-uniform-jumpskirt-color-rainbow
+  materializedPrototype: ClothingUniformJumpskirtColorRainbow
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtBlackElegantDress
+  displayName: ent-ClothingUniformJumpskirtBlackElegantDress
+  stableKey: clothing.clothing-uniform-jumpskirt-black-elegant-dress
+  materializedPrototype: ClothingUniformJumpskirtBlackElegantDress
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtGreenElegantDress
+  displayName: ent-ClothingUniformJumpskirtGreenElegantDress
+  stableKey: clothing.clothing-uniform-jumpskirt-green-elegant-dress
+  materializedPrototype: ClothingUniformJumpskirtGreenElegantDress
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtBlueElegantDress
+  displayName: ent-ClothingUniformJumpskirtBlueElegantDress
+  stableKey: clothing.clothing-uniform-jumpskirt-blue-elegant-dress
+  materializedPrototype: ClothingUniformJumpskirtBlueElegantDress
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtPurpleElegantDress
+  displayName: ent-ClothingUniformJumpskirtPurpleElegantDress
+  stableKey: clothing.clothing-uniform-jumpskirt-purple-elegant-dress
+  materializedPrototype: ClothingUniformJumpskirtPurpleElegantDress
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtCyanStripedDress
+  displayName: ent-ClothingUniformJumpskirtCyanStripedDress
+  stableKey: clothing.clothing-uniform-jumpskirt-cyan-striped-dress
+  materializedPrototype: ClothingUniformJumpskirtCyanStripedDress
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtRedStripedDress
+  displayName: ent-ClothingUniformJumpskirtRedStripedDress
+  stableKey: clothing.clothing-uniform-jumpskirt-red-striped-dress
+  materializedPrototype: ClothingUniformJumpskirtRedStripedDress
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtGreenStripedDress
+  displayName: ent-ClothingUniformJumpskirtGreenStripedDress
+  stableKey: clothing.clothing-uniform-jumpskirt-green-striped-dress
+  materializedPrototype: ClothingUniformJumpskirtGreenStripedDress
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtPinkStripedDress
+  displayName: ent-ClothingUniformJumpskirtPinkStripedDress
+  stableKey: clothing.clothing-uniform-jumpskirt-pink-striped-dress
+  materializedPrototype: ClothingUniformJumpskirtPinkStripedDress
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtOrangeStripedDress
+  displayName: ent-ClothingUniformJumpskirtOrangeStripedDress
+  stableKey: clothing.clothing-uniform-jumpskirt-orange-striped-dress
+  materializedPrototype: ClothingUniformJumpskirtOrangeStripedDress
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtPurpleTurtleneckDress
+  displayName: ent-ClothingUniformJumpskirtPurpleTurtleneckDress
+  stableKey: clothing.clothing-uniform-jumpskirt-purple-turtleneck-dress
+  materializedPrototype: ClothingUniformJumpskirtPurpleTurtleneckDress
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtRedTurtleneckDress
+  displayName: ent-ClothingUniformJumpskirtRedTurtleneckDress
+  stableKey: clothing.clothing-uniform-jumpskirt-red-turtleneck-dress
+  materializedPrototype: ClothingUniformJumpskirtRedTurtleneckDress
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtGreenTurtleneckDress
+  displayName: ent-ClothingUniformJumpskirtGreenTurtleneckDress
+  stableKey: clothing.clothing-uniform-jumpskirt-green-turtleneck-dress
+  materializedPrototype: ClothingUniformJumpskirtGreenTurtleneckDress
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtBlueTurtleneckDress
+  displayName: ent-ClothingUniformJumpskirtBlueTurtleneckDress
+  stableKey: clothing.clothing-uniform-jumpskirt-blue-turtleneck-dress
+  materializedPrototype: ClothingUniformJumpskirtBlueTurtleneckDress
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtYellowTurtleneckDress
+  displayName: ent-ClothingUniformJumpskirtYellowTurtleneckDress
+  stableKey: clothing.clothing-uniform-jumpskirt-yellow-turtleneck-dress
+  materializedPrototype: ClothingUniformJumpskirtYellowTurtleneckDress
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingUniformJumpskirtYellowOldDress
+  displayName: ent-ClothingUniformJumpskirtYellowOldDress
+  stableKey: clothing.clothing-uniform-jumpskirt-yellow-old-dress
+  materializedPrototype: ClothingUniformJumpskirtYellowOldDress
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesColorWhite
+  displayName: ent-ClothingShoesColorWhite
+  stableKey: clothing.clothing-shoes-color-white
+  materializedPrototype: ClothingShoesColorWhite
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesColorBlue
+  displayName: ent-ClothingShoesColorBlue
+  stableKey: clothing.clothing-shoes-color-blue
+  materializedPrototype: ClothingShoesColorBlue
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesColorBrown
+  displayName: ent-ClothingShoesColorBrown
+  stableKey: clothing.clothing-shoes-color-brown
+  materializedPrototype: ClothingShoesColorBrown
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesColorGreen
+  displayName: ent-ClothingShoesColorGreen
+  stableKey: clothing.clothing-shoes-color-green
+  materializedPrototype: ClothingShoesColorGreen
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesColorOrange
+  displayName: ent-ClothingShoesColorOrange
+  stableKey: clothing.clothing-shoes-color-orange
+  materializedPrototype: ClothingShoesColorOrange
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesColorRed
+  displayName: ent-ClothingShoesColorRed
+  stableKey: clothing.clothing-shoes-color-red
+  materializedPrototype: ClothingShoesColorRed
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesColorYellow
+  displayName: ent-ClothingShoesColorYellow
+  stableKey: clothing.clothing-shoes-color-yellow
+  materializedPrototype: ClothingShoesColorYellow
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesColorPurple
+  displayName: ent-ClothingShoesColorPurple
+  stableKey: clothing.clothing-shoes-color-purple
+  materializedPrototype: ClothingShoesColorPurple
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesBootsWork
+  displayName: ent-ClothingShoesBootsWork
+  stableKey: clothing.clothing-shoes-boots-work
+  materializedPrototype: ClothingShoesBootsWork
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesBootsJack
+  displayName: ent-ClothingShoesBootsJack
+  stableKey: clothing.clothing-shoes-boots-jack
+  materializedPrototype: ClothingShoesBootsJack
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesBootsPerformer
+  displayName: ent-ClothingShoesBootsPerformer
+  stableKey: clothing.clothing-shoes-boots-performer
+  materializedPrototype: ClothingShoesBootsPerformer
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesHighheelBoots
+  displayName: ent-ClothingShoesHighheelBoots
+  stableKey: clothing.clothing-shoes-highheel-boots
+  materializedPrototype: ClothingShoesHighheelBoots
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesBootsLaceup
+  displayName: ent-ClothingShoesBootsLaceup
+  stableKey: clothing.clothing-shoes-boots-laceup
+  materializedPrototype: ClothingShoesBootsLaceup
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesBootsWinter
+  displayName: ent-ClothingShoesBootsWinter
+  stableKey: clothing.clothing-shoes-boots-winter
+  materializedPrototype: ClothingShoesBootsWinter
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesBootsCowboyBrown
+  displayName: ent-ClothingShoesBootsCowboyBrown
+  stableKey: clothing.clothing-shoes-boots-cowboy-brown
+  materializedPrototype: ClothingShoesBootsCowboyBrown
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesBootsCowboyBlack
+  displayName: ent-ClothingShoesBootsCowboyBlack
+  stableKey: clothing.clothing-shoes-boots-cowboy-black
+  materializedPrototype: ClothingShoesBootsCowboyBlack
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesBootsCowboyWhite
+  displayName: ent-ClothingShoesBootsCowboyWhite
+  stableKey: clothing.clothing-shoes-boots-cowboy-white
+  materializedPrototype: ClothingShoesBootsCowboyWhite
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingShoesBootsCowboyFancy
+  displayName: ent-ClothingShoesBootsCowboyFancy
+  stableKey: clothing.clothing-shoes-boots-cowboy-fancy
+  materializedPrototype: ClothingShoesBootsCowboyFancy
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterCoatGentle
+  displayName: ent-ClothingOuterCoatGentle
+  stableKey: clothing.clothing-outer-coat-gentle
+  materializedPrototype: ClothingOuterCoatGentle
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterCoatJensen
+  displayName: ent-ClothingOuterCoatJensen
+  stableKey: clothing.clothing-outer-coat-jensen
+  materializedPrototype: ClothingOuterCoatJensen
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterCoatTrench
+  displayName: ent-ClothingOuterCoatTrench
+  stableKey: clothing.clothing-outer-coat-trench
+  materializedPrototype: ClothingOuterCoatTrench
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterCoatExpensive
+  displayName: ent-ClothingOuterCoatExpensive
+  stableKey: clothing.clothing-outer-coat-expensive
+  materializedPrototype: ClothingOuterCoatExpensive
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterWinterCoat
+  displayName: ent-ClothingOuterWinterCoat
+  stableKey: clothing.clothing-outer-winter-coat
+  materializedPrototype: ClothingOuterWinterCoat
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterWinterColorBlack
+  displayName: ent-ClothingOuterWinterColorBlack
+  stableKey: clothing.clothing-outer-winter-color-black
+  materializedPrototype: ClothingOuterWinterColorBlack
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterWinterColorPurple
+  displayName: ent-ClothingOuterWinterColorPurple
+  stableKey: clothing.clothing-outer-winter-color-purple
+  materializedPrototype: ClothingOuterWinterColorPurple
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterWinterColorRed
+  displayName: ent-ClothingOuterWinterColorRed
+  stableKey: clothing.clothing-outer-winter-color-red
+  materializedPrototype: ClothingOuterWinterColorRed
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterWinterColorBlue
+  displayName: ent-ClothingOuterWinterColorBlue
+  stableKey: clothing.clothing-outer-winter-color-blue
+  materializedPrototype: ClothingOuterWinterColorBlue
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterWinterColorBrown
+  displayName: ent-ClothingOuterWinterColorBrown
+  stableKey: clothing.clothing-outer-winter-color-brown
+  materializedPrototype: ClothingOuterWinterColorBrown
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterWinterColorGray
+  displayName: ent-ClothingOuterWinterColorGray
+  stableKey: clothing.clothing-outer-winter-color-gray
+  materializedPrototype: ClothingOuterWinterColorGray
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterWinterColorGreen
+  displayName: ent-ClothingOuterWinterColorGreen
+  stableKey: clothing.clothing-outer-winter-color-green
+  materializedPrototype: ClothingOuterWinterColorGreen
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterWinterColorLightBrown
+  displayName: ent-ClothingOuterWinterColorLightBrown
+  stableKey: clothing.clothing-outer-winter-color-light-brown
+  materializedPrototype: ClothingOuterWinterColorLightBrown
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterWinterColorOrange
+  displayName: ent-ClothingOuterWinterColorOrange
+  stableKey: clothing.clothing-outer-winter-color-orange
+  materializedPrototype: ClothingOuterWinterColorOrange
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterWinterColorWhite
+  displayName: ent-ClothingOuterWinterColorWhite
+  stableKey: clothing.clothing-outer-winter-color-white
+  materializedPrototype: ClothingOuterWinterColorWhite
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterWinterColorYellow
+  displayName: ent-ClothingOuterWinterColorYellow
+  stableKey: clothing.clothing-outer-winter-color-yellow
+  materializedPrototype: ClothingOuterWinterColorYellow
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterCoatCloakBlack
+  displayName: ent-ClothingOuterCoatCloakBlack
+  stableKey: clothing.clothing-outer-coat-cloak-black
+  materializedPrototype: ClothingOuterCoatCloakBlack
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingOuterCoatCloakWhite
+  displayName: ent-ClothingOuterCoatCloakWhite
+  stableKey: clothing.clothing-outer-coat-cloak-white
+  materializedPrototype: ClothingOuterCoatCloakWhite
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatBeaverHat
+  displayName: ent-ClothingHeadHatBeaverHat
+  stableKey: clothing.clothing-head-hat-beaver-hat
+  materializedPrototype: ClothingHeadHatBeaverHat
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatBeret
+  displayName: ent-ClothingHeadHatBeret
+  stableKey: clothing.clothing-head-hat-beret
+  materializedPrototype: ClothingHeadHatBeret
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatBeretFrench
+  displayName: ent-ClothingHeadHatBeretFrench
+  stableKey: clothing.clothing-head-hat-beret-french
+  materializedPrototype: ClothingHeadHatBeretFrench
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatCasa
+  displayName: ent-ClothingHeadHatCasa
+  stableKey: clothing.clothing-head-hat-casa
+  materializedPrototype: ClothingHeadHatCasa
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatBowlerHat
+  displayName: ent-ClothingHeadHatBowlerHat
+  stableKey: clothing.clothing-head-hat-bowler-hat
+  materializedPrototype: ClothingHeadHatBowlerHat
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatFedoraBrown
+  displayName: ent-ClothingHeadHatFedoraBrown
+  stableKey: clothing.clothing-head-hat-fedora-brown
+  materializedPrototype: ClothingHeadHatFedoraBrown
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatFedoraGrey
+  displayName: ent-ClothingHeadHatFedoraGrey
+  stableKey: clothing.clothing-head-hat-fedora-grey
+  materializedPrototype: ClothingHeadHatFedoraGrey
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatFez
+  displayName: ent-ClothingHeadHatFez
+  stableKey: clothing.clothing-head-hat-fez
+  materializedPrototype: ClothingHeadHatFez
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatSombrero
+  displayName: ent-ClothingHeadHatSombrero
+  stableKey: clothing.clothing-head-hat-sombrero
+  materializedPrototype: ClothingHeadHatSombrero
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatTophat
+  displayName: ent-ClothingHeadHatTophat
+  stableKey: clothing.clothing-head-hat-tophat
+  materializedPrototype: ClothingHeadHatTophat
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatUshanka
+  displayName: ent-ClothingHeadHatUshanka
+  stableKey: clothing.clothing-head-hat-ushanka
+  materializedPrototype: ClothingHeadHatUshanka
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatCanadaBeanie
+  displayName: ent-ClothingHeadHatCanadaBeanie
+  stableKey: clothing.clothing-head-hat-canada-beanie
+  materializedPrototype: ClothingHeadHatCanadaBeanie
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatTrucker
+  displayName: ent-ClothingHeadHatTrucker
+  stableKey: clothing.clothing-head-hat-trucker
+  materializedPrototype: ClothingHeadHatTrucker
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadSafari
+  displayName: ent-ClothingHeadSafari
+  stableKey: clothing.clothing-head-safari
+  materializedPrototype: ClothingHeadSafari
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatGreyFlatcap
+  displayName: ent-ClothingHeadHatGreyFlatcap
+  stableKey: clothing.clothing-head-hat-grey-flatcap
+  materializedPrototype: ClothingHeadHatGreyFlatcap
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatBrownFlatcap
+  displayName: ent-ClothingHeadHatBrownFlatcap
+  stableKey: clothing.clothing-head-hat-brown-flatcap
+  materializedPrototype: ClothingHeadHatBrownFlatcap
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatCowboyBrown
+  displayName: ent-ClothingHeadHatCowboyBrown
+  stableKey: clothing.clothing-head-hat-cowboy-brown
+  materializedPrototype: ClothingHeadHatCowboyBrown
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatCowboyBlack
+  displayName: ent-ClothingHeadHatCowboyBlack
+  stableKey: clothing.clothing-head-hat-cowboy-black
+  materializedPrototype: ClothingHeadHatCowboyBlack
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatCowboyGrey
+  displayName: ent-ClothingHeadHatCowboyGrey
+  stableKey: clothing.clothing-head-hat-cowboy-grey
+  materializedPrototype: ClothingHeadHatCowboyGrey
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatCowboyRed
+  displayName: ent-ClothingHeadHatCowboyRed
+  stableKey: clothing.clothing-head-hat-cowboy-red
+  materializedPrototype: ClothingHeadHatCowboyRed
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatCowboyWhite
+  displayName: ent-ClothingHeadHatCowboyWhite
+  stableKey: clothing.clothing-head-hat-cowboy-white
+  materializedPrototype: ClothingHeadHatCowboyWhite
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadHatStrawHat
+  displayName: ent-ClothingHeadHatStrawHat
+  stableKey: clothing.clothing-head-hat-straw-hat
+  materializedPrototype: ClothingHeadHatStrawHat
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadBandBlack
+  displayName: ent-ClothingHeadBandBlack
+  stableKey: clothing.clothing-head-band-black
+  materializedPrototype: ClothingHeadBandBlack
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadBandBlue
+  displayName: ent-ClothingHeadBandBlue
+  stableKey: clothing.clothing-head-band-blue
+  materializedPrototype: ClothingHeadBandBlue
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadBandGold
+  displayName: ent-ClothingHeadBandGold
+  stableKey: clothing.clothing-head-band-gold
+  materializedPrototype: ClothingHeadBandGold
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadBandGreen
+  displayName: ent-ClothingHeadBandGreen
+  stableKey: clothing.clothing-head-band-green
+  materializedPrototype: ClothingHeadBandGreen
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadBandGrey
+  displayName: ent-ClothingHeadBandGrey
+  stableKey: clothing.clothing-head-band-grey
+  materializedPrototype: ClothingHeadBandGrey
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadBandRed
+  displayName: ent-ClothingHeadBandRed
+  stableKey: clothing.clothing-head-band-red
+  materializedPrototype: ClothingHeadBandRed
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHeadBandBrown
+  displayName: ent-ClothingHeadBandBrown
+  stableKey: clothing.clothing-head-band-brown
+  materializedPrototype: ClothingHeadBandBrown
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedRed
+  displayName: ent-ClothingNeckScarfStripedRed
+  stableKey: clothing.clothing-neck-scarf-striped-red
+  materializedPrototype: ClothingNeckScarfStripedRed
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedBlue
+  displayName: ent-ClothingNeckScarfStripedBlue
+  stableKey: clothing.clothing-neck-scarf-striped-blue
+  materializedPrototype: ClothingNeckScarfStripedBlue
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedGreen
+  displayName: ent-ClothingNeckScarfStripedGreen
+  stableKey: clothing.clothing-neck-scarf-striped-green
+  materializedPrototype: ClothingNeckScarfStripedGreen
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedBlack
+  displayName: ent-ClothingNeckScarfStripedBlack
+  stableKey: clothing.clothing-neck-scarf-striped-black
+  materializedPrototype: ClothingNeckScarfStripedBlack
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedBrown
+  displayName: ent-ClothingNeckScarfStripedBrown
+  stableKey: clothing.clothing-neck-scarf-striped-brown
+  materializedPrototype: ClothingNeckScarfStripedBrown
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedLightBlue
+  displayName: ent-ClothingNeckScarfStripedLightBlue
+  stableKey: clothing.clothing-neck-scarf-striped-light-blue
+  materializedPrototype: ClothingNeckScarfStripedLightBlue
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedOrange
+  displayName: ent-ClothingNeckScarfStripedOrange
+  stableKey: clothing.clothing-neck-scarf-striped-orange
+  materializedPrototype: ClothingNeckScarfStripedOrange
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedPurple
+  displayName: ent-ClothingNeckScarfStripedPurple
+  stableKey: clothing.clothing-neck-scarf-striped-purple
+  materializedPrototype: ClothingNeckScarfStripedPurple
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedZebra
+  displayName: ent-ClothingNeckScarfStripedZebra
+  stableKey: clothing.clothing-neck-scarf-striped-zebra
+  materializedPrototype: ClothingNeckScarfStripedZebra
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedAce
+  displayName: ent-ClothingNeckScarfStripedAce
+  stableKey: clothing.clothing-neck-scarf-striped-ace
+  materializedPrototype: ClothingNeckScarfStripedAce
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedAro
+  displayName: ent-ClothingNeckScarfStripedAro
+  stableKey: clothing.clothing-neck-scarf-striped-aro
+  materializedPrototype: ClothingNeckScarfStripedAro
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedAroace
+  displayName: ent-ClothingNeckScarfStripedAroace
+  stableKey: clothing.clothing-neck-scarf-striped-aroace
+  materializedPrototype: ClothingNeckScarfStripedAroace
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedBiSexual
+  displayName: ent-ClothingNeckScarfStripedBiSexual
+  stableKey: clothing.clothing-neck-scarf-striped-bi-sexual
+  materializedPrototype: ClothingNeckScarfStripedBiSexual
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedGay
+  displayName: ent-ClothingNeckScarfStripedGay
+  stableKey: clothing.clothing-neck-scarf-striped-gay
+  materializedPrototype: ClothingNeckScarfStripedGay
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedInter
+  displayName: ent-ClothingNeckScarfStripedInter
+  stableKey: clothing.clothing-neck-scarf-striped-inter
+  materializedPrototype: ClothingNeckScarfStripedInter
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedLesbian
+  displayName: ent-ClothingNeckScarfStripedLesbian
+  stableKey: clothing.clothing-neck-scarf-striped-lesbian
+  materializedPrototype: ClothingNeckScarfStripedLesbian
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedPan
+  displayName: ent-ClothingNeckScarfStripedPan
+  stableKey: clothing.clothing-neck-scarf-striped-pan
+  materializedPrototype: ClothingNeckScarfStripedPan
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedNonBinary
+  displayName: ent-ClothingNeckScarfStripedNonBinary
+  stableKey: clothing.clothing-neck-scarf-striped-non-binary
+  materializedPrototype: ClothingNeckScarfStripedNonBinary
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedRainbow
+  displayName: ent-ClothingNeckScarfStripedRainbow
+  stableKey: clothing.clothing-neck-scarf-striped-rainbow
+  materializedPrototype: ClothingNeckScarfStripedRainbow
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedTrans
+  displayName: ent-ClothingNeckScarfStripedTrans
+  stableKey: clothing.clothing-neck-scarf-striped-trans
+  materializedPrototype: ClothingNeckScarfStripedTrans
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingNeckScarfStripedLesbianLong
+  displayName: ent-ClothingNeckScarfStripedLesbianLong
+  stableKey: clothing.clothing-neck-scarf-striped-lesbian-long
+  materializedPrototype: ClothingNeckScarfStripedLesbianLong
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHandsGlovesColorPurple
+  displayName: ent-ClothingHandsGlovesColorPurple
+  stableKey: clothing.clothing-hands-gloves-color-purple
+  materializedPrototype: ClothingHandsGlovesColorPurple
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHandsGlovesColorRed
+  displayName: ent-ClothingHandsGlovesColorRed
+  stableKey: clothing.clothing-hands-gloves-color-red
+  materializedPrototype: ClothingHandsGlovesColorRed
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHandsGlovesColorBlue
+  displayName: ent-ClothingHandsGlovesColorBlue
+  stableKey: clothing.clothing-hands-gloves-color-blue
+  materializedPrototype: ClothingHandsGlovesColorBlue
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHandsGlovesColorTeal
+  displayName: ent-ClothingHandsGlovesColorTeal
+  stableKey: clothing.clothing-hands-gloves-color-teal
+  materializedPrototype: ClothingHandsGlovesColorTeal
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHandsGlovesColorBrown
+  displayName: ent-ClothingHandsGlovesColorBrown
+  stableKey: clothing.clothing-hands-gloves-color-brown
+  materializedPrototype: ClothingHandsGlovesColorBrown
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHandsGlovesColorGray
+  displayName: ent-ClothingHandsGlovesColorGray
+  stableKey: clothing.clothing-hands-gloves-color-gray
+  materializedPrototype: ClothingHandsGlovesColorGray
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHandsGlovesColorGreen
+  displayName: ent-ClothingHandsGlovesColorGreen
+  stableKey: clothing.clothing-hands-gloves-color-green
+  materializedPrototype: ClothingHandsGlovesColorGreen
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHandsGlovesColorLightBrown
+  displayName: ent-ClothingHandsGlovesColorLightBrown
+  stableKey: clothing.clothing-hands-gloves-color-light-brown
+  materializedPrototype: ClothingHandsGlovesColorLightBrown
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHandsGlovesColorOrange
+  displayName: ent-ClothingHandsGlovesColorOrange
+  stableKey: clothing.clothing-hands-gloves-color-orange
+  materializedPrototype: ClothingHandsGlovesColorOrange
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHandsGlovesColorWhite
+  displayName: ent-ClothingHandsGlovesColorWhite
+  stableKey: clothing.clothing-hands-gloves-color-white
+  materializedPrototype: ClothingHandsGlovesColorWhite
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHandsGlovesColorBlack
+  displayName: ent-ClothingHandsGlovesColorBlack
+  stableKey: clothing.clothing-hands-gloves-color-black
+  materializedPrototype: ClothingHandsGlovesColorBlack
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingHandsGlovesColorYellow
+  displayName: ent-ClothingHandsGlovesColorYellow
+  stableKey: clothing.clothing-hands-gloves-color-yellow
+  materializedPrototype: ClothingHandsGlovesColorYellow
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingBackpack
+  displayName: ent-ClothingBackpack
+  stableKey: clothing.clothing-backpack
+  materializedPrototype: ClothingBackpack
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingBackpackSatchel
+  displayName: ent-ClothingBackpackSatchel
+  stableKey: clothing.clothing-backpack-satchel
+  materializedPrototype: ClothingBackpackSatchel
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingBackpackSatchelLeather
+  displayName: ent-ClothingBackpackSatchelLeather
+  stableKey: clothing.clothing-backpack-satchel-leather
+  materializedPrototype: ClothingBackpackSatchelLeather
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingBackpackDuffel
+  displayName: ent-ClothingBackpackDuffel
+  stableKey: clothing.clothing-backpack-duffel
+  materializedPrototype: ClothingBackpackDuffel
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingEyesGlassesGar
+  displayName: ent-ClothingEyesGlassesGar
+  stableKey: clothing.clothing-eyes-glasses-gar
+  materializedPrototype: ClothingEyesGlassesGar
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingEyesGlassesGarOrange
+  displayName: ent-ClothingEyesGlassesGarOrange
+  stableKey: clothing.clothing-eyes-glasses-gar-orange
+  materializedPrototype: ClothingEyesGlassesGarOrange
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingEyesGlassesGarGiga
+  displayName: ent-ClothingEyesGlassesGarGiga
+  stableKey: clothing.clothing-eyes-glasses-gar-giga
+  materializedPrototype: ClothingEyesGlassesGarGiga
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingEyesGlasses
+  displayName: ent-ClothingEyesGlasses
+  stableKey: clothing.clothing-eyes-glasses
+  materializedPrototype: ClothingEyesGlasses
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingEyesGlassesJensen
+  displayName: ent-ClothingEyesGlassesJensen
+  stableKey: clothing.clothing-eyes-glasses-jensen
+  materializedPrototype: ClothingEyesGlassesJensen
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingEyesGlassesJamjar
+  displayName: ent-ClothingEyesGlassesJamjar
+  stableKey: clothing.clothing-eyes-glasses-jamjar
+  materializedPrototype: ClothingEyesGlassesJamjar
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingEyesGlassesOutlawGlasses
+  displayName: ent-ClothingEyesGlassesOutlawGlasses
+  stableKey: clothing.clothing-eyes-glasses-outlaw-glasses
+  materializedPrototype: ClothingEyesGlassesOutlawGlasses
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingEyesGlassesCheapSunglasses
+  displayName: ent-ClothingEyesGlassesCheapSunglasses
+  stableKey: clothing.clothing-eyes-glasses-cheap-sunglasses
+  materializedPrototype: ClothingEyesGlassesCheapSunglasses
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingEyesGlassesSunglasses
+  displayName: ent-ClothingEyesGlassesSunglasses
+  stableKey: clothing.clothing-eyes-glasses-sunglasses
+  materializedPrototype: ClothingEyesGlassesSunglasses
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingEyesGlassesNoir
+  displayName: ent-ClothingEyesGlassesNoir
+  stableKey: clothing.clothing-eyes-glasses-noir
+  materializedPrototype: ClothingEyesGlassesNoir
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingMaskBandBlack
+  displayName: ent-ClothingMaskBandBlack
+  stableKey: clothing.clothing-mask-band-black
+  materializedPrototype: ClothingMaskBandBlack
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingMaskBandBlue
+  displayName: ent-ClothingMaskBandBlue
+  stableKey: clothing.clothing-mask-band-blue
+  materializedPrototype: ClothingMaskBandBlue
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingMaskBandGold
+  displayName: ent-ClothingMaskBandGold
+  stableKey: clothing.clothing-mask-band-gold
+  materializedPrototype: ClothingMaskBandGold
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingMaskBandGreen
+  displayName: ent-ClothingMaskBandGreen
+  stableKey: clothing.clothing-mask-band-green
+  materializedPrototype: ClothingMaskBandGreen
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingMaskBandGrey
+  displayName: ent-ClothingMaskBandGrey
+  stableKey: clothing.clothing-mask-band-grey
+  materializedPrototype: ClothingMaskBandGrey
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingMaskBandRed
+  displayName: ent-ClothingMaskBandRed
+  stableKey: clothing.clothing-mask-band-red
+  materializedPrototype: ClothingMaskBandRed
+
+- type: ncItemDefinition
+  parent: NCShopClothingDefinitionBase
+  id: NCItemCatalogClothingMaskBandBrown
+  displayName: ent-ClothingMaskBandBrown
+  stableKey: clothing.clothing-mask-band-brown
+  materializedPrototype: ClothingMaskBandBrown
+

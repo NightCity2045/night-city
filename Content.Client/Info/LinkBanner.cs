@@ -31,6 +31,7 @@ namespace Content.Client.Info
             buttons.AddChild(rulesButton);
 
             AddInfoButton("server-info-discord-button", CCVars.InfoLinksDiscord);
+            AddInfoButton("server-info-discord-second-button", CCVars.InfoLinksDiscordSecond);
             AddInfoButton("server-info-website-button", CCVars.InfoLinksWebsite);
             AddInfoButton("server-info-wiki-button", CCVars.InfoLinksWiki);
             AddInfoButton("server-info-forum-button", CCVars.InfoLinksForum);

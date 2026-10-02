@@ -19,8 +19,19 @@
 - type: startingGear
   id: BiotechnicaBotanistGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitHydroponics
-    back: ClothingBackpack
-    shoes: ClothingShoesColorBrown
+    jumpsuit: ClothingUniformEnvirosuitBiotechnicaBotany
+    back: ClothingBackpackBiotechnica
+    shoes: ClothingShoesBiotechnicaBotany
+    head: ClothingHeadEnvirohelmBiotechnicaBotany
+    eyes: ClothingEyesGogglesBiotechnicaBotany
+    mask: ClothingMaskBiotechnicaBotany
+    gloves: ClothingHandsGlovesBiotechnica
     id: BotanistPDA
-    belt: ClothingBeltPlantFilled
+    belt: ClothingBeltBiotechnicaBotany
+    outerClothing: ClothingOuterApronBiotechnicaBotany
+  storage:
+    belt:
+    - HydroponicsToolMiniHoe
+    - HydroponicsToolSpade
+    - HydroponicsToolClippers
+    - ChemistryBottleRobustHarvest

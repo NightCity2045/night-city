@@ -107,12 +107,12 @@
 - type: loadout
   id: ArmorVest
   equipment:
-    outerClothing: ClothingOuterArmorBasic
+    armor: ClothingOuterArmorBasic # NC
 
 - type: loadout
   id: ArmorVestSlim
   equipment:
-    outerClothing: ClothingOuterArmorBasicSlim
+    armor: ClothingOuterArmorBasicSlim # NC
 
 - type: loadout
   id: SecurityOfficerWintercoat

@@ -13,7 +13,7 @@ namespace Content.Client._NC.AstraGraph;
 /// Registers Studio net messages once for the client process.
 /// Entity systems are created again on every connect, and a second registration throws.
 /// </summary>
-public sealed class AstraClientNet
+public sealed partial class AstraClientNet
 {
     [Dependency] private IClientNetManager _net = default!;
     [Dependency] private IEntitySystemManager _systems = default!;

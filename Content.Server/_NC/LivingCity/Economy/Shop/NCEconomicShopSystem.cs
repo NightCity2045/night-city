@@ -2,17 +2,24 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System.Numerics;
 using Content.Server.Preferences.Managers;
+using Content.Server.Construction;
 using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.LivingCity.Market;
 using Content.Server._NC.LivingCity.Time;
+using Content.Server._NC.Vehicle;
 using Content.Shared._NC.Identity;
 using Content.Shared._NC.LivingCity.Economy;
 using Content.Shared._NC.LivingCity.Economy.Shop;
 using Content.Shared._NC.LivingCity.Market;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
+using Content.Shared._NC.Vehicle.Components;
 using Robust.Server.GameObjects;
+using Robust.Shared.Map;
+using Robust.Shared.Physics;
+using Robust.Shared.Physics.Components;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 
@@ -37,12 +44,18 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
     [Dependency] private ISharedPlayerManager _players = default!;
     [Dependency] private IServerPreferencesManager _preferences = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;
+    [Dependency] private EntityLookupSystem _lookup = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private NCVehicleOwnershipSystem _vehicleOwnership = default!;
+    [Dependency] private FlatpackSystem _flatpack = default!;
 
     private readonly Dictionary<EntityUid, ShopRuntime> _shops = [];
     private readonly Dictionary<(EntityUid Shop, EntityUid User), ShopView> _views = [];
     private readonly HashSet<(EntityUid Shop, EntityUid User)> _processing = [];
     private readonly HashSet<EntityUid> _bootstrapping = [];
     private readonly HashSet<Task> _inFlight = [];
+    private readonly HashSet<EntityUid> _reservedVehicleZones = [];
+    private readonly Dictionary<(EntityUid Shop, EntityUid User), EntityUid> _vehicleDeliveries = [];
 
     public override void Initialize()
     {
@@ -70,6 +83,8 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
         {
             _views.Remove(key);
             _processing.Remove(key);
+            if (_vehicleDeliveries.Remove(key, out var zone))
+                _reservedVehicleZones.Remove(zone);
         }
     }
 
@@ -98,6 +113,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
         if (node?.Snapshot.Owner != seller || !account.IsResolved)
             return false;
         _shops[uid] = new ShopRuntime(seller, account.AccountId, stockNodeId, enabled, null);
+        await RefreshOpenViewsAsync(uid);
         return true;
     }
 
@@ -107,6 +123,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
             !TryComp<NCEconomicShopComponent>(uid, out var component) || !component.ExternalStock)
             return false;
         _shops[uid] = runtime with { Ready = enabled };
+        Track(RefreshOpenViewsAsync(uid));
         return true;
     }
 
@@ -158,8 +175,10 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
         }
         finally
         {
+            if (_vehicleDeliveries.Remove((uid, user), out var zone))
+                _reservedVehicleZones.Remove(zone);
             _processing.Remove((uid, user));
-            await SendStateAsync(uid, component, user);
+            await RefreshOpenViewsAsync(uid);
         }
     }
 
@@ -183,7 +202,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
             return "nc-economic-shop-result-unavailable";
 
         long assetVersion;
-        string? purchasedDefinition = null;
+        NCItemDefinitionPrototype? purchasedDefinition = null;
         if (request.Kind == NCEconomicOfferKind.CommodityBatch)
         {
             var batchId = new NCCommodityBatchId(assetGuid);
@@ -201,8 +220,13 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
             var item = await _assets.GetItemAsync(itemId, true);
             if (item == null || !source.Snapshot.ItemIds.Contains(itemId) || item.Snapshot.ReservationId.HasValue)
                 return "nc-economic-shop-result-unavailable";
+            if (!_prototypes.TryIndex(new ProtoId<NCItemDefinitionPrototype>(item.Snapshot.DefinitionId),
+                    out purchasedDefinition) || purchasedDefinition.MaterializedPrototype == null)
+                return "nc-economic-shop-result-unavailable";
             assetVersion = item.AggregateVersion;
-            purchasedDefinition = item.Snapshot.DefinitionId;
+            if (purchasedDefinition.Delivery == NCEconomicDeliveryKind.VehicleZone &&
+                !TryReserveVehicleZone(shop, user, purchasedDefinition.MaterializedPrototype.Value))
+                return "nc-economic-shop-result-delivery-zone";
         }
 
         var buyerAccount = await _finance.EnsurePrimaryAccountAsync(buyer, AuditSource);
@@ -302,24 +326,133 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
                 ? "nc-economic-shop-result-funds"
                 : "nc-economic-shop-result-settlement";
         }
-        if (purchasedDefinition != null && settlement.Fulfillment != null)
-            await FulfillItemDemandAsync(buyer, purchasedDefinition, settlement.Fulfillment);
-        return "nc-economic-shop-result-success";
+        if (purchasedDefinition != null)
+        {
+            if (!TryDeliverPhysical(shop, user, purchasedDefinition))
+                return "nc-economic-shop-result-delivery-pending";
+
+            if (settlement.Transfer != null)
+                await FulfillItemDemandAsync(buyer, purchasedDefinition.ID, settlement.Transfer);
+        }
+        return purchasedDefinition == null
+            ? "nc-economic-shop-result-success"
+            : "nc-economic-shop-result-success-delivered";
     }
 
     /// <summary>
-    /// Closes the buyer's matching item demand only after the economic fulfillment authority confirms transfer.
-    /// Failure here never rolls back an already-settled purchase; reconciliation can safely retry the request later.
+    /// Reserves one mapper-authored bay before money moves. The broadphase check prevents a vehicle from being
+    /// created over a hard fixture; the reservation also serializes simultaneous purchases against the same bay.
+    /// </summary>
+    private bool TryReserveVehicleZone(EntityUid shop, EntityUid user, EntProtoId vehiclePrototype)
+    {
+        if (!_prototypes.HasIndex<EntityPrototype>(vehiclePrototype) ||
+            !TryComp<NCEconomicShopComponent>(shop, out var storefront))
+            return false;
+
+        var shopMap = Transform(shop).MapID;
+        var query = EntityQueryEnumerator<NCEconomicShopVehicleDeliveryZoneComponent, TransformComponent>();
+        while (query.MoveNext(out var zone, out var delivery, out var xform))
+        {
+            if (_reservedVehicleZones.Contains(zone) || xform.MapID != shopMap ||
+                !string.Equals(delivery.ShopId, storefront.ShopId, StringComparison.OrdinalIgnoreCase) ||
+                !IsVehicleZoneClear(zone, delivery, xform))
+                continue;
+
+            _reservedVehicleZones.Add(zone);
+            _vehicleDeliveries[(shop, user)] = zone;
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool IsVehicleZoneClear(
+        EntityUid zone,
+        NCEconomicShopVehicleDeliveryZoneComponent delivery,
+        TransformComponent xform)
+    {
+        var center = _transform.GetMapCoordinates(zone);
+        var rotation = _transform.GetWorldRotation(zone);
+        var x = rotation.RotateVec(new Vector2(delivery.HalfExtents.X, 0));
+        var y = rotation.RotateVec(new Vector2(0, delivery.HalfExtents.Y));
+        var extent = Vector2.Abs(x) + Vector2.Abs(y);
+        foreach (var other in _lookup.GetEntitiesIntersecting(
+                     center.MapId,
+                     new Box2(center.Position - extent, center.Position + extent)))
+        {
+            if (other == zone || !TryComp<PhysicsComponent>(other, out var body) || !body.CanCollide ||
+                !TryComp<FixturesComponent>(other, out var fixtures))
+                continue;
+            foreach (var fixture in fixtures.Fixtures.Values)
+            {
+                if (fixture.Hard && fixture.CollisionLayer != 0)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Spawns settled merchandise at its mapper-authored delivery point, matching the direct physical delivery
+    /// used by vending machines. Vehicles additionally receive their persistent owner after spawning in a bay.
+    /// </summary>
+    private bool TryDeliverPhysical(
+        EntityUid shop,
+        EntityUid user,
+        NCItemDefinitionPrototype definition)
+    {
+        if (definition.MaterializedPrototype is not { } prototype)
+            return false;
+
+        EntityUid spawned;
+        if (definition.Delivery == NCEconomicDeliveryKind.VehicleZone)
+        {
+            if (!_vehicleDeliveries.TryGetValue((shop, user), out var zone) ||
+                !TryComp<NCEconomicShopVehicleDeliveryZoneComponent>(zone, out var delivery) ||
+                !IsVehicleZoneClear(zone, delivery, Transform(zone)))
+                return false;
+
+            spawned = Spawn(prototype, Transform(zone).Coordinates);
+            _transform.SetWorldRotation(spawned, _transform.GetWorldRotation(zone));
+            if (!HasComp<NCVehicleComponent>(spawned) ||
+                !_vehicleOwnership.TryRegisterPurchasedVehicle(spawned, user))
+            {
+                QueueDel(spawned);
+                return false;
+            }
+        }
+        else
+        {
+            // Store consoles dispense ordinary merchandise directly onto their own tile, as vending machines do.
+            spawned = Spawn(prototype, Transform(shop).Coordinates);
+            if (definition.FlatpackTarget is { } target)
+            {
+                // Furniture listings share the generic flatpack shell; the definition supplies the deployed entity.
+                if (!_flatpack.TrySetFlatpackResult(spawned, target))
+                {
+                    QueueDel(spawned);
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Closes the buyer's matching item demand after the durable asset transfer and physical delivery both succeed.
+    /// Failure here never rolls back an already-settled purchase.
     /// </summary>
     private async Task FulfillItemDemandAsync(
         NCPartyRef buyer,
         string definitionId,
-        NCEconomicFulfillmentRecord fulfillment)
+        NCEconomicAssetTransferRecord transfer)
     {
         var request = await _market.FindOpenRequestAsync(buyer, NCMarketRequestKind.UniqueItem, definitionId);
         if (request == null)
             return;
-        var stable = $"{fulfillment.Snapshot.FulfillmentId}.{request.Snapshot.RequestId}";
+        var stable = $"{transfer.Snapshot.TransferId}.{request.Snapshot.RequestId}";
         await _market.ChangeRequestStatusAsync(new NCChangeMarketRequestStatusRequest(
             NCPersistentIdentity.Command("economic-shop", "fulfill-item-demand", stable),
             request.Snapshot.RequestId,
@@ -328,7 +461,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
             null,
             buyer,
             NCPersistentIdentity.Correlation("economic-shop", "fulfill-item-demand", stable),
-            fulfillment.Snapshot.LastAppliedEventId,
+            transfer.Snapshot.LastAppliedEventId,
             "economic-shop-item-demand"));
     }
 
@@ -457,11 +590,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
 
             await SeedAsync(config, sellerAccount.Owner, nodeId);
             _shops[uid] = new ShopRuntime(sellerAccount.Owner, sellerAccount.AccountId, nodeId, true, null);
-            if (Exists(uid) && TryComp<NCEconomicShopComponent>(uid, out var component))
-            {
-                foreach (var key in _views.Keys.Where(key => key.Shop == uid).ToArray())
-                    await SendStateAsync(uid, component, key.User);
-            }
+            await RefreshOpenViewsAsync(uid);
         }
         catch (Exception exception)
         {
@@ -476,17 +605,27 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
 
     private async Task SeedAsync(ShopConfiguration config, NCPartyRef seller, NCStockNodeId nodeId)
     {
+        var initialNode = await _assets.GetStockNodeAsync(nodeId, true);
+        if (initialNode == null)
+            throw new InvalidOperationException("Shop stock disappeared before seeding.");
+
+        var existingBatches = initialNode.Snapshot.CommodityBatchIds.ToHashSet();
+        var existingItems = initialNode.Snapshot.ItemIds.ToHashSet();
         foreach (var seed in config.Commodities.OrderBy(seed => seed.Commodity.Id))
         {
             var source = NCPersistentIdentity.Command(
                 "economic-shop", "initial-commodity-source", $"{config.ShopId}.{seed.Commodity.Id}");
+            var batchId = NCPersistentIdentity.CommodityBatch(seed.Commodity.Id, source, "initial");
+            if (existingBatches.Contains(batchId))
+                continue;
+
             var node = await _assets.GetStockNodeAsync(nodeId, true);
             if (node == null)
                 throw new InvalidOperationException("Shop stock disappeared during commodity seeding.");
             await _assets.CreateCommodityBatchAsync(new NCCreateCommodityBatchRequest(
                 NCPersistentIdentity.Command(
                     "economic-shop", "initial-commodity", $"{config.ShopId}.{seed.Commodity.Id}"),
-                NCPersistentIdentity.CommodityBatch(seed.Commodity.Id, source, "initial"),
+                batchId,
                 seed.Commodity,
                 seed.Quantity,
                 seed.Quality,
@@ -500,6 +639,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
                 NCPersistentIdentity.Correlation(
                     "economic-shop", "initial-commodity", $"{config.ShopId}.{seed.Commodity.Id}"),
                 AuditSource: AuditSource));
+            existingBatches.Add(batchId);
         }
 
         foreach (var seed in config.Items.OrderBy(seed => seed.Definition.Id))
@@ -507,13 +647,17 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
             for (var index = 0; index < seed.Quantity; index++)
             {
                 var key = $"{config.ShopId}.{seed.Definition.Id}.{index}";
+                var itemId = SeededItemId(config.ShopId, seed.Definition, index);
+                if (existingItems.Contains(itemId))
+                    continue;
+
                 var source = NCPersistentIdentity.Command("economic-shop", "initial-item-source", key);
                 var node = await _assets.GetStockNodeAsync(nodeId, true);
                 if (node == null)
                     throw new InvalidOperationException("Shop stock disappeared during item seeding.");
                 await _assets.CreateItemInstanceAsync(new NCCreateItemInstanceRequest(
                     NCPersistentIdentity.Command("economic-shop", "initial-item", key),
-                    new NCItemId(NCPersistentIdentity.Command("economic-shop", "item-identity", key)),
+                    itemId,
                     seed.Definition,
                     $"{config.ShopId}-{seed.Definition.Id}-{index + 1:D3}",
                     seed.Condition,
@@ -526,6 +670,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
                     seller,
                     NCPersistentIdentity.Correlation("economic-shop", "initial-item", key),
                     AuditSource: AuditSource));
+                existingItems.Add(itemId);
             }
         }
     }
@@ -534,6 +679,8 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
     {
         if (!_views.TryGetValue((uid, user), out var view))
             return;
+        // Account and stock reads are independent; do not make the balance wait behind catalog construction.
+        var balanceTask = GetBalanceAsync(user);
         var listings = new List<NCEconomicShopListingSummary>();
         var now = default(NCActiveWorldTime);
         var ready = _shops.TryGetValue(uid, out var runtime) && runtime.Ready &&
@@ -547,7 +694,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
                 {
                     if (listings.Count >= component.MaximumListings)
                         break;
-                    var batch = await _assets.GetCommodityBatchAsync(batchId, true);
+                    var batch = await _assets.GetCommodityBatchAsync(batchId);
                     if (batch == null || batch.Snapshot.Lifecycle != NCEconomicAssetLifecycle.Active ||
                         batch.Snapshot.ExpiresAt is { } expiry && now >= expiry ||
                         !_prototypes.TryIndex(new ProtoId<NCCommodityPrototype>(batch.Snapshot.CommodityId),
@@ -561,6 +708,9 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
                         batchId.ToString(),
                         definition.ID,
                         definition.StableKey,
+                        definition.CatalogDescription?.Id ?? "nc-economic-shop-description-generic",
+                        definition.CatalogCategory?.Id ?? "nc-economic-shop-category-other",
+                        definition.MaterializedPrototype?.Id ?? string.Empty,
                         available,
                         price,
                         batch.Snapshot.Quality,
@@ -568,40 +718,77 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
                             ? TimeSpan.FromTicks(expiresAt.Ticks - now.Ticks)
                             : null));
                 }
-                foreach (var itemId in node.Snapshot.ItemIds.OrderBy(id => id.Value))
+                var groupedItems = new Dictionary<(string Definition, int Condition),
+                    (NCItemDefinitionPrototype Definition, NCItemId First, int Condition, long Count)>();
+                var availableItemIds = node.Snapshot.ItemIds.ToHashSet();
+                var catalogItemIds = new HashSet<NCItemId>();
+
+                // Regular storefront stock has deterministic identities. Count it directly from the stock-node index
+                // instead of issuing one database read for every physical item on every UI refresh.
+                foreach (var seed in Configuration(component).Items.OrderBy(seed => seed.Definition.Id))
                 {
-                    if (listings.Count >= component.MaximumListings)
-                        break;
-                    var item = await _assets.GetItemAsync(itemId, true);
+                    if (!_prototypes.TryIndex(seed.Definition, out NCItemDefinitionPrototype? definition) ||
+                        definition.BasePrice == null)
+                        continue;
+                    var condition = seed.Condition ?? definition.DefaultCondition;
+                    for (var index = 0; index < seed.Quantity; index++)
+                    {
+                        var itemId = SeededItemId(component.ShopId.Trim().ToLowerInvariant(), seed.Definition, index);
+                        catalogItemIds.Add(itemId);
+                        if (!availableItemIds.Contains(itemId))
+                            continue;
+                        var key = (definition.ID, condition);
+                        if (groupedItems.TryGetValue(key, out var group))
+                            groupedItems[key] = (group.Definition, group.First, group.Condition, group.Count + 1);
+                        else
+                            groupedItems[key] = (definition, itemId, condition, 1);
+                    }
+                }
+
+                // Preserve compatibility with stock inserted by other economy systems; only unknown identities need a
+                // record lookup, and the registry cache avoids repeated database reads for them.
+                foreach (var itemId in availableItemIds.Except(catalogItemIds).OrderBy(id => id.Value))
+                {
+                    var item = await _assets.GetItemAsync(itemId);
                     if (item == null || item.Snapshot.Lifecycle != NCEconomicAssetLifecycle.Active ||
                         item.Snapshot.ReservationId.HasValue ||
                         !_prototypes.TryIndex(new ProtoId<NCItemDefinitionPrototype>(item.Snapshot.DefinitionId),
                             out var definition) || definition.BasePrice is not { } price)
                         continue;
+
+                    var key = (definition.ID, item.Snapshot.Condition);
+                    if (groupedItems.TryGetValue(key, out var group))
+                        groupedItems[key] = (group.Definition, group.First, group.Condition, group.Count + 1);
+                    else
+                        groupedItems[key] = (definition, itemId, item.Snapshot.Condition, 1);
+                }
+
+                foreach (var group in groupedItems.Values
+                             .OrderBy(value => value.Definition.CatalogCategory?.Id)
+                             .ThenBy(value => ResolveDisplayName(value.Definition), StringComparer.CurrentCulture))
+                {
+                    if (listings.Count >= component.MaximumListings)
+                        break;
+                    var definition = group.Definition;
+                    if (definition.BasePrice is not { } price)
+                        continue;
                     listings.Add(new NCEconomicShopListingSummary(
                         NCEconomicOfferKind.ItemInstance,
-                        itemId.ToString(),
+                        group.First.ToString(),
                         definition.ID,
-                        definition.DisplayName.Id,
-                        1,
+                        ResolveDisplayName(definition),
+                        definition.CatalogDescription?.Id ?? "nc-economic-shop-description-generic",
+                        definition.CatalogCategory?.Id ?? "nc-economic-shop-category-other",
+                        definition.FlatpackTarget?.Id ?? definition.MaterializedPrototype?.Id ?? string.Empty,
+                        group.Count,
                         price,
-                        item.Snapshot.Condition,
+                        group.Condition,
                         null));
                 }
             }
         }
 
-        long balance = 0;
-        var hasAccount = false;
-        if (TryGetCharacter(user, out var characterId))
-        {
-            var account = await _finance.GetPrimaryAccountAsync(NCPartyRef.ForCharacter(characterId), true);
-            if (account != null)
-            {
-                balance = account.Snapshot.Balance;
-                hasAccount = true;
-            }
-        }
+        var (balance, hasAccount) = await balanceTask;
         _ui.SetUiState(uid, NCEconomicShopUiKey.Key, new NCEconomicShopState(
             component.DisplayName,
             balance,
@@ -609,6 +796,64 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
             ready,
             view.Notice,
             listings));
+    }
+
+    private async Task<(long Balance, bool HasAccount)> GetBalanceAsync(EntityUid user)
+    {
+        if (TryGetCharacter(user, out var characterId))
+        {
+            var account = await _finance.GetPrimaryAccountAsync(NCPartyRef.ForCharacter(characterId), true);
+            if (account != null)
+                return (account.Snapshot.Balance, true);
+        }
+
+        return (0, false);
+    }
+
+    private static NCItemId SeededItemId(
+        string shopId,
+        ProtoId<NCItemDefinitionPrototype> definition,
+        int index)
+    {
+        var key = $"{shopId}.{definition.Id}.{index}";
+        return new NCItemId(NCPersistentIdentity.Command("economic-shop", "item-identity", key));
+    }
+
+    /// <summary>
+    /// Entity prototypes with inline names do not have an <c>ent-*</c> localization key, so resolve their
+    /// authored name for the catalog instead of exposing the missing key to the player.
+    /// </summary>
+    private string ResolveDisplayName(NCItemDefinitionPrototype definition)
+    {
+        if (!definition.DisplayName.StartsWith("ent-", StringComparison.Ordinal))
+            return definition.DisplayName;
+
+        var preview = definition.FlatpackTarget ?? definition.MaterializedPrototype;
+        return preview is { } prototype && _prototypes.TryIndex<EntityPrototype>(prototype, out var entity)
+            ? entity.Name
+            : definition.DisplayName;
+    }
+
+    /// <summary>
+    /// Pushes authoritative stock and balance changes to every player currently viewing this storefront.
+    /// The copied key set remains safe when a client closes the BUI while persistent reads are in flight.
+    /// </summary>
+    private async Task RefreshOpenViewsAsync(EntityUid shop)
+    {
+        foreach (var key in _views.Keys.Where(key => key.Shop == shop).ToArray())
+        {
+            if (Deleted(key.Shop) || Deleted(key.User) ||
+                !TryComp<NCEconomicShopComponent>(key.Shop, out var component))
+            {
+                _views.Remove(key);
+                _processing.Remove(key);
+                if (_vehicleDeliveries.Remove(key, out var zone))
+                    _reservedVehicleZones.Remove(zone);
+                continue;
+            }
+
+            await SendStateAsync(key.Shop, component, key.User);
+        }
     }
 
     private bool TryGetCharacter(EntityUid user, out NCCharacterId characterId)
@@ -636,15 +881,37 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
         }
     }
 
-    private static ShopConfiguration Configuration(NCEconomicShopComponent component) => new(
-        component.ShopId.Trim().ToLowerInvariant(),
-        component.DisplayName.Trim(),
-        component.SellerOrganizationId.Trim().ToLowerInvariant(),
-        component.SemanticLocationKey.Trim().ToLowerInvariant(),
-        component.MaximumListings,
-        component.InitialCommodities.Select(seed => new CommoditySeed(seed.Commodity, seed.Quantity, seed.Quality))
-            .ToArray(),
-        component.InitialItems.Select(seed => new ItemSeed(seed.Definition, seed.Quantity, seed.Condition)).ToArray());
+    private ShopConfiguration Configuration(NCEconomicShopComponent component)
+    {
+        // Catalog-linked definitions keep the console prototype small: product, price and stock stay together.
+        var items = new Dictionary<ProtoId<NCItemDefinitionPrototype>, ItemSeed>();
+        if (component.Catalog is { } catalog)
+        {
+            foreach (var definition in _prototypes.EnumeratePrototypes<NCItemDefinitionPrototype>())
+            {
+                if (definition.Abstract || definition.ShopCatalog != catalog || definition.ShopInitialQuantity <= 0)
+                    continue;
+
+                var id = new ProtoId<NCItemDefinitionPrototype>(definition.ID);
+                items[id] = new ItemSeed(id, definition.ShopInitialQuantity, null);
+            }
+        }
+
+        // Explicit seeds remain backwards compatible and override catalog defaults when both are present.
+        foreach (var seed in component.InitialItems)
+            items[seed.Definition] = new ItemSeed(seed.Definition, seed.Quantity, seed.Condition);
+
+        return new ShopConfiguration(
+            component.ShopId.Trim().ToLowerInvariant(),
+            component.DisplayName.Trim(),
+            component.SellerOrganizationId.Trim().ToLowerInvariant(),
+            component.SemanticLocationKey.Trim().ToLowerInvariant(),
+            component.MaximumListings,
+            component.InitialCommodities
+                .Select(seed => new CommoditySeed(seed.Commodity, seed.Quantity, seed.Quality))
+                .ToArray(),
+            items.Values.ToArray());
+    }
 
     private sealed record ShopConfiguration(
         string ShopId,
@@ -657,7 +924,7 @@ public sealed partial class NCEconomicShopSystem : EntitySystem
     {
         public bool IsValid => ShopId.Length is > 0 and <= 128 && DisplayName.Length is > 0 and <= 128 &&
             SellerOrganizationId.Length is > 0 and <= 128 && SemanticLocationKey.Length is > 0 and <= 128 &&
-            MaximumListings is > 0 and <= 100 && Commodities.Count <= 64 && Items.Count <= 64 &&
+            MaximumListings is > 0 and <= 256 && Commodities.Count <= 64 && Items.Count <= 256 &&
             Commodities.All(seed => seed.Quantity > 0) && Items.All(seed => seed.Quantity is > 0 and <= 128);
     }
 

@@ -104,9 +104,16 @@ public sealed partial class NCDeathSuccessionSystem : EntitySystem
             _ = OpenActorEstateAsync(args.ActorId);
     }
 
+    /// <summary>
+    /// Opens a player estate and moves the character's electronic balance into probate before profile deletion.
+    /// This path is independent from physical A-Life actor lifecycle state.
+    /// </summary>
     public Task<NCEstateRecord?> OpenCharacterEstateAsync(NCCharacterId characterId, Guid deathEventId,
-        NCPartyRef beneficiary = default) => _estates.OpenAsync(NCPartyRef.ForCharacter(characterId), beneficiary,
-        deathEventId, $"Estate of character {characterId}");
+        NCPartyRef beneficiary = default) => OpenEstateAndCollectCashAsync(
+        NCPartyRef.ForCharacter(characterId),
+        beneficiary,
+        deathEventId,
+        $"Estate of character {characterId}");
 
     private async Task OpenActorEstateAsync(NCActorId actorId)
     {
@@ -114,34 +121,79 @@ public sealed partial class NCDeathSuccessionSystem : EntitySystem
         {
             var actor = await _actors.GetAsync(actorId, true);
             if (actor == null || actor.Snapshot.Lifecycle.Status != NCCityActorStatus.Dead) return;
-            var decedent = NCPartyRef.ForActor(actorId);
-            var estate = await _estates.OpenAsync(decedent, default, actor.Snapshot.LastAppliedEventId,
+            await OpenEstateAndCollectCashAsync(
+                NCPartyRef.ForActor(actorId),
+                default,
+                actor.Snapshot.LastAppliedEventId,
                 $"Estate of {actor.Snapshot.Identity.FullName}");
-            if (estate == null) return;
-            var account = await _finance.GetPrimaryAccountAsync(decedent, true);
-            if (account == null || account.Snapshot.Balance < 0) return;
-            var asset = new NCEstateAssetRef(NCEstateAssetKind.Money, account.Snapshot.AccountId.ToString(),
-                account.Snapshot.Balance, false);
-            estate = await _estates.AddAssetAsync(estate.Snapshot.EstateId, estate.AggregateVersion, asset) ?? estate;
-            if (account.Snapshot.Balance > 0)
-            {
-                var stable = estate.Snapshot.EstateId.ToString();
-                var transfer = await _finance.TransferAsync(new NCPartyTransferRequest(
-                    NCPersistentIdentity.Command("estate", "collect-cash", stable),
-                    NCPersistentIdentity.Transaction("estate", "collect-cash", stable), decedent,
-                    estate.Snapshot.EstateParty, account.Snapshot.Balance, NCLedgerTransactionKind.Transfer,
-                    $"estate:{stable}", estate.Snapshot.Administrator,
-                    NCPersistentIdentity.Correlation("estate", "collect-cash", stable),
-                    estate.Snapshot.DeathEventId, "estate-death-workflow"));
-                if (transfer.Status is not (NCEconomyMutationStatus.Applied or NCEconomyMutationStatus.Duplicate))
-                    return;
-            }
-            estate = await _estates.GetAsync(estate.Snapshot.EstateId, true);
-            if (estate != null)
-                await _estates.SetAssetTransferredAsync(estate.Snapshot.EstateId, estate.AggregateVersion,
-                    NCEstateAssetKind.Money, account.Snapshot.AccountId.ToString());
         }
         finally { _processing.Remove(actorId); }
+    }
+
+    private async Task<NCEstateRecord?> OpenEstateAndCollectCashAsync(
+        NCPartyRef decedent,
+        NCPartyRef beneficiary,
+        Guid deathEventId,
+        string displayName)
+    {
+        var estate = await _estates.OpenAsync(decedent, beneficiary, deathEventId, displayName);
+        if (estate == null)
+            return null;
+
+        var account = await _finance.GetPrimaryAccountAsync(decedent, true);
+        if (account == null)
+            return estate;
+        if (account.Snapshot.Balance < 0)
+            return null;
+
+        var accountId = account.Snapshot.AccountId.ToString();
+        var existingAsset = estate.Snapshot.Assets.FirstOrDefault(value =>
+            value.Kind == NCEstateAssetKind.Money && value.AssetId == accountId);
+        if (existingAsset != default)
+        {
+            if (existingAsset.Transferred)
+                return estate;
+        }
+        else
+        {
+            var asset = new NCEstateAssetRef(
+                NCEstateAssetKind.Money,
+                accountId,
+                account.Snapshot.Balance,
+                false);
+            estate = await _estates.AddAssetAsync(estate.Snapshot.EstateId, estate.AggregateVersion, asset);
+            if (estate == null)
+                return null;
+        }
+
+        if (account.Snapshot.Balance > 0)
+        {
+            var stable = estate.Snapshot.EstateId.ToString();
+            var transfer = await _finance.TransferAsync(new NCPartyTransferRequest(
+                NCPersistentIdentity.Command("estate", "collect-cash", stable),
+                NCPersistentIdentity.Transaction("estate", "collect-cash", stable),
+                decedent,
+                estate.Snapshot.EstateParty,
+                account.Snapshot.Balance,
+                NCLedgerTransactionKind.Transfer,
+                $"estate:{stable}",
+                estate.Snapshot.Administrator,
+                NCPersistentIdentity.Correlation("estate", "collect-cash", stable),
+                estate.Snapshot.DeathEventId,
+                "estate-death-workflow"));
+            if (transfer.Status is not (NCEconomyMutationStatus.Applied or NCEconomyMutationStatus.Duplicate))
+                return null;
+        }
+
+        estate = await _estates.GetAsync(estate.Snapshot.EstateId, true);
+        if (estate == null)
+            return null;
+
+        return await _estates.SetAssetTransferredAsync(
+            estate.Snapshot.EstateId,
+            estate.AggregateVersion,
+            NCEstateAssetKind.Money,
+            accountId);
     }
 
     public async Task<bool> DistributeAsync(NCEstateId estateId)

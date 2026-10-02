@@ -20,11 +20,12 @@
 - type: startingGear
   id: BiotechnicaChiefGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitResearchDirector
-    back: ClothingBackpackScience
-    shoes: ClothingShoesColorWhite
-    head: ClothingHeadHatBeretRND
+    jumpsuit: ClothingUniformBiotech
+    back: ClothingBackpackSatchelBiotechnica
+    shoes: ClothingShoesBiotechnica
+    head: ClothingHeadHatBiotechCap
     eyes: ClothingEyesGlasses
-    gloves: ClothingHandsGlovesNitrile
+    gloves: ClothingHandsGlovesBiotechnica
     id: RnDPDA
-    outerClothing: ClothingOuterCoatRD
+    armor: ClothingOuterArmorBiotechBulletproof
+    outerClothing: ClothingOuterCoatBiotechnicaMedtechAdvanced

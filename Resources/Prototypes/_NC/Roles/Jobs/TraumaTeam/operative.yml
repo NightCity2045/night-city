@@ -25,8 +25,13 @@
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
     id: SecurityPDA
-    belt: ClothingBeltSecurityFilled
-    outerClothing: ClothingOuterArmorBasic
+    belt: ClothingBeltSecurity
+    outerClothing: ClothingOuterHardsuitTraumaArmored
   storage:
     back:
     - NCTraumaResponseCartridge
+    belt:
+    - Handcuffs
+    - Handcuffs
+    - HoloprojectorSecurity
+    - RadioHandheldSecurity

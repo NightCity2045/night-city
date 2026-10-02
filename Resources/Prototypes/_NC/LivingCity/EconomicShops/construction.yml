@@ -1,0 +1,109 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Construction materials and stack goods.
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemConstructionSheetPlasteel10
+  displayName: ent-SheetPlasteel10
+  stableKey: construction.sheet-plasteel10
+  materializedPrototype: SheetPlasteel10
+  basePrice: 120
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemConstructionSheetBrass10
+  displayName: ent-SheetBrass10
+  stableKey: construction.sheet-brass10
+  materializedPrototype: SheetBrass10
+  basePrice: 70
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemConstructionSheetPlasma10
+  displayName: ent-SheetPlasma10
+  stableKey: construction.sheet-plasma10
+  materializedPrototype: SheetPlasma10
+  basePrice: 160
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemConstructionSheetUranium
+  displayName: ent-SheetUranium
+  stableKey: construction.sheet-uranium
+  materializedPrototype: SheetUranium
+  basePrice: 220
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemConstructionSheetRGlass
+  displayName: ent-SheetRGlass
+  stableKey: construction.sheet-r-glass
+  materializedPrototype: SheetRGlass
+  basePrice: 75
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemConstructionSheetPGlass
+  displayName: ent-SheetPGlass
+  stableKey: construction.sheet-p-glass
+  materializedPrototype: SheetPGlass
+  basePrice: 110
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemConstructionSheetRPGlass
+  displayName: ent-SheetRPGlass
+  stableKey: construction.sheet-rp-glass
+  materializedPrototype: SheetRPGlass
+  basePrice: 145
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemConstructionSheetUGlass
+  displayName: ent-SheetUGlass
+  stableKey: construction.sheet-u-glass
+  materializedPrototype: SheetUGlass
+  basePrice: 170
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemConstructionSheetRUGlass
+  displayName: ent-SheetRUGlass
+  stableKey: construction.sheet-ru-glass
+  materializedPrototype: SheetRUGlass
+  basePrice: 210
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemConstructionMaterialWoodPlank10
+  displayName: ent-MaterialWoodPlank10
+  stableKey: construction.material-wood-plank10
+  materializedPrototype: MaterialWoodPlank10
+  basePrice: 30
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemConstructionMaterialCardboard10
+  displayName: ent-MaterialCardboard10
+  stableKey: construction.material-cardboard10
+  materializedPrototype: MaterialCardboard10
+  basePrice: 15
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemConstructionMaterialCloth10
+  displayName: ent-MaterialCloth10
+  stableKey: construction.material-cloth10
+  materializedPrototype: MaterialCloth10
+  basePrice: 25
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemConstructionMaterialDurathread
+  displayName: ent-MaterialDurathread
+  stableKey: construction.material-durathread
+  materializedPrototype: MaterialDurathread
+  basePrice: 90
+

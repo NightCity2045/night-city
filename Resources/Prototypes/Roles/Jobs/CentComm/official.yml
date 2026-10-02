@@ -23,7 +23,7 @@
     head: ClothingHeadHatCentcom
     eyes: ClothingEyesGlassesCommand
     gloves: ClothingHandsGlovesColorBlack
-    outerClothing: ClothingOuterArmorCentcommCarapace
+    armor: ClothingOuterArmorCentcommCarapace # NC
     id: CentcomPDA
     ears: ClothingHeadsetAltCentCom
     belt: WeaponPistolN1984

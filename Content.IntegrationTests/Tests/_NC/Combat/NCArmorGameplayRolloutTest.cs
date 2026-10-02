@@ -9,6 +9,9 @@ using Content.Shared._NC.Combat.Armor;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared.Charges.Components;
 using Content.Shared.Charges.Systems;
+using System.Collections.Generic;
+using Content.Shared.Clothing;
+using Content.Shared.Clothing.Components;
 using Content.Shared.Examine;
 using Content.Shared.FixedPoint;
 using Content.Shared.Hands.EntitySystems;
@@ -31,6 +34,44 @@ public sealed class NCArmorGameplayRolloutTest : GameTest
     private static readonly ProtoId<NCArmorSectionPrototype> ArmorjackSection =
         "NCArmorSectionLightArmorjackBody";
 
+    private static readonly string[] DedicatedArmorSlotPrototypes =
+    [
+        "ClothingOuterArmorBasic",
+        "ClothingOuterArmorBasicSlim",
+        "ClothingOuterArmorBulletproof",
+        "ClothingOuterArmorReflective",
+        "ClothingOuterVestDetective",
+        "ClothingOuterArmorCaptainCarapace",
+        "ClothingOuterArmorCentcommCarapace",
+        "ClothingOuterVestWeb",
+        "ClothingOuterVestWebElite",
+        "ClothingOuterVestWebMerc",
+        "ClothingOuterArmorBiotechBulletproof",
+        "ClothingOuterArmorMilitechBulletproof",
+        "ClothingOuterArmorNWN",
+    ];
+
+    private static readonly string[] LightArmorMobilityPrototypes =
+    [
+        "ClothingOuterArmorBasic",
+        "ClothingOuterArmorBasicSlim",
+        "ClothingOuterArmorReflective",
+        "ClothingOuterVestDetective",
+    ];
+
+    private static readonly string[] HeavyArmorMobilityPrototypes =
+    [
+        "ClothingOuterArmorBulletproof",
+        "ClothingOuterArmorCaptainCarapace",
+        "ClothingOuterArmorCentcommCarapace",
+        "ClothingOuterVestWeb",
+        "ClothingOuterVestWebElite",
+        "ClothingOuterVestWebMerc",
+        "ClothingOuterArmorBiotechBulletproof",
+        "ClothingOuterArmorMilitechBulletproof",
+        "ClothingOuterArmorNWN",
+    ];
+
     [SidedDependency(Side.Server)] private NCArmorResolutionSystem _armor = default!;
     [SidedDependency(Side.Server)] private NCArmorRepairSystem _repair = default!;
     [SidedDependency(Side.Server)] private InventorySystem _inventory = default!;
@@ -48,7 +89,7 @@ public sealed class NCArmorGameplayRolloutTest : GameTest
     {
         var human = SSpawn("MobHuman");
         var vest = SSpawn("ClothingOuterArmorBasic");
-        Assert.That(_inventory.TryEquip(human, vest, "outerClothing"), Is.True);
+        Assert.That(_inventory.TryEquip(human, vest, "armor"), Is.True);
 
         Assert.Multiple(() =>
         {
@@ -69,7 +110,7 @@ public sealed class NCArmorGameplayRolloutTest : GameTest
         var helmet = SSpawn("ClothingHeadHelmetBasic");
         Assert.Multiple(() =>
         {
-            Assert.That(_inventory.TryEquip(human, vest, "outerClothing"), Is.True);
+            Assert.That(_inventory.TryEquip(human, vest, "armor"), Is.True);
             Assert.That(_inventory.TryEquip(human, helmet, "head"), Is.True);
         });
 
@@ -82,6 +123,58 @@ public sealed class NCArmorGameplayRolloutTest : GameTest
             Assert.That(chest.ParticipatingSections, Has.Length.EqualTo(1));
             Assert.That(chest.EffectiveSection?.Source, Is.EqualTo(vest));
         });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void ArmorAndOuterwearCanBeEquippedTogether()
+    {
+        var human = SSpawn("MobHuman");
+        var vest = SSpawn("ClothingOuterArmorBasic");
+        var secondVest = SSpawn("ClothingOuterArmorBasic");
+        var captainCoat = SSpawn("ClothingOuterWinterCap");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_inventory.TryEquip(human, vest, "armor"), Is.True);
+            Assert.That(_inventory.TryEquip(human, captainCoat, "outerClothing"), Is.True);
+            Assert.That(_inventory.TryEquip(human, secondVest, "armor"), Is.False);
+        });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(_inventory.TryGetSlotEntity(human, "armor", out var equippedVest), Is.True);
+            Assert.That(equippedVest, Is.EqualTo(vest));
+            Assert.That(_inventory.TryGetSlotEntity(human, "outerClothing", out var equippedCoat), Is.True);
+            Assert.That(equippedCoat, Is.EqualTo(captainCoat));
+        });
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void DedicatedArmorGarmentsCannotUseTheJacketSlot()
+    {
+        foreach (var prototype in DedicatedArmorSlotPrototypes)
+        {
+            var armor = SSpawn(prototype);
+            var clothing = SEntMan.GetComponent<ClothingComponent>(armor);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(clothing.Slots.HasFlag(SlotFlags.ARMOR), Is.True,
+                    $"{prototype} cannot use the dedicated armor slot.");
+                Assert.That(clothing.Slots.HasFlag(SlotFlags.OUTERCLOTHING), Is.False,
+                    $"{prototype} can still use the jacket slot.");
+            });
+        }
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void ArmorMobilityPenaltiesMatchTheirWeightClass()
+    {
+        AssertMobilityProfile(LightArmorMobilityPrototypes, 0.95f, 0.90f);
+        AssertMobilityProfile(HeavyArmorMobilityPrototypes, 0.90f, 0.80f);
     }
 
     [Test]
@@ -208,5 +301,22 @@ public sealed class NCArmorGameplayRolloutTest : GameTest
             NCArmorDamageClass.Ballistic,
             20,
             1));
+    }
+
+    private void AssertMobilityProfile(IEnumerable<string> prototypes, float walkModifier, float sprintModifier)
+    {
+        foreach (var prototype in prototypes)
+        {
+            var armor = SSpawn(prototype);
+            var speed = SEntMan.GetComponent<ClothingSpeedModifierComponent>(armor);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(speed.WalkModifier, Is.EqualTo(walkModifier).Within(0.001f),
+                    $"{prototype} has the wrong walking modifier.");
+                Assert.That(speed.SprintModifier, Is.EqualTo(sprintModifier).Within(0.001f),
+                    $"{prototype} has the wrong sprint modifier.");
+            });
+        }
     }
 }

@@ -172,7 +172,7 @@
 # Hidden source entities exercise the same prototype/component initialization path used by real equipment.
 - type: entity
   id: NCArmorTestKevlar
-  parent: ClothingOuterArmorBase
+  parent: [ ClothingOuterArmorBase, NCClothingArmorSlotBase ]
   name: NC armor test kevlar
   categories: [ HideSpawnMenu ]
   components:
@@ -181,7 +181,7 @@
 
 - type: entity
   id: NCArmorTestLightArmorjack
-  parent: ClothingOuterArmorBase
+  parent: [ ClothingOuterArmorBase, NCClothingArmorSlotBase ]
   name: NC armor test light armorjack
   categories: [ HideSpawnMenu ]
   components:
@@ -190,7 +190,7 @@
 
 - type: entity
   id: NCArmorTestPlateCarrier
-  parent: ClothingOuterArmorBase
+  parent: [ ClothingOuterArmorBase, NCClothingArmorSlotBase ]
   name: NC armor test plate carrier
   categories: [ HideSpawnMenu ]
   components:

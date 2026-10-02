@@ -25,6 +25,10 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IUserInterfaceManager _ui = default!;
     private NCVehicleDriverHud? _hud;
+    private Control? _inventoryHud;
+    private Control? _hotbarHud;
+    private bool _inventoryHudWasVisible;
+    private bool _hotbarHudWasVisible;
     private TimeSpan _nextInput;
     private uint _sequence;
     private bool _gearUp;
@@ -38,6 +42,8 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
         // Initial state reconciliation can enqueue the same open more than once before the next frame.
         if (_hud != null)
             return;
+
+        HideCharacterHud();
         _hud = new NCVehicleDriverHud();
         var viewport = _ui.ActiveScreen?.FindControl<LayoutContainer>("ViewportContainer");
         if (viewport != null)
@@ -223,6 +229,38 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
 
     private void ReleaseSteering() => _hud?.ReleaseSteeringGrip();
 
+    private void HideCharacterHud()
+    {
+        // Driver controls replace the character inventory and hand hotbars while this BUI is open.
+        _inventoryHud = _ui.ActiveScreen?.FindControl<Control>("Inventory");
+        _hotbarHud = _ui.ActiveScreen?.FindControl<Control>("Hotbar");
+
+        if (_inventoryHud != null)
+        {
+            _inventoryHudWasVisible = _inventoryHud.Visible;
+            _inventoryHud.Visible = false;
+        }
+
+        if (_hotbarHud != null)
+        {
+            _hotbarHudWasVisible = _hotbarHud.Visible;
+            _hotbarHud.Visible = false;
+        }
+    }
+
+    private void RestoreCharacterHud()
+    {
+        // Restore the exact pre-driving state instead of forcing normally hidden widgets on.
+        if (_inventoryHud != null)
+            _inventoryHud.Visible = _inventoryHudWasVisible;
+
+        if (_hotbarHud != null)
+            _hotbarHud.Visible = _hotbarHudWasVisible;
+
+        _inventoryHud = null;
+        _hotbarHud = null;
+    }
+
     private void SendAction(NCVehicleDriverAction action)
     {
         if (EntMan.TryGetComponent<NCVehicleDriveComponent>(Owner, out var drive))
@@ -246,6 +284,7 @@ public sealed partial class NCVehicleDriverBoundUserInterface(EntityUid owner, E
         if (disposing)
         {
             ReleaseSteering();
+            RestoreCharacterHud();
             EntMan.System<InputSystem>().SetEntityContextActive();
         }
         base.Dispose(disposing);

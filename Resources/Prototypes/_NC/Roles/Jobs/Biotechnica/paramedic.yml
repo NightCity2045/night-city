@@ -19,16 +19,17 @@
 - type: startingGear
   id: BiotechnicaParamedicGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitParamedic
-    back: ClothingBackpackMedical
-    shoes: ClothingShoesBootsWork
-    head: ClothingHeadHatParamedicsoft
+    jumpsuit: ClothingUniformBiotech
+    back: ClothingBackpackBiotechnica
+    shoes: ClothingShoesBiotechnica
+    head: ClothingHeadHatBiotechnicaSterile
     eyes: ClothingEyesHudMedical
-    mask: ClothingMaskSterile
-    gloves: ClothingHandsGlovesLatex
+    mask: ClothingMaskBiotechnicaMedtech
+    gloves: ClothingHandsGlovesBiotechnica
     id: ParamedicPDA
     belt: ClothingBeltMedicalFilled
-    outerClothing: ClothingOuterCoatParamedicWB
+    armor: ClothingOuterArmorBiotechBulletproof
+    outerClothing: ClothingOuterCoatBiotechnicaMedtechAdvanced
   storage:
     back:
     - MedTekCartridge

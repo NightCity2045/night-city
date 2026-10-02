@@ -7,7 +7,9 @@ namespace Content.Shared._NC.ZLevels.Core.EntitySystems;
 
 public abstract partial class NCSharedZLevelsSystem
 {
-    public static int MaxZLevelsBelowRendering = 3;
+    // NC start: synchronized from the replicated rendering CVar during system initialization.
+    public static int MaxZLevelsBelowRendering = 4;
+    // NC end
     public const float ZLevelOffset = 0.7f;
 
     public const float ZGravityForce = 9.8f;

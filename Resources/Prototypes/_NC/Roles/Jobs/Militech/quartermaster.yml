@@ -19,10 +19,10 @@
 - type: startingGear
   id: MilitechQuartermasterGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitQM
+    jumpsuit: ClothingUniformMilitech
     back: ClothingBackpackCargo
     shoes: ClothingShoesBootsWork
-    head: ClothingHeadHatQMsoft
+    head: ClothingHeadHatMilitechCap
     id: QuartermasterPDA
     belt: BoxFolderClipboardThreePapers
     pocket1: AppraisalTool

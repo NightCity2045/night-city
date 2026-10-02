@@ -19,12 +19,18 @@
 - type: startingGear
   id: MilitechSecuritySpecialistGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitSecGrey
+    jumpsuit: ClothingUniformMilitech
     back: ClothingBackpackSecurity
     shoes: ClothingShoesBootsJack
-    head: ClothingHeadHatBeretSecurity
+    head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlassesSecurity
     gloves: ClothingHandsGlovesCombat
     id: SecurityPDA
-    belt: ClothingBeltSecurityFilled
-    outerClothing: ClothingOuterArmorBasic
+    belt: ClothingBeltSecurity
+    armor: ClothingOuterArmorMilitechBulletproof
+  storage:
+    belt:
+    - Handcuffs
+    - Handcuffs
+    - HoloprojectorSecurity
+    - RadioHandheldSecurity

@@ -40,7 +40,7 @@
 - type: loadout
   id: DetectiveArmorVest
   equipment:
-    outerClothing: ClothingOuterVestDetective
+    armor: ClothingOuterVestDetective # NC
 
 - type: loadout
   id: DetectiveCoat

@@ -3,13 +3,287 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 - type: entity
-  parent: BaseWeaponRevolver
+  abstract: true
+  id: NCBaseWeaponPistol9x19
+  parent: BaseWeaponPistol
+  components:
+  - type: Gun
+    fireRate: 4
+    selectedMode: SemiAuto
+    availableModes: [ SemiAuto ]
+  - type: ItemSlots
+    slots:
+      gun_magazine:
+        name: Magazine
+        startingItem: NCMagazine9x19Pistol
+        insertSound: /Audio/Weapons/Guns/MagIn/pistol_magin.ogg
+        ejectSound: /Audio/Weapons/Guns/MagOut/pistol_magout.ogg
+        priority: 2
+        whitelist:
+          tags: [ NCMagazine9x19Pistol ]
+        whitelistFailPopup: gun-magazine-whitelist-fail
+      gun_chamber:
+        name: Chamber
+        priority: 1
+        whitelist:
+          tags: [ NCCartridge9x19 ]
+
+- type: entity
+  abstract: true
+  id: NCBaseWeaponPistol11mm
+  parent: BaseWeaponPistol
+  components:
+  - type: Gun
+    fireRate: 3
+    selectedMode: SemiAuto
+    availableModes: [ SemiAuto ]
+    cameraRecoilScalar: 1.5
+  - type: ItemSlots
+    slots:
+      gun_magazine:
+        name: Magazine
+        startingItem: NCMagazine11mmPistol
+        insertSound: /Audio/Weapons/Guns/MagIn/pistol_magin.ogg
+        ejectSound: /Audio/Weapons/Guns/MagOut/pistol_magout.ogg
+        priority: 2
+        whitelist:
+          tags: [ NCMagazine11mmPistol ]
+        whitelistFailPopup: gun-magazine-whitelist-fail
+      gun_chamber:
+        name: Chamber
+        priority: 1
+        whitelist:
+          tags: [ NCCartridge11mm ]
+
+- type: entity
+  abstract: true
+  id: NCBaseWeaponPistol12mm
+  parent: BaseWeaponPistol
+  components:
+  - type: Gun
+    fireRate: 2
+    selectedMode: SemiAuto
+    availableModes: [ SemiAuto ]
+    cameraRecoilScalar: 2.2
+    angleIncrease: 2
+  - type: ItemSlots
+    slots:
+      gun_magazine:
+        name: Magazine
+        startingItem: NCMagazine12mmPistol
+        insertSound: /Audio/Weapons/Guns/MagIn/pistol_magin.ogg
+        ejectSound: /Audio/Weapons/Guns/MagOut/pistol_magout.ogg
+        priority: 2
+        whitelist:
+          tags: [ NCMagazine12mmPistol ]
+        whitelistFailPopup: gun-magazine-whitelist-fail
+      gun_chamber:
+        name: Chamber
+        priority: 1
+        whitelist:
+          tags: [ NCCartridge12mm ]
+
+- type: entity
+  id: NCWeaponPistolStreetmaster
+  parent: NCBaseWeaponPistol9x19
+  name: Dai Lung Streetmaster
+  description: A cheap polymer 9x19 pistol made for the street market.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Dai_Lung_Streetmaster.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Dai_Lung_Streetmaster.rsi
+
+- type: entity
+  id: NCWeaponPistolCheesemaker
+  parent: NCBaseWeaponPistol9x19
+  name: Federated Arms Cheesemaker
+  description: A compact 9x19 pistol whose low price is its best feature.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Fed_Arms_Cheesemaker.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Fed_Arms_Cheesemaker.rsi
+
+- type: entity
+  id: NCWeaponPistolHelloCutie
+  parent: NCBaseWeaponPistol9x19
+  name: Hello Cutie
+  description: A fashionable 9x19 pistol with an aggressively cheerful finish.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Pistol/hello_cutie.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Pistol/hello_cutie.rsi
+
+- type: entity
+  id: NCWeaponPistolP35
+  parent: NCBaseWeaponPistol9x19
+  name: Sternmeyer P-35
+  description: A dependable service pistol chambered in 9x19mm.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Sternmeyer_P35.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Sternmeyer_P35.rsi
+
+- type: entity
+  id: NCWeaponPistolFederalX9
+  parent: NCBaseWeaponPistol11mm
+  name: Federated Arms X-9
+  description: A heavy polymer sidearm chambered in 11mm.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Pistol/federal_hand_x9.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Pistol/federal_hand_x9.rsi
+
+- type: entity
+  id: NCWeaponPistolAvenger
+  parent: NCBaseWeaponPistol11mm
+  name: Militech Avenger
+  description: A rugged 11mm combat pistol from Militech.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Pistol/militech_avenger.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Pistol/militech_avenger.rsi
+
+- type: entity
+  id: NCWeaponPistolMarkIII
+  parent: NCBaseWeaponPistol11mm
+  name: Mustang Arms Mark III
+  description: A precise 11mm handgun built around a reinforced slide.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Pistol/mustang_arms_markIII.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Pistol/mustang_arms_markIII.rsi
+
+- type: entity
+  id: NCWeaponPistolStukach
+  parent: NCBaseWeaponPistol11mm
+  name: Stukach
+  description: A heavy 11mm pistol common among street enforcers.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Pistol/stukach.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Pistol/stukach.rsi
+
+- type: entity
+  id: NCWeaponPistolOverlord
+  parent: NCBaseWeaponPistol12mm
+  name: Overlord
+  description: A very heavy 12mm pistol built to settle arguments immediately.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Pistol/overlord.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Pistol/overlord.rsi
+
+- type: entity
+  id: NCWeaponPistolBoomerBuster
+  parent: NCBaseWeaponPistol12mm
+  name: Militech Boomer Buster
+  description: An oversized 12mm pistol designed for armored targets.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Militech_Boomer_Buster/big.rsi
+  - type: Item
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Militech_Boomer_Buster/tiny.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Militech_Boomer_Buster/tiny.rsi
+
+- type: entity
+  id: NCWeaponPistolMallorian
+  parent: NCBaseWeaponPistol12mm
+  name: Mallorian Arms handgun
+  description: A rare, brutally powerful 12mm custom handgun.
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Mallorian_Arms/big.rsi
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+  - type: Item
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Mallorian_Arms/tiny.rsi
+  - type: Clothing
+    sprite: _NC/Objects/Weapons/Guns/Pistol/Mallorian_Arms/tiny.rsi
+  - type: ChamberMagazineAmmoProvider
+    boltClosed: null
+  - type: NCMallorianAltFire
+    spread: 20
+    volleySound:
+      path: /Audio/Weapons/Guns/Gunshots/shotgun.ogg
+  - type: ActionGrant
+    actions:
+    - NCActionMallorianAltFire
+  - type: ItemActionGrant
+    actions:
+    - NCActionMallorianAltFire
+  - type: ItemSlots
+    slots:
+      gun_magazine:
+        name: Magazine
+        startingItem: NCMagazine12mmMallorian
+        insertSound: /Audio/Weapons/Guns/MagIn/pistol_magin.ogg
+        ejectSound: /Audio/Weapons/Guns/MagOut/pistol_magout.ogg
+        priority: 2
+        whitelist:
+          tags: [ NCMagazine12mmPistol ]
+        whitelistFailPopup: gun-magazine-whitelist-fail
+      gun_chamber:
+        name: Chamber
+        priority: 1
+        whitelist:
+          tags: [ NCCartridge12mm ]
+
+- type: entity
   id: NCWeaponPistolBurya
-  name: Tech Burya pistol
-  description: A high-caliber Tech revolver pistol capable of firing charged, high-velocity rounds.
+  parent: [ BaseWeaponRevolver, BaseGunWieldable ]
+  name: Techtronika Burya
+  description: A three-shot 14mm Tech revolver. Its armor-piercing discharge is slow, deafening and capable of breaking the shooter's hands.
   components:
   - type: Sprite
     sprite: _NC/Objects/Weapons/Guns/Pistol/BT_Burya.rsi
-    state: icon
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+  - type: Item
+    sprite: _NC/Objects/Weapons/Guns/Pistol/BT_Burya.rsi
   - type: Clothing
     sprite: _NC/Objects/Weapons/Guns/Pistol/BT_Burya.rsi
+  - type: Gun
+    fireRate: 0.4
+    cameraRecoilScalar: 4.5
+    minAngle: 1
+    maxAngle: 10
+    angleIncrease: 10
+    angleDecay: 2
+    selectedMode: SemiAuto
+    availableModes: [ SemiAuto ]
+    soundGunshot:
+      path: /Audio/Weapons/Guns/Gunshots/sniper.ogg
+  - type: GunWieldBonus
+    minAngle: -0.5
+    maxAngle: -3
+    angleIncrease: -2
+    angleDecay: 2
+  - type: UseDelay
+    delay: 2.5
+  - type: RevolverAmmoProvider
+    whitelist:
+      tags: [ NCCartridge14mmBurya ]
+    proto: NCCartridge14mmBurya
+    capacity: 3
+    chambers: [ true, true, true ]
+    ammoSlots: [ null, null, null ]
+  - type: NCHeavyWeaponRecoil
+    additionalImpulse: 110
+    wieldedHandDamage:
+      types:
+        Blunt: 12
+    singleHandDamage:
+      types:
+        Blunt: 18

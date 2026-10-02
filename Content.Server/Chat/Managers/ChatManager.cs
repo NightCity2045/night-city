@@ -65,6 +65,7 @@ internal sealed partial class ChatManager : IChatManager
     public void Initialize()
     {
         _netManager.RegisterNetMessage<MsgChatMessage>();
+        _netManager.RegisterNetMessage<MsgUpdateChatMessage>(); // NC
         _netManager.RegisterNetMessage<MsgDeleteChatMessagesBy>();
 
         _configurationManager.OnValueChanged(CCVars.OocEnabled, OnOocEnabledChanged, true);
@@ -371,8 +372,23 @@ internal sealed partial class ChatManager : IChatManager
         user?.AddEntity(netSource);
 
         wrappedMessage = PrependFollowButtonIfAppropriate(wrappedMessage, source, client);
+        // NC-Edit-Start
+        var translated = TryDispatchTranslatedChatToOne(
+            channel,
+            message,
+            wrappedMessage,
+            netSource,
+            user?.Key,
+            hideChat,
+            client,
+            colorOverride,
+            audioPath,
+            audioVolume);
+
         var msg = new ChatMessage(channel, message, wrappedMessage, netSource, user?.Key, hideChat, colorOverride, audioPath, audioVolume);
-        _netManager.ServerSendMessage(new MsgChatMessage() { Message = msg }, client);
+        if (!translated)
+            _netManager.ServerSendMessage(new MsgChatMessage { Message = msg }, client);
+        // NC-Edit-End
 
         if (!recordReplay)
             return;
@@ -397,7 +413,22 @@ internal sealed partial class ChatManager : IChatManager
         {
             var customWrapMessage = PrependFollowButtonIfAppropriate(wrappedMessage, source, client);
             var msg = new ChatMessage(channel, message, customWrapMessage, netSource, user?.Key, hideChat, colorOverride, audioPath, audioVolume);
-            _netManager.ServerSendMessage(new MsgChatMessage { Message = msg }, client);
+            // NC-Edit-Start
+            if (!TryDispatchTranslatedChatToOne(
+                    channel,
+                    message,
+                    customWrapMessage,
+                    netSource,
+                    user?.Key,
+                    hideChat,
+                    client,
+                    colorOverride,
+                    audioPath,
+                    audioVolume))
+            {
+                _netManager.ServerSendMessage(new MsgChatMessage { Message = msg }, client);
+            }
+            // NC-Edit-End
         }
 
         if (!recordReplay)
@@ -428,21 +459,22 @@ internal sealed partial class ChatManager : IChatManager
 
     public void ChatMessageToAll(ChatChannel channel, string message, string wrappedMessage, EntityUid source, bool hideChat, bool recordReplay, Color? colorOverride = null, string? audioPath = null, float audioVolume = 0, NetUserId? author = null)
     {
-        var user = author == null ? null : EnsurePlayer(author);
-        var netSource = _entityManager.GetNetEntity(source);
-        user?.AddEntity(netSource);
-
-        var msg = new ChatMessage(channel, message, wrappedMessage, netSource, user?.Key, hideChat, colorOverride, audioPath, audioVolume);
-        _netManager.ServerSendToAll(new MsgChatMessage() { Message = msg });
-
-        if (!recordReplay)
-            return;
-
-        if ((channel & ChatChannel.AdminRelated) == 0 ||
-            _configurationManager.GetCVar(CCVars.ReplayRecordAdminChat))
-        {
-            _replay.RecordServerMessage(msg);
-        }
+        // NC-Edit-Start
+        // Translation preferences are per recipient, so broadcasts must fan out through the normal path.
+        var clients = _player.Sessions.Select(session => session.Channel).ToList();
+        ChatMessageToMany(
+            channel,
+            message,
+            wrappedMessage,
+            source,
+            hideChat,
+            recordReplay,
+            clients,
+            colorOverride,
+            audioPath,
+            audioVolume,
+            author);
+        // NC-Edit-End
     }
 
     public bool MessageCharacterLimit(ICommonSession? player, string message)

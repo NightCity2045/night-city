@@ -19,10 +19,10 @@
 - type: startingGear
   id: MilitechRiggerGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitEngineering
+    jumpsuit: ClothingUniformMilitech
     back: ClothingBackpackEngineering
     shoes: ClothingShoesBootsWork
-    head: ClothingHeadHatHardhatYellow
+    head: ClothingHeadHatMilitechCap
     eyes: ClothingEyesGlassesMeson
     gloves: ClothingHandsGlovesColorYellow
     id: EngineerPDA

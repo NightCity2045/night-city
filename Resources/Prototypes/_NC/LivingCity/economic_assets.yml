@@ -144,6 +144,8 @@
   serialRequired: true
   maximumInstalledParts: 1
   allowedInstalledPartDefinitions: [ NCItemWeaponPartBudgetOptic ]
+  catalogCategory: nc-economic-shop-category-weapons
+  catalogDescription: nc-economic-shop-description-budget-pistol
 
 - type: ncItemDefinition
   id: NCItemWeaponPartBudgetOptic
@@ -156,6 +158,391 @@
   legalStatus: Legal
   serialRequired: true
   maximumInstalledParts: 0
+  catalogCategory: nc-economic-shop-category-weapons
+  catalogDescription: nc-economic-shop-description-generic
+
+- type: ncItemDefinition
+  id: NCItemWeaponViperPistol
+  displayName: nc-economic-item-viper-pistol
+  stableKey: weapon.viper-pistol
+  domain: WeaponAssembly
+  domainPrototypeId: WeaponPistolViper
+  materializedPrototype: WeaponPistolViper
+  basePrice: 180
+  defaultCondition: 1000
+  legalStatus: Restricted
+  serialRequired: true
+  catalogCategory: nc-economic-shop-category-weapons
+  catalogDescription: nc-economic-shop-description-viper-pistol
+
+- type: ncItemDefinition
+  id: NCItemPistolMagazine
+  displayName: nc-economic-item-pistol-magazine
+  stableKey: ammunition.pistol-magazine
+  domain: WeaponAssembly
+  domainPrototypeId: MagazinePistol
+  materializedPrototype: MagazinePistol
+  basePrice: 25
+  defaultCondition: 1000
+  legalStatus: Restricted
+  catalogCategory: nc-economic-shop-category-ammunition
+  catalogDescription: nc-economic-shop-description-pistol-magazine
+
+- type: ncItemDefinition
+  id: NCItemLightArmorVest
+  displayName: nc-economic-item-light-armor-vest
+  stableKey: armor.light-vest
+  domain: Generic
+  materializedPrototype: ClothingOuterArmorBasic
+  basePrice: 240
+  defaultCondition: 1000
+  legalStatus: Restricted
+  catalogCategory: nc-economic-shop-category-armor
+  catalogDescription: nc-economic-shop-description-light-armor
+
+- type: ncItemDefinition
+  id: NCItemClothingBlackJumpsuit
+  displayName: nc-economic-item-black-jumpsuit
+  stableKey: clothing.black-jumpsuit
+  domain: Generic
+  materializedPrototype: ClothingUniformJumpsuitColorBlack
+  basePrice: 35
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-clothing
+  catalogDescription: nc-economic-shop-description-everyday-clothing
+
+- type: ncItemDefinition
+  id: NCItemClothingBlueJumpsuit
+  displayName: nc-economic-item-blue-jumpsuit
+  stableKey: clothing.blue-jumpsuit
+  domain: Generic
+  materializedPrototype: ClothingUniformJumpsuitColorBlue
+  basePrice: 35
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-clothing
+  catalogDescription: nc-economic-shop-description-everyday-clothing
+
+- type: ncItemDefinition
+  id: NCItemClothingRedDress
+  displayName: nc-economic-item-red-dress
+  stableKey: clothing.red-dress
+  domain: Generic
+  materializedPrototype: ClothingUniformJumpskirtRedElegantDress
+  basePrice: 65
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-clothing
+  catalogDescription: nc-economic-shop-description-everyday-clothing
+
+- type: ncItemDefinition
+  id: NCItemClothingBlackShoes
+  displayName: nc-economic-item-black-shoes
+  stableKey: clothing.black-shoes
+  domain: Generic
+  materializedPrototype: ClothingShoesColorBlack
+  basePrice: 25
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-clothing
+  catalogDescription: nc-economic-shop-description-everyday-clothing
+
+- type: ncItemDefinition
+  id: NCItemClothingBomberJacket
+  displayName: nc-economic-item-bomber-jacket
+  stableKey: clothing.bomber-jacket
+  domain: Generic
+  materializedPrototype: ClothingOuterCoatBomber
+  basePrice: 90
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-clothing
+  catalogDescription: nc-economic-shop-description-everyday-clothing
+
+- type: ncItemDefinition
+  id: NCItemFurnitureChairFlatpack
+  displayName: nc-economic-item-chair-flatpack
+  stableKey: furniture.chair-flatpack
+  domain: Generic
+  materializedPrototype: NCFurnitureChairFlatpack
+  basePrice: 45
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-furniture
+  catalogDescription: nc-economic-shop-description-flatpack
+
+- type: ncItemDefinition
+  id: NCItemFurnitureOfficeChairFlatpack
+  displayName: nc-economic-item-office-chair-flatpack
+  stableKey: furniture.office-chair-flatpack
+  domain: Generic
+  materializedPrototype: NCFurnitureOfficeChairFlatpack
+  basePrice: 90
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-furniture
+  catalogDescription: nc-economic-shop-description-flatpack
+
+- type: ncItemDefinition
+  id: NCItemFurnitureTableFlatpack
+  displayName: nc-economic-item-table-flatpack
+  stableKey: furniture.table-flatpack
+  domain: Generic
+  materializedPrototype: NCFurnitureTableFlatpack
+  basePrice: 70
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-furniture
+  catalogDescription: nc-economic-shop-description-flatpack
+
+- type: ncItemDefinition
+  id: NCItemFurnitureBedFlatpack
+  displayName: nc-economic-item-bed-flatpack
+  stableKey: furniture.bed-flatpack
+  domain: Generic
+  materializedPrototype: NCFurnitureBedFlatpack
+  basePrice: 110
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-furniture
+  catalogDescription: nc-economic-shop-description-flatpack
+
+- type: ncItemDefinition
+  id: NCItemFurnitureBookshelfFlatpack
+  displayName: nc-economic-item-bookshelf-flatpack
+  stableKey: furniture.bookshelf-flatpack
+  domain: Generic
+  materializedPrototype: NCFurnitureBookshelfFlatpack
+  basePrice: 85
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-furniture
+  catalogDescription: nc-economic-shop-description-flatpack
+
+- type: ncItemDefinition
+  id: NCItemFurnitureRackFlatpack
+  displayName: nc-economic-item-rack-flatpack
+  stableKey: furniture.rack-flatpack
+  domain: Generic
+  materializedPrototype: NCFurnitureRackFlatpack
+  basePrice: 75
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-furniture
+  catalogDescription: nc-economic-shop-description-flatpack
+
+- type: ncItemDefinition
+  id: NCItemConstructionSteel
+  displayName: nc-economic-item-steel-stack
+  stableKey: construction.steel-stack
+  domain: Generic
+  materializedPrototype: SheetSteel10
+  basePrice: 40
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-construction
+  catalogDescription: nc-economic-shop-description-construction-stack
+
+- type: ncItemDefinition
+  id: NCItemConstructionGlass
+  displayName: nc-economic-item-glass-stack
+  stableKey: construction.glass-stack
+  domain: Generic
+  materializedPrototype: SheetGlass10
+  basePrice: 35
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-construction
+  catalogDescription: nc-economic-shop-description-construction-stack
+
+- type: ncItemDefinition
+  id: NCItemConstructionPlastic
+  displayName: nc-economic-item-plastic-stack
+  stableKey: construction.plastic-stack
+  domain: Generic
+  materializedPrototype: SheetPlastic10
+  basePrice: 30
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-construction
+  catalogDescription: nc-economic-shop-description-construction-stack
+
+- type: ncItemDefinition
+  id: NCItemConstructionRods
+  displayName: nc-economic-item-metal-rods
+  stableKey: construction.metal-rods
+  domain: Generic
+  materializedPrototype: PartRodMetal10
+  basePrice: 30
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-construction
+  catalogDescription: nc-economic-shop-description-construction-stack
+
+- type: ncItemDefinition
+  id: NCItemConstructionCable
+  displayName: nc-economic-item-cable-coil
+  stableKey: construction.cable-coil
+  domain: Generic
+  materializedPrototype: CableApcStack10
+  basePrice: 20
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-construction
+  catalogDescription: nc-economic-shop-description-construction-stack
+
+- type: ncItemDefinition
+  id: NCItemMedicineTraumaAnalgesic
+  displayName: nc-economic-item-trauma-analgesic
+  stableKey: medicine.trauma-analgesic
+  domain: Pharmaceutical
+  domainPrototypeId: NCSyringeTraumaAnalgesic
+  materializedPrototype: NCSyringeTraumaAnalgesic
+  basePrice: 35
+  defaultCondition: 1000
+  legalStatus: Restricted
+  catalogCategory: nc-economic-shop-category-medicine
+  catalogDescription: nc-economic-shop-description-trauma-analgesic
+
+- type: ncItemDefinition
+  id: NCItemMedicineBroadAntibiotic
+  displayName: nc-economic-item-broad-antibiotic
+  stableKey: medicine.broad-antibiotic
+  domain: Pharmaceutical
+  domainPrototypeId: NCSyringeBroadAntibiotic
+  materializedPrototype: NCSyringeBroadAntibiotic
+  basePrice: 50
+  defaultCondition: 1000
+  legalStatus: Restricted
+  catalogCategory: nc-economic-shop-category-medicine
+  catalogDescription: nc-economic-shop-description-broad-antibiotic
+
+- type: ncItemDefinition
+  id: NCItemMedicineOxygenCarrier
+  displayName: nc-economic-item-oxygen-carrier
+  stableKey: medicine.synthetic-oxygen-carrier
+  domain: Pharmaceutical
+  domainPrototypeId: NCSyringeSyntheticOxygenCarrier
+  materializedPrototype: NCSyringeSyntheticOxygenCarrier
+  basePrice: 65
+  defaultCondition: 1000
+  legalStatus: Restricted
+  catalogCategory: nc-economic-shop-category-medicine
+  catalogDescription: nc-economic-shop-description-oxygen-carrier
+
+- type: ncItemDefinition
+  id: NCItemMedicineTourniquet
+  displayName: nc-economic-item-tourniquet
+  stableKey: medicine.tourniquet
+  domain: Pharmaceutical
+  domainPrototypeId: Tourniquet
+  materializedPrototype: Tourniquet
+  basePrice: 30
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-medicine
+  catalogDescription: nc-economic-shop-description-tourniquet
+
+- type: ncItemDefinition
+  id: NCItemMedicineSplint
+  displayName: nc-economic-item-splint
+  stableKey: medicine.splint
+  domain: Pharmaceutical
+  domainPrototypeId: NCFieldSplint
+  materializedPrototype: NCFieldSplint
+  basePrice: 40
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-medicine
+  catalogDescription: nc-economic-shop-description-splint
+
+- type: ncItemDefinition
+  id: NCItemVehicleMaiMai
+  displayName: nc-economic-item-vehicle-maimai
+  stableKey: vehicle.makigai-maimai
+  domain: Generic
+  materializedPrototype: NCVehicleMakigaiMaiMai2045
+  basePrice: 5500
+  defaultCondition: 1000
+  serialRequired: true
+  catalogCategory: nc-economic-shop-category-vehicles
+  catalogDescription: nc-economic-shop-description-vehicle-maimai
+  delivery: VehicleZone
+
+- type: ncItemDefinition
+  id: NCItemVehicleGalena
+  displayName: nc-economic-item-vehicle-galena
+  stableKey: vehicle.thorton-galena
+  domain: Generic
+  materializedPrototype: NCVehicleThortonGalena2045
+  basePrice: 8500
+  defaultCondition: 1000
+  serialRequired: true
+  catalogCategory: nc-economic-shop-category-vehicles
+  catalogDescription: nc-economic-shop-description-vehicle-galena
+  delivery: VehicleZone
+
+- type: ncItemDefinition
+  id: NCItemVehicleQuartz
+  displayName: nc-economic-item-vehicle-quartz
+  stableKey: vehicle.archer-quartz
+  domain: Generic
+  materializedPrototype: NCVehicleArcherQuartz2045
+  basePrice: 14000
+  defaultCondition: 1000
+  serialRequired: true
+  catalogCategory: nc-economic-shop-category-vehicles
+  catalogDescription: nc-economic-shop-description-vehicle-quartz
+  delivery: VehicleZone
+
+- type: ncItemDefinition
+  id: NCItemVehicleBattery
+  displayName: nc-economic-item-vehicle-battery
+  stableKey: vehicle-part.battery
+  domain: Generic
+  materializedPrototype: NCVehicleBatteryItem
+  basePrice: 180
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-vehicle-parts
+  catalogDescription: nc-economic-shop-description-vehicle-part
+
+- type: ncItemDefinition
+  id: NCItemVehicleStarter
+  displayName: nc-economic-item-vehicle-starter
+  stableKey: vehicle-part.starter
+  domain: Generic
+  materializedPrototype: NCVehicleStarterItem
+  basePrice: 140
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-vehicle-parts
+  catalogDescription: nc-economic-shop-description-vehicle-part
+
+- type: ncItemDefinition
+  id: NCItemVehicleRadiator
+  displayName: nc-economic-item-vehicle-radiator
+  stableKey: vehicle-part.radiator
+  domain: Generic
+  materializedPrototype: NCVehicleRadiatorItem
+  basePrice: 220
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-vehicle-parts
+  catalogDescription: nc-economic-shop-description-vehicle-part
+
+- type: ncItemDefinition
+  id: NCItemVehicleTyre
+  displayName: nc-economic-item-vehicle-tyre
+  stableKey: vehicle-part.front-left-tyre
+  domain: Generic
+  materializedPrototype: NCVehicleFrontLeftTyreItem
+  basePrice: 120
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-vehicle-parts
+  catalogDescription: nc-economic-shop-description-vehicle-part
+
+- type: ncItemDefinition
+  id: NCItemVehicleBrakePads
+  displayName: nc-economic-item-vehicle-brake-pads
+  stableKey: vehicle-part.front-left-pads
+  domain: Generic
+  materializedPrototype: NCVehicleFrontLeftPadsItem
+  basePrice: 80
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-vehicle-parts
+  catalogDescription: nc-economic-shop-description-vehicle-part
+
+- type: ncItemDefinition
+  id: NCItemVehicleFasteners
+  displayName: nc-economic-item-vehicle-fasteners
+  stableKey: vehicle-part.fasteners
+  domain: Generic
+  materializedPrototype: NCVehicleFastenerPack
+  basePrice: 35
+  defaultCondition: 1000
+  catalogCategory: nc-economic-shop-category-vehicle-parts
+  catalogDescription: nc-economic-shop-description-vehicle-part
 
 - type: ncEconomicService
   id: NCEconomicServiceCyberwareStreetMaintenance

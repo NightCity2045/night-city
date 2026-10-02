@@ -640,7 +640,8 @@ public sealed partial class NCMedicalPersistenceSystem
                Enum.IsDefined(physiology.Consciousness) &&
                Enum.IsDefined(physiology.Condition) &&
                Finite(physiology.BrainFunction, 0f, 1f) &&
-               ValidTime(physiology.TimeBelowCriticalPerfusion);
+               ValidTime(physiology.TimeBelowCriticalPerfusion) &&
+               ValidTime(physiology.TimeInClinicalDeath);
     }
 
     private static bool ValidTreatmentFlags(NCWoundTreatmentFlags flags)
@@ -747,6 +748,7 @@ public sealed partial class NCMedicalPersistenceSystem
                 Condition = source.Physiology.Condition,
                 BrainFunction = source.Physiology.BrainFunction,
                 TimeBelowCriticalPerfusion = source.Physiology.TimeBelowCriticalPerfusion,
+                TimeInClinicalDeath = source.Physiology.TimeInClinicalDeath,
                 Irreversible = source.Physiology.Irreversible,
             },
         };

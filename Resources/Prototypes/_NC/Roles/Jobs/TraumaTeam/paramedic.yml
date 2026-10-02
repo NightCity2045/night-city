@@ -28,7 +28,7 @@
     gloves: ClothingHandsGlovesLatex
     id: ParamedicPDA
     belt: ClothingBeltMedicalFilled
-    outerClothing: ClothingOuterCoatParamedicWB
+    outerClothing: ClothingOuterHardsuitTraumaMed
   storage:
     back:
     - MedTekCartridge

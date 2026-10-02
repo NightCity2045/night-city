@@ -93,10 +93,10 @@ public sealed class NCArmorResolutionTest : GameTest
         var request = new NCArmorResolveRequest(human, Chest, NCArmorDamageClass.Ballistic, 15, 1);
 
         Assert.That(_armor.ResolveBound(request).HasArmor, Is.False);
-        Assert.That(_inventory.TryEquip(human, armorjack, "outerClothing"), Is.True);
+        Assert.That(_inventory.TryEquip(human, armorjack, "armor"), Is.True);
         Assert.That(_armor.ResolveBound(request).EffectiveSp, Is.EqualTo(FixedPoint2.New(11)));
 
-        Assert.That(_inventory.TryUnequip(human, "outerClothing", true), Is.True);
+        Assert.That(_inventory.TryUnequip(human, "armor", true), Is.True);
         Assert.That(_armor.ResolveBound(request).HasArmor, Is.False);
     }
 

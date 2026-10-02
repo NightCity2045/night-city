@@ -317,7 +317,6 @@
     - state: smoke
       map: ["enum.NCVehicleVisualLayers.Smoke"]
       visible: false
-    rotation: 180
     noRot: false
     scale: 1, 1
   - type: Clickable

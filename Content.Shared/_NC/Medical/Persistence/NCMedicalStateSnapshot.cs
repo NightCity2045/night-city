@@ -496,6 +496,7 @@ public sealed partial class NCPhysiologyStateSnapshot
     [DataField] public NCPhysiologicalCondition Condition;
     [DataField] public float BrainFunction;
     [DataField] public TimeSpan TimeBelowCriticalPerfusion;
+    [DataField] public TimeSpan TimeInClinicalDeath;
     [DataField] public bool Irreversible;
 }
 

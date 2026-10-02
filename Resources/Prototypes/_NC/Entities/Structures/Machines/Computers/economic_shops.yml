@@ -29,8 +29,7 @@
     - map: ["enum.WiresVisualLayers.MaintenancePanel"]
       state: generic_panel_open
 
-# Finite bootstrap stock is idempotent. Once sold or consumed it is not recreated by a map reload; production and
-# logistics become the only restocking paths in phase 10.
+# Preserve the original economic-system test storefront for maps and admin workflows that already use its ID.
 - type: entity
   parent: NCComputerEconomicShopBase
   id: NCComputerStreetMedicalShop
@@ -55,3 +54,231 @@
       quantity: 3
   - type: PointLight
     color: "#4DD0A7"
+
+# Every storefront owns a finite persistent stock node. Stable shop IDs keep bootstrap idempotent across map reloads.
+- type: entity
+  parent: NCComputerEconomicShopBase
+  id: NCComputerGunStore
+  name: gun store catalog terminal
+  description: A licensed terminal for pistols, ammunition and light civilian armor.
+  components:
+  - type: NCEconomicShop
+    shopId: retail-gun-store
+    displayName: nc-economic-shop-name-gun-store
+    sellerOrganizationId: night-city-retail-gun-store
+    semanticLocationKey: city.shop.gun-store
+    maximumListings: 256
+    catalog: NCShopCatalogGun
+    initialItems:
+    - definition: NCItemWeaponBudgetPistolMk1
+      quantity: 12
+    - definition: NCItemWeaponViperPistol
+      quantity: 6
+    - definition: NCItemPistolMagazine
+      quantity: 40
+    - definition: NCItemLightArmorVest
+      quantity: 10
+  - type: PointLight
+    color: "#D86464"
+
+- type: entity
+  parent: NCComputerEconomicShopBase
+  id: NCComputerClothingStore
+  name: clothing store catalog terminal
+  description: A retail terminal for ordinary street clothes.
+  components:
+  - type: NCEconomicShop
+    shopId: retail-clothing-store
+    displayName: nc-economic-shop-name-clothing-store
+    sellerOrganizationId: night-city-retail-clothing-store
+    semanticLocationKey: city.shop.clothing-store
+    maximumListings: 256
+    catalog: NCShopCatalogClothing
+    initialItems:
+    - definition: NCItemClothingBlackJumpsuit
+      quantity: 20
+    - definition: NCItemClothingBlueJumpsuit
+      quantity: 20
+    - definition: NCItemClothingRedDress
+      quantity: 12
+    - definition: NCItemClothingBlackShoes
+      quantity: 24
+    - definition: NCItemClothingBomberJacket
+      quantity: 12
+  - type: PointLight
+    color: "#D56FE8"
+
+- type: entity
+  parent: NCComputerEconomicShopBase
+  id: NCComputerFurnitureStore
+  name: furniture store catalog terminal
+  description: A terminal for compact, tool-deployable furniture flatpacks.
+  components:
+  - type: NCEconomicShop
+    shopId: retail-furniture-store
+    displayName: nc-economic-shop-name-furniture-store
+    sellerOrganizationId: night-city-retail-furniture-store
+    semanticLocationKey: city.shop.furniture-store
+    maximumListings: 256
+    catalog: NCShopCatalogFurniture
+    initialItems:
+    - definition: NCItemFurnitureChairFlatpack
+      quantity: 20
+    - definition: NCItemFurnitureOfficeChairFlatpack
+      quantity: 12
+    - definition: NCItemFurnitureTableFlatpack
+      quantity: 16
+    - definition: NCItemFurnitureBedFlatpack
+      quantity: 10
+    - definition: NCItemFurnitureBookshelfFlatpack
+      quantity: 10
+    - definition: NCItemFurnitureRackFlatpack
+      quantity: 12
+  - type: PointLight
+    color: "#D7A868"
+
+- type: entity
+  parent: NCComputerEconomicShopBase
+  id: NCComputerConstructionStore
+  name: construction supply catalog terminal
+  description: A terminal for scarce building material bundles.
+  components:
+  - type: NCEconomicShop
+    shopId: retail-construction-store
+    displayName: nc-economic-shop-name-construction-store
+    sellerOrganizationId: night-city-retail-construction-store
+    semanticLocationKey: city.shop.construction-store
+    maximumListings: 256
+    catalog: NCShopCatalogConstruction
+    initialItems:
+    - definition: NCItemConstructionSteel
+      quantity: 30
+    - definition: NCItemConstructionGlass
+      quantity: 24
+    - definition: NCItemConstructionPlastic
+      quantity: 24
+    - definition: NCItemConstructionRods
+      quantity: 24
+    - definition: NCItemConstructionCable
+      quantity: 30
+  - type: PointLight
+    color: "#EFB341"
+
+- type: entity
+  parent: NCComputerEconomicShopBase
+  id: NCComputerPharmacy
+  name: pharmacy catalog terminal
+  description: A pharmacy storefront stocked for Night City's detailed trauma medicine.
+  components:
+  - type: NCEconomicShop
+    shopId: retail-pharmacy
+    displayName: nc-economic-shop-name-pharmacy
+    sellerOrganizationId: night-city-retail-pharmacy
+    semanticLocationKey: city.shop.pharmacy
+    maximumListings: 256
+    catalog: NCShopCatalogPharmacy
+    initialItems:
+    - definition: NCItemMedicineTraumaAnalgesic
+      quantity: 24
+    - definition: NCItemMedicineBroadAntibiotic
+      quantity: 16
+    - definition: NCItemMedicineOxygenCarrier
+      quantity: 12
+    - definition: NCItemMedicineTourniquet
+      quantity: 20
+    - definition: NCItemMedicineSplint
+      quantity: 20
+  - type: PointLight
+    color: "#4DD0A7"
+
+- type: entity
+  parent: NCComputerEconomicShopBase
+  id: NCComputerAutoStore
+  name: auto dealership catalog terminal
+  description: A dealership terminal for vehicles and replacement parts.
+  components:
+  - type: NCEconomicShop
+    shopId: retail-auto-store
+    displayName: nc-economic-shop-name-auto-store
+    sellerOrganizationId: night-city-retail-auto-store
+    semanticLocationKey: city.shop.auto-store
+    maximumListings: 256
+    catalog: NCShopCatalogAuto
+    initialItems:
+    - definition: NCItemVehicleMaiMai
+      quantity: 3
+    - definition: NCItemVehicleGalena
+      quantity: 3
+    - definition: NCItemVehicleQuartz
+      quantity: 2
+    - definition: NCItemVehicleBattery
+      quantity: 10
+    - definition: NCItemVehicleStarter
+      quantity: 10
+    - definition: NCItemVehicleRadiator
+      quantity: 8
+    - definition: NCItemVehicleTyre
+      quantity: 16
+    - definition: NCItemVehicleBrakePads
+      quantity: 16
+    - definition: NCItemVehicleFasteners
+      quantity: 24
+  - type: PointLight
+    color: "#5FA8FF"
+
+- type: entity
+  parent: MarkerBase
+  id: NCMarkerAutoStoreDeliveryZone
+  name: auto dealership delivery zone
+  suffix: NC, Mapping
+  description: Keep the marked rectangle free; purchased vehicles are delivered here.
+  components:
+  - type: NCEconomicShopVehicleDeliveryZone
+    shopId: retail-auto-store
+    halfExtents: 2.5, 4
+  - type: Sprite
+    state: blue
+    color: "#5FA8FF"
+
+# These attendants are presentation-only physical fixtures. They have no AI, mind or Living City actor binding.
+- type: entity
+  parent: MobHumanBase
+  id: NCShopkeeperDisplayBase
+  abstract: true
+  suffix: Static, Invulnerable
+  components:
+  - type: RandomHumanoidAppearance
+    randomizeName: false
+  - type: Godmode
+  - type: Physics
+    bodyType: Static
+
+- type: entity
+  parent: NCShopkeeperDisplayBase
+  id: NCShopkeeperGunStore
+  name: gun store clerk
+
+- type: entity
+  parent: NCShopkeeperDisplayBase
+  id: NCShopkeeperClothingStore
+  name: clothing store clerk
+
+- type: entity
+  parent: NCShopkeeperDisplayBase
+  id: NCShopkeeperFurnitureStore
+  name: furniture store clerk
+
+- type: entity
+  parent: NCShopkeeperDisplayBase
+  id: NCShopkeeperConstructionStore
+  name: construction supply clerk
+
+- type: entity
+  parent: NCShopkeeperDisplayBase
+  id: NCShopkeeperPharmacy
+  name: pharmacy clerk
+
+- type: entity
+  parent: NCShopkeeperDisplayBase
+  id: NCShopkeeperAutoStore
+  name: auto dealership clerk

@@ -1,0 +1,663 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Civilian vehicles, replacement parts, tools and fluids.
+- type: ncItemDefinition
+  parent: NCShopVehicleDefinitionBase
+  id: NCItemCatalogNCVehicleMizutaniShion2045
+  displayName: ent-NCVehicleMizutaniShion2045
+  stableKey: vehicle.nc-vehicle-mizutani-shion2045
+  materializedPrototype: NCVehicleMizutaniShion2045
+  basePrice: 18000
+
+- type: ncItemDefinition
+  parent: NCShopVehicleDefinitionBase
+  id: NCItemCatalogNCVehicleQuadraType662045
+  displayName: ent-NCVehicleQuadraType662045
+  stableKey: vehicle.nc-vehicle-quadra-type662045
+  materializedPrototype: NCVehicleQuadraType662045
+  basePrice: 22000
+
+- type: ncItemDefinition
+  parent: NCShopVehicleDefinitionBase
+  id: NCItemCatalogNCVehicleQuadraTurboR2045
+  displayName: ent-NCVehicleQuadraTurboR2045
+  stableKey: vehicle.nc-vehicle-quadra-turbo-r2045
+  materializedPrototype: NCVehicleQuadraTurboR2045
+  basePrice: 28000
+
+- type: ncItemDefinition
+  parent: NCShopVehicleDefinitionBase
+  id: NCItemCatalogNCVehicleRayfieldCaliburn2045
+  displayName: ent-NCVehicleRayfieldCaliburn2045
+  stableKey: vehicle.nc-vehicle-rayfield-caliburn2045
+  materializedPrototype: NCVehicleRayfieldCaliburn2045
+  basePrice: 48000
+
+- type: ncItemDefinition
+  parent: NCShopVehicleDefinitionBase
+  id: NCItemCatalogNCVehicleVillefortAlvarado2045
+  displayName: ent-NCVehicleVillefortAlvarado2045
+  stableKey: vehicle.nc-vehicle-villefort-alvarado2045
+  materializedPrototype: NCVehicleVillefortAlvarado2045
+  basePrice: 19000
+
+- type: ncItemDefinition
+  parent: NCShopVehicleDefinitionBase
+  id: NCItemCatalogNCVehicleThortonColby2045
+  displayName: ent-NCVehicleThortonColby2045
+  stableKey: vehicle.nc-vehicle-thorton-colby2045
+  materializedPrototype: NCVehicleThortonColby2045
+  basePrice: 12000
+
+- type: ncItemDefinition
+  parent: NCShopVehicleDefinitionBase
+  id: NCItemCatalogNCVehicleRecoveryTruck
+  displayName: ent-NCVehicleRecoveryTruck
+  stableKey: vehicle.nc-vehicle-recovery-truck
+  materializedPrototype: NCVehicleRecoveryTruck
+  basePrice: 16000
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleEngineItem
+  displayName: ent-NCVehicleEngineItem
+  stableKey: vehicle-part.nc-vehicle-engine-item
+  materializedPrototype: NCVehicleEngineItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleGearboxItem
+  displayName: ent-NCVehicleGearboxItem
+  stableKey: vehicle-part.nc-vehicle-gearbox-item
+  materializedPrototype: NCVehicleGearboxItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleAlternatorItem
+  displayName: ent-NCVehicleAlternatorItem
+  stableKey: vehicle-part.nc-vehicle-alternator-item
+  materializedPrototype: NCVehicleAlternatorItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleWiringItem
+  displayName: ent-NCVehicleWiringItem
+  stableKey: vehicle-part.nc-vehicle-wiring-item
+  materializedPrototype: NCVehicleWiringItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleEcuItem
+  displayName: ent-NCVehicleEcuItem
+  stableKey: vehicle-part.nc-vehicle-ecu-item
+  materializedPrototype: NCVehicleEcuItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleCoilItem
+  displayName: ent-NCVehicleCoilItem
+  stableKey: vehicle-part.nc-vehicle-coil-item
+  materializedPrototype: NCVehicleCoilItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFuelPumpItem
+  displayName: ent-NCVehicleFuelPumpItem
+  stableKey: vehicle-part.nc-vehicle-fuel-pump-item
+  materializedPrototype: NCVehicleFuelPumpItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFuelFilterItem
+  displayName: ent-NCVehicleFuelFilterItem
+  stableKey: vehicle-part.nc-vehicle-fuel-filter-item
+  materializedPrototype: NCVehicleFuelFilterItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleWaterPumpItem
+  displayName: ent-NCVehicleWaterPumpItem
+  stableKey: vehicle-part.nc-vehicle-water-pump-item
+  materializedPrototype: NCVehicleWaterPumpItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFanItem
+  displayName: ent-NCVehicleFanItem
+  stableKey: vehicle-part.nc-vehicle-fan-item
+  materializedPrototype: NCVehicleFanItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleThermostatItem
+  displayName: ent-NCVehicleThermostatItem
+  stableKey: vehicle-part.nc-vehicle-thermostat-item
+  materializedPrototype: NCVehicleThermostatItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleCoolantHoseItem
+  displayName: ent-NCVehicleCoolantHoseItem
+  stableKey: vehicle-part.nc-vehicle-coolant-hose-item
+  materializedPrototype: NCVehicleCoolantHoseItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleOilPumpItem
+  displayName: ent-NCVehicleOilPumpItem
+  stableKey: vehicle-part.nc-vehicle-oil-pump-item
+  materializedPrototype: NCVehicleOilPumpItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleOilFilterItem
+  displayName: ent-NCVehicleOilFilterItem
+  stableKey: vehicle-part.nc-vehicle-oil-filter-item
+  materializedPrototype: NCVehicleOilFilterItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleSteeringRackItem
+  displayName: ent-NCVehicleSteeringRackItem
+  stableKey: vehicle-part.nc-vehicle-steering-rack-item
+  materializedPrototype: NCVehicleSteeringRackItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleMasterCylinderItem
+  displayName: ent-NCVehicleMasterCylinderItem
+  stableKey: vehicle-part.nc-vehicle-master-cylinder-item
+  materializedPrototype: NCVehicleMasterCylinderItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleBrakeLinesItem
+  displayName: ent-NCVehicleBrakeLinesItem
+  stableKey: vehicle-part.nc-vehicle-brake-lines-item
+  materializedPrototype: NCVehicleBrakeLinesItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleClutchItem
+  displayName: ent-NCVehicleClutchItem
+  stableKey: vehicle-part.nc-vehicle-clutch-item
+  materializedPrototype: NCVehicleClutchItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehiclePropShaftItem
+  displayName: ent-NCVehiclePropShaftItem
+  stableKey: vehicle-part.nc-vehicle-prop-shaft-item
+  materializedPrototype: NCVehiclePropShaftItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearDifferentialItem
+  displayName: ent-NCVehicleRearDifferentialItem
+  stableKey: vehicle-part.nc-vehicle-rear-differential-item
+  materializedPrototype: NCVehicleRearDifferentialItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleHoodItem
+  displayName: ent-NCVehicleHoodItem
+  stableKey: vehicle-part.nc-vehicle-hood-item
+  materializedPrototype: NCVehicleHoodItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontBumperItem
+  displayName: ent-NCVehicleFrontBumperItem
+  stableKey: vehicle-part.nc-vehicle-front-bumper-item
+  materializedPrototype: NCVehicleFrontBumperItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearBumperItem
+  displayName: ent-NCVehicleRearBumperItem
+  stableKey: vehicle-part.nc-vehicle-rear-bumper-item
+  materializedPrototype: NCVehicleRearBumperItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontLeftArmItem
+  displayName: ent-NCVehicleFrontLeftArmItem
+  stableKey: vehicle-part.nc-vehicle-front-left-arm-item
+  materializedPrototype: NCVehicleFrontLeftArmItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontLeftSpringItem
+  displayName: ent-NCVehicleFrontLeftSpringItem
+  stableKey: vehicle-part.nc-vehicle-front-left-spring-item
+  materializedPrototype: NCVehicleFrontLeftSpringItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontLeftDamperItem
+  displayName: ent-NCVehicleFrontLeftDamperItem
+  stableKey: vehicle-part.nc-vehicle-front-left-damper-item
+  materializedPrototype: NCVehicleFrontLeftDamperItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontLeftHubItem
+  displayName: ent-NCVehicleFrontLeftHubItem
+  stableKey: vehicle-part.nc-vehicle-front-left-hub-item
+  materializedPrototype: NCVehicleFrontLeftHubItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontLeftRimItem
+  displayName: ent-NCVehicleFrontLeftRimItem
+  stableKey: vehicle-part.nc-vehicle-front-left-rim-item
+  materializedPrototype: NCVehicleFrontLeftRimItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontLeftBrakeItem
+  displayName: ent-NCVehicleFrontLeftBrakeItem
+  stableKey: vehicle-part.nc-vehicle-front-left-brake-item
+  materializedPrototype: NCVehicleFrontLeftBrakeItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontRightArmItem
+  displayName: ent-NCVehicleFrontRightArmItem
+  stableKey: vehicle-part.nc-vehicle-front-right-arm-item
+  materializedPrototype: NCVehicleFrontRightArmItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontRightSpringItem
+  displayName: ent-NCVehicleFrontRightSpringItem
+  stableKey: vehicle-part.nc-vehicle-front-right-spring-item
+  materializedPrototype: NCVehicleFrontRightSpringItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontRightDamperItem
+  displayName: ent-NCVehicleFrontRightDamperItem
+  stableKey: vehicle-part.nc-vehicle-front-right-damper-item
+  materializedPrototype: NCVehicleFrontRightDamperItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontRightHubItem
+  displayName: ent-NCVehicleFrontRightHubItem
+  stableKey: vehicle-part.nc-vehicle-front-right-hub-item
+  materializedPrototype: NCVehicleFrontRightHubItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontRightRimItem
+  displayName: ent-NCVehicleFrontRightRimItem
+  stableKey: vehicle-part.nc-vehicle-front-right-rim-item
+  materializedPrototype: NCVehicleFrontRightRimItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontRightTyreItem
+  displayName: ent-NCVehicleFrontRightTyreItem
+  stableKey: vehicle-part.nc-vehicle-front-right-tyre-item
+  materializedPrototype: NCVehicleFrontRightTyreItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontRightBrakeItem
+  displayName: ent-NCVehicleFrontRightBrakeItem
+  stableKey: vehicle-part.nc-vehicle-front-right-brake-item
+  materializedPrototype: NCVehicleFrontRightBrakeItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearLeftArmItem
+  displayName: ent-NCVehicleRearLeftArmItem
+  stableKey: vehicle-part.nc-vehicle-rear-left-arm-item
+  materializedPrototype: NCVehicleRearLeftArmItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearLeftSpringItem
+  displayName: ent-NCVehicleRearLeftSpringItem
+  stableKey: vehicle-part.nc-vehicle-rear-left-spring-item
+  materializedPrototype: NCVehicleRearLeftSpringItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearLeftDamperItem
+  displayName: ent-NCVehicleRearLeftDamperItem
+  stableKey: vehicle-part.nc-vehicle-rear-left-damper-item
+  materializedPrototype: NCVehicleRearLeftDamperItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearLeftHubItem
+  displayName: ent-NCVehicleRearLeftHubItem
+  stableKey: vehicle-part.nc-vehicle-rear-left-hub-item
+  materializedPrototype: NCVehicleRearLeftHubItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearLeftRimItem
+  displayName: ent-NCVehicleRearLeftRimItem
+  stableKey: vehicle-part.nc-vehicle-rear-left-rim-item
+  materializedPrototype: NCVehicleRearLeftRimItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearLeftTyreItem
+  displayName: ent-NCVehicleRearLeftTyreItem
+  stableKey: vehicle-part.nc-vehicle-rear-left-tyre-item
+  materializedPrototype: NCVehicleRearLeftTyreItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearLeftBrakeItem
+  displayName: ent-NCVehicleRearLeftBrakeItem
+  stableKey: vehicle-part.nc-vehicle-rear-left-brake-item
+  materializedPrototype: NCVehicleRearLeftBrakeItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearRightArmItem
+  displayName: ent-NCVehicleRearRightArmItem
+  stableKey: vehicle-part.nc-vehicle-rear-right-arm-item
+  materializedPrototype: NCVehicleRearRightArmItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearRightSpringItem
+  displayName: ent-NCVehicleRearRightSpringItem
+  stableKey: vehicle-part.nc-vehicle-rear-right-spring-item
+  materializedPrototype: NCVehicleRearRightSpringItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearRightDamperItem
+  displayName: ent-NCVehicleRearRightDamperItem
+  stableKey: vehicle-part.nc-vehicle-rear-right-damper-item
+  materializedPrototype: NCVehicleRearRightDamperItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearRightHubItem
+  displayName: ent-NCVehicleRearRightHubItem
+  stableKey: vehicle-part.nc-vehicle-rear-right-hub-item
+  materializedPrototype: NCVehicleRearRightHubItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearRightRimItem
+  displayName: ent-NCVehicleRearRightRimItem
+  stableKey: vehicle-part.nc-vehicle-rear-right-rim-item
+  materializedPrototype: NCVehicleRearRightRimItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearRightTyreItem
+  displayName: ent-NCVehicleRearRightTyreItem
+  stableKey: vehicle-part.nc-vehicle-rear-right-tyre-item
+  materializedPrototype: NCVehicleRearRightTyreItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearRightBrakeItem
+  displayName: ent-NCVehicleRearRightBrakeItem
+  stableKey: vehicle-part.nc-vehicle-rear-right-brake-item
+  materializedPrototype: NCVehicleRearRightBrakeItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontLeftDiscItem
+  displayName: ent-NCVehicleFrontLeftDiscItem
+  stableKey: vehicle-part.nc-vehicle-front-left-disc-item
+  materializedPrototype: NCVehicleFrontLeftDiscItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontRightDiscItem
+  displayName: ent-NCVehicleFrontRightDiscItem
+  stableKey: vehicle-part.nc-vehicle-front-right-disc-item
+  materializedPrototype: NCVehicleFrontRightDiscItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearLeftDiscItem
+  displayName: ent-NCVehicleRearLeftDiscItem
+  stableKey: vehicle-part.nc-vehicle-rear-left-disc-item
+  materializedPrototype: NCVehicleRearLeftDiscItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearRightDiscItem
+  displayName: ent-NCVehicleRearRightDiscItem
+  stableKey: vehicle-part.nc-vehicle-rear-right-disc-item
+  materializedPrototype: NCVehicleRearRightDiscItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontRightPadsItem
+  displayName: ent-NCVehicleFrontRightPadsItem
+  stableKey: vehicle-part.nc-vehicle-front-right-pads-item
+  materializedPrototype: NCVehicleFrontRightPadsItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearLeftPadsItem
+  displayName: ent-NCVehicleRearLeftPadsItem
+  stableKey: vehicle-part.nc-vehicle-rear-left-pads-item
+  materializedPrototype: NCVehicleRearLeftPadsItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRearRightPadsItem
+  displayName: ent-NCVehicleRearRightPadsItem
+  stableKey: vehicle-part.nc-vehicle-rear-right-pads-item
+  materializedPrototype: NCVehicleRearRightPadsItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleAutomaticGearboxItem
+  displayName: ent-NCVehicleAutomaticGearboxItem
+  stableKey: vehicle-part.nc-vehicle-automatic-gearbox-item
+  materializedPrototype: NCVehicleAutomaticGearboxItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontDifferentialItem
+  displayName: ent-NCVehicleFrontDifferentialItem
+  stableKey: vehicle-part.nc-vehicle-front-differential-item
+  materializedPrototype: NCVehicleFrontDifferentialItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontLeftShaftItem
+  displayName: ent-NCVehicleFrontLeftShaftItem
+  stableKey: vehicle-part.nc-vehicle-front-left-shaft-item
+  materializedPrototype: NCVehicleFrontLeftShaftItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFrontRightShaftItem
+  displayName: ent-NCVehicleFrontRightShaftItem
+  stableKey: vehicle-part.nc-vehicle-front-right-shaft-item
+  materializedPrototype: NCVehicleFrontRightShaftItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleTransferCaseItem
+  displayName: ent-NCVehicleTransferCaseItem
+  stableKey: vehicle-part.nc-vehicle-transfer-case-item
+  materializedPrototype: NCVehicleTransferCaseItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleHeadlampsItem
+  displayName: ent-NCVehicleHeadlampsItem
+  stableKey: vehicle-part.nc-vehicle-headlamps-item
+  materializedPrototype: NCVehicleHeadlampsItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleHornItem
+  displayName: ent-NCVehicleHornItem
+  stableKey: vehicle-part.nc-vehicle-horn-item
+  materializedPrototype: NCVehicleHornItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleWasherPumpItem
+  displayName: ent-NCVehicleWasherPumpItem
+  stableKey: vehicle-part.nc-vehicle-washer-pump-item
+  materializedPrototype: NCVehicleWasherPumpItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleWiperMotorItem
+  displayName: ent-NCVehicleWiperMotorItem
+  stableKey: vehicle-part.nc-vehicle-wiper-motor-item
+  materializedPrototype: NCVehicleWiperMotorItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleAirbagItem
+  displayName: ent-NCVehicleAirbagItem
+  stableKey: vehicle-part.nc-vehicle-airbag-item
+  materializedPrototype: NCVehicleAirbagItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleSteeringPumpItem
+  displayName: ent-NCVehicleSteeringPumpItem
+  stableKey: vehicle-part.nc-vehicle-steering-pump-item
+  materializedPrototype: NCVehicleSteeringPumpItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleFuelTankItem
+  displayName: ent-NCVehicleFuelTankItem
+  stableKey: vehicle-part.nc-vehicle-fuel-tank-item
+  materializedPrototype: NCVehicleFuelTankItem
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleElectricalRepairKit
+  displayName: ent-NCVehicleElectricalRepairKit
+  stableKey: vehicle-part.nc-vehicle-electrical-repair-kit
+  materializedPrototype: NCVehicleElectricalRepairKit
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRunningGearRepairKit
+  displayName: ent-NCVehicleRunningGearRepairKit
+  stableKey: vehicle-part.nc-vehicle-running-gear-repair-kit
+  materializedPrototype: NCVehicleRunningGearRepairKit
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRubberRepairKit
+  displayName: ent-NCVehicleRubberRepairKit
+  stableKey: vehicle-part.nc-vehicle-rubber-repair-kit
+  materializedPrototype: NCVehicleRubberRepairKit
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleBodyworkRepairKit
+  displayName: ent-NCVehicleBodyworkRepairKit
+  stableKey: vehicle-part.nc-vehicle-bodywork-repair-kit
+  materializedPrototype: NCVehicleBodyworkRepairKit
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleRepairKit
+  displayName: ent-NCVehicleRepairKit
+  stableKey: vehicle-part.nc-vehicle-repair-kit
+  materializedPrototype: NCVehicleRepairKit
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleTyreRepairKit
+  displayName: ent-NCVehicleTyreRepairKit
+  stableKey: vehicle-part.nc-vehicle-tyre-repair-kit
+  materializedPrototype: NCVehicleTyreRepairKit
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleScanner
+  displayName: ent-NCVehicleScanner
+  stableKey: vehicle-part.nc-vehicle-scanner
+  materializedPrototype: NCVehicleScanner
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleCompressionTester
+  displayName: ent-NCVehicleCompressionTester
+  stableKey: vehicle-part.nc-vehicle-compression-tester
+  materializedPrototype: NCVehicleCompressionTester
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleAlignmentGauge
+  displayName: ent-NCVehicleAlignmentGauge
+  stableKey: vehicle-part.nc-vehicle-alignment-gauge
+  materializedPrototype: NCVehicleAlignmentGauge
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleOilBottle
+  displayName: ent-NCVehicleOilBottle
+  stableKey: vehicle-part.nc-vehicle-oil-bottle
+  materializedPrototype: NCVehicleOilBottle
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleCoolantBottle
+  displayName: ent-NCVehicleCoolantBottle
+  stableKey: vehicle-part.nc-vehicle-coolant-bottle
+  materializedPrototype: NCVehicleCoolantBottle
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleBrakeBottle
+  displayName: ent-NCVehicleBrakeBottle
+  stableKey: vehicle-part.nc-vehicle-brake-bottle
+  materializedPrototype: NCVehicleBrakeBottle
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleTransmissionBottle
+  displayName: ent-NCVehicleTransmissionBottle
+  stableKey: vehicle-part.nc-vehicle-transmission-bottle
+  materializedPrototype: NCVehicleTransmissionBottle
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleSteeringBottle
+  displayName: ent-NCVehicleSteeringBottle
+  stableKey: vehicle-part.nc-vehicle-steering-bottle
+  materializedPrototype: NCVehicleSteeringBottle
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleWasherBottle
+  displayName: ent-NCVehicleWasherBottle
+  stableKey: vehicle-part.nc-vehicle-washer-bottle
+  materializedPrototype: NCVehicleWasherBottle
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleTowCable
+  displayName: ent-NCVehicleTowCable
+  stableKey: vehicle-part.nc-vehicle-tow-cable
+  materializedPrototype: NCVehicleTowCable
+
+- type: ncItemDefinition
+  parent: NCShopVehiclePartDefinitionBase
+  id: NCItemCatalogNCVehicleWinchCable
+  displayName: ent-NCVehicleWinchCable
+  stableKey: vehicle-part.nc-vehicle-winch-cable
+  materializedPrototype: NCVehicleWinchCable
+

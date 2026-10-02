@@ -1,0 +1,325 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Player-controlled event bodies. RandomHumanoidAppearance assigns a random human
+# appearance and name when the body is spawned; no NPC or ghost-role logic is added.
+- type: entity
+  abstract: true
+  parent: MobHuman
+  id: NCEventArasakaMilitechPuppetBase
+  components:
+  - type: RandomHumanoidAppearance
+
+# Militech defenders
+- type: entity
+  parent: NCEventArasakaMilitechPuppetBase
+  id: NCEventMilitechCommander
+  name: Militech detachment commander
+  description: The officer responsible for securing the recovered technology.
+  components:
+  - type: Loadout
+    prototypes: [ NCEventMilitechCommanderGear ]
+
+- type: entity
+  parent: NCEventArasakaMilitechPuppetBase
+  id: NCEventMilitechOperative
+  name: Militech operative
+  description: A corporate infantry operative assigned to defend the local base.
+  components:
+  - type: Loadout
+    prototypes: [ NCEventMilitechOperativeGear ]
+
+- type: entity
+  parent: NCEventArasakaMilitechPuppetBase
+  id: NCEventMilitechBreacher
+  name: Militech breacher
+  description: A close-quarters specialist guarding the recovered technology.
+  components:
+  - type: Loadout
+    prototypes: [ NCEventMilitechBreacherGear ]
+
+- type: entity
+  parent: NCEventArasakaMilitechPuppetBase
+  id: NCEventMilitechCombatMedic
+  name: Militech combat medic
+  description: A combat medic assigned to keep the Militech detachment alive.
+  components:
+  - type: Loadout
+    prototypes: [ NCEventMilitechCombatMedicGear ]
+
+- type: entity
+  parent: NCEventArasakaMilitechPuppetBase
+  id: NCEventMilitechTechnician
+  name: Militech field technician
+  description: A field technician responsible for the base and the recovered technology.
+  components:
+  - type: Loadout
+    prototypes: [ NCEventMilitechTechnicianGear ]
+
+# Arasaka-funded proxy force. Neutral clothing preserves plausible deniability.
+- type: entity
+  parent: NCEventArasakaMilitechPuppetBase
+  id: NCEventProxySquadLeader
+  name: proxy security squad leader
+  description: The leader of a deniable security team hired to steal the technology.
+  components:
+  - type: Loadout
+    prototypes: [ NCEventProxySquadLeaderGear ]
+
+- type: entity
+  parent: NCEventArasakaMilitechPuppetBase
+  id: NCEventProxyAssault
+  name: proxy security assault operative
+  description: A rifleman from a deniable security company.
+  components:
+  - type: Loadout
+    prototypes: [ NCEventProxyAssaultGear ]
+
+- type: entity
+  parent: NCEventArasakaMilitechPuppetBase
+  id: NCEventProxyBreacher
+  name: proxy security breacher
+  description: A close-quarters specialist from a deniable security company.
+  components:
+  - type: Loadout
+    prototypes: [ NCEventProxyBreacherGear ]
+
+- type: entity
+  parent: NCEventArasakaMilitechPuppetBase
+  id: NCEventProxyMarksman
+  name: proxy security marksman
+  description: A precision shooter covering the attempt to steal the technology.
+  components:
+  - type: Loadout
+    prototypes: [ NCEventProxyMarksmanGear ]
+
+- type: entity
+  parent: NCEventArasakaMilitechPuppetBase
+  id: NCEventProxyFieldMedic
+  name: proxy security field medic
+  description: A field medic attached to a deniable security team.
+  components:
+  - type: Loadout
+    prototypes: [ NCEventProxyFieldMedicGear ]
+
+# Every class receives exactly four spare magazines for its primary weapon.
+- type: startingGear
+  id: NCEventMilitechCommanderGear
+  equipment:
+    jumpsuit: ClothingUniformMilitech
+    back: ClothingBackpackDuffelSecurity
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHatMilitechCap
+    eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesCombat
+    belt: ClothingBeltSecurity
+    armor: ClothingOuterArmorMilitechBulletproof
+  storage:
+    back:
+    - NCMagazine9x19SMG
+    - NCMagazine9x19SMG
+    - NCMagazine9x19SMG
+    - NCMagazine9x19SMG
+    - RadioHandheldSecurity
+    belt:
+    - NCWeaponPistolAvenger
+  inhand:
+  - NCWeaponSMGSaratoga
+
+- type: startingGear
+  id: NCEventMilitechOperativeGear
+  equipment:
+    jumpsuit: ClothingUniformMilitech
+    back: ClothingBackpackSecurity
+    shoes: ClothingShoesBootsJack
+    eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesCombat
+    belt: ClothingBeltSecurity
+    armor: ClothingOuterArmorMilitechBulletproof
+  storage:
+    back:
+    - NCMagazine9x19SMG
+    - NCMagazine9x19SMG
+    - NCMagazine9x19SMG
+    - NCMagazine9x19SMG
+    - RadioHandheldSecurity
+    belt:
+    - NCWeaponPistolAvenger
+  inhand:
+  - NCWeaponSMGSaratoga
+
+- type: startingGear
+  id: NCEventMilitechBreacherGear
+  equipment:
+    jumpsuit: ClothingUniformMilitech
+    back: ClothingBackpackDuffelSecurity
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHelmetBasic
+    eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesCombat
+    belt: ClothingBeltSecurity
+    armor: ClothingOuterArmorMilitechBulletproof
+  storage:
+    back:
+    - NCMagazine12GaugeCrusher
+    - NCMagazine12GaugeCrusher
+    - NCMagazine12GaugeCrusher
+    - NCMagazine12GaugeCrusher
+    - RadioHandheldSecurity
+    belt:
+    - NCWeaponPistolAvenger
+  inhand:
+  - NCWeaponShotgunCrusher
+
+- type: startingGear
+  id: NCEventMilitechCombatMedicGear
+  equipment:
+    jumpsuit: ClothingUniformMilitech
+    back: ClothingBackpackMedical
+    shoes: ClothingShoesBootsJack
+    eyes: ClothingEyesHudMedical
+    gloves: ClothingHandsGlovesNitrile
+    belt: ClothingBeltMedicalFilled
+    armor: ClothingOuterArmorMilitechBulletproof
+  storage:
+    back:
+    - NCMagazine11mmPistol
+    - NCMagazine11mmPistol
+    - NCMagazine11mmPistol
+    - NCMagazine11mmPistol
+    - MedkitCombatFilled
+    - RadioHandheldSecurity
+  inhand:
+  - NCWeaponPistolAvenger
+
+- type: startingGear
+  id: NCEventMilitechTechnicianGear
+  equipment:
+    jumpsuit: ClothingUniformMilitech
+    back: ClothingBackpackEngineering
+    shoes: ClothingShoesBootsJack
+    eyes: ClothingEyesGlassesMeson
+    gloves: ClothingHandsGlovesColorYellow
+    belt: ClothingBeltUtilityFilled
+    armor: ClothingOuterArmorMilitechBulletproof
+  storage:
+    back:
+    - NCMagazine9x19Pistol
+    - NCMagazine9x19Pistol
+    - NCMagazine9x19Pistol
+    - NCMagazine9x19Pistol
+    - RadioHandheldSecurity
+  inhand:
+  - NCWeaponPistolP35
+
+- type: startingGear
+  id: NCEventProxySquadLeaderGear
+  equipment:
+    jumpsuit: ClothingUniformArmoredBusinessSuit
+    back: ClothingBackpackDuffelSecurity
+    shoes: ClothingShoesBootsJack
+    eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesCombat
+    belt: ClothingBeltSecurity
+    armor: ClothingOuterArmorNWN
+  storage:
+    back:
+    - NCMagazine11mmSMG
+    - NCMagazine11mmSMG
+    - NCMagazine11mmSMG
+    - NCMagazine11mmSMG
+    - RadioHandheldSecurity
+    belt:
+    - NCWeaponPistolFederalX9
+  inhand:
+  - NCWeaponSMGShingen
+
+- type: startingGear
+  id: NCEventProxyAssaultGear
+  equipment:
+    jumpsuit: ClothingUniformArmoredBusinessSuit
+    back: ClothingBackpackSecurity
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHelmetBasic
+    eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesCombat
+    belt: ClothingBeltSecurity
+    armor: ClothingOuterArmorNWN
+  storage:
+    back:
+    - NCMagazine556Rifle
+    - NCMagazine556Rifle
+    - NCMagazine556Rifle
+    - NCMagazine556Rifle
+    - RadioHandheldSecurity
+    belt:
+    - NCWeaponPistolFederalX9
+  inhand:
+  - NCWeaponRifleNowaki
+
+- type: startingGear
+  id: NCEventProxyBreacherGear
+  equipment:
+    jumpsuit: ClothingUniformArmoredBusinessSuit
+    back: ClothingBackpackDuffelSecurity
+    shoes: ClothingShoesBootsJack
+    head: ClothingHeadHelmetBasic
+    eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesCombat
+    belt: ClothingBeltUtilityFilled
+    armor: ClothingOuterArmorNWN
+  storage:
+    back:
+    - NCMagazine12GaugeCrusher
+    - NCMagazine12GaugeCrusher
+    - NCMagazine12GaugeCrusher
+    - NCMagazine12GaugeCrusher
+    - NCWeaponPistolStukach
+    - RadioHandheldSecurity
+  inhand:
+  - NCWeaponShotgunCrusher
+
+- type: startingGear
+  id: NCEventProxyMarksmanGear
+  equipment:
+    jumpsuit: ClothingUniformArmoredBusinessSuit
+    back: ClothingBackpackDuffelSecurity
+    shoes: ClothingShoesBootsJack
+    eyes: ClothingEyesGlassesSecurity
+    gloves: ClothingHandsGlovesCombat
+    belt: ClothingBeltSecurity
+    armor: ClothingOuterArmorNWN
+  storage:
+    back:
+    - NCMagazine762Sniper
+    - NCMagazine762Sniper
+    - NCMagazine762Sniper
+    - NCMagazine762Sniper
+    - RadioHandheldSecurity
+    belt:
+    - NCWeaponPistolP35
+  inhand:
+  - NCWeaponRifleNomadSniper
+
+- type: startingGear
+  id: NCEventProxyFieldMedicGear
+  equipment:
+    jumpsuit: ClothingUniformArmoredBusinessSuit
+    back: ClothingBackpackMedical
+    shoes: ClothingShoesBootsJack
+    eyes: ClothingEyesHudMedical
+    gloves: ClothingHandsGlovesNitrile
+    belt: ClothingBeltMedicalFilled
+    armor: ClothingOuterArmorNWN
+  storage:
+    back:
+    - NCMagazine11mmSMG
+    - NCMagazine11mmSMG
+    - NCMagazine11mmSMG
+    - NCMagazine11mmSMG
+    - NCWeaponPistolP35
+    - MedkitCombatFilled
+    - RadioHandheldSecurity
+  inhand:
+  - NCWeaponSMGShingen

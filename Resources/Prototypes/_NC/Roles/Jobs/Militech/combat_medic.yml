@@ -19,7 +19,7 @@
 - type: startingGear
   id: MilitechCombatMedicGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitParamedic
+    jumpsuit: ClothingUniformMilitech
     back: ClothingBackpackMedical
     shoes: ClothingShoesBootsJack
     eyes: ClothingEyesHudMedical
@@ -27,7 +27,7 @@
     gloves: ClothingHandsGlovesNitrile
     id: ParamedicPDA
     belt: ClothingBeltMedicalFilled
-    outerClothing: ClothingOuterArmorBasic
+    armor: ClothingOuterArmorMilitechBulletproof
   storage:
     back:
     - MedTekCartridge

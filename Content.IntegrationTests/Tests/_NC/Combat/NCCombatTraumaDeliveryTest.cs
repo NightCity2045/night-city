@@ -52,7 +52,7 @@ public sealed class NCCombatTraumaDeliveryTest : GameTest
     {
         var body = SSpawn("MobHuman");
         var armor = SSpawn("NCArmorTestLightArmorjack");
-        Assert.That(_inventory.TryEquip(body, armor, "outerClothing"), Is.True);
+        Assert.That(_inventory.TryEquip(body, armor, "armor"), Is.True);
 
         ProtoId<DamageTypePrototype> piercingId = "Piercing";
         var damage = new DamageSpecifier(_prototypes.Index(piercingId), 15);

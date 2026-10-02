@@ -128,6 +128,7 @@ public sealed partial class NCPhysiologySystem : EntitySystem
         physiology.Condition = NCPhysiologicalCondition.Stable;
         physiology.BrainFunction = 1f;
         physiology.TimeBelowCriticalPerfusion = TimeSpan.Zero;
+        physiology.TimeInClinicalDeath = TimeSpan.Zero;
         physiology.Irreversible = false;
         return true;
     }
@@ -285,11 +286,7 @@ public sealed partial class NCPhysiologySystem : EntitySystem
                 emergencySupport.BrainInjuryRateMultiplier,
                 profile);
             physiology.Irreversible |= vitalFunctions.BrainNonFunctional;
-            if (physiology.Irreversible)
-            {
-                SetDead(circulation, physiology);
-            }
-            else
+            if (!physiology.Irreversible)
             {
                 physiology.Condition = circulation.Perfusion <= profile.ArrestPerfusionThreshold
                     ? NCPhysiologicalCondition.ClinicalArrest
@@ -302,24 +299,42 @@ public sealed partial class NCPhysiologySystem : EntitySystem
                             ? NCPhysiologicalCondition.Compensating
                             : NCPhysiologicalCondition.Stable;
 
-                var consciousnessScore = Math.Clamp(
-                    MathF.Min(
-                        MathF.Min(circulation.Perfusion, physiology.Oxygenation),
-                        physiology.BrainFunction) -
-                    physiology.Shock * profile.ShockConsciousnessPenalty -
-                    MathF.Max(
-                        0f,
-                        MathF.Max(pharmacology.Sedation, pharmacology.Anesthesia) -
-                        pharmacology.Arousal),
-                    0f,
-                    1f);
-                physiology.Consciousness = ResolveConsciousness(consciousnessScore, profile);
-                if (physiology.Condition == NCPhysiologicalCondition.ClinicalArrest &&
-                    physiology.Consciousness < NCConsciousnessState.Comatose)
+                // Clinical death is reversible for a bounded period. The timer only measures continuous
+                // arrest, so restoring circulation before the deadline gives treatment a real recovery path.
+                if (physiology.Condition == NCPhysiologicalCondition.ClinicalArrest)
                 {
-                    physiology.Consciousness = NCConsciousnessState.Comatose;
+                    physiology.TimeInClinicalDeath += TimeSpan.FromSeconds(Math.Max(0d, elapsed.TotalSeconds));
+                    physiology.Irreversible = physiology.TimeInClinicalDeath >= profile.RevivableDeathDuration;
+                }
+                else
+                {
+                    physiology.TimeInClinicalDeath = TimeSpan.Zero;
+                }
+
+                if (!physiology.Irreversible)
+                {
+                    var consciousnessScore = Math.Clamp(
+                        MathF.Min(
+                            MathF.Min(circulation.Perfusion, physiology.Oxygenation),
+                            physiology.BrainFunction) -
+                        physiology.Shock * profile.ShockConsciousnessPenalty -
+                        MathF.Max(
+                            0f,
+                            MathF.Max(pharmacology.Sedation, pharmacology.Anesthesia) -
+                            pharmacology.Arousal),
+                        0f,
+                        1f);
+                    physiology.Consciousness = ResolveConsciousness(consciousnessScore, profile);
+                    if (physiology.Condition == NCPhysiologicalCondition.ClinicalArrest &&
+                        physiology.Consciousness < NCConsciousnessState.Comatose)
+                    {
+                        physiology.Consciousness = NCConsciousnessState.Comatose;
+                    }
                 }
             }
+
+            if (physiology.Irreversible)
+                SetDead(circulation, physiology);
         }
 
         circulation.LastEvaluation += elapsed;
@@ -506,8 +521,6 @@ public sealed partial class NCPhysiologySystem : EntitySystem
                 0f,
                 1f),
             directBrainFunction);
-        if (physiology.TimeBelowCriticalPerfusion >= profile.BrainDeathDelay)
-            physiology.Irreversible = true;
     }
 
     private static void SetDead(NCCirculationComponent circulation, NCPhysiologyComponent physiology)
@@ -524,14 +537,14 @@ public sealed partial class NCPhysiologySystem : EntitySystem
 
     private static MobState ToMobState(NCPhysiologyComponent physiology)
     {
-        if (physiology.Condition == NCPhysiologicalCondition.Dead ||
+        if (physiology.Condition is NCPhysiologicalCondition.Dead or
+            NCPhysiologicalCondition.ClinicalArrest ||
             physiology.Consciousness == NCConsciousnessState.BrainDead)
         {
             return MobState.Dead;
         }
 
-        if (physiology.Condition is NCPhysiologicalCondition.Critical or
-            NCPhysiologicalCondition.ClinicalArrest ||
+        if (physiology.Condition == NCPhysiologicalCondition.Critical ||
             physiology.Consciousness >= NCConsciousnessState.Unconscious)
         {
             return MobState.Critical;
@@ -594,6 +607,7 @@ public sealed partial class NCPhysiologySystem : EntitySystem
             profile.PainThresholds.Count != 5 ||
             profile.ShockThresholds.Count != 4 ||
             profile.BrainDeathDelay <= TimeSpan.Zero ||
+            profile.RevivableDeathDuration <= TimeSpan.Zero ||
             !IsStrictlyAscending(profile.PainThresholds) ||
             !IsStrictlyAscending(profile.ShockThresholds) ||
             profile.ArrestPerfusionThreshold < 0f ||

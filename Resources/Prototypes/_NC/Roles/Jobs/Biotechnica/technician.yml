@@ -19,12 +19,12 @@
 - type: startingGear
   id: BiotechnicaTechGear
   equipment:
-    jumpsuit: ClothingUniformJumpsuitEngineering
-    back: ClothingBackpackEngineering
-    shoes: ClothingShoesBootsWork
-    head: ClothingHeadHatHardhatYellow
-    eyes: ClothingEyesGlassesMeson
-    gloves: ClothingHandsGlovesColorYellow
+    jumpsuit: ClothingUniformBiotech
+    back: ClothingBackpackBiotechnica
+    shoes: ClothingShoesBiotechnica
+    head: ClothingHeadHatBiotechCap
+    eyes: ClothingEyesGogglesBiotechnicaTech
+    gloves: ClothingHandsGlovesBiotechnica
     id: EngineerPDA
     belt: ClothingBeltUtilityEngineering
   storage:
