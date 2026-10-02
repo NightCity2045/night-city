@@ -44,11 +44,17 @@ public static class AstraConsumerLayout
                 if (!seen.Add(cursor.FullName))
                     break;
 
-                var manifest = Path.Combine(cursor.FullName, "AstraGraph", ManifestFileName);
-                var robust = Path.Combine(cursor.FullName, "RobustToolbox");
-                if (File.Exists(manifest) && Directory.Exists(robust))
+                if (IsConsumerRoot(cursor.FullName))
                 {
                     consumerRoot = cursor.FullName;
+                    return true;
+                }
+
+                // Watchdog keeps the checkout in a sibling source directory while launching from bin.
+                var source = Path.Combine(cursor.FullName, "source");
+                if (IsConsumerRoot(source))
+                {
+                    consumerRoot = Path.GetFullPath(source);
                     return true;
                 }
 
@@ -58,6 +64,13 @@ public static class AstraConsumerLayout
 
         consumerRoot = string.Empty;
         return false;
+    }
+
+    private static bool IsConsumerRoot(string path)
+    {
+        var manifest = Path.Combine(path, "AstraGraph", ManifestFileName);
+        var robust = Path.Combine(path, "RobustToolbox");
+        return File.Exists(manifest) && Directory.Exists(robust);
     }
 
     /// <summary>

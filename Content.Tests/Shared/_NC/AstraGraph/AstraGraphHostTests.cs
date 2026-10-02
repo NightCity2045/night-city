@@ -109,6 +109,21 @@ public sealed class AstraGraphHostTests
     }
 
     [Test]
+    public void Locate_FindsWatchdogSourceCheckoutBesideBin()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "astra-watchdog-" + Guid.NewGuid().ToString("N"));
+        var source = Path.Combine(root, "source");
+        var nested = Path.Combine(root, "bin", "Content.Server");
+        Directory.CreateDirectory(Path.Combine(source, "AstraGraph"));
+        Directory.CreateDirectory(Path.Combine(source, "RobustToolbox"));
+        Directory.CreateDirectory(nested);
+        File.WriteAllText(Path.Combine(source, "AstraGraph", "Compatibility.json"), "{}");
+
+        Assert.That(AstraConsumerLayout.TryLocate(new[] { nested }, out var found), Is.True);
+        Assert.That(found, Is.EqualTo(Path.GetFullPath(source)));
+    }
+
+    [Test]
     public void Checkout_RobustCommitMatchesCompatibilityManifest()
     {
         Assert.That(AstraConsumerLayout.TryLocate(out var root), Is.True, "Night City checkout was not found.");
