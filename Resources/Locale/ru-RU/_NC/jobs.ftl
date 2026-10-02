@@ -1,6 +1,3 @@
-job-name-passenger = Житель
-job-description-passenger = Постоянный житель Найт-Сити без назначенной должности.
-
 nc-character-department-title = Проживание и департамент
 nc-character-department-explanation = Выберите Жителя, чтобы остаться безработным, или департамент, чтобы начать с его стартовой должности.
 nc-character-department-apply = Устроиться
@@ -59,8 +56,6 @@ job-name-biotechnica-operative-lead = Руководитель оператив�
 job-description-biotechnica-operative-lead = Руководит корпоративными полевыми операциями.
 job-name-biotechnica-operative = Оперативник Biotechnica
 job-description-biotechnica-operative = Выполняет корпоративные полевые задания.
-job-name-biotechnica-rigger = Риггер Biotechnica
-job-description-biotechnica-rigger = Обслуживает дроны и полевую технику.
 job-name-biotechnica-botanist = Агроном Biotechnica
 job-description-biotechnica-botanist = Работает с дефицитными культурами и биопроизводством.
 job-name-biotechnica-med-tech = Медтехник Biotechnica
@@ -71,25 +66,6 @@ job-name-biotechnica-netrunner = Нетраннер Biotechnica
 job-description-biotechnica-netrunner = Ведёт корпоративные сетевые операции.
 job-name-biotechnica-paramedic = Парамедик Biotechnica
 job-description-biotechnica-paramedic = Оказывает полевую помощь корпоративным группам.
-
-job-name-militech-chief = Директор Militech
-job-description-militech-chief = Руководит операциями Militech в Найт-Сити.
-job-name-militech-operative-lead = Руководитель оперативников Militech
-job-description-militech-operative-lead = Командует полевыми группами Militech.
-job-name-militech-operative = Оперативник Militech
-job-description-militech-operative = Выполняет вооружённые корпоративные операции.
-job-name-militech-rigger = Риггер Militech
-job-description-militech-rigger = Обслуживает дроны, транспорт и полевые системы.
-job-name-militech-netrunner = Нетраннер Militech
-job-description-militech-netrunner = Ведёт военные сетевые операции.
-job-name-militech-security-specialist = Специалист безопасности Militech
-job-description-militech-security-specialist = Защищает корпоративный персонал и имущество.
-job-name-militech-combat-medic = Боевой медик Militech
-job-description-militech-combat-medic = Оказывает помощь под огнём.
-job-name-militech-tech = Техник Militech
-job-description-militech-tech = Обслуживает военную технику.
-job-name-militech-quartermaster = Квартирмейстер Militech
-job-description-militech-quartermaster = Контролирует дефицитное корпоративное снабжение.
 
 job-name-zhirafa-janitor = Работник санитарной службы Zhirafa
 job-description-zhirafa-janitor = Обслуживает улицы и городские пространства.

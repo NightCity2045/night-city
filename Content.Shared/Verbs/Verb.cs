@@ -178,10 +178,13 @@ namespace Content.Shared.Verbs
                 return otherVerb.Priority - Priority;
 
             // Then try use alphabetical verb categories. Uncategorized verbs always appear first.
-            if (Category?.Text != otherVerb.Category?.Text)
+            // NC-Edit-Start
+            // Category text is localized independently on the server and client, so identity must use the stable key.
+            if (Category?.LocalizationId != otherVerb.Category?.LocalizationId)
             {
-                return string.Compare(Category?.Text, otherVerb.Category?.Text, StringComparison.CurrentCulture);
+                return string.Compare(Category?.LocalizationId, otherVerb.Category?.LocalizationId, StringComparison.Ordinal);
             }
+            // NC-Edit-End
 
             // Then try use alphabetical verb text.
             if (Text != otherVerb.Text)

@@ -9,6 +9,13 @@ namespace Content.Shared.Verbs
     [Serializable, NetSerializable]
     public sealed class VerbCategory
     {
+        // NC-Edit-Start
+        /// <summary>
+        /// Stable localization key used to identify this category across client and server locales.
+        /// </summary>
+        public readonly string LocalizationId;
+        // NC-Edit-End
+
         public readonly string Text;
 
         public readonly SpriteSpecifier? Icon;
@@ -30,6 +37,7 @@ namespace Content.Shared.Verbs
 
         public VerbCategory(string text, string? icon, bool iconsOnly = false)
         {
+            LocalizationId = text; // NC
             Text = Loc.GetString(text);
             Icon = icon == null ? null : new SpriteSpecifier.Texture(new(icon));
             IconsOnly = iconsOnly;

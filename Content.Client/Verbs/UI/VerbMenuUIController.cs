@@ -139,7 +139,7 @@ namespace Content.Client.Verbs.UI
 
             foreach (var cat in ExtraCategories)
             {
-                extras.Add(cat.Text);
+                extras.Add(cat.LocalizationId); // NC
             }
 
             foreach (var verb in CurrentVerbs)
@@ -150,13 +150,13 @@ namespace Content.Client.Verbs.UI
                     _context.AddElement(popup, element);
                 }
                 // Add the category if it's not an extra (this is to avoid shuffling if we're filling from server verbs response).
-                else if (!extras.Contains(verb.Category.Text) && listedCategories.Add(verb.Category.Text))
+                else if (!extras.Contains(verb.Category.LocalizationId) && listedCategories.Add(verb.Category.LocalizationId)) // NC
                     AddVerbCategory(verb.Category, popup);
             }
 
             foreach (var category in ExtraCategories)
             {
-                if (listedCategories.Add(category.Text))
+                if (listedCategories.Add(category.LocalizationId)) // NC
                     AddVerbCategory(category, popup);
             }
 
@@ -173,15 +173,19 @@ namespace Content.Client.Verbs.UI
             var drawIcons = false;
             foreach (var verb in CurrentVerbs)
             {
-                if (verb.Category?.Text == category.Text)
+                if (verb.Category?.LocalizationId == category.LocalizationId) // NC
                 {
                     verbsInCategory.Add(verb);
                     drawIcons = drawIcons || verb.Icon != null || verb.IconEntity != null;
                 }
             }
 
-            if (verbsInCategory.Count == 0 && !ExtraCategories.Contains(category))
+            // NC-Edit-Start
+            // Networked and local category objects are distinct instances; compare their stable localization keys.
+            if (verbsInCategory.Count == 0 &&
+                ExtraCategories.All(extra => extra.LocalizationId != category.LocalizationId))
                 return;
+            // NC-Edit-End
 
             var style = verbsInCategory.FirstOrDefault()?.TextStyleClass ?? Verb.DefaultTextStyleClass;
             var element = new VerbMenuElement(category, style);

@@ -76,7 +76,7 @@ namespace Content.Client.Verbs.UI
             });
         }
 
-        public VerbMenuElement(VerbCategory category, string styleClass) : base(category.Text)
+        public VerbMenuElement(VerbCategory category, string styleClass) : base(Loc.GetString(category.LocalizationId)) // NC
         {
             Label.SetOnlyStyleClass(styleClass);
 

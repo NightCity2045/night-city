@@ -7,6 +7,9 @@
   id: NCBaseWeaponSMG9x19
   parent: [ BaseWeaponSubMachineGun, BaseGunWieldable ]
   components:
+  - type: GunWieldBonus
+    minAngle: -1
+    maxAngle: -14
   - type: ItemSlots
     slots:
       gun_magazine:
@@ -33,6 +36,9 @@
     fireRate: 7
     cameraRecoilScalar: 1.4
     angleIncrease: 4
+  - type: GunWieldBonus
+    minAngle: -1
+    maxAngle: -14
   - type: ItemSlots
     slots:
       gun_magazine:
