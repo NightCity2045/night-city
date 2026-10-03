@@ -1,0 +1,244 @@
+diff --git a/AstraGraph.Content.Shared/AstraGraph.Content.Shared.csproj b/AstraGraph.Content.Shared/AstraGraph.Content.Shared.csproj
+new file mode 100644
+index 0000000..8a0db79
+--- /dev/null
++++ b/AstraGraph.Content.Shared/AstraGraph.Content.Shared.csproj
+@@ -0,0 +1,8 @@
++<Project Sdk="Microsoft.NET.Sdk">
++  <PropertyGroup>
++    <TargetFrameworks></TargetFrameworks>
++    <TargetFramework>net10.0</TargetFramework>
++    <AssemblyName>Content.AstraGraph.Shared</AssemblyName>
++    <RootNamespace>Content.AstraGraph</RootNamespace>
++  </PropertyGroup>
++</Project>
+diff --git a/AstraGraph.Content.Shared/AstraPackage.cs b/AstraGraph.Content.Shared/AstraPackage.cs
+new file mode 100644
+index 0000000..c1ad5dd
+--- /dev/null
++++ b/AstraGraph.Content.Shared/AstraPackage.cs
+@@ -0,0 +1,42 @@
++// SPDX-FileCopyrightText: 2026 Astro
++// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
++// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
++
++namespace Content.AstraGraph.Portable;
++
++public enum AstraExecutionSide : byte
++{
++    Shared,
++    Predicted,
++    Client
++}
++
++public readonly record struct AstraPackageIdentity(
++    Guid GraphId,
++    Guid RevisionId,
++    AstraExecutionSide Side,
++    int ActivationTick,
++    ulong BindingCatalogHash,
++    ulong SchemaHash);
++
++/// <summary>
++/// Immutable validated program package. Source documents and CLR metadata never cross into the client runtime.
++/// </summary>
++public sealed class AstraPackage
++{
++    public AstraPackageIdentity Identity { get; }
++    public byte[] Bytecode { get; }
++
++    public AstraPackage(AstraPackageIdentity identity, byte[] bytecode)
++    {
++        Identity = identity;
++        Bytecode = bytecode;
++    }
++}
++
++public readonly record struct AstraPackageManifestEntry(
++    AstraPackageIdentity Identity,
++    int EncodedLength,
++    ulong ContentHash);
+diff --git a/AstraGraph.Content.Shared/AstraPackageCodec.cs b/AstraGraph.Content.Shared/AstraPackageCodec.cs
+new file mode 100644
+index 0000000..befd946
+--- /dev/null
++++ b/AstraGraph.Content.Shared/AstraPackageCodec.cs
+@@ -0,0 +1,151 @@
++// SPDX-FileCopyrightText: 2026 Astro
++// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
++// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
++
++using System.Buffers.Binary;
++
++namespace Content.AstraGraph.Portable;
++
++/// <summary>
++/// Bounded binary package codec used by sandboxed clients. It intentionally has no JSON, stream, filesystem,
++/// reflection, crypto, or networking dependency.
++/// </summary>
++public static class AstraPackageCodec
++{
++    public const uint Magic = 0x41535452;
++    public const byte FormatVersion = 1;
++    public const int HeaderSize = 64;
++    public const int MaxBytecodeBytes = 8 * 1024 * 1024;
++
++    public static bool TryEncode(AstraPackage package, out byte[] encoded)
++    {
++        encoded = [];
++        if (package.Bytecode.Length > MaxBytecodeBytes)
++            return false;
++
++        encoded = new byte[HeaderSize + package.Bytecode.Length];
++        var span = encoded.AsSpan();
++        BinaryPrimitives.WriteUInt32LittleEndian(span, Magic);
++        span[4] = FormatVersion;
++        span[5] = (byte) package.Identity.Side;
++        package.Identity.GraphId.TryWriteBytes(span[8..24]);
++        package.Identity.RevisionId.TryWriteBytes(span[24..40]);
++        BinaryPrimitives.WriteInt32LittleEndian(span[40..44], package.Identity.ActivationTick);
++        BinaryPrimitives.WriteUInt64LittleEndian(span[44..52], package.Identity.BindingCatalogHash);
++        BinaryPrimitives.WriteUInt64LittleEndian(span[52..60], package.Identity.SchemaHash);
++        BinaryPrimitives.WriteInt32LittleEndian(span[60..64], package.Bytecode.Length);
++        package.Bytecode.CopyTo(span[HeaderSize..]);
++        return true;
++    }
++
++    public static bool TryDecode(ReadOnlySpan<byte> encoded, out AstraPackage? package)
++    {
++        package = null;
++        if (encoded.Length < HeaderSize ||
++            BinaryPrimitives.ReadUInt32LittleEndian(encoded) != Magic ||
++            encoded[4] != FormatVersion ||
++            encoded[5] > (byte) AstraExecutionSide.Client)
++        {
++            return false;
++        }
++
++        var payloadLength = BinaryPrimitives.ReadInt32LittleEndian(encoded[60..64]);
++        if (payloadLength < 0 || payloadLength > MaxBytecodeBytes || encoded.Length != HeaderSize + payloadLength)
++            return false;
++
++        var identity = new AstraPackageIdentity(
++            new Guid(encoded[8..24]),
++            new Guid(encoded[24..40]),
++            (AstraExecutionSide) encoded[5],
++            BinaryPrimitives.ReadInt32LittleEndian(encoded[40..44]),
++            BinaryPrimitives.ReadUInt64LittleEndian(encoded[44..52]),
++            BinaryPrimitives.ReadUInt64LittleEndian(encoded[52..60]));
++
++        package = new AstraPackage(identity, encoded[HeaderSize..].ToArray());
++        return true;
++    }
++
++    public static ulong ComputeContentHash(ReadOnlySpan<byte> data)
++    {
++        const ulong offset = 14695981039346656037UL;
++        const ulong prime = 1099511628211UL;
++        var hash = offset;
++        foreach (var value in data)
++        {
++            hash ^= value;
++            hash *= prime;
++        }
++
++        return hash;
++    }
++}
+diff --git a/AstraGraph.Content.Client/AstraGraph.Content.Client.csproj b/AstraGraph.Content.Client/AstraGraph.Content.Client.csproj
+new file mode 100644
+index 0000000..97a63fc
+--- /dev/null
++++ b/AstraGraph.Content.Client/AstraGraph.Content.Client.csproj
+@@ -0,0 +1,16 @@
++<Project Sdk="Microsoft.NET.Sdk">
++  <PropertyGroup>
++    <TargetFrameworks></TargetFrameworks>
++    <TargetFramework>net10.0</TargetFramework>
++    <AssemblyName>Content.AstraGraph.Client</AssemblyName>
++    <RootNamespace>Content.AstraGraph</RootNamespace>
++  </PropertyGroup>
++  <ItemGroup>
++    <ProjectReference Include="..\AstraGraph.Content.Shared\AstraGraph.Content.Shared.csproj" />
++    <ProjectReference Include="$(RobustToolboxRoot)\Robust.Shared\Robust.Shared.csproj"
++                      Condition="'$(RobustToolboxRoot)' != '' and Exists('$(RobustToolboxRoot)\Robust.Shared\Robust.Shared.csproj')" />
++    <ProjectReference Include="$(RobustToolboxRoot)\Robust.Client\Robust.Client.csproj"
++                      Condition="'$(RobustToolboxRoot)' != '' and Exists('$(RobustToolboxRoot)\Robust.Client\Robust.Client.csproj')" />
++  </ItemGroup>
++</Project>
+diff --git a/AstraGraph.Content.Client/ClientAstraGraphSystem.cs b/AstraGraph.Content.Client/ClientAstraGraphSystem.cs
+new file mode 100644
+index 0000000..6f3c520
+--- /dev/null
++++ b/AstraGraph.Content.Client/ClientAstraGraphSystem.cs
+@@ -0,0 +1,105 @@
++// SPDX-FileCopyrightText: 2026 Astro
++// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
++// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
++
++using Content.AstraGraph.Portable;
++using Robust.Client.UserInterface;
++using Robust.Shared.GameObjects;
++using Robust.Shared.IoC;
++using Robust.Shared.Timing;
++
++namespace Content.AstraGraph.Robust.Client;
++
++/// <summary>
++/// Sandboxed client host. It only receives validated portable packages and activates them on simulation ticks.
++/// Authoring, compilation, persistence, reflection, and HTTP remain server/tool responsibilities.
++/// </summary>
++public sealed class ClientAstraGraphSystem : EntitySystem
++{
++    [Dependency] private readonly IGameTiming _timing = default!;
++    [Dependency] private readonly IUriOpener _uriOpener = default!;
++
++    private readonly Dictionary<Guid, AstraPackage> _active = new();
++    private readonly Dictionary<Guid, AstraPackage> _staged = new();
++
++    public IReadOnlyDictionary<Guid, AstraPackage> ActivePackages => _active;
++
++    public bool TryStagePackage(ReadOnlySpan<byte> encoded, ulong expectedHash = 0)
++    {
++        if (expectedHash != 0 && AstraPackageCodec.ComputeContentHash(encoded) != expectedHash)
++            return false;
++
++        if (!AstraPackageCodec.TryDecode(encoded, out var package) || package == null)
++            return false;
++
++        _staged[package.Identity.GraphId] = package;
++        return true;
++    }
++
++    public override void Update(float frameTime)
++    {
++        base.Update(frameTime);
++        var tick = (int) _timing.CurTick.Value;
++        if (_staged.Count == 0)
++            return;
++
++        List<Guid>? activated = null;
++        foreach (var (graphId, package) in _staged)
++        {
++            if (package.Identity.ActivationTick > tick)
++                continue;
++
++            _active[graphId] = package;
++            (activated ??= []).Add(graphId);
++        }
++
++        if (activated == null)
++            return;
++
++        foreach (var graphId in activated)
++            _staged.Remove(graphId);
++    }
++
++    public void OpenStudio(Uri uri)
++    {
++        if (uri.Scheme is not ("https" or "http"))
++            return;
++
++        _uriOpener.OpenUri(uri);
++    }
++}

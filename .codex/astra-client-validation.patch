@@ -1,0 +1,45 @@
+diff --git a/AstraGraph.Content.Client/ClientAstraGraphSystem.cs b/AstraGraph.Content.Client/ClientAstraGraphSystem.cs
+--- a/AstraGraph.Content.Client/ClientAstraGraphSystem.cs
++++ b/AstraGraph.Content.Client/ClientAstraGraphSystem.cs
+@@ -89,12 +89,13 @@ public sealed class ClientAstraGraphSystem : EntitySystem
+         var missing = new List<Guid>();
+         foreach (var entry in message.Entries)
+         {
+-            _expected[entry.GraphId] = entry;
+-            if (!_active.TryGetValue(entry.GraphId, out var active) ||
+-                active.Identity.RevisionId != entry.RevisionId)
+-            {
+-                missing.Add(entry.GraphId);
+-            }
++            if (_active.TryGetValue(entry.GraphId, out var active) &&
++                active.Identity.RevisionId == entry.RevisionId)
++                continue;
++
++            _expected[entry.GraphId] = entry;
++            missing.Add(entry.GraphId);
+         }
+@@ -111,9 +112,20 @@ public sealed class ClientAstraGraphSystem : EntitySystem
+     private void OnPackage(AstraPackageResponse message)
+     {
+         if (!_expected.TryGetValue(message.GraphId, out var expected) ||
+             expected.RevisionId != message.RevisionId ||
+-            !TryStagePackage(message.Encoded, message.ContentHash))
++            expected.ContentHash != message.ContentHash ||
++            AstraPackageCodec.ComputeContentHash(message.Encoded) != message.ContentHash ||
++            !AstraPackageCodec.TryDecode(message.Encoded, out var package) ||
++            package == null)
+         {
+             return;
+         }
++
++        var identity = package.Identity;
++        if (identity.GraphId != expected.GraphId || identity.RevisionId != expected.RevisionId ||
++            (byte) identity.Side != expected.Side || identity.ActivationTick != expected.ActivationTick ||
++            identity.BindingCatalogHash != expected.BindingCatalogHash || identity.SchemaHash != expected.SchemaHash)
++        {
++            return;
++        }
++
++        _staged[identity.GraphId] = package;
+ 
+         _expected.Remove(message.GraphId);

@@ -1,0 +1,19 @@
+diff --git a/tests/AstraGraph.Portable.Tests/AstraPackageCodecTests.cs b/tests/AstraGraph.Portable.Tests/AstraPackageCodecTests.cs
+--- a/tests/AstraGraph.Portable.Tests/AstraPackageCodecTests.cs
++++ b/tests/AstraGraph.Portable.Tests/AstraPackageCodecTests.cs
+@@ -46,9 +46,12 @@ public sealed class AstraPackageCodecTests
+     public void ContentHashIsDeterministic()
+     {
+         byte[] data = [10, 20, 30];
+-        Assert.That(AstraPackageCodec.ComputeContentHash(data),
+-            Is.EqualTo(AstraPackageCodec.ComputeContentHash(data)));
+-        Assert.That(AstraPackageCodec.ComputeContentHash(data),
+-            Is.Not.EqualTo(AstraPackageCodec.ComputeContentHash([10, 20, 31])));
++        var first = AstraPackageCodec.ComputeContentHash(data);
++        var second = AstraPackageCodec.ComputeContentHash(data);
++        var different = AstraPackageCodec.ComputeContentHash([10, 20, 31]);
++
++        Assert.That(first, Is.EqualTo(second));
++        Assert.That(first, Is.Not.EqualTo(different));
+     }
+ }

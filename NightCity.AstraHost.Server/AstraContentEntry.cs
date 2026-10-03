@@ -23,7 +23,8 @@ public static class AstraContentEntry
         AstraGraphAssemblyLoad.Load(
             dependencies,
             typeof(ServerAstraGraphSystem).Assembly,
-            typeof(ServerAstraGraphSystem).BaseType?.Assembly);
+            typeof(ServerAstraGraphSystem).BaseType?.Assembly,
+            typeof(ServerAstraPackageSystem).Assembly);
     }
 
     public static void InstallSchemas(Robust.Shared.GameObjects.IComponentFactory factory, IDependencyCollection dependencies)

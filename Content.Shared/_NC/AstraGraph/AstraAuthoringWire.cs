@@ -20,6 +20,7 @@ public sealed class MsgAstraStudioLaunch : NetMessage
     public bool IsResponse;
     public bool Granted;
     public string Token = string.Empty;
+    public string StudioUrl = string.Empty;
 
     public override void ReadFromBuffer(NetIncomingMessage buffer, IRobustSerializer serializer)
     {
@@ -27,6 +28,7 @@ public sealed class MsgAstraStudioLaunch : NetMessage
         IsResponse = buffer.ReadBoolean();
         Granted = buffer.ReadBoolean();
         Token = buffer.ReadString();
+        StudioUrl = buffer.ReadString();
     }
 
     public override void WriteToBuffer(NetOutgoingMessage buffer, IRobustSerializer serializer)
@@ -35,6 +37,7 @@ public sealed class MsgAstraStudioLaunch : NetMessage
         buffer.Write(IsResponse);
         buffer.Write(Granted);
         buffer.Write(Token);
+        buffer.Write(StudioUrl);
     }
 }
 

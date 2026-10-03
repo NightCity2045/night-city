@@ -6,10 +6,10 @@
     <LangVersion>latest</LangVersion>
     <!-- The module loader typechecks every DLL whose name starts with Content. This assembly must not. -->
     <AssemblyName>Content.NightCity.AstraHost.Shared</AssemblyName>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\RobustToolbox\Robust.Shared\Robust.Shared.csproj" />
-    <ProjectReference Include="..\AstraGraph\AstraGraph.Robust.Shared\AstraGraph.Robust.Shared.csproj" />
-    <ProjectReference Include="..\AstraGraph\AstraGraph.Editor.Protocol\AstraGraph.Editor.Protocol.csproj" />
+    <Compile Include="AstraWireReply.cs" />
   </ItemGroup>
 </Project>

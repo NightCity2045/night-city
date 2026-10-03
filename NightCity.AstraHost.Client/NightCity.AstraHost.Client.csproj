@@ -5,13 +5,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <AssemblyName>Content.NightCity.AstraHost.Client</AssemblyName>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
-  <Import Project="..\RobustToolbox\Imports\WebView.props" />
   <ItemGroup>
     <ProjectReference Include="..\RobustToolbox\Robust.Shared\Robust.Shared.csproj" />
     <ProjectReference Include="..\RobustToolbox\Robust.Client\Robust.Client.csproj" />
     <ProjectReference Include="..\NightCity.AstraHost.Shared\NightCity.AstraHost.Shared.csproj" />
-    <ProjectReference Include="..\AstraGraph\AstraGraph.Robust.Client\AstraGraph.Robust.Client.csproj" />
-    <ProjectReference Include="..\AstraGraph\AstraGraph.Editor.Protocol\AstraGraph.Editor.Protocol.csproj" />
+    <ProjectReference Include="..\AstraGraph\AstraGraph.Content.Client\AstraGraph.Content.Client.csproj" />
+    <Compile Include="AstraContentEntry.cs" />
+    <Compile Include="AstraStudioBridge.cs" />
   </ItemGroup>
 </Project>

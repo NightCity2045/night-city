@@ -7,9 +7,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Content.Server.Administration;
 using Content.Server.Administration.Managers;
+using Content.Shared.CCVar;
 using Content.Shared._NC.AstraGraph;
 using Robust.Server.Player;
 using Robust.Shared.Asynchronous;
+using Robust.Shared.Configuration;
 using Robust.Shared.Network;
 
 namespace Content.Server._NC.AstraGraph;
@@ -23,6 +25,7 @@ public sealed partial class AstraServerIntegrationSystem : EntitySystem
     [Dependency] private IPlayerManager _players = default!;
     [Dependency] private IServerNetManager _net = default!;
     [Dependency] private ITaskManager _tasks = default!;
+    [Dependency] private IConfigurationManager _cfg = default!;
 
     private readonly Dictionary<NetUserId, INetChannel> _studioChannels = new();
 
@@ -61,7 +64,10 @@ public sealed partial class AstraServerIntegrationSystem : EntitySystem
 
         var channel = message.MsgChannel;
         var session = _players.GetSessionByChannel(channel);
-        var token = AstraServerRuntime.IssueLaunchToken(session);
+        var studioUrl = _cfg.GetCVar(CCVars.NCAstraStudioUrl);
+        var validUrl = Uri.TryCreate(studioUrl, UriKind.Absolute, out var parsed) &&
+                       parsed.Scheme is "https" or "http";
+        var token = validUrl ? AstraServerRuntime.IssueLaunchToken(session) : null;
         if (token != null)
             _studioChannels[session.UserId] = channel;
 
@@ -70,7 +76,10 @@ public sealed partial class AstraServerIntegrationSystem : EntitySystem
             RequestId = message.RequestId,
             IsResponse = true,
             Granted = token != null,
-            Token = token ?? string.Empty
+            Token = token ?? string.Empty,
+            StudioUrl = token == null
+                ? string.Empty
+                : $"{studioUrl.TrimEnd('/')}#astra-token={Uri.EscapeDataString(token)}"
         }, channel);
     }
 

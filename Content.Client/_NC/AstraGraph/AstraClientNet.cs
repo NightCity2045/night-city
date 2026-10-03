@@ -21,18 +21,11 @@ public sealed partial class AstraClientNet
     public void Initialize()
     {
         _net.RegisterNetMessage<MsgAstraStudioLaunch>(OnStudioLaunch);
-        _net.RegisterNetMessage<MsgAstraAuthoring>(OnAuthoring);
     }
 
     private void OnStudioLaunch(MsgAstraStudioLaunch message)
     {
         if (_systems.TryGetEntitySystem(out AstraClientIntegrationSystem? system))
             system.OnStudioLaunch(message);
-    }
-
-    private void OnAuthoring(MsgAstraAuthoring message)
-    {
-        if (_systems.TryGetEntitySystem(out AstraClientIntegrationSystem? system))
-            system.OnAuthoring(message);
     }
 }

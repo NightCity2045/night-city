@@ -1,0 +1,273 @@
+diff --git a/AstraGraph.Content.Network/AstraGraph.Content.Network.csproj b/AstraGraph.Content.Network/AstraGraph.Content.Network.csproj
+new file mode 100644
+--- /dev/null
++++ b/AstraGraph.Content.Network/AstraGraph.Content.Network.csproj
+@@ -0,0 +1,14 @@
++<Project Sdk="Microsoft.NET.Sdk">
++  <PropertyGroup>
++    <TargetFrameworks></TargetFrameworks>
++    <TargetFramework>net10.0</TargetFramework>
++    <AssemblyName>Content.AstraGraph.Network</AssemblyName>
++    <RootNamespace>Content.AstraGraph</RootNamespace>
++  </PropertyGroup>
++  <ItemGroup>
++    <ProjectReference Include="..\AstraGraph.Content.Shared\AstraGraph.Content.Shared.csproj" />
++    <ProjectReference Include="$(RobustToolboxRoot)\Robust.Shared\Robust.Shared.csproj"
++                      Condition="'$(RobustToolboxRoot)' != '' and Exists('$(RobustToolboxRoot)\Robust.Shared\Robust.Shared.csproj')" />
++  </ItemGroup>
++</Project>
+diff --git a/AstraGraph.Content.Network/AstraPackageMessages.cs b/AstraGraph.Content.Network/AstraPackageMessages.cs
+new file mode 100644
+--- /dev/null
++++ b/AstraGraph.Content.Network/AstraPackageMessages.cs
+@@ -0,0 +1,65 @@
++// SPDX-FileCopyrightText: 2026 Astro
++// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
++// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
++
++using Robust.Shared.GameObjects;
++using Robust.Shared.Serialization;
++
++namespace Content.AstraGraph.Network;
++
++public static class AstraNetworkProtocol
++{
++    public const int Version = 1;
++}
++
++[Serializable, NetSerializable]
++public readonly record struct AstraNetManifestEntry(
++    Guid GraphId,
++    Guid RevisionId,
++    byte Side,
++    int ActivationTick,
++    ulong BindingCatalogHash,
++    ulong SchemaHash,
++    int EncodedLength,
++    ulong ContentHash);
++
++[Serializable, NetSerializable]
++public sealed class AstraManifestRequest : EntityEventArgs;
++
++[Serializable, NetSerializable]
++public sealed class AstraManifestResponse(int protocolVersion, List<AstraNetManifestEntry> entries) : EntityEventArgs
++{
++    public int ProtocolVersion { get; } = protocolVersion;
++    public List<AstraNetManifestEntry> Entries { get; } = entries;
++}
++
++[Serializable, NetSerializable]
++public sealed class AstraPackageRequest(List<Guid> graphIds) : EntityEventArgs
++{
++    public List<Guid> GraphIds { get; } = graphIds;
++}
++
++[Serializable, NetSerializable]
++public sealed class AstraPackageResponse(Guid graphId, Guid revisionId, ulong contentHash, byte[] encoded) : EntityEventArgs
++{
++    public Guid GraphId { get; } = graphId;
++    public Guid RevisionId { get; } = revisionId;
++    public ulong ContentHash { get; } = contentHash;
++    public byte[] Encoded { get; } = encoded;
++}
++
++[Serializable, NetSerializable]
++public sealed class AstraClientReady(List<Guid> revisions) : EntityEventArgs
++{
++    public List<Guid> Revisions { get; } = revisions;
++}
+diff --git a/AstraGraph.Content.Server/AstraGraph.Content.Server.csproj b/AstraGraph.Content.Server/AstraGraph.Content.Server.csproj
+new file mode 100644
+--- /dev/null
++++ b/AstraGraph.Content.Server/AstraGraph.Content.Server.csproj
+@@ -0,0 +1,16 @@
++<Project Sdk="Microsoft.NET.Sdk">
++  <PropertyGroup>
++    <TargetFrameworks></TargetFrameworks>
++    <TargetFramework>net10.0</TargetFramework>
++    <AssemblyName>Content.AstraGraph.Server</AssemblyName>
++    <RootNamespace>Content.AstraGraph</RootNamespace>
++  </PropertyGroup>
++  <ItemGroup>
++    <ProjectReference Include="..\AstraGraph.Content.Shared\AstraGraph.Content.Shared.csproj" />
++    <ProjectReference Include="..\AstraGraph.Content.Network\AstraGraph.Content.Network.csproj" />
++    <ProjectReference Include="$(RobustToolboxRoot)\Robust.Shared\Robust.Shared.csproj"
++                      Condition="'$(RobustToolboxRoot)' != '' and Exists('$(RobustToolboxRoot)\Robust.Shared\Robust.Shared.csproj')" />
++    <ProjectReference Include="$(RobustToolboxRoot)\Robust.Server\Robust.Server.csproj"
++                      Condition="'$(RobustToolboxRoot)' != '' and Exists('$(RobustToolboxRoot)\Robust.Server\Robust.Server.csproj')" />
++  </ItemGroup>
++</Project>
+diff --git a/AstraGraph.Content.Server/ServerAstraPackageSystem.cs b/AstraGraph.Content.Server/ServerAstraPackageSystem.cs
+new file mode 100644
+--- /dev/null
++++ b/AstraGraph.Content.Server/ServerAstraPackageSystem.cs
+@@ -0,0 +1,102 @@
++// SPDX-FileCopyrightText: 2026 Astro
++// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
++// SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
++
++using Content.AstraGraph.Network;
++using Content.AstraGraph.Portable;
++using Robust.Shared.GameObjects;
++
++namespace Content.AstraGraph.Robust.Server;
++
++/// <summary>
++/// Authoritative distributor for validated portable packages. Compilation and persistence feed this system;
++/// clients can only request immutable revisions already accepted by the server.
++/// </summary>
++public sealed class ServerAstraPackageSystem : EntitySystem
++{
++    private readonly Dictionary<Guid, PublishedPackage> _packages = new();
++
++    public override void Initialize()
++    {
++        base.Initialize();
++        SubscribeNetworkEvent<AstraManifestRequest>(OnManifestRequest);
++        SubscribeNetworkEvent<AstraPackageRequest>(OnPackageRequest);
++        SubscribeNetworkEvent<AstraClientReady>(OnClientReady);
++    }
++
++    public bool TryPublish(AstraPackage package)
++    {
++        if (!AstraPackageCodec.TryEncode(package, out var encoded))
++            return false;
++
++        _packages[package.Identity.GraphId] = new PublishedPackage(
++            package.Identity,
++            encoded,
++            AstraPackageCodec.ComputeContentHash(encoded));
++        return true;
++    }
++
++    private void OnManifestRequest(AstraManifestRequest message, EntitySessionEventArgs args)
++    {
++        var entries = new List<AstraNetManifestEntry>(_packages.Count);
++        foreach (var package in _packages.Values)
++        {
++            var identity = package.Identity;
++            entries.Add(new AstraNetManifestEntry(
++                identity.GraphId,
++                identity.RevisionId,
++                (byte) identity.Side,
++                identity.ActivationTick,
++                identity.BindingCatalogHash,
++                identity.SchemaHash,
++                package.Encoded.Length,
++                package.ContentHash));
++        }
++
++        RaiseNetworkEvent(new AstraManifestResponse(AstraNetworkProtocol.Version, entries), args.SenderSession);
++    }
++
++    private void OnPackageRequest(AstraPackageRequest message, EntitySessionEventArgs args)
++    {
++        foreach (var graphId in message.GraphIds)
++        {
++            if (!_packages.TryGetValue(graphId, out var package))
++                continue;
++
++            RaiseNetworkEvent(new AstraPackageResponse(
++                graphId,
++                package.Identity.RevisionId,
++                package.ContentHash,
++                package.Encoded), args.SenderSession);
++        }
++    }
++
++    private void OnClientReady(AstraClientReady message, EntitySessionEventArgs args)
++    {
++        // Readiness is deliberately a network boundary only. Activation remains tick-authoritative.
++    }
++
++    private sealed record PublishedPackage(AstraPackageIdentity Identity, byte[] Encoded, ulong ContentHash);
++}
+diff --git a/AstraGraph.Content.Client/AstraGraph.Content.Client.csproj b/AstraGraph.Content.Client/AstraGraph.Content.Client.csproj
+--- a/AstraGraph.Content.Client/AstraGraph.Content.Client.csproj
++++ b/AstraGraph.Content.Client/AstraGraph.Content.Client.csproj
+@@ -7,6 +7,7 @@
+   </PropertyGroup>
+   <ItemGroup>
+     <ProjectReference Include="..\AstraGraph.Content.Shared\AstraGraph.Content.Shared.csproj" />
++    <ProjectReference Include="..\AstraGraph.Content.Network\AstraGraph.Content.Network.csproj" />
+     <ProjectReference Include="$(RobustToolboxRoot)\Robust.Shared\Robust.Shared.csproj"
+                       Condition="'$(RobustToolboxRoot)' != '' and Exists('$(RobustToolboxRoot)\Robust.Shared\Robust.Shared.csproj')" />
+diff --git a/AstraGraph.Content.Client/ClientAstraGraphSystem.cs b/AstraGraph.Content.Client/ClientAstraGraphSystem.cs
+--- a/AstraGraph.Content.Client/ClientAstraGraphSystem.cs
++++ b/AstraGraph.Content.Client/ClientAstraGraphSystem.cs
+@@ -3,6 +3,7 @@
+ // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+ 
++using Content.AstraGraph.Network;
+ using Content.AstraGraph.Portable;
+ using Robust.Client.UserInterface;
+ using Robust.Shared.GameObjects;
+@@ -20,10 +21,19 @@ public sealed class ClientAstraGraphSystem : EntitySystem
+     private readonly Dictionary<Guid, AstraPackage> _active = new();
+     private readonly Dictionary<Guid, AstraPackage> _staged = new();
++    private readonly Dictionary<Guid, AstraNetManifestEntry> _expected = new();
+ 
+     public IReadOnlyDictionary<Guid, AstraPackage> ActivePackages => _active;
+ 
++    public override void Initialize()
++    {
++        base.Initialize();
++        SubscribeNetworkEvent<AstraManifestResponse>(OnManifest);
++        SubscribeNetworkEvent<AstraPackageResponse>(OnPackage);
++        RaiseNetworkEvent(new AstraManifestRequest());
++    }
++
+     public bool TryStagePackage(ReadOnlySpan<byte> encoded, ulong expectedHash = 0)
+     {
+         if (expectedHash != 0 && AstraPackageCodec.ComputeContentHash(encoded) != expectedHash)
+@@ -68,6 +78,48 @@ public sealed class ClientAstraGraphSystem : EntitySystem
+         _uriOpener.OpenUri(uri);
+     }
++
++    private void OnManifest(AstraManifestResponse message)
++    {
++        if (message.ProtocolVersion != AstraNetworkProtocol.Version)
++            return;
++
++        _expected.Clear();
++        var missing = new List<Guid>();
++        foreach (var entry in message.Entries)
++        {
++            _expected[entry.GraphId] = entry;
++            if (!_active.TryGetValue(entry.GraphId, out var active) ||
++                active.Identity.RevisionId != entry.RevisionId)
++            {
++                missing.Add(entry.GraphId);
++            }
++        }
++
++        if (missing.Count == 0)
++        {
++            SendReady();
++            return;
++        }
++
++        RaiseNetworkEvent(new AstraPackageRequest(missing));
++    }
++
++    private void OnPackage(AstraPackageResponse message)
++    {
++        if (!_expected.TryGetValue(message.GraphId, out var expected) ||
++            expected.RevisionId != message.RevisionId ||
++            !TryStagePackage(message.Encoded, message.ContentHash))
++        {
++            return;
++        }
++
++        _expected.Remove(message.GraphId);
++        if (_expected.Count == 0)
++            SendReady();
++    }
++
++    private void SendReady()
++    {
++        var revisions = _staged.Values.Select(package => package.Identity.RevisionId).ToList();
++        revisions.AddRange(_active.Values.Select(package => package.Identity.RevisionId));
++        RaiseNetworkEvent(new AstraClientReady(revisions));
++    }
+ }

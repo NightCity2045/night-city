@@ -1,0 +1,25 @@
+diff --git a/AstraGraph.slnx b/AstraGraph.slnx
+--- a/AstraGraph.slnx
++++ b/AstraGraph.slnx
+@@ -1,23 +1,4 @@
+ <Solution>
+-  <Project Path="../night-city/RobustToolbox/Avalonia.Base/Avalonia.Base.csproj" />
+-  <Project Path="../night-city/RobustToolbox/Lidgren.Network/Lidgren.Network.csproj" />
+-  <Project Path="../night-city/RobustToolbox/NetSerializer/NetSerializer/NetSerializer.csproj" />
+-  <Project Path="../night-city/RobustToolbox/Robust.Analyzers/Robust.Analyzers.csproj" />
+-  <Project Path="../night-city/RobustToolbox/Robust.Client.Injectors/Robust.Client.Injectors.csproj" />
+-  <Project Path="../night-city/RobustToolbox/Robust.Client.NameGenerator/Robust.Client.NameGenerator.csproj" />
+-  <Project Path="../night-city/RobustToolbox/Robust.Client/Robust.Client.csproj" />
+-  <Project Path="../night-city/RobustToolbox/Robust.LoaderApi/Robust.LoaderApi/Robust.LoaderApi.csproj" />
+-  <Project Path="../night-city/RobustToolbox/Robust.Packaging/Robust.Packaging.csproj" />
+-  <Project Path="../night-city/RobustToolbox/Robust.Serialization.Generator/Robust.Serialization.Generator.csproj" />
+-  <Project Path="../night-city/RobustToolbox/Robust.Server/Robust.Server.csproj" />
+-  <Project Path="../night-city/RobustToolbox/Robust.Shared.CompNetworkGenerator/Robust.Shared.CompNetworkGenerator.csproj" />
+-  <Project Path="../night-city/RobustToolbox/Robust.Shared.EntitySystemSubscriptionsGenerator/Robust.Shared.EntitySystemSubscriptionsGenerator.csproj" />
+-  <Project Path="../night-city/RobustToolbox/Robust.Shared.Maths/Robust.Shared.Maths.csproj" />
+-  <Project Path="../night-city/RobustToolbox/Robust.Shared.Scripting/Robust.Shared.Scripting.csproj" />
+-  <Project Path="../night-city/RobustToolbox/Robust.Shared/Robust.Shared.csproj" />
+-  <Project Path="../night-city/RobustToolbox/Robust.Xaml/Robust.Xaml.csproj" />
+-  <Project Path="../night-city/RobustToolbox/XamlX/src/XamlX.IL.Cecil/XamlX.IL.Cecil.csproj" />
+-  <Project Path="../night-city/RobustToolbox/XamlX/src/XamlX/XamlX.csproj" />
+   <Project Path="AstraGraph.Binding/AstraGraph.Binding.csproj" />
