@@ -101,8 +101,10 @@ public abstract partial class NCSharedZLevelsSystem
         zPhysicsComponent.LocalPosition += zPhysicsComponent.Velocity * frameTime;
         var distanceToGround = zPhysicsComponent.LocalPosition - zPhysicsComponent.CachedGroundHeight;
 
-        if (zPhysicsComponent.AutoStep && distanceToGround < 0)
+        // NC-Edit-Start: walls are high ground too, but only slope prototypes are valid automatic steps.
+        if (zPhysicsComponent is { AutoStep: true, CachedGroundIsSlope: true } && distanceToGround < 0)
             zPhysicsComponent.LocalPosition -= distanceToGround;
+        // NC-Edit-End
 
         if (zPhysicsComponent.CachedStickyGround)
             zPhysicsComponent.LocalPosition -= distanceToGround;
@@ -147,7 +149,16 @@ public abstract partial class NCSharedZLevelsSystem
 
         if (zPhysicsComponent.LocalPosition >= 1)
         {
-            if (HasTileAbove(entity))
+            // NC-Edit-Start: a floor above is the destination at the top of a staircase, not a ceiling.
+            if (zPhysicsComponent.CachedGroundIsSlope && zPhysicsComponent.CachedGroundHeight >= 1f)
+            {
+                if (TryMoveUp(entity))
+                    zPhysicsComponent.LocalPosition -= 1;
+                else
+                    zPhysicsComponent.LocalPosition = 1;
+            }
+            else if (HasTileAbove(entity))
+            // NC-Edit-End
             {
                 if (float.Abs(zPhysicsComponent.Velocity) >= ImpactVelocityLimit)
                 {

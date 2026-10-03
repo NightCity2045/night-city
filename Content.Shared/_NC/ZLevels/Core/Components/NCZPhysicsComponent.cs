@@ -95,6 +95,15 @@ public sealed partial class NCZPhysicsComponent : Component
     [ViewVariables]
     public bool CachedStickyGround;
 
+    // NC-Edit-Start
+    /// <summary>
+    /// Whether the currently cached ground is a traversable slope that may connect Z-levels.
+    /// This is independent from <see cref="CachedStickyGround"/>, which is only enabled while descending smoothly.
+    /// </summary>
+    [ViewVariables]
+    public bool CachedGroundIsSlope;
+    // NC-Edit-End
+
     #endregion
 
     #region Sleep

@@ -71,8 +71,9 @@ public abstract partial class NCSharedZLevelsSystem
             return;
 
         entity.Comp.CachedTile = tile;
-        entity.Comp.CachedGroundHeight = ComputeGroundHeightInternal((entity, entity), out var sticky);
+        entity.Comp.CachedGroundHeight = ComputeGroundHeightInternal((entity, entity), out var sticky, out var slope);
         entity.Comp.CachedStickyGround = sticky;
+        entity.Comp.CachedGroundIsSlope = slope; // NC
     }
 
     private void OnMoveEvent(Entity<NCZPhysicsComponent> entity, ref MoveEvent args)
@@ -95,9 +96,14 @@ public abstract partial class NCSharedZLevelsSystem
     /// Returns values where 0 means ground on the same level, -1 means ground one level below,
     /// and intermediate values are possible for high ground entities (stairs).
     /// </summary>
-    private float ComputeGroundHeightInternal(Entity<NCZPhysicsComponent?> target, out bool stickyGround, int maxFloors = 1)
+    private float ComputeGroundHeightInternal(
+        Entity<NCZPhysicsComponent?> target,
+        out bool stickyGround,
+        out bool slopeGround,
+        int maxFloors = 1)
     {
         stickyGround = false;
+        slopeGround = false; // NC
 
         if (!Resolve(target, ref target.Comp, false))
             return 0;
@@ -133,6 +139,10 @@ public abstract partial class NCSharedZLevelsSystem
             {
                 if (!_zHighGroundQuery.TryComp(uid, out var heightComp))
                     continue;
+
+                // NC-Edit-Start: only explicitly traversable slopes may carry a body between Z-level maps.
+                slopeGround = heightComp.Stick;
+                // NC-Edit-End
 
                 var dir = Transform(uid.Value).LocalRotation.GetCardinalDir();
 

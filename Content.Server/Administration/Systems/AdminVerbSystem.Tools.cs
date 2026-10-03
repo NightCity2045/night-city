@@ -105,23 +105,8 @@ public sealed partial class AdminVerbSystem
             args.Verbs.Add(emergencyAccess);
         }
 
-        if (HasComp<DamageableComponent>(args.Target))
-        {
-            Verb rejuvenate = new()
-            {
-                Text = Loc.GetString("admin-verbs-rejuvenate"),
-                Category = VerbCategory.Tricks,
-                Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/AdminActions/rejuvenate.png")),
-                Act = () =>
-                {
-                    _rejuvenate.PerformRejuvenate(args.Target);
-                },
-                Impact = LogImpact.Extreme,
-                Message = Loc.GetString("admin-trick-rejuvenate-description"),
-                Priority = (int)TricksVerbPriorities.Rejuvenate,
-            };
-            args.Verbs.Add(rejuvenate);
-        }
+        // NC-Edit-Start: Rejuvenate is exposed once in the Debug category by AddDebugVerbs.
+        // NC-Edit-End
 
         if (!HasComp<GodmodeComponent>(args.Target))
         {
