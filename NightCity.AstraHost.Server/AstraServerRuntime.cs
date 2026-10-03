@@ -4,8 +4,8 @@
 
 using System.Reflection;
 using System.Text.Json;
-using AstraGraph.Editor.Protocol;
-using AstraGraph.Robust.Server;
+using Content.AstraGraph.Editor.Protocol;
+using Content.AstraGraph.Robust.Server;
 using Content.Shared._NC.AstraGraph;
 using Robust.Shared.GameObjects;
 using Robust.Shared.IoC;

@@ -3,8 +3,8 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Text.Json;
-using AstraGraph.Editor.Protocol;
-using AstraGraph.Robust.Client;
+using Content.AstraGraph.Editor.Protocol;
+using Content.AstraGraph.Robust.Client;
 using Content.Shared._NC.AstraGraph;
 using Robust.Shared.ContentPack;
 using Robust.Shared.GameObjects;

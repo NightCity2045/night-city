@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <!-- The module loader typechecks every DLL whose name starts with Content. This assembly must not. -->
-    <AssemblyName>NightCity.AstraHost.Shared</AssemblyName>
+    <AssemblyName>Content.NightCity.AstraHost.Shared</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\RobustToolbox\Robust.Shared\Robust.Shared.csproj" />

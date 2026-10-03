@@ -5,7 +5,7 @@
 using System;
 using System.IO;
 using System.Text.Json;
-using AstraGraph.Editor.Protocol;
+using Content.AstraGraph.Editor.Protocol;
 using Content.Shared._NC.AstraGraph;
 using Content.Shared._NC.AstraGraph.Bindings;
 using Content.Shared.Administration;

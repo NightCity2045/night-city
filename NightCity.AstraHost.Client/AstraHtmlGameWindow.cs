@@ -5,8 +5,8 @@
 using System.Numerics;
 using System.Text;
 using System.Text.Json;
-using AstraGraph.Editor.Protocol;
-using AstraGraph.UI.Html;
+using Content.AstraGraph.Editor.Protocol;
+using Content.AstraGraph.UI.Html;
 using Robust.Client.UserInterface.CustomControls;
 using Robust.Client.WebView;
 using Robust.Shared.Asynchronous;
