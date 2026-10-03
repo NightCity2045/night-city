@@ -15,14 +15,15 @@ public static class AstraStudioBridge
 {
     public static bool TryOpen(string address)
     {
-        if (!Uri.TryCreate(address, UriKind.Absolute, out var uri) ||
-            uri.Scheme is not ("https" or "http"))
+        // NC: Content sandbox does not expose UriKind; the trusted engine URI service performs final validation.
+        if (!address.StartsWith("https://", StringComparison.OrdinalIgnoreCase) &&
+            !address.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }
 
         var systems = IoCManager.Resolve<IEntitySystemManager>();
-        systems.GetEntitySystem<ClientAstraGraphSystem>().OpenStudio(uri);
+        systems.GetEntitySystem<ClientAstraGraphSystem>().OpenStudio(address);
         return true;
     }
 }
