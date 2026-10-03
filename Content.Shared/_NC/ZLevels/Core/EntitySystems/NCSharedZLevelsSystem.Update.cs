@@ -87,6 +87,22 @@ public abstract partial class NCSharedZLevelsSystem
         var oldVelocity = zPhysicsComponent.Velocity;
         var oldHeight = zPhysicsComponent.LocalPosition;
 
+        // NC-Edit-Start: crossing the uphill tile boundary completes the staircase transition.
+        // Reset vertical state on the destination floor so the paired down staircase cannot immediately bounce the body back.
+        if (zPhysicsComponent.PendingSlopeTransitionUp)
+        {
+            zPhysicsComponent.PendingSlopeTransitionUp = false;
+            if (TryMoveUp(entity))
+            {
+                zPhysicsComponent.LocalPosition = 0f;
+                zPhysicsComponent.Velocity = 0f;
+                DirtyField(entity, zPhysicsComponent, nameof(NCZPhysicsComponent.LocalPosition));
+                DirtyField(entity, zPhysicsComponent, nameof(NCZPhysicsComponent.Velocity));
+                return;
+            }
+        }
+        // NC-Edit-End
+
         if (zPhysicsComponent.VelocityGravity)
             zPhysicsComponent.Velocity -= ZGravityForce * zPhysicsComponent.GravityMultiplier * frameTime;
 

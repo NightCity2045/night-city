@@ -9135,21 +9135,25 @@ entities:
     components:
     - type: Transform
       parent: 1
+      rot: 3.141592653589793 rad
       pos: -119.5,103.5
   - uid: 845
     components:
     - type: Transform
       parent: 1
+      rot: 3.141592653589793 rad
       pos: -120.5,103.5
   - uid: 846
     components:
     - type: Transform
       parent: 1
+      rot: 3.141592653589793 rad
       pos: -118.5,103.5
   - uid: 1221
     components:
     - type: Transform
       parent: 1
+      rot: 3.141592653589793 rad
       pos: -121.5,103.5
   - uid: 4929
     components:
@@ -9182,6 +9186,7 @@ entities:
     components:
     - type: Transform
       parent: 1
+      rot: 3.141592653589793 rad
       pos: -122.5,103.5
   - uid: 12138
     components:
@@ -9199,11 +9204,13 @@ entities:
     components:
     - type: Transform
       parent: 1
+      rot: 3.141592653589793 rad
       pos: 32.5,22.5
   - uid: 12242
     components:
     - type: Transform
       parent: 1
+      rot: 3.141592653589793 rad
       pos: 31.5,22.5
 - proto: NCStairsUp
   entities:

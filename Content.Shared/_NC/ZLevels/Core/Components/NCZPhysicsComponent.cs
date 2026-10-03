@@ -102,6 +102,13 @@ public sealed partial class NCZPhysicsComponent : Component
     /// </summary>
     [ViewVariables]
     public bool CachedGroundIsSlope;
+
+    /// <summary>
+    /// Set for one physics step after the body walks through the upper edge of a staircase tile.
+    /// The transition is deferred to the Z-physics update to avoid changing maps while movement caches are rebuilt.
+    /// </summary>
+    [ViewVariables]
+    public bool PendingSlopeTransitionUp;
     // NC-Edit-End
 
     #endregion

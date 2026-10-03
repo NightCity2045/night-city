@@ -16,6 +16,10 @@ public abstract partial class NCSharedZLevelsSystem
     private const float ZVelocityLimit = 20.0f;
     private const int MaxStepsPerFrame = 10;
 
+    // NC-Edit-Start: tile coordinates never reach the exact 1.0 endpoint before entering the next tile.
+    private const float StaircaseUpperEdgeHeight = 0.9f;
+    // NC-Edit-End
+
     /// <summary>
     /// The minimum speed required to trigger LandEvent events.
     /// </summary>

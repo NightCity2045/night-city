@@ -5,7 +5,7 @@ meta:
   forkId: ""
   forkVersion: ""
   time: 10/01/2026 19:26:23
-  entityCount: 4128
+  entityCount: 4126
 maps:
 - 1
 grids:
@@ -3996,25 +3996,17 @@ entities:
     - type: Transform
       parent: 1
       pos: 125.5,7.5
-  - uid: 3498
-    components:
-    - type: Transform
-      parent: 1
-      pos: 124.5,7.5
-  - uid: 3499
-    components:
-    - type: Transform
-      parent: 1
-      pos: 125.5,7.5
   - uid: 3773
     components:
     - type: Transform
       parent: 1
+      rot: 3.141592653589793 rad
       pos: 37.5,22.5
   - uid: 3805
     components:
     - type: Transform
       parent: 1
+      rot: 3.141592653589793 rad
       pos: 36.5,22.5
 - proto: NCStairsUp
   entities:

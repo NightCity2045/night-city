@@ -5,7 +5,7 @@ meta:
   forkId: ""
   forkVersion: ""
   time: 10/01/2026 19:26:23
-  entityCount: 539
+  entityCount: 540
 maps:
 - 1
 grids:
@@ -3442,4 +3442,12 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -73.5,-31.5
+
+- proto: NCStairsDown
+  entities:
+  - uid: 1045
+    components:
+    - type: Transform
+      parent: 1
+      pos: 115.5,188.5
 ...

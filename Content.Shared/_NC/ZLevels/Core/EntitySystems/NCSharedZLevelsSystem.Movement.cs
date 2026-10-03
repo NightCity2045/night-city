@@ -70,10 +70,17 @@ public abstract partial class NCSharedZLevelsSystem
         if (tile == entity.Comp.CachedTile && !force)
             return;
 
+        // NC-Edit-Start: remember an uphill staircase exit before replacing the old tile cache.
+        // The interpolated curve approaches 1.0, but the body enters the next tile before it can equal 1.0 exactly.
+        var exitedUpperSlopeEdge = entity.Comp.CachedGroundIsSlope &&
+                                   entity.Comp.CachedGroundHeight >= StaircaseUpperEdgeHeight;
+
         entity.Comp.CachedTile = tile;
         entity.Comp.CachedGroundHeight = ComputeGroundHeightInternal((entity, entity), out var sticky, out var slope);
         entity.Comp.CachedStickyGround = sticky;
-        entity.Comp.CachedGroundIsSlope = slope; // NC
+        entity.Comp.CachedGroundIsSlope = slope;
+        entity.Comp.PendingSlopeTransitionUp |= exitedUpperSlopeEdge && !slope;
+        // NC-Edit-End
     }
 
     private void OnMoveEvent(Entity<NCZPhysicsComponent> entity, ref MoveEvent args)
