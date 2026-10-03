@@ -837,9 +837,39 @@ public sealed partial class ChatUIController : UIController
             DecorateChatMessage(replacement);
             History[i] = (History[i].Tick, replacement);
             Repopulate();
+            AddFinalizedSpeechBubble(replacement); // NC
             return;
         }
     }
+
+    // NC-Edit-Start
+    private void AddFinalizedSpeechBubble(ChatMessage msg)
+    {
+        // Delayed translations replace a provisional chat line. Create the bubble only from the final payload so
+        // players never see stale untranslated speech above the speaker.
+        if (msg.SenderEntity == default)
+            return;
+
+        switch (msg.Channel)
+        {
+            case ChatChannel.Local:
+                AddSpeechBubble(msg, SpeechBubble.SpeechType.Say);
+                break;
+            case ChatChannel.Whisper:
+                AddSpeechBubble(msg, SpeechBubble.SpeechType.Whisper);
+                break;
+            case ChatChannel.Dead when _ghost is { IsGhost: true }:
+                AddSpeechBubble(msg, SpeechBubble.SpeechType.Say);
+                break;
+            case ChatChannel.Emotes:
+                AddSpeechBubble(msg, SpeechBubble.SpeechType.Emote);
+                break;
+            case ChatChannel.LOOC when _config.GetCVar(CCVars.LoocAboveHeadShow):
+                AddSpeechBubble(msg, SpeechBubble.SpeechType.Looc);
+                break;
+        }
+    }
+    // NC-Edit-End
 
     private void DecorateChatMessage(ChatMessage msg)
     {
@@ -901,6 +931,13 @@ public sealed partial class ChatUIController : UIController
         // Local messages that have an entity attached get a speech bubble.
         if (!speechBubble || msg.SenderEntity == default)
             return;
+
+        // NC-Edit-Start
+        // A message id marks provisional text that will be finalized by MsgUpdateChatMessage. Waiting prevents an
+        // untranslated bubble from surviving after the corresponding chat line has been replaced.
+        if (msg.ServerMessageId != null)
+            return;
+        // NC-Edit-End
 
         switch (msg.Channel)
         {

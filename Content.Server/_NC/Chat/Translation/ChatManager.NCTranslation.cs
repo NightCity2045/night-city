@@ -92,13 +92,9 @@ internal sealed partial class ChatManager
             SendNCChatMessage(client, channel, message, wrappedMessage, source, senderKey, hideChat, colorOverride, audioPath, audioVolume, messageId, false));
 
         var delayedTranslation = await translationTask;
-        if (delayedTranslation == null)
-            return;
-
         var delayed = BuildNCTranslatedMessage(message, wrappedMessage, delayedTranslation, targetLanguage);
-        if (string.Equals(delayed.Visible, message, StringComparison.Ordinal))
-            return;
-
+        // Always finalize a provisional message. The client delays its speech bubble until this update, so a
+        // failed or unnecessary translation must still release the original text for display above the speaker.
         await RunNCTranslationOnMainThreadAsync(() =>
             SendNCChatMessage(client, channel, delayed.Visible, delayed.Wrapped, source, senderKey, hideChat, colorOverride, null, 0f, messageId, true));
     }
