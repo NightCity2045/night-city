@@ -34,3 +34,12 @@
     lift: 1000000
   - type: ApcPowerReceiver
     needsPower: false
+
+- type: entity
+  parent: ComputerShuttle
+  id: NCAVPilotConsole
+  name: AV pilot console
+  description: An autonomous flight console for piloting an AV.
+  components:
+  - type: ApcPowerReceiver
+    needsPower: false

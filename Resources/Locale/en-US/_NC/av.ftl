@@ -7,6 +7,8 @@ ent-NCAVLifter = AV lift fan
 ent-NCAVLifterDebug = AV lift fan
     .suffix = DEBUG
     .desc = A debug lift fan with unlimited local power.
+ent-NCAVPilotConsole = AV pilot console
+    .desc = An autonomous flight console for piloting an AV.
 
 nc-av-console-title = AV Flight Console
 nc-av-console-mode-flight = FLIGHT

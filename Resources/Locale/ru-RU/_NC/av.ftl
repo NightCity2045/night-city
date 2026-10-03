@@ -7,6 +7,8 @@ ent-NCAVLifter = подъёмный вентилятор АВи
 ent-NCAVLifterDebug = подъёмный вентилятор АВи
     .suffix = DEBUG
     .desc = Отладочный подъёмный вентилятор с автономным питанием.
+ent-NCAVPilotConsole = консоль пилота АВи
+    .desc = Автономная полётная консоль для управления АВи.
 
 nc-av-console-title = Полётная консоль АВи
 nc-av-console-mode-flight = ПОЛЁТ
