@@ -70,18 +70,73 @@ public abstract partial class NCSharedZLevelsSystem
         if (tile == entity.Comp.CachedTile && !force)
             return;
 
-        // NC-Edit-Start: remember an uphill staircase exit before replacing the old tile cache.
-        // The interpolated curve approaches 1.0, but the body enters the next tile before it can equal 1.0 exactly.
-        var exitedUpperSlopeEdge = entity.Comp.CachedGroundIsSlope &&
-                                   entity.Comp.CachedGroundHeight >= StaircaseUpperEdgeHeight;
-
         entity.Comp.CachedTile = tile;
+
+        // NC-Edit-Start: stairs are discrete map transitions and never participate in simulated Z-height.
+        if (TryGetStairTransition(entity, out var levelOffset))
+        {
+            if (!entity.Comp.StairTransitionLocked)
+            {
+                entity.Comp.StairTransitionLocked = true;
+                if (TryMove(entity, levelOffset))
+                {
+                    ResetVerticalStateAfterStairTransition(entity);
+                    return;
+                }
+
+                entity.Comp.StairTransitionLocked = false;
+            }
+        }
+        else
+        {
+            entity.Comp.StairTransitionLocked = false;
+        }
+        // NC-Edit-End
+
         entity.Comp.CachedGroundHeight = ComputeGroundHeightInternal((entity, entity), out var sticky, out var slope);
         entity.Comp.CachedStickyGround = sticky;
         entity.Comp.CachedGroundIsSlope = slope;
-        entity.Comp.PendingSlopeTransitionUp |= exitedUpperSlopeEdge && !slope;
-        // NC-Edit-End
     }
+
+    // NC-Edit-Start: resolve and execute the simple tile-based staircase transition.
+    private bool TryGetStairTransition(EntityUid target, out int levelOffset)
+    {
+        levelOffset = 0;
+
+        var xform = Transform(target);
+        if (xform.MapUid is not { } mapUid)
+            return false;
+
+        var worldPos = _transform.GetWorldPosition(xform);
+        if (!_map.TryFindGridAt(mapUid, worldPos, out var gridUid, out var grid))
+            return false;
+
+        var gridTile = _map.WorldToTile(gridUid, grid, worldPos);
+        var query = _map.GetAnchoredEntitiesEnumerator(gridUid, grid, gridTile);
+        while (query.MoveNext(out var uid))
+        {
+            if (!TryComp<NCZStairTransitionComponent>(uid, out var stair))
+                continue;
+
+            levelOffset = stair.LevelOffset;
+            return levelOffset != 0;
+        }
+
+        return false;
+    }
+
+    private void ResetVerticalStateAfterStairTransition(Entity<NCZPhysicsComponent> entity)
+    {
+        entity.Comp.LocalPosition = 0f;
+        entity.Comp.Velocity = 0f;
+        entity.Comp.CachedGroundHeight = 0f;
+        entity.Comp.CachedStickyGround = false;
+        entity.Comp.CachedGroundIsSlope = false;
+
+        DirtyField(entity, entity.Comp, nameof(NCZPhysicsComponent.LocalPosition));
+        DirtyField(entity, entity.Comp, nameof(NCZPhysicsComponent.Velocity));
+    }
+    // NC-Edit-End
 
     private void OnMoveEvent(Entity<NCZPhysicsComponent> entity, ref MoveEvent args)
     {

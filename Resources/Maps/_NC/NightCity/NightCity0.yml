@@ -5,7 +5,7 @@ meta:
   forkId: ""
   forkVersion: ""
   time: 10/01/2026 19:26:22
-  entityCount: 12862
+  entityCount: 12863
 maps:
 - 1
 grids:
@@ -72274,6 +72274,13 @@ entities:
 - proto: SpawnPointLatejoin
   entities:
   - uid: 12936
+    components:
+    - type: Transform
+      parent: 1
+      pos: 0,0
+- proto: SpawnPointPassenger
+  entities:
+  - uid: 12937
     components:
     - type: Transform
       parent: 1

@@ -87,22 +87,6 @@ public abstract partial class NCSharedZLevelsSystem
         var oldVelocity = zPhysicsComponent.Velocity;
         var oldHeight = zPhysicsComponent.LocalPosition;
 
-        // NC-Edit-Start: crossing the uphill tile boundary completes the staircase transition.
-        // Reset vertical state on the destination floor so the paired down staircase cannot immediately bounce the body back.
-        if (zPhysicsComponent.PendingSlopeTransitionUp)
-        {
-            zPhysicsComponent.PendingSlopeTransitionUp = false;
-            if (TryMoveUp(entity))
-            {
-                zPhysicsComponent.LocalPosition = 0f;
-                zPhysicsComponent.Velocity = 0f;
-                DirtyField(entity, zPhysicsComponent, nameof(NCZPhysicsComponent.LocalPosition));
-                DirtyField(entity, zPhysicsComponent, nameof(NCZPhysicsComponent.Velocity));
-                return;
-            }
-        }
-        // NC-Edit-End
-
         if (zPhysicsComponent.VelocityGravity)
             zPhysicsComponent.Velocity -= ZGravityForce * zPhysicsComponent.GravityMultiplier * frameTime;
 
@@ -150,40 +134,19 @@ public abstract partial class NCSharedZLevelsSystem
             }
         }
 
-        if (zPhysicsComponent.LocalPosition < 0)
+        if (zPhysicsComponent.LocalPosition < 0 && TryMoveDownOrChasm(entity))
         {
-            // NC-Edit-Start: descend through the map only at the lower edge of a staircase.
-            // Transitioning on the first negative height places the body near the top of the paired up staircase,
-            // which immediately sends it back to the previous floor when it tries to leave.
-            var staircaseDescent = zPhysicsComponent.CachedGroundIsSlope &&
-                                   zPhysicsComponent.CachedGroundHeight <= -StaircaseUpperEdgeHeight;
-            var canMoveDown = !zPhysicsComponent.CachedGroundIsSlope || staircaseDescent;
-
-            if (canMoveDown && TryMoveDownOrChasm(entity))
+            zPhysicsComponent.LocalPosition += 1;
+            if (zPhysicsComponent is { CachedStickyGround: false, Fallable: true })
             {
-                zPhysicsComponent.LocalPosition += 1;
-                if (!staircaseDescent &&
-                    zPhysicsComponent is { CachedStickyGround: false, Fallable: true })
-                {
-                    var fallEv = new NCZLevelFallMapEvent();
-                    RaiseLocalEvent(entity, ref fallEv);
-                }
+                var fallEv = new NCZLevelFallMapEvent();
+                RaiseLocalEvent(entity, ref fallEv);
             }
-            // NC-Edit-End
         }
 
         if (zPhysicsComponent.LocalPosition >= 1)
         {
-            // NC-Edit-Start: a floor above is the destination at the top of a staircase, not a ceiling.
-            if (zPhysicsComponent.CachedGroundIsSlope && zPhysicsComponent.CachedGroundHeight >= 1f)
-            {
-                if (TryMoveUp(entity))
-                    zPhysicsComponent.LocalPosition -= 1;
-                else
-                    zPhysicsComponent.LocalPosition = 1;
-            }
-            else if (HasTileAbove(entity))
-            // NC-Edit-End
+            if (HasTileAbove(entity))
             {
                 if (float.Abs(zPhysicsComponent.Velocity) >= ImpactVelocityLimit)
                 {
