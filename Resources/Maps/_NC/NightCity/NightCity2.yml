@@ -4,8 +4,8 @@ meta:
   engineVersion: 284.0.2
   forkId: ""
   forkVersion: ""
-  time: 09/27/2026 15:17:30
-  entityCount: 2117
+  time: 10/01/2026 19:26:23
+  entityCount: 2286
 maps:
 - 1
 grids:
@@ -547,7 +547,7 @@ entities:
         -1,-7: 506381209866076160
         -5,-8: 18374403900871474688
         -5,-7: 280371153272574
-        -5,-4: 4485090715956674560
+        -5,-4: 0
         14,22: 18374686479671623680
         14,23: 18446744073709551615
         15,22: 2233785415175766016
@@ -557,6 +557,7 @@ entities:
         13,22: 18158513697557839872
         13,23: 18229723555195321596
         13,24: 278163506396412
+        4,2: 8680767961989906432
     - type: RadiationGridResistance
     - type: DecalGrid
       chunkCollection:
@@ -615,6 +616,7 @@ entities:
             37: -12,11
     - type: ExplosionAirtightGrid
     - type: NCZLevelsLaddersCache
+    - type: NavMap
 - proto: Airlock
   entities:
   - uid: 555
@@ -859,6 +861,38 @@ entities:
     - type: Transform
       parent: 1
       pos: -10.5,-18.5
+- proto: ArrivalsShuttleTimer
+  entities:
+  - uid: 2098
+    components:
+    - type: Transform
+      parent: 1
+      pos: 24.5,23.5
+  - uid: 2106
+    components:
+    - type: Transform
+      parent: 1
+      pos: 16.5,23.5
+  - uid: 2176
+    components:
+    - type: Transform
+      parent: 1
+      pos: 15.5,23.5
+  - uid: 2177
+    components:
+    - type: Transform
+      parent: 1
+      pos: 18.5,23.5
+  - uid: 2178
+    components:
+    - type: Transform
+      parent: 1
+      pos: 20.5,23.5
+  - uid: 2194
+    components:
+    - type: Transform
+      parent: 1
+      pos: 22.5,23.5
 - proto: BananiumDoor
   entities:
   - uid: 167
@@ -873,29 +907,23 @@ entities:
       parent: 1
       pos: 34.5,20.5
     - type: NCCityLocation
-  - uid: 246
-    components:
-    - type: Transform
-      parent: 1
-      pos: 25.5,21.5
-    - type: NCCityLocation
   - uid: 260
     components:
     - type: Transform
       parent: 1
       pos: 36.5,19.5
     - type: NCCityLocation
+  - uid: 2090
+    components:
+    - type: Transform
+      parent: 1
+      pos: 12.5,19.5
+    - type: NCCityLocation
   - uid: 2108
     components:
     - type: Transform
       parent: 1
       pos: 25.5,22.5
-    - type: NCCityLocation
-  - uid: 2109
-    components:
-    - type: Transform
-      parent: 1
-      pos: 21.5,16.5
     - type: NCCityLocation
   - uid: 2110
     components:
@@ -909,18 +937,58 @@ entities:
       parent: 1
       pos: 9.5,14.5
     - type: NCCityLocation
+  - uid: 2140
+    components:
+    - type: Transform
+      parent: 1
+      pos: 9.5,17.5
+    - type: NCCityLocation
+  - uid: 2196
+    components:
+    - type: Transform
+      parent: 1
+      pos: 25.5,17.5
+    - type: NCCityLocation
+  - uid: 2198
+    components:
+    - type: Transform
+      parent: 1
+      pos: 25.5,18.5
+    - type: NCCityLocation
+  - uid: 2205
+    components:
+    - type: Transform
+      parent: 1
+      pos: 22.5,16.5
+    - type: NCCityLocation
+  - uid: 2228
+    components:
+    - type: Transform
+      parent: 1
+      pos: 7.5,21.5
+    - type: NCCityLocation
+- proto: BarSignEmprah
+  entities:
   - uid: 2112
     components:
     - type: Transform
       parent: 1
-      pos: 9.5,21.5
-    - type: NCCityLocation
-  - uid: 2113
+      pos: 16.5,23.5
+  - uid: 2179
     components:
     - type: Transform
       parent: 1
-      pos: 11.5,20.5
-    - type: NCCityLocation
+      pos: 18.5,23.5
+  - uid: 2190
+    components:
+    - type: Transform
+      parent: 1
+      pos: 20.5,23.5
+  - uid: 2191
+    components:
+    - type: Transform
+      parent: 1
+      pos: 22.5,23.5
 - proto: Beaker
   entities:
   - uid: 1928
@@ -994,6 +1062,166 @@ entities:
     - type: Transform
       parent: 1
       pos: 123.5,184.5
+- proto: BoxFolderBlack
+  entities:
+  - uid: 2145
+    components:
+    - type: Transform
+      parent: 1
+      pos: 27.3862,20.000624
+    - type: NCCityLocation
+  - uid: 2146
+    components:
+    - type: Transform
+      parent: 1
+      pos: 28.472038,15.596708
+    - type: NCCityLocation
+  - uid: 2147
+    components:
+    - type: Transform
+      parent: 1
+      pos: 33.487663,15.612333
+    - type: NCCityLocation
+  - uid: 2166
+    components:
+    - type: Transform
+      parent: 1
+      pos: 32.639606,17.64278
+    - type: NCCityLocation
+  - uid: 2209
+    components:
+    - type: Transform
+      parent: 1
+      pos: 24.650555,21.586418
+    - type: NCCityLocation
+  - uid: 2210
+    components:
+    - type: Transform
+      parent: 1
+      pos: 15.400555,21.586418
+    - type: NCCityLocation
+  - uid: 2211
+    components:
+    - type: Transform
+      parent: 1
+      pos: 21.63493,21.617668
+    - type: NCCityLocation
+  - uid: 2245
+    components:
+    - type: Transform
+      parent: 1
+      pos: 6.8363247,15.738415
+    - type: NCCityLocation
+  - uid: 2246
+    components:
+    - type: Transform
+      parent: 1
+      pos: 6.8363247,15.738415
+    - type: NCCityLocation
+  - uid: 2247
+    components:
+    - type: Transform
+      parent: 1
+      pos: 6.9417934,15.738415
+    - type: NCCityLocation
+- proto: BoxFolderGreenEmpty
+  entities:
+  - uid: 2148
+    components:
+    - type: Transform
+      parent: 1
+      pos: 28.347038,15.674833
+    - type: NCCityLocation
+  - uid: 2149
+    components:
+    - type: Transform
+      parent: 1
+      pos: 33.393913,15.706083
+    - type: NCCityLocation
+  - uid: 2150
+    components:
+    - type: Transform
+      parent: 1
+      pos: 27.632294,19.75453
+    - type: NCCityLocation
+  - uid: 2167
+    components:
+    - type: Transform
+      parent: 1
+      pos: 32.545856,17.720905
+    - type: NCCityLocation
+  - uid: 2212
+    components:
+    - type: Transform
+      parent: 1
+      pos: 24.44743,21.398918
+    - type: NCCityLocation
+  - uid: 2213
+    components:
+    - type: Transform
+      parent: 1
+      pos: 21.479822,21.492668
+    - type: NCCityLocation
+  - uid: 2214
+    components:
+    - type: Transform
+      parent: 1
+      pos: 15.636072,21.398918
+    - type: NCCityLocation
+  - uid: 2242
+    components:
+    - type: Transform
+      parent: 1
+      pos: 13.419403,20.588348
+    - type: NCCityLocation
+  - uid: 2243
+    components:
+    - type: Transform
+      parent: 1
+      pos: 13.665497,20.588348
+    - type: NCCityLocation
+  - uid: 2244
+    components:
+    - type: Transform
+      parent: 1
+      pos: 13.419403,20.588348
+    - type: NCCityLocation
+  - uid: 2278
+    components:
+    - type: Transform
+      parent: 1
+      pos: 16.333261,13.700624
+    - type: NCCityLocation
+  - uid: 2279
+    components:
+    - type: Transform
+      parent: 1
+      pos: 16.223886,13.591249
+    - type: NCCityLocation
+  - uid: 2280
+    components:
+    - type: Transform
+      parent: 1
+      pos: 16.333261,13.684999
+    - type: NCCityLocation
+  - uid: 2281
+    components:
+    - type: Transform
+      parent: 1
+      pos: 22.192253,14.6693735
+    - type: NCCityLocation
+  - uid: 2282
+    components:
+    - type: Transform
+      parent: 1
+      pos: 22.192253,14.6693735
+    - type: NCCityLocation
+  - uid: 2283
+    components:
+    - type: Transform
+      parent: 1
+      pos: 22.192253,14.7318735
+    - type: NCCityLocation
 - proto: CannabisSeeds
   entities:
   - uid: 1582
@@ -1039,6 +1267,41 @@ entities:
     - type: NCCityLocation
 - proto: ChairOfficeDark
   entities:
+  - uid: 179
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 28.351732,20.353745
+    - type: NCCityLocation
+  - uid: 190
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 26.629076,20.740463
+    - type: NCCityLocation
+  - uid: 208
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 32.640797,14.693588
+    - type: NCCityLocation
+  - uid: 209
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 27.507982,14.201401
+    - type: NCCityLocation
+  - uid: 232
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 33.5197,18.771713
+    - type: NCCityLocation
   - uid: 1948
     components:
     - type: Transform
@@ -1072,6 +1335,25 @@ entities:
       rot: 3.141592653589793 rad
       pos: 123.11127,195.77493
     - type: NCCityLocation
+  - uid: 2131
+    components:
+    - type: Transform
+      parent: 1
+      pos: 27.51477,16.65823
+    - type: NCCityLocation
+  - uid: 2132
+    components:
+    - type: Transform
+      parent: 1
+      pos: 32.518494,16.673855
+    - type: NCCityLocation
+  - uid: 2157
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 31.533112,18.687313
+    - type: NCCityLocation
 - proto: ChairOfficeLight
   entities:
   - uid: 134
@@ -1080,6 +1362,34 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 7.5350814,16.75698
+    - type: NCCityLocation
+  - uid: 237
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 16.60832,20.757206
+    - type: NCCityLocation
+  - uid: 238
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 19.561445,20.757206
+    - type: NCCityLocation
+  - uid: 248
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 20.510664,20.651737
+    - type: NCCityLocation
+  - uid: 257
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 23.52333,20.651737
     - type: NCCityLocation
   - uid: 270
     components:
@@ -1115,6 +1425,25 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 5.6726656,17.782728
+    - type: NCCityLocation
+  - uid: 2239
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 11.399475,20.631588
+    - type: NCCityLocation
+  - uid: 2253
+    components:
+    - type: Transform
+      parent: 1
+      pos: 15.533745,14.680662
+    - type: NCCityLocation
+  - uid: 2273
+    components:
+    - type: Transform
+      parent: 1
+      pos: 21.361002,15.576519
     - type: NCCityLocation
 - proto: ChemDispenser
   entities:
@@ -1338,6 +1667,26 @@ entities:
       rot: 3.141592653589793 rad
       pos: 6.5,14.5
     - type: NCCityLocation
+  - uid: 2237
+    components:
+    - type: Transform
+      parent: 1
+      pos: 11.5,22.5
+    - type: NCCityLocation
+  - uid: 2252
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 15.5,12.5
+    - type: NCCityLocation
+  - uid: 2274
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 21.5,13.5
+    - type: NCCityLocation
 - proto: computerBodyScanner
   entities:
   - uid: 1806
@@ -1365,6 +1714,50 @@ entities:
     - type: Transform
       parent: 1
       pos: 107.5,186.5
+- proto: CrateTrashCart
+  entities:
+  - uid: 1602
+    components:
+    - type: Transform
+      parent: 1
+      pos: 37.5,13.5
+  - uid: 2257
+    components:
+    - type: Transform
+      parent: 1
+      pos: 14.5,15.5
+  - uid: 2272
+    components:
+    - type: Transform
+      parent: 1
+      pos: 24.5,15.5
+- proto: CrewMonitoringServer
+  entities:
+  - uid: 2078
+    components:
+    - type: Transform
+      parent: 1
+      pos: 10.5,13.5
+  - uid: 2221
+    components:
+    - type: Transform
+      parent: 1
+      pos: 11.5,13.5
+  - uid: 2222
+    components:
+    - type: Transform
+      parent: 1
+      pos: 12.5,13.5
+  - uid: 2223
+    components:
+    - type: Transform
+      parent: 1
+      pos: 11.5,15.5
+  - uid: 2224
+    components:
+    - type: Transform
+      parent: 1
+      pos: 12.5,15.5
 - proto: Defibrillator
   entities:
   - uid: 1798
@@ -1412,6 +1805,82 @@ entities:
     - type: Transform
       parent: 1
       pos: 121.83913,191.439
+- proto: filingCabinet
+  entities:
+  - uid: 280
+    components:
+    - type: Transform
+      parent: 1
+      pos: 36.5,14.5
+    - type: NCCityLocation
+  - uid: 2138
+    components:
+    - type: Transform
+      parent: 1
+      pos: 37.5,14.5
+    - type: NCCityLocation
+- proto: filingCabinetDrawer
+  entities:
+  - uid: 2119
+    components:
+    - type: Transform
+      parent: 1
+      pos: 34.5,14.5
+    - type: NCCityLocation
+  - uid: 2137
+    components:
+    - type: Transform
+      parent: 1
+      pos: 26.5,14.5
+    - type: NCCityLocation
+- proto: filingCabinetTall
+  entities:
+  - uid: 2232
+    components:
+    - type: Transform
+      parent: 1
+      pos: 5.5,20.5
+    - type: NCCityLocation
+  - uid: 2233
+    components:
+    - type: Transform
+      parent: 1
+      pos: 6.5,20.5
+    - type: NCCityLocation
+  - uid: 2234
+    components:
+    - type: Transform
+      parent: 1
+      pos: 8.5,20.5
+    - type: NCCityLocation
+  - uid: 2240
+    components:
+    - type: Transform
+      parent: 1
+      pos: 13.5,21.5
+    - type: NCCityLocation
+  - uid: 2258
+    components:
+    - type: Transform
+      parent: 1
+      pos: 18.5,13.5
+    - type: NCCityLocation
+  - uid: 2271
+    components:
+    - type: Transform
+      parent: 1
+      pos: 24.5,14.5
+    - type: NCCityLocation
+- proto: FloorDrain
+  entities:
+  - uid: 2225
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 8.5,22.5
+    - type: Fixtures
+      fixtures: {}
 - proto: Grille
   entities:
   - uid: 1907
@@ -1500,6 +1969,12 @@ entities:
       parent: 1
       pos: -15.5,-31.5
     - type: NCCityLocation
+  - uid: 2256
+    components:
+    - type: Transform
+      parent: 1
+      pos: 18.5,14.5
+    - type: NCCityLocation
 - proto: KitchenReagentGrinder
   entities:
   - uid: 1847
@@ -1507,6 +1982,53 @@ entities:
     - type: Transform
       parent: 1
       pos: 122.5,191.5
+- proto: Lamp
+  entities:
+  - uid: 127
+    components:
+    - type: Transform
+      parent: 1
+      pos: 10.587178,21.673944
+  - uid: 1598
+    components:
+    - type: Transform
+      parent: 1
+      pos: 27.507982,21.724838
+  - uid: 2118
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 26.603565,15.92583
+  - uid: 2144
+    components:
+    - type: Transform
+      parent: 1
+      pos: 31.61919,15.941455
+  - uid: 2165
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 32.503845,19.781345
+  - uid: 2169
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 24.582832,20.890493
+  - uid: 2207
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 15.535957,20.921743
+  - uid: 2208
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 18.489082,21.859243
 - proto: LampGold
   entities:
   - uid: 228
@@ -1514,6 +2036,20 @@ entities:
     - type: Transform
       parent: 1
       pos: 5.5854244,15.815037
+- proto: LampInterrogator
+  entities:
+  - uid: 2254
+    components:
+    - type: Transform
+      parent: 1
+      pos: 14.578493,13.743162
+    - type: NCCityLocation
+  - uid: 2275
+    components:
+    - type: Transform
+      parent: 1
+      pos: 20.536652,14.674522
+    - type: NCCityLocation
 - proto: LargeBeaker
   entities:
   - uid: 1840
@@ -1559,6 +2095,21 @@ entities:
     - type: Transform
       parent: 1
       pos: 8.5,13.5
+  - uid: 2099
+    components:
+    - type: Transform
+      parent: 1
+      pos: 13.5,22.5
+  - uid: 2259
+    components:
+    - type: Transform
+      parent: 1
+      pos: 18.5,12.5
+  - uid: 2270
+    components:
+    - type: Transform
+      parent: 1
+      pos: 24.5,13.5
 - proto: LockerFreezerBase
   entities:
   - uid: 1557
@@ -1566,6 +2117,11 @@ entities:
     - type: Transform
       parent: 1
       pos: -16.5,-31.5
+  - uid: 2255
+    components:
+    - type: Transform
+      parent: 1
+      pos: 18.5,15.5
 - proto: LockerParamedicFilled
   entities:
   - uid: 2001
@@ -1663,12 +2219,11 @@ entities:
       pos: 109.5,191.5
 - proto: NCComputerNCPDBudget
   entities:
-  - uid: 237
+  - uid: 2219
     components:
     - type: Transform
       parent: 1
-      rot: 1.5707963267948966 rad
-      pos: 5.5,14.5
+      pos: 10.5,15.5
     - type: NCCityLocation
     - type: ContainerContainer
       containers:
@@ -1683,51 +2238,65 @@ entities:
     - type: ItemSlots
 - proto: NCComputerNCPDPersonnel
   entities:
-  - uid: 209
+  - uid: 1603
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
-      pos: 5.5,20.5
+      pos: 5.5,14.5
     - type: NCCityLocation
-  - uid: 2115
+  - uid: 2251
     components:
     - type: Transform
       parent: 1
-      pos: 12.5,17.5
+      rot: 1.5707963267948966 rad
+      pos: 14.5,12.5
     - type: NCCityLocation
 - proto: NCComputerPoliceRecords
   entities:
-  - uid: 2114
-    components:
-    - type: Transform
-      parent: 1
-      pos: 29.5,18.5
-    - type: NCCityLocation
-  - uid: 2116
-    components:
-    - type: Transform
-      parent: 1
-      pos: 14.5,13.5
-    - type: NCCityLocation
   - uid: 2117
     components:
     - type: Transform
       parent: 1
-      pos: 20.5,14.5
+      pos: 26.5,21.5
+    - type: NCCityLocation
+  - uid: 2135
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 28.5,14.5
+    - type: NCCityLocation
+  - uid: 2136
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 31.5,14.5
+    - type: NCCityLocation
+  - uid: 2142
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 20.5,13.5
+    - type: NCCityLocation
+  - uid: 2168
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 33.5,17.5
+    - type: NCCityLocation
+  - uid: 2238
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 10.5,22.5
     - type: NCCityLocation
 - proto: NCPoweredlightAzure
   entities:
-  - uid: 176
-    components:
-    - type: Transform
-      parent: 1
-      pos: 31.5,22.5
-  - uid: 208
-    components:
-    - type: Transform
-      parent: 1
-      pos: 30.5,22.5
   - uid: 1595
     components:
     - type: Transform
@@ -1960,29 +2529,6 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 118.5,14.5
-  - uid: 1598
-    components:
-    - type: Transform
-      parent: 1
-      pos: -25.5,9.5
-  - uid: 1601
-    components:
-    - type: Transform
-      parent: 1
-      rot: 1.5707963267948966 rad
-      pos: -25.5,8.5
-  - uid: 1602
-    components:
-    - type: Transform
-      parent: 1
-      rot: 3.141592653589793 rad
-      pos: -24.5,8.5
-  - uid: 1603
-    components:
-    - type: Transform
-      parent: 1
-      rot: 3.141592653589793 rad
-      pos: -24.5,9.5
   - uid: 1604
     components:
     - type: Transform
@@ -2005,11 +2551,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 115.5,191.5
-  - uid: 2078
-    components:
-    - type: Transform
-      parent: 1
-      pos: 36.5,22.5
   - uid: 2079
     components:
     - type: Transform
@@ -5917,6 +6458,33 @@ entities:
     - type: Transform
       parent: 1
       pos: 7.5,13.5
+  - uid: 2276
+    components:
+    - type: Transform
+      parent: 1
+      pos: 22.5,14.5
+  - uid: 2277
+    components:
+    - type: Transform
+      parent: 1
+      pos: 16.5,13.5
+- proto: PhoneInstrument
+  entities:
+  - uid: 2215
+    components:
+    - type: Transform
+      parent: 1
+      pos: 24.11524,21.738007
+  - uid: 2216
+    components:
+    - type: Transform
+      parent: 1
+      pos: 16.099615,21.784882
+  - uid: 2217
+    components:
+    - type: Transform
+      parent: 1
+      pos: 19.92774,21.784882
 - proto: PillCanister
   entities:
   - uid: 1867
@@ -5970,6 +6538,27 @@ entities:
       rot: 3.141592653589793 rad
       pos: 13.685247,-35.47477
     - type: NCCityLocation
+- proto: PottedPlant0
+  entities:
+  - uid: 2218
+    components:
+    - type: Transform
+      parent: 1
+      pos: 15.5,22.5
+- proto: PottedPlant21
+  entities:
+  - uid: 1601
+    components:
+    - type: Transform
+      parent: 1
+      pos: 29.5,22.5
+- proto: PottedPlant22
+  entities:
+  - uid: 2152
+    components:
+    - type: Transform
+      parent: 1
+      pos: 33.5,22.5
 - proto: PowerCellRecharger
   entities:
   - uid: 1880
@@ -6006,6 +6595,93 @@ entities:
     - type: Transform
       parent: 1
       pos: -14.5,-18.5
+- proto: PoweredlightLED
+  entities:
+  - uid: 2125
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 37.5,21.5
+  - uid: 2128
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 32.5,13.5
+  - uid: 2129
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 15.5,20.5
+  - uid: 2130
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 24.5,20.5
+  - uid: 2133
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 36.5,16.5
+  - uid: 2153
+    components:
+    - type: Transform
+      parent: 1
+      pos: 28.5,22.5
+  - uid: 2231
+    components:
+    - type: Transform
+      parent: 1
+      pos: 23.5,15.5
+  - uid: 2260
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 10.5,21.5
+  - uid: 2261
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 5.5,20.5
+  - uid: 2262
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 8.5,15.5
+  - uid: 2263
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 12.5,14.5
+  - uid: 2264
+    components:
+    - type: Transform
+      parent: 1
+      pos: 6.5,22.5
+  - uid: 2265
+    components:
+    - type: Transform
+      parent: 1
+      pos: 16.5,15.5
+  - uid: 2266
+    components:
+    - type: Transform
+      parent: 1
+      pos: 23.5,18.5
+  - uid: 2267
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 14.5,17.5
 - proto: PoweredSmallLight
   entities:
   - uid: 557
@@ -7306,6 +7982,56 @@ entities:
     - type: Transform
       parent: 1
       pos: 120.5,187.5
+  - uid: 2164
+    components:
+    - type: Transform
+      parent: 1
+      pos: 23.5,12.5
+  - uid: 2182
+    components:
+    - type: Transform
+      parent: 1
+      pos: 17.5,19.5
+  - uid: 2184
+    components:
+    - type: Transform
+      parent: 1
+      pos: 12.5,23.5
+  - uid: 2186
+    components:
+    - type: Transform
+      parent: 1
+      pos: 4.5,19.5
+  - uid: 2195
+    components:
+    - type: Transform
+      parent: 1
+      pos: 20.5,19.5
+  - uid: 2197
+    components:
+    - type: Transform
+      parent: 1
+      pos: 16.5,11.5
+  - uid: 2199
+    components:
+    - type: Transform
+      parent: 1
+      pos: 19.5,19.5
+  - uid: 2200
+    components:
+    - type: Transform
+      parent: 1
+      pos: 18.5,19.5
+  - uid: 2201
+    components:
+    - type: Transform
+      parent: 1
+      pos: 21.5,19.5
+  - uid: 2202
+    components:
+    - type: Transform
+      parent: 1
+      pos: 22.5,19.5
 - proto: Retractor
   entities:
   - uid: 1959
@@ -7325,6 +8051,58 @@ entities:
     - type: Transform
       parent: 1
       pos: 107.52204,191.68175
+    - type: NCCityLocation
+- proto: Screen
+  entities:
+  - uid: 2172
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 21.5,23.5
+  - uid: 2173
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 17.5,23.5
+  - uid: 2174
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 19.5,23.5
+  - uid: 2175
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 23.5,23.5
+- proto: ShuttersNormal
+  entities:
+  - uid: 2139
+    components:
+    - type: Transform
+      parent: 1
+      pos: 4.5,19.5
+    - type: NCCityLocation
+  - uid: 2284
+    components:
+    - type: Transform
+      parent: 1
+      pos: 12.5,23.5
+    - type: NCCityLocation
+  - uid: 2285
+    components:
+    - type: Transform
+      parent: 1
+      pos: 16.5,11.5
+    - type: NCCityLocation
+  - uid: 2286
+    components:
+    - type: Transform
+      parent: 1
+      pos: 23.5,12.5
     - type: NCCityLocation
 - proto: SignSurgery
   entities:
@@ -7358,6 +8136,12 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 113.5,184.5
+  - uid: 2229
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 8.5,22.5
 - proto: SinkStemlessWater
   entities:
   - uid: 1962
@@ -7608,6 +8392,12 @@ entities:
       pos: -12.5,20.5
 - proto: Table
   entities:
+  - uid: 199
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 32.5,18.5
   - uid: 2005
     components:
     - type: Transform
@@ -7658,6 +8448,132 @@ entities:
     - type: Transform
       parent: 1
       pos: 128.5,14.5
+  - uid: 2113
+    components:
+    - type: Transform
+      parent: 1
+      pos: 23.5,21.5
+  - uid: 2115
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 31.5,15.5
+  - uid: 2120
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 28.5,15.5
+  - uid: 2121
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 27.5,15.5
+  - uid: 2122
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 26.5,15.5
+  - uid: 2123
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 32.5,15.5
+  - uid: 2124
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 33.5,15.5
+  - uid: 2126
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 27.5,19.5
+  - uid: 2127
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 27.5,20.5
+  - uid: 2141
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 27.5,21.5
+  - uid: 2143
+    components:
+    - type: Transform
+      parent: 1
+      pos: 16.5,21.5
+  - uid: 2151
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 32.5,17.5
+  - uid: 2156
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 32.5,19.5
+  - uid: 2171
+    components:
+    - type: Transform
+      parent: 1
+      pos: 15.5,21.5
+  - uid: 2181
+    components:
+    - type: Transform
+      parent: 1
+      pos: 18.5,21.5
+  - uid: 2183
+    components:
+    - type: Transform
+      parent: 1
+      pos: 24.5,21.5
+  - uid: 2187
+    components:
+    - type: Transform
+      parent: 1
+      pos: 19.5,21.5
+  - uid: 2188
+    components:
+    - type: Transform
+      parent: 1
+      pos: 20.5,21.5
+  - uid: 2189
+    components:
+    - type: Transform
+      parent: 1
+      pos: 21.5,21.5
+  - uid: 2192
+    components:
+    - type: Transform
+      parent: 1
+      pos: 15.5,20.5
+  - uid: 2193
+    components:
+    - type: Transform
+      parent: 1
+      pos: 24.5,20.5
+  - uid: 2241
+    components:
+    - type: Transform
+      parent: 1
+      pos: 13.5,20.5
+  - uid: 2250
+    components:
+    - type: Transform
+      parent: 1
+      pos: 18.5,14.5
 - proto: TableCard
   entities:
   - uid: 1583
@@ -7801,6 +8717,44 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -12.5,-24.5
+- proto: TableFancyBlack
+  entities:
+  - uid: 2158
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 5.5,15.5
+  - uid: 2159
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 6.5,15.5
+  - uid: 2160
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 7.5,15.5
+  - uid: 2161
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 6.5,16.5
+  - uid: 2162
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 6.5,17.5
+  - uid: 2163
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 6.5,18.5
 - proto: TableGlass
   entities:
   - uid: 1551
@@ -7815,6 +8769,56 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -15.5,-30.5
+- proto: TableReinforcedGlass
+  entities:
+  - uid: 2109
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 14.5,13.5
+  - uid: 2116
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 20.5,14.5
+  - uid: 2134
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 21.5,14.5
+  - uid: 2235
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 10.5,21.5
+  - uid: 2236
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 11.5,21.5
+  - uid: 2248
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 15.5,13.5
+  - uid: 2249
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 16.5,13.5
+  - uid: 2269
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 22.5,14.5
 - proto: TableWood
   entities:
   - uid: 140
@@ -7882,6 +8886,13 @@ entities:
       rot: 1.5707963267948966 rad
       pos: 13.5,-38.5
     - type: NCCityLocation
+  - uid: 2230
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 5.5,22.5
+    - type: NCCityLocation
 - proto: WallmountTelescreen
   entities:
   - uid: 141
@@ -7891,12 +8902,12 @@ entities:
       pos: 7.5,15.5
 - proto: WallmountTelevisionFrame
   entities:
-  - uid: 199
+  - uid: 2206
     components:
     - type: Transform
       parent: 1
-      rot: -1.5707963267948966 rad
-      pos: 9.5,17.5
+      rot: 1.5707963267948966 rad
+      pos: 4.5,17.5
 - proto: WallReinforced
   entities:
   - uid: 124
@@ -7914,11 +8925,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 4.5,12.5
-  - uid: 127
-    components:
-    - type: Transform
-      parent: 1
-      pos: 4.5,18.5
   - uid: 128
     components:
     - type: Transform
@@ -8058,7 +9064,7 @@ entities:
     components:
     - type: Transform
       parent: 1
-      pos: 29.5,12.5
+      pos: 25.5,21.5
   - uid: 160
     components:
     - type: Transform
@@ -8068,12 +9074,12 @@ entities:
     components:
     - type: Transform
       parent: 1
-      pos: 30.5,12.5
+      pos: 9.5,21.5
   - uid: 162
     components:
     - type: Transform
       parent: 1
-      pos: 28.5,12.5
+      pos: 14.5,22.5
   - uid: 163
     components:
     - type: Transform
@@ -8114,16 +9120,16 @@ entities:
     - type: Transform
       parent: 1
       pos: 24.5,12.5
+  - uid: 176
+    components:
+    - type: Transform
+      parent: 1
+      pos: 21.5,16.5
   - uid: 178
     components:
     - type: Transform
       parent: 1
       pos: 22.5,12.5
-  - uid: 179
-    components:
-    - type: Transform
-      parent: 1
-      pos: 23.5,12.5
   - uid: 180
     components:
     - type: Transform
@@ -8174,11 +9180,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 16.5,23.5
-  - uid: 190
-    components:
-    - type: Transform
-      parent: 1
-      pos: 12.5,23.5
   - uid: 191
     components:
     - type: Transform
@@ -8274,11 +9275,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 38.5,20.5
-  - uid: 232
-    components:
-    - type: Transform
-      parent: 1
-      pos: 9.5,18.5
   - uid: 233
     components:
     - type: Transform
@@ -8299,11 +9295,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 8.5,12.5
-  - uid: 238
-    components:
-    - type: Transform
-      parent: 1
-      pos: 9.5,17.5
   - uid: 239
     components:
     - type: Transform
@@ -8338,17 +9329,19 @@ entities:
     components:
     - type: Transform
       parent: 1
-      pos: 10.5,20.5
+      rot: 3.141592653589793 rad
+      pos: 26.5,12.5
+  - uid: 246
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 27.5,12.5
   - uid: 247
     components:
     - type: Transform
       parent: 1
       pos: 4.5,14.5
-  - uid: 248
-    components:
-    - type: Transform
-      parent: 1
-      pos: 4.5,19.5
   - uid: 249
     components:
     - type: Transform
@@ -8383,17 +9376,13 @@ entities:
     components:
     - type: Transform
       parent: 1
-      pos: 26.5,12.5
+      rot: 3.141592653589793 rad
+      pos: 30.5,12.5
   - uid: 256
     components:
     - type: Transform
       parent: 1
       pos: 15.5,11.5
-  - uid: 257
-    components:
-    - type: Transform
-      parent: 1
-      pos: 27.5,12.5
   - uid: 258
     components:
     - type: Transform
@@ -8469,11 +9458,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 20.5,23.5
-  - uid: 280
-    components:
-    - type: Transform
-      parent: 1
-      pos: 16.5,11.5
   - uid: 283
     components:
     - type: Transform
@@ -8498,7 +9482,7 @@ entities:
     components:
     - type: Transform
       parent: 1
-      pos: 12.5,20.5
+      pos: 14.5,21.5
   - uid: 2082
     components:
     - type: Transform
@@ -8513,37 +9497,34 @@ entities:
     components:
     - type: Transform
       parent: 1
-      pos: 13.5,20.5
+      rot: 3.141592653589793 rad
+      pos: 28.5,12.5
   - uid: 2085
     components:
     - type: Transform
       parent: 1
-      pos: 14.5,20.5
+      rot: 3.141592653589793 rad
+      pos: 29.5,12.5
   - uid: 2086
     components:
     - type: Transform
       parent: 1
-      pos: 15.5,20.5
+      pos: 14.5,20.5
   - uid: 2087
     components:
     - type: Transform
       parent: 1
-      pos: 15.5,19.5
+      pos: 14.5,19.5
   - uid: 2088
     components:
     - type: Transform
       parent: 1
-      pos: 15.5,18.5
+      pos: 13.5,19.5
   - uid: 2089
     components:
     - type: Transform
       parent: 1
       pos: 14.5,16.5
-  - uid: 2090
-    components:
-    - type: Transform
-      parent: 1
-      pos: 25.5,18.5
   - uid: 2091
     components:
     - type: Transform
@@ -8573,22 +9554,12 @@ entities:
     components:
     - type: Transform
       parent: 1
-      pos: 15.5,17.5
+      pos: 11.5,19.5
   - uid: 2097
     components:
     - type: Transform
       parent: 1
       pos: 20.5,16.5
-  - uid: 2098
-    components:
-    - type: Transform
-      parent: 1
-      pos: 25.5,17.5
-  - uid: 2099
-    components:
-    - type: Transform
-      parent: 1
-      pos: 22.5,16.5
   - uid: 2100
     components:
     - type: Transform
@@ -8619,16 +9590,66 @@ entities:
     - type: Transform
       parent: 1
       pos: 25.5,13.5
-  - uid: 2106
-    components:
-    - type: Transform
-      parent: 1
-      pos: 25.5,19.5
   - uid: 2107
     components:
     - type: Transform
       parent: 1
       pos: 25.5,20.5
+  - uid: 2114
+    components:
+    - type: Transform
+      parent: 1
+      pos: 25.5,19.5
+  - uid: 2154
+    components:
+    - type: Transform
+      parent: 1
+      pos: 4.5,18.5
+  - uid: 2155
+    components:
+    - type: Transform
+      parent: 1
+      pos: 15.5,19.5
+  - uid: 2170
+    components:
+    - type: Transform
+      parent: 1
+      pos: 16.5,19.5
+  - uid: 2180
+    components:
+    - type: Transform
+      parent: 1
+      pos: 10.5,19.5
+  - uid: 2185
+    components:
+    - type: Transform
+      parent: 1
+      pos: 9.5,18.5
+  - uid: 2203
+    components:
+    - type: Transform
+      parent: 1
+      pos: 23.5,19.5
+  - uid: 2204
+    components:
+    - type: Transform
+      parent: 1
+      pos: 24.5,19.5
+  - uid: 2220
+    components:
+    - type: Transform
+      parent: 1
+      pos: 5.5,21.5
+  - uid: 2226
+    components:
+    - type: Transform
+      parent: 1
+      pos: 6.5,21.5
+  - uid: 2227
+    components:
+    - type: Transform
+      parent: 1
+      pos: 8.5,21.5
 - proto: WallSolid
   entities:
   - uid: 14
@@ -12226,6 +13247,13 @@ entities:
     - type: Transform
       parent: 1
       pos: 130.5,10.5
+- proto: WaterCooler
+  entities:
+  - uid: 2268
+    components:
+    - type: Transform
+      parent: 1
+      pos: 35.5,22.5
 - proto: Windoor
   entities:
   - uid: 1543

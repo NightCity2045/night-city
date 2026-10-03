@@ -4,8 +4,8 @@ meta:
   engineVersion: 284.0.2
   forkId: ""
   forkVersion: ""
-  time: 09/27/2026 15:17:29
-  entityCount: 1137
+  time: 10/01/2026 19:26:21
+  entityCount: 1147
 maps:
 - 1
 grids:
@@ -1510,6 +1510,23 @@ entities:
     - type: NCCityLocation
 - proto: NCPoweredlightBlueGray
   entities:
+  - uid: 1037
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 7.5,24.5
+  - uid: 1038
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 27.5,18.5
+  - uid: 1039
+    components:
+    - type: Transform
+      parent: 1
+      pos: 4.5,18.5
   - uid: 1126
     components:
     - type: Transform
@@ -1576,12 +1593,63 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 27.5,26.5
-  - uid: 1137
+  - uid: 1138
     components:
     - type: Transform
       parent: 1
-      rot: 3.141592653589793 rad
-      pos: 13.5,26.5
+      rot: 1.5707963267948966 rad
+      pos: 21.5,17.5
+  - uid: 1139
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 16.5,18.5
+  - uid: 1140
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 16.5,13.5
+  - uid: 1141
+    components:
+    - type: Transform
+      parent: 1
+      pos: 27.5,21.5
+  - uid: 1142
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 32.5,20.5
+  - uid: 1143
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 17.5,28.5
+  - uid: 1144
+    components:
+    - type: Transform
+      parent: 1
+      pos: 19.5,21.5
+  - uid: 1145
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 11.5,21.5
+  - uid: 1146
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 14.5,16.5
+  - uid: 1147
+    components:
+    - type: Transform
+      parent: 1
+      pos: 22.5,21.5
 - proto: NCPoweredlightCyan
   entities:
   - uid: 697
@@ -1893,22 +1961,6 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 13.5,5.5
-- proto: NCVehicleGarageEntrance
-  entities:
-  - uid: 1038
-    components:
-    - type: Transform
-      parent: 1
-      rot: -1.5707963267948966 rad
-      pos: 14.582364,8.548681
-- proto: NCVehicleGarageExit
-  entities:
-  - uid: 1037
-    components:
-    - type: Transform
-      parent: 1
-      rot: -1.5707963267948966 rad
-      pos: 14.582364,7.0721188
 - proto: NCVehicleMasterCylinderItem
   entities:
   - uid: 1040
@@ -2286,14 +2338,6 @@ entities:
           ents: []
           showEnts: True
           occludes: True
-- proto: NCVehicleParkingBay
-  entities:
-  - uid: 1039
-    components:
-    - type: Transform
-      parent: 1
-      rot: -1.5707963267948966 rad
-      pos: 14.476895,9.77915
 - proto: NCVehicleRepairBench
   entities:
   - uid: 430
@@ -2322,6 +2366,12 @@ entities:
     - type: Transform
       parent: 1
       pos: -141.5,102.5
+  - uid: 1137
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 13.5,8.5
 - proto: NoticeBoard
   entities:
   - uid: 283
