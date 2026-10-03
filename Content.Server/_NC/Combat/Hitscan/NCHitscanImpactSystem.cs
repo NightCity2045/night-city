@@ -24,6 +24,7 @@ public sealed partial class NCHitscanImpactSystem : EntitySystem
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private NCCombatTraumaDeliverySystem _delivery = default!;
     [Dependency] private NCMedicalDamageRoutingSystem _routing = default!;
+    [Dependency] private NCTargetingAccuracySystem _accuracy = default!;
     [Dependency] private NCTargetingSelectionSystem _targeting = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
 
@@ -110,6 +111,7 @@ public sealed partial class NCHitscanImpactSystem : EntitySystem
             _timing.CurTime)
         {
             HasPhysicalHitPosition = true,
+            ShooterMoving = args.Raycast.Shooter is { } movingShooter && _accuracy.IsMoving(movingShooter),
         };
 
         if (!_delivery.TryDeliver(impact, out var delivered))

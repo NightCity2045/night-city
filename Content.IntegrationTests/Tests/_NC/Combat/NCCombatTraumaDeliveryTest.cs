@@ -10,11 +10,13 @@ using Content.IntegrationTests.Fixtures.Attributes;
 using Content.Server._NC.Combat.Armor;
 using Content.Server._NC.Combat.Damage;
 using Content.Server._NC.Combat.Projectiles;
+using Content.Server._NC.Combat.Targeting;
 using Content.Server._NC.Medical.Physiology;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Armor;
 using Content.Shared._NC.Combat.Damage;
 using Content.Shared._NC.Combat.Targeting;
+using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared.Damage;
@@ -38,6 +40,7 @@ public sealed class NCCombatTraumaDeliveryTest : GameTest
     [SidedDependency(Side.Server)] private InventorySystem _inventory = default!;
     [SidedDependency(Side.Server)] private NCArmorResolutionSystem _armor = default!;
     [SidedDependency(Side.Server)] private NCCombatTraumaDeliverySystem _delivery = default!;
+    [SidedDependency(Side.Server)] private NCHitLocationSystem _hitLocations = default!;
     [SidedDependency(Side.Server)] private NCProjectileVolleySystem _volleys = default!;
     [SidedDependency(Side.Server)] private NCPhysiologySchedulerSystem _physiology = default!;
 
@@ -153,6 +156,79 @@ public sealed class NCCombatTraumaDeliveryTest : GameTest
                 Assert.That(delivered.LocationSource, Is.EqualTo(NCHitLocationSource.Collision));
             });
         }
+    }
+
+    [Test]
+    [RunOnSide(Side.Server)]
+    public void CalledShotResolvesSelectedRedirectAndPhysicalFallbackDeterministically()
+    {
+        var body = SSpawn("MobHuman");
+        var medicalBody = SComp<NCMedicalBodyComponent>(body);
+        ProtoId<DamageTypePrototype> piercingId = "Piercing";
+        var damage = new DamageSpecifier(_prototypes.Index(piercingId), 1);
+        var sawSelected = false;
+        var sawRedirect = false;
+        var sawCollision = false;
+        var sawMovementPenalty = false;
+
+        for (ulong seed = 1; seed <= 10_000; seed++)
+        {
+            var impact = new NCResolvedCombatImpact(
+                new NCActionResolutionId(Guid.Parse("3e8c88bf-447c-48b9-9094-715bbb7b8abd")),
+                0,
+                0,
+                seed,
+                body,
+                null,
+                null,
+                null,
+                body,
+                NCTargetingMode.SelectedZone,
+                "NCZoneHead",
+                "NCBallisticStandard",
+                damage,
+                new Vector2(0f, 0.1f),
+                Vector2.UnitY,
+                0f,
+                TimeSpan.FromSeconds(1))
+            {
+                HasPhysicalHitPosition = true,
+            };
+
+            Assert.That(_hitLocations.TryResolve(
+                impact,
+                (body, medicalBody),
+                out var actualZone,
+                out _,
+                out var source), Is.True);
+
+            sawSelected |= source == NCHitLocationSource.Selected && actualZone.Id == "NCZoneHead";
+            sawRedirect |= source == NCHitLocationSource.SelectedRedirect && actualZone.Id == "NCZoneChest";
+            sawCollision |= source == NCHitLocationSource.Collision && actualZone.Id == "NCZoneChest";
+
+            if (source == NCHitLocationSource.Selected)
+            {
+                var movingImpact = impact with { ShooterMoving = true };
+                Assert.That(_hitLocations.TryResolve(
+                    movingImpact,
+                    (body, medicalBody),
+                    out _,
+                    out _,
+                    out var movingSource), Is.True);
+                sawMovementPenalty |= movingSource != NCHitLocationSource.Selected;
+            }
+
+            if (sawSelected && sawRedirect && sawCollision && sawMovementPenalty)
+                break;
+        }
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(sawSelected, Is.True, "Head called shots never resolved their selected zone.");
+            Assert.That(sawRedirect, Is.True, "Failed head called shots never redirected to the chest.");
+            Assert.That(sawCollision, Is.True, "Complete called-shot misses never used physical collision anatomy.");
+            Assert.That(sawMovementPenalty, Is.True, "Movement never reduced selected-zone precision.");
+        });
     }
 
     [Test]

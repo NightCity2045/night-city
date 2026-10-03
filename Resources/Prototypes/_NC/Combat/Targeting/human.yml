@@ -6,7 +6,7 @@
   id: NCHumanTargetingAccuracy
   defaultForHumans: true
   movementSpeedThreshold: 0.1
-  movingSpread: 8
+  movingHitChanceMultiplier: 0.75
 
 - type: ncTargetZone
   id: NCZoneHead
@@ -14,6 +14,9 @@
   externalOrganCategory: Head
   medicalRegionCategory: Head
   automaticWeight: 10
+  calledShotHitChance: 0.85
+  calledShotRedirectChance: 0.32
+  calledShotRedirectZones: [ NCZoneChest ]
   armorLocation: Head
   fallbackZone: NCZoneChest
   neighborZones: [ NCZoneChest, NCZoneArmLeft, NCZoneArmRight ]
@@ -26,6 +29,9 @@
   externalOrganCategory: Head
   medicalRegionCategory: Eyes
   automaticWeight: 1
+  calledShotHitChance: 0.05
+  calledShotRedirectChance: 0.28
+  calledShotRedirectZones: [ NCZoneHead, NCZoneChest ]
   armorLocation: Face
   fallbackZone: NCZoneHead
   neighborZones: [ NCZoneHead, NCZoneMouth ]
@@ -39,6 +45,9 @@
   externalOrganCategory: Head
   medicalRegionCategory: Tongue
   automaticWeight: 1
+  calledShotHitChance: 0.05
+  calledShotRedirectChance: 0.28
+  calledShotRedirectZones: [ NCZoneHead, NCZoneChest ]
   armorLocation: Face
   fallbackZone: NCZoneHead
   neighborZones: [ NCZoneHead, NCZoneEyes ]
@@ -52,6 +61,7 @@
   externalOrganCategory: Torso
   medicalRegionCategory: Thorax
   automaticWeight: 28
+  calledShotHitChance: 1
   armorLocation: Chest
   neighborZones: [ NCZoneAbdomen, NCZoneHead, NCZoneArmLeft, NCZoneArmRight ]
   hitBounds: { position: "0.30,0.52", size: "0.40,0.23" }
@@ -63,6 +73,9 @@
   externalOrganCategory: Torso
   medicalRegionCategory: Abdomen
   automaticWeight: 16
+  calledShotHitChance: 0.8
+  calledShotRedirectChance: 0.32
+  calledShotRedirectZones: [ NCZoneChest ]
   armorLocation: Abdomen
   fallbackZone: NCZoneChest
   neighborZones: [ NCZoneChest, NCZoneGroin ]
@@ -75,6 +88,9 @@
   externalOrganCategory: Torso
   medicalRegionCategory: PelvisGroin
   automaticWeight: 4
+  calledShotHitChance: 0.8
+  calledShotRedirectChance: 0.32
+  calledShotRedirectZones: [ NCZoneAbdomen, NCZoneChest ]
   armorLocation: Groin
   fallbackZone: NCZoneAbdomen
   neighborZones: [ NCZoneAbdomen, NCZoneLegLeft, NCZoneLegRight ]
@@ -88,6 +104,9 @@
   externalOrganCategory: ArmLeft
   medicalRegionCategory: ArmLeft
   automaticWeight: 8
+  calledShotHitChance: 0.5
+  calledShotRedirectChance: 0.32
+  calledShotRedirectZones: [ NCZoneChest ]
   armorLocation: ArmLeft
   fallbackZone: NCZoneChest
   neighborZones: [ NCZoneChest, NCZoneHandLeft ]
@@ -101,6 +120,9 @@
   externalOrganCategory: ArmRight
   medicalRegionCategory: ArmRight
   automaticWeight: 8
+  calledShotHitChance: 0.5
+  calledShotRedirectChance: 0.32
+  calledShotRedirectZones: [ NCZoneChest ]
   armorLocation: ArmRight
   fallbackZone: NCZoneChest
   neighborZones: [ NCZoneChest, NCZoneHandRight ]
@@ -114,6 +136,9 @@
   externalOrganCategory: HandLeft
   medicalRegionCategory: HandLeft
   automaticWeight: 2
+  calledShotHitChance: 0.05
+  calledShotRedirectChance: 0.28
+  calledShotRedirectZones: [ NCZoneArmLeft, NCZoneChest ]
   armorLocation: HandLeft
   fallbackZone: NCZoneArmLeft
   neighborZones: [ NCZoneArmLeft ]
@@ -127,6 +152,9 @@
   externalOrganCategory: HandRight
   medicalRegionCategory: HandRight
   automaticWeight: 2
+  calledShotHitChance: 0.05
+  calledShotRedirectChance: 0.28
+  calledShotRedirectZones: [ NCZoneArmRight, NCZoneChest ]
   armorLocation: HandRight
   fallbackZone: NCZoneArmRight
   neighborZones: [ NCZoneArmRight ]
@@ -140,6 +168,9 @@
   externalOrganCategory: LegLeft
   medicalRegionCategory: LegLeft
   automaticWeight: 8
+  calledShotHitChance: 0.3
+  calledShotRedirectChance: 0.3
+  calledShotRedirectZones: [ NCZoneChest ]
   armorLocation: LegLeft
   fallbackZone: NCZoneAbdomen
   neighborZones: [ NCZoneGroin, NCZoneFootLeft ]
@@ -153,6 +184,9 @@
   externalOrganCategory: LegRight
   medicalRegionCategory: LegRight
   automaticWeight: 8
+  calledShotHitChance: 0.3
+  calledShotRedirectChance: 0.3
+  calledShotRedirectZones: [ NCZoneChest ]
   armorLocation: LegRight
   fallbackZone: NCZoneAbdomen
   neighborZones: [ NCZoneGroin, NCZoneFootRight ]
@@ -166,6 +200,9 @@
   externalOrganCategory: FootLeft
   medicalRegionCategory: FootLeft
   automaticWeight: 2
+  calledShotHitChance: 0.05
+  calledShotRedirectChance: 0.26
+  calledShotRedirectZones: [ NCZoneLegLeft, NCZoneChest ]
   armorLocation: FootLeft
   fallbackZone: NCZoneLegLeft
   neighborZones: [ NCZoneLegLeft ]
@@ -179,6 +216,9 @@
   externalOrganCategory: FootRight
   medicalRegionCategory: FootRight
   automaticWeight: 2
+  calledShotHitChance: 0.05
+  calledShotRedirectChance: 0.26
+  calledShotRedirectZones: [ NCZoneLegRight, NCZoneChest ]
   armorLocation: FootRight
   fallbackZone: NCZoneLegRight
   neighborZones: [ NCZoneLegRight ]

@@ -23,6 +23,7 @@ public sealed partial class NCProjectileContextSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
+    [Dependency] private NCTargetingAccuracySystem _accuracy = default!;
     [Dependency] private NCTargetingSelectionSystem _targeting = default!;
 
     private ProtoId<NCProjectileDamageProfileMapPrototype>? _defaultProfileMap;
@@ -53,6 +54,7 @@ public sealed partial class NCProjectileContextSystem : EntitySystem
         pending.IntendedTarget = gun.Comp.Target;
         pending.TargetingMode = selection.Mode;
         pending.SelectedZone = selection.SelectedZone;
+        pending.ShooterMoving = shooter is { } movingShooter && _accuracy.IsMoving(movingShooter);
         pending.CreatedAt = _timing.CurTime;
     }
 
@@ -92,6 +94,7 @@ public sealed partial class NCProjectileContextSystem : EntitySystem
             context.IntendedTarget = pending.IntendedTarget;
             context.TargetingMode = pending.TargetingMode;
             context.SelectedZone = pending.SelectedZone;
+            context.ShooterMoving = pending.ShooterMoving;
             context.Seed = pending.ResolutionId.DeriveSeed(sequence);
             sequence++;
         }

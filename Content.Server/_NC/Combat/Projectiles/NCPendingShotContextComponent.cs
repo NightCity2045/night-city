@@ -33,5 +33,8 @@ public sealed partial class NCPendingShotContextComponent : Component
     public ProtoId<NCTargetZonePrototype>? SelectedZone;
 
     [ViewVariables]
+    public bool ShooterMoving;
+
+    [ViewVariables]
     public TimeSpan CreatedAt;
 }

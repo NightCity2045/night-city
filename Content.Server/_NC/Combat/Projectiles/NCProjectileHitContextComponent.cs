@@ -47,5 +47,8 @@ public sealed partial class NCProjectileHitContextComponent : Component
     public ProtoId<NCTargetZonePrototype>? SelectedZone;
 
     [ViewVariables]
+    public bool ShooterMoving;
+
+    [ViewVariables]
     public ulong Seed;
 }

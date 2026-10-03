@@ -138,6 +138,7 @@ public sealed partial class NCProjectileImpactSystem : EntitySystem
             // same action result and deterministic neighbour spread instead of each rolling their own anatomy.
             ForcedZone = distributedZone,
             HasPhysicalHitPosition = distributedZone == null,
+            ShooterMoving = context.ShooterMoving,
         };
 
         if (!_delivery.TryDeliver(impact, out var delivery))

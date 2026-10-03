@@ -107,6 +107,15 @@ public sealed class NCAnatomyTest : GameTest
                     $"Zone {zone.ID} is missing localization {zone.DisplayName}.");
                 Assert.That(float.IsFinite(zone.AutomaticWeight), Is.True);
                 Assert.That(zone.AutomaticWeight, Is.GreaterThan(0f));
+                Assert.That(float.IsFinite(zone.CalledShotHitChance), Is.True);
+                Assert.That(zone.CalledShotHitChance, Is.InRange(0f, 1f));
+                Assert.That(float.IsFinite(zone.CalledShotRedirectChance), Is.True);
+                Assert.That(zone.CalledShotRedirectChance, Is.InRange(0f, 1f));
+                Assert.That(zone.CalledShotRedirectZones, Is.Unique);
+                Assert.That(zone.CalledShotRedirectZones, Is.SubsetOf(profile.TargetZones));
+                Assert.That(zone.CalledShotRedirectZones, Does.Not.Contain(zoneId));
+                if (zone.CalledShotRedirectChance > 0f)
+                    Assert.That(zone.CalledShotRedirectZones, Is.Not.Empty);
                 Assert.That(zone.Selectable, Is.True);
                 Assert.That(zone.StandardCombatAllowed, Is.True);
                 Assert.That(zone.HitPriority, Is.GreaterThanOrEqualTo(0));
@@ -153,6 +162,17 @@ public sealed class NCAnatomyTest : GameTest
         }
 
         Assert.That(totalWeight, Is.EqualTo(100f).Within(0.001f));
+        var accuracyProfiles = _prototypes.EnumeratePrototypes<NCTargetingAccuracyProfilePrototype>()
+            .Where(candidate => candidate.DefaultForHumans)
+            .ToArray();
+        Assert.That(accuracyProfiles, Has.Length.EqualTo(1));
+        Assert.Multiple(() =>
+        {
+            Assert.That(float.IsFinite(accuracyProfiles[0].MovementSpeedThreshold), Is.True);
+            Assert.That(accuracyProfiles[0].MovementSpeedThreshold, Is.GreaterThanOrEqualTo(0f));
+            Assert.That(float.IsFinite(accuracyProfiles[0].MovingHitChanceMultiplier), Is.True);
+            Assert.That(accuracyProfiles[0].MovingHitChanceMultiplier, Is.InRange(0f, 1f));
+        });
         Assert.That(doll.StatusLayers.Single(layer => layer.Id == "torso").SourceZones.Select(zone => zone.Id),
             Is.EquivalentTo(new[] { "NCZoneChest", "NCZoneAbdomen" }));
         Assert.That(doll.StatusLayers.Single(layer => layer.Id == "head").SourceZones.Select(zone => zone.Id),

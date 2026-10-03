@@ -5,18 +5,15 @@
 using Content.Shared._NC.Combat.Targeting;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Prototypes;
-using Robust.Shared.Random;
 
 namespace Content.Server._NC.Combat.Targeting;
 
 /// <summary>
-/// Applies the server-authoritative trajectory penalty for anatomical targeting while moving.
+/// Resolves the server-authoritative movement penalty for deliberate anatomical targeting.
 /// </summary>
 public sealed partial class NCTargetingAccuracySystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
-    [Dependency] private IRobustRandom _random = default!;
-    [Dependency] private NCTargetingSelectionSystem _targeting = default!;
 
     private ProtoId<NCTargetingAccuracyProfilePrototype>? _defaultProfile;
 
@@ -29,29 +26,34 @@ public sealed partial class NCTargetingAccuracySystem : EntitySystem
     }
 
     /// <summary>
-    /// Returns the authoritative base trajectory after applying any movement penalty.
-    /// Automatic targeting and stationary deliberate shots retain their original direction.
+    /// Captures local shooter movement when the attack is accepted. Grid motion does not reduce precision.
     /// </summary>
-    public Angle ApplyMovementSpread(EntityUid shooter, Angle direction)
+    public bool IsMoving(EntityUid shooter)
     {
-        var selection = _targeting.GetSelection(shooter);
-        if (selection.Mode != NCTargetingMode.SelectedZone ||
-            !TryGetDefaultProfile(out var profile) ||
+        if (!TryGetDefaultProfile(out var profile) ||
             !TryComp<PhysicsComponent>(shooter, out var body))
         {
-            return direction;
+            return false;
         }
 
         var threshold = Math.Max(0f, profile.MovementSpeedThreshold);
-        if (body.LinearVelocity.LengthSquared() <= threshold * threshold)
-            return direction;
+        return body.LinearVelocity.LengthSquared() > threshold * threshold;
+    }
 
-        var spread = Math.Max(0f, (float) profile.MovingSpread.Theta);
-        if (spread <= 0f || !float.IsFinite(spread))
-            return direction;
+    /// <summary>
+    /// Applies the data-driven movement modifier without changing the physical trajectory.
+    /// </summary>
+    public float ResolveCalledShotHitChance(float baseChance, bool shooterMoving)
+    {
+        var chance = Math.Clamp(float.IsFinite(baseChance) ? baseChance : 0f, 0f, 1f);
+        if (!shooterMoving || !TryGetDefaultProfile(out var profile))
+            return chance;
 
-        var halfSpread = new Angle(spread / 2f);
-        return direction + _random.NextAngle(-halfSpread, halfSpread);
+        var multiplier = Math.Clamp(
+            float.IsFinite(profile.MovingHitChanceMultiplier) ? profile.MovingHitChanceMultiplier : 0f,
+            0f,
+            1f);
+        return chance * multiplier;
     }
 
     private bool TryGetDefaultProfile(out NCTargetingAccuracyProfilePrototype profile)

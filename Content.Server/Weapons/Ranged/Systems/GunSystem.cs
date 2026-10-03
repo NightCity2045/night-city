@@ -1,8 +1,5 @@
 using System.Numerics;
 using Content.Server.Cargo.Systems;
-// NC start - movement destabilizes deliberate anatomical targeting.
-using Content.Server._NC.Combat.Targeting;
-// NC end
 // NC start - authoritative physical projectile context adapter.
 using Content.Server._NC.Combat.Projectiles;
 // NC end
@@ -36,10 +33,6 @@ public sealed partial class GunSystem : SharedGunSystem
     // NC start - snapshots private zone intent only after pre-shot cancellation succeeds.
     [Dependency] private NCProjectileContextSystem _ncProjectileContext = default!;
     // NC end
-    // NC start - server-authoritative movement spread for deliberate anatomical targeting.
-    [Dependency] private NCTargetingAccuracySystem _ncTargetingAccuracy = default!;
-    // NC end
-
     private const float DamagePitchVariation = 0.05f;
 
     public override void Initialize()
@@ -106,11 +99,7 @@ public sealed partial class GunSystem : SharedGunSystem
         var toMap = TransformSystem.ToMapCoordinates(toCoordinates).Position;
         var mapDirection = toMap - fromMap.Position;
         var mapAngle = mapDirection.ToAngle();
-        // NC-Edit-Start: moving while selecting an anatomical zone reduces the chance of hitting the body at all.
-        if (user is { } shooter)
-            mapAngle = _ncTargetingAccuracy.ApplyMovementSpread(shooter, mapAngle);
         var angle = GetRecoilAngle(Timing.CurTime, gun, mapAngle);
-        // NC-Edit-End
 
         // NC start - distribute one consumed cartridge per trajectory for the Mallorian's synchronous volley.
         var ncVolley = CompOrNull<NCMallorianAltFireComponent>(gun);

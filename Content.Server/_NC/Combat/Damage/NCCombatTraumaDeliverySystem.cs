@@ -59,6 +59,11 @@ public readonly record struct NCResolvedCombatImpact(
     /// Synthetic source positions must not masquerade as anatomical collision evidence.
     /// </summary>
     public bool HasPhysicalHitPosition { get; init; }
+
+    /// <summary>
+    /// Shot-time snapshot used only for selected-zone precision. It never changes physical hit confirmation.
+    /// </summary>
+    public bool ShooterMoving { get; init; }
 }
 
 /// <summary>

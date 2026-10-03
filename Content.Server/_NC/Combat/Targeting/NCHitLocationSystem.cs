@@ -17,8 +17,13 @@ namespace Content.Server._NC.Combat.Targeting;
 /// </summary>
 public sealed partial class NCHitLocationSystem : EntitySystem
 {
+    private const ulong CalledShotHitSalt = 0xA0761D6478BD642FUL;
+    private const ulong CalledShotRedirectSalt = 0xE7037ED1A0B428DBUL;
+    private const ulong CalledShotZoneSalt = 0x8EBC6AF09C88C6E3UL;
+
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCAnatomySystem _anatomy = default!;
+    [Dependency] private NCTargetingAccuracySystem _accuracy = default!;
     [Dependency] private StandingStateSystem _standing = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
 
@@ -43,9 +48,8 @@ public sealed partial class NCHitLocationSystem : EntitySystem
         if (impact.IntendedTarget == body.Owner &&
             impact.TargetingMode == NCTargetingMode.SelectedZone &&
             impact.SelectedZone is { } selected &&
-            _anatomy.TryResolveSelectedZone(body, selected, out actualZone, out region))
+            TryResolveCalledShot(impact, body, selected, out actualZone, out region, out source))
         {
-            source = NCHitLocationSource.Selected;
             return true;
         }
 
@@ -59,6 +63,57 @@ public sealed partial class NCHitLocationSystem : EntitySystem
         if (TryResolveWeighted(body, impact.Seed, impact.ImpactDirection, out actualZone, out region))
         {
             source = NCHitLocationSource.Weighted;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Resolves anatomical precision after physics has already confirmed contact with the body.
+    /// A complete called-shot miss falls through to collision or weighted anatomy in <see cref="TryResolve"/>.
+    /// </summary>
+    private bool TryResolveCalledShot(
+        in NCResolvedCombatImpact impact,
+        Entity<NCMedicalBodyComponent?> body,
+        ProtoId<NCTargetZonePrototype> selected,
+        out ProtoId<NCTargetZonePrototype> actualZone,
+        out EntityUid region,
+        out NCHitLocationSource source)
+    {
+        actualZone = default;
+        region = default;
+        source = default;
+        if (!_prototypes.TryIndex(selected, out NCTargetZonePrototype? zone))
+            return false;
+
+        var hitChance = _accuracy.ResolveCalledShotHitChance(zone.CalledShotHitChance, impact.ShooterMoving);
+        if (Roll(impact.Seed, CalledShotHitSalt) < hitChance &&
+            _anatomy.TryResolveSelectedZone(body, selected, out actualZone, out region))
+        {
+            source = NCHitLocationSource.Selected;
+            return true;
+        }
+
+        var redirectChance = Math.Clamp(
+            float.IsFinite(zone.CalledShotRedirectChance) ? zone.CalledShotRedirectChance : 0f,
+            0f,
+            1f);
+        if (Roll(impact.Seed, CalledShotRedirectSalt) >= redirectChance ||
+            zone.CalledShotRedirectZones.Count == 0)
+        {
+            return false;
+        }
+
+        // A deterministic offset keeps replay stable. The one-pass scan tolerates missing optional anatomy.
+        var offset = (int) (SplitMix64(impact.Seed ^ CalledShotZoneSalt) % (uint) zone.CalledShotRedirectZones.Count);
+        for (var i = 0; i < zone.CalledShotRedirectZones.Count; i++)
+        {
+            var candidate = zone.CalledShotRedirectZones[(offset + i) % zone.CalledShotRedirectZones.Count];
+            if (!_anatomy.TryResolveSelectedZone(body, candidate, out actualZone, out region))
+                continue;
+
+            source = NCHitLocationSource.SelectedRedirect;
             return true;
         }
 
@@ -193,5 +248,10 @@ public sealed partial class NCHitLocationSystem : EntitySystem
     private static float ToUnitInterval(ulong value)
     {
         return (float) ((value >> 40) * (1.0 / (1UL << 24)));
+    }
+
+    private static float Roll(ulong seed, ulong salt)
+    {
+        return ToUnitInterval(SplitMix64(seed ^ salt));
     }
 }

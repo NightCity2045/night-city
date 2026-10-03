@@ -29,8 +29,9 @@ public sealed partial class NCTargetingAccuracyProfilePrototype : IPrototype
     public float MovementSpeedThreshold { get; private set; } = 0.1f;
 
     /// <summary>
-    /// Full angular cone added to a deliberately aimed shot while the shooter is moving.
+    /// Multiplier applied to the selected-zone hit chance while the shooter is moving.
+    /// Movement affects anatomical precision only; physical projectile direction remains unchanged.
     /// </summary>
     [DataField]
-    public Angle MovingSpread { get; private set; } = Angle.FromDegrees(8);
+    public float MovingHitChanceMultiplier { get; private set; } = 0.75f;
 }

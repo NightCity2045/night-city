@@ -37,6 +37,25 @@ public sealed partial class NCTargetZonePrototype : IPrototype
     [DataField]
     public float AutomaticWeight { get; private set; }
 
+    /// <summary>
+    /// Chance that a physical hit lands on this deliberately selected anatomical zone.
+    /// A failed roll changes the anatomical location; it never erases an impact already confirmed by physics.
+    /// </summary>
+    [DataField]
+    public float CalledShotHitChance { get; private set; } = 1f;
+
+    /// <summary>
+    /// Chance that a failed called shot is redirected to a nearby configured zone before physical fallback.
+    /// </summary>
+    [DataField]
+    public float CalledShotRedirectChance { get; private set; }
+
+    /// <summary>
+    /// Ordered zones eligible for deterministic redirection after a failed called shot.
+    /// </summary>
+    [DataField]
+    public List<ProtoId<NCTargetZonePrototype>> CalledShotRedirectZones { get; private set; } = [];
+
     [DataField]
     public bool Selectable { get; private set; } = true;
 
@@ -108,6 +127,7 @@ public enum NCHitLocationSource : byte
     Selected,
     Collision,
     Weighted,
+    SelectedRedirect,
 }
 
 public enum NCArmorLocation : byte
