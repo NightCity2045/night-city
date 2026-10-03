@@ -2,6 +2,12 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+- type: ncTargetingAccuracyProfile
+  id: NCHumanTargetingAccuracy
+  defaultForHumans: true
+  movementSpeedThreshold: 0.1
+  movingSpread: 8
+
 - type: ncTargetZone
   id: NCZoneHead
   displayName: nc-target-zone-head

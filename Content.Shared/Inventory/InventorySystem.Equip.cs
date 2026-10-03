@@ -252,24 +252,10 @@ public abstract partial class InventorySystem
             return false;
 
         DebugTools.Assert(slotDefinition.Name == slot);
-        if (slotDefinition.DependsOn != null)
-        {
-            if (!TryGetSlotEntity(target, slotDefinition.DependsOn, out EntityUid? slotEntity, inventory))
-                return false;
-
-            if (slotDefinition.DependsOnComponents is { } componentRegistry)
-            {
-                foreach (var (_, entry) in componentRegistry)
-                {
-                    if (!HasComp(slotEntity, entry.Component.GetType()))
-                        return false;
-
-                    if (TryComp<AllowSuitStorageComponent>(slotEntity, out var comp) &&
-                        _whitelistSystem.IsWhitelistFailOrNull(comp.Whitelist, itemUid))
-                        return false;
-                }
-            }
-        }
+        // NC-Edit-Start: allow a dependent slot to be provided by any configured equipment layer.
+        if (!AreSlotDependenciesSatisfied(target, itemUid, slotDefinition, inventory))
+            return false;
+        // NC-Edit-End
 
         var fittingInPocket = slotDefinition.SlotFlags.HasFlag(SlotFlags.POCKET) &&
                               item != null &&
@@ -479,11 +465,23 @@ public abstract partial class InventorySystem
         // But checking this in a EntGotRemovedFromContainerMessage subscription is fundamentally incompatible with the current prediction API for popups and audio since we don't have a user.
         foreach (var slotDef in inventory.Slots)
         {
-            if (slotDef != slotDefinition && slotDef.DependsOn == slotDefinition.Name)
+            // NC-Edit-Start: keep the dependent item equipped while another valid provider remains.
+            var removedDependency = slotDef.DependsOn == slotDefinition.Name ||
+                                    Array.IndexOf(slotDef.DependsOnAny, slotDefinition.Name) >= 0;
+            if (slotDef == slotDefinition || !removedDependency)
+                continue;
+
+            if (slotDef.DependsOnAny.Length > 0 &&
+                TryGetSlotEntity(target, slotDef.Name, out EntityUid? dependentItem, inventory) &&
+                dependentItem is { } item &&
+                AreSlotDependenciesSatisfied(target, item, slotDef, inventory))
             {
-                //this recursive call might be risky
-                TryUnequip(actor, target, slotDef.Name, out _, ref itemsDropped, true, true, predicted, inventory, reparent: reparent);
+                continue;
             }
+
+            //this recursive call might be risky
+            TryUnequip(actor, target, slotDef.Name, out _, ref itemsDropped, true, true, predicted, inventory, reparent: reparent);
+            // NC-Edit-End
         }
 
         // we check if any items were dropped, and make a popup if they were.

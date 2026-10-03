@@ -152,15 +152,24 @@ public abstract partial class NCSharedZLevelsSystem
 
         if (zPhysicsComponent.LocalPosition < 0)
         {
-            if (TryMoveDownOrChasm(entity))
+            // NC-Edit-Start: descend through the map only at the lower edge of a staircase.
+            // Transitioning on the first negative height places the body near the top of the paired up staircase,
+            // which immediately sends it back to the previous floor when it tries to leave.
+            var staircaseDescent = zPhysicsComponent.CachedGroundIsSlope &&
+                                   zPhysicsComponent.CachedGroundHeight <= -StaircaseUpperEdgeHeight;
+            var canMoveDown = !zPhysicsComponent.CachedGroundIsSlope || staircaseDescent;
+
+            if (canMoveDown && TryMoveDownOrChasm(entity))
             {
                 zPhysicsComponent.LocalPosition += 1;
-                if (zPhysicsComponent is { CachedStickyGround: false, Fallable: true })
+                if (!staircaseDescent &&
+                    zPhysicsComponent is { CachedStickyGround: false, Fallable: true })
                 {
                     var fallEv = new NCZLevelFallMapEvent();
                     RaiseLocalEvent(entity, ref fallEv);
                 }
             }
+            // NC-Edit-End
         }
 
         if (zPhysicsComponent.LocalPosition >= 1)

@@ -32,3 +32,65 @@ nc-reagent-name-synthetic-oxygen-carrier = synthetic oxygen carrier
 nc-reagent-desc-synthetic-oxygen-carrier = Temporarily adds oxygen-carrying capacity to circulating fluid without replacing lost blood volume.
 nc-reagent-name-cyberware-coolant-agent = cyberware coolant agent
 nc-reagent-desc-cyberware-coolant-agent = Circulates through compatible implants and removes measured excess heat; it does not repair organic tissue.
+
+# Prefilled syringes
+
+ent-NCSyringeTraumaAnalgesic = trauma analgesic syringe
+    .desc = { nc-reagent-desc-trauma-analgesic }
+    .suffix = { "" }
+
+ent-NCSyringeSurgicalAnesthetic = surgical anesthetic syringe
+    .desc = { nc-reagent-desc-surgical-anesthetic }
+    .suffix = { "" }
+
+ent-NCSyringeSedative = clinical sedative syringe
+    .desc = { nc-reagent-desc-sedative }
+    .suffix = { "" }
+
+ent-NCSyringeVasopressor = vasopressor syringe
+    .desc = { nc-reagent-desc-vasopressor }
+    .suffix = { "" }
+
+ent-NCSyringeAntiarrhythmic = antiarrhythmic syringe
+    .desc = { nc-reagent-desc-antiarrhythmic }
+    .suffix = { "" }
+
+ent-NCSyringeRespiratoryStimulant = respiratory stimulant syringe
+    .desc = { nc-reagent-desc-respiratory-stimulant }
+    .suffix = { "" }
+
+ent-NCSyringeBroadAntibiotic = broad-spectrum antibiotic syringe
+    .desc = { nc-reagent-desc-broad-antibiotic }
+    .suffix = { "" }
+
+ent-NCSyringeAntitoxin = systemic antitoxin syringe
+    .desc = { nc-reagent-desc-antitoxin }
+    .suffix = { "" }
+
+ent-NCSyringeImmunosuppressant = immunosuppressant syringe
+    .desc = { nc-reagent-desc-immunosuppressant }
+    .suffix = { "" }
+
+ent-NCSyringeProcoagulant = procoagulant syringe
+    .desc = { nc-reagent-desc-procoagulant }
+    .suffix = { "" }
+
+ent-NCSyringeStimulant = clinical stimulant syringe
+    .desc = { nc-reagent-desc-stimulant }
+    .suffix = { "" }
+
+ent-NCSyringeAnticoagulant = anticoagulant syringe
+    .desc = { nc-reagent-desc-anticoagulant }
+    .suffix = { "" }
+
+ent-NCSyringeVasodilator = vasodilator syringe
+    .desc = { nc-reagent-desc-vasodilator }
+    .suffix = { "" }
+
+ent-NCSyringeSyntheticOxygenCarrier = synthetic oxygen carrier syringe
+    .desc = { nc-reagent-desc-synthetic-oxygen-carrier }
+    .suffix = { "" }
+
+ent-NCSyringeCyberwareCoolantAgent = cyberware coolant agent syringe
+    .desc = { nc-reagent-desc-cyberware-coolant-agent }
+    .suffix = { "" }

@@ -32,3 +32,65 @@ nc-reagent-name-synthetic-oxygen-carrier = синтетический перен
 nc-reagent-desc-synthetic-oxygen-carrier = Временно добавляет циркулирующей жидкости кислородную ёмкость, не восполняя потерю объёма крови.
 nc-reagent-name-cyberware-coolant-agent = охлаждающий агент для киберимплантов
 nc-reagent-desc-cyberware-coolant-agent = Циркулирует через совместимые импланты и отводит измеримый избыток тепла; органические ткани не восстанавливает.
+
+# Предзаполненные шприцы
+
+ent-NCSyringeTraumaAnalgesic = шприц с травматологическим анальгетиком
+    .desc = { nc-reagent-desc-trauma-analgesic }
+    .suffix = { "" }
+
+ent-NCSyringeSurgicalAnesthetic = шприц с хирургическим анестетиком
+    .desc = { nc-reagent-desc-surgical-anesthetic }
+    .suffix = { "" }
+
+ent-NCSyringeSedative = шприц с клиническим седативом
+    .desc = { nc-reagent-desc-sedative }
+    .suffix = { "" }
+
+ent-NCSyringeVasopressor = шприц с вазопрессором
+    .desc = { nc-reagent-desc-vasopressor }
+    .suffix = { "" }
+
+ent-NCSyringeAntiarrhythmic = шприц с антиаритмиком
+    .desc = { nc-reagent-desc-antiarrhythmic }
+    .suffix = { "" }
+
+ent-NCSyringeRespiratoryStimulant = шприц со стимулятором дыхания
+    .desc = { nc-reagent-desc-respiratory-stimulant }
+    .suffix = { "" }
+
+ent-NCSyringeBroadAntibiotic = шприц с антибиотиком широкого спектра
+    .desc = { nc-reagent-desc-broad-antibiotic }
+    .suffix = { "" }
+
+ent-NCSyringeAntitoxin = шприц с системным антитоксином
+    .desc = { nc-reagent-desc-antitoxin }
+    .suffix = { "" }
+
+ent-NCSyringeImmunosuppressant = шприц с иммунодепрессантом
+    .desc = { nc-reagent-desc-immunosuppressant }
+    .suffix = { "" }
+
+ent-NCSyringeProcoagulant = шприц с прокоагулянтом
+    .desc = { nc-reagent-desc-procoagulant }
+    .suffix = { "" }
+
+ent-NCSyringeStimulant = шприц с клиническим стимулятором
+    .desc = { nc-reagent-desc-stimulant }
+    .suffix = { "" }
+
+ent-NCSyringeAnticoagulant = шприц с антикоагулянтом
+    .desc = { nc-reagent-desc-anticoagulant }
+    .suffix = { "" }
+
+ent-NCSyringeVasodilator = шприц с вазодилататором
+    .desc = { nc-reagent-desc-vasodilator }
+    .suffix = { "" }
+
+ent-NCSyringeSyntheticOxygenCarrier = шприц с синтетическим переносчиком кислорода
+    .desc = { nc-reagent-desc-synthetic-oxygen-carrier }
+    .suffix = { "" }
+
+ent-NCSyringeCyberwareCoolantAgent = шприц с охлаждающим агентом для киберимплантов
+    .desc = { nc-reagent-desc-cyberware-coolant-agent }
+    .suffix = { "" }
