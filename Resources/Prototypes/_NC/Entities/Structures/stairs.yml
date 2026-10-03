@@ -23,6 +23,6 @@
   components:
   - type: NCZLevelHighGround
     heightCurve:
-    - 1
     - 0
+    - -1
     stick: true

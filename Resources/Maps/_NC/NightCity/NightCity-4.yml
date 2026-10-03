@@ -30,6 +30,7 @@ entities:
     - type: Transform
     - type: Map
       mapPaused: True
+    - type: AlwaysPowered
     - type: GridTree
     - type: Broadphase
     - type: OccluderTree

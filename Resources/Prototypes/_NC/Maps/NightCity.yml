@@ -45,8 +45,6 @@
               Oxygen: 21.824879
               Nitrogen: 82.10312
         - type: NCUniformAir
-        # All devices on every Night City level operate independently of APC networks.
-        - type: AlwaysPowered
         - type: MapLight
           ambientLightColor: "#D8B059FF"
         - type: NCDayNightCycle
