@@ -16,7 +16,7 @@ RELEASE_DIR = "release"
 # Forks should change these to publish to their own infrastructure.
 #
 ROBUST_CDN_URL = "https://cdn.dark-haven.xyz/"
-FORK_ID = "wizards"
+FORK_ID = "EchoCyber"
 
 def main():
     parser = argparse.ArgumentParser()
