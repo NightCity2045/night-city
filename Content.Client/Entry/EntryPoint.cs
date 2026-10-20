@@ -1,4 +1,3 @@
-using Content.Client._NC.AstraGraph;
 using Content.Client.Administration.Managers;
 using Content.Client.Changelog;
 using Content.Client.Chat.Managers;
@@ -81,7 +80,6 @@ namespace Content.Client.Entry
         [Dependency] private IEntitySystemManager _entitySystemManager = default!;
         [Dependency] private ClientsidePlaytimeTrackingManager _clientsidePlaytimeManager = default!;
         [Dependency] private ClientFeedbackManager _feedbackManager = null!;
-        [Dependency] private AstraClientNet _astraNet = default!;
 
         public override void PreInit()
         {
@@ -98,10 +96,6 @@ namespace Content.Client.Entry
         {
             Dependencies.BuildGraph();
             Dependencies.InjectDependencies(this);
-
-            // NC-Edit-Start
-            AstraContentEntry.Load(Dependencies);
-            // NC-Edit-End
 
             _contentLoc.Initialize();
             _componentFactory.DoAutoRegistrations();
@@ -137,7 +131,6 @@ namespace Content.Client.Entry
             _prototypeManager.RegisterIgnore("codewordGenerator");
             _prototypeManager.RegisterIgnore("codewordFaction");
 
-            AstraContentEntry.InstallSchemas(_componentFactory, Dependencies);
             _componentFactory.GenerateNetIds();
             _adminManager.Initialize();
             _screenshotHook.Initialize();
@@ -181,7 +174,6 @@ namespace Content.Client.Entry
             _documentParsingManager.Initialize();
             _titleWindowManager.Initialize();
             _feedbackManager.Initialize();
-            _astraNet.Initialize();
 
             _baseClient.RunLevelChanged += (_, args) =>
             {

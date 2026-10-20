@@ -323,6 +323,3 @@ error.glsl
 # NC
 .rules/
 .plan/
-
-# AstraGraph runtime revisions. Project graphs live in Resources/AstraGraph.
-/data/

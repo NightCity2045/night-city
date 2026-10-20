@@ -125,12 +125,6 @@
         NameColor = 1 << 21,
 
         /// <summary>
-        ///     Opens the AstraGraph authoring environment.
-        ///     Publish, rollback, and engine access stay in AstraGraph's own permissions.
-        /// </summary>
-        AstraGraph = 1u << 24, // NC
-
-        /// <summary>
         ///     Dangerous host permissions like scsi.
         /// </summary>
         Host = 1u << 31,

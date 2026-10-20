@@ -101,7 +101,3 @@
 - Flags: ADMIN
   Commands:
     - admin_overlay
-
-- Flags: ASTRAGRAPH
-  Commands:
-    - astra

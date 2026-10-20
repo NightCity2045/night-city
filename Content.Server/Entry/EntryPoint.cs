@@ -1,4 +1,3 @@
-using Content.Server._NC.AstraGraph;
 using Content.Server.Acz;
 using Content.Server.Administration;
 using Content.Server.Administration.Logs;
@@ -98,10 +97,6 @@ namespace Content.Server.Entry
             Dependencies.BuildGraph();
             Dependencies.InjectDependencies(this);
 
-            // NC-Edit-Start
-            AstraContentEntry.Load(Dependencies);
-            // NC-Edit-End
-
             LoadConfigPresets(_cfg, _res, _log.GetSawmill("configpreset"));
 
             var aczProvider = new ContentMagicAczProvider(Dependencies);
@@ -110,7 +105,6 @@ namespace Content.Server.Entry
             _factory.DoAutoRegistrations();
             _factory.IgnoreMissingComponents("Visuals");
             _factory.RegisterIgnore(IgnoredComponents.List);
-            AstraContentEntry.InstallSchemas(_factory, Dependencies);
             _factory.GenerateNetIds();
 
             _proto.RegisterIgnore("parallax");

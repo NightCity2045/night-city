@@ -10,13 +10,6 @@ namespace Content.Packaging;
 
 public static class ClientPackaging
 {
-    // NC-Edit-Start
-    private static readonly List<string> ClientNotExtraAssemblies = new()
-    {
-        "JetBrains.Annotations",
-    };
-    // NC-Edit-End
-
     /// <summary>
     /// Be advised this can be called from server packaging during a HybridACZ build.
     /// </summary>
@@ -86,19 +79,12 @@ public static class ClientPackaging
 
         var inputPass = graph.Input;
 
-        // NC-Edit-Start
-        // AstraGraph lives in non-Content assemblies, so package every client dependency that the launcher does not provide.
-        var sourcePath = Path.Combine(contentDir, "bin", "Content.Client");
-        var deps = DepsHandler.Load(Path.Combine(sourcePath, "Content.Client.deps.json"));
-        var contentAssemblies = GetContentAssemblyNamesToCopy(deps);
-
         await RobustSharedPackaging.WriteContentAssemblies(
             inputPass,
             contentDir,
             "Content.Client",
-            contentAssemblies,
+            new[] { "Content.Client", "Content.Shared", "Content.Shared.Database" },
             cancel: cancel);
-        // NC-Edit-End
 
         await RobustClientPackaging.WriteClientResources(
             contentDir,
@@ -108,25 +94,4 @@ public static class ClientPackaging
 
         inputPass.InjectFinished();
     }
-
-    // NC-Edit-Start
-    private static IEnumerable<string> GetContentAssemblyNamesToCopy(DepsHandler deps)
-    {
-        var depsContent = deps.RecursiveGetLibrariesFrom("Content.Client").SelectMany(GetLibraryNames);
-        var depsRobust = deps.RecursiveGetLibrariesFrom("Robust.Client");
-
-        // WebView is supplied as a launcher engine module rather than as content.
-        if (deps.Libraries.ContainsKey("Robust.Client.WebView"))
-            depsRobust.UnionWith(deps.RecursiveGetLibrariesFrom("Robust.Client.WebView"));
-
-        var robustAssemblies = depsRobust.SelectMany(GetLibraryNames).ToHashSet();
-        return depsContent
-            .Except(robustAssemblies)
-            .Select(path => path[..^4])
-            .Where(path => !ClientNotExtraAssemblies.Any(path.StartsWith))
-            .Order(StringComparer.Ordinal);
-
-        IEnumerable<string> GetLibraryNames(string library) => deps.Libraries[library].GetDllNames();
-    }
-    // NC-Edit-End
 }
