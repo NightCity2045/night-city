@@ -84,6 +84,7 @@ public sealed partial class NCCyberwareSystem
     {
         if (state == null || string.IsNullOrWhiteSpace(state.EntityPrototype) ||
             state.EntityPrototype.Length > 128 || state.StableInstanceId == Guid.Empty ||
+            string.IsNullOrWhiteSpace(state.Profile.Id) ||
             !_prototypes.TryIndex(state.Profile, out NCCyberwarePrototype? profile) ||
             !_prototypes.TryIndex<EntityPrototype>(state.EntityPrototype, out var entityPrototype) ||
             !entityPrototype.TryComp<NCCyberwareComponent>(out var definition, _componentFactory) ||
@@ -91,8 +92,13 @@ public sealed partial class NCCyberwareSystem
             !entityPrototype.TryComp<NCOrganIntegrityComponent>(out _, _componentFactory) ||
             !Finite(state.MaximumIntegrity, float.Epsilon, 1_000_000f) ||
             MathF.Abs(state.MaximumIntegrity - profile.MaximumIntegrity) > 0.001f ||
-            !Finite(state.CurrentIntegrity, 0f, state.MaximumIntegrity) ||
-            !Finite(state.CurrentPower, 0f, profile.PowerCapacity) ||
+            !Unit(state.PermanentDamage) ||
+            !Finite(state.CurrentIntegrity, 0f,
+                NCCyberwareCondition.ServiceCeiling(state.MaximumIntegrity, state.PermanentDamage)) ||
+            !ValidateAssembly(profile, state.Assembly, state.StableInstanceId) ||
+            !ValidatePowerBus(entityPrototype, state) ||
+            state.Assembly?.ValidatedRevision != null && state.CurrentIntegrity <= 0f ||
+            state.CurrentPower != 0f ||
             !Finite(state.Heat, 0f, profile.HeatCapacity) ||
             !Finite(state.Load, 0f, 1f) ||
             state.EmpDisabledUntil < TimeSpan.FromDays(-3_650_000) ||
@@ -133,8 +139,17 @@ public sealed partial class NCCyberwareSystem
             return false;
         }
 
-        module.StateInitialized = true;
+        var previousIdentity = module.StableInstanceId;
         module.StableInstanceId = state.StableInstanceId;
+        if (!TryRestoreAssembly(moduleUid, _prototypes.Index(state.Profile), state.Assembly) ||
+            !TryRestorePowerBus(moduleUid, state.PowerBus))
+        {
+            module.StableInstanceId = previousIdentity;
+            return false;
+        }
+        module.StateInitialized = true;
+        module.PermanentDamage = state.PermanentDamage;
+        module.ThermalShutdown = state.ThermalShutdown;
         module.InstalledSlot = state.Slot;
         module.CurrentPower = state.CurrentPower;
         module.Heat = state.Heat;
@@ -252,6 +267,10 @@ public sealed partial class NCCyberwareSystem
             NeuralIntegrity = module.NeuralIntegrity,
             NeuralState = module.NeuralState,
             Calibrated = module.Calibrated,
+            PermanentDamage = module.PermanentDamage,
+            Assembly = CaptureAssembly(moduleUid),
+            PowerBus = CapturePowerBus(moduleUid),
+            ThermalShutdown = module.ThermalShutdown,
         };
         return true;
     }

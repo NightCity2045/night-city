@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Contracts/SS14Mcp.Contracts.csproj" />
+  </ItemGroup>
+</Project>

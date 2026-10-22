@@ -259,6 +259,7 @@ When a local player action should feel immediate, check whether it should be pre
 
 ## Resources
 
+- When additional sprites or UI images are needed, generated artwork may be used. Match the existing build's visual style and use nearby project assets as references.
 - Put prototypes under the most specific existing subtree in `Resources/Prototypes/`.
 - If you introduce a new prototype parent tree, put parent prototypes in `base.yml` and variants in sibling files.
 - Keep entity prototype field order as `type`, `abstract`, `parent`, `id`, `categories`, `name`, `suffix`, `description`, `components`.

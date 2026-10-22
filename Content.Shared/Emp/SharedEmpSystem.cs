@@ -47,9 +47,10 @@ public abstract partial class SharedEmpSystem : EntitySystem
     /// <param name="user">The player that caused the effect. Used for predicted audio.</param>
     public void EmpPulse(MapCoordinates mapCoordinates, float range, float energyConsumption, TimeSpan duration, EntityUid? user = null)
     {
+        var pulseId = Guid.NewGuid(); // NC: one identity for every target and contained battery in this pulse.
         foreach (var uid in _lookup.GetEntitiesInRange(mapCoordinates, range))
         {
-            TryEmpEffects(uid, energyConsumption, duration, user);
+            TryEmpEffects(uid, energyConsumption, duration, user, pulseId); // NC
         }
         // TODO: replace with PredictedSpawn once it works with animated sprites
         if (_net.IsServer)
@@ -72,9 +73,10 @@ public abstract partial class SharedEmpSystem : EntitySystem
     {
         _entSet.Clear();
         _lookup.GetEntitiesInRange(coordinates, range, _entSet);
+        var pulseId = Guid.NewGuid(); // NC
         foreach (var uid in _entSet)
         {
-            TryEmpEffects(uid, energyConsumption, duration, user);
+            TryEmpEffects(uid, energyConsumption, duration, user, pulseId); // NC
         }
         // TODO: replace with PredictedSpawn once it works with animated sprites
         if (_net.IsServer)
@@ -94,14 +96,14 @@ public abstract partial class SharedEmpSystem : EntitySystem
     /// <param name="duration">The duration of the EMP effects.</param>
     /// <param name="user">The player that caused the EMP. For prediction purposes.</param>
     /// <returns>If the entity was affected by the EMP.</returns>
-    public bool TryEmpEffects(EntityUid uid, float energyConsumption, TimeSpan duration, EntityUid? user = null)
+    public bool TryEmpEffects(EntityUid uid, float energyConsumption, TimeSpan duration, EntityUid? user = null, Guid pulseId = default) // NC
     {
         var attemptEv = new EmpAttemptEvent();
         RaiseLocalEvent(uid, ref attemptEv);
         if (attemptEv.Cancelled)
             return false;
 
-        return DoEmpEffects(uid, energyConsumption, duration, user);
+        return DoEmpEffects(uid, energyConsumption, duration, user, pulseId); // NC
     }
 
     /// <summary>
@@ -112,7 +114,7 @@ public abstract partial class SharedEmpSystem : EntitySystem
     /// <param name="duration">The duration of the EMP effects.</param>
     /// <param name="user">The player that caused the EMP. For prediction purposes.</param>
     /// <returns>If the entity was affected by the EMP.</returns>
-    public bool DoEmpEffects(EntityUid uid, float energyConsumption, TimeSpan duration, EntityUid? user = null)
+    public bool DoEmpEffects(EntityUid uid, float energyConsumption, TimeSpan duration, EntityUid? user = null, Guid pulseId = default) // NC
     {
         var strMultiplier = 1f;
         var durMultiplier = 1f;
@@ -121,7 +123,10 @@ public abstract partial class SharedEmpSystem : EntitySystem
             strMultiplier = resistance.StrengthMultiplier;
             durMultiplier = resistance.DurationMultiplier;
         }
-        var ev = new EmpPulseEvent(energyConsumption * strMultiplier, false, false, duration * durMultiplier, user);
+        // NC-Edit-Start
+        var ev = new EmpPulseEvent(energyConsumption * strMultiplier, false, false, duration * durMultiplier, user,
+            pulseId == Guid.Empty ? Guid.NewGuid() : pulseId);
+        // NC-Edit-End
         RaiseLocalEvent(uid, ref ev);
 
         // TODO: replace with PredictedSpawn once it works with animated sprites
@@ -194,7 +199,7 @@ public record struct EmpAttemptEvent(bool Cancelled);
 /// <param name="User">The player that caused the EMP. For prediction purposes.</param>
 
 [ByRefEvent]
-public record struct EmpPulseEvent(float EnergyConsumption, bool Affected, bool Disabled, TimeSpan Duration, EntityUid? User);
+public record struct EmpPulseEvent(float EnergyConsumption, bool Affected, bool Disabled, TimeSpan Duration, EntityUid? User, Guid PulseId = default); // NC
 
 /// <summary>
 /// Raised on an entity after <see cref="EmpDisabledComponent"/> is removed.

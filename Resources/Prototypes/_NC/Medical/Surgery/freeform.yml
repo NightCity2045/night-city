@@ -118,6 +118,8 @@
     NCSlotNeuralCore: { position: "0.44, 0.48", size: "0.24, 0.22", minimumDepth: 0.74, visual: Cyberware, zones: [ NCZoneHead ] }
     NCSlotCranialUtility: { position: "0.66, 0.53", size: "0.22, 0.2", minimumDepth: 0.68, visual: Cyberware, zones: [ NCZoneHead ] }
     NCSlotThoracicSupport: { position: "0.5, 0.57", size: "0.24, 0.26", minimumDepth: 0.72, visual: Cyberware, zones: [ NCZoneChest ] }
+    NCSlotThoracicPower: { position: "0.32, 0.57", size: "0.18, 0.22", minimumDepth: 0.72, visual: Cyberware, zones: [ NCZoneChest ] }
+    NCSlotThoracicConverter: { position: "0.7, 0.57", size: "0.18, 0.22", minimumDepth: 0.72, visual: Cyberware, zones: [ NCZoneChest ] }
     NCSlotSubdermalThorax: { position: "0.5, 0.34", size: "0.52, 0.16", minimumDepth: 0.52, visual: Cyberware, zones: [ NCZoneChest ] }
     NCSlotArmUtilityLeft: { position: "0.58, 0.5", size: "0.24, 0.28", minimumDepth: 0.58, visual: Cyberware, zones: [ NCZoneArmLeft, NCZoneHandLeft ] }
     NCSlotArmUtilityRight: { position: "0.58, 0.5", size: "0.24, 0.28", minimumDepth: 0.58, visual: Cyberware, zones: [ NCZoneArmRight, NCZoneHandRight ] }

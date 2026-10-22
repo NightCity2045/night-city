@@ -257,7 +257,7 @@
     pressureFullScaleVolume: 1800
     compressionFullScaleVolume: 1200
   - type: NCCyberwareSlotHost
-    slots: [ NCSlotThoracicSupport, NCSlotSubdermalThorax ]
+    slots: [ NCSlotThoracicSupport, NCSlotSubdermalThorax, NCSlotThoracicPower, NCSlotThoracicConverter ]
 
 - type: entity
   id: NCOrganHumanAbdomen

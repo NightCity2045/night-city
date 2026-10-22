@@ -1063,7 +1063,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
 
     private string CyberwareName(ProtoId<NCCyberwarePrototype> id) =>
         _prototypes.TryIndex(id, out NCCyberwarePrototype? cyberware)
-            ? cyberware.Name
+            ? cyberware.NameId is { } name ? Loc.GetString(name) : cyberware.Name
             : PrototypeName(id.Id);
 
     private Texture? CyberwareIcon(NCMedicalCyberwareSummary module)
@@ -1079,7 +1079,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
 
     private string CyberwareSlotName(ProtoId<NCCyberwareSlotPrototype> id) =>
         _prototypes.TryIndex(id, out NCCyberwareSlotPrototype? slot)
-            ? slot.Name
+            ? slot.NameId is { } name ? Loc.GetString(name) : slot.Name
             : PrototypeName(id.Id);
 
     private static string DrugName(ProtoId<NCDrugProfilePrototype> id) =>

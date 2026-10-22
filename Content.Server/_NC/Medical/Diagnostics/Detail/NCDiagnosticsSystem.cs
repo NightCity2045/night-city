@@ -462,7 +462,10 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                 module.NeuralState,
                 module.Calibrated,
                 module.Operational,
-                module.FunctionalEfficiency));
+                module.FunctionalEfficiency,
+                _cyberware.GetSupplyCharge(moduleUid),
+                _cyberware.GetPowerFraction(moduleUid),
+                module.PowerGranted));
         }
 
         var exactDrugs = new List<NCAdminExactDrugSummary>();
@@ -921,9 +924,9 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                     ? NCDiagnosticBand.None
                     : ToFunctionBand(SafeRatio(integrity.CurrentIntegrity, integrity.MaxIntegrity)),
                 ToFunctionBand(module.FunctionalEfficiency),
-                profile.PowerCapacity <= 0f
+                !profile.RequiresPower
                     ? NCDiagnosticBand.None
-                    : ToFunctionBand(SafeRatio(module.CurrentPower, profile.PowerCapacity)),
+                    : ToFunctionBand(_cyberware.GetPowerFraction(moduleUid)),
                 ToFractionBand(SafeRatio(module.Heat, profile.HeatCapacity)),
                 module.NeuralState,
                 module.Operational,

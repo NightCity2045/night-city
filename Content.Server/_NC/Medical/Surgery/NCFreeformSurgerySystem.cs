@@ -1560,7 +1560,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             return false;
         }
 
-        name = $"{slotPrototype.Name} — implant target";
+        var slotName = slotPrototype.NameId is { } nameId ? Loc.GetString(nameId) : slotPrototype.Name;
+        name = Loc.GetString("nc-cyberware-power-implant-target", ("slot", slotName));
         return true;
     }
 

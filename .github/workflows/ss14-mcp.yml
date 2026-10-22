@@ -1,0 +1,65 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+name: SS14 Developer MCP
+on:
+  pull_request:
+    paths:
+      - 'Tools/_NC/SS14Mcp/**'
+      - 'Content.*/_NC/Diagnostics/**'
+      - '.github/workflows/ss14-mcp.yml'
+  workflow_dispatch:
+    inputs:
+      runtime:
+        description: Build game and run native server smoke test
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  tools:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet restore Tools/_NC/SS14Mcp/SS14Mcp.slnx
+      - run: dotnet build Tools/_NC/SS14Mcp/SS14Mcp.slnx --no-restore
+      - run: dotnet test Tools/_NC/SS14Mcp/Tests/SS14Mcp.Tests.csproj --no-build --no-restore --logger trx --results-directory artifacts/mcp-tests
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mcp-tests-${{ matrix.os }}
+          path: artifacts/mcp-tests
+  native-server:
+    if: github.event_name == 'workflow_dispatch' && inputs.runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SS14_MCP_RUNTIME_TESTS: '1'
+      SS14_MCP_TEST_CLIENTS: '0'
+      SS14_MCP_WORKSPACE: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet restore Content.Server/Content.Server.csproj -p:EnableNCDiagnostics=true
+      - run: dotnet build Content.Server/Content.Server.csproj -c DebugOpt --no-restore -p:EnableNCDiagnostics=true
+      - run: dotnet restore Tools/_NC/SS14Mcp/SS14Mcp.slnx
+      - run: dotnet test Tools/_NC/SS14Mcp/Tests/SS14Mcp.Tests.csproj --filter Category=Runtime --logger trx --results-directory artifacts/mcp-tests
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mcp-native-server
+          path: |
+            artifacts/mcp-tests
+            artifacts/ss14-mcp/*.json
+            artifacts/ss14-mcp/*.html
+            artifacts/ss14-mcp/environments/*/manifest.json
+            artifacts/ss14-mcp/environments/*/process-output.json

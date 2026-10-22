@@ -17,6 +17,8 @@ using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Surgery;
 using Content.Shared._NC.Medical.Systemic;
 using Content.Shared.Body;
+using Content.Shared.Nutrition.Components;
+using Content.Shared.Nutrition.EntitySystems;
 using Robust.Shared.Containers;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
@@ -57,6 +59,7 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
     [Dependency] private NCMedicalBodySystem _medicalBodies = default!;
     [Dependency] private NCPhysiologySchedulerSystem _scheduler = default!;
     [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private HungerSystem _nutrition = default!;
 
     /// <summary>
     /// Captures one body's semantic medical state. Null means the body or its live organ graph is invalid
@@ -72,6 +75,8 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
         }
 
         var initialOrgans = initial.Organs;
+        if (!allowTerminating)
+            _cyberware.TryAdvanceBodyPower(character, _timing.CurTime);
         var expected = initialOrgans.Keys.ToHashSet();
         if (!_pharmacology.TryCapturePersistentState(character, _timing.CurTime, out var pharmacology))
             return null;
@@ -94,6 +99,7 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
             Circulation = CaptureCirculation(character),
             Physiology = CapturePhysiology(character),
             CyberwareModules = _cyberware.CaptureInstalledModules(character),
+            Nutrition = TryComp<HungerComponent>(character, out var hunger) ? _nutrition.GetHunger(hunger) : null,
         };
 
         foreach (var (category, organ) in organs.OrderBy(entry => entry.Key.Id, StringComparer.Ordinal))
@@ -144,6 +150,9 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
         ApplyCirculationState(character, current.Circulation);
         _circulationBlood.SynchronizeSolution(character);
         ApplyPhysiologyState(character, current.Physiology);
+        if (current.Nutrition is { } nutrition && TryComp<HungerComponent>(character, out var hunger))
+            _nutrition.SetHunger(character, nutrition, hunger);
+        _cyberware.ResetPowerClock(character);
 
         if (!_medicalBodies.TryRestoreSnapshotMetadata(
                 (character, medical),
@@ -193,12 +202,16 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
                 InitializeLegacyLongitudinalWounds(migrated);
                 InitializeLegacySystemicChannels(migrated);
                 InitializeLegacyWoundVisualization(migrated);
+                if (!MigrateCyberwareAssemblies(migrated))
+                    return false;
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
             case NCMedicalSnapshotVersions.LongitudinalWounds:
                 migrated = CloneSnapshot(snapshot);
                 InitializeLegacySystemicChannels(migrated);
                 InitializeLegacyWoundVisualization(migrated);
+                if (!MigrateCyberwareAssemblies(migrated))
+                    return false;
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
             case NCMedicalSnapshotVersions.CyberwareGraph:
@@ -206,27 +219,39 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
                 migrated.Pharmacology = null;
                 InitializeLegacySystemicChannels(migrated);
                 InitializeLegacyWoundVisualization(migrated);
+                if (!MigrateCyberwareAssemblies(migrated))
+                    return false;
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
             case NCMedicalSnapshotVersions.PharmacologyGraph:
                 migrated = CloneSnapshot(snapshot);
                 InitializeLegacySystemicChannels(migrated);
                 InitializeLegacyWoundVisualization(migrated);
+                if (!MigrateCyberwareAssemblies(migrated))
+                    return false;
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
             case NCMedicalSnapshotVersions.SystemicSepsis:
                 migrated = CloneSnapshot(snapshot);
                 InitializeLegacyWoundVisualization(migrated);
+                if (!MigrateCyberwareAssemblies(migrated))
+                    return false;
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
             case NCMedicalSnapshotVersions.TransplantRejection:
                 migrated = CloneSnapshot(snapshot);
                 InitializeLegacyWoundVisualization(migrated);
+                if (!MigrateCyberwareAssemblies(migrated))
+                    return false;
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
             case NCMedicalSnapshotVersions.WoundVisualization:
             case NCMedicalSnapshotVersions.CavityFluidLedger:
+            case NCMedicalSnapshotVersions.SpatialSurgery:
+            case NCMedicalSnapshotVersions.ModularCyberware:
                 migrated = CloneSnapshot(snapshot);
+                if (!MigrateCyberwareAssemblies(migrated))
+                    return false;
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
             case NCMedicalSnapshotVersions.Current:
@@ -235,6 +260,18 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
             default:
                 return false;
         }
+    }
+
+    private bool MigrateCyberwareAssemblies(NCMedicalStateSnapshot snapshot)
+    {
+        foreach (var module in snapshot.CyberwareModules.Concat(snapshot.Organs.Values
+                     .Where(organ => organ.Cyberware != null).Select(organ => organ.Cyberware!)))
+        {
+            if (string.IsNullOrWhiteSpace(module.Profile.Id))
+                return false;
+            module.Assembly ??= _cyberware.CreateDefaultAssemblySnapshot(module.Profile, module.StableInstanceId);
+        }
+        return _cyberware.TryMigrateLegacyPower(snapshot);
     }
 
     /// <summary>

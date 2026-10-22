@@ -38,7 +38,9 @@ public static class NCMedicalSnapshotVersions
     public const ushort WoundVisualization = 8;
     public const ushort CavityFluidLedger = 9;
     public const ushort SpatialSurgery = 10;
-    public const ushort Current = SpatialSurgery;
+    public const ushort ModularCyberware = 11;
+    public const ushort BodyPowerBus = 12;
+    public const ushort Current = BodyPowerBus;
 }
 
 /// <summary>
@@ -79,6 +81,9 @@ public sealed partial class NCMedicalStateSnapshot
 
     [DataField]
     public List<NCCyberwareStateSnapshot> CyberwareModules = [];
+
+    [DataField]
+    public float? Nutrition;
 
     [DataField]
     public NCWoundStateSnapshot? Wounds;

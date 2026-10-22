@@ -12,6 +12,7 @@
     <PackageReference Include="SixLabors.ImageSharp" />
     <PackageReference Include="Pidgin" />
     <PackageReference Include="Robust.Shared.AuthLib" />
+    <PackageReference Include="Serilog" Condition="'$(EnableNCDiagnostics)' == 'true'" /> <!-- NC: bounded diagnostic log capture. -->
   </ItemGroup>
 
   <Import Project="..\RobustToolbox\Imports\Lidgren.props" />

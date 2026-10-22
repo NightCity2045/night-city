@@ -1,0 +1,100 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncCyberwarePartSlot
+  id: NCIndustrialArmActuatorSlot
+  name: nc-cyberware-slot-actuator
+
+- type: ncCyberwarePartSlot
+  id: NCIndustrialArmControllerSlot
+  name: nc-cyberware-slot-controller
+
+- type: ncCyberwarePartSlot
+  id: NCIndustrialArmSensorSlot
+  name: nc-cyberware-slot-sensor
+
+- type: ncCyberwarePart
+  id: NCIndustrialArmActuator
+  slot: NCIndustrialArmActuatorSlot
+  maximumIntegrity: 80
+
+- type: ncCyberwarePart
+  id: NCIndustrialArmController
+  slot: NCIndustrialArmControllerSlot
+  maximumIntegrity: 40
+
+- type: ncCyberwarePart
+  id: NCIndustrialArmSensor
+  slot: NCIndustrialArmSensorSlot
+  maximumIntegrity: 40
+
+- type: ncCyberwareAssembly
+  id: NCIndustrialArmAssembly
+  defaultParts:
+    NCIndustrialArmActuatorSlot: NCCyberarmActuator
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCIndustrialArmSensorSlot: NCCyberarmSensor
+  repairMaterial: Steel
+  repairPerUnit: 20
+  frameDamageThresholdFraction: 0.5
+  framePermanentDamageScale: 0.25
+  internalDamageThresholdFraction: 0.5
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCCyberarmActuator
+  name: industrial cyberarm actuator
+  description: A replaceable drive for the industrial arm family.
+  components:
+  - type: Sprite
+    state: micro_mani
+  - type: NCCyberwarePart
+    profile: NCIndustrialArmActuator
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCCyberarmController
+  name: industrial cyberarm controller
+  description: A local motor controller for the industrial arm family.
+  components:
+  - type: Sprite
+    state: capacitor
+  - type: NCCyberwarePart
+    profile: NCIndustrialArmController
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCCyberarmSensor
+  name: industrial cyberarm sensor interface
+  description: A replaceable feedback interface for the industrial arm family.
+  components:
+  - type: Sprite
+    state: scan_module
+  - type: NCCyberwarePart
+    profile: NCIndustrialArmSensor
+
+- type: entity
+  parent: NCOrganHumanCyberArmLeft
+  id: NCOrganHumanCyberArmLeftFrame
+  suffix: Empty frame
+  components:
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: TableReinforced
+  id: NCCyberwareWorkbench
+  name: cyberware service bench
+  description: Mount detached cyberware, fit compatible parts, and inspect or test the assembly. Steel repairs serviceable damage.
+  components:
+  - type: NCCyberwareWorkbench
+  - type: PowerCellSlot
+    cellSlotId: nc_bench_cell
+  - type: ItemSlots
+    slots:
+      nc_bench_cell:
+        name: nc-cyberware-power-bench-cell
+        whitelist:
+          components: [ PowerCell ]
+

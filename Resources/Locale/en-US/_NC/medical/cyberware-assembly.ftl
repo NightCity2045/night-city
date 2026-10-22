@@ -1,0 +1,26 @@
+nc-cyberware-slot-actuator = Actuator
+nc-cyberware-slot-controller = Controller
+nc-cyberware-slot-sensor = Sensor interface
+nc-cyberware-bench-rejected = Check access, the held item, the matching empty slot and the available repair material.
+nc-cyberware-bench-eject = Remove cyberware from bench
+nc-cyberware-bench-test = Test assembly
+nc-cyberware-bench-test-passed = The complete assembly passes its current bench check.
+nc-cyberware-bench-test-failed = The check failed. Check missing or destroyed parts, frame damage, charge, heat and EMP disruption.
+nc-cyberware-bench-empty = Use detached cyberware on the bench, then fit held parts. Use steel to repair serviceable damage. Remove parts or test through the context menu.
+nc-cyberware-bench-frame = {$item}: frame {$current}/{$ceiling}, nominal {$nominal}; configuration {$revision}.
+nc-cyberware-bench-tested = This configuration has a valid bench check.
+nc-cyberware-bench-untested = This configuration needs a new bench check.
+nc-cyberware-bench-missing = {$slot}: missing — assembly cannot function.
+nc-cyberware-bench-part = {$slot}: {$item}, {$current}/{$ceiling}, nominal {$nominal}.
+ent-NCCyberarmActuator = industrial cyberarm actuator
+    .desc = A replaceable drive for the industrial arm family.
+ent-NCCyberarmController = industrial cyberarm controller
+    .desc = A local motor controller for the industrial arm family.
+ent-NCCyberarmSensor = industrial cyberarm sensor interface
+    .desc = A replaceable feedback interface for the industrial arm family.
+ent-NCCyberwareWorkbench = cyberware service bench
+    .desc = Mount detached cyberware, fit compatible parts, and inspect or test the assembly. Steel repairs serviceable damage.
+ent-NCOrganHumanCyberArmLeftFrame = industrial cyberarm frame
+    .desc = An empty left-arm frame for compatible actuator, controller and sensor modules.
+    .suffix = Empty frame
+

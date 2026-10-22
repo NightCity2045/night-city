@@ -14,6 +14,7 @@
     <PackageReference Include="NetCord" />
     <PackageReference Include="prometheus-net" />
     <PackageReference Include="Microsoft.Extensions.ObjectPool" />
+    <PackageReference Include="Serilog" Condition="'$(EnableNCDiagnostics)' == 'true'" /> <!-- NC: bounded diagnostic log capture. -->
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Content.Packaging\Content.Packaging.csproj" />

@@ -444,6 +444,8 @@ public sealed partial class NCMedicalPersistenceSystem
                 NCMedicalSnapshotVersions.TransplantRejection or
                 NCMedicalSnapshotVersions.WoundVisualization or
                 NCMedicalSnapshotVersions.CavityFluidLedger or
+                NCMedicalSnapshotVersions.SpatialSurgery or
+                NCMedicalSnapshotVersions.ModularCyberware or
                 NCMedicalSnapshotVersions.Current) ||
             runtimeAnchor < TimeSpan.Zero ||
             !HasNonNullSnapshotShape(source))

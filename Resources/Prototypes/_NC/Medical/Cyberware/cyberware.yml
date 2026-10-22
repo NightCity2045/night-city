@@ -43,7 +43,6 @@
   id: NCRepairProfileStreetCyberware
   name: street cyberware service pack
   integrityPerUnit: 20
-  powerPerUnit: 600
   coolingPerUnit: 30
   neuralIntegrityPerUnit: 0.15
   maximumUnitsPerAction: 2
@@ -55,7 +54,6 @@
   id: NCRepairProfileClinicalCyberware
   name: clinical cyberware service pack
   integrityPerUnit: 35
-  powerPerUnit: 1200
   coolingPerUnit: 50
   neuralIntegrityPerUnit: 0.25
   maximumUnitsPerAction: 2
@@ -77,6 +75,7 @@
 
 - type: ncCyberware
   id: NCNeuralLinkMk1
+  powerPriority: Control
   name: neural link Mk.1
   manufacturer: Zhirafa Technical Collective
   icon:
@@ -116,6 +115,7 @@
 
 - type: ncCyberware
   id: NCCirculatoryAssistMk1
+  powerPriority: LifeSupport
   name: circulatory assist pump Mk.1
   manufacturer: Biotechnica Night City
   icon:
@@ -153,6 +153,7 @@
 
 - type: ncCyberware
   id: NCIndustrialCyberArm
+  assembly: NCIndustrialArmAssembly
   name: industrial cyberarm
   manufacturer: Militech Industrial Systems
   icon:
@@ -198,6 +199,7 @@
 
 - type: ncCyberware
   id: NCCyberopticsMk1
+  powerPriority: Control
   name: cyberoptics Mk.1
   manufacturer: Kiroshi Optics
   icon:
@@ -236,6 +238,7 @@
 
 - type: ncCyberware
   id: NCCyberheartMk1
+  powerPriority: LifeSupport
   name: cyberheart Mk.1
   manufacturer: Biotechnica Night City
   icon:
@@ -335,6 +338,7 @@
   - type: NCDetachedOrganMedicalData
     sourceBodyProfile: Human
     requiredParentCategory: Torso
+    woundProfile: NCHumanWoundSystem
     treatmentProfile: NCHumanFieldTreatment
 
 - type: entity
@@ -362,6 +366,7 @@
   - type: NCDetachedOrganMedicalData
     sourceBodyProfile: Human
     requiredParentCategory: Torso
+    woundProfile: NCHumanWoundSystem
     treatmentProfile: NCHumanFieldTreatment
 
 - type: entity
@@ -388,6 +393,7 @@
   - type: NCDetachedOrganMedicalData
     sourceBodyProfile: Human
     requiredParentCategory: Head
+    woundProfile: NCHumanWoundSystem
     treatmentProfile: NCHumanFieldTreatment
 
 - type: entity
@@ -416,4 +422,5 @@
   - type: NCDetachedOrganMedicalData
     sourceBodyProfile: Human
     requiredParentCategory: Thorax
+    woundProfile: NCHumanWoundSystem
     treatmentProfile: NCHumanFieldTreatment

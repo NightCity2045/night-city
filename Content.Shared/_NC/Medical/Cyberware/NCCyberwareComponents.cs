@@ -46,6 +46,13 @@ public sealed partial class NCCyberwareComponent : Component
     [DataField]
     public float CurrentPower;
 
+    // CurrentPower is a legacy serialization field only. Runtime power comes from a physical body bus.
+    [ViewVariables]
+    public bool PowerGranted;
+
+    [DataField]
+    public bool ThermalShutdown;
+
     [DataField]
     public float Heat;
 
@@ -69,6 +76,9 @@ public sealed partial class NCCyberwareComponent : Component
 
     [DataField]
     public float FunctionalEfficiency = 1f;
+
+    [DataField]
+    public float PermanentDamage;
 
     [ViewVariables]
     public TimeSpan LastAdvancedAt;

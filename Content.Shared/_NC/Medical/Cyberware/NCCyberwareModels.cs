@@ -129,4 +129,16 @@ public sealed partial class NCCyberwareStateSnapshot
 
     [DataField]
     public bool Calibrated;
+
+    [DataField]
+    public float PermanentDamage;
+
+    [DataField]
+    public NCCyberwareAssemblySnapshot? Assembly;
+
+    [DataField]
+    public NCCyberwarePowerBusSnapshot? PowerBus;
+
+    [DataField]
+    public bool ThermalShutdown;
 }

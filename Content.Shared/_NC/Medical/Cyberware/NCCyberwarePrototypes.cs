@@ -21,6 +21,9 @@ public sealed partial class NCCyberwareSlotPrototype : IPrototype
     [DataField(required: true)]
     public string Name { get; private set; } = default!;
 
+    [DataField]
+    public LocId? NameId { get; private set; }
+
     [DataField(required: true)]
     public List<ProtoId<OrganCategoryPrototype>> HostCategories { get; private set; } = [];
 
@@ -79,6 +82,9 @@ public sealed partial class NCCyberwarePrototype : IPrototype
     [DataField(required: true)]
     public string Name { get; private set; } = default!;
 
+    [DataField]
+    public LocId? NameId { get; private set; }
+
     [DataField(required: true)]
     public string Manufacturer { get; private set; } = default!;
 
@@ -115,6 +121,7 @@ public sealed partial class NCCyberwarePrototype : IPrototype
     public List<ProtoId<NCCyberwareRepairProfilePrototype>> AuxiliaryServiceProfiles { get; private set; } = [];
 
     [DataField]
+    // Legacy capacities are retained only to validate and migrate pre-12 snapshots.
     public float PowerCapacity { get; private set; }
 
     [DataField]
@@ -128,6 +135,12 @@ public sealed partial class NCCyberwarePrototype : IPrototype
 
     [DataField]
     public float LoadedPowerPerSecond { get; private set; }
+
+    [DataField]
+    public bool RequiresPower { get; private set; } = true;
+
+    [DataField]
+    public NCCyberwarePowerPriority PowerPriority { get; private set; } = NCCyberwarePowerPriority.Professional;
 
     [DataField(required: true)]
     public float HeatCapacity { get; private set; }
@@ -188,6 +201,9 @@ public sealed partial class NCCyberwarePrototype : IPrototype
 
     [DataField]
     public List<string> Capabilities { get; private set; } = [];
+
+    [DataField]
+    public ProtoId<NCCyberwareAssemblyPrototype>? Assembly { get; private set; }
 }
 
 public enum NCCyberwareForm : byte

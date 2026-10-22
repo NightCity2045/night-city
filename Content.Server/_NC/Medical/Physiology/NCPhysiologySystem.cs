@@ -8,6 +8,7 @@ using Content.Server._NC.Medical.Bleeding;
 using Content.Server._NC.Medical.Pharmacology;
 using Content.Server._NC.Medical.Systemic;
 using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Cyberware;
 using Content.Shared._NC.Medical.Emergency;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Systemic;
@@ -414,6 +415,9 @@ public sealed partial class NCPhysiologySystem : EntitySystem
             var capacity = function.BaseCapacity > 0f
                 ? Math.Clamp(function.CurrentCapacity / function.BaseCapacity, 0f, 1f)
                 : 0f;
+            // Read the physical replacement's output once; never feed it back into CurrentCapacity.
+            if (TryComp<NCCyberwareComponent>(organ, out var cyberware))
+                capacity = MathF.Min(capacity, Math.Clamp(cyberware.FunctionalEfficiency, 0f, 1f));
             switch (function.FunctionType)
             {
                 case NCOrganFunctionType.Circulation:
