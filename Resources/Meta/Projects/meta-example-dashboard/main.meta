@@ -1,0 +1,103 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+module examples.dashboard;
+import meta.app;
+import meta.system;
+import meta.text;
+import meta.vehicle;
+
+link engine:vehicle.EngineController="engine-ecu";
+link dashboard:vehicle.VehicleDashboard="vehicle-telemetry";
+
+var engineSeen:bool=false;
+var vehicleSeen:bool=false;
+var engineTime:int=0;
+var vehicleTime:int=0;
+var temperature:float=0.0;
+var rpm:int=0;
+var oil:float=0.0;
+var speed:float=0.0;
+var fuel:float=0.0;
+var battery:float=0.0;
+var gear:int=0;
+var automatic:bool=false;
+var running:bool=false;
+var hasFaults:bool=false;
+var temperatures:array<float>=[];
+
+pub struct DashboardState {
+    title:string;
+    status:string;
+    speed:string;
+    rpm:string;
+    temperature:string;
+    fuel:string;
+    oil:string;
+    battery:string;
+    gear:string;
+    fresh:bool;
+    history:array<float>;
+}
+
+pub fn view(context:app.AppContext)->DashboardState {
+    let ru:bool=context.locale=="ru-RU";
+    let now:int=system.nowMs();
+    let fresh:bool=engineSeen&&vehicleSeen&&now>=engineTime&&now>=vehicleTime&&now-engineTime<=1000&&now-vehicleTime<=1000;
+    var title:string="Vehicle instruments";
+    var status:string="Waiting for current native samples";
+    var speedText:string="Speed: —";
+    var rpmText:string="Engine speed: —";
+    var temperatureText:string="Temperature: —";
+    var fuelText:string="Fuel: —";
+    var oilText:string="Oil pressure: —";
+    var batteryText:string="Battery: —";
+    var gearText:string="Gear: —";
+    if(ru) {
+        title="Приборная панель";status="Ожидание актуальных данных оборудования";
+        speedText="Скорость: —";rpmText="Обороты двигателя: —";temperatureText="Температура: —";
+        fuelText="Топливо: —";oilText="Давление масла: —";batteryText="Аккумулятор: —";gearText="Передача: —";
+    }
+    if(fresh) {
+        if(ru) {
+            status="Актуальные показания оборудования";
+            if(hasFaults){status="Оборудование сообщает о неисправности";}
+            speedText="Скорость: "+text.fromFloat(speed*3.6)+" км/ч";
+            rpmText="Обороты двигателя: "+text.fromInt(rpm)+" об/мин";
+            temperatureText="Температура: "+text.fromFloat(temperature)+" °C";
+            fuelText="Топливо: "+text.fromFloat(fuel)+" л";
+            oilText="Давление масла: "+text.fromFloat(oil)+" кПа";
+            batteryText="Аккумулятор: "+text.fromFloat(battery*100.0)+" %";
+            gearText="Передача: "+text.fromInt(gear);
+        } else {
+            status="Current native instrument samples";
+            if(hasFaults){status="Native equipment reports a fault";}
+            speedText="Speed: "+text.fromFloat(speed*3.6)+" km/h";
+            rpmText="Engine speed: "+text.fromInt(rpm)+" rpm";
+            temperatureText="Temperature: "+text.fromFloat(temperature)+" °C";
+            fuelText="Fuel: "+text.fromFloat(fuel)+" L";
+            oilText="Oil pressure: "+text.fromFloat(oil)+" kPa";
+            batteryText="Battery: "+text.fromFloat(battery*100.0)+" %";
+            gearText="Gear: "+text.fromInt(gear);
+        }
+    }
+    return new DashboardState(title:title,status:status,speed:speedText,rpm:rpmText,temperature:temperatureText,
+        fuel:fuelText,oil:oilText,battery:batteryText,gear:gearText,fresh:fresh,history:temperatures);
+}
+
+watch engine.telemetryChanged(sample) {
+    if(!system.isFresh(sample.stamp,1000)){engineSeen=false;return;}
+    temperature=sample.temperatureC;rpm=sample.rpm;oil=sample.oilPressureKPa;hasFaults=sample.faults.length>0;
+    if(temperatures.length==0){temperatures=[sample.temperatureC];}
+    else if(temperatures.length==1){temperatures=[temperatures[0],sample.temperatureC];}
+    else if(temperatures.length==2){temperatures=[temperatures[0],temperatures[1],sample.temperatureC];}
+    else if(temperatures.length==3){temperatures=[temperatures[0],temperatures[1],temperatures[2],sample.temperatureC];}
+    else if(temperatures.length==4){temperatures=[temperatures[0],temperatures[1],temperatures[2],temperatures[3],sample.temperatureC];}
+    else if(temperatures.length==5){temperatures=[temperatures[0],temperatures[1],temperatures[2],temperatures[3],temperatures[4],sample.temperatureC];}
+    else{temperatures=[temperatures[1],temperatures[2],temperatures[3],temperatures[4],temperatures[5],sample.temperatureC];}
+    engineTime=system.nowMs();engineSeen=true;
+}
+watch dashboard.telemetryChanged(sample) {
+    if(!system.isFresh(sample.stamp,1000)){vehicleSeen=false;return;}
+    speed=sample.speedMps;fuel=sample.fuelLitres;battery=sample.batteryFraction;
+    gear=sample.gear;automatic=sample.automatic;running=sample.engineRunning;
+    vehicleTime=system.nowMs();vehicleSeen=true;
+}

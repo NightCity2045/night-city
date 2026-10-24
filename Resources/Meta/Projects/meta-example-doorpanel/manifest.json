@@ -1,0 +1,40 @@
+{
+  "version": "1.0",
+  "id": "meta-example-doorpanel",
+  "name": "Door panel controller",
+  "nameRu": "Контроллер дверной панели",
+  "packageName": "examples.doorpanel",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.doorpanel",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.doorpanel.meta",
+      "sha256": "ee2af0cee8e71da40027ac5af2229c9b1beae273ebb601db97a56eaf5dde0d51"
+    }
+  ],
+  "startMode": "OnPower",
+  "bindings": [
+    {
+      "slot": "front-door",
+      "capability": "meta.doors.Door",
+      "contractHash": "eb9affb74c5a05fcd584eeb2f21d6c941ff51f820a84fecfc1d1f70447c9ab28",
+      "requiredScopes": [
+        "door.control",
+        "door.observe"
+      ]
+    },
+    {
+      "slot": "front-panel",
+      "capability": "meta.doors.DoorPanel",
+      "contractHash": "83e9fda13cd33cea2349beafe948e32210bed5e6f1b93aa48c261926c5c969b0",
+      "requiredScopes": [
+        "doorpanel.observe"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

@@ -139,6 +139,7 @@ namespace Content.Shared.Movement.Systems
 
             var ev = new RefreshMovementSpeedModifiersEvent();
             RaiseLocalEvent(ent, ev);
+            ev.ClampToBaseSpeeds(ent.Comp.BaseWalkSpeed, ent.Comp.BaseSprintSpeed); // NC
 
             if (MathHelper.CloseTo(ev.WalkSpeedModifier, ent.Comp.WalkSpeedModifier) &&
                 MathHelper.CloseTo(ev.SprintSpeedModifier, ent.Comp.SprintSpeedModifier))
@@ -215,6 +216,23 @@ namespace Content.Shared.Movement.Systems
 
         public float WalkSpeedModifier { get; private set; } = 1.0f;
         public float SprintSpeedModifier { get; private set; } = 1.0f;
+
+        // NC-Edit-Start: limits are applied after every multiplicative provider, independent of event ordering.
+        private float _maximumWalkSpeed = float.PositiveInfinity;
+        private float _maximumSprintSpeed = float.PositiveInfinity;
+
+        public void LimitSpeed(float walk, float sprint)
+        {
+            if (float.IsFinite(walk) && walk > 0f) _maximumWalkSpeed = MathF.Min(_maximumWalkSpeed, walk);
+            if (float.IsFinite(sprint) && sprint > 0f) _maximumSprintSpeed = MathF.Min(_maximumSprintSpeed, sprint);
+        }
+
+        public void ClampToBaseSpeeds(float walk, float sprint)
+        {
+            if (walk > 0f) WalkSpeedModifier = MathF.Min(WalkSpeedModifier, _maximumWalkSpeed / walk);
+            if (sprint > 0f) SprintSpeedModifier = MathF.Min(SprintSpeedModifier, _maximumSprintSpeed / sprint);
+        }
+        // NC-Edit-End
 
         public void ModifySpeed(float walk, float sprint)
         {

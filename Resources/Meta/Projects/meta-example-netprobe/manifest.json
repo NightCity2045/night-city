@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "id": "meta-example-netprobe",
+  "name": "Local NET probe",
+  "nameRu": "Проверка локальной СЕТИ",
+  "packageName": "examples.netprobe",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.netprobe",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.netprobe.meta",
+      "sha256": "078d3093d208c363b2e721ed17ce26c12831796977be7c9874dea73848d9c81a"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [
+    {
+      "slot": "active-net-session",
+      "capability": "meta.netrun.NetSession",
+      "contractHash": "b976121f78f7556b0c54c1023d5bc93855350a9641eafdcd2aa1de5ebef1cd65",
+      "requiredScopes": [
+        "netrun.observe",
+        "netrun.probe"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

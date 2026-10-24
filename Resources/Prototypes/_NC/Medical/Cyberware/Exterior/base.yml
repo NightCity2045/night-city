@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncCyberwareFinish
+  id: NCFinishChrome
+  name: nc-cyberware-finish-chrome
+  color: "#A8BAC9"
+
+- type: ncCyberwareFinish
+  id: NCFinishMedical
+  name: nc-cyberware-finish-medical
+  color: "#EFF5FF"
+
+- type: ncCyberwareFinish
+  id: NCFinishSyntheticSkin
+  name: nc-cyberware-finish-synthetic-skin
+  syntheticSkin: true
+
+- type: entity
+  abstract: true
+  parent: BaseItem
+  id: NCCyberwareFinishKitBase
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberarm_right
+  - type: Item
+    size: Small
+
+- type: entity
+  parent: NCCyberwareFinishKitBase
+  id: NCCyberwareChromeFinishKit
+  components:
+  - type: NCCyberwareFinishApplicator
+    finish: NCFinishChrome
+
+- type: entity
+  parent: NCCyberwareFinishKitBase
+  id: NCCyberwareMedicalFinishKit
+  components:
+  - type: Sprite
+    color: "#EFF5FF"
+  - type: NCCyberwareFinishApplicator
+    finish: NCFinishMedical
+
+- type: entity
+  parent: NCCyberwareFinishKitBase
+  id: NCCyberwareSyntheticSkinKit
+  components:
+  - type: Sprite
+    color: "#D7A487"
+  - type: NCCyberwareFinishApplicator
+    finish: NCFinishSyntheticSkin

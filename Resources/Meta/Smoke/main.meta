@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+module program.main;
+import meta.app;
+import meta.system;
+
+var total:int=0;
+pub struct SmokeState { heading:string; count:int; }
+pub struct SmokeInput { step:int; }
+
+pub fn view(context:app.AppContext)->SmokeState {
+    var heading:string="META counter: hello 🙂 é";
+    if(context.locale=="ru-RU"){heading="Счётчик META: привет 🙂 é";}
+    return new SmokeState(heading:heading,count:total);
+}
+
+pub fn bump(context:app.AppContext,input:SmokeInput)->result<void> {
+    if(total<1000000){total=total+input.step;}
+    return ok(());
+}
+
+fn main()->void { system.log("META smoke"); }

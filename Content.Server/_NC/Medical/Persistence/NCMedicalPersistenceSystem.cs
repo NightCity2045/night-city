@@ -60,6 +60,7 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
     [Dependency] private NCPhysiologySchedulerSystem _scheduler = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private HungerSystem _nutrition = default!;
+    [Dependency] private Content.Server._NC.Medical.Humanity.NCHumanitySystem _humanity = default!;
 
     /// <summary>
     /// Captures one body's semantic medical state. Null means the body or its live organ graph is invalid
@@ -68,12 +69,22 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
     /// </summary>
     public NCMedicalStateSnapshot? SerializeMedicalState(EntityUid character, bool allowTerminating = false)
     {
+        if (!allowTerminating && TryComp<Content.Shared._NC.Medical.Cyberware.Borg.NCBorgCoreComponent>(character, out var core) &&
+            core.Occupied && _timing.CurTime > core.LastAdvancedAt)
+            _scheduler.ProcessNow(character, _timing.CurTime - core.LastAdvancedAt);
         if (!TryGetBodyContext(character, out var medical, out _, out var initial, allowTerminating) ||
             !TryCollectOrganMap(character, initial, out var organs))
         {
             return null;
         }
 
+        if (!allowTerminating)
+        {
+            _humanity.TrySettleBody(character);
+            _humanity.TryReconcile(character);
+        }
+        if (!_humanity.TryCapturePersistentState(character, out var humanity))
+            return null;
         var initialOrgans = initial.Organs;
         if (!allowTerminating)
             _cyberware.TryAdvanceBodyPower(character, _timing.CurTime);
@@ -100,6 +111,8 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
             Physiology = CapturePhysiology(character),
             CyberwareModules = _cyberware.CaptureInstalledModules(character),
             Nutrition = TryComp<HungerComponent>(character, out var hunger) ? _nutrition.GetHunger(hunger) : null,
+            BorgCore = CaptureBorgCore(character),
+            Humanity = humanity,
         };
 
         foreach (var (category, organ) in organs.OrderBy(entry => entry.Key.Id, StringComparer.Ordinal))
@@ -123,11 +136,17 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
         if (!TryMigrateSnapshot(snapshot, out var current) ||
             !TryGetBodyContext(character, out var medical, out _, out var initial) ||
             !CompleteLegacyOrganIdentity(initial, current, snapshot.Version) ||
-            !ValidateCurrentSnapshot(character, current))
+            snapshot.Version < NCMedicalSnapshotVersions.Humanity && !_humanity.TryPrepareLegacyState(character, current) ||
+            !PrepareAbilityMigration(character, snapshot.Version, current) ||
+            !PrepareExteriorMigration(character, snapshot.Version, current) ||
+            !PrepareServiceMigration(character, snapshot.Version, current) ||
+            !ValidateCurrentSnapshot(character, current) ||
+            !_cyberware.CanRestorePhysicalIdentities(character, current))
         {
             return false;
         }
 
+        using var humanityRestore = _humanity.SuspendConfiguration(character);
         // Graph mutations can fail for physical container reasons. The graph helper rolls back any
         // detach/spawn work before returning false, so semantic component writes only start after success.
         if (!TryMatchOrganGraph(character, initial, current, out var detachedEntities) ||
@@ -137,6 +156,8 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
         }
 
         if (!ApplyOrganState(character, current, organs))
+            return false;
+        if (!TryRestoreBorgCore(character, current.BorgCore))
             return false;
         if (!_cyberware.TryRestoreInstalledModules(character, current.CyberwareModules, _timing.CurTime))
             return false;
@@ -153,6 +174,8 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
         if (current.Nutrition is { } nutrition && TryComp<HungerComponent>(character, out var hunger))
             _nutrition.SetHunger(character, nutrition, hunger);
         _cyberware.ResetPowerClock(character);
+        if (!_humanity.TryRestorePersistentState(character, current.Humanity))
+            return false;
 
         if (!_medicalBodies.TryRestoreSnapshotMetadata(
                 (character, medical),
@@ -191,7 +214,20 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
         out NCMedicalStateSnapshot migrated)
     {
         migrated = default!;
-        if (snapshot == null || !HasNonNullSnapshotShape(snapshot))
+        if (snapshot == null || !HasNonNullSnapshotShape(snapshot) ||
+            snapshot.Version < NCMedicalSnapshotVersions.BorgCore && snapshot.BorgCore != null ||
+            snapshot.Version < NCMedicalSnapshotVersions.Humanity && snapshot.Humanity != null ||
+            snapshot.Version < NCMedicalSnapshotVersions.CyberwareAbilities &&
+                (snapshot.CyberwareModules.Any(module => module.AbilityCooldownSeconds.HasValue) ||
+                 snapshot.Organs.Values.Any(organ => organ.Cyberware?.AbilityCooldownSeconds != null)) ||
+            snapshot.Version < NCMedicalSnapshotVersions.CyberwareExteriors &&
+                (snapshot.CyberwareModules.Any(module => module.Exterior != null) ||
+                 snapshot.Organs.Values.Any(organ => organ.Cyberware?.Exterior != null)))
+            return false;
+
+        if (snapshot.Version < NCMedicalSnapshotVersions.CyberwareService &&
+            (snapshot.CyberwareModules.Any(module => module.Service != null) ||
+             snapshot.Organs.Values.Any(organ => organ.Cyberware?.Service != null)))
             return false;
 
         switch (snapshot.Version)
@@ -254,6 +290,14 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
                     return false;
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
+            case NCMedicalSnapshotVersions.BodyPowerBus:
+            case NCMedicalSnapshotVersions.BorgCore:
+            case NCMedicalSnapshotVersions.Humanity:
+            case NCMedicalSnapshotVersions.CyberwareAbilities:
+            case NCMedicalSnapshotVersions.CyberwareExteriors:
+                migrated = CloneSnapshot(snapshot);
+                migrated.Version = NCMedicalSnapshotVersions.Current;
+                return true;
             case NCMedicalSnapshotVersions.Current:
                 migrated = CloneSnapshot(snapshot);
                 return true;
@@ -272,6 +316,27 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
             module.Assembly ??= _cyberware.CreateDefaultAssemblySnapshot(module.Profile, module.StableInstanceId);
         }
         return _cyberware.TryMigrateLegacyPower(snapshot);
+    }
+
+    private bool PrepareExteriorMigration(EntityUid body, ushort originalVersion, NCMedicalStateSnapshot current)
+    {
+        if (originalVersion < NCMedicalSnapshotVersions.CyberwareExteriors)
+            _cyberware.PrepareLegacyExteriors(body, current);
+        return true;
+    }
+
+    private bool PrepareServiceMigration(EntityUid body, ushort originalVersion, NCMedicalStateSnapshot current)
+    {
+        if (originalVersion < NCMedicalSnapshotVersions.CyberwareService)
+            _cyberware.PrepareLegacyServiceState(body, current);
+        return true;
+    }
+
+    private bool PrepareAbilityMigration(EntityUid body, ushort originalVersion, NCMedicalStateSnapshot current)
+    {
+        if (originalVersion < NCMedicalSnapshotVersions.CyberwareAbilities)
+            _cyberware.PrepareLegacyAbilityCooldowns(body, current);
+        return true;
     }
 
     /// <summary>
@@ -507,7 +572,7 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
                                    (replacing || desiredMissing.Contains(category)))
                 .Select(category => current[category])
                 .ToList();
-            if (!_detachment.TryDetachOrgan(character, rootCategory, out var detachedRoot))
+            if (!_detachment.TryDetachOrgan(character, rootCategory, out var detachedRoot, preserveCyberwareCalibration: true))
             {
                 RollbackGraph(character, detachedRoots, []);
                 return false;
@@ -635,7 +700,7 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
         foreach (var detached in detachedRoots.Reverse())
         {
             if (Exists(detached.Root))
-                _detachment.TryAttachOrgan(character, detached.ParentCategory, detached.Root);
+                _detachment.TryAttachOrgan(character, detached.ParentCategory, detached.Root, preserveCyberwareCalibration: true);
         }
     }
 

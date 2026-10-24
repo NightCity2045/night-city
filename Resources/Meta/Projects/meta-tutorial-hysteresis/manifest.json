@@ -1,0 +1,55 @@
+{
+  "version": "1.0",
+  "id": "meta-tutorial-hysteresis",
+  "name": "2. Stable hysteresis",
+  "nameRu": "2. Устойчивый гистерезис",
+  "packageName": "nc.training.hysteresis",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "training.main",
+  "files": [
+    {
+      "path": "app.json",
+      "sourcePath": "Resources/Meta/Projects/meta-tutorial-hysteresis/app.json",
+      "sha256": "438df6b778a59f87dca690bc31eb5cba8d62d512f15330c954d9c2d74838bd77"
+    },
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Projects/meta-tutorial-hysteresis/main.meta",
+      "sha256": "ed6cd174b29676ecb3b03501abf0069698192cb810939e3984bb7a58e8ba10af"
+    },
+    {
+      "path": "README.md",
+      "sourcePath": "Resources/Meta/Projects/meta-tutorial-hysteresis/README.md",
+      "sha256": "27e0b3565680b61b2ee49c07e3c202ae103cc50815ad576fc37f7164ab20893d"
+    },
+    {
+      "path": "ui/main.mui",
+      "sourcePath": "Resources/Meta/Projects/meta-tutorial-hysteresis/ui/main.mui",
+      "sha256": "4b48a5d406e87baf4d9adba4f3112ac1d88398e6021b49b3afdaa7b9dc80bc2a"
+    }
+  ],
+  "startMode": "OnPower",
+  "bindings": [
+    {
+      "slot": "training-sensor",
+      "capability": "meta.sensors.TemperatureSensor",
+      "contractHash": "707ebecbeccad33b9d890091ff373d8960cc9ad6d238a62655a0b90339b9e24d",
+      "requiredScopes": [
+        "sensor.temperature.observe"
+      ]
+    },
+    {
+      "slot": "training-alarm",
+      "capability": "meta.security.Alarm",
+      "contractHash": "2e3bac335044a980267ee3621e14b6e8463eee235420f85887a5ddf2b22aae7f",
+      "requiredScopes": [
+        "alarm.control"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json",
+  "stateSchemaVersion": 1
+}

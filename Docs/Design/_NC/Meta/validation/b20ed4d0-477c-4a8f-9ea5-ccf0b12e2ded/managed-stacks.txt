@@ -1,0 +1,244 @@
+Dump: D:\projects\night-city\Docs\Design\_NC\Meta\validation\b20ed4d0-477c-4a8f-9ea5-ccf0b12e2ded\testhost_33200_20261024T100919_hangdump.dmp
+CLR versions: 1
+Runtime: 10.0.326.7603
+Managed threads: 16
+
+THREAD managed=1 os=7608 alive=True state=135712 gc=Preemptive locks=4294967295
+  000000777eaff650 00007ff988161dd4 [DebuggerU2MCatchHandlerFrame]
+
+THREAD managed=2 os=2084 alive=True state=33726496 gc=Preemptive locks=4294967295
+  000000777dfee800 00007ff9881628a4 [InlinedCallFrame]
+  000000777dfee800 00007ff8b00638c7 [InlinedCallFrame]
+  000000777dfee7d0 00007ff8b00638c7 System.Threading.Monitor.Wait(System.Object, Int32)
+  000000777dfee8a0 00007ff8b0070a6c System.Threading.ManualResetEventSlim.Wait(Int32, System.Threading.CancellationToken)
+  000000777dfee930 00007ff8b008bccf System.Threading.Tasks.Task.SpinThenBlockingWait(Int32, System.Threading.CancellationToken)
+  000000777dfee9a0 00007ff8b008ba15 System.Threading.Tasks.Task.InternalWaitCore(Int32, System.Threading.CancellationToken)
+  000000777dfeea20 00007ff8b008b956 System.Threading.Tasks.Task.InternalWait(Int32, System.Threading.CancellationToken)
+  000000777dfeea50 00007ff8b008b601 System.Threading.Tasks.Task.Wait(Int32, System.Threading.CancellationToken)
+  000000777dfeea80 00007ff8b008b4e2 System.Threading.Tasks.Task.Wait()
+  000000777dfeeab0 00007ff8acc7c15b Microsoft.VisualStudio.TestPlatform.TestHost.DefaultEngineInvoker.Invoke(System.Collections.Generic.IDictionary`2<System.String,System.String>)
+  000000777dfeebc0 00007ff8acc73709 Microsoft.VisualStudio.TestPlatform.TestHost.Program.Run(System.String[], Microsoft.VisualStudio.TestPlatform.Execution.UiLanguageOverride)
+  000000777dfeec00 00007ff8acc72b5f Microsoft.VisualStudio.TestPlatform.TestHost.Program.Run(System.String[])
+  000000777dfeec40 00007ff8acc718a1 Microsoft.VisualStudio.TestPlatform.TestHost.Program.Main(System.String[])
+
+THREAD managed=4 os=14592 alive=True state=33731104 gc=Preemptive locks=4294967295
+  000000777edfda40 00007ff9881628a4 [InlinedCallFrame]
+  000000777edfda40 00007ff8b00638c7 [InlinedCallFrame]
+  000000777edfda10 00007ff8b00638c7 System.Threading.Monitor.Wait(System.Object, Int32)
+  000000777edfdae0 00007ff8b0070a6c System.Threading.ManualResetEventSlim.Wait(Int32, System.Threading.CancellationToken)
+  000000777edfdb70 00007ff8ae2506c4 NUnit.Framework.Api.NUnitTestAssemblyRunner.WaitForCompletion(Int32)
+  000000777edfdba0 00007ff8ae249a67 NUnit.Framework.Api.NUnitTestAssemblyRunner.Run(NUnit.Framework.Interfaces.ITestListener, NUnit.Framework.Interfaces.ITestFilter)
+  000000777edfdbd0 00007ff8ae249909 NUnit.Framework.Api.FrameworkController.RunTests(System.Action`1<System.String>, System.String)
+  000000777edfdf68 00007ff90c8699b3 [InlinedCallFrame]
+  000000777edfdf68 00007ff8b00f53bd [InlinedCallFrame]
+  000000777edfdf20 00007ff8b00f53bd System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(System.Object, IntPtr*)
+  000000777edfe020 00007ff8b00f5f36 System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(System.Object, System.Span`1<System.Object>, System.Reflection.BindingFlags)
+  000000777edfe0a0 00007ff8b00f5bd0 System.Reflection.MethodBaseInvoker.InvokeWithFewArgs(System.Object, System.Reflection.BindingFlags, System.Reflection.Binder, System.Object[], System.Globalization.CultureInfo)
+  000000777edfe1b0 00007ff8b0108674 System.Reflection.RuntimeMethodInfo.Invoke(System.Object, System.Reflection.BindingFlags, System.Reflection.Binder, System.Object[], System.Globalization.CultureInfo)
+  000000777edfe220 00007ff8b00f4bd3 System.Reflection.MethodBase.Invoke(System.Object, System.Object[])
+  000000777edfe260 00007ff8ad658fac NUnit.Engine.Drivers.NUnitNetStandardDriver.ExecuteMethod(System.Reflection.MethodInfo, System.Object[])
+  000000777edfe2a0 00007ff8ae24983e NUnit.Engine.Drivers.NUnitNetStandardDriver.ExecuteMethod(System.String, System.Type[], System.Object[])
+  000000777edfe2e0 00007ff8ae2497ba NUnit.Engine.Drivers.NUnitNetStandardDriver.Run(NUnit.Engine.ITestEventListener, System.String)
+  000000777edfe370 00007ff8ae2490ec NUnit.Engine.Runners.DirectTestRunner.RunTests(NUnit.Engine.ITestEventListener, NUnit.Engine.TestFilter)
+  000000777edfe520 00007ff8ae248fa0 NUnit.Engine.Runners.AbstractTestRunner.Run(NUnit.Engine.ITestEventListener, NUnit.Engine.TestFilter)
+  000000777edfe550 00007ff8ae24755d NUnit.Engine.Runners.MasterTestRunner.RunTests(NUnit.Engine.ITestEventListener, NUnit.Engine.TestFilter)
+  000000777edfe770 00007ff8ae246fb8 NUnit.Engine.Runners.MasterTestRunner.Run(NUnit.Engine.ITestEventListener, NUnit.Engine.TestFilter)
+  000000777edfe7a0 00007ff8ae246f43 NUnit.VisualStudio.TestAdapter.NUnitEngine.NUnitEngineAdapter.Run(NUnit.Engine.ITestEventListener, NUnit.Engine.TestFilter)
+  000000777edfe800 00007ff8ae244d5d NUnit.VisualStudio.TestAdapter.ExecutionProcesses.Execution.Run(NUnit.Engine.TestFilter, NUnit.VisualStudio.TestAdapter.NUnitEngine.DiscoveryConverter, NUnit.VisualStudio.TestAdapter.NUnit3TestExecutor)
+  000000777edfe8a0 00007ff8ae2441a5 NUnit.VisualStudio.TestAdapter.ExecutionProcesses.VsTestExecution.Run(NUnit.Engine.TestFilter, NUnit.VisualStudio.TestAdapter.NUnitEngine.DiscoveryConverter, NUnit.VisualStudio.TestAdapter.NUnit3TestExecutor)
+  000000777edfe8e0 00007ff8ad62867e NUnit.VisualStudio.TestAdapter.NUnit3TestExecutor.RunAssembly(System.String, System.Linq.IGrouping`2<System.String,Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase>, NUnit.Engine.TestFilter, System.String)
+  000000777edfeae0 00007ff8ad6281f9 NUnit.VisualStudio.TestAdapter.NUnit3TestExecutor.RunAssemblies(System.Collections.Generic.IEnumerable`1<System.String>, NUnit.Engine.TestFilter)
+  000000777edfebe0 00007ff8ad363821 NUnit.VisualStudio.TestAdapter.NUnit3TestExecutor.RunTests(System.Collections.Generic.IEnumerable`1<System.String>, Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter.IRunContext, Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter.IFrameworkHandle)
+  000000777edfece0 00007ff8ad362b5f Microsoft.VisualStudio.TestPlatform.Common.ExtensionDecorators.SerialTestRunDecorator.RunTests(System.Collections.Generic.IEnumerable`1<System.String>, Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter.IRunContext, Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter.IFrameworkHandle)
+  000000777edfed20 00007ff8ad362a9a Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Execution.RunTestsWithSources.InvokeExecutor(Microsoft.VisualStudio.TestPlatform.Common.ExtensionFramework.Utilities.LazyExtension`2<Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter.ITestExecutor,Microsoft.VisualStudio.TestPlatform.Common.Interfaces.ITestExecutorCapabilities>, System.Tuple`2<System.Uri,System.String>, Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Adapter.RunContext, Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter.IFrameworkHandle)
+  000000777edfed80 00007ff8ad36028d Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Execution.BaseRunTests.RunTestInternalWithExecutors(System.Collections.Generic.IEnumerable`1<System.Tuple`2<System.Uri,System.String>>, Int64)
+  000000777edff440 00007ff8ad353898 Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Execution.BaseRunTests.RunTestsInternal()
+  000000777edff4f0 00007ff8ad352718 Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Execution.BaseRunTests.RunTests()
+  000000777edff5f0 00007ff8ad330d22 Microsoft.VisualStudio.TestPlatform.CrossPlatEngine.Execution.ExecutionManager.StartTestRun(System.Collections.Generic.Dictionary`2<System.String,System.Collections.Generic.IEnumerable`1<System.String>>, System.String, System.String, Microsoft.VisualStudio.TestPlatform.ObjectModel.Engine.ClientProtocol.TestExecutionContext, Microsoft.VisualStudio.TestPlatform.ObjectModel.Engine.ITestCaseEventsHandler, Microsoft.VisualStudio.TestPlatform.ObjectModel.Client.IInternalTestRunEventsHandler)
+  000000777edff670 00007ff8ad32dc6f Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.TestRequestHandler+<>c__DisplayClass45_4.<OnMessageReceived>b__3()
+  000000777edff700 00007ff8accc36b8 Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.TestRequestHandler+<>c.<.ctor>b__31_2(System.Action)
+  000000777edff730 00007ff8accc35f5 Microsoft.VisualStudio.TestPlatform.Utilities.JobQueue`1[[System.__Canon, System.Private.CoreLib]].SafeProcessJob(System.__Canon)
+  000000777edff7a0 00007ff8acc7b7f6 Microsoft.VisualStudio.TestPlatform.Utilities.JobQueue`1[[System.__Canon, System.Private.CoreLib]].BackgroundJobProcessor(System.String)
+  000000777edff8f0 00007ff8acc7b160 Microsoft.VisualStudio.TestPlatform.Utilities.JobQueue`1[[System.__Canon, System.Private.CoreLib]].<.ctor>b__16_0()
+  000000777edff920 00007ff8b006d0fe System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, System.Threading.ContextCallback, System.Object)
+  000000777edff990 00007ff8b008ae86 System.Threading.Tasks.Task.ExecuteWithThreadLocal(System.Threading.Tasks.Task ByRef, System.Threading.Thread)
+  000000777edffa30 00007ff8b0064082 System.Threading.Thread.StartCallback()
+  000000777edffc90 00007ff90c8699b3 [DebuggerU2MCatchHandlerFrame]
+
+THREAD managed=5 os=19596 alive=True state=50508320 gc=Preemptive locks=4294967295
+  000000777ee3f6a8 00007ff9881628a4 [InlinedCallFrame]
+  000000777ee3f6a8 00007ff8b0067f52 [InlinedCallFrame]
+  000000777ee3f650 00007ff8b0067f52 System.Threading.WaitHandle.WaitAnyMultiple(System.ReadOnlySpan`1<Microsoft.Win32.SafeHandles.SafeWaitHandle>, Int32)
+  000000777ee3f750 00007ff8b0085bb2 System.Threading.PortableThreadPool+WaitThread.WaitThreadStart()
+  000000777ee3f7b0 00007ff8b006408b System.Threading.Thread.StartCallback()
+  000000777ee3fa10 00007ff90c8699b3 [DebuggerU2MCatchHandlerFrame]
+
+THREAD managed=6 os=29460 alive=True state=16953888 gc=Preemptive locks=4294967295
+  000000777ee7f4b8 00007ff988164d44 [InlinedCallFrame]
+  000000777ee7f4b8 00007ff8b0085543 [InlinedCallFrame]
+  000000777ee7f450 00007ff8b0085543 System.Threading.PortableThreadPool+IOCompletionPoller.Poll()
+  000000777ee7f560 00007ff8b006408b System.Threading.Thread.StartCallback()
+  000000777ee7f7c0 00007ff90c8699b3 [DebuggerU2MCatchHandlerFrame]
+
+THREAD managed=7 os=19336 alive=True state=16953888 gc=Preemptive locks=4294967295
+  000000777eebf788 00007ff988164d44 [InlinedCallFrame]
+  000000777eebf788 00007ff8b0085543 [InlinedCallFrame]
+  000000777eebf720 00007ff8b0085543 System.Threading.PortableThreadPool+IOCompletionPoller.Poll()
+  000000777eebf830 00007ff8b006408b System.Threading.Thread.StartCallback()
+  000000777eebfa90 00007ff90c8699b3 [DebuggerU2MCatchHandlerFrame]
+
+THREAD managed=9 os=20924 alive=True state=50508320 gc=Preemptive locks=4294967295
+  000000777f07f3d0 00007ff9881628a4 [InlinedCallFrame]
+  000000777f07f3d0 00007ff8ae1ead67 [InlinedCallFrame]
+  000000777f07f3a0 00007ff8ae1ead67 System.Threading.WaitHandle.WaitOneNoCheck(Int32, Boolean, System.Object, WaitHandleWaitSourceMap)
+  000000777f07f460 00007ff8b00836a9 System.Threading.PortableThreadPool+GateThread.GateThreadStart()
+  000000777f07f5a0 00007ff8b006408b System.Threading.Thread.StartCallback()
+  000000777f07f800 00007ff90c8699b3 [DebuggerU2MCatchHandlerFrame]
+
+THREAD managed=10 os=34568 alive=True state=16953888 gc=Preemptive locks=4294967295
+  000000777f1ff568 00007ff988161dd4 [InlinedCallFrame]
+  000000777f1ff568 00007ff8ae1fd2a2 [InlinedCallFrame]
+  000000777f1ff530 00007ff8ae1fd2a2 System.Net.Sockets.SocketPal.Poll(System.Net.Sockets.SafeSocketHandle, Int32, System.Net.Sockets.SelectMode, Boolean ByRef)
+  000000777f1ff620 00007ff8ae1fd05f System.Net.Sockets.Socket.Poll(Int32, System.Net.Sockets.SelectMode)
+  000000777f1ff670 00007ff8acc84d14 Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.TcpClientExtensions.MessageLoopAsync(System.Net.Sockets.TcpClient, Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.Interfaces.ICommunicationChannel, System.Action`1<System.Exception>, System.Threading.CancellationToken)
+  000000777f1ff800 00007ff8acc84344 Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.SocketClient.<OnServerConnected>b__16_0()
+  000000777f1ff850 00007ff8b038377f System.Threading.Tasks.Task`1[[System.__Canon, System.Private.CoreLib]].InnerInvoke()
+  000000777f1ff890 00007ff8b006d25e System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(System.Threading.Thread, System.Threading.ExecutionContext, System.Threading.ContextCallback, System.Object)
+  000000777f1ff8e0 00007ff8b008ae6d System.Threading.Tasks.Task.ExecuteWithThreadLocal(System.Threading.Tasks.Task ByRef, System.Threading.Thread)
+  000000777f1ff980 00007ff8b007877f System.Threading.ThreadPoolWorkQueue.Dispatch()
+  000000777f1ffa00 00007ff8b0086397 System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart()
+  000000777f1ffb00 00007ff8b006408b System.Threading.Thread.StartCallback()
+  000000777f1ffd60 00007ff90c8699b3 [DebuggerU2MCatchHandlerFrame]
+
+THREAD managed=12 os=10676 alive=True state=33731104 gc=Preemptive locks=4294967295
+  000000777f4ff5a0 00007ff9881628a4 [InlinedCallFrame]
+  000000777f4ff5a0 00007ff8b00638c7 [InlinedCallFrame]
+  000000777f4ff570 00007ff8b00638c7 System.Threading.Monitor.Wait(System.Object, Int32)
+  000000777f4ff640 00007ff8b0070a6c System.Threading.ManualResetEventSlim.Wait(Int32, System.Threading.CancellationToken)
+  000000777f4ff6d0 00007ff8b00706b2 System.Threading.ManualResetEventSlim.Wait()
+  000000777f4ff700 00007ff8acc858a3 Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.TestRequestHandler.ProcessRequests(Microsoft.VisualStudio.TestPlatform.ObjectModel.Engine.TesthostProtocol.ITestHostManagerFactory)
+  000000777f4ff730 00007ff8acc857bf Microsoft.VisualStudio.TestPlatform.TestHost.DefaultEngineInvoker+<>c__DisplayClass22_0.<StartProcessingAsync>b__0()
+  000000777f4ff770 00007ff8b006d0fe System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, System.Threading.ContextCallback, System.Object)
+  000000777f4ff7e0 00007ff8b008ae86 System.Threading.Tasks.Task.ExecuteWithThreadLocal(System.Threading.Tasks.Task ByRef, System.Threading.Thread)
+  000000777f4ff880 00007ff8b0064082 System.Threading.Thread.StartCallback()
+  000000777f4ffae0 00007ff90c8699b3 [DebuggerU2MCatchHandlerFrame]
+
+THREAD managed=13 os=11664 alive=True state=33731104 gc=Preemptive locks=4294967295
+  000000777f67f720 00007ff9881628a4 [InlinedCallFrame]
+  000000777f67f720 00007ff8ae1ead67 [InlinedCallFrame]
+  000000777f67f6f0 00007ff8ae1ead67 System.Threading.WaitHandle.WaitOneNoCheck(Int32, Boolean, System.Object, WaitHandleWaitSourceMap)
+  000000777f67f7b0 00007ff8b007c785 System.Threading.TimerQueue.TimerThread()
+  000000777f67f850 00007ff8b006408b System.Threading.Thread.StartCallback()
+  000000777f67fab0 00007ff90c8699b3 [DebuggerU2MCatchHandlerFrame]
+
+THREAD managed=15 os=10844 alive=True state=33730592 gc=Preemptive locks=4294967295
+  000000777fc7f7f0 00007ff9881628a4 [InlinedCallFrame]
+  000000777fc7f7f0 00007ff8af87d988 [InlinedCallFrame]
+  000000777fc7f7a0 00007ff8af87d988 System.Threading.ManualResetEventSlim.Wait(Int32, System.Threading.CancellationToken)
+  000000777fc7f8d0 00007ff8ae24e51b NUnit.Framework.Internal.Execution.EventQueue`1[[System.__Canon, System.Private.CoreLib]].Dequeue(Boolean)
+  000000777fc7f970 00007ff8ae24de62 NUnit.Framework.Internal.Execution.EventPump`2[[System.__Canon, System.Private.CoreLib],[System.__Canon, System.Private.CoreLib]].PumpThreadProc()
+  000000777fc7fb20 00007ff8b0065d4b System.Threading.Thread+StartHelper.Callback(System.Object)
+  000000777fc7fb60 00007ff8ae1f6f69 System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, System.Threading.ContextCallback, System.Object)
+  000000777fc7fdf0 00007ff90c8699b3 [DebuggerU2MCatchHandlerFrame]
+
+THREAD managed=16 os=31812 alive=True state=33730592 gc=Preemptive locks=4294967295
+  000000777fdfea78 00007ff9881628a4 [InlinedCallFrame]
+  000000777fdfea78 00007ff8ae4a071c [InlinedCallFrame]
+  000000777fdfea30 00007ff8ae4a071c System.Threading.ManualResetEventSlim.Wait(Int32, System.Threading.CancellationToken)
+  000000777fdfeb20 00007ff8b008bccf System.Threading.Tasks.Task.SpinThenBlockingWait(Int32, System.Threading.CancellationToken)
+  000000777fdfeb90 00007ff8b008ba15 System.Threading.Tasks.Task.InternalWaitCore(Int32, System.Threading.CancellationToken)
+  000000777fdfec10 00007ff8b008b956 System.Threading.Tasks.Task.InternalWait(Int32, System.Threading.CancellationToken)
+  000000777fdfec40 00007ff8b00ed055 System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(System.Threading.Tasks.Task, System.Threading.Tasks.ConfigureAwaitOptions)
+  000000777fdfec80 00007ff8af7d87dd System.Runtime.CompilerServices.TaskAwaiter`1[[System.Threading.Tasks.VoidTaskResult, System.Private.CoreLib]].GetResult()
+  000000777fdfecb0 00007ff8af7d87a2 NUnit.Framework.Internal.TaskAwaitAdapter+GenericAdapter`1[[System.Threading.Tasks.VoidTaskResult, System.Private.CoreLib]].BlockUntilCompleted()
+  000000777fdfecf0 00007ff8af7d8764 NUnit.Framework.Internal.MessagePumpStrategy+NoMessagePumpStrategy.WaitForCompletion(NUnit.Framework.Internal.AwaitAdapter)
+  000000777fdfed20 00007ff8ae4b471d NUnit.Framework.Internal.AsyncToSyncAdapter.Await[[System.__Canon, System.Private.CoreLib]](NUnit.Framework.Internal.TestExecutionContext, System.Func`1<System.Object>)
+  000000777fdfed80 00007ff8ae4b459a NUnit.Framework.Internal.AsyncToSyncAdapter.Await(NUnit.Framework.Internal.TestExecutionContext, System.Func`1<System.Object>)
+  000000777fdfedb0 00007ff8ae445230 NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(NUnit.Framework.Internal.TestExecutionContext, NUnit.Framework.Interfaces.IMethodInfo)
+  000000777fdfee30 00007ff8ae444f6d NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUp(NUnit.Framework.Internal.TestExecutionContext)
+  000000777fdfef10 00007ff8ae4b4434 NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand+<>c__DisplayClass1_0.<Execute>b__0()
+  000000777fdfef70 00007ff8ae4b4380 NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(NUnit.Framework.Internal.TestExecutionContext, System.Action)
+  000000777fdfefc0 00007ff8ae4b4287 NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.Execute(NUnit.Framework.Internal.TestExecutionContext)
+  000000777fdff040 00007ff8ae441fec NUnit.Framework.Internal.Commands.BeforeTestCommand.Execute(NUnit.Framework.Internal.TestExecutionContext)
+  000000777fdff090 00007ff8ae4a3d8c NUnit.Framework.Internal.Execution.SimpleWorkItem+<>c__DisplayClass3_0.<PerformWork>b__0()
+  000000777fdff0d0 00007ff8ad678fb3 NUnit.Framework.Internal.ContextUtils+<>c__DisplayClass1_0`1[[System.__Canon, System.Private.CoreLib]].<DoIsolated>b__0(System.Object)
+  000000777fdff110 00007ff8ae470eb2 System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, System.Threading.ContextCallback, System.Object)
+  000000777fdff180 00007ff8ad678d5f NUnit.Framework.Internal.ContextUtils.DoIsolated(System.Threading.ContextCallback, System.Object)
+  000000777fdff1f0 00007ff8ad678c43 NUnit.Framework.Internal.ContextUtils.DoIsolated[[System.__Canon, System.Private.CoreLib]](System.Func`1<System.__Canon>)
+  000000777fdff250 00007ff8ae4a121c NUnit.Framework.Internal.Execution.SimpleWorkItem.PerformWork()
+  000000777fdff2c0 00007ff8ae250c8d NUnit.Framework.Internal.Execution.WorkItem.RunOnCurrentThread()
+  000000777fdff350 00007ff8ae250a6d NUnit.Framework.Internal.Execution.WorkItem.Execute()
+  000000777fdff420 00007ff8ae2500c9 NUnit.Framework.Internal.Execution.TestWorker.TestWorkerThreadProc()
+  000000777fdff510 00007ff8b0065d4b System.Threading.Thread+StartHelper.Callback(System.Object)
+  000000777fdff550 00007ff8ae1f6f69 System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, System.Threading.ContextCallback, System.Object)
+  000000777fdff7e0 00007ff90c8699b3 [DebuggerU2MCatchHandlerFrame]
+
+THREAD managed=17 os=32224 alive=True state=33714208 gc=Preemptive locks=4294967295
+  000000777ff7f4c0 00007ff98575af04 [InlinedCallFrame]
+  000000777ff7f4c0 00007ff8af87d988 [InlinedCallFrame]
+  000000777ff7f470 00007ff8af87d988 System.Threading.ManualResetEventSlim.Wait(Int32, System.Threading.CancellationToken)
+  000000777ff7f5a0 00007ff8ae250403 NUnit.Framework.Internal.Execution.WorkItemQueue.Dequeue()
+  000000777ff7f650 00007ff8ae24ff24 NUnit.Framework.Internal.Execution.TestWorker.TestWorkerThreadProc()
+  000000777ff7f740 00007ff8b0065d4b System.Threading.Thread+StartHelper.Callback(System.Object)
+  000000777ff7f780 00007ff8ae1f6f69 System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, System.Threading.ContextCallback, System.Object)
+  000000777ff7fa10 00007ff90c8699b3 [DebuggerU2MCatchHandlerFrame]
+
+THREAD managed=18 os=22152 alive=True state=176672 gc=Preemptive locks=4294967295
+  00000077002fdf90 00007ff9881627f4 [InlinedCallFrame]
+  00000077002fdf90 00007ff8af884c6e [InlinedCallFrame]
+  00000077002fdf50 00007ff8af884c6e ILStubClass.IL_STUB_PInvoke(Char*, UInt32, UInt32, TerraFX.Interop.Windows.SECURITY_ATTRIBUTES*, UInt32, UInt32, TerraFX.Interop.Windows.HANDLE)
+  00000077002fe020 0000027318a7aa3e Robust.Shared.Utility.FileHelper.TryGetFileWindows(System.String, System.IO.FileStream ByRef)
+  00000077002fe0d0 0000027318a7f6c3 Robust.Shared.ContentPack.ResourceManager.TryContentFileRead(System.Nullable`1<Robust.Shared.Utility.ResPath>, System.IO.Stream ByRef)
+  00000077002fe1d0 0000027318a7f368 Robust.Shared.ContentPack.ResourceManager.ContentFileRead(Robust.Shared.Utility.ResPath)
+  00000077002fe240 0000027319eab2c7 Robust.Shared.Resources.RsiLoading.LoadImages(RsiMetadata, SixLabors.ImageSharp.Configuration, System.Func`2<System.String,System.IO.Stream>)
+  00000077002fe3d0 0000027319de1712 Robust.Client.ResourceManagement.RSIResource.LoadPreTextureFolder(Robust.Shared.ContentPack.IResourceManager, LoadStepData, System.IO.Stream)
+  00000077002fe460 000002731af549c1 Robust.Client.ResourceManagement.RSIResource.LoadPreTexture(Robust.Shared.ContentPack.IResourceManager, LoadStepData)
+  00000077002fe4f0 000002731af49957 Robust.Client.ResourceManagement.ResourceCache.TryGetResource[[System.__Canon, System.Private.CoreLib]](Robust.Shared.Utility.ResPath, System.__Canon ByRef)
+  00000077002fe660 000002731af3ac6b Robust.Client.GameObjects.SpriteComponent.LayerSetData(Layer, Robust.Shared.GameObjects.PrototypeLayerData)
+  00000077002fe7f0 000002731af4beb0 Robust.Client.GameObjects.SpriteComponent.Robust.Shared.Serialization.ISerializationHooks.AfterDeserialization()
+  00000077002fe930 000002731af71515 Robust.Shared.Prototypes.PrototypeManager.InstantiateKinds(KindData[], System.Collections.Generic.Dictionary`2<System.Type,System.Threading.Tasks.Task>)
+  00000077002feb40 0000027318b248fc Robust.Shared.Prototypes.PrototypeManager.ResolveResults()
+  00000077002fecc0 0000027318aedc09 Robust.Client.Prototypes.ClientPrototypeManager.LoadDefaultPrototypes(System.Collections.Generic.Dictionary`2<System.Type,System.Collections.Generic.HashSet`1<System.String>>)
+  00000077002fed00 00007ff8af887403 Robust.Client.GameController.StartupContinue(DisplayMode)
+  00000077002ff550 00007ff8af7db4d1 Robust.UnitTesting.RobustIntegrationTest+ClientIntegrationInstance.Init()
+  00000077002ffa10 00007ff8af7d4d6c Robust.UnitTesting.RobustIntegrationTest+ClientIntegrationInstance.ThreadMain()
+  00000077002ffa80 00007ff8b0065d4b System.Threading.Thread+StartHelper.Callback(System.Object)
+  00000077002ffac0 00007ff8ae470eb2 System.Threading.ExecutionContext.RunInternal(System.Threading.ExecutionContext, System.Threading.ContextCallback, System.Object)
+  00000077002ffd50 00007ff90c8699b3 [DebuggerU2MCatchHandlerFrame]
+CURRENT RESOURCE STACK ROOTS:
+  STRING 263276537c8: D:\projects\night-city\artifacts\meta-integration\d742ee0ca724401d8e7e46c6fd16dd60\Resources\Textures\Structures\Specific\carp_rift.rsi\icon_blue.png
+  STRING 26327653278: /Textures/Structures/Specific/carp_rift.rsi/icon_blue.png
+  STRING 263276536b8: Textures/Structures/Specific/carp_rift.rsi/icon_blue.png
+  OBJECT 2632763ec10: Robust.Shared.Resources.RsiLoading+RsiMetadata
+    States: 2632763eb98 Robust.Shared.Resources.RsiLoading+StateMetadata[]
+  OBJECT 2632763dd50: Robust.Client.ResourceManagement.RSIResource+LoadStepData
+    Path.CanonPath: /Textures/Structures/Specific/carp_rift.rsi
+    AtlasSheet: 0 
+    AtlasList: 0 
+    FrameCounts: 2632763ec38 System.Int32[]
+    CallbackOffsets: 0 
+    AtlasTexture: 0 
+    Rsi: 0 
+  STRING 2632763ddd8: /Textures/Structures/Specific/carp_rift.rsi/meta.json
+  OBJECT 2632763e490: System.IO.FileStream
+    _asyncActiveSemaphore: 0 
+    _strategy: 2632763e4f0 System.IO.Strategies.BufferedFileStreamStrategy
+  STRING 2632763dcc8: /Textures/Structures/Specific/carp_rift.rsi
+
+THREAD managed=51 os=26592 alive=True state=16953888 gc=Preemptive locks=4294967295
+  00000077035ff6c8 00007ff988161e74 [InlinedCallFrame]
+  00000077035ff6c8 00007ff8ae1f9f6c [InlinedCallFrame]
+  00000077035ff690 00007ff8ae1f9f6c System.Threading.LowLevelLifoSemaphore.WaitForSignal(Int32)
+  00000077035ff760 00007ff8ae1f9ca9 System.Threading.LowLevelLifoSemaphore.Wait(Int32, Boolean)
+  00000077035ff810 00007ff8b00863e1 System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart()
+  00000077035ff910 00007ff8b006408b System.Threading.Thread.StartCallback()
+  00000077035ffb70 00007ff90c8699b3 [DebuggerU2MCatchHandlerFrame]
+
+THREAD managed=52 os=20940 alive=True state=16953888 gc=Preemptive locks=4294967295
+  000000770377f778 00007ff988161e74 [InlinedCallFrame]
+  000000770377f778 00007ff8ae1f9f6c [InlinedCallFrame]
+  000000770377f740 00007ff8ae1f9f6c System.Threading.LowLevelLifoSemaphore.WaitForSignal(Int32)
+  000000770377f810 00007ff8ae1f9ca9 System.Threading.LowLevelLifoSemaphore.Wait(Int32, Boolean)
+  000000770377f8c0 00007ff8b00863e1 System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart()
+  000000770377f9c0 00007ff8b006408b System.Threading.Thread.StartCallback()
+  000000770377fc20 00007ff90c8699b3 [DebuggerU2MCatchHandlerFrame]

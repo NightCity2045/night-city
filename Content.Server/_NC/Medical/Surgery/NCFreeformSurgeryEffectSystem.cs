@@ -3,6 +3,11 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Numerics;
+using Content.Server.Administration.Logs;
+using Content.Shared.Database;
+using Content.Shared.ActionBlocker;
+using Content.Shared.Interaction;
+using Robust.Shared.Containers;
 using System.Linq;
 using Content.Server._NC.Medical.Anatomy.Detachment;
 using Content.Server._NC.Medical.Bleeding;
@@ -45,15 +50,24 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
     [Dependency] private NCSurgerySystem _legacy = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
+    [Dependency] private SharedInteractionSystem _interaction = default!;
+    [Dependency] private ActionBlockerSystem _blocker = default!;
+    [Dependency] private SharedContainerSystem _containers = default!;
+    [Dependency] private IAdminLogManager _adminLog = default!;
 
     public NCFreeformSurgeryEffectResult ApplyStroke(in NCFreeformSurgeryEffectContext context)
     {
         if (!TryComp<NCSurgicalSiteComponent>(context.Region, out var site) ||
             !TryComp<NCMedicalBodyComponent>(context.Patient, out var medical) ||
+            !TryComp<OrganComponent>(context.Region, out var regionOrgan) || regionOrgan.Body != context.Patient ||
             context.Points.Length < 2)
         {
             return NCFreeformSurgeryEffectResult.Rejected;
         }
+        // Effect adapters are trusted, but may still carry a stale structure from a removed/different body.
+        if (context.Structure is { } affected && HasComp<NCCyberwareComponent>(affected) &&
+            !_cyberware.CollectCyberware(context.Patient).Contains(affected))
+            return NCFreeformSurgeryEffectResult.NoTarget;
 
         var length = PathLength(context.Points);
         var power = Math.Clamp(
@@ -70,7 +84,16 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         if (!_legacy.CanConsumeToolResource(context.Tool, context.ToolComponent, context.Definition.ConsumedUses))
             return NCFreeformSurgeryEffectResult.ResourceEmpty;
 
-        var resolution = NCActionResolutionId.New();
+        var resolution = context.ResolutionId.IsValid ? context.ResolutionId : NCActionResolutionId.New();
+        var actedItem = context.Structure ?? context.Region;
+        if (context.Definition.Action is NCFreeformSurgeryAction.Transplant or NCFreeformSurgeryAction.Cyberware &&
+            TryComp<NCSurgeryGameplaySelectionComponent>(context.Surgeon, out var stagedSelection) &&
+            stagedSelection.Patient == context.Patient && stagedSelection.Graft is { } stagedItem)
+            actedItem = stagedItem;
+        var history = EnsureComp<NCFreeformSurgeryHistoryComponent>(context.Patient);
+        if (history.Completed.Contains(resolution.Value))
+            return new NCFreeformSurgeryEffectResult(true, false, null);
+        var warning = NCFreeformSurgeryFailure.None;
         var applied = context.Definition.Action switch
         {
             NCFreeformSurgeryAction.Disinfect => ApplyDisinfection(context, site, center, power),
@@ -92,8 +115,11 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
             NCFreeformSurgeryAction.OpenBone => ApplyBoneAccess(context, site),
             NCFreeformSurgeryAction.Separate => ApplySeparation(context),
             NCFreeformSurgeryAction.Amputate => ApplyAmputation(context),
-            NCFreeformSurgeryAction.Transplant => ApplyTransplant(context),
-            NCFreeformSurgeryAction.Cyberware => ApplyCyberware(context, resolution),
+            NCFreeformSurgeryAction.Transplant => ApplyTransplant(context, resolution, out warning),
+            NCFreeformSurgeryAction.Cyberware => ApplyCyberware(context, resolution, out warning),
+            NCFreeformSurgeryAction.CalibrateCyberware => ApplyCyberwareCalibration(context, resolution, out warning),
+            NCFreeformSurgeryAction.DisconnectCyberware => ApplyCyberwareDisconnection(context, resolution),
+            NCFreeformSurgeryAction.RepairCyberware => ApplyCyberwareRepair(context, resolution, out warning),
             NCFreeformSurgeryAction.DrainCavity => ApplyCavityDrain(context, power),
             _ => false,
         };
@@ -113,7 +139,12 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         }
 
         if (!applied)
-            return NCFreeformSurgeryEffectResult.NoTarget;
+            return new NCFreeformSurgeryEffectResult(false, false,
+                warning == NCFreeformSurgeryFailure.None ? NCFreeformSurgeryFailure.NoApplicableTarget : warning);
+
+        history.Completed.Enqueue(resolution.Value);
+        while (history.Completed.Count > 128)
+            history.Completed.Dequeue();
 
         // Dirt never blocks a physical intervention. It is transferred into the real local site and wounds.
         var introduced = MathF.Max(0f, context.Definition.ContaminationPerUnit) * length;
@@ -125,6 +156,25 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         }
 
         _legacy.TryConsumeToolResource(context.Tool, context.ToolComponent, context.Definition.ConsumedUses);
+        var item = actedItem;
+        var configuration = TryComp<NCCyberwareAssemblyComponent>(item, out var assembly)
+            ? assembly.ConfigurationRevision : 0;
+        var identity = CompOrNull<NCCyberwareComponent>(item)?.StableInstanceId ?? Guid.Empty;
+        var testEnergy = 0f;
+        if (warning == NCFreeformSurgeryFailure.None &&
+            context.Definition.Action is NCFreeformSurgeryAction.Cyberware or NCFreeformSurgeryAction.Transplant or
+                NCFreeformSurgeryAction.CalibrateCyberware &&
+            TryComp<NCCyberwareComponent>(item, out var tested) &&
+            _cyberware.CollectCyberware(context.Patient).Contains(item))
+        {
+            var definition = _prototypes.Index(tested.Profile);
+            testEnergy = definition.RequiresPower ? definition.CalibrationEnergy : 0f;
+        }
+        _adminLog.Add(LogType.Action, LogImpact.Medium,
+            $"Surgery {resolution.Value}: {ToPrettyString(context.Surgeon):actor} on {ToPrettyString(context.Patient):patient}, " +
+            $"tool {ToPrettyString(context.Tool):tool}, item {ToPrettyString(item):item}, action {context.Definition.Action}, " +
+            $"instance {identity}, configuration {configuration}, resource uses {context.Definition.ConsumedUses}, " +
+            $"calibration joules {testEnergy}, result {warning}.");
 
         _medicalBodies.TryMarkDirty(
             (context.Patient, medical),
@@ -135,7 +185,7 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
             NCMedicalDirtyDomains.Consciousness |
             NCMedicalDirtyDomains.Diagnostics |
             NCMedicalDirtyDomains.Persistence);
-        return new NCFreeformSurgeryEffectResult(true, true, null);
+        return new NCFreeformSurgeryEffectResult(true, true, warning);
     }
 
     private bool ApplyIncision(
@@ -485,7 +535,7 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
     private bool ApplyOrganRepair(in NCFreeformSurgeryEffectContext context, float power)
     {
         var target = context.Structure ?? context.Region;
-        if (!TryComp<NCOrganIntegrityComponent>(target, out var integrity))
+        if (HasComp<NCCyberwareComponent>(target) || !TryComp<NCOrganIntegrityComponent>(target, out var integrity))
             return false;
 
         integrity.CurrentIntegrity = Math.Clamp(
@@ -548,7 +598,7 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
     private bool ApplyNerve(in NCFreeformSurgeryEffectContext context, float power)
     {
         var target = context.Structure ?? context.Region;
-        if (!TryComp<NCNerveComponent>(target, out var nerve))
+        if (HasComp<NCCyberwareComponent>(target) || !TryComp<NCNerveComponent>(target, out var nerve))
             return false;
         nerve.NeuralIntegrity = Math.Clamp(nerve.NeuralIntegrity + power * 0.55f, 0f, 1f);
         nerve.MotorFunction = Math.Clamp(nerve.MotorFunction + power * 0.4f, 0f, 1f);
@@ -646,10 +696,13 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         return true;
     }
 
-    private bool ApplyTransplant(in NCFreeformSurgeryEffectContext context)
+    private bool ApplyTransplant(in NCFreeformSurgeryEffectContext context, NCActionResolutionId resolution,
+        out NCFreeformSurgeryFailure warning)
     {
+        warning = NCFreeformSurgeryFailure.None;
         if (!TryComp<NCSurgeryGameplaySelectionComponent>(context.Surgeon, out var selection) ||
             selection.Patient != context.Patient || selection.Graft is not { } graft ||
+            !CanReachStagedItem(context, graft) ||
             !TryComp<OrganComponent>(context.Region, out var parent) || parent.Category is not { } parentCategory)
         {
             return false;
@@ -659,16 +712,25 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
             return false;
 
         RemComp<NCSurgeryGameplaySelectionComponent>(context.Surgeon);
+        if (HasComp<NCCyberwareComponent>(graft))
+            warning = _cyberware.TryFinishMount(graft, resolution);
         return true;
     }
 
     private bool ApplyCyberware(
         in NCFreeformSurgeryEffectContext context,
-        NCActionResolutionId resolution)
+        NCActionResolutionId resolution,
+        out NCFreeformSurgeryFailure warning)
     {
+        warning = NCFreeformSurgeryFailure.None;
+        if (TryComp<NCSurgeryGameplaySelectionComponent>(context.Surgeon, out var stagedSelection) &&
+            stagedSelection.Patient == context.Patient && stagedSelection.Graft is { } staged &&
+            !CanReachStagedItem(context, staged))
+            return false;
         if (TryComp<NCSurgeryGameplaySelectionComponent>(context.Surgeon, out var selection) &&
             selection.Patient == context.Patient && selection.Graft is { } module &&
             HasComp<NCCyberwareComponent>(module) &&
+            CanReachStagedItem(context, module) &&
             _cyberware.TryFindInstallSlot(context.Patient, context.Region, module, out var slot))
         {
             var result = _cyberware.TryInstall(new NCCyberwareInstallRequest(
@@ -678,11 +740,12 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
                 module,
                 slot,
                 ConnectNeuralInterface: true,
-                CalibrateNeuralInterface: true));
+                CalibrateNeuralInterface: false));
             if (!result.Accepted)
                 return false;
 
             RemComp<NCSurgeryGameplaySelectionComponent>(context.Surgeon);
+            warning = _cyberware.TryFinishMount(module, resolution);
             return true;
         }
 
@@ -701,6 +764,36 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
 
         _hands.TryPickupAnyHand(context.Surgeon, target.Value);
         return true;
+    }
+
+    private bool CanReachStagedItem(in NCFreeformSurgeryEffectContext context, EntityUid item)
+    {
+        return !TerminatingOrDeleted(item) && _blocker.CanInteract(context.Surgeon, context.Patient) &&
+               (_hands.IsHolding(context.Surgeon, item) ||
+                !_containers.IsEntityInContainer(item) && _interaction.InRangeUnobstructed(context.Surgeon, item, 2f));
+    }
+
+    private bool ApplyCyberwareCalibration(in NCFreeformSurgeryEffectContext context, NCActionResolutionId resolution,
+        out NCFreeformSurgeryFailure failure)
+    {
+        failure = NCFreeformSurgeryFailure.NoApplicableTarget;
+        return context.Structure is { } target && _cyberware.TryCalibrateCyberware((target, null), resolution, out failure);
+    }
+
+    private bool ApplyCyberwareDisconnection(in NCFreeformSurgeryEffectContext context, NCActionResolutionId resolution)
+    {
+        return context.Structure is { } target &&
+               _cyberware.TrySetNeuralInterface(target, resolution, false, false).Status == NCCyberwareMutationStatus.Applied;
+    }
+
+    private bool ApplyCyberwareRepair(in NCFreeformSurgeryEffectContext context, NCActionResolutionId resolution,
+        out NCFreeformSurgeryFailure failure)
+    {
+        failure = NCFreeformSurgeryFailure.CyberwareNoRepairNeeded;
+        var applied = context.Structure is { } target && _cyberware.TryApplyLocalService((target, null), resolution);
+        if (applied)
+            failure = NCFreeformSurgeryFailure.None;
+        return applied;
     }
 
     private bool HasLocalOpenAccess(
@@ -927,7 +1020,8 @@ public readonly record struct NCFreeformSurgeryEffectContext(
     float? StructureMinimumDepth = null,
     bool StructureDetachableBySeparation = false,
     bool StructureBlocksDeeperStructures = false,
-    Guid? WoundId = null);
+    Guid? WoundId = null,
+    NCActionResolutionId ResolutionId = default);
 
 public readonly record struct NCFreeformSurgeryEffectResult(bool Accepted, bool Applied, NCFreeformSurgeryFailure? Failure)
 {

@@ -35,6 +35,9 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
     private readonly IPrototypeManager _prototypes;
     private NCFreeformSurgeryState? _state;
     private bool _updating;
+    private string? _capabilityTool;
+    private NCFreeformSurgeryCapabilitySummary[]? _capabilityLayout;
+    private readonly List<Button> _capabilityButtons = [];
 
     public NCFreeformSurgeryWindow(IPrototypeManager prototypes)
     {
@@ -102,6 +105,17 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
 
     private void PopulateCapabilities(NCFreeformSurgeryState state)
     {
+        // Keep the physical click target alive while periodic vitals/state updates arrive.
+        if (CanReuseCapabilities(state))
+        {
+            for (var index = 0; index < _capabilityButtons.Count; index++)
+                _capabilityButtons[index].Pressed = state.Capabilities[index].Selected;
+            return;
+        }
+
+        _capabilityTool = state.ToolPrototype;
+        _capabilityLayout = state.Capabilities;
+        _capabilityButtons.Clear();
         CapabilityContainer.RemoveAllChildren();
         ToolSprite.SetPrototype(null);
         ToolSprite.Visible = !string.IsNullOrEmpty(state.ToolPrototype);
@@ -143,6 +157,7 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
             var selected = capability.Capability;
             button.OnPressed += _ => CapabilityChanged?.Invoke(selected);
             CapabilityContainer.AddChild(button);
+            _capabilityButtons.Add(button);
         }
 
         if (state.Capabilities.Length == 0)
@@ -153,6 +168,20 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
                 FontColorOverride = Color.FromHex("#E9B658"),
             });
         }
+    }
+
+    private bool CanReuseCapabilities(NCFreeformSurgeryState state)
+    {
+        if (_capabilityLayout == null || _capabilityTool != state.ToolPrototype ||
+            _capabilityLayout.Length != state.Capabilities.Length)
+            return false;
+        for (var index = 0; index < _capabilityLayout.Length; index++)
+        {
+            if ((_capabilityLayout[index] with { Selected = false }) !=
+                (state.Capabilities[index] with { Selected = false }))
+                return false;
+        }
+        return true;
     }
 
     private void PopulateSite(NCFreeformSurgeryState state, float displayedDepth)
@@ -258,6 +287,9 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
         NCFreeformSurgeryAction.Amputate => "Amputation",
         NCFreeformSurgeryAction.Transplant => "Transplantation",
         NCFreeformSurgeryAction.Cyberware => "Cyberware installation / removal",
+        NCFreeformSurgeryAction.CalibrateCyberware => Loc.GetString("nc-cyberware-surgery-calibrate"),
+        NCFreeformSurgeryAction.DisconnectCyberware => Loc.GetString("nc-cyberware-surgery-disconnect"),
+        NCFreeformSurgeryAction.RepairCyberware => Loc.GetString("nc-cyberware-surgery-repair"),
         NCFreeformSurgeryAction.Cauterize => "Cautery",
         NCFreeformSurgeryAction.Autopsy => "Autopsy",
         NCFreeformSurgeryAction.DrainCavity => "Cavity drainage",
@@ -267,6 +299,15 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
     private static string FeedbackText(NCFreeformSurgeryFailure failure) => failure switch
     {
         NCFreeformSurgeryFailure.None => string.Empty,
+        NCFreeformSurgeryFailure.CyberwareCalibrationRequired => Loc.GetString("nc-cyberware-surgery-calibration-required"),
+        NCFreeformSurgeryFailure.CyberwareAssemblyIncomplete => Loc.GetString("nc-cyberware-surgery-assembly-incomplete"),
+        NCFreeformSurgeryFailure.CyberwareOutputLow => Loc.GetString("nc-cyberware-surgery-output-low"),
+        NCFreeformSurgeryFailure.CyberwareSignalWeak => Loc.GetString("nc-cyberware-surgery-signal-weak"),
+        NCFreeformSurgeryFailure.CyberwareNoPower => Loc.GetString("nc-cyberware-surgery-no-power"),
+        NCFreeformSurgeryFailure.CyberwarePowerOverload => Loc.GetString("nc-cyberware-surgery-power-overload"),
+        NCFreeformSurgeryFailure.CyberwareOverheated => Loc.GetString("nc-cyberware-surgery-overheated"),
+        NCFreeformSurgeryFailure.CyberwareEmpDisabled => Loc.GetString("nc-cyberware-surgery-emp-disabled"),
+        NCFreeformSurgeryFailure.CyberwareNoRepairNeeded => Loc.GetString("nc-cyberware-surgery-no-repair-needed"),
         NCFreeformSurgeryFailure.OutOfRange => "Intervention paused: move back within reach of the patient.",
         NCFreeformSurgeryFailure.StaleRevision => "The operative field changed. Live data has been synchronized; repeat the action.",
         NCFreeformSurgeryFailure.ToolUnavailable => "The active hand does not contain a surgical instrument.",

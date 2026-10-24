@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Content.Shared.Database\Content.Shared.Database.csproj" />
+    <ProjectReference Include="..\Content.Meta\Content.Meta.csproj" /> <!-- NC: pure META language and protocol core. -->
     <!-- NC: shared, engine-independent local diagnostics contracts. -->
     <ProjectReference Include="..\Tools\_NC\SS14Mcp\Contracts\SS14Mcp.Contracts.csproj" Condition="'$(EnableNCDiagnostics)' == 'true'" />
   </ItemGroup>

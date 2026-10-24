@@ -1,0 +1,41 @@
+{
+  "version": "1.0",
+  "views": {
+    "main": {
+      "function": "stock.security.view",
+      "document": "ui/main.mui",
+      "stateType": "stock.security.JournalState",
+      "fields": {
+        "title": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "report": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "refreshLabel": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "actions": [
+        "refresh"
+      ]
+    }
+  },
+  "actions": {
+    "refresh": {
+      "function": "stock.security.refresh",
+      "inputType": "stock.security.Empty",
+      "inputs": {},
+      "scopes": []
+    }
+  },
+  "resources": []
+}
+

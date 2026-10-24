@@ -10,7 +10,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       x:Class="Content.Client._NC.Medical.Surgery.NCFreeformSurgeryWindow"
                       Title="Surgical field"
-                      SetSize="1260 820"
+                      SetSize="1260 760"
                       MinSize="980 640">
     <PanelContainer HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
         <PanelContainer.PanelOverride>

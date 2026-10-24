@@ -6,6 +6,8 @@ using System.Linq;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Cyberware;
+using Content.Shared._NC.Medical.Cyberware.Abilities;
+using Content.Shared._NC.Medical.Cyberware.Visuals;
 using Content.Shared.Body;
 using Robust.Shared.Prototypes;
 
@@ -109,6 +111,18 @@ public sealed partial class NCCyberwareSystem
             return false;
         }
 
+        if (!NCCyberwareServiceHistory.Valid(state.Service) || !_prototypes.TryIndex(state.Service!.Firmware, out var firmware) ||
+            firmware.CompatibleProfiles.Count > 0 && !firmware.CompatibleProfiles.Contains(state.Profile))
+            return false;
+        var hasAbility = entityPrototype.TryComp<NCCyberwareAbilityComponent>(out _, _componentFactory);
+        var hasExterior = entityPrototype.TryComp<NCCyberwareExteriorComponent>(out _, _componentFactory);
+        if (hasExterior != (state.Exterior != null) ||
+            state.Exterior is { } exterior && (!_prototypes.HasIndex(exterior.Finish) ||
+                !Unit(exterior.SkinColor.R) || !Unit(exterior.SkinColor.G) || !Unit(exterior.SkinColor.B) || exterior.SkinColor.A != 1f))
+            return false;
+        if (hasAbility != state.AbilityCooldownSeconds.HasValue ||
+            state.AbilityCooldownSeconds is { } cooldown && !NCCyberwareAbilityMath.ValidCooldown(cooldown))
+            return false;
         ValidateProfile(profile);
         if (installedModule)
         {
@@ -148,12 +162,31 @@ public sealed partial class NCCyberwareSystem
             return false;
         }
         module.StateInitialized = true;
+        module.Service = NCCyberwareServiceHistory.Clone(state.Service!);
+        module.PersistenceCapturedAt = null;
+        if (TryComp<NCCyberwareExteriorComponent>(moduleUid, out var exterior) && state.Exterior is { } finish)
+        {
+            exterior.Finish = finish.Finish;
+            exterior.Ruptured = finish.Ruptured;
+            exterior.SkinColor = finish.SkinColor;
+            exterior.ObservedIntegrity = state.CurrentIntegrity;
+            exterior.ProjectionInitialized = false;
+        }
         module.PermanentDamage = state.PermanentDamage;
         module.ThermalShutdown = state.ThermalShutdown;
         module.InstalledSlot = state.Slot;
         module.CurrentPower = state.CurrentPower;
         module.Heat = state.Heat;
         module.Load = state.Load;
+        module.ActiveLoadUntil = null;
+        if (TryComp<NCCyberwareAbilityComponent>(moduleUid, out var ability))
+        {
+            ability.CooldownRemainingSeconds = state.AbilityCooldownSeconds!.Value;
+            ability.CooldownObservedAt = runtimeAnchor;
+            ability.Active = false;
+            ability.ActiveUntil = null;
+            module.Load = 0f;
+        }
         module.EmpDisabledUntil = state.EmpDisabledUntil;
         module.NeuralIntegrity = state.NeuralIntegrity;
         module.NeuralState = state.NeuralState;
@@ -254,6 +287,7 @@ public sealed partial class NCCyberwareSystem
         snapshot = new NCCyberwareStateSnapshot
         {
             EntityPrototype = entityPrototype,
+            Service = NCCyberwareServiceHistory.Clone(module.Service),
             Profile = module.Profile,
             StableInstanceId = module.StableInstanceId,
             Slot = slot,
@@ -271,6 +305,16 @@ public sealed partial class NCCyberwareSystem
             Assembly = CaptureAssembly(moduleUid),
             PowerBus = CapturePowerBus(moduleUid),
             ThermalShutdown = module.ThermalShutdown,
+            Exterior = TryComp<NCCyberwareExteriorComponent>(moduleUid, out var exterior)
+                ? new NCCyberwareExteriorSnapshot
+                {
+                    Finish = exterior.Finish,
+                    Ruptured = exterior.Ruptured,
+                    SkinColor = exterior.SkinColor ?? (TryComp<VisualOrganComponent>(moduleUid, out var visual) ? visual.Profile.SkinColor : Color.White),
+                } : null,
+            AbilityCooldownSeconds = TryComp<NCCyberwareAbilityComponent>(moduleUid, out var ability)
+                ? NCCyberwareAbilityMath.Remaining(ability.CooldownRemainingSeconds, ability.CooldownObservedAt, _timing.CurTime)
+                : null,
         };
         return true;
     }
@@ -354,7 +398,7 @@ public sealed partial class NCCyberwareSystem
         if (profile.NeuralRequirement == NCCyberwareNeuralRequirement.None)
             return state.NeuralState == NCCyberwareNeuralState.NotApplicable && state.Calibrated;
         return state.NeuralState != NCCyberwareNeuralState.NotApplicable &&
-               (state.Calibrated || state.NeuralState == NCCyberwareNeuralState.Disconnected);
+               (state.Calibrated || state.NeuralState is NCCyberwareNeuralState.Disconnected or NCCyberwareNeuralState.Disrupted);
     }
 
     private static bool Finite(float value, float minimum, float maximum)

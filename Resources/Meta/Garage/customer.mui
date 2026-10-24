@@ -1,0 +1,26 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<Page id="customer" title="{bind title}">
+  <Column id="page" gap="8" margin="12">
+    <Header id="title" text="{bind title}"/>
+    <Text id="message" text="{bind message}"/>
+    <Button id="refresh" action="refresh" text="{bind refreshLabel}"/>
+    <Table id="orders" items="{bind orders}" pageSize="64" rowAction="select" rowKey="id" rowField="order" columns="summary status invoice"/>
+    <Panel id="createPanel" class="card">
+      <Column id="createFields" gap="6">
+        <Text id="subjectLabel" text="{bind subjectLabel}"/>
+        <Input id="subject" field="subject" maxLength="256"/>
+        <Button id="create" action="create" text="{bind createLabel}"/>
+      </Column>
+    </Panel>
+    <Panel id="orderPanel" class="card">
+      <Column id="orderFields" gap="6">
+        <Text id="referenceLabel" text="{bind orderLabel}"/>
+        <Text id="selected" text="{bind selection}"/>
+        <Input id="reference" field="id" value="{bind selectedId}" maxLength="64" visible="false"/>
+        <Button id="payment" action="pay" text="{bind payLabel}" enabled="{bind hasSelection}"/>
+        <Button id="complete" action="complete" text="{bind completeLabel}" enabled="{bind hasSelection}"/>
+        <Button id="cancel" action="cancel" text="{bind cancelLabel}" enabled="{bind hasSelection}"/>
+      </Column>
+    </Panel>
+  </Column>
+</Page>

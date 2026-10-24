@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+module examples.functions;
+import meta.implants;
+import meta.system;
+link controller: implants.FunctionalController = "function";
+var wasActive: bool = false;
+
+async watch controller.stateChanged(state) {
+    if(state.active) {
+        wasActive = true;
+        // Renew only an already active native mode. Never rearm an inactive or manually stopped mode.
+        match(await controller.setEnabled(true)) { ok(current) => {} err(error) => { system.log("Native control renewal rejected."); } }
+    } else if(wasActive) { wasActive = false; system.log("Native mode inactive."); }
+}
+
+async fn main() -> void {
+    match(controller.snapshot()) {
+        ok(state) => {
+            if(state.kind == implants.FunctionKind.Biomonitor) {
+                match(await controller.pulse()) { ok(current) => { system.log("Native reading requested."); } err(error) => { system.log("Native reading rejected."); } }
+            } else {
+                match(await controller.setEnabled(true)) { ok(current) => { system.log("Native mode requested."); } err(error) => { system.log("Native mode rejected."); } }
+            }
+        }
+        err(error) => { system.log("Native controller unavailable."); }
+    }
+}

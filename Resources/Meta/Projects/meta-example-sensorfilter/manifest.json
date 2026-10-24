@@ -1,0 +1,31 @@
+{
+  "version": "1.0",
+  "id": "meta-example-sensorfilter",
+  "name": "Temperature filter",
+  "nameRu": "Фильтр температуры",
+  "packageName": "examples.sensorfilter",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.sensorfilter",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.sensorfilter.meta",
+      "sha256": "8f07fb9aa04d6836c40053fb79638fca016bb4b12825ba6cf1a9be40b76e0492"
+    }
+  ],
+  "startMode": "OnPower",
+  "bindings": [
+    {
+      "slot": "room-temperature",
+      "capability": "meta.sensors.TemperatureSensor",
+      "contractHash": "707ebecbeccad33b9d890091ff373d8960cc9ad6d238a62655a0b90339b9e24d",
+      "requiredScopes": [
+        "sensor.temperature.observe"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

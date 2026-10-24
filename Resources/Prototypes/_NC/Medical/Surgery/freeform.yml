@@ -328,6 +328,25 @@
       minimumPower: 0.2
       maximumPower: 0.8
       radius: 0.16
+    NCSurgeryToolCyberwareCalibration:
+      action: CalibrateCyberware
+      duration: 6s
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+    NCSurgeryToolCyberwareDisconnection:
+      action: DisconnectCyberware
+      duration: 3s
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+    NCSurgeryToolCyberwareRepair:
+      action: RepairCyberware
+      duration: 5s
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+      consumedUses: 1
     NCSurgeryToolCavityDrainage:
       action: DrainCavity
       duration: 3s

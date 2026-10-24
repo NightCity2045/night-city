@@ -1,0 +1,13 @@
+{
+  "Seed": 1515870810,
+  "Case": 0,
+  "CompilerBuild": "nc-meta-1.0.0",
+  "CoreSha256": "a7c9e5567abddaefb5ff53b0b1061b3256bae73448e8257876737f2b0073c0f2",
+  "CatalogHash": "4d0bc5929f0da02e17bf980e6aef13cf9685a2abd10d7116eef20efbef1f63ed",
+  "VerifierPolicy": 1,
+  "GasPolicy": 1,
+  "RuntimeAbi": "1.0",
+  "Source": "module oracle.program;\nimport meta.system; import meta.text;\nfn mark(value:int)-\u003Eint {system.log(text.fromInt(value));return value;}\nfn main()-\u003Evoid {let result=mark(0);system.log(\u0022answer:\u0022\u002Btext.fromInt(result));}",
+  "MinimizedSource": "module oracle.program;\nimport meta.system; import meta.text;\nfn mark(value:int)-\u003Eint {system.log(text.fromInt(value));return value;}\nfn main()-\u003Evoid {let result=mark(0);system.log(\u0022answer:\u0022\u002Btext.fromInt(result));}",
+  "Failure": "Compiler rejected generated valid source: E102:identifier,result;E102:expression,result"
+}

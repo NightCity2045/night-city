@@ -279,11 +279,15 @@ public sealed partial class DiagnosticApplication : IDisposable
     {
         "session_get", "capabilities_get", "entities_query", "entity_inspect", "entity_snapshot", "maps_list",
         "map_region_inspect", "prototype_get", "prototype_search", "logs_read", "metrics_capture", "actions_list", "request_status",
+        "meta_performance_status", "meta_performance_read", "meta_app_load_status", "meta_app_frontend_list", "meta_app_frontend_read",
+        "meta_demo_list", "meta_demo_status",
         "client_inspect", "client_capture", "capture_get", "capture_discard", "ui_inspect", "replication_inspect", "replication_watch", "replication_unwatch",
     };
 
     internal static bool IsMutation(string command) => command is "action_execute" or "fixture_create" or "fixture_spawn" or
-        "fixture_destroy" or "fixture_reset" or "fixture_attach" or "fixture_access" or "fixture_power" or "client_input" or "ui_interact";
+        "fixture_destroy" or "fixture_reset" or "fixture_attach" or "fixture_access" or "fixture_power" or "client_input" or "ui_interact" or
+        "meta_performance_start" or "meta_performance_stop" or "meta_demo_create" or "meta_demo_destroy" or
+        "meta_app_load_prepare" or "meta_app_load_open" or "meta_app_load_attach" or "meta_app_load_stop" or "meta_app_frontend_capture" or "meta_app_frontend_action" or "meta_app_frontend_stop";
 
     internal static bool CanRunInScenario(string command) => ReadCommands.Contains(command) || IsMutation(command) ||
         command is "condition_wait" or "snapshot_diff" or "map_region_capture" or "resource_inspect" or "state_compare";

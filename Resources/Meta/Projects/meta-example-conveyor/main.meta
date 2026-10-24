@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+module examples.conveyor;
+import meta.system;
+import meta.industrial;
+
+link load: LoadSensor = "buffer-load";
+link belt: Conveyor = "input-conveyor";
+var requestedRunning: bool = false;
+
+async watch load.loadSampled(sample) {
+    if (!system.isFresh(sample.stamp, 1500)) {
+        return;
+    }
+    var desired: bool = requestedRunning;
+    if (sample.kilograms >= 100.0) {
+        desired = false;
+    } else if (sample.kilograms <= 80.0) {
+        desired = true;
+    }
+    let applied = await belt.setEnabled(desired);
+    match (applied) {
+        ok(state) => { requestedRunning = state.requestedEnabled; }
+        err(problem) => { system.log(problem.message); }
+    }
+}

@@ -71,7 +71,8 @@ public readonly record struct NCSurgeryStepExecutionChangedEvent(
     EntityUid Practitioner,
     bool Running,
     bool Cancelled,
-    bool ProcedureCompleted = false);
+    bool ProcedureCompleted = false,
+    bool? StepApplied = null);
 
 /// <summary>
 /// One explicit surgery step carried through the engine DoAfter. The session/step tuple prevents a

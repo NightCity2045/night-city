@@ -76,6 +76,9 @@ public sealed partial class NCCyberwareRepairProfilePrototype : IPrototype
 [Prototype("ncCyberware")]
 public sealed partial class NCCyberwarePrototype : IPrototype
 {
+    [DataField]
+    public List<ProtoId<Content.Shared._NC.Medical.Humanity.NCHumanityPackagePrototype>> HumanityPackages { get; private set; } = [];
+
     [IdDataField]
     public string ID { get; private set; } = default!;
 
@@ -204,6 +207,15 @@ public sealed partial class NCCyberwarePrototype : IPrototype
 
     [DataField]
     public ProtoId<NCCyberwareAssemblyPrototype>? Assembly { get; private set; }
+
+    [DataField]
+    public bool RequiresSeparateCalibration { get; private set; }
+
+    [DataField]
+    public float CalibrationMinimumEfficiency { get; private set; } = 0.5f;
+
+    [DataField]
+    public float CalibrationEnergy { get; private set; } = 1f;
 }
 
 public enum NCCyberwareForm : byte

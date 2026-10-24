@@ -1,0 +1,12 @@
+{
+  "version": "1.0",
+  "execution": "native-client-ui",
+  "workspaceFiles": ["main.meta", "app.json", "ui/main.mui", "meta.test.json"],
+  "initialCounter": 0,
+  "afterOneButtonPress": 1,
+  "afterResync": 1,
+  "afterDesktopReopen": 1,
+  "ownerOnlySecondActor": "no-private-workspace-or-app-projection",
+  "unicode": ["кириллица", "🙂", "é"],
+  "notes": "The fixture tests main execution. UI expectations require actual observed native client actions; this file is not evidence that those checks ran."
+}

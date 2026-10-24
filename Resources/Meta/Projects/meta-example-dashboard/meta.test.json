@@ -1,0 +1,18 @@
+{
+  "rootModule": "examples.dashboard",
+  "responses": [],
+  "events": [
+    {
+      "slot": "engine-ecu", "event": "telemetryChanged", "sequence": 1,
+      "arguments": [{"temperatureC": 90.0, "rpm": 2400, "oilPressureKPa": 300.0, "coolantFraction": 0.8,
+        "faults": [], "mode": "Normal", "stamp": {"epoch": 1, "sequence": 1, "tick": 60}}]
+    },
+    {
+      "slot": "vehicle-telemetry", "event": "telemetryChanged", "sequence": 2,
+      "arguments": [{"speedMps": 10.0, "fuelLitres": 25.0, "batteryFraction": 0.75, "gear": 3, "automatic": true,
+        "engineRunning": true, "stamp": {"epoch": 1, "sequence": 2, "tick": 60}}]
+    }
+  ],
+  "expectedLogs": [],
+  "expectedCommands": []
+}

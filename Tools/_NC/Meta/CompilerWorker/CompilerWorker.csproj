@@ -1,0 +1,16 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>Meta.CompilerWorker</AssemblyName>
+  </PropertyGroup>
+  <Import Project="../../../../MSBuild/Content.props" />
+  <ItemGroup>
+    <ProjectReference Include="../../../../Content.Meta/Content.Meta.csproj" />
+  </ItemGroup>
+</Project>

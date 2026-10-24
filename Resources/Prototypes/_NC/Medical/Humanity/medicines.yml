@@ -1,0 +1,155 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncDrugProfile
+  id: NCDrugNeuralRestorative
+  category: NeuralRestorative
+  maximumConcentration: 30
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 6
+  toxicConcentration: 12
+  clearancePerSecond: 0.01
+  baselineClearanceFraction: 0.05
+  liverClearanceFraction: 0.7
+  kidneyClearanceFraction: 0.25
+  humanityRecoveryPerSecondAtTherapeutic: 0.033333334
+  overdoseBurdenPerSecondAtMaximum: 1.2
+  interactions:
+    NCDrugNeuralStabilizer:
+      therapeuticMultiplier: 0.9
+      toxicityMultiplier: 1.5
+    NCDrugCombinedNeuralSupport:
+      therapeuticMultiplier: 0.9
+      toxicityMultiplier: 1.5
+
+- type: ncDrugProfile
+  id: NCDrugNeuralStabilizer
+  category: NeuralStabilizer
+  maximumConcentration: 24
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 4
+  toxicConcentration: 10
+  clearancePerSecond: 0.04
+  baselineClearanceFraction: 0.05
+  liverClearanceFraction: 0.7
+  kidneyClearanceFraction: 0.25
+  crisisSuppressionPerSecondAtTherapeutic: 0.6
+  sedationAtTherapeutic: 0.1
+  overdoseBurdenPerSecondAtMaximum: 1.5
+  interactions:
+    NCDrugNeuralRestorative:
+      therapeuticMultiplier: 0.9
+      toxicityMultiplier: 1.5
+    NCDrugCombinedNeuralSupport:
+      therapeuticMultiplier: 0.9
+      toxicityMultiplier: 1.5
+
+- type: ncDrugProfile
+  id: NCDrugCombinedNeuralSupport
+  category: NeuralRestorative
+  maximumConcentration: 24
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 6
+  toxicConcentration: 10
+  clearancePerSecond: 0.02
+  baselineClearanceFraction: 0.05
+  liverClearanceFraction: 0.7
+  kidneyClearanceFraction: 0.25
+  humanityRecoveryPerSecondAtTherapeutic: 0.025
+  crisisSuppressionPerSecondAtTherapeutic: 0.3
+  overdoseBurdenPerSecondAtMaximum: 2
+  interactions:
+    NCDrugNeuralRestorative:
+      therapeuticMultiplier: 0.9
+      toxicityMultiplier: 1.5
+    NCDrugNeuralStabilizer:
+      therapeuticMultiplier: 0.9
+      toxicityMultiplier: 1.5
+
+- type: reagent
+  id: NCNeuralRestorative
+  name: nc-reagent-name-neural-restorative
+  group: Medicine
+  desc: nc-reagent-desc-neural-restorative
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#59B5B0"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugNeuralRestorative
+
+- type: reagent
+  id: NCNeuralStabilizer
+  name: nc-reagent-name-neural-stabilizer
+  group: Medicine
+  desc: nc-reagent-desc-neural-stabilizer
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#7981BC"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugNeuralStabilizer
+
+- type: reagent
+  id: NCCombinedNeuralSupport
+  name: nc-reagent-name-combined-neural-support
+  group: Medicine
+  desc: nc-reagent-desc-combined-neural-support
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#93B875"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugCombinedNeuralSupport
+
+- type: entity
+  parent: PrefilledSyringe
+  id: NCSyringeNeuralRestorative
+  suffix: NC neural restorative
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-neural-restorative
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCNeuralRestorative
+        Quantity: 10
+
+- type: entity
+  parent: PrefilledSyringe
+  id: NCSyringeNeuralStabilizer
+  suffix: NC neural stabilizer
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-neural-stabilizer
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCNeuralStabilizer
+        Quantity: 10
+
+- type: entity
+  parent: PrefilledSyringe
+  id: NCSyringeCombinedNeuralSupport
+  suffix: NC combined neural support
+  components:
+  - type: Label
+    localizedLabel: nc-reagent-name-combined-neural-support
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: NCCombinedNeuralSupport
+        Quantity: 10

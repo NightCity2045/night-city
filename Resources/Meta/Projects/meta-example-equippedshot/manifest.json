@@ -1,0 +1,40 @@
+{
+  "version": "1.0",
+  "id": "meta-example-equippedshot",
+  "name": "One equipped native trigger",
+  "nameRu": "Один штатный спуск оружия",
+  "packageName": "examples.equippedshot",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.equippedshot",
+  "files": [
+    {
+      "path": "main.meta",
+      "sha256": "9b1145ec211f64a7b6f00725920401cc2c3d1933ff0add98425849b0d8e707fc",
+      "sourcePath": "Resources/Meta/Examples/examples.equippedshot.meta"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [
+    {
+      "slot": "equipped-drone-camera",
+      "capability": "meta.drone.Perception",
+      "contractHash": "04e2602441ea76262486d20f260768c6bc0ed326afc1a9e8a587ed02c357907c",
+      "requiredScopes": [
+        "drone.observe"
+      ]
+    },
+    {
+      "slot": "equipped-drone-weapon",
+      "capability": "meta.drone.WeaponController",
+      "contractHash": "e317b77a12e1212e52c9249e631f2d495b27076d903cbfa0ae9f1e01ece368f5",
+      "requiredScopes": [
+        "drone.weapon.read",
+        "drone.weapon.fire"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

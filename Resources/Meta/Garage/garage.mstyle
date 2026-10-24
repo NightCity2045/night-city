@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "tokens": {"surface": "#142527", "border": "#286b6a", "text": "#d6eeeb"},
+  "rules": [
+    {"selector": ".card", "properties": {"background": "$surface", "borderColor": "$border", "borderWidth": "1", "padding": "10", "cornerRadius": "4"}},
+    {"selector": "#title", "properties": {"color": "$text", "fontSize": "22"}},
+    {"selector": ".card", "maxWidth": 600, "properties": {"padding": "6"}},
+    {"selector": "#refresh", "state": "hover", "properties": {"background": "#286b6a"}}
+  ]
+}

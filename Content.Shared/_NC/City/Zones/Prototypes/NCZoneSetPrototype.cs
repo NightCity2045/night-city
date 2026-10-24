@@ -39,7 +39,7 @@ public sealed partial class NCZoneDefinition
     /// <summary>
     /// Empty for a root zone.
     /// </summary>
-    [DataField(customTypeSerializer: typeof(NCZoneIdSerializer))]
+    [DataField(customTypeSerializer: typeof(NCZoneParentIdSerializer))]
     public NCZoneId Parent { get; private set; }
 
     [DataField(required: true)]

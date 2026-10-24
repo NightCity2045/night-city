@@ -1,0 +1,49 @@
+{
+  "version": "1.0",
+  "id": "meta-example-dashboard",
+  "name": "Native vehicle dashboard",
+  "nameRu": "Приборная панель транспорта",
+  "packageName": "examples.dashboard",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.dashboard",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Dashboard/main.meta",
+      "sha256": "140fece2504d86db7a60f46b1d815f9570b9a6b50d2048b76b14478969fdf6b7"
+    },
+    {
+      "path": "app.json",
+      "sourcePath": "Resources/Meta/Dashboard/app.json",
+      "sha256": "7667c5866c3abc97efe66f33db615fc71921c7a49ad8f8e58abab24d79e5450a"
+    },
+    {
+      "path": "ui/dashboard.mui",
+      "sourcePath": "Resources/Meta/Dashboard/dashboard.mui",
+      "sha256": "179d0b49528033bea47bf24e297c107ab94b4296b85634a18578f762d096e910"
+    }
+  ],
+  "startMode": "OnPower",
+  "bindings": [
+    {
+      "slot": "engine-ecu",
+      "capability": "meta.vehicle.EngineController",
+      "contractHash": "717b0100c834226ed7433cab2db281d8865982b0dda7df22d8c30dfadddc0753",
+      "requiredScopes": [
+        "vehicle.engine.observe"
+      ]
+    },
+    {
+      "slot": "vehicle-telemetry",
+      "capability": "meta.vehicle.VehicleDashboard",
+      "contractHash": "f9273e34020a88262fe8eaac78cd5c09fb515b518ff91df6e846c12c59a5f635",
+      "requiredScopes": [
+        "vehicle.telemetry.observe"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

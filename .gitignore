@@ -53,6 +53,9 @@ artifacts/
 *_i.h
 *.ilk
 *.meta
+# META language sources and the standalone runtime project are repository content.
+!/Content.Meta/
+!/Resources/Meta/**/*.meta
 *.obj
 *.pch
 *.pdb

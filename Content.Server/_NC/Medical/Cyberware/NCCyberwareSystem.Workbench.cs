@@ -43,6 +43,22 @@ public sealed partial class NCCyberwareSystem
     {
         if (args.Handled)
             return;
+        // The native ItemSlots handler owns cell insertion. Service routing must leave that interaction available.
+        if (HasComp<Content.Shared.PowerCell.Components.PowerCellComponent>(args.Used))
+            return;
+        if (HasComp<Content.Shared.Paper.PaperComponent>(args.Used))
+        {
+            args.Handled = TryWriteServiceDocument(bench.AsNullable(), args.User, args.Used);
+            return;
+        }
+        if (HasComp<NCCyberwareFirmwareCardComponent>(args.Used))
+        {
+            args.Handled = true;
+            if (TryGetServiceWorkpiece(bench.AsNullable(), out var workpiece) &&
+                TryComp<NCCyberwareComponent>(workpiece, out var hardware))
+                TryFlashFirmware(bench.AsNullable(), args.User, args.Used, workpiece, hardware.Service.Revision);
+            return;
+        }
         var accepted = HasComp<NCCyberwareComponent>(args.Used)
             ? TryMountAssembly(bench.AsNullable(), args.User, args.Used)
             : HasComp<NCCyberwarePartComponent>(args.Used)
@@ -68,7 +84,7 @@ public sealed partial class NCCyberwareSystem
             !Exists(moduleUid) || TerminatingOrDeleted(moduleUid) ||
             !_assemblyHands.IsHolding(user, moduleUid) ||
             !TryComp<NCCyberwareComponent>(moduleUid, out var module) ||
-            !TryGetProfile(module.Profile, out var profile) || profile.Assembly == null ||
+            !TryGetProfile(module.Profile, out var profile) ||
             TryResolveOwningBody(moduleUid, out _))
             return false;
         InitializeState(moduleUid, module, profile);
@@ -126,6 +142,7 @@ public sealed partial class NCCyberwareSystem
             passed = _cells.TryGetBatteryFromSlot(bench.Owner, out var battery) &&
                      _battery.TryUseCharge(battery.Value.AsNullable(), Comp<NCCyberwareWorkbenchComponent>(bench).TestEnergy);
         assembly.ValidatedRevision = passed ? expectedRevision : null;
+        RecordService(moduleUid, NCCyberwareServiceOperation.Tested, Guid.NewGuid());
         _assemblyPopup.PopupEntity(Loc.GetString(passed ? "nc-cyberware-bench-test-passed" :
             "nc-cyberware-bench-test-failed"), bench, user);
         return passed;
@@ -172,6 +189,7 @@ public sealed partial class NCCyberwareSystem
         assembly.ValidatedRevision = null;
         RefreshAssembly(assembly);
         UpdateOperational(moduleUid, module, profile, _timing.CurTime);
+        RecordService(moduleUid, NCCyberwareServiceOperation.Repaired, Guid.NewGuid());
         return true;
     }
 
@@ -190,18 +208,29 @@ public sealed partial class NCCyberwareSystem
         return true;
     }
 
+    private bool TryGetServiceWorkpiece(Entity<NCCyberwareWorkbenchComponent?> bench, out EntityUid module)
+    {
+        module = default;
+        if (!Resolve(bench, ref bench.Comp, false) || bench.Comp.Workpiece?.ContainedEntity is not { } workpiece ||
+            TerminatingOrDeleted(workpiece) || !HasComp<NCCyberwareComponent>(workpiece) ||
+            TryResolveOwningBody(workpiece, out _)) return false;
+        module = workpiece;
+        return true;
+    }
+
     private void OnWorkbenchVerbs(Entity<NCCyberwareWorkbenchComponent> bench, ref GetVerbsEvent<InteractionVerb> args)
     {
         if (!args.CanAccess || !args.CanInteract ||
-            !TryGetWorkpiece(bench.AsNullable(), out var moduleUid, out var assembly))
+            !TryGetServiceWorkpiece(bench.AsNullable(), out var moduleUid))
             return;
         var user = args.User;
-        var revision = assembly.ConfigurationRevision;
         args.Verbs.Add(new InteractionVerb
         {
             Text = Loc.GetString("nc-cyberware-bench-eject"),
             Act = () => TryEjectAssembly(bench.AsNullable(), user, moduleUid),
         });
+        if (!TryGetWorkpiece(bench.AsNullable(), out _, out var assembly)) return;
+        var revision = assembly.ConfigurationRevision;
         args.Verbs.Add(new InteractionVerb
         {
             Text = Loc.GetString("nc-cyberware-bench-test"),
@@ -225,7 +254,7 @@ public sealed partial class NCCyberwareSystem
     {
         if (!args.IsInDetailsRange)
             return;
-        if (!TryGetWorkpiece(bench.AsNullable(), out var moduleUid, out var assembly))
+        if (!TryGetServiceWorkpiece(bench.AsNullable(), out var moduleUid))
         {
             args.PushMarkup(Loc.GetString("nc-cyberware-bench-empty"));
             return;
@@ -233,6 +262,11 @@ public sealed partial class NCCyberwareSystem
         var module = Comp<NCCyberwareComponent>(moduleUid);
         var profile = _prototypes.Index(module.Profile);
         var frame = Comp<NCOrganIntegrityComponent>(moduleUid);
+        if (!TryGetWorkpiece(bench.AsNullable(), out _, out var assembly))
+        {
+            args.PushMarkup(Loc.GetString("nc-cyberware-service-mounted", ("item", moduleUid)));
+            return;
+        }
         args.PushMarkup(Loc.GetString("nc-cyberware-bench-frame", ("item", moduleUid),
             ("current", frame.CurrentIntegrity),
             ("ceiling", NCCyberwareCondition.ServiceCeiling(profile.MaximumIntegrity, module.PermanentDamage)),

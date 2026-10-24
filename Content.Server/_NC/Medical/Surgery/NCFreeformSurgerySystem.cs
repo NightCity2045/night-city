@@ -286,11 +286,30 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             return;
         }
 
+        var pending = new NCFreeformSurgeryDoAfterEvent(request, capability);
+        if (request.StructureHandle is { } handle && session.StructureHandles.TryGetValue(handle, out var structure))
+            pending.ExpectedStructure = GetNetEntity(structure);
+        if (definition.Action is NCFreeformSurgeryAction.Cyberware or NCFreeformSurgeryAction.Transplant &&
+            TryComp<NCSurgeryGameplaySelectionComponent>(surgeon, out var selection) &&
+            selection.Patient == session.Patient && selection.Graft is { } graft)
+            pending.ExpectedGraft = GetNetEntity(graft);
+        if (definition.Action is NCFreeformSurgeryAction.Cyberware or NCFreeformSurgeryAction.CalibrateCyberware or
+            NCFreeformSurgeryAction.DisconnectCyberware or NCFreeformSurgeryAction.RepairCyberware &&
+            pending.ExpectedGraft == null && pending.ExpectedStructure == null)
+        {
+            SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.NoApplicableTarget);
+            return;
+        }
+        var configurationTarget = pending.ExpectedGraft ?? pending.ExpectedStructure;
+        if (configurationTarget is { } configured &&
+            TryComp<NCCyberwareAssemblyComponent>(GetEntity(configured), out var assembly))
+            pending.ExpectedConfiguration = assembly.ConfigurationRevision;
+
         var doAfter = new DoAfterArgs(
             EntityManager,
             surgeon,
             definition.Duration,
-            new NCFreeformSurgeryDoAfterEvent(request, capability),
+            pending,
             tool,
             target: session.Patient,
             used: tool)
@@ -329,13 +348,14 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             return;
         }
 
-        CompleteInteraction(args.ToRequest(), args.User, actor.PlayerSession);
+        CompleteInteraction(args.ToRequest(), args.User, actor.PlayerSession, args);
     }
 
     private void CompleteInteraction(
         NCInteractiveSurgeryActionRequest request,
         EntityUid surgeon,
-        ICommonSession recipient)
+        ICommonSession recipient,
+        NCFreeformSurgeryDoAfterEvent pending)
     {
         if (!TryResolveSession(request.SessionId, surgeon, out var session, out var profile, out var failure))
         {
@@ -429,19 +449,36 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         // NC: A sprite click carries the opaque handle emitted by the preceding authoritative state. Resolve that
         // same entity after the DoAfter; never fall through to a larger overlapping organ such as a lung when the
         // player actually clicked the heart. Cyberware staging retains its dedicated target resolver below.
+        var stagedCyberware = definition.Action == NCFreeformSurgeryAction.Cyberware &&
+                              HasStagedInternalCyberware(surgeon, session);
         var structure = session.Depth >= definition.MinimumDepth
             ? request.StructureHandle is { } structureHandle &&
-              definition.Action != NCFreeformSurgeryAction.Cyberware
+              !stagedCyberware
                 ? ResolveStructureHandleAt(session, profile, site, contact, session.Depth, structureHandle)
                 : ResolveStructureAt(surgeon, session, profile, site, contact, session.Depth, true)
             : null;
         if (request.StructureHandle != null &&
-            definition.Action != NCFreeformSurgeryAction.Cyberware &&
+            !stagedCyberware &&
             structure == null)
         {
             session.LastSequence = request.Sequence;
             session.LastInputAt = _timing.CurTime;
             SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.NoApplicableTarget);
+            return;
+        }
+        EntityUid? graft = null;
+        if (definition.Action is NCFreeformSurgeryAction.Cyberware or NCFreeformSurgeryAction.Transplant &&
+            TryComp<NCSurgeryGameplaySelectionComponent>(surgeon, out var selected) && selected.Patient == session.Patient)
+            graft = selected.Graft;
+        var configurationTarget = graft ?? structure;
+        if (pending.ExpectedStructure is { } expected && structure != GetEntity(expected) ||
+            pending.ExpectedGraft != (graft is { } staged ? GetNetEntity(staged) : (NetEntity?) null) ||
+            pending.ExpectedConfiguration is { } revision &&
+            (configurationTarget == null || !TryComp<NCCyberwareAssemblyComponent>(configurationTarget.Value, out var assembly) ||
+             assembly.ConfigurationRevision != revision))
+        {
+            session.LastSequence = request.Sequence;
+            SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.StaleRevision);
             return;
         }
         if (definition.Action == NCFreeformSurgeryAction.Cyberware &&
@@ -499,7 +536,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             structureMinimumDepth,
             structureDetachableBySeparation,
             structureBlocksDeeperStructures,
-            request.WoundId));
+            request.WoundId,
+            new NCActionResolutionId(request.SessionId.DeriveGuid(0x53555247U, request.Sequence))));
 
         session.LastSequence = request.Sequence;
         session.LastInputAt = _timing.CurTime;
@@ -1100,7 +1138,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         {
             var definition = profile.Tools[capability];
             var name = _prototypes.TryIndex(capability, out NCSurgeryToolCapabilityPrototype? prototype)
-                ? prototype.Name
+                ? prototype.NameId is { } nameId ? Loc.GetString(nameId) : prototype.Name
                 : capability.Id;
             return new NCFreeformSurgeryCapabilitySummary(
                 capability,
@@ -1475,7 +1513,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
     {
         if (!session.StructureHandles.TryGetValue(handle, out var candidate) || Deleted(candidate) ||
             candidate != session.Region && !CollectStructureCandidates(session, profile, false).Contains(candidate) ||
-            !TryGetStructureDefinition(candidate, session, profile, false, out var definition) ||
+            !TryGetStructureDefinition(candidate, session, profile, candidate == session.Region, out var definition) ||
             depth + 0.001f < definition.MinimumDepth || !Contains(definition, point) ||
             !IsExposed(site, session, definition, profile.MinimumOpenRetraction))
         {

@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+- type: entity
+  parent: NCMetaTerminal
+  id: NCMetaServiceTerminal
+  components:
+  - type: NCMetaServiceDesk
+  - type: NCMetaDevice
+    interfaces: [meta.services.ServiceOrders]
+    allowClaim: true

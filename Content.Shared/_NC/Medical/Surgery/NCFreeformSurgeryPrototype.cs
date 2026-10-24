@@ -378,4 +378,7 @@ public enum NCFreeformSurgeryAction : byte
     Cauterize,
     Autopsy,
     DrainCavity,
+    CalibrateCyberware,
+    DisconnectCyberware,
+    RepairCyberware,
 }

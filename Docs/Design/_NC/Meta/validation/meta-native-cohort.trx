@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="09fdcbd4-3e32-403b-ae3e-7a218fa9001c" name="Yuri@SEXMACHINE 2026-10-24 09:06:03" runUser="SexMachine\Yuri" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-24T09:06:03.2258156+03:00" queuing="2026-10-24T09:06:03.2258163+03:00" start="2026-10-24T08:58:47.4253832+03:00" finish="2026-10-24T09:06:03.2264343+03:00" />
+  <TestSettings name="default" id="dd7e9b59-7ce7-4363-9882-f7729964668b">
+    <Deployment runDeploymentRoot="Yuri_SEXMACHINE_2026-10-24_09_06_03" />
+  </TestSettings>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="0" executed="0" passed="0" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 5.2.0.0: Test execution started&#xD;
+Running selected tests in D:\projects\night-city\artifacts\meta-integration\aac96460efe64a1698a9e05cd949e357\bin\Content.IntegrationTests\Content.IntegrationTests.dll&#xD;
+   NUnit3TestExecutor discovered 51 of 51 NUnit test cases using Current Discovery mode, Non-Explicit run&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="SEXMACHINE" outcome="Error" timestamp="2026-10-24T09:05:58.8214174+03:00">
+        <Text>The active test run was aborted. Reason: Test host process crashed</Text>
+      </RunInfo>
+      <RunInfo computerName="SEXMACHINE" outcome="Warning" timestamp="2026-10-24T09:05:58.8555899+03:00">
+        <Text>Data collector 'Blame' message: The specified inactivity time of 5 minutes has elapsed. Collecting hang dumps from testhost and its child processes.</Text>
+      </RunInfo>
+      <RunInfo computerName="SEXMACHINE" outcome="Warning" timestamp="2026-10-24T09:05:58.8565085+03:00">
+        <Text>Data collector 'Blame' message: Dumping 30416 - testhost.</Text>
+      </RunInfo>
+    </RunInfos>
+    <CollectorDataEntries>
+      <Collector agentName="SEXMACHINE" uri="datacollector://microsoft/TestPlatform/Extensions/Blame/v1" collectorDisplayName="Blame">
+        <UriAttachments>
+          <UriAttachment>
+            <A href="SEXMACHINE\Sequence_a7ae5b0501f7458d967af8f186bbb886.xml"></A>
+          </UriAttachment>
+          <UriAttachment>
+            <A href="SEXMACHINE\testhost_30416_20261024T090553_hangdump.dmp"></A>
+          </UriAttachment>
+        </UriAttachments>
+      </Collector>
+    </CollectorDataEntries>
+  </ResultSummary>
+</TestRun>

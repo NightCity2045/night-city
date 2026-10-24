@@ -16,6 +16,7 @@
 
 - type: ncCyberwarePart
   id: NCIndustrialArmActuator
+  humanityPackages: [ NCHumanityProfessionalMotor ]
   slot: NCIndustrialArmActuatorSlot
   maximumIntegrity: 80
 

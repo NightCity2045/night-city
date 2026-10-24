@@ -4,6 +4,7 @@
 
 using System.Numerics;
 using Content.Shared._NC.Vehicle.Assembly;
+using Content.Shared._NC.Meta.Domains;
 using Content.Shared._NC.Vehicle.Components;
 using Content.Shared._NC.Vehicle.Prototypes;
 using Content.Shared.Friction;
@@ -96,10 +97,34 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             if (!unattended && tuning.Automatic && drive.Selector == NCVehicleSelector.Drive && _timing.CurTime >= drive.NextAutomaticShift)
             {
                 var previous = drive.Gear;
-                if (drive.EngineRpm > tuning.AutomaticUpshiftRpm)
-                    drive.Gear = Math.Min(tuning.GearRatios.Length - 2, drive.Gear + 1);
-                else if (drive.EngineRpm < tuning.AutomaticDownshiftRpm)
-                    drive.Gear = Math.Max(1, drive.Gear - 1);
+                var upshiftRpm = tuning.AutomaticUpshiftRpm;
+                var maximumGear = tuning.GearRatios.Length - 2;
+                var requestedGear = 0;
+                var governed = TryComp<NCMetaVehicleGovernorComponent>(uid, out var transmission) &&
+                    transmission.TransmissionUntil > _timing.CurTime && transmission.TransmissionAuthority == drive.Authority;
+                if (governed)
+                {
+                    var activeTransmission = transmission!;
+                    if (float.IsFinite(activeTransmission.UpshiftMultiplier) && activeTransmission.UpshiftMultiplier is >= 0.75f and <= 1f)
+                        upshiftRpm = Math.Max(tuning.AutomaticDownshiftRpm + 1, upshiftRpm * activeTransmission.UpshiftMultiplier);
+                    if (activeTransmission.MaximumForwardGear > 0)
+                        maximumGear = Math.Min(maximumGear, activeTransmission.MaximumForwardGear);
+                    requestedGear = activeTransmission.RequestedForwardGear;
+                }
+                var candidate = requestedGear > 0 ? requestedGear : drive.EngineRpm > upshiftRpm ? Math.Min(maximumGear, drive.Gear + 1) :
+                    drive.EngineRpm < tuning.AutomaticDownshiftRpm || drive.Gear > maximumGear ? Math.Max(1, drive.Gear - 1) : drive.Gear;
+                if (!governed)
+                {
+                    if (drive.EngineRpm > tuning.AutomaticUpshiftRpm)
+                        drive.Gear = Math.Min(tuning.GearRatios.Length - 2, drive.Gear + 1);
+                    else if (drive.EngineRpm < tuning.AutomaticDownshiftRpm)
+                        drive.Gear = Math.Max(1, drive.Gear - 1);
+                }
+                else if (candidate is > 0 && candidate < tuning.GearRatios.Length - 1 &&
+                    (candidate <= maximumGear || drive.Gear > maximumGear && candidate < drive.Gear) && drive.Gear > 0 && drive.Gear < tuning.GearRatios.Length - 1 &&
+                    float.IsFinite(drive.EngineRpm) && drive.EngineRpm >= 0 &&
+                    drive.EngineRpm * tuning.GearRatios[candidate] / tuning.GearRatios[drive.Gear] <= tuning.RedlineRpm * 0.95f)
+                    drive.Gear = candidate;
                 if (drive.Gear != previous)
                     drive.NextAutomaticShift = _timing.CurTime + TimeSpan.FromSeconds(tuning.AutomaticShiftSeconds);
             }
@@ -217,11 +242,15 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
         clutchTorque *= NCVehiclePerformanceCompiler.Get(drive.AssemblyFunctions, NCVehicleFunction.Transmission);
         var engineTorque = 0f;
         TryComp<NCVehicleConditionComponent>(uid, out var condition);
+        var assisted = TryComp<NCMetaVehicleGovernorComponent>(uid, out var assistance) && drive.Driver != null &&
+            assistance.AssistanceUntil > _timing.CurTime && assistance.AssistanceAuthority == drive.Authority;
         if (drive.EngineRunning && drive.Fuel > 0 && drive.AssemblyReady)
         {
             var idle = Math.Clamp((tuning.IdleRpm - drive.EngineRpm) / tuning.IdleRpm, 0, 1);
             engineTorque = NCVehicleDriveMath.Curve(tuning.TorqueCurve, drive.EngineRpm) * Math.Max(drive.Throttle, idle);
             engineTorque *= drive.AssemblyPower * (condition?.EnginePower ?? 1) * (calibration?.EngineMultiplier ?? 1);
+            if (TryComp<NCMetaVehicleGovernorComponent>(uid, out var governor))
+                engineTorque *= float.IsFinite(governor.PowerLimit) ? Math.Clamp(governor.PowerLimit, 0, 1) : 0;
             if (drive.EngineRpm >= tuning.RedlineRpm)
                 engineTorque = 0;
             drive.Fuel = Math.Max(0, drive.Fuel - dt * (tuning.FuelIdleRate + tuning.FuelLoadRate * drive.Throttle) * (calibration?.FuelMultiplier ?? 1));
@@ -320,7 +349,7 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
             var tyreSpeed = Math.Abs(previousOmega * wheel.Radius);
             var roadSpeed = Math.Abs(longitudinal);
             // Pulling the mechanical handbrake suspends ESC so it cannot cancel the driver's requested rotation.
-            if (electronics && tuning.StabilityControl && drive.HandbrakeApplication < 0.1f && roadSpeed > tuning.LowSpeed)
+            if (electronics && tuning.StabilityControl && (!assisted || !assistance!.StabilityDisabled) && drive.HandbrakeApplication < 0.1f && roadSpeed > tuning.LowSpeed)
             {
                 // ESC requests selective tyre braking; available grip still bounds its yaw correction.
                 var targetYaw = longitudinal * MathF.Tan(drive.Steering * tuning.SteeringAngle * (calibration?.SteeringMultiplier ?? 1)) / tuning.Wheelbase;
@@ -329,10 +358,10 @@ public sealed partial class NCVehicleDriveSystem : EntitySystem
                     braking += Math.Min(tuning.StabilityBrakeLimit, Math.Abs(yawError) * tuning.StabilityGain) *
                         (condition?.BrakePower ?? 1) * NCVehiclePerformanceCompiler.Get(drive.AssemblyFunctions, NCVehicleFunction.Braking, i);
             }
-            if (electronics && tuning.TractionControl && tyreSpeed > roadSpeed + tuning.LowSpeed * tuning.TractionSlip &&
+            if (electronics && tuning.TractionControl && (!assisted || !assistance!.TractionDisabled) && tyreSpeed > roadSpeed + tuning.LowSpeed * tuning.TractionSlip &&
                 torque * previousOmega > 0)
                 torque *= Math.Clamp((roadSpeed + tuning.LowSpeed * tuning.TractionSlip) / tyreSpeed, 0, 1);
-            if (electronics && tuning.AntiLockBrakes && roadSpeed > tuning.LowSpeed && drive.Brake > 0)
+            if (electronics && tuning.AntiLockBrakes && (!assisted || !assistance!.AbsDisabled) && roadSpeed > tuning.LowSpeed && drive.Brake > 0)
                 braking *= Math.Clamp(tyreSpeed / (roadSpeed * (1 - tuning.AntiLockSlip)), 0, 1);
             // ABS releases hydraulic pressure only; the mechanical handbrake and parking pawl remain engaged.
             if (wheel.Handbrake && drive.HandbrakeApplication > 0)

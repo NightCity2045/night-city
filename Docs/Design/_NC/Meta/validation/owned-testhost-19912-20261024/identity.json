@@ -1,0 +1,9 @@
+{
+  "ownedProcessId": 19912,
+  "executable": "D:\\projects\\night-city\\artifacts\\meta-integration\\73d74dbf0e8649928f5dcd2e7e398d9b\\bin\\Content.IntegrationTests\\testhost.exe",
+  "verifiedStartUtc": "2026-10-24T16:40:55.5535092Z",
+  "dumpKind": "Triage",
+  "dumpSha256": "a53c5ec1018cbab478ddf6b7f96a86e391f7a3079640c858ff150972b00d9e1a",
+  "capturedUtc": "2026-10-24T16:45:11.9570083Z",
+  "processStopped": false
+}

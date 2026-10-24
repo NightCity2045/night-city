@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="f942e559-f0d0-4fbd-a227-1719f4b2f709" name="Yuri@SEXMACHINE 2026-10-24 08:54:24" runUser="SexMachine\Yuri" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-24T08:54:24.6062840+03:00" queuing="2026-10-24T08:54:24.6062846+03:00" start="2026-10-24T08:54:18.1582304+03:00" finish="2026-10-24T08:54:24.6169479+03:00" />
+  <TestSettings name="default" id="d7ec7aa9-942f-4082-8a36-707637129fce">
+    <Deployment runDeploymentRoot="Yuri_SEXMACHINE_2026-10-24_08_54_24" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="f6f1afa5-6b6c-42ee-8b2a-7ebae94d2b08" testId="a3b859ae-35f1-d0d6-737b-1ee05549ef3f" testName="RenameAndDefaultsPreserveOriginalDataAndDoNotOverwriteCustomerSettings" computerName="SEXMACHINE" duration="00:00:00.0074030" startTime="2026-10-24T08:54:24.4839430+03:00" endTime="2026-10-24T08:54:24.4913468+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f6f1afa5-6b6c-42ee-8b2a-7ebae94d2b08" />
+    <UnitTestResult executionId="a49d416a-2af7-4724-a1cc-9bc414fba46c" testId="15d0d351-48c1-8356-5bb9-e94130098c33" testName="CollisionAndInvalidUnicodeOrPathsFailWithoutPublishingPartialData" computerName="SEXMACHINE" duration="00:00:00.0272260" startTime="2026-10-24T08:54:24.4445989+03:00" endTime="2026-10-24T08:54:24.4712964+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a49d416a-2af7-4724-a1cc-9bc414fba46c" />
+    <UnitTestResult executionId="1693d942-c196-4b27-b156-9bcf284bcf0c" testId="b993ffbc-9b89-d931-abf8-4bc18029d668" testName="QuotasApplyBeforeAStageCanBeReturned" computerName="SEXMACHINE" duration="00:00:00.0048500" startTime="2026-10-24T08:54:24.4785704+03:00" endTime="2026-10-24T08:54:24.4834203+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1693d942-c196-4b27-b156-9bcf284bcf0c" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="CollisionAndInvalidUnicodeOrPathsFailWithoutPublishingPartialData" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="15d0d351-48c1-8356-5bb9-e94130098c33">
+      <Execution id="a49d416a-2af7-4724-a1cc-9bc414fba46c" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Persistence.MetaStateTransformerTests" name="CollisionAndInvalidUnicodeOrPathsFailWithoutPublishingPartialData" />
+    </UnitTest>
+    <UnitTest name="QuotasApplyBeforeAStageCanBeReturned" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="b993ffbc-9b89-d931-abf8-4bc18029d668">
+      <Execution id="1693d942-c196-4b27-b156-9bcf284bcf0c" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Persistence.MetaStateTransformerTests" name="QuotasApplyBeforeAStageCanBeReturned" />
+    </UnitTest>
+    <UnitTest name="RenameAndDefaultsPreserveOriginalDataAndDoNotOverwriteCustomerSettings" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="a3b859ae-35f1-d0d6-737b-1ee05549ef3f">
+      <Execution id="f6f1afa5-6b6c-42ee-8b2a-7ebae94d2b08" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Persistence.MetaStateTransformerTests" name="RenameAndDefaultsPreserveOriginalDataAndDoNotOverwriteCustomerSettings" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="a3b859ae-35f1-d0d6-737b-1ee05549ef3f" executionId="f6f1afa5-6b6c-42ee-8b2a-7ebae94d2b08" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="15d0d351-48c1-8356-5bb9-e94130098c33" executionId="a49d416a-2af7-4724-a1cc-9bc414fba46c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b993ffbc-9b89-d931-abf8-4bc18029d668" executionId="1693d942-c196-4b27-b156-9bcf284bcf0c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="3" executed="3" passed="3" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 5.2.0.0: Test execution started&#xD;
+Running selected tests in D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll&#xD;
+   NUnit3TestExecutor discovered 3 of 3 NUnit test cases using Current Discovery mode, Non-Explicit run&#xD;
+NUnit Adapter 5.2.0.0: Test execution complete&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

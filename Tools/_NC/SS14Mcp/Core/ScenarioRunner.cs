@@ -174,14 +174,14 @@ public sealed class ScenarioRunner(DiagnosticApplication application)
                         }
                         if (expectedError != null && !observedExpectedError)
                             throw new DiagnosticException("expected_error_not_observed", "The command succeeded instead of returning the expected error.");
-                        if (command == "fixture_create" && result?["data"]?["fixtureId"]?.GetValue<string>() is { } fixtureId)
+                        if ((command is "fixture_create" or "meta_demo_create") && result?["data"]?["fixtureId"]?.GetValue<string>() is { } fixtureId)
                             fixtures[args["targetId"]!.GetValue<string>() + ":" + fixtureId] = new JsonObject
                             {
                                 ["targetId"] = args["targetId"]!.DeepClone(), ["fixtureId"] = fixtureId,
                                 ["serverInstanceId"] = result["serverInstanceId"]!.DeepClone(),
                                 ["worldGeneration"] = result["worldGeneration"]!.DeepClone(),
                             };
-                        if (command == "fixture_destroy")
+                        if (command is "fixture_destroy" or "meta_demo_destroy")
                             fixtures.Remove(args["targetId"]!.GetValue<string>() + ":" + args.RequiredString("fixtureId", 64));
                     }
                     context["steps"]![id] = result?.DeepClone();

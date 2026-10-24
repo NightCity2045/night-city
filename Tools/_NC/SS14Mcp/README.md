@@ -71,6 +71,25 @@ A client also requires `NC_DIAGNOSTICS_PIPE`, an alphanumeric/hyphen/underscore 
 
 ## Catalogue and coverage
 
+### Optional pristine SQLite prefill for owned environments
+
+The default creates an empty private database. An explicit prefill can avoid replaying historical migrations for every new owned environment. It copies only a validated pristine schema, migration history and reviewed default rows. The ordinary server `Database.Migrate()` still runs and applies any newer migrations. This disk path never enables the game's separate memory-only diagnostic seed hook.
+
+Build `Tools/_NC/Meta/SqliteSeed/SqliteSeed.csproj` separately, then run its compiled `SqliteSeed.dll stage-helper <workspace> <seedId>`. It stages an append-only, read-only helper bundle at `artifacts/meta-db-bootstrap/<seedId>/materializer/<helperSha256>/`; the small result supplies the fourth pin. The existing seed and its manifest stay unchanged. Start the owning MCP process with all four variables, or leave all four unset:
+
+```powershell
+$env:SS14_MCP_SQLITE_SEED_ID = '<canonical lowercase GuidN>'
+$env:SS14_MCP_SQLITE_SEED_SHA256 = '<seed.db SHA256>'
+$env:SS14_MCP_SQLITE_MANIFEST_SHA256 = '<immutable seed manifest SHA256>'
+$env:SS14_MCP_SQLITE_HELPER_SHA256 = '<helper-manifest.json SHA256>'
+```
+
+Partial selections fail closed. Before starting the game process, the supervisor pins the helper inventory, reads the actual staged `Content.Server.Database.dll` migration metadata, and invokes the helper with a 20-second deadline and an 8 KiB combined output cap. The helper validates the selected immutable seed, uses real SQLite backup into fresh memory and then a new disk file, compares schema/default/history content, and atomically publishes only `artifacts/ss14-mcp/environments/<newGuidN>/server-data/preferences.db`. Existing data, links, unknown migration history and changed hashes are rejected. The environment manifest records the prefill result. All seed-selection variables, including the memory-only `NC_DIAGNOSTICS_*` seed variables, are stripped from game children.
+
+The standalone CLI also supports `validate <workspace> <seedId> <seedSha256> <manifestSha256> <databaseAssembly> <databaseSha256>` and `materialize <workspace> <seedId> <seedSha256> <manifestSha256> <ownedEnvironmentGuidN> <databaseSha256>`. Materialize derives its database assembly and destination from that environment ID; it does not accept an arbitrary output path. The original four-argument package producer remains supported.
+
+Tool-only tests are in `Tools/_NC/Meta/SqliteSeed.Tests`. The opt-in `SqliteSeedOwnedProcessTests` additionally runs the real pinned helper against a selected package/actual server database assembly, checks no-overwrite/source integrity, and removes only its own fresh test directory. It starts no game processes. Native server startup and its migration pass require a separate runtime verification.
+
 | Area | Tools / behavior | Coverage |
 |---|---|---|
 | Runtime | `environment_list/attach/start/stop/logs`, `session_get`, `capabilities_get` | Only processes created by this supervisor can be stopped; 0–3 clients, up to 3 active environments |

@@ -64,6 +64,7 @@ public readonly record struct NCResolvedCombatImpact(
     /// Shot-time snapshot used only for selected-zone precision. It never changes physical hit confirmation.
     /// </summary>
     public bool ShooterMoving { get; init; }
+    public float MovingPenaltyReduction { get; init; }
 }
 
 /// <summary>

@@ -23,6 +23,8 @@ public enum NCDrugCategory : byte
     Immunosuppressant,
     SyntheticOxygenCarrier,
     CyberwareService,
+    NeuralRestorative,
+    NeuralStabilizer,
 }
 
 /// <summary>
@@ -47,7 +49,9 @@ public readonly record struct NCPharmacologyModifiers(
     float ToxinRecoveryPerSecond,
     float ShockContribution,
     float BrainFunctionMultiplier,
-    float OverdoseFraction)
+    float OverdoseFraction,
+    float HumanityRecoveryPerSecond = 0f,
+    float CrisisSuppressionPerSecond = 0f)
 {
     public static readonly NCPharmacologyModifiers Neutral = new(
         0f,

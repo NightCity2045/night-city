@@ -1,0 +1,87 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: guideEntry
+  id: NCMetaProgramming
+  name: guide-entry-nc-meta-programming
+  text: /ServerInfo/Guidebook/_NC/Meta/Programming.xml
+  children: [NCMetaProgrammingRu]
+
+- type: guideEntry
+  id: NCMetaProgrammingRu
+  name: guide-entry-nc-meta-programming-ru
+  text: /ServerInfo/Guidebook/_NC/Meta/ProgrammingRu.xml
+
+- type: entity
+  parent: BaseGuidebook
+  id: NCMetaProgrammingManual
+  name: META programming manual
+  description: A practical guide to private projects, isolated tests, device commissioning and native recovery.
+  components:
+  - type: Sprite
+    layers:
+    - state: paper
+    - state: cover_base
+      color: "#163e43"
+    - state: decor_wingette
+      color: "#2ed4c7"
+    - state: icon_text
+  - type: GuideHelp
+    openOnActivation: true
+    guides: [NCMetaProgramming, NCMetaProgrammingRu]
+
+- type: vendingMachineInventory
+  id: NCMetaDevelopmentInventory
+  startingInventory:
+    NCMetaProgrammingManual: 6
+    NCMetaCommissioningTool: 4
+    NCMetaLoadCell: 4
+    NCMetaWaypointA: 4
+    NCMetaWaypointB: 4
+    NCMetaLoadingWaypoint: 4
+    NCMetaClinicalController: 2
+    NCMetaServiceTablet: 2
+    NCMetaCommissioningKit: 2
+    NCMetaNetworkCable: 8
+    NCMetaSensorFlatpack: 2
+    NCMetaAlarmFlatpack: 2
+    NCMetaCameraFlatpack: 2
+    NCMetaDoorFlatpack: 1
+    NCMetaPanelFlatpack: 2
+    NCMetaConveyorFlatpack: 1
+    NCMetaFabricatorFlatpack: 1
+    NCMetaGrinderFlatpack: 1
+    NCMetaChemMasterFlatpack: 1
+    NCMetaCyberdeck: 2
+    NCMetaCargoDrone: 1
+    NCMetaCyberOptics: 2
+    NCMetaEquippedDrone: 1
+    NCMetaBodyScanner: 1
+    NCMetaScannerGateway: 1
+    NCMetaToolHandImplant: 1
+    NCMetaMantisBladeImplant: 1
+    NCMetaBiomonitorImplant: 1
+    NCMetaSandevistanImplant: 1
+    NCMetaKerenzikovImplant: 1
+    NCMetaDemoNetAccessPoint: 1
+    NCMetaDemoNetData: 1
+    NCMetaDemoNetControl: 1
+    NCMetaDemoNetFirewall: 1
+    NCMetaMarketplaceService: 1
+    PowerCellSmall: 6
+    PowerCellMedium: 4
+
+- type: entity
+  parent: VendingMachineVendomat
+  id: NCMetaDevelopmentVendor
+  name: META service equipment vendor
+  description: Finite physical stock for programming and commissioning compatible devices. Software access never transfers device ownership.
+  components:
+  - type: VendingMachine
+    pack: NCMetaDevelopmentInventory
+    offState: off
+    brokenState: broken
+    normalState: normal-unshaded
+    ejectState: eject-unshaded
+    denyState: deny-unshaded
+  - type: GuideHelp
+    guides: [NCMetaProgramming, NCMetaProgrammingRu]

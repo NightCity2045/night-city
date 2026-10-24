@@ -42,6 +42,7 @@ public sealed class NCCyberwareSystemTest : GameTest
     [SidedDependency(Side.Server)] private NCCyberwareSystem _cyberware = default!;
     [SidedDependency(Side.Server)] private NCDiagnosticsSystem _diagnostics = default!;
     [SidedDependency(Side.Server)] private NCMedicalPersistenceSystem _persistence = default!;
+    [SidedDependency(Side.Server)] private Content.Server._NC.Medical.Humanity.NCHumanitySystem _humanity = default!;
     [SidedDependency(Side.Server)] private IComponentFactory _components = default!;
     [SidedDependency(Side.Server)] private IPrototypeManager _prototypes = default!;
     [SidedDependency(Side.Server)] private IResourceManager _resources = default!;
@@ -255,6 +256,8 @@ public sealed class NCCyberwareSystemTest : GameTest
                 .Any(field => field.FieldType == typeof(EntityUid)), Is.False);
         });
 
+        var savedCharge = _battery.GetCharge(cell);
+        SEntMan.DeleteEntity(source);
         var target = SSpawn(HumanMob);
         Assert.That(_persistence.RestoreMedicalState(target, persisted), Is.True);
         var restored = _cyberware.CollectCyberware(target).Single(module =>
@@ -264,7 +267,7 @@ public sealed class NCCyberwareSystemTest : GameTest
         {
             Assert.That(restoredState.CurrentPower, Is.Zero);
             Assert.That(_persistence.SerializeMedicalState(target)!.CyberwareModules.Single(value => value.PowerBus != null)
-                .PowerBus!.Main!.Charge, Is.EqualTo(_battery.GetCharge(cell)));
+                .PowerBus!.Main!.Charge, Is.EqualTo(savedCharge));
             Assert.That(restoredState.Heat, Is.EqualTo(42f));
             Assert.That(restoredState.InstalledSlot?.Id, Is.EqualTo("NCSlotNeuralCore"));
             Assert.That(SComp<Content.Shared.Body.ChildOrganComponent>(restored).Parent,
@@ -279,6 +282,8 @@ public sealed class NCCyberwareSystemTest : GameTest
         var source = SSpawn(HumanMob);
         var snapshot = _persistence.SerializeMedicalState(source)!;
         var armState = snapshot.Organs["ArmLeft"];
+        // This hand-authored replacement predates the exterior and service sections.
+        snapshot.Version = NCMedicalSnapshotVersions.CyberwareAbilities;
         var stableId = Guid.Parse("d067c60f-c33d-48a6-acb3-d7da7b3c4872");
         armState.EntityPrototype = "NCOrganHumanCyberArmLeft";
         armState.CyberwareIdentity = "NCOrganHumanCyberArmLeft";
@@ -306,6 +311,7 @@ public sealed class NCCyberwareSystemTest : GameTest
         armState.Cyberware.Assembly = _cyberware.CreateDefaultAssemblySnapshot("NCIndustrialCyberArm", stableId);
 
         var body = SSpawn(HumanMob);
+        Assert.That(_humanity.TryPrepareLegacyState(body, snapshot), Is.True);
         Assert.That(_persistence.RestoreMedicalState(body, snapshot), Is.True);
         var arm = GetOrgan(body, "ArmLeft");
         Assert.That(SComp<NCCyberwareComponent>(arm).StableInstanceId, Is.EqualTo(stableId));

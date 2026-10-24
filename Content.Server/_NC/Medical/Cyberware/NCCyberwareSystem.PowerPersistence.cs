@@ -18,7 +18,7 @@ public sealed partial class NCCyberwareSystem
     private static readonly EntProtoId PowerBusPrototype = "NCImplantPowerBusMk1";
     private static readonly ProtoId<NCCyberwarePrototype> PowerBusProfile = "NCPowerBusMk1";
 
-    private NCCyberwarePowerBusSnapshot? CapturePowerBus(EntityUid uid)
+    public NCCyberwarePowerBusSnapshot? CapturePowerBus(EntityUid uid)
     {
         return !HasComp<NCCyberwarePowerBusComponent>(uid) ? null : new NCCyberwarePowerBusSnapshot
         {
@@ -49,8 +49,13 @@ public sealed partial class NCCyberwareSystem
             return state.PowerBus == null;
         if (state.PowerBus == null)
             return false;
-        var identities = new HashSet<Guid> { state.StableInstanceId };
-        foreach (var cell in new[] { state.PowerBus.Main, state.PowerBus.Reserve })
+        return ValidatePhysicalPowerBus(state.PowerBus, state.StableInstanceId);
+    }
+
+    public bool ValidatePhysicalPowerBus(NCCyberwarePowerBusSnapshot snapshot, Guid ownerId)
+    {
+        var identities = new HashSet<Guid> { ownerId };
+        foreach (var cell in new[] { snapshot.Main, snapshot.Reserve })
         {
             if (cell == null)
                 continue;
@@ -67,11 +72,11 @@ public sealed partial class NCCyberwareSystem
         return true;
     }
 
-    private bool TryRestorePowerBus(EntityUid uid, NCCyberwarePowerBusSnapshot? snapshot)
+    public bool TryRestorePowerBus(EntityUid uid, NCCyberwarePowerBusSnapshot? snapshot)
     {
         if (!TryComp<NCCyberwarePowerBusComponent>(uid, out var bus))
             return snapshot == null;
-        if (snapshot == null)
+        if (snapshot == null || !ValidatePhysicalPowerBus(snapshot, Guid.Empty))
             return false;
         var states = new[]
         {

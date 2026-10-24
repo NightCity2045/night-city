@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="../Contracts/SS14Mcp.Contracts.csproj" />
+    <Compile Include="../../Meta/SqliteSeed/SqliteSeedArtifact.cs" Link="Seeds/SqliteSeedArtifact.cs" />
   </ItemGroup>
 </Project>

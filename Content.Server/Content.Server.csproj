@@ -10,6 +10,9 @@
   </PropertyGroup>
   <Import Project="../MSBuild/Content.props" />
   <ItemGroup>
+    <ProjectReference Include="../Content.Meta/Content.Meta.csproj" /> <!-- NC: pure META runtime. -->
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" PrivateAssets="All" />
     <PackageReference Include="NetCord" />
     <PackageReference Include="prometheus-net" />
@@ -19,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Content.Packaging\Content.Packaging.csproj" />
     <ProjectReference Include="..\Content.Server.Database\Content.Server.Database.csproj" />
+    <ProjectReference Include="..\Tools\_NC\Meta\CompilerWorker\CompilerWorker.csproj" ReferenceOutputAssembly="false" /> <!-- NC -->
     <ProjectReference Include="..\Content.Shared.Database\Content.Shared.Database.csproj" />
     <ProjectReference Include="..\Content.Shared\Content.Shared.csproj" />
     <Content Include="server_config.toml">
@@ -32,4 +36,22 @@
   <Import Project="..\RobustToolbox\Imports\Server.props" />
   <Import Project="..\RobustToolbox\Imports\Shared.props" />
   <Import Project="..\RobustToolbox\Imports\Packaging.props" />
+  <!-- NC-Edit-Start: the isolated compiler is part of the distributable server. -->
+  <Target Name="CopyNCMetaCompilerWorker" AfterTargets="Build;Publish">
+    <PropertyGroup>
+      <NCMetaWorkerDirectory>$(MSBuildProjectDirectory)/../Tools/_NC/Meta/CompilerWorker/bin/$(Configuration)/net10.0</NCMetaWorkerDirectory>
+      <NCMetaWorkerDirectory Condition="'$(EnableNCDiagnostics)' == 'true'">$(NCDiagnosticsOutputRoot)/CompilerWorker/net10.0</NCMetaWorkerDirectory>
+    </PropertyGroup>
+    <ItemGroup>
+      <NCMetaWorkerFile Include="$(NCMetaWorkerDirectory)/Meta.CompilerWorker.dll" />
+      <NCMetaWorkerFile Include="$(NCMetaWorkerDirectory)/Meta.CompilerWorker.deps.json" />
+      <NCMetaWorkerFile Include="$(NCMetaWorkerDirectory)/Meta.CompilerWorker.runtimeconfig.json" />
+      <NCMetaWorkerFile Include="$(NCMetaWorkerDirectory)/Content.Meta.dll" />
+    </ItemGroup>
+    <!-- The game loader recursively scans TargetDir. Only the sibling is a worker bundle. -->
+    <Delete Files="$(TargetDir)MetaCompilerWorker/Meta.CompilerWorker.dll;$(TargetDir)MetaCompilerWorker/Meta.CompilerWorker.deps.json;$(TargetDir)MetaCompilerWorker/Meta.CompilerWorker.runtimeconfig.json;$(TargetDir)MetaCompilerWorker/Content.Meta.dll;$(TargetDir)Meta.CompilerWorker.dll;$(TargetDir)Meta.CompilerWorker.deps.json;$(TargetDir)Meta.CompilerWorker.runtimeconfig.json" />
+    <Copy SourceFiles="@(NCMetaWorkerFile)" DestinationFolder="$(TargetDir)../MetaCompilerWorker" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(NCMetaWorkerFile)" DestinationFolder="$(PublishDir)../MetaCompilerWorker" SkipUnchangedFiles="true" Condition="'$(PublishDir)' != ''" />
+  </Target>
+  <!-- NC-Edit-End -->
 </Project>

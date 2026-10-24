@@ -1,0 +1,923 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="9ff5eebd-03c3-410e-aa2c-e08e82e3db89" name="Yuri@SEXMACHINE 2026-10-24 22:03:34" runUser="SexMachine\Yuri" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-24T22:03:34.3107256+03:00" queuing="2026-10-24T22:03:34.3107263+03:00" start="2026-10-24T21:55:59.6470146+03:00" finish="2026-10-24T22:03:35.0259748+03:00" />
+  <TestSettings name="default" id="8af43b3d-9bf3-4ee2-99d8-5e7f593c9f7d">
+    <Deployment runDeploymentRoot="Yuri_SEXMACHINE_2026-10-24_22_03_34" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="e1f37662-3700-411f-95f9-b0aa60b9d0fd" testId="cc2334cd-b8ee-1f34-e6e1-812a8f727be8" testName="UnbootedUpdatesPreserveHealthyCodeAndDataAndCannotWriteThroughAReplacedGeneration" computerName="SEXMACHINE" duration="00:00:00.0165000" startTime="2026-10-24T22:03:34.2759106+03:00" endTime="2026-10-24T22:03:34.2924096+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e1f37662-3700-411f-95f9-b0aa60b9d0fd">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+     at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaInstallationPersistenceTest.UnbootedUpdatesPreserveHealthyCodeAndDataAndCannotWriteThroughAReplacedGeneration() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaInstallationPersistenceTest.cs:line 27&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1)    at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaInstallationPersistenceTest.UnbootedUpdatesPreserveHealthyCodeAndDataAndCannotWriteThroughAReplacedGeneration() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaInstallationPersistenceTest.cs:line 27&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="f8b5fdb5-48b3-4f6e-86ef-8b2f4219622f" testId="0fb9b64b-dae7-268b-d4f2-db62250c99b0" testName="RealFrontendActionReplaysACompletedServiceCommandButRejectsADamagedSelectedParticipant(&quot;assign&quot;)" computerName="SEXMACHINE" duration="00:00:00.0068090" startTime="2026-10-24T22:03:34.5235641+03:00" endTime="2026-10-24T22:03:34.5303742+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f8b5fdb5-48b3-4f6e-86ef-8b2f4219622f">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+     at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaServiceReplayTransportTest.RealFrontendActionReplaysACompletedServiceCommandButRejectsADamagedSelectedParticipant(String operation) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaServiceReplayTransportTest.cs:line 49&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1)    at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaServiceReplayTransportTest.RealFrontendActionReplaysACompletedServiceCommandButRejectsADamagedSelectedParticipant(String operation) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaServiceReplayTransportTest.cs:line 49&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="4cc3fe06-6bc8-4f7e-9c84-d21d4245da18" testId="491d68d3-6bc9-4383-3381-ac0e1b2e9d4d" testName="RealFrontendActionReplaysACompletedServiceCommandButRejectsADamagedSelectedParticipant(&quot;create&quot;)" computerName="SEXMACHINE" duration="00:00:00.0196080" startTime="2026-10-24T22:03:34.4919112+03:00" endTime="2026-10-24T22:03:34.5115184+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4cc3fe06-6bc8-4f7e-9c84-d21d4245da18">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+     at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaServiceReplayTransportTest.RealFrontendActionReplaysACompletedServiceCommandButRejectsADamagedSelectedParticipant(String operation) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaServiceReplayTransportTest.cs:line 49&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1)    at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaServiceReplayTransportTest.RealFrontendActionReplaysACompletedServiceCommandButRejectsADamagedSelectedParticipant(String operation) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaServiceReplayTransportTest.cs:line 49&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d463bb0e-b038-4ba6-a2c8-e0b18686a16d" testId="2c95c6b3-b792-cf65-12ec-e5c0feaeb017" testName="JsonNullCompletedResultNeverFallsThroughToASecondActivation" computerName="SEXMACHINE" duration="00:00:00.0065390" startTime="2026-10-24T22:03:34.3675011+03:00" endTime="2026-10-24T22:03:34.3740417+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d463bb0e-b038-4ba6-a2c8-e0b18686a16d">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+     at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.JsonNullCompletedResultNeverFallsThroughToASecondActivation() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 203&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.JsonNullCompletedResultNeverFallsThroughToASecondActivation() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 225&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1)    at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.JsonNullCompletedResultNeverFallsThroughToASecondActivation() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 203&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.JsonNullCompletedResultNeverFallsThroughToASecondActivation() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 225&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="2445efd5-7c41-4df9-b9b2-2d36fc44fa9a" testId="84c2fa77-a923-5f00-f35e-42daefe45dfc" testName="ImmutableOrdinaryAndLicensedAcknowledgementsDoNotReactivateAnOlderImage" computerName="SEXMACHINE" duration="00:00:00.0081410" startTime="2026-10-24T22:03:34.3531497+03:00" endTime="2026-10-24T22:03:34.3612923+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2445efd5-7c41-4df9-b9b2-2d36fc44fa9a">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+     at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ImmutableOrdinaryAndLicensedAcknowledgementsDoNotReactivateAnOlderImage() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 52&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ImmutableOrdinaryAndLicensedAcknowledgementsDoNotReactivateAnOlderImage() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 92&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1)    at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ImmutableOrdinaryAndLicensedAcknowledgementsDoNotReactivateAnOlderImage() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 52&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ImmutableOrdinaryAndLicensedAcknowledgementsDoNotReactivateAnOlderImage() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 92&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="cb690480-23b2-4f24-be08-14f44db3fd08" testId="fd026de4-580f-a5c3-1b37-7d04ff9fedfc" testName="DifferentFirmwarePackagesRequireAnExplicitTransitionEvenWhenBothSchemasAreOne(False)" computerName="SEXMACHINE" duration="00:05:25.7909320" startTime="2026-10-24T21:58:08.4204250+03:00" endTime="2026-10-24T22:03:34.2112639+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cb690480-23b2-4f24-be08-14f44db3fd08">
+      <Output>
+        <StdOut>GetPair: Called by test _NC.Meta.NCMetaFirmwareStateIsolationTest.DifferentFirmwarePackagesRequireAnExplicitTransitionEvenWhenBothSchemasAreOne(False)&#xD;
+GetPair: Looking in pool for a suitable pair&#xD;
+GetPair: Creating a new pair, no suitable pair found in pool&#xD;
+CLIENT: 4.012s [DEBG] root: OS: Microsoft Windows 10.0.26200 X64&#xD;
+CLIENT: 4.014s [DEBG] root: .NET Runtime: .NET 10.0.3 win-x64&#xD;
+CLIENT: 4.014s [DEBG] root: Server GC: False&#xD;
+CLIENT: 4.014s [DEBG] root: Processor: 16x 13th Gen Intel(R) Core(TM) i5-13500H&#xD;
+CLIENT: 4.014s [DEBG] root: Available Memory: 31.73 GiB&#xD;
+CLIENT: 4.014s [DEBG] root: Architecture: X64&#xD;
+CLIENT: 4.014s [DEBG] root: Robust Version: 284.0.2.0&#xD;
+CLIENT: 4.014s [DEBG] root: Compile Options: DEVELOPMENT;TOOLS;DEBUG;CLIENT_SCRIPTING&#xD;
+CLIENT: 4.014s [DEBG] root: Intrinsics: X86Aes;Avx;Avx2;Bmi1;Bmi2;Fma;Lzcnt;Pclmulqdq;Popcnt;Sse;Sse2;Sse3;Ssse3;Sse41;Sse42;X86Base&#xD;
+CLIENT: 16.654s [DEBG] serialization: Skipping registering data definition for type Content.Shared.EntityConditions.EntityConditionEvent`1[T] since it is abstract or an interface&#xD;
+CLIENT: 16.776s [DEBG] serialization: Skipping registering data definition for type Content.Shared.DeviceLinking.DevicePortPrototype since it is abstract or an interface&#xD;
+CLIENT: 17.055s [DEBG] serialization: Skipping registering data definition for type Content.Shared.StatusIcon.StatusIconPrototype since it is abstract or an interface&#xD;
+CLIENT: 20.601s [DEBG] res.preload: Skipping texture preloading due to CVar value.&#xD;
+CLIENT: 21.006s [INFO] szr: Serializer Types Hash: 047922B09ABD5F8162F9B92383DC8399FE7B10AC82F3F3B4906B1D2A864FE070&#xD;
+CLIENT: 21.478s [WARN] proto: Registering an ignored prototype Content.Shared.Maps.GameMapPrototype&#xD;
+CLIENT: 315.459s [INFO] client: Tickrate changed to: 30 on tick 1&#xD;
+CLIENT: 315.463s [INFO] client: Tickrate changed to: 1 on tick 1&#xD;
+CLIENT: 315.468s [DEBG] client: Runlevel changed to: Initialize&#xD;
+CLIENT: 319.079s [DEBG] style: Initializing Stylesheets...&#xD;
+CLIENT: 319.539s [DEBG] style: Initialized 504 style rules in 00:00:00.4591159&#xD;
+CLIENT: 319.617s [DEBG] root: Switching to state Content.Client.MainMenu.MainScreen&#xD;
+CLIENT: 319.988s [DEBG] clyde: Tile atlas took 00:00:00.3426305 to build&#xD;
+SERVER: 323.936s [INFO] srv: Timescale changed to: 1 on tick 1&#xD;
+SERVER: 323.937s [INFO] srv: Name: MyServer&#xD;
+SERVER: 323.937s [INFO] srv: TickRate: 30(33.33ms)&#xD;
+SERVER: 323.938s [INFO] srv: Max players: 256&#xD;
+SERVER: 324.793s [INFO] szr: Serializer Types Hash: 047922B09ABD5F8162F9B92383DC8399FE7B10AC82F3F3B4906B1D2A864FE070&#xD;
+SERVER: 325.422s [INFO] configpreset: Loaded config preset: "/ConfigPresets/Build/debug.toml"</StdOut>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) SetUp : System.InvalidOperationException : Type is already registered: Content.IntegrationTests.Tests._NC.Meta.NCMetaDoseObservationComponent&#xD;
+  --SetUp&#xD;
+   at Robust.Shared.GameObjects.ComponentFactory.Register(Type type, CompIdx idx, Dictionary`2 names, Dictionary`2 lowerCaseNames, Dictionary`2 types, Dictionary`2 idxToType, HashSet`1 ignored, Boolean overwrite) in D:\projects\night-city\RobustToolbox\Robust.Shared\GameObjects\ComponentFactory.cs:line 100&#xD;
+   at Robust.Shared.GameObjects.ComponentFactory.RegisterTypesInternal(Type[] types, Boolean overwrite) in D:\projects\night-city\RobustToolbox\Robust.Shared\GameObjects\ComponentFactory.cs:line 492&#xD;
+   at Robust.Shared.GameObjects.ComponentFactory.DoAutoRegistrations() in D:\projects\night-city\RobustToolbox\Robust.Shared\GameObjects\ComponentFactory.cs:line 458&#xD;
+   at Content.Server.Entry.EntryPoint.Init() in D:\projects\night-city\Content.Server\Entry\EntryPoint.cs:line 105&#xD;
+   at Robust.Shared.ContentPack.BaseModLoader.BroadcastRunLevel(ModRunLevel level) in D:\projects\night-city\RobustToolbox\Robust.Shared\ContentPack\BaseModLoader.cs:line 82&#xD;
+   at Robust.Server.BaseServer.Start(ServerOptions options, Func`1 logHandlerFactory) in D:\projects\night-city\RobustToolbox\Robust.Server\BaseServer.cs:line 371&#xD;
+   at Robust.UnitTesting.RobustIntegrationTest.ServerIntegrationInstance.Init() in D:\projects\night-city\RobustToolbox\Robust.UnitTesting\RobustIntegrationTest.cs:line 860&#xD;
+   at Robust.UnitTesting.RobustIntegrationTest.ServerIntegrationInstance._serverMain() in D:\projects\night-city\RobustToolbox\Robust.UnitTesting\RobustIntegrationTest.cs:line 771&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Robust.UnitTesting.RobustIntegrationTest.IntegrationInstance.WaitIdleImplAsync(Boolean throwOnUnhandled, CancellationToken cancellationToken) in D:\projects\night-city\RobustToolbox\Robust.UnitTesting\RobustIntegrationTest.cs:line 564&#xD;
+   at Robust.UnitTesting.RobustIntegrationTest.TestPair.GenerateServer() in D:\projects\night-city\RobustToolbox\Robust.UnitTesting\RobustIntegrationTest.TestPair.cs:line 28&#xD;
+   at Robust.UnitTesting.Pool.TestPair`2.Init(Int32 id, BasePoolManager manager, PairSettings settings, TextWriter testOut, TextWriter gravestone) in D:\projects\night-city\RobustToolbox\Robust.UnitTesting\Pool\TestPair.cs:line 83&#xD;
+   at Robust.UnitTesting.Pool.PoolManager`1.CreateServerClientPair(PairSettings settings, ITestContextLike context, TextWriter testOut) in D:\projects\night-city\RobustToolbox\Robust.UnitTesting\Pool\PoolManager.cs:line 297&#xD;
+   at Robust.UnitTesting.Pool.PoolManager`1.GetPair(PairSettings settings, ITestContextLike testContext) in D:\projects\night-city\RobustToolbox\Robust.UnitTesting\Pool\PoolManager.cs:line 202&#xD;
+   at Content.IntegrationTests.PoolManager.GetServerClient(PoolSettings settings, ITestContextLike testContext) in D:\projects\night-city\Content.IntegrationTests\PoolManager.cs:line 79&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoSetup() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 167&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.BlockUntilCompleted()&#xD;
+   at NUnit.Framework.Internal.MessagePumpStrategy.NoMessagePumpStrategy.WaitForCompletion(AwaitAdapter awaiter)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUp(TestExecutionContext context)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1) --SetUp&#xD;
+   at Robust.Shared.GameObjects.ComponentFactory.Register(Type type, CompIdx idx, Dictionary`2 names, Dictionary`2 lowerCaseNames, Dictionary`2 types, Dictionary`2 idxToType, HashSet`1 ignored, Boolean overwrite) in D:\projects\night-city\RobustToolbox\Robust.Shared\GameObjects\ComponentFactory.cs:line 100&#xD;
+   at Robust.Shared.GameObjects.ComponentFactory.RegisterTypesInternal(Type[] types, Boolean overwrite) in D:\projects\night-city\RobustToolbox\Robust.Shared\GameObjects\ComponentFactory.cs:line 492&#xD;
+   at Robust.Shared.GameObjects.ComponentFactory.DoAutoRegistrations() in D:\projects\night-city\RobustToolbox\Robust.Shared\GameObjects\ComponentFactory.cs:line 458&#xD;
+   at Content.Server.Entry.EntryPoint.Init() in D:\projects\night-city\Content.Server\Entry\EntryPoint.cs:line 105&#xD;
+   at Robust.Shared.ContentPack.BaseModLoader.BroadcastRunLevel(ModRunLevel level) in D:\projects\night-city\RobustToolbox\Robust.Shared\ContentPack\BaseModLoader.cs:line 82&#xD;
+   at Robust.Server.BaseServer.Start(ServerOptions options, Func`1 logHandlerFactory) in D:\projects\night-city\RobustToolbox\Robust.Server\BaseServer.cs:line 371&#xD;
+   at Robust.UnitTesting.RobustIntegrationTest.ServerIntegrationInstance.Init() in D:\projects\night-city\RobustToolbox\Robust.UnitTesting\RobustIntegrationTest.cs:line 860&#xD;
+   at Robust.UnitTesting.RobustIntegrationTest.ServerIntegrationInstance._serverMain() in D:\projects\night-city\RobustToolbox\Robust.UnitTesting\RobustIntegrationTest.cs:line 771&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at Robust.UnitTesting.RobustIntegrationTest.IntegrationInstance.WaitIdleImplAsync(Boolean throwOnUnhandled, CancellationToken cancellationToken) in D:\projects\night-city\RobustToolbox\Robust.UnitTesting\RobustIntegrationTest.cs:line 564&#xD;
+   at Robust.UnitTesting.RobustIntegrationTest.TestPair.GenerateServer() in D:\projects\night-city\RobustToolbox\Robust.UnitTesting\RobustIntegrationTest.TestPair.cs:line 28&#xD;
+   at Robust.UnitTesting.Pool.TestPair`2.Init(Int32 id, BasePoolManager manager, PairSettings settings, TextWriter testOut, TextWriter gravestone) in D:\projects\night-city\RobustToolbox\Robust.UnitTesting\Pool\TestPair.cs:line 83&#xD;
+   at Robust.UnitTesting.Pool.PoolManager`1.CreateServerClientPair(PairSettings settings, ITestContextLike context, TextWriter testOut) in D:\projects\night-city\RobustToolbox\Robust.UnitTesting\Pool\PoolManager.cs:line 297&#xD;
+   at Robust.UnitTesting.Pool.PoolManager`1.GetPair(PairSettings settings, ITestContextLike testContext) in D:\projects\night-city\RobustToolbox\Robust.UnitTesting\Pool\PoolManager.cs:line 202&#xD;
+   at Content.IntegrationTests.PoolManager.GetServerClient(PoolSettings settings, ITestContextLike testContext) in D:\projects\night-city\Content.IntegrationTests\PoolManager.cs:line 79&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoSetup() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 167&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.BlockUntilCompleted()&#xD;
+   at NUnit.Framework.Internal.MessagePumpStrategy.NoMessagePumpStrategy.WaitForCompletion(AwaitAdapter awaiter)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUp(TestExecutionContext context)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="330e228d-efab-4f11-b7fe-acf12ca41ccd" testId="7cf6180c-fede-8ea4-6ea1-c9617dca025e" testName="UpgradeStagesTrustedStateAndRollbackRestoresTheMatchingSchemaWithoutDataLoss" computerName="SEXMACHINE" duration="00:00:00.0143670" startTime="2026-10-24T22:03:34.5423611+03:00" endTime="2026-10-24T22:03:34.5567293+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="330e228d-efab-4f11-b7fe-acf12ca41ccd">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+     at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaStateMigrationTest.UpgradeStagesTrustedStateAndRollbackRestoresTheMatchingSchemaWithoutDataLoss() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaStateMigrationTest.cs:line 43&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1)    at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaStateMigrationTest.UpgradeStagesTrustedStateAndRollbackRestoresTheMatchingSchemaWithoutDataLoss() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaStateMigrationTest.cs:line 43&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="ec025855-386b-4392-bd03-47796540613b" testId="b7a9fa39-69de-9cde-b29e-f638c7490377" testName="ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(&quot;MiddleEvent&quot;)" computerName="SEXMACHINE" duration="00:00:00.0116760" startTime="2026-10-24T22:03:34.4681088+03:00" endTime="2026-10-24T22:03:34.4810755+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ec025855-386b-4392-bd03-47796540613b">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+     at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(String fault) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 145&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(String fault) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 193&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1)    at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(String fault) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 145&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(String fault) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 193&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="109b5957-0271-4990-88a3-ab5d7ad89022" testId="ea5e5c73-897c-28d2-b5d4-5cba6dc7dd78" testName="AnActuallyConnectedApplicationCannotDeliverAnAlreadyAcceptedPacketAfterItsInvokingSessionCloses(&quot;CloseUi&quot;)" computerName="SEXMACHINE" duration="00:00:00.0140760" startTime="2026-10-24T22:03:34.2930693+03:00" endTime="2026-10-24T22:03:34.3071425+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="109b5957-0271-4990-88a3-ab5d7ad89022">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+     at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaNativeAppTransportTest.AnActuallyConnectedApplicationCannotDeliverAnAlreadyAcceptedPacketAfterItsInvokingSessionCloses(String transition) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaNativeAppTransportTest.cs:line 49&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1)    at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaNativeAppTransportTest.AnActuallyConnectedApplicationCannotDeliverAnAlreadyAcceptedPacketAfterItsInvokingSessionCloses(String transition) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaNativeAppTransportTest.cs:line 49&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="4668bd0a-8c38-46b8-a97e-f96d4cb8f134" testId="127dd09d-cd4a-6115-6598-a3223619053c" testName="AnActuallyConnectedApplicationCannotDeliverAnAlreadyAcceptedPacketAfterItsInvokingSessionCloses(&quot;DetachMind&quot;)" computerName="SEXMACHINE" duration="00:00:00.0066990" startTime="2026-10-24T22:03:34.3078573+03:00" endTime="2026-10-24T22:03:34.3145522+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4668bd0a-8c38-46b8-a97e-f96d4cb8f134">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+     at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaNativeAppTransportTest.AnActuallyConnectedApplicationCannotDeliverAnAlreadyAcceptedPacketAfterItsInvokingSessionCloses(String transition) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaNativeAppTransportTest.cs:line 49&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1)    at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaNativeAppTransportTest.AnActuallyConnectedApplicationCannotDeliverAnAlreadyAcceptedPacketAfterItsInvokingSessionCloses(String transition) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaNativeAppTransportTest.cs:line 49&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a775447f-a74b-4a16-b513-1779951c8810" testId="0f984e66-10de-c002-92f5-c13a14b3b655" testName="ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(&quot;ParticipantPayload&quot;)" computerName="SEXMACHINE" duration="00:00:00.0351640" startTime="2026-10-24T22:03:34.4049831+03:00" endTime="2026-10-24T22:03:34.4401478+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a775447f-a74b-4a16-b513-1779951c8810">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+     at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(String fault) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 145&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(String fault) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 193&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1)    at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(String fault) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 145&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(String fault) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 193&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="499f9b39-3267-4e7e-99ee-15ec967b8b01" testId="d51ea6cc-0256-036c-7717-804c0ec23945" testName="CompletedReceiptRequiresTheExactCommandScopePrincipalFingerprintAndStatus" computerName="SEXMACHINE" duration="00:00:00.0194429" startTime="2026-10-24T22:03:34.3224757+03:00" endTime="2026-10-24T22:03:34.3419193+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="499f9b39-3267-4e7e-99ee-15ec967b8b01">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+     at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CompletedReceiptRequiresTheExactCommandScopePrincipalFingerprintAndStatus() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 100&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CompletedReceiptRequiresTheExactCommandScopePrincipalFingerprintAndStatus() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 134&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1)    at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CompletedReceiptRequiresTheExactCommandScopePrincipalFingerprintAndStatus() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 100&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CompletedReceiptRequiresTheExactCommandScopePrincipalFingerprintAndStatus() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 134&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="8e28f4f6-23b3-4c34-a0e5-15d04ffd18b3" testId="fcf62fcb-17d1-d113-3e16-372a0347a8f0" testName="ProjectAndDevelopmentImportEarlyAcknowledgementsAuthenticateTheirRealParticipants" computerName="SEXMACHINE" duration="00:00:00.0088470" startTime="2026-10-24T22:03:34.3741429+03:00" endTime="2026-10-24T22:03:34.3829881+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8e28f4f6-23b3-4c34-a0e5-15d04ffd18b3">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+     at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ProjectAndDevelopmentImportEarlyAcknowledgementsAuthenticateTheirRealParticipants() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 234&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ProjectAndDevelopmentImportEarlyAcknowledgementsAuthenticateTheirRealParticipants() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 285&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1)    at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ProjectAndDevelopmentImportEarlyAcknowledgementsAuthenticateTheirRealParticipants() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 234&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ProjectAndDevelopmentImportEarlyAcknowledgementsAuthenticateTheirRealParticipants() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 285&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="6d10d549-43ff-43af-9c77-2f211cae999a" testId="4a1084eb-4885-9f18-eec6-1eefefbeabfa" testName="GrantAcknowledgementSurvivesRevocationWithoutRestoringTheGrantAndRejectsDamagedPolicy" computerName="SEXMACHINE" duration="00:00:00.0061720" startTime="2026-10-24T22:03:34.3463925+03:00" endTime="2026-10-24T22:03:34.3525655+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6d10d549-43ff-43af-9c77-2f211cae999a">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+     at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.GrantAcknowledgementSurvivesRevocationWithoutRestoringTheGrantAndRejectsDamagedPolicy() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 293&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.GrantAcknowledgementSurvivesRevocationWithoutRestoringTheGrantAndRejectsDamagedPolicy() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 329&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1)    at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.GrantAcknowledgementSurvivesRevocationWithoutRestoringTheGrantAndRejectsDamagedPolicy() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 293&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.GrantAcknowledgementSurvivesRevocationWithoutRestoringTheGrantAndRejectsDamagedPolicy() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 329&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="567f76a8-f4fa-4991-a7b8-88ff549128f9" testId="de9fe3e6-56fd-aa4b-0425-d913b0866ff7" testName="ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(&quot;MissingAttestation&quot;)" computerName="SEXMACHINE" duration="00:00:00.0020030" startTime="2026-10-24T22:03:34.4889154+03:00" endTime="2026-10-24T22:03:34.4909200+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="567f76a8-f4fa-4991-a7b8-88ff549128f9">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+     at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(String fault) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 145&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(String fault) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 193&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1)    at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.StartRound() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 370&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.CreateScene() in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 336&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(String fault) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 145&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest.ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(String fault) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaReplayIntegrityTest.cs:line 193&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="7296c8fc-b849-4f1f-9321-714678f2b15d" testId="0e5e0d33-5671-f35f-d117-b0007a2a7a95" testName="DifferentFirmwarePackagesRequireAnExplicitTransitionEvenWhenBothSchemasAreOne(True)" computerName="SEXMACHINE" duration="00:00:00.0460120" startTime="2026-10-24T22:03:34.2175927+03:00" endTime="2026-10-24T22:03:34.2636053+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7296c8fc-b849-4f1f-9321-714678f2b15d">
+      <Output>
+        <ErrorInfo>
+          <Message>Multiple failures or warnings in test:&#xD;
+  1) System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+     at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaFirmwareStateIsolationTest.DifferentFirmwarePackagesRequireAnExplicitTransitionEvenWhenBothSchemasAreOne(Boolean explicitTransition) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaFirmwareStateIsolationTest.cs:line 46&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)&#xD;
+  2) TearDown : System.NullReferenceException : Object reference not set to an instance of an object.&#xD;
+  --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)&#xD;
+</Message>
+          <StackTrace>
+1)    at Content.IntegrationTests.Fixtures.GameTest.get_Server() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 77&#xD;
+   at Content.IntegrationTests.Tests._NC.Meta.NCMetaFirmwareStateIsolationTest.DifferentFirmwarePackagesRequireAnExplicitTransitionEvenWhenBothSchemasAreOne(Boolean explicitTransition) in D:\projects\night-city\Content.IntegrationTests\Tests\_NC\Meta\NCMetaFirmwareStateIsolationTest.cs:line 46&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.RunTestMethod(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)&#xD;
+   at NUnit.Framework.Internal.Commands.BeforeAndAfterTestCommand.&lt;&gt;c__DisplayClass1_0.&lt;Execute&gt;b__0()&#xD;
+   at NUnit.Framework.Internal.Commands.DelegatingTestCommand.RunTestMethodInThreadAbortSafeZone(TestExecutionContext context, Action action)
+2) --TearDown&#xD;
+   at Content.IntegrationTests.Fixtures.GameTest.DoTeardown() in D:\projects\night-city\Content.IntegrationTests\Fixtures\GameTest.cs:line 263&#xD;
+   at NUnit.Framework.Internal.TaskAwaitAdapter.GenericAdapter`1.GetResult()&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await[TResult](TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.AsyncToSyncAdapter.Await(TestExecutionContext context, Func`1 invoke)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunSetUpOrTearDownMethod(TestExecutionContext context, IMethodInfo method)&#xD;
+   at NUnit.Framework.Internal.Commands.SetUpTearDownItem.RunTearDown(TestExecutionContext context)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(&quot;MiddleEvent&quot;)" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="b7a9fa39-69de-9cde-b29e-f638c7490377">
+      <Execution id="ec025855-386b-4392-bd03-47796540613b" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest" name="ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(&quot;MiddleEvent&quot;)" />
+    </UnitTest>
+    <UnitTest name="ImmutableOrdinaryAndLicensedAcknowledgementsDoNotReactivateAnOlderImage" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="84c2fa77-a923-5f00-f35e-42daefe45dfc">
+      <Execution id="2445efd5-7c41-4df9-b9b2-2d36fc44fa9a" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest" name="ImmutableOrdinaryAndLicensedAcknowledgementsDoNotReactivateAnOlderImage" />
+    </UnitTest>
+    <UnitTest name="GrantAcknowledgementSurvivesRevocationWithoutRestoringTheGrantAndRejectsDamagedPolicy" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="4a1084eb-4885-9f18-eec6-1eefefbeabfa">
+      <Execution id="6d10d549-43ff-43af-9c77-2f211cae999a" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest" name="GrantAcknowledgementSurvivesRevocationWithoutRestoringTheGrantAndRejectsDamagedPolicy" />
+    </UnitTest>
+    <UnitTest name="UpgradeStagesTrustedStateAndRollbackRestoresTheMatchingSchemaWithoutDataLoss" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="7cf6180c-fede-8ea4-6ea1-c9617dca025e">
+      <Execution id="330e228d-efab-4f11-b7fe-acf12ca41ccd" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaStateMigrationTest" name="UpgradeStagesTrustedStateAndRollbackRestoresTheMatchingSchemaWithoutDataLoss" />
+    </UnitTest>
+    <UnitTest name="AnActuallyConnectedApplicationCannotDeliverAnAlreadyAcceptedPacketAfterItsInvokingSessionCloses(&quot;DetachMind&quot;)" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="127dd09d-cd4a-6115-6598-a3223619053c">
+      <Execution id="4668bd0a-8c38-46b8-a97e-f96d4cb8f134" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaNativeAppTransportTest" name="AnActuallyConnectedApplicationCannotDeliverAnAlreadyAcceptedPacketAfterItsInvokingSessionCloses(&quot;DetachMind&quot;)" />
+    </UnitTest>
+    <UnitTest name="DifferentFirmwarePackagesRequireAnExplicitTransitionEvenWhenBothSchemasAreOne(True)" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="0e5e0d33-5671-f35f-d117-b0007a2a7a95">
+      <Execution id="7296c8fc-b849-4f1f-9321-714678f2b15d" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaFirmwareStateIsolationTest" name="DifferentFirmwarePackagesRequireAnExplicitTransitionEvenWhenBothSchemasAreOne(True)" />
+    </UnitTest>
+    <UnitTest name="JsonNullCompletedResultNeverFallsThroughToASecondActivation" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="2c95c6b3-b792-cf65-12ec-e5c0feaeb017">
+      <Execution id="d463bb0e-b038-4ba6-a2c8-e0b18686a16d" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest" name="JsonNullCompletedResultNeverFallsThroughToASecondActivation" />
+    </UnitTest>
+    <UnitTest name="ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(&quot;ParticipantPayload&quot;)" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="0f984e66-10de-c002-92f5-c13a14b3b655">
+      <Execution id="a775447f-a74b-4a16-b513-1779951c8810" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest" name="ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(&quot;ParticipantPayload&quot;)" />
+    </UnitTest>
+    <UnitTest name="CompletedReceiptRequiresTheExactCommandScopePrincipalFingerprintAndStatus" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="d51ea6cc-0256-036c-7717-804c0ec23945">
+      <Execution id="499f9b39-3267-4e7e-99ee-15ec967b8b01" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest" name="CompletedReceiptRequiresTheExactCommandScopePrincipalFingerprintAndStatus" />
+    </UnitTest>
+    <UnitTest name="DifferentFirmwarePackagesRequireAnExplicitTransitionEvenWhenBothSchemasAreOne(False)" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="fd026de4-580f-a5c3-1b37-7d04ff9fedfc">
+      <Execution id="cb690480-23b2-4f24-be08-14f44db3fd08" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaFirmwareStateIsolationTest" name="DifferentFirmwarePackagesRequireAnExplicitTransitionEvenWhenBothSchemasAreOne(False)" />
+    </UnitTest>
+    <UnitTest name="RealFrontendActionReplaysACompletedServiceCommandButRejectsADamagedSelectedParticipant(&quot;create&quot;)" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="491d68d3-6bc9-4383-3381-ac0e1b2e9d4d">
+      <Execution id="4cc3fe06-6bc8-4f7e-9c84-d21d4245da18" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaServiceReplayTransportTest" name="RealFrontendActionReplaysACompletedServiceCommandButRejectsADamagedSelectedParticipant(&quot;create&quot;)" />
+    </UnitTest>
+    <UnitTest name="ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(&quot;MissingAttestation&quot;)" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="de9fe3e6-56fd-aa4b-0425-d913b0866ff7">
+      <Execution id="567f76a8-f4fa-4991-a7b8-88ff549128f9" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest" name="ReplayRejectsActualProviderDamageBeyondTheSelectedCheckpointWithoutExecutingAgain(&quot;MissingAttestation&quot;)" />
+    </UnitTest>
+    <UnitTest name="UnbootedUpdatesPreserveHealthyCodeAndDataAndCannotWriteThroughAReplacedGeneration" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="cc2334cd-b8ee-1f34-e6e1-812a8f727be8">
+      <Execution id="e1f37662-3700-411f-95f9-b0aa60b9d0fd" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaInstallationPersistenceTest" name="UnbootedUpdatesPreserveHealthyCodeAndDataAndCannotWriteThroughAReplacedGeneration" />
+    </UnitTest>
+    <UnitTest name="RealFrontendActionReplaysACompletedServiceCommandButRejectsADamagedSelectedParticipant(&quot;assign&quot;)" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="0fb9b64b-dae7-268b-d4f2-db62250c99b0">
+      <Execution id="f8b5fdb5-48b3-4f6e-86ef-8b2f4219622f" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaServiceReplayTransportTest" name="RealFrontendActionReplaysACompletedServiceCommandButRejectsADamagedSelectedParticipant(&quot;assign&quot;)" />
+    </UnitTest>
+    <UnitTest name="AnActuallyConnectedApplicationCannotDeliverAnAlreadyAcceptedPacketAfterItsInvokingSessionCloses(&quot;CloseUi&quot;)" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="ea5e5c73-897c-28d2-b5d4-5cba6dc7dd78">
+      <Execution id="109b5957-0271-4990-88a3-ab5d7ad89022" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaNativeAppTransportTest" name="AnActuallyConnectedApplicationCannotDeliverAnAlreadyAcceptedPacketAfterItsInvokingSessionCloses(&quot;CloseUi&quot;)" />
+    </UnitTest>
+    <UnitTest name="ProjectAndDevelopmentImportEarlyAcknowledgementsAuthenticateTheirRealParticipants" storage="d:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\content.integrationtests\content.integrationtests.dll" id="fcf62fcb-17d1-d113-3e16-372a0347a8f0">
+      <Execution id="8e28f4f6-23b3-4c34-a0e5-15d04ffd18b3" />
+      <TestMethod codeBase="D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.IntegrationTests.Tests._NC.Meta.NCMetaReplayIntegrityTest" name="ProjectAndDevelopmentImportEarlyAcknowledgementsAuthenticateTheirRealParticipants" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="cc2334cd-b8ee-1f34-e6e1-812a8f727be8" executionId="e1f37662-3700-411f-95f9-b0aa60b9d0fd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0fb9b64b-dae7-268b-d4f2-db62250c99b0" executionId="f8b5fdb5-48b3-4f6e-86ef-8b2f4219622f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="491d68d3-6bc9-4383-3381-ac0e1b2e9d4d" executionId="4cc3fe06-6bc8-4f7e-9c84-d21d4245da18" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2c95c6b3-b792-cf65-12ec-e5c0feaeb017" executionId="d463bb0e-b038-4ba6-a2c8-e0b18686a16d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="84c2fa77-a923-5f00-f35e-42daefe45dfc" executionId="2445efd5-7c41-4df9-b9b2-2d36fc44fa9a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fd026de4-580f-a5c3-1b37-7d04ff9fedfc" executionId="cb690480-23b2-4f24-be08-14f44db3fd08" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7cf6180c-fede-8ea4-6ea1-c9617dca025e" executionId="330e228d-efab-4f11-b7fe-acf12ca41ccd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b7a9fa39-69de-9cde-b29e-f638c7490377" executionId="ec025855-386b-4392-bd03-47796540613b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ea5e5c73-897c-28d2-b5d4-5cba6dc7dd78" executionId="109b5957-0271-4990-88a3-ab5d7ad89022" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="127dd09d-cd4a-6115-6598-a3223619053c" executionId="4668bd0a-8c38-46b8-a97e-f96d4cb8f134" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0f984e66-10de-c002-92f5-c13a14b3b655" executionId="a775447f-a74b-4a16-b513-1779951c8810" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d51ea6cc-0256-036c-7717-804c0ec23945" executionId="499f9b39-3267-4e7e-99ee-15ec967b8b01" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fcf62fcb-17d1-d113-3e16-372a0347a8f0" executionId="8e28f4f6-23b3-4c34-a0e5-15d04ffd18b3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4a1084eb-4885-9f18-eec6-1eefefbeabfa" executionId="6d10d549-43ff-43af-9c77-2f211cae999a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="de9fe3e6-56fd-aa4b-0425-d913b0866ff7" executionId="567f76a8-f4fa-4991-a7b8-88ff549128f9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0e5e0d33-5671-f35f-d117-b0007a2a7a95" executionId="7296c8fc-b849-4f1f-9321-714678f2b15d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="16" executed="16" passed="0" failed="16" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 5.2.0.0: Test execution started&#xD;
+Running selected tests in D:\projects\night-city\artifacts\meta-integration\a450fb06c7c943748681f063733cb667\bin\Content.IntegrationTests\Content.IntegrationTests.dll&#xD;
+   NUnit3TestExecutor discovered 16 of 16 NUnit test cases using Current Discovery mode, Non-Explicit run&#xD;
+NUnit Adapter 5.2.0.0: Test execution complete&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="SEXMACHINE" outcome="Warning" timestamp="2026-10-24T22:03:34.8295265+03:00">
+        <Text>Data collector 'Blame' message: All tests finished running, Sequence file will not be generated.</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

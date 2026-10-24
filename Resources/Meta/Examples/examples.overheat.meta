@@ -1,0 +1,43 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+module examples.overheat;
+import meta.system;
+import meta.vehicle;
+
+link ecu: EngineController = "engine-ecu";
+var initialized: bool = false;
+var safeRequested: bool = false;
+var lastCommandMs: int = -1000;
+
+async watch ecu.telemetryChanged(state) {
+    if (!system.isFresh(state.stamp, 1000)) {
+        return;
+    }
+    if (!initialized) {
+        safeRequested = state.mode == EngineMode.Safe;
+        initialized = true;
+    }
+    if (state.temperatureC >= 110.0) {
+        safeRequested = true;
+    } else if (state.temperatureC <= 100.0) {
+        safeRequested = false;
+    }
+    let now: int = system.nowMs();
+    if (now - lastCommandMs < 500) {
+        return;
+    }
+    if (safeRequested) {
+        lastCommandMs = now;
+        let changed = await ecu.setMode(EngineMode.Safe);
+        match (changed) {
+            ok(_) => { system.log("Ограничение нагрузки подтверждено"); }
+            err(problem) => { system.log(problem.message); }
+        }
+    } else if (state.mode == EngineMode.Safe) {
+        lastCommandMs = now;
+        let changed = await ecu.setMode(EngineMode.Normal);
+        match (changed) {
+            ok(_) => { system.log("Температура снизилась"); }
+            err(problem) => { system.log(problem.message); }
+        }
+    }
+}

@@ -1,0 +1,64 @@
+{
+  "rootModule": "examples.equippedshot",
+  "responses": [
+    {
+      "member": "meta.drone.WeaponController.snapshot",
+      "value": {
+        "equipped": true,
+        "ready": true,
+        "loaded": 6,
+        "stamp": {
+          "epoch": 1,
+          "sequence": 1,
+          "tick": 60
+        }
+      },
+      "pending": false
+    },
+    {
+      "member": "meta.drone.Perception.observe",
+      "value": [
+        {
+          "reference": "contact-1",
+          "kind": "Mobile",
+          "bearingDegrees": 0.0,
+          "rangeMeters": 1.0,
+          "confidence": 1.0,
+          "stamp": {
+            "epoch": 1,
+            "sequence": 1,
+            "tick": 60
+          }
+        }
+      ],
+      "pending": false
+    },
+    {
+      "member": "meta.drone.WeaponController.fire",
+      "value": {
+        "operationId": "operation",
+        "status": "Applied",
+        "requested": 1,
+        "completed": 1,
+        "errorCode": {
+          "tag": "none"
+        },
+        "stamp": {
+          "epoch": 1,
+          "sequence": 1,
+          "tick": 60
+        }
+      },
+      "pending": true
+    }
+  ],
+  "events": [],
+  "expectedLogs": [
+    "Native shot confirmed."
+  ],
+  "expectedCommands": [
+    "snapshot()",
+    "observe()",
+    "fire(contact-1,controlled-trigger-1)"
+  ]
+}

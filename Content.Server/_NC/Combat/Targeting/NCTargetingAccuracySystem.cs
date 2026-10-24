@@ -43,7 +43,7 @@ public sealed partial class NCTargetingAccuracySystem : EntitySystem
     /// <summary>
     /// Applies the data-driven movement modifier without changing the physical trajectory.
     /// </summary>
-    public float ResolveCalledShotHitChance(float baseChance, bool shooterMoving)
+    public float ResolveCalledShotHitChance(float baseChance, bool shooterMoving, float movingPenaltyReduction = 0f)
     {
         var chance = Math.Clamp(float.IsFinite(baseChance) ? baseChance : 0f, 0f, 1f);
         if (!shooterMoving || !TryGetDefaultProfile(out var profile))
@@ -53,8 +53,13 @@ public sealed partial class NCTargetingAccuracySystem : EntitySystem
             float.IsFinite(profile.MovingHitChanceMultiplier) ? profile.MovingHitChanceMultiplier : 0f,
             0f,
             1f);
-        return chance * multiplier;
+        return chance * Content.Shared._NC.Medical.Cyberware.Abilities.NCCyberwareAbilityMath.RestoreMovingPenalty(
+            multiplier, float.IsFinite(movingPenaltyReduction) ? Math.Clamp(movingPenaltyReduction, 0f, 1f) : 0f);
     }
+
+    public float CaptureMovementPenaltyReduction(EntityUid? shooter)
+        => TryComp<Content.Shared._NC.Medical.Cyberware.Abilities.NCCyberwareAbilityBodyComponent>(shooter, out var abilities)
+            ? abilities.MovingPenaltyReduction : 0f;
 
     private bool TryGetDefaultProfile(out NCTargetingAccuracyProfilePrototype profile)
     {

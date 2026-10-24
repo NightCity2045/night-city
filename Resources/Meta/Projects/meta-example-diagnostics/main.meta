@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+module examples.diagnostics;
+import meta.system;
+import meta.text;
+import meta.vehicle;
+
+link ecu: EngineController = "engine-ecu";
+
+fn main() -> void {
+    let response = ecu.snapshot();
+    match (response) {
+        ok(state) => {
+            if (!system.isFresh(state.stamp, 2000)) {
+                system.log("Телеметрия устарела");
+                return;
+            }
+            system.log("RPM=" + text.fromInt(state.rpm));
+            if (state.coolantFraction < 0.25) {
+                system.log("Недостаточно охлаждающей жидкости");
+            }
+            if (state.oilPressureKPa < 100.0 && state.rpm > 1000) {
+                system.log("Низкое давление масла при работе");
+            }
+            for (let code in state.faults) {
+                system.log("FAULT " + code);
+            }
+        }
+        err(problem) => { system.log(problem.message); }
+    }
+}

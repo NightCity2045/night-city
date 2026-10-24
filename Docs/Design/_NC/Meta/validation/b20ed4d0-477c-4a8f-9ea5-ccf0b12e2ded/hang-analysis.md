@@ -1,0 +1,7 @@
+# Native startup timeout, 24 October 2026
+
+The full private cohort `4e81622cccc94f9cbbc3ae2103fd3888` contains all eleven META fixture classes and a compiler worker whose META core SHA matches the native runtime. Run `meta-native-private.trx` passed five receipt contract cases, then reached the 600-second inactivity deadline while creating its first gameplay pair.
+
+The saved dump and `managed-stacks.txt` place managed thread 18 in Windows file opening through `FileHelper.TryGetFileWindows`, `RsiLoading.LoadImages`, `SpriteComponent.AfterDeserialization` and client prototype initialization. The captured image is `Resources/Textures/Structures/Specific/carp_rift.rsi/icon_blue.png`. NUnit is waiting for async setup. There is no server startup or META snapshot wait on the captured stacks. A single sample does not prove a permanently blocked file or identify the cause of filesystem latency.
+
+Reusing the same immutable binary/resource image with a 1800-second external deadline completed in 2.34 minutes: five pure cases passed and 57 gameplay/database cases failed. The first failure was `Unknown prototype type: 'ncMetaHardwareProfile'` in global test prototypes. The registered type is `ncMetaHardware`. Subsequent `Pair == null` exceptions are cascading fixture failures. The two incorrect YAML types were corrected in source; a new coherent build is required before rerunning them. No gameplay acceptance is inferred from this failed run.

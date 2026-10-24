@@ -1,0 +1,16 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+    xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Content.Client._NC.Meta.UI.NCMetaDevelopmentConfirmationWindow"
+    Title="{Loc 'nc-meta-development-confirm-title'}" MinWidth="480" SetWidth="600" SetHeight="400">
+    <BoxContainer Orientation="Vertical" Margin="12" SeparationOverride="8">
+        <Label Name="Kind" />
+        <ItemList Name="Details" VerticalExpand="True" />
+        <CheckBox Name="Consent" Text="{Loc 'nc-meta-development-confirm-consent'}" />
+        <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+            <Button Name="Cancel" Text="{Loc 'nc-meta-firmware-cancel'}" HorizontalExpand="True" />
+            <Button Name="Confirm" Text="{Loc 'nc-meta-firmware-confirm'}" Disabled="True" HorizontalExpand="True" />
+        </BoxContainer>
+    </BoxContainer>
+</controls:FancyWindow>

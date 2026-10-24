@@ -1,0 +1,91 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncHumanityProfile
+  id: NCHumanityDefault
+  activeUpdateInterval: 1s
+  safeRecoveryPerSecond: 0.1
+  overloadPerSecond: 0.15
+  overburdenPerSecond: 0.01
+  vulnerabilityScale: 2
+  stableMinimumPerfusion: 0.7
+  stableMinimumOxygenation: 0.8
+  stableMaximumShock: 0.2
+  neuralTraumaThreshold: 0.35
+  stressHysteresis: 5
+  humanityHysteresis: 2
+  stabilizationSeconds: 30
+  bands:
+  - stage: Warning
+    humanityBelow: 50
+    stressAtLeast: 35
+    enhancementEfficiency: 1
+  - stage: Crisis
+    humanityBelow: 35
+    stressAtLeast: 60
+    enhancementEfficiency: 0.85
+  - stage: Acute
+    humanityBelow: 20
+    stressAtLeast: 85
+    enhancementEfficiency: 0.65
+    blocksEnhancedModes: true
+
+- type: ncHumanityStimulus
+  id: NCHumanityNeuralTrauma
+  impulse: 12
+  cooldownSeconds: 30
+
+- type: ncHumanityPackage
+  id: NCHumanityMedical
+  adaptationKey: medical-replacement
+  burden: 0
+  acuteCost: 0
+
+- type: ncHumanityPackage
+  id: NCHumanityInterface
+  adaptationKey: auxiliary-interface
+  burden: 1
+  acuteCost: 2
+
+- type: ncHumanityPackage
+  id: NCHumanitySensory
+  adaptationKey: sensory-extension
+  burden: 2
+  acuteCost: 4
+  crisisAffected: true
+
+- type: ncHumanityPackage
+  id: NCHumanityProfessionalMotor
+  adaptationKey: motor-enhancement
+  burden: 3
+  acuteCost: 6
+  crisisAffected: true
+
+- type: ncHumanityPackage
+  id: NCHumanityWeapon
+  adaptationKey: integrated-weapon
+  burden: 4
+  acuteCost: 8
+  crisisAffected: true
+
+- type: ncHumanityPackage
+  id: NCHumanityReflex
+  adaptationKey: reflex-accelerator
+  burden: 8
+  acuteCost: 12
+  crisisAffected: true
+
+- type: ncHumanityPackage
+  id: NCHumanityHeavyMotor
+  adaptationKey: motor-enhancement
+  burden: 10
+  acuteCost: 16
+  crisisAffected: true
+
+- type: ncHumanityPackage
+  id: NCHumanityFullConversion
+  adaptationKey: full-conversion
+  perAnatomicalContext: false
+  burden: 20
+  acuteCost: 25

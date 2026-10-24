@@ -42,6 +42,7 @@ public sealed class NCCyberwareIntegrationContractTest : GameTest
     [SidedDependency(Side.Server)] private NCCyberwareSystem _cyberware = default!;
     [SidedDependency(Side.Server)] private NCBodyFunctionSystem _functions = default!;
     [SidedDependency(Side.Server)] private NCMedicalPersistenceSystem _persistence = default!;
+    [SidedDependency(Side.Server)] private Content.Server._NC.Medical.Humanity.NCHumanitySystem _humanity = default!;
     [SidedDependency(Side.Server)] private NCPhysiologySchedulerSystem _scheduler = default!;
     [SidedDependency(Side.Server)] private SharedBatterySystem _battery = default!;
     [SidedDependency(Side.Server)] private ItemSlotsSystem _powerSlots = default!;
@@ -56,7 +57,7 @@ public sealed class NCCyberwareIntegrationContractTest : GameTest
     [RunOnSide(Side.Server)]
     public void CyberarmPowerLossAndServiceReachOnlyTheAffectedGrip()
     {
-        var body = CreateScene();
+        var body = CreateScene("ArmLeft");
         var arm = GetOrgan(body, "ArmLeft");
         var function = SComp<NCBodyFunctionComponent>(body);
         var initialGrip = function.LeftGrip;
@@ -81,7 +82,7 @@ public sealed class NCCyberwareIntegrationContractTest : GameTest
     [RunOnSide(Side.Server)]
     public void CyberopticsPowerLossAndServiceReachVision()
     {
-        var body = CreateScene();
+        var body = CreateScene("Eyes");
         var eyes = GetOrgan(body, "Eyes");
         var function = SComp<NCBodyFunctionComponent>(body);
         var initialVision = function.Vision;
@@ -97,7 +98,7 @@ public sealed class NCCyberwareIntegrationContractTest : GameTest
     [RunOnSide(Side.Server)]
     public void ReportCyberheartPowerLossIntegration()
     {
-        var body = CreateScene();
+        var body = CreateScene("Heart");
         var heart = GetOrgan(body, "Heart");
         Assert.That(_scheduler.ProcessNow(body, TimeSpan.Zero), Is.True);
         var initialOutput = SComp<NCCirculationComponent>(body).CardiacOutput;
@@ -153,7 +154,7 @@ public sealed class NCCyberwareIntegrationContractTest : GameTest
         const int measuredIterations = 100;
         var body = CreateScene();
         var modules = _cyberware.CollectCyberware(body).ToArray();
-        Assert.That(modules, Has.Length.EqualTo(3));
+        Assert.That(modules, Has.Length.EqualTo(4));
         for (var i = 0; i < warmupIterations; i++)
             Assert.That(AdvanceScene(body, modules), Is.True);
 
@@ -172,7 +173,7 @@ public sealed class NCCyberwareIntegrationContractTest : GameTest
             Assert.That(advanced, Is.True);
             Assert.That(modules.All(module => SComp<NCCyberwareComponent>(module).Operational), Is.True);
             Assert.That(SComp<NCPhysiologyComponent>(body).Condition, Is.EqualTo(NCPhysiologicalCondition.Stable));
-            Assert.That(_cyberware.CollectCyberware(body), Has.Count.EqualTo(3));
+            Assert.That(_cyberware.CollectCyberware(body), Has.Count.EqualTo(4));
         });
         Report("explicit-medical-boundaries", new
         {
@@ -193,7 +194,7 @@ public sealed class NCCyberwareIntegrationContractTest : GameTest
         });
     }
 
-    private EntityUid CreateScene()
+    private EntityUid CreateScene(ProtoId<OrganCategoryPrototype>? replacement = null)
     {
         // Restore supplies a reproducible starting graph, not a shortcut for a player's surgical procedure.
         // Existing cyberware tests use the same semantic restore boundary for anatomical replacements.
@@ -201,10 +202,23 @@ public sealed class NCCyberwareIntegrationContractTest : GameTest
         NCCyberwareTestPower.Install(SEntMan, _cyberware, _powerSlots, _battery, template);
         var snapshot = _persistence.SerializeMedicalState(template);
         Assert.That(snapshot, Is.Not.Null);
-        ReplaceOrgan(snapshot!, "ArmLeft", "NCOrganHumanCyberArmLeft", "NCIndustrialCyberArm");
-        ReplaceOrgan(snapshot!, "Eyes", "NCOrganHumanCyberEyes", "NCCyberopticsMk1");
-        ReplaceOrgan(snapshot!, "Heart", "NCOrganHumanCyberHeart", "NCCyberheartMk1");
+        // The replacements below deliberately construct the pre-exterior/service fixture format.
+        snapshot!.Version = NCMedicalSnapshotVersions.CyberwareAbilities;
+        if (replacement == null || replacement.Value.Id == "ArmLeft")
+            ReplaceOrgan(snapshot!, "ArmLeft", "NCOrganHumanCyberArmLeft", "NCIndustrialCyberArm");
+        if (replacement == null || replacement.Value.Id == "Eyes")
+            ReplaceOrgan(snapshot!, "Eyes", "NCOrganHumanCyberEyes", "NCCyberopticsMk1");
+        if (replacement == null || replacement.Value.Id == "Heart")
+            ReplaceOrgan(snapshot!, "Heart", "NCOrganHumanCyberHeart", "NCCyberheartMk1");
+        foreach (var module in snapshot.CyberwareModules)
+        {
+            module.Exterior = null;
+            module.Service = null;
+        }
+        // The fixture replaces its template; retaining it would duplicate the bus and cell serials.
+        SEntMan.DeleteEntity(template);
         var body = SSpawn(HumanMob);
+        Assert.That(_humanity.TryPrepareLegacyState(body, snapshot!), Is.True);
         Assert.That(_persistence.RestoreMedicalState(body, snapshot!), Is.True);
         Assert.That(_scheduler.ProcessNow(body, TimeSpan.Zero), Is.True);
         return body;

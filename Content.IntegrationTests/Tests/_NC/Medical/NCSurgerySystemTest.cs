@@ -529,8 +529,9 @@ public sealed class NCSurgerySystemTest : GameTest
             Assert.That(result.Accepted, Is.True);
             Assert.That(installed.InstalledSlot?.Id, Is.EqualTo("NCSlotNeuralCore"));
             Assert.That(SComp<ChildOrganComponent>(implant).Parent, Is.EqualTo(head));
-            Assert.That(installed.Calibrated, Is.True);
-            Assert.That(installed.NeuralState, Is.EqualTo(NCCyberwareNeuralState.Linked));
+            Assert.That(installed.Calibrated, Is.False);
+            Assert.That(result.Failure, Is.EqualTo(NCFreeformSurgeryFailure.CyberwareCalibrationRequired));
+            Assert.That(installed.NeuralState, Is.EqualTo(NCCyberwareNeuralState.Disconnected));
             Assert.That(SEntMan.HasComponent<NCSurgeryGameplaySelectionComponent>(surgeon), Is.False);
         });
 
@@ -1164,8 +1165,8 @@ public sealed class NCSurgerySystemTest : GameTest
         {
             Assert.That(installed.InstalledSlot?.Id, Is.EqualTo("NCSlotNeuralCore"));
             Assert.That(SComp<ChildOrganComponent>(module).Parent, Is.EqualTo(head));
-            Assert.That(installed.Calibrated, Is.True);
-            Assert.That(installed.NeuralState, Is.EqualTo(NCCyberwareNeuralState.Linked));
+            Assert.That(installed.Calibrated, Is.False);
+            Assert.That(installed.NeuralState, Is.EqualTo(NCCyberwareNeuralState.Disconnected));
         });
 
         Assert.That(_surgery.StartSurgery(
@@ -1200,7 +1201,7 @@ public sealed class NCSurgerySystemTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
-    public void MechanicalReplacementIsACompatibleCalibratedLiveGraft()
+    public void MechanicalReplacementIsACompatibleLiveGraftAwaitingItsSeparateTest()
     {
         var patient = SSpawn(HumanMob);
         var surgeon = SSpawn(HumanMob);
@@ -1270,9 +1271,9 @@ public sealed class NCSurgerySystemTest : GameTest
             Assert.That(SComp<OrganComponent>(replacement).Body, Is.EqualTo(patient));
             Assert.That(SComp<ChildOrganComponent>(replacement).Parent, Is.EqualTo(torso));
             Assert.That(SEntMan.HasComponent<NCDetachedOrganMedicalDataComponent>(replacement), Is.False);
-            Assert.That(cyberware.Calibrated, Is.True);
-            Assert.That(cyberware.NeuralState, Is.EqualTo(NCCyberwareNeuralState.Linked));
-            Assert.That(cyberware.Operational, Is.True);
+            Assert.That(cyberware.Calibrated, Is.False);
+            Assert.That(cyberware.NeuralState, Is.EqualTo(NCCyberwareNeuralState.Disconnected));
+            Assert.That(cyberware.Operational, Is.False);
         });
     }
 

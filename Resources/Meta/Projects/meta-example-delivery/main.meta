@@ -1,0 +1,52 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+module examples.delivery;
+import meta.drone;
+import meta.system;
+link camera: drone.Perception = "cargo-drone-camera";
+link gripper: drone.Manipulator = "cargo-drone-gripper";
+link navigation: drone.DroneController = "cargo-drone-navigation";
+var activeRequest: int = 0;
+
+async fn main() -> void {
+    match(camera.observe()) {
+        ok(contacts) => {
+            for(let contact in contacts) {
+                if(contact.kind == drone.ContactKind.Item) {
+                    match(await gripper.pickUp(contact.reference, "delivery-pickup-1")) {
+                        ok(receipt) => {
+                            if(receipt.status != system.OperationStatus.Applied) { system.log("Pickup requires reconciliation."); return; }
+                            system.log("Cargo acquired.");
+                            match(navigation.resolveWaypoint("loading")) {
+                                ok(point) => {
+                                    match(await navigation.setDestination(point)) {
+                                        ok(route) => { activeRequest = route.requestId; }
+                                        err(error) => { system.log("Route rejected; cargo remains physical."); }
+                                    }
+                                }
+                                err(error) => { system.log("Commission the loading waypoint first."); }
+                            }
+                        }
+                        err(error) => { system.log("Pickup rejected."); }
+                    }
+                    return;
+                }
+            }
+        }
+        err(error) => { system.log("Camera unavailable."); }
+    }
+}
+async watch navigation.navigationFinished(event) {
+    if(event.requestId != activeRequest || event.status != drone.NavigationStatus.Arrived) { return; }
+    match(navigation.resolveWaypoint("loading")) {
+        ok(point) => {
+            match(await gripper.dropAt(point, "delivery-drop-1")) {
+                ok(receipt) => {
+                    if(receipt.status == system.OperationStatus.Applied) { system.log("Delivery applied."); }
+                    else { system.log("Drop requires reconciliation."); }
+                }
+                err(error) => { system.log("Drop rejected; inspect the real gripper."); }
+            }
+        }
+        err(error) => { system.log("Waypoint authority changed."); }
+    }
+}

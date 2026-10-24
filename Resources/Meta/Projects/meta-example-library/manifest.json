@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "id": "meta-example-library",
+  "name": "Reusable smoothing library",
+  "nameRu": "Библиотека сглаживания",
+  "packageName": "examples.libraryuse",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.libraryuse",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.libraryuse.meta",
+      "sha256": "7fefb6ed088ddea1620ba1886fd26a45ba591ff11e71da93be094461111e580a"
+    },
+    {
+      "path": "filters.meta",
+      "sourcePath": "Resources/Meta/Examples/maker.filters.meta",
+      "sha256": "5ff3f1b9dff510accfd89459aee4e1e73c672c4d5792db16f227fd472be902a5"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [],
+  "testFixture": "meta.test.json"
+}

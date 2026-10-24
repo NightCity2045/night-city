@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "id": "meta-physical-door",
+  "maximumSeconds": 600,
+  "environment": {
+    "start": true,
+    "clients": 0,
+    "graphics": false
+  },
+  "steps": [
+    {
+      "id": "session",
+      "command": "session_get"
+    },
+    {
+      "id": "scene",
+      "command": "meta_demo_create",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "scene": "NCMetaDoorScene"
+      }
+    },
+    {
+      "id": "noImplicitOwnership",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/scene/data/ownershipGranted"
+        },
+        "equals": false
+      }
+    },
+    {
+      "id": "nativePower",
+      "command": "condition_wait",
+      "arguments": {
+        "command": "meta_demo_status",
+        "arguments": {
+          "serverInstanceId": {
+            "$ref": "/steps/session/serverInstanceId"
+          },
+          "worldGeneration": {
+            "$ref": "/steps/session/worldGeneration"
+          },
+          "fixtureId": {
+            "$ref": "/steps/scene/data/fixtureId"
+          }
+        },
+        "path": "/data/hostPowered",
+        "equals": true,
+        "timeoutSeconds": 30,
+        "intervalMilliseconds": 200,
+        "minimumStableMilliseconds": 500
+      }
+    },
+    {
+      "id": "physicalRoutes",
+      "command": "condition_wait",
+      "arguments": {
+        "command": "meta_demo_status",
+        "arguments": {
+          "serverInstanceId": {
+            "$ref": "/steps/session/serverInstanceId"
+          },
+          "worldGeneration": {
+            "$ref": "/steps/session/worldGeneration"
+          },
+          "fixtureId": {
+            "$ref": "/steps/scene/data/fixtureId"
+          }
+        },
+        "path": "/data/routesReady",
+        "equals": true,
+        "timeoutSeconds": 30,
+        "intervalMilliseconds": 200,
+        "minimumStableMilliseconds": 500
+      }
+    },
+    {
+      "id": "inspect",
+      "command": "meta_demo_status",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "fixtureId": {
+          "$ref": "/steps/scene/data/fixtureId"
+        }
+      }
+    },
+    {
+      "id": "noImplicitMission",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/inspect/data/commissionedWaypoints"
+        },
+        "equals": 0
+      }
+    },
+    {
+      "id": "destroy",
+      "command": "meta_demo_destroy",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "fixtureId": {
+          "$ref": "/steps/scene/data/fixtureId"
+        }
+      }
+    }
+  ]
+}
+

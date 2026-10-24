@@ -1,0 +1,23 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsTestProject>true</IsTestProject>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <DefineConstants>$(DefineConstants);TOOLS;NC_DIAGNOSTICS</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit3TestAdapter" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" />
+    <Compile Include="../../../../Content.Server/Database/_NC/Meta/NCMetaSqliteSeedPackage.cs" Link="NCMetaSqliteSeedPackage.cs" />
+    <Compile Include="../../../../Content.Tests/_NC/Meta/NCMetaSqliteSeedPackageTests.cs" Link="NCMetaSqliteSeedPackageTests.cs" />
+    <Compile Include="../SqliteSeed/SqliteSeedArtifact.cs" Link="SqliteSeedArtifact.cs" />
+    <Compile Include="../SqliteSeed/SqliteSeedCommands.cs" Link="SqliteSeedCommands.cs" />
+  </ItemGroup>
+</Project>

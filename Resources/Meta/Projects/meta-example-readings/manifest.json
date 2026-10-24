@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "id": "meta-example-readings",
+  "name": "Typed readings",
+  "nameRu": "Типизированные показания",
+  "packageName": "examples.readings",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.readings",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.readings.meta",
+      "sha256": "ccc491ee242db860b9426e662284cb1f600639798812c8f8e62098e03c816fd1"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [],
+  "testFixture": "meta.test.json"
+}

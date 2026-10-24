@@ -1,0 +1,63 @@
+{
+  "version": "1.0",
+  "id": "meta-tutorial-installation",
+  "name": "5. Install and recover",
+  "nameRu": "5. Установка и восстановление",
+  "packageName": "nc.training.installation",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "training.main",
+  "files": [
+    {
+      "path": "app.json",
+      "sourcePath": "Resources/Meta/Projects/meta-tutorial-installation/app.json",
+      "sha256": "ab186f1c925504ac80877cce1eb193702e29be64576cd96a81d7b8c7b661312c"
+    },
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Projects/meta-tutorial-installation/main.meta",
+      "sha256": "c61b3d95c15983bcc356b9cff4d024820a95f1219217bc0b252fad814bf810f3"
+    },
+    {
+      "path": "README.md",
+      "sourcePath": "Resources/Meta/Projects/meta-tutorial-installation/README.md",
+      "sha256": "254e055fa89f08b9009795eb9428f5454ff337972e911103c718f26127c9560b"
+    },
+    {
+      "path": "ui/main.mui",
+      "sourcePath": "Resources/Meta/Projects/meta-tutorial-installation/ui/main.mui",
+      "sha256": "2c61368aa13f15f9509a54cb51b06f7bb686210fd323160e7fb4646bd3776a2b"
+    }
+  ],
+  "startMode": "OnPower",
+  "bindings": [
+    {
+      "slot": "training-sensor",
+      "capability": "meta.sensors.TemperatureSensor",
+      "contractHash": "707ebecbeccad33b9d890091ff373d8960cc9ad6d238a62655a0b90339b9e24d",
+      "requiredScopes": [
+        "sensor.temperature.observe"
+      ]
+    },
+    {
+      "slot": "training-alarm",
+      "capability": "meta.security.Alarm",
+      "contractHash": "2e3bac335044a980267ee3621e14b6e8463eee235420f85887a5ddf2b22aae7f",
+      "requiredScopes": [
+        "alarm.control"
+      ]
+    },
+    {
+      "slot": "training-data",
+      "capability": "meta.files.FileStore",
+      "contractHash": "c7634c1859d74a9212400dd06f15286fe1c7bb80a1105e39adc191638a724fd9",
+      "requiredScopes": [
+        "files.write"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json",
+  "stateSchemaVersion": 1
+}

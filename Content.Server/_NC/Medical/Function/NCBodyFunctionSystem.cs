@@ -393,7 +393,7 @@ public sealed partial class NCBodyFunctionSystem : EntitySystem
     private float EvaluateIntegrity(EntityUid organ)
     {
         var cyberwareFunction = TryComp<NCCyberwareComponent>(organ, out var cyberware)
-            ? ClampUnit(cyberware.FunctionalEfficiency)
+            ? ClampUnit(cyberware.FunctionalEfficiency * cyberware.CrisisEfficiency)
             : 1f;
         if (!TryComp<NCOrganIntegrityComponent>(organ, out var integrity) || integrity.MaxIntegrity <= 0f)
             return cyberwareFunction;

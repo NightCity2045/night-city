@@ -32,6 +32,15 @@ public sealed partial class NCCyberwareSystem
         if (TryResolveOwningBody(bus, out var body))
         {
             target = body;
+            // A replacement organ may itself be the physical holder; no fictitious implant-slot edge is needed.
+            if (TryComp<NCCyberwareComponent>(bus, out var direct) && direct.InstalledSlot == null &&
+                TryComp<NCSurgicalSiteComponent>(bus, out var ownSite))
+            {
+                return ownSite.BoneCasingOpen && ownSite.TissuesRetracted &&
+                       ownSite.AccessDepth is NCSurgicalAccessDepth.OrganExposed or NCSurgicalAccessDepth.ProcedureInProgress &&
+                       _assemblyBlocker.CanInteract(user, body) &&
+                       _assemblyInteraction.InRangeUnobstructed(user, body, 2f);
+            }
             if (!TryComp<ChildOrganComponent>(bus, out var child) || child.Parent is not { } host ||
                 !TryComp<NCSurgicalSiteComponent>(host, out var site) ||
                 !TryComp<NCCyberwareComponent>(bus, out var module) || module.InstalledSlot is not { } slot ||

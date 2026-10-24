@@ -1,0 +1,111 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncMetaHardware
+  id: NCMetaEmbedded
+  gasPerWindow: 50000
+  idleWatts: 1
+  activeWatts: 4
+  memoryBytes: 262144
+  storageBytes: 1048576
+  maxProcesses: 1
+  cpuWeight: 1
+  interfaces: [meta.doors.Door, meta.doors.DoorPanel, meta.files.FileStore, meta.sensors.TemperatureSensor, meta.security.Camera, meta.security.Alarm]
+
+- type: ncMetaHardware
+  id: NCMetaComputer
+  gasPerWindow: 200000
+  idleWatts: 40
+  activeWatts: 100
+  interfaces: [meta.files.FileStore, meta.net.MessagePort, meta.doors.Door, meta.doors.DoorPanel, meta.sensors.TemperatureSensor, meta.security.Camera, meta.security.Alarm, meta.vehicle.EngineController, meta.vehicle.TransmissionController, meta.vehicle.VehicleDashboard, meta.vehicle.DriverAssistance, meta.vehicle.VehicleSecurity, meta.industrial.Conveyor, meta.industrial.LoadSensor, meta.industrial.Fabricator, meta.lab.Grinder, meta.lab.ChemMaster, meta.services.ServiceOrders, meta.implants.FunctionalController, meta.drone.DroneController, meta.drone.NavigationSupervisor, meta.drone.Perception, meta.drone.Manipulator, meta.drone.WeaponController]
+  memoryBytes: 8388608
+  storageBytes: 67108864
+  maxProcesses: 8
+  cpuWeight: 8
+
+- type: ncMetaHardware
+  id: NCMetaIndustrial
+  gasPerWindow: 150000
+  idleWatts: 20
+  activeWatts: 60
+  memoryBytes: 4194304
+  storageBytes: 33554432
+  maxProcesses: 4
+  cpuWeight: 4
+  interfaces: [meta.industrial.Conveyor, meta.industrial.LoadSensor, meta.industrial.Fabricator, meta.lab.Grinder, meta.lab.ChemMaster, meta.files.FileStore]
+
+- type: ncMetaHardware
+  id: NCMetaServer
+  gasPerWindow: 500000
+  idleWatts: 100
+  activeWatts: 400
+  interfaces: [meta.files.FileStore, meta.net.MessagePort, meta.doors.Door, meta.doors.DoorPanel, meta.sensors.TemperatureSensor, meta.security.Camera, meta.security.Alarm, meta.vehicle.EngineController, meta.vehicle.TransmissionController, meta.vehicle.VehicleDashboard, meta.vehicle.DriverAssistance, meta.vehicle.VehicleSecurity, meta.industrial.Conveyor, meta.industrial.LoadSensor, meta.industrial.Fabricator, meta.lab.Grinder, meta.lab.ChemMaster, meta.services.ServiceOrders, meta.implants.FunctionalController, meta.drone.DroneController, meta.drone.NavigationSupervisor, meta.drone.Perception, meta.drone.Manipulator, meta.drone.WeaponController]
+  memoryBytes: 16777216
+  storageBytes: 268435456
+  maxProcesses: 16
+  cpuWeight: 16
+
+- type: ncMetaHardware
+  id: NCMetaCyberdeck
+  gasPerWindow: 200000
+  idleWatts: 2
+  activeWatts: 10
+  memoryBytes: 4194304
+  storageBytes: 33554432
+  maxProcesses: 4
+  cpuWeight: 6
+  interfaces: [meta.netrun.NetSession, meta.net.MessagePort, meta.files.FileStore]
+
+- type: ncMetaHardware
+  id: NCMetaMobile
+  gasPerWindow: 75000
+  idleWatts: 1
+  activeWatts: 4
+  interfaces: [meta.files.FileStore, meta.net.MessagePort]
+  memoryBytes: 2097152
+  storageBytes: 16777216
+  maxProcesses: 4
+  cpuWeight: 2
+
+- type: ncMetaHardware
+  id: NCMetaAgent
+  gasPerWindow: 75000
+  idleWatts: 1
+  activeWatts: 4
+  interfaces: [meta.files.FileStore, meta.net.MessagePort]
+  memoryBytes: 2097152
+  storageBytes: 16777216
+  maxProcesses: 4
+  cpuWeight: 2
+
+- type: ncMetaHardware
+  id: NCMetaVehicle
+  gasPerWindow: 75000
+  idleWatts: 2
+  activeWatts: 8
+  memoryBytes: 524288
+  storageBytes: 4194304
+  maxProcesses: 2
+  cpuWeight: 2
+  interfaces: [meta.vehicle.EngineController, meta.vehicle.TransmissionController, meta.vehicle.VehicleDashboard, meta.vehicle.DriverAssistance, meta.vehicle.VehicleSecurity, meta.files.FileStore]
+
+- type: ncMetaHardware
+  id: NCMetaDrone
+  gasPerWindow: 100000
+  idleWatts: 2
+  activeWatts: 8
+  memoryBytes: 1048576
+  storageBytes: 8388608
+  maxProcesses: 2
+  cpuWeight: 3
+  interfaces: [meta.drone.DroneController, meta.drone.NavigationSupervisor, meta.files.FileStore, meta.drone.Perception, meta.drone.Manipulator, meta.drone.WeaponController]
+
+- type: ncMetaHardware
+  id: NCMetaImplant
+  gasPerWindow: 25000
+  idleWatts: 0
+  activeWatts: 1
+  memoryBytes: 131072
+  storageBytes: 1048576
+  maxProcesses: 1
+  cpuWeight: 1
+  interfaces: [meta.implants.Optics, meta.implants.FunctionalController]

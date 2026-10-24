@@ -1,0 +1,101 @@
+{
+  "responses": [
+    {
+      "member": "meta.implants.FunctionalController.snapshot",
+      "value": {
+        "operational": true,
+        "stamp": {
+          "epoch": 1,
+          "tick": 60,
+          "sequence": 1
+        },
+        "activeRemainingMs": 0,
+        "active": false,
+        "cooldownMs": 0,
+        "kind": "Tool"
+      }
+    },
+    {
+      "pending": true,
+      "value": {
+        "operational": true,
+        "stamp": {
+          "epoch": 1,
+          "tick": 60,
+          "sequence": 2
+        },
+        "activeRemainingMs": 0,
+        "active": true,
+        "cooldownMs": 0,
+        "kind": "Tool"
+      },
+      "member": "meta.implants.FunctionalController.setEnabled"
+    },
+    {
+      "pending": true,
+      "value": {
+        "operational": true,
+        "stamp": {
+          "epoch": 1,
+          "tick": 60,
+          "sequence": 2
+        },
+        "activeRemainingMs": 0,
+        "active": true,
+        "cooldownMs": 0,
+        "kind": "Tool"
+      },
+      "member": "meta.implants.FunctionalController.setEnabled"
+    }
+  ],
+  "expectedCommands": [
+    "snapshot()",
+    "setEnabled(true)",
+    "setEnabled(true)"
+  ],
+  "events": [
+    {
+      "sequence": 1,
+      "arguments": [
+        {
+          "operational": true,
+          "stamp": {
+            "epoch": 1,
+            "tick": 60,
+            "sequence": 2
+          },
+          "activeRemainingMs": 0,
+          "active": true,
+          "cooldownMs": 0,
+          "kind": "Tool"
+        }
+      ],
+      "slot": "function",
+      "event": "stateChanged"
+    },
+    {
+      "sequence": 2,
+      "arguments": [
+        {
+          "operational": true,
+          "stamp": {
+            "epoch": 1,
+            "tick": 60,
+            "sequence": 1
+          },
+          "activeRemainingMs": 0,
+          "active": false,
+          "cooldownMs": 0,
+          "kind": "Tool"
+        }
+      ],
+      "slot": "function",
+      "event": "stateChanged"
+    }
+  ],
+  "rootModule": "examples.functions",
+  "expectedLogs": [
+    "Native mode requested.",
+    "Native mode inactive."
+  ]
+}

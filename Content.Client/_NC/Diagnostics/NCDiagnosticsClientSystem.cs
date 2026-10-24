@@ -68,7 +68,7 @@ public sealed partial class NCDiagnosticsClientSystem : EntitySystem
         "session_get", "capabilities_get", "client_inspect", "entity_inspect", "entity_snapshot", "replication_inspect",
         "ui_inspect", "logs_read", "metrics_capture", "client_capture", "capture_get", "request_status",
         "capture_discard",
-        "replication_watch", "replication_unwatch",
+        "replication_watch", "replication_unwatch", "meta_app_frontend_list", "meta_app_frontend_read",
     ];
 
     public override void Initialize()
@@ -104,6 +104,7 @@ public sealed partial class NCDiagnosticsClientSystem : EntitySystem
         _frame++;
         if (_timing.LastRealTick.Value < _lastRealTick)
         {
+            ResetGuiDiagnostics();
             ReleaseAllInput();
             _pump.ResetWorld();
             _controls.Clear();
@@ -113,8 +114,9 @@ public sealed partial class NCDiagnosticsClientSystem : EntitySystem
         }
         _lastRealTick = _timing.LastRealTick.Value;
         ReleaseExpiredInput();
+        UpdateGuiDiagnostics();
         if (_pump.QueueLength != 0)
-            _pump.Process(_timing.CurTick.Value, DispatchLogged, command => command is "client_input" or "ui_interact");
+            _pump.Process(_timing.CurTick.Value, DispatchLogged, IsClientMutation);
     }
 
     public override void Shutdown()
@@ -122,6 +124,7 @@ public sealed partial class NCDiagnosticsClientSystem : EntitySystem
         _enabled = false;
         _gameStates.GameStateApplied -= OnGameStateApplied;
         ReleaseAllInput();
+        ResetGuiDiagnostics(shuttingDown: true);
         _shutdown.Cancel();
         _pump.Stop();
         if (_logHandler != null)
@@ -173,7 +176,10 @@ public sealed partial class NCDiagnosticsClientSystem : EntitySystem
     private void PumpOnMainThread()
     {
         if (_enabled)
-            _pump.Process(_timing.CurTick.Value, DispatchLogged, command => command is "client_input" or "ui_interact");
+        {
+            UpdateGuiDiagnostics();
+            _pump.Process(_timing.CurTick.Value, DispatchLogged, IsClientMutation);
+        }
         Interlocked.Exchange(ref _dispatchScheduled, 0);
         if (_enabled && _pump.QueueLength != 0)
             SchedulePump();
@@ -194,6 +200,8 @@ public sealed partial class NCDiagnosticsClientSystem : EntitySystem
         catch (OperationCanceledException) { }
     }
 
+    private static bool IsClientMutation(string command) => command is "client_input" or "ui_interact" or "meta_app_frontend_capture" or "meta_app_frontend_action" or "meta_app_frontend_stop";
+
     private JsonNode? Dispatch(DiagnosticRequest request) => request.Command switch
     {
         "session_get" or "capabilities_get" or "client_inspect" => SessionInfo(),
@@ -202,6 +210,8 @@ public sealed partial class NCDiagnosticsClientSystem : EntitySystem
         "replication_watch" => WatchReplication(request.Arguments),
         "replication_unwatch" => UnwatchReplication(request.Arguments),
         "ui_inspect" => InspectUi(request.Arguments),
+        "meta_app_frontend_list" or "meta_app_frontend_read" => InspectMetaApps(request.Arguments),
+        "meta_app_frontend_capture" or "meta_app_frontend_action" or "meta_app_frontend_stop" => MutateMetaApp(request.Command, request.Arguments),
         "ui_interact" => InteractUi(request.Arguments),
         "client_input" => ExecuteInput(request.Arguments),
         "client_capture" => StartCapture(request.Arguments),
@@ -233,8 +243,11 @@ public sealed partial class NCDiagnosticsClientSystem : EntitySystem
         ["lastProcessedTick"] = _timing.LastProcessedTick.Value, ["frame"] = _frame,
         ["graphics"] = _graphics, ["input"] = _canInput, ["uiPointerInput"] = _canInput && _graphics,
         ["localEntity"] = _players.LocalEntity is { } uid ? GetNetEntity(uid).ToString() : null,
+        ["editorInputHandler"] = _canInput && _graphics, ["osImeCandidateCoverage"] = false,
+        ["clipboardTestLease"] = _canInput && _graphics, ["nativeWindowResize"] = _canInput && _graphics,
+        ["uiActions"] = new JsonArray("click", "set_text", "submit", "focus", "editor_input", "clipboard", "client_size", "own_window_size"),
         ["userId"] = _players.LocalSession?.UserId.ToString(),
-        ["commands"] = JsonSerializer.SerializeToNode(ReadCommands.Concat(_canInput ? new[] { "client_input", "ui_interact" } : [])),
+        ["commands"] = JsonSerializer.SerializeToNode(ReadCommands.Concat(_canInput ? new[] { "client_input", "ui_interact", "meta_app_frontend_capture", "meta_app_frontend_action", "meta_app_frontend_stop" } : [])),
         ["replicationCoverage"] = "last-applied-tick-and-current-client-projection",
         ["predictionHistory"] = false,
         ["authoritativeHistoryAdapters"] = new JsonArray("Door"),

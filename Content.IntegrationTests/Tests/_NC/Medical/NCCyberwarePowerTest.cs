@@ -6,6 +6,7 @@ using System.Linq;
 using System.Numerics;
 using Content.IntegrationTests.Fixtures;
 using Content.IntegrationTests.Fixtures.Attributes;
+using Content.Server._NC.Medical.Anatomy.Detachment;
 using Content.Server._NC.Medical.Cyberware;
 using Content.Server._NC.Medical.Persistence;
 using Content.Server._NC.Medical.Physiology;
@@ -43,6 +44,7 @@ public sealed class NCCyberwarePowerTest : GameTest
     [SidedDependency(Side.Server)] private SharedMapSystem _maps = default!;
     [SidedDependency(Side.Server)] private SharedEmpSystem _emp = default!;
     [SidedDependency(Side.Server)] private NCPhysiologySchedulerSystem _scheduler = default!;
+    [SidedDependency(Side.Server)] private NCOrganDetachmentSystem _detachment = default!;
 
     public override PoolSettings PoolSettings => new() { Connected = false };
 
@@ -184,27 +186,28 @@ public sealed class NCCyberwarePowerTest : GameTest
 
     [Test]
     [RunOnSide(Side.Server)]
-    public void PowerLossReachesRealCardiacOutputWithoutAffectingAnOrganicHeart()
+    public void PowerLossAndRestorationReachRealCardiacOutputWithoutAffectingAnOrganicHeart()
     {
         var (body, _, cell, _) = CreateScene();
         _battery.SetCharge(cell, 0f);
         _scheduler.ProcessNow(body, TimeSpan.Zero);
         Assert.That(SComp<NCCirculationComponent>(body).CardiacOutput, Is.GreaterThan(0f));
-        var snapshot = _persistence.SerializeMedicalState(body)!;
-        var heart = snapshot.Organs["Heart"];
-        heart.EntityPrototype = "NCOrganHumanCyberHeart";
-        heart.CyberwareIdentity = heart.EntityPrototype;
-        heart.Integrity!.MaxIntegrity = heart.Integrity.CurrentIntegrity = 110f;
-        heart.Integrity.Material = NCAnatomicalMaterialKind.Mechanical;
-        heart.Cyberware = new NCCyberwareStateSnapshot
-        {
-            EntityPrototype = heart.EntityPrototype, Profile = "NCCyberheartMk1", StableInstanceId = Guid.NewGuid(),
-            MaximumIntegrity = 110f, CurrentIntegrity = 110f, NeuralIntegrity = 1f,
-            NeuralState = NCCyberwareNeuralState.NotApplicable, Calibrated = true,
-        };
-        Assert.That(_persistence.RestoreMedicalState(body, snapshot), Is.True);
+        Assert.That(_detachment.TryDetachOrgan(body, "Heart", out _), Is.True);
+        var cyberheart = SEntMan.SpawnEntity("NCOrganHumanCyberHeart", SComp<TransformComponent>(body).Coordinates);
+        Assert.That(_detachment.TryAttachOrgan(body, "Thorax", cyberheart), Is.True);
         _scheduler.ProcessNow(body, TimeSpan.Zero);
         Assert.That(SComp<NCCirculationComponent>(body).CardiacOutput, Is.Zero.Within(0.001f));
+        var holder = _cyberware.CollectCyberware(body).Single(uid => SEntMan.HasComponent<NCCyberwarePowerBusComponent>(uid));
+        Assert.That(_cells.TryGetBatteryFromSlot(holder, out var restoredCell), Is.True);
+        var heartUid = Organ(body, "Heart");
+        var identity = SComp<NCCyberwareComponent>(heartUid).StableInstanceId;
+        _battery.SetCharge(restoredCell!.Value.AsNullable(), 100f);
+        _cyberware.ResetPowerClock(body);
+        _scheduler.ProcessNow(body, TimeSpan.Zero);
+        Assert.That(SComp<NCCirculationComponent>(body).CardiacOutput, Is.GreaterThan(0f));
+        Assert.That(SComp<NCCyberwareComponent>(heartUid).StableInstanceId, Is.EqualTo(identity));
+        Assert.That(_cyberware.TryAdvanceBodyPower(body, SGameTiming.CurTime + TimeSpan.FromSeconds(1)), Is.True);
+        Assert.That(_battery.GetCharge(restoredCell.Value.AsNullable()), Is.LessThan(100f).And.GreaterThan(0f));
     }
 
     [Test]
@@ -216,6 +219,12 @@ public sealed class NCCyberwarePowerTest : GameTest
         Install(body, "NCImplantNeuralLinkMk1", "Head", "NCSlotNeuralCore");
         var legacy = _persistence.SerializeMedicalState(body)!;
         legacy.Version = NCMedicalSnapshotVersions.ModularCyberware;
+        legacy.Humanity = null;
+        foreach (var module in legacy.CyberwareModules)
+        {
+            module.Exterior = null;
+            module.Service = null;
+        }
         legacy.CyberwareModules.Single().CurrentPower = 1234f;
         Assert.That(_persistence.TryMigrateSnapshot(legacy, out var first), Is.True);
         Assert.That(_persistence.TryMigrateSnapshot(legacy, out var repeated), Is.True);

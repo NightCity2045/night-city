@@ -1,0 +1,48 @@
+{
+  "version": "1.0",
+  "id": "meta-stock-device-control",
+  "name": "Owned door control",
+  "nameRu": "Управление своей дверью",
+  "packageName": "nc.stock.device-control",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "stock.control",
+  "files": [
+    {
+      "path": "app.json",
+      "sourcePath": "Resources/Meta/Projects/meta-stock-device-control/app.json",
+      "sha256": "96f6cdd2719a9422ed8106a77d902096bee3cf51b1c7dd2f1afa57c6d2c454be"
+    },
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Projects/meta-stock-device-control/main.meta",
+      "sha256": "e882f8afd67cfba3b87fd8935e463aa949164fae3071bbcf40f217263663f308"
+    },
+    {
+      "path": "README.md",
+      "sourcePath": "Resources/Meta/Projects/meta-stock-device-control/README.md",
+      "sha256": "494795a7fe213ddae788577e3ac1bd32d15077ca5e933be98012078fa5dcb33b"
+    },
+    {
+      "path": "ui/main.mui",
+      "sourcePath": "Resources/Meta/Projects/meta-stock-device-control/ui/main.mui",
+      "sha256": "647af9d59211f6c2e0a39d1450e14f0bb578bbfd8c46fe73062bf26ded6db758"
+    }
+  ],
+  "startMode": "OnPower",
+  "bindings": [
+    {
+      "slot": "owned-door",
+      "capability": "meta.doors.Door",
+      "contractHash": "eb9affb74c5a05fcd584eeb2f21d6c941ff51f820a84fecfc1d1f70447c9ab28",
+      "requiredScopes": [
+        "door.control",
+        "door.observe"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json",
+  "stateSchemaVersion": 1
+}

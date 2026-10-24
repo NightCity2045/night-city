@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+module examples.optics;
+import meta.system;
+import meta.implants;
+
+link optics: Optics = "my-optics";
+var requestedFilter: OpticFilter = OpticFilter.Clear;
+
+async watch optics.lightSampled(sample) {
+    if (!system.isFresh(sample.stamp, 1000)) {
+        return;
+    }
+    var desired: OpticFilter = requestedFilter;
+    if (sample.normalizedLight < 0.2) {
+        desired = OpticFilter.LowLight;
+    } else if (sample.normalizedLight > 0.4) {
+        desired = OpticFilter.Clear;
+    }
+    let changed = await optics.setFilter(desired);
+    match (changed) {
+        ok(state) => { requestedFilter = state.requestedFilter; }
+        err(problem) => { system.log(problem.message); }
+    }
+}

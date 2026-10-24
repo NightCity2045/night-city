@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: [NCToolHandImplant, BaseNCMetaFunctionalImplant]
+  id: NCMetaToolHandImplant
+  suffix: META compatible native controller
+
+- type: entity
+  parent: [NCMantisBladeImplant, BaseNCMetaFunctionalImplant]
+  id: NCMetaMantisBladeImplant
+  suffix: META compatible native controller
+
+- type: entity
+  parent: [NCBiomonitorImplant, BaseNCMetaFunctionalImplant]
+  id: NCMetaBiomonitorImplant
+  suffix: META compatible native controller
+
+- type: entity
+  parent: [NCSandevistanImplant, BaseNCMetaFunctionalImplant]
+  id: NCMetaSandevistanImplant
+  suffix: META compatible native controller
+
+- type: entity
+  parent: [NCKerenzikovImplant, BaseNCMetaFunctionalImplant]
+  id: NCMetaKerenzikovImplant
+  suffix: META compatible native controller

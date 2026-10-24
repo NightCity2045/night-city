@@ -97,6 +97,17 @@ namespace Content.Client.Entry
             Dependencies.BuildGraph();
             Dependencies.InjectDependencies(this);
 
+            // NC-Edit-Start: an isolated diagnostic run keeps the resource model paired with its copied assemblies.
+#if NC_DIAGNOSTICS
+            if (System.Environment.GetEnvironmentVariable("NC_DIAGNOSTICS_ISOLATED") == "1")
+            {
+                _configManager.SetCVar(Robust.Shared.CVars.ResPrototypeReloadWatch, false);
+                _configManager.SetCVar(Robust.Shared.CVars.XamlHotReloadMarkerName,
+                    ".nc-isolated-no-xaml-reload-" + System.Guid.NewGuid().ToString("N"));
+            }
+#endif
+            // NC-Edit-End
+
             _contentLoc.Initialize();
             _componentFactory.DoAutoRegistrations();
             _componentFactory.IgnoreMissingComponents();

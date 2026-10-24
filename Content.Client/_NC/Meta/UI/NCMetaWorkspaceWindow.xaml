@@ -1,0 +1,409 @@
+<!-- SPDX-FileCopyrightText: 2026 Astro
+SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md. -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+    xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+    xmlns:editor="clr-namespace:Content.Client._NC.Meta.Editor"
+    xmlns:metaUi="clr-namespace:Content.Client._NC.Meta.UI"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Content.Client._NC.Meta.UI.NCMetaWorkspaceWindow"
+    Title="{Loc 'nc-meta-workspace-title'}" MinWidth="820" MinHeight="600" SetWidth="1080" SetHeight="740">
+    <BoxContainer Orientation="Vertical" Margin="8" SeparationOverride="6">
+        <metaUi:NCMetaToolbarScrollContainer Name="ProjectToolbar" VScrollEnabled="False" HorizontalExpand="True">
+        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+            <OptionButton Name="Projects" MinWidth="160" />
+            <LineEdit Name="ProjectName" PlaceHolder="{Loc 'nc-meta-project-name'}" HorizontalExpand="True" />
+            <Button Name="NewProject" Text="{Loc 'nc-meta-new-project'}" />
+            <Button Name="RenameProject" Text="{Loc 'nc-meta-rename'}" />
+            <Button Name="DeleteProject" Text="{Loc 'nc-meta-delete-project'}" />
+            <Button Name="Refresh" Text="{Loc 'nc-meta-refresh'}" />
+        </BoxContainer>
+        </metaUi:NCMetaToolbarScrollContainer>
+        <metaUi:NCMetaToolbarScrollContainer VScrollEnabled="False" HorizontalExpand="True">
+        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+            <Button Name="Save" Text="{Loc 'nc-meta-save'}" />
+            <Button Name="Build" Text="{Loc 'nc-meta-build'}" />
+            <Button Name="Tests" Text="{Loc 'nc-meta-test'}" />
+            <OptionButton Name="Devices" MinWidth="160" HorizontalExpand="True" />
+            <Button Name="Install" Text="{Loc 'nc-meta-install'}" />
+            <Button Name="Start" Text="{Loc 'nc-meta-start'}" />
+            <Button Name="Stop" Text="{Loc 'nc-meta-stop'}" />
+            <Button Name="Rollback" Text="{Loc 'nc-meta-rollback'}" />
+        </BoxContainer>
+        </metaUi:NCMetaToolbarScrollContainer>
+        <metaUi:NCMetaToolbarScrollContainer VScrollEnabled="False" HorizontalExpand="True">
+        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+            <OptionButton Name="Installations" MinWidth="180" HorizontalExpand="True" />
+            <Button Name="ExportMedia" Text="{Loc 'nc-meta-export-media'}" />
+            <Button Name="ImportMedia" Text="{Loc 'nc-meta-import-media'}" />
+            <OptionButton Name="ApplicationViews" MinWidth="100" />
+            <Button Name="OpenApplication" Text="{Loc 'nc-meta-open-application'}" />
+        </BoxContainer>
+        </metaUi:NCMetaToolbarScrollContainer>
+        <Label Name="ReleaseInfo" ClipText="True" />
+        <Label Name="Status" ClipText="True" />
+        <metaUi:NCMetaToolbarScrollContainer Name="NativeToolsMenu" VScrollEnabled="False" Visible="False">
+            <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                <Button Name="ToolsInstaller" Text="{Loc 'nc-meta-tools-installer'}" />
+                <Button Name="ToolsRecovery" Text="{Loc 'nc-meta-tools-recovery'}" />
+                <Button Name="ToolsHardware" Text="{Loc 'nc-meta-tools-hardware'}" />
+                <Button Name="ToolsDiagnostics" Text="{Loc 'nc-meta-tools-diagnostics'}" />
+                <Button Name="ToolsMarket" Text="{Loc 'nc-meta-market-tab'}" />
+                <Button Name="ToolsPermissions" Text="{Loc 'nc-meta-grants-tab'}" />
+            </BoxContainer>
+        </metaUi:NCMetaToolbarScrollContainer>
+        <BoxContainer Name="Conflict" Orientation="Horizontal" Visible="False">
+            <Label Text="{Loc 'nc-meta-conflict'}" HorizontalExpand="True" />
+            <Button Name="ReloadRemote" Text="{Loc 'nc-meta-reload-remote'}" />
+            <Button Name="KeepLocal" Text="{Loc 'nc-meta-keep-local'}" />
+            <Button Name="CopyLocal" Text="{Loc 'nc-meta-copy-local'}" />
+        </BoxContainer>
+        <TabContainer Name="MainContentTabs" VerticalExpand="True">
+        <BoxContainer Name="EditorTab" Orientation="Horizontal" VerticalExpand="True" SeparationOverride="6">
+            <BoxContainer Orientation="Vertical" SetWidth="190" SeparationOverride="4">
+                <Label Text="{Loc 'nc-meta-project-files'}" />
+                <OptionButton Name="Templates" MinWidth="120" />
+                <Button Name="ImportTemplate" Text="{Loc 'nc-meta-import-template'}" />
+                <ItemList Name="Files" VerticalExpand="True" />
+                <LineEdit Name="FilePath" PlaceHolder="{Loc 'nc-meta-file-path'}" />
+                <BoxContainer Orientation="Horizontal">
+                    <Button Name="NewFile" Text="{Loc 'nc-meta-new-file'}" />
+                    <Button Name="RenameFile" Text="{Loc 'nc-meta-rename'}" />
+                </BoxContainer>
+                <Button Name="DeleteFile" Text="{Loc 'nc-meta-delete-file'}" />
+                <Label Name="FileInfo" ClipText="True" />
+            </BoxContainer>
+            <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="4">
+                <metaUi:NCMetaToolbarScrollContainer VScrollEnabled="False"><BoxContainer Name="FileTabs" Orientation="Horizontal" /></metaUi:NCMetaToolbarScrollContainer>
+                <metaUi:NCMetaToolbarScrollContainer VScrollEnabled="False">
+                <BoxContainer Orientation="Horizontal">
+                    <LineEdit Name="Search" PlaceHolder="{Loc 'nc-meta-search'}" HorizontalExpand="True" />
+                    <Button Name="Find" Text="{Loc 'nc-meta-find'}" />
+                    <LineEdit Name="Replacement" PlaceHolder="{Loc 'nc-meta-replace'}" HorizontalExpand="True" />
+                    <Button Name="Replace" Text="{Loc 'nc-meta-replace-all'}" />
+                    <Button Name="Undo" Text="{Loc 'nc-meta-undo'}" />
+                    <Button Name="Redo" Text="{Loc 'nc-meta-redo'}" />
+                </BoxContainer>
+                </metaUi:NCMetaToolbarScrollContainer>
+                <editor:NCMetaCodeEditor Name="Editor" />
+                <OptionButton Name="OutputSelector" />
+                <TabContainer Name="Output" TabsVisible="False" SetHeight="170">
+                    <ItemList Name="Diagnostics" />
+                    <ItemList Name="Logs" />
+                    <BoxContainer Orientation="Vertical">
+                        <Label Text="{Loc 'nc-meta-debug-world-continues'}" />
+                        <metaUi:NCMetaToolbarScrollContainer VScrollEnabled="False">
+                        <BoxContainer Orientation="Horizontal">
+                            <Button Name="Attach" Text="{Loc 'nc-meta-debug-attach'}" />
+                            <Button Name="Detach" Text="{Loc 'nc-meta-debug-detach'}" />
+                            <Button Name="Pause" Text="{Loc 'nc-meta-debug-pause'}" />
+                            <Button Name="Continue" Text="{Loc 'nc-meta-debug-continue'}" />
+                            <Button Name="StepInto" Text="{Loc 'nc-meta-debug-step-into'}" />
+                            <Button Name="StepOver" Text="{Loc 'nc-meta-debug-step-over'}" />
+                            <Button Name="StepOut" Text="{Loc 'nc-meta-debug-step-out'}" />
+                            <Button Name="Breakpoint" Text="{Loc 'nc-meta-debug-breakpoint'}" />
+                        </BoxContainer>
+                        </metaUi:NCMetaToolbarScrollContainer>
+                        <ItemList Name="Variables" VerticalExpand="True" />
+                        <BoxContainer Orientation="Horizontal">
+                            <LineEdit Name="Expression" HorizontalExpand="True" PlaceHolder="{Loc 'nc-meta-debug-expression'}" />
+                            <Button Name="Evaluate" Text="{Loc 'nc-meta-debug-evaluate'}" />
+                        </BoxContainer>
+                    </BoxContainer>
+                    <BoxContainer Orientation="Vertical">
+                        <Label Text="{Loc 'nc-meta-preview-description'}" />
+                        <BoxContainer Orientation="Horizontal">
+                            <LineEdit Name="MockState" Text="{}" HorizontalExpand="True" />
+                            <Button Name="Preview" Text="{Loc 'nc-meta-preview'}" />
+                            <OptionButton Name="PreviewSize" />
+                        </BoxContainer>
+                        <ScrollContainer VerticalExpand="True"><BoxContainer Name="PreviewHost" Orientation="Vertical" /></ScrollContainer>
+                        <Label Name="PreviewCosts" ClipText="True" />
+                        <Label Name="PreviewAction" ClipText="True" />
+                    </BoxContainer>
+                    <BoxContainer Orientation="Vertical">
+                        <BoxContainer Orientation="Horizontal">
+                            <Button Name="Analyze" Text="{Loc 'nc-meta-analyze'}" />
+                            <Button Name="Complete" Text="{Loc 'nc-meta-complete'}" />
+                            <Button Name="Definition" Text="{Loc 'nc-meta-definition'}" />
+                            <Button Name="References" Text="{Loc 'nc-meta-references'}" />
+                            <Label Name="SymbolDocs" ClipText="True" HorizontalExpand="True" />
+                        </BoxContainer>
+                        <ItemList Name="LanguageResults" VerticalExpand="True" />
+                    </BoxContainer>
+                    <BoxContainer Orientation="Vertical">
+                        <Label Text="{Loc 'nc-meta-bindings-consent'}" />
+                        <BoxContainer Orientation="Horizontal">
+                            <Button Name="PublishWebsite" Text="{Loc 'nc-meta-publish-website'}" />
+                            <Button Name="WithdrawWebsite" Text="{Loc 'nc-meta-withdraw-website'}" />
+                            <Label Name="WebsiteAddress" ClipText="True" HorizontalExpand="True" />
+                        </BoxContainer>
+                        <ItemList Name="LinkContracts" SetHeight="64" />
+                        <ItemList Name="DeviceInterfaces" SetHeight="64" />
+                        <TextEdit Name="BindingsInput" VerticalExpand="True" />
+                    </BoxContainer>
+                    <BoxContainer Orientation="Vertical" SeparationOverride="4">
+                        <Label Text="{Loc 'nc-meta-hosting-description'}" />
+                        <BoxContainer Orientation="Horizontal">
+                            <LineEdit Name="HostingHost" PlaceHolder="{Loc 'nc-meta-hosting-host'}" HorizontalExpand="True" />
+                            <LineEdit Name="HostingView" PlaceHolder="{Loc 'nc-meta-hosting-view'}" HorizontalExpand="True" />
+                        </BoxContainer>
+                        <BoxContainer Orientation="Horizontal">
+                            <LineEdit Name="HostingDomain" PlaceHolder="{Loc 'nc-meta-hosting-domain'}" HorizontalExpand="True" />
+                            <LineEdit Name="HostingUnits" Text="0" SetWidth="45" />
+                            <Button Name="HostingOffer" Text="{Loc 'nc-meta-hosting-offer'}" />
+                            <Button Name="HostingQuote" Text="{Loc 'nc-meta-hosting-get-quote'}" />
+                        </BoxContainer>
+                        <Label Name="HostingPrice" ClipText="True" />
+                        <Button Name="HostingPurchase" Text="{Loc 'nc-meta-hosting-purchase-consent'}" Disabled="True" />
+                        <ItemList Name="HostingLeases" VerticalExpand="True" />
+                        <Button Name="HostingRefund" Text="{Loc 'nc-meta-hosting-refund'}" Disabled="True" />
+                    </BoxContainer>
+                    <BoxContainer Name="FirmwarePanel" Orientation="Vertical" SeparationOverride="4">
+                        <RichTextLabel Text="{Loc 'nc-meta-firmware-description'}" />
+                        <Button Name="FirmwarePreview" Text="{Loc 'nc-meta-firmware-preview'}" />
+                        <Label Name="FirmwareNotice" ClipText="True" />
+                        <ItemList Name="FirmwareDetails" SetHeight="100" />
+                        <ItemList Name="FirmwareLinks" VerticalExpand="True" MinHeight="70" />
+                        <OptionButton Name="FirmwareLinkDevice" Disabled="True" />
+                        <Button Name="FirmwareInstall" Text="{Loc 'nc-meta-firmware-review'}" Disabled="True" />
+                    </BoxContainer>
+                </TabContainer>
+            </BoxContainer>
+        </BoxContainer>
+        <BoxContainer Name="SoftwareTab" Orientation="Horizontal" SeparationOverride="8">
+            <BoxContainer Orientation="Vertical" SetWidth="240" SeparationOverride="4">
+                <Label Text="{Loc 'nc-meta-market-catalog'}" />
+                <BoxContainer Orientation="Horizontal">
+                    <Button Name="SoftwareCatalogPrevious" Text="{Loc 'nc-meta-table-previous'}" />
+                    <Button Name="SoftwareRefresh" Text="{Loc 'nc-meta-refresh'}" />
+                    <Button Name="SoftwareCatalogNext" Text="{Loc 'nc-meta-table-next'}" />
+                </BoxContainer>
+                <ItemList Name="SoftwareCatalog" VerticalExpand="True" MinHeight="100" />
+                <Label Text="{Loc 'nc-meta-market-licenses'}" />
+                <BoxContainer Orientation="Horizontal">
+                    <Button Name="SoftwareLicensePrevious" Text="{Loc 'nc-meta-table-previous'}" />
+                    <Button Name="SoftwareLicenseNext" Text="{Loc 'nc-meta-table-next'}" />
+                </BoxContainer>
+                <ItemList Name="SoftwareLicenses" VerticalExpand="True" MinHeight="100" />
+            </BoxContainer>
+            <TabContainer Name="SoftwarePanels" HorizontalExpand="True" VerticalExpand="True">
+                <ScrollContainer Name="SoftwareProductPanel">
+                <BoxContainer Orientation="Vertical" SeparationOverride="4" HorizontalExpand="True">
+                    <Label Name="SoftwareName" ClipText="True" />
+                    <Label Name="SoftwareDescription" ClipText="True" />
+                    <ItemList Name="SoftwareReleases" SetHeight="80" />
+                    <ItemList Name="SoftwareDetails" SetHeight="160" />
+                    <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                        <OptionButton Name="SoftwareDeploymentSlot" />
+                        <OptionButton Name="SoftwareOwner" HorizontalExpand="True" />
+                        <Label Text="{Loc 'nc-meta-market-seat-count'}" />
+                        <LineEdit Name="SoftwareSeatCount" Text="1" SetWidth="60" />
+                        <Button Name="SoftwareQuote" Text="{Loc 'nc-meta-market-quote'}" />
+                    </BoxContainer>
+                    <Label Name="SoftwarePrice" ClipText="True" />
+                    <Button Name="SoftwarePurchase" Text="{Loc 'nc-meta-market-purchase'}" Disabled="True" />
+                    <Label Text="{Loc 'nc-meta-market-device-links'}" />
+                    <ItemList Name="SoftwareLinks" SetHeight="80" />
+                    <OptionButton Name="SoftwareLinkDevice" Disabled="True" />
+                    <CheckBox Name="SoftwareScopeConsent" Text="{Loc 'nc-meta-market-scope-consent'}" />
+                    <Button Name="SoftwareInstall" Text="{Loc 'nc-meta-market-install'}" Disabled="True" />
+                    <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                        <Button Name="SoftwareAssignSeat" Text="{Loc 'nc-meta-market-assign-seat'}" Disabled="True" />
+                        <Button Name="SoftwareReleaseSeat" Text="{Loc 'nc-meta-market-release-seat'}" Disabled="True" />
+                    </BoxContainer>
+                    <ItemList Name="SoftwareSeats" SetHeight="70" />
+                    <controls:ConfirmButton Name="SoftwareDiscardCopy" Text="{Loc 'nc-meta-market-discard-copy'}"
+                        ConfirmationText="{Loc 'nc-meta-market-discard-confirm'}" Disabled="True" />
+                </BoxContainer>
+                </ScrollContainer>
+                <ScrollContainer Name="SoftwarePublishPanel">
+                    <BoxContainer Orientation="Vertical" SeparationOverride="4" HorizontalExpand="True">
+                        <RichTextLabel Text="{Loc 'nc-meta-market-publish-description'}" />
+                        <OptionButton Name="SoftwarePublisherOwner" />
+                        <CheckBox Name="SoftwarePublishNew" Text="{Loc 'nc-meta-market-new-product'}" Pressed="True" />
+                        <LineEdit Name="SoftwarePublishName" PlaceHolder="{Loc 'nc-meta-market-product-name'}" />
+                        <TextEdit Name="SoftwarePublishDescription" SetHeight="65" />
+                        <Label Text="{Loc 'nc-meta-market-changelog'}" />
+                        <TextEdit Name="SoftwarePublishChangelog" SetHeight="65" />
+                        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                            <Label Text="{Loc 'nc-meta-market-price'}" />
+                            <LineEdit Name="SoftwarePublishPrice" Text="0" SetWidth="100" />
+                            <OptionButton Name="SoftwarePublishSource" HorizontalExpand="True" />
+                            <OptionButton Name="SoftwarePublishTransfer" HorizontalExpand="True" />
+                        </BoxContainer>
+                        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                            <OptionButton Name="SoftwarePublishOffline" HorizontalExpand="True" />
+                            <OptionButton Name="SoftwarePublishUpdates" HorizontalExpand="True" />
+                        </BoxContainer>
+                        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                            <Label Text="{Loc 'nc-meta-market-grace-seconds'}" />
+                            <LineEdit Name="SoftwarePublishGrace" Text="0" SetWidth="100" />
+                            <Label Text="{Loc 'nc-meta-market-support-seconds'}" />
+                            <LineEdit Name="SoftwarePublishSupport" Text="0" SetWidth="100" />
+                        </BoxContainer>
+                        <CheckBox Name="SoftwarePublishResale" Text="{Loc 'nc-meta-market-allow-resale'}" Pressed="True" />
+                        <CheckBox Name="SoftwarePublishBuild" Text="{Loc 'nc-meta-market-allow-build'}" />
+                        <CheckBox Name="SoftwarePublishOrganizations" Text="{Loc 'nc-meta-market-allow-organizations'}" Pressed="True" />
+                        <CheckBox Name="SoftwarePublishRedistribution" Text="{Loc 'nc-meta-market-allow-redistribution'}" />
+                        <Button Name="SoftwarePublish" Text="{Loc 'nc-meta-market-publish-current'}" />
+                    </BoxContainer>
+                </ScrollContainer>
+                <BoxContainer Name="SoftwareSourcePanel" Orientation="Vertical" SeparationOverride="4">
+                    <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                        <OptionButton Name="SoftwareSourcePath" HorizontalExpand="True" />
+                        <Button Name="SoftwareReadSource" Text="{Loc 'nc-meta-market-read-source'}" Disabled="True" />
+                    </BoxContainer>
+                    <Label Name="SoftwareSourceStatus" ClipText="True" />
+                    <editor:NCMetaCodeEditor Name="SoftwareSourceEditor" Editable="False" VerticalExpand="True" />
+                </BoxContainer>
+                <ScrollContainer Name="SoftwareTransferPanel">
+                    <BoxContainer Orientation="Vertical" SeparationOverride="4" HorizontalExpand="True">
+                        <RichTextLabel Text="{Loc 'nc-meta-market-transfer-description'}" />
+                        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                            <LineEdit Name="SoftwareContactQuery" PlaceHolder="{Loc 'nc-meta-market-contact-query'}" HorizontalExpand="True" />
+                            <Button Name="SoftwareContactSearch" Text="{Loc 'nc-meta-market-contact-search'}" />
+                        </BoxContainer>
+                        <Label Name="SoftwareContactNotice" ClipText="True" />
+                        <ItemList Name="SoftwareContacts" SetHeight="140" />
+                        <Label Name="SoftwareTransferLicense" ClipText="True" />
+                        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                            <Label Text="{Loc 'nc-meta-market-transfer-price'}" />
+                            <LineEdit Name="SoftwareResalePrice" Text="0" SetWidth="100" />
+                            <Button Name="SoftwareResaleOffer" Text="{Loc 'nc-meta-market-transfer-offer'}" Disabled="True" HorizontalExpand="True" />
+                        </BoxContainer>
+                        <Label Name="SoftwareOutgoingResale" ClipText="True" />
+                        <Label Text="{Loc 'nc-meta-market-incoming-offers'}" />
+                        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                            <Button Name="SoftwareResalePrevious" Text="{Loc 'nc-meta-table-previous'}" />
+                            <Button Name="SoftwareResaleRefresh" Text="{Loc 'nc-meta-refresh'}" />
+                            <Button Name="SoftwareResaleNext" Text="{Loc 'nc-meta-table-next'}" />
+                        </BoxContainer>
+                        <ItemList Name="SoftwareResales" SetHeight="120" />
+                        <ItemList Name="SoftwareResaleDetails" SetHeight="160" />
+                        <CheckBox Name="SoftwareResaleConsent" Text="{Loc 'nc-meta-market-resale-consent'}" />
+                        <Button Name="SoftwareResaleAccept" Text="{Loc 'nc-meta-market-resale-accept'}" Disabled="True" />
+                    </BoxContainer>
+                </ScrollContainer>
+            </TabContainer>
+        </BoxContainer>
+        <ScrollContainer Name="ServiceGrantsTab">
+            <BoxContainer Orientation="Vertical" SeparationOverride="6" HorizontalExpand="True">
+                <RichTextLabel Text="{Loc 'nc-meta-grants-description'}" />
+                <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                    <Button Name="GrantsRefresh" Text="{Loc 'nc-meta-refresh'}" />
+                    <Label Name="GrantsInstallation" ClipText="True" HorizontalExpand="True" />
+                </BoxContainer>
+                <Label Name="GrantsPolicy" ClipText="True" />
+                <Label Text="{Loc 'nc-meta-grants-bindings'}" />
+                <ItemList Name="GrantsLinks" SetHeight="100" />
+                <Label Text="{Loc 'nc-meta-grants-members'}" />
+                <ScrollContainer MinHeight="100" SetHeight="160">
+                    <BoxContainer Name="GrantsMembers" Orientation="Vertical" HorizontalExpand="True" />
+                </ScrollContainer>
+                <CheckBox Name="GrantsScopeConsent" Text="{Loc 'nc-meta-grants-scope-consent'}" />
+                <CheckBox Name="GrantsUnattended" Text="{Loc 'nc-meta-grants-unattended-consent'}" />
+                <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                    <Label Text="{Loc 'nc-meta-grants-duration'}" />
+                    <OptionButton Name="GrantsDuration" HorizontalExpand="True" />
+                    <Button Name="GrantsIssue" Text="{Loc 'nc-meta-grants-issue'}" Disabled="True" />
+                </BoxContainer>
+                <Label Text="{Loc 'nc-meta-grants-current'}" />
+                <ItemList Name="GrantsCurrent" SetHeight="120" />
+                <ItemList Name="GrantsDetails" SetHeight="100" />
+                <controls:ConfirmButton Name="GrantsRevoke" Text="{Loc 'nc-meta-grants-revoke'}"
+                    ConfirmationText="{Loc 'nc-meta-grants-revoke-confirm'}" Disabled="True" />
+                <controls:ConfirmButton Name="GrantsRevokeAll" Text="{Loc 'nc-meta-grants-revoke-all'}"
+                    ConfirmationText="{Loc 'nc-meta-grants-revoke-all-confirm'}" Disabled="True" />
+            </BoxContainer>
+        </ScrollContainer>
+        <BoxContainer Name="DevelopmentTab" Orientation="Horizontal" SeparationOverride="6">
+            <BoxContainer Orientation="Vertical" SetWidth="230" SeparationOverride="4">
+                <Label Text="{Loc 'nc-meta-development-contracts'}" />
+                <BoxContainer Orientation="Horizontal">
+                    <Button Name="DevelopmentPrevious" Text="{Loc 'nc-meta-table-previous'}" />
+                    <Button Name="DevelopmentRefresh" Text="{Loc 'nc-meta-refresh'}" />
+                    <Button Name="DevelopmentNext" Text="{Loc 'nc-meta-table-next'}" />
+                </BoxContainer>
+                <ItemList Name="DevelopmentRows" VerticalExpand="True" MinHeight="100" />
+                <Label Text="{Loc 'nc-meta-development-inbox'}" />
+                <ItemList Name="DevelopmentInbox" SetHeight="100" />
+                <Button Name="DevelopmentImport" Text="{Loc 'nc-meta-development-import'}" Disabled="True" />
+            </BoxContainer>
+            <TabContainer Name="DevelopmentPanels" HorizontalExpand="True" VerticalExpand="True">
+                <ScrollContainer Name="DevelopmentReview">
+                    <BoxContainer Orientation="Vertical" SeparationOverride="4" HorizontalExpand="True">
+                        <Label Name="DevelopmentSubject" ClipText="True" />
+                        <TextEdit Name="DevelopmentTerms" Editable="False" SetHeight="120" />
+                        <ItemList Name="DevelopmentDetails" SetHeight="180" />
+                        <CheckBox Name="DevelopmentConsent" Text="{Loc 'nc-meta-development-consent'}" />
+                        <CheckBox Name="DevelopmentAutoConsent" Text="{Loc 'nc-meta-development-auto-consent'}" />
+                        <BoxContainer Orientation="Horizontal">
+                            <OptionButton Name="DevelopmentAction" HorizontalExpand="True" />
+                            <Button Name="DevelopmentExecute" Text="{Loc 'nc-meta-development-execute'}" Disabled="True" />
+                        </BoxContainer>
+                        <LineEdit Name="DevelopmentReason" PlaceHolder="{Loc 'nc-meta-development-dispute-reason'}" />
+                        <BoxContainer Orientation="Horizontal">
+                            <LineEdit Name="DevelopmentCustomerAmount" Text="0" HorizontalExpand="True" PlaceHolder="{Loc 'nc-meta-development-customer-refund'}" />
+                            <LineEdit Name="DevelopmentDeveloperAmount" Text="0" HorizontalExpand="True" PlaceHolder="{Loc 'nc-meta-development-developer-payment'}" />
+                        </BoxContainer>
+                        <CheckBox Name="DevelopmentTransfer" Text="{Loc 'nc-meta-development-transfer-resolution'}" />
+                        <Label Text="{Loc 'nc-meta-development-fixtures'}" />
+                        <ItemList Name="DevelopmentFrozenFixtures" SetHeight="70" />
+                        <Button Name="DevelopmentReadFixture" Text="{Loc 'nc-meta-development-read-fixture'}" />
+                        <TextEdit Name="DevelopmentFixtureText" Editable="False" SetHeight="140" />
+                    </BoxContainer>
+                </ScrollContainer>
+                <ScrollContainer Name="DevelopmentOfferPanel">
+                    <BoxContainer Orientation="Vertical" SeparationOverride="4" HorizontalExpand="True">
+                        <RichTextLabel Text="{Loc 'nc-meta-development-offer-help'}" />
+                        <BoxContainer Orientation="Horizontal">
+                            <LineEdit Name="DevelopmentContactQuery" PlaceHolder="{Loc 'nc-meta-development-contact-search'}" HorizontalExpand="True" />
+                            <Button Name="DevelopmentContactSearch" Text="{Loc 'nc-meta-development-contact-find'}" />
+                        </BoxContainer>
+                        <ItemList Name="DevelopmentContacts" SetHeight="80" />
+                        <OptionButton Name="DevelopmentArbitrator" />
+                        <LineEdit Name="DevelopmentOfferSubject" PlaceHolder="{Loc 'nc-meta-development-subject'}" />
+                        <TextEdit Name="DevelopmentRequirements" SetHeight="90" />
+                        <LineEdit Name="DevelopmentFailure" PlaceHolder="{Loc 'nc-meta-development-failure-conditions'}" />
+                        <BoxContainer Orientation="Horizontal">
+                            <LineEdit Name="DevelopmentPrice" Text="100" HorizontalExpand="True" PlaceHolder="{Loc 'nc-meta-market-price'}" />
+                            <LineEdit Name="DevelopmentDeadline" Text="60" HorizontalExpand="True" PlaceHolder="{Loc 'nc-meta-development-deadline-minutes'}" />
+                            <LineEdit Name="DevelopmentSupport" Text="0" HorizontalExpand="True" PlaceHolder="{Loc 'nc-meta-development-support-minutes'}" />
+                        </BoxContainer>
+                        <CheckBox Name="DevelopmentOfferSource" Text="{Loc 'nc-meta-development-source-copy'}" />
+                        <CheckBox Name="DevelopmentOfferAuto" Text="{Loc 'nc-meta-development-auto-policy'}" />
+                        <Label Text="{Loc 'nc-meta-development-targets'}" />
+                        <ItemList Name="DevelopmentTargets" SelectMode="Multiple" SetHeight="80" />
+                        <Label Text="{Loc 'nc-meta-development-fixtures'}" />
+                        <ItemList Name="DevelopmentOfferFixtures" SelectMode="Multiple" SetHeight="80" />
+                        <LineEdit Name="DevelopmentScopes" PlaceHolder="{Loc 'nc-meta-development-scope-ceiling'}" />
+                        <BoxContainer Orientation="Horizontal">
+                            <LineEdit Name="DevelopmentResident" Text="1048576" HorizontalExpand="True" PlaceHolder="{Loc 'nc-meta-development-resident-ceiling'}" />
+                            <LineEdit Name="DevelopmentMemory" Text="1048576" HorizontalExpand="True" PlaceHolder="{Loc 'nc-meta-development-memory-ceiling'}" />
+                            <LineEdit Name="DevelopmentStorage" Text="1048576" HorizontalExpand="True" PlaceHolder="{Loc 'nc-meta-development-storage-ceiling'}" />
+                        </BoxContainer>
+                        <Button Name="DevelopmentOffer" Text="{Loc 'nc-meta-development-create-offer'}" />
+                    </BoxContainer>
+                </ScrollContainer>
+            </TabContainer>
+        </BoxContainer>
+        <ScrollContainer Name="NativeToolsPanel">
+            <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="6">
+                <RichTextLabel Text="{Loc 'nc-meta-tools-description'}" />
+                <RichTextLabel Name="ToolsHelp" />
+                <BoxContainer Name="ToolsStockPanel" Orientation="Vertical" SeparationOverride="4">
+                    <OptionButton Name="ToolsStock" />
+                    <Button Name="ToolsPrepare" Text="{Loc 'nc-meta-tools-prepare-stock'}" />
+                    <ItemList Name="ToolsLinks" SetHeight="100" />
+                    <OptionButton Name="ToolsLinkDevice" />
+                    <CheckBox Name="ToolsBindingConsent" Text="{Loc 'nc-meta-tools-binding-consent'}" />
+                    <Button Name="ToolsInstall" Text="{Loc 'nc-meta-install'}" />
+                </BoxContainer>
+                <ItemList Name="ToolsMeasurements" MinHeight="160" VerticalExpand="True" />
+                <ItemList Name="ToolsLogs" MinHeight="100" VerticalExpand="True" />
+            </BoxContainer>
+        </ScrollContainer>
+        </TabContainer>
+    </BoxContainer>
+</controls:FancyWindow>

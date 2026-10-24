@@ -1,0 +1,57 @@
+program       = "module", qualifiedName, ";", { importDecl }, { declaration } ;
+qualifiedName = IDENT, { ".", IDENT } ;
+importDecl    = "import", qualifiedName, [ "as", IDENT ], ";" ;
+declaration   = globalDecl | functionDecl | structDecl | enumDecl | linkDecl | watchDecl ;
+globalDecl    = [ "pub" ], "const", IDENT, ":", type, "=", expression, ";"
+              | ( "let" | "var" ), IDENT, ":", type, "=", expression, ";" ;
+functionDecl  = [ "pub" ], [ "async" ], "fn", IDENT, "(", [ parameters ], ")",
+                "->", type, block ;
+parameters    = parameter, { ",", parameter } ;
+parameter     = IDENT, ":", type ;
+structDecl    = [ "pub" ], "struct", IDENT, "{", { fieldDecl }, "}" ;
+fieldDecl     = IDENT, ":", type, ";" ;
+enumDecl      = [ "pub" ], "enum", IDENT, "{", IDENT, { ",", IDENT }, [ "," ], "}" ;
+linkDecl      = "link", IDENT, ":", typeName, "=", STRING, ";" ;
+watchDecl     = [ "async" ], "watch", IDENT, ".", IDENT, "(", [ names ], ")", block ;
+names         = IDENT, { ",", IDENT } ;
+type          = primitive | typeName | singleType | mapType ;
+primitive     = "void" | "bool" | "byte" | "int" | "float" | "string" ;
+typeName      = qualifiedName ;
+singleType    = ( "array" | "list" | "option" | "result" ), "<", type, ">" ;
+mapType       = "map", "<", type, ",", type, ">" ;
+block         = "{", { statement }, "}" ;
+statement     = localDecl | ifStmt | whileStmt | forStmt | matchStmt | returnStmt
+              | "break", ";" | "continue", ";" | "yield", ";" | simpleStmt | block ;
+localDecl     = ( "let" | "var" ), IDENT, [ ":", type ], "=", expression, ";"
+              | "const", IDENT, ":", type, "=", expression, ";" ;
+ifStmt        = "if", "(", expression, ")", block, [ "else", ( block | ifStmt ) ] ;
+whileStmt     = "while", "(", expression, ")", block ;
+forStmt       = "for", "(", "let", IDENT, "in", expression, ")", block ;
+matchStmt     = "match", "(", expression, ")", "{", matchArm, { matchArm }, "}" ;
+matchArm      = pattern, "=>", block ;
+pattern       = ( "some" | "ok" | "err" ), "(", binding, ")"
+              | "none" | "true" | "false" | qualifiedName | "_" ;
+binding       = IDENT | "_" ;
+returnStmt    = "return", [ expression ], ";" ;
+simpleStmt    = expression, [ "=", expression ], ";" ;
+expression    = logicalOr ;
+logicalOr     = logicalAnd, { "||", logicalAnd } ;
+logicalAnd    = bitOr, { "&&", bitOr } ;
+bitOr         = bitXor, { "|", bitXor } ;
+bitXor        = bitAnd, { "^", bitAnd } ;
+bitAnd        = equality, { "&", equality } ;
+equality      = relation, { ( "==" | "!=" ), relation } ;
+relation      = shift, { ( "<" | "<=" | ">" | ">=" ), shift } ;
+shift         = additive, { ( "<<" | ">>" ), additive } ;
+additive      = product, { ( "+" | "-" ), product } ;
+product       = unary, { ( "*" | "/" | "%" ), unary } ;
+unary         = ( "!" | "~" | "+" | "-" | "await" ), unary | postfix ;
+postfix       = primary, { ".", IDENT | "[", expression, "]" | "(", [ arguments ], ")" } ;
+arguments     = expression, { ",", expression } ;
+primary       = INTEGER | FLOAT | STRING | "true" | "false" | IDENT | "none"
+              | ( "some" | "ok" | "err" ), "(", expression, ")"
+              | "(", [ expression ], ")"
+              | "[", [ arguments ], "]"
+              | "new", type, "(", [ constructorArgs ], ")" ;
+constructorArgs = namedArgs | arguments ;
+namedArgs     = IDENT, ":", expression, { ",", IDENT, ":", expression } ;

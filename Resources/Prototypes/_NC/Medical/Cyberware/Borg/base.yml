@@ -1,0 +1,170 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  abstract: true
+  parent: [ BaseMob, MobCombat, MobDamageable, MobBloodstream, BaseSpeciesAppearance ]
+  id: NCBorgCarrierBase
+  components:
+  - type: Body
+  - type: Hands
+  - type: Blindable
+  - type: NCMedicalBody
+    profile: Human
+  - type: NCHumanityMonitor
+  - type: NCCyberwareAbilityBody
+  - type: NCCyberwareExteriorBody
+  - type: NCBodyFunction
+    profile: NCHumanBodyFunction
+  - type: Speech
+    speechSounds: Alto
+  - type: Vocal
+    emoteSounds: MaleHuman
+  - type: Emoting
+  - type: MindExaminable
+  - type: Sprite
+    layers:
+    # Torso
+    - map: [ "enum.HumanoidVisualLayers.Chest" ]
+
+    # Head
+    - map: [ "enum.HumanoidVisualLayers.Head" ]
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: head_m
+      color: "#A8BAC9"
+      visible: false
+    - map: [ "enum.HumanoidVisualLayers.Snout" ]
+    - map: [ "enum.HumanoidVisualLayers.Eyes" ]
+
+    # Limbs
+    - map: [ "enum.HumanoidVisualLayers.RArm" ]
+    - map: [ "enum.HumanoidVisualLayers.LArm" ]
+    - map: [ "enum.HumanoidVisualLayers.RLeg" ]
+    - map: [ "enum.HumanoidVisualLayers.LLeg" ]
+
+    # Underwear & clothing
+    - map: [ "enum.HumanoidVisualLayers.UndergarmentBottom" ]
+    - map: [ "enum.HumanoidVisualLayers.UndergarmentTop" ]
+    # NC-Edit-Start: Pants render below compatible legacy tops.
+    - map: ["pants"]
+    # NC-Edit-End
+    - map: ["jumpsuit"]
+
+    # Extremities
+    - map: ["enum.HumanoidVisualLayers.LFoot"]
+    - map: ["enum.HumanoidVisualLayers.RFoot"]
+    - map: ["enum.HumanoidVisualLayers.LHand"]
+    - map: ["enum.HumanoidVisualLayers.RHand"]
+
+    # Stuff that goes over the body but below equipment
+    - map: ["enum.HumanoidVisualLayers.Overlay"]
+
+    # More equipment
+    - map: [ "gloves" ]
+    - map: [ "shoes" ]
+    - map: [ "ears" ]
+    - map: [ "eyes" ]
+    - map: [ "belt" ]
+    - map: [ "id" ]
+    # NC-Edit-Start: Ballistic vests render over clothes and below coats.
+    - map: [ "armor" ]
+    # NC-Edit-End
+    - map: [ "outerClothing" ]
+    - map: [ "back" ]
+    - map: [ "neck" ]
+    - map: [ "suitstorage" ]
+
+    # Stuff that goes in front of equipment
+    - map: [ "enum.HumanoidVisualLayers.SnoutCover" ]
+    - map: [ "enum.HumanoidVisualLayers.FacialHair" ]
+    - map: [ "enum.HumanoidVisualLayers.Hair" ]
+    - map: [ "enum.HumanoidVisualLayers.HeadSide" ]
+    - map: [ "enum.HumanoidVisualLayers.HeadTop" ]
+    - map: [ "enum.HumanoidVisualLayers.Tail" ]
+    - map: [ "enum.HumanoidVisualLayers.TailOverlay" ]
+
+    # Stuff that goes in front of stuff that goes in front of equipment
+    - map: [ "mask" ]
+    - map: [ "head" ]
+    - map: [ "pocket1" ]
+    - map: [ "pocket2" ]
+
+    # Extra stuff
+    - map: ["enum.HumanoidVisualLayers.Handcuffs"]
+      color: "#ffffff"
+      sprite: Objects/Misc/handcuffs.rsi
+      state: body-overlay-2
+      visible: false
+    - sprite: Objects/Specific/Robotics/mmi.rsi
+      state: mmi_off
+      map: [ pod ]
+  - type: GenericVisualizer
+    visuals:
+      enum.NCBorgVisuals.Shell:
+        pod:
+          True: { visible: false }
+          False: { visible: true }
+        enum.HumanoidVisualLayers.Head:
+          True: { visible: true }
+          False: { visible: false }
+  # Expected medical graph, including deliberately absent factory nodes. InitialBody never creates a brain
+  # for either manufactured carrier. Only the original patient's physical brain enters the empty pod.
+  - type: InitialBody
+    organs:
+      Head: NCBorgPodHead
+      Brain: NCOrganHumanBrain
+      Heart: NCBorgPerfusionPump
+      Lungs: NCBorgOxygenator
+      Liver: NCBorgMetabolicFilter
+      Kidneys: NCBorgWasteFilter
+      Stomach: NCBorgNutrientProcessor
+      Torso: NCBorgFrameTorso
+      Thorax: NCBorgFramePowerHolder
+      Abdomen: NCBorgFrameAbdomen
+      PelvisGroin: NCBorgFramePelvis
+      ArmLeft: NCBorgFrameArmLeft
+      ArmRight: NCBorgFrameArmRight
+      HandLeft: NCBorgFrameHandLeft
+      HandRight: NCBorgFrameHandRight
+      LegLeft: NCBorgFrameLegLeft
+      LegRight: NCBorgFrameLegRight
+      FootLeft: NCBorgFrameFootLeft
+      FootRight: NCBorgFrameFootRight
+      Eyes: NCBorgFrameEyes
+      Ears: NCBorgFrameEars
+      Tongue: NCBorgFrameMouth
+    relationships:
+      Head: [ Brain, Heart, Lungs, Liver, Kidneys, Stomach, Torso ]
+      Torso: [ Thorax, Abdomen, PelvisGroin, ArmLeft, ArmRight, LegLeft, LegRight, Eyes, Ears, Tongue ]
+      ArmLeft: [ HandLeft ]
+      ArmRight: [ HandRight ]
+      LegLeft: [ FootLeft ]
+      LegRight: [ FootRight ]
+
+- type: entity
+  abstract: true
+  parent: [ OrganBase, OrganBaseChildInternal ]
+  id: NCBorgMechanicalOrganBase
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/stock_parts.rsi
+    state: micro_mani
+  - type: NCOrganIntegrity
+    material: Mechanical
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+  - type: NCSurgicalSite
+  - type: NCCyberware
+    profile: NCBorgPeripheral
+
+- type: entity
+  abstract: true
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgSupportOrganBase
+  components:
+  - type: NCBorgSupportProvider
+  - type: Metabolizer
+    metabolizerTypes: [ Human ]
+  - type: NCCyberware
+    profile: NCBorgSupportNode

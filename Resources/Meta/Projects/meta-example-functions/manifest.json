@@ -1,0 +1,34 @@
+{
+  "version": "1.0",
+  "id": "meta-example-functions",
+  "name": "Native implant modes",
+  "nameRu": "Штатные режимы импланта",
+  "packageName": "examples.functions",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.functions",
+  "files": [
+    {
+      "path": "main.meta",
+      "sha256": "dd5ebae2823882f2f571f9844cbbb34cbeb9f1d2be17e7c21c5338a17c2d6814",
+      "sourcePath": "Resources/Meta/Examples/examples.functions.meta"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [
+    {
+      "slot": "function",
+      "capability": "meta.implants.FunctionalController",
+      "contractHash": "9b94d4917e157c5ede69553949d06940919fd3adfed1877cc0f22de812742574",
+      "requiredScopes": [
+        "implant.function.read",
+        "implant.function.control",
+        "implant.function.pulse",
+        "implant.function.observe"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

@@ -82,10 +82,12 @@ public sealed partial class NCEconomicAssetRegistrySystem
                 var existing = await GetTransferAsync(request.TransferId, true);
                 if (existing != null)
                 {
-                    return Same(existing.Snapshot, request)
-                        ? await LoadItemTransferResult(request, existing, NCEconomicAssetMutationStatus.Duplicate)
-                        : RejectTransfer(NCEconomicAssetMutationStatus.Rejected,
+                    if (!Same(existing.Snapshot, request))
+                        return RejectTransfer(NCEconomicAssetMutationStatus.Rejected,
                             "The transfer identity is bound to different immutable data.");
+                    await ReconcileOwnershipAsync(await LoadOwnershipContextAsync(request.TransferId.Value,
+                        Key(request.ItemId), request.ExpectedOwner, request.NewOwner, epoch, now));
+                    return await LoadItemTransferResult(request, existing, NCEconomicAssetMutationStatus.Duplicate);
                 }
                 if (command == InitialCommandState.Completed)
                     return RejectTransfer(NCEconomicAssetMutationStatus.StorageFailure,
@@ -171,6 +173,10 @@ public sealed partial class NCEconomicAssetRegistrySystem
                         "living-city.item-instance.transferred-with-assembly", request.AuditSource));
                 }
 
+                await using var ownership = await PrepareOwnershipAsync(new(request.TransferId.Value, item,
+                    installedParts, request.ExpectedOwner, request.NewOwner, epoch, now), writes);
+                if (!await ownership.TryBeginCommitAsync())
+                    return RejectTransfer(NCEconomicAssetMutationStatus.Rejected, ownership.Error!);
                 var persisted = await Persist(
                     command == InitialCommandState.Available ? request.CommandId : Guid.NewGuid(),
                     TransferItemCommand,

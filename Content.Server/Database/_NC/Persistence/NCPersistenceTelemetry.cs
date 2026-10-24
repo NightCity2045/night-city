@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.Data.Common;
 using System.Threading;
 using Content.Shared._NC.Configuration;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Prometheus;
 
 namespace Content.Server.Database;
@@ -228,6 +230,13 @@ public sealed partial class ServerDbManager
                 }
             }
         }
+        catch (NCMetaBlobQuotaException)
+        {
+            // Expected bounded-storage backpressure must not trip the shared DB circuit.
+            RegisterNCPersistenceSuccess();
+            NCPersistenceTelemetry.Record(write, writeClass, Stopwatch.GetElapsedTime(startedAt), null, false);
+            throw;
+        }
         catch
         {
             RegisterNCPersistenceFailure();
@@ -342,8 +351,15 @@ public sealed partial class ServerDbManager
         return TimeSpan.FromMilliseconds(Math.Min(maximum, initial * multiplier));
     }
 
-    private static bool IsTransient(Exception exception) =>
-        exception is TimeoutException or DbException;
+    internal static bool IsTransient(Exception exception) => exception switch
+    {
+        // EF's ExecuteUpdate strategy wraps PostgreSQL serialization failures in
+        // InvalidOperationException; SaveChanges uses DbUpdateException instead.
+        DbUpdateException { InnerException: PostgresException postgres } => postgres.IsTransient,
+        InvalidOperationException { InnerException: PostgresException postgres } => postgres.IsTransient,
+        PostgresException postgres => postgres.IsTransient,
+        _ => exception is TimeoutException or DbException,
+    };
 }
 
 public sealed class NCPersistenceBackpressureException(int maximumQueuedOperations) : Exception(

@@ -81,34 +81,42 @@ public sealed partial class ServerDbManager
         return RunDbCommand(() => _db.GetNCActiveJobAsync(characterId));
     }
 
-    public Task<NCPersonnelChangeData> HireNCCharacterAsync(NCCharacterId target, string jobId, int positionLimit,
+    public async Task<NCPersonnelChangeData> HireNCCharacterAsync(NCCharacterId target, string jobId, int positionLimit,
         NCCharacterId actor, string actorName, string reason)
     {
         DbWriteOpsMetric.Inc();
-        return RunDbCommand(() => _db.HireNCCharacterAsync(target, jobId, positionLimit, actor, actorName, reason));
+        var result = await RunDbCommand(() => _db.HireNCCharacterAsync(target, jobId, positionLimit, actor, actorName, reason));
+        if (result.Result == NCPersonnelChangeResult.Success) NotifyNCPlayerEmploymentChanged();
+        return result;
     }
 
-    public Task<NCPersonnelChangeData> SelfHireNCCharacterAsync(NCCharacterId target, string jobId, int positionLimit,
+    public async Task<NCPersonnelChangeData> SelfHireNCCharacterAsync(NCCharacterId target, string jobId, int positionLimit,
         string actorName, string reason)
     {
         DbWriteOpsMetric.Inc();
-        return RunDbCommand(() => _db.SelfHireNCCharacterAsync(target, jobId, positionLimit, actorName, reason));
+        var result = await RunDbCommand(() => _db.SelfHireNCCharacterAsync(target, jobId, positionLimit, actorName, reason));
+        if (result.Result == NCPersonnelChangeResult.Success) NotifyNCPlayerEmploymentChanged();
+        return result;
     }
 
-    public Task<NCPersonnelChangeData> TerminateNCCharacterAsync(NCCharacterId target,
+    public async Task<NCPersonnelChangeData> TerminateNCCharacterAsync(NCCharacterId target,
         IReadOnlyCollection<string> organizationJobs, NCCharacterId actor, string actorName, string reason)
     {
         DbWriteOpsMetric.Inc();
-        return RunDbCommand(() => _db.TerminateNCCharacterAsync(target, organizationJobs, actor, actorName, reason));
+        var result = await RunDbCommand(() => _db.TerminateNCCharacterAsync(target, organizationJobs, actor, actorName, reason));
+        if (result.Result == NCPersonnelChangeResult.Success) NotifyNCPlayerEmploymentChanged();
+        return result;
     }
 
-    public Task<NCPersonnelChangeData> ChangeNCCharacterPositionAsync(NCCharacterId target, string newJobId,
+    public async Task<NCPersonnelChangeData> ChangeNCCharacterPositionAsync(NCCharacterId target, string newJobId,
         int positionLimit, IReadOnlyCollection<string> organizationJobs, NCEmploymentEventType eventType,
         NCCharacterId actor, string actorName, string reason)
     {
         DbWriteOpsMetric.Inc();
-        return RunDbCommand(() => _db.ChangeNCCharacterPositionAsync(target, newJobId, positionLimit,
+        var result = await RunDbCommand(() => _db.ChangeNCCharacterPositionAsync(target, newJobId, positionLimit,
             organizationJobs, eventType, actor, actorName, reason));
+        if (result.Result == NCPersonnelChangeResult.Success) NotifyNCPlayerEmploymentChanged();
+        return result;
     }
 }
 

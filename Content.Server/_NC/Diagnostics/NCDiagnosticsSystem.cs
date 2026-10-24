@@ -41,6 +41,8 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private ITaskManager _tasks = default!;
     [Dependency] private IBaseServer _server = default!;
+    [Dependency] private Content.Server._NC.Medical.Cyberware.NCCyberwareSystem _cyberwareMetrics = default!;
+    [Dependency] private Content.Server._NC.Medical.Physiology.NCPhysiologySchedulerSystem _physiologyMetrics = default!;
 
     private readonly DiagnosticRequestPump _pump = new("server");
     private readonly DiagnosticLogBuffer _logBuffer = new();
@@ -57,11 +59,15 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
     [
         "session_get", "capabilities_get", "entities_query", "entity_inspect", "entity_snapshot", "maps_list",
         "map_region_inspect", "prototype_get", "prototype_search", "logs_read", "metrics_capture", "actions_list", "request_status",
+        "meta_performance_status", "meta_performance_read", "meta_app_load_status",
+        "meta_demo_list", "meta_demo_status",
     ];
 
     private static readonly string[] MutationCommands =
     [
         "action_execute", "fixture_create", "fixture_spawn", "fixture_destroy", "fixture_reset", "fixture_attach", "fixture_access", "fixture_power",
+        "meta_performance_start", "meta_performance_stop", "meta_app_load_prepare", "meta_app_load_open", "meta_app_load_attach", "meta_app_load_stop",
+        "meta_demo_create", "meta_demo_destroy",
     ];
 
     public override void Initialize()
@@ -203,7 +209,22 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                 args.BoundedInt("limit", 100, 1, 200), args["level"]?.GetValue<string>(), args["category"]?.GetValue<string>()), DiagnosticProtocol.JsonOptions),
             "metrics_capture" => new JsonObject { ["tick"] = _timing.CurTick.Value,
                 ["diagnosticQueue"] = _pump.QueueLength, ["managedMemoryBytes"] = GC.GetTotalMemory(false),
-                ["fixtureCount"] = _fixtures.Count, ["scope"] = "process-and-diagnostics" },
+                ["fixtureCount"] = _fixtures.Count, ["scope"] = "process-and-diagnostics",
+                ["cyberware"] = JsonSerializer.SerializeToNode(_cyberwareMetrics.GetRuntimeCounters(), DiagnosticProtocol.JsonOptions),
+                ["physiology"] = JsonSerializer.SerializeToNode(_physiologyMetrics.GetRuntimeCounters(), DiagnosticProtocol.JsonOptions) },
+            "meta_app_load_prepare" => PrepareMetaAppLoad(args),
+            "meta_app_load_status" => ReadMetaAppLoad(args),
+            "meta_app_load_open" => OpenMetaAppLoad(args),
+            "meta_app_load_attach" => AttachMetaAppLoad(args),
+            "meta_app_load_stop" => StopMetaAppLoad(args),
+            "meta_performance_start" => StartMetaPerformance(args),
+            "meta_performance_stop" => StopMetaPerformance(args),
+            "meta_performance_status" => ReadMetaPerformance(args, false),
+            "meta_performance_read" => ReadMetaPerformance(args, true),
+            "meta_demo_create" => CreateMetaDemo(args),
+            "meta_demo_destroy" => DestroyMetaDemo(args),
+            "meta_demo_list" => ReadMetaDemos(),
+            "meta_demo_status" => ReadMetaDemoStatus(args),
             "actions_list" => ActionCatalogue(),
             "action_execute" => ExecuteAction(args),
             "fixture_create" => CreateFixture(args),

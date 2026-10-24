@@ -18,8 +18,20 @@ public sealed partial class NCCyberwareSystem
     private void InitializeAssemblyEvents()
     {
         SubscribeLocalEvent<NCCyberwarePartComponent, MapInitEvent>(OnPartMapInit);
+        SubscribeLocalEvent<NCCyberwareAssemblyComponent, ComponentInit>(OnAssemblyInit);
         SubscribeLocalEvent<NCCyberwareAssemblyComponent, EntInsertedIntoContainerMessage>(OnAssemblyInserted);
         SubscribeLocalEvent<NCCyberwareAssemblyComponent, EntRemovedFromContainerMessage>(OnAssemblyRemoved);
+    }
+
+    private void OnAssemblyInit(Entity<NCCyberwareAssemblyComponent> assembly, ref ComponentInit args)
+    {
+        // Post-map-init world YAML does not raise MapInit again. Rebind its existing physical containers;
+        // never populate a restored assembly with newly manufactured default parts.
+        if (!assembly.Comp.Initialized || !TryComp<NCCyberwareComponent>(assembly, out var module) ||
+            !TryGetProfile(module.Profile, out var profile) || profile.Assembly is not { } definition)
+            return;
+        EnsureAssemblyContainers(assembly, assembly.Comp, _prototypes.Index(definition));
+        RefreshAssembly(assembly.Comp);
     }
 
     private void OnPartMapInit(Entity<NCCyberwarePartComponent> part, ref MapInitEvent args)
@@ -93,10 +105,17 @@ public sealed partial class NCCyberwareSystem
             ? uint.MaxValue
             : assembly.Comp.ConfigurationRevision + 1;
         assembly.Comp.ValidatedRevision = null;
+        RecordService(assembly, NCCyberwareServiceOperation.Configuration, Guid.NewGuid());
+        InvalidateCalibration(assembly);
         RefreshAssembly(assembly.Comp);
         UpdateOperational(assembly, module, profile, _timing.CurTime);
         if (TryResolveOwningBody(assembly, out var body))
+        {
             MarkBodyChanged(body);
+            var changed = new NCCyberwareStateChangedEvent(NCActionResolutionId.New(), assembly.Owner,
+                NCCyberwareStateChangeKind.Configuration, module.FunctionalEfficiency, module.FunctionalEfficiency);
+            RaiseLocalEvent(body, ref changed);
+        }
     }
 
     private void RefreshAssembly(NCCyberwareAssemblyComponent assembly)

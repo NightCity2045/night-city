@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "views": {
+    "dashboard": {
+      "function": "examples.dashboard.view",
+      "document": "ui/dashboard.mui",
+      "stateType": "examples.dashboard.DashboardState",
+      "fields": {
+        "title": {"type": "string", "maxLength": 128},
+        "status": {"type": "string", "maxLength": 128},
+        "speed": {"type": "string", "maxLength": 128},
+        "rpm": {"type": "string", "maxLength": 128},
+        "temperature": {"type": "string", "maxLength": 128},
+        "fuel": {"type": "string", "maxLength": 128},
+        "oil": {"type": "string", "maxLength": 128},
+        "battery": {"type": "string", "maxLength": 128},
+        "gear": {"type": "string", "maxLength": 128},
+        "fresh": {"type": "boolean"},
+        "history": {"type": "array", "maxLength": 6}
+      },
+      "actions": []
+    }
+  },
+  "actions": {},
+  "resources": []
+}

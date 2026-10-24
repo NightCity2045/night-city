@@ -1,0 +1,1033 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="fbf0bd79-3acf-4e20-83ea-206b85df3d5b" name="Yuri@SEXMACHINE 2026-10-22 19:38:19" runUser="SexMachine\Yuri" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-22T19:38:19.8054897+03:00" queuing="2026-10-22T19:38:19.8054900+03:00" start="2026-10-22T19:38:18.5241579+03:00" finish="2026-10-22T19:38:20.6948637+03:00" />
+  <TestSettings name="default" id="b2b835b2-0796-4018-98b7-45f7d776b8c5">
+    <Deployment runDeploymentRoot="Yuri_SEXMACHINE_2026-10-22_19_38_19" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="19436371-26dd-450d-9e7c-18466b3e64c9" testId="4e9a1e7a-4e3a-645c-4fe0-818be7b4ea1e" testName="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Button id='x' onClick='evil' /&gt;&lt;/Page&gt;&quot;)" computerName="SEXMACHINE" duration="00:00:00.0000280" startTime="2026-10-22T19:38:20.4321722+03:00" endTime="2026-10-22T19:38:20.4322003+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="19436371-26dd-450d-9e7c-18466b3e64c9" />
+    <UnitTestResult executionId="61e78bf8-397f-46ec-8ab6-d4602490ee42" testId="88a3cb4c-e7a2-4dbe-9c3a-190407dd3992" testName="DisposeReleasesSessionProjection" computerName="SEXMACHINE" duration="00:00:00.0041760" startTime="2026-10-22T19:38:20.4266012+03:00" endTime="2026-10-22T19:38:20.4307771+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="61e78bf8-397f-46ec-8ab6-d4602490ee42" />
+    <UnitTestResult executionId="75fd0d65-148d-441a-82fa-7feb8fd472b3" testId="0995c6a9-256b-388b-d685-f4c9f5953caf" testName="InvalidViewDataIsRejected(&quot;{\&quot;name\&quot;:\&quot;Alice\&quot;,\&quot;name\&quot;:\&quot;Bob\&quot;,\&quot;enabled\&quot;:true,\&quot;rows\&quot;:[]}&quot;)" computerName="SEXMACHINE" duration="00:00:00.0001450" startTime="2026-10-22T19:38:20.4328112+03:00" endTime="2026-10-22T19:38:20.4329561+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="75fd0d65-148d-441a-82fa-7feb8fd472b3" />
+    <UnitTestResult executionId="b9666a1c-bcd7-4f90-8528-2e407140b086" testId="c21a53b6-db16-5e54-e2c3-c26fac0deafc" testName="ValidDocumentBindsOnlyDeclaredFieldsAndActions" computerName="SEXMACHINE" duration="00:00:00.0013029" startTime="2026-10-22T19:38:20.4362878+03:00" endTime="2026-10-22T19:38:20.4375905+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b9666a1c-bcd7-4f90-8528-2e407140b086" />
+    <UnitTestResult executionId="0608ce44-be25-401a-90d0-1f51b58f14b4" testId="c73489cb-f480-4a0f-6cab-d10e67e4456e" testName="HeaderAndDirectoryMutationsAreRejected(20)" computerName="SEXMACHINE" duration="00:00:00.0002650" startTime="2026-10-22T19:38:19.7419766+03:00" endTime="2026-10-22T19:38:19.7422417+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0608ce44-be25-401a-90d0-1f51b58f14b4" />
+    <UnitTestResult executionId="f88e5b62-6468-480f-ae05-8e17beca194b" testId="297dc093-0878-c4fc-b88e-23cbebee1826" testName="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Button id='x' action='admin' /&gt;&lt;/Page&gt;&quot;)" computerName="SEXMACHINE" duration="00:00:00.0000950" startTime="2026-10-22T19:38:20.4320686+03:00" endTime="2026-10-22T19:38:20.4321634+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f88e5b62-6468-480f-ae05-8e17beca194b" />
+    <UnitTestResult executionId="15d32480-8081-4344-a11e-7fed34c2c21e" testId="87df7ce4-4581-d042-31c3-69929fc836a6" testName="NormativeNegativeProgramsHaveStableDiagnostics(&quot;struct Node { children:list&lt;Node&gt;; }&quot;,&quot;E219&quot;)" computerName="SEXMACHINE" duration="00:00:00.0006910" startTime="2026-10-22T19:38:19.9604148+03:00" endTime="2026-10-22T19:38:19.9611051+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="15d32480-8081-4344-a11e-7fed34c2c21e" />
+    <UnitTestResult executionId="3c3264f0-5d13-4ab9-91e8-1a88d2229b5e" testId="1f0bd065-95e8-6f65-6439-c926b7ff35b6" testName="UnicodeSpansUseNormalizedUtf8ScalarBoundaries" computerName="SEXMACHINE" duration="00:00:00.0052930" startTime="2026-10-22T19:38:20.3168786+03:00" endTime="2026-10-22T19:38:20.3221717+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3c3264f0-5d13-4ab9-91e8-1a88d2229b5e" />
+    <UnitTestResult executionId="81b1cb19-2597-4897-a9f0-ee1c3c6a8506" testId="6cbf77ea-d6c8-f0a4-208c-88a3fb45456a" testName="MetaValueIsExactlySixteenBytesWithoutClrReference" computerName="SEXMACHINE" duration="00:00:00.0003130" startTime="2026-10-22T19:38:20.6052446+03:00" endTime="2026-10-22T19:38:20.6055569+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="81b1cb19-2597-4897-a9f0-ee1c3c6a8506" />
+    <UnitTestResult executionId="43556e57-d868-403d-a5d1-9445ec901a8b" testId="c7482311-9f16-5917-5106-b6bfae5b08aa" testName="UnsafeStyleIsRejected(&quot;{\&quot;rules\&quot;:[{\&quot;selector\&quot;:\&quot;#root\&quot;,\&quot;properties\&quot;:{\&quot;script\&quot;:\&quot;evil\&quot;}}]}&quot;)" computerName="SEXMACHINE" duration="00:00:00.0006630" startTime="2026-10-22T19:38:20.4354423+03:00" endTime="2026-10-22T19:38:20.4361055+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="43556e57-d868-403d-a5d1-9445ec901a8b" />
+    <UnitTestResult executionId="3b283b3d-391e-465c-ba07-64b452a82990" testId="10ebcb28-2f5a-930b-336e-d388358cd00e" testName="HostPathsAreRejected(&quot;config/../mode&quot;)" computerName="SEXMACHINE" duration="00:00:00.0000030" startTime="2026-10-22T19:38:19.7628308+03:00" endTime="2026-10-22T19:38:19.7628339+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3b283b3d-391e-465c-ba07-64b452a82990" />
+    <UnitTestResult executionId="a16c738f-901a-449f-bc1c-68298d29af91" testId="b86469cd-0d67-6ec4-ebf6-16ca4fe817ec" testName="NumericBoundariesTrapOnlyTheProcess(IDiv,long.MinValue,-1,NumericFault)" computerName="SEXMACHINE" duration="00:00:00.0015460" startTime="2026-10-22T19:38:20.6056050+03:00" endTime="2026-10-22T19:38:20.6071504+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a16c738f-901a-449f-bc1c-68298d29af91" />
+    <UnitTestResult executionId="b60e6e54-5211-4569-a1d2-f5868b7a3cb0" testId="7d57144e-bc2b-2851-5172-9dbee4dd5524" testName="UnsafeStyleIsRejected(&quot;{\&quot;rules\&quot;:[{\&quot;selector\&quot;:\&quot;#root\&quot;,\&quot;properties\&quot;:{\&quot;image\&quot;:\&quot;../secrets\&quot;}}]}&quot;)" computerName="SEXMACHINE" duration="00:00:00.0000560" startTime="2026-10-22T19:38:20.4361267+03:00" endTime="2026-10-22T19:38:20.4361822+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b60e6e54-5211-4569-a1d2-f5868b7a3cb0" />
+    <UnitTestResult executionId="15e07cd5-e0fd-41eb-8041-5f4315870290" testId="91d49683-b049-443a-e93d-088d1f523aad" testName="HeaderAndDirectoryMutationsAreRejected(56)" computerName="SEXMACHINE" duration="00:00:00.0002060" startTime="2026-10-22T19:38:19.7424991+03:00" endTime="2026-10-22T19:38:19.7427052+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="15e07cd5-e0fd-41eb-8041-5f4315870290" />
+    <UnitTestResult executionId="08ec7192-a3f5-487b-b8de-b25ebe73d559" testId="12544c0f-270d-0deb-8bde-524e457b0696" testName="YieldDoesNotResetActivationGas" computerName="SEXMACHINE" duration="00:00:00.0019270" startTime="2026-10-22T19:38:20.6213219+03:00" endTime="2026-10-22T19:38:20.6232483+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="08ec7192-a3f5-487b-b8de-b25ebe73d559" />
+    <UnitTestResult executionId="18733f54-c5c3-4450-9e74-bd6bf8d38b64" testId="f55cb54f-c720-2a3b-8ebd-e119e3d88f86" testName="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Text id='x' visible='{bind name}' /&gt;&lt;/Page&gt;&quot;)" computerName="SEXMACHINE" duration="00:00:00.0001970" startTime="2026-10-22T19:38:20.4322186+03:00" endTime="2026-10-22T19:38:20.4324152+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="18733f54-c5c3-4450-9e74-bd6bf8d38b64" />
+    <UnitTestResult executionId="1e16f768-c721-4d9d-9716-8ce0464ce846" testId="9f9f4c0c-9152-581c-59d7-5a191bc5cf69" testName="EveryRegistryInstructionRoundTripsAndUnknownOpcodeIsRejected" computerName="SEXMACHINE" duration="00:00:00.0041610" startTime="2026-10-22T19:38:19.7352320+03:00" endTime="2026-10-22T19:38:19.7393924+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1e16f768-c721-4d9d-9716-8ce0464ce846" />
+    <UnitTestResult executionId="1cd0942c-b570-4b30-a646-364bd17a2902" testId="8f6dbe51-72f2-203a-de81-6ec65cce0d30" testName="InvalidViewDataIsRejected(&quot;{\&quot;name\&quot;:\&quot;Alice\&quot;,\&quot;enabled\&quot;:true,\&quot;rows\&quot;:[],\&quot;secret\&quot;:1}&quot;)" computerName="SEXMACHINE" duration="00:00:00.0000250" startTime="2026-10-22T19:38:20.4329663+03:00" endTime="2026-10-22T19:38:20.4329913+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1cd0942c-b570-4b30-a646-364bd17a2902" />
+    <UnitTestResult executionId="3f07f110-acaf-4ea7-8a1b-0f2f226fd349" testId="e00e7142-0c44-696e-0272-1c0b4b3492c7" testName="HeaderAndDirectoryMutationsAreRejected(76)" computerName="SEXMACHINE" duration="00:00:00.0003210" startTime="2026-10-22T19:38:19.7438744+03:00" endTime="2026-10-22T19:38:19.7441956+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3f07f110-acaf-4ea7-8a1b-0f2f226fd349" />
+    <UnitTestResult executionId="14d54ed9-44c0-406f-8bcf-c7d0953189c9" testId="4e367ea9-dcc2-ffb3-cb4e-95a0a9f13a04" testName="HeaderAndDirectoryMutationsAreRejected(10)" computerName="SEXMACHINE" duration="00:00:00.0002420" startTime="2026-10-22T19:38:19.7411978+03:00" endTime="2026-10-22T19:38:19.7414398+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="14d54ed9-44c0-406f-8bcf-c7d0953189c9" />
+    <UnitTestResult executionId="124c5ca8-103e-4d6a-bb89-e6612b0f50de" testId="b8041dd5-3746-fbc2-6c5e-8b2af1f5fec8" testName="HostPathsAreRejected(&quot;config\\mode&quot;)" computerName="SEXMACHINE" duration="00:00:00.0000120" startTime="2026-10-22T19:38:19.7628372+03:00" endTime="2026-10-22T19:38:19.7628496+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="124c5ca8-103e-4d6a-bb89-e6612b0f50de" />
+    <UnitTestResult executionId="247d52ad-dc54-44b5-869d-8e1fb4641885" testId="1ff4ca92-eaaa-366d-67ac-c1e16c9f41c4" testName="UnsafeStyleIsRejected(&quot;{\&quot;rules\&quot;:[{\&quot;selector\&quot;:\&quot;System.Button\&quot;,\&quot;properties\&quot;:{}}]}&quot;)" computerName="SEXMACHINE" duration="00:00:00.0002070" startTime="2026-10-22T19:38:20.4352240+03:00" endTime="2026-10-22T19:38:20.4354310+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="247d52ad-dc54-44b5-869d-8e1fb4641885" />
+    <UnitTestResult executionId="3ab7cfa6-a528-403c-984c-c2ab812ca466" testId="cfe62533-c7f3-c445-c82e-4a40d6933f6c" testName="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn main()-&gt;void { if(1){} }&quot;,&quot;E202&quot;)" computerName="SEXMACHINE" duration="00:00:00.0007200" startTime="2026-10-22T19:38:19.9516847+03:00" endTime="2026-10-22T19:38:19.9524044+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3ab7cfa6-a528-403c-984c-c2ab812ca466" />
+    <UnitTestResult executionId="5d576662-ab7e-4548-997e-6891f5f6b868" testId="3dd361f1-c447-46e6-6aec-aac0d3b3bd57" testName="PermissionIsIntersectionAndRecheckedAgainstAllEpochs" computerName="SEXMACHINE" duration="00:00:00.0026310" startTime="2026-10-22T19:38:19.7628710+03:00" endTime="2026-10-22T19:38:19.7655017+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5d576662-ab7e-4548-997e-6891f5f6b868" />
+    <UnitTestResult executionId="f2cb679e-54c8-4f6e-a3c9-ad0bb11f4522" testId="5a0598b1-4dc9-bf88-eeca-04cb902c5e4a" testName="NormativeProgramsCompileAndVerify(&quot;motion&quot;)" computerName="SEXMACHINE" duration="00:00:00.0192190" startTime="2026-10-22T19:38:20.1276614+03:00" endTime="2026-10-22T19:38:20.1468795+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f2cb679e-54c8-4f6e-a3c9-ad0bb11f4522">
+      <Output>
+        <ErrorInfo>
+          <Message>Content.Meta.Bytecode.MetaFormatException : Declared maxStack does not match independently computed maximum.</Message>
+          <StackTrace>   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+1)    at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="1c6d9b07-4a51-44fb-8609-8aaa1439b1c3" testId="e56484d4-b920-2763-0f95-e2fd52971179" testName="CanonicalJsonUsesSortedKeysLiteralUnicodeAndLongControlEscapes" computerName="SEXMACHINE" duration="00:00:00.0481590" startTime="2026-10-22T19:38:19.5819193+03:00" endTime="2026-10-22T19:38:19.6300335+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1c6d9b07-4a51-44fb-8609-8aaa1439b1c3" />
+    <UnitTestResult executionId="8864a665-1dec-43ea-ac06-b7c452ea7f70" testId="b77f4550-cf20-8b0c-1ce8-efdde019de41" testName="NormativeProgramsCompileAndVerify(&quot;sensorfilter&quot;)" computerName="SEXMACHINE" duration="00:00:00.0268040" startTime="2026-10-22T19:38:20.1469117+03:00" endTime="2026-10-22T19:38:20.1737158+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8864a665-1dec-43ea-ac06-b7c452ea7f70">
+      <Output>
+        <ErrorInfo>
+          <Message>Content.Meta.Bytecode.MetaFormatException : Declared maxStack does not match independently computed maximum.</Message>
+          <StackTrace>   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+1)    at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="1d4d8ef5-0971-40e6-8b62-53e8a3935edd" testId="49b8ab14-9b4c-55c4-ecf2-b5fbb501cfa6" testName="HostPathsAreRejected(&quot;../secret&quot;)" computerName="SEXMACHINE" duration="00:00:00.0000180" startTime="2026-10-22T19:38:19.7627932+03:00" endTime="2026-10-22T19:38:19.7628115+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1d4d8ef5-0971-40e6-8b62-53e8a3935edd" />
+    <UnitTestResult executionId="90abc9f9-ba86-4620-ac4e-1fc17f42d7fd" testId="79a9d087-cd85-076a-50c5-9f2e47aae347" testName="GuestRecursionUsesExplicitFramesAndStopsAtFrameLimit" computerName="SEXMACHINE" duration="00:00:00.0024580" startTime="2026-10-22T19:38:20.5942800+03:00" endTime="2026-10-22T19:38:20.5967382+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="90abc9f9-ba86-4620-ac4e-1fc17f42d7fd" />
+    <UnitTestResult executionId="86957d13-068d-4480-b6c1-ede7383a5fa4" testId="bf879fa6-9006-6edc-bbf1-c372b7f9887e" testName="HeaderAndDirectoryMutationsAreRejected(4)" computerName="SEXMACHINE" duration="00:00:00.0005019" startTime="2026-10-22T19:38:19.7401788+03:00" endTime="2026-10-22T19:38:19.7406806+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="86957d13-068d-4480-b6c1-ede7383a5fa4" />
+    <UnitTestResult executionId="50603217-17f7-407f-b5a7-ab7dbcce46c0" testId="d5b1b8f6-9c94-5a95-49cf-9945ac32b888" testName="NormativeNegativeProgramsHaveStableDiagnostics(&quot;import meta.doors; link d:Door=\&quot;x\&quot;; fn main()-&gt;void { let x=d.GetType(); }&quot;,&quot;E225&quot;)" computerName="SEXMACHINE" duration="00:00:00.0006260" startTime="2026-10-22T19:38:19.9552493+03:00" endTime="2026-10-22T19:38:19.9558751+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="50603217-17f7-407f-b5a7-ab7dbcce46c0" />
+    <UnitTestResult executionId="0ed5921c-6290-4d7d-aa48-e56280e69db2" testId="2d7b206f-1f0c-b9f1-8912-31ddebceb4db" testName="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn f()-&gt;int { if(true){return 1;} }&quot;,&quot;E214&quot;)" computerName="SEXMACHINE" duration="00:00:00.0007050" startTime="2026-10-22T19:38:19.9586457+03:00" endTime="2026-10-22T19:38:19.9593503+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0ed5921c-6290-4d7d-aa48-e56280e69db2" />
+    <UnitTestResult executionId="df842037-62d5-478c-8ddf-f94e688c66dd" testId="fcea4e24-0921-7643-ea18-4aaab97cf3a8" testName="IntegerRulesMatchNormativeSemantics(IRem,-7,3,-1)" computerName="SEXMACHINE" duration="00:00:00.0009870" startTime="2026-10-22T19:38:20.5995491+03:00" endTime="2026-10-22T19:38:20.6005360+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="df842037-62d5-478c-8ddf-f94e688c66dd" />
+    <UnitTestResult executionId="26e1cf91-7fe7-42a8-a28b-bc5e111b9c3e" testId="a91539d5-959c-48fd-d847-7a4d9e15b51e" testName="NormativeProgramsCompileAndVerify(&quot;netprobe&quot;)" computerName="SEXMACHINE" duration="00:00:00.0237050" startTime="2026-10-22T19:38:20.2931089+03:00" endTime="2026-10-22T19:38:20.3168130+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="26e1cf91-7fe7-42a8-a28b-bc5e111b9c3e">
+      <Output>
+        <ErrorInfo>
+          <Message>Content.Meta.Bytecode.MetaFormatException : Declared maxStack does not match independently computed maximum.</Message>
+          <StackTrace>   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+1)    at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3e36e023-e930-4599-ba39-b76a669624ce" testId="fe6a009d-10c1-2f53-0d4f-08682795b9b6" testName="NormativeProgramsCompileAndVerify(&quot;optics&quot;)" computerName="SEXMACHINE" duration="00:00:00.0241160" startTime="2026-10-22T19:38:20.2689609+03:00" endTime="2026-10-22T19:38:20.2930759+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3e36e023-e930-4599-ba39-b76a669624ce">
+      <Output>
+        <ErrorInfo>
+          <Message>Content.Meta.Bytecode.MetaFormatException : Declared maxStack does not match independently computed maximum.</Message>
+          <StackTrace>   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+1)    at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="006e1d8f-5325-4401-a11b-22de700fcc7b" testId="69b9fe17-41d3-9975-b3d3-022fa6ebca33" testName="HeaderAndDirectoryMutationsAreRejected(0)" computerName="SEXMACHINE" duration="00:00:00.0007010" startTime="2026-10-22T19:38:19.7394559+03:00" endTime="2026-10-22T19:38:19.7401561+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="006e1d8f-5325-4401-a11b-22de700fcc7b" />
+    <UnitTestResult executionId="b4e4375f-2572-49a2-ae84-b6b0fb29b396" testId="7ca68dad-9d95-551e-cc77-60957f90e4d6" testName="HostPathsAreRejected(&quot;config//mode&quot;)" computerName="SEXMACHINE" duration="00:00:00.0000050" startTime="2026-10-22T19:38:19.7628159+03:00" endTime="2026-10-22T19:38:19.7628204+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b4e4375f-2572-49a2-ae84-b6b0fb29b396" />
+    <UnitTestResult executionId="390a4353-8a2d-4732-ab67-e6499cb5c411" testId="dac4f31d-0991-e6a2-62cf-0f747375e2b6" testName="NormativeProgramsCompileAndVerify(&quot;files&quot;)" computerName="SEXMACHINE" duration="00:00:00.0207140" startTime="2026-10-22T19:38:20.0622123+03:00" endTime="2026-10-22T19:38:20.0829259+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="390a4353-8a2d-4732-ab67-e6499cb5c411">
+      <Output>
+        <ErrorInfo>
+          <Message>Content.Meta.Bytecode.MetaFormatException : Declared maxStack does not match independently computed maximum.</Message>
+          <StackTrace>   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+1)    at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="ad8098c6-069d-43bd-a85f-9b9e0f78a7bf" testId="d4477b8f-829d-4f91-07fa-af2baea6301a" testName="NumericBoundariesTrapOnlyTheProcess(IShl,2,64,NumericFault)" computerName="SEXMACHINE" duration="00:00:00.0031850" startTime="2026-10-22T19:38:20.6105839+03:00" endTime="2026-10-22T19:38:20.6137691+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ad8098c6-069d-43bd-a85f-9b9e0f78a7bf" />
+    <UnitTestResult executionId="2ba8a949-b1eb-46c2-8009-ef4a82ef142f" testId="7fb34a8f-786a-22eb-d957-8af883ce7be5" testName="NormativeProgramsCompileAndVerify(&quot;arraystats&quot;)" computerName="SEXMACHINE" duration="00:00:00.0284320" startTime="2026-10-22T19:38:20.0090766+03:00" endTime="2026-10-22T19:38:20.0375086+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2ba8a949-b1eb-46c2-8009-ef4a82ef142f">
+      <Output>
+        <ErrorInfo>
+          <Message>Content.Meta.Bytecode.MetaFormatException : Declared maxStack does not match independently computed maximum.</Message>
+          <StackTrace>   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+1)    at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="8477c5bc-67a4-47af-8ac3-0a2d58028811" testId="4409d5da-9534-f9bc-47ee-efc07238b53f" testName="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn main()-&gt;void { let x=1; {let x=2;} }&quot;,&quot;E211&quot;)" computerName="SEXMACHINE" duration="00:00:00.0002509" startTime="2026-10-22T19:38:19.9601589+03:00" endTime="2026-10-22T19:38:19.9604094+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8477c5bc-67a4-47af-8ac3-0a2d58028811" />
+    <UnitTestResult executionId="6dcb547b-9f70-470b-8eda-11c7ef9bf660" testId="27f76e4d-505d-19af-4d8e-e141514a00f6" testName="HeaderAndDirectoryMutationsAreRejected(16)" computerName="SEXMACHINE" duration="00:00:00.0002490" startTime="2026-10-22T19:38:19.7417179+03:00" endTime="2026-10-22T19:38:19.7419667+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6dcb547b-9f70-470b-8eda-11c7ef9bf660" />
+    <UnitTestResult executionId="74b9d8ed-3b51-4cb6-a9d8-f262f2279fca" testId="41f1a2ed-ac42-7556-9fe0-ddfee7847b1b" testName="LibraryImportAndMutualRecursionCompile" computerName="SEXMACHINE" duration="00:00:00.0738300" startTime="2026-10-22T19:38:19.8338884+03:00" endTime="2026-10-22T19:38:19.9077173+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="74b9d8ed-3b51-4cb6-a9d8-f262f2279fca">
+      <Output>
+        <ErrorInfo>
+          <Message>  Assert.That(code, new ThrowsNothingConstraint())&#xD;
+  Expected: No Exception to be thrown&#xD;
+  But was:  &lt;Content.Meta.Bytecode.MetaFormatException: Declared maxStack does not match independently computed maximum.&#xD;
+   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.&lt;&gt;c__DisplayClass4_0.&lt;LibraryImportAndMutualRecursionCompile&gt;b__1() in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 59&#xD;
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at NUnit.Framework.Internal.ExceptionHelper.Rethrow(Exception exception)&#xD;
+   at NUnit.Framework.Internal.Reflect.DynamicInvokeWithTransparentExceptions(Delegate delegate)&#xD;
+   at NUnit.Framework.Internal.ExceptionHelper.RecordException(Delegate parameterlessDelegate, String parameterName)&gt;&#xD;
+</Message>
+          <StackTrace>   at Content.Meta.Tests.Language.HybridCompilerTests.LibraryImportAndMutualRecursionCompile() in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 59&#xD;
+
+1)    at Content.Meta.Tests.Language.HybridCompilerTests.LibraryImportAndMutualRecursionCompile() in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 59&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="af3ca007-2341-416d-96df-01ee3a90073e" testId="68fb9c16-ac72-d43d-f3ed-7d810d3504fa" testName="IntegerRulesMatchNormativeSemantics(IShl,long.MaxValue,1,-2)" computerName="SEXMACHINE" duration="00:00:00.0009750" startTime="2026-10-22T19:38:20.6005549+03:00" endTime="2026-10-22T19:38:20.6015301+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="af3ca007-2341-416d-96df-01ee3a90073e" />
+    <UnitTestResult executionId="61c09032-dac3-4f19-8297-84b0c11c3b80" testId="5ad0e3c8-e63c-ab80-8220-2d099ec271ce" testName="NormativeProgramsCompileAndVerify(&quot;hello&quot;)" computerName="SEXMACHINE" duration="00:00:00.0245240" startTime="2026-10-22T19:38:19.9611589+03:00" endTime="2026-10-22T19:38:19.9856822+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="61c09032-dac3-4f19-8297-84b0c11c3b80">
+      <Output>
+        <ErrorInfo>
+          <Message>Content.Meta.Bytecode.MetaFormatException : Declared maxStack does not match independently computed maximum.</Message>
+          <StackTrace>   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+1)    at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at System.Reflection.MethodBaseInvoker.InterpretedInvoke_Method(Object obj, IntPtr* args)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c1f07206-4af0-4090-89aa-afc7261f1597" testId="183a623e-3692-151d-c31d-47942f484e47" testName="NormativeNegativeProgramsHaveStableDiagnostics(&quot;import meta.doors; link d:Door=\&quot;x\&quot;; fn main()-&gt;void { let x=await d.setOpen(true); }&quot;,&quot;E231&quot;)" computerName="SEXMACHINE" duration="00:00:00.0012710" startTime="2026-10-22T19:38:19.9531104+03:00" endTime="2026-10-22T19:38:19.9543812+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c1f07206-4af0-4090-89aa-afc7261f1597" />
+    <UnitTestResult executionId="4f8e39fc-5b97-4148-b464-833ca8f8b1d8" testId="e628122a-1949-e9ec-299d-8406a2b50b49" testName="NormativeProgramsCompileAndVerify(&quot;conveyor&quot;)" computerName="SEXMACHINE" duration="00:00:00.0184089" startTime="2026-10-22T19:38:20.2505178+03:00" endTime="2026-10-22T19:38:20.2689267+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4f8e39fc-5b97-4148-b464-833ca8f8b1d8">
+      <Output>
+        <ErrorInfo>
+          <Message>Content.Meta.Bytecode.MetaFormatException : Declared maxStack does not match independently computed maximum.</Message>
+          <StackTrace>   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+1)    at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="5bb15052-3c20-4f14-8544-400be852e211" testId="03fddbb6-5e06-97ad-d2c7-4b08af28d777" testName="HostileDocumentIsRejected(&quot;&lt;Page id='root' xmlns:x='clr-namespace:System'&gt;&lt;x:Object id='evil'/&gt;&lt;/Page&gt;&quot;)" computerName="SEXMACHINE" duration="00:00:00.0002560" startTime="2026-10-22T19:38:20.4310719+03:00" endTime="2026-10-22T19:38:20.4313270+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5bb15052-3c20-4f14-8544-400be852e211" />
+    <UnitTestResult executionId="2fc2467c-ff05-4e32-ba8e-405ae673bfd3" testId="1643f118-9eac-bb99-ef40-ab085bf6b75d" testName="NormativeProgramsCompileAndVerify(&quot;math&quot;)" computerName="SEXMACHINE" duration="00:00:00.0233150" startTime="2026-10-22T19:38:19.9857159+03:00" endTime="2026-10-22T19:38:20.0090304+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2fc2467c-ff05-4e32-ba8e-405ae673bfd3">
+      <Output>
+        <ErrorInfo>
+          <Message>Content.Meta.Bytecode.MetaFormatException : Declared maxStack does not match independently computed maximum.</Message>
+          <StackTrace>   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+1)    at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="05cad572-87c2-4912-9bb9-a6f532008321" testId="30746417-5869-5aa4-0f75-2e7a3354b54b" testName="VerifierRejectsForgedMaximumAndCollectionTypeCycle" computerName="SEXMACHINE" duration="00:00:00.0040190" startTime="2026-10-22T19:38:19.7501109+03:00" endTime="2026-10-22T19:38:19.7541291+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="05cad572-87c2-4912-9bb9-a6f532008321" />
+    <UnitTestResult executionId="8b8b5708-1a7f-4c2a-b5e8-fca9872c33c6" testId="beb1f872-f99c-8b92-f21d-914b36c2f895" testName="LargeAllocationFailsBeforeAllocatingGuestArray" computerName="SEXMACHINE" duration="00:00:00.0026610" startTime="2026-10-22T19:38:20.6025487+03:00" endTime="2026-10-22T19:38:20.6052096+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8b8b5708-1a7f-4c2a-b5e8-fca9872c33c6" />
+    <UnitTestResult executionId="5f319fce-dd43-4fe9-b035-30c3167cc6a0" testId="55b35a70-056d-0911-5ba9-c11cc6d13089" testName="HeaderAndDirectoryMutationsAreRejected(12)" computerName="SEXMACHINE" duration="00:00:00.0002540" startTime="2026-10-22T19:38:19.7414492+03:00" endTime="2026-10-22T19:38:19.7417025+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5f319fce-dd43-4fe9-b035-30c3167cc6a0" />
+    <UnitTestResult executionId="89d66de1-d3c6-4616-a64a-4736d06b510a" testId="4e160351-b6dd-b760-e83a-4b864e8eec6c" testName="NormativeProgramsCompileAndVerify(&quot;readings&quot;)" computerName="SEXMACHINE" duration="00:00:00.0246370" startTime="2026-10-22T19:38:20.0375410+03:00" endTime="2026-10-22T19:38:20.0621780+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="89d66de1-d3c6-4616-a64a-4736d06b510a">
+      <Output>
+        <ErrorInfo>
+          <Message>Content.Meta.Bytecode.MetaFormatException : Declared maxStack does not match independently computed maximum.</Message>
+          <StackTrace>   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+1)    at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="aacfbc65-f834-42f8-9cd9-e96bafdb9031" testId="5f9cf370-101a-cea8-517c-d8e5deb38d5c" testName="InvalidViewDataIsRejected(&quot;{\&quot;name\&quot;:17,\&quot;enabled\&quot;:true,\&quot;rows\&quot;:[]}&quot;)" computerName="SEXMACHINE" duration="00:00:00.0001910" startTime="2026-10-22T19:38:20.4326113+03:00" endTime="2026-10-22T19:38:20.4328021+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="aacfbc65-f834-42f8-9cd9-e96bafdb9031" />
+    <UnitTestResult executionId="73953291-acdc-4f37-b60d-c1655267c6c4" testId="6b12892c-21bd-68dd-cc6c-e8a27d2ea8a0" testName="NormativeNegativeProgramsHaveStableDiagnostics(&quot;import meta.doors; link d:Door=\&quot;x\&quot;; async fn main()-&gt;void { d.setOpen(true); }&quot;,&quot;E232&quot;)" computerName="SEXMACHINE" duration="00:00:00.0007950" startTime="2026-10-22T19:38:19.9544075+03:00" endTime="2026-10-22T19:38:19.9552020+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="73953291-acdc-4f37-b60d-c1655267c6c4" />
+    <UnitTestResult executionId="48059d89-eecc-4449-8804-86994ff02897" testId="4e13f088-2095-8f9f-10cd-276abd0f19ef" testName="NestedGenericsAndShiftHaveDifferentContexts" computerName="SEXMACHINE" duration="00:00:00.0325900" startTime="2026-10-22T19:38:19.9166084+03:00" endTime="2026-10-22T19:38:19.9491978+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="48059d89-eecc-4449-8804-86994ff02897">
+      <Output>
+        <ErrorInfo>
+          <Message>  Assert.That(code, new ThrowsNothingConstraint())&#xD;
+  Expected: No Exception to be thrown&#xD;
+  But was:  &lt;Content.Meta.Bytecode.MetaFormatException: Yield requires async function.&#xD;
+   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateOperands(MetaModule m, MetaFunctionDef f, MetaInstruction i, Dictionary`2 boundaries) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 358&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 205&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.&lt;&gt;c__DisplayClass6_0.&lt;NestedGenericsAndShiftHaveDifferentContexts&gt;b__1() in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 90&#xD;
+   at InvokeStub_TestDelegate.Invoke(Object, Object, IntPtr*)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)&#xD;
+--- End of stack trace from previous location ---&#xD;
+   at NUnit.Framework.Internal.ExceptionHelper.Rethrow(Exception exception)&#xD;
+   at NUnit.Framework.Internal.Reflect.DynamicInvokeWithTransparentExceptions(Delegate delegate)&#xD;
+   at NUnit.Framework.Internal.ExceptionHelper.RecordException(Delegate parameterlessDelegate, String parameterName)&gt;&#xD;
+</Message>
+          <StackTrace>   at Content.Meta.Tests.Language.HybridCompilerTests.NestedGenericsAndShiftHaveDifferentContexts() in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 90&#xD;
+
+1)    at Content.Meta.Tests.Language.HybridCompilerTests.NestedGenericsAndShiftHaveDifferentContexts() in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 90&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9e70f06b-1d6f-472e-bc7c-8ea600892915" testId="9e1752c0-15bf-d272-c259-2e078280eb6e" testName="NumericBoundariesTrapOnlyTheProcess(IDiv,2,0,NumericFault)" computerName="SEXMACHINE" duration="00:00:00.0016600" startTime="2026-10-22T19:38:20.6088392+03:00" endTime="2026-10-22T19:38:20.6104982+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9e70f06b-1d6f-472e-bc7c-8ea600892915" />
+    <UnitTestResult executionId="a954c7d7-5e3c-49cc-b360-b41c82f17396" testId="7cef132f-1308-bc8a-1c8a-deebc86a0a18" testName="ClockRegressionDoesNotRefillRateLimit" computerName="SEXMACHINE" duration="00:00:00.0067080" startTime="2026-10-22T19:38:19.7551511+03:00" endTime="2026-10-22T19:38:19.7618586+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a954c7d7-5e3c-49cc-b360-b41c82f17396" />
+    <UnitTestResult executionId="6a36d096-03bf-426f-8222-e91bac2efd71" testId="16aab7a7-07eb-36d0-7c78-985690df5d96" testName="HeaderAndDirectoryMutationsAreRejected(72)" computerName="SEXMACHINE" duration="00:00:00.0002730" startTime="2026-10-22T19:38:19.7435906+03:00" endTime="2026-10-22T19:38:19.7438635+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6a36d096-03bf-426f-8222-e91bac2efd71" />
+    <UnitTestResult executionId="e3b0e529-1ca5-472e-8254-f4437fcf91a8" testId="aa4fc861-20cb-4123-0b67-79e94b7cc6b3" testName="DefiniteAssignmentAndImmutableLifetimeAreIndependentlyChecked" computerName="SEXMACHINE" duration="00:00:00.0105670" startTime="2026-10-22T19:38:19.7246357+03:00" endTime="2026-10-22T19:38:19.7352023+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e3b0e529-1ca5-472e-8254-f4437fcf91a8" />
+    <UnitTestResult executionId="ce3add0c-f51f-4722-81f7-3d4858dcab28" testId="6f2308d8-58c9-65ab-1b02-c88f10bc506b" testName="HeaderAndDirectoryMutationsAreRejected(22)" computerName="SEXMACHINE" duration="00:00:00.0002420" startTime="2026-10-22T19:38:19.7422497+03:00" endTime="2026-10-22T19:38:19.7424917+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ce3add0c-f51f-4722-81f7-3d4858dcab28" />
+    <UnitTestResult executionId="2013715d-4e3a-4821-bcc5-b0051da4e528" testId="a5532905-4522-ef92-97d2-7bdf4b2fa954" testName="DepthAndActiveControlBudgetsAreEnforced" computerName="SEXMACHINE" duration="00:00:00.0449970" startTime="2026-10-22T19:38:20.3223440+03:00" endTime="2026-10-22T19:38:20.3673399+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2013715d-4e3a-4821-bcc5-b0051da4e528" />
+    <UnitTestResult executionId="7931d315-6102-4b7a-81be-a87158ca808b" testId="05e0be72-4ac9-3361-4132-6d208f9f360d" testName="IntegerRulesMatchNormativeSemantics(IRem,long.MinValue,-1,0)" computerName="SEXMACHINE" duration="00:00:00.0013320" startTime="2026-10-22T19:38:20.5968034+03:00" endTime="2026-10-22T19:38:20.5981351+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7931d315-6102-4b7a-81be-a87158ca808b" />
+    <UnitTestResult executionId="ecfd949b-a5e5-4811-8e17-340e1c74a2b8" testId="8c9884ec-b5bc-4b4b-b280-f551df9557e7" testName="GeneratedPureExpressionsAgreeWithIndependentAstOracleAcrossSlices" computerName="SEXMACHINE" duration="00:00:00.1564250" startTime="2026-10-22T19:38:20.4378141+03:00" endTime="2026-10-22T19:38:20.5942393+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ecfd949b-a5e5-4811-8e17-340e1c74a2b8" />
+    <UnitTestResult executionId="6b82156a-e09a-4462-a7ce-bf594e0dfe4f" testId="485b77ac-5a50-995c-4a12-f22ad7afb180" testName="HeaderAndDirectoryMutationsAreRejected(68)" computerName="SEXMACHINE" duration="00:00:00.0002810" startTime="2026-10-22T19:38:19.7433019+03:00" endTime="2026-10-22T19:38:19.7435826+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6b82156a-e09a-4462-a7ce-bf594e0dfe4f" />
+    <UnitTestResult executionId="3ea5ed77-5aae-441c-838a-565b0fcfa7cb" testId="001cf7bb-1049-50b4-29ee-d768d4d03438" testName="ProcessObjectHandlesCannotBeTransferredBetweenProcesses" computerName="SEXMACHINE" duration="00:00:00.0032590" startTime="2026-10-22T19:38:20.6138213+03:00" endTime="2026-10-22T19:38:20.6170792+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3ea5ed77-5aae-441c-838a-565b0fcfa7cb" />
+    <UnitTestResult executionId="e39300dc-0661-467f-ac5a-e0b2ce185687" testId="87ca77f5-35a2-9619-c686-85ebda353849" testName="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Text id='x' text='{bind name.ToString()}'/&gt;&lt;/Page&gt;&quot;)" computerName="SEXMACHINE" duration="00:00:00.0003410" startTime="2026-10-22T19:38:20.4317173+03:00" endTime="2026-10-22T19:38:20.4320583+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e39300dc-0661-467f-ac5a-e0b2ce185687" />
+    <UnitTestResult executionId="c0d1f834-b0a0-47fc-a817-f91c54ab2b01" testId="f42889ce-8cd4-4628-1ae0-0b8b49fd863e" testName="NormativeProgramsCompileAndVerify(&quot;overheat&quot;)" computerName="SEXMACHINE" duration="00:00:00.0261510" startTime="2026-10-22T19:38:20.2011170+03:00" endTime="2026-10-22T19:38:20.2272672+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c0d1f834-b0a0-47fc-a817-f91c54ab2b01">
+      <Output>
+        <ErrorInfo>
+          <Message>Content.Meta.Bytecode.MetaFormatException : Declared maxStack does not match independently computed maximum.</Message>
+          <StackTrace>   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+1)    at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="50c1d8b9-300c-4225-9a20-0f1b8a07ab6c" testId="d8f66e65-6a15-f3c5-6925-9daeaf2fd7bc" testName="HostPathsAreRejected(&quot;config/./mode&quot;)" computerName="SEXMACHINE" duration="00:00:00.0000040" startTime="2026-10-22T19:38:19.7628237+03:00" endTime="2026-10-22T19:38:19.7628277+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="50c1d8b9-300c-4225-9a20-0f1b8a07ab6c" />
+    <UnitTestResult executionId="306192fc-9900-4586-9d59-97ec91e3efd2" testId="0df2ed6c-8c44-772e-299d-5078321c3339" testName="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn main()-&gt;void { let x:int=1; x=2; }&quot;,&quot;E210&quot;)" computerName="SEXMACHINE" duration="00:00:00.0002870" startTime="2026-10-22T19:38:19.9598649+03:00" endTime="2026-10-22T19:38:19.9601514+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="306192fc-9900-4586-9d59-97ec91e3efd2" />
+    <UnitTestResult executionId="e8f089bd-fc1c-4cb2-a7d4-509b8afd414d" testId="4d8102da-5456-befc-fda6-c208c9c04f07" testName="StructUpdateCopiesValueWhileArrayFieldsKeepLocalAliases" computerName="SEXMACHINE" duration="00:00:00.0041620" startTime="2026-10-22T19:38:20.6171285+03:00" endTime="2026-10-22T19:38:20.6212900+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e8f089bd-fc1c-4cb2-a7d4-509b8afd414d" />
+    <UnitTestResult executionId="b8d11128-a280-4761-8493-c8622f167372" testId="b7e178ac-099f-f4a4-415c-8e7fd8c9d99b" testName="NumericBoundariesTrapOnlyTheProcess(IAdd,long.MaxValue,1,NumericFault)" computerName="SEXMACHINE" duration="00:00:00.0016329" startTime="2026-10-22T19:38:20.6071764+03:00" endTime="2026-10-22T19:38:20.6088089+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b8d11128-a280-4761-8493-c8622f167372" />
+    <UnitTestResult executionId="b87f3626-c2b8-453b-a268-978feb47c9f2" testId="e2005560-dfff-89e7-e220-6c988fff1956" testName="HostPathsAreRejected(&quot;C:/server.cfg&quot;)" computerName="SEXMACHINE" duration="00:00:00.0002150" startTime="2026-10-22T19:38:19.7625626+03:00" endTime="2026-10-22T19:38:19.7627774+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b87f3626-c2b8-453b-a268-978feb47c9f2" />
+    <UnitTestResult executionId="4bb949ca-302e-4ca3-98da-a3afb9d01454" testId="12fad825-4dc4-4e55-3433-77359e4b8f5d" testName="NormativeNegativeProgramsHaveStableDiagnostics(&quot;import meta.doors; fn main()-&gt;void { let x=new Door(id:17); }&quot;,&quot;E226&quot;)" computerName="SEXMACHINE" duration="00:00:00.0008220" startTime="2026-10-22T19:38:19.9578000+03:00" endTime="2026-10-22T19:38:19.9586220+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4bb949ca-302e-4ca3-98da-a3afb9d01454">
+      <Output>
+        <ErrorInfo>
+          <Message>  Assert.That(result.Diagnostics.Select(d =&gt; d.Code), Does.Contain(diagnostic))&#xD;
+  Expected: some item equal to "E226"&#xD;
+  But was:  &lt; "E228" &gt;&#xD;
+</Message>
+          <StackTrace>   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeNegativeProgramsHaveStableDiagnostics(String body, String diagnostic) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 82&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeNegativeProgramsHaveStableDiagnostics(Object, Span`1)&#xD;
+
+1)    at Content.Meta.Tests.Language.HybridCompilerTests.NormativeNegativeProgramsHaveStableDiagnostics(String body, String diagnostic) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 82&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeNegativeProgramsHaveStableDiagnostics(Object, Span`1)&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="71408f63-6329-41cf-aa13-1878d785a655" testId="c8d444ce-3f87-8625-413e-cc80f79854ec" testName="NormativeProgramsCompileAndVerify(&quot;doorpanel&quot;)" computerName="SEXMACHINE" duration="00:00:00.0247670" startTime="2026-10-22T19:38:20.1028495+03:00" endTime="2026-10-22T19:38:20.1276158+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="71408f63-6329-41cf-aa13-1878d785a655">
+      <Output>
+        <ErrorInfo>
+          <Message>Content.Meta.Bytecode.MetaFormatException : Declared maxStack does not match independently computed maximum.</Message>
+          <StackTrace>   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+1)    at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="f3b194b0-37e4-4ca0-a7d9-25bd4f516012" testId="619ac2b1-658f-6427-c66c-4ab95a3bd6ae" testName="NormativeProgramsCompileAndVerify(&quot;diagnostics&quot;)" computerName="SEXMACHINE" duration="00:00:00.0273300" startTime="2026-10-22T19:38:20.1737511+03:00" endTime="2026-10-22T19:38:20.2010801+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f3b194b0-37e4-4ca0-a7d9-25bd4f516012">
+      <Output>
+        <ErrorInfo>
+          <Message>Content.Meta.Bytecode.MetaFormatException : Declared maxStack does not match independently computed maximum.</Message>
+          <StackTrace>   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+1)    at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c7f219bb-9b84-4eeb-9c64-433cdb9c5499" testId="673f94e8-e880-59db-fe6c-7afc29cf5a54" testName="HeaderAndDirectoryMutationsAreRejected(64)" computerName="SEXMACHINE" duration="00:00:00.0002630" startTime="2026-10-22T19:38:19.7427093+03:00" endTime="2026-10-22T19:38:19.7429723+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c7f219bb-9b84-4eeb-9c64-433cdb9c5499" />
+    <UnitTestResult executionId="0145fc7a-f6e2-4864-88a6-df3f643354e9" testId="3821dd3d-2c8a-9c81-2ebe-c3f813387aee" testName="ContainerUsesNormativeHeaderDirectoryAndDigest" computerName="SEXMACHINE" duration="00:00:00.0935090" startTime="2026-10-22T19:38:19.6310787+03:00" endTime="2026-10-22T19:38:19.7245875+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0145fc7a-f6e2-4864-88a6-df3f643354e9" />
+    <UnitTestResult executionId="8ad128a9-cf9d-4c3c-9564-f99bcf2ad89e" testId="e3ace438-37d6-0d10-bc44-2ab4d54e0fda" testName="NormativeNegativeProgramsHaveStableDiagnostics(&quot;const a:array&lt;int&gt;=[1,2];&quot;,&quot;E216&quot;)" computerName="SEXMACHINE" duration="00:00:00.0004900" startTime="2026-10-22T19:38:19.9593655+03:00" endTime="2026-10-22T19:38:19.9598553+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8ad128a9-cf9d-4c3c-9564-f99bcf2ad89e">
+      <Output>
+        <ErrorInfo>
+          <Message>  Assert.That(result.Diagnostics.Select(d =&gt; d.Code), Does.Contain(diagnostic))&#xD;
+  Expected: some item equal to "E216"&#xD;
+  But was:  &lt; "E102" &gt;&#xD;
+</Message>
+          <StackTrace>   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeNegativeProgramsHaveStableDiagnostics(String body, String diagnostic) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 82&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeNegativeProgramsHaveStableDiagnostics(Object, Span`1)&#xD;
+
+1)    at Content.Meta.Tests.Language.HybridCompilerTests.NormativeNegativeProgramsHaveStableDiagnostics(String body, String diagnostic) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 82&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeNegativeProgramsHaveStableDiagnostics(Object, Span`1)&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d74b8cff-f5a8-4cb7-8939-40a5b7cdcb93" testId="b08162b0-9039-a495-5660-f5c203171682" testName="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Text id='x' text='{Binding name}'/&gt;&lt;/Page&gt;&quot;)" computerName="SEXMACHINE" duration="00:00:00.0003579" startTime="2026-10-22T19:38:20.4313391+03:00" endTime="2026-10-22T19:38:20.4316974+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d74b8cff-f5a8-4cb7-8939-40a5b7cdcb93" />
+    <UnitTestResult executionId="d8668a4a-a4b4-407b-a307-48412a48b937" testId="fc14bd65-d601-ee93-213b-69c60c6e5322" testName="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Text id='root' /&gt;&lt;/Page&gt;&quot;)" computerName="SEXMACHINE" duration="00:00:00.0000120" startTime="2026-10-22T19:38:20.4322039+03:00" endTime="2026-10-22T19:38:20.4322155+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d8668a4a-a4b4-407b-a307-48412a48b937" />
+    <UnitTestResult executionId="b708e6ce-0b7f-4cea-b0f7-da32f7307f53" testId="4a755c7c-ddcb-458c-8946-703944ed245f" testName="PrefixUsesSegmentBoundary" computerName="SEXMACHINE" duration="00:00:00.0002900" startTime="2026-10-22T19:38:19.7655206+03:00" endTime="2026-10-22T19:38:19.7658100+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b708e6ce-0b7f-4cea-b0f7-da32f7307f53" />
+    <UnitTestResult executionId="223d43e4-b10d-45d6-bbd6-850ae4667487" testId="dd7cf8db-453b-2688-02d7-8c7753450801" testName="HeaderAndDirectoryMutationsAreRejected(8)" computerName="SEXMACHINE" duration="00:00:00.0002120" startTime="2026-10-22T19:38:19.7409731+03:00" endTime="2026-10-22T19:38:19.7411852+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="223d43e4-b10d-45d6-bbd6-850ae4667487" />
+    <UnitTestResult executionId="add5c1bc-0d4c-411d-9007-acec50f2dc9f" testId="4d01ddf1-f395-0167-97cf-4a2f2cb0e3cd" testName="LimitsAndCancellationAreBounded" computerName="SEXMACHINE" duration="00:00:00.0086780" startTime="2026-10-22T19:38:19.9078988+03:00" endTime="2026-10-22T19:38:19.9165760+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="add5c1bc-0d4c-411d-9007-acec50f2dc9f" />
+    <UnitTestResult executionId="aa4c3067-6a39-4578-a312-13234bee64f7" testId="4d60c7f0-f0f6-7107-a377-928680602590" testName="IntegerRulesMatchNormativeSemantics(IShr,-8,2,-2)" computerName="SEXMACHINE" duration="00:00:00.0009640" startTime="2026-10-22T19:38:20.6015484+03:00" endTime="2026-10-22T19:38:20.6025124+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="aa4c3067-6a39-4578-a312-13234bee64f7" />
+    <UnitTestResult executionId="5062b5de-62ae-4a02-8347-6c3346440196" testId="511c7f08-d841-57af-150c-f02793bb6e0d" testName="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Image id='x' resource='https://example.com/a.png' /&gt;&lt;/Page&gt;&quot;)" computerName="SEXMACHINE" duration="00:00:00.0001230" startTime="2026-10-22T19:38:20.4324244+03:00" endTime="2026-10-22T19:38:20.4325473+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5062b5de-62ae-4a02-8347-6c3346440196" />
+    <UnitTestResult executionId="29bba350-c521-44e6-bc6a-2e3408754d3f" testId="0bce7acd-90de-3034-fcb3-d821d7e6a416" testName="NormativeProgramsCompileAndVerify(&quot;pong&quot;)" computerName="SEXMACHINE" duration="00:00:00.0198640" startTime="2026-10-22T19:38:20.0829599+03:00" endTime="2026-10-22T19:38:20.1028234+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="29bba350-c521-44e6-bc6a-2e3408754d3f">
+      <Output>
+        <ErrorInfo>
+          <Message>Content.Meta.Bytecode.MetaFormatException : Declared maxStack does not match independently computed maximum.</Message>
+          <StackTrace>   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+1)    at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="8cf8d754-ae40-47e7-bce1-7e033dc06087" testId="56da0783-1dda-ffe4-c360-240287881190" testName="PatchGapRequestsResyncWithoutMutation" computerName="SEXMACHINE" duration="00:00:00.0021750" startTime="2026-10-22T19:38:20.4330054+03:00" endTime="2026-10-22T19:38:20.4351799+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8cf8d754-ae40-47e7-bce1-7e033dc06087" />
+    <UnitTestResult executionId="2ea797b4-73e5-4306-b052-84cff821031e" testId="0abc9557-49cd-5fd6-35b6-fcc1a34e9b11" testName="HostileDocumentIsRejected(&quot;&lt;!DOCTYPE Page [&lt;!ENTITY x SYSTEM 'file:///etc/passwd'&gt;]&gt;&lt;Page id='root'&gt;&lt;Text id='text'&gt;&amp;x;&lt;/Text&gt;&lt;/Page&gt;&quot;)" computerName="SEXMACHINE" duration="00:00:00.0002140" startTime="2026-10-22T19:38:20.4308459+03:00" endTime="2026-10-22T19:38:20.4310596+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2ea797b4-73e5-4306-b052-84cff821031e" />
+    <UnitTestResult executionId="77a41a72-e40b-4c03-a589-2eaa46fecdfe" testId="c0f47440-1c8a-b74e-98dc-c21306c3f954" testName="UnsafeStyleIsRejected(&quot;{\&quot;tokens\&quot;:{\&quot;a\&quot;:\&quot;$b\&quot;,\&quot;b\&quot;:\&quot;$a\&quot;},\&quot;rules\&quot;:[{\&quot;selector\&quot;:\&quot;#root\&quot;,\&quot;properties\&quot;:{\&quot;color\&quot;:\&quot;$a\&quot;}}]}&quot;)" computerName="SEXMACHINE" duration="00:00:00.0000600" startTime="2026-10-22T19:38:20.4361956+03:00" endTime="2026-10-22T19:38:20.4362555+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="77a41a72-e40b-4c03-a589-2eaa46fecdfe" />
+    <UnitTestResult executionId="4d78c2a5-5bf4-49f0-9a45-ad2db0edaf1f" testId="9ab97c94-cb4c-6cdd-1fbe-051314b309ce" testName="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn main()-&gt;void { let x:option&lt;int&gt;=some(1); match(x){some(y)=&gt;{}} }&quot;,&quot;E241&quot;)" computerName="SEXMACHINE" duration="00:00:00.0014640" startTime="2026-10-22T19:38:19.9563116+03:00" endTime="2026-10-22T19:38:19.9577757+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4d78c2a5-5bf4-49f0-9a45-ad2db0edaf1f">
+      <Output>
+        <ErrorInfo>
+          <Message>  Assert.That(result.Diagnostics.Select(d =&gt; d.Code), Does.Contain(diagnostic))&#xD;
+  Expected: some item equal to "E241"&#xD;
+  But was:  &lt; "E102" &gt;&#xD;
+</Message>
+          <StackTrace>   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeNegativeProgramsHaveStableDiagnostics(String body, String diagnostic) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 82&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeNegativeProgramsHaveStableDiagnostics(Object, Span`1)&#xD;
+
+1)    at Content.Meta.Tests.Language.HybridCompilerTests.NormativeNegativeProgramsHaveStableDiagnostics(String body, String diagnostic) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 82&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeNegativeProgramsHaveStableDiagnostics(Object, Span`1)&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c30d5b3b-c631-437b-90c8-c48ca3cbea81" testId="2548039c-e6ba-c82f-9bce-60445c226abf" testName="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn main()-&gt;void { let x=none; }&quot;,&quot;E203&quot;)" computerName="SEXMACHINE" duration="00:00:00.0004020" startTime="2026-10-22T19:38:19.9558926+03:00" endTime="2026-10-22T19:38:19.9562940+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c30d5b3b-c631-437b-90c8-c48ca3cbea81" />
+    <UnitTestResult executionId="cb06418e-6e37-456c-852a-c73eea214b32" testId="adc3b740-9aa0-1d26-c05d-66d9c382221c" testName="NormativeNegativeProgramsHaveStableDiagnostics(&quot;var t:float=110;&quot;,&quot;E201&quot;)" computerName="SEXMACHINE" duration="00:00:00.0024010" startTime="2026-10-22T19:38:19.9492605+03:00" endTime="2026-10-22T19:38:19.9516607+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cb06418e-6e37-456c-852a-c73eea214b32" />
+    <UnitTestResult executionId="f993e69e-215b-427c-9208-4f41178eedf5" testId="930e40f3-7711-636b-2248-8e35ef9abcb7" testName="ConstantArithmeticIsCheckedAndPreservesDefinedRemainder" computerName="SEXMACHINE" duration="00:00:00.0678639" startTime="2026-10-22T19:38:19.7659965+03:00" endTime="2026-10-22T19:38:19.8338599+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f993e69e-215b-427c-9208-4f41178eedf5" />
+    <UnitTestResult executionId="28b80242-18c0-4a77-ab35-20d3de38e704" testId="5bd47d09-640c-2025-f833-7fbf611ec1b7" testName="HostileDocumentIsRejected(&quot;&lt;?evil execute?&gt;&lt;Page id='root'/&gt;&quot;)" computerName="SEXMACHINE" duration="00:00:00.0000250" startTime="2026-10-22T19:38:20.4325563+03:00" endTime="2026-10-22T19:38:20.4325809+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="28b80242-18c0-4a77-ab35-20d3de38e704" />
+    <UnitTestResult executionId="bb6a9515-ce95-4471-bd83-0f48f64459ef" testId="94bd44dd-a1f1-4495-8ed5-c615c142117a" testName="MutatingSourceBytesOrMetadataCannotChangeVerifiedArtifact" computerName="SEXMACHINE" duration="00:00:00.0023869" startTime="2026-10-22T19:38:19.7456329+03:00" endTime="2026-10-22T19:38:19.7480195+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bb6a9515-ce95-4471-bd83-0f48f64459ef" />
+    <UnitTestResult executionId="7553cfa9-ad11-4966-8bcc-9772bae12a82" testId="cbe0ff10-ceec-3d14-dcc4-8399de496420" testName="NormativeProgramsCompileAndVerify(&quot;patrol&quot;)" computerName="SEXMACHINE" duration="00:00:00.0231810" startTime="2026-10-22T19:38:20.2273019+03:00" endTime="2026-10-22T19:38:20.2504828+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7553cfa9-ad11-4966-8bcc-9772bae12a82">
+      <Output>
+        <ErrorInfo>
+          <Message>Content.Meta.Bytecode.MetaFormatException : Declared maxStack does not match independently computed maximum.</Message>
+          <StackTrace>   at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+1)    at Content.Meta.Verification.MetaVerifier.Require(Boolean condition, String message) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 383&#xD;
+   at Content.Meta.Verification.MetaVerifier.ValidateFunction(MetaModule m, MetaFunctionDef f, MetaInstruction[] code, MetaLimits limits, Int32&amp; work) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 323&#xD;
+   at Content.Meta.Verification.MetaVerifier.Verify(Byte[] bytes, MetaVerificationCatalog catalog, MetaLimits limits) in D:\projects\night-city\Content.Meta\Verification\MetaVerifier.cs:line 31&#xD;
+   at Content.Meta.Tests.Language.HybridCompilerTests.NormativeProgramsCompileAndVerify(String name) in D:\projects\night-city\Content.Meta.Tests\Language\HybridCompilerTests.cs:line 45&#xD;
+   at InvokeStub_HybridCompilerTests.NormativeProgramsCompileAndVerify(Object, Span`1)&#xD;
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="f61220ad-42c3-4571-84bb-58d3481bf4f0" testId="3b3527b5-b738-a1e6-64b2-9bc466b0e319" testName="NormativeNegativeProgramsHaveStableDiagnostics(&quot;import meta.doors; link d:Door = entityId;&quot;,&quot;E103&quot;)" computerName="SEXMACHINE" duration="00:00:00.0006630" startTime="2026-10-22T19:38:19.9524266+03:00" endTime="2026-10-22T19:38:19.9530895+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f61220ad-42c3-4571-84bb-58d3481bf4f0" />
+    <UnitTestResult executionId="08caace9-216b-409d-ba68-b5ecf14e88f2" testId="4bbcfd7c-b397-992a-657e-8d205a8f3496" testName="IntegerRulesMatchNormativeSemantics(IDiv,-7,3,-2)" computerName="SEXMACHINE" duration="00:00:00.0013620" startTime="2026-10-22T19:38:20.5981598+03:00" endTime="2026-10-22T19:38:20.5995219+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="08caace9-216b-409d-ba68-b5ecf14e88f2" />
+    <UnitTestResult executionId="ab195a8f-8beb-428a-9e87-513c2105d386" testId="13b059ed-48e2-70f9-a0e9-8f73b85408e0" testName="VerifierRejectsBranchIntoOperandAndUnreachableUnknownOpcode" computerName="SEXMACHINE" duration="00:00:00.0020620" startTime="2026-10-22T19:38:19.7480351+03:00" endTime="2026-10-22T19:38:19.7500964+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ab195a8f-8beb-428a-9e87-513c2105d386" />
+    <UnitTestResult executionId="9c626e82-dab7-4c77-a1b4-dee01c5b5690" testId="7fb86823-df70-8378-33a7-f80d97a0d005" testName="HeaderAndDirectoryMutationsAreRejected(66)" computerName="SEXMACHINE" duration="00:00:00.0003130" startTime="2026-10-22T19:38:19.7429811+03:00" endTime="2026-10-22T19:38:19.7432937+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9c626e82-dab7-4c77-a1b4-dee01c5b5690" />
+    <UnitTestResult executionId="abd3c30a-85d0-4d1d-96d1-d2a81a9c3398" testId="0769b8fb-ea22-5e20-c301-aab5ae4968db" testName="HostPathsAreRejected(&quot;/server.cfg&quot;)" computerName="SEXMACHINE" duration="00:00:00.0005900" startTime="2026-10-22T19:38:19.7619520+03:00" endTime="2026-10-22T19:38:19.7625417+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="abd3c30a-85d0-4d1d-96d1-d2a81a9c3398" />
+    <UnitTestResult executionId="c5d7132e-d59b-45f0-b77a-ad9f8dd2098e" testId="32a6bfc6-1ae9-8e4e-b70c-926596c83adb" testName="DeterministicMalformedInputCorpusDoesNotThrow" computerName="SEXMACHINE" duration="00:00:00.0591940" startTime="2026-10-22T19:38:20.3673756+03:00" endTime="2026-10-22T19:38:20.4265693+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c5d7132e-d59b-45f0-b77a-ad9f8dd2098e" />
+    <UnitTestResult executionId="58b6de49-f334-43d6-8489-4573135d3b7f" testId="9d496db5-9a74-9706-df8d-3889c962ffcb" testName="HeaderAndDirectoryMutationsAreRejected(6)" computerName="SEXMACHINE" duration="00:00:00.0002690" startTime="2026-10-22T19:38:19.7407000+03:00" endTime="2026-10-22T19:38:19.7409685+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="58b6de49-f334-43d6-8489-4573135d3b7f" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="HostPathsAreRejected(&quot;config/./mode&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="d8f66e65-6a15-f3c5-6925-9daeaf2fd7bc">
+      <Execution id="50c1d8b9-300c-4225-9a20-0f1b8a07ab6c" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaAuthorityTests" name="HostPathsAreRejected(&quot;config/./mode&quot;)" />
+    </UnitTest>
+    <UnitTest name="DepthAndActiveControlBudgetsAreEnforced" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="a5532905-4522-ef92-97d2-7bdf4b2fa954">
+      <Execution id="2013715d-4e3a-4821-bcc5-b0051da4e528" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="DepthAndActiveControlBudgetsAreEnforced" />
+    </UnitTest>
+    <UnitTest name="LargeAllocationFailsBeforeAllocatingGuestArray" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="beb1f872-f99c-8b92-f21d-914b36c2f895">
+      <Execution id="8b8b5708-1a7f-4c2a-b5e8-fca9872c33c6" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="LargeAllocationFailsBeforeAllocatingGuestArray" />
+    </UnitTest>
+    <UnitTest name="HeaderAndDirectoryMutationsAreRejected(22)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="6f2308d8-58c9-65ab-1b02-c88f10bc506b">
+      <Execution id="ce3add0c-f51f-4722-81f7-3d4858dcab28" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="HeaderAndDirectoryMutationsAreRejected(22)" />
+    </UnitTest>
+    <UnitTest name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;import meta.doors; fn main()-&gt;void { let x=new Door(id:17); }&quot;,&quot;E226&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="12fad825-4dc4-4e55-3433-77359e4b8f5d">
+      <Execution id="4bb949ca-302e-4ca3-98da-a3afb9d01454" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;import meta.doors; fn main()-&gt;void { let x=new Door(id:17); }&quot;,&quot;E226&quot;)" />
+    </UnitTest>
+    <UnitTest name="NormativeProgramsCompileAndVerify(&quot;overheat&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="f42889ce-8cd4-4628-1ae0-0b8b49fd863e">
+      <Execution id="c0d1f834-b0a0-47fc-a817-f91c54ab2b01" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeProgramsCompileAndVerify(&quot;overheat&quot;)" />
+    </UnitTest>
+    <UnitTest name="ConstantArithmeticIsCheckedAndPreservesDefinedRemainder" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="930e40f3-7711-636b-2248-8e35ef9abcb7">
+      <Execution id="f993e69e-215b-427c-9208-4f41178eedf5" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="ConstantArithmeticIsCheckedAndPreservesDefinedRemainder" />
+    </UnitTest>
+    <UnitTest name="IntegerRulesMatchNormativeSemantics(IDiv,-7,3,-2)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="4bbcfd7c-b397-992a-657e-8d205a8f3496">
+      <Execution id="08caace9-216b-409d-ba68-b5ecf14e88f2" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="IntegerRulesMatchNormativeSemantics(IDiv,-7,3,-2)" />
+    </UnitTest>
+    <UnitTest name="HeaderAndDirectoryMutationsAreRejected(20)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="c73489cb-f480-4a0f-6cab-d10e67e4456e">
+      <Execution id="0608ce44-be25-401a-90d0-1f51b58f14b4" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="HeaderAndDirectoryMutationsAreRejected(20)" />
+    </UnitTest>
+    <UnitTest name="HostileDocumentIsRejected(&quot;&lt;!DOCTYPE Page [&lt;!ENTITY x SYSTEM 'file:///etc/passwd'&gt;]&gt;&lt;Page id='root'&gt;&lt;Text id='text'&gt;&amp;x;&lt;/Text&gt;&lt;/Page&gt;&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="0abc9557-49cd-5fd6-35b6-fcc1a34e9b11">
+      <Execution id="2ea797b4-73e5-4306-b052-84cff821031e" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="HostileDocumentIsRejected(&quot;&lt;!DOCTYPE Page [&lt;!ENTITY x SYSTEM 'file:///etc/passwd'&gt;]&gt;&lt;Page id='root'&gt;&lt;Text id='text'&gt;&amp;x;&lt;/Text&gt;&lt;/Page&gt;&quot;)" />
+    </UnitTest>
+    <UnitTest name="HeaderAndDirectoryMutationsAreRejected(76)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="e00e7142-0c44-696e-0272-1c0b4b3492c7">
+      <Execution id="3f07f110-acaf-4ea7-8a1b-0f2f226fd349" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="HeaderAndDirectoryMutationsAreRejected(76)" />
+    </UnitTest>
+    <UnitTest name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;var t:float=110;&quot;,&quot;E201&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="adc3b740-9aa0-1d26-c05d-66d9c382221c">
+      <Execution id="cb06418e-6e37-456c-852a-c73eea214b32" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;var t:float=110;&quot;,&quot;E201&quot;)" />
+    </UnitTest>
+    <UnitTest name="HeaderAndDirectoryMutationsAreRejected(64)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="673f94e8-e880-59db-fe6c-7afc29cf5a54">
+      <Execution id="c7f219bb-9b84-4eeb-9c64-433cdb9c5499" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="HeaderAndDirectoryMutationsAreRejected(64)" />
+    </UnitTest>
+    <UnitTest name="ProcessObjectHandlesCannotBeTransferredBetweenProcesses" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="001cf7bb-1049-50b4-29ee-d768d4d03438">
+      <Execution id="3ea5ed77-5aae-441c-838a-565b0fcfa7cb" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="ProcessObjectHandlesCannotBeTransferredBetweenProcesses" />
+    </UnitTest>
+    <UnitTest name="NormativeProgramsCompileAndVerify(&quot;pong&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="0bce7acd-90de-3034-fcb3-d821d7e6a416">
+      <Execution id="29bba350-c521-44e6-bc6a-2e3408754d3f" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeProgramsCompileAndVerify(&quot;pong&quot;)" />
+    </UnitTest>
+    <UnitTest name="HeaderAndDirectoryMutationsAreRejected(0)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="69b9fe17-41d3-9975-b3d3-022fa6ebca33">
+      <Execution id="006e1d8f-5325-4401-a11b-22de700fcc7b" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="HeaderAndDirectoryMutationsAreRejected(0)" />
+    </UnitTest>
+    <UnitTest name="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Text id='x' text='{bind name.ToString()}'/&gt;&lt;/Page&gt;&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="87ca77f5-35a2-9619-c686-85ebda353849">
+      <Execution id="e39300dc-0661-467f-ac5a-e0b2ce185687" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Text id='x' text='{bind name.ToString()}'/&gt;&lt;/Page&gt;&quot;)" />
+    </UnitTest>
+    <UnitTest name="IntegerRulesMatchNormativeSemantics(IRem,long.MinValue,-1,0)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="05e0be72-4ac9-3361-4132-6d208f9f360d">
+      <Execution id="7931d315-6102-4b7a-81be-a87158ca808b" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="IntegerRulesMatchNormativeSemantics(IRem,long.MinValue,-1,0)" />
+    </UnitTest>
+    <UnitTest name="NormativeProgramsCompileAndVerify(&quot;readings&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="4e160351-b6dd-b760-e83a-4b864e8eec6c">
+      <Execution id="89d66de1-d3c6-4616-a64a-4736d06b510a" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeProgramsCompileAndVerify(&quot;readings&quot;)" />
+    </UnitTest>
+    <UnitTest name="NormativeProgramsCompileAndVerify(&quot;hello&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="5ad0e3c8-e63c-ab80-8220-2d099ec271ce">
+      <Execution id="61c09032-dac3-4f19-8297-84b0c11c3b80" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeProgramsCompileAndVerify(&quot;hello&quot;)" />
+    </UnitTest>
+    <UnitTest name="NormativeProgramsCompileAndVerify(&quot;math&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="1643f118-9eac-bb99-ef40-ab085bf6b75d">
+      <Execution id="2fc2467c-ff05-4e32-ba8e-405ae673bfd3" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeProgramsCompileAndVerify(&quot;math&quot;)" />
+    </UnitTest>
+    <UnitTest name="UnsafeStyleIsRejected(&quot;{\&quot;rules\&quot;:[{\&quot;selector\&quot;:\&quot;#root\&quot;,\&quot;properties\&quot;:{\&quot;script\&quot;:\&quot;evil\&quot;}}]}&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="c7482311-9f16-5917-5106-b6bfae5b08aa">
+      <Execution id="43556e57-d868-403d-a5d1-9445ec901a8b" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="UnsafeStyleIsRejected(&quot;{\&quot;rules\&quot;:[{\&quot;selector\&quot;:\&quot;#root\&quot;,\&quot;properties\&quot;:{\&quot;script\&quot;:\&quot;evil\&quot;}}]}&quot;)" />
+    </UnitTest>
+    <UnitTest name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;struct Node { children:list&lt;Node&gt;; }&quot;,&quot;E219&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="87df7ce4-4581-d042-31c3-69929fc836a6">
+      <Execution id="15d32480-8081-4344-a11e-7fed34c2c21e" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;struct Node { children:list&lt;Node&gt;; }&quot;,&quot;E219&quot;)" />
+    </UnitTest>
+    <UnitTest name="CanonicalJsonUsesSortedKeysLiteralUnicodeAndLongControlEscapes" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="e56484d4-b920-2763-0f95-e2fd52971179">
+      <Execution id="1c6d9b07-4a51-44fb-8609-8aaa1439b1c3" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="CanonicalJsonUsesSortedKeysLiteralUnicodeAndLongControlEscapes" />
+    </UnitTest>
+    <UnitTest name="GuestRecursionUsesExplicitFramesAndStopsAtFrameLimit" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="79a9d087-cd85-076a-50c5-9f2e47aae347">
+      <Execution id="90abc9f9-ba86-4620-ac4e-1fc17f42d7fd" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="GuestRecursionUsesExplicitFramesAndStopsAtFrameLimit" />
+    </UnitTest>
+    <UnitTest name="InvalidViewDataIsRejected(&quot;{\&quot;name\&quot;:17,\&quot;enabled\&quot;:true,\&quot;rows\&quot;:[]}&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="5f9cf370-101a-cea8-517c-d8e5deb38d5c">
+      <Execution id="aacfbc65-f834-42f8-9cd9-e96bafdb9031" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="InvalidViewDataIsRejected(&quot;{\&quot;name\&quot;:17,\&quot;enabled\&quot;:true,\&quot;rows\&quot;:[]}&quot;)" />
+    </UnitTest>
+    <UnitTest name="HeaderAndDirectoryMutationsAreRejected(56)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="91d49683-b049-443a-e93d-088d1f523aad">
+      <Execution id="15e07cd5-e0fd-41eb-8041-5f4315870290" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="HeaderAndDirectoryMutationsAreRejected(56)" />
+    </UnitTest>
+    <UnitTest name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;import meta.doors; link d:Door=\&quot;x\&quot;; async fn main()-&gt;void { d.setOpen(true); }&quot;,&quot;E232&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="6b12892c-21bd-68dd-cc6c-e8a27d2ea8a0">
+      <Execution id="73953291-acdc-4f37-b60d-c1655267c6c4" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;import meta.doors; link d:Door=\&quot;x\&quot;; async fn main()-&gt;void { d.setOpen(true); }&quot;,&quot;E232&quot;)" />
+    </UnitTest>
+    <UnitTest name="HostPathsAreRejected(&quot;C:/server.cfg&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="e2005560-dfff-89e7-e220-6c988fff1956">
+      <Execution id="b87f3626-c2b8-453b-a268-978feb47c9f2" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaAuthorityTests" name="HostPathsAreRejected(&quot;C:/server.cfg&quot;)" />
+    </UnitTest>
+    <UnitTest name="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Button id='x' onClick='evil' /&gt;&lt;/Page&gt;&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="4e9a1e7a-4e3a-645c-4fe0-818be7b4ea1e">
+      <Execution id="19436371-26dd-450d-9e7c-18466b3e64c9" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Button id='x' onClick='evil' /&gt;&lt;/Page&gt;&quot;)" />
+    </UnitTest>
+    <UnitTest name="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Text id='root' /&gt;&lt;/Page&gt;&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="fc14bd65-d601-ee93-213b-69c60c6e5322">
+      <Execution id="d8668a4a-a4b4-407b-a307-48412a48b937" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Text id='root' /&gt;&lt;/Page&gt;&quot;)" />
+    </UnitTest>
+    <UnitTest name="HeaderAndDirectoryMutationsAreRejected(66)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="7fb86823-df70-8378-33a7-f80d97a0d005">
+      <Execution id="9c626e82-dab7-4c77-a1b4-dee01c5b5690" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="HeaderAndDirectoryMutationsAreRejected(66)" />
+    </UnitTest>
+    <UnitTest name="UnsafeStyleIsRejected(&quot;{\&quot;tokens\&quot;:{\&quot;a\&quot;:\&quot;$b\&quot;,\&quot;b\&quot;:\&quot;$a\&quot;},\&quot;rules\&quot;:[{\&quot;selector\&quot;:\&quot;#root\&quot;,\&quot;properties\&quot;:{\&quot;color\&quot;:\&quot;$a\&quot;}}]}&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="c0f47440-1c8a-b74e-98dc-c21306c3f954">
+      <Execution id="77a41a72-e40b-4c03-a589-2eaa46fecdfe" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="UnsafeStyleIsRejected(&quot;{\&quot;tokens\&quot;:{\&quot;a\&quot;:\&quot;$b\&quot;,\&quot;b\&quot;:\&quot;$a\&quot;},\&quot;rules\&quot;:[{\&quot;selector\&quot;:\&quot;#root\&quot;,\&quot;properties\&quot;:{\&quot;color\&quot;:\&quot;$a\&quot;}}]}&quot;)" />
+    </UnitTest>
+    <UnitTest name="UnicodeSpansUseNormalizedUtf8ScalarBoundaries" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="1f0bd065-95e8-6f65-6439-c926b7ff35b6">
+      <Execution id="3c3264f0-5d13-4ab9-91e8-1a88d2229b5e" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="UnicodeSpansUseNormalizedUtf8ScalarBoundaries" />
+    </UnitTest>
+    <UnitTest name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;import meta.doors; link d:Door=\&quot;x\&quot;; fn main()-&gt;void { let x=d.GetType(); }&quot;,&quot;E225&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="d5b1b8f6-9c94-5a95-49cf-9945ac32b888">
+      <Execution id="50603217-17f7-407f-b5a7-ab7dbcce46c0" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;import meta.doors; link d:Door=\&quot;x\&quot;; fn main()-&gt;void { let x=d.GetType(); }&quot;,&quot;E225&quot;)" />
+    </UnitTest>
+    <UnitTest name="NumericBoundariesTrapOnlyTheProcess(IDiv,2,0,NumericFault)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="9e1752c0-15bf-d272-c259-2e078280eb6e">
+      <Execution id="9e70f06b-1d6f-472e-bc7c-8ea600892915" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="NumericBoundariesTrapOnlyTheProcess(IDiv,2,0,NumericFault)" />
+    </UnitTest>
+    <UnitTest name="NormativeProgramsCompileAndVerify(&quot;diagnostics&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="619ac2b1-658f-6427-c66c-4ab95a3bd6ae">
+      <Execution id="f3b194b0-37e4-4ca0-a7d9-25bd4f516012" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeProgramsCompileAndVerify(&quot;diagnostics&quot;)" />
+    </UnitTest>
+    <UnitTest name="NestedGenericsAndShiftHaveDifferentContexts" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="4e13f088-2095-8f9f-10cd-276abd0f19ef">
+      <Execution id="48059d89-eecc-4449-8804-86994ff02897" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NestedGenericsAndShiftHaveDifferentContexts" />
+    </UnitTest>
+    <UnitTest name="NormativeProgramsCompileAndVerify(&quot;doorpanel&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="c8d444ce-3f87-8625-413e-cc80f79854ec">
+      <Execution id="71408f63-6329-41cf-aa13-1878d785a655" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeProgramsCompileAndVerify(&quot;doorpanel&quot;)" />
+    </UnitTest>
+    <UnitTest name="HeaderAndDirectoryMutationsAreRejected(12)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="55b35a70-056d-0911-5ba9-c11cc6d13089">
+      <Execution id="5f319fce-dd43-4fe9-b035-30c3167cc6a0" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="HeaderAndDirectoryMutationsAreRejected(12)" />
+    </UnitTest>
+    <UnitTest name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;const a:array&lt;int&gt;=[1,2];&quot;,&quot;E216&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="e3ace438-37d6-0d10-bc44-2ab4d54e0fda">
+      <Execution id="8ad128a9-cf9d-4c3c-9564-f99bcf2ad89e" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;const a:array&lt;int&gt;=[1,2];&quot;,&quot;E216&quot;)" />
+    </UnitTest>
+    <UnitTest name="IntegerRulesMatchNormativeSemantics(IShr,-8,2,-2)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="4d60c7f0-f0f6-7107-a377-928680602590">
+      <Execution id="aa4c3067-6a39-4578-a312-13234bee64f7" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="IntegerRulesMatchNormativeSemantics(IShr,-8,2,-2)" />
+    </UnitTest>
+    <UnitTest name="DisposeReleasesSessionProjection" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="88a3cb4c-e7a2-4dbe-9c3a-190407dd3992">
+      <Execution id="61e78bf8-397f-46ec-8ab6-d4602490ee42" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="DisposeReleasesSessionProjection" />
+    </UnitTest>
+    <UnitTest name="HostPathsAreRejected(&quot;config//mode&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="7ca68dad-9d95-551e-cc77-60957f90e4d6">
+      <Execution id="b4e4375f-2572-49a2-ae84-b6b0fb29b396" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaAuthorityTests" name="HostPathsAreRejected(&quot;config//mode&quot;)" />
+    </UnitTest>
+    <UnitTest name="NumericBoundariesTrapOnlyTheProcess(IAdd,long.MaxValue,1,NumericFault)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="b7e178ac-099f-f4a4-415c-8e7fd8c9d99b">
+      <Execution id="b8d11128-a280-4761-8493-c8622f167372" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="NumericBoundariesTrapOnlyTheProcess(IAdd,long.MaxValue,1,NumericFault)" />
+    </UnitTest>
+    <UnitTest name="NormativeProgramsCompileAndVerify(&quot;patrol&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="cbe0ff10-ceec-3d14-dcc4-8399de496420">
+      <Execution id="7553cfa9-ad11-4966-8bcc-9772bae12a82" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeProgramsCompileAndVerify(&quot;patrol&quot;)" />
+    </UnitTest>
+    <UnitTest name="PatchGapRequestsResyncWithoutMutation" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="56da0783-1dda-ffe4-c360-240287881190">
+      <Execution id="8cf8d754-ae40-47e7-bce1-7e033dc06087" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="PatchGapRequestsResyncWithoutMutation" />
+    </UnitTest>
+    <UnitTest name="ClockRegressionDoesNotRefillRateLimit" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="7cef132f-1308-bc8a-1c8a-deebc86a0a18">
+      <Execution id="a954c7d7-5e3c-49cc-b360-b41c82f17396" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaAuthorityTests" name="ClockRegressionDoesNotRefillRateLimit" />
+    </UnitTest>
+    <UnitTest name="InvalidViewDataIsRejected(&quot;{\&quot;name\&quot;:\&quot;Alice\&quot;,\&quot;enabled\&quot;:true,\&quot;rows\&quot;:[],\&quot;secret\&quot;:1}&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="8f6dbe51-72f2-203a-de81-6ec65cce0d30">
+      <Execution id="1cd0942c-b570-4b30-a646-364bd17a2902" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="InvalidViewDataIsRejected(&quot;{\&quot;name\&quot;:\&quot;Alice\&quot;,\&quot;enabled\&quot;:true,\&quot;rows\&quot;:[],\&quot;secret\&quot;:1}&quot;)" />
+    </UnitTest>
+    <UnitTest name="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Text id='x' visible='{bind name}' /&gt;&lt;/Page&gt;&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="f55cb54f-c720-2a3b-8ebd-e119e3d88f86">
+      <Execution id="18733f54-c5c3-4450-9e74-bd6bf8d38b64" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Text id='x' visible='{bind name}' /&gt;&lt;/Page&gt;&quot;)" />
+    </UnitTest>
+    <UnitTest name="NormativeProgramsCompileAndVerify(&quot;netprobe&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="a91539d5-959c-48fd-d847-7a4d9e15b51e">
+      <Execution id="26e1cf91-7fe7-42a8-a28b-bc5e111b9c3e" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeProgramsCompileAndVerify(&quot;netprobe&quot;)" />
+    </UnitTest>
+    <UnitTest name="HeaderAndDirectoryMutationsAreRejected(8)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="dd7cf8db-453b-2688-02d7-8c7753450801">
+      <Execution id="223d43e4-b10d-45d6-bbd6-850ae4667487" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="HeaderAndDirectoryMutationsAreRejected(8)" />
+    </UnitTest>
+    <UnitTest name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn main()-&gt;void { let x=none; }&quot;,&quot;E203&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="2548039c-e6ba-c82f-9bce-60445c226abf">
+      <Execution id="c30d5b3b-c631-437b-90c8-c48ca3cbea81" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn main()-&gt;void { let x=none; }&quot;,&quot;E203&quot;)" />
+    </UnitTest>
+    <UnitTest name="LimitsAndCancellationAreBounded" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="4d01ddf1-f395-0167-97cf-4a2f2cb0e3cd">
+      <Execution id="add5c1bc-0d4c-411d-9007-acec50f2dc9f" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="LimitsAndCancellationAreBounded" />
+    </UnitTest>
+    <UnitTest name="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Button id='x' action='admin' /&gt;&lt;/Page&gt;&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="297dc093-0878-c4fc-b88e-23cbebee1826">
+      <Execution id="f88e5b62-6468-480f-ae05-8e17beca194b" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Button id='x' action='admin' /&gt;&lt;/Page&gt;&quot;)" />
+    </UnitTest>
+    <UnitTest name="IntegerRulesMatchNormativeSemantics(IShl,long.MaxValue,1,-2)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="68fb9c16-ac72-d43d-f3ed-7d810d3504fa">
+      <Execution id="af3ca007-2341-416d-96df-01ee3a90073e" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="IntegerRulesMatchNormativeSemantics(IShl,long.MaxValue,1,-2)" />
+    </UnitTest>
+    <UnitTest name="IntegerRulesMatchNormativeSemantics(IRem,-7,3,-1)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="fcea4e24-0921-7643-ea18-4aaab97cf3a8">
+      <Execution id="df842037-62d5-478c-8ddf-f94e688c66dd" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="IntegerRulesMatchNormativeSemantics(IRem,-7,3,-1)" />
+    </UnitTest>
+    <UnitTest name="StructUpdateCopiesValueWhileArrayFieldsKeepLocalAliases" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="4d8102da-5456-befc-fda6-c208c9c04f07">
+      <Execution id="e8f089bd-fc1c-4cb2-a7d4-509b8afd414d" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="StructUpdateCopiesValueWhileArrayFieldsKeepLocalAliases" />
+    </UnitTest>
+    <UnitTest name="ValidDocumentBindsOnlyDeclaredFieldsAndActions" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="c21a53b6-db16-5e54-e2c3-c26fac0deafc">
+      <Execution id="b9666a1c-bcd7-4f90-8528-2e407140b086" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="ValidDocumentBindsOnlyDeclaredFieldsAndActions" />
+    </UnitTest>
+    <UnitTest name="HostPathsAreRejected(&quot;/server.cfg&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="0769b8fb-ea22-5e20-c301-aab5ae4968db">
+      <Execution id="abd3c30a-85d0-4d1d-96d1-d2a81a9c3398" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaAuthorityTests" name="HostPathsAreRejected(&quot;/server.cfg&quot;)" />
+    </UnitTest>
+    <UnitTest name="PermissionIsIntersectionAndRecheckedAgainstAllEpochs" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="3dd361f1-c447-46e6-6aec-aac0d3b3bd57">
+      <Execution id="5d576662-ab7e-4548-997e-6891f5f6b868" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaAuthorityTests" name="PermissionIsIntersectionAndRecheckedAgainstAllEpochs" />
+    </UnitTest>
+    <UnitTest name="GeneratedPureExpressionsAgreeWithIndependentAstOracleAcrossSlices" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="8c9884ec-b5bc-4b4b-b280-f551df9557e7">
+      <Execution id="ecfd949b-a5e5-4811-8e17-340e1c74a2b8" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="GeneratedPureExpressionsAgreeWithIndependentAstOracleAcrossSlices" />
+    </UnitTest>
+    <UnitTest name="NormativeProgramsCompileAndVerify(&quot;optics&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="fe6a009d-10c1-2f53-0d4f-08682795b9b6">
+      <Execution id="3e36e023-e930-4599-ba39-b76a669624ce" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeProgramsCompileAndVerify(&quot;optics&quot;)" />
+    </UnitTest>
+    <UnitTest name="PrefixUsesSegmentBoundary" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="4a755c7c-ddcb-458c-8946-703944ed245f">
+      <Execution id="b708e6ce-0b7f-4cea-b0f7-da32f7307f53" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaAuthorityTests" name="PrefixUsesSegmentBoundary" />
+    </UnitTest>
+    <UnitTest name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;import meta.doors; link d:Door = entityId;&quot;,&quot;E103&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="3b3527b5-b738-a1e6-64b2-9bc466b0e319">
+      <Execution id="f61220ad-42c3-4571-84bb-58d3481bf4f0" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;import meta.doors; link d:Door = entityId;&quot;,&quot;E103&quot;)" />
+    </UnitTest>
+    <UnitTest name="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Text id='x' text='{Binding name}'/&gt;&lt;/Page&gt;&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="b08162b0-9039-a495-5660-f5c203171682">
+      <Execution id="d74b8cff-f5a8-4cb7-8939-40a5b7cdcb93" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Text id='x' text='{Binding name}'/&gt;&lt;/Page&gt;&quot;)" />
+    </UnitTest>
+    <UnitTest name="HeaderAndDirectoryMutationsAreRejected(6)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="9d496db5-9a74-9706-df8d-3889c962ffcb">
+      <Execution id="58b6de49-f334-43d6-8489-4573135d3b7f" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="HeaderAndDirectoryMutationsAreRejected(6)" />
+    </UnitTest>
+    <UnitTest name="YieldDoesNotResetActivationGas" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="12544c0f-270d-0deb-8bde-524e457b0696">
+      <Execution id="08ec7192-a3f5-487b-b8de-b25ebe73d559" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="YieldDoesNotResetActivationGas" />
+    </UnitTest>
+    <UnitTest name="HostPathsAreRejected(&quot;config\\mode&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="b8041dd5-3746-fbc2-6c5e-8b2af1f5fec8">
+      <Execution id="124c5ca8-103e-4d6a-bb89-e6612b0f50de" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaAuthorityTests" name="HostPathsAreRejected(&quot;config\\mode&quot;)" />
+    </UnitTest>
+    <UnitTest name="NumericBoundariesTrapOnlyTheProcess(IDiv,long.MinValue,-1,NumericFault)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="b86469cd-0d67-6ec4-ebf6-16ca4fe817ec">
+      <Execution id="a16c738f-901a-449f-bc1c-68298d29af91" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="NumericBoundariesTrapOnlyTheProcess(IDiv,long.MinValue,-1,NumericFault)" />
+    </UnitTest>
+    <UnitTest name="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Image id='x' resource='https://example.com/a.png' /&gt;&lt;/Page&gt;&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="511c7f08-d841-57af-150c-f02793bb6e0d">
+      <Execution id="5062b5de-62ae-4a02-8347-6c3346440196" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="HostileDocumentIsRejected(&quot;&lt;Page id='root'&gt;&lt;Image id='x' resource='https://example.com/a.png' /&gt;&lt;/Page&gt;&quot;)" />
+    </UnitTest>
+    <UnitTest name="DeterministicMalformedInputCorpusDoesNotThrow" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="32a6bfc6-1ae9-8e4e-b70c-926596c83adb">
+      <Execution id="c5d7132e-d59b-45f0-b77a-ad9f8dd2098e" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="DeterministicMalformedInputCorpusDoesNotThrow" />
+    </UnitTest>
+    <UnitTest name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn main()-&gt;void { let x:option&lt;int&gt;=some(1); match(x){some(y)=&gt;{}} }&quot;,&quot;E241&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="9ab97c94-cb4c-6cdd-1fbe-051314b309ce">
+      <Execution id="4d78c2a5-5bf4-49f0-9a45-ad2db0edaf1f" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn main()-&gt;void { let x:option&lt;int&gt;=some(1); match(x){some(y)=&gt;{}} }&quot;,&quot;E241&quot;)" />
+    </UnitTest>
+    <UnitTest name="HostPathsAreRejected(&quot;config/../mode&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="10ebcb28-2f5a-930b-336e-d388358cd00e">
+      <Execution id="3b283b3d-391e-465c-ba07-64b452a82990" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaAuthorityTests" name="HostPathsAreRejected(&quot;config/../mode&quot;)" />
+    </UnitTest>
+    <UnitTest name="HostPathsAreRejected(&quot;../secret&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="49b8ab14-9b4c-55c4-ecf2-b5fbb501cfa6">
+      <Execution id="1d4d8ef5-0971-40e6-8b62-53e8a3935edd" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaAuthorityTests" name="HostPathsAreRejected(&quot;../secret&quot;)" />
+    </UnitTest>
+    <UnitTest name="NormativeProgramsCompileAndVerify(&quot;arraystats&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="7fb34a8f-786a-22eb-d957-8af883ce7be5">
+      <Execution id="2ba8a949-b1eb-46c2-8009-ef4a82ef142f" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeProgramsCompileAndVerify(&quot;arraystats&quot;)" />
+    </UnitTest>
+    <UnitTest name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn main()-&gt;void { let x=1; {let x=2;} }&quot;,&quot;E211&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="4409d5da-9534-f9bc-47ee-efc07238b53f">
+      <Execution id="8477c5bc-67a4-47af-8ac3-0a2d58028811" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn main()-&gt;void { let x=1; {let x=2;} }&quot;,&quot;E211&quot;)" />
+    </UnitTest>
+    <UnitTest name="HostileDocumentIsRejected(&quot;&lt;Page id='root' xmlns:x='clr-namespace:System'&gt;&lt;x:Object id='evil'/&gt;&lt;/Page&gt;&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="03fddbb6-5e06-97ad-d2c7-4b08af28d777">
+      <Execution id="5bb15052-3c20-4f14-8544-400be852e211" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="HostileDocumentIsRejected(&quot;&lt;Page id='root' xmlns:x='clr-namespace:System'&gt;&lt;x:Object id='evil'/&gt;&lt;/Page&gt;&quot;)" />
+    </UnitTest>
+    <UnitTest name="VerifierRejectsForgedMaximumAndCollectionTypeCycle" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="30746417-5869-5aa4-0f75-2e7a3354b54b">
+      <Execution id="05cad572-87c2-4912-9bb9-a6f532008321" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="VerifierRejectsForgedMaximumAndCollectionTypeCycle" />
+    </UnitTest>
+    <UnitTest name="HeaderAndDirectoryMutationsAreRejected(16)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="27f76e4d-505d-19af-4d8e-e141514a00f6">
+      <Execution id="6dcb547b-9f70-470b-8eda-11c7ef9bf660" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="HeaderAndDirectoryMutationsAreRejected(16)" />
+    </UnitTest>
+    <UnitTest name="DefiniteAssignmentAndImmutableLifetimeAreIndependentlyChecked" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="aa4fc861-20cb-4123-0b67-79e94b7cc6b3">
+      <Execution id="e3b0e529-1ca5-472e-8254-f4437fcf91a8" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="DefiniteAssignmentAndImmutableLifetimeAreIndependentlyChecked" />
+    </UnitTest>
+    <UnitTest name="NormativeProgramsCompileAndVerify(&quot;motion&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="5a0598b1-4dc9-bf88-eeca-04cb902c5e4a">
+      <Execution id="f2cb679e-54c8-4f6e-a3c9-ad0bb11f4522" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeProgramsCompileAndVerify(&quot;motion&quot;)" />
+    </UnitTest>
+    <UnitTest name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn main()-&gt;void { if(1){} }&quot;,&quot;E202&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="cfe62533-c7f3-c445-c82e-4a40d6933f6c">
+      <Execution id="3ab7cfa6-a528-403c-984c-c2ab812ca466" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn main()-&gt;void { if(1){} }&quot;,&quot;E202&quot;)" />
+    </UnitTest>
+    <UnitTest name="ContainerUsesNormativeHeaderDirectoryAndDigest" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="3821dd3d-2c8a-9c81-2ebe-c3f813387aee">
+      <Execution id="0145fc7a-f6e2-4864-88a6-df3f643354e9" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="ContainerUsesNormativeHeaderDirectoryAndDigest" />
+    </UnitTest>
+    <UnitTest name="HeaderAndDirectoryMutationsAreRejected(72)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="16aab7a7-07eb-36d0-7c78-985690df5d96">
+      <Execution id="6a36d096-03bf-426f-8222-e91bac2efd71" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="HeaderAndDirectoryMutationsAreRejected(72)" />
+    </UnitTest>
+    <UnitTest name="NormativeProgramsCompileAndVerify(&quot;conveyor&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="e628122a-1949-e9ec-299d-8406a2b50b49">
+      <Execution id="4f8e39fc-5b97-4148-b464-833ca8f8b1d8" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeProgramsCompileAndVerify(&quot;conveyor&quot;)" />
+    </UnitTest>
+    <UnitTest name="HeaderAndDirectoryMutationsAreRejected(4)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="bf879fa6-9006-6edc-bbf1-c372b7f9887e">
+      <Execution id="86957d13-068d-4480-b6c1-ede7383a5fa4" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="HeaderAndDirectoryMutationsAreRejected(4)" />
+    </UnitTest>
+    <UnitTest name="LibraryImportAndMutualRecursionCompile" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="41f1a2ed-ac42-7556-9fe0-ddfee7847b1b">
+      <Execution id="74b9d8ed-3b51-4cb6-a9d8-f262f2279fca" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="LibraryImportAndMutualRecursionCompile" />
+    </UnitTest>
+    <UnitTest name="UnsafeStyleIsRejected(&quot;{\&quot;rules\&quot;:[{\&quot;selector\&quot;:\&quot;System.Button\&quot;,\&quot;properties\&quot;:{}}]}&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="1ff4ca92-eaaa-366d-67ac-c1e16c9f41c4">
+      <Execution id="247d52ad-dc54-44b5-869d-8e1fb4641885" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="UnsafeStyleIsRejected(&quot;{\&quot;rules\&quot;:[{\&quot;selector\&quot;:\&quot;System.Button\&quot;,\&quot;properties\&quot;:{}}]}&quot;)" />
+    </UnitTest>
+    <UnitTest name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn main()-&gt;void { let x:int=1; x=2; }&quot;,&quot;E210&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="0df2ed6c-8c44-772e-299d-5078321c3339">
+      <Execution id="306192fc-9900-4586-9d59-97ec91e3efd2" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn main()-&gt;void { let x:int=1; x=2; }&quot;,&quot;E210&quot;)" />
+    </UnitTest>
+    <UnitTest name="MutatingSourceBytesOrMetadataCannotChangeVerifiedArtifact" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="94bd44dd-a1f1-4495-8ed5-c615c142117a">
+      <Execution id="bb6a9515-ce95-4471-bd83-0f48f64459ef" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="MutatingSourceBytesOrMetadataCannotChangeVerifiedArtifact" />
+    </UnitTest>
+    <UnitTest name="NumericBoundariesTrapOnlyTheProcess(IShl,2,64,NumericFault)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="d4477b8f-829d-4f91-07fa-af2baea6301a">
+      <Execution id="ad8098c6-069d-43bd-a85f-9b9e0f78a7bf" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="NumericBoundariesTrapOnlyTheProcess(IShl,2,64,NumericFault)" />
+    </UnitTest>
+    <UnitTest name="NormativeProgramsCompileAndVerify(&quot;sensorfilter&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="b77f4550-cf20-8b0c-1ce8-efdde019de41">
+      <Execution id="8864a665-1dec-43ea-ac06-b7c452ea7f70" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeProgramsCompileAndVerify(&quot;sensorfilter&quot;)" />
+    </UnitTest>
+    <UnitTest name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn f()-&gt;int { if(true){return 1;} }&quot;,&quot;E214&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="2d7b206f-1f0c-b9f1-8912-31ddebceb4db">
+      <Execution id="0ed5921c-6290-4d7d-aa48-e56280e69db2" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;fn f()-&gt;int { if(true){return 1;} }&quot;,&quot;E214&quot;)" />
+    </UnitTest>
+    <UnitTest name="HeaderAndDirectoryMutationsAreRejected(68)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="485b77ac-5a50-995c-4a12-f22ad7afb180">
+      <Execution id="6b82156a-e09a-4462-a7ce-bf594e0dfe4f" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="HeaderAndDirectoryMutationsAreRejected(68)" />
+    </UnitTest>
+    <UnitTest name="VerifierRejectsBranchIntoOperandAndUnreachableUnknownOpcode" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="13b059ed-48e2-70f9-a0e9-8f73b85408e0">
+      <Execution id="ab195a8f-8beb-428a-9e87-513c2105d386" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="VerifierRejectsBranchIntoOperandAndUnreachableUnknownOpcode" />
+    </UnitTest>
+    <UnitTest name="UnsafeStyleIsRejected(&quot;{\&quot;rules\&quot;:[{\&quot;selector\&quot;:\&quot;#root\&quot;,\&quot;properties\&quot;:{\&quot;image\&quot;:\&quot;../secrets\&quot;}}]}&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="7d57144e-bc2b-2851-5172-9dbee4dd5524">
+      <Execution id="b60e6e54-5211-4569-a1d2-f5868b7a3cb0" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="UnsafeStyleIsRejected(&quot;{\&quot;rules\&quot;:[{\&quot;selector\&quot;:\&quot;#root\&quot;,\&quot;properties\&quot;:{\&quot;image\&quot;:\&quot;../secrets\&quot;}}]}&quot;)" />
+    </UnitTest>
+    <UnitTest name="NormativeProgramsCompileAndVerify(&quot;files&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="dac4f31d-0991-e6a2-62cf-0f747375e2b6">
+      <Execution id="390a4353-8a2d-4732-ab67-e6499cb5c411" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeProgramsCompileAndVerify(&quot;files&quot;)" />
+    </UnitTest>
+    <UnitTest name="HeaderAndDirectoryMutationsAreRejected(10)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="4e367ea9-dcc2-ffb3-cb4e-95a0a9f13a04">
+      <Execution id="14d54ed9-44c0-406f-8bcf-c7d0953189c9" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="HeaderAndDirectoryMutationsAreRejected(10)" />
+    </UnitTest>
+    <UnitTest name="EveryRegistryInstructionRoundTripsAndUnknownOpcodeIsRejected" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="9f9f4c0c-9152-581c-59d7-5a191bc5cf69">
+      <Execution id="1e16f768-c721-4d9d-9716-8ce0464ce846" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Bytecode.MetaBytecodeTests" name="EveryRegistryInstructionRoundTripsAndUnknownOpcodeIsRejected" />
+    </UnitTest>
+    <UnitTest name="MetaValueIsExactlySixteenBytesWithoutClrReference" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="6cbf77ea-d6c8-f0a4-208c-88a3fb45456a">
+      <Execution id="81b1cb19-2597-4897-a9f0-ee1c3c6a8506" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Runtime.MetaRuntimeTests" name="MetaValueIsExactlySixteenBytesWithoutClrReference" />
+    </UnitTest>
+    <UnitTest name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;import meta.doors; link d:Door=\&quot;x\&quot;; fn main()-&gt;void { let x=await d.setOpen(true); }&quot;,&quot;E231&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="183a623e-3692-151d-c31d-47942f484e47">
+      <Execution id="c1f07206-4af0-4090-89aa-afc7261f1597" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.HybridCompilerTests" name="NormativeNegativeProgramsHaveStableDiagnostics(&quot;import meta.doors; link d:Door=\&quot;x\&quot;; fn main()-&gt;void { let x=await d.setOpen(true); }&quot;,&quot;E231&quot;)" />
+    </UnitTest>
+    <UnitTest name="InvalidViewDataIsRejected(&quot;{\&quot;name\&quot;:\&quot;Alice\&quot;,\&quot;name\&quot;:\&quot;Bob\&quot;,\&quot;enabled\&quot;:true,\&quot;rows\&quot;:[]}&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="0995c6a9-256b-388b-d685-f4c9f5953caf">
+      <Execution id="75fd0d65-148d-441a-82fa-7feb8fd472b3" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="InvalidViewDataIsRejected(&quot;{\&quot;name\&quot;:\&quot;Alice\&quot;,\&quot;name\&quot;:\&quot;Bob\&quot;,\&quot;enabled\&quot;:true,\&quot;rows\&quot;:[]}&quot;)" />
+    </UnitTest>
+    <UnitTest name="HostileDocumentIsRejected(&quot;&lt;?evil execute?&gt;&lt;Page id='root'/&gt;&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="5bd47d09-640c-2025-f833-7fbf611ec1b7">
+      <Execution id="28b80242-18c0-4a77-ab35-20d3de38e704" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiSecurityTests" name="HostileDocumentIsRejected(&quot;&lt;?evil execute?&gt;&lt;Page id='root'/&gt;&quot;)" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="4e9a1e7a-4e3a-645c-4fe0-818be7b4ea1e" executionId="19436371-26dd-450d-9e7c-18466b3e64c9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="88a3cb4c-e7a2-4dbe-9c3a-190407dd3992" executionId="61e78bf8-397f-46ec-8ab6-d4602490ee42" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0995c6a9-256b-388b-d685-f4c9f5953caf" executionId="75fd0d65-148d-441a-82fa-7feb8fd472b3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c21a53b6-db16-5e54-e2c3-c26fac0deafc" executionId="b9666a1c-bcd7-4f90-8528-2e407140b086" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c73489cb-f480-4a0f-6cab-d10e67e4456e" executionId="0608ce44-be25-401a-90d0-1f51b58f14b4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="297dc093-0878-c4fc-b88e-23cbebee1826" executionId="f88e5b62-6468-480f-ae05-8e17beca194b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="87df7ce4-4581-d042-31c3-69929fc836a6" executionId="15d32480-8081-4344-a11e-7fed34c2c21e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1f0bd065-95e8-6f65-6439-c926b7ff35b6" executionId="3c3264f0-5d13-4ab9-91e8-1a88d2229b5e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6cbf77ea-d6c8-f0a4-208c-88a3fb45456a" executionId="81b1cb19-2597-4897-a9f0-ee1c3c6a8506" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c7482311-9f16-5917-5106-b6bfae5b08aa" executionId="43556e57-d868-403d-a5d1-9445ec901a8b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="10ebcb28-2f5a-930b-336e-d388358cd00e" executionId="3b283b3d-391e-465c-ba07-64b452a82990" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b86469cd-0d67-6ec4-ebf6-16ca4fe817ec" executionId="a16c738f-901a-449f-bc1c-68298d29af91" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7d57144e-bc2b-2851-5172-9dbee4dd5524" executionId="b60e6e54-5211-4569-a1d2-f5868b7a3cb0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="91d49683-b049-443a-e93d-088d1f523aad" executionId="15e07cd5-e0fd-41eb-8041-5f4315870290" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="12544c0f-270d-0deb-8bde-524e457b0696" executionId="08ec7192-a3f5-487b-b8de-b25ebe73d559" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f55cb54f-c720-2a3b-8ebd-e119e3d88f86" executionId="18733f54-c5c3-4450-9e74-bd6bf8d38b64" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9f9f4c0c-9152-581c-59d7-5a191bc5cf69" executionId="1e16f768-c721-4d9d-9716-8ce0464ce846" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8f6dbe51-72f2-203a-de81-6ec65cce0d30" executionId="1cd0942c-b570-4b30-a646-364bd17a2902" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e00e7142-0c44-696e-0272-1c0b4b3492c7" executionId="3f07f110-acaf-4ea7-8a1b-0f2f226fd349" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4e367ea9-dcc2-ffb3-cb4e-95a0a9f13a04" executionId="14d54ed9-44c0-406f-8bcf-c7d0953189c9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b8041dd5-3746-fbc2-6c5e-8b2af1f5fec8" executionId="124c5ca8-103e-4d6a-bb89-e6612b0f50de" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1ff4ca92-eaaa-366d-67ac-c1e16c9f41c4" executionId="247d52ad-dc54-44b5-869d-8e1fb4641885" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cfe62533-c7f3-c445-c82e-4a40d6933f6c" executionId="3ab7cfa6-a528-403c-984c-c2ab812ca466" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3dd361f1-c447-46e6-6aec-aac0d3b3bd57" executionId="5d576662-ab7e-4548-997e-6891f5f6b868" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5a0598b1-4dc9-bf88-eeca-04cb902c5e4a" executionId="f2cb679e-54c8-4f6e-a3c9-ad0bb11f4522" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e56484d4-b920-2763-0f95-e2fd52971179" executionId="1c6d9b07-4a51-44fb-8609-8aaa1439b1c3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b77f4550-cf20-8b0c-1ce8-efdde019de41" executionId="8864a665-1dec-43ea-ac06-b7c452ea7f70" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="49b8ab14-9b4c-55c4-ecf2-b5fbb501cfa6" executionId="1d4d8ef5-0971-40e6-8b62-53e8a3935edd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="79a9d087-cd85-076a-50c5-9f2e47aae347" executionId="90abc9f9-ba86-4620-ac4e-1fc17f42d7fd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bf879fa6-9006-6edc-bbf1-c372b7f9887e" executionId="86957d13-068d-4480-b6c1-ede7383a5fa4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d5b1b8f6-9c94-5a95-49cf-9945ac32b888" executionId="50603217-17f7-407f-b5a7-ab7dbcce46c0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2d7b206f-1f0c-b9f1-8912-31ddebceb4db" executionId="0ed5921c-6290-4d7d-aa48-e56280e69db2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fcea4e24-0921-7643-ea18-4aaab97cf3a8" executionId="df842037-62d5-478c-8ddf-f94e688c66dd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a91539d5-959c-48fd-d847-7a4d9e15b51e" executionId="26e1cf91-7fe7-42a8-a28b-bc5e111b9c3e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fe6a009d-10c1-2f53-0d4f-08682795b9b6" executionId="3e36e023-e930-4599-ba39-b76a669624ce" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="69b9fe17-41d3-9975-b3d3-022fa6ebca33" executionId="006e1d8f-5325-4401-a11b-22de700fcc7b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7ca68dad-9d95-551e-cc77-60957f90e4d6" executionId="b4e4375f-2572-49a2-ae84-b6b0fb29b396" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dac4f31d-0991-e6a2-62cf-0f747375e2b6" executionId="390a4353-8a2d-4732-ab67-e6499cb5c411" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d4477b8f-829d-4f91-07fa-af2baea6301a" executionId="ad8098c6-069d-43bd-a85f-9b9e0f78a7bf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7fb34a8f-786a-22eb-d957-8af883ce7be5" executionId="2ba8a949-b1eb-46c2-8009-ef4a82ef142f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4409d5da-9534-f9bc-47ee-efc07238b53f" executionId="8477c5bc-67a4-47af-8ac3-0a2d58028811" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="27f76e4d-505d-19af-4d8e-e141514a00f6" executionId="6dcb547b-9f70-470b-8eda-11c7ef9bf660" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="41f1a2ed-ac42-7556-9fe0-ddfee7847b1b" executionId="74b9d8ed-3b51-4cb6-a9d8-f262f2279fca" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="68fb9c16-ac72-d43d-f3ed-7d810d3504fa" executionId="af3ca007-2341-416d-96df-01ee3a90073e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5ad0e3c8-e63c-ab80-8220-2d099ec271ce" executionId="61c09032-dac3-4f19-8297-84b0c11c3b80" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="183a623e-3692-151d-c31d-47942f484e47" executionId="c1f07206-4af0-4090-89aa-afc7261f1597" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e628122a-1949-e9ec-299d-8406a2b50b49" executionId="4f8e39fc-5b97-4148-b464-833ca8f8b1d8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="03fddbb6-5e06-97ad-d2c7-4b08af28d777" executionId="5bb15052-3c20-4f14-8544-400be852e211" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1643f118-9eac-bb99-ef40-ab085bf6b75d" executionId="2fc2467c-ff05-4e32-ba8e-405ae673bfd3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="30746417-5869-5aa4-0f75-2e7a3354b54b" executionId="05cad572-87c2-4912-9bb9-a6f532008321" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="beb1f872-f99c-8b92-f21d-914b36c2f895" executionId="8b8b5708-1a7f-4c2a-b5e8-fca9872c33c6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="55b35a70-056d-0911-5ba9-c11cc6d13089" executionId="5f319fce-dd43-4fe9-b035-30c3167cc6a0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4e160351-b6dd-b760-e83a-4b864e8eec6c" executionId="89d66de1-d3c6-4616-a64a-4736d06b510a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5f9cf370-101a-cea8-517c-d8e5deb38d5c" executionId="aacfbc65-f834-42f8-9cd9-e96bafdb9031" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6b12892c-21bd-68dd-cc6c-e8a27d2ea8a0" executionId="73953291-acdc-4f37-b60d-c1655267c6c4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4e13f088-2095-8f9f-10cd-276abd0f19ef" executionId="48059d89-eecc-4449-8804-86994ff02897" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9e1752c0-15bf-d272-c259-2e078280eb6e" executionId="9e70f06b-1d6f-472e-bc7c-8ea600892915" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7cef132f-1308-bc8a-1c8a-deebc86a0a18" executionId="a954c7d7-5e3c-49cc-b360-b41c82f17396" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="16aab7a7-07eb-36d0-7c78-985690df5d96" executionId="6a36d096-03bf-426f-8222-e91bac2efd71" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="aa4fc861-20cb-4123-0b67-79e94b7cc6b3" executionId="e3b0e529-1ca5-472e-8254-f4437fcf91a8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6f2308d8-58c9-65ab-1b02-c88f10bc506b" executionId="ce3add0c-f51f-4722-81f7-3d4858dcab28" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a5532905-4522-ef92-97d2-7bdf4b2fa954" executionId="2013715d-4e3a-4821-bcc5-b0051da4e528" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="05e0be72-4ac9-3361-4132-6d208f9f360d" executionId="7931d315-6102-4b7a-81be-a87158ca808b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8c9884ec-b5bc-4b4b-b280-f551df9557e7" executionId="ecfd949b-a5e5-4811-8e17-340e1c74a2b8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="485b77ac-5a50-995c-4a12-f22ad7afb180" executionId="6b82156a-e09a-4462-a7ce-bf594e0dfe4f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="001cf7bb-1049-50b4-29ee-d768d4d03438" executionId="3ea5ed77-5aae-441c-838a-565b0fcfa7cb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="87ca77f5-35a2-9619-c686-85ebda353849" executionId="e39300dc-0661-467f-ac5a-e0b2ce185687" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f42889ce-8cd4-4628-1ae0-0b8b49fd863e" executionId="c0d1f834-b0a0-47fc-a817-f91c54ab2b01" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d8f66e65-6a15-f3c5-6925-9daeaf2fd7bc" executionId="50c1d8b9-300c-4225-9a20-0f1b8a07ab6c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0df2ed6c-8c44-772e-299d-5078321c3339" executionId="306192fc-9900-4586-9d59-97ec91e3efd2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4d8102da-5456-befc-fda6-c208c9c04f07" executionId="e8f089bd-fc1c-4cb2-a7d4-509b8afd414d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b7e178ac-099f-f4a4-415c-8e7fd8c9d99b" executionId="b8d11128-a280-4761-8493-c8622f167372" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e2005560-dfff-89e7-e220-6c988fff1956" executionId="b87f3626-c2b8-453b-a268-978feb47c9f2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="12fad825-4dc4-4e55-3433-77359e4b8f5d" executionId="4bb949ca-302e-4ca3-98da-a3afb9d01454" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c8d444ce-3f87-8625-413e-cc80f79854ec" executionId="71408f63-6329-41cf-aa13-1878d785a655" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="619ac2b1-658f-6427-c66c-4ab95a3bd6ae" executionId="f3b194b0-37e4-4ca0-a7d9-25bd4f516012" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="673f94e8-e880-59db-fe6c-7afc29cf5a54" executionId="c7f219bb-9b84-4eeb-9c64-433cdb9c5499" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3821dd3d-2c8a-9c81-2ebe-c3f813387aee" executionId="0145fc7a-f6e2-4864-88a6-df3f643354e9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e3ace438-37d6-0d10-bc44-2ab4d54e0fda" executionId="8ad128a9-cf9d-4c3c-9564-f99bcf2ad89e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b08162b0-9039-a495-5660-f5c203171682" executionId="d74b8cff-f5a8-4cb7-8939-40a5b7cdcb93" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fc14bd65-d601-ee93-213b-69c60c6e5322" executionId="d8668a4a-a4b4-407b-a307-48412a48b937" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4a755c7c-ddcb-458c-8946-703944ed245f" executionId="b708e6ce-0b7f-4cea-b0f7-da32f7307f53" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dd7cf8db-453b-2688-02d7-8c7753450801" executionId="223d43e4-b10d-45d6-bbd6-850ae4667487" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4d01ddf1-f395-0167-97cf-4a2f2cb0e3cd" executionId="add5c1bc-0d4c-411d-9007-acec50f2dc9f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4d60c7f0-f0f6-7107-a377-928680602590" executionId="aa4c3067-6a39-4578-a312-13234bee64f7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="511c7f08-d841-57af-150c-f02793bb6e0d" executionId="5062b5de-62ae-4a02-8347-6c3346440196" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0bce7acd-90de-3034-fcb3-d821d7e6a416" executionId="29bba350-c521-44e6-bc6a-2e3408754d3f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="56da0783-1dda-ffe4-c360-240287881190" executionId="8cf8d754-ae40-47e7-bce1-7e033dc06087" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0abc9557-49cd-5fd6-35b6-fcc1a34e9b11" executionId="2ea797b4-73e5-4306-b052-84cff821031e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c0f47440-1c8a-b74e-98dc-c21306c3f954" executionId="77a41a72-e40b-4c03-a589-2eaa46fecdfe" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9ab97c94-cb4c-6cdd-1fbe-051314b309ce" executionId="4d78c2a5-5bf4-49f0-9a45-ad2db0edaf1f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2548039c-e6ba-c82f-9bce-60445c226abf" executionId="c30d5b3b-c631-437b-90c8-c48ca3cbea81" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="adc3b740-9aa0-1d26-c05d-66d9c382221c" executionId="cb06418e-6e37-456c-852a-c73eea214b32" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="930e40f3-7711-636b-2248-8e35ef9abcb7" executionId="f993e69e-215b-427c-9208-4f41178eedf5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5bd47d09-640c-2025-f833-7fbf611ec1b7" executionId="28b80242-18c0-4a77-ab35-20d3de38e704" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="94bd44dd-a1f1-4495-8ed5-c615c142117a" executionId="bb6a9515-ce95-4471-bd83-0f48f64459ef" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cbe0ff10-ceec-3d14-dcc4-8399de496420" executionId="7553cfa9-ad11-4966-8bcc-9772bae12a82" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3b3527b5-b738-a1e6-64b2-9bc466b0e319" executionId="f61220ad-42c3-4571-84bb-58d3481bf4f0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4bbcfd7c-b397-992a-657e-8d205a8f3496" executionId="08caace9-216b-409d-ba68-b5ecf14e88f2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="13b059ed-48e2-70f9-a0e9-8f73b85408e0" executionId="ab195a8f-8beb-428a-9e87-513c2105d386" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7fb86823-df70-8378-33a7-f80d97a0d005" executionId="9c626e82-dab7-4c77-a1b4-dee01c5b5690" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0769b8fb-ea22-5e20-c301-aab5ae4968db" executionId="abd3c30a-85d0-4d1d-96d1-d2a81a9c3398" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="32a6bfc6-1ae9-8e4e-b70c-926596c83adb" executionId="c5d7132e-d59b-45f0-b77a-ad9f8dd2098e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9d496db5-9a74-9706-df8d-3889c962ffcb" executionId="58b6de49-f334-43d6-8489-4573135d3b7f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="104" executed="104" passed="84" failed="20" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 5.2.0.0: Test execution started&#xD;
+Running all tests in D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll&#xD;
+   NUnit3TestExecutor discovered 104 of 104 NUnit test cases using Current Discovery mode, Non-Explicit run&#xD;
+NUnit Adapter 5.2.0.0: Test execution complete&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

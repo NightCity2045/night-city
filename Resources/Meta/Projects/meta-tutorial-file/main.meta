@@ -1,0 +1,52 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+module training.main;
+import meta.app;
+import meta.system;
+import meta.text;
+import meta.numeric;
+import meta.sensors;
+import meta.security;
+import meta.files;
+
+link sensor:sensors.TemperatureSensor="training-sensor";
+link alarm:security.Alarm="training-alarm";
+link data:files.FileStore="training-data";
+
+var hot:bool=false;
+var seen:bool=false;
+var lastSeen:int=0;
+var temperature:float=0.0;
+var high:int=30;
+var low:int=25;
+
+pub struct TrainingState { title:string; hint:string; status:string; reading:string; highLabel:string; lowLabel:string; applyLabel:string; high:int; low:int; fresh:bool; }
+
+fn label(ru:bool,english:string,russian:string)->string {if(ru){return russian;}return english;}
+pub fn view(context:app.AppContext)->TrainingState {
+    let ru:bool=context.locale=="ru-RU";
+    let fresh:bool=seen&&system.nowMs()-lastSeen<=2000;
+    var status:string=label(ru,"Sensor unavailable","Датчик недоступен");
+    if(fresh){status=label(ru,"Alarm off","Тревога выключена");if(hot){status=label(ru,"Alarm requested","Тревога запрошена");}}
+    return new TrainingState(title:label(ru,"3. Durable transition log","3. Надёжный журнал переходов"),
+        hint:label(ru,"The last confirmed transition is written to the private training file.","Последний подтверждённый переход записывается в личный учебный файл."),
+        status:status,reading:text.fromFloat(temperature)+" °C",
+        highLabel:label(ru,"Alarm threshold","Порог включения"),lowLabel:label(ru,"Clear threshold","Порог выключения"),
+        applyLabel:label(ru,"Apply limits","Применить пороги"),high:high,low:low,fresh:fresh);
+}
+
+async watch sensor.temperatureChanged(sample) {
+    if(!system.isFresh(sample.stamp,2000)){return;}
+    temperature=sample.celsius;lastSeen=system.nowMs();seen=true;
+    var requested:bool=hot;
+    if(temperature>=numeric.toFloat(high)){requested=true;}
+    else if(temperature<=numeric.toFloat(low)){requested=false;}
+    if(requested==hot){return;}
+    match(await alarm.setActive(requested)) {
+        ok(state)=>{hot=state.requestedActive;
+            var line:string="alarm-off"; if(hot){line="alarm-on";}
+            match(await data.writeTextAtomic("training/last-transition.txt",line)){ok(_)=>{} err(problem)=>{}}
+        }
+        err(problem)=>{}
+    }
+}
+

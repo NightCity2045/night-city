@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+module examples.fabricator;
+import meta.industrial;
+import meta.system;
+link machine: industrial.Fabricator = "fabricator";
+
+watch machine.operationChanged(receipt) {
+    if(receipt.status == system.OperationStatus.Applied) { system.log("Production completed."); }
+    if(receipt.status == system.OperationStatus.OutcomeUnknown) { system.log("Inspect the machine and its receipt before retrying."); }
+}
+
+async fn main() -> void {
+    match(await machine.start("Wirecutter", 3, "demo-batch-1")) {
+        ok(receipt) => {
+            if(receipt.status == system.OperationStatus.Running) { system.log("Production accepted."); }
+            if(receipt.status == system.OperationStatus.Applied) { system.log("Production already completed."); }
+        }
+        err(error) => { system.log("Production rejected."); }
+    }
+}

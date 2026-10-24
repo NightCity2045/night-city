@@ -9,11 +9,13 @@ using Content.Server._NC.Medical.Pharmacology;
 using Content.Server._NC.Medical.Systemic;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Cyberware;
+using Content.Shared._NC.Medical.Cyberware.Borg;
 using Content.Shared._NC.Medical.Emergency;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Systemic;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
+using Content.Shared.Body.Components;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
@@ -184,6 +186,14 @@ public sealed partial class NCPhysiologySystem : EntitySystem
             return false;
 
         var (circulation, physiology) = EnsureInitialized(body);
+        // An empty manufactured carrier has no patient to diagnose. Once occupied, loss of its brain uses
+        // the ordinary irreversible-death path, including during service or a damaged-core evacuation.
+        if (TryComp<NCBorgCoreComponent>(body, out var core) && !core.Occupied &&
+            !Comp<BodyComponent>(body).Organs!.ContainedEntities.Any(HasComp<BrainComponent>))
+        {
+            circulation.LastEvaluation = _timing.CurTime;
+            return true;
+        }
         var profile = _prototypes.Index(circulation.Profile);
         ValidateProfile(profile);
 
@@ -415,6 +425,8 @@ public sealed partial class NCPhysiologySystem : EntitySystem
             var capacity = function.BaseCapacity > 0f
                 ? Math.Clamp(function.CurrentCapacity / function.BaseCapacity, 0f, 1f)
                 : 0f;
+            if (HasComp<NCBorgSupportProviderComponent>(organ) && TryComp<NCBorgCoreComponent>(body, out var core))
+                capacity = MathF.Min(capacity, NCBorgSupport.Capacity(core, function.FunctionType));
             // Read the physical replacement's output once; never feed it back into CurrentCapacity.
             if (TryComp<NCCyberwareComponent>(organ, out var cyberware))
                 capacity = MathF.Min(capacity, Math.Clamp(cyberware.FunctionalEfficiency, 0f, 1f));

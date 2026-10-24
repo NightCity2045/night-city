@@ -172,8 +172,11 @@ public sealed class NCCyberwareAssemblyTest : GameTest
         var (user, _, arm) = CreateBench();
         Assert.That(_cyberware.TryCaptureOrganState(arm, out var cyberware), Is.True);
         cyberware.Assembly = null;
+        cyberware.Exterior = null;
+        cyberware.Service = null;
         var legacy = _persistence.SerializeMedicalState(user)!;
         legacy.Version = NCMedicalSnapshotVersions.SpatialSurgery;
+        legacy.Humanity = null;
         var armState = legacy.Organs["ArmLeft"];
         armState.EntityPrototype = "NCOrganHumanCyberArmLeft";
         armState.CyberwareIdentity = armState.EntityPrototype;

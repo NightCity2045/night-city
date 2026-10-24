@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "id": "meta-example-hello",
+  "name": "Hello META",
+  "nameRu": "Привет, META",
+  "packageName": "examples.hello",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.hello",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.hello.meta",
+      "sha256": "91235fefdd7e927c3bb9e64fa7268564b3028e1a6f102f3a366f4bced4cc5ac5"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [],
+  "testFixture": "meta.test.json"
+}

@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "id": "meta-example-files",
+  "name": "Private file storage",
+  "nameRu": "Приватное файловое хранилище",
+  "packageName": "examples.files",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.files",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.files.meta",
+      "sha256": "bd3a83b603e897b5d922000f3ab3e5f8edfbc94b2ba4db47dde08fed511a4957"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [
+    {
+      "slot": "data",
+      "capability": "meta.files.FileStore",
+      "contractHash": "c7634c1859d74a9212400dd06f15286fe1c7bb80a1105e39adc191638a724fd9",
+      "requiredScopes": [
+        "files.read",
+        "files.write"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

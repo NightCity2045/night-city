@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="8d794558-d06f-426c-8990-b008e70d78aa" name="Yuri@SEXMACHINE 2026-10-24 14:04:33" runUser="SexMachine\Yuri" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-24T14:04:33.4316143+03:00" queuing="2026-10-24T14:04:33.4316147+03:00" start="2026-10-24T14:04:32.3043948+03:00" finish="2026-10-24T14:04:33.4369961+03:00" />
+  <TestSettings name="default" id="47773039-5287-403b-911b-490ca6990e50">
+    <Deployment runDeploymentRoot="Yuri_SEXMACHINE_2026-10-24_14_04_33" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="a217b702-1ecb-4f80-b8c0-ff01cd1fb7ac" testId="d6b1eb18-9e39-7e57-4b07-b8017f446121" testName="CommercialReleaseAndPinnedLicenseAreBlobRoots" computerName="SEXMACHINE" duration="00:00:00.0023410" startTime="2026-10-24T14:04:33.3096038+03:00" endTime="2026-10-24T14:04:33.3119447+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a217b702-1ecb-4f80-b8c0-ff01cd1fb7ac" />
+    <UnitTestResult executionId="ce414668-6145-46c2-b6e8-6f1a818edd30" testId="63b5236e-d510-5ee3-8e39-6c421ea7a16e" testName="MalformedAndAmbiguousRootMetadataFailsClosed" computerName="SEXMACHINE" duration="00:00:00.0024340" startTime="2026-10-24T14:04:33.3183168+03:00" endTime="2026-10-24T14:04:33.3207508+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ce414668-6145-46c2-b6e8-6f1a818edd30" />
+    <UnitTestResult executionId="0459ddf9-b80d-46f9-8233-dc2dab7ec54b" testId="f8491055-ab25-d790-028e-1c22f720cd07" testName="OperatorDenyListIsBoundedCanonicalAndNeverSilentlyDropsMalformedEntries" computerName="SEXMACHINE" duration="00:00:00.0036100" startTime="2026-10-24T14:04:33.3058254+03:00" endTime="2026-10-24T14:04:33.3094349+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0459ddf9-b80d-46f9-8233-dc2dab7ec54b" />
+    <UnitTestResult executionId="9d5cb78b-afb0-4847-bc77-5b7066ffacc2" testId="f034369b-594d-9566-d42b-00872e3274f4" testName="OverflowPreservesExactAggregateCountsAndNeverClaimsCompleteRawCoverage" computerName="SEXMACHINE" duration="00:00:00.0081780" startTime="2026-10-24T14:04:33.2922071+03:00" endTime="2026-10-24T14:04:33.3003853+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9d5cb78b-afb0-4847-bc77-5b7066ffacc2" />
+    <UnitTestResult executionId="6f6e8313-e24d-410e-9ea1-a4aa81af61dc" testId="bc38ef10-d754-fbfc-398e-ba2a5cb0bd2a" testName="ConcurrentNativeWritersPublishWholeSamplesAndSaturateWithoutIntegerWrap" computerName="SEXMACHINE" duration="00:00:00.0133830" startTime="2026-10-24T14:04:33.2765715+03:00" endTime="2026-10-24T14:04:33.2898793+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6f6e8313-e24d-410e-9ea1-a4aa81af61dc" />
+    <UnitTestResult executionId="cc271a9d-f9da-41d3-9145-db977b0a748e" testId="ff48228c-f7fa-1a14-aac9-2e5d09e0a5e1" testName="FrozenContractFixturesAndDeliveredCustomerClaimsRetainTheirRawBytes" computerName="SEXMACHINE" duration="00:00:00.0063220" startTime="2026-10-24T14:04:33.3119679+03:00" endTime="2026-10-24T14:04:33.3182901+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cc271a9d-f9da-41d3-9145-db977b0a748e" />
+    <UnitTestResult executionId="5aa0a435-e1e6-4385-9877-52a6db73278c" testId="7111881a-106b-0e61-6fa5-fcb380cf4f22" testName="StoppedCaptureRejectsFurtherWritesAndPagesHaveExplicitBounds" computerName="SEXMACHINE" duration="00:00:00.0034140" startTime="2026-10-24T14:04:33.3004239+03:00" endTime="2026-10-24T14:04:33.3038377+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5aa0a435-e1e6-4385-9877-52a6db73278c" />
+    <UnitTestResult executionId="1d3003b7-7fbf-4830-ba14-31eda5e6fa64" testId="0a925859-882e-8144-8d64-98bcbd3b972d" testName="NativeImageDependenciesRetainBytesWithoutTreatingContainerHashesAsBlobs" computerName="SEXMACHINE" duration="00:00:00.0002740" startTime="2026-10-24T14:04:33.3207783+03:00" endTime="2026-10-24T14:04:33.3210524+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1d3003b7-7fbf-4830-ba14-31eda5e6fa64" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="ConcurrentNativeWritersPublishWholeSamplesAndSaturateWithoutIntegerWrap" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="bc38ef10-d754-fbfc-398e-ba2a5cb0bd2a">
+      <Execution id="6f6e8313-e24d-410e-9ea1-a4aa81af61dc" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Diagnostics.MetaMetricCaptureTests" name="ConcurrentNativeWritersPublishWholeSamplesAndSaturateWithoutIntegerWrap" />
+    </UnitTest>
+    <UnitTest name="NativeImageDependenciesRetainBytesWithoutTreatingContainerHashesAsBlobs" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="0a925859-882e-8144-8d64-98bcbd3b972d">
+      <Execution id="1d3003b7-7fbf-4830-ba14-31eda5e6fa64" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.MetaBlobReferencesTests" name="NativeImageDependenciesRetainBytesWithoutTreatingContainerHashesAsBlobs" />
+    </UnitTest>
+    <UnitTest name="CommercialReleaseAndPinnedLicenseAreBlobRoots" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="d6b1eb18-9e39-7e57-4b07-b8017f446121">
+      <Execution id="a217b702-1ecb-4f80-b8c0-ff01cd1fb7ac" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.MetaBlobReferencesTests" name="CommercialReleaseAndPinnedLicenseAreBlobRoots" />
+    </UnitTest>
+    <UnitTest name="MalformedAndAmbiguousRootMetadataFailsClosed" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="63b5236e-d510-5ee3-8e39-6c421ea7a16e">
+      <Execution id="ce414668-6145-46c2-b6e8-6f1a818edd30" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.MetaBlobReferencesTests" name="MalformedAndAmbiguousRootMetadataFailsClosed" />
+    </UnitTest>
+    <UnitTest name="StoppedCaptureRejectsFurtherWritesAndPagesHaveExplicitBounds" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="7111881a-106b-0e61-6fa5-fcb380cf4f22">
+      <Execution id="5aa0a435-e1e6-4385-9877-52a6db73278c" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Diagnostics.MetaMetricCaptureTests" name="StoppedCaptureRejectsFurtherWritesAndPagesHaveExplicitBounds" />
+    </UnitTest>
+    <UnitTest name="OperatorDenyListIsBoundedCanonicalAndNeverSilentlyDropsMalformedEntries" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="f8491055-ab25-d790-028e-1c22f720cd07">
+      <Execution id="0459ddf9-b80d-46f9-8233-dc2dab7ec54b" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaOperationalPolicyTests" name="OperatorDenyListIsBoundedCanonicalAndNeverSilentlyDropsMalformedEntries" />
+    </UnitTest>
+    <UnitTest name="FrozenContractFixturesAndDeliveredCustomerClaimsRetainTheirRawBytes" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="ff48228c-f7fa-1a14-aac9-2e5d09e0a5e1">
+      <Execution id="cc271a9d-f9da-41d3-9145-db977b0a748e" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.MetaBlobReferencesTests" name="FrozenContractFixturesAndDeliveredCustomerClaimsRetainTheirRawBytes" />
+    </UnitTest>
+    <UnitTest name="OverflowPreservesExactAggregateCountsAndNeverClaimsCompleteRawCoverage" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="f034369b-594d-9566-d42b-00872e3274f4">
+      <Execution id="9d5cb78b-afb0-4847-bc77-5b7066ffacc2" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Diagnostics.MetaMetricCaptureTests" name="OverflowPreservesExactAggregateCountsAndNeverClaimsCompleteRawCoverage" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="d6b1eb18-9e39-7e57-4b07-b8017f446121" executionId="a217b702-1ecb-4f80-b8c0-ff01cd1fb7ac" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="63b5236e-d510-5ee3-8e39-6c421ea7a16e" executionId="ce414668-6145-46c2-b6e8-6f1a818edd30" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f8491055-ab25-d790-028e-1c22f720cd07" executionId="0459ddf9-b80d-46f9-8233-dc2dab7ec54b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f034369b-594d-9566-d42b-00872e3274f4" executionId="9d5cb78b-afb0-4847-bc77-5b7066ffacc2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bc38ef10-d754-fbfc-398e-ba2a5cb0bd2a" executionId="6f6e8313-e24d-410e-9ea1-a4aa81af61dc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ff48228c-f7fa-1a14-aac9-2e5d09e0a5e1" executionId="cc271a9d-f9da-41d3-9145-db977b0a748e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7111881a-106b-0e61-6fa5-fcb380cf4f22" executionId="5aa0a435-e1e6-4385-9877-52a6db73278c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0a925859-882e-8144-8d64-98bcbd3b972d" executionId="1d3003b7-7fbf-4830-ba14-31eda5e6fa64" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="8" executed="8" passed="8" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 5.2.0.0: Test execution started&#xD;
+Running selected tests in D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll&#xD;
+   NUnit3TestExecutor discovered 8 of 8 NUnit test cases using Current Discovery mode, Non-Explicit run&#xD;
+NUnit Adapter 5.2.0.0: Test execution complete&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

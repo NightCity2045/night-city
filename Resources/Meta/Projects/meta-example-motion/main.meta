@@ -1,0 +1,18 @@
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+module examples.motion;
+import meta.system;
+import meta.security;
+
+link camera: Camera = "entrance-camera";
+link alarm: Alarm = "entrance-alarm";
+
+async watch camera.motionDetected(detection) {
+    if (detection.confidence < 0.8 || !system.isFresh(detection.stamp, 500)) {
+        return;
+    }
+    let response = await alarm.setActive(true);
+    match (response) {
+        ok(_) => { system.log("Движение: тревога запрошена"); }
+        err(problem) => { system.log(problem.message); }
+    }
+}

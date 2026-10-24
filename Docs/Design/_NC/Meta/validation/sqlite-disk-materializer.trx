@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="05e7c14e-a7f8-49d6-b047-f58685a29d00" name="Yuri@SEXMACHINE 2026-10-24 19:50:54" runUser="SexMachine\Yuri" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-24T19:50:54.7961252+03:00" queuing="2026-10-24T19:50:54.7961259+03:00" start="2026-10-24T19:50:52.5051242+03:00" finish="2026-10-24T19:50:57.2499018+03:00" />
+  <TestSettings name="default" id="d7f98d2c-0134-460a-9c16-ac210c85b5b3">
+    <Deployment runDeploymentRoot="Yuri_SEXMACHINE_2026-10-24_19_50_54" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="099442ce-faa4-43cd-ac43-71b0c1981de3" testId="aa5eddba-5f09-148c-36ee-024dd8ac29e2" testName="TamperedSeedOrManifestCannotCreateOwnedDiskOutput" computerName="SEXMACHINE" duration="00:00:00.6689140" startTime="2026-10-24T19:50:56.4491975+03:00" endTime="2026-10-24T19:50:57.1181106+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="099442ce-faa4-43cd-ac43-71b0c1981de3" />
+    <UnitTestResult executionId="4982a9ee-2bca-4180-b733-863a6736bcc3" testId="a477b8fe-e8e1-ff43-fdea-7f26a54846e9" testName="RejectsUnexpectedPersistentRowsAndDefaultChanges(&quot;storage&quot;,&quot;UPDATE nc_meta_blob_storage SET allocated_count=1;&quot;)" computerName="SEXMACHINE" duration="00:00:00.0557830" startTime="2026-10-24T19:50:54.8893013+03:00" endTime="2026-10-24T19:50:54.9450833+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4982a9ee-2bca-4180-b733-863a6736bcc3" />
+    <UnitTestResult executionId="c6e4f163-824d-4ed5-af8a-b53ddb5bc4c5" testId="ecb55baa-853f-4aba-d3b7-037f8fab77df" testName="RepeatCannotOverwriteExistingDatabaseAndWrongAssemblyHashCreatesNoData" computerName="SEXMACHINE" duration="00:00:00.8065660" startTime="2026-10-24T19:50:55.6425475+03:00" endTime="2026-10-24T19:50:56.4491132+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c6e4f163-824d-4ed5-af8a-b53ddb5bc4c5" />
+    <UnitTestResult executionId="97ee8308-19ab-4636-9942-ff5e5ea07882" testId="6b5eaf93-4314-e0f6-d18b-abd7bc79746c" testName="RejectsUnexpectedPersistentRowsAndDefaultChanges(&quot;hidden-default-data&quot;,&quot;ALTER TABLE server ADD COLUMN hidden_state TEXT DEFAULT 'private';&quot;)" computerName="SEXMACHINE" duration="00:00:00.0543660" startTime="2026-10-24T19:50:54.9926942+03:00" endTime="2026-10-24T19:50:55.0470593+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="97ee8308-19ab-4636-9942-ff5e5ea07882" />
+    <UnitTestResult executionId="a280622a-f84a-4d72-94c2-4e103f82a3c4" testId="3f830ebb-6f90-1e74-f5e2-ec4fae0f18ac" testName="RejectsAnyPartialEnvironmentSelection(&quot;NC_DIAGNOSTICS_WORKSPACE&quot;)" computerName="SEXMACHINE" duration="00:00:00.0465930" startTime="2026-10-24T19:50:54.5064083+03:00" endTime="2026-10-24T19:50:54.5529998+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a280622a-f84a-4d72-94c2-4e103f82a3c4" />
+    <UnitTestResult executionId="ff6965dd-cc23-496c-b096-055f8b3b6e1b" testId="80e3dcc8-95cf-50e2-10f2-5b1839b9c5dc" testName="RejectsWritablePackageAndSidecar" computerName="SEXMACHINE" duration="00:00:00.0641790" startTime="2026-10-24T19:50:55.1031124+03:00" endTime="2026-10-24T19:50:55.1672898+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ff6965dd-cc23-496c-b096-055f8b3b6e1b" />
+    <UnitTestResult executionId="7bb5aefc-e80a-4630-956a-43036ed194bc" testId="9588d9ce-2d55-9992-1f9a-57494fda8202" testName="RejectsAnyPartialEnvironmentSelection(&quot;NC_DIAGNOSTICS_SQLITE_SEED_SHA256&quot;)" computerName="SEXMACHINE" duration="00:00:00.0373120" startTime="2026-10-24T19:50:54.5905917+03:00" endTime="2026-10-24T19:50:54.6279035+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7bb5aefc-e80a-4630-956a-43036ed194bc" />
+    <UnitTestResult executionId="036c4e42-1e31-4765-856b-e4badb4d95fd" testId="08a29a96-7513-dfe3-7583-0083bd322aeb" testName="ActualBackupPreservesSourceAndSeparatesMemoryDatabases" computerName="SEXMACHINE" duration="00:00:00.1925760" startTime="2026-10-24T19:50:53.4109343+03:00" endTime="2026-10-24T19:50:53.6034510+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="036c4e42-1e31-4765-856b-e4badb4d95fd" />
+    <UnitTestResult executionId="7c9112a4-13c4-471b-a7c9-2517cfc5ce38" testId="51e60384-e945-b327-6e6e-6c6293b72df0" testName="RealDiskBackupRemainsPristineAndNormalEfMigrateAppliesPendingMigration" computerName="SEXMACHINE" duration="00:00:00.4729400" startTime="2026-10-24T19:50:55.1694782+03:00" endTime="2026-10-24T19:50:55.6424171+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7c9112a4-13c4-471b-a7c9-2517cfc5ce38" />
+    <UnitTestResult executionId="426cb046-0b21-482f-9f55-14136013c40e" testId="d971d6a1-6116-664d-01a9-125c31d38f08" testName="OrdinaryEfMigrateAppliesPendingRealMigrationAfterBackup" computerName="SEXMACHINE" duration="00:00:00.7890560" startTime="2026-10-24T19:50:53.6047278+03:00" endTime="2026-10-24T19:50:54.3937822+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="426cb046-0b21-482f-9f55-14136013c40e" />
+    <UnitTestResult executionId="2f7062c8-91d5-4cbc-986e-014c1f9144ea" testId="9de03edf-7db1-0f8d-0270-3b17e44ea39d" testName="RejectsUnexpectedPersistentRowsAndDefaultChanges(&quot;server&quot;,&quot;INSERT INTO server VALUES(1,'not pristine');&quot;)" computerName="SEXMACHINE" duration="00:00:00.0475150" startTime="2026-10-24T19:50:54.9451248+03:00" endTime="2026-10-24T19:50:54.9926391+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2f7062c8-91d5-4cbc-986e-014c1f9144ea" />
+    <UnitTestResult executionId="56f14b9c-c3b7-4afd-92dc-a6a19017c4ec" testId="8e927bd4-450d-d87d-bad9-259fcc5fba2a" testName="RejectsUnexpectedPersistentRowsAndDefaultChanges(&quot;application_state&quot;,&quot;INSERT INTO application_state(payload) VALUES('persisted actor or money');&quot;)" computerName="SEXMACHINE" duration="00:00:00.0603320" startTime="2026-10-24T19:50:54.8289376+03:00" endTime="2026-10-24T19:50:54.8892686+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="56f14b9c-c3b7-4afd-92dc-a6a19017c4ec" />
+    <UnitTestResult executionId="7026001c-5973-4655-b64a-421eddc2b365" testId="6f9b9fec-3b5f-8608-9b56-bcf066a76c18" testName="RejectsAnyPartialEnvironmentSelection(&quot;NC_DIAGNOSTICS_SQLITE_SEED_ID&quot;)" computerName="SEXMACHINE" duration="00:00:00.0375170" startTime="2026-10-24T19:50:54.5530398+03:00" endTime="2026-10-24T19:50:54.5905563+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7026001c-5973-4655-b64a-421eddc2b365" />
+    <UnitTestResult executionId="4d76051c-4385-4b48-aaef-78c79e2de787" testId="8bdd6591-6d25-9790-c14d-b26c9639ab88" testName="RejectsNonfreshMemoryAndAttachedDatabase" computerName="SEXMACHINE" duration="00:00:00.0676200" startTime="2026-10-24T19:50:54.6701787+03:00" endTime="2026-10-24T19:50:54.7377979+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4d76051c-4385-4b48-aaef-78c79e2de787" />
+    <UnitTestResult executionId="f15c29c2-c0ad-4760-9e26-e2163fda431f" testId="e34d8a18-0ad9-2ad3-26ba-493a29d1a505" testName="RejectsUnexpectedPersistentRowsAndDefaultChanges(&quot;sequence&quot;,&quot;INSERT INTO application_state(payload) VALUES('old'); DELETE FROM application_state;&quot;)" computerName="SEXMACHINE" duration="00:00:00.0558870" startTime="2026-10-24T19:50:55.0470983+03:00" endTime="2026-10-24T19:50:55.1029833+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f15c29c2-c0ad-4760-9e26-e2163fda431f" />
+    <UnitTestResult executionId="df93ecc6-1b4c-44d2-b812-c1d11b8f8bdb" testId="c85e4425-ce81-07c5-d9ee-145301643b36" testName="PackagesCheckpointedWalHeaderWithoutCreatingSourceSidecars" computerName="SEXMACHINE" duration="00:00:00.1124430" startTime="2026-10-24T19:50:54.3938714+03:00" endTime="2026-10-24T19:50:54.5063137+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="df93ecc6-1b4c-44d2-b812-c1d11b8f8bdb" />
+    <UnitTestResult executionId="c22935ea-b628-4b60-9046-512238bf03ee" testId="9f7dd8c8-dada-42d6-709f-35619db29cf8" testName="RejectsAnyPartialEnvironmentSelection(&quot;NC_DIAGNOSTICS_SQLITE_MANIFEST_SHA256&quot;)" computerName="SEXMACHINE" duration="00:00:00.0396090" startTime="2026-10-24T19:50:54.6279322+03:00" endTime="2026-10-24T19:50:54.6675397+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c22935ea-b628-4b60-9046-512238bf03ee" />
+    <UnitTestResult executionId="f037c633-d7e5-4f45-8692-8060059b409d" testId="be269687-c680-9b44-1640-88f0c8b42e2c" testName="RejectsSeedHashManifestHashAndFutureHistoryWithoutChangingSource" computerName="SEXMACHINE" duration="00:00:00.0910200" startTime="2026-10-24T19:50:54.7378390+03:00" endTime="2026-10-24T19:50:54.8288586+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f037c633-d7e5-4f45-8692-8060059b409d" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="RejectsUnexpectedPersistentRowsAndDefaultChanges(&quot;storage&quot;,&quot;UPDATE nc_meta_blob_storage SET allocated_count=1;&quot;)" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="a477b8fe-e8e1-ff43-fdea-7f26a54846e9">
+      <Execution id="4982a9ee-2bca-4180-b733-863a6736bcc3" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaSqliteSeedPackageTests" name="RejectsUnexpectedPersistentRowsAndDefaultChanges(&quot;storage&quot;,&quot;UPDATE nc_meta_blob_storage SET allocated_count=1;&quot;)" />
+    </UnitTest>
+    <UnitTest name="RejectsUnexpectedPersistentRowsAndDefaultChanges(&quot;server&quot;,&quot;INSERT INTO server VALUES(1,'not pristine');&quot;)" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="9de03edf-7db1-0f8d-0270-3b17e44ea39d">
+      <Execution id="2f7062c8-91d5-4cbc-986e-014c1f9144ea" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaSqliteSeedPackageTests" name="RejectsUnexpectedPersistentRowsAndDefaultChanges(&quot;server&quot;,&quot;INSERT INTO server VALUES(1,'not pristine');&quot;)" />
+    </UnitTest>
+    <UnitTest name="ActualBackupPreservesSourceAndSeparatesMemoryDatabases" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="08a29a96-7513-dfe3-7583-0083bd322aeb">
+      <Execution id="036c4e42-1e31-4765-856b-e4badb4d95fd" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaSqliteSeedPackageTests" name="ActualBackupPreservesSourceAndSeparatesMemoryDatabases" />
+    </UnitTest>
+    <UnitTest name="RejectsUnexpectedPersistentRowsAndDefaultChanges(&quot;sequence&quot;,&quot;INSERT INTO application_state(payload) VALUES('old'); DELETE FROM application_state;&quot;)" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="e34d8a18-0ad9-2ad3-26ba-493a29d1a505">
+      <Execution id="f15c29c2-c0ad-4760-9e26-e2163fda431f" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaSqliteSeedPackageTests" name="RejectsUnexpectedPersistentRowsAndDefaultChanges(&quot;sequence&quot;,&quot;INSERT INTO application_state(payload) VALUES('old'); DELETE FROM application_state;&quot;)" />
+    </UnitTest>
+    <UnitTest name="RejectsWritablePackageAndSidecar" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="80e3dcc8-95cf-50e2-10f2-5b1839b9c5dc">
+      <Execution id="ff6965dd-cc23-496c-b096-055f8b3b6e1b" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaSqliteSeedPackageTests" name="RejectsWritablePackageAndSidecar" />
+    </UnitTest>
+    <UnitTest name="RealDiskBackupRemainsPristineAndNormalEfMigrateAppliesPendingMigration" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="51e60384-e945-b327-6e6e-6c6293b72df0">
+      <Execution id="7c9112a4-13c4-471b-a7c9-2517cfc5ce38" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="NightCity.Diagnostics.Seeds.Tests.SqliteDiskMaterializerTests" name="RealDiskBackupRemainsPristineAndNormalEfMigrateAppliesPendingMigration" />
+    </UnitTest>
+    <UnitTest name="RejectsAnyPartialEnvironmentSelection(&quot;NC_DIAGNOSTICS_SQLITE_SEED_ID&quot;)" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="6f9b9fec-3b5f-8608-9b56-bcf066a76c18">
+      <Execution id="7026001c-5973-4655-b64a-421eddc2b365" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaSqliteSeedPackageTests" name="RejectsAnyPartialEnvironmentSelection(&quot;NC_DIAGNOSTICS_SQLITE_SEED_ID&quot;)" />
+    </UnitTest>
+    <UnitTest name="RejectsNonfreshMemoryAndAttachedDatabase" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="8bdd6591-6d25-9790-c14d-b26c9639ab88">
+      <Execution id="4d76051c-4385-4b48-aaef-78c79e2de787" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaSqliteSeedPackageTests" name="RejectsNonfreshMemoryAndAttachedDatabase" />
+    </UnitTest>
+    <UnitTest name="TamperedSeedOrManifestCannotCreateOwnedDiskOutput" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="aa5eddba-5f09-148c-36ee-024dd8ac29e2">
+      <Execution id="099442ce-faa4-43cd-ac43-71b0c1981de3" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="NightCity.Diagnostics.Seeds.Tests.SqliteDiskMaterializerTests" name="TamperedSeedOrManifestCannotCreateOwnedDiskOutput" />
+    </UnitTest>
+    <UnitTest name="OrdinaryEfMigrateAppliesPendingRealMigrationAfterBackup" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="d971d6a1-6116-664d-01a9-125c31d38f08">
+      <Execution id="426cb046-0b21-482f-9f55-14136013c40e" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaSqliteSeedPackageTests" name="OrdinaryEfMigrateAppliesPendingRealMigrationAfterBackup" />
+    </UnitTest>
+    <UnitTest name="RejectsAnyPartialEnvironmentSelection(&quot;NC_DIAGNOSTICS_SQLITE_SEED_SHA256&quot;)" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="9588d9ce-2d55-9992-1f9a-57494fda8202">
+      <Execution id="7bb5aefc-e80a-4630-956a-43036ed194bc" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaSqliteSeedPackageTests" name="RejectsAnyPartialEnvironmentSelection(&quot;NC_DIAGNOSTICS_SQLITE_SEED_SHA256&quot;)" />
+    </UnitTest>
+    <UnitTest name="RejectsUnexpectedPersistentRowsAndDefaultChanges(&quot;application_state&quot;,&quot;INSERT INTO application_state(payload) VALUES('persisted actor or money');&quot;)" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="8e927bd4-450d-d87d-bad9-259fcc5fba2a">
+      <Execution id="56f14b9c-c3b7-4afd-92dc-a6a19017c4ec" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaSqliteSeedPackageTests" name="RejectsUnexpectedPersistentRowsAndDefaultChanges(&quot;application_state&quot;,&quot;INSERT INTO application_state(payload) VALUES('persisted actor or money');&quot;)" />
+    </UnitTest>
+    <UnitTest name="RejectsAnyPartialEnvironmentSelection(&quot;NC_DIAGNOSTICS_WORKSPACE&quot;)" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="3f830ebb-6f90-1e74-f5e2-ec4fae0f18ac">
+      <Execution id="a280622a-f84a-4d72-94c2-4e103f82a3c4" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaSqliteSeedPackageTests" name="RejectsAnyPartialEnvironmentSelection(&quot;NC_DIAGNOSTICS_WORKSPACE&quot;)" />
+    </UnitTest>
+    <UnitTest name="PackagesCheckpointedWalHeaderWithoutCreatingSourceSidecars" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="c85e4425-ce81-07c5-d9ee-145301643b36">
+      <Execution id="df93ecc6-1b4c-44d2-b812-c1d11b8f8bdb" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaSqliteSeedPackageTests" name="PackagesCheckpointedWalHeaderWithoutCreatingSourceSidecars" />
+    </UnitTest>
+    <UnitTest name="RepeatCannotOverwriteExistingDatabaseAndWrongAssemblyHashCreatesNoData" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="ecb55baa-853f-4aba-d3b7-037f8fab77df">
+      <Execution id="c6e4f163-824d-4ed5-af8a-b53ddb5bc4c5" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="NightCity.Diagnostics.Seeds.Tests.SqliteDiskMaterializerTests" name="RepeatCannotOverwriteExistingDatabaseAndWrongAssemblyHashCreatesNoData" />
+    </UnitTest>
+    <UnitTest name="RejectsAnyPartialEnvironmentSelection(&quot;NC_DIAGNOSTICS_SQLITE_MANIFEST_SHA256&quot;)" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="9f7dd8c8-dada-42d6-709f-35619db29cf8">
+      <Execution id="c22935ea-b628-4b60-9046-512238bf03ee" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaSqliteSeedPackageTests" name="RejectsAnyPartialEnvironmentSelection(&quot;NC_DIAGNOSTICS_SQLITE_MANIFEST_SHA256&quot;)" />
+    </UnitTest>
+    <UnitTest name="RejectsSeedHashManifestHashAndFutureHistoryWithoutChangingSource" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="be269687-c680-9b44-1640-88f0c8b42e2c">
+      <Execution id="f037c633-d7e5-4f45-8692-8060059b409d" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaSqliteSeedPackageTests" name="RejectsSeedHashManifestHashAndFutureHistoryWithoutChangingSource" />
+    </UnitTest>
+    <UnitTest name="RejectsUnexpectedPersistentRowsAndDefaultChanges(&quot;hidden-default-data&quot;,&quot;ALTER TABLE server ADD COLUMN hidden_state TEXT DEFAULT 'private';&quot;)" storage="d:\projects\night-city\tools\_nc\meta\sqliteseed.tests\bin\debug\net10.0\sqliteseed.tests.dll" id="6b5eaf93-4314-e0f6-d18b-abd7bc79746c">
+      <Execution id="97ee8308-19ab-4636-9942-ff5e5ea07882" />
+      <TestMethod codeBase="D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaSqliteSeedPackageTests" name="RejectsUnexpectedPersistentRowsAndDefaultChanges(&quot;hidden-default-data&quot;,&quot;ALTER TABLE server ADD COLUMN hidden_state TEXT DEFAULT 'private';&quot;)" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="aa5eddba-5f09-148c-36ee-024dd8ac29e2" executionId="099442ce-faa4-43cd-ac43-71b0c1981de3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a477b8fe-e8e1-ff43-fdea-7f26a54846e9" executionId="4982a9ee-2bca-4180-b733-863a6736bcc3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ecb55baa-853f-4aba-d3b7-037f8fab77df" executionId="c6e4f163-824d-4ed5-af8a-b53ddb5bc4c5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6b5eaf93-4314-e0f6-d18b-abd7bc79746c" executionId="97ee8308-19ab-4636-9942-ff5e5ea07882" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3f830ebb-6f90-1e74-f5e2-ec4fae0f18ac" executionId="a280622a-f84a-4d72-94c2-4e103f82a3c4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="80e3dcc8-95cf-50e2-10f2-5b1839b9c5dc" executionId="ff6965dd-cc23-496c-b096-055f8b3b6e1b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9588d9ce-2d55-9992-1f9a-57494fda8202" executionId="7bb5aefc-e80a-4630-956a-43036ed194bc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="08a29a96-7513-dfe3-7583-0083bd322aeb" executionId="036c4e42-1e31-4765-856b-e4badb4d95fd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="51e60384-e945-b327-6e6e-6c6293b72df0" executionId="7c9112a4-13c4-471b-a7c9-2517cfc5ce38" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d971d6a1-6116-664d-01a9-125c31d38f08" executionId="426cb046-0b21-482f-9f55-14136013c40e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9de03edf-7db1-0f8d-0270-3b17e44ea39d" executionId="2f7062c8-91d5-4cbc-986e-014c1f9144ea" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8e927bd4-450d-d87d-bad9-259fcc5fba2a" executionId="56f14b9c-c3b7-4afd-92dc-a6a19017c4ec" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6f9b9fec-3b5f-8608-9b56-bcf066a76c18" executionId="7026001c-5973-4655-b64a-421eddc2b365" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8bdd6591-6d25-9790-c14d-b26c9639ab88" executionId="4d76051c-4385-4b48-aaef-78c79e2de787" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e34d8a18-0ad9-2ad3-26ba-493a29d1a505" executionId="f15c29c2-c0ad-4760-9e26-e2163fda431f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c85e4425-ce81-07c5-d9ee-145301643b36" executionId="df93ecc6-1b4c-44d2-b812-c1d11b8f8bdb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9f7dd8c8-dada-42d6-709f-35619db29cf8" executionId="c22935ea-b628-4b60-9046-512238bf03ee" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="be269687-c680-9b44-1640-88f0c8b42e2c" executionId="f037c633-d7e5-4f45-8692-8060059b409d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="18" executed="18" passed="18" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 5.2.0.0: Test execution started&#xD;
+Running all tests in D:\projects\night-city\Tools\_NC\Meta\SqliteSeed.Tests\bin\Debug\net10.0\SqliteSeed.Tests.dll&#xD;
+   NUnit3TestExecutor discovered 18 of 18 NUnit test cases using Current Discovery mode, Non-Explicit run&#xD;
+NUnit Adapter 5.2.0.0: Test execution complete&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

@@ -1,0 +1,100 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: Autolathe
+  id: NCMetaFabricator
+  suffix: META production controller
+  components:
+  - type: NCMetaMachine
+    fabricator: true
+  - type: NCMetaHost
+    profile: NCMetaIndustrial
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.industrial.Fabricator, meta.files.FileStore]
+  - type: NCMetaTerminal
+  - type: NCMetaStorage
+    capacityBytes: 33554432
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: UserInterface
+    interfaces:
+      enum.LatheUiKey.Key:
+        type: LatheBoundUserInterface
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+
+- type: entity
+  parent: KitchenReagentGrinder
+  id: NCMetaLaboratoryGrinder
+  suffix: META batch controller
+  components:
+  - type: NCMetaMachine
+    grinder: true
+  - type: NCMetaHost
+    profile: NCMetaIndustrial
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.lab.Grinder, meta.files.FileStore]
+  - type: NCMetaTerminal
+  - type: NCMetaStorage
+    capacityBytes: 33554432
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: UserInterface
+    interfaces:
+      enum.ReagentGrinderUiKey.Key:
+        type: ReagentGrinderBoundUserInterface
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+
+- type: entity
+  parent: ChemMaster
+  id: NCMetaLaboratoryChemMaster
+  suffix: META packaging controller
+  components:
+  - type: NCMetaMachine
+    chemMaster: true
+  - type: NCMetaHost
+    profile: NCMetaIndustrial
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.lab.ChemMaster, meta.files.FileStore]
+  - type: NCMetaTerminal
+  - type: NCMetaStorage
+    capacityBytes: 33554432
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: UserInterface
+    interfaces:
+      enum.ChemMasterUiKey.Key:
+        type: ChemMasterBoundUserInterface
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+
+- type: entity
+  parent: computerBodyScanner
+  id: NCMetaBodyScanner
+  suffix: META commissioning port
+  components:
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: []
+  - type: NCMetaPort
+    networkId: LOCAL
+
+- type: entity
+  parent: NCMetaClinicalController
+  id: NCMetaScannerGateway
+  suffix: META stationary scanner gateway
+  components:
+  - type: NCMetaClinical
+    diagnosticTier: ScannerInternal
+    dosingHardware: false
+    procedureHardware: false
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.medical.MedicalMonitor]

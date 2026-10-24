@@ -123,6 +123,15 @@ public enum NCFreeformSurgeryFailure : byte
     AttachmentUnavailable,
     SurgicalAccessClosed,
     NoApplicableTarget,
+    CyberwareCalibrationRequired,
+    CyberwareAssemblyIncomplete,
+    CyberwareOutputLow,
+    CyberwareSignalWeak,
+    CyberwareNoPower,
+    CyberwarePowerOverload,
+    CyberwareOverheated,
+    CyberwareEmpDisabled,
+    CyberwareNoRepairNeeded,
 }
 
 [Serializable, NetSerializable]
@@ -431,6 +440,11 @@ public sealed partial class NCFreeformSurgeryDoAfterEvent : DoAfterEvent
     [DataField] public int? StructureHandle;
     [DataField] public ProtoId<NCSurgeryToolCapabilityPrototype> Capability;
 
+    // Set by the server when the timed contact starts, never supplied by the interaction request.
+    [DataField] public NetEntity? ExpectedStructure;
+    [DataField] public NetEntity? ExpectedGraft;
+    [DataField] public uint? ExpectedConfiguration;
+
     private NCFreeformSurgeryDoAfterEvent()
     {
     }
@@ -467,7 +481,12 @@ public sealed partial class NCFreeformSurgeryDoAfterEvent : DoAfterEvent
 
     public override DoAfterEvent Clone()
     {
-        return new NCFreeformSurgeryDoAfterEvent(ToRequest(), Capability);
+        return new NCFreeformSurgeryDoAfterEvent(ToRequest(), Capability)
+        {
+            ExpectedStructure = ExpectedStructure,
+            ExpectedGraft = ExpectedGraft,
+            ExpectedConfiguration = ExpectedConfiguration,
+        };
     }
 
     public override bool IsDuplicate(DoAfterEvent other)

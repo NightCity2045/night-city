@@ -5,8 +5,10 @@
 using System.Linq;
 using Content.Server._NC.Medical.Systemic;
 using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Cyberware.Borg;
 using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Physiology;
+using Content.Shared._NC.Medical.Humanity;
 using Content.Shared._NC.Medical.Systemic;
 using Content.Shared.Body;
 using Content.Shared.EntityEffects;
@@ -426,6 +428,8 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         var antibiotic = 0f;
         var immunosuppression = 0f;
         var toxinRecovery = 0f;
+        var humanityRecovery = 0f;
+        var crisisSuppression = 0f;
 
         BuildEvaluationOrder(state);
         foreach (var drugId in state.EvaluationOrder)
@@ -436,6 +440,11 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
 
             var fraction = ResolveTherapeuticFraction(drug, exposure.Concentration) *
                            ResolveInteractionTherapeutics(state, profile, drugId, drug);
+            var psychologicalFraction = Math.Clamp(NCHumanityMath.TreatmentFactor(exposure.Concentration,
+                drug.MinimumEffectiveConcentration, drug.TherapeuticConcentration, drug.ToxicConcentration,
+                drug.MaximumConcentration) * ResolveInteractionTherapeutics(state, profile, drugId, drug), 0f, 1f);
+            humanityRecovery += drug.HumanityRecoveryPerSecondAtTherapeutic * psychologicalFraction;
+            crisisSuppression += drug.CrisisSuppressionPerSecondAtTherapeutic * psychologicalFraction;
             if (fraction <= 0f)
                 continue;
 
@@ -499,7 +508,9 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             Math.Clamp(toxinRecovery, 0f, profile.MaximumToxinRecoveryPerSecond),
             Math.Clamp(profile.OverdoseShockAtMaximum * overdoseFraction, 0f, 1f),
             Math.Clamp(1f - profile.OverdoseBrainPenaltyAtMaximum * overdoseFraction, 0f, 1f),
-            overdoseFraction);
+            overdoseFraction,
+            Math.Clamp(humanityRecovery, 0f, profile.MaximumHumanityRecoveryPerSecond) * (1f - overdoseFraction),
+            Math.Clamp(crisisSuppression, 0f, profile.MaximumCrisisSuppressionPerSecond) * (1f - overdoseFraction));
     }
 
     private void BuildEvaluationOrder(NCPharmacologyComponent state)
@@ -598,6 +609,12 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             var fraction = function.BaseCapacity > 0f
                 ? Math.Clamp(function.CurrentCapacity / function.BaseCapacity, 0f, 1f)
                 : 0f;
+            if (HasComp<NCBorgSupportProviderComponent>(organ) && TryComp<NCBorgCoreComponent>(body, out var core))
+            {
+                fraction = MathF.Min(fraction, NCBorgSupport.Capacity(core, function.FunctionType));
+                if (TryComp<NCOrganIntegrityComponent>(organ, out var integrity))
+                    fraction = MathF.Min(fraction, integrity.FunctionalEfficiency);
+            }
             capacity = MathF.Min(capacity, fraction);
         }
         return found ? capacity : 0f;
@@ -681,6 +698,8 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
                float.IsFinite(profile.MaximumInteractionMultiplier) &&
                profile.MaximumInteractionMultiplier >= 1f &&
                IsFiniteNonNegative(profile.MaximumToxinRecoveryPerSecond) &&
+               IsFiniteNonNegative(profile.MaximumHumanityRecoveryPerSecond) &&
+               IsFiniteNonNegative(profile.MaximumCrisisSuppressionPerSecond) &&
                IsFiniteRange(profile.OverdoseShockAtMaximum, 0f, 1f) &&
                IsFiniteRange(profile.OverdoseBrainPenaltyAtMaximum, 0f, 1f) &&
                IsFiniteRange(profile.OverdoseCardiacPenaltyAtMaximum, 0f, 1f) &&
@@ -725,7 +744,9 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             !IsFiniteRange(drug.AntibioticPowerAtTherapeutic, 0f, 1f) ||
             !IsFiniteRange(drug.ImmunosuppressionAtTherapeutic, 0f, 1f) ||
             !IsFiniteNonNegative(drug.ToxinRecoveryPerSecondAtTherapeutic) ||
-            !IsFiniteNonNegative(drug.OverdoseBurdenPerSecondAtMaximum))
+            !IsFiniteNonNegative(drug.OverdoseBurdenPerSecondAtMaximum) ||
+            !IsFiniteNonNegative(drug.HumanityRecoveryPerSecondAtTherapeutic) ||
+            !IsFiniteNonNegative(drug.CrisisSuppressionPerSecondAtTherapeutic))
         {
             return false;
         }

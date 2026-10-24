@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="9e2bda24-06e3-46c2-9286-c9d2411ffda8" name="Yuri@SEXMACHINE 2026-10-23 06:11:39" runUser="SexMachine\Yuri" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-23T06:11:39.8828084+03:00" queuing="2026-10-23T06:11:39.8828089+03:00" start="2026-10-23T06:11:37.1762751+03:00" finish="2026-10-23T06:11:39.8913627+03:00" />
+  <TestSettings name="default" id="04a1a5e4-c682-4520-bc1b-0a22e02f2516">
+    <Deployment runDeploymentRoot="Yuri_SEXMACHINE_2026-10-23_06_11_39" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="effeba2f-dab1-4f52-b094-40c019ed3dfb" testId="3099c2e0-e846-dd5f-5069-3084feec2f34" testName="DeleteWholeDocumentThenTypeUnicodeRepeatedly" computerName="SEXMACHINE" duration="00:00:00.0080630" startTime="2026-10-23T06:11:39.7411536+03:00" endTime="2026-10-23T06:11:39.7491602+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="effeba2f-dab1-4f52-b094-40c019ed3dfb" />
+    <UnitTestResult executionId="0e45cbb0-2b5a-4aeb-a180-24c787693db8" testId="6ca10b97-21f7-8435-aeb6-13f7d7a9af4a" testName="LargeUnicodeSnapshotDoesNotSplitSurrogatePairsBetweenLeaves" computerName="SEXMACHINE" duration="00:00:00.0128900" startTime="2026-10-23T06:11:39.7504102+03:00" endTime="2026-10-23T06:11:39.7633000+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0e45cbb0-2b5a-4aeb-a180-24c787693db8" />
+    <UnitTestResult executionId="6bbe20f7-70b7-4eb8-9bdd-eeba8b87e9b5" testId="a525be6e-c0a1-0ec3-5043-18ae8676ea5e" testName="RepeatedBoundaryEditsStayBalancedAndPreserveHistory" computerName="SEXMACHINE" duration="00:00:00.0298710" startTime="2026-10-23T06:11:39.7633342+03:00" endTime="2026-10-23T06:11:39.7932047+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6bbe20f7-70b7-4eb8-9bdd-eeba8b87e9b5" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="RepeatedBoundaryEditsStayBalancedAndPreserveHistory" storage="d:\projects\night-city\bin/ncdiagnostics/content.tests/content.tests.dll" id="a525be6e-c0a1-0ec3-5043-18ae8676ea5e">
+      <Execution id="6bbe20f7-70b7-4eb8-9bdd-eeba8b87e9b5" />
+      <TestMethod codeBase="D:\projects\night-city\bin/NCDiagnostics/Content.Tests/Content.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaEditorRopeTests" name="RepeatedBoundaryEditsStayBalancedAndPreserveHistory" />
+    </UnitTest>
+    <UnitTest name="LargeUnicodeSnapshotDoesNotSplitSurrogatePairsBetweenLeaves" storage="d:\projects\night-city\bin/ncdiagnostics/content.tests/content.tests.dll" id="6ca10b97-21f7-8435-aeb6-13f7d7a9af4a">
+      <Execution id="0e45cbb0-2b5a-4aeb-a180-24c787693db8" />
+      <TestMethod codeBase="D:\projects\night-city\bin/NCDiagnostics/Content.Tests/Content.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaEditorRopeTests" name="LargeUnicodeSnapshotDoesNotSplitSurrogatePairsBetweenLeaves" />
+    </UnitTest>
+    <UnitTest name="DeleteWholeDocumentThenTypeUnicodeRepeatedly" storage="d:\projects\night-city\bin/ncdiagnostics/content.tests/content.tests.dll" id="3099c2e0-e846-dd5f-5069-3084feec2f34">
+      <Execution id="effeba2f-dab1-4f52-b094-40c019ed3dfb" />
+      <TestMethod codeBase="D:\projects\night-city\bin/NCDiagnostics/Content.Tests/Content.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Tests._NC.Meta.NCMetaEditorRopeTests" name="DeleteWholeDocumentThenTypeUnicodeRepeatedly" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="3099c2e0-e846-dd5f-5069-3084feec2f34" executionId="effeba2f-dab1-4f52-b094-40c019ed3dfb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6ca10b97-21f7-8435-aeb6-13f7d7a9af4a" executionId="0e45cbb0-2b5a-4aeb-a180-24c787693db8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a525be6e-c0a1-0ec3-5043-18ae8676ea5e" executionId="6bbe20f7-70b7-4eb8-9bdd-eeba8b87e9b5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="3" executed="3" passed="3" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 5.2.0.0: Test execution started&#xD;
+Running selected tests in D:\projects\night-city\bin/NCDiagnostics/Content.Tests/Content.Tests.dll&#xD;
+   NUnit3TestExecutor discovered 3 of 3 NUnit test cases using Current Discovery mode, Non-Explicit run&#xD;
+NUnit Adapter 5.2.0.0: Test execution complete&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

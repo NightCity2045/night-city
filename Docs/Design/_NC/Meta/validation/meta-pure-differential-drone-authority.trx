@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="153db40f-afd9-48f0-b5d1-d3c553f443f9" name="Yuri@SEXMACHINE 2026-10-24 10:31:43" runUser="SexMachine\Yuri" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-24T10:31:43.6407946+03:00" queuing="2026-10-24T10:31:43.6407950+03:00" start="2026-10-24T10:31:41.6029261+03:00" finish="2026-10-24T10:31:44.0559265+03:00" />
+  <TestSettings name="default" id="711ac0e3-ea35-4f50-b46c-93434665c086">
+    <Deployment runDeploymentRoot="Yuri_SEXMACHINE_2026-10-24_10_31_43" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="21ab8ba0-e134-4c40-b57b-7da6688b6177" testId="63b5236e-d510-5ee3-8e39-6c421ea7a16e" testName="MalformedAndAmbiguousRootMetadataFailsClosed" computerName="SEXMACHINE" duration="00:00:00.0143530" startTime="2026-10-24T10:31:43.4862840+03:00" endTime="2026-10-24T10:31:43.5006359+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="21ab8ba0-e134-4c40-b57b-7da6688b6177" />
+    <UnitTestResult executionId="b5e83233-fc8c-4c28-9e85-25819c0ef992" testId="a4f614de-2236-9a17-f7ca-3454cf37725a" testName="ActiveWorldExpiryAndIssueBoundaryAreExact(100,True)" computerName="SEXMACHINE" duration="00:00:00.0020450" startTime="2026-10-24T10:31:43.2252084+03:00" endTime="2026-10-24T10:31:43.2272535+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b5e83233-fc8c-4c28-9e85-25819c0ef992" />
+    <UnitTestResult executionId="6cf99755-dab5-4ac4-91fb-d69e43ed6632" testId="df1cd4bb-2e19-619d-6f83-03c3e0d6573b" testName="ContactReferencesCannotBeManufacturedOrComparedBySource(&quot;let contact:drone.ContactRef = new drone.ContactRef();&quot;)" computerName="SEXMACHINE" duration="00:00:00.0198640" startTime="2026-10-24T10:31:43.5012831+03:00" endTime="2026-10-24T10:31:43.5211465+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6cf99755-dab5-4ac4-91fb-d69e43ed6632" />
+    <UnitTestResult executionId="9740c10b-140b-424b-b9c8-c7bec0cd67f4" testId="69b46a0d-2852-da29-57e9-458264e51058" testName="SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(90210)" computerName="SEXMACHINE" duration="00:00:00.0077150" startTime="2026-10-24T10:31:43.4461199+03:00" endTime="2026-10-24T10:31:43.4538347+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9740c10b-140b-424b-b9c8-c7bec0cd67f4">
+      <Output>
+        <ErrorInfo>
+          <Message>Seed 90210, case 0: Compiler rejected generated valid source: E102:identifier,result;E102:expression,result. Reduced source: module oracle.program;&#xD;
+import meta.system; import meta.text;&#xD;
+fn mark(value:int)-&gt;int {system.log(text.fromInt(value));return value;}&#xD;
+fn main()-&gt;void {let result=mark(66);system.log("answer:"+text.fromInt(result));}</Message>
+          <StackTrace>   at Content.Meta.Tests.Language.MetaDifferentialTests.SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(UInt32 seed) in D:\projects\night-city\Content.Meta.Tests\Language\MetaDifferentialTests.cs:line 52&#xD;
+   at InvokeStub_MetaDifferentialTests.SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(Object, Span`1)&#xD;
+
+1)    at Content.Meta.Tests.Language.MetaDifferentialTests.SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(UInt32 seed) in D:\projects\night-city\Content.Meta.Tests\Language\MetaDifferentialTests.cs:line 52&#xD;
+   at InvokeStub_MetaDifferentialTests.SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(Object, Span`1)&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+      <ResultFiles>
+        <ResultFile path="SEXMACHINE\differential-90210-0.json" />
+      </ResultFiles>
+    </UnitTestResult>
+    <UnitTestResult executionId="8130df7e-5b12-4ab2-9566-f6f81560ffea" testId="ac0b2772-b151-c135-953b-74084f5327cb" testName="AServiceGrantBindsInstallationPrincipalImageHostAndUnattendedConsent" computerName="SEXMACHINE" duration="00:00:00.0117680" startTime="2026-10-24T10:31:43.2342496+03:00" endTime="2026-10-24T10:31:43.2460169+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8130df7e-5b12-4ab2-9566-f6f81560ffea" />
+    <UnitTestResult executionId="05b98adb-b7b9-440b-885d-9cf42226bbb1" testId="edd7abee-9c8f-b838-3848-e3d9092de16e" testName="SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(1)" computerName="SEXMACHINE" duration="00:00:00.1873910" startTime="2026-10-24T10:31:43.2583619+03:00" endTime="2026-10-24T10:31:43.4457524+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="05b98adb-b7b9-440b-885d-9cf42226bbb1">
+      <Output>
+        <ErrorInfo>
+          <Message>Seed 1, case 0: Compiler rejected generated valid source: E102:identifier,result;E102:expression,result. Reduced source: module oracle.program;&#xD;
+import meta.system; import meta.text;&#xD;
+fn mark(value:int)-&gt;int {system.log(text.fromInt(value));return value;}&#xD;
+fn main()-&gt;void {let result=mark(78);system.log("answer:"+text.fromInt(result));}</Message>
+          <StackTrace>   at Content.Meta.Tests.Language.MetaDifferentialTests.SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(UInt32 seed) in D:\projects\night-city\Content.Meta.Tests\Language\MetaDifferentialTests.cs:line 52&#xD;
+
+1)    at Content.Meta.Tests.Language.MetaDifferentialTests.SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(UInt32 seed) in D:\projects\night-city\Content.Meta.Tests\Language\MetaDifferentialTests.cs:line 52&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+      <ResultFiles>
+        <ResultFile path="SEXMACHINE\differential-1-0.json" />
+      </ResultFiles>
+    </UnitTestResult>
+    <UnitTestResult executionId="d6a95158-0fd6-4417-8e6b-611bbe425f9d" testId="068b0598-a6e0-e4a3-c582-b33dbb8c3f3e" testName="PolicyExpiryAlsoBoundsAZeroLinkUnattendedProcess" computerName="SEXMACHINE" duration="00:00:00.0064430" startTime="2026-10-24T10:31:43.2471763+03:00" endTime="2026-10-24T10:31:43.2536184+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d6a95158-0fd6-4417-8e6b-611bbe425f9d" />
+    <UnitTestResult executionId="09b8e6d6-fe6f-4ada-a368-270a851d31ed" testId="4b0d07af-9b83-add0-23d7-177ce652b175" testName="StorageContactsAndOperationReceiptsCrossTheVerifiedAbiWithoutEntityIdentifiers" computerName="SEXMACHINE" duration="00:00:00.1212390" startTime="2026-10-24T10:31:43.8044507+03:00" endTime="2026-10-24T10:31:43.9256890+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="09b8e6d6-fe6f-4ada-a368-270a851d31ed" />
+    <UnitTestResult executionId="dff0d9a7-fd5b-4dd2-a410-2b954dcd79e9" testId="d56115bf-6fab-8405-9185-458889b293f9" testName="ActiveWorldExpiryAndIssueBoundaryAreExact(99,False)" computerName="SEXMACHINE" duration="00:00:00.0146090" startTime="2026-10-24T10:31:43.2078905+03:00" endTime="2026-10-24T10:31:43.2224253+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dff0d9a7-fd5b-4dd2-a410-2b954dcd79e9" />
+    <UnitTestResult executionId="0223a66c-4bb3-4157-b5a1-965cb9e94f18" testId="c524fec7-922e-342f-3c66-404b2c91ef16" testName="SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(1515870810)" computerName="SEXMACHINE" duration="00:00:00.0212390" startTime="2026-10-24T10:31:43.4541163+03:00" endTime="2026-10-24T10:31:43.4753556+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0223a66c-4bb3-4157-b5a1-965cb9e94f18">
+      <Output>
+        <ErrorInfo>
+          <Message>Seed 1515870810, case 0: Compiler rejected generated valid source: E102:identifier,result;E102:expression,result. Reduced source: module oracle.program;&#xD;
+import meta.system; import meta.text;&#xD;
+fn mark(value:int)-&gt;int {system.log(text.fromInt(value));return value;}&#xD;
+fn main()-&gt;void {let result=mark(0);system.log("answer:"+text.fromInt(result));}</Message>
+          <StackTrace>   at Content.Meta.Tests.Language.MetaDifferentialTests.SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(UInt32 seed) in D:\projects\night-city\Content.Meta.Tests\Language\MetaDifferentialTests.cs:line 52&#xD;
+   at InvokeStub_MetaDifferentialTests.SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(Object, Span`1)&#xD;
+
+1)    at Content.Meta.Tests.Language.MetaDifferentialTests.SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(UInt32 seed) in D:\projects\night-city\Content.Meta.Tests\Language\MetaDifferentialTests.cs:line 52&#xD;
+   at InvokeStub_MetaDifferentialTests.SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(Object, Span`1)&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+      <ResultFiles>
+        <ResultFile path="SEXMACHINE\differential-1515870810-0.json" />
+      </ResultFiles>
+    </UnitTestResult>
+    <UnitTestResult executionId="15b8e708-1d93-4b58-b25c-061e44596851" testId="7ad24260-7a9e-cdd8-4a75-b31b6d9c3374" testName="RevocationAndMalformedOrOversizedPolicyFailClosed" computerName="SEXMACHINE" duration="00:00:00.0029100" startTime="2026-10-24T10:31:43.2536631+03:00" endTime="2026-10-24T10:31:43.2565727+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="15b8e708-1d93-4b58-b25c-061e44596851" />
+    <UnitTestResult executionId="6a2d1008-4509-450a-a400-f41378829911" testId="4fe779a8-5841-b9d5-e643-56d2d3859009" testName="MatchingScopeAloneCannotAuthorizeAnotherMemberTargetContractOrRevision" computerName="SEXMACHINE" duration="00:00:00.0008830" startTime="2026-10-24T10:31:43.2460663+03:00" endTime="2026-10-24T10:31:43.2469494+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6a2d1008-4509-450a-a400-f41378829911" />
+    <UnitTestResult executionId="c8a7b561-e0ec-4c2f-a3fa-d4df96631839" testId="55628885-8836-ae9f-b89f-5565a80bef36" testName="PublishedFunctionalArtifactsRetainTheExactTrustedCatalogAfterDroneCapabilitiesAreAdded" computerName="SEXMACHINE" duration="00:00:00.2592110" startTime="2026-10-24T10:31:43.5451811+03:00" endTime="2026-10-24T10:31:43.8043915+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c8a7b561-e0ec-4c2f-a3fa-d4df96631839" />
+    <UnitTestResult executionId="9ee9e785-53f0-4a66-83a5-d7f434093fc9" testId="e3e0c6ee-e2a2-86bf-3cf0-6d08476ddff0" testName="ActiveWorldExpiryAndIssueBoundaryAreExact(1000,False)" computerName="SEXMACHINE" duration="00:00:00.0000460" startTime="2026-10-24T10:31:43.2274612+03:00" endTime="2026-10-24T10:31:43.2275070+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9ee9e785-53f0-4a66-83a5-d7f434093fc9" />
+    <UnitTestResult executionId="c5f089e2-165a-46e2-a41c-28e0195befa7" testId="d6b1eb18-9e39-7e57-4b07-b8017f446121" testName="CommercialReleaseAndPinnedLicenseAreBlobRoots" computerName="SEXMACHINE" duration="00:00:00.0079900" startTime="2026-10-24T10:31:43.4782617+03:00" endTime="2026-10-24T10:31:43.4862512+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c5f089e2-165a-46e2-a41c-28e0195befa7" />
+    <UnitTestResult executionId="94432fd2-a219-4888-89fc-cea200669e7a" testId="e1ac0dde-f40a-2d7d-759d-74d703d3a6ca" testName="ActiveWorldExpiryAndIssueBoundaryAreExact(999,True)" computerName="SEXMACHINE" duration="00:00:00.0001220" startTime="2026-10-24T10:31:43.2273122+03:00" endTime="2026-10-24T10:31:43.2274344+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="94432fd2-a219-4888-89fc-cea200669e7a" />
+    <UnitTestResult executionId="76d590e2-05fc-47a2-801a-840d4fecc831" testId="0a925859-882e-8144-8d64-98bcbd3b972d" testName="NativeImageDependenciesRetainBytesWithoutTreatingContainerHashesAsBlobs" computerName="SEXMACHINE" duration="00:00:00.0003669" startTime="2026-10-24T10:31:43.5006691+03:00" endTime="2026-10-24T10:31:43.5010354+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="76d590e2-05fc-47a2-801a-840d4fecc831" />
+    <UnitTestResult executionId="a90650a5-e537-472d-a85f-d7836a832bc6" testId="b3e09462-f0c6-695e-86bf-bb48d6703d21" testName="ContactReferencesCannotBeManufacturedOrComparedBySource(&quot;let contact:drone.ContactRef = 1;&quot;)" computerName="SEXMACHINE" duration="00:00:00.0082370" startTime="2026-10-24T10:31:43.5211996+03:00" endTime="2026-10-24T10:31:43.5294348+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a90650a5-e537-472d-a85f-d7836a832bc6" />
+    <UnitTestResult executionId="dcbe53ac-766a-4acc-a609-2ce549b2e00c" testId="b5b549d2-9ecc-9aac-4912-47c550fb318d" testName="ContactReferencesCannotBeManufacturedOrComparedBySource(&quot;match(camera.observe()){ok(contacts)=&gt;{if(contacts.length&gt;0){let p=contacts[0].reference;if(p==p){system.log(\&quot;same\&quot;);}}}err(error)=&gt;{}}&quot;)" computerName="SEXMACHINE" duration="00:00:00.0156090" startTime="2026-10-24T10:31:43.5295003+03:00" endTime="2026-10-24T10:31:43.5451087+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dcbe53ac-766a-4acc-a609-2ce549b2e00c" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="ActiveWorldExpiryAndIssueBoundaryAreExact(1000,False)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="e3e0c6ee-e2a2-86bf-3cf0-6d08476ddff0">
+      <Execution id="9ee9e785-53f0-4a66-83a5-d7f434093fc9" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaServiceAuthorityTests" name="ActiveWorldExpiryAndIssueBoundaryAreExact(1000,False)" />
+    </UnitTest>
+    <UnitTest name="ActiveWorldExpiryAndIssueBoundaryAreExact(99,False)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="d56115bf-6fab-8405-9185-458889b293f9">
+      <Execution id="dff0d9a7-fd5b-4dd2-a410-2b954dcd79e9" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaServiceAuthorityTests" name="ActiveWorldExpiryAndIssueBoundaryAreExact(99,False)" />
+    </UnitTest>
+    <UnitTest name="SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(1)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="edd7abee-9c8f-b838-3848-e3d9092de16e">
+      <Execution id="05b98adb-b7b9-440b-885d-9cf42226bbb1" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.MetaDifferentialTests" name="SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(1)" />
+    </UnitTest>
+    <UnitTest name="SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(90210)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="69b46a0d-2852-da29-57e9-458264e51058">
+      <Execution id="9740c10b-140b-424b-b9c8-c7bec0cd67f4" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.MetaDifferentialTests" name="SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(90210)" />
+    </UnitTest>
+    <UnitTest name="MalformedAndAmbiguousRootMetadataFailsClosed" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="63b5236e-d510-5ee3-8e39-6c421ea7a16e">
+      <Execution id="21ab8ba0-e134-4c40-b57b-7da6688b6177" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.MetaBlobReferencesTests" name="MalformedAndAmbiguousRootMetadataFailsClosed" />
+    </UnitTest>
+    <UnitTest name="NativeImageDependenciesRetainBytesWithoutTreatingContainerHashesAsBlobs" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="0a925859-882e-8144-8d64-98bcbd3b972d">
+      <Execution id="76d590e2-05fc-47a2-801a-840d4fecc831" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.MetaBlobReferencesTests" name="NativeImageDependenciesRetainBytesWithoutTreatingContainerHashesAsBlobs" />
+    </UnitTest>
+    <UnitTest name="CommercialReleaseAndPinnedLicenseAreBlobRoots" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="d6b1eb18-9e39-7e57-4b07-b8017f446121">
+      <Execution id="c5f089e2-165a-46e2-a41c-28e0195befa7" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.MetaBlobReferencesTests" name="CommercialReleaseAndPinnedLicenseAreBlobRoots" />
+    </UnitTest>
+    <UnitTest name="SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(1515870810)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="c524fec7-922e-342f-3c66-404b2c91ef16">
+      <Execution id="0223a66c-4bb3-4157-b5a1-965cb9e94f18" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Language.MetaDifferentialTests" name="SeededExpressionsAgreeOnValuesFaultsAndEvaluationOrderAcrossSlices(1515870810)" />
+    </UnitTest>
+    <UnitTest name="AServiceGrantBindsInstallationPrincipalImageHostAndUnattendedConsent" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="ac0b2772-b151-c135-953b-74084f5327cb">
+      <Execution id="8130df7e-5b12-4ab2-9566-f6f81560ffea" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaServiceAuthorityTests" name="AServiceGrantBindsInstallationPrincipalImageHostAndUnattendedConsent" />
+    </UnitTest>
+    <UnitTest name="ActiveWorldExpiryAndIssueBoundaryAreExact(100,True)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="a4f614de-2236-9a17-f7ca-3454cf37725a">
+      <Execution id="b5e83233-fc8c-4c28-9e85-25819c0ef992" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaServiceAuthorityTests" name="ActiveWorldExpiryAndIssueBoundaryAreExact(100,True)" />
+    </UnitTest>
+    <UnitTest name="StorageContactsAndOperationReceiptsCrossTheVerifiedAbiWithoutEntityIdentifiers" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="4b0d07af-9b83-add0-23d7-177ce652b175">
+      <Execution id="09b8e6d6-fe6f-4ada-a368-270a851d31ed" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Testing.MetaDroneContractTests" name="StorageContactsAndOperationReceiptsCrossTheVerifiedAbiWithoutEntityIdentifiers" />
+    </UnitTest>
+    <UnitTest name="ContactReferencesCannotBeManufacturedOrComparedBySource(&quot;let contact:drone.ContactRef = new drone.ContactRef();&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="df1cd4bb-2e19-619d-6f83-03c3e0d6573b">
+      <Execution id="6cf99755-dab5-4ac4-91fb-d69e43ed6632" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Testing.MetaDroneContractTests" name="ContactReferencesCannotBeManufacturedOrComparedBySource(&quot;let contact:drone.ContactRef = new drone.ContactRef();&quot;)" />
+    </UnitTest>
+    <UnitTest name="PublishedFunctionalArtifactsRetainTheExactTrustedCatalogAfterDroneCapabilitiesAreAdded" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="55628885-8836-ae9f-b89f-5565a80bef36">
+      <Execution id="c8a7b561-e0ec-4c2f-a3fa-d4df96631839" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Testing.MetaDroneContractTests" name="PublishedFunctionalArtifactsRetainTheExactTrustedCatalogAfterDroneCapabilitiesAreAdded" />
+    </UnitTest>
+    <UnitTest name="ActiveWorldExpiryAndIssueBoundaryAreExact(999,True)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="e1ac0dde-f40a-2d7d-759d-74d703d3a6ca">
+      <Execution id="94432fd2-a219-4888-89fc-cea200669e7a" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaServiceAuthorityTests" name="ActiveWorldExpiryAndIssueBoundaryAreExact(999,True)" />
+    </UnitTest>
+    <UnitTest name="MatchingScopeAloneCannotAuthorizeAnotherMemberTargetContractOrRevision" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="4fe779a8-5841-b9d5-e643-56d2d3859009">
+      <Execution id="6a2d1008-4509-450a-a400-f41378829911" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaServiceAuthorityTests" name="MatchingScopeAloneCannotAuthorizeAnotherMemberTargetContractOrRevision" />
+    </UnitTest>
+    <UnitTest name="PolicyExpiryAlsoBoundsAZeroLinkUnattendedProcess" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="068b0598-a6e0-e4a3-c582-b33dbb8c3f3e">
+      <Execution id="d6a95158-0fd6-4417-8e6b-611bbe425f9d" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaServiceAuthorityTests" name="PolicyExpiryAlsoBoundsAZeroLinkUnattendedProcess" />
+    </UnitTest>
+    <UnitTest name="ContactReferencesCannotBeManufacturedOrComparedBySource(&quot;let contact:drone.ContactRef = 1;&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="b3e09462-f0c6-695e-86bf-bb48d6703d21">
+      <Execution id="a90650a5-e537-472d-a85f-d7836a832bc6" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Testing.MetaDroneContractTests" name="ContactReferencesCannotBeManufacturedOrComparedBySource(&quot;let contact:drone.ContactRef = 1;&quot;)" />
+    </UnitTest>
+    <UnitTest name="RevocationAndMalformedOrOversizedPolicyFailClosed" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="7ad24260-7a9e-cdd8-4a75-b31b6d9c3374">
+      <Execution id="15b8e708-1d93-4b58-b25c-061e44596851" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Hosting.MetaServiceAuthorityTests" name="RevocationAndMalformedOrOversizedPolicyFailClosed" />
+    </UnitTest>
+    <UnitTest name="ContactReferencesCannotBeManufacturedOrComparedBySource(&quot;match(camera.observe()){ok(contacts)=&gt;{if(contacts.length&gt;0){let p=contacts[0].reference;if(p==p){system.log(\&quot;same\&quot;);}}}err(error)=&gt;{}}&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="b5b549d2-9ecc-9aac-4912-47c550fb318d">
+      <Execution id="dcbe53ac-766a-4acc-a609-2ce549b2e00c" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Testing.MetaDroneContractTests" name="ContactReferencesCannotBeManufacturedOrComparedBySource(&quot;match(camera.observe()){ok(contacts)=&gt;{if(contacts.length&gt;0){let p=contacts[0].reference;if(p==p){system.log(\&quot;same\&quot;);}}}err(error)=&gt;{}}&quot;)" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="63b5236e-d510-5ee3-8e39-6c421ea7a16e" executionId="21ab8ba0-e134-4c40-b57b-7da6688b6177" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a4f614de-2236-9a17-f7ca-3454cf37725a" executionId="b5e83233-fc8c-4c28-9e85-25819c0ef992" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="df1cd4bb-2e19-619d-6f83-03c3e0d6573b" executionId="6cf99755-dab5-4ac4-91fb-d69e43ed6632" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="69b46a0d-2852-da29-57e9-458264e51058" executionId="9740c10b-140b-424b-b9c8-c7bec0cd67f4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ac0b2772-b151-c135-953b-74084f5327cb" executionId="8130df7e-5b12-4ab2-9566-f6f81560ffea" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="edd7abee-9c8f-b838-3848-e3d9092de16e" executionId="05b98adb-b7b9-440b-885d-9cf42226bbb1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="068b0598-a6e0-e4a3-c582-b33dbb8c3f3e" executionId="d6a95158-0fd6-4417-8e6b-611bbe425f9d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4b0d07af-9b83-add0-23d7-177ce652b175" executionId="09b8e6d6-fe6f-4ada-a368-270a851d31ed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d56115bf-6fab-8405-9185-458889b293f9" executionId="dff0d9a7-fd5b-4dd2-a410-2b954dcd79e9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c524fec7-922e-342f-3c66-404b2c91ef16" executionId="0223a66c-4bb3-4157-b5a1-965cb9e94f18" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7ad24260-7a9e-cdd8-4a75-b31b6d9c3374" executionId="15b8e708-1d93-4b58-b25c-061e44596851" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4fe779a8-5841-b9d5-e643-56d2d3859009" executionId="6a2d1008-4509-450a-a400-f41378829911" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="55628885-8836-ae9f-b89f-5565a80bef36" executionId="c8a7b561-e0ec-4c2f-a3fa-d4df96631839" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e3e0c6ee-e2a2-86bf-3cf0-6d08476ddff0" executionId="9ee9e785-53f0-4a66-83a5-d7f434093fc9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d6b1eb18-9e39-7e57-4b07-b8017f446121" executionId="c5f089e2-165a-46e2-a41c-28e0195befa7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e1ac0dde-f40a-2d7d-759d-74d703d3a6ca" executionId="94432fd2-a219-4888-89fc-cea200669e7a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0a925859-882e-8144-8d64-98bcbd3b972d" executionId="76d590e2-05fc-47a2-801a-840d4fecc831" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b3e09462-f0c6-695e-86bf-bb48d6703d21" executionId="a90650a5-e537-472d-a85f-d7836a832bc6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b5b549d2-9ecc-9aac-4912-47c550fb318d" executionId="dcbe53ac-766a-4acc-a609-2ce549b2e00c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="19" executed="19" passed="16" failed="3" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 5.2.0.0: Test execution started&#xD;
+Running selected tests in D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll&#xD;
+   NUnit3TestExecutor discovered 19 of 19 NUnit test cases using Current Discovery mode, Non-Explicit run&#xD;
+NUnit Adapter 5.2.0.0: Test execution complete&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "id": "meta-example-math",
+  "name": "Power calculator",
+  "nameRu": "Расчёт мощности",
+  "packageName": "examples.math",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.math",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.math.meta",
+      "sha256": "f284b6bc6be53d2f9307beb35be08a67d5e346ef107cb129fb442ff1c57e1e67"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [],
+  "testFixture": "meta.test.json"
+}

@@ -1,0 +1,181 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="15689808-c98d-4360-a268-b4c238edbc08" name="Yuri@SEXMACHINE 2026-10-23 03:52:07" runUser="SexMachine\Yuri" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-10-23T03:52:07.9795307+03:00" queuing="2026-10-23T03:52:07.9795312+03:00" start="2026-10-23T03:52:04.4801312+03:00" finish="2026-10-23T03:52:08.0927571+03:00" />
+  <TestSettings name="default" id="5d4637e9-e28d-4cb9-9119-e115ddcb6f14">
+    <Deployment runDeploymentRoot="Yuri_SEXMACHINE_2026-10-23_03_52_07" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="ed7d3ec8-3ef7-4304-b1f8-934c170a5468" testId="14951611-a6f3-7176-2d14-429455895df7" testName="PaymentActionAwaitsNativeConfirmationWithoutClaimingTheInvoiceWasPaid" computerName="SEXMACHINE" duration="00:00:00.0047500" startTime="2026-10-23T03:52:06.9047101+03:00" endTime="2026-10-23T03:52:06.9094600+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ed7d3ec8-3ef7-4304-b1f8-934c170a5468">
+      <Output>
+        <ErrorInfo>
+          <Message>  E450:Compiler operand stack underflow.&#xD;
+Assert.That(result.Success, Is.True)&#xD;
+  Expected: True&#xD;
+  But was:  False&#xD;
+</Message>
+          <StackTrace>   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.Harness..ctor() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 46&#xD;
+   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.PaymentActionAwaitsNativeConfirmationWithoutClaimingTheInvoiceWasPaid() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 245&#xD;
+
+1)    at Content.Meta.Tests.Testing.MetaGarageApplicationTests.Harness..ctor() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 46&#xD;
+   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.PaymentActionAwaitsNativeConfirmationWithoutClaimingTheInvoiceWasPaid() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 245&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d9c2699f-c96a-43cc-bc75-f9f345b27eae" testId="a4606628-f768-5573-4597-3243b08aba70" testName="ACommittedMutationRemainsSuccessfulWhenItsSubsequentPrivateRefreshFails" computerName="SEXMACHINE" duration="00:00:00.1174970" startTime="2026-10-23T03:52:06.7059139+03:00" endTime="2026-10-23T03:52:06.8234094+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d9c2699f-c96a-43cc-bc75-f9f345b27eae">
+      <Output>
+        <ErrorInfo>
+          <Message>  E450:Compiler operand stack underflow.&#xD;
+Assert.That(result.Success, Is.True)&#xD;
+  Expected: True&#xD;
+  But was:  False&#xD;
+</Message>
+          <StackTrace>   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.Harness..ctor() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 46&#xD;
+   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.ACommittedMutationRemainsSuccessfulWhenItsSubsequentPrivateRefreshFails() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 222&#xD;
+
+1)    at Content.Meta.Tests.Testing.MetaGarageApplicationTests.Harness..ctor() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 46&#xD;
+   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.ACommittedMutationRemainsSuccessfulWhenItsSubsequentPrivateRefreshFails() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 222&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="e96062a5-60da-4067-a9bd-a862bbea775d" testId="612e1131-5125-1d9f-9d02-4a699bc2d309" testName="UnicodeProjectionUsesBoundedUtf8Output(2,True)" computerName="SEXMACHINE" duration="00:00:00.3248300" startTime="2026-10-23T03:52:06.3457694+03:00" endTime="2026-10-23T03:52:06.6704369+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e96062a5-60da-4067-a9bd-a862bbea775d" />
+    <UnitTestResult executionId="2d889ccf-e8e9-4a8a-ad0c-409af880c635" testId="3ed85427-2e76-b297-0955-6b4ee783d988" testName="UnicodeProjectionUsesBoundedUtf8Output(6,False)" computerName="SEXMACHINE" duration="00:00:00.0296300" startTime="2026-10-23T03:52:06.6731964+03:00" endTime="2026-10-23T03:52:06.7028267+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2d889ccf-e8e9-4a8a-ad0c-409af880c635" />
+    <UnitTestResult executionId="8bb5171b-1642-4481-b3ab-cf9cc4e82df3" testId="dc477803-dd99-5cf5-fd2a-90cd602ae260" testName="AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(&quot;begin&quot;,&quot;transition&quot;)" computerName="SEXMACHINE" duration="00:00:00.0535260" startTime="2026-10-23T03:52:06.8348381+03:00" endTime="2026-10-23T03:52:06.8883634+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8bb5171b-1642-4481-b3ab-cf9cc4e82df3">
+      <Output>
+        <ErrorInfo>
+          <Message>  E450:Compiler operand stack underflow.&#xD;
+Assert.That(result.Success, Is.True)&#xD;
+  Expected: True&#xD;
+  But was:  False&#xD;
+</Message>
+          <StackTrace>   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.Harness..ctor() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 46&#xD;
+   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(String action, String member) in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 236&#xD;
+   at InvokeStub_MetaGarageApplicationTests.AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(Object, Span`1)&#xD;
+
+1)    at Content.Meta.Tests.Testing.MetaGarageApplicationTests.Harness..ctor() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 46&#xD;
+   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(String action, String member) in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 236&#xD;
+   at InvokeStub_MetaGarageApplicationTests.AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(Object, Span`1)&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="fb7a6535-33a9-46b9-bc7f-94ba1db4f251" testId="783fe31d-3f59-ed58-0fa3-b59dd5e75df3" testName="AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(&quot;take&quot;,&quot;assign&quot;)" computerName="SEXMACHINE" duration="00:00:00.0109940" startTime="2026-10-23T03:52:06.8237722+03:00" endTime="2026-10-23T03:52:06.8347645+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fb7a6535-33a9-46b9-bc7f-94ba1db4f251">
+      <Output>
+        <ErrorInfo>
+          <Message>  E450:Compiler operand stack underflow.&#xD;
+Assert.That(result.Success, Is.True)&#xD;
+  Expected: True&#xD;
+  But was:  False&#xD;
+</Message>
+          <StackTrace>   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.Harness..ctor() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 46&#xD;
+   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(String action, String member) in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 236&#xD;
+
+1)    at Content.Meta.Tests.Testing.MetaGarageApplicationTests.Harness..ctor() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 46&#xD;
+   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(String action, String member) in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 236&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="760f8f66-fb52-4714-b033-3763f838d968" testId="9f0491c0-548d-3035-18e2-2789995a9f8f" testName="OneSharedVmNeverCarriesCustomerRowsIntoAnotherOrRevokedSession" computerName="SEXMACHINE" duration="00:00:00.0050560" startTime="2026-10-23T03:52:06.8995282+03:00" endTime="2026-10-23T03:52:06.9045831+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="760f8f66-fb52-4714-b033-3763f838d968">
+      <Output>
+        <ErrorInfo>
+          <Message>  E450:Compiler operand stack underflow.&#xD;
+Assert.That(result.Success, Is.True)&#xD;
+  Expected: True&#xD;
+  But was:  False&#xD;
+</Message>
+          <StackTrace>   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.Harness..ctor() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 46&#xD;
+   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.OneSharedVmNeverCarriesCustomerRowsIntoAnotherOrRevokedSession() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 195&#xD;
+
+1)    at Content.Meta.Tests.Testing.MetaGarageApplicationTests.Harness..ctor() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 46&#xD;
+   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.OneSharedVmNeverCarriesCustomerRowsIntoAnotherOrRevokedSession() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 195&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="378b3c67-d8b5-4c1d-ae47-58f0db2dd461" testId="33f3b9e3-87f5-c1bf-570c-6d101a3cc7ab" testName="AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(&quot;invoice&quot;,&quot;invoice&quot;)" computerName="SEXMACHINE" duration="00:00:00.0110510" startTime="2026-10-23T03:52:06.8884336+03:00" endTime="2026-10-23T03:52:06.8994838+03:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="378b3c67-d8b5-4c1d-ae47-58f0db2dd461">
+      <Output>
+        <ErrorInfo>
+          <Message>  E450:Compiler operand stack underflow.&#xD;
+Assert.That(result.Success, Is.True)&#xD;
+  Expected: True&#xD;
+  But was:  False&#xD;
+</Message>
+          <StackTrace>   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.Harness..ctor() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 46&#xD;
+   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(String action, String member) in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 236&#xD;
+   at InvokeStub_MetaGarageApplicationTests.AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(Object, Span`1)&#xD;
+
+1)    at Content.Meta.Tests.Testing.MetaGarageApplicationTests.Harness..ctor() in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 46&#xD;
+   at Content.Meta.Tests.Testing.MetaGarageApplicationTests.AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(String action, String member) in D:\projects\night-city\Content.Meta.Tests\Testing\MetaGarageApplicationTests.cs:line 236&#xD;
+   at InvokeStub_MetaGarageApplicationTests.AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(Object, Span`1)&#xD;
+
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(&quot;invoice&quot;,&quot;invoice&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="33f3b9e3-87f5-c1bf-570c-6d101a3cc7ab">
+      <Execution id="378b3c67-d8b5-4c1d-ae47-58f0db2dd461" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Testing.MetaGarageApplicationTests" name="AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(&quot;invoice&quot;,&quot;invoice&quot;)" />
+    </UnitTest>
+    <UnitTest name="OneSharedVmNeverCarriesCustomerRowsIntoAnotherOrRevokedSession" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="9f0491c0-548d-3035-18e2-2789995a9f8f">
+      <Execution id="760f8f66-fb52-4714-b033-3763f838d968" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Testing.MetaGarageApplicationTests" name="OneSharedVmNeverCarriesCustomerRowsIntoAnotherOrRevokedSession" />
+    </UnitTest>
+    <UnitTest name="UnicodeProjectionUsesBoundedUtf8Output(2,True)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="612e1131-5125-1d9f-9d02-4a699bc2d309">
+      <Execution id="e96062a5-60da-4067-a9bd-a862bbea775d" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiProjectionTests" name="UnicodeProjectionUsesBoundedUtf8Output(2,True)" />
+    </UnitTest>
+    <UnitTest name="PaymentActionAwaitsNativeConfirmationWithoutClaimingTheInvoiceWasPaid" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="14951611-a6f3-7176-2d14-429455895df7">
+      <Execution id="ed7d3ec8-3ef7-4304-b1f8-934c170a5468" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Testing.MetaGarageApplicationTests" name="PaymentActionAwaitsNativeConfirmationWithoutClaimingTheInvoiceWasPaid" />
+    </UnitTest>
+    <UnitTest name="AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(&quot;take&quot;,&quot;assign&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="783fe31d-3f59-ed58-0fa3-b59dd5e75df3">
+      <Execution id="fb7a6535-33a9-46b9-bc7f-94ba1db4f251" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Testing.MetaGarageApplicationTests" name="AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(&quot;take&quot;,&quot;assign&quot;)" />
+    </UnitTest>
+    <UnitTest name="AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(&quot;begin&quot;,&quot;transition&quot;)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="dc477803-dd99-5cf5-fd2a-90cd602ae260">
+      <Execution id="8bb5171b-1642-4481-b3ab-cf9cc4e82df3" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Testing.MetaGarageApplicationTests" name="AHumanBusinessReferenceResolvesBeforeTheRevisionBoundMutation(&quot;begin&quot;,&quot;transition&quot;)" />
+    </UnitTest>
+    <UnitTest name="ACommittedMutationRemainsSuccessfulWhenItsSubsequentPrivateRefreshFails" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="a4606628-f768-5573-4597-3243b08aba70">
+      <Execution id="d9c2699f-c96a-43cc-bc75-f9f345b27eae" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Testing.MetaGarageApplicationTests" name="ACommittedMutationRemainsSuccessfulWhenItsSubsequentPrivateRefreshFails" />
+    </UnitTest>
+    <UnitTest name="UnicodeProjectionUsesBoundedUtf8Output(6,False)" storage="d:\projects\night-city\content.meta.tests\bin\debugopt\net10.0\content.meta.tests.dll" id="3ed85427-2e76-b297-0955-6b4ee783d988">
+      <Execution id="2d889ccf-e8e9-4a8a-ad0c-409af880c635" />
+      <TestMethod codeBase="D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="Content.Meta.Tests.Mui.MuiProjectionTests" name="UnicodeProjectionUsesBoundedUtf8Output(6,False)" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="14951611-a6f3-7176-2d14-429455895df7" executionId="ed7d3ec8-3ef7-4304-b1f8-934c170a5468" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a4606628-f768-5573-4597-3243b08aba70" executionId="d9c2699f-c96a-43cc-bc75-f9f345b27eae" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="612e1131-5125-1d9f-9d02-4a699bc2d309" executionId="e96062a5-60da-4067-a9bd-a862bbea775d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3ed85427-2e76-b297-0955-6b4ee783d988" executionId="2d889ccf-e8e9-4a8a-ad0c-409af880c635" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dc477803-dd99-5cf5-fd2a-90cd602ae260" executionId="8bb5171b-1642-4481-b3ab-cf9cc4e82df3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="783fe31d-3f59-ed58-0fa3-b59dd5e75df3" executionId="fb7a6535-33a9-46b9-bc7f-94ba1db4f251" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9f0491c0-548d-3035-18e2-2789995a9f8f" executionId="760f8f66-fb52-4714-b033-3763f838d968" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="33f3b9e3-87f5-c1bf-570c-6d101a3cc7ab" executionId="378b3c67-d8b5-4c1d-ae47-58f0db2dd461" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="8" executed="8" passed="2" failed="6" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>NUnit Adapter 5.2.0.0: Test execution started&#xD;
+Running selected tests in D:\projects\night-city\Content.Meta.Tests\bin\DebugOpt\net10.0\Content.Meta.Tests.dll&#xD;
+   NUnit3TestExecutor discovered 8 of 8 NUnit test cases using Current Discovery mode, Non-Explicit run&#xD;
+NUnit Adapter 5.2.0.0: Test execution complete&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

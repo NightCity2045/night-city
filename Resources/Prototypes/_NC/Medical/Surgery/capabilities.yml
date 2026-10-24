@@ -110,6 +110,7 @@
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolCyberware
   name: cyberware interface and calibration
+  nameId: nc-cyberware-surgery-mount
   representativeTool: Multitool
 
 - type: ncSurgeryToolCapability

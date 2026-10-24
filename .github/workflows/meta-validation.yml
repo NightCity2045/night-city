@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+name: META validation
+
+on:
+  push:
+    branches: [master, staging, stable]
+    paths: ['Content.Meta/**', 'Content.Meta.Tests/**', 'Resources/Meta/**', 'Tools/_NC/Meta/CompilerWorker/**', 'Content.Server/_NC/Meta/Compilation/**', 'Directory.*.props', 'global.json', '.github/workflows/meta-validation.yml']
+  pull_request:
+    paths: ['Content.Meta/**', 'Content.Meta.Tests/**', 'Resources/Meta/**', 'Tools/_NC/Meta/CompilerWorker/**', 'Content.Server/_NC/Meta/Compilation/**', 'Directory.*.props', 'global.json', '.github/workflows/meta-validation.yml']
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: meta-validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pure-and-resources:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        submodules: recursive
+    - uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 10.0.x
+    - name: Restore pure tests and bounded worker
+      run: |
+        dotnet restore Content.Meta.Tests/Content.Meta.Tests.csproj
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        dotnet restore Tools/_NC/Meta/CompilerWorker/CompilerWorker.csproj
+        exit $LASTEXITCODE
+    - name: Build isolated compiler worker
+      run: dotnet build Tools/_NC/Meta/CompilerWorker/CompilerWorker.csproj -c DebugOpt --no-restore
+    - name: Validate language, VM, MUI, manifests, bindings, fixtures and every shipped app
+      run: dotnet test Content.Meta.Tests/Content.Meta.Tests.csproj -c DebugOpt --no-restore --logger 'trx;LogFileName=meta-validation.trx' --results-directory test_results/meta -- NUnit.ConsoleOut=0

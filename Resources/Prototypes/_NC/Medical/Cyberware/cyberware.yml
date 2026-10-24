@@ -75,6 +75,8 @@
 
 - type: ncCyberware
   id: NCNeuralLinkMk1
+  humanityPackages: [ NCHumanityInterface ]
+  requiresSeparateCalibration: true
   powerPriority: Control
   name: neural link Mk.1
   manufacturer: Zhirafa Technical Collective
@@ -115,6 +117,7 @@
 
 - type: ncCyberware
   id: NCCirculatoryAssistMk1
+  humanityPackages: [ NCHumanityMedical ]
   powerPriority: LifeSupport
   name: circulatory assist pump Mk.1
   manufacturer: Biotechnica Night City
@@ -153,6 +156,8 @@
 
 - type: ncCyberware
   id: NCIndustrialCyberArm
+  humanityPackages: [ NCHumanityProfessionalMotor ]
+  requiresSeparateCalibration: true
   assembly: NCIndustrialArmAssembly
   name: industrial cyberarm
   manufacturer: Militech Industrial Systems
@@ -199,6 +204,7 @@
 
 - type: ncCyberware
   id: NCCyberopticsMk1
+  humanityPackages: [ NCHumanityMedical ]
   powerPriority: Control
   name: cyberoptics Mk.1
   manufacturer: Kiroshi Optics
@@ -238,6 +244,7 @@
 
 - type: ncCyberware
   id: NCCyberheartMk1
+  humanityPackages: [ NCHumanityMedical ]
   powerPriority: LifeSupport
   name: cyberheart Mk.1
   manufacturer: Biotechnica Night City
@@ -318,6 +325,15 @@
   parent: NCOrganHumanDetachableParentRegionBase
   name: left industrial cyberarm
   components:
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.LArm
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: l_arm
+      color: "#A8BAC9"
+  - type: NCCyberwareExterior
+  - type: NCCyberwareSlotHost
+    slots: [ NCSlotArmUtilityLeft ]
   - type: Sprite
     sprite: _NC/Objects/Cyberware/implants.rsi
     state: cyberarm_left
@@ -346,6 +362,15 @@
   parent: NCOrganHumanDetachableParentRegionBase
   name: right industrial cyberarm
   components:
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.RArm
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: r_arm
+      color: "#A8BAC9"
+  - type: NCCyberwareExterior
+  - type: NCCyberwareSlotHost
+    slots: [ NCSlotArmUtilityRight ]
   - type: Sprite
     sprite: _NC/Objects/Cyberware/implants.rsi
     state: cyberarm_right
@@ -374,6 +399,12 @@
   parent: NCOrganHumanRegionBase
   name: cyberoptics Mk.1
   components:
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.Eyes
+    data:
+      sprite: Mobs/Customization/eyes.rsi
+      state: eyes
+      color: "#75DCEB"
   - type: Sprite
     sprite: _NC/Objects/Cyberware/implants.rsi
     state: cyberoptics

@@ -16,6 +16,12 @@ public sealed partial class InitialBodyComponent : Component
     [DataField(required: true)]
     public Dictionary<ProtoId<OrganCategoryPrototype>, EntProtoId<OrganComponent>> Organs;
 
+    // NC-Edit-Start
+    /// <summary>Expected graph nodes deliberately absent from a newly manufactured empty body.</summary>
+    [DataField]
+    public HashSet<ProtoId<OrganCategoryPrototype>> ExcludedOrgans = [];
+    // NC-Edit-End
+
     /// <summary>
     /// Organ relationships, based on their categories. Keys are parents to their values.
     /// </summary>

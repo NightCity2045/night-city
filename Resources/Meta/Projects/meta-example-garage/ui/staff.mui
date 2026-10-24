@@ -1,0 +1,34 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<Page id="staff" title="{bind title}">
+  <Column id="page" gap="8" margin="12">
+    <Header id="title" text="{bind title}"/>
+    <Text id="message" text="{bind message}"/>
+    <Button id="refresh" action="refresh" text="{bind refreshLabel}"/>
+    <Table id="orders" items="{bind orders}" pageSize="64" rowAction="select" rowKey="id" rowField="order" columns="summary status invoice"/>
+    <Panel id="nativeReadings" class="card">
+      <Column id="readings" gap="6">
+        <Text id="engine" text="{bind engine}"/>
+        <Text id="vehicle" text="{bind vehicle}"/>
+        <Text id="nativeWork" text="{bind physicalNote}"/>
+      </Column>
+    </Panel>
+    <Panel id="workPanel" class="card">
+      <Column id="workFields" gap="6">
+        <Text id="referenceLabel" text="{bind orderLabel}"/>
+        <Text id="selected" text="{bind selection}"/>
+        <Input id="reference" field="id" value="{bind selectedId}" maxLength="64" visible="false"/>
+        <Row id="workActions" gap="6">
+          <Button id="take" action="take" text="{bind assignLabel}" enabled="{bind hasSelection}"/>
+          <Button id="begin" action="begin" text="{bind beginLabel}" enabled="{bind hasSelection}"/>
+          <Button id="ready" action="ready" text="{bind readyLabel}" enabled="{bind hasSelection}"/>
+        </Row>
+        <NumberInput id="amount" field="amount" min="1" max="65536" step="1"/>
+        <Text id="amountLabel" text="{bind amountLabel}"/>
+        <Text id="descriptionLabel" text="{bind descriptionLabel}"/>
+        <Input id="description" field="description" maxLength="512"/>
+        <Button id="invoice" action="invoice" text="{bind invoiceLabel}" enabled="{bind hasSelection}"/>
+        <Button id="cancel" action="cancel" text="{bind cancelLabel}" enabled="{bind hasSelection}"/>
+      </Column>
+    </Panel>
+  </Column>
+</Page>

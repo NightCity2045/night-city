@@ -1,0 +1,20 @@
+Owned identity confirmed pid=19912 start=2026-10-24T16:40:55.5535092Z; live readonly suspend=false; UTC=2026-10-24T17:02:07.8667624Z
+ACTIVE WORKITEM 1c537fee520 state=1 test=D:\projects\night-city\artifacts\meta-integration\73d74dbf0e8649928f5dcd2e7e398d9b\bin\Content.IntegrationTests\Content.IntegrationTests.dll
+  FIXTURE 0 
+ACTIVE WORKITEM 1c537fef790 state=1 test=Content.IntegrationTests.Tests._NC.Meta
+  FIXTURE 1c53801b6a8 Content.IntegrationTests.PoolManagerTestEventHandler
+ACTIVE WORKITEM 1c537ff8448 state=1 test=Content.IntegrationTests.Tests._NC.Meta.NCMetaFirmwareStateIsolationTest.DifferentFirmwarePackagesRequireAnExplicitTransitionEvenWhenBothSchemasAreOne(False)
+  FIXTURE 1c5dbedef28 Content.IntegrationTests.Tests._NC.Meta.NCMetaFirmwareStateIsolationTest
+ACTIVE WORKITEM 1c537ff86e0 state=1 test=Content.IntegrationTests.Tests._NC.Meta.NCMetaFirmwareStateIsolationTest.DifferentFirmwarePackagesRequireAnExplicitTransitionEvenWhenBothSchemasAreOne
+  FIXTURE 1c53801b6a8 Content.IntegrationTests.PoolManagerTestEventHandler
+ACTIVE WORKITEM 1c537ff9028 state=1 test=Content.IntegrationTests.Tests._NC.Meta.NCMetaFirmwareStateIsolationTest
+  FIXTURE 1c53801b6a8 Content.IntegrationTests.PoolManagerTestEventHandler
+ACTIVE WORKITEM 1c538015820 state=1 test=Content.IntegrationTests.Tests._NC
+  FIXTURE 1c53801b6a8 Content.IntegrationTests.PoolManagerTestEventHandler
+ACTIVE WORKITEM 1c5380183e8 state=1 test=Content.IntegrationTests.Tests
+  FIXTURE 1c53801b6a8 Content.IntegrationTests.PoolManagerTestEventHandler
+ACTIVE WORKITEM 1c538018a98 state=1 test=Content.IntegrationTests.PoolManagerTestEventHandler
+  FIXTURE 1c53801b6a8 Content.IntegrationTests.PoolManagerTestEventHandler
+ACTIVE WORKITEM 1c538019148 state=1 test=Content
+  FIXTURE 0 
+Finished bounded scan objects=2500001 candidates=0 shown=0 seconds=6.251 lines=19; non-suspended live heap is best-effort.

@@ -14,8 +14,10 @@
 
   <!-- NC: isolate trusted diagnostic output from ordinary builds and their incremental compiler inputs. -->
   <PropertyGroup Condition="'$(EnableNCDiagnostics)' == 'true'">
-    <OutputPath>$(MSBuildThisFileDirectory)../bin/NCDiagnostics/$(MSBuildProjectName)/</OutputPath>
+    <NCDiagnosticsOutputRoot Condition="'$(NCDiagnosticsOutputRoot)' == ''">$(MSBuildThisFileDirectory)../bin/NCDiagnostics</NCDiagnosticsOutputRoot>
+    <OutputPath>$(NCDiagnosticsOutputRoot)/$(MSBuildProjectName)/</OutputPath>
     <IntermediateOutputPath>obj/NCDiagnostics/$(Configuration)/</IntermediateOutputPath>
+    <IntermediateOutputPath Condition="'$(NCDiagnosticsBuildId)' != ''">obj/NCDiagnostics/$(NCDiagnosticsBuildId)/$(Configuration)/</IntermediateOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

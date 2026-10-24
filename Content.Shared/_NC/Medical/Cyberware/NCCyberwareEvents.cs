@@ -39,4 +39,5 @@ public enum NCCyberwareStateChangeKind : byte
     NeuralInterface,
     MechanicalTrauma,
     MechanicalService,
+    Configuration,
 }

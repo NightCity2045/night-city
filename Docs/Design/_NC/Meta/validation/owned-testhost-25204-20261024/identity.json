@@ -1,0 +1,19 @@
+{
+  "ownedProcessId": 25204,
+  "processName": "testhost",
+  "verifiedStartUtc": "2026-10-24T12:14:23.7688024Z",
+  "verifiedStartUtcTicks": 639284408637688024,
+  "dumpKind": "DiagnosticsClient.DumpType.Triage",
+  "dumpFile": "hang-triage.dmp",
+  "dumpBytes": 7634545,
+  "dumpSha256": "2200eac43bb3e8d6fb53ee5d3973e967b8cd0fb0ea586744305ca2c62930e7f0",
+  "capturedUtc": "2026-10-24T12:26:11.0003315Z",
+  "clrVersion": "10.0.326.7603",
+  "installedRuntime": "10.0.3",
+  "localDac": "C:/Program Files/dotnet/shared/Microsoft.NETCore.App/10.0.3/mscordaccore.dll",
+  "localDacSha256": "f265dfc0b16e1386ed42038d022d3b8f24db4121e7dd8ba5a1c9d324766fe845",
+  "analyzer": "cached Microsoft.Diagnostics.Runtime 3.1.512801; explicit local DAC",
+  "managedThreads": 33,
+  "processStoppedByThisDiagnostic": false,
+  "systemProfileStarted": false
+}

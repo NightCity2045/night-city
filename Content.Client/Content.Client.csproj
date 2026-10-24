@@ -7,6 +7,9 @@
   </PropertyGroup>
   <Import Project="../MSBuild/Content.props" />
   <ItemGroup>
+    <ProjectReference Include="../Content.Meta/Content.Meta.csproj" /> <!-- NC: pure META and MUI schemas. -->
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Nett" />
     <PackageReference Include="JetBrains.Annotations" PrivateAssets="All" />
     <PackageReference Include="SixLabors.ImageSharp" />

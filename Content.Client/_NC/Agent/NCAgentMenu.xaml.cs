@@ -1121,6 +1121,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
 
     private void BuildCitiNet(NCAgentUpdateMessage data)
     {
+        BuiltInContent.AddChild(CreateMetaBrowserEntry());
         var aliasInput = new LineEdit
         {
             Text = data.OwnAlias,

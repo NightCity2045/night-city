@@ -12,6 +12,9 @@ using Content.Server.Database;
 using Content.Server.GameTicking;
 using Content.Server._NC.LivingCity.Economy;
 using Content.Server._NC.LivingCity.Identity;
+using Content.Server._NC.LivingCity.Actors.Components;
+using Content.Server._NC.Meta.Devices;
+using Content.Server._NC.Meta.Persistence;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.Identity;
 using Content.Shared._NC.LivingCity.Economy;
@@ -143,6 +146,8 @@ public sealed class NCEconomicAssetRegistrySystemTest : GameTest
         });
         Assert.That((await assets.CreateItemInstanceAsync(createItem)).Status,
             Is.EqualTo(NCEconomicAssetMutationStatus.Duplicate));
+
+        using var ownershipParticipant = new RecordingOwnershipParticipant(assets, database, itemId);
 
         var buyer = NCPartyRef.ForCharacter(await CreateCharacterAsync(database));
         var quoteRequest = new NCCreateEconomicQuoteRequest(
@@ -319,6 +324,7 @@ public sealed class NCEconomicAssetRegistrySystemTest : GameTest
         var reservationAfterFailure = await assets.GetReservationAsync(itemReservationRequest.ReservationId, true);
         var itemAfterFailure = await assets.GetItemAsync(itemId, true);
         var transferAfterFailure = await assets.GetTransferAsync(purchaseTransferId, true);
+        var participantAfterFailure = await ownershipParticipant.ReadAsync();
         Assert.Multiple(() =>
         {
             Assert.That(unfunded.Status, Is.EqualTo(NCEconomicTradeMutationStatus.InsufficientFunds));
@@ -326,6 +332,8 @@ public sealed class NCEconomicAssetRegistrySystemTest : GameTest
             Assert.That(itemAfterFailure?.Snapshot.ReservationId, Is.EqualTo(itemReservationRequest.ReservationId));
             Assert.That(transferAfterFailure, Is.Null,
                 "A failed monetary leg must roll back every participant write.");
+            Assert.That(participantAfterFailure, Is.Null,
+                "The software/ownership participant must roll back with the unpaid physical asset.");
         });
 
         var buyerAccount = await finance.EnsurePrimaryAccountWithOpeningBalanceAsync(
@@ -357,6 +365,9 @@ public sealed class NCEconomicAssetRegistrySystemTest : GameTest
         });
         Assert.That((await assets.SettleReservationAsync(settlementRequest)).Status,
             Is.EqualTo(NCEconomicTradeMutationStatus.Duplicate));
+        Assert.That((await ownershipParticipant.ReadAsync())?.AggregateVersion, Is.EqualTo(1),
+            "A duplicate paid transfer reconciles native authority without applying participant snapshots twice.");
+        Assert.That(System.Text.Json.JsonSerializer.Deserialize<string>((await ownershipParticipant.ReadAsync())!.Payload), Is.EqualTo(buyer.ToString()));
 
         var serviceQuoteRequest = new NCCreateEconomicQuoteRequest(
             Guid.NewGuid(),
@@ -559,6 +570,9 @@ public sealed class NCEconomicAssetRegistrySystemTest : GameTest
         });
         Assert.That((await assets.RefundSettlementAsync(itemRefundRequest)).Status,
             Is.EqualTo(NCEconomicTradeMutationStatus.Duplicate));
+        Assert.That((await ownershipParticipant.ReadAsync())?.AggregateVersion, Is.EqualTo(2),
+            "The reverse transfer must include the same participant atomically, once.");
+        Assert.That(System.Text.Json.JsonSerializer.Deserialize<string>((await ownershipParticipant.ReadAsync())!.Payload), Is.EqualTo(owner.ToString()));
 
         var completedServiceRefund = await assets.RefundSettlementAsync(new NCRefundEconomicSettlementRequest(
             Guid.NewGuid(),
@@ -744,6 +758,66 @@ public sealed class NCEconomicAssetRegistrySystemTest : GameTest
                     $"{issue.Code}: {issue.AggregateType}/{issue.AggregateId} -> {issue.RelatedId}")));
         });
 
+        // Bind a real native host after its random ID has been allocated, proving lookup does not assume a hash-derived ID.
+        var nativeDevices = server.System<NCMetaDeviceRegistrySystem>();
+        var metaPersistence = server.System<NCMetaPersistenceSystem>();
+        var testMap = await Pair.CreateTestMap();
+        EntityUid metaHost = default;
+        string nativeDeviceId = null;
+        await server.WaitPost(() =>
+        {
+            metaHost = server.EntMan.SpawnEntity("NCMetaTerminal", testMap.GridCoords);
+            server.EntMan.EnsureComponent<NCCityPersistentItemAdapterComponent>(metaHost).ItemId = itemId;
+            Assert.That(nativeDevices.TryGetEntry(metaHost, out var native), Is.True);
+            nativeDeviceId = native.Id;
+        });
+        await WaitUntil(server, () => nativeDevices.TryGetEntry(metaHost, out var native) && native.Ready,
+            "The real META host did not complete durable owner restoration.");
+        Assert.That(clock.TryGetCurrentTime(out var claimEpoch, out var claimTime), Is.True);
+        var claimedDevice = await metaPersistence.ClaimDeviceAsync(Guid.NewGuid(), nativeDeviceId, owner.ToString(),
+            "Private transfer test", claimEpoch, claimTime, itemId);
+        Assert.That(claimedDevice, Is.Not.Null);
+        Assert.That(await metaPersistence.ReadEconomicDeviceIdAsync(itemId), Is.EqualTo(nativeDeviceId));
+        Assert.That(nativeDeviceId, Is.Not.EqualTo(NCMetaPersistenceSystem.StableGuid("meta-device:item:" + itemId).ToString("D")));
+        await server.WaitPost(() => Assert.That(nativeDevices.TryApplyOwner(metaHost, nativeDeviceId, string.Empty,
+            owner.ToString(), claimedDevice.AuthorityEpoch), Is.True));
+        var beforeNativeTransfer = await assets.GetItemAsync(itemId, true);
+        var transferRequest = new NCTransferItemRequest(Guid.NewGuid(), NCEconomicTransferId.New(), itemId,
+            beforeNativeTransfer!.AggregateVersion, stockNodeId, restoredNode!.AggregateVersion, destinationNodeId,
+            restoredDestination!.AggregateVersion, owner, buyer, owner, Guid.NewGuid());
+        ownershipParticipant.AllowCommit = false;
+        Assert.That((await assets.TransferItemAsync(transferRequest)).Status, Is.EqualTo(NCEconomicAssetMutationStatus.Rejected));
+        Assert.That((await assets.GetItemAsync(itemId, true))!.Snapshot.Owner, Is.EqualTo(owner));
+        Assert.That((await ownershipParticipant.ReadAsync())!.AggregateVersion, Is.EqualTo(2));
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(nativeDevices.TryGetEntry(metaHost, out var native) && native.Ready, Is.True,
+                "A failed enclosing guard must restore the still-durable owner's native entry.");
+            Assert.That(native.Owner, Is.EqualTo(owner.ToString()));
+        });
+        ownershipParticipant.AllowCommit = true;
+        ownershipParticipant.ExtraWrites = 32;
+        var overBudget = await assets.TransferItemAsync(transferRequest);
+        Assert.That(overBudget.Status, Is.EqualTo(NCEconomicAssetMutationStatus.Rejected));
+        Assert.That(overBudget.Error, Does.Contain("32 aggregate write budget"));
+        Assert.That(await assets.GetTransferAsync(transferRequest.TransferId, true), Is.Null);
+        ownershipParticipant.ExtraWrites = 0;
+        Assert.That((await assets.TransferItemAsync(transferRequest)).Status, Is.EqualTo(NCEconomicAssetMutationStatus.Applied));
+        Assert.That((await assets.TransferItemAsync(transferRequest)).Status, Is.EqualTo(NCEconomicAssetMutationStatus.Duplicate));
+        Assert.That((await ownershipParticipant.ReadAsync())!.AggregateVersion, Is.EqualTo(3));
+        var transferredDevice = await metaPersistence.ReadDeviceAsync(nativeDeviceId);
+        Assert.That(transferredDevice.Owner, Is.EqualTo(buyer.ToString()));
+        Assert.That(transferredDevice.Projects, Is.Empty, "The recipient receives no previous owner's private workspace.");
+        Assert.That(await metaPersistence.ReadInstallationsAsync(nativeDeviceId, buyer.ToString()), Is.Empty);
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(nativeDevices.TryGetEntry(metaHost, out var native) && native.Ready, Is.True);
+            Assert.That(native.Owner, Is.EqualTo(buyer.ToString()));
+            Assert.That(native.AuthorityEpoch, Is.EqualTo(claimedDevice.AuthorityEpoch + 1));
+        });
+        Assert.That(ownershipParticipant.Reconciled, Is.GreaterThanOrEqualTo(7));
+        Assert.That(ownershipParticipant.OpenDrains, Is.Zero, "Every rejection, rollback, success and replay releases the drain.");
+
         await server.WaitPost(() => server.EntMan.EventBus.RaiseEvent(
             EventSource.Local,
             new GameRunLevelChangedEvent(GameRunLevel.InRound, GameRunLevel.PostRound)));
@@ -761,6 +835,50 @@ public sealed class NCEconomicAssetRegistrySystemTest : GameTest
             RefundTransactionId = NCTransactionId.New(),
             RefundTransferId = NCEconomicTransferId.New(),
         })).Status, Is.EqualTo(NCEconomicTradeMutationStatus.ClockUnavailable));
+    }
+
+    private sealed class RecordingOwnershipParticipant : INCItemOwnershipParticipant, IDisposable
+    {
+        private readonly NCEconomicAssetRegistrySystem _assets;
+        private readonly IServerDbManager _database;
+        private readonly NCItemId _item;
+        public string Name => "integration-physical-ownership";
+        public bool AllowCommit = true;
+        public int ExtraWrites;
+        public int OpenDrains;
+        public int Reconciled;
+
+        public RecordingOwnershipParticipant(NCEconomicAssetRegistrySystem assets, IServerDbManager database, NCItemId item)
+        {
+            _assets = assets; _database = database; _item = item;
+            assets.RegisterItemOwnershipParticipant(this);
+        }
+
+        public Task<NCAggregateSnapshotData> ReadAsync() =>
+            _database.GetNCAggregateSnapshotAsync("test.item-ownership", _item.ToString());
+
+        public async Task<NCItemOwnershipPreparation> PrepareAsync(NCItemOwnershipContext context)
+        {
+            if (context.Root.Snapshot.ItemId != _item) return new([], () => Task.FromResult(true));
+            Assert.That(context.Root.Snapshot.Owner, Is.EqualTo(context.PreviousOwner));
+            Assert.That(context.Parts.All(part => part.Snapshot.Owner == context.PreviousOwner), Is.True);
+            var current = await ReadAsync();
+            var writes = new List<NCPersistentAggregateWrite>
+            {
+                new(Guid.NewGuid(), "test.item-owner.transferred", "test.item-ownership", _item.ToString(),
+                    current?.AggregateVersion ?? 0, 1, System.Text.Json.JsonSerializer.Serialize(context.NewOwner.ToString()), "{}"),
+            };
+            for (var index = 0; index < ExtraWrites; index++)
+                writes.Add(new(Guid.NewGuid(), "test.item-owner.extra", "test.item-owner-extra", Guid.NewGuid().ToString("D"), 0, 1, "{}", "{}"));
+            OpenDrains++;
+            return new(writes, () => Task.FromResult(AllowCommit), new Drain(this));
+        }
+
+        public Task ReconcileAsync(NCItemOwnershipContext context)
+        { if (context.Root.Snapshot.ItemId == _item) Reconciled++; return Task.CompletedTask; }
+        public void Dispose() => _assets.UnregisterItemOwnershipParticipant(this);
+        private sealed class Drain(RecordingOwnershipParticipant owner) : IDisposable
+        { public void Dispose() => owner.OpenDrains--; }
     }
 
     private static async Task<NCCharacterId> CreateCharacterAsync(IServerDbManager database)

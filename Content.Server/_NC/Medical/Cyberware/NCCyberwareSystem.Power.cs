@@ -19,6 +19,16 @@ namespace Content.Server._NC.Medical.Cyberware;
 
 public sealed partial class NCCyberwareSystem
 {
+    private ulong _powerBatches;
+    private ulong _powerSegments;
+    private ulong _powerModuleSteps;
+    private double _lastPowerMilliseconds;
+    private double _maximumPowerMilliseconds;
+
+    /// <summary>Read-only counters; no entity scan, scheduler mutation or synthetic time advance.</summary>
+    public NCCyberwareRuntimeCounters GetRuntimeCounters() => new(_scheduled.Count, _schedule.Count,
+        _powerBatches, _powerSegments, _powerModuleSteps, _lastPowerMilliseconds, _maximumPowerMilliseconds);
+
     [Dependency] private SharedBatterySystem _battery = default!;
     [Dependency] private PowerCellSystem _cells = default!;
     [Dependency] private ItemSlotsSystem _powerSlots = default!;
@@ -97,7 +107,8 @@ public sealed partial class NCCyberwareSystem
 
     private Entity<BatteryComponent>? GetBusCell(EntityUid holder, string slot)
     {
-        if (!_powerSlots.TryGetSlot(holder, slot, out var itemSlot) || itemSlot.Item is not { } uid ||
+        if (!TryComp<ItemSlotsComponent>(holder, out var slots) ||
+            !_powerSlots.TryGetSlot(holder, slot, out var itemSlot, slots) || itemSlot.Item is not { } uid ||
             TerminatingOrDeleted(uid) || !TryComp<BatteryComponent>(uid, out var battery))
             return null;
         return (uid, battery);
@@ -142,7 +153,7 @@ public sealed partial class NCCyberwareSystem
             if (!profile.RequiresPower || module.LastAdvancedAt > now || !CanRunElectronics(uid, module, profile, now))
                 continue;
             demands.Add(new NCCyberwarePowerDemand(module.StableInstanceId, profile.PowerPriority,
-                profile.IdlePowerPerSecond + profile.LoadedPowerPerSecond * EffectivePowerLoad(module, profile)));
+                profile.IdlePowerPerSecond + profile.LoadedPowerPerSecond * EffectivePowerLoad(module, profile, now)));
         }
         return NCCyberwarePowerMath.Allocate(demands, maximum,
             main is { } primary && _battery.GetCharge(primary.AsNullable()) > PowerEpsilon,
@@ -166,11 +177,13 @@ public sealed partial class NCCyberwareSystem
         foreach (var uid in modules)
             InitializeState(uid, Comp<NCCyberwareComponent>(uid), _prototypes.Index(Comp<NCCyberwareComponent>(uid).Profile));
         var cursor = state.LastAdvancedAt;
+        var powerStarted = System.Diagnostics.Stopwatch.GetTimestamp();
         state.Advancing = true;
         try
         {
             while (cursor < observedAt)
             {
+                _powerSegments++;
                 foreach (var uid in modules)
                 {
                     var module = Comp<NCCyberwareComponent>(uid);
@@ -207,9 +220,11 @@ public sealed partial class NCCyberwareSystem
                     }
                     if (module.EmpDisabledUntil > cursor)
                         seconds = MathF.Min(seconds, (float)(module.EmpDisabledUntil - cursor).TotalSeconds);
+                    if (module.ActiveLoadUntil is { } activeUntil && activeUntil > cursor)
+                        seconds = MathF.Min(seconds, (float)(activeUntil - cursor).TotalSeconds);
                     var generating = (!profile.RequiresPower || powered.Contains(module.StableInstanceId)) &&
                                      CanRunElectronics(uid, module, profile, cursor);
-                    var rate = (generating ? profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond * EffectivePowerLoad(module, profile) : 0f) -
+                    var rate = (generating ? profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond * EffectivePowerLoad(module, profile, cursor) : 0f) -
                                profile.PassiveCoolingPerSecond;
                     var threshold = rate > 0f ? profile.HeatShutdownThreshold : profile.HeatDeratingThreshold;
                     if (rate != 0f && (threshold - module.Heat) / rate > PowerEpsilon)
@@ -227,10 +242,11 @@ public sealed partial class NCCyberwareSystem
                     var module = Comp<NCCyberwareComponent>(uid);
                     if (module.LastAdvancedAt > cursor)
                         continue;
+                    _powerModuleSteps++;
                     var profile = _prototypes.Index(module.Profile);
                     var generating = (!profile.RequiresPower || powered.Contains(module.StableInstanceId)) &&
                                      CanRunElectronics(uid, module, profile, cursor);
-                    var rate = (generating ? profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond * EffectivePowerLoad(module, profile) : 0f) -
+                    var rate = (generating ? profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond * EffectivePowerLoad(module, profile, cursor) : 0f) -
                                profile.PassiveCoolingPerSecond;
                     var thermal = NCCyberwarePowerMath.AdvanceHeat(module.Heat, rate, seconds,
                         profile.HeatCapacity, profile.HeatDamageThreshold, profile.HeatDamagePerSecond);
@@ -258,6 +274,9 @@ public sealed partial class NCCyberwareSystem
         finally
         {
             state.Advancing = false;
+            _powerBatches++;
+            _lastPowerMilliseconds = System.Diagnostics.Stopwatch.GetElapsedTime(powerStarted).TotalMilliseconds;
+            _maximumPowerMilliseconds = Math.Max(_maximumPowerMilliseconds, _lastPowerMilliseconds);
         }
     }
 
@@ -343,12 +362,13 @@ public sealed partial class NCCyberwareSystem
             _assemblyPopup.PopupEntity(Loc.GetString(message), body, body);
     }
 
-    private static float EffectivePowerLoad(NCCyberwareComponent module, NCCyberwarePrototype profile)
+    private static float EffectivePowerLoad(NCCyberwareComponent module, NCCyberwarePrototype profile, TimeSpan now)
     {
+        var active = module.ActiveLoadUntil is { } deadline && deadline <= now ? 0f : module.Load;
         return profile.NeuralRequirement == NCCyberwareNeuralRequirement.Required &&
                (!module.Calibrated || module.NeuralIntegrity < profile.NeuralMinimumOperationalIntegrity ||
                 module.NeuralState is NCCyberwareNeuralState.Disconnected or NCCyberwareNeuralState.Disrupted)
-            ? 0f : module.Load;
+            ? 0f : Math.Clamp(active + module.ComputeLoad, 0f, 1f);
     }
 
     public float GetPowerFraction(EntityUid moduleUid)
@@ -394,3 +414,8 @@ public sealed partial class NCCyberwareSystem
         }
     }
 }
+
+/// <summary>Process-local observations. These counters are not gameplay state and are never persisted.</summary>
+public readonly record struct NCCyberwareRuntimeCounters(int ScheduledBodies, int HeapEntries,
+    ulong PowerBatches, ulong IntegrationSegments, ulong ModuleSteps, double LastPowerMilliseconds,
+    double MaximumPowerMilliseconds);

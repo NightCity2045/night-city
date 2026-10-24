@@ -34,6 +34,7 @@ public sealed partial class NCPendingShotContextComponent : Component
 
     [ViewVariables]
     public bool ShooterMoving;
+    public float MovingPenaltyReduction;
 
     [ViewVariables]
     public TimeSpan CreatedAt;

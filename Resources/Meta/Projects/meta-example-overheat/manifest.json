@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "id": "meta-example-overheat",
+  "name": "Engine temperature governor",
+  "nameRu": "Ограничитель температуры двигателя",
+  "packageName": "examples.overheat",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.overheat",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.overheat.meta",
+      "sha256": "bcc677e2bf2f47adc0950076badd4bee29f23230580bf9186617b900b9ef0a11"
+    }
+  ],
+  "startMode": "OnPower",
+  "bindings": [
+    {
+      "slot": "engine-ecu",
+      "capability": "meta.vehicle.EngineController",
+      "contractHash": "717b0100c834226ed7433cab2db281d8865982b0dda7df22d8c30dfadddc0753",
+      "requiredScopes": [
+        "vehicle.engine.observe",
+        "vehicle.engine.mode"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json"
+}
