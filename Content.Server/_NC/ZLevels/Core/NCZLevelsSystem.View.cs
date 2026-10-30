@@ -159,7 +159,7 @@ public sealed partial class NCZLevelsSystem
         _popup.PopupPredictedCoordinates(
             Loc.GetString(
                 "nc-zlevel-falling-popup",
-                ("name", Content.Shared.IdentityManagement.Identity.Name(ent, EntityManager))),
+                ("entity", Content.Shared.IdentityManagement.Identity.Name(ent, EntityManager))), // NC edit
             Transform(ent).Coordinates,
             ent);
     }

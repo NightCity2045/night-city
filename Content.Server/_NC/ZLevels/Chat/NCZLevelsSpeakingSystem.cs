@@ -72,7 +72,7 @@ public sealed partial class NCZLevelsSpeakingSystem : EntitySystem
                 message,
                 Loc.GetString(
                     "nc-zlevel-voice-from-down",
-                    ("name", Content.Shared.IdentityManagement.Identity.Name(ent, EntityManager))));
+                    ("message", Content.Shared.IdentityManagement.Identity.Name(ent, EntityManager)))); // NC Edit
         }
     }
 

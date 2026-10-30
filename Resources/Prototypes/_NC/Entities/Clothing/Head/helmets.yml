@@ -25,7 +25,7 @@
     sprite: _NC/Clothing/Head/Envirohelms/biotechnica_botany.rsi
 
 - type: entity
-  parent: ClothingHeadHardsuitBase
+  parent: [ ClothingHeadHardsuitBase, ClothingHeadSuitWithLightBase ]
   id: ClothingHeadHelmetHardsuitTraumaArmored
   name: Trauma Team armored hardsuit helmet
   description: Heavy combat medical hardsuit helmet deployed by Trauma Team rapid response commanders.
@@ -36,8 +36,8 @@
     sprite: _NC/Clothing/Head/Hardsuits/trauma_armored_helmet.rsi
 
 - type: entity
-  parent: ClothingHeadHardsuitBase
-  id: ClothingHeadHelmetHardsuitTrauma
+  parent: [ ClothingHeadHardsuitBase, ClothingHeadSuitWithLightBase]
+  id: ClothingHeadHelmetHardsuitTrauma #ClothingHeadHelmetHardsuitMilitech
   name: Trauma Team hardsuit helmet
   description: Standard armored helmet issued to Trauma Team emergency response personnel.
   components:
@@ -47,7 +47,7 @@
     sprite: _NC/Clothing/Head/Hardsuits/trauma_helmet.rsi
 
 - type: entity
-  parent: ClothingHeadHardsuitBase
+  parent: [ ClothingHeadHardsuitBase, ClothingHeadSuitWithLightBase ]
   id: ClothingHeadHelmetHardsuitTraumaMed
   name: Trauma Team medical hardsuit helmet
   description: A specialized response helmet with integrated diagnostic visors for Trauma Team medics.
