@@ -12,7 +12,7 @@
   salary: 400
   setPreference: false
   startingGear: TraumaTeamOperativeGear
-  icon: JobIconSecurityOfficer
+  icon: NCJobIconTraumaTeamOperative
   accessGroups: [ TraumaBasic ]
   access: [ Trauma_Operative ]
 

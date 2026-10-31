@@ -12,7 +12,7 @@
   salary: 350
   setPreference: false
   startingGear: TraumaTeamParamedicGear
-  icon: JobIconParamedic
+  icon: NCJobIconTraumaTeamParamed
   accessGroups: [ TraumaBasic ]
   access: [ Trauma_Morgue ]
 
