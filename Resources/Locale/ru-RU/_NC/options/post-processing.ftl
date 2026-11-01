@@ -3,8 +3,6 @@
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 ui-options-nc-post-processing-label = Постобработка Night City
-ui-options-nc-cel-shading = Аниме-сел-шейдинг
-ui-options-nc-cel-shading-strength = Интенсивность сел-шейдинга
 ui-options-nc-bloom = Свечение
 ui-options-nc-bloom-intensity = Интенсивность свечения
 ui-options-nc-vignette = Виньетирование

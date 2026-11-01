@@ -79,12 +79,6 @@ public sealed partial class GraphicsTab : Control
         Control.AddOptionCheckBox(CCVars.ParallaxLowQuality, ParallaxLowQualityCheckBox);
 
         // NC-Edit-Start
-        Control.AddOptionCheckBox(NCGraphicsCVars.CelShading, NCCelShadingCheckBox);
-        Control.AddOptionPercentSlider(
-            NCGraphicsCVars.CelShadingStrength,
-            NCCelShadingStrengthSlider,
-            0f,
-            1f);
         Control.AddOptionCheckBox(NCGraphicsCVars.Bloom, NCBloomCheckBox);
         Control.AddOptionSlider(
             NCGraphicsCVars.BloomIntensity,

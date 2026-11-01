@@ -19,8 +19,6 @@
 
                 <!-- NC-Edit-Start -->
                 <Label Text="{Loc 'ui-options-nc-post-processing-label'}" StyleClasses="LabelKeyText"/>
-                <CheckBox Name="NCCelShadingCheckBox" Text="{Loc 'ui-options-nc-cel-shading'}" />
-                <ui:OptionSlider Name="NCCelShadingStrengthSlider" Title="{Loc 'ui-options-nc-cel-shading-strength'}" />
                 <CheckBox Name="NCBloomCheckBox" Text="{Loc 'ui-options-nc-bloom'}" />
                 <ui:OptionSlider Name="NCBloomIntensitySlider" Title="{Loc 'ui-options-nc-bloom-intensity'}" />
                 <CheckBox Name="NCVignetteCheckBox" Text="{Loc 'ui-options-nc-vignette'}" />
