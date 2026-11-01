@@ -1,0 +1,10 @@
+{
+  "rootModule": "examples.laboratory",
+  "responses": [
+    {"member":"meta.lab.Grinder.start","value":{"operationId":"fixture-grind","status":"Running","requested":1,"completed":0,"errorCode":{"tag":"none"},"stamp":{"epoch":1,"sequence":1,"tick":60}},"pending":true},
+    {"member":"meta.lab.ChemMaster.pills","value":{"operationId":"fixture-package","status":"Applied","requested":3,"completed":3,"errorCode":{"tag":"none"},"stamp":{"epoch":1,"sequence":2,"tick":60}},"pending":true}
+  ],
+  "events": [{"slot":"grinder","event":"operationChanged","arguments":[{"operationId":"fixture-grind","status":"Applied","requested":1,"completed":1,"errorCode":{"tag":"none"},"stamp":{"epoch":1,"sequence":3,"tick":60}}],"sequence":1}],
+  "expectedLogs": ["Grinding admitted.","Packaging completed.","Grinding completed."],
+  "expectedCommands": ["start(Grind,demo-grind-1)","pills(3,5,Laboratory batch,demo-package-1)"]
+}

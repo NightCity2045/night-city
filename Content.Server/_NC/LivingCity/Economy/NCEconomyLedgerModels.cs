@@ -90,13 +90,20 @@ public sealed record NCPostLedgerTransactionRequest(
     Guid? CausationId = null,
     string AuditSource = "system",
     IReadOnlyList<NCAtomicLedgerParticipantWrite>? ParticipantWrites = null,
-    IReadOnlyList<NCAtomicLedgerOutboxWrite>? ParticipantOutboxMessages = null);
+    IReadOnlyList<NCAtomicLedgerOutboxWrite>? ParticipantOutboxMessages = null,
+    Content.Server.Database.NCMetaAuthorityConstraints? Authority = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    string? ParticipantResultPayload = null);
 
 public sealed record NCEconomyMutationResult(
     NCEconomyMutationStatus Status,
     IReadOnlyList<NCAccountRecord> Accounts,
     NCLedgerTransactionRecord? Transaction,
-    string? Error);
+    string? Error)
+{
+    [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+    public string? ParticipantResultPayload { get; init; }
+}
 
 public sealed class NCAccountPersistedEvent(
     NCAccountId accountId,

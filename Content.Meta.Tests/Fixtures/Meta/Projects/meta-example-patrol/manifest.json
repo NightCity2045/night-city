@@ -1,0 +1,33 @@
+{
+  "version": "1.0",
+  "id": "meta-example-patrol",
+  "name": "Physical drone patrol",
+  "nameRu": "Физическое патрулирование дроном",
+  "packageName": "examples.patrol",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.patrol",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.patrol.meta",
+      "sha256": "fe36769f8a34fa3744389187dfaa266c800160311ede0d53c4526e467cdf968c"
+    }
+  ],
+  "startMode": "OnPower",
+  "bindings": [
+    {
+      "slot": "patrol-drone",
+      "capability": "meta.drone.DroneController",
+      "contractHash": "a546f893405f7e5423b941ea28983033893adeba2ae52031e7c226099e79fa33",
+      "requiredScopes": [
+        "drone.route.read",
+        "drone.navigate",
+        "drone.navigation.observe"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

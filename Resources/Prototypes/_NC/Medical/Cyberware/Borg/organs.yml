@@ -1,0 +1,387 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgPodHead
+  name: biopod casing
+  components:
+  - type: Organ
+    category: Head
+  - type: ParentOrgan
+  - type: NCCyberwareSlotHost
+    slots: [ NCSlotNeuralCore, NCSlotCranialUtility, NCSlotMotorBurst, NCSlotMotorStabilizer ]
+  - type: NCCyberware
+    profile: NCBorgSupportNode
+
+- type: entity
+  parent: NCBorgSupportOrganBase
+  id: NCBorgPerfusionPump
+  name: biopod life support node
+  components:
+  - type: Organ
+    category: Heart
+  - type: NCOrganFunction
+    functionType: Circulation
+  - type: Metabolizer
+    metabolizerTypes: [ Human ]
+    stages: [ Bloodstream ]
+
+- type: entity
+  parent: NCBorgSupportOrganBase
+  id: NCBorgOxygenator
+  name: biopod life support node
+  components:
+  - type: Organ
+    category: Lungs
+  - type: NCOrganFunction
+    functionType: Respiration
+  - type: Metabolizer
+    stages: []
+
+- type: entity
+  parent: NCBorgSupportOrganBase
+  id: NCBorgMetabolicFilter
+  name: biopod life support node
+  components:
+  - type: Organ
+    category: Liver
+  - type: NCOrganFunction
+    functionType: Metabolism
+  - type: Metabolizer
+    metabolizerTypes: [ Human ]
+    stages: [ Metabolites ]
+
+- type: entity
+  parent: NCBorgSupportOrganBase
+  id: NCBorgWasteFilter
+  name: biopod life support node
+  components:
+  - type: Organ
+    category: Kidneys
+  - type: NCOrganFunction
+    functionType: Filtration
+  - type: Metabolizer
+    stages: []
+
+- type: entity
+  parent: NCBorgSupportOrganBase
+  id: NCBorgNutrientProcessor
+  name: biopod life support node
+  components:
+  - type: Organ
+    category: Stomach
+  - type: NCOrganFunction
+    functionType: Digestion
+  - type: Metabolizer
+    metabolizerTypes: [ Human ]
+    stages: [ Digestion ]
+  - type: Stomach
+  - type: SolutionManager
+    solutions:
+    - SolutionStomach
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgFrameTorso
+  name: standard civilian frame
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/parts.rsi
+    state: torso_m
+    color: "#A8BAC9"
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.Chest
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: torso_m
+      color: "#A8BAC9"
+  - type: Organ
+    category: Torso
+  - type: ParentOrgan
+  - type: NCBorgStandardShell
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgFramePowerHolder
+  name: civilian frame cell holder
+  components:
+  - type: Organ
+    category: Thorax
+  - type: NCCyberware
+    profile: NCBorgFrameBus
+  - type: NCCyberwarePowerBus
+  - type: NCCyberwareSlotHost
+    slots: [ NCSlotThoracicConverter, NCSlotSubdermalThorax ]
+  - type: NCSurgicalSite
+    accessDepth: OrganExposed
+    tissuesRetracted: true
+    boneCasingOpen: true
+  - type: PowerCellSlot
+    cellSlotId: nc_main_cell
+    fitsInCharger: false
+  - type: ItemSlots
+    slots:
+      nc_main_cell:
+        name: nc-cyberware-power-main-cell
+        locked: true
+        disableEject: true
+        insertOnInteract: false
+        whitelist:
+          components: [ PowerCell ]
+      nc_reserve_cell:
+        name: nc-cyberware-power-reserve-cell
+        locked: true
+        disableEject: true
+        insertOnInteract: false
+        whitelist:
+          components: [ PowerCell ]
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgFrameAbdomen
+  name: civilian frame node
+  components:
+  - type: Organ
+    category: Abdomen
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgFramePelvis
+  name: civilian frame node
+  components:
+  - type: Organ
+    category: PelvisGroin
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgFrameArmLeft
+  name: civilian frame node
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/parts.rsi
+    state: l_arm
+    color: "#A8BAC9"
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.LArm
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: l_arm
+      color: "#A8BAC9"
+  - type: NCCyberwareExterior
+  - type: Organ
+    category: ArmLeft
+  - type: ParentOrgan
+  - type: NCCyberwareSlotHost
+    slots: [ NCSlotArmUtilityLeft ]
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    movementContribution: 0.5
+    gripContribution: 0.35
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgFrameArmRight
+  name: civilian frame node
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/parts.rsi
+    state: r_arm
+    color: "#A8BAC9"
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.RArm
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: r_arm
+      color: "#A8BAC9"
+  - type: NCCyberwareExterior
+  - type: Organ
+    category: ArmRight
+  - type: ParentOrgan
+  - type: NCCyberwareSlotHost
+    slots: [ NCSlotArmUtilityRight ]
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    movementContribution: 0.5
+    gripContribution: 0.35
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgFrameHandLeft
+  name: civilian frame node
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/parts.rsi
+    state: l_hand
+    color: "#A8BAC9"
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.LHand
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: l_hand
+      color: "#A8BAC9"
+  - type: Organ
+    category: HandLeft
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    movementContribution: 0.25
+    gripContribution: 0.65
+  - type: HandOrgan
+    handID: left
+    data:
+      location: Left
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgFrameHandRight
+  name: civilian frame node
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/parts.rsi
+    state: r_hand
+    color: "#A8BAC9"
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.RHand
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: r_hand
+      color: "#A8BAC9"
+  - type: Organ
+    category: HandRight
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    movementContribution: 0.25
+    gripContribution: 0.65
+  - type: HandOrgan
+    handID: right
+    data:
+      location: Right
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgFrameLegLeft
+  name: civilian frame node
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/parts.rsi
+    state: l_leg
+    color: "#A8BAC9"
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.LLeg
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: l_leg
+      color: "#A8BAC9"
+  - type: NCCyberwareExterior
+  - type: Organ
+    category: LegLeft
+  - type: ParentOrgan
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    movementContribution: 0.5
+    gripContribution: 0
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgFrameLegRight
+  name: civilian frame node
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/parts.rsi
+    state: r_leg
+    color: "#A8BAC9"
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.RLeg
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: r_leg
+      color: "#A8BAC9"
+  - type: NCCyberwareExterior
+  - type: Organ
+    category: LegRight
+  - type: ParentOrgan
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    movementContribution: 0.5
+    gripContribution: 0
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgFrameFootLeft
+  name: civilian frame node
+  components:
+  - type: Sprite
+    sprite: Mobs/Species/Human/parts.rsi
+    state: l_foot
+    color: "#A8BAC9"
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.LFoot
+    data:
+      sprite: Mobs/Species/Human/parts.rsi
+      state: l_foot
+      color: "#A8BAC9"
+  - type: Organ
+    category: FootLeft
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    movementContribution: 0.25
+    gripContribution: 0
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgFrameFootRight
+  name: civilian frame node
+  components:
+  - type: Sprite
+    sprite: Mobs/Species/Human/parts.rsi
+    state: r_foot
+    color: "#A8BAC9"
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.RFoot
+    data:
+      sprite: Mobs/Species/Human/parts.rsi
+      state: r_foot
+      color: "#A8BAC9"
+  - type: Organ
+    category: FootRight
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    movementContribution: 0.25
+    gripContribution: 0
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgFrameEyes
+  name: civilian frame node
+  components:
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.Eyes
+    data:
+      sprite: Mobs/Customization/eyes.rsi
+      state: eyes
+      color: "#75DCEB"
+  - type: Organ
+    category: Eyes
+  - type: NCOrganFunction
+    functionType: Vision
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgFrameEars
+  name: civilian frame node
+  components:
+  - type: Organ
+    category: Ears
+  - type: NCOrganFunction
+    functionType: Hearing
+
+- type: entity
+  parent: NCBorgMechanicalOrganBase
+  id: NCBorgFrameMouth
+  name: civilian frame node
+  components:
+  - type: Organ
+    category: Tongue
+  - type: NCOrganFunction
+    functionType: Speech

@@ -1,0 +1,56 @@
+{
+  "rootModule": "examples.overheat",
+  "responses": [
+    {
+      "member": "meta.vehicle.EngineController.setMode",
+      "value": {
+        "temperatureC": 111,
+        "rpm": 3200,
+        "oilPressureKPa": 250,
+        "coolantFraction": 0.8,
+        "faults": [],
+        "mode": "Safe",
+        "stamp": {
+          "epoch": 1,
+          "sequence": 1,
+          "tick": 60
+        }
+      },
+      "pending": false,
+      "completeAfterSlices": 1
+    }
+  ],
+  "events": [
+    {
+      "slot": "engine-ecu",
+      "event": "telemetryChanged",
+      "arguments": [
+        {
+          "temperatureC": 111,
+          "rpm": 3200,
+          "oilPressureKPa": 250,
+          "coolantFraction": 0.8,
+          "faults": [],
+          "mode": "Normal",
+          "stamp": {
+            "epoch": 1,
+            "sequence": 1,
+            "tick": 60
+          }
+        }
+      ],
+      "sequence": 1,
+      "nowMs": 1000,
+      "tick": 60
+    }
+  ],
+  "expectedLogs": [
+    "Ограничение нагрузки подтверждено"
+  ],
+  "expectedCommands": [
+    "setMode(Safe)"
+  ],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}

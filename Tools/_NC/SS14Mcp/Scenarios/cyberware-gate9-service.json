@@ -1,0 +1,654 @@
+{
+  "version": 1,
+  "id": "cyberware-gate9-service-resources",
+  "maximumSeconds": 600,
+  "environment": {
+    "start": true,
+    "clients": 0,
+    "graphics": false
+  },
+  "steps": [
+    {
+      "id": "session",
+      "command": "session_get"
+    },
+    {
+      "id": "baseline",
+      "command": "metrics_capture"
+    },
+    {
+      "id": "fixture",
+      "command": "fixture_create",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        }
+      }
+    },
+    {
+      "id": "actor",
+      "command": "fixture_spawn",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "fixtureId": {
+          "$ref": "/steps/fixture/data/fixtureId"
+        },
+        "prototype": "MobHuman",
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "bench",
+      "command": "fixture_spawn",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "fixtureId": {
+          "$ref": "/steps/fixture/data/fixtureId"
+        },
+        "prototype": "NCCyberwareWorkbench",
+        "x": 0.5,
+        "y": 0
+      }
+    },
+    {
+      "id": "cell",
+      "command": "fixture_spawn",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "fixtureId": {
+          "$ref": "/steps/fixture/data/fixtureId"
+        },
+        "prototype": "PowerCellHigh",
+        "x": -0.5,
+        "y": 0
+      }
+    },
+    {
+      "id": "arm",
+      "command": "fixture_spawn",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "fixtureId": {
+          "$ref": "/steps/fixture/data/fixtureId"
+        },
+        "prototype": "NCOrganHumanCyberArmLeft",
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "card",
+      "command": "fixture_spawn",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "fixtureId": {
+          "$ref": "/steps/fixture/data/fixtureId"
+        },
+        "prototype": "NCCyberwareServiceLockCard",
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "paper",
+      "command": "fixture_spawn",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "fixtureId": {
+          "$ref": "/steps/fixture/data/fixtureId"
+        },
+        "prototype": "Paper",
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "take-cell",
+      "command": "action_execute",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "actor": {
+          "$ref": "/steps/actor/data/netEntity"
+        },
+        "action": "pickup",
+        "target": {
+          "$ref": "/steps/cell/data/netEntity"
+        }
+      }
+    },
+    {
+      "id": "cell-picked",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/take-cell/data/handled"
+        },
+        "equals": true
+      }
+    },
+    {
+      "id": "insert-cell",
+      "command": "action_execute",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "actor": {
+          "$ref": "/steps/actor/data/netEntity"
+        },
+        "action": "interact",
+        "target": {
+          "$ref": "/steps/bench/data/netEntity"
+        }
+      }
+    },
+    {
+      "id": "powered-bench",
+      "command": "entity_inspect",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "netEntity": {
+          "$ref": "/steps/bench/data/netEntity"
+        },
+        "components": [
+          "NCCyberwareWorkbench"
+        ]
+      }
+    },
+    {
+      "id": "cell-in-native-slot",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/powered-bench/data/readers/containers/items/nc_bench_cell/entities/0"
+        },
+        "equals": {
+          "$ref": "/steps/cell/data/netEntity"
+        }
+      }
+    },
+    {
+      "id": "take-arm",
+      "command": "action_execute",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "actor": {
+          "$ref": "/steps/actor/data/netEntity"
+        },
+        "action": "pickup",
+        "target": {
+          "$ref": "/steps/arm/data/netEntity"
+        }
+      }
+    },
+    {
+      "id": "arm-picked",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/take-arm/data/handled"
+        },
+        "equals": true
+      }
+    },
+    {
+      "id": "mount-arm",
+      "command": "action_execute",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "actor": {
+          "$ref": "/steps/actor/data/netEntity"
+        },
+        "action": "interact",
+        "target": {
+          "$ref": "/steps/bench/data/netEntity"
+        }
+      }
+    },
+    {
+      "id": "mounted-bench",
+      "command": "entity_inspect",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "netEntity": {
+          "$ref": "/steps/bench/data/netEntity"
+        },
+        "components": [
+          "NCCyberwareWorkbench"
+        ]
+      }
+    },
+    {
+      "id": "workpiece-mounted",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/mounted-bench/data/readers/containers/items/nc_cyberware_workpiece/entities/0"
+        },
+        "equals": {
+          "$ref": "/steps/arm/data/netEntity"
+        }
+      }
+    },
+    {
+      "id": "before-firmware",
+      "command": "entity_inspect",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "netEntity": {
+          "$ref": "/steps/arm/data/netEntity"
+        },
+        "components": [
+          "NCCyberware",
+          "NCOrganIntegrity"
+        ]
+      }
+    },
+    {
+      "id": "take-card",
+      "command": "action_execute",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "actor": {
+          "$ref": "/steps/actor/data/netEntity"
+        },
+        "action": "pickup",
+        "target": {
+          "$ref": "/steps/card/data/netEntity"
+        }
+      }
+    },
+    {
+      "id": "card-picked",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/take-card/data/handled"
+        },
+        "equals": true
+      }
+    },
+    {
+      "id": "flash",
+      "command": "action_execute",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "actor": {
+          "$ref": "/steps/actor/data/netEntity"
+        },
+        "action": "interact",
+        "target": {
+          "$ref": "/steps/bench/data/netEntity"
+        }
+      }
+    },
+    {
+      "id": "after-firmware",
+      "command": "entity_inspect",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "netEntity": {
+          "$ref": "/steps/arm/data/netEntity"
+        },
+        "components": [
+          "NCCyberware",
+          "NCOrganIntegrity"
+        ]
+      }
+    },
+    {
+      "id": "firmware-is-local-lock",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/after-firmware/data/cyberwareService/firmware"
+        },
+        "equals": "NCFirmwareServiceLock"
+      }
+    },
+    {
+      "id": "serial-retained",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/after-firmware/data/cyberwareService/instanceId"
+        },
+        "equals": {
+          "$ref": "/steps/before-firmware/data/cyberwareService/instanceId"
+        }
+      }
+    },
+    {
+      "id": "integrity-retained",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/after-firmware/data/components/NCOrganIntegrity/fields/CurrentIntegrity"
+        },
+        "equals": {
+          "$ref": "/steps/before-firmware/data/components/NCOrganIntegrity/fields/CurrentIntegrity"
+        }
+      }
+    },
+    {
+      "id": "put-down-card",
+      "command": "action_execute",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "actor": {
+          "$ref": "/steps/actor/data/netEntity"
+        },
+        "action": "drop"
+      }
+    },
+    {
+      "id": "card-dropped",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/put-down-card/data/handled"
+        },
+        "equals": true
+      }
+    },
+    {
+      "id": "take-paper",
+      "command": "action_execute",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "actor": {
+          "$ref": "/steps/actor/data/netEntity"
+        },
+        "action": "pickup",
+        "target": {
+          "$ref": "/steps/paper/data/netEntity"
+        }
+      }
+    },
+    {
+      "id": "paper-picked",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/take-paper/data/handled"
+        },
+        "equals": true
+      }
+    },
+    {
+      "id": "print",
+      "command": "action_execute",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "actor": {
+          "$ref": "/steps/actor/data/netEntity"
+        },
+        "action": "interact",
+        "target": {
+          "$ref": "/steps/bench/data/netEntity"
+        }
+      }
+    },
+    {
+      "id": "report",
+      "command": "entity_inspect",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "netEntity": {
+          "$ref": "/steps/paper/data/netEntity"
+        },
+        "components": [
+          "Paper"
+        ]
+      }
+    },
+    {
+      "id": "paper-filled",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/report/data/paper/hasContent"
+        },
+        "equals": true
+      }
+    },
+    {
+      "id": "paper-editable",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/report/data/paper/editingDisabled"
+        },
+        "equals": false
+      }
+    },
+    {
+      "id": "cell-after-service",
+      "command": "entity_inspect",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "netEntity": {
+          "$ref": "/steps/cell/data/netEntity"
+        },
+        "components": [
+          "Battery"
+        ]
+      }
+    },
+    {
+      "id": "two-joules-consumed",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/cell-after-service/data/battery/charge"
+        },
+        "equals": 1078
+      }
+    },
+    {
+      "id": "human-0",
+      "command": "fixture_spawn",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "fixtureId": {
+          "$ref": "/steps/fixture/data/fixtureId"
+        },
+        "prototype": "MobHuman",
+        "x": 3,
+        "y": 3
+      }
+    },
+    {
+      "id": "human-1",
+      "command": "fixture_spawn",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "fixtureId": {
+          "$ref": "/steps/fixture/data/fixtureId"
+        },
+        "prototype": "MobHuman",
+        "x": 4,
+        "y": 3
+      }
+    },
+    {
+      "id": "human-2",
+      "command": "fixture_spawn",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "fixtureId": {
+          "$ref": "/steps/fixture/data/fixtureId"
+        },
+        "prototype": "MobHuman",
+        "x": 5,
+        "y": 3
+      }
+    },
+    {
+      "id": "industrial-shell",
+      "command": "fixture_spawn",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "fixtureId": {
+          "$ref": "/steps/fixture/data/fixtureId"
+        },
+        "prototype": "NCBorgStandardShell",
+        "x": -3,
+        "y": 3
+      }
+    },
+    {
+      "id": "clinical-shell",
+      "command": "fixture_spawn",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "fixtureId": {
+          "$ref": "/steps/fixture/data/fixtureId"
+        },
+        "prototype": "NCBorgClinicalShell",
+        "x": -4,
+        "y": 3
+      }
+    },
+    {
+      "id": "cohort-metrics",
+      "command": "metrics_capture"
+    },
+    {
+      "id": "settle",
+      "command": "condition_wait",
+      "arguments": {
+        "command": "metrics_capture",
+        "arguments": {},
+        "path": "/data/scope",
+        "equals": "process-and-diagnostics",
+        "minimumStableMilliseconds": 5000,
+        "intervalMilliseconds": 1000,
+        "timeoutSeconds": 15
+      }
+    },
+    {
+      "id": "settled-metrics",
+      "command": "metrics_capture"
+    }
+  ]
+}

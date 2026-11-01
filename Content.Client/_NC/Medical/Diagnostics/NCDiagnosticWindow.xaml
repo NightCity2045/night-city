@@ -50,6 +50,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                         <Label Name="PatientNameLabel" StyleClasses="LabelHeadingBigger" FontColorOverride="#D8FFFB"
                                ClipText="True" />
                         <RichTextLabel Name="PatientStateLabel" HorizontalExpand="True" />
+                        <RichTextLabel Name="HumanityStateLabel" HorizontalExpand="True" Visible="False" />
                         <Label Text="{Loc 'nc-medical-diagnostics-data-scope'}" FontColorOverride="#4D918C" />
                         <BoxContainer Orientation="Horizontal" SeparationOverride="7">
                             <Label Name="TierLabel" FontColorOverride="#6DE9DC" />

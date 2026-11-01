@@ -20,8 +20,7 @@ public sealed record NCHumanityRecord(NCHumanitySnapshot Snapshot, long Aggregat
 public sealed record NCHumanityMutationResult(bool Applied, NCHumanityRecord? Humanity, string? Error);
 
 /// <summary>
-/// Authoritative permanent Humanity loss from cyberware operations. A source world event applies once; ordinary
-/// incident code can observe crisis transitions but cannot change Humanity.
+/// Read-only pre-Gate-5 actor records used for migration. The living brain's medical snapshot owns new H/S state.
 /// </summary>
 public sealed partial class NCHumanityRegistrySystem : EntitySystem
 {
@@ -53,52 +52,13 @@ public sealed partial class NCHumanityRegistrySystem : EntitySystem
         return loaded;
     }
 
-    public async Task<NCHumanityMutationResult> ApplyCyberwareCostAsync(NCActorId actorId, int humanityCost,
+    /// <summary>Legacy anonymous costs are retired. Commit a physical functional package through NC medicine.</summary>
+    public Task<NCHumanityMutationResult> ApplyCyberwareCostAsync(NCActorId actorId, int humanityCost,
         Guid sourceWorldEventId, NCZoneId currentZone, NCPartyRef initiator)
     {
-        if (!TryPolicy(out var policy) || !actorId.IsValid || humanityCost <= 0 || sourceWorldEventId == Guid.Empty ||
-            !currentZone.IsValid || !initiator.IsValid || !_clock.TryGetCurrentTime(out var epoch, out var now))
-            return new(false, null, "The Humanity mutation request is invalid.");
-        var gate = Gate(actorId.Value);
-        await gate.WaitAsync();
-        try
-        {
-            var current = await GetAsync(actorId, true);
-            if (current?.Snapshot.AppliedSourceEventIds.Contains(sourceWorldEventId) == true)
-                return new(false, current, null);
-            if ((current?.Snapshot.AppliedSourceEventIds.Count ?? 0) >= policy.MaximumAppliedSources)
-                return new(false, current, "The Humanity provenance capacity is exhausted.");
-            var maximum = current?.Snapshot.MaximumHumanity ?? policy.DefaultMaximumHumanity;
-            var nextValue = Math.Max(0, (current?.Snapshot.CurrentHumanity ?? maximum) - humanityCost);
-            var stage = Stage(nextValue, policy);
-            var eventId = Guid.NewGuid();
-            var snapshot = new NCHumanitySnapshot(actorId, maximum, nextValue,
-                checked((current?.Snapshot.PermanentCyberwareLoss ?? 0) + humanityCost), stage,
-                (current?.Snapshot.AppliedSourceEventIds ?? []).Append(sourceWorldEventId).ToArray(), now,
-                (current?.Snapshot.DataVersion ?? 0) + 1, eventId);
-            var commandId = NCPersistentIdentity.Command("humanity", "cyberware-cost",
-                $"{actorId}.{sourceWorldEventId:D}");
-            var result = await _database.ApplyNCPersistentMutationAsync(new NCPersistentMutationRequest(commandId,
-                "living-city.humanity.cyberware-cost", "humanity", actorId.ToString(), eventId,
-                "living-city.humanity.changed", AggregateType, actorId.ToString(), current?.AggregateVersion ?? 0,
-                SnapshotFormatVersion, JsonSerializer.Serialize(snapshot, JsonOptions), JsonSerializer.Serialize(
-                    new HumanityEvent(actorId, humanityCost, stage, sourceWorldEventId), JsonOptions),
-                JsonSerializer.Serialize(new HumanityReceipt(actorId), JsonOptions),
-                NCPersistentIdentity.Correlation("humanity", "cyberware-cost",
-                    $"{actorId}.{sourceWorldEventId:D}"), sourceWorldEventId, epoch, now, []));
-            if (result.Status is not (NCPersistentMutationStatus.Applied or
-                NCPersistentMutationStatus.DuplicateCompleted))
-                return new(false, current, result.Error ?? "The Humanity mutation failed.");
-            var loaded = await GetAsync(actorId, true);
-            if (loaded == null)
-                return new(false, null, "The Humanity state could not be reloaded.");
-            RaiseLocalEvent(new NCHumanityCrisisPersistedEvent(loaded, currentZone, sourceWorldEventId, initiator,
-                current?.Snapshot.CrisisStage ?? NCHumanityCrisisStage.Stable));
-            return new(result.Status == NCPersistentMutationStatus.Applied, loaded, null);
-        }
-        finally { gate.Release(); }
+        return Task.FromResult(new NCHumanityMutationResult(false, null,
+            "Legacy Humanity writes are retired; use the physical medical package authority."));
     }
-
     private bool TryPolicy(out NCHumanityPolicyPrototype policy) => _prototypes.TryIndex(DefaultPolicy, out policy!) &&
         policy.DefaultMaximumHumanity > 0 && policy.StrainedThreshold > policy.DissociatingThreshold &&
         policy.DissociatingThreshold > policy.CyberpsychosisThreshold && policy.CyberpsychosisThreshold >= 0 &&

@@ -71,14 +71,32 @@ public abstract partial class SharedVisualBodySystem : EntitySystem
     protected virtual void SetOrganColor(Entity<VisualOrganComponent> ent, Color color)
     {
         ent.Comp.Data.Color = color;
+        ent.Comp.Data = ResolveOrganAppearance(ent, ent.Comp.Data); // NC
         Dirty(ent);
     }
 
     protected virtual void SetOrganAppearance(Entity<VisualOrganComponent> ent, PrototypeLayerData data)
     {
-        ent.Comp.Data = data;
+        ent.Comp.Data = ResolveOrganAppearance(ent, data); // NC
         Dirty(ent);
     }
+
+    // NC-Edit-Start: retain the native organ/clothing layers while allowing authoritative exterior presentation.
+    private PrototypeLayerData ResolveOrganAppearance(Entity<VisualOrganComponent> ent, PrototypeLayerData data)
+    {
+        var ev = new Content.Shared._NC.Medical.Cyberware.Visuals.NCGetOrganVisualAppearanceEvent(data);
+        RaiseLocalEvent(ent, ref ev);
+        return ev.Data;
+    }
+
+    public bool TryRefreshOrganAppearance(Entity<VisualOrganComponent?> ent)
+    {
+        if (!Resolve(ent, ref ent.Comp))
+            return false;
+        SetOrganAppearance((ent, ent.Comp), ent.Comp.Data);
+        return true;
+    }
+    // NC-Edit-End
 
     protected virtual void SetOrganMarkings(Entity<VisualOrganMarkingsComponent> ent, Dictionary<HumanoidVisualLayers, List<Marking>> markings)
     {

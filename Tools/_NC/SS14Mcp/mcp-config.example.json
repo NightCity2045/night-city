@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "ss14-dev": {
+      "command": "dotnet",
+      "args": [
+        "D:/projects/night-city/Tools/_NC/SS14Mcp/Server/bin/Debug/net10.0/SS14Mcp.Server.dll"
+      ],
+      "env": {
+        "SS14_MCP_WORKSPACE": "D:/projects/night-city",
+        "SS14_MCP_MODULES": "all"
+      }
+    }
+  }
+}

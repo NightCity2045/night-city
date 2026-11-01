@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "id": "meta-example-fabricator",
+  "name": "Durable fabrication batch",
+  "nameRu": "Производственная партия с квитанцией",
+  "packageName": "examples.fabricator",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.fabricator",
+  "files": [
+    {
+      "path": "main.meta",
+      "sha256": "5dc9f9fe943a063e92830be6026a56e5225e5c5a4da79022264ebc512299323f",
+      "sourcePath": "Resources/Meta/Examples/examples.fabricator.meta"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [
+    {
+      "slot": "fabricator",
+      "requiredScopes": [
+        "machine.produce",
+        "machine.operation.observe"
+      ],
+      "contractHash": "c52e2f8189aa028c6bfc3d49a5f052b5e2b9d4d031652168163ad1bcfba03cc8",
+      "capability": "meta.industrial.Fabricator"
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

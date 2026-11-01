@@ -1,0 +1,56 @@
+{
+  "version": "1.0",
+  "views": {
+    "main": {
+      "function": "stock.control.view",
+      "document": "ui/main.mui",
+      "stateType": "stock.control.ControlState",
+      "fields": {
+        "title": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "openLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "closeLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 256
+        }
+      },
+      "actions": [
+        "open",
+        "close"
+      ]
+    }
+  },
+  "actions": {
+    "open": {
+      "function": "stock.control.open",
+      "inputType": "stock.control.Empty",
+      "inputs": {},
+      "scopes": [
+        "door.control"
+      ]
+    },
+    "close": {
+      "function": "stock.control.close",
+      "inputType": "stock.control.Empty",
+      "inputs": {},
+      "scopes": [
+        "door.control"
+      ]
+    }
+  },
+  "resources": []
+}
+

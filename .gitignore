@@ -53,6 +53,9 @@ artifacts/
 *_i.h
 *.ilk
 *.meta
+# META language sources and the standalone runtime project are repository content.
+!/Content.Meta/
+!/Resources/Meta/**/*.meta
 *.obj
 *.pch
 *.pdb
@@ -301,6 +304,9 @@ Resources/Changelog/DiscordDebug.md
 
 # Windows
 desktop.ini
+
+# Test crash and hang dumps
+*.dmp
 
 # Images generated using the MapRenderer
 Resources/MapImages

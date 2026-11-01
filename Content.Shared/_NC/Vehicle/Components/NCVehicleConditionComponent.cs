@@ -49,6 +49,8 @@ public sealed partial class NCVehicleConditionComponent : Component
     [DataField(required: true)] public float HotWear;
     [DataField(required: true)] public float WearInterval;
     [DataField(required: true)] public float BatteryCapacity;
+    /// <summary>Nominal electrical bus voltage; converts native ampere-hours to joules for auxiliary consumers.</summary>
+    [DataField] public float BatteryVoltage = 12;
     [DataField(required: true)] public float StarterCharge;
     [DataField(required: true)] public float IgnitionAmps;
     [DataField(required: true)] public float AlternatorAmps;

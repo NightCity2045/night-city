@@ -1,0 +1,31 @@
+{
+  "version": "1.0",
+  "id": "meta-example-diagnostics",
+  "name": "Engine diagnostics",
+  "nameRu": "Диагностика двигателя",
+  "packageName": "examples.diagnostics",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.diagnostics",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.diagnostics.meta",
+      "sha256": "bd0ee13bea9fccb7982e28e3176055d2476e029367f27c7f7811f2942602efc1"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [
+    {
+      "slot": "engine-ecu",
+      "capability": "meta.vehicle.EngineController",
+      "contractHash": "717b0100c834226ed7433cab2db281d8865982b0dda7df22d8c30dfadddc0753",
+      "requiredScopes": [
+        "vehicle.engine.read"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

@@ -8,6 +8,7 @@ using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Bleeding;
 using Content.Shared._NC.Medical.Cyberware;
+using Content.Shared._NC.Medical.Cyberware.Borg;
 using Content.Shared._NC.Medical.Emergency;
 using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Physiology;
@@ -38,7 +39,14 @@ public static class NCMedicalSnapshotVersions
     public const ushort WoundVisualization = 8;
     public const ushort CavityFluidLedger = 9;
     public const ushort SpatialSurgery = 10;
-    public const ushort Current = SpatialSurgery;
+    public const ushort ModularCyberware = 11;
+    public const ushort BodyPowerBus = 12;
+    public const ushort BorgCore = 13;
+    public const ushort Humanity = 14;
+    public const ushort CyberwareAbilities = 15;
+    public const ushort CyberwareExteriors = 16;
+    public const ushort CyberwareService = 17;
+    public const ushort Current = CyberwareService;
 }
 
 /// <summary>
@@ -79,6 +87,15 @@ public sealed partial class NCMedicalStateSnapshot
 
     [DataField]
     public List<NCCyberwareStateSnapshot> CyberwareModules = [];
+
+    [DataField]
+    public float? Nutrition;
+
+    [DataField]
+    public NCBorgCoreSnapshot? BorgCore;
+
+    [DataField]
+    public Content.Shared._NC.Medical.Humanity.NCHumanityStateSnapshot? Humanity;
 
     [DataField]
     public NCWoundStateSnapshot? Wounds;

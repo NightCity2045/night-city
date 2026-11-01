@@ -137,6 +137,8 @@ public sealed partial class NCPhysiologySchedulerSystem : EntitySystem
             if (_emergencyCare.AdvanceInterventions(body, elapsed))
                 _physiology.EvaluateBody(body, TimeSpan.Zero);
 
+            var completed = new Content.Shared._NC.Medical.Humanity.NCMedicalIntervalCompletedEvent(elapsed);
+            RaiseLocalEvent(body, ref completed);
             ScheduleNext(body);
             return true;
         }

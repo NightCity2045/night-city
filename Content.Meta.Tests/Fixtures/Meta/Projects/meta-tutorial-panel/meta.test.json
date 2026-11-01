@@ -1,0 +1,103 @@
+{
+  "rootModule": "training.main",
+  "responses": [
+    {
+      "member": "meta.security.Alarm.setActive",
+      "value": {
+        "requestedActive": true,
+        "stamp": {
+          "epoch": 1,
+          "sequence": 1,
+          "tick": 60
+        }
+      }
+    },
+    {
+      "member": "meta.files.FileStore.writeTextAtomic",
+      "value": null,
+      "pending": true,
+      "completeAfterSlices": 2
+    },
+    {
+      "member": "meta.security.Alarm.setActive",
+      "value": {
+        "requestedActive": false,
+        "stamp": {
+          "epoch": 1,
+          "sequence": 3,
+          "tick": 180
+        }
+      }
+    },
+    {
+      "member": "meta.files.FileStore.writeTextAtomic",
+      "value": null,
+      "pending": true,
+      "completeAfterSlices": 2
+    }
+  ],
+  "events": [
+    {
+      "slot": "training-sensor",
+      "event": "temperatureChanged",
+      "arguments": [
+        {
+          "celsius": 31,
+          "stamp": {
+            "epoch": 1,
+            "sequence": 1,
+            "tick": 60
+          }
+        }
+      ],
+      "sequence": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "slot": "training-sensor",
+      "event": "temperatureChanged",
+      "arguments": [
+        {
+          "celsius": 28,
+          "stamp": {
+            "epoch": 1,
+            "sequence": 2,
+            "tick": 120
+          }
+        }
+      ],
+      "sequence": 2,
+      "nowMs": 2000,
+      "tick": 120
+    },
+    {
+      "slot": "training-sensor",
+      "event": "temperatureChanged",
+      "arguments": [
+        {
+          "celsius": 24,
+          "stamp": {
+            "epoch": 1,
+            "sequence": 3,
+            "tick": 180
+          }
+        }
+      ],
+      "sequence": 3,
+      "nowMs": 3000,
+      "tick": 180
+    }
+  ],
+  "expectedLogs": [],
+  "expectedCommands": [
+    "setActive(true)",
+    "writeTextAtomic(training/last-transition.txt,alarm-on)",
+    "setActive(false)",
+    "writeTextAtomic(training/last-transition.txt,alarm-off)"
+  ],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}
+

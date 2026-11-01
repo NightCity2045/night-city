@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+- type: entity
+  abstract: true
+  id: BaseNCMetaFunctionalImplant
+  components:
+  - type: NCMetaFunctionalImplant
+  - type: NCMetaHost
+    profile: NCMetaImplant
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.implants.FunctionalController]
+  - type: NCMetaTerminal
+    allowCompilation: false
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface

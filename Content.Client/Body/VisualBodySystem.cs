@@ -13,6 +13,7 @@ namespace Content.Client.Body;
 
 public sealed partial class VisualBodySystem : SharedVisualBodySystem
 {
+    public event Action<EntityUid>? OrganVisualChanged; // NC
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private DisplacementMapSystem _displacement = default!;
     [Dependency] private MarkingManager _marking = default!;
@@ -57,6 +58,7 @@ public sealed partial class VisualBodySystem : SharedVisualBodySystem
     private void OnOrganGotRemoved(Entity<VisualOrganComponent> ent, ref OrganGotRemovedEvent args)
     {
         RemoveVisual(ent, args.Target);
+        OrganVisualChanged?.Invoke(ent.Owner); // NC
     }
 
     private void OnOrganState(Entity<VisualOrganComponent> ent, ref AfterAutoHandleStateEvent args)
@@ -65,6 +67,7 @@ public sealed partial class VisualBodySystem : SharedVisualBodySystem
             return;
 
         ApplyVisual(ent, body);
+        OrganVisualChanged?.Invoke(ent.Owner); // NC
     }
 
     private void ApplyVisual(Entity<VisualOrganComponent> ent, EntityUid target)

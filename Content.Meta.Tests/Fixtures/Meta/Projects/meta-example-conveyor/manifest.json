@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "id": "meta-example-conveyor",
+  "name": "Load controlled conveyor",
+  "nameRu": "Конвейер с контролем нагрузки",
+  "packageName": "examples.conveyor",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.conveyor",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.conveyor.meta",
+      "sha256": "5a60743fd7838dda79be58f74358c6f1bfa1d2ac02bbd0909bde44a4932101a8"
+    }
+  ],
+  "startMode": "OnPower",
+  "bindings": [
+    {
+      "slot": "buffer-load",
+      "capability": "meta.industrial.LoadSensor",
+      "contractHash": "dc9e173ff2641bf618fb0d014a230c795b0ca6e91ec790b6e585b99f21da1e84",
+      "requiredScopes": [
+        "sensor.load.observe"
+      ]
+    },
+    {
+      "slot": "input-conveyor",
+      "capability": "meta.industrial.Conveyor",
+      "contractHash": "b51aa034548a0ec5ea45fdc13f2cc9f4981737a2c91a1079a938ec488ec01627",
+      "requiredScopes": [
+        "conveyor.control"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

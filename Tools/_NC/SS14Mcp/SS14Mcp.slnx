@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Contracts/SS14Mcp.Contracts.csproj" />
+  <Project Path="Core/SS14Mcp.Core.csproj" />
+  <Project Path="Server/SS14Mcp.Server.csproj" />
+  <Project Path="Cli/SS14Mcp.Cli.csproj" />
+  <Project Path="Tests/SS14Mcp.Tests.csproj" />
+</Solution>

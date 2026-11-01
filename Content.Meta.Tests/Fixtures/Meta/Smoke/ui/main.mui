@@ -1,0 +1,11 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<Page id="root" title="{bind heading}">
+  <Column id="layout" gap="8" margin="12">
+    <Header id="heading" text="{bind heading}"/>
+    <Text id="count" text="{bind count}"/>
+    <Form id="increment" action="bump">
+      <NumberInput id="step" field="step" value="1" min="1" max="1" visible="false"/>
+      <Button id="bump" action="bump" text="+1"/>
+    </Form>
+  </Column>
+</Page>

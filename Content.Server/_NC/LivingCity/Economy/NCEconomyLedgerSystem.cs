@@ -5,6 +5,8 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Text.Json;
+using System.Text;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Content.Server.Database;
@@ -302,7 +304,7 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
         }
 
         var replay = await TryReplay(request.CommandId, "living-city.ledger.post", "transaction",
-            TransactionKey(request.TransactionId));
+            TransactionKey(request.TransactionId), ParticipantResultFingerprint(request.TransactionId.Value, request.ParticipantResultPayload));
         if (replay != null)
             return replay;
 
@@ -414,7 +416,7 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
                 accountReceipts.ToArray(),
                 new TransactionReceipt(transaction, 1),
                 epoch,
-                now);
+                now) { ParticipantResultPayload = request.ParticipantResultPayload };
             var persisted = await _database.ApplyNCPersistentBatchMutationAsync(new NCPersistentBatchMutationRequest(
                 request.CommandId,
                 "living-city.ledger.post",
@@ -431,7 +433,8 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
                         message.MessageId,
                         message.EventId,
                         message.MessageType,
-                        message.Payload)).ToArray()));
+                        message.Payload)).ToArray(),
+                RequestFingerprint: ParticipantResultFingerprint(request.TransactionId.Value, request.ParticipantResultPayload), Authority: request.Authority));
             return ApplyBatchResult(persisted, receipt);
         }
         catch (Exception exception)
@@ -449,12 +452,14 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
         Guid commandId,
         string commandType,
         string scopeType,
-        string scopeId)
+        string scopeId,
+        string? expectedFingerprint = null)
     {
         var existing = await _database.GetNCPersistentCommandResultAsync(commandId);
         if (existing == null)
             return null;
-        if (existing.CommandType != commandType || existing.ScopeType != scopeType || existing.ScopeId != scopeId)
+        if (existing.CommandType != commandType || existing.ScopeType != scopeType || existing.ScopeId != scopeId ||
+            existing.RequestFingerprint != expectedFingerprint)
             return Reject(NCEconomyMutationStatus.StorageFailure,
                 "The command ID is already owned by another economy operation.");
         if (existing.Status != NCPersistentMutationStatus.DuplicateCompleted)
@@ -556,7 +561,7 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
                 receipt.PersistedAt));
         }
 
-        return new NCEconomyMutationResult(status, accounts, transaction, null);
+        return new NCEconomyMutationResult(status, accounts, transaction, null) { ParticipantResultPayload = receipt.ParticipantResultPayload };
     }
 
     private void Publish(NCAccountRecord account)
@@ -587,7 +592,8 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
         if (!TryValidateMetadata(request.CommandId, request.CorrelationId, request.AuditSource, out error) ||
             !request.TransactionId.IsValid || !request.Initiator.IsValid || request.Legs == null ||
             request.Legs.Length is < 2 or > MaximumLegs || string.IsNullOrWhiteSpace(request.Reference) ||
-            request.Reference.Trim().Length > MaximumReferenceLength || !Enum.IsDefined(request.Kind))
+            request.Reference.Trim().Length > MaximumReferenceLength || !Enum.IsDefined(request.Kind) ||
+            request.ParticipantResultPayload != null && Encoding.UTF8.GetByteCount(request.ParticipantResultPayload) > 16384)
         {
             error ??= "The ledger transaction metadata is invalid.";
             return false;
@@ -727,6 +733,7 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
         {
             var receipt = JsonSerializer.Deserialize<EconomyReceipt>(payload, JsonOptions);
             if (receipt == null || !receipt.SessionEpoch.IsValid || !receipt.PersistedAt.IsValid ||
+                receipt.ParticipantResultPayload != null && Encoding.UTF8.GetByteCount(receipt.ParticipantResultPayload) > 16384 ||
                 receipt.Accounts == null || receipt.Accounts.Length is < 1 or > MaximumLegs ||
                 receipt.Accounts.Any(account => account.AggregateVersion < 1 ||
                     !ValidAccount(account.Snapshot, account.Snapshot.AccountId)) ||
@@ -861,5 +868,13 @@ public sealed partial class NCEconomyLedgerSystem : EntitySystem
         AccountReceipt[] Accounts,
         TransactionReceipt? Transaction,
         NCSessionEpoch SessionEpoch,
-        NCActiveWorldTime PersistedAt);
+        NCActiveWorldTime PersistedAt)
+    {
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
+        public string? ParticipantResultPayload { get; init; }
+    }
+
+    /// <summary>Null preserves existing receipts. A domain acknowledgement cannot alias a different result under one transaction.</summary>
+    public static string? ParticipantResultFingerprint(Guid transactionId, string? payload) => payload == null ? null :
+        Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(transactionId.ToString("D") + "\n" + payload)));
 }

@@ -1,0 +1,77 @@
+{
+  "version": "1.0",
+  "views": {
+    "main": {
+      "function": "training.main.view",
+      "document": "ui/main.mui",
+      "stateType": "training.main.TrainingState",
+      "fields": {
+        "title": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "hint": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "reading": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "highLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "lowLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "applyLabel": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "high": {
+          "type": "integer",
+          "min": 1,
+          "max": 80
+        },
+        "low": {
+          "type": "integer",
+          "min": 1,
+          "max": 80
+        },
+        "fresh": {
+          "type": "boolean"
+        }
+      },
+      "actions": [
+        "configure"
+      ]
+    }
+  },
+  "actions": {
+    "configure": {
+      "function": "training.main.configure",
+      "inputType": "training.main.SettingsInput",
+      "inputs": {
+        "high": {
+          "type": "integer",
+          "min": 1,
+          "max": 80
+        },
+        "low": {
+          "type": "integer",
+          "min": 1,
+          "max": 80
+        }
+      },
+      "scopes": []
+    }
+  },
+  "resources": []
+}
+

@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="DebugOpt" />
+  </Configurations>
+  <Project Path="../../../Content.Shared/Content.Shared.csproj" />
+  <Project Path="../../../Content.Server/Content.Server.csproj" />
+  <Project Path="../../../Content.Client/Content.Client.csproj" />
+</Solution>

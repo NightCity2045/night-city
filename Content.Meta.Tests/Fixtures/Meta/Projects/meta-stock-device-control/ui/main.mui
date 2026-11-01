@@ -1,0 +1,9 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<Page id="control" title="{bind title}">
+  <Column id="layout" gap="8" margin="12">
+    <Header id="title" text="{bind title}"/><Text id="status" text="{bind status}"/>
+    <Text id="note" text="{bind note}"/>
+    <Row id="actions" gap="8"><Button id="open" action="open" text="{bind openLabel}"/><Button id="close" action="close" text="{bind closeLabel}"/></Row>
+  </Column>
+</Page>
+

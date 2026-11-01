@@ -1,0 +1,17 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<Page id="dashboard" title="{bind title}">
+  <Column id="instruments" gap="8" margin="12">
+    <Header id="title" text="{bind title}"/>
+    <Text id="status" text="{bind status}"/>
+    <Grid id="readings" columns="2" gap="8">
+      <Panel id="speedPanel"><Text id="speed" text="{bind speed}"/></Panel>
+      <Panel id="rpmPanel"><Text id="rpm" text="{bind rpm}"/></Panel>
+      <Panel id="temperaturePanel"><Text id="temperature" text="{bind temperature}"/></Panel>
+      <Panel id="fuelPanel"><Text id="fuel" text="{bind fuel}"/></Panel>
+      <Panel id="oilPanel"><Text id="oil" text="{bind oil}"/></Panel>
+      <Panel id="batteryPanel"><Text id="battery" text="{bind battery}"/></Panel>
+      <Panel id="gearPanel"><Text id="gear" text="{bind gear}"/></Panel>
+    </Grid>
+    <Chart id="thermalHistory" items="{bind history}" min="-40" max="160" visible="{bind fresh}" height="100"/>
+  </Column>
+</Page>

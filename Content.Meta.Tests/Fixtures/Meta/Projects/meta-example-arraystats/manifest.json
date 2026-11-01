@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "id": "meta-example-arraystats",
+  "name": "Sample statistics",
+  "nameRu": "Статистика показаний",
+  "packageName": "examples.arraystats",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.arraystats",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.arraystats.meta",
+      "sha256": "9b764a1c2fd3acefb35c973000265f497847f8ba2c3cdf11e733bae6942c3d2b"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [],
+  "testFixture": "meta.test.json"
+}

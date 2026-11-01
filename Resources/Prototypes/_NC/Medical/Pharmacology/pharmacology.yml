@@ -4,6 +4,8 @@
 
 - type: ncPharmacologyProfile
   id: NCHumanPharmacology
+  maximumHumanityRecoveryPerSecond: 0.033333334
+  maximumCrisisSuppressionPerSecond: 2
   defaultForHumans: true
   activeDrugCapacity: 16
   activeUpdateInterval: 1s

@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "id": "meta-example-optics",
+  "name": "Adaptive cyberoptics",
+  "nameRu": "Адаптивная кибероптика",
+  "packageName": "examples.optics",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.optics",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.optics.meta",
+      "sha256": "23bdd2dad0c196ecd69e1b235e6ac76bb48bde34e05312541e9d436f44206ea0"
+    }
+  ],
+  "startMode": "OnPower",
+  "bindings": [
+    {
+      "slot": "my-optics",
+      "capability": "meta.implants.Optics",
+      "contractHash": "569cadb15c5092e41981f531bc612cf190e44852b0bc8ed2e04289b9192ca3b1",
+      "requiredScopes": [
+        "implant.optics.observe",
+        "implant.optics.filter"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

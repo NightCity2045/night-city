@@ -16,6 +16,7 @@ using Content.Shared._NC.Medical.Treatment;
 using Content.Shared._NC.Medical.Transplantation;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
+using Content.Shared.Nutrition.Components;
 using Content.Shared.Damage.Prototypes;
 using Robust.Shared.Prototypes;
 
@@ -79,14 +80,19 @@ public sealed partial class NCMedicalPersistenceSystem
     /// </summary>
     private static bool HasNonNullSnapshotShape(NCMedicalStateSnapshot snapshot)
     {
+        if (snapshot.BorgCore is { } core &&
+            (core.PowerBus == null || core.Support?.Contents == null || core.Bloodstream?.Contents == null ||
+             core.Metabolites?.Contents == null || core.Stomach?.Contents == null || core.ConsumptionRemainders == null))
+            return false;
         if (snapshot.MissingOrganCategories == null ||
             snapshot.Organs == null ||
             snapshot.CyberwareModules == null ||
             snapshot.Circulation == null ||
             snapshot.Physiology == null ||
             snapshot.Circulation.TransfusionCompatibility == null ||
-            snapshot.CyberwareModules.Any(module => module == null) ||
+            snapshot.CyberwareModules.Any(module => module == null || !HasAssemblyShape(module)) ||
             snapshot.Organs.Values.Any(organ => organ == null ||
+                organ.Cyberware is { } cyberware && !HasAssemblyShape(cyberware) ||
                 organ.SurgicalSite is { TemporaryDevices: null } or { Incisions: null } ||
                 organ.SurgicalSite?.Incisions.Any(incision => incision == null || incision.Polyline == null) == true))
         {
@@ -127,6 +133,9 @@ public sealed partial class NCMedicalPersistenceSystem
             snapshot.Pharmacology?.ActiveDrugs.Any(exposure => exposure == null) == true)
             return false;
 
+        if (snapshot.Humanity is { } humanity && !Content.Shared._NC.Medical.Humanity.NCHumanityMath.Validate(humanity))
+            return false;
+
         return true;
     }
 
@@ -140,6 +149,14 @@ public sealed partial class NCMedicalPersistenceSystem
             snapshot.MissingOrganCategories.Count > MaxMissingOrganCategories ||
             snapshot.Organs.Count > MaxOrganRecords ||
             snapshot.CyberwareModules.Count > MaxCyberwareRecords ||
+            snapshot.CyberwareModules.Count(module => module.PowerBus != null) > 1 ||
+            !ValidateBorgCore(character, snapshot.BorgCore) ||
+            !_humanity.ValidatePersistentState(character, snapshot) ||
+            snapshot.BorgCore is { } borg && (!borg.Occupied && snapshot.Organs.ContainsKey("Brain") ||
+                borg.Occupied && !snapshot.Organs.ContainsKey("Brain") && !snapshot.Physiology.Irreversible) ||
+            snapshot.Nutrition is { } nutrition && (!float.IsFinite(nutrition) || nutrition < 0f ||
+                !TryComp<HungerComponent>(character, out var hunger) ||
+                nutrition > hunger.Thresholds[HungerThreshold.Overfed]) ||
             !TryBuildParentMap(initial, out var parents))
         {
             return false;
@@ -184,11 +201,19 @@ public sealed partial class NCMedicalPersistenceSystem
         }
 
         var cyberwareIds = new HashSet<Guid>();
+        if (snapshot.BorgCore is { } carrier)
+        {
+            cyberwareIds.Add(carrier.CoreId);
+            if (carrier.PowerBus.Main is { } main)
+                cyberwareIds.Add(main.StableInstanceId);
+            if (carrier.PowerBus.Reserve is { } reserve)
+                cyberwareIds.Add(reserve.StableInstanceId);
+        }
         var occupiedSlots = new HashSet<(ProtoId<OrganCategoryPrototype>, ProtoId<NCCyberwareSlotPrototype>)>();
         foreach (var state in snapshot.CyberwareModules)
         {
             if (!_cyberware.ValidatePersistentState(state, true) ||
-                !cyberwareIds.Add(state.StableInstanceId) ||
+                !AddCyberwareIdentities(cyberwareIds, state) ||
                 state.HostCategory is not { } hostCategory || state.Slot is not { } slot ||
                 missing.Contains(hostCategory) || !snapshot.Organs.TryGetValue(hostCategory, out var hostState) ||
                 !_prototypes.TryIndex<EntityPrototype>(hostState.EntityPrototype, out var hostPrototype) ||
@@ -201,7 +226,7 @@ public sealed partial class NCMedicalPersistenceSystem
 
         foreach (var organ in snapshot.Organs.Values)
         {
-            if (organ.Cyberware is { } cyberware && !cyberwareIds.Add(cyberware.StableInstanceId))
+            if (organ.Cyberware is { } cyberware && !AddCyberwareIdentities(cyberwareIds, cyberware))
                 return false;
         }
 
@@ -702,6 +727,9 @@ public sealed partial class NCMedicalPersistenceSystem
             AnatomyProfile = source.AnatomyProfile,
             MissingOrganCategories = [.. source.MissingOrganCategories],
             CyberwareModules = source.CyberwareModules.Select(CloneCyberware).ToList(),
+            Nutrition = source.Nutrition,
+            BorgCore = CloneBorgCore(source.BorgCore),
+            Humanity = source.Humanity == null ? null : Content.Shared._NC.Medical.Humanity.NCHumanityMath.Clone(source.Humanity),
             Wounds = CloneWounds(source.Wounds),
             Bleeding = CloneBleeding(source.Bleeding),
             Treatment = CloneTreatment(source.Treatment),
@@ -902,6 +930,7 @@ public sealed partial class NCMedicalPersistenceSystem
     {
         return new NCCyberwareStateSnapshot
         {
+            Service = source.Service == null ? null : NCCyberwareServiceHistory.Clone(source.Service),
             EntityPrototype = source.EntityPrototype,
             Profile = source.Profile,
             StableInstanceId = source.StableInstanceId,
@@ -916,7 +945,62 @@ public sealed partial class NCMedicalPersistenceSystem
             NeuralIntegrity = source.NeuralIntegrity,
             NeuralState = source.NeuralState,
             Calibrated = source.Calibrated,
+            PermanentDamage = source.PermanentDamage,
+            ThermalShutdown = source.ThermalShutdown,
+            AbilityCooldownSeconds = source.AbilityCooldownSeconds,
+            Exterior = source.Exterior == null ? null : new Content.Shared._NC.Medical.Cyberware.Visuals.NCCyberwareExteriorSnapshot
+            {
+                Finish = source.Exterior.Finish,
+                Ruptured = source.Exterior.Ruptured,
+                SkinColor = source.Exterior.SkinColor,
+            },
+            PowerBus = source.PowerBus is { } powerBus ? new NCCyberwarePowerBusSnapshot
+            {
+                Main = ClonePowerCell(powerBus.Main),
+                Reserve = ClonePowerCell(powerBus.Reserve),
+            } : null,
+            Assembly = source.Assembly is { } assembly
+                ? new NCCyberwareAssemblySnapshot
+                {
+                    ConfigurationRevision = assembly.ConfigurationRevision,
+                    ValidatedRevision = assembly.ValidatedRevision,
+                    Parts = assembly.Parts.Select(part => new NCCyberwarePartSnapshot
+                    {
+                        Slot = part.Slot,
+                        EntityPrototype = part.EntityPrototype,
+                        StableInstanceId = part.StableInstanceId,
+                        CurrentIntegrity = part.CurrentIntegrity,
+                        PermanentDamage = part.PermanentDamage,
+                    }).ToList(),
+                }
+                : null,
         };
+    }
+
+    private static bool AddCyberwareIdentities(HashSet<Guid> identities, NCCyberwareStateSnapshot state)
+    {
+        return identities.Add(state.StableInstanceId) &&
+               (state.Assembly == null || state.Assembly.Parts.All(part => identities.Add(part.StableInstanceId))) &&
+               (state.PowerBus?.Main is not { } main || identities.Add(main.StableInstanceId)) &&
+               (state.PowerBus?.Reserve is not { } reserve || identities.Add(reserve.StableInstanceId));
+    }
+
+    private static NCCyberwareCellSnapshot? ClonePowerCell(NCCyberwareCellSnapshot? source)
+    {
+        return source == null ? null : new NCCyberwareCellSnapshot
+        {
+            Prototype = source.Prototype,
+            StableInstanceId = source.StableInstanceId,
+            Charge = source.Charge,
+            RechargeDelay = source.RechargeDelay,
+        };
+    }
+
+    private static bool HasAssemblyShape(NCCyberwareStateSnapshot state)
+    {
+        return (state.Service == null || NCCyberwareServiceHistory.Valid(state.Service)) &&
+               (state.Assembly == null || state.Assembly.Parts != null && state.Assembly.Parts.Count <= 8 &&
+                state.Assembly.Parts.All(part => part != null));
     }
 
     private static NCWoundStateSnapshot? CloneWounds(NCWoundStateSnapshot? source)

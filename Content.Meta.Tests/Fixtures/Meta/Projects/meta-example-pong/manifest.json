@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "id": "meta-example-pong",
+  "name": "Local network responder",
+  "nameRu": "Ответчик локальной сети",
+  "packageName": "examples.pong",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.pong",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.pong.meta",
+      "sha256": "45f0f5cf00323a5f9ab4318d54298e1568dc053f03eb4a887f547b45289bf652"
+    }
+  ],
+  "startMode": "OnPower",
+  "bindings": [
+    {
+      "slot": "local-port",
+      "capability": "meta.net.MessagePort",
+      "contractHash": "74aadfa9fd28aec532c3528b097411c969507d3313927fc252ae38caaa0c5bcc",
+      "requiredScopes": [
+        "net.send",
+        "net.receive"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

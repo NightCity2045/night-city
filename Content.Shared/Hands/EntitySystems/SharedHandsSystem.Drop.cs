@@ -106,7 +106,7 @@ public abstract partial class SharedHandsSystem
     /// <summary>
     ///     Drops an item at the target location.
     /// </summary>
-    public bool TryDrop(Entity<HandsComponent?> ent, EntityUid entity, EntityCoordinates? targetDropLocation = null, bool checkActionBlocker = true, bool doDropInteraction = true)
+    public bool TryDrop(Entity<HandsComponent?> ent, EntityUid entity, EntityCoordinates? targetDropLocation = null, bool checkActionBlocker = true, bool doDropInteraction = true, Func<bool>? commitGuard = null) // NC
     {
         if (!Resolve(ent, ref ent.Comp, false))
             return false;
@@ -114,19 +114,21 @@ public abstract partial class SharedHandsSystem
         if (!IsHolding(ent, entity, out var hand))
             return false;
 
-        return TryDrop(ent, hand, targetDropLocation, checkActionBlocker, doDropInteraction);
+        return TryDrop(ent, hand, targetDropLocation, checkActionBlocker, doDropInteraction, commitGuard); // NC
     }
 
     /// <summary>
     ///     Drops a hands contents at the target location.
     /// </summary>
-    public bool TryDrop(Entity<HandsComponent?> ent, string handId, EntityCoordinates? targetDropLocation = null, bool checkActionBlocker = true, bool doDropInteraction = true)
+    public bool TryDrop(Entity<HandsComponent?> ent, string handId, EntityCoordinates? targetDropLocation = null, bool checkActionBlocker = true, bool doDropInteraction = true, Func<bool>? commitGuard = null) // NC
     {
         if (!Resolve(ent, ref ent.Comp, false))
             return false;
 
         if (!CanDropHeld(ent, handId, checkActionBlocker))
             return false;
+
+        if (commitGuard != null && !commitGuard()) return false; // NC
 
         if (!TryGetHeldItem(ent, handId, out var entity))
             return false;

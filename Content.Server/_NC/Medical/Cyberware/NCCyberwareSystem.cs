@@ -28,6 +28,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
     [Dependency] private SharedContainerSystem _containers = default!;
     [Dependency] private OrganRelationSystem _relations = default!;
     [Dependency] private NCMedicalBodySystem _medicalBodies = default!;
+    [Dependency] private Content.Server._NC.Medical.Humanity.NCHumanitySystem _humanity = default!;
 
     private readonly Dictionary<EntityUid, TimeSpan> _scheduled = [];
     private readonly PriorityQueue<EntityUid, long> _schedule = new();
@@ -38,6 +39,11 @@ public sealed partial class NCCyberwareSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
+        InitializeAssemblyEvents();
+        InitializeWorkbenchEvents();
+        InitializePowerEvents();
+        InitializePowerServiceEvents();
+        InitializeWorldPersistence();
 
         SubscribeLocalEvent<NCCyberwareSlotHostComponent, ComponentInit>(OnSlotHostInit);
         SubscribeLocalEvent<NCCyberwareSlotHostComponent, ComponentShutdown>(OnSlotHostShutdown);
@@ -47,7 +53,8 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         SubscribeLocalEvent<NCCyberwareComponent, OrganGotRemovedEvent>(OnCyberwareOrganRemoved);
         SubscribeLocalEvent<BodyComponent, OrganInsertedIntoEvent>(OnBodyOrganInserted);
         SubscribeLocalEvent<BodyComponent, OrganRemovedFromEvent>(OnBodyOrganRemoved);
-        SubscribeLocalEvent<NCMedicalBodyComponent, EmpPulseEvent>(OnEmpPulse);
+        SubscribeLocalEvent<NCMedicalBodyComponent, EmpPulseEvent>(OnEmpPulse,
+            before: [typeof(Content.Shared.Power.EntitySystems.SharedBatterySystem)]);
     }
 
     private void OnSlotHostInit(Entity<NCCyberwareSlotHostComponent> host, ref ComponentInit args)
@@ -74,6 +81,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
 
     private void OnCyberwareShutdown(Entity<NCCyberwareComponent> module, ref ComponentShutdown args)
     {
+        _physicalIdentities.Remove(module.Owner);
         _scheduled.Remove(module.Owner);
     }
 
@@ -85,6 +93,8 @@ public sealed partial class NCCyberwareSystem : EntitySystem
 
     private void OnCyberwareOrganRemoved(Entity<NCCyberwareComponent> module, ref OrganGotRemovedEvent args)
     {
+        module.Comp.CrisisEfficiency = 1f;
+        module.Comp.CrisisBlocksActiveModes = false;
         _scheduled.Remove(module.Owner);
     }
 
@@ -100,6 +110,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         if (!HasComp<NCMedicalBodyComponent>(body.Owner))
             return;
         ScheduleContainedModules(args.Organ, false);
+        RefreshBodyPower(body, _timing.CurTime);
     }
 
     private void OnEmpPulse(Entity<NCMedicalBodyComponent> body, ref EmpPulseEvent args)
@@ -108,7 +119,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             return;
 
         var result = ApplyEmp(new NCCyberwareEmpRequest(
-            NCActionResolutionId.New(),
+            args.PulseId == Guid.Empty ? NCActionResolutionId.New() : new NCActionResolutionId(args.PulseId),
             body.Owner,
             args.EnergyConsumption,
             args.Duration));
@@ -121,24 +132,16 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         base.Update(frameTime);
 
         var now = _timing.CurTime;
-        while (_schedule.TryPeek(out var module, out var dueTicks) && dueTicks <= now.Ticks)
+        while (_schedule.TryPeek(out var body, out var dueTicks) && dueTicks <= now.Ticks)
         {
             _schedule.Dequeue();
-            if (!_scheduled.TryGetValue(module, out var expectedDue) || expectedDue.Ticks != dueTicks)
+            if (!_scheduled.TryGetValue(body, out var expectedDue) || expectedDue.Ticks != dueTicks)
                 continue;
-
-            _scheduled.Remove(module);
-            if (!TryComp<NCCyberwareComponent>(module, out var state) ||
-                !TryGetProfile(state.Profile, out var profile) ||
-                !TryResolveOwningBody(module, out _))
-            {
+            _scheduled.Remove(body);
+            if (!HasComp<NCMedicalBodyComponent>(body) || TerminatingOrDeleted(body))
                 continue;
-            }
-
-            var elapsed = now - state.LastAdvancedAt;
-            if (elapsed > TimeSpan.Zero)
-                AdvanceModule(module, elapsed, now);
-            Schedule(module, profile, false);
+            TryAdvanceBodyPower(body, now);
+            SchedulePowerBody(body);
         }
     }
 
@@ -277,7 +280,9 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             return Reject(NCCyberwareMutationFailure.SlotIncompatible);
         }
 
+        TryAdvanceBodyPower(request.Patient, _timing.CurTime);
         InitializeState(request.Module, module, profile);
+        _humanity.TrySettleBody(request.Patient);
         if (!_containers.Insert(request.Module, host.Modules, containerXform: Transform(request.HostOrgan)))
             return Reject(NCCyberwareMutationFailure.PhysicalContainerFailure);
 
@@ -294,8 +299,8 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         UpdateOperational(request.Module, module, profile, _timing.CurTime);
         Remember(request.Patient, key);
         Schedule(request.Module, profile, true);
+        RecordService(request.Module, NCCyberwareServiceOperation.Installed, request.ResolutionId.Value, request.Patient);
         MarkBodyChanged(request.Patient);
-
         var installed = new NCCyberwareInstalledEvent(
             request.ResolutionId,
             request.Module,
@@ -349,6 +354,8 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             return Reject(NCCyberwareMutationFailure.NotInstalledInPatient);
         }
 
+        TryAdvanceBodyPower(request.Patient, _timing.CurTime);
+        _humanity.TrySettleBody(request.Patient);
         _relations.Orphan((request.Module, child));
         if (!_containers.Remove(request.Module, host.Modules, destination: Transform(request.Patient).Coordinates))
         {
@@ -358,15 +365,17 @@ public sealed partial class NCCyberwareSystem : EntitySystem
 
         var previousFunction = module.FunctionalEfficiency;
         module.InstalledSlot = null;
+        InvalidateCalibration(request.Module);
         module.Load = 0f;
         module.Operational = false;
         module.FunctionalEfficiency = 0f;
         if (module.NeuralState != NCCyberwareNeuralState.NotApplicable)
             module.NeuralState = NCCyberwareNeuralState.Disconnected;
         _scheduled.Remove(request.Module);
+        RefreshBodyPower(request.Patient, _timing.CurTime);
         Remember(request.Patient, key);
+        RecordService(request.Module, NCCyberwareServiceOperation.Removed, request.ResolutionId.Value, request.Patient);
         MarkBodyChanged(request.Patient);
-
         var removed = new NCCyberwareRemovedEvent(
             request.ResolutionId,
             request.Module,
@@ -405,6 +414,8 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             return Duplicate();
 
         var modules = CollectCyberware(request.Patient);
+        TryAdvanceBodyPower(request.Patient, _timing.CurTime);
+        ApplyBusEmp(request.Patient, request);
         var affected = 0;
         var now = _timing.CurTime;
         foreach (var moduleUid in modules)
@@ -421,7 +432,6 @@ public sealed partial class NCCyberwareSystem : EntitySystem
                 continue;
 
             var previousFunction = module.FunctionalEfficiency;
-            module.CurrentPower = MathF.Max(0f, module.CurrentPower - effectiveEnergy);
             module.Heat = Math.Clamp(
                 module.Heat + MathF.Min(
                     profile.MaximumEmpHeat,
@@ -441,6 +451,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
                     integrity.CurrentIntegrity - surge,
                     0f,
                     MathF.Max(0f, integrity.MaxIntegrity));
+                DamageAssembly(moduleUid, module, profile, surge);
                 NormalizeMechanicalIntegrity(integrity);
             }
 
@@ -497,6 +508,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             return Duplicate();
 
         var previous = module.FunctionalEfficiency;
+        TryAdvanceBodyPower(body, _timing.CurTime);
         ApplyRequestedNeuralConnection(module, profile, connected, calibrated);
         UpdateOperational(moduleUid, module, profile, _timing.CurTime);
         Remember(body, key);
@@ -688,11 +700,13 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         if (IsDuplicate(patient, key))
             return Duplicate();
 
+        TryAdvanceBodyPower(patient, _timing.CurTime);
         var previous = module.FunctionalEfficiency;
         integrity.CurrentIntegrity = Math.Clamp(
             integrity.CurrentIntegrity - amount,
             0f,
             MathF.Max(0f, integrity.MaxIntegrity));
+        DamageAssembly(moduleUid, module, profile, amount);
         NormalizeMechanicalIntegrity(integrity);
         UpdateOperational(moduleUid, module, profile, _timing.CurTime);
         Remember(patient, key);
@@ -718,6 +732,11 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             return false;
         }
 
+        if (load > 0f && module.CrisisBlocksActiveModes)
+            return false;
+
+        if (TryResolveOwningBody(moduleUid, out var body))
+            TryAdvanceBodyPower(body, _timing.CurTime);
         module.Load = Math.Clamp(load, 0f, 1f);
         Schedule(moduleUid, profile, true);
         return true;
@@ -737,59 +756,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             return false;
         }
 
-        InitializeState(moduleUid, module, profile);
-        var now = observedAt ?? _timing.CurTime;
-        var previousPower = module.CurrentPower;
-        var previousHeat = module.Heat;
-        var previousFunction = module.FunctionalEfficiency;
-        var seconds = (float) elapsed.TotalSeconds;
-        var poweredAtStart = profile.PowerCapacity <= 0f || module.CurrentPower > profile.MinimumOperationalPower;
-        if (poweredAtStart && profile.PowerCapacity > 0f)
-        {
-            var draw = profile.IdlePowerPerSecond + profile.LoadedPowerPerSecond * module.Load;
-            module.CurrentPower = MathF.Max(0f, module.CurrentPower - draw * seconds);
-        }
-
-        var generatedHeat = poweredAtStart
-            ? profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond * module.Load
-            : 0f;
-        module.Heat = Math.Clamp(
-            module.Heat + (generatedHeat - profile.PassiveCoolingPerSecond) * seconds,
-            0f,
-            profile.HeatCapacity);
-        if (module.Heat > profile.HeatDamageThreshold &&
-            TryComp<NCOrganIntegrityComponent>(moduleUid, out var integrity))
-        {
-            var overheatFraction = SafeFraction(
-                module.Heat - profile.HeatDamageThreshold,
-                profile.HeatCapacity - profile.HeatDamageThreshold);
-            integrity.CurrentIntegrity = Math.Clamp(
-                integrity.CurrentIntegrity - profile.HeatDamagePerSecond * overheatFraction * seconds,
-                0f,
-                MathF.Max(0f, integrity.MaxIntegrity));
-            NormalizeMechanicalIntegrity(integrity);
-        }
-
-        module.LastAdvancedAt = now;
-        UpdateNeuralState(module, profile, now);
-        UpdateOperational(moduleUid, module, profile, now);
-        if (!MathHelper.CloseTo(previousPower, module.CurrentPower) ||
-            !MathHelper.CloseTo(previousHeat, module.Heat) ||
-            !MathHelper.CloseTo(previousFunction, module.FunctionalEfficiency))
-        {
-            MarkBodyChanged(body);
-            RaiseStateChanged(
-                body,
-                moduleUid,
-                default,
-                !MathHelper.CloseTo(previousHeat, module.Heat)
-                    ? NCCyberwareStateChangeKind.Heat
-                    : NCCyberwareStateChangeKind.Power,
-                previousFunction,
-                module.FunctionalEfficiency);
-        }
-
-        return true;
+        return TryAdvanceBodyPower(body, observedAt ?? _timing.CurTime);
     }
 
     public List<EntityUid> CollectCyberware(EntityUid body)
@@ -848,7 +815,33 @@ public sealed partial class NCCyberwareSystem : EntitySystem
                 integrity.Necrosis = 0f;
             }
 
-            module.CurrentPower = profile.PowerCapacity;
+            module.PermanentDamage = 0f;
+            if (HasComp<NCCyberwarePowerBusComponent>(moduleUid))
+            {
+                foreach (var slot in new[] { NCCyberwarePowerBusComponent.MainSlot, NCCyberwarePowerBusComponent.ReserveSlot })
+                {
+                    if (GetBusCell(moduleUid, slot) is { } cell)
+                        _battery.SetCharge(cell.AsNullable(), cell.Comp.MaxCharge);
+                }
+            }
+            if (TryComp<NCCyberwareAssemblyComponent>(moduleUid, out var assembly))
+            {
+                foreach (var container in assembly.Parts.Values)
+                {
+                    if (container.ContainedEntity is not { } partUid)
+                        continue;
+                    var part = Comp<NCCyberwarePartComponent>(partUid);
+                    part.PermanentDamage = 0f;
+                    var partProfile = _prototypes.Index(part.Profile);
+                    var partIntegrity = Comp<NCOrganIntegrityComponent>(partUid);
+                    partIntegrity.CurrentIntegrity = partProfile.MaximumIntegrity;
+                    NormalizePart(part, partIntegrity, partProfile);
+                }
+                assembly.ValidatedRevision = null;
+                RefreshAssembly(assembly);
+            }
+            module.CurrentPower = 0f;
+            module.ThermalShutdown = false;
             module.Heat = 0f;
             module.Load = 0f;
             module.EmpDisabledUntil = TimeSpan.Zero;
@@ -899,6 +892,9 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         NCCyberwareComponent module,
         NCCyberwarePrototype profile)
     {
+        if (module.StableInstanceId == Guid.Empty)
+            module.StableInstanceId = Guid.NewGuid();
+        InitializeAssembly(moduleUid, module, profile);
         if (module.StateInitialized)
         {
             NormalizeState(module, profile);
@@ -906,7 +902,8 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         }
 
         module.StateInitialized = true;
-        module.CurrentPower = profile.PowerCapacity * profile.StartingPowerFraction;
+        module.CurrentPower = 0f;
+        module.PowerGranted = !profile.RequiresPower;
         module.Heat = 0f;
         module.Load = 0f;
         module.EmpDisabledUntil = TimeSpan.Zero;
@@ -916,9 +913,6 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             ? NCCyberwareNeuralState.NotApplicable
             : NCCyberwareNeuralState.Disconnected;
         module.LastAdvancedAt = _timing.CurTime;
-        if (module.StableInstanceId == Guid.Empty)
-            module.StableInstanceId = Guid.NewGuid();
-
         if (TryComp<NCOrganIntegrityComponent>(moduleUid, out var integrity))
         {
             integrity.Material = NCAnatomicalMaterialKind.Mechanical;
@@ -932,7 +926,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
 
     private void NormalizeState(NCCyberwareComponent module, NCCyberwarePrototype profile)
     {
-        module.CurrentPower = Math.Clamp(module.CurrentPower, 0f, profile.PowerCapacity);
+        module.CurrentPower = 0f;
         module.Heat = Math.Clamp(module.Heat, 0f, profile.HeatCapacity);
         module.Load = Math.Clamp(module.Load, 0f, 1f);
         module.NeuralIntegrity = Math.Clamp(module.NeuralIntegrity, 0f, 1f);
@@ -946,9 +940,18 @@ public sealed partial class NCCyberwareSystem : EntitySystem
     {
         var structural = 1f;
         if (TryComp<NCOrganIntegrityComponent>(moduleUid, out var integrity))
-            structural = SafeFraction(integrity.CurrentIntegrity, integrity.MaxIntegrity);
+        {
+            integrity.CurrentIntegrity = MathF.Min(integrity.CurrentIntegrity,
+                NCCyberwareCondition.ServiceCeiling(profile.MaximumIntegrity, module.PermanentDamage));
+            NormalizeMechanicalIntegrity(integrity);
+            structural = SafeFraction(integrity.CurrentIntegrity, profile.MaximumIntegrity);
+        }
+        if (TryComp<NCCyberwareAssemblyComponent>(moduleUid, out var assembly))
+            structural = MathF.Min(structural, assembly.FunctionalEfficiency);
 
-        var powered = profile.PowerCapacity <= 0f || module.CurrentPower > profile.MinimumOperationalPower;
+        if (module.CrisisBlocksActiveModes)
+            module.Load = 0f;
+        var powered = !profile.RequiresPower || module.PowerGranted;
         var heatFactor = module.Heat <= profile.HeatDeratingThreshold
             ? 1f
             : 1f - SafeFraction(
@@ -971,7 +974,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         }
 
         var empDisabled = module.EmpDisabledUntil > now;
-        module.FunctionalEfficiency = powered && !empDisabled && module.Heat < profile.HeatShutdownThreshold
+        module.FunctionalEfficiency = powered && !empDisabled && !module.ThermalShutdown && module.Heat < profile.HeatShutdownThreshold
             ? Math.Clamp(structural * heatFactor * neuralFactor, 0f, 1f)
             : 0f;
         module.Operational = module.FunctionalEfficiency > 0f;
@@ -1035,11 +1038,31 @@ public sealed partial class NCCyberwareSystem : EntitySystem
 
     private void Schedule(EntityUid module, NCCyberwarePrototype profile, bool resetAnchor)
     {
+        if (!TryResolveOwningBody(module, out var body))
+            return;
         if (resetAnchor && TryComp<NCCyberwareComponent>(module, out var state))
             state.LastAdvancedAt = _timing.CurTime;
-        var due = _timing.CurTime + profile.UpdateInterval;
-        _scheduled[module] = due;
-        _schedule.Enqueue(module, due.Ticks);
+        var power = EnsureComp<NCCyberwarePowerStateComponent>(body);
+        if (!power.Initialized)
+        {
+            power.Initialized = true;
+            power.LastAdvancedAt = _timing.CurTime;
+        }
+        RefreshBodyPower(body, _timing.CurTime);
+        SchedulePowerBody(body);
+    }
+
+    private void SchedulePowerBody(EntityUid body)
+    {
+        var modules = CollectCyberware(body);
+        if (modules.Count == 0)
+            return;
+        var interval = modules.Min(uid => _prototypes.Index(Comp<NCCyberwareComponent>(uid).Profile).UpdateInterval);
+        var due = _timing.CurTime + interval;
+        if (_scheduled.TryGetValue(body, out var existing) && existing <= due)
+            return;
+        _scheduled[body] = due;
+        _schedule.Enqueue(body, due.Ticks);
     }
 
     private void ScheduleContainedModules(EntityUid hostUid, bool active)
@@ -1234,6 +1257,8 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             !Positive(profile.EmpDisableDurationMultiplier) || !NonNegative(profile.NeuralDamagePerEmpEnergy) ||
             !Unit(profile.NeuralDegradedThreshold) || !Unit(profile.NeuralMinimumOperationalIntegrity) ||
             profile.NeuralMinimumOperationalIntegrity > profile.NeuralDegradedThreshold ||
+            !Unit(profile.CalibrationMinimumEfficiency) || profile.CalibrationMinimumEfficiency <= 0f ||
+            !Positive(profile.CalibrationEnergy) ||
             profile.UpdateInterval <= TimeSpan.Zero ||
             profile.Capabilities.Any(string.IsNullOrWhiteSpace) ||
             profile.Capabilities.Count != profile.Capabilities.Distinct(StringComparer.Ordinal).Count() ||
@@ -1365,12 +1390,9 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         integrity.CurrentIntegrity = Math.Clamp(
             integrity.CurrentIntegrity + repair.IntegrityPerUnit * units,
             0f,
-            MathF.Max(0f, integrity.MaxIntegrity));
+            NCCyberwareCondition.ServiceCeiling(profile.MaximumIntegrity, module.PermanentDamage));
         NormalizeMechanicalIntegrity(integrity);
-        module.CurrentPower = Math.Clamp(
-            module.CurrentPower + repair.PowerPerUnit * units,
-            0f,
-            profile.PowerCapacity);
+        module.CurrentPower = 0f;
         module.Heat = Math.Clamp(
             module.Heat - repair.CoolingPerUnit * units,
             0f,
@@ -1404,9 +1426,9 @@ public sealed partial class NCCyberwareSystem : EntitySystem
     {
         var needed = 0f;
         if (repair.IntegrityPerUnit > 0f)
-            needed = MathF.Max(needed, (integrity.MaxIntegrity - integrity.CurrentIntegrity) / repair.IntegrityPerUnit);
-        if (repair.PowerPerUnit > 0f)
-            needed = MathF.Max(needed, (profile.PowerCapacity - module.CurrentPower) / repair.PowerPerUnit);
+            needed = MathF.Max(needed,
+                (NCCyberwareCondition.ServiceCeiling(profile.MaximumIntegrity, module.PermanentDamage) -
+                 integrity.CurrentIntegrity) / repair.IntegrityPerUnit);
         if (repair.CoolingPerUnit > 0f)
             needed = MathF.Max(needed, module.Heat / repair.CoolingPerUnit);
         if (repair.NeuralIntegrityPerUnit > 0f)

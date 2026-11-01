@@ -23,6 +23,9 @@ public sealed partial class NCSurgeryToolCapabilityPrototype : IPrototype
     [DataField(required: true)]
     public string Name { get; private set; } = default!;
 
+    [DataField]
+    public LocId? NameId { get; private set; }
+
     /// <summary>
     /// Representative physical item shown by the surgery console. The resolver still accepts every held
     /// tool that supplies this capability; this prototype exists only so the player sees a concrete item

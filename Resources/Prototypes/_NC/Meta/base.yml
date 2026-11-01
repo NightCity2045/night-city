@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  abstract: true
+  parent: BaseComputer
+  id: NCMetaTerminalBase
+  components:
+  - type: NCMetaHost
+    profile: NCMetaComputer
+    allowClaim: true
+  - type: NCMetaTerminal
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: NCMetaStorage
+    capacityBytes: 67108864
+  - type: ActivatableUI
+    key: enum.NCMetaUiKey.Workspace
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+      enum.NCMetaUiKey.Application:
+        type: NCMetaApplicationBoundUserInterface
+
+- type: entity
+  parent: NCMetaTerminalBase
+  id: NCMetaTerminal
+  name: META development terminal
+  description: A programmable computer with a META development environment and recovery tools.
+
+- type: entity
+  parent: NCMetaTerminalBase
+  id: NCMetaServer
+  name: META application server
+  description: A physical host for META applications and CitiNet services.
+  components:
+  - type: NCMetaHost
+    profile: NCMetaServer
+    allowClaim: true
+  - type: NCMetaStorage
+    capacityBytes: 268435456
+  - type: NCMetaPort
+    networkId: LOCAL

@@ -1,0 +1,127 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: NCBorgCarrierBase
+  id: NCBorgCore
+  name: biopod
+  description: A physical living-brain carrier. Supply its cell, perfusion medium, oxygen, dialysate, coolant and nutrients before conversion.
+  components:
+  - type: NCBorgCore
+    humanityPackages: [ NCHumanityFullConversion ]
+  - type: Item
+    size: Normal
+  - type: Hunger
+    baseDecayRate: 0.005
+  - type: InitialBody
+    excludedOrgans: [ Brain, Torso, Thorax, Abdomen, PelvisGroin, ArmLeft, ArmRight, HandLeft, HandRight, LegLeft, LegRight, FootLeft, FootRight, Eyes, Ears, Tongue ]
+  - type: NCCyberwarePowerBus
+  - type: PowerCellSlot
+    cellSlotId: nc_main_cell
+    fitsInCharger: false
+  - type: ItemSlots
+    slots:
+      nc_main_cell:
+        name: nc-cyberware-power-main-cell
+        insertOnInteract: true
+        whitelist:
+          components: [ PowerCell ]
+      nc_reserve_cell:
+        name: nc-cyberware-power-reserve-cell
+        locked: true
+        disableEject: true
+        insertOnInteract: false
+        whitelist:
+          components: [ PowerCell ]
+  - type: SolutionManager
+    solutions:
+    - NCBorgSupportReservoir
+  - type: RefillableSolution
+    solution: nc_biopod_support
+  - type: DrainableSolution
+    solution: nc_biopod_support
+
+- type: entity
+  parent: Solution
+  id: NCBorgSupportReservoir
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Solution
+    id: nc_biopod_support
+    solution:
+      maxVol: 300
+      canReact: false
+
+- type: entity
+  parent: NCBorgCarrierBase
+  id: NCBorgStandardShell
+  name: standard civilian shell
+  description: One humanoid frame on an empty mounting socket. The torso, limbs, sensors and real power cells remain physical organs when a biopod connects.
+  components:
+  - type: NCBorgShellSocket
+  - type: InitialBody
+    excludedOrgans: [ Brain, Heart, Lungs, Liver, Kidneys, Stomach ]
+
+- type: entity
+  parent: NCBorgStandardShell
+  id: NCBorgEmptySocket
+  name: empty shell socket
+  description: An empty mechanical docking carrier. A disconnected shell retains its own parts, damage and batteries here.
+  components:
+  - type: InitialBody
+    excludedOrgans: [ Brain, Heart, Lungs, Liver, Kidneys, Stomach, Torso, Thorax, Abdomen, PelvisGroin, ArmLeft, ArmRight, HandLeft, HandRight, LegLeft, LegRight, FootLeft, FootRight, Eyes, Ears, Tongue ]
+
+- type: entity
+  parent: BaseItem
+  id: NCBorgSupportBottle
+  name: biopod support mixture
+  description: A finite 100-unit service supply for the external biopod reservoir. Nutrients and medicine enter the separate injection port.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/beaker.rsi
+    state: beaker
+  - type: SolutionManager
+    solutions:
+    - NCBorgSupportBottleSolution
+  - type: DrainableSolution
+    solution: beaker
+  - type: RefillableSolution
+    solution: beaker
+  - type: SolutionTransfer
+    canChangeTransferAmount: true
+    transferAmount: 25
+
+- type: entity
+  parent: Solution
+  id: NCBorgSupportBottleSolution
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Solution
+    id: beaker
+    solution:
+      maxVol: 100
+      canReact: false
+      reagents:
+      - ReagentId: NCBiopodPerfusate
+        Quantity: 25
+      - ReagentId: Oxygen
+        Quantity: 25
+      - ReagentId: NCBiopodDialysate
+        Quantity: 25
+      - ReagentId: NCBiopodCoolant
+        Quantity: 25
+
+- type: entity
+  parent: PrefilledSyringe
+  id: NCBorgNutrientSyringe
+  name: biopod nutrient syringe
+  description: A finite nutrient dose for the biopod's injection port. The normal artificial metabolism assimilates it over time.
+  components:
+  - type: Label
+    localizedLabel: reagent-name-nutriment
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: Nutriment
+        Quantity: 15

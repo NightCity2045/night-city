@@ -1,0 +1,75 @@
+{
+  "rootModule": "examples.conveyor",
+  "responses": [
+    {
+      "member": "meta.industrial.Conveyor.setEnabled",
+      "value": {
+        "requestedEnabled": true,
+        "stamp": {
+          "epoch": 1,
+          "sequence": 1,
+          "tick": 60
+        }
+      },
+      "pending": false,
+      "completeAfterSlices": 1
+    },
+    {
+      "member": "meta.industrial.Conveyor.setEnabled",
+      "value": {
+        "requestedEnabled": false,
+        "stamp": {
+          "epoch": 1,
+          "sequence": 1,
+          "tick": 60
+        }
+      },
+      "pending": false,
+      "completeAfterSlices": 1
+    }
+  ],
+  "events": [
+    {
+      "slot": "buffer-load",
+      "event": "loadSampled",
+      "arguments": [
+        {
+          "kilograms": 70,
+          "stamp": {
+            "epoch": 1,
+            "sequence": 1,
+            "tick": 60
+          }
+        }
+      ],
+      "sequence": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "slot": "buffer-load",
+      "event": "loadSampled",
+      "arguments": [
+        {
+          "kilograms": 110,
+          "stamp": {
+            "epoch": 1,
+            "sequence": 2,
+            "tick": 60
+          }
+        }
+      ],
+      "sequence": 2,
+      "nowMs": 1000,
+      "tick": 60
+    }
+  ],
+  "expectedLogs": [],
+  "expectedCommands": [
+    "setEnabled(true)",
+    "setEnabled(false)"
+  ],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}

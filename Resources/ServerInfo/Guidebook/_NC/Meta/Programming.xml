@@ -1,0 +1,104 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<Document>
+# META programming and commissioning
+
+META programs run on a physical host. A compiled file, an example or a passed test does not provide ownership, a network route, power or permission to operate another device.
+
+## First program
+
+1. Claim an unowned compatible terminal through its interaction menu.
+2. Open the META workspace, create a private project and write its source.
+3. Save the source, compile it and run its isolated Test fixture. Test devices are simulated and cannot change the world.
+4. Review the program's required interfaces and scopes. Bind each slot to an owned, powered, reachable device.
+5. Install the verified artifact, then start it. Logs, debugger controls, stop and rollback are available from the workspace.
+
+## Development and service tools
+
+Claim your host, then use its interaction menu to open Software installer, Installation recovery, Hardware monitor or Diagnostics. These native tools work without opening the source editor. The installer uses your verified project or a purchased release from the software marketplace. Review the exact target and release, confirm any payment separately, bind the required devices and approve the named methods before installation. Opening an application never grants control.
+
+Hardware monitor shows actual host power, health, process reservations, gas, load and temperature where the equipment provides it. Recovery selects an exact installed package: stop it, inspect its permissions and previous image, and confirm rollback. A physically present image retained after a device transfer remains inactive until the new owner explicitly installs it with fresh permissions and state.
+
+## Equipment
+
+The existing construction catalog supplies compatible flatpacks, service tablets, local NET nodes, drones and implant hardware; the vehicle catalog supplies the compatible ECU car. Stock and payment remain subject to the native shop. A purchased implant still requires normal surgery, and a machine still requires physical power, commissioning and explicit control permission.
+
+## Compatible equipment
+
+<Box>
+<GuideEntityEmbed Entity="NCMetaSupraEcu"/>
+<GuideEntityEmbed Entity="NCMetaPatrolDrone"/>
+<GuideEntityEmbed Entity="NCMetaConveyor"/>
+</Box>
+
+The ECU may limit requested torque; native fuel, heat, condition, braking and tyre physics remain authoritative. Transmission requests require a physically installed electronic automatic transmission. Programming a manual gearbox does not add an actuator. The driver's manual controls take priority, and guest control expires when its lease is not refreshed.
+
+Driver assistance reads the real ABS, stability and traction hardware. Stock controllers do not allow disabling these protections; a configurable assistance variant must be installed for that function. Requests expire with the driver authority or their short lease. Vehicle security uses the physical key, lock, alarm sounder and battery. An accepted lock request may still be pending; check the subsequent state before treating the car as secured.
+
+A vehicle dashboard can be written as a META/MUI application. Bind its engine and instrument slots to the physical vehicle, install your package and open its dashboard view. Speed, fuel and battery readings come from native equipment. Missing or stale samples display an unavailable state; the chart contains actual samples rather than invented starting values.
+
+The route drone moves through native steering and pathfinding. Use a commissioning tool on your drone, then on a nearby physical waypoint to add that marker to its mission map. Repeat for the second marker. Moving or destroying a marker can make a route unavailable. The robot cannot teleport or search the world for hidden targets.
+
+The owner selects Manual, Assistant, Autonomous, Maintenance or Emergency in the physical interaction menu. Assistant control requires renewing the operator lease. A guest can request Emergency but cannot rearm itself. Navigation supervision distinguishes a failed path search from an obstructed or cancelled route; the older route interface reports a failed search as Blocked.
+
+A compatible conveyor includes a local load cell. A separate owned sensor can be bound with the commissioning tool. Sensor loss, interlocks, power loss and expired control stop guest operation.
+
+## Production and laboratory batches
+
+<Box>
+<GuideEntityEmbed Entity="NCMetaFabricator"/>
+<GuideEntityEmbed Entity="NCMetaLaboratoryGrinder"/>
+<GuideEntityEmbed Entity="NCMetaLaboratoryChemMaster"/>
+</Box>
+
+
+
+## Clinical equipment and optics
+
+<Box>
+<GuideEntityEmbed Entity="NCMetaClinicalController"/>
+<GuideEntityEmbed Entity="NCMetaScannerGateway"/>
+<GuideEntityEmbed Entity="NCMetaBodyScanner"/>
+<GuideEntityEmbed Entity="NCMetaCyberOptics"/>
+</Box>
+
+The bedside controller starts with an empty physical reservoir and automation disabled. Claim it, use it on a nearby patient, review its physical equipment and enable automation explicitly. Programs receive an opaque patient reference and only the diagnostic information permitted by the real scanner. They cannot write organ health or choose arbitrary patients, reagents or dose amounts.
+
+Surgical requests use the practitioner's existing selected step, actual active-hand tool and normal timed interruption rules. A patient change, lost permission, power loss or a stopped installation invalidates the old request before its effect. A receipt marked OutcomeUnknown requires checking the native equipment and operation status; do not blindly repeat an uncertain action under a new key.
+
+Compatible optics must first be installed through normal surgery and powered by the patient's real implant bus. The wearer can claim installed optics and open its workspace through their own interaction menu. Manual clear and low-light settings take priority over firmware.
+
+For unattended monitoring, bind a patient to the stationary gateway, then select that gateway and the owned body scanner with the commissioning tool. Wire the scanner to a real operating table and buckle the same patient to it. Every read checks the table occupant, scanner power and capability. Replacing or unbuckling the patient invalidates the old observation. Dosing and procedures still require the nearby conscious practitioner.
+
+## Functional implants
+
+<Box>
+<GuideEntityEmbed Entity="NCMetaToolHandImplant"/>
+<GuideEntityEmbed Entity="NCMetaMantisBladeImplant"/>
+<GuideEntityEmbed Entity="NCMetaBiomonitorImplant"/>
+<GuideEntityEmbed Entity="NCMetaSandevistanImplant"/>
+<GuideEntityEmbed Entity="NCMetaKerenzikovImplant"/>
+</Box>
+
+These variants use their normal surgical installation, calibration and physical implant power bus. Only the actual wearer can claim an installed controller and enable META automation through their own interaction menu. Compile software on a suitable computer, then install the verified package on the compatible implant.
+
+
+The tool and blade require their real hand to be free. Deploying a blade does not attack a target: weapon use and tool interactions remain ordinary physical actions. Sandevistan duration, cooldown, motor mode conflicts, power, heat, EMP and neural restrictions retain their native limits. Biomonitor pulse is a one-shot native reading shown to the wearer and paid from the real body battery.
+
+## Websites
+
+Write your own META application and MUI views, then register its public CitiNet name and path in the hosting panel. You can use your own host or rent capacity. Public pages expose only their declared actions; server permissions and physical device checks remain authoritative.
+
+## Drone sensors, cargo and equipped weapons
+
+NCMetaCargoDrone adds a real camera and one physical gripper. NCMetaEquippedDrone adds a reloadable six-cartridge ballistic mount. The original route drone does not acquire these interfaces automatically. Bind each source slot to the compatible physical drone and grant only the required scopes.
+
+The camera returns at most sixteen frozen relative observations. Range, field of view, an opaque wall, darkness, a disabled camera, stealth and containers restrict what it can see. A ContactRef belongs to one process, device and control generation and expires after two seconds. It cannot be manufactured, compared, saved as an entity ID or used to inspect another entity's inventory. Moving a target does not rewrite an old measurement; physical commands recheck the current native observation.
+
+
+
+## Recovery
+
+Firmware installation requires physical maintenance and unchanged service conditions until activation. Vehicle electronics require the stopped vehicle, open hood, diagnostic tool and workshop bench. Installed cyberware requires normal surgical access and operational implant hardware. Put drones in Maintenance and stop them, stop conveyors under manual control, and disconnect the clinical patient with automation disabled. A changed owner, service tool, patient context or device generation invalidates the pending installation.
+
+Stop the program before changing its wiring or patient context. A denied command, stale sample or native interlock is a real outcome; changing the source does not bypass it. Reinstall a previous verified artifact through rollback when needed. Review persistent files and operation receipts before restarting a program after an interrupted action.
+</Document>

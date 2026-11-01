@@ -5,116 +5,139 @@
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolDisinfection
   name: disinfection
+  nameId: nc-surgery-ui-cap-disinfection
   representativeTool: Cautery
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolCautery
   name: tissue cautery
+  nameId: nc-surgery-ui-cap-cautery
   representativeTool: Cautery
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolIncision
   name: controlled incision
+  nameId: nc-surgery-ui-cap-incision
   representativeTool: Scalpel
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolHemostasis
   name: hemostasis
+  nameId: nc-surgery-ui-cap-hemostasis
   representativeTool: Hemostat
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolRetraction
   name: tissue retraction
+  nameId: nc-surgery-ui-cap-retraction
   representativeTool: Retractor
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolSuturing
   name: suturing
+  nameId: nc-surgery-ui-cap-suturing
   representativeTool: MedicatedSuture
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolDebridement
   name: debridement
+  nameId: nc-surgery-ui-cap-debridement
   representativeTool: Scalpel
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolVascularRepair
   name: vascular repair
+  nameId: nc-surgery-ui-cap-vascular-repair
   representativeTool: MedicatedSuture
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolBoneReduction
   name: bone reduction
+  nameId: nc-surgery-ui-cap-bone-reduction
   representativeTool: Drill
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolBoneFixation
   name: bone fixation
+  nameId: nc-surgery-ui-cap-bone-fixation
   representativeTool: Drill
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolOrganRepair
   name: organ repair
+  nameId: nc-surgery-ui-cap-organ-repair
   representativeTool: Cautery
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolIrrigation
   name: sterile irrigation
+  nameId: nc-surgery-ui-cap-irrigation
   representativeTool: SyringeSaline
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolForeignBodyExtraction
   name: foreign body extraction
+  nameId: nc-surgery-ui-cap-foreign-body-extraction
   representativeTool: Hemostat
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolTendonRepair
   name: tendon repair
+  nameId: nc-surgery-ui-cap-tendon-repair
   representativeTool: MedicatedSuture
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolNerveRepair
   name: nerve repair
+  nameId: nc-surgery-ui-cap-nerve-repair
   representativeTool: MedicatedSuture
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolOrganSeparation
   name: organ separation
+  nameId: nc-surgery-ui-cap-organ-separation
   representativeTool: Saw
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolTransplant
   name: transplant anastomosis
+  nameId: nc-surgery-ui-cap-transplant
   representativeTool: MedicatedSuture
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolCranialAccess
   name: bone access
+  nameId: nc-surgery-ui-cap-cranial-access
   representativeTool: Drill
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolOphthalmicRepair
   name: ophthalmic repair
+  nameId: nc-surgery-ui-cap-ophthalmic-repair
   representativeTool: MedicatedSuture
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolAmputation
   name: controlled amputation
+  nameId: nc-surgery-ui-cap-amputation
   representativeTool: Saw
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolAutopsy
   name: forensic dissection
+  nameId: nc-surgery-ui-cap-autopsy
   representativeTool: Scalpel
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolCyberware
   name: cyberware interface and calibration
+  nameId: nc-cyberware-surgery-mount
   representativeTool: Multitool
 
 - type: ncSurgeryToolCapability
   id: NCSurgeryToolCavityDrainage
   name: cavity drainage
+  nameId: nc-surgery-ui-cap-cavity-drainage
   representativeTool: NCSurgicalDrain
 
 - type: ncSurgeryFacilityCapability

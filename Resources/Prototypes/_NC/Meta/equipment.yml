@@ -1,0 +1,153 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: [BaseHandheldComputer, PowerCellSlotMediumItem]
+  id: NCMetaServiceTablet
+  name: META service tablet
+  description: A battery powered host for ready applications, native installation tools and device diagnostics.
+  components:
+  - type: Sprite
+    sprite: Objects/Tools/multitool.rsi
+    state: icon
+  - type: NCMetaHost
+    profile: NCMetaComputer
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+  - type: NCMetaTerminal
+  - type: NCMetaStorage
+    capacityBytes: 67108864
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: PowerCellDraw
+    enabled: true
+    drawRate: 1
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+      enum.NCMetaUiKey.Application:
+        type: NCMetaApplicationBoundUserInterface
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCMetaTerminalFlatpack
+  name: META terminal flatpack
+  description: Assembly preserves the equipment's native power, safety and ownership requirements.
+  components:
+  - type: Flatpack
+    entity: NCMetaTerminal
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCMetaDoorFlatpack
+  name: META door flatpack
+  description: Assembly preserves the equipment's native power, safety and ownership requirements.
+  components:
+  - type: Flatpack
+    entity: NCMetaDoor
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCMetaPanelFlatpack
+  name: META panel flatpack
+  description: Assembly preserves the equipment's native power, safety and ownership requirements.
+  components:
+  - type: Flatpack
+    entity: NCMetaDoorPanel
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCMetaSensorFlatpack
+  name: META temperature sensor flatpack
+  description: Assembly preserves the equipment's native power, safety and ownership requirements.
+  components:
+  - type: Flatpack
+    entity: NCMetaTemperatureSensor
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCMetaAlarmFlatpack
+  name: META alarm flatpack
+  description: Assembly preserves the equipment's native power, safety and ownership requirements.
+  components:
+  - type: Flatpack
+    entity: NCMetaAlarm
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCMetaCameraFlatpack
+  name: META camera flatpack
+  description: Assembly preserves the equipment's native power, safety and ownership requirements.
+  components:
+  - type: Flatpack
+    entity: NCMetaCamera
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCMetaConveyorFlatpack
+  name: META conveyor flatpack
+  description: Assembly preserves the equipment's native power, safety and ownership requirements.
+  components:
+  - type: Flatpack
+    entity: NCMetaConveyor
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCMetaFabricatorFlatpack
+  name: META fabricator flatpack
+  description: Assembly preserves the equipment's native power, safety and ownership requirements.
+  components:
+  - type: Flatpack
+    entity: NCMetaFabricator
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCMetaGrinderFlatpack
+  name: META laboratory grinder flatpack
+  description: Assembly preserves the equipment's native power, safety and ownership requirements.
+  components:
+  - type: Flatpack
+    entity: NCMetaLaboratoryGrinder
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCMetaChemMasterFlatpack
+  name: META ChemMaster flatpack
+  description: Assembly preserves the equipment's native power, safety and ownership requirements.
+  components:
+  - type: Flatpack
+    entity: NCMetaLaboratoryChemMaster
+
+- type: entity
+  parent: BaseFlatpack
+  id: NCMetaVendorFlatpack
+  name: META equipment vendor flatpack
+  description: Assembly preserves the equipment's native power, safety and ownership requirements.
+  components:
+  - type: Flatpack
+    entity: NCMetaDevelopmentVendor
+
+- type: entity
+  parent: CrateEngineering
+  id: NCMetaCommissioningKit
+  name: META commissioning kit
+  description: Finite physical equipment for the complete temperature, hysteresis, file and operator-panel tutorial.
+  components:
+  - type: EntityTableContainerFill
+    containers:
+      entity_storage: !type:AllSelector
+        children:
+        - id: NCMetaServiceTablet
+        - id: NCMetaSensorFlatpack
+        - id: NCMetaAlarmFlatpack
+        - id: NCMetaPanelFlatpack
+        - id: NCMetaProgrammingManual
+        - id: NCMetaCommissioningTool
+        - id: Multitool
+        - id: NCMetaNetworkCable
+          amount: 4
+        - id: PowerCellMedium
+          amount: 2
+        - id: Wrench
+

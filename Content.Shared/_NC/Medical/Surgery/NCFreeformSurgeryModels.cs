@@ -123,6 +123,15 @@ public enum NCFreeformSurgeryFailure : byte
     AttachmentUnavailable,
     SurgicalAccessClosed,
     NoApplicableTarget,
+    CyberwareCalibrationRequired,
+    CyberwareAssemblyIncomplete,
+    CyberwareOutputLow,
+    CyberwareSignalWeak,
+    CyberwareNoPower,
+    CyberwarePowerOverload,
+    CyberwareOverheated,
+    CyberwareEmpDisabled,
+    CyberwareNoRepairNeeded,
 }
 
 [Serializable, NetSerializable]
@@ -298,7 +307,8 @@ public sealed class NCFreeformSurgeryState(
     NCFreeformSurgeryStructureSummary[] structures,
     NCFreeformSurgeryIncisionSummary[] incisions,
     NCFreeformSurgeryWoundSummary[] wounds,
-    NCFreeformSurgeryAttachmentSummary[] attachments) : EntityEventArgs
+    NCFreeformSurgeryAttachmentSummary[] attachments,
+    ProtoId<NCTargetZonePrototype>? stagedGraftZone = null) : EntityEventArgs
 {
     public NCActionResolutionId SessionId { get; } = sessionId;
     public uint Revision { get; } = revision;
@@ -335,6 +345,8 @@ public sealed class NCFreeformSurgeryState(
     public NCFreeformSurgeryIncisionSummary[] Incisions { get; } = incisions;
     public NCFreeformSurgeryWoundSummary[] Wounds { get; } = wounds;
     public NCFreeformSurgeryAttachmentSummary[] Attachments { get; } = attachments;
+    /// <summary>Server-staged missing zone whose living receiving parent can be operated on.</summary>
+    public ProtoId<NCTargetZonePrototype>? StagedGraftZone { get; } = stagedGraftZone;
 }
 
 [Serializable, NetSerializable]
@@ -431,6 +443,11 @@ public sealed partial class NCFreeformSurgeryDoAfterEvent : DoAfterEvent
     [DataField] public int? StructureHandle;
     [DataField] public ProtoId<NCSurgeryToolCapabilityPrototype> Capability;
 
+    // Set by the server when the timed contact starts, never supplied by the interaction request.
+    [DataField] public NetEntity? ExpectedStructure;
+    [DataField] public NetEntity? ExpectedGraft;
+    [DataField] public uint? ExpectedConfiguration;
+
     private NCFreeformSurgeryDoAfterEvent()
     {
     }
@@ -467,7 +484,12 @@ public sealed partial class NCFreeformSurgeryDoAfterEvent : DoAfterEvent
 
     public override DoAfterEvent Clone()
     {
-        return new NCFreeformSurgeryDoAfterEvent(ToRequest(), Capability);
+        return new NCFreeformSurgeryDoAfterEvent(ToRequest(), Capability)
+        {
+            ExpectedStructure = ExpectedStructure,
+            ExpectedGraft = ExpectedGraft,
+            ExpectedConfiguration = ExpectedConfiguration,
+        };
     }
 
     public override bool IsDuplicate(DoAfterEvent other)

@@ -1,0 +1,63 @@
+{
+  "version": "1.0",
+  "id": "meta-tutorial-file",
+  "name": "3. Durable transition log",
+  "nameRu": "3. Надёжный журнал переходов",
+  "packageName": "nc.training.file",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "training.main",
+  "files": [
+    {
+      "path": "app.json",
+      "sourcePath": "Resources/Meta/Projects/meta-tutorial-file/app.json",
+      "sha256": "438df6b778a59f87dca690bc31eb5cba8d62d512f15330c954d9c2d74838bd77"
+    },
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Projects/meta-tutorial-file/main.meta",
+      "sha256": "a95a4c454b478af2231a726cc2e4cf8881d4a0225bff70ab437271105b4fe4cc"
+    },
+    {
+      "path": "README.md",
+      "sourcePath": "Resources/Meta/Projects/meta-tutorial-file/README.md",
+      "sha256": "f81f19426f4aaddf6b6909dcd14a183ab03575f39d74d1fdad9d651614be9c16"
+    },
+    {
+      "path": "ui/main.mui",
+      "sourcePath": "Resources/Meta/Projects/meta-tutorial-file/ui/main.mui",
+      "sha256": "4b48a5d406e87baf4d9adba4f3112ac1d88398e6021b49b3afdaa7b9dc80bc2a"
+    }
+  ],
+  "startMode": "OnPower",
+  "bindings": [
+    {
+      "slot": "training-sensor",
+      "capability": "meta.sensors.TemperatureSensor",
+      "contractHash": "707ebecbeccad33b9d890091ff373d8960cc9ad6d238a62655a0b90339b9e24d",
+      "requiredScopes": [
+        "sensor.temperature.observe"
+      ]
+    },
+    {
+      "slot": "training-alarm",
+      "capability": "meta.security.Alarm",
+      "contractHash": "2e3bac335044a980267ee3621e14b6e8463eee235420f85887a5ddf2b22aae7f",
+      "requiredScopes": [
+        "alarm.control"
+      ]
+    },
+    {
+      "slot": "training-data",
+      "capability": "meta.files.FileStore",
+      "contractHash": "c7634c1859d74a9212400dd06f15286fe1c7bb80a1105e39adc191638a724fd9",
+      "requiredScopes": [
+        "files.write"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json",
+  "stateSchemaVersion": 1
+}

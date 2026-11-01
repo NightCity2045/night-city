@@ -1,0 +1,190 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncCyberware
+  id: NCClinicalCyberArm
+  humanityPackages:
+  - NCHumanityMedical
+  requiresSeparateCalibration: true
+  assembly: NCIndustrialArmAssembly
+  name: clinical cyberarm
+  manufacturer: Night City clinical adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberarm_right
+  hostIcons:
+    ArmLeft:
+      sprite: _NC/Objects/Cyberware/implants.rsi
+      state: cyberarm_left
+    ArmRight:
+      sprite: _NC/Objects/Cyberware/implants.rsi
+      state: cyberarm_right
+  form: LimbReplacement
+  size: 5
+  maximumIntegrity: 160
+  repairProfile: NCRepairProfileStreetCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  powerCapacity: 10800
+  startingPowerFraction: 1
+  minimumOperationalPower: 1
+  idlePowerPerSecond: 0.5
+  loadedPowerPerSecond: 5
+  heatCapacity: 160
+  idleHeatPerSecond: 0.2
+  loadedHeatPerSecond: 2.5
+  passiveCoolingPerSecond: 0.8
+  heatDeratingThreshold: 95
+  heatShutdownThreshold: 130
+  heatDamageThreshold: 140
+  heatDamagePerSecond: 2
+  empResistance: 1200
+  empSurgeDamagePerEnergy: 0.001
+  maximumEmpSurgeDamage: 45
+  empHeatPerEnergy: 0.002
+  maximumEmpHeat: 90
+  empDisableDurationMultiplier: 0.75
+  neuralDamagePerEmpEnergy: 1.0e-05
+  neuralRequirement: Required
+  neuralDegradedThreshold: 0.65
+  neuralMinimumOperationalIntegrity: 0.15
+  updateInterval: 1s
+  capabilities:
+  - Movement
+  - Grip
+  - ServiceHatch
+  nameId: nc-cyberware-profile-clinical-arm
+
+- type: ncCyberware
+  id: NCClinicalCyberLeg
+  humanityPackages:
+  - NCHumanityMedical
+  requiresSeparateCalibration: true
+  name: clinical cyberleg
+  manufacturer: Night City clinical adaptation
+  icon:
+    sprite: _NC/Mobs/Cyberware/parts.rsi
+    state: l_leg
+  hostIcons:
+    LegLeft:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: l_leg
+    LegRight:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: r_leg
+  form: LimbReplacement
+  size: 5
+  maximumIntegrity: 160
+  repairProfile: NCRepairProfileStreetCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  powerCapacity: 10800
+  startingPowerFraction: 1
+  minimumOperationalPower: 1
+  idlePowerPerSecond: 0.5
+  loadedPowerPerSecond: 5
+  heatCapacity: 160
+  idleHeatPerSecond: 0.2
+  loadedHeatPerSecond: 2.5
+  passiveCoolingPerSecond: 0.8
+  heatDeratingThreshold: 95
+  heatShutdownThreshold: 130
+  heatDamageThreshold: 140
+  heatDamagePerSecond: 2
+  empResistance: 1200
+  empSurgeDamagePerEnergy: 0.001
+  maximumEmpSurgeDamage: 45
+  empHeatPerEnergy: 0.002
+  maximumEmpHeat: 90
+  empDisableDurationMultiplier: 0.75
+  neuralDamagePerEmpEnergy: 1.0e-05
+  neuralRequirement: Required
+  neuralDegradedThreshold: 0.65
+  neuralMinimumOperationalIntegrity: 0.15
+  updateInterval: 1s
+  capabilities:
+  - Movement
+  nameId: nc-cyberware-profile-clinical-leg
+
+- type: entity
+  parent: NCOrganHumanCyberArmLeft
+  id: NCOrganHumanClinicalCyberArmLeft
+  components:
+  - type: NCCyberware
+    profile: NCClinicalCyberArm
+  - type: NCCyberwareExterior
+    finish: NCFinishMedical
+
+- type: entity
+  parent: NCOrganHumanDetachableParentRegionBase
+  id: NCOrganHumanCyberLegLeft
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/parts.rsi
+    state: l_leg
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.LLeg
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: l_leg
+  - type: NCCyberwareExterior
+    finish: NCFinishMedical
+  - type: Organ
+    category: LegLeft
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    movementContribution: 0.5
+    armorLocations:
+    - LegLeft
+  - type: NCJoint
+  - type: NCNerve
+    cyberprostheticInterface: true
+  - type: NCCyberware
+    profile: NCClinicalCyberLeg
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: Torso
+    woundProfile: NCHumanWoundSystem
+    treatmentProfile: NCHumanFieldTreatment
+
+- type: entity
+  parent: NCOrganHumanCyberArmRight
+  id: NCOrganHumanClinicalCyberArmRight
+  components:
+  - type: NCCyberware
+    profile: NCClinicalCyberArm
+  - type: NCCyberwareExterior
+    finish: NCFinishMedical
+
+- type: entity
+  parent: NCOrganHumanDetachableParentRegionBase
+  id: NCOrganHumanCyberLegRight
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/parts.rsi
+    state: r_leg
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.RLeg
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: r_leg
+  - type: NCCyberwareExterior
+    finish: NCFinishMedical
+  - type: Organ
+    category: LegRight
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    movementContribution: 0.5
+    armorLocations:
+    - LegRight
+  - type: NCJoint
+  - type: NCNerve
+    cyberprostheticInterface: true
+  - type: NCCyberware
+    profile: NCClinicalCyberLeg
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: Torso
+    woundProfile: NCHumanWoundSystem
+    treatmentProfile: NCHumanFieldTreatment

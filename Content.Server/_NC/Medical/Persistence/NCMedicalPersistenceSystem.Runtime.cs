@@ -12,6 +12,7 @@ using Content.Server._NC.LivingCity.Time;
 using Content.Server._NC.Persistence.RoundSnapshot;
 using Content.Shared._NC.Identity;
 using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Cyberware.Borg;
 using Content.Shared._NC.Medical.Persistence;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Treatment;
@@ -34,8 +35,10 @@ public sealed partial class NCMedicalPersistenceSystem
     [Dependency] private IServerPreferencesManager _preferences = default!;
     [Dependency] private ISerializationManager _serialization = default!;
     [Dependency] private ITaskManager _taskManager = default!;
+    [Dependency] private NCRoundRestoreContextSystem _restoreContext = default!;
 
     private readonly Dictionary<EntityUid, PlayerBinding> _playerBindings = [];
+    private readonly Dictionary<EntityUid, PlayerBinding> _disconnectedMedicalBodies = [];
     private readonly Dictionary<NCCharacterId, EntityUid> _boundCharacters = [];
     private readonly Dictionary<NCCharacterId, OwnerSaveState> _saveStates = [];
     private readonly HashSet<EntityUid> _loadingBodies = [];
@@ -47,6 +50,7 @@ public sealed partial class NCMedicalPersistenceSystem
         base.Initialize();
 
         SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawnComplete);
+        SubscribeLocalEvent<PlayerBeforeSpawnEvent>(OnBorgBeforeSpawn);
         SubscribeLocalEvent<PlayerDetachedEvent>(OnPlayerDetached);
         SubscribeLocalEvent<NCMedicalBodyComponent, NCMedicalBodyChangedEvent>(OnMedicalBodyChanged);
         SubscribeLocalEvent<NCMedicalBodyComponent, EntityTerminatingEvent>(OnMedicalBodyTerminating);
@@ -67,6 +71,14 @@ public sealed partial class NCMedicalPersistenceSystem
         if (!HasComp<NCMedicalBodyComponent>(body) ||
             !_preferences.TryGetSelectedNCCharacterId(args.Player.UserId, out var characterId))
         {
+            return;
+        }
+
+        if (TryGetLiveBorgCharacter(characterId, out var liveCore) && liveCore != body)
+        {
+            if (!TryReclaimBorgCharacter(body, liveCore, characterId))
+                MarkOwnerBlocked(body, NCMedicalStableOwnerKind.PlayerCharacter,
+                    characterId.Value.ToString(CultureInfo.InvariantCulture), 0);
             return;
         }
 
@@ -92,10 +104,11 @@ public sealed partial class NCMedicalPersistenceSystem
         try
         {
             var ownerId = characterId.Value.ToString(CultureInfo.InvariantCulture);
-            var sections = await _database.GetLatestNCRoundSnapshotSectionsAsync(
-                RoundSnapshotSectionType,
-                RoundSnapshotOwnerType,
-                ownerId);
+            var sections = _restoreContext.Manifest is { } manifest
+                ? await _database.GetNCRoundSnapshotSectionsAsync(manifest.SnapshotId,
+                    RoundSnapshotSectionType, RoundSnapshotOwnerType, ownerId)
+                : await _database.GetLatestNCRoundSnapshotSectionsAsync(
+                    RoundSnapshotSectionType, RoundSnapshotOwnerType, ownerId);
             var section = sections is [{ ChunkIndex: 0 }] ? sections[0] : null;
             stored = section == null
                 ? await _database.GetNCMedicalSnapshotAsync(characterId)
@@ -137,6 +150,12 @@ public sealed partial class NCMedicalPersistenceSystem
 
         binding.State.ExpectedRevision = stored.Revision;
         SetOwnerRevision(body, stored.Revision);
+        if (TryDecodeStoredSnapshot(stored, out var decoded) && decoded.BorgCore != null)
+        {
+            if (!TryRestorePlayerBorg(body, stored))
+                FailClosed(body, binding, "stored Borg carrier could not be restored");
+            return;
+        }
         var restored = TryRestoreStoredMedicalState(body, stored);
         _loadingBodies.Remove(body);
         if (!restored)
@@ -158,6 +177,10 @@ public sealed partial class NCMedicalPersistenceSystem
             args.Entity,
             allowTerminating: TerminatingOrDeleted(args.Entity),
             invalidIsError: false);
+        // Disconnection never authorizes a second physical brain. Keep the carrier's stable ownership and
+        // checkpoints alive; a later spawn for this character reuses it instead of loading a second copy.
+        if (HasComp<NCBorgCoreComponent>(args.Entity) && !TerminatingOrDeleted(args.Entity))
+            return;
         ReleasePlayerBinding(args.Entity, binding, keepSaveState: true);
     }
 
@@ -179,7 +202,12 @@ public sealed partial class NCMedicalPersistenceSystem
         Entity<NCMedicalBodyComponent> entity,
         ref EntityTerminatingEvent args)
     {
+        if (TryComp<NCMedicalPersistenceOwnerComponent>(entity, out var owner) &&
+            owner.Kind == NCMedicalStableOwnerKind.PlayerCharacter && int.TryParse(owner.Key, out var number) &&
+            _borgCharacters.GetValueOrDefault(new NCCharacterId(number)) == entity.Owner)
+            _borgCharacters.Remove(new NCCharacterId(number));
         CapturePlayerMemory(entity.Owner, allowTerminating: true);
+        _disconnectedMedicalBodies.Remove(entity.Owner);
         if (_playerBindings.TryGetValue(entity.Owner, out var binding))
             ReleasePlayerBinding(entity.Owner, binding, keepSaveState: true);
     }
@@ -209,17 +237,22 @@ public sealed partial class NCMedicalPersistenceSystem
             ReleasePlayerBinding(body, binding, keepSaveState: true);
         }
         _roundSnapshots.Clear();
+        _disconnectedMedicalBodies.Clear();
     }
 
     private void OnActiveWorldSessionStarted(NCActiveWorldSessionStartedEvent args)
     {
         _roundSnapshots.Clear();
+        _disconnectedMedicalBodies.Clear();
     }
 
     private void OnRoundSnapshotCapture(NCRoundSnapshotCaptureEvent args)
     {
-        foreach (var body in _playerBindings.Keys.ToArray())
-            CapturePlayerMemory(body, allowTerminating: TerminatingOrDeleted(body));
+        foreach (var body in _playerBindings.Keys.Concat(_disconnectedMedicalBodies.Keys).Distinct().ToArray())
+        {
+            if (!CapturePlayerMemory(body, allowTerminating: TerminatingOrDeleted(body)))
+                args.Fail($"Medical capture failed for {ToPrettyString(body)}; refusing a mixed ownership checkpoint.");
+        }
 
         foreach (var (characterId, pending) in _roundSnapshots.OrderBy(value => value.Key.Value))
         {
@@ -236,13 +269,14 @@ public sealed partial class NCMedicalPersistenceSystem
         }
     }
 
-    private void CapturePlayerMemory(
+    private bool CapturePlayerMemory(
         EntityUid body,
         bool allowTerminating,
         bool invalidIsError = true)
     {
-        if (_loadingBodies.Contains(body) || !_playerBindings.TryGetValue(body, out var binding))
-            return;
+        if (_loadingBodies.Contains(body) ||
+            !_playerBindings.TryGetValue(body, out var binding) && !_disconnectedMedicalBodies.TryGetValue(body, out binding))
+            return false;
 
         var snapshot = SerializeMedicalState(body, allowTerminating);
         if (snapshot == null || !TryEncodeSnapshot(snapshot, out var payload))
@@ -252,10 +286,11 @@ public sealed partial class NCMedicalPersistenceSystem
                 Log.Error(message);
             else
                 Log.Warning(message);
-            return;
+            return false;
         }
 
         _roundSnapshots[binding.CharacterId] = new PendingWrite(snapshot.Version, payload, DateTime.UtcNow);
+        return true;
     }
 
     /// <summary>
@@ -293,6 +328,10 @@ public sealed partial class NCMedicalPersistenceSystem
 
     private void ReleasePlayerBinding(EntityUid body, PlayerBinding binding, bool keepSaveState = false)
     {
+        // Keep observing the remaining physical body at the common checkpoint after logout. A cached logout
+        // payload is no longer authoritative if another character extracts its hardware later in the round.
+        if (keepSaveState && !TerminatingOrDeleted(body))
+            _disconnectedMedicalBodies[body] = binding;
         _loadingBodies.Remove(body);
         _playerBindings.Remove(body);
         if (_boundCharacters.GetValueOrDefault(binding.CharacterId) == body)
@@ -444,6 +483,13 @@ public sealed partial class NCMedicalPersistenceSystem
                 NCMedicalSnapshotVersions.TransplantRejection or
                 NCMedicalSnapshotVersions.WoundVisualization or
                 NCMedicalSnapshotVersions.CavityFluidLedger or
+                NCMedicalSnapshotVersions.SpatialSurgery or
+                NCMedicalSnapshotVersions.ModularCyberware or
+                NCMedicalSnapshotVersions.BodyPowerBus or
+                NCMedicalSnapshotVersions.BorgCore or
+                NCMedicalSnapshotVersions.Humanity or
+                NCMedicalSnapshotVersions.CyberwareAbilities or
+                NCMedicalSnapshotVersions.CyberwareExteriors or
                 NCMedicalSnapshotVersions.Current) ||
             runtimeAnchor < TimeSpan.Zero ||
             !HasNonNullSnapshotShape(source))

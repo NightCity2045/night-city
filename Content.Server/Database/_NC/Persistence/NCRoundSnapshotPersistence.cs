@@ -82,11 +82,14 @@ public partial interface IServerDbManager
 
 public sealed partial class ServerDbManager
 {
-    public Task<NCRoundSnapshotCommitResult> CommitNCRoundSnapshotAsync(NCRoundSnapshotCommitRequest request)
+    public async Task<NCRoundSnapshotCommitResult> CommitNCRoundSnapshotAsync(NCRoundSnapshotCommitRequest request)
     {
         DbWriteOpsMetric.Inc();
-        return RunNCPersistentDbCommand(true, NCPersistenceWriteClass.CoalescedCheckpoint,
+        var result = await RunNCPersistentDbCommand(true, NCPersistenceWriteClass.CoalescedCheckpoint,
             () => _db.CommitNCRoundSnapshotAsync(request));
+        if (result.Status is NCRoundSnapshotCommitStatus.Committed or NCRoundSnapshotCommitStatus.Duplicate)
+            NotifyNCPlayerEmploymentChanged();
+        return result;
     }
 
     public Task<NCRoundSnapshotManifestData?> GetLatestCommittedNCRoundSnapshotAsync()
@@ -180,6 +183,7 @@ public abstract partial class ServerDbBase
             });
         }
 
+        TrackNCMetaCheckpointBlobReferences(db.DbContext, request.SnapshotId, request.Sections);
         await db.DbContext.SaveChangesAsync();
 
         // Character death is part of publishing the world state. Keeping it in this transaction prevents

@@ -44,6 +44,7 @@ public abstract partial class SharedReagentGrinderSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
+        InitializeAutomation(); // NC
 
         SubscribeLocalEvent<InsideReagentGrinderComponent, SolutionChangedEvent>(OnBeakerSolutionContainerChanged);
 
@@ -189,11 +190,13 @@ public abstract partial class SharedReagentGrinderSystem : EntitySystem
 
     private void OnStartMessage(Entity<ReagentGrinderComponent> ent, ref ReagentGrinderStartMessage message)
     {
+        TakeAutomationManualControl(ent.Owner); // NC
         StartGrinder(ent, message.Program);
     }
 
     private void OnToggleAutoModeMessage(Entity<ReagentGrinderComponent> ent, ref ReagentGrinderToggleAutoModeMessage message)
     {
+        TakeAutomationManualControl(ent.Owner); // NC
         // Cycle through the enum values.
         ent.Comp.AutoMode = (GrinderAutoMode)(((byte)ent.Comp.AutoMode + 1) % Enum.GetValues<GrinderAutoMode>().Length);
         Dirty(ent);
@@ -281,6 +284,8 @@ public abstract partial class SharedReagentGrinderSystem : EntitySystem
     {
         if (ent.Comp.Program is not { } program)
             return; // Already finished.
+        if (!CanCompleteAutomation(ent)) return; // NC
+        var automation = AutomationOutput(ent.Owner); // NC
 
         ent.Comp.Program = null;
         ent.Comp.AudioStream = _audioSystem.Stop(ent.Comp.AudioStream);
@@ -293,11 +298,16 @@ public abstract partial class SharedReagentGrinderSystem : EntitySystem
 
         var beaker = _itemSlotsSystem.GetItemOrNull(ent.Owner, ReagentGrinderComponent.BeakerSlotId);
         if (beaker is null || !_solutionContainersSystem.TryGetFitsInDispenser(beaker.Value, out var beakerSolutionEntity, out var beakerSolution))
+        {
+            CompleteAutomation(ent.Owner, automation); // NC
             return;
+        }
 
         // Convert items into reagents.
         foreach (var item in ent.Comp.InputContainer.ContainedEntities.ToList())
         {
+            if (!CanContinueAutomationOutput(ent.Owner, automation)) break; // NC
+            var processedUnits = 1; // NC
             var solution = GetGrinderSolution(item, program);
 
             if (solution is null)
@@ -321,6 +331,7 @@ public abstract partial class SharedReagentGrinderSystem : EntitySystem
                 var scaledSolution = new Solution(solution);
                 scaledSolution.ScaleSolution(fitsCount);
                 solution = scaledSolution;
+                processedUnits = fitsCount; // NC
 
                 _stackSystem.SetCount((item, stack), stack.Count - fitsCount); // Setting to 0 will QueueDel
             }
@@ -331,8 +342,13 @@ public abstract partial class SharedReagentGrinderSystem : EntitySystem
 
                 _destructible.DestroyEntity(item);
             }
-            _solutionContainersSystem.TryAddSolution(beakerSolutionEntity.Value, solution);
+            // NC-Edit-Start
+            var delivered = _solutionContainersSystem.TryAddSolution(beakerSolutionEntity.Value, solution);
+            if (automation != null && !delivered) { TryCancelAutomationJob(ent.Owner, "OutcomeUnknown"); break; }
+            // NC-Edit-End
+            OnAutomationItemProduced(ent.Owner, automation, processedUnits); // NC
         }
+        CompleteAutomation(ent.Owner, automation); // NC
         // UpdateUi is called when the entity in the grinder is deleted or the solution in the beaker is changed.
     }
 

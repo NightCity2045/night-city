@@ -347,6 +347,7 @@ public abstract partial class SharedGunSystem : EntitySystem
 
         var fromCoordinates = Transform(user).Coordinates;
         // Remove ammo
+        if (!CanCommitControlledShot(gun.Owner)) return false; // NC: fresh native authority immediately before ammo debit.
         var ev = new TakeAmmoEvent(shots, [], fromCoordinates, user);
 
         // Listen it just makes the other code around it easier if shots == 0 to do this.

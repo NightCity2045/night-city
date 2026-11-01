@@ -203,42 +203,49 @@ namespace Content.Server.Chemistry.EntitySystems
 
         private void OnCreatePillsMessage(Entity<ChemMasterComponent> chemMaster, ref ChemMasterCreatePillsMessage message)
         {
-            var user = message.Actor;
+            CreatePillsCore(chemMaster, message.Actor, message.Number, message.Dosage, message.Label); // NC
+        }
+
+        // NC-Edit-Start: shared native operation body for the BUI and checked automation entry point.
+        private (int Completed, bool Consumed) CreatePillsCore(Entity<ChemMasterComponent> chemMaster, EntityUid user,
+            uint number, uint dosage, string label, Func<bool>? guard = null)
+        {
             var maybeContainer = _itemSlotsSystem.GetItemOrNull(chemMaster, SharedChemMaster.OutputSlotName);
             if (maybeContainer is not { Valid: true } container
                 || !TryComp(container, out StorageComponent? storage))
             {
-                return; // output can't fit pills
+                return (0, false); // output can't fit pills
             }
 
             // Ensure the number is valid.
-            if (message.Number == 0 || !_storageSystem.HasSpace((container, storage)))
-                return;
+            if (number == 0 || !_storageSystem.HasSpace((container, storage)))
+                return (0, false);
 
             // Ensure the amount is valid.
-            if (message.Dosage == 0 || message.Dosage > chemMaster.Comp.PillDosageLimit)
-                return;
+            if (dosage == 0 || dosage > chemMaster.Comp.PillDosageLimit)
+                return (0, false);
 
             // Ensure label length is within the character limit.
-            if (message.Label.Length > SharedChemMaster.LabelMaxLength)
-                return;
+            if (label.Length > SharedChemMaster.LabelMaxLength)
+                return (0, false);
 
-            var needed = message.Dosage * message.Number;
+            var needed = dosage * number;
 
-            if (!WithdrawFromSource(chemMaster, needed, user, out var withdrawal))
-                return;
-            _labelSystem.Label(container, message.Label);
+            if (guard != null && !guard() || !WithdrawFromSource(chemMaster, needed, user, out var withdrawal))
+                return (0, false);
+            _labelSystem.Label(container, label);
+            var completed = 0;
 
-            for (var i = 0; i < message.Number; i++)
+            for (var i = 0; i < number; i++)
             {
                 var item = Spawn(PillPrototypeId, Transform(container).Coordinates);
                 _storageSystem.Insert(container, item, out _, user: user, storage);
-                _labelSystem.Label(item, message.Label);
+                _labelSystem.Label(item, label);
 
                 _solutionContainerSystem.EnsureSolution(item, SharedChemMaster.PillSolutionName, out var itemSolution);
-                itemSolution.Comp.Solution.MaxVolume = message.Dosage;
+                itemSolution.Comp.Solution.MaxVolume = dosage;
 
-                _solutionContainerSystem.TryAddSolution(itemSolution, withdrawal.SplitSolution(message.Dosage));
+                if (_solutionContainerSystem.TryAddSolution(itemSolution, withdrawal.SplitSolution(dosage))) completed++;
 
                 var pill = EnsureComp<PillComponent>(item);
                 pill.PillType = chemMaster.Comp.PillType;
@@ -250,31 +257,39 @@ namespace Content.Server.Chemistry.EntitySystems
 
             UpdateUiState(chemMaster);
             ClickSound(chemMaster);
+            return (completed, true);
         }
+        // NC-Edit-End
 
         private void OnOutputToBottleMessage(Entity<ChemMasterComponent> chemMaster, ref ChemMasterOutputToBottleMessage message)
         {
-            var user = message.Actor;
+            BottleCore(chemMaster, message.Actor, message.Dosage, message.Label); // NC
+        }
+
+        // NC-Edit-Start
+        private (int Completed, bool Consumed) BottleCore(Entity<ChemMasterComponent> chemMaster, EntityUid user,
+            FixedPoint2 dosage, string label, Func<bool>? guard = null)
+        {
             var maybeContainer = _itemSlotsSystem.GetItemOrNull(chemMaster, SharedChemMaster.OutputSlotName);
             if (maybeContainer is not { Valid: true } container
                 || !_solutionContainerSystem.TryGetSolution(container, SharedChemMaster.BottleSolutionName, out var soln, out var solution))
             {
-                return; // output can't fit reagents
+                return (0, false); // output can't fit reagents
             }
 
             // Ensure the amount is valid.
-            if (message.Dosage == 0 || message.Dosage > solution.AvailableVolume)
-                return;
+            if (dosage <= 0 || dosage > solution.AvailableVolume)
+                return (0, false);
 
             // Ensure label length is within the character limit.
-            if (message.Label.Length > SharedChemMaster.LabelMaxLength)
-                return;
+            if (label.Length > SharedChemMaster.LabelMaxLength)
+                return (0, false);
 
-            if (!WithdrawFromSource(chemMaster, message.Dosage, user, out var withdrawal))
-                return;
+            if (guard != null && !guard() || !WithdrawFromSource(chemMaster, dosage, user, out var withdrawal))
+                return (0, false);
 
-            _labelSystem.Label(container, message.Label);
-            _solutionContainerSystem.TryAddSolution(soln.Value, withdrawal);
+            _labelSystem.Label(container, label);
+            var delivered = _solutionContainerSystem.TryAddSolution(soln.Value, withdrawal);
 
             // Log bottle creation by a user
             _adminLogger.Add(LogType.Action, LogImpact.Low,
@@ -282,7 +297,9 @@ namespace Content.Server.Chemistry.EntitySystems
 
             UpdateUiState(chemMaster);
             ClickSound(chemMaster);
+            return (delivered ? 1 : 0, true);
         }
+        // NC-Edit-End
 
         private bool WithdrawFromSource(
             Entity<ChemMasterComponent> chemMaster,

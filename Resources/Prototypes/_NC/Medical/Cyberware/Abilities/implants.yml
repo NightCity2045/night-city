@@ -1,0 +1,155 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: NCCyberwareAbilityImplantBase
+  id: NCToolHandImplant
+  suffix: NC adaptation
+  components:
+  - type: Sprite
+    state: cyberarm_right
+  - type: NCCyberware
+    profile: NCToolHand
+  - type: NCCyberwareAbility
+    profile: NCToolHandAbility
+
+- type: entity
+  parent: BaseAction
+  id: NCToolHandAction
+  components:
+  - type: Action
+    useDelay: 0.3
+    itemIconStyle: NoItem
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    layers:
+    - state: cyberarm_right
+  - type: InstantAction
+    event: !type:NCActivateCyberwareAbilityEvent
+
+- type: entity
+  parent: NCCyberwareAbilityImplantBase
+  id: NCBiomonitorImplant
+  suffix: NC adaptation
+  components:
+  - type: Sprite
+    state: circulatory_assist
+  - type: NCCyberware
+    profile: NCBiomonitor
+  - type: NCCyberwareAbility
+    profile: NCBiomonitorAbility
+
+- type: entity
+  parent: BaseAction
+  id: NCBiomonitorAction
+  components:
+  - type: Action
+    useDelay: 0.3
+    itemIconStyle: NoItem
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    layers:
+    - state: circulatory_assist
+  - type: InstantAction
+    event: !type:NCActivateCyberwareAbilityEvent
+
+- type: entity
+  parent: NCCyberwareAbilityImplantBase
+  id: NCMantisBladeImplant
+  suffix: NC adaptation
+  components:
+  - type: Sprite
+    state: cyberarm_right
+  - type: NCCyberware
+    profile: NCMantisBlade
+  - type: NCCyberwareAbility
+    profile: NCMantisBladeAbility
+
+- type: entity
+  parent: BaseAction
+  id: NCMantisBladeAction
+  components:
+  - type: Action
+    useDelay: 0.3
+    itemIconStyle: NoItem
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    layers:
+    - state: cyberarm_right
+  - type: InstantAction
+    event: !type:NCActivateCyberwareAbilityEvent
+
+- type: entity
+  parent: NCCyberwareAbilityImplantBase
+  id: NCSandevistanImplant
+  suffix: NC adaptation
+  components:
+  - type: Sprite
+    state: neural_link
+  - type: NCCyberware
+    profile: NCSandevistan
+  - type: NCCyberwareAbility
+    profile: NCSandevistanAbility
+
+- type: entity
+  parent: BaseAction
+  id: NCSandevistanAction
+  components:
+  - type: Action
+    useDelay: 0.3
+    itemIconStyle: NoItem
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    layers:
+    - state: neural_link
+  - type: InstantAction
+    event: !type:NCActivateCyberwareAbilityEvent
+
+- type: entity
+  parent: NCCyberwareAbilityImplantBase
+  id: NCKerenzikovImplant
+  suffix: NC adaptation
+  components:
+  - type: Sprite
+    state: neural_link
+  - type: NCCyberware
+    profile: NCKerenzikov
+  - type: NCCyberwareAbility
+    profile: NCKerenzikovAbility
+
+- type: entity
+  parent: BaseAction
+  id: NCKerenzikovAction
+  components:
+  - type: Action
+    useDelay: 0.3
+    itemIconStyle: NoItem
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    layers:
+    - state: neural_link
+  - type: InstantAction
+    event: !type:NCActivateCyberwareAbilityEvent
+
+- type: entity
+  parent: Screwdriver
+  id: NCIntegralScrewdriver
+  suffix: Integral NC tool
+
+- type: entity
+  parent: CombatKnife
+  id: NCIntegralMantisBlade
+  suffix: Integral NC weapon
+  components:
+  - type: Sprite
+    sprite: Objects/Weapons/Melee/katana.rsi
+    state: icon
+  - type: Item
+    sprite: Objects/Weapons/Melee/katana.rsi
+  - type: MeleeWeapon
+    attackRate: 1
+    damage:
+      types:
+        Slash: 14
+        Piercing: 3

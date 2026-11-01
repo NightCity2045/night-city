@@ -1,0 +1,12 @@
+{
+  "rootModule": "examples.hello",
+  "responses": [],
+  "events": [],
+  "expectedLogs": [
+    "META: программа запущена"
+  ],
+  "expectedCommands": [],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}

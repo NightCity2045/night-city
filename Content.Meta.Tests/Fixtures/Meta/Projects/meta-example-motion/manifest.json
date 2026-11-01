@@ -1,0 +1,39 @@
+{
+  "version": "1.0",
+  "id": "meta-example-motion",
+  "name": "Motion alarm",
+  "nameRu": "Сигнализация движения",
+  "packageName": "examples.motion",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.motion",
+  "files": [
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Examples/examples.motion.meta",
+      "sha256": "29d7c9fac59edd34bb1ec720a0b0d4b6fcbbbbfa6eb534306351a4a22556b083"
+    }
+  ],
+  "startMode": "OnPower",
+  "bindings": [
+    {
+      "slot": "entrance-camera",
+      "capability": "meta.security.Camera",
+      "contractHash": "0eafff42aaf69c1234fd0bf1e88bba3e1d683891cc64d879d85d432bdab3e65a",
+      "requiredScopes": [
+        "camera.motion.observe"
+      ]
+    },
+    {
+      "slot": "entrance-alarm",
+      "capability": "meta.security.Alarm",
+      "contractHash": "2e3bac335044a980267ee3621e14b6e8463eee235420f85887a5ddf2b22aae7f",
+      "requiredScopes": [
+        "alarm.control"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

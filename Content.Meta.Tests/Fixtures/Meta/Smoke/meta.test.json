@@ -1,0 +1,10 @@
+{
+  "rootModule": "program.main",
+  "responses": [],
+  "events": [],
+  "expectedLogs": ["META smoke"],
+  "expectedCommands": [],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}

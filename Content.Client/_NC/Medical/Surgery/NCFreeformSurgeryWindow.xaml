@@ -9,8 +9,8 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                       xmlns:surgery="clr-namespace:Content.Client._NC.Medical.Surgery"
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       x:Class="Content.Client._NC.Medical.Surgery.NCFreeformSurgeryWindow"
-                      Title="Surgical field"
-                      SetSize="1260 820"
+                      Title="{Loc 'nc-surgery-ui-title'}"
+                      SetSize="1260 760"
                       MinSize="980 640">
     <PanelContainer HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
         <PanelContainer.PanelOverride>
@@ -23,10 +23,10 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                     <gfx:StyleBoxFlat BackgroundColor="#07191D" BorderColor="#37E2D1" BorderThickness="0 0 0 1" />
                 </PanelContainer.PanelOverride>
                 <BoxContainer Margin="10 4" Orientation="Horizontal">
-                    <Label Text="MEDTECH SURGICAL FIELD" FontColorOverride="#7AFFF2" />
-                    <Label Text=" // LOCAL CLINICAL LINK" FontColorOverride="#4BA49D" />
+                    <Label Text="{Loc 'nc-surgery-ui-header'}" FontColorOverride="#7AFFF2" />
+                    <Label Text="{Loc 'nc-surgery-ui-link'}" FontColorOverride="#4BA49D" />
                     <Control HorizontalExpand="True" />
-                    <Label Name="ConnectionLabel" Text="● LIVE" FontColorOverride="#67E89A" />
+                    <Label Name="ConnectionLabel" Text="{Loc 'nc-surgery-ui-status-live'}" FontColorOverride="#67E89A" />
                 </BoxContainer>
             </PanelContainer>
 
@@ -36,15 +36,15 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                 </PanelContainer.PanelOverride>
                 <BoxContainer Margin="12 8" Orientation="Horizontal" SeparationOverride="18">
                     <BoxContainer Orientation="Vertical" MinWidth="260">
-                        <Label Text="ACTIVE PATIENT" FontColorOverride="#57B9B1" />
+                        <Label Text="{Loc 'nc-surgery-ui-patient'}" FontColorOverride="#57B9B1" />
                         <Label Name="PatientName" StyleClasses="LabelHeadingBigger" FontColorOverride="#E3FAF6" />
                         <Label Name="PatientState" FontColorOverride="#FFC95C" />
                     </BoxContainer>
                     <BoxContainer Orientation="Vertical" HorizontalExpand="True">
-                        <Label Text="LIVE PHYSIOLOGY" FontColorOverride="#57B9B1" />
+                        <Label Text="{Loc 'nc-surgery-ui-physiology'}" FontColorOverride="#57B9B1" />
                         <Label Name="VitalsLabel" ClipText="True" />
                         <BoxContainer Orientation="Horizontal" SeparationOverride="8">
-                            <Label Text="Patient motion" FontColorOverride="#7DBDB7" />
+                            <Label Text="{Loc 'nc-surgery-ui-motion'}" FontColorOverride="#7DBDB7" />
                             <ProgressBar Name="MovementBar" MinValue="0" MaxValue="1" HorizontalExpand="True" SetHeight="9" />
                             <Label Name="MovementValue" MinWidth="48" />
                         </BoxContainer>
@@ -63,13 +63,13 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                           HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
                 <BoxContainer Orientation="Vertical" SeparationOverride="6" HorizontalExpand="True" VerticalExpand="True">
                     <BoxContainer Orientation="Horizontal" SeparationOverride="8">
-                        <Label Text="1 // PATIENT OPERATIVE FIELD" FontColorOverride="#72F5E7" />
-                        <Label Text="// AUTOMATIC ANATOMICAL HIT-TEST" FontColorOverride="#57B9B1" />
+                        <Label Text="{Loc 'nc-surgery-ui-field'}" FontColorOverride="#72F5E7" />
+                        <Label Text="{Loc 'nc-surgery-ui-hit-test'}" FontColorOverride="#57B9B1" />
                         <Control HorizontalExpand="True" />
                         <Label Name="LayerLabel" FontColorOverride="#7DBDB7" />
                     </BoxContainer>
                     <BoxContainer Orientation="Horizontal" SeparationOverride="4">
-                        <Label Text="The operative side is detected automatically · click a wound, incision or exposed structure directly"
+                        <Label Text="{Loc 'nc-surgery-ui-hint'}"
                                FontColorOverride="#839C9D" HorizontalExpand="True" />
                     </BoxContainer>
                     <PanelContainer HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
@@ -84,11 +84,11 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                         </PanelContainer.PanelOverride>
                         <BoxContainer Margin="9 6" Orientation="Vertical" SeparationOverride="3">
                             <BoxContainer Orientation="Horizontal">
-                                <Label Text="Working depth" FontColorOverride="#62BDB6" MinWidth="110" />
+                                <Label Text="{Loc 'nc-surgery-ui-depth'}" FontColorOverride="#62BDB6" MinWidth="110" />
                                 <Slider Name="DepthSlider" MinValue="0" MaxValue="100" HorizontalExpand="True" />
                                 <Label Name="DepthLabel" MinWidth="130" HorizontalAlignment="Right" />
                             </BoxContainer>
-                            <Label Text="LMB: apply held tool · RMB: attach instrument · wheel: working depth"
+                            <Label Text="{Loc 'nc-surgery-ui-controls'}"
                                    FontColorOverride="#829C9E" HorizontalAlignment="Center" />
                         </BoxContainer>
                     </PanelContainer>
@@ -100,7 +100,7 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                     </PanelContainer.PanelOverride>
                     <ScrollContainer HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
                         <BoxContainer Margin="9" Orientation="Vertical" SeparationOverride="8" HorizontalExpand="True">
-                            <Label Text="2 // ACTIVE INSTRUMENT" FontColorOverride="#72F5E7" />
+                            <Label Text="{Loc 'nc-surgery-ui-instrument'}" FontColorOverride="#72F5E7" />
                             <PanelContainer HorizontalExpand="True">
                                 <PanelContainer.PanelOverride>
                                     <gfx:StyleBoxFlat BackgroundColor="#091D22" BorderColor="#236861" BorderThickness="1" />
@@ -114,13 +114,14 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                                     </BoxContainer>
                                 </BoxContainer>
                             </PanelContainer>
-                            <Label Text="TOOL MODE" FontColorOverride="#57B9B1" />
+                            <Label Text="{Loc 'nc-surgery-ui-tool-mode'}" FontColorOverride="#57B9B1" />
+                            <RichTextLabel Name="GraftHint" Visible="False" HorizontalExpand="True" />
                             <BoxContainer Name="CapabilityContainer" Orientation="Vertical" SeparationOverride="4" HorizontalExpand="True" />
-                            <Label Text="SITE TELEMETRY" FontColorOverride="#57B9B1" />
+                            <Label Text="{Loc 'nc-surgery-ui-telemetry'}" FontColorOverride="#57B9B1" />
                             <RichTextLabel Name="SiteStatus" HorizontalExpand="True" />
-                            <Label Text="ATTACHED INSTRUMENTS" FontColorOverride="#57B9B1" />
+                            <Label Text="{Loc 'nc-surgery-ui-attachments'}" FontColorOverride="#57B9B1" />
                             <BoxContainer Name="AttachmentContainer" Orientation="Vertical" SeparationOverride="4" HorizontalExpand="True" />
-                            <Label Text="Visible geometry is anatomical data. Every change is validated and applied by the server."
+                            <Label Text="{Loc 'nc-surgery-ui-authority'}"
                                    FontColorOverride="#718B8D" />
                         </BoxContainer>
                     </ScrollContainer>

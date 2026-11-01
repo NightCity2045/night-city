@@ -148,12 +148,29 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
                 ("consciousness", Value(snapshot.Vitals.Consciousness))),
             ConditionColor(snapshot.Vitals.Condition));
         PatientNameLabel.ToolTip = PatientNameLabel.Text;
+        HumanityStateLabel.Visible = snapshot.Humanity != null;
+        if (snapshot.Humanity is { } humanity)
+        {
+            var stage = humanity.Stage switch
+            {
+                Content.Shared._NC.Medical.Humanity.NCCyberCrisisStage.Warning => "nc-humanity-stage-warning",
+                Content.Shared._NC.Medical.Humanity.NCCyberCrisisStage.Crisis => "nc-humanity-stage-crisis",
+                Content.Shared._NC.Medical.Humanity.NCCyberCrisisStage.Acute => "nc-humanity-stage-acute",
+                _ => "nc-humanity-stage-stable",
+            };
+            HumanityStateLabel.SetMessage(Loc.GetString("nc-humanity-status", ("current", MathF.Round(humanity.Current, 1)),
+                ("maximum", MathF.Round(humanity.Maximum, 1)), ("burden", MathF.Round(humanity.Burden, 1)),
+                ("stress", MathF.Round(humanity.Stress, 1)), ("stage", Loc.GetString(stage))));
+        }
+        else HumanityStateLabel.Clear();
         TierLabel.Text = TierName(snapshot.Tier);
         ConfidenceLabel.Text = TierConfidence(snapshot.Tier);
     }
 
     private void ShowEmptyHeader()
     {
+        HumanityStateLabel.Visible = false;
+        HumanityStateLabel.Clear();
         PatientSprite.Visible = false;
         PatientNameLabel.Text = Loc.GetString("nc-medical-diagnostics-patient-unknown");
         PatientStateLabel.Clear();
@@ -1063,7 +1080,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
 
     private string CyberwareName(ProtoId<NCCyberwarePrototype> id) =>
         _prototypes.TryIndex(id, out NCCyberwarePrototype? cyberware)
-            ? cyberware.Name
+            ? cyberware.NameId is { } name ? Loc.GetString(name) : cyberware.Name
             : PrototypeName(id.Id);
 
     private Texture? CyberwareIcon(NCMedicalCyberwareSummary module)
@@ -1079,7 +1096,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
 
     private string CyberwareSlotName(ProtoId<NCCyberwareSlotPrototype> id) =>
         _prototypes.TryIndex(id, out NCCyberwareSlotPrototype? slot)
-            ? slot.Name
+            ? slot.NameId is { } name ? Loc.GetString(name) : slot.Name
             : PrototypeName(id.Id);
 
     private static string DrugName(ProtoId<NCDrugProfilePrototype> id) =>

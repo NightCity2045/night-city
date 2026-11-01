@@ -1,0 +1,32 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+    xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Content.Client._NC.Meta.UI.NCMetaNetWindow"
+    Title="{Loc 'nc-meta-net-console'}" MinWidth="540" MinHeight="420" SetWidth="650" SetHeight="540">
+    <BoxContainer Orientation="Vertical" Margin="8" SeparationOverride="6">
+        <BoxContainer Orientation="Horizontal" SeparationOverride="6">
+            <Label Name="Trace" HorizontalExpand="True" />
+            <Label Name="Budget" HorizontalExpand="True" />
+            <Button Name="Refresh" Text="{Loc 'nc-meta-net-refresh'}" />
+            <Button Name="Disconnect" Text="{Loc 'nc-meta-net-emergency-exit'}" />
+        </BoxContainer>
+        <Label Name="Status" ClipText="True" />
+        <Label Text="{Loc 'nc-meta-net-nodes'}" />
+        <ItemList Name="Nodes" VerticalExpand="True" />
+        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+            <Button Name="Scan" Text="{Loc 'nc-meta-net-scan'}" />
+            <Button Name="Probe" Text="{Loc 'nc-meta-net-probe'}" />
+            <Button Name="Read" Text="{Loc 'nc-meta-net-read'}" />
+            <Button Name="CopySoftware" Text="{Loc 'nc-meta-net-copy-software'}" />
+        </BoxContainer>
+        <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+            <Button Name="Control" Text="{Loc 'nc-meta-net-acquire-control'}" />
+            <Button Name="Activate" Text="{Loc 'nc-meta-net-activate'}" />
+            <Button Name="Deactivate" Text="{Loc 'nc-meta-net-deactivate'}" />
+            <Button Name="Defend" Text="{Loc 'nc-meta-net-defend'}" />
+        </BoxContainer>
+        <Label Text="{Loc 'nc-meta-net-preview'}" />
+        <ScrollContainer SetHeight="100"><Label Name="Preview" /></ScrollContainer>
+    </BoxContainer>
+</controls:FancyWindow>

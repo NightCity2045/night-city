@@ -1,0 +1,213 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncMetaRadio
+  id: NCMetaLocalRadio
+  channel: meta-local
+  maximumRange: 8
+  maximumInterference: 0
+
+- type: ncMetaRadio
+  id: NCMetaShieldedRadio
+  channel: meta-local
+  maximumRange: 6
+  maximumInterference: 1
+
+- type: ncMetaHardware
+  id: NCMetaNetworkHost
+  memoryBytes: 1048576
+  storageBytes: 4194304
+  maxProcesses: 1
+  cpuWeight: 2
+  interfaces: [meta.net.MessagePort, meta.files.FileStore]
+
+- type: ncMetaNetTool
+  id: NCMetaNetProbe
+  rating: 2
+  durationMilliseconds: 1000
+  cooldownMilliseconds: 1000
+  cost: 1
+  budget: 10
+
+- type: ncMetaNetTool
+  id: NCMetaNetDefenseTool
+  rating: 4
+  compatibleKinds: [Defense]
+  durationMilliseconds: 1500
+  cooldownMilliseconds: 1000
+  cost: 2
+  budget: 10
+
+- type: ncMetaNetDefense
+  id: NCMetaNetUnprotected
+  rating: 0
+  traceOnSuccess: 1
+  traceOnFailure: 3
+  iceThreshold: 6
+  blackIceThreshold: 9
+  blackIceDamage:
+    types:
+      Shock: 2
+
+- type: ncMetaNetDefense
+  id: NCMetaNetSecured
+  rating: 3
+  traceOnSuccess: 1
+  traceOnFailure: 3
+  iceThreshold: 6
+  blackIceThreshold: 9
+  blackIceDamage:
+    types:
+      Shock: 5
+
+- type: ncMetaNetDefense
+  id: NCMetaNetBlackIce
+  rating: 1
+  traceOnSuccess: 1
+  traceOnFailure: 3
+  iceThreshold: 3
+  blackIceThreshold: 4
+  threatIntervalMilliseconds: 1000
+  blackIceDamage:
+    types:
+      Shock: 10
+
+- type: entity
+  parent: NCMetaTerminalBase
+  id: NCMetaNetworkPort
+  name: META network terminal
+  description: A physical message endpoint. Wired traffic requires a connected data cable.
+  components:
+  - type: NCMetaHost
+    profile: NCMetaNetworkHost
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.net.MessagePort]
+  - type: NCMetaPort
+    networkId: meta-demo
+    range: 8
+  - type: NCMetaMessagePort
+  - type: DeviceNetwork
+    deviceNetId: Private
+    receiveFrequency: 1945
+    transmitFrequency: 1945
+
+- type: entity
+  parent: BaseHandheldComputer
+  id: NCMetaCyberdeck
+  name: META cyberdeck
+  description: A battery powered local NET terminal. Use it on a reachable access point to connect.
+  components:
+  - type: Sprite
+    sprite: Objects/Tools/multitool.rsi
+    state: icon
+  - type: Item
+    size: Normal
+  - type: NCMetaHost
+    profile: NCMetaCyberdeck
+    allowClaim: true
+  - type: NCMetaTerminal
+  - type: NCMetaStorage
+    capacityBytes: 33554432
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.netrun.NetSession, meta.net.MessagePort]
+  - type: NCMetaCyberdeck
+  - type: NCMetaPort
+    networkId: meta-demo
+    wireless: true
+    range: 8
+  - type: NCMetaMessagePort
+  - type: PowerCellDraw
+    drawRate: 0
+    useCharge: 1
+  - type: ItemSlots
+    slots:
+      cell_slot:
+        startingItem: PowerCellSmall
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Inorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 50
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [Destruction]
+  - type: ActivatableUI
+    key: enum.NCMetaNetUiKey.Console
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+      enum.NCMetaNetUiKey.Console:
+        type: NCMetaNetBoundUserInterface
+  - type: DeviceNetwork
+    deviceNetId: Private
+    receiveFrequency: 1945
+    transmitFrequency: 1945
+
+- type: entity
+  parent: NCMetaCyberdeck
+  id: NCMetaNeuralCyberdeck
+  name: META cyberdeck
+  suffix: neural interface
+  description: A local NET deck with a neural interface. Black ICE can harm its operator when an operational powered neural implant is connected.
+  components:
+  - type: NCMetaCyberdeck
+    neuralInterface: true
+
+- type: entity
+  parent: NCMetaCyberdeck
+  id: NCMetaDefenseCyberdeck
+  name: META cyberdeck
+  suffix: defense tool
+  description: A local NET deck carrying a defense-only tool. Its profile is incompatible with data and control nodes.
+  components:
+  - type: NCMetaCyberdeck
+    toolProfile: NCMetaNetDefenseTool
+
+- type: entity
+  parent: NCMetaCyberdeck
+  id: NCMetaRadioJammer
+  name: META radio interference unit
+  description: A battery powered interference emitter for local META radio channels. Its native emitter operates independently of loaded software.
+  components:
+  - type: NCMetaRadioInterference
+    radius: 6
+    strength: 1
+  - type: NCMetaPort
+    radioProfile: NCMetaShieldedRadio
+
+- type: entity
+  parent: BaseItem
+  id: NCMetaNetworkCable
+  name: META data cable
+  description: Connect the two ends to physical data ports. Excess distance or an obstruction breaks the route.
+  components:
+  - type: Sprite
+    sprite: Objects/Tools/cable-coils.rsi
+    state: coil-10
+  - type: NCMetaNetworkCable
+    maximumLength: 8
+
+- type: entity
+  parent: NCMetaServer
+  id: NCMetaMarketplaceService
+  name: CitiNet software gateway
+  description: A powered native software service. Connect a local data cable to browse, license and activate software through CitiNet.
+  components:
+  - type: NCMetaHost
+    profile: NCMetaServer
+    allowClaim: false
+  - type: NCMetaPort
+    networkId: CITYNET
+  - type: NCMetaMessagePort
+    gatewayNetworks: [LOCAL]
+  - type: NCMetaCitiNetService
+  - type: DeviceNetwork
+    deviceNetId: Private
+    receiveFrequency: 1945
+    transmitFrequency: 1945

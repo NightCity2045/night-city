@@ -62,3 +62,10 @@ public sealed partial class NCFreeformSurgerySessionComponent : Component
     [ViewVariables]
     public readonly Dictionary<int, EntityUid> AttachmentHandles = [];
 }
+
+/// <summary>Bounded active-round action receipts; not a saved authority or an item transfer ledger.</summary>
+[RegisterComponent, UnsavedComponent]
+public sealed partial class NCFreeformSurgeryHistoryComponent : Component
+{
+    public readonly Queue<Guid> Completed = new();
+}

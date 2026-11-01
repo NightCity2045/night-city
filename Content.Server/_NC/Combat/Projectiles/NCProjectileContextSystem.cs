@@ -55,6 +55,7 @@ public sealed partial class NCProjectileContextSystem : EntitySystem
         pending.TargetingMode = selection.Mode;
         pending.SelectedZone = selection.SelectedZone;
         pending.ShooterMoving = shooter is { } movingShooter && _accuracy.IsMoving(movingShooter);
+        pending.MovingPenaltyReduction = _accuracy.CaptureMovementPenaltyReduction(shooter);
         pending.CreatedAt = _timing.CurTime;
     }
 
@@ -95,6 +96,7 @@ public sealed partial class NCProjectileContextSystem : EntitySystem
             context.TargetingMode = pending.TargetingMode;
             context.SelectedZone = pending.SelectedZone;
             context.ShooterMoving = pending.ShooterMoving;
+            context.MovingPenaltyReduction = pending.MovingPenaltyReduction;
             context.Seed = pending.ResolutionId.DeriveSeed(sequence);
             sequence++;
         }

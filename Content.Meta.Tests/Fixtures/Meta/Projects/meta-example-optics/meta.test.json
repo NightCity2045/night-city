@@ -1,0 +1,75 @@
+{
+  "rootModule": "examples.optics",
+  "responses": [
+    {
+      "member": "meta.implants.Optics.setFilter",
+      "value": {
+        "requestedFilter": "LowLight",
+        "stamp": {
+          "epoch": 1,
+          "sequence": 1,
+          "tick": 60
+        }
+      },
+      "pending": false,
+      "completeAfterSlices": 1
+    },
+    {
+      "member": "meta.implants.Optics.setFilter",
+      "value": {
+        "requestedFilter": "Clear",
+        "stamp": {
+          "epoch": 1,
+          "sequence": 1,
+          "tick": 60
+        }
+      },
+      "pending": false,
+      "completeAfterSlices": 1
+    }
+  ],
+  "events": [
+    {
+      "slot": "my-optics",
+      "event": "lightSampled",
+      "arguments": [
+        {
+          "normalizedLight": 0.1,
+          "stamp": {
+            "epoch": 1,
+            "sequence": 1,
+            "tick": 60
+          }
+        }
+      ],
+      "sequence": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "slot": "my-optics",
+      "event": "lightSampled",
+      "arguments": [
+        {
+          "normalizedLight": 0.5,
+          "stamp": {
+            "epoch": 1,
+            "sequence": 2,
+            "tick": 60
+          }
+        }
+      ],
+      "sequence": 2,
+      "nowMs": 1000,
+      "tick": 60
+    }
+  ],
+  "expectedLogs": [],
+  "expectedCommands": [
+    "setFilter(LowLight)",
+    "setFilter(Clear)"
+  ],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}

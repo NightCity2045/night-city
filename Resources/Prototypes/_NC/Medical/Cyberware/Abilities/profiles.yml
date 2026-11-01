@@ -1,0 +1,277 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncCyberwareAbilityPolicy
+  id: NCCyberwareAbilityPolicy
+  maximumMotorBonus: 0.25
+  minimumManualDurationFactor: 0.8
+  maximumPenaltyReduction: 0.25
+  maximumWalkSpeed: 4.5
+  maximumSprintSpeed: 6
+  manualMotorQualities: [ Screwing, Anchoring, Prying ]
+
+- type: ncCyberwareSlot
+  id: NCSlotMotorBurst
+  name: motor burst controller bay
+  nameId: nc-cyberware-slot-motor-burst
+  hostCategories: [ Head ]
+  capacity: 1
+
+- type: ncCyberwareSlot
+  id: NCSlotMotorStabilizer
+  name: motor stabilization controller bay
+  nameId: nc-cyberware-slot-motor-stabilizer
+  hostCategories: [ Head ]
+  capacity: 1
+
+- type: ncCyberwareAbility
+  id: NCToolHandAbility
+  activationSound:
+    path: /Audio/Mecha/sound_mecha_hydraulic.ogg
+    params:
+      volume: -8
+  retractionSound:
+    path: /Audio/Mecha/sound_mecha_hydraulic.ogg
+    params:
+      volume: -10
+  kind: Tool
+  action: NCToolHandAction
+  integralItem: NCIntegralScrewdriver
+  startupEnergy: 0
+  cooldownSeconds: 0
+
+- type: ncCyberware
+  id: NCToolHand
+  name: NCToolHand
+  nameId: nc-cyberware-profile-nctoolhand
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberarm_right
+  form: Implant
+  compatibleSlots: [ NCSlotArmUtilityLeft, NCSlotArmUtilityRight ]
+  size: 1
+  maximumIntegrity: 80
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
+  humanityPackages: [ NCHumanityToolMount ]
+  requiresSeparateCalibration: true
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 2
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+
+- type: ncCyberwareAbility
+  id: NCBiomonitorAbility
+  activationSound:
+    path: /Audio/Machines/high_tech_confirm.ogg
+    params:
+      volume: -12
+  kind: Biomonitor
+  action: NCBiomonitorAction
+  startupEnergy: 1
+  cooldownSeconds: 0
+
+- type: ncCyberware
+  id: NCBiomonitor
+  name: NCBiomonitor
+  nameId: nc-cyberware-profile-ncbiomonitor
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: circulatory_assist
+  form: Implant
+  compatibleSlots: [ NCSlotSubdermalThorax ]
+  size: 1
+  maximumIntegrity: 80
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
+  humanityPackages: [ NCHumanityBiomonitor ]
+  requiresSeparateCalibration: true
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 0.5
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 0.1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+
+- type: ncCyberwareAbility
+  id: NCMantisBladeAbility
+  activationSound:
+    path: /Audio/Items/unsheath.ogg
+  retractionSound:
+    path: /Audio/Mecha/sound_mecha_hydraulic.ogg
+    params:
+      volume: -8
+  kind: Blade
+  action: NCMantisBladeAction
+  integralItem: NCIntegralMantisBlade
+  startupEnergy: 0
+  cooldownSeconds: 0
+
+- type: ncCyberware
+  id: NCMantisBlade
+  name: NCMantisBlade
+  nameId: nc-cyberware-profile-ncmantisblade
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: cyberarm_right
+  form: Implant
+  compatibleSlots: [ NCSlotArmUtilityLeft, NCSlotArmUtilityRight ]
+  size: 1
+  maximumIntegrity: 80
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
+  humanityPackages: [ NCHumanityWeapon ]
+  requiresSeparateCalibration: true
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 5
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 2
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+
+- type: ncCyberwareAbility
+  id: NCSandevistanAbility
+  activationSound:
+    path: /Audio/Mecha/mechmove03.ogg
+    params:
+      volume: -6
+  retractionSound:
+    path: /Audio/Mecha/sound_mecha_hydraulic.ogg
+    params:
+      volume: -8
+  kind: MotorBurst
+  action: NCSandevistanAction
+  startupEnergy: 10
+  cooldownSeconds: 30
+  durationSeconds: 6
+  activeStress: NCHumanityMotorOverdrive
+
+- type: ncCyberware
+  id: NCSandevistan
+  name: NCSandevistan
+  nameId: nc-cyberware-profile-ncsandevistan
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: neural_link
+  form: Implant
+  compatibleSlots: [ NCSlotMotorBurst ]
+  size: 1
+  maximumIntegrity: 80
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
+  humanityPackages: [ NCHumanitySandevistan ]
+  requiresSeparateCalibration: true
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 20
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 6
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+
+- type: ncCyberwareAbility
+  id: NCKerenzikovAbility
+  activationSound:
+    path: /Audio/Machines/high_tech_confirm.ogg
+    params:
+      volume: -8
+  kind: Stabilization
+  action: NCKerenzikovAction
+  startupEnergy: 2
+  cooldownSeconds: 0
+
+- type: ncCyberware
+  id: NCKerenzikov
+  name: NCKerenzikov
+  nameId: nc-cyberware-profile-nckerenzikov
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/implants.rsi
+    state: neural_link
+  form: Implant
+  compatibleSlots: [ NCSlotMotorStabilizer ]
+  size: 1
+  maximumIntegrity: 80
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
+  humanityPackages: [ NCHumanityKerenzikov ]
+  requiresSeparateCalibration: true
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 5
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 1.1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+
+- type: ncHumanityStimulus
+  id: NCHumanityMotorOverdrive
+  impulse: 0.5
+  cooldownSeconds: 0.9
+
+- type: ncHumanityPackage
+  id: NCHumanityToolMount
+  adaptationKey: tool-mount
+  burden: 3
+  acuteCost: 6
+  crisisAffected: true
+
+- type: ncHumanityPackage
+  id: NCHumanityBiomonitor
+  adaptationKey: biomonitor
+  burden: 1
+  acuteCost: 2
+
+- type: ncHumanityPackage
+  id: NCHumanitySandevistan
+  adaptationKey: motor-burst
+  burden: 8
+  acuteCost: 12
+  crisisAffected: true
+
+- type: ncHumanityPackage
+  id: NCHumanityKerenzikov
+  adaptationKey: motor-stabilizer
+  burden: 8
+  acuteCost: 12
+  crisisAffected: true

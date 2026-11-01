@@ -1,0 +1,111 @@
+{
+  "rootModule": "examples.delivery",
+  "responses": [
+    {
+      "member": "meta.drone.Perception.observe",
+      "value": [
+        {
+          "reference": "contact-1",
+          "kind": "Item",
+          "bearingDegrees": 0.0,
+          "rangeMeters": 1.0,
+          "confidence": 1.0,
+          "stamp": {
+            "epoch": 1,
+            "sequence": 1,
+            "tick": 60
+          }
+        }
+      ],
+      "pending": false
+    },
+    {
+      "member": "meta.drone.Manipulator.pickUp",
+      "value": {
+        "operationId": "operation",
+        "status": "Applied",
+        "requested": 1,
+        "completed": 1,
+        "errorCode": {
+          "tag": "none"
+        },
+        "stamp": {
+          "epoch": 1,
+          "sequence": 1,
+          "tick": 60
+        }
+      },
+      "pending": true
+    },
+    {
+      "member": "meta.drone.DroneController.resolveWaypoint",
+      "value": "loading",
+      "pending": false
+    },
+    {
+      "member": "meta.drone.DroneController.setDestination",
+      "value": {
+        "requestId": 1,
+        "stamp": {
+          "epoch": 1,
+          "sequence": 1,
+          "tick": 60
+        }
+      },
+      "pending": true
+    },
+    {
+      "member": "meta.drone.DroneController.resolveWaypoint",
+      "value": "loading",
+      "pending": false
+    },
+    {
+      "member": "meta.drone.Manipulator.dropAt",
+      "value": {
+        "operationId": "operation",
+        "status": "Applied",
+        "requested": 1,
+        "completed": 1,
+        "errorCode": {
+          "tag": "none"
+        },
+        "stamp": {
+          "epoch": 1,
+          "sequence": 1,
+          "tick": 60
+        }
+      },
+      "pending": true
+    }
+  ],
+  "events": [
+    {
+      "slot": "cargo-drone-navigation",
+      "event": "navigationFinished",
+      "arguments": [
+        {
+          "requestId": 1,
+          "status": "Arrived",
+          "stamp": {
+            "epoch": 1,
+            "sequence": 1,
+            "tick": 60
+          }
+        }
+      ],
+      "sequence": 1
+    }
+  ],
+  "expectedLogs": [
+    "Cargo acquired.",
+    "Delivery applied."
+  ],
+  "expectedCommands": [
+    "observe()",
+    "pickUp(contact-1,delivery-pickup-1)",
+    "resolveWaypoint(loading)",
+    "setDestination(loading)",
+    "resolveWaypoint(loading)",
+    "dropAt(loading,delivery-drop-1)"
+  ]
+}

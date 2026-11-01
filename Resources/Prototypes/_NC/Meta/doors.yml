@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: Airlock
+  id: NCMetaDoor
+  components:
+  - type: NCMetaDevice
+    interfaces: [meta.doors.Door]
+    allowClaim: true
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: NCMetaHost
+    profile: NCMetaEmbedded
+    allowClaim: true
+  - type: NCMetaStorage
+  - type: NCMetaTerminal
+  - type: ActivatableUI
+    key: enum.NCMetaUiKey.Workspace
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+
+- type: entity
+  parent: BaseWallmountMetallic
+  id: NCMetaDoorPanel
+  components:
+  - type: Sprite
+    sprite: Structures/Wallmounts/switch.rsi
+    state: dead
+  - type: NCMetaDevice
+    interfaces: [meta.doors.DoorPanel]
+    allowClaim: true
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: NCMetaDoorPanel

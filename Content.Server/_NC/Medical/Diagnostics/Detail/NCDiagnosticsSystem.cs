@@ -63,6 +63,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
     [Dependency] private PlayerRateLimitManager _rateLimit = default!;
     [Dependency] private NCCyberwareSystem _cyberware = default!;
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
+    [Dependency] private Content.Server._NC.Medical.Humanity.NCHumanitySystem _humanity = default!;
     [Dependency] private NCSystemicSystem _systemic = default!;
     [Dependency] private NCBodyScannerConsoleSystem _bodyScanner = default!;
 
@@ -173,7 +174,9 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             (ushort) Math.Clamp(organsOmitted, 0, ushort.MaxValue),
             (ushort) Math.Clamp(cyberwareOmitted, 0, ushort.MaxValue),
             (ushort) Math.Clamp(drugsOmitted, 0, ushort.MaxValue),
-            (ushort) Math.Clamp(historyOmitted, 0, ushort.MaxValue));
+            (ushort) Math.Clamp(historyOmitted, 0, ushort.MaxValue),
+            policy.Tier is NCDiagnosticTier.SelfSensations or NCDiagnosticTier.AdminExact &&
+            _humanity.TryGetStatus(target, out var humanity) ? humanity : null);
         return true;
     }
 
@@ -462,7 +465,10 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                 module.NeuralState,
                 module.Calibrated,
                 module.Operational,
-                module.FunctionalEfficiency));
+                module.FunctionalEfficiency,
+                _cyberware.GetSupplyCharge(moduleUid),
+                _cyberware.GetPowerFraction(moduleUid),
+                module.PowerGranted));
         }
 
         var exactDrugs = new List<NCAdminExactDrugSummary>();
@@ -921,9 +927,9 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                     ? NCDiagnosticBand.None
                     : ToFunctionBand(SafeRatio(integrity.CurrentIntegrity, integrity.MaxIntegrity)),
                 ToFunctionBand(module.FunctionalEfficiency),
-                profile.PowerCapacity <= 0f
+                !profile.RequiresPower
                     ? NCDiagnosticBand.None
-                    : ToFunctionBand(SafeRatio(module.CurrentPower, profile.PowerCapacity)),
+                    : ToFunctionBand(_cyberware.GetPowerFraction(moduleUid)),
                 ToFractionBand(SafeRatio(module.Heat, profile.HeatCapacity)),
                 module.NeuralState,
                 module.Operational,

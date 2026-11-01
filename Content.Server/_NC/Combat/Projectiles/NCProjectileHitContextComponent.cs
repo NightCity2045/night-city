@@ -48,6 +48,7 @@ public sealed partial class NCProjectileHitContextComponent : Component
 
     [ViewVariables]
     public bool ShooterMoving;
+    public float MovingPenaltyReduction;
 
     [ViewVariables]
     public ulong Seed;

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO.Compression;
+using Content.Packaging._NC.Meta; // NC
 using Robust.Packaging;
 using Robust.Packaging.AssetProcessing;
 using Robust.Packaging.AssetProcessing.Passes;
@@ -137,6 +138,10 @@ public static class ServerPackaging
             await WriteServerResources(platform, "", writer, logger, hybridAcz, default);
             await writer.FinishedTask;
         }
+        // NC-Edit-Start: inspect the committed archive, after ZipArchive writes its directory.
+        using (var validation = ZipFile.OpenRead(Path.Combine("release", $"SS14.Server_{platform.Rid}.zip")))
+            NCMetaCompilerWorkerPackaging.ValidateArchive(validation);
+        // NC-Edit-End
 
         logger.Info($"Finished packaging server in {sw.Elapsed}");
     }
@@ -170,6 +175,10 @@ public static class ServerPackaging
     {
         var graph = new RobustServerAssetGraph();
         var passes = graph.AllPasses.ToList();
+        // NC-Edit-Start: worker support data must stay outside Resources/Assemblies.
+        var workerInput = NCMetaCompilerWorkerPackaging.CreateInput(graph);
+        passes.Add(workerInput);
+        // NC-Edit-End
 
         pass.Dependencies.Add(new AssetPassDependency(graph.Output.Name));
         passes.Add(pass);
@@ -181,6 +190,7 @@ public static class ServerPackaging
 
         // Additional assemblies that need to be copied such as EFCore.
         var sourcePath = Path.Combine(contentDir, "bin", "Content.Server");
+        NCMetaCompilerWorkerPackaging.InjectBundle(workerInput, contentDir, cancel); // NC
 
         var deps = DepsHandler.Load(Path.Combine(sourcePath, "Content.Server.deps.json"));
 
@@ -214,6 +224,7 @@ public static class ServerPackaging
 
         inputPassCore.InjectFinished();
         inputPassResources.InjectFinished();
+        workerInput.InjectFinished(); // NC
     }
 
     // This returns both content assemblies (e.g. Content.Server.dll) and dependencies (e.g. Npgsql)
