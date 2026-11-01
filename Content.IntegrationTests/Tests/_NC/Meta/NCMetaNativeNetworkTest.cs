@@ -63,7 +63,6 @@ public sealed partial class NCMetaNativeNetworkTest : GameTest
         HumanoidCharacterProfile profile = null!;
         await Server.WaitAssertion(() =>
         {
-            Assert.That(Server.System<NCCityActorRuntimeIndexSystem>().TryBind(actor, body), Is.True);
             profile = HumanoidCharacterProfile.Random();
         });
         var payload = NCHumanoidProfilePayload.Serialize(Server.ResolveDependency<ISerializationManager>(), profile);
@@ -72,6 +71,7 @@ public sealed partial class NCMetaNativeNetworkTest : GameTest
             new("NCLivingCityResident"), new("NCDefaultResidentPersona"), payload, default, null, request,
             AuditSource: "integration.meta-native-network"));
         Assert.That(created.Status, Is.EqualTo(NCCityActorMutationStatus.Applied), created.Error);
+        await NCMetaNativeActorHarness.RestoreBinding(Server, actor, body);
         return NCPartyRef.ForActor(actor).ToString();
     }
 
@@ -120,8 +120,22 @@ public sealed partial class NCMetaNativeNetworkTest : GameTest
 
     private async Task Destroy(Scene scene)
     {
+        await NCMetaNativeTestTasks.CloseWorld(Server);
+        // Capture before map deletion tears down the actor's authoritative medical graph.
+        await NCMetaNativeActorHarness.UnbindBeforeDelete(Server, scene.Actor, scene.NetworkActor);
         await Server.WaitPost(() => { _scenes.TryDestroy(scene.Physical.Id); Observer.Clear(); });
         await Server.WaitRunTicks(2);
+    }
+
+    private async Task RestoreSceneActorBindings(Scene scene)
+    {
+        Assert.That(NCPartyRef.TryParse(scene.Owner, out var owner) && owner.TryGetActor(out _), Is.True);
+        owner.TryGetActor(out var actor);
+        await NCMetaNativeActorHarness.RestoreBinding(Server, actor, scene.Actor);
+        if (scene.NetworkActor == scene.Actor) return;
+        Assert.That(NCPartyRef.TryParse(scene.NetworkOwner, out var networkOwner) && networkOwner.TryGetActor(out _), Is.True);
+        networkOwner.TryGetActor(out var networkActor);
+        await NCMetaNativeActorHarness.RestoreBinding(Server, networkActor, scene.NetworkActor);
     }
 
     private async Task<NCMetaNativeNetworkProgramHarness.Installed> Program(Scene scene, string key, string source,

@@ -94,7 +94,7 @@ public sealed partial class DiagnosticTools
     public Task<CallToolResult> ClientInspect(string targetId, CancellationToken cancellationToken = default) =>
         Call("client_inspect", new JsonObject { ["targetId"] = targetId }, cancellationToken);
 
-    [McpServerTool(Name = "client_input", ReadOnly = false, Destructive = true), Description("Submit a curated native input function: move_up/down/left/right, use, activate_in_hand, drop or swap_hands. Held input expires within one second.")]
+    [McpServerTool(Name = "client_input", ReadOnly = false, Destructive = true), Description("Submit a curated native input function: move_up/down/left/right, use, context_menu, activate_in_hand, drop or swap_hands. Held input expires within one second.")]
     public Task<CallToolResult> ClientInput(string function, string serverInstanceId, long worldGeneration, string targetId, string? netEntity = null, string state = "press", int durationMilliseconds = 100, string? operationId = null, CancellationToken cancellationToken = default) =>
         Call("client_input", new JsonObject { ["function"] = function, ["serverInstanceId"] = serverInstanceId, ["worldGeneration"] = worldGeneration, ["targetId"] = targetId, ["netEntity"] = netEntity, ["state"] = state, ["durationMilliseconds"] = durationMilliseconds, ["operationId"] = operationId }, cancellationToken);
 

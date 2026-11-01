@@ -345,50 +345,6 @@
 
 - type: ncItemDefinition
   parent: NCShopConstructionDefinitionBase
-  id: NCItemMetaNetAccessPoint
-  displayName: ent-NCMetaDemoNetAccessPoint
-  stableKey: meta.netaccesspoint
-  materializedPrototype: NCMetaDemoNetAccessPoint
-  basePrice: 200
-  shopInitialQuantity: 1
-  catalogCategory: nc-meta-equipment-category
-  catalogDescription: nc-meta-equipment-description
-
-- type: ncItemDefinition
-  parent: NCShopConstructionDefinitionBase
-  id: NCItemMetaNetData
-  displayName: ent-NCMetaDemoNetData
-  stableKey: meta.netdata
-  materializedPrototype: NCMetaDemoNetData
-  basePrice: 200
-  shopInitialQuantity: 1
-  catalogCategory: nc-meta-equipment-category
-  catalogDescription: nc-meta-equipment-description
-
-- type: ncItemDefinition
-  parent: NCShopConstructionDefinitionBase
-  id: NCItemMetaNetControl
-  displayName: ent-NCMetaDemoNetControl
-  stableKey: meta.netcontrol
-  materializedPrototype: NCMetaDemoNetControl
-  basePrice: 250
-  shopInitialQuantity: 1
-  catalogCategory: nc-meta-equipment-category
-  catalogDescription: nc-meta-equipment-description
-
-- type: ncItemDefinition
-  parent: NCShopConstructionDefinitionBase
-  id: NCItemMetaNetFirewall
-  displayName: ent-NCMetaDemoNetFirewall
-  stableKey: meta.netfirewall
-  materializedPrototype: NCMetaDemoNetFirewall
-  basePrice: 300
-  shopInitialQuantity: 1
-  catalogCategory: nc-meta-equipment-category
-  catalogDescription: nc-meta-equipment-description
-
-- type: ncItemDefinition
-  parent: NCShopConstructionDefinitionBase
   id: NCItemMetaCitiNetGateway
   displayName: ent-NCMetaMarketplaceService
   stableKey: meta.citinetgateway

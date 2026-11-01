@@ -23,7 +23,7 @@ public sealed record NCMetaDevelopmentRequest(NCMetaDevelopmentAction Action, st
     Guid ReceiptId = default, Guid Nonce = default, bool Confirm = false, bool AutomaticConsent = false,
     Guid ProjectId = default, Guid ReleaseId = default, string Text = "", long CustomerAmount = 0,
     long DeveloperAmount = 0, bool TransferDelivery = false, string ResolutionHash = "",
-    int Offset = 0, NCMetaDevelopmentOffer? Offer = null, int Utf8Offset = 0);
+    int Offset = 0, NCMetaDevelopmentOffer? Offer = null, int Utf8Offset = 0) : NCMetaWorkspacePayload;
 
 [Serializable, NetSerializable]
 public sealed record NCMetaDevelopmentFixtureChunk(string Path, string Source, int Offset, int TotalBytes, string Sha256, bool Complete,

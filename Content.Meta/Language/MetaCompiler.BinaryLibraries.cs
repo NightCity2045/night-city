@@ -99,14 +99,62 @@ public sealed partial class MetaCompiler
         {
             foreach (var library in _binaryLibraries)
             {
-                library.Types = new int[library.Module.Types.Length];
+                library.RequiredTypes = RequiredBinaryTypes(library);
+                library.Types = Enumerable.Repeat(-1, library.Module.Types.Length).ToArray();
                 foreach (var type in library.Module.Types)
                 {
+                    if (!library.RequiredTypes.Contains(type.Id)) continue;
                     if (_userTypes.ContainsKey(type.Name)) { _budget.Report("E305", EmptySpan, type.Name); continue; }
                     library.Types[type.Id] = AddType(type.Name, type.Kind, type.ContractHash);
                     if (type.Kind is MetaTypeKind.Struct or MetaTypeKind.Enum && type.ContractHash == null) _binaryTypeNames.Add(type.Name);
                 }
             }
+        }
+
+        private HashSet<int> RequiredBinaryTypes(BinaryLibrary library)
+        {
+            // Old modules contain their catalog's complete native type table. Unused types from
+            // retired APIs are metadata, not a dependency of an otherwise compatible library.
+            var module = library.Module;
+            var current = _catalog.Types.Select(type => type.Name).ToHashSet(StringComparer.Ordinal);
+            var required = new HashSet<int>();
+            var pending = new Queue<int>();
+            void Add(int id) { if (required.Add(id)) pending.Enqueue(id); }
+            foreach (var type in module.Types)
+                if (type.Id < 6 || current.Contains(type.Name) ||
+                    type.ContractHash == null && type.Kind is MetaTypeKind.Struct or MetaTypeKind.Enum)
+                    Add(type.Id);
+            foreach (var constant in module.Constants) Add(constant.TypeId);
+            foreach (var global in module.Globals) Add(global.TypeId);
+            foreach (var import in module.Imports)
+            {
+                if (import.CapabilityTypeId is { } capability) Add(capability);
+                if (import.ReturnType is { } result) Add(result);
+                foreach (var parameter in import.ParameterTypes) Add(parameter);
+            }
+            foreach (var function in module.Functions)
+            {
+                Add(function.ReturnType);
+                foreach (var parameter in function.ParameterTypes) Add(parameter);
+                foreach (var local in function.Locals) Add(local.TypeId);
+                foreach (var instruction in MetaInstructionCodec.Decode(module.Code.AsSpan(function.CodeOffset, function.CodeLength)))
+                {
+                    _budget.Cancellation.ThrowIfCancellationRequested();
+                    if (instruction.Opcode is MetaOpcode.Eq or MetaOpcode.Ne or MetaOpcode.Lt or MetaOpcode.Le or MetaOpcode.Gt or MetaOpcode.Ge or
+                        MetaOpcode.RecordNew or MetaOpcode.RecordGet or MetaOpcode.RecordSet or MetaOpcode.VariantNew or MetaOpcode.VariantTag or
+                        MetaOpcode.VariantPayload or MetaOpcode.ArrayNew or MetaOpcode.ArrayLen or MetaOpcode.ArrayGet or MetaOpcode.ArraySet or
+                        MetaOpcode.ArrayLiteral or MetaOpcode.BrVariant) Add((int) instruction.A);
+                    if (instruction.Opcode == MetaOpcode.CallIntrinsic && instruction.B != uint.MaxValue) Add((int) instruction.B);
+                }
+            }
+            while (pending.TryDequeue(out var id))
+            {
+                var type = module.Types[id];
+                foreach (var argument in type.Args) Add(argument);
+                foreach (var field in type.Fields) Add(field.TypeId);
+                foreach (var variant in type.Variants) if (variant.PayloadTypeId is { } payload) Add(payload);
+            }
+            return required;
         }
 
         private void DefineBinaryTypes()
@@ -115,6 +163,7 @@ public sealed partial class MetaCompiler
             foreach (var library in _binaryLibraries)
                 foreach (var source in library.Module.Types)
                 {
+                    if (!library.RequiredTypes.Contains(source.Id)) continue;
                     var id = library.Types[source.Id];
                     var mapped = source with
                     {
@@ -332,6 +381,7 @@ public sealed partial class MetaCompiler
         {
             public MetaBinaryLibrary Dependency = dependency;
             public MetaModule Module = module;
+            public HashSet<int> RequiredTypes = [];
             public int[] Types = []; public int[] Functions = []; public int[] Constants = []; public int[] Globals = []; public int[] Imports = [];
         }
     }

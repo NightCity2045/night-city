@@ -14,7 +14,7 @@ public sealed record NCMetaGrantSummary(Guid GrantId, Guid InstallationId, strin
 
 [Serializable, NetSerializable]
 public sealed record NCMetaGrantApprovalRequest(long ExpectedRevision, bool ScopeConsent, bool AllowUnattended,
-    long? ExpiresAtTicks, List<NCMetaGrantConsent> Bindings);
+    long? ExpiresAtTicks, List<NCMetaGrantConsent> Bindings) : Content.Shared._NC.Meta.UI.NCMetaWorkspacePayload;
 
 [Serializable, NetSerializable]
 public sealed record NCMetaGrantMember(string Name, string Scope);

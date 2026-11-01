@@ -69,8 +69,8 @@ public sealed class HybridRuntimeTests
     public void PureNormativeSourceExecutesItsExpectedOutput(string name, string expected)
     {
         var directory = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
-        while (directory != null && !Directory.Exists(Path.Combine(directory.FullName, "Resources", "Meta", "Examples"))) directory = directory.Parent;
-        var source = File.ReadAllText(Path.Combine(directory!.FullName, "Resources", "Meta", "Examples", "examples." + name + ".meta"));
+        while (directory != null && !Directory.Exists(Path.Combine(directory.FullName, "Content.Meta.Tests", "Fixtures", "Meta", "Examples"))) directory = directory.Parent;
+        var source = File.ReadAllText(Path.Combine(directory!.FullName, "Content.Meta.Tests", "Fixtures", "Meta", "Examples", "examples." + name + ".meta"));
         var result = new MetaCompiler().Compile(new([new("example.meta", source)], "examples." + name));
         Assert.That(result.Success, Is.True);
         var host = new RecordingHost(); var process = new MetaProcess(MetaVerifier.Verify(result.Artifact!, MetaApiCatalog.Default.CreateVerificationCatalog(result.Module!)), host);

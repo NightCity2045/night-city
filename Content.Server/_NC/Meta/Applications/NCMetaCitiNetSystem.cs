@@ -13,6 +13,7 @@ using Content.Server._NC.Agent;
 using Content.Server._NC.Meta.Devices;
 using Content.Server._NC.Meta.Persistence;
 using Content.Server._NC.Meta.Authority;
+using Content.Server._NC.Meta.Commerce;
 using Content.Shared._NC.Agent.Components;
 using Content.Shared._NC.Meta;
 using Content.Shared._NC.Meta.UI;
@@ -36,6 +37,7 @@ public sealed partial class NCMetaCitiNetSystem : EntitySystem
     [Dependency] private NCMetaHostingSystem _hosting = default!;
     [Dependency] private NCMetaPersistenceSystem _persistence = default!;
     [Dependency] private NCMetaAuthoritySystem _authority = default!;
+    [Dependency] private NCMetaMarketplaceSystem _marketplace = default!;
     [Dependency] private IServerDbManager _database = default!;
     [Dependency] private ITaskManager _tasks = default!;
     [Dependency] private NCAgentSystem _agents = default!;
@@ -124,7 +126,7 @@ public sealed partial class NCMetaCitiNetSystem : EntitySystem
         return !committed.Active;
     }
 
-    private bool Connected(EntityUid host) => TryComp<NCMetaPortComponent>(host, out var port) && port.NetworkId == "CITYNET";
+    private bool Connected(EntityUid host) => _marketplace.HasCitiNetRoute(host);
     private bool Restore(Guid id, Publication publication)
     {
         Cache(id, publication);

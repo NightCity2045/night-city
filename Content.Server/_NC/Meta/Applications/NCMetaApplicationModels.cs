@@ -16,6 +16,9 @@ public sealed record NCMetaAppPolicy(ImmutableHashSet<string> AudienceParties, I
 }
 
 public sealed record NCMetaAppRegistration(EntityUid Host, string Owner, Guid RuntimeGeneration,
-    MuiVerifiedApplication Application, NCMetaAppPolicy Policy);
+    MuiVerifiedApplication Application, NCMetaAppPolicy Policy)
+{
+    internal readonly Dictionary<string, Content.Shared._NC.Meta.UI.NCMetaMuiPresentation> Presentations = new(StringComparer.Ordinal);
+}
 
 public enum NCMetaAppPresentation : byte { Desktop, Agent, Website, Dashboard }

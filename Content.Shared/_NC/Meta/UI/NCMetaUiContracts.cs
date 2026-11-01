@@ -81,7 +81,7 @@ public sealed class NCMetaWorkspaceRequestMessage(
     int totalUtf8Bytes = 0,
     string contentSha256 = "",
     bool complete = true,
-    Guid installationId = default) : BoundUserInterfaceMessage
+    Guid installationId = default, NCMetaWorkspacePayload? payload = null) : BoundUserInterfaceMessage
 {
     public readonly NCMetaWorkspaceOperation Operation = operation;
     public readonly Guid RequestId = requestId;
@@ -100,6 +100,7 @@ public sealed class NCMetaWorkspaceRequestMessage(
     public readonly string ContentSha256 = contentSha256;
     public readonly bool Complete = complete;
     public readonly Guid InstallationId = installationId;
+    public readonly NCMetaWorkspacePayload? Payload = payload;
 }
 
 /// <summary>Private editor projection, sent only to the authenticated reader of the physical terminal.</summary>
@@ -149,12 +150,16 @@ public sealed class NCMetaAppState : BoundUserInterfaceState
 {
     public Guid SessionId;
     public string ViewId = "";
+    public bool Website;
     public string Title = "";
-    public string Document = "";
-    public string Styles = "";
-    public string ContractJson = "";
-    public List<NCMetaMuiResource> Resources = [];
-    public string StateJson = "{}";
+    [NonSerialized] public string Document = "";
+    [NonSerialized] public string Styles = "";
+    [NonSerialized] public string ContractJson = "";
+    public NCMetaMuiPresentation? Presentation;
+    [NonSerialized] public List<NCMetaMuiResource> Resources = [];
+    [NonSerialized] public string StateJson = "{}";
+    public int StateBytes;
+    public NCMetaUiValue? Values;
     public long BaseRevision;
     public long Revision;
     public bool FullSnapshot = true;

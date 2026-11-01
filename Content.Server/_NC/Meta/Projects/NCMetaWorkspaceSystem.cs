@@ -73,10 +73,12 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
         SubscribeLocalEvent<NCMetaTerminalComponent, NCMetaWorkspaceRequestMessage>(OnRequest);
         InitializeNativeTools();
         InitializeLanguageSymbols();
+        InitializeAuthoring();
     }
 
     public override void Shutdown()
     {
+        ClearDrafts();
         ShutdownLanguageSymbols();
         if (_compiler != null)
             _ = _compiler.DisposeAsync();
@@ -94,6 +96,10 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
         base.Update(frameTime);
         if (_timing.CurTime < _nextCleanup) return;
         _nextCleanup = _timing.CurTime + TimeSpan.FromSeconds(5);
+        foreach (var pair in _drafts.ToArray())
+            if (!DraftCurrent(pair.Value)) CloseDraft(pair.Key);
+        foreach (var pair in _draftProofs.ToArray())
+            if (pair.Value.Until <= _timing.CurTime || !IsCurrent(pair.Value.Context, afterClaim: true)) _draftProofs.Remove(pair.Key);
         foreach (var key in _uploads.Where(pair => pair.Value.Expires <= _timing.CurTime).Select(pair => pair.Key).ToArray())
             if (_uploads.Remove(key, out var upload)) upload.Bytes.Dispose();
         foreach (var key in _leases.Where(pair => pair.Value.Expires <= _timing.CurTime).Select(pair => pair.Key).ToArray())
@@ -118,6 +124,8 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
         _nativeTools.Remove((ent.Owner, actor));
         _languageTransfers.Remove((ent.Owner, actor));
         _languageBuildTokens.Remove((ent.Owner, actor));
+        CloseDraft((ent.Owner, actor));
+        _draftProofs.Remove((ent.Owner, actor));
         if (actor is { } user && _uploads.Remove((ent.Owner, user), out var upload))
             upload.Bytes.Dispose();
         foreach (var file in _leases.Where(pair => pair.Value.Terminal == ent.Owner && pair.Value.User == actor)
@@ -166,6 +174,17 @@ public sealed partial class NCMetaWorkspaceSystem : EntitySystem
         }
         _requestRates[user] = (rate.Rate, _timing.CurTime);
         if (!alreadyAdmitted && !rate.Rate.TryConsume(_timing.CurTime.Ticks / TimeSpan.TicksPerMillisecond)) return false;
+        if (request.Payload != null)
+        {
+            if (request.Source != "") return false;
+            string? source;
+            try { source = EncodeWorkspacePayload(request.Payload); }
+            catch (Exception exception) when (exception is JsonException or ArgumentException or InvalidOperationException) { return false; }
+            if (source == null || source.Length > 32768 || Utf8.GetByteCount(source) > 32768) return false;
+            request = new(request.Operation, request.RequestId, request.FileId, request.BaseRevision, source,
+                request.DeviceId, request.ReleaseId, request.SourceOffset, request.ProjectId, request.Path, request.Utf8Offset,
+                request.ChunkBytes, request.TransferId, request.TotalUtf8Bytes, request.ContentSha256, request.Complete, request.InstallationId);
+        }
         if (request.Source.Length > 32 * 1024 || request.Path.Length > 192 || request.ContentSha256.Length > 64 ||
             request.DeviceId.Length > 128)
             return false;

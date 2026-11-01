@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Content.Client._NC.Meta.Mui;
+using Content.Client._NC.Meta.UI;
+using Content.Client._NC.Agent;
 using Content.IntegrationTests.Fixtures;
 using Content.Meta.Language;
 using Content.Meta.Mui;
@@ -21,10 +24,14 @@ using Content.Server._NC.Meta.Runtime;
 using Content.Shared._NC.Meta.Network;
 using Content.Shared._NC.Meta.UI;
 using Content.Shared.Mind;
+using Content.Shared.CartridgeLoader;
+using Content.Shared.PDA;
 using Content.Shared.UserInterface;
 using Robust.Client.UserInterface;
+using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Enums;
 using Robust.Shared.GameObjects;
+using Robust.Shared.Map;
 
 namespace Content.IntegrationTests.Tests._NC.Meta;
 
@@ -33,6 +40,87 @@ public sealed class NCMetaNativeAppTransportTest : GameTest
 {
     public override PoolSettings PoolSettings => new() { Connected = true };
     private Func<string> _serverDiagnostics = null!;
+
+    [Test]
+    public async Task CitiNetWebsiteRendersInsideBrowserAndClosingItReleasesTheSession()
+    {
+        await Client.WaitAssertion(() =>
+        {
+            using var browser = new NCMetaCitiNetBrowser();
+            using var sessions = new NCMetaApplicationSessionManager(browser.TryShowWebsite);
+            var requests = new List<BoundUserInterfaceMessage>();
+            sessions.Requested += requests.Add;
+            var presentation = new NCMetaMuiPresentation
+            {
+                NodeCount = 2,
+                Root = new() { Id = "customer", Kind = NCMetaMuiControlKind.Page, Children =
+                    [new() { Id = "subject", Kind = NCMetaMuiControlKind.Input, Properties = new() { ["field"] = "subject", ["maxLength"] = "256" } }] },
+                Views = new() { ["customer"] = new("test.customer", "ui/customer.mui", new(), [], null) },
+            };
+            Assert.That(NCMetaMuiValues.PresentationValid(presentation, "customer"), Is.True);
+            var sessionId = Guid.NewGuid();
+            Assert.That(sessions.TryApplyState(new NCMetaAppState
+            {
+                SessionId = sessionId, ViewId = "customer", Website = true, Title = "Test website",
+                Presentation = presentation, Values = new NCMetaUiObject(), StateBytes = 2,
+            }), Is.True);
+            var host = browser.FindControl<BoxContainer>("BrowserPageHost");
+            Assert.That(host.ChildCount, Is.EqualTo(1));
+            Assert.That(host.Children.Single(), Is.TypeOf<NCMetaApplicationView>());
+            Assert.That(browser.FindControl<TabContainer>("BrowserSections").CurrentTab, Is.Zero);
+            var pending = new Queue<Control>();
+            pending.Enqueue(host);
+            LineEdit? input = null;
+            while (pending.TryDequeue(out var control))
+            {
+                if (control is LineEdit { Name: "subject" } field) input = field;
+                foreach (var child in control.Children) pending.Enqueue(child);
+            }
+            Assert.That(input, Is.Not.Null);
+            input!.Text = "Текст формы";
+            browser.FeedHost.AddChild(new Label { Text = "A city feed update" });
+            browser.FeedHost.DisposeAllChildren();
+            Assert.That(input.Text, Is.EqualTo("Текст формы"));
+            sessions.CloseWebsite();
+            Assert.That(sessions.SessionCount, Is.Zero);
+            Assert.That(host.ChildCount, Is.Zero);
+            Assert.That(input.Disposed, Is.True);
+            Assert.That(requests.OfType<NCMetaAppCloseMessage>().Single().SessionId, Is.EqualTo(sessionId));
+        });
+    }
+
+    [Test]
+    public async Task AgentIgnoresLoaderUpdatesAfterItsWindowHasBeenDisposed()
+    {
+        await Client.WaitAssertion(() =>
+        {
+            var owner = CEntMan.SpawnEntity(null, MapCoordinates.Nullspace);
+            using var menu = new NCAgentMenu();
+            using var ui = new NCAgentBoundUserInterface(owner, PdaUiKey.Key);
+            var type = typeof(NCAgentBoundUserInterface);
+            type.GetField("_menu", BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(ui, menu);
+            menu.Dispose();
+            Assert.DoesNotThrow(() => type.GetMethod("UpdateState", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .Invoke(ui, [new CartridgeLoaderUiState([], null)]));
+            CEntMan.DeleteEntity(owner);
+        });
+    }
+
+    [Test]
+    public async Task WorkspaceRefreshPreservesTheSelectedPermissionsTab()
+    {
+        await Client.WaitAssertion(() =>
+        {
+            using var window = new NCMetaWorkspaceWindow();
+            window.ApplyState(new NCMetaWorkspaceState());
+            window.OpenCentered();
+            var tabs = window.FindControl<TabContainer>("MainContentTabs");
+            tabs.CurrentTab = 2;
+            window.ApplyState(new NCMetaWorkspaceState());
+            Assert.That(tabs.CurrentTab, Is.EqualTo(2), "A permission response must not send the user back to the editor.");
+            window.Close();
+        });
+    }
 
     private async Task Until(Func<bool> check, int maximumTicks = 900, [CallerArgumentExpression(nameof(check))] string condition = "")
     {
@@ -62,7 +150,7 @@ public sealed class NCMetaNativeAppTransportTest : GameTest
                     if (control.Disposed) continue;
                     if (control is NCMetaMuiRenderer renderer && renderer.SessionId == session && renderer.Revision >= 0)
                     {
-                        sent = renderer.TryRequestAction("send", "{}");
+                        sent = renderer.TryRequestAction("send", new NCMetaUiObject());
                         return;
                     }
                     foreach (var child in control.Children) if (pending.Count < 8192) pending.Enqueue(child);
@@ -71,11 +159,28 @@ public sealed class NCMetaNativeAppTransportTest : GameTest
             if (sent) return;
             await Pair.RunTicksSync(1);
         }
-        Assert.Fail("The real native renderer did not receive its first snapshot and submit the declared action through BUI.");
+        var server = "";
+        if (_serverDiagnostics != null) await Server.WaitPost(() => server = _serverDiagnostics());
+        var client = new List<string>();
+        await Client.WaitPost(() =>
+        {
+            var pending = new Queue<Control>();
+            pending.Enqueue(Client.ResolveDependency<IUserInterfaceManager>().RootControl);
+            for (var work = 0; work < 8192 && pending.TryDequeue(out var control); work++)
+            {
+                if (control.Disposed) continue;
+                if (control is NCMetaMuiRenderer renderer) client.Add($"renderer={renderer.SessionId}; revision={renderer.Revision}");
+                if (control is Label { Name: "Notice" } notice) client.Add($"notice={notice.Text}");
+                foreach (var child in control.Children) if (pending.Count < 8192) pending.Enqueue(child);
+            }
+        });
+        Assert.Fail("The real native renderer did not receive its first snapshot and submit the declared action through BUI. " +
+            server + "; client=" + string.Join(" | ", client.Take(16)));
     }
 
     [TestCase("CloseUi")]
     [TestCase("DetachMind")]
+    [Repeat(3)]
     public async Task AnActuallyConnectedApplicationCannotDeliverAnAlreadyAcceptedPacketAfterItsInvokingSessionCloses(string transition)
     {
         var scenes = Server.System<NCMetaDemoSceneSystem>();
@@ -171,6 +276,8 @@ public sealed class NCMetaNativeAppTransportTest : GameTest
                 Assert.That(apps.TryOpen(sourceHost, scene.Operator, sourceHost, "main", NCMetaAppPresentation.Desktop,
                     NCMetaUiKey.Application, () => devices.CanManage(sourceHost, scene.Operator), out session), Is.True);
             });
+            // Exercise the private initial update while the peer has not yet applied the new BUI subscription.
+            await Server.WaitRunTicks(20);
             await SendThroughReadyFrontend(session);
             await Until(() => runtime.GetLogs(sourceHost, scene.Operator, sender.Installation.Id).Contains("queued") &&
                 sender.Runtime.Process.State == MetaProcessState.Idle && sender.Runtime.InvocationActor == null);

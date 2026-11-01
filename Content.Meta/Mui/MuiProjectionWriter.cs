@@ -99,11 +99,11 @@ public sealed class MuiProjectionWriter : IDisposable
                 case Kind.EndArray: _writer.WriteEndArray(); break;
                 case Kind.CaptureField:
                     _writer.Flush();
-                    _fields.Add(work.Name!, Encoding.UTF8.GetString(_bytes.Written[work.Start..]));
+                    _fields.Add(work.Name!, _bytes.GetText(work.Start));
                     break;
                 case Kind.Finish:
                     _writer.Flush();
-                    Result = new(Encoding.UTF8.GetString(_bytes.Written), _fields.ToImmutableDictionary(StringComparer.Ordinal));
+                    Result = new(_bytes.GetText(), _fields.ToImmutableDictionary(StringComparer.Ordinal));
                     Progress = MuiCodecProgress.Complete;
                     break;
             }
@@ -189,7 +189,7 @@ public sealed class MuiProjectionWriter : IDisposable
     private sealed class Output : Stream
     {
         private readonly MemoryStream _buffer = new();
-        public ReadOnlySpan<byte> Written => _buffer.GetBuffer().AsSpan(0, checked((int) _buffer.Length));
+        public string GetText(int start = 0) => Encoding.UTF8.GetString(_buffer.GetBuffer(), start, checked((int) _buffer.Length - start));
         public override bool CanRead => false;
         public override bool CanSeek => false;
         public override bool CanWrite => true;

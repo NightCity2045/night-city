@@ -13,11 +13,11 @@ public sealed record NCMetaFirmwarePreview(Guid ReleaseId, long ArtifactResident
     string PackageName = "", string Version = "");
 
 [Serializable, NetSerializable]
-public sealed record NCMetaFirmwareSelection(Guid ProductId = default);
+public sealed record NCMetaFirmwareSelection(Guid ProductId = default) : NCMetaWorkspacePayload;
 
 /// <summary>Consent over the exact server-admitted immutable release and its independent memory/storage costs.</summary>
 [Serializable, NetSerializable]
 public sealed record NCMetaFirmwareInstallRequest(List<NCMetaSoftwareBinding> Bindings, bool ScopeConsent,
     List<string> ApprovedScopes, bool ResourceConsent, long ApprovedArtifactResidentBytes,
     long ApprovedProcessMemoryBytes, long ApprovedPackageBytes, Guid ProductId = default,
-    Guid ExpectedInstallationId = default, long ExpectedInstallationRevision = 0);
+    Guid ExpectedInstallationId = default, long ExpectedInstallationRevision = 0) : NCMetaWorkspacePayload;

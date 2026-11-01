@@ -44,7 +44,7 @@ public sealed partial class NCCyberwareAssemblyPrototype : IPrototype
 [RegisterComponent]
 public sealed partial class NCCyberwareAssemblyComponent : Component
 {
-    [DataField] public bool Initialized;
+    [DataField] public new bool Initialized;
     [DataField] public uint ConfigurationRevision = 1;
     [DataField] public uint? ValidatedRevision;
     [ViewVariables] public Dictionary<ProtoId<NCCyberwarePartSlotPrototype>, ContainerSlot> Parts = [];
@@ -58,7 +58,7 @@ public sealed partial class NCCyberwarePartComponent : Component
     [DataField(required: true)] public ProtoId<NCCyberwarePartPrototype> Profile;
     [DataField] public Guid StableInstanceId;
     [DataField] public float PermanentDamage;
-    [DataField] public bool Initialized;
+    [DataField] public new bool Initialized;
 }
 
 [RegisterComponent]

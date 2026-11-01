@@ -1,6 +1,11 @@
 light_mode unshaded;
 uniform sampler2D SCREEN_TEXTURE;
 uniform sampler2D BLOOM_TEXTURE;
+uniform sampler2D LIGHT_TEXTURE;
+
+uniform bool celEnabled;
+uniform bool celLighting;
+uniform highp float celStrength;
 
 uniform highp float bloomIntensity;
 uniform bool bloomEnabled;
@@ -23,6 +28,64 @@ highp vec3 ACESFilm(highp vec3 x) {
     return clamp((x*(a*x+b))/(x*(c*x+d)+e), 0.0, 1.0);
 }
 
+// Quantize illumination independently of painted sprite detail.
+highp vec3 celShade(highp vec3 scene, highp vec3 illumination) {
+    highp float lightPeak = max(illumination.r, max(illumination.g, illumination.b));
+    // The light buffer is linear. Space the bands in perceptual brightness so
+    // dark rooms do not collapse into a single band; HDR highlights stay intact.
+    highp float brightness = sqrt(clamp(lightPeak, 0.0, 1.0));
+    highp float band = 0.11;
+    band += 0.21 * smoothstep(0.19, 0.21, brightness);
+    band += 0.28 * smoothstep(0.44, 0.46, brightness);
+    band += 0.40 * smoothstep(0.72, 0.74, brightness);
+    highp float scale = clamp((band * band) / max(lightPeak, 0.0001), 0.42, 1.8);
+
+    // Do not lift black/FOV pixels or amplify near-black noise. Fullbright layers
+    // have no separate mask in the composite, so protect pixels brighter than
+    // their local illumination as a conservative approximation for emissives.
+    highp float scenePeak = max(scene.r, max(scene.g, scene.b));
+    highp float emissive = smoothstep(lightPeak + 0.04, lightPeak + 0.16, scenePeak);
+    highp float weight = smoothstep(0.025, 0.12, brightness) * (1.0 - emissive);
+    return scene * mix(1.0, scale, weight);
+}
+
+highp float luminance(highp vec3 color) {
+    return dot(color, vec3(0.2126, 0.7152, 0.0722));
+}
+
+// A world-wide art treatment, independent of district IDs or map prototypes.
+// Violet ink shadows and saturated lights supply the graphic anime contrast
+// even in flat ambient lighting, where illumination bands alone do very little.
+highp vec3 celGrade(highp vec3 color) {
+    highp vec3 exposed = ACESFilm(max(color, vec3(0.0)) * 1.25);
+    highp float value = luminance(exposed);
+    highp vec3 saturated = max(mix(vec3(value), exposed, 1.3), vec3(0.0));
+    highp float peak = max(color.r, max(color.g, color.b));
+    highp float low = min(color.r, min(color.g, color.b));
+    highp float chroma = (peak - low) / max(peak, 0.0001);
+    highp float shadow = 1.0 - smoothstep(0.12, 0.55, value);
+    // Neutral surfaces receive dark indigo ink, rather than a pink exposure
+    // lift. Strong source colors retain more of their authored hue.
+    highp vec3 ink = value * vec3(0.45, 0.35, 0.95);
+    highp vec3 graded = mix(saturated, ink, shadow * (0.9 - 0.45 * chroma));
+    return mix(graded, color, smoothstep(0.75, 1.0, peak));
+}
+
+// Thin contrast lines on the darker side of pronounced image edges. No wide
+// outline dilation: the pixel silhouette and small painted features stay put.
+highp vec2 celEdge(highp vec2 uv, highp vec3 center) {
+    highp vec2 pixel = SCREEN_PIXEL_SIZE.xy;
+    highp float left = luminance(texture(SCREEN_TEXTURE, uv - vec2(pixel.x, 0.0)).rgb);
+    highp float below = luminance(texture(SCREEN_TEXTURE, uv - vec2(0.0, pixel.y)).rgb);
+    highp float neighbor = luminance(texture(SCREEN_TEXTURE, uv + vec2(pixel.x, 0.0)).rgb);
+    neighbor = max(neighbor, left);
+    neighbor = max(neighbor, luminance(texture(SCREEN_TEXTURE, uv + vec2(0.0, pixel.y)).rgb));
+    neighbor = max(neighbor, below);
+    highp float value = luminance(center);
+    return vec2(smoothstep(0.035, 0.13, neighbor - value),
+        smoothstep(0.02, 0.09, value - min(left, below)));
+}
+
 void fragment() {
     highp vec2 screenUV = FRAGCOORD.xy * SCREEN_PIXEL_SIZE.xy;
     highp vec4 scene = texture(SCREEN_TEXTURE, screenUV);
@@ -41,19 +104,43 @@ void fragment() {
     highp float tintWeight = smoothstep(0.0, 0.2, luma) * 0.7; // Protect absolute blacks
     result = mix(result, graded, tintWeight); 
 
-    // 2. Bloom
+    // 2. Bloom: retain the existing intensity convention.
+    highp vec3 bloomAmount = vec3(0.0);
+    highp vec3 celBloom = vec3(0.0);
     if (bloomEnabled) {
         highp vec3 bloom = texture(BLOOM_TEXTURE, screenUV).rgb;
-        result += bloom * (bloomIntensity / 100.0);
+        bloomAmount = bloom * (bloomIntensity / 100.0);
+        // The legacy shader divides the already-normalized intensity twice.
+        // Give the cel path a restrained but visible glow without changing it.
+        celBloom = bloom * bloomIntensity * 0.15;
     }
 
-    // 3. Tonemapping (Filmic Look)
-    result = ACESFilm(result * 1.1); // Slight exposure boost before tonemapping
+    // 3. Zero strength/disabled retains the original cinematic grade.
+    result = ACESFilm((result + bloomAmount) * 1.1);
+    if (celEnabled) {
+        highp vec3 celResult = scene.rgb;
+        highp vec3 illumination = vec3(0.0);
+        if (celLighting) {
+            illumination = texture(LIGHT_TEXTURE, screenUV).rgb;
+            celResult = celShade(celResult, illumination);
+        }
+        celResult = celGrade(celResult);
+        highp vec2 edges = celEdge(screenUV, scene.rgb);
+        celResult *= 1.0 - 0.3 * edges.x;
+        highp float peak = max(scene.r, max(scene.g, scene.b));
+        highp float low = min(scene.r, min(scene.g, scene.b));
+        highp float neutral = 1.0 - (peak - low) / max(peak, 0.0001);
+        highp float rim = edges.y * neutral * smoothstep(0.005, 0.04, peak);
+        rim *= smoothstep(0.03, 0.22, max(illumination.r, max(illumination.g, illumination.b)));
+        rim *= 1.0 - smoothstep(0.55, 0.9, peak);
+        celResult += vec3(0.015, 0.10, 0.18) * rim;
+        result = mix(result, celResult + celBloom, celStrength);
+    }
 
     // 4. Vignette
     if (vignetteEnabled) {
         highp float dist = distance(screenUV, vec2(0.5));
-        highp float vignette = smoothstep(vignetteRadius, vignetteRadius - vignetteSoftness, dist);
+        highp float vignette = 1.0 - smoothstep(vignetteRadius - max(vignetteSoftness, 0.0001), vignetteRadius, dist);
         result = mix(vignetteColor.rgb, result, vignette);
     }
 

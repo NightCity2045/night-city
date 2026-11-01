@@ -67,7 +67,7 @@ public sealed partial class NCCyberwareMotionSystem : EntitySystem
             { _active.Remove(uid); _previous.Remove(uid); continue; }
             if (!TryComp<SpriteComponent>(uid, out var sprite) || !sprite.Visible ||
                 !TryComp<PhysicsComponent>(uid, out var physics) || physics.LinearVelocity.LengthSquared() <= 0.01f ||
-                !TryComp<TransformComponent>(uid, out var xform) || xform.MapID == MapId.Nullspace ||
+                !TryComp(uid, out TransformComponent? xform) || xform.MapID == MapId.Nullspace ||
                 _containers.IsEntityOrParentInContainer(uid))
             { _previous.Remove(uid); continue; }
             var position = _transform.GetMapCoordinates(uid);

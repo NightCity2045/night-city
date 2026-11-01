@@ -61,7 +61,12 @@ public sealed partial class NCMetaLaboratoryClinicalTest
             var program = await Install(scene, GrindProgram, new Dictionary<string, EntityUid> { ["grinder"] = grinder }, "native.lab.grinder");
             await Server.WaitPost(() => MoveBetween(scene, grinder));
             var invocation = await Invoke(scene, program, "run");
-            await Until(() => native.IsActive(grinder), "The published META command never started the actual grinder.");
+            await Until(() => native.IsActive(grinder), "The published META command never started the actual grinder.",
+                diagnostics: () => $"Host powered={_devices.IsPowered(scene["host"])}; " +
+                    $"grinder powered={_devices.IsPowered(grinder)}; supply={_batteries.GetCharge(scene.Physical.PowerSupply)}; " +
+                    $"VM={program.Runtime.Process.State}; fault={program.Runtime.Process.Fault}; " +
+                    $"stop={program.Runtime.Process.StopReason}; completed={invocation.Completed}; " +
+                    $"logs={string.Join(" | ", _runtime.GetLogs(scene["host"], scene.Actor))}");
             if (mode != "apply") await Server.WaitAssertion(() =>
             {
                 if (mode == "manual")

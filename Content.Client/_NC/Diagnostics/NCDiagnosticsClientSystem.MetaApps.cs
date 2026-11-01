@@ -11,14 +11,14 @@ namespace Content.Client._NC.Diagnostics;
 
 public sealed partial class NCDiagnosticsClientSystem
 {
-    private NCMetaApplicationWindow[] MetaAppWindows()
+    private NCMetaApplicationView[] MetaAppWindows()
     {
-        var result = new List<NCMetaApplicationWindow>();
+        var result = new List<NCMetaApplicationView>();
         var pending = new Queue<Control>(); pending.Enqueue(_ui.RootControl);
         for (var work = 0; work < 8192 && pending.TryDequeue(out var control); work++)
         {
             if (control.Disposed) continue;
-            if (control is NCMetaApplicationWindow window && window.SessionId != Guid.Empty && result.Count < 4) result.Add(window);
+            if (control is NCMetaApplicationView window && window.SessionId != Guid.Empty && result.Count < 4) result.Add(window);
             foreach (var child in control.Children) if (pending.Count < 8192) pending.Enqueue(child);
         }
         return result.ToArray();
@@ -33,7 +33,7 @@ public sealed partial class NCDiagnosticsClientSystem
         return new JsonObject { ["session"] = JsonSerializer.SerializeToNode(window.GetDiagnosticSnapshot(), DiagnosticProtocol.JsonOptions),
             ["samples"] = JsonSerializer.SerializeToNode(window.ReadDiagnosticSamples(offset, count), DiagnosticProtocol.JsonOptions) };
     }
-    private static NCMetaApplicationWindow SelectMetaApp(JsonObject args, NCMetaApplicationWindow[] windows)
+    private static NCMetaApplicationView SelectMetaApp(JsonObject args, NCMetaApplicationView[] windows)
     {
         if (!Guid.TryParse(args.RequiredString("sessionId", 36), out var id) || windows.FirstOrDefault(window => window.SessionId == id) is not { } selected)
             throw new DiagnosticException("app_session_not_found", "Select an actual open native app session in this client.");

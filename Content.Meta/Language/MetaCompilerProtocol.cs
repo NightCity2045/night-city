@@ -7,7 +7,7 @@ namespace Content.Meta.Language;
 /// <summary>One length-prefixed immutable request and one bounded response. No paths or credentials are transmitted.</summary>
 public static class MetaCompilerProtocol
 {
-    public const int Version = 1;
+    public const int Version = 2;
     public const int MaximumRequestBytes = 8 * 1024 * 1024;
     public const int MaximumResponseBytes = 2 * 1024 * 1024;
     public static readonly JsonSerializerOptions JsonOptions = new() { MaxDepth = 32, PropertyNameCaseInsensitive = false, UnmappedMemberHandling = System.Text.Json.Serialization.JsonUnmappedMemberHandling.Disallow };
@@ -30,6 +30,7 @@ public static class MetaCompilerProtocol
     }
 }
 
-public sealed record MetaWorkerRequest(int ProtocolVersion, string CatalogHash, MetaCompilationRequest Compilation);
+public sealed record MetaWorkerRequest(int ProtocolVersion, string CatalogHash, MetaCompilationRequest Compilation,
+    MetaSemanticQuery? Semantic = null);
 public sealed record MetaWorkerResponse(int ProtocolVersion, byte[]? Artifact, string? ArtifactHash, string CacheIdentity,
-    MetaDiagnostic[] Diagnostics, MetaFunctionAnalysis[] Analysis);
+    MetaDiagnostic[] Diagnostics, MetaFunctionAnalysis[] Analysis, MetaSemanticReply? Semantic = null);

@@ -38,7 +38,7 @@ public sealed partial class NCCyberwareCellComponent : Component
 public sealed partial class NCCyberwarePowerStateComponent : Component
 {
     [ViewVariables] public TimeSpan LastAdvancedAt;
-    [ViewVariables] public bool Initialized;
+    [ViewVariables] public new bool Initialized;
     [ViewVariables] public bool Advancing;
     [ViewVariables] public NCCyberwarePowerWarning Warning;
 }

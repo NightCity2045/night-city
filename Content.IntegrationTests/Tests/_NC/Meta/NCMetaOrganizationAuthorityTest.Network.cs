@@ -123,7 +123,11 @@ public sealed partial class NCMetaOrganizationAuthorityTest
                 Assert.That(result.Status, Is.EqualTo(NCPersistentMutationStatus.VersionConflict));
                 Assert.That(await Native(() => persistence.ReadSnapshotAsync("meta.net.policy", accessId)), Is.EqualTo(baseline));
                 Assert.That(await Native(() => db.GetNCAggregateSnapshotAsync("meta.test.net-witness", witness)), Is.Null);
-                Assert.That(await Native(() => db.GetNCPersistentCommandResultAsync(request)), Is.Null);
+                var receipt = await Native(() => db.GetNCPersistentCommandResultAsync(request));
+                Assert.That(receipt, Is.Not.Null);
+                Assert.That(receipt!.Status, Is.EqualTo(NCPersistentMutationStatus.DuplicateFailed));
+                Assert.That(receipt.CommandType, Is.EqualTo("meta.test.net-stale-management"));
+                Assert.That(receipt.ScopeId, Is.EqualTo(owner.ToString()));
             }
             Assert.That(await Native(() => db.SetNCCharacterEmploymentAsync(ServerSession.UserId, character.Value, new ProtoId<JobPrototype>(employee))), Is.True);
             await Server.WaitAssertion(() =>
@@ -152,6 +156,7 @@ public sealed partial class NCMetaOrganizationAuthorityTest
         }
         finally
         {
+            await NCMetaNativeTestTasks.CloseWorld(Server);
             await Server.WaitPost(() => { if (physical != null) scenes.TryDestroy(physical.Id); });
             await Server.WaitRunTicks(2);
         }

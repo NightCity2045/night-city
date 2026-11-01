@@ -14,6 +14,7 @@ namespace Content.Client._NC.Graphics.PostProcessing;
 public sealed partial class NCPostProcessClientSystem : EntitySystem
 {
     [Dependency] private IClyde _clyde = default!;
+    [Dependency] private ILightManager _lights = default!;
     [Dependency] private IConfigurationManager _configuration = default!;
     [Dependency] private IOverlayManager _overlays = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
@@ -24,7 +25,7 @@ public sealed partial class NCPostProcessClientSystem : EntitySystem
     {
         base.Initialize();
 
-        _overlay = new NCPostProcessOverlay(_clyde, _configuration, _prototypes);
+        _overlay = new NCPostProcessOverlay(_clyde, _configuration, _prototypes, _lights, EntityManager);
         if (_overlays.AddOverlay(_overlay))
             return;
 

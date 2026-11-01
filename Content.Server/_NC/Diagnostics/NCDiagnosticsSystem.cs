@@ -85,6 +85,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
         _logHandler = new CaptureLogHandler(_logBuffer);
         _logs.RootSawmill.AddHandler(_logHandler);
         _statusHost.AddHandler(HandleRequestAsync);
+        Log.Info("NC diagnostics HTTP bridge initialized.");
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundRestart);
     }
 

@@ -10,11 +10,9 @@ namespace Content.Client._NC.Meta.UI;
 public sealed class NCMetaApplicationBoundUserInterface : BoundUserInterface
 {
     private NCMetaApplicationWindow? _window;
-    private readonly NCMetaInvoiceConfirmationManager _invoices = new();
 
     public NCMetaApplicationBoundUserInterface(EntityUid owner, Enum key) : base(owner, key)
     {
-        _invoices.Requested += SendMessage;
     }
 
     protected override void Open()
@@ -22,15 +20,15 @@ public sealed class NCMetaApplicationBoundUserInterface : BoundUserInterface
         base.Open();
         _window = this.CreateWindow<NCMetaApplicationWindow>();
         _window.Requested += SendMessage;
+        // The first private update may precede replication of the open BUI subscription.
+        SendMessage(new NCMetaAppResyncMessage(Guid.Empty, -1));
     }
 
     protected override void ReceiveMessage(BoundUserInterfaceMessage message)
     {
         base.ReceiveMessage(message);
-        if (_invoices.TryReceive(message)) return;
         if (message is NCMetaAppUpdateMessage update)
         {
-            if (update.State.Closed) _invoices.CloseSession(update.State.SessionId);
             _window?.ApplyState(update.State);
         }
         else if (message is NCMetaAppActionResultMessage result)
@@ -39,7 +37,6 @@ public sealed class NCMetaApplicationBoundUserInterface : BoundUserInterface
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing) _invoices.Dispose();
         if (disposing && _window?.SessionId is { } session && session != Guid.Empty)
             SendMessage(new NCMetaAppCloseMessage(session));
         base.Dispose(disposing);

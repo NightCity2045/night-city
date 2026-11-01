@@ -28,9 +28,9 @@ public sealed partial class NCMetaCodeEditor : Control
     private readonly Stack<(Rope.Node Text, int Caret)> _redo = [];
     private Rope.Node _rope = Rope.Leaf.Empty;
     private string _text = "";
-    private readonly List<int> _lines = [0];
-    private readonly List<(int Start, int End, int Line)> _visual = [(0, 0, 0)];
-    private int[] _graphemes = [];
+    private readonly List<int> _lines = new() { 0 };
+    private readonly List<(int Start, int End, int Line)> _visual = new() { (0, 0, 0) };
+    private List<int> _graphemes = new();
     private int _caret;
     private int _anchor;
     private int _firstLine;
@@ -255,10 +255,10 @@ public sealed partial class NCMetaCodeEditor : Control
             if (_caret < _text.Length && _text[_caret] == character &&
                 (character is ')' or ']' or '}' && IsCodeCaret() || character == '"' && _syntax.Any(span => span.Color == StringColor && span.End == _caret + 1)))
             { Move(GraphemeCeiling(_caret + 1), false); EnsureCaretVisible(); return; }
-            var close = character switch { '(' => ')', '[' => ']', '{' => '}', '"' => '"', _ => '\0' };
-            if (close != '\0' && IsCodeCaret())
+            var close = character switch { '(' => ")", '[' => "]", '{' => "}", '"' => "\"", _ => "" };
+            if (close.Length != 0 && IsCodeCaret())
             {
-                if (TryReplaceSelection(args.Text + close)) Move(_caret - 1, false);
+                if (TryReplaceSelection(string.Concat(args.Text, close))) Move(_caret - 1, false);
                 return;
             }
         }
@@ -454,7 +454,7 @@ public sealed partial class NCMetaCodeEditor : Control
         var horizontal = Measure(_text[_visual[line].Start.._caret]);
         var target = Math.Clamp(line + delta, 0, _visual.Count - 1);
         var x = 0f;
-        foreach (var element in StringInfo.GetTextElementEnumerator(_text[_visual[target].Start.._visual[target].End]).AsEnumerable())
+        foreach (var element in NCMetaGraphemes.Elements(_text[_visual[target].Start.._visual[target].End]))
         {
             var width = Measure(element.Text);
             if (horizontal < x + width / 2) { Move(_visual[target].Start + element.Index, selecting); return; }
@@ -504,21 +504,21 @@ public sealed partial class NCMetaCodeEditor : Control
     private int LineEnd(int line) => line + 1 < _lines.Count ? _lines[line + 1] - 1 : _text.Length;
     private int GraphemeFloor(int index)
     {
-        if (_graphemes.Length == 0)
+        if (_graphemes.Count == 0)
             return 0;
         if (index >= _text.Length)
             return _text.Length;
-        var position = Array.BinarySearch(_graphemes, index);
+        var position = _graphemes.BinarySearch(index);
         return position >= 0 ? index : _graphemes[Math.Max(0, ~position - 1)];
     }
     private int GraphemeCeiling(int index)
     {
-        if (_graphemes.Length == 0)
+        if (_graphemes.Count == 0)
             return 0;
         if (index >= _text.Length)
             return _text.Length;
-        var position = Array.BinarySearch(_graphemes, index);
-        return position >= 0 ? index : _graphemes[Math.Min(_graphemes.Length - 1, ~position)];
+        var position = _graphemes.BinarySearch(index);
+        return position >= 0 ? index : ~position >= _graphemes.Count ? _text.Length : _graphemes[~position];
     }
 
     private int HitTest(Vector2 position)
@@ -526,7 +526,7 @@ public sealed partial class NCMetaCodeEditor : Control
         var line = Math.Clamp(_firstLine + (int) (position.Y / Math.Max(1, _font.GetLineHeight(UIScale))), 0, _visual.Count - 1);
         var visual = _visual[line];
         var x = 52 * UIScale;
-        foreach (var element in StringInfo.GetTextElementEnumerator(_text[visual.Start..visual.End]).AsEnumerable())
+        foreach (var element in NCMetaGraphemes.Elements(_text[visual.Start..visual.End]))
         {
             var width = Measure(element.Text);
             if (position.X < x + width / 2)
@@ -551,7 +551,7 @@ public sealed partial class NCMetaCodeEditor : Control
         for (var i = 0; i < _text.Length; i++)
             if (_text[i] == '\n')
                 _lines.Add(i + 1);
-        _graphemes = StringInfo.ParseCombiningCharacters(_text);
+        _graphemes = NCMetaGraphemes.Boundaries(_text);
         _caret = GraphemeFloor(_caret);
         _anchor = GraphemeFloor(_anchor);
         UpdateSyntax();
@@ -596,7 +596,7 @@ public sealed partial class NCMetaCodeEditor : Control
             }
             var segment = start;
             var width = 0f;
-            foreach (var element in StringInfo.GetTextElementEnumerator(_text[start..end]).AsEnumerable())
+            foreach (var element in NCMetaGraphemes.Elements(_text[start..end]))
             {
                 var offset = start + element.Index;
                 var size = Measure(element.Text);
@@ -720,7 +720,7 @@ public sealed partial class NCMetaCodeEditor : Control
                 handle.DrawString(_font, new Vector2(4 * UIScale, baseline), (visual.Line + 1).ToString(CultureInfo.InvariantCulture), Color.Gray);
             var x = 52 * UIScale;
             var source = _text[visual.Start..visual.End];
-            foreach (var element in StringInfo.GetTextElementEnumerator(source).AsEnumerable())
+            foreach (var element in NCMetaGraphemes.Elements(source))
             {
                 var offset = visual.Start + element.Index;
                 var width = Measure(element.Text);
@@ -789,14 +789,5 @@ public sealed partial class NCMetaCodeEditor : Control
             ClipboardUnavailable = null;
         }
         base.Dispose(disposing);
-    }
-}
-
-internal static class NCMetaTextElements
-{
-    public static IEnumerable<(string Text, int Index)> AsEnumerable(this TextElementEnumerator enumerator)
-    {
-        while (enumerator.MoveNext())
-            yield return (enumerator.GetTextElement(), enumerator.ElementIndex);
     }
 }

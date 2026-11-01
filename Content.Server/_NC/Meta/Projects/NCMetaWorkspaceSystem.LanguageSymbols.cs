@@ -36,6 +36,9 @@ public sealed partial class NCMetaWorkspaceSystem
     private void OnLanguageDeviceRevoked(string device) => InvalidateLanguageTransfers();
     private void InvalidateLanguageTransfers()
     {
+        foreach (var draft in _drafts.Values.ToArray())
+            SendDraft(draft, new(draft.Request.Id) { Rejected = true, Complete = true });
+        ClearDrafts();
         foreach (var transfer in _languageTransfers.Values.ToArray())
             if (_ui.IsUiOpen(transfer.Context.Terminal, NCMetaUiKey.Workspace, transfer.Context.User))
                 _ui.ServerSendUiMessage(transfer.Context.Terminal, NCMetaUiKey.Workspace,

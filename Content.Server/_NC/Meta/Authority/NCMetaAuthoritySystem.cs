@@ -85,7 +85,11 @@ public sealed partial class NCMetaAuthoritySystem : EntitySystem
         base.Update(frameTime);
         if (Interlocked.Exchange(ref _managementDirty, 0) != 0)
         {
-            _management.Clear();
+            // A fresh proof can arrive after the DB generation changed but before this deferred cleanup.
+            var generation = _database.NCPlayerEmploymentGeneration;
+            foreach (var (key, proof) in _management.ToArray())
+                if (proof.Employment != null && proof.EmploymentGeneration != generation)
+                    _management.Remove(key);
             if (ManagementAuthorityChanged != null)
                 foreach (Action subscriber in ManagementAuthorityChanged.GetInvocationList())
                     try { subscriber(); }

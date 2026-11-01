@@ -88,11 +88,9 @@ public sealed partial class NCMetaWorkspaceWindow
     private void SendDevelopment(NCMetaDevelopmentRequest request)
     {
         if (_developmentPending != Guid.Empty) return;
-        var source = JsonSerializer.Serialize(request);
-        if (Encoding.UTF8.GetByteCount(source) > 32768) { Status.Text = Loc.GetString("nc-meta-development-input"); return; }
         _developmentPending = Guid.NewGuid(); _developmentWait = 0;
         if (request.Action == NCMetaDevelopmentAction.SearchContacts) _developmentSearchRequest = _developmentPending;
-        Requested?.Invoke(new(NCMetaWorkspaceOperation.DevelopmentContract, _developmentPending, source: source,
+        Requested?.Invoke(new(NCMetaWorkspaceOperation.DevelopmentContract, _developmentPending, payload: request,
             deviceId: _selectedDeviceId, releaseId: _state.ActiveReleaseId, projectId: _state.ProjectId));
         UpdateDevelopmentButtons();
     }
@@ -237,8 +235,8 @@ public sealed partial class NCMetaWorkspaceWindow
         if (chunk.Complete)
         {
             if (_developmentFixtureReceived == _developmentFixtureBytes.Length &&
-                Convert.ToHexStringLower(SHA256.HashData(_developmentFixtureBytes)) == _developmentFixtureHash)
-                SetDevelopmentText(DevelopmentFixtureText, new UTF8Encoding(false, true).GetString(_developmentFixtureBytes));
+                Content.Client._NC.Meta.Editor.NCMetaSourceHash.ToHexStringLower(Content.Client._NC.Meta.Editor.NCMetaSourceHash.HashData(_developmentFixtureBytes)) == _developmentFixtureHash)
+                SetDevelopmentText(DevelopmentFixtureText, Content.Client._NC.Meta.Editor.NCMetaSourceHash.DecodeUtf8(_developmentFixtureBytes));
             _developmentFixtureBytes = null;
         }
         else SendDevelopment(DevelopmentCommand(NCMetaDevelopmentAction.ReadFixture) with { Text = chunk.Path, Utf8Offset = _developmentFixtureReceived });

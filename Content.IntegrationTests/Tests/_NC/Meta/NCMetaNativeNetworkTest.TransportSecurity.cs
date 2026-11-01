@@ -107,7 +107,7 @@ public sealed partial class NCMetaNativeNetworkTest
                 SComp<NCMetaMessagePortComponent>(scene.Physical.Objects["host"]).LatencyMilliseconds = 500;
                 Observer.Observe(scene.Physical.Objects["data"]);
             });
-            sender = await Program(scene, "host", Send(address, "old", transition == "ManualStop" ? "await system.sleepMs(2000);" : ""));
+            sender = await Program(scene, "host", Send(address, "old", transition == "ManualStop" ? "while(true){yield;}" : ""));
             await Until(() => Logs(scene, "host", sender.Installation.Id).Contains("accepted"));
             if (transition != "ManualStop")
                 await Until(() => sender.Runtime.Process.State == MetaProcessState.Stopped);
@@ -116,8 +116,8 @@ public sealed partial class NCMetaNativeNetworkTest
                 var policy = await _persistence.ReadServiceGrantPolicyAsync(sender.Installation.Id);
                 string hostId = "";
                 await Server.WaitPost(() => { MoveTo(scene.Actor, scene.Physical.Objects["host"]); _devices.TryGetEntry(scene.Physical.Objects["host"], out var device); hostId = device.Id; });
-                var revoked = await _authority.TryRevokeGrantAsync(scene.Physical.Objects["host"], scene.Actor,
-                    scene.Physical.Objects["host"], Guid.NewGuid(), hostId, sender.Installation.Id, Guid.Empty, policy!.Revision);
+                var revoked = await NCMetaNativeTestTasks.Run(Server, () => _authority.TryRevokeGrantAsync(scene.Physical.Objects["host"], scene.Actor,
+                    scene.Physical.Objects["host"], Guid.NewGuid(), hostId, sender.Installation.Id, Guid.Empty, policy!.Revision));
                 Assert.That(revoked.Success, Is.True, revoked.MessageKey);
             }
             else await Server.WaitAssertion(() =>
@@ -179,9 +179,14 @@ public sealed partial class NCMetaNativeNetworkTest
                 else if (transition == "Endpoint") SEntMan.DeleteEntity(scene.Physical.Objects["data"]);
                 else
                 {
-                    var cable = scene.Physical.Cables.Single(uid => SComp<NCMetaNetworkCableComponent>(uid).PortA == scene.Physical.Objects["data"] ||
-                        SComp<NCMetaNetworkCableComponent>(uid).PortB == scene.Physical.Objects["data"]);
-                    MoveTo(scene.Actor, cable); Assert.That(_network.TryDisconnectCable(cable, scene.Actor), Is.True);
+                    var cables = scene.Physical.Cables.Where(uid => SComp<NCMetaNetworkCableComponent>(uid).PortA == scene.Physical.Objects["data"] ||
+                        SComp<NCMetaNetworkCableComponent>(uid).PortB == scene.Physical.Objects["data"]).ToArray();
+                    Assert.That(cables, Is.Not.Empty);
+                    foreach (var cable in cables)
+                    {
+                        MoveTo(scene.Actor, cable);
+                        Assert.That(_network.TryDisconnectCable(cable, scene.Actor), Is.True);
+                    }
                 }
             });
             await Server.WaitRunTicks(90);

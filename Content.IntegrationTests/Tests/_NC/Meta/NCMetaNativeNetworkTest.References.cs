@@ -87,8 +87,17 @@ public sealed partial class NCMetaNativeNetworkTest
             {
                 var id = Enumerable.Range(0, a.Artifact.FunctionCount).Single(index => a.Artifact.GetFunction(index).Name == "native.refs.probe");
                 Assert.That(_runtime.TryInvokeAuthorized(scene.Deck, a.Runtime.Generation, scene.Actor, id,
-                    _ => [reference], (_, _) => { }, () => _devices.CanManage(scene.Deck, scene.Actor)), Is.False,
-                    "A revoked VM-local handle cannot re-enter a native call.");
+                    _ => [reference], (_, _) => { }, () => _devices.CanManage(scene.Deck, scene.Actor)), Is.True);
+            });
+            await Until(() => a.Runtime.Process.State is MetaProcessState.Faulted or MetaProcessState.Stopped or MetaProcessState.Quarantined,
+                reason: "A revoked host argument must be rejected before native execution.");
+            await Server.WaitAssertion(() =>
+            {
+                Assert.That(_runtime.GetLogs(scene.Deck, scene.Actor, a.Installation.Id), Has.None.EqualTo("probed"),
+                    "A revoked VM-local handle cannot authorize a native operation.");
+                Assert.That(_net.TryGetState(scene.Deck, scene.Actor, out var state), Is.True);
+                Assert.That(state.SessionId, Is.EqualTo(Guid.Empty));
+                Assert.That(state.ActionPending, Is.False);
             });
         }
         finally { await Destroy(scene); }

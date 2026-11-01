@@ -132,7 +132,7 @@ public static class MetaBytecodeWriter
         var directoryEnd = checked(64 + sections.Count * 16);
         var length = sections.Aggregate(directoryEnd, (total, section) => checked(total + section.Bytes.Length));
         var output = new byte[length];
-        "META"u8.CopyTo(output);
+        output[0] = (byte) 'M'; output[1] = (byte) 'E'; output[2] = (byte) 'T'; output[3] = (byte) 'A';
         BinaryPrimitives.WriteUInt16LittleEndian(output.AsSpan(4), 1);
         BinaryPrimitives.WriteUInt16LittleEndian(output.AsSpan(8), 1);
         BinaryPrimitives.WriteUInt32LittleEndian(output.AsSpan(16), checked((uint) length));
@@ -160,7 +160,8 @@ public static class MetaBytecodeLoader
     {
         limits ??= new MetaLimits();
         if (bytes.Length < 64 || bytes.Length > limits.ArtifactBytes) throw new MetaFormatException("Artifact size limit.");
-        if (!bytes[..4].SequenceEqual("META"u8)) throw new MetaFormatException("Invalid magic.");
+        if (bytes[0] != (byte) 'M' || bytes[1] != (byte) 'E' || bytes[2] != (byte) 'T' || bytes[3] != (byte) 'A')
+            throw new MetaFormatException("Invalid magic.");
         if (BinaryPrimitives.ReadUInt16LittleEndian(bytes[4..]) != 1 || BinaryPrimitives.ReadUInt16LittleEndian(bytes[6..]) != 0 || BinaryPrimitives.ReadUInt16LittleEndian(bytes[8..]) != 1 || BinaryPrimitives.ReadUInt16LittleEndian(bytes[10..]) != 0)
             throw new MetaFormatException("Unsupported bytecode/language version.");
         if (BinaryPrimitives.ReadUInt32LittleEndian(bytes[12..]) != 0 || BinaryPrimitives.ReadUInt16LittleEndian(bytes[22..]) != 0 || BinaryPrimitives.ReadUInt64LittleEndian(bytes[56..]) != 0)

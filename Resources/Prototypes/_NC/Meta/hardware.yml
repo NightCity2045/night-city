@@ -16,7 +16,7 @@
   gasPerWindow: 200000
   idleWatts: 40
   activeWatts: 100
-  interfaces: [meta.files.FileStore, meta.net.MessagePort, meta.doors.Door, meta.doors.DoorPanel, meta.sensors.TemperatureSensor, meta.security.Camera, meta.security.Alarm, meta.vehicle.EngineController, meta.vehicle.TransmissionController, meta.vehicle.VehicleDashboard, meta.vehicle.DriverAssistance, meta.vehicle.VehicleSecurity, meta.industrial.Conveyor, meta.industrial.LoadSensor, meta.industrial.Fabricator, meta.lab.Grinder, meta.lab.ChemMaster, meta.services.ServiceOrders, meta.implants.FunctionalController, meta.drone.DroneController, meta.drone.NavigationSupervisor, meta.drone.Perception, meta.drone.Manipulator, meta.drone.WeaponController]
+  interfaces: [meta.files.FileStore, meta.net.MessagePort, meta.doors.Door, meta.doors.DoorPanel, meta.sensors.TemperatureSensor, meta.security.Camera, meta.security.Alarm, meta.vehicle.EngineController, meta.vehicle.TransmissionController, meta.vehicle.VehicleDashboard, meta.vehicle.DriverAssistance, meta.vehicle.VehicleSecurity, meta.industrial.Conveyor, meta.industrial.LoadSensor, meta.industrial.Fabricator, meta.lab.Grinder, meta.lab.ChemMaster, meta.implants.FunctionalController, meta.drone.DroneController, meta.drone.NavigationSupervisor, meta.drone.Perception, meta.drone.Manipulator, meta.drone.WeaponController]
   memoryBytes: 8388608
   storageBytes: 67108864
   maxProcesses: 8
@@ -38,7 +38,7 @@
   gasPerWindow: 500000
   idleWatts: 100
   activeWatts: 400
-  interfaces: [meta.files.FileStore, meta.net.MessagePort, meta.doors.Door, meta.doors.DoorPanel, meta.sensors.TemperatureSensor, meta.security.Camera, meta.security.Alarm, meta.vehicle.EngineController, meta.vehicle.TransmissionController, meta.vehicle.VehicleDashboard, meta.vehicle.DriverAssistance, meta.vehicle.VehicleSecurity, meta.industrial.Conveyor, meta.industrial.LoadSensor, meta.industrial.Fabricator, meta.lab.Grinder, meta.lab.ChemMaster, meta.services.ServiceOrders, meta.implants.FunctionalController, meta.drone.DroneController, meta.drone.NavigationSupervisor, meta.drone.Perception, meta.drone.Manipulator, meta.drone.WeaponController]
+  interfaces: [meta.files.FileStore, meta.net.MessagePort, meta.doors.Door, meta.doors.DoorPanel, meta.sensors.TemperatureSensor, meta.security.Camera, meta.security.Alarm, meta.vehicle.EngineController, meta.vehicle.TransmissionController, meta.vehicle.VehicleDashboard, meta.vehicle.DriverAssistance, meta.vehicle.VehicleSecurity, meta.industrial.Conveyor, meta.industrial.LoadSensor, meta.industrial.Fabricator, meta.lab.Grinder, meta.lab.ChemMaster, meta.implants.FunctionalController, meta.drone.DroneController, meta.drone.NavigationSupervisor, meta.drone.Perception, meta.drone.Manipulator, meta.drone.WeaponController]
   memoryBytes: 16777216
   storageBytes: 268435456
   maxProcesses: 16

@@ -62,10 +62,6 @@
     NCMetaBiomonitorImplant: 1
     NCMetaSandevistanImplant: 1
     NCMetaKerenzikovImplant: 1
-    NCMetaDemoNetAccessPoint: 1
-    NCMetaDemoNetData: 1
-    NCMetaDemoNetControl: 1
-    NCMetaDemoNetFirewall: 1
     NCMetaMarketplaceService: 1
     PowerCellSmall: 6
     PowerCellMedium: 4

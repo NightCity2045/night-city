@@ -81,7 +81,7 @@ public sealed partial class NCMetaNetToolProfilePrototype : IPrototype
 {
     [IdDataField] public string ID { get; private set; } = string.Empty;
     [DataField] public int Rating = 2;
-    [DataField] public List<NCMetaNetNodeKind> CompatibleKinds = [NCMetaNetNodeKind.Data, NCMetaNetNodeKind.Control, NCMetaNetNodeKind.Defense];
+    [DataField] public List<NCMetaNetNodeKind> CompatibleKinds = new() { NCMetaNetNodeKind.Data, NCMetaNetNodeKind.Control, NCMetaNetNodeKind.Defense };
     [DataField] public int DurationMilliseconds = 1000;
     [DataField] public int Cost = 1;
     [DataField] public int Budget = 10;

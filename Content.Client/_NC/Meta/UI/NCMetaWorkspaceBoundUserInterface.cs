@@ -16,6 +16,7 @@ public sealed class NCMetaWorkspaceBoundUserInterface(EntityUid owner, Enum key)
         base.Open();
         _window = this.CreateWindow<NCMetaWorkspaceWindow>();
         _window.Requested += SendMessage;
+        _window.AuthoringRequested += SendMessage;
         SendMessage(new NCMetaWorkspaceRequestMessage(NCMetaWorkspaceOperation.Open, Guid.NewGuid()));
     }
 
@@ -24,5 +25,7 @@ public sealed class NCMetaWorkspaceBoundUserInterface(EntityUid owner, Enum key)
         base.ReceiveMessage(message);
         if (message is NCMetaWorkspaceUpdateMessage update)
             _window?.ApplyState(update.State);
+        if (message is NCMetaAuthoringReplyMessage authoring)
+            _window?.ApplyAuthoringReply(authoring);
     }
 }

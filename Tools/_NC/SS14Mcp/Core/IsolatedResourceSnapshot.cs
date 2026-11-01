@@ -23,11 +23,16 @@ public static class IsolatedResourceSnapshot
         while (pending.TryPop(out var directory))
         {
             cancellationToken.ThrowIfCancellationRequested();
+            // Entries come from a checked directory, rather than caller-supplied paths.
+            // Recheck ancestors once per descent, not once for every resource file.
+            if (directory != source) paths.Resolve(directory);
             foreach (var entry in new DirectoryInfo(directory).EnumerateFileSystemInfos())
             {
-                paths.Resolve(entry.FullName);
                 if ((entry.Attributes & FileAttributes.ReparsePoint) != 0)
+                {
+                    paths.Resolve(entry.FullName);
                     throw new DiagnosticException("invalid_resource_snapshot", "Resource snapshots cannot contain links.");
+                }
                 if (entry is DirectoryInfo) pending.Push(entry.FullName);
                 else if (files.Count < 300000) files.Add(entry.FullName);
                 else throw new DiagnosticException("resource_snapshot_limit", "The resource snapshot file limit was exceeded.");

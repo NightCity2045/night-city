@@ -78,7 +78,7 @@ public sealed partial class NCMetaWorkspaceWindow
         UpdateFirmwareControls();
         FirmwareNotice.Text = Loc.GetString("nc-meta-firmware-checking");
         Requested?.Invoke(new(NCMetaWorkspaceOperation.PreviewFirmware, _firmwarePreviewRequest,
-            source: JsonSerializer.Serialize(new NCMetaFirmwareSelection(productId)),
+            payload: new NCMetaFirmwareSelection(productId),
             deviceId: _firmwareDevice, releaseId: _firmwareRelease, projectId: _firmwareProject,
             installationId: SelectedInstallation?.Slot == "Firmware" ? _firmwareInstallation : Guid.Empty));
     }
@@ -168,10 +168,7 @@ public sealed partial class NCMetaWorkspaceWindow
             var request = new NCMetaFirmwareInstallRequest(bindings, true, preview.RequiredScopes.Take(64).ToList(), true,
                 preview.ArtifactResidentBytes, preview.ProcessMemoryBytes, preview.PackageBytes,
                 preview.ProductId, preview.InstallationId, preview.InstallationRevision);
-            var source = JsonSerializer.Serialize(request);
-            if (Encoding.UTF8.GetByteCount(source) > 32 * 1024)
-            { Status.Text = Loc.GetString("nc-meta-firmware-request-large"); return; }
-            Requested?.Invoke(new(NCMetaWorkspaceOperation.InstallFirmware, Guid.NewGuid(), source: source,
+            Requested?.Invoke(new(NCMetaWorkspaceOperation.InstallFirmware, Guid.NewGuid(), payload: request,
                 deviceId: targetDevice, releaseId: preview.ReleaseId, projectId: targetProject, installationId: preview.InstallationId));
         };
         dialog.OnClose += () => { if (ReferenceEquals(_firmwareDialog, dialog)) _firmwareDialog = null; dialog.Dispose(); };

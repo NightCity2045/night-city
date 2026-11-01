@@ -24,7 +24,7 @@ public sealed partial class NCMetaSnapshotSystem : EntitySystem
         "meta.software.license", "meta.software.owner", "meta.software.device", "meta.software.catalog",
         "meta.software.release-index", "meta.software.copy-evidence", "meta.software.resale", "meta.software.resale-recipient", "meta.software.inheritance", "meta.inherited-images", "meta.service-grants",
         "meta.net.policy", "meta.net.journal",
-        "meta.service-order", "meta.service-board", "meta.clinical.operation", "meta.machine.operation", "meta.drone.operation", "meta.operation",
+        "meta.clinical.operation", "meta.machine.operation", "meta.drone.operation", "meta.operation",
         "meta.site-publication", "meta.hosting-quote", "meta.software.quote", "meta.software.command", "meta.quote-pool",
         "meta.development-contract", "meta.development.delivery", "meta.development.delivery-claim",
         "meta.development.acceptance", "meta.development.party", "meta.development.inbox", "meta.development.command",

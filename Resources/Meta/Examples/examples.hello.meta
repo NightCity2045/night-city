@@ -1,7 +1,0 @@
-// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
-module examples.hello;
-import meta.system;
-
-fn main() -> void {
-    system.log("META: программа запущена");
-}

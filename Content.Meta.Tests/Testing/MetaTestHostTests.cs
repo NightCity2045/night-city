@@ -36,19 +36,19 @@ public sealed class MetaTestHostTests
         get
         {
             var directory = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
-            while (directory != null && !Directory.Exists(Path.Combine(directory.FullName, "Resources", "Meta", "Examples"))) directory = directory.Parent;
+            while (directory != null && !Directory.Exists(Path.Combine(directory.FullName, "Content.Meta.Tests", "Fixtures", "Meta", "Examples"))) directory = directory.Parent;
             return directory!.FullName;
         }
     }
-    public static IEnumerable<string> Examples() => MetaTestHost.ParseSuite(File.ReadAllText(Path.Combine(Root, "Resources", "Meta", "Examples", "fixtures.json"))).Programs.Select(p => p.RootModule);
+    public static IEnumerable<string> Examples() => MetaTestHost.ParseSuite(File.ReadAllText(Path.Combine(Root, "Content.Meta.Tests", "Fixtures", "Meta", "Examples", "fixtures.json"))).Programs.Select(p => p.RootModule);
 
     [TestCaseSource(nameof(Examples))]
     public async Task AllFifteenProgramsRunThroughWorkerVerifierAndBoundedHostFixture(string module)
     {
         if (!OperatingSystem.IsWindows()) Assert.Ignore("The worker currently requires Windows Job Objects.");
-        var suite = MetaTestHost.ParseSuite(File.ReadAllText(Path.Combine(Root, "Resources", "Meta", "Examples", "fixtures.json")));
+        var suite = MetaTestHost.ParseSuite(File.ReadAllText(Path.Combine(Root, "Content.Meta.Tests", "Fixtures", "Meta", "Examples", "fixtures.json")));
         var fixture = suite.Programs.Single(p => p.RootModule == module);
-        var source = File.ReadAllText(Path.Combine(Root, "Resources", "Meta", "Examples", module + ".meta"));
+        var source = File.ReadAllText(Path.Combine(Root, "Content.Meta.Tests", "Fixtures", "Meta", "Examples", module + ".meta"));
         await using var pool = new MetaCompilerWorkerPool(MetaTestWorkerBundle.Resolve());
         var compiled = await pool.CompileAsync("fixture-test", new([new("fixture.meta", source)], module));
         Assert.That(compiled.Success, Is.True, string.Join(',', compiled.Diagnostics.Select(d => d.Code)));

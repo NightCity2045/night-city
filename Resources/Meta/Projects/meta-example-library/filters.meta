@@ -1,6 +1,0 @@
-// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
-module maker.filters;
-
-pub fn smooth(previous: float, current: float, alpha: float) -> float {
-    return previous * (1.0 - alpha) + current * alpha;
-}

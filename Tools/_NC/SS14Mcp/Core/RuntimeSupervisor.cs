@@ -271,31 +271,12 @@ public sealed class RuntimeSupervisor(WorkspacePaths paths, IDiagnosticBridge br
         process.BeginErrorReadLine();
     }
 
-    private async Task WaitForBridgeAsync(OwnedEnvironment environment, DiagnosticTarget target, CancellationToken cancellationToken)
-    {
-        var until = DateTimeOffset.UtcNow.AddMinutes(3);
-        do
+    private Task WaitForBridgeAsync(OwnedEnvironment environment, DiagnosticTarget target, CancellationToken cancellationToken) =>
+        RuntimeStartupWaiter.WaitAsync(bridge, target, () =>
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            Process[] processes;
             lock (environment.Gate)
-                processes = environment.Processes.ToArray();
-            if (processes.Any(x => x.HasExited))
-                throw new DiagnosticException("process_exited", "A game process exited during startup. Read environment logs.");
-            try
-            {
-                var response = await bridge.ExecuteAsync(target, new DiagnosticRequest
-                {
-                    Command = "session_get", DeadlineUnixMilliseconds = DateTimeOffset.UtcNow.AddSeconds(2).ToUnixTimeMilliseconds(),
-                }, cancellationToken);
-                if (response.Error == null && (target.Kind != "client" || response.Data?["userId"] != null))
-                    return;
-            }
-            catch (DiagnosticException exception) when (exception.Code is "bridge_unavailable" or "timeout") { }
-            await Task.Delay(500, cancellationToken);
-        } while (DateTimeOffset.UtcNow < until);
-        throw new DiagnosticException("startup_timeout", "The diagnostic bridge did not become ready within three minutes.");
-    }
+                return environment.Processes.Any(process => process.HasExited);
+        }, cancellationToken);
 
     private static void PrepareResourceRoots(string directory)
     {

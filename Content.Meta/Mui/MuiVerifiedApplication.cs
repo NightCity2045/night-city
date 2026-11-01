@@ -91,7 +91,7 @@ public sealed class MuiVerifiedApplication
         foreach (var (id, view) in contract!.Views)
         {
             if (view.StateType is null || !publicTypes.Contains(view.StateType) || !functions.TryGetValue(view.Function, out var export) ||
-                !export.ParameterTypes.SequenceEqual(["meta.app.AppContext"]) || export.ReturnType != view.StateType ||
+                !export.ParameterTypes.SequenceEqual(new[] { "meta.app.AppContext" }) || export.ReturnType != view.StateType ||
                 !documents.TryGetValue(view.Document, out var source) || !MuiParser.TryParse(source, view, contract, documents, out var document, out _) ||
                 !styles!.FitsBudget(document!))
                 return false;
@@ -103,7 +103,7 @@ public sealed class MuiVerifiedApplication
         foreach (var (id, action) in contract.Actions)
         {
             if (action.InputType is null || !publicTypes.Contains(action.InputType) || !functions.TryGetValue(action.Function, out var export) ||
-                !export.ParameterTypes.SequenceEqual(["meta.app.AppContext", action.InputType]) || export.ReturnType != "result<void>")
+                !export.ParameterTypes.SequenceEqual(new[] { "meta.app.AppContext", action.InputType }) || export.ReturnType != "result<void>")
                 return false;
             var definition = artifact.GetFunction(export.FunctionId);
             var result = artifact.GetType(definition.ReturnType);
@@ -138,7 +138,7 @@ public sealed class MuiVerifiedApplication
         void Add(string text)
         {
             var bytes = Encoding.UTF8.GetBytes(text);
-            Span<byte> length = stackalloc byte[4];
+            var length = new byte[4];
             System.Buffers.Binary.BinaryPrimitives.WriteInt32LittleEndian(length, bytes.Length);
             hash.AppendData(length);
             hash.AppendData(bytes);

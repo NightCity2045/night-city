@@ -274,22 +274,6 @@ public sealed partial class MetaApiCatalog
         Method("meta.medical.ProcedureController", "startSelectedStep", "result<meta.medical.OperationReceipt>", "medical.procedure", true, "meta.medical.PatientRef", "string");
         Method("meta.medical.ProcedureController", "operationStatus", "result<meta.medical.OperationReceipt>", "medical.operation.read", true, "string");
         Event("meta.medical.ProcedureController", "operationChanged", "meta.medical.OperationReceipt", "medical.operation.observe", "Ordered", 8);
-        Capability("meta.services", "ServiceOrders");
-        Enum("meta.services", "OrderStatus", "Submitted", "Assigned", "InProgress", "AwaitingPayment", "Paid", "Ready", "Completed", "Cancelled");
-        Enum("meta.services", "OrderAction", "Begin", "Ready", "Complete", "Cancel");
-        Dto("meta.services", "Order", "id:string", "subject:string", "customer:string", "executor:string", "status:meta.services.OrderStatus",
-            "revision:int", "invoiceId:string", "invoiceHash:string", "amount:int", "paid:bool");
-        Dto("meta.services", "PaymentRequest", "confirmationId:string", "pending:bool");
-        Dto("meta.services", "OrderChange", "id:string", "revision:int");
-        Method("meta.services.ServiceOrders", "create", "result<meta.services.Order>", "services.create", true, "meta.app.UserRef", "meta.app.SessionRef", "string", "string");
-        Method("meta.services.ServiceOrders", "listOrders", "result<array<meta.services.Order>>", "services.read", true, "meta.app.UserRef", "meta.app.SessionRef");
-        Method("meta.services.ServiceOrders", "cachedList", "result<array<meta.services.Order>>", "services.read", false, "meta.app.UserRef", "meta.app.SessionRef");
-        Method("meta.services.ServiceOrders", "get", "result<meta.services.Order>", "services.read", true, "meta.app.UserRef", "meta.app.SessionRef", "string");
-        Method("meta.services.ServiceOrders", "assign", "result<meta.services.Order>", "services.assign", true, "meta.app.UserRef", "meta.app.SessionRef", "string", "string", "int", "string");
-        Method("meta.services.ServiceOrders", "transition", "result<meta.services.Order>", "services.control", true, "meta.app.UserRef", "meta.app.SessionRef", "string", "meta.services.OrderAction", "int", "string");
-        Method("meta.services.ServiceOrders", "invoice", "result<meta.services.Order>", "services.invoice", true, "meta.app.UserRef", "meta.app.SessionRef", "string", "int", "string", "int", "string");
-        Method("meta.services.ServiceOrders", "requestPayment", "result<meta.services.PaymentRequest>", "services.pay", true, "meta.app.UserRef", "meta.app.SessionRef", "string");
-        Event("meta.services.ServiceOrders", "orderChanged", "meta.services.OrderChange", "services.observe", "Ordered", 16);
         return new(types, members, intrinsics);
     }
 }

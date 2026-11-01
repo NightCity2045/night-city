@@ -71,8 +71,13 @@ public sealed class MuiApplicationTests
         Assert.That(process.TryReleaseOpaque(authority), Is.True);
     }
 
-    [TestCase("citi://a45b6b15-7d02-4c44-ae27-c10535495264/main", true)]
-    [TestCase("citi://a45b6b15-7d02-4c44-ae27-c10535495264", true)]
+    [TestCase("citi://watson/services/repairs", true)]
+    [TestCase("citi://shop.city", true)]
+    [TestCase("citi://a45b6b15-7d02-4c44-ae27-c10535495264/main", false)]
+    [TestCase("citi://a45b6b15-7d02-4c44-ae27-c10535495264", false)]
+    [TestCase("citi://watson//repairs", false)]
+    [TestCase("citi://watson/../repairs", false)]
+    [TestCase("citi://watson/repairs/", false)]
     [TestCase("https://example.com", false)]
     [TestCase("citi://a45b6b15-7d02-4c44-ae27-c10535495264/../secret", false)]
     [TestCase("citi://a45b6b15-7d02-4c44-ae27-c10535495264/main?admin=true", false)]
@@ -80,4 +85,15 @@ public sealed class MuiApplicationTests
     [TestCase("citi://a45b6b15-7d02-4c44-ae27-c10535495264/%2e%2e", false)]
     public void CitiNetRoutesCannotBecomeExternalOrAmbiguousAddresses(string address, bool accepted) =>
         Assert.That(MuiCitiNetAddress.TryParse(address, out _), Is.EqualTo(accepted));
+
+    [Test]
+    public void RegisteredCitiNetPathsRoundTripWithoutExposingDeviceIdentity()
+    {
+        const string address = "citi://watson/services/repairs";
+        Assert.That(MuiCitiNetAddress.TryParse(address, out var route), Is.True);
+        Assert.That(route!.Domain, Is.EqualTo("watson/services/repairs"));
+        Assert.That(route.HostDeviceId, Is.EqualTo(Guid.Empty));
+        Assert.That(route.View, Is.Null);
+        Assert.That(route.ToString(), Is.EqualTo(address));
+    }
 }

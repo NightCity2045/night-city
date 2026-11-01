@@ -126,6 +126,8 @@
       cell_slot:
         startingItem: PowerCellSmall
   - type: Damageable
+  - type: Injurable
+    damageContainer: Inorganic
   - type: Destructible
     thresholds:
     - trigger:
@@ -190,85 +192,6 @@
     state: coil-10
   - type: NCMetaNetworkCable
     maximumLength: 8
-
-- type: entity
-  parent: NCMetaNetworkPort
-  id: NCMetaDemoNetAccessPoint
-  name: local NET access point
-  suffix: training
-  description: A local architecture entrance for a physical cable or a nearby unobstructed radio link.
-  components:
-  - type: NCMetaPort
-    networkId: meta-demo
-    wireless: true
-    range: 8
-  - type: NCMetaNetAccessPoint
-    architectureId: meta-demo
-    entryNodes: [entry]
-  - type: NCMetaNetNode
-    architectureId: meta-demo
-    nodeId: entry
-    label: nc-meta-net-entry-node
-    kind: Defense
-    defense: NCMetaNetUnprotected
-    neighbors: [data, control, firewall, black-ice]
-
-- type: entity
-  parent: NCMetaNetworkPort
-  id: NCMetaDemoNetData
-  name: local NET data node
-  suffix: training
-  description: A data service exposing one configured virtual file after an authorized NET action.
-  components:
-  - type: NCMetaNetNode
-    architectureId: meta-demo
-    nodeId: data
-    label: nc-meta-net-data-node
-    kind: Data
-    dataPath: public/status.txt
-    defense: NCMetaNetUnprotected
-
-- type: entity
-  parent: NCMetaNetworkPort
-  id: NCMetaDemoNetControl
-  name: local NET control node
-  suffix: training
-  description: A scoped control service for one physically connected door that permits service control.
-  components:
-  - type: NCMetaNetNode
-    architectureId: meta-demo
-    nodeId: control
-    label: nc-meta-net-control-node
-    kind: Control
-    defense: NCMetaNetUnprotected
-
-- type: entity
-  parent: NCMetaNetworkPort
-  id: NCMetaDemoNetFirewall
-  name: local NET firewall
-  suffix: training
-  description: A protected node for native tool and defense resolution.
-  components:
-  - type: NCMetaNetNode
-    architectureId: meta-demo
-    nodeId: firewall
-    label: nc-meta-net-firewall-node
-    kind: Defense
-    defense: NCMetaNetSecured
-
-- type: entity
-  parent: NCMetaDemoNetFirewall
-  id: NCMetaDemoNetBlackIce
-  name: local NET Black ICE
-  suffix: training
-  description: A dangerous native defense. Its threat timer continues while META software is paused or stopped.
-  components:
-  - type: NCMetaNetNode
-    architectureId: meta-demo
-    nodeId: black-ice
-    label: nc-meta-net-black-ice-node
-    kind: Defense
-    defense: NCMetaNetBlackIce
 
 - type: entity
   parent: NCMetaServer

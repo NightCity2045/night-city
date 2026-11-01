@@ -55,16 +55,37 @@ public sealed class MetaCompilerWorkerPool : IAsyncDisposable
                 BinaryDependencies = request.BinaryDependencies?.Select(d => d with { Artifact = d.Artifact.ToArray() }).ToArray() };
             var key = principal + ":" + Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(request, MetaCompilerProtocol.JsonOptions)));
             if (_negativeCache.TryGetValue(key, out var cached) && cached.Expires > DateTime.UtcNow) return cached.Result;
-            var completion = new TaskCompletionSource<MetaCompilationResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var completion = new TaskCompletionSource<WorkerReply>(TaskCreationOptions.RunContinuationsAsynchronously);
             if (!_jobs.Writer.TryWrite(new(principal, request, completion, cancellation))) throw new InvalidOperationException("META compile queue is full.");
             queued = true;
-            var result = await completion.Task.WaitAsync(cancellation);
+            var result = (await completion.Task.WaitAsync(cancellation)).Compilation ?? throw new InvalidDataException("Missing compiler result.");
             if (!result.Success)
             {
                 if (_negativeCache.Count >= 64) _negativeCache.Clear();
                 _negativeCache[key] = (DateTime.UtcNow.AddSeconds(15), result);
             }
             return result;
+        }
+        finally { if (!queued) _principals.TryRemove(principal, out _); }
+    }
+
+    public async Task<MetaSemanticReply> AnalyzeAsync(string principal, MetaCompilationRequest request,
+        MetaSemanticQuery semantic, CancellationToken cancellation = default)
+    {
+        if (string.IsNullOrWhiteSpace(principal) || principal.Length > 128) throw new ArgumentException("Principal is required and bounded.");
+        ValidateRequest(request);
+        if (semantic.Dependencies.Length > 16 || semantic.File.Length > 192 || semantic.Revision.Length != 64 || semantic.Kind is < 0 or > 3)
+            throw new ArgumentException("Semantic query exceeds policy.");
+        if (!_principals.TryAdd(principal, 0)) throw new InvalidOperationException("META principal already has a pending compilation.");
+        var queued = false;
+        try
+        {
+            request = request with { Limits = null, Sources = request.Sources.ToArray() };
+            semantic = semantic with { Dependencies = semantic.Dependencies.ToArray() };
+            var completion = new TaskCompletionSource<WorkerReply>(TaskCreationOptions.RunContinuationsAsynchronously);
+            if (!_jobs.Writer.TryWrite(new(principal, request, completion, cancellation, semantic))) throw new InvalidOperationException("META compile queue is full.");
+            queued = true;
+            return (await completion.Task.WaitAsync(cancellation)).Semantic ?? throw new InvalidDataException("Missing semantic result.");
         }
         finally { if (!queued) _principals.TryRemove(principal, out _); }
     }
@@ -95,22 +116,21 @@ public sealed class MetaCompilerWorkerPool : IAsyncDisposable
         {
             await foreach (var job in _jobs.Reader.ReadAllAsync(_shutdown.Token))
             {
-                if (job.Cancellation.IsCancellationRequested) { job.Completion.TrySetCanceled(job.Cancellation); _principals.TryRemove(job.Principal, out _); continue; }
+                if (job.Cancellation.IsCancellationRequested) { _principals.TryRemove(job.Principal, out _); job.Completion.TrySetCanceled(job.Cancellation); continue; }
                 try
                 {
-                    var result = await RunAsync(job.Request, job.Cancellation);
+                    var result = await RunAsync(job.Request, job.Semantic, job.Cancellation);
                     _principals.TryRemove(job.Principal, out _);
                     job.Completion.TrySetResult(result);
                 }
-                catch (OperationCanceledException) { job.Completion.TrySetCanceled(); }
-                catch (Exception exception) { job.Completion.TrySetException(exception); }
-                finally { _principals.TryRemove(job.Principal, out _); }
+                catch (OperationCanceledException) { _principals.TryRemove(job.Principal, out _); job.Completion.TrySetCanceled(); }
+                catch (Exception exception) { _principals.TryRemove(job.Principal, out _); job.Completion.TrySetException(exception); }
             }
         }
         catch (OperationCanceledException) { }
     }
 
-    private async Task<MetaCompilationResult> RunAsync(MetaCompilationRequest request, CancellationToken cancellation)
+    private async Task<WorkerReply> RunAsync(MetaCompilationRequest request, MetaSemanticQuery? semantic, CancellationToken cancellation)
     {
         if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException("META compiler production workers require an installed, tested OS memory policy; Windows Job Objects are currently supported.");
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellation, _shutdown.Token);
@@ -133,7 +153,7 @@ public sealed class MetaCompilerWorkerPool : IAsyncDisposable
         using var kill = deadline.Token.Register(() => TryKill(process));
         try
         {
-            await MetaCompilerProtocol.WriteAsync(process.StandardInput.BaseStream, new MetaWorkerRequest(MetaCompilerProtocol.Version, MetaApiCatalog.Default.Hash, request), MetaCompilerProtocol.MaximumRequestBytes, deadline.Token);
+            await MetaCompilerProtocol.WriteAsync(process.StandardInput.BaseStream, new MetaWorkerRequest(MetaCompilerProtocol.Version, MetaApiCatalog.Default.Hash, request, semantic), MetaCompilerProtocol.MaximumRequestBytes, deadline.Token);
             process.StandardInput.Close();
             var response = await MetaCompilerProtocol.ReadAsync<MetaWorkerResponse>(process.StandardOutput.BaseStream, MetaCompilerProtocol.MaximumResponseBytes, deadline.Token);
             await process.WaitForExitAsync(deadline.Token);
@@ -141,6 +161,23 @@ public sealed class MetaCompilerWorkerPool : IAsyncDisposable
             foreach (var diagnostic in response.Diagnostics)
                 if (diagnostic.Code.Length > 16 || diagnostic.Arguments.Sum(a => a.Length) > 4096 || diagnostic.Related.Count > 8 || diagnostic.StartUtf8Byte < 0 || diagnostic.EndUtf8Byte < diagnostic.StartUtf8Byte)
                     throw new InvalidDataException("Invalid META diagnostic response.");
+            if (semantic != null)
+            {
+                var reply = response.Semantic;
+                var sources = request.Sources.ToDictionary(source => source.FileId, source => new SourceText(source.FileId, source.Text), StringComparer.Ordinal);
+                if (response.Artifact != null || reply == null || reply.Signature is not { Length: <= 4096 } ||
+                    reply.Items is not { Length: <= 128 } || reply.Diagnostics is not { Length: <= 100 } ||
+                    reply.Items.Any(item => item == null || item.Name is not { Length: <= 4096 } || item.Signature is not { Length: <= 4096 } ||
+                        item.Location is { } location && (!sources.TryGetValue(location.FileId, out var source) || source.Revision != location.Revision ||
+                            !source.IsScalarBoundary(location.StartUtf8Byte) || !source.IsScalarBoundary(location.EndUtf8Byte) || location.EndUtf8Byte < location.StartUtf8Byte)) ||
+                    reply.Diagnostics.Any(diagnostic => diagnostic == null || diagnostic.Code is not { Length: <= 16 } ||
+                        !sources.TryGetValue(diagnostic.FileId, out var source) || source.Revision != diagnostic.SourceRevision ||
+                        !source.IsScalarBoundary(diagnostic.StartUtf8Byte) || !source.IsScalarBoundary(diagnostic.EndUtf8Byte) || diagnostic.EndUtf8Byte < diagnostic.StartUtf8Byte) ||
+                    JsonSerializer.SerializeToUtf8Bytes(reply, MetaCompilerProtocol.JsonOptions).Length > 65536)
+                    throw new InvalidDataException("Invalid META semantic response.");
+                return new(null, reply);
+            }
+            if (response.Semantic != null) throw new InvalidDataException("Unexpected META semantic response.");
             MetaModule? module = null;
             MetaExportCertificate? exports = null;
             if (response.Artifact != null)
@@ -150,7 +187,7 @@ public sealed class MetaCompilerWorkerPool : IAsyncDisposable
                 if (response.ArtifactHash != verified.Digest) throw new InvalidDataException("Worker artifact digest mismatch.");
                 exports = new MetaCompiler().VerifyExports(request, verified, deadline.Token);
             }
-            return new(response.Artifact, response.ArtifactHash, response.CacheIdentity, response.Diagnostics, module, response.Analysis, exports);
+            return new(new(response.Artifact, response.ArtifactHash, response.CacheIdentity, response.Diagnostics, module, response.Analysis, exports), null);
         }
         finally { TryKill(process); }
     }
@@ -168,7 +205,9 @@ public sealed class MetaCompilerWorkerPool : IAsyncDisposable
         while (_jobs.Reader.TryRead(out var job)) job.Completion.TrySetCanceled();
         _shutdown.Dispose();
     }
-    private sealed record Job(string Principal, MetaCompilationRequest Request, TaskCompletionSource<MetaCompilationResult> Completion, CancellationToken Cancellation);
+    private sealed record WorkerReply(MetaCompilationResult? Compilation, MetaSemanticReply? Semantic);
+    private sealed record Job(string Principal, MetaCompilationRequest Request, TaskCompletionSource<WorkerReply> Completion,
+        CancellationToken Cancellation, MetaSemanticQuery? Semantic = null);
 
     private sealed class WindowsWorkerJob : IDisposable
     {

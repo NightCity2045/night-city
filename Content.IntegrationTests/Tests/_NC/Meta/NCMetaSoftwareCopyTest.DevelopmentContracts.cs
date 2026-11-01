@@ -38,6 +38,12 @@ public sealed partial class NCMetaSoftwareCopyTest
             Assert.That(ui.TryOpenUi(scene.Source.Entity, NCMetaUiKey.Workspace, developerActor), Is.True);
         });
         await Server.WaitRunTicks(3);
+        await NCMetaNativeTestTasks.Run(Server, () => RunDevelopmentScenario(scene, automatic, fakePass));
+    }
+
+    private async Task<bool> RunDevelopmentScenario(Scene scene, bool automatic, bool fakePass)
+    {
+        var developerActor = scene.SourceActor!.Value;
         var finance = Server.System<NCPartyFinanceAdapterSystem>();
         Assert.That(NCPartyRef.TryParse(scene.Owner, out var buyer), Is.True);
         Assert.That(NCPartyRef.TryParse(scene.SourceOwner, out var seller), Is.True);
@@ -163,5 +169,6 @@ public sealed partial class NCMetaSoftwareCopyTest
         }
         var escrow = await Server.System<NCEconomyLedgerSystem>().GetAccountAsync(NCPersistentIdentity.SystemAccount("meta-development." + current.Id.ToString("D")), true);
         Assert.That(escrow!.Snapshot.Balance, Is.Zero);
+        return true;
     }
 }

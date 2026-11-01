@@ -3,22 +3,26 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Linq;
-using Content.Meta.Mui;
 using Content.Shared._NC.Meta.UI;
 
 namespace Content.Client._NC.Meta.UI;
 
-/// <summary>Reusable presentation host for private Agent/CitiNet routes. All routes share one four-window budget.</summary>
+/// <summary>Private application sessions share one budget; websites render inside the CitiNet browser.</summary>
 public sealed class NCMetaApplicationSessionManager : IDisposable
 {
-    private readonly Dictionary<Guid, NCMetaApplicationWindow> _sessions = [];
-    private readonly NCMetaInvoiceConfirmationManager _invoices = new();
+    private readonly Dictionary<Guid, NCMetaApplicationView> _sessions = [];
+    private readonly Dictionary<Guid, NCMetaApplicationWindow> _windows = [];
+    private readonly Func<NCMetaApplicationView, bool>? _presentWebsite;
+    private Guid _websiteSession;
     private bool _disposed;
     public event Action<BoundUserInterfaceMessage>? Requested;
+    public event Action<string>? WebsiteNotice;
     public int SessionCount => _sessions.Count;
 
-    public NCMetaApplicationSessionManager() => _invoices.Requested += message => Requested?.Invoke(message);
-    public bool TryReceiveInvoice(BoundUserInterfaceMessage message) => !_disposed && _invoices.TryReceive(message);
+    public NCMetaApplicationSessionManager(Func<NCMetaApplicationView, bool>? presentWebsite = null)
+    {
+        _presentWebsite = presentWebsite;
+    }
 
     public bool TryApplyState(NCMetaAppState state)
     {
@@ -26,43 +30,76 @@ public sealed class NCMetaApplicationSessionManager : IDisposable
             return false;
         if (state.Closed)
         {
+            if (_websiteSession == state.SessionId) WebsiteNotice?.Invoke(state.Notice);
             Close(state.SessionId);
             return true;
         }
-        if (!_sessions.TryGetValue(state.SessionId, out var window))
+        if (!_sessions.TryGetValue(state.SessionId, out var view))
         {
-            if (!state.FullSnapshot || _sessions.Count >= MuiLimits.ClientSessions)
+            if (!state.FullSnapshot || _sessions.Count >= 4)
                 return false;
-            window = new NCMetaApplicationWindow();
             var sessionId = state.SessionId;
-            window.Requested += message => Requested?.Invoke(message);
-            window.OnClose += () =>
+            if (state.Website)
             {
-                _invoices.CloseSession(sessionId);
-                if (_sessions.Remove(sessionId))
-                    Requested?.Invoke(new NCMetaAppCloseMessage(sessionId));
-                window.Dispose();
-            };
-            _sessions.Add(sessionId, window);
-            window.OpenCentered();
+                if (_presentWebsite == null) return false;
+                CloseWebsite();
+                view = new NCMetaApplicationView();
+                if (!_presentWebsite(view))
+                {
+                    view.Dispose();
+                    return false;
+                }
+                _websiteSession = sessionId;
+            }
+            else
+            {
+                var window = new NCMetaApplicationWindow();
+                view = window.ApplicationView;
+                window.OnClose += () =>
+                {
+                    _windows.Remove(sessionId);
+                    if (_sessions.Remove(sessionId))
+                        Requested?.Invoke(new NCMetaAppCloseMessage(sessionId));
+                    window.Dispose();
+                };
+                _windows.Add(sessionId, window);
+                window.OpenCentered();
+            }
+            view.Requested += message => Requested?.Invoke(message);
+            _sessions.Add(sessionId, view);
         }
-        window.ApplyState(state);
+        view.ApplyState(state);
         return true;
     }
 
     public void ApplyResult(NCMetaAppActionResultMessage result)
     {
-        if (_sessions.TryGetValue(result.SessionId, out var window))
-            window.ApplyResult(result);
+        if (_sessions.TryGetValue(result.SessionId, out var view))
+            view.ApplyResult(result);
     }
 
     public void Close(Guid sessionId)
     {
-        _invoices.CloseSession(sessionId);
-        if (!_sessions.Remove(sessionId, out var window))
+        if (!_sessions.Remove(sessionId, out var view))
             return;
-        window.Close();
-        window.Dispose();
+        if (_websiteSession == sessionId) _websiteSession = Guid.Empty;
+        if (_windows.Remove(sessionId, out var window))
+        {
+            window.Close();
+            window.Dispose();
+        }
+        else
+        {
+            view.Parent?.RemoveChild(view);
+            view.Dispose();
+        }
+    }
+
+    public void CloseWebsite()
+    {
+        if (_websiteSession == Guid.Empty) return;
+        Requested?.Invoke(new NCMetaAppCloseMessage(_websiteSession));
+        Close(_websiteSession);
     }
 
     public void Dispose()
@@ -75,7 +112,7 @@ public sealed class NCMetaApplicationSessionManager : IDisposable
             Requested?.Invoke(new NCMetaAppCloseMessage(session));
             Close(session);
         }
-        _invoices.Dispose();
         Requested = null;
+        WebsiteNotice = null;
     }
 }

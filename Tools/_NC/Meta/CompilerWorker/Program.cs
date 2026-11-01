@@ -8,9 +8,16 @@ try
     using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(5));
     var request = await MetaCompilerProtocol.ReadAsync<MetaWorkerRequest>(Console.OpenStandardInput(), MetaCompilerProtocol.MaximumRequestBytes, deadline.Token);
     if (request.ProtocolVersion != MetaCompilerProtocol.Version || request.CatalogHash != MetaApiCatalog.Default.Hash) return 2;
-    var result = new MetaCompiler().Compile(request.Compilation with { Limits = null }, deadline.Token);
-    var response = new MetaWorkerResponse(MetaCompilerProtocol.Version, result.Artifact, result.ArtifactHash, result.CacheIdentity,
-        result.Diagnostics.ToArray(), result.Analysis.ToArray());
+    MetaWorkerResponse response;
+    if (request.Semantic is { } semantic)
+        response = new(MetaCompilerProtocol.Version, null, null, "", Array.Empty<MetaDiagnostic>(), Array.Empty<MetaFunctionAnalysis>(),
+            MetaSemanticQueryRunner.Run(request.Compilation with { Limits = null }, semantic, deadline.Token));
+    else
+    {
+        var result = new MetaCompiler().Compile(request.Compilation with { Limits = null }, deadline.Token);
+        response = new(MetaCompilerProtocol.Version, result.Artifact, result.ArtifactHash, result.CacheIdentity,
+            result.Diagnostics.ToArray(), result.Analysis.ToArray());
+    }
     await MetaCompilerProtocol.WriteAsync(Console.OpenStandardOutput(), response, MetaCompilerProtocol.MaximumResponseBytes, deadline.Token);
     return 0;
 }

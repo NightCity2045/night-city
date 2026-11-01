@@ -59,7 +59,7 @@ public sealed partial class NCMetaPersistenceSystem
                     value.Package == package && (value.FromPackage.Length == 0 ? value.Package : value.FromPackage) == fromPackage &&
                     value.FromVersion == fromVersion && value.ToVersion == toVersion).Take(2).ToArray();
                 captured.SetResult(candidates is [var transformer] && transformer.Steps.Count <= MetaStateTransformer.MaximumSteps
-                    ? transformer.Steps.Select(value => new MetaStateTransformStep(value.Kind, value.Path, value.Target, value.Text)).ToArray()
+                    ? transformer.Steps.Select(value => new MetaStateTransformStep((MetaStateTransformKind) value.Kind, value.Path, value.Target, value.Text)).ToArray()
                     : null);
             }
             catch (Exception exception) { captured.SetException(exception); }

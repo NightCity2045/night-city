@@ -39,7 +39,7 @@ public sealed record MetaOperationReceipt(string Id, string Owner, string Device
     public static string HashFields(params string[] fields)
     {
         using var stream = new MemoryStream();
-        Span<byte> length = stackalloc byte[4];
+        var length = new byte[4];
         foreach (var field in fields)
         {
             var bytes = Encoding.UTF8.GetBytes(field);

@@ -7,38 +7,20 @@ META programs run on a physical host. A compiled file, an example or a passed te
 ## First program
 
 1. Claim an unowned compatible terminal through its interaction menu.
-2. Open the META workspace and import a built-in example into your private project.
+2. Open the META workspace, create a private project and write its source.
 3. Save the source, compile it and run its isolated Test fixture. Test devices are simulated and cannot change the world.
 4. Review the program's required interfaces and scopes. Bind each slot to an owned, powered, reachable device.
 5. Install the verified artifact, then start it. Logs, debugger controls, stop and rollback are available from the workspace.
 
-The library example contains two source modules. The first fifteen templates demonstrate logs, arithmetic, collections, files, messages, doors, sensors, vehicles, robots, conveyors, optics and NET probes. Additional packages cover dashboards, service applications, production, laboratory batches and functional implants.
+## Development and service tools
 
-## Ready applications and service tools
-
-Claim your host, then use its interaction menu to open Software installer, Installation recovery, Hardware monitor or Diagnostics. These native tools work without opening the source editor. The installer prepares a selected built-in application, or uses the software marketplace for a purchased release. Review the exact target and release, confirm any payment separately, bind the required devices and approve the named methods before installation. Opening an application never grants control.
-
-The owned-door application requests open or close and displays the observed physical door phase. An accepted command can still be moving or blocked. The security journal records fresh camera and door events in the installation's private file volume. It is a bounded private log, not the protected native NET evidence journal. Both applications have English and Russian views. Return to the development workspace when you want to edit your own source.
+Claim your host, then use its interaction menu to open Software installer, Installation recovery, Hardware monitor or Diagnostics. These native tools work without opening the source editor. The installer uses your verified project or a purchased release from the software marketplace. Review the exact target and release, confirm any payment separately, bind the required devices and approve the named methods before installation. Opening an application never grants control.
 
 Hardware monitor shows actual host power, health, process reservations, gas, load and temperature where the equipment provides it. Recovery selects an exact installed package: stop it, inspect its permissions and previous image, and confirm rollback. A physically present image retained after a device transfer remains inactive until the new owner explicitly installs it with fresh permissions and state.
 
-## Temperature tutorial
-
-The commissioning kit is finite stock in ordinary Vendomats and the construction catalog. It contains a battery-powered service tablet, sensor, alarm and panel flatpacks, data cables, power cells, a wrench, multitool, commissioning tool and this manual. Unpack the equipment with the multitool in a powered location, insert a charged cell into the tablet and claim each device. Data cables provide communication; stationary machines still need their normal electrical supply.
-
-1. Prepare “1. Temperature threshold”. Bind training-sensor to the temperature sensor and training-alarm to the alarm. Review and approve the exact bindings. The alarm turns on at 30 °C and off below that same threshold.
-2. Prepare “2. Temperature hysteresis” on the same physical equipment. It turns on at 30 °C and clears at 25 °C. A reading of 28 °C keeps the previous hot state instead of repeatedly toggling the alarm.
-3. Prepare “3. Persistent transition file”. Bind training-data to the host's private FileStore. Each successful alarm transition atomically replaces training/last-transition.txt; it does not save another installation's files.
-4. Prepare “4. Operator panel”. Open its application view and choose integer limits from 1 to 80, with the clear limit strictly below the alarm limit. The form changes this running application's limits; it does not grant access or persist the limits across a restart.
-5. Prepare “5. Install and recover”. Review the verified release and scopes, install it, explicitly approve unattended operation if needed, then start it and open the panel. Stop it, inspect the transition file and recover the previous image through the native tools.
-
-Fresh samples drive the tutorial. Missing or stale readings show the sensor as unavailable. A space heater changes real local air temperature only after normal assembly, power and manual activation; the program does not manufacture readings or heat.
-
-## Equipment and isolated demonstrations
+## Equipment
 
 The existing construction catalog supplies compatible flatpacks, service tablets, local NET nodes, drones and implant hardware; the vehicle catalog supplies the compatible ECU car. Stock and payment remain subject to the native shop. A purchased implant still requires normal surgery, and a machine still requires physical power, commissioning and explicit control permission.
-
-Six isolated demonstration scenes cover the door and thermal tutorial, workshop, local NET, patrol/delivery, conveyor/production and bedside/laboratory. A test operator can create them through the trusted diagnostic fixture tools. Each scene has real finite APC power and physical wiring. Claim and commission its devices normally; no scene issues ownership, installs a program, assigns a patient or enables automation for you. These scenes do not replace production maps.
 
 ## Compatible equipment
 
@@ -52,7 +34,7 @@ The ECU may limit requested torque; native fuel, heat, condition, braking and ty
 
 Driver assistance reads the real ABS, stability and traction hardware. Stock controllers do not allow disabling these protections; a configurable assistance variant must be installed for that function. Requests expire with the driver authority or their short lease. Vehicle security uses the physical key, lock, alarm sounder and battery. An accepted lock request may still be pending; check the subsequent state before treating the car as secured.
 
-The vehicle dashboard example is an ordinary META/MUI application. Bind its engine and instrument slots to the physical vehicle, install the package and open the dashboard view. Speed, fuel and battery readings come from native equipment. Missing or stale samples display an unavailable state; the chart contains actual samples rather than invented starting values.
+A vehicle dashboard can be written as a META/MUI application. Bind its engine and instrument slots to the physical vehicle, install your package and open its dashboard view. Speed, fuel and battery readings come from native equipment. Missing or stale samples display an unavailable state; the chart contains actual samples rather than invented starting values.
 
 The route drone moves through native steering and pathfinding. Use a commissioning tool on your drone, then on a nearby physical waypoint to add that marker to its mission map. Repeat for the second marker. Moving or destroying a marker can make a route unavailable. The robot cannot teleport or search the world for hidden targets.
 
@@ -68,9 +50,7 @@ A compatible conveyor includes a local load cell. A separate owned sensor can be
 <GuideEntityEmbed Entity="NCMetaLaboratoryChemMaster"/>
 </Box>
 
-The fabricator reserves real materials and reports the number of physically completed items. Enable automation at the machine before running the fabricator template. Keep the same operation key when checking or cancelling a batch. Applied confirms its native completion; OutcomeUnknown requires inspection and must not trigger an automatic repeat. Manual control, power loss and revoked access stop the remaining work.
 
-The laboratory template starts a grinder containing real ingredients and a receiving beaker, then packages a separately prepared ChemMaster buffer. It does not move a beaker between machines. ChemMaster packaging needs its commissioned, conscious practitioner nearby. Labels, pill counts and dosages retain the native machine limits.
 
 ## Clinical equipment and optics
 
@@ -101,15 +81,12 @@ For unattended monitoring, bind a patient to the stationary gateway, then select
 
 These variants use their normal surgical installation, calibration and physical implant power bus. Only the actual wearer can claim an installed controller and enable META automation through their own interaction menu. Compile software on a suitable computer, then install the verified package on the compatible implant.
 
-The native implant modes template requests the supported mode and renews control only while that mode remains active. It never rearms an inactive controller. Native manual activation takes control away from META immediately. A stopped process or expired three-second control lease retracts or stops the mode that the program controlled.
 
 The tool and blade require their real hand to be free. Deploying a blade does not attack a target: weapon use and tool interactions remain ordinary physical actions. Sandevistan duration, cooldown, motor mode conflicts, power, heat, EMP and neural restrictions retain their native limits. Biomonitor pulse is a one-shot native reading shown to the wearer and paid from the real body battery.
 
-## Service applications
+## Websites
 
-A service desk can host a customer website and a private staff view from one META application. Customers create work orders and see only their permitted records. Staff assignment, work status and invoice actions still require the native provider's permissions. The garage example reads permitted ECU telemetry, while repairs use the existing workshop, real tools and parts.
-
-Select a row in the table to choose a service order; the displayed ORD reference identifies it to the workshop. Each window keeps its own selection. Refresh the list when it is unavailable or out of date. Requesting payment opens a separate native confirmation for the exact invoice; issuing a quote or pressing the request button alone does not pay it. Keep the staff view private when publishing the customer website.
+Write your own META application and MUI views, then register its public CitiNet name and path in the hosting panel. You can use your own host or rent capacity. Public pages expose only their declared actions; server permissions and physical device checks remain authoritative.
 
 ## Drone sensors, cargo and equipped weapons
 
@@ -117,9 +94,7 @@ NCMetaCargoDrone adds a real camera and one physical gripper. NCMetaEquippedDron
 
 The camera returns at most sixteen frozen relative observations. Range, field of view, an opaque wall, darkness, a disabled camera, stealth and containers restrict what it can see. A ContactRef belongs to one process, device and control generation and expires after two seconds. It cannot be manufactured, compared, saved as an entity ID or used to inspect another entity's inventory. Moving a target does not rewrite an old measurement; physical commands recheck the current native observation.
 
-The delivery template picks up one visible physical item with the real free gripper, follows the commissioned loading waypoint and drops that same item only after arrival and within physical reach. Storage insertion uses native locks, capacity, item restrictions and drop checks. Manual control, lost power, an invalid grant or a changed control generation cancel pending automation. Take control through the existing manual mode before handling the drone yourself.
 
-The equipped-shot template is a manually started controlled-range demonstration. It requests one shot at the first visible mobile contact; review the scene and fire grant before running it. The program cannot create ammunition, bullets or damage. The native weapon turns at its configured rate, checks its actual facing and uses normal ammo, cooldown and shot blockers. Its receipt confirms a real projectile output, not a hit or damage. It leaves no background firing target. Uncertain debit/output becomes OutcomeUnknown; inspect operationStatus before any new-key retry.
 
 ## Recovery
 

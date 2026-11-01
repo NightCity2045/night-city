@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<TestSequence>
-  <Test Name="Content.IntegrationTests.Tests._NC.Meta.NCMetaDomainHardwareTest.APhysicalConveyorSignalInvalidatesTheCapturedFirmwareServiceRevision" DisplayName="APhysicalConveyorSignalInvalidatesTheCapturedFirmwareServiceRevision" Source="D:\projects\night-city\artifacts\meta-integration\aac96460efe64a1698a9e05cd949e357\bin\Content.IntegrationTests\Content.IntegrationTests.dll" Completed="False" />
-  <Test Name="Content.IntegrationTests.Tests._NC.Meta.NCMetaDomainHardwareTest.ClinicalFirmwareCannotBeServicedWithAutomationOrAnAttachedPatient" DisplayName="ClinicalFirmwareCannotBeServicedWithAutomationOrAnAttachedPatient" Source="D:\projects\night-city\artifacts\meta-integration\aac96460efe64a1698a9e05cd949e357\bin\Content.IntegrationTests\Content.IntegrationTests.dll" Completed="False" />
-</TestSequence>

@@ -20,6 +20,7 @@ public sealed partial class NCDiagnosticsClientSystem
 {
     private readonly Dictionary<string, Control> _controls = new();
     private readonly Dictionary<string, HashSet<string>> _observedRows = new();
+    private readonly Dictionary<string, HashSet<string>> _observedTabs = new();
 
     private JsonObject InspectUi(JsonObject args)
     {
@@ -27,6 +28,7 @@ public sealed partial class NCDiagnosticsClientSystem
         var includeHidden = args["includeHidden"]?.GetValue<bool>() ?? false;
         _controls.Clear();
         _observedRows.Clear();
+        _observedTabs.Clear();
         var rowBudget = 256;
         var snapshot = Guid.NewGuid().ToString("N");
         var queue = new Queue<(Control Control, string Path, int Depth)>();
@@ -85,6 +87,21 @@ public sealed partial class NCDiagnosticsClientSystem
                 node["textTruncated"] = !redacted && multiline.TextLength > 512;
                 node["text"] = redacted ? "[redacted]" : Rope.CollapseSubstring(multiline.TextRope, 0..Math.Min(512, multiline.TextLength));
             }
+            if (control is TabContainer { TabsVisible: true, ChildCount: <= 64 } tabs && !SensitiveTextControl(tabs))
+            {
+                var titles = new JsonArray();
+                var observed = new HashSet<string>(StringComparer.Ordinal);
+                for (var tab = 0; tab < tabs.ChildCount; tab++)
+                {
+                    if (!tabs.GetTabVisible(tab)) continue;
+                    var title = tabs.GetActualTabTitle(tab);
+                    if (title.Length > 512) continue;
+                    observed.Add(title);
+                    titles.Add(new JsonObject { ["title"] = title, ["selected"] = tabs.CurrentTab == tab });
+                }
+                node["tabs"] = titles;
+                _observedTabs[id] = observed;
+            }
             if (control is ItemList list && !SensitiveTextControl(list))
             {
                 var rows = new JsonArray();
@@ -103,7 +120,7 @@ public sealed partial class NCDiagnosticsClientSystem
                 node["rowClickSupported"] = list.Count <= 512;
             }
             nodes.Add(node);
-            if (depth >= 16 || UnsafeControl(control))
+            if (depth >= 32 || UnsafeControl(control))
                 continue;
             for (var index = 0; index < Math.Min(control.ChildCount, 128); index++)
             {
@@ -135,10 +152,25 @@ public sealed partial class NCDiagnosticsClientSystem
         switch (action)
         {
             case "editor_input": return InteractEditor(control, args);
+            case "scroll": return InteractScroll(control, args);
+            case "select_tab":
+            {
+                RequireGuiInput(control);
+                var title = args.RequiredString("text", 512);
+                if (control is not TabContainer { TabsVisible: true, ChildCount: <= 64 } tabs ||
+                    !_observedTabs.TryGetValue(id, out var observedTabs) || !observedTabs.Contains(title))
+                    throw new DiagnosticException("unsupported_control", "Select a visible tab title from the current UI inspection.");
+                var tabMatches = Enumerable.Range(0, tabs.ChildCount).Where(index => tabs.GetTabVisible(index) && tabs.GetActualTabTitle(index) == title).Take(2).ToArray();
+                if (tabMatches.Length != 1)
+                    throw new DiagnosticException("ambiguous_item", "The observed tab title is missing or ambiguous; inspect the UI again.");
+                tabs.CurrentTab = tabMatches[0];
+                break;
+            }
             case "clipboard": return InteractClipboard(control, args);
             case "client_size": return ResizeDiagnosticWindow(control, args, true);
             case "own_window_size": return ResizeDiagnosticWindow(control, args, false);
             case "click":
+            case "hover":
                 if (!_graphics)
                     throw new DiagnosticException("rendering_unavailable", "Pointer UI interaction requires a graphical client.");
                 if (control.PixelSize.X <= 0 || control.PixelSize.Y <= 0)
@@ -167,7 +199,7 @@ public sealed partial class NCDiagnosticsClientSystem
                     {
                         if (failure != null)
                             Log.Error("diagnostics.input: " + failure.Code + ": " + failure.Message);
-                    });
+                    }, press: action == "click");
                 break;
             case "set_text":
             case "submit":
@@ -218,7 +250,7 @@ public sealed partial class NCDiagnosticsClientSystem
                 throw new DiagnosticException("unsupported_action", "This UI action is not in the declared diagnostic catalogue.");
         }
         return new JsonObject { ["submitted"] = true, ["action"] = action, ["controlId"] = id,
-            ["frame"] = _frame, ["executionPath"] = action == "click" ? "sdl-event-queue" : "public-ui-control-api",
+            ["frame"] = _frame, ["executionPath"] = action is "click" or "hover" ? "sdl-event-queue" : "public-ui-control-api",
             ["outcomeConfirmed"] = false };
     }
 

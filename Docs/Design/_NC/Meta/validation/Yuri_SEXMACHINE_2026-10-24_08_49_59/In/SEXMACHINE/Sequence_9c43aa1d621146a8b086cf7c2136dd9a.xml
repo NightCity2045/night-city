@@ -1,4 +1,0 @@
-<?xml version="1.0"?>
-<TestSequence>
-  <Test Name="Content.IntegrationTests.Tests._NC.Meta.NCMetaPhysicalNetworkTest.ASharedSegmentAndNearbyPositionsDoNotReplaceTheTwoPhysicalCableEnds" DisplayName="ASharedSegmentAndNearbyPositionsDoNotReplaceTheTwoPhysicalCableEnds" Source="D:\projects\night-city\artifacts\meta-integration\0206a6b99ca049639b4ae538847fa902\bin\Content.IntegrationTests/Content.IntegrationTests.dll" Completed="False" />
-</TestSequence>

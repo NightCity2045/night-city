@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param(
     [string] $Filter = 'FullyQualifiedName~NCPersistentMutationPersistenceTest|FullyQualifiedName~Content.IntegrationTests.Tests._NC.Meta',
-    [string] $ResultsDirectory = 'Docs/Design/_NC/Meta/validation',
+    [Alias('ResultDirectory')] [string] $ResultsDirectory = 'artifacts/meta-validation',
     [string] $ResultName = 'meta-native-integration.trx',
     [string] $BuiltDirectory = '',
     [ValidateRange(30, 1800)] [int] $TestTimeoutSeconds = 1800,

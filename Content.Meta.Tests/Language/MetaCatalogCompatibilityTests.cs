@@ -58,6 +58,18 @@ public sealed class MetaCatalogCompatibilityTests
     }
 
     [Test]
+    public void AClosedLibraryThatUsesARemovedNativeApiStillFailsToLink()
+    {
+        var old = CompileBaseline("module maker.retired;import meta.services;pub fn state()->services.OrderStatus{return services.OrderStatus.Submitted;}",
+            "maker.retired", true);
+        var dependency = new MetaBinaryLibrary("maker.legacy", "1.0.0", old.ArtifactHash!, old.Artifact!, old.Exports!);
+        var current = new MetaCompiler().Compile(new([new("main.meta", "module test.current;import maker.retired;fn main()->void{let state=retired.state();}")],
+            "test.current", BinaryDependencies: [dependency]));
+        Assert.That(current.Success, Is.False);
+        Assert.That(current.Diagnostics.Any(diagnostic => diagnostic.Code == "E305"), Is.True);
+    }
+
+    [Test]
     public void HistoricalHashNeverGrantsTrustToChangedNativeDtoOrUnknownCatalog()
     {
         var old = CompileBaseline("module test.legacy;fn main()->void{}", "test.legacy");

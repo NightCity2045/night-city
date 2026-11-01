@@ -67,7 +67,7 @@ public sealed partial class NCMetaLaboratoryClinicalTest : GameTest
     }
     private sealed class Invocation { public bool Completed; }
 
-    private async Task Until(Func<bool> condition, string reason, int maximumTicks = 900)
+    private async Task Until(Func<bool> condition, string reason, int maximumTicks = 900, Func<string> diagnostics = null)
     {
         var elapsed = Stopwatch.StartNew();
         for (var tick = 0; tick < maximumTicks && elapsed.Elapsed < TimeSpan.FromSeconds(30); tick++)
@@ -81,7 +81,9 @@ public sealed partial class NCMetaLaboratoryClinicalTest : GameTest
             if (remaining <= TimeSpan.Zero) break;
             await Server.WaitRunTicks(1).WaitAsync(remaining);
         }
-        Assert.Fail(reason);
+        var detail = "";
+        if (diagnostics != null) await Server.WaitPost(() => detail = diagnostics());
+        Assert.Fail(reason + " " + detail);
     }
 
     private Task<T> Durable<T>(Func<Task<T>> operation) => NCMetaNativeTestTasks.Run(Server, operation);
@@ -156,6 +158,9 @@ public sealed partial class NCMetaLaboratoryClinicalTest : GameTest
         await Server.WaitAssertion(() =>
         {
             Assert.That(_scenes.TryCreate("NCMetaBedsideLabScene", out physical), Is.True);
+            // Give the real APC network headroom for the grinder's native 5 W -> 750 W load step.
+            // Power-loss tests still disconnect the actual receiver and retain every native interlock.
+            SSpawnAtPosition("APCHyperCapacity", new EntityCoordinates(physical.Grid, new Vector2(-3.5f, -4.5f)));
             profile = HumanoidCharacterProfile.Random();
             ChargePortable(physical.Objects["bedside"]);
             if (clinicalHost)
@@ -232,12 +237,11 @@ public sealed partial class NCMetaLaboratoryClinicalTest : GameTest
         Assert.That(_solutions.TryGetSolution(entity, name, out var solution, out _), Is.True);
         if (name == SharedChemMaster.BufferSolutionName && SEntMan.HasComponent<Content.Server.Chemistry.Components.ChemMasterComponent>(entity))
         {
-            // ChemMaster's native transfer path fills this unlimited buffer directly;
-            // its zero MaxVolume deliberately rejects the general bounded-container API.
+            // Match ChemMasterSystem.TransferReagents: its zero-capacity buffer stores reagents directly.
+            // UpdateChemicals would treat the entire native buffer as overflow and discard it.
             var buffer = solution!.Value.Comp.Solution;
             var before = buffer.Volume;
             buffer.AddReagent("Water", FixedPoint2.New(amount));
-            _solutions.UpdateChemicals(solution.Value);
             Assert.That(buffer.Volume, Is.EqualTo(before + FixedPoint2.New(amount)));
             return;
         }

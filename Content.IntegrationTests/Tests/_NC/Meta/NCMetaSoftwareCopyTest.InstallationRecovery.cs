@@ -54,7 +54,7 @@ public sealed partial class NCMetaSoftwareCopyTest
         NCMetaMutationOutcome installed;
         if (licensed)
         {
-            var admission = await _marketplace.PrepareActivationAsync(physical.Owner, physical.Deck.Id, physical.Product.Id, release.Id, true);
+            var admission = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.PrepareActivationAsync(physical.Owner, physical.Deck.Id, physical.Product.Id, release.Id, true));
             Assert.That(admission, Is.Not.Null);
             installed = await _persistence.InstallLicensedAsync(Guid.NewGuid(), physical.Deck.Id, physical.Owner, physical.Product.Id,
                 admission!, [], _epoch, _time, 4 * 1024 * 1024, slotKind: slot, autoStart: true,
@@ -73,36 +73,39 @@ public sealed partial class NCMetaSoftwareCopyTest
         return new(physical, project, release, artifact, approved.Installation, licensed, slot, memory);
     }
 
-    private async Task<NCMetaRuntimeInstance> StartRecoveryInstallation(RecoveryScene scene, NCMetaInstallation installation)
+    private Task<NCMetaRuntimeInstance> StartRecoveryInstallation(RecoveryScene scene, NCMetaInstallation installation) =>
+        NCMetaNativeTestTasks.Run(Server, () => StartRecoveryInstallationNative(scene, installation));
+
+    private async Task<NCMetaRuntimeInstance> StartRecoveryInstallationNative(RecoveryScene scene, NCMetaInstallation installation)
     {
         var runtime = Server.System<NCMetaRuntimeSystem>();
         var authorization = await _marketplace.ResolveRunAuthorizationAsync(scene.Physical.Owner, scene.Physical.Deck.Id, installation.Active);
         Assert.That(authorization, Is.Not.Null);
-        var service = await ApproveServiceAsync(scene.Physical, installation, scene.Artifact, scene.Physical.Deck.Entity, scene.Physical.Actor);
+        var service = await ApproveServiceNative(scene.Physical, installation, scene.Artifact, scene.Physical.Deck.Entity, scene.Physical.Actor);
         installation = service.Installation;
         NCMetaRuntimeInstance running = null!;
         for (var attempt = 0; attempt < 180; attempt++)
         {
-            var started = false;
-            await Server.WaitPost(() =>
-            {
-                started = runtime.TryGetInstallation(scene.Physical.Deck.Entity, scene.Physical.Owner, installation.Id, out running!) ||
+            var started = runtime.TryGetInstallation(scene.Physical.Deck.Entity, scene.Physical.Owner, installation.Id, out running!) ||
                     runtime.TryStart(scene.Physical.Deck.Entity, scene.Physical.Actor, installation, scene.Artifact, false,
                         authorization!.ExpiresAtTicks, authorization.Contact, service.Admission) &&
                     runtime.TryGetInstallation(scene.Physical.Deck.Entity, scene.Physical.Owner, installation.Id, out running!);
-            });
             if (started) return running;
-            await Server.WaitRunTicks(1);
+            await Task.Delay(Server.Timing.TickPeriod);
         }
         Assert.Fail("The native fixture never admitted its durable running installation.");
         return null!;
     }
 
-    private async Task<(NCMetaInstallation Installation, NCMetaServiceAdmission Admission)> ApproveServiceAsync(Scene scene, NCMetaInstallation installation,
+    private Task<(NCMetaInstallation Installation, NCMetaServiceAdmission Admission)> ApproveServiceAsync(Scene scene, NCMetaInstallation installation,
+        VerifiedArtifact artifact, EntityUid host, EntityUid actor, bool unattended = true) =>
+        NCMetaNativeTestTasks.Run(Server, () => ApproveServiceNative(scene, installation, artifact, host, actor, unattended));
+
+    private async Task<(NCMetaInstallation Installation, NCMetaServiceAdmission Admission)> ApproveServiceNative(Scene scene, NCMetaInstallation installation,
         VerifiedArtifact artifact, EntityUid host, EntityUid actor, bool unattended = true)
     {
-        await Server.WaitAssertion(() => Assert.That(Server.System<SharedUserInterfaceSystem>()
-            .TryOpenUi(host, NCMetaUiKey.Workspace, actor), Is.True));
+        Assert.That(Server.System<SharedUserInterfaceSystem>()
+            .TryOpenUi(host, NCMetaUiKey.Workspace, actor), Is.True);
         var authority = Server.System<NCMetaAuthoritySystem>();
         var admission = await authority.ResolveServiceAdmissionAsync(installation, artifact, unattended);
         if (admission != null) return (installation, admission);
@@ -153,8 +156,8 @@ public sealed partial class NCMetaSoftwareCopyTest
             Assert.That(hardware.TryCaptureFirmwareService(physical.Deck.Entity, physical.Actor, out var stamp), Is.True);
             service = stamp;
         });
-        var admission = scene.Licensed ? await _marketplace.PrepareActivationAsync(physical.Owner, physical.Deck.Id,
-            physical.Product.Id, scene.Release.Id, true) : null;
+        var admission = scene.Licensed ? await NCMetaNativeTestTasks.Run(Server, () => _marketplace.PrepareActivationAsync(physical.Owner, physical.Deck.Id,
+            physical.Product.Id, scene.Release.Id, true)) : null;
         Assert.That(!scene.Licensed || admission != null, Is.True);
         var licenseBefore = admission?.ActivationWrite?.ExpectedAggregateVersion;
         var oldVolumeBefore = (await _persistence.ReadSnapshotAsync("meta.volume", old.StateVolumeId.ToString("D")))!.AggregateVersion;
@@ -165,12 +168,10 @@ public sealed partial class NCMetaSoftwareCopyTest
         {
             if (!await nativeGuard()) return false;
             guardCalls++;
-            await Server.WaitAssertion(() =>
-            {
-                Assert.That(original.Process.State, Is.EqualTo(MetaProcessState.Stopped));
-                Assert.That(runtime.TryGetGeneration(physical.Deck.Entity, physical.Owner, original.Generation, out _), Is.False);
-            });
+            Assert.That(original.Process.State, Is.EqualTo(MetaProcessState.Stopped));
+            Assert.That(runtime.TryGetGeneration(physical.Deck.Entity, physical.Owner, original.Generation, out _), Is.False);
             // This real write commits after candidate preparation and invalidates its old-volume CAS.
+            Assert.That(_persistence.TryCaptureTime(out _epoch, out _time), Is.True);
             var changed = await _persistence.WriteTextAsync(Guid.NewGuid(), old.StateVolumeId, physical.Owner,
                 "swap.txt", "committed concurrently", 256 * 1024, _epoch, _time);
             Assert.That(changed.Success, Is.True, changed.MessageKey);
@@ -180,13 +181,13 @@ public sealed partial class NCMetaSoftwareCopyTest
                 var stop = new NCMetaWorkspaceRequestMessage(NCMetaWorkspaceOperation.Stop, Guid.NewGuid(),
                     deviceId: physical.Deck.Id, installationId: old.Id, projectId: device.ActiveProject)
                     { Actor = physical.Actor, UiKey = NCMetaUiKey.Workspace };
-                await Server.WaitPost(() => SEntMan.EventBus.RaiseLocalEvent(physical.Deck.Entity, stop));
+                SEntMan.EventBus.RaiseLocalEvent(physical.Deck.Entity, stop);
                 var stopped = false;
                 for (var attempt = 0; attempt < 180; attempt++)
                 {
                     var current = await _persistence.ReadInstallationAsync(physical.Deck.Id, physical.Owner, old.Id);
                     if (current is { AutoStart: false } && current.Revision > old.Revision) { stopped = true; break; }
-                    await Server.WaitRunTicks(1);
+                    await Task.Delay(Server.Timing.TickPeriod);
                 }
                 Assert.That(stopped, Is.True, "The real native Stop request must commit before the rejected swap completes.");
             }
@@ -194,11 +195,12 @@ public sealed partial class NCMetaSoftwareCopyTest
             {
                 var fresh = await _marketplace.PrepareActivationAsync(physical.Owner, physical.Deck.Id, physical.Product.Id, scene.Release.Id, true);
                 Assert.That(fresh, Is.Not.Null);
+                Assert.That(_persistence.TryCaptureTime(out _epoch, out _time), Is.True);
                 var replacement = await _persistence.InstallLicensedAsync(Guid.NewGuid(), physical.Deck.Id, physical.Owner,
                     physical.Product.Id, fresh!, [], _epoch, _time, 4 * 1024 * 1024, autoStart: true);
                 Assert.That(replacement.Success, Is.True, replacement.MessageKey);
                 newer = (await _persistence.ReadInstallationsAsync(physical.Deck.Id, physical.Owner)).Single();
-                newerRuntime = await StartRecoveryInstallation(scene, newer);
+                newerRuntime = await StartRecoveryInstallationNative(scene, newer);
             }
             else if (race == "Exception") throw new InvalidOperationException("native commit aborted after the competing durable write");
             return true;
@@ -209,8 +211,9 @@ public sealed partial class NCMetaSoftwareCopyTest
                 slotKind: scene.Slot, autoStart: true, memoryLimitBytes: scene.Slot == "Firmware" ? scene.Memory : null)
             : _persistence.InstallAsync(Guid.NewGuid(), physical.Deck.Id, physical.Owner, scene.Project, scene.Release,
                 [], true, _epoch, _time, 4 * 1024 * 1024, activationGuard: () => CompeteAfterNativeStop(guard));
-        var attemptSwap = workspace.TryCommitInstallationSwapAsync(physical.Deck.Entity, physical.Actor, physical.Deck.Entity,
-            scene.Artifact, [], scene.Slot, old, Persist, firmwareStamp: service);
+        var attemptSwap = NCMetaNativeTestTasks.Run(Server, () =>
+            workspace.TryCommitInstallationSwapAsync(physical.Deck.Entity, physical.Actor, physical.Deck.Entity,
+                scene.Artifact, [], scene.Slot, old, Persist, firmwareStamp: service));
         if (race == "Exception")
         {
             InvalidOperationException? failure = null;

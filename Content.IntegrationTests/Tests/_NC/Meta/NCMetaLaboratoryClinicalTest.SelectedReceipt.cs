@@ -45,13 +45,17 @@ public sealed partial class NCMetaLaboratoryClinicalTest
         }
         """;
 
-    private async Task<Guid> SelectRealLabCheckpoint(Scene scene)
+    private async Task<Guid> SelectRealLabCheckpoint(Scene scene, Action beforeClose = null)
     {
         var persistence = Server.System<NCMetaPersistenceSystem>();
         NCSessionEpoch ending = default;
         await Server.WaitAssertion(() => Assert.That(persistence.TryCaptureTime(out ending, out _), Is.True));
-        await Server.WaitPost(() => SEntMan.EventBus.RaiseEvent(EventSource.Local,
-            new GameRunLevelChangedEvent(GameRunLevel.InRound, GameRunLevel.PreRoundLobby)));
+        await Server.WaitPost(() =>
+        {
+            beforeClose?.Invoke();
+            SEntMan.EventBus.RaiseEvent(EventSource.Local,
+                new GameRunLevelChangedEvent(GameRunLevel.InRound, GameRunLevel.PreRoundLobby));
+        });
         Guid selected = default;
         await Server.WaitAssertion(() =>
         {

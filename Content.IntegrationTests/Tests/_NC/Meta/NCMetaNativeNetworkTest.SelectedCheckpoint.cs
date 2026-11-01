@@ -60,6 +60,7 @@ public sealed partial class NCMetaNativeNetworkTest
                     new GameRunLevelChangedEvent(GameRunLevel.PreRoundLobby, GameRunLevel.InRound));
             });
             await Until(() => _persistence.TryCaptureTime(out var fresh, out _) && fresh != ending);
+            await RestoreSceneActorBindings(scene);
             await Server.WaitAssertion(() => Assert.That(snapshots.SelectedSnapshotId, Is.EqualTo(selected)));
             Assert.That((await database.GetNCRoundSnapshotSectionsAsync(selected, "meta-aggregates", "world", "city")).Count,
                 Is.GreaterThan(0), "The real selected manifest must contain the META policy/journal baseline.");
@@ -121,13 +122,30 @@ public sealed partial class NCMetaNativeNetworkTest
         }
         finally
         {
-            if (changed) await Corrupt(context =>
+            // ActionPending can clear before its deferred outcome audit finishes. Drain that real write
+            // while the deliberate integrity fault still owns the expected error logging scope.
+            if (changed)
             {
-                if (removed != null) { context.NCEventJournal.Add(removed); context.SaveChanges(); }
-                else context.NCAggregateSnapshots.Where(value => value.AggregateType == type && value.AggregateId == accessId)
-                    .ExecuteUpdate(update => update.SetProperty(value => value.Payload, originalPayload));
-            });
-            await Server.WaitPost(() => _net.Log.Level = level);
+                await Server.WaitPost(() => _net.QuiesceSessions());
+                await NCMetaNativeTestTasks.Run(Server, async () => { await _persistence.QuiesceAsync(); return true; });
+            }
+            try
+            {
+                if (changed) await Corrupt(context =>
+                {
+                    if (removed != null) { context.NCEventJournal.Add(removed); context.SaveChanges(); }
+                    else context.NCAggregateSnapshots.Where(value => value.AggregateType == type && value.AggregateId == accessId)
+                        .ExecuteUpdate(update => update.SetProperty(value => value.Payload, originalPayload));
+                });
+            }
+            finally
+            {
+                await Server.WaitPost(() =>
+                {
+                    if (changed) { _persistence.ResumeIngress(); _net.ResumeSessions(); }
+                    _net.Log.Level = level;
+                });
+            }
             await Destroy(scene);
         }
     }

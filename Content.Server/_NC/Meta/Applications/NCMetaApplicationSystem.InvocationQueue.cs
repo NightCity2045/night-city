@@ -245,7 +245,7 @@ public sealed partial class NCMetaApplicationSystem
                 case Job.Sweep:
                     _sweep = session.MemberNode?.Next ?? _members.First;
                     _nextSweep = _system._now + Math.Max(16, 1000 / Math.Max(1, _members.Count));
-                    _system.UpdateSessionInvoice(session); break;
+                    break;
             }
             return MetaContinuationResult.Progress;
         }
@@ -367,8 +367,8 @@ public sealed partial class NCMetaApplicationSystem
             if (!patch.Changed && !consume && !session.ForceSnapshot) { DropOutput(session); return; }
             var revision = session.Revision + 1;
             var update = _system.BuildState(session, patch.FullSnapshot, patch.Body!, session.Revision, revision);
-            var wire = WireBytes(update);
-            var retained = 256L + wire + update.StateJson.Length * 2L;
+            var wire = _system.WireBytes(update);
+            var retained = 256L + wire + update.StateJson.Length * 2L + NCMetaMuiPresentationBuilder.ValueMemory(update.Values);
             var replacement = output.Result.Json.Length * 2L + output.Result.Fields.Sum(field => 128L + field.Key.Length * 2L + field.Value.Length * 2L);
             if (!_system.TryResizeSession(session, replacement + retained)) { DelayOutput(session); return; }
             session.Json = output.Result.Json; session.Fields = output.Result.Fields; session.Revision = revision;

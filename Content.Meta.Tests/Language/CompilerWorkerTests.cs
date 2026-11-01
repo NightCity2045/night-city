@@ -83,4 +83,22 @@ public sealed class CompilerWorkerTests
         using var canceled = new CancellationTokenSource(); canceled.Cancel();
         Assert.ThrowsAsync<TaskCanceledException>(async () => await pool.CompileAsync("canceled", request, canceled.Token));
     }
+
+    [Test]
+    public async Task SemanticQueriesUseTheSameIsolatedWorkerAndPrincipalAdmission()
+    {
+        if (!OperatingSystem.IsWindows()) Assert.Ignore("Production worker resource policy is currently Windows Job Objects.");
+        await using var pool = new MetaCompilerWorkerPool(WorkerPath());
+        const string text = "module draft; fn answer()->int {return 42;} fn main()->void {let value:int=answer();}";
+        var source = new SourceText("draft.meta", text);
+        var request = new MetaCompilationRequest([new(source.FileId, text)], "draft");
+        var query = new MetaSemanticQuery(2, source.FileId, source.Revision, text.LastIndexOf("answer()", StringComparison.Ordinal) + 1, []);
+        var pending = pool.AnalyzeAsync("semantic-principal", request, query);
+        Assert.ThrowsAsync<InvalidOperationException>(async () => await pool.CompileAsync("semantic-principal", request));
+        var result = await pending;
+        Assert.That(result.Items, Has.Length.EqualTo(1));
+        Assert.That(result.Items[0].Location!.Value.FileId, Is.EqualTo(source.FileId));
+        Assert.That(result.Items[0].Location!.Value.Revision, Is.EqualTo(source.Revision));
+        Assert.That(result.Items[0].Location!.Value.StartUtf8Byte, Is.EqualTo(text.IndexOf("answer", StringComparison.Ordinal)));
+    }
 }

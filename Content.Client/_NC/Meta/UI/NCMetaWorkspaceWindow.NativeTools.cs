@@ -54,7 +54,7 @@ public sealed partial class NCMetaWorkspaceWindow
                 _state.Links.Take(64).Any(link => !_toolsBindings.ContainsKey(link.Slot))) return;
             var bindings = _state.Links.Take(64).Select(link => new NCMetaSoftwareBinding(link.Slot,
                 _toolsBindings[link.Slot], link.ContractHash, link.RequiredScopes.ToList())).ToArray();
-            Request(NCMetaWorkspaceOperation.Install, JsonSerializer.Serialize(bindings));
+            Request(NCMetaWorkspaceOperation.Install, payload: new NCMetaBindingsPayload(bindings.ToList()));
         };
     }
 
@@ -62,7 +62,8 @@ public sealed partial class NCMetaWorkspaceWindow
     {
         var tools = _state.NativeTools;
         var mode = tools != null;
-        var change = mode != _nativeToolsMode || tools?.View != _nativeToolsView;
+        var view = tools?.View ?? "";
+        var change = mode != _nativeToolsMode || view != _nativeToolsView;
         if (mode && !_nativeToolsMode)
         {
             NCMetaUiLifecycle.BeforeRemove(Editor);
@@ -76,7 +77,7 @@ public sealed partial class NCMetaWorkspaceWindow
             if (SoftwarePanels.CurrentTab is 1 or 2) SoftwarePanels.CurrentTab = 0;
             ClearSoftwareSource(); Conflict.Visible = false;
         }
-        _nativeToolsMode = mode; _nativeToolsView = tools?.View ?? "";
+        _nativeToolsMode = mode; _nativeToolsView = view;
         Title = Loc.GetString(mode ? "nc-meta-tools-title" : "nc-meta-workspace-title");
         NativeToolsMenu.Visible = mode; ProjectToolbar.Visible = !mode; ReleaseInfo.Visible = !mode;
         Save.Visible = Build.Visible = Tests.Visible = Install.Visible = ExportMedia.Visible = ImportMedia.Visible = !mode;
@@ -108,6 +109,7 @@ public sealed partial class NCMetaWorkspaceWindow
             ToolsStock.AddItem(_localization.DefaultCulture?.TwoLetterISOLanguageName == "ru" ? _state.Templates[i].NameRu : _state.Templates[i].Name, i);
         if (ToolsStock.ItemCount > 0) ToolsStock.SelectId(Math.Clamp(selectedStock, 0, ToolsStock.ItemCount - 1));
         ToolsPrepare.Disabled = ToolsStock.ItemCount == 0;
+        ToolsStock.Visible = ToolsPrepare.Visible = ToolsStock.ItemCount > 0;
         UpdateToolsLinks();
         ToolsMeasurements.Clear();
         foreach (var row in tools.Hardware.Take(64))

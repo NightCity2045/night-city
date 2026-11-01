@@ -10,12 +10,9 @@ public static class NCCyberwarePersistenceClock
     {
         rebased = default;
         if (capturedAt < TimeSpan.Zero || runtime < TimeSpan.Zero) return false;
-        try
-        {
-            var remaining = deadline > capturedAt ? deadline - capturedAt : TimeSpan.Zero;
-            rebased = runtime + remaining;
-            return true;
-        }
-        catch (OverflowException) { return false; }
+        var remaining = deadline > capturedAt ? deadline.Ticks - capturedAt.Ticks : 0;
+        if (runtime.Ticks > long.MaxValue - remaining) return false;
+        rebased = TimeSpan.FromTicks(runtime.Ticks + remaining);
+        return true;
     }
 }

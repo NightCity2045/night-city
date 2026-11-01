@@ -62,6 +62,7 @@ public sealed partial class NCMetaApplicationSystem : EntitySystem
         public ActionIngress? Ingress;
         public long PendingAck = -1;
         public long? PendingResync;
+        public bool InitialReady;
         public NCMetaAppState[]? ResyncPlan;
         public int ResyncIndex;
         public PendingProjection? Output;
@@ -119,7 +120,6 @@ public sealed partial class NCMetaApplicationSystem : EntitySystem
         SubscribeLocalEvent<NCMetaApplicationUiComponent, NCMetaAppCloseMessage>(OnClose);
         SubscribeLocalEvent<NCMetaApplicationUiComponent, BoundUIClosedEvent>(OnUiClosed);
         SubscribeLocalEvent<NCMetaApplicationUiComponent, ComponentShutdown>(OnUiShutdown);
-        SubscribeLocalEvent<NCMetaApplicationUiComponent, NCMetaInvoiceDecisionMessage>(OnInvoiceDecision);
         _runtime.ViewStateChanged += OnViewStateChanged;
     }
 
@@ -135,8 +135,6 @@ public sealed partial class NCMetaApplicationSystem : EntitySystem
         _invalidatedAt.Clear();
         foreach (var work in _applicationWork.Values.ToArray()) work.Cancel(MetaStopReason.Stop);
         _applicationWork.Clear();
-        _invoicePrompts.Clear(); _invoiceRates.Clear(); _invoiceDecisionRates.Clear();
-        _invoiceBySession.Clear();
         base.Shutdown();
     }
 
@@ -171,7 +169,7 @@ public sealed partial class NCMetaApplicationSystem : EntitySystem
         if (_applicationWork.Remove((host, runtime.Generation), out var previous)) previous.Cancel(MetaStopReason.Stop);
         _applications.Remove((host, runtime.Generation));
         var packageBytes = 8192L + application.ContractJson.Length * 2L + application.StyleJson.Length * 2L +
-            application.Views.Values.Sum(view => view.Source.Length * 2L + view.Document.NodeCount * 384L) +
+            application.Views.Values.Sum(view => view.Source.Length * 2L + view.Document.NodeCount * 640L) +
             application.Resources.Sum(resource => 128L + resource.Key.Length * 2L + resource.Value.Length * 2L);
         if (!_runtime.TryReserveApplicationMemory(host, runtime.Generation, packageBytes, out var packageLease)) return false;
         var work = new ApplicationWork(this, registration, runtime, packageLease);
@@ -417,11 +415,20 @@ public sealed partial class NCMetaApplicationSystem : EntitySystem
     private NCMetaAppState BuildState(Session session, bool full, string json, long previous, long revision)
     {
         var app = session.Registration.Application;
+        NCMetaMuiPresentation? presentation = null;
+        if (full && !session.Registration.Presentations.TryGetValue(session.View, out presentation))
+        {
+            presentation = NCMetaMuiPresentationBuilder.Build(app, session.View, session.Registration.Presentations.Values.FirstOrDefault());
+            session.Registration.Presentations.Add(session.View, presentation);
+        }
         return new()
         {
             SessionId = session.Id, ViewId = session.View, Title = app.Artifact.Manifest.PackageName,
+            Website = session.Presentation == NCMetaAppPresentation.Website,
             ContractJson = full ? app.ContractJson : "", Document = full ? app.Views[session.View].Source : "",
             Styles = full ? app.StyleJson : "", StateJson = json, BaseRevision = previous, Revision = revision, FullSnapshot = full,
+            Presentation = presentation, Values = NCMetaMuiPresentationBuilder.ReadValues(json),
+            StateBytes = Encoding.UTF8.GetByteCount(json),
             Resources = full ? app.Resources.Select(x => new NCMetaMuiResource(x.Key, x.Value)).ToList() : [],
         };
     }
@@ -446,9 +453,27 @@ public sealed partial class NCMetaApplicationSystem : EntitySystem
     }
     private void OnResync(Entity<NCMetaApplicationUiComponent> ent, ref NCMetaAppResyncMessage args)
     {
-        if (!_sessions.TryGetValue(args.SessionId, out var session) || session.UiOwner != ent.Owner || session.User != args.Actor) return;
-        if (!_resyncRates.TryGetValue(session.Connection, out var rate)) _resyncRates.Add(session.Connection, rate = new(2, 1));
-        if (!rate.TryConsume(_now)) return;
+        Session? session;
+        if (args.SessionId == Guid.Empty && args.Revision == -1)
+        {
+            session = null;
+            foreach (var candidate in _sessions.Values)
+            {
+                if (candidate.UiOwner != ent.Owner || candidate.User != args.Actor || !candidate.UiKey.Equals(args.UiKey)) continue;
+                if (session != null) return;
+                session = candidate;
+            }
+            if (session == null || session.InitialReady || !CanUse(session)) return;
+            // One ready acknowledgement per admitted session. Four simultaneous window opens must
+            // not compete for the ordinary resync limiter; subsequent requests retain that limiter.
+            session.InitialReady = true;
+        }
+        else
+        {
+            if (!_sessions.TryGetValue(args.SessionId, out session) || session.UiOwner != ent.Owner || session.User != args.Actor) return;
+            if (!_resyncRates.TryGetValue(session.Connection, out var rate)) _resyncRates.Add(session.Connection, rate = new(2, 1));
+            if (!rate.TryConsume(_now)) return;
+        }
         session.PendingResync = args.Revision; session.ResyncPlan = null; session.ResyncIndex = 0;
         _applicationWork[(session.Registration.Host, session.Registration.RuntimeGeneration)].EnqueueControl(session);
     }
@@ -488,7 +513,6 @@ public sealed partial class NCMetaApplicationSystem : EntitySystem
     {
         if (!_sessions.Remove(id, out var session))
             return;
-        CloseInvoices(session);
         if (_applicationWork.TryGetValue((session.Registration.Host, session.Registration.RuntimeGeneration), out var work)) work.Remove(session);
         if (_runtime.TryGetGeneration(session.Registration.Host, session.Registration.Owner, session.Registration.RuntimeGeneration, out var runtime))
         {
@@ -514,9 +538,13 @@ public sealed partial class NCMetaApplicationSystem : EntitySystem
         RandomNumberGenerator.Fill(bytes);
         return BitConverter.ToUInt64(bytes);
     }
-    private static int WireBytes(NCMetaAppState state) => Encoding.UTF8.GetByteCount(state.ContractJson) +
-        Encoding.UTF8.GetByteCount(state.Document) + Encoding.UTF8.GetByteCount(state.Styles) + Encoding.UTF8.GetByteCount(state.StateJson) +
-        state.Resources.Sum(x => Encoding.UTF8.GetByteCount(x.Source) + Encoding.UTF8.GetByteCount(x.Path));
+    [Dependency] private Robust.Shared.Serialization.IRobustSerializer _wireSerializer = default!;
+    private int WireBytes(NCMetaAppState state)
+    {
+        using var counter = new NCMetaWireSizeStream();
+        _wireSerializer.SerializeDirect(counter, state);
+        return checked((int) counter.Length);
+    }
     private long SessionBytes(Session session) => 2048L + session.Json.Length * 2L +
         session.Fields.Sum(field => 128L + field.Key.Length * 2L + field.Value.Length * 2L) + session.Receipts.Count * 512L +
         (session.Action is { } action ? 512L + action.Action.Length * 2L + action.Body.Length * 2L : 0) +

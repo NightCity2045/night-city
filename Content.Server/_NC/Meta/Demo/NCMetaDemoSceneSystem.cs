@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Numerics;
 using Content.Server.Atmos.EntitySystems;
+using Content.Server._NC.Atmos.Components;
 using Content.Server._NC.Meta.Devices;
 using Content.Server._NC.Meta.Domains;
 using Content.Server._NC.Meta.Network;
@@ -89,6 +90,11 @@ public sealed partial class NCMetaDemoSceneSystem : EntitySystem
         var map = _maps.CreateMap();
         try
         {
+            var air = new GasMixture(Atmospherics.CellVolume) { Temperature = Atmospherics.T20C };
+            air.AdjustMoles(Gas.Oxygen, Atmospherics.OxygenMolesStandard);
+            air.AdjustMoles(Gas.Nitrogen, Atmospherics.NitrogenMolesStandard);
+            _atmosphere.SetMapAtmosphere(map, false, air);
+            EnsureComp<NCUniformAirComponent>(map);
             var grid = _maps.CreateGridEntity(map);
             var tile = new Tile(_tiles["FloorSteel"].TileId);
             // 121 floor tiles and 121 real LV cable segments are a fixed bounded fixture footprint.
@@ -99,10 +105,6 @@ public sealed partial class NCMetaDemoSceneSystem : EntitySystem
                 Spawn("CableApcExtension", new EntityCoordinates(grid.Owner, new Vector2(x + 0.5f, y + 0.5f)));
             }
             _maps.SetAmbientLight(Transform(map).MapID, Color.White);
-            var air = new GasMixture(Atmospherics.CellVolume) { Temperature = Atmospherics.T20C };
-            air.AdjustMoles(Gas.Oxygen, Atmospherics.OxygenMolesStandard);
-            air.AdjustMoles(Gas.Nitrogen, Atmospherics.NitrogenMolesStandard);
-            _atmosphere.SetMapAtmosphere(map, false, air);
             var power = Spawn("APCHyperCapacity", new EntityCoordinates(grid.Owner, new Vector2(-4.5f, -4.5f)));
             Spawn("Poweredlight", new EntityCoordinates(grid.Owner, new Vector2(0.5f, 4.5f)));
             var actor = Spawn("MobHuman", new EntityCoordinates(grid.Owner, new Vector2(0.5f, -1.5f)));

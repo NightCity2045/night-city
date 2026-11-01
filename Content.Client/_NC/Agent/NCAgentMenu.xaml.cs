@@ -5,6 +5,7 @@
 using System.Numerics;
 using System.Linq;
 using Content.Client._NC.Agent.Shards;
+using Content.Client._NC.Meta.UI;
 using Content.Client.GameTicking.Managers;
 using Content.Client.PDA;
 using Content.Shared._NC.Agent;
@@ -1121,7 +1122,13 @@ public sealed partial class NCAgentMenu : NCAgentWindow
 
     private void BuildCitiNet(NCAgentUpdateMessage data)
     {
-        BuiltInContent.AddChild(CreateMetaBrowserEntry());
+        BuiltInContent.AddChild(_metaBrowser);
+        NCMetaUiLifecycle.RemoveChildren(_metaBrowser.FeedHost);
+        BuildCitiNetFeed(data, _metaBrowser.FeedHost);
+    }
+
+    private void BuildCitiNetFeed(NCAgentUpdateMessage data, BoxContainer target)
+    {
         var aliasInput = new LineEdit
         {
             Text = data.OwnAlias,
@@ -1149,7 +1156,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         identity.AddChild(CreateStatusLabel($"HANDLE // @{data.OwnAlias}", "#EE9BFF"));
         identity.AddChild(CreateMutedLabel($"ADDRESS // {data.OwnAddress}"));
         identity.AddChild(aliasRow);
-        BuiltInContent.AddChild(WrapCard(identity, "#693576", "#17111C"));
+        target.AddChild(WrapCard(identity, "#693576", "#17111C"));
 
         var postInput = new LineEdit
         {
@@ -1161,8 +1168,8 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         var publishRow = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal };
         publishRow.AddChild(postInput);
         publishRow.AddChild(publish);
-        BuiltInContent.AddChild(publishRow);
-        BuiltInContent.AddChild(CreateMutedLabel("MENTIONS // @Handle or @\"Handle With Spaces\""));
+        target.AddChild(publishRow);
+        target.AddChild(CreateMutedLabel("MENTIONS // @Handle or @\"Handle With Spaces\""));
 
         var pageControls = new BoxContainer
         {
@@ -1181,7 +1188,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         pageControls.AddChild(newer);
         pageControls.AddChild(page);
         pageControls.AddChild(older);
-        BuiltInContent.AddChild(pageControls);
+        target.AddChild(pageControls);
 
         var feed = new BoxContainer
         {
@@ -1199,7 +1206,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
             VerticalExpand = true,
         };
         scroll.AddChild(feed);
-        BuiltInContent.AddChild(scroll);
+        target.AddChild(scroll);
     }
 
     private void BuildMap()

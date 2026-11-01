@@ -4,12 +4,98 @@ using NightCity.Diagnostics.Core;
 using NUnit.Framework;
 using System.Security.Cryptography;
 using System.Text;
+using System.Diagnostics;
 
 namespace NightCity.Diagnostics.Tests;
 
 [TestFixture]
 public sealed class ResourceSnapshotTests
 {
+    [TestCase("SourceRoot", true, "invalid_path")]
+    [TestCase("SourceAncestor", true, "invalid_path")]
+    [TestCase("Nested", true, "invalid_path")]
+    [TestCase("Nested", false, "invalid_resource_snapshot")]
+    public async Task LinkedSourcePathsAndNestedDirectoriesAreRejectedBeforeAnyCopy(string position, bool outsideWorkspace, string code)
+    {
+        var root = Path.Combine(Path.GetTempPath(), "ss14-resource-links-" + Guid.NewGuid().ToString("N"));
+        var outside = Path.Combine(Path.GetTempPath(), "ss14-resource-links-outside-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        Directory.CreateDirectory(outside);
+        var target = outsideWorkspace ? outside : Path.Combine(root, "target");
+        Directory.CreateDirectory(target);
+        var marker = Path.Combine(target, "marker.bin");
+        await File.WriteAllBytesAsync(marker, [1, 2, 3]);
+        var source = position == "SourceAncestor" ? "alias/Resources" : "Resources";
+        var link = position switch
+        {
+            "SourceAncestor" => Path.Combine(root, "alias"),
+            "Nested" => Path.Combine(root, "Resources", "linked"),
+            _ => Path.Combine(root, "Resources"),
+        };
+        Directory.CreateDirectory(Path.GetDirectoryName(link)!);
+        if (position == "SourceAncestor") Directory.CreateDirectory(Path.Combine(target, "Resources"));
+        try
+        {
+            await CreateDirectoryLink(link, target);
+            var error = Assert.ThrowsAsync<DiagnosticException>(() =>
+                IsolatedResourceSnapshot.CaptureAsync(new(root), source, "run", CancellationToken.None));
+            Assert.Multiple(() =>
+            {
+                Assert.That(error!.Code, Is.EqualTo(code));
+                Assert.That(Directory.Exists(Path.Combine(root, "run")), Is.False);
+                Assert.That(File.ReadAllBytes(marker), Is.EqualTo(new byte[] { 1, 2, 3 }));
+            });
+        }
+        finally
+        {
+            if (Directory.Exists(link))
+            {
+                Assert.That(new DirectoryInfo(link).LinkTarget, Is.Not.Null);
+                Directory.Delete(link);
+            }
+            DeleteOwnedDirectory(root);
+            DeleteOwnedDirectory(outside);
+        }
+    }
+
+    private static async Task CreateDirectoryLink(string link, string target)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            Directory.CreateSymbolicLink(link, target);
+            return;
+        }
+        // Junctions exercise the real Windows reparse guard without requiring Developer Mode.
+        // Encode literal owned paths so shell metacharacters in the user's temp path stay inert.
+        var script = "$ErrorActionPreference='Stop'; New-Item -ItemType Junction -Path '" + link.Replace("'", "''") +
+            "' -Target '" + target.Replace("'", "''") + "' | Out-Null";
+        var start = new ProcessStartInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System),
+            "WindowsPowerShell", "v1.0", "powershell.exe"))
+        {
+            UseShellExecute = false, CreateNoWindow = true, RedirectStandardError = true,
+        };
+        foreach (var argument in new[] { "-NoLogo", "-NoProfile", "-NonInteractive", "-EncodedCommand", Convert.ToBase64String(Encoding.Unicode.GetBytes(script)) })
+            start.ArgumentList.Add(argument);
+        using var process = Process.Start(start)!;
+        var errors = process.StandardError.ReadToEndAsync();
+        if (!process.WaitForExit(10000))
+        {
+            process.Kill(entireProcessTree: true);
+            await process.WaitForExitAsync();
+            Assert.Fail("Creating an owned test junction timed out.");
+        }
+        Assert.That(process.ExitCode, Is.Zero, await errors);
+    }
+
+    private static void DeleteOwnedDirectory(string directory)
+    {
+        var absolute = Path.GetFullPath(directory);
+        Assert.That(Path.GetDirectoryName(absolute), Is.EqualTo(Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar)));
+        Assert.That(Path.GetFileName(absolute), Does.StartWith("ss14-resource-links-"));
+        Assert.That(new DirectoryInfo(absolute).Attributes & FileAttributes.ReparsePoint, Is.EqualTo((FileAttributes)0));
+        Directory.Delete(absolute, recursive: true);
+    }
+
     [Test]
     public async Task MultipleStreamedBatchesRetainTheCanonicalOrderedHashAndExactBytes()
     {

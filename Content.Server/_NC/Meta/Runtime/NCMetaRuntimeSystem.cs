@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
 using System.Text;
 using Content.Meta.Bytecode;
 using Content.Meta.Diagnostics;
@@ -119,7 +120,7 @@ public sealed partial class NCMetaRuntimeSystem : EntitySystem
     [Dependency] private NCMetaNetworkSystem _network = default!;
     [Dependency] private NCMetaHardwareSystem _hardware = default!;
     [Dependency] private ITaskManager _tasks = default!;
-    private readonly MetaScheduler _scheduler = new();
+    private MetaScheduler _scheduler = new();
     private readonly Dictionary<(EntityUid Host, Guid Installation), NCMetaRuntimeInstance> _instances = [];
     private readonly Dictionary<EntityUid, HashSet<NCMetaRuntimeInstance>> _hosts = [];
     private readonly Dictionary<string, NCMetaRuntimeInstance> _processes = new(StringComparer.Ordinal);
@@ -133,12 +134,15 @@ public sealed partial class NCMetaRuntimeSystem : EntitySystem
     private readonly ConcurrentQueue<NativeCompletion> _completed = new();
     private readonly Queue<(NCMetaRuntimeInstance Runtime, bool Healthy, string Reason)> _bootNotices = [];
     private NCSessionEpoch _epoch;
-    private long _clockEpoch = 1;
+    // Separate cold server lifetimes, while retaining at least 2^62 ordered round transitions of headroom.
+    private long _clockEpoch = BitConverter.ToInt64(RandomNumberGenerator.GetBytes(sizeof(long)), 0) & ((1L << 62) - 1);
     private long _now;
     private long _operation;
     private long _sequence;
     private ulong _eventAuthority;
     public MetaSchedulerTickResult? LastTick { get; private set; }
+    /// <summary>Read-only scheduler/SampleStamp namespace; durable authority uses the opaque native world UUID.</summary>
+    public long SchedulerEpoch => _clockEpoch;
     public object? GetDiagnosticSnapshot(EntityUid host) => _hosts.TryGetValue(host, out var instances)
         ? instances.Select(instance => new { installationId = instance.Installation.Id, generation = instance.Generation, artifactDigest = instance.Artifact.Digest,
             state = instance.Process.State.ToString(), memoryBytes = instance.Process.MemoryBytes,
@@ -150,6 +154,20 @@ public sealed partial class NCMetaRuntimeSystem : EntitySystem
         foreach (var runtime in _instances.Values.ToArray()) Stop(runtime, MetaStopReason.Stop);
         _bootNotices.Clear();
         _intents.Clear();
+    }
+
+    private void EnterWorldEpoch(NCSessionEpoch epoch, NCActiveWorldTime time)
+    {
+        if (_epoch == epoch) return;
+        SuspendAll();
+        // Active-world time is restored per world session. A closed session's timers,
+        // quotas and continuations must not survive into a new session's scheduler.
+        _scheduler = new MetaScheduler { Metrics = _metrics };
+        _now = time.Ticks / TimeSpan.TicksPerMillisecond;
+        // Native epochs are opaque UUIDs. The scheduler requires an ordered local generation,
+        // while all persistent authority and asynchronous proofs retain the original UUID.
+        _clockEpoch = checked(_clockEpoch + 1);
+        _epoch = epoch;
     }
 
     public override void Initialize()
@@ -180,12 +198,7 @@ public sealed partial class NCMetaRuntimeSystem : EntitySystem
         base.Update(frameTime);
         using var elapsed = MetaMetricScope.Measure(_metrics, MetaMetric.RuntimeElapsed, MetricTick);
         if (!_persistence.TryCaptureTime(out var epoch, out var time)) return;
-        if (_epoch != epoch)
-        {
-            foreach (var old in _instances.Values.ToArray()) Stop(old, MetaStopReason.Stop);
-            _epoch = epoch;
-            _clockEpoch = BitConverter.ToInt64(epoch.Value.ToByteArray(), 0) & long.MaxValue;
-        }
+        EnterWorldEpoch(epoch, time);
         _now = time.Ticks / TimeSpan.TicksPerMillisecond;
         StopExpiredEntitlements(epoch, time);
         UpdateMarketplaceContacts();
@@ -309,18 +322,13 @@ public sealed partial class NCMetaRuntimeSystem : EntitySystem
             serviceAdmission.Principal != installation.Owner || !_serviceAuthority.CanContinue(serviceAdmission) ||
             _bootNotices.Count != 0 || !CanInstallOwned(host, installation.Owner, artifact, installation.Bindings, installation.SlotKind) || !_devices.TryGetEntry(host, out var device) ||
             device.Id != installation.HostDeviceId || device.Owner != installation.Owner ||
-            !_persistence.TryCaptureTime(out var epoch, out _) || !TryComp<NCMetaHostComponent>(host, out var hardware))
+            !_persistence.TryCaptureTime(out var epoch, out var time) || !TryComp<NCMetaHostComponent>(host, out var hardware))
             return false;
         NCMetaManagementProof? attending = null;
         if (!serviceAdmission.AllowUnattended && (actor == null ||
             !_serviceAuthority.TryGetManagementProof(actor.Value, installation.Owner, out attending) ||
             !_serviceAuthority.CanAttendService(attending))) return false;
-        if (_epoch != epoch)
-        {
-            SuspendAll();
-            _epoch = epoch;
-            _clockEpoch = BitConverter.ToInt64(epoch.Value.ToByteArray(), 0) & long.MaxValue;
-        }
+        EnterWorldEpoch(epoch, time);
         var profile = _prototypes.Index(hardware.Profile);
         if (installation.Id == Guid.Empty || installation.SlotKind is not ("User" or "Firmware") ||
             installation.SlotKind == "User" && !profile.AllowUserPackages) return false;
@@ -554,7 +562,7 @@ public sealed partial class NCMetaRuntimeSystem : EntitySystem
         if (_pendingNative.Count >= 256 || !instance.Commands.TryConsume(_now)) return Error("RateLimited");
         if (member.Owner == "meta.files.FileStore" && !instance.Files.TryConsume(_now)) return Error("RateLimited");
         if (_operation == long.MaxValue) return Error("QuotaExceeded");
-        var retained = member.Owner == "meta.files.FileStore" ? 140L * 1024 : member.Owner == "meta.services.ServiceOrders" ? 512L * 1024 : 16384L;
+        var retained = member.Owner == "meta.files.FileStore" ? 140L * 1024 : 16384L;
         retained += 256 + request.Arguments.Count * 16L;
         if (!_scheduler.TryReserveAuxiliaryMemory(instance.ProcessId, retained, out var memoryLease)) return Error("QuotaExceeded");
         var id = ++_operation;

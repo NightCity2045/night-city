@@ -97,6 +97,13 @@ public sealed partial class NCMetaNativeNetworkTest
         var door = scene.Physical.Objects["door"];
         try
         {
+            await Server.WaitAssertion(() =>
+            {
+                MoveTo(scene.NetworkActor, scene.Physical.Objects["host"]);
+                if (SComp<DoorComponent>(door).State != DoorState.Closed)
+                    Assert.That(Server.System<SharedDoorSystem>().TryClose(door, SComp<DoorComponent>(door)), Is.True);
+            });
+            await Until(() => SComp<DoorComponent>(door).State == DoorState.Closed);
             await Connect(scene); // Native control configuration extends an existing authenticated architecture policy.
             await Server.WaitAssertion(() =>
             {

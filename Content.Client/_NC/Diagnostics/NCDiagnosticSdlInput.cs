@@ -15,20 +15,20 @@ namespace Content.Client._NC.Diagnostics;
 /// </summary>
 internal static class NCDiagnosticSdlInput
 {
-    private sealed record ClickWork(string Title, float X, float Y, Action<DiagnosticFault?> Completed);
+    private sealed record ClickWork(string Title, float X, float Y, Action<DiagnosticFault?> Completed, bool Press);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void MainThreadCallback(nint userData);
     private static readonly MainThreadCallback Callback = OnMainThread;
     private static int _pending;
 
-    public static void Click(string windowTitle, float pixelX, float pixelY, Action<DiagnosticFault?> completed)
+    public static void Click(string windowTitle, float pixelX, float pixelY, Action<DiagnosticFault?> completed, bool press = true)
     {
         if (Interlocked.Increment(ref _pending) > 8)
         {
             Interlocked.Decrement(ref _pending);
             throw new DiagnosticException("busy", "The native UI input queue is full.", true);
         }
-        var handle = GCHandle.Alloc(new ClickWork(windowTitle, pixelX, pixelY, completed));
+        var handle = GCHandle.Alloc(new ClickWork(windowTitle, pixelX, pixelY, completed, press));
         try
         {
             // SDL window queries must run on SDL's thread, which may differ from the game thread.
@@ -56,7 +56,7 @@ internal static class NCDiagnosticSdlInput
             var work = (ClickWork)handle.Target!;
             try
             {
-                PushClick(work.Title, work.X, work.Y);
+                PushClick(work.Title, work.X, work.Y, work.Press);
                 work.Completed(null);
             }
             catch (DiagnosticException exception)
@@ -90,7 +90,7 @@ internal static class NCDiagnosticSdlInput
         [FieldOffset(32)] public float Y;
     }
 
-    private static void PushClick(string windowTitle, float pixelX, float pixelY)
+    private static void PushClick(string windowTitle, float pixelX, float pixelY, bool press)
     {
         try
         {
@@ -123,7 +123,10 @@ internal static class NCDiagnosticSdlInput
             var motion = new InputEvent { Type = 0x400, WindowId = windowId, X = x, Y = y };
             var down = new InputEvent { Type = 0x401, WindowId = windowId, X = x, Y = y, Button = 1, Down = 1, Clicks = 1 };
             var up = new InputEvent { Type = 0x402, WindowId = windowId, X = x, Y = y, Button = 1, Clicks = 1 };
-            if (!PushEvent(ref motion) || !PushEvent(ref down))
+            if (!PushEvent(ref motion))
+                throw new DiagnosticException("input_unavailable", "SDL rejected the UI pointer event.");
+            if (!press) return;
+            if (!PushEvent(ref down))
                 throw new DiagnosticException("input_unavailable", "SDL rejected the UI input event.");
             if (!PushEvent(ref up))
             {

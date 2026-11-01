@@ -21,11 +21,14 @@ public sealed partial class NCMetaMarketplaceSystem
     { if (_marketplaceServices.Count < 64) _marketplaceServices.Add(ent.Owner); }
     private void OnMarketplaceServiceShutdown(Entity<NCMetaCitiNetServiceComponent> ent, ref ComponentShutdown args) => _marketplaceServices.Remove(ent.Owner);
 
-    public bool HasMarketplaceRoute(EntityUid source)
+    public bool HasMarketplaceRoute(EntityUid source) => HasCitiNetRoute(source, requireMarketplace: true);
+
+    /// <summary>A live native gateway and physical route establish connectivity; the segment label alone does not.</summary>
+    public bool HasCitiNetRoute(EntityUid source, bool requireMarketplace = false)
     {
         if (!_devices.TryGetEntry(source, out var entry) || !entry.Ready || !_devices.IsPowered(source)) return false;
         foreach (var service in _marketplaceServices)
-            if (TryComp<NCMetaCitiNetServiceComponent>(service, out var endpoint) && endpoint.SoftwareMarketplace &&
+            if (TryComp<NCMetaCitiNetServiceComponent>(service, out var endpoint) && (!requireMarketplace || endpoint.SoftwareMarketplace) &&
                 _devices.TryGetEntry(service, out var target) && target.Ready && _devices.IsPowered(service) &&
                 TryComp<NCMetaPortComponent>(service, out var port) && port.NetworkId == "CITYNET" && _network.CanRoute(source, service)) return true;
         return false;

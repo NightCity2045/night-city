@@ -2,6 +2,7 @@
 // The physical scene/owner builder is composed by the test fixture, not mocked here.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Content.Meta.Language;
@@ -11,6 +12,7 @@ using Content.Server._NC.Meta.Authority;
 using Content.Server._NC.Meta.Devices;
 using Content.Server._NC.Meta.Persistence;
 using Content.Server._NC.Meta.Runtime;
+using Content.Shared._NC.Meta;
 using Content.Shared._NC.Meta.Authority;
 using Content.Shared._NC.Meta.UI;
 using Content.Shared._NC.Persistence.Time;
@@ -27,6 +29,23 @@ internal sealed class NCMetaNativeNetworkProgramHarness(RobustIntegrationTest.Se
         NCMetaServiceAdmission Admission, NCMetaRuntimeInstance Runtime);
     internal sealed record Prepared(EntityUid Host, EntityUid Actor, string Owner, NCMetaInstallation Installation,
         VerifiedArtifact Artifact, NCMetaServiceAdmission Admission, bool RetainForInvocations);
+
+    private async Task WaitForSourceBootAsync(EntityUid host)
+    {
+        var elapsed = Stopwatch.StartNew();
+        for (var tick = 0; tick < 900; tick++)
+        {
+            var remaining = TimeSpan.FromSeconds(30) - elapsed.Elapsed;
+            if (remaining <= TimeSpan.Zero) break;
+            var ready = false;
+            await server.WaitPost(() => ready = server.EntMan.System<NCMetaHardwareSystem>().CanUseDevice(host)).WaitAsync(remaining);
+            if (ready) return;
+            remaining = TimeSpan.FromSeconds(30) - elapsed.Elapsed;
+            if (remaining <= TimeSpan.Zero) break;
+            await server.WaitRunTicks(1).WaitAsync(remaining);
+        }
+        Assert.Fail("The claimed source host did not complete its ordinary native hardware boot within 30 seconds/900 ticks.");
+    }
 
     // Preconditions: real body has a durable native canonical owner; all endpoints Ready, claimed to that owner,
     // charged and physically routed. This helper does not issue ownership, manufacture host tokens or call adapters.
@@ -50,6 +69,7 @@ internal sealed class NCMetaNativeNetworkProgramHarness(RobustIntegrationTest.Se
             Assert.That(devices.CanManage(host, actor), Is.True);
             Assert.That(persistence.TryCaptureTime(out epoch, out time), Is.True);
         });
+        await WaitForSourceBootAsync(host);
         var proof = await NCMetaNativeTestTasks.Run(server, () => authority.CaptureManagementAsync(actor, device.Owner));
         Assert.That(proof, Is.Not.Null);
         NCMetaAuthorityConstraints constraints = null!;
@@ -85,8 +105,18 @@ internal sealed class NCMetaNativeNetworkProgramHarness(RobustIntegrationTest.Se
                 bindings.Add(new(link.SlotName, target!.Id, link.ContractHash, scopes));
                 consents.Add(new(link.SlotName, target.Id, members.Select(member => member.QualifiedName).ToList(), scopes.ToList()));
             }
-            Assert.That(entities.System<NCMetaRuntimeSystem>().CanInstall(host, actor, verified, bindings.ToArray()), Is.True,
-                "The real source hardware profile and physical bindings must admit the compiled artifact before installation.");
+            var runtime = entities.System<NCMetaRuntimeSystem>();
+            if (!runtime.CanInstall(host, actor, verified, bindings.ToArray()))
+            {
+                entities.TryGetComponent(host, out NCMetaHostComponent hardware);
+                entities.TryGetComponent(host, out NCMetaHardwareStateComponent state);
+                var endpoints = string.Join("; ", bindings.Select(binding => devices.TryResolve(binding.DeviceId, out var endpoint)
+                    ? $"{binding.Slot}:ready={endpoint.Ready},owner={endpoint.Owner},powered={devices.IsPowered(endpoint.Entity)},route={runtime.CanReach(host, endpoint.Entity)}"
+                    : binding.Slot + ":missing"));
+                Assert.Fail("The real source hardware profile and physical bindings must admit the compiled artifact before installation. " +
+                    $"manage={devices.CanManage(host, actor)},powered={devices.IsPowered(host)},profile={hardware?.Profile},disabled={hardware?.Disabled}," +
+                    $"power={state?.Power},health={state?.Health}; {endpoints}");
+            }
         });
         var published = await NCMetaNativeTestTasks.Run(server, () => persistence.PublishReleaseAsync(Guid.NewGuid(), project, compiled.Artifact!,
             MetaCompiler.BuildId, epoch, time, compiled.Exports, buildDeviceId: device.Id, authority: constraints));

@@ -14,7 +14,7 @@ public sealed class HybridCompilerTests
         get
         {
             var directory = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
-            while (directory != null && !Directory.Exists(Path.Combine(directory.FullName, "Resources", "Meta", "Examples"))) directory = directory.Parent;
+            while (directory != null && !Directory.Exists(Path.Combine(directory.FullName, "Content.Meta.Tests", "Fixtures", "Meta", "Examples"))) directory = directory.Parent;
             return directory?.FullName ?? throw new InvalidOperationException("Cannot locate META source fixtures.");
         }
     }
@@ -37,7 +37,7 @@ public sealed class HybridCompilerTests
     [TestCase("netprobe")]
     public void NormativeProgramsCompileAndVerify(string name)
     {
-        var path = Path.Combine(Root, "Resources", "Meta", "Examples", "examples." + name + ".meta");
+        var path = Path.Combine(Root, "Content.Meta.Tests", "Fixtures", "Meta", "Examples", "examples." + name + ".meta");
         var result = Compile(File.ReadAllText(path), "examples." + name);
         Assert.That(result.Diagnostics.Where(d => d.Severity == MetaDiagnosticSeverity.Error), Is.Empty, string.Join('\n', result.Diagnostics.Select(d => d.Code + ":" + string.Join(',', d.Arguments))));
         Assert.That(result.Success, Is.True);

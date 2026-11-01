@@ -4,11 +4,20 @@
 
 using System.Globalization;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using Content.Client.Resources;
 using Content.Client._NC.Meta.UI;
-using Content.Meta.Mui;
+using Content.Shared._NC.Meta.UI;
+using MuiNode = Content.Shared._NC.Meta.UI.NCMetaMuiNode;
+using MuiControlKind = Content.Shared._NC.Meta.UI.NCMetaMuiControlKind;
+using MuiValueKind = Content.Shared._NC.Meta.UI.NCMetaMuiValueKind;
+using MuiAppContract = Content.Shared._NC.Meta.UI.NCMetaMuiPresentation;
+using MuiViewContract = Content.Shared._NC.Meta.UI.NCMetaMuiView;
+using MuiLimits = Content.Client._NC.Meta.Mui.NCMetaMuiValues;
+using MuiUpdateResult = Content.Client._NC.Meta.Mui.NCMetaMuiUpdateResult;
+using JsonNode = Content.Shared._NC.Meta.UI.NCMetaUiValue;
+using JsonObject = Content.Shared._NC.Meta.UI.NCMetaUiObject;
+using JsonArray = Content.Shared._NC.Meta.UI.NCMetaUiArray;
+using JsonValue = Content.Shared._NC.Meta.UI.NCMetaUiScalar;
 using Robust.Client.Graphics;
 using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
@@ -18,7 +27,7 @@ using Robust.Shared.Timing;
 namespace Content.Client._NC.Meta.Mui;
 
 /// <summary>Native renderer for validated META documents. Never loads XAML, CLR types, native styles or world state.</summary>
-public sealed class NCMetaMuiRenderer : BoxContainer
+public sealed partial class NCMetaMuiRenderer : BoxContainer
 {
     [Dependency] private IResourceCache _resources = default!;
     private readonly Dictionary<(string Alias, int Size), Font> _fonts = [];
@@ -29,9 +38,9 @@ public sealed class NCMetaMuiRenderer : BoxContainer
     private readonly Dictionary<string, Func<object?>> _inputs = new(StringComparer.Ordinal);
     private readonly MuiAppContract _contract;
     private readonly MuiViewContract _view;
-    private readonly MuiStyleSheet _styles;
+    private readonly List<NCMetaMuiStyleRule> _styles;
     private readonly IReadOnlyDictionary<string, Texture> _images;
-    private readonly MuiSessionState _state;
+    private readonly NCMetaMuiSessionState _state;
     private readonly HashSet<Control> _hovered = [];
     private readonly Dictionary<Control, Pulse> _pulses = [];
     private float _animationAccumulator;
@@ -42,25 +51,25 @@ public sealed class NCMetaMuiRenderer : BoxContainer
     public int NativeControlCount => Count(this) - 1;
     private static int Count(Control control) => 1 + control.Children.Sum(Count);
 
-    public NCMetaMuiRenderer(ValidatedMuiDocument document, MuiViewContract view, MuiAppContract contract,
-        MuiStyleSheet styles, Guid sessionId, IReadOnlyDictionary<string, Texture>? images = null)
+    public NCMetaMuiRenderer(NCMetaMuiPresentation contract, string viewId,
+        Guid sessionId, IReadOnlyDictionary<string, Texture>? images = null)
     {
         IoCManager.InjectDependencies(this);
         Orientation = LayoutOrientation.Vertical;
         HorizontalExpand = true;
         VerticalExpand = true;
         _contract = contract;
-        _view = view;
-        _styles = styles;
-        _state = new(sessionId, view.Fields);
-        _images = images ?? contract.Resources.Where(MuiResourceCatalog.IsImage).ToDictionary(x => x,
+        if (!NCMetaMuiValues.PresentationValid(contract, viewId)) throw new ArgumentException("Invalid MUI presentation.");
+        _view = contract.Views[viewId];
+        _styles = contract.Styles;
+        _state = new(sessionId, _view.Fields);
+        _images = images ?? contract.Resources.Where(x => x is "images/info" or "images/home" or "images/inventory").ToDictionary(x => x,
             x => _resources.GetResource<TextureResource>(x switch
             {
                 "images/info" => "/Textures/Interface/info.svg.192dpi.png", "images/home" => "/Textures/Interface/home.png",
                 _ => "/Textures/Interface/inventory.svg.192dpi.png",
             }).Texture);
-        if (!styles.FitsBudget(document)) { _rejected = true; return; }
-        AddChild(CreateNode(document.Root));
+        AddChild(CreateNode(contract.Root));
         if (NativeControlCount > MuiLimits.Controls)
         {
             NCMetaUiLifecycle.RemoveChildren(this);
@@ -69,10 +78,10 @@ public sealed class NCMetaMuiRenderer : BoxContainer
         }
     }
 
-    public MuiUpdateResult TryUpdate(long baseRevision, long revision, string json, bool snapshot)
+    public MuiUpdateResult TryUpdate(long baseRevision, long revision, NCMetaUiValue? values, bool snapshot)
     {
         if (_rejected) return MuiUpdateResult.Invalid;
-        var result = snapshot ? _state.TryApplySnapshot(revision, json) : _state.TryApplyPatch(baseRevision, revision, json);
+        var result = snapshot ? _state.TryApplySnapshot(revision, values) : _state.TryApplyPatch(baseRevision, revision, values);
         if (result == MuiUpdateResult.Gap)
             ResyncRequested?.Invoke();
         if (result == MuiUpdateResult.Applied)
@@ -80,11 +89,12 @@ public sealed class NCMetaMuiRenderer : BoxContainer
             var changed = new HashSet<string>(StringComparer.Ordinal);
             if (!snapshot)
             {
-                using var patch = JsonDocument.Parse(json);
-                if (patch.RootElement.TryGetProperty("set", out var set))
-                    foreach (var field in set.EnumerateObject()) changed.Add(field.Name);
-                if (patch.RootElement.TryGetProperty("remove", out var remove))
-                    foreach (var field in remove.EnumerateArray()) changed.Add(field.GetString()!);
+                if (values is NCMetaUiObject patch)
+                {
+                    if (patch["set"] is NCMetaUiObject set) foreach (var field in set) changed.Add(field.Key);
+                    if (patch["remove"] is NCMetaUiArray remove) foreach (var field in remove)
+                        if (field is NCMetaUiScalar scalar && scalar.TryGetValue<string>(out var name)) changed.Add(name);
+                }
             }
             foreach (var (node, control) in _nodes.Values)
                 if (snapshot || DependsOn(node, changed)) ApplyNode(node, control);
@@ -142,9 +152,9 @@ public sealed class NCMetaMuiRenderer : BoxContainer
         }
         else if (control is OptionButton select)
         {
-            for (var i = 0; i < node.Children.Length; i++)
+            for (var i = 0; i < node.Children.Count; i++)
                 select.AddItem(node.Children[i].Properties.GetValueOrDefault("text", ""), i);
-            AddInput(node, () => ParseInput(node, select.SelectedId >= 0 && select.SelectedId < node.Children.Length
+            AddInput(node, () => ParseInput(node, select.SelectedId >= 0 && select.SelectedId < node.Children.Count
                 ? Value(node.Children[select.SelectedId], "value") : ""));
         }
         if (control is TextureRect image && node.Properties.TryGetValue("resource", out var resource) && _images.TryGetValue(resource, out var texture))
@@ -204,16 +214,18 @@ public sealed class NCMetaMuiRenderer : BoxContainer
             else if (_inputs.TryGetValue(field.Key, out var input))
                 values[field.Key] = input();
         }
-        var json = JsonSerializer.Serialize(values);
-        TryRequestAction(actionId, json);
+        var data = new NCMetaUiObject();
+        foreach (var pair in values) data[pair.Key] = NCMetaMuiValues.Scalar(pair.Value);
+        TryRequestAction(actionId, data);
     }
 
     /// <summary>Uses the same declared-action and typed-input boundary as native form controls.</summary>
-    public bool TryRequestAction(string actionId, string json)
+    public bool TryRequestAction(string actionId, NCMetaUiObject values)
     {
         if (_rejected || _state.Closed || !_view.Actions.Contains(actionId) ||
             !_contract.Actions.TryGetValue(actionId, out var action) ||
-            !MuiDataValidator.TryValidate(json, action.Inputs, MuiLimits.ActionBytes, out _)) return false;
+            !NCMetaMuiValues.Validate(values, action.Inputs, MuiLimits.ActionBytes) ||
+            !NCMetaMuiValues.TryWrite(values, MuiLimits.ActionBytes, out var json)) return false;
         ActionRequested?.Invoke(actionId, json);
         return true;
     }
@@ -257,14 +269,14 @@ public sealed class NCMetaMuiRenderer : BoxContainer
             select.Disabled = !Boolean(node, "enabled", true);
             var previousSelection = select.SelectedId;
             select.Clear();
-            for (var i = 0; i < node.Children.Length; i++)
+            for (var i = 0; i < node.Children.Count; i++)
                 select.AddItem(Value(node.Children[i], "text"), i);
-            if (previousSelection >= 0 && previousSelection < node.Children.Length)
+            if (previousSelection >= 0 && previousSelection < node.Children.Count)
                 select.SelectId(previousSelection);
             if (node.Properties.ContainsKey("value"))
             {
                 var selected = Value(node, "value");
-                for (var i = 0; i < node.Children.Length; i++)
+                for (var i = 0; i < node.Children.Count; i++)
                     if (Value(node.Children[i], "value") == selected)
                     {
                         select.SelectId(i);
@@ -320,7 +332,7 @@ public sealed class NCMetaMuiRenderer : BoxContainer
         _pulses.Remove(control, out var previousPulse);
         var computed = new Dictionary<string, string>(StringComparer.Ordinal);
         var classes = node.Properties.GetValueOrDefault("class", "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        foreach (var rule in _styles.Rules)
+        foreach (var rule in _styles)
         {
             if (Size.X < rule.MinWidth || Size.X > rule.MaxWidth ||
                 (rule.Selector[0] == '#' ? rule.Selector[1..] != node.Id : !classes.Contains(rule.Selector[1..])))

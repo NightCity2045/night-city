@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 using System.Linq;
 using System.Text;
-using System.Text.Json;
 using Content.Shared._NC.Meta.Authority;
 using Content.Shared._NC.Meta.UI;
 using Robust.Client.UserInterface.Controls;
@@ -96,13 +95,14 @@ public sealed partial class NCMetaWorkspaceWindow
         SendServiceGrantRequest(NCMetaWorkspaceOperation.ReadServiceGrants);
     }
 
-    private void SendServiceGrantRequest(NCMetaWorkspaceOperation operation, string source = "", Guid fileId = default, long revision = 0)
+    private void SendServiceGrantRequest(NCMetaWorkspaceOperation operation, string source = "", Guid fileId = default, long revision = 0,
+        NCMetaWorkspacePayload? payload = null)
     {
         if (!ServiceGrantTargetIsCurrent() || _grantRequest != Guid.Empty) return;
         _grantRequest = Guid.NewGuid();
         _grantRequestSeconds = 0;
         Requested?.Invoke(new(operation, _grantRequest, fileId, revision, source, _grantDevice,
-            _grantRelease, projectId: _state.ProjectId, installationId: _grantInstallation));
+            _grantRelease, projectId: _state.ProjectId, installationId: _grantInstallation, payload: payload));
         UpdateServiceGrantControls();
     }
 
@@ -195,9 +195,8 @@ public sealed partial class NCMetaWorkspaceWindow
             return new NCMetaGrantConsent(link.Slot, link.TargetDeviceId, members.Select(member => member.Name).Distinct(StringComparer.Ordinal).ToList(),
                 members.Select(member => member.Scope).Distinct(StringComparer.Ordinal).ToList());
         }).ToList();
-        var source = JsonSerializer.Serialize(new NCMetaGrantApprovalRequest(policy.Revision, true, GrantsUnattended.Pressed, expires, bindings));
-        if (Encoding.UTF8.GetByteCount(source) > 32 * 1024) { Status.Text = Loc.GetString("nc-meta-market-request-large"); return; }
-        SendServiceGrantRequest(NCMetaWorkspaceOperation.IssueServiceGrants, source);
+        SendServiceGrantRequest(NCMetaWorkspaceOperation.IssueServiceGrants,
+            payload: new NCMetaGrantApprovalRequest(policy.Revision, true, GrantsUnattended.Pressed, expires, bindings));
     }
 
     private void UpdateServiceGrantControls()

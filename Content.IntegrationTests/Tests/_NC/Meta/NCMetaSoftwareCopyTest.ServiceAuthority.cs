@@ -34,16 +34,16 @@ public sealed partial class NCMetaSoftwareCopyTest
         {
             var policy = await _persistence.ReadServiceGrantPolicyAsync(installation.Id);
             await Server.WaitAssertion(() => Assert.That(_persistence.TryCaptureTime(out _epoch, out _time), Is.True));
-            var result = await authority.TryIssueInstallationGrantsAsync(scene.Deck.Entity, scene.Actor, scene.Deck.Entity,
+            var result = await NCMetaNativeTestTasks.Run(Server, () => authority.TryIssueInstallationGrantsAsync(scene.Deck.Entity, scene.Actor, scene.Deck.Entity,
                 Guid.NewGuid(), installation, scene.Artifact,
-                new NCMetaGrantApprovalRequest(policy!.Revision, true, true, _time.Ticks + TimeSpan.TicksPerSecond * 3, []));
+                new NCMetaGrantApprovalRequest(policy!.Revision, true, true, _time.Ticks + TimeSpan.TicksPerSecond * 3, [])));
             Assert.That(result.Success, Is.True, result.MessageKey);
             installation = (await _persistence.ReadInstallationsAsync(scene.Deck.Id, scene.Owner)).Single();
-            var fresh = await authority.ResolveServiceAdmissionAsync(installation, scene.Artifact, unattended: true);
+            var fresh = await NCMetaNativeTestTasks.Run(Server, () => authority.ResolveServiceAdmissionAsync(installation, scene.Artifact, unattended: true));
             Assert.That(fresh?.ExpiresAtTicks, Is.Not.Null, "The policy deadline exists even when it grants no device links.");
             approved = (installation, fresh!);
         }
-        var authorization = await _marketplace.ResolveRunAuthorizationAsync(scene.Owner, scene.Deck.Id, installation.Active);
+        var authorization = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.ResolveRunAuthorizationAsync(scene.Owner, scene.Deck.Id, installation.Active));
         Assert.That(authorization, Is.Not.Null);
         var system = Server.System<NCMetaRuntimeSystem>();
         NCMetaRuntimeInstance runtime = null!;
@@ -62,8 +62,8 @@ public sealed partial class NCMetaSoftwareCopyTest
         {
             var policy = await _persistence.ReadServiceGrantPolicyAsync(installation.Id);
             Assert.That(policy!.Grants, Is.Empty);
-            var revoked = await authority.TryRevokeGrantAsync(scene.Deck.Entity, scene.Actor, scene.Deck.Entity,
-                Guid.NewGuid(), scene.Deck.Id, installation.Id, Guid.Empty, policy.Revision);
+            var revoked = await NCMetaNativeTestTasks.Run(Server, () => authority.TryRevokeGrantAsync(scene.Deck.Entity, scene.Actor, scene.Deck.Entity,
+                Guid.NewGuid(), scene.Deck.Id, installation.Id, Guid.Empty, policy.Revision));
             Assert.That(revoked.Success, Is.True, revoked.MessageKey);
         }
         else if (!expire)
@@ -71,11 +71,11 @@ public sealed partial class NCMetaSoftwareCopyTest
             Assert.That(NCPartyRef.TryParse(scene.Owner, out var principal), Is.True);
             var actors = Server.System<NCCityActorRegistrySystem>();
             var actorId = new NCActorId(principal.PersistentId);
-            var record = await actors.GetAsync(actorId);
+            var record = await NCMetaNativeTestTasks.Run(Server, () => actors.GetAsync(actorId));
             Assert.That(record, Is.Not.Null);
-            var result = await actors.SetStatusAsync(new(Guid.NewGuid(), actorId, record!.AggregateVersion,
+            var result = await NCMetaNativeTestTasks.Run(Server, () => actors.SetStatusAsync(new(Guid.NewGuid(), actorId, record!.AggregateVersion,
                 invalidation == "Dead" ? NCCityActorStatus.Dead : NCCityActorStatus.Archived, Guid.NewGuid(),
-                AuditSource: "integration.meta-service-principal"));
+                AuditSource: "integration.meta-service-principal")));
             Assert.That(result.Status, Is.EqualTo(NCCityActorMutationStatus.Applied), result.Error);
         }
         for (var step = 0; step < 300 && runtime.Process.State != MetaProcessState.Stopped; step++)
@@ -86,6 +86,6 @@ public sealed partial class NCMetaSoftwareCopyTest
             Assert.That(runtime.Process.StopReason, Is.EqualTo(MetaStopReason.PermissionRevoked));
             Assert.That(system.TryGetInstallation(scene.Deck.Entity, scene.Owner, installation.Id, out _), Is.False);
         });
-        Assert.That(await authority.ResolveServiceAdmissionAsync(installation, scene.Artifact, unattended: true), Is.Null);
+        Assert.That(await NCMetaNativeTestTasks.Run(Server, () => authority.ResolveServiceAdmissionAsync(installation, scene.Artifact, unattended: true)), Is.Null);
     }
 }

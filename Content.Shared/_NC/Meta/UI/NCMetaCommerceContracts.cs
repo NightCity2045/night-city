@@ -88,33 +88,33 @@ public sealed class NCMetaCommerceState
 
 // These DTOs are bounded requests carried by the existing workspace Source JSON field, never actor authority.
 [Serializable, NetSerializable]
-public sealed record NCMetaSoftwareBrowseRequest(int CatalogOffset = 0, int LicenseOffset = 0, string LicenseOwner = "", int ResaleOffset = 0);
+public sealed record NCMetaSoftwareBrowseRequest(int CatalogOffset = 0, int LicenseOffset = 0, string LicenseOwner = "", int ResaleOffset = 0) : NCMetaWorkspacePayload;
 [Serializable, NetSerializable]
-public sealed record NCMetaSoftwareSelection(Guid ProductId, int Major, Guid ReleaseId = default, string SlotKind = "User");
+public sealed record NCMetaSoftwareSelection(Guid ProductId, int Major, Guid ReleaseId = default, string SlotKind = "User") : NCMetaWorkspacePayload;
 [Serializable, NetSerializable]
 public sealed record NCMetaSoftwareQuoteRequest(Guid ProductId, int Major, Guid ReleaseId,
     string LicenseOwner = "", NCMetaSoftwareLicenseScope Scope = NCMetaSoftwareLicenseScope.Device, int SeatCount = 1,
-    string SlotKind = "User");
+    string SlotKind = "User") : NCMetaWorkspacePayload;
 [Serializable, NetSerializable]
-public sealed record NCMetaSoftwarePurchaseRequest(Guid QuoteId);
+public sealed record NCMetaSoftwarePurchaseRequest(Guid QuoteId) : NCMetaWorkspacePayload;
 [Serializable, NetSerializable]
 public sealed record NCMetaSoftwareBinding(string Slot, string DeviceId, string ContractHash, List<string> Scopes);
 [Serializable, NetSerializable]
 public sealed record NCMetaSoftwareInstallRequest(Guid ProductId, Guid ReleaseId, List<NCMetaSoftwareBinding> Bindings,
-    bool ScopeConsent, List<string> ApprovedScopes);
+    bool ScopeConsent, List<string> ApprovedScopes) : NCMetaWorkspacePayload;
 [Serializable, NetSerializable]
-public sealed record NCMetaSoftwareSeatRequest(Guid LicenseId, string DeviceId);
+public sealed record NCMetaSoftwareSeatRequest(Guid LicenseId, string DeviceId) : NCMetaWorkspacePayload;
 [Serializable, NetSerializable]
 public sealed record NCMetaSoftwareSourceRequest(Guid ProductId, Guid ReleaseId, string Path, Guid? LicenseId = null,
-    string LicenseOwner = "");
+    string LicenseOwner = "") : NCMetaWorkspacePayload;
 [Serializable, NetSerializable]
 public sealed record NCMetaSoftwarePublishRequest(Guid ProductId, string Name, string Description, string Changelog,
-    long Price, NCMetaSoftwareTerms Terms, string PublisherOwner = "");
+    long Price, NCMetaSoftwareTerms Terms, string PublisherOwner = "") : NCMetaWorkspacePayload;
 [Serializable, NetSerializable]
-public sealed record NCMetaSoftwareContactRequest(string Query);
+public sealed record NCMetaSoftwareContactRequest(string Query) : NCMetaWorkspacePayload;
 [Serializable, NetSerializable]
-public sealed record NCMetaSoftwareOfferResaleRequest(Guid LicenseId, string BuyerParty, long Price);
+public sealed record NCMetaSoftwareOfferResaleRequest(Guid LicenseId, string BuyerParty, long Price) : NCMetaWorkspacePayload;
 [Serializable, NetSerializable]
-public sealed record NCMetaSoftwareAcceptResaleRequest(Guid LicenseId, long OfferRevision);
+public sealed record NCMetaSoftwareAcceptResaleRequest(Guid LicenseId, long OfferRevision) : NCMetaWorkspacePayload;
 [Serializable, NetSerializable]
-public sealed record NCMetaSoftwareDiscardCopyRequest(Guid LicenseId);
+public sealed record NCMetaSoftwareDiscardCopyRequest(Guid LicenseId) : NCMetaWorkspacePayload;

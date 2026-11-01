@@ -16,7 +16,7 @@ public sealed class MetaStockApplicationTests
         get
         {
             var directory = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
-            while (directory != null && !Directory.Exists(Path.Combine(directory.FullName, "Resources", "Meta", "Projects"))) directory = directory.Parent;
+            while (directory != null && !Directory.Exists(Path.Combine(directory.FullName, "Content.Meta.Tests", "Fixtures", "Meta", "Projects"))) directory = directory.Parent;
             return directory!.FullName;
         }
     }
@@ -36,7 +36,7 @@ public sealed class MetaStockApplicationTests
         private long _nowMs = 1000;
         public Harness(string id)
         {
-            var folder = Path.Combine(Root, "Resources", "Meta", "Projects", id);
+            var folder = Path.Combine(Root, "Content.Meta.Tests", "Fixtures", "Meta", "Projects", id);
             using var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(folder, "manifest.json")));
             var request = new MetaCompilationRequest([new("main.meta", File.ReadAllText(Path.Combine(folder, "main.meta")))],
                 manifest.RootElement.GetProperty("rootModule").GetString()!);

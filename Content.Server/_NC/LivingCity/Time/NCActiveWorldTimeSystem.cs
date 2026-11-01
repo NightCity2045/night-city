@@ -181,6 +181,11 @@ public sealed partial class NCActiveWorldTimeSystem : EntitySystem
         try
         {
             finalTime = state.PersistedTime.Advance(state.Pending + state.InFlight);
+            if (finalTime < state.LastPublishedTime)
+            {
+                state.Pending += TimeSpan.FromTicks(state.LastPublishedTime.Ticks - finalTime.Ticks);
+                finalTime = state.LastPublishedTime;
+            }
         }
         catch (OverflowException exception)
         {

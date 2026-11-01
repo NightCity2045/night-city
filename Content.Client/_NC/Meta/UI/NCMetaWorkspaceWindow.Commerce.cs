@@ -184,14 +184,11 @@ public sealed partial class NCMetaWorkspaceWindow
         control.OnItemSelected += args => control.SelectId(args.Id);
     }
 
-    private Guid CommerceRequest(NCMetaWorkspaceOperation operation, object payload, int utf8Offset = 0)
+    private Guid CommerceRequest(NCMetaWorkspaceOperation operation, NCMetaWorkspacePayload payload, int utf8Offset = 0)
     {
         var id = Guid.NewGuid();
-        var source = JsonSerializer.Serialize(payload);
-        if (Encoding.UTF8.GetByteCount(source) > 32 * 1024)
-        { Status.Text = Loc.GetString("nc-meta-market-request-large"); return Guid.Empty; }
-        Requested?.Invoke(new(operation, id, source: source, deviceId: _selectedDeviceId,
-            releaseId: _state.ActiveReleaseId, projectId: _state.ProjectId, utf8Offset: utf8Offset, installationId: _selectedInstallationId));
+        Requested?.Invoke(new(operation, id, deviceId: _selectedDeviceId,
+            releaseId: _state.ActiveReleaseId, projectId: _state.ProjectId, utf8Offset: utf8Offset, installationId: _selectedInstallationId, payload: payload));
         return id;
     }
 
@@ -407,7 +404,7 @@ public sealed partial class NCMetaWorkspaceWindow
         download.Received += bytes.Length;
         if (!source.Complete) { ReadSoftwareSource(download.Received); return; }
         _softwareDownload = null;
-        if (download.Received != total || !string.Equals(Convert.ToHexString(SHA256.HashData(download.Bytes)), source.Sha256, StringComparison.OrdinalIgnoreCase))
+        if (download.Received != total || !string.Equals(Content.Client._NC.Meta.Editor.NCMetaSourceHash.ToHexString(Content.Client._NC.Meta.Editor.NCMetaSourceHash.HashData(download.Bytes)), source.Sha256, StringComparison.OrdinalIgnoreCase))
         { SoftwareSourceStatus.Text = Loc.GetString("nc-meta-market-source-invalid"); return; }
         SoftwareSourceEditor.TrySetSource(Encoding.UTF8.GetString(download.Bytes));
         SoftwareSourceStatus.Text = source.Path;

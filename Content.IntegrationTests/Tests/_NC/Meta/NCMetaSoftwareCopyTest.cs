@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.ExceptionServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Content.IntegrationTests.Fixtures;
@@ -11,6 +13,7 @@ using Content.Meta.Commerce;
 using Content.Meta.Language;
 using Content.Meta.Runtime;
 using Content.Meta.Verification;
+using Content.Server.Atmos.EntitySystems;
 using Content.Server.Database;
 using Content.Server.GameTicking;
 using Content.Server._NC.LivingCity.Time;
@@ -21,6 +24,7 @@ using Content.Server._NC.Meta.Network;
 using Content.Server._NC.Meta.Persistence;
 using Content.Server._NC.Meta.Runtime;
 using Content.Shared._NC.Meta;
+using Content.Shared.Atmos;
 using Content.Shared._NC.Identity;
 using Content.Shared._NC.Persistence.Identity;
 using Content.Shared._NC.Persistence.Time;
@@ -41,10 +45,34 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
     [SidedDependency(Side.Server)] private IServerDbManager _database = default!;
     private NCSessionEpoch _epoch;
     private NCActiveWorldTime _time;
+    private readonly List<EntityUid> _nativeSoftwareBodies = [];
+
+    public override async Task DoTeardown()
+    {
+        try { await base.DoTeardown(); }
+        catch when (Server.UnhandledException != null || Client.UnhandledException != null)
+        {
+            ExceptionDispatchInfo.Capture(Server.UnhandledException ?? Client.UnhandledException!).Throw();
+            throw;
+        }
+    }
+
+    [TearDown]
+    public async Task UnbindNativeSoftwareActors()
+    {
+        await NCMetaNativeTestTasks.CloseWorld(Server);
+        if (_nativeSoftwareBodies.Count != 0)
+        {
+            await NCMetaNativeActorHarness.UnbindBeforeDelete(Server, _nativeSoftwareBodies.ToArray());
+            _nativeSoftwareBodies.Clear();
+        }
+        await Pair.ReallyBeIdle();
+    }
 
     [TestPrototypes]
     private const string Hardware = """
         - type: entity
+          parent: PowerCellSlotMediumItem
           id: NCMetaIntegrationCopyHost
           components:
           - type: NCMetaHost
@@ -131,7 +159,11 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         MapId map = default;
         await Server.WaitPost(() =>
         {
-            Server.System<SharedMapSystem>().CreateMap(out map);
+            var mapEntity = Server.System<SharedMapSystem>().CreateMap(out map);
+            var air = new GasMixture(Atmospherics.CellVolume) { Temperature = Atmospherics.T20C };
+            air.AdjustMoles(Gas.Oxygen, Atmospherics.OxygenMolesStandard);
+            air.AdjustMoles(Gas.Nitrogen, Atmospherics.NitrogenMolesStandard);
+            Server.System<AtmosphereSystem>().SetMapAtmosphere(mapEntity, false, air);
             deck = SEntMan.SpawnEntity(hotFirmware ? "NCMetaIntegrationHotFirmwareHost" :
                 firmwareHost ? "NCMetaIntegrationFirmwareHost" : "NCMetaIntegrationCopyHost", new MapCoordinates(Vector2.Zero, map));
             source = SEntMan.SpawnEntity("NCMetaIntegrationCopyHost", new MapCoordinates(Vector2.UnitY, map));
@@ -151,14 +183,20 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         Assert.That(deckEntry?.Ready, Is.True);
         Assert.That(sourceEntry?.Ready, Is.True);
         var actorId = new NCActorId(Guid.NewGuid());
-        if (firmwareHost || nativeOwner || hotFirmware) await Server.WaitAssertion(() =>
-            Assert.That(Server.System<NCCityActorRuntimeIndexSystem>().TryBind(actorId, actor), Is.True));
-        if (firmwareHost || nativeOwner || hotFirmware) await CreateNativeServiceOwnerAsync(actorId, "Fixture device owner");
+        if (firmwareHost || nativeOwner || hotFirmware)
+        {
+            await CreateNativeServiceOwnerAsync(actorId, "Fixture device owner");
+            await NCMetaNativeActorHarness.RestoreBinding(Server, actorId, actor);
+            _nativeSoftwareBodies.Add(actor);
+        }
         var owner = firmwareHost || nativeOwner || hotFirmware ? NCPartyRef.ForActor(actorId).ToString() : NCPartyRef.ForCharacter(new NCCharacterId(744)).ToString();
         var sourceActorId = new NCActorId(Guid.NewGuid());
-        if (sourceActor is { } nativeSourceActor) await Server.WaitAssertion(() =>
-            Assert.That(Server.System<NCCityActorRuntimeIndexSystem>().TryBind(sourceActorId, nativeSourceActor), Is.True));
-        if (nativeSourceOwner) await CreateNativeServiceOwnerAsync(sourceActorId, "Fixture software publisher");
+        if (sourceActor is { } nativeSourceActor)
+        {
+            await CreateNativeServiceOwnerAsync(sourceActorId, "Fixture software publisher");
+            await NCMetaNativeActorHarness.RestoreBinding(Server, sourceActorId, nativeSourceActor);
+            _nativeSoftwareBodies.Add(nativeSourceActor);
+        }
         var sourceOwner = nativeSourceOwner ? NCPartyRef.ForActor(sourceActorId).ToString() : NCPartyRef.ForCharacter(new NCCharacterId(745)).ToString();
         var deckRecord = await NCMetaNativeTestTasks.Run(Server, () => _persistence.ClaimDeviceAsync(Guid.NewGuid(), deckEntry.Id, owner, "Copy target", _epoch, _time));
         var sourceRecord = await NCMetaNativeTestTasks.Run(Server, () => _persistence.ClaimDeviceAsync(Guid.NewGuid(), sourceEntry.Id, sourceOwner, "Copy source", _epoch, _time));
@@ -218,8 +256,8 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         var license = await SeedPurchasedSeat(scene);
         var hardware = Server.System<NCMetaHardwareSystem>();
         var runtime = Server.System<NCMetaRuntimeSystem>();
-        var normal = await _marketplace.ReadCompatibilityAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id);
-        var firmware = await _marketplace.ReadCompatibilityAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, "Firmware");
+        var normal = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.ReadCompatibilityAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id));
+        var firmware = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.ReadCompatibilityAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, "Firmware"));
         Assert.That(normal, Is.Not.Null);
         Assert.That(normal!.Compatible, Is.False, "A firmware-only device must not sell an unusable User-slot admission.");
         Assert.That(firmware?.Compatible, Is.True);
@@ -237,7 +275,7 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
             Assert.That(hardware.TryCaptureFirmwareService(scene.Deck.Entity, scene.Actor, out stamp), Is.True);
         });
         var memory = 1048576 - scene.Artifact.ResidentMemoryBytes;
-        var admission = await _marketplace.PrepareActivationAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, true);
+        var admission = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.PrepareActivationAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, true));
         Assert.That(admission, Is.Not.Null);
         async Task<bool> NativeGuard()
         {
@@ -263,7 +301,7 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         Assert.That(await _persistence.ReadInstallationsAsync(scene.Deck.Id, scene.Owner), Is.Empty);
         Assert.That((await _persistence.ReadSnapshotAsync("meta.software.license", license.Id.ToString("D")))!.AggregateVersion,
             Is.EqualTo(license.Revision), "The rejected slot swap must not consume its activation grant.");
-        admission = await _marketplace.PrepareActivationAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, true);
+        admission = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.PrepareActivationAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, true));
         Assert.That(admission, Is.Not.Null);
         var requestId = Guid.NewGuid();
         var installed = await _persistence.InstallLicensedAsync(requestId, scene.Deck.Id, scene.Owner, scene.Product.Id,
@@ -285,7 +323,7 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
             .UpgradeStateBytes.ContainsKey("firmware"), Is.True);
         Assert.That((await _persistence.ReadSoftwareStorageUsageAsync(scene.Deck.Id, scene.Owner))!
             .UpgradeStateBytes.ContainsKey("firmware"), Is.False, "Slot reservations must not collide with a User package of the same name.");
-        var refreshed = await _marketplace.PrepareActivationAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, true);
+        var refreshed = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.PrepareActivationAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, true));
         var staleGuardCalls = 0;
         var stale = await _persistence.InstallLicensedAsync(Guid.NewGuid(), scene.Deck.Id, scene.Owner, scene.Product.Id,
             refreshed!, [], _epoch, _time, 4 * 1024 * 1024,
@@ -366,7 +404,7 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
 
     private async Task<NCMetaInstallation> ActivatePurchasedImage(Scene scene)
     {
-        var activation = await _marketplace.PrepareActivationAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, true);
+        var activation = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.PrepareActivationAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, true));
         Assert.That(activation, Is.Not.Null);
         await Server.WaitAssertion(() => Assert.That(_persistence.TryCaptureTime(out _epoch, out _time), Is.True));
         var result = await _persistence.InstallLicensedAsync(Guid.NewGuid(), scene.Deck.Id, scene.Owner, scene.Product.Id,
@@ -377,7 +415,7 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
 
     private async Task<NCMetaRuntimeInstance> StartLicensedLoop(Scene scene, NCMetaInstallation installation)
     {
-        var authorization = await _marketplace.ResolveRunAuthorizationAsync(scene.Owner, scene.Deck.Id, installation.Active, online: true);
+        var authorization = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.ResolveRunAuthorizationAsync(scene.Owner, scene.Deck.Id, installation.Active, online: true));
         Assert.That(authorization?.Contact, Is.Not.Null);
         await Server.WaitAssertion(() => Assert.That(_persistence.TryCaptureTime(out _epoch, out _time), Is.True));
         Assert.That(await _persistence.SetAutoStartAsync(Guid.NewGuid(), installation, true, _epoch, _time), Is.True);
@@ -402,8 +440,8 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
 
     private async Task<NCMetaDeviceTransferPreparation> TransferPhysicalFixture(Scene scene, string previousOwner, string nextOwner)
     {
-        var preparation = await _marketplace.PrepareDeviceTransferAsync(scene.Deck.Id, previousOwner, nextOwner,
-            scene.Deck.AuthorityEpoch, Guid.NewGuid());
+        var preparation = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.PrepareDeviceTransferAsync(scene.Deck.Id, previousOwner, nextOwner,
+            scene.Deck.AuthorityEpoch, Guid.NewGuid()));
         Assert.That(preparation, Is.Not.Null);
         var physical = await _persistence.PrepareInstallationOwnerTransferAsync(scene.Deck.Id, previousOwner, nextOwner,
             preparation!.PreserveInstallationIds);
@@ -416,7 +454,7 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         var transferred = await _database.ApplyNCPersistentBatchMutationAsync(new(Guid.NewGuid(), "meta.test.device-transfer",
             "meta.owner", previousOwner, [.. preparation.Writes, .. physical!], "{}", Guid.NewGuid(), null, _epoch, _time, []));
         Assert.That(transferred.Status, Is.EqualTo(NCPersistentMutationStatus.Applied));
-        Assert.That(await _marketplace.TryApplyCommittedDeviceTransferAsync(preparation), Is.True);
+        Assert.That(await NCMetaNativeTestTasks.Run(Server, () => _marketplace.TryApplyCommittedDeviceTransferAsync(preparation)), Is.True);
         return preparation;
     }
 
@@ -425,7 +463,7 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
     {
         var scene = await CreatePublishedPhysicalImage();
         var admission = Admission(scene);
-        var copied = await _marketplace.TryCopySoftwareAsync(admission, () => true);
+        var copied = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.TryCopySoftwareAsync(admission, () => true));
         Assert.That(copied.Success, Is.True, copied.MessageKey);
         var license = copied.License!;
         Assert.Multiple(() =>
@@ -443,15 +481,15 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         var command = await _database.GetNCPersistentCommandResultAsync(admission.ActionId);
         Assert.That(command?.CommandType, Is.EqualTo("meta.software.copy"));
         Assert.That(command?.RequestFingerprint, Has.Length.EqualTo(64));
-        var retry = await _marketplace.TryCopySoftwareAsync(admission, () => true);
+        var retry = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.TryCopySoftwareAsync(admission, () => true));
         Assert.That(retry.Success, Is.True);
         Assert.That(retry.License?.Id, Is.EqualTo(license.Id));
         Assert.That(await _persistence.ReadReservedSoftwareCopyBytesAsync(scene.Deck.Id, scene.Owner), Is.EqualTo(scene.Bytes));
-        Assert.That((await _marketplace.TryCopySoftwareAsync(admission with { NodeGeneration = 2 }, () => true)).Success, Is.False);
-        Assert.That(await _marketplace.ResolveRunAuthorizationAsync(scene.Owner, scene.Deck.Id,
-            scene.Release with { CommercialOrigin = new(scene.Product.Id, 1, scene.Project.Id, scene.Release.Id) }), Is.Null,
+        Assert.That((await NCMetaNativeTestTasks.Run(Server, () => _marketplace.TryCopySoftwareAsync(admission with { NodeGeneration = 2 }, () => true))).Success, Is.False);
+        Assert.That(await NCMetaNativeTestTasks.Run(Server, () => _marketplace.ResolveRunAuthorizationAsync(scene.Owner, scene.Deck.Id,
+            scene.Release with { CommercialOrigin = new(scene.Product.Id, 1, scene.Project.Id, scene.Release.Id) })), Is.Null,
             "Owning the copied bytes does not silently approve activation.");
-        var activation = await _marketplace.PrepareActivationAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, true);
+        var activation = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.PrepareActivationAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, true));
         Assert.That(activation, Is.Not.Null);
         await Server.WaitAssertion(() => Assert.That(_persistence.TryCaptureTime(out _epoch, out _time), Is.True));
         Assert.That((await _persistence.InstallLicensedAsync(Guid.NewGuid(), scene.Deck.Id, scene.Owner, scene.Product.Id,
@@ -460,7 +498,7 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         Assert.That(installed.Bindings, Is.Empty);
         Assert.That(installed.Owner, Is.EqualTo(scene.Owner));
         Assert.That(await _persistence.ReadProjectAsync(scene.Project.Id, scene.Owner), Is.Null);
-        var authorization = await _marketplace.ResolveRunAuthorizationAsync(scene.Owner, scene.Deck.Id, installed.Active);
+        var authorization = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.ResolveRunAuthorizationAsync(scene.Owner, scene.Deck.Id, installed.Active));
         Assert.That(authorization, Is.Not.Null);
         Assert.That(authorization!.ExpiresAtTicks, Is.EqualTo(license.IllegalExpiresAtTicks));
     }
@@ -471,7 +509,7 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         var scene = await CreatePublishedPhysicalImage();
         var admission = Admission(scene);
         var checks = 0;
-        var denied = await _marketplace.TryCopySoftwareAsync(admission, () => ++checks == 1);
+        var denied = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.TryCopySoftwareAsync(admission, () => ++checks == 1));
         Assert.That(checks, Is.EqualTo(2), "The native guard must be rechecked after bytecode and DB work.");
         Assert.That(denied.Success, Is.False);
         Assert.That(await _persistence.ReadReservedSoftwareCopyBytesAsync(scene.Deck.Id, scene.Owner), Is.Zero);
@@ -498,7 +536,7 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
     public async Task AWellFormedIllegalLicenseWithoutTheNativeEvidenceReceiptCannotResolveTheImage()
     {
         var scene = await CreatePublishedPhysicalImage();
-        var copied = await _marketplace.TryCopySoftwareAsync(Admission(scene), () => true);
+        var copied = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.TryCopySoftwareAsync(Admission(scene), () => true));
         Assert.That(copied.Success, Is.True, copied.MessageKey);
         var forged = copied.License! with { Id = Guid.NewGuid(), EvidenceId = Guid.NewGuid(), Revision = 1 };
         Assert.That(MetaSoftwarePolicy.ValidLicense(forged), Is.True);
@@ -509,7 +547,7 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
             "meta.owner", scene.Owner, [Write("meta.software.license", forged.Id.ToString("D"), 0, forged),
                 Write("meta.software.device", scene.Deck.Id, 1, index)], "{}", Guid.NewGuid(), null, _epoch, _time, []));
         Assert.That(changed.Status, Is.EqualTo(NCPersistentMutationStatus.Applied));
-        Assert.That(await _marketplace.ResolveLicensedReleaseAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id), Is.Null);
+        Assert.That(await NCMetaNativeTestTasks.Run(Server, () => _marketplace.ResolveLicensedReleaseAsync(scene.Owner, scene.Deck.Id, scene.Product.Id, scene.Release.Id)), Is.Null);
     }
 
     [Test]
@@ -591,8 +629,8 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         Assert.That((await _persistence.WriteTextAsync(Guid.NewGuid(), previousInstallation.StateVolumeId, scene.Owner,
             "private.txt", "previous owner's private data", 262144, _epoch, _time)).Success, Is.True);
         var nextOwner = NCPartyRef.ForCharacter(new NCCharacterId(746)).ToString();
-        var preparation = await _marketplace.PrepareDeviceTransferAsync(scene.Deck.Id, scene.Owner, nextOwner,
-            scene.Deck.AuthorityEpoch, Guid.NewGuid());
+        var preparation = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.PrepareDeviceTransferAsync(scene.Deck.Id, scene.Owner, nextOwner,
+            scene.Deck.AuthorityEpoch, Guid.NewGuid()));
         Assert.That(preparation, Is.Not.Null);
         Assert.That(preparation!.PreserveInstallationIds, Is.EqualTo(new[] { previousInstallation.Id }));
         var images = await _persistence.PrepareInstallationOwnerTransferAsync(scene.Deck.Id, scene.Owner, nextOwner,
@@ -606,20 +644,20 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         var transferred = await _database.ApplyNCPersistentBatchMutationAsync(new(Guid.NewGuid(), "meta.test.device-transfer",
             "meta.owner", scene.Owner, [.. preparation.Writes, .. images!], "{}", Guid.NewGuid(), null, _epoch, _time, []));
         Assert.That(transferred.Status, Is.EqualTo(NCPersistentMutationStatus.Applied));
-        Assert.That(await _marketplace.TryApplyCommittedDeviceTransferAsync(preparation), Is.True);
+        Assert.That(await NCMetaNativeTestTasks.Run(Server, () => _marketplace.TryApplyCommittedDeviceTransferAsync(preparation)), Is.True);
         Assert.That(await _persistence.ReadInstallationsAsync(scene.Deck.Id, nextOwner), Is.Empty);
         Assert.That(await _persistence.HasInheritedImageAsync(scene.Deck.Id, nextOwner, previousInstallation.Id,
             previousInstallation.Active.Id, previousInstallation.Active.Digest), Is.True);
         Assert.That(await _persistence.ReadReservedInheritedBytesAsync(scene.Deck.Id, nextOwner), Is.EqualTo(scene.Bytes));
         var usage = await _persistence.ReadSoftwareStorageUsageAsync(scene.Deck.Id, nextOwner);
         Assert.That(usage?.Bytes, Is.EqualTo(scene.Bytes));
-        var compatibility = await _marketplace.ReadCompatibilityAsync(nextOwner, scene.Deck.Id, scene.Product.Id, scene.Release.Id);
+        var compatibility = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.ReadCompatibilityAsync(nextOwner, scene.Deck.Id, scene.Product.Id, scene.Release.Id));
         Assert.That(compatibility?.Compatible, Is.True);
         Assert.That(compatibility?.AvailableStorageBytes, Is.EqualTo(4 * 1024 * 1024), "Reinstall consumes its own retained-image reservation atomically.");
-        Assert.That(await _marketplace.ResolveInstalledReleaseAsync(nextOwner, scene.Deck.Id, scene.Product.Id, scene.Release.Id), Is.Null);
+        Assert.That(await NCMetaNativeTestTasks.Run(Server, () => _marketplace.ResolveInstalledReleaseAsync(nextOwner, scene.Deck.Id, scene.Product.Id, scene.Release.Id)), Is.Null);
         await Server.WaitPost(() => { SComp<NCMetaHostComponent>(scene.Service).Disabled = true; _devices.TryInvalidate(scene.Service); });
-        Assert.That(await _marketplace.PrepareActivationAsync(nextOwner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, false), Is.Null);
-        var activation = await _marketplace.PrepareActivationAsync(nextOwner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, true);
+        Assert.That(await NCMetaNativeTestTasks.Run(Server, () => _marketplace.PrepareActivationAsync(nextOwner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, false)), Is.Null);
+        var activation = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.PrepareActivationAsync(nextOwner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, true));
         Assert.That(activation, Is.Not.Null);
         Assert.That(activation!.RequiredInheritedInstallationId, Is.EqualTo(previousInstallation.Id));
         var nextLicense = JsonSerializer.Deserialize<MetaSoftwareLicense>(activation.ActivationWrite!.SnapshotPayload)!;
@@ -668,8 +706,8 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         Assert.That(release.Status, Is.EqualTo(NCPersistentMutationStatus.Applied));
         Assert.That(MetaSoftwarePolicy.CanTransferWithDevice(released, scene.Deck.Id), Is.True);
         var nextOwner = NCPartyRef.ForCharacter(new NCCharacterId(747)).ToString();
-        var preparation = await _marketplace.PrepareDeviceTransferAsync(scene.Deck.Id, scene.Owner, nextOwner,
-            scene.Deck.AuthorityEpoch, Guid.NewGuid());
+        var preparation = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.PrepareDeviceTransferAsync(scene.Deck.Id, scene.Owner, nextOwner,
+            scene.Deck.AuthorityEpoch, Guid.NewGuid()));
         Assert.That(preparation, Is.Not.Null);
         Assert.That(preparation!.TransferredLicenses, Does.Contain(license.Id));
         Assert.That(preparation.PreserveInstallationIds, Is.Empty);
@@ -711,7 +749,7 @@ public sealed partial class NCMetaSoftwareCopyTest : GameTest
         Assert.That(proof.Images.Single().ActivatedAtTicks, Is.Null);
         Assert.That(await _persistence.HasInheritedImageAsync(scene.Deck.Id, nextOwner, image.Id, image.Active.Id, image.Active.Digest), Is.True);
         await Server.WaitPost(() => { SComp<NCMetaHostComponent>(scene.Service).Disabled = true; _devices.TryInvalidate(scene.Service); });
-        Assert.That(await _marketplace.PrepareActivationAsync(nextOwner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, true), Is.Null,
+        Assert.That(await NCMetaNativeTestTasks.Run(Server, () => _marketplace.PrepareActivationAsync(nextOwner, scene.Deck.Id, scene.Product.Id, scene.Release.Id, true)), Is.Null,
             "The bytes and bound commercial rights survive, but a released activation cannot be reconstructed offline.");
     }
 }

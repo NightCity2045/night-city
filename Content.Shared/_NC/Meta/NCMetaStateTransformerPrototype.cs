@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
-using Content.Meta.Persistence;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._NC.Meta;
@@ -20,8 +19,11 @@ public sealed partial class NCMetaStateTransformerPrototype : IPrototype
 [DataDefinition]
 public sealed partial class NCMetaStateTransformStep
 {
-    [DataField(required: true)] public MetaStateTransformKind Kind;
+    [DataField(required: true)] public NCMetaStateTransformKind Kind;
     [DataField(required: true)] public string Path = string.Empty;
     [DataField] public string Target = string.Empty;
     [DataField] public string Text = string.Empty;
 }
+
+// The shared prototype carries configuration only; executing transformations belongs to the server.
+public enum NCMetaStateTransformKind : byte { Rename, Delete, SetDefault }

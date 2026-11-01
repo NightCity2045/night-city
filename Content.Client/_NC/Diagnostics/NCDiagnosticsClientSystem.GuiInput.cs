@@ -13,6 +13,7 @@ using Content.Client._NC.Meta.UI;
 using Content.Meta.Hosting;
 using NightCity.Diagnostics.Contracts;
 using Robust.Client.UserInterface;
+using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Maths;
 
 namespace Content.Client._NC.Diagnostics;
@@ -22,6 +23,7 @@ public sealed partial class NCDiagnosticsClientSystem
     private sealed record EditorInput(string Op, string Text = "", int StartRunes = 0, int LengthRunes = 0, Guid Lease = default, Guid Nonce = default);
     private sealed record ClipboardInput(string Op, string Text = "", Guid Nonce = default);
     private sealed record ResizeInput(int Width = 0, int Height = 0, bool Restore = false);
+    private sealed record ScrollInput(int X = 0, int Y = 0);
     private sealed class ClipboardLease(Guid id, long world, FileStream exclusive, string seed, TimeSpan expires)
     {
         public readonly Guid Id = id;
@@ -80,6 +82,19 @@ public sealed partial class NCDiagnosticsClientSystem
             lease.Phase != "seeded" || _timing.RealTime >= lease.Expires)
             throw new DiagnosticException("stale_clipboard_lease", "A current seeded clipboard test lease is required.");
         return lease;
+    }
+    private JsonObject InteractScroll(Control control, JsonObject arguments)
+    {
+        RequireGuiInput(control);
+        if (control is not ScrollContainer scroll)
+            throw new DiagnosticException("unsupported_control", "Scrolling requires an observed scroll container.");
+        var input = ParseGuiInput<ScrollInput>(arguments);
+        if (input.X is < -512 or > 512 || input.Y is < -512 or > 512 || input is { X: 0, Y: 0 })
+            throw new DiagnosticException("invalid_arguments", "Scroll deltas must be nonzero and bounded to 512 UI units per axis.");
+        scroll.HScrollTarget += input.X;
+        scroll.VScrollTarget += input.Y;
+        return new JsonObject { ["submitted"] = true, ["outcomeConfirmed"] = false, ["frame"] = _frame,
+            ["executionPath"] = "public-ui-control-api" };
     }
     private JsonObject InteractEditor(Control control, JsonObject arguments)
     {

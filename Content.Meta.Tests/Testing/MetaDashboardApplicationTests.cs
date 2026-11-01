@@ -16,7 +16,7 @@ public sealed class MetaDashboardApplicationTests
         get
         {
             var folder = new DirectoryInfo(TestContext.CurrentContext.TestDirectory);
-            while (folder != null && !Directory.Exists(Path.Combine(folder.FullName, "Resources", "Meta", "Dashboard"))) folder = folder.Parent;
+            while (folder != null && !Directory.Exists(Path.Combine(folder.FullName, "Content.Meta.Tests", "Fixtures", "Meta", "Dashboard"))) folder = folder.Parent;
             return folder!.FullName;
         }
     }
@@ -31,7 +31,7 @@ public sealed class MetaDashboardApplicationTests
     [TestCase("ru-RU", "Скорость:")]
     public void NativeTelemetryUpdatesARealPublicAppViewAndStaleSamplesDisappear(string locale, string speedLabel)
     {
-        var path = Path.Combine(Root, "Resources", "Meta", "Dashboard");
+        var path = Path.Combine(Root, "Content.Meta.Tests", "Fixtures", "Meta", "Dashboard");
         var request = new MetaCompilationRequest([new("main.meta", File.ReadAllText(Path.Combine(path, "main.meta")))], "examples.dashboard");
         var compiler = new MetaCompiler(); var compiled = compiler.Compile(request);
         Assert.That(compiled.Success, Is.True, string.Join(',', compiled.Diagnostics.Select(d => d.Code + ":" + string.Join(',', d.Arguments))));

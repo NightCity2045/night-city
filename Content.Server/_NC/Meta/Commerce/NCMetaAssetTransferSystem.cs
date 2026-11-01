@@ -12,7 +12,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Server._NC.Meta.Commerce;
 
 /// <summary>Joins physical item custody and WithDevice licenses in the existing economy transaction.</summary>
-public sealed class NCMetaAssetTransferSystem : EntitySystem, INCItemOwnershipParticipant
+public sealed partial class NCMetaAssetTransferSystem : EntitySystem, INCItemOwnershipParticipant
 {
     [Dependency] private NCEconomicAssetRegistrySystem _assets = default!;
     [Dependency] private NCMetaMarketplaceSystem _marketplace = default!;
@@ -22,7 +22,7 @@ public sealed class NCMetaAssetTransferSystem : EntitySystem, INCItemOwnershipPa
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private ITaskManager _tasks = default!;
 
-    public string Name => "meta-device-software";
+    public new string Name => "meta-device-software";
 
     public override void Initialize()
     {

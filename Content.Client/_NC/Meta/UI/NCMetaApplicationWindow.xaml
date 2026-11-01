@@ -4,12 +4,8 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
 <controls:FancyWindow xmlns="https://spacestation14.io"
     xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:meta="clr-namespace:Content.Client._NC.Meta.UI"
     x:Class="Content.Client._NC.Meta.UI.NCMetaApplicationWindow"
     Title="{Loc 'nc-meta-application-title'}" MinWidth="320" MinHeight="240" SetWidth="640" SetHeight="480">
-    <BoxContainer Orientation="Vertical" Margin="8" SeparationOverride="6">
-        <Label Name="Notice" ClipText="True" />
-        <ScrollContainer VerticalExpand="True" HorizontalExpand="True">
-            <BoxContainer Name="ViewHost" Orientation="Vertical" HorizontalExpand="True" />
-        </ScrollContainer>
-    </BoxContainer>
+    <meta:NCMetaApplicationView Name="ApplicationView" Access="Public" Margin="8" />
 </controls:FancyWindow>

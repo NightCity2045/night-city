@@ -13,6 +13,12 @@ namespace Content.Shared._NC.Configuration;
 [CVarDefs]
 public sealed class NCGraphicsCVars : CVars
 {
+    public static readonly CVarDef<bool> CelShading =
+        CVarDef.Create("graphics.cel_shading", true, CVar.CLIENTONLY | CVar.ARCHIVE);
+
+    public static readonly CVarDef<float> CelShadingStrength =
+        CVarDef.Create("graphics.cel_shading_strength", 0.8f, CVar.CLIENTONLY | CVar.ARCHIVE);
+
     public static readonly CVarDef<float> FilmGrainStrength =
         CVarDef.Create("graphics.film_grain_strength", 60f, CVar.CLIENTONLY | CVar.ARCHIVE);
 

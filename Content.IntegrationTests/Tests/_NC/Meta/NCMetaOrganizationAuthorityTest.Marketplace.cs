@@ -104,7 +104,7 @@ public sealed partial class NCMetaOrganizationAuthorityTest
             employee = SProtoMan.EnumeratePrototypes<JobPrototype>().Select(value => new ProtoId<JobPrototype>(value.ID))
                 .First(value => !department.NCPersonnelManagers.Contains(value));
             organization = NCPersistentIdentity.Organization(department.ID);
-            Server.System<SharedMapSystem>().CreateMap(out var map);
+            SetBreathableMap(Server.System<SharedMapSystem>().CreateMap(out var map));
             user = SEntMan.SpawnEntity("MobHuman", new MapCoordinates(Vector2.Zero, map));
             terminal = SEntMan.SpawnEntity("NCMetaIntegrationOrgMarketTerminal", new MapCoordinates(Vector2.Zero, map));
             target = SEntMan.SpawnEntity("NCMetaIntegrationOrgMarketTerminal", new MapCoordinates(Vector2.UnitY, map));
@@ -182,9 +182,11 @@ public sealed partial class NCMetaOrganizationAuthorityTest
             "{}", Guid.NewGuid(), null, epoch, time, [])));
         Assert.That(seeded.Status, Is.EqualTo(NCPersistentMutationStatus.Applied));
         var credit = Guid.NewGuid();
-        Assert.That((await Native(() => finance.AdjustWithIssuanceAsync(new(credit,
+        var credited = await Native(() => finance.AdjustWithIssuanceAsync(new(credit,
             NCPersistentIdentity.Transaction("meta", "org-market-credit", credit.ToString("D")), organization, 1000,
-            NCLedgerTransactionKind.Adjustment, "Native authority test", organization, credit)))).Status, Is.EqualTo(NCEconomyMutationStatus.Applied));
+            NCLedgerTransactionKind.Adjustment, "Native authority test", organization, credit)));
+        var creditClock = credited.Status == NCEconomyMutationStatus.Applied ? "" : await CaptureClockFailureAsync();
+        Assert.That(credited.Status, Is.EqualTo(NCEconomyMutationStatus.Applied), $"{credited.Error}; {creditClock}");
         Assert.That((await Native(() => finance.EnsurePrimaryAccountAsync(actor, "native.org-market-test"))).IsResolved, Is.True);
         var payer = (await Native(() => finance.GetPrimaryAccountAsync(organization, true)))!;
         var payee = (await Native(() => finance.GetPrimaryAccountAsync(actor, true)))!;
@@ -224,15 +226,23 @@ public sealed partial class NCMetaOrganizationAuthorityTest
                 Assert.That(await Native(() => persistence.ReadSnapshotAsync("meta.software.license", NCMetaPersistenceSystem.StableGuid("software-copy-license:" + purchaseRequest).ToString("D"))), Is.Null);
                 Assert.That(await Native(() => persistence.ReadReservedSoftwareCopyBytesAsync(targetEntry.Id, organization.ToString())), Is.Zero);
                 Assert.That((await Native(() => persistence.ReadSoftwareStorageUsageAsync(targetEntry.Id, organization.ToString())))!.Revision, Is.EqualTo(before!.Revision));
-                Assert.That(await Native(() => database.GetNCPersistentCommandResultAsync(purchaseRequest)), Is.Null);
+                var copyReceipt = await Native(() => database.GetNCPersistentCommandResultAsync(purchaseRequest));
+                Assert.That(copyReceipt, Is.Not.Null);
+                Assert.That(copyReceipt!.Status, Is.EqualTo(NCPersistentMutationStatus.DuplicateFailed));
+                Assert.That(copyReceipt.CommandType, Is.EqualTo("meta.software.copy"));
+                Assert.That(copyReceipt.ScopeId, Is.EqualTo(organization.ToString()));
                 Assert.That((await Native(() => finance.GetPrimaryAccountAsync(organization, true)))!.Snapshot.Balance, Is.EqualTo(payer.Snapshot.Balance));
             }
             finally { await Native(async () => { await marketplace.ClearIsolatedBeforeCommitAsync(purchaseRequest); return true; }); }
             return;
         }
-        var quoted = await Native(() => marketplace.TryQuoteAsync(terminal, user, Guid.NewGuid(), product.Id, 1, release.Id,
+        var quoteRequest = Guid.NewGuid();
+        var quoted = await Native(() => marketplace.TryQuoteAsync(terminal, user, quoteRequest, product.Id, 1, release.Id,
             organization.ToString(), MetaLicenseScope.Organization, 2, [targetEntry.Id]));
-        Assert.That(quoted.Success, Is.True, quoted.MessageKey);
+        var quoteFailure = quoted.Success ? null : await Native(() => database.GetNCPersistentCommandResultAsync(
+            NCPersistentIdentity.Command("meta", "software-quote", actor + ":" + quoteRequest)));
+        var quoteClock = quoted.Success ? "" : await CaptureClockFailureAsync();
+        Assert.That(quoted.Success, Is.True, $"{quoted.MessageKey}; {quoteFailure?.Status}: {quoteFailure?.Error}; {quoteClock}");
         var quote = quoted.Quote!;
         var licenseId = NCMetaPersistenceSystem.StableGuid("software-license:" + quote.Id);
         var poolBefore = await Native(() => persistence.ReadSnapshotAsync("meta.quote-pool", "software"));
@@ -272,7 +282,14 @@ public sealed partial class NCMetaOrganizationAuthorityTest
             if (!restoreBeforeCommit)
                 Assert.That(await Native(() => database.SetNCCharacterEmploymentAsync(ServerSession!.UserId, character.Value, manager)), Is.True);
             Assert.That(await Native(() => authority.CaptureManagementAsync(user, organization.ToString())), Is.Not.Null);
-            var accepted = await Native(() => marketplace.TryPurchaseAsync(terminal, user, purchaseRequest, quote.Id));
+            var failedCommand = NCPersistentIdentity.Command("meta", "software-purchase", actor + ":" + purchaseRequest);
+            var rejectedReceipt = await Native(() => database.GetNCPersistentCommandResultAsync(failedCommand));
+            Assert.That(rejectedReceipt, Is.Not.Null);
+            Assert.That(rejectedReceipt!.Status, Is.EqualTo(NCPersistentMutationStatus.DuplicateFailed));
+            Assert.That((await Native(() => marketplace.TryPurchaseAsync(terminal, user, purchaseRequest, quote.Id))).Success, Is.False,
+                "A terminal denial must remain denied when its command is replayed.");
+            var acceptedRequest = Guid.NewGuid();
+            var accepted = await Native(() => marketplace.TryPurchaseAsync(terminal, user, acceptedRequest, quote.Id));
             Assert.That(accepted.Success, Is.True, accepted.MessageKey);
             Assert.That(accepted.License!.Id, Is.EqualTo(licenseId));
             Assert.That((await Native(() => finance.GetPrimaryAccountAsync(organization, true)))!.Snapshot.Balance, Is.EqualTo(payer.Snapshot.Balance - quote.Price));
@@ -280,7 +297,7 @@ public sealed partial class NCMetaOrganizationAuthorityTest
             Assert.That((await Native(() => marketplace.TryReleaseSeatAsync(terminal, user, releaseRequest, licenseId, targetEntry.Id))).Success, Is.True);
             var committedLicense = await Native(() => persistence.ReadSnapshotAsync("meta.software.license", licenseId.ToString("D")));
             Assert.That(await Native(() => database.SetNCCharacterEmploymentAsync(ServerSession!.UserId, character.Value, employee)), Is.True);
-            var historical = await Native(() => marketplace.TryPurchaseAsync(terminal, user, purchaseRequest, quote.Id));
+            var historical = await Native(() => marketplace.TryPurchaseAsync(terminal, user, acceptedRequest, quote.Id));
             var released = await Native(() => marketplace.TryReleaseSeatAsync(terminal, user, releaseRequest, licenseId, targetEntry.Id));
             Assert.Multiple(() =>
             {

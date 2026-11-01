@@ -15,6 +15,7 @@ using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.Meta.Devices;
 using Content.Server._NC.Meta.Persistence;
 using Content.Server._NC.Meta.Authority;
+using Content.Server._NC.Meta.Commerce;
 using Content.Server._NC.Meta.Runtime;
 using Content.Shared._NC.LivingCity.Economy;
 using Content.Shared._NC.Meta;
@@ -49,6 +50,7 @@ public sealed partial class NCMetaHostingSystem : EntitySystem
     [Dependency] private NCMetaRuntimeSystem _runtime = default!;
     [Dependency] private NCMetaPersistenceSystem _persistence = default!;
     [Dependency] private NCMetaAuthoritySystem _authority = default!;
+    [Dependency] private NCMetaMarketplaceSystem _marketplace = default!;
     [Dependency] private NCEntityPartyResolverSystem _parties = default!;
     [Dependency] private SharedUserInterfaceSystem _ui = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
@@ -101,7 +103,7 @@ public sealed partial class NCMetaHostingSystem : EntitySystem
             !_authority.TryGetManagementProof(user, device.Owner, out var management) ||
             !(runtimeGeneration == Guid.Empty ? _applications.TryGetRegistration(host, out var registration) :
                 _applications.TryGetRegistration(host, runtimeGeneration, out registration)) || !registration.Application.Views.ContainsKey(view) ||
-            !TryComp<NCMetaPortComponent>(host, out var port) || port.NetworkId != "CITYNET" ||
+            !_marketplace.HasCitiNetRoute(host) ||
             !_persistence.TryCaptureTime(out var epoch, out var time))
             return Failure("nc-meta-hosting-access");
         var owner = device.Owner;
@@ -116,7 +118,7 @@ public sealed partial class NCMetaHostingSystem : EntitySystem
         var authority = await Main(() => _authority.IsCurrent(management) && _devices.CanManage(host, user) &&
             _devices.TryGetEntry(host, out var currentDevice) && currentDevice.Id == hostId && currentDevice.Owner == owner &&
             currentDevice.DeviceEpoch == device.DeviceEpoch && currentDevice.AuthorityEpoch == device.AuthorityEpoch &&
-            TryComp<NCMetaPortComponent>(host, out var currentPort) && currentPort.NetworkId == "CITYNET" &&
+            _marketplace.HasCitiNetRoute(host) &&
             _applications.TryGetRegistration(host, generation, out var app) &&
             _persistence.TryCaptureTime(out var freshEpoch, out _) && freshEpoch == epoch ? _authority.CaptureWriteConstraints(management, host) : null);
         if (authority == null)

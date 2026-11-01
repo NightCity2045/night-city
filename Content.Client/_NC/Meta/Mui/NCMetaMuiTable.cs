@@ -3,8 +3,11 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Linq;
-using System.Text.Json.Nodes;
-using Content.Meta.Mui;
+using JsonNode = Content.Shared._NC.Meta.UI.NCMetaUiValue;
+using JsonArray = Content.Shared._NC.Meta.UI.NCMetaUiArray;
+using JsonObject = Content.Shared._NC.Meta.UI.NCMetaUiObject;
+using JsonValue = Content.Shared._NC.Meta.UI.NCMetaUiScalar;
+using MuiLimits = Content.Client._NC.Meta.Mui.NCMetaMuiValues;
 using Robust.Client.UserInterface.Controls;
 
 namespace Content.Client._NC.Meta.Mui;

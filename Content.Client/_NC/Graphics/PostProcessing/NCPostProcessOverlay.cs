@@ -8,14 +8,16 @@ using Content.Shared._NC.Configuration;
 using Robust.Client.Graphics;
 using Robust.Shared.Configuration;
 using Robust.Shared.Enums;
+using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
+using Robust.Shared.Map.Components;
 using Robust.Shared.Maths;
 using Robust.Shared.Prototypes;
 
 namespace Content.Client._NC.Graphics.PostProcessing;
 
 /// <summary>
-/// Applies the Night City color grade, bloom, vignette, and film grain to the rendered world.
+/// Applies light-driven cel shading, color grading, bloom, vignette, and film grain to the world.
 /// </summary>
 public sealed class NCPostProcessOverlay : Overlay
 {
@@ -27,10 +29,14 @@ public sealed class NCPostProcessOverlay : Overlay
 
     private readonly IClyde _clyde;
     private readonly IConfigurationManager _configuration;
+    private readonly ILightManager _lights;
+    private readonly IEntityManager _entities;
     private readonly ShaderInstance _thresholdShader;
     private readonly ShaderInstance _postProcessShader;
     private readonly OverlayResourceCache<CachedResources> _resources = new();
 
+    private bool _celShadingEnabled;
+    private float _celShadingStrength;
     private bool _bloomEnabled;
     private int _bloomIntensity;
     private float _bloomThreshold;
@@ -46,15 +52,21 @@ public sealed class NCPostProcessOverlay : Overlay
     public NCPostProcessOverlay(
         IClyde clyde,
         IConfigurationManager configuration,
-        IPrototypeManager prototypes)
+        IPrototypeManager prototypes,
+        ILightManager lights,
+        IEntityManager entities)
     {
         _clyde = clyde;
         _configuration = configuration;
+        _lights = lights;
+        _entities = entities;
         _thresholdShader = prototypes.Index(ThresholdShader).InstanceUnique();
         _postProcessShader = prototypes.Index(PostProcessShader).InstanceUnique();
         ZIndex = PostProcessZIndex;
 
         // Cache archived settings so the render hot path does not perform repeated CVar lookups.
+        _configuration.OnValueChanged(NCGraphicsCVars.CelShading, OnCelShadingChanged, true);
+        _configuration.OnValueChanged(NCGraphicsCVars.CelShadingStrength, OnCelShadingStrengthChanged, true);
         _configuration.OnValueChanged(NCGraphicsCVars.Bloom, OnBloomChanged, true);
         _configuration.OnValueChanged(NCGraphicsCVars.BloomIntensity, OnBloomIntensityChanged, true);
         _configuration.OnValueChanged(NCGraphicsCVars.BloomThreshold, OnBloomThresholdChanged, true);
@@ -119,6 +131,17 @@ public sealed class NCPostProcessOverlay : Overlay
         }
 
         _postProcessShader.SetParameter("SCREEN_TEXTURE", screenTexture);
+        _postProcessShader.SetParameter("celEnabled", _celShadingEnabled);
+        _postProcessShader.SetParameter("celStrength", _celShadingStrength);
+        // WorldSpace overlays run after Clyde unbinds lighting. Bind the viewport's actual
+        // light buffer explicitly, and never sample a stale buffer in unlit/debug views.
+        var celLighting = _celShadingEnabled && _celShadingStrength > 0f &&
+            _lights.Enabled && _lights.DrawLighting && eye.DrawLight &&
+            _entities.TryGetComponent<MapComponent>(args.MapUid, out var map) && map.LightingEnabled;
+        _postProcessShader.SetParameter("celLighting", celLighting);
+        if (celLighting)
+            _postProcessShader.SetParameter("LIGHT_TEXTURE", viewport.LightRenderTarget.Texture);
+
         _postProcessShader.SetParameter("bloomEnabled", _bloomEnabled);
         if (_bloomEnabled && resources.BloomTarget != null)
         {
@@ -146,6 +169,8 @@ public sealed class NCPostProcessOverlay : Overlay
 
     protected override void DisposeBehavior()
     {
+        _configuration.UnsubValueChanged(NCGraphicsCVars.CelShading, OnCelShadingChanged);
+        _configuration.UnsubValueChanged(NCGraphicsCVars.CelShadingStrength, OnCelShadingStrengthChanged);
         _configuration.UnsubValueChanged(NCGraphicsCVars.Bloom, OnBloomChanged);
         _configuration.UnsubValueChanged(NCGraphicsCVars.BloomIntensity, OnBloomIntensityChanged);
         _configuration.UnsubValueChanged(NCGraphicsCVars.BloomThreshold, OnBloomThresholdChanged);
@@ -173,6 +198,16 @@ public sealed class NCPostProcessOverlay : Overlay
             size,
             new RenderTargetFormatParameters(RenderTargetColorFormat.Rgba8Srgb),
             name: "nc-post-process-bloom-blur");
+    }
+
+    private void OnCelShadingChanged(bool value)
+    {
+        _celShadingEnabled = value;
+    }
+
+    private void OnCelShadingStrengthChanged(float value)
+    {
+        _celShadingStrength = float.IsFinite(value) ? Math.Clamp(value, 0f, 1f) : 0.8f;
     }
 
     private void OnBloomChanged(bool value)

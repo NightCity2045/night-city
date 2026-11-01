@@ -28,6 +28,7 @@ public sealed partial class NCDiagnosticsClientSystem
             "move_left" => EngineKeyFunctions.MoveLeft,
             "move_right" => EngineKeyFunctions.MoveRight,
             "use" => EngineKeyFunctions.Use,
+            "context_menu" => EngineKeyFunctions.UseSecondary,
             "activate_in_hand" => ContentKeyFunctions.UseItemInHand,
             "drop" => ContentKeyFunctions.Drop,
             "swap_hands" => ContentKeyFunctions.SwapHands,
@@ -65,7 +66,7 @@ public sealed partial class NCDiagnosticsClientSystem
         var coordinates = _transforms.ToCoordinates(actor, _transforms.GetMapCoordinates(uid));
         var message = new ClientFullInputCmdMessage(_timing.CurTick, _timing.TickFraction,
             _inputManager.NetworkBindMap.KeyFunctionID(function), coordinates,
-            new ScreenCoordinates(0, 0, default), state, uid);
+            _graphics ? _inputManager.MouseScreenPosition : new ScreenCoordinates(0, 0, default), state, uid);
         _input.HandleInputCommand(_players.LocalSession, function, message);
     }
 

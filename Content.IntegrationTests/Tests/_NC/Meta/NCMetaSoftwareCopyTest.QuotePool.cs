@@ -38,6 +38,8 @@ public sealed partial class NCMetaSoftwareCopyTest
         Assert.That(NCPartyRef.TryParse(scene.SourceOwner, out var seller), Is.True);
         var finance = Server.System<NCPartyFinanceAdapterSystem>();
         var ledger = Server.System<NCEconomyLedgerSystem>();
+        if (paid)
+            Assert.That((await Native(() => finance.EnsurePrimaryAccountAsync(seller, "native.quote-publisher"))).IsResolved, Is.True);
         var credit = Guid.NewGuid();
         Assert.That((await Native(() => finance.AdjustWithIssuanceAsync(new(credit,
             NCPersistentIdentity.Transaction("meta", "quote-test-credit", credit.ToString("D")), buyer, 1000,

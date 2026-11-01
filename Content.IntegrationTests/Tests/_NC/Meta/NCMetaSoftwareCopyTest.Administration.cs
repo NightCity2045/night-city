@@ -30,7 +30,7 @@ public sealed partial class NCMetaSoftwareCopyTest
         installation = (await _persistence.ReadInstallationsAsync(scene.Deck.Id, scene.Owner)).Single();
         var approved = await ApproveServiceAsync(scene, installation, scene.Artifact, scene.Deck.Entity, scene.Actor);
         installation = approved.Installation;
-        var authorization = await _marketplace.ResolveRunAuthorizationAsync(scene.Owner, scene.Deck.Id, installation.Active);
+        var authorization = await NCMetaNativeTestTasks.Run(Server, () => _marketplace.ResolveRunAuthorizationAsync(scene.Owner, scene.Deck.Id, installation.Active));
         Assert.That(authorization, Is.Not.Null);
         var system = Server.System<NCMetaRuntimeSystem>();
         NCMetaRuntimeInstance runtime = null!;
@@ -61,7 +61,7 @@ public sealed partial class NCMetaSoftwareCopyTest
                 Assert.That(system.GetAdministrativeSnapshot().Audit.Length, Is.LessThanOrEqualTo(128));
                 Assert.That(system.GetAdministrativeSnapshot().Audit.Any(value => value.Generation == runtime.Generation && value.Phase == NCMetaAuditPhase.Stopped), Is.True);
                 // This is the real domain system, with no META adapter or automatic control.
-                var door = SEntMan.SpawnEntity("Door", new EntityCoordinates(scene.Deck.Entity, new System.Numerics.Vector2(2, 0)));
+                var door = SEntMan.SpawnEntity("WoodDoor", SComp<TransformComponent>(scene.Deck.Entity).Coordinates.Offset(new System.Numerics.Vector2(2, 0)));
                 var nativeDoor = SComp<DoorComponent>(door);
                 Assert.That(Server.System<SharedDoorSystem>().TryOpen(door, nativeDoor, quiet: true), Is.True);
             });
@@ -74,6 +74,9 @@ public sealed partial class NCMetaSoftwareCopyTest
                 configuration.SetCVar(NCMetaCVars.Enabled, previousEnabled);
             });
         }
+
+        // Preserve synchronization errors instead of losing them in the base teardown.
+        await Pair.RunUntilSynced();
     }
 
     [TestCase(0)]
@@ -90,8 +93,8 @@ public sealed partial class NCMetaSoftwareCopyTest
         var calls = 0;
         var authority = Server.System<NCMetaAuthoritySystem>();
         var request = Guid.NewGuid();
-        var outcome = await authority.TryAdministrativeRevokeAsync(request, installation.Id, "integration-native-admin",
-            "authority regression", () => ++calls <= authorizedChecks);
+        var outcome = await NCMetaNativeTestTasks.Run(Server, () => authority.TryAdministrativeRevokeAsync(request, installation.Id, "integration-native-admin",
+            "authority regression", () => ++calls <= authorizedChecks));
         var current = await _persistence.ReadServiceGrantPolicyAsync(installation.Id);
         Assert.That(current!.Issuer, Is.EqualTo(previous!.Issuer));
         Assert.That(current.Revoked, Is.EqualTo(authorizedChecks == 2));
@@ -102,9 +105,9 @@ public sealed partial class NCMetaSoftwareCopyTest
             Assert.That(await _database.GetNCPersistentCommandResultAsync(request), Is.Null);
             return;
         }
-        Assert.That(await authority.ResolveServiceAdmissionAsync(approved.Installation, scene.Artifact, true), Is.Null);
-        var replay = await authority.TryAdministrativeRevokeAsync(request, installation.Id, "integration-native-admin",
-            "authority regression", () => true);
+        Assert.That(await NCMetaNativeTestTasks.Run(Server, () => authority.ResolveServiceAdmissionAsync(approved.Installation, scene.Artifact, true)), Is.Null);
+        var replay = await NCMetaNativeTestTasks.Run(Server, () => authority.TryAdministrativeRevokeAsync(request, installation.Id, "integration-native-admin",
+            "authority regression", () => true));
         Assert.That(replay, Is.EqualTo(outcome));
         var receipt = await _database.GetNCPersistentCommandResultAsync(request);
         Assert.That(receipt!.ScopeType, Is.EqualTo("meta.admin"));
