@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+- type: entity
+  parent: BaseItem
+  id: NCMetaDataCartridge
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/module.rsi
+    state: generic
+  - type: NCMetaDevice
+    allowClaim: true
+  - type: NCMetaRemovableMedia

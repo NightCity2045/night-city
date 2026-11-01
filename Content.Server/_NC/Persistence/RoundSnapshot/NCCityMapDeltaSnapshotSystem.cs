@@ -33,6 +33,7 @@ namespace Content.Server._NC.Persistence.RoundSnapshot;
 /// </summary>
 public sealed partial class NCCityMapDeltaSnapshotSystem : EntitySystem
 {
+    [Dependency] private Content.Server._NC.Medical.Cyberware.NCCyberwareSystem _cyberwareWorld = default!;
     private const string SectionType = "city-map-delta";
     private const string OwnerType = "world";
     private const string OwnerId = "city";
@@ -50,6 +51,7 @@ public sealed partial class NCCityMapDeltaSnapshotSystem : EntitySystem
     [Dependency] private NCMapCoordinatesSystem _coordinates = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private TagSystem _tags = default!;
+    [Dependency] private NCRoundRestoreContextSystem _restore = default!;
 
     private readonly List<EntityUid> _roots = [];
     private bool _serializing;
@@ -76,10 +78,10 @@ public sealed partial class NCCityMapDeltaSnapshotSystem : EntitySystem
         IReadOnlyList<NCRoundSnapshotSectionData> sections;
         try
         {
-            var manifestTask = _database.GetLatestCommittedNCRoundSnapshotAsync();
-            var sectionsTask = _database.GetLatestNCRoundSnapshotSectionsAsync(SectionType, OwnerType, OwnerId);
-            _tasks.BlockWaitOnTask(Task.WhenAll(manifestTask, sectionsTask));
-            manifest = manifestTask.GetAwaiter().GetResult();
+            manifest = _restore.Manifest;
+            if (manifest == null) return;
+            var sectionsTask = _database.GetNCRoundSnapshotSectionsAsync(manifest.SnapshotId, SectionType, OwnerType, OwnerId);
+            _tasks.BlockWaitOnTask(sectionsTask);
             sections = sectionsTask.GetAwaiter().GetResult();
         }
         catch (Exception exception)
@@ -214,7 +216,7 @@ public sealed partial class NCCityMapDeltaSnapshotSystem : EntitySystem
             using var reader = new StringReader(entry.EntityYaml);
             if (!_loader.TryLoadGeneric(reader, "city map delta", out var result, MapLoadOptions.Default) ||
                 result.Maps.Count != 0 || result.Grids.Count != 0 || result.Orphans.Count != 1 ||
-                result.RootNodes.Count != 1)
+                result.RootNodes.Count != 1 || !_cyberwareWorld.CanUseRestoredWorldTree(result.Orphans.Single()))
             {
                 DeleteLoaded(result?.RootNodes ?? []);
                 DeleteLoaded(loaded.Select(value => value.Root));

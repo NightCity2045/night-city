@@ -1,0 +1,21 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework><LangVersion>14</LangVersion><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings>
+    <IsTestProject>true</IsTestProject><ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="NUnit" /><PackageReference Include="NUnit3TestAdapter" /><PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <!-- Compile the real content packager sources against existing public engine APIs; never build the game graph. -->
+    <Compile Include="../../../../Content.Packaging/ServerPackaging.cs" Link="ServerPackaging.cs" />
+    <Compile Include="../../../../Content.Packaging/ClientPackaging.cs" Link="ClientPackaging.cs" />
+    <Compile Include="../../../../Content.Packaging/SharedPackaging.cs" Link="SharedPackaging.cs" />
+    <Compile Include="../../../../Content.Packaging/DepsHandler.cs" Link="DepsHandler.cs" />
+    <Compile Include="../../../../Content.Packaging/_NC/Meta/NCMetaCompilerWorkerPackaging.cs" Link="NCMetaCompilerWorkerPackaging.cs" />
+    <Reference Include="Robust.Packaging"><HintPath>../../../../Content.Packaging/bin/Debug/net10.0/Robust.Packaging.dll</HintPath></Reference>
+    <Reference Include="Robust.Shared"><HintPath>../../../../Content.Packaging/bin/Debug/net10.0/Robust.Shared.dll</HintPath></Reference>
+    <Reference Include="Robust.Shared.Maths"><HintPath>../../../../Content.Packaging/bin/Debug/net10.0/Robust.Shared.Maths.dll</HintPath></Reference>
+    <Reference Include="YamlDotNet"><HintPath>../../../../Content.Packaging/bin/Debug/net10.0/YamlDotNet.dll</HintPath></Reference>
+    <Reference Include="SixLabors.ImageSharp"><HintPath>../../../../Content.Packaging/bin/Debug/net10.0/SixLabors.ImageSharp.dll</HintPath></Reference>
+  </ItemGroup>
+</Project>

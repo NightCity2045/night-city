@@ -14,6 +14,8 @@ namespace Content.Shared._NC.Medical.Pharmacology;
 [Prototype("ncPharmacologyProfile")]
 public sealed partial class NCPharmacologyProfilePrototype : IPrototype
 {
+    [DataField] public float MaximumHumanityRecoveryPerSecond { get; private set; } = 2f / 60f;
+    [DataField] public float MaximumCrisisSuppressionPerSecond { get; private set; } = 2f;
     [IdDataField]
     public string ID { get; private set; } = default!;
 
@@ -111,6 +113,8 @@ public sealed partial class NCDrugInteractionRule
 [Prototype("ncDrugProfile")]
 public sealed partial class NCDrugProfilePrototype : IPrototype
 {
+    [DataField] public float HumanityRecoveryPerSecondAtTherapeutic { get; private set; }
+    [DataField] public float CrisisSuppressionPerSecondAtTherapeutic { get; private set; }
     [IdDataField]
     public string ID { get; private set; } = default!;
 

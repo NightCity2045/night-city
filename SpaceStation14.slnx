@@ -27,6 +27,9 @@
   <Project Path="Content.Client/Content.Client.csproj" />
   <Project Path="Content.IntegrationTests/Content.IntegrationTests.csproj" />
   <Project Path="Content.MapRenderer/Content.MapRenderer.csproj" />
+  <Project Path="Content.Meta/Content.Meta.csproj" />
+  <Project Path="Content.Meta.Tests/Content.Meta.Tests.csproj" />
+  <Project Path="Tools/_NC/Meta/CompilerWorker/CompilerWorker.csproj" />
   <Project Path="Content.Packaging/Content.Packaging.csproj" />
   <Project Path="Content.PatreonParser/Content.PatreonParser.csproj">
     <BuildType Solution="DebugOpt|*" Project="Debug" />

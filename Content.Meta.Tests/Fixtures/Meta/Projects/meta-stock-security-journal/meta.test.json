@@ -1,0 +1,68 @@
+{
+  "rootModule": "stock.security",
+  "responses": [
+    {
+      "member": "meta.files.FileStore.readText",
+      "value": "",
+      "pending": true,
+      "completeAfterSlices": 1
+    },
+    {
+      "member": "meta.files.FileStore.writeTextAtomic",
+      "value": null,
+      "pending": true,
+      "completeAfterSlices": 2
+    },
+    {
+      "member": "meta.files.FileStore.writeTextAtomic",
+      "value": null,
+      "pending": true,
+      "completeAfterSlices": 2
+    }
+  ],
+  "events": [
+    {
+      "slot": "owned-camera",
+      "event": "motionDetected",
+      "arguments": [
+        {
+          "confidence": 0.9,
+          "stamp": {
+            "epoch": 1,
+            "sequence": 1,
+            "tick": 60
+          }
+        }
+      ],
+      "sequence": 1
+    },
+    {
+      "slot": "owned-door",
+      "event": "stateChanged",
+      "arguments": [
+        {
+          "desiredOpen": false,
+          "phase": "Closed",
+          "stamp": {
+            "epoch": 1,
+            "sequence": 2,
+            "tick": 120
+          }
+        }
+      ],
+      "sequence": 2,
+      "nowMs": 2000,
+      "tick": 120
+    }
+  ],
+  "expectedLogs": [],
+  "expectedCommands": [
+    "readText(security/log.txt)",
+    "writeTextAtomic(security/log.txt,1: Motion / Движение\n)",
+    "writeTextAtomic(security/log.txt,1: Motion / Движение\n2: Door changed / Дверь изменила состояние\n)"
+  ],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}
+

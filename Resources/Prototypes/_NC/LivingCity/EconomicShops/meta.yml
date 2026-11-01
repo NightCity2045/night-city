@@ -1,0 +1,355 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Existing construction storefronts discover these finite native stock definitions.
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaLoadingWaypoint
+  displayName: ent-NCMetaLoadingWaypoint
+  stableKey: meta.loading-waypoint
+  materializedPrototype: NCMetaLoadingWaypoint
+  basePrice: 25
+  shopInitialQuantity: 4
+
+- type: ncItemDefinition
+  parent: NCShopVehicleDefinitionBase
+  id: NCItemMetaSupra
+  displayName: ent-NCMetaSupraEcu
+  stableKey: meta.supra-ecu
+  materializedPrototype: NCMetaSupraEcu
+  basePrice: 20000
+  shopInitialQuantity: 1
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaCommissioningTool
+  displayName: ent-NCMetaCommissioningTool
+  stableKey: meta.commissioning-tool
+  materializedPrototype: NCMetaCommissioningTool
+  basePrice: 40
+  shopInitialQuantity: 4
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaWaypointA
+  displayName: ent-NCMetaWaypointA
+  stableKey: meta.waypoint-a
+  materializedPrototype: NCMetaWaypointA
+  basePrice: 25
+  shopInitialQuantity: 4
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaWaypointB
+  displayName: ent-NCMetaWaypointB
+  stableKey: meta.waypoint-b
+  materializedPrototype: NCMetaWaypointB
+  basePrice: 25
+  shopInitialQuantity: 4
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaLoadCell
+  displayName: ent-NCMetaLoadCell
+  stableKey: meta.load-cell
+  materializedPrototype: NCMetaLoadCell
+  basePrice: 80
+  shopInitialQuantity: 4
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaCommissioningKit
+  displayName: ent-NCMetaCommissioningKit
+  stableKey: meta.commissioningkit
+  materializedPrototype: NCMetaCommissioningKit
+  basePrice: 450
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaTablet
+  displayName: ent-NCMetaServiceTablet
+  stableKey: meta.tablet
+  materializedPrototype: NCMetaServiceTablet
+  basePrice: 300
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaTerminal
+  displayName: ent-NCMetaTerminalFlatpack
+  stableKey: meta.terminal
+  materializedPrototype: NCMetaTerminalFlatpack
+  basePrice: 350
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaDoor
+  displayName: ent-NCMetaDoorFlatpack
+  stableKey: meta.door
+  materializedPrototype: NCMetaDoorFlatpack
+  basePrice: 250
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaPanel
+  displayName: ent-NCMetaPanelFlatpack
+  stableKey: meta.panel
+  materializedPrototype: NCMetaPanelFlatpack
+  basePrice: 80
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaSensor
+  displayName: ent-NCMetaSensorFlatpack
+  stableKey: meta.sensor
+  materializedPrototype: NCMetaSensorFlatpack
+  basePrice: 80
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaAlarm
+  displayName: ent-NCMetaAlarmFlatpack
+  stableKey: meta.alarm
+  materializedPrototype: NCMetaAlarmFlatpack
+  basePrice: 100
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaCamera
+  displayName: ent-NCMetaCameraFlatpack
+  stableKey: meta.camera
+  materializedPrototype: NCMetaCameraFlatpack
+  basePrice: 120
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaConveyor
+  displayName: ent-NCMetaConveyorFlatpack
+  stableKey: meta.conveyor
+  materializedPrototype: NCMetaConveyorFlatpack
+  basePrice: 350
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaFabricator
+  displayName: ent-NCMetaFabricatorFlatpack
+  stableKey: meta.fabricator
+  materializedPrototype: NCMetaFabricatorFlatpack
+  basePrice: 600
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaGrinder
+  displayName: ent-NCMetaGrinderFlatpack
+  stableKey: meta.grinder
+  materializedPrototype: NCMetaGrinderFlatpack
+  basePrice: 300
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaChemMaster
+  displayName: ent-NCMetaChemMasterFlatpack
+  stableKey: meta.chemmaster
+  materializedPrototype: NCMetaChemMasterFlatpack
+  basePrice: 450
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaNetworkCable
+  displayName: ent-NCMetaNetworkCable
+  stableKey: meta.networkcable
+  materializedPrototype: NCMetaNetworkCable
+  basePrice: 20
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaDeck
+  displayName: ent-NCMetaCyberdeck
+  stableKey: meta.deck
+  materializedPrototype: NCMetaCyberdeck
+  basePrice: 450
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaCargoDrone
+  displayName: ent-NCMetaCargoDrone
+  stableKey: meta.cargodrone
+  materializedPrototype: NCMetaCargoDrone
+  basePrice: 900
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaOptics
+  displayName: ent-NCMetaCyberOptics
+  stableKey: meta.optics
+  materializedPrototype: NCMetaCyberOptics
+  basePrice: 650
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaClinical
+  displayName: ent-NCMetaClinicalController
+  stableKey: meta.clinical
+  materializedPrototype: NCMetaClinicalController
+  basePrice: 700
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaVendor
+  displayName: ent-NCMetaVendorFlatpack
+  stableKey: meta.vendor
+  materializedPrototype: NCMetaVendorFlatpack
+  basePrice: 1200
+  shopInitialQuantity: 2
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaEquippedDrone
+  displayName: ent-NCMetaEquippedDrone
+  stableKey: meta.equippeddrone
+  materializedPrototype: NCMetaEquippedDrone
+  basePrice: 1100
+  shopInitialQuantity: 1
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaScanner
+  displayName: ent-NCMetaBodyScanner
+  stableKey: meta.scanner
+  materializedPrototype: NCMetaBodyScanner
+  basePrice: 450
+  shopInitialQuantity: 1
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaScannerGateway
+  displayName: ent-NCMetaScannerGateway
+  stableKey: meta.scannergateway
+  materializedPrototype: NCMetaScannerGateway
+  basePrice: 600
+  shopInitialQuantity: 1
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaToolHand
+  displayName: ent-NCMetaToolHandImplant
+  stableKey: meta.toolhand
+  materializedPrototype: NCMetaToolHandImplant
+  basePrice: 1000
+  shopInitialQuantity: 1
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaMantisBlade
+  displayName: ent-NCMetaMantisBladeImplant
+  stableKey: meta.mantisblade
+  materializedPrototype: NCMetaMantisBladeImplant
+  basePrice: 1500
+  shopInitialQuantity: 1
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaBiomonitor
+  displayName: ent-NCMetaBiomonitorImplant
+  stableKey: meta.biomonitor
+  materializedPrototype: NCMetaBiomonitorImplant
+  basePrice: 800
+  shopInitialQuantity: 1
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaSandevistan
+  displayName: ent-NCMetaSandevistanImplant
+  stableKey: meta.sandevistan
+  materializedPrototype: NCMetaSandevistanImplant
+  basePrice: 2000
+  shopInitialQuantity: 1
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaKerenzikov
+  displayName: ent-NCMetaKerenzikovImplant
+  stableKey: meta.kerenzikov
+  materializedPrototype: NCMetaKerenzikovImplant
+  basePrice: 1800
+  shopInitialQuantity: 1
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description
+
+- type: ncItemDefinition
+  parent: NCShopConstructionDefinitionBase
+  id: NCItemMetaCitiNetGateway
+  displayName: ent-NCMetaMarketplaceService
+  stableKey: meta.citinetgateway
+  materializedPrototype: NCMetaMarketplaceService
+  basePrice: 800
+  shopInitialQuantity: 1
+  catalogCategory: nc-meta-equipment-category
+  catalogDescription: nc-meta-equipment-description

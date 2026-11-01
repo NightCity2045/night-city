@@ -1,0 +1,7 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<Page id="journal" title="{bind title}">
+  <Column id="layout" gap="8" margin="12"><Header id="title" text="{bind title}"/><Text id="status" text="{bind status}"/>
+    <Button id="refresh" action="refresh" text="{bind refreshLabel}"/><Scroll id="entries"><Text id="report" text="{bind report}"/></Scroll>
+  </Column>
+</Page>
+

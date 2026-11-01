@@ -21,6 +21,8 @@ using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Damage;
 using Content.Shared.FixedPoint;
 using Content.Shared.Item;
+using Content.Shared.Containers.ItemSlots;
+using Content.Shared.Power.EntitySystems;
 using Robust.Shared.ContentPack;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
@@ -32,12 +34,15 @@ namespace Content.IntegrationTests.Tests._NC.Medical;
 [TestOf(typeof(NCCyberwareSystem))]
 public sealed class NCCyberwareSystemTest : GameTest
 {
+    [SidedDependency(Side.Server)] private SharedBatterySystem _battery = default!;
+    [SidedDependency(Side.Server)] private ItemSlotsSystem _powerSlots = default!;
     private static readonly EntProtoId HumanMob = "MobHuman";
 
     [SidedDependency(Side.Server)] private NCAnatomySystem _anatomy = default!;
     [SidedDependency(Side.Server)] private NCCyberwareSystem _cyberware = default!;
     [SidedDependency(Side.Server)] private NCDiagnosticsSystem _diagnostics = default!;
     [SidedDependency(Side.Server)] private NCMedicalPersistenceSystem _persistence = default!;
+    [SidedDependency(Side.Server)] private Content.Server._NC.Medical.Humanity.NCHumanitySystem _humanity = default!;
     [SidedDependency(Side.Server)] private IComponentFactory _components = default!;
     [SidedDependency(Side.Server)] private IPrototypeManager _prototypes = default!;
     [SidedDependency(Side.Server)] private IResourceManager _resources = default!;
@@ -142,16 +147,17 @@ public sealed class NCCyberwareSystemTest : GameTest
     public void EmpAndBodyServiceAreBoundedAndExactlyOnce()
     {
         var body = SSpawn(HumanMob);
+        var cell = NCCyberwareTestPower.Install(SEntMan, _cyberware, _powerSlots, _battery, body);
         var neural = Install(body, "Head", "NCImplantNeuralLinkMk1", "NCSlotNeuralCore", true);
         var pump = Install(body, "Thorax", "NCImplantCirculatoryAssistMk1", "NCSlotThoracicSupport");
         var neuralState = SComp<NCCyberwareComponent>(neural);
         var pumpState = SComp<NCCyberwareComponent>(pump);
-        var powerAtStart = neuralState.CurrentPower;
+        var powerAtStart = _battery.GetCharge(cell);
         Assert.That(_cyberware.TrySetLoad(neural, 1f), Is.True);
-        Assert.That(_cyberware.AdvanceModule(neural, TimeSpan.FromSeconds(10)), Is.True);
+        Assert.That(_cyberware.AdvanceModule(neural, TimeSpan.FromSeconds(10), SGameTiming.CurTime + TimeSpan.FromSeconds(10)), Is.True);
         Assert.Multiple(() =>
         {
-            Assert.That(neuralState.CurrentPower, Is.LessThan(powerAtStart));
+            Assert.That(_battery.GetCharge(cell), Is.LessThan(powerAtStart));
             Assert.That(neuralState.Heat, Is.GreaterThan(0f));
             Assert.That(neuralState.Operational, Is.True);
         });
@@ -183,24 +189,24 @@ public sealed class NCCyberwareSystemTest : GameTest
             Assert.That(pumpState.Heat, Is.EqualTo(pumpHeat));
         });
 
-        var powerBefore = neuralState.CurrentPower;
+        var powerBefore = _battery.GetCharge(cell);
         var integrityBefore = SComp<NCOrganIntegrityComponent>(neural).CurrentIntegrity;
         var empId = NCActionResolutionId.New();
         var emp = new NCCyberwareEmpRequest(empId, body, 2_000f, TimeSpan.FromSeconds(8), 7);
         var appliedEmp = _cyberware.ApplyEmp(emp);
-        var powerAfter = neuralState.CurrentPower;
+        var powerAfter = _battery.GetCharge(cell);
         var integrityAfter = SComp<NCOrganIntegrityComponent>(neural).CurrentIntegrity;
         var duplicateEmp = _cyberware.ApplyEmp(emp);
         Assert.Multiple(() =>
         {
             Assert.That(appliedEmp.Status, Is.EqualTo(NCCyberwareMutationStatus.Applied));
-            Assert.That(appliedEmp.AffectedModules, Is.EqualTo(2));
+            Assert.That(appliedEmp.AffectedModules, Is.EqualTo(3));
             Assert.That(neuralState.EmpDisabledUntil, Is.GreaterThan(TimeSpan.Zero));
             Assert.That(neuralState.NeuralState, Is.EqualTo(NCCyberwareNeuralState.Disrupted));
             Assert.That(powerAfter, Is.LessThan(powerBefore));
             Assert.That(integrityAfter, Is.LessThan(integrityBefore));
             Assert.That(duplicateEmp.Status, Is.EqualTo(NCCyberwareMutationStatus.Duplicate));
-            Assert.That(neuralState.CurrentPower, Is.EqualTo(powerAfter));
+            Assert.That(_battery.GetCharge(cell), Is.EqualTo(powerAfter));
             Assert.That(SComp<NCOrganIntegrityComponent>(neural).CurrentIntegrity, Is.EqualTo(integrityAfter));
         });
     }
@@ -210,11 +216,11 @@ public sealed class NCCyberwareSystemTest : GameTest
     public void DiagnosticsAndPersistenceUseBoundedSemanticCyberwareState()
     {
         var source = SSpawn(HumanMob);
+        var cell = NCCyberwareTestPower.Install(SEntMan, _cyberware, _powerSlots, _battery, source, 2345f);
         var installed = Install(source, "Head", "NCImplantNeuralLinkMk1", "NCSlotNeuralCore", true);
         var knownId = Guid.Parse("fc868755-43fe-491a-8ca4-a692315821f6");
         var state = SComp<NCCyberwareComponent>(installed);
         state.StableInstanceId = knownId;
-        state.CurrentPower = 2_345f;
         state.Heat = 42f;
 
         Assert.That(_diagnostics.TryBuildSnapshot(
@@ -232,7 +238,7 @@ public sealed class NCCyberwareSystemTest : GameTest
         Assert.Multiple(() =>
         {
             Assert.That(visual.Cyberware, Is.Empty);
-            Assert.That(scanner.Cyberware, Has.Count.EqualTo(1));
+            Assert.That(scanner.Cyberware, Has.Count.EqualTo(2));
             Assert.That(scanner.Cyberware[0].Profile.Id, Is.EqualTo("NCNeuralLinkMk1"));
             Assert.That(scanner.Cyberware[0].Slot?.Id, Is.EqualTo("NCSlotNeuralCore"));
         });
@@ -240,7 +246,7 @@ public sealed class NCCyberwareSystemTest : GameTest
         var first = _persistence.SerializeMedicalState(source);
         Assert.That(first, Is.Not.Null);
         var persisted = first!;
-        Assert.That(persisted.CyberwareModules, Has.Count.EqualTo(1));
+        Assert.That(persisted.CyberwareModules, Has.Count.EqualTo(2));
         Assert.Multiple(() =>
         {
             Assert.That(persisted.CyberwareModules[0].HostCategory?.Id, Is.EqualTo("Head"));
@@ -250,6 +256,8 @@ public sealed class NCCyberwareSystemTest : GameTest
                 .Any(field => field.FieldType == typeof(EntityUid)), Is.False);
         });
 
+        var savedCharge = _battery.GetCharge(cell);
+        SEntMan.DeleteEntity(source);
         var target = SSpawn(HumanMob);
         Assert.That(_persistence.RestoreMedicalState(target, persisted), Is.True);
         var restored = _cyberware.CollectCyberware(target).Single(module =>
@@ -257,7 +265,9 @@ public sealed class NCCyberwareSystemTest : GameTest
         var restoredState = SComp<NCCyberwareComponent>(restored);
         Assert.Multiple(() =>
         {
-            Assert.That(restoredState.CurrentPower, Is.EqualTo(2_345f));
+            Assert.That(restoredState.CurrentPower, Is.Zero);
+            Assert.That(_persistence.SerializeMedicalState(target)!.CyberwareModules.Single(value => value.PowerBus != null)
+                .PowerBus!.Main!.Charge, Is.EqualTo(savedCharge));
             Assert.That(restoredState.Heat, Is.EqualTo(42f));
             Assert.That(restoredState.InstalledSlot?.Id, Is.EqualTo("NCSlotNeuralCore"));
             Assert.That(SComp<Content.Shared.Body.ChildOrganComponent>(restored).Parent,
@@ -272,6 +282,8 @@ public sealed class NCCyberwareSystemTest : GameTest
         var source = SSpawn(HumanMob);
         var snapshot = _persistence.SerializeMedicalState(source)!;
         var armState = snapshot.Organs["ArmLeft"];
+        // This hand-authored replacement predates the exterior and service sections.
+        snapshot.Version = NCMedicalSnapshotVersions.CyberwareAbilities;
         var stableId = Guid.Parse("d067c60f-c33d-48a6-acb3-d7da7b3c4872");
         armState.EntityPrototype = "NCOrganHumanCyberArmLeft";
         armState.CyberwareIdentity = "NCOrganHumanCyberArmLeft";
@@ -288,7 +300,7 @@ public sealed class NCCyberwareSystemTest : GameTest
             StableInstanceId = stableId,
             CurrentIntegrity = 160f,
             MaximumIntegrity = 160f,
-            CurrentPower = 10_800f,
+            CurrentPower = 0f,
             Heat = 0f,
             Load = 0f,
             EmpDisabledUntil = TimeSpan.Zero,
@@ -296,8 +308,10 @@ public sealed class NCCyberwareSystemTest : GameTest
             NeuralState = NCCyberwareNeuralState.Disconnected,
             Calibrated = false,
         };
+        armState.Cyberware.Assembly = _cyberware.CreateDefaultAssemblySnapshot("NCIndustrialCyberArm", stableId);
 
         var body = SSpawn(HumanMob);
+        Assert.That(_humanity.TryPrepareLegacyState(body, snapshot), Is.True);
         Assert.That(_persistence.RestoreMedicalState(body, snapshot), Is.True);
         var arm = GetOrgan(body, "ArmLeft");
         Assert.That(SComp<NCCyberwareComponent>(arm).StableInstanceId, Is.EqualTo(stableId));

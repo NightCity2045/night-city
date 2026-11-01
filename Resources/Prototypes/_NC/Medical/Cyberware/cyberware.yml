@@ -43,7 +43,6 @@
   id: NCRepairProfileStreetCyberware
   name: street cyberware service pack
   integrityPerUnit: 20
-  powerPerUnit: 600
   coolingPerUnit: 30
   neuralIntegrityPerUnit: 0.15
   maximumUnitsPerAction: 2
@@ -55,7 +54,6 @@
   id: NCRepairProfileClinicalCyberware
   name: clinical cyberware service pack
   integrityPerUnit: 35
-  powerPerUnit: 1200
   coolingPerUnit: 50
   neuralIntegrityPerUnit: 0.25
   maximumUnitsPerAction: 2
@@ -77,6 +75,9 @@
 
 - type: ncCyberware
   id: NCNeuralLinkMk1
+  humanityPackages: [ NCHumanityInterface ]
+  requiresSeparateCalibration: true
+  powerPriority: Control
   name: neural link Mk.1
   manufacturer: Zhirafa Technical Collective
   icon:
@@ -116,6 +117,8 @@
 
 - type: ncCyberware
   id: NCCirculatoryAssistMk1
+  humanityPackages: [ NCHumanityMedical ]
+  powerPriority: LifeSupport
   name: circulatory assist pump Mk.1
   manufacturer: Biotechnica Night City
   icon:
@@ -153,6 +156,9 @@
 
 - type: ncCyberware
   id: NCIndustrialCyberArm
+  humanityPackages: [ NCHumanityProfessionalMotor ]
+  requiresSeparateCalibration: true
+  assembly: NCIndustrialArmAssembly
   name: industrial cyberarm
   manufacturer: Militech Industrial Systems
   icon:
@@ -198,6 +204,8 @@
 
 - type: ncCyberware
   id: NCCyberopticsMk1
+  humanityPackages: [ NCHumanityMedical ]
+  powerPriority: Control
   name: cyberoptics Mk.1
   manufacturer: Kiroshi Optics
   icon:
@@ -236,6 +244,8 @@
 
 - type: ncCyberware
   id: NCCyberheartMk1
+  humanityPackages: [ NCHumanityMedical ]
+  powerPriority: LifeSupport
   name: cyberheart Mk.1
   manufacturer: Biotechnica Night City
   icon:
@@ -315,6 +325,15 @@
   parent: NCOrganHumanDetachableParentRegionBase
   name: left industrial cyberarm
   components:
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.LArm
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: l_arm
+      color: "#A8BAC9"
+  - type: NCCyberwareExterior
+  - type: NCCyberwareSlotHost
+    slots: [ NCSlotArmUtilityLeft ]
   - type: Sprite
     sprite: _NC/Objects/Cyberware/implants.rsi
     state: cyberarm_left
@@ -335,6 +354,7 @@
   - type: NCDetachedOrganMedicalData
     sourceBodyProfile: Human
     requiredParentCategory: Torso
+    woundProfile: NCHumanWoundSystem
     treatmentProfile: NCHumanFieldTreatment
 
 - type: entity
@@ -342,6 +362,15 @@
   parent: NCOrganHumanDetachableParentRegionBase
   name: right industrial cyberarm
   components:
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.RArm
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: r_arm
+      color: "#A8BAC9"
+  - type: NCCyberwareExterior
+  - type: NCCyberwareSlotHost
+    slots: [ NCSlotArmUtilityRight ]
   - type: Sprite
     sprite: _NC/Objects/Cyberware/implants.rsi
     state: cyberarm_right
@@ -362,6 +391,7 @@
   - type: NCDetachedOrganMedicalData
     sourceBodyProfile: Human
     requiredParentCategory: Torso
+    woundProfile: NCHumanWoundSystem
     treatmentProfile: NCHumanFieldTreatment
 
 - type: entity
@@ -369,6 +399,12 @@
   parent: NCOrganHumanRegionBase
   name: cyberoptics Mk.1
   components:
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.Eyes
+    data:
+      sprite: Mobs/Customization/eyes.rsi
+      state: eyes
+      color: "#75DCEB"
   - type: Sprite
     sprite: _NC/Objects/Cyberware/implants.rsi
     state: cyberoptics
@@ -388,6 +424,7 @@
   - type: NCDetachedOrganMedicalData
     sourceBodyProfile: Human
     requiredParentCategory: Head
+    woundProfile: NCHumanWoundSystem
     treatmentProfile: NCHumanFieldTreatment
 
 - type: entity
@@ -416,4 +453,5 @@
   - type: NCDetachedOrganMedicalData
     sourceBodyProfile: Human
     requiredParentCategory: Thorax
+    woundProfile: NCHumanWoundSystem
     treatmentProfile: NCHumanFieldTreatment

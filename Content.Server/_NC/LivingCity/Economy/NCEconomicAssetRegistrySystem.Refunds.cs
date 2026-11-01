@@ -22,7 +22,7 @@ public sealed partial class NCEconomicAssetRegistrySystem
         NCRefundEconomicSettlementRequest request)
     {
         if (!Valid(request) || !TryGetPolicy(out var policy) ||
-            !_clock.TryGetCurrentTime(out _, out var now))
+            !_clock.TryGetCurrentTime(out var epoch, out var now))
         {
             return RejectTrade(_clock.IsReady
                 ? NCEconomicTradeMutationStatus.Rejected
@@ -63,6 +63,9 @@ public sealed partial class NCEconomicAssetRegistrySystem
                     return RejectTrade(Map(replay.Status), replay.Error ??
                         "The refunded reservation does not match this command replay.");
                 }
+                if (initialQuote.Snapshot.OfferKind == NCEconomicOfferKind.ItemInstance)
+                    await ReconcileOwnershipAsync(await LoadOwnershipContextAsync(request.RefundTransferId!.Value.Value,
+                        initialQuote.Snapshot.OfferId, initialQuote.Snapshot.Buyer, initialQuote.Snapshot.Seller, epoch, now));
                 return await LoadRefundResult(request, replay, NCEconomicTradeMutationStatus.Duplicate);
             }
 
@@ -121,6 +124,14 @@ public sealed partial class NCEconomicAssetRegistrySystem
                 writes.Add(QuoteWrite(quote, nextQuote, quoteEventId,
                     "living-city.economic-quote.refunded", request.AuditSource));
 
+                await using var ownership = assetResult.Transfer?.AssetKind == NCEconomicTransferAssetKind.ItemInstance
+                    ? await PrepareOwnershipAsync(await LoadOwnershipContextAsync(assetResult.Transfer.TransferId.Value,
+                        assetResult.Transfer.SourceAssetId, assetResult.Transfer.PreviousOwner,
+                        assetResult.Transfer.NewOwner, epoch, now), writes,
+                        reservedWrites: refundLegs!.Length + 1, maximumParticipants: 24)
+                    : null;
+                if (ownership != null && !await ownership.TryBeginCommitAsync())
+                    return RejectTrade(NCEconomicTradeMutationStatus.Rejected, ownership.Error!);
                 var ledger = await _ledger.PostTransactionAsync(RefundLedgerRequest(
                     request,
                     quote.Snapshot,

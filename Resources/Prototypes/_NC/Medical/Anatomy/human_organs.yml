@@ -102,7 +102,7 @@
   - type: NCNerve
   - type: NCSurgicalSite
   - type: NCCyberwareSlotHost
-    slots: [ NCSlotNeuralCore, NCSlotCranialUtility ]
+    slots: [ NCSlotNeuralCore, NCSlotCranialUtility, NCSlotMotorBurst, NCSlotMotorStabilizer ]
 
 - type: entity
   id: NCOrganHumanArmLeft
@@ -157,6 +157,11 @@
   - type: NCJoint
   - type: NCNerve
   - type: NCSurgicalSite
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: ArmLeft
+    woundProfile: NCHumanWoundSystem
+    treatmentProfile: NCHumanFieldTreatment
 
 - type: entity
   id: NCOrganHumanHandRight
@@ -173,6 +178,11 @@
   - type: NCJoint
   - type: NCNerve
   - type: NCSurgicalSite
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: ArmRight
+    woundProfile: NCHumanWoundSystem
+    treatmentProfile: NCHumanFieldTreatment
 
 - type: entity
   id: NCOrganHumanLegLeft
@@ -257,7 +267,7 @@
     pressureFullScaleVolume: 1800
     compressionFullScaleVolume: 1200
   - type: NCCyberwareSlotHost
-    slots: [ NCSlotThoracicSupport, NCSlotSubdermalThorax ]
+    slots: [ NCSlotThoracicSupport, NCSlotSubdermalThorax, NCSlotThoracicPower, NCSlotThoracicConverter ]
 
 - type: entity
   id: NCOrganHumanAbdomen

@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "id": "server-native-pickup-drop",
+  "maximumSeconds": 300,
+  "environment": {
+    "start": true,
+    "clients": 0,
+    "graphics": false
+  },
+  "steps": [
+    {
+      "id": "session",
+      "command": "session_get"
+    },
+    {
+      "id": "fixture",
+      "command": "fixture_create",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        }
+      }
+    },
+    {
+      "id": "actor",
+      "command": "fixture_spawn",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "fixtureId": {
+          "$ref": "/steps/fixture/data/fixtureId"
+        },
+        "prototype": "MobHuman",
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "item",
+      "command": "fixture_spawn",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "fixtureId": {
+          "$ref": "/steps/fixture/data/fixtureId"
+        },
+        "prototype": "Crowbar",
+        "x": 0.5,
+        "y": 0
+      }
+    },
+    {
+      "id": "pickup",
+      "command": "action_execute",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "actor": {
+          "$ref": "/steps/actor/data/netEntity"
+        },
+        "target": {
+          "$ref": "/steps/item/data/netEntity"
+        },
+        "action": "pickup"
+      }
+    },
+    {
+      "id": "pickup-handled",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/pickup/data/handled"
+        },
+        "equals": true
+      }
+    },
+    {
+      "id": "held-item",
+      "command": "entity_inspect",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "netEntity": {
+          "$ref": "/steps/item/data/netEntity"
+        },
+        "components": [
+          "Transform"
+        ]
+      }
+    },
+    {
+      "id": "item-contained",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/held-item/data/transform/parent"
+        },
+        "equals": {
+          "$ref": "/steps/actor/data/netEntity"
+        }
+      }
+    },
+    {
+      "id": "drop",
+      "command": "action_execute",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "actor": {
+          "$ref": "/steps/actor/data/netEntity"
+        },
+        "action": "drop"
+      }
+    },
+    {
+      "id": "dropped-item",
+      "command": "entity_inspect",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "netEntity": {
+          "$ref": "/steps/item/data/netEntity"
+        },
+        "components": [
+          "Transform"
+        ]
+      }
+    },
+    {
+      "id": "item-on-grid",
+      "assert": {
+        "actual": {
+          "$ref": "/steps/dropped-item/data/transform/parent"
+        },
+        "equals": {
+          "$ref": "/steps/fixture/data/grid"
+        }
+      }
+    },
+    {
+      "id": "snapshot",
+      "command": "entity_snapshot",
+      "arguments": {
+        "serverInstanceId": {
+          "$ref": "/steps/session/serverInstanceId"
+        },
+        "worldGeneration": {
+          "$ref": "/steps/session/worldGeneration"
+        },
+        "netEntity": {
+          "$ref": "/steps/actor/data/netEntity"
+        },
+        "components": [
+          "Hands"
+        ]
+      }
+    },
+    {
+      "id": "metrics",
+      "command": "metrics_capture"
+    }
+  ]
+}

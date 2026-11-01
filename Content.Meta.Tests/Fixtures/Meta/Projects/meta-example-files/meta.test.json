@@ -1,0 +1,28 @@
+{
+  "rootModule": "examples.files",
+  "responses": [
+    {
+      "member": "meta.files.FileStore.writeTextAtomic",
+      "value": null,
+      "pending": true,
+      "completeAfterSlices": 2
+    },
+    {
+      "member": "meta.files.FileStore.readText",
+      "value": "economy",
+      "pending": true,
+      "completeAfterSlices": 2
+    }
+  ],
+  "events": [],
+  "expectedLogs": [
+    "mode=economy"
+  ],
+  "expectedCommands": [
+    "writeTextAtomic(config/mode.txt,economy)",
+    "readText(config/mode.txt)"
+  ],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}

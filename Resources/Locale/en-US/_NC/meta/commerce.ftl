@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+nc-meta-software-published = Software release published.
+nc-meta-software-quote-ready = Review the software license quote before confirming payment.
+nc-meta-software-purchased = Payment and software license committed.
+nc-meta-software-access = Software access was denied. Check ownership, authority and the selected device.
+nc-meta-software-input = The software product or license parameters are invalid.
+nc-meta-software-busy = The software service is busy. Retry shortly.
+nc-meta-software-conflict = The product, account or license changed. Refresh before retrying.
+nc-meta-software-quota = The software catalog, device or license quota is full.
+nc-meta-software-expired = The quote expired or its product changed. Request a new quote.
+nc-meta-software-account = An authorized active payment account is unavailable.
+nc-meta-software-funds = There are insufficient funds for this software license.
+nc-meta-software-already-owned = This device already has a license for this product major.
+nc-meta-software-storage = The software storage service is unavailable.
+nc-meta-software-invalid-artifact = The published artifact failed independent verification.
+nc-meta-software-seat-assigned = The software license seat is assigned to this device.
+nc-meta-software-seat-released = The software seat and its former activation were released.
+nc-meta-software-source-denied = The release source policy does not authorize access to this file.
+nc-meta-software-source-ready = The authorized source file is ready.
+nc-meta-software-resale-ready = Review the license transfer offer before accepting payment.
+nc-meta-software-transferred = Payment and the software license transfer committed. Former device activations were revoked.
+nc-meta-software-compatible = This hardware supports the required interfaces and minimum package resources.
+nc-meta-software-incompatible = This hardware lacks a required interface, memory or package storage. Choose a compatible target before payment.
+nc-meta-software-network = The CitiNet marketplace service is unreachable. Check the powered gateway and physical connection.
+nc-meta-software-copied = The evidence-bound software copy and its restricted device license were saved for 30 active minutes.
+nc-meta-software-copy-discarded = The copied image reservation was removed and its illegal device license revoked.

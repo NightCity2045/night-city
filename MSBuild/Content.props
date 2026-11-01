@@ -8,6 +8,16 @@
     <LangVersion Condition="'$(LangVersion)' == ''">14</LangVersion>
     <IsPackable Condition="'$(IsPackable)' == ''">false</IsPackable>
     <Nullable Condition="'$(Nullable)' == ''">enable</Nullable>
+    <!-- NC: explicit opt-in trusted local diagnostics; ordinary content builds keep the client sandbox. -->
+    <DefineConstants Condition="'$(EnableNCDiagnostics)' == 'true'">$(DefineConstants);NC_DIAGNOSTICS</DefineConstants>
+  </PropertyGroup>
+
+  <!-- NC: isolate trusted diagnostic output from ordinary builds and their incremental compiler inputs. -->
+  <PropertyGroup Condition="'$(EnableNCDiagnostics)' == 'true'">
+    <NCDiagnosticsOutputRoot Condition="'$(NCDiagnosticsOutputRoot)' == ''">$(MSBuildThisFileDirectory)../bin/NCDiagnostics</NCDiagnosticsOutputRoot>
+    <OutputPath>$(NCDiagnosticsOutputRoot)/$(MSBuildProjectName)/</OutputPath>
+    <IntermediateOutputPath>obj/NCDiagnostics/$(Configuration)/</IntermediateOutputPath>
+    <IntermediateOutputPath Condition="'$(NCDiagnosticsBuildId)' != ''">obj/NCDiagnostics/$(NCDiagnosticsBuildId)/$(Configuration)/</IntermediateOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

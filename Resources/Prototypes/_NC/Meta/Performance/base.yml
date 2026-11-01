@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+- type: entity
+  parent: NCMetaServer
+  id: NCMetaPerformanceHost
+  categories: [HideSpawnMenu]
+  name: isolated META load host
+  description: A fixture-owned physical host using ordinary server RAM, gas and process quotas. It is available only to the isolated diagnostics workload driver.
+  components:
+  - type: ApcPowerReceiver
+    needsPower: false
+  - type: NCMetaDevice
+    interfaces: [meta.net.MessagePort, meta.files.FileStore]
+  - type: NCMetaMessagePort
+  - type: DeviceNetwork
+    deviceNetId: Private
+    receiveFrequency: 1945
+    transmitFrequency: 1945
+
+- type: entity
+  parent: MobSiliconBase
+  id: NCMetaPerformanceBot
+  categories: [HideSpawnMenu]
+  name: isolated physical load robot
+  description: A fixture-owned physical robot driven through native steering during a bounded isolated load capture. It is not a simulated player session.
+  components:
+  - type: Sprite
+    sprite: Mobs/Silicon/Bots/supplybot.rsi
+    state: supplybot
+  - type: ComplexInteraction

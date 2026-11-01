@@ -7,10 +7,12 @@ using Content.Server._NC.Medical.Bleeding;
 using Content.Server._NC.Medical.Physiology;
 using Content.Server._NC.Medical.Persistence;
 using Content.Server._NC.Medical.Wounds;
+using Content.Server._NC.Medical.Cyberware;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Anatomy.Detachment;
 using Content.Shared._NC.Medical.Bleeding;
+using Content.Shared._NC.Medical.Cyberware;
 using Content.Shared._NC.Medical.Persistence;
 using Content.Shared._NC.Medical.Treatment;
 using Content.Shared._NC.Medical.Transplantation;
@@ -36,7 +38,61 @@ public sealed partial class NCOrganDetachmentSystem : EntitySystem
     [Dependency] private NCMedicalBodySystem _medicalBodies = default!;
     [Dependency] private NCBleedingSystem _bleeding = default!;
     [Dependency] private NCWoundSystem _wounds = default!;
+    [Dependency] private NCCyberwareSystem _cyberware = default!;
     [Dependency] private NCPhysiologySchedulerSystem _physiology = default!;
+    [Dependency] private Content.Server._NC.Medical.Humanity.NCHumanitySystem _humanity = default!;
+
+    private readonly HashSet<EntityUid> _transferring = [];
+
+    /// <summary>
+    /// Moves the same physical subtree between two bodies synchronously. Intermediate graph states are not
+    /// physiological checkpoints. A failed container move restores the source before either is evaluated.
+    /// This is not a death exemption: both completed graphs are evaluated immediately after the transaction.
+    /// </summary>
+    public bool TryTransferOrgan(EntityUid source, EntityUid destination,
+        ProtoId<OrganCategoryPrototype> category, ProtoId<OrganCategoryPrototype> parentCategory)
+    {
+        if (source == destination || _transferring.Contains(source) || _transferring.Contains(destination) ||
+            !CanDetachOrgan(source, category, out var expected) ||
+            !_anatomy.TryGetOrgan(destination, parentCategory, out _) ||
+            _anatomy.TryGetOrgan(destination, category, out _) ||
+            !TryComp<ChildOrganComponent>(expected, out var child) || child.Parent is not { } parent ||
+            !TryComp<OrganComponent>(parent, out var parentOrgan) || parentOrgan.Category is not { } oldParent)
+            return false;
+
+        _humanity.TrySettleBody(source);
+        _humanity.TrySettleBody(destination);
+        _transferring.Add(source);
+        _transferring.Add(destination);
+        try
+        {
+            if (!TryDetachOrgan(source, category, out var root, preserveCyberwareCalibration: true))
+                return false;
+            if (TryAttachOrgan(destination, parentCategory, root, preserveCyberwareCalibration: true))
+            {
+                _cyberware.InvalidateAttachmentCalibration(root);
+                _cyberware.RecordAnatomicalTransfer(root, source, false);
+                _cyberware.RecordAnatomicalTransfer(root, destination, true);
+                foreach (var descendant in _relations.AllChildren(root))
+                {
+                    _cyberware.InvalidateAttachmentCalibration(descendant);
+                    _cyberware.RecordAnatomicalTransfer(descendant, source, false);
+                    _cyberware.RecordAnatomicalTransfer(descendant, destination, true);
+                }
+                return true;
+            }
+            if (!TryAttachOrgan(source, oldParent, root, preserveCyberwareCalibration: true))
+                throw new InvalidOperationException("A preflighted organ transfer could not restore its source graph.");
+            return false;
+        }
+        finally
+        {
+            _transferring.Remove(source);
+            _transferring.Remove(destination);
+            MarkBodyChanged(source);
+            MarkBodyChanged(destination);
+        }
+    }
 
     /// <summary>
     /// Removes the organ identified by <paramref name="category"/> and every live OrganRelation descendant
@@ -46,6 +102,13 @@ public sealed partial class NCOrganDetachmentSystem : EntitySystem
         EntityUid body,
         ProtoId<OrganCategoryPrototype> category,
         out EntityUid organRoot)
+    {
+        return TryDetachOrgan(body, category, out organRoot, preserveCyberwareCalibration: false);
+    }
+
+    /// <summary>Calibration preservation is reserved for technical medical snapshot transfer and rollback.</summary>
+    public bool TryDetachOrgan(EntityUid body, ProtoId<OrganCategoryPrototype> category, out EntityUid organRoot,
+        bool preserveCyberwareCalibration)
     {
         organRoot = default;
         if (!TryGetAuthoritativeBody(body, out var bodyComponent) ||
@@ -74,6 +137,7 @@ public sealed partial class NCOrganDetachmentSystem : EntitySystem
                 return false;
         }
 
+        if (!_transferring.Contains(body)) _humanity.TrySettleBody(body);
         // Every flat body-container member is placed at the body's current world position. OrganRelation,
         // not transform parenting, remains the sole hierarchy for the detached anatomical subtree.
         var destination = Transform(body).Coordinates;
@@ -94,6 +158,14 @@ public sealed partial class NCOrganDetachmentSystem : EntitySystem
         _relations.Orphan(root);
         ExtractMedicalPayload(body, root, categories, originalParentCategory);
         AssignDetachedPersistenceOwner(body, root, subtree);
+        if (!preserveCyberwareCalibration)
+        {
+            foreach (var organ in subtree)
+            {
+                _cyberware.InvalidateAttachmentCalibration(organ);
+                _cyberware.RecordAnatomicalTransfer(organ, body, false);
+            }
+        }
         MarkBodyChanged(body);
         organRoot = root;
         return true;
@@ -141,6 +213,13 @@ public sealed partial class NCOrganDetachmentSystem : EntitySystem
         ProtoId<OrganCategoryPrototype> parentCategory,
         EntityUid organRoot)
     {
+        return TryAttachOrgan(body, parentCategory, organRoot, preserveCyberwareCalibration: false);
+    }
+
+    /// <summary>Technical snapshot rollback can retain calibration without another gameplay operation.</summary>
+    public bool TryAttachOrgan(EntityUid body, ProtoId<OrganCategoryPrototype> parentCategory, EntityUid organRoot,
+        bool preserveCyberwareCalibration)
+    {
         if (!TryGetAuthoritativeBody(body, out var bodyComponent) ||
             !_anatomy.TryGetOrgan(body, parentCategory, out var parent) ||
             !TryCollectSubtree(organRoot, out var subtree, out var categories) ||
@@ -160,6 +239,7 @@ public sealed partial class NCOrganDetachmentSystem : EntitySystem
         }
 
         var organContainer = bodyComponent.Organs!;
+        if (!_transferring.Contains(body)) _humanity.TrySettleBody(body);
         var placements = new Dictionary<EntityUid, OriginalPlacement>(subtree.Count);
         foreach (var organ in subtree)
         {
@@ -193,6 +273,14 @@ public sealed partial class NCOrganDetachmentSystem : EntitySystem
 
         _relations.Relate(parent, organRoot);
         RestoreMedicalPayload(body, organRoot);
+        if (!preserveCyberwareCalibration)
+        {
+            foreach (var organ in subtree)
+            {
+                _cyberware.InvalidateAttachmentCalibration(organ);
+                _cyberware.RecordAnatomicalTransfer(organ, body, true);
+            }
+        }
         RemComp<NCDetachedOrganPersistenceOwnerComponent>(organRoot);
         var attached = new NCOrganAttachedEvent(organRoot);
         RaiseLocalEvent(body, ref attached);
@@ -290,6 +378,14 @@ public sealed partial class NCOrganDetachmentSystem : EntitySystem
                 {
                     return false;
                 }
+
+                // Slot modules share the relation graph, but travel inside their host's physical container.
+                // They are not flat body-container organs and must not block detachment of that host.
+                if (!HasComp<OrganComponent>(child) &&
+                    TryComp<NCCyberwareComponent>(child, out var module) && module.InstalledSlot is { } slot &&
+                    TryComp<NCCyberwareSlotHostComponent>(current, out var host) &&
+                    host.Slots.Contains(slot) && host.Modules?.ContainedEntities.Contains(child) == true)
+                    continue;
 
                 pending.Push(child);
             }
@@ -601,6 +697,9 @@ public sealed partial class NCOrganDetachmentSystem : EntitySystem
 
     private void MarkBodyChanged(EntityUid body)
     {
+        if (_transferring.Contains(body))
+            return;
+        _humanity.TryReconcile(body);
         _medicalBodies.TryMarkDirty(
             body,
             NCMedicalDirtyDomains.Anatomy |

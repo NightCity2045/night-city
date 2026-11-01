@@ -1,0 +1,3 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<!-- Standalone tools must restore without the RobustToolbox submodule. Versions live in their project files. -->
+<Project />

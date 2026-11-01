@@ -572,6 +572,13 @@ public sealed partial class NCPhysicalActorLifecycleSystem : EntitySystem
             Retry(pending, now, "The actor's medical state could not be restored.");
             return;
         }
+        if (!_domains.TryImportLegacyHumanity(actorId, entity))
+        {
+            _runtime.Unbind(entity);
+            QueueDel(entity);
+            Retry(pending, now, "The actor's legacy Humanity state could not be migrated.");
+            return;
+        }
         if (!_physicalization.TryMaterialize(entity, inventoryPlan, out var inventoryError))
         {
             _runtime.Unbind(entity);

@@ -1,0 +1,26 @@
+<!-- SPDX-FileCopyrightText: 2026 Astro
+SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md. -->
+<BoxContainer xmlns="https://spacestation14.io"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Content.Client._NC.Meta.UI.NCMetaCitiNetBrowser"
+    Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True">
+    <TabContainer Name="BrowserSections" VerticalExpand="True" HorizontalExpand="True">
+        <BoxContainer Name="WebsiteTab" Orientation="Vertical" SeparationOverride="6" VerticalExpand="True" HorizontalExpand="True">
+            <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                <Button Name="BrowserBack" Text="{Loc 'nc-meta-browser-back'}" Disabled="True" />
+                <Button Name="BrowserForward" Text="{Loc 'nc-meta-browser-forward'}" Disabled="True" />
+                <Button Name="BrowserReload" Text="{Loc 'nc-meta-browser-reload'}" Disabled="True" />
+            </BoxContainer>
+            <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                <LineEdit Name="BrowserAddress" Text="citi://" HorizontalExpand="True" PlaceHolder="{Loc 'nc-meta-browser-address'}" />
+                <Button Name="BrowserGo" Text="{Loc 'nc-meta-browser-open'}" />
+            </BoxContainer>
+            <Label Name="BrowserTitle" Text="{Loc 'nc-meta-browser-title'}" ClipText="True" />
+            <Label Name="BrowserStatus" ClipText="True" />
+            <Label Name="BrowserEmpty" Text="{Loc 'nc-meta-browser-empty'}" ClipText="True" />
+            <BoxContainer Name="BrowserPageHost" Orientation="Vertical" VerticalExpand="True" HorizontalExpand="True" />
+        </BoxContainer>
+        <BoxContainer Name="FeedHost" Access="Public" Orientation="Vertical" VerticalExpand="True" HorizontalExpand="True" />
+    </TabContainer>
+</BoxContainer>

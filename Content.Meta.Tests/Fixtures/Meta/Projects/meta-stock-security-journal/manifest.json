@@ -1,0 +1,64 @@
+{
+  "version": "1.0",
+  "id": "meta-stock-security-journal",
+  "name": "Security journal",
+  "nameRu": "Журнал охраны",
+  "packageName": "nc.stock.security-journal",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "stock.security",
+  "files": [
+    {
+      "path": "app.json",
+      "sourcePath": "Resources/Meta/Projects/meta-stock-security-journal/app.json",
+      "sha256": "a33446b121a7b7d50bdca6148e2787ef84fabf6b5a0b4ca6648850efb4f6e967"
+    },
+    {
+      "path": "main.meta",
+      "sourcePath": "Resources/Meta/Projects/meta-stock-security-journal/main.meta",
+      "sha256": "488275acf033025bd3ef15baf0b352d023d1c0ac67e787659b17030e0b01e2c9"
+    },
+    {
+      "path": "README.md",
+      "sourcePath": "Resources/Meta/Projects/meta-stock-security-journal/README.md",
+      "sha256": "e1cac6eda1a03d0d557d92032d726c778699d88a6265b1be85e567956f9310c4"
+    },
+    {
+      "path": "ui/main.mui",
+      "sourcePath": "Resources/Meta/Projects/meta-stock-security-journal/ui/main.mui",
+      "sha256": "b385902afa7ba8aa8cddff6353d39764d5c29bc0fcf8738b0a384f5da4cec2a4"
+    }
+  ],
+  "startMode": "OnPower",
+  "bindings": [
+    {
+      "slot": "owned-camera",
+      "capability": "meta.security.Camera",
+      "contractHash": "0eafff42aaf69c1234fd0bf1e88bba3e1d683891cc64d879d85d432bdab3e65a",
+      "requiredScopes": [
+        "camera.motion.observe"
+      ]
+    },
+    {
+      "slot": "owned-door",
+      "capability": "meta.doors.Door",
+      "contractHash": "eb9affb74c5a05fcd584eeb2f21d6c941ff51f820a84fecfc1d1f70447c9ab28",
+      "requiredScopes": [
+        "door.observe"
+      ]
+    },
+    {
+      "slot": "journal-data",
+      "capability": "meta.files.FileStore",
+      "contractHash": "c7634c1859d74a9212400dd06f15286fe1c7bb80a1105e39adc191638a724fd9",
+      "requiredScopes": [
+        "files.read",
+        "files.write"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json",
+  "stateSchemaVersion": 1
+}

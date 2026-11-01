@@ -15,7 +15,9 @@ using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using Robust.Client.Utility;
 using Robust.Shared.Input;
+using Robust.Shared.Graphics.RSI;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Utility;
 
 namespace Content.Client._NC.Medical.Surgery;
 
@@ -130,7 +132,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             !_resources.TryGetResource<TextureResource>(surgery.BodyLayerAtlas, out var bodyLayers) ||
             !_resources.TryGetResource<TextureResource>(surgery.AnatomyAtlas, out var anatomyTexture) ||
             !_resources.TryGetResource<TextureResource>(surgery.WoundAtlas, out var woundTexture) ||
-            !_resources.TryGetResource<TextureResource>(surgery.ForeignBodySprite, out var foreignBodyTexture))
+            !TryGetForeignBodyTexture(surgery.ForeignBodySprite, out var foreignBodyTexture))
         {
             _body.Configure(new Vector2(128f, 192f), [], null);
             return;
@@ -159,13 +161,33 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             bodyLayers.Texture,
             anatomyTexture.Texture,
             woundTexture.Texture,
-            foreignBodyTexture.Texture);
+            foreignBodyTexture);
         _body.Configure(
             surgery.BodyCanvasSize,
             zones.OrderByDescending(zone => zone.Priority)
                 .ThenBy(zone => zone.Bounds.Size.LengthSquared())
                 .ToArray(),
             visuals);
+    }
+
+    private bool TryGetForeignBodyTexture(ResPath path, out Texture texture)
+    {
+        texture = default!;
+        // Existing profiles reference a state PNG. Read the RSI frame instead of loading its packed PNG
+        // as a raw texture (which warns and would also display the entire sheet for animated states).
+        if (path.Directory.ToString().EndsWith(".rsi", StringComparison.Ordinal))
+        {
+            if (!_resources.TryGetResource<RSIResource>(path.Directory, out var resource) ||
+                !resource.RSI.TryGetState(new RSI.StateId(path.FilenameWithoutExtension), out var state))
+                return false;
+            texture = state.GetFrame(RsiDirection.South, 0);
+            return true;
+        }
+
+        if (!_resources.TryGetResource<TextureResource>(path, out var raw))
+            return false;
+        texture = raw.Texture;
+        return true;
     }
 
     private readonly record struct ZoneProjection(
@@ -389,6 +411,16 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                     destination,
                     Color.White,
                     destination);
+            }
+
+            // A staged prosthesis exposes a receiving-site target, not a fake restored limb. Ordinary missing
+            // zones remain absent and cannot be clicked; the server resolves this marker to the live parent.
+            if (TryGetGraftSiteBounds(out _, out var graftBounds))
+            {
+                var color = Color.FromHex("#FFC95C");
+                handle.DrawRect(graftBounds, color, filled: false);
+                handle.DrawLine(graftBounds.TopLeft, graftBounds.BottomRight, color);
+                handle.DrawLine(graftBounds.TopRight, graftBounds.BottomLeft, color);
             }
 
             // NC: Open sites replace only their own skin pixels. All other wounds and incisions remain in the
@@ -1002,6 +1034,14 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             if (_state == null || _visuals == null || PixelWidth <= 0f || PixelHeight <= 0f)
                 return false;
 
+            if (TryGetGraftSiteBounds(out var receivingZone, out var receivingBounds) &&
+                receivingBounds.Contains(screenPoint))
+            {
+                zone = receivingZone.Zone;
+                local = receivingZone.InteractionAnchor;
+                return true;
+            }
+
             var canvasPoint = screenPoint / PixelSize * _canvasSize;
             if (canvasPoint.X < 0f || canvasPoint.Y < 0f ||
                 canvasPoint.X >= _canvasSize.X || canvasPoint.Y >= _canvasSize.Y)
@@ -1020,7 +1060,6 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                 return false;
             }
 
-            canvasPoint = UnmirrorCanvasPoint(canvasPoint);
             foreach (var candidate in _zones)
             {
                 if (_state.MissingZones.Contains(candidate.Zone) || !candidate.Bounds.Contains(canvasPoint))
@@ -1033,14 +1072,27 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
             return false;
         }
 
+        private bool TryGetGraftSiteBounds(out ZoneProjection zone, out UIBox2 bounds)
+        {
+            zone = default;
+            bounds = default;
+            if (_state?.StagedGraftZone is not { } stagedZone ||
+                !_state.MissingZones.Contains(stagedZone) || !TryGetZone(stagedZone, out zone))
+                return false;
+
+            var center = LocalToScreen(stagedZone, _state.Surface, zone.InteractionAnchor);
+            var size = new Vector2(MathF.Max(CanvasScale * 8f, 12f));
+            bounds = UIBox2.FromDimensions(center - size * 0.5f, size);
+            return true;
+        }
+
         /// <summary>
-        /// NC: Maps a canonical anatomical zone to the currently displayed surface without deriving gameplay
-        /// state from pixels. Mirrored surfaces swap the destination crop while sampling the same registered body.
+        /// Maps a canonical anatomical zone to the fixed front-facing diagram. The patient's surface is
+        /// independent of the diagram layout and must never swap left and right anatomical zones.
         /// </summary>
         private UIBox2 ZoneScreenBounds(ZoneProjection zone)
         {
-            // NC: The body silhouette always faces the player. Surface selection mirrors contact coordinates,
-            // not anatomical presence; otherwise walking around the patient swaps an amputated left/right limb.
+            // The body silhouette always faces the player, regardless of the accessible patient surface.
             return UIBox2.FromDimensions(zone.Bounds.TopLeft / _canvasSize * PixelSize,
                 zone.Bounds.Size / _canvasSize * PixelSize);
         }
@@ -1103,20 +1155,7 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                 return PixelSize * 0.5f;
             var canvasPoint = projection.Bounds.TopLeft + Vector2.Clamp(point, Vector2.Zero, Vector2.One) *
                 projection.Bounds.Size;
-            canvasPoint = MirrorCanvasPoint(canvasPoint, surface);
             return canvasPoint / _canvasSize * PixelSize;
-        }
-
-        private Vector2 MirrorCanvasPoint(Vector2 point, NCWoundSurface surface)
-        {
-            if (surface is NCWoundSurface.Rear or NCWoundSurface.Right)
-                point.X = _canvasSize.X - point.X;
-            return point;
-        }
-
-        private Vector2 UnmirrorCanvasPoint(Vector2 point)
-        {
-            return MirrorCanvasPoint(point, _state?.Surface ?? NCWoundSurface.Front);
         }
 
         private float CanvasScale => MathF.Min(

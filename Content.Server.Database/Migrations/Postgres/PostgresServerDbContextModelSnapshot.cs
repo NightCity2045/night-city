@@ -1426,6 +1426,8 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.HasKey("AggregateType", "AggregateId")
                         .HasName("PK_nc_aggregate_snapshot");
 
+                    b.HasIndex("AggregateType", "AggregateVersion", "CreatedAt", "AggregateId");
+
                     b.ToTable("nc_aggregate_snapshot", (string)null);
                 });
 
@@ -1980,6 +1982,258 @@ namespace Content.Server.Database.Migrations.Postgres
 
                             t.HasCheckConstraint("CK_nc_medical_snapshot_version", "snapshot_version > 0");
                         });
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCMetaAggregateBlobReference", b =>
+                {
+                    b.Property<string>("AggregateType")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("aggregate_type");
+
+                    b.Property<string>("AggregateId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("aggregate_id");
+
+                    b.Property<long>("AggregateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("aggregate_version");
+
+                    b.Property<string>("Digest")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("digest");
+
+                    b.HasKey("AggregateType", "AggregateId", "AggregateVersion", "Digest")
+                        .HasName("PK_nc_meta_blob_reference");
+
+                    b.HasIndex("Digest")
+                        .HasDatabaseName("IX_nc_meta_blob_reference_digest");
+
+                    b.ToTable("nc_meta_blob_reference", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCMetaAggregateRevision", b =>
+                {
+                    b.Property<string>("AggregateType")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("aggregate_type");
+
+                    b.Property<string>("AggregateId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("aggregate_id");
+
+                    b.Property<long>("AggregateVersion")
+                        .HasColumnType("bigint")
+                        .HasColumnName("aggregate_version");
+
+                    b.Property<long>("ActiveWorldTicks")
+                        .HasColumnType("bigint")
+                        .HasColumnName("active_world_ticks");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("FormatVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("format_version");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payload");
+
+                    b.Property<int>("ReferencePolicyVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("reference_policy_version");
+
+                    b.Property<Guid>("SessionEpoch")
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_epoch");
+
+                    b.HasKey("AggregateType", "AggregateId", "AggregateVersion")
+                        .HasName("PK_nc_meta_revision");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_nc_meta_revision_created_at");
+
+                    b.HasIndex("ReferencePolicyVersion", "AggregateType", "AggregateId", "AggregateVersion");
+
+                    b.ToTable("nc_meta_revision", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCMetaBlob", b =>
+                {
+                    b.Property<string>("Digest")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("digest");
+
+                    b.Property<long>("AdmittedUntilUtcTicks")
+                        .HasColumnType("bigint")
+                        .HasColumnName("admitted_until_utc_ticks");
+
+                    b.Property<int>("ByteCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("byte_count");
+
+                    b.Property<byte[]>("Bytes")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("bytes");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.HasKey("Digest")
+                        .HasName("PK_nc_meta_blob");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_nc_meta_blob_created_at");
+
+                    b.ToTable("nc_meta_blob", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCMetaBlobMaintenance", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("smallint")
+                        .HasColumnName("nc_meta_blob_maintenance_id");
+
+                    b.Property<string>("AggregateIdCursor")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("aggregate_id_cursor");
+
+                    b.Property<string>("AggregateTypeCursor")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("aggregate_type_cursor");
+
+                    b.Property<bool>("AggregatesComplete")
+                        .HasColumnType("boolean")
+                        .HasColumnName("aggregates_complete");
+
+                    b.Property<int>("PolicyVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("policy_version");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_meta_blob_maintenance");
+
+                    b.ToTable("nc_meta_blob_maintenance", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCMetaBlobStorage", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("smallint")
+                        .HasColumnName("nc_meta_blob_storage_id");
+
+                    b.Property<long>("AllocatedBytes")
+                        .HasColumnType("bigint")
+                        .HasColumnName("allocated_bytes");
+
+                    b.Property<long>("AllocatedCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("allocated_count");
+
+                    b.Property<bool>("BackfillComplete")
+                        .HasColumnType("boolean")
+                        .HasColumnName("backfill_complete");
+
+                    b.Property<string>("BackfillCursor")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("backfill_cursor");
+
+                    b.Property<double>("ByteTokens")
+                        .HasColumnType("double precision")
+                        .HasColumnName("byte_tokens");
+
+                    b.Property<double>("CountTokens")
+                        .HasColumnType("double precision")
+                        .HasColumnName("count_tokens");
+
+                    b.Property<long>("RefilledAtUtcTicks")
+                        .HasColumnType("bigint")
+                        .HasColumnName("refilled_at_utc_ticks");
+
+                    b.HasKey("Id")
+                        .HasName("PK_nc_meta_blob_storage");
+
+                    b.ToTable("nc_meta_blob_storage", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)1,
+                            AllocatedBytes = 0L,
+                            AllocatedCount = 0L,
+                            BackfillComplete = false,
+                            BackfillCursor = "",
+                            ByteTokens = 0.0,
+                            CountTokens = 0.0,
+                            RefilledAtUtcTicks = 0L
+                        });
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCMetaCheckpointBlobBackfill", b =>
+                {
+                    b.Property<Guid>("SnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("snapshot_id");
+
+                    b.Property<bool>("Complete")
+                        .HasColumnType("boolean")
+                        .HasColumnName("complete");
+
+                    b.Property<string>("DigestCursor")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("digest_cursor");
+
+                    b.Property<int>("NextChunk")
+                        .HasColumnType("integer")
+                        .HasColumnName("next_chunk");
+
+                    b.Property<int>("PolicyVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("policy_version");
+
+                    b.HasKey("SnapshotId")
+                        .HasName("PK_nc_meta_checkpoint_blob_backfill");
+
+                    b.ToTable("nc_meta_checkpoint_blob_backfill", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCMetaCheckpointBlobReference", b =>
+                {
+                    b.Property<Guid>("SnapshotId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("snapshot_id");
+
+                    b.Property<string>("Digest")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("digest");
+
+                    b.HasKey("SnapshotId", "Digest")
+                        .HasName("PK_nc_meta_checkpoint_blob_reference");
+
+                    b.HasIndex("Digest")
+                        .HasDatabaseName("IX_nc_meta_checkpoint_blob_reference_digest");
+
+                    b.ToTable("nc_meta_checkpoint_blob_reference", (string)null);
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCOrganizationBankAccount", b =>
@@ -4324,6 +4578,50 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasConstraintName("FK_nc_medical_character_snapshot_profile_profile_id");
 
                     b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCMetaAggregateBlobReference", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCMetaBlob", null)
+                        .WithMany()
+                        .HasForeignKey("Digest")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_meta_blob_reference_nc_meta_blob_digest");
+
+                    b.HasOne("Content.Server.Database.NCMetaAggregateRevision", null)
+                        .WithMany()
+                        .HasForeignKey("AggregateType", "AggregateId", "AggregateVersion")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_meta_blob_reference_nc_meta_revision_aggregate_type_aggr~");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCMetaCheckpointBlobBackfill", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCRoundSnapshot", null)
+                        .WithMany()
+                        .HasForeignKey("SnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_meta_checkpoint_blob_backfill_nc_round_snapshot_ncround_~");
+                });
+
+            modelBuilder.Entity("Content.Server.Database.NCMetaCheckpointBlobReference", b =>
+                {
+                    b.HasOne("Content.Server.Database.NCMetaBlob", null)
+                        .WithMany()
+                        .HasForeignKey("Digest")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_meta_checkpoint_blob_reference_nc_meta_blob_digest");
+
+                    b.HasOne("Content.Server.Database.NCRoundSnapshot", null)
+                        .WithMany()
+                        .HasForeignKey("SnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_nc_meta_checkpoint_blob_reference_nc_round_snapshot_snapsho~");
                 });
 
             modelBuilder.Entity("Content.Server.Database.NCOrganizationBankTransaction", b =>

@@ -6,12 +6,20 @@
     <WarningsAsErrors>RA0032;nullable</WarningsAsErrors>
   </PropertyGroup>
   <Import Project="../MSBuild/Content.props" />
+  <!-- NC: the development loader scans Content.* DLLs, including leftovers from older client builds. -->
+  <Target Name="RemoveServerMetaCoreFromOrdinaryClient" AfterTargets="Build" Condition="'$(EnableNCDiagnostics)' != 'true'">
+    <Delete Files="$(TargetDir)Content.Meta.dll;$(TargetDir)Content.Meta.pdb" />
+  </Target>
+  <ItemGroup>
+    <ProjectReference Include="../Content.Meta/Content.Meta.csproj" Condition="'$(EnableNCDiagnostics)' == 'true'" /> <!-- NC: trusted diagnostics only; the ordinary client never loads the compiler/VM. -->
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Nett" />
     <PackageReference Include="JetBrains.Annotations" PrivateAssets="All" />
     <PackageReference Include="SixLabors.ImageSharp" />
     <PackageReference Include="Pidgin" />
     <PackageReference Include="Robust.Shared.AuthLib" />
+    <PackageReference Include="Serilog" Condition="'$(EnableNCDiagnostics)' == 'true'" /> <!-- NC: bounded diagnostic log capture. -->
   </ItemGroup>
 
   <Import Project="..\RobustToolbox\Imports\Lidgren.props" />

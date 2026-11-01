@@ -87,6 +87,10 @@ public sealed partial class NCFreeformSurgeryClientSystem : EntitySystem
         // first reply received by a newly opened client, so never pass their empty ProtoId into PrototypeManager.
         if (!state.Accepted && string.IsNullOrEmpty(state.AnatomyProfile.Id))
         {
+            // A late rejection from a replaced session must never roll the active window back to its token.
+            if (_sessionId.IsValid && _sessionId != state.SessionId)
+                return;
+
             _sessionId = state.SessionId;
             EnsureWindow();
             if (_interactionPending)

@@ -31,6 +31,7 @@ public abstract partial class SharedToolSystem : EntitySystem
     [Dependency] private SharedTransformSystem _transformSystem = default!;
     [Dependency] private TileSystem _tiles = default!;
     [Dependency] private TurfSystem _turfs = default!;
+    [Dependency] private Content.Shared._NC.Medical.Cyberware.Abilities.NCCyberwareAbilityModifiersSystem _ncMotor = default!; // NC
 
     public const string CutQuality = "Cutting";
     public const string PulseQuality = "Pulsing";
@@ -165,6 +166,7 @@ public abstract partial class SharedToolSystem : EntitySystem
         if (!CanStartToolUse(tool, user, target, fuel, toolQualitiesNeeded, toolComponent))
             return false;
 
+        delay = _ncMotor.GetManualToolDelay(user, toolQualitiesNeeded, fuel, delay); // NC
         var toolEvent = new ToolDoAfterEvent(fuel, doAfterEv, GetNetEntity(target));
         var doAfterArgs = new DoAfterArgs(EntityManager, user, delay / toolComponent.SpeedModifier, toolEvent, tool, target: target, used: tool)
         {

@@ -1,0 +1,7 @@
+{
+  "rootModule": "examples.fabricator",
+  "responses": [{"member":"meta.industrial.Fabricator.start","value":{"operationId":"fixture-batch","status":"Running","requested":3,"completed":0,"errorCode":{"tag":"none"},"stamp":{"epoch":1,"sequence":1,"tick":60}},"pending":true}],
+  "events": [{"slot":"fabricator","event":"operationChanged","arguments":[{"operationId":"fixture-batch","status":"Applied","requested":3,"completed":3,"errorCode":{"tag":"none"},"stamp":{"epoch":1,"sequence":2,"tick":60}}],"sequence":1}],
+  "expectedLogs": ["Production accepted.","Production completed."],
+  "expectedCommands": ["start(Wirecutter,3,demo-batch-1)"]
+}

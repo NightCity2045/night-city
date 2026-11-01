@@ -1,0 +1,44 @@
+{
+  "rootModule": "examples.pong",
+  "responses": [
+    {
+      "member": "meta.net.MessagePort.send",
+      "value": {
+        "messageId": "fixture-1",
+        "accepted": true
+      },
+      "pending": false,
+      "completeAfterSlices": 1
+    }
+  ],
+  "events": [
+    {
+      "slot": "local-port",
+      "event": "messageReceived",
+      "arguments": [
+        {
+          "replyTo": "fixture-peer",
+          "topic": "ping",
+          "payload": "hello",
+          "stamp": {
+            "epoch": 1,
+            "sequence": 1,
+            "tick": 60
+          }
+        }
+      ],
+      "sequence": 1,
+      "nowMs": 1000,
+      "tick": 60
+    }
+  ],
+  "expectedLogs": [
+    "Ответ принят сетевым контроллером"
+  ],
+  "expectedCommands": [
+    "send(fixture-peer,pong,META online)"
+  ],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}

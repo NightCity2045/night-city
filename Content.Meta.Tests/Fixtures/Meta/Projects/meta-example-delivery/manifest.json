@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "id": "meta-example-delivery",
+  "name": "Physical cargo delivery",
+  "nameRu": "Физическая доставка груза",
+  "packageName": "examples.delivery",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.delivery",
+  "files": [
+    {
+      "path": "main.meta",
+      "sha256": "3e50683c7477c983d4e5f5de3e71e4b5de4584d7e5c2d1f0697bf5ce6ef0389e",
+      "sourcePath": "Resources/Meta/Examples/examples.delivery.meta"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [
+    {
+      "slot": "cargo-drone-camera",
+      "capability": "meta.drone.Perception",
+      "contractHash": "04e2602441ea76262486d20f260768c6bc0ed326afc1a9e8a587ed02c357907c",
+      "requiredScopes": [
+        "drone.observe"
+      ]
+    },
+    {
+      "slot": "cargo-drone-gripper",
+      "capability": "meta.drone.Manipulator",
+      "contractHash": "7938354e362b8942465fed1ff55c432c3397310a9e8f0ace39e71246444e40a6",
+      "requiredScopes": [
+        "drone.cargo.pickup",
+        "drone.cargo.drop"
+      ]
+    },
+    {
+      "slot": "cargo-drone-navigation",
+      "capability": "meta.drone.DroneController",
+      "contractHash": "a546f893405f7e5423b941ea28983033893adeba2ae52031e7c226099e79fa33",
+      "requiredScopes": [
+        "drone.route.read",
+        "drone.navigate",
+        "drone.navigation.observe"
+      ]
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

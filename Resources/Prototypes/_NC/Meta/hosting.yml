@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncMetaHosting
+  id: NCMetaHostingStandard
+  domainFee: 100
+  hostingUnitFee: 50
+  termSeconds: 3600
+  quoteSeconds: 30
+  capacityUnits: 16
+  sessionsPerUnit: 4
+  defaultGraceSeconds: 60

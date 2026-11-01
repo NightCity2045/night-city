@@ -1,0 +1,117 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncCyberware
+  id: NCBorgPeripheral
+  name: standard Borg node
+  nameId: nc-borg-node-name
+  manufacturer: Zhirafa Technical Collective
+  icon:
+    sprite: Objects/Misc/stock_parts.rsi
+    state: micro_mani
+  form: OrganReplacement
+  size: 1
+  maximumIntegrity: 100
+  repairProfile: NCRepairProfileStreetCyberware
+  requiresPower: true
+  idlePowerPerSecond: 0.25
+  loadedPowerPerSecond: 1
+  powerPriority: Control
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  passiveCoolingPerSecond: 0.2
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 80
+  heatDamageThreshold: 90
+  neuralRequirement: None
+  empResistance: 100
+  empSurgeDamagePerEnergy: 0.001
+  maximumEmpSurgeDamage: 20
+  empDisableDurationMultiplier: 1
+  updateInterval: 1s
+
+- type: ncCyberware
+  id: NCBorgFrameBus
+  name: standard Borg node
+  nameId: nc-borg-node-name
+  manufacturer: Zhirafa Technical Collective
+  icon:
+    sprite: Objects/Misc/stock_parts.rsi
+    state: micro_mani
+  form: OrganReplacement
+  size: 1
+  maximumIntegrity: 100
+  repairProfile: NCRepairProfileStreetCyberware
+  requiresPower: false
+  idlePowerPerSecond: 0
+  loadedPowerPerSecond: 0
+  powerPriority: Control
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  passiveCoolingPerSecond: 0.2
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 80
+  heatDamageThreshold: 90
+  neuralRequirement: None
+  empResistance: 100
+  empSurgeDamagePerEnergy: 0.001
+  maximumEmpSurgeDamage: 20
+  empDisableDurationMultiplier: 1
+  updateInterval: 1s
+
+- type: ncCyberware
+  id: NCBorgSupportNode
+  name: standard Borg node
+  nameId: nc-borg-node-name
+  manufacturer: Zhirafa Technical Collective
+  icon:
+    sprite: Objects/Misc/stock_parts.rsi
+    state: micro_mani
+  form: OrganReplacement
+  size: 1
+  maximumIntegrity: 100
+  repairProfile: NCRepairProfileStreetCyberware
+  requiresPower: false
+  idlePowerPerSecond: 0
+  loadedPowerPerSecond: 0
+  powerPriority: Control
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  passiveCoolingPerSecond: 0.2
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 80
+  heatDamageThreshold: 90
+  neuralRequirement: None
+  empResistance: 100
+  empSurgeDamagePerEnergy: 0.001
+  maximumEmpSurgeDamage: 20
+  empDisableDurationMultiplier: 1
+  updateInterval: 1s
+
+- type: reagent
+  id: NCBiopodPerfusate
+  name: nc-borg-reagent-perfusate
+  group: Medicine
+  desc: nc-borg-reagent-perfusate-desc
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#73b9b0"
+
+- type: reagent
+  id: NCBiopodDialysate
+  name: nc-borg-reagent-dialysate
+  group: Medicine
+  desc: nc-borg-reagent-dialysate-desc
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#73b9b0"
+
+- type: reagent
+  id: NCBiopodCoolant
+  name: nc-borg-reagent-coolant
+  group: Medicine
+  desc: nc-borg-reagent-coolant-desc
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#73b9b0"

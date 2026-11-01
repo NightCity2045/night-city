@@ -84,7 +84,7 @@ public sealed partial class GunSystem : SharedGunSystem
         {
             var selfEvent = new SelfBeforeGunShotEvent(user.Value, gun, ammo);
             RaiseLocalEvent(user.Value, selfEvent);
-            if (selfEvent.Cancelled)
+            if (selfEvent.Cancelled || !CanCommitControlledShot(gun.Owner)) // NC: authority after all native attempt handlers, before projectile output.
             {
                 userImpulse = false;
                 return;

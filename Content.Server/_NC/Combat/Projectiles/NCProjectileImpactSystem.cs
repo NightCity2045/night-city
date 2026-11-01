@@ -139,6 +139,7 @@ public sealed partial class NCProjectileImpactSystem : EntitySystem
             ForcedZone = distributedZone,
             HasPhysicalHitPosition = distributedZone == null,
             ShooterMoving = context.ShooterMoving,
+            MovingPenaltyReduction = context.MovingPenaltyReduction,
         };
 
         if (!_delivery.TryDeliver(impact, out var delivery))

@@ -43,6 +43,7 @@ public enum NCCyberwareActionKind : byte
     NeuralInterface,
     Service,
     MechanicalTrauma,
+    Calibration,
 }
 
 public readonly record struct NCCyberwareMutationResult(
@@ -88,6 +89,8 @@ public enum NCCyberwareMutationFailure : byte
 [DataDefinition]
 public sealed partial class NCCyberwareStateSnapshot
 {
+    [DataField] public NCCyberwareServiceState? Service;
+
     [DataField]
     public string EntityPrototype = string.Empty;
 
@@ -129,4 +132,22 @@ public sealed partial class NCCyberwareStateSnapshot
 
     [DataField]
     public bool Calibrated;
+
+    [DataField]
+    public float PermanentDamage;
+
+    [DataField]
+    public NCCyberwareAssemblySnapshot? Assembly;
+
+    [DataField]
+    public NCCyberwarePowerBusSnapshot? PowerBus;
+
+    [DataField]
+    public bool ThermalShutdown;
+
+    [DataField]
+    public float? AbilityCooldownSeconds;
+
+    [DataField]
+    public Content.Shared._NC.Medical.Cyberware.Visuals.NCCyberwareExteriorSnapshot? Exterior;
 }

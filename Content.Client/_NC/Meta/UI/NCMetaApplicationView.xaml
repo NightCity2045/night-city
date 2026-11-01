@@ -1,0 +1,12 @@
+<!-- SPDX-FileCopyrightText: 2026 Astro
+SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md. -->
+<BoxContainer xmlns="https://spacestation14.io"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Content.Client._NC.Meta.UI.NCMetaApplicationView"
+    Orientation="Vertical" HorizontalExpand="True" VerticalExpand="True" SeparationOverride="6">
+    <Label Name="Notice" ClipText="True" />
+    <ScrollContainer VerticalExpand="True" HorizontalExpand="True">
+        <BoxContainer Name="ViewHost" Orientation="Vertical" HorizontalExpand="True" />
+    </ScrollContainer>
+</BoxContainer>

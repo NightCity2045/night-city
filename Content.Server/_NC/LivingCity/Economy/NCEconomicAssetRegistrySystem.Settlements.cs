@@ -52,7 +52,7 @@ public sealed partial class NCEconomicAssetRegistrySystem
         NCSettleEconomicReservationRequest request)
     {
         if (!Valid(request) || !TryGetPolicy(out var assetPolicy) || !TryGetPricingPolicy(out var pricingPolicy) ||
-            !_clock.TryGetCurrentTime(out _, out var now))
+            !_clock.TryGetCurrentTime(out var epoch, out var now))
         {
             return RejectTrade(_clock.IsReady
                 ? NCEconomicTradeMutationStatus.Rejected
@@ -93,6 +93,9 @@ public sealed partial class NCEconomicAssetRegistrySystem
                     return RejectTrade(Map(replay.Status), replay.Error ??
                         "The settled reservation does not match this ledger command replay.");
                 }
+                if (initialQuote.Snapshot.OfferKind == NCEconomicOfferKind.ItemInstance)
+                    await ReconcileOwnershipAsync(await LoadOwnershipContextAsync(request.TransferId!.Value.Value,
+                        initialQuote.Snapshot.OfferId, initialQuote.Snapshot.Seller, initialQuote.Snapshot.Buyer, epoch, now));
                 return await LoadTradeResult(request.ReservationId, replay, NCEconomicTradeMutationStatus.Duplicate);
             }
 
@@ -158,6 +161,13 @@ public sealed partial class NCEconomicAssetRegistrySystem
                 writes.Add(QuoteWrite(quote, nextQuote, quoteEventId,
                     "living-city.economic-quote.settled", request.AuditSource));
 
+                await using var ownership = transfer?.AssetKind == NCEconomicTransferAssetKind.ItemInstance
+                    ? await PrepareOwnershipAsync(await LoadOwnershipContextAsync(transfer.TransferId.Value,
+                        transfer.SourceAssetId, transfer.PreviousOwner, transfer.NewOwner, epoch, now), writes,
+                        reservedWrites: legs!.Length + 1, maximumParticipants: 24)
+                    : null;
+                if (ownership != null && !await ownership.TryBeginCommitAsync())
+                    return RejectTrade(NCEconomicTradeMutationStatus.Rejected, ownership.Error!);
                 var participants = writes.Select(ToParticipant).ToArray();
                 var ledger = await _ledger.PostTransactionAsync(
                     LedgerRequest(request, quote.Snapshot, legs!, participants));

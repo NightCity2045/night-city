@@ -1,0 +1,22 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+    xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Content.Client._NC.Meta.UI.NCMetaFirmwareInstallWindow"
+    Title="{Loc 'nc-meta-firmware-confirm-title'}" MinWidth="520" MinHeight="400" SetWidth="650" SetHeight="500">
+    <BoxContainer Orientation="Vertical" Margin="12" SeparationOverride="8">
+        <RichTextLabel Text="{Loc 'nc-meta-firmware-native-confirmation'}" />
+        <Label Name="Target" ClipText="True" />
+        <Label Name="Package" ClipText="True" />
+        <Label Name="Artifact" />
+        <Label Name="Memory" />
+        <Label Name="Storage" />
+        <ItemList Name="Permissions" VerticalExpand="True" />
+        <CheckBox Name="ScopeConsent" Text="{Loc 'nc-meta-firmware-scope-consent'}" />
+        <CheckBox Name="ResourceConsent" Text="{Loc 'nc-meta-firmware-resource-consent'}" />
+        <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+            <Button Name="Cancel" Text="{Loc 'nc-meta-firmware-cancel'}" HorizontalExpand="True" />
+            <Button Name="Confirm" Text="{Loc 'nc-meta-firmware-confirm'}" Disabled="True" HorizontalExpand="True" />
+        </BoxContainer>
+    </BoxContainer>
+</controls:FancyWindow>

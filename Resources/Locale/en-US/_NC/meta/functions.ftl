@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+nc-meta-function-claim = Claim META controller: {$module}
+nc-meta-function-workspace = Open META workspace: {$module}
+nc-meta-function-automation = Enable META automation: {$module}
+nc-meta-function-manual = Stop META automation: {$module}
+ent-NCMetaToolHandImplant = tool hand implant
+    .desc = A native integral tool controller compatible with META. Hand occupancy, physical power and tool restrictions remain authoritative.
+    .suffix = META compatible native controller
+ent-NCMetaMantisBladeImplant = mantis blade implant
+    .desc = A native deployable blade controller compatible with META. Firmware can deploy or retract it; attacks remain native physical actions.
+    .suffix = META compatible native controller
+ent-NCMetaBiomonitorImplant = biomonitor implant
+    .desc = A native biomonitor compatible with META. Each requested reading draws real power and is shown to its wearer.
+    .suffix = META compatible native controller
+ent-NCMetaSandevistanImplant = Sandevistan implant
+    .desc = A native motor burst controller compatible with META. Programs cannot extend its native burst or skip cooldown, power and neural restrictions.
+    .suffix = META compatible native controller
+ent-NCMetaKerenzikovImplant = Kerenzikov implant
+    .desc = A native stabilization controller compatible with META. Its normal motor mode arbitration and physical restrictions remain authoritative.
+    .suffix = META compatible native controller

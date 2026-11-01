@@ -246,6 +246,13 @@ public sealed partial class DragDropSystem : SharedDragDropSystem
 
             // pop up drag shadow under mouse
             var mousePos = _eyeManager.PixelToMap(screenPos);
+            // NC-Edit-Start
+            if (mousePos.MapId == MapId.Nullspace)
+            {
+                EndDrag();
+                return;
+            }
+            // NC-Edit-End
             _dragShadow = EntityManager.SpawnEntity("dragshadow", mousePos);
             var dragSprite = Comp<SpriteComponent>(_dragShadow.Value);
             _sprite.CopySprite((_draggedEntity.Value, draggedSprite), (_dragShadow.Value, dragSprite));
@@ -556,7 +563,20 @@ public sealed partial class DragDropSystem : SharedDragDropSystem
         // Update position every frame to make it smooth.
         if (Exists(_dragShadow))
         {
-            var mousePos = _eyeManager.PixelToMap(_inputManager.MouseScreenPosition);
+            // NC-Edit-Start
+            var screenPos = _inputManager.MouseScreenPosition;
+            if (!screenPos.IsValid || !TryComp(_dragShadow.Value, out TransformComponent? shadow) || !shadow.ParentUid.Valid)
+            {
+                EndDrag();
+                return;
+            }
+            var mousePos = _eyeManager.PixelToMap(screenPos);
+            if (mousePos.MapId == MapId.Nullspace || mousePos.MapId != shadow.MapID)
+            {
+                EndDrag();
+                return;
+            }
+            // NC-Edit-End
             _transformSystem.SetWorldPosition(_dragShadow.Value, mousePos.Position);
         }
     }

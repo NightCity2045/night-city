@@ -1,0 +1,33 @@
+{
+  "rootModule": "examples.diagnostics",
+  "responses": [
+    {
+      "member": "meta.vehicle.EngineController.snapshot",
+      "value": {
+        "temperatureC": 90,
+        "rpm": 3200,
+        "oilPressureKPa": 250,
+        "coolantFraction": 0.8,
+        "faults": [],
+        "mode": "Normal",
+        "stamp": {
+          "epoch": 1,
+          "sequence": 1,
+          "tick": 60
+        }
+      },
+      "pending": false,
+      "completeAfterSlices": 1
+    }
+  ],
+  "events": [],
+  "expectedLogs": [
+    "RPM=3200"
+  ],
+  "expectedCommands": [
+    "snapshot()"
+  ],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}

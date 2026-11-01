@@ -61,6 +61,7 @@ namespace Content.Server.Lathe
         public override void Initialize()
         {
             base.Initialize();
+            InitializeAutomation(); // NC
             SubscribeLocalEvent<LatheComponent, GetMaterialWhitelistEvent>(OnGetWhitelist);
             SubscribeLocalEvent<LatheComponent, MapInitEvent>(OnMapInit);
             SubscribeLocalEvent<LatheComponent, PowerChangedEvent>(OnPowerChanged);
@@ -171,6 +172,8 @@ namespace Content.Server.Lathe
             if (!Resolve(uid, ref component))
                 return false;
 
+            TakeAutomationManualControl(uid); // NC
+
             if (quantity <= 0)
                 return false;
             quantity = int.Min(quantity, MaxItemsPerRequest);
@@ -193,6 +196,7 @@ namespace Content.Server.Lathe
         {
             if (!Resolve(uid, ref component))
                 return false;
+            if (!CanContinueAutomation(uid, component)) return false; // NC
             if (component.CurrentRecipe != null || component.Queue.Count <= 0 || !this.IsPowered(uid, EntityManager))
                 return false;
 
@@ -227,6 +231,7 @@ namespace Content.Server.Lathe
         {
             if (!Resolve(uid, ref comp, ref prodComp, false))
                 return;
+            if (!CanCompleteAutomationItem(uid, comp, prodComp)) return; // NC
 
             if (comp.CurrentRecipe != null)
             {
@@ -258,6 +263,7 @@ namespace Content.Server.Lathe
                 }
             }
 
+            if (!OnAutomationItemProduced(uid)) return; // NC: a cancelled output cannot resume a replacement queue.
             comp.CurrentRecipe = null;
             prodComp.StartTime = _timing.CurTime;
 
@@ -464,6 +470,7 @@ namespace Content.Server.Lathe
         {
             if (!Resolve(uid, ref component))
                 return;
+            if (TryCancelAutomationJob(uid, "Cancelled")) return; // NC
 
             if (component.CurrentRecipe != null)
             {
@@ -521,6 +528,7 @@ namespace Content.Server.Lathe
         /// <param name="args"></param>
         public void OnLatheDeleteRequestMessage(EntityUid uid, LatheComponent component, ref LatheDeleteRequestMessage args)
         {
+            TakeAutomationManualControl(uid); // NC
             if (args.Index < 0 || args.Index >= component.Queue.Count)
                 return;
 
@@ -543,6 +551,7 @@ namespace Content.Server.Lathe
 
         public void OnLatheMoveRequestMessage(EntityUid uid, LatheComponent component, ref LatheMoveRequestMessage args)
         {
+            TakeAutomationManualControl(uid); // NC
             if (args.Change == 0 || args.Index < 0 || args.Index >= component.Queue.Count)
                 return;
 
@@ -588,6 +597,7 @@ namespace Content.Server.Lathe
 
         public void OnLatheAbortFabricationMessage(EntityUid uid, LatheComponent component, ref LatheAbortFabricationMessage args)
         {
+            TakeAutomationManualControl(uid); // NC
             if (component.CurrentRecipe == null)
                 return;
 

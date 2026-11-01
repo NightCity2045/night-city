@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: AirSensor
+  id: NCMetaTemperatureSensor
+  components:
+  - type: NCMetaTemperatureSensor
+  - type: NCMetaDevice
+    interfaces: [meta.sensors.TemperatureSensor]
+    allowClaim: true
+  - type: NCMetaPort
+    networkId: LOCAL
+
+- type: entity
+  parent: SurveillanceCameraGeneral
+  id: NCMetaCamera
+  components:
+  - type: NCMetaCamera
+  - type: NCMetaDevice
+    interfaces: [meta.security.Camera]
+    allowClaim: true
+  - type: NCMetaPort
+    networkId: LOCAL
+
+- type: entity
+  parent: BaseWallmountMetallic
+  id: NCMetaAlarm
+  components:
+  - type: Sprite
+    sprite: Structures/Wallmounts/switch.rsi
+    state: dead
+  - type: NCMetaAlarm
+  - type: AmbientSound
+    enabled: false
+    volume: -8
+    range: 8
+    sound:
+      path: /Audio/Machines/alarm.ogg
+  - type: NCMetaDevice
+    interfaces: [meta.security.Alarm]
+    allowClaim: true
+  - type: NCMetaPort
+    networkId: LOCAL

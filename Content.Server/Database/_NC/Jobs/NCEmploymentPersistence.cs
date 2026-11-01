@@ -27,19 +27,23 @@ public sealed partial class ServerDbManager
         return RunDbCommand(() => _db.GetNCCharacterEmploymentDataAsync(userId));
     }
 
-    public Task<bool> SetNCCharacterEmploymentAsync(
+    public async Task<bool> SetNCCharacterEmploymentAsync(
         NetUserId userId,
         int profileId,
         ProtoId<JobPrototype>? job)
     {
         DbWriteOpsMetric.Inc();
-        return RunDbCommand(() => _db.SetNCCharacterEmploymentAsync(userId, profileId, job));
+        var result = await RunDbCommand(() => _db.SetNCCharacterEmploymentAsync(userId, profileId, job));
+        if (result) NotifyNCPlayerEmploymentChanged();
+        return result;
     }
 
-    public Task<bool> ResignNCCharacterEmploymentAsync(NetUserId userId, int profileId)
+    public async Task<bool> ResignNCCharacterEmploymentAsync(NetUserId userId, int profileId)
     {
         DbWriteOpsMetric.Inc();
-        return RunDbCommand(() => _db.ResignNCCharacterEmploymentAsync(userId, profileId));
+        var result = await RunDbCommand(() => _db.ResignNCCharacterEmploymentAsync(userId, profileId));
+        if (result) NotifyNCPlayerEmploymentChanged();
+        return result;
     }
 }
 

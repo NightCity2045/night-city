@@ -37,6 +37,8 @@ public sealed partial class InitialBodySystem : EntitySystem
 
         foreach (var (part, proto) in ent.Comp.Organs)
         {
+            if (ent.Comp.ExcludedOrgans.Contains(part)) // NC
+                continue; // NC
             // TODO: When e#6192 is merged replace this all with TrySpawnInContainer...
             var spawn = Spawn(proto, coords);
 

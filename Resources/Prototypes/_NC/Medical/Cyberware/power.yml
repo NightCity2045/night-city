@@ -1,0 +1,133 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncCyberwareSlot
+  id: NCSlotThoracicPower
+  name: thoracic power holder bay
+  nameId: nc-cyberware-power-holder-bay
+  hostCategories: [ Thorax ]
+  capacity: 2
+
+- type: ncCyberwareSlot
+  id: NCSlotThoracicConverter
+  name: thoracic bioconverter bay
+  nameId: nc-cyberware-power-converter-bay
+  hostCategories: [ Thorax ]
+  capacity: 1
+
+- type: ncCyberware
+  id: NCPowerBusMk1
+  name: body power bus Mk.1
+  nameId: ent-NCImplantPowerBusMk1
+  manufacturer: Zhirafa Technical Collective
+  icon:
+    sprite: Objects/Misc/stock_parts.rsi
+    state: capacitor
+  form: Implant
+  compatibleSlots: [ NCSlotThoracicPower ]
+  size: 2
+  maximumIntegrity: 80
+  repairProfile: NCRepairProfileStreetCyberware
+  requiresPower: false
+  heatCapacity: 100
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 80
+  heatDamageThreshold: 90
+  passiveCoolingPerSecond: 0.5
+  empResistance: 500
+  empSurgeDamagePerEnergy: 0.001
+  maximumEmpSurgeDamage: 20
+  empHeatPerEnergy: 0.002
+  maximumEmpHeat: 50
+  neuralRequirement: None
+  updateInterval: 1s
+
+- type: ncCyberware
+  id: NCBioconverterMk1
+  name: nutritional bioconverter Mk.1
+  nameId: ent-NCImplantBioconverterMk1
+  manufacturer: Biotechnica Night City
+  icon:
+    sprite: Objects/Misc/stock_parts.rsi
+    state: micro_mani
+  form: Implant
+  compatibleSlots: [ NCSlotThoracicConverter ]
+  size: 1
+  maximumIntegrity: 60
+  repairProfile: NCRepairProfileClinicalCyberware
+  requiresPower: false
+  heatCapacity: 60
+  heatDeratingThreshold: 35
+  heatShutdownThreshold: 45
+  heatDamageThreshold: 50
+  idleHeatPerSecond: 0.1
+  passiveCoolingPerSecond: 0.25
+  empResistance: 500
+  empSurgeDamagePerEnergy: 0.001
+  maximumEmpSurgeDamage: 20
+  empHeatPerEnergy: 0.002
+  maximumEmpHeat: 40
+  neuralRequirement: None
+  updateInterval: 1s
+
+- type: entity
+  parent: NCCyberwareImplantBase
+  id: NCImplantPowerBusMk1
+  name: body power bus Mk.1
+  description: A physical main-cell holder and isolated life-support reserve. Installed cells require an exposed thoracic service site.
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/stock_parts.rsi
+    state: capacitor
+  - type: NCCyberware
+    profile: NCPowerBusMk1
+  - type: NCCyberwarePowerBus
+    maximumPower: 40
+    lowChargeFraction: 0.2
+  - type: PowerCellSlot
+    cellSlotId: nc_main_cell
+    fitsInCharger: false
+  - type: ItemSlots
+    slots:
+      nc_main_cell:
+        name: nc-cyberware-power-main-cell
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        whitelist:
+          components: [ PowerCell ]
+      nc_reserve_cell:
+        name: nc-cyberware-power-reserve-cell
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        whitelist:
+          components: [ PowerCell ]
+
+- type: entity
+  parent: NCCyberwareImplantBase
+  id: NCImplantBioconverterMk1
+  name: nutritional bioconverter Mk.1
+  description: Converts nutrition above the protected threshold into charge in the body's real main battery. It cannot charge a missing cell.
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/stock_parts.rsi
+    state: micro_mani
+  - type: NCCyberware
+    profile: NCBioconverterMk1
+  - type: NCCyberwareBioconverter
+    maximumPower: 3
+    energyPerNutrition: 120
+    protectedNutrition: 100
+
+- type: entity
+  parent: PowerCellHyperPrinted
+  id: NCCyberwarePowerCell
+  name: body power cell
+  suffix: Empty
+  description: A high-density standard-interface body cell. The same vanilla battery stores every joule; smaller standard cells also fit the holder.
+  components:
+  - type: Battery
+    maxCharge: 64800
+    startingCharge: 0

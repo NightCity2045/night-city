@@ -1,0 +1,279 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncMetaHardware
+  id: NCMetaVehicleDomainHardware
+  memoryBytes: 524288
+  storageBytes: 4194304
+  maxProcesses: 2
+  cpuWeight: 2
+  gasPerWindow: 75000
+  idleWatts: 2
+  activeWatts: 8
+  interfaces: [meta.vehicle.EngineController, meta.vehicle.TransmissionController, meta.vehicle.VehicleDashboard, meta.vehicle.DriverAssistance, meta.vehicle.VehicleSecurity, meta.files.FileStore]
+
+- type: ncMetaHardware
+  id: NCMetaClinicalHardware
+  memoryBytes: 1048576
+  storageBytes: 8388608
+  maxProcesses: 2
+  cpuWeight: 2
+  interfaces: [meta.medical.MedicalMonitor, meta.medical.DosingController, meta.medical.ProcedureController, meta.files.FileStore]
+
+- type: entity
+  parent: NCToyotaSupra1996
+  id: NCMetaSupraEcu
+  suffix: META ECU
+  components:
+  - type: NCMetaEcu
+  - type: NCMetaTcu
+    electronicActuator: true
+  - type: NCMetaDriverAssistance
+  - type: NCVehicleSecurity
+  - type: AmbientSound
+    enabled: false
+    volume: -8
+    range: 8
+    sound:
+      path: /Audio/Machines/alarm.ogg
+  - type: NCMetaHost
+    profile: NCMetaVehicleDomainHardware
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.vehicle.EngineController, meta.vehicle.TransmissionController, meta.vehicle.VehicleDashboard, meta.vehicle.DriverAssistance, meta.vehicle.VehicleSecurity]
+  - type: NCMetaTerminal
+  - type: NCMetaStorage
+    capacityBytes: 4194304
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+      enum.NCMetaUiKey.Application:
+        type: NCMetaApplicationBoundUserInterface
+
+- type: entity
+  parent: NCMetaSupraEcu
+  id: NCMetaSupraConfigurableAssistance
+  suffix: META configurable driver assistance
+  components:
+  - type: NCMetaDriverAssistance
+    allowDisable: true
+
+- type: entity
+  parent: [MobSiliconBase, PowerCellSlotMediumItem]
+  id: NCMetaPatrolDrone
+  name: META route drone
+  description: A physical programmable robot. Its mission map contains only waypoints explicitly commissioned with a service tool.
+  components:
+  - type: Sprite
+    sprite: Mobs/Silicon/Bots/supplybot.rsi
+    state: supplybot
+  - type: NCMetaDrone
+  - type: NCMetaHost
+    profile: NCMetaDrone
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.drone.DroneController, meta.drone.NavigationSupervisor]
+  - type: NCMetaTerminal
+  - type: NCMetaStorage
+    capacityBytes: 8388608
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: PowerCellDraw
+    enabled: true
+    drawRate: 2
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+      enum.NCMetaUiKey.Application:
+        type: NCMetaApplicationBoundUserInterface
+
+- type: entity
+  parent: ConveyorBelt
+  id: NCMetaConveyor
+  suffix: META controller and load cell
+  components:
+  - type: NCMetaConveyor
+  - type: NCMetaLoadSensor
+  - type: NCMetaHost
+    profile: NCMetaIndustrial
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.industrial.Conveyor, meta.industrial.LoadSensor]
+  - type: NCMetaTerminal
+  - type: NCMetaStorage
+    capacityBytes: 33554432
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+
+- type: entity
+  parent: BaseHandheldComputer
+  id: NCMetaLoadCell
+  name: META load cell
+  description: A local physical mass sensor with a programmable interface.
+  components:
+  - type: Sprite
+    sprite: Objects/Tools/multitool.rsi
+    state: icon
+  - type: NCMetaLoadSensor
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.industrial.LoadSensor]
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: PowerCellDraw
+    enabled: true
+    drawRate: 1
+
+- type: entity
+  parent: NCOrganHumanCyberEyes
+  id: NCMetaCyberOptics
+  suffix: META compatible low-light hardware
+  components:
+  - type: NCMetaOptics
+    supportsLowLight: true
+  - type: NCMetaHost
+    profile: NCMetaImplant
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.implants.Optics]
+  - type: NCMetaTerminal
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+
+- type: entity
+  parent: BaseHandheldComputer
+  id: NCMetaClinicalController
+  name: META bedside controller
+  description: A patient-bound diagnostic and dosing controller. It uses a real refillable reservoir and the practitioner's native surgical tools.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/healthanalyzer.rsi
+    state: icon
+  - type: NCDiagnosticCapability
+    capability: NCDiagnosticsHandheldApproximate
+  - type: NCMetaClinical
+    dosingHardware: true
+    procedureHardware: true
+    diagnosticTier: HandheldApproximate
+  - type: NCMetaHost
+    profile: NCMetaClinicalHardware
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.medical.MedicalMonitor, meta.medical.DosingController, meta.medical.ProcedureController]
+  - type: NCMetaTerminal
+  - type: NCMetaStorage
+    capacityBytes: 8388608
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: SolutionManager
+    solutions: [NCMetaDosingReservoir]
+  - type: RefillableSolution
+    solution: chemicals
+  - type: ExaminableSolution
+    solution: chemicals
+    exactVolume: true
+  - type: PowerCellDraw
+    enabled: true
+    drawRate: 1
+  - type: ActivatableUI
+    key: enum.NCMetaUiKey.Workspace
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+      enum.NCMetaUiKey.Application:
+        type: NCMetaApplicationBoundUserInterface
+
+- type: entity
+  parent: Solution
+  id: NCMetaDosingReservoir
+  categories: [HideSpawnMenu]
+  components:
+  - type: Solution
+    id: chemicals
+    solution:
+      maxVol: 30
+
+- type: entity
+  parent: BaseItem
+  id: NCMetaCommissioningTool
+  name: META commissioning tool
+  description: Select an owned drone, conveyor or clinical gateway, then a physical waypoint, load sensor or body scanner. It does not grant device ownership.
+  components:
+  - type: Sprite
+    sprite: Objects/Tools/multitool.rsi
+    state: icon
+  - type: NCMetaCommissioningTool
+
+- type: entity
+  parent: ClothingHeadHatCone
+  id: NCMetaWaypointA
+  name: META waypoint A
+  description: A physical mission-map marker. Place it before commissioning the route.
+  components:
+  - type: NCMetaWaypoint
+    name: checkpointA
+
+- type: entity
+  parent: NCMetaWaypointA
+  id: NCMetaWaypointB
+  name: META waypoint B
+  components:
+  - type: NCMetaWaypoint
+    name: checkpointB
+
+- type: entity
+  parent: NCMetaPatrolDrone
+  id: NCMetaCargoDrone
+  suffix: META camera and physical gripper
+  components:
+  - type: NCMetaDroneSensor
+  - type: NCMetaDroneManipulator
+  - type: SurveillanceCamera
+    networkSet: false
+  - type: Hands
+    activeHandId: gripper
+    hands:
+      gripper:
+        location: Middle
+  - type: ComplexInteraction
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.drone.DroneController, meta.drone.NavigationSupervisor, meta.drone.Perception, meta.drone.Manipulator]
+
+- type: entity
+  parent: NCMetaCargoDrone
+  id: NCMetaEquippedDrone
+  suffix: META equipped ballistic controller
+  components:
+  - type: NCMetaDroneWeapon
+  - type: Gun
+    fireRate: 1
+    selectedMode: SemiAuto
+    availableModes: [SemiAuto]
+    soundGunshot:
+      path: /Audio/Weapons/Guns/Gunshots/pistol.ogg
+  - type: BallisticAmmoProvider
+    proto: CartridgePistol
+    capacity: 6
+    whitelist:
+      tags: [CartridgePistol]
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.drone.DroneController, meta.drone.NavigationSupervisor, meta.drone.Perception, meta.drone.Manipulator, meta.drone.WeaponController]

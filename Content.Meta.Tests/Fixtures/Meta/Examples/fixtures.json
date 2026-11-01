@@ -1,0 +1,637 @@
+{
+  "version": "1.0",
+  "programs": [
+    {
+      "rootModule": "examples.hello",
+      "responses": [],
+      "events": [],
+      "expectedLogs": [
+        "META: программа запущена"
+      ],
+      "expectedCommands": [],
+      "epoch": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "rootModule": "examples.math",
+      "responses": [],
+      "events": [],
+      "expectedLogs": [
+        "250 W"
+      ],
+      "expectedCommands": [],
+      "epoch": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "rootModule": "examples.arraystats",
+      "responses": [],
+      "events": [],
+      "expectedLogs": [
+        "98.5"
+      ],
+      "expectedCommands": [],
+      "epoch": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "rootModule": "examples.readings",
+      "responses": [],
+      "events": [],
+      "expectedLogs": [
+        "Требуется проверка"
+      ],
+      "expectedCommands": [],
+      "epoch": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "rootModule": "examples.files",
+      "responses": [
+        {
+          "member": "meta.files.FileStore.writeTextAtomic",
+          "value": null,
+          "pending": true,
+          "completeAfterSlices": 2
+        },
+        {
+          "member": "meta.files.FileStore.readText",
+          "value": "economy",
+          "pending": true,
+          "completeAfterSlices": 2
+        }
+      ],
+      "events": [],
+      "expectedLogs": [
+        "mode=economy"
+      ],
+      "expectedCommands": [
+        "writeTextAtomic(config/mode.txt,economy)",
+        "readText(config/mode.txt)"
+      ],
+      "epoch": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "rootModule": "examples.pong",
+      "responses": [
+        {
+          "member": "meta.net.MessagePort.send",
+          "value": {
+            "messageId": "fixture-1",
+            "accepted": true
+          },
+          "pending": false,
+          "completeAfterSlices": 1
+        }
+      ],
+      "events": [
+        {
+          "slot": "local-port",
+          "event": "messageReceived",
+          "arguments": [
+            {
+              "replyTo": "fixture-peer",
+              "topic": "ping",
+              "payload": "hello",
+              "stamp": {
+                "epoch": 1,
+                "sequence": 1,
+                "tick": 60
+              }
+            }
+          ],
+          "sequence": 1,
+          "nowMs": 1000,
+          "tick": 60
+        }
+      ],
+      "expectedLogs": [
+        "Ответ принят сетевым контроллером"
+      ],
+      "expectedCommands": [
+        "send(fixture-peer,pong,META online)"
+      ],
+      "epoch": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "rootModule": "examples.doorpanel",
+      "responses": [
+        {
+          "member": "meta.doors.Door.setOpen",
+          "value": {
+            "desiredOpen": true,
+            "phase": "Opening",
+            "stamp": {
+              "epoch": 1,
+              "sequence": 1,
+              "tick": 60
+            }
+          },
+          "pending": true,
+          "completeAfterSlices": 2
+        }
+      ],
+      "events": [
+        {
+          "slot": "front-panel",
+          "event": "requested",
+          "arguments": [
+            {
+              "open": true,
+              "requestId": "fixture-1",
+              "stamp": {
+                "epoch": 1,
+                "sequence": 1,
+                "tick": 60
+              }
+            }
+          ],
+          "sequence": 1,
+          "nowMs": 1000,
+          "tick": 60
+        },
+        {
+          "slot": "front-door",
+          "event": "stateChanged",
+          "arguments": [
+            {
+              "desiredOpen": true,
+              "phase": "Open",
+              "stamp": {
+                "epoch": 1,
+                "sequence": 1,
+                "tick": 60
+              }
+            }
+          ],
+          "sequence": 1,
+          "nowMs": 1000,
+          "tick": 60
+        }
+      ],
+      "expectedLogs": [
+        "Команда двери принята",
+        "Дверь достигла открытого положения"
+      ],
+      "expectedCommands": [
+        "setOpen(true)"
+      ],
+      "epoch": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "rootModule": "examples.motion",
+      "responses": [
+        {
+          "member": "meta.security.Alarm.setActive",
+          "value": {
+            "requestedActive": true,
+            "stamp": {
+              "epoch": 1,
+              "sequence": 1,
+              "tick": 60
+            }
+          },
+          "pending": false,
+          "completeAfterSlices": 1
+        }
+      ],
+      "events": [
+        {
+          "slot": "entrance-camera",
+          "event": "motionDetected",
+          "arguments": [
+            {
+              "confidence": 0.9,
+              "stamp": {
+                "epoch": 1,
+                "sequence": 1,
+                "tick": 60
+              }
+            }
+          ],
+          "sequence": 1,
+          "nowMs": 1000,
+          "tick": 60
+        }
+      ],
+      "expectedLogs": [
+        "Движение: тревога запрошена"
+      ],
+      "expectedCommands": [
+        "setActive(true)"
+      ],
+      "epoch": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "rootModule": "examples.sensorfilter",
+      "responses": [],
+      "events": [
+        {
+          "slot": "room-temperature",
+          "event": "temperatureChanged",
+          "arguments": [
+            {
+              "celsius": 20,
+              "stamp": {
+                "epoch": 1,
+                "sequence": 1,
+                "tick": 60
+              }
+            }
+          ],
+          "sequence": 1,
+          "nowMs": 1000,
+          "tick": 60
+        },
+        {
+          "slot": "room-temperature",
+          "event": "temperatureChanged",
+          "arguments": [
+            {
+              "celsius": 24,
+              "stamp": {
+                "epoch": 1,
+                "sequence": 2,
+                "tick": 60
+              }
+            }
+          ],
+          "sequence": 2,
+          "nowMs": 1000,
+          "tick": 60
+        }
+      ],
+      "expectedLogs": [
+        "20",
+        "21"
+      ],
+      "expectedCommands": [],
+      "epoch": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "rootModule": "examples.diagnostics",
+      "responses": [
+        {
+          "member": "meta.vehicle.EngineController.snapshot",
+          "value": {
+            "temperatureC": 90,
+            "rpm": 3200,
+            "oilPressureKPa": 250,
+            "coolantFraction": 0.8,
+            "faults": [],
+            "mode": "Normal",
+            "stamp": {
+              "epoch": 1,
+              "sequence": 1,
+              "tick": 60
+            }
+          },
+          "pending": false,
+          "completeAfterSlices": 1
+        }
+      ],
+      "events": [],
+      "expectedLogs": [
+        "RPM=3200"
+      ],
+      "expectedCommands": [
+        "snapshot()"
+      ],
+      "epoch": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "rootModule": "examples.overheat",
+      "responses": [
+        {
+          "member": "meta.vehicle.EngineController.setMode",
+          "value": {
+            "temperatureC": 111,
+            "rpm": 3200,
+            "oilPressureKPa": 250,
+            "coolantFraction": 0.8,
+            "faults": [],
+            "mode": "Safe",
+            "stamp": {
+              "epoch": 1,
+              "sequence": 1,
+              "tick": 60
+            }
+          },
+          "pending": false,
+          "completeAfterSlices": 1
+        }
+      ],
+      "events": [
+        {
+          "slot": "engine-ecu",
+          "event": "telemetryChanged",
+          "arguments": [
+            {
+              "temperatureC": 111,
+              "rpm": 3200,
+              "oilPressureKPa": 250,
+              "coolantFraction": 0.8,
+              "faults": [],
+              "mode": "Normal",
+              "stamp": {
+                "epoch": 1,
+                "sequence": 1,
+                "tick": 60
+              }
+            }
+          ],
+          "sequence": 1,
+          "nowMs": 1000,
+          "tick": 60
+        }
+      ],
+      "expectedLogs": [
+        "Ограничение нагрузки подтверждено"
+      ],
+      "expectedCommands": [
+        "setMode(Safe)"
+      ],
+      "epoch": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "rootModule": "examples.patrol",
+      "responses": [
+        {
+          "member": "meta.drone.DroneController.resolveWaypoint",
+          "value": "gate",
+          "pending": false,
+          "completeAfterSlices": 1
+        },
+        {
+          "member": "meta.drone.DroneController.setDestination",
+          "value": {
+            "requestId": 1,
+            "stamp": {
+              "epoch": 1,
+              "sequence": 1,
+              "tick": 60
+            }
+          },
+          "pending": true,
+          "completeAfterSlices": 2
+        },
+        {
+          "member": "meta.drone.DroneController.resolveWaypoint",
+          "value": "loading",
+          "pending": false,
+          "completeAfterSlices": 1
+        },
+        {
+          "member": "meta.drone.DroneController.setDestination",
+          "value": {
+            "requestId": 2,
+            "stamp": {
+              "epoch": 1,
+              "sequence": 1,
+              "tick": 60
+            }
+          },
+          "pending": false,
+          "completeAfterSlices": 1
+        }
+      ],
+      "events": [
+        {
+          "slot": "patrol-drone",
+          "event": "navigationFinished",
+          "arguments": [
+            {
+              "requestId": 1,
+              "status": "Arrived",
+              "stamp": {
+                "epoch": 1,
+                "sequence": 1,
+                "tick": 60
+              }
+            }
+          ],
+          "sequence": 1,
+          "nowMs": 1000,
+          "tick": 60
+        }
+      ],
+      "expectedLogs": [],
+      "expectedCommands": [
+        "resolveWaypoint(gate)",
+        "setDestination(gate)",
+        "resolveWaypoint(loading)",
+        "setDestination(loading)"
+      ],
+      "epoch": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "rootModule": "examples.conveyor",
+      "responses": [
+        {
+          "member": "meta.industrial.Conveyor.setEnabled",
+          "value": {
+            "requestedEnabled": true,
+            "stamp": {
+              "epoch": 1,
+              "sequence": 1,
+              "tick": 60
+            }
+          },
+          "pending": false,
+          "completeAfterSlices": 1
+        },
+        {
+          "member": "meta.industrial.Conveyor.setEnabled",
+          "value": {
+            "requestedEnabled": false,
+            "stamp": {
+              "epoch": 1,
+              "sequence": 1,
+              "tick": 60
+            }
+          },
+          "pending": false,
+          "completeAfterSlices": 1
+        }
+      ],
+      "events": [
+        {
+          "slot": "buffer-load",
+          "event": "loadSampled",
+          "arguments": [
+            {
+              "kilograms": 70,
+              "stamp": {
+                "epoch": 1,
+                "sequence": 1,
+                "tick": 60
+              }
+            }
+          ],
+          "sequence": 1,
+          "nowMs": 1000,
+          "tick": 60
+        },
+        {
+          "slot": "buffer-load",
+          "event": "loadSampled",
+          "arguments": [
+            {
+              "kilograms": 110,
+              "stamp": {
+                "epoch": 1,
+                "sequence": 2,
+                "tick": 60
+              }
+            }
+          ],
+          "sequence": 2,
+          "nowMs": 1000,
+          "tick": 60
+        }
+      ],
+      "expectedLogs": [],
+      "expectedCommands": [
+        "setEnabled(true)",
+        "setEnabled(false)"
+      ],
+      "epoch": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "rootModule": "examples.optics",
+      "responses": [
+        {
+          "member": "meta.implants.Optics.setFilter",
+          "value": {
+            "requestedFilter": "LowLight",
+            "stamp": {
+              "epoch": 1,
+              "sequence": 1,
+              "tick": 60
+            }
+          },
+          "pending": false,
+          "completeAfterSlices": 1
+        },
+        {
+          "member": "meta.implants.Optics.setFilter",
+          "value": {
+            "requestedFilter": "Clear",
+            "stamp": {
+              "epoch": 1,
+              "sequence": 1,
+              "tick": 60
+            }
+          },
+          "pending": false,
+          "completeAfterSlices": 1
+        }
+      ],
+      "events": [
+        {
+          "slot": "my-optics",
+          "event": "lightSampled",
+          "arguments": [
+            {
+              "normalizedLight": 0.1,
+              "stamp": {
+                "epoch": 1,
+                "sequence": 1,
+                "tick": 60
+              }
+            }
+          ],
+          "sequence": 1,
+          "nowMs": 1000,
+          "tick": 60
+        },
+        {
+          "slot": "my-optics",
+          "event": "lightSampled",
+          "arguments": [
+            {
+              "normalizedLight": 0.5,
+              "stamp": {
+                "epoch": 1,
+                "sequence": 2,
+                "tick": 60
+              }
+            }
+          ],
+          "sequence": 2,
+          "nowMs": 1000,
+          "tick": 60
+        }
+      ],
+      "expectedLogs": [],
+      "expectedCommands": [
+        "setFilter(LowLight)",
+        "setFilter(Clear)"
+      ],
+      "epoch": 1,
+      "nowMs": 1000,
+      "tick": 60
+    },
+    {
+      "rootModule": "examples.netprobe",
+      "responses": [
+        {
+          "member": "meta.netrun.NetSession.listVisibleNodes",
+          "value": [
+            {
+              "reference": "data-1",
+              "label": "Fixture data",
+              "kind": "Data"
+            }
+          ],
+          "pending": false,
+          "completeAfterSlices": 1
+        },
+        {
+          "member": "meta.netrun.NetSession.probe",
+          "value": {
+            "success": true,
+            "traceLevel": 2,
+            "detail": "fixture success"
+          },
+          "pending": true,
+          "completeAfterSlices": 2
+        }
+      ],
+      "events": [],
+      "expectedLogs": [
+        "Проверка успешна: fixture success",
+        "Trace=2"
+      ],
+      "expectedCommands": [
+        "listVisibleNodes()",
+        "probe(data-1)"
+      ],
+      "epoch": 1,
+      "nowMs": 1000,
+      "tick": 60
+    }
+  ]
+}

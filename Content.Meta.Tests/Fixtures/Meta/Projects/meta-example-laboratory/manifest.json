@@ -1,0 +1,40 @@
+{
+  "version": "1.0",
+  "id": "meta-example-laboratory",
+  "name": "Laboratory batch and packaging",
+  "nameRu": "Лабораторная партия и упаковка",
+  "packageName": "examples.laboratory",
+  "packageVersion": "1.0.0",
+  "languageVersion": "1.0",
+  "bytecodeVersion": "1.0",
+  "runtimeAbi": "1.0",
+  "rootModule": "examples.laboratory",
+  "files": [
+    {
+      "path": "main.meta",
+      "sha256": "7d1b2fee5f2275187a2ef559b850461a3b537fb10c33344b5382a9d61d2a8938",
+      "sourcePath": "Resources/Meta/Examples/examples.laboratory.meta"
+    }
+  ],
+  "startMode": "Manual",
+  "bindings": [
+    {
+      "slot": "grinder",
+      "requiredScopes": [
+        "lab.process",
+        "lab.operation.observe"
+      ],
+      "contractHash": "187f61056b11c524346f72038c3a8ddb2a43c94534f1a9afe9170c488cdaf574",
+      "capability": "meta.lab.Grinder"
+    },
+    {
+      "slot": "packager",
+      "requiredScopes": [
+        "lab.package"
+      ],
+      "contractHash": "b969cf631dbf7f32b24ba40b9ac57f0c1011f38121ecb25b7fdc948d739c044c",
+      "capability": "meta.lab.ChemMaster"
+    }
+  ],
+  "testFixture": "meta.test.json"
+}

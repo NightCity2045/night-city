@@ -272,7 +272,8 @@ public sealed class NCMedicalSnapshot(
     ushort organsOmitted,
     ushort cyberwareOmitted,
     ushort drugsOmitted,
-    ushort historyOmitted)
+    ushort historyOmitted,
+    Content.Shared._NC.Medical.Humanity.NCHumanityStatus? humanity = null)
 {
     /// <summary>
     /// Server-authoritative correlation for this observation. It is not a wound or forensic identifier.
@@ -297,4 +298,5 @@ public sealed class NCMedicalSnapshot(
     public ushort CyberwareOmitted { get; } = cyberwareOmitted;
     public ushort DrugsOmitted { get; } = drugsOmitted;
     public ushort HistoryOmitted { get; } = historyOmitted;
+    public Content.Shared._NC.Medical.Humanity.NCHumanityStatus? Humanity { get; } = humanity;
 }

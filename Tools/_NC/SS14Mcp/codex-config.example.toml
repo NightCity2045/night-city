@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# Merge this server entry into your Codex configuration after building the package.
+[mcp_servers.ss14_dev]
+command = "dotnet"
+args = ["D:/projects/night-city/artifacts/ss14-mcp-package/Server/SS14Mcp.Server.dll"]
+startup_timeout_sec = 30
+tool_timeout_sec = 60
+
+[mcp_servers.ss14_dev.env]
+SS14_MCP_WORKSPACE = "D:/projects/night-city"
+SS14_MCP_MODULES = "all"

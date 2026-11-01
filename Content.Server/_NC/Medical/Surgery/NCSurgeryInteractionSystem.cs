@@ -4,6 +4,7 @@
 
 using System.Linq;
 using Content.Server._NC.Combat.Targeting;
+using Content.Server._NC.Medical.Cyberware;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
@@ -32,6 +33,7 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
     private const int OrganTraversalLimit = 64;
     private const int MaximumDirectCandidates = 64;
     private static readonly TimeSpan DirectChoiceLifetime = TimeSpan.FromSeconds(12);
+    private readonly Dictionary<NCActionResolutionId, (Func<bool> CanCommit, TimeSpan Expires, EntityUid User, EntityUid Patient, EntityUid Tool)> _nativeStepGuards = [];
 
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IGameTiming _timing = default!;
@@ -42,6 +44,7 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private NCAnatomySystem _anatomy = default!;
     [Dependency] private NCTargetingSelectionSystem _targeting = default!;
+    [Dependency] private NCCyberwareSystem _cyberware = default!;
     [Dependency] private NCSurgerySystem _surgery = default!;
     [Dependency] private NCFreeformSurgerySystem _freeform = default!;
 
@@ -134,28 +137,11 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
             return false;
         }
 
-        foreach (var procedure in _prototypes.EnumeratePrototypes<NCSurgeryProcedurePrototype>()
-                     .Where(candidate => candidate.CyberwareOperation == NCSurgeryCyberwareOperation.Install)
-                     .OrderBy(candidate => candidate.ID, StringComparer.Ordinal))
-        {
-            if (procedure.CompatibleCyberwareProfiles.Count > 0 &&
-                !procedure.CompatibleCyberwareProfiles.Contains(cyberware.Profile) ||
-                !_surgery.TryPrepareProcedureTarget(
-                    patient,
-                    targetRegion,
-                    procedure.ID,
-                    module,
-                    out _,
-                    out _))
-            {
-                continue;
-            }
-
-            BindStagedProcedure(user, patient, procedure.ID, selectedZone, targetRegion, module);
-            return true;
-        }
-
-        return false;
+        if (!_cyberware.TryFindInstallSlot(patient, targetRegion, module, out _))
+            return false;
+        // Player surgery uses physical bay compatibility, not the legacy procedure catalogue's profile allowlist.
+        BindStagedProcedure(user, patient, "NCSurgeryCyberwareInstallation", selectedZone, targetRegion, module);
+        return true;
     }
 
     /// <summary>
@@ -642,9 +628,15 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
     public NCSurgeryInteractionNotice TryStartCurrentStep(
         EntityUid user,
         EntityUid patient,
-        out string stepName)
+        out string stepName,
+        Func<bool>? canCommit = null)
     {
         stepName = string.Empty;
+        // An expired guard must remain a denial until its DoAfter is consumed. Only deleted physical participants are safe to prune.
+        foreach (var expired in _nativeStepGuards.Where(pair => !Exists(pair.Value.User) || !Exists(pair.Value.Patient) || !Exists(pair.Value.Tool)).Select(pair => pair.Key).ToArray())
+            _nativeStepGuards.Remove(expired);
+        if (canCommit != null && (_nativeStepGuards.Count >= 64 || !canCommit()))
+            return NCSurgeryInteractionNotice.StepUnavailable;
         if (!HasComp<NCMedicalBodyComponent>(patient) ||
             !_hands.TryGetActiveItem(user, out var held) || held is not { } toolUid ||
             !TryComp<NCSurgeryToolComponent>(toolUid, out var toolComponent))
@@ -702,8 +694,13 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
             DistanceThreshold = SharedInteractionSystem.InteractionRange,
         };
 
+        if (canCommit != null)
+            _nativeStepGuards.Add(eventArgs.ActionResolutionId, (canCommit, _timing.CurTime + TimeSpan.FromMinutes(5), user, patient, tool.Owner));
         if (!_doAfter.TryStartDoAfter(doAfter))
+        {
+            _nativeStepGuards.Remove(eventArgs.ActionResolutionId);
             return NCSurgeryInteractionNotice.StepUnavailable;
+        }
 
         selection.StepInProgress = true;
         selection.ExecutingStepIndex = session.CurrentStepIndex;
@@ -729,7 +726,9 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
             selection.StepEndsAt = TimeSpan.Zero;
         }
 
-        if (args.Cancelled)
+        var nativeAuthorized = !_nativeStepGuards.Remove(args.ActionResolutionId, out var guard) ||
+            guard.Expires > _timing.CurTime && guard.CanCommit();
+        if (args.Cancelled || !nativeAuthorized)
         {
             var cancelled = new NCSurgeryStepExecutionChangedEvent(args.User, false, true);
             RaiseLocalEvent(patient, ref cancelled);
@@ -766,7 +765,8 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
         var procedureCompleted = result.Status == NCSurgeryStepResolutionStatus.Completed;
         if (procedureCompleted)
             RemComp<NCSurgeryGameplaySelectionComponent>(args.User);
-        var completed = new NCSurgeryStepExecutionChangedEvent(args.User, false, false, procedureCompleted);
+        var completed = new NCSurgeryStepExecutionChangedEvent(args.User, false, false, procedureCompleted,
+            result.Status is NCSurgeryStepResolutionStatus.Resolved or NCSurgeryStepResolutionStatus.Completed);
         RaiseLocalEvent(patient, ref completed);
     }
 

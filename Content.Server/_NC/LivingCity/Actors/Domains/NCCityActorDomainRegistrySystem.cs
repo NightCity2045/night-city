@@ -38,12 +38,16 @@ public sealed partial class NCCityActorDomainRegistrySystem : EntitySystem
     [Dependency] private NCCityActorHealthAdapterSystem _healthAdapter = default!;
     [Dependency] private NCCityActorInventoryAdapterSystem _inventoryAdapter = default!;
     [Dependency] private NCMedicalPersistenceSystem _medical = default!;
+    [Dependency] private Content.Server._NC.LivingCity.CityServices.NCHumanityRegistrySystem _legacyHumanity = default!;
+    [Dependency] private Content.Server._NC.Medical.Humanity.NCHumanitySystem _humanity = default!;
+    private readonly ConcurrentDictionary<NCActorId, Content.Server._NC.LivingCity.CityServices.NCHumanityRecord> _legacyHumanityImports = [];
 
     private readonly ConcurrentDictionary<NCActorId, NCCityActorHealthRecord> _healthCache = [];
     private readonly ConcurrentDictionary<NCActorId, NCCityActorInventoryRecord> _inventoryCache = [];
 
     public bool Unload(NCActorId actorId)
     {
+        _legacyHumanityImports.TryRemove(actorId, out _);
         return _healthCache.TryRemove(actorId, out _) | _inventoryCache.TryRemove(actorId, out _);
     }
 
@@ -73,6 +77,9 @@ public sealed partial class NCCityActorDomainRegistrySystem : EntitySystem
 
         var stored = await _database.GetNCAggregateSnapshotAsync(HealthAggregateType, ActorKey(actorId));
         var record = DeserializeHealth(stored, actorId);
+        if (record != null && record.Snapshot.MedicalSnapshotVersion < Content.Shared._NC.Medical.Persistence.NCMedicalSnapshotVersions.Humanity &&
+            await _legacyHumanity.GetAsync(actorId) is { } legacy)
+            _legacyHumanityImports[actorId] = legacy;
         return record == null ? null : CacheNewest(record);
     }
 
@@ -129,6 +136,16 @@ public sealed partial class NCCityActorDomainRegistrySystem : EntitySystem
             CreateInventoryWrite(inventoryEventId, "living-city.actor-inventory.initialized",
                 actorId, 0, inventory, auditSource),
         ];
+    }
+
+    public bool TryImportLegacyHumanity(NCActorId actorId, EntityUid actorEntity)
+    {
+        if (!_runtime.TryGetActor(actorEntity, out var bound) || bound != actorId) return false;
+        if (!_legacyHumanityImports.TryGetValue(actorId, out var legacy)) return true;
+        if (!_humanity.TryImportLegacyState(actorEntity, legacy.Snapshot)) return false;
+        // Keep the immutable source until a v14 checkpoint or unload: inventory restoration may still fail
+        // after this step, and the next physical spawn must receive the same legacy H rather than a fresh 100.
+        return true;
     }
 
     public bool TryRestoreHealth(NCActorId actorId, EntityUid actorEntity, NCCityActorHealthRecord record)
@@ -402,8 +419,13 @@ public sealed partial class NCCityActorDomainRegistrySystem : EntitySystem
 
     private NCCityActorHealthRecord CacheNewest(NCCityActorHealthRecord candidate)
     {
-        return _healthCache.AddOrUpdate(candidate.Snapshot.ActorId, candidate,
+        var newest = _healthCache.AddOrUpdate(candidate.Snapshot.ActorId, candidate,
             (_, current) => current.AggregateVersion > candidate.AggregateVersion ? current : candidate);
+        // Only a committed/reloaded medical checkpoint retires the migration source. A spawn retry before
+        // that checkpoint still needs it; afterwards replaying it could discard Humanity restored by medicine.
+        if (newest.Snapshot.MedicalSnapshotVersion >= Content.Shared._NC.Medical.Persistence.NCMedicalSnapshotVersions.Humanity)
+            _legacyHumanityImports.TryRemove(newest.Snapshot.ActorId, out _);
+        return newest;
     }
 
     private NCCityActorInventoryRecord CacheNewest(NCCityActorInventoryRecord candidate)

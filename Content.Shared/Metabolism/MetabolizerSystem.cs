@@ -257,6 +257,12 @@ public sealed partial class MetabolizerSystem : EntitySystem
 
     private void TryMetabolize(Entity<MetabolizerComponent, OrganComponent?, SolutionManagerComponent?> ent)
     {
+        // NC-Edit-Start
+        var attempt = new MetabolizerAttemptEvent();
+        RaiseLocalEvent(ent, ref attempt);
+        if (attempt.Cancelled)
+            return;
+        // NC-Edit-End
         _organQuery.Resolve(ent, ref ent.Comp2, logMissing: false);
         _solutionQuery.Resolve(ent, ref ent.Comp3, logMissing: false);
 

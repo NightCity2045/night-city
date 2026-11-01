@@ -5,6 +5,11 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
   <Import Project="../MSBuild/Content.props" />
+  <!-- NC: diagnostic-only pristine SQLite bootstrap tests use the actual backup provider. -->
+  <ItemGroup Condition="'$(EnableNCDiagnostics)' == 'true'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NUnit" />
     <PackageReference Include="NUnit3TestAdapter" />

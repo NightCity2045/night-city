@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: Multitool
+  id: NCCyberwareServiceTool
+  name: cyberware service probe
+  description: A contact probe for mounting, functional testing and physically disconnecting exposed cyberware.
+  components:
+  - type: NCSurgeryTool
+    capabilities:
+      NCSurgeryToolCyberware: 1
+      NCSurgeryToolCyberwareCalibration: 1
+      NCSurgeryToolCyberwareDisconnection: 1
+
+- type: entity
+  parent: BaseItem
+  id: NCCyberwareServiceKit
+  name: cyberware service kit
+  description: Ten consumable service applications for exposed frames and replaceable nodes. Cannot reverse permanent damage.
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/stock_parts.rsi
+    state: capacitor
+  - type: NCSurgeryTool
+    capabilities:
+      NCSurgeryToolCyberwareRepair: 1
+    usesRemaining: 10
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolCyberwareCalibration
+  name: cyberware functional test
+  nameId: nc-cyberware-surgery-calibrate
+  representativeTool: NCCyberwareServiceTool
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolCyberwareDisconnection
+  name: physical neural disconnection
+  nameId: nc-cyberware-surgery-disconnect
+  representativeTool: NCCyberwareServiceTool
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolCyberwareRepair
+  name: local cyberware service
+  nameId: nc-cyberware-surgery-repair
+  representativeTool: NCCyberwareServiceKit

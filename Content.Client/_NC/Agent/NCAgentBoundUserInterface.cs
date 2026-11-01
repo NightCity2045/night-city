@@ -14,6 +14,8 @@ using Content.Shared.Containers.ItemSlots;
 using Content.Shared.PDA;
 using JetBrains.Annotations;
 using Robust.Client.UserInterface;
+using Content.Client._NC.Meta.UI;
+using Content.Shared._NC.Meta.UI;
 
 namespace Content.Client._NC.Agent;
 
@@ -28,18 +30,22 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
 
     [ViewVariables]
     private NCAgentMenu? _menu;
+    private readonly NCMetaApplicationSessionManager _metaApplications;
 
     public NCAgentBoundUserInterface(EntityUid owner, Enum uiKey) : base(owner, uiKey)
     {
         _pdaSystem = EntMan.System<PdaSystem>();
         _shardSystem = EntMan.System<NCAgentShardSystem>();
+        _metaApplications = new(view => _menu is { Disposed: false } && _menu.TryShowMetaWebsite(view));
+        _metaApplications.Requested += SendMessage;
+        _metaApplications.WebsiteNotice += notice => _menu?.ShowMetaSiteNotice(notice);
     }
 
     protected override void Open()
     {
         base.Open();
 
-        if (_menu == null)
+        if (_menu is null or { Disposed: true })
             CreateMenu();
     }
 
@@ -66,6 +72,11 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
             SendPredictedMessage(new ItemSlotButtonPressedEvent(CartridgeLoaderComponent.CartridgeSlotId));
         _menu.ProgramCloseButton.OnPressed += _ => DeactivateActiveCartridge();
         _menu.OnOpenAgentApp += app => SendMessage(new NCAgentOpenAppMessage(app));
+        _menu.MetaSiteRequested += address =>
+        {
+            _metaApplications.CloseWebsite();
+            SendMessage(new NCMetaBrowserNavigateMessage(Guid.NewGuid(), address));
+        };
         _menu.OnFixerWorkRequest += SendMessage;
         _menu.OnContractRequest += SendMessage;
         _menu.OnTraumaTeamRequest += SendMessage;
@@ -116,6 +127,9 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
 
     protected override void UpdateState(BoundUserInterfaceState state)
     {
+        if (_menu is { Disposed: true })
+            return;
+
         base.UpdateState(state);
 
         if (state is not PdaUpdateState updateState)
@@ -132,12 +146,24 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
 
     protected override void ReceiveMessage(BoundUserInterfaceMessage message)
     {
+        if (_menu is { Disposed: true })
+            return;
+
         base.ReceiveMessage(message);
         if (_menu == null)
             return;
 
         switch (message)
         {
+            case NCMetaAppUpdateMessage app:
+                _metaApplications.TryApplyState(app.State);
+                break;
+            case NCMetaAppActionResultMessage action:
+                _metaApplications.ApplyResult(action);
+                break;
+            case NCMetaBrowserResultMessage result:
+                _menu.ShowMetaSiteNotice(result.Notice);
+                break;
             case NCAgentContractsUpdateMessage contracts:
                 _menu.UpdateContractData(contracts);
                 break;
@@ -171,13 +197,23 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
 
     protected override void AttachCartridgeUI(Control cartridgeUiFragment, string? title)
     {
+        if (_menu is not { Disposed: false })
+            return;
+
         _menu?.ProgramView.AddChild(cartridgeUiFragment);
         _menu?.ToProgramView(title ?? Loc.GetString("comp-pda-io-program-fallback-title"));
     }
 
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+            _metaApplications.Dispose();
+        base.Dispose(disposing);
+    }
+
     protected override void DetachCartridgeUI(Control cartridgeUiFragment)
     {
-        if (_menu == null)
+        if (_menu is not { Disposed: false })
             return;
 
         _menu.ToHomeScreen();
@@ -187,7 +223,7 @@ public sealed class NCAgentBoundUserInterface : CartridgeLoaderBoundUserInterfac
 
     protected override void UpdateAvailablePrograms(List<(EntityUid, CartridgeComponent)> programs)
     {
-        if (_menu == null)
+        if (_menu is not { Disposed: false })
             return;
 
         var storage = EntMan.GetComponentOrNull<NCAgentShardStorageComponent>(Owner);

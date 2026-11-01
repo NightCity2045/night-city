@@ -1,0 +1,121 @@
+{
+  "version": "1.0",
+  "projects": [
+    {
+      "id": "meta-example-hello",
+      "manifest": "Resources/Meta/Projects/meta-example-hello/manifest.json"
+    },
+    {
+      "id": "meta-example-math",
+      "manifest": "Resources/Meta/Projects/meta-example-math/manifest.json"
+    },
+    {
+      "id": "meta-example-arraystats",
+      "manifest": "Resources/Meta/Projects/meta-example-arraystats/manifest.json"
+    },
+    {
+      "id": "meta-example-readings",
+      "manifest": "Resources/Meta/Projects/meta-example-readings/manifest.json"
+    },
+    {
+      "id": "meta-example-files",
+      "manifest": "Resources/Meta/Projects/meta-example-files/manifest.json"
+    },
+    {
+      "id": "meta-example-pong",
+      "manifest": "Resources/Meta/Projects/meta-example-pong/manifest.json"
+    },
+    {
+      "id": "meta-example-doorpanel",
+      "manifest": "Resources/Meta/Projects/meta-example-doorpanel/manifest.json"
+    },
+    {
+      "id": "meta-example-motion",
+      "manifest": "Resources/Meta/Projects/meta-example-motion/manifest.json"
+    },
+    {
+      "id": "meta-example-sensorfilter",
+      "manifest": "Resources/Meta/Projects/meta-example-sensorfilter/manifest.json"
+    },
+    {
+      "id": "meta-example-diagnostics",
+      "manifest": "Resources/Meta/Projects/meta-example-diagnostics/manifest.json"
+    },
+    {
+      "id": "meta-example-overheat",
+      "manifest": "Resources/Meta/Projects/meta-example-overheat/manifest.json"
+    },
+    {
+      "id": "meta-example-patrol",
+      "manifest": "Resources/Meta/Projects/meta-example-patrol/manifest.json"
+    },
+    {
+      "id": "meta-example-conveyor",
+      "manifest": "Resources/Meta/Projects/meta-example-conveyor/manifest.json"
+    },
+    {
+      "id": "meta-example-optics",
+      "manifest": "Resources/Meta/Projects/meta-example-optics/manifest.json"
+    },
+    {
+      "id": "meta-example-netprobe",
+      "manifest": "Resources/Meta/Projects/meta-example-netprobe/manifest.json"
+    },
+    {
+      "id": "meta-example-library",
+      "manifest": "Resources/Meta/Projects/meta-example-library/manifest.json"
+    },
+    {
+      "id": "meta-example-dashboard",
+      "manifest": "Resources/Meta/Projects/meta-example-dashboard/manifest.json"
+    },
+    {
+      "manifest": "Resources/Meta/Projects/meta-example-fabricator/manifest.json",
+      "id": "meta-example-fabricator"
+    },
+    {
+      "manifest": "Resources/Meta/Projects/meta-example-laboratory/manifest.json",
+      "id": "meta-example-laboratory"
+    },
+    {
+      "id": "meta-example-functions",
+      "manifest": "Resources/Meta/Projects/meta-example-functions/manifest.json"
+    },
+    {
+      "id": "meta-example-delivery",
+      "manifest": "Resources/Meta/Projects/meta-example-delivery/manifest.json"
+    },
+    {
+      "id": "meta-example-equippedshot",
+      "manifest": "Resources/Meta/Projects/meta-example-equippedshot/manifest.json"
+    },
+    {
+      "id": "meta-tutorial-threshold",
+      "manifest": "Resources/Meta/Projects/meta-tutorial-threshold/manifest.json"
+    },
+    {
+      "id": "meta-tutorial-hysteresis",
+      "manifest": "Resources/Meta/Projects/meta-tutorial-hysteresis/manifest.json"
+    },
+    {
+      "id": "meta-tutorial-file",
+      "manifest": "Resources/Meta/Projects/meta-tutorial-file/manifest.json"
+    },
+    {
+      "id": "meta-tutorial-panel",
+      "manifest": "Resources/Meta/Projects/meta-tutorial-panel/manifest.json"
+    },
+    {
+      "id": "meta-tutorial-installation",
+      "manifest": "Resources/Meta/Projects/meta-tutorial-installation/manifest.json"
+    },
+    {
+      "id": "meta-stock-device-control",
+      "manifest": "Resources/Meta/Projects/meta-stock-device-control/manifest.json"
+    },
+    {
+      "id": "meta-stock-security-journal",
+      "manifest": "Resources/Meta/Projects/meta-stock-security-journal/manifest.json"
+    }
+  ]
+}

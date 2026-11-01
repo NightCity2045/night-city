@@ -1,0 +1,39 @@
+{
+  "rootModule": "examples.netprobe",
+  "responses": [
+    {
+      "member": "meta.netrun.NetSession.listVisibleNodes",
+      "value": [
+        {
+          "reference": "data-1",
+          "label": "Fixture data",
+          "kind": "Data"
+        }
+      ],
+      "pending": false,
+      "completeAfterSlices": 1
+    },
+    {
+      "member": "meta.netrun.NetSession.probe",
+      "value": {
+        "success": true,
+        "traceLevel": 2,
+        "detail": "fixture success"
+      },
+      "pending": true,
+      "completeAfterSlices": 2
+    }
+  ],
+  "events": [],
+  "expectedLogs": [
+    "Проверка успешна: fixture success",
+    "Trace=2"
+  ],
+  "expectedCommands": [
+    "listVisibleNodes()",
+    "probe(data-1)"
+  ],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}

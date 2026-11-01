@@ -1,0 +1,28 @@
+{
+  "rootModule": "stock.control",
+  "responses": [],
+  "events": [
+    {
+      "slot": "owned-door",
+      "event": "stateChanged",
+      "arguments": [
+        {
+          "desiredOpen": false,
+          "phase": "Closed",
+          "stamp": {
+            "epoch": 1,
+            "sequence": 1,
+            "tick": 60
+          }
+        }
+      ],
+      "sequence": 1
+    }
+  ],
+  "expectedLogs": [],
+  "expectedCommands": [],
+  "epoch": 1,
+  "nowMs": 1000,
+  "tick": 60
+}
+

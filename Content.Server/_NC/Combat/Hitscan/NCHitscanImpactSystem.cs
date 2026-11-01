@@ -112,6 +112,7 @@ public sealed partial class NCHitscanImpactSystem : EntitySystem
         {
             HasPhysicalHitPosition = true,
             ShooterMoving = args.Raycast.Shooter is { } movingShooter && _accuracy.IsMoving(movingShooter),
+            MovingPenaltyReduction = _accuracy.CaptureMovementPenaltyReduction(args.Raycast.Shooter),
         };
 
         if (!_delivery.TryDeliver(impact, out var delivered))

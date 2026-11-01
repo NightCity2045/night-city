@@ -174,6 +174,7 @@ public abstract partial class ServerDbContext
 
     private static void ConfigureNCPersistenceModels(ModelBuilder modelBuilder)
     {
+        ConfigureNCMetaBlobModels(modelBuilder);
         modelBuilder.Entity<NCEventJournalEntry>()
             .HasIndex(value => new { value.AggregateType, value.AggregateId, value.AggregateVersion })
             .IsUnique();

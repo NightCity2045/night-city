@@ -31,6 +31,11 @@ public sealed partial class NCCyberwareSlotHostComponent : Component
 [RegisterComponent]
 public sealed partial class NCCyberwareComponent : Component
 {
+    [DataField] public NCCyberwareServiceState Service = new();
+
+    /// <summary>Generic world YAML clock, distinct from the medical snapshot's CapturedAt.</summary>
+    [DataField] public TimeSpan? PersistenceCapturedAt;
+
     [DataField(required: true)]
     public ProtoId<NCCyberwarePrototype> Profile;
 
@@ -46,11 +51,26 @@ public sealed partial class NCCyberwareComponent : Component
     [DataField]
     public float CurrentPower;
 
+    // CurrentPower is a legacy serialization field only. Runtime power comes from a physical body bus.
+    [ViewVariables]
+    public bool PowerGranted;
+
+    [DataField]
+    public bool ThermalShutdown;
+
     [DataField]
     public float Heat;
 
     [DataField]
     public float Load;
+
+    /// <summary>Trusted compute demand composes with the native active mode and is never restored as authority.</summary>
+    [ViewVariables]
+    public float ComputeLoad;
+
+    /// <summary>Runtime boundary for timed active modes; the body power solver splits at this deadline.</summary>
+    [ViewVariables]
+    public TimeSpan? ActiveLoadUntil;
 
     [DataField]
     public TimeSpan EmpDisabledUntil;
@@ -69,6 +89,15 @@ public sealed partial class NCCyberwareComponent : Component
 
     [DataField]
     public float FunctionalEfficiency = 1f;
+
+    /// <summary>Separate psychological restriction; never changes structural damage or life support.</summary>
+    [ViewVariables]
+    public float CrisisEfficiency = 1f;
+    [ViewVariables]
+    public bool CrisisBlocksActiveModes;
+
+    [DataField]
+    public float PermanentDamage;
 
     [ViewVariables]
     public TimeSpan LastAdvancedAt;

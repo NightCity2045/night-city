@@ -72,7 +72,9 @@ public sealed record NCPersistentBatchMutationRequest(
     NCSessionEpoch SessionEpoch,
     NCActiveWorldTime ActiveWorldTime,
     IReadOnlyList<NCPersistentBatchOutboxWrite> OutboxMessages,
-    NCPersistenceWriteClass WriteClass = NCPersistenceWriteClass.DurableOutcome);
+    NCPersistenceWriteClass WriteClass = NCPersistenceWriteClass.DurableOutcome,
+    string? RequestFingerprint = null,
+    NCMetaAuthorityConstraints? Authority = null);
 
 public sealed record NCPersistentAggregateMutationData(
     string AggregateType,
@@ -98,7 +100,8 @@ public sealed record NCPersistentCommandResultData(
     NCPersistentMutationStatus Status,
     IReadOnlyList<NCPersistentAggregateMutationData> Aggregates,
     string? ResultPayload,
-    string? Error);
+    string? Error,
+    string? RequestFingerprint = null);
 
 /// <summary>
 /// A domain executor supplies the already validated next snapshot and event. This boundary performs no
@@ -123,7 +126,9 @@ public sealed record NCPersistentMutationRequest(
     NCSessionEpoch SessionEpoch,
     NCActiveWorldTime ActiveWorldTime,
     IReadOnlyList<NCOutboxWrite> OutboxMessages,
-    NCPersistenceWriteClass WriteClass = NCPersistenceWriteClass.DurableOutcome);
+    NCPersistenceWriteClass WriteClass = NCPersistenceWriteClass.DurableOutcome,
+    string? RequestFingerprint = null,
+    NCMetaAuthorityConstraints? Authority = null);
 
 public sealed record NCPersistentMutationResult(
     NCPersistentMutationStatus Status,
@@ -371,7 +376,8 @@ public abstract partial class ServerDbBase
             status,
             envelope?.AggregateVersions ?? [],
             envelope?.DomainResultPayload,
-            receipt.Error);
+            receipt.Error,
+            envelope?.RequestFingerprint);
     }
 
     public async Task<NCPersistentMutationResult> ApplyNCPersistentMutationAsync(
@@ -386,7 +392,12 @@ public abstract partial class ServerDbBase
             .AsNoTracking()
             .SingleOrDefaultAsync(value => value.CommandId == request.CommandId);
         if (existingReceipt != null)
+        {
+            if (!MatchesCommand(existingReceipt, request.CommandType, request.ScopeType, request.ScopeId, request.RequestFingerprint))
+                return new NCPersistentMutationResult(NCPersistentMutationStatus.VersionConflict,
+                    request.CommandId, null, 0, null, "Command ID belongs to a different request.");
             return ReceiptToResult(existingReceipt);
+        }
 
         var snapshot = await db.DbContext.NCAggregateSnapshots
             .SingleOrDefaultAsync(value =>
@@ -420,9 +431,15 @@ public abstract partial class ServerDbBase
                 error);
         }
 
-        if (currentVersion != request.ExpectedAggregateVersion)
+        var authorityCurrent = await CheckNCMetaAuthorityAsync(db.DbContext, request.Authority);
+        var projectCurrent = await CheckNCMetaProjectMutationAsync(db.DbContext, request.CommandType,
+            [new(request.EventId, request.EventType, request.AggregateType, request.AggregateId,
+                request.ExpectedAggregateVersion, request.SnapshotFormatVersion, request.SnapshotPayload, request.EventPayload)]);
+        if (!authorityCurrent || !projectCurrent || currentVersion != request.ExpectedAggregateVersion)
         {
-            var error = $"Expected aggregate version {request.ExpectedAggregateVersion}, found {currentVersion}.";
+            var error = !authorityCurrent ? "Native META authority changed before commit." : !projectCurrent ?
+                "The META project has been deleted or its retirement transition is invalid." :
+                $"Expected aggregate version {request.ExpectedAggregateVersion}, found {currentVersion}.";
             db.DbContext.NCCommandReceipts.Add(CreateReceipt(
                 request,
                 NCCommandReceiptState.Failed,
@@ -444,6 +461,12 @@ public abstract partial class ServerDbBase
             throw new InvalidOperationException("The aggregate version space has been exhausted.");
 
         var nextVersion = currentVersion + 1;
+        if (snapshot != null)
+            await TrackNCMetaBlobReferencesAsync(db.DbContext, snapshot.AggregateType, snapshot.AggregateId,
+                snapshot.AggregateVersion, snapshot.FormatVersion, snapshot.SessionEpoch, snapshot.ActiveWorldTicks,
+                snapshot.Payload, snapshot.CreatedAt);
+        await TrackNCMetaBlobReferencesAsync(db.DbContext, request.AggregateType, request.AggregateId, nextVersion,
+            request.SnapshotFormatVersion, request.SessionEpoch.Value, request.ActiveWorldTime.Ticks, request.SnapshotPayload, now);
         var receipt = CreateReceipt(
             request,
             NCCommandReceiptState.Started,
@@ -463,7 +486,9 @@ public abstract partial class ServerDbBase
             CausationId = request.CausationId,
             SessionEpoch = request.SessionEpoch.Value,
             ActiveWorldTicks = request.ActiveWorldTime.Ticks,
-            Payload = request.EventPayload,
+            Payload = NCMetaJournalIntegrity.Attest(request.AggregateType, request.AggregateId, nextVersion,
+                request.SnapshotFormatVersion, request.SessionEpoch.Value, request.ActiveWorldTime.Ticks,
+                request.SnapshotPayload, request.EventPayload, snapshot),
             CreatedAt = now,
             AppliedAt = now,
         });
@@ -501,7 +526,8 @@ public abstract partial class ServerDbBase
 
         receipt.State = NCCommandReceiptState.Completed;
         receipt.CompletedAtWorldTicks = request.ActiveWorldTime.Ticks;
-        receipt.ResultPayload = SerializeReceiptEnvelope(request.EventId, nextVersion, request.ResultPayload);
+        receipt.ResultPayload = SerializeReceiptEnvelope(request.EventId, nextVersion, request.ResultPayload,
+            fingerprint: request.RequestFingerprint);
         receipt.UpdatedAt = now;
 
         await db.DbContext.SaveChangesAsync();
@@ -531,7 +557,12 @@ public abstract partial class ServerDbBase
             .AsNoTracking()
             .SingleOrDefaultAsync(value => value.CommandId == request.CommandId);
         if (existingReceipt != null)
+        {
+            if (!MatchesCommand(existingReceipt, request.CommandType, request.ScopeType, request.ScopeId, request.RequestFingerprint))
+                return new NCPersistentBatchMutationResult(NCPersistentMutationStatus.VersionConflict,
+                    request.CommandId, [], null, "Command ID belongs to a different request.");
             return ReceiptToBatchResult(existingReceipt);
+        }
 
         var aggregateTypes = request.Writes.Select(value => value.AggregateType).Distinct().ToArray();
         var aggregateIds = request.Writes.Select(value => value.AggregateId).Distinct().ToArray();
@@ -576,7 +607,8 @@ public abstract partial class ServerDbBase
                 error);
         }
 
-        var conflict = false;
+        var conflict = !await CheckNCMetaAuthorityAsync(db.DbContext, request.Authority) ||
+            !await CheckNCMetaProjectMutationAsync(db.DbContext, request.CommandType, request.Writes);
         for (var i = 0; i < request.Writes.Count; i++)
         {
             if (request.Writes[i].ExpectedAggregateVersion != current[i].AggregateVersion)
@@ -615,6 +647,13 @@ public abstract partial class ServerDbBase
                 throw new InvalidOperationException("The aggregate version space has been exhausted.");
 
             var nextVersion = write.ExpectedAggregateVersion + 1;
+            snapshots.TryGetValue((write.AggregateType, write.AggregateId), out var snapshot);
+            if (snapshot != null)
+                await TrackNCMetaBlobReferencesAsync(db.DbContext, snapshot.AggregateType, snapshot.AggregateId,
+                    snapshot.AggregateVersion, snapshot.FormatVersion, snapshot.SessionEpoch, snapshot.ActiveWorldTicks,
+                    snapshot.Payload, snapshot.CreatedAt);
+            await TrackNCMetaBlobReferencesAsync(db.DbContext, write.AggregateType, write.AggregateId, nextVersion,
+                write.SnapshotFormatVersion, request.SessionEpoch.Value, request.ActiveWorldTime.Ticks, write.SnapshotPayload, now);
             db.DbContext.NCEventJournal.Add(new NCEventJournalEntry
             {
                 EventId = write.EventId,
@@ -627,12 +666,14 @@ public abstract partial class ServerDbBase
                 CausationId = request.CausationId,
                 SessionEpoch = request.SessionEpoch.Value,
                 ActiveWorldTicks = request.ActiveWorldTime.Ticks,
-                Payload = write.EventPayload,
+                Payload = NCMetaJournalIntegrity.Attest(write.AggregateType, write.AggregateId, nextVersion,
+                    write.SnapshotFormatVersion, request.SessionEpoch.Value, request.ActiveWorldTime.Ticks,
+                    write.SnapshotPayload, write.EventPayload, snapshot),
                 CreatedAt = now,
                 AppliedAt = now,
             });
 
-            if (!snapshots.TryGetValue((write.AggregateType, write.AggregateId), out var snapshot))
+            if (snapshot == null)
             {
                 snapshot = new NCAggregateSnapshot
                 {
@@ -676,7 +717,8 @@ public abstract partial class ServerDbBase
             applied[0].EventId,
             applied[0].AggregateVersion,
             request.ResultPayload,
-            applied);
+            applied,
+            request.RequestFingerprint);
         receipt.UpdatedAt = now;
 
         await db.DbContext.SaveChangesAsync();
@@ -1030,7 +1072,7 @@ public abstract partial class ServerDbBase
             CompletedAtWorldTicks = state == NCCommandReceiptState.Started
                 ? null
                 : request.ActiveWorldTime.Ticks,
-            ResultPayload = resultPayload,
+            ResultPayload = WithFingerprint(resultPayload, request.RequestFingerprint),
             Error = error,
             CreatedAt = now,
             UpdatedAt = now,
@@ -1056,9 +1098,8 @@ public abstract partial class ServerDbBase
             CompletedAtWorldTicks = state == NCCommandReceiptState.Started
                 ? null
                 : request.ActiveWorldTime.Ticks,
-            ResultPayload = aggregates == null
-                ? null
-                : SerializeReceiptEnvelope(null, aggregates[0].AggregateVersion, null, aggregates),
+            ResultPayload = SerializeReceiptEnvelope(null, aggregates?[0].AggregateVersion ?? 0, null,
+                aggregates, request.RequestFingerprint),
             Error = error,
             CreatedAt = now,
             UpdatedAt = now,
@@ -1104,13 +1145,14 @@ public abstract partial class ServerDbBase
         Guid? eventId,
         long aggregateVersion,
         string? resultPayload,
-        IReadOnlyList<NCPersistentAggregateMutationData>? aggregateVersions = null)
+        IReadOnlyList<NCPersistentAggregateMutationData>? aggregateVersions = null,
+        string? fingerprint = null)
     {
         return JsonSerializer.Serialize(new NCReceiptEnvelope(
             eventId,
             aggregateVersion,
             resultPayload,
-            aggregateVersions?.ToArray()));
+            aggregateVersions?.ToArray(), fingerprint));
     }
 
     private static NCReceiptEnvelope? DeserializeReceiptEnvelope(string? payload)
@@ -1131,6 +1173,8 @@ public abstract partial class ServerDbBase
     private static void ValidateMutationRequest(NCPersistentMutationRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
+        ValidateFingerprint(request.RequestFingerprint);
+        ValidateNCMetaAuthority(request.Authority);
         if (request.CommandId == Guid.Empty)
             throw new ArgumentException("Command ID must be non-empty.", nameof(request));
         if (request.EventId == Guid.Empty)
@@ -1169,6 +1213,8 @@ public abstract partial class ServerDbBase
     private static void ValidateBatchMutationRequest(NCPersistentBatchMutationRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
+        ValidateFingerprint(request.RequestFingerprint);
+        ValidateNCMetaAuthority(request.Authority);
         if (request.CommandId == Guid.Empty)
             throw new ArgumentException("Command ID must be non-empty.", nameof(request));
         if (request.CorrelationId == Guid.Empty)
@@ -1225,9 +1271,30 @@ public abstract partial class ServerDbBase
             throw new ArgumentException($"Value must contain 1..{maxLength} characters.", parameterName);
     }
 
+    private static bool MatchesCommand(NCCommandReceipt receipt, string commandType, string scopeType,
+        string scopeId, string? fingerprint) =>
+        receipt.CommandType == commandType && receipt.ScopeType == scopeType && receipt.ScopeId == scopeId &&
+        DeserializeReceiptEnvelope(receipt.ResultPayload)?.RequestFingerprint == fingerprint;
+
+    private static void ValidateFingerprint(string? fingerprint)
+    {
+        if (fingerprint != null && (fingerprint.Length != 64 ||
+            fingerprint.Any(c => c is not (>= '0' and <= '9') and not (>= 'a' and <= 'f'))))
+            throw new ArgumentException("Request fingerprint must be canonical SHA-256.", nameof(fingerprint));
+    }
+
+    private static string? WithFingerprint(string? payload, string? fingerprint)
+    {
+        if (fingerprint == null)
+            return payload;
+        var envelope = DeserializeReceiptEnvelope(payload) ?? new NCReceiptEnvelope(null, 0, null);
+        return JsonSerializer.Serialize(envelope with { RequestFingerprint = fingerprint });
+    }
+
     private sealed record NCReceiptEnvelope(
         Guid? EventId,
         long AggregateVersion,
         string? DomainResultPayload,
-        NCPersistentAggregateMutationData[]? AggregateVersions = null);
+        NCPersistentAggregateMutationData[]? AggregateVersions = null,
+        string? RequestFingerprint = null);
 }

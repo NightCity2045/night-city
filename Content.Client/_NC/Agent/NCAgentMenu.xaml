@@ -98,7 +98,7 @@
                                     </PanelContainer.PanelOverride>
                                     <BoxContainer Orientation="Vertical" Margin="10 8">
                                         <Label Text="CITINET" FontColorOverride="#EE9BFF" />
-                                        <Label Text="Night City feed" FontColorOverride="#896192" />
+                                        <Label Text="{Loc 'nc-meta-browser-tagline'}" FontColorOverride="#896192" />
                                     </BoxContainer>
                                 </PanelContainer>
                             </ContainerButton>

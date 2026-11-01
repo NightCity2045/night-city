@@ -70,7 +70,8 @@ public abstract partial class SharedHandsSystem
         bool animateUser = false,
         bool animate = true,
         HandsComponent? handsComp = null,
-        ItemComponent? item = null)
+        ItemComponent? item = null,
+        Func<bool>? commitGuard = null) // NC
     {
         if (!Resolve(uid, ref handsComp, false))
             return false;
@@ -92,6 +93,8 @@ public abstract partial class SharedHandsSystem
 
         if (!BeforeDoPickup((uid, handsComp), entity))
             return false;
+
+        if (commitGuard != null && (!commitGuard() || !_interactionSystem.InRangeUnobstructed(uid, entity))) return false; // NC
 
         if (animate)
         {

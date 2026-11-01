@@ -42,6 +42,8 @@ public sealed partial class NCPlayerPossessionsSnapshotSystem : EntitySystem
     [Dependency] private MapLoaderSystem _loader = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private ITaskManager _taskManager = default!;
+    [Dependency] private NCRoundRestoreContextSystem _restore = default!;
+    [Dependency] private Content.Server._NC.Medical.Cyberware.NCCyberwareSystem _cyberwareWorld = default!;
 
     private readonly Dictionary<EntityUid, NCCharacterId> _bindings = [];
     private readonly Dictionary<NCCharacterId, PossessionsDocument> _detached = [];
@@ -78,7 +80,8 @@ public sealed partial class NCPlayerPossessionsSnapshotSystem : EntitySystem
         {
             try
             {
-                var sections = await _database.GetLatestNCRoundSnapshotSectionsAsync(
+                if (_restore.Manifest is not { } manifest) return;
+                var sections = await _database.GetNCRoundSnapshotSectionsAsync(manifest.SnapshotId,
                     SectionType,
                     OwnerType,
                     Key(characterId));
@@ -258,7 +261,8 @@ public sealed partial class NCPlayerPossessionsSnapshotSystem : EntitySystem
             using var reader = new StringReader(entry.EntityYaml);
             if (!_loader.TryLoadGeneric(reader, $"character possessions {entry.Kind}/{entry.Id}", out var result,
                     MapLoadOptions.Default) || result.Maps.Count != 0 || result.Grids.Count != 0 ||
-                result.Orphans.Count != 1 || result.RootNodes.Count != 1)
+                result.Orphans.Count != 1 || result.RootNodes.Count != 1 ||
+                !_cyberwareWorld.CanUseRestoredWorldTree(result.Orphans.Single()))
             {
                 foreach (var root in result?.RootNodes ?? [])
                 {

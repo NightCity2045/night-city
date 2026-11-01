@@ -109,7 +109,10 @@ public readonly record struct NCAdminExactCyberwareSummary(
     NCCyberwareNeuralState NeuralState,
     bool Calibrated,
     bool Operational,
-    float FunctionalEfficiency);
+    float FunctionalEfficiency,
+    float SupplyCharge = 0f,
+    float SupplyFraction = 0f,
+    bool PowerGranted = false);
 
 public readonly record struct NCAdminExactDrugSummary(
     ProtoId<NCDrugProfilePrototype> Profile,

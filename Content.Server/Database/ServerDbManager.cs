@@ -488,16 +488,22 @@ namespace Content.Server.Database
             return RunDbCommand(() => _db.MakeCharacterSlotLegacyAsync(userId, slot));
         }
 
-        public Task SaveCharacterSlotAsync(NetUserId userId, HumanoidCharacterProfile? profile, int slot)
+        public async Task SaveCharacterSlotAsync(NetUserId userId, HumanoidCharacterProfile? profile, int slot) // NC
         {
             DbWriteOpsMetric.Inc();
-            return RunDbCommand(() => _db.SaveCharacterSlotAsync(userId, profile, slot));
+            // NC-Edit-Start
+            await RunDbCommand(() => _db.SaveCharacterSlotAsync(userId, profile, slot));
+            if (profile == null) NotifyNCPlayerEmploymentChanged();
+            // NC-Edit-End
         }
 
-        public Task DeleteSlotAndSetSelectedIndex(NetUserId userId, int deleteSlot, int newSlot)
+        public async Task DeleteSlotAndSetSelectedIndex(NetUserId userId, int deleteSlot, int newSlot) // NC
         {
             DbWriteOpsMetric.Inc();
-            return RunDbCommand(() => _db.DeleteSlotAndSetSelectedIndex(userId, deleteSlot, newSlot));
+            // NC-Edit-Start
+            await RunDbCommand(() => _db.DeleteSlotAndSetSelectedIndex(userId, deleteSlot, newSlot));
+            NotifyNCPlayerEmploymentChanged();
+            // NC-Edit-End
         }
 
         public Task SaveAdminOOCColorAsync(NetUserId userId, Color color)
@@ -1171,6 +1177,11 @@ namespace Content.Server.Database
 
             if (!inMemory)
             {
+#if TOOLS && NC_DIAGNOSTICS
+                // NC-Edit-Start: an isolated pristine seed can never overwrite file-backed user data.
+                if (NCMetaSqliteSeedPackage.Requested) throw new InvalidOperationException("Diagnostic SQLite seeds require in-memory user data.");
+                // NC-Edit-End
+#endif
                 var finalPreferencesDbPath = Path.Combine(_res.UserData.RootDir!, configPreferencesDbPath);
                 _sawmill.Debug($"Using SQLite DB \"{finalPreferencesDbPath}\"");
                 getConnection = () => new SqliteConnection($"Data Source={finalPreferencesDbPath}");
@@ -1182,6 +1193,20 @@ namespace Content.Server.Database
                 // When using an in-memory DB we have to open it manually
                 // so EFCore doesn't open, close and wipe it every operation.
                 _sqliteInMemoryConnection.Open();
+#if TOOLS && NC_DIAGNOSTICS
+                // NC-Edit-Start: explicit pristine schema prefill; ServerDbSqlite still runs normal Migrate.
+                try
+                {
+                    if (NCMetaSqliteSeedPackage.ReadEnvironment() is { } seed)
+                    {
+                        NCMetaSqliteSeedPackage.LoadIntoNewMemory(_sqliteInMemoryConnection, seed,
+                            NCMetaSqliteSeedPackage.ReadSqliteMigrationIds(typeof(SqliteServerDbContext).Assembly.Location));
+                        _sawmill.Info($"Loaded pristine SQLite seed {seed.Id}; normal migrations follow.");
+                    }
+                }
+                catch { _sqliteInMemoryConnection.Dispose(); _sqliteInMemoryConnection = null; throw; }
+                // NC-Edit-End
+#endif
                 getConnection = () => _sqliteInMemoryConnection;
             }
 

@@ -87,7 +87,7 @@ public sealed partial class NCHitLocationSystem : EntitySystem
         if (!_prototypes.TryIndex(selected, out NCTargetZonePrototype? zone))
             return false;
 
-        var hitChance = _accuracy.ResolveCalledShotHitChance(zone.CalledShotHitChance, impact.ShooterMoving);
+        var hitChance = _accuracy.ResolveCalledShotHitChance(zone.CalledShotHitChance, impact.ShooterMoving, impact.MovingPenaltyReduction);
         if (Roll(impact.Seed, CalledShotHitSalt) < hitChance &&
             _anatomy.TryResolveSelectedZone(body, selected, out actualZone, out region))
         {

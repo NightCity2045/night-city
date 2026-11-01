@@ -1,5 +1,11 @@
 namespace Content.Shared.Body.Events;
 
+// NC-Edit-Start
+/// <summary>Physical metabolism providers may be unavailable, e.g. an unpowered artificial pump.</summary>
+[ByRefEvent]
+public record struct MetabolizerAttemptEvent(bool Cancelled = false);
+// NC-Edit-End
+
 /// <summary>
 /// Raised on an entity to determine their metabolic multiplier.
 /// </summary>
