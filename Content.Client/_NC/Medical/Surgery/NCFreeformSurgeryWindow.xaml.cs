@@ -76,9 +76,12 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
 
         ToolName.Text = state.ToolName;
         SterilityBar.Value = Math.Clamp(state.ToolSterility, 0f, 1f);
-        SterilityLabel.Text = $"Sterility {state.ToolSterility:P0}";
+        SterilityLabel.Text = Loc.GetString("nc-surgery-ui-sterility", ("value", state.ToolSterility.ToString("P0")));
         SterilityLabel.FontColorOverride = SeverityColor(1f - state.ToolSterility);
         PopulateCapabilities(state);
+        GraftHint.Visible = state.StagedGraftZone != null;
+        if (GraftHint.Visible)
+            GraftHint.SetMessage(Loc.GetString("nc-surgery-ui-graft-hint"), Color.FromHex("#FFC95C"));
         PopulateSite(state, displayedDepth);
         PopulateAttachments(state);
         SurgicalField.SetState(state, displayedDepth);
@@ -129,7 +132,7 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
                 ToggleMode = true,
                 Pressed = capability.Selected,
                 HorizontalExpand = true,
-                ToolTip = $"{capability.Name}: {ActionName(capability.Action)}",
+                ToolTip = $"{CapabilityName(capability)}: {ActionName(capability.Action)}",
             };
             var row = new BoxContainer
             {
@@ -149,7 +152,7 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
             }
             row.AddChild(new Label
             {
-                Text = $"{ActionName(capability.Action)}\n{capability.Name}",
+                Text = $"{ActionName(capability.Action)}\n{CapabilityName(capability)}",
                 HorizontalExpand = true,
                 ClipText = true,
             });
@@ -164,10 +167,17 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
         {
             CapabilityContainer.AddChild(new Label
             {
-                Text = "Hold a compatible surgical instrument in the active hand.",
+                Text = Loc.GetString("nc-surgery-ui-hold-tool"),
                 FontColorOverride = Color.FromHex("#E9B658"),
             });
         }
+    }
+
+    private string CapabilityName(NCFreeformSurgeryCapabilitySummary capability)
+    {
+        return _prototypes.TryIndex(capability.Capability, out var prototype) && prototype.NameId is { } nameId
+            ? Loc.GetString(nameId)
+            : capability.Name;
     }
 
     private bool CanReuseCapabilities(NCFreeformSurgeryState state)
@@ -220,7 +230,7 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
         {
             AttachmentContainer.AddChild(new Label
             {
-                Text = "None",
+                Text = Loc.GetString("nc-surgery-ui-none"),
                 FontColorOverride = Color.FromHex("#718B8D"),
             });
             return;
@@ -230,7 +240,7 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
         {
             var button = new Button
             {
-                Text = $"Detach {attachment.Name}",
+                Text = Loc.GetString("nc-surgery-ui-detach", ("tool", attachment.Name)),
                 HorizontalExpand = true,
             };
             var handle = attachment.Handle;
@@ -268,32 +278,32 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
 
     private static string ActionName(NCFreeformSurgeryAction action) => action switch
     {
-        NCFreeformSurgeryAction.Disinfect => "Field disinfection",
-        NCFreeformSurgeryAction.Incise => "Incision",
-        NCFreeformSurgeryAction.Hemostasis => "Hemostasis",
-        NCFreeformSurgeryAction.Retract => "Retraction",
-        NCFreeformSurgeryAction.Suture => "Suturing",
-        NCFreeformSurgeryAction.Irrigate => "Irrigation",
-        NCFreeformSurgeryAction.Debride => "Debridement",
-        NCFreeformSurgeryAction.RepairVessel => "Vascular repair",
-        NCFreeformSurgeryAction.RepairOrgan => "Organ repair",
-        NCFreeformSurgeryAction.ReduceBone => "Bone reduction",
-        NCFreeformSurgeryAction.FixBone => "Bone fixation",
-        NCFreeformSurgeryAction.RepairTendon => "Tendon repair",
-        NCFreeformSurgeryAction.RepairNerve => "Nerve repair",
-        NCFreeformSurgeryAction.ExtractForeignBody => "Foreign-body extraction",
-        NCFreeformSurgeryAction.OpenBone => "Bone access",
-        NCFreeformSurgeryAction.Separate => "Separation",
-        NCFreeformSurgeryAction.Amputate => "Amputation",
-        NCFreeformSurgeryAction.Transplant => "Transplantation",
-        NCFreeformSurgeryAction.Cyberware => "Cyberware installation / removal",
+        NCFreeformSurgeryAction.Disinfect => Loc.GetString("nc-surgery-ui-action-disinfect"),
+        NCFreeformSurgeryAction.Incise => Loc.GetString("nc-surgery-ui-action-incise"),
+        NCFreeformSurgeryAction.Hemostasis => Loc.GetString("nc-surgery-ui-action-hemostasis"),
+        NCFreeformSurgeryAction.Retract => Loc.GetString("nc-surgery-ui-action-retract"),
+        NCFreeformSurgeryAction.Suture => Loc.GetString("nc-surgery-ui-action-suture"),
+        NCFreeformSurgeryAction.Irrigate => Loc.GetString("nc-surgery-ui-action-irrigate"),
+        NCFreeformSurgeryAction.Debride => Loc.GetString("nc-surgery-ui-action-debride"),
+        NCFreeformSurgeryAction.RepairVessel => Loc.GetString("nc-surgery-ui-action-repair-vessel"),
+        NCFreeformSurgeryAction.RepairOrgan => Loc.GetString("nc-surgery-ui-action-repair-organ"),
+        NCFreeformSurgeryAction.ReduceBone => Loc.GetString("nc-surgery-ui-action-reduce-bone"),
+        NCFreeformSurgeryAction.FixBone => Loc.GetString("nc-surgery-ui-action-fix-bone"),
+        NCFreeformSurgeryAction.RepairTendon => Loc.GetString("nc-surgery-ui-action-repair-tendon"),
+        NCFreeformSurgeryAction.RepairNerve => Loc.GetString("nc-surgery-ui-action-repair-nerve"),
+        NCFreeformSurgeryAction.ExtractForeignBody => Loc.GetString("nc-surgery-ui-action-extract-foreign-body"),
+        NCFreeformSurgeryAction.OpenBone => Loc.GetString("nc-surgery-ui-action-open-bone"),
+        NCFreeformSurgeryAction.Separate => Loc.GetString("nc-surgery-ui-action-separate"),
+        NCFreeformSurgeryAction.Amputate => Loc.GetString("nc-surgery-ui-action-amputate"),
+        NCFreeformSurgeryAction.Transplant => Loc.GetString("nc-surgery-ui-action-transplant"),
+        NCFreeformSurgeryAction.Cyberware => Loc.GetString("nc-surgery-ui-action-cyberware"),
         NCFreeformSurgeryAction.CalibrateCyberware => Loc.GetString("nc-cyberware-surgery-calibrate"),
         NCFreeformSurgeryAction.DisconnectCyberware => Loc.GetString("nc-cyberware-surgery-disconnect"),
         NCFreeformSurgeryAction.RepairCyberware => Loc.GetString("nc-cyberware-surgery-repair"),
-        NCFreeformSurgeryAction.Cauterize => "Cautery",
-        NCFreeformSurgeryAction.Autopsy => "Autopsy",
-        NCFreeformSurgeryAction.DrainCavity => "Cavity drainage",
-        _ => action.ToString(),
+        NCFreeformSurgeryAction.Cauterize => Loc.GetString("nc-surgery-ui-action-cauterize"),
+        NCFreeformSurgeryAction.Autopsy => Loc.GetString("nc-surgery-ui-action-autopsy"),
+        NCFreeformSurgeryAction.DrainCavity => Loc.GetString("nc-surgery-ui-action-drain-cavity"),
+        _ => Loc.GetString("nc-surgery-ui-unknown-action"),
     };
 
     private static string FeedbackText(NCFreeformSurgeryFailure failure) => failure switch
@@ -308,18 +318,19 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
         NCFreeformSurgeryFailure.CyberwareOverheated => Loc.GetString("nc-cyberware-surgery-overheated"),
         NCFreeformSurgeryFailure.CyberwareEmpDisabled => Loc.GetString("nc-cyberware-surgery-emp-disabled"),
         NCFreeformSurgeryFailure.CyberwareNoRepairNeeded => Loc.GetString("nc-cyberware-surgery-no-repair-needed"),
-        NCFreeformSurgeryFailure.OutOfRange => "Intervention paused: move back within reach of the patient.",
-        NCFreeformSurgeryFailure.StaleRevision => "The operative field changed. Live data has been synchronized; repeat the action.",
-        NCFreeformSurgeryFailure.ToolUnavailable => "The active hand does not contain a surgical instrument.",
-        NCFreeformSurgeryFailure.ToolBroken => "The selected instrument is broken.",
-        NCFreeformSurgeryFailure.CapabilityUnavailable => "Select a supported mode of the instrument in your active hand.",
-        NCFreeformSurgeryFailure.ResourceEmpty => "The instrument has no remaining material or working charge.",
-        NCFreeformSurgeryFailure.AttachmentUnavailable => "The instrument cannot be attached or removed at this point.",
+        NCFreeformSurgeryFailure.OutOfRange => Loc.GetString("nc-surgery-ui-failure-out-of-range"),
+        NCFreeformSurgeryFailure.StaleRevision => Loc.GetString("nc-surgery-ui-failure-stale-revision"),
+        NCFreeformSurgeryFailure.ToolUnavailable => Loc.GetString("nc-surgery-ui-failure-tool-unavailable"),
+        NCFreeformSurgeryFailure.ToolBroken => Loc.GetString("nc-surgery-ui-failure-tool-broken"),
+        NCFreeformSurgeryFailure.CapabilityUnavailable => Loc.GetString("nc-surgery-ui-failure-capability-unavailable"),
+        NCFreeformSurgeryFailure.ResourceEmpty => Loc.GetString("nc-surgery-ui-failure-resource-empty"),
+        NCFreeformSurgeryFailure.AttachmentUnavailable => Loc.GetString("nc-surgery-ui-failure-attachment-unavailable"),
         NCFreeformSurgeryFailure.SurgicalAccessClosed =>
-            "This point is not physically exposed at the selected depth. Open or deepen a local incision first.",
-        NCFreeformSurgeryFailure.NoApplicableTarget => "No applicable wound, incision or exposed structure is under the instrument.",
-        NCFreeformSurgeryFailure.RateLimited => "Move the instrument more deliberately.",
-        _ => $"Surgical request rejected: {failure}.",
+            Loc.GetString("nc-surgery-ui-failure-surgical-access-closed"),
+        NCFreeformSurgeryFailure.NoApplicableTarget => Loc.GetString("nc-surgery-ui-failure-no-applicable-target"),
+        NCFreeformSurgeryFailure.RateLimited => Loc.GetString("nc-surgery-ui-failure-rate-limited"),
+        NCFreeformSurgeryFailure.SessionUnavailable => Loc.GetString("nc-surgery-ui-failure-session"),
+        _ => Loc.GetString("nc-surgery-ui-failure-other"),
     };
 
     private static Color SeverityColor(float value)

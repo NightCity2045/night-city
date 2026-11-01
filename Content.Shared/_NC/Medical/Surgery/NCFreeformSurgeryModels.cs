@@ -307,7 +307,8 @@ public sealed class NCFreeformSurgeryState(
     NCFreeformSurgeryStructureSummary[] structures,
     NCFreeformSurgeryIncisionSummary[] incisions,
     NCFreeformSurgeryWoundSummary[] wounds,
-    NCFreeformSurgeryAttachmentSummary[] attachments) : EntityEventArgs
+    NCFreeformSurgeryAttachmentSummary[] attachments,
+    ProtoId<NCTargetZonePrototype>? stagedGraftZone = null) : EntityEventArgs
 {
     public NCActionResolutionId SessionId { get; } = sessionId;
     public uint Revision { get; } = revision;
@@ -344,6 +345,8 @@ public sealed class NCFreeformSurgeryState(
     public NCFreeformSurgeryIncisionSummary[] Incisions { get; } = incisions;
     public NCFreeformSurgeryWoundSummary[] Wounds { get; } = wounds;
     public NCFreeformSurgeryAttachmentSummary[] Attachments { get; } = attachments;
+    /// <summary>Server-staged missing zone whose living receiving parent can be operated on.</summary>
+    public ProtoId<NCTargetZonePrototype>? StagedGraftZone { get; } = stagedGraftZone;
 }
 
 [Serializable, NetSerializable]

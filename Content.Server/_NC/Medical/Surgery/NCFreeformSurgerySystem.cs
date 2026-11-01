@@ -110,6 +110,15 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             return false;
         }
 
+        // Staging a graft or clicking another instrument reopens this same field. Preserve the token and
+        // pending DoAfters instead of invalidating requests already sent by the surgeon's window.
+        if (TryComp<NCFreeformSurgerySessionComponent>(surgeon, out var existing) &&
+            existing.Patient == patient && existing.SessionId.IsValid)
+        {
+            SendState(surgeon, existing, actor.PlayerSession);
+            return true;
+        }
+
         // Freeform surgery derives the actual anatomical region from the operative-field pixel. Combat
         // targeting must not preselect or redirect the first surgical gesture.
         var requestedZone = anatomy.AutomaticFallbackZone;
@@ -1069,6 +1078,12 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         var wounds = BuildWounds(surgeon, session, profile);
         var attachments = BuildAttachments(session);
         var missingZones = BuildMissingZones(session.Patient, profile);
+        ProtoId<NCTargetZonePrototype>? stagedGraftZone = null;
+        if (TryComp<NCSurgeryGameplaySelectionComponent>(surgeon, out var staged) &&
+            staged.Patient == session.Patient && staged.Graft is { } graft && !TerminatingOrDeleted(graft) &&
+            missingZones.Contains(staged.TargetZone) &&
+            TryResolveFieldRegion(surgeon, session.Patient, staged.TargetZone, out _, out _))
+            stagedGraftZone = staged.TargetZone;
         TryComp<NCCirculationComponent>(session.Patient, out var circulation);
         TryComp<NCPhysiologyComponent>(session.Patient, out var physiology);
 
@@ -1103,7 +1118,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             structures,
             incisions,
             wounds,
-            attachments), recipient);
+            attachments,
+            stagedGraftZone), recipient);
     }
 
     private NCFreeformSurgeryCapabilitySummary[] BuildCapabilities(
@@ -1117,8 +1133,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         toolName = Loc.GetString("nc-medical-freeform-surgery-empty-hand");
         toolPrototype = string.Empty;
         sterility = 0f;
-        if (!_hands.TryGetActiveItem(surgeon, out var held) || held is not { } tool ||
-            !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool))
+        if (!_hands.TryGetActiveItem(surgeon, out var held) || held is not { } tool)
         {
             session.SelectedCapability = null;
             return [];
@@ -1126,6 +1141,11 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
 
         toolName = Name(tool);
         toolPrototype = MetaData(tool).EntityPrototype?.ID ?? string.Empty;
+        if (!TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool))
+        {
+            session.SelectedCapability = null;
+            return [];
+        }
         sterility = surgicalTool.Sterility;
         var available = surgicalTool.Capabilities.Keys
             .Where(profile.Tools.ContainsKey)

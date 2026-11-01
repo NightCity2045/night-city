@@ -775,6 +775,7 @@
   name: limb reattachment
   description: Attaches a staged biological or mechanical limb, hand or foot graft to its exact parent region.
   compatibleBodyProfiles: [ Human ]
+  compatibleMaterials: [ Organic, Hybrid, Mechanical ]
   requiredAuthorizations:
   - NCSurgeryAuthorizationOrthopedic
   - NCSurgeryAuthorizationVascular

@@ -157,6 +157,11 @@
   - type: NCJoint
   - type: NCNerve
   - type: NCSurgicalSite
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: ArmLeft
+    woundProfile: NCHumanWoundSystem
+    treatmentProfile: NCHumanFieldTreatment
 
 - type: entity
   id: NCOrganHumanHandRight
@@ -173,6 +178,11 @@
   - type: NCJoint
   - type: NCNerve
   - type: NCSurgicalSite
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: ArmRight
+    woundProfile: NCHumanWoundSystem
+    treatmentProfile: NCHumanFieldTreatment
 
 - type: entity
   id: NCOrganHumanLegLeft

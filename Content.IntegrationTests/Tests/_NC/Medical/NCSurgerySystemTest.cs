@@ -443,6 +443,64 @@ public sealed class NCSurgerySystemTest : GameTest
 
     }
 
+    [TestCase(false, false)]
+    [TestCase(false, true)]
+    [TestCase(true, false)]
+    [TestCase(true, true)]
+    [RunOnSide(Side.Server)]
+    public void FreeformTransplantAttachesSpawnedHandToInstalledCyberarm(bool right, bool clinical)
+    {
+        EntProtoId armPrototype = clinical
+            ? (right ? "NCOrganHumanClinicalCyberArmRight" : "NCOrganHumanClinicalCyberArmLeft")
+            : (right ? "NCOrganHumanCyberArmRight" : "NCOrganHumanCyberArmLeft");
+        EntProtoId handPrototype = right ? "NCOrganHumanHandRight" : "NCOrganHumanHandLeft";
+        EntProtoId wrongHandPrototype = right ? "NCOrganHumanHandLeft" : "NCOrganHumanHandRight";
+        ProtoId<OrganCategoryPrototype> armCategory = right ? "ArmRight" : "ArmLeft";
+        ProtoId<OrganCategoryPrototype> handCategory = right ? "HandRight" : "HandLeft";
+        ProtoId<NCTargetZonePrototype> handZone = right ? "NCZoneHandRight" : "NCZoneHandLeft";
+        var patient = SSpawn(HumanMob);
+        var surgeon = SSpawn(HumanMob);
+        var tool = SSpawn(DebugMultitool);
+        var arm = SSpawn(armPrototype);
+        var hand = SSpawn(handPrototype);
+        var wrongHand = SSpawn(wrongHandPrototype);
+        var profile = _prototypes.Index(HumanFreeformSurgery);
+        var toolComponent = SComp<NCSurgeryToolComponent>(tool);
+
+        Assert.That(_detachment.TryDetachOrgan(patient, armCategory, out _), Is.True);
+        Assert.That(_detachment.TryAttachOrgan(patient, "Torso", arm), Is.True);
+        Assert.That(_anatomy.TryGetOrgan(patient, handCategory, out _), Is.False);
+        Assert.That(_targeting.TrySetSelection(surgeon,
+            new NCTargetingState(NCTargetingMode.SelectedZone, handZone), out _, out _), Is.True);
+        Assert.That(_surgeryInteraction.TryStageGraft(surgeon, patient, wrongHand), Is.False);
+        Assert.That(SComp<NCDetachedOrganMedicalDataComponent>(hand).RequiredParentCategory,
+            Is.EqualTo(armCategory));
+        Assert.That(_surgery.TryPrepareProcedureTarget(patient, arm, "NCSurgeryLimbReattachment", hand,
+            out _, out var preparationFailure), Is.True, $"Graft preparation: {preparationFailure}");
+        Assert.That(_surgeryInteraction.TryStageGraft(surgeon, patient, hand), Is.True);
+
+        var result = _freeformEffects.ApplyStroke(new NCFreeformSurgeryEffectContext(
+            surgeon, patient, arm, tool, toolComponent, handZone, NCWoundSurface.Front, 0.8f,
+            new[] { new Vector2(0.35f, 0.5f), new Vector2(0.65f, 0.5f) },
+            profile.Tools[TransplantCapability], toolComponent.Capabilities[TransplantCapability],
+            toolComponent.Sterility, profile.UnpreparedFieldContamination,
+            profile.MinimumOpenRetraction, null, false, false,
+            profile.IncidentalTendonRuptureThreshold, profile.IncidentalBoneCrackThreshold,
+            profile.IncidentalBoneBreakThreshold));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Accepted, Is.True);
+            Assert.That(_anatomy.TryGetOrgan(patient, handCategory, out var attached), Is.True);
+            Assert.That(attached, Is.EqualTo(hand));
+            Assert.That(SComp<ChildOrganComponent>(hand).Parent, Is.EqualTo(arm));
+            Assert.That(SComp<OrganComponent>(hand).Body, Is.EqualTo(patient));
+            Assert.That(SComp<OrganComponent>(wrongHand).Body, Is.Null);
+            Assert.That(SEntMan.HasComponent<NCDetachedOrganMedicalDataComponent>(hand), Is.False);
+            Assert.That(SEntMan.HasComponent<NCSurgeryGameplaySelectionComponent>(surgeon), Is.False);
+        });
+    }
+
     [Test]
     [RunOnSide(Side.Server)]
     public void FreeformCyberwareInstallsAStagedInternalImplant()
