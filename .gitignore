@@ -323,3 +323,5 @@ error.glsl
 # NC
 .rules/
 .plan/
+
+.local/
