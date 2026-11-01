@@ -37,10 +37,11 @@
   <Import Project="..\RobustToolbox\Imports\Shared.props" />
   <Import Project="..\RobustToolbox\Imports\Packaging.props" />
   <!-- NC-Edit-Start: the isolated compiler is part of the distributable server. -->
-  <Target Name="CopyNCMetaCompilerWorker" AfterTargets="Build;Publish">
+  <Target Name="CopyNCMetaCompilerWorker" AfterTargets="Build">
     <PropertyGroup>
       <NCMetaWorkerDirectory>$(MSBuildProjectDirectory)/../Tools/_NC/Meta/CompilerWorker/bin/$(Configuration)/net10.0</NCMetaWorkerDirectory>
       <NCMetaWorkerDirectory Condition="'$(EnableNCDiagnostics)' == 'true'">$(NCDiagnosticsOutputRoot)/CompilerWorker/net10.0</NCMetaWorkerDirectory>
+      <NCMetaWorkerOutputDirectory>$([MSBuild]::NormalizeDirectory('$(TargetDir)', '..', 'MetaCompilerWorker'))</NCMetaWorkerOutputDirectory>
     </PropertyGroup>
     <ItemGroup>
       <NCMetaWorkerFile Include="$(NCMetaWorkerDirectory)/Meta.CompilerWorker.dll" />
@@ -50,8 +51,14 @@
     </ItemGroup>
     <!-- The game loader recursively scans TargetDir. Only the sibling is a worker bundle. -->
     <Delete Files="$(TargetDir)MetaCompilerWorker/Meta.CompilerWorker.dll;$(TargetDir)MetaCompilerWorker/Meta.CompilerWorker.deps.json;$(TargetDir)MetaCompilerWorker/Meta.CompilerWorker.runtimeconfig.json;$(TargetDir)MetaCompilerWorker/Content.Meta.dll;$(TargetDir)Meta.CompilerWorker.dll;$(TargetDir)Meta.CompilerWorker.deps.json;$(TargetDir)Meta.CompilerWorker.runtimeconfig.json" />
-    <Copy SourceFiles="@(NCMetaWorkerFile)" DestinationFolder="$(TargetDir)../MetaCompilerWorker" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(NCMetaWorkerFile)" DestinationFolder="$(PublishDir)../MetaCompilerWorker" SkipUnchangedFiles="true" Condition="'$(PublishDir)' != ''" />
+    <Copy SourceFiles="@(NCMetaWorkerFile)" DestinationFolder="$(NCMetaWorkerOutputDirectory)" SkipUnchangedFiles="true" />
+  </Target>
+  <!-- PublishDir is also populated during Build; publishing the sibling bundle then puts it back under TargetDir. -->
+  <Target Name="PublishNCMetaCompilerWorker" AfterTargets="Publish" DependsOnTargets="CopyNCMetaCompilerWorker">
+    <PropertyGroup>
+      <NCMetaWorkerPublishDirectory>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishDir)', '..', 'MetaCompilerWorker'))</NCMetaWorkerPublishDirectory>
+    </PropertyGroup>
+    <Copy SourceFiles="@(NCMetaWorkerFile)" DestinationFolder="$(NCMetaWorkerPublishDirectory)" SkipUnchangedFiles="true" />
   </Target>
   <!-- NC-Edit-End -->
 </Project>
