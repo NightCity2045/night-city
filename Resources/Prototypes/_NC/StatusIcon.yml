@@ -2,7 +2,7 @@
   parent: JobIcon
   id: NCJobIconTraumaTeamOperative
   icon:
-    sprite: &icon-rsi /Textures/_NC/Interface/Misc/job_icons.rsi
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
     state: trauma
   jobName: job-name-trauma-team-operative
 
@@ -10,6 +10,6 @@
   parent: JobIcon
   id: NCJobIconTraumaTeamParamed
   icon:
-    sprite: &icon-rsi /Textures/_NC/Interface/Misc/job_icons.rsi
+    sprite: /Textures/_NC/Interface/Misc/job_icons.rsi
     state: trauma-paramed
-  jobName: job-name-cargotech
+  jobName: job-name-trauma-team-paramedic
