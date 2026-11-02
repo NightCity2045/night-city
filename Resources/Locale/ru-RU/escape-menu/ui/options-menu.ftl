@@ -268,6 +268,8 @@ ui-options-function-shuttle-strafe-down = Стрейф вниз
 ui-options-function-shuttle-rotate-left = Поворот налево
 ui-options-function-shuttle-rotate-right = Поворот направо
 ui-options-function-shuttle-brake = Торможение
+ui-options-function-ncav-ascend = Взлет
+ui-options-function-ncav-descend = Снижение
 
 ## Network menu
 

@@ -43,3 +43,96 @@
   components:
   - type: ApcPowerReceiver
     needsPower: false
+
+- type: entity
+  id: NCAVHolographicProjector
+  name: AV holographic projector
+  description: A holographic projector that allows you to broadcast information on ground from AV.
+  placement:
+    mode: SnapgridCenter
+    snap:
+    - Wallmount
+  components:
+  - type: NCAVHolographicProjector
+    projection: NCAVHolographicProjection3x6
+  - type: Physics
+    bodyType: Static
+  - type: PointLight
+    enabled: false
+    color: "#FF0000FF"
+    energy: 5
+    radius: 9
+    softness: 1
+    offset: "0, -0.5"
+    lightMask: MaskCone
+    autoRot: true
+  - type: Clickable
+  - type: InteractionOutline
+  - type: WallMount
+  - type: ExtensionCableReceiver
+  - type: Transform
+    anchored: true
+  - type: Damageable
+    damageModifierSet: Metallic
+  - type: Appearance
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Fixtures
+    fixtures:
+      light:
+        shape:
+          !type:PhysShapeCircle
+          radius: 0.5
+        hard: false
+        mask:
+        - GhostImpassable
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,-0.2,-0.15"
+        density: 190
+        mask:
+        - None
+        layer:
+        - TabletopMachineLayer
+  - type: ApcPowerReceiver
+  - type: Sprite
+    sprite: _NC/Structures/Machines/AV/holographic_projector.rsi
+    layers:
+    - map: [ "enum.PoweredLightLayers.Base" ]
+      state: HolographicProjector
+    - map: [ "enum.PoweredLightLayers.Glow" ]
+      state: HolographicProjector_on
+      shader: unshaded
+  - type: StaticPrice
+    price: 200
+  - type: DeviceNetwork
+    deviceNetId: Wireless
+    receiveFrequencyId: SmartLight
+  - type: DeviceLinkSink
+    ports:
+    - On
+    - Off
+    - Toggle
+  - type: PoweredLightVisuals
+    blinkingSound:
+      path: "/Audio/Machines/light_tube_on.ogg"
+    spriteStateMap:
+      off: HolographicProjector
+      on: HolographicProjector_on
+
+- type: entity
+  id: NCAVHolographicProjection3x6
+  name: projection
+  description: projection
+  placement:
+    mode: SnapgridCenter
+    snap:
+    - Wallmount
+  components:
+  - type: Sprite
+    offset: 0.5,-3.5
+    sprite: _NC/Structures/Machines/AV/projections.rsi
+    layers:
+    - state: ProjectionStayAway3x6
+      shader: unshaded

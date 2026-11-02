@@ -262,6 +262,10 @@ namespace Content.Client.Options.UI.Tabs
             AddButton(ContentKeyFunctions.ShuttleRotateLeft);
             AddButton(ContentKeyFunctions.ShuttleRotateRight);
             AddButton(ContentKeyFunctions.ShuttleBrake);
+            // NC-Edit-Start
+            AddButton(ContentKeyFunctions.NCAVAscend);
+            AddButton(ContentKeyFunctions.NCAVDescend);
+            // NC-Edit-End
 
             AddHeader("ui-options-header-map-editor");
             AddButton(EngineKeyFunctions.EditorPlaceObject);
