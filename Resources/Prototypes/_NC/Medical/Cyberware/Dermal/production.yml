@@ -1,0 +1,128 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: latheRecipe
+  id: NCProduceDermalPlates
+  result: NCDermalPlates
+  completetime: 12
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 1800
+    Plastic: 200
+
+- type: construction
+  id: NCDermalMeshConstruction
+  graph: NCDermalMeshConstruction
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+
+- type: constructionGraph
+  id: NCDermalMeshConstruction
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - tag: NCCyberFiber
+        name: nc-cyber-production-ingredient-fiber
+        icon:
+          sprite: _NC/Objects/Cyberware/production.rsi
+          state: fiber
+        doAfter: 3
+      - tag: NCCyberFiber
+        name: nc-cyber-production-ingredient-fiber
+        icon:
+          sprite: _NC/Objects/Cyberware/production.rsi
+          state: fiber
+        doAfter: 3
+      - material: Plastic
+        amount: 1
+        doAfter: 2
+      - material: Cloth
+        amount: 2
+        doAfter: 2
+  - node: complete
+    entity: NCDermalMesh
+
+- type: construction
+  id: NCImplantSkinweaveTorsoUnpreparedConstruction
+  graph: NCImplantSkinweaveTorsoUnpreparedConstruction
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+
+- type: constructionGraph
+  id: NCImplantSkinweaveTorsoUnpreparedConstruction
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - tag: NCDermalMesh
+        name: nc-dermal-ingredient-mesh
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: mesh
+        doAfter: 3
+      - tag: NCDermalMesh
+        name: nc-dermal-ingredient-mesh
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: mesh
+        doAfter: 3
+      - material: Plastic
+        amount: 1
+        doAfter: 2
+      - material: Cloth
+        amount: 2
+        doAfter: 2
+  - node: complete
+    entity: NCImplantSkinweaveTorsoUnprepared
+
+- type: construction
+  id: NCImplantSubdermalArmorTorsoUnpreparedConstruction
+  graph: NCImplantSubdermalArmorTorsoUnpreparedConstruction
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+
+- type: constructionGraph
+  id: NCImplantSubdermalArmorTorsoUnpreparedConstruction
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - tag: NCDermalMesh
+        name: nc-dermal-ingredient-mesh
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: mesh
+        doAfter: 3
+      - tag: NCDermalPlates
+        name: nc-dermal-ingredient-plates
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: plates
+        doAfter: 3
+      - tag: NCDermalPlates
+        name: nc-dermal-ingredient-plates
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: plates
+        doAfter: 3
+      - material: Plastic
+        amount: 2
+        doAfter: 2
+  - node: complete
+    entity: NCImplantSubdermalArmorTorsoUnprepared
+

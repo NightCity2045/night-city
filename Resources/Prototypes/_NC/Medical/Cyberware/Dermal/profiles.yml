@@ -1,0 +1,175 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncCyberwareSlot
+  id: NCSlotDermalArmorThorax
+  name: torso dermal armor bay
+  nameId: nc-dermal-slot-torso
+  hostCategories: [ Thorax ]
+  capacity: 1
+  regionalSurgeryPositionX: 0.72
+
+- type: ncCyberware
+  id: NCSkinweaveTorso
+  name: Skinweave torso
+  nameId: nc-dermal-profile-skinweave
+  manufacturer: Night City 2045 clinical adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/dermal.rsi
+    state: skinweave
+  form: Implant
+  material: Hybrid
+  compatibleSlots: [ NCSlotDermalArmorThorax ]
+  size: 1
+  maximumIntegrity: 100
+  repairProfile: NCRepairProfileClinicalCyberware
+  humanityPackages: [ NCHumanityProfessionalMotor ]
+  dermalArmor: true
+  requiresFactoryPreparation: true
+  factoryTestSeconds: 8
+  factoryTestEnergy: 10
+  requiresPower: false
+  vulnerableToEmp: false
+  requiresSeparateCalibration: false
+  neuralRequirement: None
+  idlePowerPerSecond: 0
+  loadedPowerPerSecond: 0
+  idleHeatPerSecond: 0
+  loadedHeatPerSecond: 0
+  passiveCoolingPerSecond: 0.4
+  heatCapacity: 120
+  heatDeratingThreshold: 80
+  heatShutdownThreshold: 100
+  heatDamageThreshold: 110
+  heatDamagePerSecond: 1
+  updateInterval: 0.5s
+  capabilities: []
+  skeletalSurgery:
+  - stage: DermalChest
+    name: nc-dermal-step-dermalchest
+    zone: NCZoneChest
+    structure: Thorax
+    action: DistributeDermal
+    minimumDepth: 0.28
+  - stage: DermalAbdomen
+    name: nc-dermal-step-dermalabdomen
+    zone: NCZoneAbdomen
+    structure: Abdomen
+    action: DistributeDermal
+    minimumDepth: 0.28
+    prerequisites: DermalChest
+  - stage: DermalGroin
+    name: nc-dermal-step-dermalgroin
+    zone: NCZoneGroin
+    structure: PelvisGroin
+    action: DistributeDermal
+    minimumDepth: 0.28
+    prerequisites: DermalChest, DermalAbdomen
+  - stage: DermalFixation
+    name: nc-dermal-step-dermalfixation
+    zone: NCZoneChest
+    structure: Thorax
+    action: FixDermal
+    minimumDepth: 0.28
+    prerequisites: DermalChest, DermalAbdomen, DermalGroin
+
+- type: ncArmorSection
+  id: NCSkinweaveTorsoSurface
+  displayName: nc-dermal-profile-skinweave
+  coveredZones: [ NCZoneChest, NCZoneAbdomen, NCZoneGroin ]
+  maxSp: 7
+  applicableDamageClasses: [ Ballistic, Slash, Pierce, Blunt ]
+  conditionProfile: NCArmorConditionStandard
+  ablationGroup: torso
+  rigid: false
+
+- type: ncArmorProfile
+  id: NCSkinweaveTorsoArmor
+  sections: [ NCSkinweaveTorsoSurface ]
+
+- type: ncCyberware
+  id: NCSubdermalArmorTorso
+  name: SubdermalArmor torso
+  nameId: nc-dermal-profile-subdermal
+  manufacturer: Night City 2045 clinical adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/dermal.rsi
+    state: subdermal
+  form: Implant
+  material: Hybrid
+  compatibleSlots: [ NCSlotDermalArmorThorax ]
+  size: 1
+  maximumIntegrity: 100
+  repairProfile: NCRepairProfileClinicalCyberware
+  humanityPackages: [ NCHumanityHeavyMotor ]
+  dermalArmor: true
+  requiresFactoryPreparation: true
+  factoryTestSeconds: 12
+  factoryTestEnergy: 20
+  requiresPower: false
+  vulnerableToEmp: false
+  requiresSeparateCalibration: false
+  neuralRequirement: None
+  idlePowerPerSecond: 0
+  loadedPowerPerSecond: 0
+  idleHeatPerSecond: 0
+  loadedHeatPerSecond: 0
+  passiveCoolingPerSecond: 0.4
+  heatCapacity: 120
+  heatDeratingThreshold: 80
+  heatShutdownThreshold: 100
+  heatDamageThreshold: 110
+  heatDamagePerSecond: 1
+  updateInterval: 0.5s
+  capabilities: []
+  skeletalSurgery:
+  - stage: DermalChest
+    name: nc-dermal-step-dermalchest
+    zone: NCZoneChest
+    structure: Thorax
+    action: DistributeDermal
+    minimumDepth: 0.38
+  - stage: DermalAbdomen
+    name: nc-dermal-step-dermalabdomen
+    zone: NCZoneAbdomen
+    structure: Abdomen
+    action: DistributeDermal
+    minimumDepth: 0.38
+    prerequisites: DermalChest
+  - stage: DermalGroin
+    name: nc-dermal-step-dermalgroin
+    zone: NCZoneGroin
+    structure: PelvisGroin
+    action: DistributeDermal
+    minimumDepth: 0.38
+    prerequisites: DermalChest, DermalAbdomen
+  - stage: DermalFixation
+    name: nc-dermal-step-dermalfixation
+    zone: NCZoneChest
+    structure: Thorax
+    action: FixDermal
+    minimumDepth: 0.38
+    prerequisites: DermalChest, DermalAbdomen, DermalGroin
+  - stage: DermalCheck
+    name: nc-dermal-step-dermalcheck
+    zone: NCZoneChest
+    structure: Thorax
+    action: CheckDermal
+    minimumDepth: 0.38
+    prerequisites: DermalChest, DermalAbdomen, DermalGroin, DermalFixation
+
+- type: ncArmorSection
+  id: NCSubdermalArmorTorsoSurface
+  displayName: nc-dermal-profile-subdermal
+  coveredZones: [ NCZoneChest, NCZoneAbdomen, NCZoneGroin ]
+  maxSp: 11
+  applicableDamageClasses: [ Ballistic, Slash, Pierce, Blunt ]
+  conditionProfile: NCArmorConditionStandard
+  ablationGroup: torso
+  rigid: true
+
+- type: ncArmorProfile
+  id: NCSubdermalArmorTorsoArmor
+  sections: [ NCSubdermalArmorTorsoSurface ]
+

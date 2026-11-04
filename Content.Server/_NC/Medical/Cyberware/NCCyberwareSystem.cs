@@ -43,6 +43,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         InitializeWorkbenchEvents();
         InitializePowerEvents();
         InitializeSkeletalLoadEvents();
+        InitializeDermalEvents();
         InitializePowerServiceEvents();
         InitializeWorldPersistence();
 
@@ -1008,6 +1009,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             ? Math.Clamp(structural * heatFactor * neuralFactor, 0f, 1f)
             : 0f;
         module.Operational = module.FunctionalEfficiency > 0f;
+        RefreshDermalArmor(moduleUid, module, profile);
 
         if (TryComp<NCNerveComponent>(moduleUid, out var nerve) &&
             profile.NeuralRequirement != NCCyberwareNeuralRequirement.None)

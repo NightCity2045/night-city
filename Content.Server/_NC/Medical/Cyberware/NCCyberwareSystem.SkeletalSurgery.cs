@@ -93,10 +93,10 @@ public sealed partial class NCCyberwareSystem
         var pending = profile.SkeletalSurgery.FirstOrDefault(value => value.Zone == zone && (completed & value.Stage) == 0);
         if (pending == null || pending.Action != action) return false;
         step = pending;
-        failure = NCFreeformSurgeryFailure.SkeletalPrerequisitesMissing;
+        failure = profile.DermalArmor ? NCFreeformSurgeryFailure.DermalPrerequisitesMissing : NCFreeformSurgeryFailure.SkeletalPrerequisitesMissing;
         if ((completed & step.Prerequisites) != step.Prerequisites) return false;
         if (profile.RequiredSupportProfile != null && !entity.Comp.SupportReady) return false;
-        failure = NCFreeformSurgeryFailure.SkeletalStructureDamaged;
+        failure = profile.DermalArmor ? NCFreeformSurgeryFailure.DermalTissueDamaged : NCFreeformSurgeryFailure.SkeletalStructureDamaged;
         if (!_skeletalAnatomy.TryGetOrgan(body, step.Structure, out var structure) ||
             !TryComp<NCOrganIntegrityComponent>(structure, out var integrity) ||
             integrity.CurrentIntegrity < integrity.MaxIntegrity * .5f ||

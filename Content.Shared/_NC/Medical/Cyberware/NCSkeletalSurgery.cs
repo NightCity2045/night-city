@@ -23,6 +23,11 @@ public enum NCSkeletalSurgeryStage : ushort
     ArmRight = 32,
     LegLeft = 64,
     LegRight = 128,
+    DermalChest = 256,
+    DermalAbdomen = 512,
+    DermalGroin = 1024,
+    DermalFixation = 2048,
+    DermalCheck = 4096,
 }
 
 /// <summary>One local intervention on a real attached anatomical structure, through its own operative access.</summary>
@@ -60,10 +65,11 @@ public static class NCSkeletalSurgeryPlan
         foreach (var step in steps)
         {
             var bit = (ushort) step.Stage;
-            if (bit == 0 || bit > 128 || (bit & (bit - 1)) != 0 || (seen & step.Stage) != 0 ||
+            if (bit == 0 || bit > 4096 || (bit & (bit - 1)) != 0 || (seen & step.Stage) != 0 ||
                 (seen & step.Prerequisites) != step.Prerequisites ||
                 !float.IsFinite(step.MinimumDepth) || step.MinimumDepth < 0 || step.MinimumDepth > 1 ||
-                step.Action is not (NCFreeformSurgeryAction.AnchorSkeletal or NCFreeformSurgeryAction.ConnectSkeletal))
+                step.Action is not (NCFreeformSurgeryAction.AnchorSkeletal or NCFreeformSurgeryAction.ConnectSkeletal or
+                    NCFreeformSurgeryAction.DistributeDermal or NCFreeformSurgeryAction.FixDermal or NCFreeformSurgeryAction.CheckDermal))
                 return false;
             seen |= step.Stage;
         }

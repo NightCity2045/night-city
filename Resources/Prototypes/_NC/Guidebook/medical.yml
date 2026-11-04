@@ -15,6 +15,7 @@
   - NCSurgeryGuide
   - NCCyberwareMedicine
   - NCCyberwareProductionGuide
+  - NCDermalArmorGuide
   - NCAftercare
   - NCDoctorQuickReference
 
@@ -67,3 +68,8 @@
   id: NCCyberwareProductionGuide
   name: guide-entry-nc-cyberware-production
   text: "/ServerInfo/Guidebook/_NC/Medical/CyberwareProduction.xml"
+
+- type: guideEntry
+  id: NCDermalArmorGuide
+  name: guide-entry-nc-dermal
+  text: "/ServerInfo/Guidebook/_NC/Medical/DermalArmor.xml"

@@ -304,7 +304,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             pending.ExpectedGraft = GetNetEntity(graft);
         if (definition.Action is NCFreeformSurgeryAction.Cyberware or NCFreeformSurgeryAction.CalibrateCyberware or
             NCFreeformSurgeryAction.DisconnectCyberware or NCFreeformSurgeryAction.RepairCyberware or
-            NCFreeformSurgeryAction.AnchorSkeletal or NCFreeformSurgeryAction.ConnectSkeletal or NCFreeformSurgeryAction.TestSkeletal &&
+            NCFreeformSurgeryAction.AnchorSkeletal or NCFreeformSurgeryAction.ConnectSkeletal or NCFreeformSurgeryAction.TestSkeletal or
+            NCFreeformSurgeryAction.DistributeDermal or NCFreeformSurgeryAction.FixDermal or NCFreeformSurgeryAction.CheckDermal &&
             pending.ExpectedGraft == null && pending.ExpectedStructure == null)
         {
             SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.NoApplicableTarget);

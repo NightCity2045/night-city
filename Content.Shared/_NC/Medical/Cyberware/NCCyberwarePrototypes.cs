@@ -132,6 +132,9 @@ public sealed partial class NCCyberwarePrototype : IPrototype
     [DataField]
     public List<NCSkeletalSurgeryStep> SkeletalSurgery { get; private set; } = [];
 
+    /// <summary>Passive regional armor whose SP is derived from persisted implant integrity.</summary>
+    [DataField] public bool DermalArmor { get; private set; }
+
     [DataField]
     public bool RequiresSkeletalLoadTest { get; private set; }
 

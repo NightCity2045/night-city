@@ -127,6 +127,7 @@
     NCSlotThoracicSupport: { position: "0.5, 0.57", size: "0.24, 0.26", minimumDepth: 0.72, visual: Cyberware, zones: [ NCZoneChest ] }
     NCSlotThoracicPower: { position: "0.32, 0.57", size: "0.18, 0.22", minimumDepth: 0.72, visual: Cyberware, zones: [ NCZoneChest ] }
     NCSlotThoracicConverter: { position: "0.7, 0.57", size: "0.18, 0.22", minimumDepth: 0.72, visual: Cyberware, zones: [ NCZoneChest ] }
+    NCSlotDermalArmorThorax: { position: "0.72, 0.5", size: "0.2, 0.28", minimumDepth: 0.28, visual: Cyberware, zones: [ NCZoneChest ] }
     NCSlotSubdermalThorax: { position: "0.5, 0.34", size: "0.52, 0.16", minimumDepth: 0.52, visual: Cyberware, zones: [ NCZoneChest ] }
     NCSlotArmUtilityLeft: { position: "0.58, 0.5", size: "0.24, 0.28", minimumDepth: 0.58, visual: Cyberware, zones: [ NCZoneArmLeft, NCZoneHandLeft ] }
     NCSlotArmUtilityRight: { position: "0.58, 0.5", size: "0.24, 0.28", minimumDepth: 0.58, visual: Cyberware, zones: [ NCZoneArmRight, NCZoneHandRight ] }
@@ -326,6 +327,38 @@
       maximumPower: 14
       contaminationPerUnit: 0.05
       radius: 0.04
+    NCSurgeryToolDermalMount:
+      action: Cyberware
+      duration: 8s
+      minimumDepth: 0.28
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+      contaminationPerUnit: 0.025
+    NCSurgeryToolDermalDistribution:
+      action: DistributeDermal
+      duration: 8s
+      minimumDepth: 0.28
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+      contaminationPerUnit: 0.025
+    NCSurgeryToolDermalFixation:
+      action: FixDermal
+      duration: 10s
+      minimumDepth: 0.28
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+      contaminationPerUnit: 0.025
+    NCSurgeryToolDermalCheck:
+      action: CheckDermal
+      duration: 10s
+      minimumDepth: 0.38
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+      contaminationPerUnit: 0.025
     NCSurgeryToolSkeletalAnchoring:
       action: AnchorSkeletal
       duration: 6s

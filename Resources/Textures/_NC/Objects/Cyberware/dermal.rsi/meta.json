@@ -1,0 +1,23 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Generated with OpenAI ImageGen for Night City, 2026.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "mesh"
+        },
+        {
+            "name": "plates"
+        },
+        {
+            "name": "skinweave"
+        },
+        {
+            "name": "subdermal"
+        }
+    ]
+}

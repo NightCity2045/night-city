@@ -19,7 +19,7 @@ public sealed partial class NCCyberwareSystem
         if (!TryComp<NCCyberwareComponent>(uid, out var module) || !TryGetProfile(module.Profile, out var profile))
             return NCFreeformSurgeryFailure.NoApplicableTarget;
         if (!SkeletalSurgeryReady(uid, module, profile))
-            return NCFreeformSurgeryFailure.SkeletalSurgeryIncomplete;
+            return profile.DermalArmor ? NCFreeformSurgeryFailure.DermalSurgeryIncomplete : NCFreeformSurgeryFailure.SkeletalSurgeryIncomplete;
         if (profile.RequiresSeparateCalibration)
             return NCFreeformSurgeryFailure.CyberwareCalibrationRequired;
         TryCalibrateCyberware((uid, module), resolution, out var failure);
@@ -41,7 +41,7 @@ public sealed partial class NCCyberwareSystem
             !TryResolveOwningBody(entity, out var body) ||
             !TryComp<NCOrganIntegrityComponent>(entity, out var frame))
             return false;
-        failure = NCFreeformSurgeryFailure.SkeletalSurgeryIncomplete;
+        failure = profile.DermalArmor ? NCFreeformSurgeryFailure.DermalSurgeryIncomplete : NCFreeformSurgeryFailure.SkeletalSurgeryIncomplete;
         if (!SkeletalSurgeryReady(entity, entity.Comp, profile))
             return false;
         failure = NCFreeformSurgeryFailure.CyberwareEmpDisabled;

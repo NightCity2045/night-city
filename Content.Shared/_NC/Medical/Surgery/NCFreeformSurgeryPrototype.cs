@@ -384,4 +384,7 @@ public enum NCFreeformSurgeryAction : byte
     AnchorSkeletal,
     ConnectSkeletal,
     TestSkeletal,
+    DistributeDermal,
+    FixDermal,
+    CheckDermal,
 }

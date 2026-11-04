@@ -99,7 +99,8 @@ public sealed partial class NCCyberwareMapControl : Control
         Func<NCMedicalCyberwareSummary, Texture?> icon,
         Func<NCMedicalCyberwareSummary, string> tooltip,
         Func<NCMedicalCyberwareSummary, Color> color,
-        Func<NCMedicalCyberwareSummary, bool> skeletalEnhancement)
+        Func<NCMedicalCyberwareSummary, bool> skeletalEnhancement,
+        Func<NCMedicalCyberwareSummary, bool> dermalArmor)
     {
         Clear();
         _skeletonDefinitions = skeletalSlots;
@@ -147,9 +148,15 @@ public sealed partial class NCCyberwareMapControl : Control
 
             var anatomical = NewColumn();
             var implants = NewGrid(false);
+            var dermal = NewGrid(false);
             foreach (var index in roots)
             {
                 var module = modules[index];
+                if (dermalArmor(module))
+                {
+                    dermal.AddChild(CreateIcon(index, group, module, 42, icon, tooltip, color));
+                    continue;
+                }
                 var hasModules = parents.Any(parent => parent == index);
                 if (module.Form == NCCyberwareForm.Implant && !hasModules)
                 {
@@ -189,6 +196,13 @@ public sealed partial class NCCyberwareMapControl : Control
                 anatomical.AddChild(Caption("nc-cyberware-map-organ-implants"));
                 anatomical.AddChild(implants);
                 _contents[group].AddChild(anatomical);
+            }
+            if (dermal.ChildCount > 0)
+            {
+                var skin = NewColumn();
+                skin.AddChild(Caption("nc-dermal-map-skin"));
+                skin.AddChild(dermal);
+                _contents[group].AddChild(skin);
             }
             if (_contents[group].ChildCount == 0)
                 _contents[group].AddChild(new Label

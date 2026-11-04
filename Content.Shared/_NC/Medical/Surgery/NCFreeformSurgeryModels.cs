@@ -137,6 +137,9 @@ public enum NCFreeformSurgeryFailure : byte
     SkeletalStructureDamaged,
     SkeletalLoadTestRequired,
     FactoryPreparationRequired,
+    DermalSurgeryIncomplete,
+    DermalPrerequisitesMissing,
+    DermalTissueDamaged,
 }
 
 [Serializable, NetSerializable]

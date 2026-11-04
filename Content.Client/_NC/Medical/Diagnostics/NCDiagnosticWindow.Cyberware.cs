@@ -31,7 +31,8 @@ public sealed partial class NCDiagnosticWindow
             _prototypes.EnumeratePrototypes<NCSkeletalSlotPrototype>().OrderBy(slot => slot.Order).ToArray(),
             CyberwareIcon, CyberwareTooltip,
             module => BandColor(CyberwareSeverity(module)),
-            module => _prototypes.TryIndex(module.Profile, out NCCyberwarePrototype? profile) && profile.SkeletalEnhancement);
+            module => _prototypes.TryIndex(module.Profile, out NCCyberwarePrototype? profile) && profile.SkeletalEnhancement,
+            module => _prototypes.TryIndex(module.Profile, out NCCyberwarePrototype? profile) && profile.DermalArmor);
         if (modules.Length == 0)
         {
             AddEmpty(CyberwareContainer);
@@ -111,9 +112,12 @@ public sealed partial class NCDiagnosticWindow
         if (module.HostIndex is { } host && _snapshot is { } snapshot && host >= 0 && host < snapshot.Cyberware.Count)
             details += "\n" + Loc.GetString("nc-cyberware-map-installed-in", ("host", CyberwareName(snapshot.Cyberware[host].Profile)));
         details += NeuralDependencyDetails(module);
-        if (_prototypes.TryIndex(module.Profile, out NCCyberwarePrototype? definition) && definition.SkeletalEnhancement)
+        if (_prototypes.TryIndex(module.Profile, out NCCyberwarePrototype? definition) && (definition.SkeletalEnhancement || definition.DermalArmor))
         {
-            details += "\n" + Loc.GetString("nc-skeletal-diagnostics-allowance",
+            if (definition.DermalArmor)
+                details += "\n" + Loc.GetString("nc-dermal-diagnostics");
+            if (definition.SkeletalEnhancement)
+                details += "\n" + Loc.GetString("nc-skeletal-diagnostics-allowance",
                 ("current", module.HardsuitAllowancePercent ?? 0),
                 ("maximum", (int) MathF.Round(definition.HardsuitPenaltyAllowance * 100f)));
             if (definition.SkeletalSurgery.Count > 0)
