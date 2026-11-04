@@ -10,6 +10,17 @@ namespace Content.Tests.Shared._NC.Medical;
 [TestFixture]
 public sealed class NCSkeletalSupportTest
 {
+    [TestCase(0f, .3f, true, 0f)]
+    [TestCase(.15f, .3f, true, .5f)]
+    [TestCase(.4f, .3f, true, 1f)]
+    [TestCase(.4f, .45f, true, .8888889f)]
+    [TestCase(.4f, .3f, false, 0f)]
+    [TestCase(.4f, 0f, true, 0f)]
+    public void MotorDemandTracksSuitPenaltyAndReadiness(float penalty, float allowance, bool ready, float expected)
+    {
+        Assert.That(NCSkeletalSupportMath.MotorLoad(penalty, allowance, ready), Is.EqualTo(expected).Within(.00001f));
+    }
+
     [TestCase(.6f, .15f, .75f)]
     [TestCase(.6f, .30f, .90f)]
     [TestCase(.6f, .45f, 1f)]

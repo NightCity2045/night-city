@@ -320,6 +320,7 @@ public sealed partial class NCCyberwareSystem
     private void RefreshBodyPower(EntityUid body, TimeSpan now, IReadOnlyList<EntityUid>? modules = null)
     {
         modules ??= CollectCyberware(body);
+        RefreshSkeletalLoads(body, modules);
         var grants = AllocateBodyPower(modules, now, out _, out _)
             .Where(value => value.Source != NCCyberwarePowerSource.None).Select(value => value.Id).ToHashSet();
         foreach (var uid in modules)

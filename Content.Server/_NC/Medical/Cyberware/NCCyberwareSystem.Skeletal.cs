@@ -4,12 +4,73 @@
 
 using Content.Shared._NC.Medical.Cyberware;
 using Content.Shared.Movement.Systems;
+using Content.Shared.Movement.Components;
+using Content.Shared.Movement.Events;
+using Content.Shared.Inventory;
+using Content.Shared.Inventory.Events;
+using Content.Shared.Item.ItemToggle;
+using Content.Shared.Standing;
+using Content.Shared.Clothing;
+using Content.Shared.Tag;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.Medical.Cyberware;
 
 public sealed partial class NCCyberwareSystem
 {
+    private static readonly ProtoId<TagPrototype> SkeletalHardsuitTag = "Hardsuit";
+
     [Dependency] private MovementSpeedModifierSystem _skeletalMovement = default!;
+    [Dependency] private InventorySystem _skeletalInventory = default!;
+    [Dependency] private ItemToggleSystem _skeletalToggle = default!;
+    [Dependency] private StandingStateSystem _skeletalStanding = default!;
+    [Dependency] private TagSystem _skeletalTags = default!;
+
+    private void InitializeSkeletalLoadEvents()
+    {
+        SubscribeLocalEvent<NCSkeletalSupportBodyComponent, MoveInputEvent>(OnSkeletalMoveInput);
+        SubscribeLocalEvent<NCSkeletalSupportBodyComponent, DidEquipEvent>(OnSkeletalEquipped);
+        SubscribeLocalEvent<NCSkeletalSupportBodyComponent, DidUnequipEvent>(OnSkeletalUnequipped);
+    }
+
+    private void OnSkeletalMoveInput(Entity<NCSkeletalSupportBodyComponent> body, ref MoveInputEvent args) => RefreshSkeletalLoadBoundary(body);
+    private void OnSkeletalEquipped(Entity<NCSkeletalSupportBodyComponent> body, ref DidEquipEvent args) => RefreshSkeletalLoadBoundary(body);
+    private void OnSkeletalUnequipped(Entity<NCSkeletalSupportBodyComponent> body, ref DidUnequipEvent args) => RefreshSkeletalLoadBoundary(body);
+
+    private void RefreshSkeletalLoadBoundary(EntityUid body)
+    {
+        // Debit the preceding interval using the old load before observing changed input/equipment.
+        TryAdvanceBodyPower(body, _timing.CurTime);
+        RefreshBodyPower(body, _timing.CurTime);
+    }
+
+    private void RefreshSkeletalLoads(EntityUid body, IReadOnlyList<EntityUid> modules)
+    {
+        var penalty = 0f;
+        if (TryComp<InputMoverComponent>(body, out var mover) && mover.CanMove && mover.HasDirectionalMovement)
+        {
+            var slots = _skeletalInventory.GetSlotEnumerator((body, null), SlotFlags.WITHOUT_POCKET);
+            while (slots.MoveNext(out var slot))
+            {
+                if (slot.ContainedEntity is not { } clothing || !_skeletalTags.HasTag(clothing, SkeletalHardsuitTag) ||
+                    !TryComp<ClothingSpeedModifierComponent>(clothing, out var speed)) continue;
+                if (speed.RequireActivated && !_skeletalToggle.IsActivated(clothing) ||
+                    speed.Standing is { } standing && !_skeletalStanding.IsMatchingState(body, standing)) continue;
+                penalty = MathF.Max(penalty, 1f - (mover.Sprinting ? speed.SprintModifier : speed.WalkModifier));
+            }
+        }
+        foreach (var uid in modules)
+        {
+            var module = Comp<NCCyberwareComponent>(uid);
+            var profile = _prototypes.Index(module.Profile);
+            if (!profile.SkeletalEnhancement || !profile.RequiresPower) continue;
+            // Demand is independent of the previous power grant, avoiding overload oscillation.
+            module.Load = NCSkeletalSupportMath.MotorLoad(penalty, profile.HardsuitPenaltyAllowance,
+                SkeletalSurgeryReady(uid, module, profile) && module.SupportReady &&
+                (!profile.RequiresSkeletalLoadTest || module.SkeletalLoadTestPassed) && !module.CrisisBlocksActiveModes);
+        }
+    }
+
     // Requirements are one layer deep: evaluating a graft never enters another support requirement.
     private readonly List<float> _supportEfficiencies = new(2);
 

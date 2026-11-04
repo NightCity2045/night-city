@@ -17,6 +17,31 @@ public sealed class NCCyberwareServiceTest : ContentUnitTest
     public void InitializeSerialization() => IoCManager.Resolve<ISerializationManager>().Initialize();
 
     [Test]
+    public void FirmwareEvidenceSurvivesAuditEvictionCloneAndSerialization()
+    {
+        var state = new NCCyberwareServiceState();
+        Assert.That(NCCyberwareServiceHistory.TryAppend(state, 0, Guid.NewGuid(), NCCyberwareServiceOperation.Firmware, ""), Is.True);
+        for (var i = 0; i < 100; i++)
+            Assert.That(NCCyberwareServiceHistory.TryAppend(state, state.Revision, Guid.NewGuid(), NCCyberwareServiceOperation.Tested, ""), Is.True);
+        Assert.That(state.History.Exists(entry => entry.Operation == NCCyberwareServiceOperation.Firmware), Is.False);
+        var copy = NCCyberwareServiceHistory.Clone(state);
+        var serialization = IoCManager.Resolve<ISerializationManager>();
+        var restored = serialization.Read<NCCyberwareServiceState>(serialization.WriteValue(copy, alwaysWrite: true), notNullableOverride: true);
+        Assert.That(restored.FirmwareFlashed, Is.True);
+        Assert.That(NCCyberwareServiceHistory.Valid(restored), Is.True);
+    }
+
+    [Test]
+    public void LegacyFirmwareEvidenceMigratesButBlankItemsRemainUnflashed()
+    {
+        var state = new NCCyberwareServiceState();
+        Assert.That(NCCyberwareServiceHistory.Clone(state).FirmwareFlashed, Is.False);
+        NCCyberwareServiceHistory.TryAppend(state, 0, Guid.NewGuid(), NCCyberwareServiceOperation.Firmware, "");
+        state.FirmwareFlashed = false;
+        Assert.That(NCCyberwareServiceHistory.Clone(state).FirmwareFlashed, Is.True);
+    }
+
+    [Test]
     public void TransferBetweenCharactersKeepsIdentityDefectsAndPrivateHistory()
     {
         var state = new NCCyberwareStateSnapshot

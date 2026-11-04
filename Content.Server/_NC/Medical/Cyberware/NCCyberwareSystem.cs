@@ -42,6 +42,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         InitializeAssemblyEvents();
         InitializeWorkbenchEvents();
         InitializePowerEvents();
+        InitializeSkeletalLoadEvents();
         InitializePowerServiceEvents();
         InitializeWorldPersistence();
 
@@ -910,6 +911,8 @@ public sealed partial class NCCyberwareSystem : EntitySystem
     {
         if (module.StableInstanceId == Guid.Empty)
             module.StableInstanceId = Guid.NewGuid();
+        // A certified factory item is also evidence for older saves whose bounded audit was truncated.
+        module.Service.FirmwareFlashed |= module.FactoryPrepared;
         InitializeAssembly(moduleUid, module, profile);
         RefreshFactoryAppearance(moduleUid, module);
         if (module.StateInitialized)

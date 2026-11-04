@@ -146,7 +146,7 @@ public sealed partial class NCCyberwareSystem
         var integrity = Comp<NCOrganIntegrityComponent>(moduleUid);
         var passed = integrity.CurrentIntegrity > 0f && module.EmpDisabledUntil <= _timing.CurTime &&
                      !_prototypes.Index(module.Service.Firmware).InhibitActiveModes &&
-                     (!profile.RequiresFactoryPreparation || module.Service.History.Any(entry => entry.Operation == NCCyberwareServiceOperation.Firmware)) &&
+                     (!profile.RequiresFactoryPreparation || module.Service.FirmwareFlashed) &&
                      NCCyberwareProductionMath.CanTest(MathF.Min(assembly.FunctionalEfficiency,
                          NCCyberwareCondition.Efficiency(integrity.CurrentIntegrity, profile.MaximumIntegrity)),
                          profile.RequiresFactoryPreparation ? profile.FactoryMinimumEfficiency : float.Epsilon,

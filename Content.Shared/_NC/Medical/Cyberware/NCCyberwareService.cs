@@ -28,6 +28,8 @@ public sealed partial class NCCyberwareServiceState
 {
     [DataField] public ProtoId<NCCyberwareFirmwarePrototype> Firmware = "NCFirmwareStandard";
     [DataField] public uint Revision;
+    // Durable manufacturing evidence; bounded audit history must not decide readiness.
+    [DataField] public bool FirmwareFlashed;
     [DataField] public ulong OmittedEvents;
     [DataField] public List<NCCyberwareServiceEntry> History = [];
 }
@@ -82,6 +84,9 @@ public static class NCCyberwareServiceHistory
             resolution == Guid.Empty || !Enum.IsDefined(operation) || owner == null || owner.Length > 160 ||
             state.History.Any(entry => entry.ResolutionId == resolution))
             return false;
+        // Also migrate retained evidence from saves written before FirmwareFlashed existed.
+        state.FirmwareFlashed |= operation == NCCyberwareServiceOperation.Firmware ||
+                                 state.History.Any(entry => entry.Operation == NCCyberwareServiceOperation.Firmware);
         if (state.History.Count == Capacity)
         {
             state.History.RemoveAt(0);
@@ -96,6 +101,7 @@ public static class NCCyberwareServiceHistory
 
     public static NCCyberwareServiceState Clone(NCCyberwareServiceState state) => new()
     {
+        FirmwareFlashed = state.FirmwareFlashed || state.History.Any(entry => entry.Operation == NCCyberwareServiceOperation.Firmware),
         Firmware = state.Firmware, Revision = state.Revision, OmittedEvents = state.OmittedEvents,
         History = state.History.Select(entry => new NCCyberwareServiceEntry
         {

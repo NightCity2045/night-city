@@ -22,6 +22,12 @@ public sealed partial class NCSkeletalSupportBodyComponent : Component
 
 public static class NCSkeletalSupportMath
 {
+    public static float MotorLoad(float penalty, float allowance, bool ready)
+    {
+        if (!ready || !float.IsFinite(penalty) || !float.IsFinite(allowance) || allowance <= 0f) return 0f;
+        return Math.Clamp(penalty / allowance, 0f, 1f);
+    }
+
     public static float Compensate(float modifier, float allowance)
     {
         if (!float.IsFinite(modifier)) return 1f;

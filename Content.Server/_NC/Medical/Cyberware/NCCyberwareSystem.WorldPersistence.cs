@@ -152,6 +152,7 @@ public sealed partial class NCCyberwareSystem
             QueueDel(ent);
             return false;
         }
+        module.Service = NCCyberwareServiceHistory.Clone(module.Service);
         module.EmpDisabledUntil = deadline;
         ent.Comp.Restored = true;
         module.LastAdvancedAt = _timing.CurTime;
