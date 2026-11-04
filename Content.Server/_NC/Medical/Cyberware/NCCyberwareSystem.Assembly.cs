@@ -75,7 +75,7 @@ public sealed partial class NCCyberwareSystem
         EnsureAssemblyContainers(uid, assembly, _prototypes.Index(profile.Assembly.Value));
         if (!assembly.Initialized)
         {
-            var initial = CreateDefaultAssemblySnapshot(module.Profile, module.StableInstanceId);
+            var initial = CreateDefaultAssemblySnapshot(module.Profile, module.StableInstanceId, module.QualityParts);
             if (initial != null && module.FactoryPrepared) initial.ValidatedRevision = initial.ConfigurationRevision;
             if (initial == null || !TryRestoreAssembly(uid, profile, initial))
                 throw new InvalidOperationException($"Cannot initialize cyberware assembly {uid}.");
@@ -189,14 +189,16 @@ public sealed partial class NCCyberwareSystem
 
     /// <summary>Deterministic one-time migration of a previously monolithic factory item, not a gameplay refill.</summary>
     public NCCyberwareAssemblySnapshot? CreateDefaultAssemblySnapshot(
-        ProtoId<NCCyberwarePrototype> profileId, Guid instanceId)
+        ProtoId<NCCyberwarePrototype> profileId, Guid instanceId,
+        IReadOnlyDictionary<ProtoId<NCCyberwarePartSlotPrototype>, EntProtoId>? qualityParts = null)
     {
         if (!_prototypes.TryIndex(profileId, out var profile) || profile.Assembly is not { } assemblyId)
             return null;
         var definition = _prototypes.Index(assemblyId);
         var snapshot = new NCCyberwareAssemblySnapshot();
-        foreach (var (slot, prototype) in definition.DefaultParts.OrderBy(pair => pair.Key.Id, StringComparer.Ordinal))
+        foreach (var (slot, defaultPrototype) in definition.DefaultParts.OrderBy(pair => pair.Key.Id, StringComparer.Ordinal))
         {
+            var prototype = qualityParts != null && qualityParts.TryGetValue(slot, out var replacement) ? replacement : defaultPrototype;
             var entity = _prototypes.Index(prototype);
             if (!entity.TryComp<NCCyberwarePartComponent>(out var part, _componentFactory))
                 throw new InvalidOperationException($"Missing physical part on {prototype}.");

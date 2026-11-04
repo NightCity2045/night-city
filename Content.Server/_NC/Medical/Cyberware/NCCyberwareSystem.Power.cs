@@ -153,7 +153,7 @@ public sealed partial class NCCyberwareSystem
             if (!profile.RequiresPower || module.LastAdvancedAt > now || !CanRunElectronics(uid, module, profile, now))
                 continue;
             demands.Add(new NCCyberwarePowerDemand(module.StableInstanceId, profile.PowerPriority,
-                profile.IdlePowerPerSecond + profile.LoadedPowerPerSecond * EffectivePowerLoad(module, profile, now)));
+                (profile.IdlePowerPerSecond + profile.LoadedPowerPerSecond * EffectivePowerLoad(module, profile, now)) / QualityPerformance(uid)));
         }
         return NCCyberwarePowerMath.Allocate(demands, maximum,
             main is { } primary && _battery.GetCharge(primary.AsNullable()) > PowerEpsilon,
@@ -224,7 +224,7 @@ public sealed partial class NCCyberwareSystem
                         seconds = MathF.Min(seconds, (float)(activeUntil - cursor).TotalSeconds);
                     var generating = (!profile.RequiresPower || powered.Contains(module.StableInstanceId)) &&
                                      CanRunElectronics(uid, module, profile, cursor);
-                    var rate = (generating ? profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond * EffectivePowerLoad(module, profile, cursor) : 0f) -
+                    var rate = (generating ? (profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond * EffectivePowerLoad(module, profile, cursor)) / QualityPerformance(uid) : 0f) -
                                profile.PassiveCoolingPerSecond;
                     var threshold = rate > 0f ? profile.HeatShutdownThreshold : profile.HeatDeratingThreshold;
                     if (rate != 0f && (threshold - module.Heat) / rate > PowerEpsilon)
@@ -246,7 +246,7 @@ public sealed partial class NCCyberwareSystem
                     var profile = _prototypes.Index(module.Profile);
                     var generating = (!profile.RequiresPower || powered.Contains(module.StableInstanceId)) &&
                                      CanRunElectronics(uid, module, profile, cursor);
-                    var rate = (generating ? profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond * EffectivePowerLoad(module, profile, cursor) : 0f) -
+                    var rate = (generating ? (profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond * EffectivePowerLoad(module, profile, cursor)) / QualityPerformance(uid) : 0f) -
                                profile.PassiveCoolingPerSecond;
                     var thermal = NCCyberwarePowerMath.AdvanceHeat(module.Heat, rate, seconds,
                         profile.HeatCapacity, profile.HeatDamageThreshold, profile.HeatDamagePerSecond);

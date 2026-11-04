@@ -1,0 +1,139 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncCyberwarePart
+  id: NCIndustrialArmActuatorQualityImprovised
+  humanityPackages:
+  - NCHumanityProfessionalMotor
+  slot: NCIndustrialArmActuatorSlot
+  maximumIntegrity: 56.0
+  quality: NCCyberwareQualityImprovised
+
+- type: ncCyberwarePart
+  id: NCIndustrialArmActuatorQualityImproved
+  humanityPackages:
+  - NCHumanityProfessionalMotor
+  slot: NCIndustrialArmActuatorSlot
+  maximumIntegrity: 100.0
+  quality: NCCyberwareQualityImproved
+
+- type: ncCyberwarePart
+  id: NCIndustrialArmActuatorQualityPremium
+  humanityPackages:
+  - NCHumanityProfessionalMotor
+  slot: NCIndustrialArmActuatorSlot
+  maximumIntegrity: 120.0
+  quality: NCCyberwareQualityPremium
+
+- type: ncCyberwarePart
+  id: NCIndustrialArmControllerQualityImprovised
+  slot: NCIndustrialArmControllerSlot
+  maximumIntegrity: 28.0
+  quality: NCCyberwareQualityImprovised
+
+- type: ncCyberwarePart
+  id: NCIndustrialArmControllerQualityImproved
+  slot: NCIndustrialArmControllerSlot
+  maximumIntegrity: 50.0
+  quality: NCCyberwareQualityImproved
+
+- type: ncCyberwarePart
+  id: NCIndustrialArmControllerQualityPremium
+  slot: NCIndustrialArmControllerSlot
+  maximumIntegrity: 60.0
+  quality: NCCyberwareQualityPremium
+
+- type: ncCyberwarePart
+  id: NCIndustrialArmSensorQualityImprovised
+  slot: NCIndustrialArmSensorSlot
+  maximumIntegrity: 28.0
+  quality: NCCyberwareQualityImprovised
+
+- type: ncCyberwarePart
+  id: NCIndustrialArmSensorQualityImproved
+  slot: NCIndustrialArmSensorSlot
+  maximumIntegrity: 50.0
+  quality: NCCyberwareQualityImproved
+
+- type: ncCyberwarePart
+  id: NCIndustrialArmSensorQualityPremium
+  slot: NCIndustrialArmSensorSlot
+  maximumIntegrity: 60.0
+  quality: NCCyberwareQualityPremium
+
+- type: ncCyberwarePart
+  id: NCSkeletalAnchorsPartQualityImprovised
+  slot: NCSkeletalAnchorSlot
+  maximumIntegrity: 56.0
+  quality: NCCyberwareQualityImprovised
+
+- type: ncCyberwarePart
+  id: NCSkeletalAnchorsPartQualityImproved
+  slot: NCSkeletalAnchorSlot
+  maximumIntegrity: 100.0
+  quality: NCCyberwareQualityImproved
+
+- type: ncCyberwarePart
+  id: NCSkeletalAnchorsPartQualityPremium
+  slot: NCSkeletalAnchorSlot
+  maximumIntegrity: 120.0
+  quality: NCCyberwareQualityPremium
+
+- type: ncCyberwarePart
+  id: NCSkeletalHeavyAnchorsPartQualityImprovised
+  slot: NCSkeletalHeavyAnchorSlot
+  maximumIntegrity: 98.0
+  quality: NCCyberwareQualityImprovised
+
+- type: ncCyberwarePart
+  id: NCSkeletalHeavyAnchorsPartQualityImproved
+  slot: NCSkeletalHeavyAnchorSlot
+  maximumIntegrity: 175.0
+  quality: NCCyberwareQualityImproved
+
+- type: ncCyberwarePart
+  id: NCSkeletalHeavyAnchorsPartQualityPremium
+  slot: NCSkeletalHeavyAnchorSlot
+  maximumIntegrity: 210.0
+  quality: NCCyberwareQualityPremium
+
+- type: ncCyberwarePart
+  id: NCBetaActuatorPartQualityImprovised
+  humanityPackages:
+  - NCHumanityProfessionalMotor
+  slot: NCBetaActuatorSlot
+  maximumIntegrity: 98.0
+  quality: NCCyberwareQualityImprovised
+
+- type: ncCyberwarePart
+  id: NCBetaActuatorPartQualityImproved
+  humanityPackages:
+  - NCHumanityProfessionalMotor
+  slot: NCBetaActuatorSlot
+  maximumIntegrity: 175.0
+  quality: NCCyberwareQualityImproved
+
+- type: ncCyberwarePart
+  id: NCBetaActuatorPartQualityPremium
+  humanityPackages:
+  - NCHumanityProfessionalMotor
+  slot: NCBetaActuatorSlot
+  maximumIntegrity: 210.0
+  quality: NCCyberwareQualityPremium
+
+- type: ncCyberwarePart
+  id: NCSkeletalPowerPartQualityImprovised
+  slot: NCSkeletalPowerSlot
+  maximumIntegrity: 42.0
+  quality: NCCyberwareQualityImprovised
+
+- type: ncCyberwarePart
+  id: NCSkeletalPowerPartQualityImproved
+  slot: NCSkeletalPowerSlot
+  maximumIntegrity: 75.0
+  quality: NCCyberwareQualityImproved
+
+- type: ncCyberwarePart
+  id: NCSkeletalPowerPartQualityPremium
+  slot: NCSkeletalPowerSlot
+  maximumIntegrity: 90.0
+  quality: NCCyberwareQualityPremium

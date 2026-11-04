@@ -150,9 +150,9 @@ public sealed partial class NCCyberwareSystem
                      NCCyberwareProductionMath.CanTest(MathF.Min(assembly.FunctionalEfficiency,
                          NCCyberwareCondition.Efficiency(integrity.CurrentIntegrity, profile.MaximumIntegrity)),
                          profile.RequiresFactoryPreparation ? profile.FactoryMinimumEfficiency : float.Epsilon,
-                         profile.RequiresPower ? profile.IdlePowerPerSecond + profile.LoadedPowerPerSecond : 0f,
+                         profile.RequiresPower ? (profile.IdlePowerPerSecond + profile.LoadedPowerPerSecond) / QualityPerformance(moduleUid) : 0f,
                          Comp<NCCyberwareWorkbenchComponent>(bench).MaximumTestPower, module.Heat,
-                         profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond, profile.PassiveCoolingPerSecond,
+                         (profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond) / QualityPerformance(moduleUid), profile.PassiveCoolingPerSecond,
                          profile.FactoryTestSeconds, profile.HeatDeratingThreshold);
         if (passed && profile.RequiresPower)
             passed = _cells.TryGetBatteryFromSlot(bench.Owner, out var battery) &&

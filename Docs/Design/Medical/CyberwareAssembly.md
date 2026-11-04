@@ -174,3 +174,35 @@ completed installation. New installations require fixation, connection and check
 through the existing authoritative surgery action/DoAfter pipeline. Runtime samples
 are not persisted as fresh medical readings. The preceding META API catalog is
 frozen separately so previously compiled artifacts remain verifiable.
+
+## Quality across NC cyberware
+
+Every concrete NC cyberware entity and replaceable cyberware part has improvised,
+standard, improved and premium variants. Existing IDs remain standard. The frame
+grade and factory parts are declared on the entity, preserving gameplay profile
+identity (including skeletal prerequisites and abilities). Existing snapshots retain
+the entity prototype and actual replacement-part prototypes; repair never upgrades
+quality. Empty frames remain empty, and assembled factory variants start with
+matching-grade parts.
+
+The effective grade is the weakest of the frame and installed parts. Its performance
+factor divides running power demand, generated heat and mechanical impact damage;
+dermal ablation also uses it, without increasing maximum SP. Standard behavior is
+unchanged. Quality does not increase hardsuit allowance, bypass neural prerequisites,
+increase weapon damage, or turn one skeletal model into another. Part grades change
+nominal integrity independently of current damage and permanent wear.
+
+Grade recipes extend only the existing base recipe packs and machines. Items without
+a manufacturing recipe remain without one. Improvised recipes cost 75% of base;
+improved cost 150% plus gold; premium cost 200% plus gold and silver. Medical parts
+retain their existing recipes.
+
+Medical controllers currently store a native firmware ID, not executable META
+bytecode. `Programmer.meta` is the host-side flashing program. `flash(0/1/2)` selects
+basic self-test, biomonitor, or injector mode in `NCMetaMedicalControllerSystem`;
+`NCMedicalImplantSystem` implements the actual sampling and dosing behavior.
+
+Validation for the quality extension: DebugOpt client/server build, 159 targeted
+medical content tests, and the YAML linter. A static coverage pass checked all 219
+added entity variants and 135 factory slot/grade assignments. Full in-game operation
+of every quality variant was not exercised.

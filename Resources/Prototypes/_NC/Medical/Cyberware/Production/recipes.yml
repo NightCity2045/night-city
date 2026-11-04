@@ -149,7 +149,13 @@
   - NCProduceNCMedicalPumpPremium
   - NCProduceDermalPlates
   - NCProduceNCSkeletalAnchors
+  - NCProduceNCSkeletalAnchorsQualityImprovised
+  - NCProduceNCSkeletalAnchorsQualityImproved
+  - NCProduceNCSkeletalAnchorsQualityPremium
   - NCProduceNCSkeletalHeavyAnchors
+  - NCProduceNCSkeletalHeavyAnchorsQualityImprovised
+  - NCProduceNCSkeletalHeavyAnchorsQualityImproved
+  - NCProduceNCSkeletalHeavyAnchorsQualityPremium
 
 - type: latheRecipePack
   id: NCCyberElectronicsStatic
@@ -163,26 +169,53 @@
   - NCProduceNCMedicalSensorImproved
   - NCProduceNCMedicalSensorPremium
   - NCProduceNCMedicalControllerBasic
+  - NCProduceNCMedicalControllerBasicQualityImprovised
+  - NCProduceNCMedicalControllerBasicQualityImproved
+  - NCProduceNCMedicalControllerBasicQualityPremium
   - BiogeneratorMachineCircuitboard
   - BiofabricatorMachineCircuitboard
   - ExosuitFabricatorMachineCircuitboard
   - NCProduceNCSkeletalPowerJunction
+  - NCProduceNCSkeletalPowerJunctionQualityImprovised
+  - NCProduceNCSkeletalPowerJunctionQualityImproved
+  - NCProduceNCSkeletalPowerJunctionQualityPremium
   - NCProduceNCCyberarmController
+  - NCProduceNCCyberarmControllerQualityImprovised
+  - NCProduceNCCyberarmControllerQualityImproved
+  - NCProduceNCCyberarmControllerQualityPremium
   - NCProduceNCCyberarmSensor
+  - NCProduceNCCyberarmSensorQualityImprovised
+  - NCProduceNCCyberarmSensorQualityImproved
+  - NCProduceNCCyberarmSensorQualityPremium
   - NCProduceNCCyberwareStandardFirmwareCard
   - NCProduceNCImplantPowerBusMk1
+  - NCProduceNCImplantPowerBusMk1QualityImprovised
+  - NCProduceNCImplantPowerBusMk1QualityImproved
+  - NCProduceNCImplantPowerBusMk1QualityPremium
 
 - type: latheRecipePack
   id: NCCyberRoboticsStatic
   recipes:
   - NCProduceNCImplantLinearFrameSigmaEmpty
+  - NCProduceNCImplantLinearFrameSigmaEmptyQualityImprovised
+  - NCProduceNCImplantLinearFrameSigmaEmptyQualityImproved
+  - NCProduceNCImplantLinearFrameSigmaEmptyQualityPremium
   - NCProduceNCImplantLinearFrameBetaEmpty
+  - NCProduceNCImplantLinearFrameBetaEmptyQualityImprovised
+  - NCProduceNCImplantLinearFrameBetaEmptyQualityImproved
+  - NCProduceNCImplantLinearFrameBetaEmptyQualityPremium
 
 - type: latheRecipePack
   id: NCCyberMedicalStatic
   recipes:
   - NCProduceNCBiomonitorImplantEmpty
+  - NCProduceNCBiomonitorImplantEmptyQualityImprovised
+  - NCProduceNCBiomonitorImplantEmptyQualityImproved
+  - NCProduceNCBiomonitorImplantEmptyQualityPremium
   - NCProduceNCAutoInjectorImplantEmpty
+  - NCProduceNCAutoInjectorImplantEmptyQualityImprovised
+  - NCProduceNCAutoInjectorImplantEmptyQualityImproved
+  - NCProduceNCAutoInjectorImplantEmptyQualityPremium
   - NCProduceNCMedicalInjectorCartridge
   - NCProduceNCCyberwareSterileWrap
   - NCProduceNCCyberwareServiceTool

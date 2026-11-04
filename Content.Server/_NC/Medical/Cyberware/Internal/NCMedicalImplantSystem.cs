@@ -39,6 +39,7 @@ public sealed partial class NCMedicalImplantSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<NCMedicalImplantComponent, ExaminedEvent>(OnExamined);
+        SubscribeLocalEvent<NCCyberwareComponent, ExaminedEvent>(OnCyberwareExamined);
         SubscribeLocalEvent<NCCyberwarePartComponent, ExaminedEvent>(OnPartExamined);
     }
 
@@ -218,6 +219,13 @@ public sealed partial class NCMedicalImplantSystem : EntitySystem
     {
         if (ent.Comp.Injector) args.PushMarkup(Settings(ent.Owner, ent.Comp));
         args.PushMarkup(Loc.GetString(_cyberware.MedicalControllerReady(ent) ? "nc-medical-controller-ready" : "nc-medical-controller-unready"));
+    }
+
+    private void OnCyberwareExamined(Entity<NCCyberwareComponent> ent, ref ExaminedEvent args)
+    {
+        args.PushMarkup(Loc.GetString("nc-cyberware-frame-quality", ("quality", Loc.GetString(_prototypes.Index(ent.Comp.Quality).Name))));
+        if (_cyberware.GetAssemblyQuality(ent) is { } grade)
+            args.PushMarkup(Loc.GetString("nc-medical-part-quality", ("quality", Loc.GetString(_prototypes.Index(grade).Name))));
     }
 
     private void OnPartExamined(Entity<NCCyberwarePartComponent> ent, ref ExaminedEvent args)

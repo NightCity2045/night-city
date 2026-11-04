@@ -42,7 +42,7 @@ public sealed partial class NCCyberwareSystem
             !TryComp<NCOrganIntegrityComponent>(implant, out var integrity) ||
             !_prototypes.TryIndex(args.Section, out var section)) return;
         integrity.CurrentIntegrity = NCDermalArmorMath.Ablate(integrity.CurrentIntegrity, profile.MaximumIntegrity,
-            section.MaxSp.Float(), (args.PreviousSp - args.CurrentSp).Float());
+            section.MaxSp.Float(), (args.PreviousSp - args.CurrentSp).Float() / QualityPerformance(implant));
         module.FactoryPrepared = false;
         UpdateOperational(implant, module, profile, _timing.CurTime);
         RefreshFactoryAppearance(implant, module);

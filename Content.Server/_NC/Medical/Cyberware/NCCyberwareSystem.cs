@@ -718,10 +718,10 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         TryAdvanceBodyPower(patient, _timing.CurTime);
         var previous = module.FunctionalEfficiency;
         integrity.CurrentIntegrity = Math.Clamp(
-            integrity.CurrentIntegrity - amount,
+            integrity.CurrentIntegrity - amount / QualityPerformance(moduleUid),
             0f,
             MathF.Max(0f, integrity.MaxIntegrity));
-        DamageAssembly(moduleUid, module, profile, amount);
+        DamageAssembly(moduleUid, module, profile, amount / QualityPerformance(moduleUid));
         NormalizeMechanicalIntegrity(integrity, profile.Material);
         UpdateOperational(moduleUid, module, profile, _timing.CurTime);
         Remember(patient, key);

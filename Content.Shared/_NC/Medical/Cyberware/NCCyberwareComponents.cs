@@ -31,6 +31,9 @@ public sealed partial class NCCyberwareSlotHostComponent : Component
 [RegisterComponent]
 public sealed partial class NCCyberwareComponent : Component
 {
+    // Factory grade belongs to the physical entity prototype; medical snapshots retain that prototype.
+    [DataField] public ProtoId<Internal.NCCyberwareQualityPrototype> Quality = "NCCyberwareQualityStandard";
+    [DataField] public Dictionary<ProtoId<NCCyberwarePartSlotPrototype>, EntProtoId> QualityParts = [];
     [DataField] public NCCyberwareServiceState Service = new();
 
     /// <summary>Generic world YAML clock, distinct from the medical snapshot's CapturedAt.</summary>

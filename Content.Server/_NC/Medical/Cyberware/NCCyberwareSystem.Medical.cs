@@ -9,8 +9,9 @@ public sealed partial class NCCyberwareSystem
 {
     public ProtoId<NCCyberwareQualityPrototype>? GetAssemblyQuality(EntityUid uid)
     {
-        if (!TryComp<NCCyberwareAssemblyComponent>(uid, out var assembly)) return "NCCyberwareQualityStandard";
-        NCCyberwareQualityPrototype? result = null;
+        var grade = TryComp<NCCyberwareComponent>(uid, out var module) ? module.Quality : new ProtoId<NCCyberwareQualityPrototype>("NCCyberwareQualityStandard");
+        if (!TryComp<NCCyberwareAssemblyComponent>(uid, out var assembly)) return grade;
+        NCCyberwareQualityPrototype? result = _prototypes.Index(grade);
         foreach (var container in assembly.Parts.Values)
         {
             if (container.ContainedEntity is not { } part || !TryComp<NCCyberwarePartComponent>(part, out var component)) return null;
@@ -20,6 +21,10 @@ public sealed partial class NCCyberwareSystem
         if (result == null) return null;
         return new ProtoId<NCCyberwareQualityPrototype>(result.ID);
     }
+
+    public float QualityPerformance(EntityUid uid) =>
+        GetAssemblyQuality(uid) is { } grade ? _prototypes.Index(grade).Performance :
+        TryComp<NCCyberwareComponent>(uid, out var frame) ? _prototypes.Index(frame.Quality).Performance : 1f;
 
     public bool MedicalControllerReady(EntityUid uid)
     {
@@ -46,6 +51,11 @@ public sealed partial class NCCyberwareSystem
         {
             var controlQuality = _prototypes.Index(_prototypes.Index(board.Profile).Quality);
             if (controlQuality.Performance < selected.Performance) selected = controlQuality;
+        }
+        if (TryComp<NCCyberwareComponent>(uid, out var frame))
+        {
+            var frameQuality = _prototypes.Index(frame.Quality);
+            if (frameQuality.Performance < selected.Performance) selected = frameQuality;
         }
         return selected;
     }
