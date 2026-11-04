@@ -4,6 +4,7 @@
  */
 
 using Content.Server._NC.ZLevels.Core.Components;
+using Content.Server.NPC.HTN;
 using Content.Server.Station.Events;
 using Content.Server.Station.Systems;
 using Content.Shared._NC.Coordinates.Systems;
@@ -131,6 +132,9 @@ public sealed partial class NCZLevelsSystem : NCSharedZLevelsSystem
             Log.Info($"Map with ID {mapComp.MapId} initialized.");
         }
     }
+
+    // NPCs keep simulating Z-physics even on floors without players.
+    protected override bool CanAutomaticallySleep(EntityUid uid) => !HasComp<HTNComponent>(uid);
 
     public override void Update(float frameTime)
     {
