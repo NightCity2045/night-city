@@ -97,6 +97,11 @@ public sealed partial class NCCyberwareSystem
             !Unit(state.PermanentDamage) ||
             !Finite(state.CurrentIntegrity, 0f,
                 NCCyberwareCondition.ServiceCeiling(state.MaximumIntegrity, state.PermanentDamage)) ||
+            profile.RequiresFactoryPreparation && state.FactoryPrepared && state.Assembly is { } factory &&
+                factory.ValidatedRevision != factory.ConfigurationRevision ||
+            !NCSkeletalSurgeryPlan.Valid(profile.SkeletalSurgery, state.SkeletalSurgeryCompleted) ||
+            state.SkeletalLoadTestPassed && (!profile.RequiresSkeletalLoadTest || !state.Calibrated ||
+                !NCSkeletalSurgeryPlan.Complete(profile.SkeletalSurgery, state.SkeletalSurgeryCompleted)) ||
             !ValidateAssembly(profile, state.Assembly, state.StableInstanceId) ||
             !ValidatePowerBus(entityPrototype, state) ||
             state.Assembly?.ValidatedRevision != null && state.CurrentIntegrity <= 0f ||
@@ -192,12 +197,15 @@ public sealed partial class NCCyberwareSystem
         module.NeuralIntegrity = state.NeuralIntegrity;
         module.NeuralState = state.NeuralState;
         module.Calibrated = state.Calibrated;
+        module.FactoryPrepared = state.FactoryPrepared;
+        RefreshFactoryAppearance(moduleUid, module);
+        module.SkeletalSurgeryCompleted = state.SkeletalSurgeryCompleted;
+        module.SkeletalLoadTestPassed = state.SkeletalLoadTestPassed;
         module.LastAdvancedAt = runtimeAnchor;
         integrity.MaxIntegrity = state.MaximumIntegrity;
         integrity.CurrentIntegrity = state.CurrentIntegrity;
-        NormalizeMechanicalIntegrity(integrity);
-
         var profile = _prototypes.Index(state.Profile);
+        NormalizeMechanicalIntegrity(integrity, profile.Material);
         UpdateNeuralState(module, profile, runtimeAnchor);
         UpdateOperational(moduleUid, module, profile, runtimeAnchor);
         if (TryResolveOwningBody(moduleUid, out _))
@@ -311,6 +319,9 @@ public sealed partial class NCCyberwareSystem
             NeuralIntegrity = module.NeuralIntegrity,
             NeuralState = module.NeuralState,
             Calibrated = module.Calibrated,
+            FactoryPrepared = module.FactoryPrepared,
+            SkeletalSurgeryCompleted = module.SkeletalSurgeryCompleted,
+            SkeletalLoadTestPassed = module.SkeletalLoadTestPassed,
             PermanentDamage = module.PermanentDamage,
             Assembly = CaptureAssembly(moduleUid),
             PowerBus = CapturePowerBus(moduleUid),

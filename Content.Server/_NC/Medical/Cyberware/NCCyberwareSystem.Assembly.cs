@@ -75,6 +75,7 @@ public sealed partial class NCCyberwareSystem
         if (!assembly.Initialized)
         {
             var initial = CreateDefaultAssemblySnapshot(module.Profile, module.StableInstanceId);
+            if (initial != null && module.FactoryPrepared) initial.ValidatedRevision = initial.ConfigurationRevision;
             if (initial == null || !TryRestoreAssembly(uid, profile, initial))
                 throw new InvalidOperationException($"Cannot initialize cyberware assembly {uid}.");
         }
@@ -105,6 +106,7 @@ public sealed partial class NCCyberwareSystem
             ? uint.MaxValue
             : assembly.Comp.ConfigurationRevision + 1;
         assembly.Comp.ValidatedRevision = null;
+        module.FactoryPrepared = false;
         RecordService(assembly, NCCyberwareServiceOperation.Configuration, Guid.NewGuid());
         InvalidateCalibration(assembly);
         RefreshAssembly(assembly.Comp);
@@ -160,7 +162,7 @@ public sealed partial class NCCyberwareSystem
         var frame = Comp<NCOrganIntegrityComponent>(uid);
         frame.CurrentIntegrity = MathF.Min(frame.CurrentIntegrity,
             NCCyberwareCondition.ServiceCeiling(profile.MaximumIntegrity, module.PermanentDamage));
-        NormalizeMechanicalIntegrity(frame);
+        NormalizeMechanicalIntegrity(frame, profile.Material);
         var internalDamage = MathF.Max(0f,
             damage - (continuousHeat ? 0f : profile.MaximumIntegrity * definition.InternalDamageThresholdFraction)) /
             assembly.Parts.Count;
@@ -179,6 +181,8 @@ public sealed partial class NCCyberwareSystem
             NormalizePart(part, integrity, partProfile);
         }
         assembly.ValidatedRevision = null;
+        module.FactoryPrepared = false;
+        RefreshFactoryAppearance(uid, module);
         RefreshAssembly(assembly);
     }
 

@@ -1,0 +1,38 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Generated with OpenAI ImageGen for Night City, 2026",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "fiber"
+        },
+        {
+            "name": "muscle"
+        },
+        {
+            "name": "composite"
+        },
+        {
+            "name": "anchors"
+        },
+        {
+            "name": "heavy_anchors"
+        },
+        {
+            "name": "beta_actuator"
+        },
+        {
+            "name": "power"
+        },
+        {
+            "name": "frame_sigma"
+        },
+        {
+            "name": "frame_beta"
+        }
+    ]
+}

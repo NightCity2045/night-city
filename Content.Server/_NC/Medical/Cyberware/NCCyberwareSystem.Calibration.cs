@@ -18,6 +18,8 @@ public sealed partial class NCCyberwareSystem
     {
         if (!TryComp<NCCyberwareComponent>(uid, out var module) || !TryGetProfile(module.Profile, out var profile))
             return NCFreeformSurgeryFailure.NoApplicableTarget;
+        if (!SkeletalSurgeryReady(uid, module, profile))
+            return NCFreeformSurgeryFailure.SkeletalSurgeryIncomplete;
         if (profile.RequiresSeparateCalibration)
             return NCFreeformSurgeryFailure.CyberwareCalibrationRequired;
         TryCalibrateCyberware((uid, module), resolution, out var failure);
@@ -39,6 +41,9 @@ public sealed partial class NCCyberwareSystem
             !TryResolveOwningBody(entity, out var body) ||
             !TryComp<NCOrganIntegrityComponent>(entity, out var frame))
             return false;
+        failure = NCFreeformSurgeryFailure.SkeletalSurgeryIncomplete;
+        if (!SkeletalSurgeryReady(entity, entity.Comp, profile))
+            return false;
         failure = NCFreeformSurgeryFailure.CyberwareEmpDisabled;
         if (entity.Comp.EmpDisabledUntil > _timing.CurTime)
             return false;
@@ -53,6 +58,8 @@ public sealed partial class NCCyberwareSystem
             return false;
         if (profile.NeuralRequirement != NCCyberwareNeuralRequirement.None &&
             entity.Comp.NeuralIntegrity < profile.NeuralDegradedThreshold)
+            return false;
+        if (profile.RequiredSupportProfile != null && !entity.Comp.SupportReady)
             return false;
         var output = NCCyberwareCondition.Efficiency(frame.CurrentIntegrity, profile.MaximumIntegrity);
         if (TryComp<NCCyberwareAssemblyComponent>(entity, out var assembly))
@@ -133,11 +140,14 @@ public sealed partial class NCCyberwareSystem
             return false;
         }
         ApplyRequestedNeuralConnection(entity.Comp, profile, true, true);
+        entity.Comp.SkeletalLoadTestPassed = false;
         if (TryComp<NCCyberwareAssemblyComponent>(entity, out var assembly))
             assembly.ValidatedRevision = assembly.ConfigurationRevision;
         Remember(body, key);
         RefreshBodyPower(body, _timing.CurTime);
         MarkBodyChanged(body);
+        if (profile.RequiresSkeletalLoadTest)
+            failure = NCFreeformSurgeryFailure.SkeletalLoadTestRequired;
         return true;
     }
 
@@ -155,6 +165,7 @@ public sealed partial class NCCyberwareSystem
     {
         if (!TryComp<NCCyberwareComponent>(uid, out var module) || !TryGetProfile(module.Profile, out var profile))
             return;
+        module.SkeletalLoadTestPassed = false;
         module.Calibrated = profile.NeuralRequirement == NCCyberwareNeuralRequirement.None;
         module.NeuralState = module.Calibrated ? NCCyberwareNeuralState.NotApplicable : NCCyberwareNeuralState.Disconnected;
         module.Load = 0f;

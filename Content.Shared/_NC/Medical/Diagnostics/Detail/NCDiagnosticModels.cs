@@ -219,7 +219,11 @@ public readonly record struct NCMedicalCyberwareSummary(
     int? HostIndex = null,
     List<NCMedicalCyberwarePartSummary>? Parts = null,
     NCCyberwareNeuralDependencyState NeuralDependency = NCCyberwareNeuralDependencyState.None,
-    int? NeuralFoundationIndex = null);
+    int? NeuralFoundationIndex = null,
+    int? AvailableSupports = null,
+    int? HardsuitAllowancePercent = null,
+    NCSkeletalSurgeryStage SkeletalSurgeryCompleted = NCSkeletalSurgeryStage.None,
+    bool SkeletalLoadTestPassed = false);
 
 [Serializable, NetSerializable]
 public readonly record struct NCMedicalDrugSummary(

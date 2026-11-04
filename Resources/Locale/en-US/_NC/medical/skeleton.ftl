@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-nc-skeleton-map-title = SKELETON // ANATOMICAL REPLACEMENTS
-nc-skeleton-map-hint = Each site replaces one bone structure. Select a detected device to inspect it.
+nc-skeleton-map-title = SKELETON // AUGMENTATIONS AND REPLACEMENTS
+nc-skeleton-map-hint = Bone replacements and whole-body augmentations are separate layers. Select a device to inspect it.
 nc-skeleton-map-undetected = Not detected
 nc-skeleton-map-undetected-hint = No replacement was disclosed for this site. This does not confirm the bone’s presence or condition.
 nc-skeleton-procedure-replacement = Bone replacement

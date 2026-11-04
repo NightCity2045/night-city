@@ -120,6 +120,9 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
             NCFreeformSurgeryAction.CalibrateCyberware => ApplyCyberwareCalibration(context, resolution, out warning),
             NCFreeformSurgeryAction.DisconnectCyberware => ApplyCyberwareDisconnection(context, resolution),
             NCFreeformSurgeryAction.RepairCyberware => ApplyCyberwareRepair(context, resolution, out warning),
+            NCFreeformSurgeryAction.AnchorSkeletal or NCFreeformSurgeryAction.ConnectSkeletal =>
+                ApplySkeletalSurgery(context, resolution, out warning),
+            NCFreeformSurgeryAction.TestSkeletal => ApplySkeletalLoadTest(context, resolution, out warning),
             NCFreeformSurgeryAction.DrainCavity => ApplyCavityDrain(context, power),
             _ => false,
         };
@@ -757,7 +760,11 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
                 ConnectNeuralInterface: true,
                 CalibrateNeuralInterface: false));
             if (!result.Accepted)
+            {
+                if (result.Failure == NCCyberwareMutationFailure.FactoryPreparationRequired)
+                    warning = NCFreeformSurgeryFailure.FactoryPreparationRequired;
                 return false;
+            }
 
             RemComp<NCSurgeryGameplaySelectionComponent>(context.Surgeon);
             warning = _cyberware.TryFinishMount(module, resolution);
@@ -770,6 +777,9 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
 
         // With no staged module, contact on an exposed installed module is removal. General cyberware service
         // remains the responsibility of its physical service items and must not silently double as surgery.
+        if (_prototypes.TryIndex(Comp<NCCyberwareComponent>(target.Value).Profile, out var targetProfile) &&
+            targetProfile.SkeletalSurgery.Count > 0 && context.Zone != targetProfile.SkeletalSurgery[0].Zone)
+            return false;
         var removal = _cyberware.TryRemove(new NCCyberwareRemoveRequest(
             resolution,
             context.Patient,
@@ -788,10 +798,31 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
                 !_containers.IsEntityInContainer(item) && _interaction.InRangeUnobstructed(context.Surgeon, item, 2f));
     }
 
+    private bool ApplySkeletalSurgery(in NCFreeformSurgeryEffectContext context, NCActionResolutionId resolution,
+        out NCFreeformSurgeryFailure failure)
+    {
+        failure = NCFreeformSurgeryFailure.NoApplicableTarget;
+        return context.Structure is { } target && _cyberware.TryPerformSkeletalSurgery((target, null),
+            context.Zone, context.Definition.Action, resolution, out failure);
+    }
+
+    private bool ApplySkeletalLoadTest(in NCFreeformSurgeryEffectContext context, NCActionResolutionId resolution,
+        out NCFreeformSurgeryFailure failure)
+    {
+        failure = NCFreeformSurgeryFailure.NoApplicableTarget;
+        return context.Structure is { } target && TryComp<NCCyberwareComponent>(target, out var module) &&
+               _prototypes.TryIndex(module.Profile, out var profile) && profile.SkeletalSurgery.Count > 0 &&
+               context.Zone == profile.SkeletalSurgery[0].Zone &&
+               _cyberware.TryTestSkeletalLoad((target, null), resolution, out failure);
+    }
+
     private bool ApplyCyberwareCalibration(in NCFreeformSurgeryEffectContext context, NCActionResolutionId resolution,
         out NCFreeformSurgeryFailure failure)
     {
         failure = NCFreeformSurgeryFailure.NoApplicableTarget;
+        if (context.Structure is { } module && TryComp<NCCyberwareComponent>(module, out var implant) &&
+            _prototypes.TryIndex(implant.Profile, out var profile) && profile.SkeletalSurgery.Count > 0 &&
+            context.Zone != profile.SkeletalSurgery[0].Zone) return false;
         return context.Structure is { } target && _cyberware.TryCalibrateCyberware((target, null), resolution, out failure);
     }
 

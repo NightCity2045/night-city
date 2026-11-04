@@ -255,7 +255,7 @@ public sealed partial class NCCyberwareSystem
                     {
                         integrity.CurrentIntegrity = MathF.Max(0f, integrity.CurrentIntegrity - thermal.Damage);
                         DamageAssembly(uid, module, profile, thermal.Damage, continuousHeat: true);
-                        NormalizeMechanicalIntegrity(integrity);
+                        NormalizeMechanicalIntegrity(integrity, profile.Material);
                     }
                 }
                 if (converter is { } conversion && main is { } charging)
@@ -336,6 +336,7 @@ public sealed partial class NCCyberwareSystem
             var module = Comp<NCCyberwareComponent>(uid);
             UpdateOperational(uid, module, _prototypes.Index(module.Profile), now, modules);
         }
+        RefreshSkeletalSupport(body, modules);
         UpdatePowerWarning(body, modules, now);
     }
 

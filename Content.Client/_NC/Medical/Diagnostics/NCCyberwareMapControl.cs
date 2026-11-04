@@ -31,6 +31,8 @@ public sealed partial class NCCyberwareMapControl : Control
     private readonly List<(PanelContainer Panel, int Index, int Group, Color Color, bool Replacement)> _icons = [];
     private int _selected = -1;
     private readonly List<int> _spinalDevices = [];
+    private readonly HashSet<int> _skeletalEnhancements = [];
+    private readonly HashSet<ProtoId<NCCyberwarePrototype>> _skeletalEnhancementProfiles = [];
 
     public event Action<int>? ModuleSelected;
 
@@ -84,6 +86,8 @@ public sealed partial class NCCyberwareMapControl : Control
         _grids.Clear();
         _icons.Clear();
         _spinalDevices.Clear();
+        _skeletalEnhancements.Clear();
+        _skeletalEnhancementProfiles.Clear();
         _selected = -1;
         _skeleton.RemoveAllChildren();
         _skeletalSlots.Clear();
@@ -94,12 +98,19 @@ public sealed partial class NCCyberwareMapControl : Control
         IReadOnlyList<NCSkeletalSlotPrototype> skeletalSlots,
         Func<NCMedicalCyberwareSummary, Texture?> icon,
         Func<NCMedicalCyberwareSummary, string> tooltip,
-        Func<NCMedicalCyberwareSummary, Color> color)
+        Func<NCMedicalCyberwareSummary, Color> color,
+        Func<NCMedicalCyberwareSummary, bool> skeletalEnhancement)
     {
         Clear();
         _skeletonDefinitions = skeletalSlots;
         for (var i = 0; i < modules.Count; i++)
-            if (modules[i].HostCategory?.Id == "Spine")
+            if (skeletalEnhancement(modules[i]))
+            {
+                _skeletalEnhancements.Add(i);
+                _skeletalEnhancementProfiles.Add(modules[i].Profile);
+            }
+        for (var i = 0; i < modules.Count; i++)
+            if (!_skeletalEnhancements.Contains(i) && modules[i].HostCategory?.Id == "Spine")
                 _spinalDevices.Add(i);
         Visible = true;
         _body.SetProjection(new ProtoId<NCAnatomyProfilePrototype>("Human"), true, false);
@@ -126,7 +137,7 @@ public sealed partial class NCCyberwareMapControl : Control
             var roots = new List<int>();
             for (var i = 0; i < modules.Count; i++)
             {
-                if (GroupFor(modules[i]) != group)
+                if (_skeletalEnhancements.Contains(i) || GroupFor(modules[i]) != group)
                     continue;
                 var parent = parents[i];
                 if (parent == null || parent < 0 || parent >= modules.Count || parent == i ||
@@ -247,6 +258,7 @@ public sealed partial class NCCyberwareMapControl : Control
 
     private int GroupFor(NCMedicalCyberwareSummary module)
     {
+        if (_skeletalEnhancementProfiles.Contains(module.Profile)) return 9;
         if (_skeletonDefinitions.Any(slot => slot.Category == module.HostCategory))
             return 8;
         var host = module.HostCategory?.Id ?? string.Empty;
@@ -397,6 +409,17 @@ public sealed partial class NCCyberwareMapControl : Control
                     handle.DrawCircle((start + end) * .5f, 10 * UIScale, color, filled: false);
             }
             owner.DrawSkeleton(handle, size);
+            if (owner._skeletalEnhancements.Contains(owner._selected))
+            {
+                foreach (var slot in owner._skeletonDefinitions)
+                {
+                    var start = slot.MapStart * size;
+                    var end = slot.MapEnd * size;
+                    handle.DrawLine(start, end, Color.FromHex("#E4FFFC"));
+                    handle.DrawCircle(start, 3 * UIScale, Color.FromHex("#E4FFFC"));
+                    handle.DrawCircle(end, 3 * UIScale, Color.FromHex("#E4FFFC"));
+                }
+            }
             for (var i = 0; i < Anchors.Length; i++)
             {
                 var selected = owner._icons.Exists(item => item.Index == owner._selected && item.Group == i);

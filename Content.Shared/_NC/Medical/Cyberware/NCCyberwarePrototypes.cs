@@ -33,6 +33,10 @@ public sealed partial class NCCyberwareSlotPrototype : IPrototype
 
     [DataField(required: true)]
     public float Capacity { get; private set; }
+
+    /// <summary>Horizontal atlas position of this bay's regional surgical connectors.</summary>
+    [DataField]
+    public float RegionalSurgeryPositionX { get; private set; } = .5f;
 }
 
 /// <summary>
@@ -115,6 +119,39 @@ public sealed partial class NCCyberwarePrototype : IPrototype
     /// <summary>One independent neural foundation required for operation, not physical containment.</summary>
     [DataField]
     public ProtoId<NCCyberwarePrototype>? RequiredNeuralInterface { get; private set; }
+
+    [DataField]
+    public ProtoId<NCCyberwarePrototype>? RequiredSupportProfile { get; private set; }
+
+    [DataField]
+    public int RequiredSupportCount { get; private set; }
+
+    [DataField]
+    public NCAnatomicalMaterialKind Material { get; private set; } = NCAnatomicalMaterialKind.Mechanical;
+
+    [DataField]
+    public List<NCSkeletalSurgeryStep> SkeletalSurgery { get; private set; } = [];
+
+    [DataField]
+    public bool RequiresSkeletalLoadTest { get; private set; }
+
+    [DataField] public bool RequiresFactoryPreparation { get; private set; }
+    [DataField] public float FactoryTestEnergy { get; private set; } = 1f;
+    [DataField] public float FactoryTestSeconds { get; private set; } = 5f;
+    [DataField] public float FactoryMinimumEfficiency { get; private set; } = .9f;
+
+    [DataField]
+    public bool SkeletalEnhancement { get; private set; }
+
+    /// <summary>Percentage-point allowance against a worn hardsuit's own clothing penalty only.</summary>
+    [DataField]
+    public float HardsuitPenaltyAllowance { get; private set; }
+
+    [DataField]
+    public float BoneTraumaMultiplier { get; private set; } = 1f;
+
+    [DataField]
+    public bool VulnerableToEmp { get; private set; } = true;
 
     [DataField]
     public List<ProtoId<NCCyberwareSlotPrototype>> CompatibleSlots { get; private set; } = [];

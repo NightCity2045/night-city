@@ -1,0 +1,224 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: Tag
+  id: NCCyberFiber
+
+- type: Tag
+  id: NCCyberMuscle
+
+- type: Tag
+  id: NCCyberComposite
+
+- type: entity
+  parent: BaseItem
+  id: NCBiocompatibleFiber
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/production.rsi
+    state: fiber
+  - type: Item
+    size: Small
+  - type: Tag
+    tags: [ NCCyberFiber ]
+
+- type: entity
+  parent: BaseItem
+  id: NCSyntheticMuscle
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/production.rsi
+    state: muscle
+  - type: Item
+    size: Small
+  - type: Tag
+    tags: [ NCCyberMuscle ]
+
+- type: entity
+  parent: BaseItem
+  id: NCBoneReinforcementComposite
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/production.rsi
+    state: composite
+  - type: Item
+    size: Small
+  - type: Tag
+    tags: [ NCCyberComposite ]
+
+- type: ncCyberwarePartSlot
+  id: NCSkeletalAnchorSlot
+  name: nc-cyber-production-slot-ncskeletalanchorslot
+
+- type: ncCyberwarePartSlot
+  id: NCSkeletalPowerSlot
+  name: nc-cyber-production-slot-ncskeletalpowerslot
+
+- type: ncCyberwarePart
+  id: NCSkeletalAnchorsPart
+  slot: NCSkeletalAnchorSlot
+  maximumIntegrity: 80
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCSkeletalAnchors
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/production.rsi
+    state: anchors
+  - type: NCCyberwarePart
+    profile: NCSkeletalAnchorsPart
+
+- type: ncCyberwarePart
+  id: NCSkeletalHeavyAnchorsPart
+  slot: NCSkeletalHeavyAnchorSlot
+  maximumIntegrity: 140
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCSkeletalHeavyAnchors
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/production.rsi
+    state: heavy_anchors
+  - type: NCCyberwarePart
+    profile: NCSkeletalHeavyAnchorsPart
+
+- type: ncCyberwarePart
+  id: NCBetaActuatorPart
+  humanityPackages: [ NCHumanityProfessionalMotor ]
+  slot: NCBetaActuatorSlot
+  maximumIntegrity: 140
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCBetaActuator
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/production.rsi
+    state: beta_actuator
+  - type: NCCyberwarePart
+    profile: NCBetaActuatorPart
+
+- type: ncCyberwarePart
+  id: NCSkeletalPowerPart
+  slot: NCSkeletalPowerSlot
+  maximumIntegrity: 60
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCSkeletalPowerJunction
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/production.rsi
+    state: power
+  - type: NCCyberwarePart
+    profile: NCSkeletalPowerPart
+
+- type: ncCyberwareAssembly
+  id: NCLinearFrameSigmaAssembly
+  defaultParts:
+    NCIndustrialArmActuatorSlot: NCCyberarmActuator
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCIndustrialArmSensorSlot: NCCyberarmSensor
+    NCSkeletalAnchorSlot: NCSkeletalAnchors
+    NCSkeletalPowerSlot: NCSkeletalPowerJunction
+  repairMaterial: Steel
+  repairPerUnit: 20
+
+- type: entity
+  parent: NCImplantLinearFrameSigma
+  id: NCImplantLinearFrameSigmaEmpty
+  suffix: Unassembled
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/production.rsi
+    layers:
+    - state: frame_sigma
+      map: [ "enum.NCCyberwareProductionVisuals.Empty" ]
+    - sprite: _NC/Objects/Cyberware/skeletal.rsi
+      state: linear_frame_sigma
+      visible: false
+      map: [ "enum.NCCyberwareProductionVisuals.Ready" ]
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.NCCyberwareProductionVisuals.Prepared:
+        enum.NCCyberwareProductionVisuals.Empty:
+          True: { visible: false }
+          False: { visible: true }
+        enum.NCCyberwareProductionVisuals.Ready:
+          True: { visible: true }
+          False: { visible: false }
+
+- type: ncCyberwareAssembly
+  id: NCLinearFrameBetaAssembly
+  defaultParts:
+    NCBetaActuatorSlot: NCBetaActuator
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCIndustrialArmSensorSlot: NCCyberarmSensor
+    NCSkeletalHeavyAnchorSlot: NCSkeletalHeavyAnchors
+    NCSkeletalPowerSlot: NCSkeletalPowerJunction
+  repairMaterial: Steel
+  repairPerUnit: 20
+
+- type: entity
+  parent: NCImplantLinearFrameBeta
+  id: NCImplantLinearFrameBetaEmpty
+  suffix: Unassembled
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/production.rsi
+    layers:
+    - state: frame_beta
+      map: [ "enum.NCCyberwareProductionVisuals.Empty" ]
+    - sprite: _NC/Objects/Cyberware/skeletal.rsi
+      state: linear_frame_beta
+      visible: false
+      map: [ "enum.NCCyberwareProductionVisuals.Ready" ]
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.NCCyberwareProductionVisuals.Prepared:
+        enum.NCCyberwareProductionVisuals.Empty:
+          True: { visible: false }
+          False: { visible: true }
+        enum.NCCyberwareProductionVisuals.Ready:
+          True: { visible: true }
+          False: { visible: false }
+
+- type: entity
+  parent: NCImplantMuscleBoneLace
+  id: NCImplantMuscleBoneLaceUnprepared
+  suffix: Unprepared
+  components:
+  - type: Appearance
+  - type: NCCyberware
+    factoryPrepared: false
+
+- type: entity
+  parent: BaseItem
+  id: NCCyberwareSterileWrap
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medical.rsi
+    state: gauze
+  - type: NCCyberwareSterileWrap
+
+
+- type: ncCyberwarePartSlot
+  id: NCSkeletalHeavyAnchorSlot
+  name: nc-cyber-production-slot-ncskeletalheavyanchorslot
+
+- type: ncCyberwarePartSlot
+  id: NCBetaActuatorSlot
+  name: nc-cyber-production-slot-ncbetaactuatorslot

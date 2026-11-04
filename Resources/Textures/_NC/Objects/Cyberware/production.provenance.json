@@ -1,0 +1,16 @@
+{
+  "generator": "OpenAI ImageGen",
+  "source": "exec-9411475f-39ac-4680-8169-362a07efd0ec.png",
+  "sourceSha256": "bc8d30d17451a2a6de4512ede8aefb509fa3b86061b5d329d49cc7c8f42b387c",
+  "originalSource": "exec-56592fc4-838b-4220-8971-7b4f91066379.png",
+  "processing": "ImageGen removed background and grid; local equal-cell crop, alpha threshold128, Lanczos fit30x30 centered32x32,24-color palette.",
+  "license": "CC-BY-SA-3.0",
+  "emptyFrameSource": {
+    "file": "exec-495614a6-f240-4d7d-a1f8-d2dc6707b384.png",
+    "sha256": "18b002f50c8768ef53ee6a02d2b167df4d6fc3f9594f14d11e8405ab2a6cef7b",
+    "referenceSprites": [
+      "skeletal.rsi/linear_frame_sigma.png",
+      "skeletal.rsi/linear_frame_beta.png"
+    ]
+  }
+}

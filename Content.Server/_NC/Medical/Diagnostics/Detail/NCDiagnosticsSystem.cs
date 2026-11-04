@@ -936,7 +936,13 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                 module.Operational,
                 empDisabled,
                 Parts: BuildCyberwareParts(moduleUid),
-                NeuralDependency: module.NeuralDependency));
+                NeuralDependency: module.NeuralDependency,
+                AvailableSupports: profile.RequiredSupportProfile != null ? module.AvailableSupports : null,
+                HardsuitAllowancePercent: profile.SkeletalEnhancement
+                    ? (int) MathF.Round(profile.HardsuitPenaltyAllowance * module.FunctionalEfficiency *
+                        (profile.RequiresPower ? (module.CrisisBlocksActiveModes ? 0f : module.CrisisEfficiency) : 1f) * 100f) : null,
+                SkeletalSurgeryCompleted: module.SkeletalSurgeryCompleted,
+                SkeletalLoadTestPassed: module.SkeletalLoadTestPassed));
             disclosedEntities.Add(moduleUid);
         }
 

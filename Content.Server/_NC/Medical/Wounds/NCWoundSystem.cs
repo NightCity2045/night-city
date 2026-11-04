@@ -1,3 +1,4 @@
+using Content.Shared._NC.Medical.Cyberware;
 // SPDX-FileCopyrightText: 2026 Astro
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
@@ -626,11 +627,12 @@ public sealed partial class NCWoundSystem : EntitySystem
                          request,
                          0xA24BAED4963EE407UL))
             {
-                ApplyIntegrity(child, traumaAmount * prototype.ContainedStructureDamageMultiplier);
+                var structuralTrauma = traumaAmount * (CompOrNull<NCSkeletalSupportBodyComponent>(body)?.BoneTraumaMultiplier ?? 1f);
+                ApplyIntegrity(child, structuralTrauma * prototype.ContainedStructureDamageMultiplier);
                 ApplyBoneState(
                     child,
-                    severity,
-                    traumaAmount,
+                    ResolveSeverity(structuralTrauma, systemProfile.SeverityThresholds),
+                    structuralTrauma,
                     prototype.ContainedStructureDamageMultiplier,
                     systemProfile);
             }

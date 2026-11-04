@@ -30,7 +30,8 @@ public sealed partial class NCDiagnosticWindow
         CyberwareMap.SetModules(modules,
             _prototypes.EnumeratePrototypes<NCSkeletalSlotPrototype>().OrderBy(slot => slot.Order).ToArray(),
             CyberwareIcon, CyberwareTooltip,
-            module => BandColor(CyberwareSeverity(module)));
+            module => BandColor(CyberwareSeverity(module)),
+            module => _prototypes.TryIndex(module.Profile, out NCCyberwarePrototype? profile) && profile.SkeletalEnhancement);
         if (modules.Length == 0)
         {
             AddEmpty(CyberwareContainer);
@@ -110,6 +111,27 @@ public sealed partial class NCDiagnosticWindow
         if (module.HostIndex is { } host && _snapshot is { } snapshot && host >= 0 && host < snapshot.Cyberware.Count)
             details += "\n" + Loc.GetString("nc-cyberware-map-installed-in", ("host", CyberwareName(snapshot.Cyberware[host].Profile)));
         details += NeuralDependencyDetails(module);
+        if (_prototypes.TryIndex(module.Profile, out NCCyberwarePrototype? definition) && definition.SkeletalEnhancement)
+        {
+            details += "\n" + Loc.GetString("nc-skeletal-diagnostics-allowance",
+                ("current", module.HardsuitAllowancePercent ?? 0),
+                ("maximum", (int) MathF.Round(definition.HardsuitPenaltyAllowance * 100f)));
+            if (definition.SkeletalSurgery.Count > 0)
+            {
+                foreach (var step in definition.SkeletalSurgery)
+                    details += "\n" + Loc.GetString("nc-skeletal-diagnostics-step", ("step", Loc.GetString(step.Name)),
+                        ("state", Loc.GetString((module.SkeletalSurgeryCompleted & step.Stage) != 0
+                            ? "nc-skeletal-surgery-done" : "nc-skeletal-surgery-pending")));
+                if (definition.RequiresSkeletalLoadTest)
+                    details += "\n" + Loc.GetString("nc-skeletal-diagnostics-step",
+                        ("step", Loc.GetString("nc-skeletal-surgery-test")),
+                        ("state", Loc.GetString(module.SkeletalLoadTestPassed
+                            ? "nc-skeletal-surgery-done" : "nc-skeletal-surgery-pending")));
+            }
+            if (definition.RequiredSupportProfile != null)
+                details += "\n" + Loc.GetString("nc-skeletal-diagnostics-grafts",
+                    ("current", module.AvailableSupports ?? 0), ("required", definition.RequiredSupportCount));
+        }
         AddCard(CyberwareContainer, CyberwareName(module.Profile), details, BandColor(CyberwareSeverity(module)),
             icon: CyberwareIcon(module), metrics:
             [

@@ -40,6 +40,7 @@ public enum NCCyberwareServiceOperation : byte
     Repaired,
     Tested,
     Firmware,
+    Prepared,
 }
 
 [DataDefinition]

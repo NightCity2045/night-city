@@ -34,6 +34,22 @@ public sealed partial class NCCyberwareMapControl
         var hint = new RichTextLabel { HorizontalExpand = true };
         hint.SetMessage(Loc.GetString("nc-skeleton-map-hint"), Muted);
         _skeleton.AddChild(hint);
+        if (_skeletalEnhancements.Count > 0)
+        {
+            _skeleton.AddChild(new Label
+            {
+                Text = Loc.GetString("nc-skeletal-diagnostics-layers"), FontColorOverride = Accent,
+            });
+            var enhancements = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 8 };
+            for (var i = 0; i < modules.Count; i++)
+            {
+                if (!_skeletalEnhancements.Contains(i)) continue;
+                var device = CreateIcon(i, 9, modules[i], 52, icon, tooltip, color);
+                device.MaxSize = new Vector2(52);
+                enhancements.AddChild(device);
+            }
+            _skeleton.AddChild(enhancements);
+        }
         var tiles = new WrapContainer
         {
             LayoutAxis = Axis.Horizontal, SeparationOverride = 8, CrossSeparationOverride = 8,

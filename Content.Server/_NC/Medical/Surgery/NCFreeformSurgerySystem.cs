@@ -303,7 +303,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             selection.Patient == session.Patient && selection.Graft is { } graft)
             pending.ExpectedGraft = GetNetEntity(graft);
         if (definition.Action is NCFreeformSurgeryAction.Cyberware or NCFreeformSurgeryAction.CalibrateCyberware or
-            NCFreeformSurgeryAction.DisconnectCyberware or NCFreeformSurgeryAction.RepairCyberware &&
+            NCFreeformSurgeryAction.DisconnectCyberware or NCFreeformSurgeryAction.RepairCyberware or
+            NCFreeformSurgeryAction.AnchorSkeletal or NCFreeformSurgeryAction.ConnectSkeletal or NCFreeformSurgeryAction.TestSkeletal &&
             pending.ExpectedGraft == null && pending.ExpectedStructure == null)
         {
             SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.NoApplicableTarget);
@@ -313,6 +314,9 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         if (configurationTarget is { } configured &&
             TryComp<NCCyberwareAssemblyComponent>(GetEntity(configured), out var assembly))
             pending.ExpectedConfiguration = assembly.ConfigurationRevision;
+
+        if (configurationTarget is { } skeletal && TryComp<NCCyberwareComponent>(GetEntity(skeletal), out var module))
+            pending.ExpectedSkeletalSurgery = module.SkeletalSurgeryCompleted;
 
         var doAfter = new DoAfterArgs(
             EntityManager,
@@ -482,6 +486,9 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         var configurationTarget = graft ?? structure;
         if (pending.ExpectedStructure is { } expected && structure != GetEntity(expected) ||
             pending.ExpectedGraft != (graft is { } staged ? GetNetEntity(staged) : (NetEntity?) null) ||
+            pending.ExpectedSkeletalSurgery is { } expectedProgress &&
+            (configurationTarget == null || !TryComp<NCCyberwareComponent>(configurationTarget.Value, out var module) ||
+             module.SkeletalSurgeryCompleted != expectedProgress) ||
             pending.ExpectedConfiguration is { } revision &&
             (configurationTarget == null || !TryComp<NCCyberwareAssemblyComponent>(configurationTarget.Value, out var assembly) ||
              assembly.ConfigurationRevision != revision))
@@ -1254,7 +1261,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             var normalizedFunction = Math.Clamp(function, 0f, 1f);
             result.Add(new NCFreeformSurgeryStructureSummary(
                 handle,
-                Name(candidate),
+                _cyberware.TryGetSkeletalSurgeryTarget(candidate, session.TargetZone, out _, out var contactName)
+                    ? contactName : Name(candidate),
                 StructureKind(candidate),
                 definition.Visual,
                 definition.Position,
@@ -1661,6 +1669,11 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             }
         }
 
+        // Local connectors disclose the same attached implant through each required regional access.
+        foreach (var module in _cyberware.CollectCyberware(session.Patient))
+            if (!result.Contains(module) &&
+                _cyberware.TryGetSkeletalSurgeryTarget(module, session.TargetZone, out _, out _))
+                result.Add(module);
         return result;
     }
 
@@ -1671,6 +1684,8 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         bool allowRegionFallback,
         out NCFreeformSurgeryStructureDefinition definition)
     {
+        if (_cyberware.TryGetSkeletalSurgeryTarget(candidate, session.TargetZone, out definition, out _))
+            return true;
         if (TryComp<OrganComponent>(candidate, out var organ) && organ.Category is { } category &&
             profile.Structures.TryGetValue(category, out definition!))
         {

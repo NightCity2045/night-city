@@ -89,6 +89,9 @@
   name: cyberware service bench
   description: Mount detached cyberware, fit compatible parts, and inspect or test the assembly. Steel repairs serviceable damage.
   components:
+  - type: Construction
+    graph: NCCyberwareWorkbenchConstruction
+    node: complete
   - type: NCCyberwareWorkbench
   - type: PowerCellSlot
     cellSlotId: nc_bench_cell

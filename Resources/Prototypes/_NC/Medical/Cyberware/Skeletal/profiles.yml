@@ -1,0 +1,276 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncCyberwareSlot
+  id: NCSlotMuscleBoneLacePrimary
+  regionalSurgeryPositionX: 0.22
+  name: primary-graft bay
+  nameId: nc-skeletal-slot-primary-graft
+  hostCategories: [ Thorax ]
+  capacity: 1
+
+- type: ncCyberwareSlot
+  id: NCSlotMuscleBoneLaceSecondary
+  regionalSurgeryPositionX: 0.78
+  name: secondary-graft bay
+  nameId: nc-skeletal-slot-secondary-graft
+  hostCategories: [ Thorax ]
+  capacity: 1
+
+- type: ncCyberwareSlot
+  id: NCSlotImplantedLinearFrame
+  name: linear-frame bay
+  nameId: nc-skeletal-slot-linear-frame
+  hostCategories: [ Spine ]
+  capacity: 3
+
+- type: ncCyberware
+  id: NCGraftedMuscleBoneLace
+  skeletalSurgery:
+  - stage: Torso
+    name: nc-skeletal-step-graft-torso
+    zone: NCZoneChest
+    structure: Thorax
+    action: ConnectSkeletal
+    minimumDepth: 0.68
+  - stage: ArmLeft
+    name: nc-skeletal-step-graft-armleft
+    zone: NCZoneArmLeft
+    structure: ArmBoneLeft
+    action: ConnectSkeletal
+    prerequisites: Torso
+    minimumDepth: 0.58
+  - stage: ArmRight
+    name: nc-skeletal-step-graft-armright
+    zone: NCZoneArmRight
+    structure: ArmBoneRight
+    action: ConnectSkeletal
+    prerequisites: Torso
+    minimumDepth: 0.58
+  - stage: LegLeft
+    name: nc-skeletal-step-graft-legleft
+    zone: NCZoneLegLeft
+    structure: LegBoneLeft
+    action: ConnectSkeletal
+    prerequisites: Torso
+    minimumDepth: 0.58
+  - stage: LegRight
+    name: nc-skeletal-step-graft-legright
+    zone: NCZoneLegRight
+    structure: LegBoneRight
+    action: ConnectSkeletal
+    prerequisites: Torso
+    minimumDepth: 0.58
+  material: Hybrid
+  name: muscle bone lace
+  nameId: nc-skeletal-profile-muscle-bone-lace
+  manufacturer: Night City 2045 clinical adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/skeletal.rsi
+    state: muscle_bone_lace
+  form: Implant
+  compatibleSlots: [ NCSlotMuscleBoneLacePrimary, NCSlotMuscleBoneLaceSecondary ]
+  size: 1
+  maximumIntegrity: 100
+  repairProfile: NCRepairProfileClinicalCyberware
+  humanityPackages: [ NCHumanityProfessionalMotor ]
+  skeletalEnhancement: true
+  requiresFactoryPreparation: true
+  hardsuitPenaltyAllowance: 0.15
+  boneTraumaMultiplier: 0.75
+  requiresPower: false
+  vulnerableToEmp: false
+  requiresSeparateCalibration: false
+  idlePowerPerSecond: 0
+  loadedPowerPerSecond: 0
+  heatCapacity: 120
+  idleHeatPerSecond: 0
+  loadedHeatPerSecond: 0
+  passiveCoolingPerSecond: 0.4
+  heatDeratingThreshold: 80
+  heatShutdownThreshold: 100
+  heatDamageThreshold: 110
+  heatDamagePerSecond: 1
+  neuralRequirement: None
+  updateInterval: 0.5s
+  capabilities: []
+
+- type: ncCyberware
+  id: NCImplantedLinearFrameSigma
+  assembly: NCLinearFrameSigmaAssembly
+  factoryTestEnergy: 50
+  factoryTestSeconds: 8
+  skeletalSurgery:
+  - stage: Torso
+    name: nc-skeletal-step-spinal-anchor
+    zone: NCZoneChest
+    structure: VertebralColumn
+    action: AnchorSkeletal
+    minimumDepth: 0.8
+  - stage: Pelvis
+    name: nc-skeletal-step-pelvic-anchor
+    zone: NCZoneGroin
+    structure: PelvisBone
+    action: AnchorSkeletal
+    prerequisites: Torso
+    minimumDepth: 0.72
+  - stage: ArmLeft
+    name: nc-skeletal-step-link-armleft
+    zone: NCZoneArmLeft
+    structure: ArmBoneLeft
+    action: ConnectSkeletal
+    prerequisites: Torso, Pelvis
+    minimumDepth: 0.58
+  - stage: ArmRight
+    name: nc-skeletal-step-link-armright
+    zone: NCZoneArmRight
+    structure: ArmBoneRight
+    action: ConnectSkeletal
+    prerequisites: Torso, Pelvis
+    minimumDepth: 0.58
+  - stage: LegLeft
+    name: nc-skeletal-step-link-legleft
+    zone: NCZoneLegLeft
+    structure: LegBoneLeft
+    action: ConnectSkeletal
+    prerequisites: Torso, Pelvis
+    minimumDepth: 0.58
+  - stage: LegRight
+    name: nc-skeletal-step-link-legright
+    zone: NCZoneLegRight
+    structure: LegBoneRight
+    action: ConnectSkeletal
+    prerequisites: Torso, Pelvis
+    minimumDepth: 0.58
+  name: linear frame sigma
+  nameId: nc-skeletal-profile-linear-frame-sigma
+  manufacturer: Night City 2045 clinical adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/skeletal.rsi
+    state: linear_frame_sigma
+  form: Implant
+  compatibleSlots: [ NCSlotImplantedLinearFrame ]
+  size: 3
+  maximumIntegrity: 140
+  repairProfile: NCRepairProfileClinicalCyberware
+  humanityPackages: [ NCHumanityHeavyMotor ]
+  skeletalEnhancement: true
+  requiresFactoryPreparation: true
+  hardsuitPenaltyAllowance: 0.3
+  boneTraumaMultiplier: 1
+  requiresPower: true
+  vulnerableToEmp: true
+  requiresSeparateCalibration: true
+  requiredSupportProfile: NCGraftedMuscleBoneLace
+  requiredSupportCount: 1
+  idlePowerPerSecond: 1.5
+  loadedPowerPerSecond: 6
+  heatCapacity: 120
+  idleHeatPerSecond: 0.15
+  loadedHeatPerSecond: 2
+  passiveCoolingPerSecond: 0.4
+  heatDeratingThreshold: 80
+  heatShutdownThreshold: 100
+  heatDamageThreshold: 110
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.5s
+  capabilities: []
+
+- type: ncCyberware
+  id: NCImplantedLinearFrameBeta
+  assembly: NCLinearFrameBetaAssembly
+  factoryTestEnergy: 150
+  factoryTestSeconds: 12
+  skeletalSurgery:
+  - stage: Torso
+    name: nc-skeletal-step-spinal-anchor
+    zone: NCZoneChest
+    structure: VertebralColumn
+    action: AnchorSkeletal
+    minimumDepth: 0.8
+  - stage: Pelvis
+    name: nc-skeletal-step-pelvic-anchor
+    zone: NCZoneGroin
+    structure: PelvisBone
+    action: AnchorSkeletal
+    prerequisites: Torso
+    minimumDepth: 0.72
+  - stage: TorsoReinforcement
+    name: nc-skeletal-step-spinal-reinforcement
+    zone: NCZoneChest
+    structure: VertebralColumn
+    action: AnchorSkeletal
+    prerequisites: Torso, Pelvis
+    minimumDepth: 0.8
+  - stage: PelvisReinforcement
+    name: nc-skeletal-step-pelvic-reinforcement
+    zone: NCZoneGroin
+    structure: PelvisBone
+    action: AnchorSkeletal
+    prerequisites: Torso, Pelvis, TorsoReinforcement
+    minimumDepth: 0.72
+  - stage: ArmLeft
+    name: nc-skeletal-step-link-armleft
+    zone: NCZoneArmLeft
+    structure: ArmBoneLeft
+    action: ConnectSkeletal
+    prerequisites: Torso, Pelvis, TorsoReinforcement, PelvisReinforcement
+    minimumDepth: 0.58
+  - stage: ArmRight
+    name: nc-skeletal-step-link-armright
+    zone: NCZoneArmRight
+    structure: ArmBoneRight
+    action: ConnectSkeletal
+    prerequisites: Torso, Pelvis, TorsoReinforcement, PelvisReinforcement
+    minimumDepth: 0.58
+  - stage: LegLeft
+    name: nc-skeletal-step-link-legleft
+    zone: NCZoneLegLeft
+    structure: LegBoneLeft
+    action: ConnectSkeletal
+    prerequisites: Torso, Pelvis, TorsoReinforcement, PelvisReinforcement
+    minimumDepth: 0.58
+  - stage: LegRight
+    name: nc-skeletal-step-link-legright
+    zone: NCZoneLegRight
+    structure: LegBoneRight
+    action: ConnectSkeletal
+    prerequisites: Torso, Pelvis, TorsoReinforcement, PelvisReinforcement
+    minimumDepth: 0.58
+  requiresSkeletalLoadTest: true
+  name: linear frame beta
+  nameId: nc-skeletal-profile-linear-frame-beta
+  manufacturer: Night City 2045 clinical adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/skeletal.rsi
+    state: linear_frame_beta
+  form: Implant
+  compatibleSlots: [ NCSlotImplantedLinearFrame ]
+  size: 3
+  maximumIntegrity: 180
+  repairProfile: NCRepairProfileClinicalCyberware
+  humanityPackages: [ NCHumanityHeavyMotor ]
+  skeletalEnhancement: true
+  requiresFactoryPreparation: true
+  hardsuitPenaltyAllowance: 0.45
+  boneTraumaMultiplier: 1
+  requiresPower: true
+  vulnerableToEmp: true
+  requiresSeparateCalibration: true
+  requiredSupportProfile: NCGraftedMuscleBoneLace
+  requiredSupportCount: 2
+  idlePowerPerSecond: 3
+  loadedPowerPerSecond: 10
+  heatCapacity: 120
+  idleHeatPerSecond: 0.15
+  loadedHeatPerSecond: 2
+  passiveCoolingPerSecond: 0.4
+  heatDeratingThreshold: 80
+  heatShutdownThreshold: 100
+  heatDamageThreshold: 110
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.5s
+  capabilities: []

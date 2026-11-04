@@ -1,0 +1,43 @@
+<Document>
+# Cyberware manufacturing
+
+## Production equipment
+
+Use the existing ore processor, autolathe, circuit imprinter, biofabricator, medical techfab and exosuit fabricator. Print their existing circuit boards on the circuit imprinter, then use normal machine construction. Construct the cyberware service bench through the construction menu: 12 steel sheets, 4 glass sheets, 6 cable and a screwdriver. Fit a charged standard power cell.
+
+On the current Night City maps, metal processing is on level 0; autolathe and electronics are on level -3; chemistry and medical fabrication are on level +2; hydroponics is on level +1. Biogeneration, biofabrication and exosuit fabrication can be built from their existing boards. The cyberware bench can be constructed locally.
+
+## Muscle and bone reinforcement
+
+1. Grow plants and process them in a biogenerator to obtain biomass.
+2. Fabricate a synthetic muscle cassette from 100 biomass in a biofabricator.
+3. Mix 5 oil, 10 carbon and 5 silicon; heat to 350 K to produce reinforcing fiber.
+4. Mix 5 oil, 10 phosphorus and 10 silicon; heat to 420 K to produce bone composite.
+5. Use the construction menu to combine one cassette, one fiber spool, one composite cartridge, 2 plastic sheets and 2 cloth into an unprepared reinforcement kit.
+6. Mount the kit on the cyberware bench. Insert a charged cell and use one sterile preparation pack from the medical techfab on the bench. Stay at the bench until the preparation finishes.
+
+## Linear frames
+
+Print an empty Sigma or Beta frame in the exosuit fabricator. Print anchors in an autolathe and controllers, sensor interfaces and power junctions in a circuit imprinter.
+
+Build a standard actuator from 2 micro-manipulators, 4 steel and 4 cable with a screwdriver. Beta needs a heavy actuator built from 5 micro-manipulators, 10 steel and 6 high-voltage cable.
+
+Mount the empty frame on the cyberware bench. Fit the actuator, controller, sensor interface, anchor kit and power junction. Beta uses its own heavy actuator and reinforced-anchor slots. Normal Sigma parts cannot fill these slots.
+
+Apply a standard firmware card to the occupied bench. Use the bench interaction menu to test the assembly. Tests require a charged cell, healthy components, sufficient rated power and thermal headroom. Sigma testing uses at least 50 energy, Beta 150. Changed parts or firmware invalidate the test.
+
+Use one sterile preparation pack on the occupied bench after a successful test. Preparation takes time and consumes another 50 energy for Sigma or 150 for Beta. The physical pack is consumed only after successful completion. Eject the prepared implant using the bench menu.
+
+## Surgery
+
+Manufacturing does not complete surgery. Sigma needs one fully integrated muscle/bone reinforcement set, Beta needs two. Install the frame through the chest; secure spinal and pelvic anchors and connect each limb through its own operative access. Beta also needs reinforced anchors. Then calibrate the implanted frame; Beta requires a separate powered load test.
+
+Extracted implants need new factory preparation before another installation. Damaged hardware retains its condition through disassembly and storage. A normal printed power cell fits the body bus; a separate special battery is not required.
+
+<Box>
+<GuideEntityEmbed Entity="NCCyberwareWorkbench"/>
+<GuideEntityEmbed Entity="NCImplantLinearFrameSigmaEmpty"/>
+<GuideEntityEmbed Entity="NCImplantLinearFrameBetaEmpty"/>
+<GuideEntityEmbed Entity="NCCyberwareSterileWrap"/>
+</Box>
+</Document>

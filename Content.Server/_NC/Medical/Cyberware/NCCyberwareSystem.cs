@@ -109,6 +109,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
     {
         if (!HasComp<NCMedicalBodyComponent>(body.Owner))
             return;
+        InvalidateSkeletalConnections(body, args.Organ);
         ScheduleContainedModules(args.Organ, false);
         RefreshBodyPower(body, _timing.CurTime);
     }
@@ -250,6 +251,10 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             return Reject(NCCyberwareMutationFailure.ModuleUnavailable);
         }
 
+        if (profile.RequiresFactoryPreparation && (!module.FactoryPrepared ||
+            TryComp<NCCyberwareAssemblyComponent>(request.Module, out var factoryAssembly) &&
+            factoryAssembly.ValidatedRevision != factoryAssembly.ConfigurationRevision))
+            return Reject(NCCyberwareMutationFailure.FactoryPreparationRequired);
         if (profile.Form != NCCyberwareForm.Implant)
             return Reject(NCCyberwareMutationFailure.SlotIncompatible);
         if (module.InstalledSlot != null ||
@@ -367,6 +372,8 @@ public sealed partial class NCCyberwareSystem : EntitySystem
 
         var previousFunction = module.FunctionalEfficiency;
         module.InstalledSlot = null;
+        module.FactoryPrepared = false;
+        module.SkeletalSurgeryCompleted = NCSkeletalSurgeryStage.None;
         InvalidateCalibration(request.Module);
         module.Load = 0f;
         module.Operational = false;
@@ -423,7 +430,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         foreach (var moduleUid in modules)
         {
             if (!TryComp<NCCyberwareComponent>(moduleUid, out var module) ||
-                !TryGetProfile(module.Profile, out var profile))
+                !TryGetProfile(module.Profile, out var profile) || !profile.VulnerableToEmp)
             {
                 continue;
             }
@@ -454,7 +461,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
                     0f,
                     MathF.Max(0f, integrity.MaxIntegrity));
                 DamageAssembly(moduleUid, module, profile, surge);
-                NormalizeMechanicalIntegrity(integrity);
+                NormalizeMechanicalIntegrity(integrity, profile.Material);
             }
 
             var durationTicks = request.Duration.Ticks * profile.EmpDisableDurationMultiplier;
@@ -515,6 +522,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         var previous = module.FunctionalEfficiency;
         TryAdvanceBodyPower(body, _timing.CurTime);
         ApplyRequestedNeuralConnection(module, profile, connected, calibrated);
+        module.SkeletalLoadTestPassed = false;
         RefreshBodyPower(body, _timing.CurTime);
         Remember(body, key);
         Schedule(moduleUid, profile, true);
@@ -712,7 +720,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             0f,
             MathF.Max(0f, integrity.MaxIntegrity));
         DamageAssembly(moduleUid, module, profile, amount);
-        NormalizeMechanicalIntegrity(integrity);
+        NormalizeMechanicalIntegrity(integrity, profile.Material);
         UpdateOperational(moduleUid, module, profile, _timing.CurTime);
         Remember(patient, key);
         Schedule(moduleUid, profile, true);
@@ -813,7 +821,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             InitializeState(moduleUid, module, profile);
             if (TryComp<NCOrganIntegrityComponent>(moduleUid, out var integrity))
             {
-                integrity.Material = NCAnatomicalMaterialKind.Mechanical;
+                integrity.Material = profile.Material;
                 integrity.MaxIntegrity = profile.MaximumIntegrity;
                 integrity.CurrentIntegrity = profile.MaximumIntegrity;
                 integrity.FunctionalEfficiency = 1f;
@@ -903,6 +911,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         if (module.StableInstanceId == Guid.Empty)
             module.StableInstanceId = Guid.NewGuid();
         InitializeAssembly(moduleUid, module, profile);
+        RefreshFactoryAppearance(moduleUid, module);
         if (module.StateInitialized)
         {
             NormalizeState(module, profile);
@@ -923,10 +932,10 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         module.LastAdvancedAt = _timing.CurTime;
         if (TryComp<NCOrganIntegrityComponent>(moduleUid, out var integrity))
         {
-            integrity.Material = NCAnatomicalMaterialKind.Mechanical;
+            integrity.Material = profile.Material;
             integrity.MaxIntegrity = profile.MaximumIntegrity;
             integrity.CurrentIntegrity = profile.MaximumIntegrity;
-            NormalizeMechanicalIntegrity(integrity);
+            NormalizeMechanicalIntegrity(integrity, profile.Material);
         }
 
         UpdateOperational(moduleUid, module, profile, _timing.CurTime);
@@ -952,7 +961,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         {
             integrity.CurrentIntegrity = MathF.Min(integrity.CurrentIntegrity,
                 NCCyberwareCondition.ServiceCeiling(profile.MaximumIntegrity, module.PermanentDamage));
-            NormalizeMechanicalIntegrity(integrity);
+            NormalizeMechanicalIntegrity(integrity, profile.Material);
             structural = SafeFraction(integrity.CurrentIntegrity, profile.MaximumIntegrity);
         }
         if (TryComp<NCCyberwareAssemblyComponent>(moduleUid, out var assembly))
@@ -984,8 +993,12 @@ public sealed partial class NCCyberwareSystem : EntitySystem
 
         var dependency = ResolveNeuralDependency(moduleUid, profile, now, modules);
         module.NeuralDependency = dependency.State;
-        neuralFactor *= dependency.Efficiency;
-        if (dependency.Efficiency <= 0f)
+        var supportFactor = ResolveSupportFactor(moduleUid, module, profile, now, modules);
+        neuralFactor *= dependency.Efficiency * supportFactor;
+        if (!SkeletalSurgeryReady(moduleUid, module, profile) ||
+            profile.RequiresSkeletalLoadTest && !module.SkeletalLoadTestPassed)
+            neuralFactor = 0f;
+        if (dependency.Efficiency <= 0f || supportFactor <= 0f)
             module.Load = 0f;
         var empDisabled = module.EmpDisabledUntil > now;
         module.FunctionalEfficiency = powered && !empDisabled && !module.ThermalShutdown && module.Heat < profile.HeatShutdownThreshold
@@ -1227,7 +1240,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             return;
         if (string.IsNullOrWhiteSpace(slot.Name) || slot.HostCategories.Count == 0 ||
             slot.HostCategories.Count != slot.HostCategories.Distinct().Count() ||
-            !float.IsFinite(slot.Capacity) || slot.Capacity <= 0f ||
+            !float.IsFinite(slot.Capacity) || slot.Capacity <= 0f || !Unit(slot.RegionalSurgeryPositionX) ||
             slot.HostCategories.Any(category => !_prototypes.HasIndex(category)) ||
             slot.LegacyHostCategories.Count != slot.LegacyHostCategories.Distinct().Count() ||
             slot.LegacyHostCategories.Any(category => !_prototypes.HasIndex(category) || slot.HostCategories.Contains(category)))
@@ -1251,8 +1264,12 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         if (!_validatedProfiles.Add(profile.ID))
             return;
 
+        if (!Positive(profile.FactoryTestEnergy) || !Positive(profile.FactoryTestSeconds) || !Unit(profile.FactoryMinimumEfficiency) ||
+            !NCSkeletalSurgeryPlan.ValidDefinition(profile.SkeletalSurgery) ||
+            profile.RequiresSkeletalLoadTest && (profile.SkeletalSurgery.Count == 0 || !profile.RequiresPower))
+            throw new InvalidOperationException($"Invalid skeletal surgery plan: {profile.ID}");
         if (string.IsNullOrWhiteSpace(profile.Name) || string.IsNullOrWhiteSpace(profile.Manufacturer) ||
-            !Enum.IsDefined(profile.Form) || !Enum.IsDefined(profile.NeuralRequirement) ||
+            !Enum.IsDefined(profile.Form) || !Enum.IsDefined(profile.Material) || !Enum.IsDefined(profile.NeuralRequirement) ||
             !Positive(profile.Size) || !Positive(profile.MaximumIntegrity) ||
             !NonNegative(profile.PowerCapacity) || !Unit(profile.StartingPowerFraction) ||
             !NonNegative(profile.MinimumOperationalPower) ||
@@ -1292,8 +1309,17 @@ public sealed partial class NCCyberwareSystem : EntitySystem
 
         if (profile.RequiredNeuralInterface is { } required &&
             (required.Id == profile.ID || !_prototypes.TryIndex(required, out NCCyberwarePrototype? foundation) ||
-             foundation.RequiredNeuralInterface != null || !foundation.Capabilities.Contains("NeuralInterface")))
+             foundation.RequiredNeuralInterface != null || foundation.RequiredSupportProfile != null || !foundation.Capabilities.Contains("NeuralInterface")))
             throw new InvalidOperationException($"Invalid neural foundation for {profile.ID}.");
+
+        if (!Unit(profile.HardsuitPenaltyAllowance) || !Unit(profile.BoneTraumaMultiplier) ||
+            !profile.SkeletalEnhancement && (profile.HardsuitPenaltyAllowance > 0f || profile.BoneTraumaMultiplier < 1f) ||
+            profile.RequiredSupportProfile == null && profile.RequiredSupportCount != 0 ||
+            profile.RequiredSupportProfile is { } support &&
+            (profile.RequiredSupportCount is < 1 or > 2 || support.Id == profile.ID ||
+             !_prototypes.TryIndex(support, out NCCyberwarePrototype? supportDefinition) ||
+             supportDefinition.RequiredSupportProfile != null || supportDefinition.RequiredNeuralInterface != null))
+            throw new InvalidOperationException($"Invalid skeletal support for {profile.ID}.");
 
         if (_prototypes.TryIndex(profile.RepairProfile, out NCCyberwareRepairProfilePrototype? repair))
             ValidateRepairProfile(repair);
@@ -1412,7 +1438,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             integrity.CurrentIntegrity + repair.IntegrityPerUnit * units,
             0f,
             NCCyberwareCondition.ServiceCeiling(profile.MaximumIntegrity, module.PermanentDamage));
-        NormalizeMechanicalIntegrity(integrity);
+        NormalizeMechanicalIntegrity(integrity, profile.Material);
         module.CurrentPower = 0f;
         module.Heat = Math.Clamp(
             module.Heat - repair.CoolingPerUnit * units,
@@ -1426,9 +1452,10 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         UpdateOperational(moduleUid, module, profile, now);
     }
 
-    private static void NormalizeMechanicalIntegrity(NCOrganIntegrityComponent integrity)
+    private static void NormalizeMechanicalIntegrity(NCOrganIntegrityComponent integrity,
+        NCAnatomicalMaterialKind material = NCAnatomicalMaterialKind.Mechanical)
     {
-        integrity.Material = NCAnatomicalMaterialKind.Mechanical;
+        integrity.Material = material;
         integrity.CurrentIntegrity = Math.Clamp(
             integrity.CurrentIntegrity,
             0f,

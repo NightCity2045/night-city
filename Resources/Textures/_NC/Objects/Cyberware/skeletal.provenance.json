@@ -1,0 +1,7 @@
+{
+    "generator": "OpenAI ImageGen",
+    "source_sha256": "c7d04f73616f38e27de347df9d21221674d838725c73f3b6e457f4f3461437d9",
+    "source_filename": "exec-12272f8d-63bf-4428-a638-697809611ad7.png",
+    "license": "CC-BY-SA-3.0",
+    "normalization": "Split into three equal horizontal cells; crop alpha bounds; fit within 30x30 with Lanczos; quantize 24 RGB colors without dithering; alpha threshold 128; center on transparent 32x32 canvas."
+}

@@ -296,6 +296,9 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
         NCFreeformSurgeryAction.Separate => Loc.GetString("nc-surgery-ui-action-separate"),
         NCFreeformSurgeryAction.Amputate => Loc.GetString("nc-surgery-ui-action-amputate"),
         NCFreeformSurgeryAction.Transplant => Loc.GetString("nc-surgery-ui-action-transplant"),
+        NCFreeformSurgeryAction.AnchorSkeletal => Loc.GetString("nc-skeletal-surgery-anchor"),
+        NCFreeformSurgeryAction.ConnectSkeletal => Loc.GetString("nc-skeletal-surgery-connect"),
+        NCFreeformSurgeryAction.TestSkeletal => Loc.GetString("nc-skeletal-surgery-test"),
         NCFreeformSurgeryAction.Cyberware => Loc.GetString("nc-surgery-ui-action-cyberware"),
         NCFreeformSurgeryAction.CalibrateCyberware => Loc.GetString("nc-cyberware-surgery-calibrate"),
         NCFreeformSurgeryAction.DisconnectCyberware => Loc.GetString("nc-cyberware-surgery-disconnect"),
@@ -309,6 +312,11 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
     private static string FeedbackText(NCFreeformSurgeryFailure failure) => failure switch
     {
         NCFreeformSurgeryFailure.None => string.Empty,
+        NCFreeformSurgeryFailure.FactoryPreparationRequired => Loc.GetString("nc-cyber-production-unprepared"),
+        NCFreeformSurgeryFailure.SkeletalSurgeryIncomplete => Loc.GetString("nc-skeletal-surgery-incomplete"),
+        NCFreeformSurgeryFailure.SkeletalPrerequisitesMissing => Loc.GetString("nc-skeletal-surgery-prerequisites"),
+        NCFreeformSurgeryFailure.SkeletalStructureDamaged => Loc.GetString("nc-skeletal-surgery-damaged"),
+        NCFreeformSurgeryFailure.SkeletalLoadTestRequired => Loc.GetString("nc-skeletal-surgery-test-required"),
         NCFreeformSurgeryFailure.CyberwareCalibrationRequired => Loc.GetString("nc-cyberware-surgery-calibration-required"),
         NCFreeformSurgeryFailure.CyberwareAssemblyIncomplete => Loc.GetString("nc-cyberware-surgery-assembly-incomplete"),
         NCFreeformSurgeryFailure.CyberwareOutputLow => Loc.GetString("nc-cyberware-surgery-output-low"),

@@ -26,6 +26,7 @@ public sealed partial class NCCyberwareSystem
     {
         if (!TryComp<NCCyberwareComponent>(uid, out var module))
             return;
+        RefreshFactoryAppearance(uid, module);
         if (!NCCyberwareServiceHistory.TryAppend(module.Service, module.Service.Revision, resolution,
                 operation, body is { } patient ? ServiceOwner(patient) : string.Empty))
             Log.Warning($"Cyberware {module.StableInstanceId} rejected service audit {resolution} at revision {module.Service.Revision}.");
@@ -52,7 +53,8 @@ public sealed partial class NCCyberwareSystem
                _prototypes.TryIndex(media.Firmware, out var firmware) &&
                TryComp<NCCyberwareComponent>(uid, out var module) &&
                NCCyberwareServiceHistory.Valid(module.Service) && module.Service.Revision == expectedRevision &&
-               expectedRevision < uint.MaxValue && module.Service.Firmware != media.Firmware &&
+               expectedRevision < uint.MaxValue &&
+               (module.Service.Firmware != media.Firmware || !module.FactoryPrepared && _prototypes.Index(module.Profile).RequiresFactoryPreparation) &&
                (firmware.CompatibleProfiles.Count == 0 || firmware.CompatibleProfiles.Contains(module.Profile));
     }
 
@@ -65,6 +67,7 @@ public sealed partial class NCCyberwareSystem
             !_battery.TryUseCharge(battery.Value.AsNullable(), bench.Comp.TestEnergy))
             return false;
         var module = Comp<NCCyberwareComponent>(expectedModule);
+        module.FactoryPrepared = false;
         module.Service.Firmware = Comp<NCCyberwareFirmwareCardComponent>(card).Firmware;
         if (TryComp<NCCyberwareAssemblyComponent>(expectedModule, out var assembly)) assembly.ValidatedRevision = null;
         RecordService(expectedModule, NCCyberwareServiceOperation.Firmware, Guid.NewGuid());

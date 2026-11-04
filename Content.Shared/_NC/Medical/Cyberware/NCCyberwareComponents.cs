@@ -82,7 +82,22 @@ public sealed partial class NCCyberwareComponent : Component
     public NCCyberwareNeuralState NeuralState;
 
     [DataField]
+    public NCSkeletalSurgeryStage SkeletalSurgeryCompleted;
+
+    [DataField]
+    public bool SkeletalLoadTestPassed;
+
+    [DataField]
+    public bool FactoryPrepared;
+
+    [DataField]
     public bool Calibrated;
+
+    [ViewVariables]
+    public bool SupportReady = true;
+
+    [ViewVariables]
+    public int AvailableSupports;
 
     [ViewVariables]
     public NCCyberwareNeuralDependencyState NeuralDependency;

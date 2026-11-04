@@ -115,7 +115,7 @@
     profile: NCBorgFrameBus
   - type: NCCyberwarePowerBus
   - type: NCCyberwareSlotHost
-    slots: [ NCSlotThoracicConverter, NCSlotSubdermalThorax ]
+    slots: [ NCSlotThoracicConverter, NCSlotSubdermalThorax, NCSlotMuscleBoneLacePrimary, NCSlotMuscleBoneLaceSecondary ]
   - type: NCSurgicalSite
     accessDepth: OrganExposed
     tissuesRetracted: true

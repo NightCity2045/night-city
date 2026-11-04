@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
-nc-skeleton-map-title = СКЕЛЕТ // АНАТОМИЧЕСКИЕ ЗАМЕНЫ
-nc-skeleton-map-hint = Каждое место — замена одной костной структуры. Выберите обнаруженное устройство для осмотра.
+nc-skeleton-map-title = СКЕЛЕТ // УСИЛЕНИЯ И ЗАМЕНЫ
+nc-skeleton-map-hint = Костные замены и системные усиления учитываются отдельно. Выберите устройство для осмотра.
 nc-skeleton-map-undetected = Не обнаружено
 nc-skeleton-map-undetected-hint = Замена в этом месте не обнаружена при сканировании. Наличие и состояние самой кости этим не подтверждаются.
 nc-skeleton-procedure-replacement = Замена костной структуры

@@ -19,7 +19,7 @@
     tissueProfile: NCHumanCavityTissue
   - type: NCNerve
   - type: NCCyberwareSlotHost
-    slots: [ NCSlotMotorBurst ]
+    slots: [ NCSlotMotorBurst, NCSlotImplantedLinearFrame ]
 
 - type: entity
   parent: NCOrganHumanStructureBase

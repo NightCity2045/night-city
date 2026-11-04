@@ -31,6 +31,7 @@ public sealed partial class NCCyberwareSystem
         SubscribeLocalEvent<NCCyberwareWorkbenchComponent, InteractUsingEvent>(OnWorkbenchInteract);
         SubscribeLocalEvent<NCCyberwareWorkbenchComponent, GetVerbsEvent<InteractionVerb>>(OnWorkbenchVerbs);
         SubscribeLocalEvent<NCCyberwareWorkbenchComponent, ExaminedEvent>(OnWorkbenchExamined);
+        SubscribeLocalEvent<NCCyberwareWorkbenchComponent, NCCyberwarePreparationDoAfterEvent>(OnFactoryPreparation);
     }
 
     private void OnWorkbenchInit(Entity<NCCyberwareWorkbenchComponent> bench, ref ComponentInit args)
@@ -57,6 +58,13 @@ public sealed partial class NCCyberwareSystem
             if (TryGetServiceWorkpiece(bench.AsNullable(), out var workpiece) &&
                 TryComp<NCCyberwareComponent>(workpiece, out var hardware))
                 TryFlashFirmware(bench.AsNullable(), args.User, args.Used, workpiece, hardware.Service.Revision);
+            return;
+        }
+        if (HasComp<NCCyberwareSterileWrapComponent>(args.Used))
+        {
+            args.Handled = true;
+            if (!TryStartFactoryPreparation(bench.AsNullable(), args.User, args.Used))
+                _assemblyPopup.PopupEntity(Loc.GetString("nc-cyber-production-preparation-failed"), bench, args.User);
             return;
         }
         var accepted = HasComp<NCCyberwareComponent>(args.Used)
@@ -136,12 +144,21 @@ public sealed partial class NCCyberwareSystem
         var module = Comp<NCCyberwareComponent>(moduleUid);
         var profile = _prototypes.Index(module.Profile);
         var integrity = Comp<NCOrganIntegrityComponent>(moduleUid);
-        var passed = assembly.FunctionalEfficiency > 0f && integrity.CurrentIntegrity > 0f &&
-                     module.Heat < profile.HeatShutdownThreshold && module.EmpDisabledUntil <= _timing.CurTime;
+        var passed = integrity.CurrentIntegrity > 0f && module.EmpDisabledUntil <= _timing.CurTime &&
+                     !_prototypes.Index(module.Service.Firmware).InhibitActiveModes &&
+                     (!profile.RequiresFactoryPreparation || module.Service.History.Any(entry => entry.Operation == NCCyberwareServiceOperation.Firmware)) &&
+                     NCCyberwareProductionMath.CanTest(MathF.Min(assembly.FunctionalEfficiency,
+                         NCCyberwareCondition.Efficiency(integrity.CurrentIntegrity, profile.MaximumIntegrity)),
+                         profile.RequiresFactoryPreparation ? profile.FactoryMinimumEfficiency : float.Epsilon,
+                         profile.RequiresPower ? profile.IdlePowerPerSecond + profile.LoadedPowerPerSecond : 0f,
+                         Comp<NCCyberwareWorkbenchComponent>(bench).MaximumTestPower, module.Heat,
+                         profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond, profile.PassiveCoolingPerSecond,
+                         profile.FactoryTestSeconds, profile.HeatDeratingThreshold);
         if (passed && profile.RequiresPower)
             passed = _cells.TryGetBatteryFromSlot(bench.Owner, out var battery) &&
-                     _battery.TryUseCharge(battery.Value.AsNullable(), Comp<NCCyberwareWorkbenchComponent>(bench).TestEnergy);
+                     _battery.TryUseCharge(battery.Value.AsNullable(), MathF.Max(Comp<NCCyberwareWorkbenchComponent>(bench).TestEnergy, profile.FactoryTestEnergy));
         assembly.ValidatedRevision = passed ? expectedRevision : null;
+        module.FactoryPrepared = false;
         RecordService(moduleUid, NCCyberwareServiceOperation.Tested, Guid.NewGuid());
         _assemblyPopup.PopupEntity(Loc.GetString(passed ? "nc-cyberware-bench-test-passed" :
             "nc-cyberware-bench-test-failed"), bench, user);
@@ -187,6 +204,7 @@ public sealed partial class NCCyberwareSystem
         integrity.CurrentIntegrity = MathF.Min(ceiling, integrity.CurrentIntegrity + definition.RepairPerUnit);
         NormalizeMechanicalIntegrity(integrity);
         assembly.ValidatedRevision = null;
+        module.FactoryPrepared = false;
         RefreshAssembly(assembly);
         UpdateOperational(moduleUid, module, profile, _timing.CurTime);
         RecordService(moduleUid, NCCyberwareServiceOperation.Repaired, Guid.NewGuid());
@@ -262,6 +280,8 @@ public sealed partial class NCCyberwareSystem
         var module = Comp<NCCyberwareComponent>(moduleUid);
         var profile = _prototypes.Index(module.Profile);
         var frame = Comp<NCOrganIntegrityComponent>(moduleUid);
+        if (profile.RequiresFactoryPreparation)
+            args.PushMarkup(Loc.GetString(module.FactoryPrepared ? "nc-cyber-production-prepared" : "nc-cyber-production-unprepared"));
         if (!TryGetWorkpiece(bench.AsNullable(), out _, out var assembly))
         {
             args.PushMarkup(Loc.GetString("nc-cyberware-service-mounted", ("item", moduleUid)));

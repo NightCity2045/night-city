@@ -1,3 +1,4 @@
+using Content.Shared._NC.Medical.Cyberware; // NC
 using Content.Shared.Examine;
 using Content.Shared.Inventory;
 using Content.Shared.Item.ItemToggle;
@@ -18,6 +19,7 @@ public sealed partial class ClothingSpeedModifierSystem : EntitySystem
     [Dependency] private MovementSpeedModifierSystem _movementSpeed = default!;
     [Dependency] private SharedContainerSystem _container = default!;
     [Dependency] private StandingStateSystem _standing = default!;
+    [Dependency] private NCSkeletalSupportSystem _skeletalSupport = default!; // NC
 
     public override void Initialize()
     {
@@ -62,7 +64,10 @@ public sealed partial class ClothingSpeedModifierSystem : EntitySystem
         if (component.Standing != null && !_standing.IsMatchingState(args.Owner, component.Standing.Value))
             return;
 
-        args.Args.ModifySpeed(component.WalkModifier, component.SprintModifier);
+        // NC-Edit-Start: compensate only this worn hardsuit; other movement providers remain independent.
+        var modifiers = _skeletalSupport.GetClothingModifiers(args.Owner, uid, component.WalkModifier, component.SprintModifier);
+        args.Args.ModifySpeed(modifiers.Walk, modifiers.Sprint);
+        // NC-Edit-End
     }
 
     private void OnClothingVerbExamine(EntityUid uid, ClothingSpeedModifierComponent component, GetVerbsEvent<ExamineVerb> args)

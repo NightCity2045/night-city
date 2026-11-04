@@ -62,10 +62,16 @@ public sealed partial class NCCyberwarePartComponent : Component
 }
 
 [RegisterComponent]
+public sealed partial class NCCyberwareSterileWrapComponent : Component
+{
+}
+
+[RegisterComponent]
 public sealed partial class NCCyberwareWorkbenchComponent : Component
 {
     public const string ContainerId = "nc_cyberware_workpiece";
     [DataField] public float TestEnergy = 1f;
+    [DataField] public float MaximumTestPower = 20f;
     [ViewVariables] public ContainerSlot? Workpiece;
 }
 

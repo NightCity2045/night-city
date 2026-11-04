@@ -873,11 +873,11 @@
   description: Installs and calibrates a staged physical implant in a compatible live anatomical bay.
   compatibleBodyProfiles: [ Human ]
   requiredAuthorizations: [ NCSurgeryAuthorizationGeneral, NCSurgeryAuthorizationOrgan ]
-  compatibleTargetCategories: [ Head, Thorax, ArmLeft, ArmRight ]
+  compatibleTargetCategories: [ Head, Thorax, Spine, ArmLeft, ArmRight ]
   targetRequirements: Integrity
   requiresGraft: true
   cyberwareOperation: Install
-  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCCirculatoryAssistMk1, NCToolHand, NCBiomonitor, NCMantisBlade, NCSandevistan, NCKerenzikov ]
+  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCCirculatoryAssistMk1, NCToolHand, NCBiomonitor, NCMantisBlade, NCSandevistan, NCKerenzikov, NCGraftedMuscleBoneLace, NCImplantedLinearFrameSigma, NCImplantedLinearFrameBeta ]
   facility:
     required: true
     capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
@@ -917,10 +917,10 @@
   description: Safely disconnects and extracts one installed module selected from the live host organ.
   compatibleBodyProfiles: [ Human ]
   requiredAuthorizations: [ NCSurgeryAuthorizationGeneral, NCSurgeryAuthorizationOrgan ]
-  compatibleTargetCategories: [ Head, Thorax, ArmLeft, ArmRight ]
+  compatibleTargetCategories: [ Head, Thorax, Spine, ArmLeft, ArmRight ]
   targetRequirements: Integrity
   cyberwareOperation: Remove
-  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCCirculatoryAssistMk1, NCToolHand, NCBiomonitor, NCMantisBlade, NCSandevistan, NCKerenzikov ]
+  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCCirculatoryAssistMk1, NCToolHand, NCBiomonitor, NCMantisBlade, NCSandevistan, NCKerenzikov, NCGraftedMuscleBoneLace, NCImplantedLinearFrameSigma, NCImplantedLinearFrameBeta ]
   facility:
     required: true
     capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
