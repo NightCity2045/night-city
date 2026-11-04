@@ -534,6 +534,8 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                     DrawCell(handle, _visuals.AnatomyAtlas, _visuals.Profile.AnatomyAtlasGrid,
                         tissueCell, aperture, Color.White);
                 }
+                // Dermal bays and implants are exposed within soft tissue, before any bone is opened.
+                DrawAuthoritativeStructures(handle, incision, aperture, drawOrgans: false);
                 return;
             }
 
@@ -572,7 +574,8 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                          .Where(value => drawOrgans || value.Kind is
                              NCFreeformSurgeryStructureKind.Bone or
                              NCFreeformSurgeryStructureKind.Tendon or
-                             NCFreeformSurgeryStructureKind.Nerve)
+                             NCFreeformSurgeryStructureKind.Nerve or
+                             NCFreeformSurgeryStructureKind.Cyberware)
                          // NC: Structural supports sit behind deeper organ sprites. Higher authored depth is
                          // drawn last, matching the same ordering used by authoritative cursor hit-testing.
                          .OrderBy(value => value.Kind == NCFreeformSurgeryStructureKind.Bone ? 0 : 1)
