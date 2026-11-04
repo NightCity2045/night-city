@@ -90,7 +90,7 @@
 
 - type: ncCyberware
   id: NCSubdermalArmorTorso
-  name: SubdermalArmor torso
+  name: SubdermalArmor full body
   nameId: nc-dermal-profile-subdermal
   manufacturer: Night City 2045 clinical adaptation
   icon:
@@ -162,11 +162,25 @@
 - type: ncArmorSection
   id: NCSubdermalArmorTorsoSurface
   displayName: nc-dermal-profile-subdermal
-  coveredZones: [ NCZoneChest, NCZoneAbdomen, NCZoneGroin ]
+  coveredZones:
+  - NCZoneHead
+  - NCZoneEyes
+  - NCZoneMouth
+  - NCZoneChest
+  - NCZoneAbdomen
+  - NCZoneGroin
+  - NCZoneArmLeft
+  - NCZoneArmRight
+  - NCZoneHandLeft
+  - NCZoneHandRight
+  - NCZoneLegLeft
+  - NCZoneLegRight
+  - NCZoneFootLeft
+  - NCZoneFootRight
   maxSp: 11
   applicableDamageClasses: [ Ballistic, Slash, Pierce, Blunt ]
   conditionProfile: NCArmorConditionStandard
-  ablationGroup: torso
+  ablationGroup: subdermal
   rigid: true
 
 - type: ncArmorProfile

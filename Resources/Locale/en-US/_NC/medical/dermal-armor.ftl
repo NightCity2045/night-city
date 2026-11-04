@@ -3,7 +3,7 @@
 
 nc-dermal-slot-torso = Torso dermal armor
 nc-dermal-profile-skinweave = Skinweave (torso, SP 7)
-nc-dermal-profile-subdermal = Subdermal armor (torso, SP 11)
+nc-dermal-profile-subdermal = Subdermal armor (full body, SP 11)
 nc-dermal-step-dermalchest = Distribute protection across the chest
 nc-dermal-step-dermalabdomen = Distribute protection across the abdomen
 nc-dermal-step-dermalgroin = Distribute protection across the groin
@@ -19,18 +19,18 @@ nc-dermal-surgery-check = Check plates
 nc-dermal-surgery-incomplete = Complete regional distribution and fixation first.
 nc-dermal-surgery-prerequisites = Complete the preceding dermal installation stage.
 nc-dermal-surgery-damaged = The regional tissue must be repaired before integration.
-nc-dermal-diagnostics = Passive torso armor: chest, abdomen and groin. Protection starts after all installation stages; penetrating hits reduce integrity and SP. Armor layers use the highest SP, without adding them.
+nc-dermal-diagnostics = Passive dermal armor: Skinweave protects the torso; subdermal plates protect the entire body, including the head, hands and feet. Protection starts after all installation stages; penetrating hits reduce integrity and SP. Armor layers use the highest SP, without adding them.
 nc-dermal-ingredient-mesh = dermal fiber mesh
 nc-dermal-ingredient-plates = dermal armor plates
 ent-NCDermalMesh = dermal fiber mesh
 ent-NCDermalPlates = dermal armor plates
 ent-NCImplantSkinweaveTorso = Skinweave torso implant
-ent-NCImplantSubdermalArmorTorso = subdermal torso armor
+ent-NCImplantSubdermalArmorTorso = subdermal armor
 ent-NCImplantSkinweaveTorsoUnprepared = Skinweave torso implant
-ent-NCImplantSubdermalArmorTorsoUnprepared = subdermal torso armor
+ent-NCImplantSubdermalArmorTorsoUnprepared = subdermal armor
 guide-entry-nc-dermal = Dermal armor: manufacture and surgery
 nc-guide-dermal-1 = [head=1]Dermal armor[/head]
-    Skinweave provides SP 7; subdermal plates provide SP 11. This regional kit protects the chest, abdomen and groin only. One torso bay accepts either implant. Neither requires a battery or neural link; EMP does not disable them.
+    Skinweave provides SP 7 to the chest, abdomen and groin. Subdermal plates provide SP 11 to all body zones, including the head, eyes, mouth, arms, hands, legs and feet. One torso bay accepts either implant. Neither requires a battery or neural link; EMP does not disable them.
 nc-guide-dermal-2 = [head=2]Manufacture[/head]
     Synthesize one biocompatible fiber from 5 oil + 10 carbon + 5 silicon at 350 K. Construction menu: 2 cyberfiber + 1 plastic + 2 cloth make one dermal mesh. Print dermal plates on the mechanical cyberware lathe (1800 steel + 200 plastic per set).
     Skinweave kit: 2 meshes + 1 plastic + 2 cloth. Plate kit: 1 mesh + 2 sets of plates + 2 plastic. Construction produces an unprepared implant. Use the cyberware workbench and sterile packaging to complete factory preparation before implantation.
