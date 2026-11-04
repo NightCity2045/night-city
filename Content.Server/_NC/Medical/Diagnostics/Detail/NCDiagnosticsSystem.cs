@@ -895,6 +895,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             .ToList();
         var limit = Math.Clamp(policy.MaxCyberwareRecords, 0, AbsoluteMaxCyberware);
         var result = new List<NCMedicalCyberwareSummary>(Math.Min(limit, modules.Count));
+        var disclosedEntities = new List<EntityUid>(Math.Min(limit, modules.Count));
         foreach (var moduleUid in modules.Take(limit))
         {
             var module = Comp<NCCyberwareComponent>(moduleUid);
@@ -933,11 +934,44 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                 ToFractionBand(SafeRatio(module.Heat, profile.HeatCapacity)),
                 module.NeuralState,
                 module.Operational,
-                empDisabled));
+                empDisabled,
+                Parts: BuildCyberwareParts(moduleUid)));
+            disclosedEntities.Add(moduleUid);
+        }
+
+        // Indices refer only to rows in this filtered snapshot, never to live entity identifiers.
+        // An omitted host remains unspecified rather than being guessed from anatomical category.
+        var indices = disclosedEntities.Select((uid, index) => (uid, index)).ToDictionary(pair => pair.uid, pair => pair.index);
+        for (var i = 0; i < disclosedEntities.Count; i++)
+        {
+            if (result[i].Slot != null && TryComp<ChildOrganComponent>(disclosedEntities[i], out var child) &&
+                child.Parent is { } parent && indices.TryGetValue(parent, out var hostIndex) && hostIndex != i)
+                result[i] = result[i] with { HostIndex = hostIndex };
         }
 
         omitted = modules.Count - result.Count;
         return result;
+    }
+
+    private List<NCMedicalCyberwarePartSummary>? BuildCyberwareParts(EntityUid module)
+    {
+        if (!TryComp<NCCyberwareAssemblyComponent>(module, out var assembly))
+            return null;
+
+        var parts = new List<NCMedicalCyberwarePartSummary>();
+        foreach (var (slot, container) in assembly.Parts.OrderBy(pair => pair.Key.Id, StringComparer.Ordinal).Take(8))
+        {
+            EntProtoId? prototype = null;
+            var condition = NCDiagnosticBand.Critical;
+            if (container.ContainedEntity is { } uid && HasComp<NCCyberwarePartComponent>(uid))
+            {
+                prototype = MetaData(uid).EntityPrototype?.ID;
+                if (TryComp<NCOrganIntegrityComponent>(uid, out var integrity))
+                    condition = ToFunctionBand(SafeRatio(integrity.CurrentIntegrity, integrity.MaxIntegrity));
+            }
+            parts.Add(new NCMedicalCyberwarePartSummary(slot, prototype, condition));
+        }
+        return parts;
     }
 
     private List<NCMedicalDrugSummary> BuildDrugs(

@@ -93,23 +93,23 @@
     Chemical: "1, 2"
     Amputation: "2, 1"
   structures:
-    Skull: { position: "0.5, 0.48", size: "0.72, 0.72", minimumDepth: 0.42, visual: Skull, zones: [ NCZoneHead ], blocksDeeperStructures: true }
+    Skull: { position: "0.5, 0.48", size: "0.72, 0.72", minimumDepth: 0.42, visual: Skull, zones: [ NCZoneHead ], blocksDeeperStructures: true, detachableBySeparation: true }
     Brain: { position: "0.5, 0.5", size: "0.5, 0.44", minimumDepth: 0.74, visual: Brain, zones: [ NCZoneHead ], detachableBySeparation: true }
     Eyes: { position: "0.5, 0.38", size: "0.55, 0.18", minimumDepth: 0.44, visual: Eyes, zones: [ NCZoneEyes ], detachableBySeparation: true }
     Tongue: { position: "0.5, 0.64", size: "0.28, 0.18", minimumDepth: 0.38, visual: Tongue, zones: [ NCZoneMouth ], detachableBySeparation: true }
     Ears: { position: "0.5, 0.5", size: "0.82, 0.22", minimumDepth: 0.42, visual: Ears, zones: [ NCZoneHead ], detachableBySeparation: true }
-    RibCage: { position: "0.5, 0.5", size: "0.82, 0.78", minimumDepth: 0.46, visual: RibCage, zones: [ NCZoneChest ], blocksDeeperStructures: true }
+    RibCage: { position: "0.5, 0.5", size: "0.82, 0.78", minimumDepth: 0.46, visual: RibCage, zones: [ NCZoneChest ], blocksDeeperStructures: true, detachableBySeparation: true }
     Lungs: { position: "0.5, 0.46", size: "0.76, 0.56", minimumDepth: 0.7, visual: Lungs, zones: [ NCZoneChest ], detachableBySeparation: true }
     Heart: { position: "0.52, 0.57", size: "0.24, 0.27", minimumDepth: 0.76, visual: Heart, zones: [ NCZoneChest ], detachableBySeparation: true }
     Liver: { position: "0.37, 0.42", size: "0.45, 0.3", minimumDepth: 0.7, visual: Liver, zones: [ NCZoneAbdomen ], detachableBySeparation: true }
     Stomach: { position: "0.62, 0.46", size: "0.3, 0.28", minimumDepth: 0.7, visual: Stomach, zones: [ NCZoneAbdomen ], detachableBySeparation: true }
     Kidneys: { position: "0.5, 0.67", size: "0.58, 0.2", minimumDepth: 0.76, visual: Kidneys, zones: [ NCZoneAbdomen ], detachableBySeparation: true }
     Appendix: { position: "0.67, 0.76", size: "0.14, 0.14", minimumDepth: 0.76, visual: Appendix, zones: [ NCZoneAbdomen ], detachableBySeparation: true }
-    PelvisBone: { position: "0.5, 0.55", size: "0.78, 0.56", minimumDepth: 0.48, visual: Pelvis, zones: [ NCZoneGroin ], blocksDeeperStructures: true }
-    ArmBoneLeft: { position: "0.5, 0.5", size: "0.2, 0.82", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneArmLeft, NCZoneHandLeft ] }
-    ArmBoneRight: { position: "0.5, 0.5", size: "0.2, 0.82", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneArmRight, NCZoneHandRight ] }
-    LegBoneLeft: { position: "0.5, 0.5", size: "0.22, 0.84", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneLegLeft, NCZoneFootLeft ] }
-    LegBoneRight: { position: "0.5, 0.5", size: "0.22, 0.84", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneLegRight, NCZoneFootRight ] }
+    PelvisBone: { position: "0.5, 0.55", size: "0.78, 0.56", minimumDepth: 0.48, visual: Pelvis, zones: [ NCZoneGroin ], blocksDeeperStructures: true, detachableBySeparation: true }
+    ArmBoneLeft: { position: "0.5, 0.5", size: "0.2, 0.82", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneArmLeft, NCZoneHandLeft ], detachableBySeparation: true }
+    ArmBoneRight: { position: "0.5, 0.5", size: "0.2, 0.82", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneArmRight, NCZoneHandRight ], detachableBySeparation: true }
+    LegBoneLeft: { position: "0.5, 0.5", size: "0.22, 0.84", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneLegLeft, NCZoneFootLeft ], detachableBySeparation: true }
+    LegBoneRight: { position: "0.5, 0.5", size: "0.22, 0.84", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneLegRight, NCZoneFootRight ], detachableBySeparation: true }
     TendonSetLeftArm: { position: "0.62, 0.5", size: "0.18, 0.76", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneArmLeft, NCZoneHandLeft ] }
     TendonSetRightArm: { position: "0.62, 0.5", size: "0.18, 0.76", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneArmRight, NCZoneHandRight ] }
     TendonSetLeftLeg: { position: "0.62, 0.5", size: "0.18, 0.78", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneLegLeft, NCZoneFootLeft ] }

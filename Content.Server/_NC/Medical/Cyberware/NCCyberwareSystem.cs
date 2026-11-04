@@ -874,7 +874,10 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         if (TryComp<OrganComponent>(module, out var organ) &&
             organ.Body == body &&
             IsLiveBodyOrgan(body, module))
-            return true;
+        {
+            hostCategory = organ.Category;
+            return hostCategory != null;
+        }
         if (!TryResolveInstalledModule(body, module, out _, out var hostUid, out _, out var installedSlot) ||
             !TryComp<OrganComponent>(hostUid, out var hostOrgan) ||
             hostOrgan.Category is not { } category)

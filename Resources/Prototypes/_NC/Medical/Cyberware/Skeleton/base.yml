@@ -1,0 +1,90 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Future artificial bones inherit one of these bases and supply Sprite and NCCyberware.
+# Their cyberware profile must use form: OrganReplacement. No accessory slot is involved.
+- type: entity
+  abstract: true
+  parent: NCOrganHumanStructureBase
+  id: NCOrganHumanSkeletalReplacementBase
+  components:
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+  - type: NCOrganIntegrity
+    material: Mechanical
+  - type: NCBone
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    woundProfile: NCHumanWoundSystem
+    treatmentProfile: NCHumanFieldTreatment
+
+- type: entity
+  abstract: true
+  parent: NCOrganHumanSkeletalReplacementBase
+  id: NCOrganHumanCyberSkullBase
+  components:
+  - type: Organ
+    category: Skull
+  - type: NCDetachedOrganMedicalData
+    requiredParentCategory: Head
+
+- type: entity
+  abstract: true
+  parent: NCOrganHumanSkeletalReplacementBase
+  id: NCOrganHumanCyberRibCageBase
+  components:
+  - type: Organ
+    category: RibCage
+  - type: NCDetachedOrganMedicalData
+    requiredParentCategory: Thorax
+
+- type: entity
+  abstract: true
+  parent: NCOrganHumanSkeletalReplacementBase
+  id: NCOrganHumanCyberPelvisBoneBase
+  components:
+  - type: Organ
+    category: PelvisBone
+  - type: NCDetachedOrganMedicalData
+    requiredParentCategory: PelvisGroin
+
+- type: entity
+  abstract: true
+  parent: NCOrganHumanSkeletalReplacementBase
+  id: NCOrganHumanCyberArmBoneRightBase
+  components:
+  - type: Organ
+    category: ArmBoneRight
+  - type: NCDetachedOrganMedicalData
+    requiredParentCategory: ArmRight
+
+- type: entity
+  abstract: true
+  parent: NCOrganHumanSkeletalReplacementBase
+  id: NCOrganHumanCyberArmBoneLeftBase
+  components:
+  - type: Organ
+    category: ArmBoneLeft
+  - type: NCDetachedOrganMedicalData
+    requiredParentCategory: ArmLeft
+
+- type: entity
+  abstract: true
+  parent: NCOrganHumanSkeletalReplacementBase
+  id: NCOrganHumanCyberLegBoneRightBase
+  components:
+  - type: Organ
+    category: LegBoneRight
+  - type: NCDetachedOrganMedicalData
+    requiredParentCategory: LegRight
+
+- type: entity
+  abstract: true
+  parent: NCOrganHumanSkeletalReplacementBase
+  id: NCOrganHumanCyberLegBoneLeftBase
+  components:
+  - type: Organ
+    category: LegBoneLeft
+  - type: NCDetachedOrganMedicalData
+    requiredParentCategory: LegLeft

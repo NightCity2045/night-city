@@ -198,6 +198,12 @@ public readonly record struct NCMedicalOrganSummary(
     NCDiagnosticBand Rejection);
 
 [Serializable, NetSerializable]
+public readonly record struct NCMedicalCyberwarePartSummary(
+    ProtoId<NCCyberwarePartSlotPrototype> Slot,
+    EntProtoId? EntityPrototype,
+    NCDiagnosticBand Integrity);
+
+[Serializable, NetSerializable]
 public readonly record struct NCMedicalCyberwareSummary(
     ProtoId<NCCyberwarePrototype> Profile,
     NCCyberwareForm Form,
@@ -209,7 +215,9 @@ public readonly record struct NCMedicalCyberwareSummary(
     NCDiagnosticBand Heat,
     NCCyberwareNeuralState NeuralState,
     bool Operational,
-    bool EmpDisabled);
+    bool EmpDisabled,
+    int? HostIndex = null,
+    List<NCMedicalCyberwarePartSummary>? Parts = null);
 
 [Serializable, NetSerializable]
 public readonly record struct NCMedicalDrugSummary(

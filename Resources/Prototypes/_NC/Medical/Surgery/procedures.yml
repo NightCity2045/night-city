@@ -953,3 +953,53 @@
   abortEffects:
   - kind: AddSiteContamination
     amount: 0.2
+
+- type: ncSurgeryProcedure
+  id: NCSurgeryBoneReplacement
+  name: bone replacement
+  nameId: nc-skeleton-procedure-replacement
+  description: Replaces one missing skeletal structure with a graft of the same anatomical category.
+  compatibleBodyProfiles: [ Human ]
+  compatibleMaterials: [ Organic, Hybrid, Mechanical ]
+  requiredAuthorizations:
+  - NCSurgeryAuthorizationOrthopedic
+  - NCSurgeryAuthorizationTransplant
+  compatibleTargetCategories: [ Head, Thorax, PelvisGroin, ArmLeft, ArmRight, LegLeft, LegRight ]
+  targetRequirements: Integrity
+  requiresGraft: true
+  compatibleGraftCategories: [ Skull, RibCage, PelvisBone, ArmBoneRight, ArmBoneLeft, LegBoneRight, LegBoneLeft ]
+  compatibleGraftMaterials: [ Organic, Hybrid, Mechanical ]
+  facility:
+    required: true
+    capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
+    minimumQuality: 0.75
+    minimumSterility: 0.7
+    requirePower: true
+    requireStableSurface: true
+  environment:
+    required: true
+    minimumSterility: 0.7
+    minimumLighting: 0.8
+    maximumMotion: 0.05
+    maximumContamination: 0.25
+  patient:
+    minimumOxygenation: 0.35
+    maximumShockStage: Severe
+    minimumAnalgesia: 0.6
+    minimumSedation: 0.55
+    minimumAnesthesia: 0.65
+    maximumMovement: 0.05
+    requireAirwayMonitoring: true
+  steps:
+  - NCSurgeryStepPrepareField
+  - NCSurgeryStepIncise
+  - NCSurgeryStepControlBleeders
+  - NCSurgeryStepRetractTissue
+  - NCSurgeryStepOpenCavity
+  - NCSurgeryStepPrepareGraftBed
+  - NCSurgeryStepPrepareClosure
+  - NCSurgeryStepCloseSite
+  - NCSurgeryStepAttachGraft
+  abortEffects:
+  - kind: AddSiteContamination
+    amount: 0.24

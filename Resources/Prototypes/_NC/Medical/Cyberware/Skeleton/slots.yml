@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Anatomical replacements use the existing organ category; they do not consume accessory bays.
+
+- type: ncSkeletalSlot
+  id: NCSkeletonSkull
+  name: nc-skeleton-slot-skull
+  category: Skull
+  parentCategory: Head
+  targetZone: NCZoneHead
+  mapStart: "0.50, 0.13"
+  mapEnd: "0.50, 0.18"
+  order: 0
+
+- type: ncSkeletalSlot
+  id: NCSkeletonRibCage
+  name: nc-skeleton-slot-ribcage
+  category: RibCage
+  parentCategory: Thorax
+  targetZone: NCZoneChest
+  mapStart: "0.50, 0.25"
+  mapEnd: "0.50, 0.36"
+  order: 1
+
+- type: ncSkeletalSlot
+  id: NCSkeletonPelvisBone
+  name: nc-skeleton-slot-pelvisbone
+  category: PelvisBone
+  parentCategory: PelvisGroin
+  targetZone: NCZoneGroin
+  mapStart: "0.49, 0.47"
+  mapEnd: "0.51, 0.51"
+  order: 2
+
+- type: ncSkeletalSlot
+  id: NCSkeletonArmBoneRight
+  name: nc-skeleton-slot-armboneright
+  category: ArmBoneRight
+  parentCategory: ArmRight
+  targetZone: NCZoneArmRight
+  mapStart: "0.46, 0.25"
+  mapEnd: "0.42, 0.52"
+  order: 3
+
+- type: ncSkeletalSlot
+  id: NCSkeletonArmBoneLeft
+  name: nc-skeleton-slot-armboneleft
+  category: ArmBoneLeft
+  parentCategory: ArmLeft
+  targetZone: NCZoneArmLeft
+  mapStart: "0.54, 0.25"
+  mapEnd: "0.58, 0.52"
+  order: 4
+
+- type: ncSkeletalSlot
+  id: NCSkeletonLegBoneRight
+  name: nc-skeleton-slot-legboneright
+  category: LegBoneRight
+  parentCategory: LegRight
+  targetZone: NCZoneLegRight
+  mapStart: "0.48, 0.53"
+  mapEnd: "0.465, 0.91"
+  order: 5
+
+- type: ncSkeletalSlot
+  id: NCSkeletonLegBoneLeft
+  name: nc-skeleton-slot-legboneleft
+  category: LegBoneLeft
+  parentCategory: LegLeft
+  targetZone: NCZoneLegLeft
+  mapStart: "0.52, 0.53"
+  mapEnd: "0.535, 0.91"
+  order: 6
