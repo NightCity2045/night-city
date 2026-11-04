@@ -130,7 +130,8 @@ public sealed partial class NCCyberwareSystem
                 state.HostCategory is not { } hostCategory ||
                 !profile.CompatibleSlots.Contains(slotId) ||
                 !_prototypes.TryIndex(slotId, out NCCyberwareSlotPrototype? slot) ||
-                !slot.HostCategories.Contains(hostCategory) || profile.Size > slot.Capacity)
+                (!slot.HostCategories.Contains(hostCategory) && !slot.LegacyHostCategories.Contains(hostCategory)) ||
+                profile.Size > slot.Capacity)
             {
                 return false;
             }
@@ -221,52 +222,61 @@ public sealed partial class NCCyberwareSystem
             return false;
         }
 
-        var old = CaptureInstalledRuntime(body);
-        var detachedOld = new List<InstalledRuntime>(old.Count);
-        foreach (var entry in old)
+        var previousLegacyRestore = _restoringLegacyNeuralHosts;
+        _restoringLegacyNeuralHosts = true;
+        try
         {
-            if (!TryRemoveForRestore(body, entry.Module))
+            var old = CaptureInstalledRuntime(body);
+            var detachedOld = new List<InstalledRuntime>(old.Count);
+            foreach (var entry in old)
             {
-                RollbackOldModules(body, detachedOld);
-                return false;
-            }
-            detachedOld.Add(entry);
-        }
-
-        var spawned = new List<EntityUid>(desired.Count);
-        foreach (var state in desired)
-        {
-            if (state.HostCategory is not { } hostCategory || state.Slot is not { } slot ||
-                !TryFindOrgan(body, hostCategory, out var host))
-            {
-                RollbackRestoredModules(body, spawned, detachedOld);
-                return false;
+                if (!TryRemoveForRestore(body, entry.Module))
+                {
+                    RollbackOldModules(body, detachedOld);
+                    return false;
+                }
+                detachedOld.Add(entry);
             }
 
-            var module = Spawn(state.EntityPrototype, Transform(body).Coordinates);
-            spawned.Add(module);
-            var install = TryInstall(new NCCyberwareInstallRequest(
-                NCActionResolutionId.New(),
-                body,
-                host,
-                module,
-                slot,
-                state.NeuralState is NCCyberwareNeuralState.Linked or NCCyberwareNeuralState.Degraded,
-                state.Calibrated));
-            if (!install.Accepted || !TryApplyPersistentState(module, state, runtimeAnchor))
+            var spawned = new List<EntityUid>(desired.Count);
+            foreach (var state in desired)
             {
-                RollbackRestoredModules(body, spawned, detachedOld);
-                return false;
-            }
-        }
+                if (state.HostCategory is not { } hostCategory || state.Slot is not { } slot ||
+                    !TryFindOrgan(body, hostCategory, out var host))
+                {
+                    RollbackRestoredModules(body, spawned, detachedOld);
+                    return false;
+                }
 
-        foreach (var entry in detachedOld)
-        {
-            if (Exists(entry.Module))
-                QueueDel(entry.Module);
+                var module = Spawn(state.EntityPrototype, Transform(body).Coordinates);
+                spawned.Add(module);
+                var install = TryInstall(new NCCyberwareInstallRequest(
+                    NCActionResolutionId.New(),
+                    body,
+                    host,
+                    module,
+                    slot,
+                    state.NeuralState is NCCyberwareNeuralState.Linked or NCCyberwareNeuralState.Degraded,
+                    state.Calibrated));
+                if (!install.Accepted || !TryApplyPersistentState(module, state, runtimeAnchor))
+                {
+                    RollbackRestoredModules(body, spawned, detachedOld);
+                    return false;
+                }
+            }
+
+            foreach (var entry in detachedOld)
+            {
+                if (Exists(entry.Module))
+                    QueueDel(entry.Module);
+            }
+            RemComp<NCCyberwareBodyStateComponent>(body);
+            return true;
         }
-        RemComp<NCCyberwareBodyStateComponent>(body);
-        return true;
+        finally
+        {
+            _restoringLegacyNeuralHosts = previousLegacyRestore;
+        }
     }
 
     private bool TryCaptureState(

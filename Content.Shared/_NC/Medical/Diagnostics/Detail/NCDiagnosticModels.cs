@@ -217,7 +217,9 @@ public readonly record struct NCMedicalCyberwareSummary(
     bool Operational,
     bool EmpDisabled,
     int? HostIndex = null,
-    List<NCMedicalCyberwarePartSummary>? Parts = null);
+    List<NCMedicalCyberwarePartSummary>? Parts = null,
+    NCCyberwareNeuralDependencyState NeuralDependency = NCCyberwareNeuralDependencyState.None,
+    int? NeuralFoundationIndex = null);
 
 [Serializable, NetSerializable]
 public readonly record struct NCMedicalDrugSummary(

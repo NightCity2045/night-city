@@ -935,7 +935,8 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                 module.NeuralState,
                 module.Operational,
                 empDisabled,
-                Parts: BuildCyberwareParts(moduleUid)));
+                Parts: BuildCyberwareParts(moduleUid),
+                NeuralDependency: module.NeuralDependency));
             disclosedEntities.Add(moduleUid);
         }
 
@@ -944,6 +945,9 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
         var indices = disclosedEntities.Select((uid, index) => (uid, index)).ToDictionary(pair => pair.uid, pair => pair.index);
         for (var i = 0; i < disclosedEntities.Count; i++)
         {
+            if (_cyberware.TryGetNeuralFoundation(disclosedEntities[i], out var foundation) &&
+                indices.TryGetValue(foundation, out var foundationIndex))
+                result[i] = result[i] with { NeuralFoundationIndex = foundationIndex };
             if (result[i].Slot != null && TryComp<ChildOrganComponent>(disclosedEntities[i], out var child) &&
                 child.Parent is { } parent && indices.TryGetValue(parent, out var hostIndex) && hostIndex != i)
                 result[i] = result[i] with { HostIndex = hostIndex };

@@ -93,6 +93,8 @@
     Chemical: "1, 2"
     Amputation: "2, 1"
   structures:
+    Spine: { position: "0.5, 0.5", size: "0.12, 0.7", minimumDepth: 0.8, visual: Tendon, zones: [ NCZoneChest ] }
+    VertebralColumn: { position: "0.5, 0.5", size: "0.18, 0.76", minimumDepth: 0.74, visual: LongBone, zones: [ NCZoneChest ], detachableBySeparation: true }
     Skull: { position: "0.5, 0.48", size: "0.72, 0.72", minimumDepth: 0.42, visual: Skull, zones: [ NCZoneHead ], blocksDeeperStructures: true, detachableBySeparation: true }
     Brain: { position: "0.5, 0.5", size: "0.5, 0.44", minimumDepth: 0.74, visual: Brain, zones: [ NCZoneHead ], detachableBySeparation: true }
     Eyes: { position: "0.5, 0.38", size: "0.55, 0.18", minimumDepth: 0.44, visual: Eyes, zones: [ NCZoneEyes ], detachableBySeparation: true }
@@ -115,6 +117,8 @@
     TendonSetLeftLeg: { position: "0.62, 0.5", size: "0.18, 0.78", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneLegLeft, NCZoneFootLeft ] }
     TendonSetRightLeg: { position: "0.62, 0.5", size: "0.18, 0.78", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneLegRight, NCZoneFootRight ] }
   cyberwareSlots:
+    NCSlotMotorBurst: { position: "0.5, 0.5", size: "0.12, 0.24", minimumDepth: 0.8, visual: Cyberware, zones: [ NCZoneChest ] }
+    NCSlotMotorStabilizer: { position: "0.62, 0.55", size: "0.18, 0.18", minimumDepth: 0.74, visual: Cyberware, zones: [ NCZoneHead ] }
     NCSlotNeuralCore: { position: "0.44, 0.48", size: "0.24, 0.22", minimumDepth: 0.74, visual: Cyberware, zones: [ NCZoneHead ] }
     NCSlotCranialUtility: { position: "0.66, 0.53", size: "0.22, 0.2", minimumDepth: 0.68, visual: Cyberware, zones: [ NCZoneHead ] }
     NCSlotThoracicSupport: { position: "0.5, 0.57", size: "0.24, 0.26", minimumDepth: 0.72, visual: Cyberware, zones: [ NCZoneChest ] }

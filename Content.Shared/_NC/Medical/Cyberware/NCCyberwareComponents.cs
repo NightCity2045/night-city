@@ -84,6 +84,9 @@ public sealed partial class NCCyberwareComponent : Component
     [DataField]
     public bool Calibrated;
 
+    [ViewVariables]
+    public NCCyberwareNeuralDependencyState NeuralDependency;
+
     [DataField]
     public bool Operational;
 

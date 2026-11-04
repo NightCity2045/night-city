@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: organCategory
+  id: Spine
+
+- type: organCategory
+  id: VertebralColumn
+
+# The neural host survives replacement of its skeletal child; no implant is stored inside a bone.
+- type: entity
+  parent: NCOrganHumanParentRegionBase
+  id: NCOrganHumanSpine
+  components:
+  - type: Organ
+    category: Spine
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanCavityTissue
+  - type: NCNerve
+  - type: NCCyberwareSlotHost
+    slots: [ NCSlotMotorBurst ]
+
+- type: entity
+  parent: NCOrganHumanStructureBase
+  id: NCOrganHumanVertebralColumn
+  components:
+  - type: Organ
+    category: VertebralColumn
+  - type: NCBone
+
+- type: entity
+  parent: NCOrganHumanSpine
+  id: NCBorgFrameSpine
+  components:
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+  - type: NCOrganIntegrity
+    material: Mechanical
+  - type: NCNerve
+    cyberprostheticInterface: true
+
+- type: entity
+  parent: NCOrganHumanVertebralColumn
+  id: NCBorgFrameVertebralColumn
+  components:
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+  - type: NCOrganIntegrity
+    material: Mechanical

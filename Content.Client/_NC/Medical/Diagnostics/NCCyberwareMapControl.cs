@@ -30,6 +30,7 @@ public sealed partial class NCCyberwareMapControl : Control
     private readonly float[] _rowHeights = new float[4];
     private readonly List<(PanelContainer Panel, int Index, int Group, Color Color, bool Replacement)> _icons = [];
     private int _selected = -1;
+    private readonly List<int> _spinalDevices = [];
 
     public event Action<int>? ModuleSelected;
 
@@ -82,6 +83,7 @@ public sealed partial class NCCyberwareMapControl : Control
             content.RemoveAllChildren();
         _grids.Clear();
         _icons.Clear();
+        _spinalDevices.Clear();
         _selected = -1;
         _skeleton.RemoveAllChildren();
         _skeletalSlots.Clear();
@@ -96,8 +98,29 @@ public sealed partial class NCCyberwareMapControl : Control
     {
         Clear();
         _skeletonDefinitions = skeletalSlots;
+        for (var i = 0; i < modules.Count; i++)
+            if (modules[i].HostCategory?.Id == "Spine")
+                _spinalDevices.Add(i);
         Visible = true;
         _body.SetProjection(new ProtoId<NCAnatomyProfilePrototype>("Human"), true, false);
+        // A neural foundation is a separate visual root even when physically mounted inside a cybernetic head.
+        // Otherwise a pod -> link -> device chain would hide the second-level devices in the regional layout.
+        var neuralRoots = modules.Where(module => module.NeuralFoundationIndex != null)
+            .Select(module => module.NeuralFoundationIndex!.Value).ToHashSet();
+        var parents = new int?[modules.Count];
+        for (var i = 0; i < modules.Count; i++)
+        {
+            if (neuralRoots.Contains(i))
+                continue;
+            foreach (var candidate in new[] { modules[i].NeuralFoundationIndex, modules[i].HostIndex })
+            {
+                if (candidate is not { } parent || parent < 0 || parent >= modules.Count || parent == i ||
+                    GroupFor(modules[parent]) != GroupFor(modules[i]))
+                    continue;
+                parents[i] = parent;
+                break;
+            }
+        }
         for (var group = 0; group < _groups.Count; group++)
         {
             var roots = new List<int>();
@@ -105,7 +128,7 @@ public sealed partial class NCCyberwareMapControl : Control
             {
                 if (GroupFor(modules[i]) != group)
                     continue;
-                var parent = modules[i].HostIndex;
+                var parent = parents[i];
                 if (parent == null || parent < 0 || parent >= modules.Count || parent == i ||
                     GroupFor(modules[parent.Value]) != group)
                     roots.Add(i);
@@ -116,7 +139,7 @@ public sealed partial class NCCyberwareMapControl : Control
             foreach (var index in roots)
             {
                 var module = modules[index];
-                var hasModules = modules.Any(candidate => candidate.HostIndex == index);
+                var hasModules = parents.Any(parent => parent == index);
                 if (module.Form == NCCyberwareForm.Implant && !hasModules)
                 {
                     implants.AddChild(CreateIcon(index, group, module, 42, icon, tooltip, color));
@@ -129,8 +152,8 @@ public sealed partial class NCCyberwareMapControl : Control
                 var descendants = NewGrid(true);
                 for (var child = 0; child < modules.Count; child++)
                 {
-                    // Only explicit physical ownership from the scan creates a nested module.
-                    if (modules[child].HostIndex == index && GroupFor(modules[child]) == group)
+                    // Physical containment and neural dependencies are distinct server-disclosed edges.
+                    if (parents[child] == index && GroupFor(modules[child]) == group)
                         descendants.AddChild(CreateIcon(child, group, modules[child], 42, icon, tooltip, color));
                 }
                 var node = new BoxContainer
@@ -143,7 +166,8 @@ public sealed partial class NCCyberwareMapControl : Control
                 {
                     node.AddChild(new OwnershipConnector());
                     var attached = NewColumn();
-                    attached.AddChild(Caption("nc-cyberware-map-modules"));
+                    attached.AddChild(Caption(modules.Any(candidate => candidate.NeuralFoundationIndex == index)
+                        ? "nc-cyberware-neural-connections" : "nc-cyberware-map-modules"));
                     attached.AddChild(descendants);
                     node.AddChild(attached);
                 }
@@ -231,7 +255,7 @@ public sealed partial class NCCyberwareMapControl : Control
         if (host is "ArmLeft" or "HandLeft") return 5;
         if (host is "LegRight" or "FootRight") return 6;
         if (host is "LegLeft" or "FootLeft") return 7;
-        if (host is "Head" or "Brain") return 0;
+        if (host is "Head" or "Brain" or "Spine") return 0;
         if (host is "Thorax" or "Heart") return 2;
         return 3;
     }
@@ -319,6 +343,14 @@ public sealed partial class NCCyberwareMapControl : Control
                 distance = next;
                 nearest = item.Index;
             }
+            foreach (var index in owner._spinalDevices)
+            {
+                var next = Vector2.DistanceSquared(point, new Vector2(.5f, .345f));
+                if (next >= distance)
+                    continue;
+                distance = next;
+                nearest = index;
+            }
             foreach (var item in owner._skeletalSlots)
             {
                 var next = Vector2.DistanceSquared(point, (item.Slot.MapStart + item.Slot.MapEnd) * .5f);
@@ -354,6 +386,15 @@ public sealed partial class NCCyberwareMapControl : Control
                 handle.DrawCircle(a, 4 * UIScale, color);
                 handle.DrawCircle(b, 4 * UIScale, color);
                 handle.DrawCircle(c, 4 * UIScale, color);
+            }
+            foreach (var index in owner._spinalDevices)
+            {
+                var color = index == owner._selected ? Color.FromHex("#E4FFFC") : Accent;
+                var start = new Vector2(.5f, .20f) * size;
+                var end = new Vector2(.5f, .49f) * size;
+                handle.DrawLine(start, end, color);
+                if (index == owner._selected)
+                    handle.DrawCircle((start + end) * .5f, 10 * UIScale, color, filled: false);
             }
             owner.DrawSkeleton(handle, size);
             for (var i = 0; i < Anchors.Length; i++)

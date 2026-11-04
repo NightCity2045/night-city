@@ -67,7 +67,7 @@ public sealed partial class NCDiagnosticWindow
     }
 
     private string CyberwarePlacement(NCMedicalCyberwareSummary module) => module.Slot is { } slot
-        ? CyberwareSlotName(slot)
+        ? (module.HostCategory is { } category ? OrganName(category.Id) + " · " : string.Empty) + CyberwareSlotName(slot)
         : module.HostCategory is { } host ? OrganName(host.Id) : Value(module.Form);
 
     private string CyberwareTooltip(NCMedicalCyberwareSummary module) =>
@@ -75,7 +75,23 @@ public sealed partial class NCDiagnosticWindow
         Loc.GetString(module.Operational
             ? "nc-medical-diagnostics-cyberware-online"
             : "nc-medical-diagnostics-cyberware-offline") +
-        (module.EmpDisabled ? "\n" + Loc.GetString("nc-cyberware-map-emp") : string.Empty);
+        (module.EmpDisabled ? "\n" + Loc.GetString("nc-cyberware-map-emp") : string.Empty) + NeuralDependencyDetails(module);
+
+    private string NeuralDependencyDetails(NCMedicalCyberwareSummary module)
+    {
+        var message = module.NeuralDependency switch
+        {
+            NCCyberwareNeuralDependencyState.Missing => "nc-cyberware-neural-missing",
+            NCCyberwareNeuralDependencyState.Unavailable => "nc-cyberware-neural-unavailable",
+            _ => null,
+        };
+        var details = message == null ? string.Empty : "\n" + Loc.GetString(message);
+        if (module.NeuralFoundationIndex is { } index && _snapshot is { } snapshot &&
+            index >= 0 && index < snapshot.Cyberware.Count)
+            details += "\n" + Loc.GetString("nc-cyberware-neural-linked",
+                ("host", CyberwareName(snapshot.Cyberware[index].Profile)));
+        return details;
+    }
 
     private static NCDiagnosticBand CyberwareSeverity(NCMedicalCyberwareSummary module) =>
         !module.Operational || module.EmpDisabled
@@ -93,6 +109,7 @@ public sealed partial class NCDiagnosticWindow
             details += " · " + Loc.GetString("nc-cyberware-map-emp");
         if (module.HostIndex is { } host && _snapshot is { } snapshot && host >= 0 && host < snapshot.Cyberware.Count)
             details += "\n" + Loc.GetString("nc-cyberware-map-installed-in", ("host", CyberwareName(snapshot.Cyberware[host].Profile)));
+        details += NeuralDependencyDetails(module);
         AddCard(CyberwareContainer, CyberwareName(module.Profile), details, BandColor(CyberwareSeverity(module)),
             icon: CyberwareIcon(module), metrics:
             [

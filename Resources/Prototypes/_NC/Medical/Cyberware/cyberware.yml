@@ -75,6 +75,7 @@
 
 - type: ncCyberware
   id: NCNeuralLinkMk1
+  nameId: nc-cyberware-profile-neural-link-mk1
   humanityPackages: [ NCHumanityInterface ]
   requiresSeparateCalibration: true
   powerPriority: Control

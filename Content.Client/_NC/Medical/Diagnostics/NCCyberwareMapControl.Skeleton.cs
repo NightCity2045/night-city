@@ -43,9 +43,11 @@ public sealed partial class NCCyberwareMapControl
             var tile = new BoxContainer
             {
                 Orientation = BoxContainer.LayoutOrientation.Vertical,
-                SeparationOverride = 4, MinWidth = 130, MaxWidth = 150,
+                SeparationOverride = 4, MinWidth = 130, MaxWidth = 130,
             };
-            tile.AddChild(new Label { Text = Loc.GetString(slot.Name), FontColorOverride = Accent, ClipText = true });
+            var title = new RichTextLabel { HorizontalExpand = true, MinHeight = 42 };
+            title.SetMessage(Loc.GetString(slot.Name), Accent);
+            tile.AddChild(title);
             var found = false;
             for (var index = 0; index < modules.Count; index++)
             {
@@ -129,6 +131,12 @@ public sealed partial class NCCyberwareMapControl
                 Line(.65f, .72f, .8f, .3f);
                 Line(.2f, .3f, .5f, .48f);
                 Line(.5f, .48f, .8f, .3f);
+            }
+            else if (kind == 7)
+            {
+                Line(.5f, .15f, .5f, .85f);
+                for (var y = .2f; y < .85f; y += .12f)
+                    Line(.35f, y, .65f, y);
             }
             else
             {

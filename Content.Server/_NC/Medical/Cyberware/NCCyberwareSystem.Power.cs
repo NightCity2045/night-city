@@ -329,7 +329,12 @@ public sealed partial class NCCyberwareSystem
             module.PowerGranted = !profile.RequiresPower || grants.Contains(module.StableInstanceId);
             module.CurrentPower = 0f;
             UpdateNeuralState(module, profile, now);
-            UpdateOperational(uid, module, profile, now);
+        }
+        // Allocate every grant before evaluating dependencies; enumeration order cannot starve a foundation.
+        foreach (var uid in modules)
+        {
+            var module = Comp<NCCyberwareComponent>(uid);
+            UpdateOperational(uid, module, _prototypes.Index(module.Profile), now, modules);
         }
         UpdatePowerWarning(body, modules, now);
     }

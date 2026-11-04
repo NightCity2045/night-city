@@ -15,7 +15,8 @@
   id: NCSlotMotorBurst
   name: motor burst controller bay
   nameId: nc-cyberware-slot-motor-burst
-  hostCategories: [ Head ]
+  hostCategories: [ Spine ]
+  legacyHostCategories: [ Head ]
   capacity: 1
 
 - type: ncCyberwareSlot
@@ -199,6 +200,7 @@
   heatShutdownThreshold: 85
   heatDamageThreshold: 90
   heatDamagePerSecond: 1
+  requiredNeuralInterface: NCNeuralLinkMk1
   neuralRequirement: Required
   updateInterval: 0.1s
   capabilities: []
@@ -240,6 +242,7 @@
   heatShutdownThreshold: 85
   heatDamageThreshold: 90
   heatDamagePerSecond: 1
+  requiredNeuralInterface: NCNeuralLinkMk1
   neuralRequirement: Required
   updateInterval: 0.1s
   capabilities: []

@@ -73,3 +73,13 @@
   mapStart: "0.52, 0.53"
   mapEnd: "0.535, 0.91"
   order: 6
+
+- type: ncSkeletalSlot
+  id: NCSkeletonVertebralColumn
+  name: nc-skeleton-slot-vertebralcolumn
+  category: VertebralColumn
+  parentCategory: Spine
+  targetZone: NCZoneChest
+  mapStart: "0.50, 0.20"
+  mapEnd: "0.50, 0.49"
+  order: 7

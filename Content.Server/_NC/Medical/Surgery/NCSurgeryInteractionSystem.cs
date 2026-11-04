@@ -137,10 +137,10 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
             return false;
         }
 
-        if (!_cyberware.TryFindInstallSlot(patient, targetRegion, module, out _))
+        if (!_cyberware.TryFindInstallHost(patient, targetRegion, module, out var host, out _))
             return false;
         // Player surgery uses physical bay compatibility, not the legacy procedure catalogue's profile allowlist.
-        BindStagedProcedure(user, patient, "NCSurgeryCyberwareInstallation", selectedZone, targetRegion, module);
+        BindStagedProcedure(user, patient, "NCSurgeryCyberwareInstallation", selectedZone, host, module);
         return true;
     }
 

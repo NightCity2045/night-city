@@ -27,6 +27,10 @@ public sealed partial class NCCyberwareSlotPrototype : IPrototype
     [DataField(required: true)]
     public List<ProtoId<OrganCategoryPrototype>> HostCategories { get; private set; } = [];
 
+    /// <summary>Accepted only when inspecting old saved hosts, never for a new installation.</summary>
+    [DataField]
+    public List<ProtoId<OrganCategoryPrototype>> LegacyHostCategories { get; private set; } = [];
+
     [DataField(required: true)]
     public float Capacity { get; private set; }
 }
@@ -107,6 +111,10 @@ public sealed partial class NCCyberwarePrototype : IPrototype
 
     [DataField(required: true)]
     public NCCyberwareForm Form { get; private set; }
+
+    /// <summary>One independent neural foundation required for operation, not physical containment.</summary>
+    [DataField]
+    public ProtoId<NCCyberwarePrototype>? RequiredNeuralInterface { get; private set; }
 
     [DataField]
     public List<ProtoId<NCCyberwareSlotPrototype>> CompatibleSlots { get; private set; } = [];

@@ -964,10 +964,10 @@
   requiredAuthorizations:
   - NCSurgeryAuthorizationOrthopedic
   - NCSurgeryAuthorizationTransplant
-  compatibleTargetCategories: [ Head, Thorax, PelvisGroin, ArmLeft, ArmRight, LegLeft, LegRight ]
+  compatibleTargetCategories: [ Head, Thorax, Spine, PelvisGroin, ArmLeft, ArmRight, LegLeft, LegRight ]
   targetRequirements: Integrity
   requiresGraft: true
-  compatibleGraftCategories: [ Skull, RibCage, PelvisBone, ArmBoneRight, ArmBoneLeft, LegBoneRight, LegBoneLeft ]
+  compatibleGraftCategories: [ Skull, RibCage, VertebralColumn, PelvisBone, ArmBoneRight, ArmBoneLeft, LegBoneRight, LegBoneLeft ]
   compatibleGraftMaterials: [ Organic, Hybrid, Mechanical ]
   facility:
     required: true

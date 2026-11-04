@@ -268,7 +268,9 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         }
 
         ValidateSlot(slot);
-        if (!slot.HostCategories.Contains(hostCategory) || !profile.CompatibleSlots.Contains(request.Slot))
+        if ((!slot.HostCategories.Contains(hostCategory) &&
+             !(_restoringLegacyNeuralHosts && slot.LegacyHostCategories.Contains(hostCategory))) ||
+            !profile.CompatibleSlots.Contains(request.Slot))
             return Reject(NCCyberwareMutationFailure.SlotIncompatible);
         if (profile.Size > slot.Capacity)
             return Reject(NCCyberwareMutationFailure.CapacityExceeded);
@@ -296,7 +298,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         if (module.StableInstanceId == Guid.Empty)
             module.StableInstanceId = request.ResolutionId.DeriveGuid(0x43594245U);
 
-        UpdateOperational(request.Module, module, profile, _timing.CurTime);
+        RefreshBodyPower(request.Patient, _timing.CurTime);
         Remember(request.Patient, key);
         Schedule(request.Module, profile, true);
         RecordService(request.Module, NCCyberwareServiceOperation.Installed, request.ResolutionId.Value, request.Patient);
@@ -476,7 +478,10 @@ public sealed partial class NCCyberwareSystem : EntitySystem
 
         Remember(request.Patient, key);
         if (affected > 0)
+        {
+            RefreshBodyPower(request.Patient, _timing.CurTime);
             MarkBodyChanged(request.Patient);
+        }
         return Applied(affected);
     }
 
@@ -510,7 +515,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         var previous = module.FunctionalEfficiency;
         TryAdvanceBodyPower(body, _timing.CurTime);
         ApplyRequestedNeuralConnection(module, profile, connected, calibrated);
-        UpdateOperational(moduleUid, module, profile, _timing.CurTime);
+        RefreshBodyPower(body, _timing.CurTime);
         Remember(body, key);
         Schedule(moduleUid, profile, true);
         MarkBodyChanged(body);
@@ -939,7 +944,8 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         EntityUid moduleUid,
         NCCyberwareComponent module,
         NCCyberwarePrototype profile,
-        TimeSpan now)
+        TimeSpan now,
+        IReadOnlyList<EntityUid>? modules = null)
     {
         var structural = 1f;
         if (TryComp<NCOrganIntegrityComponent>(moduleUid, out var integrity))
@@ -976,6 +982,11 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             }
         }
 
+        var dependency = ResolveNeuralDependency(moduleUid, profile, now, modules);
+        module.NeuralDependency = dependency.State;
+        neuralFactor *= dependency.Efficiency;
+        if (dependency.Efficiency <= 0f)
+            module.Load = 0f;
         var empDisabled = module.EmpDisabledUntil > now;
         module.FunctionalEfficiency = powered && !empDisabled && !module.ThermalShutdown && module.Heat < profile.HeatShutdownThreshold
             ? Math.Clamp(structural * heatFactor * neuralFactor, 0f, 1f)
@@ -1205,7 +1216,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
             if (!_prototypes.TryIndex(slotId, out NCCyberwareSlotPrototype? slot))
                 throw new InvalidOperationException($"NC cyberware slot {slotId} does not exist.");
             ValidateSlot(slot);
-            if (!slot.HostCategories.Contains(category))
+            if (!slot.HostCategories.Contains(category) && !slot.LegacyHostCategories.Contains(category))
                 throw new InvalidOperationException($"NC cyberware slot {slotId} cannot be hosted by {category}.");
         }
     }
@@ -1217,7 +1228,9 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         if (string.IsNullOrWhiteSpace(slot.Name) || slot.HostCategories.Count == 0 ||
             slot.HostCategories.Count != slot.HostCategories.Distinct().Count() ||
             !float.IsFinite(slot.Capacity) || slot.Capacity <= 0f ||
-            slot.HostCategories.Any(category => !_prototypes.HasIndex(category)))
+            slot.HostCategories.Any(category => !_prototypes.HasIndex(category)) ||
+            slot.LegacyHostCategories.Count != slot.LegacyHostCategories.Distinct().Count() ||
+            slot.LegacyHostCategories.Any(category => !_prototypes.HasIndex(category) || slot.HostCategories.Contains(category)))
         {
             throw new InvalidOperationException($"NC cyberware slot profile {slot.ID} is invalid.");
         }
@@ -1276,6 +1289,11 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         {
             throw new InvalidOperationException($"NC cyberware profile {profile.ID} is invalid.");
         }
+
+        if (profile.RequiredNeuralInterface is { } required &&
+            (required.Id == profile.ID || !_prototypes.TryIndex(required, out NCCyberwarePrototype? foundation) ||
+             foundation.RequiredNeuralInterface != null || !foundation.Capabilities.Contains("NeuralInterface")))
+            throw new InvalidOperationException($"Invalid neural foundation for {profile.ID}.");
 
         if (_prototypes.TryIndex(profile.RepairProfile, out NCCyberwareRepairProfilePrototype? repair))
             ValidateRepairProfile(repair);

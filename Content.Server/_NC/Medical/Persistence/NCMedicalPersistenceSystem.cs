@@ -140,6 +140,7 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
             !PrepareAbilityMigration(character, snapshot.Version, current) ||
             !PrepareExteriorMigration(character, snapshot.Version, current) ||
             !PrepareServiceMigration(character, snapshot.Version, current) ||
+            !PrepareNeuralMigration(initial, snapshot.Version, current) ||
             !ValidateCurrentSnapshot(character, current) ||
             !_cyberware.CanRestorePhysicalIdentities(character, current))
         {
@@ -295,6 +296,7 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
             case NCMedicalSnapshotVersions.Humanity:
             case NCMedicalSnapshotVersions.CyberwareAbilities:
             case NCMedicalSnapshotVersions.CyberwareExteriors:
+            case NCMedicalSnapshotVersions.CyberwareService:
                 migrated = CloneSnapshot(snapshot);
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;

@@ -15,7 +15,7 @@
   - type: Hunger
     baseDecayRate: 0.005
   - type: InitialBody
-    excludedOrgans: [ Brain, Torso, Thorax, Abdomen, PelvisGroin, ArmLeft, ArmRight, HandLeft, HandRight, LegLeft, LegRight, FootLeft, FootRight, Eyes, Ears, Tongue ]
+    excludedOrgans: [ Brain, Spine, VertebralColumn, Torso, Thorax, Abdomen, PelvisGroin, ArmLeft, ArmRight, HandLeft, HandRight, LegLeft, LegRight, FootLeft, FootRight, Eyes, Ears, Tongue ]
   - type: NCCyberwarePowerBus
   - type: PowerCellSlot
     cellSlotId: nc_main_cell
@@ -70,7 +70,7 @@
   description: An empty mechanical docking carrier. A disconnected shell retains its own parts, damage and batteries here.
   components:
   - type: InitialBody
-    excludedOrgans: [ Brain, Heart, Lungs, Liver, Kidneys, Stomach, Torso, Thorax, Abdomen, PelvisGroin, ArmLeft, ArmRight, HandLeft, HandRight, LegLeft, LegRight, FootLeft, FootRight, Eyes, Ears, Tongue ]
+    excludedOrgans: [ Brain, Heart, Lungs, Liver, Kidneys, Stomach, Spine, VertebralColumn, Torso, Thorax, Abdomen, PelvisGroin, ArmLeft, ArmRight, HandLeft, HandRight, LegLeft, LegRight, FootLeft, FootRight, Eyes, Ears, Tongue ]
 
 - type: entity
   parent: BaseItem

@@ -102,7 +102,7 @@
   - type: NCNerve
   - type: NCSurgicalSite
   - type: NCCyberwareSlotHost
-    slots: [ NCSlotNeuralCore, NCSlotCranialUtility, NCSlotMotorBurst, NCSlotMotorStabilizer ]
+    slots: [ NCSlotNeuralCore, NCSlotCranialUtility, NCSlotMotorStabilizer ]
 
 - type: entity
   id: NCOrganHumanArmLeft

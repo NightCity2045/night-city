@@ -88,3 +88,13 @@
     category: LegBoneLeft
   - type: NCDetachedOrganMedicalData
     requiredParentCategory: LegLeft
+
+- type: entity
+  abstract: true
+  parent: NCOrganHumanSkeletalReplacementBase
+  id: NCOrganHumanCyberVertebralColumnBase
+  components:
+  - type: Organ
+    category: VertebralColumn
+  - type: NCDetachedOrganMedicalData
+    requiredParentCategory: Spine

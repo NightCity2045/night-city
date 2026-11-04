@@ -46,6 +46,11 @@ public sealed partial class NCCyberwareSystem
         if (entity.Comp.ThermalShutdown || entity.Comp.Heat >= profile.HeatDeratingThreshold)
             return false;
         failure = NCFreeformSurgeryFailure.CyberwareSignalWeak;
+        if (profile.RequiredNeuralInterface != null &&
+            (!TryGetNeuralFoundation(entity.Owner, out var foundation) ||
+             !Comp<NCCyberwareComponent>(foundation).Calibrated ||
+             !Comp<NCCyberwareComponent>(foundation).Operational))
+            return false;
         if (profile.NeuralRequirement != NCCyberwareNeuralRequirement.None &&
             entity.Comp.NeuralIntegrity < profile.NeuralDegradedThreshold)
             return false;
