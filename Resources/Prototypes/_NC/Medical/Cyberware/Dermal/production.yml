@@ -125,4 +125,3 @@
         doAfter: 2
   - node: complete
     entity: NCImplantSubdermalArmorTorsoUnprepared
-
