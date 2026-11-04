@@ -136,3 +136,41 @@ Suggested changelog:
 - add: A cyberware service bench supports physical part replacement, diagnosis and testing.
 - tweak: Severe damage can permanently reduce the repairable capacity of individual cyberware nodes.
 ```
+
+## Medical controllers and quality
+
+`NCBiomonitorImplant` now uses the same physical assembly and service workflow;
+`NCAutoInjectorImplant` adds a controller/pump assembly. Empty manufacturing
+outputs contain no default parts. Electronics, mechanical and medical lathe packs
+produce the corresponding boards, sensors, pumps, frames and refillable cartridges.
+The localized **Medical implants: controllers and dosing** guide documents the
+player workflow, power requirements and surgical access.
+
+`ncCyberwarePart.quality` references a data-defined quality profile (standard by
+default for existing parts). Four medical grades change nominal part integrity,
+measurement resolution and performance. The weakest controller/sensor or
+controller/pump limits the relevant function; the scanner reports the lowest
+assembly grade separately from damage. Repair preserves part prototype/quality.
+
+A blank `NCMedicalControllerComponent` has no firmware. The basic preprogrammed
+variant supports self-test but cannot operate either implant. META's
+`MedicalProgrammer.flash(0|1|2)` writes basic, biomonitor or dosing firmware;
+`selfTest()` reports whether a programmed board is intact. The program in
+`Resources/Meta/Medical/Programmer.meta` defaults to basic firmware. Programming
+requires the device owner, a nearby authorized runtime host and a detached board.
+Native checks remain authoritative; META cannot bypass dosing limits.
+
+The injector uses a private `Solution` cartridge and the existing bloodstream API.
+Manual and automatic doses share stock, actual metered-dose budget and cooldown.
+Changing settings disables automation. Loading another cartridge resets its budget
+but not cooldown. Automatic dosing requires a fresh reading from an operational
+biomonitor on the same body; it remains available during unconsciousness, while
+manual controls require the wearer's normal interaction eligibility.
+
+Medical snapshot version 19 preserves settings, contents, delivered quantity,
+cooldown and controller firmware through explicit clones and assembly snapshots.
+Version 18 and earlier installed biomonitors migrate to standard components with
+completed installation. New installations require fixation, connection and checking
+through the existing authoritative surgery action/DoAfter pipeline. Runtime samples
+are not persisted as fresh medical readings. The preceding META API catalog is
+frozen separately so previously compiled artifacts remain verifiable.

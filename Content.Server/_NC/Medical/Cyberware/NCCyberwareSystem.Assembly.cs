@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Shared._NC.Medical.Cyberware.Internal;
 using System.Linq;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Medical.Anatomy;
@@ -209,6 +210,7 @@ public sealed partial class NCCyberwareSystem
                 EntityPrototype = prototype.Id,
                 StableInstanceId = new NCActionResolutionId(instanceId).DeriveGuid(0x43595054, stream),
                 CurrentIntegrity = partProfile.MaximumIntegrity,
+                MedicalFirmware = entity.TryComp<NCMedicalControllerComponent>(out var controller, _componentFactory) ? controller.Firmware : null,
             });
         }
         return snapshot;
@@ -233,6 +235,7 @@ public sealed partial class NCCyberwareSystem
                 !_prototypes.TryIndex<EntityPrototype>(part.EntityPrototype, out var entity) ||
                 !entity.TryComp<NCCyberwarePartComponent>(out var component, _componentFactory) ||
                 !_prototypes.TryIndex(component.Profile, out var partProfile) || partProfile.Slot != part.Slot ||
+                part.MedicalFirmware is { } firmware && (!entity.TryComp<NCMedicalControllerComponent>(out _, _componentFactory) || !_prototypes.HasIndex(firmware)) ||
                 !Unit(part.PermanentDamage) ||
                 !Finite(part.CurrentIntegrity, 0f,
                     NCCyberwareCondition.ServiceCeiling(partProfile.MaximumIntegrity, part.PermanentDamage)))
@@ -263,6 +266,7 @@ public sealed partial class NCCyberwareSystem
                 StableInstanceId = part.StableInstanceId,
                 CurrentIntegrity = Comp<NCOrganIntegrityComponent>(partUid).CurrentIntegrity,
                 PermanentDamage = part.PermanentDamage,
+                MedicalFirmware = TryComp<NCMedicalControllerComponent>(partUid, out var controller) ? controller.Firmware : null,
             });
         }
         return snapshot;
@@ -295,6 +299,7 @@ public sealed partial class NCCyberwareSystem
                 var part = Comp<NCCyberwarePartComponent>(partUid);
                 part.StableInstanceId = state.StableInstanceId;
                 part.PermanentDamage = state.PermanentDamage;
+                if (TryComp<NCMedicalControllerComponent>(partUid, out var controller)) controller.Firmware = state.MedicalFirmware;
                 var integrity = Comp<NCOrganIntegrityComponent>(partUid);
                 integrity.CurrentIntegrity = state.CurrentIntegrity;
                 NormalizePart(part, integrity, _prototypes.Index(part.Profile));

@@ -267,7 +267,7 @@
     pressureFullScaleVolume: 1800
     compressionFullScaleVolume: 1200
   - type: NCCyberwareSlotHost
-    slots: [ NCSlotThoracicSupport, NCSlotDermalArmorThorax, NCSlotSubdermalThorax, NCSlotThoracicPower, NCSlotThoracicConverter, NCSlotMuscleBoneLacePrimary, NCSlotMuscleBoneLaceSecondary ]
+    slots: [ NCSlotBiomonitorThorax, NCSlotThoracicSupport, NCSlotDermalArmorThorax, NCSlotSubdermalThorax, NCSlotThoracicPower, NCSlotThoracicConverter, NCSlotMuscleBoneLacePrimary, NCSlotMuscleBoneLaceSecondary ]
 
 - type: entity
   id: NCOrganHumanAbdomen
@@ -276,6 +276,8 @@
   components:
   - type: Organ
     category: Abdomen
+  - type: NCCyberwareSlotHost
+    slots: [ NCSlotMedicalAbdomen ]
   - type: NCAnatomicalRegion
     tissueProfile: NCHumanCavityTissue
     vitalImportance: Important

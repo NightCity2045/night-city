@@ -1,0 +1,54 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: NCBiomonitorImplant
+  id: NCBiomonitorImplantEmpty
+  suffix: Empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCCyberwareImplantBase
+  id: NCAutoInjectorImplant
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    state: medipen
+  - type: NCCyberware
+    profile: NCAutoInjector
+    factoryPrepared: true
+  - type: NCMedicalImplant
+    requiredFirmware: NCMedicalFirmwareInjector
+    injector: true
+
+- type: entity
+  parent: NCAutoInjectorImplant
+  id: NCAutoInjectorImplantEmpty
+  suffix: Empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: BaseItem
+  id: NCMedicalInjectorCartridge
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/vial.rsi
+    state: vial
+  - type: NCMedicalCartridge
+  - type: SolutionContainerManager
+    solutions:
+      cartridge:
+        maxVol: 30
+  - type: RefillableSolution
+    solution: cartridge
+  - type: DrainableSolution
+    solution: cartridge
+  - type: ExaminableSolution
+    solution: cartridge

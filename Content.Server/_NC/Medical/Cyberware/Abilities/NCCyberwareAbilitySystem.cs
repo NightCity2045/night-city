@@ -110,7 +110,7 @@ public sealed partial class NCCyberwareAbilitySystem : EntitySystem
         return !TerminatingOrDeleted(body) && !TerminatingOrDeleted(uid) &&
                _cyberware.TryGetOwningBody(uid, out var owner) && owner == body &&
                TryComp<NCCyberwareComponent>(uid, out var hardware) && hardware.Operational && !hardware.CrisisBlocksActiveModes &&
-               _cyberware.FirmwareAllowsActiveModes(uid) &&
+               _cyberware.FirmwareAllowsActiveModes(uid) && _cyberware.MedicalControllerReady(uid) &&
                TryComp<BodyComponent>(body, out var graph) && graph.Organs != null &&
                graph.Organs.ContainedEntities.Any(organ => HasComp<Content.Shared.Body.Components.BrainComponent>(organ)) &&
                TryComp<NCPhysiologyComponent>(body, out var physiology) && !physiology.Irreversible &&

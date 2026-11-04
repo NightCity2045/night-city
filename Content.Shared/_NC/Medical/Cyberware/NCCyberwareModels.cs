@@ -92,6 +92,7 @@ public enum NCCyberwareMutationFailure : byte
 [DataDefinition]
 public sealed partial class NCCyberwareStateSnapshot
 {
+    [DataField] public Internal.NCMedicalImplantState? MedicalImplant;
     [DataField] public NCCyberwareServiceState? Service;
 
     [DataField]

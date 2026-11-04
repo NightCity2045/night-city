@@ -201,7 +201,12 @@ public readonly record struct NCMedicalOrganSummary(
 public readonly record struct NCMedicalCyberwarePartSummary(
     ProtoId<NCCyberwarePartSlotPrototype> Slot,
     EntProtoId? EntityPrototype,
-    NCDiagnosticBand Integrity);
+    NCDiagnosticBand Integrity,
+    ProtoId<Content.Shared._NC.Medical.Cyberware.Internal.NCCyberwareQualityPrototype>? Quality = null,
+    ProtoId<NCCyberwareFirmwarePrototype>? Firmware = null);
+
+[Serializable, NetSerializable]
+public readonly record struct NCMedicalImplantSummary(bool Injector, bool ControllerReady, float Remaining, float Dose, float Interval, float Limit, float Delivered, float Cooldown, bool Automatic);
 
 [Serializable, NetSerializable]
 public readonly record struct NCMedicalCyberwareSummary(
@@ -223,7 +228,9 @@ public readonly record struct NCMedicalCyberwareSummary(
     int? AvailableSupports = null,
     int? HardsuitAllowancePercent = null,
     NCSkeletalSurgeryStage SkeletalSurgeryCompleted = NCSkeletalSurgeryStage.None,
-    bool SkeletalLoadTestPassed = false);
+    bool SkeletalLoadTestPassed = false,
+    NCMedicalImplantSummary? Medical = null,
+    ProtoId<Content.Shared._NC.Medical.Cyberware.Internal.NCCyberwareQualityPrototype>? Quality = null);
 
 [Serializable, NetSerializable]
 public readonly record struct NCMedicalDrugSummary(

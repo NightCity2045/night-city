@@ -278,6 +278,9 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
 
     private static string ActionName(NCFreeformSurgeryAction action) => action switch
     {
+        NCFreeformSurgeryAction.FixMedical => Loc.GetString("nc-medical-stage-fixmedical"),
+        NCFreeformSurgeryAction.ConnectMedical => Loc.GetString("nc-medical-stage-connectmedical"),
+        NCFreeformSurgeryAction.CheckMedical => Loc.GetString("nc-medical-stage-checkmedical"),
         NCFreeformSurgeryAction.Disinfect => Loc.GetString("nc-surgery-ui-action-disinfect"),
         NCFreeformSurgeryAction.Incise => Loc.GetString("nc-surgery-ui-action-incise"),
         NCFreeformSurgeryAction.Hemostasis => Loc.GetString("nc-surgery-ui-action-hemostasis"),

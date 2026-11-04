@@ -237,6 +237,9 @@ public sealed partial class MetaApiCatalog
         Method("meta.lab.ChemMaster", "operationStatus", "result<meta.system.JobReceipt>", "lab.operation.read", true, "string");
         Event("meta.lab.ChemMaster", "operationChanged", "meta.system.JobReceipt", "lab.operation.observe", "Ordered", 16);
         Capability("meta.implants", "Optics");
+        Capability("meta.implants", "MedicalProgrammer");
+        Method("meta.implants.MedicalProgrammer", "selfTest", "result<bool>", "implant.medical.read", false);
+        Method("meta.implants.MedicalProgrammer", "flash", "result<bool>", "implant.medical.flash", true, "int");
         Capability("meta.implants", "FunctionalController");
         Enum("meta.implants", "FunctionKind", "Tool", "Blade", "Biomonitor", "MotorBurst", "Stabilization");
         Dto("meta.implants", "FunctionState", "kind:meta.implants.FunctionKind", "active:bool", "operational:bool",

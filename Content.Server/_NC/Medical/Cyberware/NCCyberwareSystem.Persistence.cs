@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Shared._NC.Medical.Cyberware.Internal;
 using System.Linq;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Medical.Anatomy;
@@ -84,6 +85,7 @@ public sealed partial class NCCyberwareSystem
 
     public bool ValidatePersistentState(NCCyberwareStateSnapshot state, bool installedModule)
     {
+        if (state?.MedicalImplant is { } medical && !NCMedicalImplantMath.Valid(medical)) return false;
         if (state == null || string.IsNullOrWhiteSpace(state.EntityPrototype) ||
             state.EntityPrototype.Length > 128 || state.StableInstanceId == Guid.Empty ||
             string.IsNullOrWhiteSpace(state.Profile.Id) ||
@@ -91,6 +93,7 @@ public sealed partial class NCCyberwareSystem
             !_prototypes.TryIndex<EntityPrototype>(state.EntityPrototype, out var entityPrototype) ||
             !entityPrototype.TryComp<NCCyberwareComponent>(out var definition, _componentFactory) ||
             definition.Profile != state.Profile ||
+            entityPrototype.TryComp<NCMedicalImplantComponent>(out _, _componentFactory) != (state.MedicalImplant != null) ||
             !entityPrototype.TryComp<NCOrganIntegrityComponent>(out _, _componentFactory) ||
             !Finite(state.MaximumIntegrity, float.Epsilon, 1_000_000f) ||
             MathF.Abs(state.MaximumIntegrity - profile.MaximumIntegrity) > 0.001f ||
@@ -166,6 +169,11 @@ public sealed partial class NCCyberwareSystem
         {
             module.StableInstanceId = previousIdentity;
             return false;
+        }
+        if (TryComp<NCMedicalImplantComponent>(moduleUid, out var medical))
+        {
+            medical.State = state.MedicalImplant is { } saved ? NCMedicalImplantMath.Clone(saved) : new();
+            medical.HasSample = false;
         }
         module.StateInitialized = true;
         module.Service = NCCyberwareServiceHistory.Clone(state.Service!);
@@ -324,6 +332,7 @@ public sealed partial class NCCyberwareSystem
             SkeletalLoadTestPassed = module.SkeletalLoadTestPassed,
             PermanentDamage = module.PermanentDamage,
             Assembly = CaptureAssembly(moduleUid),
+            MedicalImplant = TryComp<NCMedicalImplantComponent>(moduleUid, out var medical) ? NCMedicalImplantMath.Clone(medical.State) : null,
             PowerBus = CapturePowerBus(moduleUid),
             ThermalShutdown = module.ThermalShutdown,
             Exterior = TryComp<NCCyberwareExteriorComponent>(moduleUid, out var exterior)

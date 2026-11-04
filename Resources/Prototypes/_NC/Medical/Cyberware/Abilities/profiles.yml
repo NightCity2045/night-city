@@ -92,13 +92,15 @@
     sprite: _NC/Objects/Cyberware/implants.rsi
     state: circulatory_assist
   form: Implant
-  compatibleSlots: [ NCSlotSubdermalThorax ]
+  compatibleSlots: [ NCSlotBiomonitorThorax, NCSlotSubdermalThorax ]
   size: 1
   maximumIntegrity: 80
   repairProfile: NCRepairProfileClinicalCyberware
   auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
   humanityPackages: [ NCHumanityBiomonitor ]
-  requiresSeparateCalibration: true
+  assembly: NCBiomonitorAssembly
+  requiresFactoryPreparation: true
+  requiresSeparateCalibration: false
   idlePowerPerSecond: 0.2
   loadedPowerPerSecond: 0.5
   heatCapacity: 100
@@ -109,9 +111,31 @@
   heatShutdownThreshold: 85
   heatDamageThreshold: 90
   heatDamagePerSecond: 1
-  neuralRequirement: Required
+  neuralRequirement: None
   updateInterval: 0.1s
   capabilities: []
+
+  skeletalSurgery:
+  - stage: MedicalFixation
+    name: nc-medical-stage-fixmedical
+    zone: NCZoneChest
+    structure: Thorax
+    action: FixMedical
+    minimumDepth: 0.28
+  - stage: MedicalConnection
+    name: nc-medical-stage-connectmedical
+    zone: NCZoneChest
+    structure: Thorax
+    action: ConnectMedical
+    minimumDepth: 0.28
+    prerequisites: MedicalFixation
+  - stage: MedicalCheck
+    name: nc-medical-stage-checkmedical
+    zone: NCZoneChest
+    structure: Thorax
+    action: CheckMedical
+    minimumDepth: 0.28
+    prerequisites: MedicalFixation, MedicalConnection
 
 - type: ncCyberwareAbility
   id: NCMantisBladeAbility

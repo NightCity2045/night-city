@@ -1,0 +1,14 @@
+module medical.programmer;
+import meta.implants;
+link board:MedicalProgrammer="medical-board";
+
+// 0: basic self-test, 1: biomonitor, 2: autoinjector.
+// Bind medical-board to an owned, detached medical controller.
+async fn main()->void {
+    match(await board.flash(0)) {
+        ok(programmed)=>{
+            match(board.selfTest()) { ok(passed)=>{} err(error)=>{} }
+        }
+        err(error)=>{}
+    }
+}

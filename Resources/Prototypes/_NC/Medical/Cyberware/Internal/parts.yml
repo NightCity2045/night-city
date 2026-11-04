@@ -1,0 +1,302 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncCyberwareQuality
+  id: NCCyberwareQualityImprovised
+  name: nc-medical-quality-improvised
+  performance: 0.7
+  measurementStep: 5
+
+- type: ncCyberwareQuality
+  id: NCCyberwareQualityStandard
+  name: nc-medical-quality-standard
+  performance: 1
+  measurementStep: 1
+
+- type: ncCyberwareQuality
+  id: NCCyberwareQualityImproved
+  name: nc-medical-quality-improved
+  performance: 1.25
+  measurementStep: 0.5
+
+- type: ncCyberwareQuality
+  id: NCCyberwareQualityPremium
+  name: nc-medical-quality-premium
+  performance: 1.5
+  measurementStep: 0.1
+
+- type: ncCyberwarePartSlot
+  id: NCMedicalControllerSlot
+  name: nc-medical-slot-controller
+
+- type: ncCyberwarePartSlot
+  id: NCMedicalSensorSlot
+  name: nc-medical-slot-sensor
+
+- type: ncCyberwarePartSlot
+  id: NCMedicalPumpSlot
+  name: nc-medical-slot-pump
+
+- type: ncCyberwarePart
+  id: NCMedicalControllerImprovisedPart
+  slot: NCMedicalControllerSlot
+  maximumIntegrity: 40
+  quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCMedicalControllerImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    state: capacitor
+  - type: NCCyberwarePart
+    profile: NCMedicalControllerImprovisedPart
+  - type: NCMedicalController
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.implants.MedicalProgrammer]
+  - type: NCMetaPort
+    networkId: LOCAL
+
+- type: ncCyberwarePart
+  id: NCMedicalControllerStandardPart
+  slot: NCMedicalControllerSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityStandard
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCMedicalControllerStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    state: capacitor
+  - type: NCCyberwarePart
+    profile: NCMedicalControllerStandardPart
+  - type: NCMedicalController
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.implants.MedicalProgrammer]
+  - type: NCMetaPort
+    networkId: LOCAL
+
+- type: ncCyberwarePart
+  id: NCMedicalControllerImprovedPart
+  slot: NCMedicalControllerSlot
+  maximumIntegrity: 80
+  quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCMedicalControllerImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    state: capacitor
+  - type: NCCyberwarePart
+    profile: NCMedicalControllerImprovedPart
+  - type: NCMedicalController
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.implants.MedicalProgrammer]
+  - type: NCMetaPort
+    networkId: LOCAL
+
+- type: ncCyberwarePart
+  id: NCMedicalControllerPremiumPart
+  slot: NCMedicalControllerSlot
+  maximumIntegrity: 100
+  quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCMedicalControllerPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    state: capacitor
+  - type: NCCyberwarePart
+    profile: NCMedicalControllerPremiumPart
+  - type: NCMedicalController
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces: [meta.implants.MedicalProgrammer]
+  - type: NCMetaPort
+    networkId: LOCAL
+
+- type: ncCyberwarePart
+  id: NCMedicalSensorImprovisedPart
+  slot: NCMedicalSensorSlot
+  maximumIntegrity: 40
+  quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCMedicalSensorImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    state: scan_module
+  - type: NCCyberwarePart
+    profile: NCMedicalSensorImprovisedPart
+
+- type: ncCyberwarePart
+  id: NCMedicalSensorStandardPart
+  slot: NCMedicalSensorSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityStandard
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCMedicalSensorStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    state: scan_module
+  - type: NCCyberwarePart
+    profile: NCMedicalSensorStandardPart
+
+- type: ncCyberwarePart
+  id: NCMedicalSensorImprovedPart
+  slot: NCMedicalSensorSlot
+  maximumIntegrity: 80
+  quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCMedicalSensorImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    state: scan_module
+  - type: NCCyberwarePart
+    profile: NCMedicalSensorImprovedPart
+
+- type: ncCyberwarePart
+  id: NCMedicalSensorPremiumPart
+  slot: NCMedicalSensorSlot
+  maximumIntegrity: 100
+  quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCMedicalSensorPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    state: scan_module
+  - type: NCCyberwarePart
+    profile: NCMedicalSensorPremiumPart
+
+- type: ncCyberwarePart
+  id: NCMedicalPumpImprovisedPart
+  slot: NCMedicalPumpSlot
+  maximumIntegrity: 40
+  quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCMedicalPumpImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    state: micro_mani
+  - type: NCCyberwarePart
+    profile: NCMedicalPumpImprovisedPart
+
+- type: ncCyberwarePart
+  id: NCMedicalPumpStandardPart
+  slot: NCMedicalPumpSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityStandard
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCMedicalPumpStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    state: micro_mani
+  - type: NCCyberwarePart
+    profile: NCMedicalPumpStandardPart
+
+- type: ncCyberwarePart
+  id: NCMedicalPumpImprovedPart
+  slot: NCMedicalPumpSlot
+  maximumIntegrity: 80
+  quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCMedicalPumpImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    state: micro_mani
+  - type: NCCyberwarePart
+    profile: NCMedicalPumpImprovedPart
+
+- type: ncCyberwarePart
+  id: NCMedicalPumpPremiumPart
+  slot: NCMedicalPumpSlot
+  maximumIntegrity: 100
+  quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCMedicalPumpPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    state: micro_mani
+  - type: NCCyberwarePart
+    profile: NCMedicalPumpPremiumPart
+
+- type: ncCyberwareFirmware
+  id: NCMedicalFirmwareBasic
+  name: nc-medical-firmware-basic
+  inhibitActiveModes: true
+
+- type: entity
+  parent: NCMedicalControllerStandard
+  id: NCMedicalControllerBasic
+  components:
+  - type: NCMedicalController
+    firmware: NCMedicalFirmwareBasic
+
+- type: ncCyberwareFirmware
+  id: NCMedicalFirmwareBiomonitor
+  name: nc-medical-firmware-biomonitor
+  inhibitActiveModes: false
+
+- type: entity
+  parent: NCMedicalControllerStandard
+  id: NCMedicalControllerBiomonitor
+  components:
+  - type: NCMedicalController
+    firmware: NCMedicalFirmwareBiomonitor
+
+- type: ncCyberwareFirmware
+  id: NCMedicalFirmwareInjector
+  name: nc-medical-firmware-injector
+  inhibitActiveModes: false
+
+- type: entity
+  parent: NCMedicalControllerStandard
+  id: NCMedicalControllerInjector
+  components:
+  - type: NCMedicalController
+    firmware: NCMedicalFirmwareInjector
+
+- type: ncCyberwareAssembly
+  id: NCBiomonitorAssembly
+  defaultParts:
+    NCMedicalControllerSlot: NCMedicalControllerBiomonitor
+    NCMedicalSensorSlot: NCMedicalSensorStandard
+
+- type: ncCyberwareAssembly
+  id: NCAutoInjectorAssembly
+  defaultParts:
+    NCMedicalControllerSlot: NCMedicalControllerInjector
+    NCMedicalPumpSlot: NCMedicalPumpStandard
+

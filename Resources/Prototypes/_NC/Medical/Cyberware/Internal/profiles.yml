@@ -1,0 +1,71 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncCyberwareSlot
+  id: NCSlotBiomonitorThorax
+  name: BiomonitorThorax
+  nameId: nc-medical-bay-biomonitorthorax
+  hostCategories: [ Thorax ]
+  capacity: 1
+  regionalSurgeryPositionX: 0.72
+
+- type: ncCyberwareSlot
+  id: NCSlotMedicalAbdomen
+  name: MedicalAbdomen
+  nameId: nc-medical-bay-medicalabdomen
+  hostCategories: [ Abdomen ]
+  capacity: 1
+  regionalSurgeryPositionX: 0.72
+
+- type: ncCyberware
+  id: NCAutoInjector
+  name: NCAutoInjector
+  nameId: nc-medical-profile-injector
+  manufacturer: Night City adaptation
+  icon:
+    sprite: Objects/Specific/Medical/medipen.rsi
+    state: medipen
+  form: Implant
+  compatibleSlots: [ NCSlotMedicalAbdomen ]
+  size: 1
+  maximumIntegrity: 80
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
+  humanityPackages: [ NCHumanityBiomonitor ]
+  assembly: NCAutoInjectorAssembly
+  requiresFactoryPreparation: true
+  requiresSeparateCalibration: false
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 0.5
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 0.1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: None
+  updateInterval: 0.1s
+  capabilities: []
+
+  skeletalSurgery:
+  - stage: MedicalFixation
+    name: nc-medical-stage-fixmedical
+    zone: NCZoneAbdomen
+    structure: Abdomen
+    action: FixMedical
+    minimumDepth: 0.4
+  - stage: MedicalConnection
+    name: nc-medical-stage-connectmedical
+    zone: NCZoneAbdomen
+    structure: Abdomen
+    action: ConnectMedical
+    minimumDepth: 0.4
+    prerequisites: MedicalFixation
+  - stage: MedicalCheck
+    name: nc-medical-stage-checkmedical
+    zone: NCZoneAbdomen
+    structure: Abdomen
+    action: CheckMedical
+    minimumDepth: 0.4
+    prerequisites: MedicalFixation, MedicalConnection

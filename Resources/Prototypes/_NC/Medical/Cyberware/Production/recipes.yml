@@ -143,6 +143,10 @@
 - type: latheRecipePack
   id: NCCyberMechanicalStatic
   recipes:
+  - NCProduceNCMedicalPumpImprovised
+  - NCProduceNCMedicalPumpStandard
+  - NCProduceNCMedicalPumpImproved
+  - NCProduceNCMedicalPumpPremium
   - NCProduceDermalPlates
   - NCProduceNCSkeletalAnchors
   - NCProduceNCSkeletalHeavyAnchors
@@ -150,6 +154,15 @@
 - type: latheRecipePack
   id: NCCyberElectronicsStatic
   recipes:
+  - NCProduceNCMedicalControllerImprovised
+  - NCProduceNCMedicalControllerStandard
+  - NCProduceNCMedicalControllerImproved
+  - NCProduceNCMedicalControllerPremium
+  - NCProduceNCMedicalSensorImprovised
+  - NCProduceNCMedicalSensorStandard
+  - NCProduceNCMedicalSensorImproved
+  - NCProduceNCMedicalSensorPremium
+  - NCProduceNCMedicalControllerBasic
   - BiogeneratorMachineCircuitboard
   - BiofabricatorMachineCircuitboard
   - ExosuitFabricatorMachineCircuitboard
@@ -168,6 +181,9 @@
 - type: latheRecipePack
   id: NCCyberMedicalStatic
   recipes:
+  - NCProduceNCBiomonitorImplantEmpty
+  - NCProduceNCAutoInjectorImplantEmpty
+  - NCProduceNCMedicalInjectorCartridge
   - NCProduceNCCyberwareSterileWrap
   - NCProduceNCCyberwareServiceTool
   - NCProduceNCSkeletalMountingTool

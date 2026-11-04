@@ -121,7 +121,7 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
             NCFreeformSurgeryAction.DisconnectCyberware => ApplyCyberwareDisconnection(context, resolution),
             NCFreeformSurgeryAction.RepairCyberware => ApplyCyberwareRepair(context, resolution, out warning),
             NCFreeformSurgeryAction.AnchorSkeletal or NCFreeformSurgeryAction.ConnectSkeletal or
-                NCFreeformSurgeryAction.DistributeDermal or NCFreeformSurgeryAction.FixDermal or NCFreeformSurgeryAction.CheckDermal =>
+                NCFreeformSurgeryAction.DistributeDermal or NCFreeformSurgeryAction.FixDermal or NCFreeformSurgeryAction.CheckDermal or NCFreeformSurgeryAction.FixMedical or NCFreeformSurgeryAction.ConnectMedical or NCFreeformSurgeryAction.CheckMedical =>
                 ApplySkeletalSurgery(context, resolution, out warning),
             NCFreeformSurgeryAction.TestSkeletal => ApplySkeletalLoadTest(context, resolution, out warning),
             NCFreeformSurgeryAction.DrainCavity => ApplyCavityDrain(context, power),

@@ -387,4 +387,7 @@ public enum NCFreeformSurgeryAction : byte
     DistributeDermal,
     FixDermal,
     CheckDermal,
+    FixMedical,
+    ConnectMedical,
+    CheckMedical,
 }

@@ -930,6 +930,7 @@ public sealed partial class NCMedicalPersistenceSystem
     {
         return new NCCyberwareStateSnapshot
         {
+            MedicalImplant = source.MedicalImplant == null ? null : Content.Shared._NC.Medical.Cyberware.Internal.NCMedicalImplantMath.Clone(source.MedicalImplant),
             Service = source.Service == null ? null : NCCyberwareServiceHistory.Clone(source.Service),
             EntityPrototype = source.EntityPrototype,
             Profile = source.Profile,
@@ -969,6 +970,7 @@ public sealed partial class NCMedicalPersistenceSystem
                     ValidatedRevision = assembly.ValidatedRevision,
                     Parts = assembly.Parts.Select(part => new NCCyberwarePartSnapshot
                     {
+                        MedicalFirmware = part.MedicalFirmware,
                         Slot = part.Slot,
                         EntityPrototype = part.EntityPrototype,
                         StableInstanceId = part.StableInstanceId,
@@ -1001,7 +1003,8 @@ public sealed partial class NCMedicalPersistenceSystem
 
     private static bool HasAssemblyShape(NCCyberwareStateSnapshot state)
     {
-        return (state.Service == null || NCCyberwareServiceHistory.Valid(state.Service)) &&
+        return (state.MedicalImplant == null || Content.Shared._NC.Medical.Cyberware.Internal.NCMedicalImplantMath.Valid(state.MedicalImplant)) &&
+               (state.Service == null || NCCyberwareServiceHistory.Valid(state.Service)) &&
                (state.Assembly == null || state.Assembly.Parts != null && state.Assembly.Parts.Count <= 8 &&
                 state.Assembly.Parts.All(part => part != null));
     }

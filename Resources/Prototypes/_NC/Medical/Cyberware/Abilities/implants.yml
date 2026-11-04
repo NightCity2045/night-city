@@ -37,8 +37,11 @@
     state: circulatory_assist
   - type: NCCyberware
     profile: NCBiomonitor
+    factoryPrepared: true
   - type: NCCyberwareAbility
     profile: NCBiomonitorAbility
+  - type: NCMedicalImplant
+    requiredFirmware: NCMedicalFirmwareBiomonitor
 
 - type: entity
   parent: BaseAction

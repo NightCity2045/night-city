@@ -999,7 +999,7 @@ public sealed partial class NCCyberwareSystem : EntitySystem
         module.NeuralDependency = dependency.State;
         var supportFactor = ResolveSupportFactor(moduleUid, module, profile, now, modules);
         neuralFactor *= dependency.Efficiency * supportFactor;
-        if (!SkeletalSurgeryReady(moduleUid, module, profile) ||
+        if (!MedicalControllerReady(moduleUid) || !SkeletalSurgeryReady(moduleUid, module, profile) ||
             profile.RequiresSkeletalLoadTest && !module.SkeletalLoadTestPassed)
             neuralFactor = 0f;
         if (dependency.Efficiency <= 0f || supportFactor <= 0f)

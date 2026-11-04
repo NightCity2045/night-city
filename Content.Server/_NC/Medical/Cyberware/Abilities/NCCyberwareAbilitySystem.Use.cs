@@ -20,6 +20,7 @@ namespace Content.Server._NC.Medical.Cyberware.Abilities;
 
 public sealed partial class NCCyberwareAbilitySystem
 {
+    [Dependency] private Internal.NCMedicalImplantSystem _medicalHardware = default!;
     private void OnActivate(Entity<NCCyberwareAbilityComponent> module, ref NCActivateCyberwareAbilityEvent args)
     {
         if (!args.Handled)
@@ -55,6 +56,8 @@ public sealed partial class NCCyberwareAbilitySystem
         if (profile.Kind == NCCyberwareAbilityKind.Biomonitor)
         {
             _cyberware.TrySetLoad(module, 0f);
+            if (HasComp<Content.Shared._NC.Medical.Cyberware.Internal.NCMedicalImplantComponent>(module))
+                return _medicalHardware.TryRead(body);
             if (!TryComp<NCPhysiologyComponent>(body, out var physiology) || !TryComp<NCCirculationComponent>(body, out var circulation))
                 return false;
             _popup.PopupEntity(Loc.GetString("nc-cyberware-biomonitor-reading",

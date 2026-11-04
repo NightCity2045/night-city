@@ -47,7 +47,8 @@ public static class NCMedicalSnapshotVersions
     public const ushort CyberwareExteriors = 16;
     public const ushort CyberwareService = 17;
     public const ushort NeuralFoundations = 18;
-    public const ushort Current = NeuralFoundations;
+    public const ushort MedicalControllers = 19;
+    public const ushort Current = MedicalControllers;
 }
 
 /// <summary>

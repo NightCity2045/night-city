@@ -18,6 +18,7 @@ public sealed partial class NCCyberwarePartSlotPrototype : IPrototype
 [Prototype("ncCyberwarePart")]
 public sealed partial class NCCyberwarePartPrototype : IPrototype
 {
+    [DataField] public ProtoId<Internal.NCCyberwareQualityPrototype> Quality = "NCCyberwareQualityStandard";
     [DataField] public List<ProtoId<Content.Shared._NC.Medical.Humanity.NCHumanityPackagePrototype>> HumanityPackages { get; private set; } = [];
     [IdDataField] public string ID { get; private set; } = default!;
     [DataField(required: true)] public ProtoId<NCCyberwarePartSlotPrototype> Slot { get; private set; }
@@ -86,6 +87,7 @@ public sealed partial class NCCyberwareAssemblySnapshot
 [DataDefinition]
 public sealed partial class NCCyberwarePartSnapshot
 {
+    [DataField] public ProtoId<NCCyberwareFirmwarePrototype>? MedicalFirmware;
     [DataField(required: true)] public ProtoId<NCCyberwarePartSlotPrototype> Slot;
     [DataField] public string EntityPrototype = string.Empty;
     [DataField] public Guid StableInstanceId;

@@ -1,0 +1,187 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: latheRecipe
+  id: NCProduceNCMedicalControllerImprovised
+  result: NCMedicalControllerImprovised
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 100
+    Glass: 100
+    Plastic: 100
+
+- type: latheRecipe
+  id: NCProduceNCMedicalControllerStandard
+  result: NCMedicalControllerStandard
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 200
+    Glass: 200
+    Plastic: 100
+
+- type: latheRecipe
+  id: NCProduceNCMedicalControllerImproved
+  result: NCMedicalControllerImproved
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 300
+    Glass: 300
+    Plastic: 100
+    Gold: 100
+
+- type: latheRecipe
+  id: NCProduceNCMedicalControllerPremium
+  result: NCMedicalControllerPremium
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 400
+    Glass: 400
+    Plastic: 100
+    Gold: 100
+    Silver: 100
+
+- type: latheRecipe
+  id: NCProduceNCMedicalSensorImprovised
+  result: NCMedicalSensorImprovised
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 100
+    Glass: 100
+    Plastic: 100
+
+- type: latheRecipe
+  id: NCProduceNCMedicalSensorStandard
+  result: NCMedicalSensorStandard
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 200
+    Glass: 200
+    Plastic: 100
+
+- type: latheRecipe
+  id: NCProduceNCMedicalSensorImproved
+  result: NCMedicalSensorImproved
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 300
+    Glass: 300
+    Plastic: 100
+    Gold: 100
+
+- type: latheRecipe
+  id: NCProduceNCMedicalSensorPremium
+  result: NCMedicalSensorPremium
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 400
+    Glass: 400
+    Plastic: 100
+    Gold: 100
+    Silver: 100
+
+- type: latheRecipe
+  id: NCProduceNCMedicalPumpImprovised
+  result: NCMedicalPumpImprovised
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 100
+    Glass: 100
+    Plastic: 100
+
+- type: latheRecipe
+  id: NCProduceNCMedicalPumpStandard
+  result: NCMedicalPumpStandard
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 200
+    Glass: 200
+    Plastic: 100
+
+- type: latheRecipe
+  id: NCProduceNCMedicalPumpImproved
+  result: NCMedicalPumpImproved
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 300
+    Glass: 300
+    Plastic: 100
+    Gold: 100
+
+- type: latheRecipe
+  id: NCProduceNCMedicalPumpPremium
+  result: NCMedicalPumpPremium
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 400
+    Glass: 400
+    Plastic: 100
+    Gold: 100
+    Silver: 100
+
+- type: latheRecipe
+  id: NCProduceNCMedicalControllerBasic
+  result: NCMedicalControllerBasic
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 150
+    Glass: 150
+    Plastic: 100
+
+- type: latheRecipe
+  id: NCProduceNCBiomonitorImplantEmpty
+  result: NCBiomonitorImplantEmpty
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 500
+    Glass: 200
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCAutoInjectorImplantEmpty
+  result: NCAutoInjectorImplantEmpty
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 500
+    Glass: 200
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCMedicalInjectorCartridge
+  result: NCMedicalInjectorCartridge
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 500
+    Glass: 200
+    Plastic: 300
+
