@@ -16,6 +16,7 @@
   - NCCyberwareMedicine
   - NCCyberwareProductionGuide
   - NCCyberarmsGuide
+  - NCCyberpsychosisGuide
   - NCDermalArmorGuide
   - NCInternalMedicalGuide
   - NCAftercare
@@ -85,3 +86,8 @@
   id: NCCyberarmsGuide
   name: guide-entry-nc-cyberarms
   text: "/ServerInfo/Guidebook/_NC/Medical/Cyberarms.xml"
+
+- type: guideEntry
+  id: NCCyberpsychosisGuide
+  name: guide-entry-nc-cyberpsychosis
+  text: "/ServerInfo/Guidebook/_NC/Medical/Cyberpsychosis.xml"

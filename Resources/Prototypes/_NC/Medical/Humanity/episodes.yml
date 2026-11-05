@@ -1,0 +1,128 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+- type: ncCyberEpisode
+  id: NCCyberHypervigilance
+  name: nc-psychosis-profile-vigilance
+  symptoms: [NCCyberFootsteps, NCCyberPhantom, NCCyberThreat, NCCyberAfterimage]
+
+- type: ncCyberEpisode
+  id: NCCyberOpticalEpisode
+  name: nc-psychosis-profile-optical
+  packageKey: sensory-extension
+  symptoms: [NCCyberStatic, NCCyberPhantom, NCCyberThreat, NCCyberAfterimage]
+
+- type: ncCyberEpisode
+  id: NCCyberMotorEpisode
+  name: nc-psychosis-profile-motor
+  packageKey: integrated-weapon
+  symptoms: [NCCyberServo, NCCyberBodyEcho, NCCyberMotorReflex, NCCyberThreat]
+
+- type: ncCyberEpisode
+  id: NCCyberReflexEpisode
+  name: nc-psychosis-profile-reflex
+  packageKey: reflex-accelerator
+  symptoms: [NCCyberStatic, NCCyberFootsteps, NCCyberBodyEcho, NCCyberThreat]
+
+- type: ncCyberEpisode
+  id: NCCyberDissociation
+  name: nc-psychosis-profile-body
+  packageKey: motor-enhancement
+  symptoms: [NCCyberServo, NCCyberBodyEcho, NCCyberPhantom, NCCyberAfterimage]
+
+- type: ncCyberSymptom
+  id: NCCyberFootsteps
+  message: nc-psychosis-symptom-footsteps
+  duration: 3
+  cooldown: 14
+  sound:
+    path: /Audio/Effects/Footsteps/tile1.ogg
+    params:
+      volume: -8
+
+- type: ncCyberSymptom
+  id: NCCyberServo
+  message: nc-psychosis-symptom-servo
+  duration: 3
+  cooldown: 12
+  bodyEcho: true
+  sound:
+    path: /Audio/Machines/buzz-sigh.ogg
+    params:
+      volume: -12
+
+- type: ncCyberSymptom
+  id: NCCyberStatic
+  message: nc-psychosis-symptom-static
+  duration: 3
+  cooldown: 12
+  bodyEcho: true
+
+- type: ncCyberSymptom
+  id: NCCyberPhantom
+  message: nc-psychosis-symptom-phantom
+  minimumStage: Crisis
+  duration: 2.5
+  cooldown: 16
+  phantom: true
+
+- type: ncCyberSymptom
+  id: NCCyberThreat
+  message: nc-psychosis-symptom-threat
+  minimumStage: Crisis
+  duration: 4
+  cooldown: 15
+  threat: true
+  phantom: true
+  shootAtViewer: true
+  shotSound:
+    path: /Audio/Weapons/Guns/Gunshots/mk58.ogg
+    params:
+      volume: -10
+
+- type: ncCyberSymptom
+  id: NCCyberBodyEcho
+  message: nc-psychosis-symptom-body
+  minimumStage: Crisis
+  duration: 4
+  cooldown: 14
+  bodyEcho: true
+
+- type: ncCyberSymptom
+  id: NCCyberMotorReflex
+  message: nc-psychosis-symptom-motor
+  minimumStage: Crisis
+  duration: 6
+  cooldown: 22
+  motorWarning: true
+  bodyEcho: true
+
+- type: ncCyberSymptom
+  id: NCCyberAfterimage
+  message: nc-psychosis-symptom-afterimage
+  duration: 3
+  cooldown: 20
+  bodyEcho: true
+
+- type: ncHumanityStimulus
+  id: NCHumanityCombat
+  impulse: 3
+  cooldownSeconds: 8
+
+- type: ncHumanityStimulus
+  id: NCHumanityViolence
+  impulse: 2
+  cooldownSeconds: 12
+
+- type: ncHumanityStimulus
+  id: NCHumanitySevereTrauma
+  impulse: 8
+  cooldownSeconds: 20
+
+- type: ncHumanityStimulus
+  id: NCHumanityAmputation
+  impulse: 16
+  cooldownSeconds: 30
+
+- type: ncHumanityStimulus
+  id: NCHumanityWitnessDeath
+  impulse: 8
+  cooldownSeconds: 45

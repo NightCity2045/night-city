@@ -297,10 +297,13 @@ namespace Content.Client.Verbs.UI
 
         private void HandleVerbsResponse(VerbsResponseEvent msg)
         {
-            if (OpenMenu == null || !OpenMenu.Visible || CurrentTarget != msg.Entity)
+            // NC-Edit-Start: A fast server can reply before the hovered submenu becomes visible.
+            // Close() clears OpenMenu, so populate the pending menu instead of discarding its verbs.
+            if (OpenMenu == null || CurrentTarget != msg.Entity) // NC
                 return;
 
             AddServerVerbs(msg.Verbs, OpenMenu);
+            // NC-Edit-End
         }
 
         private void ExecuteVerb(Verb verb)

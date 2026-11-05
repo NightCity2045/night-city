@@ -178,7 +178,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             (ushort) Math.Clamp(cyberwareOmitted, 0, ushort.MaxValue),
             (ushort) Math.Clamp(drugsOmitted, 0, ushort.MaxValue),
             (ushort) Math.Clamp(historyOmitted, 0, ushort.MaxValue),
-            policy.Tier is NCDiagnosticTier.SelfSensations or NCDiagnosticTier.AdminExact &&
+            policy.Tier is NCDiagnosticTier.SelfSensations or NCDiagnosticTier.ScannerInternal or NCDiagnosticTier.SurgicalConsole or NCDiagnosticTier.AdminExact &&
             _humanity.TryGetStatus(target, out var humanity) ? humanity : null);
         return true;
     }

@@ -1,0 +1,14 @@
+<!-- SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0 -->
+<controls:FancyWindow xmlns="https://spacestation14.io"
+ xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+ Title="{Loc nc-psychosis-panel}" MinWidth="420">
+ <BoxContainer Orientation="Vertical" SeparationOverride="10" Margin="10">
+  <Label Name="StageLabel" FontColorOverride="#55DDCC" />
+  <RichTextLabel Name="Details" MaxWidth="450" />
+  <RichTextLabel Name="Advice" MaxWidth="450" />
+  <Button Name="SafeMode" Text="{Loc nc-psychosis-safe-mode}" />
+  <Button Name="Support" Text="{Loc nc-psychosis-decline-support}" />
+  <CheckBox Name="ReducedEffects" Text="{Loc nc-psychosis-reduced-effects}" />
+  <CheckBox Name="QuietSounds" Text="{Loc nc-psychosis-quiet-sounds}" />
+ </BoxContainer>
+</controls:FancyWindow>

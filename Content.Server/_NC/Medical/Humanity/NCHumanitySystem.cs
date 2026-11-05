@@ -48,6 +48,7 @@ public sealed partial class NCHumanitySystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
+        InitializeEpisodes();
         SubscribeLocalEvent<NCHumanityMonitorComponent, MapInitEvent>(OnMapInit,
             after: [typeof(InitialBodySystem), typeof(NCCyberwareSystem)]);
         SubscribeLocalEvent<NCHumanityMonitorComponent, NCMedicalBodyChangedEvent>(OnBodyChanged);
@@ -89,6 +90,7 @@ public sealed partial class NCHumanitySystem : EntitySystem
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
+        UpdateEpisodePresentation();
         if (_pending.Count == 0) return;
         var pending = _pending.ToArray();
         _pending.Clear();
@@ -191,7 +193,8 @@ public sealed partial class NCHumanitySystem : EntitySystem
     private void OnNextUpdate(Entity<NCHumanityMonitorComponent> body, ref NCMedicalNextUpdateEvent args)
     {
         if (!TryGetBrain(body, out var brain) || brain.Comp.State.Stress <= 0f &&
-            brain.Comp.State.Burden <= 0f && brain.Comp.State.Stage == NCCyberCrisisStage.Stable &&
+            brain.Comp.State.Burden <= 0f && brain.Comp.State.Stage == NCCyberCrisisStage.Stable && brain.Comp.State.Exhaustion <= 0f &&
+            brain.Comp.State.SupportCooldown <= 0f && brain.Comp.State.MotorInhibitSeconds <= 0f &&
             !brain.Comp.State.RecentImpulses.Any(memory => memory.RemainingSeconds > 0f))
             return;
         var interval = GetProfile().ActiveUpdateInterval;
@@ -211,7 +214,7 @@ public sealed partial class NCHumanitySystem : EntitySystem
         var state = brain.Comp.State;
         if (!NCHumanityMath.Validate(state)) return false;
         var drugs = _pharmacology.GetModifiers(body);
-        if (state.Burden <= 0f && state.Stress <= 0f && state.Stage == NCCyberCrisisStage.Stable &&
+        if (state.Burden <= 0f && state.Stress <= 0f && state.Stage == NCCyberCrisisStage.Stable && state.Exhaustion <= 0f && state.SupportCooldown <= 0f && state.MotorInhibitSeconds <= 0f &&
             !state.RecentImpulses.Any(memory => memory.RemainingSeconds > 0f) &&
             (state.Current >= NCHumanityMath.Base || drugs.HumanityRecoveryPerSecond <= 0f))
             return true;
@@ -227,10 +230,12 @@ public sealed partial class NCHumanitySystem : EntitySystem
         var stable = TryComp<NCCirculationComponent>(body, out var circulation) &&
                      circulation.Perfusion >= profile.StableMinimumPerfusion &&
                      physiology.Oxygenation >= profile.StableMinimumOxygenation && physiology.Shock <= profile.StableMaximumShock;
+        AddPhysiologicalStrain(body, state, physiology, drugs, modules, seconds, ref stable);
         var before = (state.Current, state.Stress, state.Stage, state.StabilizingSeconds);
         var cooldownAdvanced = seconds > 0f && state.RecentImpulses.Any(memory => memory.RemainingSeconds > 0f);
         NCHumanityMath.Advance(state, profile, seconds, drugs.HumanityRecoveryPerSecond,
-            drugs.CrisisSuppressionPerSecond, overloaded, stable);
+            drugs.CrisisSuppressionPerSecond + (state.SupportSeconds > 0f ? .3f : 0f), overloaded, stable);
+        if (profile.EpisodesEnabled && seconds > 0f) MarkChanged(body);
         ApplyEnhancementRestrictions(modules, state.Stage);
         if (before != (state.Current, state.Stress, state.Stage, state.StabilizingSeconds) || cooldownAdvanced)
         {
@@ -287,7 +292,7 @@ public sealed partial class NCHumanitySystem : EntitySystem
         if (!TryGetBrain(body, out var brain) || !NCHumanityMath.Validate(brain.Comp.State)) return false;
         var state = brain.Comp.State;
         status = new(state.Current, NCHumanityMath.Maximum(state.Burden), state.Burden, state.Stress,
-            state.Stage, EnhancementEfficiency(state.Stage));
+            state.Stage, EnhancementEfficiency(state.Stage), state.Exhaustion, state.SupportSeconds);
         return true;
     }
     private void MarkChanged(EntityUid body, bool mechanical = false) => _medical.TryMarkDirty(body,
@@ -298,6 +303,7 @@ public sealed partial class NCHumanitySystem : EntitySystem
         NCCyberCrisisStage.Warning => "nc-humanity-stage-warning",
         NCCyberCrisisStage.Crisis => "nc-humanity-stage-crisis",
         NCCyberCrisisStage.Acute => "nc-humanity-stage-acute",
+        NCCyberCrisisStage.Recovery => "nc-humanity-stage-recovery",
         _ => "nc-humanity-stage-stable",
     };
     private string StatusText(NCHumanityStatus status) => Loc.GetString("nc-humanity-status",
@@ -306,13 +312,19 @@ public sealed partial class NCHumanitySystem : EntitySystem
         ("stage", Loc.GetString(StageMessage(status.Stage))));
     private void OnGetVerbs(Entity<NCHumanityMonitorComponent> body, ref GetVerbsEvent<InteractionVerb> args)
     {
+        AddEpisodeVerbs(body, ref args);
         if (args.User != body.Owner || !TryGetStatus(body, out _)) return;
         var uid = body.Owner;
         args.Verbs.Add(new InteractionVerb { Text = Loc.GetString("nc-humanity-check"),
             Act = () => { if (TryGetStatus(uid, out var status)) _popup.PopupEntity(StatusText(status), uid, uid, PopupType.Large); } });
     }
     private void OnExamined(Entity<NCHumanityMonitorComponent> body, ref ExaminedEvent args)
-    { if (args.Examiner == body.Owner && TryGetStatus(body, out var status)) args.PushMarkup(StatusText(status)); }
+    {
+        if (!TryGetStatus(body, out var status)) return;
+        if (args.Examiner == body.Owner) args.PushMarkup(StatusText(status));
+        else if (status.Stage is NCCyberCrisisStage.Crisis or NCCyberCrisisStage.Acute)
+            args.PushMarkup(Loc.GetString("nc-psychosis-observed"));
+    }
 
     public bool TryCapturePersistentState(EntityUid body, out NCHumanityStateSnapshot? snapshot)
     {

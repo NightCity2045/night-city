@@ -33,6 +33,10 @@ public sealed partial class NCHumanityProfilePrototype : IPrototype
     [DataField] public float StressHysteresis { get; private set; } = 5f;
     [DataField] public float HumanityHysteresis { get; private set; } = 2f;
     [DataField] public float StabilizationSeconds { get; private set; } = 30f;
+    [DataField] public bool EpisodesEnabled { get; private set; }
+    [DataField] public float EscalationSeconds { get; private set; } = 8f;
+    [DataField] public float MaximumAcuteSeconds { get; private set; } = 90f;
+    [DataField] public float RecoverySeconds { get; private set; } = 120f;
     [DataField] public List<NCHumanityCrisisBand> Bands { get; private set; } = [];
 }
 

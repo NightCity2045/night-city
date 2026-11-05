@@ -165,11 +165,14 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
                 Content.Shared._NC.Medical.Humanity.NCCyberCrisisStage.Warning => "nc-humanity-stage-warning",
                 Content.Shared._NC.Medical.Humanity.NCCyberCrisisStage.Crisis => "nc-humanity-stage-crisis",
                 Content.Shared._NC.Medical.Humanity.NCCyberCrisisStage.Acute => "nc-humanity-stage-acute",
+                Content.Shared._NC.Medical.Humanity.NCCyberCrisisStage.Recovery => "nc-humanity-stage-recovery",
                 _ => "nc-humanity-stage-stable",
             };
             HumanityStateLabel.SetMessage(Loc.GetString("nc-humanity-status", ("current", MathF.Round(humanity.Current, 1)),
                 ("maximum", MathF.Round(humanity.Maximum, 1)), ("burden", MathF.Round(humanity.Burden, 1)),
-                ("stress", MathF.Round(humanity.Stress, 1)), ("stage", Loc.GetString(stage))));
+                ("stress", MathF.Round(humanity.Stress, 1)), ("stage", Loc.GetString(stage))) + "\n" +
+                Loc.GetString("nc-psychosis-details", ("stress", MathF.Round(humanity.Stress)), ("exhaustion", MathF.Round(humanity.Exhaustion)),
+                    ("burden", MathF.Round(humanity.Burden)), ("support", MathF.Round(humanity.SupportSeconds))));
         }
         else HumanityStateLabel.Clear();
         TierLabel.Text = TierName(snapshot.Tier);
