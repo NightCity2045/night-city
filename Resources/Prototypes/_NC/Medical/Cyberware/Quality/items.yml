@@ -502,6 +502,12 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCArmToolsPartSlot: NCArmToolsImprovised
+      NCArmGuidePartSlot: NCArmGuideImprovised
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImprovised
+      NCArmLockPartSlot: NCArmLockImprovised
 
 - type: entity
   parent: NCToolHandImplant
@@ -510,6 +516,12 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCArmToolsPartSlot: NCArmToolsImproved
+      NCArmGuidePartSlot: NCArmGuideImproved
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImproved
+      NCArmLockPartSlot: NCArmLockImproved
 
 - type: entity
   parent: NCToolHandImplant
@@ -518,6 +530,12 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCArmToolsPartSlot: NCArmToolsPremium
+      NCArmGuidePartSlot: NCArmGuidePremium
+      NCArmMicrodrivePartSlot: NCArmMicrodrivePremium
+      NCArmLockPartSlot: NCArmLockPremium
 
 - type: entity
   parent: NCBiomonitorImplant
@@ -559,6 +577,12 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCArmBladePartSlot: NCArmBladeImprovised
+      NCArmHingePartSlot: NCArmHingeImprovised
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImprovised
+      NCArmLockPartSlot: NCArmLockImprovised
 
 - type: entity
   parent: NCMantisBladeImplant
@@ -567,6 +591,12 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCArmBladePartSlot: NCArmBladeImproved
+      NCArmHingePartSlot: NCArmHingeImproved
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImproved
+      NCArmLockPartSlot: NCArmLockImproved
 
 - type: entity
   parent: NCMantisBladeImplant
@@ -575,6 +605,12 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCArmBladePartSlot: NCArmBladePremium
+      NCArmHingePartSlot: NCArmHingePremium
+      NCArmMicrodrivePartSlot: NCArmMicrodrivePremium
+      NCArmLockPartSlot: NCArmLockPremium
 
 - type: entity
   parent: NCSandevistanImplant

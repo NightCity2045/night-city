@@ -10,7 +10,9 @@ using Content.Server._NC.Medical.Cyberware;
 using Content.Server._NC.Medical.Pharmacology;
 using Content.Server._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Anatomy.Detachment;
 using Content.Shared._NC.Medical.Cyberware;
+using Content.Shared._NC.Medical.Cyberware.Arms;
 using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Persistence;
 using Content.Shared._NC.Medical.Physiology;
@@ -144,6 +146,7 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
             !PrepareMedicalControllerMigration(snapshot.Version, current) ||
             !PrepareOpticMigration(initial, snapshot.Version, current) ||
             !PrepareNeuralModuleMigration(snapshot.Version, current) ||
+            !PrepareArmMigration(snapshot.Version, current) ||
             !ValidateCurrentSnapshot(character, current) ||
             !_cyberware.CanRestorePhysicalIdentities(character, current))
         {
@@ -625,7 +628,16 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
                      .ThenBy(category => category.Id, StringComparer.Ordinal))
         {
             var organPrototype = snapshot.Organs[category].EntityPrototype;
-            var spawnedOrgan = Spawn(organPrototype, new EntityCoordinates(character, Vector2.Zero));
+            // Snapshot categories own the entire anatomy graph, including missing hands.
+            // Suppress the fresh cyberarm's bundled hand before MapInit can manufacture one.
+            var spawnedOrgan = EntityManager.CreateEntityUninitialized(organPrototype,
+                new EntityCoordinates(character, Vector2.Zero));
+            if (TryComp<NCArmFrameComponent>(spawnedOrgan, out var armFrame))
+                armFrame.HandInitialized = true;
+            EntityManager.InitializeAndStartEntity(spawnedOrgan);
+            // These are attached snapshot organs, not new detached grafts. Their
+            // wounds and treatments are restored from the body's snapshot below.
+            RemComp<NCDetachedOrganMedicalDataComponent>(spawnedOrgan);
             if (!_containers.Insert(spawnedOrgan, organContainer, containerXform: Transform(character)))
             {
                 Del(spawnedOrgan);

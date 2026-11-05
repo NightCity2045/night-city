@@ -40,6 +40,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
     private const int MaximumBodyOrgans = 96;
     private const int MaximumCyberwarePerRegion = 16;
 
+    [Dependency] private Content.Server._NC.Medical.Cyberware.Abilities.NCCyberwareAbilitySystem _armAbilities = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
@@ -267,7 +268,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         }
 
         if (!_hands.TryGetActiveItem(surgeon, out var held) || held is not { } tool ||
-            !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool) ||
+            !CanUseArmTool(tool, surgeon) || !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool) ||
             !surgicalTool.Capabilities.ContainsKey(request.Capability) ||
             !profile.Tools.ContainsKey(request.Capability))
         {
@@ -288,7 +289,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         }
         if (!ValidateInteraction(request) ||
             !_hands.TryGetActiveItem(surgeon, out var held) || held is not { } tool ||
-            !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool) || surgicalTool.Broken ||
+            !CanUseArmTool(tool, surgeon) || !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool) || surgicalTool.Broken ||
             !TryResolveCapability(session, profile, surgicalTool, out var capability, out var definition, out _))
         {
             SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.ToolUnavailable);
@@ -338,6 +339,10 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             SendState(surgeon, session, args.SenderSession, false, NCFreeformSurgeryFailure.RateLimited);
         }
     }
+
+    private bool CanUseArmTool(EntityUid tool, EntityUid user) =>
+        !HasComp<Content.Server._NC.Medical.Cyberware.Abilities.NCIntegralCyberwareItemComponent>(tool) ||
+        _armAbilities.CanUseIntegral(tool, user);
 
     private void OnInteractionDoAfter(
         Entity<NCSurgeryToolComponent> tool,
@@ -416,7 +421,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         }
 
         if (!_hands.TryGetActiveItem(surgeon, out var held) || held is not { } tool ||
-            !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool))
+            !CanUseArmTool(tool, surgeon) || !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool))
         {
             SendState(surgeon, session, recipient, false, NCFreeformSurgeryFailure.ToolUnavailable);
             return;
@@ -594,7 +599,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
             request.Zone == session.TargetZone && requestedRegion == session.Region &&
             request.ExpectedRevision != site.SpatialRevision ||
             !_hands.TryGetActiveItem(surgeon, out var held) || held is not { } tool ||
-            !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool) || surgicalTool.Broken ||
+            !CanUseArmTool(tool, surgeon) || !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool) || surgicalTool.Broken ||
             !TryResolveCapability(session, profile, surgicalTool, out var capability, out var definition, out _) ||
             !definition.Attachable)
         {
@@ -690,7 +695,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
         if (!TryComp<NCSurgicalSiteComponent>(session.Region, out var site) ||
             !regionChanged && request.ExpectedRevision != site.SpatialRevision ||
             !_hands.TryGetActiveItem(surgeon, out var held) || held is not { } tool ||
-            !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool) || surgicalTool.Broken ||
+            !CanUseArmTool(tool, surgeon) || !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool) || surgicalTool.Broken ||
             !TryResolveCapability(session, profile, surgicalTool, out var capability, out var definition, out var quality) ||
             capability != expectedCapability || !definition.Attachable)
         {
@@ -1149,7 +1154,7 @@ public sealed partial class NCFreeformSurgerySystem : EntitySystem
 
         toolName = Name(tool);
         toolPrototype = MetaData(tool).EntityPrototype?.ID ?? string.Empty;
-        if (!TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool))
+        if (!CanUseArmTool(tool, surgeon) || !TryComp<NCSurgeryToolComponent>(tool, out var surgicalTool))
         {
             session.SelectedCapability = null;
             return [];

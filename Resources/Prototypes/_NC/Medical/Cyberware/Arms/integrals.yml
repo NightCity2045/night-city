@@ -1,0 +1,148 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: CombatKnife
+  id: NCIntegralArmImpact
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: impact
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    size: Small
+  - type: MeleeWeapon
+    attackRate: 1
+    range: 1.5
+    damage:
+      types:
+        Blunt: 12
+- type: entity
+  parent: CombatKnife
+  id: NCIntegralArmClaws
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: claws
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    size: Small
+  - type: MeleeWeapon
+    attackRate: 1
+    range: 1.5
+    damage:
+      types:
+        Slash: 10
+- type: entity
+  parent: CombatKnife
+  id: NCIntegralArmBlade
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: blade
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    size: Small
+  - type: MeleeWeapon
+    attackRate: 1
+    range: 1.5
+    damage:
+      types:
+        Slash: 14
+- type: entity
+  parent: CombatKnife
+  id: NCIntegralArmMonowire
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: monowire
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    size: Small
+  - type: MeleeWeapon
+    attackRate: 0.8
+    range: 2
+    damage:
+      types:
+        Slash: 11
+- type: entity
+  parent: BaseItem
+  id: NCIntegralArmPistol
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: pistol
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    size: Small
+  - type: Gun
+    fireRate: 2
+    selectedMode: SemiAuto
+    availableModes:
+    - SemiAuto
+    projectileSpeed: 35
+    soundGunshot:
+      path: /Audio/Weapons/Guns/Gunshots/pistol.ogg
+  - type: AmmoCounter
+  - type: ChamberMagazineAmmoProvider
+  - type: ItemSlots
+    slots:
+      gun_magazine:
+        name: Magazine
+        whitelist:
+          tags:
+          - MagazinePistol
+      gun_chamber:
+        name: Chamber
+        whitelist:
+          tags:
+          - CartridgePistol
+  - type: ContainerContainer
+    containers:
+      gun_magazine: !type:ContainerSlot {}
+      gun_chamber: !type:ContainerSlot {}
+- type: entity
+  parent: BaseItem
+  id: NCIntegralArmLauncher
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: launcher
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    size: Small
+  - type: Gun
+    fireRate: 0.5
+    selectedMode: SemiAuto
+    availableModes:
+    - SemiAuto
+    projectileSpeed: 20
+    soundGunshot:
+      path: /Audio/Weapons/Guns/Gunshots/rpgfire.ogg
+  - type: AmmoCounter
+  - type: BallisticAmmoProvider
+    capacity: 1
+    proto: null
+    whitelist:
+      tags:
+      - CartridgeRocket
+    fillDelay: 2s
+  - type: ContainerContainer
+    containers:
+      ballistic-ammo: !type:Container
+        ents: []
+- type: entity
+  parent: BaseItem
+  id: NCIntegralArmMedical
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: medical
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    size: Small
+  - type: NCSurgeryTool
+    capabilities:
+      NCSurgeryToolIncision: 1
+      NCSurgeryToolHemostasis: 1
+      NCSurgeryToolRetraction: 1
+      NCSurgeryToolSuturing: 1

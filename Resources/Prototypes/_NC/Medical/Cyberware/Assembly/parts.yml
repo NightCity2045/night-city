@@ -80,6 +80,8 @@
   id: NCOrganHumanCyberArmLeftFrame
   suffix: Empty frame
   components:
+  - type: NCCyberware
+    factoryPrepared: false
   - type: NCCyberwareAssembly
     initialized: true
 

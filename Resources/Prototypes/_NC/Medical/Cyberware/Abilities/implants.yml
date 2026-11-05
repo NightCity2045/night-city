@@ -5,15 +5,23 @@
 - type: entity
   parent: NCCyberwareAbilityImplantBase
   id: NCToolHandImplant
-  suffix: NC adaptation
   components:
   - type: Sprite
-    state: cyberarm_right
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: tool
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
   - type: NCCyberware
     profile: NCToolHand
+    factoryPrepared: true
+  - type: NCArmModule
+    kind: Tool
+    volume: 1
+    visualState: tool
+    requiresHeavyFrame: false
+    deploySeconds: 0.6
   - type: NCCyberwareAbility
     profile: NCToolHandAbility
-
 - type: entity
   parent: BaseAction
   id: NCToolHandAction
@@ -22,9 +30,14 @@
     useDelay: 0.3
     itemIconStyle: NoItem
   - type: Sprite
-    sprite: _NC/Objects/Cyberware/implants.rsi
+    sprite: _NC/Objects/Cyberware/arms.rsi
     layers:
-    - state: cyberarm_right
+    - state: tool
+      map: ["enum.ActionVisuals.Icon"]
+    - state: tool
+      map: ["enum.ActionVisuals.IconToggled"]
+      color: "#70FFFF"
+      visible: false
   - type: InstantAction
     event: !type:NCActivateCyberwareAbilityEvent
 
@@ -60,15 +73,23 @@
 - type: entity
   parent: NCCyberwareAbilityImplantBase
   id: NCMantisBladeImplant
-  suffix: NC adaptation
   components:
   - type: Sprite
-    state: cyberarm_right
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: mantis
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
   - type: NCCyberware
     profile: NCMantisBlade
+    factoryPrepared: true
+  - type: NCArmModule
+    kind: Mantis
+    volume: 3
+    visualState: mantis
+    requiresHeavyFrame: false
+    deploySeconds: 0.6
   - type: NCCyberwareAbility
     profile: NCMantisBladeAbility
-
 - type: entity
   parent: BaseAction
   id: NCMantisBladeAction
@@ -77,9 +98,14 @@
     useDelay: 0.3
     itemIconStyle: NoItem
   - type: Sprite
-    sprite: _NC/Objects/Cyberware/implants.rsi
+    sprite: _NC/Objects/Cyberware/arms.rsi
     layers:
-    - state: cyberarm_right
+    - state: mantis
+      map: ["enum.ActionVisuals.Icon"]
+    - state: mantis
+      map: ["enum.ActionVisuals.IconToggled"]
+      color: "#70FFFF"
+      visible: false
   - type: InstantAction
     event: !type:NCActivateCyberwareAbilityEvent
 
@@ -144,23 +170,35 @@
     event: !type:NCActivateCyberwareAbilityEvent
 
 - type: entity
-  parent: Screwdriver
+  parent: BaseItem
   id: NCIntegralScrewdriver
-  suffix: Integral NC tool
-
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: tool
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    size: Small
+  - type: Tool
+    qualities:
+    - Screwing
+    - Anchoring
+    - Cutting
+    - Prying
+    speedModifier: 1
 - type: entity
   parent: CombatKnife
   id: NCIntegralMantisBlade
-  suffix: Integral NC weapon
   components:
   - type: Sprite
-    sprite: Objects/Weapons/Melee/katana.rsi
-    state: icon
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: mantis
   - type: Item
-    sprite: Objects/Weapons/Melee/katana.rsi
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    size: Small
   - type: MeleeWeapon
     attackRate: 1
+    range: 1.5
     damage:
       types:
-        Slash: 14
-        Piercing: 3
+        Slash: 17

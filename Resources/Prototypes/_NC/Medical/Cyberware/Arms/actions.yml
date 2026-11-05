@@ -1,0 +1,146 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: BaseAction
+  id: NCArmImpactAction
+  components:
+  - type: Action
+    useDelay: 0.5
+    itemIconStyle: NoItem
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    layers:
+    - state: impact
+      map: ["enum.ActionVisuals.Icon"]
+    - state: impact
+      map: ["enum.ActionVisuals.IconToggled"]
+      color: "#70FFFF"
+      visible: false
+  - type: InstantAction
+    event: !type:NCActivateCyberwareAbilityEvent {}
+- type: entity
+  parent: BaseAction
+  id: NCArmClawsAction
+  components:
+  - type: Action
+    useDelay: 0.5
+    itemIconStyle: NoItem
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    layers:
+    - state: claws
+      map: ["enum.ActionVisuals.Icon"]
+    - state: claws
+      map: ["enum.ActionVisuals.IconToggled"]
+      color: "#70FFFF"
+      visible: false
+  - type: InstantAction
+    event: !type:NCActivateCyberwareAbilityEvent {}
+- type: entity
+  parent: BaseAction
+  id: NCArmBladeAction
+  components:
+  - type: Action
+    useDelay: 0.5
+    itemIconStyle: NoItem
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    layers:
+    - state: blade
+      map: ["enum.ActionVisuals.Icon"]
+    - state: blade
+      map: ["enum.ActionVisuals.IconToggled"]
+      color: "#70FFFF"
+      visible: false
+  - type: InstantAction
+    event: !type:NCActivateCyberwareAbilityEvent {}
+- type: entity
+  parent: BaseAction
+  id: NCArmMonowireAction
+  components:
+  - type: Action
+    useDelay: 0.5
+    itemIconStyle: NoItem
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    layers:
+    - state: monowire
+      map: ["enum.ActionVisuals.Icon"]
+    - state: monowire
+      map: ["enum.ActionVisuals.IconToggled"]
+      color: "#70FFFF"
+      visible: false
+  - type: InstantAction
+    event: !type:NCActivateCyberwareAbilityEvent {}
+- type: entity
+  parent: BaseAction
+  id: NCArmPistolAction
+  components:
+  - type: Action
+    useDelay: 0.5
+    itemIconStyle: NoItem
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    layers:
+    - state: pistol
+      map: ["enum.ActionVisuals.Icon"]
+    - state: pistol
+      map: ["enum.ActionVisuals.IconToggled"]
+      color: "#70FFFF"
+      visible: false
+  - type: InstantAction
+    event: !type:NCActivateCyberwareAbilityEvent {}
+- type: entity
+  parent: BaseAction
+  id: NCArmLauncherAction
+  components:
+  - type: Action
+    useDelay: 0.5
+    itemIconStyle: NoItem
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    layers:
+    - state: launcher
+      map: ["enum.ActionVisuals.Icon"]
+    - state: launcher
+      map: ["enum.ActionVisuals.IconToggled"]
+      color: "#70FFFF"
+      visible: false
+  - type: InstantAction
+    event: !type:NCActivateCyberwareAbilityEvent {}
+- type: entity
+  parent: BaseAction
+  id: NCArmMedicalAction
+  components:
+  - type: Action
+    useDelay: 0.5
+    itemIconStyle: NoItem
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    layers:
+    - state: medical
+      map: ["enum.ActionVisuals.Icon"]
+    - state: medical
+      map: ["enum.ActionVisuals.IconToggled"]
+      color: "#70FFFF"
+      visible: false
+  - type: InstantAction
+    event: !type:NCActivateCyberwareAbilityEvent {}
+- type: entity
+  parent: BaseAction
+  id: NCArmStorageAction
+  components:
+  - type: Action
+    useDelay: 0.5
+    itemIconStyle: NoItem
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    layers:
+    - state: storage
+      map: ["enum.ActionVisuals.Icon"]
+    - state: storage
+      map: ["enum.ActionVisuals.IconToggled"]
+      color: "#70FFFF"
+      visible: false
+  - type: InstantAction
+    event: !type:NCActivateCyberwareAbilityEvent {}

@@ -120,7 +120,7 @@ public sealed partial class NCCyberwareSystem
         if (!ent.Comp.Saved) return true;
         var identity = PhysicalIdentity(ent);
         if (identity == Guid.Empty || _physicalIdentities.Any(other => other != ent.Owner &&
-                !TerminatingOrDeleted(other) && PhysicalIdentity(other) == identity))
+                !TerminatingOrDeleted(other) && !_armContentsReplacedEntities.Contains(other) && PhysicalIdentity(other) == identity))
         {
             Log.Warning($"Rejected duplicated or missing physical cyberware identity {identity} while restoring {ToPrettyString(ent)}.");
             ent.Comp.Rejected = true;

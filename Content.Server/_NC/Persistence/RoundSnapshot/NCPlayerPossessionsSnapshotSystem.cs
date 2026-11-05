@@ -183,7 +183,8 @@ public sealed partial class NCPlayerPossessionsSnapshotSystem : EntitySystem
         {
             foreach (var handId in _hands.EnumerateHands((body, hands)))
             {
-                if (_hands.TryGetHeldItem((body, hands), handId, out var item) && seen.Add(item.Value))
+                if (_hands.TryGetHeldItem((body, hands), handId, out var item) &&
+                    !HasComp<Content.Server._NC.Medical.Cyberware.Abilities.NCIntegralCyberwareItemComponent>(item.Value) && seen.Add(item.Value)) // NC: owned integral tools are captured by medical hardware.
                     roots.Add(new Placement(PossessionPlacement.Hand, handId, item.Value));
             }
         }

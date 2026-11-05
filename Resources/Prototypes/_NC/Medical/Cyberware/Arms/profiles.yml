@@ -1,0 +1,580 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncCyberwareSlot
+  id: NCSlotArmHandLeft
+  name: NCSlotArmHandLeft
+  nameId: nc-arm-bay-hand
+  hostCategories:
+  - ArmLeft
+  capacity: 4
+
+- type: ncCyberwareSlot
+  id: NCSlotArmSocketLeft
+  name: NCSlotArmSocketLeft
+  nameId: nc-arm-bay-socket
+  hostCategories:
+  - ArmLeft
+  capacity: 4
+
+- type: ncCyberwareSlot
+  id: NCSlotArmForearm2Left
+  name: NCSlotArmForearm2Left
+  nameId: nc-arm-bay-forearm2
+  hostCategories:
+  - ArmLeft
+  capacity: 4
+
+- type: ncCyberwareSlot
+  id: NCSlotArmForearm3Left
+  name: NCSlotArmForearm3Left
+  nameId: nc-arm-bay-forearm3
+  hostCategories:
+  - ArmLeft
+  capacity: 4
+
+- type: ncCyberwareSlot
+  id: NCSlotArmHandRight
+  name: NCSlotArmHandRight
+  nameId: nc-arm-bay-hand
+  hostCategories:
+  - ArmRight
+  capacity: 4
+
+- type: ncCyberwareSlot
+  id: NCSlotArmSocketRight
+  name: NCSlotArmSocketRight
+  nameId: nc-arm-bay-socket
+  hostCategories:
+  - ArmRight
+  capacity: 4
+
+- type: ncCyberwareSlot
+  id: NCSlotArmForearm2Right
+  name: NCSlotArmForearm2Right
+  nameId: nc-arm-bay-forearm2
+  hostCategories:
+  - ArmRight
+  capacity: 4
+
+- type: ncCyberwareSlot
+  id: NCSlotArmForearm3Right
+  name: NCSlotArmForearm3Right
+  nameId: nc-arm-bay-forearm3
+  hostCategories:
+  - ArmRight
+  capacity: 4
+
+- type: ncCyberware
+  id: NCArmImpact
+  name: NCArmImpact
+  nameId: nc-arm-profile-impact
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: impact
+  form: Implant
+  compatibleSlots:
+  - NCSlotArmHandLeft
+  - NCSlotArmHandRight
+  size: 1
+  maximumIntegrity: 100
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanityToolMount
+  requiresSeparateCalibration: true
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 2
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+  assembly: NCArmImpactAssembly
+  requiresFactoryPreparation: true
+
+- type: ncCyberwareAbility
+  id: NCArmImpactAbility
+  kind: Blade
+  action: NCArmImpactAction
+  cooldownSeconds: 0
+  startupEnergy: 0
+  integralItem: NCIntegralArmImpact
+
+- type: ncCyberware
+  id: NCArmClaws
+  name: NCArmClaws
+  nameId: nc-arm-profile-claws
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: claws
+  form: Implant
+  compatibleSlots:
+  - NCSlotArmHandLeft
+  - NCSlotArmHandRight
+  size: 1
+  maximumIntegrity: 100
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanityToolMount
+  requiresSeparateCalibration: true
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 2
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+  assembly: NCArmClawsAssembly
+  requiresFactoryPreparation: true
+
+- type: ncCyberwareAbility
+  id: NCArmClawsAbility
+  kind: Blade
+  action: NCArmClawsAction
+  cooldownSeconds: 0
+  startupEnergy: 0
+  integralItem: NCIntegralArmClaws
+
+- type: ncCyberware
+  id: NCArmBlade
+  name: NCArmBlade
+  nameId: nc-arm-profile-blade
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: blade
+  form: Implant
+  compatibleSlots:
+  - NCSlotArmUtilityLeft
+  - NCSlotArmUtilityRight
+  - NCSlotArmForearm2Left
+  - NCSlotArmForearm2Right
+  - NCSlotArmForearm3Left
+  - NCSlotArmForearm3Right
+  size: 1
+  maximumIntegrity: 100
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanityToolMount
+  requiresSeparateCalibration: true
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 2
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+  assembly: NCArmBladeAssembly
+  requiresFactoryPreparation: true
+
+- type: ncCyberwareAbility
+  id: NCArmBladeAbility
+  kind: Blade
+  action: NCArmBladeAction
+  cooldownSeconds: 0
+  startupEnergy: 0
+  integralItem: NCIntegralArmBlade
+
+- type: ncCyberware
+  id: NCArmMonowire
+  name: NCArmMonowire
+  nameId: nc-arm-profile-monowire
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: monowire
+  form: Implant
+  compatibleSlots:
+  - NCSlotArmUtilityLeft
+  - NCSlotArmUtilityRight
+  - NCSlotArmForearm2Left
+  - NCSlotArmForearm2Right
+  - NCSlotArmForearm3Left
+  - NCSlotArmForearm3Right
+  size: 1
+  maximumIntegrity: 100
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanityToolMount
+  requiresSeparateCalibration: true
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 2
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+  assembly: NCArmMonowireAssembly
+  requiresFactoryPreparation: true
+
+- type: ncCyberwareAbility
+  id: NCArmMonowireAbility
+  kind: Blade
+  action: NCArmMonowireAction
+  cooldownSeconds: 0
+  startupEnergy: 0
+  integralItem: NCIntegralArmMonowire
+
+- type: ncCyberware
+  id: NCArmPistol
+  name: NCArmPistol
+  nameId: nc-arm-profile-pistol
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: pistol
+  form: Implant
+  compatibleSlots:
+  - NCSlotArmUtilityLeft
+  - NCSlotArmUtilityRight
+  - NCSlotArmForearm2Left
+  - NCSlotArmForearm2Right
+  - NCSlotArmForearm3Left
+  - NCSlotArmForearm3Right
+  size: 1
+  maximumIntegrity: 100
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanityToolMount
+  requiresSeparateCalibration: true
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 2
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+  assembly: NCArmPistolAssembly
+  requiresFactoryPreparation: true
+
+- type: ncCyberwareAbility
+  id: NCArmPistolAbility
+  kind: Gun
+  action: NCArmPistolAction
+  cooldownSeconds: 0
+  startupEnergy: 0
+  integralItem: NCIntegralArmPistol
+
+- type: ncCyberware
+  id: NCArmLauncher
+  name: NCArmLauncher
+  nameId: nc-arm-profile-launcher
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: launcher
+  form: Implant
+  compatibleSlots:
+  - NCSlotArmUtilityLeft
+  - NCSlotArmUtilityRight
+  - NCSlotArmForearm2Left
+  - NCSlotArmForearm2Right
+  - NCSlotArmForearm3Left
+  - NCSlotArmForearm3Right
+  size: 1
+  maximumIntegrity: 160
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanityToolMount
+  requiresSeparateCalibration: true
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 5
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+  assembly: NCArmLauncherAssembly
+  requiresFactoryPreparation: true
+
+- type: ncCyberwareAbility
+  id: NCArmLauncherAbility
+  kind: Gun
+  action: NCArmLauncherAction
+  cooldownSeconds: 0
+  startupEnergy: 2
+  integralItem: NCIntegralArmLauncher
+
+- type: ncCyberware
+  id: NCArmMedical
+  name: NCArmMedical
+  nameId: nc-arm-profile-medical
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: medical
+  form: Implant
+  compatibleSlots:
+  - NCSlotArmHandLeft
+  - NCSlotArmHandRight
+  size: 1
+  maximumIntegrity: 100
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanityToolMount
+  requiresSeparateCalibration: true
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 2
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+  assembly: NCArmMedicalAssembly
+  requiresFactoryPreparation: true
+
+- type: ncCyberwareAbility
+  id: NCArmMedicalAbility
+  kind: Tool
+  action: NCArmMedicalAction
+  cooldownSeconds: 0
+  startupEnergy: 0
+  integralItem: NCIntegralArmMedical
+
+- type: ncCyberware
+  id: NCArmStorage
+  name: NCArmStorage
+  nameId: nc-arm-profile-storage
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: storage
+  form: Implant
+  compatibleSlots:
+  - NCSlotArmUtilityLeft
+  - NCSlotArmUtilityRight
+  - NCSlotArmForearm2Left
+  - NCSlotArmForearm2Right
+  - NCSlotArmForearm3Left
+  - NCSlotArmForearm3Right
+  size: 1
+  maximumIntegrity: 100
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanityToolMount
+  requiresSeparateCalibration: true
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 2
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+  assembly: NCArmStorageAssembly
+  requiresFactoryPreparation: true
+
+- type: ncCyberwareAbility
+  id: NCArmStorageAbility
+  kind: Storage
+  action: NCArmStorageAction
+  cooldownSeconds: 0
+  startupEnergy: 0
+
+- type: ncCyberware
+  id: NCArmQuickSocket
+  name: NCArmQuickSocket
+  nameId: nc-arm-profile-socket
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: socket
+  form: Implant
+  compatibleSlots:
+  - NCSlotArmSocketLeft
+  - NCSlotArmSocketRight
+  size: 1
+  maximumIntegrity: 100
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanityToolMount
+  requiresSeparateCalibration: true
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 2
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+  assembly: NCArmQuickSocketAssembly
+  requiresFactoryPreparation: true
+
+- type: ncCyberware
+  id: NCCivilianCyberArm
+  humanityPackages:
+  - NCHumanityProfessionalMotor
+  requiresSeparateCalibration: true
+  assembly: NCCivilianArmAssembly
+  name: industrial cyberarm
+  manufacturer: Militech Industrial Systems
+  icon:
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: civilian_right
+  hostIcons:
+    ArmLeft:
+      sprite: _NC/Objects/Cyberware/arms.rsi
+      state: civilian_left
+    ArmRight:
+      sprite: _NC/Objects/Cyberware/arms.rsi
+      state: civilian_right
+  form: LimbReplacement
+  size: 5
+  maximumIntegrity: 120
+  repairProfile: NCRepairProfileStreetCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  powerCapacity: 10800
+  startingPowerFraction: 1
+  minimumOperationalPower: 1
+  idlePowerPerSecond: 0.5
+  loadedPowerPerSecond: 5
+  heatCapacity: 160
+  idleHeatPerSecond: 0.2
+  loadedHeatPerSecond: 2.5
+  passiveCoolingPerSecond: 0.8
+  heatDeratingThreshold: 95
+  heatShutdownThreshold: 130
+  heatDamageThreshold: 140
+  heatDamagePerSecond: 2
+  empResistance: 1200
+  empSurgeDamagePerEnergy: 0.001
+  maximumEmpSurgeDamage: 45
+  empHeatPerEnergy: 0.002
+  maximumEmpHeat: 90
+  empDisableDurationMultiplier: 0.75
+  neuralDamagePerEmpEnergy: 1.0e-05
+  neuralRequirement: Required
+  neuralDegradedThreshold: 0.65
+  neuralMinimumOperationalIntegrity: 0.15
+  updateInterval: 1s
+  capabilities:
+  - Movement
+  - Grip
+  - ServiceHatch
+  nameId: nc-arm-profile-civilian
+
+- type: ncCyberware
+  id: NCArmoredCyberArm
+  humanityPackages:
+  - NCHumanityProfessionalMotor
+  requiresSeparateCalibration: true
+  assembly: NCArmoredArmAssembly
+  name: industrial cyberarm
+  manufacturer: Militech Industrial Systems
+  icon:
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: armored_right
+  hostIcons:
+    ArmLeft:
+      sprite: _NC/Objects/Cyberware/arms.rsi
+      state: armored_left
+    ArmRight:
+      sprite: _NC/Objects/Cyberware/arms.rsi
+      state: armored_right
+  form: LimbReplacement
+  size: 5
+  maximumIntegrity: 220
+  repairProfile: NCRepairProfileStreetCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  powerCapacity: 10800
+  startingPowerFraction: 1
+  minimumOperationalPower: 1
+  idlePowerPerSecond: 0.5
+  loadedPowerPerSecond: 5
+  heatCapacity: 160
+  idleHeatPerSecond: 0.2
+  loadedHeatPerSecond: 2.5
+  passiveCoolingPerSecond: 0.8
+  heatDeratingThreshold: 95
+  heatShutdownThreshold: 130
+  heatDamageThreshold: 140
+  heatDamagePerSecond: 2
+  empResistance: 1200
+  empSurgeDamagePerEnergy: 0.001
+  maximumEmpSurgeDamage: 45
+  empHeatPerEnergy: 0.002
+  maximumEmpHeat: 90
+  empDisableDurationMultiplier: 0.75
+  neuralDamagePerEmpEnergy: 1.0e-05
+  neuralRequirement: Required
+  neuralDegradedThreshold: 0.65
+  neuralMinimumOperationalIntegrity: 0.15
+  updateInterval: 1s
+  capabilities:
+  - Movement
+  - Grip
+  - ServiceHatch
+  nameId: nc-arm-profile-armored

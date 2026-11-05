@@ -932,6 +932,7 @@ public sealed partial class NCMedicalPersistenceSystem
         {
             OpticRadarCooldownSeconds = source.OpticRadarCooldownSeconds,
             NeuralEnabled = source.NeuralEnabled,
+            ArmContents = source.ArmContents.Select(value => new Content.Shared._NC.Medical.Cyberware.Arms.NCArmContentsSnapshot { Slot = value.Slot, Yaml = value.Yaml }).ToList(),
             MedicalImplant = source.MedicalImplant == null ? null : Content.Shared._NC.Medical.Cyberware.Internal.NCMedicalImplantMath.Clone(source.MedicalImplant),
             Service = source.Service == null ? null : NCCyberwareServiceHistory.Clone(source.Service),
             EntityPrototype = source.EntityPrototype,
@@ -1006,7 +1007,7 @@ public sealed partial class NCMedicalPersistenceSystem
 
     private static bool HasAssemblyShape(NCCyberwareStateSnapshot state)
     {
-        return Finite(state.OpticRadarCooldownSeconds, 0, 65) && (state.MedicalImplant == null || Content.Shared._NC.Medical.Cyberware.Internal.NCMedicalImplantMath.Valid(state.MedicalImplant)) &&
+        return state.ArmContents != null && state.ArmContents.Count <= 8 && state.ArmContents.All(value => value != null && value.Yaml != null && value.Yaml.Length <= 262144) && Finite(state.OpticRadarCooldownSeconds, 0, 65) && (state.MedicalImplant == null || Content.Shared._NC.Medical.Cyberware.Internal.NCMedicalImplantMath.Valid(state.MedicalImplant)) &&
                (state.Service == null || NCCyberwareServiceHistory.Valid(state.Service)) &&
                (state.Assembly == null || state.Assembly.Parts != null && state.Assembly.Parts.Count <= 8 &&
                 state.Assembly.Parts.All(part => part != null && part.OpticPhotos != null && part.OpticPhotos.Count <= 4 && part.OpticPhotos.All(photo => photo is { Length: 18432 })));

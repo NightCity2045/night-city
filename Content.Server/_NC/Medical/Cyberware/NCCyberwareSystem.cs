@@ -279,6 +279,8 @@ public sealed partial class NCCyberwareSystem : EntitySystem
              !(_restoringLegacyNeuralHosts && slot.LegacyHostCategories.Contains(hostCategory))) ||
             !profile.CompatibleSlots.Contains(request.Slot))
             return Reject(NCCyberwareMutationFailure.SlotIncompatible);
+        if (!CanFitArmModule(request.HostOrgan, request.Module, restoring: _restoringLegacyNeuralHosts))
+            return Reject(NCCyberwareMutationFailure.SlotIncompatible);
         if (profile.Size > slot.Capacity)
             return Reject(NCCyberwareMutationFailure.CapacityExceeded);
         if (FindInstalledInSlot(host, request.Slot) != null)
@@ -374,7 +376,9 @@ public sealed partial class NCCyberwareSystem : EntitySystem
 
         var previousFunction = module.FunctionalEfficiency;
         module.InstalledSlot = null;
-        module.FactoryPrepared = false;
+        // Mechanical arm cassettes detach at their service connector, without opening the sealed assembly.
+        if (!HasComp<Content.Shared._NC.Medical.Cyberware.Arms.NCArmModuleComponent>(request.Module))
+            module.FactoryPrepared = false;
         module.SkeletalSurgeryCompleted = NCSkeletalSurgeryStage.None;
         InvalidateCalibration(request.Module);
         module.Load = 0f;

@@ -28,35 +28,32 @@
 
 - type: ncCyberwareAbility
   id: NCToolHandAbility
-  activationSound:
-    path: /Audio/Mecha/sound_mecha_hydraulic.ogg
-    params:
-      volume: -8
-  retractionSound:
-    path: /Audio/Mecha/sound_mecha_hydraulic.ogg
-    params:
-      volume: -10
   kind: Tool
   action: NCToolHandAction
-  integralItem: NCIntegralScrewdriver
-  startupEnergy: 0
   cooldownSeconds: 0
-
+  startupEnergy: 0
+  integralItem: NCIntegralScrewdriver
 - type: ncCyberware
   id: NCToolHand
   name: NCToolHand
-  nameId: nc-cyberware-profile-nctoolhand
+  nameId: nc-arm-profile-tool
   manufacturer: Night City adaptation
   icon:
-    sprite: _NC/Objects/Cyberware/implants.rsi
-    state: cyberarm_right
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: tool
   form: Implant
-  compatibleSlots: [ NCSlotArmUtilityLeft, NCSlotArmUtilityRight ]
+  compatibleSlots:
+  - NCSlotArmHandLeft
+  - NCSlotArmHandRight
+  - NCSlotArmUtilityLeft
+  - NCSlotArmUtilityRight
   size: 1
-  maximumIntegrity: 80
+  maximumIntegrity: 100
   repairProfile: NCRepairProfileClinicalCyberware
-  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
-  humanityPackages: [ NCHumanityToolMount ]
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanityToolMount
   requiresSeparateCalibration: true
   idlePowerPerSecond: 0.2
   loadedPowerPerSecond: 2
@@ -71,7 +68,8 @@
   neuralRequirement: Required
   updateInterval: 0.1s
   capabilities: []
-
+  assembly: NCToolHandAssembly
+  requiresFactoryPreparation: true
 - type: ncCyberwareAbility
   id: NCBiomonitorAbility
   activationSound:
@@ -139,39 +137,40 @@
 
 - type: ncCyberwareAbility
   id: NCMantisBladeAbility
-  activationSound:
-    path: /Audio/Items/unsheath.ogg
-  retractionSound:
-    path: /Audio/Mecha/sound_mecha_hydraulic.ogg
-    params:
-      volume: -8
   kind: Blade
   action: NCMantisBladeAction
-  integralItem: NCIntegralMantisBlade
-  startupEnergy: 0
   cooldownSeconds: 0
-
+  startupEnergy: 0
+  integralItem: NCIntegralMantisBlade
 - type: ncCyberware
   id: NCMantisBlade
   name: NCMantisBlade
-  nameId: nc-cyberware-profile-ncmantisblade
+  nameId: nc-arm-profile-mantis
   manufacturer: Night City adaptation
   icon:
-    sprite: _NC/Objects/Cyberware/implants.rsi
-    state: cyberarm_right
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: mantis
   form: Implant
-  compatibleSlots: [ NCSlotArmUtilityLeft, NCSlotArmUtilityRight ]
+  compatibleSlots:
+  - NCSlotArmUtilityLeft
+  - NCSlotArmUtilityRight
+  - NCSlotArmForearm2Left
+  - NCSlotArmForearm2Right
+  - NCSlotArmForearm3Left
+  - NCSlotArmForearm3Right
   size: 1
-  maximumIntegrity: 80
+  maximumIntegrity: 100
   repairProfile: NCRepairProfileClinicalCyberware
-  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
-  humanityPackages: [ NCHumanityWeapon ]
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanityToolMount
   requiresSeparateCalibration: true
   idlePowerPerSecond: 0.2
-  loadedPowerPerSecond: 5
+  loadedPowerPerSecond: 2
   heatCapacity: 100
   idleHeatPerSecond: 0.05
-  loadedHeatPerSecond: 2
+  loadedHeatPerSecond: 1
   passiveCoolingPerSecond: 0.5
   heatDeratingThreshold: 60
   heatShutdownThreshold: 85
@@ -180,7 +179,8 @@
   neuralRequirement: Required
   updateInterval: 0.1s
   capabilities: []
-
+  assembly: NCMantisBladeAssembly
+  requiresFactoryPreparation: true
 - type: ncCyberwareAbility
   id: NCSandevistanAbility
   activationSound:

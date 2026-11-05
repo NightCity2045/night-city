@@ -15,6 +15,7 @@
   - NCSurgeryGuide
   - NCCyberwareMedicine
   - NCCyberwareProductionGuide
+  - NCCyberarmsGuide
   - NCDermalArmorGuide
   - NCInternalMedicalGuide
   - NCAftercare
@@ -79,3 +80,8 @@
   id: NCInternalMedicalGuide
   name: guide-entry-nc-medical-implants
   text: "/ServerInfo/Guidebook/_NC/Medical/InternalImplants.xml"
+
+- type: guideEntry
+  id: NCCyberarmsGuide
+  name: guide-entry-nc-cyberarms
+  text: "/ServerInfo/Guidebook/_NC/Medical/Cyberarms.xml"

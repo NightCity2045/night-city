@@ -20,6 +20,8 @@ namespace Content.Server._NC.Medical.Cyberware.Abilities;
 
 public sealed partial class NCCyberwareAbilitySystem
 {
+    [Dependency] private Content.Shared.Storage.EntitySystems.SharedStorageSystem _armStorage = default!;
+    [Dependency] private Arms.NCArmHardwareSystem _armHardware = default!;
     [Dependency] private Internal.NCMedicalImplantSystem _medicalHardware = default!;
     private void OnActivate(Entity<NCCyberwareAbilityComponent> module, ref NCActivateCyberwareAbilityEvent args)
     {
@@ -68,7 +70,14 @@ public sealed partial class NCCyberwareAbilitySystem
                     ? "nc-cyberware-biomonitor-alarm" : "nc-cyberware-biomonitor-stable"))), body, body, PopupType.Large);
             return true;
         }
+        if (profile.Kind == NCCyberwareAbilityKind.Storage)
+        {
+            _cyberware.TrySetLoad(module, 0f);
+            _armStorage.OpenStorageUI(module, body);
+            return true;
+        }
         module.Comp.Active = true;
+        _armHardware.SetDeployed(body, module, true);
         module.Comp.ActiveUntil = profile.Kind == NCCyberwareAbilityKind.MotorBurst
             ? _timing.CurTime + TimeSpan.FromSeconds(profile.DurationSeconds) : null;
         Comp<NCCyberwareComponent>(module).ActiveLoadUntil = module.Comp.ActiveUntil;
@@ -93,6 +102,7 @@ public sealed partial class NCCyberwareAbilitySystem
     {
         if (!module.Comp.Active) return;
         module.Comp.Active = false;
+        if (module.Comp.Body is { } visualBody) _armHardware.SetDeployed(visualBody, module, false);
         if (module.Comp.Body is { } owner && !TerminatingOrDeleted(owner))
             _audio.PlayPvs(GetProfile(module.Comp).RetractionSound, owner);
         _active.Remove(module);
@@ -134,6 +144,7 @@ public sealed partial class NCCyberwareAbilitySystem
         }
         if (module.Comp.IntegralItem is not { } integral || TerminatingOrDeleted(integral) ||
             !_hands.TryPickup(body, integral, hand)) return false;
+        EnsureComp<NCIntegralCyberwareItemComponent>(integral).Module = module;
         EnsureComp<UnremoveableComponent>(integral);
         return true;
     }
@@ -146,10 +157,12 @@ public sealed partial class NCCyberwareAbilitySystem
         _containers.Insert(item, module.Comp.ItemContainer);
     }
 
+    public bool CanUseIntegral(EntityUid item, EntityUid user) => TryComp<NCIntegralCyberwareItemComponent>(item, out var bound) && CanUseIntegralItem(item, bound, user);
+
     private bool CanUseIntegralItem(EntityUid item, NCIntegralCyberwareItemComponent bound, EntityUid user)
     {
         return bound.Module is { } uid && TryComp<NCCyberwareAbilityComponent>(uid, out var module) &&
-               module.Body == user && module.Active && module.IntegralItem == item && CanOperate(user, uid) &&
+               module.Body == user && module.Active && module.IntegralItem == item && CanOperate(user, uid) && _armHardware.IsDeployedReady(uid) &&
                TryFindHand(user, uid, out var hand) && _hands.GetHeldItem(user, hand) == item;
     }
     private void OnMeleeAttempt(Entity<NCIntegralCyberwareItemComponent> item, ref AttemptMeleeEvent args)

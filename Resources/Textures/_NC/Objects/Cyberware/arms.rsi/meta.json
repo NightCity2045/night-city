@@ -1,0 +1,123 @@
+{
+    "version": 1,
+    "license": "CC0-1.0",
+    "copyright": "Original Night City 2045 art. Inventory reference generated with OpenAI ImageGen; native on-body pixel masters authored separately. Sources and prompt: Tools/_NC/Cyberware/Art; build: Tools/_NC/Cyberware/generate_cyberarm_sprites.py.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "microdrive",
+            "directions": 1
+        },
+        {
+            "name": "guide",
+            "directions": 1
+        },
+        {
+            "name": "lock",
+            "directions": 1
+        },
+        {
+            "name": "damper",
+            "directions": 1
+        },
+        {
+            "name": "cooling",
+            "directions": 1
+        },
+        {
+            "name": "claws",
+            "directions": 1
+        },
+        {
+            "name": "blade",
+            "directions": 1
+        },
+        {
+            "name": "hinge",
+            "directions": 1
+        },
+        {
+            "name": "reel",
+            "directions": 1
+        },
+        {
+            "name": "wire",
+            "directions": 1
+        },
+        {
+            "name": "pistol",
+            "directions": 1
+        },
+        {
+            "name": "launcher",
+            "directions": 1
+        },
+        {
+            "name": "tool",
+            "directions": 1
+        },
+        {
+            "name": "medical",
+            "directions": 1
+        },
+        {
+            "name": "storage",
+            "directions": 1
+        },
+        {
+            "name": "socket",
+            "directions": 1
+        },
+        {
+            "name": "impact",
+            "directions": 1
+        },
+        {
+            "name": "cuff",
+            "directions": 1
+        },
+        {
+            "name": "shell",
+            "directions": 1
+        },
+        {
+            "name": "drive",
+            "directions": 1
+        },
+        {
+            "name": "mantis",
+            "directions": 1
+        },
+        {
+            "name": "monowire",
+            "directions": 1
+        },
+        {
+            "name": "civilian_left",
+            "directions": 1
+        },
+        {
+            "name": "civilian_right",
+            "directions": 1
+        },
+        {
+            "name": "armored_left",
+            "directions": 1
+        },
+        {
+            "name": "armored_right",
+            "directions": 1
+        },
+        {
+            "name": "inhand-left",
+            "directions": 4
+        },
+        {
+            "name": "inhand-right",
+            "directions": 4
+        }
+    ]
+}

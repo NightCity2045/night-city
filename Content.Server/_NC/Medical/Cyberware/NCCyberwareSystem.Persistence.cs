@@ -123,6 +123,10 @@ public sealed partial class NCCyberwareSystem
         if (!NCCyberwareServiceHistory.Valid(state.Service) || !_prototypes.TryIndex(state.Service!.Firmware, out var firmware) ||
             firmware.CompatibleProfiles.Count > 0 && !firmware.CompatibleProfiles.Contains(state.Profile))
             return false;
+        if (state.ArmContents == null || state.ArmContents.Count > 8 ||
+            state.ArmContents.Count(value => value?.Slot == "integral") > 1 ||
+            state.ArmContents.Any(value => value == null || value.Slot is not ("integral" or "storage") || string.IsNullOrWhiteSpace(value.Yaml) || value.Yaml.Length > 262144) ||
+            state.ArmContents.Count > 0 && !entityPrototype.TryComp<Content.Shared._NC.Medical.Cyberware.Arms.NCArmModuleComponent>(out _, _componentFactory)) return false;
         var hasAbility = entityPrototype.TryComp<NCCyberwareAbilityComponent>(out _, _componentFactory);
         var hasExterior = entityPrototype.TryComp<NCCyberwareExteriorComponent>(out _, _componentFactory);
         if (hasExterior != (state.Exterior != null) ||
@@ -166,7 +170,7 @@ public sealed partial class NCCyberwareSystem
         var previousIdentity = module.StableInstanceId;
         module.StableInstanceId = state.StableInstanceId;
         if (!TryRestoreAssembly(moduleUid, _prototypes.Index(state.Profile), state.Assembly) ||
-            !TryRestorePowerBus(moduleUid, state.PowerBus))
+            !TryRestorePowerBus(moduleUid, state.PowerBus) || !RestoreArmContents(moduleUid, state.ArmContents))
         {
             module.StableInstanceId = previousIdentity;
             return false;
@@ -243,6 +247,8 @@ public sealed partial class NCCyberwareSystem
         }
 
         var previousLegacyRestore = _restoringLegacyNeuralHosts;
+        var previousReplacedContents = _armContentsReplacedEntities;
+        _armContentsReplacedEntities = [];
         _restoringLegacyNeuralHosts = true;
         try
         {
@@ -258,6 +264,7 @@ public sealed partial class NCCyberwareSystem
                 detachedOld.Add(entry);
             }
 
+            foreach (var entry in detachedOld) RegisterReplacedArmContents(entry.Module);
             var spawned = new List<EntityUid>(desired.Count);
             foreach (var state in desired)
             {
@@ -296,6 +303,7 @@ public sealed partial class NCCyberwareSystem
         finally
         {
             _restoringLegacyNeuralHosts = previousLegacyRestore;
+            _armContentsReplacedEntities = previousReplacedContents;
         }
     }
 
@@ -337,6 +345,7 @@ public sealed partial class NCCyberwareSystem
             PermanentDamage = module.PermanentDamage,
             NeuralEnabled = !TryComp<Content.Shared._NC.Medical.Cyberware.Neural.NCNeuralHardwareComponent>(moduleUid, out var neural) || neural.Enabled,
             Assembly = CaptureAssembly(moduleUid),
+            ArmContents = CaptureArmContents(moduleUid),
             OpticRadarCooldownSeconds = TryComp<Content.Shared._NC.Medical.Cyberware.Optics.NCOpticRadarComponent>(moduleUid, out var radar)
                 ? (float) Math.Clamp((radar.ReadyAt - _timing.CurTime).TotalSeconds, 0, 65) : 0,
             MedicalImplant = TryComp<NCMedicalImplantComponent>(moduleUid, out var medical) ? NCMedicalImplantMath.Clone(medical.State) : null,

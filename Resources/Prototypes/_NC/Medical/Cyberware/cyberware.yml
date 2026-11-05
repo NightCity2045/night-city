@@ -365,7 +365,10 @@
       color: "#A8BAC9"
   - type: NCCyberwareExterior
   - type: NCCyberwareSlotHost
-    slots: [ NCSlotArmUtilityLeft ]
+    slots: [ NCSlotArmUtilityLeft, NCSlotArmHandLeft, NCSlotArmSocketLeft, NCSlotArmForearm2Left, NCSlotArmForearm3Left ]
+  - type: NCArmFrame
+    heavy: true
+    defaultHand: NCOrganHumanCyberHandLeft
   - type: Sprite
     sprite: _NC/Objects/Cyberware/implants.rsi
     state: cyberarm_left
@@ -402,7 +405,10 @@
       color: "#A8BAC9"
   - type: NCCyberwareExterior
   - type: NCCyberwareSlotHost
-    slots: [ NCSlotArmUtilityRight ]
+    slots: [ NCSlotArmUtilityRight, NCSlotArmHandRight, NCSlotArmSocketRight, NCSlotArmForearm2Right, NCSlotArmForearm3Right ]
+  - type: NCArmFrame
+    heavy: true
+    defaultHand: NCOrganHumanCyberHandRight
   - type: Sprite
     sprite: _NC/Objects/Cyberware/implants.rsi
     state: cyberarm_right

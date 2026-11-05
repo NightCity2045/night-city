@@ -8,6 +8,7 @@
   name: cyberware service probe
   description: A contact probe for mounting, functional testing and physically disconnecting exposed cyberware.
   components:
+  - type: NCArmServiceTool
   - type: NCSurgeryTool
     capabilities:
       NCSurgeryToolCyberware: 1
