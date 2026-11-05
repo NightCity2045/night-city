@@ -92,6 +92,8 @@ public enum NCCyberwareMutationFailure : byte
 [DataDefinition]
 public sealed partial class NCCyberwareStateSnapshot
 {
+    [DataField] public float OpticRadarCooldownSeconds;
+    [DataField] public bool NeuralEnabled = true;
     [DataField] public Internal.NCMedicalImplantState? MedicalImplant;
     [DataField] public NCCyberwareServiceState? Service;
 

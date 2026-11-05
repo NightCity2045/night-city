@@ -12,8 +12,9 @@ public sealed partial class NCCyberwareSystem
         var grade = TryComp<NCCyberwareComponent>(uid, out var module) ? module.Quality : new ProtoId<NCCyberwareQualityPrototype>("NCCyberwareQualityStandard");
         if (!TryComp<NCCyberwareAssemblyComponent>(uid, out var assembly)) return grade;
         NCCyberwareQualityPrototype? result = _prototypes.Index(grade);
-        foreach (var container in assembly.Parts.Values)
+        foreach (var (slot, container) in assembly.Parts)
         {
+            if (assembly.OptionalSlots.Contains(slot)) continue;
             if (container.ContainedEntity is not { } part || !TryComp<NCCyberwarePartComponent>(part, out var component)) return null;
             var quality = _prototypes.Index(_prototypes.Index(component.Profile).Quality);
             if (result == null || quality.Performance < result.Performance) result = quality;

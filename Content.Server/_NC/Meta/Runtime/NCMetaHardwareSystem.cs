@@ -332,10 +332,14 @@ public sealed partial class NCMetaHardwareSystem : EntitySystem
         return null;
     }
 
+    [Dependency] private Content.Server._NC.Medical.Cyberware.Optics.NCCyberOpticsSystem _cyberEyes = default!;
+
+    [Dependency] private Content.Server._NC.Medical.Cyberware.Neural.NCNeuralHardwareSystem _neuralHardware = default!;
+
     private bool HasPhysicalPowerSource(EntityUid host)
     {
         SharedApcPowerReceiverComponent? receiver = null;
-        return _receivers.ResolveApc(host, ref receiver) || HasComp<PowerCellSlotComponent>(host) ||
+        return _neuralHardware.HasControllerPower(host) || _cyberEyes.HasControllerPower(host) || _receivers.ResolveApc(host, ref receiver) || HasComp<PowerCellSlotComponent>(host) ||
             HasComp<NCVehicleConditionComponent>(host) || HasComp<NCMetaOpticsComponent>(host) || HasComp<NCMetaFunctionalImplantComponent>(host);
     }
 
@@ -351,6 +355,8 @@ public sealed partial class NCMetaHardwareSystem : EntitySystem
             { if (_cells.TryGetBatteryFromSlot(host, out var battery)) _batteries.UseCharge(battery.Value.AsNullable(), watts * seconds); }
         }
         else if (HasComp<NCVehicleConditionComponent>(host) && seconds > 0) _vehicles.TryUseElectricalEnergy(host, watts * seconds);
+        else if (HasComp<Content.Shared._NC.Medical.Cyberware.Neural.NCNeuralControllerComponent>(host)) _neuralHardware.TrySetRuntimeWatts(host, watts, seconds);
+        else if (HasComp<Content.Shared._NC.Medical.Cyberware.Optics.NCOpticControllerComponent>(host)) _cyberEyes.TrySetRuntimeWatts(host, watts, seconds);
         else if (HasComp<NCMetaOpticsComponent>(host)) _optics.TrySetRuntimeWatts(host, watts);
         else if (HasComp<NCMetaFunctionalImplantComponent>(host)) _functions.TrySetRuntimeWatts(host, watts);
         state.AppliedWatts = watts;

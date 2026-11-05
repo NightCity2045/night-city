@@ -140,7 +140,7 @@ public abstract partial class SharedVisualBodySystem : EntitySystem
 
         ent.Comp.Profile = data;
 
-        if (ent.Comp.Layer.Equals(HumanoidVisualLayers.Eyes))
+        if (ent.Comp.Layer.Equals(HumanoidVisualLayers.Eyes) || ent.Comp.Layer.Equals(HumanoidVisualLayers.EyesRight)) // NC
             SetOrganColor(ent, ent.Comp.Profile.EyeColor);
         else
             SetOrganColor(ent, ent.Comp.Profile.SkinColor);

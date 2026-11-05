@@ -22,6 +22,7 @@ public sealed partial class NCCyberwarePartPrototype : IPrototype
     [DataField] public List<ProtoId<Content.Shared._NC.Medical.Humanity.NCHumanityPackagePrototype>> HumanityPackages { get; private set; } = [];
     [IdDataField] public string ID { get; private set; } = default!;
     [DataField(required: true)] public ProtoId<NCCyberwarePartSlotPrototype> Slot { get; private set; }
+    [DataField] public List<ProtoId<NCCyberwarePartSlotPrototype>> CompatibleSlots { get; private set; } = [];
     [DataField(required: true)] public float MaximumIntegrity { get; private set; }
     [DataField] public float PermanentDamageThresholdFraction { get; private set; } = 0.5f;
     [DataField] public float PermanentDamageScale { get; private set; } = 0.25f;
@@ -33,6 +34,7 @@ public sealed partial class NCCyberwareAssemblyPrototype : IPrototype
     [IdDataField] public string ID { get; private set; } = default!;
     [DataField(required: true)]
     public Dictionary<ProtoId<NCCyberwarePartSlotPrototype>, EntProtoId> DefaultParts { get; private set; } = [];
+    [DataField] public List<ProtoId<NCCyberwarePartSlotPrototype>> OptionalSlots { get; private set; } = [];
     [DataField] public ProtoId<StackPrototype> RepairMaterial { get; private set; } = "Steel";
     [DataField] public float RepairPerUnit { get; private set; } = 20f;
     [DataField] public float FrameDamageThresholdFraction { get; private set; } = 0.5f;
@@ -49,6 +51,7 @@ public sealed partial class NCCyberwareAssemblyComponent : Component
     [DataField] public uint ConfigurationRevision = 1;
     [DataField] public uint? ValidatedRevision;
     [ViewVariables] public Dictionary<ProtoId<NCCyberwarePartSlotPrototype>, ContainerSlot> Parts = [];
+    [ViewVariables] public HashSet<ProtoId<NCCyberwarePartSlotPrototype>> OptionalSlots = [];
     [ViewVariables] public float FunctionalEfficiency;
     [ViewVariables] public bool Restoring;
 }
@@ -72,7 +75,7 @@ public sealed partial class NCCyberwareWorkbenchComponent : Component
 {
     public const string ContainerId = "nc_cyberware_workpiece";
     [DataField] public float TestEnergy = 1f;
-    [DataField] public float MaximumTestPower = 20f;
+    [DataField] public float MaximumTestPower = 40f;
     [ViewVariables] public ContainerSlot? Workpiece;
 }
 
@@ -87,6 +90,7 @@ public sealed partial class NCCyberwareAssemblySnapshot
 [DataDefinition]
 public sealed partial class NCCyberwarePartSnapshot
 {
+    [DataField] public List<byte[]> OpticPhotos = [];
     [DataField] public ProtoId<NCCyberwareFirmwarePrototype>? MedicalFirmware;
     [DataField(required: true)] public ProtoId<NCCyberwarePartSlotPrototype> Slot;
     [DataField] public string EntityPrototype = string.Empty;

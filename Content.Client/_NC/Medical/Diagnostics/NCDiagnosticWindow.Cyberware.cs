@@ -182,10 +182,10 @@ public sealed partial class NCDiagnosticWindow
             {
                 MinSize = new System.Numerics.Vector2(52, 52),
                 MouseFilter = Control.MouseFilterMode.Pass,
-                ToolTip = name + "\n" + (present ? FunctionBandName(part.Integrity) : Loc.GetString("nc-cyberware-map-part-missing")),
+                ToolTip = name + "\n" + (present ? FunctionBandName(part.Integrity) : Loc.GetString(part.Optional ? "nc-optics-option-empty" : "nc-cyberware-map-part-missing")),
                 PanelOverride = new StyleBoxFlat
                 {
-                    BackgroundColor = Color.FromHex("#07161D"), BorderColor = BandColor(part.Integrity),
+                    BackgroundColor = Color.FromHex("#07161D"), BorderColor = !present && part.Optional ? MutedColor : BandColor(part.Integrity),
                     BorderThickness = new Thickness(1),
                 },
             };
@@ -196,7 +196,7 @@ public sealed partial class NCDiagnosticWindow
                     Margin = new Thickness(4), Stretch = TextureRect.StretchMode.KeepAspectCentered,
                 });
             else
-                frame.AddChild(new Label { Text = "—", FontColorOverride = CriticalColor });
+                frame.AddChild(new Label { Text = "—", FontColorOverride = part.Optional ? MutedColor : CriticalColor });
             tile.AddChild(frame);
             if (part.Quality is { } partQuality && _prototypes.TryIndex(partQuality, out var grade))
                 tile.AddChild(new Label { Text = Loc.GetString(grade.Name), FontColorOverride = MutedColor });

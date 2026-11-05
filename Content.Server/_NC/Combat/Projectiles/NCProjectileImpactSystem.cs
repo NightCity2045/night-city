@@ -24,6 +24,7 @@ public sealed partial class NCProjectileImpactSystem : EntitySystem
 {
     private const ulong ImpactSeedStride = 0x9E3779B97F4A7C15UL;
 
+    [Dependency] private Content.Server._NC.Medical.Cyberware.Neural.NCNeuralHardwareSystem _neuralReactions = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private NCCombatTraumaDeliverySystem _delivery = default!;
     [Dependency] private NCMedicalDamageRoutingSystem _routing = default!;
@@ -31,6 +32,10 @@ public sealed partial class NCProjectileImpactSystem : EntitySystem
     [Dependency] private NCProjectileVolleySystem _volleys = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
+
+    public bool TryEvadeProjectile(EntityUid projectile, EntityUid target) =>
+        TryComp<NCProjectileHitContextComponent>(projectile, out var context) &&
+        _neuralReactions.TryEvade(target, context.Shooter, context.ResolutionId, context.ProjectileSequence);
 
     /// <summary>
     /// Returns true only when NC medicine accepted or explicitly cancelled this human impact.

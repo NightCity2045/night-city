@@ -537,6 +537,14 @@ public abstract partial class SharedMeleeWeaponSystem : EntitySystem
         // Sawmill.Debug($"Melee damage is {damage.Total} out of {component.Damage.Total}");
 
         // Raise event before doing damage so we can cancel damage if the event is handled
+        // NC: resolve passive reactions before weapon contact effects.
+        if (NCTryEvadeMelee(user, target.Value))
+        {
+            var missed = new MeleeHitEvent(new List<EntityUid>(), user, meleeUid, damage, null);
+            RaiseLocalEvent(meleeUid, missed);
+            _meleeSound.PlaySwingSound(user, meleeUid, component);
+            return;
+        }
         var hitEvent = new MeleeHitEvent(new List<EntityUid> { target.Value }, user, meleeUid, damage, null);
         RaiseLocalEvent(meleeUid, hitEvent);
 
@@ -695,7 +703,8 @@ public abstract partial class SharedMeleeWeaponSystem : EntitySystem
                 // NC end
                 continue;
 
-            targets.Add(entity);
+            // NC: avoid contact effects as well as damage on a successful reaction.
+            if (!NCTryEvadeMelee(user, entity)) targets.Add(entity);
         }
 
         // Sawmill.Debug($"Melee damage is {damage.Total} out of {component.Damage.Total}");

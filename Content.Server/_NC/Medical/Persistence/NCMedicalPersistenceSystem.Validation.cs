@@ -930,6 +930,8 @@ public sealed partial class NCMedicalPersistenceSystem
     {
         return new NCCyberwareStateSnapshot
         {
+            OpticRadarCooldownSeconds = source.OpticRadarCooldownSeconds,
+            NeuralEnabled = source.NeuralEnabled,
             MedicalImplant = source.MedicalImplant == null ? null : Content.Shared._NC.Medical.Cyberware.Internal.NCMedicalImplantMath.Clone(source.MedicalImplant),
             Service = source.Service == null ? null : NCCyberwareServiceHistory.Clone(source.Service),
             EntityPrototype = source.EntityPrototype,
@@ -971,6 +973,7 @@ public sealed partial class NCMedicalPersistenceSystem
                     Parts = assembly.Parts.Select(part => new NCCyberwarePartSnapshot
                     {
                         MedicalFirmware = part.MedicalFirmware,
+                        OpticPhotos = part.OpticPhotos.Select(photo => photo.ToArray()).ToList(),
                         Slot = part.Slot,
                         EntityPrototype = part.EntityPrototype,
                         StableInstanceId = part.StableInstanceId,
@@ -1003,10 +1006,10 @@ public sealed partial class NCMedicalPersistenceSystem
 
     private static bool HasAssemblyShape(NCCyberwareStateSnapshot state)
     {
-        return (state.MedicalImplant == null || Content.Shared._NC.Medical.Cyberware.Internal.NCMedicalImplantMath.Valid(state.MedicalImplant)) &&
+        return Finite(state.OpticRadarCooldownSeconds, 0, 65) && (state.MedicalImplant == null || Content.Shared._NC.Medical.Cyberware.Internal.NCMedicalImplantMath.Valid(state.MedicalImplant)) &&
                (state.Service == null || NCCyberwareServiceHistory.Valid(state.Service)) &&
                (state.Assembly == null || state.Assembly.Parts != null && state.Assembly.Parts.Count <= 8 &&
-                state.Assembly.Parts.All(part => part != null));
+                state.Assembly.Parts.All(part => part != null && part.OpticPhotos != null && part.OpticPhotos.Count <= 4 && part.OpticPhotos.All(photo => photo is { Length: 18432 })));
     }
 
     private static NCWoundStateSnapshot? CloneWounds(NCWoundStateSnapshot? source)

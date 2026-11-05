@@ -1,0 +1,139 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: NCMetaCyberOptics
+  id: NCMetaCyberOpticsRight
+  components:
+  - type: Organ
+    category: EyesRight
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.EyesRight
+    data:
+      sprite: _NC/Objects/Cyberware/optics.rsi
+      state: worn_right
+  - type: NCOrganFunction
+    functionType: Vision
+    baseCapacity: 0.5
+
+- type: entity
+  parent: NCOrganHumanEyes
+  id: NCOrganHumanEyesRight
+  components:
+  - type: Organ
+    category: EyesRight
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.EyesRight
+    data:
+      sprite: _NC/Objects/Cyberware/optics.rsi
+      state: worn_right
+  - type: NCOrganFunction
+    functionType: Vision
+    baseCapacity: 0.5
+
+- type: entity
+  parent: NCOrganHumanCyberEyes
+  id: NCOrganHumanCyberEyesRight
+  components:
+  - type: Organ
+    category: EyesRight
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.EyesRight
+    data:
+      sprite: _NC/Objects/Cyberware/optics.rsi
+      state: worn_right
+  - type: NCOrganFunction
+    functionType: Vision
+    baseCapacity: 0.5
+
+- type: entity
+  parent: NCMetaCyberOpticsQualityImprovised
+  id: NCMetaCyberOpticsQualityImprovisedRight
+  components:
+  - type: Organ
+    category: EyesRight
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.EyesRight
+    data:
+      sprite: _NC/Objects/Cyberware/optics.rsi
+      state: worn_right
+  - type: NCOrganFunction
+    functionType: Vision
+    baseCapacity: 0.5
+
+- type: entity
+  parent: NCMetaCyberOpticsQualityImproved
+  id: NCMetaCyberOpticsQualityImprovedRight
+  components:
+  - type: Organ
+    category: EyesRight
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.EyesRight
+    data:
+      sprite: _NC/Objects/Cyberware/optics.rsi
+      state: worn_right
+  - type: NCOrganFunction
+    functionType: Vision
+    baseCapacity: 0.5
+
+- type: entity
+  parent: NCMetaCyberOpticsQualityPremium
+  id: NCMetaCyberOpticsQualityPremiumRight
+  components:
+  - type: Organ
+    category: EyesRight
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.EyesRight
+    data:
+      sprite: _NC/Objects/Cyberware/optics.rsi
+      state: worn_right
+  - type: NCOrganFunction
+    functionType: Vision
+    baseCapacity: 0.5
+
+- type: entity
+  parent: NCOrganHumanCyberEyesQualityImprovised
+  id: NCOrganHumanCyberEyesQualityImprovisedRight
+  components:
+  - type: Organ
+    category: EyesRight
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.EyesRight
+    data:
+      sprite: _NC/Objects/Cyberware/optics.rsi
+      state: worn_right
+  - type: NCOrganFunction
+    functionType: Vision
+    baseCapacity: 0.5
+
+- type: entity
+  parent: NCOrganHumanCyberEyesQualityImproved
+  id: NCOrganHumanCyberEyesQualityImprovedRight
+  components:
+  - type: Organ
+    category: EyesRight
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.EyesRight
+    data:
+      sprite: _NC/Objects/Cyberware/optics.rsi
+      state: worn_right
+  - type: NCOrganFunction
+    functionType: Vision
+    baseCapacity: 0.5
+
+- type: entity
+  parent: NCOrganHumanCyberEyesQualityPremium
+  id: NCOrganHumanCyberEyesQualityPremiumRight
+  components:
+  - type: Organ
+    category: EyesRight
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.EyesRight
+    data:
+      sprite: _NC/Objects/Cyberware/optics.rsi
+      state: worn_right
+  - type: NCOrganFunction
+    functionType: Vision
+    baseCapacity: 0.5
+
+- type: organCategory
+  id: EyesRight

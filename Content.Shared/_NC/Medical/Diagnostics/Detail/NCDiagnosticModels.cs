@@ -203,7 +203,8 @@ public readonly record struct NCMedicalCyberwarePartSummary(
     EntProtoId? EntityPrototype,
     NCDiagnosticBand Integrity,
     ProtoId<Content.Shared._NC.Medical.Cyberware.Internal.NCCyberwareQualityPrototype>? Quality = null,
-    ProtoId<NCCyberwareFirmwarePrototype>? Firmware = null);
+    ProtoId<NCCyberwareFirmwarePrototype>? Firmware = null,
+    bool Optional = false);
 
 [Serializable, NetSerializable]
 public readonly record struct NCMedicalImplantSummary(bool Injector, bool ControllerReady, float Remaining, float Dose, float Interval, float Limit, float Delivered, float Cooldown, bool Automatic);

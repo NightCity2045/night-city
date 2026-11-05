@@ -271,6 +271,11 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImprovised
+      NCOpticPowerSlot: NCOpticPowerImprovised
+      NCNeuralProcessorSlot: NCNeuralProcessorImprovised
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImprovised
 
 - type: entity
   parent: NCImplantNeuralLinkMk1
@@ -279,6 +284,11 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImproved
+      NCOpticPowerSlot: NCOpticPowerImproved
+      NCNeuralProcessorSlot: NCNeuralProcessorImproved
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImproved
 
 - type: entity
   parent: NCImplantNeuralLinkMk1
@@ -287,6 +297,11 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicPremium
+      NCOpticPowerSlot: NCOpticPowerPremium
+      NCNeuralProcessorSlot: NCNeuralProcessorPremium
+      NCNeuralElectrodeSlot: NCNeuralElectrodePremium
 
 - type: entity
   parent: NCImplantCirculatoryAssistMk1
@@ -568,6 +583,13 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImprovised
+      NCOpticPowerSlot: NCOpticPowerImprovised
+      NCNeuralProcessorSlot: NCNeuralProcessorImprovised
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImprovised
+      NCNeuralPulseSlot: NCNeuralPulseImprovised
+      NCNeuralCoolingSlot: NCNeuralCoolingImprovised
 
 - type: entity
   parent: NCSandevistanImplant
@@ -576,6 +598,13 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImproved
+      NCOpticPowerSlot: NCOpticPowerImproved
+      NCNeuralProcessorSlot: NCNeuralProcessorImproved
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImproved
+      NCNeuralPulseSlot: NCNeuralPulseImproved
+      NCNeuralCoolingSlot: NCNeuralCoolingImproved
 
 - type: entity
   parent: NCSandevistanImplant
@@ -584,6 +613,13 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicPremium
+      NCOpticPowerSlot: NCOpticPowerPremium
+      NCNeuralProcessorSlot: NCNeuralProcessorPremium
+      NCNeuralElectrodeSlot: NCNeuralElectrodePremium
+      NCNeuralPulseSlot: NCNeuralPulsePremium
+      NCNeuralCoolingSlot: NCNeuralCoolingPremium
 
 - type: entity
   parent: NCKerenzikovImplant
@@ -592,6 +628,11 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImprovised
+      NCOpticPowerSlot: NCOpticPowerImprovised
+      NCNeuralProcessorSlot: NCNeuralProcessorImprovised
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImprovised
 
 - type: entity
   parent: NCKerenzikovImplant
@@ -600,6 +641,11 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImproved
+      NCOpticPowerSlot: NCOpticPowerImproved
+      NCNeuralProcessorSlot: NCNeuralProcessorImproved
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImproved
 
 - type: entity
   parent: NCKerenzikovImplant
@@ -608,6 +654,11 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicPremium
+      NCOpticPowerSlot: NCOpticPowerPremium
+      NCNeuralProcessorSlot: NCNeuralProcessorPremium
+      NCNeuralElectrodeSlot: NCNeuralElectrodePremium
 
 - type: entity
   parent: NCOrganHumanCyberArmLeftFrame
@@ -1888,6 +1939,13 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImprovised
+      NCOpticPowerSlot: NCOpticPowerImprovised
+      NCNeuralProcessorSlot: NCNeuralProcessorImprovised
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImprovised
+      NCNeuralPulseSlot: NCNeuralPulseImprovised
+      NCNeuralCoolingSlot: NCNeuralCoolingImprovised
 
 - type: entity
   parent: NCMetaSandevistanImplant
@@ -1896,6 +1954,13 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImproved
+      NCOpticPowerSlot: NCOpticPowerImproved
+      NCNeuralProcessorSlot: NCNeuralProcessorImproved
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImproved
+      NCNeuralPulseSlot: NCNeuralPulseImproved
+      NCNeuralCoolingSlot: NCNeuralCoolingImproved
 
 - type: entity
   parent: NCMetaSandevistanImplant
@@ -1904,6 +1969,13 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicPremium
+      NCOpticPowerSlot: NCOpticPowerPremium
+      NCNeuralProcessorSlot: NCNeuralProcessorPremium
+      NCNeuralElectrodeSlot: NCNeuralElectrodePremium
+      NCNeuralPulseSlot: NCNeuralPulsePremium
+      NCNeuralCoolingSlot: NCNeuralCoolingPremium
 
 - type: entity
   parent: NCMetaKerenzikovImplant
@@ -1912,6 +1984,11 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImprovised
+      NCOpticPowerSlot: NCOpticPowerImprovised
+      NCNeuralProcessorSlot: NCNeuralProcessorImprovised
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImprovised
 
 - type: entity
   parent: NCMetaKerenzikovImplant
@@ -1920,6 +1997,11 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImproved
+      NCOpticPowerSlot: NCOpticPowerImproved
+      NCNeuralProcessorSlot: NCNeuralProcessorImproved
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImproved
 
 - type: entity
   parent: NCMetaKerenzikovImplant
@@ -1928,3 +2010,8 @@
   components:
   - type: NCCyberware
     quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicPremium
+      NCOpticPowerSlot: NCOpticPowerPremium
+      NCNeuralProcessorSlot: NCNeuralProcessorPremium
+      NCNeuralElectrodeSlot: NCNeuralElectrodePremium

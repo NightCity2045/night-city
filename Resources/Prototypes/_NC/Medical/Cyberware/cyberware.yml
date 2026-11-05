@@ -76,7 +76,8 @@
 - type: ncCyberware
   id: NCNeuralLinkMk1
   nameId: nc-cyberware-profile-neural-link-mk1
-  humanityPackages: [ NCHumanityInterface ]
+  humanityPackages:
+  - NCHumanityInterface
   requiresSeparateCalibration: true
   powerPriority: Control
   name: neural link Mk.1
@@ -85,11 +86,13 @@
     sprite: _NC/Objects/Cyberware/implants.rsi
     state: neural_link
   form: Implant
-  compatibleSlots: [ NCSlotNeuralCore ]
+  compatibleSlots:
+  - NCSlotNeuralCore
   size: 1
   maximumIntegrity: 60
   repairProfile: NCRepairProfileClinicalCyberware
-  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
   powerCapacity: 3600
   startingPowerFraction: 1
   minimumOperationalPower: 1
@@ -109,12 +112,37 @@
   empHeatPerEnergy: 0.003
   maximumEmpHeat: 60
   empDisableDurationMultiplier: 1
-  neuralDamagePerEmpEnergy: 0.00002
+  neuralDamagePerEmpEnergy: 2.0e-05
   neuralRequirement: Required
   neuralDegradedThreshold: 0.7
   neuralMinimumOperationalIntegrity: 0.2
   updateInterval: 1s
-  capabilities: [ NeuralInterface, SmartDeviceBus ]
+  capabilities:
+  - NeuralInterface
+  - SmartDeviceBus
+  assembly: NCNeuralLinkMk1Assembly
+  requiresFactoryPreparation: true
+  skeletalSurgery:
+  - stage: MedicalFixation
+    name: nc-medical-stage-fixmedical
+    zone: NCZoneHead
+    structure: Brain
+    action: FixMedical
+    minimumDepth: 0.74
+  - stage: MedicalConnection
+    name: nc-medical-stage-connectmedical
+    zone: NCZoneHead
+    structure: Brain
+    action: ConnectMedical
+    minimumDepth: 0.74
+    prerequisites: MedicalFixation
+  - stage: MedicalCheck
+    name: nc-medical-stage-checkmedical
+    zone: NCZoneHead
+    structure: Brain
+    action: CheckMedical
+    minimumDepth: 0.74
+    prerequisites: MedicalFixation, MedicalConnection
 
 - type: ncCyberware
   id: NCCirculatoryAssistMk1
@@ -298,12 +326,15 @@
   description: A clinical cranial neural-interface module. It is inert until installed and calibrated.
   components:
   - type: Sprite
-    sprite: _NC/Objects/Cyberware/implants.rsi
-    state: neural_link
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: link
   - type: Item
     sprite: _NC/Objects/Cyberware/implants.rsi
   - type: NCCyberware
     profile: NCNeuralLinkMk1
+    factoryPrepared: true
+  - type: NCNeuralHardware
+    kind: Link
 
 - type: entity
   id: NCImplantCirculatoryAssistMk1
@@ -403,8 +434,8 @@
   - type: VisualOrgan
     layer: enum.HumanoidVisualLayers.Eyes
     data:
-      sprite: Mobs/Customization/eyes.rsi
-      state: eyes
+      sprite: _NC/Objects/Cyberware/optics.rsi
+      state: worn_left
       color: "#75DCEB"
   - type: Sprite
     sprite: _NC/Objects/Cyberware/implants.rsi
@@ -418,6 +449,7 @@
     armorLocations: [ Face ]
   - type: NCOrganFunction
     functionType: Vision
+    baseCapacity: 0.5
   - type: NCNerve
     cyberprostheticInterface: true
   - type: NCCyberware

@@ -153,6 +153,7 @@
       TendonSetRightLeg: NCOrganHumanTendonSetRightLeg
       Brain: NCOrganHumanBrain
       Eyes: NCOrganHumanEyes
+      EyesRight: NCOrganHumanEyesRight
       Tongue: NCOrganHumanTongue
       Appendix: NCOrganHumanAppendix
       Ears: NCOrganHumanEars
@@ -167,7 +168,7 @@
       Spine: [ VertebralColumn ]
       Abdomen: [ Liver, Kidneys, Stomach, Appendix ]
       PelvisGroin: [ PelvisBone ]
-      Head: [ Skull, Brain, Eyes, Tongue, Ears ]
+      Head: [ Skull, Brain, Eyes, EyesRight, Tongue, Ears ]
       ArmLeft: [ ArmBoneLeft, TendonSetLeftArm, HandLeft ]
       ArmRight: [ ArmBoneRight, TendonSetRightArm, HandRight ]
       LegLeft: [ LegBoneLeft, TendonSetLeftLeg, FootLeft ]

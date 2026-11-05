@@ -1,0 +1,1129 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncCyberwarePartSlot
+  id: NCOpticControllerSlot
+  name: nc-optics-slot-controller
+
+- type: ncCyberwarePartSlot
+  id: NCOpticMatrixSlot
+  name: nc-optics-slot-matrix
+
+- type: ncCyberwarePartSlot
+  id: NCOpticNeuralSlot
+  name: nc-optics-slot-neural
+
+- type: ncCyberwarePartSlot
+  id: NCOpticPowerSlot
+  name: nc-optics-slot-power
+
+- type: ncCyberwarePartSlot
+  id: NCOpticModule1Slot
+  name: nc-optics-slot-module1
+
+- type: ncCyberwarePartSlot
+  id: NCOpticModule2Slot
+  name: nc-optics-slot-module2
+
+- type: ncCyberwarePartSlot
+  id: NCOpticModule3Slot
+  name: nc-optics-slot-module3
+
+- type: ncCyberwarePartSlot
+  id: NCOpticCosmeticSlot
+  name: nc-optics-slot-cosmetic
+
+- type: ncMetaHardware
+  id: NCMetaOpticController
+  memoryBytes: 262144
+  storageBytes: 1048576
+  maxProcesses: 1
+  gasPerWindow: 25000
+  idleWatts: 0
+  activeWatts: 1
+  interfaces:
+  - meta.implants.CyberEye
+
+- type: ncCyberwarePart
+  id: NCOpticControllerStandardPart
+  slot: NCOpticControllerSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityStandard
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticControllerStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: controller
+  - type: NCCyberwarePart
+    profile: NCOpticControllerStandardPart
+  - type: NCOpticController
+  - type: NCMetaHost
+    profile: NCMetaOpticController
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces:
+    - meta.implants.CyberEye
+  - type: NCMetaTerminal
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+
+- type: entity
+  parent: NCOpticControllerStandard
+  id: NCOpticControllerBasicStandard
+  suffix: Standard
+  components:
+  - type: NCOpticController
+    factoryProgram: true
+
+- type: ncCyberwarePart
+  id: NCOpticControllerImprovisedPart
+  slot: NCOpticControllerSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticControllerImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: controller
+  - type: NCCyberwarePart
+    profile: NCOpticControllerImprovisedPart
+  - type: NCOpticController
+  - type: NCMetaHost
+    profile: NCMetaOpticController
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces:
+    - meta.implants.CyberEye
+  - type: NCMetaTerminal
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+
+- type: entity
+  parent: NCOpticControllerImprovised
+  id: NCOpticControllerBasicImprovised
+  suffix: Improvised
+  components:
+  - type: NCOpticController
+    factoryProgram: true
+
+- type: ncCyberwarePart
+  id: NCOpticControllerImprovedPart
+  slot: NCOpticControllerSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticControllerImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: controller
+  - type: NCCyberwarePart
+    profile: NCOpticControllerImprovedPart
+  - type: NCOpticController
+  - type: NCMetaHost
+    profile: NCMetaOpticController
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces:
+    - meta.implants.CyberEye
+  - type: NCMetaTerminal
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+
+- type: entity
+  parent: NCOpticControllerImproved
+  id: NCOpticControllerBasicImproved
+  suffix: Improved
+  components:
+  - type: NCOpticController
+    factoryProgram: true
+
+- type: ncCyberwarePart
+  id: NCOpticControllerPremiumPart
+  slot: NCOpticControllerSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticControllerPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: controller
+  - type: NCCyberwarePart
+    profile: NCOpticControllerPremiumPart
+  - type: NCOpticController
+  - type: NCMetaHost
+    profile: NCMetaOpticController
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces:
+    - meta.implants.CyberEye
+  - type: NCMetaTerminal
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+
+- type: entity
+  parent: NCOpticControllerPremium
+  id: NCOpticControllerBasicPremium
+  suffix: Premium
+  components:
+  - type: NCOpticController
+    factoryProgram: true
+
+- type: ncCyberwarePart
+  id: NCOpticMatrixStandardPart
+  slot: NCOpticMatrixSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityStandard
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticMatrixStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: matrix
+  - type: NCCyberwarePart
+    profile: NCOpticMatrixStandardPart
+
+- type: ncCyberwarePart
+  id: NCOpticMatrixImprovisedPart
+  slot: NCOpticMatrixSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticMatrixImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: matrix
+  - type: NCCyberwarePart
+    profile: NCOpticMatrixImprovisedPart
+
+- type: ncCyberwarePart
+  id: NCOpticMatrixImprovedPart
+  slot: NCOpticMatrixSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticMatrixImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: matrix
+  - type: NCCyberwarePart
+    profile: NCOpticMatrixImprovedPart
+
+- type: ncCyberwarePart
+  id: NCOpticMatrixPremiumPart
+  slot: NCOpticMatrixSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticMatrixPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: matrix
+  - type: NCCyberwarePart
+    profile: NCOpticMatrixPremiumPart
+
+- type: ncCyberwarePart
+  id: NCOpticNeuralStandardPart
+  slot: NCOpticNeuralSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityStandard
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticNeuralStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: neural
+  - type: NCCyberwarePart
+    profile: NCOpticNeuralStandardPart
+
+- type: ncCyberwarePart
+  id: NCOpticNeuralImprovisedPart
+  slot: NCOpticNeuralSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticNeuralImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: neural
+  - type: NCCyberwarePart
+    profile: NCOpticNeuralImprovisedPart
+
+- type: ncCyberwarePart
+  id: NCOpticNeuralImprovedPart
+  slot: NCOpticNeuralSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticNeuralImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: neural
+  - type: NCCyberwarePart
+    profile: NCOpticNeuralImprovedPart
+
+- type: ncCyberwarePart
+  id: NCOpticNeuralPremiumPart
+  slot: NCOpticNeuralSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticNeuralPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: neural
+  - type: NCCyberwarePart
+    profile: NCOpticNeuralPremiumPart
+
+- type: ncCyberwarePart
+  id: NCOpticPowerStandardPart
+  slot: NCOpticPowerSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityStandard
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticPowerStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: power
+  - type: NCCyberwarePart
+    profile: NCOpticPowerStandardPart
+
+- type: ncCyberwarePart
+  id: NCOpticPowerImprovisedPart
+  slot: NCOpticPowerSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticPowerImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: power
+  - type: NCCyberwarePart
+    profile: NCOpticPowerImprovisedPart
+
+- type: ncCyberwarePart
+  id: NCOpticPowerImprovedPart
+  slot: NCOpticPowerSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticPowerImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: power
+  - type: NCCyberwarePart
+    profile: NCOpticPowerImprovedPart
+
+- type: ncCyberwarePart
+  id: NCOpticPowerPremiumPart
+  slot: NCOpticPowerSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticPowerPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: power
+  - type: NCCyberwarePart
+    profile: NCOpticPowerPremiumPart
+
+- type: ncCyberwarePart
+  id: NCOpticLowLightStandardPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityStandard
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticLowLightStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: lowlight
+  - type: NCCyberwarePart
+    profile: NCOpticLowLightStandardPart
+  - type: NCOpticModule
+    mode: LowLight
+
+- type: ncCyberwarePart
+  id: NCOpticLowLightImprovisedPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImprovised
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticLowLightImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: lowlight
+  - type: NCCyberwarePart
+    profile: NCOpticLowLightImprovisedPart
+  - type: NCOpticModule
+    mode: LowLight
+
+- type: ncCyberwarePart
+  id: NCOpticLowLightImprovedPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImproved
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticLowLightImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: lowlight
+  - type: NCCyberwarePart
+    profile: NCOpticLowLightImprovedPart
+  - type: NCOpticModule
+    mode: LowLight
+
+- type: ncCyberwarePart
+  id: NCOpticLowLightPremiumPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityPremium
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticLowLightPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: lowlight
+  - type: NCCyberwarePart
+    profile: NCOpticLowLightPremiumPart
+  - type: NCOpticModule
+    mode: LowLight
+
+- type: ncCyberwarePart
+  id: NCOpticInfraredStandardPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityStandard
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticInfraredStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: infrared
+  - type: NCCyberwarePart
+    profile: NCOpticInfraredStandardPart
+  - type: NCOpticModule
+    mode: Infrared
+
+- type: ncCyberwarePart
+  id: NCOpticInfraredImprovisedPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImprovised
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticInfraredImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: infrared
+  - type: NCCyberwarePart
+    profile: NCOpticInfraredImprovisedPart
+  - type: NCOpticModule
+    mode: Infrared
+
+- type: ncCyberwarePart
+  id: NCOpticInfraredImprovedPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImproved
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticInfraredImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: infrared
+  - type: NCCyberwarePart
+    profile: NCOpticInfraredImprovedPart
+  - type: NCOpticModule
+    mode: Infrared
+
+- type: ncCyberwarePart
+  id: NCOpticInfraredPremiumPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityPremium
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticInfraredPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: infrared
+  - type: NCCyberwarePart
+    profile: NCOpticInfraredPremiumPart
+  - type: NCOpticModule
+    mode: Infrared
+
+- type: ncCyberwarePart
+  id: NCOpticTelescopeStandardPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityStandard
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticTelescopeStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: telescope
+  - type: NCCyberwarePart
+    profile: NCOpticTelescopeStandardPart
+  - type: NCOpticModule
+    mode: Telescope
+
+- type: ncCyberwarePart
+  id: NCOpticTelescopeImprovisedPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImprovised
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticTelescopeImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: telescope
+  - type: NCCyberwarePart
+    profile: NCOpticTelescopeImprovisedPart
+  - type: NCOpticModule
+    mode: Telescope
+
+- type: ncCyberwarePart
+  id: NCOpticTelescopeImprovedPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImproved
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticTelescopeImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: telescope
+  - type: NCCyberwarePart
+    profile: NCOpticTelescopeImprovedPart
+  - type: NCOpticModule
+    mode: Telescope
+
+- type: ncCyberwarePart
+  id: NCOpticTelescopePremiumPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityPremium
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticTelescopePremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: telescope
+  - type: NCCyberwarePart
+    profile: NCOpticTelescopePremiumPart
+  - type: NCOpticModule
+    mode: Telescope
+
+- type: ncCyberwarePart
+  id: NCOpticAntiFlashStandardPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityStandard
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticAntiFlashStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: antiflash
+  - type: NCCyberwarePart
+    profile: NCOpticAntiFlashStandardPart
+  - type: NCOpticModule
+    mode: AntiFlash
+
+- type: ncCyberwarePart
+  id: NCOpticAntiFlashImprovisedPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImprovised
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticAntiFlashImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: antiflash
+  - type: NCCyberwarePart
+    profile: NCOpticAntiFlashImprovisedPart
+  - type: NCOpticModule
+    mode: AntiFlash
+
+- type: ncCyberwarePart
+  id: NCOpticAntiFlashImprovedPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImproved
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticAntiFlashImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: antiflash
+  - type: NCCyberwarePart
+    profile: NCOpticAntiFlashImprovedPart
+  - type: NCOpticModule
+    mode: AntiFlash
+
+- type: ncCyberwarePart
+  id: NCOpticAntiFlashPremiumPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityPremium
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticAntiFlashPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: antiflash
+  - type: NCCyberwarePart
+    profile: NCOpticAntiFlashPremiumPart
+  - type: NCOpticModule
+    mode: AntiFlash
+
+- type: ncCyberwarePart
+  id: NCOpticRecordingStandardPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityStandard
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticRecordingStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: recording
+  - type: NCCyberwarePart
+    profile: NCOpticRecordingStandardPart
+  - type: NCOpticModule
+    mode: Recording
+  - type: NCOpticMemory
+
+- type: ncCyberwarePart
+  id: NCOpticRecordingImprovisedPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImprovised
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticRecordingImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: recording
+  - type: NCCyberwarePart
+    profile: NCOpticRecordingImprovisedPart
+  - type: NCOpticModule
+    mode: Recording
+  - type: NCOpticMemory
+
+- type: ncCyberwarePart
+  id: NCOpticRecordingImprovedPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImproved
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticRecordingImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: recording
+  - type: NCCyberwarePart
+    profile: NCOpticRecordingImprovedPart
+  - type: NCOpticModule
+    mode: Recording
+  - type: NCOpticMemory
+
+- type: ncCyberwarePart
+  id: NCOpticRecordingPremiumPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityPremium
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticRecordingPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: recording
+  - type: NCCyberwarePart
+    profile: NCOpticRecordingPremiumPart
+  - type: NCOpticModule
+    mode: Recording
+  - type: NCOpticMemory
+
+- type: ncCyberwarePart
+  id: NCOpticAugmentedRealityStandardPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityStandard
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticAugmentedRealityStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: ar
+  - type: NCCyberwarePart
+    profile: NCOpticAugmentedRealityStandardPart
+  - type: NCOpticModule
+    mode: AugmentedReality
+
+- type: ncCyberwarePart
+  id: NCOpticAugmentedRealityImprovisedPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImprovised
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticAugmentedRealityImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: ar
+  - type: NCCyberwarePart
+    profile: NCOpticAugmentedRealityImprovisedPart
+  - type: NCOpticModule
+    mode: AugmentedReality
+
+- type: ncCyberwarePart
+  id: NCOpticAugmentedRealityImprovedPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImproved
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticAugmentedRealityImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: ar
+  - type: NCCyberwarePart
+    profile: NCOpticAugmentedRealityImprovedPart
+  - type: NCOpticModule
+    mode: AugmentedReality
+
+- type: ncCyberwarePart
+  id: NCOpticAugmentedRealityPremiumPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityPremium
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticAugmentedRealityPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: ar
+  - type: NCCyberwarePart
+    profile: NCOpticAugmentedRealityPremiumPart
+  - type: NCOpticModule
+    mode: AugmentedReality
+
+- type: ncCyberwarePart
+  id: NCOpticRadarStandardPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityStandard
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticRadarStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: radar
+  - type: NCCyberwarePart
+    profile: NCOpticRadarStandardPart
+  - type: NCOpticModule
+    mode: Radar
+
+- type: ncCyberwarePart
+  id: NCOpticRadarImprovisedPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImprovised
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticRadarImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: radar
+  - type: NCCyberwarePart
+    profile: NCOpticRadarImprovisedPart
+  - type: NCOpticModule
+    mode: Radar
+
+- type: ncCyberwarePart
+  id: NCOpticRadarImprovedPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImproved
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticRadarImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: radar
+  - type: NCCyberwarePart
+    profile: NCOpticRadarImprovedPart
+  - type: NCOpticModule
+    mode: Radar
+
+- type: ncCyberwarePart
+  id: NCOpticRadarPremiumPart
+  slot: NCOpticModule1Slot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityPremium
+  compatibleSlots:
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticRadarPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: radar
+  - type: NCCyberwarePart
+    profile: NCOpticRadarPremiumPart
+  - type: NCOpticModule
+    mode: Radar
+
+- type: ncCyberwarePart
+  id: NCOpticCosmeticStandardPart
+  slot: NCOpticCosmeticSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityStandard
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticCosmeticStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: cosmetic
+  - type: NCCyberwarePart
+    profile: NCOpticCosmeticStandardPart
+  - type: NCOpticModule
+    mode: Clear
+    cosmetic: true
+    irisColor: '#44E6DA'
+    glow: true
+
+- type: ncCyberwarePart
+  id: NCOpticCosmeticImprovisedPart
+  slot: NCOpticCosmeticSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticCosmeticImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: cosmetic
+  - type: NCCyberwarePart
+    profile: NCOpticCosmeticImprovisedPart
+  - type: NCOpticModule
+    mode: Clear
+    cosmetic: true
+    irisColor: '#44E6DA'
+    glow: true
+
+- type: ncCyberwarePart
+  id: NCOpticCosmeticImprovedPart
+  slot: NCOpticCosmeticSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticCosmeticImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: cosmetic
+  - type: NCCyberwarePart
+    profile: NCOpticCosmeticImprovedPart
+  - type: NCOpticModule
+    mode: Clear
+    cosmetic: true
+    irisColor: '#44E6DA'
+    glow: true
+
+- type: ncCyberwarePart
+  id: NCOpticCosmeticPremiumPart
+  slot: NCOpticCosmeticSlot
+  maximumIntegrity: 60
+  quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCOpticCosmeticPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: cosmetic
+  - type: NCCyberwarePart
+    profile: NCOpticCosmeticPremiumPart
+  - type: NCOpticModule
+    mode: Clear
+    cosmetic: true
+    irisColor: '#44E6DA'
+    glow: true
+
+- type: ncCyberwareAssembly
+  id: NCOpticAssembly
+  defaultParts:
+    NCOpticControllerSlot: NCOpticControllerBasicStandard
+    NCOpticMatrixSlot: NCOpticMatrixStandard
+    NCOpticNeuralSlot: NCOpticNeuralStandard
+    NCOpticPowerSlot: NCOpticPowerStandard
+  optionalSlots:
+  - NCOpticModule1Slot
+  - NCOpticModule2Slot
+  - NCOpticModule3Slot
+  - NCOpticCosmeticSlot

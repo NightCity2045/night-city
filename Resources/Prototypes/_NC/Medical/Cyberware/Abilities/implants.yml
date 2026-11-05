@@ -89,11 +89,15 @@
   suffix: NC adaptation
   components:
   - type: Sprite
-    state: neural_link
+    state: sandevistan
+    sprite: _NC/Objects/Cyberware/neural.rsi
   - type: NCCyberware
     profile: NCSandevistan
+    factoryPrepared: true
   - type: NCCyberwareAbility
     profile: NCSandevistanAbility
+  - type: NCNeuralHardware
+    kind: Sandevistan
 
 - type: entity
   parent: BaseAction
@@ -115,11 +119,15 @@
   suffix: NC adaptation
   components:
   - type: Sprite
-    state: neural_link
+    state: kerenzikov
+    sprite: _NC/Objects/Cyberware/neural.rsi
   - type: NCCyberware
     profile: NCKerenzikov
+    factoryPrepared: true
   - type: NCCyberwareAbility
     profile: NCKerenzikovAbility
+  - type: NCNeuralHardware
+    kind: Kerenzikov
 
 - type: entity
   parent: BaseAction

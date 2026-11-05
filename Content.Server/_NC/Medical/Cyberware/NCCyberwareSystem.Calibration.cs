@@ -64,8 +64,9 @@ public sealed partial class NCCyberwareSystem
         var output = NCCyberwareCondition.Efficiency(frame.CurrentIntegrity, profile.MaximumIntegrity);
         if (TryComp<NCCyberwareAssemblyComponent>(entity, out var assembly))
         {
-            foreach (var slot in assembly.Parts.Values)
+            foreach (var (slotId, slot) in assembly.Parts)
             {
+                if (assembly.OptionalSlots.Contains(slotId)) continue;
                 failure = NCFreeformSurgeryFailure.CyberwareAssemblyIncomplete;
                 if (slot.ContainedEntity is not { } partUid ||
                     !TryComp<NCCyberwarePartComponent>(partUid, out var part) ||

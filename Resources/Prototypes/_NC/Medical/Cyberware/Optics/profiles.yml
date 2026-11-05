@@ -1,0 +1,137 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncCyberware
+  id: NCCyberEyeLeftProfile
+  humanityPackages:
+  - NCHumanityMedical
+  powerPriority: Control
+  name: cybereye left
+  manufacturer: Kiroshi Optics
+  icon:
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: eye_left
+  form: OrganReplacement
+  size: 1
+  maximumIntegrity: 65
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  powerCapacity: 5400
+  startingPowerFraction: 1
+  minimumOperationalPower: 1
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 0.8
+  heatCapacity: 80
+  idleHeatPerSecond: 0.1
+  loadedHeatPerSecond: 0.7
+  passiveCoolingPerSecond: 0.3
+  heatDeratingThreshold: 50
+  heatShutdownThreshold: 70
+  heatDamageThreshold: 75
+  heatDamagePerSecond: 0.8
+  empResistance: 450
+  empSurgeDamagePerEnergy: 0.002
+  maximumEmpSurgeDamage: 25
+  empHeatPerEnergy: 0.0025
+  maximumEmpHeat: 50
+  empDisableDurationMultiplier: 1.1
+  neuralDamagePerEmpEnergy: 2.0e-05
+  neuralRequirement: None
+  neuralDegradedThreshold: 0.75
+  neuralMinimumOperationalIntegrity: 0.25
+  updateInterval: 0.5s
+  capabilities:
+  - Vision
+  nameId: nc-optics-profile-left
+  assembly: NCOpticAssembly
+  requiresFactoryPreparation: true
+  requiresSeparateCalibration: false
+  skeletalSurgery:
+  - stage: MedicalFixation
+    name: nc-medical-stage-fixmedical
+    zone: NCZoneEyes
+    structure: Eyes
+    action: FixMedical
+    minimumDepth: 0.44
+  - stage: MedicalConnection
+    name: nc-medical-stage-connectmedical
+    zone: NCZoneEyes
+    structure: Eyes
+    action: ConnectMedical
+    minimumDepth: 0.44
+    prerequisites: MedicalFixation
+  - stage: MedicalCheck
+    name: nc-medical-stage-checkmedical
+    zone: NCZoneEyes
+    structure: Eyes
+    action: CheckMedical
+    minimumDepth: 0.44
+    prerequisites: MedicalFixation, MedicalConnection
+
+- type: ncCyberware
+  id: NCCyberEyeRightProfile
+  humanityPackages:
+  - NCHumanityMedical
+  powerPriority: Control
+  name: cybereye right
+  manufacturer: Kiroshi Optics
+  icon:
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: eye_right
+  form: OrganReplacement
+  size: 1
+  maximumIntegrity: 65
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  powerCapacity: 5400
+  startingPowerFraction: 1
+  minimumOperationalPower: 1
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 0.8
+  heatCapacity: 80
+  idleHeatPerSecond: 0.1
+  loadedHeatPerSecond: 0.7
+  passiveCoolingPerSecond: 0.3
+  heatDeratingThreshold: 50
+  heatShutdownThreshold: 70
+  heatDamageThreshold: 75
+  heatDamagePerSecond: 0.8
+  empResistance: 450
+  empSurgeDamagePerEnergy: 0.002
+  maximumEmpSurgeDamage: 25
+  empHeatPerEnergy: 0.0025
+  maximumEmpHeat: 50
+  empDisableDurationMultiplier: 1.1
+  neuralDamagePerEmpEnergy: 2.0e-05
+  neuralRequirement: None
+  neuralDegradedThreshold: 0.75
+  neuralMinimumOperationalIntegrity: 0.25
+  updateInterval: 0.5s
+  capabilities:
+  - Vision
+  nameId: nc-optics-profile-right
+  assembly: NCOpticAssembly
+  requiresFactoryPreparation: true
+  requiresSeparateCalibration: false
+  skeletalSurgery:
+  - stage: MedicalFixation
+    name: nc-medical-stage-fixmedical
+    zone: NCZoneEyesRight
+    structure: EyesRight
+    action: FixMedical
+    minimumDepth: 0.44
+  - stage: MedicalConnection
+    name: nc-medical-stage-connectmedical
+    zone: NCZoneEyesRight
+    structure: EyesRight
+    action: ConnectMedical
+    minimumDepth: 0.44
+    prerequisites: MedicalFixation
+  - stage: MedicalCheck
+    name: nc-medical-stage-checkmedical
+    zone: NCZoneEyesRight
+    structure: EyesRight
+    action: CheckMedical
+    minimumDepth: 0.44
+    prerequisites: MedicalFixation, MedicalConnection

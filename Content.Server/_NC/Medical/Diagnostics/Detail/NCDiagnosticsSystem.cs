@@ -996,7 +996,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                 if (TryComp<NCOrganIntegrityComponent>(uid, out var integrity))
                     condition = ToFunctionBand(SafeRatio(integrity.CurrentIntegrity, integrity.MaxIntegrity));
             }
-            parts.Add(new NCMedicalCyberwarePartSummary(slot, prototype, condition, quality, firmware));
+            parts.Add(new NCMedicalCyberwarePartSummary(slot, prototype, condition, quality, firmware, assembly.OptionalSlots.Contains(slot)));
         }
         return parts;
     }

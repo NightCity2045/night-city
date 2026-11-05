@@ -144,6 +144,7 @@
   compatibleTargetCategories:
   - Brain
   - Eyes
+  - EyesRight
   - Tongue
   - Ears
   - Appendix
@@ -507,7 +508,7 @@
   description: Repairs one damaged biological eye structure.
   compatibleBodyProfiles: [ Human ]
   requiredAuthorizations: [ NCSurgeryAuthorizationOrgan ]
-  compatibleTargetCategories: [ Eyes ]
+  compatibleTargetCategories: [ Eyes, EyesRight ]
   targetRequirements: Integrity, Function
   targetState:
     maximumIntegrityRatio: 0.95
@@ -594,7 +595,7 @@
   description: Removes the selected biological eye structure as a live detached graft.
   compatibleBodyProfiles: [ Human ]
   requiredAuthorizations: [ NCSurgeryAuthorizationOrgan ]
-  compatibleTargetCategories: [ Eyes ]
+  compatibleTargetCategories: [ Eyes, EyesRight ]
   targetRequirements: Integrity
   facility:
     required: true
@@ -685,7 +686,7 @@
   compatibleTargetCategories: [ Head ]
   targetRequirements: Integrity
   requiresGraft: true
-  compatibleGraftCategories: [ Eyes ]
+  compatibleGraftCategories: [ Eyes, EyesRight ]
   compatibleGraftMaterials: [ Organic, Hybrid, Mechanical ]
   facility:
     required: true
@@ -877,7 +878,7 @@
   targetRequirements: Integrity
   requiresGraft: true
   cyberwareOperation: Install
-  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCCirculatoryAssistMk1, NCToolHand, NCBiomonitor, NCMantisBlade, NCSandevistan, NCKerenzikov, NCGraftedMuscleBoneLace, NCImplantedLinearFrameSigma, NCImplantedLinearFrameBeta ]
+  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCNeuralInterface, NCNeuralChipSocket, NCCirculatoryAssistMk1, NCToolHand, NCBiomonitor, NCMantisBlade, NCSandevistan, NCKerenzikov, NCGraftedMuscleBoneLace, NCImplantedLinearFrameSigma, NCImplantedLinearFrameBeta ]
   facility:
     required: true
     capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]
@@ -920,7 +921,7 @@
   compatibleTargetCategories: [ Head, Thorax, Spine, ArmLeft, ArmRight ]
   targetRequirements: Integrity
   cyberwareOperation: Remove
-  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCCirculatoryAssistMk1, NCToolHand, NCBiomonitor, NCMantisBlade, NCSandevistan, NCKerenzikov, NCGraftedMuscleBoneLace, NCImplantedLinearFrameSigma, NCImplantedLinearFrameBeta ]
+  compatibleCyberwareProfiles: [ NCNeuralLinkMk1, NCNeuralInterface, NCNeuralChipSocket, NCCirculatoryAssistMk1, NCToolHand, NCBiomonitor, NCMantisBlade, NCSandevistan, NCKerenzikov, NCGraftedMuscleBoneLace, NCImplantedLinearFrameSigma, NCImplantedLinearFrameBeta ]
   facility:
     required: true
     capabilities: [ NCSurgeryFacilityStableSurface, NCSurgeryFacilityMonitoring, NCSurgeryFacilityVentilation ]

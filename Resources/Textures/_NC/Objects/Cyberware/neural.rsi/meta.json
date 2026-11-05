@@ -1,0 +1,50 @@
+{
+    "version": 1,
+    "license": "CC0-1.0",
+    "copyright": "Original procedural pixel art created for Night City 2045.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "controller"
+        },
+        {
+            "name": "processor"
+        },
+        {
+            "name": "electrode"
+        },
+        {
+            "name": "connector"
+        },
+        {
+            "name": "reader"
+        },
+        {
+            "name": "pulse"
+        },
+        {
+            "name": "cooling"
+        },
+        {
+            "name": "link"
+        },
+        {
+            "name": "interface"
+        },
+        {
+            "name": "chipsocket"
+        },
+        {
+            "name": "kerenzikov"
+        },
+        {
+            "name": "sandevistan"
+        },
+        {
+            "name": "trail"
+        }
+    ]
+}

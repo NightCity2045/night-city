@@ -1,0 +1,61 @@
+{
+    "version": 1,
+    "license": "CC0-1.0",
+    "copyright": "Original procedural pixel art created for Night City 2045.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "controller"
+        },
+        {
+            "name": "matrix"
+        },
+        {
+            "name": "neural"
+        },
+        {
+            "name": "power"
+        },
+        {
+            "name": "lowlight"
+        },
+        {
+            "name": "infrared"
+        },
+        {
+            "name": "telescope"
+        },
+        {
+            "name": "antiflash"
+        },
+        {
+            "name": "recording"
+        },
+        {
+            "name": "ar"
+        },
+        {
+            "name": "radar"
+        },
+        {
+            "name": "cosmetic"
+        },
+        {
+            "name": "eye_left"
+        },
+        {
+            "name": "worn_left",
+            "directions": 4
+        },
+        {
+            "name": "eye_right"
+        },
+        {
+            "name": "worn_right",
+            "directions": 4
+        }
+    ]
+}

@@ -492,6 +492,8 @@ public sealed partial class NCMedicalPersistenceSystem
                 NCMedicalSnapshotVersions.CyberwareExteriors or
                 NCMedicalSnapshotVersions.CyberwareService or
                 NCMedicalSnapshotVersions.NeuralFoundations or
+                NCMedicalSnapshotVersions.MedicalControllers or
+                NCMedicalSnapshotVersions.CyberOptics or
                 NCMedicalSnapshotVersions.Current) ||
             runtimeAnchor < TimeSpan.Zero ||
             !HasNonNullSnapshotShape(source))

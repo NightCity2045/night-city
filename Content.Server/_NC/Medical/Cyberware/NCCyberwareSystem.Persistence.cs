@@ -85,6 +85,7 @@ public sealed partial class NCCyberwareSystem
 
     public bool ValidatePersistentState(NCCyberwareStateSnapshot state, bool installedModule)
     {
+        if (state != null && !Finite(state.OpticRadarCooldownSeconds, 0, 65)) return false;
         if (state?.MedicalImplant is { } medical && !NCMedicalImplantMath.Valid(medical)) return false;
         if (state == null || string.IsNullOrWhiteSpace(state.EntityPrototype) ||
             state.EntityPrototype.Length > 128 || state.StableInstanceId == Guid.Empty ||
@@ -175,6 +176,8 @@ public sealed partial class NCCyberwareSystem
             medical.State = state.MedicalImplant is { } saved ? NCMedicalImplantMath.Clone(saved) : new();
             medical.HasSample = false;
         }
+        if (TryComp<Content.Shared._NC.Medical.Cyberware.Optics.NCOpticRadarComponent>(moduleUid, out var radar))
+        { radar.ReadyAt = _timing.CurTime + TimeSpan.FromSeconds(state.OpticRadarCooldownSeconds); radar.ActiveUntil = TimeSpan.Zero; }
         module.StateInitialized = true;
         module.Service = NCCyberwareServiceHistory.Clone(state.Service!);
         module.PersistenceCapturedAt = null;
@@ -189,6 +192,7 @@ public sealed partial class NCCyberwareSystem
         module.PermanentDamage = state.PermanentDamage;
         module.ThermalShutdown = state.ThermalShutdown;
         module.InstalledSlot = state.Slot;
+        if (TryComp<Content.Shared._NC.Medical.Cyberware.Neural.NCNeuralHardwareComponent>(moduleUid, out var neural)) neural.Enabled = state.NeuralEnabled;
         module.CurrentPower = state.CurrentPower;
         module.Heat = state.Heat;
         module.Load = state.Load;
@@ -331,7 +335,10 @@ public sealed partial class NCCyberwareSystem
             SkeletalSurgeryCompleted = module.SkeletalSurgeryCompleted,
             SkeletalLoadTestPassed = module.SkeletalLoadTestPassed,
             PermanentDamage = module.PermanentDamage,
+            NeuralEnabled = !TryComp<Content.Shared._NC.Medical.Cyberware.Neural.NCNeuralHardwareComponent>(moduleUid, out var neural) || neural.Enabled,
             Assembly = CaptureAssembly(moduleUid),
+            OpticRadarCooldownSeconds = TryComp<Content.Shared._NC.Medical.Cyberware.Optics.NCOpticRadarComponent>(moduleUid, out var radar)
+                ? (float) Math.Clamp((radar.ReadyAt - _timing.CurTime).TotalSeconds, 0, 65) : 0,
             MedicalImplant = TryComp<NCMedicalImplantComponent>(moduleUid, out var medical) ? NCMedicalImplantMath.Clone(medical.State) : null,
             PowerBus = CapturePowerBus(moduleUid),
             ThermalShutdown = module.ThermalShutdown,

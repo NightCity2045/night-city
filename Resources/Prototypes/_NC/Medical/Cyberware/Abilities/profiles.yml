@@ -207,12 +207,15 @@
     sprite: _NC/Objects/Cyberware/implants.rsi
     state: neural_link
   form: Implant
-  compatibleSlots: [ NCSlotMotorBurst ]
+  compatibleSlots:
+  - NCSlotMotorBurst
   size: 1
   maximumIntegrity: 80
   repairProfile: NCRepairProfileClinicalCyberware
-  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
-  humanityPackages: [ NCHumanitySandevistan ]
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanitySandevistan
   requiresSeparateCalibration: true
   idlePowerPerSecond: 0.2
   loadedPowerPerSecond: 20
@@ -228,6 +231,29 @@
   neuralRequirement: Required
   updateInterval: 0.1s
   capabilities: []
+  assembly: NCSandevistanAssembly
+  requiresFactoryPreparation: true
+  skeletalSurgery:
+  - stage: MedicalFixation
+    name: nc-medical-stage-fixmedical
+    zone: NCZoneChest
+    structure: Spine
+    action: FixMedical
+    minimumDepth: 0.8
+  - stage: MedicalConnection
+    name: nc-medical-stage-connectmedical
+    zone: NCZoneChest
+    structure: Spine
+    action: ConnectMedical
+    minimumDepth: 0.8
+    prerequisites: MedicalFixation
+  - stage: MedicalCheck
+    name: nc-medical-stage-checkmedical
+    zone: NCZoneChest
+    structure: Spine
+    action: CheckMedical
+    minimumDepth: 0.8
+    prerequisites: MedicalFixation, MedicalConnection
 
 - type: ncCyberwareAbility
   id: NCKerenzikovAbility
@@ -249,14 +275,17 @@
     sprite: _NC/Objects/Cyberware/implants.rsi
     state: neural_link
   form: Implant
-  compatibleSlots: [ NCSlotMotorStabilizer ]
+  compatibleSlots:
+  - NCSlotMotorStabilizer
   size: 1
   maximumIntegrity: 80
   repairProfile: NCRepairProfileClinicalCyberware
-  auxiliaryServiceProfiles: [ NCCoolantServiceAgent ]
-  humanityPackages: [ NCHumanityKerenzikov ]
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanityKerenzikov
   requiresSeparateCalibration: true
-  idlePowerPerSecond: 0.2
+  idlePowerPerSecond: 1.2
   loadedPowerPerSecond: 5
   heatCapacity: 100
   idleHeatPerSecond: 0.05
@@ -270,6 +299,29 @@
   neuralRequirement: Required
   updateInterval: 0.1s
   capabilities: []
+  assembly: NCKerenzikovAssembly
+  requiresFactoryPreparation: true
+  skeletalSurgery:
+  - stage: MedicalFixation
+    name: nc-medical-stage-fixmedical
+    zone: NCZoneHead
+    structure: Brain
+    action: FixMedical
+    minimumDepth: 0.74
+  - stage: MedicalConnection
+    name: nc-medical-stage-connectmedical
+    zone: NCZoneHead
+    structure: Brain
+    action: ConnectMedical
+    minimumDepth: 0.74
+    prerequisites: MedicalFixation
+  - stage: MedicalCheck
+    name: nc-medical-stage-checkmedical
+    zone: NCZoneHead
+    structure: Brain
+    action: CheckMedical
+    minimumDepth: 0.74
+    prerequisites: MedicalFixation, MedicalConnection
 
 - type: ncHumanityStimulus
   id: NCHumanityMotorOverdrive

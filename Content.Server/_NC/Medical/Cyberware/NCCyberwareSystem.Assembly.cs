@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using Content.Shared._NC.Medical.Cyberware.Internal;
+using Content.Shared._NC.Medical.Cyberware.Optics;
 using System.Linq;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Medical.Anatomy;
@@ -85,11 +86,12 @@ public sealed partial class NCCyberwareSystem
     private void EnsureAssemblyContainers(EntityUid uid, NCCyberwareAssemblyComponent assembly,
         NCCyberwareAssemblyPrototype profile)
     {
-        if (profile.DefaultParts.Count is < 1 or > MaximumAssemblyParts || !Positive(profile.RepairPerUnit) ||
+        if (profile.DefaultParts.Count < 1 || profile.DefaultParts.Count + profile.OptionalSlots.Count > MaximumAssemblyParts || !Positive(profile.RepairPerUnit) ||
             !Unit(profile.FrameDamageThresholdFraction) || !Unit(profile.InternalDamageThresholdFraction) ||
             !NonNegative(profile.FramePermanentDamageScale) || !NonNegative(profile.HeatPermanentDamageScale))
             throw new InvalidOperationException($"Invalid cyberware assembly {profile.ID}.");
-        foreach (var slot in profile.DefaultParts.Keys)
+        assembly.OptionalSlots = profile.OptionalSlots.ToHashSet();
+        foreach (var slot in profile.DefaultParts.Keys.Concat(profile.OptionalSlots))
         {
             if (!assembly.Parts.ContainsKey(slot))
                 assembly.Parts.Add(slot, _containers.EnsureContainer<ContainerSlot>(uid, $"nc_part_{slot.Id}"));
@@ -124,8 +126,9 @@ public sealed partial class NCCyberwareSystem
     private void RefreshAssembly(NCCyberwareAssemblyComponent assembly)
     {
         var efficiency = 1f;
-        foreach (var container in assembly.Parts.Values)
+        foreach (var (slot, container) in assembly.Parts)
         {
+            if (assembly.OptionalSlots.Contains(slot)) continue;
             if (container.ContainedEntity is not { } uid ||
                 !TryComp<NCCyberwarePartComponent>(uid, out var part) ||
                 !TryComp<NCOrganIntegrityComponent>(uid, out var integrity))
@@ -166,8 +169,8 @@ public sealed partial class NCCyberwareSystem
         NormalizeMechanicalIntegrity(frame, profile.Material);
         var internalDamage = MathF.Max(0f,
             damage - (continuousHeat ? 0f : profile.MaximumIntegrity * definition.InternalDamageThresholdFraction)) /
-            assembly.Parts.Count;
-        foreach (var container in assembly.Parts.Values)
+            Math.Max(1, assembly.Parts.Values.Count(part => part.ContainedEntity != null));
+        foreach (var (slot, container) in assembly.Parts)
         {
             if (container.ContainedEntity is not { } partUid ||
                 !TryComp<NCCyberwarePartComponent>(partUid, out var part) ||
@@ -229,22 +232,26 @@ public sealed partial class NCCyberwareSystem
         var definition = _prototypes.Index(profile.Assembly.Value);
         var slots = new HashSet<ProtoId<NCCyberwarePartSlotPrototype>>();
         var ids = new HashSet<Guid> { rootId };
+        var options = new HashSet<NCOpticMode>();
         foreach (var part in snapshot.Parts)
         {
-            if (part == null || !definition.DefaultParts.ContainsKey(part.Slot) || !slots.Add(part.Slot) ||
+            if (part == null || part.OpticPhotos == null || part.OpticPhotos.Count > NCOpticMemoryComponent.Capacity ||
+                part.OpticPhotos.Any(photo => photo == null || photo.Length != NCOpticMemoryComponent.Bytes) || !(definition.DefaultParts.ContainsKey(part.Slot) || definition.OptionalSlots.Contains(part.Slot)) || !slots.Add(part.Slot) ||
                 part.StableInstanceId == Guid.Empty || !ids.Add(part.StableInstanceId) ||
                 string.IsNullOrWhiteSpace(part.EntityPrototype) || part.EntityPrototype.Length > 128 ||
                 !_prototypes.TryIndex<EntityPrototype>(part.EntityPrototype, out var entity) ||
                 !entity.TryComp<NCCyberwarePartComponent>(out var component, _componentFactory) ||
-                !_prototypes.TryIndex(component.Profile, out var partProfile) || partProfile.Slot != part.Slot ||
+                !_prototypes.TryIndex(component.Profile, out var partProfile) || (partProfile.Slot != part.Slot && !partProfile.CompatibleSlots.Contains(part.Slot)) ||
                 part.MedicalFirmware is { } firmware && (!entity.TryComp<NCMedicalControllerComponent>(out _, _componentFactory) || !_prototypes.HasIndex(firmware)) ||
+                part.OpticPhotos.Count > 0 && !entity.TryComp<NCOpticMemoryComponent>(out _, _componentFactory) ||
+                entity.TryComp<NCOpticModuleComponent>(out var option, _componentFactory) && !options.Add(option.Mode) ||
                 !Unit(part.PermanentDamage) ||
                 !Finite(part.CurrentIntegrity, 0f,
                     NCCyberwareCondition.ServiceCeiling(partProfile.MaximumIntegrity, part.PermanentDamage)))
                 return false;
         }
-        return snapshot.ValidatedRevision == null || slots.Count == definition.DefaultParts.Count &&
-            snapshot.Parts.All(part => part.CurrentIntegrity > 0f);
+        return snapshot.ValidatedRevision == null || definition.DefaultParts.Keys.All(slots.Contains) &&
+            snapshot.Parts.Where(part => definition.DefaultParts.ContainsKey(part.Slot)).All(part => part.CurrentIntegrity > 0f);
     }
 
     private NCCyberwareAssemblySnapshot? CaptureAssembly(EntityUid uid)
@@ -268,6 +275,7 @@ public sealed partial class NCCyberwareSystem
                 StableInstanceId = part.StableInstanceId,
                 CurrentIntegrity = Comp<NCOrganIntegrityComponent>(partUid).CurrentIntegrity,
                 PermanentDamage = part.PermanentDamage,
+                OpticPhotos = TryComp<NCOpticMemoryComponent>(partUid, out var memory) ? memory.Photos.Select(photo => photo.ToArray()).ToList() : [],
                 MedicalFirmware = TryComp<NCMedicalControllerComponent>(partUid, out var controller) ? controller.Firmware : null,
             });
         }
@@ -301,6 +309,7 @@ public sealed partial class NCCyberwareSystem
                 var part = Comp<NCCyberwarePartComponent>(partUid);
                 part.StableInstanceId = state.StableInstanceId;
                 part.PermanentDamage = state.PermanentDamage;
+                if (TryComp<NCOpticMemoryComponent>(partUid, out var memory)) memory.Photos = state.OpticPhotos.Select(photo => photo.ToArray()).ToList();
                 if (TryComp<NCMedicalControllerComponent>(partUid, out var controller)) controller.Firmware = state.MedicalFirmware;
                 var integrity = Comp<NCOrganIntegrityComponent>(partUid);
                 integrity.CurrentIntegrity = state.CurrentIntegrity;

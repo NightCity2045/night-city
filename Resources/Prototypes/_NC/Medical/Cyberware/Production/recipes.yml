@@ -156,6 +156,58 @@
   - NCProduceNCSkeletalHeavyAnchorsQualityImprovised
   - NCProduceNCSkeletalHeavyAnchorsQualityImproved
   - NCProduceNCSkeletalHeavyAnchorsQualityPremium
+  - NCProduceNCNeuralControllerStandard
+  - NCProduceNCNeuralControllerBasicStandard
+  - NCProduceNCNeuralControllerImprovised
+  - NCProduceNCNeuralControllerBasicImprovised
+  - NCProduceNCNeuralControllerImproved
+  - NCProduceNCNeuralControllerBasicImproved
+  - NCProduceNCNeuralControllerPremium
+  - NCProduceNCNeuralControllerBasicPremium
+  - NCProduceNCNeuralProcessorStandard
+  - NCProduceNCNeuralProcessorImprovised
+  - NCProduceNCNeuralProcessorImproved
+  - NCProduceNCNeuralProcessorPremium
+  - NCProduceNCNeuralElectrodeStandard
+  - NCProduceNCNeuralElectrodeImprovised
+  - NCProduceNCNeuralElectrodeImproved
+  - NCProduceNCNeuralElectrodePremium
+  - NCProduceNCNeuralConnectorStandard
+  - NCProduceNCNeuralConnectorImprovised
+  - NCProduceNCNeuralConnectorImproved
+  - NCProduceNCNeuralConnectorPremium
+  - NCProduceNCNeuralReaderStandard
+  - NCProduceNCNeuralReaderImprovised
+  - NCProduceNCNeuralReaderImproved
+  - NCProduceNCNeuralReaderPremium
+  - NCProduceNCNeuralPulseStandard
+  - NCProduceNCNeuralPulseImprovised
+  - NCProduceNCNeuralPulseImproved
+  - NCProduceNCNeuralPulsePremium
+  - NCProduceNCNeuralCoolingStandard
+  - NCProduceNCNeuralCoolingImprovised
+  - NCProduceNCNeuralCoolingImproved
+  - NCProduceNCNeuralCoolingPremium
+  - NCProduceNCImplantNeuralLinkMk1Empty
+  - NCProduceNCImplantNeuralLinkMk1QualityImprovisedEmpty
+  - NCProduceNCImplantNeuralLinkMk1QualityImprovedEmpty
+  - NCProduceNCImplantNeuralLinkMk1QualityPremiumEmpty
+  - NCProduceNCKerenzikovImplantEmpty
+  - NCProduceNCKerenzikovImplantQualityImprovisedEmpty
+  - NCProduceNCKerenzikovImplantQualityImprovedEmpty
+  - NCProduceNCKerenzikovImplantQualityPremiumEmpty
+  - NCProduceNCSandevistanImplantEmpty
+  - NCProduceNCSandevistanImplantQualityImprovisedEmpty
+  - NCProduceNCSandevistanImplantQualityImprovedEmpty
+  - NCProduceNCSandevistanImplantQualityPremiumEmpty
+  - NCProduceNCNeuralInterfaceImplantEmpty
+  - NCProduceNCNeuralInterfaceImplantQualityImprovisedEmpty
+  - NCProduceNCNeuralInterfaceImplantQualityImprovedEmpty
+  - NCProduceNCNeuralInterfaceImplantQualityPremiumEmpty
+  - NCProduceNCNeuralChipSocketImplantEmpty
+  - NCProduceNCNeuralChipSocketImplantQualityImprovisedEmpty
+  - NCProduceNCNeuralChipSocketImplantQualityImprovedEmpty
+  - NCProduceNCNeuralChipSocketImplantQualityPremiumEmpty
 
 - type: latheRecipePack
   id: NCCyberElectronicsStatic
@@ -169,6 +221,72 @@
   - NCProduceNCMedicalSensorImproved
   - NCProduceNCMedicalSensorPremium
   - NCProduceNCMedicalControllerBasic
+  - NCProduceNCOpticRadarImplantStandardEmpty
+  - NCProduceNCOpticRadarImplantImprovisedEmpty
+  - NCProduceNCOpticRadarImplantImprovedEmpty
+  - NCProduceNCOpticRadarImplantPremiumEmpty
+  - NCProduceNCOpticRadarHandheld
+  - NCProduceNCOpticRadarShield
+  - NCProduceNCOpticControllerStandard
+  - NCProduceNCOpticControllerBasicStandard
+  - NCProduceNCOpticControllerImprovised
+  - NCProduceNCOpticControllerBasicImprovised
+  - NCProduceNCOpticControllerImproved
+  - NCProduceNCOpticControllerBasicImproved
+  - NCProduceNCOpticControllerPremium
+  - NCProduceNCOpticControllerBasicPremium
+  - NCProduceNCOpticMatrixStandard
+  - NCProduceNCOpticMatrixImprovised
+  - NCProduceNCOpticMatrixImproved
+  - NCProduceNCOpticMatrixPremium
+  - NCProduceNCOpticNeuralStandard
+  - NCProduceNCOpticNeuralImprovised
+  - NCProduceNCOpticNeuralImproved
+  - NCProduceNCOpticNeuralPremium
+  - NCProduceNCOpticPowerStandard
+  - NCProduceNCOpticPowerImprovised
+  - NCProduceNCOpticPowerImproved
+  - NCProduceNCOpticPowerPremium
+  - NCProduceNCOpticLowLightStandard
+  - NCProduceNCOpticLowLightImprovised
+  - NCProduceNCOpticLowLightImproved
+  - NCProduceNCOpticLowLightPremium
+  - NCProduceNCOpticInfraredStandard
+  - NCProduceNCOpticInfraredImprovised
+  - NCProduceNCOpticInfraredImproved
+  - NCProduceNCOpticInfraredPremium
+  - NCProduceNCOpticTelescopeStandard
+  - NCProduceNCOpticTelescopeImprovised
+  - NCProduceNCOpticTelescopeImproved
+  - NCProduceNCOpticTelescopePremium
+  - NCProduceNCOpticAntiFlashStandard
+  - NCProduceNCOpticAntiFlashImprovised
+  - NCProduceNCOpticAntiFlashImproved
+  - NCProduceNCOpticAntiFlashPremium
+  - NCProduceNCOpticRecordingStandard
+  - NCProduceNCOpticRecordingImprovised
+  - NCProduceNCOpticRecordingImproved
+  - NCProduceNCOpticRecordingPremium
+  - NCProduceNCOpticAugmentedRealityStandard
+  - NCProduceNCOpticAugmentedRealityImprovised
+  - NCProduceNCOpticAugmentedRealityImproved
+  - NCProduceNCOpticAugmentedRealityPremium
+  - NCProduceNCOpticRadarStandard
+  - NCProduceNCOpticRadarImprovised
+  - NCProduceNCOpticRadarImproved
+  - NCProduceNCOpticRadarPremium
+  - NCProduceNCOpticCosmeticStandard
+  - NCProduceNCOpticCosmeticImprovised
+  - NCProduceNCOpticCosmeticImproved
+  - NCProduceNCOpticCosmeticPremium
+  - NCProduceNCCyberEyeLeftStandardEmpty
+  - NCProduceNCCyberEyeLeftImprovisedEmpty
+  - NCProduceNCCyberEyeLeftImprovedEmpty
+  - NCProduceNCCyberEyeLeftPremiumEmpty
+  - NCProduceNCCyberEyeRightStandardEmpty
+  - NCProduceNCCyberEyeRightImprovisedEmpty
+  - NCProduceNCCyberEyeRightImprovedEmpty
+  - NCProduceNCCyberEyeRightPremiumEmpty
   - NCProduceNCMedicalControllerBasicQualityImprovised
   - NCProduceNCMedicalControllerBasicQualityImproved
   - NCProduceNCMedicalControllerBasicQualityPremium

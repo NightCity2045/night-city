@@ -16,7 +16,7 @@ public sealed partial class NCCyberwareAbilitySystem
     }
     /// <summary>Physical controls notify automation before their original native toggle, without changing that toggle's meaning.</summary>
     public event Action<EntityUid>? ManualControlRequested;
-    private void NotifyManualControl(EntityUid module) => ManualControlRequested?.Invoke(module);
+    internal void NotifyManualControl(EntityUid module) => ManualControlRequested?.Invoke(module);
 
     public bool TryGetFunctionState(EntityUid uid, out NCCyberwareFunctionState state)
     {
@@ -25,6 +25,12 @@ public sealed partial class NCCyberwareAbilitySystem
         var profile = GetProfile(module);
         var remaining = NCCyberwareAbilityMath.Remaining(module.CooldownRemainingSeconds, module.CooldownObservedAt, _timing.CurTime);
         if (!NCCyberwareAbilityMath.ValidCooldown(remaining)) return false;
+        if (TryComp<Content.Shared._NC.Medical.Cyberware.Neural.NCNeuralHardwareComponent>(uid, out var neural) &&
+            neural.Kind == Content.Shared._NC.Medical.Cyberware.Neural.NCNeuralKind.Kerenzikov)
+        {
+            state = new(profile.Kind, neural.Enabled && CanOperate(body, uid), CanOperate(body, uid), 0, 0);
+            return true;
+        }
         var active = module.ActiveUntil is { } until ? Math.Max(0, (until - _timing.CurTime).TotalMilliseconds) : 0;
         state = new(profile.Kind, module.Active, CanOperate(body, uid), (long) Math.Ceiling(remaining * 1000), (long) Math.Ceiling(active));
         return true;
@@ -35,6 +41,14 @@ public sealed partial class NCCyberwareAbilitySystem
     {
         if (!Resolve(module, ref module.Comp) || module.Comp.Body != body || guard != null && !guard() ||
             GetProfile(module.Comp).Kind == NCCyberwareAbilityKind.Biomonitor) return false;
+        if (TryComp<Content.Shared._NC.Medical.Cyberware.Neural.NCNeuralHardwareComponent>(module.Owner, out var neural) &&
+            neural.Kind == Content.Shared._NC.Medical.Cyberware.Neural.NCNeuralKind.Kerenzikov)
+        {
+            if (enabled && !CanOperate(body, module)) return false;
+            neural.Enabled = enabled;
+            _medical.TryMarkDirty(body, Content.Shared._NC.Medical.Anatomy.NCMedicalDirtyDomains.Persistence);
+            return true;
+        }
         if (module.Comp.Active == enabled) return !enabled || CanOperate(body, module);
         return TryToggle(body, module, guard);
     }

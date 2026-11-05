@@ -145,6 +145,8 @@ public sealed partial class NCCyberwareAbilitySystem : EntitySystem
                 module.Body = body;
                 if (!CanOperate(body, uid))
                 { Stop((uid, module)); _actions.RemoveAction(module.Action); continue; }
+                if (profile.Kind == NCCyberwareAbilityKind.Stabilization && HasComp<Content.Shared._NC.Medical.Cyberware.Neural.NCNeuralHardwareComponent>(uid))
+                { Stop((uid, module)); _actions.RemoveAction(module.Action); continue; }
                 if (_actions.GetAction(module.Action) is not { } existingAction || existingAction.Comp.AttachedEntity != body)
                     _actions.AddAction(body, ref module.Action, profile.Action.Id, uid);
                 _actions.SetToggled(module.Action, module.Active);

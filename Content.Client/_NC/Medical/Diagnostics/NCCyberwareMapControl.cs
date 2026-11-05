@@ -276,7 +276,7 @@ public sealed partial class NCCyberwareMapControl : Control
         if (_skeletonDefinitions.Any(slot => slot.Category == module.HostCategory))
             return 8;
         var host = module.HostCategory?.Id ?? string.Empty;
-        if (host is "Eyes") return 1;
+        if (host is "Eyes" or "EyesRight") return 1;
         if (host is "ArmRight" or "HandRight") return 4;
         if (host is "ArmLeft" or "HandLeft") return 5;
         if (host is "LegRight" or "FootRight") return 6;
