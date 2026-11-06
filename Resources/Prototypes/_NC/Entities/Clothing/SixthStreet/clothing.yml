@@ -1,0 +1,252 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: ClothingHeadBase
+  id: NCSixthStreetFieldCap
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Head/Hats/sixth_street_field_cap.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Head/Hats/sixth_street_field_cap.rsi
+
+- type: entity
+  parent: ClothingHeadHelmetArmoredBase
+  id: NCSixthStreetCombatHelmet
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Head/Helmets/sixth_street_combat_helmet.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Head/Helmets/sixth_street_combat_helmet.rsi
+  - type: NCArmor
+    profile: NCArmorCombatHelmet
+  - type: HideLayerClothing
+    layers:
+      Hair: HEAD
+
+- type: entity
+  parent: ClothingHeadBase
+  id: NCSixthStreetVeteranBeret
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Head/Hats/sixth_street_veteran_beret.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Head/Hats/sixth_street_veteran_beret.rsi
+
+- type: entity
+  parent: ClothingMaskBase
+  id: NCSixthStreetBandana
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Mask/sixth_street_bandana.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Mask/sixth_street_bandana.rsi
+
+- type: entity
+  parent: ClothingEyesBase
+  id: NCSixthStreetBallisticGoggles
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Eyes/Glasses/sixth_street_ballistic_goggles.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Eyes/Glasses/sixth_street_ballistic_goggles.rsi
+
+- type: entity
+  parent: ClothingHeadset
+  id: NCSixthStreetRadioHeadset
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Ears/Headsets/sixth_street_radio_headset.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Ears/Headsets/sixth_street_radio_headset.rsi
+  - type: ContainerFill
+    containers:
+      key_slots: []
+
+- type: entity
+  parent: UnsensoredClothingUniformBase
+  id: NCSixthStreetTshirt
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Uniforms/Tops/sixth_street_tshirt.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Uniforms/Tops/sixth_street_tshirt.rsi
+
+- type: entity
+  parent: UnsensoredClothingUniformBase
+  id: NCSixthStreetFieldShirt
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Uniforms/Tops/sixth_street_field_shirt.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Uniforms/Tops/sixth_street_field_shirt.rsi
+
+- type: entity
+  parent: UnsensoredClothingUniformBase
+  id: NCSixthStreetTankTop
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Uniforms/Tops/sixth_street_tank_top.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Uniforms/Tops/sixth_street_tank_top.rsi
+
+- type: entity
+  parent: UnsensoredClothingUniformBase
+  id: NCSixthStreetOliveCargo
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Uniforms/Pants/sixth_street_olive_cargo.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Uniforms/Pants/sixth_street_olive_cargo.rsi
+    slots:
+    - legs
+
+- type: entity
+  parent: UnsensoredClothingUniformBase
+  id: NCSixthStreetTanCargo
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Uniforms/Pants/sixth_street_tan_cargo.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Uniforms/Pants/sixth_street_tan_cargo.rsi
+    slots:
+    - legs
+
+- type: entity
+  parent: UnsensoredClothingUniformBase
+  id: NCSixthStreetJeans
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Uniforms/Pants/sixth_street_jeans.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Uniforms/Pants/sixth_street_jeans.rsi
+    slots:
+    - legs
+
+- type: entity
+  parent:
+  - ClothingOuterArmorBase
+  - NCClothingArmorSlotBase
+  id: NCSixthStreetLightVest
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Armor/sixth_street_light_vest.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Armor/sixth_street_light_vest.rsi
+    slots:
+    - armor
+  - type: NCArmor
+    profile: NCArmorLightArmorjack
+
+- type: entity
+  parent:
+  - ClothingOuterArmorBase
+  - NCClothingArmorSlotBase
+  id: NCSixthStreetHeavyVest
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Armor/sixth_street_heavy_vest.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Armor/sixth_street_heavy_vest.rsi
+    slots:
+    - armor
+  - type: NCArmor
+    profile: NCArmorPlateCarrier
+  - type: ClothingSpeedModifier
+    walkModifier: 0.9
+    sprintModifier: 0.8
+
+- type: entity
+  parent: ClothingOuterBase
+  id: NCSixthStreetBomber
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Coats/sixth_street_bomber.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Coats/sixth_street_bomber.rsi
+
+- type: entity
+  parent: ClothingOuterBase
+  id: NCSixthStreetFieldJacket
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/OuterClothing/Coats/sixth_street_field_jacket.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/OuterClothing/Coats/sixth_street_field_jacket.rsi
+
+- type: entity
+  parent: ClothingHandsBase
+  id: NCSixthStreetFingerlessGloves
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Hands/Gloves/sixth_street_fingerless_gloves.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Hands/Gloves/sixth_street_fingerless_gloves.rsi
+
+- type: entity
+  parent: ClothingShoesBase
+  id: NCSixthStreetCombatBoots
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Shoes/Boots/sixth_street_combat_boots.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Shoes/Boots/sixth_street_combat_boots.rsi
+
+- type: entity
+  parent: ClothingBeltStorageBase
+  id: NCSixthStreetUtilityBelt
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Belt/sixth_street_utility_belt.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Belt/sixth_street_utility_belt.rsi
+
+- type: entity
+  parent: ClothingBackpack
+  id: NCSixthStreetPatrolBackpack
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Back/Backpacks/sixth_street_patrol_backpack.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Back/Backpacks/sixth_street_patrol_backpack.rsi
+
+- type: entity
+  parent: ClothingBackpackDuffel
+  id: NCSixthStreetDuffel
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Back/Duffels/sixth_street_duffel.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Back/Duffels/sixth_street_duffel.rsi
+
+- type: entity
+  parent: ClothingNeckBase
+  id: NCSixthStreetDogTags
+  components:
+  - type: Sprite
+    sprite: _NC/Clothing/Neck/Misc/sixth_street_dog_tags.rsi
+    state: icon
+  - type: Clothing
+    sprite: _NC/Clothing/Neck/Misc/sixth_street_dog_tags.rsi

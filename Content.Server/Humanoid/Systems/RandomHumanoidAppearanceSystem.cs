@@ -1,3 +1,4 @@
+using System.Linq; // NC
 using Content.Server.Humanoid.Components;
 using Content.Shared.Body;
 using Content.Shared.Humanoid;
@@ -25,6 +26,20 @@ public sealed partial class RandomHumanoidAppearanceSystem : EntitySystem
             return;
 
         var profile = HumanoidCharacterProfile.RandomWithSpecies(humanoid.Species);
+
+        // NC-Edit-Start: Filter the new profile before applying it to the actual body organs.
+        if (component.AllowedMarkingLayers is { } allowedLayers)
+        {
+            foreach (var markings in profile.Appearance.Markings.Values)
+            {
+                foreach (var layer in markings.Keys.ToArray())
+                {
+                    if (!allowedLayers.Contains(layer))
+                        markings.Remove(layer);
+                }
+            }
+        }
+        // NC-Edit-End
 
         _visualBody.ApplyProfileTo(uid, profile);
         _humanoidProfile.ApplyProfileTo(uid, profile);

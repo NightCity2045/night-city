@@ -1,0 +1,18 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Originally sprited by belay5 (Discord) then recolored by Nairod (Github). Human icon and equipped-MASK reused from Clothing/Mask/neckgaiterred.rsi for Sixth Street. | Equipped fabric palette adapted with ImageGen, 2026; native frame registration and source silhouette preserved.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "icon"
+        },
+        {
+            "name": "equipped-MASK",
+            "directions": 4
+        }
+    ]
+}

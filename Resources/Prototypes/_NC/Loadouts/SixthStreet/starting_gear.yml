@@ -1,0 +1,96 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Unarmed outfits; preserve the separate top, pants, armor and jacket slots.
+- type: startingGear
+  id: NCSixthStreetPatrolGear
+  equipment:
+    shoes: NCSixthStreetCombatBoots
+    gloves: NCSixthStreetFingerlessGloves
+    neck: NCSixthStreetDogTags
+    ears: NCSixthStreetRadioHeadset
+    id: NCSixthStreetFactionId
+    pants: NCSixthStreetOliveCargo
+    jumpsuit: NCSixthStreetTshirt
+    armor: NCSixthStreetLightVest
+    belt: NCSixthStreetUtilityBelt
+    head: NCSixthStreetFieldCap
+    back: NCSixthStreetPatrolBackpack
+
+- type: startingGear
+  id: NCSixthStreetGuardGear
+  equipment:
+    shoes: NCSixthStreetCombatBoots
+    gloves: NCSixthStreetFingerlessGloves
+    neck: NCSixthStreetDogTags
+    ears: NCSixthStreetRadioHeadset
+    id: NCSixthStreetFactionId
+    pants: NCSixthStreetTanCargo
+    jumpsuit: NCSixthStreetFieldShirt
+    armor: NCSixthStreetHeavyVest
+    eyes: NCSixthStreetBallisticGoggles
+    mask: NCSixthStreetBandana
+    head: NCSixthStreetCombatHelmet
+    back: NCSixthStreetPatrolBackpack
+
+- type: startingGear
+  id: NCSixthStreetVeteranGear
+  equipment:
+    shoes: NCSixthStreetCombatBoots
+    gloves: NCSixthStreetFingerlessGloves
+    neck: NCSixthStreetDogTags
+    ears: NCSixthStreetRadioHeadset
+    id: NCSixthStreetFactionId
+    pants: NCSixthStreetJeans
+    jumpsuit: NCSixthStreetTankTop
+    outerClothing: NCSixthStreetBomber
+    head: NCSixthStreetVeteranBeret
+    belt: NCSixthStreetUtilityBelt
+
+- type: startingGear
+  id: NCSixthStreetScoutGear
+  equipment:
+    shoes: NCSixthStreetCombatBoots
+    gloves: NCSixthStreetFingerlessGloves
+    neck: NCSixthStreetDogTags
+    ears: NCSixthStreetRadioHeadset
+    id: NCSixthStreetFactionId
+    pants: NCSixthStreetOliveCargo
+    jumpsuit: NCSixthStreetFieldShirt
+    armor: NCSixthStreetLightVest
+    outerClothing: NCSixthStreetFieldJacket
+    back: NCSixthStreetPatrolBackpack
+    head: NCSixthStreetFieldCap
+
+- type: startingGear
+  id: NCSixthStreetMedicGear
+  equipment:
+    shoes: NCSixthStreetCombatBoots
+    gloves: NCSixthStreetFingerlessGloves
+    neck: NCSixthStreetDogTags
+    ears: NCSixthStreetRadioHeadset
+    id: NCSixthStreetFactionId
+    pants: NCSixthStreetTanCargo
+    jumpsuit: NCSixthStreetTshirt
+    armor: NCSixthStreetLightVest
+    back: NCSixthStreetDuffel
+    belt: NCSixthStreetUtilityBelt
+    mask: NCSixthStreetBandana
+    head: NCSixthStreetVeteranBeret
+    pocket1: NCSixthStreetMedicalPouchFilled
+
+- type: startingGear
+  id: NCSixthStreetQuartermasterGear
+  equipment:
+    shoes: NCSixthStreetCombatBoots
+    gloves: NCSixthStreetFingerlessGloves
+    neck: NCSixthStreetDogTags
+    ears: NCSixthStreetRadioHeadset
+    id: NCSixthStreetFactionId
+    pants: NCSixthStreetJeans
+    jumpsuit: NCSixthStreetTankTop
+    outerClothing: NCSixthStreetFieldJacket
+    back: NCSixthStreetDuffel
+    belt: NCSixthStreetUtilityBelt
+    head: NCSixthStreetFieldCap
