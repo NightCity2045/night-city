@@ -46,6 +46,7 @@ public sealed partial class NCMonowireVisualSystem : EntitySystem
 
 public sealed class NCMonowireOverlay(NCMonowireVisualSystem system) : Overlay
 {
+    private const int Segments = 40;
     public override OverlaySpace Space => OverlaySpace.WorldSpace;
     protected override void Draw(in OverlayDrawArgs args)
     {
@@ -53,9 +54,27 @@ public sealed class NCMonowireOverlay(NCMonowireVisualSystem system) : Overlay
         {
             if (arc.Map != args.MapId) continue;
             var fade = Math.Clamp((float)(arc.Expires - system.Now).TotalSeconds / .25f, 0, 1);
-            var middle = (arc.Start + arc.End) / 2 + new Vector2(0, .25f * fade);
-            args.WorldHandle.DrawLine(arc.Start, middle, Color.Cyan.WithAlpha(fade));
-            args.WorldHandle.DrawLine(middle, arc.End, Color.White.WithAlpha(fade));
+            var delta = arc.End - arc.Start;
+            var length = delta.Length();
+            if (length < 0.001f) continue;
+
+            // A travelling ripple along a bowed filament, in the plane of the strike.
+            // The envelope pins both ends and lets the wire straighten as it loses energy.
+            var normal = new Vector2(-delta.Y, delta.X) / length;
+            var age = 1f - fade;
+            var bend = Math.Min(length * 0.24f, 0.65f) * fade;
+            var color = new Color(0.7f, 0.95f, 1f, fade);
+            var previous = arc.Start;
+            for (var i = 1; i <= Segments; i++)
+            {
+                var t = i / (float) Segments;
+                var envelope = MathF.Sin(MathF.PI * t);
+                var ripple = MathF.Sin(MathF.Tau * (t - age * 1.4f));
+                var offset = envelope * bend * (0.7f + 0.3f * ripple);
+                var point = i == Segments ? arc.End : arc.Start + delta * t + normal * offset;
+                args.WorldHandle.DrawLine(previous, point, color);
+                previous = point;
+            }
         }
     }
 }

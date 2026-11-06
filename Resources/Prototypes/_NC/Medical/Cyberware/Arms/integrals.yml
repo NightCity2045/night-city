@@ -60,10 +60,24 @@
     size: Small
   - type: MeleeWeapon
     attackRate: 0.8
-    range: 2
+    range: 3
+    # NCMonowireVisualSystem draws the wire. Do not also swing a copy of the arm item.
+    animation: NCWeaponArcMonowire
+    wideAnimation: NCWeaponArcMonowire
     damage:
       types:
         Slash: 11
+- type: entity
+  parent: WeaponArcStatic
+  id: NCWeaponArcMonowire
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    visible: false
+  - type: WeaponArcVisuals
+    animation: None
+  - type: TimedDespawn
+    lifetime: 0.25
 - type: entity
   parent: BaseItem
   id: NCIntegralArmPistol
