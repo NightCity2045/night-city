@@ -1,4 +1,4 @@
-nc-zlevel-voice-from-up = Голос доносится сверху: {$message}
+nc-zlevel-voice-from-up = Голос доносится сверху: {$name}
 nc-zlevel-voice-from-down = Голос доносится снизу: {$message}
 nc-zlevel-falling-popup = {$entity} падает на уровень ниже!
 nc-zlevel-look-up-fail = Отсюда не видно уровень выше.

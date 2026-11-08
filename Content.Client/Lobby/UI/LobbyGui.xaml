@@ -8,7 +8,8 @@
     xmlns:style="clr-namespace:Content.Client.Stylesheets"
     xmlns:lobbyUi="clr-namespace:Content.Client.Lobby.UI"
     xmlns:info="clr-namespace:Content.Client.Info"
-    xmlns:widgets="clr-namespace:Content.Client.UserInterface.Systems.Chat.Widgets">
+    xmlns:widgets="clr-namespace:Content.Client.UserInterface.Systems.Chat.Widgets"
+    xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client">
     <!-- Background -->
     <TextureRect Access="Public" VerticalExpand="True" HorizontalExpand="True" Name="Background"
                  Stretch="KeepAspectCovered" />
@@ -20,8 +21,11 @@
                 <Control Name="DefaultState" VerticalExpand="True">
                     <BoxContainer Name="TopLeft" Orientation="Vertical">
                         <!-- Left Top Panel -->
-                        <PanelContainer StyleClasses="BackgroundPanel" HorizontalAlignment="Left" Name="LeftSideTop"
+                        <PanelContainer HorizontalAlignment="Left" Name="LeftSideTop"
                                         VerticalAlignment="Top">
+                            <PanelContainer.PanelOverride>
+                                <gfx:StyleBoxFlat BackgroundColor="#000000AA" />
+                            </PanelContainer.PanelOverride>
                             <BoxContainer Orientation="Vertical" HorizontalAlignment="Center" MaxWidth="800">
                                 <info:LinkBanner Name="LinkBanner" VerticalExpand="false" HorizontalAlignment="Center"
                                                  Margin="3 3 3 3" />
@@ -53,7 +57,10 @@
                     <!-- Left Bot Panel -->
                     <BoxContainer Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Bottom">
                         <info:DevInfoBanner Name="DevInfoBanner" VerticalExpand="false" Margin="3 3 3 3" />
-                        <PanelContainer StyleClasses="BackgroundPanel" Margin="3 3 3 3">
+                        <PanelContainer Margin="3 3 3 3">
+                            <PanelContainer.PanelOverride>
+                                <gfx:StyleBoxFlat BackgroundColor="#000000AA" />
+                            </PanelContainer.PanelOverride>
                             <BoxContainer Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="3 3 3 3">
                                 <RichTextLabel Name="LobbySong" Access="Public" HorizontalAlignment="Left" />
                                 <RichTextLabel Name="LobbyBackground" Access="Public" HorizontalAlignment="Left" />
@@ -66,8 +73,11 @@
                 <Control Access="Public" Visible="False" Name="CharacterSetupState" VerticalExpand="True" />
             </BoxContainer>
             <!-- Right Panel -->
-            <PanelContainer Name="RightSide" Access="Public" StyleClasses="BackgroundPanel" HorizontalAlignment="Right" VerticalExpand="True"
+            <PanelContainer Name="RightSide" Access="Public" HorizontalAlignment="Right" VerticalExpand="True"
                             VerticalAlignment="Stretch">
+                <PanelContainer.PanelOverride>
+                    <gfx:StyleBoxFlat BackgroundColor="#000000AA" />
+                </PanelContainer.PanelOverride>
                 <BoxContainer Orientation="Vertical" HorizontalExpand="True">
                     <!-- Top row -->
                     <BoxContainer Orientation="Horizontal" MinSize="0 40" Name="HeaderContainer" Access="Public"

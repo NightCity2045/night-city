@@ -4,7 +4,7 @@
   id: BaseStructureWall
   # NC: Walls are lateral blockers and must not provide Z-level ground height.
   name: basewall
-  description: Keeps the air in and the greytide out.
+  description: Keeps corpo in and the cyberpunks out. # NC edit
   placement:
     mode: SnapgridCenter
     snap:

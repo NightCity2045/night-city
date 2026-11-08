@@ -1,0 +1,8 @@
+﻿- type: soundCollection
+  id: NCLobbyMusic
+  files:
+  - /Audio/_NC/Ambience/City/RosaWalton-IReallyWantToStayAtYourHouse.ogg
+  - /Audio/_NC/Ambience/City/KalmanChodakiewitz-InLoveWithMyself.ogg
+  - /Audio/_NC/Ambience/City/RatBoy-WhosReadyForTomorrow.ogg
+  - /Audio/_NC/Ambience/Fight/P.T.Adamczyk-TheRebelPath.ogg
+  - /Audio/_NC/Ambience/Fight/RunTheJewels-NoSavePoint.ogg

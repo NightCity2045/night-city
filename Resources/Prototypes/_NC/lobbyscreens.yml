@@ -29,6 +29,12 @@
   artist: lobby-cyberpunk-street-2-artist
 
 - type: lobbyBackground
+  id: NCThankYouDavid
+  background: /Textures/_NC/LobbyScreens/thank-you-david.webp
+  title: lobby-thank-you-david-title
+  artist: lobby-thank-you-david-artist
+
+- type: lobbyBackground
   id: NCTraumaTeam
   background: /Textures/_NC/LobbyScreens/trauma-team.webp
   title: lobby-trauma-team-title

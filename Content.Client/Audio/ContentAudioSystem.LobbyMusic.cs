@@ -197,6 +197,8 @@ public sealed partial class ContentAudioSystem
 
         var lobbySongChangedEvent = new LobbySoundtrackChangedEvent(soundtrackFilename);
         _lobbySoundtrackChanged?.Invoke(lobbySongChangedEvent);
+
+        LobbyMusicVolumeCVarChanged(_configManager.GetCVar(CCVars.LobbyMusicVolume)); //NC edit. For some reason, it plays music without sound. This thing fixes that.
     }
 
     private void EndLobbyMusic()

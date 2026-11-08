@@ -1,0 +1,34 @@
+﻿- type: soundCollection
+  id: NCAmbienceCity
+  files:
+  - /Audio/_NC/Ambience/City/P.T.Adamczyk-OutsiderNoMore.ogg
+  - /Audio/_NC/Ambience/City/P.T.Adamczyk-RiteOfPassage.ogg
+  - /Audio/_NC/Ambience/City/PaulLeonardMorgan-BellsOfLagunaBend.ogg
+  - /Audio/_NC/Ambience/City/PaulLeonardMorgan-HanakoAndYorinobu.ogg
+  - /Audio/_NC/Ambience/City/PaulLeonardMorgan-TheStreetsAreLongAssGutters.ogg
+  - /Audio/_NC/Ambience/City/RatBoy-WhosReadyForTomorrow.ogg
+
+- type: soundCollection
+  id: NCAmbienceCityHappy
+  files:
+  - /Audio/_NC/Ambience/City/P.T.Adamczyk-OutsiderNoMore.ogg
+  - /Audio/_NC/Ambience/City/P.T.Adamczyk-RiteOfPassage.ogg
+  - /Audio/_NC/Ambience/City/PaulLeonardMorgan-BellsOfLagunaBend.ogg
+  - /Audio/_NC/Ambience/City/PaulLeonardMorgan-HanakoAndYorinobu.ogg
+  - /Audio/_NC/Ambience/City/PaulLeonardMorgan-TheStreetsAreLongAssGutters.ogg
+  - /Audio/_NC/Ambience/City/RatBoy-WhosReadyForTomorrow.ogg
+  - /Audio/_NC/Ambience/City/RosaWalton-IReallyWantToStayAtYourHouse.ogg
+  - /Audio/_NC/Ambience/City/KalmanChodakiewitz-InLoveWithMyself.ogg
+
+- type: soundCollection
+  id: NCAmbienceFight
+  files:
+  - /Audio/_NC/Ambience/Fight/P.T.Adamczyk-TheRebelPath.ogg
+  - /Audio/_NC/Ambience/Fight/RunTheJewels-NoSavePoint.ogg
+
+- type: soundCollection
+  id: NCAmbienceDanger
+  files:
+  - /Audio/_NC/Ambience/Danger/P.T.Adamczyk-KangTaoDown.ogg
+  - /Audio/_NC/Ambience/Danger/MarcinPrzybyłowicz-CloseProbing.ogg
+  - /Audio/_NC/Ambience/Danger/AkiraYamaoka-ModernAnthill.ogg

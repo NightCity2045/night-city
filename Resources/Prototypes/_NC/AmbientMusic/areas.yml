@@ -1,0 +1,48 @@
+﻿- type: ambientMusic
+  id: CityGeneral
+  sound:
+    params:
+      volume: -11
+    collection: NCAmbienceCity
+  fadeIn: true
+  interruptable: true
+
+- type: ambientMusic
+  id: CityHappy
+  sound:
+    params:
+      volume: -11
+    collection: NCAmbienceCityHappy
+  fadeIn: true
+  interruptable: true
+  priority: 5
+  conditions:
+  - !type:NearbyComponentsCondition
+    anchored: false
+    count: 2
+    components:
+    - type: HumanoidProfile
+    range: 10
+  - !type:IsGhostCondition
+    inverted: true
+
+
+
+
+#- type: ambientMusic
+#  id: Danger
+#  sound:
+#    params:
+#      volume: -10
+#    collection: NCAmbienceDanger
+#  fadeIn: true
+#  interruptable: true
+
+#- type: ambientMusic
+#  id: Danger
+#  sound:
+#    params:
+#      volume: -10
+#    collection: NCAmbienceFight
+#  fadeIn: true
+#  interruptable: true

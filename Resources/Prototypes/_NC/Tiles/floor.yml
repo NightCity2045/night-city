@@ -705,7 +705,7 @@
 
 - type: tile
   id: NCFloorapp1
-  name: разметка вперёд
+  name: tiles-NCFloorapp1
   sprite: /Textures/_NC/Tiles/alze1/app1.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -716,7 +716,7 @@
 
 - type: tile
   id: NCFloorapp2
-  name: разметка вверх
+  name: tiles-NCFloorapp2
   sprite: /Textures/_NC/Tiles/alze1/app2.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -727,7 +727,7 @@
 
 - type: tile
   id: NCFloorapp3
-  name: разметка т образная вниз
+  name: tiles-NCFloorapp3
   sprite: /Textures/_NC/Tiles/alze1/app3.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -738,7 +738,7 @@
 
 - type: tile
   id: NCFloorapp4
-  name: разметка т образная вверх
+  name: tiles-NCFloorapp4
   sprite: /Textures/_NC/Tiles/alze1/app4.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -749,7 +749,7 @@
 
 - type: tile
   id: NCFloorapp5
-  name: разметка крестовая
+  name: tiles-NCFloorapp5
   sprite: /Textures/_NC/Tiles/alze1/app5.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -760,7 +760,7 @@
 
 - type: tile
   id: NCfloorasf1
-  name: дорожный бордюр вниз
+  name: tiles-NCfloorasf1
   sprite: /Textures/_NC/Tiles/alze2/asf1.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -771,7 +771,7 @@
 
 - type: tile
   id: NCfloorasf2
-  name: дорожный бордюр вверх
+  name: tiles-NCfloorasf2
   sprite: /Textures/_NC/Tiles/alze2/asf2.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -782,7 +782,7 @@
 
 - type: tile
   id: NCfloorasf3
-  name: дорожный бордюр влево
+  name: tiles-NCfloorasf3
   sprite: /Textures/_NC/Tiles/alze2/asf3.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -793,7 +793,7 @@
 
 - type: tile
   id: NCfloorasf4
-  name: дорожный бордюр вправо
+  name: tiles-NCfloorasf4
   sprite: /Textures/_NC/Tiles/alze2/asf4.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -804,7 +804,7 @@
 
 - type: tile
   id: NCfloorasf5
-  name: дорожный бордюр поворот вниз влево
+  name: tiles-NCfloorasf5
   sprite: /Textures/_NC/Tiles/alze2/asf5.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -815,7 +815,7 @@
 
 - type: tile
   id: NCfloorasf6
-  name: дорожный бордюр поворот вниз вправо
+  name: tiles-NCfloorasf6
   sprite: /Textures/_NC/Tiles/alze2/asf6.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -826,7 +826,7 @@
 
 - type: tile
   id: NCfloorasf7
-  name: дорожный бордюр поворот вверх влево
+  name: tiles-NCfloorasf7
   sprite: /Textures/_NC/Tiles/alze2/asf7.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -837,7 +837,7 @@
 
 - type: tile
   id: NCfloorasf8
-  name: дорожный бордюр поворот вверх вправо
+  name: tiles-NCfloorasf8
   sprite: /Textures/_NC/Tiles/alze2/asf8.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -848,7 +848,7 @@
 
 - type: tile
   id: NCfloorasf9
-  name: дорожный бордюр сплошняком
+  name: tiles-NCfloorasf9
   sprite: /Textures/_NC/Tiles/alze2/asf9.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -859,7 +859,7 @@
 
 - type: tile
   id: NCfloorpl1
-  name: тротуарная плитка влево
+  name: tiles-NCfloorpl1
   sprite: /Textures/_NC/Tiles/alze2/pl1.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -870,7 +870,7 @@
 
 - type: tile
   id: NCfloorpl2
-  name: тротуарная плитка вправо
+  name: tiles-NCfloorpl2
   sprite: /Textures/_NC/Tiles/alze2/pl2.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -881,7 +881,7 @@
 
 - type: tile
   id: NCfloorpl3
-  name: тротуарная плитка влево вниз
+  name: tiles-NCfloorpl3
   sprite: /Textures/_NC/Tiles/alze2/pl3.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -892,7 +892,7 @@
 
 - type: tile
   id: NCfloorpl4
-  name: тротуарная плитка вправо вниз
+  name: tiles-NCfloorpl4
   sprite: /Textures/_NC/Tiles/alze2/pl4.png
   baseTurf: FloorDirt
   isSubfloor: false
@@ -903,7 +903,7 @@
 
 - type: tile
   id: NCfloorpa
-  name: Простая плитка
+  name: tiles-NCfloorpa
   sprite: /Textures/_NC/Tiles/alze3/pa.png
   baseTurf: FloorDirt
   isSubfloor: false

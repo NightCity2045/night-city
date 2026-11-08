@@ -1,9 +1,9 @@
 
 - type: entity
   parent: WallSolid
-  id: NCWalMetals
-  name: ent-NCWalMetals
-  description: ent-NCWalMetals-desc
+  id: NCWallMetals
+  name: NCWallMetals
+  description: NCWallMetals-desc
   components:
   - type: Sprite
     sprite: _NC/Structures/Walls/metals.rsi
@@ -15,9 +15,9 @@
 
 - type: entity
   parent: WallSolid
-  id: NCWalMetalsa
-  name: ent-NCWalMetalsa
-  description: ent-NCWalMetalsa-desc
+  id: NCWallMetalsa
+  name: NCWallMetalsa
+  description: NCWallMetalsa-desc
   components:
   - type: Sprite
     sprite: _NC/Structures/Walls/metalsa.rsi
@@ -29,9 +29,9 @@
 
 - type: entity
   parent: WallSolid
-  id: NCWalbeton
-  name: ent-NCWalbeton
-  description: ent-NCWalbeton-desc
+  id: NCWallbeton
+  name: NCWallbeton
+  description: NCWallbeton-desc
   components:
   - type: Sprite
     sprite: _NC/Structures/Walls/beton.rsi
@@ -43,7 +43,7 @@
 
 - type: entity
   parent: WallSolid
-  id: NCWalproflista
+  id: NCWallproflista
   name: профлист
   components:
   - type: Sprite
@@ -56,7 +56,7 @@
 
 - type: entity
   parent: WallSolid
-  id: NCWalproflistb
+  id: NCWallproflistb
   name: профлист из стали
   components:
   - type: Sprite
@@ -69,7 +69,7 @@
 
 - type: entity
   parent: WallSolid
-  id: NCWalproflist
+  id: NCWallproflist
   name: профлист зелёный
   components:
   - type: Sprite
@@ -82,7 +82,7 @@
 
 - type: entity
   parent: WallSolid
-  id: NCWalproflistd
+  id: NCWallproflistd
   name: профлист красный
   components:
   - type: Sprite
@@ -95,7 +95,7 @@
 
 - type: entity
   parent: WallSolid
-  id: NCWalprofliste
+  id: NCWallprofliste
   name: профлист из меди
   components:
   - type: Sprite
@@ -108,7 +108,7 @@
 
 - type: entity
   parent: WallSolid
-  id: NCWalproflistg
+  id: NCWallproflistg
   name: профлист синий
   components:
   - type: Sprite

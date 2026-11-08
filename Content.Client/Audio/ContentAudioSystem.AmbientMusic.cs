@@ -29,7 +29,7 @@ public sealed partial class ContentAudioSystem
     [Dependency] private SharedEntityConditionsSystem _conditions = default!;
 
     private readonly TimeSpan _minAmbienceTime = TimeSpan.FromSeconds(40);
-    private readonly TimeSpan _maxAmbienceTime = TimeSpan.FromSeconds(100);
+    private readonly TimeSpan _maxAmbienceTime = TimeSpan.FromSeconds(110);
 
     private const float AmbientMusicFadeTime = 10f;
     private static float _volumeSlider;

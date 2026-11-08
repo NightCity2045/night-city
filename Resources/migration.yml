@@ -900,3 +900,18 @@ CrateEngineeringJetpack: CrateSpaceMiniJetpack
 CrateEngineeringMiniJetpack: CrateSpaceMiniJetpack
 CrateEngineeringShuttle: CrateSpaceShuttlePower
 CrateEngineeringThruster: CrateSpaceThruster
+
+
+
+
+# NC things
+
+NCWalMetals: NCWallMetals
+NCWalMetalsa: NCWallMetalsa
+NCWalbeton: NCWallbeton
+NCWalproflista: NCWallproflista
+NCWalproflistb: NCWallproflistb
+NCWalproflist: NCWallproflist
+NCWalproflistd: NCWallproflistd
+NCWalprofliste: NCWallprofliste
+NCWalproflistg: NCWallproflistg
