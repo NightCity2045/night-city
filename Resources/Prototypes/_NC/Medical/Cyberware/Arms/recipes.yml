@@ -1,0 +1,1711 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: latheRecipe
+  id: NCProduceNCArmMicrodriveStandard
+  result: NCArmMicrodriveStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 100
+    Gold: 50
+
+- type: latheRecipe
+  id: NCProduceNCArmMicrodriveImprovised
+  result: NCArmMicrodriveImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 300
+    Plastic: 50
+    Gold: 50
+
+- type: latheRecipe
+  id: NCProduceNCArmMicrodriveImproved
+  result: NCArmMicrodriveImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Plastic: 100
+    Gold: 50
+
+- type: latheRecipe
+  id: NCProduceNCArmMicrodrivePremium
+  result: NCArmMicrodrivePremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 150
+    Gold: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmGuideStandard
+  result: NCArmGuideStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Plastic: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmGuideImprovised
+  result: NCArmGuideImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 350
+    Plastic: 50
+
+- type: latheRecipe
+  id: NCProduceNCArmGuideImproved
+  result: NCArmGuideImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmGuidePremium
+  result: NCArmGuidePremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 750
+    Plastic: 150
+
+- type: latheRecipe
+  id: NCProduceNCArmLockStandard
+  result: NCArmLockStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 200
+    Glass: 100
+    Gold: 50
+
+- type: latheRecipe
+  id: NCProduceNCArmLockImprovised
+  result: NCArmLockImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 150
+    Glass: 50
+    Gold: 50
+
+- type: latheRecipe
+  id: NCProduceNCArmLockImproved
+  result: NCArmLockImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 250
+    Glass: 100
+    Gold: 50
+
+- type: latheRecipe
+  id: NCProduceNCArmLockPremium
+  result: NCArmLockPremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 300
+    Glass: 150
+    Gold: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmDamperStandard
+  result: NCArmDamperStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 200
+
+- type: latheRecipe
+  id: NCProduceNCArmDamperImprovised
+  result: NCArmDamperImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 300
+    Plastic: 150
+
+- type: latheRecipe
+  id: NCProduceNCArmDamperImproved
+  result: NCArmDamperImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Plastic: 250
+
+- type: latheRecipe
+  id: NCProduceNCArmDamperPremium
+  result: NCArmDamperPremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmCoolingStandard
+  result: NCArmCoolingStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Glass: 100
+    Plastic: 200
+
+- type: latheRecipe
+  id: NCProduceNCArmCoolingImprovised
+  result: NCArmCoolingImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 300
+    Glass: 50
+    Plastic: 150
+
+- type: latheRecipe
+  id: NCProduceNCArmCoolingImproved
+  result: NCArmCoolingImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Glass: 100
+    Plastic: 250
+
+- type: latheRecipe
+  id: NCProduceNCArmCoolingPremium
+  result: NCArmCoolingPremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Glass: 150
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmClawsStandard
+  result: NCArmClawsStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plasteel: 200
+
+- type: latheRecipe
+  id: NCProduceNCArmClawsImprovised
+  result: NCArmClawsImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plasteel: 150
+
+- type: latheRecipe
+  id: NCProduceNCArmClawsImproved
+  result: NCArmClawsImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 750
+    Plasteel: 250
+
+- type: latheRecipe
+  id: NCProduceNCArmClawsPremium
+  result: NCArmClawsPremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 900
+    Plasteel: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmBladeStandard
+  result: NCArmBladeStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 800
+    Plasteel: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmBladeImprovised
+  result: NCArmBladeImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 550
+    Plasteel: 200
+
+- type: latheRecipe
+  id: NCProduceNCArmBladeImproved
+  result: NCArmBladeImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1000
+    Plasteel: 400
+
+- type: latheRecipe
+  id: NCProduceNCArmBladePremium
+  result: NCArmBladePremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1200
+    Plasteel: 450
+
+- type: latheRecipe
+  id: NCProduceNCArmHingeStandard
+  result: NCArmHingeStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plasteel: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmHingeImprovised
+  result: NCArmHingeImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plasteel: 200
+
+- type: latheRecipe
+  id: NCProduceNCArmHingeImproved
+  result: NCArmHingeImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 750
+    Plasteel: 400
+
+- type: latheRecipe
+  id: NCProduceNCArmHingePremium
+  result: NCArmHingePremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 900
+    Plasteel: 450
+
+- type: latheRecipe
+  id: NCProduceNCArmReelStandard
+  result: NCArmReelStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 300
+    Plastic: 200
+
+- type: latheRecipe
+  id: NCProduceNCArmReelImprovised
+  result: NCArmReelImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 200
+    Plastic: 150
+
+- type: latheRecipe
+  id: NCProduceNCArmReelImproved
+  result: NCArmReelImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 250
+
+- type: latheRecipe
+  id: NCProduceNCArmReelPremium
+  result: NCArmReelPremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 450
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmWireStandard
+  result: NCArmWireStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 300
+    Plasteel: 400
+    Glass: 200
+    Gold: 200
+
+- type: latheRecipe
+  id: NCProduceNCArmWireImprovised
+  result: NCArmWireImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 200
+    Plasteel: 300
+    Glass: 150
+    Gold: 150
+
+- type: latheRecipe
+  id: NCProduceNCArmWireImproved
+  result: NCArmWireImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plasteel: 500
+    Glass: 250
+    Gold: 250
+
+- type: latheRecipe
+  id: NCProduceNCArmWirePremium
+  result: NCArmWirePremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 450
+    Plasteel: 600
+    Glass: 300
+    Gold: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmPistolCoreStandard
+  result: NCArmPistolCoreStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1200
+    Plasteel: 300
+    Plastic: 200
+
+- type: latheRecipe
+  id: NCProduceNCArmPistolCoreImprovised
+  result: NCArmPistolCoreImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 850
+    Plasteel: 200
+    Plastic: 150
+
+- type: latheRecipe
+  id: NCProduceNCArmPistolCoreImproved
+  result: NCArmPistolCoreImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1500
+    Plasteel: 400
+    Plastic: 250
+
+- type: latheRecipe
+  id: NCProduceNCArmPistolCorePremium
+  result: NCArmPistolCorePremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1800
+    Plasteel: 450
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmLauncherCoreStandard
+  result: NCArmLauncherCoreStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 2500
+    Plasteel: 1500
+    Plastic: 400
+
+- type: latheRecipe
+  id: NCProduceNCArmLauncherCoreImprovised
+  result: NCArmLauncherCoreImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1750
+    Plasteel: 1050
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmLauncherCoreImproved
+  result: NCArmLauncherCoreImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 3100
+    Plasteel: 1900
+    Plastic: 500
+
+- type: latheRecipe
+  id: NCProduceNCArmLauncherCorePremium
+  result: NCArmLauncherCorePremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 3750
+    Plasteel: 2250
+    Plastic: 600
+
+- type: latheRecipe
+  id: NCProduceNCArmToolsStandard
+  result: NCArmToolsStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1000
+    Plastic: 200
+
+- type: latheRecipe
+  id: NCProduceNCArmToolsImprovised
+  result: NCArmToolsImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 700
+    Plastic: 150
+
+- type: latheRecipe
+  id: NCProduceNCArmToolsImproved
+  result: NCArmToolsImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1250
+    Plastic: 250
+
+- type: latheRecipe
+  id: NCProduceNCArmToolsPremium
+  result: NCArmToolsPremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1500
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmMedicalToolsStandard
+  result: NCArmMedicalToolsStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1000
+    Glass: 200
+    Silver: 200
+    Plastic: 200
+
+- type: latheRecipe
+  id: NCProduceNCArmMedicalToolsImprovised
+  result: NCArmMedicalToolsImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 700
+    Glass: 150
+    Silver: 150
+    Plastic: 150
+
+- type: latheRecipe
+  id: NCProduceNCArmMedicalToolsImproved
+  result: NCArmMedicalToolsImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1250
+    Glass: 250
+    Silver: 250
+    Plastic: 250
+
+- type: latheRecipe
+  id: NCProduceNCArmMedicalToolsPremium
+  result: NCArmMedicalToolsPremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1500
+    Glass: 300
+    Silver: 300
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmPocketStandard
+  result: NCArmPocketStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 300
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmPocketImprovised
+  result: NCArmPocketImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 200
+    Plastic: 200
+
+- type: latheRecipe
+  id: NCProduceNCArmPocketImproved
+  result: NCArmPocketImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 400
+
+- type: latheRecipe
+  id: NCProduceNCArmPocketPremium
+  result: NCArmPocketPremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 450
+    Plastic: 450
+
+- type: latheRecipe
+  id: NCProduceNCArmSocketStandard
+  result: NCArmSocketStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 200
+    Gold: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmSocketImprovised
+  result: NCArmSocketImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 150
+    Gold: 50
+
+- type: latheRecipe
+  id: NCProduceNCArmSocketImproved
+  result: NCArmSocketImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 750
+    Plastic: 250
+    Gold: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmSocketPremium
+  result: NCArmSocketPremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 900
+    Plastic: 300
+    Gold: 150
+
+- type: latheRecipe
+  id: NCProduceNCArmImpactStandard
+  result: NCArmImpactStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plasteel: 500
+
+- type: latheRecipe
+  id: NCProduceNCArmImpactImprovised
+  result: NCArmImpactImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plasteel: 350
+
+- type: latheRecipe
+  id: NCProduceNCArmImpactImproved
+  result: NCArmImpactImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 750
+    Plasteel: 600
+
+- type: latheRecipe
+  id: NCProduceNCArmImpactPremium
+  result: NCArmImpactPremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 900
+    Plasteel: 750
+
+- type: latheRecipe
+  id: NCProduceNCArmCuffStandard
+  result: NCArmCuffStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Plastic: 400
+    Cloth: 200
+    Biomass: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmCuffImprovised
+  result: NCArmCuffImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Plastic: 300
+    Cloth: 150
+    Biomass: 50
+
+- type: latheRecipe
+  id: NCProduceNCArmCuffImproved
+  result: NCArmCuffImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Plastic: 500
+    Cloth: 250
+    Biomass: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmCuffPremium
+  result: NCArmCuffPremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Plastic: 600
+    Cloth: 300
+    Biomass: 150
+
+- type: latheRecipe
+  id: NCProduceNCArmShellStandard
+  result: NCArmShellStandard
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 600
+
+- type: latheRecipe
+  id: NCProduceNCArmShellImprovised
+  result: NCArmShellImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 400
+
+- type: latheRecipe
+  id: NCProduceNCArmShellImproved
+  result: NCArmShellImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 750
+    Plastic: 750
+
+- type: latheRecipe
+  id: NCProduceNCArmShellPremium
+  result: NCArmShellPremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 900
+    Plastic: 900
+
+- type: latheRecipe
+  id: NCProduceNCArmPowerDriveStandard
+  result: NCArmPowerDriveStandard
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1500
+    Plasteel: 600
+    Gold: 150
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmPowerDriveImprovised
+  result: NCArmPowerDriveImprovised
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1050
+    Plasteel: 420
+    Gold: 105
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmPowerDriveImproved
+  result: NCArmPowerDriveImproved
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1875
+    Plasteel: 750
+    Gold: 188
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmPowerDrivePremium
+  result: NCArmPowerDrivePremium
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 2250
+    Plasteel: 900
+    Gold: 225
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmImpactImplantEmpty
+  result: NCArmImpactImplantEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmImpactImplantImprovisedEmpty
+  result: NCArmImpactImplantImprovisedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 280
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmImpactImplantImprovedEmpty
+  result: NCArmImpactImplantImprovedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmImpactImplantPremiumEmpty
+  result: NCArmImpactImplantPremiumEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmClawsImplantEmpty
+  result: NCArmClawsImplantEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmClawsImplantImprovisedEmpty
+  result: NCArmClawsImplantImprovisedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 280
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmClawsImplantImprovedEmpty
+  result: NCArmClawsImplantImprovedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmClawsImplantPremiumEmpty
+  result: NCArmClawsImplantPremiumEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmBladeImplantEmpty
+  result: NCArmBladeImplantEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmBladeImplantImprovisedEmpty
+  result: NCArmBladeImplantImprovisedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 280
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmBladeImplantImprovedEmpty
+  result: NCArmBladeImplantImprovedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmBladeImplantPremiumEmpty
+  result: NCArmBladeImplantPremiumEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCMantisBladeImplantEmpty
+  result: NCMantisBladeImplantEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCMantisBladeImplantImprovisedEmpty
+  result: NCMantisBladeImplantImprovisedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 280
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCMantisBladeImplantImprovedEmpty
+  result: NCMantisBladeImplantImprovedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCMantisBladeImplantPremiumEmpty
+  result: NCMantisBladeImplantPremiumEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmMonowireImplantEmpty
+  result: NCArmMonowireImplantEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmMonowireImplantImprovisedEmpty
+  result: NCArmMonowireImplantImprovisedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 280
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmMonowireImplantImprovedEmpty
+  result: NCArmMonowireImplantImprovedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmMonowireImplantPremiumEmpty
+  result: NCArmMonowireImplantPremiumEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmPistolImplantEmpty
+  result: NCArmPistolImplantEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmPistolImplantImprovisedEmpty
+  result: NCArmPistolImplantImprovisedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 280
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmPistolImplantImprovedEmpty
+  result: NCArmPistolImplantImprovedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmPistolImplantPremiumEmpty
+  result: NCArmPistolImplantPremiumEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmLauncherImplantEmpty
+  result: NCArmLauncherImplantEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 200
+    Plasteel: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmLauncherImplantImprovisedEmpty
+  result: NCArmLauncherImplantImprovisedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 280
+    Plastic: 200
+    Plasteel: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmLauncherImplantImprovedEmpty
+  result: NCArmLauncherImplantImprovedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Plastic: 200
+    Plasteel: 300
+
+- type: latheRecipe
+  id: NCProduceNCArmLauncherImplantPremiumEmpty
+  result: NCArmLauncherImplantPremiumEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 200
+    Plasteel: 300
+
+- type: latheRecipe
+  id: NCProduceNCToolHandImplantEmpty
+  result: NCToolHandImplantEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCToolHandImplantImprovisedEmpty
+  result: NCToolHandImplantImprovisedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 280
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCToolHandImplantImprovedEmpty
+  result: NCToolHandImplantImprovedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCToolHandImplantPremiumEmpty
+  result: NCToolHandImplantPremiumEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmMedicalImplantEmpty
+  result: NCArmMedicalImplantEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmMedicalImplantImprovisedEmpty
+  result: NCArmMedicalImplantImprovisedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 280
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmMedicalImplantImprovedEmpty
+  result: NCArmMedicalImplantImprovedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmMedicalImplantPremiumEmpty
+  result: NCArmMedicalImplantPremiumEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmStorageImplantEmpty
+  result: NCArmStorageImplantEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmStorageImplantImprovisedEmpty
+  result: NCArmStorageImplantImprovisedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 280
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmStorageImplantImprovedEmpty
+  result: NCArmStorageImplantImprovedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmStorageImplantPremiumEmpty
+  result: NCArmStorageImplantPremiumEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmQuickSocketImplantEmpty
+  result: NCArmQuickSocketImplantEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmQuickSocketImplantImprovisedEmpty
+  result: NCArmQuickSocketImplantImprovisedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 280
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmQuickSocketImplantImprovedEmpty
+  result: NCArmQuickSocketImplantImprovedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCArmQuickSocketImplantPremiumEmpty
+  result: NCArmQuickSocketImplantPremiumEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 200
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanCivilianCyberArmLeftFrame
+  result: NCOrganHumanCivilianCyberArmLeftFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1500
+    Plastic: 800
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanCivilianCyberArmRightFrame
+  result: NCOrganHumanCivilianCyberArmRightFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1500
+    Plastic: 800
+    Plasteel: 100
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanArmoredCyberArmLeftFrame
+  result: NCOrganHumanArmoredCyberArmLeftFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 2000
+    Plastic: 800
+    Plasteel: 1500
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanArmoredCyberArmRightFrame
+  result: NCOrganHumanArmoredCyberArmRightFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 2000
+    Plastic: 800
+    Plasteel: 1500
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanCivilianCyberArmLeftImprovisedFrame
+  result: NCOrganHumanCivilianCyberArmLeftImprovisedFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 900
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanCivilianCyberArmLeftImprovedFrame
+  result: NCOrganHumanCivilianCyberArmLeftImprovedFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1560
+    Plastic: 520
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanCivilianCyberArmLeftPremiumFrame
+  result: NCOrganHumanCivilianCyberArmLeftPremiumFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 2040
+    Plastic: 680
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanCivilianCyberArmRightImprovisedFrame
+  result: NCOrganHumanCivilianCyberArmRightImprovisedFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 900
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanCivilianCyberArmRightImprovedFrame
+  result: NCOrganHumanCivilianCyberArmRightImprovedFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1560
+    Plastic: 520
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanCivilianCyberArmRightPremiumFrame
+  result: NCOrganHumanCivilianCyberArmRightPremiumFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 2040
+    Plastic: 680
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanArmoredCyberArmLeftImprovisedFrame
+  result: NCOrganHumanArmoredCyberArmLeftImprovisedFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 900
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanArmoredCyberArmLeftImprovedFrame
+  result: NCOrganHumanArmoredCyberArmLeftImprovedFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1560
+    Plastic: 520
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanArmoredCyberArmLeftPremiumFrame
+  result: NCOrganHumanArmoredCyberArmLeftPremiumFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 2040
+    Plastic: 680
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanArmoredCyberArmRightImprovisedFrame
+  result: NCOrganHumanArmoredCyberArmRightImprovisedFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 900
+    Plastic: 300
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanArmoredCyberArmRightImprovedFrame
+  result: NCOrganHumanArmoredCyberArmRightImprovedFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1560
+    Plastic: 520
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanArmoredCyberArmRightPremiumFrame
+  result: NCOrganHumanArmoredCyberArmRightPremiumFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 2040
+    Plastic: 680
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanCyberArmLeftFrame
+  result: NCOrganHumanCyberArmLeftFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1400
+    Plastic: 400
+
+- type: latheRecipe
+  id: NCProduceNCOrganHumanCyberArmRightFrame
+  result: NCOrganHumanCyberArmRightFrame
+  completetime: 20
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1400
+    Plastic: 400
+
+- type: latheRecipe
+  id: NCProduceNCCyberarmActuator
+  result: NCCyberarmActuator
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 800
+    Plastic: 200
+    Gold: 100
+
+- type: latheRecipe
+  id: NCProduceNCCyberarmActuatorQualityImprovised
+  result: NCCyberarmActuatorQualityImprovised
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 800
+    Plastic: 200
+    Gold: 50
+
+- type: latheRecipe
+  id: NCProduceNCCyberarmActuatorQualityImproved
+  result: NCCyberarmActuatorQualityImproved
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 800
+    Plastic: 200
+    Gold: 150
+
+- type: latheRecipe
+  id: NCProduceNCCyberarmActuatorQualityPremium
+  result: NCCyberarmActuatorQualityPremium
+  completetime: 10
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 800
+    Plastic: 200
+    Gold: 250

@@ -69,6 +69,8 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
         BodyDoll.TargetingChanged += OnBodyZoneSelected;
         AllBodyButton.OnPressed += _ => ClearBodyFilter();
 
+        CyberwareMap.ModuleSelected += OnCyberwareSelected;
+
         SetTabTitles(0, 0, 0, 0, 0, 0);
         ShowEmptyHeader();
     }
@@ -112,7 +114,14 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
 
     public void SetSnapshot(NCMedicalSnapshot snapshot, EntityUid? patient)
     {
-        var sameSnapshot = _snapshot?.MedicalRevision == snapshot.MedicalRevision && _patient == patient;
+        if (_patient != patient)
+        {
+            _selectedCyberwareIndex = 0;
+            _selectedCyberware = null;
+        }
+
+        var sameSnapshot = _snapshot?.MedicalRevision == snapshot.MedicalRevision && _patient == patient &&
+                           _snapshot?.Disclosures == snapshot.Disclosures && _snapshot?.Tier == snapshot.Tier;
         _snapshot = snapshot;
         _patient = patient;
         _secondsSinceUpdate = 0f;
@@ -156,11 +165,14 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
                 Content.Shared._NC.Medical.Humanity.NCCyberCrisisStage.Warning => "nc-humanity-stage-warning",
                 Content.Shared._NC.Medical.Humanity.NCCyberCrisisStage.Crisis => "nc-humanity-stage-crisis",
                 Content.Shared._NC.Medical.Humanity.NCCyberCrisisStage.Acute => "nc-humanity-stage-acute",
+                Content.Shared._NC.Medical.Humanity.NCCyberCrisisStage.Recovery => "nc-humanity-stage-recovery",
                 _ => "nc-humanity-stage-stable",
             };
             HumanityStateLabel.SetMessage(Loc.GetString("nc-humanity-status", ("current", MathF.Round(humanity.Current, 1)),
                 ("maximum", MathF.Round(humanity.Maximum, 1)), ("burden", MathF.Round(humanity.Burden, 1)),
-                ("stress", MathF.Round(humanity.Stress, 1)), ("stage", Loc.GetString(stage))));
+                ("stress", MathF.Round(humanity.Stress, 1)), ("stage", Loc.GetString(stage))) + "\n" +
+                Loc.GetString("nc-psychosis-details", ("stress", MathF.Round(humanity.Stress)), ("exhaustion", MathF.Round(humanity.Exhaustion)),
+                    ("burden", MathF.Round(humanity.Burden)), ("support", MathF.Round(humanity.SupportSeconds))));
         }
         else HumanityStateLabel.Clear();
         TierLabel.Text = TierName(snapshot.Tier);
@@ -245,7 +257,8 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
             snapshot.Regions.Count,
             snapshot.Wounds.Count + snapshot.WoundsOmitted,
             snapshot.Organs.Count + snapshot.OrgansOmitted,
-            snapshot.Cyberware.Count + snapshot.CyberwareOmitted,
+            Has(snapshot.Disclosures, NCDiagnosticDisclosure.Cyberware)
+                ? snapshot.Cyberware.Count + snapshot.CyberwareOmitted : 0,
             snapshot.Drugs.Count + snapshot.DrugsOmitted,
             snapshot.History.Count + snapshot.HistoryOmitted);
     }
@@ -552,72 +565,6 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
         AddOmitted(OrgansContainer, snapshot.OrgansOmitted);
     }
 
-    private void PopulateCyberware(NCMedicalSnapshot snapshot)
-    {
-        if (!Has(snapshot.Disclosures, NCDiagnosticDisclosure.Cyberware))
-        {
-            AddUnavailable(CyberwareContainer, NCDiagnosticTier.ScannerInternal);
-            return;
-        }
-        if (snapshot.Cyberware.Count == 0)
-        {
-            AddEmpty(CyberwareContainer);
-            return;
-        }
-
-        foreach (var module in snapshot.Cyberware.Take(MaximumRowsPerSection))
-        {
-            var placement = module.Slot is { } slot
-                ? CyberwareSlotName(slot)
-                : module.HostCategory is { } host
-                    ? OrganName(host.Id)
-                    : Value(module.Form);
-            var state = module.Operational
-                ? Loc.GetString("nc-medical-diagnostics-cyberware-online")
-                : Loc.GetString("nc-medical-diagnostics-cyberware-offline");
-            var details = Loc.GetString(
-                "nc-medical-diagnostics-cyberware-summary",
-                ("placement", placement),
-                ("neural", Value(module.NeuralState)),
-                ("state", state));
-            var severity = !module.Operational || module.EmpDisabled
-                ? NCDiagnosticBand.Critical
-                : MaxBand(
-                    MaxBand(module.Integrity, module.Function),
-                    module.Heat);
-            AddCard(
-                CyberwareContainer,
-                CyberwareName(module.Profile),
-                details,
-                BandColor(severity),
-                icon: CyberwareIcon(module),
-                metrics:
-                [
-                    new DiagnosticMetric(
-                        Loc.GetString("nc-medical-diagnostics-metric-integrity"),
-                        BandName(module.Integrity),
-                        RemainingProgress(module.Integrity),
-                        BandColor(module.Integrity)),
-                    new DiagnosticMetric(
-                        Loc.GetString("nc-medical-diagnostics-metric-function"),
-                        FunctionBandName(module.Function),
-                        RemainingProgress(module.Function),
-                        BandColor(module.Function)),
-                    new DiagnosticMetric(
-                        Loc.GetString("nc-medical-diagnostics-metric-power"),
-                        FunctionBandName(module.Power),
-                        RemainingProgress(module.Power),
-                        BandColor(module.Power)),
-                    new DiagnosticMetric(
-                        Loc.GetString("nc-medical-diagnostics-metric-heat"),
-                        BandName(module.Heat),
-                        BandProgress(module.Heat),
-                        BandColor(module.Heat)),
-                ]);
-        }
-        AddOmitted(CyberwareContainer, snapshot.CyberwareOmitted);
-    }
-
     private void PopulateDrugs(NCMedicalSnapshot snapshot)
     {
         if (!Has(snapshot.Disclosures, NCDiagnosticDisclosure.Drugs))
@@ -837,7 +784,8 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
         Color color,
         string marker = "●",
         Texture? icon = null,
-        IReadOnlyList<DiagnosticMetric>? metrics = null)
+        IReadOnlyList<DiagnosticMetric>? metrics = null,
+        int metricColumns = 3)
     {
         var panel = new PanelContainer
         {
@@ -920,7 +868,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
         {
             var metricGrid = new GridContainer
             {
-                Columns = Math.Min(3, metrics.Count),
+                Columns = Math.Min(metricColumns, metrics.Count),
                 HSeparationOverride = 6,
                 VSeparationOverride = 5,
                 HorizontalExpand = true,
@@ -1070,7 +1018,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
 
     private string SurgeryProcedureName(ProtoId<NCSurgeryProcedurePrototype> id) =>
         _prototypes.TryIndex(id, out NCSurgeryProcedurePrototype? procedure)
-            ? procedure.Name
+            ? procedure.NameId is { } name ? Loc.GetString(name) : procedure.Name
             : PrototypeName(id.Id);
 
     private string SurgeryStepName(ProtoId<NCSurgeryStepPrototype> id) =>
@@ -1274,6 +1222,8 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
         WoundsContainer.RemoveAllChildren();
         OrgansContainer.RemoveAllChildren();
         CyberwareContainer.RemoveAllChildren();
+        CyberwareMap.Clear();
+        CyberwareCount.Text = string.Empty;
         DrugsContainer.RemoveAllChildren();
         HistoryContainer.RemoveAllChildren();
     }

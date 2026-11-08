@@ -1,0 +1,29 @@
+{
+    "version": 1,
+    "license": "CC0-1.0",
+    "copyright": "Generated with OpenAI ImageGen for Night City 2045, 2026; native sprite normalization by project contributors.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "stable"
+        },
+        {
+            "name": "warning"
+        },
+        {
+            "name": "crisis"
+        },
+        {
+            "name": "acute"
+        },
+        {
+            "name": "recovery"
+        },
+        {
+            "name": "phantom"
+        }
+    ]
+}

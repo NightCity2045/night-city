@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+ent-NCBiocompatibleFiber = biocompatible reinforcing fiber
+    .desc = A spool for muscle and bone reinforcement. Synthesized from oil, carbon and silicon at 350 K.
+ent-NCSyntheticMuscle = synthetic muscle cassette
+    .desc = A sterile culture-derived muscle substrate fabricated from biomass.
+ent-NCBoneReinforcementComposite = bone reinforcement composite
+    .desc = An implant-grade composite synthesized from oil, phosphorus and silicon at 420 K.
+ent-NCSkeletalAnchors = skeletal anchor kit
+    .desc = Standard spinal and pelvic mounting hardware for Sigma.
+ent-NCSkeletalHeavyAnchors = reinforced skeletal anchor kit
+    .desc = Reinforced spinal and pelvic mounting hardware for Beta.
+ent-NCBetaActuator = Beta heavy actuator kit
+    .desc = A heavy drive assembly built from manipulators, steel and high-voltage cable.
+ent-NCSkeletalPowerJunction = skeletal power junction
+    .desc = A replaceable power distribution node for implanted frames.
+ent-NCCyberwareSterileWrap = cyberware sterile preparation pack
+    .desc = Use on an occupied powered cyberware bench after assembly, firmware and testing. Consumed during preparation.
+ent-NCImplantLinearFrameSigmaEmpty = unassembled linear frame Sigma
+    .desc = Empty manufactured frame. Fit five compatible parts on the cyberware bench, flash, test and prepare.
+ent-NCImplantLinearFrameBetaEmpty = unassembled linear frame Beta
+    .desc = Empty heavy frame. Requires heavy actuators and reinforced anchors, firmware, testing and preparation.
+ent-NCImplantMuscleBoneLaceUnprepared = unprepared muscle and bone reinforcement kit
+    .desc = Assembled from muscle, reinforcing fiber and composite. Prepare on a powered cyberware bench before surgery.
+nc-cyber-production-slot-ncskeletalanchorslot = skeletal anchors
+nc-cyber-production-slot-ncskeletalheavyanchorslot = reinforced skeletal anchors
+nc-cyber-production-slot-ncbetaactuatorslot = Beta heavy actuators
+nc-cyber-production-slot-ncskeletalpowerslot = power junction
+nc-cyber-production-ingredient-fiber = biocompatible reinforcing fiber
+nc-cyber-production-ingredient-muscle = synthetic muscle cassette
+nc-cyber-production-ingredient-composite = bone reinforcement composite
+nc-cyber-production-prepared = Factory checked and sterile prepared: ready for surgery.
+nc-cyber-production-unprepared = Factory preparation required. Assemble, flash and test frames, then use a sterile preparation pack on the powered bench.
+nc-cyber-production-preparation-failed = Preparation unavailable: check the held sterile pack, battery, assembly test and component condition.
+guide-entry-nc-cyberware-production = Cyberware manufacturing
+nc-cyber-production-item-name = { $implant } — { $state }
+nc-cyber-production-state-ready = ready
+nc-cyber-production-state-unassembled = requires preparation

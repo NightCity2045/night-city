@@ -75,6 +75,9 @@ public sealed partial class NCSurgeryProcedurePrototype : IPrototype
     public string Name { get; private set; } = default!;
 
     [DataField]
+    public LocId? NameId { get; private set; }
+
+    [DataField]
     public string Description { get; private set; } = string.Empty;
 
     [DataField(required: true)]

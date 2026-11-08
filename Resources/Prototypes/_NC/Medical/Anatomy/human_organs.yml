@@ -102,7 +102,7 @@
   - type: NCNerve
   - type: NCSurgicalSite
   - type: NCCyberwareSlotHost
-    slots: [ NCSlotNeuralCore, NCSlotCranialUtility, NCSlotMotorBurst, NCSlotMotorStabilizer ]
+    slots: [ NCSlotNeuralCore, NCSlotCranialUtility, NCSlotMotorStabilizer ]
 
 - type: entity
   id: NCOrganHumanArmLeft
@@ -267,7 +267,7 @@
     pressureFullScaleVolume: 1800
     compressionFullScaleVolume: 1200
   - type: NCCyberwareSlotHost
-    slots: [ NCSlotThoracicSupport, NCSlotSubdermalThorax, NCSlotThoracicPower, NCSlotThoracicConverter ]
+    slots: [ NCSlotRadarThorax, NCSlotBiomonitorThorax, NCSlotThoracicSupport, NCSlotDermalArmorThorax, NCSlotSubdermalThorax, NCSlotThoracicPower, NCSlotThoracicConverter, NCSlotMuscleBoneLacePrimary, NCSlotMuscleBoneLaceSecondary ]
 
 - type: entity
   id: NCOrganHumanAbdomen
@@ -276,6 +276,8 @@
   components:
   - type: Organ
     category: Abdomen
+  - type: NCCyberwareSlotHost
+    slots: [ NCSlotMedicalAbdomen ]
   - type: NCAnatomicalRegion
     tissueProfile: NCHumanCavityTissue
     vitalImportance: Important
@@ -443,7 +445,14 @@
   - type: NCOrganIntegrity
   - type: NCOrganFunction
     functionType: Vision
+    baseCapacity: 0.5
   - type: NCSurgicalSite
+
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.Eyes
+    data:
+      sprite: _NC/Objects/Cyberware/optics.rsi
+      state: worn_left
 
 - type: entity
   id: NCOrganHumanTongue

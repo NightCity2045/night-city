@@ -1,0 +1,595 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: construction
+  id: NCCyberarmActuatorConstructionQualityImprovised
+  graph: NCCyberarmActuatorConstructionQualityImprovised
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+  name: nc-quality-recipe-nccyberarmactuatorconstructionqualityimprovised
+
+- type: constructionGraph
+  id: NCCyberarmActuatorConstructionQualityImprovised
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - material: Manipulator
+        amount: 2
+        doAfter: 2
+      - material: Steel
+        amount: 3
+        doAfter: 2
+      - material: Cable
+        amount: 3
+        doAfter: 2
+      - tool: Screwing
+        doAfter: 4
+  - node: complete
+    entity: NCCyberarmActuatorQualityImprovised
+
+- type: construction
+  id: NCCyberarmActuatorConstructionQualityImproved
+  graph: NCCyberarmActuatorConstructionQualityImproved
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+  name: nc-quality-recipe-nccyberarmactuatorconstructionqualityimproved
+
+- type: constructionGraph
+  id: NCCyberarmActuatorConstructionQualityImproved
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - material: Manipulator
+        amount: 3
+        doAfter: 2
+      - material: Steel
+        amount: 6
+        doAfter: 2
+      - material: Cable
+        amount: 6
+        doAfter: 2
+      - tool: Screwing
+        doAfter: 4
+      - material: Gold
+        amount: 1
+        doAfter: 2
+  - node: complete
+    entity: NCCyberarmActuatorQualityImproved
+
+- type: construction
+  id: NCCyberarmActuatorConstructionQualityPremium
+  graph: NCCyberarmActuatorConstructionQualityPremium
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+  name: nc-quality-recipe-nccyberarmactuatorconstructionqualitypremium
+
+- type: constructionGraph
+  id: NCCyberarmActuatorConstructionQualityPremium
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - material: Manipulator
+        amount: 4
+        doAfter: 2
+      - material: Steel
+        amount: 8
+        doAfter: 2
+      - material: Cable
+        amount: 8
+        doAfter: 2
+      - tool: Screwing
+        doAfter: 4
+      - material: Gold
+        amount: 1
+        doAfter: 2
+      - material: Silver
+        amount: 1
+        doAfter: 2
+  - node: complete
+    entity: NCCyberarmActuatorQualityPremium
+
+- type: construction
+  id: NCBetaActuatorConstructionQualityImprovised
+  graph: NCBetaActuatorConstructionQualityImprovised
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+  name: nc-quality-recipe-ncbetaactuatorconstructionqualityimprovised
+
+- type: constructionGraph
+  id: NCBetaActuatorConstructionQualityImprovised
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - material: Manipulator
+        amount: 4
+        doAfter: 2
+      - material: Steel
+        amount: 8
+        doAfter: 2
+      - material: CableHV
+        amount: 5
+        doAfter: 2
+      - tool: Screwing
+        doAfter: 4
+  - node: complete
+    entity: NCBetaActuatorQualityImprovised
+
+- type: construction
+  id: NCBetaActuatorConstructionQualityImproved
+  graph: NCBetaActuatorConstructionQualityImproved
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+  name: nc-quality-recipe-ncbetaactuatorconstructionqualityimproved
+
+- type: constructionGraph
+  id: NCBetaActuatorConstructionQualityImproved
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - material: Manipulator
+        amount: 8
+        doAfter: 2
+      - material: Steel
+        amount: 15
+        doAfter: 2
+      - material: CableHV
+        amount: 9
+        doAfter: 2
+      - tool: Screwing
+        doAfter: 4
+      - material: Gold
+        amount: 1
+        doAfter: 2
+  - node: complete
+    entity: NCBetaActuatorQualityImproved
+
+- type: construction
+  id: NCBetaActuatorConstructionQualityPremium
+  graph: NCBetaActuatorConstructionQualityPremium
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+  name: nc-quality-recipe-ncbetaactuatorconstructionqualitypremium
+
+- type: constructionGraph
+  id: NCBetaActuatorConstructionQualityPremium
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - material: Manipulator
+        amount: 10
+        doAfter: 2
+      - material: Steel
+        amount: 20
+        doAfter: 2
+      - material: CableHV
+        amount: 12
+        doAfter: 2
+      - tool: Screwing
+        doAfter: 4
+      - material: Gold
+        amount: 1
+        doAfter: 2
+      - material: Silver
+        amount: 1
+        doAfter: 2
+  - node: complete
+    entity: NCBetaActuatorQualityPremium
+
+- type: construction
+  id: NCMuscleBoneLaceConstructionQualityImprovised
+  graph: NCMuscleBoneLaceConstructionQualityImprovised
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+  name: nc-quality-recipe-ncmusclebonelaceconstructionqualityimprovised
+
+- type: constructionGraph
+  id: NCMuscleBoneLaceConstructionQualityImprovised
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - tag: NCCyberFiber
+        name: nc-cyber-production-ingredient-fiber
+        icon:
+          sprite: _NC/Objects/Cyberware/production.rsi
+          state: fiber
+        doAfter: 3
+      - tag: NCCyberMuscle
+        name: nc-cyber-production-ingredient-muscle
+        icon:
+          sprite: _NC/Objects/Cyberware/production.rsi
+          state: muscle
+        doAfter: 3
+      - tag: NCCyberComposite
+        name: nc-cyber-production-ingredient-composite
+        icon:
+          sprite: _NC/Objects/Cyberware/production.rsi
+          state: composite
+        doAfter: 3
+      - material: Plastic
+        amount: 2
+      - material: Cloth
+        amount: 2
+  - node: complete
+    entity: NCImplantMuscleBoneLaceUnpreparedQualityImprovised
+
+- type: construction
+  id: NCMuscleBoneLaceConstructionQualityImproved
+  graph: NCMuscleBoneLaceConstructionQualityImproved
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+  name: nc-quality-recipe-ncmusclebonelaceconstructionqualityimproved
+
+- type: constructionGraph
+  id: NCMuscleBoneLaceConstructionQualityImproved
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - tag: NCCyberFiber
+        name: nc-cyber-production-ingredient-fiber
+        icon:
+          sprite: _NC/Objects/Cyberware/production.rsi
+          state: fiber
+        doAfter: 3
+      - tag: NCCyberMuscle
+        name: nc-cyber-production-ingredient-muscle
+        icon:
+          sprite: _NC/Objects/Cyberware/production.rsi
+          state: muscle
+        doAfter: 3
+      - tag: NCCyberComposite
+        name: nc-cyber-production-ingredient-composite
+        icon:
+          sprite: _NC/Objects/Cyberware/production.rsi
+          state: composite
+        doAfter: 3
+      - material: Plastic
+        amount: 3
+      - material: Cloth
+        amount: 3
+      - material: Gold
+        amount: 1
+        doAfter: 2
+  - node: complete
+    entity: NCImplantMuscleBoneLaceUnpreparedQualityImproved
+
+- type: construction
+  id: NCMuscleBoneLaceConstructionQualityPremium
+  graph: NCMuscleBoneLaceConstructionQualityPremium
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+  name: nc-quality-recipe-ncmusclebonelaceconstructionqualitypremium
+
+- type: constructionGraph
+  id: NCMuscleBoneLaceConstructionQualityPremium
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - tag: NCCyberFiber
+        name: nc-cyber-production-ingredient-fiber
+        icon:
+          sprite: _NC/Objects/Cyberware/production.rsi
+          state: fiber
+        doAfter: 3
+      - tag: NCCyberMuscle
+        name: nc-cyber-production-ingredient-muscle
+        icon:
+          sprite: _NC/Objects/Cyberware/production.rsi
+          state: muscle
+        doAfter: 3
+      - tag: NCCyberComposite
+        name: nc-cyber-production-ingredient-composite
+        icon:
+          sprite: _NC/Objects/Cyberware/production.rsi
+          state: composite
+        doAfter: 3
+      - material: Plastic
+        amount: 4
+      - material: Cloth
+        amount: 4
+      - material: Gold
+        amount: 1
+        doAfter: 2
+      - material: Silver
+        amount: 1
+        doAfter: 2
+  - node: complete
+    entity: NCImplantMuscleBoneLaceUnpreparedQualityPremium
+
+- type: construction
+  id: NCImplantSkinweaveTorsoUnpreparedConstructionQualityImprovised
+  graph: NCImplantSkinweaveTorsoUnpreparedConstructionQualityImprovised
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+  name: nc-quality-recipe-ncimplantskinweavetorsounpreparedconstructionqualityimprovised
+
+- type: constructionGraph
+  id: NCImplantSkinweaveTorsoUnpreparedConstructionQualityImprovised
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - tag: NCDermalMesh
+        name: nc-dermal-ingredient-mesh
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: mesh
+        doAfter: 3
+      - tag: NCDermalMesh
+        name: nc-dermal-ingredient-mesh
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: mesh
+        doAfter: 3
+      - material: Plastic
+        amount: 1
+        doAfter: 2
+      - material: Cloth
+        amount: 2
+        doAfter: 2
+  - node: complete
+    entity: NCImplantSkinweaveTorsoUnpreparedQualityImprovised
+
+- type: construction
+  id: NCImplantSkinweaveTorsoUnpreparedConstructionQualityImproved
+  graph: NCImplantSkinweaveTorsoUnpreparedConstructionQualityImproved
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+  name: nc-quality-recipe-ncimplantskinweavetorsounpreparedconstructionqualityimproved
+
+- type: constructionGraph
+  id: NCImplantSkinweaveTorsoUnpreparedConstructionQualityImproved
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - tag: NCDermalMesh
+        name: nc-dermal-ingredient-mesh
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: mesh
+        doAfter: 3
+      - tag: NCDermalMesh
+        name: nc-dermal-ingredient-mesh
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: mesh
+        doAfter: 3
+      - material: Plastic
+        amount: 2
+        doAfter: 2
+      - material: Cloth
+        amount: 3
+        doAfter: 2
+      - material: Gold
+        amount: 1
+        doAfter: 2
+  - node: complete
+    entity: NCImplantSkinweaveTorsoUnpreparedQualityImproved
+
+- type: construction
+  id: NCImplantSkinweaveTorsoUnpreparedConstructionQualityPremium
+  graph: NCImplantSkinweaveTorsoUnpreparedConstructionQualityPremium
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+  name: nc-quality-recipe-ncimplantskinweavetorsounpreparedconstructionqualitypremium
+
+- type: constructionGraph
+  id: NCImplantSkinweaveTorsoUnpreparedConstructionQualityPremium
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - tag: NCDermalMesh
+        name: nc-dermal-ingredient-mesh
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: mesh
+        doAfter: 3
+      - tag: NCDermalMesh
+        name: nc-dermal-ingredient-mesh
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: mesh
+        doAfter: 3
+      - material: Plastic
+        amount: 2
+        doAfter: 2
+      - material: Cloth
+        amount: 4
+        doAfter: 2
+      - material: Gold
+        amount: 1
+        doAfter: 2
+      - material: Silver
+        amount: 1
+        doAfter: 2
+  - node: complete
+    entity: NCImplantSkinweaveTorsoUnpreparedQualityPremium
+
+- type: construction
+  id: NCImplantSubdermalArmorTorsoUnpreparedConstructionQualityImprovised
+  graph: NCImplantSubdermalArmorTorsoUnpreparedConstructionQualityImprovised
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+  name: nc-quality-recipe-ncimplantsubdermalarmortorsounpreparedconstructionqualityimprovised
+
+- type: constructionGraph
+  id: NCImplantSubdermalArmorTorsoUnpreparedConstructionQualityImprovised
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - tag: NCDermalMesh
+        name: nc-dermal-ingredient-mesh
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: mesh
+        doAfter: 3
+      - tag: NCDermalPlates
+        name: nc-dermal-ingredient-plates
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: plates
+        doAfter: 3
+      - tag: NCDermalPlates
+        name: nc-dermal-ingredient-plates
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: plates
+        doAfter: 3
+      - material: Plastic
+        amount: 2
+        doAfter: 2
+  - node: complete
+    entity: NCImplantSubdermalArmorTorsoUnpreparedQualityImprovised
+
+- type: construction
+  id: NCImplantSubdermalArmorTorsoUnpreparedConstructionQualityImproved
+  graph: NCImplantSubdermalArmorTorsoUnpreparedConstructionQualityImproved
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+  name: nc-quality-recipe-ncimplantsubdermalarmortorsounpreparedconstructionqualityimproved
+
+- type: constructionGraph
+  id: NCImplantSubdermalArmorTorsoUnpreparedConstructionQualityImproved
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - tag: NCDermalMesh
+        name: nc-dermal-ingredient-mesh
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: mesh
+        doAfter: 3
+      - tag: NCDermalPlates
+        name: nc-dermal-ingredient-plates
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: plates
+        doAfter: 3
+      - tag: NCDermalPlates
+        name: nc-dermal-ingredient-plates
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: plates
+        doAfter: 3
+      - material: Plastic
+        amount: 3
+        doAfter: 2
+      - material: Gold
+        amount: 1
+        doAfter: 2
+  - node: complete
+    entity: NCImplantSubdermalArmorTorsoUnpreparedQualityImproved
+
+- type: construction
+  id: NCImplantSubdermalArmorTorsoUnpreparedConstructionQualityPremium
+  graph: NCImplantSubdermalArmorTorsoUnpreparedConstructionQualityPremium
+  startNode: start
+  targetNode: complete
+  category: construction-category-tools
+  objectType: Item
+  name: nc-quality-recipe-ncimplantsubdermalarmortorsounpreparedconstructionqualitypremium
+
+- type: constructionGraph
+  id: NCImplantSubdermalArmorTorsoUnpreparedConstructionQualityPremium
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: complete
+      steps:
+      - tag: NCDermalMesh
+        name: nc-dermal-ingredient-mesh
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: mesh
+        doAfter: 3
+      - tag: NCDermalPlates
+        name: nc-dermal-ingredient-plates
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: plates
+        doAfter: 3
+      - tag: NCDermalPlates
+        name: nc-dermal-ingredient-plates
+        icon:
+          sprite: _NC/Objects/Cyberware/dermal.rsi
+          state: plates
+        doAfter: 3
+      - material: Plastic
+        amount: 4
+        doAfter: 2
+      - material: Gold
+        amount: 1
+        doAfter: 2
+      - material: Silver
+        amount: 1
+        doAfter: 2
+  - node: complete
+    entity: NCImplantSubdermalArmorTorsoUnpreparedQualityPremium

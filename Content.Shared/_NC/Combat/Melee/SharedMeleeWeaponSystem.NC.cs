@@ -10,6 +10,8 @@ namespace Content.Shared.Weapons.Melee;
 
 public abstract partial class SharedMeleeWeaponSystem
 {
+    protected virtual bool NCTryEvadeMelee(EntityUid user, EntityUid target) => false;
+
     /// <summary>
     /// Authoritative medical bodies remain valid physical melee targets even if compatibility HP is later removed.
     /// </summary>

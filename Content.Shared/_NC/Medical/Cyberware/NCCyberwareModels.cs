@@ -44,6 +44,8 @@ public enum NCCyberwareActionKind : byte
     Service,
     MechanicalTrauma,
     Calibration,
+    SkeletalSurgery,
+    SkeletalLoadTest,
 }
 
 public readonly record struct NCCyberwareMutationResult(
@@ -80,6 +82,7 @@ public enum NCCyberwareMutationFailure : byte
     RepairProfileMismatch,
     InvalidAmount,
     PhysicalContainerFailure,
+    FactoryPreparationRequired,
 }
 
 /// <summary>
@@ -89,6 +92,10 @@ public enum NCCyberwareMutationFailure : byte
 [DataDefinition]
 public sealed partial class NCCyberwareStateSnapshot
 {
+    [DataField] public float OpticRadarCooldownSeconds;
+    [DataField] public bool NeuralEnabled = true;
+    [DataField] public List<Arms.NCArmContentsSnapshot> ArmContents = [];
+    [DataField] public Internal.NCMedicalImplantState? MedicalImplant;
     [DataField] public NCCyberwareServiceState? Service;
 
     [DataField]
@@ -129,6 +136,15 @@ public sealed partial class NCCyberwareStateSnapshot
 
     [DataField]
     public NCCyberwareNeuralState NeuralState;
+
+    [DataField]
+    public NCSkeletalSurgeryStage SkeletalSurgeryCompleted;
+
+    [DataField]
+    public bool SkeletalLoadTestPassed;
+
+    [DataField]
+    public bool FactoryPrepared;
 
     [DataField]
     public bool Calibrated;

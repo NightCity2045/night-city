@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolFixMedical
+  name: FixMedical
+  nameId: nc-medical-stage-fixmedical
+  representativeTool: NCCyberwareServiceTool
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolConnectMedical
+  name: ConnectMedical
+  nameId: nc-medical-stage-connectmedical
+  representativeTool: NCCyberwareServiceTool
+
+- type: ncSurgeryToolCapability
+  id: NCSurgeryToolCheckMedical
+  name: CheckMedical
+  nameId: nc-medical-stage-checkmedical
+  representativeTool: NCCyberwareServiceTool
+

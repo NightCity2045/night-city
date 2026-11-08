@@ -28,14 +28,30 @@
   displayName: nc-target-zone-eyes
   externalOrganCategory: Head
   medicalRegionCategory: Eyes
-  automaticWeight: 1
+  automaticWeight: 0.5
   calledShotHitChance: 0.05
   calledShotRedirectChance: 0.28
   calledShotRedirectZones: [ NCZoneHead, NCZoneChest ]
   armorLocation: Face
   fallbackZone: NCZoneHead
   neighborZones: [ NCZoneHead, NCZoneMouth ]
-  hitBounds: { position: "0.39,0.84", size: "0.22,0.06" }
+  hitBounds: { position: "0.39,0.84", size: "0.11,0.06" }
+  hitPriority: 20
+  downedWeightMultiplier: 0.8
+
+- type: ncTargetZone
+  id: NCZoneEyesRight
+  displayName: nc-optics-zone-right
+  externalOrganCategory: Head
+  medicalRegionCategory: EyesRight
+  automaticWeight: 0.5
+  calledShotHitChance: 0.05
+  calledShotRedirectChance: 0.28
+  calledShotRedirectZones: [ NCZoneHead, NCZoneChest ]
+  armorLocation: Face
+  fallbackZone: NCZoneHead
+  neighborZones: [ NCZoneHead, NCZoneMouth ]
+  hitBounds: { position: "0.5,0.84", size: "0.11,0.06" }
   hitPriority: 20
   downedWeightMultiplier: 0.8
 

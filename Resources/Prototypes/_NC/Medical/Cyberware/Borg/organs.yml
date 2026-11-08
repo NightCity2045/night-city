@@ -11,6 +11,7 @@
     category: Head
   - type: ParentOrgan
   - type: NCCyberwareSlotHost
+    # The former burst bay is retained solely for restoring pre-spinal biopods. New installs reject it.
     slots: [ NCSlotNeuralCore, NCSlotCranialUtility, NCSlotMotorBurst, NCSlotMotorStabilizer ]
   - type: NCCyberware
     profile: NCBorgSupportNode
@@ -109,11 +110,12 @@
   components:
   - type: Organ
     category: Thorax
+  - type: ParentOrgan
   - type: NCCyberware
     profile: NCBorgFrameBus
   - type: NCCyberwarePowerBus
   - type: NCCyberwareSlotHost
-    slots: [ NCSlotThoracicConverter, NCSlotSubdermalThorax ]
+    slots: [ NCSlotThoracicConverter, NCSlotSubdermalThorax, NCSlotMuscleBoneLacePrimary, NCSlotMuscleBoneLaceSecondary ]
   - type: NCSurgicalSite
     accessDepth: OrganExposed
     tissuesRetracted: true

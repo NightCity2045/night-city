@@ -9,7 +9,7 @@ using Robust.Shared.Audio;
 
 namespace Content.Shared._NC.Medical.Cyberware.Abilities;
 
-public enum NCCyberwareAbilityKind : byte { Tool, Blade, Biomonitor, MotorBurst, Stabilization }
+public enum NCCyberwareAbilityKind : byte { Tool, Blade, Biomonitor, MotorBurst, Stabilization, Gun, Storage }
 
 [Prototype("ncCyberwareAbility")]
 public sealed partial class NCCyberwareAbilityPrototype : IPrototype

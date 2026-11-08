@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Shared._NC.Medical.Cyberware.Internal;
 using System.Linq;
 using Content.Shared._NC.ActionResolution;
 using Content.Shared._NC.Medical.Anatomy;
@@ -84,6 +85,8 @@ public sealed partial class NCCyberwareSystem
 
     public bool ValidatePersistentState(NCCyberwareStateSnapshot state, bool installedModule)
     {
+        if (state != null && !Finite(state.OpticRadarCooldownSeconds, 0, 65)) return false;
+        if (state?.MedicalImplant is { } medical && !NCMedicalImplantMath.Valid(medical)) return false;
         if (state == null || string.IsNullOrWhiteSpace(state.EntityPrototype) ||
             state.EntityPrototype.Length > 128 || state.StableInstanceId == Guid.Empty ||
             string.IsNullOrWhiteSpace(state.Profile.Id) ||
@@ -91,12 +94,18 @@ public sealed partial class NCCyberwareSystem
             !_prototypes.TryIndex<EntityPrototype>(state.EntityPrototype, out var entityPrototype) ||
             !entityPrototype.TryComp<NCCyberwareComponent>(out var definition, _componentFactory) ||
             definition.Profile != state.Profile ||
+            entityPrototype.TryComp<NCMedicalImplantComponent>(out _, _componentFactory) != (state.MedicalImplant != null) ||
             !entityPrototype.TryComp<NCOrganIntegrityComponent>(out _, _componentFactory) ||
             !Finite(state.MaximumIntegrity, float.Epsilon, 1_000_000f) ||
             MathF.Abs(state.MaximumIntegrity - profile.MaximumIntegrity) > 0.001f ||
             !Unit(state.PermanentDamage) ||
             !Finite(state.CurrentIntegrity, 0f,
                 NCCyberwareCondition.ServiceCeiling(state.MaximumIntegrity, state.PermanentDamage)) ||
+            profile.RequiresFactoryPreparation && state.FactoryPrepared && state.Assembly is { } factory &&
+                factory.ValidatedRevision != factory.ConfigurationRevision ||
+            !NCSkeletalSurgeryPlan.Valid(profile.SkeletalSurgery, state.SkeletalSurgeryCompleted) ||
+            state.SkeletalLoadTestPassed && (!profile.RequiresSkeletalLoadTest || !state.Calibrated ||
+                !NCSkeletalSurgeryPlan.Complete(profile.SkeletalSurgery, state.SkeletalSurgeryCompleted)) ||
             !ValidateAssembly(profile, state.Assembly, state.StableInstanceId) ||
             !ValidatePowerBus(entityPrototype, state) ||
             state.Assembly?.ValidatedRevision != null && state.CurrentIntegrity <= 0f ||
@@ -114,6 +123,10 @@ public sealed partial class NCCyberwareSystem
         if (!NCCyberwareServiceHistory.Valid(state.Service) || !_prototypes.TryIndex(state.Service!.Firmware, out var firmware) ||
             firmware.CompatibleProfiles.Count > 0 && !firmware.CompatibleProfiles.Contains(state.Profile))
             return false;
+        if (state.ArmContents == null || state.ArmContents.Count > 8 ||
+            state.ArmContents.Count(value => value?.Slot == "integral") > 1 ||
+            state.ArmContents.Any(value => value == null || value.Slot is not ("integral" or "storage") || string.IsNullOrWhiteSpace(value.Yaml) || value.Yaml.Length > 262144) ||
+            state.ArmContents.Count > 0 && !entityPrototype.TryComp<Content.Shared._NC.Medical.Cyberware.Arms.NCArmModuleComponent>(out _, _componentFactory)) return false;
         var hasAbility = entityPrototype.TryComp<NCCyberwareAbilityComponent>(out _, _componentFactory);
         var hasExterior = entityPrototype.TryComp<NCCyberwareExteriorComponent>(out _, _componentFactory);
         if (hasExterior != (state.Exterior != null) ||
@@ -130,7 +143,8 @@ public sealed partial class NCCyberwareSystem
                 state.HostCategory is not { } hostCategory ||
                 !profile.CompatibleSlots.Contains(slotId) ||
                 !_prototypes.TryIndex(slotId, out NCCyberwareSlotPrototype? slot) ||
-                !slot.HostCategories.Contains(hostCategory) || profile.Size > slot.Capacity)
+                (!slot.HostCategories.Contains(hostCategory) && !slot.LegacyHostCategories.Contains(hostCategory)) ||
+                profile.Size > slot.Capacity)
             {
                 return false;
             }
@@ -156,11 +170,18 @@ public sealed partial class NCCyberwareSystem
         var previousIdentity = module.StableInstanceId;
         module.StableInstanceId = state.StableInstanceId;
         if (!TryRestoreAssembly(moduleUid, _prototypes.Index(state.Profile), state.Assembly) ||
-            !TryRestorePowerBus(moduleUid, state.PowerBus))
+            !TryRestorePowerBus(moduleUid, state.PowerBus) || !RestoreArmContents(moduleUid, state.ArmContents))
         {
             module.StableInstanceId = previousIdentity;
             return false;
         }
+        if (TryComp<NCMedicalImplantComponent>(moduleUid, out var medical))
+        {
+            medical.State = state.MedicalImplant is { } saved ? NCMedicalImplantMath.Clone(saved) : new();
+            medical.HasSample = false;
+        }
+        if (TryComp<Content.Shared._NC.Medical.Cyberware.Optics.NCOpticRadarComponent>(moduleUid, out var radar))
+        { radar.ReadyAt = _timing.CurTime + TimeSpan.FromSeconds(state.OpticRadarCooldownSeconds); radar.ActiveUntil = TimeSpan.Zero; }
         module.StateInitialized = true;
         module.Service = NCCyberwareServiceHistory.Clone(state.Service!);
         module.PersistenceCapturedAt = null;
@@ -175,6 +196,7 @@ public sealed partial class NCCyberwareSystem
         module.PermanentDamage = state.PermanentDamage;
         module.ThermalShutdown = state.ThermalShutdown;
         module.InstalledSlot = state.Slot;
+        if (TryComp<Content.Shared._NC.Medical.Cyberware.Neural.NCNeuralHardwareComponent>(moduleUid, out var neural)) neural.Enabled = state.NeuralEnabled;
         module.CurrentPower = state.CurrentPower;
         module.Heat = state.Heat;
         module.Load = state.Load;
@@ -191,12 +213,15 @@ public sealed partial class NCCyberwareSystem
         module.NeuralIntegrity = state.NeuralIntegrity;
         module.NeuralState = state.NeuralState;
         module.Calibrated = state.Calibrated;
+        module.FactoryPrepared = state.FactoryPrepared;
+        RefreshFactoryAppearance(moduleUid, module);
+        module.SkeletalSurgeryCompleted = state.SkeletalSurgeryCompleted;
+        module.SkeletalLoadTestPassed = state.SkeletalLoadTestPassed;
         module.LastAdvancedAt = runtimeAnchor;
         integrity.MaxIntegrity = state.MaximumIntegrity;
         integrity.CurrentIntegrity = state.CurrentIntegrity;
-        NormalizeMechanicalIntegrity(integrity);
-
         var profile = _prototypes.Index(state.Profile);
+        NormalizeMechanicalIntegrity(integrity, profile.Material);
         UpdateNeuralState(module, profile, runtimeAnchor);
         UpdateOperational(moduleUid, module, profile, runtimeAnchor);
         if (TryResolveOwningBody(moduleUid, out _))
@@ -221,52 +246,65 @@ public sealed partial class NCCyberwareSystem
             return false;
         }
 
-        var old = CaptureInstalledRuntime(body);
-        var detachedOld = new List<InstalledRuntime>(old.Count);
-        foreach (var entry in old)
+        var previousLegacyRestore = _restoringLegacyNeuralHosts;
+        var previousReplacedContents = _armContentsReplacedEntities;
+        _armContentsReplacedEntities = [];
+        _restoringLegacyNeuralHosts = true;
+        try
         {
-            if (!TryRemoveForRestore(body, entry.Module))
+            var old = CaptureInstalledRuntime(body);
+            var detachedOld = new List<InstalledRuntime>(old.Count);
+            foreach (var entry in old)
             {
-                RollbackOldModules(body, detachedOld);
-                return false;
-            }
-            detachedOld.Add(entry);
-        }
-
-        var spawned = new List<EntityUid>(desired.Count);
-        foreach (var state in desired)
-        {
-            if (state.HostCategory is not { } hostCategory || state.Slot is not { } slot ||
-                !TryFindOrgan(body, hostCategory, out var host))
-            {
-                RollbackRestoredModules(body, spawned, detachedOld);
-                return false;
+                if (!TryRemoveForRestore(body, entry.Module))
+                {
+                    RollbackOldModules(body, detachedOld);
+                    return false;
+                }
+                detachedOld.Add(entry);
             }
 
-            var module = Spawn(state.EntityPrototype, Transform(body).Coordinates);
-            spawned.Add(module);
-            var install = TryInstall(new NCCyberwareInstallRequest(
-                NCActionResolutionId.New(),
-                body,
-                host,
-                module,
-                slot,
-                state.NeuralState is NCCyberwareNeuralState.Linked or NCCyberwareNeuralState.Degraded,
-                state.Calibrated));
-            if (!install.Accepted || !TryApplyPersistentState(module, state, runtimeAnchor))
+            foreach (var entry in detachedOld) RegisterReplacedArmContents(entry.Module);
+            var spawned = new List<EntityUid>(desired.Count);
+            foreach (var state in desired)
             {
-                RollbackRestoredModules(body, spawned, detachedOld);
-                return false;
-            }
-        }
+                if (state.HostCategory is not { } hostCategory || state.Slot is not { } slot ||
+                    !TryFindOrgan(body, hostCategory, out var host))
+                {
+                    RollbackRestoredModules(body, spawned, detachedOld);
+                    return false;
+                }
 
-        foreach (var entry in detachedOld)
-        {
-            if (Exists(entry.Module))
-                QueueDel(entry.Module);
+                var module = Spawn(state.EntityPrototype, Transform(body).Coordinates);
+                spawned.Add(module);
+                var install = TryInstall(new NCCyberwareInstallRequest(
+                    NCActionResolutionId.New(),
+                    body,
+                    host,
+                    module,
+                    slot,
+                    state.NeuralState is NCCyberwareNeuralState.Linked or NCCyberwareNeuralState.Degraded,
+                    state.Calibrated));
+                if (!install.Accepted || !TryApplyPersistentState(module, state, runtimeAnchor))
+                {
+                    RollbackRestoredModules(body, spawned, detachedOld);
+                    return false;
+                }
+            }
+
+            foreach (var entry in detachedOld)
+            {
+                if (Exists(entry.Module))
+                    QueueDel(entry.Module);
+            }
+            RemComp<NCCyberwareBodyStateComponent>(body);
+            return true;
         }
-        RemComp<NCCyberwareBodyStateComponent>(body);
-        return true;
+        finally
+        {
+            _restoringLegacyNeuralHosts = previousLegacyRestore;
+            _armContentsReplacedEntities = previousReplacedContents;
+        }
     }
 
     private bool TryCaptureState(
@@ -301,8 +339,16 @@ public sealed partial class NCCyberwareSystem
             NeuralIntegrity = module.NeuralIntegrity,
             NeuralState = module.NeuralState,
             Calibrated = module.Calibrated,
+            FactoryPrepared = module.FactoryPrepared,
+            SkeletalSurgeryCompleted = module.SkeletalSurgeryCompleted,
+            SkeletalLoadTestPassed = module.SkeletalLoadTestPassed,
             PermanentDamage = module.PermanentDamage,
+            NeuralEnabled = !TryComp<Content.Shared._NC.Medical.Cyberware.Neural.NCNeuralHardwareComponent>(moduleUid, out var neural) || neural.Enabled,
             Assembly = CaptureAssembly(moduleUid),
+            ArmContents = CaptureArmContents(moduleUid),
+            OpticRadarCooldownSeconds = TryComp<Content.Shared._NC.Medical.Cyberware.Optics.NCOpticRadarComponent>(moduleUid, out var radar)
+                ? (float) Math.Clamp((radar.ReadyAt - _timing.CurTime).TotalSeconds, 0, 65) : 0,
+            MedicalImplant = TryComp<NCMedicalImplantComponent>(moduleUid, out var medical) ? NCMedicalImplantMath.Clone(medical.State) : null,
             PowerBus = CapturePowerBus(moduleUid),
             ThermalShutdown = module.ThermalShutdown,
             Exterior = TryComp<NCCyberwareExteriorComponent>(moduleUid, out var exterior)

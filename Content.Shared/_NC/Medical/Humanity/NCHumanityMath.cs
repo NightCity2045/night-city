@@ -5,7 +5,7 @@
 namespace Content.Shared._NC.Medical.Humanity;
 
 /// <summary>Deterministic package accounting and bounded psychological state; never changes physical health or control.</summary>
-public static class NCHumanityMath
+public static partial class NCHumanityMath
 {
     public const float Base = 100f;
     public const int MaximumAdaptations = 4096;
@@ -15,6 +15,8 @@ public static class NCHumanityMath
     public static bool ValidateProfile(NCHumanityProfilePrototype profile)
     {
         if (profile.ActiveUpdateInterval <= TimeSpan.Zero || profile.ActiveUpdateInterval > TimeSpan.FromMinutes(1) ||
+            !FiniteRange(profile.EscalationSeconds, .1f, 300f) ||
+            !FiniteRange(profile.MaximumAcuteSeconds, 1f, 3600f) || !FiniteRange(profile.RecoverySeconds, 1f, 3600f) ||
             !FiniteRange(profile.SafeRecoveryPerSecond, 0f, 100f) || !FiniteRange(profile.OverloadPerSecond, 0f, 100f) ||
             !FiniteRange(profile.OverburdenPerSecond, 0f, 100f) || !FiniteRange(profile.VulnerabilityScale, 0f, 100f) ||
             !FiniteRange(profile.StableMinimumPerfusion, 0f, 1f) || !FiniteRange(profile.StableMinimumOxygenation, 0f, 1f) ||
@@ -25,7 +27,7 @@ public static class NCHumanityMath
         var seen = new HashSet<NCCyberCrisisStage>();
         foreach (var band in profile.Bands)
         {
-            if (band == null || !Enum.IsDefined(band.Stage) || band.Stage == NCCyberCrisisStage.Stable || !seen.Add(band.Stage) ||
+            if (band == null || !Enum.IsDefined(band.Stage) || band.Stage is NCCyberCrisisStage.Stable or NCCyberCrisisStage.Recovery || !seen.Add(band.Stage) ||
                 !FiniteRange(band.HumanityBelow, 0f, 100f) || !FiniteRange(band.StressAtLeast, 0f, 100f) ||
                 !FiniteRange(band.EnhancementEfficiency, 0.1f, 1f)) return false;
             foreach (var other in profile.Bands)
@@ -39,6 +41,10 @@ public static class NCHumanityMath
     {
         if (!FiniteRange(state.Burden, 0f, 100000f) || !FiniteRange(state.Current, 0f, Maximum(state.Burden)) ||
             !FiniteRange(state.Stress, 0f, 100f) || !Enum.IsDefined(state.Stage) ||
+            !FiniteRange(state.Exhaustion, 0f, 100f) || !FiniteRange(state.EscalatingSeconds, 0f, 86400f) ||
+            !FiniteRange(state.AcuteSeconds, 0f, 86400f) || !FiniteRange(state.RecoverySeconds, 0f, 86400f) ||
+            !FiniteRange(state.MotorInhibitSeconds, 0f, 86400f) || !FiniteRange(state.SupportSeconds, 0f, 86400f) || !FiniteRange(state.SupportCooldown, 0f, 86400f) ||
+            !FiniteRange(state.SymptomSeconds, 0f, 86400f) ||
             !FiniteRange(state.StabilizingSeconds, 0f, 86400f) || state.Adaptation == null ||
             state.Adaptation.Count > MaximumAdaptations || state.RecentImpulses == null ||
             state.RecentImpulses.Count > MaximumRecentImpulses)
@@ -105,6 +111,11 @@ public static class NCHumanityMath
     public static void UpdateStage(NCHumanityStateSnapshot state, NCHumanityProfilePrototype profile, float seconds)
     {
         if (!Validate(state) || !ValidateProfile(profile) || !FiniteRange(seconds, 0f, 86400f)) return;
+        if (profile.EpisodesEnabled)
+        {
+            AdvanceEpisode(state, profile, seconds);
+            return;
+        }
         var desired = NCCyberCrisisStage.Stable;
         NCHumanityCrisisBand? currentBand = null;
         foreach (var band in profile.Bands)
@@ -142,7 +153,11 @@ public static class NCHumanityMath
     public static NCHumanityStateSnapshot Clone(NCHumanityStateSnapshot source) => new()
     {
         Current = source.Current, Burden = source.Burden, Stress = source.Stress, Stage = source.Stage,
-        StabilizingSeconds = source.StabilizingSeconds, Adaptation = new(source.Adaptation),
+        StabilizingSeconds = source.StabilizingSeconds, Exhaustion = source.Exhaustion,
+        EscalatingSeconds = source.EscalatingSeconds, AcuteSeconds = source.AcuteSeconds,
+        RecoverySeconds = source.RecoverySeconds, SupportSeconds = source.SupportSeconds, MotorInhibitSeconds = source.MotorInhibitSeconds,
+        SupportCooldown = source.SupportCooldown, DeclinesSupport = source.DeclinesSupport,
+        SymptomSeconds = source.SymptomSeconds, Episode = source.Episode, Adaptation = new(source.Adaptation),
         RecentImpulses = source.RecentImpulses.ConvertAll(memory => new NCHumanityImpulseMemory
         { Source = memory.Source, Profile = memory.Profile, RemainingSeconds = memory.RemainingSeconds }),
     };

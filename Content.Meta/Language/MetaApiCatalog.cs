@@ -236,7 +236,25 @@ public sealed partial class MetaApiCatalog
         Method("meta.lab.ChemMaster", "pills", "result<meta.system.JobReceipt>", "lab.package", true, "int", "int", "string", "string");
         Method("meta.lab.ChemMaster", "operationStatus", "result<meta.system.JobReceipt>", "lab.operation.read", true, "string");
         Event("meta.lab.ChemMaster", "operationChanged", "meta.system.JobReceipt", "lab.operation.observe", "Ordered", 16);
+        Capability("meta.implants", "NeuralController");
+        Dto("meta.implants", "NeuralSample", "kind:int", "enabled:bool", "heat:float", "cooldownMs:int", "stamp:" + S + "SampleStamp");
+        Dto("meta.implants", "NeuralCommand", "enabled:bool", "stamp:" + S + "SampleStamp");
+        Method("meta.implants.NeuralController", "sample", "result<meta.implants.NeuralSample>", "implant.neural.read", false);
+        Method("meta.implants.NeuralController", "setEnabled", "result<bool>", "implant.neural.control", true, "bool");
+        Event("meta.implants.NeuralController", "sampled", "meta.implants.NeuralSample", "implant.neural.observe");
+        Event("meta.implants.NeuralController", "commanded", "meta.implants.NeuralCommand", "implant.neural.observe", "Ordered", 8);
+        Capability("meta.implants", "CyberEye");
+        Dto("meta.implants", "EyeSample", "light:float", "modules:int", "stamp:" + S + "SampleStamp");
+        Dto("meta.implants", "EyeCommand", "mode:int", "enabled:bool", "stamp:" + S + "SampleStamp");
+        Method("meta.implants.CyberEye", "sample", "result<meta.implants.EyeSample>", "implant.eye.read", false);
+        Method("meta.implants.CyberEye", "setMode", "result<bool>", "implant.eye.control", true, "int", "bool");
+        Method("meta.implants.CyberEye", "heartbeat", "result<bool>", "implant.eye.control", true);
+        Event("meta.implants.CyberEye", "sampled", "meta.implants.EyeSample", "implant.eye.observe");
+        Event("meta.implants.CyberEye", "commanded", "meta.implants.EyeCommand", "implant.eye.observe", "Ordered", 8);
         Capability("meta.implants", "Optics");
+        Capability("meta.implants", "MedicalProgrammer");
+        Method("meta.implants.MedicalProgrammer", "selfTest", "result<bool>", "implant.medical.read", false);
+        Method("meta.implants.MedicalProgrammer", "flash", "result<bool>", "implant.medical.flash", true, "int");
         Capability("meta.implants", "FunctionalController");
         Enum("meta.implants", "FunctionKind", "Tool", "Blade", "Biomonitor", "MotorBurst", "Stabilization");
         Dto("meta.implants", "FunctionState", "kind:meta.implants.FunctionKind", "active:bool", "operational:bool",

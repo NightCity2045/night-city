@@ -198,6 +198,18 @@ public readonly record struct NCMedicalOrganSummary(
     NCDiagnosticBand Rejection);
 
 [Serializable, NetSerializable]
+public readonly record struct NCMedicalCyberwarePartSummary(
+    ProtoId<NCCyberwarePartSlotPrototype> Slot,
+    EntProtoId? EntityPrototype,
+    NCDiagnosticBand Integrity,
+    ProtoId<Content.Shared._NC.Medical.Cyberware.Internal.NCCyberwareQualityPrototype>? Quality = null,
+    ProtoId<NCCyberwareFirmwarePrototype>? Firmware = null,
+    bool Optional = false);
+
+[Serializable, NetSerializable]
+public readonly record struct NCMedicalImplantSummary(bool Injector, bool ControllerReady, float Remaining, float Dose, float Interval, float Limit, float Delivered, float Cooldown, bool Automatic);
+
+[Serializable, NetSerializable]
 public readonly record struct NCMedicalCyberwareSummary(
     ProtoId<NCCyberwarePrototype> Profile,
     NCCyberwareForm Form,
@@ -209,7 +221,17 @@ public readonly record struct NCMedicalCyberwareSummary(
     NCDiagnosticBand Heat,
     NCCyberwareNeuralState NeuralState,
     bool Operational,
-    bool EmpDisabled);
+    bool EmpDisabled,
+    int? HostIndex = null,
+    List<NCMedicalCyberwarePartSummary>? Parts = null,
+    NCCyberwareNeuralDependencyState NeuralDependency = NCCyberwareNeuralDependencyState.None,
+    int? NeuralFoundationIndex = null,
+    int? AvailableSupports = null,
+    int? HardsuitAllowancePercent = null,
+    NCSkeletalSurgeryStage SkeletalSurgeryCompleted = NCSkeletalSurgeryStage.None,
+    bool SkeletalLoadTestPassed = false,
+    NCMedicalImplantSummary? Medical = null,
+    ProtoId<Content.Shared._NC.Medical.Cyberware.Internal.NCCyberwareQualityPrototype>? Quality = null);
 
 [Serializable, NetSerializable]
 public readonly record struct NCMedicalDrugSummary(

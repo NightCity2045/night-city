@@ -1,0 +1,23 @@
+module neural.basic;
+import meta.implants;
+import meta.system;
+link neural:NeuralController = "neural";
+
+// A wearer request still passes native power, cooldown and medical checks.
+async watch neural.commanded(command) {
+    match (await neural.setEnabled(command.enabled)) {
+        ok(applied) => { if (!applied) { system.log("Neural command unavailable"); } }
+        err(error) => { system.log("Neural command rejected"); }
+    }
+}
+
+// Conservative software cutoff. Native thermal protection always remains active.
+async watch neural.sampled(sample) {
+    if (sample.kind == 4 && sample.heat >= 0.85) {
+        match (await neural.setEnabled(false)) {
+            ok(stopped) => {}
+            err(error) => { system.log("Neural cutoff unavailable"); }
+        }
+    }
+}
+fn main() -> void { system.log("Neural basic ready"); }

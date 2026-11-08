@@ -34,5 +34,6 @@ namespace Content.Shared.Humanoid
         Ensnare,
         Fire,
 
+        EyesRight, // NC: independent right-eye organ visual.
     }
 }

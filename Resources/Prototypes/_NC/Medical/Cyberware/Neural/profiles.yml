@@ -1,0 +1,132 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+
+- type: ncCyberwareSlot
+  id: NCSlotNeuralInterface
+  name: NCSlotNeuralInterface
+  nameId: nc-neural-bay-interface
+  hostCategories:
+  - Head
+  capacity: 1
+
+- type: ncCyberware
+  id: NCNeuralInterface
+  name: NCNeuralInterface
+  nameId: nc-neural-profile-interface
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: interface
+  form: Implant
+  compatibleSlots:
+  - NCSlotNeuralInterface
+  size: 1
+  maximumIntegrity: 80
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanityBiomonitor
+  assembly: NCNeuralInterfaceAssembly
+  requiresFactoryPreparation: true
+  requiresSeparateCalibration: false
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 0.5
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 0.1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+  skeletalSurgery:
+  - stage: MedicalFixation
+    name: nc-medical-stage-fixmedical
+    zone: NCZoneHead
+    structure: Head
+    action: FixMedical
+    minimumDepth: 0.55
+  - stage: MedicalConnection
+    name: nc-medical-stage-connectmedical
+    zone: NCZoneHead
+    structure: Head
+    action: ConnectMedical
+    minimumDepth: 0.55
+    prerequisites: MedicalFixation
+  - stage: MedicalCheck
+    name: nc-medical-stage-checkmedical
+    zone: NCZoneHead
+    structure: Head
+    action: CheckMedical
+    minimumDepth: 0.55
+    prerequisites: MedicalFixation, MedicalConnection
+  requiredNeuralInterface: NCNeuralLinkMk1
+
+- type: ncCyberwareSlot
+  id: NCSlotChipSocket
+  name: NCSlotChipSocket
+  nameId: nc-neural-bay-chipsocket
+  hostCategories:
+  - Head
+  capacity: 1
+
+- type: ncCyberware
+  id: NCNeuralChipSocket
+  name: NCNeuralChipSocket
+  nameId: nc-neural-profile-chipsocket
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: chipsocket
+  form: Implant
+  compatibleSlots:
+  - NCSlotChipSocket
+  size: 1
+  maximumIntegrity: 80
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanityBiomonitor
+  assembly: NCNeuralChipSocketAssembly
+  requiresFactoryPreparation: true
+  requiresSeparateCalibration: false
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 0.5
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 0.1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: Required
+  updateInterval: 0.1s
+  capabilities: []
+  skeletalSurgery:
+  - stage: MedicalFixation
+    name: nc-medical-stage-fixmedical
+    zone: NCZoneHead
+    structure: Head
+    action: FixMedical
+    minimumDepth: 0.5
+  - stage: MedicalConnection
+    name: nc-medical-stage-connectmedical
+    zone: NCZoneHead
+    structure: Head
+    action: ConnectMedical
+    minimumDepth: 0.5
+    prerequisites: MedicalFixation
+  - stage: MedicalCheck
+    name: nc-medical-stage-checkmedical
+    zone: NCZoneHead
+    structure: Head
+    action: CheckMedical
+    minimumDepth: 0.5
+    prerequisites: MedicalFixation, MedicalConnection
+  requiredNeuralInterface: NCNeuralLinkMk1

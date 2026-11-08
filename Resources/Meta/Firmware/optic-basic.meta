@@ -1,0 +1,22 @@
+module optics.basic;
+import meta.implants;
+import meta.system;
+link eye:CyberEye = "eye";
+
+// Native hardware verifies the installed module, wearer, power and cooldown.
+async watch eye.commanded(command) {
+    match (await eye.setMode(command.mode, command.enabled)) {
+        ok(applied) => { if (!applied) { system.log("Module unavailable"); } }
+        err(error) => { system.log("Optics command rejected"); }
+    }
+}
+
+// Losing the VM or its permissions expires the native two-second lease.
+// Basic eyesight remains available independently of this program.
+async watch eye.sampled(sample) {
+    match (await eye.heartbeat()) {
+        ok(healthy) => {}
+        err(error) => { system.log("Optics offline"); }
+    }
+}
+fn main() -> void { system.log("Optics basic ready"); }

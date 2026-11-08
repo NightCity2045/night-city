@@ -381,4 +381,13 @@ public enum NCFreeformSurgeryAction : byte
     CalibrateCyberware,
     DisconnectCyberware,
     RepairCyberware,
+    AnchorSkeletal,
+    ConnectSkeletal,
+    TestSkeletal,
+    DistributeDermal,
+    FixDermal,
+    CheckDermal,
+    FixMedical,
+    ConnectMedical,
+    CheckMedical,
 }

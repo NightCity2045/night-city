@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  id: NCOrganHumanCyberHandLeft
+  parent: OrganHumanHandLeft
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/parts.rsi
+    state: l_hand
+  - type: VisualOrgan
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: l_hand
+      color: "#A8BAC9"
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    movementContribution: 0.25
+    gripContribution: 0.65
+    armorLocations: [ HandLeft ]
+  - type: NCOrganIntegrity
+  - type: NCJoint
+  - type: NCNerve
+    cyberprostheticInterface: true
+  - type: NCSurgicalSite
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: ArmLeft
+    woundProfile: NCHumanWoundSystem
+    treatmentProfile: NCHumanFieldTreatment
+
+- type: entity
+  id: NCOrganHumanCyberHandRight
+  parent: OrganHumanHandRight
+  components:
+  - type: Sprite
+    sprite: _NC/Mobs/Cyberware/parts.rsi
+    state: r_hand
+  - type: VisualOrgan
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: r_hand
+      color: "#A8BAC9"
+  - type: NCAnatomicalRegion
+    tissueProfile: NCHumanMechanicalTissue
+    movementContribution: 0.25
+    gripContribution: 0.65
+    armorLocations: [ HandRight ]
+  - type: NCOrganIntegrity
+  - type: NCJoint
+  - type: NCNerve
+    cyberprostheticInterface: true
+  - type: NCSurgicalSite
+  - type: NCDetachedOrganMedicalData
+    sourceBodyProfile: Human
+    requiredParentCategory: ArmRight
+    woundProfile: NCHumanWoundSystem
+    treatmentProfile: NCHumanFieldTreatment

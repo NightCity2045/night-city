@@ -218,7 +218,8 @@ public sealed partial class NCMetaNetworkSystem : EntitySystem, INCMetaDeviceAda
         if (cable.Comp.PortB is { } b && _cablesByPort.TryGetValue(b, out var right)) { right.Remove(cable.Owner); if (right.Count == 0) _cablesByPort.Remove(b); }
     }
     private bool CanWire(EntityUid a, EntityUid b, float length) => Exists(a) && Exists(b) && float.IsFinite(length) && length is > 0 and <= 32 && _interaction.InRangeUnobstructed(a, b, range: length);
-    private bool Online(EntityUid uid) => _devices.IsPowered(uid) && (!TryComp<NCMetaHostComponent>(uid, out var host) || !host.Disabled);
+    [Dependency] private Content.Server._NC.Medical.Cyberware.Neural.NCNeuralHardwareSystem _neuralPorts = default!;
+    private bool Online(EntityUid uid) => _neuralPorts.IsPortOnline(uid) && _devices.IsPowered(uid) && (!TryComp<NCMetaHostComponent>(uid, out var host) || !host.Disabled);
     private bool AllowedSegment(EntityUid a, EntityUid b)
     {
         if (!TryComp<NCMetaPortComponent>(a, out var from) || !TryComp<NCMetaPortComponent>(b, out var to) || from.NetworkId.Length == 0 || to.NetworkId.Length == 0) return false;

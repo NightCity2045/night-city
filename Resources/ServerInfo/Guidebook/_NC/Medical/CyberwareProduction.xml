@@ -1,0 +1,24 @@
+<Document>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-1"/>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-2"/>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-3"/>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-4"/>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-5"/>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-6"/>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-7"/>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-8"/>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-9"/>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-10"/>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-11"/>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-12"/>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-13"/>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-14"/>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-15"/>
+<NCGuideLocalizedText Key="nc-guide-cyber-production-16"/>
+<Box Orientation="Vertical">
+<GuideEntityEmbed Entity="NCCyberwareWorkbench"/>
+<GuideEntityEmbed Entity="NCImplantLinearFrameSigmaEmpty"/>
+<GuideEntityEmbed Entity="NCImplantLinearFrameBetaEmpty"/>
+<GuideEntityEmbed Entity="NCCyberwareSterileWrap"/>
+</Box>
+</Document>

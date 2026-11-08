@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Shared._NC.Medical.Cyberware.Internal;
 using System.Linq;
 using Content.Server.Medical.Components;
 using Content.Server.Power.EntitySystems;
 using Content.Server.Players.RateLimiting;
 using Content.Server._NC.Medical.Cyberware;
+using Content.Server._NC.Medical.Cyberware.Internal;
 using Content.Server._NC.Medical.Pharmacology;
 using Content.Server._NC.Medical.Systemic;
 using Content.Server._NC.Medical.Diagnostics.Scanner;
@@ -62,6 +64,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
     [Dependency] private SharedBatterySystem _battery = default!;
     [Dependency] private PlayerRateLimitManager _rateLimit = default!;
     [Dependency] private NCCyberwareSystem _cyberware = default!;
+    [Dependency] private NCMedicalImplantSystem _medicalImplants = default!;
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
     [Dependency] private Content.Server._NC.Medical.Humanity.NCHumanitySystem _humanity = default!;
     [Dependency] private NCSystemicSystem _systemic = default!;
@@ -175,7 +178,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             (ushort) Math.Clamp(cyberwareOmitted, 0, ushort.MaxValue),
             (ushort) Math.Clamp(drugsOmitted, 0, ushort.MaxValue),
             (ushort) Math.Clamp(historyOmitted, 0, ushort.MaxValue),
-            policy.Tier is NCDiagnosticTier.SelfSensations or NCDiagnosticTier.AdminExact &&
+            policy.Tier is NCDiagnosticTier.SelfSensations or NCDiagnosticTier.ScannerInternal or NCDiagnosticTier.SurgicalConsole or NCDiagnosticTier.AdminExact &&
             _humanity.TryGetStatus(target, out var humanity) ? humanity : null);
         return true;
     }
@@ -895,6 +898,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             .ToList();
         var limit = Math.Clamp(policy.MaxCyberwareRecords, 0, AbsoluteMaxCyberware);
         var result = new List<NCMedicalCyberwareSummary>(Math.Min(limit, modules.Count));
+        var disclosedEntities = new List<EntityUid>(Math.Min(limit, modules.Count));
         foreach (var moduleUid in modules.Take(limit))
         {
             var module = Comp<NCCyberwareComponent>(moduleUid);
@@ -933,11 +937,68 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                 ToFractionBand(SafeRatio(module.Heat, profile.HeatCapacity)),
                 module.NeuralState,
                 module.Operational,
-                empDisabled));
+                empDisabled,
+                Parts: BuildCyberwareParts(moduleUid),
+                NeuralDependency: module.NeuralDependency,
+                AvailableSupports: profile.RequiredSupportProfile != null ? module.AvailableSupports : null,
+                HardsuitAllowancePercent: profile.SkeletalEnhancement
+                    ? (int) MathF.Round(profile.HardsuitPenaltyAllowance * module.FunctionalEfficiency *
+                        (profile.RequiresPower ? (module.CrisisBlocksActiveModes ? 0f : module.CrisisEfficiency) : 1f) * 100f) : null,
+                SkeletalSurgeryCompleted: module.SkeletalSurgeryCompleted,
+                SkeletalLoadTestPassed: module.SkeletalLoadTestPassed,
+                Medical: BuildMedicalImplant(moduleUid),
+                Quality: _cyberware.GetAssemblyQuality(moduleUid)));
+            disclosedEntities.Add(moduleUid);
+        }
+
+        // Indices refer only to rows in this filtered snapshot, never to live entity identifiers.
+        // An omitted host remains unspecified rather than being guessed from anatomical category.
+        var indices = disclosedEntities.Select((uid, index) => (uid, index)).ToDictionary(pair => pair.uid, pair => pair.index);
+        for (var i = 0; i < disclosedEntities.Count; i++)
+        {
+            if (_cyberware.TryGetNeuralFoundation(disclosedEntities[i], out var foundation) &&
+                indices.TryGetValue(foundation, out var foundationIndex))
+                result[i] = result[i] with { NeuralFoundationIndex = foundationIndex };
+            if (result[i].Slot != null && TryComp<ChildOrganComponent>(disclosedEntities[i], out var child) &&
+                child.Parent is { } parent && indices.TryGetValue(parent, out var hostIndex) && hostIndex != i)
+                result[i] = result[i] with { HostIndex = hostIndex };
         }
 
         omitted = modules.Count - result.Count;
         return result;
+    }
+
+    private NCMedicalImplantSummary? BuildMedicalImplant(EntityUid uid)
+    {
+        if (!TryComp<NCMedicalImplantComponent>(uid, out var medical)) return null;
+        var state = medical.State;
+        return new(medical.Injector, _cyberware.MedicalControllerReady(uid), state.Cartridge.Volume.Float(),
+            NCMedicalImplantMath.MeteredDose(state.Dose, _cyberware.MedicalPartQuality(uid, "NCMedicalPumpSlot").MeasurementStep), state.IntervalSeconds, state.Limit, state.Delivered, state.CooldownSeconds, state.Automatic);
+    }
+
+    private List<NCMedicalCyberwarePartSummary>? BuildCyberwareParts(EntityUid module)
+    {
+        if (!TryComp<NCCyberwareAssemblyComponent>(module, out var assembly))
+            return null;
+
+        var parts = new List<NCMedicalCyberwarePartSummary>();
+        foreach (var (slot, container) in assembly.Parts.OrderBy(pair => pair.Key.Id, StringComparer.Ordinal).Take(8))
+        {
+            EntProtoId? prototype = null;
+            var condition = NCDiagnosticBand.Critical;
+            ProtoId<NCCyberwareQualityPrototype>? quality = null;
+            ProtoId<NCCyberwareFirmwarePrototype>? firmware = null;
+            if (container.ContainedEntity is { } uid && HasComp<NCCyberwarePartComponent>(uid))
+            {
+                prototype = MetaData(uid).EntityPrototype?.ID;
+                quality = _prototypes.Index(Comp<NCCyberwarePartComponent>(uid).Profile).Quality;
+                if (TryComp<NCMedicalControllerComponent>(uid, out var controller)) firmware = controller.Firmware;
+                if (TryComp<NCOrganIntegrityComponent>(uid, out var integrity))
+                    condition = ToFunctionBand(SafeRatio(integrity.CurrentIntegrity, integrity.MaxIntegrity));
+            }
+            parts.Add(new NCMedicalCyberwarePartSummary(slot, prototype, condition, quality, firmware, assembly.OptionalSlots.Contains(slot)));
+        }
+        return parts;
     }
 
     private List<NCMedicalDrugSummary> BuildDrugs(
@@ -1296,6 +1357,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
         Entity<NCMedicalBodyComponent> entity,
         ref GetVerbsEvent<AlternativeVerb> args)
     {
+        _medicalImplants.AddPatientVerbs(entity, ref args);
         if (!args.CanAccess || !TryComp<ActorComponent>(args.User, out var actor))
             return;
 

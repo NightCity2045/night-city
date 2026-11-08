@@ -18,7 +18,7 @@ public sealed partial class NCCyberwareAbilityComponent : Component
     [ViewVariables] public TimeSpan CooldownObservedAt;
     [ViewVariables] public EntityUid? Body;
     [ViewVariables] public EntityUid? Action;
-    [ViewVariables] public EntityUid? IntegralItem;
+    [DataField] public EntityUid? IntegralItem;
     [ViewVariables] public ContainerSlot? ItemContainer;
     [ViewVariables] public bool Active;
     [ViewVariables] public TimeSpan? ActiveUntil;

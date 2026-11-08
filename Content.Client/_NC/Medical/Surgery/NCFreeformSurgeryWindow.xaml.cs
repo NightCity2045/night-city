@@ -278,6 +278,9 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
 
     private static string ActionName(NCFreeformSurgeryAction action) => action switch
     {
+        NCFreeformSurgeryAction.FixMedical => Loc.GetString("nc-medical-stage-fixmedical"),
+        NCFreeformSurgeryAction.ConnectMedical => Loc.GetString("nc-medical-stage-connectmedical"),
+        NCFreeformSurgeryAction.CheckMedical => Loc.GetString("nc-medical-stage-checkmedical"),
         NCFreeformSurgeryAction.Disinfect => Loc.GetString("nc-surgery-ui-action-disinfect"),
         NCFreeformSurgeryAction.Incise => Loc.GetString("nc-surgery-ui-action-incise"),
         NCFreeformSurgeryAction.Hemostasis => Loc.GetString("nc-surgery-ui-action-hemostasis"),
@@ -296,6 +299,12 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
         NCFreeformSurgeryAction.Separate => Loc.GetString("nc-surgery-ui-action-separate"),
         NCFreeformSurgeryAction.Amputate => Loc.GetString("nc-surgery-ui-action-amputate"),
         NCFreeformSurgeryAction.Transplant => Loc.GetString("nc-surgery-ui-action-transplant"),
+        NCFreeformSurgeryAction.DistributeDermal => Loc.GetString("nc-dermal-surgery-distribute"),
+        NCFreeformSurgeryAction.FixDermal => Loc.GetString("nc-dermal-surgery-fix"),
+        NCFreeformSurgeryAction.CheckDermal => Loc.GetString("nc-dermal-surgery-check"),
+        NCFreeformSurgeryAction.AnchorSkeletal => Loc.GetString("nc-skeletal-surgery-anchor"),
+        NCFreeformSurgeryAction.ConnectSkeletal => Loc.GetString("nc-skeletal-surgery-connect"),
+        NCFreeformSurgeryAction.TestSkeletal => Loc.GetString("nc-skeletal-surgery-test"),
         NCFreeformSurgeryAction.Cyberware => Loc.GetString("nc-surgery-ui-action-cyberware"),
         NCFreeformSurgeryAction.CalibrateCyberware => Loc.GetString("nc-cyberware-surgery-calibrate"),
         NCFreeformSurgeryAction.DisconnectCyberware => Loc.GetString("nc-cyberware-surgery-disconnect"),
@@ -309,6 +318,14 @@ public sealed partial class NCFreeformSurgeryWindow : FancyWindow
     private static string FeedbackText(NCFreeformSurgeryFailure failure) => failure switch
     {
         NCFreeformSurgeryFailure.None => string.Empty,
+        NCFreeformSurgeryFailure.FactoryPreparationRequired => Loc.GetString("nc-cyber-production-unprepared"),
+        NCFreeformSurgeryFailure.DermalSurgeryIncomplete => Loc.GetString("nc-dermal-surgery-incomplete"),
+        NCFreeformSurgeryFailure.DermalPrerequisitesMissing => Loc.GetString("nc-dermal-surgery-prerequisites"),
+        NCFreeformSurgeryFailure.DermalTissueDamaged => Loc.GetString("nc-dermal-surgery-damaged"),
+        NCFreeformSurgeryFailure.SkeletalSurgeryIncomplete => Loc.GetString("nc-skeletal-surgery-incomplete"),
+        NCFreeformSurgeryFailure.SkeletalPrerequisitesMissing => Loc.GetString("nc-skeletal-surgery-prerequisites"),
+        NCFreeformSurgeryFailure.SkeletalStructureDamaged => Loc.GetString("nc-skeletal-surgery-damaged"),
+        NCFreeformSurgeryFailure.SkeletalLoadTestRequired => Loc.GetString("nc-skeletal-surgery-test-required"),
         NCFreeformSurgeryFailure.CyberwareCalibrationRequired => Loc.GetString("nc-cyberware-surgery-calibration-required"),
         NCFreeformSurgeryFailure.CyberwareAssemblyIncomplete => Loc.GetString("nc-cyberware-surgery-assembly-incomplete"),
         NCFreeformSurgeryFailure.CyberwareOutputLow => Loc.GetString("nc-cyberware-surgery-output-low"),

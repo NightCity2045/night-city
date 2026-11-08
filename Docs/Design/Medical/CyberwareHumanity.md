@@ -106,3 +106,10 @@ Verification on 2026-10-23:
 
 Integration fixture execution remains explicitly disabled. T01/T36–T43 runtime acceptance is prepared,
 not reported as passed; the isolated server must start successfully before that work can be verified.
+
+## Episode extension
+
+The production profile now uses the staged episode lifecycle in [Cyberpsychosis](Cyberpsychosis.md),
+including recovery, exhaustion and owner-only perception. This supersedes the initial H/S band activation
+and the earlier text-only presentation; package accounting and brain ownership are unchanged. Scanner and
+surgical-console diagnostic capabilities now disclose the real psychological status as well as self/admin.

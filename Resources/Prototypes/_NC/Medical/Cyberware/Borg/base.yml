@@ -120,6 +120,8 @@
       Kidneys: NCBorgWasteFilter
       Stomach: NCBorgNutrientProcessor
       Torso: NCBorgFrameTorso
+      Spine: NCBorgFrameSpine
+      VertebralColumn: NCBorgFrameVertebralColumn
       Thorax: NCBorgFramePowerHolder
       Abdomen: NCBorgFrameAbdomen
       PelvisGroin: NCBorgFramePelvis
@@ -137,6 +139,8 @@
     relationships:
       Head: [ Brain, Heart, Lungs, Liver, Kidneys, Stomach, Torso ]
       Torso: [ Thorax, Abdomen, PelvisGroin, ArmLeft, ArmRight, LegLeft, LegRight, Eyes, Ears, Tongue ]
+      Thorax: [ Spine ]
+      Spine: [ VertebralColumn ]
       ArmLeft: [ HandLeft ]
       ArmRight: [ HandRight ]
       LegLeft: [ FootLeft ]

@@ -31,6 +31,7 @@ public sealed partial class NCCyberwareSystem
         SubscribeLocalEvent<NCCyberwareWorkbenchComponent, InteractUsingEvent>(OnWorkbenchInteract);
         SubscribeLocalEvent<NCCyberwareWorkbenchComponent, GetVerbsEvent<InteractionVerb>>(OnWorkbenchVerbs);
         SubscribeLocalEvent<NCCyberwareWorkbenchComponent, ExaminedEvent>(OnWorkbenchExamined);
+        SubscribeLocalEvent<NCCyberwareWorkbenchComponent, NCCyberwarePreparationDoAfterEvent>(OnFactoryPreparation);
     }
 
     private void OnWorkbenchInit(Entity<NCCyberwareWorkbenchComponent> bench, ref ComponentInit args)
@@ -57,6 +58,20 @@ public sealed partial class NCCyberwareSystem
             if (TryGetServiceWorkpiece(bench.AsNullable(), out var workpiece) &&
                 TryComp<NCCyberwareComponent>(workpiece, out var hardware))
                 TryFlashFirmware(bench.AsNullable(), args.User, args.Used, workpiece, hardware.Service.Revision);
+            return;
+        }
+        if (HasComp<NCCyberwareSterileWrapComponent>(args.Used))
+        {
+            args.Handled = true;
+            if (!TryStartFactoryPreparation(bench.AsNullable(), args.User, args.Used))
+                _assemblyPopup.PopupEntity(Loc.GetString("nc-cyber-production-preparation-failed"), bench, args.User);
+            return;
+        }
+        if ((HasComp<Content.Shared._NC.Medical.Cyberware.Optics.NCOpticControllerComponent>(args.Used) ||
+             HasComp<Content.Shared._NC.Medical.Cyberware.Neural.NCNeuralControllerComponent>(args.Used)) &&
+            bench.Comp.Workpiece is { ContainedEntity: null } socket && CanOperateWorkbench(bench.AsNullable(), args.User))
+        {
+            args.Handled = _assemblyHands.TryDropIntoContainer(args.User, args.Used, socket);
             return;
         }
         var accepted = HasComp<NCCyberwareComponent>(args.Used)
@@ -97,10 +112,14 @@ public sealed partial class NCCyberwareSystem
             assembly.ConfigurationRevision == uint.MaxValue || !_assemblyHands.IsHolding(user, partUid) ||
             !Exists(partUid) || TerminatingOrDeleted(partUid) ||
             !TryComp<NCCyberwarePartComponent>(partUid, out var part) ||
-            !_prototypes.TryIndex(part.Profile, out var profile) ||
-            !assembly.Parts.TryGetValue(profile.Slot, out var container) || container.ContainedEntity != null)
+            !_prototypes.TryIndex(part.Profile, out var profile))
             return false;
-        return _assemblyHands.TryDropIntoContainer(user, partUid, container);
+        if (TryComp<Content.Shared._NC.Medical.Cyberware.Optics.NCOpticModuleComponent>(partUid, out var option) &&
+            assembly.Parts.Values.Any(socket => socket.ContainedEntity is { } installed &&
+                TryComp<Content.Shared._NC.Medical.Cyberware.Optics.NCOpticModuleComponent>(installed, out var other) && other.Mode == option.Mode)) return false;
+        var container = assembly.Parts.FirstOrDefault(pair =>
+            (pair.Key == profile.Slot || profile.CompatibleSlots.Contains(pair.Key)) && pair.Value.ContainedEntity == null).Value;
+        return container != null && _assemblyHands.TryDropIntoContainer(user, partUid, container);
     }
 
     public bool TryRemoveAssemblyPart(Entity<NCCyberwareWorkbenchComponent?> bench, EntityUid user,
@@ -136,12 +155,21 @@ public sealed partial class NCCyberwareSystem
         var module = Comp<NCCyberwareComponent>(moduleUid);
         var profile = _prototypes.Index(module.Profile);
         var integrity = Comp<NCOrganIntegrityComponent>(moduleUid);
-        var passed = assembly.FunctionalEfficiency > 0f && integrity.CurrentIntegrity > 0f &&
-                     module.Heat < profile.HeatShutdownThreshold && module.EmpDisabledUntil <= _timing.CurTime;
+        var passed = MedicalControllerReady(moduleUid) && integrity.CurrentIntegrity > 0f && module.EmpDisabledUntil <= _timing.CurTime &&
+                     !_prototypes.Index(module.Service.Firmware).InhibitActiveModes &&
+                     (!profile.RequiresFactoryPreparation || module.Service.FirmwareFlashed) &&
+                     NCCyberwareProductionMath.CanTest(MathF.Min(assembly.FunctionalEfficiency,
+                         NCCyberwareCondition.Efficiency(integrity.CurrentIntegrity, profile.MaximumIntegrity)),
+                         profile.RequiresFactoryPreparation ? profile.FactoryMinimumEfficiency : float.Epsilon,
+                         profile.RequiresPower ? (profile.IdlePowerPerSecond + profile.LoadedPowerPerSecond) / QualityPerformance(moduleUid) : 0f,
+                         Comp<NCCyberwareWorkbenchComponent>(bench).MaximumTestPower, module.Heat,
+                         (profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond) / QualityPerformance(moduleUid), profile.PassiveCoolingPerSecond,
+                         profile.FactoryTestSeconds, profile.HeatDeratingThreshold);
         if (passed && profile.RequiresPower)
             passed = _cells.TryGetBatteryFromSlot(bench.Owner, out var battery) &&
-                     _battery.TryUseCharge(battery.Value.AsNullable(), Comp<NCCyberwareWorkbenchComponent>(bench).TestEnergy);
+                     _battery.TryUseCharge(battery.Value.AsNullable(), MathF.Max(Comp<NCCyberwareWorkbenchComponent>(bench).TestEnergy, profile.FactoryTestEnergy));
         assembly.ValidatedRevision = passed ? expectedRevision : null;
+        module.FactoryPrepared = false;
         RecordService(moduleUid, NCCyberwareServiceOperation.Tested, Guid.NewGuid());
         _assemblyPopup.PopupEntity(Loc.GetString(passed ? "nc-cyberware-bench-test-passed" :
             "nc-cyberware-bench-test-failed"), bench, user);
@@ -187,6 +215,7 @@ public sealed partial class NCCyberwareSystem
         integrity.CurrentIntegrity = MathF.Min(ceiling, integrity.CurrentIntegrity + definition.RepairPerUnit);
         NormalizeMechanicalIntegrity(integrity);
         assembly.ValidatedRevision = null;
+        module.FactoryPrepared = false;
         RefreshAssembly(assembly);
         UpdateOperational(moduleUid, module, profile, _timing.CurTime);
         RecordService(moduleUid, NCCyberwareServiceOperation.Repaired, Guid.NewGuid());
@@ -212,7 +241,9 @@ public sealed partial class NCCyberwareSystem
     {
         module = default;
         if (!Resolve(bench, ref bench.Comp, false) || bench.Comp.Workpiece?.ContainedEntity is not { } workpiece ||
-            TerminatingOrDeleted(workpiece) || !HasComp<NCCyberwareComponent>(workpiece) ||
+            TerminatingOrDeleted(workpiece) || (!HasComp<NCCyberwareComponent>(workpiece) &&
+            !HasComp<Content.Shared._NC.Medical.Cyberware.Optics.NCOpticControllerComponent>(workpiece) &&
+            !HasComp<Content.Shared._NC.Medical.Cyberware.Neural.NCNeuralControllerComponent>(workpiece)) ||
             TryResolveOwningBody(workpiece, out _)) return false;
         module = workpiece;
         return true;
@@ -259,9 +290,15 @@ public sealed partial class NCCyberwareSystem
             args.PushMarkup(Loc.GetString("nc-cyberware-bench-empty"));
             return;
         }
-        var module = Comp<NCCyberwareComponent>(moduleUid);
+        if (!TryComp<NCCyberwareComponent>(moduleUid, out var module))
+        {
+            args.PushMarkup(Loc.GetString("nc-cyberware-service-mounted", ("item", moduleUid)));
+            return;
+        }
         var profile = _prototypes.Index(module.Profile);
         var frame = Comp<NCOrganIntegrityComponent>(moduleUid);
+        if (profile.RequiresFactoryPreparation)
+            args.PushMarkup(Loc.GetString(module.FactoryPrepared ? "nc-cyber-production-prepared" : "nc-cyber-production-unprepared"));
         if (!TryGetWorkpiece(bench.AsNullable(), out _, out var assembly))
         {
             args.PushMarkup(Loc.GetString("nc-cyberware-service-mounted", ("item", moduleUid)));
@@ -278,7 +315,7 @@ public sealed partial class NCCyberwareSystem
             var slotName = Loc.GetString(_prototypes.Index(slot).Name);
             if (container.ContainedEntity is not { } partUid)
             {
-                args.PushMarkup(Loc.GetString("nc-cyberware-bench-missing", ("slot", slotName)));
+                args.PushMarkup(Loc.GetString(assembly.OptionalSlots.Contains(slot) ? "nc-optics-bench-option-empty" : "nc-cyberware-bench-missing", ("slot", slotName)));
                 continue;
             }
             var part = Comp<NCCyberwarePartComponent>(partUid);

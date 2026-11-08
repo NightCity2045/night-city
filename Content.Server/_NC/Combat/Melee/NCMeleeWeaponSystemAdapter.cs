@@ -10,6 +10,10 @@ namespace Content.Server.Weapons.Melee;
 
 public sealed partial class MeleeWeaponSystem
 {
+    [Dependency] private Content.Server._NC.Medical.Cyberware.Neural.NCNeuralHardwareSystem _neuralReactions = default!;
+    protected override bool NCTryEvadeMelee(EntityUid user, EntityUid target) =>
+        _neuralReactions.TryEvade(target, user, Content.Shared._NC.ActionResolution.NCActionResolutionId.New(), 0);
+
     [Dependency] private NCMeleeAttackAdapterSystem _ncMeleeAdapter = default!;
 
     protected override void NCBeginAuthoritativeMedicalAttack(

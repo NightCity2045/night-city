@@ -1,0 +1,415 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: NCOrganHumanCyberArmLeft
+  id: NCOrganHumanCivilianCyberArmLeft
+  components:
+  - type: NCCyberware
+    profile: NCCivilianCyberArm
+  - type: NCArmFrame
+    volume: 4
+    heavy: false
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: civilian_left
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.LArm
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: l_arm
+      color: '#D0D4D8'
+
+- type: entity
+  parent: NCOrganHumanCivilianCyberArmLeft
+  id: NCOrganHumanCivilianCyberArmLeftFrame
+  suffix: Unassembled
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanCyberArmRight
+  id: NCOrganHumanCivilianCyberArmRight
+  components:
+  - type: NCCyberware
+    profile: NCCivilianCyberArm
+  - type: NCArmFrame
+    volume: 4
+    heavy: false
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: civilian_right
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.RArm
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: r_arm
+      color: '#D0D4D8'
+
+- type: entity
+  parent: NCOrganHumanCivilianCyberArmRight
+  id: NCOrganHumanCivilianCyberArmRightFrame
+  suffix: Unassembled
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanCyberArmLeft
+  id: NCOrganHumanArmoredCyberArmLeft
+  components:
+  - type: NCCyberware
+    profile: NCArmoredCyberArm
+  - type: NCArmFrame
+    volume: 4
+    heavy: true
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: armored_left
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.LArm
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: l_arm
+      color: '#697A86'
+
+- type: entity
+  parent: NCOrganHumanArmoredCyberArmLeft
+  id: NCOrganHumanArmoredCyberArmLeftFrame
+  suffix: Unassembled
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanCyberArmRight
+  id: NCOrganHumanArmoredCyberArmRight
+  components:
+  - type: NCCyberware
+    profile: NCArmoredCyberArm
+  - type: NCArmFrame
+    volume: 4
+    heavy: true
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: armored_right
+  - type: VisualOrgan
+    layer: enum.HumanoidVisualLayers.RArm
+    data:
+      sprite: _NC/Mobs/Cyberware/parts.rsi
+      state: r_arm
+      color: '#697A86'
+
+- type: entity
+  parent: NCOrganHumanArmoredCyberArmRight
+  id: NCOrganHumanArmoredCyberArmRightFrame
+  suffix: Unassembled
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanCivilianCyberArmLeft
+  id: NCOrganHumanCivilianCyberArmLeftImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImprovised
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImprovised
+      NCArmCuffPartSlot: NCArmCuffImprovised
+      NCArmShellPartSlot: NCArmShellImprovised
+
+- type: entity
+  parent: NCOrganHumanCivilianCyberArmLeftImprovised
+  id: NCOrganHumanCivilianCyberArmLeftImprovisedFrame
+  suffix: Unassembled Improvised
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanCivilianCyberArmLeft
+  id: NCOrganHumanCivilianCyberArmLeftImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImproved
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImproved
+      NCArmCuffPartSlot: NCArmCuffImproved
+      NCArmShellPartSlot: NCArmShellImproved
+
+- type: entity
+  parent: NCOrganHumanCivilianCyberArmLeftImproved
+  id: NCOrganHumanCivilianCyberArmLeftImprovedFrame
+  suffix: Unassembled Improved
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanCivilianCyberArmLeft
+  id: NCOrganHumanCivilianCyberArmLeftPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityPremium
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityPremium
+      NCArmCuffPartSlot: NCArmCuffPremium
+      NCArmShellPartSlot: NCArmShellPremium
+
+- type: entity
+  parent: NCOrganHumanCivilianCyberArmLeftPremium
+  id: NCOrganHumanCivilianCyberArmLeftPremiumFrame
+  suffix: Unassembled Premium
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanCivilianCyberArmRight
+  id: NCOrganHumanCivilianCyberArmRightImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImprovised
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImprovised
+      NCArmCuffPartSlot: NCArmCuffImprovised
+      NCArmShellPartSlot: NCArmShellImprovised
+
+- type: entity
+  parent: NCOrganHumanCivilianCyberArmRightImprovised
+  id: NCOrganHumanCivilianCyberArmRightImprovisedFrame
+  suffix: Unassembled Improvised
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanCivilianCyberArmRight
+  id: NCOrganHumanCivilianCyberArmRightImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImproved
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImproved
+      NCArmCuffPartSlot: NCArmCuffImproved
+      NCArmShellPartSlot: NCArmShellImproved
+
+- type: entity
+  parent: NCOrganHumanCivilianCyberArmRightImproved
+  id: NCOrganHumanCivilianCyberArmRightImprovedFrame
+  suffix: Unassembled Improved
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanCivilianCyberArmRight
+  id: NCOrganHumanCivilianCyberArmRightPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityPremium
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityPremium
+      NCArmCuffPartSlot: NCArmCuffPremium
+      NCArmShellPartSlot: NCArmShellPremium
+
+- type: entity
+  parent: NCOrganHumanCivilianCyberArmRightPremium
+  id: NCOrganHumanCivilianCyberArmRightPremiumFrame
+  suffix: Unassembled Premium
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanArmoredCyberArmLeft
+  id: NCOrganHumanArmoredCyberArmLeftImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImprovised
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImprovised
+      NCArmCuffPartSlot: NCArmCuffImprovised
+      NCArmShellPartSlot: NCArmShellImprovised
+
+- type: entity
+  parent: NCOrganHumanArmoredCyberArmLeftImprovised
+  id: NCOrganHumanArmoredCyberArmLeftImprovisedFrame
+  suffix: Unassembled Improvised
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanArmoredCyberArmLeft
+  id: NCOrganHumanArmoredCyberArmLeftImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImproved
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImproved
+      NCArmCuffPartSlot: NCArmCuffImproved
+      NCArmShellPartSlot: NCArmShellImproved
+
+- type: entity
+  parent: NCOrganHumanArmoredCyberArmLeftImproved
+  id: NCOrganHumanArmoredCyberArmLeftImprovedFrame
+  suffix: Unassembled Improved
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanArmoredCyberArmLeft
+  id: NCOrganHumanArmoredCyberArmLeftPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityPremium
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityPremium
+      NCArmCuffPartSlot: NCArmCuffPremium
+      NCArmShellPartSlot: NCArmShellPremium
+
+- type: entity
+  parent: NCOrganHumanArmoredCyberArmLeftPremium
+  id: NCOrganHumanArmoredCyberArmLeftPremiumFrame
+  suffix: Unassembled Premium
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanArmoredCyberArmRight
+  id: NCOrganHumanArmoredCyberArmRightImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImprovised
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImprovised
+      NCArmCuffPartSlot: NCArmCuffImprovised
+      NCArmShellPartSlot: NCArmShellImprovised
+
+- type: entity
+  parent: NCOrganHumanArmoredCyberArmRightImprovised
+  id: NCOrganHumanArmoredCyberArmRightImprovisedFrame
+  suffix: Unassembled Improvised
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanArmoredCyberArmRight
+  id: NCOrganHumanArmoredCyberArmRightImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImproved
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImproved
+      NCArmCuffPartSlot: NCArmCuffImproved
+      NCArmShellPartSlot: NCArmShellImproved
+
+- type: entity
+  parent: NCOrganHumanArmoredCyberArmRightImproved
+  id: NCOrganHumanArmoredCyberArmRightImprovedFrame
+  suffix: Unassembled Improved
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanArmoredCyberArmRight
+  id: NCOrganHumanArmoredCyberArmRightPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityPremium
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityPremium
+      NCArmCuffPartSlot: NCArmCuffPremium
+      NCArmShellPartSlot: NCArmShellPremium
+
+- type: entity
+  parent: NCOrganHumanArmoredCyberArmRightPremium
+  id: NCOrganHumanArmoredCyberArmRightPremiumFrame
+  suffix: Unassembled Premium
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCOrganHumanCyberArmRight
+  id: NCOrganHumanCyberArmRightFrame
+  suffix: Unassembled
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true

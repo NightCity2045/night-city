@@ -253,7 +253,16 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                     <BoxContainer Name="OrgansContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
                 </ScrollContainer>
                 <ScrollContainer Name="CyberwareTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
-                    <BoxContainer Name="CyberwareContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
+                    <BoxContainer Margin="8" Orientation="Vertical" SeparationOverride="8" HorizontalExpand="True">
+                        <BoxContainer Orientation="Horizontal" SeparationOverride="8">
+                            <Label Text="{Loc 'nc-cyberware-map-title'}" StyleClasses="LabelHeading" FontColorOverride="#75FFF2" />
+                            <Control HorizontalExpand="True" />
+                            <Label Name="CyberwareCount" FontColorOverride="#75A8A4" />
+                        </BoxContainer>
+                        <Label Text="{Loc 'nc-cyberware-map-hint'}" FontColorOverride="#75A8A4" />
+                        <diagnostics:NCCyberwareMapControl Name="CyberwareMap" HorizontalExpand="True" />
+                        <BoxContainer Name="CyberwareContainer" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />
+                    </BoxContainer>
                 </ScrollContainer>
                 <ScrollContainer Name="DrugsTab" HScrollEnabled="False" HorizontalExpand="True" VerticalExpand="True" RectClipContent="True">
                     <BoxContainer Name="DrugsContainer" Margin="8" Orientation="Vertical" SeparationOverride="7" HorizontalExpand="True" />

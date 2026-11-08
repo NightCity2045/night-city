@@ -140,7 +140,7 @@ public sealed partial class NCSurgeryDirectClientSystem : EntitySystem
             return localized;
 
         return _prototypes.TryIndex(id, out NCSurgeryProcedurePrototype? procedure)
-            ? procedure.Name
+            ? procedure.NameId is { } name ? Loc.GetString(name) : procedure.Name
             : id.Id;
     }
 

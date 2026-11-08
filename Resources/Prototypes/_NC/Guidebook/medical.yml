@@ -14,6 +14,11 @@
   - NCPharmacologyGuide
   - NCSurgeryGuide
   - NCCyberwareMedicine
+  - NCCyberwareProductionGuide
+  - NCCyberarmsGuide
+  - NCCyberpsychosisGuide
+  - NCDermalArmorGuide
+  - NCInternalMedicalGuide
   - NCAftercare
   - NCDoctorQuickReference
 
@@ -61,3 +66,28 @@
   id: NCDoctorQuickReference
   name: guide-entry-nc-doctor-quick-reference
   text: "/ServerInfo/Guidebook/_NC/Medical/QuickReference.xml"
+
+- type: guideEntry
+  id: NCCyberwareProductionGuide
+  name: guide-entry-nc-cyberware-production
+  text: "/ServerInfo/Guidebook/_NC/Medical/CyberwareProduction.xml"
+
+- type: guideEntry
+  id: NCDermalArmorGuide
+  name: guide-entry-nc-dermal
+  text: "/ServerInfo/Guidebook/_NC/Medical/DermalArmor.xml"
+
+- type: guideEntry
+  id: NCInternalMedicalGuide
+  name: guide-entry-nc-medical-implants
+  text: "/ServerInfo/Guidebook/_NC/Medical/InternalImplants.xml"
+
+- type: guideEntry
+  id: NCCyberarmsGuide
+  name: guide-entry-nc-cyberarms
+  text: "/ServerInfo/Guidebook/_NC/Medical/Cyberarms.xml"
+
+- type: guideEntry
+  id: NCCyberpsychosisGuide
+  name: guide-entry-nc-cyberpsychosis
+  text: "/ServerInfo/Guidebook/_NC/Medical/Cyberpsychosis.xml"

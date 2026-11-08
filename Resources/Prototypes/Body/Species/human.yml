@@ -138,6 +138,8 @@
       Thorax: NCOrganHumanThorax
       Abdomen: NCOrganHumanAbdomen
       PelvisGroin: NCOrganHumanPelvisGroin
+      Spine: NCOrganHumanSpine
+      VertebralColumn: NCOrganHumanVertebralColumn
       Skull: NCOrganHumanSkull
       RibCage: NCOrganHumanRibCage
       PelvisBone: NCOrganHumanPelvisBone
@@ -151,6 +153,7 @@
       TendonSetRightLeg: NCOrganHumanTendonSetRightLeg
       Brain: NCOrganHumanBrain
       Eyes: NCOrganHumanEyes
+      EyesRight: NCOrganHumanEyesRight
       Tongue: NCOrganHumanTongue
       Appendix: NCOrganHumanAppendix
       Ears: NCOrganHumanEars
@@ -161,10 +164,11 @@
       Kidneys: NCOrganHumanKidneys
     relationships:
       Torso: [ Head, ArmLeft, ArmRight, LegLeft, LegRight, Thorax, Abdomen, PelvisGroin ]
-      Thorax: [ RibCage, Heart, Lungs ]
+      Thorax: [ RibCage, Heart, Lungs, Spine ]
+      Spine: [ VertebralColumn ]
       Abdomen: [ Liver, Kidneys, Stomach, Appendix ]
       PelvisGroin: [ PelvisBone ]
-      Head: [ Skull, Brain, Eyes, Tongue, Ears ]
+      Head: [ Skull, Brain, Eyes, EyesRight, Tongue, Ears ]
       ArmLeft: [ ArmBoneLeft, TendonSetLeftArm, HandLeft ]
       ArmRight: [ ArmBoneRight, TendonSetRightArm, HandRight ]
       LegLeft: [ LegBoneLeft, TendonSetLeftLeg, FootLeft ]

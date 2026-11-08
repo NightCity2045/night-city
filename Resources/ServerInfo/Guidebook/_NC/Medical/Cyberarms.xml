@@ -1,0 +1,12 @@
+<Document>
+<NCGuideLocalizedText Key="nc-guide-arms-1"/>
+<NCGuideLocalizedText Key="nc-guide-arms-2"/>
+<NCGuideLocalizedText Key="nc-guide-arms-3"/>
+<NCGuideLocalizedText Key="nc-guide-arms-4"/>
+<NCGuideLocalizedText Key="nc-guide-arms-5"/>
+<NCGuideLocalizedText Key="nc-guide-arms-6"/>
+<NCGuideLocalizedText Key="nc-guide-arms-7"/>
+<GuideEntityEmbed Entity="NCOrganHumanCivilianCyberArmLeftFrame"/>
+<GuideEntityEmbed Entity="NCArmMonowireImplant"/>
+<GuideEntityEmbed Entity="NCArmQuickSocketImplant"/>
+</Document>

@@ -1,0 +1,14 @@
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      Title="{Loc nc-optics-album}" MinWidth="410" MinHeight="340">
+    <BoxContainer Orientation="Vertical" SeparationOverride="8">
+        <TextureRect Name="Photo" MinWidth="384" MinHeight="288" Stretch="KeepAspectCentered" />
+        <BoxContainer>
+            <Button Name="Previous" Text="{Loc nc-optics-previous}" />
+            <Label Name="Counter" HorizontalExpand="True" HorizontalAlignment="Center" />
+            <Button Name="Next" Text="{Loc nc-optics-next}" />
+            <Button Name="Delete" Text="{Loc nc-optics-delete}" />
+        </BoxContainer>
+    </BoxContainer>
+</controls:FancyWindow>

@@ -1,0 +1,1744 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmMicrodriveStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: microdrive
+  - type: NCCyberwarePart
+    profile: NCArmMicrodriveStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmMicrodriveImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: microdrive
+  - type: NCCyberwarePart
+    profile: NCArmMicrodriveImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmMicrodriveImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: microdrive
+  - type: NCCyberwarePart
+    profile: NCArmMicrodriveImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmMicrodrivePremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: microdrive
+  - type: NCCyberwarePart
+    profile: NCArmMicrodrivePremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmGuideStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: guide
+  - type: NCCyberwarePart
+    profile: NCArmGuideStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmGuideImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: guide
+  - type: NCCyberwarePart
+    profile: NCArmGuideImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmGuideImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: guide
+  - type: NCCyberwarePart
+    profile: NCArmGuideImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmGuidePremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: guide
+  - type: NCCyberwarePart
+    profile: NCArmGuidePremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmLockStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: lock
+  - type: NCCyberwarePart
+    profile: NCArmLockStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmLockImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: lock
+  - type: NCCyberwarePart
+    profile: NCArmLockImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmLockImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: lock
+  - type: NCCyberwarePart
+    profile: NCArmLockImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmLockPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: lock
+  - type: NCCyberwarePart
+    profile: NCArmLockPremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmDamperStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: damper
+  - type: NCCyberwarePart
+    profile: NCArmDamperStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmDamperImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: damper
+  - type: NCCyberwarePart
+    profile: NCArmDamperImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmDamperImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: damper
+  - type: NCCyberwarePart
+    profile: NCArmDamperImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmDamperPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: damper
+  - type: NCCyberwarePart
+    profile: NCArmDamperPremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmCoolingStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: cooling
+  - type: NCCyberwarePart
+    profile: NCArmCoolingStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmCoolingImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: cooling
+  - type: NCCyberwarePart
+    profile: NCArmCoolingImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmCoolingImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: cooling
+  - type: NCCyberwarePart
+    profile: NCArmCoolingImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmCoolingPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: cooling
+  - type: NCCyberwarePart
+    profile: NCArmCoolingPremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmClawsStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: claws
+  - type: NCCyberwarePart
+    profile: NCArmClawsStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmClawsImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: claws
+  - type: NCCyberwarePart
+    profile: NCArmClawsImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmClawsImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: claws
+  - type: NCCyberwarePart
+    profile: NCArmClawsImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmClawsPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: claws
+  - type: NCCyberwarePart
+    profile: NCArmClawsPremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmBladeStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: blade
+  - type: NCCyberwarePart
+    profile: NCArmBladeStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmBladeImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: blade
+  - type: NCCyberwarePart
+    profile: NCArmBladeImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmBladeImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: blade
+  - type: NCCyberwarePart
+    profile: NCArmBladeImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmBladePremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: blade
+  - type: NCCyberwarePart
+    profile: NCArmBladePremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmHingeStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: hinge
+  - type: NCCyberwarePart
+    profile: NCArmHingeStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmHingeImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: hinge
+  - type: NCCyberwarePart
+    profile: NCArmHingeImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmHingeImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: hinge
+  - type: NCCyberwarePart
+    profile: NCArmHingeImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmHingePremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: hinge
+  - type: NCCyberwarePart
+    profile: NCArmHingePremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmReelStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: reel
+  - type: NCCyberwarePart
+    profile: NCArmReelStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmReelImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: reel
+  - type: NCCyberwarePart
+    profile: NCArmReelImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmReelImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: reel
+  - type: NCCyberwarePart
+    profile: NCArmReelImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmReelPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: reel
+  - type: NCCyberwarePart
+    profile: NCArmReelPremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmWireStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: wire
+  - type: NCCyberwarePart
+    profile: NCArmWireStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmWireImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: wire
+  - type: NCCyberwarePart
+    profile: NCArmWireImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmWireImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: wire
+  - type: NCCyberwarePart
+    profile: NCArmWireImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmWirePremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: wire
+  - type: NCCyberwarePart
+    profile: NCArmWirePremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmPistolCoreStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: pistol
+  - type: NCCyberwarePart
+    profile: NCArmPistolCoreStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmPistolCoreImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: pistol
+  - type: NCCyberwarePart
+    profile: NCArmPistolCoreImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmPistolCoreImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: pistol
+  - type: NCCyberwarePart
+    profile: NCArmPistolCoreImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmPistolCorePremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: pistol
+  - type: NCCyberwarePart
+    profile: NCArmPistolCorePremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmLauncherCoreStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: launcher
+  - type: NCCyberwarePart
+    profile: NCArmLauncherCoreStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmLauncherCoreImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: launcher
+  - type: NCCyberwarePart
+    profile: NCArmLauncherCoreImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmLauncherCoreImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: launcher
+  - type: NCCyberwarePart
+    profile: NCArmLauncherCoreImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmLauncherCorePremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: launcher
+  - type: NCCyberwarePart
+    profile: NCArmLauncherCorePremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmToolsStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: tool
+  - type: NCCyberwarePart
+    profile: NCArmToolsStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmToolsImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: tool
+  - type: NCCyberwarePart
+    profile: NCArmToolsImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmToolsImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: tool
+  - type: NCCyberwarePart
+    profile: NCArmToolsImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmToolsPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: tool
+  - type: NCCyberwarePart
+    profile: NCArmToolsPremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmMedicalToolsStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: medical
+  - type: NCCyberwarePart
+    profile: NCArmMedicalToolsStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmMedicalToolsImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: medical
+  - type: NCCyberwarePart
+    profile: NCArmMedicalToolsImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmMedicalToolsImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: medical
+  - type: NCCyberwarePart
+    profile: NCArmMedicalToolsImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmMedicalToolsPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: medical
+  - type: NCCyberwarePart
+    profile: NCArmMedicalToolsPremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmPocketStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: storage
+  - type: NCCyberwarePart
+    profile: NCArmPocketStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmPocketImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: storage
+  - type: NCCyberwarePart
+    profile: NCArmPocketImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmPocketImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: storage
+  - type: NCCyberwarePart
+    profile: NCArmPocketImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmPocketPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: storage
+  - type: NCCyberwarePart
+    profile: NCArmPocketPremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmSocketStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: socket
+  - type: NCCyberwarePart
+    profile: NCArmSocketStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmSocketImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: socket
+  - type: NCCyberwarePart
+    profile: NCArmSocketImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmSocketImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: socket
+  - type: NCCyberwarePart
+    profile: NCArmSocketImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmSocketPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: socket
+  - type: NCCyberwarePart
+    profile: NCArmSocketPremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmImpactStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: impact
+  - type: NCCyberwarePart
+    profile: NCArmImpactStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmImpactImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: impact
+  - type: NCCyberwarePart
+    profile: NCArmImpactImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmImpactImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: impact
+  - type: NCCyberwarePart
+    profile: NCArmImpactImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmImpactPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: impact
+  - type: NCCyberwarePart
+    profile: NCArmImpactPremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmCuffStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: cuff
+  - type: NCCyberwarePart
+    profile: NCArmCuffStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmCuffImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: cuff
+  - type: NCCyberwarePart
+    profile: NCArmCuffImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmCuffImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: cuff
+  - type: NCCyberwarePart
+    profile: NCArmCuffImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmCuffPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: cuff
+  - type: NCCyberwarePart
+    profile: NCArmCuffPremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmShellStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: shell
+  - type: NCCyberwarePart
+    profile: NCArmShellStandardPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmShellImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: shell
+  - type: NCCyberwarePart
+    profile: NCArmShellImprovisedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmShellImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: shell
+  - type: NCCyberwarePart
+    profile: NCArmShellImprovedPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmShellPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: shell
+  - type: NCCyberwarePart
+    profile: NCArmShellPremiumPart
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmPowerDriveStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: drive
+  - type: NCCyberwarePart
+    profile: NCArmPowerDriveStandardPart
+  - type: NCArmDrive
+    strength: 1.35
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmPowerDriveImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: drive
+  - type: NCCyberwarePart
+    profile: NCArmPowerDriveImprovisedPart
+  - type: NCArmDrive
+    strength: 1.35
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmPowerDriveImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: drive
+  - type: NCCyberwarePart
+    profile: NCArmPowerDriveImprovedPart
+  - type: NCArmDrive
+    strength: 1.35
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCArmPowerDrivePremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: drive
+  - type: NCCyberwarePart
+    profile: NCArmPowerDrivePremiumPart
+  - type: NCArmDrive
+    strength: 1.35
+- type: entity
+  parent: NCCyberwareAbilityImplantBase
+  id: NCArmImpactImplant
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: impact
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+  - type: NCCyberware
+    profile: NCArmImpact
+    factoryPrepared: true
+  - type: NCArmModule
+    kind: Impact
+    volume: 1
+    visualState: impact
+    requiresHeavyFrame: false
+    deploySeconds: 0.6
+  - type: NCCyberwareAbility
+    profile: NCArmImpactAbility
+- type: entity
+  parent: NCArmImpactImplant
+  id: NCArmImpactImplantEmpty
+  suffix: Unassembled Standard
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmImpactImplant
+  id: NCArmImpactImplantImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCArmImpactPartSlot: NCArmImpactImprovised
+      NCArmDamperPartSlot: NCArmDamperImprovised
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImprovised
+      NCArmLockPartSlot: NCArmLockImprovised
+- type: entity
+  parent: NCArmImpactImplantImprovised
+  id: NCArmImpactImplantImprovisedEmpty
+  suffix: Unassembled Improvised
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmImpactImplant
+  id: NCArmImpactImplantImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCArmImpactPartSlot: NCArmImpactImproved
+      NCArmDamperPartSlot: NCArmDamperImproved
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImproved
+      NCArmLockPartSlot: NCArmLockImproved
+- type: entity
+  parent: NCArmImpactImplantImproved
+  id: NCArmImpactImplantImprovedEmpty
+  suffix: Unassembled Improved
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmImpactImplant
+  id: NCArmImpactImplantPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCArmImpactPartSlot: NCArmImpactPremium
+      NCArmDamperPartSlot: NCArmDamperPremium
+      NCArmMicrodrivePartSlot: NCArmMicrodrivePremium
+      NCArmLockPartSlot: NCArmLockPremium
+- type: entity
+  parent: NCArmImpactImplantPremium
+  id: NCArmImpactImplantPremiumEmpty
+  suffix: Unassembled Premium
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCCyberwareAbilityImplantBase
+  id: NCArmClawsImplant
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: claws
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+  - type: NCCyberware
+    profile: NCArmClaws
+    factoryPrepared: true
+  - type: NCArmModule
+    kind: Claws
+    volume: 1
+    visualState: claws
+    requiresHeavyFrame: false
+    deploySeconds: 0.6
+  - type: NCCyberwareAbility
+    profile: NCArmClawsAbility
+- type: entity
+  parent: NCArmClawsImplant
+  id: NCArmClawsImplantEmpty
+  suffix: Unassembled Standard
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmClawsImplant
+  id: NCArmClawsImplantImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCArmClawsPartSlot: NCArmClawsImprovised
+      NCArmGuidePartSlot: NCArmGuideImprovised
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImprovised
+      NCArmLockPartSlot: NCArmLockImprovised
+- type: entity
+  parent: NCArmClawsImplantImprovised
+  id: NCArmClawsImplantImprovisedEmpty
+  suffix: Unassembled Improvised
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmClawsImplant
+  id: NCArmClawsImplantImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCArmClawsPartSlot: NCArmClawsImproved
+      NCArmGuidePartSlot: NCArmGuideImproved
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImproved
+      NCArmLockPartSlot: NCArmLockImproved
+- type: entity
+  parent: NCArmClawsImplantImproved
+  id: NCArmClawsImplantImprovedEmpty
+  suffix: Unassembled Improved
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmClawsImplant
+  id: NCArmClawsImplantPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCArmClawsPartSlot: NCArmClawsPremium
+      NCArmGuidePartSlot: NCArmGuidePremium
+      NCArmMicrodrivePartSlot: NCArmMicrodrivePremium
+      NCArmLockPartSlot: NCArmLockPremium
+- type: entity
+  parent: NCArmClawsImplantPremium
+  id: NCArmClawsImplantPremiumEmpty
+  suffix: Unassembled Premium
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCCyberwareAbilityImplantBase
+  id: NCArmBladeImplant
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: blade
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+  - type: NCCyberware
+    profile: NCArmBlade
+    factoryPrepared: true
+  - type: NCArmModule
+    kind: Blade
+    volume: 2
+    visualState: blade
+    requiresHeavyFrame: false
+    deploySeconds: 0.6
+  - type: NCCyberwareAbility
+    profile: NCArmBladeAbility
+- type: entity
+  parent: NCArmBladeImplant
+  id: NCArmBladeImplantEmpty
+  suffix: Unassembled Standard
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmBladeImplant
+  id: NCArmBladeImplantImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCArmBladePartSlot: NCArmBladeImprovised
+      NCArmGuidePartSlot: NCArmGuideImprovised
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImprovised
+      NCArmLockPartSlot: NCArmLockImprovised
+- type: entity
+  parent: NCArmBladeImplantImprovised
+  id: NCArmBladeImplantImprovisedEmpty
+  suffix: Unassembled Improvised
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmBladeImplant
+  id: NCArmBladeImplantImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCArmBladePartSlot: NCArmBladeImproved
+      NCArmGuidePartSlot: NCArmGuideImproved
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImproved
+      NCArmLockPartSlot: NCArmLockImproved
+- type: entity
+  parent: NCArmBladeImplantImproved
+  id: NCArmBladeImplantImprovedEmpty
+  suffix: Unassembled Improved
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmBladeImplant
+  id: NCArmBladeImplantPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCArmBladePartSlot: NCArmBladePremium
+      NCArmGuidePartSlot: NCArmGuidePremium
+      NCArmMicrodrivePartSlot: NCArmMicrodrivePremium
+      NCArmLockPartSlot: NCArmLockPremium
+- type: entity
+  parent: NCArmBladeImplantPremium
+  id: NCArmBladeImplantPremiumEmpty
+  suffix: Unassembled Premium
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCMantisBladeImplant
+  id: NCMantisBladeImplantEmpty
+  suffix: Unassembled Standard
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCMantisBladeImplantQualityImprovised
+  id: NCMantisBladeImplantImprovisedEmpty
+  suffix: Unassembled Improvised
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCMantisBladeImplantQualityImproved
+  id: NCMantisBladeImplantImprovedEmpty
+  suffix: Unassembled Improved
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCMantisBladeImplantQualityPremium
+  id: NCMantisBladeImplantPremiumEmpty
+  suffix: Unassembled Premium
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCCyberwareAbilityImplantBase
+  id: NCArmMonowireImplant
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: monowire
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+  - type: NCCyberware
+    profile: NCArmMonowire
+    factoryPrepared: true
+  - type: NCArmModule
+    kind: Monowire
+    volume: 2
+    visualState: monowire
+    requiresHeavyFrame: false
+    deploySeconds: 0.6
+  - type: NCCyberwareAbility
+    profile: NCArmMonowireAbility
+- type: entity
+  parent: NCArmMonowireImplant
+  id: NCArmMonowireImplantEmpty
+  suffix: Unassembled Standard
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmMonowireImplant
+  id: NCArmMonowireImplantImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCArmWirePartSlot: NCArmWireImprovised
+      NCArmReelPartSlot: NCArmReelImprovised
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImprovised
+      NCArmLockPartSlot: NCArmLockImprovised
+- type: entity
+  parent: NCArmMonowireImplantImprovised
+  id: NCArmMonowireImplantImprovisedEmpty
+  suffix: Unassembled Improvised
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmMonowireImplant
+  id: NCArmMonowireImplantImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCArmWirePartSlot: NCArmWireImproved
+      NCArmReelPartSlot: NCArmReelImproved
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImproved
+      NCArmLockPartSlot: NCArmLockImproved
+- type: entity
+  parent: NCArmMonowireImplantImproved
+  id: NCArmMonowireImplantImprovedEmpty
+  suffix: Unassembled Improved
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmMonowireImplant
+  id: NCArmMonowireImplantPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCArmWirePartSlot: NCArmWirePremium
+      NCArmReelPartSlot: NCArmReelPremium
+      NCArmMicrodrivePartSlot: NCArmMicrodrivePremium
+      NCArmLockPartSlot: NCArmLockPremium
+- type: entity
+  parent: NCArmMonowireImplantPremium
+  id: NCArmMonowireImplantPremiumEmpty
+  suffix: Unassembled Premium
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCCyberwareAbilityImplantBase
+  id: NCArmPistolImplant
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: pistol
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+  - type: NCCyberware
+    profile: NCArmPistol
+    factoryPrepared: true
+  - type: NCArmModule
+    kind: Pistol
+    volume: 2
+    visualState: pistol
+    requiresHeavyFrame: false
+    deploySeconds: 0.6
+  - type: NCCyberwareAbility
+    profile: NCArmPistolAbility
+- type: entity
+  parent: NCArmPistolImplant
+  id: NCArmPistolImplantEmpty
+  suffix: Unassembled Standard
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmPistolImplant
+  id: NCArmPistolImplantImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCArmPistolCorePartSlot: NCArmPistolCoreImprovised
+      NCArmGuidePartSlot: NCArmGuideImprovised
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImprovised
+      NCArmLockPartSlot: NCArmLockImprovised
+- type: entity
+  parent: NCArmPistolImplantImprovised
+  id: NCArmPistolImplantImprovisedEmpty
+  suffix: Unassembled Improvised
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmPistolImplant
+  id: NCArmPistolImplantImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCArmPistolCorePartSlot: NCArmPistolCoreImproved
+      NCArmGuidePartSlot: NCArmGuideImproved
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImproved
+      NCArmLockPartSlot: NCArmLockImproved
+- type: entity
+  parent: NCArmPistolImplantImproved
+  id: NCArmPistolImplantImprovedEmpty
+  suffix: Unassembled Improved
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmPistolImplant
+  id: NCArmPistolImplantPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCArmPistolCorePartSlot: NCArmPistolCorePremium
+      NCArmGuidePartSlot: NCArmGuidePremium
+      NCArmMicrodrivePartSlot: NCArmMicrodrivePremium
+      NCArmLockPartSlot: NCArmLockPremium
+- type: entity
+  parent: NCArmPistolImplantPremium
+  id: NCArmPistolImplantPremiumEmpty
+  suffix: Unassembled Premium
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCCyberwareAbilityImplantBase
+  id: NCArmLauncherImplant
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: launcher
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+  - type: NCCyberware
+    profile: NCArmLauncher
+    factoryPrepared: true
+  - type: NCArmModule
+    kind: Launcher
+    volume: 4
+    visualState: launcher
+    requiresHeavyFrame: true
+    deploySeconds: 1.2
+  - type: NCCyberwareAbility
+    profile: NCArmLauncherAbility
+- type: entity
+  parent: NCArmLauncherImplant
+  id: NCArmLauncherImplantEmpty
+  suffix: Unassembled Standard
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmLauncherImplant
+  id: NCArmLauncherImplantImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCArmLauncherCorePartSlot: NCArmLauncherCoreImprovised
+      NCArmHingePartSlot: NCArmHingeImprovised
+      NCArmDamperPartSlot: NCArmDamperImprovised
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImprovised
+      NCArmCoolingPartSlot: NCArmCoolingImprovised
+      NCArmLockPartSlot: NCArmLockImprovised
+- type: entity
+  parent: NCArmLauncherImplantImprovised
+  id: NCArmLauncherImplantImprovisedEmpty
+  suffix: Unassembled Improvised
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmLauncherImplant
+  id: NCArmLauncherImplantImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCArmLauncherCorePartSlot: NCArmLauncherCoreImproved
+      NCArmHingePartSlot: NCArmHingeImproved
+      NCArmDamperPartSlot: NCArmDamperImproved
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImproved
+      NCArmCoolingPartSlot: NCArmCoolingImproved
+      NCArmLockPartSlot: NCArmLockImproved
+- type: entity
+  parent: NCArmLauncherImplantImproved
+  id: NCArmLauncherImplantImprovedEmpty
+  suffix: Unassembled Improved
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmLauncherImplant
+  id: NCArmLauncherImplantPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCArmLauncherCorePartSlot: NCArmLauncherCorePremium
+      NCArmHingePartSlot: NCArmHingePremium
+      NCArmDamperPartSlot: NCArmDamperPremium
+      NCArmMicrodrivePartSlot: NCArmMicrodrivePremium
+      NCArmCoolingPartSlot: NCArmCoolingPremium
+      NCArmLockPartSlot: NCArmLockPremium
+- type: entity
+  parent: NCArmLauncherImplantPremium
+  id: NCArmLauncherImplantPremiumEmpty
+  suffix: Unassembled Premium
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCToolHandImplant
+  id: NCToolHandImplantEmpty
+  suffix: Unassembled Standard
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCToolHandImplantQualityImprovised
+  id: NCToolHandImplantImprovisedEmpty
+  suffix: Unassembled Improvised
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCToolHandImplantQualityImproved
+  id: NCToolHandImplantImprovedEmpty
+  suffix: Unassembled Improved
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCToolHandImplantQualityPremium
+  id: NCToolHandImplantPremiumEmpty
+  suffix: Unassembled Premium
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCCyberwareAbilityImplantBase
+  id: NCArmMedicalImplant
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: medical
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+  - type: NCCyberware
+    profile: NCArmMedical
+    factoryPrepared: true
+  - type: NCArmModule
+    kind: Medical
+    volume: 1
+    visualState: medical
+    requiresHeavyFrame: false
+    deploySeconds: 0.6
+  - type: NCCyberwareAbility
+    profile: NCArmMedicalAbility
+- type: entity
+  parent: NCArmMedicalImplant
+  id: NCArmMedicalImplantEmpty
+  suffix: Unassembled Standard
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmMedicalImplant
+  id: NCArmMedicalImplantImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCArmMedicalToolsPartSlot: NCArmMedicalToolsImprovised
+      NCArmGuidePartSlot: NCArmGuideImprovised
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImprovised
+      NCArmLockPartSlot: NCArmLockImprovised
+- type: entity
+  parent: NCArmMedicalImplantImprovised
+  id: NCArmMedicalImplantImprovisedEmpty
+  suffix: Unassembled Improvised
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmMedicalImplant
+  id: NCArmMedicalImplantImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCArmMedicalToolsPartSlot: NCArmMedicalToolsImproved
+      NCArmGuidePartSlot: NCArmGuideImproved
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImproved
+      NCArmLockPartSlot: NCArmLockImproved
+- type: entity
+  parent: NCArmMedicalImplantImproved
+  id: NCArmMedicalImplantImprovedEmpty
+  suffix: Unassembled Improved
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmMedicalImplant
+  id: NCArmMedicalImplantPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCArmMedicalToolsPartSlot: NCArmMedicalToolsPremium
+      NCArmGuidePartSlot: NCArmGuidePremium
+      NCArmMicrodrivePartSlot: NCArmMicrodrivePremium
+      NCArmLockPartSlot: NCArmLockPremium
+- type: entity
+  parent: NCArmMedicalImplantPremium
+  id: NCArmMedicalImplantPremiumEmpty
+  suffix: Unassembled Premium
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCCyberwareAbilityImplantBase
+  id: NCArmStorageImplant
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: storage
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+  - type: NCCyberware
+    profile: NCArmStorage
+    factoryPrepared: true
+  - type: NCArmModule
+    kind: Storage
+    volume: 1
+    visualState: storage
+    requiresHeavyFrame: false
+    deploySeconds: 0.6
+  - type: NCCyberwareAbility
+    profile: NCArmStorageAbility
+  - type: NCArmPocket
+  - type: Storage
+    grid:
+    - 0,0,1,1
+    maxItemSize: Small
+  - type: ContainerContainer
+    containers:
+      storagebase: !type:Container
+        ents: []
+  - type: UserInterface
+    interfaces:
+      enum.StorageUiKey.Key:
+        type: StorageBoundUserInterface
+        interactionRange: 0
+
+- type: entity
+  parent: NCArmStorageImplant
+  id: NCArmStorageImplantEmpty
+  suffix: Unassembled Standard
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmStorageImplant
+  id: NCArmStorageImplantImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCArmPocketPartSlot: NCArmPocketImprovised
+      NCArmLockPartSlot: NCArmLockImprovised
+- type: entity
+  parent: NCArmStorageImplantImprovised
+  id: NCArmStorageImplantImprovisedEmpty
+  suffix: Unassembled Improvised
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmStorageImplant
+  id: NCArmStorageImplantImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCArmPocketPartSlot: NCArmPocketImproved
+      NCArmLockPartSlot: NCArmLockImproved
+- type: entity
+  parent: NCArmStorageImplantImproved
+  id: NCArmStorageImplantImprovedEmpty
+  suffix: Unassembled Improved
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmStorageImplant
+  id: NCArmStorageImplantPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCArmPocketPartSlot: NCArmPocketPremium
+      NCArmLockPartSlot: NCArmLockPremium
+- type: entity
+  parent: NCArmStorageImplantPremium
+  id: NCArmStorageImplantPremiumEmpty
+  suffix: Unassembled Premium
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCCyberwareAbilityImplantBase
+  id: NCArmQuickSocketImplant
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/arms.rsi
+    state: socket
+  - type: Item
+    sprite: _NC/Objects/Cyberware/arms.rsi
+  - type: NCCyberware
+    profile: NCArmQuickSocket
+    factoryPrepared: true
+  - type: NCArmModule
+    kind: QuickSocket
+    volume: 0
+    visualState: socket
+    requiresHeavyFrame: false
+    deploySeconds: 0.6
+- type: entity
+  parent: NCArmQuickSocketImplant
+  id: NCArmQuickSocketImplantEmpty
+  suffix: Unassembled Standard
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmQuickSocketImplant
+  id: NCArmQuickSocketImplantImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCArmSocketPartSlot: NCArmSocketImprovised
+      NCArmLockPartSlot: NCArmLockImprovised
+- type: entity
+  parent: NCArmQuickSocketImplantImprovised
+  id: NCArmQuickSocketImplantImprovisedEmpty
+  suffix: Unassembled Improvised
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmQuickSocketImplant
+  id: NCArmQuickSocketImplantImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCArmSocketPartSlot: NCArmSocketImproved
+      NCArmLockPartSlot: NCArmLockImproved
+- type: entity
+  parent: NCArmQuickSocketImplantImproved
+  id: NCArmQuickSocketImplantImprovedEmpty
+  suffix: Unassembled Improved
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+- type: entity
+  parent: NCArmQuickSocketImplant
+  id: NCArmQuickSocketImplantPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCArmSocketPartSlot: NCArmSocketPremium
+      NCArmLockPartSlot: NCArmLockPremium
+- type: entity
+  parent: NCArmQuickSocketImplantPremium
+  id: NCArmQuickSocketImplantPremiumEmpty
+  suffix: Unassembled Premium
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true

@@ -120,6 +120,10 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
             NCFreeformSurgeryAction.CalibrateCyberware => ApplyCyberwareCalibration(context, resolution, out warning),
             NCFreeformSurgeryAction.DisconnectCyberware => ApplyCyberwareDisconnection(context, resolution),
             NCFreeformSurgeryAction.RepairCyberware => ApplyCyberwareRepair(context, resolution, out warning),
+            NCFreeformSurgeryAction.AnchorSkeletal or NCFreeformSurgeryAction.ConnectSkeletal or
+                NCFreeformSurgeryAction.DistributeDermal or NCFreeformSurgeryAction.FixDermal or NCFreeformSurgeryAction.CheckDermal or NCFreeformSurgeryAction.FixMedical or NCFreeformSurgeryAction.ConnectMedical or NCFreeformSurgeryAction.CheckMedical =>
+                ApplySkeletalSurgery(context, resolution, out warning),
+            NCFreeformSurgeryAction.TestSkeletal => ApplySkeletalLoadTest(context, resolution, out warning),
             NCFreeformSurgeryAction.DrainCavity => ApplyCavityDrain(context, power),
             _ => false,
         };
@@ -702,8 +706,9 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         warning = NCFreeformSurgeryFailure.None;
         if (!TryComp<NCSurgeryGameplaySelectionComponent>(context.Surgeon, out var selection) ||
             selection.Patient != context.Patient || selection.Graft is not { } graft ||
-            !CanReachStagedItem(context, graft) ||
-            !TryComp<OrganComponent>(context.Region, out var parent) || parent.Category is not { } parentCategory)
+            !CanReachStagedItem(context, graft) || selection.TargetZone != context.Zone ||
+            !TryComp<OrganComponent>(selection.TargetRegion, out var parent) || parent.Body != context.Patient ||
+            parent.Category is not { } parentCategory || !IsWithinOperativeRegion(selection.TargetRegion, context.Region))
         {
             return false;
         }
@@ -715,6 +720,20 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
         if (HasComp<NCCyberwareComponent>(graft))
             warning = _cyberware.TryFinishMount(graft, resolution);
         return true;
+    }
+
+    private bool IsWithinOperativeRegion(EntityUid candidate, EntityUid region)
+    {
+        // A staged receiving node may be below the visible surgical region (for example spinal bone in chest).
+        for (var depth = 0; depth < 64; depth++)
+        {
+            if (candidate == region)
+                return true;
+            if (!TryComp<ChildOrganComponent>(candidate, out var child) || child.Parent is not { } parent)
+                return false;
+            candidate = parent;
+        }
+        return false;
     }
 
     private bool ApplyCyberware(
@@ -731,18 +750,22 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
             selection.Patient == context.Patient && selection.Graft is { } module &&
             HasComp<NCCyberwareComponent>(module) &&
             CanReachStagedItem(context, module) &&
-            _cyberware.TryFindInstallSlot(context.Patient, context.Region, module, out var slot))
+            _cyberware.TryFindInstallHost(context.Patient, context.Region, module, out var host, out var slot))
         {
             var result = _cyberware.TryInstall(new NCCyberwareInstallRequest(
                 resolution,
                 context.Patient,
-                context.Region,
+                host,
                 module,
                 slot,
                 ConnectNeuralInterface: true,
                 CalibrateNeuralInterface: false));
             if (!result.Accepted)
+            {
+                if (result.Failure == NCCyberwareMutationFailure.FactoryPreparationRequired)
+                    warning = NCFreeformSurgeryFailure.FactoryPreparationRequired;
                 return false;
+            }
 
             RemComp<NCSurgeryGameplaySelectionComponent>(context.Surgeon);
             warning = _cyberware.TryFinishMount(module, resolution);
@@ -755,6 +778,9 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
 
         // With no staged module, contact on an exposed installed module is removal. General cyberware service
         // remains the responsibility of its physical service items and must not silently double as surgery.
+        if (_prototypes.TryIndex(Comp<NCCyberwareComponent>(target.Value).Profile, out var targetProfile) &&
+            targetProfile.SkeletalSurgery.Count > 0 && context.Zone != targetProfile.SkeletalSurgery[0].Zone)
+            return false;
         var removal = _cyberware.TryRemove(new NCCyberwareRemoveRequest(
             resolution,
             context.Patient,
@@ -773,10 +799,31 @@ public sealed partial class NCFreeformSurgeryEffectSystem : EntitySystem
                 !_containers.IsEntityInContainer(item) && _interaction.InRangeUnobstructed(context.Surgeon, item, 2f));
     }
 
+    private bool ApplySkeletalSurgery(in NCFreeformSurgeryEffectContext context, NCActionResolutionId resolution,
+        out NCFreeformSurgeryFailure failure)
+    {
+        failure = NCFreeformSurgeryFailure.NoApplicableTarget;
+        return context.Structure is { } target && _cyberware.TryPerformSkeletalSurgery((target, null),
+            context.Zone, context.Definition.Action, resolution, out failure);
+    }
+
+    private bool ApplySkeletalLoadTest(in NCFreeformSurgeryEffectContext context, NCActionResolutionId resolution,
+        out NCFreeformSurgeryFailure failure)
+    {
+        failure = NCFreeformSurgeryFailure.NoApplicableTarget;
+        return context.Structure is { } target && TryComp<NCCyberwareComponent>(target, out var module) &&
+               _prototypes.TryIndex(module.Profile, out var profile) && profile.SkeletalSurgery.Count > 0 &&
+               context.Zone == profile.SkeletalSurgery[0].Zone &&
+               _cyberware.TryTestSkeletalLoad((target, null), resolution, out failure);
+    }
+
     private bool ApplyCyberwareCalibration(in NCFreeformSurgeryEffectContext context, NCActionResolutionId resolution,
         out NCFreeformSurgeryFailure failure)
     {
         failure = NCFreeformSurgeryFailure.NoApplicableTarget;
+        if (context.Structure is { } module && TryComp<NCCyberwareComponent>(module, out var implant) &&
+            _prototypes.TryIndex(implant.Profile, out var profile) && profile.SkeletalSurgery.Count > 0 &&
+            context.Zone != profile.SkeletalSurgery[0].Zone) return false;
         return context.Structure is { } target && _cyberware.TryCalibrateCyberware((target, null), resolution, out failure);
     }
 

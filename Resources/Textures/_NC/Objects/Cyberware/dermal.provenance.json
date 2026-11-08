@@ -1,0 +1,8 @@
+{
+    "provider": "OpenAI ImageGen",
+    "source": "exec-7038819b-e99d-4bb3-b722-b6fa0e1b40e3.png",
+    "sha256": "3e9f034bb73560f52706de17549fcf76f07161cd830785385ed2ddc4602b17bd",
+    "prompt": "dermal.prompt.txt",
+    "normalization": "Four equal cells; crop alpha bounds; fit 30x30 on 32x32 canvas; 24 colors; binary alpha. Original source preserved.",
+    "license": "CC-BY-SA-3.0"
+}

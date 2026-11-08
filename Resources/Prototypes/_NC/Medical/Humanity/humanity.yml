@@ -5,6 +5,10 @@
 - type: ncHumanityProfile
   id: NCHumanityDefault
   activeUpdateInterval: 1s
+  episodesEnabled: true
+  escalationSeconds: 8
+  maximumAcuteSeconds: 90
+  recoverySeconds: 120
   safeRecoveryPerSecond: 0.1
   overloadPerSecond: 0.15
   overburdenPerSecond: 0.01

@@ -1,0 +1,2053 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  parent: NCCyberarmActuator
+  id: NCCyberarmActuatorQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberwarePart
+    profile: NCIndustrialArmActuatorQualityImprovised
+
+- type: entity
+  parent: NCCyberarmActuator
+  id: NCCyberarmActuatorQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberwarePart
+    profile: NCIndustrialArmActuatorQualityImproved
+
+- type: entity
+  parent: NCCyberarmActuator
+  id: NCCyberarmActuatorQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberwarePart
+    profile: NCIndustrialArmActuatorQualityPremium
+
+- type: entity
+  parent: NCCyberarmController
+  id: NCCyberarmControllerQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberwarePart
+    profile: NCIndustrialArmControllerQualityImprovised
+
+- type: entity
+  parent: NCCyberarmController
+  id: NCCyberarmControllerQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberwarePart
+    profile: NCIndustrialArmControllerQualityImproved
+
+- type: entity
+  parent: NCCyberarmController
+  id: NCCyberarmControllerQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberwarePart
+    profile: NCIndustrialArmControllerQualityPremium
+
+- type: entity
+  parent: NCCyberarmSensor
+  id: NCCyberarmSensorQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberwarePart
+    profile: NCIndustrialArmSensorQualityImprovised
+
+- type: entity
+  parent: NCCyberarmSensor
+  id: NCCyberarmSensorQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberwarePart
+    profile: NCIndustrialArmSensorQualityImproved
+
+- type: entity
+  parent: NCCyberarmSensor
+  id: NCCyberarmSensorQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberwarePart
+    profile: NCIndustrialArmSensorQualityPremium
+
+- type: entity
+  parent: NCMedicalControllerBasic
+  id: NCMedicalControllerBasicQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberwarePart
+    profile: NCMedicalControllerImprovisedPart
+
+- type: entity
+  parent: NCMedicalControllerBasic
+  id: NCMedicalControllerBasicQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberwarePart
+    profile: NCMedicalControllerImprovedPart
+
+- type: entity
+  parent: NCMedicalControllerBasic
+  id: NCMedicalControllerBasicQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberwarePart
+    profile: NCMedicalControllerPremiumPart
+
+- type: entity
+  parent: NCMedicalControllerBiomonitor
+  id: NCMedicalControllerBiomonitorQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberwarePart
+    profile: NCMedicalControllerImprovisedPart
+
+- type: entity
+  parent: NCMedicalControllerBiomonitor
+  id: NCMedicalControllerBiomonitorQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberwarePart
+    profile: NCMedicalControllerImprovedPart
+
+- type: entity
+  parent: NCMedicalControllerBiomonitor
+  id: NCMedicalControllerBiomonitorQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberwarePart
+    profile: NCMedicalControllerPremiumPart
+
+- type: entity
+  parent: NCMedicalControllerInjector
+  id: NCMedicalControllerInjectorQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberwarePart
+    profile: NCMedicalControllerImprovisedPart
+
+- type: entity
+  parent: NCMedicalControllerInjector
+  id: NCMedicalControllerInjectorQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberwarePart
+    profile: NCMedicalControllerImprovedPart
+
+- type: entity
+  parent: NCMedicalControllerInjector
+  id: NCMedicalControllerInjectorQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberwarePart
+    profile: NCMedicalControllerPremiumPart
+
+- type: entity
+  parent: NCSkeletalAnchors
+  id: NCSkeletalAnchorsQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberwarePart
+    profile: NCSkeletalAnchorsPartQualityImprovised
+
+- type: entity
+  parent: NCSkeletalAnchors
+  id: NCSkeletalAnchorsQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberwarePart
+    profile: NCSkeletalAnchorsPartQualityImproved
+
+- type: entity
+  parent: NCSkeletalAnchors
+  id: NCSkeletalAnchorsQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberwarePart
+    profile: NCSkeletalAnchorsPartQualityPremium
+
+- type: entity
+  parent: NCSkeletalHeavyAnchors
+  id: NCSkeletalHeavyAnchorsQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberwarePart
+    profile: NCSkeletalHeavyAnchorsPartQualityImprovised
+
+- type: entity
+  parent: NCSkeletalHeavyAnchors
+  id: NCSkeletalHeavyAnchorsQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberwarePart
+    profile: NCSkeletalHeavyAnchorsPartQualityImproved
+
+- type: entity
+  parent: NCSkeletalHeavyAnchors
+  id: NCSkeletalHeavyAnchorsQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberwarePart
+    profile: NCSkeletalHeavyAnchorsPartQualityPremium
+
+- type: entity
+  parent: NCBetaActuator
+  id: NCBetaActuatorQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberwarePart
+    profile: NCBetaActuatorPartQualityImprovised
+
+- type: entity
+  parent: NCBetaActuator
+  id: NCBetaActuatorQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberwarePart
+    profile: NCBetaActuatorPartQualityImproved
+
+- type: entity
+  parent: NCBetaActuator
+  id: NCBetaActuatorQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberwarePart
+    profile: NCBetaActuatorPartQualityPremium
+
+- type: entity
+  parent: NCSkeletalPowerJunction
+  id: NCSkeletalPowerJunctionQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberwarePart
+    profile: NCSkeletalPowerPartQualityImprovised
+
+- type: entity
+  parent: NCSkeletalPowerJunction
+  id: NCSkeletalPowerJunctionQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberwarePart
+    profile: NCSkeletalPowerPartQualityImproved
+
+- type: entity
+  parent: NCSkeletalPowerJunction
+  id: NCSkeletalPowerJunctionQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberwarePart
+    profile: NCSkeletalPowerPartQualityPremium
+
+- type: entity
+  parent: NCMetaCyberOptics
+  id: NCMetaCyberOpticsQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCMetaCyberOptics
+  id: NCMetaCyberOpticsQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCMetaCyberOptics
+  id: NCMetaCyberOpticsQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCImplantNeuralLinkMk1
+  id: NCImplantNeuralLinkMk1QualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImprovised
+      NCOpticPowerSlot: NCOpticPowerImprovised
+      NCNeuralProcessorSlot: NCNeuralProcessorImprovised
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImprovised
+
+- type: entity
+  parent: NCImplantNeuralLinkMk1
+  id: NCImplantNeuralLinkMk1QualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImproved
+      NCOpticPowerSlot: NCOpticPowerImproved
+      NCNeuralProcessorSlot: NCNeuralProcessorImproved
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImproved
+
+- type: entity
+  parent: NCImplantNeuralLinkMk1
+  id: NCImplantNeuralLinkMk1QualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicPremium
+      NCOpticPowerSlot: NCOpticPowerPremium
+      NCNeuralProcessorSlot: NCNeuralProcessorPremium
+      NCNeuralElectrodeSlot: NCNeuralElectrodePremium
+
+- type: entity
+  parent: NCImplantCirculatoryAssistMk1
+  id: NCImplantCirculatoryAssistMk1QualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCImplantCirculatoryAssistMk1
+  id: NCImplantCirculatoryAssistMk1QualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCImplantCirculatoryAssistMk1
+  id: NCImplantCirculatoryAssistMk1QualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCOrganHumanCyberArmLeft
+  id: NCOrganHumanCyberArmLeftQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImprovised
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImprovised
+
+- type: entity
+  parent: NCOrganHumanCyberArmLeft
+  id: NCOrganHumanCyberArmLeftQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImproved
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImproved
+
+- type: entity
+  parent: NCOrganHumanCyberArmLeft
+  id: NCOrganHumanCyberArmLeftQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityPremium
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityPremium
+
+- type: entity
+  parent: NCOrganHumanCyberArmRight
+  id: NCOrganHumanCyberArmRightQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImprovised
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImprovised
+
+- type: entity
+  parent: NCOrganHumanCyberArmRight
+  id: NCOrganHumanCyberArmRightQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImproved
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImproved
+
+- type: entity
+  parent: NCOrganHumanCyberArmRight
+  id: NCOrganHumanCyberArmRightQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityPremium
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityPremium
+
+- type: entity
+  parent: NCOrganHumanCyberEyes
+  id: NCOrganHumanCyberEyesQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCOrganHumanCyberEyes
+  id: NCOrganHumanCyberEyesQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCOrganHumanCyberEyes
+  id: NCOrganHumanCyberEyesQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCOrganHumanCyberHeart
+  id: NCOrganHumanCyberHeartQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCOrganHumanCyberHeart
+  id: NCOrganHumanCyberHeartQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCOrganHumanCyberHeart
+  id: NCOrganHumanCyberHeartQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCImplantPowerBusMk1
+  id: NCImplantPowerBusMk1QualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCImplantPowerBusMk1
+  id: NCImplantPowerBusMk1QualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCImplantPowerBusMk1
+  id: NCImplantPowerBusMk1QualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCImplantBioconverterMk1
+  id: NCImplantBioconverterMk1QualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCImplantBioconverterMk1
+  id: NCImplantBioconverterMk1QualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCImplantBioconverterMk1
+  id: NCImplantBioconverterMk1QualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCToolHandImplant
+  id: NCToolHandImplantQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCArmToolsPartSlot: NCArmToolsImprovised
+      NCArmGuidePartSlot: NCArmGuideImprovised
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImprovised
+      NCArmLockPartSlot: NCArmLockImprovised
+
+- type: entity
+  parent: NCToolHandImplant
+  id: NCToolHandImplantQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCArmToolsPartSlot: NCArmToolsImproved
+      NCArmGuidePartSlot: NCArmGuideImproved
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImproved
+      NCArmLockPartSlot: NCArmLockImproved
+
+- type: entity
+  parent: NCToolHandImplant
+  id: NCToolHandImplantQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCArmToolsPartSlot: NCArmToolsPremium
+      NCArmGuidePartSlot: NCArmGuidePremium
+      NCArmMicrodrivePartSlot: NCArmMicrodrivePremium
+      NCArmLockPartSlot: NCArmLockPremium
+
+- type: entity
+  parent: NCBiomonitorImplant
+  id: NCBiomonitorImplantQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCMedicalControllerSlot: NCMedicalControllerBiomonitorQualityImprovised
+      NCMedicalSensorSlot: NCMedicalSensorImprovised
+
+- type: entity
+  parent: NCBiomonitorImplant
+  id: NCBiomonitorImplantQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCMedicalControllerSlot: NCMedicalControllerBiomonitorQualityImproved
+      NCMedicalSensorSlot: NCMedicalSensorImproved
+
+- type: entity
+  parent: NCBiomonitorImplant
+  id: NCBiomonitorImplantQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCMedicalControllerSlot: NCMedicalControllerBiomonitorQualityPremium
+      NCMedicalSensorSlot: NCMedicalSensorPremium
+
+- type: entity
+  parent: NCMantisBladeImplant
+  id: NCMantisBladeImplantQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCArmBladePartSlot: NCArmBladeImprovised
+      NCArmHingePartSlot: NCArmHingeImprovised
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImprovised
+      NCArmLockPartSlot: NCArmLockImprovised
+
+- type: entity
+  parent: NCMantisBladeImplant
+  id: NCMantisBladeImplantQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCArmBladePartSlot: NCArmBladeImproved
+      NCArmHingePartSlot: NCArmHingeImproved
+      NCArmMicrodrivePartSlot: NCArmMicrodriveImproved
+      NCArmLockPartSlot: NCArmLockImproved
+
+- type: entity
+  parent: NCMantisBladeImplant
+  id: NCMantisBladeImplantQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCArmBladePartSlot: NCArmBladePremium
+      NCArmHingePartSlot: NCArmHingePremium
+      NCArmMicrodrivePartSlot: NCArmMicrodrivePremium
+      NCArmLockPartSlot: NCArmLockPremium
+
+- type: entity
+  parent: NCSandevistanImplant
+  id: NCSandevistanImplantQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImprovised
+      NCOpticPowerSlot: NCOpticPowerImprovised
+      NCNeuralProcessorSlot: NCNeuralProcessorImprovised
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImprovised
+      NCNeuralPulseSlot: NCNeuralPulseImprovised
+      NCNeuralCoolingSlot: NCNeuralCoolingImprovised
+
+- type: entity
+  parent: NCSandevistanImplant
+  id: NCSandevistanImplantQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImproved
+      NCOpticPowerSlot: NCOpticPowerImproved
+      NCNeuralProcessorSlot: NCNeuralProcessorImproved
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImproved
+      NCNeuralPulseSlot: NCNeuralPulseImproved
+      NCNeuralCoolingSlot: NCNeuralCoolingImproved
+
+- type: entity
+  parent: NCSandevistanImplant
+  id: NCSandevistanImplantQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicPremium
+      NCOpticPowerSlot: NCOpticPowerPremium
+      NCNeuralProcessorSlot: NCNeuralProcessorPremium
+      NCNeuralElectrodeSlot: NCNeuralElectrodePremium
+      NCNeuralPulseSlot: NCNeuralPulsePremium
+      NCNeuralCoolingSlot: NCNeuralCoolingPremium
+
+- type: entity
+  parent: NCKerenzikovImplant
+  id: NCKerenzikovImplantQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImprovised
+      NCOpticPowerSlot: NCOpticPowerImprovised
+      NCNeuralProcessorSlot: NCNeuralProcessorImprovised
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImprovised
+
+- type: entity
+  parent: NCKerenzikovImplant
+  id: NCKerenzikovImplantQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImproved
+      NCOpticPowerSlot: NCOpticPowerImproved
+      NCNeuralProcessorSlot: NCNeuralProcessorImproved
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImproved
+
+- type: entity
+  parent: NCKerenzikovImplant
+  id: NCKerenzikovImplantQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicPremium
+      NCOpticPowerSlot: NCOpticPowerPremium
+      NCNeuralProcessorSlot: NCNeuralProcessorPremium
+      NCNeuralElectrodeSlot: NCNeuralElectrodePremium
+
+- type: entity
+  parent: NCOrganHumanCyberArmLeftFrame
+  id: NCOrganHumanCyberArmLeftFrameQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImprovised
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImprovised
+
+- type: entity
+  parent: NCOrganHumanCyberArmLeftFrame
+  id: NCOrganHumanCyberArmLeftFrameQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImproved
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImproved
+
+- type: entity
+  parent: NCOrganHumanCyberArmLeftFrame
+  id: NCOrganHumanCyberArmLeftFrameQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityPremium
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityPremium
+
+- type: entity
+  parent: NCBorgPodHead
+  id: NCBorgPodHeadQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgPodHead
+  id: NCBorgPodHeadQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgPodHead
+  id: NCBorgPodHeadQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgPerfusionPump
+  id: NCBorgPerfusionPumpQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgPerfusionPump
+  id: NCBorgPerfusionPumpQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgPerfusionPump
+  id: NCBorgPerfusionPumpQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgOxygenator
+  id: NCBorgOxygenatorQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgOxygenator
+  id: NCBorgOxygenatorQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgOxygenator
+  id: NCBorgOxygenatorQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgMetabolicFilter
+  id: NCBorgMetabolicFilterQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgMetabolicFilter
+  id: NCBorgMetabolicFilterQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgMetabolicFilter
+  id: NCBorgMetabolicFilterQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgWasteFilter
+  id: NCBorgWasteFilterQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgWasteFilter
+  id: NCBorgWasteFilterQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgWasteFilter
+  id: NCBorgWasteFilterQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgNutrientProcessor
+  id: NCBorgNutrientProcessorQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgNutrientProcessor
+  id: NCBorgNutrientProcessorQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgNutrientProcessor
+  id: NCBorgNutrientProcessorQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgFrameTorso
+  id: NCBorgFrameTorsoQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgFrameTorso
+  id: NCBorgFrameTorsoQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgFrameTorso
+  id: NCBorgFrameTorsoQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgFramePowerHolder
+  id: NCBorgFramePowerHolderQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgFramePowerHolder
+  id: NCBorgFramePowerHolderQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgFramePowerHolder
+  id: NCBorgFramePowerHolderQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgFrameAbdomen
+  id: NCBorgFrameAbdomenQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgFrameAbdomen
+  id: NCBorgFrameAbdomenQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgFrameAbdomen
+  id: NCBorgFrameAbdomenQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgFramePelvis
+  id: NCBorgFramePelvisQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgFramePelvis
+  id: NCBorgFramePelvisQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgFramePelvis
+  id: NCBorgFramePelvisQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgFrameArmLeft
+  id: NCBorgFrameArmLeftQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgFrameArmLeft
+  id: NCBorgFrameArmLeftQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgFrameArmLeft
+  id: NCBorgFrameArmLeftQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgFrameArmRight
+  id: NCBorgFrameArmRightQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgFrameArmRight
+  id: NCBorgFrameArmRightQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgFrameArmRight
+  id: NCBorgFrameArmRightQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgFrameHandLeft
+  id: NCBorgFrameHandLeftQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgFrameHandLeft
+  id: NCBorgFrameHandLeftQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgFrameHandLeft
+  id: NCBorgFrameHandLeftQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgFrameHandRight
+  id: NCBorgFrameHandRightQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgFrameHandRight
+  id: NCBorgFrameHandRightQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgFrameHandRight
+  id: NCBorgFrameHandRightQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgFrameLegLeft
+  id: NCBorgFrameLegLeftQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgFrameLegLeft
+  id: NCBorgFrameLegLeftQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgFrameLegLeft
+  id: NCBorgFrameLegLeftQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgFrameLegRight
+  id: NCBorgFrameLegRightQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgFrameLegRight
+  id: NCBorgFrameLegRightQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgFrameLegRight
+  id: NCBorgFrameLegRightQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgFrameFootLeft
+  id: NCBorgFrameFootLeftQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgFrameFootLeft
+  id: NCBorgFrameFootLeftQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgFrameFootLeft
+  id: NCBorgFrameFootLeftQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgFrameFootRight
+  id: NCBorgFrameFootRightQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgFrameFootRight
+  id: NCBorgFrameFootRightQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgFrameFootRight
+  id: NCBorgFrameFootRightQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgFrameEyes
+  id: NCBorgFrameEyesQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgFrameEyes
+  id: NCBorgFrameEyesQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgFrameEyes
+  id: NCBorgFrameEyesQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgFrameEars
+  id: NCBorgFrameEarsQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgFrameEars
+  id: NCBorgFrameEarsQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgFrameEars
+  id: NCBorgFrameEarsQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgFrameMouth
+  id: NCBorgFrameMouthQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgFrameMouth
+  id: NCBorgFrameMouthQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgFrameMouth
+  id: NCBorgFrameMouthQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgClinicalFrameTorso
+  id: NCBorgClinicalFrameTorsoQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgClinicalFrameTorso
+  id: NCBorgClinicalFrameTorsoQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgClinicalFrameTorso
+  id: NCBorgClinicalFrameTorsoQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgClinicalFrameArmLeft
+  id: NCBorgClinicalFrameArmLeftQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgClinicalFrameArmLeft
+  id: NCBorgClinicalFrameArmLeftQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgClinicalFrameArmLeft
+  id: NCBorgClinicalFrameArmLeftQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgClinicalFrameArmRight
+  id: NCBorgClinicalFrameArmRightQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgClinicalFrameArmRight
+  id: NCBorgClinicalFrameArmRightQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgClinicalFrameArmRight
+  id: NCBorgClinicalFrameArmRightQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgClinicalFrameLegLeft
+  id: NCBorgClinicalFrameLegLeftQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgClinicalFrameLegLeft
+  id: NCBorgClinicalFrameLegLeftQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgClinicalFrameLegLeft
+  id: NCBorgClinicalFrameLegLeftQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBorgClinicalFrameLegRight
+  id: NCBorgClinicalFrameLegRightQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCBorgClinicalFrameLegRight
+  id: NCBorgClinicalFrameLegRightQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCBorgClinicalFrameLegRight
+  id: NCBorgClinicalFrameLegRightQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCOrganHumanClinicalCyberArmLeft
+  id: NCOrganHumanClinicalCyberArmLeftQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImprovised
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImprovised
+
+- type: entity
+  parent: NCOrganHumanClinicalCyberArmLeft
+  id: NCOrganHumanClinicalCyberArmLeftQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImproved
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImproved
+
+- type: entity
+  parent: NCOrganHumanClinicalCyberArmLeft
+  id: NCOrganHumanClinicalCyberArmLeftQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityPremium
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityPremium
+
+- type: entity
+  parent: NCOrganHumanCyberLegLeft
+  id: NCOrganHumanCyberLegLeftQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCOrganHumanCyberLegLeft
+  id: NCOrganHumanCyberLegLeftQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCOrganHumanCyberLegLeft
+  id: NCOrganHumanCyberLegLeftQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCOrganHumanClinicalCyberArmRight
+  id: NCOrganHumanClinicalCyberArmRightQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImprovised
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImprovised
+
+- type: entity
+  parent: NCOrganHumanClinicalCyberArmRight
+  id: NCOrganHumanClinicalCyberArmRightQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImproved
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImproved
+
+- type: entity
+  parent: NCOrganHumanClinicalCyberArmRight
+  id: NCOrganHumanClinicalCyberArmRightQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityPremium
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityPremium
+
+- type: entity
+  parent: NCOrganHumanCyberLegRight
+  id: NCOrganHumanCyberLegRightQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCOrganHumanCyberLegRight
+  id: NCOrganHumanCyberLegRightQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCOrganHumanCyberLegRight
+  id: NCOrganHumanCyberLegRightQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCImplantSkinweaveTorso
+  id: NCImplantSkinweaveTorsoQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCImplantSkinweaveTorso
+  id: NCImplantSkinweaveTorsoQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCImplantSkinweaveTorso
+  id: NCImplantSkinweaveTorsoQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCImplantSkinweaveTorsoUnprepared
+  id: NCImplantSkinweaveTorsoUnpreparedQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCImplantSkinweaveTorsoUnprepared
+  id: NCImplantSkinweaveTorsoUnpreparedQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCImplantSkinweaveTorsoUnprepared
+  id: NCImplantSkinweaveTorsoUnpreparedQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCImplantSubdermalArmorTorso
+  id: NCImplantSubdermalArmorTorsoQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCImplantSubdermalArmorTorso
+  id: NCImplantSubdermalArmorTorsoQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCImplantSubdermalArmorTorso
+  id: NCImplantSubdermalArmorTorsoQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCImplantSubdermalArmorTorsoUnprepared
+  id: NCImplantSubdermalArmorTorsoUnpreparedQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCImplantSubdermalArmorTorsoUnprepared
+  id: NCImplantSubdermalArmorTorsoUnpreparedQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCImplantSubdermalArmorTorsoUnprepared
+  id: NCImplantSubdermalArmorTorsoUnpreparedQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCBiomonitorImplantEmpty
+  id: NCBiomonitorImplantEmptyQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCMedicalControllerSlot: NCMedicalControllerBiomonitorQualityImprovised
+      NCMedicalSensorSlot: NCMedicalSensorImprovised
+
+- type: entity
+  parent: NCBiomonitorImplantEmpty
+  id: NCBiomonitorImplantEmptyQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCMedicalControllerSlot: NCMedicalControllerBiomonitorQualityImproved
+      NCMedicalSensorSlot: NCMedicalSensorImproved
+
+- type: entity
+  parent: NCBiomonitorImplantEmpty
+  id: NCBiomonitorImplantEmptyQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCMedicalControllerSlot: NCMedicalControllerBiomonitorQualityPremium
+      NCMedicalSensorSlot: NCMedicalSensorPremium
+
+- type: entity
+  parent: NCAutoInjectorImplant
+  id: NCAutoInjectorImplantQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCMedicalControllerSlot: NCMedicalControllerInjectorQualityImprovised
+      NCMedicalPumpSlot: NCMedicalPumpImprovised
+
+- type: entity
+  parent: NCAutoInjectorImplant
+  id: NCAutoInjectorImplantQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCMedicalControllerSlot: NCMedicalControllerInjectorQualityImproved
+      NCMedicalPumpSlot: NCMedicalPumpImproved
+
+- type: entity
+  parent: NCAutoInjectorImplant
+  id: NCAutoInjectorImplantQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCMedicalControllerSlot: NCMedicalControllerInjectorQualityPremium
+      NCMedicalPumpSlot: NCMedicalPumpPremium
+
+- type: entity
+  parent: NCAutoInjectorImplantEmpty
+  id: NCAutoInjectorImplantEmptyQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCMedicalControllerSlot: NCMedicalControllerInjectorQualityImprovised
+      NCMedicalPumpSlot: NCMedicalPumpImprovised
+
+- type: entity
+  parent: NCAutoInjectorImplantEmpty
+  id: NCAutoInjectorImplantEmptyQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCMedicalControllerSlot: NCMedicalControllerInjectorQualityImproved
+      NCMedicalPumpSlot: NCMedicalPumpImproved
+
+- type: entity
+  parent: NCAutoInjectorImplantEmpty
+  id: NCAutoInjectorImplantEmptyQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCMedicalControllerSlot: NCMedicalControllerInjectorQualityPremium
+      NCMedicalPumpSlot: NCMedicalPumpPremium
+
+- type: entity
+  parent: NCImplantMuscleBoneLace
+  id: NCImplantMuscleBoneLaceQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCImplantMuscleBoneLace
+  id: NCImplantMuscleBoneLaceQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCImplantMuscleBoneLace
+  id: NCImplantMuscleBoneLaceQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCImplantLinearFrameSigma
+  id: NCImplantLinearFrameSigmaQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImprovised
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImprovised
+      NCSkeletalAnchorSlot: NCSkeletalAnchorsQualityImprovised
+      NCSkeletalPowerSlot: NCSkeletalPowerJunctionQualityImprovised
+
+- type: entity
+  parent: NCImplantLinearFrameSigma
+  id: NCImplantLinearFrameSigmaQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImproved
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImproved
+      NCSkeletalAnchorSlot: NCSkeletalAnchorsQualityImproved
+      NCSkeletalPowerSlot: NCSkeletalPowerJunctionQualityImproved
+
+- type: entity
+  parent: NCImplantLinearFrameSigma
+  id: NCImplantLinearFrameSigmaQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityPremium
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityPremium
+      NCSkeletalAnchorSlot: NCSkeletalAnchorsQualityPremium
+      NCSkeletalPowerSlot: NCSkeletalPowerJunctionQualityPremium
+
+- type: entity
+  parent: NCImplantLinearFrameBeta
+  id: NCImplantLinearFrameBetaQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCBetaActuatorSlot: NCBetaActuatorQualityImprovised
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImprovised
+      NCSkeletalHeavyAnchorSlot: NCSkeletalHeavyAnchorsQualityImprovised
+      NCSkeletalPowerSlot: NCSkeletalPowerJunctionQualityImprovised
+
+- type: entity
+  parent: NCImplantLinearFrameBeta
+  id: NCImplantLinearFrameBetaQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCBetaActuatorSlot: NCBetaActuatorQualityImproved
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImproved
+      NCSkeletalHeavyAnchorSlot: NCSkeletalHeavyAnchorsQualityImproved
+      NCSkeletalPowerSlot: NCSkeletalPowerJunctionQualityImproved
+
+- type: entity
+  parent: NCImplantLinearFrameBeta
+  id: NCImplantLinearFrameBetaQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCBetaActuatorSlot: NCBetaActuatorQualityPremium
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityPremium
+      NCSkeletalHeavyAnchorSlot: NCSkeletalHeavyAnchorsQualityPremium
+      NCSkeletalPowerSlot: NCSkeletalPowerJunctionQualityPremium
+
+- type: entity
+  parent: NCImplantLinearFrameSigmaEmpty
+  id: NCImplantLinearFrameSigmaEmptyQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImprovised
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImprovised
+      NCSkeletalAnchorSlot: NCSkeletalAnchorsQualityImprovised
+      NCSkeletalPowerSlot: NCSkeletalPowerJunctionQualityImprovised
+
+- type: entity
+  parent: NCImplantLinearFrameSigmaEmpty
+  id: NCImplantLinearFrameSigmaEmptyQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityImproved
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImproved
+      NCSkeletalAnchorSlot: NCSkeletalAnchorsQualityImproved
+      NCSkeletalPowerSlot: NCSkeletalPowerJunctionQualityImproved
+
+- type: entity
+  parent: NCImplantLinearFrameSigmaEmpty
+  id: NCImplantLinearFrameSigmaEmptyQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCIndustrialArmActuatorSlot: NCCyberarmActuatorQualityPremium
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityPremium
+      NCSkeletalAnchorSlot: NCSkeletalAnchorsQualityPremium
+      NCSkeletalPowerSlot: NCSkeletalPowerJunctionQualityPremium
+
+- type: entity
+  parent: NCImplantLinearFrameBetaEmpty
+  id: NCImplantLinearFrameBetaEmptyQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCBetaActuatorSlot: NCBetaActuatorQualityImprovised
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImprovised
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImprovised
+      NCSkeletalHeavyAnchorSlot: NCSkeletalHeavyAnchorsQualityImprovised
+      NCSkeletalPowerSlot: NCSkeletalPowerJunctionQualityImprovised
+
+- type: entity
+  parent: NCImplantLinearFrameBetaEmpty
+  id: NCImplantLinearFrameBetaEmptyQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCBetaActuatorSlot: NCBetaActuatorQualityImproved
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityImproved
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityImproved
+      NCSkeletalHeavyAnchorSlot: NCSkeletalHeavyAnchorsQualityImproved
+      NCSkeletalPowerSlot: NCSkeletalPowerJunctionQualityImproved
+
+- type: entity
+  parent: NCImplantLinearFrameBetaEmpty
+  id: NCImplantLinearFrameBetaEmptyQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCBetaActuatorSlot: NCBetaActuatorQualityPremium
+      NCIndustrialArmControllerSlot: NCCyberarmControllerQualityPremium
+      NCIndustrialArmSensorSlot: NCCyberarmSensorQualityPremium
+      NCSkeletalHeavyAnchorSlot: NCSkeletalHeavyAnchorsQualityPremium
+      NCSkeletalPowerSlot: NCSkeletalPowerJunctionQualityPremium
+
+- type: entity
+  parent: NCImplantMuscleBoneLaceUnprepared
+  id: NCImplantMuscleBoneLaceUnpreparedQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCImplantMuscleBoneLaceUnprepared
+  id: NCImplantMuscleBoneLaceUnpreparedQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCImplantMuscleBoneLaceUnprepared
+  id: NCImplantMuscleBoneLaceUnpreparedQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCMetaToolHandImplant
+  id: NCMetaToolHandImplantQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCMetaToolHandImplant
+  id: NCMetaToolHandImplantQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCMetaToolHandImplant
+  id: NCMetaToolHandImplantQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCMetaMantisBladeImplant
+  id: NCMetaMantisBladeImplantQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+
+- type: entity
+  parent: NCMetaMantisBladeImplant
+  id: NCMetaMantisBladeImplantQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+
+- type: entity
+  parent: NCMetaMantisBladeImplant
+  id: NCMetaMantisBladeImplantQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+
+- type: entity
+  parent: NCMetaBiomonitorImplant
+  id: NCMetaBiomonitorImplantQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCMedicalControllerSlot: NCMedicalControllerBiomonitorQualityImprovised
+      NCMedicalSensorSlot: NCMedicalSensorImprovised
+
+- type: entity
+  parent: NCMetaBiomonitorImplant
+  id: NCMetaBiomonitorImplantQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCMedicalControllerSlot: NCMedicalControllerBiomonitorQualityImproved
+      NCMedicalSensorSlot: NCMedicalSensorImproved
+
+- type: entity
+  parent: NCMetaBiomonitorImplant
+  id: NCMetaBiomonitorImplantQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCMedicalControllerSlot: NCMedicalControllerBiomonitorQualityPremium
+      NCMedicalSensorSlot: NCMedicalSensorPremium
+
+- type: entity
+  parent: NCMetaSandevistanImplant
+  id: NCMetaSandevistanImplantQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImprovised
+      NCOpticPowerSlot: NCOpticPowerImprovised
+      NCNeuralProcessorSlot: NCNeuralProcessorImprovised
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImprovised
+      NCNeuralPulseSlot: NCNeuralPulseImprovised
+      NCNeuralCoolingSlot: NCNeuralCoolingImprovised
+
+- type: entity
+  parent: NCMetaSandevistanImplant
+  id: NCMetaSandevistanImplantQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImproved
+      NCOpticPowerSlot: NCOpticPowerImproved
+      NCNeuralProcessorSlot: NCNeuralProcessorImproved
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImproved
+      NCNeuralPulseSlot: NCNeuralPulseImproved
+      NCNeuralCoolingSlot: NCNeuralCoolingImproved
+
+- type: entity
+  parent: NCMetaSandevistanImplant
+  id: NCMetaSandevistanImplantQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicPremium
+      NCOpticPowerSlot: NCOpticPowerPremium
+      NCNeuralProcessorSlot: NCNeuralProcessorPremium
+      NCNeuralElectrodeSlot: NCNeuralElectrodePremium
+      NCNeuralPulseSlot: NCNeuralPulsePremium
+      NCNeuralCoolingSlot: NCNeuralCoolingPremium
+
+- type: entity
+  parent: NCMetaKerenzikovImplant
+  id: NCMetaKerenzikovImplantQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImprovised
+      NCOpticPowerSlot: NCOpticPowerImprovised
+      NCNeuralProcessorSlot: NCNeuralProcessorImprovised
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImprovised
+
+- type: entity
+  parent: NCMetaKerenzikovImplant
+  id: NCMetaKerenzikovImplantQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImproved
+      NCOpticPowerSlot: NCOpticPowerImproved
+      NCNeuralProcessorSlot: NCNeuralProcessorImproved
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImproved
+
+- type: entity
+  parent: NCMetaKerenzikovImplant
+  id: NCMetaKerenzikovImplantQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicPremium
+      NCOpticPowerSlot: NCOpticPowerPremium
+      NCNeuralProcessorSlot: NCNeuralProcessorPremium
+      NCNeuralElectrodeSlot: NCNeuralElectrodePremium

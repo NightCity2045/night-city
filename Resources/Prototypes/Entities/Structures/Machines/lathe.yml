@@ -124,6 +124,7 @@
     unlitIdleState: unlit
     unlitRunningState: unlit-building
     staticPacks:
+    - NCCyberMechanicalStatic # NC: skeletal implant production.
     - ToolsStatic
     - PartsStatic
     - AtmosStatic
@@ -254,6 +255,7 @@
     idleState: icon
     runningState: building
     staticPacks:
+    - NCCyberElectronicsStatic # NC: skeletal implant production.
     - ScienceBoardsStatic
     - ServiceBoardsStatic
     - CargoBoardsStatic
@@ -308,6 +310,7 @@
     idleState: fab-idle
     runningState: fab-active
     staticPacks:
+    - NCCyberRoboticsStatic # NC: skeletal implant production.
     - RoboticsStatic
     - BorgModulesStatic
     - BorgLimbsStatic
@@ -357,6 +360,7 @@
     idleState: icon
     runningState: building
     staticPacks:
+    - NCCyberBiologyStatic # NC: skeletal implant production.
     - FriendlyCubesStatic
   - type: EmagLatheRecipes
     emagStaticPacks:
@@ -474,6 +478,7 @@
     unlitIdleState: unlit
     unlitRunningState: unlit-building
     staticPacks:
+    - NCCyberMedicalStatic # NC: skeletal implant production.
     - TopicalsStatic
     - ChemistryStatic
     - MedicalStatic

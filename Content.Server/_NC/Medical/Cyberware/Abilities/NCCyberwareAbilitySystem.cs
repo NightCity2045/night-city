@@ -100,7 +100,7 @@ public sealed partial class NCCyberwareAbilitySystem : EntitySystem
             !float.IsFinite(profile.MotorBonus) || profile.MotorBonus is < 0f or > 1f ||
             !float.IsFinite(profile.ManualDurationFactor) || profile.ManualDurationFactor is <= 0f or > 1f ||
             !float.IsFinite(profile.MovingPenaltyReduction) || profile.MovingPenaltyReduction is < 0f or > 1f ||
-            (profile.Kind is NCCyberwareAbilityKind.Tool or NCCyberwareAbilityKind.Blade) != profile.IntegralItem.HasValue)
+            (profile.Kind is NCCyberwareAbilityKind.Tool or NCCyberwareAbilityKind.Blade or NCCyberwareAbilityKind.Gun) != profile.IntegralItem.HasValue)
             throw new InvalidOperationException($"Invalid cyberware ability {profile.ID}.");
         return profile;
     }
@@ -109,8 +109,8 @@ public sealed partial class NCCyberwareAbilitySystem : EntitySystem
     {
         return !TerminatingOrDeleted(body) && !TerminatingOrDeleted(uid) &&
                _cyberware.TryGetOwningBody(uid, out var owner) && owner == body &&
-               TryComp<NCCyberwareComponent>(uid, out var hardware) && hardware.Operational && !hardware.CrisisBlocksActiveModes &&
-               _cyberware.FirmwareAllowsActiveModes(uid) &&
+               TryComp<NCCyberwareComponent>(uid, out var hardware) && hardware.Operational && _cyberware.ArmHardwareReady(uid) && !hardware.CrisisBlocksActiveModes &&
+               _cyberware.FirmwareAllowsActiveModes(uid) && _cyberware.MedicalControllerReady(uid) &&
                TryComp<BodyComponent>(body, out var graph) && graph.Organs != null &&
                graph.Organs.ContainedEntities.Any(organ => HasComp<Content.Shared.Body.Components.BrainComponent>(organ)) &&
                TryComp<NCPhysiologyComponent>(body, out var physiology) && !physiology.Irreversible &&
@@ -144,6 +144,8 @@ public sealed partial class NCCyberwareAbilitySystem : EntitySystem
                 }
                 module.Body = body;
                 if (!CanOperate(body, uid))
+                { Stop((uid, module)); _actions.RemoveAction(module.Action); continue; }
+                if (profile.Kind == NCCyberwareAbilityKind.Stabilization && HasComp<Content.Shared._NC.Medical.Cyberware.Neural.NCNeuralHardwareComponent>(uid))
                 { Stop((uid, module)); _actions.RemoveAction(module.Action); continue; }
                 if (_actions.GetAction(module.Action) is not { } existingAction || existingAction.Comp.AttachedEntity != body)
                     _actions.AddAction(body, ref module.Action, profile.Action.Id, uid);

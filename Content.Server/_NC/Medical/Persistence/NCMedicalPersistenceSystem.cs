@@ -10,7 +10,9 @@ using Content.Server._NC.Medical.Cyberware;
 using Content.Server._NC.Medical.Pharmacology;
 using Content.Server._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Anatomy;
+using Content.Shared._NC.Medical.Anatomy.Detachment;
 using Content.Shared._NC.Medical.Cyberware;
+using Content.Shared._NC.Medical.Cyberware.Arms;
 using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Persistence;
 using Content.Shared._NC.Medical.Physiology;
@@ -140,6 +142,11 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
             !PrepareAbilityMigration(character, snapshot.Version, current) ||
             !PrepareExteriorMigration(character, snapshot.Version, current) ||
             !PrepareServiceMigration(character, snapshot.Version, current) ||
+            !PrepareNeuralMigration(initial, snapshot.Version, current) ||
+            !PrepareMedicalControllerMigration(snapshot.Version, current) ||
+            !PrepareOpticMigration(initial, snapshot.Version, current) ||
+            !PrepareNeuralModuleMigration(snapshot.Version, current) ||
+            !PrepareArmMigration(snapshot.Version, current) ||
             !ValidateCurrentSnapshot(character, current) ||
             !_cyberware.CanRestorePhysicalIdentities(character, current))
         {
@@ -295,11 +302,16 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
             case NCMedicalSnapshotVersions.Humanity:
             case NCMedicalSnapshotVersions.CyberwareAbilities:
             case NCMedicalSnapshotVersions.CyberwareExteriors:
+            case NCMedicalSnapshotVersions.CyberwareService:
                 migrated = CloneSnapshot(snapshot);
                 migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
+            case NCMedicalSnapshotVersions.NeuralFoundations:
+            case NCMedicalSnapshotVersions.MedicalControllers:
+            case NCMedicalSnapshotVersions.CyberOptics:
             case NCMedicalSnapshotVersions.Current:
                 migrated = CloneSnapshot(snapshot);
+                migrated.Version = NCMedicalSnapshotVersions.Current;
                 return true;
             default:
                 return false;
@@ -329,6 +341,24 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
     {
         if (originalVersion < NCMedicalSnapshotVersions.CyberwareService)
             _cyberware.PrepareLegacyServiceState(body, current);
+        return true;
+    }
+
+    private bool PrepareMedicalControllerMigration(ushort version, NCMedicalStateSnapshot snapshot)
+    {
+        if (version >= NCMedicalSnapshotVersions.MedicalControllers) return true;
+        foreach (var module in snapshot.CyberwareModules)
+        {
+            if (module.Profile.Id != "NCBiomonitor") continue;
+            module.Assembly ??= _cyberware.CreateDefaultAssemblySnapshot(module.Profile, module.StableInstanceId);
+            if (module.Assembly == null) return false;
+            module.Assembly.ValidatedRevision = module.Assembly.ConfigurationRevision;
+            module.MedicalImplant = new();
+            module.FactoryPrepared = true;
+            module.SkeletalSurgeryCompleted = Content.Shared._NC.Medical.Cyberware.NCSkeletalSurgeryStage.MedicalFixation |
+                Content.Shared._NC.Medical.Cyberware.NCSkeletalSurgeryStage.MedicalConnection |
+                Content.Shared._NC.Medical.Cyberware.NCSkeletalSurgeryStage.MedicalCheck;
+        }
         return true;
     }
 
@@ -598,7 +628,16 @@ public sealed partial class NCMedicalPersistenceSystem : EntitySystem
                      .ThenBy(category => category.Id, StringComparer.Ordinal))
         {
             var organPrototype = snapshot.Organs[category].EntityPrototype;
-            var spawnedOrgan = Spawn(organPrototype, new EntityCoordinates(character, Vector2.Zero));
+            // Snapshot categories own the entire anatomy graph, including missing hands.
+            // Suppress the fresh cyberarm's bundled hand before MapInit can manufacture one.
+            var spawnedOrgan = EntityManager.CreateEntityUninitialized(organPrototype,
+                new EntityCoordinates(character, Vector2.Zero));
+            if (TryComp<NCArmFrameComponent>(spawnedOrgan, out var armFrame))
+                armFrame.HandInitialized = true;
+            EntityManager.InitializeAndStartEntity(spawnedOrgan);
+            // These are attached snapshot organs, not new detached grafts. Their
+            // wounds and treatments are restored from the body's snapshot below.
+            RemComp<NCDetachedOrganMedicalDataComponent>(spawnedOrgan);
             if (!_containers.Insert(spawnedOrgan, organContainer, containerXform: Transform(character)))
             {
                 Del(spawnedOrgan);

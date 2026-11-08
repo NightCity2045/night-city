@@ -1,0 +1,714 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralControllerStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: controller
+  - type: NCCyberwarePart
+    profile: NCNeuralControllerStandardPart
+  - type: NCNeuralController
+  - type: NCMetaHost
+    profile: NCMetaNeuralController
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces:
+    - meta.implants.NeuralController
+    - meta.net.MessagePort
+  - type: NCMetaTerminal
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: NCMetaMessagePort
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+
+- type: entity
+  parent: NCNeuralControllerStandard
+  id: NCNeuralControllerBasicStandard
+  suffix: Standard
+  components:
+  - type: NCNeuralController
+    factoryProgram: true
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralControllerImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: controller
+  - type: NCCyberwarePart
+    profile: NCNeuralControllerImprovisedPart
+  - type: NCNeuralController
+  - type: NCMetaHost
+    profile: NCMetaNeuralController
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces:
+    - meta.implants.NeuralController
+    - meta.net.MessagePort
+  - type: NCMetaTerminal
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: NCMetaMessagePort
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+
+- type: entity
+  parent: NCNeuralControllerImprovised
+  id: NCNeuralControllerBasicImprovised
+  suffix: Improvised
+  components:
+  - type: NCNeuralController
+    factoryProgram: true
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralControllerImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: controller
+  - type: NCCyberwarePart
+    profile: NCNeuralControllerImprovedPart
+  - type: NCNeuralController
+  - type: NCMetaHost
+    profile: NCMetaNeuralController
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces:
+    - meta.implants.NeuralController
+    - meta.net.MessagePort
+  - type: NCMetaTerminal
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: NCMetaMessagePort
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+
+- type: entity
+  parent: NCNeuralControllerImproved
+  id: NCNeuralControllerBasicImproved
+  suffix: Improved
+  components:
+  - type: NCNeuralController
+    factoryProgram: true
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralControllerPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: controller
+  - type: NCCyberwarePart
+    profile: NCNeuralControllerPremiumPart
+  - type: NCNeuralController
+  - type: NCMetaHost
+    profile: NCMetaNeuralController
+    allowClaim: true
+  - type: NCMetaDevice
+    allowClaim: true
+    interfaces:
+    - meta.implants.NeuralController
+    - meta.net.MessagePort
+  - type: NCMetaTerminal
+  - type: NCMetaPort
+    networkId: LOCAL
+  - type: NCMetaMessagePort
+  - type: UserInterface
+    interfaces:
+      enum.NCMetaUiKey.Workspace:
+        type: NCMetaWorkspaceBoundUserInterface
+
+- type: entity
+  parent: NCNeuralControllerPremium
+  id: NCNeuralControllerBasicPremium
+  suffix: Premium
+  components:
+  - type: NCNeuralController
+    factoryProgram: true
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralProcessorStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: processor
+  - type: NCCyberwarePart
+    profile: NCNeuralProcessorStandardPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralProcessorImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: processor
+  - type: NCCyberwarePart
+    profile: NCNeuralProcessorImprovisedPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralProcessorImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: processor
+  - type: NCCyberwarePart
+    profile: NCNeuralProcessorImprovedPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralProcessorPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: processor
+  - type: NCCyberwarePart
+    profile: NCNeuralProcessorPremiumPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralElectrodeStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: electrode
+  - type: NCCyberwarePart
+    profile: NCNeuralElectrodeStandardPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralElectrodeImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: electrode
+  - type: NCCyberwarePart
+    profile: NCNeuralElectrodeImprovisedPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralElectrodeImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: electrode
+  - type: NCCyberwarePart
+    profile: NCNeuralElectrodeImprovedPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralElectrodePremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: electrode
+  - type: NCCyberwarePart
+    profile: NCNeuralElectrodePremiumPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralConnectorStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: connector
+  - type: NCCyberwarePart
+    profile: NCNeuralConnectorStandardPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralConnectorImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: connector
+  - type: NCCyberwarePart
+    profile: NCNeuralConnectorImprovisedPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralConnectorImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: connector
+  - type: NCCyberwarePart
+    profile: NCNeuralConnectorImprovedPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralConnectorPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: connector
+  - type: NCCyberwarePart
+    profile: NCNeuralConnectorPremiumPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralReaderStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: reader
+  - type: NCCyberwarePart
+    profile: NCNeuralReaderStandardPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralReaderImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: reader
+  - type: NCCyberwarePart
+    profile: NCNeuralReaderImprovisedPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralReaderImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: reader
+  - type: NCCyberwarePart
+    profile: NCNeuralReaderImprovedPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralReaderPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: reader
+  - type: NCCyberwarePart
+    profile: NCNeuralReaderPremiumPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralPulseStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: pulse
+  - type: NCCyberwarePart
+    profile: NCNeuralPulseStandardPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralPulseImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: pulse
+  - type: NCCyberwarePart
+    profile: NCNeuralPulseImprovisedPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralPulseImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: pulse
+  - type: NCCyberwarePart
+    profile: NCNeuralPulseImprovedPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralPulsePremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: pulse
+  - type: NCCyberwarePart
+    profile: NCNeuralPulsePremiumPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralCoolingStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: cooling
+  - type: NCCyberwarePart
+    profile: NCNeuralCoolingStandardPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralCoolingImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: cooling
+  - type: NCCyberwarePart
+    profile: NCNeuralCoolingImprovisedPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralCoolingImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: cooling
+  - type: NCCyberwarePart
+    profile: NCNeuralCoolingImprovedPart
+
+- type: entity
+  parent: NCBaseCyberwarePart
+  id: NCNeuralCoolingPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: cooling
+  - type: NCCyberwarePart
+    profile: NCNeuralCoolingPremiumPart
+
+- type: entity
+  parent: NCImplantNeuralLinkMk1
+  id: NCImplantNeuralLinkMk1Empty
+  suffix: Standard empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCImplantNeuralLinkMk1QualityImprovised
+  id: NCImplantNeuralLinkMk1QualityImprovisedEmpty
+  suffix: Improvised empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCImplantNeuralLinkMk1QualityImproved
+  id: NCImplantNeuralLinkMk1QualityImprovedEmpty
+  suffix: Improved empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCImplantNeuralLinkMk1QualityPremium
+  id: NCImplantNeuralLinkMk1QualityPremiumEmpty
+  suffix: Premium empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCKerenzikovImplant
+  id: NCKerenzikovImplantEmpty
+  suffix: Standard empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCKerenzikovImplantQualityImprovised
+  id: NCKerenzikovImplantQualityImprovisedEmpty
+  suffix: Improvised empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCKerenzikovImplantQualityImproved
+  id: NCKerenzikovImplantQualityImprovedEmpty
+  suffix: Improved empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCKerenzikovImplantQualityPremium
+  id: NCKerenzikovImplantQualityPremiumEmpty
+  suffix: Premium empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCSandevistanImplant
+  id: NCSandevistanImplantEmpty
+  suffix: Standard empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCSandevistanImplantQualityImprovised
+  id: NCSandevistanImplantQualityImprovisedEmpty
+  suffix: Improvised empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCSandevistanImplantQualityImproved
+  id: NCSandevistanImplantQualityImprovedEmpty
+  suffix: Improved empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCSandevistanImplantQualityPremium
+  id: NCSandevistanImplantQualityPremiumEmpty
+  suffix: Premium empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCCyberwareImplantBase
+  id: NCNeuralInterfaceImplant
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: interface
+  - type: NCCyberware
+    profile: NCNeuralInterface
+    factoryPrepared: true
+  - type: NCNeuralHardware
+    kind: Interface
+
+- type: entity
+  parent: NCNeuralInterfaceImplant
+  id: NCNeuralInterfaceImplantEmpty
+  suffix: Standard empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCNeuralInterfaceImplant
+  id: NCNeuralInterfaceImplantQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImprovised
+      NCOpticPowerSlot: NCOpticPowerImprovised
+      NCNeuralConnectorSlot: NCNeuralConnectorImprovised
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImprovised
+
+- type: entity
+  parent: NCNeuralInterfaceImplantQualityImprovised
+  id: NCNeuralInterfaceImplantQualityImprovisedEmpty
+  suffix: Improvised empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCNeuralInterfaceImplant
+  id: NCNeuralInterfaceImplantQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImproved
+      NCOpticPowerSlot: NCOpticPowerImproved
+      NCNeuralConnectorSlot: NCNeuralConnectorImproved
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImproved
+
+- type: entity
+  parent: NCNeuralInterfaceImplantQualityImproved
+  id: NCNeuralInterfaceImplantQualityImprovedEmpty
+  suffix: Improved empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCNeuralInterfaceImplant
+  id: NCNeuralInterfaceImplantQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicPremium
+      NCOpticPowerSlot: NCOpticPowerPremium
+      NCNeuralConnectorSlot: NCNeuralConnectorPremium
+      NCNeuralElectrodeSlot: NCNeuralElectrodePremium
+
+- type: entity
+  parent: NCNeuralInterfaceImplantQualityPremium
+  id: NCNeuralInterfaceImplantQualityPremiumEmpty
+  suffix: Premium empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCCyberwareImplantBase
+  id: NCNeuralChipSocketImplant
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/neural.rsi
+    state: chipsocket
+  - type: NCCyberware
+    profile: NCNeuralChipSocket
+    factoryPrepared: true
+  - type: NCNeuralHardware
+    kind: ChipSocket
+
+- type: entity
+  parent: NCNeuralChipSocketImplant
+  id: NCNeuralChipSocketImplantEmpty
+  suffix: Standard empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCNeuralChipSocketImplant
+  id: NCNeuralChipSocketImplantQualityImprovised
+  suffix: Improvised
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImprovised
+      NCOpticPowerSlot: NCOpticPowerImprovised
+      NCNeuralReaderSlot: NCNeuralReaderImprovised
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImprovised
+
+- type: entity
+  parent: NCNeuralChipSocketImplantQualityImprovised
+  id: NCNeuralChipSocketImplantQualityImprovisedEmpty
+  suffix: Improvised empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCNeuralChipSocketImplant
+  id: NCNeuralChipSocketImplantQualityImproved
+  suffix: Improved
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicImproved
+      NCOpticPowerSlot: NCOpticPowerImproved
+      NCNeuralReaderSlot: NCNeuralReaderImproved
+      NCNeuralElectrodeSlot: NCNeuralElectrodeImproved
+
+- type: entity
+  parent: NCNeuralChipSocketImplantQualityImproved
+  id: NCNeuralChipSocketImplantQualityImprovedEmpty
+  suffix: Improved empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCNeuralChipSocketImplant
+  id: NCNeuralChipSocketImplantQualityPremium
+  suffix: Premium
+  components:
+  - type: NCCyberware
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCNeuralControllerSlot: NCNeuralControllerBasicPremium
+      NCOpticPowerSlot: NCOpticPowerPremium
+      NCNeuralReaderSlot: NCNeuralReaderPremium
+      NCNeuralElectrodeSlot: NCNeuralElectrodePremium
+
+- type: entity
+  parent: NCNeuralChipSocketImplantQualityPremium
+  id: NCNeuralChipSocketImplantQualityPremiumEmpty
+  suffix: Premium empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true

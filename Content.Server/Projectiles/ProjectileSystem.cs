@@ -52,6 +52,14 @@ public sealed partial class ProjectileSystem : SharedProjectileSystem
             return;
         }
 
+        // NC: a successful neural reaction precedes payload effects, embedding and wound delivery.
+        if (_ncProjectileImpact.TryEvadeProjectile(uid, target))
+        {
+            component.ProjectileSpent = true;
+            if (component.DeleteOnCollide) QueueDel(uid);
+            return;
+        }
+
         var ev = new ProjectileHitEvent(component.Damage * _damageableSystem.UniversalProjectileDamageModifier, target, component.Shooter);
         RaiseLocalEvent(uid, ref ev);
 

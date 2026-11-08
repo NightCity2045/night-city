@@ -189,8 +189,19 @@ public abstract partial class NCSharedZLevelsSystem
         SleepUpdate((entity, entity.Comp1), frameTime);
     }
 
+    /// <summary>
+    /// Whether an idle body may leave the Z-physics update list. Explicit lifecycle deactivation is separate.
+    /// </summary>
+    protected virtual bool CanAutomaticallySleep(EntityUid uid) => true;
+
     private void SleepUpdate(Entity<NCZPhysicsComponent> entity, float frameTime)
     {
+        if (!CanAutomaticallySleep(entity))
+        {
+            entity.Comp.SleepTimer = 0f;
+            return;
+        }
+
         var distanceToGround = entity.Comp.LocalPosition - entity.Comp.CachedGroundHeight;
         var almostStopped = float.Abs(entity.Comp.Velocity) < entity.Comp.SleepThreshold && float.Abs(distanceToGround) <= 0.01f;
 

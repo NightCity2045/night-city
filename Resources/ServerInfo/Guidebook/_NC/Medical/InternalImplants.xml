@@ -1,0 +1,13 @@
+<Document>
+<NCGuideLocalizedText Key="nc-guide-medical-implants-1"/>
+<NCGuideLocalizedText Key="nc-guide-medical-implants-2"/>
+<NCGuideLocalizedText Key="nc-guide-medical-implants-3"/>
+<NCGuideLocalizedText Key="nc-guide-medical-implants-4"/>
+<Box Orientation="Vertical">
+<GuideEntityEmbed Entity="NCMedicalControllerStandard"/>
+<GuideEntityEmbed Entity="NCMedicalControllerBasic"/>
+<GuideEntityEmbed Entity="NCBiomonitorImplant"/>
+<GuideEntityEmbed Entity="NCAutoInjectorImplant"/>
+<GuideEntityEmbed Entity="NCMedicalInjectorCartridge"/>
+</Box>
+</Document>

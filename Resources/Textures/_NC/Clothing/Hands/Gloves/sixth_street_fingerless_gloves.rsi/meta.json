@@ -1,0 +1,18 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Taken from tgstation at commit https://github.com/tgstation/tgstation/commit/54ecdcc05bcaf335489938b1253a2a733ba12271. Inhand sprites by SeamLesss (Github) | Sixth Street adaptation: ImageGen-assisted artwork, 2026. Template source: Clothing/Hands/Gloves/fingerless.rsi. Native frame registration and RSI packaging for Night City 2045.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "icon"
+        },
+        {
+            "name": "equipped-HAND",
+            "directions": 4
+        }
+    ]
+}

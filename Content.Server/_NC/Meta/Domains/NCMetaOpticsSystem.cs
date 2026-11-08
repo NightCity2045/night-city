@@ -103,7 +103,7 @@ public sealed partial class NCMetaOpticsSystem : EntitySystem, INCMetaDeviceAdap
         }
     }
 
-    private bool TryMeasure(EntityUid body, NCMetaOpticsComponent optics, out double normalized)
+    public bool TryMeasure(EntityUid body, NCMetaOpticsComponent optics, out double normalized)
     {
         normalized = 0;
         if (!float.IsFinite(optics.SensorRadius) || optics.SensorRadius is <= 0 or > 8 || Transform(body).MapUid is not { } map || !TryComp<MapLightComponent>(map, out var ambient)) return false;
@@ -202,7 +202,7 @@ public sealed partial class NCMetaOpticsSystem : EntitySystem, INCMetaDeviceAdap
         if (!Resolve(ent, ref ent.Comp) || !CanOperate(ent.Owner, out var body, out _) || body != user) return false;
         ent.Comp.ManualOverride = false; ent.Comp.Controller = null; return true;
     }
-    public IEnumerable<EntityUid> GetInstalledModules(EntityUid body) => _optics.Keys.Where(module => CanOperate(module, out var installed, out _) && installed == body);
+    public IEnumerable<EntityUid> GetInstalledModules(EntityUid body) => _optics.Keys.Where(module => !HasComp<Content.Shared._NC.Medical.Cyberware.Optics.NCCyberEyeComponent>(module) && CanOperate(module, out var installed, out _) && installed == body);
     private void Clear(EntityUid uid, NCMetaOpticsComponent optics)
     {
         if (optics.Clearing) return;

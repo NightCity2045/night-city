@@ -1,0 +1,12 @@
+<Document>
+<NCGuideLocalizedText Key="nc-guide-dermal-1"/>
+<NCGuideLocalizedText Key="nc-guide-dermal-2"/>
+<NCGuideLocalizedText Key="nc-guide-dermal-3"/>
+<NCGuideLocalizedText Key="nc-guide-dermal-4"/>
+<Box Orientation="Vertical">
+<GuideEntityEmbed Entity="NCDermalMesh"/>
+<GuideEntityEmbed Entity="NCDermalPlates"/>
+<GuideEntityEmbed Entity="NCImplantSkinweaveTorso"/>
+<GuideEntityEmbed Entity="NCImplantSubdermalArmorTorso"/>
+</Box>
+</Document>

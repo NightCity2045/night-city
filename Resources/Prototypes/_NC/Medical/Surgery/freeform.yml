@@ -34,7 +34,8 @@
   bodyCanvasSize: "128, 192"
   bodyZones:
     NCZoneHead: { position: "50, 0", size: "28, 30", openingSize: "25, 25", incisionDirection: "0, 1", incisionLength: 0.3 }
-    NCZoneEyes: { position: "55, 10", size: "18, 6", openingSize: "18, 10", incisionDirection: "1, 0", incisionLength: 0.22 }
+    NCZoneEyes: { position: "55, 10", size: "8, 6", openingSize: "8, 10", incisionDirection: "1, 0", incisionLength: 0.22 }
+    NCZoneEyesRight: { position: "65, 10", size: "8, 6", openingSize: "8, 10", incisionDirection: "1, 0", incisionLength: 0.22 }
     NCZoneMouth: { position: "57, 18", size: "14, 7", openingSize: "16, 10", incisionDirection: "1, 0", incisionLength: 0.22 }
     NCZoneChest: { position: "42, 29", size: "44, 35", openingSize: "42, 34", incisionDirection: "0, 1", incisionLength: 0.42 }
     NCZoneAbdomen: { position: "47, 62", size: "34, 28", openingSize: "32, 27", incisionDirection: "0, 1", incisionLength: 0.38 }
@@ -93,33 +94,46 @@
     Chemical: "1, 2"
     Amputation: "2, 1"
   structures:
-    Skull: { position: "0.5, 0.48", size: "0.72, 0.72", minimumDepth: 0.42, visual: Skull, zones: [ NCZoneHead ], blocksDeeperStructures: true }
+    Spine: { position: "0.5, 0.5", size: "0.12, 0.7", minimumDepth: 0.8, visual: Tendon, zones: [ NCZoneChest ] }
+    VertebralColumn: { position: "0.5, 0.5", size: "0.18, 0.76", minimumDepth: 0.74, visual: LongBone, zones: [ NCZoneChest ], detachableBySeparation: true }
+    Skull: { position: "0.5, 0.48", size: "0.72, 0.72", minimumDepth: 0.42, visual: Skull, zones: [ NCZoneHead ], blocksDeeperStructures: true, detachableBySeparation: true }
     Brain: { position: "0.5, 0.5", size: "0.5, 0.44", minimumDepth: 0.74, visual: Brain, zones: [ NCZoneHead ], detachableBySeparation: true }
-    Eyes: { position: "0.5, 0.38", size: "0.55, 0.18", minimumDepth: 0.44, visual: Eyes, zones: [ NCZoneEyes ], detachableBySeparation: true }
+    Eyes: { position: "0.35, 0.38", size: "0.24, 0.18", minimumDepth: 0.44, visual: Eyes, zones: [ NCZoneEyes ], detachableBySeparation: true }
+    EyesRight: { position: "0.65, 0.38", size: "0.24, 0.18", minimumDepth: 0.44, visual: Eyes, zones: [ NCZoneEyesRight ], detachableBySeparation: true }
     Tongue: { position: "0.5, 0.64", size: "0.28, 0.18", minimumDepth: 0.38, visual: Tongue, zones: [ NCZoneMouth ], detachableBySeparation: true }
     Ears: { position: "0.5, 0.5", size: "0.82, 0.22", minimumDepth: 0.42, visual: Ears, zones: [ NCZoneHead ], detachableBySeparation: true }
-    RibCage: { position: "0.5, 0.5", size: "0.82, 0.78", minimumDepth: 0.46, visual: RibCage, zones: [ NCZoneChest ], blocksDeeperStructures: true }
+    RibCage: { position: "0.5, 0.5", size: "0.82, 0.78", minimumDepth: 0.46, visual: RibCage, zones: [ NCZoneChest ], blocksDeeperStructures: true, detachableBySeparation: true }
     Lungs: { position: "0.5, 0.46", size: "0.76, 0.56", minimumDepth: 0.7, visual: Lungs, zones: [ NCZoneChest ], detachableBySeparation: true }
     Heart: { position: "0.52, 0.57", size: "0.24, 0.27", minimumDepth: 0.76, visual: Heart, zones: [ NCZoneChest ], detachableBySeparation: true }
     Liver: { position: "0.37, 0.42", size: "0.45, 0.3", minimumDepth: 0.7, visual: Liver, zones: [ NCZoneAbdomen ], detachableBySeparation: true }
     Stomach: { position: "0.62, 0.46", size: "0.3, 0.28", minimumDepth: 0.7, visual: Stomach, zones: [ NCZoneAbdomen ], detachableBySeparation: true }
     Kidneys: { position: "0.5, 0.67", size: "0.58, 0.2", minimumDepth: 0.76, visual: Kidneys, zones: [ NCZoneAbdomen ], detachableBySeparation: true }
     Appendix: { position: "0.67, 0.76", size: "0.14, 0.14", minimumDepth: 0.76, visual: Appendix, zones: [ NCZoneAbdomen ], detachableBySeparation: true }
-    PelvisBone: { position: "0.5, 0.55", size: "0.78, 0.56", minimumDepth: 0.48, visual: Pelvis, zones: [ NCZoneGroin ], blocksDeeperStructures: true }
-    ArmBoneLeft: { position: "0.5, 0.5", size: "0.2, 0.82", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneArmLeft, NCZoneHandLeft ] }
-    ArmBoneRight: { position: "0.5, 0.5", size: "0.2, 0.82", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneArmRight, NCZoneHandRight ] }
-    LegBoneLeft: { position: "0.5, 0.5", size: "0.22, 0.84", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneLegLeft, NCZoneFootLeft ] }
-    LegBoneRight: { position: "0.5, 0.5", size: "0.22, 0.84", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneLegRight, NCZoneFootRight ] }
+    PelvisBone: { position: "0.5, 0.55", size: "0.78, 0.56", minimumDepth: 0.48, visual: Pelvis, zones: [ NCZoneGroin ], blocksDeeperStructures: true, detachableBySeparation: true }
+    ArmBoneLeft: { position: "0.5, 0.5", size: "0.2, 0.82", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneArmLeft, NCZoneHandLeft ], detachableBySeparation: true }
+    ArmBoneRight: { position: "0.5, 0.5", size: "0.2, 0.82", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneArmRight, NCZoneHandRight ], detachableBySeparation: true }
+    LegBoneLeft: { position: "0.5, 0.5", size: "0.22, 0.84", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneLegLeft, NCZoneFootLeft ], detachableBySeparation: true }
+    LegBoneRight: { position: "0.5, 0.5", size: "0.22, 0.84", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneLegRight, NCZoneFootRight ], detachableBySeparation: true }
     TendonSetLeftArm: { position: "0.62, 0.5", size: "0.18, 0.76", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneArmLeft, NCZoneHandLeft ] }
     TendonSetRightArm: { position: "0.62, 0.5", size: "0.18, 0.76", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneArmRight, NCZoneHandRight ] }
     TendonSetLeftLeg: { position: "0.62, 0.5", size: "0.18, 0.78", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneLegLeft, NCZoneFootLeft ] }
     TendonSetRightLeg: { position: "0.62, 0.5", size: "0.18, 0.78", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneLegRight, NCZoneFootRight ] }
   cyberwareSlots:
+    NCSlotNeuralInterface: { position: "0.2, 0.65", size: "0.18, 0.18", minimumDepth: 0.55, visual: Cyberware, zones: [ NCZoneHead ] }
+    NCSlotChipSocket: { position: "0.8, 0.3", size: "0.18, 0.18", minimumDepth: 0.5, visual: Cyberware, zones: [ NCZoneHead ] }
+    NCSlotMuscleBoneLacePrimary: { position: "0.15, 0.5", size: "0.16, 0.24", minimumDepth: 0.68, visual: Cyberware, zones: [ NCZoneChest ] }
+    NCSlotMuscleBoneLaceSecondary: { position: "0.85, 0.5", size: "0.16, 0.24", minimumDepth: 0.68, visual: Cyberware, zones: [ NCZoneChest ] }
+    NCSlotImplantedLinearFrame: { position: "0.5, 0.5", size: "0.22, 0.64", minimumDepth: 0.8, visual: Cyberware, zones: [ NCZoneChest ] }
+    NCSlotMotorBurst: { position: "0.5, 0.5", size: "0.12, 0.24", minimumDepth: 0.8, visual: Cyberware, zones: [ NCZoneChest ] }
+    NCSlotMotorStabilizer: { position: "0.62, 0.55", size: "0.18, 0.18", minimumDepth: 0.74, visual: Cyberware, zones: [ NCZoneHead ] }
     NCSlotNeuralCore: { position: "0.44, 0.48", size: "0.24, 0.22", minimumDepth: 0.74, visual: Cyberware, zones: [ NCZoneHead ] }
     NCSlotCranialUtility: { position: "0.66, 0.53", size: "0.22, 0.2", minimumDepth: 0.68, visual: Cyberware, zones: [ NCZoneHead ] }
     NCSlotThoracicSupport: { position: "0.5, 0.57", size: "0.24, 0.26", minimumDepth: 0.72, visual: Cyberware, zones: [ NCZoneChest ] }
     NCSlotThoracicPower: { position: "0.32, 0.57", size: "0.18, 0.22", minimumDepth: 0.72, visual: Cyberware, zones: [ NCZoneChest ] }
     NCSlotThoracicConverter: { position: "0.7, 0.57", size: "0.18, 0.22", minimumDepth: 0.72, visual: Cyberware, zones: [ NCZoneChest ] }
+    NCSlotDermalArmorThorax: { position: "0.72, 0.5", size: "0.2, 0.28", minimumDepth: 0.28, visual: Cyberware, zones: [ NCZoneChest ] }
+    NCSlotMedicalAbdomen: { position: "0.72, 0.5", size: "0.2, 0.28", minimumDepth: 0.4, visual: Cyberware, zones: [ NCZoneAbdomen ] }
+    NCSlotBiomonitorThorax: { position: "0.72, 0.5", size: "0.2, 0.28", minimumDepth: 0.28, visual: Cyberware, zones: [ NCZoneChest ] }
     NCSlotSubdermalThorax: { position: "0.5, 0.34", size: "0.52, 0.16", minimumDepth: 0.52, visual: Cyberware, zones: [ NCZoneChest ] }
     NCSlotArmUtilityLeft: { position: "0.58, 0.5", size: "0.24, 0.28", minimumDepth: 0.58, visual: Cyberware, zones: [ NCZoneArmLeft, NCZoneHandLeft ] }
     NCSlotArmUtilityRight: { position: "0.58, 0.5", size: "0.24, 0.28", minimumDepth: 0.58, visual: Cyberware, zones: [ NCZoneArmRight, NCZoneHandRight ] }
@@ -319,6 +333,85 @@
       maximumPower: 14
       contaminationPerUnit: 0.05
       radius: 0.04
+    NCSurgeryToolFixMedical:
+      action: FixMedical
+      duration: 8s
+      minimumDepth: 0.28
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+      contaminationPerUnit: 0.025
+    NCSurgeryToolConnectMedical:
+      action: ConnectMedical
+      duration: 8s
+      minimumDepth: 0.28
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+      contaminationPerUnit: 0.025
+    NCSurgeryToolCheckMedical:
+      action: CheckMedical
+      duration: 8s
+      minimumDepth: 0.28
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+      contaminationPerUnit: 0.025
+    NCSurgeryToolDermalMount:
+      action: Cyberware
+      duration: 8s
+      minimumDepth: 0.28
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+      contaminationPerUnit: 0.025
+    NCSurgeryToolDermalDistribution:
+      action: DistributeDermal
+      duration: 8s
+      minimumDepth: 0.28
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+      contaminationPerUnit: 0.025
+    NCSurgeryToolDermalFixation:
+      action: FixDermal
+      duration: 10s
+      minimumDepth: 0.28
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+      contaminationPerUnit: 0.025
+    NCSurgeryToolDermalCheck:
+      action: CheckDermal
+      duration: 10s
+      minimumDepth: 0.38
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+      contaminationPerUnit: 0.025
+    NCSurgeryToolSkeletalAnchoring:
+      action: AnchorSkeletal
+      duration: 6s
+      minimumDepth: 0.55
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+      contaminationPerUnit: 0.025
+    NCSurgeryToolSkeletalConnection:
+      action: ConnectSkeletal
+      duration: 5s
+      minimumDepth: 0.55
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
+      contaminationPerUnit: 0.025
+    NCSurgeryToolSkeletalLoadTest:
+      action: TestSkeletal
+      duration: 8s
+      minimumDepth: 0.8
+      requiresOpenAccess: true
+      minimumPower: 1
+      maximumPower: 1
     NCSurgeryToolCyberware:
       action: Cyberware
       duration: 6s

@@ -1,0 +1,77 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: NCCyberwareImplantBase
+  id: NCImplantSkinweaveTorso
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/dermal.rsi
+    state: skinweave
+  - type: Item
+    size: Normal
+  - type: Appearance
+  - type: NCCyberware
+    profile: NCSkinweaveTorso
+    factoryPrepared: true
+  - type: NCArmor
+    profile: NCSkinweaveTorsoArmor
+
+- type: entity
+  parent: NCImplantSkinweaveTorso
+  id: NCImplantSkinweaveTorsoUnprepared
+  suffix: Unprepared
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+
+- type: entity
+  parent: NCCyberwareImplantBase
+  id: NCImplantSubdermalArmorTorso
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/dermal.rsi
+    state: subdermal
+  - type: Item
+    size: Normal
+  - type: Appearance
+  - type: NCCyberware
+    profile: NCSubdermalArmorTorso
+    factoryPrepared: true
+  - type: NCArmor
+    profile: NCSubdermalArmorTorsoArmor
+
+- type: entity
+  parent: NCImplantSubdermalArmorTorso
+  id: NCImplantSubdermalArmorTorsoUnprepared
+  suffix: Unprepared
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+
+- type: Tag
+  id: NCDermalMesh
+
+- type: entity
+  parent: BaseItem
+  id: NCDermalMesh
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/dermal.rsi
+    state: mesh
+  - type: Tag
+    tags: [ NCDermalMesh ]
+
+- type: Tag
+  id: NCDermalPlates
+
+- type: entity
+  parent: BaseItem
+  id: NCDermalPlates
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/dermal.rsi
+    state: plates
+  - type: Tag
+    tags: [ NCDermalPlates ]

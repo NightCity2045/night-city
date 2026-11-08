@@ -1,0 +1,18 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "by yagulash(discord) | Sixth Street adaptation: ImageGen-assisted artwork, 2026. Template source: _NC/Clothing/Head/Hats/militech_cap.rsi. Native frame registration and RSI packaging for Night City 2045.",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "icon"
+        },
+        {
+            "name": "equipped-HELMET",
+            "directions": 4
+        }
+    ]
+}

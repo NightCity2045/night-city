@@ -1,0 +1,448 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: latheRecipe
+  id: NCProduceNCMedicalControllerBasicQualityImprovised
+  result: NCMedicalControllerBasicQualityImprovised
+  completetime: 6
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 113
+    Glass: 113
+    Plastic: 75
+  name: nc-quality-recipe-ncproducencmedicalcontrollerbasicqualityimprovised
+
+- type: latheRecipe
+  id: NCProduceNCMedicalControllerBasicQualityImproved
+  result: NCMedicalControllerBasicQualityImproved
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 225
+    Glass: 225
+    Plastic: 150
+    Gold: 100
+  name: nc-quality-recipe-ncproducencmedicalcontrollerbasicqualityimproved
+
+- type: latheRecipe
+  id: NCProduceNCMedicalControllerBasicQualityPremium
+  result: NCMedicalControllerBasicQualityPremium
+  completetime: 16
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 300
+    Glass: 300
+    Plastic: 200
+    Gold: 100
+    Silver: 100
+  name: nc-quality-recipe-ncproducencmedicalcontrollerbasicqualitypremium
+
+- type: latheRecipe
+  id: NCProduceNCBiomonitorImplantEmptyQualityImprovised
+  result: NCBiomonitorImplantEmptyQualityImprovised
+  completetime: 6
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 375
+    Glass: 150
+    Plastic: 225
+  name: nc-quality-recipe-ncproducencbiomonitorimplantemptyqualityimprovised
+
+- type: latheRecipe
+  id: NCProduceNCBiomonitorImplantEmptyQualityImproved
+  result: NCBiomonitorImplantEmptyQualityImproved
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 750
+    Glass: 300
+    Plastic: 450
+    Gold: 100
+  name: nc-quality-recipe-ncproducencbiomonitorimplantemptyqualityimproved
+
+- type: latheRecipe
+  id: NCProduceNCBiomonitorImplantEmptyQualityPremium
+  result: NCBiomonitorImplantEmptyQualityPremium
+  completetime: 16
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1000
+    Glass: 400
+    Plastic: 600
+    Gold: 100
+    Silver: 100
+  name: nc-quality-recipe-ncproducencbiomonitorimplantemptyqualitypremium
+
+- type: latheRecipe
+  id: NCProduceNCAutoInjectorImplantEmptyQualityImprovised
+  result: NCAutoInjectorImplantEmptyQualityImprovised
+  completetime: 6
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 375
+    Glass: 150
+    Plastic: 225
+  name: nc-quality-recipe-ncproducencautoinjectorimplantemptyqualityimprovised
+
+- type: latheRecipe
+  id: NCProduceNCAutoInjectorImplantEmptyQualityImproved
+  result: NCAutoInjectorImplantEmptyQualityImproved
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 750
+    Glass: 300
+    Plastic: 450
+    Gold: 100
+  name: nc-quality-recipe-ncproducencautoinjectorimplantemptyqualityimproved
+
+- type: latheRecipe
+  id: NCProduceNCAutoInjectorImplantEmptyQualityPremium
+  result: NCAutoInjectorImplantEmptyQualityPremium
+  completetime: 16
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1000
+    Glass: 400
+    Plastic: 600
+    Gold: 100
+    Silver: 100
+  name: nc-quality-recipe-ncproducencautoinjectorimplantemptyqualitypremium
+
+- type: latheRecipe
+  id: NCProduceNCSkeletalAnchorsQualityImprovised
+  result: NCSkeletalAnchorsQualityImprovised
+  completetime: 6
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 75
+  name: nc-quality-recipe-ncproducencskeletalanchorsqualityimprovised
+
+- type: latheRecipe
+  id: NCProduceNCSkeletalAnchorsQualityImproved
+  result: NCSkeletalAnchorsQualityImproved
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1200
+    Plastic: 150
+    Gold: 100
+  name: nc-quality-recipe-ncproducencskeletalanchorsqualityimproved
+
+- type: latheRecipe
+  id: NCProduceNCSkeletalAnchorsQualityPremium
+  result: NCSkeletalAnchorsQualityPremium
+  completetime: 16
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1600
+    Plastic: 200
+    Gold: 100
+    Silver: 100
+  name: nc-quality-recipe-ncproducencskeletalanchorsqualitypremium
+
+- type: latheRecipe
+  id: NCProduceNCSkeletalHeavyAnchorsQualityImprovised
+  result: NCSkeletalHeavyAnchorsQualityImprovised
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1200
+    Plastic: 150
+    Silver: 75
+  name: nc-quality-recipe-ncproducencskeletalheavyanchorsqualityimprovised
+
+- type: latheRecipe
+  id: NCProduceNCSkeletalHeavyAnchorsQualityImproved
+  result: NCSkeletalHeavyAnchorsQualityImproved
+  completetime: 24
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 2400
+    Plastic: 300
+    Silver: 150
+    Gold: 100
+  name: nc-quality-recipe-ncproducencskeletalheavyanchorsqualityimproved
+
+- type: latheRecipe
+  id: NCProduceNCSkeletalHeavyAnchorsQualityPremium
+  result: NCSkeletalHeavyAnchorsQualityPremium
+  completetime: 32
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 3200
+    Plastic: 400
+    Silver: 300
+    Gold: 100
+  name: nc-quality-recipe-ncproducencskeletalheavyanchorsqualitypremium
+
+- type: latheRecipe
+  id: NCProduceNCSkeletalPowerJunctionQualityImprovised
+  result: NCSkeletalPowerJunctionQualityImprovised
+  completetime: 6
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 300
+    Plastic: 225
+    Gold: 75
+  name: nc-quality-recipe-ncproducencskeletalpowerjunctionqualityimprovised
+
+- type: latheRecipe
+  id: NCProduceNCSkeletalPowerJunctionQualityImproved
+  result: NCSkeletalPowerJunctionQualityImproved
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 450
+    Gold: 250
+  name: nc-quality-recipe-ncproducencskeletalpowerjunctionqualityimproved
+
+- type: latheRecipe
+  id: NCProduceNCSkeletalPowerJunctionQualityPremium
+  result: NCSkeletalPowerJunctionQualityPremium
+  completetime: 16
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 800
+    Plastic: 600
+    Gold: 300
+    Silver: 100
+  name: nc-quality-recipe-ncproducencskeletalpowerjunctionqualitypremium
+
+- type: latheRecipe
+  id: NCProduceNCCyberarmControllerQualityImprovised
+  result: NCCyberarmControllerQualityImprovised
+  completetime: 5
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 75
+    Glass: 375
+    Gold: 75
+    Plastic: 75
+  name: nc-quality-recipe-ncproducenccyberarmcontrollerqualityimprovised
+
+- type: latheRecipe
+  id: NCProduceNCCyberarmControllerQualityImproved
+  result: NCCyberarmControllerQualityImproved
+  completetime: 9
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 150
+    Glass: 750
+    Gold: 250
+    Plastic: 150
+  name: nc-quality-recipe-ncproducenccyberarmcontrollerqualityimproved
+
+- type: latheRecipe
+  id: NCProduceNCCyberarmControllerQualityPremium
+  result: NCCyberarmControllerQualityPremium
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 200
+    Glass: 1000
+    Gold: 300
+    Plastic: 200
+    Silver: 100
+  name: nc-quality-recipe-ncproducenccyberarmcontrollerqualitypremium
+
+- type: latheRecipe
+  id: NCProduceNCCyberarmSensorQualityImprovised
+  result: NCCyberarmSensorQualityImprovised
+  completetime: 5
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 150
+    Glass: 225
+    Gold: 75
+  name: nc-quality-recipe-ncproducenccyberarmsensorqualityimprovised
+
+- type: latheRecipe
+  id: NCProduceNCCyberarmSensorQualityImproved
+  result: NCCyberarmSensorQualityImproved
+  completetime: 9
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 300
+    Glass: 450
+    Gold: 250
+  name: nc-quality-recipe-ncproducenccyberarmsensorqualityimproved
+
+- type: latheRecipe
+  id: NCProduceNCCyberarmSensorQualityPremium
+  result: NCCyberarmSensorQualityPremium
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 400
+    Glass: 600
+    Gold: 300
+    Silver: 100
+  name: nc-quality-recipe-ncproducenccyberarmsensorqualitypremium
+
+- type: latheRecipe
+  id: NCProduceNCImplantPowerBusMk1QualityImprovised
+  result: NCImplantPowerBusMk1QualityImprovised
+  completetime: 6
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 300
+    Plastic: 150
+    Gold: 75
+  name: nc-quality-recipe-ncproducencimplantpowerbusmk1qualityimprovised
+
+- type: latheRecipe
+  id: NCProduceNCImplantPowerBusMk1QualityImproved
+  result: NCImplantPowerBusMk1QualityImproved
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 600
+    Plastic: 300
+    Gold: 250
+  name: nc-quality-recipe-ncproducencimplantpowerbusmk1qualityimproved
+
+- type: latheRecipe
+  id: NCProduceNCImplantPowerBusMk1QualityPremium
+  result: NCImplantPowerBusMk1QualityPremium
+  completetime: 16
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 800
+    Plastic: 400
+    Gold: 300
+    Silver: 100
+  name: nc-quality-recipe-ncproducencimplantpowerbusmk1qualitypremium
+
+- type: latheRecipe
+  id: NCProduceNCImplantLinearFrameSigmaEmptyQualityImprovised
+  result: NCImplantLinearFrameSigmaEmptyQualityImprovised
+  completetime: 15
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1500
+    Plastic: 375
+  name: nc-quality-recipe-ncproducencimplantlinearframesigmaemptyqualityimprovised
+
+- type: latheRecipe
+  id: NCProduceNCImplantLinearFrameSigmaEmptyQualityImproved
+  result: NCImplantLinearFrameSigmaEmptyQualityImproved
+  completetime: 30
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 3000
+    Plastic: 750
+    Gold: 100
+  name: nc-quality-recipe-ncproducencimplantlinearframesigmaemptyqualityimproved
+
+- type: latheRecipe
+  id: NCProduceNCImplantLinearFrameSigmaEmptyQualityPremium
+  result: NCImplantLinearFrameSigmaEmptyQualityPremium
+  completetime: 40
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 4000
+    Plastic: 1000
+    Gold: 100
+    Silver: 100
+  name: nc-quality-recipe-ncproducencimplantlinearframesigmaemptyqualitypremium
+
+- type: latheRecipe
+  id: NCProduceNCImplantLinearFrameBetaEmptyQualityImprovised
+  result: NCImplantLinearFrameBetaEmptyQualityImprovised
+  completetime: 27
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 2625
+    Plastic: 600
+  name: nc-quality-recipe-ncproducencimplantlinearframebetaemptyqualityimprovised
+
+- type: latheRecipe
+  id: NCProduceNCImplantLinearFrameBetaEmptyQualityImproved
+  result: NCImplantLinearFrameBetaEmptyQualityImproved
+  completetime: 53
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 5250
+    Plastic: 1200
+    Gold: 100
+  name: nc-quality-recipe-ncproducencimplantlinearframebetaemptyqualityimproved
+
+- type: latheRecipe
+  id: NCProduceNCImplantLinearFrameBetaEmptyQualityPremium
+  result: NCImplantLinearFrameBetaEmptyQualityPremium
+  completetime: 70
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 7000
+    Plastic: 1600
+    Gold: 100
+    Silver: 100
+  name: nc-quality-recipe-ncproducencimplantlinearframebetaemptyqualitypremium

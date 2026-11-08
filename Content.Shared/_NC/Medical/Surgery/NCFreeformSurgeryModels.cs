@@ -132,6 +132,14 @@ public enum NCFreeformSurgeryFailure : byte
     CyberwareOverheated,
     CyberwareEmpDisabled,
     CyberwareNoRepairNeeded,
+    SkeletalSurgeryIncomplete,
+    SkeletalPrerequisitesMissing,
+    SkeletalStructureDamaged,
+    SkeletalLoadTestRequired,
+    FactoryPreparationRequired,
+    DermalSurgeryIncomplete,
+    DermalPrerequisitesMissing,
+    DermalTissueDamaged,
 }
 
 [Serializable, NetSerializable]
@@ -448,6 +456,8 @@ public sealed partial class NCFreeformSurgeryDoAfterEvent : DoAfterEvent
     [DataField] public NetEntity? ExpectedGraft;
     [DataField] public uint? ExpectedConfiguration;
 
+    [DataField] public Content.Shared._NC.Medical.Cyberware.NCSkeletalSurgeryStage? ExpectedSkeletalSurgery;
+
     private NCFreeformSurgeryDoAfterEvent()
     {
     }
@@ -489,6 +499,7 @@ public sealed partial class NCFreeformSurgeryDoAfterEvent : DoAfterEvent
             ExpectedStructure = ExpectedStructure,
             ExpectedGraft = ExpectedGraft,
             ExpectedConfiguration = ExpectedConfiguration,
+            ExpectedSkeletalSurgery = ExpectedSkeletalSurgery,
         };
     }
 

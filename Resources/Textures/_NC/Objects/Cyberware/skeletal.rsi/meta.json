@@ -1,0 +1,20 @@
+{
+    "version": 1,
+    "license": "CC-BY-SA-3.0",
+    "copyright": "Generated with OpenAI ImageGen for Night City, 2026",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "muscle_bone_lace"
+        },
+        {
+            "name": "linear_frame_sigma"
+        },
+        {
+            "name": "linear_frame_beta"
+        }
+    ]
+}

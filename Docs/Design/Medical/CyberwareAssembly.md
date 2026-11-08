@@ -136,3 +136,73 @@ Suggested changelog:
 - add: A cyberware service bench supports physical part replacement, diagnosis and testing.
 - tweak: Severe damage can permanently reduce the repairable capacity of individual cyberware nodes.
 ```
+
+## Medical controllers and quality
+
+`NCBiomonitorImplant` now uses the same physical assembly and service workflow;
+`NCAutoInjectorImplant` adds a controller/pump assembly. Empty manufacturing
+outputs contain no default parts. Electronics, mechanical and medical lathe packs
+produce the corresponding boards, sensors, pumps, frames and refillable cartridges.
+The localized **Medical implants: controllers and dosing** guide documents the
+player workflow, power requirements and surgical access.
+
+`ncCyberwarePart.quality` references a data-defined quality profile (standard by
+default for existing parts). Four medical grades change nominal part integrity,
+measurement resolution and performance. The weakest controller/sensor or
+controller/pump limits the relevant function; the scanner reports the lowest
+assembly grade separately from damage. Repair preserves part prototype/quality.
+
+A blank `NCMedicalControllerComponent` has no firmware. The basic preprogrammed
+variant supports self-test but cannot operate either implant. META's
+`MedicalProgrammer.flash(0|1|2)` writes basic, biomonitor or dosing firmware;
+`selfTest()` reports whether a programmed board is intact. The program in
+`Resources/Meta/Medical/Programmer.meta` defaults to basic firmware. Programming
+requires the device owner, a nearby authorized runtime host and a detached board.
+Native checks remain authoritative; META cannot bypass dosing limits.
+
+The injector uses a private `Solution` cartridge and the existing bloodstream API.
+Manual and automatic doses share stock, actual metered-dose budget and cooldown.
+Changing settings disables automation. Loading another cartridge resets its budget
+but not cooldown. Automatic dosing requires a fresh reading from an operational
+biomonitor on the same body; it remains available during unconsciousness, while
+manual controls require the wearer's normal interaction eligibility.
+
+Medical snapshot version 19 preserves settings, contents, delivered quantity,
+cooldown and controller firmware through explicit clones and assembly snapshots.
+Version 18 and earlier installed biomonitors migrate to standard components with
+completed installation. New installations require fixation, connection and checking
+through the existing authoritative surgery action/DoAfter pipeline. Runtime samples
+are not persisted as fresh medical readings. The preceding META API catalog is
+frozen separately so previously compiled artifacts remain verifiable.
+
+## Quality across NC cyberware
+
+Every concrete NC cyberware entity and replaceable cyberware part has improvised,
+standard, improved and premium variants. Existing IDs remain standard. The frame
+grade and factory parts are declared on the entity, preserving gameplay profile
+identity (including skeletal prerequisites and abilities). Existing snapshots retain
+the entity prototype and actual replacement-part prototypes; repair never upgrades
+quality. Empty frames remain empty, and assembled factory variants start with
+matching-grade parts.
+
+The effective grade is the weakest of the frame and installed parts. Its performance
+factor divides running power demand, generated heat and mechanical impact damage;
+dermal ablation also uses it, without increasing maximum SP. Standard behavior is
+unchanged. Quality does not increase hardsuit allowance, bypass neural prerequisites,
+increase weapon damage, or turn one skeletal model into another. Part grades change
+nominal integrity independently of current damage and permanent wear.
+
+Grade recipes extend only the existing base recipe packs and machines. Items without
+a manufacturing recipe remain without one. Improvised recipes cost 75% of base;
+improved cost 150% plus gold; premium cost 200% plus gold and silver. Medical parts
+retain their existing recipes.
+
+Medical controllers currently store a native firmware ID, not executable META
+bytecode. `Programmer.meta` is the host-side flashing program. `flash(0/1/2)` selects
+basic self-test, biomonitor, or injector mode in `NCMetaMedicalControllerSystem`;
+`NCMedicalImplantSystem` implements the actual sampling and dosing behavior.
+
+Validation for the quality extension: DebugOpt client/server build, 159 targeted
+medical content tests, and the YAML linter. A static coverage pass checked all 219
+added entity variants and 135 factory slot/grade assignments. Full in-game operation
+of every quality variant was not exercised.

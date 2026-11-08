@@ -137,10 +137,10 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
             return false;
         }
 
-        if (!_cyberware.TryFindInstallSlot(patient, targetRegion, module, out _))
+        if (!_cyberware.TryFindInstallHost(patient, targetRegion, module, out var host, out _))
             return false;
         // Player surgery uses physical bay compatibility, not the legacy procedure catalogue's profile allowlist.
-        BindStagedProcedure(user, patient, "NCSurgeryCyberwareInstallation", selectedZone, targetRegion, module);
+        BindStagedProcedure(user, patient, "NCSurgeryCyberwareInstallation", selectedZone, host, module);
         return true;
     }
 
@@ -150,6 +150,9 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
     /// </summary>
     public bool TryStageGraft(EntityUid user, EntityUid patient, EntityUid graft)
     {
+        ProtoId<NCSurgeryProcedurePrototype> procedure = HasComp<NCBoneComponent>(graft)
+            ? "NCSurgeryBoneReplacement"
+            : "NCSurgeryLimbReattachment";
         var targeting = _targeting.GetSelection(user);
         if (Deleted(user) || Deleted(patient) || Deleted(graft) ||
             !HasComp<NCMedicalBodyComponent>(patient) ||
@@ -159,7 +162,7 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
             !_surgery.TryPrepareProcedureTarget(
                 patient,
                 parent,
-                "NCSurgeryLimbReattachment",
+                procedure,
                 graft,
                 out _,
                 out _))
@@ -167,7 +170,7 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
             return false;
         }
 
-        BindStagedProcedure(user, patient, "NCSurgeryLimbReattachment", selectedZone, parent, graft);
+        BindStagedProcedure(user, patient, procedure, selectedZone, parent, graft);
         return true;
     }
 
@@ -448,7 +451,8 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
         {
             if (!TryComp<OrganComponent>(candidate, out var organ) ||
                 organ.Category is not { } graftCategory ||
-                graftCategory != zone.ExternalOrganCategory && graftCategory != zone.MedicalRegionCategory ||
+                graftCategory != zone.ExternalOrganCategory && graftCategory != zone.MedicalRegionCategory &&
+                !IsSkeletalGraftForZone(candidate, graftCategory, selectedZone) ||
                 _anatomy.TryGetOrgan(patient, graftCategory, out _) ||
                 !TryComp<NCDetachedOrganMedicalDataComponent>(candidate, out var payload) ||
                 !_anatomy.TryGetOrgan(patient, payload.RequiredParentCategory, out var liveParent))
@@ -463,6 +467,16 @@ public sealed partial class NCSurgeryInteractionSystem : EntitySystem
         }
 
         return false;
+    }
+
+    private bool IsSkeletalGraftForZone(EntityUid graft, ProtoId<OrganCategoryPrototype> category,
+        ProtoId<NCTargetZonePrototype> zone)
+    {
+        return HasComp<NCBoneComponent>(graft) &&
+               TryComp<NCDetachedOrganMedicalDataComponent>(graft, out var payload) &&
+               _prototypes.EnumeratePrototypes<NCSkeletalSlotPrototype>().Any(slot =>
+                   slot.Category == category && slot.TargetZone == zone &&
+                   slot.ParentCategory == payload.RequiredParentCategory);
     }
 
     private int GetDirectStartStep(

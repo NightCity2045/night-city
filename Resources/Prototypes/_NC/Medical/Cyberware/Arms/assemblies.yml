@@ -1,0 +1,142 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncCyberwareAssembly
+  id: NCArmImpactAssembly
+  defaultParts:
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCArmImpactPartSlot: NCArmImpactStandard
+    NCArmDamperPartSlot: NCArmDamperStandard
+    NCArmMicrodrivePartSlot: NCArmMicrodriveStandard
+    NCArmLockPartSlot: NCArmLockStandard
+  repairMaterial: Steel
+  repairPerUnit: 20
+
+- type: ncCyberwareAssembly
+  id: NCArmClawsAssembly
+  defaultParts:
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCArmClawsPartSlot: NCArmClawsStandard
+    NCArmGuidePartSlot: NCArmGuideStandard
+    NCArmMicrodrivePartSlot: NCArmMicrodriveStandard
+    NCArmLockPartSlot: NCArmLockStandard
+  repairMaterial: Steel
+  repairPerUnit: 20
+
+- type: ncCyberwareAssembly
+  id: NCArmBladeAssembly
+  defaultParts:
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCArmBladePartSlot: NCArmBladeStandard
+    NCArmGuidePartSlot: NCArmGuideStandard
+    NCArmMicrodrivePartSlot: NCArmMicrodriveStandard
+    NCArmLockPartSlot: NCArmLockStandard
+  repairMaterial: Steel
+  repairPerUnit: 20
+
+- type: ncCyberwareAssembly
+  id: NCMantisBladeAssembly
+  defaultParts:
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCArmBladePartSlot: NCArmBladeStandard
+    NCArmHingePartSlot: NCArmHingeStandard
+    NCArmMicrodrivePartSlot: NCArmMicrodriveStandard
+    NCArmLockPartSlot: NCArmLockStandard
+  repairMaterial: Steel
+  repairPerUnit: 20
+
+- type: ncCyberwareAssembly
+  id: NCArmMonowireAssembly
+  defaultParts:
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCArmWirePartSlot: NCArmWireStandard
+    NCArmReelPartSlot: NCArmReelStandard
+    NCArmMicrodrivePartSlot: NCArmMicrodriveStandard
+    NCArmLockPartSlot: NCArmLockStandard
+  repairMaterial: Steel
+  repairPerUnit: 20
+
+- type: ncCyberwareAssembly
+  id: NCArmPistolAssembly
+  defaultParts:
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCArmPistolCorePartSlot: NCArmPistolCoreStandard
+    NCArmGuidePartSlot: NCArmGuideStandard
+    NCArmMicrodrivePartSlot: NCArmMicrodriveStandard
+    NCArmLockPartSlot: NCArmLockStandard
+  repairMaterial: Steel
+  repairPerUnit: 20
+
+- type: ncCyberwareAssembly
+  id: NCArmLauncherAssembly
+  defaultParts:
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCArmLauncherCorePartSlot: NCArmLauncherCoreStandard
+    NCArmHingePartSlot: NCArmHingeStandard
+    NCArmDamperPartSlot: NCArmDamperStandard
+    NCArmMicrodrivePartSlot: NCArmMicrodriveStandard
+    NCArmCoolingPartSlot: NCArmCoolingStandard
+    NCArmLockPartSlot: NCArmLockStandard
+  repairMaterial: Steel
+  repairPerUnit: 20
+
+- type: ncCyberwareAssembly
+  id: NCToolHandAssembly
+  defaultParts:
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCArmToolsPartSlot: NCArmToolsStandard
+    NCArmGuidePartSlot: NCArmGuideStandard
+    NCArmMicrodrivePartSlot: NCArmMicrodriveStandard
+    NCArmLockPartSlot: NCArmLockStandard
+  repairMaterial: Steel
+  repairPerUnit: 20
+
+- type: ncCyberwareAssembly
+  id: NCArmMedicalAssembly
+  defaultParts:
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCArmMedicalToolsPartSlot: NCArmMedicalToolsStandard
+    NCArmGuidePartSlot: NCArmGuideStandard
+    NCArmMicrodrivePartSlot: NCArmMicrodriveStandard
+    NCArmLockPartSlot: NCArmLockStandard
+  repairMaterial: Steel
+  repairPerUnit: 20
+
+- type: ncCyberwareAssembly
+  id: NCArmStorageAssembly
+  defaultParts:
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCArmPocketPartSlot: NCArmPocketStandard
+    NCArmLockPartSlot: NCArmLockStandard
+  repairMaterial: Steel
+  repairPerUnit: 20
+
+- type: ncCyberwareAssembly
+  id: NCArmQuickSocketAssembly
+  defaultParts:
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCArmSocketPartSlot: NCArmSocketStandard
+    NCArmLockPartSlot: NCArmLockStandard
+  repairMaterial: Steel
+  repairPerUnit: 20
+
+- type: ncCyberwareAssembly
+  id: NCCivilianArmAssembly
+  defaultParts:
+    NCIndustrialArmActuatorSlot: NCCyberarmActuator
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCIndustrialArmSensorSlot: NCCyberarmSensor
+    NCArmCuffPartSlot: NCArmCuffStandard
+    NCArmShellPartSlot: NCArmShellStandard
+  repairMaterial: Steel
+  repairPerUnit: 20
+
+- type: ncCyberwareAssembly
+  id: NCArmoredArmAssembly
+  defaultParts:
+    NCIndustrialArmActuatorSlot: NCCyberarmActuator
+    NCIndustrialArmControllerSlot: NCCyberarmController
+    NCIndustrialArmSensorSlot: NCCyberarmSensor
+    NCArmCuffPartSlot: NCArmCuffStandard
+    NCArmShellPartSlot: NCArmShellStandard
+  repairMaterial: Steel
+  repairPerUnit: 20

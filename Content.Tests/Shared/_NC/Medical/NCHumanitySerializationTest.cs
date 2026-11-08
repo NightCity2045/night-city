@@ -23,11 +23,15 @@ public sealed class NCHumanitySerializationTest : ContentUnitTest
     public void RequiredStateFieldsRoundTripIncludingZeroesAndRemainingCooldowns()
     {
         var serialization = IoCManager.Resolve<ISerializationManager>();
-        var source = new NCHumanityStateSnapshot { Current = 0, Stress = 0, StabilizingSeconds = 12 };
+        var source = new NCHumanityStateSnapshot { Current = 0, Stress = 0, StabilizingSeconds = 12, Exhaustion = 17, RecoverySeconds = 81, DeclinesSupport = true, Episode = "NCCyberMotorEpisode" };
         source.Adaptation["motor:left"] = 6;
         source.RecentImpulses.Add(new() { Source = Guid.NewGuid(), Profile = "NCHumanityNeuralTrauma", RemainingSeconds = 9 });
         var node = serialization.WriteValue(source, alwaysWrite: true, notNullableOverride: true);
         var restored = serialization.Read<NCHumanityStateSnapshot>(node, notNullableOverride: true);
+        Assert.That(restored.Exhaustion, Is.EqualTo(17));
+        Assert.That(restored.RecoverySeconds, Is.EqualTo(81));
+        Assert.That(restored.DeclinesSupport, Is.True);
+        Assert.That(restored.Episode, Is.EqualTo(source.Episode));
         Assert.That(restored.Current, Is.Zero);
         Assert.That(restored.Stress, Is.Zero);
         Assert.That(restored.Adaptation["motor:left"], Is.EqualTo(6));

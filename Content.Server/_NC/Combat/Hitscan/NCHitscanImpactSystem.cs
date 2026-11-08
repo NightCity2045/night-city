@@ -21,6 +21,7 @@ namespace Content.Server._NC.Combat.Hitscan;
 /// </summary>
 public sealed partial class NCHitscanImpactSystem : EntitySystem
 {
+    [Dependency] private Content.Server._NC.Medical.Cyberware.Neural.NCNeuralHardwareSystem _neuralReactions = default!;
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private NCCombatTraumaDeliverySystem _delivery = default!;
     [Dependency] private NCMedicalDamageRoutingSystem _routing = default!;
@@ -50,6 +51,8 @@ public sealed partial class NCHitscanImpactSystem : EntitySystem
             Log.Error($"NC hitscan impact on {ToPrettyString(target.Owner)} has no damage routing map; compatibility HP was suppressed.");
             return;
         }
+
+        if (_neuralReactions.TryEvade(target.Owner, args.Raycast.Shooter, resolutionId, 0)) return;
 
         var systemic = _routing.ApplySystemicSubset(
             target.Owner,

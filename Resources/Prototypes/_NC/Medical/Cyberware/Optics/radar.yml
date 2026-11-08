@@ -1,0 +1,272 @@
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: ncCyberwareSlot
+  id: NCSlotRadarThorax
+  name: RadarThorax
+  nameId: nc-optics-radar-slot
+  hostCategories:
+  - Thorax
+  capacity: 1
+  regionalSurgeryPositionX: 0.85
+
+- type: ncCyberware
+  id: NCOpticRadarImplantProfile
+  name: thoracic radar
+  nameId: nc-optics-radar-profile
+  manufacturer: Night City adaptation
+  icon:
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: radar
+  form: Implant
+  compatibleSlots:
+  - NCSlotRadarThorax
+  size: 1
+  maximumIntegrity: 80
+  repairProfile: NCRepairProfileClinicalCyberware
+  auxiliaryServiceProfiles:
+  - NCCoolantServiceAgent
+  humanityPackages:
+  - NCHumanityBiomonitor
+  assembly: NCOpticRadarAssembly
+  requiresFactoryPreparation: true
+  requiresSeparateCalibration: false
+  idlePowerPerSecond: 0.2
+  loadedPowerPerSecond: 0.5
+  heatCapacity: 100
+  idleHeatPerSecond: 0.05
+  loadedHeatPerSecond: 0.1
+  passiveCoolingPerSecond: 0.5
+  heatDeratingThreshold: 60
+  heatShutdownThreshold: 85
+  heatDamageThreshold: 90
+  heatDamagePerSecond: 1
+  neuralRequirement: None
+  updateInterval: 0.1s
+  capabilities: []
+  skeletalSurgery:
+  - stage: MedicalFixation
+    name: nc-medical-stage-fixmedical
+    zone: NCZoneChest
+    structure: Thorax
+    action: FixMedical
+    minimumDepth: 0.4
+  - stage: MedicalConnection
+    name: nc-medical-stage-connectmedical
+    zone: NCZoneChest
+    structure: Thorax
+    action: ConnectMedical
+    minimumDepth: 0.4
+    prerequisites: MedicalFixation
+  - stage: MedicalCheck
+    name: nc-medical-stage-checkmedical
+    zone: NCZoneChest
+    structure: Thorax
+    action: CheckMedical
+    minimumDepth: 0.4
+    prerequisites: MedicalFixation, MedicalConnection
+
+- type: ncCyberwareAssembly
+  id: NCOpticRadarAssembly
+  defaultParts:
+    NCMedicalSensorSlot: NCMedicalSensorStandard
+    NCOpticPowerSlot: NCOpticPowerStandard
+
+- type: entity
+  parent: NCCyberwareImplantBase
+  id: NCOpticRadarImplantStandard
+  suffix: Standard
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: radar
+  - type: NCCyberware
+    profile: NCOpticRadarImplantProfile
+    factoryPrepared: true
+    quality: NCCyberwareQualityStandard
+    qualityParts:
+      NCMedicalSensorSlot: NCMedicalSensorStandard
+      NCOpticPowerSlot: NCOpticPowerStandard
+  - type: NCOpticRadar
+
+- type: entity
+  parent: NCOpticRadarImplantStandard
+  id: NCOpticRadarImplantStandardEmpty
+  suffix: Standard empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCCyberwareImplantBase
+  id: NCOpticRadarImplantImprovised
+  suffix: Improvised
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: radar
+  - type: NCCyberware
+    profile: NCOpticRadarImplantProfile
+    factoryPrepared: true
+    quality: NCCyberwareQualityImprovised
+    qualityParts:
+      NCMedicalSensorSlot: NCMedicalSensorImprovised
+      NCOpticPowerSlot: NCOpticPowerImprovised
+  - type: NCOpticRadar
+
+- type: entity
+  parent: NCOpticRadarImplantImprovised
+  id: NCOpticRadarImplantImprovisedEmpty
+  suffix: Improvised empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCCyberwareImplantBase
+  id: NCOpticRadarImplantImproved
+  suffix: Improved
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: radar
+  - type: NCCyberware
+    profile: NCOpticRadarImplantProfile
+    factoryPrepared: true
+    quality: NCCyberwareQualityImproved
+    qualityParts:
+      NCMedicalSensorSlot: NCMedicalSensorImproved
+      NCOpticPowerSlot: NCOpticPowerImproved
+  - type: NCOpticRadar
+
+- type: entity
+  parent: NCOpticRadarImplantImproved
+  id: NCOpticRadarImplantImprovedEmpty
+  suffix: Improved empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: NCCyberwareImplantBase
+  id: NCOpticRadarImplantPremium
+  suffix: Premium
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: radar
+  - type: NCCyberware
+    profile: NCOpticRadarImplantProfile
+    factoryPrepared: true
+    quality: NCCyberwareQualityPremium
+    qualityParts:
+      NCMedicalSensorSlot: NCMedicalSensorPremium
+      NCOpticPowerSlot: NCOpticPowerPremium
+  - type: NCOpticRadar
+
+- type: entity
+  parent: NCOpticRadarImplantPremium
+  id: NCOpticRadarImplantPremiumEmpty
+  suffix: Premium empty frame
+  components:
+  - type: NCCyberware
+    factoryPrepared: false
+  - type: NCCyberwareAssembly
+    initialized: true
+
+- type: entity
+  parent: BaseHandheldComputer
+  id: NCOpticRadarHandheld
+  components:
+  - type: Sprite
+    sprite: _NC/Objects/Cyberware/optics.rsi
+    state: radar
+  - type: NCOpticRadar
+
+- type: entity
+  parent: BaseItem
+  id: NCOpticRadarShield
+  components:
+  - type: Sprite
+    sprite: Objects/Materials/Sheets/metal.rsi
+    state: steel
+  - type: NCOpticRadarShield
+  - type: Item
+    size: Large
+
+- type: latheRecipe
+  id: NCProduceNCOpticRadarImplantStandardEmpty
+  result: NCOpticRadarImplantStandardEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Glass: 300
+    Plastic: 200
+
+- type: latheRecipe
+  id: NCProduceNCOpticRadarImplantImprovisedEmpty
+  result: NCOpticRadarImplantImprovisedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Glass: 300
+    Plastic: 200
+
+- type: latheRecipe
+  id: NCProduceNCOpticRadarImplantImprovedEmpty
+  result: NCOpticRadarImplantImprovedEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Glass: 300
+    Plastic: 200
+
+- type: latheRecipe
+  id: NCProduceNCOpticRadarImplantPremiumEmpty
+  result: NCOpticRadarImplantPremiumEmpty
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Glass: 300
+    Plastic: 200
+
+- type: latheRecipe
+  id: NCProduceNCOpticRadarHandheld
+  result: NCOpticRadarHandheld
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 500
+    Glass: 500
+    Plastic: 300
+    Gold: 100
+
+- type: latheRecipe
+  id: NCProduceNCOpticRadarShield
+  result: NCOpticRadarShield
+  completetime: 12
+  applyMaterialDiscount: false
+  categories:
+  - Parts
+  materials:
+    Steel: 1000
+    Silver: 100

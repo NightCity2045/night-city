@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: NCMobHumanSixthStreetBase
+  id: NCMobHumanSixthStreetPatrol
+  components:
+  - type: Loadout
+    prototypes:
+    - NCSixthStreetPatrolGear
+
+- type: entity
+  parent: NCMobHumanSixthStreetBase
+  id: NCMobHumanSixthStreetGuard
+  components:
+  - type: Loadout
+    prototypes:
+    - NCSixthStreetGuardGear
+
+- type: entity
+  parent: NCMobHumanSixthStreetBase
+  id: NCMobHumanSixthStreetVeteran
+  components:
+  - type: Loadout
+    prototypes:
+    - NCSixthStreetVeteranGear
+
+- type: entity
+  parent: NCMobHumanSixthStreetBase
+  id: NCMobHumanSixthStreetScout
+  components:
+  - type: Loadout
+    prototypes:
+    - NCSixthStreetScoutGear
+
+- type: entity
+  parent: NCMobHumanSixthStreetBase
+  id: NCMobHumanSixthStreetMedic
+  components:
+  - type: Loadout
+    prototypes:
+    - NCSixthStreetMedicGear
+
+- type: entity
+  parent: NCMobHumanSixthStreetBase
+  id: NCMobHumanSixthStreetQuartermaster
+  components:
+  - type: Loadout
+    prototypes:
+    - NCSixthStreetQuartermasterGear

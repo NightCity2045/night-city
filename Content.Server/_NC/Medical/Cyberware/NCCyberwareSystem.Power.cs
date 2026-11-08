@@ -153,7 +153,7 @@ public sealed partial class NCCyberwareSystem
             if (!profile.RequiresPower || module.LastAdvancedAt > now || !CanRunElectronics(uid, module, profile, now))
                 continue;
             demands.Add(new NCCyberwarePowerDemand(module.StableInstanceId, profile.PowerPriority,
-                profile.IdlePowerPerSecond + profile.LoadedPowerPerSecond * EffectivePowerLoad(module, profile, now)));
+                (profile.IdlePowerPerSecond + profile.LoadedPowerPerSecond * EffectivePowerLoad(module, profile, now)) / QualityPerformance(uid)));
         }
         return NCCyberwarePowerMath.Allocate(demands, maximum,
             main is { } primary && _battery.GetCharge(primary.AsNullable()) > PowerEpsilon,
@@ -224,7 +224,7 @@ public sealed partial class NCCyberwareSystem
                         seconds = MathF.Min(seconds, (float)(activeUntil - cursor).TotalSeconds);
                     var generating = (!profile.RequiresPower || powered.Contains(module.StableInstanceId)) &&
                                      CanRunElectronics(uid, module, profile, cursor);
-                    var rate = (generating ? profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond * EffectivePowerLoad(module, profile, cursor) : 0f) -
+                    var rate = (generating ? (profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond * EffectivePowerLoad(module, profile, cursor)) / QualityPerformance(uid) : 0f) -
                                profile.PassiveCoolingPerSecond;
                     var threshold = rate > 0f ? profile.HeatShutdownThreshold : profile.HeatDeratingThreshold;
                     if (rate != 0f && (threshold - module.Heat) / rate > PowerEpsilon)
@@ -246,7 +246,7 @@ public sealed partial class NCCyberwareSystem
                     var profile = _prototypes.Index(module.Profile);
                     var generating = (!profile.RequiresPower || powered.Contains(module.StableInstanceId)) &&
                                      CanRunElectronics(uid, module, profile, cursor);
-                    var rate = (generating ? profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond * EffectivePowerLoad(module, profile, cursor) : 0f) -
+                    var rate = (generating ? (profile.IdleHeatPerSecond + profile.LoadedHeatPerSecond * EffectivePowerLoad(module, profile, cursor)) / QualityPerformance(uid) : 0f) -
                                profile.PassiveCoolingPerSecond;
                     var thermal = NCCyberwarePowerMath.AdvanceHeat(module.Heat, rate, seconds,
                         profile.HeatCapacity, profile.HeatDamageThreshold, profile.HeatDamagePerSecond);
@@ -255,7 +255,7 @@ public sealed partial class NCCyberwareSystem
                     {
                         integrity.CurrentIntegrity = MathF.Max(0f, integrity.CurrentIntegrity - thermal.Damage);
                         DamageAssembly(uid, module, profile, thermal.Damage, continuousHeat: true);
-                        NormalizeMechanicalIntegrity(integrity);
+                        NormalizeMechanicalIntegrity(integrity, profile.Material);
                     }
                 }
                 if (converter is { } conversion && main is { } charging)
@@ -320,6 +320,7 @@ public sealed partial class NCCyberwareSystem
     private void RefreshBodyPower(EntityUid body, TimeSpan now, IReadOnlyList<EntityUid>? modules = null)
     {
         modules ??= CollectCyberware(body);
+        RefreshSkeletalLoads(body, modules);
         var grants = AllocateBodyPower(modules, now, out _, out _)
             .Where(value => value.Source != NCCyberwarePowerSource.None).Select(value => value.Id).ToHashSet();
         foreach (var uid in modules)
@@ -329,8 +330,14 @@ public sealed partial class NCCyberwareSystem
             module.PowerGranted = !profile.RequiresPower || grants.Contains(module.StableInstanceId);
             module.CurrentPower = 0f;
             UpdateNeuralState(module, profile, now);
-            UpdateOperational(uid, module, profile, now);
         }
+        // Allocate every grant before evaluating dependencies; enumeration order cannot starve a foundation.
+        foreach (var uid in modules)
+        {
+            var module = Comp<NCCyberwareComponent>(uid);
+            UpdateOperational(uid, module, _prototypes.Index(module.Profile), now, modules);
+        }
+        RefreshSkeletalSupport(body, modules);
         UpdatePowerWarning(body, modules, now);
     }
 

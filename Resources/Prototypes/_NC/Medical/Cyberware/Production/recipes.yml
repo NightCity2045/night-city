@@ -1,0 +1,491 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: latheRecipe
+  id: NCProduceNCSyntheticMuscle
+  result: NCSyntheticMuscle
+  completetime: 30
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Biomass: 100
+
+- type: latheRecipe
+  id: NCProduceNCSkeletalAnchors
+  result: NCSkeletalAnchors
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 800
+    Plastic: 100
+
+- type: latheRecipe
+  id: NCProduceNCSkeletalHeavyAnchors
+  result: NCSkeletalHeavyAnchors
+  completetime: 16
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 1600
+    Plastic: 200
+    Silver: 100
+
+- type: latheRecipe
+  id: NCProduceNCSkeletalPowerJunction
+  result: NCSkeletalPowerJunction
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 400
+    Plastic: 300
+    Gold: 100
+
+- type: latheRecipe
+  id: NCProduceNCCyberarmController
+  result: NCCyberarmController
+  completetime: 6
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 100
+    Glass: 500
+    Gold: 100
+    Plastic: 100
+
+- type: latheRecipe
+  id: NCProduceNCCyberarmSensor
+  result: NCCyberarmSensor
+  completetime: 6
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 200
+    Glass: 300
+    Gold: 100
+
+- type: latheRecipe
+  id: NCProduceNCCyberwareStandardFirmwareCard
+  result: NCCyberwareStandardFirmwareCard
+  completetime: 3
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 50
+    Glass: 100
+    Plastic: 100
+
+- type: latheRecipe
+  id: NCProduceNCImplantPowerBusMk1
+  result: NCImplantPowerBusMk1
+  completetime: 8
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 400
+    Plastic: 200
+    Gold: 100
+
+- type: latheRecipe
+  id: NCProduceNCImplantLinearFrameSigmaEmpty
+  result: NCImplantLinearFrameSigmaEmpty
+  completetime: 20
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 2000
+    Plastic: 500
+
+- type: latheRecipe
+  id: NCProduceNCImplantLinearFrameBetaEmpty
+  result: NCImplantLinearFrameBetaEmpty
+  completetime: 35
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 3500
+    Plastic: 800
+
+- type: latheRecipe
+  id: NCProduceNCCyberwareSterileWrap
+  result: NCCyberwareSterileWrap
+  completetime: 5
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Cloth: 200
+    Plastic: 200
+    Silver: 50
+
+- type: latheRecipe
+  id: NCProduceNCCyberwareServiceTool
+  result: NCCyberwareServiceTool
+  completetime: 5
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 300
+    Glass: 100
+    Plastic: 100
+
+- type: latheRecipe
+  id: NCProduceNCSkeletalMountingTool
+  result: NCSkeletalMountingTool
+  completetime: 6
+  applyMaterialDiscount: false
+  categories: [ Parts ]
+  materials:
+    Steel: 500
+    Plastic: 100
+
+- type: latheRecipePack
+  id: NCCyberMechanicalStatic
+  recipes:
+  - NCProduceNCOrganHumanCivilianCyberArmLeftImprovisedFrame
+  - NCProduceNCOrganHumanCivilianCyberArmLeftImprovedFrame
+  - NCProduceNCOrganHumanCivilianCyberArmLeftPremiumFrame
+  - NCProduceNCOrganHumanCivilianCyberArmRightImprovisedFrame
+  - NCProduceNCOrganHumanCivilianCyberArmRightImprovedFrame
+  - NCProduceNCOrganHumanCivilianCyberArmRightPremiumFrame
+  - NCProduceNCOrganHumanArmoredCyberArmLeftImprovisedFrame
+  - NCProduceNCOrganHumanArmoredCyberArmLeftImprovedFrame
+  - NCProduceNCOrganHumanArmoredCyberArmLeftPremiumFrame
+  - NCProduceNCOrganHumanArmoredCyberArmRightImprovisedFrame
+  - NCProduceNCOrganHumanArmoredCyberArmRightImprovedFrame
+  - NCProduceNCOrganHumanArmoredCyberArmRightPremiumFrame
+  - NCProduceNCOrganHumanCyberArmLeftFrame
+  - NCProduceNCOrganHumanCyberArmRightFrame
+  - NCProduceNCCyberarmActuator
+  - NCProduceNCCyberarmActuatorQualityImprovised
+  - NCProduceNCCyberarmActuatorQualityImproved
+  - NCProduceNCCyberarmActuatorQualityPremium
+  - NCProduceNCArmMicrodriveStandard
+  - NCProduceNCArmMicrodriveImprovised
+  - NCProduceNCArmMicrodriveImproved
+  - NCProduceNCArmMicrodrivePremium
+  - NCProduceNCArmGuideStandard
+  - NCProduceNCArmGuideImprovised
+  - NCProduceNCArmGuideImproved
+  - NCProduceNCArmGuidePremium
+  - NCProduceNCArmLockStandard
+  - NCProduceNCArmLockImprovised
+  - NCProduceNCArmLockImproved
+  - NCProduceNCArmLockPremium
+  - NCProduceNCArmDamperStandard
+  - NCProduceNCArmDamperImprovised
+  - NCProduceNCArmDamperImproved
+  - NCProduceNCArmDamperPremium
+  - NCProduceNCArmCoolingStandard
+  - NCProduceNCArmCoolingImprovised
+  - NCProduceNCArmCoolingImproved
+  - NCProduceNCArmCoolingPremium
+  - NCProduceNCArmClawsStandard
+  - NCProduceNCArmClawsImprovised
+  - NCProduceNCArmClawsImproved
+  - NCProduceNCArmClawsPremium
+  - NCProduceNCArmBladeStandard
+  - NCProduceNCArmBladeImprovised
+  - NCProduceNCArmBladeImproved
+  - NCProduceNCArmBladePremium
+  - NCProduceNCArmHingeStandard
+  - NCProduceNCArmHingeImprovised
+  - NCProduceNCArmHingeImproved
+  - NCProduceNCArmHingePremium
+  - NCProduceNCArmReelStandard
+  - NCProduceNCArmReelImprovised
+  - NCProduceNCArmReelImproved
+  - NCProduceNCArmReelPremium
+  - NCProduceNCArmWireStandard
+  - NCProduceNCArmWireImprovised
+  - NCProduceNCArmWireImproved
+  - NCProduceNCArmWirePremium
+  - NCProduceNCArmPistolCoreStandard
+  - NCProduceNCArmPistolCoreImprovised
+  - NCProduceNCArmPistolCoreImproved
+  - NCProduceNCArmPistolCorePremium
+  - NCProduceNCArmLauncherCoreStandard
+  - NCProduceNCArmLauncherCoreImprovised
+  - NCProduceNCArmLauncherCoreImproved
+  - NCProduceNCArmLauncherCorePremium
+  - NCProduceNCArmToolsStandard
+  - NCProduceNCArmToolsImprovised
+  - NCProduceNCArmToolsImproved
+  - NCProduceNCArmToolsPremium
+  - NCProduceNCArmMedicalToolsStandard
+  - NCProduceNCArmMedicalToolsImprovised
+  - NCProduceNCArmMedicalToolsImproved
+  - NCProduceNCArmMedicalToolsPremium
+  - NCProduceNCArmPocketStandard
+  - NCProduceNCArmPocketImprovised
+  - NCProduceNCArmPocketImproved
+  - NCProduceNCArmPocketPremium
+  - NCProduceNCArmSocketStandard
+  - NCProduceNCArmSocketImprovised
+  - NCProduceNCArmSocketImproved
+  - NCProduceNCArmSocketPremium
+  - NCProduceNCArmImpactStandard
+  - NCProduceNCArmImpactImprovised
+  - NCProduceNCArmImpactImproved
+  - NCProduceNCArmImpactPremium
+  - NCProduceNCArmCuffStandard
+  - NCProduceNCArmCuffImprovised
+  - NCProduceNCArmCuffImproved
+  - NCProduceNCArmCuffPremium
+  - NCProduceNCArmShellStandard
+  - NCProduceNCArmShellImprovised
+  - NCProduceNCArmShellImproved
+  - NCProduceNCArmShellPremium
+  - NCProduceNCArmPowerDriveStandard
+  - NCProduceNCArmPowerDriveImprovised
+  - NCProduceNCArmPowerDriveImproved
+  - NCProduceNCArmPowerDrivePremium
+  - NCProduceNCArmImpactImplantEmpty
+  - NCProduceNCArmImpactImplantImprovisedEmpty
+  - NCProduceNCArmImpactImplantImprovedEmpty
+  - NCProduceNCArmImpactImplantPremiumEmpty
+  - NCProduceNCArmClawsImplantEmpty
+  - NCProduceNCArmClawsImplantImprovisedEmpty
+  - NCProduceNCArmClawsImplantImprovedEmpty
+  - NCProduceNCArmClawsImplantPremiumEmpty
+  - NCProduceNCArmBladeImplantEmpty
+  - NCProduceNCArmBladeImplantImprovisedEmpty
+  - NCProduceNCArmBladeImplantImprovedEmpty
+  - NCProduceNCArmBladeImplantPremiumEmpty
+  - NCProduceNCMantisBladeImplantEmpty
+  - NCProduceNCMantisBladeImplantImprovisedEmpty
+  - NCProduceNCMantisBladeImplantImprovedEmpty
+  - NCProduceNCMantisBladeImplantPremiumEmpty
+  - NCProduceNCArmMonowireImplantEmpty
+  - NCProduceNCArmMonowireImplantImprovisedEmpty
+  - NCProduceNCArmMonowireImplantImprovedEmpty
+  - NCProduceNCArmMonowireImplantPremiumEmpty
+  - NCProduceNCArmPistolImplantEmpty
+  - NCProduceNCArmPistolImplantImprovisedEmpty
+  - NCProduceNCArmPistolImplantImprovedEmpty
+  - NCProduceNCArmPistolImplantPremiumEmpty
+  - NCProduceNCArmLauncherImplantEmpty
+  - NCProduceNCArmLauncherImplantImprovisedEmpty
+  - NCProduceNCArmLauncherImplantImprovedEmpty
+  - NCProduceNCArmLauncherImplantPremiumEmpty
+  - NCProduceNCToolHandImplantEmpty
+  - NCProduceNCToolHandImplantImprovisedEmpty
+  - NCProduceNCToolHandImplantImprovedEmpty
+  - NCProduceNCToolHandImplantPremiumEmpty
+  - NCProduceNCArmMedicalImplantEmpty
+  - NCProduceNCArmMedicalImplantImprovisedEmpty
+  - NCProduceNCArmMedicalImplantImprovedEmpty
+  - NCProduceNCArmMedicalImplantPremiumEmpty
+  - NCProduceNCArmStorageImplantEmpty
+  - NCProduceNCArmStorageImplantImprovisedEmpty
+  - NCProduceNCArmStorageImplantImprovedEmpty
+  - NCProduceNCArmStorageImplantPremiumEmpty
+  - NCProduceNCArmQuickSocketImplantEmpty
+  - NCProduceNCArmQuickSocketImplantImprovisedEmpty
+  - NCProduceNCArmQuickSocketImplantImprovedEmpty
+  - NCProduceNCArmQuickSocketImplantPremiumEmpty
+  - NCProduceNCOrganHumanCivilianCyberArmLeftFrame
+  - NCProduceNCOrganHumanCivilianCyberArmRightFrame
+  - NCProduceNCOrganHumanArmoredCyberArmLeftFrame
+  - NCProduceNCOrganHumanArmoredCyberArmRightFrame
+  - NCProduceNCMedicalPumpImprovised
+  - NCProduceNCMedicalPumpStandard
+  - NCProduceNCMedicalPumpImproved
+  - NCProduceNCMedicalPumpPremium
+  - NCProduceDermalPlates
+  - NCProduceNCSkeletalAnchors
+  - NCProduceNCSkeletalAnchorsQualityImprovised
+  - NCProduceNCSkeletalAnchorsQualityImproved
+  - NCProduceNCSkeletalAnchorsQualityPremium
+  - NCProduceNCSkeletalHeavyAnchors
+  - NCProduceNCSkeletalHeavyAnchorsQualityImprovised
+  - NCProduceNCSkeletalHeavyAnchorsQualityImproved
+  - NCProduceNCSkeletalHeavyAnchorsQualityPremium
+  - NCProduceNCNeuralControllerStandard
+  - NCProduceNCNeuralControllerBasicStandard
+  - NCProduceNCNeuralControllerImprovised
+  - NCProduceNCNeuralControllerBasicImprovised
+  - NCProduceNCNeuralControllerImproved
+  - NCProduceNCNeuralControllerBasicImproved
+  - NCProduceNCNeuralControllerPremium
+  - NCProduceNCNeuralControllerBasicPremium
+  - NCProduceNCNeuralProcessorStandard
+  - NCProduceNCNeuralProcessorImprovised
+  - NCProduceNCNeuralProcessorImproved
+  - NCProduceNCNeuralProcessorPremium
+  - NCProduceNCNeuralElectrodeStandard
+  - NCProduceNCNeuralElectrodeImprovised
+  - NCProduceNCNeuralElectrodeImproved
+  - NCProduceNCNeuralElectrodePremium
+  - NCProduceNCNeuralConnectorStandard
+  - NCProduceNCNeuralConnectorImprovised
+  - NCProduceNCNeuralConnectorImproved
+  - NCProduceNCNeuralConnectorPremium
+  - NCProduceNCNeuralReaderStandard
+  - NCProduceNCNeuralReaderImprovised
+  - NCProduceNCNeuralReaderImproved
+  - NCProduceNCNeuralReaderPremium
+  - NCProduceNCNeuralPulseStandard
+  - NCProduceNCNeuralPulseImprovised
+  - NCProduceNCNeuralPulseImproved
+  - NCProduceNCNeuralPulsePremium
+  - NCProduceNCNeuralCoolingStandard
+  - NCProduceNCNeuralCoolingImprovised
+  - NCProduceNCNeuralCoolingImproved
+  - NCProduceNCNeuralCoolingPremium
+  - NCProduceNCImplantNeuralLinkMk1Empty
+  - NCProduceNCImplantNeuralLinkMk1QualityImprovisedEmpty
+  - NCProduceNCImplantNeuralLinkMk1QualityImprovedEmpty
+  - NCProduceNCImplantNeuralLinkMk1QualityPremiumEmpty
+  - NCProduceNCKerenzikovImplantEmpty
+  - NCProduceNCKerenzikovImplantQualityImprovisedEmpty
+  - NCProduceNCKerenzikovImplantQualityImprovedEmpty
+  - NCProduceNCKerenzikovImplantQualityPremiumEmpty
+  - NCProduceNCSandevistanImplantEmpty
+  - NCProduceNCSandevistanImplantQualityImprovisedEmpty
+  - NCProduceNCSandevistanImplantQualityImprovedEmpty
+  - NCProduceNCSandevistanImplantQualityPremiumEmpty
+  - NCProduceNCNeuralInterfaceImplantEmpty
+  - NCProduceNCNeuralInterfaceImplantQualityImprovisedEmpty
+  - NCProduceNCNeuralInterfaceImplantQualityImprovedEmpty
+  - NCProduceNCNeuralInterfaceImplantQualityPremiumEmpty
+  - NCProduceNCNeuralChipSocketImplantEmpty
+  - NCProduceNCNeuralChipSocketImplantQualityImprovisedEmpty
+  - NCProduceNCNeuralChipSocketImplantQualityImprovedEmpty
+  - NCProduceNCNeuralChipSocketImplantQualityPremiumEmpty
+
+- type: latheRecipePack
+  id: NCCyberElectronicsStatic
+  recipes:
+  - NCProduceNCMedicalControllerImprovised
+  - NCProduceNCMedicalControllerStandard
+  - NCProduceNCMedicalControllerImproved
+  - NCProduceNCMedicalControllerPremium
+  - NCProduceNCMedicalSensorImprovised
+  - NCProduceNCMedicalSensorStandard
+  - NCProduceNCMedicalSensorImproved
+  - NCProduceNCMedicalSensorPremium
+  - NCProduceNCMedicalControllerBasic
+  - NCProduceNCOpticRadarImplantStandardEmpty
+  - NCProduceNCOpticRadarImplantImprovisedEmpty
+  - NCProduceNCOpticRadarImplantImprovedEmpty
+  - NCProduceNCOpticRadarImplantPremiumEmpty
+  - NCProduceNCOpticRadarHandheld
+  - NCProduceNCOpticRadarShield
+  - NCProduceNCOpticControllerStandard
+  - NCProduceNCOpticControllerBasicStandard
+  - NCProduceNCOpticControllerImprovised
+  - NCProduceNCOpticControllerBasicImprovised
+  - NCProduceNCOpticControllerImproved
+  - NCProduceNCOpticControllerBasicImproved
+  - NCProduceNCOpticControllerPremium
+  - NCProduceNCOpticControllerBasicPremium
+  - NCProduceNCOpticMatrixStandard
+  - NCProduceNCOpticMatrixImprovised
+  - NCProduceNCOpticMatrixImproved
+  - NCProduceNCOpticMatrixPremium
+  - NCProduceNCOpticNeuralStandard
+  - NCProduceNCOpticNeuralImprovised
+  - NCProduceNCOpticNeuralImproved
+  - NCProduceNCOpticNeuralPremium
+  - NCProduceNCOpticPowerStandard
+  - NCProduceNCOpticPowerImprovised
+  - NCProduceNCOpticPowerImproved
+  - NCProduceNCOpticPowerPremium
+  - NCProduceNCOpticLowLightStandard
+  - NCProduceNCOpticLowLightImprovised
+  - NCProduceNCOpticLowLightImproved
+  - NCProduceNCOpticLowLightPremium
+  - NCProduceNCOpticInfraredStandard
+  - NCProduceNCOpticInfraredImprovised
+  - NCProduceNCOpticInfraredImproved
+  - NCProduceNCOpticInfraredPremium
+  - NCProduceNCOpticTelescopeStandard
+  - NCProduceNCOpticTelescopeImprovised
+  - NCProduceNCOpticTelescopeImproved
+  - NCProduceNCOpticTelescopePremium
+  - NCProduceNCOpticAntiFlashStandard
+  - NCProduceNCOpticAntiFlashImprovised
+  - NCProduceNCOpticAntiFlashImproved
+  - NCProduceNCOpticAntiFlashPremium
+  - NCProduceNCOpticRecordingStandard
+  - NCProduceNCOpticRecordingImprovised
+  - NCProduceNCOpticRecordingImproved
+  - NCProduceNCOpticRecordingPremium
+  - NCProduceNCOpticAugmentedRealityStandard
+  - NCProduceNCOpticAugmentedRealityImprovised
+  - NCProduceNCOpticAugmentedRealityImproved
+  - NCProduceNCOpticAugmentedRealityPremium
+  - NCProduceNCOpticRadarStandard
+  - NCProduceNCOpticRadarImprovised
+  - NCProduceNCOpticRadarImproved
+  - NCProduceNCOpticRadarPremium
+  - NCProduceNCOpticCosmeticStandard
+  - NCProduceNCOpticCosmeticImprovised
+  - NCProduceNCOpticCosmeticImproved
+  - NCProduceNCOpticCosmeticPremium
+  - NCProduceNCCyberEyeLeftStandardEmpty
+  - NCProduceNCCyberEyeLeftImprovisedEmpty
+  - NCProduceNCCyberEyeLeftImprovedEmpty
+  - NCProduceNCCyberEyeLeftPremiumEmpty
+  - NCProduceNCCyberEyeRightStandardEmpty
+  - NCProduceNCCyberEyeRightImprovisedEmpty
+  - NCProduceNCCyberEyeRightImprovedEmpty
+  - NCProduceNCCyberEyeRightPremiumEmpty
+  - NCProduceNCMedicalControllerBasicQualityImprovised
+  - NCProduceNCMedicalControllerBasicQualityImproved
+  - NCProduceNCMedicalControllerBasicQualityPremium
+  - BiogeneratorMachineCircuitboard
+  - BiofabricatorMachineCircuitboard
+  - ExosuitFabricatorMachineCircuitboard
+  - NCProduceNCSkeletalPowerJunction
+  - NCProduceNCSkeletalPowerJunctionQualityImprovised
+  - NCProduceNCSkeletalPowerJunctionQualityImproved
+  - NCProduceNCSkeletalPowerJunctionQualityPremium
+  - NCProduceNCCyberarmController
+  - NCProduceNCCyberarmControllerQualityImprovised
+  - NCProduceNCCyberarmControllerQualityImproved
+  - NCProduceNCCyberarmControllerQualityPremium
+  - NCProduceNCCyberarmSensor
+  - NCProduceNCCyberarmSensorQualityImprovised
+  - NCProduceNCCyberarmSensorQualityImproved
+  - NCProduceNCCyberarmSensorQualityPremium
+  - NCProduceNCCyberwareStandardFirmwareCard
+  - NCProduceNCImplantPowerBusMk1
+  - NCProduceNCImplantPowerBusMk1QualityImprovised
+  - NCProduceNCImplantPowerBusMk1QualityImproved
+  - NCProduceNCImplantPowerBusMk1QualityPremium
+
+- type: latheRecipePack
+  id: NCCyberRoboticsStatic
+  recipes:
+  - NCProduceNCImplantLinearFrameSigmaEmpty
+  - NCProduceNCImplantLinearFrameSigmaEmptyQualityImprovised
+  - NCProduceNCImplantLinearFrameSigmaEmptyQualityImproved
+  - NCProduceNCImplantLinearFrameSigmaEmptyQualityPremium
+  - NCProduceNCImplantLinearFrameBetaEmpty
+  - NCProduceNCImplantLinearFrameBetaEmptyQualityImprovised
+  - NCProduceNCImplantLinearFrameBetaEmptyQualityImproved
+  - NCProduceNCImplantLinearFrameBetaEmptyQualityPremium
+
+- type: latheRecipePack
+  id: NCCyberMedicalStatic
+  recipes:
+  - NCProduceNCBiomonitorImplantEmpty
+  - NCProduceNCBiomonitorImplantEmptyQualityImprovised
+  - NCProduceNCBiomonitorImplantEmptyQualityImproved
+  - NCProduceNCBiomonitorImplantEmptyQualityPremium
+  - NCProduceNCAutoInjectorImplantEmpty
+  - NCProduceNCAutoInjectorImplantEmptyQualityImprovised
+  - NCProduceNCAutoInjectorImplantEmptyQualityImproved
+  - NCProduceNCAutoInjectorImplantEmptyQualityPremium
+  - NCProduceNCMedicalInjectorCartridge
+  - NCProduceNCCyberwareSterileWrap
+  - NCProduceNCCyberwareServiceTool
+  - NCProduceNCSkeletalMountingTool
+
+- type: latheRecipePack
+  id: NCCyberBiologyStatic
+  recipes:
+  - NCProduceNCSyntheticMuscle

@@ -8,7 +8,7 @@ using Robust.Shared.Serialization;
 namespace Content.Shared._NC.Medical.Humanity;
 
 [Serializable, NetSerializable]
-public enum NCCyberCrisisStage : byte { Stable, Warning, Crisis, Acute }
+public enum NCCyberCrisisStage : byte { Stable, Warning, Crisis, Acute, Recovery }
 
 /// <summary>Character state carried by the one living brain, never by a replaceable frame or implant.</summary>
 [RegisterComponent]
@@ -30,6 +30,17 @@ public sealed partial class NCHumanityStateSnapshot
     [DataField(required: true)] public float Stress;
     [DataField(required: true)] public NCCyberCrisisStage Stage;
     [DataField(required: true)] public float StabilizingSeconds;
+    // Optional fields preserve pre-episode saves. All durations are remaining online time.
+    [DataField] public float Exhaustion;
+    [DataField] public float EscalatingSeconds;
+    [DataField] public float AcuteSeconds;
+    [DataField] public float RecoverySeconds;
+    [DataField] public float SupportSeconds;
+    [DataField] public float MotorInhibitSeconds;
+    [DataField] public float SupportCooldown;
+    [DataField] public bool DeclinesSupport;
+    [DataField] public float SymptomSeconds;
+    [DataField] public ProtoId<NCCyberEpisodePrototype>? Episode;
     [DataField(required: true)] public Dictionary<string, float> Adaptation = [];
     [DataField(required: true)] public List<NCHumanityImpulseMemory> RecentImpulses = [];
 }
@@ -46,7 +57,7 @@ public readonly record struct NCHumanityPackageDose(float Burden, float AcuteCos
 
 [Serializable, NetSerializable]
 public readonly record struct NCHumanityStatus(float Current, float Maximum, float Burden, float Stress,
-    NCCyberCrisisStage Stage, float EnhancementEfficiency);
+    NCCyberCrisisStage Stage, float EnhancementEfficiency, float Exhaustion = 0f, float SupportSeconds = 0f);
 
 /// <summary>Runs after the scheduler has completed pharmacology, circulation and physiology for this interval.</summary>
 [ByRefEvent]
