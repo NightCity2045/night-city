@@ -96,8 +96,8 @@ public sealed partial class NCCyberEpisodeClientSystem : EntitySystem
     public bool TryGetPerceivedPosition(out Vector2 position)
     {
         position = default;
-        if (View?.PerceivedTarget is not { } target || !TryGetEntity(target, out var uid) ||
-            _players.LocalEntity is not { } body ||
+        if (View?.PerceivedTarget is not { } target || !TryGetEntity(target, out var nullableUid) ||
+            nullableUid is not { } uid || _players.LocalEntity is not { } body ||
             Transform(uid).MapID != Transform(body).MapID || !TryComp<Robust.Client.GameObjects.SpriteComponent>(uid, out var sprite) || !sprite.Visible)
             return false;
         position = _transform.GetWorldPosition(uid);
