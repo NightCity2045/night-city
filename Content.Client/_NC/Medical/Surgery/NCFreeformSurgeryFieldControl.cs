@@ -811,10 +811,27 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                 return null;
             }
 
-            return _state.Structures
-                .Where(structure => structure.Exposed && Contains(structure.Position, structure.Size, local))
-                .OrderByDescending(structure => structure.MinimumDepth)
-                .Select(structure => structure.Name)
+            var picked = PickStructureAtDepth(_state.Structures
+                .Where(structure => structure.Exposed && Contains(structure.Position, structure.Size, local)));
+            return picked.Handle > 0 ? picked.Name : null;
+        }
+
+        /// <summary>
+        /// NC: Overlapping exposed structures are layered by the working-depth slider. The deepest structure that
+        /// the slider has reached wins, so a rib cage can be selected over the lungs behind it. When the slider is
+        /// shallower than every candidate, the outermost one wins instead of the deepest. Equal depths prefer bone,
+        /// which keeps a skull or rib cage from losing clicks to thin overlapping strips such as ears.
+        /// </summary>
+        private NCFreeformSurgeryStructureSummary PickStructureAtDepth(
+            IEnumerable<NCFreeformSurgeryStructureSummary> candidates)
+        {
+            var list = candidates.ToList();
+            var reached = list.Where(value => value.MinimumDepth <= _predictedDepth + 0.001f).ToList();
+            return (reached.Count > 0
+                    ? reached.OrderByDescending(value => value.MinimumDepth)
+                    : list.OrderBy(value => value.MinimumDepth))
+                .ThenByDescending(value => value.Kind == NCFreeformSurgeryStructureKind.Bone)
+                .ThenByDescending(value => value.Handle)
                 .FirstOrDefault();
         }
 
@@ -910,12 +927,9 @@ public sealed partial class NCFreeformSurgeryFieldControl : Container
                 Vector2.Zero,
                 Vector2.One);
             local = operativePoint;
-            structure = _state.Structures
+            structure = PickStructureAtDepth(_state.Structures
                 .Where(value => value.Exposed && value.Kind != NCFreeformSurgeryStructureKind.Region &&
-                                Contains(value.Position, value.Size, operativePoint))
-                .OrderByDescending(value => value.MinimumDepth)
-                .ThenByDescending(value => value.Handle)
-                .FirstOrDefault();
+                                Contains(value.Position, value.Size, operativePoint)));
             if (structure.Handle <= 0)
                 return false;
 

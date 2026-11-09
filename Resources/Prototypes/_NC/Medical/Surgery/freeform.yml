@@ -110,14 +110,14 @@
     Kidneys: { position: "0.5, 0.67", size: "0.58, 0.2", minimumDepth: 0.76, visual: Kidneys, zones: [ NCZoneAbdomen ], detachableBySeparation: true }
     Appendix: { position: "0.67, 0.76", size: "0.14, 0.14", minimumDepth: 0.76, visual: Appendix, zones: [ NCZoneAbdomen ], detachableBySeparation: true }
     PelvisBone: { position: "0.5, 0.55", size: "0.78, 0.56", minimumDepth: 0.48, visual: Pelvis, zones: [ NCZoneGroin ], blocksDeeperStructures: true, detachableBySeparation: true }
-    ArmBoneLeft: { position: "0.5, 0.5", size: "0.2, 0.82", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneArmLeft, NCZoneHandLeft ], detachableBySeparation: true }
-    ArmBoneRight: { position: "0.5, 0.5", size: "0.2, 0.82", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneArmRight, NCZoneHandRight ], detachableBySeparation: true }
-    LegBoneLeft: { position: "0.5, 0.5", size: "0.22, 0.84", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneLegLeft, NCZoneFootLeft ], detachableBySeparation: true }
-    LegBoneRight: { position: "0.5, 0.5", size: "0.22, 0.84", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneLegRight, NCZoneFootRight ], detachableBySeparation: true }
-    TendonSetLeftArm: { position: "0.62, 0.5", size: "0.18, 0.76", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneArmLeft, NCZoneHandLeft ] }
-    TendonSetRightArm: { position: "0.62, 0.5", size: "0.18, 0.76", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneArmRight, NCZoneHandRight ] }
-    TendonSetLeftLeg: { position: "0.62, 0.5", size: "0.18, 0.78", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneLegLeft, NCZoneFootLeft ] }
-    TendonSetRightLeg: { position: "0.62, 0.5", size: "0.18, 0.78", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneLegRight, NCZoneFootRight ] }
+    ArmBoneLeft: { position: "0.5, 0.5", size: "0.3, 0.82", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneArmLeft, NCZoneHandLeft ], detachableBySeparation: true }
+    ArmBoneRight: { position: "0.5, 0.5", size: "0.3, 0.82", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneArmRight, NCZoneHandRight ], detachableBySeparation: true }
+    LegBoneLeft: { position: "0.5, 0.5", size: "0.3, 0.84", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneLegLeft, NCZoneFootLeft ], detachableBySeparation: true }
+    LegBoneRight: { position: "0.5, 0.5", size: "0.3, 0.84", minimumDepth: 0.5, visual: LongBone, zones: [ NCZoneLegRight, NCZoneFootRight ], detachableBySeparation: true }
+    TendonSetLeftArm: { position: "0.75, 0.5", size: "0.14, 0.76", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneArmLeft, NCZoneHandLeft ] }
+    TendonSetRightArm: { position: "0.75, 0.5", size: "0.14, 0.76", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneArmRight, NCZoneHandRight ] }
+    TendonSetLeftLeg: { position: "0.75, 0.5", size: "0.14, 0.78", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneLegLeft, NCZoneFootLeft ] }
+    TendonSetRightLeg: { position: "0.75, 0.5", size: "0.14, 0.78", minimumDepth: 0.42, visual: Tendon, zones: [ NCZoneLegRight, NCZoneFootRight ] }
   cyberwareSlots:
     NCSlotNeuralInterface: { position: "0.2, 0.65", size: "0.18, 0.18", minimumDepth: 0.55, visual: Cyberware, zones: [ NCZoneHead ] }
     NCSlotChipSocket: { position: "0.8, 0.3", size: "0.18, 0.18", minimumDepth: 0.5, visual: Cyberware, zones: [ NCZoneHead ] }
@@ -135,8 +135,8 @@
     NCSlotMedicalAbdomen: { position: "0.72, 0.5", size: "0.2, 0.28", minimumDepth: 0.4, visual: Cyberware, zones: [ NCZoneAbdomen ] }
     NCSlotBiomonitorThorax: { position: "0.72, 0.5", size: "0.2, 0.28", minimumDepth: 0.28, visual: Cyberware, zones: [ NCZoneChest ] }
     NCSlotSubdermalThorax: { position: "0.5, 0.34", size: "0.52, 0.16", minimumDepth: 0.52, visual: Cyberware, zones: [ NCZoneChest ] }
-    NCSlotArmUtilityLeft: { position: "0.58, 0.5", size: "0.24, 0.28", minimumDepth: 0.58, visual: Cyberware, zones: [ NCZoneArmLeft, NCZoneHandLeft ] }
-    NCSlotArmUtilityRight: { position: "0.58, 0.5", size: "0.24, 0.28", minimumDepth: 0.58, visual: Cyberware, zones: [ NCZoneArmRight, NCZoneHandRight ] }
+    NCSlotArmUtilityLeft: { position: "0.78, 0.5", size: "0.22, 0.28", minimumDepth: 0.58, visual: Cyberware, zones: [ NCZoneArmLeft, NCZoneHandLeft ] }
+    NCSlotArmUtilityRight: { position: "0.78, 0.5", size: "0.22, 0.28", minimumDepth: 0.58, visual: Cyberware, zones: [ NCZoneArmRight, NCZoneHandRight ] }
   tools:
     NCSurgeryToolDisinfection:
       action: Disinfect
