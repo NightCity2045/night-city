@@ -97,10 +97,10 @@ public sealed partial class NCCyberEpisodeClientSystem : EntitySystem
     {
         position = default;
         if (View?.PerceivedTarget is not { } target || !TryGetEntity(target, out var uid) ||
-            !TryComp<TransformComponent>(uid, out var transform) || _players.LocalEntity is not { } body ||
-            transform.MapID != Transform(body).MapID || !TryComp<Robust.Client.GameObjects.SpriteComponent>(uid, out var sprite) || !sprite.Visible)
+            _players.LocalEntity is not { } body ||
+            Transform(uid).MapID != Transform(body).MapID || !TryComp<Robust.Client.GameObjects.SpriteComponent>(uid, out var sprite) || !sprite.Visible)
             return false;
-        position = _transform.GetWorldPosition(transform);
+        position = _transform.GetWorldPosition(uid);
         return true;
     }
     public static string StageKey(NCCyberCrisisStage stage) => stage switch

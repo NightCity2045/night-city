@@ -79,3 +79,48 @@ nc-surgery-ui-status-live = ● СВЯЗЬ
 nc-surgery-ui-link =  // ЛОКАЛЬНОЕ ПОДКЛЮЧЕНИЕ
 nc-surgery-ui-header = МЕДТЕХ — ХИРУРГИЧЕСКОЕ ПОЛЕ
 nc-surgery-ui-title = Хирургическое поле
+
+nc-surgery-ui-vitals = O₂ {$oxygen}   Перфузия {$perfusion}   Боль {$pain}   Шок {$shock}
+nc-surgery-ui-access-depth = ДОСТУП: {$depth}
+nc-surgery-ui-state-unknown = Неизвестно
+nc-surgery-ui-status-resync = ● РЕСИНХРОНИЗАЦИЯ
+nc-surgery-ui-status-paused = ● ПАУЗА
+nc-surgery-ui-depth-layer = {$depth} · {$layer}
+nc-surgery-ui-site-closed = кожа не вскрыта
+nc-surgery-ui-site-status =
+    Автоматический доступ: {$surface} · активная область: {$stage}
+    Рабочая глубина: {$depth} · загрязнение: {$contamination}
+    Постоянные операционные области: {$sites} · кровоточащие раны: {$bleeding}
+    Открытые структуры: {$exposed} · закреплённые инструменты: {$attached}
+nc-surgery-ui-site-stage-incised = кожа рассечена
+nc-surgery-ui-site-stage-retracted = мягкие ткани открыты
+nc-surgery-ui-site-stage-structural-exposed = кость обнажена
+nc-surgery-ui-site-stage-cavity-open = полость вскрыта
+nc-surgery-ui-site-stage-sutured = ушито
+nc-surgery-ui-site-stage-unknown = неизвестно
+nc-surgery-ui-surface-front = спереди
+nc-surgery-ui-surface-rear = сзади
+nc-surgery-ui-surface-left = слева
+nc-surgery-ui-surface-right = справа
+nc-surgery-ui-surface-unknown = неизвестно
+nc-surgery-ui-access-closed = ЗАКРЫТО
+nc-surgery-ui-access-incised = РАЗРЕЗ
+nc-surgery-ui-access-bleeders-controlled = КРОВОТЕЧЕНИЕ ОСТАНОВЛЕНО
+nc-surgery-ui-access-soft-tissue-retracted = МЯГКИЕ ТКАНИ РАЗВЕДЕНЫ
+nc-surgery-ui-access-cavity-opened = ПОЛОСТЬ ВСКРЫТА
+nc-surgery-ui-access-encased-structure-opened = КОСТНАЯ СТРУКТУРА ВСКРЫТА
+nc-surgery-ui-access-organ-exposed = ОРГАН ОБНАЖЁН
+nc-surgery-ui-access-procedure-in-progress = ОПЕРАЦИЯ ИДЁТ
+nc-surgery-ui-access-ready-for-closure = ГОТОВО К ЗАКРЫТИЮ
+nc-surgery-ui-access-closed-post-op = ЗАКРЫТО, ПОСЛЕОПЕРАЦИОННЫЙ ПЕРИОД
+nc-surgery-ui-layer-surface = поверхность
+nc-surgery-ui-layer-soft-tissue = мягкие ткани
+nc-surgery-ui-layer-vascular = сосуды
+nc-surgery-ui-layer-structural = костная структура
+nc-surgery-ui-layer-cavity = полость
+nc-surgery-ui-layer-internal-organ = внутренний орган
+nc-surgery-ui-layer-mechanical = механика
+nc-surgery-ui-failure-patient-unavailable = Пациент больше недоступен.
+nc-surgery-ui-failure-invalid-region = На этой анатомической области нельзя оперировать.
+nc-surgery-ui-failure-invalid-surface = На этой поверхности тела нельзя оперировать.
+nc-surgery-ui-failure-invalid-input = Хирургический ввод отклонён.

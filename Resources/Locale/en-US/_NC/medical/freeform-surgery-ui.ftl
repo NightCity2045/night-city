@@ -79,3 +79,48 @@ nc-surgery-ui-status-live = ● LIVE
 nc-surgery-ui-link =  // LOCAL CLINICAL LINK
 nc-surgery-ui-header = MEDTECH SURGICAL FIELD
 nc-surgery-ui-title = Surgical field
+
+nc-surgery-ui-vitals = O₂ {$oxygen}   Perfusion {$perfusion}   Pain {$pain}   Shock {$shock}
+nc-surgery-ui-access-depth = ACCESS: {$depth}
+nc-surgery-ui-state-unknown = Unknown
+nc-surgery-ui-status-resync = ● RESYNC
+nc-surgery-ui-status-paused = ● PAUSED
+nc-surgery-ui-depth-layer = {$depth} · {$layer}
+nc-surgery-ui-site-closed = closed skin
+nc-surgery-ui-site-status =
+    Automatic access: {$surface} · active site: {$stage}
+    Working depth: {$depth} · contamination: {$contamination}
+    Persistent operative sites: {$sites} · bleeding wounds: {$bleeding}
+    Exposed structures: {$exposed} · attached tools: {$attached}
+nc-surgery-ui-site-stage-incised = incised skin
+nc-surgery-ui-site-stage-retracted = soft tissue exposed
+nc-surgery-ui-site-stage-structural-exposed = bone exposed
+nc-surgery-ui-site-stage-cavity-open = body cavity open
+nc-surgery-ui-site-stage-sutured = sutured
+nc-surgery-ui-site-stage-unknown = unknown
+nc-surgery-ui-surface-front = front
+nc-surgery-ui-surface-rear = rear
+nc-surgery-ui-surface-left = left
+nc-surgery-ui-surface-right = right
+nc-surgery-ui-surface-unknown = unknown
+nc-surgery-ui-access-closed = CLOSED
+nc-surgery-ui-access-incised = INCISED
+nc-surgery-ui-access-bleeders-controlled = BLEEDERS CONTROLLED
+nc-surgery-ui-access-soft-tissue-retracted = SOFT TISSUE RETRACTED
+nc-surgery-ui-access-cavity-opened = CAVITY OPENED
+nc-surgery-ui-access-encased-structure-opened = ENCASED STRUCTURE OPENED
+nc-surgery-ui-access-organ-exposed = ORGAN EXPOSED
+nc-surgery-ui-access-procedure-in-progress = PROCEDURE IN PROGRESS
+nc-surgery-ui-access-ready-for-closure = READY FOR CLOSURE
+nc-surgery-ui-access-closed-post-op = CLOSED, POST-OP
+nc-surgery-ui-layer-surface = surface
+nc-surgery-ui-layer-soft-tissue = soft tissue
+nc-surgery-ui-layer-vascular = vascular
+nc-surgery-ui-layer-structural = structural
+nc-surgery-ui-layer-cavity = cavity
+nc-surgery-ui-layer-internal-organ = internal organ
+nc-surgery-ui-layer-mechanical = mechanical
+nc-surgery-ui-failure-patient-unavailable = The patient is no longer available.
+nc-surgery-ui-failure-invalid-region = That anatomical region cannot be operated on.
+nc-surgery-ui-failure-invalid-surface = That body surface cannot be operated on.
+nc-surgery-ui-failure-invalid-input = The surgical input was rejected.
