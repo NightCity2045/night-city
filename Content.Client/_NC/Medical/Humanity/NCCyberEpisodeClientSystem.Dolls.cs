@@ -29,7 +29,7 @@ public sealed partial class NCCyberEpisodeClientSystem
 
     private bool CanCopyBody(EntityUid body, EntityUid observer) =>
         TryComp<SpriteComponent>(body, out var sprite) && sprite.Visible &&
-        TryComp<TransformComponent>(body, out var transform) && transform.MapID == Transform(observer).MapID &&
+        Transform(body).MapID == Transform(observer).MapID &&
         _interaction.InRangeUnobstructed(observer, body, 7f);
 
     private void CreateDoll(EntityUid observer)
@@ -69,7 +69,7 @@ public sealed partial class NCCyberEpisodeClientSystem
         if (!TryComp<SpriteComponent>(model, out var source)) return;
         var doll = Spawn("clientsideclone", coordinates);
         _doll = doll;
-        _tags.AddTag(doll, "HideContextMenu");
+        _tags.AddTag(doll, HideContextMenuTag);
         var sprite = Comp<SpriteComponent>(doll);
         _sprites.CopySprite((model, source), (doll, sprite));
         _transform.SetWorldRotation(doll, !weaponOnly && symptom.Threat

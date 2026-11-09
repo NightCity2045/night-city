@@ -12,6 +12,7 @@ namespace Content.Client._NC.Medical.Humanity;
 public sealed partial class NCCyberEpisodeClientSystem
 {
     [Dependency] private GunSystem _guns = default!;
+    private static readonly ProtoId<Content.Shared.Tag.TagPrototype> HideContextMenuTag = "HideContextMenu";
     private static readonly EntProtoId ShotPrototype = "BulletPistol";
     private static readonly EntProtoId FlashPrototype = "MuzzleFlashEffect";
     private readonly List<LocalFlight> _flights = [];
@@ -25,7 +26,7 @@ public sealed partial class NCCyberEpisodeClientSystem
         var angle = (end - start).ToWorldAngle();
         // A disposable visual anchor receives the ordinary GunSystem flash animation and point light.
         var source = Spawn("clientsideclone", coordinates);
-        _tags.AddTag(source, "HideContextMenu");
+        _tags.AddTag(source, HideContextMenuTag);
         EnsureComp<TimedDespawnComponent>(source).Lifetime = .4f;
         _shotEffects.Add(source);
         _guns.PlayLocalMuzzleFlash(source, FlashPrototype, angle);
@@ -35,7 +36,7 @@ public sealed partial class NCCyberEpisodeClientSystem
         var prototype = _prototypes.Index(ShotPrototype);
         var visuals = new ComponentRegistry { ["Sprite"] = prototype.Components["Sprite"] };
         var bullet = Spawn("clientsideclone", coordinates, visuals, angle);
-        _tags.AddTag(bullet, "HideContextMenu");
+        _tags.AddTag(bullet, HideContextMenuTag);
         var impact = ((ProjectileComponent) prototype.Components["Projectile"].Component).ImpactEffect;
         _flights.Add(new(bullet, coordinates, end, _timing.CurTime,
             Vector2.Distance(start, end) / SharedGunSystem.ProjectileSpeed, angle, impact));
