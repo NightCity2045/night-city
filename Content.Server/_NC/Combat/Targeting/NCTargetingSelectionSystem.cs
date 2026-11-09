@@ -15,6 +15,7 @@ public sealed partial class NCTargetingSelectionSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCAnatomySystem _anatomy = default!;
+    [Dependency] private NCAimedMovementSystem _aimedMovement = default!;
 
     public override void Initialize()
     {
@@ -107,6 +108,7 @@ public sealed partial class NCTargetingSelectionSystem : EntitySystem
         {
             targeting.Revision++;
         }
+        _aimedMovement.SetZoneSelected(user, normalized.Mode == NCTargetingMode.SelectedZone);
         authoritative = normalized;
         return true;
     }

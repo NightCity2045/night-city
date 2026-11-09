@@ -7,6 +7,7 @@
   defaultForHumans: true
   movementSpeedThreshold: 0.1
   movingHitChanceMultiplier: 0.75
+  aimedMovementSpeedMultiplier: 0.2
 
 - type: ncTargetZone
   id: NCZoneHead

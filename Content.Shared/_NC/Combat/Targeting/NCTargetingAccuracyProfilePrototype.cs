@@ -34,4 +34,11 @@ public sealed partial class NCTargetingAccuracyProfilePrototype : IPrototype
     /// </summary>
     [DataField]
     public float MovingHitChanceMultiplier { get; private set; } = 0.75f;
+
+    /// <summary>
+    /// Fraction of base movement speed a shooter may keep while in combat mode, holding a firearm and having
+    /// deliberately selected a body zone. It is a hard cap that no other speed bonus can lift.
+    /// </summary>
+    [DataField]
+    public float AimedMovementSpeedMultiplier { get; private set; } = 0.2f;
 }
