@@ -10,7 +10,7 @@ namespace Content.Shared._NC.Combat.Targeting;
 /// Replicated mirror of "the controlled body has deliberately selected an anatomical zone". Only the boolean is
 /// replicated so movement can be predicted; the selected zone itself stays private to the server.
 /// </summary>
-[RegisterComponent, NetworkedComponent, AutoGenerateComponentState, UnsavedComponent]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(true), UnsavedComponent]
 [Access(typeof(NCAimedMovementSystem))]
 public sealed partial class NCAimedTargetingComponent : Component
 {
