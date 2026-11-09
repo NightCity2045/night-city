@@ -134,6 +134,18 @@ public abstract partial class NCSharedZLevelsSystem
             }
         }
 
+        // NC-Edit-Start: a solid floor on this level can never be tunnelled through. A fast landing overshoots the
+        // floor within one physics step; without this clamp the body would be moved to the map below (sinking under
+        // the ground) or, on the lowest map, deleted by the terminal fall.
+        if (zPhysicsComponent is { Fallable: true } && zPhysicsComponent.CachedGroundHeight >= 0f &&
+            zPhysicsComponent.LocalPosition < 0f)
+        {
+            zPhysicsComponent.LocalPosition = 0f;
+            if (zPhysicsComponent.Velocity < 0f)
+                zPhysicsComponent.Velocity = 0f;
+        }
+        // NC-Edit-End
+
         if (zPhysicsComponent.LocalPosition < 0 && TryMoveDownOrChasm(entity))
         {
             zPhysicsComponent.LocalPosition += 1;
