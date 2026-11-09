@@ -74,6 +74,10 @@ public abstract partial class SharedCombatModeSystem : EntitySystem
         component.IsInCombatMode = value;
         Dirty(entity, component);
 
+        // NC: aimed-shot movement limits depend on combat mode.
+        var combatModeChanged = new Content.Shared._NC.Combat.Targeting.NCCombatModeChangedEvent(value);
+        RaiseLocalEvent(entity, ref combatModeChanged);
+
         if (component.CombatToggleActionEntity != null)
             _actionsSystem.SetToggled(component.CombatToggleActionEntity, component.IsInCombatMode);
 
