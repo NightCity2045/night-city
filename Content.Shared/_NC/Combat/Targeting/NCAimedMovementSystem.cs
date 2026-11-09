@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System.Linq;
 using Content.Shared.CombatMode;
 using Content.Shared.Hands;
 using Content.Shared.Hands.EntitySystems;
@@ -17,7 +18,7 @@ namespace Content.Shared._NC.Combat.Targeting;
 /// Slows a shooter who is in combat mode, holds a firearm and has deliberately selected a body zone.
 /// The slowdown is a hard speed cap, so speed boosts from other systems cannot lift it.
 /// </summary>
-public sealed class NCAimedMovementSystem : EntitySystem
+public sealed partial class NCAimedMovementSystem : EntitySystem
 {
     [Dependency] private SharedCombatModeSystem _combat = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
@@ -91,22 +92,22 @@ public sealed class NCAimedMovementSystem : EntitySystem
         _movement.RefreshMovementSpeedModifiers(ent.Owner);
     }
 
-    private void OnEquipped(Entity<NCAimedTargetingComponent> ent, DidEquipHandEvent args)
+    private void OnEquipped(Entity<NCAimedTargetingComponent> ent, ref DidEquipHandEvent args)
     {
         _movement.RefreshMovementSpeedModifiers(ent.Owner);
     }
 
-    private void OnUnequipped(Entity<NCAimedTargetingComponent> ent, DidUnequipHandEvent args)
+    private void OnUnequipped(Entity<NCAimedTargetingComponent> ent, ref DidUnequipHandEvent args)
     {
         _movement.RefreshMovementSpeedModifiers(ent.Owner);
     }
 
-    private void OnGunSelected(Entity<GunComponent> gun, HandSelectedEvent args)
+    private void OnGunSelected(Entity<GunComponent> gun, ref HandSelectedEvent args)
     {
         _movement.RefreshMovementSpeedModifiers(args.User);
     }
 
-    private void OnGunDeselected(Entity<GunComponent> gun, HandDeselectedEvent args)
+    private void OnGunDeselected(Entity<GunComponent> gun, ref HandDeselectedEvent args)
     {
         _movement.RefreshMovementSpeedModifiers(args.User);
     }
