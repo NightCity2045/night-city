@@ -442,3 +442,5 @@ nc-medical-diagnostics-drug-drug-gram-positive-antibiotic = антибиотик
 nc-medical-diagnostics-drug-drug-gram-negative-antibiotic = антибиотик против грамотрицательных
 nc-medical-diagnostics-drug-drug-x17 = NC-X17
 nc-medical-diagnostics-drug-unidentified = неопознанное соединение
+nc-medical-diagnostics-drug-drug-plasma-factors = факторы свёртывания плазмы
+nc-medical-diagnostics-drug-drug-red-cells = эритроциты

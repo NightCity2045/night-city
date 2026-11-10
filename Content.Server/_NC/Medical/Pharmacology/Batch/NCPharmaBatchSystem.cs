@@ -68,6 +68,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCPharmaDepotSystem _depot = default!;
     [Dependency] private NCSystemicSystem _systemic = default!;
+    [Dependency] private Content.Server._NC.Medical.Bleeding.NCCirculationBloodSystem _blood = default!;
     [Dependency] private Content.Server._NC.Medical.Pharmacology.Lab.NCBiotechActionSystem _actions = default!;
 
     private readonly Dictionary<Guid, NCPharmaBatchRecord> _batches = new();
@@ -228,6 +229,8 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
             effect.EffectiveConcentration,
             NCPharmaBatchMath.ResolveAbsorption(form, ResolveModifiers(formula)),
             NCPharmaBatchMath.ResolveClearanceFactor(ResolveModifiers(formula)));
+        if (form.TransfusionVolume > 0f)
+            InfuseVolume(patient, form.TransfusionVolume * delivered); // NC: synthetic blood also restores volume
         if (effect.ToxinBurden > 0f)
             _systemic.Apply(patient, tuning.ToxinProfile, effect.ToxinBurden);
         if (effect.SepsisBurden > 0f)

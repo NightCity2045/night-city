@@ -30,6 +30,19 @@ public sealed partial class NCLabSampleComponent : Component
     public string Source = string.Empty;
 }
 
+/// <summary>What a bag of donated blood holds after the bank has processed it.</summary>
+public enum NCBloodComponent : byte
+{
+    /// <summary>Whole blood: volume and oxygen carrying together.</summary>
+    Whole,
+
+    /// <summary>Red cells: oxygen carrying in a small volume. Matched to the recipient like whole blood.</summary>
+    RedCells,
+
+    /// <summary>Plasma: volume and clotting factors. Compatible the other way round.</summary>
+    Plasma,
+}
+
 /// <summary>
 /// An empty or filled bag of donated blood. The group is what the donor really had when the bag was filled;
 /// a bag that spent too long warm is spoiled and cannot be used.
@@ -48,6 +61,9 @@ public sealed partial class NCBloodBagComponent : Component
 
     [DataField, AutoNetworkedField]
     public string Donor = string.Empty;
+
+    [DataField, AutoNetworkedField]
+    public NCBloodComponent Component;
 
     /// <summary>Volume drawn into the bag when it was filled.</summary>
     [DataField]
@@ -88,6 +104,9 @@ public sealed partial class NCPharmaExtractDoAfterEvent : SimpleDoAfterEvent;
 public sealed partial class NCVivariumDoAfterEvent : SimpleDoAfterEvent;
 
 [Serializable, NetSerializable]
+public sealed partial class NCBloodCentrifugeDoAfterEvent : SimpleDoAfterEvent;
+
+[Serializable, NetSerializable]
 public sealed partial class NCPharmaTreatDoAfterEvent : SimpleDoAfterEvent;
 
 [Serializable, NetSerializable]
@@ -119,6 +138,7 @@ public sealed class NCLabExamineSystem : EntitySystem
         }
 
         args.PushMarkup(Loc.GetString("nc-lab-bag-filled",
+            ("component", Loc.GetString("nc-lab-blood-component-" + bag.Comp.Component.ToString().ToLowerInvariant())),
             ("group", Loc.GetString("nc-lab-blood-group-" + bag.Comp.Group.ToLowerInvariant())),
             ("donor", bag.Comp.Donor)));
         if (bag.Comp.Spoiled)

@@ -36,6 +36,7 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
     [Dependency] private NCMedicalBodySystem _medicalBodies = default!;
     [Dependency] private NCCirculationBloodSystem _blood = default!;
     [Dependency] private NCSystemicSystem _systemic = default!;
+    [Dependency] private Content.Server._NC.Medical.Pharmacology.NCPharmacologySystem _pharmacology = default!;
     [Dependency] private SharedStackSystem _stacks = default!;
     [Dependency] private StandingStateSystem _standing = default!;
 
@@ -247,6 +248,15 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
 
             donorGroup = donationBag.Group;
             infusionVolume = donationBag.Volume;
+            if (donationBag.Component == NCBloodComponent.Plasma)
+            {
+                // Plasma is matched the other way round: the donor's plasma must suit the recipient's cells.
+                var recipient = circulation.TransfusionCompatibility;
+                donorGroup = profile.TransfusionCompatibility.TryGetValue(recipient, out var suitable) &&
+                             suitable.Contains(donationBag.Group, StringComparer.Ordinal)
+                    ? recipient
+                    : string.Empty;
+            }
         }
 
         var transfusion = _blood.TryTransfuse(
@@ -278,7 +288,15 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
         var consumed = ConsumeResource(item, itemState, capability);
         if (donationBag != null)
         {
-            // NC: a donated bag is single-use.
+            // NC: what the component adds besides volume, then a donated bag is single-use.
+            var addition = donationBag.Component switch
+            {
+                NCBloodComponent.Plasma => "NCDrugPlasmaFactors",
+                NCBloodComponent.RedCells => "NCDrugRedCells",
+                _ => null,
+            };
+            if (addition != null)
+                _pharmacology.ApplyDose(patient, addition, 4f);
             QueueDel(item);
         }
 

@@ -109,6 +109,17 @@
   costMultiplier: 1.35
   localTissueFraction: 0.5
 
+- type: ncPharmaDeliveryForm
+  id: NCPharmaDeliveryTransfusion
+  name: nc-pharma-delivery-transfusion
+  concentrationMultiplier: 1
+  sterilityRiskMultiplier: 1.6
+  adulterantMultiplier: 1.3
+  administrationDelay: 8s
+  absorptionDuration: 40s
+  transfusionVolume: 300
+  pack: NCPharmaBloodBag
+
 - type: ncPharmaModifier
   id: NCPharmaModifierFastRelease
   name: nc-pharma-modifier-fast-release

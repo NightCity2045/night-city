@@ -440,3 +440,5 @@ nc-medical-diagnostics-drug-drug-gram-positive-antibiotic = gram-positive antibi
 nc-medical-diagnostics-drug-drug-gram-negative-antibiotic = gram-negative antibiotic
 nc-medical-diagnostics-drug-drug-x17 = NC-X17
 nc-medical-diagnostics-drug-unidentified = unidentified compound
+nc-medical-diagnostics-drug-drug-plasma-factors = plasma clotting factors
+nc-medical-diagnostics-drug-drug-red-cells = red cells

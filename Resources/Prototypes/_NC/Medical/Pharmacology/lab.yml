@@ -622,3 +622,211 @@
     size: Normal
     sprite: Objects/Specific/Chemistry/jug.rsi
   - type: NCVivariumSubjectCrate
+
+# --- Synthetic blood and blood components -----------------------------------------------------------------
+- type: ncPharmaFormula
+  id: NCPharmaFormulaSyntheticBlood
+  name: nc-pharma-formula-synthetic-blood
+  version: 1
+  compound: NCDrugSyntheticOxygenCarrier
+  deliveryForm: NCPharmaDeliveryTransfusion
+  targetConcentration: 6
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.75
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: ClinicalOnly
+
+- type: entity
+  parent: BaseItem
+  id: NCPharmaBloodBag
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medical.rsi
+    state: bloodpack
+  - type: Item
+    size: Small
+    heldPrefix: bloodpack
+  - type: NCPharmaContainer
+
+- type: ncDrugProfile
+  id: NCDrugPlasmaFactors
+  category: Procoagulant
+  maximumConcentration: 25
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 0.75
+  therapeuticConcentration: 4
+  toxicConcentration: 14
+  clearancePerSecond: 0.03
+  baselineClearanceFraction: 0.1
+  liverClearanceFraction: 0.45
+  kidneyClearanceFraction: 0.4
+  bleedingMultiplierAtTherapeutic: 0.65
+  overdoseBurdenPerSecondAtMaximum: 0.8
+
+- type: ncDrugProfile
+  id: NCDrugRedCells
+  category: SyntheticOxygenCarrier
+  maximumConcentration: 25
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 0.75
+  therapeuticConcentration: 4
+  toxicConcentration: 16
+  clearancePerSecond: 0.012
+  baselineClearanceFraction: 0.1
+  liverClearanceFraction: 0.4
+  kidneyClearanceFraction: 0.45
+  oxygenCarrierContributionAtTherapeutic: 0.3
+  overdoseBurdenPerSecondAtMaximum: 0.6
+
+- type: entity
+  parent: NCBloodBagFilled
+  id: NCBloodBagRedCells
+  components:
+  - type: NCBloodBag
+    component: RedCells
+
+- type: entity
+  parent: NCBloodBagFilled
+  id: NCBloodBagPlasma
+  components:
+  - type: NCBloodBag
+    component: Plasma
+
+- type: entity
+  parent: NCLabMachineBase
+  id: NCBloodCentrifuge
+  components:
+  - type: ContainerContainer
+    containers:
+      bag: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      bag:
+        name: nc-lab-bag-slot
+        whitelist:
+          components:
+          - NCBloodBag
+  - type: NCBloodCentrifuge
+
+# --- The biological interface of cyberware (§49) ------------------------------------------------------------
+- type: entity
+  parent: NCLabTissueSeedSkin
+  id: NCLabTissueSeedCoating
+  components:
+  - type: NCTissueSeed
+    output: NCBiocompatCoating
+    duration: 480s
+
+- type: entity
+  parent: BaseItem
+  id: NCBiocompatCoating
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/vial.rsi
+    state: vial
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Chemistry/vial.rsi
+  - type: NCImplantConsumable
+    kind: Coating
+    amount: 0.3
+
+- type: entity
+  parent: NCLabTissueSeedSkin
+  id: NCLabTissueSeedAntibacterial
+  components:
+  - type: NCTissueSeed
+    output: NCAntibacterialMaterial
+    duration: 300s
+
+- type: entity
+  parent: BaseItem
+  id: NCAntibacterialMaterial
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/vial.rsi
+    state: vial
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Chemistry/vial.rsi
+  - type: NCImplantConsumable
+    kind: Antibacterial
+    amount: 0.35
+
+- type: entity
+  parent: NCLabTissueSeedSkin
+  id: NCLabTissueSeedInterface
+  components:
+  - type: NCTissueSeed
+    output: NCTissueInterface
+    duration: 900s
+
+- type: entity
+  parent: BaseItem
+  id: NCTissueInterface
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/vial.rsi
+    state: vial
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Chemistry/vial.rsi
+  - type: NCImplantConsumable
+    kind: TissueInterface
+    amount: 0.35
+
+- type: entity
+  parent: NCLabTissueSeedSkin
+  id: NCLabTissueSeedGel
+  components:
+  - type: NCTissueSeed
+    output: NCNeuroconductiveGel
+    duration: 360s
+
+- type: entity
+  parent: BaseItem
+  id: NCNeuroconductiveGel
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/vial.rsi
+    state: vial
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Chemistry/vial.rsi
+  - type: NCImplantConsumable
+    kind: NeuralGel
+    amount: 0.4
+
+- type: entity
+  parent: NCLabTissueSeedSkin
+  id: NCLabTissueSeedMatrix
+  components:
+  - type: NCTissueSeed
+    output: NCRegenerativeMatrix
+    duration: 720s
+
+- type: entity
+  parent: BaseItem
+  id: NCRegenerativeMatrix
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/vial.rsi
+    state: vial
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Chemistry/vial.rsi
+  - type: NCImplantConsumable
+    kind: Matrix
+    amount: 0.3
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaImmunosuppressant
+  name: nc-pharma-formula-immunosuppressant
+  version: 1
+  compound: NCDrugImmunosuppressant
+  deliveryForm: NCPharmaDeliveryInfusion
+  targetConcentration: 5
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.88
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: ClinicalOnly

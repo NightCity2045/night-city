@@ -206,6 +206,13 @@ public sealed partial class NCPharmaDeliveryFormPrototype : IPrototype
     [DataField]
     public float ConcentrationMultiplier { get; private set; } = 1f;
 
+    /// <summary>
+    /// Volume of blood-like fluid one dose infuses. Zero for forms that carry no volume. It is given as a
+    /// universal product: it is matched to nobody, which is what a synthetic blood is for.
+    /// </summary>
+    [DataField]
+    public float TransfusionVolume { get; private set; }
+
     /// <summary>The physical pack this form is delivered in. Missing means the station's default pack.</summary>
     [DataField]
     public EntProtoId? Pack { get; private set; }

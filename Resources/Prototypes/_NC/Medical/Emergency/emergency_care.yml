@@ -24,6 +24,8 @@
     NC-A-Positive: [ NC-A-Positive, NC-AB-Positive ]
     NC-B-Positive: [ NC-B-Positive, NC-AB-Positive ]
     NC-AB-Positive: [ NC-AB-Positive ]
+    # A synthetic blood is universal: it is matched to nobody.
+    NC-Synthetic: [ NC-O-Negative, NC-A-Positive, NC-B-Positive, NC-AB-Positive ]
   defibrillationBurnProfile: NCEnvironmentThermalStandard
   defibrillationBurnDamageType: Heat
   defibrillationBurnZone: NCZoneChest

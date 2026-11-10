@@ -17,6 +17,23 @@ public sealed partial class NCPharmaBatchSystem
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
 
     /// <summary>
+    /// Infuses blood-like volume through the same transfusion rules as donor blood. A synthetic blood is
+    /// universal, so it uses a group that every recipient accepts; the volume is bounded by the same limits.
+    /// </summary>
+    private void InfuseVolume(EntityUid patient, float volume)
+    {
+        if (!_prototypes.TryIndex<Content.Shared._NC.Medical.Emergency.NCEmergencyCareProfilePrototype>("NCHumanEmergencyCare", out var care))
+            return;
+
+        _blood.TryTransfuse(
+            patient,
+            "NC-Synthetic",
+            volume,
+            care.MaximumBloodVolumeMultiplier,
+            care.TransfusionCompatibility);
+    }
+
+    /// <summary>
     /// The part of a dose that works directly on the wounds: an antibiotic removes infection from every wound
     /// (scaled by strain sensitivity), an analgesic numbs and a procoagulant slows bleeding for a while. All of
     /// it depends on the blood supply that carries the drug to the tissue.

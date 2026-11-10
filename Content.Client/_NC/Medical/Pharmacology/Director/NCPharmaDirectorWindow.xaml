@@ -1,0 +1,26 @@
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      Title="{Loc 'nc-pharma-director-title'}"
+                      SetSize="1000 640" MinSize="760 460">
+    <BoxContainer Orientation="Horizontal" Margin="10" SeparationOverride="10">
+        <BoxContainer Orientation="Vertical" MinWidth="380" SeparationOverride="6">
+            <OptionButton Name="TabSelector" />
+            <ItemList Name="RowList" VerticalExpand="True" />
+        </BoxContainer>
+        <BoxContainer Orientation="Vertical" HorizontalExpand="True" SeparationOverride="6">
+            <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
+                <RichTextLabel Name="DetailLabel" />
+            </ScrollContainer>
+            <BoxContainer Orientation="Horizontal" SeparationOverride="6">
+                <Button Name="RefreshButton" Text="{Loc 'nc-pharma-director-refresh'}" />
+                <Button Name="RecallButton" Text="{Loc 'nc-pharma-director-recall'}" />
+                <Button Name="ContaminateButton" Text="{Loc 'nc-pharma-director-contaminate'}" />
+            </BoxContainer>
+            <BoxContainer Orientation="Horizontal" SeparationOverride="6">
+                <Button Name="ChemicalButton" Text="{Loc 'nc-pharma-director-grant-chemical'}" />
+                <Button Name="InVitroButton" Text="{Loc 'nc-pharma-director-grant-invitro'}" />
+                <Button Name="InVivoButton" Text="{Loc 'nc-pharma-director-grant-invivo'}" />
+            </BoxContainer>
+        </BoxContainer>
+    </BoxContainer>
+</controls:FancyWindow>
