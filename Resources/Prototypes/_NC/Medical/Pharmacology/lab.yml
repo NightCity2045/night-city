@@ -592,3 +592,33 @@
   - type: NCPharmaWasteCanister
     filled: true
     emptyPrototype: NCPharmaWasteCanister
+
+# --- Vivarium: test subjects for experimental pharmacology and toxicology ----------------------------------
+- type: entity
+  parent: NCLabMachineBase
+  id: NCLabVivarium
+  components:
+  - type: ContainerContainer
+    containers:
+      pack: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      pack:
+        name: nc-pharma-pack-slot
+        whitelist:
+          components:
+          - NCPharmaContainer
+  - type: NCPharmaWasteTank
+  - type: NCVivarium
+
+- type: entity
+  parent: BaseItem
+  id: NCVivariumSubjectCrate
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/jug.rsi
+    state: icon_empty
+  - type: Item
+    size: Normal
+    sprite: Objects/Specific/Chemistry/jug.rsi
+  - type: NCVivariumSubjectCrate

@@ -64,6 +64,7 @@ public enum NCPharmaJournalKind : byte
     QcPerformed,
     Administered,
     Approved,
+    Experiment,
 }
 
 /// <summary>Result of a research request to the formula registry.</summary>
@@ -181,7 +182,8 @@ public readonly record struct NCPharmaFormulaSummary(
     string DefaultProfile,
     NCPharmaRegulatoryStatus Status,
     string? DerivedFrom,
-    bool CanApprove);
+    bool CanApprove,
+    float ToxicConcentration = 0f);
 
 [Serializable, NetSerializable]
 public readonly record struct NCPharmaJournalSummary(
@@ -190,3 +192,19 @@ public readonly record struct NCPharmaJournalSummary(
     string BatchCode,
     string Actor,
     string Detail);
+
+/// <summary>What a study of a dose did to a test subject.</summary>
+public enum NCPharmaStudyOutcome : byte
+{
+    Tolerated,
+    Strained,
+    Lost,
+}
+
+/// <summary>Result of giving one dose to a test subject. Peak is the concentration the subject reached.</summary>
+public readonly record struct NCPharmaStudyResult(
+    NCPharmaStudyOutcome Outcome,
+    float Peak,
+    float ToxicRatio,
+    float Toxin,
+    float Sepsis);

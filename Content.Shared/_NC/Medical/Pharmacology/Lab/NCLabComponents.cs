@@ -85,6 +85,9 @@ public sealed partial class NCPharmaPurifyDoAfterEvent : SimpleDoAfterEvent;
 public sealed partial class NCPharmaExtractDoAfterEvent : SimpleDoAfterEvent;
 
 [Serializable, NetSerializable]
+public sealed partial class NCVivariumDoAfterEvent : SimpleDoAfterEvent;
+
+[Serializable, NetSerializable]
 public sealed partial class NCPharmaTreatDoAfterEvent : SimpleDoAfterEvent;
 
 [Serializable, NetSerializable]

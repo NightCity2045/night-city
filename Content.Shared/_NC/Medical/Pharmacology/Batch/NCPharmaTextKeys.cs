@@ -35,6 +35,7 @@ public static class NCPharmaTextKeys
         NCPharmaJournalKind.QcPerformed => "nc-pharma-journal-qc",
         NCPharmaJournalKind.Administered => "nc-pharma-journal-administered",
         NCPharmaJournalKind.Approved => "nc-pharma-journal-approved",
+        NCPharmaJournalKind.Experiment => "nc-pharma-journal-experiment",
         _ => "nc-pharma-journal-version-created",
     };
 

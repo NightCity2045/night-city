@@ -176,7 +176,8 @@ public sealed partial class NCPharmaBatchSystem
         formula.DefaultProductionProfile.Id,
         formula.RegulatoryStatus,
         formula.DerivedFrom,
-        CanApprove(formula));
+        CanApprove(formula),
+        _prototypes.TryIndex(formula.Compound, out var summaryCompound) ? summaryCompound.ToxicConcentration : 0f);
 
     public NCPharmaFormulaSummary[] BuildFormulaSummaries(bool producibleOnly)
     {
@@ -201,8 +202,9 @@ public sealed partial class NCPharmaBatchSystem
 
         return _journal
             .Where(entry => lineage.Contains(entry.FormulaId))
-            .TakeLast(limit)
             .Select(entry => new NCPharmaJournalSummary(entry.Kind, entry.FormulaId, entry.BatchCode, entry.Actor, entry.Detail))
+            .Concat(BuildExperimentRows(lineage)) // NC: the full experiment records, as rows of the journal
+            .TakeLast(limit)
             .ToArray();
     }
 

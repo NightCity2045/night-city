@@ -129,7 +129,7 @@ public sealed class NCPharmaStationSystem : EntitySystem
             if (_batches.TryIsolateCompound(pool, item, Name(args.User), out var formula, out var codename))
             {
                 QueueDel(item);
-                _popup.PopupEntity(Loc.GetString("nc-pharma-isolated", ("name", Loc.GetString(codename))), machine, args.User);
+                _popup.PopupEntity(Loc.GetString("nc-pharma-isolated", ("name", codename)), machine, args.User);
                 return;
             }
 

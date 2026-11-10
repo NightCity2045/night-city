@@ -478,4 +478,28 @@ public sealed class NCPharmaBatchMathTests
         Assert.That(dirty.ModifierToxicity, Is.GreaterThan(clean.ModifierToxicity));
         Assert.That(dirty.Quality.Purity, Is.EqualTo(clean.Quality.Purity));
     }
+
+    [Test]
+    public void StudyOutcomeFollowsPeakToxinAndSepsis()
+    {
+        var tuning = Tuning();
+        Assert.That(NCPharmaBatchMath.ResolveStudy(tuning, new NCPharmaDoseEffect(2f, 0f, 0f), 10f).Outcome, Is.EqualTo(NCPharmaStudyOutcome.Tolerated));
+        Assert.That(NCPharmaBatchMath.ResolveStudy(tuning, new NCPharmaDoseEffect(7f, 0f, 0f), 10f).Outcome, Is.EqualTo(NCPharmaStudyOutcome.Strained));
+        Assert.That(NCPharmaBatchMath.ResolveStudy(tuning, new NCPharmaDoseEffect(11f, 0f, 0f), 10f).Outcome, Is.EqualTo(NCPharmaStudyOutcome.Lost));
+        Assert.That(NCPharmaBatchMath.ResolveStudy(tuning, new NCPharmaDoseEffect(2f, 0.6f, 0f), 10f).Outcome, Is.EqualTo(NCPharmaStudyOutcome.Lost));
+        Assert.That(NCPharmaBatchMath.ResolveStudy(tuning, new NCPharmaDoseEffect(2f, 0f, 0.2f), 10f).Outcome, Is.EqualTo(NCPharmaStudyOutcome.Strained));
+    }
+
+    [Test]
+    public void SloppyQcBlursNumbersButNotTheVerdict()
+    {
+        var actual = new NCPharmaQuality(5f, 0.6f, 0.95f, 0.95f, 0.9f);
+        var exact = NCPharmaBatchMath.RunQc(Tuning(), Guid.NewGuid(), actual, Label(), NCPharmaQcTests.All);
+        var id = Guid.NewGuid();
+        var sloppy = NCPharmaBatchMath.RunQc(Tuning(), id, actual, Label(), NCPharmaQcTests.All, 0f, 0.5f);
+        var again = NCPharmaBatchMath.RunQc(Tuning(), id, actual, Label(), NCPharmaQcTests.All, 0f, 0.5f);
+        Assert.That(sloppy.Failed, Is.EqualTo(exact.Failed));
+        Assert.That(sloppy.Purity, Is.EqualTo(again.Purity));
+        Assert.That(sloppy.Purity, Is.Not.EqualTo(exact.Purity));
+    }
 }

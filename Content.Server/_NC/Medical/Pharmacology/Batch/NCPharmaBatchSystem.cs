@@ -68,6 +68,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCPharmaDepotSystem _depot = default!;
     [Dependency] private NCSystemicSystem _systemic = default!;
+    [Dependency] private Content.Server._NC.Medical.Pharmacology.Lab.NCBiotechActionSystem _actions = default!;
 
     private readonly Dictionary<Guid, NCPharmaBatchRecord> _batches = new();
     private int _nextBatchNumber = 1;
@@ -145,6 +146,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
             $"purity={inputs.InputPurity:F3} sterility={inputs.EquipmentSterility:F3} " +
             $"mixing={inputs.EquipmentMixing:F3} calibration={inputs.CalibrationError:F3})");
         _batches.Add(record.BatchId, record);
+        RecordProduction(formula, record, profile.ID, inputs, producer); // NC
         if (IsTracked(formula))
             AddJournal(NCPharmaJournalKind.Produced, formulaId, record.BatchCode, producer,
                 $"{outcome.Doses} doses, label purity {profile.LabelPurity:P0}");
@@ -203,6 +205,8 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         if (!CanAdminister(patient, container, out var batch, out var formula, out var form, out var tuning))
             return false;
 
+        // The common action-resolution layer judges the injection; a clumsy one loses part of the dose.
+        var delivered = Math.Min(1f, _actions.Resolve(administrator, "NCBiotechAdminister", container.Owner, [batch.BatchId]).Quality);
         var doseIndex = batch.DosesAdministered++;
         var effect = NCPharmaBatchMath.ResolveDose(
             tuning, form, batch.Actual, batch.ModifierToxicity, batch.BatchId, doseIndex);
@@ -210,11 +214,11 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
             ? NCPharmaBatchMath.ResolveMassScale(tuning, physics.FixturesMass)
             : 1f;
         var localFraction = NCPharmaBatchMath.ResolveLocalFraction(tuning, form, ResolveModifiers(formula));
-        var localConcentration = effect.EffectiveConcentration * massScale * localFraction;
+        var localConcentration = effect.EffectiveConcentration * massScale * localFraction * delivered;
         effect = effect with
         {
-            EffectiveConcentration = effect.EffectiveConcentration * massScale * (1f - localFraction),
-            ToxinBurden = effect.ToxinBurden * massScale,
+            EffectiveConcentration = effect.EffectiveConcentration * massScale * (1f - localFraction) * delivered,
+            ToxinBurden = effect.ToxinBurden * massScale * delivered,
         };
         if (localConcentration > 0f)
             ApplyLocalTissue(patient, formula.Compound, localConcentration, tuning);
@@ -229,6 +233,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         if (effect.SepsisBurden > 0f)
             _systemic.Apply(patient, tuning.SepsisProfile, effect.SepsisBurden);
 
+        RecordClinicalResponse(batch, Name(patient), effect.EffectiveConcentration); // NC
         container.Comp.Doses--;
         Dirty(container.Owner, container.Comp);
         if (IsTracked(formula))
@@ -273,7 +278,8 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         Guid batchId,
         string actor,
         NCPharmaQcTests tests,
-        out NCPharmaQcReport report)
+        out NCPharmaQcReport report,
+        float quality = 1f)
     {
         report = default;
         if (tests == NCPharmaQcTests.None ||
@@ -283,12 +289,13 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
             return false;
         }
 
-        report = NCPharmaBatchMath.RunQc(tuning, batchId, batch.Actual, batch.Label, tests, batch.Masking);
+        report = NCPharmaBatchMath.RunQc(tuning, batchId, batch.Actual, batch.Label, tests, batch.Masking, quality);
         batch.LastQc = report;
         batch.QcState = NCPharmaBatchMath.ResolveQcState(batch.QcState, report);
         AddAudit(batch, tuning, NCPharmaAuditKind.QcPerformed, actor,
             $"tests={report.Performed} failed={report.Failed} state={batch.QcState}");
         RefreshContainers(batch);
+        RecordQcAnalysis(batchId, report); // NC
         // Quality control is a chemical analysis: it tells the laboratory what the compound is.
         if (TryGetFormula(batch.Formula, out var analysedFormula))
             RecordAnalysis(analysedFormula.Compound, Content.Shared._NC.Medical.Pharmacology.Lab.NCAnalysisTier.Chemical);

@@ -25,3 +25,19 @@
 - type: ncBiotechProcedure
   id: NCBiotechFill
   name: nc-biotech-procedure-fill
+
+- type: ncBiotechProcedure
+  id: NCBiotechAdminister
+  name: nc-biotech-procedure-administer
+
+- type: ncBiotechProcedure
+  id: NCBiotechQc
+  name: nc-biotech-procedure-qc
+
+- type: ncBiotechProcedure
+  id: NCBiotechSample
+  name: nc-biotech-procedure-sample
+
+- type: ncBiotechProcedure
+  id: NCBiotechStudy
+  name: nc-biotech-procedure-study

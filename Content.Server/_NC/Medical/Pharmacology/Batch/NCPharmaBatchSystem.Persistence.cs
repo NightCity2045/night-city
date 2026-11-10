@@ -44,9 +44,11 @@ public sealed partial class NCPharmaBatchSystem
         base.Initialize();
 
         SubscribeLocalEvent<NCRoundSnapshotCaptureEvent>(OnRoundSnapshotCapture);
+        // Everything comes back before the bodies that may already carry its compounds.
         SubscribeLocalEvent<NCActiveWorldSessionStartedEvent>(
             OnSessionStarted,
-            after: [typeof(NCRoundRestoreContextSystem)]);
+            after: [typeof(NCRoundRestoreContextSystem)],
+            before: [typeof(Content.Server._NC.Medical.Persistence.NCMedicalPersistenceSystem)]);
     }
 
     private void OnRoundSnapshotCapture(NCRoundSnapshotCaptureEvent args)
@@ -55,6 +57,7 @@ public sealed partial class NCPharmaBatchSystem
         CaptureJournal(args);
         CaptureKnowledge(args);
         CaptureUnknown(args);
+        CaptureExperiments(args);
 
         var ordered = _batches.Values.OrderBy(batch => batch.CreatedAt).ThenBy(batch => batch.BatchId).ToList();
         for (var start = 0; start < ordered.Count || start == 0; start += BatchesPerChunk)
@@ -82,12 +85,14 @@ public sealed partial class NCPharmaBatchSystem
 
     private void OnSessionStarted(NCActiveWorldSessionStartedEvent args)
     {
+        // The generated compounds first: formulas, knowledge and bodies refer to them by id.
+        OnSessionStartedEarly(args);
         _batches.Clear();
         _derived.Clear();
         _journal.Clear();
         _knowledge.Clear();
-        _unknownAssignments.Clear();
-        _worldSeed = 0;
+        _experiments.Clear();
+        _nextExperiment = 1;
         _nextBatchNumber = 1;
         if (_restore.SelectionFailed)
         {
@@ -109,7 +114,7 @@ public sealed partial class NCPharmaBatchSystem
             Restore(read.GetAwaiter().GetResult());
             RestoreJournal(snapshotId);
             RestoreKnowledge(snapshotId);
-            RestoreUnknown(snapshotId);
+            RestoreExperiments(snapshotId);
         }
         catch (Exception exception)
         {

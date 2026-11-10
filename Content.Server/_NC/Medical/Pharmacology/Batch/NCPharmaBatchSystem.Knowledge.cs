@@ -3,6 +3,7 @@
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
 using System.Linq;
+using Content.Server._NC.LivingCity.Time;
 using Content.Server._NC.Persistence.RoundSnapshot;
 using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
@@ -28,7 +29,7 @@ public sealed partial class NCPharmaBatchSystem
     private readonly Dictionary<ProtoId<NCDrugProfilePrototype>, NCAnalysisTier> _knowledge = new();
 
     /// <summary>Which compound each kind of unknown raw material turned out to be. Fixed once, then persistent.</summary>
-    private readonly Dictionary<string, ProtoId<NCDrugProfilePrototype>> _unknownAssignments = new();
+    private readonly Dictionary<string, (ProtoId<NCDrugProfilePrototype> Compound, string Pool)> _unknownAssignments = new();
 
     private uint _worldSeed;
 
@@ -93,12 +94,21 @@ public sealed partial class NCPharmaBatchSystem
         return NCCompoundDossierMath.Read(NCCompoundDossierMath.Build(drug, dependence), GetKnowledge(compound));
     }
 
-    /// <summary>Localization key of how a compound is called in a report: its codename until it is identified.</summary>
-    public string CompoundNameKey(ProtoId<NCDrugProfilePrototype> compound)
+    /// <summary>How a compound is called in a report: its codename until it is identified, then its name.</summary>
+    public string CompoundName(ProtoId<NCDrugProfilePrototype> compound)
     {
-        return IsIdentified(compound) || !_prototypes.TryIndex(compound, out var drug) || drug.Codename == null
-            ? NCLabText.DrugKey(compound.Id)
-            : drug.Codename.Value;
+        if (!IsIdentified(compound) && _prototypes.TryIndex(compound, out var drug) && drug.Codename != null)
+            return Loc.GetString(drug.Codename.Value, ("code", drug.CodenameCode));
+
+        return Loc.TryGetString(NCLabText.DrugKey(compound.Id), out var name) ? name : CodenameOrId(compound);
+    }
+
+    /// <summary>The codename of a generated compound, or its id for any other compound without a name.</summary>
+    public string CodenameOrId(ProtoId<NCDrugProfilePrototype> compound)
+    {
+        return _prototypes.TryIndex(compound, out var drug) && drug.Codename != null
+            ? Loc.GetString(drug.Codename.Value, ("code", drug.CodenameCode))
+            : compound.Id;
     }
 
     /// <summary>
@@ -125,32 +135,54 @@ public sealed partial class NCPharmaBatchSystem
     }
 
     /// <summary>
-    /// Decides what an unknown raw material is. The first time a kind of material is met, a compound is drawn
-    /// from the pool by the world's seed; afterwards it is always the same compound, in every session.
+    /// Decides what an unknown raw material is. The first time a kind of material is met, a compound is
+    /// generated from the world's seed and the material; afterwards it is always the same compound, in every
+    /// session. The compound is loaded as a real prototype, so all pharmacology treats it like any other.
     /// </summary>
     public bool TryResolveUnknown(string pool, string materialKey, out ProtoId<NCDrugProfilePrototype> compound)
     {
         compound = default;
-        if (_unknownAssignments.TryGetValue(materialKey, out compound))
+        if (_unknownAssignments.TryGetValue(materialKey, out var existing))
+        {
+            compound = existing.Compound;
             return true;
+        }
 
-        var candidates = _prototypes.EnumeratePrototypes<NCDrugProfilePrototype>()
-            .Where(drug => drug.ProceduralPool == pool)
-            .OrderBy(drug => drug.ID, StringComparer.Ordinal)
-            .ToList();
-        if (candidates.Count == 0)
-            return false;
-
-        var free = candidates.Where(drug => !_unknownAssignments.ContainsValue(drug.ID)).ToList();
-        var from = free.Count > 0 ? free : candidates;
         if (_worldSeed == 0)
             _worldSeed = (uint) _random.Next(1, int.MaxValue);
 
-        var index = (int) (NCLabSeed.Hash(_worldSeed + ":" + materialKey) % (uint) from.Count);
-        compound = from[index].ID;
-        _unknownAssignments[materialKey] = compound;
+        if (!LoadGenerated(materialKey, pool, out compound))
+            return false;
+
+        _unknownAssignments[materialKey] = (compound, pool);
         return true;
     }
+
+    private bool LoadGenerated(string materialKey, string pool, out ProtoId<NCDrugProfilePrototype> compound)
+    {
+        compound = NCCompoundGenerator.IdFor(_worldSeed, materialKey);
+        if (_prototypes.HasIndex<NCDrugProfilePrototype>(compound))
+            return true;
+
+        try
+        {
+            _prototypes.LoadString(NCCompoundGenerator.ToYaml(_worldSeed, materialKey, pool));
+            _prototypes.ResolveResults();
+        }
+        catch (Exception exception)
+        {
+            Log.Error($"Generated compound for {materialKey} could not be loaded: {exception}");
+            return false;
+        }
+
+        if (_prototypes.TryIndex(compound, out var drug) && ValidateGenerated(drug))
+            return true;
+
+        Log.Error($"Generated compound {compound} for {materialKey} is not a valid drug profile.");
+        return false;
+    }
+
+    private static bool ValidateGenerated(NCDrugProfilePrototype drug) => NCPharmacologySystem.ValidateDrug(drug);
 
     /// <summary>
     /// Isolates the compound inside an unknown raw material and gives the laboratory an experimental formula
@@ -173,7 +205,7 @@ public sealed partial class NCPharmaBatchSystem
             return false;
         }
 
-        codename = drug.Codename.Value;
+        codename = CodenameOrId(compound);
         var id = $"NCPharmaFormulaIsolated.{compound.Id}";
         if (_derived.TryGetValue(id, out var existing))
         {
@@ -186,7 +218,7 @@ public sealed partial class NCPharmaBatchSystem
 
         formula = NCPharmaFormulaPrototype.Create(
             id,
-            drug.Codename.Value,
+            "nc-pharma-formula-isolated",
             1,
             compound,
             "NCPharmaDeliveryAutoinjector",
@@ -196,7 +228,7 @@ public sealed partial class NCPharmaBatchSystem
             0.7f,
             NCPharmaRegulatoryStatus.Experimental,
             null,
-            null,
+            codename,
             author,
             null);
         _derived.Add(id, formula);
@@ -208,26 +240,45 @@ public sealed partial class NCPharmaBatchSystem
     {
         var records = _unknownAssignments
             .OrderBy(entry => entry.Key, StringComparer.Ordinal)
-            .Select(entry => new NCPharmaUnknownSnapshot { Key = entry.Key, Compound = entry.Value.Id })
+            .Select(entry => new NCPharmaUnknownSnapshot { Key = entry.Key, Compound = entry.Value.Pool })
             .ToList();
         if (_worldSeed != 0)
             records.Add(new NCPharmaUnknownSnapshot { Key = SeedKey, Compound = _worldSeed.ToString() });
         AddSimpleSection(args, UnknownSectionType, records.ToArray());
     }
 
-    private void RestoreUnknown(Guid snapshotId)
+    /// <summary>
+    /// Brings the generated compounds back by regenerating them from the saved seed. It runs before anything that
+    /// refers to a compound by id (bodies, formulas, knowledge), so none of them finds a missing prototype.
+    /// </summary>
+    private void OnSessionStartedEarly(NCActiveWorldSessionStartedEvent args)
     {
-        foreach (var record in ReadSimpleSection<NCPharmaUnknownSnapshot>(snapshotId, UnknownSectionType))
+        _unknownAssignments.Clear();
+        _worldSeed = 0;
+        if (_restore.SelectionFailed || _restore.Manifest?.SnapshotId is not { } snapshotId)
+            return;
+
+        try
         {
-            if (record.Key == SeedKey)
+            var records = ReadSimpleSection<NCPharmaUnknownSnapshot>(snapshotId, UnknownSectionType);
+            foreach (var record in records)
             {
-                if (uint.TryParse(record.Compound, out var seed))
+                if (record.Key == SeedKey && uint.TryParse(record.Compound, out var seed))
                     _worldSeed = seed;
-                continue;
             }
 
-            if (_prototypes.TryIndex<NCDrugProfilePrototype>(record.Compound, out var drug) && drug.ProceduralPool != null)
-                _unknownAssignments[record.Key] = drug.ID;
+            if (_worldSeed == 0)
+                return;
+
+            foreach (var record in records.Where(record => record.Key != SeedKey))
+            {
+                if (LoadGenerated(record.Key, record.Compound, out var compound))
+                    _unknownAssignments[record.Key] = (compound, record.Compound);
+            }
+        }
+        catch (Exception exception)
+        {
+            Log.Error($"Generated compounds of snapshot {snapshotId} could not be restored: {exception}");
         }
     }
 

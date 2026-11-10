@@ -243,7 +243,8 @@ public readonly record struct NCMedicalDrugSummary(
     NCDiagnosticNumericRange ConcentrationMilliunits,
     bool Therapeutic,
     bool Toxic,
-    bool Unidentified = false);
+    bool Unidentified = false,
+    string? RuntimeName = null);
 
 [Serializable, NetSerializable]
 public readonly record struct NCMedicalSurgerySummary(

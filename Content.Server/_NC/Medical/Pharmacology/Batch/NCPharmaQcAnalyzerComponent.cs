@@ -39,4 +39,5 @@ public sealed partial class NCPharmaQcRunComponent : Component
     public TimeSpan StartedAt;
     public TimeSpan FinishAt;
     public string Operator = string.Empty;
+    public EntityUid OperatorEntity;
 }

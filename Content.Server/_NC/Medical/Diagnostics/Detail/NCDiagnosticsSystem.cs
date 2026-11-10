@@ -1031,7 +1031,8 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                 exposure.Concentration >= profile.MinimumEffectiveConcentration &&
                 exposure.Concentration <= profile.ToxicConcentration,
                 exposure.Concentration > profile.ToxicConcentration,
-                !_batches.IsIdentified(profileId))); // NC: an unidentified compound has no name yet
+                !_batches.IsIdentified(profileId), // NC: an unidentified compound has no name yet
+                profile.CodenameCode.Length > 0 ? _batches.CodenameOrId(profileId) : null)); // generated compounds have no table name
         }
 
         var modifiers = _pharmacology.GetModifiers(body);

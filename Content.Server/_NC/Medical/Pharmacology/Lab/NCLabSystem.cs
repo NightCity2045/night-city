@@ -42,6 +42,7 @@ public sealed partial class NCLabSystem : EntitySystem
     [Dependency] private MetaDataSystem _metaData = default!;
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
     [Dependency] private NCPharmaBatchSystem _batches = default!;
+    [Dependency] private NCBiotechActionSystem _actions = default!;
 
     public override void Initialize()
     {
@@ -99,7 +100,13 @@ public sealed partial class NCLabSystem : EntitySystem
         sample.Kind = sampler.Comp.Kind;
         sample.Source = Name(patient);
         Dirty(vial, sample);
-        Capture(patient, EnsureComp<NCLabSampleDataComponent>(vial));
+        var data = EnsureComp<NCLabSampleDataComponent>(vial);
+        Capture(patient, data);
+        // A clumsy draw spoils part of the sample: it reads weaker than the patient really is.
+        var quality = Math.Min(1f, _actions.Resolve(args.User, "NCBiotechSample", sampler.Owner).Quality);
+        foreach (var drug in data.Drugs)
+            drug.Concentration *= quality;
+        data.WoundInfection *= quality;
         _hands.TryPickupAnyHand(args.User, vial);
         _popup.PopupEntity(Loc.GetString("nc-lab-sample-taken"), patient, args.User);
     }
@@ -225,7 +232,7 @@ public sealed partial class NCLabSystem : EntitySystem
         {
             var susceptibility = strain.Susceptibility.TryGetValue(drug.ID, out var value) ? value : 1f;
             report.AppendLine(Loc.GetString("nc-lab-culture-row",
-                ("drug", Loc.GetString(NCLabText.DrugKey(drug.ID))),
+                ("drug", _batches.CompoundName(drug.ID)),
                 ("result", Loc.GetString(SusceptibilityKey(susceptibility)))));
         }
     }
@@ -259,7 +266,7 @@ public sealed partial class NCLabSystem : EntitySystem
                 : concentration >= drug.MinimumEffectiveConcentration ? "nc-lab-level-therapeutic"
                 : "nc-lab-level-trace";
             report.AppendLine(Loc.GetString("nc-lab-metabolic-row",
-                ("drug", Loc.GetString(_batches.CompoundNameKey(drugId))),
+                ("drug", _batches.CompoundName(drugId)),
                 ("concentration", concentration.ToString("0.0")),
                 ("level", Loc.GetString(state))));
         }
@@ -275,9 +282,9 @@ public sealed partial class NCLabSystem : EntitySystem
     }
 
     /// <summary>Writes the compound card as far as the laboratory knows it.</summary>
-    private void AppendDossier(StringBuilder report, ProtoId<NCDrugProfilePrototype> compound)
+    public void AppendDossier(StringBuilder report, ProtoId<NCDrugProfilePrototype> compound)
     {
-        report.AppendLine(Loc.GetString("nc-lab-dossier-header", ("name", Loc.GetString(_batches.CompoundNameKey(compound)))));
+        report.AppendLine(Loc.GetString("nc-lab-dossier-header", ("name", _batches.CompoundName(compound))));
         foreach (var row in _batches.ReadDossier(compound))
         {
             var label = Loc.GetString(NCLabText.PropertyLabelKey(row.Kind));
@@ -294,7 +301,7 @@ public sealed partial class NCLabSystem : EntitySystem
         }
     }
 
-    private void Print(EntityUid machine, EntityUid user, string title, string body)
+    public void Print(EntityUid machine, EntityUid user, string title, string body)
     {
         var paper = Spawn("Paper", Transform(machine).Coordinates);
         _metaData.SetEntityName(paper, Loc.GetString("nc-lab-report-name", ("title", title)));

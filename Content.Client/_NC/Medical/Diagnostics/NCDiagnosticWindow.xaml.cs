@@ -588,7 +588,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
                     : Loc.GetString("nc-medical-diagnostics-drug-subtherapeutic");
             AddCard(
                 DrugsContainer,
-                drug.Unidentified ? Loc.GetString("nc-medical-diagnostics-drug-unidentified") : DrugName(drug.Profile), // NC
+                drug.Unidentified ? Loc.GetString("nc-medical-diagnostics-drug-unidentified") : drug.RuntimeName ?? DrugName(drug.Profile), // NC
                 Loc.GetString(
                     "nc-medical-diagnostics-drug-details",
                     ("category", Value(drug.Category)),
@@ -1051,7 +1051,9 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
             : PrototypeName(id.Id);
 
     private static string DrugName(ProtoId<NCDrugProfilePrototype> id) =>
-        Loc.GetString($"nc-medical-diagnostics-drug-{ToKebabCase(StripPrefix(id.Id))}");
+        Loc.TryGetString($"nc-medical-diagnostics-drug-{ToKebabCase(StripPrefix(id.Id))}", out var name)
+            ? name
+            : PrototypeName(id.Id); // NC: generated compounds have no table entry
 
     private static string PrototypeName(string id) => SplitIdentifier(StripPrefix(id));
 

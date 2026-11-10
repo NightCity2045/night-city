@@ -165,6 +165,26 @@ public static class NCPharmaBatchMath
         drug.AnalgesiaAtTherapeutic > 0f ||
         drug.BleedingMultiplierAtTherapeutic < 1f;
 
+    /// <summary>
+    /// What one dose does to a standard test subject. The outcome follows from the same numbers a patient would
+    /// get: the peak against the toxic concentration, the adulterant toxin and the sepsis burden.
+    /// </summary>
+    public static NCPharmaStudyResult ResolveStudy(
+        NCPharmaTuningPrototype tuning,
+        NCPharmaDoseEffect effect,
+        float toxicConcentration)
+    {
+        var ratio = toxicConcentration > 0f ? effect.EffectiveConcentration / toxicConcentration : 0f;
+        var outcome = NCPharmaStudyOutcome.Tolerated;
+        if (ratio >= 1f || effect.ToxinBurden >= tuning.StudyToxinLoss || effect.SepsisBurden >= tuning.StudySepsisLoss)
+            outcome = NCPharmaStudyOutcome.Lost;
+        else if (ratio >= tuning.StudyStrainedRatio || effect.ToxinBurden >= tuning.StudyToxinStrained ||
+                 effect.SepsisBurden >= tuning.StudySepsisStrained)
+            outcome = NCPharmaStudyOutcome.Strained;
+
+        return new NCPharmaStudyResult(outcome, effect.EffectiveConcentration, ratio, effect.ToxinBurden, effect.SepsisBurden);
+    }
+
     /// <summary>Combined elimination speed of the modifiers; never stops the body clearing the compound.</summary>
     public static float ResolveClearanceFactor(IReadOnlyList<NCPharmaModifierPrototype> modifiers)
     {
@@ -297,7 +317,8 @@ public static class NCPharmaBatchMath
         NCPharmaQuality actual,
         NCPharmaLabel label,
         NCPharmaQcTests requested,
-        float masking = 0f)
+        float masking = 0f,
+        float quality = 1f)
     {
         var failed = NCPharmaQcTests.None;
         float? concentration = null;
@@ -344,15 +365,25 @@ public static class NCPharmaBatchMath
                 failed |= NCPharmaQcTests.Stability;
         }
 
+        // A sloppy run reads the numbers less precisely. Pass and fail were decided on the true values above.
+        var blur = Math.Clamp(1f - quality, 0f, 0.5f) * 0.3f;
         return new NCPharmaQcReport(
             batchId,
             requested & NCPharmaQcTests.All,
             failed,
-            concentration,
-            purity,
-            sterility,
-            homogeneity,
-            stability);
+            Blur(concentration, batchId, 1001, blur),
+            Blur(purity, batchId, 1002, blur),
+            Blur(sterility, batchId, 1003, blur),
+            Blur(homogeneity, batchId, 1004, blur),
+            Blur(stability, batchId, 1005, blur));
+    }
+
+    private static float? Blur(float? value, Guid batchId, int stream, float blur)
+    {
+        if (value is not { } measured || blur <= 0f)
+            return value;
+
+        return MathF.Max(0f, measured * (1f + blur * DoseNoise(batchId, stream)));
     }
 
     /// <summary>Any failed test rejects the batch; all five passed certify it; everything else is partial.</summary>

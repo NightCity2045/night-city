@@ -79,4 +79,25 @@ public sealed class NCCompoundDossierTests
             Assert.That(NCLabSeed.Pick(entries, seed), Is.Not.EqualTo("b"));
         Assert.That(NCLabSeed.Pick(new List<(string, float)>(), 5u), Is.Null);
     }
+
+    [Test]
+    public void GeneratedCompoundsAreStableDistinctAndSane()
+    {
+        Assert.That(NCCompoundGenerator.IdFor(7u, "raw-a"), Is.EqualTo(NCCompoundGenerator.IdFor(7u, "raw-a")));
+        Assert.That(NCCompoundGenerator.IdFor(7u, "raw-a"), Is.Not.EqualTo(NCCompoundGenerator.IdFor(7u, "raw-b")));
+        Assert.That(NCCompoundGenerator.IdFor(7u, "raw-a"), Is.Not.EqualTo(NCCompoundGenerator.IdFor(8u, "raw-a")));
+        Assert.That(NCCompoundGenerator.ToYaml(7u, "raw-a", "street"), Is.EqualTo(NCCompoundGenerator.ToYaml(7u, "raw-a", "street")));
+        for (var seed = 1u; seed < 200u; seed++)
+        {
+            var yaml = NCCompoundGenerator.ToYaml(seed, "raw", seed % 2 == 0 ? "street" : "corporate");
+            var values = yaml.Split('\n')
+                .Select(line => line.Trim().Split(": "))
+                .Where(parts => parts.Length == 2)
+                .ToDictionary(parts => parts[0], parts => parts[1]);
+            float V(string key) => float.Parse(values[key], System.Globalization.CultureInfo.InvariantCulture);
+            Assert.That(V("therapeuticConcentration"), Is.LessThan(V("toxicConcentration")));
+            Assert.That(V("toxicConcentration"), Is.LessThan(V("maximumConcentration")));
+            Assert.That(V("baselineClearanceFraction") + V("liverClearanceFraction") + V("kidneyClearanceFraction"), Is.LessThanOrEqualTo(1f));
+        }
+    }
 }

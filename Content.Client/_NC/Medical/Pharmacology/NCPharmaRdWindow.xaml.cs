@@ -163,7 +163,7 @@ public sealed partial class NCPharmaRdWindow : FancyWindow
     {
         if (Selected() is not { } formula ||
             DeliverySelector.SelectedId < 0 || DeliverySelector.SelectedId >= _forms.Count ||
-            !_prototypes.TryIndex<NCDrugProfilePrototype>(formula.Compound, out var compound) ||
+            formula.ToxicConcentration <= 0f ||
             !_prototypes.TryIndex<NCPharmaProductionProfilePrototype>(formula.DefaultProfile, out var profile))
         {
             ForecastLabel.SetMessage(FormattedMessage.FromMarkupPermissive(string.Empty));
@@ -179,7 +179,7 @@ public sealed partial class NCPharmaRdWindow : FancyWindow
             [.. modifiers.Select(modifier => new ProtoId<NCPharmaModifierPrototype>(modifier.ID))],
             formula.DefaultProfile, 0.85f, NCPharmaRegulatoryStatus.Experimental, null, null, null);
         var forecast = NCPharmaBatchMath.Forecast(
-            candidate, modifiers, _forms[DeliverySelector.SelectedId], profile, compound.ToxicConcentration);
+            candidate, modifiers, _forms[DeliverySelector.SelectedId], profile, formula.ToxicConcentration);
         var margin = float.IsInfinity(forecast.ToxicMargin) ? "∞" : forecast.ToxicMargin.ToString("0.##");
         ForecastLabel.SetMessage(FormattedMessage.FromMarkupPermissive(Loc.GetString(
             "nc-pharma-rd-forecast",

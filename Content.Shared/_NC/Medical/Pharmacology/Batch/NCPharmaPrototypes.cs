@@ -120,6 +120,29 @@ public sealed partial class NCPharmaTuningPrototype : IPrototype
     [DataField]
     public float LocalInfectionReliefAtTherapeutic { get; private set; } = 0.35f;
 
+    [DataField]
+    public int MaximumExperiments { get; private set; } = 512;
+
+    [DataField]
+    public int MaximumExperimentNotes { get; private set; } = 24;
+
+    /// <summary>A test subject is strained when the peak reaches this share of the toxic concentration.</summary>
+    [DataField]
+    public float StudyStrainedRatio { get; private set; } = 0.6f;
+
+    /// <summary>Adulterant toxin at which a test subject is strained or lost.</summary>
+    [DataField]
+    public float StudyToxinStrained { get; private set; } = 0.2f;
+
+    [DataField]
+    public float StudyToxinLoss { get; private set; } = 0.5f;
+
+    [DataField]
+    public float StudySepsisStrained { get; private set; } = 0.15f;
+
+    [DataField]
+    public float StudySepsisLoss { get; private set; } = 0.4f;
+
     /// <summary>Share of the remaining impurity one purification pass removes. Later passes gain less.</summary>
     [DataField]
     public float PurificationGapClosed { get; private set; } = 0.5f;

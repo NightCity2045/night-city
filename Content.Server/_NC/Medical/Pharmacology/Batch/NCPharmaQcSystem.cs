@@ -22,6 +22,7 @@ public sealed partial class NCPharmaQcSystem : EntitySystem
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private UserInterfaceSystem _ui = default!;
     [Dependency] private NCPharmaBatchSystem _batches = default!;
+    [Dependency] private Content.Server._NC.Medical.Pharmacology.Lab.NCBiotechActionSystem _actions = default!;
 
     public override void Initialize()
     {
@@ -91,6 +92,7 @@ public sealed partial class NCPharmaQcSystem : EntitySystem
         run.BatchId = pack.BatchId;
         run.Tests = tests;
         run.Operator = ToPrettyString(user);
+        run.OperatorEntity = user;
         run.StartedAt = _timing.CurTime;
         run.FinishAt = _timing.CurTime + analyzer.Comp.TimePerTest * CountTests(tests);
         return NCPharmaQcNotice.Started;
@@ -101,9 +103,12 @@ public sealed partial class NCPharmaQcSystem : EntitySystem
         var batchId = run.BatchId;
         var tests = run.Tests;
         var operatorRef = run.Operator;
+        var quality = run.OperatorEntity.Valid
+            ? _actions.Resolve(run.OperatorEntity, "NCBiotechQc", analyzer.Owner, [batchId]).Quality
+            : 1f;
         RemComp<NCPharmaQcRunComponent>(analyzer);
 
-        if (!_batches.TryPerformQc(batchId, operatorRef, tests, out var report) ||
+        if (!_batches.TryPerformQc(batchId, operatorRef, tests, out var report, quality) ||
             !_batches.TryGetBatch(batchId, out var batch))
         {
             UpdateUi(analyzer, NCPharmaQcNotice.UnknownBatch);
