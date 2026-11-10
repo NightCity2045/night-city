@@ -4,6 +4,7 @@ using System.Reflection;
 using Content.Shared._NC.Medical.Pharmacology;
 using NUnit.Framework;
 
+#pragma warning disable RA0039 // Unit tests build data objects directly, without loading a server.
 namespace Content.Tests._NC.Medical.Pharmacology;
 
 [TestFixture]

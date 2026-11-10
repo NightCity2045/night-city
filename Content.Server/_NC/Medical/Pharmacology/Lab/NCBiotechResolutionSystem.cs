@@ -14,7 +14,7 @@ namespace Content.Server._NC.Medical.Pharmacology.Lab;
 /// hands grip, how well they see, how steady their movement is, how awake they are. Nothing here is a skill or
 /// a roll. A future skill system answers the same request and multiplies its own factor on top.
 /// </summary>
-public sealed class NCBiotechResolutionSystem : EntitySystem
+public sealed partial class NCBiotechResolutionSystem : EntitySystem
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private NCPharmacologySystem _pharmacology = default!;

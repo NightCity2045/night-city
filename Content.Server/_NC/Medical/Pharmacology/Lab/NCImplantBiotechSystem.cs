@@ -82,7 +82,7 @@ public sealed partial class NCImplantToleranceComponent : Component
     public float Contamination;
 }
 
-public sealed class NCImplantBiotechSystem : EntitySystem
+public sealed partial class NCImplantBiotechSystem : EntitySystem
 {
     private static readonly TimeSpan TickInterval = TimeSpan.FromSeconds(10);
 

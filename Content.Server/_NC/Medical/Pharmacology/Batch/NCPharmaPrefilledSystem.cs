@@ -36,7 +36,7 @@ public sealed partial class NCPharmaPrefilledComponent : Component
     public float Mixing = 0.98f;
 }
 
-public sealed class NCPharmaPrefilledSystem : EntitySystem
+public sealed partial class NCPharmaPrefilledSystem : EntitySystem
 {
     [Dependency] private NCPharmaBatchSystem _batches = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;

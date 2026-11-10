@@ -14,6 +14,8 @@ namespace Content.Server._NC.Medical.Pharmacology.Batch;
 
 public sealed partial class NCPharmaBatchSystem
 {
+    private static readonly ProtoId<Content.Shared._NC.Medical.Emergency.NCEmergencyCareProfilePrototype> EmergencyCareProfile = "NCHumanEmergencyCare";
+
     [Dependency] private NCMedicalBodySystem _medicalBodies = default!;
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
 
@@ -23,7 +25,7 @@ public sealed partial class NCPharmaBatchSystem
     /// </summary>
     private void InfuseVolume(EntityUid patient, float volume)
     {
-        if (!_prototypes.TryIndex<Content.Shared._NC.Medical.Emergency.NCEmergencyCareProfilePrototype>("NCHumanEmergencyCare", out var care))
+        if (!_prototypes.TryIndex(EmergencyCareProfile, out var care))
             return;
 
         _blood.TryTransfuse(

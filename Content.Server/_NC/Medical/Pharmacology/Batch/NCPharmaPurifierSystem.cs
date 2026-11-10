@@ -37,7 +37,7 @@ public sealed partial class NCPharmaFilterCartridgeComponent : Component
     public int Charges = 10;
 }
 
-public sealed class NCPharmaPurifierSystem : EntitySystem
+public sealed partial class NCPharmaPurifierSystem : EntitySystem
 {
     private const float InteractionRange = 1.5f;
 

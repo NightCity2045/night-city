@@ -25,7 +25,7 @@ public sealed partial class NCVivariumComponent : Component
     public float Range = 6f;
 }
 
-public sealed class NCVivariumSystem : EntitySystem
+public sealed partial class NCVivariumSystem : EntitySystem
 {
     [Dependency] private SharedPowerReceiverSystem _power = default!;
     [Dependency] private SharedTransformSystem _transform = default!;

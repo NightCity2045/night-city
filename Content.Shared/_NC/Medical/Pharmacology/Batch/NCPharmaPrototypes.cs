@@ -411,6 +411,7 @@ public sealed partial class NCPharmaFormulaPrototype : IPrototype
         string? author,
         ProtoId<NCPharmaReactionProfilePrototype>? reaction = null)
     {
+#pragma warning disable RA0039 // Derived formula versions are runtime objects and are never registered as prototypes.
         return new NCPharmaFormulaPrototype
         {
             ID = id,
@@ -428,6 +429,7 @@ public sealed partial class NCPharmaFormulaPrototype : IPrototype
             Author = author,
             Reaction = reaction,
         };
+#pragma warning restore RA0039
     }
 
     /// <summary>Same formula with another regulatory status, used when a version is approved or recalled.</summary>

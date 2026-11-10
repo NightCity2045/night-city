@@ -54,7 +54,7 @@ public sealed partial class NCTissueIncubatorComponent : Component
     public EntProtoId? Output;
 }
 
-public sealed class NCTissueIncubatorSystem : EntitySystem
+public sealed partial class NCTissueIncubatorSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private ItemSlotsSystem _slots = default!;

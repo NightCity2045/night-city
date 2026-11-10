@@ -6,6 +6,7 @@ using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Pharmacology.Lab;
 using NUnit.Framework;
 
+#pragma warning disable RA0039 // Unit tests build data objects directly, without loading a server.
 namespace Content.Tests._NC.Medical.Pharmacology;
 
 [TestFixture]
@@ -46,7 +47,9 @@ public sealed class NCCompoundDossierTests
     [Test]
     public void BuildingTwiceGivesTheSameDossier()
     {
-        Assert.That(NCCompoundDossierMath.Build(Stimulant(), null), Is.EqualTo(NCCompoundDossierMath.Build(Stimulant(), null)));
+        var first = NCCompoundDossierMath.Build(Stimulant(), null);
+        var second = NCCompoundDossierMath.Build(Stimulant(), null);
+        Assert.That(first, Is.EqualTo(second));
     }
 
     [Test]
@@ -74,7 +77,10 @@ public sealed class NCCompoundDossierTests
     public void SeedPickIsStableAndFollowsWeights()
     {
         var entries = new List<(string, float)> { ("a", 1f), ("b", 0f), ("c", 3f) };
-        Assert.That(NCLabSeed.Pick(entries, NCLabSeed.Hash("Alex Mercer")), Is.EqualTo(NCLabSeed.Pick(entries, NCLabSeed.Hash("Alex Mercer"))));
+        var nameSeed = NCLabSeed.Hash("Alex Mercer");
+        var pickA = NCLabSeed.Pick(entries, nameSeed);
+        var pickB = NCLabSeed.Pick(entries, nameSeed);
+        Assert.That(pickA, Is.EqualTo(pickB));
         for (var seed = 0u; seed < 500u; seed++)
             Assert.That(NCLabSeed.Pick(entries, seed), Is.Not.EqualTo("b"));
         Assert.That(NCLabSeed.Pick(new List<(string, float)>(), 5u), Is.Null);
@@ -83,10 +89,14 @@ public sealed class NCCompoundDossierTests
     [Test]
     public void GeneratedCompoundsAreStableDistinctAndSane()
     {
-        Assert.That(NCCompoundGenerator.IdFor(7u, "raw-a"), Is.EqualTo(NCCompoundGenerator.IdFor(7u, "raw-a")));
+        var idA = NCCompoundGenerator.IdFor(7u, "raw-a");
+        var idB = NCCompoundGenerator.IdFor(7u, "raw-a");
+        Assert.That(idA, Is.EqualTo(idB));
         Assert.That(NCCompoundGenerator.IdFor(7u, "raw-a"), Is.Not.EqualTo(NCCompoundGenerator.IdFor(7u, "raw-b")));
         Assert.That(NCCompoundGenerator.IdFor(7u, "raw-a"), Is.Not.EqualTo(NCCompoundGenerator.IdFor(8u, "raw-a")));
-        Assert.That(NCCompoundGenerator.ToYaml(7u, "raw-a", "street"), Is.EqualTo(NCCompoundGenerator.ToYaml(7u, "raw-a", "street")));
+        var yamlA = NCCompoundGenerator.ToYaml(7u, "raw-a", "street");
+        var yamlB = NCCompoundGenerator.ToYaml(7u, "raw-a", "street");
+        Assert.That(yamlA, Is.EqualTo(yamlB));
         for (var seed = 1u; seed < 200u; seed++)
         {
             var yaml = NCCompoundGenerator.ToYaml(seed, "raw", seed % 2 == 0 ? "street" : "corporate");

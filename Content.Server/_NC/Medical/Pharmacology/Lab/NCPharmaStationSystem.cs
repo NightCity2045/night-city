@@ -21,7 +21,7 @@ namespace Content.Server._NC.Medical.Pharmacology.Lab;
 /// formulation station, and the filling station. Each has one job, needs power, takes time, makes waste, and
 /// asks the action-resolution layer how well the procedure went.
 /// </summary>
-public sealed class NCPharmaStationSystem : EntitySystem
+public sealed partial class NCPharmaStationSystem : EntitySystem
 {
     private const float InteractionRange = 1.5f;
 

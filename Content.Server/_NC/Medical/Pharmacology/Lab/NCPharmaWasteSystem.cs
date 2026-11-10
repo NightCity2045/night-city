@@ -19,7 +19,7 @@ namespace Content.Server._NC.Medical.Pharmacology.Lab;
 /// canister goes to a powered incinerator. A canister left lying around leaks toxic fumes: the consequence
 /// has a cause, and the cause is that nobody carried the waste out.
 /// </summary>
-public sealed class NCPharmaWasteSystem : EntitySystem
+public sealed partial class NCPharmaWasteSystem : EntitySystem
 {
     private static readonly EntProtoId SmokeEntity = "Smoke";
     private static readonly ProtoId<Content.Shared.Chemistry.Reagent.ReagentPrototype> Fumes = "NCReactorFumes";

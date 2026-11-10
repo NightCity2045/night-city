@@ -39,7 +39,7 @@ public sealed partial class NCBloodCentrifugeComponent : Component
     public EntProtoId PlasmaPrototype = "NCBloodBagPlasma";
 }
 
-public sealed class NCBloodBankSystem : EntitySystem
+public sealed partial class NCBloodBankSystem : EntitySystem
 {
     private const float InteractionRange = 1.5f;
     private const float SpoilageInterval = 30f;

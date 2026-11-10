@@ -23,7 +23,7 @@ namespace Content.Server._NC.Medical.Pharmacology.Batch;
 /// The Pharma Director: the whole pharmaceutical truth in one window. Reading is open to administrators;
 /// every intervention needs the fun flag and is written to the history of the batch or compound it touches.
 /// </summary>
-public sealed class NCPharmaDirectorEui : BaseEui
+public sealed partial class NCPharmaDirectorEui : BaseEui
 {
     [Dependency] private IEntityManager _entities = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
@@ -209,7 +209,7 @@ public sealed class NCPharmaDirectorEui : BaseEui
 }
 
 [AdminCommand(AdminFlags.Admin)]
-public sealed class NCPharmaDirectorWindowCommand : IConsoleCommand
+public sealed partial class NCPharmaDirectorWindowCommand : IConsoleCommand
 {
     [Dependency] private EuiManager _eui = default!;
 
