@@ -359,6 +359,9 @@ public sealed partial class NCWoundRecordSnapshot
     [DataField] public float InitialExternalBleedRate;
     [DataField] public float InitialInternalBleedRate;
     [DataField] public NCBleedKind PrimaryBleedKind;
+    [DataField] public float LocalAnalgesia;
+    [DataField] public float LocalHemostasis;
+    [DataField] public TimeSpan LocalRemaining;
     [DataField] public float Pain;
     [DataField] public float InitialPain;
     [DataField] public float Contamination;

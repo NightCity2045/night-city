@@ -450,6 +450,9 @@ public sealed partial class NCMedicalPersistenceSystem
                 !Finite(wound.InitialInternalBleedRate, wound.InternalBleedRate, 1_000_000f) ||
                 !Finite(wound.Pain, 0f, 1_000_000_000f) ||
                 !Finite(wound.InitialPain, wound.Pain, 1_000_000_000f) ||
+                !Finite(wound.LocalAnalgesia, 0f, 1f) ||
+                !Finite(wound.LocalHemostasis, 0f, 1f) ||
+                wound.LocalRemaining < TimeSpan.Zero ||
                 !Finite(wound.Contamination, 0f, 1f) ||
                 !Finite(wound.Infection, 0f, 1f) ||
                 !Finite(wound.Necrosis, 0f, 1f) ||
@@ -820,9 +823,6 @@ public sealed partial class NCMedicalPersistenceSystem
                 Stage = record.Stage,
                 Comedown = record.Comedown,
             }).ToList(),
-            LocalAnalgesia = source.LocalAnalgesia,
-            LocalHemostasis = source.LocalHemostasis,
-            LocalRemaining = source.LocalRemaining,
             StrainEpisode = source.StrainEpisode,
             PendingDoses = source.PendingDoses.Select(dose => new NCPendingDoseSnapshot
             {
@@ -1090,6 +1090,9 @@ public sealed partial class NCMedicalPersistenceSystem
                 InitialExternalBleedRate = wound.InitialExternalBleedRate,
                 InitialInternalBleedRate = wound.InitialInternalBleedRate,
                 PrimaryBleedKind = wound.PrimaryBleedKind,
+                LocalAnalgesia = wound.LocalAnalgesia,
+                LocalHemostasis = wound.LocalHemostasis,
+                LocalRemaining = wound.LocalRemaining,
                 Pain = wound.Pain,
                 InitialPain = wound.InitialPain,
                 Contamination = wound.Contamination,

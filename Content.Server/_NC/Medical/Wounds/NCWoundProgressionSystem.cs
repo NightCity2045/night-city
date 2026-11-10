@@ -478,6 +478,20 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
             changed = true;
         }
 
+        // NC: a local effect fades on its own clock.
+        if (wound.LocalRemaining > TimeSpan.Zero)
+        {
+            wound.LocalRemaining -= TimeSpan.FromSeconds(seconds);
+            if (wound.LocalRemaining <= TimeSpan.Zero)
+            {
+                wound.LocalRemaining = TimeSpan.Zero;
+                wound.LocalAnalgesia = 0f;
+                wound.LocalHemostasis = 0f;
+            }
+
+            changed = true;
+        }
+
         var bandageSterility = GetBandageSterility(wound.WoundId, treatment);
         if (seconds > 0f && wound.ClosureState == NCWoundClosureState.Open &&
             wound.Stage != NCWoundStage.Necrotic)
@@ -637,8 +651,10 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
                 1f - wound.HealingProgress * progression.HealingBleedReductionFraction,
                 0f,
                 1f);
-            var externalRate = wound.InitialExternalBleedRate * bleedMultiplier;
-            var internalRate = wound.InitialInternalBleedRate * bleedMultiplier;
+            // NC: a locally applied dose slows the bleeding of this wound and numbs it, for a while.
+            var localBleed = 1f - Math.Clamp(wound.LocalHemostasis, 0f, 0.9f);
+            var externalRate = wound.InitialExternalBleedRate * bleedMultiplier * localBleed;
+            var internalRate = wound.InitialInternalBleedRate * bleedMultiplier * localBleed;
             sourceChanged |= MathF.Abs(wound.ExternalBleedRate - externalRate) > FloatTolerance ||
                              MathF.Abs(wound.InternalBleedRate - internalRate) > FloatTolerance;
             wound.ExternalBleedRate = externalRate;
@@ -646,7 +662,8 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
             wound.Pain = MathF.Max(
                 0f,
                 wound.InitialPain *
-                (1f - wound.HealingProgress * progression.HealingPainReductionFraction));
+                (1f - wound.HealingProgress * progression.HealingPainReductionFraction) *
+                (1f - Math.Clamp(wound.LocalAnalgesia, 0f, 1f))); // NC
 
             if (wound.HealingProgress > wound.PeakHealingProgress)
             {

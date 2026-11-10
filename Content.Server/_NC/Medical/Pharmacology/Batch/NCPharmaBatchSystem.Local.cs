@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System.Linq;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
@@ -35,8 +36,8 @@ public sealed partial class NCPharmaBatchSystem
 
     /// <summary>
     /// The part of a dose that works directly on the wounds: an antibiotic removes infection from every wound
-    /// (scaled by strain sensitivity), an analgesic numbs and a procoagulant slows bleeding for a while. All of
-    /// it depends on the blood supply that carries the drug to the tissue.
+    /// (scaled by strain sensitivity), an analgesic numbs the most painful wound and a procoagulant slows the
+    /// hardest-bleeding one, for a while. All of it depends on the blood supply that carries the drug there.
     /// </summary>
     private void ApplyLocalTissue(
         EntityUid patient,
@@ -54,8 +55,29 @@ public sealed partial class NCPharmaBatchSystem
         var (analgesia, hemostasis) = NCPharmaBatchMath.ResolveLocalEffects(
             tuning, drug.AnalgesiaAtTherapeutic, drug.BleedingMultiplierAtTherapeutic,
             localConcentration, drug.TherapeuticConcentration, perfusion);
-        if (analgesia > 0f || hemostasis > 0f)
-            _pharmacology.SetLocalEffect(patient, analgesia, hemostasis, tuning.LocalDuration);
+        // The dose is applied to the wound that needs it most: the one bleeding hardest and the one that hurts most.
+        if (hemostasis > 0f)
+        {
+            var bleeding = wounds.Wounds.Values
+                .Where(wound => wound.ClosureState == NCWoundClosureState.Open)
+                .OrderByDescending(wound => wound.ExternalBleedRate + wound.InternalBleedRate)
+                .FirstOrDefault();
+            if (bleeding != null)
+            {
+                bleeding.LocalHemostasis = MathF.Max(bleeding.LocalHemostasis, hemostasis);
+                bleeding.LocalRemaining = tuning.LocalDuration > bleeding.LocalRemaining ? tuning.LocalDuration : bleeding.LocalRemaining;
+            }
+        }
+
+        if (analgesia > 0f)
+        {
+            var painful = wounds.Wounds.Values.OrderByDescending(wound => wound.Pain).FirstOrDefault();
+            if (painful != null)
+            {
+                painful.LocalAnalgesia = MathF.Max(painful.LocalAnalgesia, analgesia);
+                painful.LocalRemaining = tuning.LocalDuration > painful.LocalRemaining ? tuning.LocalDuration : painful.LocalRemaining;
+            }
+        }
 
         var relief = NCPharmaBatchMath.ResolveLocalInfectionRelief(
             tuning,

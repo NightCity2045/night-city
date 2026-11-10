@@ -33,15 +33,6 @@ public sealed partial class NCPharmacologyStateSnapshot
     public List<NCPendingDoseSnapshot> PendingDoses = [];
 
     [DataField]
-    public float LocalAnalgesia;
-
-    [DataField]
-    public float LocalHemostasis;
-
-    [DataField]
-    public TimeSpan LocalRemaining;
-
-    [DataField]
     public int StrainEpisode;
 }
 

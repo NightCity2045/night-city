@@ -75,6 +75,17 @@ public sealed partial class NCWoundRecord
     [DataField]
     public NCBleedKind PrimaryBleedKind;
 
+    /// <summary>Pain relief a locally applied dose gives at this wound. Short lived.</summary>
+    [DataField]
+    public float LocalAnalgesia;
+
+    /// <summary>Bleeding reduction a locally applied dose gives at this wound. Short lived.</summary>
+    [DataField]
+    public float LocalHemostasis;
+
+    [DataField]
+    public TimeSpan LocalRemaining;
+
     [DataField]
     public float Pain;
 

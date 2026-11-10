@@ -32,17 +32,6 @@ public sealed partial class NCPharmacologyComponent : Component
     [DataField]
     public TimeSpan LastEvaluation;
 
-    /// <summary>Pain relief a locally applied dose gives at the wound. Short lived, no systemic cost.</summary>
-    [DataField]
-    public float LocalAnalgesia;
-
-    /// <summary>Bleeding reduction a locally applied dose gives at the wound.</summary>
-    [DataField]
-    public float LocalHemostasis;
-
-    [DataField]
-    public TimeSpan LocalRemaining;
-
     /// <summary>How many separate infections this body has had. Each one may be caused by a different strain.</summary>
     [DataField]
     public int StrainEpisode;

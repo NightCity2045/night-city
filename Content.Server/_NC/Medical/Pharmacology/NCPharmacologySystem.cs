@@ -68,8 +68,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         ref NCMedicalNextUpdateEvent args)
     {
         var hasDependence = entity.Comp.Dependence.Count > 0;
-        var hasLocal = entity.Comp.LocalRemaining > TimeSpan.Zero; // NC
-        if (entity.Comp.ActiveDrugs.Count == 0 && entity.Comp.OverdoseBurden <= 0f && !hasDependence && !hasLocal)
+        if (entity.Comp.ActiveDrugs.Count == 0 && entity.Comp.OverdoseBurden <= 0f && !hasDependence)
             return;
 
         if (!_prototypes.TryIndex(entity.Comp.Profile, out NCPharmacologyProfilePrototype? profile) ||
@@ -79,7 +78,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         }
 
         // NC: a body that only carries dependence changes slowly and is checked on a longer cadence.
-        var interval = entity.Comp.ActiveDrugs.Count == 0 && entity.Comp.OverdoseBurden <= 0f && !hasLocal
+        var interval = entity.Comp.ActiveDrugs.Count == 0 && entity.Comp.OverdoseBurden <= 0f
             ? profile.DependenceUpdateInterval
             : profile.ActiveUpdateInterval;
         if (args.Delay == null || interval < args.Delay)
@@ -208,20 +207,6 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         changed |= AdvanceDependence(body, state, seconds);
         // NC-Edit-End
 
-        // NC: a locally applied dose fades on its own clock.
-        if (state.LocalRemaining > TimeSpan.Zero)
-        {
-            state.LocalRemaining -= elapsed;
-            if (state.LocalRemaining <= TimeSpan.Zero)
-            {
-                state.LocalRemaining = TimeSpan.Zero;
-                state.LocalAnalgesia = 0f;
-                state.LocalHemostasis = 0f;
-            }
-
-            changed = true;
-        }
-
         RecomputeModifiers(state, profile);
         if (state.CachedModifiers.ToxinRecoveryPerSecond > 0f)
         {
@@ -300,9 +285,6 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             Profile = state.Profile,
             Initialized = state.StateInitialized,
             OverdoseBurden = state.OverdoseBurden,
-            LocalAnalgesia = state.LocalAnalgesia, // NC
-            LocalHemostasis = state.LocalHemostasis,
-            LocalRemaining = state.LocalRemaining,
             StrainEpisode = state.StrainEpisode,
         };
         if (!TryCaptureDependence(state, timestamp, captured))
@@ -350,23 +332,6 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
                float.IsFinite(value)
             ? Math.Clamp(value, 0f, 1f)
             : 1f;
-    }
-
-    /// <summary>
-    /// Records the local part of a dose. A stronger local effect replaces a weaker one; it never stacks, and it
-    /// fades after the local duration.
-    /// </summary>
-    public void SetLocalEffect(EntityUid body, float analgesia, float hemostasis, TimeSpan duration)
-    {
-        if (!TryEnsureInitialized(body, out var state, out var profile))
-            return;
-
-        state.LocalAnalgesia = MathF.Max(state.LocalAnalgesia, Math.Clamp(analgesia, 0f, 1f));
-        state.LocalHemostasis = MathF.Max(state.LocalHemostasis, Math.Clamp(hemostasis, 0f, 0.9f));
-        state.LocalRemaining = duration > state.LocalRemaining ? duration : state.LocalRemaining;
-        RecomputeModifiers(state, profile);
-        _medicalBodies.TryMarkDirty(body, NCMedicalDirtyDomains.Pain | NCMedicalDirtyDomains.Vascular |
-                                          NCMedicalDirtyDomains.Diagnostics | NCMedicalDirtyDomains.Persistence);
     }
 
     /// <summary>Share of an antibiotic's power that works on the strain this body carries.</summary>
@@ -421,9 +386,6 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         state.Profile = snapshot.Profile;
         state.StateInitialized = snapshot.Initialized;
         state.OverdoseBurden = snapshot.OverdoseBurden;
-        state.LocalAnalgesia = snapshot.LocalAnalgesia; // NC
-        state.LocalHemostasis = snapshot.LocalHemostasis;
-        state.LocalRemaining = snapshot.LocalRemaining;
         state.StrainEpisode = Math.Max(0, snapshot.StrainEpisode);
         state.ActiveDrugs.Clear();
         foreach (var exposure in snapshot.ActiveDrugs)
@@ -590,10 +552,6 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             immunosuppression += drug.ImmunosuppressionAtTherapeutic * fraction;
             toxinRecovery += drug.ToxinRecoveryPerSecondAtTherapeutic * fraction;
         }
-
-        // NC: the local part of a dose adds to the same channels, without any systemic cost.
-        analgesia += state.LocalAnalgesia;
-        clotting *= 1f - state.LocalHemostasis;
 
         var overdoseFraction = profile.MaximumOverdoseBurden > 0f
             ? Math.Clamp(state.OverdoseBurden / profile.MaximumOverdoseBurden, 0f, 1f)
