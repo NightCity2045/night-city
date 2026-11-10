@@ -55,7 +55,8 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         Entity<NCPharmacologyComponent> entity,
         ref NCMedicalNextUpdateEvent args)
     {
-        if (entity.Comp.ActiveDrugs.Count == 0 && entity.Comp.OverdoseBurden <= 0f)
+        var hasDependence = entity.Comp.Dependence.Count > 0;
+        if (entity.Comp.ActiveDrugs.Count == 0 && entity.Comp.OverdoseBurden <= 0f && !hasDependence)
             return;
 
         if (!_prototypes.TryIndex(entity.Comp.Profile, out NCPharmacologyProfilePrototype? profile) ||
@@ -64,8 +65,12 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             return;
         }
 
-        if (args.Delay == null || profile.ActiveUpdateInterval < args.Delay)
-            args.Delay = profile.ActiveUpdateInterval;
+        // NC: a body that only carries dependence changes slowly and is checked on a longer cadence.
+        var interval = entity.Comp.ActiveDrugs.Count == 0 && entity.Comp.OverdoseBurden <= 0f
+            ? profile.DependenceUpdateInterval
+            : profile.ActiveUpdateInterval;
+        if (args.Delay == null || interval < args.Delay)
+            args.Delay = interval;
     }
 
     /// <summary>
@@ -105,6 +110,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             0f,
             profile.MaximumRecordedCumulativeDose);
         exposure.LastAdministration = _timing.CurTime;
+        RegisterDependenceDose(state, drug, concentration); // NC
         RecomputeModifiers(state, profile);
         MarkChanged(body, drugId, previous, exposure.Concentration, state.OverdoseBurden);
         return new NCDrugDoseResult(true, drugId, previous, exposure.Concentration, false);
@@ -178,6 +184,10 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             0f,
             profile.MaximumOverdoseBurden);
         changed |= !MathHelper.CloseTo(previousOverdose, state.OverdoseBurden);
+
+        // NC-Edit-Start: tolerance, dependence and withdrawal advance with the same scheduled interval.
+        changed |= AdvanceDependence(body, state, seconds);
+        // NC-Edit-End
 
         RecomputeModifiers(state, profile);
         if (state.CachedModifiers.ToxinRecoveryPerSecond > 0f)
@@ -258,6 +268,8 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             Initialized = state.StateInitialized,
             OverdoseBurden = state.OverdoseBurden,
         };
+        if (!TryCaptureDependence(state, timestamp, captured))
+            return false; // NC
         foreach (var (drugId, exposure) in state.ActiveDrugs.OrderBy(
                      entry => entry.Key.Id,
                      StringComparer.Ordinal))
@@ -324,6 +336,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
                     : TimeSpan.Zero,
             });
         }
+        RestoreDependence(state, snapshot, timestamp); // NC
         state.RemovalBuffer.Clear();
         state.EvaluationOrder.Clear();
         state.LastEvaluation = timestamp;
@@ -344,6 +357,9 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         {
             return false;
         }
+
+        if (!ValidateDependenceSnapshot(snapshot)) // NC
+            return false;
 
         var seen = new HashSet<ProtoId<NCDrugProfilePrototype>>();
         foreach (var exposure in snapshot.ActiveDrugs)
@@ -369,6 +385,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             return HasComp<NCMedicalBodyComponent>(body);
 
         state.ActiveDrugs.Clear();
+        state.Dependence.Clear(); // NC
         state.RemovalBuffer.Clear();
         state.EvaluationOrder.Clear();
         state.OverdoseBurden = 0f;
@@ -439,7 +456,8 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
                 continue;
 
             var fraction = ResolveTherapeuticFraction(drug, exposure.Concentration) *
-                           ResolveInteractionTherapeutics(state, profile, drugId, drug);
+                           ResolveInteractionTherapeutics(state, profile, drugId, drug) *
+                           ResolveToleranceFactor(state, drugId, drug); // NC: tolerance lowers the wanted effect only
             var psychologicalFraction = Math.Clamp(NCHumanityMath.TreatmentFactor(exposure.Concentration,
                 drug.MinimumEffectiveConcentration, drug.TherapeuticConcentration, drug.ToxicConcentration,
                 drug.MaximumConcentration) * ResolveInteractionTherapeutics(state, profile, drugId, drug), 0f, 1f);
@@ -685,6 +703,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
     {
         return profile.ActiveDrugCapacity is > 0 and <= AbsoluteDrugCapacityLimit &&
                profile.ActiveUpdateInterval > TimeSpan.Zero &&
+               profile.DependenceUpdateInterval > TimeSpan.Zero && // NC
                IsFinitePositive(profile.MaximumOverdoseBurden) &&
                IsFiniteNonNegative(profile.OverdoseRecoveryPerSecond) &&
                IsFinitePositive(profile.MaximumRecordedCumulativeDose) &&

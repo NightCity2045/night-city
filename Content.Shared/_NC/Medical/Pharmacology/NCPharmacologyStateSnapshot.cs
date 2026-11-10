@@ -24,6 +24,35 @@ public sealed partial class NCPharmacologyStateSnapshot
 
     [DataField]
     public List<NCActiveDrugExposureSnapshot> ActiveDrugs = [];
+
+    [DataField]
+    public List<NCDrugDependenceSnapshot> Dependence = [];
+}
+
+/// <summary>
+/// One persisted dependence record. The time since the last dose is relative to the capture boundary, so time
+/// spent offline neither starts withdrawal nor lets dependence fade.
+/// </summary>
+[DataDefinition]
+public sealed partial class NCDrugDependenceSnapshot
+{
+    [DataField(required: true)]
+    public ProtoId<NCDrugProfilePrototype> Profile;
+
+    [DataField]
+    public float Tolerance;
+
+    [DataField]
+    public float Dependence;
+
+    [DataField]
+    public float Craving;
+
+    [DataField]
+    public TimeSpan TimeSinceLastDose;
+
+    [DataField]
+    public NCWithdrawalStage Stage;
 }
 
 /// <summary>

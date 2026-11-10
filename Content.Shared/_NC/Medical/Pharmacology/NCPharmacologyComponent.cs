@@ -25,6 +25,10 @@ public sealed partial class NCPharmacologyComponent : Component
     [DataField]
     public float OverdoseBurden;
 
+    /// <summary>Tolerance, dependence and craving towards compounds that habituate. Persistent physiology.</summary>
+    [DataField]
+    public Dictionary<ProtoId<NCDrugProfilePrototype>, NCDrugDependenceState> Dependence = new();
+
     [DataField]
     public TimeSpan LastEvaluation;
 

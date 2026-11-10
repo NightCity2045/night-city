@@ -28,6 +28,10 @@ public sealed partial class NCPharmacologyProfilePrototype : IPrototype
     [DataField(required: true)]
     public TimeSpan ActiveUpdateInterval { get; private set; }
 
+    /// <summary>Cadence while only tolerance, dependence or craving remain, which change slowly.</summary>
+    [DataField]
+    public TimeSpan DependenceUpdateInterval { get; private set; } = TimeSpan.FromSeconds(30);
+
     [DataField(required: true)]
     public float MaximumOverdoseBurden { get; private set; }
 
@@ -198,4 +202,8 @@ public sealed partial class NCDrugProfilePrototype : IPrototype
 
     [DataField]
     public Dictionary<ProtoId<NCDrugProfilePrototype>, NCDrugInteractionRule> Interactions { get; private set; } = new();
+
+    /// <summary>Tolerance and dependence rules of this compound. Absent for compounds that do not habituate.</summary>
+    [DataField]
+    public ProtoId<NCDependenceProfilePrototype>? Dependence { get; private set; }
 }

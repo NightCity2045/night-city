@@ -34,6 +34,7 @@
 - type: ncDrugProfile
   id: NCDrugTraumaAnalgesic
   category: Analgesic
+  dependence: NCDependenceAnalgesic
   maximumConcentration: 30
   removalConcentration: 0.05
   minimumEffectiveConcentration: 1
@@ -77,6 +78,7 @@
 - type: ncDrugProfile
   id: NCDrugSedative
   category: Sedative
+  dependence: NCDependenceSedative
   maximumConcentration: 30
   removalConcentration: 0.05
   minimumEffectiveConcentration: 1
@@ -234,6 +236,7 @@
 - type: ncDrugProfile
   id: NCDrugStimulant
   category: Stimulant
+  dependence: NCDependenceStimulant
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 0.75

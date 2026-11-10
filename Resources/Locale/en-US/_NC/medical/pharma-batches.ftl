@@ -119,3 +119,4 @@ nc-pharma-qc-notice-no-tests = Select at least one test.
 nc-pharma-qc-notice-busy = An analysis is already in progress.
 nc-pharma-qc-notice-started = Analysis started.
 nc-pharma-qc-notice-finished = Analysis finished.
+nc-pharma-formula-maintenance-analgesic = maintenance analgesic

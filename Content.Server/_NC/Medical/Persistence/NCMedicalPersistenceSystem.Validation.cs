@@ -133,6 +133,11 @@ public sealed partial class NCMedicalPersistenceSystem
             snapshot.Pharmacology?.ActiveDrugs.Any(exposure => exposure == null) == true)
             return false;
 
+        // NC: dependence records are optional, but a present list must be well formed.
+        if (snapshot.Pharmacology is { Dependence: null } ||
+            snapshot.Pharmacology?.Dependence.Any(record => record == null) == true)
+            return false;
+
         if (snapshot.Humanity is { } humanity && !Content.Shared._NC.Medical.Humanity.NCHumanityMath.Validate(humanity))
             return false;
 
@@ -802,6 +807,16 @@ public sealed partial class NCMedicalPersistenceSystem
                 Concentration = exposure.Concentration,
                 CumulativeDose = exposure.CumulativeDose,
                 TimeSinceAdministration = exposure.TimeSinceAdministration,
+            }).ToList(),
+            // NC: dependence persists with the character.
+            Dependence = source.Dependence.Select(record => new NCDrugDependenceSnapshot
+            {
+                Profile = record.Profile,
+                Tolerance = record.Tolerance,
+                Dependence = record.Dependence,
+                Craving = record.Craving,
+                TimeSinceLastDose = record.TimeSinceLastDose,
+                Stage = record.Stage,
             }).ToList(),
         };
     }

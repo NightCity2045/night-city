@@ -119,3 +119,4 @@ nc-pharma-qc-notice-no-tests = Выберите хотя бы один тест.
 nc-pharma-qc-notice-busy = Анализ уже идёт.
 nc-pharma-qc-notice-started = Анализ начат.
 nc-pharma-qc-notice-finished = Анализ завершён.
+nc-pharma-formula-maintenance-analgesic = поддерживающий анальгетик
