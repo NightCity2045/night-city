@@ -96,6 +96,10 @@
   kidneyClearanceFraction: 0.3
   analgesiaAtTherapeutic: 0.4
   overdoseBurdenPerSecondAtMaximum: 0.8
+  interactions:
+    NCDrugSedationReversal:
+      therapeuticMultiplier: 0.45
+      toxicityMultiplier: 0.7
 
 - type: ncPharmaFormula
   id: NCPharmaFormulaMaintenanceAnalgesic
@@ -181,6 +185,9 @@
   respiratoryTransferMultiplierAtTherapeutic: 0.92
   overdoseBurdenPerSecondAtMaximum: 1.4
   interactions:
+    NCDrugSedationReversal:
+      therapeuticMultiplier: 0.45
+      toxicityMultiplier: 0.7
     NCDrugSedative:
       therapeuticMultiplier: 1.1
       toxicityMultiplier: 1.5
@@ -207,6 +214,9 @@
   rhythmInstabilityAtTherapeutic: 0.05
   overdoseBurdenPerSecondAtMaximum: 1
   interactions:
+    NCDrugStimulantReversal:
+      therapeuticMultiplier: 0.45
+      toxicityMultiplier: 0.7
     NCDrugStimulant:
       therapeuticMultiplier: 1
       toxicityMultiplier: 1.4

@@ -71,6 +71,9 @@
   respiratoryTransferMultiplierAtTherapeutic: 0.7
   overdoseBurdenPerSecondAtMaximum: 1.8
   interactions:
+    NCDrugSedationReversal:
+      therapeuticMultiplier: 0.45
+      toxicityMultiplier: 0.7
     NCDrugSedative:
       therapeuticMultiplier: 1.15
       toxicityMultiplier: 1.75
@@ -94,6 +97,9 @@
   respiratoryTransferMultiplierAtTherapeutic: 0.85
   overdoseBurdenPerSecondAtMaximum: 1.5
   interactions:
+    NCDrugSedationReversal:
+      therapeuticMultiplier: 0.45
+      toxicityMultiplier: 0.7
     NCDrugTraumaAnalgesic:
       therapeuticMultiplier: 1
       toxicityMultiplier: 1.25
@@ -251,6 +257,9 @@
   respiratoryTransferMultiplierAtTherapeutic: 1.1
   overdoseBurdenPerSecondAtMaximum: 1.8
   interactions:
+    NCDrugStimulantReversal:
+      therapeuticMultiplier: 0.45
+      toxicityMultiplier: 0.7
     NCDrugSedative:
       therapeuticMultiplier: 0.7
       toxicityMultiplier: 1.25

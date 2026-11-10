@@ -444,3 +444,5 @@ nc-medical-diagnostics-drug-drug-x17 = NC-X17
 nc-medical-diagnostics-drug-unidentified = неопознанное соединение
 nc-medical-diagnostics-drug-drug-plasma-factors = факторы свёртывания плазмы
 nc-medical-diagnostics-drug-drug-red-cells = эритроциты
+nc-medical-diagnostics-drug-drug-sedation-reversal = реверсор седации
+nc-medical-diagnostics-drug-drug-stimulant-reversal = реверсор стимуляторов

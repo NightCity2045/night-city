@@ -118,6 +118,10 @@
   cardiacOutputMultiplierAtTherapeutic: 1.18
   rhythmInstabilityAtTherapeutic: 0.06
   overdoseBurdenPerSecondAtMaximum: 1.2
+  interactions:
+    NCDrugStimulantReversal:
+      therapeuticMultiplier: 0.45
+      toxicityMultiplier: 0.7
 
 - type: ncPharmaFormula
   id: NCPharmaFormulaX17
@@ -825,3 +829,341 @@
       enum.NCPharmaRdUiKey.Key:
         type: NCPharmaRdBoundUserInterface
   - type: NCPharmaRdConsole
+
+# --- Antidotes: they counter a family of drugs through the ordinary interaction rules --------------------------
+- type: ncDrugProfile
+  id: NCDrugSedationReversal
+  category: Antitoxin
+  maximumConcentration: 25
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 0.75
+  therapeuticConcentration: 4
+  toxicConcentration: 12
+  clearancePerSecond: 0.05
+  baselineClearanceFraction: 0.1
+  liverClearanceFraction: 0.5
+  kidneyClearanceFraction: 0.4
+  overdoseBurdenPerSecondAtMaximum: 0.8
+  interactions:
+    NCDrugSedative:
+      therapeuticMultiplier: 1
+      toxicityMultiplier: 0.6
+    NCDrugSurgicalAnesthetic:
+      therapeuticMultiplier: 1
+      toxicityMultiplier: 0.6
+    NCDrugEuphoric:
+      therapeuticMultiplier: 1
+      toxicityMultiplier: 0.6
+    NCDrugMaintenanceAnalgesic:
+      therapeuticMultiplier: 1
+      toxicityMultiplier: 0.6
+
+- type: ncDrugProfile
+  id: NCDrugStimulantReversal
+  category: Antitoxin
+  maximumConcentration: 25
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 0.75
+  therapeuticConcentration: 4
+  toxicConcentration: 12
+  clearancePerSecond: 0.05
+  baselineClearanceFraction: 0.1
+  liverClearanceFraction: 0.5
+  kidneyClearanceFraction: 0.4
+  overdoseBurdenPerSecondAtMaximum: 0.8
+  interactions:
+    NCDrugStimulant:
+      therapeuticMultiplier: 1
+      toxicityMultiplier: 0.6
+    NCDrugSocial:
+      therapeuticMultiplier: 1
+      toxicityMultiplier: 0.6
+    NCDrugX17:
+      therapeuticMultiplier: 1
+      toxicityMultiplier: 0.6
+
+# --- The basic clinical pharmacopoeia: a known formula for every clinical profile ---------------------------
+- type: ncPharmaFormula
+  id: NCPharmaFormulaSurgicalAnesthetic
+  name: nc-pharma-formula-surgical-anesthetic
+  version: 1
+  compound: NCDrugSurgicalAnesthetic
+  deliveryForm: NCPharmaDeliveryInfusion
+  targetConcentration: 5
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.88
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: ClinicalOnly
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaSedative
+  name: nc-pharma-formula-sedative
+  version: 1
+  compound: NCDrugSedative
+  deliveryForm: NCPharmaDeliveryInfusion
+  targetConcentration: 6
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.88
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: Prescription
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaVasopressor
+  name: nc-pharma-formula-vasopressor
+  version: 1
+  compound: NCDrugVasopressor
+  deliveryForm: NCPharmaDeliveryInfusion
+  targetConcentration: 4
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.86
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: ClinicalOnly
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaVasodilator
+  name: nc-pharma-formula-vasodilator
+  version: 1
+  compound: NCDrugVasodilator
+  deliveryForm: NCPharmaDeliveryInfusion
+  targetConcentration: 4
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.86
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: ClinicalOnly
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaAntiarrhythmic
+  name: nc-pharma-formula-antiarrhythmic
+  version: 1
+  compound: NCDrugAntiarrhythmic
+  deliveryForm: NCPharmaDeliveryInfusion
+  targetConcentration: 4
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.86
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: ClinicalOnly
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaRespiratoryStimulant
+  name: nc-pharma-formula-respiratory-stimulant
+  version: 1
+  compound: NCDrugRespiratoryStimulant
+  deliveryForm: NCPharmaDeliveryAutoinjector
+  targetConcentration: 4
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.85
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: Prescription
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaAntitoxin
+  name: nc-pharma-formula-antitoxin
+  version: 1
+  compound: NCDrugAntitoxin
+  deliveryForm: NCPharmaDeliveryAutoinjector
+  targetConcentration: 5
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.9
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: Prescription
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaProcoagulant
+  name: nc-pharma-formula-procoagulant
+  version: 1
+  compound: NCDrugProcoagulant
+  deliveryForm: NCPharmaDeliveryAutoinjector
+  targetConcentration: 4
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.85
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: Prescription
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaAnticoagulant
+  name: nc-pharma-formula-anticoagulant
+  version: 1
+  compound: NCDrugAnticoagulant
+  deliveryForm: NCPharmaDeliveryInfusion
+  targetConcentration: 4
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.88
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: ClinicalOnly
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaSedationReversal
+  name: nc-pharma-formula-sedation-reversal
+  version: 1
+  compound: NCDrugSedationReversal
+  deliveryForm: NCPharmaDeliveryAutoinjector
+  targetConcentration: 4
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.88
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: Prescription
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaStimulantReversal
+  name: nc-pharma-formula-stimulant-reversal
+  version: 1
+  compound: NCDrugStimulantReversal
+  deliveryForm: NCPharmaDeliveryAutoinjector
+  targetConcentration: 4
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.88
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: Prescription
+
+# --- Factory-filled packs: each makes its own batch when created, for spawning and for catalogues ----------
+- type: entity
+  parent: NCPharmaAutoinjector
+  id: NCPharmaPackTraumaAnalgesic
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaTraumaAnalgesic
+    doses: 1
+
+- type: entity
+  parent: NCPharmaPillBottle
+  id: NCPharmaPackMaintenanceAnalgesic
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaMaintenanceAnalgesic
+    doses: 10
+
+- type: entity
+  parent: NCPharmaAutoinjector
+  id: NCPharmaPackFieldStimulant
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaFieldStimulant
+    doses: 1
+
+- type: entity
+  parent: NCPharmaIvBag
+  id: NCPharmaPackBroadAntibiotic
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaBroadAntibiotic
+    doses: 1
+
+- type: entity
+  parent: NCPharmaIvBag
+  id: NCPharmaPackGramPositiveAntibiotic
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaGramPositiveAntibiotic
+    doses: 1
+
+- type: entity
+  parent: NCPharmaIvBag
+  id: NCPharmaPackGramNegativeAntibiotic
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaGramNegativeAntibiotic
+    doses: 1
+
+- type: entity
+  parent: NCPharmaIvBag
+  id: NCPharmaPackImmunosuppressant
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaImmunosuppressant
+    doses: 1
+
+- type: entity
+  parent: NCPharmaBloodBag
+  id: NCPharmaPackSyntheticBlood
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaSyntheticBlood
+    doses: 1
+
+- type: entity
+  parent: NCPharmaIvBag
+  id: NCPharmaPackSurgicalAnesthetic
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaSurgicalAnesthetic
+    doses: 1
+
+- type: entity
+  parent: NCPharmaIvBag
+  id: NCPharmaPackSedative
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaSedative
+    doses: 1
+
+- type: entity
+  parent: NCPharmaIvBag
+  id: NCPharmaPackVasopressor
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaVasopressor
+    doses: 1
+
+- type: entity
+  parent: NCPharmaIvBag
+  id: NCPharmaPackVasodilator
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaVasodilator
+    doses: 1
+
+- type: entity
+  parent: NCPharmaIvBag
+  id: NCPharmaPackAntiarrhythmic
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaAntiarrhythmic
+    doses: 1
+
+- type: entity
+  parent: NCPharmaAutoinjector
+  id: NCPharmaPackRespiratoryStimulant
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaRespiratoryStimulant
+    doses: 1
+
+- type: entity
+  parent: NCPharmaAutoinjector
+  id: NCPharmaPackAntitoxin
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaAntitoxin
+    doses: 1
+
+- type: entity
+  parent: NCPharmaAutoinjector
+  id: NCPharmaPackProcoagulant
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaProcoagulant
+    doses: 1
+
+- type: entity
+  parent: NCPharmaIvBag
+  id: NCPharmaPackAnticoagulant
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaAnticoagulant
+    doses: 1
+
+- type: entity
+  parent: NCPharmaAutoinjector
+  id: NCPharmaPackSedationReversal
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaSedationReversal
+    doses: 1
+
+- type: entity
+  parent: NCPharmaAutoinjector
+  id: NCPharmaPackStimulantReversal
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaStimulantReversal
+    doses: 1

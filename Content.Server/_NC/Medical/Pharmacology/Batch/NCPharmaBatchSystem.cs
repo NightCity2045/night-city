@@ -189,8 +189,35 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
             return null;
         }
 
+        BindContainer(container, component, batch, tuning, doses, actor);
+        return container;
+    }
+
+    /// <summary>Puts doses of an existing batch into a pack that already exists, e.g. a prefilled factory pack.</summary>
+    public bool TryBindContainer(EntityUid container, Guid batchId, int doses, string actor)
+    {
+        if (doses < 1 || !_batches.TryGetValue(batchId, out var batch) ||
+            doses > batch.DosesProduced - batch.DosesPacked ||
+            !TryGetTuning(out var tuning) ||
+            !TryComp<NCPharmaContainerComponent>(container, out var component))
+        {
+            return false;
+        }
+
+        BindContainer(container, component, batch, tuning, doses, actor);
+        return true;
+    }
+
+    private void BindContainer(
+        EntityUid container,
+        NCPharmaContainerComponent component,
+        NCPharmaBatchRecord batch,
+        NCPharmaTuningPrototype tuning,
+        int doses,
+        string actor)
+    {
         batch.DosesPacked += doses;
-        component.BatchId = batchId;
+        component.BatchId = batch.BatchId;
         component.Doses = doses;
         component.QcState = batch.QcState;
         component.KeepCold = TryGetFormula(batch.Formula, out var packFormula) &&
@@ -198,7 +225,6 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         ApplyLabel(component, batch.Label);
         Dirty(container, component);
         AddAudit(batch, tuning, NCPharmaAuditKind.Dispensed, actor, $"container={ToPrettyString(container)} doses={doses}");
-        return container;
     }
 
     /// <summary>

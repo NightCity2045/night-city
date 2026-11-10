@@ -442,3 +442,5 @@ nc-medical-diagnostics-drug-drug-x17 = NC-X17
 nc-medical-diagnostics-drug-unidentified = unidentified compound
 nc-medical-diagnostics-drug-drug-plasma-factors = plasma clotting factors
 nc-medical-diagnostics-drug-drug-red-cells = red cells
+nc-medical-diagnostics-drug-drug-sedation-reversal = sedation reversal agent
+nc-medical-diagnostics-drug-drug-stimulant-reversal = stimulant reversal agent
