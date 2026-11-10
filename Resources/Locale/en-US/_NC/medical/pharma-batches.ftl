@@ -120,3 +120,42 @@ nc-pharma-qc-notice-busy = An analysis is already in progress.
 nc-pharma-qc-notice-started = Analysis started.
 nc-pharma-qc-notice-finished = Analysis finished.
 nc-pharma-formula-maintenance-analgesic = maintenance analgesic
+
+nc-pharma-formula-euphoric = clinical euphoric
+nc-pharma-formula-social = social stimulant
+ent-NCPharmaSynthesizerCorporate = pharmaceutical synthesizer
+    .desc = A corporate production line: sterile throughout, precise dosing and a large run capacity.
+    .suffix = corporate lab
+
+nc-pharma-phase-onset = { $effect ->
+   *[stimulation] Your pulse quickens and your thoughts sharpen.
+    [sedation] A heavy calm begins to settle over you.
+    [euphoria] A warm wave of well-being starts to spread through you.
+    [perception] The edges of the world begin to shift.
+    [sociability] You feel looser and more talkative.
+    [dissociation] You start to feel distant from your own body.
+}
+nc-pharma-phase-peak = { $effect ->
+   *[stimulation] You are wired, quick and wide awake.
+    [sedation] You are deeply, heavily calm.
+    [euphoria] Everything feels warm, easy and good.
+    [perception] Colors and sounds are strange and vivid.
+    [sociability] You feel at ease with everyone around you.
+    [dissociation] You watch yourself from far away.
+}
+nc-pharma-phase-decline = { $effect ->
+   *[stimulation] The edge is wearing off.
+    [sedation] The calm is thinning out.
+    [euphoria] The warmth is slowly fading.
+    [perception] The strangeness is settling down.
+    [sociability] The easy mood is slipping away.
+    [dissociation] You feel yourself coming back.
+}
+nc-pharma-phase-comedown = { $effect ->
+   *[stimulation] The rush is gone and you feel drained.
+    [sedation] You feel sluggish and slow.
+    [euphoria] The warmth is gone and you feel flat and tired.
+    [perception] The world is dull and you feel worn out.
+    [sociability] The mood drops and you feel tired and irritable.
+    [dissociation] You are back, but heavy and numb.
+}

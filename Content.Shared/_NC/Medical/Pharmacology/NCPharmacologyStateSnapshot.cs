@@ -53,6 +53,9 @@ public sealed partial class NCDrugDependenceSnapshot
 
     [DataField]
     public NCWithdrawalStage Stage;
+
+    [DataField]
+    public float Comedown;
 }
 
 /// <summary>

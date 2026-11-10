@@ -18,6 +18,29 @@ public enum NCWithdrawalStage : byte
     Severe,
 }
 
+/// <summary>Directions of a felt effect. They are wording only: the physiology comes from the drug profile.</summary>
+[Serializable, NetSerializable]
+public enum NCPsychoactiveEffect : byte
+{
+    Stimulation,
+    Sedation,
+    Euphoria,
+    Perception,
+    Sociability,
+    Dissociation,
+}
+
+/// <summary>The four readable phases of a felt compound.</summary>
+[Serializable, NetSerializable]
+public enum NCDrugPhase : byte
+{
+    None,
+    Onset,
+    Peak,
+    Decline,
+    Comedown,
+}
+
 /// <summary>Persistent dependence state of one body towards one compound.</summary>
 [DataDefinition]
 public sealed partial class NCDrugDependenceState
@@ -37,6 +60,17 @@ public sealed partial class NCDrugDependenceState
 
     [DataField]
     public NCWithdrawalStage Stage;
+
+    /// <summary>Aftereffect still owed after the active phase, in units of the comedown compound.</summary>
+    [DataField]
+    public float Comedown;
+
+    /// <summary>Phase last announced. Runtime only: it is recomputed on the first tick after a restore.</summary>
+    [ViewVariables]
+    public NCDrugPhase Phase;
+
+    [ViewVariables]
+    public float LastConcentration;
 }
 
 /// <summary>Result of resolving one body's withdrawal for one compound at one moment.</summary>
@@ -70,6 +104,51 @@ public static class NCDependenceMath
         state.Craving = 0f;
         state.LastDose = now;
         state.Stage = NCWithdrawalStage.None;
+        state.Comedown = Math.Clamp(
+            state.Comedown + concentration * profile.ComedownPerConcentration,
+            0f,
+            MathF.Max(0f, profile.MaximumComedown));
+    }
+
+    /// <summary>
+    /// Settles the aftereffect. While the compound is active the debt is held; once it ends the debt is paid out
+    /// as a comedown level and fades. Returns the level of the comedown compound the body should now carry.
+    /// </summary>
+    public static float AdvanceComedown(
+        NCDependenceProfilePrototype profile,
+        NCDrugDependenceState state,
+        float seconds,
+        bool compoundActive)
+    {
+        if (!float.IsFinite(seconds) || seconds <= 0f || compoundActive || state.Comedown <= 0f)
+            return 0f;
+
+        var level = state.Comedown;
+        state.Comedown = MathF.Max(0f, state.Comedown - profile.ComedownDecayPerSecond * seconds);
+        return level;
+    }
+
+    /// <summary>
+    /// The phase a felt compound is in. Rising towards the therapeutic level is the onset, staying near it is
+    /// the peak, falling away is the decline, and the owed aftereffect after the active phase is the comedown.
+    /// </summary>
+    public static NCDrugPhase ResolvePhase(
+        float concentration,
+        float previousConcentration,
+        float minimumEffective,
+        float therapeutic,
+        bool comedownOwed)
+    {
+        if (concentration >= minimumEffective)
+        {
+            var rising = concentration > previousConcentration + 0.0001f;
+            var high = concentration >= therapeutic * 0.8f;
+            if (rising)
+                return high ? NCDrugPhase.Peak : NCDrugPhase.Onset;
+            return high ? NCDrugPhase.Peak : NCDrugPhase.Decline;
+        }
+
+        return comedownOwed ? NCDrugPhase.Comedown : NCDrugPhase.None;
     }
 
     /// <summary>
@@ -155,12 +234,17 @@ public static class NCDependenceMath
         IsNonNegative(profile.WithdrawalConcentrationAtFull) &&
         IsNonNegative(profile.CravingGainPerSecond) &&
         IsNonNegative(profile.CravingDecayPerSecond) &&
+        IsNonNegative(profile.ComedownPerConcentration) &&
+        IsNonNegative(profile.ComedownDecayPerSecond) &&
+        IsNonNegative(profile.MaximumComedown) &&
+        profile.Effects.Count <= 2 &&
         float.IsFinite(profile.ReplacementDecayMultiplier) && profile.ReplacementDecayMultiplier >= 1f;
 
     public static bool Validate(NCDrugDependenceState state) =>
         IsRange(state.Tolerance, 0f, 1f) &&
         IsRange(state.Dependence, 0f, 1f) &&
         IsRange(state.Craving, 0f, 1f) &&
+        IsRange(state.Comedown, 0f, 1000f) &&
         Enum.IsDefined(state.Stage);
 
     private static bool IsRange(float value, float minimum, float maximum) =>

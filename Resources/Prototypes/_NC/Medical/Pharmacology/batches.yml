@@ -350,3 +350,16 @@
           True: { visible: true }
           False: { visible: false }
   - type: NCPharmaQcAnalyzer
+
+- type: entity
+  parent: NCPharmaSynthesizerBase
+  id: NCPharmaSynthesizerCorporate
+  suffix: corporate lab
+  components:
+  - type: NCPharmaSynthesizer
+    equipmentSterility: 0.995
+    equipmentMixing: 0.99
+    calibrationError: 0
+    dosesPerPack: 10
+    maximumUnitsPerRun: 60
+

@@ -67,4 +67,26 @@ public sealed partial class NCDependenceProfilePrototype : IPrototype
     /// <summary>How much faster dependence fades while a replacement is active (controlled tapering).</summary>
     [DataField]
     public float ReplacementDecayMultiplier { get; private set; } = 4f;
+
+    /// <summary>True when the compound is felt in the body and announces its phases to the person taking it.</summary>
+    [DataField]
+    public bool Psychoactive { get; private set; }
+
+    /// <summary>The one or two directions of the felt effect. They only choose the wording of the signs.</summary>
+    [DataField]
+    public List<NCPsychoactiveEffect> Effects { get; private set; } = [];
+
+    /// <summary>Symptom compound of the aftereffect that follows the end of the active phase.</summary>
+    [DataField]
+    public ProtoId<NCDrugProfilePrototype>? ComedownCompound { get; private set; }
+
+    /// <summary>Aftereffect built per unit of concentration dosed, in units of the comedown compound.</summary>
+    [DataField]
+    public float ComedownPerConcentration { get; private set; } = 0.5f;
+
+    [DataField]
+    public float ComedownDecayPerSecond { get; private set; } = 0.01f;
+
+    [DataField]
+    public float MaximumComedown { get; private set; } = 6f;
 }

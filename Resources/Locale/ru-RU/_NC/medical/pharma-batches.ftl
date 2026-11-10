@@ -120,3 +120,42 @@ nc-pharma-qc-notice-busy = Анализ уже идёт.
 nc-pharma-qc-notice-started = Анализ начат.
 nc-pharma-qc-notice-finished = Анализ завершён.
 nc-pharma-formula-maintenance-analgesic = поддерживающий анальгетик
+
+nc-pharma-formula-euphoric = клинический эйфорик
+nc-pharma-formula-social = социальный стимулятор
+ent-NCPharmaSynthesizerCorporate = фармацевтический синтезатор
+    .desc = Корпоративная производственная линия: стерильна на всех этапах, точная дозировка и большой объём партии.
+    .suffix = корпоративная лаборатория
+
+nc-pharma-phase-onset = { $effect ->
+   *[stimulation] Пульс учащается, мысли становятся острее.
+    [sedation] Вас начинает накрывать тяжёлое спокойствие.
+    [euphoria] По телу расходится тёплая волна благополучия.
+    [perception] Края мира начинают смещаться.
+    [sociability] Вы чувствуете себя свободнее и разговорчивее.
+    [dissociation] Вы начинаете ощущать дистанцию от собственного тела.
+}
+nc-pharma-phase-peak = { $effect ->
+   *[stimulation] Вы на взводе, быстры и совершенно бодры.
+    [sedation] Вы глубоко и тяжело спокойны.
+    [euphoria] Всё кажется тёплым, лёгким и хорошим.
+    [perception] Цвета и звуки странные и яркие.
+    [sociability] Вам легко со всеми вокруг.
+    [dissociation] Вы наблюдаете за собой издалека.
+}
+nc-pharma-phase-decline = { $effect ->
+   *[stimulation] Острота понемногу уходит.
+    [sedation] Спокойствие редеет.
+    [euphoria] Тепло медленно угасает.
+    [perception] Странность понемногу оседает.
+    [sociability] Лёгкость настроения ускользает.
+    [dissociation] Вы чувствуете, что возвращаетесь.
+}
+nc-pharma-phase-comedown = { $effect ->
+   *[stimulation] Подъём прошёл, вы чувствуете опустошение.
+    [sedation] Вы вялы и заторможены.
+    [euphoria] Тепло ушло, вы чувствуете пустоту и усталость.
+    [perception] Мир кажется тусклым, вы измотаны.
+    [sociability] Настроение падает, вы устали и раздражены.
+    [dissociation] Вы вернулись, но чувствуете тяжесть и онемение.
+}

@@ -4,6 +4,7 @@
 
 using System.Linq;
 using Content.Shared._NC.Medical.Pharmacology;
+using Content.Shared.Popups;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.Medical.Pharmacology;
@@ -17,6 +18,8 @@ public sealed partial class NCPharmacologySystem
 {
     /// <summary>Smallest missing amount of a symptom compound worth topping up.</summary>
     private const float WithdrawalTopUpEpsilon = 0.01f;
+
+    [Dependency] private SharedPopupSystem _popup = default!;
 
     private void RegisterDependenceDose(NCPharmacologyComponent state, NCDrugProfilePrototype drug, float concentration)
     {
@@ -83,6 +86,13 @@ public sealed partial class NCPharmacologySystem
             var previousStage = record.Stage;
             var previousDependence = record.Dependence;
 
+            // Phase is read before the clearance of this tick is forgotten: it needs the concentration it follows.
+            var concentration = exposure?.Concentration ?? 0f;
+            var comedownLevel = NCDependenceMath.AdvanceComedown(dependence, record, seconds, compoundActive);
+            if (comedownLevel > 0f && dependence.ComedownCompound is { } comedownCompound)
+                changed |= TopUpWithdrawal(body, state, comedownCompound, comedownLevel);
+            changed |= AnnouncePhase(body, record, dependence, drug, concentration);
+
             NCDependenceMath.Decay(dependence, record, seconds, replacementActive);
             NCDependenceMath.AdvanceCraving(
                 dependence,
@@ -100,6 +110,7 @@ public sealed partial class NCPharmacologySystem
                 changed |= TopUpWithdrawal(body, state, symptom, outcome.SymptomConcentration);
 
             if (record.Tolerance <= 0f && record.Dependence <= 0f && record.Craving <= 0f &&
+                record.Comedown <= 0f && record.Phase == NCDrugPhase.None &&
                 outcome.Stage == NCWithdrawalStage.None)
             {
                 removal.Add(drugId);
@@ -113,6 +124,41 @@ public sealed partial class NCPharmacologySystem
         }
 
         return changed;
+    }
+
+    /// <summary>
+    /// Resolves the phase of a felt compound and tells the person when it changes. Only the person taking the
+    /// compound sees the signs, and only the wording depends on the direction of the effect.
+    /// </summary>
+    private bool AnnouncePhase(
+        EntityUid body,
+        NCDrugDependenceState record,
+        NCDependenceProfilePrototype dependence,
+        NCDrugProfilePrototype drug,
+        float concentration)
+    {
+        var phase = NCDependenceMath.ResolvePhase(
+            concentration,
+            record.LastConcentration,
+            drug.MinimumEffectiveConcentration,
+            drug.TherapeuticConcentration,
+            record.Comedown > 0.05f);
+        record.LastConcentration = concentration;
+        if (phase == record.Phase)
+            return false;
+
+        record.Phase = phase;
+        if (dependence.Psychoactive && phase != NCDrugPhase.None)
+        {
+            var effect = dependence.Effects.Count > 0 ? dependence.Effects[0] : NCPsychoactiveEffect.Stimulation;
+            _popup.PopupEntity(
+                Loc.GetString(NCPsychoactiveText.PhaseKey(phase), ("effect", NCPsychoactiveText.EffectId(effect))),
+                body,
+                body,
+                PopupType.Small);
+        }
+
+        return true;
     }
 
     private bool IsReplacementActive(NCPharmacologyComponent state, NCDependenceProfilePrototype dependence)
@@ -178,6 +224,7 @@ public sealed partial class NCPharmacologySystem
                 Craving = record.Craving,
                 TimeSinceLastDose = timestamp - record.LastDose,
                 Stage = record.Stage,
+                Comedown = record.Comedown,
             });
         }
 
@@ -199,6 +246,7 @@ public sealed partial class NCPharmacologySystem
                 Craving = record.Craving,
                 LastDose = timestamp >= record.TimeSinceLastDose ? timestamp - record.TimeSinceLastDose : TimeSpan.Zero,
                 Stage = record.Stage,
+                Comedown = record.Comedown,
             };
         }
     }
@@ -221,6 +269,7 @@ public sealed partial class NCPharmacologySystem
                     Dependence = record.Dependence,
                     Craving = record.Craving,
                     Stage = record.Stage,
+                    Comedown = record.Comedown,
                 }))
             {
                 return false;

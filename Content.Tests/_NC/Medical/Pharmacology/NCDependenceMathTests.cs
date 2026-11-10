@@ -136,4 +136,72 @@ public sealed class NCDependenceMathTests
         Assert.That(NCDependenceMath.Validate(new NCDrugDependenceState()), Is.True);
         Assert.That(NCDependenceMath.Validate(new NCDrugDependenceState { Tolerance = float.NaN }), Is.False);
     }
+
+    [Test]
+    public void DosingBuildsAComedownDebtThatIsHeldWhileTheCompoundIsActive()
+    {
+        var profile = Profile();
+        var state = new NCDrugDependenceState();
+        NCDependenceMath.RegisterDose(profile, state, 6f, Seconds(0));
+        var debt = state.Comedown;
+
+        var whileActive = NCDependenceMath.AdvanceComedown(profile, state, 60f, true);
+
+        Assert.That(debt, Is.GreaterThan(0f));
+        Assert.That(whileActive, Is.EqualTo(0f));
+        Assert.That(state.Comedown, Is.EqualTo(debt));
+    }
+
+    [Test]
+    public void ComedownIsPaidOutAfterTheActivePhaseAndFades()
+    {
+        var profile = Profile();
+        var state = new NCDrugDependenceState();
+        NCDependenceMath.RegisterDose(profile, state, 6f, Seconds(0));
+        var debt = state.Comedown;
+
+        var level = NCDependenceMath.AdvanceComedown(profile, state, 30f, false);
+
+        Assert.That(level, Is.EqualTo(debt));
+        Assert.That(state.Comedown, Is.LessThan(debt));
+    }
+
+    [Test]
+    public void ComedownDebtIsCapped()
+    {
+        var profile = Profile();
+        var state = new NCDrugDependenceState();
+        for (var dose = 0; dose < 200; dose++)
+            NCDependenceMath.RegisterDose(profile, state, 20f, Seconds(dose));
+
+        Assert.That(state.Comedown, Is.LessThanOrEqualTo(profile.MaximumComedown));
+    }
+
+    [TestCase(0.5f, 0f, NCDrugPhase.Onset)]
+    [TestCase(4f, 2f, NCDrugPhase.Peak)]
+    [TestCase(4f, 4f, NCDrugPhase.Peak)]
+    [TestCase(2f, 4f, NCDrugPhase.Decline)]
+    public void ActivePhasesFollowTheConcentration(float concentration, float previous, NCDrugPhase expected)
+    {
+        var phase = NCDependenceMath.ResolvePhase(concentration, previous, 0.3f, 4f, false);
+
+        Assert.That(phase, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void AfterTheActivePhaseTheComedownOrNothingFollows()
+    {
+        Assert.That(NCDependenceMath.ResolvePhase(0.1f, 2f, 0.3f, 4f, true), Is.EqualTo(NCDrugPhase.Comedown));
+        Assert.That(NCDependenceMath.ResolvePhase(0.1f, 2f, 0.3f, 4f, false), Is.EqualTo(NCDrugPhase.None));
+    }
+
+    [Test]
+    public void ARisingDoseStartsAsOnsetAndEndsAsPeak()
+    {
+        var onset = NCDependenceMath.ResolvePhase(0.4f, 0f, 0.3f, 4f, false);
+        var peak = NCDependenceMath.ResolvePhase(3.5f, 2f, 0.3f, 4f, false);
+
+        Assert.That(onset, Is.EqualTo(NCDrugPhase.Onset));
+        Assert.That(peak, Is.EqualTo(NCDrugPhase.Peak));
+    }
 }

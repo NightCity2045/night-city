@@ -817,6 +817,7 @@ public sealed partial class NCMedicalPersistenceSystem
                 Craving = record.Craving,
                 TimeSinceLastDose = record.TimeSinceLastDose,
                 Stage = record.Stage,
+                Comedown = record.Comedown,
             }).ToList(),
         };
     }
