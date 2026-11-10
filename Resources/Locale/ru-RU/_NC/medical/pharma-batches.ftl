@@ -210,3 +210,7 @@ nc-pharma-reactor-popup-release = Реактор выбрасывает токс
 nc-pharma-reactor-popup-rupture = Сосуд реактора разрывается и вспыхивает!
 nc-pharma-reactor-popup-severe = Сосуд реактора сильно взрывается!
 nc-pharma-reactor-popup-finished = Реактор заканчивает партию {$code}.
+
+ent-NCPharmaColdStorage = фармацевтическое холодное хранилище
+    .desc = Шкаф с питанием, который держит лекарства холодными. Нестабильные партии не портятся внутри, пока у шкафа есть питание.
+nc-pharma-container-examine-keep-cold = [color=#7DBDB7]Хранить в холоде: эта формула портится при комнатной температуре.[/color]

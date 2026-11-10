@@ -44,6 +44,9 @@ public sealed class NCPharmaBatchRecord
     public int DosesPacked;
     public int DosesAdministered;
     public readonly List<NCPharmaAuditEntry> Audit = [];
+
+    /// <summary>Purity at the last degradation entry in the history. Runtime only.</summary>
+    public float LoggedPurity = float.NaN;
 }
 
 public readonly record struct NCPharmaDoseResult(bool Accepted, NCPharmaDoseEffect Effect);
@@ -169,6 +172,8 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         component.BatchId = batchId;
         component.Doses = doses;
         component.QcState = batch.QcState;
+        component.KeepCold = TryGetFormula(batch.Formula, out var packFormula) &&
+                             tuning.StableThreshold > packFormula.BaseStability;
         ApplyLabel(component, batch.Label);
         Dirty(container, component);
         AddAudit(batch, tuning, NCPharmaAuditKind.Dispensed, actor, $"container={ToPrettyString(container)} doses={doses}");

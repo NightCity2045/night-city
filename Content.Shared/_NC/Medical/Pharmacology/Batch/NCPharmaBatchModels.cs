@@ -90,6 +90,7 @@ public enum NCPharmaAuditKind : byte
     Administered,
     Recalled,
     AdminInspected,
+    Degraded,
 }
 
 /// <summary>

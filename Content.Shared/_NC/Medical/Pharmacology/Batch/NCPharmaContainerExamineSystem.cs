@@ -34,6 +34,8 @@ public sealed class NCPharmaContainerExamineSystem : EntitySystem
             ("grade", grade),
             ("sterile", sterile),
             ("doses", comp.Doses)));
+        if (comp.KeepCold)
+            args.PushMarkup(Loc.GetString("nc-pharma-container-examine-keep-cold"));
         args.PushMarkup(Loc.GetString(
             "nc-pharma-container-examine-qc",
             ("state", Loc.GetString(NCPharmaTextKeys.QcState(comp.QcState)))));

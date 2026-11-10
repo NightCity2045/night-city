@@ -26,6 +26,10 @@
   defaultReaction: NCPharmaReactionStable
   maximumReactorUnits: 8
   catalystCharges: 2
+  stableThreshold: 0.7
+  degradationPerHour: 1.5
+  degradationInterval: 60s
+  minimumDegradedPurity: 0.2
 
 - type: ncPharmaDeliveryForm
   id: NCPharmaDeliveryOral
@@ -507,3 +511,69 @@
           True: { visible: true }
           False: { visible: false }
   - type: NCPharmaReactor
+
+- type: entity
+  parent: [ BaseMachinePowered, BaseStructure ]
+  id: NCPharmaColdStorage
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/mixer.rsi
+    snapCardinals: true
+    layers:
+    - state: mixer_empty
+    - state: mixer_screens
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+  - type: Icon
+    sprite: Structures/Machines/mixer.rsi
+    state: mixer_empty
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.25,-0.4,0.25,0.4"
+        density: 190
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+  - type: Damageable
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 175
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+  - type: ApcPowerReceiver
+    powerLoad: 120
+  - type: Storage
+    grid:
+    - 0,0,5,3
+    maxItemSize: Normal
+    whitelist:
+      components:
+      - NCPharmaContainer
+      - NCPharmaSource
+  - type: ContainerContainer
+    containers:
+      storagebase: !type:Container
+  - type: UserInterface
+    interfaces:
+      enum.StorageUiKey.Key:
+        type: StorageBoundUserInterface
+  - type: InteractionOutline
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+  - type: NCPharmaColdStorage

@@ -49,6 +49,13 @@ public sealed partial class NCPharmaContainerComponent : Component
     /// </summary>
     [DataField, AutoNetworkedField]
     public NCPharmaQcState QcState;
+
+    /// <summary>
+    /// Whether the formula is known to spoil outside cold storage. It comes from the formula, which is public
+    /// knowledge, never from the hidden stability of this batch.
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public bool KeepCold;
 }
 
 /// <summary>Cancellable DoAfter carried while a dose is being administered.</summary>

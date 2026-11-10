@@ -111,6 +111,21 @@ public sealed partial class NCPharmaTuningPrototype : IPrototype
     /// <summary>How many catalyst charges one run may use.</summary>
     [DataField]
     public int CatalystCharges { get; private set; } = 2;
+
+    /// <summary>Stability at or above which a batch keeps its quality without any special storage.</summary>
+    [DataField]
+    public float StableThreshold { get; private set; } = 0.7f;
+
+    /// <summary>Purity lost per hour for each unit of stability below the threshold, outside cold storage.</summary>
+    [DataField]
+    public float DegradationPerHour { get; private set; } = 1.5f;
+
+    [DataField]
+    public TimeSpan DegradationInterval { get; private set; } = TimeSpan.FromSeconds(60);
+
+    /// <summary>Degradation never takes purity below this, so a spoiled batch is poor, not nothing.</summary>
+    [DataField]
+    public float MinimumDegradedPurity { get; private set; } = 0.2f;
 }
 
 /// <summary>

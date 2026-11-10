@@ -380,4 +380,32 @@ public sealed class NCPharmaBatchMathTests
         Assert.That(approved.CustomName, Is.EqualTo("Name"));
         Assert.That(approved.DerivedFrom, Is.EqualTo("F"));
     }
+
+    [Test]
+    public void AStableBatchNeverDegrades()
+    {
+        var purity = NCPharmaBatchMath.ResolveDegradedPurity(Tuning(), 0.85f, 0.9f, 7 * 24 * 3600f);
+
+        Assert.That(purity, Is.EqualTo(0.9f));
+    }
+
+    [Test]
+    public void AnUnstableBatchLosesPurityAndTheLowerTheStabilityTheFaster()
+    {
+        var slight = NCPharmaBatchMath.ResolveDegradedPurity(Tuning(), 0.65f, 0.9f, 3600f);
+        var severe = NCPharmaBatchMath.ResolveDegradedPurity(Tuning(), 0.4f, 0.9f, 3600f);
+
+        Assert.That(slight, Is.LessThan(0.9f));
+        Assert.That(severe, Is.LessThan(slight));
+    }
+
+    [Test]
+    public void DegradationNeverTakesPurityBelowTheFloorAndNeverRaisesIt()
+    {
+        var floor = NCPharmaBatchMath.ResolveDegradedPurity(Tuning(), 0.1f, 0.9f, 1000 * 3600f);
+        var untouched = NCPharmaBatchMath.ResolveDegradedPurity(Tuning(), 0.1f, 0.1f, 3600f);
+
+        Assert.That(floor, Is.EqualTo(Tuning().MinimumDegradedPurity).Within(0.0001f));
+        Assert.That(untouched, Is.LessThanOrEqualTo(0.1f));
+    }
 }

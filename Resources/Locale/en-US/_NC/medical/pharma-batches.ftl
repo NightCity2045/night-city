@@ -210,3 +210,7 @@ nc-pharma-reactor-popup-release = The reactor vents toxic fumes!
 nc-pharma-reactor-popup-rupture = The reactor vessel ruptures and catches fire!
 nc-pharma-reactor-popup-severe = The reactor vessel explodes violently!
 nc-pharma-reactor-popup-finished = The reactor finishes batch {$code}.
+
+ent-NCPharmaColdStorage = pharmaceutical cold storage
+    .desc = A powered cabinet that keeps medicine cold. Unstable batches stop spoiling while they are inside and the cabinet has power.
+nc-pharma-container-examine-keep-cold = [color=#7DBDB7]Keep refrigerated: this formula spoils at room temperature.[/color]

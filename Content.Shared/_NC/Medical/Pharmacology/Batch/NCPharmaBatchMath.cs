@@ -105,6 +105,28 @@ public static class NCPharmaBatchMath
     }
 
     /// <summary>
+    /// Purity of an unstable batch after it spent the given time outside cold storage. Only a batch whose
+    /// stability is below the threshold degrades, and the lower the stability, the faster. Purity never rises.
+    /// </summary>
+    public static float ResolveDegradedPurity(
+        NCPharmaTuningPrototype tuning,
+        float stability,
+        float purity,
+        float seconds)
+    {
+        if (!float.IsFinite(seconds) || seconds <= 0f || !float.IsFinite(purity))
+            return purity;
+
+        var deficit = MathF.Max(0f, tuning.StableThreshold - stability);
+        if (deficit <= 0f)
+            return purity;
+
+        var loss = deficit * tuning.DegradationPerHour * (seconds / 3600f);
+        var floor = MathF.Min(purity, tuning.MinimumDegradedPurity);
+        return MathF.Max(floor, purity - loss);
+    }
+
+    /// <summary>
     /// Predicts a formula from the same numbers production uses, assuming ideal inputs. The toxic margin is how
     /// far the peak concentration stays below the compound's toxic level: below one is already unsafe.
     /// </summary>
