@@ -20,6 +20,7 @@ public enum NCPharmaStationNotice : byte
     NoSource,
     NotEnoughSource,
     InvalidRequest,
+    ExperimentalLimit,
     Busy,
     Started,
     Finished,
@@ -37,7 +38,8 @@ public sealed class NCPharmaStationState(
     float sourcePurity,
     bool busy,
     float progress,
-    NCPharmaStationNotice notice) : BoundUserInterfaceState
+    NCPharmaStationNotice notice,
+    NCPharmaFormulaSummary[] formulas) : BoundUserInterfaceState
 {
     public readonly bool SourcePresent = sourcePresent;
     public readonly float SourceUnits = sourceUnits;
@@ -45,6 +47,9 @@ public sealed class NCPharmaStationState(
     public readonly bool Busy = busy;
     public readonly float Progress = progress;
     public readonly NCPharmaStationNotice Notice = notice;
+
+    /// <summary>Every formula that may be produced here, including versions developed in game.</summary>
+    public readonly NCPharmaFormulaSummary[] Formulas = formulas;
 }
 
 /// <summary>Request to produce a known formula. The server revalidates every field.</summary>

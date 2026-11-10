@@ -104,6 +104,40 @@ public static class NCPharmaBatchMath
             : TimeSpan.Zero;
     }
 
+    /// <summary>
+    /// Predicts a formula from the same numbers production uses, assuming ideal inputs. The toxic margin is how
+    /// far the peak concentration stays below the compound's toxic level: below one is already unsafe.
+    /// </summary>
+    public static NCPharmaForecast Forecast(
+        NCPharmaFormulaPrototype formula,
+        IReadOnlyList<NCPharmaModifierPrototype> modifiers,
+        NCPharmaDeliveryFormPrototype form,
+        NCPharmaProductionProfilePrototype profile,
+        float compoundToxicConcentration)
+    {
+        var concentration = formula.TargetConcentration;
+        var stability = formula.BaseStability;
+        var toxicity = 1f;
+        var cost = profile.CostMultiplier;
+        foreach (var modifier in modifiers)
+        {
+            concentration *= modifier.ConcentrationMultiplier;
+            stability += modifier.StabilityDelta;
+            toxicity *= modifier.ToxicityMultiplier;
+            cost *= modifier.CostMultiplier;
+        }
+
+        var peak = MathF.Max(0f, concentration * form.ConcentrationMultiplier);
+        var margin = peak > 0f && compoundToxicConcentration > 0f ? compoundToxicConcentration / peak : float.PositiveInfinity;
+        return new NCPharmaForecast(
+            peak,
+            margin,
+            ClampQuality(stability * profile.StabilityMultiplier),
+            toxicity,
+            ResolveAbsorption(form, modifiers),
+            cost);
+    }
+
     /// <summary>Market class derived from measured parameters; concentration never counts as quality.</summary>
     public static NCPharmaGrade ResolveGrade(NCPharmaTuningPrototype tuning, NCPharmaQuality quality)
     {

@@ -28,6 +28,7 @@ public enum NCPharmaRegulatoryStatus : byte
     Corporate,
     Banned,
     Recalled,
+    Experimental,
 }
 
 /// <summary>How far the real composition of a batch has been confirmed by laboratory work.</summary>
@@ -52,6 +53,31 @@ public enum NCPharmaQcTests : byte
     Homogeneity = 1 << 3,
     Stability = 1 << 4,
     All = Concentration | Purity | Sterility | Homogeneity | Stability,
+}
+
+/// <summary>What happened to a formula under development. The journal is the lab notebook of its lineage.</summary>
+[Serializable, NetSerializable]
+public enum NCPharmaJournalKind : byte
+{
+    VersionCreated,
+    Produced,
+    QcPerformed,
+    Administered,
+    Approved,
+}
+
+/// <summary>Result of a research request to the formula registry.</summary>
+[Serializable, NetSerializable]
+public enum NCPharmaRdNotice : byte
+{
+    None,
+    Created,
+    Approved,
+    InvalidRequest,
+    InvalidName,
+    TooManyFormulas,
+    NotExperimental,
+    NotCertified,
 }
 
 public enum NCPharmaAuditKind : byte
@@ -123,3 +149,39 @@ public readonly record struct NCPharmaQcReport(
     float? Sterility,
     float? Homogeneity,
     float? Stability);
+
+/// <summary>
+/// Expected behavior of a formula before anything is produced. It is derived from the same data the real
+/// production uses, so a designer can see the price of a change before paying for it.
+/// </summary>
+public readonly record struct NCPharmaForecast(
+    float PeakConcentration,
+    float ToxicMargin,
+    float Stability,
+    float ToxicityMultiplier,
+    TimeSpan Absorption,
+    float CostMultiplier);
+
+/// <summary>Plain, replicated description of one formula. Prototype formulas and derived versions look alike.</summary>
+[Serializable, NetSerializable]
+public readonly record struct NCPharmaFormulaSummary(
+    string Id,
+    int Version,
+    string? NameKey,
+    string? CustomName,
+    string Compound,
+    string DeliveryForm,
+    float TargetConcentration,
+    string[] Modifiers,
+    string DefaultProfile,
+    NCPharmaRegulatoryStatus Status,
+    string? DerivedFrom,
+    bool CanApprove);
+
+[Serializable, NetSerializable]
+public readonly record struct NCPharmaJournalSummary(
+    NCPharmaJournalKind Kind,
+    string FormulaId,
+    string BatchCode,
+    string Actor,
+    string Detail);

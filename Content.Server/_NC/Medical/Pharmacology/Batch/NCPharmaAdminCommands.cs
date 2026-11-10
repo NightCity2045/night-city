@@ -132,7 +132,7 @@ public sealed partial class NCPharmaListBatchesCommand : IConsoleCommand
         var batches = _entities.System<NCPharmaBatchSystem>().Batches;
         foreach (var batch in batches.OrderBy(value => value.CreatedAt))
         {
-            shell.WriteLine($"{batch.BatchCode} {batch.BatchId} | {batch.Formula.Id} v{batch.FormulaVersion} | " +
+            shell.WriteLine($"{batch.BatchCode} {batch.BatchId} | {batch.Formula} v{batch.FormulaVersion} | " +
                             $"label {batch.Label.Grade} | QC {batch.QcState} | " +
                             $"doses {batch.DosesAdministered}/{batch.DosesProduced} used");
         }
@@ -158,7 +158,7 @@ public sealed partial class NCPharmaInspectBatchCommand : IConsoleCommand
 
         var actual = batch.Actual;
         var label = batch.Label;
-        shell.WriteLine($"{batch.BatchCode} {batch.BatchId} | {batch.Formula.Id} v{batch.FormulaVersion} | QC {batch.QcState}");
+        shell.WriteLine($"{batch.BatchCode} {batch.BatchId} | {batch.Formula} v{batch.FormulaVersion} | QC {batch.QcState}");
         shell.WriteLine($"label : conc {label.Concentration:F2} | purity {label.Purity:P1} | " +
                         $"{(label.Sterile ? "sterile" : "not sterile")} | {label.Grade}");
         shell.WriteLine($"actual: conc {actual.Concentration:F2} | purity {actual.Purity:P1} | " +

@@ -30,7 +30,7 @@ public sealed class NCPharmaBatchRecord
 {
     public Guid BatchId;
     public string BatchCode = string.Empty;
-    public ProtoId<NCPharmaFormulaPrototype> Formula;
+    public string Formula = string.Empty;
     public int FormulaVersion;
     public NCPharmaQuality Actual;
     public NCPharmaLabel Label;
@@ -89,7 +89,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
     /// label is a claim taken from the production profile, not a measurement.
     /// </summary>
     public bool TryCreateBatch(
-        ProtoId<NCPharmaFormulaPrototype> formulaId,
+        string formulaId,
         ProtoId<NCPharmaProductionProfilePrototype>? profileId,
         NCPharmaProductionInputs inputs,
         string producer,
@@ -119,20 +119,23 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         };
         record.Label = new NCPharmaLabel(
             record.BatchCode,
-            formulaId.Id,
+            formulaId,
             formula.Version,
             formula.TargetConcentration,
             profile.LabelPurity,
             profile.LabelSterile,
             profile.LabelGrade);
         AddAudit(record, tuning, NCPharmaAuditKind.Created, producer,
-            $"formula={formulaId.Id} v{formula.Version} profile={profile.ID} doses={outcome.Doses} " +
+            $"formula={formulaId} v{formula.Version} profile={profile.ID} doses={outcome.Doses} " +
             $"actual(conc={outcome.Quality.Concentration:F2} purity={outcome.Quality.Purity:F3} " +
             $"sterility={outcome.Quality.Sterility:F3} homogeneity={outcome.Quality.Homogeneity:F3} " +
             $"stability={outcome.Quality.Stability:F3}) inputs(units={inputs.InputUnits:F1} " +
             $"purity={inputs.InputPurity:F3} sterility={inputs.EquipmentSterility:F3} " +
             $"mixing={inputs.EquipmentMixing:F3} calibration={inputs.CalibrationError:F3})");
         _batches.Add(record.BatchId, record);
+        if (IsTracked(formula))
+            AddJournal(NCPharmaJournalKind.Produced, formulaId, record.BatchCode, producer,
+                $"{outcome.Doses} doses, label purity {profile.LabelPurity:P0}");
         batch = record;
         return true;
     }
@@ -201,6 +204,9 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
 
         container.Comp.Doses--;
         Dirty(container.Owner, container.Comp);
+        if (IsTracked(formula))
+            AddJournal(NCPharmaJournalKind.Administered, batch.Formula, batch.BatchCode, ToPrettyString(administrator),
+                $"dose to {Name(patient)}");
         AddAudit(batch, tuning, NCPharmaAuditKind.Administered, ToPrettyString(administrator),
             $"patient={ToPrettyString(patient)} dose#{doseIndex} effective={effect.EffectiveConcentration:F2} " +
             $"toxin={effect.ToxinBurden:F2} sepsis={effect.SepsisBurden:F2}");
@@ -222,7 +228,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         if (container.Comp.Doses < 1 ||
             !HasComp<NCMedicalBodyComponent>(patient) ||
             !_batches.TryGetValue(container.Comp.BatchId, out batch) ||
-            !_prototypes.TryIndex(batch.Formula, out formula) ||
+            !TryGetFormula(batch.Formula, out formula) ||
             !_prototypes.TryIndex(formula.DeliveryForm, out form) ||
             !TryGetTuning(out tuning))
         {
@@ -256,6 +262,9 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         AddAudit(batch, tuning, NCPharmaAuditKind.QcPerformed, actor,
             $"tests={report.Performed} failed={report.Failed} state={batch.QcState}");
         RefreshContainers(batch);
+        if (TryGetFormula(batch.Formula, out var qcFormula) && IsTracked(qcFormula))
+            AddJournal(NCPharmaJournalKind.QcPerformed, batch.Formula, batch.BatchCode, actor,
+                $"tests {report.Performed}, failed {report.Failed}, now {batch.QcState}");
         return true;
     }
 
@@ -315,7 +324,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
     }
 
     private bool CanCreateBatch(
-        ProtoId<NCPharmaFormulaPrototype> formulaId,
+        string formulaId,
         ProtoId<NCPharmaProductionProfilePrototype>? profileId,
         NCPharmaProductionInputs inputs,
         [NotNullWhen(true)] out NCPharmaFormulaPrototype? formula,
@@ -325,7 +334,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
     {
         profile = null;
         modifiers = [];
-        if (!_prototypes.TryIndex(formulaId, out formula) ||
+        if (!TryGetFormula(formulaId, out formula) ||
             !TryGetTuning(out tuning) ||
             _batches.Count >= tuning.MaximumBatches ||
             !float.IsFinite(inputs.InputUnits) || inputs.InputUnits <= 0f ||

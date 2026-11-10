@@ -89,11 +89,18 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
             return NCPharmaStationNotice.NoSource;
 
         if (units < 1 || units > station.Comp.MaximumUnitsPerRun ||
-            !_prototypes.TryIndex<NCPharmaFormulaPrototype>(formulaId, out var formula) ||
+            !_batches.TryGetFormula(formulaId, out var formula) ||
             !_prototypes.TryIndex<NCPharmaProductionProfilePrototype>(profileId, out var profile) ||
             formula.RegulatoryStatus is NCPharmaRegulatoryStatus.Banned or NCPharmaRegulatoryStatus.Recalled)
         {
             return NCPharmaStationNotice.InvalidRequest;
+        }
+
+        if (formula.RegulatoryStatus == NCPharmaRegulatoryStatus.Experimental &&
+            _batches.TryGetTuning(out var tuning) &&
+            units > tuning.MaximumExperimentalUnits)
+        {
+            return NCPharmaStationNotice.ExperimentalLimit;
         }
 
         if (source.Units < units)
@@ -131,7 +138,7 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
 
         if (!_batches.TryCreateBatch(formula, profile, inputs, producer, ToPrettyString(station), out var batch))
         {
-            Log.Error($"Synthesis of {formula.Id} at {ToPrettyString(station)} produced no batch.");
+            Log.Error($"Synthesis of {formula} at {ToPrettyString(station)} produced no batch.");
             _popup.PopupEntity(Loc.GetString("nc-pharma-station-failed"), station);
             UpdateUi(station, NCPharmaStationNotice.Failed);
             return;
@@ -192,6 +199,7 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
                 hasSource ? source.Purity : 0f,
                 busy,
                 progress,
-                notice));
+                notice,
+                _batches.BuildFormulaSummaries(true)));
     }
 }

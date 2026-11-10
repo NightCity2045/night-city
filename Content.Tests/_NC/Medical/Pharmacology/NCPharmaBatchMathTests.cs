@@ -316,4 +316,68 @@ public sealed class NCPharmaBatchMathTests
         Assert.That(NCPharmaBatchMath.ResolveAbsorption(slowForm, new[] { slow }),
             Is.EqualTo(TimeSpan.FromSeconds(NCPharmaBatchMath.MaximumAbsorptionSeconds)));
     }
+
+    [Test]
+    public void ForecastMatchesWhatProductionWouldDeliver()
+    {
+        var fast = Make<NCPharmaModifierPrototype>(
+            (nameof(NCPharmaModifierPrototype.ConcentrationMultiplier), 1.25f),
+            (nameof(NCPharmaModifierPrototype.StabilityDelta), -0.05f),
+            (nameof(NCPharmaModifierPrototype.ToxicityMultiplier), 1.2f),
+            (nameof(NCPharmaModifierPrototype.AbsorptionMultiplier), 0.4f));
+        var form = Make<NCPharmaDeliveryFormPrototype>(
+            (nameof(NCPharmaDeliveryFormPrototype.AbsorptionDuration), TimeSpan.FromSeconds(10)));
+
+        var plain = NCPharmaBatchMath.Forecast(Formula(), Array.Empty<NCPharmaModifierPrototype>(), form, Standard(), 12f);
+        var boosted = NCPharmaBatchMath.Forecast(Formula(), new[] { fast }, form, Standard(), 12f);
+
+        Assert.That(plain.PeakConcentration, Is.EqualTo(6f));
+        Assert.That(boosted.PeakConcentration, Is.EqualTo(7.5f).Within(0.001f));
+        Assert.That(boosted.ToxicMargin, Is.LessThan(plain.ToxicMargin));
+        Assert.That(boosted.Stability, Is.LessThan(plain.Stability));
+        Assert.That(boosted.Absorption, Is.LessThan(plain.Absorption));
+        Assert.That(boosted.ToxicityMultiplier, Is.EqualTo(1.2f).Within(0.001f));
+    }
+
+    [Test]
+    public void ForecastToxicMarginBelowOneMeansAnUnsafePeak()
+    {
+        var form = Make<NCPharmaDeliveryFormPrototype>();
+        var forecast = NCPharmaBatchMath.Forecast(Formula(target: 20f), Array.Empty<NCPharmaModifierPrototype>(), form, Standard(), 12f);
+
+        Assert.That(forecast.ToxicMargin, Is.LessThan(1f));
+    }
+
+    [Test]
+    public void DerivedFormulaIsANewObjectAndNeverChangesItsParent()
+    {
+        var parent = NCPharmaFormulaPrototype.Create(
+            "Parent", "name", 1, "Compound", "Form", 6f, [], "Profile", 0.85f,
+            NCPharmaRegulatoryStatus.Prescription, null, null, null);
+        var child = NCPharmaFormulaPrototype.Create(
+            "Parent.v2", parent.Name, 2, parent.Compound, parent.DeliveryForm, 7f, [], parent.DefaultProductionProfile,
+            parent.BaseStability, NCPharmaRegulatoryStatus.Experimental, parent.ID, "Better", "Dr. Test");
+
+        Assert.That(child, Is.Not.SameAs(parent));
+        Assert.That(parent.TargetConcentration, Is.EqualTo(6f));
+        Assert.That(parent.RegulatoryStatus, Is.EqualTo(NCPharmaRegulatoryStatus.Prescription));
+        Assert.That(child.DerivedFrom, Is.EqualTo("Parent"));
+        Assert.That(child.RegulatoryStatus, Is.EqualTo(NCPharmaRegulatoryStatus.Experimental));
+    }
+
+    [Test]
+    public void ApprovalChangesOnlyTheStatusOfACopy()
+    {
+        var experimental = NCPharmaFormulaPrototype.Create(
+            "F.v2", "name", 2, "Compound", "Form", 7f, [], "Profile", 0.8f,
+            NCPharmaRegulatoryStatus.Experimental, "F", "Name", "Author");
+        var approved = experimental.WithStatus(NCPharmaRegulatoryStatus.Prescription);
+
+        Assert.That(approved, Is.Not.SameAs(experimental));
+        Assert.That(experimental.RegulatoryStatus, Is.EqualTo(NCPharmaRegulatoryStatus.Experimental));
+        Assert.That(approved.RegulatoryStatus, Is.EqualTo(NCPharmaRegulatoryStatus.Prescription));
+        Assert.That(approved.TargetConcentration, Is.EqualTo(experimental.TargetConcentration));
+        Assert.That(approved.CustomName, Is.EqualTo("Name"));
+        Assert.That(approved.DerivedFrom, Is.EqualTo("F"));
+    }
 }

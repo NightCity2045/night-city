@@ -78,6 +78,27 @@ public sealed partial class NCPharmaTuningPrototype : IPrototype
 
     [DataField]
     public int MaximumBatches { get; private set; } = 4096;
+
+    /// <summary>Largest run of an unapproved formula, so an experiment stays small.</summary>
+    [DataField]
+    public int MaximumExperimentalUnits { get; private set; } = 5;
+
+    /// <summary>Most versions a laboratory may develop in one world.</summary>
+    [DataField]
+    public int MaximumDerivedFormulas { get; private set; } = 256;
+
+    [DataField]
+    public int MaximumJournalEntries { get; private set; } = 2048;
+
+    [DataField]
+    public int MaximumFormulaNameLength { get; private set; } = 48;
+
+    /// <summary>Smallest and largest target concentration relative to the formula a version is derived from.</summary>
+    [DataField]
+    public float MinimumConcentrationRatio { get; private set; } = 0.25f;
+
+    [DataField]
+    public float MaximumConcentrationRatio { get; private set; } = 2f;
 }
 
 /// <summary>
@@ -232,4 +253,54 @@ public sealed partial class NCPharmaFormulaPrototype : IPrototype
 
     [DataField]
     public NCPharmaRegulatoryStatus RegulatoryStatus { get; private set; } = NCPharmaRegulatoryStatus.Prescription;
+
+    /// <summary>Formula this one was developed from. Empty for a base formula authored as data.</summary>
+    public string? DerivedFrom { get; private set; }
+
+    /// <summary>Name given by the pharmacologist who developed the version. Absent for data formulas.</summary>
+    public string? CustomName { get; private set; }
+
+    public string? Author { get; private set; }
+
+    /// <summary>
+    /// Builds a formula at runtime, for versions developed in game. A prototype loaded from YAML is never
+    /// touched: every change is a new object with a new id.
+    /// </summary>
+    public static NCPharmaFormulaPrototype Create(
+        string id,
+        LocId name,
+        int version,
+        ProtoId<NCDrugProfilePrototype> compound,
+        ProtoId<NCPharmaDeliveryFormPrototype> deliveryForm,
+        float targetConcentration,
+        List<ProtoId<NCPharmaModifierPrototype>> modifiers,
+        ProtoId<NCPharmaProductionProfilePrototype> productionProfile,
+        float baseStability,
+        NCPharmaRegulatoryStatus status,
+        string? derivedFrom,
+        string? customName,
+        string? author)
+    {
+        return new NCPharmaFormulaPrototype
+        {
+            ID = id,
+            Name = name,
+            Version = version,
+            Compound = compound,
+            DeliveryForm = deliveryForm,
+            TargetConcentration = targetConcentration,
+            Modifiers = modifiers,
+            DefaultProductionProfile = productionProfile,
+            BaseStability = baseStability,
+            RegulatoryStatus = status,
+            DerivedFrom = derivedFrom,
+            CustomName = customName,
+            Author = author,
+        };
+    }
+
+    /// <summary>Same formula with another regulatory status, used when a version is approved or recalled.</summary>
+    public NCPharmaFormulaPrototype WithStatus(NCPharmaRegulatoryStatus status) => Create(
+        ID, Name, Version, Compound, DeliveryForm, TargetConcentration, [.. Modifiers],
+        DefaultProductionProfile, BaseStability, status, DerivedFrom, CustomName, Author);
 }

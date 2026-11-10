@@ -47,7 +47,7 @@ public sealed partial class NCPharmaSynthesizerComponent : Component
 [RegisterComponent, UnsavedComponent, Access(typeof(NCPharmaSynthesisSystem))]
 public sealed partial class NCPharmaSynthesisRunComponent : Component
 {
-    public ProtoId<NCPharmaFormulaPrototype> Formula;
+    public string Formula = string.Empty;
     public ProtoId<NCPharmaProductionProfilePrototype> Profile;
     public TimeSpan StartedAt;
     public TimeSpan FinishAt;

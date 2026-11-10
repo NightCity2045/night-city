@@ -9,6 +9,7 @@ using System.Text.Json;
 using Content.Server._NC.LivingCity.Time;
 using Content.Server._NC.Persistence.RoundSnapshot;
 using Content.Server.Database;
+using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Asynchronous;
@@ -24,6 +25,8 @@ namespace Content.Server._NC.Medical.Pharmacology.Batch;
 public sealed partial class NCPharmaBatchSystem
 {
     public const string SnapshotSectionType = "pharma-batches";
+    public const string FormulaSectionType = "pharma-formulas";
+    public const string JournalSectionType = "pharma-journal";
     private const string SnapshotOwnerType = "world";
     private const string SnapshotOwnerId = "city";
     private const int SnapshotFormatVersion = 1;
@@ -48,6 +51,9 @@ public sealed partial class NCPharmaBatchSystem
 
     private void OnRoundSnapshotCapture(NCRoundSnapshotCaptureEvent args)
     {
+        CaptureFormulas(args);
+        CaptureJournal(args);
+
         var ordered = _batches.Values.OrderBy(batch => batch.CreatedAt).ThenBy(batch => batch.BatchId).ToList();
         for (var start = 0; start < ordered.Count || start == 0; start += BatchesPerChunk)
         {
@@ -75,6 +81,8 @@ public sealed partial class NCPharmaBatchSystem
     private void OnSessionStarted(NCActiveWorldSessionStartedEvent args)
     {
         _batches.Clear();
+        _derived.Clear();
+        _journal.Clear();
         _nextBatchNumber = 1;
         if (_restore.SelectionFailed)
         {
@@ -91,7 +99,10 @@ public sealed partial class NCPharmaBatchSystem
                     snapshotId, SnapshotSectionType, SnapshotOwnerType, SnapshotOwnerId)
                 .WaitAsync(TimeSpan.FromSeconds(30));
             _tasks.BlockWaitOnTask(read);
+            // Formulas first: a batch is only valid if the version it was made from exists.
+            RestoreFormulas(snapshotId);
             Restore(read.GetAwaiter().GetResult());
+            RestoreJournal(snapshotId);
         }
         catch (Exception exception)
         {
@@ -155,7 +166,7 @@ public sealed partial class NCPharmaBatchSystem
         {
             BatchId = batch.BatchId,
             BatchCode = batch.BatchCode,
-            Formula = batch.Formula.Id,
+            Formula = batch.Formula,
             FormulaVersion = batch.FormulaVersion,
             Concentration = batch.Actual.Concentration,
             Purity = batch.Actual.Purity,
@@ -194,7 +205,7 @@ public sealed partial class NCPharmaBatchSystem
         if (value.BatchId == Guid.Empty ||
             !IsText(value.BatchCode, 1) ||
             !IsText(value.Formula, 1) ||
-            !_prototypes.HasIndex<NCPharmaFormulaPrototype>(value.Formula) ||
+            !TryGetFormula(value.Formula, out _) ||
             value.FormulaVersion < 1 ||
             !IsRange(value.Concentration, 0f, 1000f) ||
             !IsRange(value.Purity, 0f, 1f) ||
@@ -254,6 +265,163 @@ public sealed partial class NCPharmaBatchSystem
         return true;
     }
 
+    private void CaptureFormulas(NCRoundSnapshotCaptureEvent args)
+    {
+        var records = _derived.Values
+            .OrderBy(formula => formula.ID, StringComparer.Ordinal)
+            .Select(formula => new NCPharmaFormulaSnapshot
+            {
+                Id = formula.ID,
+                Name = formula.Name.Id,
+                Version = formula.Version,
+                Compound = formula.Compound.Id,
+                DeliveryForm = formula.DeliveryForm.Id,
+                Target = formula.TargetConcentration,
+                Modifiers = formula.Modifiers.Select(modifier => modifier.Id).ToList(),
+                Profile = formula.DefaultProductionProfile.Id,
+                Stability = formula.BaseStability,
+                Status = formula.RegulatoryStatus,
+                DerivedFrom = formula.DerivedFrom,
+                CustomName = formula.CustomName,
+                Author = formula.Author,
+            })
+            .ToArray();
+        AddSimpleSection(args, FormulaSectionType, records);
+    }
+
+    private void CaptureJournal(NCRoundSnapshotCaptureEvent args)
+    {
+        var records = _journal
+            .Select(entry => new NCPharmaJournalSnapshot
+            {
+                Ticks = entry.Time.Ticks,
+                Kind = entry.Kind,
+                FormulaId = entry.FormulaId,
+                BatchCode = entry.BatchCode,
+                Actor = entry.Actor,
+                Detail = entry.Detail,
+            })
+            .ToArray();
+        AddSimpleSection(args, JournalSectionType, records);
+    }
+
+    private static void AddSimpleSection<T>(NCRoundSnapshotCaptureEvent args, string sectionType, T[] records)
+    {
+        var payload = JsonSerializer.Serialize(records);
+        if (Encoding.UTF8.GetByteCount(payload) > MaximumChunkBytes)
+        {
+            args.Fail($"Pharmaceutical section {sectionType} exceeds the section size limit.");
+            return;
+        }
+
+        args.TryAddSection(sectionType, SnapshotOwnerType, SnapshotOwnerId, SnapshotFormatVersion, records.Length, payload);
+    }
+
+    private T[] ReadSimpleSection<T>(Guid snapshotId, string sectionType)
+    {
+        var read = _database.GetNCRoundSnapshotSectionsAsync(snapshotId, sectionType, SnapshotOwnerType, SnapshotOwnerId)
+            .WaitAsync(TimeSpan.FromSeconds(30));
+        _tasks.BlockWaitOnTask(read);
+        var sections = read.GetAwaiter().GetResult();
+        if (sections.Count == 0)
+            return [];
+        if (sections.Count != 1)
+            throw new InvalidOperationException($"Pharmaceutical section {sectionType} has {sections.Count} chunks.");
+
+        var section = sections[0];
+        if (section.FormatVersion != SnapshotFormatVersion ||
+            section.ChunkIndex != 0 ||
+            Encoding.UTF8.GetByteCount(section.Payload) > MaximumChunkBytes ||
+            NCRoundSnapshotCaptureEvent.Hash(section.Payload) != section.Checksum)
+        {
+            throw new InvalidOperationException($"Invalid pharmaceutical section {sectionType}.");
+        }
+
+        var records = JsonSerializer.Deserialize<T[]>(section.Payload) ??
+                      throw new InvalidOperationException($"Missing pharmaceutical section {sectionType}.");
+        if (records.Length != section.EntityCount)
+            throw new InvalidOperationException($"Pharmaceutical section {sectionType} count mismatch.");
+        return records;
+    }
+
+    private void RestoreFormulas(Guid snapshotId)
+    {
+        if (!TryGetTuning(out var tuning))
+            return;
+
+        var skipped = 0;
+        foreach (var record in ReadSimpleSection<NCPharmaFormulaSnapshot>(snapshotId, FormulaSectionType))
+        {
+            if (_derived.Count >= tuning.MaximumDerivedFormulas ||
+                !TryFormulaFromSnapshot(record, out var formula) ||
+                !_derived.TryAdd(formula.ID, formula))
+            {
+                skipped++;
+            }
+        }
+
+        if (skipped > 0)
+            Log.Error($"{skipped} invalid or duplicate pharmaceutical formulas were skipped on restore.");
+    }
+
+    private void RestoreJournal(Guid snapshotId)
+    {
+        if (!TryGetTuning(out var tuning))
+            return;
+
+        foreach (var record in ReadSimpleSection<NCPharmaJournalSnapshot>(snapshotId, JournalSectionType))
+        {
+            if (_journal.Count >= tuning.MaximumJournalEntries)
+                break;
+            if (record.Ticks < 0 || !Enum.IsDefined(record.Kind) ||
+                !IsText(record.FormulaId, 1) || !IsText(record.BatchCode, 0) ||
+                !IsText(record.Actor, 0) || !IsText(record.Detail, 0))
+            {
+                continue;
+            }
+
+            _journal.Add(new NCPharmaJournalEntry(
+                new NCActiveWorldTime(record.Ticks), record.Kind, record.FormulaId, record.BatchCode, record.Actor, record.Detail));
+        }
+    }
+
+    private bool TryFormulaFromSnapshot(NCPharmaFormulaSnapshot value, out NCPharmaFormulaPrototype formula)
+    {
+        formula = default!;
+        if (!IsText(value.Id, 1) || !IsText(value.Name, 1) ||
+            value.Version < 1 ||
+            !_prototypes.HasIndex<NCDrugProfilePrototype>(value.Compound) ||
+            !_prototypes.HasIndex<NCPharmaDeliveryFormPrototype>(value.DeliveryForm) ||
+            !_prototypes.HasIndex<NCPharmaProductionProfilePrototype>(value.Profile) ||
+            !IsRange(value.Target, 0.0001f, 1000f) ||
+            !IsRange(value.Stability, 0f, 1f) ||
+            !Enum.IsDefined(value.Status) ||
+            value.Modifiers == null || value.Modifiers.Count > NCPharmaBatchMath.MaximumModifiers ||
+            value.Modifiers.Any(modifier => !_prototypes.HasIndex<NCPharmaModifierPrototype>(modifier)) ||
+            (value.DerivedFrom != null && !IsText(value.DerivedFrom, 1)) ||
+            (value.CustomName != null && !IsText(value.CustomName, 1)) ||
+            (value.Author != null && !IsText(value.Author, 0)))
+        {
+            return false;
+        }
+
+        formula = NCPharmaFormulaPrototype.Create(
+            value.Id,
+            value.Name,
+            value.Version,
+            value.Compound,
+            value.DeliveryForm,
+            value.Target,
+            [.. value.Modifiers.Select(modifier => new ProtoId<NCPharmaModifierPrototype>(modifier))],
+            value.Profile,
+            value.Stability,
+            value.Status,
+            value.DerivedFrom,
+            value.CustomName,
+            value.Author);
+        return true;
+    }
+
     private static bool TryParseBatchNumber(string code, out int number)
     {
         number = 0;
@@ -301,6 +469,33 @@ public sealed class NCPharmaAuditSnapshot
 {
     public long Ticks { get; set; }
     public NCPharmaAuditKind Kind { get; set; }
+    public string Actor { get; set; } = string.Empty;
+    public string Detail { get; set; } = string.Empty;
+}
+
+public sealed class NCPharmaFormulaSnapshot
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public int Version { get; set; }
+    public string Compound { get; set; } = string.Empty;
+    public string DeliveryForm { get; set; } = string.Empty;
+    public float Target { get; set; }
+    public List<string> Modifiers { get; set; } = [];
+    public string Profile { get; set; } = string.Empty;
+    public float Stability { get; set; }
+    public NCPharmaRegulatoryStatus Status { get; set; }
+    public string? DerivedFrom { get; set; }
+    public string? CustomName { get; set; }
+    public string? Author { get; set; }
+}
+
+public sealed class NCPharmaJournalSnapshot
+{
+    public long Ticks { get; set; }
+    public NCPharmaJournalKind Kind { get; set; }
+    public string FormulaId { get; set; } = string.Empty;
+    public string BatchCode { get; set; } = string.Empty;
     public string Actor { get; set; } = string.Empty;
     public string Detail { get; set; } = string.Empty;
 }

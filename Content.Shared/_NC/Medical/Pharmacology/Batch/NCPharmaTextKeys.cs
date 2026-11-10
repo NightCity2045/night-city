@@ -16,6 +16,7 @@ public static class NCPharmaTextKeys
         NCPharmaRegulatoryStatus.Corporate => "nc-pharma-status-corporate",
         NCPharmaRegulatoryStatus.Banned => "nc-pharma-status-banned",
         NCPharmaRegulatoryStatus.Recalled => "nc-pharma-status-recalled",
+        NCPharmaRegulatoryStatus.Experimental => "nc-pharma-status-experimental",
         _ => "nc-pharma-status-unknown",
     };
 
@@ -26,6 +27,27 @@ public static class NCPharmaTextKeys
         NCPharmaQcState.Rejected => "nc-pharma-qc-rejected",
         NCPharmaQcState.Recalled => "nc-pharma-qc-recalled",
         _ => "nc-pharma-qc-untested",
+    };
+
+    public static string JournalKind(NCPharmaJournalKind kind) => kind switch
+    {
+        NCPharmaJournalKind.Produced => "nc-pharma-journal-produced",
+        NCPharmaJournalKind.QcPerformed => "nc-pharma-journal-qc",
+        NCPharmaJournalKind.Administered => "nc-pharma-journal-administered",
+        NCPharmaJournalKind.Approved => "nc-pharma-journal-approved",
+        _ => "nc-pharma-journal-version-created",
+    };
+
+    public static string RdNotice(NCPharmaRdNotice notice) => notice switch
+    {
+        NCPharmaRdNotice.Created => "nc-pharma-rd-notice-created",
+        NCPharmaRdNotice.Approved => "nc-pharma-rd-notice-approved",
+        NCPharmaRdNotice.InvalidRequest => "nc-pharma-rd-notice-invalid",
+        NCPharmaRdNotice.InvalidName => "nc-pharma-rd-notice-invalid-name",
+        NCPharmaRdNotice.TooManyFormulas => "nc-pharma-rd-notice-too-many",
+        NCPharmaRdNotice.NotExperimental => "nc-pharma-rd-notice-not-experimental",
+        NCPharmaRdNotice.NotCertified => "nc-pharma-rd-notice-not-certified",
+        _ => string.Empty,
     };
 
     public static string Grade(NCPharmaGrade grade) => grade switch
