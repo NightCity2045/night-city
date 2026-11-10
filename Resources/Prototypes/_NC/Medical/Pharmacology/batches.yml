@@ -1,0 +1,168 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncPharmaTuning
+  id: NCPharmaTuningDefault
+  defaultTuning: true
+  maximumDoseSpread: 0.5
+  adulterantToxinPerConcentration: 0.15
+  sepsisBurdenAtZeroSterility: 8
+  toxinProfile: NCToxinSystemicDamage
+  sepsisProfile: NCSepsisSystemicDamage
+  medicalMinimumPurity: 0.9
+  medicalMinimumSterility: 0.9
+  medicalMinimumHomogeneity: 0.85
+  corporateMinimumPurity: 0.97
+  corporateMinimumSterility: 0.97
+  corporateMinimumHomogeneity: 0.95
+  qcConcentrationTolerance: 0.1
+  qcPurityTolerance: 0.05
+  qcMinimumSterility: 0.9
+  qcMinimumHomogeneity: 0.85
+  qcMinimumStability: 0.6
+  maximumAuditEntriesPerBatch: 256
+  maximumBatches: 4096
+
+- type: ncPharmaDeliveryForm
+  id: NCPharmaDeliveryOral
+  name: nc-pharma-delivery-oral
+  concentrationMultiplier: 0.6
+  sterilityRiskMultiplier: 0.1
+  adulterantMultiplier: 1
+  administrationDelay: 2s
+
+- type: ncPharmaDeliveryForm
+  id: NCPharmaDeliveryAutoinjector
+  name: nc-pharma-delivery-autoinjector
+  concentrationMultiplier: 1
+  sterilityRiskMultiplier: 1
+  adulterantMultiplier: 1
+  administrationDelay: 1.5s
+
+- type: ncPharmaDeliveryForm
+  id: NCPharmaDeliveryInfusion
+  name: nc-pharma-delivery-infusion
+  concentrationMultiplier: 1
+  sterilityRiskMultiplier: 1.5
+  adulterantMultiplier: 1.2
+  administrationDelay: 6s
+
+- type: ncPharmaModifier
+  id: NCPharmaModifierFastRelease
+  name: nc-pharma-modifier-fast-release
+  concentrationMultiplier: 1.25
+  stabilityDelta: -0.05
+  toxicityMultiplier: 1.2
+  costMultiplier: 1.1
+
+- type: ncPharmaModifier
+  id: NCPharmaModifierExtendedRelease
+  name: nc-pharma-modifier-extended-release
+  concentrationMultiplier: 0.85
+  stabilityDelta: 0.05
+  costMultiplier: 1.15
+
+- type: ncPharmaModifier
+  id: NCPharmaModifierProtectiveCarrier
+  name: nc-pharma-modifier-protective-carrier
+  concentrationMultiplier: 0.9
+  toxicityMultiplier: 0.6
+  costMultiplier: 1.4
+
+- type: ncPharmaModifier
+  id: NCPharmaModifierStabilizer
+  name: nc-pharma-modifier-stabilizer
+  purityDelta: -0.02
+  stabilityDelta: 0.15
+  costMultiplier: 1.2
+
+- type: ncPharmaProductionProfile
+  id: NCPharmaProductionStreet
+  name: nc-pharma-production-street
+  yieldMultiplier: 1.4
+  purityMultiplier: 0.8
+  sterilityMultiplier: 0.7
+  homogeneityMultiplier: 0.7
+  stabilityMultiplier: 0.8
+  concentrationBias: 0.05
+  costMultiplier: 0.6
+  duration: 20s
+  labelPurity: 0.9
+  labelSterile: false
+  labelGrade: Street
+
+- type: ncPharmaProductionProfile
+  id: NCPharmaProductionStandard
+  name: nc-pharma-production-standard
+  yieldMultiplier: 1
+  purityMultiplier: 1
+  sterilityMultiplier: 1
+  homogeneityMultiplier: 1
+  stabilityMultiplier: 1
+  costMultiplier: 1
+  duration: 40s
+  labelPurity: 0.9
+  labelSterile: true
+  labelGrade: Medical
+
+- type: ncPharmaProductionProfile
+  id: NCPharmaProductionClean
+  name: nc-pharma-production-clean
+  yieldMultiplier: 0.6
+  purityMultiplier: 1.08
+  sterilityMultiplier: 1.1
+  homogeneityMultiplier: 1.1
+  stabilityMultiplier: 1.1
+  costMultiplier: 2
+  duration: 90s
+  labelPurity: 0.97
+  labelSterile: true
+  labelGrade: Corporate
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaTraumaAnalgesic
+  name: nc-pharma-formula-trauma-analgesic
+  version: 1
+  compound: NCDrugTraumaAnalgesic
+  deliveryForm: NCPharmaDeliveryAutoinjector
+  targetConcentration: 6
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.85
+  regulatoryStatus: Prescription
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaFieldStimulant
+  name: nc-pharma-formula-field-stimulant
+  version: 1
+  compound: NCDrugStimulant
+  deliveryForm: NCPharmaDeliveryAutoinjector
+  targetConcentration: 3.2
+  modifiers:
+  - NCPharmaModifierFastRelease
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.8
+  regulatoryStatus: Controlled
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaBroadAntibiotic
+  name: nc-pharma-formula-broad-antibiotic
+  version: 1
+  compound: NCDrugBroadAntibiotic
+  deliveryForm: NCPharmaDeliveryInfusion
+  targetConcentration: 5
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.9
+  regulatoryStatus: ClinicalOnly
+
+- type: entity
+  parent: BaseItem
+  id: NCPharmaAutoinjector
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    state: firstaid
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Medical/medipen.rsi
+  - type: NCPharmaContainer
