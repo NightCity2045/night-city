@@ -14,6 +14,8 @@ using Robust.Shared.Configuration;
 using Robust.Shared.Log;
 using Robust.Shared.Serialization.Manager;
 
+#nullable enable annotations
+
 namespace Content.Tests.Server._NC.Meta;
 
 [TestFixture]
