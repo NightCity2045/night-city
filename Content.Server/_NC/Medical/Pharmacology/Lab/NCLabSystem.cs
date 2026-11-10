@@ -301,14 +301,15 @@ public sealed partial class NCLabSystem : EntitySystem
         }
     }
 
-    public void Print(EntityUid machine, EntityUid user, string title, string body)
+    public void Print(EntityUid machine, EntityUid user, string title, string body, bool pickup = true)
     {
         var paper = Spawn("Paper", Transform(machine).Coordinates);
         _metaData.SetEntityName(paper, Loc.GetString("nc-lab-report-name", ("title", title)));
         if (TryComp<PaperComponent>(paper, out var component))
             _paper.SetContent((paper, component), title + "\n\n" + body);
 
-        _hands.TryPickupAnyHand(user, paper);
+        if (pickup)
+            _hands.TryPickupAnyHand(user, paper);
         _popup.PopupEntity(Loc.GetString("nc-lab-machine-done"), machine, user);
     }
 

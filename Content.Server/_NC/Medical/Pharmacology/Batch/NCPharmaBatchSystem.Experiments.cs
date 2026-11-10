@@ -145,36 +145,22 @@ public sealed partial class NCPharmaBatchSystem
     }
 
     /// <summary>
-    /// Gives one dose of a pack to a test subject. The dose is spent for real; the result is what the same dose
-    /// would do to a standard body, and the study is written to the experiment records.
+    /// Records a dose that was given to a real patient under observation (a player or an NPC) as a study. The dose
+    /// was already given and spent by the ordinary administration; this only writes down what it did and teaches
+    /// the laboratory what the compound does in a living body.
     /// </summary>
-    public bool TryStudyInVivo(
-        NCPharmaContainerComponent pack,
-        EntityUid packEntity,
-        string actor,
-        string subject,
-        out NCPharmaStudyResult result)
+    public bool RecordVivariumStudy(Guid batchId, string actor, string subject, NCPharmaStudyResult result)
     {
-        result = default;
-        if (pack.Doses < 1 ||
-            !_batches.TryGetValue(pack.BatchId, out var batch) ||
+        if (!_batches.TryGetValue(batchId, out var batch) ||
             !TryGetFormula(batch.Formula, out var formula) ||
-            !_prototypes.TryIndex(formula.DeliveryForm, out var form) ||
-            !_prototypes.TryIndex(formula.Compound, out var compound) ||
             !TryGetTuning(out var tuning))
         {
             return false;
         }
 
-        var doseIndex = batch.DosesAdministered++;
-        var effect = NCPharmaBatchMath.ResolveDose(
-            tuning, form, batch.Actual, batch.ModifierToxicity, batch.BatchId, doseIndex);
-        result = NCPharmaBatchMath.ResolveStudy(tuning, effect, compound.ToxicConcentration);
-        pack.Doses--;
-        Dirty(packEntity, pack);
         RecordAnalysis(formula.Compound, NCAnalysisTier.InVivo);
         AddAudit(batch, tuning, NCPharmaAuditKind.Administered, actor,
-            $"vivarium subject={subject} outcome={result.Outcome} peak={result.Peak:F2}");
+            $"observed study subject={subject} outcome={result.Outcome} peak={result.Peak:F2}");
 
         if (StartExperiment(NCPharmaExperimentKind.Vivarium, formula, actor) is { } record)
         {

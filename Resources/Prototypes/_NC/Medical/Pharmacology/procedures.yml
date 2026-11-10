@@ -73,11 +73,3 @@
   visionDemand: 0.4
   steadinessDemand: 0.6
   attentionDemand: 0.3
-
-- type: ncBiotechProcedure
-  id: NCBiotechStudy
-  name: nc-biotech-procedure-study
-  gripDemand: 0.4
-  visionDemand: 0.4
-  steadinessDemand: 0.5
-  attentionDemand: 0.5

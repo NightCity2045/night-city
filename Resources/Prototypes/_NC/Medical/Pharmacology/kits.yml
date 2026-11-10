@@ -1,0 +1,94 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Ready-made kits of laboratory consumables. The stations themselves are placed one by one.
+
+- type: entity
+  parent: CrateMedical
+  id: NCPharmaKitStreetLab
+  components:
+  - type: EntityTableContainerFill
+    containers:
+      entity_storage: !type:AllSelector
+        children:
+        - id: NCPharmaSourceCanisterStreet
+          amount: 2
+        - id: NCPharmaRawBiomass
+          amount: 2
+        - id: NCPharmaFilterCartridge
+          amount: 2
+        - id: NCPharmaWasteCanister
+          amount: 4
+        - id: NCLabSampleVial
+          amount: 4
+
+- type: entity
+  parent: CrateMedical
+  id: NCPharmaKitClinicalLab
+  components:
+  - type: EntityTableContainerFill
+    containers:
+      entity_storage: !type:AllSelector
+        children:
+        - id: NCPharmaSourceCanisterClinical
+          amount: 2
+        - id: NCPharmaRawCorporateStock
+          amount: 2
+        - id: NCPharmaFilterCartridge
+          amount: 2
+        - id: NCPharmaWasteCanister
+          amount: 4
+        - id: NCLabSampleVial
+          amount: 4
+
+- type: entity
+  parent: BoxCardboard
+  id: NCPharmaKitSampling
+  components:
+  - type: EntityTableContainerFill
+    containers:
+      storagebase: !type:AllSelector
+        children:
+        - id: NCLabBloodSampler
+          amount: 2
+        - id: NCLabWoundSwabKit
+          amount: 2
+        - id: NCLabSampleVial
+          amount: 6
+
+- type: entity
+  parent: BoxCardboard
+  id: NCPharmaKitBloodBank
+  components:
+  - type: EntityTableContainerFill
+    containers:
+      storagebase: !type:AllSelector
+        children:
+        - id: NCBloodBagEmpty
+          amount: 6
+
+- type: entity
+  parent: BoxCardboard
+  id: NCPharmaKitImplantPrep
+  components:
+  - type: EntityTableContainerFill
+    containers:
+      storagebase: !type:AllSelector
+        children:
+        - id: NCLabTissueSeedCoating
+        - id: NCLabTissueSeedAntibacterial
+        - id: NCLabTissueSeedInterface
+        - id: NCLabTissueSeedGel
+        - id: NCLabTissueSeedMatrix
+
+- type: entity
+  parent: BoxCardboard
+  id: NCPharmaKitUnknownSamples
+  components:
+  - type: EntityTableContainerFill
+    containers:
+      storagebase: !type:AllSelector
+        children:
+        - id: NCPharmaRawSeizedSample
+          amount: 2

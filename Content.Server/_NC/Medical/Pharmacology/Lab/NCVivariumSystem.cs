@@ -6,165 +6,70 @@ using System.Text;
 using Content.Server._NC.Medical.Pharmacology.Batch;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared._NC.Medical.Pharmacology.Lab;
-using Content.Shared.Containers.ItemSlots;
-using Content.Shared.DoAfter;
-using Content.Shared.Interaction;
-using Content.Shared.Popups;
 using Content.Shared.Power.EntitySystems;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.Medical.Pharmacology.Lab;
 
 /// <summary>
-/// The vivarium: test subjects for experimental pharmacology and toxicology. It is where an unknown compound, a
-/// new modifier or a suspect batch is studied for what it really does to a living body, at the price of
-/// subjects. It is a way to learn, not a gate: a known formula never has to pass through it.
+/// The vivarium: an observation post for experimental pharmacology and toxicology. The test subjects are real
+/// bodies, players and NPCs. A dose given to a patient within sight of a working post is written down as a study:
+/// what the patient actually received and how the body took it. It is a way to learn, not a gate: a known
+/// formula never has to pass through it.
 /// </summary>
 [RegisterComponent, Access(typeof(NCVivariumSystem))]
 public sealed partial class NCVivariumComponent : Component
 {
+    /// <summary>How far from the post a patient is observed.</summary>
     [DataField]
-    public string Slot = "pack";
-
-    /// <summary>Test subjects available. They are used up by studies that harm them.</summary>
-    [DataField]
-    public int Subjects = 4;
-
-    [DataField]
-    public int Capacity = 8;
-
-    [DataField]
-    public TimeSpan Duration = TimeSpan.FromSeconds(20);
-
-    [DataField]
-    public float WastePerStudy = 1f;
-
-    /// <summary>How many studies this vivarium has run; it numbers the subjects.</summary>
-    [DataField]
-    public int Studies;
-}
-
-/// <summary>A crate of test subjects for a vivarium.</summary>
-[RegisterComponent]
-public sealed partial class NCVivariumSubjectCrateComponent : Component
-{
-    [DataField]
-    public int Subjects = 4;
+    public float Range = 6f;
 }
 
 public sealed class NCVivariumSystem : EntitySystem
 {
-    private const float InteractionRange = 1.5f;
-
-    [Dependency] private SharedDoAfterSystem _doAfter = default!;
-    [Dependency] private SharedPopupSystem _popup = default!;
-    [Dependency] private ItemSlotsSystem _slots = default!;
     [Dependency] private SharedPowerReceiverSystem _power = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private NCPharmaBatchSystem _batches = default!;
     [Dependency] private NCLabSystem _lab = default!;
-    [Dependency] private NCPharmaWasteSystem _waste = default!;
-    [Dependency] private NCBiotechActionSystem _actions = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
 
     public override void Initialize()
     {
         base.Initialize();
 
-        SubscribeLocalEvent<NCVivariumComponent, ActivateInWorldEvent>(OnActivate);
-        SubscribeLocalEvent<NCVivariumComponent, InteractUsingEvent>(OnInteractUsing);
-        SubscribeLocalEvent<NCVivariumComponent, NCVivariumDoAfterEvent>(OnDone);
+        SubscribeLocalEvent<NCPharmaDoseAdministeredEvent>(OnDoseAdministered);
     }
 
-    private void OnInteractUsing(Entity<NCVivariumComponent> vivarium, ref InteractUsingEvent args)
+    private void OnDoseAdministered(ref NCPharmaDoseAdministeredEvent args)
     {
-        if (args.Handled || !TryComp<NCVivariumSubjectCrateComponent>(args.Used, out var crate))
+        if (!_batches.TryGetTuning(out var tuning) || !_prototypes.TryIndex(args.Compound, out var compound))
             return;
 
-        args.Handled = true;
-        if (vivarium.Comp.Subjects + crate.Subjects > vivarium.Comp.Capacity)
+        // Find a working post that can see the patient.
+        var patientPosition = _transform.GetMapCoordinates(args.Patient);
+        EntityUid? post = null;
+        var query = EntityQueryEnumerator<NCVivariumComponent>();
+        while (query.MoveNext(out var uid, out var vivarium))
         {
-            _popup.PopupEntity(Loc.GetString("nc-lab-vivarium-full"), vivarium, args.User);
-            return;
+            var position = _transform.GetMapCoordinates(uid);
+            if (position.MapId != patientPosition.MapId ||
+                (position.Position - patientPosition.Position).Length() > vivarium.Range ||
+                !_power.IsPowered(uid))
+            {
+                continue;
+            }
+
+            post = uid;
+            break;
         }
 
-        vivarium.Comp.Subjects += crate.Subjects;
-        QueueDel(args.Used);
-        _popup.PopupEntity(Loc.GetString("nc-lab-vivarium-restocked", ("count", vivarium.Comp.Subjects)), vivarium, args.User);
-    }
-
-    private EntityUid? GetPack(Entity<NCVivariumComponent> vivarium)
-    {
-        return _slots.TryGetSlot(vivarium.Owner, vivarium.Comp.Slot, out var slot) &&
-               slot.Item is { } item && HasComp<NCPharmaContainerComponent>(item)
-            ? item
-            : null;
-    }
-
-    private void OnActivate(Entity<NCVivariumComponent> vivarium, ref ActivateInWorldEvent args)
-    {
-        if (args.Handled || !args.Complex)
+        if (post == null)
             return;
 
-        args.Handled = true;
-        if (!_power.IsPowered(vivarium.Owner))
-        {
-            _popup.PopupEntity(Loc.GetString("nc-lab-machine-unpowered"), vivarium, args.User);
+        var result = NCPharmaBatchMath.ResolveStudy(tuning, args.Effect, compound.ToxicConcentration);
+        var subject = Name(args.Patient);
+        if (!_batches.RecordVivariumStudy(args.BatchId, Name(args.Administrator), subject, result))
             return;
-        }
-
-        if (vivarium.Comp.Subjects <= 0)
-        {
-            _popup.PopupEntity(Loc.GetString("nc-lab-vivarium-no-subjects"), vivarium, args.User);
-            return;
-        }
-
-        if (GetPack(vivarium) is not { } pack || !TryComp<NCPharmaContainerComponent>(pack, out var container) ||
-            container.Doses < 1)
-        {
-            _popup.PopupEntity(Loc.GetString("nc-lab-machine-empty"), vivarium, args.User);
-            return;
-        }
-
-        if (!_waste.CanTake(vivarium.Owner, vivarium.Comp.WastePerStudy))
-        {
-            _popup.PopupEntity(Loc.GetString("nc-pharma-waste-full"), vivarium, args.User);
-            return;
-        }
-
-        var doAfter = new DoAfterArgs(EntityManager, args.User, vivarium.Comp.Duration,
-            new NCVivariumDoAfterEvent(), vivarium.Owner, target: vivarium.Owner)
-        {
-            BreakOnMove = true,
-            DistanceThreshold = InteractionRange,
-        };
-        if (_doAfter.TryStartDoAfter(doAfter))
-            _popup.PopupEntity(Loc.GetString("nc-lab-machine-started"), vivarium, args.User);
-    }
-
-    private void OnDone(Entity<NCVivariumComponent> vivarium, ref NCVivariumDoAfterEvent args)
-    {
-        if (args.Handled || args.Cancelled)
-            return;
-
-        args.Handled = true;
-        if (!_power.IsPowered(vivarium.Owner) || vivarium.Comp.Subjects <= 0 ||
-            GetPack(vivarium) is not { } pack || !TryComp<NCPharmaContainerComponent>(pack, out var container) ||
-            !_waste.CanTake(vivarium.Owner, vivarium.Comp.WastePerStudy))
-        {
-            return;
-        }
-
-        _actions.Resolve(args.User, "NCBiotechStudy", vivarium.Owner, [container.BatchId]);
-        var number = ++vivarium.Comp.Studies;
-        var subject = Loc.GetString("nc-lab-vivarium-subject-name", ("number", number));
-        if (!_batches.TryGetPackCompound(container, out var compound) ||
-            !_batches.TryStudyInVivo(container, pack, Name(args.User), subject, out var result))
-        {
-            _popup.PopupEntity(Loc.GetString("nc-lab-machine-wrong-sample"), vivarium, args.User);
-            return;
-        }
-
-        _waste.Add(vivarium.Owner, vivarium.Comp.WastePerStudy);
-        if (result.Outcome == NCPharmaStudyOutcome.Lost)
-            vivarium.Comp.Subjects--;
 
         var report = new StringBuilder();
         report.AppendLine(Loc.GetString("nc-lab-vivarium-subject", ("subject", subject)));
@@ -173,7 +78,7 @@ public sealed class NCVivariumSystem : EntitySystem
         report.AppendLine(Loc.GetString("nc-lab-vivarium-ratio", ("ratio", result.ToxicRatio.ToString("P0"))));
         report.AppendLine(Loc.GetString("nc-lab-vivarium-toxin", ("toxin", result.Toxin.ToString("0.##"))));
         report.AppendLine(Loc.GetString("nc-lab-vivarium-sepsis", ("sepsis", result.Sepsis.ToString("0.##"))));
-        _lab.AppendDossier(report, compound);
-        _lab.Print(vivarium.Owner, args.User, Loc.GetString("nc-lab-report-vivarium"), report.ToString());
+        _lab.AppendDossier(report, args.Compound);
+        _lab.Print(post.Value, args.Administrator, Loc.GetString("nc-lab-report-vivarium"), report.ToString(), pickup: false);
     }
 }

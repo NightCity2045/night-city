@@ -58,6 +58,15 @@ public sealed class NCPharmaBatchRecord
 
 public readonly record struct NCPharmaDoseResult(bool Accepted, NCPharmaDoseEffect Effect);
 
+/// <summary>Raised once a dose has really been given to a patient. The effect is what that patient received.</summary>
+[ByRefEvent]
+public readonly record struct NCPharmaDoseAdministeredEvent(
+    EntityUid Patient,
+    EntityUid Administrator,
+    Guid BatchId,
+    ProtoId<NCDrugProfilePrototype> Compound,
+    NCPharmaDoseEffect Effect);
+
 /// <summary>
 /// Owns the registry of production batches. A pack in the world stores only a batch id and the public label;
 /// everything that decides what a dose really does lives here and is resolved at administration time.
@@ -237,6 +246,8 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
             _systemic.Apply(patient, tuning.SepsisProfile, effect.SepsisBurden);
 
         RecordClinicalResponse(batch, Name(patient), effect.EffectiveConcentration); // NC
+        var administered = new NCPharmaDoseAdministeredEvent(patient, administrator, batch.BatchId, formula.Compound, effect);
+        RaiseLocalEvent(ref administered); // NC: an observing station may turn this dose into a study
         container.Comp.Doses--;
         Dirty(container.Owner, container.Comp);
         if (IsTracked(formula))
