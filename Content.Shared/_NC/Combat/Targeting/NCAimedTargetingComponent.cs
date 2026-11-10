@@ -23,3 +23,9 @@ public sealed partial class NCAimedTargetingComponent : Component
 /// </summary>
 [ByRefEvent]
 public readonly record struct NCCombatModeChangedEvent(bool InCombatMode);
+
+/// <summary>
+/// Raised on an entity after its active hand changed so movement-affecting systems can refresh.
+/// </summary>
+[ByRefEvent]
+public readonly record struct NCActiveHandChangedEvent;

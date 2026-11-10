@@ -329,6 +329,7 @@ public abstract partial class SharedHandsSystem
         if (handId == null)
         {
             ent.Comp.ActiveHandId = null;
+            RaiseNCActiveHandChanged(ent); // NC
             return true;
         }
 
@@ -339,7 +340,15 @@ public abstract partial class SharedHandsSystem
             RaiseLocalEvent(newHeld.Value, new HandSelectedEvent(ent));
 
         Dirty(ent);
+        RaiseNCActiveHandChanged(ent); // NC
         return true;
+    }
+
+    // NC: aimed-shot movement limits depend on the active hand.
+    private void RaiseNCActiveHandChanged(EntityUid user)
+    {
+        var changed = new Content.Shared._NC.Combat.Targeting.NCActiveHandChangedEvent();
+        RaiseLocalEvent(user, ref changed);
     }
 
     /// <summary>
