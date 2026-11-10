@@ -101,6 +101,38 @@ public static class NCPharmaBatchMath
         return Math.Clamp(tuning.ReferenceBodyMass / bodyMass, tuning.MinimumMassScale, tuning.MaximumMassScale);
     }
 
+    /// <summary>Share of a dose applied to the wounds directly, from the delivery form and the modifiers.</summary>
+    public static float ResolveLocalFraction(
+        NCPharmaTuningPrototype tuning,
+        NCPharmaDeliveryFormPrototype form,
+        IReadOnlyList<NCPharmaModifierPrototype> modifiers)
+    {
+        var fraction = form.LocalTissueFraction;
+        foreach (var modifier in modifiers)
+            fraction += modifier.LocalTissueFraction;
+        return Math.Clamp(fraction, 0f, Math.Clamp(tuning.MaximumLocalFraction, 0f, 1f));
+    }
+
+    /// <summary>
+    /// Infection a locally applied dose removes from one wound. A poor blood supply carries less of the drug
+    /// to the tissue, and a strain that resists the antibiotic takes less harm from it.
+    /// </summary>
+    public static float ResolveLocalInfectionRelief(
+        NCPharmaTuningPrototype tuning,
+        float antibioticPower,
+        float susceptibility,
+        float localConcentration,
+        float therapeuticConcentration,
+        float perfusion)
+    {
+        if (therapeuticConcentration <= 0f || localConcentration <= 0f || antibioticPower <= 0f)
+            return 0f;
+
+        var fraction = localConcentration / therapeuticConcentration;
+        return antibioticPower * Math.Clamp(susceptibility, 0f, 1f) * Math.Clamp(perfusion, 0f, 1f) *
+               fraction * tuning.LocalInfectionReliefAtTherapeutic;
+    }
+
     /// <summary>The strongest masking among the modifiers; masking agents do not stack into invisibility.</summary>
     public static float ResolveMasking(IReadOnlyList<NCPharmaModifierPrototype> modifiers)
     {

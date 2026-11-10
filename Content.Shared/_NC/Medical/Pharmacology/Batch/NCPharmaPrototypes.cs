@@ -104,6 +104,14 @@ public sealed partial class NCPharmaTuningPrototype : IPrototype
     [DataField(required: true)]
     public ProtoId<NCPharmaReactionProfilePrototype> DefaultReaction { get; private set; }
 
+    /// <summary>Most of a dose that may be applied locally; some always reaches the body.</summary>
+    [DataField]
+    public float MaximumLocalFraction { get; private set; } = 0.9f;
+
+    /// <summary>Infection removed per unit of local antibiotic action at therapeutic concentration.</summary>
+    [DataField]
+    public float LocalInfectionReliefAtTherapeutic { get; private set; } = 0.35f;
+
     /// <summary>Share of the remaining impurity one purification pass removes. Later passes gain less.</summary>
     [DataField]
     public float PurificationGapClosed { get; private set; } = 0.5f;
@@ -167,6 +175,17 @@ public sealed partial class NCPharmaDeliveryFormPrototype : IPrototype
     [DataField]
     public float ConcentrationMultiplier { get; private set; } = 1f;
 
+    /// <summary>The physical pack this form is delivered in. Missing means the station's default pack.</summary>
+    [DataField]
+    public EntProtoId? Pack { get; private set; }
+
+    /// <summary>
+    /// Share of a dose that is applied to the wounds directly instead of reaching the whole body. A surgical gel
+    /// works almost entirely on the wound; a pill does not touch it at all.
+    /// </summary>
+    [DataField]
+    public float LocalTissueFraction { get; private set; }
+
     [DataField]
     public float SterilityRiskMultiplier { get; private set; } = 1f;
 
@@ -222,6 +241,10 @@ public sealed partial class NCPharmaModifierPrototype : IPrototype
     /// </summary>
     [DataField]
     public float MaskingStrength { get; private set; }
+
+    /// <summary>Adds to the share of a dose that works directly on the wounds instead of the whole body.</summary>
+    [DataField]
+    public float LocalTissueFraction { get; private set; }
 }
 
 /// <summary>

@@ -150,7 +150,7 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
         while (remaining > 0 && packs < station.Comp.MaximumPacksPerRun)
         {
             var doses = Math.Min(station.Comp.DosesPerPack, remaining);
-            if (_batches.TrySpawnContainer(station.Comp.OutputContainer, coordinates, batch.BatchId, doses, producer) == null)
+            if (_batches.TrySpawnContainer(_batches.ResolvePack(batch.Formula, station.Comp.OutputContainer), coordinates, batch.BatchId, doses, producer) == null)
                 break;
             remaining -= doses;
             packs++;

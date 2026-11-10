@@ -92,6 +92,13 @@ public sealed partial class NCPharmaBatchSystem
             return false;
         }
 
+        // A local application only helps where the compound has a local action; otherwise it would be wasted.
+        if (NCPharmaBatchMath.ResolveLocalFraction(tuning, form, modifiers) > 0f &&
+            compound.AntibioticPowerAtTherapeutic <= 0f)
+        {
+            return false;
+        }
+
         var cleanName = SanitizeFormulaName(name, tuning.MaximumFormulaNameLength);
         if (cleanName == null)
         {

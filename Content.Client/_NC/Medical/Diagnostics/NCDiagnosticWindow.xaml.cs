@@ -588,7 +588,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
                     : Loc.GetString("nc-medical-diagnostics-drug-subtherapeutic");
             AddCard(
                 DrugsContainer,
-                DrugName(drug.Profile),
+                drug.Unidentified ? Loc.GetString("nc-medical-diagnostics-drug-unidentified") : DrugName(drug.Profile), // NC
                 Loc.GetString(
                     "nc-medical-diagnostics-drug-details",
                     ("category", Value(drug.Category)),

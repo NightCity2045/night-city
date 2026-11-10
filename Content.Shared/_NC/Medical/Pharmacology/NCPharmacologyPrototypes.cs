@@ -217,6 +217,13 @@ public sealed partial class NCDrugProfilePrototype : IPrototype
     [DataField]
     public LocId? Codename { get; private set; }
 
+    /// <summary>
+    /// Pool this compound can be drawn from when an unknown raw material is isolated. Which compound a given
+    /// material turns out to be is decided once per world and then stays the same.
+    /// </summary>
+    [DataField]
+    public string? ProceduralPool { get; private set; }
+
     /// <summary>Tolerance and dependence rules of this compound. Absent for compounds that do not habituate.</summary>
     [DataField]
     public ProtoId<NCDependenceProfilePrototype>? Dependence { get; private set; }

@@ -443,4 +443,15 @@ public sealed class NCPharmaBatchMathTests
         var masked = NCPharmaBatchMath.RunQc(Tuning(), Guid.NewGuid(), actual, Label(), NCPharmaQcTests.Purity, 0.9f);
         Assert.That(masked.Purity, Is.GreaterThan(plain.Purity));
     }
+
+    [Test]
+    public void LocalReliefNeedsBloodSupplyAndASusceptibleStrain()
+    {
+        var tuning = Tuning();
+        var good = NCPharmaBatchMath.ResolveLocalInfectionRelief(tuning, 1f, 1f, 4f, 4f, 1f);
+        Assert.That(good, Is.GreaterThan(0f));
+        Assert.That(NCPharmaBatchMath.ResolveLocalInfectionRelief(tuning, 1f, 1f, 4f, 4f, 0.2f), Is.LessThan(good));
+        Assert.That(NCPharmaBatchMath.ResolveLocalInfectionRelief(tuning, 1f, 0.25f, 4f, 4f, 1f), Is.LessThan(good));
+        Assert.That(NCPharmaBatchMath.ResolveLocalInfectionRelief(tuning, 0f, 1f, 4f, 4f, 1f), Is.EqualTo(0f));
+    }
 }

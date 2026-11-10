@@ -46,6 +46,10 @@ public sealed class NCPharmaPurifierSystem : EntitySystem
     [Dependency] private ItemSlotsSystem _slots = default!;
     [Dependency] private SharedPowerReceiverSystem _power = default!;
     [Dependency] private NCPharmaBatchSystem _batches = default!;
+    [Dependency] private Content.Server._NC.Medical.Pharmacology.Lab.NCBiotechActionSystem _actions = default!;
+    [Dependency] private Content.Server._NC.Medical.Pharmacology.Lab.NCPharmaWasteSystem _waste = default!;
+
+    private const float WastePerPass = 2f;
 
     public override void Initialize()
     {
@@ -82,6 +86,12 @@ public sealed class NCPharmaPurifierSystem : EntitySystem
         if (purifier.Comp.FilterCharges <= 0)
         {
             _popup.PopupEntity(Loc.GetString("nc-pharma-purifier-no-filter"), purifier, args.User);
+            return;
+        }
+
+        if (!_waste.CanTake(purifier.Owner, WastePerPass))
+        {
+            _popup.PopupEntity(Loc.GetString("nc-pharma-waste-full"), purifier, args.User);
             return;
         }
 
@@ -123,7 +133,11 @@ public sealed class NCPharmaPurifierSystem : EntitySystem
         }
 
         purifier.Comp.FilterCharges--;
-        var (purity, units) = NCPharmaBatchMath.Purify(tuning, source.Purity, source.Units);
+        _waste.Add(purifier.Owner, WastePerPass);
+        var (gained, units) = NCPharmaBatchMath.Purify(tuning, source.Purity, source.Units);
+        // The common action-resolution layer decides how well the pass went; a plain pass has quality 1.
+        var quality = _actions.Resolve(args.User, "NCBiotechPurify", purifier.Owner).Quality;
+        var purity = source.Purity + (gained - source.Purity) * quality;
         source.Purity = purity;
         source.Units = units;
         Dirty(item, source);

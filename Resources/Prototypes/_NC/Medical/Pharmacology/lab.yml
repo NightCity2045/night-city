@@ -372,6 +372,7 @@
           components:
           - NCPharmaSource
   - type: NCPharmaPurifier
+  - type: NCPharmaWasteTank
 
 - type: entity
   parent: BaseItem
@@ -384,3 +385,208 @@
     size: Small
     sprite: Objects/Specific/Chemistry/bottle.rsi
   - type: NCPharmaFilterCartridge
+
+# --- Packs of the delivery forms ---------------------------------------------------------------------------
+- type: entity
+  parent: BaseItem
+  id: NCPharmaPillBottle
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/pills_canister.rsi
+    state: pill_canister
+  - type: Item
+    size: Small
+    sprite: Objects/Specific/Chemistry/pills_canister.rsi
+  - type: NCPharmaContainer
+
+- type: entity
+  parent: BaseItem
+  id: NCPharmaIvBag
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/chem_bag.rsi
+    state: icon
+  - type: Item
+    size: Small
+    sprite: Objects/Specific/Chemistry/chem_bag.rsi
+  - type: NCPharmaContainer
+
+- type: entity
+  parent: BaseItem
+  id: NCPharmaInhaler
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/bottle.rsi
+    state: bottle
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Chemistry/bottle.rsi
+  - type: NCPharmaContainer
+
+- type: entity
+  parent: BaseItem
+  id: NCPharmaStrip
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/pills.rsi
+    state: pill
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Chemistry/pills.rsi
+  - type: NCPharmaContainer
+
+- type: entity
+  parent: BaseItem
+  id: NCPharmaPatchBox
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/pills.rsi
+    state: pill1
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Chemistry/pills.rsi
+  - type: NCPharmaContainer
+
+- type: entity
+  parent: BaseItem
+  id: NCPharmaGelTube
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/dropper.rsi
+    state: dropper
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Chemistry/dropper.rsi
+  - type: NCPharmaContainer
+
+# --- Raw material, stations and waste ----------------------------------------------------------------------
+- type: entity
+  parent: BaseItem
+  id: NCPharmaRawBiomass
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/jug.rsi
+    state: icon_empty
+  - type: Item
+    size: Normal
+    sprite: Objects/Specific/Chemistry/jug.rsi
+  - type: NCPharmaRawMaterial
+    units: 30
+    purity: 0.65
+    origin: nc-pharma-origin-bioreactor
+    output: NCPharmaSourceCanisterStreet
+
+- type: entity
+  parent: NCPharmaRawBiomass
+  id: NCPharmaRawCorporateStock
+  components:
+  - type: NCPharmaRawMaterial
+    units: 24
+    purity: 0.9
+    origin: nc-pharma-origin-corporate
+    output: NCPharmaSourceCanisterClinical
+
+- type: entity
+  parent: NCPharmaRawBiomass
+  id: NCPharmaRawSeizedSample
+  components:
+  - type: NCPharmaRawMaterial
+    units: 12
+    purity: 0.7
+    origin: nc-pharma-origin-seized
+    unknownPool: street
+
+- type: entity
+  parent: NCLabMachineBase
+  id: NCPharmaExtractor
+  components:
+  - type: ContainerContainer
+    containers:
+      material: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      material:
+        name: nc-pharma-material-slot
+        whitelist:
+          components:
+          - NCPharmaRawMaterial
+  - type: NCPharmaWasteTank
+  - type: NCPharmaExtractor
+- type: entity
+  parent: NCLabMachineBase
+  id: NCPharmaSterileCabinet
+  components:
+  - type: ContainerContainer
+    containers:
+      pack: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      pack:
+        name: nc-pharma-pack-slot
+        whitelist:
+          components:
+          - NCPharmaContainer
+  - type: NCPharmaWasteTank
+  - type: NCPharmaTreatmentStation
+    treatment: Sterilize
+- type: entity
+  parent: NCLabMachineBase
+  id: NCPharmaFormulationStation
+  components:
+  - type: ContainerContainer
+    containers:
+      pack: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      pack:
+        name: nc-pharma-pack-slot
+        whitelist:
+          components:
+          - NCPharmaContainer
+  - type: NCPharmaWasteTank
+  - type: NCPharmaTreatmentStation
+    treatment: Homogenize
+    gapClosed: 0.65
+    stabilityCost: 0.02
+- type: entity
+  parent: NCLabMachineBase
+  id: NCPharmaFillingStation
+  components:
+  - type: ContainerContainer
+    containers:
+      pack: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      pack:
+        name: nc-pharma-pack-slot
+        whitelist:
+          components:
+          - NCPharmaContainer
+  - type: NCPharmaWasteTank
+  - type: NCPharmaFillingStation
+- type: entity
+  parent: NCLabMachineBase
+  id: NCPharmaWasteBin
+  components:
+  - type: NCPharmaWasteBin
+
+- type: entity
+  parent: BaseItem
+  id: NCPharmaWasteCanister
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/jug.rsi
+    state: icon_empty
+  - type: Item
+    size: Normal
+    sprite: Objects/Specific/Chemistry/jug.rsi
+  - type: NCPharmaWasteCanister
+    filledPrototype: NCPharmaWasteCanisterFull
+
+- type: entity
+  parent: NCPharmaWasteCanister
+  id: NCPharmaWasteCanisterFull
+  components:
+  - type: NCPharmaWasteCanister
+    filled: true
+    emptyPrototype: NCPharmaWasteCanister

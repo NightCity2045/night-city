@@ -93,6 +93,7 @@ public enum NCPharmaAuditKind : byte
     AdminInspected,
     Degraded,
     AdminAdjusted,
+    Treated,
 }
 
 /// <summary>

@@ -315,6 +315,12 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             : 1f;
     }
 
+    /// <summary>Share of an antibiotic's power that works on the strain this body carries.</summary>
+    public float GetSusceptibility(EntityUid body, ProtoId<NCDrugProfilePrototype> drugId)
+    {
+        return TryComp<NCPharmacologyComponent>(body, out var state) ? ResolveSusceptibility(state, drugId) : 1f;
+    }
+
     /// <summary>Picks the character's strain once, by name, so it is stable across restarts without being stored.</summary>
     private void AssignStrain(EntityUid body, NCPharmacologyComponent state)
     {

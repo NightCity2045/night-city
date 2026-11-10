@@ -8,6 +8,7 @@ using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Random;
 
 namespace Content.Server._NC.Medical.Pharmacology.Batch;
 
@@ -19,7 +20,17 @@ public sealed partial class NCPharmaBatchSystem
 {
     public const string KnowledgeSectionType = "pharma-knowledge";
 
+    public const string UnknownSectionType = "pharma-unknown";
+    private const string SeedKey = "#seed";
+
+    [Dependency] private IRobustRandom _random = default!;
+
     private readonly Dictionary<ProtoId<NCDrugProfilePrototype>, NCAnalysisTier> _knowledge = new();
+
+    /// <summary>Which compound each kind of unknown raw material turned out to be. Fixed once, then persistent.</summary>
+    private readonly Dictionary<string, ProtoId<NCDrugProfilePrototype>> _unknownAssignments = new();
+
+    private uint _worldSeed;
 
     /// <summary>The deepest methods that have been run on a compound.</summary>
     public NCAnalysisTier GetKnowledge(ProtoId<NCDrugProfilePrototype> compound)
@@ -107,6 +118,113 @@ public sealed partial class NCPharmaBatchSystem
         return true;
     }
 
+    /// <summary>
+    /// Decides what an unknown raw material is. The first time a kind of material is met, a compound is drawn
+    /// from the pool by the world's seed; afterwards it is always the same compound, in every session.
+    /// </summary>
+    public bool TryResolveUnknown(string pool, string materialKey, out ProtoId<NCDrugProfilePrototype> compound)
+    {
+        compound = default;
+        if (_unknownAssignments.TryGetValue(materialKey, out compound))
+            return true;
+
+        var candidates = _prototypes.EnumeratePrototypes<NCDrugProfilePrototype>()
+            .Where(drug => drug.ProceduralPool == pool)
+            .OrderBy(drug => drug.ID, StringComparer.Ordinal)
+            .ToList();
+        if (candidates.Count == 0)
+            return false;
+
+        var free = candidates.Where(drug => !_unknownAssignments.ContainsValue(drug.ID)).ToList();
+        var from = free.Count > 0 ? free : candidates;
+        if (_worldSeed == 0)
+            _worldSeed = (uint) _random.Next(1, int.MaxValue);
+
+        var index = (int) (NCLabSeed.Hash(_worldSeed + ":" + materialKey) % (uint) from.Count);
+        compound = from[index].ID;
+        _unknownAssignments[materialKey] = compound;
+        return true;
+    }
+
+    /// <summary>
+    /// Isolates the compound inside an unknown raw material and gives the laboratory an experimental formula
+    /// for it, named by its codename. Isolating the same material again finds the same formula.
+    /// </summary>
+    public bool TryIsolateCompound(
+        string pool,
+        EntityUid material,
+        string author,
+        out NCPharmaFormulaPrototype formula,
+        out string codename)
+    {
+        formula = default!;
+        codename = string.Empty;
+        var key = MetaData(material).EntityPrototype?.ID ?? string.Empty;
+        if (key.Length == 0 || !TryGetTuning(out var tuning) ||
+            !TryResolveUnknown(pool, key, out var compound) ||
+            !_prototypes.TryIndex(compound, out var drug) || drug.Codename == null)
+        {
+            return false;
+        }
+
+        codename = drug.Codename.Value;
+        var id = $"NCPharmaFormulaIsolated.{compound.Id}";
+        if (_derived.TryGetValue(id, out var existing))
+        {
+            formula = existing;
+            return true;
+        }
+
+        if (_derived.Count >= tuning.MaximumDerivedFormulas)
+            return false;
+
+        formula = NCPharmaFormulaPrototype.Create(
+            id,
+            drug.Codename.Value,
+            1,
+            compound,
+            "NCPharmaDeliveryAutoinjector",
+            MathF.Round(drug.TherapeuticConcentration * 0.8f, 1),
+            [],
+            "NCPharmaProductionStandard",
+            0.7f,
+            NCPharmaRegulatoryStatus.Experimental,
+            null,
+            null,
+            author,
+            null);
+        _derived.Add(id, formula);
+        AddJournal(NCPharmaJournalKind.VersionCreated, id, string.Empty, author, "compound isolated from raw material");
+        return true;
+    }
+
+    private void CaptureUnknown(NCRoundSnapshotCaptureEvent args)
+    {
+        var records = _unknownAssignments
+            .OrderBy(entry => entry.Key, StringComparer.Ordinal)
+            .Select(entry => new NCPharmaUnknownSnapshot { Key = entry.Key, Compound = entry.Value.Id })
+            .ToList();
+        if (_worldSeed != 0)
+            records.Add(new NCPharmaUnknownSnapshot { Key = SeedKey, Compound = _worldSeed.ToString() });
+        AddSimpleSection(args, UnknownSectionType, records.ToArray());
+    }
+
+    private void RestoreUnknown(Guid snapshotId)
+    {
+        foreach (var record in ReadSimpleSection<NCPharmaUnknownSnapshot>(snapshotId, UnknownSectionType))
+        {
+            if (record.Key == SeedKey)
+            {
+                if (uint.TryParse(record.Compound, out var seed))
+                    _worldSeed = seed;
+                continue;
+            }
+
+            if (_prototypes.TryIndex<NCDrugProfilePrototype>(record.Compound, out var drug) && drug.ProceduralPool != null)
+                _unknownAssignments[record.Key] = drug.ID;
+        }
+    }
+
     private void CaptureKnowledge(NCRoundSnapshotCaptureEvent args)
     {
         var records = _knowledge
@@ -127,6 +245,12 @@ public sealed partial class NCPharmaBatchSystem
             _knowledge[record.Compound] = (NCAnalysisTier) record.Tier;
         }
     }
+}
+
+public sealed class NCPharmaUnknownSnapshot
+{
+    public string Key { get; set; } = string.Empty;
+    public string Compound { get; set; } = string.Empty;
 }
 
 public sealed class NCPharmaKnowledgeSnapshot

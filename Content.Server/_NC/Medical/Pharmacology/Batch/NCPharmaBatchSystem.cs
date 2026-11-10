@@ -205,11 +205,15 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         var massScale = TryComp<PhysicsComponent>(patient, out var physics)
             ? NCPharmaBatchMath.ResolveMassScale(tuning, physics.FixturesMass)
             : 1f;
+        var localFraction = NCPharmaBatchMath.ResolveLocalFraction(tuning, form, ResolveModifiers(formula));
+        var localConcentration = effect.EffectiveConcentration * massScale * localFraction;
         effect = effect with
         {
-            EffectiveConcentration = effect.EffectiveConcentration * massScale,
+            EffectiveConcentration = effect.EffectiveConcentration * massScale * (1f - localFraction),
             ToxinBurden = effect.ToxinBurden * massScale,
         };
+        if (localConcentration > 0f)
+            ApplyLocalTissue(patient, formula.Compound, localConcentration, tuning);
         _depot.TryDeposit(
             patient,
             formula.Compound,
