@@ -1167,3 +1167,15 @@
   - type: NCPharmaPrefilled
     formula: NCPharmaFormulaStimulantReversal
     doses: 1
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaVasopressorAutoinjector
+  name: nc-pharma-formula-vasopressor-autoinjector
+  version: 1
+  compound: NCDrugVasopressor
+  deliveryForm: NCPharmaDeliveryAutoinjector
+  targetConcentration: 4
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.86
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: ClinicalOnly

@@ -1,0 +1,89 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# Corporate-grade autoinjectors: clean production profile, so high purity, sterility and stability.
+
+- type: entity
+  parent: NCPharmaAutoinjector
+  id: NCTraumaTeamPenTraumaAnalgesic
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaTraumaAnalgesic
+    profile: NCPharmaProductionClean
+    doses: 1
+    inputPurity: 0.99
+    sterility: 0.999
+    mixing: 0.99
+
+- type: entity
+  parent: NCPharmaAutoinjector
+  id: NCTraumaTeamPenProcoagulant
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaProcoagulant
+    profile: NCPharmaProductionClean
+    doses: 1
+    inputPurity: 0.99
+    sterility: 0.999
+    mixing: 0.99
+
+- type: entity
+  parent: NCPharmaAutoinjector
+  id: NCTraumaTeamPenRespiratoryStimulant
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaRespiratoryStimulant
+    profile: NCPharmaProductionClean
+    doses: 1
+    inputPurity: 0.99
+    sterility: 0.999
+    mixing: 0.99
+
+- type: entity
+  parent: NCPharmaAutoinjector
+  id: NCTraumaTeamPenAntitoxin
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaAntitoxin
+    profile: NCPharmaProductionClean
+    doses: 1
+    inputPurity: 0.99
+    sterility: 0.999
+    mixing: 0.99
+
+- type: entity
+  parent: NCPharmaAutoinjector
+  id: NCTraumaTeamPenVasopressor
+  components:
+  - type: NCPharmaPrefilled
+    formula: NCPharmaFormulaVasopressorAutoinjector
+    profile: NCPharmaProductionClean
+    doses: 1
+    inputPurity: 0.99
+    sterility: 0.999
+    mixing: 0.99
+
+# The combat medic bag: stabilise yourself and the person next to you.
+- type: entity
+  parent: ClothingBackpackSatchelMedical
+  id: NCTraumaTeamCombatMedicBag
+  components:
+  - type: EntityTableContainerFill
+    containers:
+      storagebase: !type:AllSelector
+        children:
+        - id: NCTraumaTeamPenTraumaAnalgesic
+          amount: 4
+        - id: NCTraumaTeamPenProcoagulant
+          amount: 3
+        - id: NCTraumaTeamPenRespiratoryStimulant
+          amount: 2
+        - id: NCTraumaTeamPenAntitoxin
+          amount: 2
+        - id: NCTraumaTeamPenVasopressor
+          amount: 2
+        - id: Gauze
+          amount: 2
+        - id: Tourniquet
+          amount: 2
