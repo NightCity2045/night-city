@@ -355,3 +355,32 @@
   applicationDuration: 3s
   resourceKind: Stack
   resourceCost: 1
+
+# --- Purification of raw material ------------------------------------------------------------------------
+- type: entity
+  parent: NCLabMachineBase
+  id: NCPharmaPurifier
+  components:
+  - type: ContainerContainer
+    containers:
+      source: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      source:
+        name: nc-pharma-purifier-slot
+        whitelist:
+          components:
+          - NCPharmaSource
+  - type: NCPharmaPurifier
+
+- type: entity
+  parent: BaseItem
+  id: NCPharmaFilterCartridge
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/bottle.rsi
+    state: bottle-1
+  - type: Item
+    size: Small
+    sprite: Objects/Specific/Chemistry/bottle.rsi
+  - type: NCPharmaFilterCartridge

@@ -421,4 +421,26 @@ public sealed class NCPharmaBatchMathTests
         Assert.That(NCPharmaBatchMath.ResolveMassScale(tuning, 0f), Is.EqualTo(1f));
         Assert.That(NCPharmaBatchMath.ResolveMassScale(tuning, float.NaN), Is.EqualTo(1f));
     }
+
+    [Test]
+    public void PurificationHasDiminishingReturnsAndAlwaysCostsMaterial()
+    {
+        var tuning = Tuning();
+        var (first, firstUnits) = NCPharmaBatchMath.Purify(tuning, 0.7f, 20f);
+        var (second, secondUnits) = NCPharmaBatchMath.Purify(tuning, first, firstUnits);
+        Assert.That(first, Is.GreaterThan(0.7f));
+        Assert.That(second - first, Is.LessThan(first - 0.7f));
+        Assert.That(second, Is.LessThan(tuning.PurificationCeiling));
+        Assert.That(secondUnits, Is.LessThan(firstUnits));
+        Assert.That(firstUnits, Is.LessThan(20f));
+    }
+
+    [Test]
+    public void MaskingHidesImpurityFromSimpleQcOnly()
+    {
+        var actual = new NCPharmaQuality(5f, 0.6f, 0.95f, 0.95f, 0.9f);
+        var plain = NCPharmaBatchMath.RunQc(Tuning(), Guid.NewGuid(), actual, Label(), NCPharmaQcTests.Purity);
+        var masked = NCPharmaBatchMath.RunQc(Tuning(), Guid.NewGuid(), actual, Label(), NCPharmaQcTests.Purity, 0.9f);
+        Assert.That(masked.Purity, Is.GreaterThan(plain.Purity));
+    }
 }

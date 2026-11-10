@@ -101,6 +101,31 @@ public static class NCPharmaBatchMath
         return Math.Clamp(tuning.ReferenceBodyMass / bodyMass, tuning.MinimumMassScale, tuning.MaximumMassScale);
     }
 
+    /// <summary>The strongest masking among the modifiers; masking agents do not stack into invisibility.</summary>
+    public static float ResolveMasking(IReadOnlyList<NCPharmaModifierPrototype> modifiers)
+    {
+        var strongest = 0f;
+        foreach (var modifier in modifiers)
+            strongest = MathF.Max(strongest, modifier.MaskingStrength);
+        return Math.Clamp(strongest, 0f, 1f);
+    }
+
+    /// <summary>
+    /// One purification pass over raw material: it closes part of the gap to the ceiling, so the last percents
+    /// cost the most, and it always costs material. Returns the new purity and the units that remain.
+    /// </summary>
+    public static (float Purity, float Units) Purify(NCPharmaTuningPrototype tuning, float purity, float units)
+    {
+        if (!float.IsFinite(purity) || !float.IsFinite(units) || units <= 0f)
+            return (purity, units);
+
+        var ceiling = Math.Clamp(tuning.PurificationCeiling, 0f, QualityCeiling);
+        var gap = MathF.Max(0f, ceiling - purity);
+        var newPurity = purity + gap * Math.Clamp(tuning.PurificationGapClosed, 0f, 1f);
+        var newUnits = units * (1f - Math.Clamp(tuning.PurificationYieldLoss, 0f, 1f));
+        return (newPurity, newUnits);
+    }
+
     /// <summary>
     /// Time a dose needs to be fully absorbed: the delivery form's own absorption scaled by every modifier.
     /// </summary>
@@ -198,7 +223,8 @@ public static class NCPharmaBatchMath
         Guid batchId,
         NCPharmaQuality actual,
         NCPharmaLabel label,
-        NCPharmaQcTests requested)
+        NCPharmaQcTests requested,
+        float masking = 0f)
     {
         var failed = NCPharmaQcTests.None;
         float? concentration = null;
@@ -217,8 +243,10 @@ public static class NCPharmaBatchMath
 
         if (requested.HasFlag(NCPharmaQcTests.Purity))
         {
-            purity = actual.Purity;
-            if (actual.Purity < label.Purity - tuning.QcPurityTolerance)
+            // A masking agent hides part of the impurity from this simple analysis.
+            var measured = actual.Purity + (1f - actual.Purity) * Math.Clamp(masking, 0f, 1f);
+            purity = measured;
+            if (measured < label.Purity - tuning.QcPurityTolerance)
                 failed |= NCPharmaQcTests.Purity;
         }
 

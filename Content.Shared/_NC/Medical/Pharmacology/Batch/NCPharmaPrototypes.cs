@@ -104,6 +104,18 @@ public sealed partial class NCPharmaTuningPrototype : IPrototype
     [DataField(required: true)]
     public ProtoId<NCPharmaReactionProfilePrototype> DefaultReaction { get; private set; }
 
+    /// <summary>Share of the remaining impurity one purification pass removes. Later passes gain less.</summary>
+    [DataField]
+    public float PurificationGapClosed { get; private set; } = 0.5f;
+
+    /// <summary>Share of the material lost in one purification pass.</summary>
+    [DataField]
+    public float PurificationYieldLoss { get; private set; } = 0.2f;
+
+    /// <summary>Purity that no amount of purification passes.</summary>
+    [DataField]
+    public float PurificationCeiling { get; private set; } = 0.985f;
+
     /// <summary>Body mass a dose is calibrated for. A lighter body feels it more strongly, a heavier one less.</summary>
     [DataField]
     public float ReferenceBodyMass { get; private set; } = 70f;
@@ -203,6 +215,13 @@ public sealed partial class NCPharmaModifierPrototype : IPrototype
     /// <summary>Scales the absorption time of the delivery form. Below one is fast, above one is slow.</summary>
     [DataField]
     public float AbsorptionMultiplier { get; private set; } = 1f;
+
+    /// <summary>
+    /// How much of the batch's impurity a simple quality-control run fails to see. A masked batch reads purer
+    /// than it is; only a study of the compound itself gives it away.
+    /// </summary>
+    [DataField]
+    public float MaskingStrength { get; private set; }
 }
 
 /// <summary>

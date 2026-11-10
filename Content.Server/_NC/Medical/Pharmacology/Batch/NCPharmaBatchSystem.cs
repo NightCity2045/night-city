@@ -38,6 +38,9 @@ public sealed class NCPharmaBatchRecord
     public NCPharmaQcState QcState = NCPharmaQcState.Untested;
     public NCPharmaQcReport? LastQc;
     public float ModifierToxicity = 1f;
+
+    /// <summary>How much impurity a simple QC run cannot see in this batch.</summary>
+    public float Masking;
     public string Producer = string.Empty;
     public string Facility = string.Empty;
     public NCActiveWorldTime CreatedAt;
@@ -116,6 +119,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
             FormulaVersion = formula.Version,
             Actual = outcome.Quality,
             ModifierToxicity = outcome.ModifierToxicity,
+            Masking = NCPharmaBatchMath.ResolveMasking(modifiers),
             Producer = producer,
             Facility = facility,
             CreatedAt = Now(),
@@ -270,7 +274,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
             return false;
         }
 
-        report = NCPharmaBatchMath.RunQc(tuning, batchId, batch.Actual, batch.Label, tests);
+        report = NCPharmaBatchMath.RunQc(tuning, batchId, batch.Actual, batch.Label, tests, batch.Masking);
         batch.LastQc = report;
         batch.QcState = NCPharmaBatchMath.ResolveQcState(batch.QcState, report);
         AddAudit(batch, tuning, NCPharmaAuditKind.QcPerformed, actor,

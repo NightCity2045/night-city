@@ -187,6 +187,8 @@ public sealed partial class NCLabSystem : EntitySystem
             title = Loc.GetString("nc-lab-report-compound");
             _batches.RecordAnalysis(compound, NCAnalysisTier.InVitro);
             AppendDossier(report, compound);
+            if (_batches.GetPackMasking(pack) > 0.05f)
+                report.AppendLine(Loc.GetString("nc-lab-masking-detected"));
         }
         else
         {

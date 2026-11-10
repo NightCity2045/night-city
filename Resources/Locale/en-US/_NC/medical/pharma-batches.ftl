@@ -32,6 +32,10 @@ nc-pharma-modifier-buffered = buffered
 nc-pharma-modifier-concentrated = concentrated
 nc-pharma-modifier-purified = purified
 nc-pharma-modifier-cold-solvent = cold solvent
+nc-pharma-modifier-absorption-enhancer = absorption enhancer
+nc-pharma-modifier-masking-agent = masking agent
+nc-pharma-modifier-potentiator = potentiator
+nc-pharma-modifier-metabolic-blocker = metabolic blocker
 
 nc-pharma-production-street = quick synthesis
 nc-pharma-production-standard = standard synthesis

@@ -46,6 +46,12 @@ public sealed partial class NCPharmaBatchSystem
         return true;
     }
 
+    /// <summary>How much of a batch's impurity a simple QC run cannot see. Only a compound study reveals it.</summary>
+    public float GetPackMasking(NCPharmaContainerComponent pack)
+    {
+        return _batches.TryGetValue(pack.BatchId, out var batch) ? batch.Masking : 0f;
+    }
+
     /// <summary>Records a finished analysis and returns the knowledge after it.</summary>
     public NCAnalysisTier RecordAnalysis(ProtoId<NCDrugProfilePrototype> compound, NCAnalysisTier performed)
     {

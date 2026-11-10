@@ -145,6 +145,39 @@
   absorptionMultiplier: 0.8
   costMultiplier: 1.1
 
+- type: ncPharmaModifier
+  id: NCPharmaModifierAbsorptionEnhancer
+  name: nc-pharma-modifier-absorption-enhancer
+  concentrationMultiplier: 1.15
+  toxicityMultiplier: 1.25
+  absorptionMultiplier: 0.5
+  costMultiplier: 1.2
+
+- type: ncPharmaModifier
+  id: NCPharmaModifierMaskingAgent
+  name: nc-pharma-modifier-masking-agent
+  purityDelta: -0.06
+  toxicityMultiplier: 1.2
+  costMultiplier: 1.3
+  maskingStrength: 0.7
+
+- type: ncPharmaModifier
+  id: NCPharmaModifierPotentiator
+  name: nc-pharma-modifier-potentiator
+  concentrationMultiplier: 1.3
+  toxicityMultiplier: 1.15
+  costMultiplier: 1.3
+
+# Slows the destruction of the compound: modelled as a long, flat arrival with a small accumulation cost.
+- type: ncPharmaModifier
+  id: NCPharmaModifierMetabolicBlocker
+  name: nc-pharma-modifier-metabolic-blocker
+  concentrationMultiplier: 1.1
+  stabilityDelta: -0.03
+  toxicityMultiplier: 1.1
+  absorptionMultiplier: 2.5
+  costMultiplier: 1.25
+
 - type: ncPharmaProductionProfile
   id: NCPharmaProductionStreet
   name: nc-pharma-production-street

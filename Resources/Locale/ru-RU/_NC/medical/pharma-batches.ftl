@@ -32,6 +32,10 @@ nc-pharma-modifier-buffered = буферизованный состав
 nc-pharma-modifier-concentrated = концентрат
 nc-pharma-modifier-purified = очищенный состав
 nc-pharma-modifier-cold-solvent = холодный растворитель
+nc-pharma-modifier-absorption-enhancer = усилитель всасывания
+nc-pharma-modifier-masking-agent = маскирующий агент
+nc-pharma-modifier-potentiator = потенциатор
+nc-pharma-modifier-metabolic-blocker = метаболический блокатор
 
 nc-pharma-production-street = быстрый синтез
 nc-pharma-production-standard = стандартный синтез

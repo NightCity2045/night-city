@@ -77,6 +77,9 @@ public sealed partial class NCLabAnalyzeDoAfterEvent : SimpleDoAfterEvent;
 [Serializable, NetSerializable]
 public sealed partial class NCBloodDrawDoAfterEvent : SimpleDoAfterEvent;
 
+[Serializable, NetSerializable]
+public sealed partial class NCPharmaPurifyDoAfterEvent : SimpleDoAfterEvent;
+
 public sealed class NCLabExamineSystem : EntitySystem
 {
     public override void Initialize()
