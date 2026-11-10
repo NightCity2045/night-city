@@ -20,6 +20,8 @@ using Content.Shared.Roles;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Prototypes;
 
+#nullable enable annotations
+
 namespace Content.IntegrationTests.Tests._NC.Meta;
 
 public sealed partial class NCMetaOrganizationAuthorityTest

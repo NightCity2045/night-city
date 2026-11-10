@@ -76,7 +76,7 @@ public sealed partial class NCMetaLaboratoryClinicalTest
                 Assert.That(Server.System<NCSurgeryInteractionSystem>().TryStageCyberware(scene.Actor, patient, implant), Is.True);
                 Assert.That(Server.System<NCAnatomySystem>().TryGetOrgan(patient, "Head", out region), Is.True);
                 contaminationBefore = SComp<NCSurgicalSiteComponent>(region).Contamination;
-                stepDuration = Server.ResolveDependency<IPrototypeManager>().Index<NCSurgeryStepPrototype>("NCSurgeryStepPrepareField").Duration;
+                stepDuration = Server.ResolveDependency<IPrototypeManager>().Index(new Robust.Shared.Prototypes.ProtoId<NCSurgeryStepPrototype>("NCSurgeryStepPrepareField")).Duration;
                 // No direct patient/site/authorization mutations. The held production tool and strapped table supply them.
             });
             var program = await Install(scene, ProcedureProgram,

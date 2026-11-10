@@ -21,6 +21,8 @@ using Content.Shared.Preferences;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Serialization.Manager;
 
+#nullable enable annotations
+
 namespace Content.IntegrationTests.Tests._NC.Meta;
 
 [TestFixture, NonParallelizable]

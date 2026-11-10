@@ -10,6 +10,8 @@ using Robust.Shared.Asynchronous;
 using Robust.Shared.GameObjects;
 using Robust.UnitTesting;
 
+#nullable enable annotations
+
 namespace Content.IntegrationTests.Tests._NC.Meta;
 
 /// <summary>Runs real durable APIs under the native server context while the test pumps its lifecycle.</summary>

@@ -84,7 +84,7 @@ public sealed class NCMetaLatheAutomationTest : GameTest
             _lathes.AutomationCompleted += OnCompleted;
             try
             {
-                var recipe = SProtoMan.Index<LatheRecipePrototype>("NCMetaTestInstantRecipe");
+                var recipe = SProtoMan.Index(new Robust.Shared.Prototypes.ProtoId<LatheRecipePrototype>("NCMetaTestInstantRecipe"));
                 Assert.That(_lathes.TryStartAutomationJob(uid, id, recipe, 3, () => true), Is.True);
                 Assert.That(outcomes, Has.Count.EqualTo(1));
                 Assert.That(products, Is.EqualTo(cancelInsideOutput ? 1 : 3));
@@ -111,7 +111,7 @@ public sealed class NCMetaLatheAutomationTest : GameTest
         {
             var uid = Machine(map.GridCoords);
             var id = Guid.NewGuid();
-            var recipe = SProtoMan.Index<LatheRecipePrototype>("NCMetaTestTimedRecipe");
+            var recipe = SProtoMan.Index(new Robust.Shared.Prototypes.ProtoId<LatheRecipePrototype>("NCMetaTestTimedRecipe"));
             Assert.That(_lathes.TryStartAutomationJob(uid, id, recipe, 3, () => true), Is.True);
             Assert.That(_materials.GetMaterialAmount(uid, "Steel"), Is.Zero);
             Assert.That(_lathes.TryCancelAutomationJob(uid, Guid.NewGuid()), Is.False);

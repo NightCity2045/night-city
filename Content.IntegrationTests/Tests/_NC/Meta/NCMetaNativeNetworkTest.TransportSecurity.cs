@@ -9,6 +9,8 @@ using Content.Shared._NC.Meta.Network;
 using Content.Shared.DeviceNetwork.Components;
 using Content.Shared.Power.EntitySystems;
 
+#nullable enable annotations
+
 namespace Content.IntegrationTests.Tests._NC.Meta;
 
 public sealed partial class NCMetaNativeNetworkTest

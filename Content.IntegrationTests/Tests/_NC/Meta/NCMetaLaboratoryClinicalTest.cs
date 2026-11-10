@@ -241,7 +241,7 @@ public sealed partial class NCMetaLaboratoryClinicalTest : GameTest
             // UpdateChemicals would treat the entire native buffer as overflow and discard it.
             var buffer = solution!.Value.Comp.Solution;
             var before = buffer.Volume;
-            buffer.AddReagent("Water", FixedPoint2.New(amount));
+            buffer.AddReagent(new Robust.Shared.Prototypes.ProtoId<Content.Shared.Chemistry.Reagent.ReagentPrototype>("Water"), FixedPoint2.New(amount));
             Assert.That(buffer.Volume, Is.EqualTo(before + FixedPoint2.New(amount)));
             return;
         }

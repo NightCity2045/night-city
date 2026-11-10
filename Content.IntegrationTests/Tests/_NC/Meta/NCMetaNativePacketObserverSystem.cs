@@ -10,6 +10,8 @@ using Content.Shared.DeviceNetwork.Events;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Reflection;
 
+#nullable enable annotations
+
 namespace Content.IntegrationTests.Tests._NC.Meta;
 
 [Reflect(false)]
