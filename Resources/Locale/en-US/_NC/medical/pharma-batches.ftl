@@ -20,11 +20,18 @@ nc-pharma-administer-failed = The dose could not be administered.
 nc-pharma-delivery-oral = oral
 nc-pharma-delivery-autoinjector = autoinjector
 nc-pharma-delivery-infusion = infusion
+nc-pharma-delivery-inhaled = inhaled
+nc-pharma-delivery-sublingual = sublingual
+nc-pharma-delivery-patch = transdermal patch
 
 nc-pharma-modifier-fast-release = fast release
 nc-pharma-modifier-extended-release = extended release
 nc-pharma-modifier-protective-carrier = protective carrier
 nc-pharma-modifier-stabilizer = stabilizer
+nc-pharma-modifier-buffered = buffered
+nc-pharma-modifier-concentrated = concentrated
+nc-pharma-modifier-purified = purified
+nc-pharma-modifier-cold-solvent = cold solvent
 
 nc-pharma-production-street = quick synthesis
 nc-pharma-production-standard = standard synthesis

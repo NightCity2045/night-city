@@ -104,6 +104,17 @@ public sealed partial class NCPharmaTuningPrototype : IPrototype
     [DataField(required: true)]
     public ProtoId<NCPharmaReactionProfilePrototype> DefaultReaction { get; private set; }
 
+    /// <summary>Body mass a dose is calibrated for. A lighter body feels it more strongly, a heavier one less.</summary>
+    [DataField]
+    public float ReferenceBodyMass { get; private set; } = 70f;
+
+    /// <summary>Bounds on the mass scaling so an odd physics mass can never nullify or explode a dose.</summary>
+    [DataField]
+    public float MinimumMassScale { get; private set; } = 0.5f;
+
+    [DataField]
+    public float MaximumMassScale { get; private set; } = 2f;
+
     /// <summary>Largest run made by hand in a reactor.</summary>
     [DataField]
     public int MaximumReactorUnits { get; private set; } = 8;

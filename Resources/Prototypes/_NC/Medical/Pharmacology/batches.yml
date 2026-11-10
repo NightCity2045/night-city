@@ -58,6 +58,33 @@
   administrationDelay: 6s
   absorptionDuration: 20s
 
+- type: ncPharmaDeliveryForm
+  id: NCPharmaDeliveryInhaled
+  name: nc-pharma-delivery-inhaled
+  concentrationMultiplier: 0.8
+  sterilityRiskMultiplier: 0.3
+  adulterantMultiplier: 1.3
+  administrationDelay: 2.5s
+  absorptionDuration: 8s
+
+- type: ncPharmaDeliveryForm
+  id: NCPharmaDeliverySublingual
+  name: nc-pharma-delivery-sublingual
+  concentrationMultiplier: 0.75
+  sterilityRiskMultiplier: 0.2
+  adulterantMultiplier: 0.9
+  administrationDelay: 2s
+  absorptionDuration: 15s
+
+- type: ncPharmaDeliveryForm
+  id: NCPharmaDeliveryPatch
+  name: nc-pharma-delivery-patch
+  concentrationMultiplier: 0.5
+  sterilityRiskMultiplier: 0.4
+  adulterantMultiplier: 0.8
+  administrationDelay: 3s
+  absorptionDuration: 120s
+
 - type: ncPharmaModifier
   id: NCPharmaModifierFastRelease
   name: nc-pharma-modifier-fast-release
@@ -88,6 +115,35 @@
   purityDelta: -0.02
   stabilityDelta: 0.15
   costMultiplier: 1.2
+
+- type: ncPharmaModifier
+  id: NCPharmaModifierBuffered
+  name: nc-pharma-modifier-buffered
+  concentrationMultiplier: 0.95
+  toxicityMultiplier: 0.8
+  absorptionMultiplier: 1.3
+  costMultiplier: 1.15
+
+- type: ncPharmaModifier
+  id: NCPharmaModifierConcentrated
+  name: nc-pharma-modifier-concentrated
+  concentrationMultiplier: 1.4
+  stabilityDelta: -0.1
+  toxicityMultiplier: 1.3
+  costMultiplier: 1.25
+
+- type: ncPharmaModifier
+  id: NCPharmaModifierPurified
+  name: nc-pharma-modifier-purified
+  purityDelta: 0.1
+  costMultiplier: 1.6
+
+- type: ncPharmaModifier
+  id: NCPharmaModifierColdSolvent
+  name: nc-pharma-modifier-cold-solvent
+  stabilityDelta: 0.1
+  absorptionMultiplier: 0.8
+  costMultiplier: 1.1
 
 - type: ncPharmaProductionProfile
   id: NCPharmaProductionStreet

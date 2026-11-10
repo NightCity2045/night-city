@@ -819,6 +819,12 @@ public sealed partial class NCMedicalPersistenceSystem
                 Stage = record.Stage,
                 Comedown = record.Comedown,
             }).ToList(),
+            PendingDoses = source.PendingDoses.Select(dose => new NCPendingDoseSnapshot
+            {
+                Drug = dose.Drug,
+                Remaining = dose.Remaining,
+                RatePerSecond = dose.RatePerSecond,
+            }).ToList(),
         };
     }
 

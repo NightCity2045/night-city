@@ -251,6 +251,27 @@ public sealed partial class NCPharmacologySystem
         }
     }
 
+    private bool ValidatePendingDoses(NCPharmacologyStateSnapshot snapshot)
+    {
+        if (snapshot.PendingDoses == null || snapshot.PendingDoses.Count > 16)
+            return false;
+        if (snapshot.PendingDoses.Count > 0 && !snapshot.Initialized)
+            return false;
+
+        foreach (var dose in snapshot.PendingDoses)
+        {
+            if (dose == null ||
+                !_prototypes.TryIndex(dose.Drug, out NCDrugProfilePrototype? drug) ||
+                !IsFiniteRange(dose.Remaining, 0.0001f, drug.MaximumConcentration) ||
+                !float.IsFinite(dose.RatePerSecond) || dose.RatePerSecond <= 0f)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private bool ValidateDependenceSnapshot(NCPharmacologyStateSnapshot snapshot)
     {
         if (snapshot.Dependence == null || snapshot.Dependence.Count > AbsoluteDrugCapacityLimit)

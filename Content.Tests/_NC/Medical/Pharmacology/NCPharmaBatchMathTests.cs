@@ -408,4 +408,17 @@ public sealed class NCPharmaBatchMathTests
         Assert.That(floor, Is.EqualTo(Tuning().MinimumDegradedPurity).Within(0.0001f));
         Assert.That(untouched, Is.LessThanOrEqualTo(0.1f));
     }
+
+    [Test]
+    public void LighterBodiesFeelADoseMoreAndTheScaleIsBounded()
+    {
+        var tuning = Tuning();
+        Assert.That(NCPharmaBatchMath.ResolveMassScale(tuning, 70f), Is.EqualTo(1f).Within(0.001f));
+        Assert.That(NCPharmaBatchMath.ResolveMassScale(tuning, 50f), Is.GreaterThan(1f));
+        Assert.That(NCPharmaBatchMath.ResolveMassScale(tuning, 140f), Is.LessThan(1f));
+        Assert.That(NCPharmaBatchMath.ResolveMassScale(tuning, 1f), Is.EqualTo(tuning.MaximumMassScale));
+        Assert.That(NCPharmaBatchMath.ResolveMassScale(tuning, 10000f), Is.EqualTo(tuning.MinimumMassScale));
+        Assert.That(NCPharmaBatchMath.ResolveMassScale(tuning, 0f), Is.EqualTo(1f));
+        Assert.That(NCPharmaBatchMath.ResolveMassScale(tuning, float.NaN), Is.EqualTo(1f));
+    }
 }

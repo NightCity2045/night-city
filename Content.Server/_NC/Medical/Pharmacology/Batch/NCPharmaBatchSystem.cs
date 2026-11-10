@@ -11,6 +11,7 @@ using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
 using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Map;
+using Robust.Shared.Physics.Components;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._NC.Medical.Pharmacology.Batch;
@@ -197,6 +198,14 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         var doseIndex = batch.DosesAdministered++;
         var effect = NCPharmaBatchMath.ResolveDose(
             tuning, form, batch.Actual, batch.ModifierToxicity, batch.BatchId, doseIndex);
+        var massScale = TryComp<PhysicsComponent>(patient, out var physics)
+            ? NCPharmaBatchMath.ResolveMassScale(tuning, physics.FixturesMass)
+            : 1f;
+        effect = effect with
+        {
+            EffectiveConcentration = effect.EffectiveConcentration * massScale,
+            ToxinBurden = effect.ToxinBurden * massScale,
+        };
         _depot.TryDeposit(
             patient,
             formula.Compound,

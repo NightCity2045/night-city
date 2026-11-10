@@ -27,7 +27,33 @@ public sealed partial class NCPharmacologyStateSnapshot
 
     [DataField]
     public List<NCDrugDependenceSnapshot> Dependence = [];
+
+    /// <summary>Doses administered but still being absorbed; they continue after a restart.</summary>
+    [DataField]
+    public List<NCPendingDoseSnapshot> PendingDoses = [];
 }
+
+/// <summary>One dose that is still arriving: what remains and how fast.</summary>
+[DataDefinition]
+public sealed partial class NCPendingDoseSnapshot
+{
+    [DataField(required: true)]
+    public ProtoId<NCDrugProfilePrototype> Drug;
+
+    [DataField]
+    public float Remaining;
+
+    [DataField]
+    public float RatePerSecond;
+}
+
+/// <summary>Raised on a body while its pharmacology is captured so the absorption depot can add its doses.</summary>
+[ByRefEvent]
+public readonly record struct NCPharmacologyDepotCaptureEvent(List<NCPendingDoseSnapshot> Doses);
+
+/// <summary>Raised on a body after its pharmacology is restored so the absorption depot can resume the doses.</summary>
+[ByRefEvent]
+public readonly record struct NCPharmacologyDepotRestoreEvent(IReadOnlyList<NCPendingDoseSnapshot> Doses);
 
 /// <summary>
 /// One persisted dependence record. The time since the last dose is relative to the capture boundary, so time

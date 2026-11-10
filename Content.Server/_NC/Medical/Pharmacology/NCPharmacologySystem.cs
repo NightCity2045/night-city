@@ -296,8 +296,20 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             });
         }
 
+        var depotEvent = new NCPharmacologyDepotCaptureEvent(captured.PendingDoses); // NC
+        RaiseLocalEvent(body, ref depotEvent); // NC
+
         snapshot = captured;
         return true;
+    }
+
+    /// <summary>
+    /// Makes sure the body has an initialized pharmacology state, so deferred doses have somewhere to be
+    /// persisted from before their first arrival.
+    /// </summary>
+    public bool TryEnsureState(EntityUid body)
+    {
+        return HasComp<NCMedicalBodyComponent>(body) && TryEnsureInitialized(body, out _, out _);
     }
 
     /// <summary>
@@ -314,6 +326,8 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         if (snapshot == null)
         {
             RemComp<NCPharmacologyComponent>(body);
+            var clearEvent = new NCPharmacologyDepotRestoreEvent([]); // NC
+            RaiseLocalEvent(body, ref clearEvent); // NC
             return true;
         }
         if (!ValidatePersistentState(snapshot))
@@ -342,6 +356,8 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         state.LastEvaluation = timestamp;
         var profile = _prototypes.Index(state.Profile);
         RecomputeModifiers(state, profile);
+        var depotEvent = new NCPharmacologyDepotRestoreEvent(snapshot.PendingDoses); // NC
+        RaiseLocalEvent(body, ref depotEvent); // NC
         return true;
     }
 
@@ -358,7 +374,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             return false;
         }
 
-        if (!ValidateDependenceSnapshot(snapshot)) // NC
+        if (!ValidateDependenceSnapshot(snapshot) || !ValidatePendingDoses(snapshot)) // NC
             return false;
 
         var seen = new HashSet<ProtoId<NCDrugProfilePrototype>>();

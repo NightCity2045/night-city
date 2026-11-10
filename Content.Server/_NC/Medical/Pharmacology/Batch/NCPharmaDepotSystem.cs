@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using System.Linq;
 using Content.Server._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Pharmacology;
@@ -28,6 +29,8 @@ public sealed partial class NCPharmaDepotSystem : EntitySystem
 
         SubscribeLocalEvent<NCPharmaDepotComponent, NCMedicalScheduledUpdateEvent>(OnScheduledUpdate);
         SubscribeLocalEvent<NCPharmaDepotComponent, NCMedicalNextUpdateEvent>(OnNextUpdate);
+        SubscribeLocalEvent<NCPharmaDepotComponent, NCPharmacologyDepotCaptureEvent>(OnCapture);
+        SubscribeLocalEvent<NCMedicalBodyComponent, NCPharmacologyDepotRestoreEvent>(OnRestore);
     }
 
     /// <summary>
@@ -47,6 +50,9 @@ public sealed partial class NCPharmaDepotSystem : EntitySystem
         }
 
         var seconds = (float) duration.TotalSeconds;
+        if (seconds > 0f && !_pharmacology.TryEnsureState(body))
+            return false;
+
         var depot = EnsureComp<NCPharmaDepotComponent>(body);
         if (seconds <= 0f || depot.Entries.Count >= MaximumEntriesPerBody)
         {
@@ -83,6 +89,39 @@ public sealed partial class NCPharmaDepotSystem : EntitySystem
         }
 
         TidyDepot(body.Owner, body.Comp);
+    }
+
+    private void OnCapture(Entity<NCPharmaDepotComponent> body, ref NCPharmacologyDepotCaptureEvent args)
+    {
+        foreach (var entry in body.Comp.Entries)
+        {
+            args.Doses.Add(new NCPendingDoseSnapshot
+            {
+                Drug = entry.Drug,
+                Remaining = entry.Remaining,
+                RatePerSecond = entry.RatePerSecond,
+            });
+        }
+    }
+
+    private void OnRestore(Entity<NCMedicalBodyComponent> body, ref NCPharmacologyDepotRestoreEvent args)
+    {
+        RemComp<NCPharmaDepotComponent>(body);
+        if (args.Doses.Count == 0)
+            return;
+
+        var depot = EnsureComp<NCPharmaDepotComponent>(body);
+        foreach (var dose in args.Doses.Take(MaximumEntriesPerBody))
+        {
+            depot.Entries.Add(new NCPharmaDepotEntry
+            {
+                Drug = dose.Drug,
+                Remaining = dose.Remaining,
+                RatePerSecond = dose.RatePerSecond,
+            });
+        }
+
+        _scheduler.Schedule(body, UpdateInterval);
     }
 
     private void OnNextUpdate(Entity<NCPharmaDepotComponent> body, ref NCMedicalNextUpdateEvent args)

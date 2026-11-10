@@ -20,11 +20,18 @@ nc-pharma-administer-failed = Не удалось ввести дозу.
 nc-pharma-delivery-oral = пероральная
 nc-pharma-delivery-autoinjector = автоинъектор
 nc-pharma-delivery-infusion = инфузия
+nc-pharma-delivery-inhaled = ингаляционная
+nc-pharma-delivery-sublingual = сублингвальная
+nc-pharma-delivery-patch = трансдермальный пластырь
 
 nc-pharma-modifier-fast-release = быстрое высвобождение
 nc-pharma-modifier-extended-release = пролонгированное высвобождение
 nc-pharma-modifier-protective-carrier = защитный носитель
 nc-pharma-modifier-stabilizer = стабилизатор
+nc-pharma-modifier-buffered = буферизованный состав
+nc-pharma-modifier-concentrated = концентрат
+nc-pharma-modifier-purified = очищенный состав
+nc-pharma-modifier-cold-solvent = холодный растворитель
 
 nc-pharma-production-street = быстрый синтез
 nc-pharma-production-standard = стандартный синтез

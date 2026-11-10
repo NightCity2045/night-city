@@ -90,6 +90,18 @@ public static class NCPharmaBatchMath
     }
 
     /// <summary>
+    /// How strongly a dose lands in a body of the given mass: the same amount of drug is more concentrated in a
+    /// lighter body. An unknown or non-positive mass is treated as the reference body.
+    /// </summary>
+    public static float ResolveMassScale(NCPharmaTuningPrototype tuning, float bodyMass)
+    {
+        if (!float.IsFinite(bodyMass) || bodyMass <= 0f || tuning.ReferenceBodyMass <= 0f)
+            return 1f;
+
+        return Math.Clamp(tuning.ReferenceBodyMass / bodyMass, tuning.MinimumMassScale, tuning.MaximumMassScale);
+    }
+
+    /// <summary>
     /// Time a dose needs to be fully absorbed: the delivery form's own absorption scaled by every modifier.
     /// </summary>
     public static TimeSpan ResolveAbsorption(
