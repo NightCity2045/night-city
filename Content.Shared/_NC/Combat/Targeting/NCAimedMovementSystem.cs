@@ -36,8 +36,8 @@ public sealed partial class NCAimedMovementSystem : EntitySystem
         SubscribeLocalEvent<NCAimedTargetingComponent, NCCombatModeChangedEvent>(OnCombatModeChanged);
         SubscribeLocalEvent<NCAimedTargetingComponent, DidEquipHandEvent>(OnEquipped);
         SubscribeLocalEvent<NCAimedTargetingComponent, DidUnequipHandEvent>(OnUnequipped);
-        SubscribeLocalEvent<GunComponent, HandSelectedEvent>(OnGunSelected);
-        SubscribeLocalEvent<GunComponent, HandDeselectedEvent>(OnGunDeselected);
+        // GunComponent already has a HandSelectedEvent subscriber, so swaps use a dedicated user-directed event.
+        SubscribeLocalEvent<NCAimedTargetingComponent, NCActiveHandChangedEvent>(OnActiveHandChanged);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnPrototypesReloaded);
     }
 
@@ -102,14 +102,9 @@ public sealed partial class NCAimedMovementSystem : EntitySystem
         _movement.RefreshMovementSpeedModifiers(ent.Owner);
     }
 
-    private void OnGunSelected(Entity<GunComponent> gun, ref HandSelectedEvent args)
+    private void OnActiveHandChanged(Entity<NCAimedTargetingComponent> ent, ref NCActiveHandChangedEvent args)
     {
-        _movement.RefreshMovementSpeedModifiers(args.User);
-    }
-
-    private void OnGunDeselected(Entity<GunComponent> gun, ref HandDeselectedEvent args)
-    {
-        _movement.RefreshMovementSpeedModifiers(args.User);
+        _movement.RefreshMovementSpeedModifiers(ent.Owner);
     }
 
     private bool TryGetProfile(out NCTargetingAccuracyProfilePrototype profile)
