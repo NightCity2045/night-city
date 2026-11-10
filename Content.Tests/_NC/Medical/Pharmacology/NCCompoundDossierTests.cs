@@ -100,4 +100,22 @@ public sealed class NCCompoundDossierTests
             Assert.That(V("baselineClearanceFraction") + V("liverClearanceFraction") + V("kidneyClearanceFraction"), Is.LessThanOrEqualTo(1f));
         }
     }
+
+    [Test]
+    public void ProcedureQualityFollowsTheActorsBodyAndNeverBelowTheFloor()
+    {
+        var procedure = new NCBiotechProcedurePrototype();
+        void Set(string name, float value) => typeof(NCBiotechProcedurePrototype)
+            .GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!.SetValue(procedure, value);
+        Set(nameof(NCBiotechProcedurePrototype.GripDemand), 0.5f);
+        Set(nameof(NCBiotechProcedurePrototype.SteadinessDemand), 0.5f);
+
+        Assert.That(NCBiotechQualityMath.Resolve(procedure, new NCBiotechActorState(1f, 1f, 1f, 1f)), Is.EqualTo(1f));
+        var shaky = NCBiotechQualityMath.Resolve(procedure, new NCBiotechActorState(1f, 1f, 0.4f, 1f));
+        var crippled = NCBiotechQualityMath.Resolve(procedure, new NCBiotechActorState(0.2f, 1f, 0.4f, 1f));
+        Assert.That(shaky, Is.LessThan(1f));
+        Assert.That(crippled, Is.LessThan(shaky));
+        Assert.That(NCBiotechQualityMath.Resolve(procedure, new NCBiotechActorState(0f, 0f, 0f, 0f)), Is.EqualTo(NCBiotechQualityMath.Floor));
+        Assert.That(NCBiotechQualityMath.Resolve(procedure, new NCBiotechActorState(1f, 1f, float.NaN, 1f)), Is.EqualTo(1f));
+    }
 }
