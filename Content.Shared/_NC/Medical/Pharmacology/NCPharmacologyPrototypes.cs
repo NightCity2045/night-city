@@ -203,6 +203,13 @@ public sealed partial class NCDrugProfilePrototype : IPrototype
     [DataField]
     public Dictionary<ProtoId<NCDrugProfilePrototype>, NCDrugInteractionRule> Interactions { get; private set; } = new();
 
+    /// <summary>
+    /// False for compounds whose interactions have not been studied. A pair that involves one and declares no
+    /// rule is reported to clinicians as unknown instead of compatible.
+    /// </summary>
+    [DataField]
+    public bool InteractionsCharted { get; private set; } = true;
+
     /// <summary>Tolerance and dependence rules of this compound. Absent for compounds that do not habituate.</summary>
     [DataField]
     public ProtoId<NCDependenceProfilePrototype>? Dependence { get; private set; }

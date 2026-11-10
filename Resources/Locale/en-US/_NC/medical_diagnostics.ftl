@@ -179,6 +179,7 @@ nc-medical-diagnostics-action-immobilize = Immobilize the affected region before
 nc-medical-diagnostics-action-organ-assessment = Confirm with an internal scanner and prepare surgical care.
 nc-medical-diagnostics-action-infection = Begin the appropriate infection-control and antibiotic protocol.
 nc-medical-diagnostics-action-overdose = Stop further administration, support vitals and use the appropriate antidote.
+nc-medical-diagnostics-action-drug-interaction = Review the active drugs together; avoid adding to this combination and monitor for stronger or weaker effects.
 nc-medical-diagnostics-action-cyberware = Isolate power faults and perform cyberware diagnostics or service.
 nc-medical-diagnostics-action-monitor-airway = Monitor breathing and airway continuously.
 nc-medical-diagnostics-action-active-surgery = Coordinate with the active surgical plan; do not disturb the operative field.
@@ -211,6 +212,9 @@ nc-medical-diagnostics-warning-neural-interface-fault = Neural interface fault
 nc-medical-diagnostics-warning-sedated = Patient sedated
 nc-medical-diagnostics-warning-anesthetized = Patient anesthetized
 nc-medical-diagnostics-warning-drug-overdose = Drug overdose
+nc-medical-diagnostics-warning-drug-interaction-caution = Drug interaction: caution
+nc-medical-diagnostics-warning-drug-interaction-dangerous = Dangerous drug interaction
+nc-medical-diagnostics-warning-drug-interaction-unknown = Drug interaction: unknown pair
 nc-medical-diagnostics-warning-sepsis = Sepsis
 nc-medical-diagnostics-warning-transplant-rejection = Transplant rejection
 

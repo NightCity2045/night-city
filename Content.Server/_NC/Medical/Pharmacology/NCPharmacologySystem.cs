@@ -557,6 +557,73 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             1f);
     }
 
+    /// <summary>
+    /// Clinician-facing reading of the current drug combination in a body. Only drugs at or above their minimum
+    /// effective concentration count; trace exposures neither alarm nor reassure.
+    /// </summary>
+    public NCDrugInteractionClass ClassifyActiveInteractions(EntityUid body)
+    {
+        var worst = NCDrugInteractionClass.Compatible;
+        if (!TryComp<NCPharmacologyComponent>(body, out var state))
+            return worst;
+
+        var active = new List<(ProtoId<NCDrugProfilePrototype> Id, NCDrugProfilePrototype Profile)>();
+        foreach (var (id, exposure) in state.ActiveDrugs)
+        {
+            if (_prototypes.TryIndex(id, out NCDrugProfilePrototype? drug) &&
+                exposure.Concentration >= drug.MinimumEffectiveConcentration)
+            {
+                active.Add((id, drug));
+            }
+        }
+
+        for (var i = 0; i < active.Count; i++)
+        {
+            for (var j = i + 1; j < active.Count; j++)
+            {
+                worst = NCDrugInteractionClassifier.Worst(worst, ClassifyPair(active[i].Id, active[i].Profile, active[j].Id, active[j].Profile));
+            }
+        }
+
+        return worst;
+    }
+
+    /// <summary>Reading of adding <paramref name="candidate"/> to whatever the body already carries.</summary>
+    public NCDrugInteractionClass ClassifyCandidate(EntityUid body, ProtoId<NCDrugProfilePrototype> candidate)
+    {
+        var worst = NCDrugInteractionClass.Compatible;
+        if (!_prototypes.TryIndex(candidate, out NCDrugProfilePrototype? drug) ||
+            !TryComp<NCPharmacologyComponent>(body, out var state))
+        {
+            return worst;
+        }
+
+        foreach (var (id, exposure) in state.ActiveDrugs)
+        {
+            if (id == candidate ||
+                !_prototypes.TryIndex(id, out NCDrugProfilePrototype? other) ||
+                exposure.Concentration < other.MinimumEffectiveConcentration)
+            {
+                continue;
+            }
+
+            worst = NCDrugInteractionClassifier.Worst(worst, ClassifyPair(candidate, drug, id, other));
+        }
+
+        return worst;
+    }
+
+    private static NCDrugInteractionClass ClassifyPair(
+        ProtoId<NCDrugProfilePrototype> aId,
+        NCDrugProfilePrototype a,
+        ProtoId<NCDrugProfilePrototype> bId,
+        NCDrugProfilePrototype b)
+    {
+        a.Interactions.TryGetValue(bId, out var aToB);
+        b.Interactions.TryGetValue(aId, out var bToA);
+        return NCDrugInteractionClassifier.ClassifyPair(aToB, bToA, a.InteractionsCharted, b.InteractionsCharted);
+    }
+
     private float ResolveInteractionTherapeutics(
         NCPharmacologyComponent state,
         NCPharmacologyProfilePrototype profile,

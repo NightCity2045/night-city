@@ -165,6 +165,7 @@
   id: NCDrugEuphoric
   category: Recreational
   dependence: NCDependenceEuphoric
+  interactionsCharted: false
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 1
@@ -191,6 +192,7 @@
   id: NCDrugSocial
   category: Recreational
   dependence: NCDependenceSocial
+  interactionsCharted: false
   maximumConcentration: 25
   removalConcentration: 0.05
   minimumEffectiveConcentration: 1

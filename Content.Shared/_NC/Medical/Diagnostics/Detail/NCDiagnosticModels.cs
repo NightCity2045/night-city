@@ -134,6 +134,9 @@ public enum NCDiagnosticWarning : byte
     DrugOverdose,
     Sepsis,
     TransplantRejection,
+    DrugInteractionCaution,
+    DrugInteractionDangerous,
+    DrugInteractionUnknown,
 }
 
 /// <summary>

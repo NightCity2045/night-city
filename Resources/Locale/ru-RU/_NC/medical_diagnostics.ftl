@@ -176,6 +176,7 @@ nc-medical-diagnostics-action-immobilize = Иммобилизуйте повре
 nc-medical-diagnostics-action-organ-assessment = Подтвердите диагноз внутренним сканером и подготовьте хирургическую помощь.
 nc-medical-diagnostics-action-infection = Начните подходящий протокол контроля инфекции и антибиотикотерапии.
 nc-medical-diagnostics-action-overdose = Прекратите введение препарата, поддержите показатели и примените подходящий антидот.
+nc-medical-diagnostics-action-drug-interaction = Оцените действующие препараты в сочетании; не добавляйте новых к этой комбинации и следите за усилением или ослаблением эффекта.
 nc-medical-diagnostics-action-cyberware = Изолируйте неисправность питания и выполните диагностику или обслуживание импланта.
 nc-medical-diagnostics-action-monitor-airway = Непрерывно контролируйте дыхание и проходимость дыхательных путей.
 nc-medical-diagnostics-action-active-surgery = Следуйте активному плану операции и не нарушайте операционное поле.
@@ -208,6 +209,9 @@ nc-medical-diagnostics-warning-neural-interface-fault = Неисправност
 nc-medical-diagnostics-warning-sedated = Пациент седирован
 nc-medical-diagnostics-warning-anesthetized = Пациент под анестезией
 nc-medical-diagnostics-warning-drug-overdose = Передозировка препарата
+nc-medical-diagnostics-warning-drug-interaction-caution = Взаимодействие препаратов: осторожно
+nc-medical-diagnostics-warning-drug-interaction-dangerous = Опасное взаимодействие препаратов
+nc-medical-diagnostics-warning-drug-interaction-unknown = Взаимодействие препаратов: пара не изучена
 nc-medical-diagnostics-warning-sepsis = Сепсис
 nc-medical-diagnostics-warning-transplant-rejection = Отторжение трансплантата
 

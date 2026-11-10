@@ -1040,6 +1040,19 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
         if (modifiers.OverdoseFraction > 0f)
             warnings.Add(NCDiagnosticWarning.DrugOverdose);
 
+        switch (_pharmacology.ClassifyActiveInteractions(body))
+        {
+            case NCDrugInteractionClass.Dangerous:
+                warnings.Add(NCDiagnosticWarning.DrugInteractionDangerous);
+                break;
+            case NCDrugInteractionClass.Caution:
+                warnings.Add(NCDiagnosticWarning.DrugInteractionCaution);
+                break;
+            case NCDrugInteractionClass.Unknown:
+                warnings.Add(NCDiagnosticWarning.DrugInteractionUnknown);
+                break;
+        }
+
         omitted = exposures.Count - result.Count;
         return result;
     }
