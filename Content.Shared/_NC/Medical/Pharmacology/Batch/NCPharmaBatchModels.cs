@@ -78,6 +78,7 @@ public enum NCPharmaRdNotice : byte
     TooManyFormulas,
     NotExperimental,
     NotCertified,
+    Unidentified,
 }
 
 public enum NCPharmaAuditKind : byte
@@ -91,6 +92,7 @@ public enum NCPharmaAuditKind : byte
     Recalled,
     AdminInspected,
     Degraded,
+    AdminAdjusted,
 }
 
 /// <summary>

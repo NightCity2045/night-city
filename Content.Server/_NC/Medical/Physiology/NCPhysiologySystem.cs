@@ -91,9 +91,25 @@ public sealed partial class NCPhysiologySystem : EntitySystem
         circulation.Perfusion = 1f;
         circulation.BloodPressureState = NCBloodPressureState.Normal;
         circulation.HeartRhythm = NCHeartRhythm.Normal;
-        circulation.TransfusionCompatibility = profile.DefaultTransfusionCompatibility;
+        circulation.TransfusionCompatibility = ResolveBloodGroup(body, profile); // NC
         circulation.LastEvaluation = _timing.CurTime;
         return (circulation, physiology);
+    }
+
+    // NC: characters differ in blood group; the pick is deterministic by name, so it needs no stored state.
+    private string ResolveBloodGroup(EntityUid body, NCPhysiologyProfilePrototype profile)
+    {
+        if (profile.TransfusionGroupWeights.Count == 0)
+            return profile.DefaultTransfusionCompatibility;
+
+        var entries = profile.TransfusionGroupWeights
+            .OrderBy(entry => entry.Key, StringComparer.Ordinal)
+            .Select(entry => (entry.Key, entry.Value))
+            .ToList();
+        return Content.Shared._NC.Medical.Pharmacology.Lab.NCLabSeed.Pick(
+                   entries,
+                   Content.Shared._NC.Medical.Pharmacology.Lab.NCLabSeed.Hash(MetaData(body).EntityName)) ??
+               profile.DefaultTransfusionCompatibility;
     }
 
     public NCPhysiologyProfilePrototype GetProfile(EntityUid body)
@@ -118,7 +134,7 @@ public sealed partial class NCPhysiologySystem : EntitySystem
         circulation.Perfusion = 1f;
         circulation.BloodPressureState = NCBloodPressureState.Normal;
         circulation.HeartRhythm = NCHeartRhythm.Normal;
-        circulation.TransfusionCompatibility = profile.DefaultTransfusionCompatibility;
+        circulation.TransfusionCompatibility = ResolveBloodGroup(body, profile); // NC
         circulation.LastEvaluation = _timing.CurTime;
 
         var physiology = EnsureComp<NCPhysiologyComponent>(body);

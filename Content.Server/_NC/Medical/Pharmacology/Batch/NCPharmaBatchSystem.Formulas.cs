@@ -58,6 +58,12 @@ public sealed partial class NCPharmaBatchSystem
     {
         derived = null;
         notice = NCPharmaRdNotice.InvalidRequest;
+        if (TryGetFormula(parentId, out var guardParent) && !IsIdentified(guardParent.Compound))
+        {
+            notice = NCPharmaRdNotice.Unidentified; // NC
+            return false;
+        }
+
         if (!TryGetTuning(out var tuning) ||
             !TryGetFormula(parentId, out var parent) ||
             !_prototypes.TryIndex<NCPharmaDeliveryFormPrototype>(deliveryFormId, out var form) ||

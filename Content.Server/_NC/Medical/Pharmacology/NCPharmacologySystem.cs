@@ -7,6 +7,7 @@ using Content.Server._NC.Medical.Systemic;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Cyberware.Borg;
 using Content.Shared._NC.Medical.Pharmacology;
+using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Humanity;
 using Content.Shared._NC.Medical.Systemic;
@@ -303,6 +304,29 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         return true;
     }
 
+    /// <summary>Share of an antibiotic's power that works on the strain this body carries.</summary>
+    private float ResolveSusceptibility(NCPharmacologyComponent state, ProtoId<NCDrugProfilePrototype> drugId)
+    {
+        return state.Strain is { } strainId &&
+               _prototypes.TryIndex(strainId, out var strain) &&
+               strain.Susceptibility.TryGetValue(drugId, out var value) &&
+               float.IsFinite(value)
+            ? Math.Clamp(value, 0f, 1f)
+            : 1f;
+    }
+
+    /// <summary>Picks the character's strain once, by name, so it is stable across restarts without being stored.</summary>
+    private void AssignStrain(EntityUid body, NCPharmacologyComponent state)
+    {
+        var strains = _prototypes.EnumeratePrototypes<NCPathogenStrainPrototype>()
+            .OrderBy(strain => strain.ID, StringComparer.Ordinal)
+            .Select(strain => (strain.ID, strain.Weight))
+            .ToList();
+        state.Strain = strains.Count == 0
+            ? null
+            : NCLabSeed.Pick(strains, NCLabSeed.Hash(MetaData(body).EntityName));
+    }
+
     /// <summary>
     /// Makes sure the body has an initialized pharmacology state, so deferred doses have somewhere to be
     /// persisted from before their first arrival.
@@ -351,6 +375,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             });
         }
         RestoreDependence(state, snapshot, timestamp); // NC
+        AssignStrain(body, state); // NC
         state.RemovalBuffer.Clear();
         state.EvaluationOrder.Clear();
         state.LastEvaluation = timestamp;
@@ -439,6 +464,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         state.StateInitialized = true;
         state.LastEvaluation = _timing.CurTime;
         state.CachedModifiers = NCPharmacologyModifiers.Neutral;
+        AssignStrain(body, state); // NC
         return true;
     }
 
@@ -494,7 +520,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             rhythmStability += drug.RhythmStabilityAtTherapeutic * fraction;
             rhythmInstability += drug.RhythmInstabilityAtTherapeutic * fraction;
             motorControl *= 1f + (drug.MotorControlMultiplierAtTherapeutic - 1f) * fraction;
-            antibiotic += drug.AntibioticPowerAtTherapeutic * fraction;
+            antibiotic += drug.AntibioticPowerAtTherapeutic * fraction * ResolveSusceptibility(state, drugId); // NC
             immunosuppression += drug.ImmunosuppressionAtTherapeutic * fraction;
             toxinRecovery += drug.ToxinRecoveryPerSecondAtTherapeutic * fraction;
         }
@@ -624,6 +650,30 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             }
 
             worst = NCDrugInteractionClassifier.Worst(worst, ClassifyPair(candidate, drug, id, other));
+        }
+
+        return worst;
+    }
+
+    /// <summary>The strain a body carries, picked once from the character. Null when no strains exist.</summary>
+    public ProtoId<NCPathogenStrainPrototype>? GetStrain(EntityUid body)
+    {
+        return TryEnsureState(body) && TryComp<NCPharmacologyComponent>(body, out var state) ? state.Strain : null;
+    }
+
+    /// <summary>Worst reading among every pair in a list of compounds, e.g. the contents of a blood sample.</summary>
+    public NCDrugInteractionClass ClassifyCombination(IReadOnlyList<ProtoId<NCDrugProfilePrototype>> compounds)
+    {
+        var worst = NCDrugInteractionClass.Compatible;
+        for (var i = 0; i < compounds.Count; i++)
+        {
+            for (var j = i + 1; j < compounds.Count; j++)
+            {
+                if (!_prototypes.TryIndex(compounds[i], out var a) || !_prototypes.TryIndex(compounds[j], out var b))
+                    continue;
+
+                worst = NCDrugInteractionClassifier.Worst(worst, ClassifyPair(compounds[i], a, compounds[j], b));
+            }
         }
 
         return worst;

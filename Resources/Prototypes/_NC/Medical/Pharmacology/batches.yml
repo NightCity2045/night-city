@@ -617,6 +617,8 @@
       components:
       - NCPharmaContainer
       - NCPharmaSource
+      - NCBloodBag
+      - NCLabSample
   - type: ContainerContainer
     containers:
       storagebase: !type:Container

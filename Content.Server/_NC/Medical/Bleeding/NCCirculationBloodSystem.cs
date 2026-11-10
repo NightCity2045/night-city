@@ -207,6 +207,48 @@ public sealed partial class NCCirculationBloodSystem : EntitySystem
     }
 
     /// <summary>
+    /// Draws blood from a donor into a collection bag. The donor must keep at least the given share of the
+    /// nominal volume, so donation can never be used to bleed someone out.
+    /// </summary>
+    public bool TryWithdraw(EntityUid body, float requestedVolume, float floorFraction, out float drawn, out string group)
+    {
+        drawn = 0f;
+        group = string.Empty;
+        if (!float.IsFinite(requestedVolume) || requestedVolume <= 0f ||
+            !float.IsFinite(floorFraction) ||
+            !TryGetContext(body, out var circulation, out var profile, out var upstream))
+        {
+            return false;
+        }
+
+        var floor = profile.NominalBloodVolume * Math.Clamp(floorFraction, 0f, 1f);
+        var available = circulation.BloodVolume - floor;
+        if (available < requestedVolume)
+            return false;
+
+        var previous = circulation.BloodVolume;
+        circulation.BloodVolume = previous - requestedVolume;
+        if (!SynchronizeSolution(body, circulation, profile, upstream))
+        {
+            circulation.BloodVolume = previous;
+            SynchronizeSolution(body, circulation, profile, upstream);
+            return false;
+        }
+
+        circulation.EffectiveCirculatingVolume = MathF.Min(circulation.EffectiveCirculatingVolume, circulation.BloodVolume);
+        _medicalBodies.TryMarkDirty(
+            body,
+            NCMedicalDirtyDomains.Vascular |
+            NCMedicalDirtyDomains.OrganFunction |
+            NCMedicalDirtyDomains.Consciousness |
+            NCMedicalDirtyDomains.Diagnostics |
+            NCMedicalDirtyDomains.Persistence);
+        drawn = requestedVolume;
+        group = circulation.TransfusionCompatibility;
+        return true;
+    }
+
+    /// <summary>
     /// Reconciles upstream blood reagents after persistence restore or an authorized full reset.
     /// </summary>
     public bool SynchronizeSolution(EntityUid body)

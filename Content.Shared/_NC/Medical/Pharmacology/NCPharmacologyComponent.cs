@@ -32,6 +32,10 @@ public sealed partial class NCPharmacologyComponent : Component
     [DataField]
     public TimeSpan LastEvaluation;
 
+    /// <summary>Bacterial strain this body carries, derived from the character so it needs no stored state.</summary>
+    [ViewVariables]
+    public ProtoId<Lab.NCPathogenStrainPrototype>? Strain;
+
     [ViewVariables]
     public NCPharmacologyModifiers CachedModifiers = NCPharmacologyModifiers.Neutral;
 

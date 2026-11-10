@@ -29,6 +29,13 @@ public sealed partial class NCPhysiologyProfilePrototype : IPrototype
     [DataField(required: true)]
     public string DefaultTransfusionCompatibility { get; private set; } = string.Empty;
 
+    /// <summary>
+    /// Relative frequency of each blood group token. A character's group is picked from it by name, so it is
+    /// stable without being stored. Empty means everyone carries <see cref="DefaultTransfusionCompatibility"/>.
+    /// </summary>
+    [DataField]
+    public Dictionary<string, float> TransfusionGroupWeights { get; private set; } = new();
+
     [DataField(required: true)]
     public float CriticalPerfusionThreshold { get; private set; }
 

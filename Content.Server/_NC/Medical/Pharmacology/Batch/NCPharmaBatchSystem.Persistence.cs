@@ -53,6 +53,7 @@ public sealed partial class NCPharmaBatchSystem
     {
         CaptureFormulas(args);
         CaptureJournal(args);
+        CaptureKnowledge(args);
 
         var ordered = _batches.Values.OrderBy(batch => batch.CreatedAt).ThenBy(batch => batch.BatchId).ToList();
         for (var start = 0; start < ordered.Count || start == 0; start += BatchesPerChunk)
@@ -83,6 +84,7 @@ public sealed partial class NCPharmaBatchSystem
         _batches.Clear();
         _derived.Clear();
         _journal.Clear();
+        _knowledge.Clear();
         _nextBatchNumber = 1;
         if (_restore.SelectionFailed)
         {
@@ -103,6 +105,7 @@ public sealed partial class NCPharmaBatchSystem
             RestoreFormulas(snapshotId);
             Restore(read.GetAwaiter().GetResult());
             RestoreJournal(snapshotId);
+            RestoreKnowledge(snapshotId);
         }
         catch (Exception exception)
         {

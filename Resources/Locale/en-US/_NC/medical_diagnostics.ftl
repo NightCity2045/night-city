@@ -436,3 +436,6 @@ nc-medical-diagnostics-value-success = completed
 nc-medical-diagnostics-value-compromised = completed with complications
 nc-medical-diagnostics-radiograph-title = X-RAY PROJECTION
 nc-medical-diagnostics-radiograph-caption = Bones and disclosed internal structures
+nc-medical-diagnostics-drug-drug-gram-positive-antibiotic = gram-positive antibiotic
+nc-medical-diagnostics-drug-drug-gram-negative-antibiotic = gram-negative antibiotic
+nc-medical-diagnostics-drug-drug-x17 = NC-X17

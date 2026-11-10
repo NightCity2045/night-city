@@ -210,6 +210,13 @@ public sealed partial class NCDrugProfilePrototype : IPrototype
     [DataField]
     public bool InteractionsCharted { get; private set; } = true;
 
+    /// <summary>
+    /// Working name of a compound nobody has identified yet. A compound that has one stays unidentified, and its
+    /// formulas cannot be developed, until chemical analysis has been done on it.
+    /// </summary>
+    [DataField]
+    public LocId? Codename { get; private set; }
+
     /// <summary>Tolerance and dependence rules of this compound. Absent for compounds that do not habituate.</summary>
     [DataField]
     public ProtoId<NCDependenceProfilePrototype>? Dependence { get; private set; }

@@ -1,0 +1,357 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+# --- Microbiology: strains and the antibiotics that work on them -------------------------------------------
+- type: ncPathogenStrain
+  id: NCStrainAlpha
+  name: nc-lab-strain-alpha
+  weight: 3
+  susceptibility:
+    NCDrugBroadAntibiotic: 0.85
+    NCDrugGramPositiveAntibiotic: 1
+    NCDrugGramNegativeAntibiotic: 0.25
+
+- type: ncPathogenStrain
+  id: NCStrainBeta
+  name: nc-lab-strain-beta
+  weight: 3
+  susceptibility:
+    NCDrugBroadAntibiotic: 0.85
+    NCDrugGramPositiveAntibiotic: 0.25
+    NCDrugGramNegativeAntibiotic: 1
+
+- type: ncPathogenStrain
+  id: NCStrainResistant
+  name: nc-lab-strain-resistant
+  weight: 1
+  susceptibility:
+    NCDrugBroadAntibiotic: 0.7
+    NCDrugGramPositiveAntibiotic: 0.4
+    NCDrugGramNegativeAntibiotic: 0.4
+
+- type: ncDrugProfile
+  id: NCDrugGramPositiveAntibiotic
+  category: Antibiotic
+  maximumConcentration: 30
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 5
+  toxicConcentration: 14
+  clearancePerSecond: 0.04
+  baselineClearanceFraction: 0.05
+  liverClearanceFraction: 0.4
+  kidneyClearanceFraction: 0.55
+  antibioticPowerAtTherapeutic: 1
+  overdoseBurdenPerSecondAtMaximum: 0.9
+
+- type: ncDrugProfile
+  id: NCDrugGramNegativeAntibiotic
+  category: Antibiotic
+  maximumConcentration: 30
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 5
+  toxicConcentration: 14
+  clearancePerSecond: 0.04
+  baselineClearanceFraction: 0.05
+  liverClearanceFraction: 0.55
+  kidneyClearanceFraction: 0.4
+  antibioticPowerAtTherapeutic: 1
+  overdoseBurdenPerSecondAtMaximum: 0.9
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaGramPositiveAntibiotic
+  name: nc-pharma-formula-gram-positive-antibiotic
+  version: 1
+  compound: NCDrugGramPositiveAntibiotic
+  deliveryForm: NCPharmaDeliveryInfusion
+  targetConcentration: 5
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.9
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: ClinicalOnly
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaGramNegativeAntibiotic
+  name: nc-pharma-formula-gram-negative-antibiotic
+  version: 1
+  compound: NCDrugGramNegativeAntibiotic
+  deliveryForm: NCPharmaDeliveryInfusion
+  targetConcentration: 5
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.9
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: ClinicalOnly
+
+# --- An unidentified compound: a stolen corporate prototype --------------------------------------------------
+- type: ncDependenceProfile
+  id: NCDependenceX17
+  toleranceGainPerConcentration: 0.012
+  maximumTolerance: 0.5
+  dependenceGainPerConcentration: 0.008
+  withdrawalCompound: NCDrugWithdrawalFatigue
+  withdrawalConcentrationAtFull: 3
+  psychoactive: true
+  effects:
+  - Stimulation
+  comedownCompound: NCDrugComedownFatigue
+  comedownPerConcentration: 0.4
+  maximumComedown: 4
+
+- type: ncDrugProfile
+  id: NCDrugX17
+  category: Stimulant
+  codename: nc-lab-codename-x17
+  dependence: NCDependenceX17
+  interactionsCharted: false
+  maximumConcentration: 20
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 4
+  toxicConcentration: 6.5
+  clearancePerSecond: 0.03
+  baselineClearanceFraction: 0.1
+  liverClearanceFraction: 0.7
+  kidneyClearanceFraction: 0.2
+  arousalAtTherapeutic: 0.6
+  cardiacOutputMultiplierAtTherapeutic: 1.18
+  rhythmInstabilityAtTherapeutic: 0.06
+  overdoseBurdenPerSecondAtMaximum: 1.2
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaX17
+  name: nc-pharma-formula-x17
+  version: 1
+  compound: NCDrugX17
+  deliveryForm: NCPharmaDeliveryAutoinjector
+  targetConcentration: 3
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.65
+  reaction: NCPharmaReactionExothermic
+  regulatoryStatus: Corporate
+
+# --- Samples, collection and the machines that read them -------------------------------------------------
+- type: entity
+  parent: BaseItem
+  id: NCLabSampleVial
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/vial.rsi
+    state: vial
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Chemistry/vial.rsi
+  - type: NCLabSample
+
+- type: entity
+  parent: BaseItem
+  id: NCLabBloodSampler
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/syringe.rsi
+    state: syringe_base0
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Chemistry/syringe.rsi
+  - type: NCLabSampler
+    kind: Blood
+    charges: 5
+
+- type: entity
+  parent: BaseItem
+  id: NCLabWoundSwabKit
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/dropper.rsi
+    state: dropper
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Chemistry/dropper.rsi
+  - type: NCLabSampler
+    kind: WoundSwab
+    charges: 5
+
+- type: entity
+  parent: BaseItem
+  id: NCBloodBagFilled
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medical.rsi
+    state: bloodpack
+  - type: Item
+    size: Small
+    heldPrefix: bloodpack
+  - type: NCBloodBag
+  - type: NCEmergencyCareItem
+    capability: NCDonatedBloodCapability
+    chargesRemaining: 1
+
+- type: entity
+  parent: BaseItem
+  id: NCBloodBagEmpty
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medical.rsi
+    state: bloodpack-empty
+  - type: Item
+    size: Small
+  - type: NCBloodBag
+    filledPrototype: NCBloodBagFilled
+
+- type: ncEmergencyCareCapability
+  id: NCDonatedBloodCapability
+  kind: BloodTransfusion
+  profile: NCHumanEmergencyCare
+  infusionVolume: 450
+  # Placeholder for the data validator: a donated bag always carries the group of its donor instead.
+  donorCompatibility: NC-O-Negative
+  chargeCost: 1
+  resourceKind: ComponentCharges
+  applicationDuration: 8s
+
+- type: entity
+  id: NCLabMachineBase
+  abstract: true
+  parent: [ BaseMachinePowered, BaseStructure ]
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/mixer.rsi
+    snapCardinals: true
+    layers:
+    - state: mixer_empty
+    - state: mixer_screens
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+  - type: Icon
+    sprite: Structures/Machines/mixer.rsi
+    state: mixer_empty
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.25,-0.4,0.25,0.4"
+        density: 190
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+  - type: Damageable
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 175
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+  - type: ApcPowerReceiver
+    powerLoad: 200
+  - type: InteractionOutline
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+
+- type: entity
+  parent: NCLabMachineBase
+  id: NCLabCultureStation
+  components:
+  - type: ContainerContainer
+    containers:
+      sample: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      sample:
+        name: nc-lab-sample-slot
+        whitelist:
+          components:
+          - NCLabSample
+          - NCPharmaContainer
+  - type: NCLabAnalyzer
+    method: Culture
+
+- type: entity
+  parent: NCLabMachineBase
+  id: NCLabMetabolicAnalyzer
+  components:
+  - type: ContainerContainer
+    containers:
+      sample: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      sample:
+        name: nc-lab-sample-slot
+        whitelist:
+          components:
+          - NCLabSample
+  - type: NCLabAnalyzer
+    method: Metabolic
+
+# --- Tissue ----------------------------------------------------------------------------------------------
+- type: entity
+  parent: NCLabMachineBase
+  id: NCLabTissueIncubator
+  components:
+  - type: ContainerContainer
+    containers:
+      seed: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      seed:
+        name: nc-lab-seed-slot
+        whitelist:
+          components:
+          - NCTissueSeed
+  - type: NCTissueIncubator
+
+- type: entity
+  parent: BaseItem
+  id: NCLabTissueSeedSkin
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/vial.rsi
+    state: vial
+  - type: Item
+    size: Tiny
+    sprite: Objects/Specific/Chemistry/vial.rsi
+  - type: NCTissueSeed
+    output: NCSyntheticSkinDressing
+    duration: 600s
+
+- type: entity
+  parent: BaseHealingItem
+  id: NCSyntheticSkinDressing
+  components:
+  - type: Sprite
+    state: gauze
+  - type: Item
+    heldPrefix: gauze
+  - type: NCTreatmentItem
+    capability: NCSyntheticSkinCapability
+  - type: Stack
+    stackType: NCSyntheticSkinStack
+    count: 1
+
+- type: stack
+  id: NCSyntheticSkinStack
+  name: nc-stack-synthetic-skin
+  icon: { sprite: /Textures/Objects/Specific/Medical/medical.rsi, state: gauze }
+  spawn: NCSyntheticSkinDressing
+  maxCount: 1
+
+- type: ncTreatmentCapability
+  id: NCSyntheticSkinCapability
+  kind: Bandage
+  profile: NCHumanFieldTreatment
+  applicationDuration: 3s
+  resourceKind: Stack
+  resourceCost: 1

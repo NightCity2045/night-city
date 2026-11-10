@@ -12,6 +12,7 @@ using Content.Shared._NC.Combat.Damage;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Emergency;
+using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
@@ -232,10 +233,26 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
                 NewResult(enriched, NCEmergencyCareOutcome.DeviceDepleted));
         }
 
+        // NC: a donated bag carries the donor's real group and volume instead of the capability's fixed ones.
+        var donorGroup = capability.DonorCompatibility;
+        var infusionVolume = capability.InfusionVolume;
+        TryComp<NCBloodBagComponent>(item, out var donationBag);
+        if (donationBag != null)
+        {
+            if (!donationBag.Filled || donationBag.Spoiled)
+            {
+                return CompleteAction(patient, state, profile, enriched, NCEmergencyCareKind.BloodTransfusion,
+                    NewResult(enriched, NCEmergencyCareOutcome.UnsupportedItem));
+            }
+
+            donorGroup = donationBag.Group;
+            infusionVolume = donationBag.Volume;
+        }
+
         var transfusion = _blood.TryTransfuse(
             patient,
-            capability.DonorCompatibility,
-            capability.InfusionVolume,
+            donorGroup,
+            infusionVolume,
             profile.MaximumBloodVolumeMultiplier,
             profile.TransfusionCompatibility,
             markDirty: false);
@@ -259,6 +276,12 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
         }
 
         var consumed = ConsumeResource(item, itemState, capability);
+        if (donationBag != null)
+        {
+            // NC: a donated bag is single-use.
+            QueueDel(item);
+        }
+
         var result = new NCEmergencyCareResult(
             enriched.ResolutionId,
             NCEmergencyCareOutcome.Applied,

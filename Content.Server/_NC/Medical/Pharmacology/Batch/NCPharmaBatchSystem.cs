@@ -276,6 +276,9 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         AddAudit(batch, tuning, NCPharmaAuditKind.QcPerformed, actor,
             $"tests={report.Performed} failed={report.Failed} state={batch.QcState}");
         RefreshContainers(batch);
+        // Quality control is a chemical analysis: it tells the laboratory what the compound is.
+        if (TryGetFormula(batch.Formula, out var analysedFormula))
+            RecordAnalysis(analysedFormula.Compound, Content.Shared._NC.Medical.Pharmacology.Lab.NCAnalysisTier.Chemical);
         if (TryGetFormula(batch.Formula, out var qcFormula) && IsTracked(qcFormula))
             AddJournal(NCPharmaJournalKind.QcPerformed, batch.Formula, batch.BatchCode, actor,
                 $"tests {report.Performed}, failed {report.Failed}, now {batch.QcState}");
