@@ -410,6 +410,7 @@ public sealed partial class NCMedicalPersistenceSystem
             HemostaticAppliedAt = record.HemostaticAppliedAt,
             BandageAbsorptionRemaining = record.BandageAbsorptionRemaining,
             BandageSterility = record.BandageSterility,
+            SaturationContamination = record.SaturationContamination,
             ModifiedAt = record.ModifiedAt,
         };
     }
@@ -846,6 +847,7 @@ public sealed partial class NCMedicalPersistenceSystem
             HemostaticAppliedAt = record.HemostaticAppliedAt,
             BandageAbsorptionRemaining = record.BandageAbsorptionRemaining,
             BandageSterility = record.BandageSterility,
+            SaturationContamination = record.SaturationContamination,
             ModifiedAt = record.ModifiedAt,
         };
     }

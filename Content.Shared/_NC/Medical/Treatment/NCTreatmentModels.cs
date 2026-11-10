@@ -83,6 +83,13 @@ public sealed partial class NCWoundTreatmentRecord
     [DataField]
     public float BandageSterility;
 
+    /// <summary>
+    /// Contamination this dressing adds to the wound when it saturates. Negative means the profile's value,
+    /// which is what dressings applied before this field existed use.
+    /// </summary>
+    [DataField]
+    public float SaturationContamination = -1f;
+
     [DataField]
     public TimeSpan ModifiedAt;
 }

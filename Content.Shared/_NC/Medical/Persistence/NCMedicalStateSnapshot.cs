@@ -455,6 +455,7 @@ public sealed partial class NCWoundTreatmentStateSnapshot
     [DataField] public TimeSpan HemostaticAppliedAt;
     [DataField] public float BandageAbsorptionRemaining;
     [DataField] public float BandageSterility;
+    [DataField] public float SaturationContamination = -1f;
     [DataField] public TimeSpan ModifiedAt;
 }
 

@@ -120,6 +120,10 @@ public sealed partial class NCTreatmentCapabilityPrototype : IPrototype
     [DataField]
     public float? BandageSterility { get; private set; }
 
+    /// <summary>Contamination the dressing adds to the wound when it saturates. Missing means the profile's own value.</summary>
+    [DataField]
+    public float? SaturatedContamination { get; private set; }
+
     /// <summary>How much blood the dressing absorbs before it saturates. Missing means the profile's own value.</summary>
     [DataField]
     public float? BandageAbsorptionCapacity { get; private set; }

@@ -589,7 +589,8 @@ public sealed partial class NCMedicalPersistenceSystem
                 !ValidOptionalAbsoluteTime(record.HemostaticAppliedAt) ||
                 !ValidAbsoluteTime(record.ModifiedAt) ||
                 !Finite(record.BandageAbsorptionRemaining, 0f, 1_000_000f) ||
-                !Finite(record.BandageSterility, 0f, 1f))
+                !Finite(record.BandageSterility, 0f, 1f) ||
+                !Finite(record.SaturationContamination, -1f, 1f))
             {
                 return false;
             }
@@ -1167,6 +1168,7 @@ public sealed partial class NCMedicalPersistenceSystem
                 HemostaticAppliedAt = treatment.HemostaticAppliedAt,
                 BandageAbsorptionRemaining = treatment.BandageAbsorptionRemaining,
                 BandageSterility = treatment.BandageSterility,
+                SaturationContamination = treatment.SaturationContamination,
                 ModifiedAt = treatment.ModifiedAt,
             });
         }

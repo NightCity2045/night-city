@@ -643,6 +643,7 @@ public sealed partial class NCTreatmentSystem : EntitySystem
                     : null;
                 treatment.BandageAbsorptionRemaining = dressing?.BandageAbsorptionCapacity ?? profile.BandageAbsorptionCapacity;
                 treatment.BandageSterility = dressing?.BandageSterility ?? profile.BandageSterility;
+                treatment.SaturationContamination = dressing?.SaturatedContamination ?? -1f;
                 break;
             case NCTreatmentKind.Hemostatic:
                 treatment.HemostaticAppliedAt = now;

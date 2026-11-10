@@ -347,7 +347,9 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
             record.AppliedFlags &= ~NCWoundTreatmentFlags.Bandaged;
             wound.TreatmentFlags &= ~NCWoundTreatmentFlags.Bandaged;
             wound.Contamination = Math.Clamp(
-                wound.Contamination + profile.SaturatedBandageContamination,
+                wound.Contamination + (record.SaturationContamination >= 0f
+                    ? record.SaturationContamination
+                    : profile.SaturatedBandageContamination),
                 0f,
                 1f);
             if (wound.ClosureState == NCWoundClosureState.Open &&
