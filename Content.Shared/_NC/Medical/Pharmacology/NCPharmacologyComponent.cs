@@ -32,7 +32,22 @@ public sealed partial class NCPharmacologyComponent : Component
     [DataField]
     public TimeSpan LastEvaluation;
 
-    /// <summary>Bacterial strain this body carries, derived from the character so it needs no stored state.</summary>
+    /// <summary>Pain relief a locally applied dose gives at the wound. Short lived, no systemic cost.</summary>
+    [DataField]
+    public float LocalAnalgesia;
+
+    /// <summary>Bleeding reduction a locally applied dose gives at the wound.</summary>
+    [DataField]
+    public float LocalHemostasis;
+
+    [DataField]
+    public TimeSpan LocalRemaining;
+
+    /// <summary>How many separate infections this body has had. Each one may be caused by a different strain.</summary>
+    [DataField]
+    public int StrainEpisode;
+
+    /// <summary>Bacterial strain of the current infection, derived from the character and the episode.</summary>
     [ViewVariables]
     public ProtoId<Lab.NCPathogenStrainPrototype>? Strain;
 
@@ -63,4 +78,11 @@ public sealed partial class NCActiveDrugExposure
 
     [DataField]
     public TimeSpan LastAdministration;
+
+    /// <summary>
+    /// Multiplier on how fast the body clears this compound. Below one when the doses carried a metabolic
+    /// blocker; blended by concentration when doses with different blockers overlap.
+    /// </summary>
+    [DataField]
+    public float ClearanceFactor = 1f;
 }

@@ -48,6 +48,7 @@ public sealed partial class NCPharmaReactorRunComponent : Component
     public bool Ventilation;
     public int CatalystLeft;
     public float SourcePurity;
+    public float SourceContaminants;
     public int Units;
     public string Operator = string.Empty;
     public TimeSpan NextStep;

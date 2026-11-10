@@ -807,6 +807,7 @@ public sealed partial class NCMedicalPersistenceSystem
                 Concentration = exposure.Concentration,
                 CumulativeDose = exposure.CumulativeDose,
                 TimeSinceAdministration = exposure.TimeSinceAdministration,
+                ClearanceFactor = exposure.ClearanceFactor,
             }).ToList(),
             // NC: dependence persists with the character.
             Dependence = source.Dependence.Select(record => new NCDrugDependenceSnapshot
@@ -819,11 +820,16 @@ public sealed partial class NCMedicalPersistenceSystem
                 Stage = record.Stage,
                 Comedown = record.Comedown,
             }).ToList(),
+            LocalAnalgesia = source.LocalAnalgesia,
+            LocalHemostasis = source.LocalHemostasis,
+            LocalRemaining = source.LocalRemaining,
+            StrainEpisode = source.StrainEpisode,
             PendingDoses = source.PendingDoses.Select(dose => new NCPendingDoseSnapshot
             {
                 Drug = dose.Drug,
                 Remaining = dose.Remaining,
                 RatePerSecond = dose.RatePerSecond,
+                ClearanceFactor = dose.ClearanceFactor,
             }).ToList(),
         };
     }

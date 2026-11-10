@@ -61,6 +61,7 @@ public sealed partial class NCBloodBagComponent : Component
     [DataField]
     public float ShelfLifeSeconds = 1200f;
 
+    [DataField]
     public float ExposedSeconds;
 
     /// <summary>What an empty bag turns into when a donor fills it.</summary>

@@ -41,7 +41,8 @@ public sealed partial class NCPharmaDepotSystem : EntitySystem
         EntityUid body,
         ProtoId<NCDrugProfilePrototype> drug,
         float concentration,
-        TimeSpan duration)
+        TimeSpan duration,
+        float clearanceFactor = 1f)
     {
         if (!HasComp<NCMedicalBodyComponent>(body) ||
             !float.IsFinite(concentration) || concentration <= 0f)
@@ -57,7 +58,7 @@ public sealed partial class NCPharmaDepotSystem : EntitySystem
         if (seconds <= 0f || depot.Entries.Count >= MaximumEntriesPerBody)
         {
             TidyDepot(body, depot);
-            return _pharmacology.ApplyDose(body, drug, concentration).Accepted;
+            return _pharmacology.ApplyDose(body, drug, concentration, clearanceFactor).Accepted;
         }
 
         depot.Entries.Add(new NCPharmaDepotEntry
@@ -65,6 +66,7 @@ public sealed partial class NCPharmaDepotSystem : EntitySystem
             Drug = drug,
             Remaining = concentration,
             RatePerSecond = concentration / seconds,
+            ClearanceFactor = clearanceFactor,
         });
         _scheduler.Schedule(body, UpdateInterval);
         return true;
@@ -81,7 +83,7 @@ public sealed partial class NCPharmaDepotSystem : EntitySystem
             var entry = body.Comp.Entries[i];
             var delivered = MathF.Min(entry.Remaining, entry.RatePerSecond * seconds);
             if (delivered > 0f)
-                _pharmacology.ApplyDose(body.Owner, entry.Drug, delivered);
+                _pharmacology.ApplyDose(body.Owner, entry.Drug, delivered, entry.ClearanceFactor);
 
             entry.Remaining -= delivered;
             if (entry.Remaining <= 0.0001f)
@@ -100,6 +102,7 @@ public sealed partial class NCPharmaDepotSystem : EntitySystem
                 Drug = entry.Drug,
                 Remaining = entry.Remaining,
                 RatePerSecond = entry.RatePerSecond,
+                ClearanceFactor = entry.ClearanceFactor,
             });
         }
     }
@@ -118,6 +121,7 @@ public sealed partial class NCPharmaDepotSystem : EntitySystem
                 Drug = dose.Drug,
                 Remaining = dose.Remaining,
                 RatePerSecond = dose.RatePerSecond,
+                ClearanceFactor = dose.ClearanceFactor,
             });
         }
 

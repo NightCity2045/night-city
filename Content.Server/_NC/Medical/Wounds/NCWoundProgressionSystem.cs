@@ -169,6 +169,7 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
             changed = true;
         }
 
+        var infectedBefore = container.Wounds.Values.Any(candidate => candidate.Infection > 0.001f); // NC
         foreach (var wound in container.Wounds.Values)
         {
             if (!_prototypes.TryIndex(wound.Prototype, out NCWoundPrototype? woundPrototype) ||
@@ -213,6 +214,10 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
                     outcome.Resolved));
             }
         }
+
+        // NC: a new infection after a clean period is a new episode, possibly of another strain.
+        if (!infectedBefore && container.Wounds.Values.Any(candidate => candidate.Infection > 0.001f))
+            RaiseLocalEvent(body, new Content.Shared._NC.Medical.Pharmacology.NCInfectionEpisodeStartedEvent());
 
         if (seconds > 0f)
         {

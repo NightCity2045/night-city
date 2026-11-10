@@ -19,6 +19,10 @@ public sealed partial class NCPharmaRawMaterialComponent : Component
     [DataField]
     public float Purity = 0.7f;
 
+    /// <summary>Share of the material that is a toxic contaminant. Hidden from the player.</summary>
+    [DataField]
+    public float Contaminants;
+
     /// <summary>Where it came from, as a localization id shown when examined.</summary>
     [DataField]
     public LocId Origin = "nc-pharma-origin-unknown";
@@ -123,7 +127,9 @@ public sealed partial class NCPharmaWasteCanisterComponent : Component
     [DataField]
     public TimeSpan LeakAfter = TimeSpan.FromMinutes(15);
 
-    public TimeSpan FilledAt;
+    /// <summary>How long the filled canister has been lying around. Persistent, so a restart does not reset it.</summary>
+    [DataField]
+    public TimeSpan Age;
 }
 
 /// <summary>An incinerator for waste canisters. It needs power.</summary>

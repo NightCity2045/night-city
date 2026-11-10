@@ -72,7 +72,7 @@ public sealed class NCPharmaWasteSystem : EntitySystem
         if (TryComp<NCPharmaWasteCanisterComponent>(filled, out var filledComponent))
         {
             filledComponent.Filled = true;
-            filledComponent.FilledAt = _timing.CurTime;
+            filledComponent.Age = TimeSpan.Zero;
         }
 
         QueueDel(args.Used);
@@ -112,10 +112,14 @@ public sealed class NCPharmaWasteSystem : EntitySystem
         var query = EntityQueryEnumerator<NCPharmaWasteCanisterComponent>();
         while (query.MoveNext(out var uid, out var canister))
         {
-            if (!canister.Filled || now - canister.FilledAt < canister.LeakAfter)
+            if (!canister.Filled)
                 continue;
 
-            canister.FilledAt = now;
+            canister.Age += CheckInterval;
+            if (canister.Age < canister.LeakAfter)
+                continue;
+
+            canister.Age = TimeSpan.Zero;
             var solution = new Solution();
             solution.AddReagent(Fumes, FixedPoint2.New(8));
             var smoke = Spawn(SmokeEntity, Transform(uid).Coordinates);

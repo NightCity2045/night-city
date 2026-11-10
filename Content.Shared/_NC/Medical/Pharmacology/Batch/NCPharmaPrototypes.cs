@@ -108,6 +108,14 @@ public sealed partial class NCPharmaTuningPrototype : IPrototype
     [DataField]
     public float MaximumLocalFraction { get; private set; } = 0.9f;
 
+    /// <summary>How much more a locally applied dose does per unit than the same dose spread through the body.</summary>
+    [DataField]
+    public float LocalEfficiency { get; private set; } = 1.5f;
+
+    /// <summary>How long a local effect on pain or bleeding lasts.</summary>
+    [DataField]
+    public TimeSpan LocalDuration { get; private set; } = TimeSpan.FromSeconds(180);
+
     /// <summary>Infection removed per unit of local antibiotic action at therapeutic concentration.</summary>
     [DataField]
     public float LocalInfectionReliefAtTherapeutic { get; private set; } = 0.35f;
@@ -241,6 +249,10 @@ public sealed partial class NCPharmaModifierPrototype : IPrototype
     /// </summary>
     [DataField]
     public float MaskingStrength { get; private set; }
+
+    /// <summary>How fast the body clears the compound. Below one slows elimination and lengthens the effect.</summary>
+    [DataField]
+    public float ClearanceMultiplier { get; private set; } = 1f;
 
     /// <summary>Adds to the share of a dose that works directly on the wounds instead of the whole body.</summary>
     [DataField]

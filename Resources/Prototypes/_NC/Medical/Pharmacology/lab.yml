@@ -8,7 +8,7 @@
   name: nc-lab-strain-alpha
   weight: 3
   susceptibility:
-    NCDrugBroadAntibiotic: 0.85
+    NCDrugBroadAntibiotic: 1
     NCDrugGramPositiveAntibiotic: 1
     NCDrugGramNegativeAntibiotic: 0.25
 
@@ -17,7 +17,7 @@
   name: nc-lab-strain-beta
   weight: 3
   susceptibility:
-    NCDrugBroadAntibiotic: 0.85
+    NCDrugBroadAntibiotic: 1
     NCDrugGramPositiveAntibiotic: 0.25
     NCDrugGramNegativeAntibiotic: 1
 
@@ -26,7 +26,7 @@
   name: nc-lab-strain-resistant
   weight: 1
   susceptibility:
-    NCDrugBroadAntibiotic: 0.7
+    NCDrugBroadAntibiotic: 0.85
     NCDrugGramPositiveAntibiotic: 0.4
     NCDrugGramNegativeAntibiotic: 0.4
 
@@ -474,6 +474,7 @@
     units: 30
     purity: 0.65
     origin: nc-pharma-origin-bioreactor
+    contaminants: 0.06
     output: NCPharmaSourceCanisterStreet
 
 - type: entity
@@ -494,6 +495,7 @@
     units: 12
     purity: 0.7
     origin: nc-pharma-origin-seized
+    contaminants: 0.15
     unknownPool: street
 
 - type: entity

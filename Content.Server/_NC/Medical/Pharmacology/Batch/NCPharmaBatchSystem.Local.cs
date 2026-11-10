@@ -17,9 +17,9 @@ public sealed partial class NCPharmaBatchSystem
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
 
     /// <summary>
-    /// The part of a dose that works directly on the wounds. Only an antibiotic has a local action: it
-    /// removes infection from every wound, scaled by the blood supply that brings it there and by how well it
-    /// works on this patient's strain. Anything else applied locally is simply not absorbed by the tissue.
+    /// The part of a dose that works directly on the wounds: an antibiotic removes infection from every wound
+    /// (scaled by strain sensitivity), an analgesic numbs and a procoagulant slows bleeding for a while. All of
+    /// it depends on the blood supply that carries the drug to the tissue.
     /// </summary>
     private void ApplyLocalTissue(
         EntityUid patient,
@@ -27,13 +27,19 @@ public sealed partial class NCPharmaBatchSystem
         float localConcentration,
         NCPharmaTuningPrototype tuning)
     {
-        if (!_prototypes.TryIndex(compound, out var drug) || drug.AntibioticPowerAtTherapeutic <= 0f ||
+        if (!_prototypes.TryIndex(compound, out var drug) ||
             !TryComp<NCWoundContainerComponent>(patient, out var wounds) || wounds.Wounds.Count == 0)
         {
             return;
         }
 
         var perfusion = TryComp<NCCirculationComponent>(patient, out var circulation) ? circulation.Perfusion : 1f;
+        var (analgesia, hemostasis) = NCPharmaBatchMath.ResolveLocalEffects(
+            tuning, drug.AnalgesiaAtTherapeutic, drug.BleedingMultiplierAtTherapeutic,
+            localConcentration, drug.TherapeuticConcentration, perfusion);
+        if (analgesia > 0f || hemostasis > 0f)
+            _pharmacology.SetLocalEffect(patient, analgesia, hemostasis, tuning.LocalDuration);
+
         var relief = NCPharmaBatchMath.ResolveLocalInfectionRelief(
             tuning,
             drug.AntibioticPowerAtTherapeutic,

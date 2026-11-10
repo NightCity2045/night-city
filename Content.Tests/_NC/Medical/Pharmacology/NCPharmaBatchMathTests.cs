@@ -454,4 +454,28 @@ public sealed class NCPharmaBatchMathTests
         Assert.That(NCPharmaBatchMath.ResolveLocalInfectionRelief(tuning, 1f, 0.25f, 4f, 4f, 1f), Is.LessThan(good));
         Assert.That(NCPharmaBatchMath.ResolveLocalInfectionRelief(tuning, 0f, 1f, 4f, 4f, 1f), Is.EqualTo(0f));
     }
+
+    [Test]
+    public void LocalEffectsNeedBloodSupplyAndOnlyExistForTheRightCompounds()
+    {
+        var tuning = Tuning();
+        var (analgesia, hemostasis) = NCPharmaBatchMath.ResolveLocalEffects(tuning, 0.6f, 0.5f, 4f, 4f, 1f);
+        Assert.That(analgesia, Is.GreaterThan(0f));
+        Assert.That(hemostasis, Is.GreaterThan(0f));
+        var (poorAnalgesia, poorHemostasis) = NCPharmaBatchMath.ResolveLocalEffects(tuning, 0.6f, 0.5f, 4f, 4f, 0.1f);
+        Assert.That(poorAnalgesia, Is.LessThan(analgesia));
+        Assert.That(poorHemostasis, Is.LessThan(hemostasis));
+        var (none, noneToo) = NCPharmaBatchMath.ResolveLocalEffects(tuning, 0f, 1f, 4f, 4f, 1f);
+        Assert.That(none, Is.EqualTo(0f));
+        Assert.That(noneToo, Is.EqualTo(0f));
+    }
+
+    [Test]
+    public void ContaminatedRawMaterialMakesEveryDoseMoreToxic()
+    {
+        var clean = Produce(Standard(), new NCPharmaProductionInputs(10f, 0.9f, 0.9f, 0.9f, 0f));
+        var dirty = Produce(Standard(), new NCPharmaProductionInputs(10f, 0.9f, 0.9f, 0.9f, 0f, 0.5f));
+        Assert.That(dirty.ModifierToxicity, Is.GreaterThan(clean.ModifierToxicity));
+        Assert.That(dirty.Quality.Purity, Is.EqualTo(clean.Quality.Purity));
+    }
 }

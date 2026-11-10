@@ -40,8 +40,17 @@ public sealed partial class NCTissueIncubatorComponent : Component
     [DataField]
     public string Slot = "seed";
 
+    [DataField]
     public NCTissuePhase Phase;
-    public TimeSpan FinishAt;
+
+    /// <summary>
+    /// Growth time still needed. It is kept as time left rather than a finish moment, so it stays right across a
+    /// restart: the clock only runs while the machine has power and the world is running.
+    /// </summary>
+    [DataField]
+    public TimeSpan Remaining;
+
+    [DataField]
     public EntProtoId? Output;
 }
 
@@ -78,7 +87,7 @@ public sealed class NCTissueIncubatorSystem : EntitySystem
                 _popup.PopupEntity(Loc.GetString("nc-lab-incubator-collected"), incubator, args.User);
                 break;
             case NCTissuePhase.Growing:
-                var remaining = Math.Max(0, (int) (incubator.Comp.FinishAt - _timing.CurTime).TotalSeconds);
+                var remaining = Math.Max(0, (int) incubator.Comp.Remaining.TotalSeconds);
                 _popup.PopupEntity(Loc.GetString("nc-lab-incubator-growing", ("seconds", remaining)), incubator, args.User);
                 break;
             default:
@@ -103,7 +112,7 @@ public sealed class NCTissueIncubatorSystem : EntitySystem
         }
 
         incubator.Comp.Phase = NCTissuePhase.Growing;
-        incubator.Comp.FinishAt = _timing.CurTime + seedData.Duration;
+        incubator.Comp.Remaining = seedData.Duration;
         incubator.Comp.Output = seedData.Output;
         QueueDel(seed);
         _popup.PopupEntity(Loc.GetString("nc-lab-incubator-started"), incubator, user);
@@ -114,7 +123,7 @@ public sealed class NCTissueIncubatorSystem : EntitySystem
         base.Update(frameTime);
 
         var now = _timing.CurTime;
-        var elapsed = now - _lastUpdate;
+        var elapsed = _lastUpdate == TimeSpan.Zero ? TimeSpan.Zero : now - _lastUpdate;
         _lastUpdate = now;
         var query = EntityQueryEnumerator<NCTissueIncubatorComponent>();
         while (query.MoveNext(out var uid, out var incubator))
@@ -122,15 +131,16 @@ public sealed class NCTissueIncubatorSystem : EntitySystem
             if (incubator.Phase != NCTissuePhase.Growing)
                 continue;
 
+            // No power, no growth: the clock stands still until the machine works again.
             if (!_power.IsPowered(uid))
-            {
-                // No power, no growth: the clock stands still until the machine works again.
-                incubator.FinishAt += elapsed;
                 continue;
-            }
 
-            if (now >= incubator.FinishAt)
+            incubator.Remaining -= elapsed;
+            if (incubator.Remaining <= TimeSpan.Zero)
+            {
+                incubator.Remaining = TimeSpan.Zero;
                 incubator.Phase = NCTissuePhase.Ready;
+            }
         }
     }
 }

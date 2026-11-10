@@ -189,6 +189,7 @@ public sealed partial class NCPharmaBatchSystem
             QcFailed = batch.LastQc?.Failed,
             ModifierToxicity = batch.ModifierToxicity,
             Masking = batch.Masking,
+            Contaminants = batch.Contaminants,
             Producer = batch.Producer,
             Facility = batch.Facility,
             CreatedTicks = batch.CreatedAt.Ticks,
@@ -224,6 +225,7 @@ public sealed partial class NCPharmaBatchSystem
             !IsRange(value.LabelPurity, 0f, 1f) ||
             !IsRange(value.ModifierToxicity, 0f, 100f) ||
             !IsRange(value.Masking, 0f, 1f) ||
+            !IsRange(value.Contaminants, 0f, 1f) ||
             !Enum.IsDefined(value.LabelGrade) ||
             !Enum.IsDefined(value.QcState) ||
             value.DosesProduced < 0 ||
@@ -264,6 +266,7 @@ public sealed partial class NCPharmaBatchSystem
             QcState = value.QcState,
             ModifierToxicity = value.ModifierToxicity,
             Masking = value.Masking,
+            Contaminants = value.Contaminants,
             Producer = value.Producer,
             Facility = value.Facility,
             CreatedAt = new NCActiveWorldTime(value.CreatedTicks),
@@ -470,6 +473,7 @@ public sealed class NCPharmaBatchSnapshot
     public NCPharmaQcTests? QcFailed { get; set; }
     public float ModifierToxicity { get; set; } = 1f;
     public float Masking { get; set; }
+    public float Contaminants { get; set; }
     public string Producer { get; set; } = string.Empty;
     public string Facility { get; set; } = string.Empty;
     public long CreatedTicks { get; set; }

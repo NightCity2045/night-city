@@ -63,6 +63,12 @@ public sealed partial class NCPharmaBatchSystem
         return _batches.TryGetValue(pack.BatchId, out var batch) ? batch.Masking : 0f;
     }
 
+    /// <summary>Contaminants of the raw material behind a batch. A compound study reveals them.</summary>
+    public float GetPackContaminants(NCPharmaContainerComponent pack)
+    {
+        return _batches.TryGetValue(pack.BatchId, out var batch) ? batch.Contaminants : 0f;
+    }
+
     /// <summary>Records a finished analysis and returns the knowledge after it.</summary>
     public NCAnalysisTier RecordAnalysis(ProtoId<NCDrugProfilePrototype> compound, NCAnalysisTier performed)
     {

@@ -29,10 +29,28 @@ public sealed partial class NCLabSamplerComponent : Component
 [RegisterComponent, Access(typeof(NCLabSystem))]
 public sealed partial class NCLabSampleDataComponent : Component
 {
+    [DataField]
     public string BloodGroup = string.Empty;
-    public List<(ProtoId<NCDrugProfilePrototype> Drug, float Concentration)> Drugs = [];
+
+    [DataField]
+    public List<NCLabSampleDrug> Drugs = [];
+
+    [DataField]
     public float WoundInfection;
+
+    [DataField]
     public ProtoId<NCPathogenStrainPrototype>? Strain;
+}
+
+/// <summary>One compound found in a sample, with its measured concentration.</summary>
+[DataDefinition]
+public sealed partial class NCLabSampleDrug
+{
+    [DataField(required: true)]
+    public ProtoId<NCDrugProfilePrototype> Drug;
+
+    [DataField]
+    public float Concentration;
 }
 
 public enum NCLabMethod : byte

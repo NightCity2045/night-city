@@ -115,7 +115,7 @@ public sealed partial class NCLabSystem : EntitySystem
             foreach (var (drug, exposure) in pharmacology.ActiveDrugs.OrderBy(entry => entry.Key.Id, StringComparer.Ordinal))
             {
                 if (exposure.Concentration > 0f)
-                    data.Drugs.Add((drug, exposure.Concentration));
+                    data.Drugs.Add(new NCLabSampleDrug { Drug = drug, Concentration = exposure.Concentration });
             }
         }
 
@@ -189,6 +189,8 @@ public sealed partial class NCLabSystem : EntitySystem
             AppendDossier(report, compound);
             if (_batches.GetPackMasking(pack) > 0.05f)
                 report.AppendLine(Loc.GetString("nc-lab-masking-detected"));
+            if (_batches.GetPackContaminants(pack) > 0.03f)
+                report.AppendLine(Loc.GetString("nc-lab-contaminants-detected"));
         }
         else
         {
@@ -244,8 +246,10 @@ public sealed partial class NCLabSystem : EntitySystem
             return;
         }
 
-        foreach (var (drugId, concentration) in data.Drugs)
+        foreach (var entry in data.Drugs)
         {
+            var drugId = entry.Drug;
+            var concentration = entry.Concentration;
             if (!_prototypes.TryIndex(drugId, out var drug))
                 continue;
 
@@ -263,10 +267,10 @@ public sealed partial class NCLabSystem : EntitySystem
         var combination = _pharmacology.ClassifyCombination(data.Drugs.Select(entry => entry.Drug).ToList());
         report.AppendLine(Loc.GetString("nc-lab-metabolic-interaction",
             ("class", Loc.GetString(NCLabText.InteractionKey(combination)))));
-        foreach (var (drugId, _) in data.Drugs)
+        foreach (var entry in data.Drugs)
         {
-            if (_prototypes.TryIndex(drugId, out var drug) && drug.Codename != null)
-                AppendDossier(report, drugId);
+            if (_prototypes.TryIndex(entry.Drug, out var drug) && drug.Codename != null)
+                AppendDossier(report, entry.Drug);
         }
     }
 

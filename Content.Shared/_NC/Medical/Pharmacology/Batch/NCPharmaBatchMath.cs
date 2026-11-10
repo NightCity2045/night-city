@@ -12,6 +12,9 @@ public static class NCPharmaBatchMath
 {
     public const int MaximumModifiers = 2;
 
+    /// <summary>Extra toxicity of a batch whose raw material was entirely contaminated.</summary>
+    public const float ContaminantToxicityAtFull = 2f;
+
     /// <summary>Nothing is perfectly pure or sterile; the last fraction of a percent is not reachable.</summary>
     public const float QualityCeiling = 0.999f;
 
@@ -53,6 +56,7 @@ public static class NCPharmaBatchMath
             cost *= modifier.CostMultiplier;
         }
 
+        toxicity *= 1f + Math.Clamp(inputs.Contaminants, 0f, 1f) * ContaminantToxicityAtFull;
         var calibration = Math.Clamp(inputs.CalibrationError, -0.5f, 0.5f);
         var concentration = MathF.Max(
             0f,
@@ -131,6 +135,43 @@ public static class NCPharmaBatchMath
         var fraction = localConcentration / therapeuticConcentration;
         return antibioticPower * Math.Clamp(susceptibility, 0f, 1f) * Math.Clamp(perfusion, 0f, 1f) *
                fraction * tuning.LocalInfectionReliefAtTherapeutic;
+    }
+
+    /// <summary>
+    /// Pain relief and bleeding reduction a locally applied dose gives at the wound. Targeting makes it more
+    /// efficient than the same drug spread through the body, but it needs blood supply to reach the tissue.
+    /// </summary>
+    public static (float Analgesia, float Hemostasis) ResolveLocalEffects(
+        NCPharmaTuningPrototype tuning,
+        float analgesiaAtTherapeutic,
+        float bleedingMultiplierAtTherapeutic,
+        float localConcentration,
+        float therapeuticConcentration,
+        float perfusion)
+    {
+        if (therapeuticConcentration <= 0f || localConcentration <= 0f)
+            return (0f, 0f);
+
+        var fraction = Math.Clamp(localConcentration / therapeuticConcentration, 0f, 1.5f);
+        var efficiency = MathF.Max(0f, tuning.LocalEfficiency) * Math.Clamp(perfusion, 0f, 1f);
+        var analgesia = Math.Clamp(MathF.Max(0f, analgesiaAtTherapeutic) * fraction * efficiency, 0f, 1f);
+        var hemostasis = Math.Clamp(MathF.Max(0f, 1f - bleedingMultiplierAtTherapeutic) * fraction * efficiency, 0f, 0.9f);
+        return (analgesia, hemostasis);
+    }
+
+    /// <summary>True when a compound has any local action at all, so a local application is not wasted.</summary>
+    public static bool HasLocalAction(NCDrugProfilePrototype drug) =>
+        drug.AntibioticPowerAtTherapeutic > 0f ||
+        drug.AnalgesiaAtTherapeutic > 0f ||
+        drug.BleedingMultiplierAtTherapeutic < 1f;
+
+    /// <summary>Combined elimination speed of the modifiers; never stops the body clearing the compound.</summary>
+    public static float ResolveClearanceFactor(IReadOnlyList<NCPharmaModifierPrototype> modifiers)
+    {
+        var factor = 1f;
+        foreach (var modifier in modifiers)
+            factor *= Math.Clamp(modifier.ClearanceMultiplier, 0.1f, 1f);
+        return Math.Clamp(factor, 0.2f, 1f);
     }
 
     /// <summary>The strongest masking among the modifiers; masking agents do not stack into invisibility.</summary>

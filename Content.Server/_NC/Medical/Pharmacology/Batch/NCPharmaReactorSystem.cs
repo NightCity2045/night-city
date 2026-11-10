@@ -173,6 +173,7 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
         run.Ventilation = false;
         run.CatalystLeft = tuning.CatalystCharges;
         run.SourcePurity = source.Purity;
+        run.SourceContaminants = TryComp<NCPharmaSourceHiddenComponent>(sourceUid, out var hidden) ? hidden.Contaminants : 0f; // NC
         run.Units = units;
         run.Operator = ToPrettyString(user);
         run.NextStep = _timing.CurTime + Step;
@@ -282,6 +283,7 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
         var outcome = NCReactorMath.Evaluate(run.State);
         var units = (int) MathF.Floor(run.Units * outcome.YieldFactor);
         var sourcePurity = run.SourcePurity;
+        var sourceContaminants = run.SourceContaminants;
         var producer = run.Operator;
         var degraded = run.State.Degraded;
         RemComp<NCPharmaReactorRunComponent>(reactor);
@@ -297,7 +299,8 @@ public sealed partial class NCPharmaReactorSystem : EntitySystem
             sourcePurity * outcome.PurityFactor,
             reactor.Comp.EquipmentSterility,
             reactor.Comp.EquipmentMixing * outcome.HomogeneityFactor,
-            0f);
+            0f,
+            sourceContaminants);
         if (!_batches.TryCreateBatch(formula, ManualProfile, inputs, producer, ToPrettyString(reactor), out var batch))
         {
             UpdateUi(reactor, NCPharmaReactorNotice.Degraded);

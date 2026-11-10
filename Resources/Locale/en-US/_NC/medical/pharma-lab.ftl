@@ -219,3 +219,4 @@ nc-pharma-waste-disposed = The canister burns.
 nc-pharma-waste-leak = The canister leaks toxic fumes.
 nc-pharma-delivery-surgical-gel = surgical gel
 nc-pharma-modifier-tissue-targeting = tissue targeting
+nc-lab-contaminants-detected = The batch carries a toxic contaminant from its raw material.

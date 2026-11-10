@@ -192,14 +192,13 @@
   toxicityMultiplier: 1.15
   costMultiplier: 1.3
 
-# Slows the destruction of the compound: modelled as a long, flat arrival with a small accumulation cost.
+# Slows the body's destruction of the compound, so the effect lasts longer and repeated doses build up.
 - type: ncPharmaModifier
   id: NCPharmaModifierMetabolicBlocker
   name: nc-pharma-modifier-metabolic-blocker
-  concentrationMultiplier: 1.1
   stabilityDelta: -0.03
   toxicityMultiplier: 1.1
-  absorptionMultiplier: 2.5
+  clearanceMultiplier: 0.5
   costMultiplier: 1.25
 
 - type: ncPharmaProductionProfile
@@ -309,6 +308,8 @@
   - type: NCPharmaSource
     units: 30
     purity: 0.78
+  - type: NCPharmaSourceHidden
+    contaminants: 0.12
 
 - type: entity
   parent: NCPharmaSourceCanisterStreet
@@ -318,6 +319,8 @@
   - type: NCPharmaSource
     units: 20
     purity: 0.95
+  - type: NCPharmaSourceHidden
+    contaminants: 0.01
 
 - type: entity
   abstract: true

@@ -146,6 +146,9 @@ public sealed class NCPharmaStationSystem : EntitySystem
             Dirty(extract, source);
         }
 
+        // The extract inherits the hidden contaminants of the raw material.
+        EnsureComp<NCPharmaSourceHiddenComponent>(extract).Contaminants = raw.Contaminants;
+
         QueueDel(item);
         _hands.TryPickupAnyHand(args.User, extract);
         _popup.PopupEntity(Loc.GetString("nc-pharma-extracted"), machine, args.User);

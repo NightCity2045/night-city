@@ -111,7 +111,8 @@ public sealed partial class NCPharmaSynthesisSystem : EntitySystem
             source.Purity,
             station.Comp.EquipmentSterility,
             station.Comp.EquipmentMixing,
-            station.Comp.CalibrationError);
+            station.Comp.CalibrationError,
+            TryComp<NCPharmaSourceHiddenComponent>(sourceUid, out var hidden) ? hidden.Contaminants : 0f); // NC
 
         source.Units -= units;
         Dirty(sourceUid, source);

@@ -24,4 +24,5 @@ public sealed class NCPharmaDepotEntry
     public ProtoId<NCDrugProfilePrototype> Drug;
     public float Remaining;
     public float RatePerSecond;
+    public float ClearanceFactor = 1f;
 }

@@ -94,7 +94,7 @@ public sealed partial class NCPharmaBatchSystem
 
         // A local application only helps where the compound has a local action; otherwise it would be wasted.
         if (NCPharmaBatchMath.ResolveLocalFraction(tuning, form, modifiers) > 0f &&
-            compound.AntibioticPowerAtTherapeutic <= 0f)
+            !NCPharmaBatchMath.HasLocalAction(compound))
         {
             return false;
         }

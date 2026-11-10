@@ -263,7 +263,8 @@ public sealed partial class NCPharmacologySystem
             if (dose == null ||
                 !_prototypes.TryIndex(dose.Drug, out NCDrugProfilePrototype? drug) ||
                 !IsFiniteRange(dose.Remaining, 0.0001f, drug.MaximumConcentration) ||
-                !float.IsFinite(dose.RatePerSecond) || dose.RatePerSecond <= 0f)
+                !float.IsFinite(dose.RatePerSecond) || dose.RatePerSecond <= 0f ||
+                !IsFiniteRange(dose.ClearanceFactor, 0.1f, 1f))
             {
                 return false;
             }

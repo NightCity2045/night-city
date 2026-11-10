@@ -31,6 +31,18 @@ public sealed partial class NCPharmacologyStateSnapshot
     /// <summary>Doses administered but still being absorbed; they continue after a restart.</summary>
     [DataField]
     public List<NCPendingDoseSnapshot> PendingDoses = [];
+
+    [DataField]
+    public float LocalAnalgesia;
+
+    [DataField]
+    public float LocalHemostasis;
+
+    [DataField]
+    public TimeSpan LocalRemaining;
+
+    [DataField]
+    public int StrainEpisode;
 }
 
 /// <summary>One dose that is still arriving: what remains and how fast.</summary>
@@ -45,7 +57,13 @@ public sealed partial class NCPendingDoseSnapshot
 
     [DataField]
     public float RatePerSecond;
+
+    [DataField]
+    public float ClearanceFactor = 1f;
 }
+
+/// <summary>Raised on a body when a new infection starts after it had none, so it may carry a new strain.</summary>
+public readonly record struct NCInfectionEpisodeStartedEvent;
 
 /// <summary>Raised on a body while its pharmacology is captured so the absorption depot can add its doses.</summary>
 [ByRefEvent]
@@ -102,4 +120,7 @@ public sealed partial class NCActiveDrugExposureSnapshot
 
     [DataField]
     public TimeSpan TimeSinceAdministration;
+
+    [DataField]
+    public float ClearanceFactor = 1f;
 }

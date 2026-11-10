@@ -125,7 +125,8 @@ public readonly record struct NCPharmaProductionInputs(
     float InputPurity,
     float EquipmentSterility,
     float EquipmentMixing,
-    float CalibrationError);
+    float CalibrationError,
+    float Contaminants = 0f);
 
 public readonly record struct NCPharmaProductionOutcome(
     NCPharmaQuality Quality,

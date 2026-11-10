@@ -219,3 +219,4 @@ nc-pharma-waste-disposed = Канистра сгорает.
 nc-pharma-waste-leak = Канистра выпускает ядовитые пары.
 nc-pharma-delivery-surgical-gel = хирургический гель
 nc-pharma-modifier-tissue-targeting = адресная доставка в ткань
+nc-lab-contaminants-detected = В партии есть токсичная примесь из исходного сырья.

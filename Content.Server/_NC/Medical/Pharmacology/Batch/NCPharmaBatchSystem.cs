@@ -41,6 +41,9 @@ public sealed class NCPharmaBatchRecord
 
     /// <summary>How much impurity a simple QC run cannot see in this batch.</summary>
     public float Masking;
+
+    /// <summary>Contaminants of the raw material. Hidden truth: it only shows in outcomes and compound studies.</summary>
+    public float Contaminants;
     public string Producer = string.Empty;
     public string Facility = string.Empty;
     public NCActiveWorldTime CreatedAt;
@@ -120,6 +123,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
             Actual = outcome.Quality,
             ModifierToxicity = outcome.ModifierToxicity,
             Masking = NCPharmaBatchMath.ResolveMasking(modifiers),
+            Contaminants = Math.Clamp(inputs.Contaminants, 0f, 1f),
             Producer = producer,
             Facility = facility,
             CreatedAt = Now(),
@@ -218,7 +222,8 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
             patient,
             formula.Compound,
             effect.EffectiveConcentration,
-            NCPharmaBatchMath.ResolveAbsorption(form, ResolveModifiers(formula)));
+            NCPharmaBatchMath.ResolveAbsorption(form, ResolveModifiers(formula)),
+            NCPharmaBatchMath.ResolveClearanceFactor(ResolveModifiers(formula)));
         if (effect.ToxinBurden > 0f)
             _systemic.Apply(patient, tuning.ToxinProfile, effect.ToxinBurden);
         if (effect.SepsisBurden > 0f)
