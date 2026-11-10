@@ -104,6 +104,13 @@ public sealed partial class NCPharmaDeliveryFormPrototype : IPrototype
 
     [DataField]
     public TimeSpan AdministrationDelay { get; private set; } = TimeSpan.FromSeconds(2);
+
+    /// <summary>
+    /// How long a dose takes to be absorbed. Zero means the whole dose enters at once. A slower absorption gives
+    /// a lower peak and a longer effect, because clearance works while the dose is still arriving.
+    /// </summary>
+    [DataField]
+    public TimeSpan AbsorptionDuration { get; private set; } = TimeSpan.Zero;
 }
 
 /// <summary>
@@ -133,6 +140,10 @@ public sealed partial class NCPharmaModifierPrototype : IPrototype
 
     [DataField]
     public float CostMultiplier { get; private set; } = 1f;
+
+    /// <summary>Scales the absorption time of the delivery form. Below one is fast, above one is slow.</summary>
+    [DataField]
+    public float AbsorptionMultiplier { get; private set; } = 1f;
 }
 
 /// <summary>

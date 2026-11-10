@@ -24,7 +24,7 @@ public sealed class NCPharmaContainerExamineSystem : EntitySystem
             return;
 
         var comp = ent.Comp;
-        var grade = Loc.GetString(GetGradeKey(comp.LabelGrade));
+        var grade = Loc.GetString(NCPharmaTextKeys.Grade(comp.LabelGrade));
         var sterile = Loc.GetString(comp.LabelSterile ? "nc-pharma-label-sterile" : "nc-pharma-label-not-sterile");
         args.PushMarkup(Loc.GetString(
             "nc-pharma-container-examine",
@@ -34,13 +34,8 @@ public sealed class NCPharmaContainerExamineSystem : EntitySystem
             ("grade", grade),
             ("sterile", sterile),
             ("doses", comp.Doses)));
+        args.PushMarkup(Loc.GetString(
+            "nc-pharma-container-examine-qc",
+            ("state", Loc.GetString(NCPharmaTextKeys.QcState(comp.QcState)))));
     }
-
-    /// <summary>Localization key of a market grade, used by every UI that shows batch labels.</summary>
-    public static string GetGradeKey(NCPharmaGrade grade) => grade switch
-    {
-        NCPharmaGrade.Corporate => "nc-pharma-grade-corporate",
-        NCPharmaGrade.Medical => "nc-pharma-grade-medical",
-        _ => "nc-pharma-grade-street",
-    };
 }

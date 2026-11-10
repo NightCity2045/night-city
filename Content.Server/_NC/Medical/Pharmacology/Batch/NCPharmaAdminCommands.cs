@@ -167,7 +167,7 @@ public sealed partial class NCPharmaInspectBatchCommand : IConsoleCommand
         shell.WriteLine($"producer {batch.Producer} @ {batch.Facility} | doses produced {batch.DosesProduced}, " +
                         $"packed {batch.DosesPacked}, administered {batch.DosesAdministered}");
         foreach (var entry in batch.Audit)
-            shell.WriteLine($"  [{entry.Time:hh\\:mm\\:ss}] {entry.Kind} by {entry.Actor}: {entry.Detail}");
+            shell.WriteLine($"  [{entry.Time.Elapsed:d\\.hh\\:mm\\:ss}] {entry.Kind} by {entry.Actor}: {entry.Detail}");
 
         var actor = shell.Player?.AttachedEntity is { } player ? _entities.ToPrettyString(player) : "server console";
         batches.RecordInspection(batch, actor);

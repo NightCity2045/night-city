@@ -288,4 +288,32 @@ public sealed class NCPharmaBatchMathTests
             Assert.That(NCPharmaBatchMath.DoseNoise(batch, dose), Is.EqualTo(noise));
         }
     }
+
+    [Test]
+    public void ModifiersScaleAbsorptionOfTheDeliveryForm()
+    {
+        var form = Make<NCPharmaDeliveryFormPrototype>(
+            (nameof(NCPharmaDeliveryFormPrototype.AbsorptionDuration), TimeSpan.FromSeconds(10)));
+        var fast = Make<NCPharmaModifierPrototype>((nameof(NCPharmaModifierPrototype.AbsorptionMultiplier), 0.4f));
+        var slow = Make<NCPharmaModifierPrototype>((nameof(NCPharmaModifierPrototype.AbsorptionMultiplier), 4f));
+
+        Assert.That(NCPharmaBatchMath.ResolveAbsorption(form, Array.Empty<NCPharmaModifierPrototype>()),
+            Is.EqualTo(TimeSpan.FromSeconds(10)));
+        Assert.That(NCPharmaBatchMath.ResolveAbsorption(form, new[] { fast }), Is.EqualTo(TimeSpan.FromSeconds(4)));
+        Assert.That(NCPharmaBatchMath.ResolveAbsorption(form, new[] { slow }), Is.EqualTo(TimeSpan.FromSeconds(40)));
+    }
+
+    [Test]
+    public void InstantFormsAndRunawayAbsorptionAreBounded()
+    {
+        var instant = Make<NCPharmaDeliveryFormPrototype>();
+        var slowForm = Make<NCPharmaDeliveryFormPrototype>(
+            (nameof(NCPharmaDeliveryFormPrototype.AbsorptionDuration), TimeSpan.FromSeconds(200)));
+        var slow = Make<NCPharmaModifierPrototype>((nameof(NCPharmaModifierPrototype.AbsorptionMultiplier), 10f));
+
+        Assert.That(NCPharmaBatchMath.ResolveAbsorption(instant, Array.Empty<NCPharmaModifierPrototype>()),
+            Is.EqualTo(TimeSpan.Zero));
+        Assert.That(NCPharmaBatchMath.ResolveAbsorption(slowForm, new[] { slow }),
+            Is.EqualTo(TimeSpan.FromSeconds(NCPharmaBatchMath.MaximumAbsorptionSeconds)));
+    }
 }

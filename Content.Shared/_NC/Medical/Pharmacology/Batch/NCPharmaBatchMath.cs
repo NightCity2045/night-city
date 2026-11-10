@@ -15,6 +15,9 @@ public static class NCPharmaBatchMath
     /// <summary>Nothing is perfectly pure or sterile; the last fraction of a percent is not reachable.</summary>
     public const float QualityCeiling = 0.999f;
 
+    /// <summary>No dose may linger in the absorption depot longer than this.</summary>
+    public const double MaximumAbsorptionSeconds = 300d;
+
     public static bool ValidateFormula(
         NCPharmaFormulaPrototype formula,
         IReadOnlyList<NCPharmaModifierPrototype> modifiers)
@@ -84,6 +87,21 @@ public static class NCPharmaBatchMath
                     tuning.AdulterantToxinPerConcentration;
         var sepsis = (1f - actual.Sterility) * form.SterilityRiskMultiplier * tuning.SepsisBurdenAtZeroSterility;
         return new NCPharmaDoseEffect(effective, toxin, sepsis);
+    }
+
+    /// <summary>
+    /// Time a dose needs to be fully absorbed: the delivery form's own absorption scaled by every modifier.
+    /// </summary>
+    public static TimeSpan ResolveAbsorption(
+        NCPharmaDeliveryFormPrototype form,
+        IReadOnlyList<NCPharmaModifierPrototype> modifiers)
+    {
+        var seconds = form.AbsorptionDuration.TotalSeconds;
+        foreach (var modifier in modifiers)
+            seconds *= modifier.AbsorptionMultiplier;
+        return double.IsFinite(seconds) && seconds > 0d
+            ? TimeSpan.FromSeconds(Math.Min(seconds, MaximumAbsorptionSeconds))
+            : TimeSpan.Zero;
     }
 
     /// <summary>Market class derived from measured parameters; concentration never counts as quality.</summary>

@@ -31,6 +31,7 @@
   sterilityRiskMultiplier: 0.1
   adulterantMultiplier: 1
   administrationDelay: 2s
+  absorptionDuration: 30s
 
 - type: ncPharmaDeliveryForm
   id: NCPharmaDeliveryAutoinjector
@@ -39,6 +40,7 @@
   sterilityRiskMultiplier: 1
   adulterantMultiplier: 1
   administrationDelay: 1.5s
+  absorptionDuration: 5s
 
 - type: ncPharmaDeliveryForm
   id: NCPharmaDeliveryInfusion
@@ -47,6 +49,7 @@
   sterilityRiskMultiplier: 1.5
   adulterantMultiplier: 1.2
   administrationDelay: 6s
+  absorptionDuration: 20s
 
 - type: ncPharmaModifier
   id: NCPharmaModifierFastRelease
@@ -55,6 +58,7 @@
   stabilityDelta: -0.05
   toxicityMultiplier: 1.2
   costMultiplier: 1.1
+  absorptionMultiplier: 0.4
 
 - type: ncPharmaModifier
   id: NCPharmaModifierExtendedRelease
@@ -62,6 +66,7 @@
   concentrationMultiplier: 0.85
   stabilityDelta: 0.05
   costMultiplier: 1.15
+  absorptionMultiplier: 4
 
 - type: ncPharmaModifier
   id: NCPharmaModifierProtectiveCarrier
@@ -166,3 +171,182 @@
     size: Tiny
     sprite: Objects/Specific/Medical/medipen.rsi
   - type: NCPharmaContainer
+
+- type: entity
+  parent: BaseItem
+  id: NCPharmaSourceCanisterStreet
+  suffix: street grade
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Chemistry/bottle.rsi
+    state: bottle-1
+  - type: Item
+    size: Small
+    sprite: Objects/Specific/Chemistry/bottle.rsi
+  - type: NCPharmaSource
+    units: 30
+    purity: 0.78
+
+- type: entity
+  parent: NCPharmaSourceCanisterStreet
+  id: NCPharmaSourceCanisterClinical
+  suffix: clinical grade
+  components:
+  - type: NCPharmaSource
+    units: 20
+    purity: 0.95
+
+- type: entity
+  abstract: true
+  parent: [ BaseMachinePowered, BaseStructure ]
+  id: NCPharmaSynthesizerBase
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/mixer.rsi
+    snapCardinals: true
+    layers:
+    - state: mixer_empty
+    - state: mixer_screens
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+  - type: Icon
+    sprite: Structures/Machines/mixer.rsi
+    state: mixer_empty
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.25,-0.4,0.25,0.4"
+        density: 190
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+  - type: Damageable
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 175
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+  - type: ApcPowerReceiver
+    powerLoad: 250
+  - type: ActivatableUI
+    key: enum.NCPharmaStationUiKey.Key
+  - type: ActivatableUIRequiresPower
+  - type: UserInterface
+    interfaces:
+      enum.NCPharmaStationUiKey.Key:
+        type: NCPharmaStationBoundUserInterface
+  - type: ContainerContainer
+    containers:
+      source: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      source:
+        name: nc-pharma-station-source-slot
+        whitelist:
+          components:
+          - NCPharmaSource
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+  - type: NCPharmaSynthesizer
+
+- type: entity
+  parent: NCPharmaSynthesizerBase
+  id: NCPharmaSynthesizerStreet
+  suffix: street lab
+  components:
+  - type: NCPharmaSynthesizer
+    equipmentSterility: 0.7
+    equipmentMixing: 0.7
+    calibrationError: 0.04
+
+- type: entity
+  parent: NCPharmaSynthesizerBase
+  id: NCPharmaSynthesizerClinical
+  suffix: clinical line
+  components:
+  - type: NCPharmaSynthesizer
+    equipmentSterility: 0.97
+    equipmentMixing: 0.96
+    calibrationError: 0
+
+- type: entity
+  parent: [ BaseMachinePowered, BaseStructure ]
+  id: NCPharmaQcAnalyzer
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/mixer.rsi
+    snapCardinals: true
+    layers:
+    - state: mixer_empty
+    - state: mixer_screens
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+  - type: Icon
+    sprite: Structures/Machines/mixer.rsi
+    state: mixer_empty
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.25,-0.4,0.25,0.4"
+        density: 190
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+  - type: Damageable
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 175
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+  - type: ApcPowerReceiver
+    powerLoad: 200
+  - type: ActivatableUI
+    key: enum.NCPharmaQcUiKey.Key
+  - type: ActivatableUIRequiresPower
+  - type: UserInterface
+    interfaces:
+      enum.NCPharmaQcUiKey.Key:
+        type: NCPharmaQcBoundUserInterface
+  - type: ContainerContainer
+    containers:
+      sample: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      sample:
+        name: nc-pharma-qc-sample-slot
+        whitelist:
+          components:
+          - NCPharmaContainer
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+  - type: NCPharmaQcAnalyzer

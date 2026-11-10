@@ -4,19 +4,20 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Content.Server._NC.LivingCity.Time;
 using Content.Server._NC.Medical.Systemic;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Pharmacology;
 using Content.Shared._NC.Medical.Pharmacology.Batch;
+using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
-using Robust.Shared.Timing;
 
 namespace Content.Server._NC.Medical.Pharmacology.Batch;
 
 /// <summary>One entry of the append-only history of a batch. It is server-only and never replicated.</summary>
 public sealed record NCPharmaAuditEntry(
-    TimeSpan Time,
+    NCActiveWorldTime Time,
     NCPharmaAuditKind Kind,
     string Actor,
     string Detail);
@@ -38,7 +39,7 @@ public sealed class NCPharmaBatchRecord
     public float ModifierToxicity = 1f;
     public string Producer = string.Empty;
     public string Facility = string.Empty;
-    public TimeSpan CreatedAt;
+    public NCActiveWorldTime CreatedAt;
     public int DosesProduced;
     public int DosesPacked;
     public int DosesAdministered;
@@ -53,9 +54,9 @@ public readonly record struct NCPharmaDoseResult(bool Accepted, NCPharmaDoseEffe
 /// </summary>
 public sealed partial class NCPharmaBatchSystem : EntitySystem
 {
-    [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private NCActiveWorldTimeSystem _worldTime = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
-    [Dependency] private NCPharmacologySystem _pharmacology = default!;
+    [Dependency] private NCPharmaDepotSystem _depot = default!;
     [Dependency] private NCSystemicSystem _systemic = default!;
 
     private readonly Dictionary<Guid, NCPharmaBatchRecord> _batches = new();
@@ -113,7 +114,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
             ModifierToxicity = outcome.ModifierToxicity,
             Producer = producer,
             Facility = facility,
-            CreatedAt = _timing.CurTime,
+            CreatedAt = Now(),
             DosesProduced = outcome.Doses,
         };
         record.Label = new NCPharmaLabel(
@@ -164,6 +165,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         batch.DosesPacked += doses;
         component.BatchId = batchId;
         component.Doses = doses;
+        component.QcState = batch.QcState;
         ApplyLabel(component, batch.Label);
         Dirty(container, component);
         AddAudit(batch, tuning, NCPharmaAuditKind.Dispensed, actor, $"container={ToPrettyString(container)} doses={doses}");
@@ -187,7 +189,11 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         var doseIndex = batch.DosesAdministered++;
         var effect = NCPharmaBatchMath.ResolveDose(
             tuning, form, batch.Actual, batch.ModifierToxicity, batch.BatchId, doseIndex);
-        _pharmacology.ApplyDose(patient, formula.Compound, effect.EffectiveConcentration);
+        _depot.TryDeposit(
+            patient,
+            formula.Compound,
+            effect.EffectiveConcentration,
+            NCPharmaBatchMath.ResolveAbsorption(form, ResolveModifiers(formula)));
         if (effect.ToxinBurden > 0f)
             _systemic.Apply(patient, tuning.ToxinProfile, effect.ToxinBurden);
         if (effect.SepsisBurden > 0f)
@@ -249,6 +255,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         batch.QcState = NCPharmaBatchMath.ResolveQcState(batch.QcState, report);
         AddAudit(batch, tuning, NCPharmaAuditKind.QcPerformed, actor,
             $"tests={report.Performed} failed={report.Failed} state={batch.QcState}");
+        RefreshContainers(batch);
         return true;
     }
 
@@ -273,15 +280,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
             $"purity {previous.Purity:F3}->{batch.Label.Purity:F3} " +
             $"sterile {previous.Sterile}->{batch.Label.Sterile} grade {previous.Grade}->{batch.Label.Grade}");
 
-        var query = EntityQueryEnumerator<NCPharmaContainerComponent>();
-        while (query.MoveNext(out var uid, out var container))
-        {
-            if (container.BatchId != batchId)
-                continue;
-            ApplyLabel(container, batch.Label);
-            Dirty(uid, container);
-        }
-
+        RefreshContainers(batch);
         return true;
     }
 
@@ -292,6 +291,7 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
 
         batch.QcState = NCPharmaQcState.Recalled;
         AddAudit(batch, tuning, NCPharmaAuditKind.Recalled, actor, "batch recalled");
+        RefreshContainers(batch);
         return true;
     }
 
@@ -300,6 +300,18 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
     {
         if (TryGetTuning(out var tuning))
             AddAudit(batch, tuning, NCPharmaAuditKind.AdminInspected, actor, "full hidden data viewed");
+    }
+
+    private List<NCPharmaModifierPrototype> ResolveModifiers(NCPharmaFormulaPrototype formula)
+    {
+        var modifiers = new List<NCPharmaModifierPrototype>(formula.Modifiers.Count);
+        foreach (var modifierId in formula.Modifiers)
+        {
+            if (_prototypes.TryIndex(modifierId, out var modifier))
+                modifiers.Add(modifier);
+        }
+
+        return modifiers;
     }
 
     private bool CanCreateBatch(
@@ -337,6 +349,21 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         return NCPharmaBatchMath.ValidateFormula(formula, modifiers);
     }
 
+    /// <summary>Copies the public label and QC certificate of a batch onto every pack that carries it.</summary>
+    private void RefreshContainers(NCPharmaBatchRecord batch)
+    {
+        var query = EntityQueryEnumerator<NCPharmaContainerComponent>();
+        while (query.MoveNext(out var uid, out var container))
+        {
+            if (container.BatchId != batch.BatchId)
+                continue;
+
+            ApplyLabel(container, batch.Label);
+            container.QcState = batch.QcState;
+            Dirty(uid, container);
+        }
+    }
+
     private static void ApplyLabel(NCPharmaContainerComponent container, NCPharmaLabel label)
     {
         container.BatchCode = label.BatchCode;
@@ -348,6 +375,12 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         container.LabelGrade = label.Grade;
     }
 
+    /// <summary>
+    /// Monotonic active-world time, which keeps advancing across rounds. Before the world has started it is zero.
+    /// </summary>
+    private NCActiveWorldTime Now() =>
+        _worldTime.TryGetCurrentTime(out _, out var time) ? time : NCActiveWorldTime.Zero;
+
     private void AddAudit(
         NCPharmaBatchRecord batch,
         NCPharmaTuningPrototype tuning,
@@ -358,6 +391,6 @@ public sealed partial class NCPharmaBatchSystem : EntitySystem
         // The oldest entries go first, but the creation record is the root of every investigation and stays.
         if (batch.Audit.Count >= tuning.MaximumAuditEntriesPerBatch && batch.Audit.Count > 1)
             batch.Audit.RemoveAt(1);
-        batch.Audit.Add(new NCPharmaAuditEntry(_timing.CurTime, kind, actor, detail));
+        batch.Audit.Add(new NCPharmaAuditEntry(Now(), kind, actor, detail));
     }
 }

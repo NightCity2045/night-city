@@ -42,6 +42,13 @@ public sealed partial class NCPharmaContainerComponent : Component
 
     [DataField, AutoNetworkedField]
     public NCPharmaGrade LabelGrade;
+
+    /// <summary>
+    /// Result of the last laboratory check, attached to the pack like a certificate. It says how far the batch
+    /// was verified, never what was found.
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public NCPharmaQcState QcState;
 }
 
 /// <summary>Cancellable DoAfter carried while a dose is being administered.</summary>
