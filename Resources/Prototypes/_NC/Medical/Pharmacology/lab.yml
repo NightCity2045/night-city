@@ -834,3 +834,17 @@
   baseStability: 0.88
   reaction: NCPharmaReactionStable
   regulatoryStatus: ClinicalOnly
+
+# --- The research console (R&D mode) ----------------------------------------------------------------------
+- type: entity
+  parent: NCLabMachineBase
+  id: NCPharmaRdConsole
+  components:
+  - type: ActivatableUI
+    key: enum.NCPharmaRdUiKey.Key
+  - type: ActivatableUIRequiresPower
+  - type: UserInterface
+    interfaces:
+      enum.NCPharmaRdUiKey.Key:
+        type: NCPharmaRdBoundUserInterface
+  - type: NCPharmaRdConsole

@@ -278,3 +278,5 @@ nc-implant-biotech-installed = The implant is already in the body; this has to b
 nc-implant-biotech-applied = The implant is prepared.
 nc-pharma-formula-immunosuppressant = immunosuppressive therapy
 nc-implant-biotech-unprepared = This module has not been prepared for living tissue; the patient will have a rough first minutes.
+ent-NCPharmaRdConsole = research console
+ent-NCPharmaRdConsole.desc = Develops new versions of formulas, approves certified ones and keeps the laboratory journal.
