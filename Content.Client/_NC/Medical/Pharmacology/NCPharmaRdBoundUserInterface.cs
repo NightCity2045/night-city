@@ -20,6 +20,7 @@ public sealed partial class NCPharmaRdBoundUserInterface(EntityUid owner, Enum k
         _window.DeriveRequested += (parent, name, form, concentration, modifiers) =>
             SendMessage(new NCPharmaRdDeriveMessage(parent, name, form, concentration, modifiers));
         _window.ApproveRequested += formula => SendMessage(new NCPharmaRdApproveMessage(formula));
+        _window.NoteRequested += (formula, text) => SendMessage(new NCPharmaRdNoteMessage(formula, text));
     }
 
     protected override void UpdateState(BoundUserInterfaceState state)

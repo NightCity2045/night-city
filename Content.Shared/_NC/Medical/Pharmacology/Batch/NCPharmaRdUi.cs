@@ -53,3 +53,11 @@ public sealed class NCPharmaRdSelectMessage(string formula) : BoundUserInterface
 {
     public readonly string Formula = formula;
 }
+
+/// <summary>A researcher's own note on a formula version: the hypothesis, what was changed, what was concluded.</summary>
+[Serializable, NetSerializable]
+public sealed class NCPharmaRdNoteMessage(string formula, string text) : BoundUserInterfaceMessage
+{
+    public readonly string Formula = formula;
+    public readonly string Text = text;
+}

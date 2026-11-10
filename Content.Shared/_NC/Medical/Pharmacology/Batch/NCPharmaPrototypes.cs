@@ -121,6 +121,9 @@ public sealed partial class NCPharmaTuningPrototype : IPrototype
     public float LocalInfectionReliefAtTherapeutic { get; private set; } = 0.35f;
 
     [DataField]
+    public int MaximumNoteLength { get; private set; } = 240;
+
+    [DataField]
     public int MaximumExperiments { get; private set; } = 512;
 
     [DataField]

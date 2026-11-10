@@ -115,4 +115,12 @@ public sealed partial class NCTreatmentCapabilityPrototype : IPrototype
 
     [DataField]
     public int ResourceCost { get; private set; } = 1;
+
+    /// <summary>Sterility of the dressing this item applies. Missing means the profile's own value.</summary>
+    [DataField]
+    public float? BandageSterility { get; private set; }
+
+    /// <summary>How much blood the dressing absorbs before it saturates. Missing means the profile's own value.</summary>
+    [DataField]
+    public float? BandageAbsorptionCapacity { get; private set; }
 }

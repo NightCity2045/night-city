@@ -43,6 +43,10 @@ SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY
                 <Button Name="ApproveButton" Text="{Loc 'nc-pharma-rd-approve'}" HorizontalExpand="True" />
             </BoxContainer>
             <Label Name="NoticeLabel" FontColorOverride="#FFC95C" />
+            <BoxContainer Orientation="Horizontal" SeparationOverride="6">
+                <LineEdit Name="NoteEdit" HorizontalExpand="True" PlaceHolder="{Loc 'nc-pharma-rd-note-placeholder'}" />
+                <Button Name="NoteButton" Text="{Loc 'nc-pharma-rd-note-save'}" />
+            </BoxContainer>
             <PanelContainer StyleClasses="LowDivider" />
             <Label Text="{Loc 'nc-pharma-rd-journal'}" StyleClasses="LabelHeading" />
             <ScrollContainer VerticalExpand="True" HScrollEnabled="False">

@@ -277,3 +277,4 @@ nc-implant-biotech-examine = Biocompatibility: fit {$fit}, cleanliness {$clean}.
 nc-implant-biotech-installed = The implant is already in the body; this has to be done on the bench.
 nc-implant-biotech-applied = The implant is prepared.
 nc-pharma-formula-immunosuppressant = immunosuppressive therapy
+nc-implant-biotech-unprepared = This module has not been prepared for living tissue; the patient will have a rough first minutes.

@@ -26,6 +26,7 @@ public sealed partial class NCPharmaRdSystem : EntitySystem
         SubscribeLocalEvent<NCPharmaRdConsoleComponent, NCPharmaRdDeriveMessage>(OnDerive);
         SubscribeLocalEvent<NCPharmaRdConsoleComponent, NCPharmaRdApproveMessage>(OnApprove);
         SubscribeLocalEvent<NCPharmaRdConsoleComponent, NCPharmaRdSelectMessage>(OnSelect);
+        SubscribeLocalEvent<NCPharmaRdConsoleComponent, NCPharmaRdNoteMessage>(OnNote);
     }
 
     private void OnUiOpened(Entity<NCPharmaRdConsoleComponent> console, ref BoundUIOpenedEvent args)
@@ -56,6 +57,12 @@ public sealed partial class NCPharmaRdSystem : EntitySystem
             console.Comp.Selected = derived.ID;
         }
 
+        UpdateUi(console, notice);
+    }
+
+    private void OnNote(Entity<NCPharmaRdConsoleComponent> console, ref NCPharmaRdNoteMessage args)
+    {
+        _batches.TryAddNote(args.Formula, Name(args.Actor), args.Text, out var notice);
         UpdateUi(console, notice);
     }
 

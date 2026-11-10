@@ -107,15 +107,21 @@ public sealed class NCImplantBiotechSystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<NCCyberwareComponent, InteractUsingEvent>(OnModuleUsing);
-        SubscribeLocalEvent<NCImplantBiocompatibilityComponent, ExaminedEvent>(OnModuleExamined);
         SubscribeLocalEvent<NCMedicalBodyComponent, NCCyberwareInstalledEvent>(OnInstalled);
     }
 
-    private void OnModuleExamined(Entity<NCImplantBiocompatibilityComponent> module, ref ExaminedEvent args)
+    /// <summary>
+    /// What the person about to install a module sees of its preparation. Nothing once it is in a body.
+    /// An unprepared module says so, because it will give the patient a rough first minutes.
+    /// </summary>
+    public string? ExamineLine(EntityUid module)
     {
-        var fit = module.Comp;
-        args.PushMarkup(Loc.GetString("nc-implant-biotech-examine",
-            ("fit", fit.Fit.ToString("P0")), ("clean", fit.Cleanliness.ToString("P0"))));
+        if (FindBody(module) != null)
+            return null;
+
+        return TryComp<NCImplantBiocompatibilityComponent>(module, out var fit)
+            ? Loc.GetString("nc-implant-biotech-examine", ("fit", fit.Fit.ToString("P0")), ("clean", fit.Cleanliness.ToString("P0")))
+            : Loc.GetString("nc-implant-biotech-unprepared");
     }
 
     private void OnModuleUsing(Entity<NCCyberwareComponent> module, ref InteractUsingEvent args)

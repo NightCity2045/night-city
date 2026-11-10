@@ -65,6 +65,7 @@ public enum NCPharmaJournalKind : byte
     Administered,
     Approved,
     Experiment,
+    Note,
 }
 
 /// <summary>Result of a research request to the formula registry.</summary>
@@ -80,6 +81,8 @@ public enum NCPharmaRdNotice : byte
     NotExperimental,
     NotCertified,
     Unidentified,
+    NoteSaved,
+    InvalidNote,
 }
 
 public enum NCPharmaAuditKind : byte

@@ -43,6 +43,8 @@ public sealed partial class NCMedicalImplantSystem : EntitySystem
         SubscribeLocalEvent<NCCyberwarePartComponent, ExaminedEvent>(OnPartExamined);
     }
 
+    [Dependency] private Content.Server._NC.Medical.Pharmacology.Lab.NCImplantBiotechSystem _implantBiotech = default!; // NC
+
     public bool IsReady(EntityUid uid, out EntityUid body)
     {
         body = default;
@@ -223,6 +225,9 @@ public sealed partial class NCMedicalImplantSystem : EntitySystem
 
     private void OnCyberwareExamined(Entity<NCCyberwareComponent> ent, ref ExaminedEvent args)
     {
+        if (_implantBiotech.ExamineLine(ent) is { } biotechLine) // NC
+            args.PushMarkup(biotechLine);
+
         args.PushMarkup(Loc.GetString("nc-cyberware-frame-quality", ("quality", Loc.GetString(_prototypes.Index(ent.Comp.Quality).Name))));
         if (_cyberware.GetAssemblyQuality(ent) is { } grade)
             args.PushMarkup(Loc.GetString("nc-medical-part-quality", ("quality", Loc.GetString(_prototypes.Index(grade).Name))));

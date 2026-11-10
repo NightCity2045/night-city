@@ -355,6 +355,9 @@
   applicationDuration: 3s
   resourceKind: Stack
   resourceCost: 1
+  # Grown skin is cleaner and takes more blood than gauze.
+  bandageSterility: 0.97
+  bandageAbsorptionCapacity: 5400
 
 # --- Purification of raw material ------------------------------------------------------------------------
 - type: entity

@@ -277,3 +277,4 @@ nc-implant-biotech-examine = Биосовместимость: прилеган�
 nc-implant-biotech-installed = Имплант уже в теле; это нужно делать на столе.
 nc-implant-biotech-applied = Имплант подготовлен.
 nc-pharma-formula-immunosuppressant = иммуноподавляющая терапия
+nc-implant-biotech-unprepared = Модуль не подготовлен к живой ткани: первые минуты у пациента пройдут тяжело.

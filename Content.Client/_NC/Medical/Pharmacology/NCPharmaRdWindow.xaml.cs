@@ -33,6 +33,7 @@ public sealed partial class NCPharmaRdWindow : FancyWindow
     public event Action<string>? SelectRequested;
     public event Action<string, string, string, float, string[]>? DeriveRequested;
     public event Action<string>? ApproveRequested;
+    public event Action<string, string>? NoteRequested;
 
     public NCPharmaRdWindow()
     {
@@ -64,6 +65,14 @@ public sealed partial class NCPharmaRdWindow : FancyWindow
         ConcentrationDown.OnPressed += _ => ChangeConcentration(-0.5f);
         ConcentrationUp.OnPressed += _ => ChangeConcentration(0.5f);
         CreateButton.OnPressed += _ => TryCreate();
+        NoteButton.OnPressed += _ =>
+        {
+            if (Selected() is { } noted && NoteEdit.Text.Trim().Length > 0)
+            {
+                NoteRequested?.Invoke(noted.Id, NoteEdit.Text);
+                NoteEdit.Text = string.Empty;
+            }
+        };
         ApproveButton.OnPressed += _ =>
         {
             if (Selected() is { } formula)
@@ -153,6 +162,7 @@ public sealed partial class NCPharmaRdWindow : FancyWindow
         ConcentrationValue.Text = formula == null ? "-" : _concentration.ToString("0.#");
         CreateButton.Disabled = formula == null;
         ApproveButton.Disabled = formula is not { CanApprove: true };
+        NoteButton.Disabled = formula == null;
         SelectedCard.SetMessage(FormattedMessage.FromMarkupPermissive(formula is { } selected
             ? BuildCard(selected)
             : Loc.GetString("nc-pharma-rd-select-hint")));

@@ -135,6 +135,25 @@ public sealed partial class NCPharmaBatchSystem
     }
 
     /// <summary>
+    /// Writes a researcher's own note to the lab journal of a formula version. The system never writes the
+    /// hypothesis for the researcher: this is where they say what they tried and what they concluded.
+    /// </summary>
+    public bool TryAddNote(string formulaId, string actor, string text, out NCPharmaRdNotice notice)
+    {
+        notice = NCPharmaRdNotice.InvalidNote;
+        if (!TryGetTuning(out var tuning) || !TryGetFormula(formulaId, out _))
+            return false;
+
+        var clean = new string((text ?? string.Empty).Where(c => !char.IsControl(c)).ToArray()).Trim();
+        if (clean.Length == 0 || clean.Length > tuning.MaximumNoteLength)
+            return false;
+
+        AddJournal(NCPharmaJournalKind.Note, formulaId, string.Empty, actor, clean);
+        notice = NCPharmaRdNotice.NoteSaved;
+        return true;
+    }
+
+    /// <summary>
     /// Moves a developed version to regular production. It needs real evidence: at least one batch of this
     /// exact version that a laboratory run certified.
     /// </summary>

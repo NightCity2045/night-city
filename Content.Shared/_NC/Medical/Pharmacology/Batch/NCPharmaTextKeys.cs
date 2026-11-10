@@ -36,6 +36,7 @@ public static class NCPharmaTextKeys
         NCPharmaJournalKind.Administered => "nc-pharma-journal-administered",
         NCPharmaJournalKind.Approved => "nc-pharma-journal-approved",
         NCPharmaJournalKind.Experiment => "nc-pharma-journal-experiment",
+        NCPharmaJournalKind.Note => "nc-pharma-journal-note",
         _ => "nc-pharma-journal-version-created",
     };
 
@@ -49,6 +50,8 @@ public static class NCPharmaTextKeys
         NCPharmaRdNotice.NotExperimental => "nc-pharma-rd-notice-not-experimental",
         NCPharmaRdNotice.NotCertified => "nc-pharma-rd-notice-not-certified",
         NCPharmaRdNotice.Unidentified => "nc-pharma-rd-notice-unidentified",
+        NCPharmaRdNotice.NoteSaved => "nc-pharma-rd-notice-note-saved",
+        NCPharmaRdNotice.InvalidNote => "nc-pharma-rd-notice-invalid-note",
         _ => string.Empty,
     };
 
