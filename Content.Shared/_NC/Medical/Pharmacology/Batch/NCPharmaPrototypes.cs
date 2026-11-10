@@ -99,6 +99,18 @@ public sealed partial class NCPharmaTuningPrototype : IPrototype
 
     [DataField]
     public float MaximumConcentrationRatio { get; private set; } = 2f;
+
+    /// <summary>Reaction used by a formula that does not name one.</summary>
+    [DataField(required: true)]
+    public ProtoId<NCPharmaReactionProfilePrototype> DefaultReaction { get; private set; }
+
+    /// <summary>Largest run made by hand in a reactor.</summary>
+    [DataField]
+    public int MaximumReactorUnits { get; private set; } = 8;
+
+    /// <summary>How many catalyst charges one run may use.</summary>
+    [DataField]
+    public int CatalystCharges { get; private set; } = 2;
 }
 
 /// <summary>
@@ -262,6 +274,10 @@ public sealed partial class NCPharmaFormulaPrototype : IPrototype
 
     public string? Author { get; private set; }
 
+    /// <summary>How this formula behaves in a reactor. A version inherits it from the formula it came from.</summary>
+    [DataField]
+    public ProtoId<NCPharmaReactionProfilePrototype>? Reaction { get; private set; }
+
     /// <summary>
     /// Builds a formula at runtime, for versions developed in game. A prototype loaded from YAML is never
     /// touched: every change is a new object with a new id.
@@ -279,7 +295,8 @@ public sealed partial class NCPharmaFormulaPrototype : IPrototype
         NCPharmaRegulatoryStatus status,
         string? derivedFrom,
         string? customName,
-        string? author)
+        string? author,
+        ProtoId<NCPharmaReactionProfilePrototype>? reaction = null)
     {
         return new NCPharmaFormulaPrototype
         {
@@ -296,11 +313,12 @@ public sealed partial class NCPharmaFormulaPrototype : IPrototype
             DerivedFrom = derivedFrom,
             CustomName = customName,
             Author = author,
+            Reaction = reaction,
         };
     }
 
     /// <summary>Same formula with another regulatory status, used when a version is approved or recalled.</summary>
     public NCPharmaFormulaPrototype WithStatus(NCPharmaRegulatoryStatus status) => Create(
         ID, Name, Version, Compound, DeliveryForm, TargetConcentration, [.. Modifiers],
-        DefaultProductionProfile, BaseStability, status, DerivedFrom, CustomName, Author);
+        DefaultProductionProfile, BaseStability, status, DerivedFrom, CustomName, Author, Reaction);
 }

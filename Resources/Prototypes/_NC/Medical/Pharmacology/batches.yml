@@ -23,6 +23,9 @@
   qcMinimumStability: 0.6
   maximumAuditEntriesPerBatch: 256
   maximumBatches: 4096
+  defaultReaction: NCPharmaReactionStable
+  maximumReactorUnits: 8
+  catalystCharges: 2
 
 - type: ncPharmaDeliveryForm
   id: NCPharmaDeliveryOral
@@ -134,6 +137,7 @@
   targetConcentration: 6
   defaultProductionProfile: NCPharmaProductionStandard
   baseStability: 0.85
+  reaction: NCPharmaReactionStable
   regulatoryStatus: Prescription
 
 - type: ncPharmaFormula
@@ -147,6 +151,7 @@
   - NCPharmaModifierFastRelease
   defaultProductionProfile: NCPharmaProductionStandard
   baseStability: 0.8
+  reaction: NCPharmaReactionExothermic
   regulatoryStatus: Controlled
 
 - type: ncPharmaFormula
@@ -158,6 +163,7 @@
   targetConcentration: 5
   defaultProductionProfile: NCPharmaProductionStandard
   baseStability: 0.9
+  reaction: NCPharmaReactionStable
   regulatoryStatus: ClinicalOnly
 
 - type: entity
@@ -363,3 +369,141 @@
     dosesPerPack: 10
     maximumUnitsPerRun: 60
 
+- type: ncPharmaProductionProfile
+  id: NCPharmaProductionManual
+  name: nc-pharma-production-manual
+  duration: 1s
+  labelPurity: 0.9
+  labelSterile: true
+  labelGrade: Medical
+
+- type: ncPharmaReaction
+  id: NCPharmaReactionStable
+  name: nc-pharma-reaction-stable
+  optimalMin: 60
+  optimalMax: 75
+  safeMin: 45
+  safeMax: 95
+  exothermicity: 0
+  volatility: 1
+
+- type: ncPharmaReaction
+  id: NCPharmaReactionExothermic
+  name: nc-pharma-reaction-exothermic
+  optimalMin: 55
+  optimalMax: 70
+  safeMin: 40
+  safeMax: 85
+  exothermicity: 1.6
+  volatility: 1.3
+
+- type: ncPharmaReaction
+  id: NCPharmaReactionVolatile
+  name: nc-pharma-reaction-volatile
+  optimalMin: 50
+  optimalMax: 62
+  safeMin: 38
+  safeMax: 75
+  exothermicity: 2.4
+  volatility: 1.8
+  pressureSoftLimit: 170
+  pressureHardLimit: 240
+  hazardous: true
+
+- type: reagent
+  id: NCReactorFumes
+  name: nc-reagent-name-reactor-fumes
+  group: Toxins
+  desc: nc-reagent-desc-reactor-fumes
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#9aa86a"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:NCApplyMedicalDrug
+        profile: NCDrugReactorFumes
+
+- type: ncDrugProfile
+  id: NCDrugReactorFumes
+  category: Toxicant
+  maximumConcentration: 25
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 0.2
+  therapeuticConcentration: 2
+  toxicConcentration: 3
+  clearancePerSecond: 0.04
+  baselineClearanceFraction: 0.4
+  liverClearanceFraction: 0.4
+  kidneyClearanceFraction: 0.2
+  respiratoryTransferMultiplierAtTherapeutic: 0.75
+  oxygenationMultiplierAtTherapeutic: 0.9
+  overdoseBurdenPerSecondAtMaximum: 2.2
+
+- type: entity
+  parent: [ BaseMachinePowered, BaseStructure ]
+  id: NCPharmaReactor
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Sprite
+    sprite: Structures/Machines/mixer.rsi
+    snapCardinals: true
+    layers:
+    - state: mixer_empty
+    - state: mixer_screens
+      shader: unshaded
+      map: ["enum.PowerDeviceVisualLayers.Powered"]
+  - type: Icon
+    sprite: Structures/Machines/mixer.rsi
+    state: mixer_empty
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.25,-0.4,0.25,0.4"
+        density: 190
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+  - type: Damageable
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 175
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+  - type: ApcPowerReceiver
+    powerLoad: 400
+  - type: ActivatableUI
+    key: enum.NCPharmaReactorUiKey.Key
+  - type: ActivatableUIRequiresPower
+  - type: UserInterface
+    interfaces:
+      enum.NCPharmaReactorUiKey.Key:
+        type: NCPharmaReactorBoundUserInterface
+  - type: ContainerContainer
+    containers:
+      source: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      source:
+        name: nc-pharma-station-source-slot
+        whitelist:
+          components:
+          - NCPharmaSource
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerDeviceVisuals.Powered:
+        enum.PowerDeviceVisualLayers.Powered:
+          True: { visible: true }
+          False: { visible: false }
+  - type: NCPharmaReactor

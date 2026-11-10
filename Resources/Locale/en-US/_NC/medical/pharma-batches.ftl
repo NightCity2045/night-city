@@ -159,3 +159,54 @@ nc-pharma-phase-comedown = { $effect ->
     [sociability] The mood drops and you feel tired and irritable.
     [dissociation] You are back, but heavy and numb.
 }
+
+nc-pharma-production-manual = manual synthesis
+nc-pharma-reaction-stable = stable reaction
+nc-pharma-reaction-exothermic = exothermic reaction
+nc-pharma-reaction-volatile = volatile reaction
+nc-reagent-name-reactor-fumes = reactor fumes
+nc-reagent-desc-reactor-fumes = Acrid fumes released by a reaction that got out of control. Damages the lungs.
+ent-NCPharmaReactor = thermoreactor
+nc-pharma-reactor-title = Thermoreactor
+nc-pharma-reactor-section-run = Run
+nc-pharma-reactor-section-gauges = Gauges
+nc-pharma-reactor-section-controls = Controls
+nc-pharma-reactor-start = Start run
+nc-pharma-reactor-no-run = No run in progress.
+nc-pharma-reactor-windows = Optimal [bold]{$optimalMin}-{$optimalMax}[/bold] °C · safe {$safeMin}-{$safeMax} °C · pressure soft {$soft} / hard {$hard}
+nc-pharma-reactor-temperature = Temperature: {$value} °C {$trend}
+nc-pharma-reactor-pressure = Pressure: {$value}
+nc-pharma-reactor-mixing = Mixing {$value} · catalyst {$catalyst} (charges left: {$left})
+nc-pharma-reactor-progress = Reaction progress: {$value}
+nc-pharma-reactor-instability = Instability: {$value}
+nc-pharma-reactor-heater = Heater
+nc-pharma-reactor-cooler = Cooler
+nc-pharma-reactor-stirring = Stirrer
+nc-pharma-reactor-venting = Pressure relief valve (slows the reaction)
+nc-pharma-reactor-ventilation = Ventilation (reduces a toxic release)
+nc-pharma-reactor-catalyst = Add catalyst
+nc-pharma-reactor-quench = Quench
+nc-pharma-reactor-stop = Emergency stop
+nc-pharma-reactor-warning-high-temperature = [color=#FFD05E]Temperature is above the optimal window.[/color]
+nc-pharma-reactor-warning-near-limit = [color=#FF6170]Temperature is close to the safe limit![/color]
+nc-pharma-reactor-warning-high-pressure = [color=#FF6170]Pressure is approaching the limit.[/color]
+nc-pharma-reactor-warning-poor-mixing = [color=#FFD05E]Poor mixing creates hot spots.[/color]
+nc-pharma-reactor-warning-runaway = [color=#FF6170]The reaction is running away: cool it now.[/color]
+nc-pharma-reactor-warning-instability = [color=#FF6170]The mixture is becoming unstable.[/color]
+nc-pharma-reactor-notice-not-experimental = Only a formula under development may be made by hand.
+nc-pharma-reactor-notice-units-limit = A manual run is limited to a small amount of material.
+nc-pharma-reactor-notice-started = The reaction has started.
+nc-pharma-reactor-notice-finished = The run is finished.
+nc-pharma-reactor-notice-stopped = Emergency stop: the material is lost.
+nc-pharma-reactor-notice-quenched = The reaction was quenched and stopped.
+nc-pharma-reactor-notice-degraded = The mixture degraded into sludge.
+nc-pharma-reactor-notice-released = Toxic fumes were released.
+nc-pharma-reactor-notice-ruptured = The vessel ruptured.
+nc-pharma-reactor-notice-catalyst = Catalyst added.
+nc-pharma-reactor-notice-no-catalyst = No catalyst left.
+nc-pharma-reactor-popup-warning = The reactor alarm sounds: the mixture is becoming unstable!
+nc-pharma-reactor-popup-degraded = The mixture is breaking down into sludge!
+nc-pharma-reactor-popup-release = The reactor vents toxic fumes!
+nc-pharma-reactor-popup-rupture = The reactor vessel ruptures and catches fire!
+nc-pharma-reactor-popup-severe = The reactor vessel explodes violently!
+nc-pharma-reactor-popup-finished = The reactor finishes batch {$code}.

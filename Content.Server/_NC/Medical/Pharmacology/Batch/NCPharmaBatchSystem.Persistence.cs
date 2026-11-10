@@ -284,6 +284,7 @@ public sealed partial class NCPharmaBatchSystem
                 DerivedFrom = formula.DerivedFrom,
                 CustomName = formula.CustomName,
                 Author = formula.Author,
+                Reaction = formula.Reaction?.Id,
             })
             .ToArray();
         AddSimpleSection(args, FormulaSectionType, records);
@@ -400,7 +401,8 @@ public sealed partial class NCPharmaBatchSystem
             value.Modifiers.Any(modifier => !_prototypes.HasIndex<NCPharmaModifierPrototype>(modifier)) ||
             (value.DerivedFrom != null && !IsText(value.DerivedFrom, 1)) ||
             (value.CustomName != null && !IsText(value.CustomName, 1)) ||
-            (value.Author != null && !IsText(value.Author, 0)))
+            (value.Author != null && !IsText(value.Author, 0)) ||
+            (value.Reaction != null && !_prototypes.HasIndex<NCPharmaReactionProfilePrototype>(value.Reaction)))
         {
             return false;
         }
@@ -418,7 +420,8 @@ public sealed partial class NCPharmaBatchSystem
             value.Status,
             value.DerivedFrom,
             value.CustomName,
-            value.Author);
+            value.Author,
+            value.Reaction == null ? (ProtoId<NCPharmaReactionProfilePrototype>?) null : new ProtoId<NCPharmaReactionProfilePrototype>(value.Reaction));
         return true;
     }
 
@@ -488,6 +491,7 @@ public sealed class NCPharmaFormulaSnapshot
     public string? DerivedFrom { get; set; }
     public string? CustomName { get; set; }
     public string? Author { get; set; }
+    public string? Reaction { get; set; }
 }
 
 public sealed class NCPharmaJournalSnapshot

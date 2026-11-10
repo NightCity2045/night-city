@@ -112,7 +112,8 @@ public sealed partial class NCPharmaBatchSystem
             NCPharmaRegulatoryStatus.Experimental,
             parent.ID,
             cleanName,
-            author);
+            author,
+            parent.Reaction);
         _derived.Add(id, derived);
         AddJournal(NCPharmaJournalKind.VersionCreated, id, string.Empty, author,
             $"derived from {parent.ID}: {concentration:0.##} per dose, {modifierIds.Count} modifiers");

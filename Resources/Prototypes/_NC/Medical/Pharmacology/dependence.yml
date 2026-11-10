@@ -108,6 +108,7 @@
   - NCPharmaModifierExtendedRelease
   defaultProductionProfile: NCPharmaProductionStandard
   baseStability: 0.9
+  reaction: NCPharmaReactionStable
   regulatoryStatus: Prescription
 
 - type: ncDependenceProfile
@@ -217,6 +218,7 @@
   targetConcentration: 5
   defaultProductionProfile: NCPharmaProductionStandard
   baseStability: 0.8
+  reaction: NCPharmaReactionVolatile
   regulatoryStatus: Controlled
 
 - type: ncPharmaFormula
@@ -228,4 +230,5 @@
   targetConcentration: 6
   defaultProductionProfile: NCPharmaProductionStandard
   baseStability: 0.85
+  reaction: NCPharmaReactionExothermic
   regulatoryStatus: Controlled

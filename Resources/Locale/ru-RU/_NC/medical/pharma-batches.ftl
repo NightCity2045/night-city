@@ -159,3 +159,54 @@ nc-pharma-phase-comedown = { $effect ->
     [sociability] Настроение падает, вы устали и раздражены.
     [dissociation] Вы вернулись, но чувствуете тяжесть и онемение.
 }
+
+nc-pharma-production-manual = ручной синтез
+nc-pharma-reaction-stable = стабильная реакция
+nc-pharma-reaction-exothermic = экзотермическая реакция
+nc-pharma-reaction-volatile = летучая реакция
+nc-reagent-name-reactor-fumes = испарения реактора
+nc-reagent-desc-reactor-fumes = Едкие испарения реакции, вышедшей из-под контроля. Повреждают лёгкие.
+ent-NCPharmaReactor = термореактор
+nc-pharma-reactor-title = Термореактор
+nc-pharma-reactor-section-run = Запуск
+nc-pharma-reactor-section-gauges = Показания
+nc-pharma-reactor-section-controls = Управление
+nc-pharma-reactor-start = Начать синтез
+nc-pharma-reactor-no-run = Синтез не идёт.
+nc-pharma-reactor-windows = Оптимум [bold]{$optimalMin}-{$optimalMax}[/bold] °C · безопасно {$safeMin}-{$safeMax} °C · давление мягкий предел {$soft} / жёсткий {$hard}
+nc-pharma-reactor-temperature = Температура: {$value} °C {$trend}
+nc-pharma-reactor-pressure = Давление: {$value}
+nc-pharma-reactor-mixing = Перемешивание {$value} · катализатор {$catalyst} (зарядов осталось: {$left})
+nc-pharma-reactor-progress = Прогресс реакции: {$value}
+nc-pharma-reactor-instability = Нестабильность: {$value}
+nc-pharma-reactor-heater = Нагрев
+nc-pharma-reactor-cooler = Охлаждение
+nc-pharma-reactor-stirring = Мешалка
+nc-pharma-reactor-venting = Клапан сброса давления (замедляет реакцию)
+nc-pharma-reactor-ventilation = Вентиляция (уменьшает токсичный выброс)
+nc-pharma-reactor-catalyst = Добавить катализатор
+nc-pharma-reactor-quench = Закалка
+nc-pharma-reactor-stop = Аварийный стоп
+nc-pharma-reactor-warning-high-temperature = [color=#FFD05E]Температура выше оптимального окна.[/color]
+nc-pharma-reactor-warning-near-limit = [color=#FF6170]Температура близка к безопасному пределу![/color]
+nc-pharma-reactor-warning-high-pressure = [color=#FF6170]Давление приближается к пределу.[/color]
+nc-pharma-reactor-warning-poor-mixing = [color=#FFD05E]Плохое перемешивание создаёт перегретые зоны.[/color]
+nc-pharma-reactor-warning-runaway = [color=#FF6170]Реакция идёт вразнос: охладите её немедленно.[/color]
+nc-pharma-reactor-warning-instability = [color=#FF6170]Смесь становится нестабильной.[/color]
+nc-pharma-reactor-notice-not-experimental = Вручную можно делать только формулу, находящуюся в разработке.
+nc-pharma-reactor-notice-units-limit = Ручной синтез ограничен небольшим количеством сырья.
+nc-pharma-reactor-notice-started = Реакция началась.
+nc-pharma-reactor-notice-finished = Синтез завершён.
+nc-pharma-reactor-notice-stopped = Аварийный стоп: сырьё потеряно.
+nc-pharma-reactor-notice-quenched = Реакцию закалили и остановили.
+nc-pharma-reactor-notice-degraded = Смесь превратилась в шлак.
+nc-pharma-reactor-notice-released = Произошёл выброс токсичных испарений.
+nc-pharma-reactor-notice-ruptured = Сосуд разрушился.
+nc-pharma-reactor-notice-catalyst = Катализатор добавлен.
+nc-pharma-reactor-notice-no-catalyst = Катализатор закончился.
+nc-pharma-reactor-popup-warning = Сигнал тревоги реактора: смесь становится нестабильной!
+nc-pharma-reactor-popup-degraded = Смесь разлагается в шлак!
+nc-pharma-reactor-popup-release = Реактор выбрасывает токсичные испарения!
+nc-pharma-reactor-popup-rupture = Сосуд реактора разрывается и вспыхивает!
+nc-pharma-reactor-popup-severe = Сосуд реактора сильно взрывается!
+nc-pharma-reactor-popup-finished = Реактор заканчивает партию {$code}.

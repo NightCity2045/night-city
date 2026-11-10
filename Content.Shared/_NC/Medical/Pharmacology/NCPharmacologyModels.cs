@@ -27,6 +27,7 @@ public enum NCDrugCategory : byte
     NeuralStabilizer,
     Withdrawal,
     Recreational,
+    Toxicant,
 }
 
 /// <summary>
