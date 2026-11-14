@@ -4,7 +4,7 @@ meta:
   engineVersion: 284.0.2
   forkId: ""
   forkVersion: ""
-  time: 10/01/2026 19:26:23
+  time: 11/14/2026 12:19:30
   entityCount: 540
 maps:
 - 1
@@ -46,12 +46,12 @@ entities:
   - uid: 1
     components:
     - type: MetaData
-      name: NightCity [4]
+      name: Mapping NC ALife Test [4]
     - type: Transform
     - type: Map
       mapPaused: True
-    - type: AlwaysPowered
     - type: GridTree
+    - type: AlwaysPowered
     - type: Broadphase
     - type: OccluderTree
     - type: MapGrid
@@ -295,7 +295,15 @@ entities:
         nodes: []
     - type: ExplosionAirtightGrid
     - type: NCZLevelsLaddersCache
-- proto: NCWalbeton
+- proto: NCStairsDown
+  entities:
+  - uid: 1045
+    components:
+    - type: Transform
+      parent: 1
+      pos: 115.5,188.5
+      anchored: False
+- proto: NCWallbeton
   entities:
   - uid: 85
     components:
@@ -672,7 +680,7 @@ entities:
     - type: Transform
       parent: 1
       pos: 138.5,56.5
-- proto: NCWalMetals
+- proto: NCWallMetals
   entities:
   - uid: 2
     components:
@@ -3442,12 +3450,4 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -73.5,-31.5
-
-- proto: NCStairsDown
-  entities:
-  - uid: 1045
-    components:
-    - type: Transform
-      parent: 1
-      pos: 115.5,188.5
 ...

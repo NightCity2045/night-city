@@ -527,9 +527,9 @@ public sealed partial class NCZoneEditorServerSystem : EntitySystem
             return;
         }
 
-        if (!TryExportDraft(args.SenderSession.UserId, request.FileName, out var path))
+        if (!TryExportDraft(args.SenderSession.UserId, request.FileName, out var path, out var error))
         {
-            SendResult(args, false, "The export file name is invalid.");
+            SendResult(args, false, error!);
             return;
         }
 
@@ -540,7 +540,13 @@ public sealed partial class NCZoneEditorServerSystem : EntitySystem
 
     public bool TryExportDraft(NetUserId userId, string fileName, out ResPath path)
     {
+        return TryExportDraft(userId, fileName, out path, out _);
+    }
+
+    private bool TryExportDraft(NetUserId userId, string fileName, out ResPath path, out string? error)
+    {
         path = default;
+        error = "The export file name is invalid.";
         if (!_drafts.TryGetValue(userId, out var draft) ||
             ValidateDraft(draft.Snapshot).Length != 0 ||
             string.IsNullOrWhiteSpace(fileName) ||
@@ -556,9 +562,13 @@ public sealed partial class NCZoneEditorServerSystem : EntitySystem
 
         path = new ResPath($"/ZoneExports/{fileName}");
         _resources.UserData.CreateDir(path.Directory);
-        using var writer = _resources.UserData.OpenWriteText(path);
-        WriteSnapshot(writer, draft.Snapshot);
-        return true;
+        // Close the writer before re-reading the saved YAML to publish the runtime prototype.
+        using (var writer = _resources.UserData.OpenWriteText(path))
+        {
+            WriteSnapshot(writer, draft.Snapshot);
+        }
+
+        return TryPublishNetworkZones(path, draft.Snapshot.NetworkId, out error);
     }
 
     /// <summary>
@@ -612,9 +622,12 @@ public sealed partial class NCZoneEditorServerSystem : EntitySystem
         try
         {
             _resources.UserData.CreateDir(path.Directory);
-            using var writer = _resources.UserData.OpenWriteText(path);
-            WriteSnapshot(writer, snapshot);
-            return true;
+            using (var writer = _resources.UserData.OpenWriteText(path))
+            {
+                WriteSnapshot(writer, snapshot);
+            }
+
+            return TryPublishNetworkZones(path, networkId, out error);
         }
         catch (Exception exception)
         {
@@ -628,6 +641,27 @@ public sealed partial class NCZoneEditorServerSystem : EntitySystem
     /// NCZoneSystem's spatial index through its normal PrototypesReloaded event.
     /// </summary>
     public bool TryLoadNetworkZones(ResPath path, NCZNetworkId expectedNetworkId, out string? error)
+    {
+        if (!TryPublishNetworkZones(path, expectedNetworkId, out error))
+            return false;
+
+        // Loading another save explicitly replaces the editor source; saving/exporting preserves drafts and history.
+        foreach (var user in _drafts
+                     .Where(pair => pair.Value.Snapshot.NetworkId == expectedNetworkId)
+                     .Select(pair => pair.Key)
+                     .ToArray())
+        {
+            _drafts.Remove(user);
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Publishes saved zone YAML through the normal prototype reload path, refreshing runtime geography and graphs
+    /// without discarding mapper drafts or their undo/redo history.
+    /// </summary>
+    private bool TryPublishNetworkZones(ResPath path, NCZNetworkId expectedNetworkId, out string? error)
     {
         error = null;
         if (!TryReadZoneSnapshot(path, out var snapshot, out error))
@@ -682,15 +716,6 @@ public sealed partial class NCZoneEditorServerSystem : EntitySystem
         {
             error = $"Unable to load zone set {path}: {exception.Message}";
             return false;
-        }
-
-        // Any in-memory draft for this network predates the loaded sidecar and must not hide it in the editor.
-        foreach (var user in _drafts
-                     .Where(pair => pair.Value.Snapshot.NetworkId == expectedNetworkId)
-                     .Select(pair => pair.Key)
-                     .ToArray())
-        {
-            _drafts.Remove(user);
         }
 
         return true;

@@ -4,8 +4,8 @@ meta:
   engineVersion: 284.0.2
   forkId: ""
   forkVersion: ""
-  time: 10/01/2026 19:26:23
-  entityCount: 4126
+  time: 11/14/2026 12:19:26
+  entityCount: 4130
 maps:
 - 1
 grids:
@@ -61,12 +61,12 @@ entities:
   - uid: 1
     components:
     - type: MetaData
-      name: NightCity [1]
+      name: Mapping NC ALife Test [1]
     - type: Transform
     - type: Map
       mapPaused: True
-    - type: AlwaysPowered
     - type: GridTree
+    - type: AlwaysPowered
     - type: Broadphase
     - type: OccluderTree
     - type: MapGrid
@@ -1041,30 +1041,50 @@ entities:
       parent: 1
       pos: -7.5,-22.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 770
     components:
     - type: Transform
       parent: 1
       pos: -62.5,-26.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 775
     components:
     - type: Transform
       parent: 1
       pos: -49.5,-28.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 821
     components:
     - type: Transform
       parent: 1
       pos: -59.5,-23.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 822
     components:
     - type: Transform
       parent: 1
       pos: -55.5,-28.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 823
     components:
     - type: Transform
@@ -1072,6 +1092,10 @@ entities:
       rot: 3.141592653589793 rad
       pos: -23.5,-40.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 825
     components:
     - type: Transform
@@ -1079,6 +1103,10 @@ entities:
       rot: 3.141592653589793 rad
       pos: -19.5,-43.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 827
     components:
     - type: Transform
@@ -1086,6 +1114,10 @@ entities:
       rot: 3.141592653589793 rad
       pos: -23.5,-46.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 828
     components:
     - type: Transform
@@ -1093,6 +1125,10 @@ entities:
       rot: 3.141592653589793 rad
       pos: -13.5,-46.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 829
     components:
     - type: Transform
@@ -1100,6 +1136,10 @@ entities:
       rot: 3.141592653589793 rad
       pos: -11.5,-44.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 831
     components:
     - type: Transform
@@ -1108,48 +1148,80 @@ entities:
       pos: -27.5,-45.5
       anchored: False
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 1520
     components:
     - type: Transform
       parent: 1
       pos: 19.5,-34.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 1522
     components:
     - type: Transform
       parent: 1
       pos: 16.5,-34.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2417
     components:
     - type: Transform
       parent: 1
       pos: -36.5,-25.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2418
     components:
     - type: Transform
       parent: 1
       pos: -31.5,-19.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2419
     components:
     - type: Transform
       parent: 1
       pos: -30.5,-28.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2662
     components:
     - type: Transform
       parent: 1
       pos: -13.5,-22.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2726
     components:
     - type: Transform
       parent: 1
       pos: 13.5,-34.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2920
     components:
     - type: Transform
@@ -1157,66 +1229,106 @@ entities:
       rot: -1.5707963267948966 rad
       pos: -137.5,16.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2928
     components:
     - type: Transform
       parent: 1
       pos: -36.5,-4.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2931
     components:
     - type: Transform
       parent: 1
       pos: -36.5,-8.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2932
     components:
     - type: Transform
       parent: 1
       pos: -44.5,-1.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2936
     components:
     - type: Transform
       parent: 1
       pos: -47.5,-10.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3070
     components:
     - type: Transform
       parent: 1
       pos: -14.5,-1.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3077
     components:
     - type: Transform
       parent: 1
       pos: -10.5,-1.5
+    - type: ApcPowerReceiver
+      needsPower: False
     - type: Door
       state: Opening
-      secondsUntilStateChange: -581715.4
+      secondsUntilStateChange: -584153.8
     - type: NCCityLocation
     - type: DeviceLinkSource
       lastSignals:
         DoorStatus: True
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3088
     components:
     - type: Transform
       parent: 1
       pos: -54.5,-43.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3089
     components:
     - type: Transform
       parent: 1
       pos: -12.5,-6.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3090
     components:
     - type: Transform
       parent: 1
       pos: -19.5,-8.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3094
     components:
     - type: Transform
@@ -1224,6 +1336,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: -130.5,17.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3095
     components:
     - type: Transform
@@ -1231,6 +1347,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: -125.5,16.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3096
     components:
     - type: Transform
@@ -1238,42 +1358,70 @@ entities:
       rot: -1.5707963267948966 rad
       pos: -123.5,18.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3111
     components:
     - type: Transform
       parent: 1
       pos: -15.5,1.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3115
     components:
     - type: Transform
       parent: 1
       pos: -8.5,1.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3118
     components:
     - type: Transform
       parent: 1
       pos: -58.5,-43.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3119
     components:
     - type: Transform
       parent: 1
       pos: -54.5,-47.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3120
     components:
     - type: Transform
       parent: 1
       pos: -67.5,-43.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3121
     components:
     - type: Transform
       parent: 1
       pos: -67.5,-47.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3474
     components:
     - type: Transform
@@ -1281,6 +1429,10 @@ entities:
       rot: 3.141592653589793 rad
       pos: 112.5,189.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3475
     components:
     - type: Transform
@@ -1288,6 +1440,10 @@ entities:
       rot: 3.141592653589793 rad
       pos: 112.5,190.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3476
     components:
     - type: Transform
@@ -1295,6 +1451,10 @@ entities:
       rot: 3.141592653589793 rad
       pos: 113.5,187.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3477
     components:
     - type: Transform
@@ -1302,12 +1462,20 @@ entities:
       rot: 3.141592653589793 rad
       pos: 120.5,185.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3618
     components:
     - type: Transform
       parent: 1
       pos: 107.5,8.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: AirlockCentralCommand
   entities:
   - uid: 3224
@@ -1316,84 +1484,140 @@ entities:
       parent: 1
       pos: -22.5,19.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3225
     components:
     - type: Transform
       parent: 1
       pos: -22.5,18.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3226
     components:
     - type: Transform
       parent: 1
       pos: -24.5,10.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3265
     components:
     - type: Transform
       parent: 1
       pos: -16.5,18.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3266
     components:
     - type: Transform
       parent: 1
       pos: -12.5,18.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3267
     components:
     - type: Transform
       parent: 1
       pos: -8.5,18.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3268
     components:
     - type: Transform
       parent: 1
       pos: -15.5,8.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3269
     components:
     - type: Transform
       parent: 1
       pos: -19.5,8.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3270
     components:
     - type: Transform
       parent: 1
       pos: -10.5,8.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3281
     components:
     - type: Transform
       parent: 1
       pos: -17.5,17.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3287
     components:
     - type: Transform
       parent: 1
       pos: -17.5,16.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3292
     components:
     - type: Transform
       parent: 1
       pos: -17.5,13.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3294
     components:
     - type: Transform
       parent: 1
       pos: -9.5,13.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3296
     components:
     - type: Transform
       parent: 1
       pos: -9.5,9.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: AirlockChemistry
   entities:
   - uid: 2663
@@ -1402,12 +1626,20 @@ entities:
       parent: 1
       pos: -10.5,-25.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3753
     components:
     - type: Transform
       parent: 1
       pos: -48.5,-34.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: AirlockGlass
   entities:
   - uid: 3585
@@ -1417,6 +1649,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 111.5,15.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3588
     components:
     - type: Transform
@@ -1424,6 +1660,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 113.5,11.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3589
     components:
     - type: Transform
@@ -1431,6 +1671,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 116.5,11.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3606
     components:
     - type: Transform
@@ -1438,6 +1682,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 139.5,10.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3607
     components:
     - type: Transform
@@ -1445,6 +1693,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 137.5,11.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3608
     components:
     - type: Transform
@@ -1452,6 +1704,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 136.5,11.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3609
     components:
     - type: Transform
@@ -1459,6 +1715,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 132.5,11.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3610
     components:
     - type: Transform
@@ -1466,6 +1726,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 131.5,11.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3611
     components:
     - type: Transform
@@ -1473,6 +1737,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 127.5,11.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3612
     components:
     - type: Transform
@@ -1480,6 +1748,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 126.5,11.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3613
     components:
     - type: Transform
@@ -1487,6 +1759,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 122.5,11.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3614
     components:
     - type: Transform
@@ -1494,6 +1770,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 121.5,11.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3615
     components:
     - type: Transform
@@ -1501,6 +1781,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 119.5,9.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3616
     components:
     - type: Transform
@@ -1508,6 +1792,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 116.5,8.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3617
     components:
     - type: Transform
@@ -1515,6 +1803,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 112.5,17.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3635
     components:
     - type: Transform
@@ -1522,6 +1814,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 101.5,10.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3636
     components:
     - type: Transform
@@ -1529,6 +1825,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 101.5,11.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: AirlockMaintChapelLocked
   entities:
   - uid: 2675
@@ -1537,6 +1837,10 @@ entities:
       parent: 1
       pos: -10.5,-28.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: AloeSeeds
   entities:
   - uid: 3361
@@ -2890,11 +3194,19 @@ entities:
     - type: Transform
       parent: 1
       pos: 141.5,16.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 479
     components:
     - type: Transform
       parent: 1
       pos: 140.5,16.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: DiseaseDiagnoser
   entities:
   - uid: 3596
@@ -2902,6 +3214,10 @@ entities:
     - type: Transform
       parent: 1
       pos: 108.5,13.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: DresserWardenFilled
   entities:
   - uid: 2685
@@ -3319,6 +3635,10 @@ entities:
     - type: Transform
       parent: 1
       pos: 107.5,193.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: KitchenMicrowave
   entities:
   - uid: 2692
@@ -3327,42 +3647,70 @@ entities:
       parent: 1
       pos: -7.5,-30.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2916
     components:
     - type: Transform
       parent: 1
       pos: -122.5,22.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3048
     components:
     - type: Transform
       parent: 1
       pos: -121.5,22.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3380
     components:
     - type: Transform
       parent: 1
       pos: 107.5,196.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3382
     components:
     - type: Transform
       parent: 1
       pos: 107.5,194.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3631
     components:
     - type: Transform
       parent: 1
       pos: 103.5,6.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3750
     components:
     - type: Transform
       parent: 1
       pos: -47.5,-29.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: KitchenReagentGrinder
   entities:
   - uid: 3379
@@ -3370,6 +3718,10 @@ entities:
     - type: Transform
       parent: 1
       pos: 109.5,196.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: LargeBeaker
   entities:
   - uid: 3385
@@ -3655,6 +4007,10 @@ entities:
       rot: 1.5707963267948966 rad
       pos: 5.5,21.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4039
     components:
     - type: Transform
@@ -3662,6 +4018,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 8.5,21.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4045
     components:
     - type: Transform
@@ -3669,6 +4029,10 @@ entities:
       rot: 1.5707963267948966 rad
       pos: 5.5,18.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4048
     components:
     - type: Transform
@@ -3676,6 +4040,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 12.5,18.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4051
     components:
     - type: Transform
@@ -3683,6 +4051,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 8.5,18.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4066
     components:
     - type: Transform
@@ -3690,6 +4062,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 12.5,15.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4070
     components:
     - type: Transform
@@ -3697,6 +4073,10 @@ entities:
       rot: 1.5707963267948966 rad
       pos: 5.5,15.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4077
     components:
     - type: Transform
@@ -3704,6 +4084,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 8.5,14.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: NCPoweredlightAzure
   entities:
   - uid: 2457
@@ -3712,24 +4096,40 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -141.5,18.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2470
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -141.5,15.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2474
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -141.5,21.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2475
     components:
     - type: Transform
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -138.5,18.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: NCPoweredlightCyberYellow
   entities:
   - uid: 2454
@@ -3737,34 +4137,58 @@ entities:
     - type: Transform
       parent: 1
       pos: -131.5,22.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2472
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: -123.5,14.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2473
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -129.5,18.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2476
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: -136.5,14.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3093
     components:
     - type: Transform
       parent: 1
       pos: -123.5,22.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3116
     components:
     - type: Transform
       parent: 1
       pos: -135.5,21.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: NCPoweredlightDeepBlue
   entities:
   - uid: 2458
@@ -3773,6 +4197,10 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -122.5,17.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: NCPoweredlightEvening
   entities:
   - uid: 4106
@@ -3780,24 +4208,40 @@ entities:
     - type: Transform
       parent: 1
       pos: 104.5,13.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4107
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 103.5,9.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4108
     components:
     - type: Transform
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 106.5,9.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4109
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 105.5,6.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: NCPoweredlightIceWhite
   entities:
   - uid: 3979
@@ -3805,69 +4249,121 @@ entities:
     - type: Transform
       parent: 1
       pos: 125.5,16.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4094
     components:
     - type: Transform
       parent: 1
       pos: 128.5,16.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4095
     components:
     - type: Transform
       parent: 1
       pos: 123.5,16.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4096
     components:
     - type: Transform
       parent: 1
       pos: 120.5,16.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4097
     components:
     - type: Transform
       parent: 1
       pos: 130.5,16.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4098
     components:
     - type: Transform
       parent: 1
       pos: 133.5,16.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4099
     components:
     - type: Transform
       parent: 1
       pos: 135.5,16.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4100
     components:
     - type: Transform
       parent: 1
       pos: 138.5,16.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4101
     components:
     - type: Transform
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 143.5,13.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4102
     components:
     - type: Transform
       parent: 1
       pos: 111.5,9.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4103
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 108.5,14.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4104
     components:
     - type: Transform
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 115.5,15.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4105
     components:
     - type: Transform
       parent: 1
       pos: 115.5,12.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: NCPoweredlightIndustrialTeal
   entities:
   - uid: 4110
@@ -3875,12 +4371,20 @@ entities:
     - type: Transform
       parent: 1
       pos: 96.5,12.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4111
     components:
     - type: Transform
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 101.5,7.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: NCPoweredlightPaleCyan
   entities:
   - uid: 4036
@@ -3888,16 +4392,28 @@ entities:
     - type: Transform
       parent: 1
       pos: 134.5,10.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4113
     components:
     - type: Transform
       parent: 1
       pos: 129.5,10.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4114
     components:
     - type: Transform
       parent: 1
       pos: 124.5,10.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: NCPoweredlightTerminalGreen
   entities:
   - uid: 3467
@@ -3906,57 +4422,136 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 114.5,189.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3487
     components:
     - type: Transform
       parent: 1
       pos: 114.5,190.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3488
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 120.5,188.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3489
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 121.5,187.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3490
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 119.5,193.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3491
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 119.5,196.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3492
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 115.5,194.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3493
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 107.5,185.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3494
     components:
     - type: Transform
       parent: 1
       pos: 114.5,186.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3495
     components:
     - type: Transform
       parent: 1
       pos: 112.5,186.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+  - uid: 3498
+    components:
+    - type: Transform
+      parent: 1
+      rot: 1.5707963267948966 rad
+      pos: 107.5,191.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+  - uid: 3499
+    components:
+    - type: Transform
+      parent: 1
+      pos: 111.5,196.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+  - uid: 4129
+    components:
+    - type: Transform
+      parent: 1
+      rot: -1.5707963267948966 rad
+      pos: 113.5,192.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+  - uid: 4130
+    components:
+    - type: Transform
+      parent: 1
+      rot: 3.141592653589793 rad
+      pos: 110.5,188.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: NCStairsDown
   entities:
   - uid: 834
@@ -4036,7 +4631,7 @@ entities:
     - type: Transform
       parent: 1
       pos: 30.5,22.5
-- proto: NCWalbeton
+- proto: NCWallbeton
   entities:
   - uid: 85
     components:
@@ -5643,7 +6238,7 @@ entities:
     - type: Transform
       parent: 1
       pos: 119.5,-65.5
-- proto: NCWalMetals
+- proto: NCWallMetals
   entities:
   - uid: 2
     components:
@@ -8017,7 +8612,7 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -73.5,-31.5
-- proto: NCWalMetalsa
+- proto: NCWallMetalsa
   entities:
   - uid: 1506
     components:
@@ -10081,6 +10676,10 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -6.5,-27.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: PoweredlightLED
   entities:
   - uid: 4112
@@ -10088,84 +10687,144 @@ entities:
     - type: Transform
       parent: 1
       pos: 27.5,22.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4115
     components:
     - type: Transform
       parent: 1
       pos: 19.5,22.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4116
     components:
     - type: Transform
       parent: 1
       pos: 22.5,15.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4117
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 36.5,16.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4118
     components:
     - type: Transform
       parent: 1
       pos: 26.5,19.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4119
     components:
     - type: Transform
       parent: 1
       pos: 26.5,15.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4120
     components:
     - type: Transform
       parent: 1
       pos: 10.5,22.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4121
     components:
     - type: Transform
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 18.5,13.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4122
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 14.5,18.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4123
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 7.5,13.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4124
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 20.5,18.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4125
     components:
     - type: Transform
       parent: 1
       rot: 3.141592653589793 rad
       pos: 34.5,20.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4126
     components:
     - type: Transform
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 33.5,16.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4127
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 29.5,14.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 4128
     components:
     - type: Transform
       parent: 1
       pos: 36.5,14.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: PoweredSmallLight
   entities:
   - uid: 2745
@@ -10174,6 +10833,10 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 16.5,-37.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: Rack
   entities:
   - uid: 3390
@@ -10531,6 +11194,10 @@ entities:
     - type: Transform
       parent: 1
       pos: 117.5,191.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: SignLibrary
   entities:
   - uid: 2721
@@ -10637,6 +11304,10 @@ entities:
     - type: Transform
       parent: 1
       pos: -121.5,20.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: SoapDeluxe
   entities:
   - uid: 3087
@@ -11489,6 +12160,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: -13.5,1.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2944
     components:
     - type: Transform
@@ -11496,6 +12171,10 @@ entities:
       rot: -1.5707963267948966 rad
       pos: -6.5,1.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3066
     components:
     - type: Transform
@@ -11503,6 +12182,10 @@ entities:
       rot: 1.5707963267948966 rad
       pos: -133.5,17.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: ToiletEmpty
   entities:
   - uid: 478
@@ -11512,6 +12195,10 @@ entities:
       rot: 1.5707963267948966 rad
       pos: 108.5,18.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2677
     components:
     - type: Transform
@@ -11519,18 +12206,30 @@ entities:
       rot: -1.5707963267948966 rad
       pos: -9.5,-24.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 2744
     components:
     - type: Transform
       parent: 1
       pos: 17.5,-35.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3756
     components:
     - type: Transform
       parent: 1
       pos: -49.5,-33.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: TomatoSeeds
   entities:
   - uid: 3461
@@ -22843,14 +23542,22 @@ entities:
     - type: Transform
       parent: 1
       pos: -10.5,-23.5
+    - type: ApcPowerReceiver
+      needsPower: False
     - type: NCCityLocation
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3758
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -50.5,-34.5
+    - type: ApcPowerReceiver
+      needsPower: False
     - type: NCCityLocation
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: WindoorSecure
   entities:
   - uid: 3969
@@ -22859,28 +23566,44 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 21.5,15.5
+    - type: ApcPowerReceiver
+      needsPower: False
     - type: NCCityLocation
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3970
     components:
     - type: Transform
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 21.5,14.5
+    - type: ApcPowerReceiver
+      needsPower: False
     - type: NCCityLocation
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3971
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 21.5,15.5
+    - type: ApcPowerReceiver
+      needsPower: False
     - type: NCCityLocation
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
   - uid: 3972
     components:
     - type: Transform
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 21.5,14.5
+    - type: ApcPowerReceiver
+      needsPower: False
     - type: NCCityLocation
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: Window
   entities:
   - uid: 158

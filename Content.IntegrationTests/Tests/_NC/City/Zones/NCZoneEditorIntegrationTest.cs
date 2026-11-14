@@ -231,6 +231,11 @@ public sealed class NCZoneEditorIntegrationTest : GameTest
             Assert.That(actualPath, Is.EqualTo(exportPath));
             var yaml = server.ResolveDependency<IResourceManager>().UserData.ReadAllText(exportPath);
             Assert.That(yaml, Does.Contain("global: true"));
+
+            var zones = server.System<NCZoneSystem>();
+            var context = zones.GetLocationContext(new NCMapCoordinates(NetworkId, new Vector2(22, 22), 0));
+            Assert.That(context.DistrictId.IsValid, Is.True,
+                "Export must apply the saved zones to the running world without a restart or explicit load.");
         });
 
         await server.WaitPost(() =>
@@ -239,6 +244,24 @@ public sealed class NCZoneEditorIntegrationTest : GameTest
             if (resources.UserData.Exists(exportPath))
                 resources.UserData.Delete(exportPath);
         });
+
+        await client.WaitPost(() => editor.UpdateZone(createdId, "Saved District", default, 0, NCZoneActivityMode.Active));
+        await pair.RunTicksSync(5);
+        await server.WaitAssertion(() =>
+        {
+            var zones = server.System<NCZoneSystem>();
+            var result = new List<NCZoneInfo>();
+            zones.GetZones(new NCMapCoordinates(NetworkId, new Vector2(22, 22), 0), result);
+            Assert.That(result.Select(zone => zone.Name), Does.Contain("Editor District"),
+                "Unsaved edits must not replace the active geography.");
+        });
+        await client.WaitPost(editor.Undo);
+        await pair.RunTicksSync(5);
+        await client.WaitAssertion(() =>
+            Assert.That(editor.Snapshot!.Zones.Single(zone => zone.Id == createdId).Name,
+                Is.EqualTo("Editor District"), "Export must preserve the mapper's undo history."));
+        await client.WaitPost(editor.Redo);
+        await pair.RunTicksSync(5);
 
         var bundlePath = new ResPath("/ZNetworkSaves/nc-zone-editor-integration") /
                          NCZoneEditorServerSystem.NetworkSaveFileName;
@@ -267,6 +290,12 @@ public sealed class NCZoneEditorIntegrationTest : GameTest
                 saveError);
             Assert.That(resources.UserData.Exists(bundlePath), Is.True);
 
+            var savedZones = new List<NCZoneInfo>();
+            server.System<NCZoneSystem>().GetZones(
+                new NCMapCoordinates(NetworkId, new Vector2(22, 22), 0), savedZones);
+            Assert.That(savedZones.Select(zone => zone.Name), Does.Contain("Saved District"),
+                "Saving must apply the current draft before any explicit zone load.");
+
             var wrongNetwork = new NCZNetworkId(Guid.Parse("0f192555-00e0-4f42-a019-bf0cf8ab58da"));
             Assert.That(
                 serverEditor.TryLoadNetworkZones(bundlePath, wrongNetwork, out _),
@@ -285,7 +314,7 @@ public sealed class NCZoneEditorIntegrationTest : GameTest
             var zones = server.System<NCZoneSystem>();
             var result = new List<NCZoneInfo>();
             zones.GetZones(new NCMapCoordinates(NetworkId, new Vector2(22, 22), 0), result);
-            Assert.That(result.Select(zone => zone.Name), Does.Contain("Editor District"));
+            Assert.That(result.Select(zone => zone.Name), Does.Contain("Saved District"));
         });
 
         await server.WaitPost(() =>

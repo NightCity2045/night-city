@@ -7,7 +7,7 @@ using Robust.Shared.GameStates;
 namespace Content.Shared._NC.ZLevels.Core.Components;
 
 /// <summary>
-/// Moves a body directly to an adjacent Z-level when it enters this stair tile.
+/// Moves a body to an adjacent Z-level when it reaches the exit end of this stair tile.
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class NCZStairTransitionComponent : Component

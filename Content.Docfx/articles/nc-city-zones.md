@@ -141,7 +141,12 @@ the mapper's current logical floor. Global outlines are shown on every floor. Al
 rebuilds the runtime spatial index, so opening the `B` panel immediately shows the restored markup. Old Z-network
 saves without this sidecar remain loadable.
 
-The Export button still writes a standalone backup beneath server user data at `/ZoneExports/<fileName>.yml`. It does
+Saving with `znetwork-save` or using Export also applies the validated saved zones to the running world without a
+restart. The normal prototype reload refreshes the zone index and tracked locations and schedules derived navigation
+graph updates. Mapper drafts and undo/redo history remain available; further edits stay in the draft until the next
+save or export.
+
+The Export button writes a standalone backup beneath server user data at `/ZoneExports/<fileName>.yml`. It does
 not replace the bundled `znetwork-save` workflow.
 
 Server commands remain for ID generation, validation, inspection, activity control, and headless recovery. The old

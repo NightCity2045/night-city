@@ -184,11 +184,13 @@ public abstract partial class SharedEntityStorageSystem : EntitySystem
         if (component.Open)
         {
             verb.Text = Loc.GetString("verb-common-close");
+            verb.TextLocalizationId = "verb-common-close"; // NC
             verb.Icon = new SpriteSpecifier.Texture(new("/Textures/Interface/VerbIcons/close.svg.192dpi.png"));
         }
         else
         {
             verb.Text = Loc.GetString("verb-common-open");
+            verb.TextLocalizationId = "verb-common-open"; // NC
             verb.Icon = new SpriteSpecifier.Texture(
                 new("/Textures/Interface/VerbIcons/open.svg.192dpi.png"));
         }

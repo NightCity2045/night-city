@@ -70,6 +70,19 @@ namespace Content.Shared.Verbs
         /// </summary>
         public string Text = string.Empty;
 
+        // NC-Edit-Start
+        /// <summary>
+        /// Stable key for verbs with a parameterless localized label. Used for network identity instead of translated text.
+        /// Verbs with formatted or dynamic labels must retain their distinguishing arguments in their identity.
+        /// </summary>
+        public string? TextLocalizationId;
+
+        /// <summary>
+        /// Resolve the label in the current locale, including for verbs received from the server.
+        /// </summary>
+        public string GetText() => TextLocalizationId == null ? Text : Loc.GetString(TextLocalizationId);
+        // NC-Edit-End
+
         /// <summary>
         ///     Sprite of the icon that the user sees on the verb button.
         /// </summary>
@@ -186,11 +199,17 @@ namespace Content.Shared.Verbs
             }
             // NC-Edit-End
 
-            // Then try use alphabetical verb text.
-            if (Text != otherVerb.Text)
+            // NC-Edit-Start
+            // Localized labels can differ between client and server. Match stable keys before comparing legacy text.
+            if (TextLocalizationId != otherVerb.TextLocalizationId)
+                return string.Compare(TextLocalizationId, otherVerb.TextLocalizationId, StringComparison.Ordinal);
+
+            // Then try use alphabetical verb text for verbs without a localization key.
+            if (TextLocalizationId == null && Text != otherVerb.Text)
             {
                 return string.Compare(Text, otherVerb.Text, StringComparison.CurrentCulture);
             }
+            // NC-Edit-End
 
             if (IconEntity != otherVerb.IconEntity)
             {

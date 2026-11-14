@@ -73,9 +73,9 @@ public abstract partial class NCSharedZLevelsSystem
         entity.Comp.CachedTile = tile;
 
         // NC-Edit-Start: stairs are discrete map transitions and never participate in simulated Z-height.
-        if (TryGetStairTransition(entity, out var levelOffset))
+        if (TryGetStairTransition(entity, out var levelOffset, out var atExit))
         {
-            if (!entity.Comp.StairTransitionLocked)
+            if (atExit && !entity.Comp.StairTransitionLocked)
             {
                 entity.Comp.StairTransitionLocked = true;
                 if (TryMove(entity, levelOffset))
@@ -99,9 +99,10 @@ public abstract partial class NCSharedZLevelsSystem
     }
 
     // NC-Edit-Start: resolve and execute the simple tile-based staircase transition.
-    private bool TryGetStairTransition(EntityUid target, out int levelOffset)
+    private bool TryGetStairTransition(EntityUid target, out int levelOffset, out bool atExit)
     {
         levelOffset = 0;
+        atExit = false;
 
         var xform = Transform(target);
         if (xform.MapUid is not { } mapUid)
@@ -119,7 +120,17 @@ public abstract partial class NCSharedZLevelsSystem
                 continue;
 
             levelOffset = stair.LevelOffset;
-            return levelOffset != 0;
+            if (levelOffset == 0)
+                return false;
+
+            // Ascending follows the stair facing; descending exits at the opposite end.
+            // Keep detecting the whole stair tile so the return lock cannot clear
+            // while walking along paired stairs.
+            var stairDirection = _transform.GetWorldRotation(uid.Value).ToWorldVec();
+            var relativePosition = worldPos - _transform.GetWorldPosition(uid.Value);
+            var progress = Vector2.Dot(relativePosition, stairDirection) * Math.Sign(levelOffset) / grid.TileSize;
+            atExit = progress >= 0.4f;
+            return true;
         }
 
         return false;
