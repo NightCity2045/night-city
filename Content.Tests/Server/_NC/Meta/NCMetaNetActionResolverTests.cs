@@ -3,6 +3,7 @@ using Content.Server._NC.Meta.Network;
 using Content.Shared._NC.Meta.Network;
 using NUnit.Framework;
 
+#pragma warning disable RA0039 // Unit tests build data objects directly, without loading a server.
 namespace Content.Tests.Server._NC.Meta;
 
 [TestFixture]

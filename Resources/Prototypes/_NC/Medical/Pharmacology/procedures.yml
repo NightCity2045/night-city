@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncBiotechProcedure
+  id: NCBiotechPurify
+  name: nc-biotech-procedure-purify
+  gripDemand: 0.2
+  visionDemand: 0.3
+  steadinessDemand: 0.4
+  attentionDemand: 0.4
+
+- type: ncBiotechProcedure
+  id: NCBiotechExtract
+  name: nc-biotech-procedure-extract
+  gripDemand: 0.3
+  visionDemand: 0.3
+  steadinessDemand: 0.3
+  attentionDemand: 0.3
+
+- type: ncBiotechProcedure
+  id: NCBiotechIsolate
+  name: nc-biotech-procedure-isolate
+  gripDemand: 0.2
+  visionDemand: 0.4
+  steadinessDemand: 0.5
+  attentionDemand: 0.6
+
+- type: ncBiotechProcedure
+  id: NCBiotechSterilize
+  name: nc-biotech-procedure-sterilize
+  gripDemand: 0.2
+  visionDemand: 0.2
+  steadinessDemand: 0.2
+  attentionDemand: 0.5
+
+- type: ncBiotechProcedure
+  id: NCBiotechFormulate
+  name: nc-biotech-procedure-formulate
+  gripDemand: 0.3
+  visionDemand: 0.3
+  steadinessDemand: 0.4
+  attentionDemand: 0.4
+
+- type: ncBiotechProcedure
+  id: NCBiotechFill
+  name: nc-biotech-procedure-fill
+  gripDemand: 0.5
+  visionDemand: 0.4
+  steadinessDemand: 0.4
+  attentionDemand: 0.2
+
+- type: ncBiotechProcedure
+  id: NCBiotechAdminister
+  name: nc-biotech-procedure-administer
+  gripDemand: 0.5
+  visionDemand: 0.4
+  steadinessDemand: 0.6
+  attentionDemand: 0.3
+
+- type: ncBiotechProcedure
+  id: NCBiotechQc
+  name: nc-biotech-procedure-qc
+  gripDemand: 0.3
+  visionDemand: 0.5
+  steadinessDemand: 0.4
+  attentionDemand: 0.5
+
+- type: ncBiotechProcedure
+  id: NCBiotechSample
+  name: nc-biotech-procedure-sample
+  gripDemand: 0.5
+  visionDemand: 0.4
+  steadinessDemand: 0.6
+  attentionDemand: 0.3

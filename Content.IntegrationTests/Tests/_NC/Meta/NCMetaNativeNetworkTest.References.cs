@@ -6,6 +6,8 @@ using Content.Meta.Runtime;
 using Content.Shared._NC.Meta.Network;
 using Robust.Shared.GameObjects;
 
+#nullable enable annotations
+
 namespace Content.IntegrationTests.Tests._NC.Meta;
 
 public sealed partial class NCMetaNativeNetworkTest

@@ -20,6 +20,8 @@ using Content.Shared._NC.Meta.Authority;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Serialization.Manager;
 
+#nullable enable annotations
+
 namespace Content.IntegrationTests.Tests._NC.Meta;
 
 public sealed partial class NCMetaSoftwareCopyTest

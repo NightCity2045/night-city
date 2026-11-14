@@ -25,8 +25,20 @@ public sealed partial class NCPharmacologyComponent : Component
     [DataField]
     public float OverdoseBurden;
 
+    /// <summary>Tolerance, dependence and craving towards compounds that habituate. Persistent physiology.</summary>
+    [DataField]
+    public Dictionary<ProtoId<NCDrugProfilePrototype>, NCDrugDependenceState> Dependence = new();
+
     [DataField]
     public TimeSpan LastEvaluation;
+
+    /// <summary>How many separate infections this body has had. Each one may be caused by a different strain.</summary>
+    [DataField]
+    public int StrainEpisode;
+
+    /// <summary>Bacterial strain of the current infection, derived from the character and the episode.</summary>
+    [ViewVariables]
+    public ProtoId<Lab.NCPathogenStrainPrototype>? Strain;
 
     [ViewVariables]
     public NCPharmacologyModifiers CachedModifiers = NCPharmacologyModifiers.Neutral;
@@ -55,4 +67,11 @@ public sealed partial class NCActiveDrugExposure
 
     [DataField]
     public TimeSpan LastAdministration;
+
+    /// <summary>
+    /// Multiplier on how fast the body clears this compound. Below one when the doses carried a metabolic
+    /// blocker; blended by concentration when doses with different blockers overlap.
+    /// </summary>
+    [DataField]
+    public float ClearanceFactor = 1f;
 }

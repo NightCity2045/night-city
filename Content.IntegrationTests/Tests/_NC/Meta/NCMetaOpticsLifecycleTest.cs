@@ -46,7 +46,7 @@ public sealed class NCMetaOpticsLifecycleTest : GameTest
         var detachedOptics = SSpawn("NCMetaCyberOptics");
         Assert.That(_cyberware.TryCaptureOrganState(detachedOptics, out var opticsState), Is.True);
         Assert.That(_cyberware.ValidatePersistentState(opticsState, installedModule: false), Is.True);
-        var profile = SProtoMan.Index<NCCyberwarePrototype>("NCCyberopticsMk1");
+        var profile = SProtoMan.Index(new Robust.Shared.Prototypes.ProtoId<NCCyberwarePrototype>("NCCyberopticsMk1"));
         var eyes = snapshot.Organs["Eyes"];
         eyes.EntityPrototype = "NCMetaCyberOptics";
         eyes.CyberwareIdentity = "NCMetaCyberOptics";

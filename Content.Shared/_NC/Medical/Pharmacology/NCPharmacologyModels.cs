@@ -25,6 +25,9 @@ public enum NCDrugCategory : byte
     CyberwareService,
     NeuralRestorative,
     NeuralStabilizer,
+    Withdrawal,
+    Recreational,
+    Toxicant,
 }
 
 /// <summary>

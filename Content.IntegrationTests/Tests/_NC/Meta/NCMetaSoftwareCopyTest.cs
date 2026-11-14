@@ -31,6 +31,8 @@ using Content.Shared._NC.Persistence.Time;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 
+#nullable enable annotations
+
 namespace Content.IntegrationTests.Tests._NC.Meta;
 
 [TestFixture]

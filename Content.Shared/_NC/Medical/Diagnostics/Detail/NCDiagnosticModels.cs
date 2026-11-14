@@ -134,6 +134,9 @@ public enum NCDiagnosticWarning : byte
     DrugOverdose,
     Sepsis,
     TransplantRejection,
+    DrugInteractionCaution,
+    DrugInteractionDangerous,
+    DrugInteractionUnknown,
 }
 
 /// <summary>
@@ -239,7 +242,9 @@ public readonly record struct NCMedicalDrugSummary(
     NCDrugCategory Category,
     NCDiagnosticNumericRange ConcentrationMilliunits,
     bool Therapeutic,
-    bool Toxic);
+    bool Toxic,
+    bool Unidentified = false,
+    string? RuntimeName = null);
 
 [Serializable, NetSerializable]
 public readonly record struct NCMedicalSurgerySummary(

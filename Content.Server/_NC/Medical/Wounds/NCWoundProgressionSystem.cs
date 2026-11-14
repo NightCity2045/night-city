@@ -169,6 +169,7 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
             changed = true;
         }
 
+        var infectedBefore = container.Wounds.Values.Any(candidate => candidate.Infection > 0.001f); // NC
         foreach (var wound in container.Wounds.Values)
         {
             if (!_prototypes.TryIndex(wound.Prototype, out NCWoundPrototype? woundPrototype) ||
@@ -213,6 +214,10 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
                     outcome.Resolved));
             }
         }
+
+        // NC: a new infection after a clean period is a new episode, possibly of another strain.
+        if (!infectedBefore && container.Wounds.Values.Any(candidate => candidate.Infection > 0.001f))
+            RaiseLocalEvent(body, new Content.Shared._NC.Medical.Pharmacology.NCInfectionEpisodeStartedEvent());
 
         if (seconds > 0f)
         {
@@ -342,7 +347,9 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
             record.AppliedFlags &= ~NCWoundTreatmentFlags.Bandaged;
             wound.TreatmentFlags &= ~NCWoundTreatmentFlags.Bandaged;
             wound.Contamination = Math.Clamp(
-                wound.Contamination + profile.SaturatedBandageContamination,
+                wound.Contamination + (record.SaturationContamination >= 0f
+                    ? record.SaturationContamination
+                    : profile.SaturatedBandageContamination),
                 0f,
                 1f);
             if (wound.ClosureState == NCWoundClosureState.Open &&
@@ -470,6 +477,20 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
         if (wound.Stage == NCWoundStage.Fresh && wound.Age >= progression.FreshToOpenDelay)
         {
             wound.Stage = NCWoundStage.Open;
+            changed = true;
+        }
+
+        // NC: a local effect fades on its own clock.
+        if (wound.LocalRemaining > TimeSpan.Zero)
+        {
+            wound.LocalRemaining -= TimeSpan.FromSeconds(seconds);
+            if (wound.LocalRemaining <= TimeSpan.Zero)
+            {
+                wound.LocalRemaining = TimeSpan.Zero;
+                wound.LocalAnalgesia = 0f;
+                wound.LocalHemostasis = 0f;
+            }
+
             changed = true;
         }
 
@@ -632,8 +653,10 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
                 1f - wound.HealingProgress * progression.HealingBleedReductionFraction,
                 0f,
                 1f);
-            var externalRate = wound.InitialExternalBleedRate * bleedMultiplier;
-            var internalRate = wound.InitialInternalBleedRate * bleedMultiplier;
+            // NC: a locally applied dose slows the bleeding of this wound and numbs it, for a while.
+            var localBleed = 1f - Math.Clamp(wound.LocalHemostasis, 0f, 0.9f);
+            var externalRate = wound.InitialExternalBleedRate * bleedMultiplier * localBleed;
+            var internalRate = wound.InitialInternalBleedRate * bleedMultiplier * localBleed;
             sourceChanged |= MathF.Abs(wound.ExternalBleedRate - externalRate) > FloatTolerance ||
                              MathF.Abs(wound.InternalBleedRate - internalRate) > FloatTolerance;
             wound.ExternalBleedRate = externalRate;
@@ -641,7 +664,8 @@ public sealed partial class NCWoundProgressionSystem : EntitySystem
             wound.Pain = MathF.Max(
                 0f,
                 wound.InitialPain *
-                (1f - wound.HealingProgress * progression.HealingPainReductionFraction));
+                (1f - wound.HealingProgress * progression.HealingPainReductionFraction) *
+                (1f - Math.Clamp(wound.LocalAnalgesia, 0f, 1f))); // NC
 
             if (wound.HealingProgress > wound.PeakHealingProgress)
             {

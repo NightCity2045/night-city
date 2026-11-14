@@ -28,6 +28,10 @@ public sealed partial class NCPharmacologyProfilePrototype : IPrototype
     [DataField(required: true)]
     public TimeSpan ActiveUpdateInterval { get; private set; }
 
+    /// <summary>Cadence while only tolerance, dependence or craving remain, which change slowly.</summary>
+    [DataField]
+    public TimeSpan DependenceUpdateInterval { get; private set; } = TimeSpan.FromSeconds(30);
+
     [DataField(required: true)]
     public float MaximumOverdoseBurden { get; private set; }
 
@@ -198,4 +202,26 @@ public sealed partial class NCDrugProfilePrototype : IPrototype
 
     [DataField]
     public Dictionary<ProtoId<NCDrugProfilePrototype>, NCDrugInteractionRule> Interactions { get; private set; } = new();
+
+    /// <summary>
+    /// False for compounds whose interactions have not been studied. A pair that involves one and declares no
+    /// rule is reported to clinicians as unknown instead of compatible.
+    /// </summary>
+    [DataField]
+    public bool InteractionsCharted { get; private set; } = true;
+
+    /// <summary>
+    /// Working name of a compound nobody has identified yet. A compound that has one stays unidentified, and its
+    /// formulas cannot be developed, until chemical analysis has been done on it.
+    /// </summary>
+    [DataField]
+    public LocId? Codename { get; private set; }
+
+    /// <summary>Fills the <c>code</c> variable of the codename message. Empty for authored compounds.</summary>
+    [DataField]
+    public string CodenameCode { get; private set; } = string.Empty;
+
+    /// <summary>Tolerance and dependence rules of this compound. Absent for compounds that do not habituate.</summary>
+    [DataField]
+    public ProtoId<NCDependenceProfilePrototype>? Dependence { get; private set; }
 }

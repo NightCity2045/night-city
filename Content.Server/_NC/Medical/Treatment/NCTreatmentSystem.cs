@@ -637,8 +637,13 @@ public sealed partial class NCTreatmentSystem : EntitySystem
                 break;
             case NCTreatmentKind.Bandage:
                 treatment.BandagedAt = now;
-                treatment.BandageAbsorptionRemaining = profile.BandageAbsorptionCapacity;
-                treatment.BandageSterility = profile.BandageSterility;
+                // NC: a special dressing (grown synthetic skin) carries its own sterility and capacity.
+                var dressing = context.Capability is { } dressingId && _prototypes.TryIndex(dressingId, out var dressingCapability)
+                    ? dressingCapability
+                    : null;
+                treatment.BandageAbsorptionRemaining = dressing?.BandageAbsorptionCapacity ?? profile.BandageAbsorptionCapacity;
+                treatment.BandageSterility = dressing?.BandageSterility ?? profile.BandageSterility;
+                treatment.SaturationContamination = dressing?.SaturatedContamination ?? -1f;
                 break;
             case NCTreatmentKind.Hemostatic:
                 treatment.HemostaticAppliedAt = now;

@@ -12,6 +12,7 @@ using Content.Shared._NC.Combat.Damage;
 using Content.Shared._NC.Combat.Targeting;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Emergency;
+using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Wounds;
 using Content.Shared.Body;
@@ -35,6 +36,7 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
     [Dependency] private NCMedicalBodySystem _medicalBodies = default!;
     [Dependency] private NCCirculationBloodSystem _blood = default!;
     [Dependency] private NCSystemicSystem _systemic = default!;
+    [Dependency] private Content.Server._NC.Medical.Pharmacology.NCPharmacologySystem _pharmacology = default!;
     [Dependency] private SharedStackSystem _stacks = default!;
     [Dependency] private StandingStateSystem _standing = default!;
 
@@ -232,10 +234,35 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
                 NewResult(enriched, NCEmergencyCareOutcome.DeviceDepleted));
         }
 
+        // NC: a donated bag carries the donor's real group and volume instead of the capability's fixed ones.
+        var donorGroup = capability.DonorCompatibility;
+        var infusionVolume = capability.InfusionVolume;
+        TryComp<NCBloodBagComponent>(item, out var donationBag);
+        if (donationBag != null)
+        {
+            if (!donationBag.Filled || donationBag.Spoiled)
+            {
+                return CompleteAction(patient, state, profile, enriched, NCEmergencyCareKind.BloodTransfusion,
+                    NewResult(enriched, NCEmergencyCareOutcome.UnsupportedItem));
+            }
+
+            donorGroup = donationBag.Group;
+            infusionVolume = donationBag.Volume;
+            if (donationBag.Component == NCBloodComponent.Plasma)
+            {
+                // Plasma is matched the other way round: the donor's plasma must suit the recipient's cells.
+                var recipient = circulation.TransfusionCompatibility;
+                donorGroup = profile.TransfusionCompatibility.TryGetValue(recipient, out var suitable) &&
+                             suitable.Contains(donationBag.Group, StringComparer.Ordinal)
+                    ? recipient
+                    : string.Empty;
+            }
+        }
+
         var transfusion = _blood.TryTransfuse(
             patient,
-            capability.DonorCompatibility,
-            capability.InfusionVolume,
+            donorGroup,
+            infusionVolume,
             profile.MaximumBloodVolumeMultiplier,
             profile.TransfusionCompatibility,
             markDirty: false);
@@ -259,6 +286,20 @@ public sealed partial class NCEmergencyCareSystem : EntitySystem
         }
 
         var consumed = ConsumeResource(item, itemState, capability);
+        if (donationBag != null)
+        {
+            // NC: what the component adds besides volume, then a donated bag is single-use.
+            var addition = donationBag.Component switch
+            {
+                NCBloodComponent.Plasma => "NCDrugPlasmaFactors",
+                NCBloodComponent.RedCells => "NCDrugRedCells",
+                _ => null,
+            };
+            if (addition != null)
+                _pharmacology.ApplyDose(patient, addition, 4f);
+            QueueDel(item);
+        }
+
         var result = new NCEmergencyCareResult(
             enriched.ResolutionId,
             NCEmergencyCareOutcome.Applied,

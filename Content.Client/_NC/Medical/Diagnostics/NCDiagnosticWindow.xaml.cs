@@ -588,7 +588,7 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
                     : Loc.GetString("nc-medical-diagnostics-drug-subtherapeutic");
             AddCard(
                 DrugsContainer,
-                DrugName(drug.Profile),
+                drug.Unidentified ? Loc.GetString("nc-medical-diagnostics-drug-unidentified") : drug.RuntimeName ?? DrugName(drug.Profile), // NC
                 Loc.GetString(
                     "nc-medical-diagnostics-drug-details",
                     ("category", Value(drug.Category)),
@@ -997,6 +997,9 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
         NCDiagnosticWarning.Infection or
         NCDiagnosticWarning.Sepsis => "nc-medical-diagnostics-action-infection",
         NCDiagnosticWarning.DrugOverdose => "nc-medical-diagnostics-action-overdose",
+        NCDiagnosticWarning.DrugInteractionCaution or
+        NCDiagnosticWarning.DrugInteractionDangerous or
+        NCDiagnosticWarning.DrugInteractionUnknown => "nc-medical-diagnostics-action-drug-interaction",
         NCDiagnosticWarning.CyberwareOffline or
         NCDiagnosticWarning.CyberwareOverheated or
         NCDiagnosticWarning.CyberwareEmpDisabled or
@@ -1048,7 +1051,9 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
             : PrototypeName(id.Id);
 
     private static string DrugName(ProtoId<NCDrugProfilePrototype> id) =>
-        Loc.GetString($"nc-medical-diagnostics-drug-{ToKebabCase(StripPrefix(id.Id))}");
+        Loc.TryGetString($"nc-medical-diagnostics-drug-{ToKebabCase(StripPrefix(id.Id))}", out var name)
+            ? name
+            : PrototypeName(id.Id); // NC: generated compounds have no table entry
 
     private static string PrototypeName(string id) => SplitIdentifier(StripPrefix(id));
 
@@ -1174,6 +1179,8 @@ public sealed partial class NCDiagnosticWindow : FancyWindow
         NCDiagnosticWarning.OrganFailure => 760,
         NCDiagnosticWarning.Sepsis => 740,
         NCDiagnosticWarning.DrugOverdose => 720,
+        NCDiagnosticWarning.DrugInteractionDangerous => 710,
+        NCDiagnosticWarning.DrugInteractionCaution => 450,
         NCDiagnosticWarning.SuspectedInternalBleeding => 680,
         NCDiagnosticWarning.FractureConfirmed => 600,
         NCDiagnosticWarning.ForeignBody => 540,

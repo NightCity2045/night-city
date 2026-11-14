@@ -16,6 +16,8 @@ using Robust.Client.UserInterface;
 using Robust.Shared.Maths;
 using Robust.Shared.Prototypes;
 
+#nullable enable annotations
+
 namespace Content.IntegrationTests.Tests._NC.Medical;
 
 [TestFixture]

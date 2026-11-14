@@ -133,6 +133,11 @@ public sealed partial class NCMedicalPersistenceSystem
             snapshot.Pharmacology?.ActiveDrugs.Any(exposure => exposure == null) == true)
             return false;
 
+        // NC: dependence records are optional, but a present list must be well formed.
+        if (snapshot.Pharmacology is { Dependence: null } ||
+            snapshot.Pharmacology?.Dependence.Any(record => record == null) == true)
+            return false;
+
         if (snapshot.Humanity is { } humanity && !Content.Shared._NC.Medical.Humanity.NCHumanityMath.Validate(humanity))
             return false;
 
@@ -445,6 +450,9 @@ public sealed partial class NCMedicalPersistenceSystem
                 !Finite(wound.InitialInternalBleedRate, wound.InternalBleedRate, 1_000_000f) ||
                 !Finite(wound.Pain, 0f, 1_000_000_000f) ||
                 !Finite(wound.InitialPain, wound.Pain, 1_000_000_000f) ||
+                !Finite(wound.LocalAnalgesia, 0f, 1f) ||
+                !Finite(wound.LocalHemostasis, 0f, 1f) ||
+                wound.LocalRemaining < TimeSpan.Zero ||
                 !Finite(wound.Contamination, 0f, 1f) ||
                 !Finite(wound.Infection, 0f, 1f) ||
                 !Finite(wound.Necrosis, 0f, 1f) ||
@@ -581,7 +589,8 @@ public sealed partial class NCMedicalPersistenceSystem
                 !ValidOptionalAbsoluteTime(record.HemostaticAppliedAt) ||
                 !ValidAbsoluteTime(record.ModifiedAt) ||
                 !Finite(record.BandageAbsorptionRemaining, 0f, 1_000_000f) ||
-                !Finite(record.BandageSterility, 0f, 1f))
+                !Finite(record.BandageSterility, 0f, 1f) ||
+                !Finite(record.SaturationContamination, -1f, 1f))
             {
                 return false;
             }
@@ -802,6 +811,26 @@ public sealed partial class NCMedicalPersistenceSystem
                 Concentration = exposure.Concentration,
                 CumulativeDose = exposure.CumulativeDose,
                 TimeSinceAdministration = exposure.TimeSinceAdministration,
+                ClearanceFactor = exposure.ClearanceFactor,
+            }).ToList(),
+            // NC: dependence persists with the character.
+            Dependence = source.Dependence.Select(record => new NCDrugDependenceSnapshot
+            {
+                Profile = record.Profile,
+                Tolerance = record.Tolerance,
+                Dependence = record.Dependence,
+                Craving = record.Craving,
+                TimeSinceLastDose = record.TimeSinceLastDose,
+                Stage = record.Stage,
+                Comedown = record.Comedown,
+            }).ToList(),
+            StrainEpisode = source.StrainEpisode,
+            PendingDoses = source.PendingDoses.Select(dose => new NCPendingDoseSnapshot
+            {
+                Drug = dose.Drug,
+                Remaining = dose.Remaining,
+                RatePerSecond = dose.RatePerSecond,
+                ClearanceFactor = dose.ClearanceFactor,
             }).ToList(),
         };
     }
@@ -1062,6 +1091,9 @@ public sealed partial class NCMedicalPersistenceSystem
                 InitialExternalBleedRate = wound.InitialExternalBleedRate,
                 InitialInternalBleedRate = wound.InitialInternalBleedRate,
                 PrimaryBleedKind = wound.PrimaryBleedKind,
+                LocalAnalgesia = wound.LocalAnalgesia,
+                LocalHemostasis = wound.LocalHemostasis,
+                LocalRemaining = wound.LocalRemaining,
                 Pain = wound.Pain,
                 InitialPain = wound.InitialPain,
                 Contamination = wound.Contamination,
@@ -1136,6 +1168,7 @@ public sealed partial class NCMedicalPersistenceSystem
                 HemostaticAppliedAt = treatment.HemostaticAppliedAt,
                 BandageAbsorptionRemaining = treatment.BandageAbsorptionRemaining,
                 BandageSterility = treatment.BandageSterility,
+                SaturationContamination = treatment.SaturationContamination,
                 ModifiedAt = treatment.ModifiedAt,
             });
         }

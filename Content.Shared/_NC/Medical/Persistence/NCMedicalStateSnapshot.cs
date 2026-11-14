@@ -359,6 +359,9 @@ public sealed partial class NCWoundRecordSnapshot
     [DataField] public float InitialExternalBleedRate;
     [DataField] public float InitialInternalBleedRate;
     [DataField] public NCBleedKind PrimaryBleedKind;
+    [DataField] public float LocalAnalgesia;
+    [DataField] public float LocalHemostasis;
+    [DataField] public TimeSpan LocalRemaining;
     [DataField] public float Pain;
     [DataField] public float InitialPain;
     [DataField] public float Contamination;
@@ -452,6 +455,7 @@ public sealed partial class NCWoundTreatmentStateSnapshot
     [DataField] public TimeSpan HemostaticAppliedAt;
     [DataField] public float BandageAbsorptionRemaining;
     [DataField] public float BandageSterility;
+    [DataField] public float SaturationContamination = -1f;
     [DataField] public TimeSpan ModifiedAt;
 }
 

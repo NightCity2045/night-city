@@ -37,6 +37,8 @@ using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
 
+#nullable enable annotations
+
 namespace Content.IntegrationTests.Tests._NC.Medical;
 
 /// <summary>Gate 4 T30–T35/T42 contracts. Prepared and compiled; execution requires the owner's opt-in.</summary>

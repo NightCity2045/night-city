@@ -1,0 +1,246 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: ncDependenceProfile
+  id: NCDependenceStimulant
+  toleranceGainPerConcentration: 0.012
+  maximumTolerance: 0.55
+  toleranceDecayPerSecond: 0.0004
+  dependenceGainPerConcentration: 0.004
+  dependenceDecayPerSecond: 0.0001
+  withdrawalThreshold: 0.25
+  withdrawalOnset: 2m
+  withdrawalRamp: 6m
+  withdrawalCompound: NCDrugWithdrawalFatigue
+  withdrawalConcentrationAtFull: 4
+  psychoactive: true
+  effects:
+  - Stimulation
+  comedownCompound: NCDrugComedownFatigue
+  comedownPerConcentration: 0.6
+  maximumComedown: 5
+
+- type: ncDependenceProfile
+  id: NCDependenceAnalgesic
+  toleranceGainPerConcentration: 0.01
+  maximumTolerance: 0.6
+  dependenceGainPerConcentration: 0.005
+  withdrawalCompound: NCDrugWithdrawalTremor
+  withdrawalConcentrationAtFull: 4
+  replacementDrugs:
+  - NCDrugMaintenanceAnalgesic
+  replacementDecayMultiplier: 4
+  psychoactive: true
+  effects:
+  - Euphoria
+  comedownCompound: NCDrugComedownFatigue
+  comedownPerConcentration: 0.3
+
+- type: ncDependenceProfile
+  id: NCDependenceSedative
+  toleranceGainPerConcentration: 0.008
+  maximumTolerance: 0.5
+  dependenceGainPerConcentration: 0.004
+  withdrawalCompound: NCDrugWithdrawalTremor
+  withdrawalConcentrationAtFull: 4
+  psychoactive: true
+  effects:
+  - Sedation
+
+# Symptom compounds. Withdrawal is carried by ordinary drug physiology, so nothing else has to know about it.
+- type: ncDrugProfile
+  id: NCDrugWithdrawalFatigue
+  category: Withdrawal
+  maximumConcentration: 50
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 0.3
+  therapeuticConcentration: 4
+  toxicConcentration: 40
+  clearancePerSecond: 0.01
+  baselineClearanceFraction: 0.5
+  liverClearanceFraction: 0.3
+  kidneyClearanceFraction: 0.2
+  sedationAtTherapeutic: 0.25
+  motorControlMultiplierAtTherapeutic: 0.85
+  cardiacOutputMultiplierAtTherapeutic: 0.95
+
+- type: ncDrugProfile
+  id: NCDrugWithdrawalTremor
+  category: Withdrawal
+  maximumConcentration: 50
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 0.3
+  therapeuticConcentration: 4
+  toxicConcentration: 40
+  clearancePerSecond: 0.01
+  baselineClearanceFraction: 0.5
+  liverClearanceFraction: 0.3
+  kidneyClearanceFraction: 0.2
+  motorControlMultiplierAtTherapeutic: 0.8
+  rhythmInstabilityAtTherapeutic: 0.15
+
+# Long-acting, low-potency stand-in for the trauma analgesic. It has no dependence of its own and, while it is
+# active, suppresses withdrawal and speeds the fade of dependence: a controlled taper.
+- type: ncDrugProfile
+  id: NCDrugMaintenanceAnalgesic
+  category: Analgesic
+  maximumConcentration: 30
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 6
+  toxicConcentration: 14
+  clearancePerSecond: 0.02
+  baselineClearanceFraction: 0.1
+  liverClearanceFraction: 0.6
+  kidneyClearanceFraction: 0.3
+  analgesiaAtTherapeutic: 0.4
+  overdoseBurdenPerSecondAtMaximum: 0.8
+  interactions:
+    NCDrugSedationReversal:
+      therapeuticMultiplier: 0.45
+      toxicityMultiplier: 0.7
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaMaintenanceAnalgesic
+  name: nc-pharma-formula-maintenance-analgesic
+  version: 1
+  compound: NCDrugMaintenanceAnalgesic
+  deliveryForm: NCPharmaDeliveryOral
+  targetConcentration: 8
+  modifiers:
+  - NCPharmaModifierExtendedRelease
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.9
+  reaction: NCPharmaReactionStable
+  regulatoryStatus: Prescription
+
+- type: ncDependenceProfile
+  id: NCDependenceEuphoric
+  toleranceGainPerConcentration: 0.014
+  maximumTolerance: 0.6
+  dependenceGainPerConcentration: 0.008
+  dependenceDecayPerSecond: 0.00008
+  withdrawalCompound: NCDrugWithdrawalTremor
+  withdrawalConcentrationAtFull: 4
+  psychoactive: true
+  effects:
+  - Euphoria
+  - Dissociation
+  comedownCompound: NCDrugComedownFatigue
+  comedownPerConcentration: 0.5
+  maximumComedown: 6
+  replacementDrugs:
+  - NCDrugMaintenanceAnalgesic
+
+- type: ncDependenceProfile
+  id: NCDependenceSocial
+  toleranceGainPerConcentration: 0.01
+  maximumTolerance: 0.45
+  dependenceGainPerConcentration: 0.003
+  withdrawalCompound: NCDrugWithdrawalFatigue
+  withdrawalConcentrationAtFull: 3
+  psychoactive: true
+  effects:
+  - Sociability
+  - Stimulation
+  comedownCompound: NCDrugComedownFatigue
+  comedownPerConcentration: 0.4
+  maximumComedown: 4
+
+# The aftereffect that follows the active phase: tiredness and weaker concentration, never a lost character.
+- type: ncDrugProfile
+  id: NCDrugComedownFatigue
+  category: Withdrawal
+  maximumConcentration: 50
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 0.3
+  therapeuticConcentration: 4
+  toxicConcentration: 40
+  clearancePerSecond: 0.012
+  baselineClearanceFraction: 0.5
+  liverClearanceFraction: 0.3
+  kidneyClearanceFraction: 0.2
+  sedationAtTherapeutic: 0.15
+  motorControlMultiplierAtTherapeutic: 0.92
+
+# Recreational compounds use the same physiology, manufacturing and QC as medicine: only the profile differs.
+- type: ncDrugProfile
+  id: NCDrugEuphoric
+  category: Recreational
+  dependence: NCDependenceEuphoric
+  interactionsCharted: false
+  maximumConcentration: 25
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 5
+  toxicConcentration: 9
+  clearancePerSecond: 0.045
+  baselineClearanceFraction: 0.1
+  liverClearanceFraction: 0.6
+  kidneyClearanceFraction: 0.3
+  analgesiaAtTherapeutic: 0.5
+  sedationAtTherapeutic: 0.25
+  motorControlMultiplierAtTherapeutic: 0.9
+  respiratoryTransferMultiplierAtTherapeutic: 0.92
+  overdoseBurdenPerSecondAtMaximum: 1.4
+  interactions:
+    NCDrugSedationReversal:
+      therapeuticMultiplier: 0.45
+      toxicityMultiplier: 0.7
+    NCDrugSedative:
+      therapeuticMultiplier: 1.1
+      toxicityMultiplier: 1.5
+    NCDrugTraumaAnalgesic:
+      therapeuticMultiplier: 1
+      toxicityMultiplier: 1.4
+
+- type: ncDrugProfile
+  id: NCDrugSocial
+  category: Recreational
+  dependence: NCDependenceSocial
+  interactionsCharted: false
+  maximumConcentration: 25
+  removalConcentration: 0.05
+  minimumEffectiveConcentration: 1
+  therapeuticConcentration: 4
+  toxicConcentration: 8
+  clearancePerSecond: 0.05
+  baselineClearanceFraction: 0.1
+  liverClearanceFraction: 0.6
+  kidneyClearanceFraction: 0.3
+  arousalAtTherapeutic: 0.35
+  cardiacOutputMultiplierAtTherapeutic: 1.05
+  rhythmInstabilityAtTherapeutic: 0.05
+  overdoseBurdenPerSecondAtMaximum: 1
+  interactions:
+    NCDrugStimulantReversal:
+      therapeuticMultiplier: 0.45
+      toxicityMultiplier: 0.7
+    NCDrugStimulant:
+      therapeuticMultiplier: 1
+      toxicityMultiplier: 1.4
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaEuphoric
+  name: nc-pharma-formula-euphoric
+  version: 1
+  compound: NCDrugEuphoric
+  deliveryForm: NCPharmaDeliveryAutoinjector
+  targetConcentration: 5
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.8
+  reaction: NCPharmaReactionVolatile
+  regulatoryStatus: Controlled
+
+- type: ncPharmaFormula
+  id: NCPharmaFormulaSocial
+  name: nc-pharma-formula-social
+  version: 1
+  compound: NCDrugSocial
+  deliveryForm: NCPharmaDeliveryOral
+  targetConcentration: 6
+  defaultProductionProfile: NCPharmaProductionStandard
+  baseStability: 0.85
+  reaction: NCPharmaReactionExothermic
+  regulatoryStatus: Controlled

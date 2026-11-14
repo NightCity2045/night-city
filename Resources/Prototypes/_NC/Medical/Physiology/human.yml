@@ -7,6 +7,11 @@
   defaultForHumans: true
   nominalBloodVolume: 5000
   defaultTransfusionCompatibility: NC-A-Positive
+  transfusionGroupWeights:
+    NC-O-Negative: 15
+    NC-A-Positive: 40
+    NC-B-Positive: 30
+    NC-AB-Positive: 15
   criticalPerfusionThreshold: 0.5
   arrestPerfusionThreshold: 0.2
   brainInjuryPerfusionThreshold: 0.3

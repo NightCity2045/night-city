@@ -7,6 +7,7 @@ using Content.Server._NC.Medical.Systemic;
 using Content.Shared._NC.Medical.Anatomy;
 using Content.Shared._NC.Medical.Cyberware.Borg;
 using Content.Shared._NC.Medical.Pharmacology;
+using Content.Shared._NC.Medical.Pharmacology.Lab;
 using Content.Shared._NC.Medical.Physiology;
 using Content.Shared._NC.Medical.Humanity;
 using Content.Shared._NC.Medical.Systemic;
@@ -36,12 +37,23 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
 
         SubscribeLocalEvent<NCPharmacologyComponent, NCMedicalScheduledUpdateEvent>(OnScheduledUpdate);
         SubscribeLocalEvent<NCPharmacologyComponent, NCMedicalNextUpdateEvent>(OnNextUpdateRequested);
+        SubscribeLocalEvent<NCMedicalBodyComponent, NCInfectionEpisodeStartedEvent>(OnInfectionStarted); // NC
     }
 
     protected override void Effect(Entity<NCMedicalBodyComponent> entity, ref EntityEffectEvent<NCApplyMedicalDrug> args)
     {
         var amount = args.Scale * args.Effect.ConcentrationPerUnit;
         ApplyDose(entity.Owner, args.Effect.Profile, amount);
+    }
+
+    // NC: every new infection is a new episode and may be a different strain, so a culture must be repeated.
+    private void OnInfectionStarted(Entity<NCMedicalBodyComponent> body, ref NCInfectionEpisodeStartedEvent args)
+    {
+        if (!TryEnsureInitialized(body, out var state, out _))
+            return;
+
+        state.StrainEpisode++;
+        AssignStrain(body, state);
     }
 
     private void OnScheduledUpdate(
@@ -55,7 +67,8 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         Entity<NCPharmacologyComponent> entity,
         ref NCMedicalNextUpdateEvent args)
     {
-        if (entity.Comp.ActiveDrugs.Count == 0 && entity.Comp.OverdoseBurden <= 0f)
+        var hasDependence = entity.Comp.Dependence.Count > 0;
+        if (entity.Comp.ActiveDrugs.Count == 0 && entity.Comp.OverdoseBurden <= 0f && !hasDependence)
             return;
 
         if (!_prototypes.TryIndex(entity.Comp.Profile, out NCPharmacologyProfilePrototype? profile) ||
@@ -64,8 +77,12 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             return;
         }
 
-        if (args.Delay == null || profile.ActiveUpdateInterval < args.Delay)
-            args.Delay = profile.ActiveUpdateInterval;
+        // NC: a body that only carries dependence changes slowly and is checked on a longer cadence.
+        var interval = entity.Comp.ActiveDrugs.Count == 0 && entity.Comp.OverdoseBurden <= 0f
+            ? profile.DependenceUpdateInterval
+            : profile.ActiveUpdateInterval;
+        if (args.Delay == null || interval < args.Delay)
+            args.Delay = interval;
     }
 
     /// <summary>
@@ -75,7 +92,8 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
     public NCDrugDoseResult ApplyDose(
         EntityUid body,
         ProtoId<NCDrugProfilePrototype> drugId,
-        float concentration)
+        float concentration,
+        float clearanceFactor = 1f) // NC: a metabolic blocker slows the elimination of this dose
     {
         if (!float.IsFinite(concentration) || concentration <= 0f ||
             !HasComp<NCMedicalBodyComponent>(body) ||
@@ -99,12 +117,18 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         }
 
         var previous = exposure.Concentration;
+        // NC: overlapping doses blend their clearance by how much of each is present.
+        var blockedFactor = float.IsFinite(clearanceFactor) ? Math.Clamp(clearanceFactor, 0.1f, 1f) : 1f;
+        exposure.ClearanceFactor = previous + concentration > 0f
+            ? (previous * exposure.ClearanceFactor + concentration * blockedFactor) / (previous + concentration)
+            : 1f;
         exposure.Concentration = Math.Clamp(previous + concentration, 0f, drug.MaximumConcentration);
         exposure.CumulativeDose = Math.Clamp(
             exposure.CumulativeDose + concentration,
             0f,
             profile.MaximumRecordedCumulativeDose);
         exposure.LastAdministration = _timing.CurTime;
+        RegisterDependenceDose(state, drug, concentration); // NC
         RecomputeModifiers(state, profile);
         MarkChanged(body, drugId, previous, exposure.Concentration, state.OverdoseBurden);
         return new NCDrugDoseResult(true, drugId, previous, exposure.Concentration, false);
@@ -153,7 +177,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
                 1f);
             exposure.Concentration = MathF.Max(
                 0f,
-                previous - drug.ClearancePerSecond * clearanceMultiplier * seconds);
+                previous - drug.ClearancePerSecond * clearanceMultiplier * exposure.ClearanceFactor * seconds); // NC
 
             var averageConcentration = (previous + exposure.Concentration) * 0.5f;
             var overdoseFraction = ResolveOverdoseFraction(drug, averageConcentration);
@@ -178,6 +202,10 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             0f,
             profile.MaximumOverdoseBurden);
         changed |= !MathHelper.CloseTo(previousOverdose, state.OverdoseBurden);
+
+        // NC-Edit-Start: tolerance, dependence and withdrawal advance with the same scheduled interval.
+        changed |= AdvanceDependence(body, state, seconds);
+        // NC-Edit-End
 
         RecomputeModifiers(state, profile);
         if (state.CachedModifiers.ToxinRecoveryPerSecond > 0f)
@@ -257,7 +285,10 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             Profile = state.Profile,
             Initialized = state.StateInitialized,
             OverdoseBurden = state.OverdoseBurden,
+            StrainEpisode = state.StrainEpisode,
         };
+        if (!TryCaptureDependence(state, timestamp, captured))
+            return false; // NC
         foreach (var (drugId, exposure) in state.ActiveDrugs.OrderBy(
                      entry => entry.Key.Id,
                      StringComparer.Ordinal))
@@ -281,11 +312,53 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
                 TimeSinceAdministration = Min(
                     timestamp - exposure.LastAdministration,
                     profile.MaximumRecordedExposureAge),
+                ClearanceFactor = exposure.ClearanceFactor, // NC
             });
         }
 
+        var depotEvent = new NCPharmacologyDepotCaptureEvent(captured.PendingDoses); // NC
+        RaiseLocalEvent(body, ref depotEvent); // NC
+
         snapshot = captured;
         return true;
+    }
+
+    /// <summary>Share of an antibiotic's power that works on the strain this body carries.</summary>
+    private float ResolveSusceptibility(NCPharmacologyComponent state, ProtoId<NCDrugProfilePrototype> drugId)
+    {
+        return state.Strain is { } strainId &&
+               _prototypes.TryIndex(strainId, out var strain) &&
+               strain.Susceptibility.TryGetValue(drugId, out var value) &&
+               float.IsFinite(value)
+            ? Math.Clamp(value, 0f, 1f)
+            : 1f;
+    }
+
+    /// <summary>Share of an antibiotic's power that works on the strain this body carries.</summary>
+    public float GetSusceptibility(EntityUid body, ProtoId<NCDrugProfilePrototype> drugId)
+    {
+        return TryComp<NCPharmacologyComponent>(body, out var state) ? ResolveSusceptibility(state, drugId) : 1f;
+    }
+
+    /// <summary>Picks the character's strain once, by name, so it is stable across restarts without being stored.</summary>
+    private void AssignStrain(EntityUid body, NCPharmacologyComponent state)
+    {
+        var strains = _prototypes.EnumeratePrototypes<NCPathogenStrainPrototype>()
+            .OrderBy(strain => strain.ID, StringComparer.Ordinal)
+            .Select(strain => (strain.ID, strain.Weight))
+            .ToList();
+        state.Strain = strains.Count == 0
+            ? null
+            : NCLabSeed.Pick(strains, NCLabSeed.Hash(MetaData(body).EntityName + ":" + state.StrainEpisode));
+    }
+
+    /// <summary>
+    /// Makes sure the body has an initialized pharmacology state, so deferred doses have somewhere to be
+    /// persisted from before their first arrival.
+    /// </summary>
+    public bool TryEnsureState(EntityUid body)
+    {
+        return HasComp<NCMedicalBodyComponent>(body) && TryEnsureInitialized(body, out _, out _);
     }
 
     /// <summary>
@@ -302,6 +375,8 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         if (snapshot == null)
         {
             RemComp<NCPharmacologyComponent>(body);
+            var clearEvent = new NCPharmacologyDepotRestoreEvent([]); // NC
+            RaiseLocalEvent(body, ref clearEvent); // NC
             return true;
         }
         if (!ValidatePersistentState(snapshot))
@@ -311,6 +386,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         state.Profile = snapshot.Profile;
         state.StateInitialized = snapshot.Initialized;
         state.OverdoseBurden = snapshot.OverdoseBurden;
+        state.StrainEpisode = Math.Max(0, snapshot.StrainEpisode);
         state.ActiveDrugs.Clear();
         foreach (var exposure in snapshot.ActiveDrugs)
         {
@@ -322,13 +398,18 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
                 LastAdministration = timestamp >= exposure.TimeSinceAdministration
                     ? timestamp - exposure.TimeSinceAdministration
                     : TimeSpan.Zero,
+                ClearanceFactor = exposure.ClearanceFactor, // NC
             });
         }
+        RestoreDependence(state, snapshot, timestamp); // NC
+        AssignStrain(body, state); // NC
         state.RemovalBuffer.Clear();
         state.EvaluationOrder.Clear();
         state.LastEvaluation = timestamp;
         var profile = _prototypes.Index(state.Profile);
         RecomputeModifiers(state, profile);
+        var depotEvent = new NCPharmacologyDepotRestoreEvent(snapshot.PendingDoses); // NC
+        RaiseLocalEvent(body, ref depotEvent); // NC
         return true;
     }
 
@@ -345,6 +426,9 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             return false;
         }
 
+        if (!ValidateDependenceSnapshot(snapshot) || !ValidatePendingDoses(snapshot)) // NC
+            return false;
+
         var seen = new HashSet<ProtoId<NCDrugProfilePrototype>>();
         foreach (var exposure in snapshot.ActiveDrugs)
         {
@@ -354,6 +438,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
                 !ValidateDrug(drug) ||
                 !IsFiniteRange(exposure.Concentration, 0f, drug.MaximumConcentration) ||
                 !IsFiniteRange(exposure.CumulativeDose, 0f, profile.MaximumRecordedCumulativeDose) ||
+                !IsFiniteRange(exposure.ClearanceFactor, 0.1f, 1f) || // NC
                 exposure.TimeSinceAdministration < TimeSpan.Zero ||
                 exposure.TimeSinceAdministration > profile.MaximumRecordedExposureAge)
             {
@@ -369,6 +454,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             return HasComp<NCMedicalBodyComponent>(body);
 
         state.ActiveDrugs.Clear();
+        state.Dependence.Clear(); // NC
         state.RemovalBuffer.Clear();
         state.EvaluationOrder.Clear();
         state.OverdoseBurden = 0f;
@@ -406,6 +492,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
         state.StateInitialized = true;
         state.LastEvaluation = _timing.CurTime;
         state.CachedModifiers = NCPharmacologyModifiers.Neutral;
+        AssignStrain(body, state); // NC
         return true;
     }
 
@@ -439,7 +526,8 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
                 continue;
 
             var fraction = ResolveTherapeuticFraction(drug, exposure.Concentration) *
-                           ResolveInteractionTherapeutics(state, profile, drugId, drug);
+                           ResolveInteractionTherapeutics(state, profile, drugId, drug) *
+                           ResolveToleranceFactor(state, drugId, drug); // NC: tolerance lowers the wanted effect only
             var psychologicalFraction = Math.Clamp(NCHumanityMath.TreatmentFactor(exposure.Concentration,
                 drug.MinimumEffectiveConcentration, drug.TherapeuticConcentration, drug.ToxicConcentration,
                 drug.MaximumConcentration) * ResolveInteractionTherapeutics(state, profile, drugId, drug), 0f, 1f);
@@ -460,7 +548,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             rhythmStability += drug.RhythmStabilityAtTherapeutic * fraction;
             rhythmInstability += drug.RhythmInstabilityAtTherapeutic * fraction;
             motorControl *= 1f + (drug.MotorControlMultiplierAtTherapeutic - 1f) * fraction;
-            antibiotic += drug.AntibioticPowerAtTherapeutic * fraction;
+            antibiotic += drug.AntibioticPowerAtTherapeutic * fraction * ResolveSusceptibility(state, drugId); // NC
             immunosuppression += drug.ImmunosuppressionAtTherapeutic * fraction;
             toxinRecovery += drug.ToxinRecoveryPerSecondAtTherapeutic * fraction;
         }
@@ -537,6 +625,97 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
             (drug.MaximumConcentration - drug.ToxicConcentration),
             0f,
             1f);
+    }
+
+    /// <summary>
+    /// Clinician-facing reading of the current drug combination in a body. Only drugs at or above their minimum
+    /// effective concentration count; trace exposures neither alarm nor reassure.
+    /// </summary>
+    public NCDrugInteractionClass ClassifyActiveInteractions(EntityUid body)
+    {
+        var worst = NCDrugInteractionClass.Compatible;
+        if (!TryComp<NCPharmacologyComponent>(body, out var state))
+            return worst;
+
+        var active = new List<(ProtoId<NCDrugProfilePrototype> Id, NCDrugProfilePrototype Profile)>();
+        foreach (var (id, exposure) in state.ActiveDrugs)
+        {
+            if (_prototypes.TryIndex(id, out NCDrugProfilePrototype? drug) &&
+                exposure.Concentration >= drug.MinimumEffectiveConcentration)
+            {
+                active.Add((id, drug));
+            }
+        }
+
+        for (var i = 0; i < active.Count; i++)
+        {
+            for (var j = i + 1; j < active.Count; j++)
+            {
+                worst = NCDrugInteractionClassifier.Worst(worst, ClassifyPair(active[i].Id, active[i].Profile, active[j].Id, active[j].Profile));
+            }
+        }
+
+        return worst;
+    }
+
+    /// <summary>Reading of adding <paramref name="candidate"/> to whatever the body already carries.</summary>
+    public NCDrugInteractionClass ClassifyCandidate(EntityUid body, ProtoId<NCDrugProfilePrototype> candidate)
+    {
+        var worst = NCDrugInteractionClass.Compatible;
+        if (!_prototypes.TryIndex(candidate, out NCDrugProfilePrototype? drug) ||
+            !TryComp<NCPharmacologyComponent>(body, out var state))
+        {
+            return worst;
+        }
+
+        foreach (var (id, exposure) in state.ActiveDrugs)
+        {
+            if (id == candidate ||
+                !_prototypes.TryIndex(id, out NCDrugProfilePrototype? other) ||
+                exposure.Concentration < other.MinimumEffectiveConcentration)
+            {
+                continue;
+            }
+
+            worst = NCDrugInteractionClassifier.Worst(worst, ClassifyPair(candidate, drug, id, other));
+        }
+
+        return worst;
+    }
+
+    /// <summary>The strain a body carries, picked once from the character. Null when no strains exist.</summary>
+    public ProtoId<NCPathogenStrainPrototype>? GetStrain(EntityUid body)
+    {
+        return TryEnsureState(body) && TryComp<NCPharmacologyComponent>(body, out var state) ? state.Strain : null;
+    }
+
+    /// <summary>Worst reading among every pair in a list of compounds, e.g. the contents of a blood sample.</summary>
+    public NCDrugInteractionClass ClassifyCombination(IReadOnlyList<ProtoId<NCDrugProfilePrototype>> compounds)
+    {
+        var worst = NCDrugInteractionClass.Compatible;
+        for (var i = 0; i < compounds.Count; i++)
+        {
+            for (var j = i + 1; j < compounds.Count; j++)
+            {
+                if (!_prototypes.TryIndex(compounds[i], out var a) || !_prototypes.TryIndex(compounds[j], out var b))
+                    continue;
+
+                worst = NCDrugInteractionClassifier.Worst(worst, ClassifyPair(compounds[i], a, compounds[j], b));
+            }
+        }
+
+        return worst;
+    }
+
+    private static NCDrugInteractionClass ClassifyPair(
+        ProtoId<NCDrugProfilePrototype> aId,
+        NCDrugProfilePrototype a,
+        ProtoId<NCDrugProfilePrototype> bId,
+        NCDrugProfilePrototype b)
+    {
+        a.Interactions.TryGetValue(bId, out var aToB);
+        b.Interactions.TryGetValue(aId, out var bToA);
+        return NCDrugInteractionClassifier.ClassifyPair(aToB, bToA, a.InteractionsCharted, b.InteractionsCharted);
     }
 
     private float ResolveInteractionTherapeutics(
@@ -685,6 +864,7 @@ public sealed partial class NCPharmacologySystem : EntityEffectSystem<NCMedicalB
     {
         return profile.ActiveDrugCapacity is > 0 and <= AbsoluteDrugCapacityLimit &&
                profile.ActiveUpdateInterval > TimeSpan.Zero &&
+               profile.DependenceUpdateInterval > TimeSpan.Zero && // NC
                IsFinitePositive(profile.MaximumOverdoseBurden) &&
                IsFiniteNonNegative(profile.OverdoseRecoveryPerSecond) &&
                IsFinitePositive(profile.MaximumRecordedCumulativeDose) &&

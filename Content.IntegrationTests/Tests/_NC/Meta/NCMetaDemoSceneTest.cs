@@ -6,6 +6,8 @@ using Content.Server._NC.Meta.Demo;
 using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
 
+#nullable enable annotations
+
 namespace Content.IntegrationTests.Tests._NC.Meta;
 
 [TestFixture, NonParallelizable]

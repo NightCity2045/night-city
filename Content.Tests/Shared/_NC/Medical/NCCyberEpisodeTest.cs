@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Content.Shared._NC.Medical.Humanity;
 using NUnit.Framework;
 
+#pragma warning disable RA0039 // Unit tests build data objects directly, without loading a server.
 namespace Content.Tests.Shared._NC.Medical;
 
 [TestFixture]

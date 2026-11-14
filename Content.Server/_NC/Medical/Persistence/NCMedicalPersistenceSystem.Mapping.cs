@@ -297,6 +297,9 @@ public sealed partial class NCMedicalPersistenceSystem
             InitialExternalBleedRate = wound.InitialExternalBleedRate,
             InitialInternalBleedRate = wound.InitialInternalBleedRate,
             PrimaryBleedKind = wound.PrimaryBleedKind,
+            LocalAnalgesia = wound.LocalAnalgesia,
+            LocalHemostasis = wound.LocalHemostasis,
+            LocalRemaining = wound.LocalRemaining,
             Pain = wound.Pain,
             InitialPain = wound.InitialPain,
             Contamination = wound.Contamination,
@@ -407,6 +410,7 @@ public sealed partial class NCMedicalPersistenceSystem
             HemostaticAppliedAt = record.HemostaticAppliedAt,
             BandageAbsorptionRemaining = record.BandageAbsorptionRemaining,
             BandageSterility = record.BandageSterility,
+            SaturationContamination = record.SaturationContamination,
             ModifiedAt = record.ModifiedAt,
         };
     }
@@ -675,6 +679,9 @@ public sealed partial class NCMedicalPersistenceSystem
                 ? wound.InitialInternalBleedRate
                 : wound.InternalBleedRate,
             PrimaryBleedKind = wound.PrimaryBleedKind,
+            LocalAnalgesia = wound.LocalAnalgesia,
+            LocalHemostasis = wound.LocalHemostasis,
+            LocalRemaining = wound.LocalRemaining,
             Pain = wound.Pain,
             InitialPain = wound.InitialPain > 0f ? wound.InitialPain : wound.Pain,
             Contamination = wound.Contamination,
@@ -840,6 +847,7 @@ public sealed partial class NCMedicalPersistenceSystem
             HemostaticAppliedAt = record.HemostaticAppliedAt,
             BandageAbsorptionRemaining = record.BandageAbsorptionRemaining,
             BandageSterility = record.BandageSterility,
+            SaturationContamination = record.SaturationContamination,
             ModifiedAt = record.ModifiedAt,
         };
     }

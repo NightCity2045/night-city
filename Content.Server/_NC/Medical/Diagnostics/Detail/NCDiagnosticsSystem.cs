@@ -66,6 +66,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
     [Dependency] private NCCyberwareSystem _cyberware = default!;
     [Dependency] private NCMedicalImplantSystem _medicalImplants = default!;
     [Dependency] private NCPharmacologySystem _pharmacology = default!;
+    [Dependency] private Content.Server._NC.Medical.Pharmacology.Batch.NCPharmaBatchSystem _batches = default!; // NC
     [Dependency] private Content.Server._NC.Medical.Humanity.NCHumanitySystem _humanity = default!;
     [Dependency] private NCSystemicSystem _systemic = default!;
     [Dependency] private NCBodyScannerConsoleSystem _bodyScanner = default!;
@@ -212,7 +213,7 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                 record.Procedure,
                 record.SurgeryStep,
                 record.SurgeryOutcome,
-                record.Drug,
+                record.Drug is { } historyDrug && !_batches.IsIdentified(historyDrug) ? null : record.Drug, // NC
                 record.AutopsyRegion,
                 record.AutopsyWoundCount,
                 record.AutopsyWoundTypes is { } types ? new List<NCWoundType>(types) : null))
@@ -1029,7 +1030,9 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
                 Quantize(exposure.Concentration, policy.DrugConcentrationQuantum, 1000f),
                 exposure.Concentration >= profile.MinimumEffectiveConcentration &&
                 exposure.Concentration <= profile.ToxicConcentration,
-                exposure.Concentration > profile.ToxicConcentration));
+                exposure.Concentration > profile.ToxicConcentration,
+                !_batches.IsIdentified(profileId), // NC: an unidentified compound has no name yet
+                profile.CodenameCode.Length > 0 ? _batches.CodenameOrId(profileId) : null)); // generated compounds have no table name
         }
 
         var modifiers = _pharmacology.GetModifiers(body);
@@ -1039,6 +1042,19 @@ public sealed partial class NCDiagnosticsSystem : EntitySystem
             warnings.Add(NCDiagnosticWarning.Anesthetized);
         if (modifiers.OverdoseFraction > 0f)
             warnings.Add(NCDiagnosticWarning.DrugOverdose);
+
+        switch (_pharmacology.ClassifyActiveInteractions(body))
+        {
+            case NCDrugInteractionClass.Dangerous:
+                warnings.Add(NCDiagnosticWarning.DrugInteractionDangerous);
+                break;
+            case NCDrugInteractionClass.Caution:
+                warnings.Add(NCDiagnosticWarning.DrugInteractionCaution);
+                break;
+            case NCDrugInteractionClass.Unknown:
+                warnings.Add(NCDiagnosticWarning.DrugInteractionUnknown);
+                break;
+        }
 
         omitted = exposures.Count - result.Count;
         return result;
