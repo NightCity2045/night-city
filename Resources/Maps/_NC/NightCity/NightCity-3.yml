@@ -4,8 +4,8 @@ meta:
   engineVersion: 284.0.2
   forkId: ""
   forkVersion: ""
-  time: 11/14/2026 12:19:22
-  entityCount: 249
+  time: 11/14/2026 13:33:14
+  entityCount: 245
 maps:
 - 1
 grids:
@@ -23,7 +23,7 @@ entities:
   - uid: 1
     components:
     - type: MetaData
-      name: Mapping NC ALife Test [-3]
+      name: NightCity [-3]
     - type: Transform
     - type: Map
       mapPaused: True
@@ -339,65 +339,6 @@ entities:
     - type: Transform
       parent: 1
       pos: -122.95581,118.55697
-- proto: NCImplantNeuralLinkMk1
-  entities:
-  - uid: 255
-    components:
-    - type: Transform
-      parent: 1
-      pos: -120.76498,132.4037
-    - type: NCCyberware
-      persistenceCapturedAt: 2493.3433628
-    - type: NCCyberwareWorldSnapshot
-      saved: True
-      capturedAt: 2493.3433628
-- proto: NCOrganHumanCyberArmLeft
-  entities:
-  - uid: 256
-    components:
-    - type: Transform
-      parent: 1
-      pos: -118.51498,132.56776
-    - type: NCCyberware
-      persistenceCapturedAt: 2493.3433628
-    - type: NCCityLocation
-    - type: ContainerContainer
-      containers:
-        nc_cyberware_modules: !type:Container
-          ents: []
-    - type: NCCyberwareWorldSnapshot
-      saved: True
-      capturedAt: 2493.3433628
-- proto: NCOrganHumanCyberArmRight
-  entities:
-  - uid: 257
-    components:
-    - type: Transform
-      parent: 1
-      pos: -118.93685,131.74745
-    - type: NCCyberware
-      persistenceCapturedAt: 2493.3433628
-    - type: NCCityLocation
-    - type: ContainerContainer
-      containers:
-        nc_cyberware_modules: !type:Container
-          ents: []
-    - type: NCCyberwareWorldSnapshot
-      saved: True
-      capturedAt: 2493.3433628
-- proto: NCOrganHumanCyberEyes
-  entities:
-  - uid: 258
-    components:
-    - type: Transform
-      parent: 1
-      pos: -121.2806,131.79433
-    - type: NCCyberware
-      persistenceCapturedAt: 2493.3433628
-    - type: NCCityLocation
-    - type: NCCyberwareWorldSnapshot
-      saved: True
-      capturedAt: 2493.3433628
 - proto: NCPoweredlightCoral
   entities:
   - uid: 367

@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+- type: entity
+  abstract: true
+  parent: NCShopkeeperDisplayBase
+  id: NCPawnShopkeeperBase
+  categories: [HideSpawnMenu]
+  components:
+  - type: Loadout
+    prototypes:
+    - NCPawnShopkeeperCasualBlueGear
+    - NCPawnShopkeeperCasualPurpleGear
+    - NCPawnShopkeeperCasualRedGear
+    - NCPawnShopkeeperCasualGreenGear
+  - type: ActivatableUI
+    key: enum.NCPawnShopUiKey.Key
+    singleUser: true
+  - type: UserInterface
+    interfaces:
+      enum.NCPawnShopUiKey.Key:
+        type: NCPawnShopBoundUserInterface
+
+# No CargoPallet component: station cargo consoles must never consume pawn merchandise.
+- type: entity
+  abstract: true
+  parent: BaseCargoPallet
+  id: NCPawnPalletBase
+  components:
+  - type: Sprite
+    sprite: Structures/cargo_pallets.rsi
+    state: cargo_pallet_sell
+  - type: Icon
+    sprite: Structures/cargo_pallets.rsi
+    state: cargo_pallet_sell
+
+# Editor marker; its spawned pawn broker inherits the random civilian outfit.
+- type: entity
+  abstract: true
+  parent: MarkerBase
+  id: NCPawnShopkeeperSpawnerBase
+  components:
+  - type: Sprite
+    layers:
+    - state: green
+    - state: ai

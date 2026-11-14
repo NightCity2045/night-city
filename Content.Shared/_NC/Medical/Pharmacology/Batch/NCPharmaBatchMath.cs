@@ -407,8 +407,7 @@ public static class NCPharmaBatchMath
         const uint offset = 2166136261u;
         const uint prime = 16777619u;
         var hash = offset;
-        Span<byte> bytes = stackalloc byte[16];
-        batchId.TryWriteBytes(bytes);
+        var bytes = batchId.ToByteArray();
         foreach (var value in bytes)
         {
             hash ^= value;

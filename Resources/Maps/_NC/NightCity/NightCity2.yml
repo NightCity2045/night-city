@@ -4,8 +4,8 @@ meta:
   engineVersion: 284.0.2
   forkId: ""
   forkVersion: ""
-  time: 11/14/2026 12:19:28
-  entityCount: 2387
+  time: 11/14/2026 13:33:27
+  entityCount: 2388
 maps:
 - 1
 grids:
@@ -54,7 +54,7 @@ entities:
   - uid: 1
     components:
     - type: MetaData
-      name: Mapping NC ALife Test [2]
+      name: NightCity [2]
     - type: Transform
     - type: Map
       mapPaused: True
@@ -362,7 +362,7 @@ entities:
           version: 7
         7,11:
           ind: 7,11
-          tiles: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAIAAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAIAAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAACAAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+          tiles: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAIAAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAIAAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAIAAAAAAAACAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
           version: 7
         7,12:
           ind: 7,12
@@ -897,16 +897,6 @@ entities:
       needsPower: False
     - type: AlwaysPoweredReceiverState
       needsPower: True
-  - uid: 1893
-    components:
-    - type: Transform
-      parent: 1
-      pos: 119.5,191.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
   - uid: 1913
     components:
     - type: Transform
@@ -922,26 +912,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 114.5,196.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
-  - uid: 2071
-    components:
-    - type: Transform
-      parent: 1
-      pos: 129.5,10.5
-    - type: NCCityLocation
-    - type: ApcPowerReceiver
-      needsPower: False
-    - type: AlwaysPoweredReceiverState
-      needsPower: True
-  - uid: 2072
-    components:
-    - type: Transform
-      parent: 1
-      pos: 135.5,15.5
     - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
@@ -2852,6 +2822,8 @@ entities:
     - type: Transform
       parent: 1
       pos: 125.5,12.5
+    - type: Lock
+      locked: False
   - uid: 2063
     components:
     - type: Transform
@@ -2934,6 +2906,30 @@ entities:
       parent: 2287
       rot: 1.5707963267948966 rad
       pos: -0.5,-0.5
+- proto: NCAirlockTraumaMedicalGlassLocked
+  entities:
+  - uid: 1804
+    components:
+    - type: Transform
+      parent: 1
+      pos: 135.5,15.5
+    - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+- proto: NCAirlockTraumaOperativeGlassLocked
+  entities:
+  - uid: 1832
+    components:
+    - type: Transform
+      parent: 1
+      pos: 129.5,10.5
+    - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
 - proto: NCAVHolographicProjector
   entities:
   - uid: 2350
@@ -3094,6 +3090,105 @@ entities:
       rot: 1.5707963267948966 rad
       pos: 10.5,22.5
     - type: NCCityLocation
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+- proto: NCLabCultureStation
+  entities:
+  - uid: 2032
+    components:
+    - type: Transform
+      parent: 1
+      pos: 111.5,184.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+- proto: NCLabMetabolicAnalyzer
+  entities:
+  - uid: 2020
+    components:
+    - type: Transform
+      parent: 1
+      pos: 115.5,186.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+- proto: NCLabVivarium
+  entities:
+  - uid: 1802
+    components:
+    - type: Transform
+      parent: 1
+      pos: 117.5,184.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+- proto: NCPharmaFillingStation
+  entities:
+  - uid: 2042
+    components:
+    - type: Transform
+      parent: 1
+      pos: 118.5,190.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+- proto: NCPharmaFormulationStation
+  entities:
+  - uid: 2021
+    components:
+    - type: Transform
+      parent: 1
+      pos: 112.5,184.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+- proto: NCPharmaQcAnalyzer
+  entities:
+  - uid: 2034
+    components:
+    - type: Transform
+      parent: 1
+      pos: 118.5,189.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+- proto: NCPharmaRdConsole
+  entities:
+  - uid: 2031
+    components:
+    - type: Transform
+      parent: 1
+      pos: 110.5,184.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+- proto: NCPharmaSterileCabinet
+  entities:
+  - uid: 2072
+    components:
+    - type: Transform
+      parent: 1
+      pos: 118.5,191.5
+    - type: ApcPowerReceiver
+      needsPower: False
+    - type: AlwaysPoweredReceiverState
+      needsPower: True
+- proto: NCPharmaSynthesizerCorporate
+  entities:
+  - uid: 2071
+    components:
+    - type: Transform
+      parent: 1
+      pos: 118.5,184.5
     - type: ApcPowerReceiver
       needsPower: False
     - type: AlwaysPoweredReceiverState
@@ -3501,131 +3596,64 @@ entities:
     - type: Transform
       parent: 1
       pos: 37.5,22.5
-- proto: NCSyringeProcoagulant
+- proto: NCTraumaResponseCartridge
   entities:
-  - uid: 2018
+  - uid: 1875
     components:
     - type: Transform
       parent: 1
-      pos: 136.22469,11.578761
-  - uid: 2029
+      pos: 129.3372,14.79136
+  - uid: 1893
     components:
     - type: Transform
       parent: 1
-      pos: 136.69344,11.438136
-  - uid: 2030
-    components:
-    - type: Transform
-      parent: 1
-      pos: 135.80281,11.610011
-  - uid: 2033
-    components:
-    - type: Transform
-      parent: 1
-      pos: 135.36531,11.547511
-- proto: NCSyringeRespiratoryStimulant
-  entities:
+      pos: 127.60283,14.681985
   - uid: 2024
     components:
     - type: Transform
       parent: 1
-      pos: 136.03719,11.469386
-  - uid: 2025
-    components:
-    - type: Transform
-      parent: 1
-      pos: 136.30281,11.469386
-  - uid: 2026
-    components:
-    - type: Transform
-      parent: 1
-      pos: 135.11531,11.531886
-  - uid: 2027
-    components:
-    - type: Transform
-      parent: 1
-      pos: 135.52156,11.469386
-- proto: NCSyringeSyntheticOxygenCarrier
-  entities:
-  - uid: 2017
-    components:
-    - type: Transform
-      parent: 1
-      pos: 135.49031,11.641261
-  - uid: 2022
-    components:
-    - type: Transform
-      parent: 1
-      pos: 136.34969,11.547511
-  - uid: 2023
-    components:
-    - type: Transform
-      parent: 1
-      pos: 135.83406,11.610011
+      pos: 128.74345,14.494485
   - uid: 2028
     components:
     - type: Transform
       parent: 1
-      pos: 136.30281,11.594386
-- proto: NCSyringeTraumaAnalgesic
+      pos: 128.38408,14.69761
+  - uid: 2033
+    components:
+    - type: Transform
+      parent: 1
+      pos: 128.0872,14.41636
+  - uid: 2035
+    components:
+    - type: Transform
+      parent: 1
+      pos: 129.05595,14.400735
+- proto: NCTraumaTeamCombatMedicBag
   entities:
   - uid: 2019
     components:
     - type: Transform
       parent: 1
-      pos: 134.75594,11.328761
-  - uid: 2031
+      pos: 136.14276,11.672635
+    - type: NCCityLocation
+  - uid: 2026
     components:
     - type: Transform
       parent: 1
-      pos: 135.08406,11.656886
-  - uid: 2032
+      pos: 136.68964,11.641385
+    - type: NCCityLocation
+  - uid: 2029
     components:
     - type: Transform
       parent: 1
-      pos: 135.95906,11.485011
-  - uid: 2035
+      pos: 137.34589,11.610135
+    - type: NCCityLocation
+  - uid: 2030
     components:
     - type: Transform
       parent: 1
-      pos: 136.50594,11.469386
-  - uid: 2037
-    components:
-    - type: Transform
-      parent: 1
-      pos: 135.16219,11.328761
-  - uid: 2038
-    components:
-    - type: Transform
-      parent: 1
-      pos: 135.25594,11.563136
-  - uid: 2042
-    components:
-    - type: Transform
-      parent: 1
-      pos: 135.83406,11.672511
-- proto: NCSyringeVasopressor
-  entities:
-  - uid: 2020
-    components:
-    - type: Transform
-      parent: 1
-      pos: 135.91219,11.672511
-  - uid: 2034
-    components:
-    - type: Transform
-      parent: 1
-      pos: 136.74031,11.438136
-  - uid: 2036
-    components:
-    - type: Transform
-      parent: 1
-      pos: 135.77156,11.578761
-  - uid: 2039
-    components:
-    - type: Transform
-      parent: 1
-      pos: 136.31844,11.672511
+      pos: 135.50214,11.68826
+    - type: NCCityLocation
 - proto: NCWallbeton
   entities:
   - uid: 2
@@ -7382,6 +7410,32 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: -100.5,-56.5
+- proto: NCWeaponSMGShingen
+  entities:
+  - uid: 2017
+    components:
+    - type: Transform
+      parent: 1
+      pos: 132.49303,13.38511
+    - type: NCCityLocation
+  - uid: 2018
+    components:
+    - type: Transform
+      parent: 1
+      pos: 132.47058,14.588235
+    - type: NCCityLocation
+  - uid: 2022
+    components:
+    - type: Transform
+      parent: 1
+      pos: 132.51746,13.63511
+    - type: NCCityLocation
+  - uid: 2027
+    components:
+    - type: Transform
+      parent: 1
+      pos: 132.50183,14.306985
+    - type: NCCityLocation
 - proto: OperatingTable
   entities:
   - uid: 1812
@@ -9576,17 +9630,27 @@ entities:
     components:
     - type: Transform
       parent: 1
-      pos: 136.5,11.5
+      pos: 137.5,11.5
   - uid: 2010
     components:
     - type: Transform
       parent: 1
       pos: 134.5,11.5
-  - uid: 2021
+  - uid: 2025
     components:
     - type: Transform
       parent: 1
       pos: 135.5,11.5
+  - uid: 2036
+    components:
+    - type: Transform
+      parent: 1
+      pos: 135.5,11.5
+  - uid: 2037
+    components:
+    - type: Transform
+      parent: 1
+      pos: 136.5,11.5
   - uid: 2073
     components:
     - type: Transform
@@ -14169,16 +14233,6 @@ entities:
     - type: Transform
       parent: 1
       pos: 117.5,196.5
-  - uid: 1802
-    components:
-    - type: Transform
-      parent: 1
-      pos: 117.5,191.5
-  - uid: 1804
-    components:
-    - type: Transform
-      parent: 1
-      pos: 117.5,188.5
   - uid: 1808
     components:
     - type: Transform
@@ -14274,21 +14328,11 @@ entities:
     - type: Transform
       parent: 1
       pos: 118.5,188.5
-  - uid: 1832
-    components:
-    - type: Transform
-      parent: 1
-      pos: 119.5,188.5
   - uid: 1833
     components:
     - type: Transform
       parent: 1
       pos: 120.5,188.5
-  - uid: 1875
-    components:
-    - type: Transform
-      parent: 1
-      pos: 118.5,191.5
   - uid: 1876
     components:
     - type: Transform
@@ -14439,6 +14483,21 @@ entities:
     - type: Transform
       parent: 1
       pos: 133.5,11.5
+  - uid: 2023
+    components:
+    - type: Transform
+      parent: 1
+      pos: 117.5,189.5
+  - uid: 2038
+    components:
+    - type: Transform
+      parent: 1
+      pos: 117.5,191.5
+  - uid: 2039
+    components:
+    - type: Transform
+      parent: 1
+      pos: 117.5,188.5
   - uid: 2040
     components:
     - type: Transform
@@ -14544,6 +14603,11 @@ entities:
     - type: Transform
       parent: 1
       pos: 130.5,10.5
+  - uid: 2388
+    components:
+    - type: Transform
+      parent: 1
+      pos: 117.5,190.5
 - proto: WaterCooler
   entities:
   - uid: 2268
@@ -14558,9 +14622,9 @@ entities:
     - type: Transform
       parent: 1
       pos: -16.5,-23.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
 - proto: WindoorSecure

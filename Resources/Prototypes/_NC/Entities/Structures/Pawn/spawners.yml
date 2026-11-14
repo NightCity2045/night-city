@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Place the marker within four tiles of the matching pawn pallet on the same grid.
+# Each marker creates exactly one merchant at its position and rotation, then deletes itself.
+- type: entity
+  parent: NCPawnShopkeeperSpawnerBase
+  id: SpawnNCPawnShopkeeper30
+  name: pawn broker spawner
+  suffix: 30%
+  components:
+  - type: EntityTableSpawner
+    offset: 0
+    table: !type:EntSelector
+      id: NCPawnShopkeeper30
+
+- type: entity
+  parent: NCPawnShopkeeperSpawnerBase
+  id: SpawnNCPawnShopkeeper15
+  name: pawn broker spawner
+  suffix: 15%
+  components:
+  - type: EntityTableSpawner
+    offset: 0
+    table: !type:EntSelector
+      id: NCPawnShopkeeper15
+
+- type: entity
+  parent: NCPawnShopkeeperSpawnerBase
+  id: SpawnNCPawnShopkeeper45
+  name: pawn broker spawner
+  suffix: 45%
+  components:
+  - type: EntityTableSpawner
+    offset: 0
+    table: !type:EntSelector
+      id: NCPawnShopkeeper45

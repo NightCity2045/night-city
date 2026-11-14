@@ -1,0 +1,15 @@
+<controls:FancyWindow xmlns="https://spacestation14.io"
+                      xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+                      Title="{Loc 'nc-pawn-title'}" SetSize="440 420" MinSize="340 300">
+    <BoxContainer Orientation="Vertical" Margin="10" SeparationOverride="8">
+        <Label Name="RateLabel" />
+        <RichTextLabel Text="{Loc 'nc-pawn-instructions'}" />
+        <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
+            <BoxContainer Name="Listings" Orientation="Vertical" SeparationOverride="4" />
+        </ScrollContainer>
+        <Label Name="TotalLabel" StyleClasses="LabelHeading" />
+        <RichTextLabel Name="NoticeLabel" />
+        <Button Name="AppraiseButton" Text="{Loc 'nc-pawn-appraise'}" />
+        <Button Name="SellButton" />
+    </BoxContainer>
+</controls:FancyWindow>

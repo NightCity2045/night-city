@@ -4,7 +4,7 @@ meta:
   engineVersion: 284.0.2
   forkId: ""
   forkVersion: ""
-  time: 11/14/2026 12:19:23
+  time: 11/14/2026 13:33:15
   entityCount: 1147
 maps:
 - 1
@@ -34,7 +34,7 @@ entities:
   - uid: 1
     components:
     - type: MetaData
-      name: Mapping NC ALife Test [-1]
+      name: NightCity [-1]
     - type: Transform
     - type: Map
       mapPaused: True
@@ -2345,7 +2345,7 @@ entities:
           restitution: 0.03
           hard: True
           friction: 0.4
-          density: 423.6508
+          density: 423.65085
           mask:
           - Impassable
           - TableLayer
@@ -2387,7 +2387,7 @@ entities:
           restitution: 0.03
           hard: True
           friction: 0.4
-          density: 423.6508
+          density: 423.65085
           mask:
           - Impassable
           - TableLayer
@@ -2517,7 +2517,7 @@ entities:
           restitution: 0.04
           hard: True
           friction: 0.4
-          density: 389.4481
+          density: 389.44803
           mask:
           - Impassable
           - TableLayer
@@ -2561,7 +2561,7 @@ entities:
           restitution: 0.04
           hard: True
           friction: 0.4
-          density: 389.4481
+          density: 389.44803
           mask:
           - Impassable
           - TableLayer
@@ -2603,7 +2603,7 @@ entities:
           restitution: 0.04
           hard: True
           friction: 0.4
-          density: 389.4481
+          density: 389.44803
           mask:
           - Impassable
           - TableLayer
@@ -2645,7 +2645,7 @@ entities:
           restitution: 0.04
           hard: True
           friction: 0.4
-          density: 389.4481
+          density: 389.44803
           mask:
           - Impassable
           - TableLayer
@@ -3711,9 +3711,9 @@ entities:
     - type: Transform
       parent: 1
       pos: -19.5,10.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
   - uid: 376
@@ -3721,9 +3721,9 @@ entities:
     - type: Transform
       parent: 1
       pos: -20.5,10.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
 - proto: WallReinforced
@@ -7153,9 +7153,9 @@ entities:
     - type: Transform
       parent: 1
       pos: 18.5,12.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
   - uid: 1054
@@ -7163,9 +7163,9 @@ entities:
     - type: Transform
       parent: 1
       pos: 23.5,12.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
   - uid: 1055
@@ -7174,9 +7174,9 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 18.5,12.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
   - uid: 1082
@@ -7185,9 +7185,9 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 23.5,12.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
   - uid: 1083
@@ -7195,9 +7195,9 @@ entities:
     - type: Transform
       parent: 1
       pos: 27.5,12.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
   - uid: 1084
@@ -7206,9 +7206,9 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: 27.5,12.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
 - proto: WindoorSecureArmoryLocked
@@ -7219,9 +7219,9 @@ entities:
       parent: 1
       rot: 3.141592653589793 rad
       pos: -20.5,13.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
 - proto: Window

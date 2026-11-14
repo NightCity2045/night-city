@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Loadout independently chooses one civilian outfit for each pawn merchant at spawn.
+- type: startingGear
+  id: NCPawnShopkeeperCasualBlueGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitCasualBlue
+    shoes: ClothingShoesColorBlack
+
+- type: startingGear
+  id: NCPawnShopkeeperCasualPurpleGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitCasualPurple
+    shoes: ClothingShoesColorWhite
+
+- type: startingGear
+  id: NCPawnShopkeeperCasualRedGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitCasualRed
+    shoes: ClothingShoesColorBrown
+
+- type: startingGear
+  id: NCPawnShopkeeperCasualGreenGear
+  equipment:
+    jumpsuit: ClothingUniformJumpsuitCasualGreen
+    shoes: ClothingShoesColorBlack

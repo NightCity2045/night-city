@@ -4,7 +4,7 @@ meta:
   engineVersion: 284.0.2
   forkId: ""
   forkVersion: ""
-  time: 11/14/2026 12:19:26
+  time: 11/14/2026 13:33:26
   entityCount: 4130
 maps:
 - 1
@@ -61,7 +61,7 @@ entities:
   - uid: 1
     components:
     - type: MetaData
-      name: Mapping NC ALife Test [1]
+      name: NightCity [1]
     - type: Transform
     - type: Map
       mapPaused: True
@@ -1292,7 +1292,7 @@ entities:
       needsPower: False
     - type: Door
       state: Opening
-      secondsUntilStateChange: -584153.8
+      secondsUntilStateChange: -586325.8
     - type: NCCityLocation
     - type: DeviceLinkSource
       lastSignals:
@@ -23542,9 +23542,9 @@ entities:
     - type: Transform
       parent: 1
       pos: -10.5,-23.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
   - uid: 3758
@@ -23553,9 +23553,9 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: -50.5,-34.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
 - proto: WindoorSecure
@@ -23566,9 +23566,9 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 21.5,15.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
   - uid: 3970
@@ -23577,9 +23577,9 @@ entities:
       parent: 1
       rot: -1.5707963267948966 rad
       pos: 21.5,14.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
   - uid: 3971
@@ -23588,9 +23588,9 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 21.5,15.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
   - uid: 3972
@@ -23599,9 +23599,9 @@ entities:
       parent: 1
       rot: 1.5707963267948966 rad
       pos: 21.5,14.5
+    - type: NCCityLocation
     - type: ApcPowerReceiver
       needsPower: False
-    - type: NCCityLocation
     - type: AlwaysPoweredReceiverState
       needsPower: True
 - proto: Window

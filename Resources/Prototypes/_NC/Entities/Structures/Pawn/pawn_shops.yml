@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+
+# Place each merchant within four tiles of its matching anchored pallet on the same grid.
+# For additional copies on one grid, give each pair its own linkId in the map editor.
+- type: entity
+  parent: NCPawnShopkeeperBase
+  id: NCPawnShopkeeper30
+  name: pawn broker
+  suffix: 30%
+  components:
+  - type: NCPawnShop
+    linkId: pawn-30
+    percentage: 30
+
+- type: entity
+  parent: NCPawnShopkeeperBase
+  id: NCPawnShopkeeper15
+  name: pawn broker
+  suffix: 15%
+  components:
+  - type: NCPawnShop
+    linkId: pawn-15
+    percentage: 15
+
+- type: entity
+  parent: NCPawnShopkeeperBase
+  id: NCPawnShopkeeper45
+  name: pawn broker
+  suffix: 45%
+  components:
+  - type: NCPawnShop
+    linkId: pawn-45
+    percentage: 45
+
+- type: entity
+  parent: NCPawnPalletBase
+  id: NCPawnPallet30
+  name: pawn receiving pallet
+  suffix: 30%
+  components:
+  - type: NCPawnPallet
+    linkId: pawn-30
+
+- type: entity
+  parent: NCPawnPalletBase
+  id: NCPawnPallet15
+  name: pawn receiving pallet
+  suffix: 15%
+  components:
+  - type: NCPawnPallet
+    linkId: pawn-15
+
+- type: entity
+  parent: NCPawnPalletBase
+  id: NCPawnPallet45
+  name: pawn receiving pallet
+  suffix: 45%
+  components:
+  - type: NCPawnPallet
+    linkId: pawn-45
