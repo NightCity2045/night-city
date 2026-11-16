@@ -9,7 +9,7 @@
 
 - type: ncMissionDefinition
   id: NCAgentCombatEasy
-  template: NCMissionLayout8x8
+  template: NCGlenFixerLayout8x8
   deliveryObjective: NCFixerMissionDataShard
   name: nc-mission-combat-1-name
   description: nc-mission-combat-1-description
@@ -32,7 +32,7 @@
 
 - type: ncMissionDefinition
   id: NCAgentCombatMedium
-  template: NCMissionLayout8x8
+  template: NCGlenFixerLayout8x8
   deliveryObjective: NCFixerMissionDataShard
   name: nc-mission-combat-2-name
   description: nc-mission-combat-2-description
@@ -55,7 +55,7 @@
 
 - type: ncMissionDefinition
   id: NCAgentCombatHard
-  template: NCMissionLayout8x8
+  template: NCGlenFixerLayout8x8
   deliveryObjective: NCFixerMissionDataShard
   name: nc-mission-combat-3-name
   description: nc-mission-combat-3-description
@@ -78,7 +78,7 @@
 
 - type: ncMissionDefinition
   id: NCAgentCombatVeryHard
-  template: NCMissionLayout8x8
+  template: NCGlenFixerLayout8x8
   deliveryObjective: NCFixerMissionDataShard
   name: nc-mission-combat-4-name
   description: nc-mission-combat-4-description
@@ -101,7 +101,7 @@
 
 - type: ncMissionDefinition
   id: NCAgentCombatExtreme
-  template: NCMissionLayout8x8
+  template: NCGlenFixerLayout8x8
   deliveryObjective: NCFixerMissionDataShard
   name: nc-mission-combat-5-name
   description: nc-mission-combat-5-description

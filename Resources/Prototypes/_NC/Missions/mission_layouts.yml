@@ -22,6 +22,25 @@
   cleanupPolicy: RestoreBaseline
   cachePolicy: Always
 
+# City site shared by the street fixer contracts.
+- type: ncZoneTemplate
+  id: NCGlenFixerLayout8x8
+  name: nc-zone-template-mission-layout-8x8
+  targetZoneId: 7309c13f-4079-49bf-9704-f486c5172a13
+  kind: MissionLayout
+  revision: 1
+  compatibleZoneKinds:
+  - MissionSlot
+  floors:
+  - relativeZ: 0
+    mapPath: /Maps/_NC/Missions/Mission8x8Floor0.yml
+  - relativeZ: 1
+    mapPath: /Maps/_NC/Missions/Mission8x8Floor1.yml
+  tilePolicy: ReplaceNonEmpty
+  entityPolicy: InteriorOnly
+  cleanupPolicy: RestoreBaseline
+  cachePolicy: Always
+
 - type: ncMissionDefinition
   id: NCMission8x8
   template: NCMissionLayout8x8

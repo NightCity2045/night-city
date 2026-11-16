@@ -138,6 +138,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
     private int _currentView;
     private NCAgentUpdateMessage? _agentData;
     private NCAgentMapUpdateMessage? _mapData;
+    private NCAgentMapMarker? _missionDestination;
     private NCAgentMapControl? _mapControl;
     private NCAgentCityUpdateMessage? _cityData;
     private EntityUid? _mapGridUid;
@@ -1224,6 +1225,7 @@ public sealed partial class NCAgentMenu : NCAgentWindow
         };
         _mapControl.SetMapSource(_mapGridUid);
         _mapControl.SetMapData(_mapData);
+        _mapControl.FocusMission(_missionDestination);
         BuiltInContent.AddChild(_mapControl);
     }
 

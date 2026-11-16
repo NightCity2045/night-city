@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
 
+using Content.Shared._NC.Coordinates;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._NC.Missions.UI;
@@ -24,11 +25,16 @@ public sealed record NCFixerWorkEntry(string Id, long Version, string Definition
     int? SecondsRemaining, int DeliverySecondsRemaining, bool Surrendered, string OrganizerName, List<string> CrewNames)
 {
     public string Location { get; init; } = string.Empty;
+    public NCMapCoordinates? Entrance { get; init; }
+    public bool Busy { get; init; }
 }
 
 [Serializable, NetSerializable]
 public sealed record NCFixerReputationEntry(string ContactName, int Executor, int Organizer, int Trust,
-    int OrganizerThreshold, int AvailableTiers, int TotalTiers);
+    int OrganizerThreshold, int AvailableTiers, int TotalTiers)
+{
+    public NCMapCoordinates? Position { get; init; }
+}
 
 [Serializable, NetSerializable]
 public sealed class NCFixerMissionUpdateMessage(List<NCFixerMissionOffer> offers, List<NCFixerWorkEntry> work,

@@ -5,7 +5,7 @@ meta:
   forkId: ""
   forkVersion: ""
   time: 11/14/2026 13:33:23
-  entityCount: 12886
+  entityCount: 12888
 maps:
 - 1
 grids:
@@ -74850,4 +74850,21 @@ entities:
       parent: 1
       pos: -129.30309,21.72769
     - type: NCCityLocation
+- proto: MetalDoor
+  entities:
+  - uid: 12938
+    components:
+    - type: Transform
+      parent: 1
+      pos: -20.5,35.5
+      anchored: true
+    - type: NCMissionEntrance
+      slotId: 7309c13f-4079-49bf-9704-f486c5172a13
+- proto: NCFixerContactAnchor
+  entities:
+  - uid: 12939
+    components:
+    - type: Transform
+      parent: 1
+      pos: -26.5,35.5
 ...

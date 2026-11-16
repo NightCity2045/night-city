@@ -11,6 +11,7 @@ using Content.Server._NC.LivingCity.Identity;
 using Content.Server._NC.LivingCity.Social;
 using Content.Server._NC.LivingCity.Time;
 using Content.Server.Preferences.Managers;
+using Content.Shared._NC.City.Zones;
 using Content.Shared._NC.Identity;
 using Content.Shared._NC.LivingCity.Actors;
 using Content.Shared._NC.LivingCity.Social;
@@ -49,6 +50,7 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
     [Dependency] private NCMissionSystem _missions = default!;
     [Dependency] private NCActiveWorldTimeSystem _clock = default!;
     [Dependency] private NCReputationRegistrySystem _reputation = default!;
+    [Dependency] private NCCityActorRuntimeIndexSystem _actorIndex = default!;
     [Dependency] private NCCityActorRegistrySystem _actors = default!;
     [Dependency] private NCPhysicalActorLifecycleSystem _physical = default!;
     [Dependency] private NCPartyFinanceAdapterSystem _finance = default!;
@@ -250,11 +252,21 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
                     names[member] = (await _parties.ResolveAsync(NCPartyRef.ForCharacter(new(member)))).DisplayName;
             var deliverySeconds = _clock.TryGetCurrentTime(out _, out var now)
                 ? (int) Math.Clamp((value.Deadline - now.Ticks) / TimeSpan.TicksPerSecond, 0, int.MaxValue) : 0;
+            EntityUid? entrance = null;
+            var busy = false;
+            if ((status is NCFixerWorkState.Planning or NCFixerWorkState.Deploying) &&
+                _prototypes.TryIndex<NCMissionDefinitionPrototype>(value.Definition, out var mission) &&
+                _prototypes.TryIndex(mission.Template, out var layout))
+            {
+                var slot = new NCMissionSlotId(layout.TargetZoneId);
+                entrance = _missions.FindEntrance(slot, user);
+                busy = _missions.IsSiteBusy(slot);
+            }
             work.Add(new(value.Id, value.Version, value.Definition,
                 _prototypes.TryIndex<NCFixerContactPrototype>(value.Contact, out var contact) ? Loc.GetString(contact.Name) : value.Contact,
                 value.Organizer, value.Crew, value.Invited, status, value.Reward, value.Paid, remaining,
                 deliverySeconds, value.Surrendered, names[value.Organizer], value.Crew.Select(id => names[id]).ToList())
-                { Location = MissionLocation(value.Definition) });
+                { Location = MissionLocation(value.Definition), Busy = busy, Entrance = entrance is { } door && _coordinates.TryGetCoordinates(door, out var point) ? point : null });
         }
         var reputation = await _reputation.GetAsync(NCPartyRef.ForCharacter(character), true);
         var scores = new List<NCFixerReputationEntry>();
@@ -272,8 +284,12 @@ public sealed partial class NCFixerMissionSystem : EntitySystem
                 entry.Audience.DomainKey == organizerKey)?.Score ?? 0;
             var available = contact.Missions.Keys.Count(id => _prototypes.TryIndex(id, out var definition) &&
                 CanOffer(definition, contact, trust));
+            Content.Shared._NC.Coordinates.NCMapCoordinates? position = null;
+            if (_actorIndex.TryGetEntity(new(contact.ActorId), out var body) &&
+                _mobState.IsAlive(body) && _coordinates.TryGetCoordinates(body, out var fixerPoint))
+                position = fixerPoint;
             scores.Add(new(Loc.GetString(contact.Name), executor, organizer, trust,
-                contact.OrganizerTrustThreshold, available, contact.Missions.Count));
+                contact.OrganizerTrustThreshold, available, contact.Missions.Count) { Position = position });
         }
         return new([], work, character.Value, false, notice) { Reputation = scores };
     }

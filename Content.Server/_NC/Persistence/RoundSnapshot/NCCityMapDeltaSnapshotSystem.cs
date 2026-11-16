@@ -12,6 +12,7 @@ using Content.Server._NC.LivingCity.Actors.Components;
 using Content.Server._NC.LivingCity.Time;
 using Content.Shared._NC.City.ZoneTemplates.Components;
 using Content.Shared._NC.Coordinates;
+using Content.Shared._NC.ZLevels.Elevators;
 using Content.Shared._NC.Coordinates.Systems;
 using Content.Shared.GameTicking;
 using Content.Shared.Mobs.Components;
@@ -273,6 +274,7 @@ public sealed partial class NCCityMapDeltaSnapshotSystem : EntitySystem
         HasComp<NCCityActorBindingComponent>(uid) ||
         HasComp<NCZoneDeploymentComponent>(uid) ||
         HasComp<NCPropertyResidentItemComponent>(uid) ||
+        HasComp<NCElevatorCabinPartComponent>(uid) ||
         HasComp<MobStateComponent>(uid);
 
     private bool IsWall(EntityUid uid) => _tags.HasTag(uid, WallTag);

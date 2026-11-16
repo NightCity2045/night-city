@@ -1,15 +1,15 @@
 nc-fixer-street-name = Relay
 nc-fixer-window-title = Fixer work
-nc-fixer-accept-offer = Agree to the job
+nc-fixer-accept-offer = Take job
 nc-fixer-invite = Invite
 nc-fixer-join = Join crew
 nc-fixer-decline = Decline
 nc-fixer-launch = Begin operation
 nc-fixer-deliver = Deliver objective and collect payment
-nc-fixer-work-accepted = Job accepted. Recruit a crew through your Agent contacts.
+nc-fixer-work-accepted = Job accepted. Open Jobs on your Agent and select Show entrance.
 nc-fixer-work-updated = Assignment updated.
 nc-fixer-work-failed = Action unavailable. Refresh and check the terms, crew and deadline.
-nc-fixer-work-help = Get work from a fixer. Invite Agent contacts to your crew. Return to the issuer with the objective shard in your active hand. Pay your crew in person.
+nc-fixer-work-help = Find a fixer on the map and speak to them to take a job.
 nc-fixer-offer-available = { $name } — { $reward } eurodollars
 nc-fixer-offer-locked = { $name } — requires the contact's trust
 nc-fixer-work-list = { $name } — { $status }
@@ -28,7 +28,7 @@ nc-fixer-reward = Cash reward to the organizer for the entire crew: { $reward } 
 nc-fixer-paid = Cash issued
 nc-fixer-unpaid = Pending
 nc-fixer-unknown-mission = Unknown assignment
-nc-fixer-state-planning = Gathering crew
+nc-fixer-state-planning = Travel to the entrance
 nc-fixer-state-deploying = Preparing site
 nc-fixer-state-active = Awaiting delivery
 nc-fixer-state-completed = Completed
@@ -50,3 +50,11 @@ nc-fixer-reputation-details = { $contact }
     Trusted organizer threshold: { $threshold }
     Available assignments: { $available } / { $total }
 nc-fixer-reputation-help = Executor reputation grows through participation in successfully delivered missions. Organizers earn reputation and trust through their recruited crew's work. Player contracts grant no points.
+
+nc-fixer-map-entrance = Show entrance
+
+nc-fixer-map-contact = { $name } · Jobs · Show on map
+
+nc-fixer-start-here = Start at entrance · { $minutes } min
+
+nc-fixer-travel = Travel to the entrance and start the operation on your Agent. Invite teammates along the way if you want.

@@ -35,6 +35,11 @@ public sealed partial class NCAgentMenu
     private NCFixerMissionControl CreateFixerWorkPanel()
     {
         var panel = new NCFixerMissionControl();
+        panel.OnMap += (point, name) =>
+        {
+            _missionDestination = new(name, point.NetworkId.ToString(), point.Z, point.Position, false);
+            OpenAgentApp(NCAgentApp.Map, "CITY MAP");
+        };
         panel.OnRequest += message => OnFixerWorkRequest?.Invoke(message);
         return panel;
     }

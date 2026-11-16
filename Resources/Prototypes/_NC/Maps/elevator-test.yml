@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: gameMap
+  id: NCElevatorTest
+  mapName: NC Elevator Test
+  mapPath: /Maps/_NC/ElevatorTest/ElevatorTest0.yml
+  minPlayers: 0
+  maxRandomOffset: 0
+  randomRotation: false
+  stations:
+    Empty:
+      stationProto: StandardStationArena
+      components:
+      - type: StationNameSetup
+        mapNameTemplate: NC Elevator Test
+      - type: StationJobs
+        availableJobs:
+          Passenger:
+          - -1
+          - -1
+      - type: NCStationZLevels
+        networkId: 9989f4d9-3616-4e68-bb79-0af6ea4c4277
+        mapsBelow:
+        - /Maps/_NC/ElevatorTest/ElevatorTest-2.yml
+        - /Maps/_NC/ElevatorTest/ElevatorTest-1.yml
+        mapsAbove:
+        - /Maps/_NC/ElevatorTest/ElevatorTest1.yml

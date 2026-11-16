@@ -72,6 +72,10 @@ public sealed partial class NCFixerMissionSystem
                     return true;
                 case NCFixerWorkAction.Launch when organizer && work.State is NCFixerWorkState.Planning or NCFixerWorkState.Deploying:
                     if (work.Epoch != epoch.Value || now.Ticks >= work.Deadline || definition.DeliveryObjective == null) return false;
+                    if (!_prototypes.TryIndex(definition.Template, out var layout) ||
+                        (planning && _missions.IsSiteBusy(new(layout.TargetZoneId))) ||
+                        _missions.FindEntrance(new(layout.TargetZoneId), user) is not { } entrance ||
+                        !_mobState.IsAlive(user) || !_interaction.InRangeUnobstructed(user, entrance)) return false;
                     // Save the run identity before requesting deployment. A repeated launch joins that exact run.
                     proposed = proposed with { State = NCFixerWorkState.Deploying, RunId = Guid.Parse(work.Id) };
                     if (!await SaveAsync(proposed, work.Version)) return false;

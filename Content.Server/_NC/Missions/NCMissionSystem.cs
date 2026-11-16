@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Content.Server._NC.City.ZoneTemplates;
@@ -24,6 +25,7 @@ using Content.Shared.GameTicking;
 using Content.Shared.Movement.Events;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
+
 
 namespace Content.Server._NC.Missions;
 
@@ -243,6 +245,27 @@ public sealed partial class NCMissionSystem : EntitySystem
         }
 
         return TryGetRun(runId, out status);
+    }
+
+    public bool IsSiteBusy(NCMissionSlotId slot) => _activeBySlot.ContainsKey(slot) || _occupancy.IsOccupied(slot.ZoneId, out _);
+
+    public EntityUid? FindEntrance(NCMissionSlotId slot, EntityUid user)
+    {
+        if (!_entrances.TryGetValue(slot, out var entrances) || !_coordinates.TryGetCoordinates(user, out var here))
+            return null;
+        EntityUid? nearest = null;
+        var best = float.PositiveInfinity;
+        foreach (var uid in entrances)
+        {
+            if (!_coordinates.TryGetCoordinates(uid, out var point) || point.NetworkId != here.NetworkId)
+                continue;
+            var distance = Vector2.DistanceSquared(here.Position, point.Position);
+            if (point.Z != here.Z) distance += 1000000f;
+            if (distance >= best) continue;
+            nearest = uid;
+            best = distance;
+        }
+        return nearest;
     }
 
     private bool TryAllocateSlot(

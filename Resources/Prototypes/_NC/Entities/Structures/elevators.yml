@@ -1,0 +1,82 @@
+# SPDX-FileCopyrightText: 2026 Astro
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-FileComment: Community Funding Additional Permission applies; see COMMUNITY-FUNDING-PERMISSION.md.
+
+- type: entity
+  parent: MarkerBase
+  id: NCElevatorSpawner
+  name: elevator spawner
+  suffix: 3x3
+  description: Creates a 3x3 elevator cabin centered here. Prepare an empty shaft at the same XY on each served Z-level.
+  components:
+  - type: Sprite
+    layers:
+    - state: blue
+  - type: NCElevatorSpawner
+
+- type: entity
+  parent: BaseWallmount
+  id: NCElevatorPanel
+  name: elevator panel
+  description: Select up or down to travel one floor. Operates the cabin carrying this panel.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Sprite
+    sprite: Structures/Wallmounts/switch.rsi
+    state: on
+  - type: NCElevatorPanel
+  - type: NCElevatorCabinPart
+  - type: UserInterface
+    interfaces:
+      enum.NCElevatorUiKey.Key:
+        type: NCElevatorBoundUserInterface
+  - type: ActivatableUI
+    key: enum.NCElevatorUiKey.Key
+
+# A thin, visible safety railing inside the platform boundary. It exists only during a trip.
+- type: entity
+  id: NCElevatorTravelBarrier
+  categories: [ HideSpawnMenu ]
+  name: elevator safety railing
+  description: Retractable safety rails keep the cabin enclosed during travel.
+  components:
+  - type: NCElevatorCabinPart
+  - type: Transform
+    anchored: true
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      north:
+        shape: !type:PhysShapeAabb
+          bounds: "-1.5,1.42,1.5,1.5"
+        layer: [ Impassable, HighImpassable, MidImpassable, LowImpassable ]
+      south:
+        shape: !type:PhysShapeAabb
+          bounds: "-1.5,-1.5,1.5,-1.42"
+        layer: [ Impassable, HighImpassable, MidImpassable, LowImpassable ]
+      east:
+        shape: !type:PhysShapeAabb
+          bounds: "1.42,-1.5,1.5,1.5"
+        layer: [ Impassable, HighImpassable, MidImpassable, LowImpassable ]
+      west:
+        shape: !type:PhysShapeAabb
+          bounds: "-1.5,-1.5,-1.42,1.5"
+        layer: [ Impassable, HighImpassable, MidImpassable, LowImpassable ]
+  - type: Sprite
+    sprite: Structures/Doors/Shutters/shutters.rsi
+    drawdepth: Overdoors
+    layers:
+    - state: closed
+      scale: "3,0.08"
+      offset: "0,1.46"
+    - state: closed
+      scale: "3,0.08"
+      offset: "0,-1.46"
+    - state: closed
+      scale: "0.08,3"
+      offset: "1.46,0"
+    - state: closed
+      scale: "0.08,3"
+      offset: "-1.46,0"

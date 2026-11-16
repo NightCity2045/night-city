@@ -2231,3 +2231,17 @@
       - -15,-52
       - -15,-48
       - -14,-48
+
+  - id: 7309c13f-4079-49bf-9704-f486c5172a13
+    kind: MissionSlot
+    parent: 768509f0-d433-57e4-b3fd-972c1cb1360b
+    name: "G Parkway Street 03"
+    geometry:
+    - kind: Volume
+      minZ: 0
+      maxZ: 1
+      vertices:
+      - -25,36
+      - -17,36
+      - -17,44
+      - -25,44
